@@ -288,10 +288,21 @@ def test_multiple_shooting_satisfies_its_own_dynamics() -> None:
     own = dynamics_defect(
         golfer, club, config, result.x, torques=result.torques, n_substeps=8
     )
-    assert own.max_defect < 1e-5
-    # A finer reference integrator shows only discretisation error, which is
-    # small next to the finite-difference path's O(1) ODE violation.
+    assert own.max_position_defect < 1e-5  # rad, discrete feasibility only
+    assert own.max_velocity_defect < 1e-5  # rad/s, discrete feasibility only
+    assert own.reference_resolution is None
+    # #9830: preserve this coarse candidate as an adverse control. A refined
+    # reference can pass the historical position regression ceiling while
+    # exposing a substantial velocity mismatch. Neither is physical approval.
     reference = dynamics_defect(golfer, club, config, result.x, torques=result.torques)
+    assert reference.reference_resolution is not None
+    assert len(reference.reference_resolution) == config.n_nodes - 1
+    assert all(
+        max(endpoint.normalized_refinement) <= 1
+        for endpoint in reference.reference_resolution
+    )
+    assert reference.max_position_defect > 0.1  # rad: intentionally unresolved swing
+    assert reference.max_velocity_defect > 10.0  # rad/s: own-grid success hides this
     fd = solve_swing_casadi(golfer, club, config, limits, joint_limits, x0)
     fd_reference = dynamics_defect(golfer, club, config, fd.x)
     assert reference.max_position_defect < 0.5
