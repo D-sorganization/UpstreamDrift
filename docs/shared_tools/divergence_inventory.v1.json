@@ -13,7 +13,7 @@
   "totals": {
     "identical": 429,
     "diverged": 275,
-    "ud-only": 1212,
+    "ud-only": 1213,
     "tools-only": 554,
     "spelling-only": 126
   },
@@ -189,7 +189,7 @@
     "club_data": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 10,
+      "ud-only": 11,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -5544,7 +5544,7 @@
       "classification": "ud-only",
       "package": "club_data",
       "subpackage": "",
-      "ud_bytes": 1004,
+      "ud_bytes": 1114,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -5629,6 +5629,18 @@
       "package": "club_data",
       "subpackage": "",
       "ud_bytes": 25148,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "club_data/player_clubs.py",
+      "classification": "ud-only",
+      "package": "club_data",
+      "subpackage": "",
+      "ud_bytes": 2922,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

@@ -1,17 +1,6 @@
-## C3D Reference Fitting (#9914, Shipped)
+# Player Bag and Capture Equipment Continuation
 
-PR #9918 merged as `6f2d63325`; epic #9914 is closed with club graphics,
-translucent segment ellipsoids and reversible handedness included. Protected
-CI and all normal push hooks passed. The operator guide is
-`docs/motion_capture/reference_model_fitting.md`; exact fit and display evidence
-is linked from `docs/development/reference_fitting_epic.md`.
-`../reference-fit-artifacts-9914/reference-display-library.zip` contains 20
-club-enabled reference assets, 20 verified numerical bundles and playback.
-Existing camera data and user changes in the original worktree are untouched.
-
-# Attributed Club Catalog Continuation
-
-Current work: `feat/9903-player-club-catalog`, #9903 / epic #9902; PR #9919 (open). Optional attributed records and JSON/CSV exchange extend the existing club-data authority; 63 tests and scoped mypy pass. Offline source examples and read-only review #9904 now pass 69 combined tests; bag UI #9905 remains open. Capture UX #9917 merged at8fce9f238 and is integrated;445 capture/parity tests passed before the merge. Canonical state: `docs/development/HANDOFF.md`. Preserve the standing manual governance and historical context below.
+Active #9905 in `feat/9905-player-club-bag`, worktree UpstreamDrift-player-bag. My Clubs UI, capture assignment/library display and immutable model context are implemented;652 broad regressions and69 focused/map/parity checks pass. Parent catalog #9919 merged01831aa4c; capture UX #9917 merged8fce9f238. Canonical state is `docs/development/HANDOFF.md`. Preserve live Capture Rig childPID61500 and standing manual governance. Wizard integration and broader goal remain open.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
