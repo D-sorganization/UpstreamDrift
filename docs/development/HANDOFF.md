@@ -72,3 +72,8 @@ Only the canonical handoff conflicted; this rendering handoff remains current.
 
 Normal pre-push mypy needs explicit TypeAlias declarations under its import policy;
 Image and Camera aliases now declare their role. No runtime behavior changed.
+
+Parent timing CI repair 250c421e4 is integrated. The newer compositor keeps its
+own existing camera-snapshot helper instead of the superseded export helper.
+NumPy shape typing and refreshed benchmark evidence are retained. Full-PR
+architecture passes with --base-ref origin/main; use this explicit comparison.

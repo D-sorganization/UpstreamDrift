@@ -42,7 +42,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)
 - **Summary:** Immutable bounded event anchors, binary-search gap-aware sampling, actual camera/clock snapshots and stale-registration checks replace unsupported calibration assumptions.
-- **Evidence:** Twelve adverse regressions first failed. Combined suite 46 passed including final camera fixtures; fourteen-module mypy passes. Diagnostic benchmark stays near 0.25 ms per sampled frame across 120 to 12000 source frames.
+- **Evidence:** Twelve adverse regressions first failed. Combined suite 46 passed including final camera fixtures; fourteen-module mypy passes. Refreshed diagnostic sampling medians are 0.157/0.093/0.304 ms across 120/1200/12000 source frames; source fingerprint retained. CI shape typing and function budget corrections pass 16 focused regressions.
 - **Next step:** Finish protected checks, then continue #9882/#9883.
 
 ### DL-#9879 · Comparison State and Export Lifetime
