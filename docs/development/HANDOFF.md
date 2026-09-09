@@ -3,7 +3,7 @@
 ## Current Continuation State
 
 - Working directory: C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin.
-- Branch: feat/9912-impact-provider-pin; implementation commit SELF; PR not created.
+- Branch: feat/9912-impact-provider-pin; implementation commit b6107f8e2; PR not created.
 - Base: 6e3610a9b; Tools candidate: 608e85b249e6f61238ac96abbe7dc37428629b9e.
 - Governing issue #9912, development entry DL-#9912, parent #9703/#9701/#9700.
 - Pair: Tools #5133. No shared source is copied or modified in this consumer.
@@ -30,12 +30,19 @@ the central validator at ad9bcb885 reports 40 inherited findings versus 41 on
 base, with no new findings after normalizing shifted diagnostic line numbers.
 DL-#9830 and DL-#9825 now concisely record their verified merged results; detailed
 evidence remains in their existing turnover documents. Other owners' entries
-are preserved. Installed-wheel validation and final provider pin remain pending.
+are preserved. The Python-only wheel built from b6107f8e2 installs with its full
+declared core dependencies into a clean environment outside the checkout. Both
+shaft and theme imports resolve under site-packages. Canonical wire/digest,
+coupled inputs, tamper refusal and theme ownership checks pass; pip check passes.
+Wheel SHA256: 6f6f259ff9679f921a5a05e515abcb4bb466589221ce6c7aefdc43b9ca656653.
+Runtime: Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, Pydantic 2.13.5.
+SKIP_UI_BUILD=1 is the existing Python-provider build path; this evidence does
+not qualify a UI/release artifact. The final reviewed provider pin remains pending.
 
 ## Remaining Work
 
 1. Incorporate the reviewed Tools repair revision and rerun the provider checks.
-2. Complete packaging, structure/manual and installed-consumer validation.
+2. Repeat installed-consumer validation when the final provider pin changes.
 3. Publish the actual paired PR, add its UD-PAIR reference to Tools #5133, and
    finish protected checks before merging in provider-then-consumer order.
 4. Continue the full #9703 engine adapters and registered #9704 studies.
@@ -44,8 +51,10 @@ This pin does not close physical calibration, flexible impact, acoustic radiatio
 or blinded sweetness qualification. Tools #5133 still has protected CI failures;
 private Gasification checkout access is separately unresolved. Current dirty
 files belong to this branch; other worktrees and user-owned source are untouched.
-The presence read is complete with no path conflicts, but reports an unrelated
-rejected identity-change warning. Preserve the original owners' scope.
+The complete presence read found common handoff/SPEC/development-log overlap
+with capture-product sessions #9898/#9913, but no implementation-path overlap.
+Each session uses its own worktree; preserve their incoming metadata during
+merges. An unrelated rejected identity-change warning is retained in inbox evidence.
 
 ## Preserved Incoming Handoff
 

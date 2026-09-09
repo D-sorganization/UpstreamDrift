@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (Tools 608e85b24; consumer base 6e3610a9b; changes SELF)
+- **Last verified:** 2026-09-09 (Tools 608e85b24; consumer base 6e3610a9b; consumer b6107f8e2)
 - **Summary:** Qualify the exact Tools #5133 candidate through the existing vendor boundary, including strict shaft inputs and paired theme compatibility.
-- **Evidence:** Six old-pin failures become six passes; all 24 provider contracts pass on candidate 608e85b24. Ruff and manual governance pass. Physical qualification remains open.
+- **Evidence:** Six old-pin failures become six passes; all 24 provider contracts pass on candidate 608e85b24. Clean Python-only wheel import/wire/theme and pip check pass. Physical qualification remains open.
 - **Next step:** Qualify the final Tools #5133 repair revision through the provider suite.
 
 ### DL-#9894 · Scoped Ubuntu CI Dependencies
