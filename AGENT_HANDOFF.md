@@ -31,6 +31,23 @@ Wave-2 disposition table (REST-verified 2026-09-09 ~00:45 UTC):
 | #9442                      | Stacked on #9440's branch (base `readiness/p1-9406-delete-tools-canonical-1`, not main); branch merged forward to `b45ec951f` with the seam-root sync; fresh CI running; auto-merge not armable while stacked - retarget to main only after #9440 lands (wave-1 rule).                                                                                                                                                                               |
 | #9636, #9633, #9618, #9610 | Conductor drafts, skipped per assignment.                                                                                                                                                                                                                                                                                                                                                                                                            |
 
+## Wave-2 Issue Backlog: 2026-09-08 (Agent `claude`, Session UD2IssuesA)
+
+Second-wave residual-backlog sweep over the older half of the 186 open issues
+(#8346–#8930). Sibling PRs from the same sweep (based on the identical main
+revision): PR #9828 (#8922, mocap retargeting IK cost) and PR #9831 (#8928,
+pendulum result accessor caching).
+
+- **#8842** — `notebooks/bunkershot3d/phase1_mvp.py` was unrunnable: it
+  imported a nonexistent top-level `bunkershot3d` package and pointed at a
+  nonexistent repo-root `configs/` tree. It now imports via
+  `src.bunkershot3d.*` with a repo-root `sys.path` bootstrap, resolves the
+  packaged `src/bunkershot3d/calibration/configs/canonical.yaml`, writes
+  artifacts under gitignored `output/bunkershot3d/`, and exits 1 with a
+  clear log line when the optional `pychrono` backend is absent (phases 1-2
+  still produce their artifacts). Smoke tests:
+  `tests/bunkershot3d/test_phase1_mvp_notebook.py`.
+
 ## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
 
 The Capture Rig tile went from "no live view at all" to a recording station.
