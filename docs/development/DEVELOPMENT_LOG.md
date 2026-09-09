@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #9910 (draft)
 - **Paths:** src/tools/capture_rig/, tests/tools/capture_rig/, scripts/generate_mocap_user_guide.py, docs/motion_capture/user_guide.md, src/config/feature_parity.json
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`b743eef0914073c9433c2816078d337e5d60b6e8` base plus working changes; capture and parity suites pass; 37 final focused checks pass; mypy and lint pass)
+- **Last verified:** 2026-09-09 (`8f590cc80779ef4dad4fd5bd4b28c63e784303b9`; capture/parity suites, 37 final focused tests, five final journey tests and normal commit/pre-push gates pass; preserving remote rebase by normal merge)
 - **Summary:** Persistent identity and action feedback, per-capture history, detector/edit association, clickable workflow/help/provenance, invalid-selection state clearing, and Qt window detachment/fullscreen with preserved content.
 - **Next step:** Run normal commit and pre-push checks, then publish #9910.
 

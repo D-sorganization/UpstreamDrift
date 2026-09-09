@@ -1,0 +1,257 @@
+{
+  "schema_version": "grf-source-reconciliation/v1",
+  "registry_id": "grf-source-reconciliation-v1",
+  "registered_at_utc": "2026-09-06T00:00:00Z",
+  "authority": "D-sorganization/UpstreamDrift#8496",
+  "scope_statement": "Each ground-reaction topic raised by the #8493 chapter is mapped to the original works already adjudicated in external_source_review.json. Works are deduplicated once and may inform several topics; reuse across topics is not replication. Topic gaps are recorded as declared scope limits, never closed by adding an unverified reference.",
+  "corpus_access": {
+    "provider": "NotebookLM",
+    "collection": "Biomechanics",
+    "status": "blocked_on_manual_authentication",
+    "checked_on": "2026-09-06",
+    "method": "notebooklm auth check --test --json against the local default profile",
+    "observed": {
+      "storage_exists": false,
+      "json_valid": false,
+      "cookies_present": false,
+      "sid_cookie": false,
+      "token_fetch": null
+    },
+    "notebook_ids": [],
+    "source_inventory_ids": [],
+    "credential_handling": "No cookie, bearer token, storage-state file, password, or session artifact is copied into this repository. The observed booleans above are the tool's own status report.",
+    "unblock_action": "A human must run notebooklm login and complete Google authentication interactively. Passwords, second factors, CAPTCHA, and browser authentication dialogs are not automated.",
+    "consequence": "Notebook and source-inventory identifiers cannot be recorded on this date. The corpus is a lead index only, so its absence removes a search aid and does not withdraw support from any topic below."
+  },
+  "evidence_policy": {
+    "corpus_authority": "research_index_only",
+    "generated_prose_is_evidence": false,
+    "verification_rule": "Every work below was checked against its own DOI, PubMed or PMC record, or publisher record before use, and carries the boundary registered for it in external_source_review.json.",
+    "gap_rule": "A topic gap is closed only by an independently verified original source that the article also cites; it is never closed by a generated summary or by an uncited bibliography addition."
+  },
+  "works": [
+    {
+      "work_id": "doi:10.1007/s40279-025-02391-3",
+      "bib_key": "watson2026grf",
+      "verified_against": "pubmed_or_pmc",
+      "verification_method": "PubMed record and Crossref relation metadata reviewed for the retained-study count, terminology finding, and correction status.",
+      "checked_on": "2026-08-14",
+      "contribution": "Systematic review of golf ground-reaction force and centre-of-pressure measurement, reporting inconsistent terminology and method across the retained studies.",
+      "boundary": "A synthesis, not a substitute for the underlying primary studies, and no cited study identifies a unique biological command, universal COP waveform, or causal performance intervention."
+    },
+    {
+      "work_id": "doi:10.1016/0021-9290(80)90172-4",
+      "bib_key": "robertson1980",
+      "verified_against": "doi",
+      "verification_method": "Publisher record resolved from the DOI and reviewed for the participant count, joint-level agreement, and transfer-magnitude statements.",
+      "checked_on": "2026-08-14",
+      "contribution": "Segment energy generation, absorption, and transfer balance applied to sagittal walking data, with intersegment transfer comparable in magnitude to generation and absorption.",
+      "boundary": "Two participants, sagittal walking, and reported disagreement at the ankle during weight acceptance and late push-off; not golf validation and not muscle identification."
+    },
+    {
+      "work_id": "doi:10.1016/j.jbiomech.2016.07.029",
+      "bib_key": "joo2016",
+      "verified_against": "pubmed_or_pmc",
+      "verification_method": "PubMed record reviewed for the input-variable expansion, participant count, and force-plate reference measurement.",
+      "checked_on": "2026-08-14",
+      "contribution": "Neural-network recovery of six-axis ground reactions from plantar-pressure inputs validated against force plates, establishing that pressure instrumentation yields predicted rather than measured shear and moment channels.",
+      "boundary": "The nonvertical channels are model predictions in the reported sample and apparatus; the method does not make free moment a directly measured insole observable."
+    },
+    {
+      "work_id": "doi:10.1016/j.jbiomech.2022.111087",
+      "bib_key": "sturdy2022",
+      "verified_against": "doi",
+      "verification_method": "Publisher record resolved from the DOI and reviewed for the residual-reduction parameter scope and validation task.",
+      "checked_on": "2026-08-14",
+      "contribution": "Automated optimization of OpenSim residual-reduction parameters, documenting how dynamic inconsistency between measured contact and modelled dynamics is reduced.",
+      "boundary": "Reduces and documents residuals in the reported task; it does not turn a residual into a measurement of unmodelled muscle action."
+    },
+    {
+      "work_id": "doi:10.1016/s0966-6362(02)00068-1",
+      "bib_key": "zajac2002",
+      "verified_against": "doi",
+      "verification_method": "Publisher record resolved from the DOI and reviewed for the induced-acceleration and power-transfer definitions used in the article.",
+      "checked_on": "2026-08-14",
+      "contribution": "Definitions separating net joint power from muscle-induced acceleration and power, and the simulation requirements each analysis family imposes.",
+      "boundary": "Induced quantities depend on coordinates, constraints, actuator representation, state, and intervention definition, and do not uniquely identify neural control."
+    },
+    {
+      "work_id": "doi:10.1080/02640410600874971",
+      "bib_key": "ballbest2007",
+      "verified_against": "pubmed_or_pmc",
+      "verification_method": "PubMed record reviewed for the participant count, skill span, and cluster-analysis result.",
+      "checked_on": "2026-08-14",
+      "contribution": "Cluster analysis of centre-of-pressure patterns in 62 golfers spanning professional through high-handicap levels, yielding two recurring direction-of-hit patterns.",
+      "boundary": "A description of recurring patterns in one sample; it does not claim that two clusters exhaust two-dimensional COP behaviour."
+    },
+    {
+      "work_id": "doi:10.1080/14763141.2019.1586983",
+      "bib_key": "han2019",
+      "verified_against": "pubmed_or_pmc",
+      "verification_method": "PubMed record and publisher record reviewed for the participant count, handicap ceiling, club conditions, and association-only framing.",
+      "checked_on": "2026-08-14",
+      "contribution": "Associations between selected lead- and trail-foot force and moment parameters and maximum clubhead speed in 63 highly skilled male golfers across three club conditions.",
+      "boundary": "Association only, male low-handicap population, selected peaks and club conditions, no causal intervention and no energetic source attribution."
+    },
+    {
+      "work_id": "doi:10.1371/journal.pone.0295152",
+      "bib_key": "werling2023",
+      "verified_against": "doi",
+      "verification_method": "Open-access publisher record resolved from the DOI and reviewed for the joint inertial-parameter and kinematics adjustment scope.",
+      "checked_on": "2026-08-14",
+      "contribution": "Automated scaling, inverse kinematics, and inverse dynamics that jointly adjust inertial parameters and kinematics to reduce dynamic inconsistency.",
+      "boundary": "A processing pipeline validated on its own corpus; it does not validate the golf reaction decomposition committed here."
+    },
+    {
+      "work_id": "doi:10.3389/fspor.2026.1790645",
+      "bib_key": "frontiers2026footground",
+      "verified_against": "publisher_record",
+      "verification_method": "Open-access publisher article reviewed for the sample size, pooled club conditions, regression blocks, and mediation design.",
+      "checked_on": "2026-08-14",
+      "contribution": "Hierarchical regression and mediation on 30 golfers in which centre-of-pressure factors plus skill group explain part of clubhead-speed variance and a constructed impulse-related transfer factor carries an indirect association.",
+      "boundary": "Small sample relative to the upstream feature space, pooled clubs, constructed factors, observational mediation, and no longitudinal causal intervention."
+    },
+    {
+      "work_id": "pmid:24149910",
+      "bib_key": "worsfold2008",
+      "verified_against": "pubmed_or_pmc",
+      "verification_method": "PubMed record reviewed for the participant count and the handicap, club, and footwear conditions.",
+      "checked_on": "2026-08-14",
+      "contribution": "Shoe-to-natural-turf torque measured in 24 golfers across handicap, club, and footwear conditions, the closest cited measurement of a rotational foot-surface interface load.",
+      "boundary": "An interface torque under specified footwear and surface conditions; it is not a free moment transported to a declared centre of pressure."
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "center_of_pressure",
+      "question": "Which original human measurements bound the article's treatment of centre-of-pressure trajectories and their association with clubhead speed?",
+      "article_locations": [
+        "chapters/_ch03_evidence.qmd",
+        "chapters/_ch03c_ground_reaction_drift.qmd"
+      ],
+      "claim_ids": ["PD-CLAIM-010", "PD-CLAIM-074", "PD-CLAIM-078"],
+      "model_internal_claim_ids": [],
+      "work_ids": [
+        "doi:10.1007/s40279-025-02391-3",
+        "doi:10.1080/02640410600874971",
+        "doi:10.3389/fspor.2026.1790645"
+      ],
+      "resolution": "externally_bounded_with_open_gap",
+      "gaps": [
+        "No cited original source establishes a universal centre-of-pressure waveform, so the article registers COP as a described observable rather than a control variable."
+      ],
+      "disagreements": [
+        "Ball and Best describe two recurring direction-of-hit clusters while Ratchanavy and colleagues represent COP as principal-component factors inside a mediation model. The article treats these as non-equivalent descriptions and adopts neither as a canonical COP parameterization."
+      ]
+    },
+    {
+      "topic_id": "contact_model",
+      "question": "Which original sources qualify the foot-ground contact representation used to convert modelled reactions into bilateral loads?",
+      "article_locations": ["chapters/_ch03c_ground_reaction_drift.qmd"],
+      "claim_ids": ["PD-CLAIM-075"],
+      "model_internal_claim_ids": ["PD-CLAIM-076", "PD-CLAIM-080"],
+      "work_ids": [
+        "doi:10.1016/j.jbiomech.2022.111087",
+        "doi:10.1371/journal.pone.0295152"
+      ],
+      "resolution": "externally_bounded_with_open_gap",
+      "gaps": [
+        "No cited original source qualifies a compliant or friction-cone foot-ground contact model for the golf swing.",
+        "The committed benchmark uses a fixed support with no feet, so bilateral foot-force allocation, centre of pressure, and free moment stay registered as non-identifiable instead of being modelled."
+      ],
+      "disagreements": [
+        "The residual-reduction literature treats dynamic inconsistency as a quantity to minimize, whereas this article treats an inverse-dynamics residual as unidentified by construction. The article keeps the stricter reading and does not report reduced residuals as evidence of recovered contact loads."
+      ]
+    },
+    {
+      "topic_id": "free_moment",
+      "question": "Which original sources bound the article's derivation and use of the vertical free moment about a transported centre of pressure?",
+      "article_locations": ["chapters/_ch03c_ground_reaction_drift.qmd"],
+      "claim_ids": ["PD-CLAIM-074"],
+      "model_internal_claim_ids": [],
+      "work_ids": ["doi:10.1016/j.jbiomech.2016.07.029", "pmid:24149910"],
+      "resolution": "externally_bounded_with_open_gap",
+      "gaps": [
+        "No cited original source reports a golf free moment transported to a declared centre of pressure; the shoe-surface torque measurement is a related but distinct interface observable.",
+        "The wrench-transport convention that defines centre of pressure and the residual vertical free moment is derived in the article from rigid-body statics rather than adopted from a cited measurement standard."
+      ],
+      "disagreements": [
+        "Pressure-instrumented work reports six-axis reactions recovered by a trained model, which the article declines to treat as a direct free-moment measurement."
+      ]
+    },
+    {
+      "topic_id": "ground_reaction_force",
+      "question": "Which original human measurements bound the article's use of golf ground-reaction force magnitude, direction, and timing, and the prospective test it registers?",
+      "article_locations": [
+        "chapters/_ch03_evidence.qmd",
+        "chapters/_ch03c_ground_reaction_drift.qmd"
+      ],
+      "claim_ids": ["PD-CLAIM-011", "PD-CLAIM-074", "PD-CLAIM-079"],
+      "model_internal_claim_ids": ["PD-CLAIM-077"],
+      "work_ids": [
+        "doi:10.1007/s40279-025-02391-3",
+        "doi:10.1080/14763141.2019.1586983",
+        "pmid:24149910"
+      ],
+      "resolution": "externally_bounded_with_open_gap",
+      "gaps": [
+        "No cited study releases participant-level six-axis bilateral wrench time series that this article could independently re-analyze, so the prospective falsification protocol stays registered rather than executed."
+      ],
+      "disagreements": [
+        "Han and colleagues report skill-associated force and moment peaks in a low-handicap male sample, while the 2026 systematic review reports that terminology and reporting differ across the retained studies. The article adopts the review's caution rather than any single peak convention."
+      ]
+    },
+    {
+      "topic_id": "segment_power",
+      "question": "Which original sources bound the segment energy generation, absorption, and transfer language the ground-reaction attribution borrows?",
+      "article_locations": [
+        "chapters/_ch02_mechanics.qmd",
+        "chapters/_ch03_interaction_forces.qmd",
+        "chapters/_ch06_methods.qmd"
+      ],
+      "claim_ids": [
+        "PD-CLAIM-044",
+        "PD-CLAIM-045",
+        "PD-CLAIM-046",
+        "PD-CLAIM-047",
+        "PD-CLAIM-050"
+      ],
+      "model_internal_claim_ids": [],
+      "work_ids": [
+        "doi:10.1016/0021-9290(80)90172-4",
+        "doi:10.1016/s0966-6362(02)00068-1"
+      ],
+      "resolution": "externally_bounded_with_open_gap",
+      "gaps": [
+        "Neither source is a golf measurement, so segment-power transfer during the swing remains model-internal and inherits no human validation from them."
+      ],
+      "disagreements": [
+        "A Robertson-Winter segment energy balance and a Zajac induced-acceleration analysis answer different questions. The article keeps both and does not report a joint-power balance as an induced-power attribution."
+      ]
+    }
+  ],
+  "coverage": {
+    "topic_count": 5,
+    "work_count": 10,
+    "topic_ids": [
+      "center_of_pressure",
+      "contact_model",
+      "free_moment",
+      "ground_reaction_force",
+      "segment_power"
+    ],
+    "externally_bounded_topic_ids": [
+      "center_of_pressure",
+      "contact_model",
+      "free_moment",
+      "ground_reaction_force",
+      "segment_power"
+    ],
+    "unsupported_topic_ids": [],
+    "open_gap_count": 7,
+    "recorded_disagreement_count": 5,
+    "corpus_enumerated": false,
+    "corpus_derived_evidence_count": 0
+  },
+  "inference_boundary": "This reconciliation cannot show that the ground-reaction attribution is correct for a human golfer. It records which original sources bound each topic and which questions no cited source answers; the enumerated NotebookLM corpus is unavailable on the recorded date and would in any case only supply leads."
+}

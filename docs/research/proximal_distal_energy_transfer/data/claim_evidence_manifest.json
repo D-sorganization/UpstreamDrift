@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "66b05c26457ecf09323fddf477d6c7bb572ca7a561badc47465eb80993a7c72f"
+    "sha256": "63df7e739680c4a85df0f10f36c3e36d73d758ea6d24e7b6c9cf43d7eb5e9947"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -4343,8 +4343,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "1bcfe0b348cd2af9a6d429ba7c346dfe557a81257e1f26cd36076d4f90d95c94",
-      "bytes": 27454,
+      "sha256": "ef4acf66fb2e455a24f61511bb903e5718964e6ad53a8cdb385587c5253c9018",
+      "bytes": 33386,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -5318,8 +5318,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json": {
-      "sha256": "f8153ab261e5181dd3ddf663429bfb71f40b191e3c610ce989a1e1d01870bffa",
-      "bytes": 18267,
+      "sha256": "03410619f085c7ce0e6516dd4e863b8693f4c85eeb98f56199c0e96e39f5819f",
+      "bytes": 18613,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -5334,8 +5334,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json": {
-      "sha256": "ad4d78e04c752def2ab2e054f7357f8772767fa27e4bab402ed5b487e3011066",
-      "bytes": 20510,
+      "sha256": "58a2960e8c5a3f1e65b5c1c80e7ed3eda7e5e39e55b644033b73d73f043f7abf",
+      "bytes": 21393,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -5350,8 +5350,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json": {
-      "sha256": "5442940996f0a3ec9c179974fe8c2716f1b0fca6f2070ec1e4d8a2933269450c",
-      "bytes": 15056,
+      "sha256": "3cccb44b6ce1040974144a49776e59b08ec18edf4babbe599a6fe3467e190e37",
+      "bytes": 15939,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -6413,8 +6413,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "1acdedc03e54000681db8011466c41319d2555437b824f98acfc327f149fe340",
-      "bytes": 163108,
+      "sha256": "78412a179eacfcc6695109a5d9f1dc1bf36e44b5fc07a60fae26aef9ca64e159",
+      "bytes": 165205,
       "referenced_by": [
         "PD-CLAIM-241"
       ]

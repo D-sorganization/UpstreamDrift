@@ -1,5 +1,5 @@
 {
-  "schema_version": "momentum-transfer-geometry-atlas/v1",
+  "schema_version": "momentum-transfer-geometry-atlas/v2",
   "study_id": "reference-explicit-momentum-transfer-geometry-atlas-v1",
   "registered_before_preferred_result": true,
   "geometry_gates": {
@@ -7,6 +7,7 @@
     "distal_tangential_projection": "cos(relative_link_angle)",
     "distal_centripetal_projection": "-sin(relative_link_angle)",
     "bilateral_differential_couple": "signed separation cross differential force",
+    "distributed_station_reduction": "axis cross first moment of station forces",
     "closed_loop_conditioning": "constraint Jacobian singular values; magnitude requires dynamics"
   },
   "negative_controls": {
@@ -15,8 +16,11 @@
     "coincident_grips": "zero bilateral couple",
     "axial_differential_force": "zero bilateral couple",
     "reversed_force_or_moment_arm": "sign reversal",
+    "common_mode_station_distribution": "zero midpoint couple",
+    "station_count_refinement": "invariant couple at a fixed first moment",
     "maximum_null_residual": 6.123233995736766e-17,
-    "maximum_reversal_residual": 1.1102230246251565e-16
+    "maximum_reversal_residual": 1.1102230246251565e-16,
+    "maximum_station_count_couple_deviation_nm": 5.551115123125783e-17
   },
   "frame_audit": {
     "rotation_count": 12,
@@ -44,6 +48,29 @@
       "minimum_condition_number": 9.052293552169415,
       "maximum_condition_number": 9.464777995504267,
       "provenance": "mechanism_ladder_study.json"
+    },
+    "subject_scaled_articulated_contact": {
+      "couple_per_span_invariance_residual": 7.105427357601002e-15,
+      "prescribed_maximum_contact_error_m": 0.6159592453773698,
+      "closed_configuration_count": 234,
+      "closed_maximum_contact_error_m": 1.1581683667605664e-10,
+      "provenance": "subject_scaled_spatial_geometry.json; subject_scaled_closed_contact.json"
+    },
+    "distributed_club": {
+      "coincident_station_couple_residual_nm": 0.0,
+      "reversed_station_couple_sign_residual_nm": 0.0,
+      "maximum_station_load_concentration": 0.8203635939772279,
+      "grip_trajectory_count": 576,
+      "shaft_trajectory_count": 384,
+      "shaft_maximum_peak_force_couple_nm": 0.3395402416152166,
+      "provenance": "articulated_distributed_grip_atlas.json; articulated_shaft_atlas.json"
+    },
+    "held_out_measurement": {
+      "net_wrench_only_allocation_rmse_n": 11.86029791643813,
+      "net_wrench_only_normalized_net_wrench_rmse": 1.476756273563415e-16,
+      "combined_registered_allocation_rmse_n": 1.0165968151127647,
+      "net_wrench_only_qualification": "fails_by_structure",
+      "provenance": "bilateral_wrench_sensor_qualification.json"
     }
   },
   "tier_coverage": {
@@ -51,24 +78,34 @@
     "fixed_hub_planar": "executed_relative_link_gates",
     "moving_base_two_hand": "linked_existing_evidence",
     "spatial_forward_contact": "linked_existing_evidence_and_frame_audit",
-    "subject_scaled": "open_requires_anthropometry_and_contact_calibration"
+    "subject_scaled_articulated_contact": "linked_prescribed_state_rejection_and_closed_reduced_tree_evidence",
+    "distributed_club": "executed_exact_first_moment_reduction_and_linked_grip_shaft_evidence",
+    "held_out_measurement": "linked_synthetic_sensor_qualification_not_device_or_participant_data",
+    "subject_scaled": "open_requires_anthropometry_and_contact_calibration",
+    "governed_human": "open_blocked_by_bilateral_wrench_dataset_acquisition"
   },
   "claim_status": {
     "force_magnitude_alone_determines_transfer": "rejected",
     "geometry_can_gate_sign_and_zero": "supported_analytically_and_in_declared_model_controls",
     "coordinate_rotation_changes_physical_power": "rejected_for_proper_rotations",
     "universal_human_geometry": "untested",
-    "coaching_prescription": "unsupported"
+    "coaching_prescription": "unsupported",
+    "station_spread_changes_couple_at_fixed_first_moment": "rejected",
+    "net_wrench_identifies_bilateral_contact_geometry": "rejected",
+    "calibrated_subject_scaled_contact_geometry": "untested"
   },
   "limitations": [
     "The atlas normalizes force and speed and therefore maps geometry rather than attainable human magnitude.",
     "The bilateral couple surface assumes an ideal opposed differential force mode at a declared midpoint.",
     "Closed-loop conditioning does not determine reaction-force magnitude without dynamics and control.",
-    "Subject-scaled scapular, wrist, grip-compliance, and distributed-club geometry remain open."
+    "The distributed reduction is exact for rigid station offsets and says nothing about measured grip pressure, finger anatomy, friction, or tissue.",
+    "The subject-scaled tier is linked reduced-tree inverse kinematics with engineering limits and coarse collision bounds, not calibrated anatomy or a participant distribution.",
+    "The held-out measurement tier is a synthetic sensor qualification; it is not device calibration and cannot close a human claim.",
+    "Scapular, wrist, and grip-compliance geometry and every governed human geometry question remain open."
   ],
   "source_sha256": {
-    "momentum_geometry_atlas.py": "ff67f0fd9ede922bb152734d5717fe6457043873a033b7ebc28a533274c85fdb",
-    "run_momentum_geometry_atlas.py": "a09b1f693682f0e229a94feb410adc367c7212ba90a10f00106f117bde6c1622"
+    "momentum_geometry_atlas.py": "dc0b02014241feaf090073c93d49fe200bd3412a89ca2dab41ae60b07cd43427",
+    "run_momentum_geometry_atlas.py": "c5f330060820f38429698c466fe4e71dcc9d3116c45eae74fe4dda01ea72d911"
   },
   "array_artifact": "momentum_geometry_atlas.npz"
 }
