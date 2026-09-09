@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9830 · Independent Shooting Accuracy
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9830
+- **PR:** not created
+- **Branch:** fix/9830-independent-shooting-convergence
+- **Paths:** optimization reference/defect contracts and docs/development/shooting_convergence_9830_turnover.md
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (unchanged case reproduces CI failure exactly in 110.59 s; three synthetic shooting refinements compared with fixed/adaptive references; no production fix yet)
+- **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
+- **Next step:** Add independent reference-integration RED controls, then separate discrete feasibility, reference resolution and continuous discrepancy with explicit component budgets. Preserve the original failing case and avoid threshold relaxation; correct parity claims and validate live/native/protected paths before delivery.
+
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 
 - **State:** in_review

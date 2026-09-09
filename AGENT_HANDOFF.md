@@ -53,8 +53,9 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 
 ## Impact Dynamics and Acoustics: #9700
 
-- Theory AffineDrift #4258/#4282 and integration plan #9706 merged. Tools T1 #5077 merged; T2 #5082 remains open.
-- Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
+- Theory AffineDrift #4258/#4282/#4298 and integration plan #9706 are merged. Tools T1 #5077 and T2 #5082 (80d580d57) are merged; T2 golf source/tests match reviewed e47fde4e and prior 476eaa98.
+- Tools T3 autonomous decay 58f33e403 and turnover 2d290079b are published through normal hooks (731 Linux golf/API tests, two optional CAD skips). Driven/nonlinear stability, bandwidth, contact/acoustics and empirical gates remain open.
+- #9830 is claimed by codex/session impact-acoustics-01a07d8a-shooting9830 until 2026-09-09T02:13:33Z. The unchanged CI case reproduces exactly; independent refinement shows both reference under-resolution and substantial continuous-ODE mismatch despite tiny own-grid residuals. Three shooting refinements are recorded in docs/development/shooting_convergence_9830_turnover.md. No production solver or threshold changes yet; add reference-integration RED tests next.
 - Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
 - Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 merged at `9aa26e4f8`; #9787 repairs its observed research companion failures.
 - #9787 / PR #9804: synchronized with main `563e7aaa9`, including native bootstrap #9726. Actual regenerated native record has SHA `0c0f3395`; only governed source hashes change. All 122 combined authority/provenance/bootstrap tests and three distinct rolling tests pass. Reviewer summary and inspected 253-page PDF are current; incoming mocap aliases are explicitly typed and the actual mypy hook passes. See `docs/development/manufactured_authority_9787_turnover.md`; protected CI remains required.
@@ -406,7 +407,6 @@ reruns. Do not restart the Actions runner or start WSL.
 ## UI Dependency Pin: #9249
 
 - Dependabot now ignores `@vitejs/plugin-react` major updates (`.github/dependabot.yml`): 6.x needs Vite 8 (`peerDependencies.vite: "^8.0.0"`; Vite 7 exports no `./internal`), so a lone bump cannot merge. Stay on plugin-react ^5 with vite ^7.3.2 until a paired Vite-8 upgrade; pairing note lives in `ui/README.md`. Branch `claude/issue-9249-ui-pin`.
-
 
 ## OCP Compat Robust to Poisoned `sys.modules` (#9771)
 
