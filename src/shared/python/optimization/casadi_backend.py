@@ -53,6 +53,16 @@ from src.shared.python.optimization._swing_models import (
     OptimizationConfig,
     OptimizationObjective,
 )
+from src.shared.python.optimization._swing_reference import (
+    ReferenceControls,
+    ReferenceEndpoint,
+    Rhs,
+    _positive_real,
+    finite_real_array,
+    finite_vector,
+    positive_integer,
+    resolved_endpoint,
+)
 from src.shared.python.optimization.model_provider import (
     build_swing_rig,
     swing_link_inertials,
@@ -66,6 +76,12 @@ _INSTALL_HINT = (
 Transcription = Literal["finite_difference", "multiple_shooting"]
 
 _GRAVITY = np.array([0.0, 0.0, -9.81])
+
+# Numerical reference defaults in rad / rad/s, never measurement uncertainty.
+_REFERENCE_RTOL = 1e-8
+_REFERENCE_POSITION_ATOL = 1e-10
+_REFERENCE_VELOCITY_ATOL = 1e-10
+_REFERENCE_STEPS_PER_INTERVAL = 32
 
 _AXES = {
     "X": np.array([1.0, 0.0, 0.0]),
@@ -389,17 +405,19 @@ def _finite_difference(values: np.ndarray, dt: float) -> np.ndarray:
 
 @dataclass(frozen=True)
 class DynamicsDefectReport:
-    """How far a node-grid trajectory is from satisfying the swing ODE.
+    """Local interval discrepancies in angular position and angular velocity.
 
     Each interval integrates the forward dynamics from ``(q_k, v_k)`` with
     the interval torque held constant and compares the result with
-    ``(q_{k+1}, v_{k+1})``. A true transcription reports defects at the
-    integrator tolerance; the finite-difference path does not (#9756).
+    ``(q_{k+1}, v_{k+1})``. Explicit fixed-grid residuals concern a discrete
+    map only. Default adaptive results retain endpoint refinement diagnostics;
+    neither path certifies physical realizability or whole-trajectory error.
     """
 
     position_defects: np.ndarray
     velocity_defects: np.ndarray
     torques: np.ndarray
+    reference_resolution: tuple[ReferenceEndpoint, ...] | None = None
 
     @property
     def max_position_defect(self) -> float:
@@ -423,6 +441,7 @@ class DynamicsDefectReport:
 
     @property
     def max_defect(self) -> float:
+        """Legacy mixed-unit maximum; use separate component budgets for accuracy."""
         return max(self.max_position_defect, self.max_velocity_defect)
 
     def to_dict(self) -> dict[str, float]:
@@ -447,10 +466,11 @@ def dynamics_defect(
     x: np.ndarray,
     *,
     torques: np.ndarray | None = None,
-    n_substeps: int = 16,
+    n_substeps: int | None = None,
     link_inertials: Mapping[str, LinkInertial] | None = None,
+    reference_controls: ReferenceControls | None = None,
 ) -> DynamicsDefectReport:
-    """Measure the multiple-shooting defect of a flagship-layout trajectory.
+    """Compare node endpoints with independently refined ODE integration.
 
     Args:
         golfer, club, config: The model and node grid the trajectory lives on.
@@ -459,50 +479,172 @@ def dynamics_defect(
             ``None`` (the finite-difference path) the torques are what the FD
             stencil implies: ``rnea(q_k, v_k, a_k)`` with ``a_k`` the central
             difference of ``v``.
-        n_substeps: RK4 substeps per interval. The default is finer than the
-            multiple-shooting solver's grid so the report measures ODE
-            violation, not merely constraint satisfaction.
+        n_substeps: None selects the adaptive reference. A positive integer
+            explicitly selects a fixed RK4 map for discrete-feasibility checks,
+            without any implied reference resolution or continuous accuracy.
+        reference_controls: Optional adaptive numerical settings. Incompatible
+            with a fixed grid. Defaults are rtol=1e-8, position/velocity atol=
+            1e-10 rad/rad/s and max_step=interval/32, then refined by the shared
+            endpoint operation. Local solver tolerances are 10/100 times tighter
+            than these endpoint budgets. Failure or unresolved refinement raises.
 
     Returns:
         Per-interval infinity-norm position and velocity defects.
     """
+    if not isinstance(golfer, GolferModel) or not isinstance(club, ClubModel):
+        raise TypeError("expected GolferModel and ClubModel")
+    trajectory = _defect_trajectory(config, x)
+    controls = _defect_reference_controls(n_substeps, reference_controls, trajectory[2])
     ca = require_casadi()
-    n = len(JOINTS)
-    n_nodes = config.n_nodes
-    x = np.asarray(x, dtype=float).reshape(-1)
-    if x.shape[0] != 2 * n * n_nodes:
-        raise ValueError(f"x must have length {2 * n * n_nodes}, got {x.shape[0]}")
-    if n_nodes < 2:
-        raise ValueError("config.n_nodes must be at least 2")
-    dt = config.swing_duration / (n_nodes - 1)
-    q = x[: n * n_nodes].reshape(n, n_nodes)
-    v = x[n * n_nodes :].reshape(n, n_nodes)
+    applied = _defect_torque_values(
+        (golfer, club, ca), trajectory, torques, link_inertials
+    )
+    if controls is not None:
+        forward = build_forward_dynamics(
+            golfer, club, ca, link_inertials=link_inertials
+        )
+        endpoints, resolution = _reference_endpoints(
+            forward, trajectory, applied, controls
+        )
+    else:
+        assert n_substeps is not None  # Validated explicit fixed-grid mode.
+        step = build_rk4_integrator(
+            golfer,
+            club,
+            trajectory[2],
+            ca,
+            n_substeps=n_substeps,
+            link_inertials=link_inertials,
+        )
+        endpoints, resolution = _fixed_endpoints(step, trajectory, applied), None
+    return _defect_report(endpoints, trajectory, applied, resolution)
 
+
+def _defect_trajectory(
+    config: OptimizationConfig, x: object
+) -> tuple[np.ndarray, np.ndarray, float]:
+    if not isinstance(config, OptimizationConfig):
+        raise TypeError("config must be OptimizationConfig")
+    nodes = positive_integer(config.n_nodes, "n_nodes")
+    if nodes < 2:
+        raise ValueError("config.n_nodes must be at least 2")
+    duration = _positive_real(config.swing_duration, "swing_duration")
+    values = finite_vector(x, "trajectory")
+    count = len(JOINTS)
+    if values.size != 2 * count * nodes:
+        raise ValueError(f"x must have length {2 * count * nodes}, got {values.size}")
+    return (
+        values[: count * nodes].reshape(count, nodes),
+        values[count * nodes :].reshape(count, nodes),
+        duration / (nodes - 1),
+    )
+
+
+def _defect_reference_controls(
+    n_substeps: int | None, controls: ReferenceControls | None, duration: float
+) -> ReferenceControls | None:
+    if n_substeps is not None:
+        positive_integer(n_substeps, "n_substeps")
+        if controls is not None:
+            raise ValueError("reference_controls cannot accompany a fixed grid")
+        return None
+    if controls is not None and not isinstance(controls, ReferenceControls):
+        raise TypeError("reference_controls must be ReferenceControls")
+    return (
+        controls
+        if controls is not None
+        else ReferenceControls(
+            _REFERENCE_RTOL,
+            _REFERENCE_POSITION_ATOL,
+            _REFERENCE_VELOCITY_ATOL,
+            duration / _REFERENCE_STEPS_PER_INTERVAL,
+        )
+    )
+
+
+def _defect_torque_values(
+    models: tuple[GolferModel, ClubModel, Any],
+    trajectory: tuple[np.ndarray, np.ndarray, float],
+    torques: object,
+    inertials: Mapping[str, LinkInertial] | None,
+) -> np.ndarray:
+    q, v, dt = trajectory
     if torques is None:
-        rnea = build_symbolic_rnea(golfer, club, ca, link_inertials=link_inertials)
-        a = _finite_difference(v, dt)
+        golfer, club, ca = models
+        rnea = build_symbolic_rnea(golfer, club, ca, link_inertials=inertials)
+        acceleration = _finite_difference(v, dt)
         torques = np.column_stack(
             [
-                np.asarray(rnea(q[:, k], v[:, k], a[:, k])).reshape(-1)
-                for k in range(n_nodes - 1)
+                finite_real_array(
+                    rnea(q[:, k], v[:, k], acceleration[:, k]), "derived torque"
+                ).reshape(-1)
+                for k in range(q.shape[1] - 1)
             ]
         )
-    torques = np.asarray(torques, dtype=float)
-    if torques.shape != (n, n_nodes - 1):
-        raise ValueError(f"torques must have shape {(n, n_nodes - 1)}")
+    values = finite_real_array(torques, "torques")
+    shape = (q.shape[0], q.shape[1] - 1)
+    if values.shape != shape:
+        raise ValueError(f"torques must have shape {shape}")
+    return values
 
-    step = build_rk4_integrator(
-        golfer, club, dt, ca, n_substeps=n_substeps, link_inertials=link_inertials
+
+def _angular_rhs(forward: Any, torque: np.ndarray) -> Rhs:
+    applied = torque.copy()
+    applied.setflags(write=False)
+    count = applied.size
+
+    def rhs(time: float, state: np.ndarray) -> np.ndarray:
+        acceleration = finite_real_array(
+            forward(state[:count], state[count:], applied), "acceleration"
+        ).reshape(-1)
+        return np.r_[state[count:], acceleration]
+
+    return rhs
+
+
+def _reference_endpoints(
+    forward: Any,
+    trajectory: tuple[np.ndarray, np.ndarray, float],
+    torques: np.ndarray,
+    controls: ReferenceControls,
+) -> tuple[np.ndarray, tuple[ReferenceEndpoint, ...]]:
+    q, v, dt = trajectory
+    results = tuple(
+        resolved_endpoint(
+            _angular_rhs(forward, torques[:, k]), np.r_[q[:, k], v[:, k]], dt, controls
+        )
+        for k in range(q.shape[1] - 1)
     )
-    pos = np.empty(n_nodes - 1)
-    vel = np.empty(n_nodes - 1)
-    for k in range(n_nodes - 1):
+    return np.column_stack([result.state for result in results]), results
+
+
+def _fixed_endpoints(
+    step: Any, trajectory: tuple[np.ndarray, np.ndarray, float], torques: np.ndarray
+) -> np.ndarray:
+    q, v, _ = trajectory
+    endpoints = []
+    for k in range(q.shape[1] - 1):
         q_next, v_next = step(q[:, k], v[:, k], torques[:, k])
-        pos[k] = np.max(np.abs(np.asarray(q_next).reshape(-1) - q[:, k + 1]))
-        vel[k] = np.max(np.abs(np.asarray(v_next).reshape(-1) - v[:, k + 1]))
-    return DynamicsDefectReport(
-        position_defects=pos, velocity_defects=vel, torques=torques
-    )
+        position = finite_real_array(q_next, "fixed-grid position").reshape(-1)
+        velocity = finite_real_array(v_next, "fixed-grid velocity").reshape(-1)
+        if position.shape != (q.shape[0],) or velocity.shape != (v.shape[0],):
+            raise ValueError("fixed-grid endpoint shape differs from the state")
+        endpoints.append(np.r_[position, velocity])
+    return np.column_stack(endpoints)
+
+
+def _defect_report(
+    endpoints: np.ndarray,
+    trajectory: tuple[np.ndarray, np.ndarray, float],
+    torques: np.ndarray,
+    resolution: tuple[ReferenceEndpoint, ...] | None,
+) -> DynamicsDefectReport:
+    q, v, _ = trajectory
+    count = q.shape[0]
+    with np.errstate(over="raise", invalid="raise"):
+        position = np.max(np.abs(endpoints[:count] - q[:, 1:]), axis=0)
+        velocity = np.max(np.abs(endpoints[count:] - v[:, 1:]), axis=0)
+    return DynamicsDefectReport(position, velocity, torques, resolution)
 
 
 def build_clubhead_position(
