@@ -3,6 +3,19 @@
 These epics extend the active professional Capture Rig goal. Completion requires
 their delivered workflows as well as the outstanding fleet communication rollout.
 
+## Player Journey Follow-Up #9913
+
+The player's hands-on review adds required delivery of immediate action feedback,
+clear capture/swing identity, per-view estimator and model/variant status, clickable
+next steps, contextual help and detailed navigation documentation. Every screen
+must detach to another monitor and redock visibly when its floating window closes.
+Video double-click/fullscreen/Escape should follow familiar Qt conventions and
+preserve the existing player state. Reuse PaneHost, QDockWidget, workflow.py and
+session/provenance evidence. The full acceptance checklist is tracked in
+[issue #9913](https://github.com/D-sorganization/UpstreamDrift/issues/9913).
+This is part of the active goal and must be tested and merged to remote main;
+it does not replace the calibration, club library, wizard or fleet requirements.
+
 ## Execution Map
 
 ```mermaid
