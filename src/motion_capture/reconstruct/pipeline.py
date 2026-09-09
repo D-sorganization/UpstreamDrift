@@ -184,18 +184,7 @@ def reconstruct_session(
     )
     fps = float(views_used[ids[0]]["fps"])
     joints = np.load(out_dir / "joints_3d_m.npy")
-    swing_file = out_dir / "swing_summary.json"
-    swing_reason = None
-    try:
-        swing, _series = summarize_swing(joints, fps)
-    except SwingDataUnavailable as exc:
-        # Sparse manual captures must still reach the continuity-based model fit.
-        # Never retain an older dense summary beside the newly sparse result.
-        swing_reason = str(exc)
-        swing_file.unlink(missing_ok=True)
-        logger.warning("Swing summary unavailable: %s", swing_reason)
-    else:
-        swing_file.write_text(swing.model_dump_json(indent=2), encoding="utf-8")
+    swing_file, swing_reason = _write_swing_summary(out_dir, joints, fps)
     summary = SessionReconstruction(
         session=str(session_dir),
         views=tuple(ids),
@@ -219,6 +208,25 @@ def reconstruct_session(
     }
     _write_summary(session_dir, out_dir, obs_set_dir, summary, parameters)
     return summary
+
+
+def _write_swing_summary(
+    out_dir: Path,
+    joints: np.ndarray,
+    fps: float,
+) -> tuple[Path, str | None]:
+    """Write swing_summary.json or remove stale summary if unavailable."""
+    swing_file = out_dir / "swing_summary.json"
+    swing_reason = None
+    try:
+        swing, _series = summarize_swing(joints, fps)
+    except SwingDataUnavailable as exc:
+        swing_reason = str(exc)
+        swing_file.unlink(missing_ok=True)
+        logger.warning("Swing summary unavailable: %s", swing_reason)
+    else:
+        swing_file.write_text(swing.model_dump_json(indent=2), encoding="utf-8")
+    return swing_file, swing_reason
 
 
 def _select_views(
