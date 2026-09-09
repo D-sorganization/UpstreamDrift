@@ -2,6 +2,11 @@
 
 This document provides a high-level overview of UpstreamDrift's architecture, covering the physics engines, data flows, and interface layers.
 
+The [Generated Capability Atlas](CAPABILITY_ATLAS.md) provides maintained C4-style
+views, capture workflow diagrams, artifact contracts and searchable feature/source
+links. Regenerate with `python3 -m scripts.generate_capability_atlas` after registry
+or workflow changes; `--check` verifies freshness without writing.
+
 ## 1. Core Architecture
 
 UpstreamDrift follows a modular architecture designed to support multiple physics engines interchangeably while providing a unified API for the frontend and analysis tools.

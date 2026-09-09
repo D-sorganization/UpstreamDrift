@@ -17,6 +17,24 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9850 · Generated Capability Atlas
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9850 (children #9852, #9853; product #9849)
+- **Branch:** `feat/9850-capability-atlas`
+- **PR:** not created
+- **Paths:** `scripts/capability_atlas/`, `scripts/generate_capability_atlas.py`,
+  `src/config/capability_connections.json`, `ui/public/capability-atlas/`,
+  `ui/src/components/simulation/LauncherDashboard.tsx`, `docs/architecture/`,
+  `tests/scripts/test_capability_atlas.py`
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`384cba80e` base)
+- **Summary:** Source-backed C4-style context, artifact/workflow network,
+  searchable feature/tile reference and standard Mermaid exports. Reads existing
+  registries and workflow; no separate feature inventory or GUI fork.
+- **Next step:** Verify browser controls and freshness, publish protected PR.
+
 ### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
 
 - **State:** in_review
