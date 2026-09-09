@@ -55,6 +55,8 @@
 
 - SELF — Record PR #9868 and passing normal push hooks (including mypy, Bandit and unit tests); place its single SPEC row inside the canonical change-log table.
 
-- SELF — CI identified two library navigation calls reaching through CapturePanel into its text control. Added a panel-owned set_session_dir API and exercised the real library-open callback in the integration test; no baseline weakening.
+- SELF — CI identified two library navigation calls reaching through CapturePanel into its text control. Added a panel-owned set_session_path API and exercised the real library-open callback in the integration test; no baseline weakening.
 
 - Verification: full LoD scan passes (3,005 source files), six GUI/library integration tests pass, and gui.py passes mypy after the navigation API correction.
+
+- SELF — Integrated concurrent agent commit c401d006e through a normal merge. Preserved its panel-owned set_session_path API and retained the callback integration tests; removed the equivalent duplicate accessor.

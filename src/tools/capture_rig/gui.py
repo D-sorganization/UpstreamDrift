@@ -267,13 +267,12 @@ class CapturePanel(QGroupBox):
             controls=self.controls(),
         )
 
+    def set_session_path(self, path: Path | str) -> None:
+        self.session_edit.setText(str(path))
+
     def session_dir(self) -> Path:
         require(self.session_edit.text().strip() != "", "choose a session folder")
         return Path(self.session_edit.text().strip())
-
-    def set_session_dir(self, path: Path) -> None:
-        """Select a capture without exposing the panel's internal text control."""
-        self.session_edit.setText(str(path))
 
     def dry_run(self) -> bool:
         return self.dry_run_check.isChecked()
@@ -1023,13 +1022,13 @@ class CaptureRigWidget(QWidget):
 
     # -- session ------------------------------------------------------------
     def _open_library_capture(self, root: Path) -> None:
-        self.capture.set_session_dir(root)
+        self.capture.set_session_path(root)
         self.refresh_session()
 
     def _import_library_videos(self, target: Path) -> None:
         self.capture.choose_import_files()
         if self.capture.pending_import:
-            self.capture.set_session_dir(target)
+            self.capture.set_session_path(target)
             self.trigger("import")
 
     def refresh_session(self) -> SessionMedia | None:
