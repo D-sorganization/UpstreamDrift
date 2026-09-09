@@ -405,8 +405,12 @@ This catalog does not copy or supersede #9064's design-manual authority or
 Issue #9192 adds the publication boundary without changing that scientific or
 content status. The existing release workflow now runs the same fail-closed
 `python3 -m scripts.companion_publication build` command for protected `main`
-and exact `vX.Y.Z` tags. It packages the manifest, manifest schema, acquisition schema,
-compatibility policy, and detached SHA-256 files; attests the exact payloads;
+and exact `vX.Y.Z` tags. It packages the manifest under both its versioned
+name and the stable consumer name `manifest.json` (byte-identical), the
+derived `capabilities.json` and metadata-only `screenshots.json` (every record
+`pending` with a reason until #9191 lands), the manifest/capabilities/
+screenshots/acquisition schemas, the compatibility policy, and detached
+SHA-256 files; attests the exact payloads;
 and records repository, source commit, workflow run, schema/generator versions,
 sizes, hashes, and artifact identities. Protected-main Actions artifacts are
 explicitly 30-day/ephemeral and have no durable release URL. Tag releases are
@@ -421,6 +425,12 @@ Protected publication commands have an explicit repository-root precondition:
 every workflow job that invokes `scripts.companion_publication` runs from
 `${{ github.workspace }}`. This is enforced by a workflow-structure contract so
 self-hosted runner defaults cannot make a successful checkout non-importable.
+Those jobs also pin `PYTHONPATH` to the workspace, and the catalog builder
+imports nothing from `src.*` (it reads `src/config/models.yaml` with a
+standalone `yaml.safe_load` reader), so the publication environment needs
+only `jsonschema` and `pyyaml` (#9416); `scripts.companion_publication check`
+runs on code pull requests in `ci-standard.yml` to prove the payload set
+builds from a clean checkout.
 Failure to establish that working directory is negative publication evidence:
 no artifact or attestation may be accepted, and #9192 remains open until a new
 protected-main run publishes and verifies the exact protected commit bytes.
@@ -5594,6 +5604,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/tools/bunker_shot_gui/shot3d.py` to optimize array magnitude calculation. (spec-exempt: micro-optimization)
 - Resolve bunkershot3d canonical imports, packaged config paths, and artifact output directories in notebooks/bunkershot3d/phase1_mvp.py (#8842 #9832).
+- Publish manifest.json, capabilities.json, and screenshots.json from import-free companion publication builder (#9416 #9434).
 - MotionRetargeting._solve_frame_ik evaluates mj_forward once per IK iteration and batches marker Jacobian/error rows into single array operations (#8922 #9828).
 - TrajectoryResultMixin memoizes all_* batch accessors, evaluates all_energies in a single pass, and derives total energy arithmetically (#8928 #9831).
 
