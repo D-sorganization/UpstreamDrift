@@ -1048,6 +1048,7 @@ jobs:
         uses: ./.github/actions/fetch-pinned-tools
       - name: Install System Dependencies
         run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
           apt_retry() {
             for attempt in {1..12}; do
               if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
@@ -1784,6 +1785,7 @@ jobs:
       - name: Install System Dependencies
         if: steps.core-test-changes.outputs.skip != 'true'
         run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
           apt_retry() {
             for attempt in {1..12}; do
               if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
@@ -2505,6 +2507,7 @@ jobs:
 
       - name: Install System Dependencies
         run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
           apt_retry() {
             for attempt in {1..12}; do
               if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
@@ -3349,6 +3352,7 @@ jobs:
       - name: Install System Dependencies
         if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
         run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
           apt_retry() {
             for attempt in {1..12}; do
               if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
