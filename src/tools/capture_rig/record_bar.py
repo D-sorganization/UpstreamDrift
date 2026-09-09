@@ -22,7 +22,6 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QComboBox,
     QDoubleSpinBox,
-    QHBoxLayout,
     QLabel,
     QProgressBar,
     QPushButton,
@@ -34,6 +33,7 @@ from src.shared.python.core.contracts import require
 from src.shared.python.theme.layout_metrics import LayoutMetrics
 
 from . import styling
+from .flow_layout import FlowLayout
 
 DURATION_PRESETS_S: tuple[float, ...] = (5.0, 10.0, 15.0, 30.0)
 COUNTDOWN_CHOICES_S: tuple[float, ...] = (0.0, 3.0, 5.0, 10.0)
@@ -194,14 +194,16 @@ class RecordBar(QWidget):
         self._render()
 
     def _build(self) -> None:
-        row = QHBoxLayout()
-        row.setSpacing(LayoutMetrics.SPACING_SM)
-        row.addWidget(self.record_button, 2)
-        row.addWidget(self.indicator, 1)
+        """The transport wraps (#9846): it sits under the video, which must
+        stay the widest thing in the tile, so the strip reflows onto a second
+        row instead of setting a floor under the whole window."""
+        row = FlowLayout(spacing=LayoutMetrics.SPACING_SM)
+        row.add_widget(self.record_button)
+        row.add_widget(self.indicator)
         for button in self.preset_buttons.values():
-            row.addWidget(button)
-        row.addWidget(self.duration_spin)
-        row.addWidget(self.countdown_combo)
+            row.add_widget(button)
+        row.add_widget(self.duration_spin)
+        row.add_widget(self.countdown_combo)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, LayoutMetrics.SPACING_SM, 0, 0)
         layout.setSpacing(LayoutMetrics.SPACING_SM)
