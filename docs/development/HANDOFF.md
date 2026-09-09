@@ -18,8 +18,8 @@ and capability-driven setup wizard. The full prior fleet rollout also remains re
 Detailed execution children and dependency/acceptance boundaries are recorded in
 `docs/development/capture_setup_execution_plan.md` and the three linked GitHub epics.
 
-The current change is a tested intrinsic-profile foundation, not a completed player
-calibration workflow. Common-reference observations, actual UI integration, multi-view
+The current change includes intrinsic profiles and visible Capture Rig header/dialog
+controls. Common-reference observations, downstream stale-selection guards, multi-view
 geometry, club data and wizard work remain open. Do not close #9898 or its epic yet.
 
 ## Files and Decisions
@@ -45,6 +45,11 @@ geometry, club data and wizard work remain open. Do not close #9898 or its epic 
 
 ## Validation
 
+- Added rig-wide verified export and per-camera profile review, with confirmation reset
+  on edits, saved revision selection and an existing-board recalibration route.
+- Entire `tests/tools/capture_rig` suite passes (388 tests). Focused UI tests cover
+  explicit confirmation, edited settings, export provenance and repeat-without-export.
+
 - TDD: profile module initially absent; revision-preservation regression then failed
   before implementing archived snapshots. Existing normal repo conftest is enabled.
 - `python3 -m pytest tests/tools/capture_rig/test_calibration_profiles.py tests/motion_capture/reconstruct/test_intrinsics.py -q --timeout=60`: 31 passed, including archive idempotency/corruption, geometry rejection and existing solver/CLI behavior.
@@ -53,16 +58,15 @@ geometry, club data and wizard work remain open. Do not close #9898 or its epic 
 
 ## Blockers and Risks
 
-No blocker prevents continued feature implementation. The profile API is not yet
-wired into Capture Rig or downstream geometry, so it is not a shipped zoom guard.
+No blocker prevents continued feature implementation. Profile review is wired into
+Capture Rig; downstream session/geometry qualification remains required before shipment.
 Do not claim physical calibration accuracy from synthetic tests alone. Generic
 calibration/reference geometry belongs to Tools under ADR-0041.
 
-Fleet context: central handoff PR #1628 merged as 537f9ad087dd3afdda60d28dd2e54d1ac7583864. Half-ton-controls #3 candidate
-f17766c5eb0ced58261f85a0869796807c6f401d awaits quality job 102603927666 in run
-34391771678 (live watch 87268). Tools#5127, Tools_Private#1475 and Gasification_Model#4942
-have direct conflict notices requesting their claimed canonical replacement queue.
-Last complete adoption inventory: 37/41. Do not restart live jobs or race closures.
+Fleet context: central handoff PR #1628 merged as 537f9ad087dd3afdda60d28dd2e54d1ac7583864. Half-ton-controls #3 merged as
+305a21307ed6f6e2a3c500da6a3c4a50cdbb73db after run34391771678 passed; lease released.
+New audit at19:53UTC confirms39/41, including Tools_Private. Tools and Gasification_Model
+still lack adoption; direct notices request the canonical replacement queue. Do not race closures.
 
 ## Next Steps
 
@@ -76,3 +80,6 @@ Last complete adoption inventory: 37/41. Do not restart live jobs or race closur
 
 - `SELF`: start DL-#9898, preserve three new goal epics, and implement tested optical
   profile compatibility with durable calibration revisions; UI integration remains open.
+
+- `SELF`: add visible calibration revision review and verified per-view exports.
+  Testable product remains open in UpstreamDrift-ubuntu-ci (PID49580, exec99934).
