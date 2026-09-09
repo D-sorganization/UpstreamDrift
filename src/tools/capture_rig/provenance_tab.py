@@ -71,6 +71,11 @@ class ProvenanceTab(QWidget):
         layout.addWidget(self.browser)
         self.current: Path | None = None
 
+    def clear_capture(self) -> None:
+        """Remove the prior capture's provenance after a failed selection."""
+        self.current = None
+        self.browser.setPlainText("No capture loaded.")
+
     def show_path(self, session: Path, path: Path | None) -> None:
         """Render the lineage of ``path`` (relative paths resolve in ``session``)."""
         if path is None:

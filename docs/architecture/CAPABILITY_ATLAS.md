@@ -46,7 +46,7 @@ flowchart LR
   n6["Expert Comparison"]
   n7["Comparison Deliverables"]
   n8["Set up Cameras and Plan"]
-  n9["Calibrate Each Camera Once"]
+  n9["Calibrate the Camera and Lens Profile"]
   n10["Record or Import the Swing Take"]
   n11["Detect the Pose in Every View"]
   n12["Annotate or Correct Points by Hand"]
