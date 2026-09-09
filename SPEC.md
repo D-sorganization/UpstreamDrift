@@ -5604,4 +5604,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Resolve bunkershot3d canonical imports, packaged config paths, and artifact output directories in notebooks/bunkershot3d/phase1_mvp.py (#8842 #9832).
 - Publish manifest.json, capabilities.json, and screenshots.json from import-free companion publication builder (#9416 #9434).
 - MotionRetargeting._solve_frame_ik evaluates mj_forward once per IK iteration and batches marker Jacobian/error rows into single array operations (#8922 #9828).
+- TrajectoryResultMixin memoizes all_* batch accessors, evaluates all_energies in a single pass, and derives total energy arithmetically (#8928 #9831).
 
