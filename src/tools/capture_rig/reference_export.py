@@ -174,6 +174,19 @@ def _render_comparison_frames(
     return written, frame_times
 
 
+def _export_camera(
+    camera: PinholeCamera | CameraCalibration | None,
+) -> CameraSnapshot | None:
+    """Normalize supported camera adapters into one saved evidence record."""
+    if isinstance(camera, PinholeCamera):
+        camera = camera.to_calibration()
+    return (
+        CameraSnapshot.from_calibration(camera, provenance="Comparison export camera")
+        if camera
+        else None
+    )
+
+
 def export_comparison_video(
     root: Path,
     view: str,
@@ -193,16 +206,7 @@ def export_comparison_video(
         raise FileExistsError("Choose a new filename; video or sidecar already exists")
 
     media = load_session(root)
-    supplied_camera = opts.camera
-    if isinstance(supplied_camera, PinholeCamera):
-        supplied_camera = supplied_camera.to_calibration()
-    snapshot = (
-        CameraSnapshot.from_calibration(
-            supplied_camera, provenance="Comparison export camera"
-        )
-        if supplied_camera
-        else None
-    )
+    snapshot = _export_camera(opts.camera)
     registration = registration.bound(
         asset, snapshot, session_clock(media.timing, view)
     )
