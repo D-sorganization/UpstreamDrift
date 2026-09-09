@@ -109,9 +109,10 @@ class CameraProfilePanel(QWidget):
 
     def setup(self) -> CameraSetup:
         """Read declared settings, with camera identity and size from the rig."""
+        mode = self.binding.mode
         return CameraSetup(
             camera_identity=self.binding.identity,
-            image_size_px=(self.binding.mode.width, self.binding.mode.height),
+            image_size_px=(mode.width, mode.height),
             **{key: field.text() for key, field in self.fields.items()},
         )
 

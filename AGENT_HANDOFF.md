@@ -11,7 +11,7 @@ the original main worktree's user changes are untouched.
 
 # Guided Capture Setup Continuation
 
-Current work: `feat/capture-guided-setup`, issue #9898, draft PR #9910. Visible profile review and verified rig export now pass Capture Rig tests; common-reference solving remains open. The user added everyday calibration (#9897), club catalog/player bag (#9902), and a capability-driven wizard (#9906) to the existing goal. See `docs/development/HANDOFF.md` and `capture_setup_execution_plan.md`. Prior comparison/product epics were delivered through #9896; their older status notes below are historical. Preserve standing UP-D0/UP-D1 governance and all unrelated work.
+Current work: `feat/9913-capture-journey`, issue #9913, PR #9917. Candidate dd8136f15 passes all445 capture/parity tests and normal hooks; remote CI/review and merge remain. Prior calibration/profile and preview recovery PR #9910 merged at18c8f922e; #9898 and its broader epics remain open. Latest player feedback adds persistent capture status, next-step/help links, saved action history and detachable/fullscreen views; DL-#9913 tracks qualification. Visible profile review and verified rig export now pass Capture Rig tests; common-reference solving remains open. The user added everyday calibration (#9897), club catalog/player bag (#9902), and a capability-driven wizard (#9906) to the existing goal. See `docs/development/HANDOFF.md` and `capture_setup_execution_plan.md`. Prior comparison/product epics were delivered through #9896; their older status notes below are historical. Preserve standing UP-D0/UP-D1 governance and all unrelated work.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 

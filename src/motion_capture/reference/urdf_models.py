@@ -48,8 +48,16 @@ def _joint(source: URDFJoint, observed: bool) -> Joint:
         axes="" if kind == "fixed" else "x",
         limits_rad=limits,
         landmark=observed,
-        pre_rotvec=tuple((rotation * axis_rotation).as_rotvec()),
-        post_rotvec=tuple(axis_rotation.inv().as_rotvec()),
+        pre_rotvec=(
+            float((rotation * axis_rotation).as_rotvec()[0]),
+            float((rotation * axis_rotation).as_rotvec()[1]),
+            float((rotation * axis_rotation).as_rotvec()[2]),
+        ),
+        post_rotvec=(
+            float(axis_rotation.inv().as_rotvec()[0]),
+            float(axis_rotation.inv().as_rotvec()[1]),
+            float(axis_rotation.inv().as_rotvec()[2]),
+        ),
     )
 
 

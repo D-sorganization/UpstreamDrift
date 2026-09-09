@@ -4243,9 +4243,10 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 <!-- prettier-ignore-start -->
 
-| Date       | PR         | Changes    |
-| ---------- | ---------- | ---------- |
 | 2026-09-09 | #9914 | Add reproducible C3D reference fitting with explicit marker profiles, native URDF/MJCF kinematics, retained observations and fit diagnostics, reference-library output, and fixed spatial alignment for the existing camera comparison pipeline. |
+| 2026-09-09 | #9913 | Add persistent swing/capture feedback, durable history, linked detector/help/workflow status and retained Qt views; bounded renderers and panel methods preserve architecture rules. |
+| 2026-09-09 | #9911 | Keep preview discovery import and timeout failures within the existing error status. |
+| 2026-09-09 | #9898 | Add visible zoom-aware intrinsic profile review, verified rig exports and immutable revisions; track everyday-reference, club-catalog and guided-setup epics #9897/#9902/#9906. |
 | 2026-09-09 | #9910 | Add visible zoom-aware intrinsic profile review, verified rig exports and immutable revisions; report camera discovery dependency and timeout failures (#9911). |
 | 2026-09-09 | #9618 | Create participant-calibrated digital twins and population ensembles: identity-safe cohort schema, synthetic benchmark calibration, holdout validation, and provenance governance (#8593). |
 | 2026-09-06 | #9636 | Retargeted the test that guards the mypy exclusion budget's re-attestation dates. The assertion derives the bound from the budget's own schedule, and repository-file reads are anchored to the repo root. |

@@ -46,7 +46,7 @@ def test_group_actions_places_each_action_once_at_its_last_step() -> None:
     assert sorted(placed) == sorted(actions)
     by_title = dict(groups)
     assert "record" in by_title["Record or Import the Swing Take"]
-    assert "record" not in by_title["Calibrate Each Camera Once"]
+    assert "record" not in by_title[workflow.INTRINSICS.title]
     assert set(by_title["Export to the Motion Pipeline"]) == {
         "export",
         "clip",
