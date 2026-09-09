@@ -1,3 +1,7 @@
+# Guided Capture Setup Continuation
+
+Current work: `feat/capture-guided-setup`, issue #9898, draft PR #9910. Visible profile review and verified rig export now pass Capture Rig tests; common-reference solving remains open. The user added everyday calibration (#9897), club catalog/player bag (#9902), and a capability-driven wizard (#9906) to the existing goal. See `docs/development/HANDOFF.md` and `capture_setup_execution_plan.md`. Prior comparison/product epics were delivered through #9896; their older status notes below are historical. Preserve standing UP-D0/UP-D1 governance and all unrelated work.
+
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
 Isolated branch `fix/9894-ubuntu-ci-sources` replaces four standard CI APT
