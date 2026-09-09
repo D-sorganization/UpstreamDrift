@@ -66,8 +66,11 @@ Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
 Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
-Updated: 2026-09-08 23:59 UTC (wave-2 PR triage, session UD2PRs)
 Updated: 2026-09-08 (wave-2 issue backlog sweep, session UD2IssuesA)
+
+## Engineering Design Manual Authority (#9064)
+
+- UP-D0 (#9066) makes `manuals/upstreamdrift` QMD the sole editable engineering-manual authority. UP-D1 (#9067) inventories the repository; non-editable formats remain unapproved.
 
 ## Capability Atlas #9850
 
