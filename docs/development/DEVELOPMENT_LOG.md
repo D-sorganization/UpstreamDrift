@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9915 · Verified Agent Context
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** https://github.com/D-sorganization/UpstreamDrift/issues/9915
+- **PR:** not created
+- **Branch:** feat/issue-9915-agent-context
+- **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `AGENTS.md`
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09; 41 existing boundary tests and three context/gate tests pass; explicit boundary reviews are recorded. Initial navigation evaluation: and 12/12 curated task expectations pass (max 13238 characters; initial median 2193 ms). Required CI wiring not yet qualified.
+- **Summary:** Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Parent epic Repository_Management#1629 remains active; no subscription infrastructure is required.
+- **Next step:** Qualify the shared provider changes with the normal local checks before publishing its protected PR.
+
 ### DL-#9894 · Scoped Ubuntu CI Dependencies
 
 - **State:** in_review

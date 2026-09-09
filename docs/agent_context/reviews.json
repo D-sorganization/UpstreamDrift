@@ -1,0 +1,66 @@
+{
+  "reviews": {
+    "capture-atlas": {
+      "fingerprint": "e600d3e9f4991e7c393242cf189893b2d32d0cd5a34a8cba94632e376a69cb33",
+      "inputs": {
+        "docs/agent_context/contracts/capture-atlas.md": "348d68b058bdb0819f71d85f5e94f9837a28e4177af747f51ce50854d148acf5",
+        "scripts/capability_atlas/model.py": "49b7423d277ffc751a5b4d3faa3b7adb72373977d7e68ceeed6e1b7baa1d7b68",
+        "scripts/capability_atlas/render.py": "78b5dfe306e355a85ae3d43bbb0362673c711216a9bb8fa14ecbe0dbeac61550",
+        "src/config/capability_connections.json": "15cb0772d018a0ae91273bfe5c50f9359eaa8632b770d6a14fc129b8aaed92c7",
+        "src/tools/capture_rig/workflow.py": "ef3c35db12049cb4ca5aa08c9a8ca5f376dd114efc61b36f72f5fd036f00e147",
+        "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be"
+      },
+      "rationale": "Reviewed capture workflow metadata and atlas generation sources. Existing atlas tests passed in the 41-test boundary run on 2026-09-09; catalog presence does not assert camera, calibration or reconstruction qualification."
+    },
+    "launcher-atlas": {
+      "fingerprint": "5b7e8571138f2a9c75e6b54522cdb437ef244e6d72310eef4c3321c79d32d14d",
+      "inputs": {
+        "docs/agent_context/contracts/launcher-atlas.md": "9cc9ae26bbf66ed47cc7877a7ae1fd14b08000fff4eca950f6a7a1a469ff279b",
+        "scripts/capability_atlas/model.py": "49b7423d277ffc751a5b4d3faa3b7adb72373977d7e68ceeed6e1b7baa1d7b68",
+        "scripts/capability_atlas/render.py": "78b5dfe306e355a85ae3d43bbb0362673c711216a9bb8fa14ecbe0dbeac61550",
+        "src/config/capability_connections.json": "15cb0772d018a0ae91273bfe5c50f9359eaa8632b770d6a14fc129b8aaed92c7",
+        "src/config/feature_parity.json": "fa719921e5d5047a2383f219ea80f06e358c93c6260358c8ccc2d4f3c7c5d165",
+        "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
+        "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
+        "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
+        "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be"
+      },
+      "rationale": "Reviewed launcher manifest and capability registry projections into the existing atlas, including declared state versus runtime availability. Existing test_capability_atlas.py passed in the 41-test boundary run on 2026-09-09."
+    },
+    "model-backends": {
+      "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
+      "inputs": {
+        "docs/agent_context/contracts/model-backends.md": "b816f8f612a186b8e2a06b9d5ab075d52e421979700afde51b0c210eb1974254",
+        "src/shared/python/simulation_backends/factory.py": "49f90d5525a84b3bdbd0989264e25b77c7ccc235c6d91a5bf7dbcd1f18c31711",
+        "src/shared/python/simulation_backends/mjcf.py": "985f5abcedea3354d4bf2f8c530748dc861754e024e4b43a59ecd984175dddff",
+        "src/shared/python/simulation_backends/model_params.py": "78aeb9c060f4b455b34b5dff5fcfe49847e7a2a3e545ec71060528a55e16be10",
+        "src/shared/python/simulation_backends/protocol.py": "d4330b8cce3d25f754ea134dcf07c3bf8e72ef18a745d816b08c1709b9d44f1f",
+        "tests/unit/simulation_backends/test_foundation.py": "cab3b398da6f172ea3d33203d1514ef29c1928179131a697943f44de8e775b48"
+      },
+      "rationale": "Reviewed SI parameter ownership, declared degree fields, lazy backend capabilities and the shared analytical/MJCF renderers including mjcf.py. Existing test_foundation.py passed in the 41-test boundary run on 2026-09-09; GPU readiness is not inferred."
+    },
+    "pipeline-api": {
+      "fingerprint": "22730716b0211732fb18c91d7d40a56dd0a9f9b316b7a58198c38dcec3edfef7",
+      "inputs": {
+        "docs/agent_context/contracts/pipeline-api.md": "f9402d270806ae313e121d36387e396302ffd5484a593f071ed3b0f042921079",
+        "src/shared/python/motion_pipeline/api.py": "6d5a080c01c13c28ba6e723695881612720c53dbb4d17573352e71bd79aea75f",
+        "src/shared/python/motion_pipeline/contracts.py": "9c8a9ac26c0d63b174e43093e3c53e1dea6422b82918c7ef79be05cf2097837c",
+        "src/shared/python/motion_pipeline/orchestrator.py": "a99ef34d57df202ad4bc5e2f4b7a04b974e80d559e47f9c97b0dece57ca9b1b8",
+        "tests/unit/motion_pipeline/orchestrator/test_api.py": "089d48d3a01b5287348b3217c93ed2b4f0923d6b28732055541aa196b92016aa"
+      },
+      "rationale": "Reviewed configuration validation, orchestration ownership and API error behavior against the current contracts and API sources. Existing test_api.py passed in the 41-test boundary run on 2026-09-09; this does not qualify optional simulation engines."
+    },
+    "pose-conventions": {
+      "fingerprint": "c1d86bdd40d3b50e9b856385ce92f8fcbd0c311fbc6f69bf96eafb2430d78d05",
+      "inputs": {
+        "docs/agent_context/contracts/pose-conventions.md": "e83c61880f6c564fd6e545eba3981009ae59e9a945f1b65616063c5fd2ae7f1b",
+        "src/shared/python/pose_interchange/adapters/mujoco.py": "582e537a802ea60f13a91c22188dad2d38b6312661bb92aba123bd2922d515ec",
+        "src/shared/python/pose_interchange/canonical.py": "57812fb94fb2551de828191880760787324228794aa2a2f06e4005d412c13487",
+        "src/shared/python/pose_interchange/protocol.py": "7cc8d1181169d8b425e53f26ef664b9fd09ecc41e663b9615fc95b6e12309b7f",
+        "tests/unit/pose_interchange/adapters/test_mujoco_protocol.py": "ea910a2a4cdcc1b026f9f6e56376226a15343cac5484f286db3edf3ea6a0ebc7"
+      },
+      "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
+    }
+  },
+  "version": 1
+}

@@ -1,0 +1,330 @@
+{
+  "version": 1,
+  "repository": "UpstreamDrift",
+  "components": [
+    {
+      "id": "launcher",
+      "title": "Launcher and Feature Registry",
+      "summary": "Resolve desktop and web tiles from existing model, launcher and parity registries. Declaration does not prove runtime availability.",
+      "owner": "UpstreamDrift: src/config",
+      "status": "implemented",
+      "sources": [
+        "src/config/launcher_manifest_loader.py",
+        "src/config/models.yaml",
+        "src/config/launcher_manifest.json",
+        "src/config/feature_parity.json"
+      ],
+      "documentation": ["docs/architecture/CAPABILITY_ATLAS.md"],
+      "tests": ["tests/config/test_launcher_manifest.py"],
+      "entrypoints": [
+        {
+          "path": "src/config/launcher_manifest_loader.py",
+          "symbol": "LauncherManifest"
+        }
+      ],
+      "tags": ["launcher", "tiles", "desktop", "web", "features"]
+    },
+    {
+      "id": "capability-atlas",
+      "title": "Capability and Architecture Atlas",
+      "summary": "Generate the existing product map from launcher, parity and capture workflow authorities. Keep gaps and file exchanges explicit.",
+      "owner": "UpstreamDrift: scripts/capability_atlas",
+      "status": "implemented",
+      "sources": [
+        "scripts/capability_atlas/model.py",
+        "scripts/capability_atlas/render.py",
+        "src/config/capability_connections.json"
+      ],
+      "documentation": ["docs/architecture/CAPABILITY_ATLAS.md"],
+      "tests": ["tests/scripts/test_capability_atlas.py"],
+      "entrypoints": [
+        {
+          "path": "scripts/capability_atlas/model.py",
+          "symbol": "build"
+        }
+      ],
+      "tags": ["atlas", "resources", "workflows", "inventory"]
+    },
+    {
+      "id": "motion-pipeline",
+      "title": "Motion Pipeline",
+      "summary": "Orchestrate source adapters, preprocessing, scaling, inverse kinematics and matching through canonical stage contracts. Production matching requires a real engine model.",
+      "owner": "UpstreamDrift: src/shared/python/motion_pipeline",
+      "status": "implemented",
+      "sources": [
+        "src/shared/python/motion_pipeline/orchestrator.py",
+        "src/shared/python/motion_pipeline/contracts.py"
+      ],
+      "documentation": ["docs/motion_pipeline/README.md"],
+      "tests": ["tests/unit/motion_pipeline/orchestrator/test_orchestrator.py"],
+      "entrypoints": [
+        {
+          "path": "src/shared/python/motion_pipeline/orchestrator.py",
+          "symbol": "MotionPipeline"
+        }
+      ],
+      "tags": ["motion", "capture", "matching", "pipeline"]
+    },
+    {
+      "id": "motion-api",
+      "title": "Motion Pipeline API",
+      "summary": "Translate REST requests into PipelineConfig; preserve invalid-input versus internal-fault responses.",
+      "owner": "UpstreamDrift: src/shared/python/motion_pipeline",
+      "status": "implemented",
+      "sources": ["src/shared/python/motion_pipeline/api.py"],
+      "documentation": ["docs/motion_pipeline/README.md"],
+      "tests": ["tests/unit/motion_pipeline/orchestrator/test_api.py"],
+      "entrypoints": [
+        {
+          "path": "src/shared/python/motion_pipeline/api.py",
+          "symbol": "create_app"
+        }
+      ],
+      "tags": ["REST", "HTTP", "upload", "requests"]
+    },
+    {
+      "id": "model-parameters",
+      "title": "Shared Model Parameters",
+      "summary": "GolfModelParams is the source of truth for model parameters used by analytical dynamics and MuJoCo renderers.",
+      "owner": "UpstreamDrift: src/shared/python/simulation_backends",
+      "status": "implemented",
+      "sources": ["src/shared/python/simulation_backends/model_params.py"],
+      "documentation": ["docs/simulation_backends/README.md"],
+      "tests": ["tests/unit/simulation_backends/test_foundation.py"],
+      "entrypoints": [
+        {
+          "path": "src/shared/python/simulation_backends/model_params.py",
+          "symbol": "GolfModelParams"
+        }
+      ],
+      "tags": ["model", "parameters", "mass", "length", "inertia"]
+    },
+    {
+      "id": "simulation-backends",
+      "title": "Simulation Backends",
+      "summary": "Construct lazy ODE, MuJoCo, MJWarp and MJX backends through make_backend. Registered names do not establish installed dependencies or GPU readiness.",
+      "owner": "UpstreamDrift: src/shared/python/simulation_backends",
+      "status": "implemented",
+      "sources": [
+        "src/shared/python/simulation_backends/factory.py",
+        "src/shared/python/simulation_backends/protocol.py"
+      ],
+      "documentation": ["docs/simulation_backends/USER_GUIDE.md"],
+      "tests": ["tests/unit/simulation_backends/test_factory.py"],
+      "entrypoints": [
+        {
+          "path": "src/shared/python/simulation_backends/factory.py",
+          "symbol": "make_backend"
+        }
+      ],
+      "tags": ["simulation", "backends", "engine", "factory", "GPU"]
+    },
+    {
+      "id": "canonical-pose",
+      "title": "Canonical Static Pose",
+      "summary": "Frozen static pose with pelvis translation in metres and intrinsic XYZ Euler and joint angles in degrees. Dynamic canonical-v2 has separate quaternion and velocity contracts.",
+      "owner": "UpstreamDrift: src/shared/python/pose_interchange",
+      "status": "implemented",
+      "sources": ["src/shared/python/pose_interchange/canonical.py"],
+      "documentation": [
+        "docs/user_guide/pose_studio/cross_engine_conventions.md"
+      ],
+      "tests": ["tests/unit/pose_interchange/test_canonical_pose.py"],
+      "entrypoints": [
+        {
+          "path": "src/shared/python/pose_interchange/canonical.py",
+          "symbol": "CanonicalPose"
+        }
+      ],
+      "tags": ["pose", "canonical", "degrees", "metres"]
+    },
+    {
+      "id": "pose-adapters",
+      "title": "Pose Convention Adapters",
+      "summary": "Translate the canonical pose to native engine coordinates with explicit joint index, sign and angular units.",
+      "owner": "UpstreamDrift: src/shared/python/pose_interchange",
+      "status": "implemented",
+      "sources": [
+        "src/shared/python/pose_interchange/protocol.py",
+        "src/shared/python/pose_interchange/adapters/mujoco.py"
+      ],
+      "documentation": [
+        "docs/user_guide/pose_studio/cross_engine_conventions.md"
+      ],
+      "tests": ["tests/unit/pose_interchange/adapters/test_mujoco_protocol.py"],
+      "entrypoints": [
+        {
+          "path": "src/shared/python/pose_interchange/protocol.py",
+          "symbol": "PoseConventionAdapter"
+        }
+      ],
+      "tags": ["adapter", "convention", "units", "coordinate", "frame"]
+    },
+    {
+      "id": "anthropometrics",
+      "title": "Anthropometric Model Pipeline",
+      "summary": "Estimate a canonical subject record and render engine model artifacts and reports from SI height and mass inputs.",
+      "owner": "UpstreamDrift: src/shared/python/anthropometrics",
+      "status": "implemented",
+      "sources": ["src/shared/python/anthropometrics/pipeline.py"],
+      "documentation": ["docs/user_guide/anthropometrics/quickstart.md"],
+      "tests": ["tests/unit/anthropometrics/test_pipeline.py"],
+      "entrypoints": [
+        {
+          "path": "src/shared/python/anthropometrics/pipeline.py",
+          "symbol": "run_pipeline"
+        }
+      ],
+      "tags": [
+        "anthropometrics",
+        "subject",
+        "height",
+        "mass",
+        "model",
+        "scaling"
+      ]
+    },
+    {
+      "id": "capture-workflow",
+      "title": "Capture Workflow State",
+      "summary": "Declarative capture steps, statuses and enabled actions used by the capture UI and existing capability atlas.",
+      "owner": "UpstreamDrift: src/tools/capture_rig",
+      "status": "implemented",
+      "sources": ["src/tools/capture_rig/workflow.py"],
+      "documentation": ["docs/motion_capture/capture_rig.md"],
+      "tests": ["tests/tools/capture_rig/test_workflow.py"],
+      "entrypoints": [
+        {
+          "path": "src/tools/capture_rig/workflow.py",
+          "symbol": "StepState"
+        }
+      ],
+      "tags": ["capture", "cameras", "stages", "workflow"]
+    },
+    {
+      "id": "application-api",
+      "title": "Application Route Registry",
+      "summary": "Discover and register application routes through the shared route registry.",
+      "owner": "UpstreamDrift: src/api",
+      "status": "implemented",
+      "sources": ["src/api/route_registry.py"],
+      "documentation": ["docs/architecture/CAPABILITY_ATLAS.md"],
+      "tests": ["tests/api/test_route_registry.py"],
+      "entrypoints": [
+        {
+          "path": "src/api/route_registry.py",
+          "symbol": "register_routes"
+        }
+      ],
+      "tags": ["API", "routes", "application", "services"]
+    },
+    {
+      "id": "canonical-qa",
+      "title": "Canonical Core Retrieval",
+      "summary": "Existing bounded local retrieval for canonical-core reference questions, separate from development context retrieval.",
+      "owner": "UpstreamDrift: src/shared/python/canonical_core",
+      "status": "implemented",
+      "sources": ["src/shared/python/canonical_core/sidekick_retrieval_qa.py"],
+      "documentation": ["docs/conventions/canonical-v2.md"],
+      "tests": ["tests/unit/canonical_core/test_sidekick_retrieval_qa.py"],
+      "entrypoints": [
+        {
+          "path": "src/shared/python/canonical_core/sidekick_retrieval_qa.py",
+          "symbol": "CanonicalCoreRetrievalQA"
+        }
+      ],
+      "tags": ["retrieval", "question", "answer", "canonical", "reference"]
+    }
+  ],
+  "relations": [
+    {
+      "id": "pipeline-api",
+      "provider": "motion-pipeline",
+      "consumer": "motion-api",
+      "kind": "calls",
+      "contract": "docs/agent_context/contracts/pipeline-api.md",
+      "inputs": [
+        "src/shared/python/motion_pipeline/api.py",
+        "src/shared/python/motion_pipeline/contracts.py",
+        "src/shared/python/motion_pipeline/orchestrator.py"
+      ],
+      "tests": ["tests/unit/motion_pipeline/orchestrator/test_api.py"]
+    },
+    {
+      "id": "model-backends",
+      "provider": "model-parameters",
+      "consumer": "simulation-backends",
+      "kind": "constructs",
+      "contract": "docs/agent_context/contracts/model-backends.md",
+      "inputs": [
+        "src/shared/python/simulation_backends/factory.py",
+        "src/shared/python/simulation_backends/mjcf.py",
+        "src/shared/python/simulation_backends/model_params.py",
+        "src/shared/python/simulation_backends/protocol.py"
+      ],
+      "tests": ["tests/unit/simulation_backends/test_foundation.py"]
+    },
+    {
+      "id": "pose-conventions",
+      "provider": "canonical-pose",
+      "consumer": "pose-adapters",
+      "kind": "translates",
+      "contract": "docs/agent_context/contracts/pose-conventions.md",
+      "inputs": [
+        "src/shared/python/pose_interchange/adapters/mujoco.py",
+        "src/shared/python/pose_interchange/canonical.py",
+        "src/shared/python/pose_interchange/protocol.py"
+      ],
+      "tests": ["tests/unit/pose_interchange/adapters/test_mujoco_protocol.py"]
+    },
+    {
+      "id": "launcher-atlas",
+      "provider": "launcher",
+      "consumer": "capability-atlas",
+      "kind": "generates",
+      "contract": "docs/agent_context/contracts/launcher-atlas.md",
+      "inputs": [
+        "scripts/capability_atlas/model.py",
+        "scripts/capability_atlas/render.py",
+        "src/config/capability_connections.json",
+        "src/config/feature_parity.json",
+        "src/config/launcher_manifest.json",
+        "src/config/launcher_manifest_loader.py",
+        "src/config/models.yaml"
+      ],
+      "tests": ["tests/scripts/test_capability_atlas.py"]
+    },
+    {
+      "id": "capture-atlas",
+      "provider": "capture-workflow",
+      "consumer": "capability-atlas",
+      "kind": "generates",
+      "contract": "docs/agent_context/contracts/capture-atlas.md",
+      "inputs": [
+        "scripts/capability_atlas/model.py",
+        "scripts/capability_atlas/render.py",
+        "src/config/capability_connections.json",
+        "src/tools/capture_rig/workflow.py"
+      ],
+      "tests": ["tests/scripts/test_capability_atlas.py"]
+    }
+  ],
+  "inventories": [
+    {
+      "path": "src/config/launcher_manifest.json",
+      "key": "tiles",
+      "title": "Launcher Metadata"
+    },
+    {
+      "path": "src/config/feature_parity.json",
+      "key": "features",
+      "title": "Feature Parity"
+    },
+    {
+      "path": "src/config/capability_connections.json",
+      "key": "nodes",
+      "title": "Capability Architecture Nodes"
+    }
+  ],
+  "dependencies": []
+}
