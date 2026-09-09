@@ -35,6 +35,11 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
+  # Companion publication hardening (Repository_Management #1507, #9416):
+  # PYTHONPATH pins module resolution to the checkout so
+  # `python3 -m scripts.companion_publication` works regardless of runner cwd
+  # quirks, and the builder itself no longer imports `src.*` (numpy). The
+  # pip pins match ci-standard.yml's companion-workflows job.
   companion-protected-main:
     name: Publish exact-commit companion artifact
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -44,6 +49,8 @@ jobs:
     defaults:
       run:
         working-directory: ${{ github.workspace }}
+    env:
+      PYTHONPATH: ${{ github.workspace }}
     permissions:
       contents: read
       id-token: write
@@ -58,7 +65,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install companion publication dependencies
-        run: python3 -m pip install jsonschema pyyaml
+        run: python3 -m pip install jsonschema==4.26.0 pyyaml==6.0.3
       - name: Build companion publication bundle
         run: >-
           python3 -m scripts.companion_publication build
@@ -204,11 +211,18 @@ jobs:
           cd dist
           sha256sum * > SHA256SUMS.txt
           cat SHA256SUMS.txt
+      # Step-level (not job-level) PYTHONPATH here on purpose: this job also
+      # builds the wheel and SBOM, which must not see the checkout on
+      # sys.path (Repository_Management #1507, #9416).
       - name: Build companion publication bundle
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: >-
           python3 -m scripts.companion_publication build
           --authority tag --output-dir dist/companion
       - name: Verify companion publication bundle
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: >-
           python3 -m scripts.companion_publication verify-bundle
           --bundle-dir dist/companion
@@ -338,6 +352,8 @@ jobs:
     defaults:
       run:
         working-directory: ${{ github.workspace }}
+    env:
+      PYTHONPATH: ${{ github.workspace }}
     permissions:
       contents: write
       id-token: write
@@ -352,7 +368,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install companion publication dependencies
-        run: python3 -m pip install jsonschema pyyaml
+        run: python3 -m pip install jsonschema==4.26.0 pyyaml==6.0.3
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: dist
