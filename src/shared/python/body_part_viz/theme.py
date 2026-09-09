@@ -21,8 +21,6 @@ import math
 import re
 from dataclasses import dataclass
 
-from matplotlib.colors import is_color_like
-
 __all__ = ["ShapeTheme"]
 
 _HEX_COLOR_RE = re.compile(
@@ -31,6 +29,9 @@ _HEX_COLOR_RE = re.compile(
 
 
 def _validate_color(value: object, field_name: str) -> None:
+    # Keep headless load contracts importable without a plotting installation.
+    from matplotlib.colors import is_color_like
+
     if not isinstance(value, str):
         raise TypeError(f"{field_name} must be str")
     if not value:

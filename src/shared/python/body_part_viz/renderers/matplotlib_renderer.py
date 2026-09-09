@@ -45,6 +45,7 @@ class _ShapeEntry:
     world_vertices: np.ndarray  # (T, V, 3)
     artist: Any  # Line3DCollection or Poly3DCollection
     is_line: bool
+    theme: ShapeTheme
 
 
 class MatplotlibRenderer:
@@ -118,6 +119,7 @@ class MatplotlibRenderer:
             world_vertices=world,
             artist=artist,
             is_line=is_line,
+            theme=theme,
         )
         return handle
 
@@ -148,6 +150,19 @@ class MatplotlibRenderer:
             canvas = getattr(self._ax.figure, "canvas", None)
             if canvas is not None and hasattr(canvas, "draw_idle"):
                 canvas.draw_idle()
+
+    def set_color(self, handle: str, color: str | None) -> None:
+        """Override fill/line color in place; None restores the original styling.
+
+        Opacity, geometry, mesh edges and visibility remain unchanged.
+        """
+        entry = self._require(handle)
+        resolved = entry.theme.color if color is None else color
+        ShapeTheme(color=resolved)  # Validate before changing the artist.
+        if entry.is_line:
+            entry.artist.set_color(resolved)
+        else:
+            entry.artist.set_facecolor(resolved)
 
     def set_visible(self, handle: str, visible: bool) -> None:
         """Show or hide the artist for ``handle``."""
