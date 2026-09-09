@@ -46,6 +46,12 @@ doc-size and scoped Ruff checks pass. Source diff from main consists solely of
 the candidate vendor pin and its two test/fixture files. Final reviewed Tools
 repinning and protected provider/consumer delivery remain pending.
 
+Post-merge audit removed one empty conflict-created heading while retaining
+the complete shipped #9894 entry. SPEC rows exactly equal the union of both
+parents, with no extras or omissions. The current main development-log audit
+has 36 inherited findings versus 37 on main, with no new findings; earlier
+40/41 counts above belong to the original base. Merge commit: 70243adfe.
+
 ## Remaining Work
 
 1. Incorporate the reviewed Tools repair revision and rerun the provider checks.
