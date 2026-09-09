@@ -74,14 +74,23 @@ pendulum result accessor caching).
   clear log line when the optional `pychrono` backend is absent (phases 1-2
   still produce their artifacts). Smoke tests:
   `tests/bunkershot3d/test_phase1_mvp_notebook.py`.
-- **#8922** — `MotionRetargeting._solve_frame_ik` called `mj_forward` once
-  **per marker per IK iteration** (~40x overcount with the golf marker set)
-  and grew the stacked Jacobian with a fresh `np.vstack` per marker. The
-  marker→(body, target) pairs are now resolved once per frame, `mj_forward`
-  runs exactly once per iteration, and the Jacobian/error rows are batched
-  into a single `np.vstack`/`np.concatenate`. Regression tests pin the
-  forward-call bound and multi-marker error reduction
+- **#8922** (PR #9828) — `MotionRetargeting._solve_frame_ik` called
+  `mj_forward` once **per marker per IK iteration** (~40x overcount with the
+  golf marker set) and grew the stacked Jacobian with a fresh `np.vstack`
+  per marker. The marker→(body, target) pairs are now resolved once per
+  frame, `mj_forward` runs exactly once per iteration, and the
+  Jacobian/error rows are batched with a single `np.vstack` /
+  `np.concatenate`. Regression tests pin the forward-call bound and
+  multi-marker error reduction
   (`tests/unit/engines/mujoco/test_motion_capture.py::TestMotionRetargetingIKCost`).
+- **#8928** — pendulum simulation result accessors re-integrated the
+  trajectory on every call (`all_energies` once per energy key = 3 passes;
+  `extract_series` fresh per plot per joint). `TrajectoryResultMixin`
+  now computes every `all_*` batch in a single pass and memoizes it on
+  the result object, and `energy_at` derives `total` arithmetically
+  (E = T + V) instead of re-evaluating both terms. Benchmark (400-step
+  golfer result): repeated `all_accelerations` 0.64 s → ~6 µs; repeated
+  `all_energies` 0.15 s → ~6 µs.
 
 ## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
 
