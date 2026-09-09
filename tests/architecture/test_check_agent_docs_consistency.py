@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from scripts import check_agent_docs_consistency as checker
+
+pytestmark = pytest.mark.unit
 
 
 def _write(path: Path, text: str) -> None:
