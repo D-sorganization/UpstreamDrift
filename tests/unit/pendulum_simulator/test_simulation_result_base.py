@@ -130,3 +130,121 @@ class TestTrajectoryResultMixin:
             TrajectoryResultMixin._assert_energy_finite(
                 {"kinetic": float("nan"), "potential": 2.0}, idx=0
             )
+
+
+@pytest.mark.unit
+class TestBatchAccessorCaching:
+    """Batch accessors must be single-pass and cached (#8928).
+
+    ``all_energies`` used to iterate the trajectory once per energy key,
+    and every ``all_*`` accessor recomputed its per-index series from
+    scratch on each call, so plotting two joints re-integrated the
+    trajectory twice.
+    """
+
+    def test_all_energies_is_single_pass(self) -> None:
+        result = _ConcreteResult(n=5)
+        calls = {"count": 0}
+        real_energy_at = result.energy_at
+
+        def counting_energy_at(idx: int) -> dict[str, float]:
+            calls["count"] += 1
+            return real_energy_at(idx)
+
+        result.energy_at = counting_energy_at  # type: ignore[method-assign]
+
+        result.all_energies()
+
+        assert calls["count"] == 5, (
+            "all_energies must evaluate energy_at once per index "
+            f"(single pass), got {calls['count']} calls for 5 steps"
+        )
+
+    def test_all_energies_is_cached(self) -> None:
+        result = _ConcreteResult(n=5)
+        calls = {"count": 0}
+        real_energy_at = result.energy_at
+
+        def counting_energy_at(idx: int) -> dict[str, float]:
+            calls["count"] += 1
+            return real_energy_at(idx)
+
+        result.energy_at = counting_energy_at  # type: ignore[method-assign]
+
+        first = result.all_energies()
+        second = result.all_energies()
+
+        assert calls["count"] == 5
+        for key, values in second.items():
+            np.testing.assert_array_equal(first[key], values)
+
+    def test_all_accelerations_is_cached(self) -> None:
+        result = _ConcreteResult(n=5)
+        calls = {"count": 0}
+        real_acc_at = result.accelerations_at
+
+        def counting_acc_at(idx: int) -> np.ndarray:
+            calls["count"] += 1
+            return real_acc_at(idx)
+
+        result.accelerations_at = counting_acc_at  # type: ignore[method-assign]
+
+        result.all_accelerations()
+        result.all_accelerations()
+
+        assert calls["count"] == 5, (
+            "a second all_accelerations() call must reuse the cached "
+            f"series, got {calls['count']} accelerations_at calls"
+        )
+
+    def test_all_torques_is_cached(self) -> None:
+        result = _ConcreteResult(n=5)
+        calls = {"count": 0}
+        real_torques_at = result.torques_at
+
+        def counting_torques_at(idx: int) -> np.ndarray:
+            calls["count"] += 1
+            return real_torques_at(idx)
+
+        result.torques_at = counting_torques_at  # type: ignore[method-assign]
+
+        result.all_torques()
+        result.all_torques()
+
+        assert calls["count"] == 5
+
+    def test_cached_series_matches_uncached_values(self) -> None:
+        result = _ConcreteResult(n=5)
+        energies = result.all_energies()
+        cached = result.all_energies()
+        for key in energies:
+            np.testing.assert_array_equal(energies[key], cached[key])
+
+
+@pytest.mark.unit
+class TestExtractSeriesMemoization:
+    """``extract_series`` must memoize on the result object (#8928)."""
+
+    def test_repeated_extract_does_not_recompute(self) -> None:
+        from src.shared.python.pendulum_simulator.data_extractor import (
+            extract_series,
+        )
+
+        result = _ConcreteResult(n=5)
+        calls = {"count": 0}
+        real_acc_at = result.accelerations_at
+
+        def counting_acc_at(idx: int) -> np.ndarray:
+            calls["count"] += 1
+            return real_acc_at(idx)
+
+        result.accelerations_at = counting_acc_at  # type: ignore[method-assign]
+
+        first, _, _ = extract_series(result, "accel_shoulder")
+        second, _, _ = extract_series(result, "accel_shoulder")
+
+        assert calls["count"] == 5, (
+            "a repeated extract_series() for the same series must reuse "
+            f"the memoized array, got {calls['count']} calls"
+        )
+        np.testing.assert_array_equal(first, second)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -62,6 +62,26 @@ class TrajectoryResultMixin:
             f"Non-finite energy at idx={idx}: {result}",
         )
 
+    def energy_at(self, idx: int) -> dict:
+        """Energy decomposition at time index."""
+        self._check_idx(idx)
+        state = self.states[idx]
+        kinetic = self._kinetic_energy_at(state)
+        potential = self._potential_energy_at(state)
+        result = {
+            "kinetic": kinetic,
+            "potential": potential,
+            "total": kinetic + potential,
+        }
+        self._assert_energy_finite(result, idx)
+        return result
+
+    def _kinetic_energy_at(self, state: np.ndarray) -> float:
+        raise NotImplementedError
+
+    def _potential_energy_at(self, state: np.ndarray) -> float:
+        raise NotImplementedError
+
     def total_torques_at(self, idx: int) -> np.ndarray:
         """Total applied torque (drive + friction) at time index.
 
@@ -75,44 +95,91 @@ class TrajectoryResultMixin:
         tau_friction: np.ndarray = self.friction_torques_at(idx)  # type: ignore[attr-defined]
         return np.asarray(tau_drive + tau_friction)
 
+    def _batch_cache(self) -> dict[str, Any]:
+        """Lazily attach and return this result's batch-accessor cache.
+
+        Simulation results are treated as immutable after construction:
+        ``t``/``states`` are produced once by the integrator and only read
+        afterwards, so a lazily-attached cache dict (not a dataclass
+        field, to keep positional construction stable) is safe.
+        """
+        cache = getattr(self, "_result_batch_cache", None)
+        if cache is None:
+            cache = {}
+            self._result_batch_cache = cache
+        return cache
+
+    def _cached_batch(self, key: str, factory: Callable[[], Any]) -> Any:
+        """Return the cached batch series, computing it once via *factory*."""
+        cache = self._batch_cache()
+        if key not in cache:
+            cache[key] = factory()
+        return cache[key]
+
     def all_positions(self) -> list[Any]:
-        positions_at = self.positions_at  # type: ignore[attr-defined]
-        return [positions_at(i) for i in range(self.n_steps)]
+        def _compute() -> list[Any]:
+            positions_at = self.positions_at  # type: ignore[attr-defined]
+            return [positions_at(i) for i in range(self.n_steps)]
+
+        return self._cached_batch("all_positions", _compute)
 
     def all_mass_matrices(self) -> list[Any]:
-        mass_matrix_at = self.mass_matrix_at  # type: ignore[attr-defined]
-        return [mass_matrix_at(i) for i in range(self.n_steps)]
+        def _compute() -> list[Any]:
+            mass_matrix_at = self.mass_matrix_at  # type: ignore[attr-defined]
+            return [mass_matrix_at(i) for i in range(self.n_steps)]
+
+        return self._cached_batch("all_mass_matrices", _compute)
 
     def all_energies(self) -> dict[str, np.ndarray]:
-        energy_at = self.energy_at  # type: ignore[attr-defined]
-        first = energy_at(0)
-        return {
-            key: np.asarray(
-                [energy_at(i)[key] for i in range(self.n_steps)], dtype=float
-            )
-            for key in first
-        }
+        """Cached single-pass energy decomposition.
+
+        ``energy_at`` is evaluated exactly once per time index (not once
+        per energy key) and the per-index dicts are transposed into
+        arrays (#8928).
+        """
+
+        def _compute() -> dict[str, np.ndarray]:
+            energy_at = self.energy_at  # type: ignore[attr-defined]
+            per_index = [energy_at(i) for i in range(self.n_steps)]
+            return {
+                key: np.asarray([row[key] for row in per_index], dtype=float)
+                for key in per_index[0]
+            }
+
+        return self._cached_batch("all_energies", _compute)
 
     def all_accelerations(self) -> np.ndarray:
-        accelerations_at = self.accelerations_at  # type: ignore[attr-defined]
-        return np.asarray(
-            [accelerations_at(i) for i in range(self.n_steps)], dtype=float
-        )
+        def _compute() -> np.ndarray:
+            accelerations_at = self.accelerations_at  # type: ignore[attr-defined]
+            return np.asarray(
+                [accelerations_at(i) for i in range(self.n_steps)], dtype=float
+            )
+
+        return self._cached_batch("all_accelerations", _compute)
 
     def all_torques(self) -> np.ndarray:
-        torques_at = self.torques_at  # type: ignore[attr-defined]
-        return np.asarray([torques_at(i) for i in range(self.n_steps)], dtype=float)
+        def _compute() -> np.ndarray:
+            torques_at = self.torques_at  # type: ignore[attr-defined]
+            return np.asarray([torques_at(i) for i in range(self.n_steps)], dtype=float)
+
+        return self._cached_batch("all_torques", _compute)
 
     def all_friction_torques(self) -> np.ndarray:
-        friction_torques_at = self.friction_torques_at  # type: ignore[attr-defined]
-        return np.asarray(
-            [friction_torques_at(i) for i in range(self.n_steps)],
-            dtype=float,
-        )
+        def _compute() -> np.ndarray:
+            friction_torques_at = self.friction_torques_at  # type: ignore[attr-defined]
+            return np.asarray(
+                [friction_torques_at(i) for i in range(self.n_steps)],
+                dtype=float,
+            )
+
+        return self._cached_batch("all_friction_torques", _compute)
 
     def all_total_torques(self) -> np.ndarray:
-        total_torques_at = self.total_torques_at
-        return np.asarray(
-            [total_torques_at(i) for i in range(self.n_steps)],
-            dtype=float,
-        )
+        def _compute() -> np.ndarray:
+            total_torques_at = self.total_torques_at
+            return np.asarray(
+                [total_torques_at(i) for i in range(self.n_steps)],
+                dtype=float,
+            )
+
+        return self._cached_batch("all_total_torques", _compute)
