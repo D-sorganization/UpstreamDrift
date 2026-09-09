@@ -78,6 +78,9 @@ class ReferenceTransform(BaseModel):
     translation_m: Vector3 = (0.0, 0.0, 0.0)
     scale: float = Field(default=1.0, gt=0.0)
     body_size_normalized: bool = False
+    # Legacy provenance strings remain readable; current bindings use typed evidence.
+    asset_fingerprint: str | None = None
+    camera_fingerprint: str | None = None
     is_calibrated: bool = False
 
     @model_validator(mode="after")
@@ -119,6 +122,9 @@ class ReferenceRegistration(BaseModel):
     )
     image_transform_2d: Matrix3x3 | None = None
     assumption_labels: tuple[str, ...] = ()
+    # Legacy provenance strings remain readable; current bindings use typed evidence.
+    asset_fingerprint: str | None = None
+    camera_fingerprint: str | None = None
     is_calibrated: bool = False
     max_gap_s: float = Field(default=0.25, gt=0, le=10)
     asset_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
@@ -132,6 +138,14 @@ class ReferenceRegistration(BaseModel):
             raise ValueError("reference_id must be a valid canonical UUID")
         if not self.calibration_id.strip():
             raise ValueError("calibration_id must be non-empty")
+        if self.is_calibrated and self.calibration_id.strip().lower() in (
+            "uncalibrated",
+            "uncalibrated_2d",
+            "none",
+        ):
+            raise ValueError(
+                "is_calibrated cannot be True with an uncalibrated calibration_id"
+            )
         if self.camera and self.clock and self.camera.camera_id != self.clock.view:
             raise ValueError("Camera and clock must describe the same view")
         return self
@@ -210,6 +224,8 @@ def sample_reference_motion(
     motion: ReferenceMotion,
     registration: ReferenceRegistration,
     scene_times: npt.NDArray[np.float64],
+    *,
+    max_gap_s: float | None = None,
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.bool_]]:
     """Sample reference motion at requested scene times using bounded linear interpolation.
 
@@ -219,6 +235,11 @@ def sample_reference_motion(
     require(
         registration.reference_id == motion.id,
         "Registration belongs to a different reference",
+    )
+    gap_limit = registration.max_gap_s if max_gap_s is None else max_gap_s
+    require(
+        np.isfinite(gap_limit) and 0 < gap_limit <= 10,
+        "max_gap_s must be finite and within (0, 10]",
     )
     t_eval = np.asarray(scene_times, dtype=float)
     require(t_eval.ndim == 1, "scene_times must be one-dimensional")
@@ -243,7 +264,7 @@ def sample_reference_motion(
         else:
             left = right - 1
             gap = motion.time_s[right] - motion.time_s[left]
-            if gap > registration.max_gap_s:
+            if gap > gap_limit:
                 continue
             alpha = (time - motion.time_s[left]) / gap
         for joint, (a, b) in enumerate(

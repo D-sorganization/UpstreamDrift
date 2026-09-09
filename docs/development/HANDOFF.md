@@ -77,3 +77,7 @@ the complete PR rather than the default local change scope. Use that explicit
 base for remaining product PRs. No limits or type exclusions were relaxed.
 The diagnostic benchmark was rerun and its source fingerprint updated after this
 non-algorithmic typing correction; host-load variability is not a performance claim.
+
+## Integration With Concurrent #9886
+
+Merged main c6f58aef9 and preserved legacy fingerprint fields, the explicit sampler gap keyword, the uncalibrated-ID guard, and all peer test scenarios. The shared immutable synchronizer retains stricter complete pairing/rate bounds; neighboring-frame sampling and typed geometry/camera/clock evidence remain authoritative. Removed the duplicate #9879 SPEC row, retaining PR #9884. CI had 14,769 passing tests and one duplicate-SPEC failure; the duplicate gate is rechecked after resolution.
