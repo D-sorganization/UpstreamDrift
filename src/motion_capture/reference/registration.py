@@ -119,6 +119,8 @@ class ReferenceRegistration(BaseModel):
     )
     image_transform_2d: Matrix3x3 | None = None
     assumption_labels: tuple[str, ...] = ()
+    asset_fingerprint: str | None = None
+    camera_fingerprint: str | None = None
     is_calibrated: bool = False
     max_gap_s: float = Field(default=0.25, gt=0, le=10)
     asset_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
@@ -134,6 +136,14 @@ class ReferenceRegistration(BaseModel):
             raise ValueError("calibration_id must be non-empty")
         if self.camera and self.clock and self.camera.camera_id != self.clock.view:
             raise ValueError("Camera and clock must describe the same view")
+        if self.is_calibrated and self.calibration_id.strip().lower() in (
+            "uncalibrated",
+            "uncalibrated_2d",
+            "none",
+        ):
+            raise ValueError(
+                "is_calibrated cannot be True with an uncalibrated calibration_id"
+            )
         return self
 
     def validate_binding(
@@ -210,6 +220,8 @@ def sample_reference_motion(
     motion: ReferenceMotion,
     registration: ReferenceRegistration,
     scene_times: npt.NDArray[np.float64],
+    *,
+    max_gap_s: float | None = None,
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.bool_]]:
     """Sample reference motion at requested scene times using bounded linear interpolation.
 
@@ -226,6 +238,7 @@ def sample_reference_motion(
     k_count = len(motion.joint_names)
     out_pts = np.zeros((len(t_eval), k_count, 3), dtype=float)
     out_valid = np.zeros((len(t_eval), k_count), dtype=bool)
+    effective_max_gap = max_gap_s if max_gap_s is not None else registration.max_gap_s
     for sample, time in enumerate(reference_times):
         right = bisect_left(motion.time_s, time)
         exact = next(
@@ -243,7 +256,7 @@ def sample_reference_motion(
         else:
             left = right - 1
             gap = motion.time_s[right] - motion.time_s[left]
-            if gap > registration.max_gap_s:
+            if gap > effective_max_gap:
                 continue
             alpha = (time - motion.time_s[left]) / gap
         for joint, (a, b) in enumerate(
