@@ -53,3 +53,5 @@ Final integration: 88 focused alignment/render/state/registration/timing/evidenc
 Explicit mypy --follow-imports=silent passes all four edited UI modules. Atlas freshness passes after regeneration.
 
 Rendering #9889 merged as a506a2958. Integrated that exact main tree; it equals the reviewed peer head. Retained the previously validated instructor UI and a single camera/clock validator. Both dependencies are now merged.
+
+Preserved remote rewrite e8a070d11 by a normal merge. Its product modules match our validated interface, but omitted evidence was retained: five gap-bound tests, benchmark, screenshots and canonical governance/handoff records. No force push.
