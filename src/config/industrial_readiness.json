@@ -10,7 +10,7 @@
       "key": "U1",
       "issue": 9477,
       "priority": "P1",
-      "title": "Pinocchio ran free-fall only and cross-engine 'total energy' had no mass term",
+      "title": "Pinocchio Ran Free-Fall Only and Cross-Engine 'Total Energy' Had No Mass Term",
       "status": "merged",
       "merge_shas": ["ee7792c5873c2265c06ee19f4bdd8ab2098bced9"],
       "implementation": [
@@ -30,7 +30,7 @@
       "key": "U2",
       "issue": 9407,
       "priority": "P0",
-      "title": "README install path did not work on a clean machine",
+      "title": "README Install Path Did Not Work on a Clean Machine",
       "status": "merged",
       "merge_shas": [
         "c9b15bb8887c1ed4e6729a91dcf65e45d4860a77",
@@ -54,7 +54,7 @@
       "key": "U3",
       "issue": 8820,
       "priority": "P1",
-      "title": "Engine dashboard exports carry no engine, model path, run ID, or timestamp",
+      "title": "Engine Dashboard Exports Carry No Engine, Model Path, Run ID, or Timestamp",
       "status": "open",
       "merge_shas": [],
       "implementation": [
@@ -73,7 +73,7 @@
       "key": "U4",
       "issue": 9417,
       "priority": "P3",
-      "title": "Ship installable artifacts: wheel, image, desktop bundles, SBOM",
+      "title": "Ship Installable Artifacts: Wheel, Image, Desktop Bundles, SBOM",
       "status": "open",
       "merge_shas": [],
       "implementation": ["deploy", "installer/windows/build_installer.py"],
@@ -87,42 +87,42 @@
   "acceptance": [
     {
       "id": "children-reconciled",
-      "criterion": "Each priority child is reconciled against current main and has a narrow PR plan.",
+      "criterion": "Each Priority Child Is Reconciled Against Current Main and Has a Narrow PR Plan.",
       "status": "met",
       "evidence": "All four queue entries were re-read against the reconciliation SHA rather than the audit snapshot: U1 and U2 are merged with the SHAs recorded here, and U3 and U4 were re-confirmed open at the named source locations and carry an ordered PR plan.",
       "blockers": []
     },
     {
       "id": "claims-carry-evidence",
-      "criterion": "Every claimed completed capability links implementation SHA, executed tests and user-visible acceptance evidence.",
+      "criterion": "Every Claimed Completed Capability Links Implementation SHA, Executed Tests and User-Visible Acceptance Evidence.",
       "status": "met",
       "evidence": "The registry contract refuses a `merged` entry that lacks a 40-character merge SHA, a test path, or acceptance evidence, and refuses any implementation or test path that does not exist in the tree.",
       "blockers": []
     },
     {
       "id": "release-profiles",
-      "criterion": "Required release profiles pass installed-product journeys; unsupported profiles are explicit.",
+      "criterion": "Required Release Profiles Pass Installed-Product Journeys; Unsupported Profiles Are Explicit.",
       "status": "partial",
       "evidence": "Engine support is explicit in `docs/operations/tier-policy.md` (MuJoCo core; Drake and Pinocchio extended; OpenSim and MyoSuite experimental behind a warning), and the source install journey is checked by `scripts/ci/verify_installation.py`. No built artifact other than the wheel has a clean-machine journey, which is exactly the U4 scope.",
       "blockers": [9417]
     },
     {
       "id": "separate-authorities",
-      "criterion": "Numerical/scientific validity, software correctness and human qualification remain separately recorded.",
+      "criterion": "Numerical/Scientific Validity, Software Correctness and Human Qualification Remain Separately Recorded.",
       "status": "met",
       "evidence": "This ledger records software correctness only. Scientific qualification stays in the design-manual governance pathway (`scripts/config/design_manual_governance.json`, `python3 -m scripts.check_design_manual_governance`); a passing entry here is not scientific or human approval, and no registered experiment may be rerun or promoted to satisfy it.",
       "blockers": []
     },
     {
       "id": "no-false-green",
-      "criterion": "Outstanding blockers have a named owner/dependency and do not masquerade as green release status.",
+      "criterion": "Outstanding Blockers Have a Named Owner/Dependency and Do Not Masquerade as Green Release Status.",
       "status": "met",
       "evidence": "`release_status` is `blocked` and the contract forbids `ready` while any queue entry is open or any acceptance criterion is unmet. Every open entry must carry an owner and a plan, must carry a dependency when the owner is unassigned, and must appear in at least one acceptance blocker list, so an open item cannot be dropped from the summary.",
       "blockers": [8820, 9417]
     },
     {
       "id": "recovery-evidence",
-      "criterion": "Release evidence includes recovery/rollback instructions and preserves user data.",
+      "criterion": "Release Evidence Includes Recovery/Rollback Instructions and Preserves User Data.",
       "status": "partial",
       "evidence": "`docs/operations/release-runbook.md` carries a Rollback section that pins downstream consumers to the previous tag, forbids overwriting or rerunning immutable release assets, and requires an incident issue before a patch release. It covers the wheel; the artifacts U4 adds have no rollback step yet.",
       "blockers": [9417]
