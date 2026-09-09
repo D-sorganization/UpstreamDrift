@@ -362,7 +362,7 @@
       "reason": "Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) and the multiview layout model/presets/editor and the layout-composited live preview and playback (#9810, #9811, #9812, #9813, #9814) run on the same local session trees; desktop-only candidate pending #7460.",
       "pending_decision": true,
       "tiles": ["capture_rig"],
-      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert/full-body reference overlays #9863 remain planned, not shipped."
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration and synchronized overlays #9865/#9866 remain planned."
     },
     "docs.document_library": {
       "title": "Document library / project map viewer",

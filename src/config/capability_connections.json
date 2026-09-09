@@ -77,6 +77,13 @@
       "description": "Saved lines, arrows, circles, ellipses and rectangles in original camera pixels.",
       "evidence": "src/tools/capture_rig/coaching_dialog.py",
       "view": "workflow"
+    },
+    {
+      "id": "capture.experts",
+      "title": "Expert Reference Library",
+      "description": "Import linked 2D video or validated C3D/model marker motion with explicit units, axes and joint names.",
+      "evidence": "src/tools/capture_rig/reference_library_dialog.py",
+      "view": "workflow"
     }
   ],
   "edges": [
@@ -330,6 +337,24 @@
       "kind": "file",
       "evidence": "src/tools/capture_rig/coaching_export.py",
       "constraint": "Draw at source resolution before crop; retain original frame numbers and preserve media",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "capture.experts",
+      "artifact": "Saved reference assets, titles, notes and archive state",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/library_dialog.py",
+      "constraint": "Reference import is available; camera registration and synchronized projection are tracked separately by #9865/#9866",
+      "view": "workflow"
+    },
+    {
+      "source": "files",
+      "target": "capture.experts",
+      "artifact": "C3D, canonical marker animation or expert video",
+      "kind": "file",
+      "evidence": "src/motion_capture/reference/importers.py",
+      "constraint": "Missing motion samples stay masked; no automatic 2D-to-3D conversion or invented camera calibration",
       "view": "workflow"
     }
   ]

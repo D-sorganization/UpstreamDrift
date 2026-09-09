@@ -1,5 +1,13 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+## Expert Reference Imports (#9864)
+
+Active isolated worktree `UpstreamDrift-reference-assets`, branch
+`feat/9864-reference-assets`, implements versioned motion/video reference imports,
+explicit source mapping, a native reference library and shared C3D residual fidelity.
+See canonical `docs/development/HANDOFF.md` and `DL-#9864`. Camera registration
+#9865 and projection/synchronization #9866 remain open goal work.
+
 ## Coaching Reference Work in Progress (#9862)
 
 Isolated branch `feat/9862-coaching-drawings` builds on editing/library PR #9868
