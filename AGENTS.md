@@ -68,6 +68,16 @@ order** before writing a line:
 
 Before adding functionality, read the [shared infrastructure directory](docs/agents/shared-infrastructure.md). It records reusable engine, motion, rendering, camera, theme and analysis modules with their public interfaces and design references. Add newly discovered modules there; keep the discovery workflow above as the required starting point.
 
+### Sidekick Infrastructure & Entry Points
+
+Sidekick is the unified AI assistant interface across PyQt and React/Tauri surfaces:
+
+- **PyQt UI Panel**: `assistant_panel` (`src/shared/python/ai/gui/assistant_panel.py`) embeds the assistant in the desktop launcher.
+- **React / Tauri UI**: `ChatPanel` (`ui/src/components/ui/ChatPanel.tsx`) provides the web and desktop chat interface.
+- **Design Tokens**: `sidekick_tokens` (`src/shared/python/theme/sidekick_tokens.py`) defines canonical color, spacing, radius, and font scales.
+- **Agent Action Layer**: `sidekick/agent` (`src/shared/python/sidekick/agent/`) routes all agent actions through `SidekickActionService`.
+- **Standalone Runner**: `sidekick.standalone` (`vendor/ud-tools/src/shared/python/sidekick/standalone/`) provides headless execution via `sidekick run`.
+
 ---
 
 ## C. Where new code goes — decision tree
