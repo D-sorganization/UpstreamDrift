@@ -4199,7 +4199,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
-| 2026-09-09 | #9881 | Qualify event synchronization (0.25–4 interval rates), gap-aware neighboring-frame sampling, camera/distortion and clock snapshots, saved registration identity checks and manual alignment claims. Include deterministic adverse fixtures and a diagnostic sampling benchmark. |
+| 2026-09-09 | #9885 | Qualify event synchronization (0.25–4 interval rates), gap-aware neighboring-frame sampling, camera/distortion and clock snapshots, saved registration identity checks and manual alignment claims. Include deterministic adverse fixtures and a diagnostic sampling benchmark. |
 | 2026-09-09 | #9884 | Preserve comparison registration/layer settings on independent edits and reference switches; validate sidecar identity/path/size; reuse safe export ownership, snapshots and deferred close. Qualification gaps remain tracked under #9863. |
 | 2026-09-09 | #9879 | Preserve comparison registration/layer settings on independent edits and reference switches; validate sidecar identity/path/size; reuse safe export ownership, snapshots and deferred close. Qualification gaps remain tracked under #9863. |
 | 2026-09-09 | #9871 | Calibrated reference overlay scene registration and event synchronization: rigid/similarity transform, body-size normalization, coordinate frame conversion from canonical Z-up into ADR-0041 scene world, event-anchor and offset time warping, missing-joint gap mask preservation across interpolation, camera projection with distortion and clipping, and uncalibrated 2D video homography. |
