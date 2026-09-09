@@ -3,6 +3,15 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/tools/capture_rig/swing_export_actions.py",
+      "symbol": "SwingExportActions.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9884,
+      "reason": "Issue #9884: SwingExportActions configures export callbacks and labels; decomposition tracked under #9884",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "src/launchers/launcher_layout_manager.py",
       "symbol": "LayoutManager.rebuild_grid",
       "rule": "function-lines",
