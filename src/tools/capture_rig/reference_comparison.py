@@ -554,7 +554,7 @@ class ReferenceComparisonDialog(QDialog):
         if self.spatial.pending or self.timing.pending:
             self._replace_inspector()
         elif self._undo:
-            self._session = self._undo.pop()
+            self._session = self._undo.pop().changed(notes=self._session.notes)
             self._replace_inspector()
         else:
             return
