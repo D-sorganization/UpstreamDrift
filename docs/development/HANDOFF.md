@@ -59,3 +59,13 @@ resolved by this merge.
 Fifty combined installer/guide/Sidekick tests pass. Document catalog, title, size,
 SPEC uniqueness and full-PR architecture checks pass. The development-log entry
 for #9894 is concise to remain within the existing 50 KiB documentation limit.
+
+## Protected Completion Candidate
+
+Current main acbb3a0c (#9895) is integrated without dropping managed guidance.
+PR #9896 now carries the final comparison controls (#9883), compatible guide
+checker (#9892), and scoped installer (#9894). It preserves all code, images,
+and benchmark evidence from #9890 and the checker qualification from #9893.
+Earlier PRs remain open until their exact changes are verified on main; do not
+close them merely as redundant. The public PR description covers this final
+scope. Full protected validation remains required before epic #9863 closure.
