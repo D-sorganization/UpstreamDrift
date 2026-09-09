@@ -98,6 +98,20 @@
       "description": "Encoded comparison video and portable evidence sidecar.",
       "evidence": "src/tools/capture_rig/reference_export.py",
       "view": "workflow"
+    },
+    {
+      "id": "clubs.catalog",
+      "title": "Attributed Club Catalog",
+      "description": "Optional component quantities, source claims and build revisions; bag UI tracked in #9905.",
+      "evidence": "src/shared/python/club_data/catalog.py",
+      "view": "system"
+    },
+    {
+      "id": "clubs.exchange",
+      "title": "Club Catalog Exchange",
+      "description": "Validated JSON and CSV; preserve missing measurements and conflicting sources.",
+      "evidence": "src/shared/python/club_data/catalog_io.py",
+      "view": "system"
     }
   ],
   "edges": [
@@ -406,6 +420,15 @@
       "evidence": "src/tools/capture_rig/reference_export.py",
       "constraint": "Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published",
       "view": "workflow"
+    },
+    {
+      "source": "clubs.exchange",
+      "target": "clubs.catalog",
+      "artifact": "Attributed build records",
+      "kind": "contract",
+      "evidence": "src/shared/python/club_data/catalog_io.py",
+      "constraint": "Catalog contract only; player bag and model binding remain #9905",
+      "view": "system"
     }
   ]
 }

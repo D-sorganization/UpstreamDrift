@@ -1,88 +1,68 @@
-# Guided Capture Setup Handoff
+# Attributed Club Catalog Handoff
 
-## Identity
+## Identity and Scope
 
-- Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-setup`
-- Branch: `feat/capture-guided-setup`
-- Baseline commit: `54b9b0586` (main after qualified product merge #9896)
-- Implementation commit: `SELF`
-- Pull request: #9910 (draft): https://github.com/D-sorganization/UpstreamDrift/pull/9910
-- Governing issue: #9898; epics #9897, #9902, #9906; development entry DL-#9898
-- Session: `capture-product-01a08427-guided-setup`, issue lease and presence active.
+- Repository: D-sorganization/UpstreamDrift.
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-clubs`.
+- Branch: `feat/9903-player-club-catalog`; implementation commit: SELF.
+- Base: `18c8f922e87c92f6f518da05c0819f71ce3193ba` (merged capture-profile PR #9910).
+- Issue: #9903; epic #9902; development entry DL-#9903.
+- Pull request: not created.
+- Session: `capture-product-01a08427-club-catalog`; central lease and presence active.
 
-## Objective and Status
+Extend the existing club-data authority so unknown measurements, source attribution,
+custom builds and conflicting claims survive exchange and cannot silently become
+model inputs. The larger capture-product goal remains active: everyday calibration
+#9897, club sources/bag #9902, guided wizard #9906 and fleet rollout all remain open.
+Gasification mapping is planned for future cheaper agents, per user direction.
 
-Complete the newly requested everyday calibration, sourced club database/player bag,
-and capability-driven setup wizard. The full prior fleet rollout also remains required.
-Detailed execution children and dependency/acceptance boundaries are recorded in
-`docs/development/capture_setup_execution_plan.md` and the three linked GitHub epics.
+## Implementation and Compatibility
 
-The current change includes intrinsic profiles and visible Capture Rig header/dialog
-controls. Common-reference observations, downstream stale-selection guards, multi-view
-geometry, club data and wizard work remain open. Do not close #9898 or its epic yet.
-
-## Files and Decisions
-
-- `calibration_profiles.py` references existing IntrinsicsRecord artifacts; it creates
-  no reference solver or competing camera contract. Manual lens settings need fresh
-  confirmation; camera/lens/zoom/focus/image size/sensor-crop changes reject reuse.
-- Saving a profile preserves an atomic calibration artifact revision separately from
-  the mutable input filename, with source provenance and digests. Old captures can
-  restore a prior revision after recalibration. Corrupt history/revisions are errors.
-- `test_calibration_profiles.py` covers compatibility, invalid quality/geometry,
-  changed/missing files, idempotency and preserved revisions. The plan records all
-  ten execution issues across the three new epics.
-- Existing #9621/#9622/#9623/#9630/#9554 and ADR-0041 remain authorities/dependencies.
-  Common paper/yardstick observations cannot silently certify full 3-D geometry.
-- Preserve existing club-data and setup/workflow/registry infrastructure. Unknown
-  club properties remain unknown, with published/measured/estimated distinctions.
-- Reconciled this task's completed DL-#9894/#9892/#9883 entries against the qualified
-  #9896 merge; earlier product epics #9849/#9850/#9863 are complete. Root handoff
-  retains standing UP-D0/UP-D1 governance and other agents' historical context.
-- User-owned changes: none in this new isolated worktree. The launched application
-  remains in the separate UpstreamDrift-ubuntu-ci checkout.
+- `club_data/catalog.py`: immutable optional attributed claims, component identity,
+  source/license metadata, deterministic build IDs and content revisions; explicit
+  SI consumption rejects unverified/suggested values, ambiguous MOI and conflicts.
+- `catalog_io.py`: bounded versioned JSON/CSV, validates all records before returning,
+  no automatic overwrite. CSV has flat identity/property columns and JSON source cells.
+- `catalog_legacy.py`: old default-filled ClubSpecification values stay unverified;
+  do not infer which values were measured. The old loader behavior is unchanged.
+- Public facade retains legacy names lazily; catalog imports avoid PyQt/pandas/openpyxl.
+- Unit factors reuse the pinned Tools `sidekick.utils.unit_constants` authority.
+- Guide and generated capability map describe the data contract only. The bag/capture
+  UI remains #9905 and the qualified public source catalog/update process remains #9904.
+- No scientific solver or calculation inventory approval is claimed. Existing
+  `blocked-inventory-required` manual release state and UP-D0/UP-D1 remain authoritative.
 
 ## Validation
 
-- Added rig-wide verified export and per-camera profile review, with confirmation reset
-  on edits, saved revision selection and an existing-board recalibration route.
-- Entire `tests/tools/capture_rig` suite passes (388 tests). Focused UI tests cover
-  explicit confirmation, edited settings, export provenance and repeat-without-export.
+- TDD: first test collection failed because `club_data.catalog` did not exist.
+- `python3 -m pytest tests/unit/test_club_catalog.py tests/unit/test_club_data_loader.py -q --no-cov -o addopts=''`: 63 passed, 8 existing import deprecation warnings.
+- `python3 -m mypy src/shared/python/club_data/catalog.py src/shared/python/club_data/catalog_io.py src/shared/python/club_data/catalog_legacy.py --follow-imports=silent --ignore-missing-imports`: passes after exchange typing corrections.
+- Scoped Ruff lint/format, architecture, map and document budgets pass. Whole-source
+  LoD reports three unchanged main capture chains fixed by pending PR #9917; no club
+  source violations. Normal commit/pre-push hooks remain to run. No PR has been published for this contract.
 
-- TDD: profile module initially absent; revision-preservation regression then failed
-  before implementing archived snapshots. Existing normal repo conftest is enabled.
-- `python3 -m pytest tests/tools/capture_rig/test_calibration_profiles.py tests/motion_capture/reconstruct/test_intrinsics.py -q --timeout=60`: 31 passed, including archive idempotency/corruption, geometry rejection and existing solver/CLI behavior.
-- Changed-file Ruff lint/format pass after reviewed dict-literal fixes. Focused mypy (`--follow-imports=silent --ignore-missing-imports`) passes for the new source module. Catalog, title, SPEC and tracked file-size checks pass; staged checks and all normal commit/pre-push hooks passed. The default shared mypy cache had incompatible NumPy stubs; the unchanged hooks passed in the task-qualified PRE_COMMIT_HOME cache.
-- Pinned Tools submodule initialized at eab74a901a7c8467e1997049a73e2cfd2df74428.
+## Concurrent Work and Risks
 
-## Blockers and Risks
+Capture UX PR #9917 is owned separately in `UpstreamDrift-capture-setup`. Preserve
+the currently launched app in `UpstreamDrift-ubuntu-ci`, PID50860. Reference agent
+#9914 owns headless C3D fitting; impact agent #9912 owns provider pinning. Shared
+SPEC/development-log conflicts must preserve each issue's entry.
 
-No blocker prevents continued feature implementation. Profile review is wired into
-Capture Rig; downstream session/geometry qualification remains required before shipment.
-Do not claim physical calibration accuracy from synthetic tests alone. Generic
-calibration/reference geometry belongs to Tools under ADR-0041.
-
-Fleet context: central handoff PR #1628 merged as 537f9ad087dd3afdda60d28dd2e54d1ac7583864. Half-ton-controls #3 merged as
-305a21307ed6f6e2a3c500da6a3c4a50cdbb73db after run34391771678 passed; lease released.
-New audit at19:53UTC confirms39/41, including Tools_Private. Tools and Gasification_Model
-still lack adoption; direct notices request the canonical replacement queue. Do not race closures.
+This isolated worktree contains only task-owned changes. Do not alter other agents'
+branches or the vendored Tools checkout. The shared reference solver is Tools PR
+#5140; numerical repair is #5136. Their CI is still pending and private downstream
+Gasification checkout remains an external credential issue. Fleet adoption is39/41,
+with Tools/Gasification policy replacement still outstanding.
 
 ## Next Steps
 
-1. Continue #9910 with the player workflow; the foundation at b4abd67bb7b6629e0992364037b4f3fd0d0e816e is locally qualified and published.
-2. Implement common-reference observation sessions and compatible profile UI, then
-   qualify consumers before closing #9898/#9900. Follow Tools geometry ownership.
-3. Execute #9899/#9901, club children #9903-#9905, and wizard children #9907-#9909.
-4. Continue actual fleet adoption and audit every required result before goal closure.
+1. Complete staged validation and normal hooks; publish #9903 contract PR.
+2. Integrate qualified public source entries/update procedure (#9904).
+3. Add bag editing and capture-bound source snapshots (#9905), then verify visible
+   workflow evidence before closing the contract issue and epic.
+4. Continue #9917 protected merge, shared calibration consumer UI, wizard and fleet rollout.
 
 ## Change Log
 
-- `SELF`: start DL-#9898, preserve three new goal epics, and implement tested optical
-  profile compatibility with durable calibration revisions; UI integration remains open.
-
-- `SELF`: add visible calibration revision review and verified per-view exports.
-  Test launch PID49580 exited: missing imageio_ffmpeg escaped automatic preview.
-  Issue #9911 adds import/timeout recovery; 11 preview regressions pass. An isolated
-  TEMP/upstreamdrift-capture-test-runtime now supplies the declared FFmpeg dependency.
-  Verify the current launch before claiming the application is still open.
+- SELF: implement and qualify optional attributed club contracts and lossless exchange;
+  update DL-#9903, SPEC, public facade and generated architecture references.
