@@ -230,8 +230,13 @@ The generator preview adds that sole classification entry and preserves the
 Tools pin; generated authorship and byte metadata also refresh. Canonical
 regeneration is now complete: all ten inventory tests pass in 16.78 s, and
 the classification projection differs only by the new reference module.
-Current-main integration remains required before publishing this follow-up.
-PR #9841 remains open; no green protected-CI claim is made.
+Commit 658fe3c8a contains runtime/inventory qualification; c2a8d5b6e integrates
+main 438bd3282. Only SPEC required manual conflict resolution, retaining both
+incoming entries and the reference section. Optimization source/tests,
+dependency metadata, optional workflow and generated inventory are unchanged
+by this merge. Inventory freshness, pinned root Ruff (6,772 files) and the
+SPEC hook pass afterward. PR #9841 remains open; publishing through normal
+push hooks and protected CI/review remain pending.
 
 Repository-pinned Ruff 0.15.17 passes root lint and format (6,771 files).
 An initial check accidentally used the shared environment's newer 0.16.4;
