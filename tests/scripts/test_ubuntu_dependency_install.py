@@ -102,6 +102,8 @@ def test_isolates_sources_and_indexes_preserving_signatures(
         assert "Dir::Etc::sourcelist=/dev/null" in call
         assert "Dir::Etc::sourceparts=" in call
         assert "Dir::State::lists=" in call
+        assert "Dir::Cache::pkgcache=" in call
+        assert "Dir::Cache::srcpkgcache=" in call
         assert "DPkg::Lock::Timeout=300" in call
         assert "APT::Update::Error-Mode=any" in call
         assert "allow-unauthenticated" not in call
