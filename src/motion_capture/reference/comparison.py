@@ -152,10 +152,14 @@ class ComparisonExportSidecarSpec:
 def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any]:
     """Assemble reproducible comparison export metadata sidecar."""
     source_sha = sha256_of(spec.source_media)
-    ref_source_sha = spec.reference_asset.source.sha256
+    ref_asset = spec.reference_asset
+    ref_source = ref_asset.source
+    ref_source_sha = ref_source.sha256
+    ref_path = ref_source.path
 
-    is_3d = spec.reference_asset.kind == "motion"
-    has_calib = bool(spec.registration and spec.registration.is_calibrated)
+    registration = spec.registration
+    is_3d = ref_asset.kind == "motion"
+    has_calib = bool(registration and registration.is_calibrated)
 
     if is_3d:
         alignment_status = (
@@ -163,6 +167,13 @@ def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any
         )
     else:
         alignment_status = "manual_2d_homography_no_3d_claim"
+
+    time_mapping_dict: dict[str, Any] | None = None
+    if spec.time_mapping:
+        time_mapping_dict = spec.time_mapping.model_dump(mode="json")
+    elif registration and registration.time_mapping:
+        reg_tm = registration.time_mapping
+        time_mapping_dict = reg_tm.model_dump(mode="json")
 
     sidecar: dict[str, Any] = {
         "schema_version": COMPARISON_EXPORT_SCHEMA,
@@ -174,10 +185,10 @@ def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any
             "view": spec.view,
         },
         "reference": {
-            "id": spec.reference_asset.id,
-            "title": spec.reference_asset.title,
-            "kind": spec.reference_asset.kind,
-            "source_path": spec.reference_asset.source.path,
+            "id": ref_asset.id,
+            "title": ref_asset.title,
+            "kind": ref_asset.kind,
+            "source_path": ref_path,
             "source_sha256": ref_source_sha,
             "alignment_status": alignment_status,
             "is_3d": is_3d,
@@ -185,17 +196,9 @@ def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any
             "missing_alignment_evidence": not has_calib,
         },
         "registration": (
-            spec.registration.model_dump(mode="json") if spec.registration else None
+            registration.model_dump(mode="json") if registration else None
         ),
-        "time_mapping": (
-            spec.time_mapping.model_dump(mode="json")
-            if spec.time_mapping
-            else (
-                spec.registration.time_mapping.model_dump(mode="json")
-                if spec.registration
-                else None
-            )
-        ),
+        "time_mapping": time_mapping_dict,
         "crop": spec.crop.model_dump(mode="json") if spec.crop else None,
         "layer_appearance": (
             spec.layer.model_dump(mode="json")
@@ -209,8 +212,8 @@ def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any
         },
     }
     inputs = [spec.source_media]
-    if Path(spec.reference_asset.source.path).is_file():
-        inputs.append(Path(spec.reference_asset.source.path))
+    if Path(ref_path).is_file():
+        inputs.append(Path(ref_path))
     return stamp(
         sidecar,
         schema_version=COMPARISON_EXPORT_SCHEMA,
