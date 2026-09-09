@@ -8,7 +8,7 @@
 - Baseline commit: 271662f68 (instructor PR #9890)
 - Implementation commit: SELF
 - Governing issue: #9892; fleet adoption Repository_Management#1579
-- Pull request: pending
+- Pull request: #9893 (draft, stacked after #9890)
 
 ## Objective and Status
 
@@ -33,3 +33,5 @@ Commit and publish a focused PR against main after #9890 merges; complete protec
 ## Change Log
 
 - SELF: Separate tested fleet-guide compatibility from instructor delivery without force pushes.
+
+PR #9893 is published. #9890 attempt 1 failed before tests on Google Chrome APT repository hash mismatches; attempt 2 was already running when inspected. Do not disable package verification. Central #1627 is at 1053f26, awaiting runners.

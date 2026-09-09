@@ -19,11 +19,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9892 · Fleet Guide Compatibility
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9892; Repository_Management#1579
 - **Branch:** fix/9892-fleet-guide-validation
-- **PR:** pending
+- **PR:** #9893
 - **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py, generated agent entry files
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (27 tests and live consistency check pass)
