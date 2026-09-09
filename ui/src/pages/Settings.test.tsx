@@ -142,7 +142,7 @@ describe('SettingsPage', () => {
 
     fireEvent.change(screen.getByLabelText(/theme/i), { target: { value: 'Light' } });
     fireEvent.change(screen.getByLabelText(/font scale/i), { target: { value: '1.5' } });
-    fireEvent.click(screen.getByRole('button', { name: /save settings/i }));
+    fireEvent.click(screen.getByRole('button', { name: /save (settings|changes)/i }));
 
     await waitFor(() => {
       const putCall = findCall('PUT', '/api/v1/settings');
@@ -182,7 +182,7 @@ describe('SettingsPage', () => {
     useSimulationStore.getState().setParameters({ duration: 9.9 });
 
     fireEvent.change(screen.getByLabelText(/duration \(s\)/i), { target: { value: '5' } });
-    fireEvent.click(screen.getByRole('button', { name: /save settings/i }));
+    fireEvent.click(screen.getByRole('button', { name: /save (settings|changes)/i }));
 
     await waitFor(() => {
       expect(findCall('PUT', '/api/v1/settings')).toBeDefined();
@@ -190,6 +190,109 @@ describe('SettingsPage', () => {
 
     // The in-session change wins (#7424 guard).
     expect(useSimulationStore.getState().parameters.duration).toBe(9.9);
+  });
+
+  // ------------------------------------------------------------------
+  // #8892 — unsaved edits can no longer be discarded silently
+  // ------------------------------------------------------------------
+
+  it('disables Save while pristine and enables it once an edit is made', async () => {
+    renderPage();
+    await screen.findByLabelText(/duration \(s\)/i);
+
+    const save = () =>
+      screen.getByRole('button', { name: /save (settings|changes)/i }) as HTMLButtonElement;
+    await waitFor(() => expect(save().disabled).toBe(true));
+    expect(screen.getByTestId('settings-dirty-state').textContent).toMatch(/all changes saved/i);
+
+    fireEvent.change(screen.getByLabelText(/font scale/i), { target: { value: '1.5' } });
+
+    await waitFor(() => expect(save().disabled).toBe(false));
+    expect(save().textContent).toMatch(/save changes/i);
+    expect(screen.getByTestId('settings-dirty-state').textContent).toMatch(/unsaved changes/i);
+  });
+
+  it('goes clean again when an edit is reverted to the loaded value', async () => {
+    renderPage();
+    const scale = (await screen.findByLabelText(/font scale/i)) as HTMLInputElement;
+    const original = scale.value;
+
+    fireEvent.change(scale, { target: { value: '1.5' } });
+    await waitFor(() =>
+      expect(screen.getByTestId('settings-dirty-state').textContent).toMatch(/unsaved changes/i),
+    );
+
+    fireEvent.change(scale, { target: { value: original } });
+    await waitFor(() =>
+      expect(screen.getByTestId('settings-dirty-state').textContent).toMatch(/all changes saved/i),
+    );
+  });
+
+  it('confirms before the back arrow discards unsaved edits', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    try {
+      renderPage();
+      await screen.findByLabelText(/duration \(s\)/i);
+
+      // Pristine: leaving must not prompt.
+      fireEvent.click(screen.getByLabelText(/back to dashboard/i));
+      expect(confirmSpy).not.toHaveBeenCalled();
+
+      fireEvent.change(screen.getByLabelText(/font scale/i), { target: { value: '1.5' } });
+      await waitFor(() =>
+        expect(screen.getByTestId('settings-dirty-state').textContent).toMatch(/unsaved changes/i),
+      );
+
+      fireEvent.click(screen.getByLabelText(/back to dashboard/i));
+      expect(confirmSpy).toHaveBeenCalledTimes(1);
+      // Answering "stay" keeps the edit.
+      expect((screen.getByLabelText(/font scale/i) as HTMLInputElement).value).toBe('1.5');
+    } finally {
+      confirmSpy.mockRestore();
+    }
+  });
+
+  it('registers a beforeunload guard only while dirty', async () => {
+    const addSpy = vi.spyOn(window, 'addEventListener');
+    const removeSpy = vi.spyOn(window, 'removeEventListener');
+    try {
+      renderPage();
+      await screen.findByLabelText(/duration \(s\)/i);
+
+      const beforeUnloadAdds = () =>
+        addSpy.mock.calls.filter(([name]) => name === 'beforeunload').length;
+      expect(beforeUnloadAdds()).toBe(0);
+
+      fireEvent.change(screen.getByLabelText(/font scale/i), { target: { value: '1.5' } });
+      await waitFor(() => expect(beforeUnloadAdds()).toBeGreaterThan(0));
+
+      // Saving clears the flag, which unregisters the guard.
+      fireEvent.click(screen.getByRole('button', { name: /save (settings|changes)/i }));
+      await waitFor(() =>
+        expect(
+          removeSpy.mock.calls.filter(([name]) => name === 'beforeunload').length,
+        ).toBeGreaterThan(0),
+      );
+    } finally {
+      addSpy.mockRestore();
+      removeSpy.mockRestore();
+    }
+  });
+
+  it('is clean again after a successful save', async () => {
+    renderPage();
+    await screen.findByLabelText(/duration \(s\)/i);
+
+    fireEvent.change(screen.getByLabelText(/font scale/i), { target: { value: '1.5' } });
+    await waitFor(() =>
+      expect(screen.getByTestId('settings-dirty-state').textContent).toMatch(/unsaved changes/i),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /save (settings|changes)/i }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('settings-dirty-state').textContent).toMatch(/all changes saved/i),
+    );
   });
 
   it('shows an error banner when settings cannot be loaded', async () => {
@@ -215,6 +318,14 @@ describe('SettingsPage', () => {
     renderPage();
     await screen.findByLabelText(/duration \(s\)/i);
 
+    // Save is disabled while pristine since #8892, so dirty the form first.
+    fireEvent.change(screen.getByLabelText(/font scale/i), { target: { value: '1.25' } });
+    await waitFor(() =>
+      expect(screen.getByTestId('settings-dirty-state').textContent).toMatch(
+        /unsaved changes/i,
+      ),
+    );
+
     apiFetchMock.mockImplementation((path: string, init?: RequestInit) => {
       const method = init?.method ?? 'GET';
       if (path === '/api/v1/settings' && method === 'PUT') {
@@ -223,7 +334,7 @@ describe('SettingsPage', () => {
       return Promise.resolve({});
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /save settings/i }));
+    fireEvent.click(screen.getByRole('button', { name: /save (settings|changes)/i }));
 
     expect(await screen.findByText(/500 boom/i)).toBeInTheDocument();
   });
