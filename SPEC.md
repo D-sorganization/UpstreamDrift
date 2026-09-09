@@ -4245,6 +4245,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-09 | #9898 | Begin zoom-aware intrinsic profile selection and immutable calibration revisions; track everyday-reference, club-catalog and guided-setup epics #9897/#9902/#9906. |
 | 2026-09-09 | #9889 | Unify comparison preview/export through the coaching compositor; apply motion opacity and coverage-aware expert homographies; retain decoders, preserve odd source pixels and verify complete staged output/input identity before publication. |
 | 2026-09-09 | #9890 | Add instructor placement, independent expert event pairing, notes, undo/reset and guarded stale-evidence review; keep responsive comparison workflow and capability diagrams aligned. |
 | 2026-09-09 | #9885 | Qualify event synchronization (0.25–4 interval rates), gap-aware neighboring-frame sampling, camera/distortion and clock snapshots, saved registration identity checks and manual alignment claims. Include deterministic adverse fixtures and a diagnostic sampling benchmark. |
