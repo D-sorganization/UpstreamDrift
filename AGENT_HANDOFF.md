@@ -1,5 +1,31 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+## Segment Force Colors: Epic #9833 in Progress
+
+Branch `feat/segment-force-colors` lives in `_codex_worktrees/segment-force-colors`.
+See `docs/development/segment_force_color_epic.md` for current scope and evidence.
+Shared Python/Three.js policies, native pendulum and MuJoCo reaction sources,
+renderer adapters, desktop controls and WebSocket/Scene3D wiring are implemented.
+Epic #9833 and children #9834–#9837 are published. Remote main `ff0effa5a` was merged
+into the branch. Git works by clearing the stale `http.https://github.com/.extraheader`
+per invocation and using `gh auth git-credential`; global settings are unchanged.
+PR #9840 is open. C3D user segments now accept explicitly bound, clock-checked
+loads and expose the shared controls. Native MuJoCo raster verification passed
+blue/red output and pixel-exact off restoration (local output/force-colors).
+Remote main `403292ca3` is merged and the SPEC conflict is resolved with both rows
+preserved. PR CI cycle 1 exposed LoD storage access, a plotting import in headless
+contracts, render-function size and a redundant websocket cast; fixes and a
+headless regression are included. MuJoCo MeshCat now uses shared leaf-object
+bindings; its native command test passes with meshcat 0.3.2 installed only under
+ignored output/native-meshcat. C3D broad tests have one unrelated loader error-text
+expectation mismatch; the new force test passes. Remaining gates: wider interface adapters, protected CI
+and merge. Native MuJoCo tests on this Windows host must import mujoco before
+pytest/Qt to avoid a loader-order DLL failure. Do not claim universal rollout.
+Combined focused regression: 575 passed; web: 68 passed with TypeScript/ESLint.
+Cycle 2 fixes add suite markers and merge main `39d944540` (CI's shallow direct
+diff had falsely reported its new notebook test deleted). All earlier CI failures
+are fixed locally; current-head checks remain required. Wider hosts remain open.
+
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
 Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
@@ -490,3 +516,11 @@ reruns. Do not restart the Actions runner or start WSL.
   Note the local reproducer cannot exercise real casadi/bioptim (Python 3.14
   has no casadi wheel); CI lanes with the `[bioptim]` extra must show the
   ocp bioptim legs running (not skipping) in combined lanes.
+
+PR #9840 CI cycle 3: full unit gate passed 14,431 tests and failed only the companion feature-count expectation and shared divergence inventory. Updated counts for the new controls and regenerated the inventory with the pinned Tools tree. Both affected modules pass (34 tests). Await the refreshed remote gate before merging.
+
+Pinocchio and Drake now expose View > Segment Force Colors via a shared MeshcatForceColorSession. Both native GUI tests pass on isolated Linux (Pinocchio 4.1.0, Drake 1.56.0). Explicit bindings and synchronous caller-supplied axial frames are required; automatic native reaction inference is not claimed. Session regression covers stale frames, model replacement and toggling. OpenSim currently has result plots, not a 3D animation host.
+
+Final native-host CI exposed optional Qt menu return annotations. Menus now use explicit QMenu construction after validating the menu bar. Pinocchio synchronizes force colors in its GUI coordinator override, leaving the legacy visualization mixin unchanged; native Linux host tests still pass (2 tests). Current required gate remains red until the type correction is validated remotely.
+
+The final host CI type check passes after menu contracts and the native COM matrix correction. The DRY gate then identified duplicated menu setup; install_force_color_menu now owns that validated setup for both GUIs. Native GUI tests pass after extraction. Await the corrected head's aggregate quality gate before closing the epic.
