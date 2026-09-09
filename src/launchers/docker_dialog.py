@@ -70,7 +70,12 @@ class EnvironmentDialog(QDialog):
         tabs.addTab(tab_build, "Build Docker")
 
         close_btn = QPushButton("Close")
-        close_btn.clicked.connect(self.accept)
+        # MUST be self.close(), not self.accept(): QDialog.accept() calls
+        # done() and hides the dialog *without* dispatching a QCloseEvent,
+        # so closeEvent -- and with it the running-build guard -- never ran.
+        # The window-manager X did run the guard, giving one dialog two
+        # close affordances with opposite semantics (#8895).
+        close_btn.clicked.connect(self.close)
         layout.addWidget(close_btn)
 
     def _build_docker_tab(self) -> QWidget:

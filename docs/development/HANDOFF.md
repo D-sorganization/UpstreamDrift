@@ -7,7 +7,7 @@
 - Branch: `feat/9850-capability-atlas`
 - Baseline commit: `384cba80e6249afb0247c97d18536c0335c054d6`
 - Implementation commit: `SELF`
-- Pull request: open
+- Pull request: #9856
 - Governing issue/epic: #9850, children #9852/#9853; parent product #9849.
 - Development log: `DL-#9850`. Previous #9784 handoff remains in git.
 
@@ -52,3 +52,5 @@
 - `SELF` — Build maintained architecture/capability atlas and record source/validation boundaries.
 
 - SELF — Verified web launcher type-check, search/empty/gap filters, and Tools source URLs in both HTML and Markdown.
+
+- SELF — Integrated origin/main 19a390b78, preserving concurrent optimization/UI work and regenerating maps from the updated parity registry.

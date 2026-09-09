@@ -54,6 +54,8 @@ class VisualizationMixin:
         if not self.meshcat or not self.plant or not self.context:  # type: ignore[attr-defined]
             return
 
+        self.segment_force_colors.update(self.plant, self.context.get_time())  # type: ignore[attr-defined]
+
         if self.visualizer:  # type: ignore[attr-defined]
             self.visualizer.update_frame_transforms(self.context)  # type: ignore[attr-defined]
             self.visualizer.update_com_transforms(self.context)  # type: ignore[attr-defined]

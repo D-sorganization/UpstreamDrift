@@ -33,7 +33,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.launchers.build_close_guard import confirm_cancel_running_build_for_close
+from src.launchers.settings_close_contract import SettingsCloseContract
 from src.launchers.docker_manager import DockerBuildThread
 from src.launchers.docker_profile_info import load_docker_profiles
 from src.launchers.launcher_constants import DOCKER_STAGES
@@ -86,7 +86,7 @@ def validate_tab_index(tab_index: int) -> int:
     return tab_index
 
 
-class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
+class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget):
     """Settings widget with Layout, Configuration, Diagnostics, MCP Servers, and Preferences tabs.
 
     Tab order:
@@ -113,6 +113,11 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
     TAB_PERFORMANCE = TAB_PERFORMANCE
     TAB_PROCESSES = TAB_PROCESSES
 
+    #: Tabs that commit only via Apply Preferences (#8896).
+    preference_tab_indexes = frozenset(
+        {TAB_APPEARANCE, TAB_STARTUP, TAB_NOTIFICATIONS, TAB_PERFORMANCE}
+    )
+
     def __init__(
         self,
         parent: QWidget | None = None,
@@ -134,6 +139,8 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         self.tabs.setCurrentIndex(validate_tab_index(initial_tab))
         # Connect tab change signal for lazy diagnostics loading
         self.tabs.currentChanged.connect(self._on_tab_changed)
+        self.tabs.currentChanged.connect(self.sync_commit_model_caption)
+        self.sync_commit_model_caption(self.tabs.currentIndex())
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -155,6 +162,7 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         )
         self.tabs.setTabsClosable(False)
         layout.addWidget(self.tabs)
+        self.install_commit_model_caption(layout)
 
         self.tabs.addTab(self._create_layout_tab(), "Layout")
         self.tabs.addTab(self._create_configuration_tab(), "Configuration")
@@ -177,10 +185,7 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
             )
             self.tabs.addTab(self._create_processes_tab(), "Processes")
 
-            # Add an Apply Preferences button
-            btn_apply = QPushButton("Apply Preferences")
-            btn_apply.clicked.connect(self._prefs_dialog._on_apply)
-            layout.addWidget(btn_apply)
+            self.install_apply_button(layout)
         except ImportError:
             self.tabs.addTab(self._create_processes_tab(), "Processes")
 
@@ -889,13 +894,8 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
             self.build_thread.cancel()
 
     def closeEvent(self, event: Any) -> None:
-        """Cancel an active Docker build before closing settings."""
-        if not confirm_cancel_running_build_for_close(
-            self,
-            event,
-            getattr(self, "build_thread", None),
-            log_message="Cancelling Docker build before closing settings",
-        ):
+        """Guard an active Docker build and unsaved preferences (#8895/#8896)."""
+        if not self.confirm_close(event):
             return
         super().closeEvent(event)
 
@@ -1180,8 +1180,17 @@ class SettingsDialog(QDialog):
         layout.addWidget(self.widget)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        buttons.rejected.connect(self.reject)
+        # MUST be close(), not reject(): reject() calls done(), which hides
+        # the dialog without dispatching a QCloseEvent, so neither guard ran
+        # (#8895/#8896). See settings_close_contract.
+        buttons.rejected.connect(self.close)
         layout.addWidget(buttons)
+
+    def closeEvent(self, event: Any) -> None:
+        """Delegate both close guards to the inner widget (#8896)."""
+        if not self.widget.confirm_close(event):
+            return
+        super().closeEvent(event)
 
     @property
     def tabs(self) -> Any:

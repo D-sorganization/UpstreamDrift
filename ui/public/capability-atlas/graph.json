@@ -668,6 +668,20 @@
       ],
       "notes": "Web-first tool; the desktop launcher opens the web route.",
       "id": "tools.terrain_engine"
+    },
+    {
+      "feature_id": "visualization.force_color_controls",
+      "title": "Shared Segment Force Color Controls",
+      "status": "parity",
+      "pyqt": "src/shared/python/body_part_viz/force_color_controls.py",
+      "api": null,
+      "web": "ui/src/components/visualization/ForceColorControls.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. This entry qualifies controls only; automatic solver load production and remaining desktop host wiring are pending in docs/development/segment_force_color_epic.md.",
+      "id": "visualization.force_color_controls"
     }
   ],
   "tiles": [
@@ -1967,7 +1981,7 @@
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "4d3349ba487c7507e93a0421098c7ad84b7fb23193d16bb3cd7992989dc167b7",
+    "src/config/feature_parity.json": "a693983faaefb2588497487b504d5c452021bdd035033a4e430399e17274ac12",
     "src/config/capability_connections.json": "59bb85e4ffe6a2c2bce4d072b57898083743fb9f747a4fd7d72f422b7234ed4b",
     "src/tools/capture_rig/workflow.py": "88ebc4a0983a7324b24b02491349dacd377877b3613bcfdb671043a1a7e4514b"
   }
