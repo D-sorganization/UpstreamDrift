@@ -15,6 +15,11 @@ from src.shared.python.model_generation.converters.urdf_parser import URDFParser
 from src.shared.python.model_generation.core.types import Joint as URDFJoint
 
 
+def _vector3(values: np.ndarray) -> tuple[float, float, float]:
+    """Keep native vectors explicit at the typed model-contract boundary."""
+    return float(values[0]), float(values[1]), float(values[2])
+
+
 def _joint(source: URDFJoint, observed: bool) -> Joint:
     kind = source.joint_type.value
     if kind not in {"fixed", "revolute", "continuous"}:
@@ -37,19 +42,13 @@ def _joint(source: URDFJoint, observed: bool) -> Joint:
     return Joint(
         name=source.child,
         parent=source.parent,
-        direction=(
-            float(offset[0] / length),
-            float(offset[1] / length),
-            float(offset[2] / length),
-        )
-        if length
-        else (0.0, 0.0, 0.0),
+        direction=_vector3(offset / length) if length else (0.0, 0.0, 0.0),
         length=source.name if length else None,
         axes="" if kind == "fixed" else "x",
         limits_rad=limits,
         landmark=observed,
-        pre_rotvec=tuple((rotation * axis_rotation).as_rotvec()),
-        post_rotvec=tuple(axis_rotation.inv().as_rotvec()),
+        pre_rotvec=_vector3((rotation * axis_rotation).as_rotvec()),
+        post_rotvec=_vector3(axis_rotation.inv().as_rotvec()),
     )
 
 

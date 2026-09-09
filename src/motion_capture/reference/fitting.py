@@ -8,9 +8,13 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.motion_capture.reconstruct.skeleton import JOINT_NAMES
+from src.shared.python.motion_matching.loaders._marker_clusters import (
+    CLUBHEAD_CLUSTER,
+    GRIP_CLUSTER,
+)
 
 from .importers import MotionDraft, finish_motion_import
-from .model import Axis
+from .model import Axis, ReferenceMotion
 from .registration import canonical_z_up_to_adr0041_world
 
 
@@ -30,17 +34,20 @@ class MarkerProfile(BaseModel):
     axes: tuple[Axis, Axis, Axis] = ("+X", "-Z", "+Y")
     units: Literal["m", "cm", "mm"] = "m"
     joints: dict[str, tuple[str, ...]]
+    club: dict[Literal["grip", "head"], tuple[str, ...]] = Field(default_factory=dict)
     notes: str = "Surface markers approximate joint centers."
 
     @model_validator(mode="after")
     def valid_profile(self) -> Self:
         if not self.joints or set(self.joints) - set(JOINT_NAMES):
             raise ValueError("Profile joints must use reconstruction joint names")
+        if self.club and set(self.club) != {"grip", "head"}:
+            raise ValueError("Club mapping needs both grip and head")
         if any(
             not names
             or len(set(names)) != len(names)
             or any(not n.strip() for n in names)
-            for names in self.joints.values()
+            for names in (*self.joints.values(), *self.club.values())
         ):
             raise ValueError("Each joint needs unique nonempty marker names")
         basis = np.array(
@@ -56,6 +63,7 @@ class MarkerProfile(BaseModel):
 
 TOUR_AVERAGE_PROFILE = MarkerProfile(
     name="tour-average-surface-proxies/1.0",
+    club={"grip": GRIP_CLUSTER, "head": CLUBHEAD_CLUSTER},
     joints={
         "mid_hip": ("WaistLeft", "WaistRight"),
         "neck": ("BackTop",),
@@ -75,7 +83,7 @@ TOUR_AVERAGE_PROFILE = MarkerProfile(
     },
     notes="Surface proxies, not anatomical centers. Waist markers approximate hips; "
     "BackTop approximates neck. Posterior shoulder markers avoid the occluded "
-    "RShoulderTop. Club and sentinel markers are excluded.",
+    "RShoulderTop. Club centroids are measured display geometry, excluded from body fitting; sentinel markers are excluded.",
 )
 
 
@@ -84,6 +92,16 @@ def map_markers(draft: MotionDraft, profile: MarkerProfile) -> np.ndarray:
     missing = {n for names in profile.joints.values() for n in names} - set(draft.names)
     if missing:
         raise ValueError(f"Profile markers absent from source: {sorted(missing)}")
+    world = canonical_z_up_to_adr0041_world(_canonical_markers(draft, profile))
+    mapped = np.full((len(draft.time_s), len(JOINT_NAMES), 3), np.nan)
+    for name, markers in profile.joints.items():
+        mapped[:, JOINT_NAMES.index(name)] = world[
+            :, [draft.names.index(m) for m in markers]
+        ].mean(axis=1)
+    return mapped
+
+
+def _canonical_markers(draft: MotionDraft, profile: MarkerProfile) -> np.ndarray:
     motion = finish_motion_import(
         draft,
         title=profile.name,
@@ -91,16 +109,50 @@ def map_markers(draft: MotionDraft, profile: MarkerProfile) -> np.ndarray:
         axes=profile.axes,
         joint_names=draft.names,
     )
-    canonical = np.array(
+    return np.array(
         [
             [point if point is not None else (np.nan,) * 3 for point in row]
             for row in motion.points_m
         ]
     )
-    world = canonical_z_up_to_adr0041_world(canonical)
-    mapped = np.full((len(draft.time_s), len(JOINT_NAMES), 3), np.nan)
-    for name, markers in profile.joints.items():
-        mapped[:, JOINT_NAMES.index(name)] = world[
-            :, [draft.names.index(m) for m in markers]
-        ].mean(axis=1)
-    return mapped
+
+
+def attach_observed_club(
+    asset: ReferenceMotion, draft: MotionDraft, profile: MarkerProfile
+) -> ReferenceMotion:
+    """Append explicit grip/head centroids; never infer club geometry from hands.
+
+    Body fit and residuals remain unchanged. Every cluster member is required
+    at each frame. Missing channels produce an explicit unavailable note.
+    """
+    if not profile.club:
+        return asset
+    missing = {n for names in profile.club.values() for n in names} - set(draft.names)
+    if missing:
+        return asset.changed(
+            notes=asset.notes + f" Club markers unavailable: {sorted(missing)}."
+        )
+    canonical = _canonical_markers(draft, profile)
+    centroids = np.stack(
+        [
+            canonical[:, [draft.names.index(n) for n in markers]].mean(axis=1)
+            for markers in (profile.club["grip"], profile.club["head"])
+        ],
+        axis=1,
+    )
+    count = len(asset.joint_names)
+    edge = (count, count + 1)
+    names = ("observed_club_grip", "observed_club_head")
+    points = tuple(
+        (*row, *(tuple(p) if np.isfinite(p).all() else None for p in ends))
+        for row, ends in zip(asset.points_m, centroids, strict=True)
+    )
+    return asset.changed(
+        joint_names=(*asset.joint_names, *names),
+        source_names=(*asset.source_names, *names),
+        edges=(*asset.edges, edge),
+        club_edges=(*asset.club_edges, edge),
+        points_m=points,
+        notes=asset.notes
+        + " Club endpoints are observed marker-cluster centroids, not fitted anatomical or clubface centers.",
+    )
