@@ -43,40 +43,46 @@ flowchart LR
   n3["Swing Selection"]
   n4["Coaching References"]
   n5["Expert Reference Library"]
-  n6["Set up Cameras and Plan"]
-  n7["Calibrate Each Camera Once"]
-  n8["Record or Import the Swing Take"]
-  n9["Detect the Pose in Every View"]
-  n10["Annotate or Correct Points by Hand"]
-  n11["Review Joint Reliability"]
-  n12["Reconstruct in 3-D"]
-  n13["Analyse the Single View"]
-  n14["Fit the Articulated Golfer"]
-  n15["Kinetics and Model Comparison"]
-  n16["Export to the Motion Pipeline"]
-  n6 -->|"Resolved plan / imported views"| n8
-  n8 -.->|"Separate chessboard take"| n7
-  n8 -.->|"Recorded swing videos"| n9
-  n8 -.->|"Video frames"| n10
-  n9 -.->|"2-D observations"| n11
-  n10 -.->|"Converted observation set"| n11
-  n9 -.->|"Single-view observations"| n13
-  n7 -.->|"intrinsics.json"| n12
-  n11 -.->|"Reviewed multi-view observations"| n12
-  n12 -.->|"joints_3d_m.npy"| n14
-  n14 -.->|"joint_angles.json"| n15
-  n12 -.->|"Reconstruction artifacts"| n16
-  n16 -.->|"TRC / canonical JSON"| n0
-  n13 -.->|"Annotated clips and metrics"| n1
-  n2 -->|"Existing session / imported videos"| n8
-  n8 -.->|"Original camera recordings"| n3
-  n3 -.->|"swing_edits.json"| n9
+  n6["Expert Comparison"]
+  n7["Comparison Deliverables"]
+  n8["Set up Cameras and Plan"]
+  n9["Calibrate Each Camera Once"]
+  n10["Record or Import the Swing Take"]
+  n11["Detect the Pose in Every View"]
+  n12["Annotate or Correct Points by Hand"]
+  n13["Review Joint Reliability"]
+  n14["Reconstruct in 3-D"]
+  n15["Analyse the Single View"]
+  n16["Fit the Articulated Golfer"]
+  n17["Kinetics and Model Comparison"]
+  n18["Export to the Motion Pipeline"]
+  n8 -->|"Resolved plan / imported views"| n10
+  n10 -.->|"Separate chessboard take"| n9
+  n10 -.->|"Recorded swing videos"| n11
+  n10 -.->|"Video frames"| n12
+  n11 -.->|"2-D observations"| n13
+  n12 -.->|"Converted observation set"| n13
+  n11 -.->|"Single-view observations"| n15
+  n9 -.->|"intrinsics.json"| n14
+  n13 -.->|"Reviewed multi-view observations"| n14
+  n14 -.->|"joints_3d_m.npy"| n16
+  n16 -.->|"joint_angles.json"| n17
+  n14 -.->|"Reconstruction artifacts"| n18
+  n18 -.->|"TRC / canonical JSON"| n0
+  n15 -.->|"Annotated clips and metrics"| n1
+  n2 -->|"Existing session / imported videos"| n10
+  n10 -.->|"Original camera recordings"| n3
+  n3 -.->|"swing_edits.json"| n11
   n3 -.->|"Swing video + provenance"| n1
   n2 -->|"Original camera view + saved drawing layer"| n4
   n3 -->|"Original camera view + saved drawing layer"| n4
   n4 -.->|"Annotated PNG / swing video + portable drawing sidecar"| n1
   n2 -->|"Saved reference assets, titles, notes and archive state"| n5
   n1 -.->|"C3D, canonical marker animation or expert video"| n5
+  n5 -->|"Expert video / marker animation"| n6
+  n3 -->|"Saved trim, crop, drawings and original clock"| n6
+  n14 -->|"Camera intrinsics, distortion and pose"| n6
+  n6 -.->|"Comparison video + reproducible sidecar"| n7
 ```
 
 Dashed connections exchange files explicitly. Single-view analysis is
