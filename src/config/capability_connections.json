@@ -109,7 +109,7 @@
     {
       "id": "clubs.exchange",
       "title": "Club Catalog Exchange",
-      "description": "Validated JSON and CSV; preserve missing measurements and conflicting sources.",
+      "description": "Validated JSON/CSV and offline manufacturer examples; source review preserves player overrides.",
       "evidence": "src/shared/python/club_data/catalog_io.py",
       "view": "system"
     }

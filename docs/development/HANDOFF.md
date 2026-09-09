@@ -6,8 +6,8 @@
 - Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-clubs`.
 - Branch: `feat/9903-player-club-catalog`; implementation commit: SELF.
 - Base: `18c8f922e87c92f6f518da05c0819f71ce3193ba` (merged capture-profile PR #9910).
-- Issue: #9903; epic #9902; development entry DL-#9903.
-- Pull request: not created.
+- Issues: #9903 and #9904; epic #9902; entries DL-#9903 and DL-#9904.
+- Pull request: not created; contract da340df45 published through normal hooks.
 - Session: `capture-product-01a08427-club-catalog`; central lease and presence active.
 
 Extend the existing club-data authority so unknown measurements, source attribution,
@@ -28,7 +28,7 @@ Gasification mapping is planned for future cheaper agents, per user direction.
 - Public facade retains legacy names lazily; catalog imports avoid PyQt/pandas/openpyxl.
 - Unit factors reuse the pinned Tools `sidekick.utils.unit_constants` authority.
 - Guide and generated capability map describe the data contract only. The bag/capture
-  UI remains #9905 and the qualified public source catalog/update process remains #9904.
+  UI remains #9905 and the qualified public source catalog/update process is implemented under #9904 and awaits publication qualification.
 - No scientific solver or calculation inventory approval is claimed. Existing
   `blocked-inventory-required` manual release state and UP-D0/UP-D1 remain authoritative.
 
@@ -66,3 +66,5 @@ with Tools/Gasification policy replacement still outstanding.
 
 - SELF: implement and qualify optional attributed club contracts and lossless exchange;
   update DL-#9903, SPEC, public facade and generated architecture references.
+
+- SELF: add three offline manufacturer builds with per-field source/units/status, read-only deterministic review command and separate player overrides. 69 catalog/source/legacy tests and two-module mypy pass; source review uses Titleist T150 2023 and PING G440 MAX HL official tables. Read-only CLI regression also passes. Update DL-#9904 and preserve earlier entries.

@@ -1613,7 +1613,7 @@
     {
       "id": "clubs.exchange",
       "title": "Club Catalog Exchange",
-      "description": "Validated JSON and CSV; preserve missing measurements and conflicting sources.",
+      "description": "Validated JSON/CSV and offline manufacturer examples; source review preserves player overrides.",
       "evidence": "src/shared/python/club_data/catalog_io.py",
       "view": "system"
     },
@@ -2167,7 +2167,7 @@
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
     "src/config/feature_parity.json": "fa719921e5d5047a2383f219ea80f06e358c93c6260358c8ccc2d4f3c7c5d165",
-    "src/config/capability_connections.json": "62c4cb9bf2c36f9077ca35f80d70192c221bf5fd02baad13781c56878ef3b638",
+    "src/config/capability_connections.json": "66b60272e7bd8d9fbdb6a0825ea274588cc9f3cc90d8f267f510e1a4da150924",
     "src/tools/capture_rig/workflow.py": "ef3c35db12049cb4ca5aa08c9a8ca5f376dd114efc61b36f72f5fd036f00e147"
   }
 }
