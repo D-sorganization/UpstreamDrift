@@ -3,7 +3,7 @@
   "source": "data/C3D_TA_Driver.c3d",
   "output": "../reference-runs/tour-driver",
   "models": ["golfer"],
-  "stride": 1,
-  "max_iterations": 100,
+  "stride": 12,
+  "max_iterations": 50,
   "fit_lengths": true
 }

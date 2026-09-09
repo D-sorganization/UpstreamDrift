@@ -20,7 +20,9 @@ python3 -m src.motion_capture.reference.fit_job --config examples/motion_capture
 ```
 
 The example fits the bundled Tour Average driver with the scapula golfer at the
-original 360 Hz. Outputs must use a new directory: previous runs are never
+explicit 30 Hz survey rate. Set `stride: 1` and `max_iterations: 100` for
+a full 360 Hz fit; the driver qualification took about 22 minutes on this
+workstation with one BLAS thread. Outputs must use a new directory: previous runs are never
 overwritten. Change `source` to `data/C3D_TA_Iron.c3d` for the iron capture and
 choose another output directory. Set `models` to `["all"]` for the available
 catalog, or list selected names. `stride: 12` selects every twelfth source frame
