@@ -169,8 +169,9 @@ def add_parameter_block(
         parameter_init.add(spec.name, np.array([float(spec.initial)]))
 
         if spec.prior is not None and spec.prior_scale is not None:
+            param_obj = biopt.ObjectiveFcn.Parameter
             parameter_objectives.add(
-                biopt.ObjectiveFcn.Parameter.MINIMIZE_PARAMETER,
+                param_obj.MINIMIZE_PARAMETER,
                 key=spec.name,
                 weight=1.0 / (float(spec.prior_scale) ** 2),
                 target=np.array([[float(spec.prior)]]),
