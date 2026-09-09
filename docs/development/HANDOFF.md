@@ -7,13 +7,13 @@
 - Branch: `feat/9860-swing-editing`
 - Baseline commit: `eaf8503ce` (merged atlas #9856 and performance #9859)
 - Implementation commit: `SELF`
-- Pull request: not created
+- Pull request: #9868, https://github.com/D-sorganization/UpstreamDrift/pull/9868
 - Governing issue/epic: #9860, #9861; #9849
 
 ## Objective and Status
 
 - Objective: Make swing selection and capture-library workflows safe, discoverable and responsive.
-- Status: in progress
+- Status: in review
 - Completed: Source-coordinate edit contract, ingestion crop/trim, native editor, visible library with notes/import/storage/archive/rename recovery and header integration, selected-swing export, downstream timeline regressions, generated maps, focused tests and Tools reuse audit.
 - Remaining: Protected PR, current-head CI and merge. Drawings/reference epics remain separate outstanding scope.
 
@@ -38,7 +38,7 @@
 
 ## Next Steps
 
-1. Push through normal hooks and open the editing/library PR.
+1. Verify current-head CI for #9868 and merge through normal branch protection.
 2. Qualify and submit editing/library PR; then coaching drawings #9862 and reference epic #9863.
 3. Refresh generated maps and obtain protected CI/merge evidence; keep open scope open.
 
@@ -52,3 +52,5 @@
 - 2d92e179d — Integrated protected main with atlas and performance improvements; preserved both development-log entries and all SPEC rows.
 
 - SELF — Add cancellable swing export with provenance, source-timeline initialization and analytics regressions, and regenerated workflow/capability references. Export/editor/clips 12 passed, reconstruction/analytics 11 passed, registry/atlas 49 passed, repaired guide/timing 10 passed, five-module mypy passed.
+
+- SELF — Record PR #9868 and passing normal push hooks (including mypy, Bandit and unit tests); place its single SPEC row inside the canonical change-log table.

@@ -537,7 +537,7 @@ The final host CI type check passes after menu contracts and the native COM matr
 ## Capture Editing and Reference Work
 
 - Product #9849 now includes trim/crop #9860, library/notes #9861 and coaching drawings #9862; separate advanced reference epic #9863 has children #9864–#9866. All are active goal scope.
-- Isolated branch feat/9860-swing-editing contains the edit recipe, ingestion mapping, native editor and visible capture library with notes, imports, archive/storage, rename recovery and editable copies. See docs/development/capture_editing_integration.md for reuse audit and remaining work. Selected-swing export and downstream trimmed-timeline qualification are implemented; protected PR/merge remains.
+- Isolated branch feat/9860-swing-editing contains the edit recipe, ingestion mapping, native editor and visible capture library with notes, imports, archive/storage, rename recovery and editable copies. See docs/development/capture_editing_integration.md for reuse audit and remaining work. Selected-swing export and downstream trimmed-timeline qualification are implemented; PR #9868 is open after normal push checks; protected CI/merge remains.
 - Preserve the concurrent #9843 GUI dock/layout work; new header entry points use existing wrapping layout without changing dock policy. Raw recordings and prior analyses must remain intact.
 
 ## Capture Product Review (#9851, #9857)
