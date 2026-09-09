@@ -2,17 +2,38 @@
 
 import json
 from pathlib import Path
+from uuid import uuid4
 
 import numpy as np
 import pytest
 
 from src.motion_capture.reference.evidence import CameraSnapshot, ViewClock
+from src.motion_capture.reference.model import ReferenceMotion
 from src.motion_capture.reference.registration import ReferenceRegistration
 from src.motion_capture.reference.scene import session_camera, session_clock
 from tests.motion_capture.test_reference_registration import two_camera_rig
-from tests.motion_capture.test_reference_timing_qualification import motion
 
 pytestmark = pytest.mark.unit
+
+
+def motion(times: tuple[float, ...]) -> ReferenceMotion:
+    return ReferenceMotion.model_validate(
+        {
+            "id": str(uuid4()),
+            "title": "Timing fixture",
+            "source": {
+                "path": "fixture.json",
+                "sha256": "0" * 64,
+                "format": "body_target_json_v1",
+            },
+            "source_units": "m",
+            "source_axes": ("+X", "+Y", "+Z"),
+            "source_names": ("joint",),
+            "joint_names": ("joint",),
+            "time_s": times,
+            "points_m": tuple(((float(i), 0, 0),) for i in range(len(times))),
+        }
+    )
 
 
 def test_binding_detects_changed_camera_and_geometry_and_ignores_notes() -> None:

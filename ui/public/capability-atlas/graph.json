@@ -2144,7 +2144,7 @@
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
     "src/config/feature_parity.json": "fa719921e5d5047a2383f219ea80f06e358c93c6260358c8ccc2d4f3c7c5d165",
-    "src/config/capability_connections.json": "e6d72ac44e8d5ef6090288f019c03bd02e1a051e4d7deaee6b27392a03a28d6e",
+    "src/config/capability_connections.json": "15cb0772d018a0ae91273bfe5c50f9359eaa8632b770d6a14fc129b8aaed92c7",
     "src/tools/capture_rig/workflow.py": "ef3c35db12049cb4ca5aa08c9a8ca5f376dd114efc61b36f72f5fd036f00e147"
   }
 }
