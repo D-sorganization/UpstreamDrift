@@ -29,6 +29,7 @@ from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPainterPath, QPen
 from PyQt6.QtWidgets import QWidget
 
 from ..jacobians import ellipsoids_double, ellipsoids_triple
+from ..force_colors import pendulum_axial_loads
 from ..joint_moments import double_pendulum_moments, triple_pendulum_moments
 from ..simulation import SimulationResult
 from .base_pendulum_widget import BasePendulumWidget
@@ -280,8 +281,19 @@ class PendulumWidget(BasePendulumWidget):
         """
         assert self._result is not None
         pos = self._result.positions_at(self._current_idx)
-        shoulder = self._world_to_pixel(*pos["shoulder"])
+        shoulder = self._world_to_pixel(*pos.get("shoulder", pos["hub"]))
         tip = self._world_to_pixel(*pos["tip"])
+
+        loads = (
+            pendulum_axial_loads(self._result, self._current_idx)
+            if self._axial_color_scale.enabled
+            else None
+        )
+        values = loads.values_n if loads is not None else {}
+        arm_color = self._axial_segment_color(values.get("arm"), self.COLOR_ARM)
+        middle_color = self._axial_segment_color(values.get("forearm"), self.COLOR_CLUB)
+        club_color = self._axial_segment_color(values.get("club"), self.COLOR_CLUB)
+        tip_color = self._axial_segment_color(values.get("club"), self.COLOR_WRIST2)
 
         wrist2 = None
         if "wrist2" in pos:
@@ -298,7 +310,7 @@ class PendulumWidget(BasePendulumWidget):
                 wrist1,
                 14,
                 10,
-                self.COLOR_ARM,
+                arm_color,
             )
             if wrist2 is not None:
                 self._draw_3d_segment(
@@ -307,7 +319,7 @@ class PendulumWidget(BasePendulumWidget):
                     wrist2,
                     10,
                     7,
-                    self.COLOR_CLUB,
+                    middle_color,
                 )
                 self._draw_3d_segment(
                     painter,
@@ -315,7 +327,7 @@ class PendulumWidget(BasePendulumWidget):
                     tip,
                     7,
                     5,
-                    self.COLOR_WRIST2,
+                    tip_color,
                 )
             else:
                 self._draw_3d_segment(
@@ -324,22 +336,22 @@ class PendulumWidget(BasePendulumWidget):
                     tip,
                     10,
                     6,
-                    self.COLOR_CLUB,
+                    club_color,
                 )
         else:
             # Flat-line rendering (default)
-            pen = QPen(self.COLOR_ARM, 5)
+            pen = QPen(arm_color, 5)
             pen.setCapStyle(Qt.PenCapStyle.RoundCap)
             painter.setPen(pen)
             painter.drawLine(shoulder, wrist1)
 
-            pen = QPen(self.COLOR_CLUB, 4)
+            pen = QPen(middle_color if wrist2 is not None else club_color, 4)
             pen.setCapStyle(Qt.PenCapStyle.RoundCap)
             painter.setPen(pen)
             painter.drawLine(wrist1, wrist2 if wrist2 is not None else tip)
 
             if wrist2 is not None:
-                pen2 = QPen(self.COLOR_WRIST2, 3)
+                pen2 = QPen(tip_color, 3)
                 pen2.setCapStyle(Qt.PenCapStyle.RoundCap)
                 painter.setPen(pen2)
                 painter.drawLine(wrist2, tip)
