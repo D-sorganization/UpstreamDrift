@@ -48,7 +48,7 @@ separated from current guidance.
 - [`legal/`](legal/licenses.md) - 1 page
 - [`motion_matching/`](motion_matching/README.md) - 2 pages
 - [`motion_pipeline/`](motion_pipeline/README.md) - 6 pages
-- [`operations/`](operations/) - 17 pages
+- [`operations/`](operations/) - 18 pages
 - [`physics/`](physics/) - 3 pages
 - [`portfolio/`](portfolio/golf_modeling_demo.md) - 1 page
 - [`references/`](references/README.md) - 1 page

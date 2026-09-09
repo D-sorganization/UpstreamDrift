@@ -28,5 +28,15 @@
     "pip_check_passed": true
   },
   "physical_qualification": "unqualified",
-  "junit_sha256": "0b8c97e710e11222856075cb67f0fdec7964fa86aac72f9848058dc38232b7b5"
+  "junit_sha256": "0b8c97e710e11222856075cb67f0fdec7964fa86aac72f9848058dc38232b7b5",
+  "main_merge_validation": {
+    "incoming_main": "18c8f922e87c92f6f518da05c0819f71ce3193ba",
+    "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+    "passed": 24,
+    "warnings": 5,
+    "skipped": 0,
+    "junit_sha256": "c988059dead011439698cf24289c000b6c68c2dc3fa6050d055912ec3bd4841d",
+    "conflicts": "four shared documentation files; both scopes preserved",
+    "source_diff_from_main": "only existing candidate gitlink and two provider test/fixture files"
+  }
 }
