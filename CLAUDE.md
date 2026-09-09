@@ -569,7 +569,7 @@ fleet hooks as `development-log`. Run it directly with
 > This section is managed centrally by Repository_Management and synced fleet-wide.
 > Do NOT edit it directly in individual repositories — edit the source in Repository_Management/AGENTS.md.
 
-### Change-log rows are keyed by pull request
+### Change-Log Rows Are Keyed by Pull Request
 
 Binding fleet-wide from
 [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520)
