@@ -151,3 +151,29 @@ render_fit_preview(Path("../reference-runs/tour-driver/golfer"), Path("../refere
 
 Orange points are the measured proxies; teal lines are the fitted model. This
 is a fixed three-dimensional view, not a calibrated image of a real golfer.
+
+## Club, Volume and Handedness Controls
+
+New Tour Average fits append observed grip and clubhead cluster centroids to
+every model. The explicit profile `club` mapping names `grip` and `head` marker
+sets; other C3D formats can supply their own sets or leave this mapping empty.
+Every member must be visible. Missing channels produce an unavailable note;
+missing samples remain gaps. The shaft connects these centroids; it does not
+claim a measured clubface orientation or alter body fit residuals.
+
+In Capture Rig's reference comparison, open **Appearance and Notes**. Toggle
+**Show Club**, **Show Stick Figure**, **Show Joints** and **Show 3D Segment
+Ellipsoids** independently. Ellipsoid opacity and radius/length are adjustable;
+overall reference opacity also applies. These shaded three-dimensional segment
+meshes are projected with the selected camera, including lens distortion, in
+the shared preview/export compositor. They illustrate volume, not anatomical
+dimensions or confidence intervals. Zero-length links have no volume.
+
+Under model placement, **Flip Left / Right Handedness** reflects canonical Y
+about zero before scene rotation, uniform scale and translation. It flips body
+and club together; target X and vertical Z remain fixed. Source joint labels
+retain their original meaning. Recheck spatial alignment after a flip. Apply
+placement, then save the comparison. Undo and reset remain available; the
+source capture, fitted joint angles and camera calibration are unchanged.
+Saved comparisons and export sidecars retain all display choices. Existing
+assets without club connectivity remain valid and show no club toggle capability.

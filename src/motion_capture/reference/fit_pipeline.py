@@ -22,7 +22,7 @@ from src.motion_capture.reconstruct.model import (
 from src.motion_capture.reconstruct.model.registry import RegisteredModel, get_model
 from src.motion_capture.rig.documents import write_document
 
-from .fitting import MarkerProfile, map_markers
+from .fitting import MarkerProfile, map_markers, attach_observed_club
 from .importers import MotionDraft
 from .model import ReferenceMotion
 from .storage import ReferenceLibrary
@@ -169,6 +169,7 @@ def fit_reference(
         time_s=draft.time_s,
         points_m=tuple(tuple(tuple(p) for p in frame) for frame in canonical),
     )
+    asset = attach_observed_club(asset, draft, profile)
     return ReferenceFit(asset, fit, _quality(fit, observed, model), manifest, observed)
 
 

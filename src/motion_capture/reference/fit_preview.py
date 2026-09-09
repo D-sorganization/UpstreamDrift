@@ -30,7 +30,13 @@ def render_fit_preview(bundle: Path, output: Path) -> Path:
     asset = ReferenceLibrary(bundle / "references").load(manifest["reference_id"])
     if not isinstance(asset, ReferenceMotion):
         raise ValueError("Fit bundle must contain a motion reference")
-    points = np.asarray(asset.points_m, dtype=float)
+    points = np.asarray(
+        [
+            [p if p is not None else (np.nan,) * 3 for p in row]
+            for row in asset.points_m
+        ],
+        dtype=float,
+    )
     observed = np.load(bundle / "observed_m.npy", allow_pickle=False)
     observed = observed[..., [0, 2, 1]] * np.array([1, -1, 1])
     indices = np.linspace(0, len(points) - 1, 4).astype(int)
@@ -49,7 +55,7 @@ def render_fit_preview(bundle: Path, output: Path) -> Path:
             valid = observed[frame][np.isfinite(observed[frame]).all(axis=1)]
             if len(valid):
                 axis.scatter(*valid.T, color="#cc5500", s=16, label="C3D Proxies")
-            equalize_3d_axes(axis, points.reshape(-1, 3))
+            equalize_3d_axes(axis, points[np.isfinite(points).all(axis=2)])
             axis.view_init(elev=15, azim=-65)
             axis.set_title(f"t = {asset.time_s[frame]:.3f} s")
             axis.set_xlabel("X (m)")

@@ -17,6 +17,9 @@ Branch: `feat/c3d-reference-overlay-9914`.
    frame independently and thereby erase swing differences.
 5. Run Tour Average driver and iron data, record quantitative evidence, qualify
    playback and document reproduction plus extension to further model adapters.
+6. Preserve explicitly mapped club measurements; add independent club/stick/joint
+   display, adjustable translucent 3D segment ellipsoids, and a saved reversible
+   handedness flip before scene placement. Cover preview/export and saved UI state.
 
 ## Reuse and Boundaries
 
@@ -103,4 +106,20 @@ identity/title test and compositor test). Published library copies have matching
 display labels; the numerical bundles and their original hashes are unchanged.
 The final library is `../reference-fit-artifacts-9914/final-library`. Earlier
 provisional folders are not the final deliverable. PR #9918 follows protected CI;
-the inherited GUI LoD cleanup is owned by #9917 and will be integrated from main.
+the inherited GUI LoD cleanup from #9917 is integrated from main.
+
+## Extended Display Qualification
+
+The user expanded the epic to club graphics, 3D ellipsoids and handedness.
+Test-first cases failed before implementation for profile club mapping, saved
+appearance fields, mirror placement, volume rendering, independent club display,
+control application and missing-club preview. The shared body-part shape and
+between-marker fitter generate segment meshes; the existing distortion-aware
+projection and comparison compositor handle both preview and export. Source
+geometry remains unchanged when display settings change. Legacy fingerprints
+remain stable for assets with no club connectivity.
+
+The complete reference and Capture Rig regression selection passes after these
+changes; LoD and architecture no-growth scans pass. The standalone preview gap
+case is separately exercised. Protected PR checks and final artifact review are
+still required before this epic is closed.
