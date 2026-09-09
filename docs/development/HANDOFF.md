@@ -54,3 +54,7 @@
 - SELF — Add cancellable swing export with provenance, source-timeline initialization and analytics regressions, and regenerated workflow/capability references. Export/editor/clips 12 passed, reconstruction/analytics 11 passed, registry/atlas 49 passed, repaired guide/timing 10 passed, five-module mypy passed.
 
 - SELF — Record PR #9868 and passing normal push hooks (including mypy, Bandit and unit tests); place its single SPEC row inside the canonical change-log table.
+
+- SELF — CI identified two library navigation calls reaching through CapturePanel into its text control. Added a panel-owned set_session_dir API and exercised the real library-open callback in the integration test; no baseline weakening.
+
+- Verification: full LoD scan passes (3,005 source files), six GUI/library integration tests pass, and gui.py passes mypy after the navigation API correction.
