@@ -8,6 +8,8 @@ import pytest
 from src.api.routes import simulation_ws
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.asyncio
 async def test_stream_preserves_force_frame_and_wire_time(monkeypatch):

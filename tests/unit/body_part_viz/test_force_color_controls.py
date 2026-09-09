@@ -11,6 +11,8 @@ from PyQt6.QtWidgets import QApplication, QCheckBox, QLineEdit, QPushButton  # n
 
 from src.shared.python.body_part_viz.force_color_controls import ForceColorControls  # noqa: E402
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def app():

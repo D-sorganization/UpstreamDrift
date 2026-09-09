@@ -8,6 +8,8 @@ import pytest
 
 from src.shared.python.body_part_viz.force_colors import ForceColorScale
 
+pytestmark = pytest.mark.unit
+
 
 def test_cross_runtime_conformance_examples():
     path = Path(__file__).resolve().parents[3] / "schemas/force-color-examples.json"

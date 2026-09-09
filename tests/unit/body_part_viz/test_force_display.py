@@ -10,6 +10,8 @@ from src.shared.python.body_part_viz.force_display import (
     SegmentLoadSeries,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class Renderer:
     def __init__(self):

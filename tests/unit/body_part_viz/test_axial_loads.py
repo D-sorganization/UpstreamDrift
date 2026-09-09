@@ -9,6 +9,8 @@ from src.shared.python.body_part_viz.axial_loads import (
     read_axial_load_frame,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_hanging_inverted_and_rotated_reactions():
     assert axial_force_from_proximal_reaction((0, 10), (0, 0), (0, -1)) == 10

@@ -137,6 +137,7 @@ class _StubLineShape:
 
 
 @pytest.mark.parametrize("shape", [_StubLineShape(), _StubMeshShape("mesh")])
+@pytest.mark.unit
 def test_color_override_survives_animation_and_restores(gl_widget, shape):
     renderer = PyQtGLRenderer(gl_widget)
     handle = renderer.add_shape(

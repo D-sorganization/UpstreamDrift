@@ -10,6 +10,8 @@ from src.shared.python.pendulum_simulator.gui.pendulum_widget import PendulumWid
 from src.shared.python.pendulum_simulator.physics import PendulumParams
 from src.shared.python.pendulum_simulator.simulation import SimulationResult
 
+pytestmark = pytest.mark.unit
+
 
 def test_shared_menu_opens_controls_and_configures_existing_canvas():
     from PyQt6.QtWidgets import QCheckBox, QDialog, QMenu

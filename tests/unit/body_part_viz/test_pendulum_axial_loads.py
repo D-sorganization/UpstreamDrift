@@ -7,6 +7,8 @@ from src.shared.python.pendulum_simulator.force_colors import pendulum_axial_loa
 from src.shared.python.pendulum_simulator.physics import PendulumParams
 from src.shared.python.pendulum_simulator.simulation import SimulationResult
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.parametrize("angle,sign", [(0.0, 1.0), (np.pi, -1.0)])
 def test_double_static_equilibria(angle, sign):
