@@ -170,9 +170,9 @@ def test_schema_requires_python_is_not_a_duplicated_version_literal() -> None:
     )
     assert "enum" not in node
     assert node["type"] == "string"
-    assert not re.search(
-        r"\d+\.\d+", node["pattern"]
-    ), f"schema pattern {node['pattern']!r} embeds a Python version literal"
+    assert not re.search(r"\d+\.\d+", node["pattern"]), (
+        f"schema pattern {node['pattern']!r} embeds a Python version literal"
+    )
 
 
 def test_schema_accepts_the_live_pyproject_requires_python() -> None:
