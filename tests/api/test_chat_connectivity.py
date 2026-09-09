@@ -230,29 +230,48 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
 ) -> None:
     """Producer thread that dies silently must not hang the consumer.
 
-    Construct a ChatService with a stub adapter whose ``stream_response``
-    blocks (simulating a wedged provider) until unblocked by cancellation
-    or teardown. The two-stage timeout in ``stream_response`` must yield a
-    structured error chunk in well under the historical 60s queue.Empty
-    timeout, and the producer thread must not leak (#9495).
+    Construct a ChatService with a stub adapter that models a *real*
+    provider: like Ollama's ``response.iter_lines()`` and the OpenAI SDK
+    stream iterator, it parks in an uninterruptible transport read and
+    never looks at ``context.metadata["stop_event"]``. Only closing the
+    stream via ``cancel_stream()`` can unwedge it, so a cooperative flag
+    alone would let the 5s join expire and leak the worker (#9509).
+
+    The two-stage timeout in ``stream_response`` must yield a structured
+    error chunk in well under the historical 60s queue.Empty timeout, and
+    the producer thread must not leak (#9495).
     """
     from src.api.services.chat_service import ChatService
 
-    unblock_event = threading.Event()
+    class _NonCooperativeAdapter:
+        """Blocks in a socket read; unblocks only when its stream closes."""
 
-    class _BlockingAdapter:
+        def __init__(self) -> None:
+            self.stream_closed = threading.Event()
+            self.cancel_calls = 0
+
+        def cancel_stream(self) -> bool:
+            self.cancel_calls += 1
+            self.stream_closed.set()
+            return True
+
         def stream_response(self, *args: Any, **kwargs: Any) -> Iterator[Any]:
-            # Wait for cancellation stop_event or test unblock_event
             ctx = args[1] if len(args) > 1 else kwargs.get("context")
-            stop_evt = getattr(ctx, "metadata", {}).get("stop_event") if ctx else None
-            if stop_evt is not None:
-                stop_evt.wait(timeout=10.0)
-            else:
-                unblock_event.wait(timeout=10.0)
+            # The contract under test: ChatService injects the cooperative
+            # flag, but a blocked provider cannot poll it -- so this stub
+            # deliberately ignores it, exactly like the real adapters.
+            assert getattr(ctx, "metadata", {}).get("stop_event") is not None
+            if not self.stream_closed.wait(timeout=10.0):
+                raise AssertionError(
+                    "provider stream was never closed: cancellation did not "
+                    "reach the transport"
+                )
+            raise OSError("stream closed by cancel_stream()")
             yield  # pragma: no cover - unreachable
 
     svc = ChatService()
-    svc._adapter = _BlockingAdapter()
+    adapter = _NonCooperativeAdapter()
+    svc._adapter = adapter
     ctx = svc.get_or_create_session(None)
     svc.add_user_message(ctx.session_id, "hi")
 
@@ -282,7 +301,6 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
                 break
     finally:
         await gen.aclose()
-        unblock_event.set()
 
     assert chunks, "expected at least one chunk before the stream closes"
     last = chunks[-1]
@@ -290,6 +308,11 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
     assert last.get("type") == "error", f"expected type=error, got {last}"
     assert "provider" in last.get("detail", "").lower(), (
         f"expected human-readable provider hint in detail, got {last!r}"
+    )
+
+    # Cancellation must have reached the transport, not just the flag (#9509)
+    assert adapter.cancel_calls >= 1, (
+        "ChatService abandoned the stream without closing the provider stream"
     )
 
     # Verify no streaming worker thread remains alive (#9495)
