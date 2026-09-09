@@ -37,6 +37,15 @@
     "skipped": 0,
     "junit_sha256": "c988059dead011439698cf24289c000b6c68c2dc3fa6050d055912ec3bd4841d",
     "conflicts": "four shared documentation files; both scopes preserved",
-    "source_diff_from_main": "only existing candidate gitlink and two provider test/fixture files"
+    "source_diff_from_main": "only existing candidate gitlink and two provider test/fixture files",
+    "documentation_audit": {
+      "main": "18c8f922e87c92f6f518da05c0819f71ce3193ba",
+      "baseline_findings": 37,
+      "current_findings": 36,
+      "new_findings": [],
+      "spec_extra_rows": [],
+      "spec_missing_rows": [],
+      "validator_revision": "ad9bcb8855199cdb4319775c17cda5db8b060779"
+    }
   }
 }
