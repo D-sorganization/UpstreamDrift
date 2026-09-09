@@ -139,6 +139,15 @@ class EventAnchors(BaseModel):
                 )
         return self
 
+    def sorted_common_events(self) -> list[str]:
+        """Return event keys present in both reference and scene, sorted by reference time."""
+        ref_dict = self.reference
+        scene_dict = self.scene
+        return sorted(
+            set(ref_dict.keys()) & set(scene_dict.keys()),
+            key=lambda k: float(ref_dict[k]),
+        )
+
 
 class TimeMapping(BaseModel):
     """Synchronizes reference timestamps into the scene timeline."""
@@ -157,10 +166,7 @@ class TimeMapping(BaseModel):
             # Piecewise linear warping through common sorted events
             ref_dict = anchors.reference
             scene_dict = anchors.scene
-            common = sorted(
-                set(ref_dict.keys()) & set(scene_dict.keys()),
-                key=lambda k: float(ref_dict[k]),
-            )
+            common = anchors.sorted_common_events()
             if len(common) == 1:
                 # Exactly one anchor: pure offset alignment so anchor matches exactly
                 k = common[0]
@@ -197,10 +203,7 @@ class TimeMapping(BaseModel):
         if anchors is not None:
             ref_dict = anchors.reference
             scene_dict = anchors.scene
-            common = sorted(
-                set(ref_dict.keys()) & set(scene_dict.keys()),
-                key=lambda k: float(ref_dict[k]),
-            )
+            common = anchors.sorted_common_events()
             if len(common) == 1:
                 # Exactly one anchor: invert pure offset alignment
                 k = common[0]
