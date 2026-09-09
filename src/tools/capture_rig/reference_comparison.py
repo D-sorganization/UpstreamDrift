@@ -27,7 +27,7 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.pose_estimation.observations import CameraCalibration
 from src.motion_capture.reference.evidence import CameraSnapshot
-from src.motion_capture.reference.scene import session_camera, session_clock
+from src.motion_capture.coaching.storage import load_layer
 from src.motion_capture.reference.comparison import (
     ComparisonLayer,
     ComparisonSession,
@@ -36,13 +36,12 @@ from src.motion_capture.reference.comparison import (
     save_comparison_session,
 )
 from src.motion_capture.reference.model import Asset
-from src.motion_capture.reference.registration import (
-    ReferenceRegistration,
-)
+from src.motion_capture.reference.registration import ReferenceRegistration
+from src.motion_capture.reference.scene import session_camera, session_clock
 from src.motion_capture.reference.storage import ReferenceLibrary
+from src.motion_capture.rig.edits import ViewEdit, load_edits
 from src.tools.capture_rig.reference_export import (
     ComparisonVideoExportOptions,
-    draw_reference_overlay,
     export_comparison_video,
 )
 
@@ -50,6 +49,8 @@ from . import styling
 from .annotate_widget import ImageCanvas
 from .flow_layout import FlowLayout
 from .player import VideoReader
+from .overlay import PoseTrack
+from .reference_rendering import ComparisonRenderContext, ComparisonRenderer
 from .session import load_session
 from .swing_export_actions import ExportJob, ExportJobSpec, SwingExportActions
 
@@ -85,9 +86,13 @@ class ReferenceComparisonDialog(QDialog):
         self._current_asset: Asset | None = self.assets[0] if self.assets else None
         try:
             self._session = self._find_or_create_session()
+            self._load_render_sources()
         except (ValueError, OSError):
             self.reader.close()
             raise
+        self._renderer = (
+            ComparisonRenderer(self._current_asset) if self._current_asset else None
+        )
 
         self.canvas = ImageCanvas()
         self._timer = QTimer(self)
@@ -108,7 +113,26 @@ class ReferenceComparisonDialog(QDialog):
         self.resize(1000, 720)
         self._build_ui()
         styling.apply_theme(self)
-        self._show_frame(0)
+        self._show_frame(self.slider.minimum())
+
+    def _load_render_sources(self) -> None:
+        self._edit = load_edits(self.root).views.get(self.view, ViewEdit())
+        if self._edit.first >= self.reader.frame_count or (
+            self._edit.last is not None and self._edit.last >= self.reader.frame_count
+        ):
+            raise ValueError("Selection exceeds the decodable recording")
+        crop = self._edit.crop
+        if crop:
+            crop.validate_size(self.reader.width, self.reader.height)
+        self._drawings = load_layer(
+            self.root,
+            self.view,
+            self.reader.width,
+            self.reader.height,
+            self.reader.frame_count,
+        )
+        observations = load_session(self.root).view(self.view).observations
+        self._track = PoseTrack.load(observations) if observations else None
 
     def _load_camera(self) -> None:
         try:
@@ -143,6 +167,7 @@ class ReferenceComparisonDialog(QDialog):
                     self._current_asset, self._camera_snapshot, self._clock
                 )
             return saved
+        labels = ("Manual reference-to-scene alignment", self._clock.source)
         return ComparisonSession(
             session_root=str(self.root),
             view=self.view,
@@ -152,10 +177,7 @@ class ReferenceComparisonDialog(QDialog):
                 reference_id=self._current_asset.id,
                 calibration_id="calib_session",
                 is_calibrated=False,
-                assumption_labels=(
-                    "Manual reference-to-scene alignment",
-                    self._clock.source,
-                ),
+                assumption_labels=labels,
             ),
             layer=ComparisonLayer(),
         )
@@ -184,7 +206,12 @@ class ReferenceComparisonDialog(QDialog):
         slider_row.addWidget(self.play_button)
 
         self.slider = QSlider(Qt.Orientation.Horizontal)
-        self.slider.setRange(0, max(0, self.reader.frame_count - 1))
+        max_frame = (
+            self._edit.last
+            if self._edit.last is not None
+            else max(0, self.reader.frame_count - 1)
+        )
+        self.slider.setRange(self._edit.first, max_frame)
         self.slider.valueChanged.connect(self._show_frame)
         slider_row.addWidget(self.slider, 1)
 
@@ -203,27 +230,25 @@ class ReferenceComparisonDialog(QDialog):
         self.colour_button.clicked.connect(self._choose_colour)
         layer_row.addWidget(self.colour_button)
 
-        self.opacity_spin = QDoubleSpinBox()
-        self.opacity_spin.setRange(0.0, 1.0)
-        self.opacity_spin.setSingleStep(0.05)
-        self.opacity_spin.setValue(self._session.layer_opacity)
+        def _spin(val: float, low: float, high: float) -> QDoubleSpinBox:
+            b = QDoubleSpinBox()
+            b.setRange(low, high)
+            b.setSingleStep(0.05)
+            b.setValue(val)
+            return b
+
+        self.opacity_spin = _spin(self._session.layer_opacity, 0.0, 1.0)
         self.opacity_spin.valueChanged.connect(self._layer_changed)
         layer_row.addWidget(QLabel("Opacity:"))
         layer_row.addWidget(self.opacity_spin)
 
-        self.offset_spin = QDoubleSpinBox()
-        self.offset_spin.setRange(-60.0, 60.0)
-        self.offset_spin.setSingleStep(0.05)
         reg = self._session.registration
-        self.offset_spin.setValue(reg.time_mapping.offset_s if reg else 0.0)
+        self.offset_spin = _spin(reg.time_mapping.offset_s if reg else 0.0, -60.0, 60.0)
         self.offset_spin.valueChanged.connect(self._reg_changed)
         layer_row.addWidget(QLabel("Time Offset (s):"))
         layer_row.addWidget(self.offset_spin)
 
-        self.scale_spin = QDoubleSpinBox()
-        self.scale_spin.setRange(0.1, 5.0)
-        self.scale_spin.setSingleStep(0.05)
-        self.scale_spin.setValue(reg.transform.scale if reg else 1.0)
+        self.scale_spin = _spin(reg.transform.scale if reg else 1.0, 0.1, 5.0)
         self.scale_spin.valueChanged.connect(self._reg_changed)
         layer_row.addWidget(QLabel("Scale:"))
         layer_row.addWidget(self.scale_spin)
@@ -235,9 +260,7 @@ class ReferenceComparisonDialog(QDialog):
         save_btn = QPushButton("Save Comparison")
         save_btn.clicked.connect(self.save)
         buttons.add_widget(save_btn)
-
         buttons.add_widget(self.exporter.button)
-
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.close)
         buttons.add_widget(close_btn)
@@ -275,6 +298,9 @@ class ReferenceComparisonDialog(QDialog):
                 self.status_label.setText(f"Cannot load comparison: {exc}")
                 return
             self._session = saved
+            if self._renderer:
+                self._renderer.close()
+            self._renderer = ComparisonRenderer(self._current_asset)
             self._update_status_label()
             registration = saved.registration
             for control, value in (
@@ -330,19 +356,34 @@ class ReferenceComparisonDialog(QDialog):
     def _show_frame(self, frame_idx: int) -> None:
         img = self.reader.read(frame_idx)
         if img is None:
+            self._timer.stop()
+            self.play_button.setText("Play")
+            self.status_label.setText(f"Could not decode source frame {frame_idx}")
             return
         t_scene = self._clock.player_time(frame_idx / self.fps)
         self.clock_label.setText(f"{t_scene:.3f}s (f{frame_idx})")
 
-        if self._current_asset and self._session.registration:
-            img = draw_reference_overlay(
-                img,
+        if self._current_asset and self._session.registration and self._renderer:
+            registration = self._session.registration
+            registration = registration.model_copy(update={"clock": self._clock})
+            context = ComparisonRenderContext(
+                self.view,
                 self._current_asset,
-                t_scene,
-                self._session.registration,
-                self._camera,
+                registration,
                 self._session.layer,
+                crop=self._edit.crop,
+                drawings=self._drawings,
+                track=self._track,
             )
+            try:
+                img = self._renderer.image(
+                    self.reader, frame_idx, context, self._camera
+                )
+            except (ValueError, OSError, cv2.error) as exc:
+                self._timer.stop()
+                self.play_button.setText("Play")
+                self.status_label.setText(f"Cannot render comparison: {exc}")
+                return
         self.canvas.set_image(img)
 
     def _toggle_play(self) -> None:
@@ -351,7 +392,7 @@ class ReferenceComparisonDialog(QDialog):
             self.play_button.setText("Play")
         else:
             if self.slider.value() >= self.slider.maximum():
-                self.slider.setValue(0)
+                self.slider.setValue(self.slider.minimum())
             self._timer.start(max(1, round(1000 / self.fps)))
             self.play_button.setText("Pause")
 
@@ -390,6 +431,11 @@ class ReferenceComparisonDialog(QDialog):
         asset, registration = self._current_asset, self._session.registration
         if asset is None or registration is None:
             raise ValueError("Choose a reference with a saved registration")
+        registration.validate_binding(
+            self.library.load(asset.id), self._camera_snapshot, self._clock
+        )
+        self._load_render_sources()
+        self._show_frame(self.slider.value())
         root, view, camera, layer = (
             self.root,
             self.view,
@@ -424,10 +470,11 @@ class ReferenceComparisonDialog(QDialog):
             event.ignore()
             return
         self.reader.close()
+        if self._renderer:
+            self._renderer.close()
         event.accept()
 
     def reject(self) -> None:
-        """Escape uses the same export cancellation guard as the close button."""
         self.close()
 
 

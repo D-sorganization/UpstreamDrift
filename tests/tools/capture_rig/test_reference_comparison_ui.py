@@ -36,6 +36,8 @@ from src.tools.capture_rig.reference_export import (
 )
 from src.tools.capture_rig.player import VideoReader
 from tests.motion_capture.rig.test_ingest import _bundle
+from tests.motion_capture.test_reference_registration import two_camera_rig
+from src.motion_capture.reference.evidence import CameraSnapshot
 from tests.tools.capture_rig.test_pane_layout import _app
 
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
@@ -121,6 +123,18 @@ def test_export_comparison_video_and_reproducible_sidecar_parity(
     layer = ComparisonLayer(colour="#00dcff", opacity=1.0, line_width=2)
 
     progress_events: list[tuple[int, int]] = []
+    # Visible 3-D references need actual camera evidence matching source pixels.
+    camera = CameraSnapshot.from_calibration(
+        two_camera_rig()[0].to_calibration(), provenance="Synthetic fixture"
+    )
+    camera = camera.model_validate(
+        camera.model_dump()
+        | {
+            "camera_id": "a",
+            "image_size_px": (64, 48),
+            "matrix": ((40, 0, 32), (0, 40, 24), (0, 0, 1)),
+        }
+    )
     sidecar = export_comparison_video(
         bundle_root,
         "a",
@@ -129,6 +143,7 @@ def test_export_comparison_video_and_reproducible_sidecar_parity(
         layer,
         out_video,
         options=ComparisonVideoExportOptions(
+            camera=camera.record(),
             progress=lambda done, total: progress_events.append((done, total)),
         ),
     )
