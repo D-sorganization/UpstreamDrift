@@ -232,3 +232,41 @@ def reprojection_rms_px(
         return None
     d = np.linalg.norm(track.px[:t] - keypoints_px[:t], axis=2)[mask]
     return float(np.sqrt(np.mean(d**2)))
+
+
+def reference_track(
+    registration: Any,
+    motion: Any,
+    camera: PinholeCamera,
+    scene_times: Array,
+    colour: Colour,
+    *,
+    label: str | None = None,
+) -> Track:
+    """Project a registered ReferenceMotion onto a view at requested scene times (#9865).
+
+    Missing joints across interpolation gaps and behind-camera/out-of-frame points
+    are marked invisible. The track kind is "reference".
+    """
+    from src.motion_capture.reference.registration import (
+        project_reference_to_camera,
+        sample_reference_motion,
+    )
+
+    t_eval = np.asarray(scene_times, dtype=float)
+    require(t_eval.ndim == 1, "scene_times must be 1-D")
+    pts_world, valid_mask = sample_reference_motion(motion, registration, t_eval)
+    px, visible = project_reference_to_camera(pts_world, valid_mask, camera)
+
+    track_label = label or f"reference: {getattr(motion, 'title', 'motion')}"
+    return Track(
+        variant=getattr(registration, "reference_id", "reference"),
+        kind="reference",
+        label=track_label,
+        colour=colour,
+        px=px,
+        visible=visible,
+        edges=tuple(tuple(e) for e in getattr(motion, "edges", ())),
+        held_out=False,
+        names=tuple(getattr(motion, "joint_names", ())),
+    )
