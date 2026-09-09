@@ -406,3 +406,23 @@ reruns. Do not restart the Actions runner or start WSL.
 ## UI Dependency Pin: #9249
 
 - Dependabot now ignores `@vitejs/plugin-react` major updates (`.github/dependabot.yml`): 6.x needs Vite 8 (`peerDependencies.vite: "^8.0.0"`; Vite 7 exports no `./internal`), so a lone bump cannot merge. Stay on plugin-react ^5 with vite ^7.3.2 until a paired Vite-8 upgrade; pairing note lives in `ui/README.md`. Branch `claude/issue-9249-ui-pin`.
+
+
+## OCP Compat Robust to Poisoned `sys.modules` (#9771)
+
+- `tests/unit/conftest.py` installs spec-less `casadi`/`pinocchio` MagicMocks
+  process-wide in `pytest_configure` and never removes them, so a lane
+  collecting `tests/unit/optimization` and `tests/integration/optimization/ocp`
+  together made `_compat.bioptim_available()` report the genuinely installed
+  stack as absent and silently skip 16 bioptim ocp tests.
+- `src/shared/python/optimization/ocp/_compat.py` now probes top-level names
+  through `importlib.machinery.PathFinder` (ignores `sys.modules`), so a mock
+  hides a real distribution only when no real one exists behind it;
+  `require_bioptim()` evicts mocked `casadi`/`bioptim`/`biorbd_casadi`
+  entries before importing so bioptim binds the genuine modules (the unit
+  tree's autouse fixture reinstalls its own mocks per test, so unit-tree
+  degradation semantics are unchanged).
+- Contracts: `tests/integration/optimization/ocp/test_compat_poisoned_sys_modules.py`.
+  Note the local reproducer cannot exercise real casadi/bioptim (Python 3.14
+  has no casadi wheel); CI lanes with the `[bioptim]` extra must show the
+  ocp bioptim legs running (not skipping) in combined lanes.
