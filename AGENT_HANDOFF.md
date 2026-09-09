@@ -7,6 +7,15 @@ Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
 Updated: 2026-09-08 23:59 UTC (wave-2 PR triage, session UD2PRs)
 Updated: 2026-09-08 (wave-2 issue backlog sweep, session UD2IssuesA)
 
+## Capability Atlas #9850
+
+Isolated branch `feat/9850-capability-atlas`, commit `SELF`, PR not created.
+See `docs/development/HANDOFF.md` and `DL-#9850` for current validation and
+continuation. Generated references consume existing registries and preserve
+GUI epic #9843 and optimization-agent file ownership. Product #9849 and
+performance review #9851 are separate workstreams. Fleet communication lives
+in Repository_Management PR #1580 and has completed a real peer message exchange.
+
 ## Wave-2 PR Triage: 2026-09-08 (Agent `claude`, Session UD2PRs)
 
 Repo-wide npm-audit red: advisory GHSA-2883-xcg3-v3hh (js-yaml high,
