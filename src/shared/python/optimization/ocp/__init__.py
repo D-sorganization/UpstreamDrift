@@ -39,14 +39,20 @@ __all__ = [
     "BIOPTIM_INSTALL_HINT",
     "BioptimNotAvailableError",
     "MaxSpeedOcpOptions",
+    "ParameterBlockBundle",
+    "ParameterOcpOptions",
     "SwingBioModel",
     "SymbolicSwingModel",
+    "add_parameter_block",
     "bioptim_available",
     "bioptim_version",
     "build_max_speed_ocp",
     "build_tracking_ocp",
+    "build_tracking_parameter_ocp",
     "require_bioptim",
     "solve_max_speed_swing",
+    "solve_tracking_parameter_ocp",
+    "tracking_to_map_estimator_result",
 ]
 
 _LAZY: dict[str, str] = {
@@ -56,6 +62,12 @@ _LAZY: dict[str, str] = {
     "build_max_speed_ocp": "src.shared.python.optimization.ocp.swing_ocp",
     "solve_max_speed_swing": "src.shared.python.optimization.ocp.swing_ocp",
     "build_tracking_ocp": "src.shared.python.optimization.ocp.tracking_ocp",
+    "ParameterBlockBundle": "src.shared.python.optimization.ocp.parameter_ocp",
+    "ParameterOcpOptions": "src.shared.python.optimization.ocp.parameter_ocp",
+    "add_parameter_block": "src.shared.python.optimization.ocp.parameter_ocp",
+    "build_tracking_parameter_ocp": "src.shared.python.optimization.ocp.parameter_ocp",
+    "solve_tracking_parameter_ocp": "src.shared.python.optimization.ocp.parameter_ocp",
+    "tracking_to_map_estimator_result": "src.shared.python.optimization.ocp.result",
 }
 
 
