@@ -144,6 +144,8 @@ class ReferenceRegistration(BaseModel):
             raise ValueError(
                 "is_calibrated cannot be True with an uncalibrated calibration_id"
             )
+        if self.camera and self.clock and self.camera.camera_id != self.clock.view:
+            raise ValueError("Camera and clock must describe the same view")
         return self
 
     def validate_binding(

@@ -1,9 +1,9 @@
-"""Annotated reference comparison video and reproducible sidecar export (#9866)."""
+"""Strict comparison export through the shared coaching clip compositor."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
@@ -13,14 +13,12 @@ import numpy as np
 import numpy.typing as npt
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 
-from src.motion_capture.coaching import DrawingLayer, render_layer
-from src.motion_capture.coaching.storage import load_layer
+from src.motion_capture.coaching.storage import load_layer, layer_path
 from src.motion_capture.provenance import write_json
 from src.motion_capture.reconstruct.cameras import PinholeCamera
 from src.shared.python.pose_estimation.observations import CameraCalibration
 from src.motion_capture.reference.evidence import CameraSnapshot
-from src.motion_capture.reference.scene import session_clock
-from src.motion_capture.reconstruct.overlay3d import reference_track
+from src.motion_capture.reference.scene import session_clock, session_camera
 from src.motion_capture.reference.comparison import (
     ComparisonExportSidecarSpec,
     ComparisonLayer,
@@ -28,14 +26,13 @@ from src.motion_capture.reference.comparison import (
 )
 from src.motion_capture.reference.model import Asset, ReferenceMotion, ReferenceVideo
 from src.motion_capture.reference.registration import ReferenceRegistration
-from src.motion_capture.rig.edits import CropRect, ViewEdit, load_edits
-from src.shared.python.core.contracts import require
+from src.motion_capture.rig.edits import ViewEdit, load_edits, EDITS_FILE
 
-from .clips import _stamp, _writer
-from .overlay import PoseTrack, draw_pose
+from .clips import ClipRange, export_clip
 from .player import VideoReader
 from .session import load_session
-from .swing_export import publish_export
+from .swing_export import publish_export, _digest
+from .reference_rendering import ComparisonRenderContext, ComparisonRenderer
 
 
 def draw_reference_overlay(
@@ -46,57 +43,15 @@ def draw_reference_overlay(
     camera: PinholeCamera | CameraCalibration | None,
     layer: ComparisonLayer,
 ) -> npt.NDArray[np.uint8]:
-    """Render reference overlay (3D projection or 2D video frame) onto scene frame."""
-    if not layer.visible or layer.opacity <= 0.0:
-        return frame
-
-    bgr_colour = layer.colour_bgr
-
-    if isinstance(asset, ReferenceMotion):
-        if camera is None:
-            return frame
-        track = reference_track(
-            registration,
-            asset,
-            camera,
-            np.array([t_scene], dtype=float),
-            bgr_colour,
-            label=asset.title,
-        )
-        if track.frames > 0 and track.visible[0].any():
-            pts = track.px[0]
-            vis = track.visible[0]
-            for edge in track.edges:
-                p1, p2 = edge
-                if vis[p1] and vis[p2] and layer.draw_skeleton:
-                    pt1 = (int(round(pts[p1, 0])), int(round(pts[p1, 1])))
-                    pt2 = (int(round(pts[p2, 0])), int(round(pts[p2, 1])))
-                    cv2.line(frame, pt1, pt2, bgr_colour, layer.line_width, cv2.LINE_AA)
-            if layer.draw_joints:
-                for k in range(len(pts)):
-                    if vis[k]:
-                        center = (int(round(pts[k, 0])), int(round(pts[k, 1])))
-                        radius = max(2, layer.line_width + 1)
-                        cv2.circle(frame, center, radius, bgr_colour, -1, cv2.LINE_AA)
-    elif isinstance(asset, ReferenceVideo):
-        t_ref = registration.time_mapping.scene_to_reference(t_scene)
-        ref_frame_idx = int(round(t_ref * asset.fps))
-        if 0 <= ref_frame_idx < asset.frames and Path(asset.source.path).is_file():
-            with VideoReader(Path(asset.source.path)) as ref_reader:
-                ref_img = ref_reader.read(ref_frame_idx)
-                if ref_img is not None:
-                    h_scene, w_scene = frame.shape[:2]
-                    resized_ref = cv2.resize(ref_img, (w_scene, h_scene))
-                    alpha = float(layer.opacity)
-                    cv2.addWeighted(
-                        resized_ref, alpha, frame, 1.0 - alpha, 0.0, dst=frame
-                    )
-    return frame
+    """One-shot compatibility API; playback/export retain a ComparisonRenderer."""
+    context = ComparisonRenderContext("preview", asset, registration, layer)
+    with ComparisonRenderer(asset) as renderer:
+        return renderer.overlay(frame, t_scene, context, camera)
 
 
 @dataclass(frozen=True)
 class ComparisonVideoExportOptions:
-    """Options and callbacks for comparison video export."""
+    """Camera evidence and slow-motion/cancellable output settings."""
 
     camera: PinholeCamera | CameraCalibration | None = None
     speed: float = 1.0
@@ -104,87 +59,115 @@ class ComparisonVideoExportOptions:
     progress: Callable[[int, int], None] = lambda done, total: None
 
 
-@dataclass(frozen=True)
-class ComparisonRenderContext:
-    """Per-view context and scene resources for rendering comparison frames."""
-
-    view: str
-    asset: Asset
-    registration: ReferenceRegistration
-    layer: ComparisonLayer
-    crop: CropRect | None = None
-    track: PoseTrack | None = None
-    drawings: DrawingLayer | None = None
-
-
-def _render_comparison_frames(
-    reader: VideoReader,
-    writer: cv2.VideoWriter,
-    opts: ComparisonVideoExportOptions,
-    frame_bounds: tuple[int, int, int],
-    ctx: ComparisonRenderContext,
-) -> tuple[int, list[float]]:
-    """Iterate source frames, composite reference overlays, and write to output video."""
-    first_frame, last_frame, total_frames = frame_bounds
-    written = 0
-    frame_times: list[float] = []
-    fps = reader.fps or 30.0
-
-    for idx in range(first_frame, last_frame + 1):
-        if opts.cancelled():
-            raise InterruptedError("Comparison export cancelled")
-        img = reader.read(idx)
-        if img is None:
-            break
-        t_scene = ctx.registration.scene_time(idx / fps)
-        frame_times.append(t_scene)
-
-        if ctx.track:
-            pose = ctx.track.at(idx)
-            if pose is not None:
-                img = draw_pose(
-                    img,
-                    pose[0],
-                    pose[1],
-                    ctx.track.edges,
-                    min_confidence=0.5,
-                )
-        if ctx.drawings:
-            img = render_layer(img, ctx.drawings, idx)
-
-        img = draw_reference_overlay(
-            img, ctx.asset, t_scene, ctx.registration, opts.camera, ctx.layer
-        )
-
-        if ctx.crop:
-            crop = ctx.crop
-            img = img[crop.y : crop.y + crop.height, crop.x : crop.x + crop.width]
-            img = np.pad(
-                img,
-                ((0, crop.height % 2), (0, crop.width % 2), (0, 0)),
-                mode="edge",
-            )
-
-        lbl = f"{ctx.view} · ref:{ctx.asset.title} f{idx} t={t_scene:.3f}s"
-        img = _stamp(img, lbl)
-        writer.write(img)
-        written += 1
-        opts.progress(written, total_frames)
-
-    return written, frame_times
-
-
-def _export_camera(
-    camera: PinholeCamera | CameraCalibration | None,
+def _camera_snapshot(
+    root: Path,
+    view: str,
+    registration: ReferenceRegistration,
+    supplied: PinholeCamera | CameraCalibration | None,
 ) -> CameraSnapshot | None:
-    """Normalize supported camera adapters into one saved evidence record."""
-    if isinstance(camera, PinholeCamera):
-        camera = camera.to_calibration()
-    return (
-        CameraSnapshot.from_calibration(camera, provenance="Comparison export camera")
-        if camera
-        else None
+    current = registration.camera
+    if current and current.provenance.startswith("Session reconstruction"):
+        # Re-read disk evidence: a dialog may have been open during recalibration.
+        return session_camera(root, "", view)
+    if supplied is None:
+        return current
+    record = (
+        supplied.to_calibration() if isinstance(supplied, PinholeCamera) else supplied
     )
+    return CameraSnapshot.from_calibration(
+        record, provenance="Comparison export camera"
+    )
+
+
+def _input_hashes(
+    paths: set[Path], cancelled: Callable[[], bool]
+) -> dict[Path, str | None]:
+    return {path: _digest(path, cancelled) if path.exists() else None for path in paths}
+
+
+def _verify_encoded(
+    path: Path, frames: int, size: tuple[int, int], cancelled: Callable[[], bool]
+) -> None:
+    """Require the staged container to decode completely before publication."""
+    with VideoReader(path) as reader:
+        if reader.frame_count != frames or (reader.width, reader.height) != size:
+            raise ValueError("Encoded comparison dimensions or frame count differ")
+        for index in range(frames):
+            if cancelled():
+                raise InterruptedError("Comparison export cancelled")
+            if reader.read(index) is None:
+                raise ValueError(f"Could not verify encoded frame {index}")
+
+
+def _render_recipe(
+    root: Path,
+    view: str,
+    asset: Asset,
+    registration: ReferenceRegistration,
+    layer: ComparisonLayer,
+    reader: VideoReader,
+) -> tuple[ComparisonRenderContext, ClipRange]:
+    edit = load_edits(root).views.get(view, ViewEdit())
+    clip = ClipRange(
+        edit.first, edit.last if edit.last is not None else reader.frame_count - 1
+    )
+    if clip.last >= reader.frame_count:
+        raise ValueError("Selection exceeds the decodable recording")
+    if not np.isfinite(reader.fps) or reader.fps <= 0:
+        raise ValueError("Source frame rate must be finite and positive")
+    if edit.crop:
+        edit.crop.validate_size(reader.width, reader.height)
+    drawings = load_layer(root, view, reader.width, reader.height, reader.frame_count)
+    return ComparisonRenderContext(
+        view, asset, registration, layer, crop=edit.crop, drawings=drawings
+    ), clip
+
+
+def _export_metadata(
+    out: Path,
+    source: Path,
+    ctx: ComparisonRenderContext,
+    clip: ClipRange,
+    result: dict[str, Any],
+    fps: float,
+) -> dict[str, Any]:
+    registration = ctx.registration
+    times = [registration.scene_time(i / fps) for i in range(clip.first, clip.last + 1)]
+    metadata = build_comparison_sidecar(
+        ComparisonExportSidecarSpec(
+            video_out=out,
+            source_media=source,
+            reference_asset=ctx.asset,
+            view=ctx.view,
+            fps=result["fps"],
+            frame_count=result["frames"],
+            output_frame_times=times,
+            registration=registration,
+            time_mapping=registration.time_mapping,
+            crop=ctx.crop,
+            layer=ctx.layer,
+        )
+    )
+    metadata.update(
+        reference_asset=ctx.asset.model_dump(mode="json"),
+        drawings=ctx.drawings.model_dump(mode="json") if ctx.drawings else None,
+        selection={"first": clip.first, "last": clip.last},
+        render_recipe={
+            "version": "comparison-compositor/1.0.0",
+            "order": [
+                "player",
+                "detected_pose",
+                "drawings",
+                "reference",
+                "crop",
+                "edge_padding",
+                "clock",
+            ],
+            "min_pose_confidence": 0.5,
+            "speed": result["speed"],
+        },
+    )
+    return metadata
 
 
 def export_comparison_video(
@@ -196,89 +179,93 @@ def export_comparison_video(
     out: Path,
     options: ComparisonVideoExportOptions | None = None,
 ) -> dict[str, Any]:
-    """Write an annotated comparison video and reproducible sidecar."""
+    """Stage all frames and metadata; publish neither file on input/decode/cancel errors."""
     opts = options or ComparisonVideoExportOptions()
+    if opts.cancelled():
+        raise InterruptedError("Comparison export cancelled")
+    if not np.isfinite(opts.speed) or not 0 < opts.speed <= 1:
+        raise ValueError("Comparison speed must be in (0, 1]")
     out = out.resolve()
-    sidecar = out.with_suffix(".json")
     if out.suffix.lower() not in (".avi", ".mp4"):
         raise ValueError("Choose an AVI or MP4 output file")
-    if out.exists() or sidecar.exists():
+    if out.exists() or out.with_suffix(".json").exists():
         raise FileExistsError("Choose a new filename; video or sidecar already exists")
-
     media = load_session(root)
-    snapshot = _export_camera(opts.camera)
+    original = media.view(view)
+    source = original.recording
+    if source is None:
+        raise ValueError("Original recording is unavailable")
+    snapshot = _camera_snapshot(root, view, registration, opts.camera)
     registration = registration.bound(
         asset, snapshot, session_clock(media.timing, view)
     )
-    original = media.view(view)
-    if original.recording is None:
-        raise ValueError("Original recording is unavailable")
-
-    edit = load_edits(root).views.get(view, ViewEdit())
-    crop = edit.crop
-    track = PoseTrack.load(original.observations) if original.observations else None
-
-    with VideoReader(original.recording) as reader:
-        fps = reader.fps or 30.0
-        first_frame = edit.first
-        last_frame = edit.last if edit.last is not None else reader.frame_count - 1
-        total_frames = max(1, last_frame - first_frame + 1)
-        w, h = (crop.width, crop.height) if crop else (reader.width, reader.height)
-        size = (w + w % 2, h + h % 2)
-
-        try:
-            drawings: DrawingLayer | None = load_layer(
-                root, view, reader.width, reader.height, reader.frame_count
-            )
-        except (ValueError, OSError):
-            drawings = None
-
-        ctx = ComparisonRenderContext(
-            view=view,
-            asset=asset,
-            registration=registration,
-            layer=layer,
-            crop=crop,
-            track=track,
-            drawings=drawings,
+    camera = snapshot.record() if snapshot else None
+    if (
+        isinstance(asset, ReferenceMotion)
+        and layer.visible
+        and layer.opacity > 0
+        and camera is None
+    ):
+        raise ValueError(
+            "A usable camera is required to export the visible motion reference"
         )
-
-        with TemporaryDirectory(prefix=".comparison-export-", dir=out.parent) as temp_d:
-            staged = Path(temp_d) / out.name
-            writer = _writer(staged, fps * opts.speed, size)
-            try:
-                written, frame_times = _render_comparison_frames(
-                    reader,
-                    writer,
-                    opts,
-                    (first_frame, last_frame, total_frames),
-                    ctx,
-                )
-            finally:
-                writer.release()
-
-            require(written > 0, "No frames written for comparison video")
-            sidecar_dict = build_comparison_sidecar(
-                ComparisonExportSidecarSpec(
-                    video_out=out,
-                    source_media=original.recording,
-                    reference_asset=asset,
-                    view=view,
-                    fps=fps * opts.speed,
-                    frame_count=written,
-                    output_frame_times=frame_times,
-                    registration=registration,
-                    time_mapping=registration.time_mapping,
-                    crop=crop,
-                    layer=layer,
-                )
+    paths = {
+        source,
+        root / EDITS_FILE,
+        layer_path(root, view),
+        root / "recordings.json",
+        root / "observations" / "observations.json",
+    }
+    if original.observations:
+        paths.add(original.observations)
+    if isinstance(asset, ReferenceVideo) or asset.source_path.exists():
+        paths.add(asset.source_path)
+    before = _input_hashes(paths, opts.cancelled)
+    if asset.source_path in before and before[asset.source_path] != asset.source.sha256:
+        raise ValueError("Reference source changed or is unavailable; import it again")
+    with VideoReader(source) as reader:
+        ctx, clip = _render_recipe(root, view, asset, registration, layer, reader)
+        fps, width, height = reader.fps, reader.width, reader.height
+        if fps * opts.speed < 1:
+            raise ValueError("Comparison speed needs an output rate of at least 1 fps")
+        if snapshot and snapshot.image_size_px != (width, height):
+            raise ValueError("Camera dimensions differ from the original recording")
+    with TemporaryDirectory(prefix=".comparison-export-", dir=out.parent) as temp:
+        staged = Path(temp) / out.name
+        with ComparisonRenderer(asset) as renderer:
+            rendering = renderer.rendering(
+                ctx, camera, fps, cancelled=opts.cancelled, progress=opts.progress
             )
-            write_json(staged.with_suffix(".json"), sidecar_dict)
-            if opts.cancelled():
-                raise InterruptedError("Comparison export cancelled")
-            publish_export(staged, out)
-
-    return sidecar_dict
+            result = export_clip(
+                replace(original, proxy=None),
+                clip,
+                staged,
+                speed=opts.speed,
+                rendering=rendering,
+            )
+        metadata = _export_metadata(out, source, ctx, clip, result, fps)
+        size = rendering.size(width, height)
+        _verify_encoded(staged, clip.frames, size, opts.cancelled)
+        metadata["output_size_px"] = size
+        metadata["source_size_px"] = (width, height)
+        metadata["padding"] = {
+            "right": (ctx.crop.width if ctx.crop else width) % 2,
+            "bottom": (ctx.crop.height if ctx.crop else height) % 2,
+        }
+        metadata["input_sha256"] = {str(path): value for path, value in before.items()}
+        write_json(staged.with_suffix(".json"), metadata)
+        current = load_session(root)
+        registration.validate_binding(
+            asset,
+            _camera_snapshot(root, view, registration, opts.camera),
+            session_clock(current.timing, view),
+        )
+        if before != _input_hashes(paths, opts.cancelled):
+            raise ValueError("Comparison source or recipe changed during export; retry")
+        if opts.cancelled():
+            raise InterruptedError("Comparison export cancelled")
+        publish_export(staged, out)
+    return metadata
 
 
 class ComparisonExportWorker(QThread):
