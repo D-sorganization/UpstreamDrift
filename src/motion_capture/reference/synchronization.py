@@ -32,9 +32,13 @@ class EventAnchors(BaseModel):
             raise ValueError("Event timestamps must be finite")
         dr, ds = np.diff(r), np.diff(s)
         if (dr <= 0).any() or (ds <= 0).any():
-            raise ValueError("Events must have unique, increasing times in both clocks")
+            raise ValueError(
+                "Events must have unique, increasing times in both clocks (strictly monotonic)"
+            )
         if ((ds / dr < MIN_RATE) | (ds / dr > MAX_RATE)).any():
-            raise ValueError("Event interval rates must be between 0.25 and 4")
+            raise ValueError(
+                "Event interval rates must be positive and bounded within [0.25, 4.0]"
+            )
         object.__setattr__(self, "reference", MappingProxyType(dict(self.reference)))
         object.__setattr__(self, "scene", MappingProxyType(dict(self.scene)))
         return self
@@ -54,7 +58,8 @@ def _warp(
     x = np.array([source[key] for key in keys])
     y = np.array([target[key] for key in keys])
     if len(keys) == 1:
-        return (values - x[0]) * rate + y[0]
+        eff_offset = y[0] - x[0] * rate
+        return values * rate + eff_offset
     result = np.asarray(np.interp(values, x, y))
     for edge, neighbor, mask in ((0, 1, values < x[0]), (-1, -2, values > x[-1])):
         slope = (y[neighbor] - y[edge]) / (x[neighbor] - x[edge])
@@ -81,11 +86,22 @@ class TimeMapping(BaseModel):
         anchors = self.event_anchors
         if anchors is not None:
             source, target = anchors.reference, anchors.scene
-            if inverse:
-                source, target = target, source
-            result = _warp(
-                arr, source, target, 1 / self.rate_scale if inverse else self.rate_scale
-            )
+            if len(source) == 1:
+                k = next(iter(source))
+                eff_offset = target[k] - source[k] * self.rate_scale
+                if inverse:
+                    result = (arr - eff_offset) / self.rate_scale
+                else:
+                    result = arr * self.rate_scale + eff_offset
+            else:
+                if inverse:
+                    source, target = target, source
+                result = _warp(
+                    arr,
+                    source,
+                    target,
+                    1 / self.rate_scale if inverse else self.rate_scale,
+                )
         elif inverse:
             result = (arr - self.offset_s) / self.rate_scale
         else:

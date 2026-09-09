@@ -28,6 +28,7 @@ ALLOWLIST = frozenset(
         "environment.yml",
         "requirements.lock",
         "requirements-dev.lock",
+        "requirements-tools.txt",  # Tools release-wheel pin (UD #9406)
         "alembic.ini",
         "Dockerfile",
         "Dockerfile.heavy_test",

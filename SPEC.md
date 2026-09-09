@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Reference Synchronization, Sampling Gaps & Calibration Identity (#9881)
+
+Harden and qualify reference synchronization, sampling gap rejection, and calibration binding (`src.motion_capture.reference.registration`):
+- `EventAnchors` validation: Enforces paired, finite, strictly monotonic ordering (`t_{k+1} > t_k`) for common reference and scene events. Rejects repeated or non-monotonic timestamps and bounds positive interval rates within `[0.01, 100.0]`.
+- `TimeMapping`: Exactly aligns single-anchor events as pure time offsets (`offset = t_scene - t_ref * rate_scale`) and provides exact mathematical inverse round-trips for scalar and array inputs including boundary extrapolation.
+- `sample_reference_motion`: Refuses linear interpolation across intervals exceeding configurable `max_gap_s` (default 0.5s), masking gaps as invalid while strictly propagating missing endpoint joint masks.
+- `ReferenceRegistration`: Explicitly binds to optional `asset_fingerprint` and `camera_fingerprint` geometry records; guards against asserting `is_calibrated=True` with uncalibrated calibration identifiers.
+- `project_reference_to_camera`: Preserves Brown-Conrady camera lens distortion, frustum clipping, and optional camera clock offsets (`camera_offset_ns`).
+
 ## Optimize Root Mean Square Calculation in OCP Tracking
 
 - Replaced `np.sum(error**2, axis=0)` with `np.einsum("i...,i...->...", error, error)` in `src/shared/python/optimization/ocp/tracking_ocp.py` to bypass intermediate array allocation overhead. (spec-exempt: micro-optimization)
@@ -4217,6 +4226,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-09 | #9888 | Unify comparison preview/export through the coaching compositor; apply motion opacity and coverage-aware expert homographies; retain decoders, preserve odd source pixels and verify complete staged output/input identity before publication. |
+| 2026-09-09 | #9442 | Consume Tools as an installable dependency (`requirements-tools.txt` release wheel), launcher bootstrap distribution preference, and tools pin reporting (#9406). |
 | 2026-09-09 | #9882 | Unify comparison preview/export through the coaching compositor; apply motion opacity and coverage-aware expert homographies; retain decoders, preserve odd source pixels and verify complete staged output/input identity before publication. |
 | 2026-09-09 | #9878 | Simultaneous state and parameter estimation via optimal control (`src/shared/python/optimization/ocp/parameter_ocp.py`): quadratic priors, identifiability gating with configurable policies, limited-memory Hessian approximation, and conversion to `MapEstimatorResult` (#9762). |
 | 2026-09-09 | #9885 | Qualify event synchronization (0.25–4 interval rates), gap-aware neighboring-frame sampling, camera/distortion and clock snapshots, saved registration identity checks and manual alignment claims. Include deterministic adverse fixtures and a diagnostic sampling benchmark. |
