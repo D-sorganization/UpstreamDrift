@@ -1,5 +1,21 @@
 # SPEC.md — Repository Specification Document
 
+## Reference Overlay: Comparison Workspace, Saved Layers & Reproducible Exports (#9866)
+
+The reference overlay comparison workspace provides dual synchronized playback,
+overlay composition, saved layer configurations, and reproducible exports:
+
+- `ReferenceComparisonDialog` provides dual playback of current take and calibrated
+  reference motions, synchronized scrub controls, alignment mode switching, and layer
+  styling adjustments (opacity, color palette, skeleton visibility).
+- Comparison state persists to and loads from sidecar JSON files (`.comparison.json`)
+  using `ComparisonSession` and `ComparisonLayer` schema representations.
+- Reproducible video exports (`export_comparison_video`) generate side-by-side or composite
+  renderings alongside signed provenance sidecars (`build_comparison_sidecar`) recording
+  camera calibration parameters, alignment timestamps, layer styling, and input file hashes.
+- Background exports run via `ComparisonExportWorker` with responsive cancellation support.
+
+
 ## Video Upload Suffix Derivation From Filename Allow-List (#9612)
 
 Video analysis endpoints (`/analyze/video` sync and `/analyze/video/async`) derive
