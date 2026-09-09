@@ -23,6 +23,24 @@ Replace QUERY and COMPONENT with the relevant concept and returned component ID.
 Reinstall after changing the provider pin with `python3 -m pip install --force-reinstall ./vendor/ud-tools/packages/agent-context`. A runtime built from another Tools
 revision is not verified merely because the submodule itself is clean.
 
+## Navigating Code Graphs
+
+The component map includes a generated Mermaid graph of registered integrations.
+Start with `python3 -m agent_context --root . search "QUERY"`, then request a
+component with `context COMPONENT`. The JSON includes upstream providers and
+downstream consumers, boundary contracts, public interfaces and relevant tests.
+Follow those edges before changing an interface; read the cited source at both
+ends. The offline browser supports the same links without an external service.
+
+For symbol-level calls and imports, use the existing CodeMap in the configured
+project environment: `codemap --repo . rebuild`, then `codemap --repo . search SYMBOL`
+and `codemap --repo . who-calls QUALIFIED_SYMBOL`. Its Python API exposes
+`imports_of(path, repo_root=...)` and `neighbors(symbol, hops=1, repo_root=...)`.
+These lexical edges are best-effort candidates, especially for dynamic dispatch
+and plugins. Verify the actual call sites. Stale queries fail; partial parser
+coverage must be resolved or inspected directly in source. Do not commit the
+local SQLite index or maintain a second hand-drawn code graph.
+
 ## Changing an Integration
 
 Read the public interfaces and contract at both ends. Update the actual

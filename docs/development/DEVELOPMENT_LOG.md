@@ -19,10 +19,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9915 · Verified Agent Context
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** https://github.com/D-sorganization/UpstreamDrift/issues/9915
-- **PR:** not created
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9920
 - **Branch:** feat/issue-9915-agent-context
 - **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `AGENTS.md`
 - **Started:** 2026-09-09
