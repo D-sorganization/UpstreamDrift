@@ -144,3 +144,33 @@ def test_is_glob_pattern_detects_metacharacters() -> None:
     assert checker._is_glob_pattern("src/a/file?.py")
     assert checker._is_glob_pattern("src/a/[abc].py")
     assert not checker._is_glob_pattern("src/launchers/embedded_host.py")
+
+
+def test_optional_and_explicit_hub_paths_keep_required_local_checks(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    text = (
+        "Check `docs/codemap.md` when present.\n"
+        "Create it from Repository_Management's `docs/templates/HANDOFF.md`.\n"
+        "Read `docs/required.md` before editing.\n"
+        "Read `docs/codemap.md` before release.\n"
+        "Read `docs/mandatory.md`. Check `docs/optional.md` when present.\n"
+    )
+    errors: list[str] = []
+    checker._assert_path_references_exist(text, errors)
+    assert errors == [
+        "CLAUDE.md references a missing path: docs/required.md",
+        "CLAUDE.md references a missing path: docs/codemap.md",
+        "CLAUDE.md references a missing path: docs/mandatory.md",
+    ]
+
+
+def test_managed_notices_and_rules_are_not_duplicate_instructions() -> None:
+    notice = (
+        "> This section is managed centrally by Repository_Management and synced fleet-wide.\n"
+        "> Do NOT edit it directly in individual repositories — edit the source in "
+        "Repository_Management/AGENTS.md."
+    )
+    text = f"---\n\n{notice}\n\n---\n\n{notice}\n\nRepeated rule.\n\nRepeated rule."
+    assert checker._iter_duplicate_paragraphs(text) == ["Repeated rule."]
