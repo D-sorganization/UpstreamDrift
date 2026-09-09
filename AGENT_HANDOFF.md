@@ -5,6 +5,7 @@ Updated: 2026-09-08 03:10 UTC
 Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
 Updated: 2026-09-08 23:59 UTC (wave-2 PR triage, session UD2PRs)
+Updated: 2026-09-08 (wave-2 issue backlog sweep, session UD2IssuesA)
 
 ## Wave-2 PR Triage: 2026-09-08 (Agent `claude`, Session UD2PRs)
 
@@ -22,7 +23,7 @@ Wave-2 disposition table (REST-verified 2026-09-09 ~00:45 UTC):
 | PR                         | Disposition at yield                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | #9465                      | **MERGED** (squash `9623a5662`).                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| #9827 (this PR)            | js-yaml audit fix; auto-merge armed, draining.                                                                                                                                                                                                                                                                                                                                                                                                       |
+| #9827                      | **MERGED** (squash `403292ca3`).                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | #9826                      | PDF identity pins in `tests/research/test_publication_quality.py` re-synced to the refreshed artifact (`bf855f79`, 2012367 bytes) on `fix/9825-preserve-reviewed-claims` (commit `30aecd113`); auto-merge armed.                                                                                                                                                                                                                                     |
 | #9763-#9767                | Five dependabot /ui bumps; unblocked by this PR's audit fix; auto-merge armed, draining.                                                                                                                                                                                                                                                                                                                                                             |
 | #9471                      | Merged main in twice (SPEC row conflicts: dropped the branch-side duplicate #9476 row, kept this PR's #9471 row); repo-structure-gates green; auto-merge armed.                                                                                                                                                                                                                                                                                      |
@@ -41,12 +42,20 @@ pendulum result accessor caching).
 - **#8842** — `notebooks/bunkershot3d/phase1_mvp.py` was unrunnable: it
   imported a nonexistent top-level `bunkershot3d` package and pointed at a
   nonexistent repo-root `configs/` tree. It now imports via
-  `src.bunkershot3d.*` with a repo-root `sys.path` bootstrap, resolves the
+  `bunkershot3d.*` with a repo-root `sys.path` bootstrap, resolves the
   packaged `src/bunkershot3d/calibration/configs/canonical.yaml`, writes
   artifacts under gitignored `output/bunkershot3d/`, and exits 1 with a
   clear log line when the optional `pychrono` backend is absent (phases 1-2
   still produce their artifacts). Smoke tests:
   `tests/bunkershot3d/test_phase1_mvp_notebook.py`.
+- **#8922** — `MotionRetargeting._solve_frame_ik` called `mj_forward` once
+  **per marker per IK iteration** (~40x overcount with the golf marker set)
+  and grew the stacked Jacobian with a fresh `np.vstack` per marker. The
+  marker→(body, target) pairs are now resolved once per frame, `mj_forward`
+  runs exactly once per iteration, and the Jacobian/error rows are batched
+  into a single `np.vstack`/`np.concatenate`. Regression tests pin the
+  forward-call bound and multi-marker error reduction
+  (`tests/unit/engines/mujoco/test_motion_capture.py::TestMotionRetargetingIKCost`).
 
 ## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
 
