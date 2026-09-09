@@ -182,7 +182,7 @@ class ReferenceComparisonDialog(QDialog):
         controls = QFormLayout()
         layer_row = QHBoxLayout()
         self.visible_check = QCheckBox("Visible")
-        self.visible_check.setChecked(self._session.layer.visible)
+        self.visible_check.setChecked(self._session.layer_visible)
         self.visible_check.toggled.connect(self._layer_changed)
         layer_row.addWidget(self.visible_check)
 
@@ -193,7 +193,7 @@ class ReferenceComparisonDialog(QDialog):
         self.opacity_spin = QDoubleSpinBox()
         self.opacity_spin.setRange(0.0, 1.0)
         self.opacity_spin.setSingleStep(0.05)
-        self.opacity_spin.setValue(self._session.layer.opacity)
+        self.opacity_spin.setValue(self._session.layer_opacity)
         self.opacity_spin.valueChanged.connect(self._layer_changed)
         layer_row.addWidget(QLabel("Opacity:"))
         layer_row.addWidget(self.opacity_spin)
@@ -252,23 +252,17 @@ class ReferenceComparisonDialog(QDialog):
             self._current_asset = self.assets[index]
             self._session = self._find_or_create_session()
             self._update_status_label()
-            self.visible_check.setChecked(self._session.layer.visible)
-            self.opacity_spin.setValue(self._session.layer.opacity)
+            self.visible_check.setChecked(self._session.layer_visible)
+            self.opacity_spin.setValue(self._session.layer_opacity)
             reg = self._session.registration
             self.offset_spin.setValue(reg.time_mapping.offset_s if reg else 0.0)
             self.scale_spin.setValue(reg.transform.scale if reg else 1.0)
             self._show_frame(self.slider.value())
 
     def _layer_changed(self) -> None:
-        self._session = self._session.changed(
-            layer=self._session.layer.model_validate(
-                {
-                    "colour": self._session.layer.colour,
-                    "opacity": self.opacity_spin.value(),
-                    "visible": self.visible_check.isChecked(),
-                    "line_width": self._session.layer.line_width,
-                }
-            )
+        self._session = self._session.with_layer(
+            opacity=self.opacity_spin.value(),
+            visible=self.visible_check.isChecked(),
         )
         self._show_frame(self.slider.value())
 
@@ -289,14 +283,10 @@ class ReferenceComparisonDialog(QDialog):
 
     def _choose_colour(self) -> None:
         col = QColorDialog.getColor(
-            QColor(self._session.layer.colour), self, "Reference Colour"
+            QColor(self._session.layer_colour), self, "Reference Colour"
         )
         if col.isValid():
-            self._session = self._session.changed(
-                layer=self._session.layer.model_validate(
-                    self._session.layer.model_dump() | {"colour": col.name()}
-                )
-            )
+            self._session = self._session.with_layer(colour=col.name())
             self._show_frame(self.slider.value())
 
     def _show_frame(self, frame_idx: int) -> None:
