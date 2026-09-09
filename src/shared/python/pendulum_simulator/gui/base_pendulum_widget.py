@@ -29,6 +29,8 @@ from PyQt6.QtCore import QPoint, QPointF, Qt
 from PyQt6.QtGui import QBrush, QColor, QFont, QMouseEvent, QPainter, QPen
 from PyQt6.QtWidgets import QWidget
 
+from src.shared.python.body_part_viz import ForceColorScale
+
 
 class BasePendulumWidget(QWidget):
     """Abstract base for zoomable/pannable pendulum visualizations.
@@ -79,6 +81,7 @@ class BasePendulumWidget(QWidget):
 
         # Feature toggles (shared across all model types)
         self._show_forces: bool = False
+        self._axial_color_scale = ForceColorScale()
         self._show_zero_torque_forces: bool = False
         self._gravity_on: bool = True
         self._force_scale: float = 1.0
@@ -106,6 +109,18 @@ class BasePendulumWidget(QWidget):
 
         # 3D segment rendering mode (#1155)
         self._3d_mode: bool = False
+
+    def set_axial_color_scale(self, scale: ForceColorScale) -> None:
+        """Apply shared optional axial coloring without changing simulation state."""
+        if not isinstance(scale, ForceColorScale):
+            raise TypeError("scale must be ForceColorScale")
+        self._axial_color_scale = scale
+        self.update()
+
+    def _axial_segment_color(self, force_n: float | None, base: QColor) -> QColor:
+        color = QColor(self._axial_color_scale.color(force_n, base.name()))
+        color.setAlphaF(base.alphaF())
+        return color
 
     # ------------------------------------------------------------------
     # Abstract interface — subclasses must implement
