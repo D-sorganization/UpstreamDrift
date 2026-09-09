@@ -44,7 +44,7 @@ class ComparisonLayer(BaseModel):
     draw_club: bool = True
     draw_ellipsoids: bool = False
     ellipsoid_opacity: float = Field(default=0.3, ge=0, le=1)
-    segment_radius_ratio: float = Field(default=0.12, gt=0, le=0.5)
+    segment_radius_ratio: float = Field(default=0.12, ge=0.01, le=0.5)
     line_width: int = Field(default=2, ge=1, le=20)
 
     @property

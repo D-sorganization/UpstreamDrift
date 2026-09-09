@@ -6,6 +6,8 @@
 - Complete: marker profiles, URDF and compiled-MJCF tree adapters, root seed,
   existing continuous fit orchestration, saved jobs and library assets,
   fixed placement estimator, standalone keyframe graphic, operator guide.
+  Expanded scope adds measured club edges, shared 3D ellipsoid projection with
+  adjustable alpha/radius, and saved reversible handedness before scene placement.
 - Validation: RED observed before each new module; 177 combined reference/UI/solver tests pass;
   new two-camera renderer, preview, identity and custom-model contracts pass
   on combined main 18c8f922e. Normal pre-push gates pass on 74e867786.
@@ -14,10 +16,13 @@
   Twenty corrected bundles verified; first driver fit was withdrawn for a negative length.
   Tracked survey evidence: docs/development/reference_fit_qualification.json. Native OpenSim adapter and MyoSuite anatomy
   are unavailable, explicitly recorded rather than replaced with a fallback.
-- Coordination: `codex-reference-9914-20260909`, issue lease and central presence
-  registered. #9913 owns capture GUI changes; no edits to those files here.
-- Next: finish evidence, rerun final checks, commit/push with normal hooks and
-  qualify protected PR #9918 after owner PR #9917. Do not close the epic without implemented acceptance.
+- Display evidence: `reference_display_qualification.json` records twenty club
+  assets derived from exactly unchanged qualified body coordinates. The external
+  `reference-display-library.zip` contains assets and a reproduction script.
+  Full reference/Capture Rig selection and targeted missing-club preview tests pass.
+- Coordination: `codex-reference-9914-20260909`, lease and reference UI paths
+  registered. #9917 integrated, concurrent branch fixes preserved in d874062a5.
+- Next: normal push and protected PR #9918 checks. Do not close before merge.
 
 # Guided Capture Setup Handoff
 

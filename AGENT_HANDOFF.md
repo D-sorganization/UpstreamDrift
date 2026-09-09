@@ -4,10 +4,11 @@ Current work is isolated in `../UpstreamDrift-reference-9914`, branch
 `feat/c3d-reference-overlay-9914`; implementation commit SELF; PR #9918.
 See `docs/development/reference_fitting_epic.md` and the operator guide
 `docs/motion_capture/reference_model_fitting.md`. DL-#9914 records current state.
-The new headless modules reuse the merged reference library and compositor;
-capture GUI changes remain owned by the #9913 agent. Reference tests pass;
-full-rate evidence and final gates are in progress. Existing camera data and
-the original main worktree's user changes are untouched.
+Reference fitting and the expanded club/ellipsoid/handedness controls reuse the
+existing compositor. #9917 is integrated; other capture work remains with its
+owner. Reference/Capture Rig regressions pass. Twenty qualified numerical bundles
+and twenty club display assets are ready; final push/CI gates remain. Existing
+camera data and the original main worktree's user changes are untouched.
 
 # Guided Capture Setup Continuation
 

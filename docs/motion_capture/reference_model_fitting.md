@@ -159,7 +159,9 @@ every model. The explicit profile `club` mapping names `grip` and `head` marker
 sets; other C3D formats can supply their own sets or leave this mapping empty.
 Every member must be visible. Missing channels produce an unavailable note;
 missing samples remain gaps. The shaft connects these centroids; it does not
-claim a measured clubface orientation or alter body fit residuals.
+claim a measured clubface orientation or alter body fit residuals. The proximal
+cluster sits partway down the shaft, so the measured connector can be separated
+from the hands. It is not a complete club mesh or an inferred grip attachment.
 
 In Capture Rig's reference comparison, open **Appearance and Notes**. Toggle
 **Show Club**, **Show Stick Figure**, **Show Joints** and **Show 3D Segment

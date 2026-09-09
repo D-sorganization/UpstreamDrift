@@ -38,12 +38,12 @@ class MotionAppearanceControls(QWidget):
         self.volume_alpha.setValue(layer.ellipsoid_opacity)
         self.radius = number("Segment Radius / Length", (0.01, 0.5), 0.01)
         self.radius.setValue(layer.segment_radius_ratio)
-        for label, field in (
+        for label, numeric_field in (
             ("Ellipsoid Opacity", self.volume_alpha),
             ("Radius / Length", self.radius),
         ):
-            field.valueChanged.connect(self.changed.emit)
-            form.addRow(label, field)
+            numeric_field.valueChanged.connect(self.changed.emit)
+            form.addRow(label, numeric_field)
         hint = QLabel(
             "Ellipsoids illustrate segment volume; they are not anatomical measurements. Club endpoints retain their source labels."
         )

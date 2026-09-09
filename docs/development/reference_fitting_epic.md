@@ -123,3 +123,10 @@ The complete reference and Capture Rig regression selection passes after these
 changes; LoD and architecture no-growth scans pass. The standalone preview gap
 case is separately exercised. Protected PR checks and final artifact review are
 still required before this epic is closed.
+
+`reference_display_qualification.json` records the 20 augmented display assets.
+They preserve every fitted body point from the corrected bundles and append
+observed club centroids. `../reference-fit-artifacts-9914/display-library` and
+`reference-display-library.zip` are the expanded deliverables. The archive
+includes a reproduction script and a driver/iron visual comparison. Synthetic
+illustration cameras do not establish registration to a particular player.

@@ -34,7 +34,9 @@ def test_mirror_precedes_placement_and_preserves_source_and_gaps() -> None:
         )
     )
     original = motion.model_dump_json()
-    transform = ReferenceTransform(scale=2, translation_m=(1, 2, 3))
+    transform = ReferenceTransform(
+        scale=2, translation_m=(1, 2, 3), rotation=((0, 0, 1), (0, 1, 0), (-1, 0, 0))
+    )
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="test",
@@ -42,7 +44,7 @@ def test_mirror_precedes_placement_and_preserves_source_and_gaps() -> None:
         transform=transform,
     )
     times, world, valid = transform_reference_motion(motion, reg)
-    assert world[0, 0] == pytest.approx((1, 4, 3.6))
+    assert world[0, 0] == pytest.approx((1.6, 4, 3))
     sampled, mask = sample_reference_motion(motion, reg, times)
     np.testing.assert_allclose(sampled, world)
     np.testing.assert_array_equal(mask, valid)
@@ -52,7 +54,7 @@ def test_mirror_precedes_placement_and_preserves_source_and_gaps() -> None:
         reg.model_dump() | {"mirror_lateral": False}
     )
     _, unmirrored, _ = transform_reference_motion(motion, restored)
-    assert unmirrored[0, 0] == pytest.approx((1, 4, 2.4))
+    assert unmirrored[0, 0] == pytest.approx((0.4, 4, 3))
 
 
 def test_appearance_round_trip_and_invalid_dimensions() -> None:
@@ -66,6 +68,7 @@ def test_appearance_round_trip_and_invalid_dimensions() -> None:
     for values in (
         {"ellipsoid_opacity": 1.1},
         {"segment_radius_ratio": 0},
+        {"segment_radius_ratio": 0.005},
         {"segment_radius_ratio": float("nan")},
     ):
         with pytest.raises(ValueError):
