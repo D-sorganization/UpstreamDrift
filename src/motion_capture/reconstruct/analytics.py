@@ -45,6 +45,10 @@ HAND_ACCELERATION_SIGMA = 600.0
 HAND_POSITION_SIGMA_M = 0.002
 
 
+class SwingDataUnavailable(ValueError):
+    """Reconstruction exists but its observed interval cannot support a summary."""
+
+
 class SwingEvents(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -310,12 +314,15 @@ def summarize_swing(
     require(joints.ndim == 3 and joints.shape[2] == 3, "need (T, K, 3) joints")
     observed = np.isfinite(joints).all(axis=(1, 2)) & np.any(joints != 0, axis=(1, 2))
     indices = np.flatnonzero(observed)
-    require(indices.size >= 3, "need at least three observed frames for swing analysis")
+    if indices.size < 3:
+        raise SwingDataUnavailable(
+            "need at least three observed frames for swing analysis"
+        )
     first, stop = int(indices[0]), int(indices[-1]) + 1
-    require(
-        observed[first:stop].all(),
-        "swing analysis needs a continuous observed interval; select a range without wholly missing frames",
-    )
+    if not observed[first:stop].all():
+        raise SwingDataUnavailable(
+            "swing analysis needs a continuous observed interval; select a range without wholly missing frames"
+        )
     summary, series = _summarize_contiguous(joints[first:stop], fps, joint_names)
     if first == 0 and stop == len(joints):
         return summary, series

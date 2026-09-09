@@ -109,3 +109,10 @@ references now include selection/library/export integration.
 Remaining: protected CI and merge; coaching shape model/editing/export under #9862 and advanced reference
 import/registration/sync/comparison under #9863. Do not close epics based on this
 document or claim these remaining features already work.
+
+Sparse manual observations remain valid reconstruction/model-fit inputs. When their
+wholly missing interior frames prevent a trustworthy swing summary, the chain
+records swing_summary_unavailable_reason, omits the summary path, removes any
+stale summary and continues to produce the reconstruction. It does not invent
+speed/event metrics across gaps. The existing every-fifth-frame model-fit accuracy
+regression and nine pipeline/analytics checks pass.
