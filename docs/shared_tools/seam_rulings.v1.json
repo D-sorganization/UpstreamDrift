@@ -190,6 +190,11 @@
       "status": "cleaned",
       "rationale": "10 of 14 diverged files are spelling-only; the rest are Tools-newer docstring/CLI edits (2026-08-20). UD copy retired 2026-09-06: 10 of the 14 differing files were import-spelling only, and the remaining four differed purely cosmetically -- three in import line-wrapping and one in `chunks or [...]` vs `chunks if chunks else [...]`, which are semantically identical. No behavioural divergence existed."
     },
+    "realtime": {
+      "ruling": "tools-canonical",
+      "status": "n/a",
+      "rationale": "Tools-only (transport_file.py)."
+    },
     "reporting": {
       "ruling": "deferred",
       "status": "pending-cleanup",
@@ -247,7 +252,7 @@
     "theme": {
       "ruling": "split",
       "status": "cleaned",
-      "rationale": "22 overlapping files are tools-canonical: Tools' __init__ exports Colors/Sizes/Weights/get_qfont (fixes UD #8894), zoom.py has the int() guard, palette.py is newer; 4 UD-only modules (color_derivation, layout_metrics, sidekick_tokens, v1) are imported by launchers/tools and stay.",
+      "rationale": "22 overlapping files are tools-canonical: Tools' __init__ exports Colors/Sizes/Weights/get_qfont (fixes UD #8894), zoom.py has the int() guard, palette.py is newer; color_derivation.py adopted upstream into Tools; 3 UD-only modules (layout_metrics, sidekick_tokens, v1) are imported by launchers/tools and stay.",
       "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "trusted_git.py": {
