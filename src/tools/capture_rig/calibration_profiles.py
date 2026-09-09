@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -250,3 +251,57 @@ def save_profile(path: Path, profile: CalibrationProfile) -> CalibrationProfile:
     updated = ProfileHistory(profiles=profiles, active_profile_id=profile.profile_id)
     write_document(path, updated.model_dump(mode="json"))
     return saved
+
+
+@dataclass(frozen=True)
+class ProfileAssignment:
+    """A reviewed intrinsic revision assigned to one current rig view."""
+
+    view: str
+    profile: CalibrationProfile
+    setup: CameraSetup
+    settings_confirmed: bool
+
+
+def write_profile_set(
+    path: Path,
+    assignments: Sequence[ProfileAssignment],
+    *,
+    required_views: Sequence[str],
+) -> None:
+    """Export only verified cameras, atomically, after checking the whole rig."""
+    views = [item.view for item in assignments]
+    if (
+        not required_views
+        or any(not view.strip() for view in views)
+        or len(views) != len(set(views))
+        or set(views) != set(required_views)
+    ):
+        raise ValueError("Select one calibration for every view in the rig")
+    identities = [item.setup.camera_identity for item in assignments]
+    if len(identities) != len(set(identities)):
+        raise ValueError("Each view must identify a different physical camera")
+    cameras, selections = [], []
+    for item in assignments:
+        compatibility = check_profile(
+            item.profile, item.setup, settings_confirmed=item.settings_confirmed
+        )
+        if not compatibility.compatible:
+            raise ValueError(f"{item.view}: {' '.join(compatibility.reasons)}")
+        data = Path(item.profile.intrinsics_path).read_bytes()
+        if hashlib.sha256(data).hexdigest() != item.profile.calibration_sha256:
+            raise ValueError("Calibration changed during export; review it again")
+        record = _record(data, item.profile.camera_id, item.setup.image_size_px)
+        camera = record.model_dump(mode="json")
+        camera["camera_id"] = item.view
+        cameras.append(camera)
+        selections.append(
+            {
+                "view": item.view,
+                "profile_id": item.profile.profile_id,
+                "calibration_sha256": item.profile.calibration_sha256,
+                "setup": item.setup.model_dump(mode="json"),
+                "confirmed_utc": datetime.now(UTC).isoformat(),
+            }
+        )
+    write_document(path, {"cameras": cameras, "profile_selections": selections})

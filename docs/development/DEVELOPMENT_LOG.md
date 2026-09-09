@@ -27,8 +27,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** src/tools/capture_rig/calibration_profiles.py, tests/tools/capture_rig/test_calibration_profiles.py, docs/development/capture_setup_execution_plan.md
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`b4abd67bb`)
-- **Summary:** Compatible optical profiles and archived intrinsic revisions; everyday observations and UI integration remain required.
-- **Next step:** Integrate reference-session capture and profile selection under #9898/#9900.
+- **Summary:** Optical profile review UI and verified rig export; everyday observations remain required.
+- **Next step:** Qualify UI/consumers, then add reference sessions under #9898/#9900.
 
 ### DL-#9882 · Comparison Rendering and Export Qualification
 
