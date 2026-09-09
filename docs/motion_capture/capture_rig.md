@@ -535,8 +535,7 @@ unavailable and its reason appears in the status tooltip.
 Saved comparisons retain the reference geometry/mapping identity, actual camera
 parameters, clock evidence and visual alignment recipe. Library title/notes
 changes do not invalidate geometry. If camera parameters, geometry or recorded
-clock alignment changed, reopening refuses the stale registration and reports
-which alignment needs review. Originals remain unchanged.
+clock alignment changed, the workspace offers manual review of the previous placement and events. Saving after review preserves the previous settings beside the active sidecar. Corrupt settings are reported without replacement. Originals remain unchanged.
 
 The backend supports affine offset/rate mapping or paired named events. Every
 event needs a time in both recordings; times increase together and interval
@@ -548,8 +547,7 @@ sources. Exact source samples remain usable beside long gaps.
 
 Preview and export map original frame time into the recorded scene clock before
 sampling the reference. Without usable recorded timing, the saved clock is
-labelled `nominal-frame-rate-unverified`. Full event/spatial controls and visual qualification are tracked by #9883;
-epic #9863 remains open until those interfaces are complete.
+labelled `nominal-frame-rate-unverified`. Use the Timing tab to edit affine alignment or paired swing events.
 
 ## Comparison Preview and Export
 
@@ -573,3 +571,33 @@ publishing. Missing frames, changed linked media, invalid drawings or camera
 changes report a failure and leave the destination unpublished. Cancellation also
 publishes neither file. Comparison preview retains one expert decoder while the
 asset is selected; switching assets or closing releases it.
+
+## Align an Expert With a Player
+
+Open Capture Library, select a capture and choose Compare Reference, then select
+its camera view and an imported expert. The selected trim, crop and coaching
+references appear in the comparison automatically.
+
+1. In Placement, set model translation in metres, rotation in degrees and model
+   scale, or move/rotate/resize an expert video. Apply the placement to preview it.
+2. In Timing, uncheck Follow Player Clock to scrub the expert independently.
+   Position both players at the same swing event, choose Pair Current Frames,
+   and name it (for example Top or Impact). Add more pairs or edit their times
+   in the table, then Apply Events. Invalid or incomplete pairs keep the last
+   usable alignment. Outside the expert time range the source preview is blank
+   and explains why.
+3. Use Notes to record the lesson objective and observations, and adjust the
+   reference colour, opacity and visibility. Notes persist with this comparison.
+4. Save Comparison, or export the composed result. Switching experts or closing
+   prompts to save, discard or continue editing when changes are pending.
+
+Reset Alignment can be undone with Undo Change. Ctrl+S saves; Alt+P plays or
+pauses; Alt+Left and Alt+Right step the player one frame; Alt+U undoes the last
+alignment change. Text editing retains its normal keyboard behavior.
+
+The inspector moves below the preview on smaller windows. Timing uses two
+columns in this layout, with an independent expert preview and event controls.
+Controls remain scrollable when the window cannot display them all. Visual QA
+uses explicitly synthetic camera/motion fixtures in
+`docs/development/artifacts/reference-comparison/`; it is layout evidence, not
+validation of a physical camera calibration or a coaching measurement.

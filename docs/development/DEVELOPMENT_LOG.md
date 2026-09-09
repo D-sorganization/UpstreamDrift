@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9883 · Instructor Reference Alignment Workspace
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9883 (advanced epic #9863)
+- **PR:** not created
+- **Branch:** `feat/9883-reference-alignment-controls`
+- **Paths:** `src/tools/capture_rig/reference_comparison.py`, `reference_controls.py`, `reference_timeline.py`, `styling.py`, related tests, docs and capability atlas
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`SELF`; 40 regression cases and seven final layout/control cases pass)
+- **Summary:** Responsive placement/timing/notes inspector, independent expert scrubbing and paired swing events, pending-edit guards, undo/reset and manual stale-evidence review with settings backup.
+- **Evidence:** Native screenshots at desktop/laptop sizes; shared rotation tests, perspective preservation, invalid event rejection, notes/switch/Escape guards, stale settings backup and existing exact preview/export parity. Architecture, mypy, LoD and DRY no-growth checks pass before final integration.
+- **Next step:** Integrate rendering #9888 and create protected review.
+
 ### DL-#9882 · Comparison Rendering and Export Qualification
 
 - **State:** in_progress

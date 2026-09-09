@@ -174,3 +174,11 @@ def apply_theme(root: QWidget) -> None:
 def connect_theme_changed(slot: Callable[[str], None] | Callable[[], None]) -> None:
     """Call ``slot`` whenever the operator switches theme."""
     theme_manager().themeChanged.connect(slot)
+
+
+def compact_tabs_style() -> str:
+    """Keep short inspector tabs visible when the preview owns most of the width."""
+    return (
+        "QTabBar::tab { min-width: 0px; "
+        f"padding: {LayoutMetrics.SPACING_SM}px {LayoutMetrics.SPACING_MD}px; }}"
+    )

@@ -1,74 +1,35 @@
-# Comparison Rendering Qualification Handoff
+# Reference Alignment Controls Handoff
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-rendering
-- Branch: fix/9882-comparison-rendering
-- Baseline: cab3505a4, timing qualification #9885 integrated
+- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-controls
+- Branch: feat/9883-reference-alignment-controls
+- Baseline commit: 66a7f017d (rendering #9888; parent #9885)
 - Implementation commit: SELF
-- Issue: #9882; advanced epic #9863
-- Pull request: pending
+- Pull request: not created
+- Governing issue/epic: #9883; advanced reference epic #9863
 
-## Implementation
+## Objective and Status
 
-ComparisonRenderer owns one expert decoder per preview/export. The same existing
-coaching ClipRendering/\_rendered/export_clip path draws detector pose, saved
-coaching shapes, reference, source-coordinate crop, even edge padding and clock.
-Motion opacity now blends drawn pixels. Expert videos use a source-pixel
-homography with warped coverage, preserving uncovered player pixels and valid
-black reference pixels. Missing camera evidence refuses a visible 3-D export.
+Professional comparison editing: model placement, expert image adjustment, paired swing events, independent expert scrubbing, lesson notes and recoverable settings. Implementation is locally qualified; parent merges and protected review remain pending.
 
-Exports validate speed, actual recording bounds/dimensions, drawings and linked
-expert identity; stage the entire clip; verify every encoded frame; recheck input
-hashes and current session camera/clock evidence before exclusive publication.
-Failures/cancellation publish neither media nor JSON. Sidecars include the exact
-reference geometry/mapping document, camera/clock/registration, drawings, source
-selection, dimensions/padding, timestamps and compositor recipe. Source video
-remains external and silent output preserves every selected frame. This is not a
-cross-file power-loss transaction or a physical calibration accuracy claim.
+## Files and Decisions
 
-The preview respects the saved swing selection/crop and uses the same compositor.
-An export snapshots current library identity and reloads saved visual sources.
-The general coaching exporter now pads odd uncropped dimensions consistently;
-its swing sidecar records that padding. No shared Tools child code was changed.
+reference_controls.py uses the shared pose6dof rotation math and validates registrations through the existing models. Image adjustments preserve perspective. reference_timeline.py owns an optional expert decoder, labels missing time coverage and provides independent scrubbing for event pairing. reference_comparison.py separates Placement, Timing and Notes, preserves pending edits on switch/close, supports undo/reset, shortcuts and explicit manual review of changed evidence. Saving reviewed settings backs up the previous sidecar. Failed saves do not mutate the saved baseline. Corrupt settings are reported without replacement. styling.py sizes inspector tabs without overriding theme colors. The generated capability atlas now includes comparison inputs and deliverables.
 
-## Evidence
+## Validation
 
-Seven initial rendering regressions failed; invalid infinite export speed reached
-an encoder timeout before validation was added. The first complete regression
-batch passed 48 tests across comparison, native state, clips, coaching and swing
-exports. Three additional cancellation/homography cases and the catalog identity
-check pass in the 33-case renderer/state rerun. Pixel tests compare exact frames
-before lossy encoding, and a real encoded container is decoded completely. Reader
-instrumentation confirms one expert decoder per preview/export owner. Synthetic
-camera changes before/during export, corrupt drawings, changed sources, decode
-failure and encoded failure publish nothing.
+Forty alignment, renderer and state regressions passed. Seven alignment scenarios passed again after layout adjustments. Three-module mypy passed before the final compact-tab style addition; final checks remain below. Full-PR architecture budget passed. LoD no-growth passed with 490 baseline occurrences and 60 reductions; DRY no-growth passed with 666 historical fingerprints. No baselines changed. Synthetic native screenshots at 1280x800 and 900x740 exposed hidden tabs and a buried pairing action; both were adjusted. Screenshots are layout evidence, not real calibration validation.
 
-Five source modules pass mypy; Ruff and architecture budgets pass. Three new
-LoD occurrences were corrected without changing baselines. Final LoD no-growth
-passes (2996 files, 490 baseline occurrences, 60 reductions); DRY no-growth passes
-with 666 existing quarantined fingerprints unchanged. Design-manual governance passes (2 QMD sources, 0 calculations), with
-publication still blocked-inventory-required. Protected checks remain pending.
+## Blockers and Risks
 
-## Continuation
+Parent timing #9885 and rendering #9888 remain protected-review dependencies. Another agent has pushed to #9885; those changes are preserved by normal merges and central scope notices. Keep one SPEC row per PR; the fleet merge driver can restore an old duplicate #9879 row, so run the duplicate gate after integration. No other worktree was modified.
 
-Integrate parent #9885, finish final no-growth checks, commit and open a focused PR
-for #9882. Then complete #9883 spatial/event controls, recoverable alignment,
-unsaved-change guards, responsive visual evidence and atlas updates. Do not close
-advanced epic #9863 yet. Fleet adoption #1579 is a separate active main-branch
-rollout run 34370327634; its 41-repository dry run passed.
+## Next Steps
 
-## Coordination
+Commit this isolated work, merge current rendering, run focused validation and all required gates, create the protected PR and finish the advanced epic only after all dependencies merge.
 
-Session capture-product-01a08427-render-qualification owns #9882 and the five
-capture-rig source modules plus tests/docs. Other active presences on the same
-files are this root agent's preceding qualification branches. #9884 merged at
-2c99bc83e; #9885 is ready with auto-merge and cab3505a4 pending protected checks.
-Use ordinary topic PRs, hooks and protections. Preserve unrelated agent work.
+## Change Log
 
-Parent cab3505a4 is merged with #9884 and concurrent main OCP changes retained.
-Only the canonical handoff conflicted; this rendering handoff remains current.
-
-Normal pre-push mypy needs explicit TypeAlias declarations under its import policy;
-Image and Camera aliases now declare their role. No runtime behavior changed.
+- SELF: Implement instructor controls, guarded workflow and generated comparison map; update DL-#9883 in place.
