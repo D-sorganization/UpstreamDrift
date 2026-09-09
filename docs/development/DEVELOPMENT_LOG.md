@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/c3d-reference-overlay-9914
 - **Paths:** src/motion_capture
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`2e84bb810`; 177 tests, 20 valid bundles)
-- **Summary:** Model fitting and camera assets; see [evidence](reference_fitting_epic.md).
-- **Next step:** Qualify and merge #9918 after #9917.
+- **Last verified:** 2026-09-09 (`a523a77f2`; reference/Capture Rig suite, 20 club assets)
+- **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
+- **Next step:** Qualify and merge #9918; #9917 integrated.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
