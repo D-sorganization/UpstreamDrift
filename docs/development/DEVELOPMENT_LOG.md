@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9914 · C3D Reference Model Fitting
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9914
 - **PR:** not created
 - **Branch:** feat/c3d-reference-overlay-9914
 - **Paths:** src/motion_capture/reference, tests/motion_capture/test_reference_fit\*, tests/motion_capture/test_reference_urdf_models.py, tests/motion_capture/test_reference_mjcf_models.py
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 on 7c09642df plus this working diff (85 reference tests pass; custom-model/preview contracts pass; final evidence pending)
+- **Last verified:** 2026-09-09 on 9fccfd8fb (134 combined reference/UI tests pass; 18 real-data bundles hash-verified; normal hooks passed on 74e867786)
 - **Summary:** Explicit surface-marker profiles and existing continuous fitting produce saved model-tree reference assets; native URDF and compiled MJCF adapters retain geometry, while unavailable OpenSim/custom constraints and MyoSuite placeholders remain explicit.
-- **Next step:** Complete the full-rate Tour Average evidence runs and qualify the saved bundles through repository gates.
+- **Next step:** Open and qualify the protected PR; full-rate runs remain additional evidence.
 
 ### DL-#9911 · Preview Discovery Failure Recovery
 

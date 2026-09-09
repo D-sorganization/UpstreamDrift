@@ -38,3 +38,34 @@ central development-log validator detects pre-existing duplicated entries and
 missing fields/SHA values elsewhere in the log; the new issue-keyed entry has
 its verifying baseline recorded. Native OpenSim fitting remains unavailable;
 the bundled MyoSuite body assets are placeholders, explicitly inventoried.
+
+## Tour Average Evidence
+
+`reference_fit_qualification.json` records the exact two saved jobs, source
+hashes, reference identities, model inventory, residuals and bundle manifest
+hashes. All output file hashes were independently verified for all 18 bundles.
+The survey uses stride 12, 50 evaluations per robust stage, and explicitly
+learnable dimensions. It retains source timestamps. Full-rate solves are
+additional qualification runs, not the basis of this survey evidence.
+
+| Model               | Driver RMS (mm) | Iron RMS (mm) |
+| ------------------- | --------------: | ------------: |
+| golfer              |           49.23 |         49.92 |
+| double_pendulum     |           33.10 |         26.86 |
+| triple_pendulum     |           13.04 |         12.31 |
+| pinocchio_golfer    |          167.65 |        171.85 |
+| pinocchio_golfer_ik |          167.65 |        171.85 |
+| drake_golfer        |          131.69 |        138.96 |
+| simple_humanoid     |          196.30 |        188.12 |
+| human_subject       |          101.11 |         96.52 |
+| mujoco_humanoid     |          236.01 |        226.31 |
+
+Scores use different mapped landmarks and are not a ranking. Fixed native
+geometry, missing endpoints and surface proxies materially limit the fits.
+The articulated golfer has the closest full-body fit in this tested catalog;
+this does not establish anatomical validity or optimal convergence.
+
+On combined main `18c8f922e` and this implementation, all 134 reference and
+Capture Rig reference UI tests pass. The normal pre-push gates passed on
+`74e867786`: Ruff, formatting, governance, mypy, Bandit and unit tests.
+The merge preserves the capture agent's calibration work and current handoff.
