@@ -1010,7 +1010,7 @@
       "bytes": 23480
     },
     "docs/research/proximal_distal_energy_transfer/data/participant_twin_calibration.json": {
-      "sha256": "4308eefb3cfaf7c2442aeabe07884c2edbef436c7d8384c490ed93989786491f",
+      "sha256": "7277447a39c335341d65a9274bc9bfd91b84581cbd0772f8b53dde03f77cb413",
       "bytes": 17881
     },
     "docs/research/proximal_distal_energy_transfer/data/participant_twin_cohort.json": {
@@ -2658,8 +2658,8 @@
       "bytes": 2032
     },
     "scripts/research/proximal_distal_energy/participant_twin_calibration.py": {
-      "sha256": "9846396a7524fdb34b667819a92abea62b2cf3b03d01ef99d9698b03713b9405",
-      "bytes": 26155
+      "sha256": "dedb30824636324915d09c1365bd8ab68109f1a80bd804ed3463c14122014bdb",
+      "bytes": 26181
     },
     "scripts/research/proximal_distal_energy/participant_twin_evaluation.py": {
       "sha256": "5f922d3b6a5b6dd1b4e27e3bee02401ae735241ecd346d8d08d8c018f34e888a",

@@ -221,7 +221,9 @@ def feature_names(channels: tuple[Channel, ...]) -> tuple[str, ...]:
 
 def design_digest(design: FloatArray, discrepancy: FloatArray) -> str:
     """Return a stable digest binding a screen to the design it screened."""
-    payload = np.concatenate((design.ravel(), discrepancy.ravel()))
+    payload = np.concatenate(
+        (np.round(design.ravel(), 9), np.round(discrepancy.ravel(), 9))
+    )
     return hashlib.sha256(
         np.ascontiguousarray(payload, dtype="<f8").tobytes()
     ).hexdigest()
