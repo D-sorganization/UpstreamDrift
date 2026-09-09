@@ -416,7 +416,7 @@ Binding fleet-wide from
   log: `| YYYY-MM-DD | #<your PR or issue> | one-line summary |`.
 - **Never put a serial spec version in a row**, and **never bump the
   `Spec Version` field**. That field is release-derived — set by
-  `scripts/bump_spec_version.py` when a release is cut.
+  Repository_Management's `scripts/bump_spec_version.py` when a release is cut.
 - **Never renumber, reorder, or reword another contributor's row**, including
   while resolving a rebase. If a rebase conflicts inside the table, keep both
   rows; that is always the correct resolution.
