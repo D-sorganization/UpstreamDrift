@@ -141,7 +141,7 @@ def test_lifecycle_buttons_call_controller_methods(
         TrainingFramework,
     )
     from src.tools.training_controller import TrainingDashboardController
-    from src.tools.training_controller.gui import MainWindow
+    from src.tools.training_controller.gui import MainWidget, MainWindow
 
     del qapp
     controller, scheduler = _make_controller()
@@ -170,6 +170,10 @@ def test_lifecycle_buttons_call_controller_methods(
         "resume_job",
         lambda _self, job_id: calls.append(("resume", job_id)),
     )
+    # Since #8884 Cancel is gated behind a confirmation dialog; answer Yes
+    # so this test keeps covering the controller wiring. The dialog itself
+    # is covered by test_lifecycle_actions_report_failures.py.
+    monkeypatch.setattr(MainWidget, "_confirm_cancel", lambda _self, _job_id: True)
     try:
         window.main_widget.job_table.selectRow(0)
         QTest.mouseClick(window.main_widget.cancel_button, Qt.MouseButton.LeftButton)
