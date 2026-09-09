@@ -1,0 +1,242 @@
+{
+  "schema_version": "upstreamdrift/club-catalog/1",
+  "records": [
+    {
+      "identity": {
+        "manufacturer": "Titleist",
+        "model": "T150",
+        "club_type": "iron",
+        "number": "7",
+        "release_year": 2023,
+        "handedness": "unspecified",
+        "region": "US",
+        "build": "2023 standard iron specification; shaft and grip unspecified"
+      },
+      "claims": [
+        {
+          "property": "length",
+          "component": "assembled",
+          "value": 37.0,
+          "unit": "in",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "Titleist T150 specifications",
+            "url": "https://www.titleist.com/golf-clubs/irons/t150-2023",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Iron Specs: T150 row, club 7; shared Length and Lie rows",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        },
+        {
+          "property": "loft",
+          "component": "head",
+          "value": 32.0,
+          "unit": "deg",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "Titleist T150 specifications",
+            "url": "https://www.titleist.com/golf-clubs/irons/t150-2023",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Iron Specs: T150 row, club 7; shared Length and Lie rows",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        },
+        {
+          "property": "lie",
+          "component": "assembled",
+          "value": 63.0,
+          "unit": "deg",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "Titleist T150 specifications",
+            "url": "https://www.titleist.com/golf-clubs/irons/t150-2023",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Iron Specs: T150 row, club 7; shared Length and Lie rows",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        }
+      ],
+      "swing_weight": null,
+      "notes": "Head/shaft/grip mass and axis-defined MOI are not provided for this build and remain unknown."
+    },
+    {
+      "identity": {
+        "manufacturer": "Titleist",
+        "model": "T150",
+        "club_type": "iron",
+        "number": "P",
+        "release_year": 2023,
+        "handedness": "unspecified",
+        "region": "US",
+        "build": "2023 standard iron specification; shaft and grip unspecified"
+      },
+      "claims": [
+        {
+          "property": "length",
+          "component": "assembled",
+          "value": 35.75,
+          "unit": "in",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "Titleist T150 specifications",
+            "url": "https://www.titleist.com/golf-clubs/irons/t150-2023",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Iron Specs: T150 row, club P; shared Length and Lie rows",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        },
+        {
+          "property": "loft",
+          "component": "head",
+          "value": 44.0,
+          "unit": "deg",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "Titleist T150 specifications",
+            "url": "https://www.titleist.com/golf-clubs/irons/t150-2023",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Iron Specs: T150 row, club P; shared Length and Lie rows",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        },
+        {
+          "property": "lie",
+          "component": "assembled",
+          "value": 64.0,
+          "unit": "deg",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "Titleist T150 specifications",
+            "url": "https://www.titleist.com/golf-clubs/irons/t150-2023",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Iron Specs: T150 row, club P; shared Length and Lie rows",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        }
+      ],
+      "swing_weight": null,
+      "notes": "Head/shaft/grip mass and axis-defined MOI are not provided for this build and remain unknown."
+    },
+    {
+      "identity": {
+        "manufacturer": "PING",
+        "model": "G440 MAX HL",
+        "club_type": "driver",
+        "number": null,
+        "release_year": null,
+        "handedness": "unspecified",
+        "region": "US",
+        "build": "10.5 degree nominal loft; ALTA Quick 35 standard HL build"
+      },
+      "claims": [
+        {
+          "property": "length",
+          "component": "assembled",
+          "value": 46.0,
+          "unit": "in",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "PING G440 MAX HL specifications",
+            "url": "https://ping.com/en-us/golf-clubs/drivers/g440-max-hl-driver",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Key Specifications: 10.5 degree configuration; Details and shaft options",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        },
+        {
+          "property": "loft",
+          "component": "head",
+          "value": 10.5,
+          "unit": "deg",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "PING G440 MAX HL specifications",
+            "url": "https://ping.com/en-us/golf-clubs/drivers/g440-max-hl-driver",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Key Specifications: 10.5 degree configuration; Details and shaft options",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        },
+        {
+          "property": "mass",
+          "component": "head",
+          "value": 196.0,
+          "unit": "g",
+          "status": "published",
+          "source": {
+            "kind": "manufacturer",
+            "title": "PING G440 MAX HL specifications",
+            "url": "https://ping.com/en-us/golf-clubs/drivers/g440-max-hl-driver",
+            "retrieved_at": "2026-09-09T22:41:00Z",
+            "license": "redistribution-unverified; public factual specifications; no open content license asserted",
+            "locator": "Key Specifications: 10.5 degree configuration; Details and shaft options",
+            "method": "Manually checked manufacturer specification table; nominal values, not measurements of a player club"
+          },
+          "confidence": null,
+          "axis": null,
+          "frame": null,
+          "origin": null,
+          "notes": ""
+        }
+      ],
+      "swing_weight": null,
+      "notes": "Nominal manufacturer specifications may vary with manufacturing tolerance. Published lie is an average across adjustable settings, so it is not treated as this capture setting. Shaft cut-weight, grip mass and axis-defined MOI remain unknown. Confirm the player build and hosel setting before use."
+    }
+  ]
+}

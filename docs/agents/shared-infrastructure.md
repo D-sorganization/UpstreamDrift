@@ -246,6 +246,9 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 
 `src/shared/python/club_data/`
 
+- `catalog.py` — optional attributed club properties/build identity; `catalog_io.py`
+  provides validated exchange and `catalog_legacy.py` marks historical defaults unverified.
+  See [club specification guide](../motion_capture/club_catalog.md).
 - `targets.py` — engine-agnostic loaders for C3D, CSV, JSON, xlsx mocap.
 - **Wiffle xlsx values are in CENTIMETRES** despite the workbook's
   "Definitions" tab claiming inches. The MATLAB loader

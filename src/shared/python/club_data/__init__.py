@@ -1,30 +1,31 @@
-"""Club data management module.
+"""Club-data authority with lazy GUI/Excel loading for headless consumers."""
 
-Provides functionality for loading, managing, and displaying golf club data
-from Excel files and other sources. This module serves as the single source
-of truth for club specifications across all physics engines (Drake, Pinocchio, MuJoCo).
-"""
+from importlib import import_module
+from typing import Any
 
-from .display import ClubDataDisplayWidget, ClubTargetOverlay
-from .loader import (
-    ClubDataLoader,
-    ClubSpecification,
-    ProPlayerData,
-    SwingMetrics,
-    load_club_data,
-    load_pro_player_data,
-)
-from .targets import ClubTargetManager, TargetTrajectory
+_EXPORTS = {
+    "ClubIdentity": "catalog",
+    "ClubRecord": "catalog",
+    "PropertyClaim": "catalog",
+    "SpecificationSource": "catalog",
+    "ClubDataLoader": "loader",
+    "ClubSpecification": "loader",
+    "ProPlayerData": "loader",
+    "SwingMetrics": "loader",
+    "load_club_data": "loader",
+    "load_pro_player_data": "loader",
+    "ClubDataDisplayWidget": "display",
+    "ClubTargetOverlay": "display",
+    "ClubTargetManager": "targets",
+    "TargetTrajectory": "targets",
+}
+__all__ = list(_EXPORTS)
 
-__all__ = [
-    "ClubDataLoader",
-    "ClubSpecification",
-    "ProPlayerData",
-    "SwingMetrics",
-    "load_club_data",
-    "load_pro_player_data",
-    "ClubDataDisplayWidget",
-    "ClubTargetOverlay",
-    "ClubTargetManager",
-    "TargetTrajectory",
-]
+
+def __getattr__(name: str) -> Any:
+    """Retain the public facade without importing optional UI dependencies eagerly."""
+    if name not in _EXPORTS:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(import_module(f".{_EXPORTS[name]}", __name__), name)
+    globals()[name] = value
+    return value
