@@ -10,6 +10,7 @@ import pytest
 from src.motion_capture.reference.comparison import (
     COMPARISON_EXPORT_SCHEMA,
     COMPARISON_SESSION_SCHEMA,
+    ComparisonExportSidecarSpec,
     ComparisonLayer,
     ComparisonSession,
     build_comparison_sidecar,
@@ -141,16 +142,18 @@ def test_build_comparison_sidecar_3d_calibrated(tmp_path: Path) -> None:
         is_calibrated=True,
     )
     sidecar = build_comparison_sidecar(
-        video_out=out_video,
-        source_media=src_video,
-        reference_asset=ref,
-        view="face_on",
-        fps=30.0,
-        frame_count=3,
-        output_frame_times=[0.0, 0.033, 0.066],
-        registration=reg,
-        crop=CropRect(x=10, y=10, width=640, height=480),
-        layer=ComparisonLayer(colour="#ff00ff", opacity=0.9),
+        ComparisonExportSidecarSpec(
+            video_out=out_video,
+            source_media=src_video,
+            reference_asset=ref,
+            view="face_on",
+            fps=30.0,
+            frame_count=3,
+            output_frame_times=[0.0, 0.033, 0.066],
+            registration=reg,
+            crop=CropRect(x=10, y=10, width=640, height=480),
+            layer=ComparisonLayer(colour="#ff00ff", opacity=0.9),
+        )
     )
 
     assert sidecar["schema_version"] == COMPARISON_EXPORT_SCHEMA
@@ -172,14 +175,16 @@ def test_build_comparison_sidecar_2d_video_no_3d_claim(tmp_path: Path) -> None:
 
     ref_vid = dummy_video(tmp_path)
     sidecar = build_comparison_sidecar(
-        video_out=out_video,
-        source_media=src_video,
-        reference_asset=ref_vid,
-        view="face_on",
-        fps=30.0,
-        frame_count=5,
-        output_frame_times=[0.0, 0.033, 0.066, 0.1, 0.133],
-        time_mapping=TimeMapping(offset_s=0.5),
+        ComparisonExportSidecarSpec(
+            video_out=out_video,
+            source_media=src_video,
+            reference_asset=ref_vid,
+            view="face_on",
+            fps=30.0,
+            frame_count=5,
+            output_frame_times=[0.0, 0.033, 0.066, 0.1, 0.133],
+            time_mapping=TimeMapping(offset_s=0.5),
+        )
     )
 
     assert sidecar["schema_version"] == COMPARISON_EXPORT_SCHEMA

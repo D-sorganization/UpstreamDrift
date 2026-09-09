@@ -30,6 +30,7 @@ from src.motion_capture.reference.registration import (
 from src.motion_capture.reference.storage import ReferenceLibrary
 from src.tools.capture_rig.reference_comparison import ReferenceComparisonDialog
 from src.tools.capture_rig.reference_export import (
+    ComparisonVideoExportOptions,
     draw_reference_overlay,
     export_comparison_video,
 )
@@ -127,7 +128,9 @@ def test_export_comparison_video_and_reproducible_sidecar_parity(
         reg,
         layer,
         out_video,
-        progress=lambda done, total: progress_events.append((done, total)),
+        options=ComparisonVideoExportOptions(
+            progress=lambda done, total: progress_events.append((done, total)),
+        ),
     )
 
     assert out_video.is_file()
@@ -174,7 +177,9 @@ def test_export_cancellation(tmp_path: Path) -> None:
             reg,
             layer,
             out_video,
-            cancelled=lambda: True,
+            options=ComparisonVideoExportOptions(
+                cancelled=lambda: True,
+            ),
         )
 
     assert not out_video.exists()

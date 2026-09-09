@@ -8,6 +8,7 @@ Defines:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal, Self
 from uuid import UUID, uuid4
@@ -36,6 +37,13 @@ class ComparisonLayer(BaseModel):
     draw_skeleton: bool = True
     draw_joints: bool = True
     line_width: int = Field(default=2, ge=1, le=20)
+
+    @property
+    def colour_bgr(self) -> tuple[int, int, int]:
+        """Convert #rrggbb hex colour to BGR tuple for OpenCV rendering."""
+        clean = self.colour.lstrip("#")
+        r, g, b = (int(clean[i : i + 2], 16) for i in (0, 2, 4))
+        return (b, g, r)
 
 
 class ComparisonSession(BaseModel):
@@ -124,26 +132,30 @@ def load_comparison_session(path: Path) -> ComparisonSession:
     return ComparisonSession.model_validate_json(path.read_text(encoding="utf-8"))
 
 
-def build_comparison_sidecar(
-    *,
-    video_out: Path,
-    source_media: Path,
-    reference_asset: Asset,
-    view: str,
-    fps: float,
-    frame_count: int,
-    output_frame_times: list[float],
-    registration: ReferenceRegistration | None = None,
-    time_mapping: TimeMapping | None = None,
-    crop: CropRect | None = None,
-    layer: ComparisonLayer | None = None,
-) -> dict[str, Any]:
-    """Assemble reproducible comparison export metadata sidecar."""
-    source_sha = sha256_of(source_media)
-    ref_source_sha = reference_asset.source.sha256
+@dataclass(frozen=True)
+class ComparisonExportSidecarSpec:
+    """Metadata parameters for reproducible comparison export sidecars."""
 
-    is_3d = reference_asset.kind == "motion"
-    has_calib = bool(registration and registration.is_calibrated)
+    video_out: Path
+    source_media: Path
+    reference_asset: Asset
+    view: str
+    fps: float
+    frame_count: int
+    output_frame_times: list[float]
+    registration: ReferenceRegistration | None = None
+    time_mapping: TimeMapping | None = None
+    crop: CropRect | None = None
+    layer: ComparisonLayer | None = None
+
+
+def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any]:
+    """Assemble reproducible comparison export metadata sidecar."""
+    source_sha = sha256_of(spec.source_media)
+    ref_source_sha = spec.reference_asset.source.sha256
+
+    is_3d = spec.reference_asset.kind == "motion"
+    has_calib = bool(spec.registration and spec.registration.is_calibrated)
 
     if is_3d:
         alignment_status = (
@@ -154,18 +166,18 @@ def build_comparison_sidecar(
 
     sidecar: dict[str, Any] = {
         "schema_version": COMPARISON_EXPORT_SCHEMA,
-        "video_file": video_out.name,
+        "video_file": spec.video_out.name,
         "created_utc": now_utc(),
         "source": {
-            "path": str(source_media),
+            "path": str(spec.source_media),
             "sha256": source_sha,
-            "view": view,
+            "view": spec.view,
         },
         "reference": {
-            "id": reference_asset.id,
-            "title": reference_asset.title,
-            "kind": reference_asset.kind,
-            "source_path": reference_asset.source.path,
+            "id": spec.reference_asset.id,
+            "title": spec.reference_asset.title,
+            "kind": spec.reference_asset.kind,
+            "source_path": spec.reference_asset.source.path,
             "source_sha256": ref_source_sha,
             "alignment_status": alignment_status,
             "is_3d": is_3d,
@@ -173,34 +185,40 @@ def build_comparison_sidecar(
             "missing_alignment_evidence": not has_calib,
         },
         "registration": (
-            registration.model_dump(mode="json") if registration else None
+            spec.registration.model_dump(mode="json") if spec.registration else None
         ),
         "time_mapping": (
-            time_mapping.model_dump(mode="json")
-            if time_mapping
+            spec.time_mapping.model_dump(mode="json")
+            if spec.time_mapping
             else (
-                registration.time_mapping.model_dump(mode="json")
-                if registration
+                spec.registration.time_mapping.model_dump(mode="json")
+                if spec.registration
                 else None
             )
         ),
-        "crop": crop.model_dump(mode="json") if crop else None,
+        "crop": spec.crop.model_dump(mode="json") if spec.crop else None,
         "layer_appearance": (
-            layer.model_dump(mode="json") if layer else ComparisonLayer().model_dump()
+            spec.layer.model_dump(mode="json")
+            if spec.layer
+            else ComparisonLayer().model_dump()
         ),
         "playback": {
-            "fps": fps,
-            "frame_count": frame_count,
-            "output_frame_times": output_frame_times,
+            "fps": spec.fps,
+            "frame_count": spec.frame_count,
+            "output_frame_times": spec.output_frame_times,
         },
     }
-    inputs = [source_media]
-    if Path(reference_asset.source.path).is_file():
-        inputs.append(Path(reference_asset.source.path))
+    inputs = [spec.source_media]
+    if Path(spec.reference_asset.source.path).is_file():
+        inputs.append(Path(spec.reference_asset.source.path))
     return stamp(
         sidecar,
         schema_version=COMPARISON_EXPORT_SCHEMA,
         module="src.motion_capture.reference.comparison",
         inputs=inputs,
-        parameters={"view": view, "fps": fps, "alignment_status": alignment_status},
+        parameters={
+            "view": spec.view,
+            "fps": spec.fps,
+            "alignment_status": alignment_status,
+        },
     )

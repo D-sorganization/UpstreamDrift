@@ -3,6 +3,7 @@
 from .comparison import (
     COMPARISON_EXPORT_SCHEMA,
     COMPARISON_SESSION_SCHEMA,
+    ComparisonExportSidecarSpec,
     ComparisonLayer,
     ComparisonSession,
     build_comparison_sidecar,
@@ -26,6 +27,7 @@ __all__ = [
     "COMPARISON_EXPORT_SCHEMA",
     "COMPARISON_SESSION_SCHEMA",
     "Asset",
+    "ComparisonExportSidecarSpec",
     "ComparisonLayer",
     "ComparisonSession",
     "EventAnchors",
