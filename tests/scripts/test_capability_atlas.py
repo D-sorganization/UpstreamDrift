@@ -78,3 +78,19 @@ def test_atlas_is_reachable_from_existing_launcher_and_project_map():
     guide = (ROOT / "docs/architecture/PROJECT_MAP.md").read_text(encoding="utf-8")
     assert 'href="/capability-atlas/index.html"' in launcher
     assert "CAPABILITY_ATLAS.md" in guide
+
+
+def test_required_quality_gate_checks_atlas_without_test_selection() -> None:
+    import yaml
+
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/ci-standard.yml").read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"]["code-quality"]["steps"]
+    check = next(
+        step
+        for step in steps
+        if step.get("name") == "Generated Capability Atlas Freshness"
+    )
+    assert check["run"] == "python3 -m scripts.generate_capability_atlas --check"
+    assert "if" not in check and not check.get("continue-on-error", False)

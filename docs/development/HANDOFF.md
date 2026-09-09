@@ -56,3 +56,5 @@
 - SELF — Integrated origin/main 19a390b78, preserving concurrent optimization/UI work and regenerating maps from the updated parity registry.
 
 - SELF — Preserved remote agent merge 3aecbb6a4 with a normal merge; generated outputs remain based on the integrated canonical registry.
+
+- SELF — Added atlas freshness to the required code-quality job after its existing project dependency installation. Parser-only probe exposed transitive dependencies in the canonical registry loader; the structural parser environment stays minimal. Ten atlas tests pass.
