@@ -1,6 +1,6 @@
-# Attributed Club Catalog Continuation
+# Player Bag and Capture Equipment Continuation
 
-Current work: `feat/9903-player-club-catalog`, #9903 / epic #9902; PR #9919 (open). Optional attributed records and JSON/CSV exchange extend the existing club-data authority; 63 tests and scoped mypy pass. Offline source examples and read-only review #9904 now pass 69 combined tests; bag UI #9905 remains open. Capture UX #9917 merged at8fce9f238 and is integrated;445 capture/parity tests passed before the merge. Canonical state: `docs/development/HANDOFF.md`. Preserve the standing manual governance and historical context below.
+Active #9905 in `feat/9905-player-club-bag`, worktree UpstreamDrift-player-bag. My Clubs UI, capture assignment/library display and immutable model context are implemented;652 broad regressions and69 focused/map/parity checks pass. Parent catalog #9919 merged01831aa4c; capture UX #9917 merged8fce9f238. Canonical state is `docs/development/HANDOFF.md`. Preserve live Capture Rig childPID61500 and standing manual governance. Wizard integration and broader goal remain open.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
