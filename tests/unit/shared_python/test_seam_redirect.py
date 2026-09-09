@@ -95,4 +95,9 @@ def test_redirected_roots_match_cleaned_rulings() -> None:
         and entry["ruling"] in {"tools-canonical", "split"}
         and name not in {"README.md", "tests"}
     }
+    # upstream_drift_tools.py was a deprecated module-level alias shim for
+    # sidekick, not a package: Tools' SharedImportAliasFinder resolves the
+    # spelling (REVERTED-retirement note in seam_rulings.v1.json), so it is
+    # not a SeamRedirectFinder root.
+    cleaned.discard("upstream_drift_tools")
     assert cleaned == set(_seam_redirect.REDIRECTED_ROOTS)

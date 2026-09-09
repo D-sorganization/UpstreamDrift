@@ -57,12 +57,17 @@ SUBMODULE_HINT = "git submodule update --init vendor/ud-tools"
 # in sync with docs/shared_tools/seam_rulings.v1.json ``status: cleaned`` rows.
 REDIRECTED_ROOTS: dict[str, Path | None] = {
     "chat_contracts": None,
+    "codemap": None,
+    "compatibility": None,
     "cors": None,
     "deprecation": None,
     "file_watcher": None,
     "logging_pkg": None,
     "notes": None,
+    "plot_engine": None,
     "plot_theme": None,
+    "programmatic_pid": None,
+    "rotation_transforms": None,
     "safe_eval": None,
     "safe_pandas_eval": None,
     "scripting": None,
