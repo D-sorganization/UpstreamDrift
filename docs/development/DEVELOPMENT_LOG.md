@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9904 · Offline Club Source Catalog
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9904; epic #9902
+- **Branch:** feat/9903-player-club-catalog
+- **PR:** not created
+- **Paths:** club_data/catalog_sources.py, public_clubs.json, scripts/review_club_catalog.py and tests
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (SELF;69 tests, offline validator and scoped mypy pass)
+- **Summary:** Three attributed partial builds, deterministic source review and preserved player overrides.
+- **Next step:** Publish and qualify the catalog implementation PR.
+
 ### DL-#9903 · Attributed Club Catalog
 
 - **State:** in_progress
@@ -122,8 +135,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** src/motion_capture/coaching, src/tools/capture_rig/coaching_canvas.py, coaching_dialog.py, coaching_export.py and related integration/tests/docs
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`77e6bca88`; protected PR merged)
-- **Summary:** Source-coordinate shape document and renderer; native draw/select/move/resize, numeric/keyboard edits, style/frame visibility, undo/redo, atomic save, library/editor entry, PNG and cancellable video export.
-- **Evidence:** Registry/atlas 49 passed; latest library/drawing/export suite 19 passed. Twelve-module mypy and storage/library follow-up pass. Full LoD clean (3,012 files). Visual review: references 496-px minimum, editor 465-px minimum. Copied captures retain validated reference layers.
+- **Summary:** Saved source-coordinate shapes; draw/edit/style/frame visibility, undo/redo, library/editor access and cancellable PNG/video export.
+- **Evidence:** 49 registry/atlas and19 drawing/export tests;12-module mypy;3012-file LoD clean. Visual minimums:496px references,465px editor.
 - **Next step:** Continue advanced expert reference epic #9863.
 
 ### DL-#9860 · Capture Editing and Library
@@ -136,8 +149,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** src/motion_capture/rig/edits.py, ingest.py, src/tools/capture_rig/swing_editor.py, related tests and docs/development/capture_editing_integration.md
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`4c89892d7`; protected PR merged)
-- **Summary:** Non-destructive source-frame selection/crop and native editor; portable capture-note/catalog backend with archive, storage, rename/rollback and editable copies. Visible Library/Edit swing header actions, notes and file controls, cancellable scans, rename journal and Windows SQLite cleanup, cancellable selected-swing export, downstream timeline guards and generated map updates are implemented.
-- **Evidence:** Integrated suite 300 passed; subsequent focused library/UI suite 12 passed and editor suite 5 passed; eight-module mypy passed. Native editor visual review at 850x650 has readable controls and 492-px minimum width.
+- **Summary:** Source-preserving trim/crop, capture notes/library, archive/storage/rename rollback, editable copies, cancellable export and timeline guards.
+- **Evidence:** 300 integrated, 12 library/UI and 5 editor tests; eight-module mypy. Visual QA: 850x650, minimum492px.
 - **Next step:** Continue advanced expert reference epic #9863.
 
 ### DL-#9851 · Capture Responsiveness and Recovery
@@ -147,10 +160,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #9851, #9857 (epic #9849)
 - **Branch:** `perf/9851-capture-responsiveness`
 - **PR:** #9859
-- **Paths:** `src/tools/capture_rig/player.py`, `src/tools/capture_rig/process_runner.py`, `scripts/benchmark_capture_responsiveness.py`, `tests/tools/capture_rig/test_player_cache.py`, `tests/tools/capture_rig/test_process_runner.py`, `docs/development/capture_product_review.md`
+- **Paths:** src/tools/capture_rig/player.py, process_runner.py, benchmark_capture_responsiveness.py and cache/process tests; docs/development/capture_product_review.md
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`eaf8503ce`)
-- **Acceptance:** Duplicate frames decode once with isolated pixels; failed child starts restore the lifecycle and allow retry; measured evidence and hardware limits documented.
+- **Acceptance:** Repeated frames decode once with isolated pixels; failed starts restore lifecycle/retry; benchmark limits documented.
 - **Evidence:** 241 camera tests after cache; six focused tests after recovery; duplicate median 196.788 to 12.613 ms.
 - **Next step:** Maintain merged functionality as capture features evolve.
 
