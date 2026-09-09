@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9914 · C3D Reference Fitting
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9914
-- **PR:** #9918
+- **PR:** #9918 (merged)
 - **Branch:** feat/c3d-reference-overlay-9914
 - **Paths:** src/motion_capture
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`a523a77f2`; reference/Capture Rig suite, 20 club assets)
+- **Last verified:** 2026-09-09 (`6f2d63325` merge; protected CI, 20 club assets)
 - **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
-- **Next step:** Qualify and merge #9918; #9917 integrated.
+- **Next step:** Retain fitting and display regressions.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
