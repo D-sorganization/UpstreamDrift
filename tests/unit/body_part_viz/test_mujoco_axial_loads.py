@@ -7,6 +7,8 @@ mujoco = pytest.importorskip("mujoco")
 
 from src.shared.python.body_part_viz.mujoco_axial_loads import MujocoAxialLoadSource
 
+pytestmark = pytest.mark.unit
+
 
 ROD = """<mujoco><option gravity="0 0 -9.81"/><worldbody>
 <body name="arbitrary_rod" pos="0 0 2"><joint type="hinge" axis="0 1 0"/>

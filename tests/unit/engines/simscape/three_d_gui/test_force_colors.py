@@ -7,6 +7,8 @@ from PyQt6.QtWidgets import QApplication, QToolButton
 
 from ._viewer_test_helpers import make_synthetic_model
 
+pytestmark = pytest.mark.unit
+
 
 def test_viewer_axial_loads_seek_clear_and_clock_contract():
     from src.apps.ui.tabs.viewer_3d_tab import Viewer3DTab

@@ -5,6 +5,8 @@ import pytest
 from src.shared.python.body_part_viz import AxialLoadFrame, ForceColorScale
 from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
 
+pytestmark = pytest.mark.unit
+
 
 def test_shared_transport_handles_multiple_geometries_and_restoration():
     calls = []

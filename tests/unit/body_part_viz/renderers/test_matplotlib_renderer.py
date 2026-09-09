@@ -89,6 +89,7 @@ def test_constructor_rejects_none() -> None:
 
 
 @pytest.mark.parametrize("shape", [LineShape(length=1.0), CylinderShape()])
+@pytest.mark.unit
 def test_force_color_override_preserves_artist_and_restores_base(ax, shape):
     from matplotlib.colors import to_rgba
 
@@ -117,6 +118,7 @@ def test_force_color_override_preserves_artist_and_restores_base(ax, shape):
     assert len(ax.collections) == 1
 
 
+@pytest.mark.unit
 def test_invalid_color_does_not_mutate_artist(ax):
     renderer = MatplotlibRenderer(ax)
     shape = LineShape(length=1.0)
