@@ -450,3 +450,38 @@ stage to apply or reject, never a correction applied to frames.
 bring-up: it builds a one-view-per-camera plan from the enumerated topology,
 runs a solo session per camera and one concurrent session, and compares the
 measured streaming count against the topology prediction.
+
+## Coaching References
+
+Open **Library → Draw References**, choose a camera view, or use **Draw References**
+inside **Edit Swing**. Draw a line, arrow, circle, ellipse or rectangle directly on
+the original video. Use Select to pick a stroke; drag it to move, or drag either
+white handle to resize. The reference list can select hidden or overlapping shapes.
+**Add at Centre** and the source-pixel coordinate fields support keyboard-only
+creation and adjustment. Apply commits the coordinate and visibility fields.
+
+Colour and width apply to the selection or the next drawing. Arrow keys nudge a
+selected reference one source pixel (Shift moves ten); Delete removes it. Undo/Redo
+and Ctrl+Z/Ctrl+Shift+Z restore edits, including Clear. Choose the first and last
+visible source frames, or turn Visible off. Source frames are zero-based and both
+bounds are included. A circle keeps equal width and height. These are visual
+coaching guides, not tracked landmarks, measured angles or automatic swing analysis.
+
+Save References writes a separate versioned layer under the session's `coaching/`
+folder, so reopening the session in the library restores it. Save/Discard/Cancel
+protects unfinished work, including Escape. Original video and pose data are not
+rewritten; references may be added to previously analyzed captures.
+
+**Export Still** writes a new lossless PNG of the current frame and a portable JSON
+sidecar. **Export Annotated Swing** uses the saved trim/crop, with progress and
+cancellation. If no selection exists, it exports the full original view. Preview
+shows the original image so the same references remain positioned correctly when
+a crop changes. Both exports draw at source resolution before cropping; sidecars
+retain the layer, original frame coordinates and crop recipe. Video output is
+silent and retains the original source hash. Still sidecars identify the source
+path and original frame/time. Selection handles are editor controls and are not
+exported. Choose new output filenames; existing media/sidecars are never replaced.
+
+Fabric JSON from the Tools web editor is not yet an interchangeable layer. Text,
+freehand and external expert/model projection belong to separate future contracts;
+the advanced reference-projection epic is #9863.

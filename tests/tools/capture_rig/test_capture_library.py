@@ -73,7 +73,19 @@ def test_editable_copy_preserves_sources_and_timing_but_not_analyses(
     (root / "observations").mkdir()
     (root / "observations" / "a.json").write_text("{}", encoding="utf-8")
     original = (root / "recordings.json").read_bytes()
+    from src.motion_capture.coaching import Drawing, DrawingLayer
+    from src.motion_capture.coaching.storage import load_layer, save_layer
+
+    references = DrawingLayer(
+        view="a",
+        width=64,
+        height=48,
+        frames=6,
+        shapes=(Drawing(kind="line", start=(10, 10), end=(40, 30)),),
+    )
+    save_layer(root, references)
     copy = library.editable_copy(root)
+    assert load_layer(copy, "a", 64, 48, 6) == references
     assert not (copy / "observations").exists()
     assert (root / "recordings.json").read_bytes() == original
     index = load_bundle(copy)[1]
