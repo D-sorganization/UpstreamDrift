@@ -8,7 +8,7 @@
 - Baseline: cab3505a4, timing qualification #9885 integrated
 - Implementation commit: SELF
 - Issue: #9882; advanced epic #9863
-- Pull request: pending
+- Pull request: #9888 (draft until parent #9885 merges)
 
 ## Implementation
 
