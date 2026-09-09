@@ -33,3 +33,7 @@ Commit this isolated work, merge current rendering, run focused validation and a
 ## Change Log
 
 - SELF: Implement instructor controls, guarded workflow and generated comparison map; update DL-#9883 in place.
+
+## Rendering Integration
+
+Merged rendering 7e06f8b68 and timing de430c500, including concurrent peer #9886 compatibility and the shared encoder path. Current settings UI and its canonical handoff remain authoritative for #9883. Rechecked SPEC duplicates after the merge driver ran.

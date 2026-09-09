@@ -209,3 +209,35 @@ def test_parent_contract_aliases_override_downstream_compatibility_aliases(
     assert sys.modules["contracts"] is parent_contracts
     assert sys.modules["shared.python.contracts"] is parent_contracts
     assert sys.modules["src.shared.python.contracts"] is downstream_contracts
+
+
+def test_installed_ud_tools_distribution_replaces_vendor_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """pip-installed ud-tools wins over the submodule (UD #9406, PR-5)."""
+    repo_root = tmp_path / "UpstreamDrift"
+    repo_root.mkdir()
+    monkeypatch.setattr(
+        launch_upstream_drift, "_ud_tools_distribution_installed", lambda: True
+    )
+
+    paths = launch_upstream_drift._launcher_bootstrap_paths(repo_root, None)
+
+    assert not any("ud-tools" in entry for entry in paths)
+    assert paths[0] == str(repo_root / "src" / "shared" / "python")
+
+
+def test_explicit_tools_root_still_wins_over_installed_distribution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = tmp_path / "UpstreamDrift"
+    tools_root = tmp_path / "Tools"
+    repo_root.mkdir()
+    (tools_root / "src" / "shared" / "python").mkdir(parents=True)
+    monkeypatch.setattr(
+        launch_upstream_drift, "_ud_tools_distribution_installed", lambda: True
+    )
+
+    paths = launch_upstream_drift._launcher_bootstrap_paths(repo_root, tools_root)
+
+    assert paths[0] == str(tools_root / "src" / "shared" / "python")
