@@ -54,3 +54,11 @@ The final export presentation options exceeded the constructor parameter
 budget in CI after the earlier local architecture check. ExportJobSpec now
 groups the snapshot factory and dialog presentation; no budget is relaxed.
 Remote rebase 94367f82a was merged without overwriting peer changes.
+
+## Preserved Peer Packaging Work
+
+Remote a008a5439 bundled separate #9406 Tools packaging changes and an export
+parameter-budget waiver. The exact peer commit is preserved on remote branch
+preserve/9884-peer-tools-integration and handed back to #9406. Those packaging
+files are restored to their prior contents in this focused comparison PR.
+ExportJobSpec meets the original budget, so the unnecessary waiver is removed.
