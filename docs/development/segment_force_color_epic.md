@@ -1,7 +1,7 @@
 # Segment Force Color Epic
 
 Status: Implementation in progress under GitHub epic #9833 and PR #9840. Remote main
-`39d944540` is merged into `feat/segment-force-colors`. Git access works with the
+`11036968c` is merged into `feat/segment-force-colors`. Git access works with the
 stale HTTP extraheader cleared per invocation; no global credential changes made.
 
 ## GitHub Work Items
@@ -123,3 +123,17 @@ duplicate legacy Pinocchio mixin; the active host's redraw hook is now exercised
 OpenSim currently has result plots rather than an animated 3D scene. Both MeshCat
 hosts require a qualified caller-supplied section-force source and explicit scene
 bindings; Drake's sampled reaction output must not be treated as current by default.
+
+## Interface Coverage Matrix
+
+| Interface                           | Display integration                                                                            | Axial-load source and qualification                                                                                                                                |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Shared Matplotlib / PyQtGraph       | Existing artists recolored through a public optional renderer capability; reusable Qt controls | Explicit frame-aligned series; native artist tests, OpenGL object tests                                                                                            |
+| Double / triple pendulum animations | Shared View action, flat and tapered segments                                                  | Analytical transmitted joint reactions; hanging/inverted sign fixtures                                                                                             |
+| MuJoCo native / MeshCat             | Shared controls, native scene RGB updates and MeshCat leaf bindings                            | Qualified capsule/cylinder sections sampled on scratch data; static/dynamic and raster evidence                                                                    |
+| Web Scene3D / URDF                  | Shared collapsed controls, owned material overrides, optional WebSocket payload                | Qualified provider or supplied frame with matching clock; TypeScript/Python oracle parity                                                                          |
+| C3D / Simscape user segments        | Shared controls and explicit load-ID/segment-index bindings                                    | Supplied series must match point times; motion alone is unavailable                                                                                                |
+| Pinocchio MeshCat                   | View action and shared model/clock session                                                     | Explicit leaf bindings and caller-supplied section loads; real GUI integration tested with Pinocchio 4.1.0                                                         |
+| Drake MeshCat                       | View action and the same shared model/clock session                                            | Explicit leaf bindings and caller-supplied aligned loads; real GUI integration tested with Drake 1.56.0; sampled reactions are not automatically relabeled current |
+| OpenSim desktop                     | Current interface contains result plots, not animated segment geometry                         | Future 3D consumers can use the shared contracts; no native OpenSim section-force qualification claimed                                                            |
+| Other/future interfaces             | Reusable Python policy/renderer capability or TypeScript material adapter                      | Host must provide stable bindings and qualified synchronous axial data; API availability does not qualify its physics                                              |
