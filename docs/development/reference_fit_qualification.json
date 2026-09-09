@@ -385,6 +385,109 @@
           "reason": "Native OpenSim custom-joint/muscle constraints require an OpenSim adapter; no surrogate fit is substituted."
         }
       }
+    },
+    "driver-full-serial": {
+      "job": {
+        "schema_version": "reference-fit-job/1.0",
+        "source": "data/C3D_TA_Driver.c3d",
+        "output": "..\\reference-fit-artifacts-9914\\driver-full-serial",
+        "models": ["golfer"],
+        "custom_models": {},
+        "profile": {
+          "schema_version": "reference-marker-profile/1.0",
+          "name": "tour-average-surface-proxies/1.0",
+          "axes": ["+X", "-Z", "+Y"],
+          "units": "m",
+          "joints": {
+            "mid_hip": ["WaistLeft", "WaistRight"],
+            "neck": ["BackTop"],
+            "nose": ["HeadFront"],
+            "left_shoulder": ["LShoulderBack"],
+            "right_shoulder": ["RShoulderBack"],
+            "left_elbow": ["LElbowOut"],
+            "right_elbow": ["RElbowOut"],
+            "left_wrist": ["LWristTop"],
+            "right_wrist": ["RWristTop"],
+            "left_hip": ["WaistLeft"],
+            "right_hip": ["WaistRight"],
+            "left_knee": ["LKneeOut"],
+            "right_knee": ["RKneeOut"],
+            "left_ankle": ["LAnkleOut"],
+            "right_ankle": ["RAnkleOut"]
+          },
+          "notes": "Surface proxies, not anatomical centers. Waist markers approximate hips; BackTop approximates neck. Posterior shoulder markers avoid the occluded RShoulderTop. Club and sentinel markers are excluded."
+        },
+        "stride": 1,
+        "max_iterations": 100,
+        "fit_lengths": true,
+        "outlier_gate_sigma": 1000.0,
+        "huber_delta": 1000.0,
+        "library": "../reference-fit-artifacts-9914/qualified-library"
+      },
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
+        "sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+        "format": "c3d"
+      },
+      "models": {
+        "golfer": {
+          "reference_id": "a397c898-2d38-5720-83e5-a19957053ae2",
+          "all_observed_rms_m": 0.06540042148005143,
+          "all_observed_max_m": 0.21390026148632588,
+          "observed_samples": 9800,
+          "retained_samples": 9800,
+          "rejected_samples": 0,
+          "iterations": 300,
+          "frames": 654,
+          "manifest_sha256": "50501b9dd5351f2ec863b6fc8a838b2e5759bee4a380451b756dda0e29c547a6"
+        }
+      },
+      "inventory": {
+        "golfer": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "double_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "triple_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "pinocchio_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+        },
+        "pinocchio_golfer_ik": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"
+        },
+        "drake_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/drake/models/generated/golfer.urdf"
+        },
+        "simple_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/simple_humanoid/humanoid.urdf"
+        },
+        "human_subject": {
+          "status": "available",
+          "source": "src/tools/model_explorer/bundled_assets/human_models/human_subject_with_meshes/model.urdf"
+        },
+        "mujoco_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/mujoco_humanoid/humanoid.xml"
+        },
+        "myosuite_body": {
+          "status": "unavailable",
+          "reason": "Bundled myobody/myoupperbody are labeled placeholder models, not MyoSuite anatomy."
+        },
+        "opensim_golfer": {
+          "status": "unavailable",
+          "reason": "Native OpenSim custom-joint/muscle constraints require an OpenSim adapter; no surrogate fit is substituted."
+        }
+      }
     }
   },
   "limitations": [

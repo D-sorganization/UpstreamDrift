@@ -69,3 +69,13 @@ On combined main `18c8f922e` and this implementation, all 134 reference and
 Capture Rig reference UI tests pass. The normal pre-push gates passed on
 `74e867786`: Ruff, formatting, governance, mypy, Bandit and unit tests.
 The merge preserves the capture agent's calibration work and current handoff.
+
+The full-rate driver run retains all 654 source frames and all 9,800 available
+observations: RMS 65.40 mm, maximum 213.90 mm, zero rejections, 300 evaluations
+across the three stages. Its bundle hashes are verified and its keyframes
+visually inspected. Finite output at the evaluation cap is not convergence;
+the 30 Hz and 360 Hz results must remain separately identified.
+
+The architecture budget initially caught a 104-line MJCF loader. Extracting
+compiled-topology validation restores the 100-line budget; native FK parity,
+Ruff, file-size, architecture and SPEC-duplicate checks pass afterward.

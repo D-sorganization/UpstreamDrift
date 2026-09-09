@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -13,6 +14,34 @@ from src.shared.python.model_generation.core.types import Joint as SourceJoint
 from src.shared.python.model_generation.core.types import JointLimits, JointType, Origin
 
 from .urdf_models import _joint
+
+if TYPE_CHECKING:
+    import mujoco
+
+REFERENCE_WORLD = "__reference_world__"
+
+
+def _body_names(
+    native: "mujoco.MjModel", landmark_map: Mapping[str, str | tuple[str, ...]]
+) -> dict[int, str]:
+    """Validate the compiled topology and explicit observed body bindings."""
+    import mujoco
+
+    if native.neq:
+        raise ValueError(
+            "MJCF equality constraints require a coupled-coordinate adapter"
+        )
+    names = {
+        i: mujoco.mj_id2name(native, mujoco.mjtObj.mjOBJ_BODY, i) or f"body_{i}"
+        for i in range(1, native.nbody)
+    }
+    if not landmark_map or set(landmark_map) - set(names.values()):
+        raise ValueError("MJCF landmark mapping must name existing bodies")
+    if sum(int(native.body_parentid[i]) == 0 for i in names) != 1:
+        raise ValueError("MJCF must contain one body tree")
+    if REFERENCE_WORLD in names.values():
+        raise ValueError("MJCF body uses a reserved reference name")
+    return names
 
 
 def load_mjcf_model(
@@ -31,21 +60,8 @@ def load_mjcf_model(
     import mujoco
 
     native = mujoco.MjModel.from_xml_path(str(path))
-    if native.neq:
-        raise ValueError(
-            "MJCF equality constraints require a coupled-coordinate adapter"
-        )
-    body_names = {
-        i: mujoco.mj_id2name(native, mujoco.mjtObj.mjOBJ_BODY, i) or f"body_{i}"
-        for i in range(1, native.nbody)
-    }
-    if not landmark_map or set(landmark_map) - set(body_names.values()):
-        raise ValueError("MJCF landmark mapping must name existing bodies")
-    if sum(int(native.body_parentid[i]) == 0 for i in body_names) != 1:
-        raise ValueError("MJCF must contain one body tree")
-    world_name = "__reference_world__"
-    if world_name in body_names.values():
-        raise ValueError("MJCF body uses a reserved reference name")
+    body_names = _body_names(native, landmark_map)
+    world_name = REFERENCE_WORLD
     joints = [Joint(world_name, None, axes="xyz", landmark=False)]
     lengths: dict[str, float] = {}
 
