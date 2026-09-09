@@ -51,3 +51,5 @@ Integrated peer rendering #9889 (a7c224e2e): preserved the newer instructor UI, 
 Final integration: 88 focused alignment/render/state/registration/timing/evidence/governance tests passed. Full architecture, module and file budgets passed. Regenerated atlas after source-hash drift in the merge. Broad mypy reports five pre-existing dependency errors in keypoint_offsets.py, \_unit_contracts.py, trc_adapter.py and rtmpose_onnx_estimator.py; explicit edited-module checking is recorded separately.
 
 Explicit mypy --follow-imports=silent passes all four edited UI modules. Atlas freshness passes after regeneration.
+
+Rendering #9889 merged as a506a2958. Integrated that exact main tree; it equals the reviewed peer head. Retained the previously validated instructor UI and a single camera/clock validator. Both dependencies are now merged.
