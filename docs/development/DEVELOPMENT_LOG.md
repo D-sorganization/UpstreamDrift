@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9892 · Fleet Guide Compatibility
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9892; Repository_Management#1579
+- **Branch:** fix/9892-fleet-guide-validation
+- **PR:** pending
+- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py, generated agent entry files
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (27 tests and live consistency check pass)
+- **Summary:** Retain central guidance with precise optional/external path handling and exact managed-notice exemptions; preserve real missing-path and duplicate-instruction failures.
+- **Evidence:** Two RED/GREEN reproductions; inherited instructor evidence remains in #9890.
+- **Next step:** Complete protected follow-up after #9890; central canonical corrections are in Repository_Management#1627.
+
 ### DL-#9883 · Instructor Reference Alignment Workspace
 
 - **State:** in_review
