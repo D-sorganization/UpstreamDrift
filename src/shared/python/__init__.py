@@ -27,6 +27,16 @@ Preferred imports:
 
 from pathlib import Path
 
+from . import _seam_redirect as _seam_redirect
+
+# Retired Tools-owned packages (UD #9406) resolve to the pinned Tools tree under
+# every spelling; this must run before any `src.shared.python.<root>` import.
+_seam_redirect.install()
+# Retired roots exist only in the pinned Tools tree; keep it as the trailing
+# search location so `shared.python.<root>` finds them whichever copy of this
+# package Python bound to the name (tests/conftest.py puts src/ first).
+__path__ = _seam_redirect.extend_shared_python_path(__path__)
+
 SUITE_ROOT = Path(__file__).resolve().parents[3]
 
 from . import ai as ai
