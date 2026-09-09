@@ -41,3 +41,5 @@ Merged rendering 7e06f8b68 and timing de430c500, including concurrent peer #9886
 Alignment Undo preserves subsequently written lesson notes; an explicit regression covers it. Removed the old #9882 SPEC row restored by the merge driver, retaining #9888. Re-run duplicate validation after every stack merge.
 
 Final screenshots refreshed and visually inspected: all three tabs fit the desktop inspector; Pair Current Frames is visible on the laptop; lesson notes remain accessible in the scrolling Notes tab. Four-module mypy and 67 integrated regressions pass.
+
+Restored standing design-manual governance and earlier task context in AGENT_HANDOFF.md after the doc-governance test exposed its removal. Canonical current state remains here. Run tests/scripts/test_design_manual_governance_contract.py before readiness.
