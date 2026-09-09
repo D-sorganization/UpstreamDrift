@@ -4,6 +4,32 @@ Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
 Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
+Updated: 2026-09-08 23:59 UTC (wave-2 PR triage, session UD2PRs)
+
+## Wave-2 PR Triage: 2026-09-08 (Agent `claude`, Session UD2PRs)
+
+Repo-wide npm-audit red: advisory GHSA-2883-xcg3-v3hh (js-yaml high,
+published 2026-09-08 between the 21:57 main push run and the 22:15 PR runs)
+fails `code-quality` (`npm audit --audit-level=high`) on every merge ref
+whose lockfile carries js-yaml 4.3.1 - main itself goes red on its next
+Standard run. Fix on `bot/claude/npm-audit-jsyaml`: npm `overrides.js-yaml`
+= `^4.3.2` in `ui/package.json` (dev-only dep of `@eslint/eslintrc`), audit
+drops to 5 moderate, gate passes. Disposition table below is maintained as
+PRs settle (in-progress at first commit).
+
+Wave-2 disposition table (REST-verified 2026-09-09 ~00:45 UTC):
+
+| PR                         | Disposition at yield                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #9465                      | **MERGED** (squash `9623a5662`).                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| #9827 (this PR)            | js-yaml audit fix; auto-merge armed, draining.                                                                                                                                                                                                                                                                                                                                                                                                       |
+| #9826                      | PDF identity pins in `tests/research/test_publication_quality.py` re-synced to the refreshed artifact (`bf855f79`, 2012367 bytes) on `fix/9825-preserve-reviewed-claims` (commit `30aecd113`); auto-merge armed.                                                                                                                                                                                                                                     |
+| #9763-#9767                | Five dependabot /ui bumps; unblocked by this PR's audit fix; auto-merge armed, draining.                                                                                                                                                                                                                                                                                                                                                             |
+| #9471                      | Merged main in twice (SPEC row conflicts: dropped the branch-side duplicate #9476 row, kept this PR's #9471 row); repo-structure-gates green; auto-merge armed.                                                                                                                                                                                                                                                                                      |
+| #9434                      | Merged main in (WORKFLOW_TRACKING.md conflict: companion entry kept, main's always-on-unit-lane entry kept); auto-merge armed.                                                                                                                                                                                                                                                                                                                       |
+| #9440                      | Merged main in: theme modify/delete resolved as PR deletions; shadow ledger 33 -> 17 (stale + this-PR entries dropped); seam rulings = main's retirement narratives + PR cleaned rows for notes/plot_theme/theme; divergence inventory regenerated; SeamRedirectFinder roots synced to merged cleaned rulings (commit `4d3193f81`). Auto-merge armed; the wave-1 #8972/#9037 Tools-palette prerequisite still applies if palette-consumer tests red. |
+| #9442                      | Stacked on #9440's branch (base `readiness/p1-9406-delete-tools-canonical-1`, not main); branch merged forward to `b45ec951f` with the seam-root sync; fresh CI running; auto-merge not armable while stacked - retarget to main only after #9440 lands (wave-1 rule).                                                                                                                                                                               |
+| #9636, #9633, #9618, #9610 | Conductor drafts, skipped per assignment.                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
 
