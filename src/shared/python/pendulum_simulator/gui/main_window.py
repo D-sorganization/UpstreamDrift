@@ -180,6 +180,14 @@ class MainWindow(QMainWindow):
         if not (_view is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
         view_menu: QMenu = _view
+        from src.shared.python.body_part_viz.force_color_controls import (
+            install_force_color_action,
+        )
+        from .base_pendulum_widget import BasePendulumWidget
+
+        install_force_color_action(
+            view_menu, lambda: self.findChildren(BasePendulumWidget)
+        )
 
         # Quick theme submenu
         self._quick_theme_menu = view_menu.addMenu("🎨 Quick Theme")

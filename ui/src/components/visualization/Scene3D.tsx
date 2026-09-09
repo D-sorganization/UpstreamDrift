@@ -110,7 +110,7 @@ export function Scene3D({
   const orbitRef = useRef<OrbitControlsImpl | null>(null);
   const rootRef = useRef<THREE.Group>(null);
   const [forceScale, setForceScale] = useState(defaultForceColorScale);
-  const segmentForces = segmentForcesAtTime(segmentLoads, frame?.time ?? NaN);
+  const segmentForces = segmentForcesAtTime(segmentLoads ?? frame?.segment_loads, frame?.time ?? NaN);
   const segmentIds = urdfModel?.links.map(link => link.link_name) ?? [
     'torso', 'head', 'left_arm', 'right_arm', 'club_shaft', 'club_head', 'left_leg', 'right_leg',
   ];

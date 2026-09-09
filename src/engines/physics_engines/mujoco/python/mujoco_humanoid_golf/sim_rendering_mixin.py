@@ -107,6 +107,19 @@ class SimRenderingMixin:
                 scene_option=self.scene_option,
             )
 
+        scale = getattr(self, "axial_color_scale", None)
+        if scale is not None and scale.enabled:
+            from src.shared.python.body_part_viz.mujoco_force_colors import (
+                apply_mujoco_scene_colors,
+            )
+
+            apply_mujoco_scene_colors(
+                self.model,
+                self.renderer.scene,
+                self.engine.get_segment_axial_loads(),
+                scale,
+            )
+
         try:
             rgb = self.renderer.render()
         except MemoryError as exc:

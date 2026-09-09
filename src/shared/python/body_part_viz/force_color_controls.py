@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from collections.abc import Callable, Iterable
+from typing import Protocol
 
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QCheckBox,
     QDoubleSpinBox,
@@ -13,9 +16,58 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QWidget,
+    QDialog,
+    QMenu,
+    QVBoxLayout,
 )
 
 from .force_colors import ForceColorScale
+
+
+class ForceColorTarget(Protocol):
+    """Small host capability for a shared settings action."""
+
+    def set_axial_color_scale(self, scale: ForceColorScale) -> None:
+        """Apply a validated scale to the current view."""
+        ...
+
+
+def install_force_color_action(
+    menu: QMenu, targets: Callable[[], Iterable[ForceColorTarget]]
+) -> QAction:
+    """Install reusable modeless settings; query current targets when applying."""
+    if not isinstance(menu, QMenu) or not callable(targets):
+        raise TypeError("menu and callable targets are required")
+    action = QAction("Segment Force Colors…", menu)
+    action.setShortcut("Ctrl+Shift+F")
+    dialog: QDialog | None = None
+
+    def apply(scale: ForceColorScale) -> None:
+        for target in targets():
+            target.set_axial_color_scale(scale)
+
+    def show() -> None:
+        nonlocal dialog
+        if dialog is None:
+            dialog = QDialog(menu)
+            dialog.setWindowTitle("Segment Force Colors")
+            layout = QVBoxLayout(dialog)
+            controls = ForceColorControls(dialog)
+            controls.scale_changed.connect(apply)
+            layout.addWidget(controls)
+            layout.addWidget(
+                QLabel(
+                    "Only qualified axial load sources are colored. Views without "
+                    "section-force data retain their original colors.",
+                    dialog,
+                )
+            )
+        dialog.show()
+        dialog.raise_()
+
+    action.triggered.connect(show)
+    menu.addAction(action)
+    return action
 
 
 class ForceColorControls(QWidget):
@@ -84,8 +136,8 @@ class ForceColorControls(QWidget):
         values = {name: field.value() for name, field in self._ranges.items()}
         colors = {name: field.text().strip() for name, field in self._colors.items()}
         try:
-            scale = ForceColorScale(
-                enabled=self._enabled.isChecked(), **values, **colors
+            scale = ForceColorScale.from_dict(
+                {"enabled": self._enabled.isChecked(), **values, **colors}
             )
         except (ValueError, TypeError) as error:
             self._error.setText(str(error))

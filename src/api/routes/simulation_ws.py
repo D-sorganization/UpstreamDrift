@@ -600,6 +600,21 @@ async def _run_simulation_loop(
             if config.get("live_analysis"):
                 frame_data["analysis"] = _engine_analysis_to_dict(engine)
 
+            from src.shared.python.body_part_viz.axial_loads import (
+                read_axial_load_frame,
+            )
+
+            try:
+                loads = read_axial_load_frame(engine, time_elapsed)
+            except (ValueError, TypeError, RuntimeError):
+                logger.exception("Axial load provider unavailable for current frame")
+                loads = None
+            if loads is not None:
+                # Validate against the exact integration clock first, then apply
+                # the same wire timestamp rounding used by the geometry frame.
+                loads["time_s"] = frame_data["time"]
+                frame_data["segment_loads"] = loads
+
             await websocket.send_json(frame_data)
 
         speed_factor = _get_simulation_speed_factor(websocket, config)

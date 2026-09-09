@@ -1,11 +1,5 @@
-/** Producer-owned axial loads at declared segment sections. */
-export interface SegmentForceFrame {
-  time_s: number;
-  source: string;
-  units: 'N';
-  sign_convention: 'tension-positive';
-  values_n: Record<string, number | null>;
-}
+import type { SegmentForceFrame } from '../../api/segmentLoads';
+export type { SegmentForceFrame } from '../../api/segmentLoads';
 
 /** Fail closed for unavailable, ambiguous or stale load frames. */
 export function segmentForcesAtTime(frame: SegmentForceFrame | undefined, time: number): Record<string, number | null> {
