@@ -405,8 +405,12 @@ This catalog does not copy or supersede #9064's design-manual authority or
 Issue #9192 adds the publication boundary without changing that scientific or
 content status. The existing release workflow now runs the same fail-closed
 `python3 -m scripts.companion_publication build` command for protected `main`
-and exact `vX.Y.Z` tags. It packages the manifest, manifest schema, acquisition schema,
-compatibility policy, and detached SHA-256 files; attests the exact payloads;
+and exact `vX.Y.Z` tags. It packages the manifest under both its versioned
+name and the stable consumer name `manifest.json` (byte-identical), the
+derived `capabilities.json` and metadata-only `screenshots.json` (every record
+`pending` with a reason until #9191 lands), the manifest/capabilities/
+screenshots/acquisition schemas, the compatibility policy, and detached
+SHA-256 files; attests the exact payloads;
 and records repository, source commit, workflow run, schema/generator versions,
 sizes, hashes, and artifact identities. Protected-main Actions artifacts are
 explicitly 30-day/ephemeral and have no durable release URL. Tag releases are
@@ -421,6 +425,12 @@ Protected publication commands have an explicit repository-root precondition:
 every workflow job that invokes `scripts.companion_publication` runs from
 `${{ github.workspace }}`. This is enforced by a workflow-structure contract so
 self-hosted runner defaults cannot make a successful checkout non-importable.
+Those jobs also pin `PYTHONPATH` to the workspace, and the catalog builder
+imports nothing from `src.*` (it reads `src/config/models.yaml` with a
+standalone `yaml.safe_load` reader), so the publication environment needs
+only `jsonschema` and `pyyaml` (#9416); `scripts.companion_publication check`
+runs on code pull requests in `ci-standard.yml` to prove the payload set
+builds from a clean checkout.
 Failure to establish that working directory is negative publication evidence:
 no artifact or attestation may be accepted, and #9192 remains open until a new
 protected-main run publishes and verifies the exact protected commit bytes.
@@ -4053,8 +4063,10 @@ blocks Python package publication on the built-wheel smoke matrix.
   FastAPI/PyQt/React surfaces await the protected Tools ground merge (#4276).
 
 ## 12. Change Log
+
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| 2026-09-09 | #9840 | Optional model-independent axial-force colors: validated positive-tension SI contract, shared color policy and controls, native pendulum and MuJoCo section-reaction adapters, visual-scene material restoration, and synchronized web force frames. Universal interface rollout remains tracked by epic #9833. |
 | 2026-09-08 | #9839 | Capture Rig: a stalled live preview no longer holds the cameras, which made every take come back empty (#9838). A preview ffmpeg can stay alive while sending nothing (observed: three processes at zero CPU for over an hour); its reader parked in a blocking pipe read never re-checked the stop flag, so `PreviewPanel.stop()` timed out, cleared its workers and reported "cameras released" while every device was still claimed, and the recorder failed with -5 on all three. `CameraWorker.stop()` now closes the source (which frees a parked reader), a watchdog releases and names any view that stops delivering, and `stop()` reports honestly when a reader thread is still finishing. Verified on the rig: preview live in 36 s, Record returns outcome=supported, preview resumes after the take. |
 | 2026-09-08 | #9826 | Preserve reviewed outcomes, numeric evidence and claim order through actual manufactured registration; refuse changed science before mutation, restore required provenance tests, regenerate deterministic native evidence with unchanged numerical results, and refresh the reviewed census/PDF, exact artifact regression and governed release records. |
 | 2026-09-08 | #9824 | Capture Rig multiview epic #9818 closed out: hardware evidence page (`docs/motion_capture/evidence/capture_rig_multiview.md`) with both composite figures and the recorder's measured frame counts (a full-resolution live-preview tee starves the stream copy at 95/393/74 frames; `-lowres:v 2` holds 60 fps at 493/494/462), handoff notes covering the DirectShow single-open constraint and the two integration defects the parallel branches produced, and a 4x4 compose budget that takes the best of several rounds instead of one wall-clock assertion that flaked under load. |
@@ -4146,6 +4158,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
 | 2026-09-09 | #9856 | Generate source-backed capability/workflow maps and searchable offline atlas linked from the launcher. |
+| 2026-09-09 | #9841 | Separate fixed-grid swing feasibility from adaptively refined ODE endpoint diagnostics, preserve strict position/velocity budgets, qualify the Bioptim dependency runtime and correct historical parity interpretations. |
+| 2026-09-03 | #9471 | One dirty-close contract for the Docker dialog, the Settings dialog, and the web Settings page (#8895, #8896, #8892) -- three instances of one defect: a close affordance that bypasses the guard meant to run on it. The Docker dialog's Close was `connect(self.accept)` and the Settings dialog's was `connect(self.reject)`; both call `done()`, which hides without dispatching a `QCloseEvent`, so the running-build guard and (for Settings) any dirty check never ran, while the window X did run them. Both now call `close()`. The build guard's untimed GUI-thread `wait()` is bounded, wrapped in a wait cursor restored in `try`/`finally`, and reports a thread that outlives the join. New `settings_close_contract` mixin captions each tab's commit model, tracks preference dirtiness by signal (`PreferencesDialog` is frozen for seam epic #9406), scopes the Apply button to the tabs where it means anything, and prompts Save / Discard / Cancel from both close paths -- which also makes the widget's build guard reachable from the dialog for the first time. On the web, `useUnsavedChangesGuard` adds `beforeunload` and a guarded back arrow (`useBlocker` needs a data router; `App.tsx` mounts a plain `BrowserRouter`), and Save is disabled while pristine. |
 | 2026-09-03 | #9465 | Training Controller job actions report their failures (#8884). `_on_cancel_clicked`/`_on_pause_clicked`/`_on_resume_clicked` each wrapped their controller call in a `try/except` whose entire body was `logger.error`, so a rejected action was indistinguishable from a successful one: nothing moved, the row still read Running, and the user clicked again or walked away believing the job had stopped. A shared `_run_job_action` now reports every failure to a new action status strip and a `QMessageBox` (keeping `logger.exception` for the traceback, per ADR-0016), refreshes the job table immediately on success instead of waiting for the next poll, and gates Cancel behind a confirmation naming the job id and its H:MM runtime. |
 | 2026-09-07 | #9478 | Made the launcher registry honest about Tools provenance and tile maturity: `provider: tools` entries in `src/config/models.yaml` and `src/config/launcher_manifest.json` now carry a `tools://` scheme so a vendor path cannot masquerade as a repo-relative one (`ModelSourcePathPolicy`/`ToolsVendorModelSourceProvider` strip the scheme; local/sibling providers reject it), and the registry gate (`tests/config/test_tile_paths_resolve.py` via the new `ready_maturity_gate` in `tile_target_resolution.py`) fails any `ready`/`beta` tile whose entry point does not resolve. Corrected maturity claims to match reality: the four `*_models_shared` sibling-folder tiles and `movement_optimizer` downgraded to `experimental` with sibling-folder caveats, `motion_capture` downgraded from `beta` (argparse CLI, not a GUI tile), and the `myosim_suite`, `biomech_gait`, `biomech_sit_to_stand`, `chat_assistant`, and `tools_calculator_hub` descriptions now state what the tiles actually do. |
 | 2026-09-08 | #9783 | Accept the two exact reviewed Tools renderer source/hash identities in consumer verification, reject swapped or unknown pairs, and preserve analysis policy, pixel tolerances and vendor pin. |
@@ -5593,6 +5607,28 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/tools/bunker_shot_gui/shot3d.py` to optimize array magnitude calculation. (spec-exempt: micro-optimization)
 - Resolve bunkershot3d canonical imports, packaged config paths, and artifact output directories in notebooks/bunkershot3d/phase1_mvp.py (#8842 #9832).
+- Publish manifest.json, capabilities.json, and screenshots.json from import-free companion publication builder (#9416 #9434).
 - MotionRetargeting._solve_frame_ik evaluates mj_forward once per IK iteration and batches marker Jacobian/error rows into single array operations (#8922 #9828).
 - TrajectoryResultMixin memoizes all_* batch accessors, evaluates all_energies in a single pass, and derives total energy arithmetically (#8928 #9831).
 
+## Independently Refined Swing Defect Reference (#9830)
+
+`casadi_backend.dynamics_defect` defaults to adaptive DOP853 endpoint
+re-integration of the existing multibody RHS. Two local-tolerance/step settings
+must agree within separately scaled position and velocity endpoint budgets.
+Strict input, endpoint, finite-value and bounded RHS-work contracts refuse
+unresolved results. Reference diagnostics retain settings and componentwise
+agreement; this is numerical evidence, not a rigorous error bound or physical
+validation. Explicit positive `n_substeps` preserves fixed RK4 diagnostics for
+discrete feasibility. The historical four-field summary remains compatible.
+
+The original coarse swing remains an adverse regression control: it can pass
+the historical position ceiling while exhibiting a large velocity mismatch.
+No shooting threshold is relaxed. Historical parity tables retain their
+original reference identity and do not establish physical realizability.
+
+Bioptim's extra selects CasADi 3.6.7, where the unchanged swing/tracking
+regressions pass. Missing legacy matrix factories use exact SDK class
+factories without replacing native exports. The install probe imports the
+consumer; matrix compatibility on 3.8 does not imply solver qualification.
+The general optimal-control extra retains its separate version range (#9842).

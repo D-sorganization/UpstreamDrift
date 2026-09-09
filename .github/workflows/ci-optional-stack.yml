@@ -419,7 +419,7 @@ jobs:
           fi
           source scripts/ci/pip_retry.sh
           pip_retry install -e ".[bioptim]" 2>&1 | tee /tmp/bioptim_install.log
-          if python3 -c "import casadi, importlib.util as u; raise SystemExit(0 if u.find_spec('bioptim') else 1)" 2>/dev/null; then
+          if python3 -c "from src.shared.python.optimization.ocp._compat import require_bioptim; require_bioptim()"; then
             echo "available=true" >> "$GITHUB_OUTPUT"
             echo "bioptim installation: SUCCESS"
           else

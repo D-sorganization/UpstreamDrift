@@ -12,6 +12,8 @@ import mujoco
 import numpy as np
 
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
+from src.shared.python.body_part_viz import AxialLoadFrame, ForceColorScale
+from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 try:
@@ -30,6 +32,7 @@ class MuJoCoMeshcatAdapter:
     """
 
     def __init__(self, model: mujoco.MjModel | None = None) -> None:
+        self._force_colors: MeshcatForceColors | None = None
         if meshcat is None:
             logger.warning("Meshcat not installed. Visualization disabled.")
             self.vis = None
@@ -75,6 +78,7 @@ class MuJoCoMeshcatAdapter:
 
         model = self.model
         self.vis["visuals"].delete()
+        color_bindings: dict[str, dict[str, list[float]]] = {}
 
         # Iterate over all geometries
         for i in range(model.ngeom):
@@ -141,6 +145,40 @@ class MuJoCoMeshcatAdapter:
                     self.vis["visuals"][name]["geometry"].set_transform(rotation_matrix)
                 else:
                     self.vis["visuals"][name].set_object(shape, material)
+
+                body = mujoco.mj_id2name(
+                    model, mujoco.mjtObj.mjOBJ_BODY, model.geom_bodyid[i]
+                )
+                if body:
+                    suffix = (
+                        "/geometry"
+                        if gtype
+                        in (
+                            mujoco.mjtGeom.mjGEOM_CYLINDER,
+                            mujoco.mjtGeom.mjGEOM_CAPSULE,
+                        )
+                        else ""
+                    )
+                    path = f"visuals/{name}{suffix}/<object>"
+                    # Match the quantized RGB actually submitted in the material.
+                    color_bindings.setdefault(body, {})[path] = [
+                        *(int(c * 255) / 255 for c in rgba[:3]),
+                        float(rgba[3]),
+                    ]
+        self._force_colors = MeshcatForceColors(
+            self._set_color_property, color_bindings
+        )
+
+    def _set_color_property(self, path: str, prop: str, value: list[float]) -> None:
+        if self.vis is not None:
+            self.vis[path].set_property(prop, value)
+
+    def update_force_colors(
+        self, frame: AxialLoadFrame | None, scale: ForceColorScale
+    ) -> None:
+        """Share the native view's qualified loads and color settings."""
+        if self._force_colors is not None:
+            self._force_colors.apply(frame, scale)
 
     def update(self, data: mujoco.MjData) -> None:
         """
