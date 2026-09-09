@@ -10,11 +10,14 @@ things a pip-first, headless checkout does not have:
   read the screen size when a plot window is opened.
 - ``matplotlib.cm.get_cmap`` -- imported by ``gui/ipopt_output_plot.py``;
   removed in matplotlib 3.9 in favour of ``matplotlib.colormaps``.
+- ``casadi.MX_eye`` / ``SX_eye`` / ``DM_eye`` -- imported by the pinned code;
+  CasADi 3.8 exposes these factories as the corresponding class ``eye`` methods.
 
 :func:`require_bioptim` installs a minimal stand-in for each *only when the
-real module is not importable*, then imports bioptim. Both shims disappear
-once the upstream PR (#9761) that makes those imports optional lands and the
-pin is bumped. Nothing here imports bioptim at module import time.
+real module or attribute is absent*, then imports bioptim. The biorbd/tkinter
+shims can disappear once #9761 lands and the pin is bumped. Factory aliases
+remain until the pinned upstream uses the class methods directly (#9842).
+Nothing here imports bioptim at module import time.
 """
 
 from __future__ import annotations
@@ -167,12 +170,23 @@ def install_matplotlib_shim() -> bool:
     return True
 
 
+def _install_casadi_eye_aliases() -> None:
+    """Supply missing legacy names using the SDK's exact symbolic factories."""
+    module = import_module("casadi")
+    for matrix_name in ("MX", "SX", "DM"):
+        alias = f"{matrix_name}_eye"
+        if not hasattr(module, alias):
+            matrix_type = getattr(module, matrix_name)
+            setattr(module, alias, matrix_type.eye)
+
+
 def require_bioptim() -> Any:
     """Import and return ``bioptim``, raising with an install hint if absent.
 
     Postcondition: ``sys.modules`` carries ``biorbd_casadi`` and ``tkinter``
-    (real or shim), ``matplotlib.cm.get_cmap`` resolves, and ``bioptim``
-    imported without touching conda.
+    (real or shim), ``matplotlib.cm.get_cmap`` resolves, missing CasADi identity
+    factory aliases resolve to its class methods, and ``bioptim`` imported
+    without touching conda. Existing SDK factories are never replaced.
 
     Spec-less mocks for ``casadi``/``bioptim`` (the unit tree's conftest
     poisons ``casadi`` process-wide, #9771) are evicted before the import so
@@ -188,6 +202,7 @@ def require_bioptim() -> Any:
     install_biorbd_shim()
     install_tkinter_shim()
     install_matplotlib_shim()
+    _install_casadi_eye_aliases()
     return import_module("bioptim")
 
 
