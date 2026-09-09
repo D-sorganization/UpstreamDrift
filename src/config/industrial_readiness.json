@@ -1,0 +1,131 @@
+{
+  "version": "1.0.0",
+  "epic": 9539,
+  "audit_snapshot": "1f69a51fce997932f04a6ad1dd95bf4d065ba971",
+  "reconciled_against": "10caddd219ce213a914fa295661929e4fbf1b686",
+  "reconciled_on": "2026-09-09",
+  "release_status": "blocked",
+  "queue": [
+    {
+      "key": "U1",
+      "issue": 9477,
+      "priority": "P1",
+      "title": "Pinocchio ran free-fall only and cross-engine 'total energy' had no mass term",
+      "status": "merged",
+      "merge_shas": ["ee7792c5873c2265c06ee19f4bdd8ab2098bced9"],
+      "implementation": [
+        "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui_simulation.py",
+        "src/shared/python/pendulum_simulator/cross_engine_perturbation.py"
+      ],
+      "tests": [
+        "tests/unit/shared_python/test_cross_engine_perturbation.py",
+        "tests/unit/test_pinocchio_gui.py"
+      ],
+      "acceptance_evidence": "Commanded torque now reaches the Pinocchio stepping loop (`set_commanded_torque` / `_advance_physics` in `gui_simulation.py`), so a user who applies nonzero actuation sees the model driven rather than dropped. Cross-engine total energy resolves through engine-native energy methods, then the mass matrix / inertia / mass fallbacks in `_eval_mass_or_inertia_energy`, so the reported figure is joules rather than a unit-mass velocity proxy.",
+      "owner": null,
+      "depends_on": [],
+      "plan": null
+    },
+    {
+      "key": "U2",
+      "issue": 9407,
+      "priority": "P0",
+      "title": "README install path did not work on a clean machine",
+      "status": "merged",
+      "merge_shas": [
+        "c9b15bb8887c1ed4e6729a91dcf65e45d4860a77",
+        "a389fcc2b549e17b2d1bad64bcea8bd33ba40783"
+      ],
+      "implementation": [
+        "install.sh",
+        "README.md",
+        "scripts/ci/verify_installation.py"
+      ],
+      "tests": [
+        "tests/scripts/wave9_scripts_b/test_verify_installation.py",
+        "tests/unit/test_install_script.py"
+      ],
+      "acceptance_evidence": "The documented install path initializes the `vendor/ud-tools` submodule and no longer advertises a Git LFS step that the repository does not use; `scripts/ci/verify_installation.py` executes the documented examples so a clean-machine install is checked rather than asserted. The audit's original missing-init finding must not be re-filed.",
+      "owner": null,
+      "depends_on": [],
+      "plan": null
+    },
+    {
+      "key": "U3",
+      "issue": 8820,
+      "priority": "P1",
+      "title": "Engine dashboard exports carry no engine, model path, run ID, or timestamp",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/shared/python/dashboard/window.py",
+        "src/shared/python/dashboard/_recorder_playback.py",
+        "src/shared/python/data_io/provenance.py",
+        "src/shared/python/data_io/export.py"
+      ],
+      "tests": ["tests/unit/data_io/test_provenance.py"],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [8822, 8821],
+      "plan": "Confirmed still open against the reconciliation SHA. `UnifiedDashboardWindow.export_data` saves under the default name `swing_data` and dumps `recorder.get_data_dict()`, which stamps only `model_name` and `num_frames`; `_flatten_dict_for_csv` then keeps only per-frame arrays, so the CSV carries no identifying column at all and MuJoCo, Drake and Pinocchio exports are byte-level indistinguishable. Narrow PR order: (1) add the engine field to `ProvenanceInfo` and make `model_path` mandatory at the dashboard call site (#8822); (2) emit a sidecar plus header rows for JSON and CSV using the already-present, currently unused `add_provenance_to_csv` (#8821); (3) stamp engine, model path and hash, timestamp and run ID into the dashboard export dict and assert the round trip from each of the three engine dashboards (#8820). Do not widen the export schema without a reimport test."
+    },
+    {
+      "key": "U4",
+      "issue": 9417,
+      "priority": "P3",
+      "title": "Ship installable artifacts: wheel, image, desktop bundles, SBOM",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": ["deploy", "installer/windows/build_installer.py"],
+      "tests": [],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9416],
+      "plan": "Confirmed still open against the reconciliation SHA: `deploy/` is present but empty, and `release.yml` publishes a wheel without the container image, Tauri bundles or per-artifact SBOM the installation docs imply. The companion-manifest dependency (#9416) is merged at 072db089188edc96f365e3a11e3e43bd27efd11d, so this is dependency-ready. Narrow PR order: decide the GA artifact set; add image build/push, bundle upload, SBOM and attestation to the release workflow; resolve the Windows MSI decision against `installer/windows/build_installer.py`; either populate `deploy/` with the API compose/helm or delete it; add a clean-machine smoke install per artifact. Ship the artifact-set decision first \u2014 the later slices depend on it."
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "children-reconciled",
+      "criterion": "Each priority child is reconciled against current main and has a narrow PR plan.",
+      "status": "met",
+      "evidence": "All four queue entries were re-read against the reconciliation SHA rather than the audit snapshot: U1 and U2 are merged with the SHAs recorded here, and U3 and U4 were re-confirmed open at the named source locations and carry an ordered PR plan.",
+      "blockers": []
+    },
+    {
+      "id": "claims-carry-evidence",
+      "criterion": "Every claimed completed capability links implementation SHA, executed tests and user-visible acceptance evidence.",
+      "status": "met",
+      "evidence": "The registry contract refuses a `merged` entry that lacks a 40-character merge SHA, a test path, or acceptance evidence, and refuses any implementation or test path that does not exist in the tree.",
+      "blockers": []
+    },
+    {
+      "id": "release-profiles",
+      "criterion": "Required release profiles pass installed-product journeys; unsupported profiles are explicit.",
+      "status": "partial",
+      "evidence": "Engine support is explicit in `docs/operations/tier-policy.md` (MuJoCo core; Drake and Pinocchio extended; OpenSim and MyoSuite experimental behind a warning), and the source install journey is checked by `scripts/ci/verify_installation.py`. No built artifact other than the wheel has a clean-machine journey, which is exactly the U4 scope.",
+      "blockers": [9417]
+    },
+    {
+      "id": "separate-authorities",
+      "criterion": "Numerical/scientific validity, software correctness and human qualification remain separately recorded.",
+      "status": "met",
+      "evidence": "This ledger records software correctness only. Scientific qualification stays in the design-manual governance pathway (`scripts/config/design_manual_governance.json`, `python3 -m scripts.check_design_manual_governance`); a passing entry here is not scientific or human approval, and no registered experiment may be rerun or promoted to satisfy it.",
+      "blockers": []
+    },
+    {
+      "id": "no-false-green",
+      "criterion": "Outstanding blockers have a named owner/dependency and do not masquerade as green release status.",
+      "status": "met",
+      "evidence": "`release_status` is `blocked` and the contract forbids `ready` while any queue entry is open or any acceptance criterion is unmet. Every open entry must carry an owner and a plan, must carry a dependency when the owner is unassigned, and must appear in at least one acceptance blocker list, so an open item cannot be dropped from the summary.",
+      "blockers": [8820, 9417]
+    },
+    {
+      "id": "recovery-evidence",
+      "criterion": "Release evidence includes recovery/rollback instructions and preserves user data.",
+      "status": "partial",
+      "evidence": "`docs/operations/release-runbook.md` carries a Rollback section that pins downstream consumers to the previous tag, forbids overwriting or rerunning immutable release assets, and requires an incident issue before a patch release. It covers the wheel; the artifacts U4 adds have no rollback step yet.",
+      "blockers": [9417]
+    }
+  ]
+}
