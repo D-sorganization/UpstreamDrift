@@ -222,6 +222,17 @@ def test_set_states_rejects_an_empty_workflow() -> None:
         rail.set_states(())
 
 
+def test_clicking_a_step_exposes_its_actions_and_navigation() -> None:
+    _app()
+    rail = _rail(_reviewed())
+    selected = []
+    rail.step_selected.connect(selected.append)
+    rail.rows["detect"].click()
+    assert selected == ["detect"]
+    assert rail.primary_action == "ingest"
+    assert rail.heading.full_text == "Review This Step"
+
+
 # -- theme compliance ------------------------------------------------------------
 def test_no_colour_literals_or_inline_stylesheets() -> None:
     lines = MODULE.read_text(encoding="utf-8").splitlines()
