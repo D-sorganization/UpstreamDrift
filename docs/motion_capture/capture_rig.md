@@ -193,7 +193,7 @@ on the next start.
 Playback composites several of the session's sources at once: `recorded`
 tiles show the raw recording (or its proxy) and `overlay` tiles the same
 footage with the detector's pose and the ticked variants' models drawn on it,
-so raw and overlay of one view can sit side by side. Frame *k* is the same
+so raw and overlay of one view can sit side by side. Frame _k_ is the same
 instant in every tile — when the manifest carries a strobe-alignment block
 each reader is shifted by its whole-frame offset. Scrubbing, play/pause,
 speed, single-frame stepping and _Export PNG..._ (the canvas exactly as shown)
@@ -216,8 +216,13 @@ The tile follows the application theme (#9816). Its header is one toolbar:
 the session line on the left, then a status strip of three chips (cameras
 bound, recorder state with the live REC readout, and the outcome of the last
 take) and the **Layout** bar on the right. The action buttons are grouped by
-workflow step, each row labelled with the step it belongs to, so the grid
-reads in the same order as the Workflow panel. Every colour and style comes
+workflow step, each group opening with a label naming the step it belongs to,
+so the grid reads in the same order as the Workflow panel. The groups sit in a
+wrapping (flow) layout (`src/tools/capture_rig/flow_layout.py`, #9844): they
+reflow onto as many rows as the pane is wide enough for, and a section label
+always opens the row its first button starts on, so the grid never sets a
+minimum width wider than a single button and the tile can be made narrow
+enough for a laptop panel. Every colour and style comes
 from `src/tools/capture_rig/styling.py`, which composes them from the active
 palette and the fleet `Styles` constants: nothing in the tile names a colour,
 spacing comes from `LayoutMetrics`, and switching theme (standalone window or
