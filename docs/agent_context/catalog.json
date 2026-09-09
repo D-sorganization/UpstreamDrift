@@ -329,5 +329,5 @@
       "title": "Capability Architecture Nodes"
     }
   ],
-  "dependencies": []
+  "dependencies": ["vendor/ud-tools"]
 }
