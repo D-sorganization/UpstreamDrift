@@ -12,7 +12,13 @@ Panels over one session directory, driven by the workflow step model
   exclusion, intrinsics and the joint reconstruction, 2-D analysis for a
   single view, export to the motion pipeline.
 * **Review** — frame-accurate playback of any view and any observation set
-  with the pose drawn on it, and the results as a table.
+  with the pose drawn on it (:mod:`.playback`), and the results as a table.
+
+A themed header (:mod:`.header`) carries the session line, a status strip
+(cameras bound, recorder state, last take) and the pane layout bar; the
+action buttons sit in :class:`~.action_grid.ActionGrid`, grouped by
+workflow step. Every colour and style comes from :mod:`.styling`, which
+follows the application theme.
 
 Every command is built by :mod:`.commands`; every file is found by
 :mod:`.session`. This module only arranges widgets and forwards clicks.
@@ -21,20 +27,17 @@ Every command is built by :mod:`.commands`; every file is found by
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-from PyQt6.QtCore import QProcess, QProcessEnvironment, Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtCore import QSettings, Qt
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
-    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -44,7 +47,6 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QPlainTextEdit,
     QPushButton,
-    QSlider,
     QSpinBox,
     QSplitter,
     QTableWidget,
@@ -58,13 +60,28 @@ from PyQt6.QtWidgets import (
 from src.motion_capture.reconstruct.measurements import TAPE_GUIDE, parse_measurement
 from src.motion_capture.rig.plan import CameraControls, CaptureMode
 from src.shared.python.core.contracts import require
+from src.shared.python.theme.layout_metrics import LayoutMetrics
 
-from . import commands, workflow
-from .commands import ESTIMATOR_OPTIONS, MODE_PRESETS, OptionSpec, PlanSelection
-from .commands import mode_text
-from .overlay import PoseTrack, draw_pose
-from .player import VideoReader, clamp_index
-from .session import SessionMedia, ViewMedia, flatten_numbers, load_session
+from . import commands, styling, workflow
+from .action_grid import ActionGrid
+from .annotate_widget import AnnotateDialog, BaseSet
+from .commands import (
+    ESTIMATOR_OPTIONS,
+    MODE_PRESETS,
+    OptionSpec,
+    PlanSelection,
+    mode_text,
+)
+from .header import HeaderBar, StatusStrip
+from . import multiview
+from .layout import LayoutBar, LayoutStore, PaneExtras, PaneHost
+from .match_panel import MatchPanel, fit_model_args, reconstruct_args
+from .playback import PlaybackPanel as PlaybackPanel  # re-export (moved, #9816)
+from .preview import PreviewPanel
+from .process_runner import RigProcessRunner
+from .provenance_tab import ProvenanceTab, SourcedTable
+from .record_bar import RecordBar
+from .session import SessionMedia, flatten_numbers, load_session
 
 logger = logging.getLogger(__name__)
 
@@ -77,8 +94,11 @@ STATUS_GLYPH = {
     workflow.Status.BLOCKED: "○",
     workflow.Status.SKIPPED: "–",
 }
-ALWAYS_ENABLED = frozenset({"stop", "load"})
-BUTTONS_PER_ROW = 5
+ALWAYS_ENABLED = frozenset({"stop", "load", "preview"})
+DEFAULT_EXPORT_LAYOUT = "three_across"  # a sensible default for the lab rig
+LAB_PLAN = Path("docs/motion_capture/plans/lab_three_view_sonnet.json")
+CONTROLS_SIZES = (420, 520)
+WINDOW_SIZE = (1600, 900)
 
 
 def _optional_float(text: str) -> float | None:
@@ -89,48 +109,6 @@ def _optional_float(text: str) -> float | None:
 
 def _csv(text: str) -> tuple[str, ...]:
     return tuple(v.strip() for v in text.split(",") if v.strip())
-
-
-class RigProcessRunner(QWidget):
-    """Runs one rig command at a time as a child process, streaming its output."""
-
-    output = pyqtSignal(str)
-    finished = pyqtSignal(int)
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._process = QProcess(self)
-        self._process.setWorkingDirectory(str(commands.repo_root()))
-        env = QProcessEnvironment()
-        for key, value in commands.child_environment().items():
-            env.insert(key, value)
-        self._process.setProcessEnvironment(env)
-        self._process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
-        self._process.readyReadStandardOutput.connect(self._drain)
-        self._process.finished.connect(self._on_finished)
-
-    @property
-    def busy(self) -> bool:
-        return self._process.state() != QProcess.ProcessState.NotRunning
-
-    def run(self, argv: Sequence[str]) -> None:
-        """Start ``argv``. Precondition: nothing is running."""
-        require(not self.busy, "a rig command is already running")
-        require(len(argv) >= 1, "argv must name a program")
-        self.output.emit("$ " + " ".join(argv) + "\n")
-        self._process.start(argv[0], list(argv[1:]))
-
-    def stop(self) -> None:
-        if self.busy:
-            self._process.kill()
-
-    def _drain(self) -> None:
-        data = bytes(self._process.readAllStandardOutput().data())
-        self.output.emit(data.decode("utf-8", errors="replace"))
-
-    def _on_finished(self, code: int, _status: Any) -> None:
-        self.output.emit(f"[exit {code}]\n")
-        self.finished.emit(int(code))
 
 
 class WorkflowPanel(QGroupBox):
@@ -184,22 +162,43 @@ class WorkflowPanel(QGroupBox):
         return {s.step.key: s.status for s in self._states}
 
 
+def live_dir(session: Path) -> Path:
+    """Where the recorder drops live snapshots for the tile during a take."""
+    return session / ".live"
+
+
+def stop_file(session: Path) -> Path:
+    """The file whose appearance ends a take early."""
+    return session / ".stop"
+
+
+def default_plan_path() -> Path | None:
+    """The lab plan shipped in docs when it exists, so Record works out of the box."""
+    candidate = commands.repo_root() / LAB_PLAN
+    return candidate if candidate.is_file() else None
+
+
+def default_session_dir() -> Path:
+    """A fresh ``sessions/<timestamp>`` under the repo for the next take."""
+    from datetime import datetime
+
+    stamp = datetime.now().strftime("%Y-%m-%dT%H-%M")
+    return commands.repo_root() / "sessions" / f"{stamp}-take"
+
+
 class CapturePanel(QGroupBox):
-    """Plan, mode, views, UVC controls and duration for the camera commands."""
+    """Plan, mode, views and UVC controls for the camera commands."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Capture", parent)
-        self.plan_edit = QLineEdit()
-        self.session_edit = QLineEdit(str(Path.cwd() / "session"))
+        self.plan_edit = QLineEdit(str(default_plan_path() or ""))
+        self.session_edit = QLineEdit(str(default_session_dir()))
         self.mode_combo = QComboBox()
         self.mode_combo.addItem(PLAN_DEFAULT, None)
         for mode in MODE_PRESETS:
             self.mode_combo.addItem(mode_text(mode), mode)
         self.views_edit = QLineEdit()
         self.views_edit.setPlaceholderText("all plan views, or e.g. cam_b,cam_c")
-        self.duration_spin = QDoubleSpinBox()
-        self.duration_spin.setRange(0.5, 600.0)
-        self.duration_spin.setValue(10.0)
         self.exposure_edit = QLineEdit()
         self.exposure_edit.setPlaceholderText("camera default")
         self.gain_edit = QLineEdit()
@@ -215,7 +214,6 @@ class CapturePanel(QGroupBox):
         )
         form.addRow("Mode", self.mode_combo)
         form.addRow("Views", self.views_edit)
-        form.addRow("Duration (s)", self.duration_spin)
         form.addRow("Exposure", self.exposure_edit)
         form.addRow("Gain", self.gain_edit)
         form.addRow("Auto-exposure", self.auto_exposure_combo)
@@ -225,8 +223,9 @@ class CapturePanel(QGroupBox):
         row = QWidget()
         layout = QHBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(LayoutMetrics.SPACING_SM)
         button = QPushButton("…")
-        button.setFixedWidth(32)
+        button.setFixedWidth(LayoutMetrics.ICON_BUTTON_WIDTH)
         button.clicked.connect(on_click)
         layout.addWidget(edit)
         layout.addWidget(button)
@@ -272,9 +271,6 @@ class CapturePanel(QGroupBox):
     def session_dir(self) -> Path:
         require(self.session_edit.text().strip() != "", "choose a session folder")
         return Path(self.session_edit.text().strip())
-
-    def duration_s(self) -> float:
-        return float(self.duration_spin.value())
 
     def dry_run(self) -> bool:
         return self.dry_run_check.isChecked()
@@ -491,177 +487,6 @@ class ProcessPanel(QGroupBox):
         return self.align_combo.currentText()
 
 
-class PlaybackPanel(QWidget):
-    """One view and one observation set at a time, frame-accurate, with overlay."""
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._reader: VideoReader | None = None
-        self._track: PoseTrack | None = None
-        self._index = 0
-        self._timer = QTimer(self)
-        self._timer.timeout.connect(self.step)
-        self.view_combo = QComboBox()
-        self.view_combo.currentIndexChanged.connect(self._on_view_changed)
-        self.set_combo = QComboBox()
-        self.set_combo.currentIndexChanged.connect(self._on_set_changed)
-        self.overlay_check = QCheckBox("pose overlay")
-        self.overlay_check.setChecked(True)
-        self.overlay_check.toggled.connect(lambda _: self.show_frame(self._index))
-        self.confidence_spin = QDoubleSpinBox()
-        self.confidence_spin.setRange(0.0, 1.0)
-        self.confidence_spin.setSingleStep(0.05)
-        self.confidence_spin.setValue(0.5)
-        self.confidence_spin.valueChanged.connect(
-            lambda _: self.show_frame(self._index)
-        )
-        self.play_button = QPushButton("Play")
-        self.play_button.clicked.connect(self.toggle_play)
-        self.image = QLabel("no session loaded")
-        self.image.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.image.setMinimumSize(320, 200)
-        self.slider = QSlider(Qt.Orientation.Horizontal)
-        self.slider.valueChanged.connect(self.show_frame)
-        self.status = QLabel("")
-        top = QHBoxLayout()
-        top.addWidget(QLabel("View"))
-        top.addWidget(self.view_combo, 1)
-        top.addWidget(QLabel("Set"))
-        top.addWidget(self.set_combo, 1)
-        top.addWidget(self.overlay_check)
-        top.addWidget(QLabel("min conf"))
-        top.addWidget(self.confidence_spin)
-        top.addWidget(self.play_button)
-        layout = QVBoxLayout(self)
-        layout.addLayout(top)
-        layout.addWidget(self.image, 1)
-        layout.addWidget(self.slider)
-        layout.addWidget(self.status)
-
-    @property
-    def frame_index(self) -> int:
-        return self._index
-
-    @property
-    def playing(self) -> bool:
-        return self._timer.isActive()
-
-    def load(self, media: SessionMedia) -> None:
-        """Offer every playable view; select the first."""
-        self.close_media()
-        self.view_combo.blockSignals(True)
-        self.view_combo.clear()
-        for view in media.views:
-            if view.playable is not None:
-                self.view_combo.addItem(view.view, view)
-        self.view_combo.blockSignals(False)
-        if self.view_combo.count():
-            self._on_view_changed(0)
-        else:
-            self.image.setText("no playable recording in this session")
-
-    def _current_view(self) -> ViewMedia | None:
-        return self.view_combo.currentData()
-
-    def current_view_name(self) -> str | None:
-        view = self._current_view()
-        return None if view is None else view.view
-
-    def current_set_name(self) -> str | None:
-        text = self.set_combo.currentText()
-        return text or None
-
-    def _on_view_changed(self, index: int) -> None:
-        view: ViewMedia | None = self.view_combo.itemData(index)
-        if view is None or view.playable is None:
-            return
-        self.close_media()
-        self._reader = VideoReader(view.playable)
-        self.set_combo.blockSignals(True)
-        self.set_combo.clear()
-        for name, path in (view.observation_sets or {}).items():
-            self.set_combo.addItem(name, path)
-        if not self.set_combo.count() and view.observations is not None:
-            self.set_combo.addItem("observations", view.observations)
-        self.set_combo.blockSignals(False)
-        self._load_track()
-        self.slider.setRange(0, max(self._reader.frame_count - 1, 0))
-        rate = self._reader.fps or view.fps or 30.0
-        self._timer.setInterval(max(int(1000.0 / rate), 1))
-        self.show_frame(0)
-
-    def _on_set_changed(self, _index: int) -> None:
-        self._load_track()
-        self.show_frame(self._index)
-
-    def _load_track(self) -> None:
-        path: Path | None = self.set_combo.currentData()
-        self._track = PoseTrack.load(path) if path is not None else None
-
-    def close_media(self) -> None:
-        self._timer.stop()
-        self.play_button.setText("Play")
-        if self._reader is not None:
-            self._reader.close()
-            self._reader = None
-        self._track = None
-
-    def toggle_play(self) -> None:
-        if self._reader is None:
-            return
-        if self.playing:
-            self._timer.stop()
-            self.play_button.setText("Play")
-        else:
-            self._timer.start()
-            self.play_button.setText("Pause")
-
-    def step(self) -> None:
-        if self._reader is None:
-            return
-        nxt = self._index + 1
-        if nxt >= self._reader.frame_count:
-            self.toggle_play()
-            return
-        self.slider.setValue(nxt)
-
-    def show_frame(self, index: int) -> None:
-        """Draw frame ``index`` (clamped) with the overlay when one exists."""
-        if self._reader is None:
-            return
-        self._index = clamp_index(index, self._reader.frame_count)
-        frame = self._reader.read(self._index)
-        if frame is None:
-            return
-        pose = self._track.at(self._index) if self._track else None
-        if pose is not None and self.overlay_check.isChecked():
-            frame = draw_pose(
-                frame,
-                pose[0],
-                pose[1],
-                self._track.edges if self._track else (),
-                min_confidence=float(self.confidence_spin.value()),
-            )
-        self._blit(frame)
-        self.slider.blockSignals(True)
-        self.slider.setValue(self._index)
-        self.slider.blockSignals(False)
-        detected = "pose" if pose is not None else "no pose"
-        total = self._reader.frame_count
-        self.status.setText(f"frame {self._index + 1}/{total} · {detected}")
-
-    def _blit(self, frame_bgr: np.ndarray) -> None:
-        rgb = np.ascontiguousarray(frame_bgr[:, :, ::-1])
-        h, w = rgb.shape[:2]
-        image = QImage(rgb.tobytes(), w, h, 3 * w, QImage.Format.Format_RGB888)
-        pixmap = QPixmap.fromImage(image).scaled(
-            self.image.size(),
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation,
-        )
-        self.image.setPixmap(pixmap)
-
-
 class ResultsTable(QTableWidget):
     """Any result payload as ``key | value`` rows."""
 
@@ -718,6 +543,7 @@ class CaptureRigWidget(QWidget):
 
     _ACTIONS: tuple[tuple[str, str], ...] = (
         ("plan_check", "Plan check"),
+        ("preview", "Preview cameras"),
         ("record", "Record"),
         ("import", "Import videos"),
         ("proxy", "Proxies"),
@@ -732,39 +558,64 @@ class CaptureRigWidget(QWidget):
         ("analyze", "Analyze 2-D"),
         ("export", "Export"),
         ("clip", "Export clip"),
+        ("multipicture", "Export multiview"),
         ("compare_takes", "Compare takes"),
+        ("annotate", "Annotate / edit points"),
         ("stop", "Stop"),
         ("load", "Load session"),
     )
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, parent: QWidget | None = None, *, settings: QSettings | None = None
+    ) -> None:
         super().__init__(parent)
+        self.layout_store = LayoutStore(settings)
         self.workflow = WorkflowPanel()
         self.capture = CapturePanel()
         self.process = ProcessPanel()
+        self.match = MatchPanel()
+        self.preview = PreviewPanel()
+        self.preview.state_changed.connect(self._on_preview_state)
+        self._resume_preview = False
+        self.record_bar = RecordBar()
+        self.record_bar.start_requested.connect(self.start_take)
+        self.record_bar.stop_requested.connect(self.stop_take)
+        self.record_bar.badge_changed.connect(self.preview.set_badge)
         self.playback = PlaybackPanel()
         self.results = QTabWidget()
-        self.swing_table = ResultsTable()
-        self.analysis_table = ResultsTable()
-        self.reliability_table = ResultsTable()
+        self.swing_table = SourcedTable()
+        self.analysis_table = SourcedTable()
+        self.reliability_table = SourcedTable()
         self.results.addTab(self.swing_table, "Swing (3-D)")
         self.results.addTab(self.analysis_table, "Analysis (2-D)")
-        self.model_table = ResultsTable()
+        self.model_table = SourcedTable()
         self.results.addTab(self.reliability_table, "Reliability")
-        self.kinetics_table = ResultsTable()
+        self.kinetics_table = SourcedTable()
         self.results.addTab(self.model_table, "Model fit")
         self.results.addTab(self.kinetics_table, "Kinetics")
+        self.provenance = ProvenanceTab()
+        self.results.addTab(self.provenance, "Provenance")
+        for table in (
+            self.swing_table,
+            self.analysis_table,
+            self.reliability_table,
+            self.model_table,
+            self.kinetics_table,
+        ):
+            table.source_selected.connect(self._show_provenance)
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(5000)
         self.runner = RigProcessRunner(self)
         self.runner.output.connect(self._append_log)
         self.runner.finished.connect(self._on_command_finished)
-        self.session_label = QLabel("no session loaded")
+        self._take_running = False
         self.buttons = self._buttons()
         self._layout()
         self.media: SessionMedia | None = None
         self._apply_workflow(None)
+        self.layout_bar.restore_last()
+        styling.connect_theme_changed(self.restyle)
 
     # -- layout -------------------------------------------------------------
     def _buttons(self) -> dict[str, QPushButton]:
@@ -779,31 +630,77 @@ class CaptureRigWidget(QWidget):
         inputs = QTabWidget()
         inputs.addTab(self.capture, "Capture")
         inputs.addTab(self.process, "Process")
+        inputs.addTab(self.match, "Match")
         left = QSplitter(Qt.Orientation.Vertical)
         left.addWidget(self.workflow)
         left.addWidget(inputs)
-        buttons = QWidget()
-        grid = QGridLayout(buttons)
-        grid.setContentsMargins(0, 0, 0, 0)
-        for i, button in enumerate(self.buttons.values()):
-            grid.addWidget(button, i // BUTTONS_PER_ROW, i % BUTTONS_PER_ROW)
+        self.action_grid = ActionGrid(self.buttons)
         middle = QWidget()
         mid_layout = QVBoxLayout(middle)
-        mid_layout.addWidget(buttons)
+        mid_layout.setContentsMargins(0, 0, 0, 0)
+        mid_layout.setSpacing(LayoutMetrics.SPACING_MD)
+        mid_layout.addWidget(self.action_grid)
         mid_layout.addWidget(self.log, 1)
-        right = QSplitter(Qt.Orientation.Vertical)
-        right.addWidget(self.playback)
-        right.addWidget(self.results)
-        right.setStretchFactor(0, 3)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(left)
-        splitter.addWidget(middle)
-        splitter.addWidget(right)
-        splitter.setStretchFactor(2, 2)
-        splitter.setSizes([420, 520, 660])
+        controls = QSplitter(Qt.Orientation.Horizontal)
+        controls.addWidget(left)
+        controls.addWidget(middle)
+        controls.setSizes(list(CONTROLS_SIZES))
+        right = Qt.DockWidgetArea.RightDockWidgetArea
+        self.panes = PaneHost(
+            controls,
+            {
+                "preview": ("Live preview", self._live_pane(), right),
+                "playback": ("Playback", self.playback, right),
+                "results": ("Results", self.results, right),
+            },
+        )
+        self.layout_bar = LayoutBar(
+            self.panes,
+            self.layout_store,
+            controls,
+            extras=PaneExtras(read=self.pane_extras, apply=self.apply_pane_extras),
+        )
+        self.header = HeaderBar(self.layout_bar)
+        self.session_label: QLabel = self.header.session
+        self.status_strip: StatusStrip = self.header.status
+        self.record_bar.badge_changed.connect(self._on_badge)
         layout = QVBoxLayout(self)
-        layout.addWidget(self.session_label)
-        layout.addWidget(splitter, 1)
+        margin = LayoutMetrics.SPACING_SM
+        layout.setContentsMargins(margin, margin, margin, margin)
+        layout.setSpacing(LayoutMetrics.SPACING_SM)
+        layout.addWidget(self.header)
+        layout.addWidget(self.panes, 1)
+
+    def pane_extras(self) -> dict[str, str]:
+        """The multiview layout each pane is drawn through (#9813/#9814).
+
+        Saved with the dock arrangement, so both come back on restart.
+        """
+        return {
+            "preview_layout": self.preview.layout_name(),
+            "playback_layout": self.playback.layout_name(),
+        }
+
+    def apply_pane_extras(self, extras: Mapping[str, str]) -> None:
+        """Put a saved arrangement's multiview layouts back on the panes."""
+        self.preview.set_layout_name(extras.get("preview_layout", ""))
+        self.playback.set_layout_name(extras.get("playback_layout", ""))
+
+    def restyle(self, _theme: str = "") -> None:
+        """Re-read every style from the theme (connected to ``themeChanged``)."""
+        self.header.restyle()
+        self.action_grid.restyle()
+        self.preview.restyle()
+        self.record_bar.restyle()
+
+    def _live_pane(self) -> QWidget:
+        """Preview tiles with the transport controls underneath, like a camera app."""
+        pane = QWidget()
+        column = QVBoxLayout(pane)
+        column.setContentsMargins(0, 0, 0, 0)
+        column.addWidget(self.preview, 1)
+        column.addWidget(self.record_bar)
+        return pane
 
     # -- commands -----------------------------------------------------------
     def command_for(self, action: str) -> list[str]:
@@ -814,8 +711,11 @@ class CaptureRigWidget(QWidget):
             "record": lambda: commands.record_command(
                 self.capture.selection(),
                 session,
-                duration_s=self.capture.duration_s(),
+                duration_s=self.record_bar.duration_s(),
                 dry_run=self.capture.dry_run(),
+                live_preview=live_dir(session),
+                stop_file=stop_file(session),
+                cameras=self.preview.camera_ids() or None,
             ),
             "import": lambda: commands.import_command(
                 session, self.capture.pending_import
@@ -835,8 +735,9 @@ class CaptureRigWidget(QWidget):
             "calibrate": lambda: self._calibrate(session),
             "reconstruct": lambda: self._reconstruct(session),
             "analyze": lambda: commands.analyze_command(session),
-            "fit_model": lambda: commands.fit_model_command(
+            "fit_model": lambda: fit_model_args(
                 session,
+                self.match.selection(),
                 model=self.process.model_name(),
                 fit_lengths=self.process.fit_lengths(),
             ),
@@ -844,12 +745,18 @@ class CaptureRigWidget(QWidget):
                 session,
                 model=self.process.model_name(),
                 body_mass_kg=self.process.body_mass(),
+                variant=self.match.selection().name,
             ),
             "compare_models": lambda: commands.compare_models_command(
-                session, fit_lengths=self.process.fit_lengths()
+                session,
+                fit_lengths=self.process.fit_lengths(),
+                variant=self.match.selection().name,
             ),
-            "export": lambda: commands.export_command(session),
+            "export": lambda: commands.export_command(
+                session, variant=self.match.selection().name
+            ),
             "clip": lambda: self._clip(session),
+            "multipicture": lambda: self._multipicture(session),
             "compare_takes": lambda: self._compare_takes(session),
         }
         if action not in builder:
@@ -862,12 +769,35 @@ class CaptureRigWidget(QWidget):
 
     def _reconstruct(self, session: Path) -> list[str]:
         cameras, intrinsics = self.process.start_file()
-        return commands.reconstruct_command(
+        return reconstruct_args(
             session,
+            self.match.selection(),
             measurements=self.process.measurements(),
             cameras=cameras,
             intrinsics=intrinsics,
             exclude_joints=self.process.exclude_joints(),
+        )
+
+    def _show_provenance(self, source: object) -> None:
+        if self.media is not None and isinstance(source, Path):
+            self.provenance.show_path(self.media.root, source)
+            self.results.setCurrentWidget(self.provenance)
+
+    def annotate_dialog(self) -> AnnotateDialog | None:
+        """The Annotate/edit dialog for the player's view and set (not shown)."""
+        if self.media is None:
+            return None
+        name = self.playback.current_view_name()
+        if name is None:
+            return None
+        view = self.media.view(name)
+        if view.playable is None:
+            return None
+        set_name = self.playback.current_set_name()
+        base_file = (view.observation_sets or {}).get(set_name) if set_name else None
+        base = BaseSet(set_name, base_file) if set_name and base_file else None
+        return AnnotateDialog(
+            self.media.root, name, view.playable, base=base, parent=self
         )
 
     def _clip(self, session: Path) -> list[str]:
@@ -883,6 +813,30 @@ class CaptureRigWidget(QWidget):
             speed=self.process.clip_speed(),
             observation_set=set_name,
         )
+
+    def _multipicture(self, session: Path) -> list[str]:
+        """Composite video of the current layout: one file from several views."""
+        name = self.export_layout_name()
+        set_name = self.playback.current_set_name()
+        out = session / f"multiview_{name}_{set_name or 'raw'}.mp4"
+        return commands.multipicture_command(
+            session,
+            name,
+            out,
+            commands.MultipictureArgs(
+                observation_set=set_name, speed=self.process.clip_speed()
+            ),
+        )
+
+    def export_layout_name(self) -> str:
+        """The layout the composite export uses: the live pane's choice.
+
+        An unsaved edit has no name the CLI could resolve, so the default
+        stands in until the operator saves the layout (#9813).
+        """
+        name = self.preview.layout_name()
+        editable = name and name != multiview.EDITED
+        return name if editable else DEFAULT_EXPORT_LAYOUT
 
     def _compare_takes(self, session: Path) -> list[str]:
         view = self.playback.current_view_name()
@@ -902,6 +856,20 @@ class CaptureRigWidget(QWidget):
         if action == "load":
             self.refresh_session()
             return
+        if action == "preview":
+            self.toggle_preview()
+            return
+        if action == "record":
+            self.record_bar.toggle()  # countdown → start_take, or stop the take
+            return
+        if action == "annotate":
+            dialog = self.annotate_dialog()
+            if dialog is None:
+                self._append_log("load a session and pick a playable view first\n")
+                return
+            dialog.exec()
+            self.refresh_session()
+            return
         if action == "import" and not self.capture.pending_import:
             self.capture.choose_import_files()
         if self.runner.busy:
@@ -915,9 +883,72 @@ class CaptureRigWidget(QWidget):
         self.runner.run(argv)
 
     def _on_command_finished(self, code: int) -> None:
+        if self._take_running:
+            self._take_running = False
+            self.status_strip.set_last_take(code)
         if code == 0:
             self.capture.pending_import = []
             self.refresh_session()
+        self.preview.stop_watching()
+        self.record_bar.recording_finished()
+        if self._resume_preview:
+            self._resume_preview = False
+            self.toggle_preview(on=True)
+
+    # -- recording ------------------------------------------------------------
+    def start_take(self) -> None:
+        """Launch the recorder; the preview switches to the recorder's snapshots.
+
+        The cameras belong to ffmpeg during a take, so the direct preview is
+        released first and resumed when the take is written.
+        """
+        if self.runner.busy:
+            self._append_log("a command is still running; press Stop first\n")
+            self.record_bar.recording_finished()
+            return
+        try:
+            argv = self.command_for("record")
+            session = self.capture.session_dir()
+        except (ValueError, TypeError) as exc:
+            self._append_log(f"cannot record: {exc}\n")
+            self.record_bar.recording_finished()
+            return
+        views = self.preview.views() or tuple(self.capture.selection().views)
+        self._resume_preview = self.preview.active or not views
+        self.preview.stop()
+        live_dir(session).mkdir(parents=True, exist_ok=True)
+        stop_file(session).unlink(missing_ok=True)
+        if views:
+            self.preview.watch_snapshots(live_dir(session), views)
+        self._take_running = True
+        self.runner.run(argv)
+        self.record_bar.recording_started()
+
+    def stop_take(self) -> None:
+        """End the running take early (the recorder sees the stop file)."""
+        try:
+            stop_file(self.capture.session_dir()).write_text("stop", encoding="utf-8")
+        except (ValueError, OSError) as exc:
+            self._append_log(f"cannot stop the take: {exc}\n")
+
+    def toggle_preview(self, on: bool | None = None) -> None:
+        """Start (or stop) the live preview of the Capture panel's plan."""
+        want = (not self.preview.active) if on is None else on
+        if not want:
+            self.preview.stop()
+            return
+        try:
+            self.preview.start(self.capture.selection())
+        except (ValueError, TypeError) as exc:
+            self._append_log(f"cannot preview: {exc}\n")
+
+    def _on_preview_state(self, active: bool) -> None:
+        self.buttons["preview"].setText("Stop preview" if active else "Preview cameras")
+        bound = len(self.preview.camera_ids()) if active else 0
+        self.status_strip.set_cameras(bound)
+
+    def _on_badge(self, readout: str) -> None:
+        self.status_strip.set_recording(self.record_bar.phase, readout)
 
     def _append_log(self, text: str) -> None:
         self.log.moveCursor(self.log.textCursor().MoveOperation.End)
@@ -940,13 +971,22 @@ class CaptureRigWidget(QWidget):
             + (f" · problems: {'; '.join(media.problems)}" if media.problems else "")
         )
         self.playback.load(media)
+        self.match.load(media)
         self.results.setCurrentIndex(1 if len(media.views) == 1 else 0)
-        self.swing_table.fill(media.swing_summary)
+        recon = media.root / "reconstruct"
+        self.swing_table.fill(
+            media.swing_summary, recon / "session_reconstruction.json"
+        )
         self.analysis_table.fill(media.analysis_2d)
-        self.model_table.fill(media.model_fit)
-        self.kinetics_table.fill(_kinetics_rows(media))
+        self.model_table.fill(
+            media.model_fit, media.root / "model" / "joint_angles.json"
+        )
+        self.kinetics_table.fill(
+            _kinetics_rows(media), media.root / "model" / "kinetics.json"
+        )
         self.reliability_table.fill(
-            _reliability_rows(media.reliability) if media.reliability else None
+            _reliability_rows(media.reliability) if media.reliability else None,
+            media.root / "reliability.json",
         )
         if media.reliability:
             self.process.suggest_exclusions(
@@ -960,8 +1000,10 @@ class CaptureRigWidget(QWidget):
         states = workflow.evaluate(media)
         self.workflow.refresh(states)
         enabled = workflow.enabled_actions(states) | ALWAYS_ENABLED
+        hints = workflow.action_hints(states, ALWAYS_ENABLED)
         for action, button in self.buttons.items():
             button.setEnabled(action in enabled)
+            button.setToolTip(hints.get(action, ""))
 
     def enabled_actions(self) -> frozenset[str]:
         return frozenset(a for a, b in self.buttons.items() if b.isEnabled())
@@ -972,7 +1014,9 @@ class CaptureRigWidget(QWidget):
         return self.runner.busy
 
     def shutdown(self) -> None:
-        """Release the decoder and kill any running command."""
+        """Release the cameras and the decoder; kill any running command."""
+        self.layout_bar.save_last()
+        self.preview.stop()
         self.playback.close_media()
         self.runner.stop()
 
@@ -982,12 +1026,28 @@ class CaptureRigWidget(QWidget):
 
 
 class CaptureRigWindow(QMainWindow):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    """The tile in its own window (``python -m src.tools.capture_rig``).
+
+    ``autostart_preview`` opens the planned cameras as soon as the window
+    shows, so the operator sees the bay without pressing anything.
+    """
+
+    def __init__(
+        self, parent: QWidget | None = None, *, autostart_preview: bool = False
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Capture Rig")
         self.widget = CaptureRigWidget(self)
         self.setCentralWidget(self.widget)
-        self.resize(1600, 900)
+        self.resize(*WINDOW_SIZE)
+        styling.apply_theme(self)
+        self._autostart_preview = autostart_preview
+
+    def showEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        super().showEvent(event)
+        if self._autostart_preview:
+            self._autostart_preview = False
+            self.widget.toggle_preview(on=True)
 
 
 def get_dockable_ui() -> CaptureRigWindow:
