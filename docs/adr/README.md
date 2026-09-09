@@ -54,6 +54,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0047](0047-trajectory-visualization-shared-wire-preserved-viewers.md)  | Trajectory Visualization — Shared Wire, Preserved Viewers                         | Accepted | 2026-08-30 |
 | [0048](0048-launch-monitor-port-plan.md)                                | Launch-Monitor Port Plan                                                          | Proposed | 2026-09-01 |
 | [0049](0049-obs-studio-is-not-a-capture-layer.md)                       | OBS Studio Is Not a Capture Layer for the Markerless Rig                          | Accepted | 2026-09-07 |
+| [0050](0050-optimizer-backend-registry-and-bioptim.md)                  | Optimizer Backend Registry and the `bioptim` OCP Layer                            | Accepted | 2026-09-08 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.

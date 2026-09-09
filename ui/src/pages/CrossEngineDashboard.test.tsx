@@ -1,13 +1,22 @@
 /**
- * Tests for CrossEngineDashboard page data structures and pure helpers.
+ * Tests for CrossEngineDashboard page data structures, pure helpers and
+ * the config-validation / bounded-polling behaviour from issue #8891.
  *
- * Avoids rendering (no DOM dependency on Recharts) so these run fast
- * in a jsdom/vitest environment.
+ * The rendering tests never reach the results view, so Recharts stays
+ * unmounted and they remain fast in a jsdom/vitest environment.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 import type { CrossEngineResult, MetricStats, PerturbationConfig } from './CrossEngineDashboard';
+import { CrossEngineDashboardPage } from './CrossEngineDashboard';
+import {
+  DEFAULT_CONFIG_TEXT,
+  POLL_DEADLINE_MS,
+  POLL_INTERVAL_MS,
+  validateConfigText,
+} from './crossEngineConfig';
 
 // ---------------------------------------------------------------------------
 // Helpers under test (inlined so tests don't rely on internal imports)
@@ -155,5 +164,169 @@ describe('MetricStats formatting', () => {
   it('formats mean in scientific notation', () => {
     const stats: MetricStats = { mean: 0.000123, std: 0.00001, cv: 0.081, robustness_score: 0.92 };
     expect(stats.mean.toExponential(3)).toBe('1.230e-4');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Config validation (issue #8891)
+// ---------------------------------------------------------------------------
+
+describe('validateConfigText', () => {
+  it('accepts the defaults', () => {
+    expect(validateConfigText(DEFAULT_CONFIG_TEXT)).toEqual({});
+  });
+
+  it('rejects a zero timestep instead of coercing it', () => {
+    const errors = validateConfigText({ ...DEFAULT_CONFIG_TEXT, dt: '0' });
+    expect(errors.dt).toBe('Timestep (s) must be at least 0.001.');
+  });
+
+  it('rejects zero trials', () => {
+    const errors = validateConfigText({ ...DEFAULT_CONFIG_TEXT, n_trials: '0' });
+    expect(errors.n_trials).toBe('Trials must be at least 1.');
+  });
+
+  it('rejects a cleared field rather than reading it as 0', () => {
+    const errors = validateConfigText({ ...DEFAULT_CONFIG_TEXT, dt: '   ' });
+    expect(errors.dt).toBe('Timestep (s) is required.');
+  });
+
+  it('rejects non-numeric text', () => {
+    const errors = validateConfigText({ ...DEFAULT_CONFIG_TEXT, t_end: 'abc' });
+    expect(errors.t_end).toBe('Duration (s) must be a number.');
+  });
+
+  it('rejects fractional whole-number fields', () => {
+    const errors = validateConfigText({ ...DEFAULT_CONFIG_TEXT, n_trials: '2.5' });
+    expect(errors.n_trials).toBe('Trials must be a whole number.');
+  });
+
+  it('rejects dt >= t_end, which the API also refuses', () => {
+    const errors = validateConfigText({ ...DEFAULT_CONFIG_TEXT, dt: '2', t_end: '1' });
+    expect(errors.dt).toBe('Timestep (s) must be smaller than the duration.');
+  });
+
+  it('allows zero noise amplitude and zero seed', () => {
+    const errors = validateConfigText({
+      ...DEFAULT_CONFIG_TEXT,
+      noise_amplitude: '0',
+      seed: '0',
+    });
+    expect(errors).toEqual({});
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rendered behaviour (issue #8891)
+// ---------------------------------------------------------------------------
+
+/** Fetch double: POST hands back a task id, GET reports "running" forever. */
+function installFetchMock() {
+  const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+    if (init?.method === 'POST') {
+      return { ok: true, json: async () => ({ task_id: 'task-1' }) } as unknown as Response;
+    }
+    return { ok: true, json: async () => ({ status: 'running' }) } as unknown as Response;
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
+async function startRunningStudy() {
+  render(<CrossEngineDashboardPage />);
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Run comparison' }));
+  });
+  expect(screen.getByRole('button', { name: 'Running…' })).toBeInTheDocument();
+}
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe('CrossEngineDashboardPage validation', () => {
+  it('blocks Run and shows a message when the timestep is zero', () => {
+    const fetchMock = installFetchMock();
+    render(<CrossEngineDashboardPage />);
+
+    fireEvent.change(screen.getByLabelText('Timestep (s)'), { target: { value: '0' } });
+
+    expect(screen.getByText('Timestep (s) must be at least 0.001.')).toBeInTheDocument();
+    const runButton = screen.getByRole('button', { name: 'Run comparison' });
+    expect(runButton).toBeDisabled();
+    fireEvent.click(runButton);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('blocks Run when trials is zero', () => {
+    const fetchMock = installFetchMock();
+    render(<CrossEngineDashboardPage />);
+
+    fireEvent.change(screen.getByLabelText('Trials'), { target: { value: '0' } });
+
+    expect(screen.getByText('Trials must be at least 1.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run comparison' })).toBeDisabled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('re-enables Run once the field is corrected', () => {
+    installFetchMock();
+    render(<CrossEngineDashboardPage />);
+    const dt = screen.getByLabelText('Timestep (s)');
+
+    fireEvent.change(dt, { target: { value: '' } });
+    expect(screen.getByRole('button', { name: 'Run comparison' })).toBeDisabled();
+
+    fireEvent.change(dt, { target: { value: '0.005' } });
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Run comparison' })).toBeEnabled();
+  });
+});
+
+describe('CrossEngineDashboardPage polling', () => {
+  it('stops polling at the deadline and reports an actionable failure', async () => {
+    vi.useFakeTimers();
+    const fetchMock = installFetchMock();
+
+    await startRunningStudy();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(POLL_DEADLINE_MS);
+    });
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/Gave up waiting for the study/);
+    const callsAtDeadline = fetchMock.mock.calls.length;
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5 * POLL_INTERVAL_MS);
+    });
+    expect(fetchMock.mock.calls.length).toBe(callsAtDeadline);
+  });
+
+  it('lets the user cancel a study that never finishes', async () => {
+    vi.useFakeTimers();
+    const fetchMock = installFetchMock();
+
+    await startRunningStudy();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3 * POLL_INTERVAL_MS);
+    });
+    const callsBeforeCancel = fetchMock.mock.calls.length;
+    expect(callsBeforeCancel).toBeGreaterThan(1);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel study' }));
+    });
+
+    expect(screen.getByRole('status')).toHaveTextContent(/Study cancelled/);
+    expect(screen.getByRole('button', { name: 'Run comparison' })).toBeEnabled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10 * POLL_INTERVAL_MS);
+    });
+    expect(fetchMock.mock.calls.length).toBe(callsBeforeCancel);
   });
 });

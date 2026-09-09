@@ -108,6 +108,139 @@ units distinct. Windows grants one process exclusive access to a camera, so a
 session either observes through frame sources or records through recorders,
 not both on the same camera.
 
+## Layout Model
+
+Multiview pictures (live preview, playback and composite export) are all
+rendered through one pure model, `tools/capture_rig/layout_model.py` (#9810).
+A `LayoutSpec` (JSON schema `rig-layout/1.0.0`) is a named `rows`x`cols` grid
+(1..4 each, so up to 16 tiles) on a canvas; every `Tile` names a `source`
+(`live`/`recorded`/`overlay` of a view plus optional variants, or `empty`), a
+`cell` (row, col, rowspan, colspan; tiles may not overlap), `rotation`
+(0/90/180/270), `flip_h`/`flip_v`, a normalised `crop`, `fit`
+(`fit` letterboxes, `fill` centre-crops, `stretch`) and an optional label.
+`to_dict()`/`from_dict()` round-trip it and name the offending field on a
+`ValueError`; `with_tile`/`without_tile`/`move_tile` return new specs.
+`compose(frames, spec, size, palette)` draws a mapping of BGR frames (keyed by
+`SourceRef.key`, e.g. `live:face_on`) into one image with theme-derived
+`Palette` colours; missing sources show a placeholder. Built-in presets:
+`single`, `side_by_side`, `three_across`, `two_by_two`, `three_by_three`,
+`four_by_four`, `primary_plus_strip`.
+
+`layout_presets.LayoutStore` (#9811) saves named layouts with a provenance
+stamp in two scopes: user (`<AppConfigLocation>/UpstreamDrift/capture_rig/layouts/`)
+and session (`<session>/layouts/`, so a layout travels with a take); built-in
+presets appear read-only in `list()`.
+
+### Layout Editor
+
+`tools/capture_rig/layout_editor.LayoutEditor` (#9812) is the interactive
+front end of the layout model: grid spinners (up to 4x4) and a preset menu
+(built-ins plus the layouts in the user and session scopes of `LayoutStore`),
+a composed thumbnail of the whole layout drawn through the same `compose()`
+the preview and export use, and per-tile controls: source, rotate, flip,
+crop (switch _Crop_ on and drag a rectangle over the tile), fit, label and
+span (+/- row and column). Click a tile to select it; drag it onto another
+cell to move it (the two swap). _Save as..._, _Load_ and _Delete_ go through
+the store; _Undo_/_Redo_ keep the last 20 edits. The widget emits
+`layout_changed(LayoutSpec)` once per edit; frames for the thumbnails come
+from an injected `frame_provider(SourceRef)`; every control's tooltip says
+what it does and, when grey, why.
+
+### Composite Video Export
+
+`rig multipicture --session S --layout NAME|PATH --out X.mp4` writes several
+streams as one video through a layout (`tools/capture_rig/mosaic.py`, #9815).
+`--layout` is a built-in preset (filled with the session's playable views in
+plan order), a layout saved in the session then the user scope of
+`LayoutStore`, or a path to a `rig-layout/1.0.0` JSON file. `recorded` tiles
+show the view's playable file; `overlay` tiles draw the observation set
+(`--set`, default `observations`) and the 3-D tracks of `--variants` on it.
+Sources are synchronised by frame index plus the per-view offsets of the
+manifest's strobe `timing` block; a shorter source holds its last frame.
+`--from/--to` bound the frame range, `--size WxH` sets the canvas, `--speed`
+is a playback-rate change (every frame kept, fps scaled: 0.5 halves the fps).
+`X.json` beside the video records the layout, sources (file, fps, offset),
+frame range, speed and the standard provenance block. `compare-takes` stitches
+through the same compositor. The tile's _Export multiview_ button exports
+through the live pane's chosen layout (#9813).
+
+Measured on the lab's three-camera rig, with both composite figures and the
+recorder's frame counts:
+[`evidence/capture_rig_multiview.md`](evidence/capture_rig_multiview.md).
+
+## Live Preview
+
+_Preview cameras_ opens every planned view through the same camera binding
+the recorder uses (`src/motion_capture/rig/binding.py`) and composites the
+latest frame of every view into one canvas above the player (#9813), one
+worker thread per camera, refreshed at up to 15 Hz. The plan path is prefilled with the lab plan and the session folder
+with a fresh `sessions/<timestamp>-take`, so _Record_ works out of the box:
+pressing it releases the cameras (ffmpeg needs the devices), runs the
+recorder, loads the take into the player and resumes the preview. A plan that
+cannot be realised on this machine is reported on the preview's status line
+rather than raised.
+
+### Multiview Live and Playback
+
+Both viewing panes are drawn through a `LayoutSpec` (#9813, #9814). The
+picker above each canvas lists the built-in presets and every saved layout;
+_Edit..._ opens the layout editor beside it, with live thumbnails, and each
+edit applies as you make it. A view that the layout does not show is still
+captured, and the same view may appear twice (full plus a cropped detail).
+The chosen layout name is saved with the pane arrangement, so both come back
+on the next start.
+
+Playback composites several of the session's sources at once: `recorded`
+tiles show the raw recording (or its proxy) and `overlay` tiles the same
+footage with the detector's pose and the ticked variants' models drawn on it,
+so raw and overlay of one view can sit side by side. Frame *k* is the same
+instant in every tile — when the manifest carries a strobe-alignment block
+each reader is shifted by its whole-frame offset. Scrubbing, play/pause,
+speed, single-frame stepping and _Export PNG..._ (the canvas exactly as shown)
+sit under the canvas.
+
+### Panes, Layouts and Recording Controls
+
+The viewing panes (**Live preview**, **Playback**, **Results**) are dock
+widgets: drag a title bar to move a pane to another edge, tear it off to float
+it (onto a second monitor if you like), tab two panes together, or close one.
+Every pane scrolls when its content is larger than the space it has, so the
+window never grows past the screen. **Layout** (top right) saves the current
+arrangement under a name, loads or deletes a saved one, and **Reset layout**
+returns to the default with every pane shown. The last arrangement is restored
+on the next start.
+
+### Appearance
+
+The tile follows the application theme (#9816). Its header is one toolbar:
+the session line on the left, then a status strip of three chips (cameras
+bound, recorder state with the live REC readout, and the outcome of the last
+take) and the **Layout** bar on the right. The action buttons are grouped by
+workflow step, each row labelled with the step it belongs to, so the grid
+reads in the same order as the Workflow panel. Every colour and style comes
+from `src/tools/capture_rig/styling.py`, which composes them from the active
+palette and the fleet `Styles` constants: nothing in the tile names a colour,
+spacing comes from `LayoutMetrics`, and switching theme (standalone window or
+embedded in the launcher alike) restyles the header, chips, preview tiles and
+the recording badge immediately. `tests/tools/capture_rig/test_theme_compliance.py`
+fails the build on a literal colour or an ad-hoc stylesheet string in the package.
+
+The live view opens with the tile. Under the tiles sits a transport strip:
+
+- **Record / Stop**: one button; during the countdown it reads _Cancel_.
+- **Take length**: 5 / 10 / 15 / 30 s presets or a custom spinner.
+- **Countdown**: none, 3, 5 or 10 s between pressing Record and the recorder
+  starting, so you can walk to address.
+- **REC readout**: a blinking red indicator with elapsed / total time and a
+  progress bar; the same `● REC 00:04 / 00:10` badge is stamped on every tile.
+
+A camera cannot be opened twice, so during a take the recorder itself keeps the
+view alive: with `--live-preview DIR` each ffmpeg process also decodes its stream at quarter
+resolution and rewrites `DIR/<view>.jpg` eight times a second (atomically), and the
+tile shows those snapshots until the take is written, then returns to the
+direct preview. **Stop** ends a take early through `--stop-file PATH`: the
+recorder polls for the file, stops every camera together and removes it.
+
 ## Recording a Session
 
 ```bash
@@ -194,6 +327,29 @@ rewritten. `timing_report.json` restates each view's offset, uncertainty and
 rate deviation and adds the skew it is expected to accumulate over its
 recording, which is what tells the reconstruction stage whether one offset per
 session is sufficient.
+
+## Match Tab, Overlays and Provenance
+
+The _Match_ tab names a variant, ticks the cameras to use and picks the
+observation set and the source (triangulate, or image space with the
+cameras of another variant). _Reconstruct_, _Fit model_, _Kinetics_,
+_Compare models_ and _Export_ all act on that variant. In the player, the
+_Model overlay_ checkboxes draw any registered variants' joints and model on
+the current view (views a variant never used are labelled held out); `rig
+overlay` writes the same as a clip. Clicking a row in any results table
+opens the _Provenance_ tab with the file's lineage down to the recordings
+and the detector plug-in (`rig lineage`).
+
+## Annotate and Edit Points
+
+_Annotate / edit points_ opens a dialog on the player's view. The banner
+names the frame and joint to click; `S` skips an occluded joint, `B` goes
+back, `N` moves to the next frame, `J` jumps, `Q` finishes and saves
+`annotations/<view>.json`. With an observation set selected in the player
+the same dialog edits that set: the detector's points are drawn, a click
+replaces one, `S` rejects it, `A` accepts the frame as detected. `rig
+annotations-to-observations` (with `--merge-with SET` for corrections)
+turns the file into an observation set the pipeline uses like any other.
 
 ## Extending the Rig
 
