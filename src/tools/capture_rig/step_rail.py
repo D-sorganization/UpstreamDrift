@@ -19,11 +19,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from PyQt6.QtCore import QSize, Qt, pyqtSignal
-from PyQt6.QtGui import QFontMetrics, QResizeEvent
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
     QHBoxLayout,
-    QLabel,
     QPushButton,
     QSizePolicy,
     QVBoxLayout,
@@ -35,6 +33,7 @@ from src.shared.python.theme.layout_metrics import LayoutMetrics
 from src.shared.python.theme.typography import Sizes, Weights, get_qfont
 
 from . import styling, workflow
+from .labels import ElidedLabel
 from .workflow import Status, Step, StepState
 
 #: The rail lives in a side dock: it must never widen the tile past this.
@@ -84,33 +83,14 @@ def blocked_note(step: Step, hints: Mapping[str, str]) -> str:
     return ""
 
 
-class RailLabel(QLabel):
-    """A label that elides its text rather than widening the rail.
-
-    Invariant: :attr:`full_text` is what the label means; ``text()`` is what
-    fits, and the tooltip always carries the whole of it.
-    """
+class RailLabel(ElidedLabel):
+    """A rail row: :class:`~.labels.ElidedLabel` in the rail's type sizes."""
 
     def __init__(self, text: str, *, small: bool = False) -> None:
         super().__init__(text)
-        self.full_text = text
         size = Sizes.SM if small else Sizes.MD
         weight = Weights.NORMAL if small else Weights.MEDIUM
         self.setFont(get_qfont(size, weight))
-        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
-
-    def minimumSizeHint(self) -> QSize:  # noqa: N802 (Qt API)
-        """Zero width: the rail's floor comes from its buttons, not its prose."""
-        return QSize(0, super().minimumSizeHint().height())
-
-    def resizeEvent(self, a0: QResizeEvent | None) -> None:  # noqa: N802 (Qt API)
-        super().resizeEvent(a0)
-        metrics = QFontMetrics(self.font())
-        fitted = metrics.elidedText(
-            self.full_text, Qt.TextElideMode.ElideRight, self.width()
-        )
-        if fitted != self.text():
-            self.setText(fitted)
 
 
 class StepRail(QWidget):

@@ -163,13 +163,21 @@ def test_preview_tiles_do_not_force_the_window_wide(tmp_path: Path) -> None:
 def test_tile_hosts_panes_and_restores_the_last_layout(tmp_path: Path) -> None:
     _app()
     widget = gui.CaptureRigWidget(settings=_settings(tmp_path))
-    assert set(widget.panes.docks) == {"preview", "playback", "results"}
-    widget.panes.set_floating("preview", True)
+    assert set(widget.panes.docks) == {
+        "rail",
+        "inputs",
+        "playback",
+        "results",
+        "actions",
+        "log",
+    }
+    assert widget.panes.centralWidget() is not None  # the live view, never a dock
+    widget.panes.set_floating("playback", True)
     widget.layout_bar.save_as("bay")
     widget.shutdown()  # remembers the arrangement
     again = gui.CaptureRigWidget(settings=_settings(tmp_path))
-    assert again.panes.is_floating("preview")
+    assert again.panes.is_floating("playback")
     assert again.layout_bar.combo.findText("bay") >= 0
     again.layout_bar.reset_button.click()
-    assert not again.panes.is_floating("preview")
+    assert not again.panes.is_floating("playback")
     again.shutdown()
