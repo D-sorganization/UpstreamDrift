@@ -82,7 +82,7 @@
     "activation.forearm_activation_index",
     "activation.trunk_activation_index"
   ],
-  "design_digest": "2f53f6791b610f9485497ae72eb6f36d79a7ec28fb3315af67eb24f04c7fd236",
+  "design_digest": "022c879434ef44cc5172d7ffe70cdbbd9ef4f31f0b80b382426734048ad33185",
   "twin_parameters": [
     "segment_inertia_scale",
     "grip_stiffness_scale",
