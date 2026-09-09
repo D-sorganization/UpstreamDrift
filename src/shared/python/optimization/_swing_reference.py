@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from numbers import Integral, Real
+from typing import Any, cast
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -150,7 +151,11 @@ def _solve_endpoint(
         rhs, initial.size, settings.pop("max_rhs_evaluations")
     )
     result = solve_ivp(
-        checked_rhs, (0.0, duration_s), initial.copy(), t_eval=[duration_s], **settings
+        cast(Callable[..., Any], checked_rhs),
+        (0.0, duration_s),
+        initial.copy(),
+        t_eval=[duration_s],
+        **settings,
     )
     if not result.success:
         raise ReferenceIntegrationError(
