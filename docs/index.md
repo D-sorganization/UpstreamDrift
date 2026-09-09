@@ -158,6 +158,7 @@ repository, which made them effectively unreachable.
 | `conventions/`          | @architecture-team    | stable    | Cross-subsystem data contracts and naming conventions, including canonical pose/state interchange.                                  |
 | `deployment/`           | @platform-team        | stable    | Deployment procedures, packaging notes, and release environment guidance.                                                           |
 | `design/`               | @architecture-team    | draft     | Feature design sketches and deeper design rationale before ADR promotion.                                                           |
+| `agents/`               | @engineering-team     | stable    | Shared infrastructure discovery references for agent and contributor workflows.                                                     |
 | `development/`          | @engineering-team     | stable    | Developer workflow notes, implementation reports, and local contribution guidance.                                                  |
 | `engineering/`          | @engineering-team     | stable    | Engineering practices and cross-cutting technical standards.                                                                        |
 | `engines/`              | @physics-team         | stable    | Physics engine support tiers, capabilities, and backend-specific documentation.                                                     |

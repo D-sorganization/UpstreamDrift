@@ -144,8 +144,6 @@ class ReferenceRegistration(BaseModel):
             raise ValueError(
                 "is_calibrated cannot be True with an uncalibrated calibration_id"
             )
-        if self.camera and self.clock and self.camera.camera_id != self.clock.view:
-            raise ValueError("Camera and clock must describe the same view")
         return self
 
     def validate_binding(
@@ -241,6 +239,10 @@ def sample_reference_motion(
     out_pts = np.zeros((len(t_eval), k_count, 3), dtype=float)
     out_valid = np.zeros((len(t_eval), k_count), dtype=bool)
     effective_max_gap = max_gap_s if max_gap_s is not None else registration.max_gap_s
+    require(
+        np.isfinite(effective_max_gap) and 0 < effective_max_gap <= 10,
+        "max_gap_s must be finite and within (0, 10]",
+    )
     for sample, time in enumerate(reference_times):
         right = bisect_left(motion.time_s, time)
         exact = next(
