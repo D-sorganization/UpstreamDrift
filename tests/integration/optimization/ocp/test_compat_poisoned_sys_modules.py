@@ -38,7 +38,9 @@ def fake_real_stack(monkeypatch, tmp_path):
     """Install fake *real* ``casadi``/``bioptim`` distributions on sys.path."""
     (tmp_path / "casadi").mkdir()
     (tmp_path / "casadi" / "__init__.py").write_text(
-        "__version__ = '9.9.9'\nMX = object\nOpti = object\n", encoding="utf-8"
+        "__version__ = '9.9.9'\nMX = object\nOpti = object\n"
+        "MX_eye = object\nSX_eye = object\nDM_eye = object\n",
+        encoding="utf-8",
     )
     (tmp_path / "bioptim").mkdir()
     (tmp_path / "bioptim" / "__init__.py").write_text(
@@ -69,6 +71,15 @@ def _poison(name: str) -> MagicMock:
 
 
 def test_probe_reports_absent_when_only_mock_exists(monkeypatch):
+    # This case promises no genuine distribution even on an optional-stack host.
+    finder = _compat.PathFinder.find_spec
+    monkeypatch.setattr(
+        _compat.PathFinder,
+        "find_spec",
+        lambda name, *args, **kwargs: (
+            None if name in ("casadi", "bioptim") else finder(name, *args, **kwargs)
+        ),
+    )
     monkeypatch.setitem(sys.modules, "casadi", _poison("casadi"))
     monkeypatch.setitem(sys.modules, "bioptim", _poison("bioptim"))
     assert _compat.bioptim_available() is False

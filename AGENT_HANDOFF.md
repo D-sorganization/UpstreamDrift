@@ -1,5 +1,31 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+## Segment Force Colors: Epic #9833 in Progress
+
+Branch `feat/segment-force-colors` lives in `_codex_worktrees/segment-force-colors`.
+See `docs/development/segment_force_color_epic.md` for current scope and evidence.
+Shared Python/Three.js policies, native pendulum and MuJoCo reaction sources,
+renderer adapters, desktop controls and WebSocket/Scene3D wiring are implemented.
+Epic #9833 and children #9834–#9837 are published. Remote main `ff0effa5a` was merged
+into the branch. Git works by clearing the stale `http.https://github.com/.extraheader`
+per invocation and using `gh auth git-credential`; global settings are unchanged.
+PR #9840 is open. C3D user segments now accept explicitly bound, clock-checked
+loads and expose the shared controls. Native MuJoCo raster verification passed
+blue/red output and pixel-exact off restoration (local output/force-colors).
+Remote main `403292ca3` is merged and the SPEC conflict is resolved with both rows
+preserved. PR CI cycle 1 exposed LoD storage access, a plotting import in headless
+contracts, render-function size and a redundant websocket cast; fixes and a
+headless regression are included. MuJoCo MeshCat now uses shared leaf-object
+bindings; its native command test passes with meshcat 0.3.2 installed only under
+ignored output/native-meshcat. C3D broad tests have one unrelated loader error-text
+expectation mismatch; the new force test passes. Remaining gates: wider interface adapters, protected CI
+and merge. Native MuJoCo tests on this Windows host must import mujoco before
+pytest/Qt to avoid a loader-order DLL failure. Do not claim universal rollout.
+Combined focused regression: 575 passed; web: 68 passed with TypeScript/ESLint.
+Cycle 2 fixes add suite markers and merge main `39d944540` (CI's shallow direct
+diff had falsely reported its new notebook test deleted). All earlier CI failures
+are fixed locally; current-head checks remain required. Wider hosts remain open.
+
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
 Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
@@ -124,12 +150,17 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 
 ## Impact Dynamics and Acoustics: #9700
 
-- AffineDrift theory #4258/#4282 and integration plan #9706 are merged. Paired grip/stability correction #4298 merged as d7e51655d after protected checks; its auxiliary benchmark made no measurements despite green workflow status.
-- Tools finite-grip response is published at 12bcf3d83 (665 Linux tests); separate-G/C spectra 97d46055c pass 692 Linux and 49 focused controls. Turnover bbc27dbe3 is published through normal hooks. Explicit stability, nonlinear contact and physical/blinded acoustics remain open.
-- PR #9804 merged as 736ec2189 from b8da0c024 with a bypassed claim-preservation helper and stale seven-source native record. Follow-up #9825 reuses the helper in actual reconciliation, preserves reviewed evidence/order and refuses changed science. Six real-path failures become 11 passes.
-- Worktree UpstreamDrift-impact-claim-preservation; branch fix/9825-preserve-reviewed-claims; base 9f54c5e0b. Lease codex / impact-acoustics-01a07d8a-claims9825 expires 2026-09-09T00:57:12Z. Actual deterministic native regeneration 15d00b5e restores 14-source provenance with unchanged numerical results; 128 strict contracts pass without skips/xfails. Reviewed 253-page PDF bf855f79 and computational release records are refreshed; source f0bbc4d50 is published through normal hooks; ready PR #9826 is awaiting protected CI/review.
-- PR #9826 native/rolling/publication CI passes at e93ef5224. PDF pins are corrected and concurrent 30aecd113 preserved in published b557682c8; all normal hooks and 11 reconciled publication tests pass, remote SHA verified. New CI is running; main 9623a5662 makes the PR behind. #9830 exactly reproduces the optional-stack defect; the 16-step reference is under-resolved and tighter integrations still show about 0.4812 rad / 25.857 rad/s mismatch. Follow claim_preservation_9825_turnover.md before delivery/merge; no threshold relaxation or physical validation is claimed.
-- Continue from docs/development/claim_preservation_9825_turnover.md. Preserve former shared branch/local 6235789dc. Tools #5103/#5106 private consumer lookup remains blocked; #8920/#8556 remain physical-parameter gates. Program: docs/development/impact_acoustics_program.md.
+- #9841/#9842 follow-up: the CI-stub callback annotation is corrected, with 67 reference tests passing. Bioptim now selects CasADi 3.6.7; the combined real OCP, matrix/import isolation and dependency suite passes 21 tests in 162.06 s. Exact missing factory aliases repair 3.8 imports, but its RK4 solve remains unsuccessful even at a 1,000-iteration budget; no numerical qualification is claimed for that combination. Inventory regeneration passes ten tests; c2a8d5b6e integrates main 438bd3282 without changing validated optimization paths. Root Ruff 0.15.17 and SPEC pass. Tools #5106 merged as 287767dfa6; #5114 tracks the separate unfinished GUI shard behind #5103. Publish through normal hooks and follow protected CI; physical/acoustic qualification remains open.
+- Claim-preservation #9826 merged as a410ae7059883d7f27f5fb12405b61859267457c from fced8c0d6 at 2026-09-09T01:12:29Z; merge verified, remaining queued auxiliary checks not claimed passed.
+- Theory AffineDrift #4258/#4282/#4298 and integration plan #9706 are merged. Tools T1 #5077 and T2 #5082 (80d580d57) are merged; T2 golf source/tests match reviewed e47fde4e and prior 476eaa98.
+- Tools T3 autonomous decay 58f33e403 and turnover 2d290079b are published through normal hooks (731 Linux golf/API tests, two optional CAD skips). Driven/nonlinear stability, bandwidth, contact/acoustics and empirical gates remain open.
+- #9830 is claimed by codex/session impact-acoustics-01a07d8a-shooting9830 until 2026-09-09T04:11:20Z. Adaptive endpoint refinement and strict contracts are implemented TDD; 75 reference/live tests, all three native comparisons and 13 degradation/registry tests pass. Own-grid residuals remain separate from continuous-ODE discrepancy; the original candidate and 0.5 rad ceiling are preserved. Eighty mixed mocked/reference tests also pass. PR #9841 is open; the current runtime/inventory follow-up and protected CI remain recorded in docs/development/shooting_convergence_9830_turnover.md.
+- Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
+- Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 merged at `9aa26e4f8`; #9787 repairs its observed research companion failures.
+- #9826 supersedes the merged #9804 registration bypass: actual reconciliation preserves reviewed claims, restores 14-source native provenance (15d00b5e) with unchanged numerical results, and retains all 328 outcomes. The reviewed 253-page PDF bf855f79 and 128 strict native contracts are documented in docs/development/claim_preservation_9825_turnover.md. Preserve prior branch/local 6235789dc as historical evidence.
+- Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
+
+- Import/provider history: `docs/development/impact_provider_import_turnover.md`; reviewed renderer evidence: `docs/development/renderer_reference_9783_turnover.md`; program design: `docs/development/impact_acoustics_program.md`.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
 evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
@@ -494,3 +525,11 @@ reruns. Do not restart the Actions runner or start WSL.
   Note the local reproducer cannot exercise real casadi/bioptim (Python 3.14
   has no casadi wheel); CI lanes with the `[bioptim]` extra must show the
   ocp bioptim legs running (not skipping) in combined lanes.
+
+PR #9840 CI cycle 3: full unit gate passed 14,431 tests and failed only the companion feature-count expectation and shared divergence inventory. Updated counts for the new controls and regenerated the inventory with the pinned Tools tree. Both affected modules pass (34 tests). Await the refreshed remote gate before merging.
+
+Pinocchio and Drake now expose View > Segment Force Colors via a shared MeshcatForceColorSession. Both native GUI tests pass on isolated Linux (Pinocchio 4.1.0, Drake 1.56.0). Explicit bindings and synchronous caller-supplied axial frames are required; automatic native reaction inference is not claimed. Session regression covers stale frames, model replacement and toggling. OpenSim currently has result plots, not a 3D animation host.
+
+Final native-host CI exposed optional Qt menu return annotations. Menus now use explicit QMenu construction after validating the menu bar. Pinocchio synchronizes force colors in its GUI coordinator override, leaving the legacy visualization mixin unchanged; native Linux host tests still pass (2 tests). Current required gate remains red until the type correction is validated remotely.
+
+The final host CI type check passes after menu contracts and the native COM matrix correction. The DRY gate then identified duplicated menu setup; install_force_color_menu now owns that validated setup for both GUIs. Native GUI tests pass after extraction. Await the corrected head's aggregate quality gate before closing the epic.
