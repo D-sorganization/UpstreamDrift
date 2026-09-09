@@ -4245,7 +4245,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
-| 2026-09-09 | #9913 | Add persistent swing/capture feedback, durable action history, detector/edit status, linked help and workflow navigation, and state-preserving Qt pop-out/redock/fullscreen controls. |
+| 2026-09-09 | #9913 | Add persistent swing/capture feedback, durable history, linked detector/help/workflow status and retained Qt views; bounded renderers and panel methods preserve architecture rules. |
 | 2026-09-09 | #9911 | Keep preview discovery import and timeout failures within the existing error status. |
 | 2026-09-09 | #9898 | Add visible zoom-aware intrinsic profile review, verified rig exports and immutable revisions; track everyday-reference, club-catalog and guided-setup epics #9897/#9902/#9906. |
 | 2026-09-09 | #9910 | Add visible zoom-aware intrinsic profile review, verified rig exports and immutable revisions; report camera discovery dependency and timeout failures (#9911). |

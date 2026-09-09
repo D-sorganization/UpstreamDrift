@@ -286,6 +286,10 @@ class PreviewPanel(QWidget):
         """Binding or streaming (the cameras are, or are about to be, claimed)."""
         return bool(self._workers) or self._binder is not None
 
+    def status_text(self) -> str:
+        """Current camera state for the persistent capture status strip."""
+        return self.status.text()
+
     def views(self) -> tuple[str, ...]:
         """Every view being captured, whether or not the layout shows it."""
         return self._views

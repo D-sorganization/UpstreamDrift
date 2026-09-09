@@ -160,9 +160,7 @@ class JourneyActions:
                 f"{label} finished. Review Capture Status and Results, or continue with the next step."
             )
         if self.history_warning:
-            host.journey.message.setText(
-                host.journey.message.text() + self.history_warning
-            )
+            host.journey.append_notice(self.history_warning)
 
     def show_step(self, key: str) -> None:
         """Navigate to instructions/settings without silently starting a job."""
@@ -204,8 +202,7 @@ class JourneyActions:
         host = self.host
         host.playback.clear_capture()
         host.match.load(None)
-        host.provenance.current = None
-        host.provenance.browser.setPlainText("No capture loaded.")
+        host.provenance.clear_capture()
         for table in (
             host.swing_table,
             host.analysis_table,
