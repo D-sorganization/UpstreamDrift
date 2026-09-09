@@ -524,3 +524,9 @@ Pinocchio and Drake now expose View > Segment Force Colors via a shared MeshcatF
 Final native-host CI exposed optional Qt menu return annotations. Menus now use explicit QMenu construction after validating the menu bar. Pinocchio synchronizes force colors in its GUI coordinator override, leaving the legacy visualization mixin unchanged; native Linux host tests still pass (2 tests). Current required gate remains red until the type correction is validated remotely.
 
 The final host CI type check passes after menu contracts and the native COM matrix correction. The DRY gate then identified duplicated menu setup; install_force_color_menu now owns that validated setup for both GUIs. Native GUI tests pass after extraction. Await the corrected head's aggregate quality gate before closing the epic.
+
+## Capture Editing and Reference Work
+
+- Product #9849 now includes trim/crop #9860, library/notes #9861 and coaching drawings #9862; separate advanced reference epic #9863 has children #9864–#9866. All are active goal scope.
+- Isolated branch feat/9860-swing-editing contains the edit recipe, ingestion mapping and native editor foundation. See docs/development/capture_editing_integration.md for reuse audit and remaining work. Not yet a complete feature or PR.
+- Preserve the concurrent #9843 GUI dock/layout work; only narrow new entry-point integration is planned. Raw recordings and prior analyses must remain intact.
