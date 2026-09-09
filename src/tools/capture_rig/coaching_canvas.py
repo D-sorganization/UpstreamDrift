@@ -9,7 +9,13 @@ import numpy.typing as npt
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QKeyEvent, QMouseEvent
 
-from src.motion_capture.coaching import Drawing, DrawingLayer, History, render_layer
+from src.motion_capture.coaching import (
+    DEFAULT_DRAWING_COLOUR,
+    Drawing,
+    DrawingLayer,
+    History,
+    render_layer,
+)
 
 from .annotate_widget import ImageCanvas
 
@@ -22,7 +28,7 @@ class CoachingCanvas(ImageCanvas):
         super().__init__()
         self.history = History(layer)
         self.tool = "select"
-        self.colour = "#ffcc33"
+        self.colour = DEFAULT_DRAWING_COLOUR
         self.stroke = 3
         self.selected: str | None = None
         self.frame = 0

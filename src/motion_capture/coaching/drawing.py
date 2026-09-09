@@ -14,6 +14,7 @@ from src.motion_capture.rig.documents import write_document
 Point = tuple[float, float]
 MAX_LAYER_BYTES = 2_000_000
 MAX_HISTORY = 100
+DEFAULT_DRAWING_COLOUR = "#ffcc33"
 
 
 class Drawing(BaseModel):
@@ -24,7 +25,7 @@ class Drawing(BaseModel):
     kind: Literal["line", "arrow", "circle", "ellipse", "rectangle"]
     start: Point
     end: Point
-    colour: str = Field(default="#ffcc33", pattern=r"^#[0-9a-fA-F]{6}$")
+    colour: str = Field(default=DEFAULT_DRAWING_COLOUR, pattern=r"^#[0-9a-fA-F]{6}$")
     stroke: int = Field(default=3, ge=1, le=40, strict=True)
     visible: bool = True
     first: int = Field(default=0, ge=0, strict=True)
