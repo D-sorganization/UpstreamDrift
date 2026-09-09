@@ -62,6 +62,15 @@ class SegmentLoadSeries:
         object.__setattr__(self, "time_s", tuple(float(t) for t in times))
         object.__setattr__(self, "values_n", MappingProxyType(copied))
 
+    def value_at(self, segment: str, frame_idx: int) -> float | None:
+        """Read a segment sample without exposing the series' storage layout."""
+        if isinstance(frame_idx, bool) or not isinstance(frame_idx, Integral):
+            raise TypeError("frame_idx must be an integer")
+        if not 0 <= frame_idx < len(self.time_s):
+            raise IndexError("frame_idx outside load recording")
+        samples = self.values_n.get(segment)
+        return None if samples is None else samples[frame_idx]
+
 
 class ForceColorDisplay:
     """Apply one scale through a narrow renderer capability, independent of model.
@@ -119,8 +128,11 @@ class ForceColorDisplay:
 
     def _apply(self) -> None:
         for segment, handle in self._handles.items():
-            samples = None if self._loads is None else self._loads.values_n.get(segment)
-            value = None if samples is None else samples[self._frame]
+            value = (
+                None
+                if self._loads is None
+                else self._loads.value_at(segment, self._frame)
+            )
             color = (
                 self._scale.color(value, "")
                 if self._scale.enabled and value is not None
