@@ -1,3 +1,8 @@
+## Verified Agent Context (#9915)
+
+Implementation and validation state: `docs/development/HANDOFF.md`, section
+Verified Agent Context. Component map: `docs/agent_context/README.md`.
+
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
 Isolated branch `fix/9894-ubuntu-ci-sources` replaces four standard CI APT

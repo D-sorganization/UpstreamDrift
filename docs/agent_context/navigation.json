@@ -1,0 +1,67 @@
+[
+  {
+    "query": "make_backend",
+    "component": "simulation-backends",
+    "source": "src/shared/python/simulation_backends/factory.py"
+  },
+  {
+    "query": "model parameters",
+    "component": "model-parameters",
+    "source": "src/shared/python/simulation_backends/model_params.py",
+    "consumer": "simulation-backends"
+  },
+  {
+    "query": "motion pipeline",
+    "component": "motion-pipeline",
+    "source": "src/shared/python/motion_pipeline/orchestrator.py",
+    "consumer": "motion-api"
+  },
+  {
+    "query": "HTTP request",
+    "component": "motion-api",
+    "source": "src/shared/python/motion_pipeline/api.py"
+  },
+  {
+    "query": "canonical pose degrees",
+    "component": "canonical-pose",
+    "source": "src/shared/python/pose_interchange/canonical.py",
+    "consumer": "pose-adapters"
+  },
+  {
+    "query": "adapter sign units",
+    "component": "pose-adapters",
+    "source": "src/shared/python/pose_interchange/protocol.py"
+  },
+  {
+    "query": "height mass subject",
+    "component": "anthropometrics",
+    "source": "src/shared/python/anthropometrics/pipeline.py"
+  },
+  {
+    "query": "capture workflow stages",
+    "component": "capture-workflow",
+    "source": "src/tools/capture_rig/workflow.py",
+    "consumer": "capability-atlas"
+  },
+  {
+    "query": "launcher tiles",
+    "component": "launcher",
+    "source": "src/config/launcher_manifest_loader.py",
+    "consumer": "capability-atlas"
+  },
+  {
+    "query": "capability atlas",
+    "component": "capability-atlas",
+    "source": "scripts/capability_atlas/model.py"
+  },
+  {
+    "query": "register_routes",
+    "component": "application-api",
+    "source": "src/api/route_registry.py"
+  },
+  {
+    "query": "canonical retrieval questions",
+    "component": "canonical-qa",
+    "source": "src/shared/python/canonical_core/sidekick_retrieval_qa.py"
+  }
+]

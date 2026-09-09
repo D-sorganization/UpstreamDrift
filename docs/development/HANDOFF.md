@@ -1,5 +1,15 @@
 # Scoped Ubuntu Dependency Installation Handoff
 
+## Verified Agent Context: #9915
+
+- Identity: `UpstreamDrift`, working directory `C:/Users/diete/Repositories/.context-implementation/UpstreamDrift`, branch `feat/issue-9915-agent-context`, implementation commit `SELF`; PR not created; development entry DL-#9915; session `context-01a0879e-ud`.
+- Objective: deliver subscription-free persistent source and integration context under Repository_Management epic #1629, with exact provider pins and protected CI enforcement.
+- Implemented locally: Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities.
+- Validation: 41 existing boundary tests and three context/gate tests pass; explicit boundary reviews are recorded. Initial navigation evaluation: and 12/12 curated task expectations pass (max 13238 characters; initial median 2193 ms). Required CI wiring not yet qualified.
+- Compatibility: scientific/manual authority is unchanged. Catalog status does not prove runtime availability. Reviews declare inspected evidence; test execution remains separate. Existing communication and handoffs remain authoritative.
+- Current limits: no release/merge claim; consumer catalog provider pins remain pending protected Tools delivery. Reviewed contracts and generated maps are present; desktop and 390px browser QA pass. Original clones and other agents' progress are preserved.
+- Ordered continuation: (1) complete provider package, integrity and normal hook checks; (2) publish and qualify protected Tools delivery; (3) pin consumers, run integration tests, record reviewed contracts, generate/inspect maps and qualify consumer CI; (4) reconcile fleet guide and epic against actual delivered PRs.
+
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
