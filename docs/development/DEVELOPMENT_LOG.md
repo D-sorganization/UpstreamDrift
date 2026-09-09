@@ -19,11 +19,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9912 · Impact Shaft Provider Integration
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9912; parent #9703
 - **Branch:** feat/9912-impact-provider-pin
-- **PR:** not created
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9916
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (Tools 608e85b24; consumer base 6e3610a9b; consumer b6107f8e2)
