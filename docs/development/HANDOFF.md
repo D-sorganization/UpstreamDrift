@@ -7,7 +7,7 @@
 - Branch: `feat/9903-player-club-catalog`; implementation commit: SELF.
 - Base: `18c8f922e87c92f6f518da05c0819f71ce3193ba` (merged capture-profile PR #9910).
 - Issues: #9903 and #9904; epic #9902; entries DL-#9903 and DL-#9904.
-- Pull request: not created; contract da340df45 published through normal hooks.
+- Pull request: #9919 (open); head167320881 published through normal hooks.
 - Session: `capture-product-01a08427-club-catalog`; central lease and presence active.
 
 Extend the existing club-data authority so unknown measurements, source attribution,
@@ -39,7 +39,7 @@ Gasification mapping is planned for future cheaper agents, per user direction.
 - `python3 -m mypy src/shared/python/club_data/catalog.py src/shared/python/club_data/catalog_io.py src/shared/python/club_data/catalog_legacy.py --follow-imports=silent --ignore-missing-imports`: passes after exchange typing corrections.
 - Scoped Ruff lint/format, architecture, map and document budgets pass. Whole-source
   LoD reports three unchanged main capture chains fixed by pending PR #9917; no club
-  source violations. Normal commit/pre-push hooks remain to run. No PR has been published for this contract.
+  source violations. Normal commit/pre-push hooks remain to run. PR #9919 is published.
 
 ## Concurrent Work and Risks
 
@@ -74,3 +74,5 @@ with replacement owners now confirmed: context/Obsidian task will carry the cano
 - SELF: integrate capture UX501092b27; preserve both issue-keyed logs and all source. Regenerate conflicting map outputs from combined registries.
 
 - SELF: integrate remote main8fce9f238 (tree-identical to501092b27); mark DL-#9913 shipped. Full LoD now passes3013 files with no baseline growth. Preserve club continuation and regenerated maps.
+
+- SELF: publish #9919 at167320881 with118 combined catalog/map/parity tests, full Ruff lint/format (6869 files), LoD and normal hooks passing. Source issues remain open until player workflow #9905 qualifies. Bag implementation is isolated in UpstreamDrift-player-bag, feat/9905-player-club-bag; preserve live Capture Rig childPID61500.
