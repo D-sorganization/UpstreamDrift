@@ -34,7 +34,7 @@ The canonical handoff retains their incoming text below the current section.
 - Read AGENTS.md and CLAUDE.md; maintain issue leases and session presence.
 - Shared physics belongs in Tools. Do not copy or edit vendored source.
 - Use topic branches and normal hooks; preserve protected CI and reviews.
-- Manuals/upstreamdrift QMD remains the engineering-manual authority.
+- Manuals/upstreamdrift QMD remains the engineering-manual authority under UP-D0 (#9066) and UP-D1 (#9067).
 - Numerical convergence, measured calibration and perceptual evidence are
   distinct; source hashes alone do not qualify a physical model.
 - Refresh this file, canonical handoff and DL-#9912 in implementation commits.
