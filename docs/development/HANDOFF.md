@@ -5,7 +5,7 @@
 - Repository: D-sorganization/UpstreamDrift
 - Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-rendering
 - Branch: fix/9882-comparison-rendering
-- Baseline: 932694401, timing qualification #9885 (parent integration pending)
+- Baseline: cab3505a4, timing qualification #9885 integrated
 - Implementation commit: SELF
 - Issue: #9882; advanced epic #9863
 - Pull request: pending
@@ -66,3 +66,6 @@ capture-rig source modules plus tests/docs. Other active presences on the same
 files are this root agent's preceding qualification branches. #9884 merged at
 2c99bc83e; #9885 is ready with auto-merge and cab3505a4 pending protected checks.
 Use ordinary topic PRs, hooks and protections. Preserve unrelated agent work.
+
+Parent cab3505a4 is merged with #9884 and concurrent main OCP changes retained.
+Only the canonical handoff conflicted; this rendering handoff remains current.

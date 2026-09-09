@@ -4,6 +4,23 @@
 
 - Replaced `np.sum(error**2, axis=0)` with `np.einsum("i...,i...->...", error, error)` in `src/shared/python/optimization/ocp/tracking_ocp.py` to bypass intermediate array allocation overhead. (spec-exempt: micro-optimization)
 
+## Simultaneous State and Parameter Estimation via Optimal Control (#9762)
+
+Phase 4 of the Bioptim optimal control migration integrates simultaneous state
+and dynamic/inertial parameter estimation (src.shared.python.optimization.ocp.parameter_ocp):
+
+- add_parameter_block: translates SharedParameterSpec definitions into bioptim ParameterList,
+  bounding, and quadratic prior penalty objectives ((p - prior)^2 / prior_scale^2).
+- ParameterBlockBundle: encapsulates parameter lists, objectives, and bounds while supporting
+  legacy 4-tuple unpacking for smooth backward compatibility.
+- build_tracking_parameter_ocp: pre-solve identifiability gate (gate_shared_parameters)
+  with configurable policy (raise, lock, warn), dynamic state/control bounds, and marker tracking.
+- solve_tracking_parameter_ocp: IPOPT solve configuration (auto-enabling limited-memory
+  Hessian approximation for free parameter counts > 5), post-solve bit-for-bit invariance
+  verification for locked parameters, and conversion to TrackingResult.
+- tracking_to_map_estimator_result: converts TrackingResult to canonical MapEstimatorResult
+  preserving parameters, state coefficients, marker residuals, and identifiability reporting.
+
 ## Capture Rig GUI: Docs, Parity Registry & Before/After Evidence (#9848)
 
 - Updated `docs/motion_capture/capture_rig.md` documenting responsive compact mode layout adaptation, single-column control dock tabification under 1400 px, and live preview dominance.
@@ -4200,6 +4217,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
 | 2026-09-09 | #9882 | Unify comparison preview/export through the coaching compositor; apply motion opacity and coverage-aware expert homographies; retain decoders, preserve odd source pixels and verify complete staged output/input identity before publication. |
+| 2026-09-09 | #9878 | Simultaneous state and parameter estimation via optimal control (`src/shared/python/optimization/ocp/parameter_ocp.py`): quadratic priors, identifiability gating with configurable policies, limited-memory Hessian approximation, and conversion to `MapEstimatorResult` (#9762). |
 | 2026-09-09 | #9885 | Qualify event synchronization (0.25–4 interval rates), gap-aware neighboring-frame sampling, camera/distortion and clock snapshots, saved registration identity checks and manual alignment claims. Include deterministic adverse fixtures and a diagnostic sampling benchmark. |
 | 2026-09-09 | #9884 | Preserve comparison registration/layer settings on independent edits and reference switches; validate sidecar identity/path/size; reuse safe export ownership, snapshots and deferred close. Qualification gaps remain tracked under #9863. |
 | 2026-09-09 | #9879 | Preserve comparison registration/layer settings on independent edits and reference switches; validate sidecar identity/path/size; reuse safe export ownership, snapshots and deferred close. Qualification gaps remain tracked under #9863. |
