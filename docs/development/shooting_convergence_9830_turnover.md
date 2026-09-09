@@ -255,6 +255,23 @@ pass; manual release remains `blocked-inventory-required`.
 
 ## Related Delivery
 
+PR #9841 publishes d165da461 through all normal hooks after the concurrent
+branch reconciliation. Publication job 102319633159 then correctly rejects
+the old checksum for `.github/workflows/ci-optional-stack.yml`. A local
+canonical validation reproduces the same `local_artifacts` mismatch; the
+only changed evidence artifact is the Bioptim import probe. The five linked
+manufactured claims PD-CLAIM-297 through PD-CLAIM-301, their numerical data,
+native operator/CI authority sections and all 328 outcomes are unchanged.
+
+The canonical `claim_evidence_integrity write` operation changes only that
+workflow's digest and byte count (32,141 to 32,130). Validation then passes
+328 claims, 2,571 references and 430 local artifacts. Full computational
+publication validation passes all 715 release artifacts and the unchanged
+253-page PDF (SHA bf855f791e142e9ff84a30af61966bee6a0fcf406fdb7f41616e0de8a6e567e5).
+No PDF regeneration, outcome promotion or archival approval occurs. The report
+is archived as `impact-9841-publication-qa.json` in system TEMP; protected CI
+must still validate the subsequently published correction.
+
 Tools autonomous decay 58f33e403 and turnover 2d290079b are published through
 normal hooks (731 Linux golf/API tests). T2 #5082 has merged as 80d580d57;
 its golf source/tests match both reviewed e47fde4e and prior 476eaa98.
