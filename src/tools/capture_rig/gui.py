@@ -76,6 +76,7 @@ from .commands import (
     mode_text,
 )
 from .header import HeaderBar, StatusStrip
+from .calibration_actions import CalibrationActions
 from .library_actions import LibraryActions
 from . import multiview
 from .layout import LayoutBar, LayoutStore, PaneExtras
@@ -626,6 +627,15 @@ class CaptureRigWidget(QWidget):
             busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
             settings=settings,
         )
+        self.calibration_actions = CalibrationActions(
+            self,
+            selection=self.capture.selection,
+            session=lambda: self.media.root if self.media else None,
+            library_root=lambda: self.library_actions.library().root,
+            apply=lambda path: self.process.start_edit.setText(str(path)),
+            recalibrate=self._recalibrate_board,
+            busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
+        )
         self._layout()
         self._layout_mode: LayoutMode = resolve_layout_mode(max(self.width(), 0))
         apply_responsive_mode(self.panes, self._layout_mode)
@@ -671,6 +681,7 @@ class CaptureRigWidget(QWidget):
             toggles=(
                 self.library_actions.library_button,
                 self.library_actions.edit_button,
+                self.calibration_actions.button,
                 self.log_toggle,
             ),
         )
@@ -949,6 +960,7 @@ class CaptureRigWidget(QWidget):
             return
         self.runner.run(argv)
         self.library_actions.refresh()
+        self.calibration_actions.refresh()
 
     def _on_command_finished(self, code: int) -> None:
         if self._take_running:
@@ -1019,6 +1031,7 @@ class CaptureRigWidget(QWidget):
     def _on_badge(self, readout: str) -> None:
         self.status_strip.set_recording(self.record_bar.phase, readout)
         self.library_actions.refresh()
+        self.calibration_actions.refresh()
 
     def _append_log(self, text: str) -> None:
         self.log.moveCursor(self.log.textCursor().MoveOperation.End)
@@ -1077,8 +1090,14 @@ class CaptureRigWidget(QWidget):
         self._apply_workflow(media)
         return media
 
+    def _recalibrate_board(self, path: Path) -> None:
+        self._open_library_capture(path)
+        if self.media is not None and self.media.root == path:
+            self.trigger("calibrate")
+
     def _apply_workflow(self, media: SessionMedia | None) -> None:
         self.library_actions.refresh()
+        self.calibration_actions.refresh()
         states = workflow.evaluate(media)
         self.workflow.refresh(states)
         enabled = workflow.enabled_actions(states) | ALWAYS_ENABLED

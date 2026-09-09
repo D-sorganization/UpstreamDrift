@@ -18,6 +18,7 @@ the recorder binds cameras (:mod:`src.motion_capture.rig.preview_source`).
 
 from __future__ import annotations
 
+import subprocess
 import time
 from collections.abc import Callable, Mapping
 from pathlib import Path
@@ -132,6 +133,14 @@ class BinderThread(QThread):
     def run(self) -> None:  # noqa: D102 - QThread entry point
         try:
             self.bound.emit(dict(self._factory(self._plan)))
+        except ImportError as exc:
+            self.failed.emit(
+                f"Camera discovery dependency unavailable: {exc}. "
+                "Install the project's pose dependencies to enable live preview. "
+                "Recorded captures remain available in the library."
+            )
+        except subprocess.TimeoutExpired as exc:
+            self.failed.emit(f"Camera discovery timed out: {exc}. Retry preview.")
         except (ValueError, OSError, RuntimeError) as exc:
             self.failed.emit(str(exc))
 

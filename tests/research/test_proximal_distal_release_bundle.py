@@ -71,8 +71,13 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "rotating_base_torso_velocity",
         "bilateral_wrench_identifiability",
         "bilateral_wrench_sensor_qualification",
+        "participant_twin_calibration",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
+    assert (
+        "governed participant cohort for digital-twin calibration and population "
+        "transport" in manifest["known_open_gates"]
+    )
     assert manifest["claims"]["feasible_closed_loop_singularity_margin"] == (
         "supported_for_declared_exact_planar_kinematic_triangle"
     )
