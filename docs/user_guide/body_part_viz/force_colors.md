@@ -88,8 +88,15 @@ MuJoCo documents a spatial-tendon limitation in `cfrc_int`; see the
 The same engine provider feeds the web stream. MeshCat, Drake, Pinocchio, OpenSim
 and other interface integrations remain tracked under #9833.
 
-The shared policy, native renderer object updates, controls and web scene wiring
-have local automated coverage. Offscreen OpenGL object tests do not qualify GPU
-raster output. Native solver adapters, automatic force stream population, and
-remaining desktop host integrations are pending in the
-[epic draft](../../development/segment_force_color_epic.md).
+The C3D/Simscape viewer exposes the same controls for user-defined shapes. Its
+`set_segment_axial_loads(loads, segment_indices)` method accepts a qualified
+`SegmentLoadSeries` and an explicit load-ID to segment-index mapping. Sample times
+must exactly equal the model's point times. Replacing the model or segment set
+clears loads to prevent stale bindings. Motion capture alone supplies no axial loads.
+
+The shared policy, native renderer updates, controls and web scene wiring have
+local automated coverage. Native MuJoCo raster verification confirms blue tension,
+red compression and pixel-exact off restoration. PyQtGraph OpenGL object tests
+do not qualify GPU raster output. Remaining desktop host integrations are tracked
+in [epic #9833](https://github.com/D-sorganization/UpstreamDrift/issues/9833) and
+[PR #9840](https://github.com/D-sorganization/UpstreamDrift/pull/9840).

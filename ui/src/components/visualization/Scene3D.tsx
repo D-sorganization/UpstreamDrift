@@ -111,7 +111,7 @@ export function Scene3D({
   const rootRef = useRef<THREE.Group>(null);
   const [forceScale, setForceScale] = useState(defaultForceColorScale);
   const segmentForces = segmentForcesAtTime(segmentLoads ?? frame?.segment_loads, frame?.time ?? NaN);
-  const segmentIds = urdfModel?.links.map(link => link.link_name) ?? [
+  const segmentIds = urdfModel?.links.length ? urdfModel.links.map(link => link.link_name) : [
     'torso', 'head', 'left_arm', 'right_arm', 'club_shaft', 'club_head', 'left_leg', 'right_leg',
   ];
 
@@ -315,7 +315,7 @@ export function Scene3D({
       <details className="absolute top-2 right-2 z-20 max-h-[70%] overflow-auto rounded bg-gray-900/95 text-white">
         <summary className="cursor-pointer p-2">Segment Force Colors</summary>
         <ForceColorControls scale={forceScale} onChange={setForceScale} />
-        {!Object.values(segmentForces).some(value => value !== null) &&
+        {!segmentIds.some(id => Object.prototype.hasOwnProperty.call(segmentForces, id) && segmentForces[id] !== null) &&
           <p className="px-3 pb-3">Axial load data unavailable for this frame.</p>}
       </details>
 

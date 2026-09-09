@@ -29,7 +29,14 @@ from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt, QTimer
 
-from src.shared.python.body_part_viz import SegmentVizSpec
+from src.shared.python.body_part_viz import (
+    ForceColorScale,
+    SegmentLoadSeries,
+    SegmentVizSpec,
+)
+from src.shared.python.body_part_viz.force_color_controls import (
+    install_force_color_action,
+)
 from src.shared.python.motion_matching.body_skeleton import (
     default_body_segments,
 )
@@ -147,6 +154,11 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._build_playback_row(left_panel)
         self._build_toggle_and_style_rows(left_panel)
         self._build_view_and_frame_controls(left_panel)
+        menu = QtWidgets.QMenu(self)
+        button = QtWidgets.QToolButton(self)
+        button.setObjectName("segment_force_colors")
+        button.setDefaultAction(install_force_color_action(menu, lambda: [self]))
+        left_panel.addWidget(button)
         layout.addLayout(left_panel, 1)
 
         right_panel = self._build_right_panel()
@@ -347,6 +359,7 @@ class Viewer3DTab(QtWidgets.QWidget):
     def update_from_model(self, model: C3DDataModel | None) -> None:
         """Update UI with data from the model."""
         self.pause()
+        self._user_segment_renderer.set_axial_loads(None, {})
         self.model = model
         self.list_markers_3d.clear()
         self._clear_event_buttons()
@@ -955,6 +968,24 @@ class Viewer3DTab(QtWidgets.QWidget):
         return StaticColor("#1f77b4")
 
     # ---------------------------------------------------- User segments API
+
+    def set_axial_color_scale(self, scale: ForceColorScale) -> None:
+        """Configure optional force colors on user-defined segment shapes."""
+        self._user_segment_renderer.set_axial_color_scale(scale)
+        self.canvas_3d.draw_idle()
+
+    def set_segment_axial_loads(
+        self, loads: SegmentLoadSeries | None, segment_indices: dict[str, int]
+    ) -> None:
+        """Attach qualified section loads with explicit IDs and exact model clock."""
+        if loads is not None:
+            if not isinstance(loads, SegmentLoadSeries):
+                raise TypeError("loads must be SegmentLoadSeries or None")
+            times = None if self.model is None else self.model.point_time
+            if times is None or not np.array_equal(times, loads.time_s):
+                raise ValueError("load times must match model point times")
+        self._user_segment_renderer.set_axial_loads(loads, segment_indices)
+        self.canvas_3d.draw_idle()
 
     def set_user_segments(
         self, segments: tuple[SegmentSpec | SegmentVizSpec, ...]
