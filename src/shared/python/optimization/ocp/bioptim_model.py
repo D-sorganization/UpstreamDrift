@@ -97,6 +97,10 @@ class _SwingModelSurface:
     def parameter_names(self) -> tuple[str, ...]:
         return self._parameter_names
 
+    @property
+    def parameters(self) -> Any:
+        return self.symbolic.parameter_symbols()
+
     # -- kinematics used by penalties -------------------------------------
 
     @property
@@ -182,13 +186,19 @@ class _SwingModelSurface:
             "parameters": self._parameter_names,
         }
 
-    def set_parameter(self, value: Any, **kwargs: Any) -> None:
+    def set_parameter(self, *args: Any, **kwargs: Any) -> None:
         """``ParameterList.add(..., function=model.set_parameter)`` hook.
 
-        bioptim calls this with the parameter's symbol at build time.
+        bioptim calls this with ``(model, value)`` or ``(value)`` at build time.
         Nothing to mutate: every function reads the OCP parameter vector
         directly, so the hook only records the symbol for inspection.
         """
+        if len(args) == 2:
+            _model, value = args
+        elif len(args) == 1:
+            value = args[0]
+        else:
+            value = None
         self.last_parameter_symbol = value
 
     def bounds_from_ranges(self, key: str, flexibility: float = 1.0) -> Any:
