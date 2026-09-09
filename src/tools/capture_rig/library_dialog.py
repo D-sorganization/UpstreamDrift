@@ -36,6 +36,7 @@ from .flow_layout import FlowLayout
 from .swing_editor import SwingEditor
 from .coaching_dialog import show_coaching
 from .reference_library_dialog import ReferenceLibraryDialog
+from .reference_comparison import show_reference_comparison
 from src.motion_capture.reference.storage import ReferenceLibrary
 
 
@@ -164,6 +165,7 @@ class LibraryDialog(QDialog):
             ("Edit swing…", self.edit_selected),
             ("Draw References…", self.draw_selected),
             ("Expert References…", self.show_references),
+            ("Compare Reference…", self.compare_reference),
             ("Add session folder…", self.add_session),
             ("Open folder", self.open_folder),
             ("Rename recording…", self.rename_selected),
@@ -373,8 +375,18 @@ class LibraryDialog(QDialog):
     def show_references(self) -> None:
         if self._leave_selection():
             ReferenceLibraryDialog(
-                ReferenceLibrary(self.library.root / "references"), self
+                ReferenceLibrary(self.library.root / "references"),
+                self,
+                capture_root=self._selected,
             ).exec()
+
+    def compare_reference(self) -> None:
+        if self._leave_selection():
+            self._operate(
+                lambda root: show_reference_comparison(
+                    root, ReferenceLibrary(self.library.root / "references"), self
+                )
+            )
 
     def draw_selected(self) -> None:
         if self._leave_selection():
