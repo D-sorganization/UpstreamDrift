@@ -71,6 +71,7 @@
     "yaml": "^2.8.3",
     "tunnel-rat": {
       "zustand": "$zustand"
-    }
+    },
+    "js-yaml": "^4.3.2"
   }
 }
