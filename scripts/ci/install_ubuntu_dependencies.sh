@@ -32,6 +32,8 @@ apt_options=(
   -o Dir::Etc::sourcelist=/dev/null
   -o "Dir::Etc::sourceparts=$workspace/sources"
   -o "Dir::State::lists=$workspace/lists"
+  -o "Dir::Cache::pkgcache=$workspace/pkgcache.bin"
+  -o "Dir::Cache::srcpkgcache=$workspace/srcpkgcache.bin"
 )
 apt_retry() {
   for attempt in {1..12}; do

@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Scoped Ubuntu CI Dependency Installation (#9894)
+
+Standard Qt/Xvfb dependency jobs share `scripts/ci/install_ubuntu_dependencies.sh`.
+A readable runner-provided signed Ubuntu deb822 source is required. Both update
+and install use temporary source, package-index and binary-cache paths, retain
+package signature/hash verification and lock retries, and fail on persistent
+errors. Shared runner source configuration is preserved; cleanup removes only
+the temporary directory created by this invocation.
+
 ## Reference Preview & Verified Export Parity (#9882)
 
 Ensure verified reference exports and comparison preview share identical spatial alignment, layer visibility, rendering pipelines, and sidecar manifest provenance (`src.tools.capture_rig.reference_export`, `src.tools.capture_rig.reference_rendering`, `src.motion_capture.reference.evidence`):
