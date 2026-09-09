@@ -22,26 +22,26 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** codex
 - **Issue:** #9913; epic #9906
-- **Branch:** feat/capture-guided-setup
-- **PR:** #9910 (draft)
+- **Branch:** feat/9913-capture-journey
+- **PR:** pending
 - **Paths:** src/tools/capture_rig/, tests/tools/capture_rig/, scripts/generate_mocap_user_guide.py, docs/motion_capture/user_guide.md, src/config/feature_parity.json
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`8f590cc80779ef4dad4fd5bd4b28c63e784303b9`; capture/parity suites, 37 final focused tests, five final journey tests and normal commit/pre-push gates pass; preserving remote rebase by normal merge)
 - **Summary:** Persistent identity and action feedback, per-capture history, detector/edit association, clickable workflow/help/provenance, invalid-selection state clearing, and Qt window detachment/fullscreen with preserved content.
-- **Next step:** Run normal commit and pre-push checks, then publish #9910.
+- **Next step:** Publish the separate #9913 PR after merged-tree checks.
 
 ### DL-#9911 · Preview Discovery Failure Recovery
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9911
 - **Branch:** feat/capture-guided-setup
-- **PR:** #9910 (draft)
+- **PR:** #9910 (merged)
 - **Paths:** src/tools/capture_rig/preview.py, tests/tools/capture_rig/test_preview.py
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`6af9c1773` base; 11 preview regressions pass)
+- **Last verified:** 2026-09-09 (`18c8f922e87c92f6f518da05c0819f71ce3193ba` merge; existing recovery tests passed)
 - **Summary:** Report missing discovery imports and subprocess timeouts through the existing preview status.
-- **Next step:** Publish and qualify with #9910.
+- **Next step:** Retain the preview recovery regressions.
 
 ### DL-#9898 · Calibration Profile Compatibility
 
