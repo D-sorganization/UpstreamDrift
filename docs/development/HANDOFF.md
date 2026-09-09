@@ -54,3 +54,11 @@ publication release claim is made. Fleet adoption #1579 remains independent.
 Session capture-product-01a08427-timing-qualification owns #9881. The separate
 state worktree remains on #9884. Vendor Tools is unchanged at eab74a901.
 Earlier incompatible registration branch 8ad3f5be7 is reference material only.
+
+## Parent Qualification Integration
+
+Merged the state/export-lifetime branch through b2b72a099. Its remote peer
+packaging work is preserved separately for #9406; no parameter-budget waiver
+is required. The inherited projection/export callers pass seven additional
+regression tests. The current change passes 46 focused tests and 14-module
+mypy, architecture, Ruff and DRY/LoD no-growth checks.
