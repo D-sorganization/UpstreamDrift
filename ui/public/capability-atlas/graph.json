@@ -495,7 +495,7 @@
     },
     {
       "feature_id": "tools.capture_rig",
-      "title": "Capture Rig camera controller with live preview, movable panes and saved layouts, themed header with status strip and workflow-grouped actions, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export",
+      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export",
       "status": "exempt",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
@@ -1981,7 +1981,7 @@
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "a693983faaefb2588497487b504d5c452021bdd035033a4e430399e17274ac12",
+    "src/config/feature_parity.json": "48bc00c9bfe0a859b7fb7ba4076f962f9560f33d1bc2efead74d400504b50e4b",
     "src/config/capability_connections.json": "59bb85e4ffe6a2c2bce4d072b57898083743fb9f747a4fd7d72f422b7234ed4b",
     "src/tools/capture_rig/workflow.py": "88ebc4a0983a7324b24b02491349dacd377877b3613bcfdb671043a1a7e4514b"
   }
