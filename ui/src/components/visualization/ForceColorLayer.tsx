@@ -37,7 +37,8 @@ export function ForceColorLayer({ rootRef, segmentIds, forces, scale }: Props) {
       previous?.adapter.dispose();
       state.current = { bindings, adapter: new SegmentMaterialColors(bindings) };
     }
-    const colors = Object.fromEntries(segmentIds.map(id => [id, forceColor(forces[id], '', scale) || null]));
+    const suppliedForces = new Map(Object.entries(forces));
+    const colors = Object.fromEntries(segmentIds.map(id => [id, forceColor(suppliedForces.get(id), '', scale) || null]));
     state.current?.adapter.apply(colors);
   });
   return null;

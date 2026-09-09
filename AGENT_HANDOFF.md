@@ -9,7 +9,10 @@ renderer adapters, desktop controls and WebSocket/Scene3D wiring are implemented
 Epic #9833 and children #9834–#9837 are published. Remote main `ff0effa5a` was merged
 into the branch. Git works by clearing the stale `http.https://github.com/.extraheader`
 per invocation and using `gh auth git-credential`; global settings are unchanged.
-Remaining gates: wider interface adapters, native render evidence, protected CI
+PR #9840 is open. C3D user segments now accept explicitly bound, clock-checked
+loads and expose the shared controls. Native MuJoCo raster verification passed
+blue/red output and pixel-exact off restoration (local output/force-colors).
+Remaining gates: wider interface adapters, remote-main conflict resolution, protected CI
 and merge. Native MuJoCo tests on this Windows host must import mujoco before
 pytest/Qt to avoid a loader-order DLL failure. Do not claim universal rollout.
 

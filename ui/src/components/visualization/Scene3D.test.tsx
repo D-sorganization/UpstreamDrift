@@ -75,6 +75,14 @@ import { Scene3D } from './Scene3D';
 import type { SimulationFrame } from '@/api/client';
 
 describe('Scene3D', () => {
+  it('reports loads for other model identifiers as unavailable', () => {
+    const frame: SimulationFrame = { frame: 0, time: 0, state: {} };
+    render(<Scene3D engine="mujoco" frame={frame} segmentLoads={{
+      time_s: 0, units: 'N', sign_convention: 'tension-positive',
+      source: 'Declared section', values_n: { unrelated_model_segment: 12 },
+    }} />);
+    expect(screen.getByText('Axial load data unavailable for this frame.')).toBeInTheDocument();
+  });
   it('exposes optional force colors and reports missing axial loads', () => {
     render(<Scene3D engine="mujoco" frame={null} />);
     const toggle = screen.getByLabelText('Color Segments by Axial Force');
