@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 
 import cv2
@@ -13,6 +14,15 @@ from .swing_export import export_swing
 from src.motion_capture.coaching import DrawingLayer
 
 ExportJob = Callable[[Path, Callable[[], bool], Callable[[int, int], None]], None]
+
+
+@dataclass(frozen=True)
+class ExportJobSpec:
+    """Snapshot factory and file-dialog presentation for an alternate video export."""
+
+    factory: Callable[[], ExportJob]
+    title: str
+    filename: str
 
 
 class SwingExportWorker(QThread):
@@ -64,16 +74,15 @@ class SwingExportActions(QObject):
         status: Callable[[str], None],
         drawings: Callable[[], DrawingLayer | None] = lambda: None,
         label: str = "Export swing…",
-        job: Callable[[], ExportJob] | None = None,
-        title: str = "Export swing",
-        filename: str = "swing.mp4",
+        job: ExportJobSpec | None = None,
     ) -> None:
         super().__init__(parent)
         self.widget, self.root = parent, root
         self._view, self._save, self._status = view, save, status
         self._drawings = drawings
-        self._job = job
-        self._title, self._filename = title, filename
+        self._job = job.factory if job else None
+        self._title = job.title if job else "Export swing"
+        self._filename = job.filename if job else "swing.mp4"
         self._worker: SwingExportWorker | None = None
         self._progress: QProgressDialog | None = None
         self._closing = False

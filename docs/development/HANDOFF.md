@@ -47,3 +47,10 @@ Session capture-product-01a08427-comparison-qualification owns #9879 in this
 isolated worktree. Shared checkouts, vendor child code and peers remain intact.
 Read the central mailbox before scope expansion, commit and handoff. Publish
 through a topic PR referencing #9879 and normal branch protections.
+
+## CI Follow-Up
+
+The final export presentation options exceeded the constructor parameter
+budget in CI after the earlier local architecture check. ExportJobSpec now
+groups the snapshot factory and dialog presentation; no budget is relaxed.
+Remote rebase 94367f82a was merged without overwriting peer changes.

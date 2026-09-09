@@ -49,7 +49,7 @@ from .annotate_widget import ImageCanvas
 from .flow_layout import FlowLayout
 from .player import VideoReader
 from .session import load_session
-from .swing_export_actions import ExportJob, SwingExportActions
+from .swing_export_actions import ExportJob, ExportJobSpec, SwingExportActions
 
 
 class ReferenceComparisonDialog(QDialog):
@@ -93,10 +93,10 @@ class ReferenceComparisonDialog(QDialog):
             view=lambda: self.view,
             save=self.save,
             status=self._export_status,
-            job=self._export_job,
+            job=ExportJobSpec(
+                self._export_job, "Export Comparison Video", "comparison.mp4"
+            ),
             label="Export Comparison Video…",
-            title="Export Comparison Video",
-            filename="comparison.mp4",
         )
 
         self.setWindowTitle(f"Reference Comparison · {view}")
