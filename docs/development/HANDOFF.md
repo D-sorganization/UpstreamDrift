@@ -69,3 +69,5 @@ or mesh files are not silently converted. Shared clones and peers' worktrees int
 
 - SELF — Integrate merged drawings #9869 / main 77e6bca88. Preserve all expert-reference additions while taking the qualified shared drawing-colour default from main. Mark editing/drawings log entries shipped based on protected merges.
 - SELF — Post-main integration qualification: 31 reference import, persistence, C3D, native reference-library and theme tests pass. Ready to validate the focused PR against merged drawings.
+
+- SELF — Full CI identified duplicate Qt button setup in reference mapping. Reuse the public shared create_button factory and label the action Import Reference. Four native reference tests and the full DRY no-growth gate pass; no quarantine changes.
