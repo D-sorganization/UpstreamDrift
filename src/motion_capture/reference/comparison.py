@@ -65,6 +65,43 @@ class ComparisonSession(BaseModel):
     def changed(self, **values: object) -> Self:
         return type(self).model_validate(self.model_dump() | values)
 
+    @property
+    def layer_visible(self) -> bool:
+        return self.layer.visible
+
+    @property
+    def layer_opacity(self) -> float:
+        return self.layer.opacity
+
+    @property
+    def layer_colour(self) -> str:
+        return self.layer.colour
+
+    @property
+    def layer_line_width(self) -> int:
+        return self.layer.line_width
+
+    def with_layer(
+        self,
+        *,
+        colour: str | None = None,
+        opacity: float | None = None,
+        visible: bool | None = None,
+        line_width: int | None = None,
+    ) -> Self:
+        current = self.layer
+        new_layer = current.model_validate(
+            {
+                "colour": colour if colour is not None else current.colour,
+                "opacity": opacity if opacity is not None else current.opacity,
+                "visible": visible if visible is not None else current.visible,
+                "line_width": line_width
+                if line_width is not None
+                else current.line_width,
+            }
+        )
+        return self.changed(layer=new_layer)
+
 
 def comparison_session_path(root: Path, view: str, reference_id: str) -> Path:
     """Conventional path for saved comparison session sidecars."""
