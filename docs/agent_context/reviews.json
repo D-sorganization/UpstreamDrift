@@ -1,31 +1,32 @@
 {
   "reviews": {
     "capture-atlas": {
-      "fingerprint": "e600d3e9f4991e7c393242cf189893b2d32d0cd5a34a8cba94632e376a69cb33",
+      "fingerprint": "c0d9d414bda73820fa157fd2f38c8c19c8931a89dacf93729defcd765b62a0a9",
       "inputs": {
-        "docs/agent_context/contracts/capture-atlas.md": "348d68b058bdb0819f71d85f5e94f9837a28e4177af747f51ce50854d148acf5",
+        "docs/agent_context/contracts/capture-atlas.md": "1494a286aadad0a55ca17eafbde14d8336da31c3dbb6436aab5d43d6f8da456f",
         "scripts/capability_atlas/model.py": "49b7423d277ffc751a5b4d3faa3b7adb72373977d7e68ceeed6e1b7baa1d7b68",
         "scripts/capability_atlas/render.py": "78b5dfe306e355a85ae3d43bbb0362673c711216a9bb8fa14ecbe0dbeac61550",
         "src/config/capability_connections.json": "15cb0772d018a0ae91273bfe5c50f9359eaa8632b770d6a14fc129b8aaed92c7",
-        "src/tools/capture_rig/workflow.py": "ef3c35db12049cb4ca5aa08c9a8ca5f376dd114efc61b36f72f5fd036f00e147",
-        "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be"
+        "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e",
+        "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be",
+        "tests/tools/capture_rig/test_workflow.py": "f583fecf6ebe50173a9e5b5108f4b105ec8636cec926ce665393fcd90669dbe2"
       },
-      "rationale": "Reviewed capture workflow metadata and atlas generation sources. Existing atlas tests passed in the 41-test boundary run on 2026-09-09; catalog presence does not assert camera, calibration or reconstruction qualification."
+      "rationale": "Reviewed current main8fce9f238: intrinsics now explicitly follow camera/lens settings and require recalibration after zoom, focus, resolution or crop changes. Updated the boundary explanation and added workflow tests as evidence. All15 atlas/workflow tests passed on2026-09-09; AST metadata projection and artifact-exchange semantics remain unchanged."
     },
     "launcher-atlas": {
-      "fingerprint": "5b7e8571138f2a9c75e6b54522cdb437ef244e6d72310eef4c3321c79d32d14d",
+      "fingerprint": "74538378d2df69507a891824469ef2f4b64d8032525bca497b094045e16f1b26",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "9cc9ae26bbf66ed47cc7877a7ae1fd14b08000fff4eca950f6a7a1a469ff279b",
         "scripts/capability_atlas/model.py": "49b7423d277ffc751a5b4d3faa3b7adb72373977d7e68ceeed6e1b7baa1d7b68",
         "scripts/capability_atlas/render.py": "78b5dfe306e355a85ae3d43bbb0362673c711216a9bb8fa14ecbe0dbeac61550",
         "src/config/capability_connections.json": "15cb0772d018a0ae91273bfe5c50f9359eaa8632b770d6a14fc129b8aaed92c7",
-        "src/config/feature_parity.json": "fa719921e5d5047a2383f219ea80f06e358c93c6260358c8ccc2d4f3c7c5d165",
+        "src/config/feature_parity.json": "2f0cab648bc01ef4d6fde999eb4b18bcedf1ee4e9bb36b361ce8e9c097992524",
         "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
         "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
         "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
         "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be"
       },
-      "rationale": "Reviewed launcher manifest and capability registry projections into the existing atlas, including declared state versus runtime availability. Existing test_capability_atlas.py passed in the 41-test boundary run on 2026-09-09."
+      "rationale": "Reviewed current main8fce9f238 feature parity changes: shipped capture journey and alignment controls update descriptive notes while parity/gap/exempt authority and registry projection remain unchanged. All15 atlas/workflow tests passed on2026-09-09; runtime availability is still not inferred from registry text."
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",

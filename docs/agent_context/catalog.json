@@ -306,7 +306,10 @@
         "src/config/capability_connections.json",
         "src/tools/capture_rig/workflow.py"
       ],
-      "tests": ["tests/scripts/test_capability_atlas.py"]
+      "tests": [
+        "tests/scripts/test_capability_atlas.py",
+        "tests/tools/capture_rig/test_workflow.py"
+      ]
     }
   ],
   "inventories": [

@@ -13,6 +13,11 @@ into workflow nodes. Architecture edges distinguish explicit artifact exchange
 from direct execution. Single-view analysis is 2-D; calibrated reconstruction
 requires multiple views and adequate geometric observability.
 
+Camera intrinsics belong to the camera and lens capture settings. Optical zoom,
+focus, resolution or crop changes require matching calibration; camera placement
+is evaluated separately. Keep these requirements in the shared step declarations
+so both the application guide and the atlas present the same prerequisites.
+
 ## Lifecycle and Failures
 
 Change workflow declarations at their source, then regenerate the capability

@@ -19,7 +19,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QResizeEvent
 from PyQt6.QtWidgets import (
     QHBoxLayout,
     QPushButton,
@@ -93,6 +94,27 @@ class RailLabel(ElidedLabel):
         self.setFont(get_qfont(size, weight))
 
 
+class RailStepButton(QPushButton):
+    """Keyboard-accessible step navigation with the rail's compact elision."""
+
+    def __init__(self, text: str) -> None:
+        super().__init__(text)
+        self.full_text = text
+        self.setFlat(True)
+        self.setFont(get_qfont(Sizes.MD, Weights.MEDIUM))
+        self.setAccessibleName(text)
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self.setMinimumHeight(28)
+
+    def resizeEvent(self, event: QResizeEvent | None) -> None:  # noqa: N802
+        super().resizeEvent(event)
+        self.setText(
+            self.fontMetrics().elidedText(
+                self.full_text, Qt.TextElideMode.ElideRight, max(0, self.width() - 20)
+            )
+        )
+
+
 class StepRail(QWidget):
     """The workflow as a narrow rail with one obvious next action.
 
@@ -101,6 +123,7 @@ class StepRail(QWidget):
     """
 
     action_triggered = pyqtSignal(str)
+    step_selected = pyqtSignal(str)
 
     def __init__(
         self,
@@ -112,7 +135,9 @@ class StepRail(QWidget):
         self._labels = dict(labels) if labels is not None else None
         self._states: tuple[StepState, ...] = ()
         self._hints: dict[str, str] = {}
-        self.rows: dict[str, RailLabel] = {}
+        self.rows: dict[str, RailStepButton] = {}
+        self._selected_key: str | None = None
+        self._allowed: frozenset[str] = frozenset()
         self.notes: dict[str, RailLabel] = {}
         self.kinds: dict[str, str] = {}
         self.primary: QPushButton | None = None
@@ -188,15 +213,22 @@ class StepRail(QWidget):
 
     # -- rendering -----------------------------------------------------------
     def _rebuild(self, allowed: frozenset[str]) -> None:
+        self._allowed = allowed
         self._clear()
         self._body.addWidget(self.heading)
         current = workflow.current(self._states)
+        selected = next(
+            (s for s in self._states if s.step.key == self._selected_key), current
+        )
+        self.heading.set_full_text(
+            HEADING if selected == current else "Review This Step"
+        )
         for state in self._states:
             is_current = current is not None and state.step.key == current.step.key
             self._add_row(
                 state, CURRENT_KIND if is_current else STATUS_KIND[state.status]
             )
-            if is_current:
+            if selected is not None and state.step.key == selected.step.key:
                 self._add_actions(state.step, allowed)
         self._body.addStretch(1)
         self.restyle()
@@ -213,9 +245,10 @@ class StepRail(QWidget):
 
     def _add_row(self, state: StepState, kind: str) -> None:
         step = state.step
-        row = RailLabel(f"{STATUS_GLYPH[state.status]}  {step.title}")
+        row = RailStepButton(f"{STATUS_GLYPH[state.status]}  {step.title}")
         reason = f" ({state.reason})" if state.reason else ""
         row.setToolTip(f"{row.full_text}\n{step.purpose}\n{state.status.value}{reason}")
+        row.clicked.connect(lambda _=False, key=step.key: self._choose_step(key))
         self.rows[step.key] = row
         self.kinds[step.key] = kind
         self._body.addWidget(row)
@@ -225,6 +258,16 @@ class StepRail(QWidget):
             label.setToolTip(note)
             self.notes[step.key] = label
             self._body.addWidget(label)
+
+    def select_step(self, key: str) -> None:
+        """Show this step's actions; the readiness rules still govern them."""
+        require(any(s.step.key == key for s in self._states), "unknown step", key)
+        self._selected_key = key
+        self._rebuild(self._allowed)
+
+    def _choose_step(self, key: str) -> None:
+        self.select_step(key)
+        self.step_selected.emit(key)
 
     def _add_actions(self, step: Step, allowed: frozenset[str]) -> None:
         actions = tuple(step.actions)

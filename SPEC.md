@@ -4246,6 +4246,11 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
 | 2026-09-09 | #9915 | Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. |
+| 2026-09-09 | #9913 | Add persistent swing/capture feedback, durable history, linked detector/help/workflow status and retained Qt views; bounded renderers and panel methods preserve architecture rules. |
+| 2026-09-09 | #9911 | Keep preview discovery import and timeout failures within the existing error status. |
+| 2026-09-09 | #9898 | Add visible zoom-aware intrinsic profile review, verified rig exports and immutable revisions; track everyday-reference, club-catalog and guided-setup epics #9897/#9902/#9906. |
+| 2026-09-09 | #9910 | Add visible zoom-aware intrinsic profile review, verified rig exports and immutable revisions; report camera discovery dependency and timeout failures (#9911). |
+| 2026-09-09 | #9618 | Create participant-calibrated digital twins and population ensembles: identity-safe cohort schema, synthetic benchmark calibration, holdout validation, and provenance governance (#8593). |
 | 2026-09-06 | #9636 | Retargeted the test that guards the mypy exclusion budget's re-attestation dates. The assertion derives the bound from the budget's own schedule, and repository-file reads are anchored to the repo root. |
 | 2026-09-09 | #9610 | Reconciled the ground-reaction bibliography against original sources in grf_source_reconciliation.json, mapping GRF, CoP, free-moment, and segment-power topics to verified publications. |
 | 2026-09-09 | #9633 | Momentum-transfer geometry atlas carried through subject-scaled articulated closed-contact, distributed-club, and synthetic held-out measurement tiers. |
