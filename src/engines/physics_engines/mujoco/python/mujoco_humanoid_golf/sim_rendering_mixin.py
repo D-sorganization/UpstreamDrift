@@ -107,6 +107,8 @@ class SimRenderingMixin:
                 scene_option=self.scene_option,
             )
 
+        axial_frame, scale = self._apply_axial_scene_colors()
+
         try:
             rgb = self.renderer.render()
         except MemoryError as exc:
@@ -133,6 +135,8 @@ class SimRenderingMixin:
         if self.meshcat_adapter:
             try:
                 self.meshcat_adapter.update(self.data)
+                if scale is not None:
+                    self.meshcat_adapter.update_force_colors(axial_frame, scale)
                 self.meshcat_adapter.draw_vectors(
                     self.data,
                     self.show_force_vectors,
@@ -173,6 +177,23 @@ class SimRenderingMixin:
         pixmap = QtGui.QPixmap.fromImage(image)
 
         self.label.setPixmap(pixmap)
+
+    def _apply_axial_scene_colors(self: Any) -> tuple[Any, Any]:
+        """Sample the optional force capability once for native and web renderers."""
+        from src.shared.python.body_part_viz.mujoco_force_colors import (
+            apply_mujoco_scene_colors,
+        )
+
+        scale = getattr(self, "axial_color_scale", None)
+        frame = None
+        if scale is not None and scale.enabled:
+            try:
+                frame = self.engine.get_segment_axial_loads()
+                apply_mujoco_scene_colors(self.model, self.renderer.scene, frame, scale)
+            except (TypeError, ValueError, RuntimeError) as exc:
+                frame = None
+                logger.debug("Axial force display unavailable: %s", exc)
+        return frame, scale
 
     @staticmethod
     def _euler_from_matrix(mat: np.ndarray) -> tuple[float, float, float]:
