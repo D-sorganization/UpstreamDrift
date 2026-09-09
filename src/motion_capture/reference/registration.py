@@ -139,16 +139,24 @@ class TimeMapping(BaseModel):
                 key=lambda k: ref_dict[k],
             )
             if len(common) >= 2:
-                r_times = [ref_dict[k] for k in common]
-                s_times = [scene_dict[k] for k in common]
+                r_times = [float(ref_dict[k]) for k in common]
+                s_times = [float(scene_dict[k]) for k in common]
                 # Bounded interpolation with linear extrapolation at endpoints
-                warped = np.interp(
-                    arr,
-                    r_times,
-                    s_times,
-                    left=s_times[0] + (arr - r_times[0]),
-                    right=s_times[-1] + (arr - r_times[-1]),
-                )
+                interp_val = np.interp(arr, r_times, s_times)
+                # Extrapolate linearly beyond bounds
+                left_mask = arr < r_times[0]
+                right_mask = arr > r_times[-1]
+                warped = np.array(interp_val, dtype=float, copy=True)
+                if np.any(left_mask):
+                    slope_l = (s_times[1] - s_times[0]) / (r_times[1] - r_times[0])
+                    warped[left_mask] = (
+                        s_times[0] + (arr[left_mask] - r_times[0]) * slope_l
+                    )
+                if np.any(right_mask):
+                    slope_r = (s_times[-1] - s_times[-2]) / (r_times[-1] - r_times[-2])
+                    warped[right_mask] = (
+                        s_times[-1] + (arr[right_mask] - r_times[-1]) * slope_r
+                    )
                 return float(warped) if arr.ndim == 0 else warped
         res = arr * self.rate_scale + self.offset_s
         return float(res) if arr.ndim == 0 else res
@@ -165,15 +173,22 @@ class TimeMapping(BaseModel):
                 key=lambda k: scene_dict[k],
             )
             if len(common) >= 2:
-                s_times = [scene_dict[k] for k in common]
-                r_times = [ref_dict[k] for k in common]
-                warped = np.interp(
-                    arr,
-                    s_times,
-                    r_times,
-                    left=r_times[0] + (arr - s_times[0]),
-                    right=r_times[-1] + (arr - s_times[-1]),
-                )
+                s_times = [float(scene_dict[k]) for k in common]
+                r_times = [float(ref_dict[k]) for k in common]
+                interp_val = np.interp(arr, s_times, r_times)
+                left_mask = arr < s_times[0]
+                right_mask = arr > s_times[-1]
+                warped = np.array(interp_val, dtype=float, copy=True)
+                if np.any(left_mask):
+                    slope_l = (r_times[1] - r_times[0]) / (s_times[1] - s_times[0])
+                    warped[left_mask] = (
+                        r_times[0] + (arr[left_mask] - s_times[0]) * slope_l
+                    )
+                if np.any(right_mask):
+                    slope_r = (r_times[-1] - r_times[-2]) / (s_times[-1] - s_times[-2])
+                    warped[right_mask] = (
+                        r_times[-1] + (arr[right_mask] - s_times[-1]) * slope_r
+                    )
                 return float(warped) if arr.ndim == 0 else warped
         res = (arr - self.offset_s) / self.rate_scale
         return float(res) if arr.ndim == 0 else res
