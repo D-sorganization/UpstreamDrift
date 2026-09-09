@@ -85,3 +85,5 @@ Merged main c6f58aef9 and preserved legacy fingerprint fields, the explicit samp
 Concurrent remote merge 054655131 is preserved. Its explicit single-anchor affine inverse and error wording are retained alongside finite positive gap validation. All peer tests remain included; no remote history is rewritten.
 
 The SPEC merge driver restored a duplicate #9879 row during concurrent integration. Retain the canonical #9884 row and explicitly recheck the duplicate gate after each stacked merge. No implementation change.
+
+Five adverse tests exposed an unchecked legacy max_gap_s keyword after concurrent integration. The explicit override now has the same finite (0, 10] bounds as the saved recipe. All five failed before the fix and pass afterward; existing valid override behavior remains.
