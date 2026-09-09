@@ -341,6 +341,12 @@ image; **Reset this view** restores its complete recording. **Save selection** s
 a reversible recipe in `swing_edits.json`. Ingest uses that recipe while retaining
 original camera coordinates and timestamps. Original recordings remain intact.
 An already analyzed take requires an editable copy so its old results remain valid.
+Keep an address hold at the beginning and the finish at the end for analysis.
+**Export swing** saves the selection and writes a separate MP4 or AVI in a background
+worker, with cancellation and a provenance JSON beside it. Choose a new filename.
+The export retains the crop exactly; an odd width/height gets one replicated edge
+pixel as encoder padding, recorded in provenance. Main multiview playback continues
+to show the original synchronized scene; selection playback is in the editor.
 
 The library's **Archive** action hides a capture from the active list; use the
 archived filter and **Restore** to bring it back. Archiving does not free disk space.

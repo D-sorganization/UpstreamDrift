@@ -27,7 +27,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from .analytics import summarize_swing
 from .cameras import PinholeCamera
 from .clean import CleanReport, clean_view
-from .bundle import observations_from_views
+from .bundle import compact_frames, observations_from_views
 from .measurements import expand_measurements, gauge
 from .fit import (
     RECONSTRUCTION_FILE,
@@ -320,7 +320,7 @@ def _initial_cameras(
     scale_anchor: tuple[str, float],
 ) -> tuple[PinholeCamera, ...]:
     """First-take placement from the cleaned joints and the intrinsics alone."""
-    obs = observations_from_views(load_views(out_dir), ids)
+    obs, _ = compact_frames(observations_from_views(load_views(out_dir), ids))
     init = initialize_cameras(
         obs,
         [i[1] for i in intrinsics],

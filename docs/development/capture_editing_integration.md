@@ -82,7 +82,30 @@ the library (350-px minimum width). The fontless Qt offscreen backend required
 loading installed Segoe UI in the screenshot harness; application fonts were not
 changed. A real Windows catalog-handle cleanup failure was reproduced and fixed.
 
-Remaining: selection export/playback integration, generated map updates, protected
-CI and merge; coaching shape model/editing/export under #9862 and advanced reference
+Export swing now reuses clips.export_clip with a cancellable native worker, exact
+inclusive selection and source crop. A separate video and source-hash/recipe sidecar
+are published without replacing existing paths. Odd dimensions are padded at the
+right/bottom instead of losing selected pixels. Cancellation or decode shortfall
+publishes neither file. The two-file publication handles ordinary errors but is not
+a power-loss transaction. Main multiview playback keeps its original scene; the
+editor previews only the selection.
+
+Two downstream regressions were reproduced: initialization failed when selected
+frames started after frame ten, and all-zero excluded frames introduced a false
+speed peak (21.134 versus 2.059 m/s in the synthetic example). Camera initialization
+now reuses observed-frame compaction. Summary computation excludes wholly missing
+prefix/suffix frames, restores source event indices and marks excluded angle values
+unobserved. A wholly missing interior frame produces a clear continuous-interval
+requirement instead of invented motion evidence. Existing analytical formulas remain
+unchanged. The focused reconstruction/analytics suite passes 11 tests.
+
+The integrated run passed all behavioral tests and exposed one stale generated user
+guide; regeneration repaired that, with 10 guide/synchronization checks passing.
+The registry/atlas suite passes 49 tests. Export/editor/coaching clip tests pass 12,
+and five affected export/reconstruction modules pass mypy. The final 850x650 export
+editor remains at a 492-px minimum width. Generated feature, workflow and atlas
+references now include selection/library/export integration.
+
+Remaining: protected CI and merge; coaching shape model/editing/export under #9862 and advanced reference
 import/registration/sync/comparison under #9863. Do not close epics based on this
 document or claim these remaining features already work.

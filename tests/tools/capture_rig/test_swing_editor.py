@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from time import monotonic
 
 import pytest
 
@@ -105,3 +106,20 @@ def test_cancel_close_keeps_unsaved_selection(
     assert dialog.isVisible() and dialog.first.value() == 2
     assert dialog.save()
     dialog.close()
+
+
+def test_export_saves_selection_without_blocking_editor(tmp_path: Path) -> None:
+    app = _app()
+    editor = SwingEditor(_bundle(tmp_path))
+    editor.first.setValue(1)
+    editor.last.setValue(3)
+    output = tmp_path / "selected.avi"
+    editor.exporter.start(output)
+    assert editor.exporter.busy
+    deadline = monotonic() + 10
+    while editor.exporter.busy and monotonic() < deadline:
+        app.processEvents()
+    assert not editor.exporter.busy
+    assert output.is_file() and output.with_suffix(".json").is_file()
+    assert "saved" in editor.status.text()
+    editor.close()

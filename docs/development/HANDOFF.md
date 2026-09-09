@@ -14,8 +14,8 @@
 
 - Objective: Make swing selection and capture-library workflows safe, discoverable and responsive.
 - Status: in progress
-- Completed: Source-coordinate edit contract, ingestion crop/trim, native editor, visible library with notes/import/storage/archive/rename recovery and header integration, focused tests and Tools reuse audit.
-- Remaining: Selection export/playback integration, generated map updates and protected PR.
+- Completed: Source-coordinate edit contract, ingestion crop/trim, native editor, visible library with notes/import/storage/archive/rename recovery and header integration, selected-swing export, downstream timeline regressions, generated maps, focused tests and Tools reuse audit.
+- Remaining: Protected PR, current-head CI and merge. Drawings/reference epics remain separate outstanding scope.
 
 ## Files and Decisions
 
@@ -38,7 +38,7 @@
 
 ## Next Steps
 
-1. Finish selection export/playback integration and map updates.
+1. Push through normal hooks and open the editing/library PR.
 2. Qualify and submit editing/library PR; then coaching drawings #9862 and reference epic #9863.
 3. Refresh generated maps and obtain protected CI/merge evidence; keep open scope open.
 
@@ -47,6 +47,8 @@
 - 3184f57b8 — Add source-preserving swing edit foundation and native editor.
 - 5d70e394e — Add portable capture notes/catalog, archive/restore, safe filename changes and editable copies.
 
-- SELF — Add visible library and header actions, rename recovery, cancellable scanning, Windows catalog cleanup and integrated UI qualification.
+- 8b14709a8 — Add visible library and header actions, rename recovery, cancellable scanning, Windows catalog cleanup and integrated UI qualification.
 
-- SELF — Integrated protected main with atlas and performance improvements; preserved both development-log entries and all SPEC rows.
+- 2d92e179d — Integrated protected main with atlas and performance improvements; preserved both development-log entries and all SPEC rows.
+
+- SELF — Add cancellable swing export with provenance, source-timeline initialization and analytics regressions, and regenerated workflow/capability references. Export/editor/clips 12 passed, reconstruction/analytics 11 passed, registry/atlas 49 passed, repaired guide/timing 10 passed, five-module mypy passed.

@@ -31,6 +31,7 @@ from src.motion_capture.rig.edits import (
 from .annotate_widget import ImageCanvas
 from . import styling
 from .player import VideoReader
+from .swing_export_actions import SwingExportActions
 
 
 class CropCanvas(ImageCanvas):
@@ -99,6 +100,13 @@ class SwingEditor(QDialog):
         self.play.clicked.connect(self._toggle_play)
         self.status = QLabel()
         self.status.setWordWrap(True)
+        self.exporter = SwingExportActions(
+            self,
+            root,
+            view=lambda: self._current,
+            save=self.save,
+            status=self.status.setText,
+        )
         self.clock = QLabel()
         self.crop_fields = {name: QSpinBox() for name in ("x", "y", "width", "height")}
         for name, field in self.crop_fields.items():
@@ -146,6 +154,7 @@ class SwingEditor(QDialog):
         close = QPushButton("Close")
         close.clicked.connect(self.close)
         buttons.addWidget(reset)
+        buttons.addWidget(self.exporter.button)
         buttons.addStretch()
         buttons.addWidget(save)
         buttons.addWidget(close)
@@ -312,6 +321,9 @@ class SwingEditor(QDialog):
 
     def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: N802
         if event is None:
+            return
+        if not self.exporter.can_close():
+            event.ignore()
             return
         try:
             dirty = self._recipe() != self._baseline
