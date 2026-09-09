@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Capture Rig GUI: Docs, Parity Registry & Before/After Evidence (#9848)
+
+- Updated `docs/motion_capture/capture_rig.md` documenting responsive compact mode layout adaptation, single-column control dock tabification under 1400 px, and live preview dominance.
+- Created evidence document `docs/motion_capture/evidence/capture_rig_responsive_evidence.md` with before/after measurements (minimum width reduced from 3276 px historical floor to 478 px against the <= 900 px budget; 1280x800 preview width 656 px vs controls 240 px, a 2.73:1 preview-to-controls ratio) and rendered UI capture `capture_rig_responsive_layout.png`.
+- Regenerated feature parity matrix and documentation.
+
+
 ## Capture Rig GUI: Adapt to Window Size & Guard Minimum Width (#9847)
 
 - `src.tools.capture_rig.responsive` introduces pure `resolve_layout_mode` classifying widths below 1400 px into `COMPACT` and at/above into `ROOMY`.
