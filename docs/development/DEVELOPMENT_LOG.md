@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9881 · Reference Timing and Camera Evidence
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9881 (advanced reference epic #9863)
+- **Branch:** fix/9881-reference-timing
+- **PR:** pending
+- **Paths:** src/motion_capture/reference, src/motion_capture/reconstruct/overlay3d.py, src/tools/capture_rig/reference_comparison.py, src/tools/capture_rig/reference_export.py, related tests and benchmark
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`SELF`; final qualification in progress)
+- **Summary:** Immutable bounded event anchors, binary-search gap-aware sampling, actual camera/clock snapshots and stale-registration checks replace unsupported calibration assumptions.
+- **Evidence:** Twelve adverse regressions first failed. Combined suite 46 passed including final camera fixtures; twelve-module mypy passes. Diagnostic benchmark stays near 0.25 ms per sampled frame across 120 to 12000 source frames.
+- **Next step:** Finish focused qualification and protected checks, then continue #9882/#9883.
+
 ### DL-#9879 · Comparison State and Export Lifetime
 
 - **State:** in_progress

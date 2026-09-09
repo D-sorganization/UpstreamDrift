@@ -172,7 +172,12 @@ def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any
 
     registration = spec.registration
     is_3d = ref_asset.kind == "motion"
-    has_calib = bool(registration and registration.is_calibrated)
+    has_calib = bool(
+        registration
+        and registration.camera
+        and registration.is_calibrated
+        and registration.transform.is_calibrated
+    )
 
     if is_3d:
         alignment_status = (

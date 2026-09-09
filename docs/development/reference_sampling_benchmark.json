@@ -1,0 +1,56 @@
+{
+  "python": "3.13.5",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "registration_sha256": "f129cd0257b6926ab2f0b87155787b9ad0d9b6dc4d3de9dce5d07936a32c96d7",
+  "workloads": [
+    {
+      "frames": 120,
+      "joints": 17,
+      "sample_one_frame": {
+        "samples": 5,
+        "median_ms": 0.252,
+        "p95_ms": 0.344,
+        "max_ms": 0.356
+      },
+      "full_trajectory_control": {
+        "samples": 5,
+        "median_ms": 17.959,
+        "p95_ms": 22.306,
+        "max_ms": 22.593
+      }
+    },
+    {
+      "frames": 1200,
+      "joints": 17,
+      "sample_one_frame": {
+        "samples": 5,
+        "median_ms": 0.255,
+        "p95_ms": 0.361,
+        "max_ms": 0.384
+      },
+      "full_trajectory_control": {
+        "samples": 5,
+        "median_ms": 168.654,
+        "p95_ms": 186.239,
+        "max_ms": 187.746
+      }
+    },
+    {
+      "frames": 12000,
+      "joints": 17,
+      "sample_one_frame": {
+        "samples": 5,
+        "median_ms": 0.228,
+        "p95_ms": 0.276,
+        "max_ms": 0.281
+      },
+      "full_trajectory_control": {
+        "samples": 5,
+        "median_ms": 2171.389,
+        "p95_ms": 2289.46,
+        "max_ms": 2314.547
+      }
+    }
+  ],
+  "limit": "Synthetic CPU sampling only; excludes loading, decoding, drawing and display."
+}

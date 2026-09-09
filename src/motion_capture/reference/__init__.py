@@ -11,6 +11,8 @@ from .comparison import (
     load_comparison_session,
     save_comparison_session,
 )
+from .evidence import CameraSnapshot, ViewClock
+from .scene import session_camera, session_clock
 from .model import Asset, ReferenceMotion, ReferenceSource, ReferenceVideo
 from .registration import (
     EventAnchors,
@@ -29,6 +31,10 @@ __all__ = [
     "Asset",
     "ComparisonExportSidecarSpec",
     "ComparisonLayer",
+    "CameraSnapshot",
+    "ViewClock",
+    "session_camera",
+    "session_clock",
     "ComparisonSession",
     "EventAnchors",
     "ReferenceMotion",

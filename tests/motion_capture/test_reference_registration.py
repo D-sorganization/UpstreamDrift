@@ -133,6 +133,7 @@ def test_sample_reference_motion_preserves_missing_joint_masks_across_gaps() -> 
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="rig_01",
+        max_gap_s=0.5,
         transform=ReferenceTransform(),
         time_mapping=TimeMapping(offset_s=0.0),
     )
@@ -162,6 +163,7 @@ def test_camera_projection_with_distortion_and_clipping() -> None:
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="rig_01",
+        max_gap_s=0.5,
         transform=ReferenceTransform(translation_m=(0.0, 0.0, 0.0)),
         time_mapping=TimeMapping(offset_s=0.0),
     )
@@ -207,6 +209,7 @@ def test_serialization_round_trip_yields_identical_pixels_and_times() -> None:
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="rig_01",
+        max_gap_s=0.5,
         transform=ReferenceTransform(
             rotation=rot,
             translation_m=(0.1, 0.2, 0.3),
@@ -279,6 +282,7 @@ def test_reference_track_generates_overlay_track() -> None:
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="rig_01",
+        max_gap_s=0.5,
         transform=ReferenceTransform(translation_m=(0.0, 0.0, 0.0)),
         time_mapping=TimeMapping(offset_s=0.0),
     )

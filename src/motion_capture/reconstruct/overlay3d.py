@@ -21,10 +21,11 @@ import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import require
+from src.shared.python.pose_estimation.observations import CameraCalibration
 
 from ..variants import get_variant, variant_dir
 from .cameras import PinholeCamera
-from .fit import RECONSTRUCTION_FILE, cameras_from_records
+from .fit import RECONSTRUCTION_FILE
 from .skeleton import JOINT_NAMES, PARENTS
 
 Array: TypeAlias = npt.NDArray[np.float64]
@@ -115,15 +116,21 @@ class Track:
         return self.px[frame], self.visible[frame].astype(float)
 
 
-def _cameras_of(root: Path) -> dict[str, PinholeCamera]:
+def _cameras_of(root: Path) -> dict[str, CameraCalibration]:
     path = root / "reconstruct" / RECONSTRUCTION_FILE
     if not path.is_file():
         return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
-    return {c.camera_id: c for c in cameras_from_records(payload["cameras"])}
+    cameras = (CameraCalibration.from_dict(row) for row in payload["cameras"])
+    return {camera.camera_id: camera for camera in cameras}
 
 
 def camera_for_view(session: Path, variant: str, view: str) -> PinholeCamera:
+    """Existing ideal-pinhole projection interface; camera selection stays shared."""
+    return PinholeCamera.from_calibration(calibration_for_view(session, variant, view))
+
+
+def calibration_for_view(session: Path, variant: str, view: str) -> CameraCalibration:
     """The view's camera: own reconstruction, then ``cameras_from``, then default.
 
     Precondition: some variant of the session has a camera for ``view``.
@@ -240,7 +247,7 @@ def reprojection_rms_px(
 def reference_track(
     registration: Any,
     motion: Any,
-    camera: PinholeCamera,
+    camera: PinholeCamera | CameraCalibration,
     scene_times: Array,
     colour: Colour,
     *,

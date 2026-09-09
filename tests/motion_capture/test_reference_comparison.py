@@ -128,7 +128,9 @@ def test_comparison_session_serialization_and_roundtrip(tmp_path: Path) -> None:
     assert loaded.notes == "Testing reference comparison session persistence"
 
 
-def test_build_comparison_sidecar_3d_calibrated(tmp_path: Path) -> None:
+def test_legacy_calibration_flag_without_evidence_is_not_a_calibrated_claim(
+    tmp_path: Path,
+) -> None:
     src_video = tmp_path / "player_take.mp4"
     src_video.write_bytes(b"player video stream bytes")
     out_video = tmp_path / "comparison_export.mp4"
@@ -160,10 +162,10 @@ def test_build_comparison_sidecar_3d_calibrated(tmp_path: Path) -> None:
     assert sidecar["video_file"] == "comparison_export.mp4"
     assert sidecar["source"]["view"] == "face_on"
     assert sidecar["reference"]["id"] == ref.id
-    assert sidecar["reference"]["alignment_status"] == "calibrated_3d_projection"
+    assert sidecar["reference"]["alignment_status"] == "uncalibrated_3d_projection"
     assert sidecar["reference"]["is_3d"] is True
-    assert sidecar["reference"]["is_calibrated"] is True
-    assert sidecar["reference"]["missing_alignment_evidence"] is False
+    assert sidecar["reference"]["is_calibrated"] is False
+    assert sidecar["reference"]["missing_alignment_evidence"] is True
     assert sidecar["playback"]["frame_count"] == 3
     assert sidecar["crop"]["width"] == 640
 
