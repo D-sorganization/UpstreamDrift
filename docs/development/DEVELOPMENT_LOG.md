@@ -17,33 +17,47 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9862 · Saved Coaching References
+### DL-#9864 · Expert Reference Asset Imports
 
 - **State:** in_review
 - **Owner:** codex
+- **Issue:** #9864 (advanced reference epic #9863)
+- **Branch:** feat/9864-reference-assets
+- **PR:** #9870 (draft)
+- **Paths:** src/motion_capture/reference, src/tools/capture_rig/reference_import.py, src/tools/capture_rig/reference_library_dialog.py, src/tools/capture_rig/library_dialog.py, src/shared/python/motion_pipeline/sources/c3d_adapter.py and related tests/docs/maps
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`90b147e10`; local qualification complete)
+- **Summary:** Versioned portable reference assets retain explicit mapping, source hashes, timestamps and missing points; native library adds imports, notes/archive and background I/O. Expert videos remain linked 2D assets.
+- **Evidence:** 30 integrated backend/import/adapter/reference UI/existing-library tests pass, including a real C3D fixture and fresh-process loader-isolation regression. Four native reference tests pass after correcting laptop-width metadata layout. Eight source modules pass mypy; architecture budget passes after alignment with the merged editing helper.
+- **Next step:** Integrate the drawing theme correction, then verify protected CI on #9870.
+
+### DL-#9862 · Saved Coaching References
+
+- **State:** shipped
+- **Owner:** codex
 - **Issue:** #9862 (product #9849)
-- **PR:** #9869 (draft)
+- **PR:** #9869
 - **Branch:** feat/9862-coaching-drawings
 - **Paths:** src/motion_capture/coaching, src/tools/capture_rig/coaching_canvas.py, coaching_dialog.py, coaching_export.py and related integration/tests/docs
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`9d5d676fb`)
+- **Last verified:** 2026-09-09 (`77e6bca88`; protected PR merged)
 - **Summary:** Source-coordinate shape document and renderer; native draw/select/move/resize, numeric/keyboard edits, style/frame visibility, undo/redo, atomic save, library/editor entry, PNG and cancellable video export.
 - **Evidence:** Registry/atlas 49 passed; latest library/drawing/export suite 19 passed. Twelve-module mypy and storage/library follow-up pass. Full LoD clean (3,012 files). Visual review: references 496-px minimum, editor 465-px minimum. Copied captures retain validated reference layers.
-- **Next step:** Integrate the corrected dependency PR #9868 before making #9869 ready for protected review.
+- **Next step:** Continue advanced expert reference epic #9863.
 
 ### DL-#9860 · Capture Editing and Library
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9860, #9861 (product #9849)
 - **PR:** #9868
 - **Branch:** feat/9860-swing-editing
 - **Paths:** src/motion_capture/rig/edits.py, ingest.py, src/tools/capture_rig/swing_editor.py, related tests and docs/development/capture_editing_integration.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`795921f63`)
+- **Last verified:** 2026-09-09 (`4c89892d7`; protected PR merged)
 - **Summary:** Non-destructive source-frame selection/crop and native editor; portable capture-note/catalog backend with archive, storage, rename/rollback and editable copies. Visible Library/Edit swing header actions, notes and file controls, cancellable scans, rename journal and Windows SQLite cleanup, cancellable selected-swing export, downstream timeline guards and generated map updates are implemented.
 - **Evidence:** Integrated suite 300 passed; subsequent focused library/UI suite 12 passed and editor suite 5 passed; eight-module mypy passed. Native editor visual review at 850x650 has readable controls and 492-px minimum width.
-- **Next step:** Verify current-head CI and protected merge for #9868.
+- **Next step:** Continue advanced expert reference epic #9863.
 
 ### DL-#9851 · Capture Responsiveness and Recovery
 

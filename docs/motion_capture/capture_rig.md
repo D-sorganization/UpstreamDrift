@@ -485,3 +485,30 @@ exported. Choose new output filenames; existing media/sidecars are never replace
 Fabric JSON from the Tools web editor is not yet an interchangeable layer. Text,
 freehand and external expert/model projection belong to separate future contracts;
 the advanced reference-projection epic is #9863.
+
+## Expert Reference Imports
+
+Open **Library → Expert References** to manage comparison assets separately from
+player captures. Use **Import motion** for C3D, existing `body_target_json_v1`
+exports or a `marker-trajectory/1.0.0` wrapper around the shared CIR
+`MarkerTrajectory` document. The CIR contains Cartesian marker positions in metres;
+engine animations must export marker trajectories first. Joint angles or a mesh
+alone do not establish a camera-visible motion reference.
+
+Confirm source units, assign the signed source axes that become reference X/Y/Z,
+and review every marker-to-joint name. You may add skeleton connections as one
+`joint name, joint name` pair per line. Canonical body targets already declare
+metres and right-handed Z-up axes. C3D uses the existing Rust-preferred adapter,
+with ezc3d fallback; missing markers are preserved, including entirely missing
+labelled tracks. No gap filling or resampling occurs during reference import.
+
+**Import video** links the original expert recording. Its frame clock is based on
+the reader's nominal frame rate; this import alone does not qualify variable-rate
+timing, another viewpoint or 3D registration. Source SHA-256 fingerprints are saved.
+Titles, lesson notes and archive state reopen from the portable reference catalog
+inside the capture library's `references` folder. Restoring an archive entry does
+not copy or delete source media. Long operations run in a worker; wait for the
+current operation to finish before closing the dialog.
+
+Camera registration, synchronization and comparison exports are the next stages
+of epic #9863 (#9865/#9866); importing an asset does not claim those stages complete.
