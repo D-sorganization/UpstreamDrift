@@ -17,18 +17,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9913 · Capture Journey Feedback and Detachable Views
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9913; epic #9906
+- **Branch:** feat/9913-capture-journey
+- **PR:** #9917 (open)
+- **Paths:** src/tools/capture_rig/, tests/tools/capture_rig/, generated guide and parity registry
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`71d8f5a1f`;445 tests, LoD/function/doc budgets and regenerated atlas pass)
+- **Summary:** Capture identity/history, linked workflow/help/provenance, safe selection clearing and retained Qt views.
+- **Next step:** Qualify protected CI/review on #9917 and merge.
+
 ### DL-#9911 · Preview Discovery Failure Recovery
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9911
 - **Branch:** feat/capture-guided-setup
-- **PR:** #9910 (draft)
+- **PR:** #9910 (merged)
 - **Paths:** src/tools/capture_rig/preview.py, tests/tools/capture_rig/test_preview.py
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`6af9c1773` base; 11 preview regressions pass)
-- **Summary:** Report missing discovery imports and subprocess timeouts through the existing preview status.
-- **Next step:** Publish and qualify with #9910.
+- **Last verified:** 2026-09-09 (`18c8f922e` merge; recovery tests pass)
+- **Summary:** Report discovery imports/timeouts through preview status.
+- **Next step:** Retain the preview recovery regressions.
 
 ### DL-#9898 · Calibration Profile Compatibility
 
@@ -36,10 +49,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #9898; epic #9897 (goal also includes #9902 and #9906)
 - **Branch:** feat/capture-guided-setup
-- **PR:** #9910 (draft)
+- **PR:** #9910 (merged); #9917 boundary cleanup
 - **Paths:** src/tools/capture_rig/calibration_profiles.py, tests/tools/capture_rig/test_calibration_profiles.py, docs/development/capture_setup_execution_plan.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`b4abd67bb`)
+- **Last verified:** 2026-09-09 (`cb8493e7e`; profile boundary cleanup in #9917)
 - **Summary:** Optical profile review UI and verified rig export; everyday observations remain required.
 - **Next step:** Qualify UI/consumers, then add reference sessions under #9898/#9900.
 
@@ -54,7 +67,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)
 - **Summary:** Immutable bounded event anchors, binary-search gap-aware sampling, actual camera/clock snapshots and stale-registration checks replace unsupported calibration assumptions.
-- **Evidence:** Twelve adverse regressions first failed. Combined suite 46 passed including final camera fixtures; fourteen-module mypy passes. Refreshed diagnostic sampling medians are 0.157/0.093/0.304 ms across 120/1200/12000 source frames; source fingerprint retained. CI shape typing and function budget corrections pass 16 focused regressions.
+- **Evidence:** 12 adverse regressions failed before repair; 46 combined tests and 14-module mypy pass. Sampling medians: 0.157/0.093/0.304 ms for120/1200/12000 frames. CI typing/budget corrections pass16 tests.
 - **Next step:** Finish protected checks, then continue #9882/#9883.
 
 ### DL-#9879 · Comparison State and Export Lifetime
@@ -68,7 +81,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`SELF`; local validation complete)
 - **Summary:** Preserve exact unrelated layer/registration fields, reject bad saved records, and reuse the existing export controller for safe thread ownership and deferred close.
-- **Evidence:** Nine regressions failed on merged main; subsequent 31 focused comparison, real-thread cancellation, existing swing and coaching tests pass. Three modified source modules pass mypy.
+- **Evidence:** Nine adverse regressions preceded repair;31 comparison/cancellation/swing/coaching tests and three-module mypy pass.
 - **Next step:** Architecture/DRY/LoD pass; await protected checks. Continue #9881, #9882 and #9883 before closing #9863.
 
 ### DL-#9865 · Reference Scene Registration & Synchronization
@@ -96,7 +109,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`90b147e10`; local qualification complete)
 - **Summary:** Versioned portable reference assets retain explicit mapping, source hashes, timestamps and missing points; native library adds imports, notes/archive and background I/O. Expert videos remain linked 2D assets.
-- **Evidence:** 30 integrated backend/import/adapter/reference UI/existing-library tests pass, including a real C3D fixture and fresh-process loader-isolation regression. Four native reference tests pass after correcting laptop-width metadata layout. Eight source modules pass mypy; architecture budget passes after alignment with the merged editing helper.
+- **Evidence:** 30 integration tests pass, including real C3D and fresh-process isolation. Four native UI tests, eight-module mypy and architecture checks pass after layout/helper corrections.
 - **Next step:** Integrate the drawing theme correction, then verify protected CI on #9870.
 
 ### DL-#9862 · Saved Coaching References
