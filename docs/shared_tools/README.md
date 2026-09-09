@@ -9,12 +9,12 @@ ledger: Tools #4915.
 
 ## Files in This Directory
 
-| File | Produced by | Purpose |
-| --- | --- | --- |
-| `divergence_inventory.v1.json` / `.md` | `python -m scripts.shared_tools.divergence_inventory --write` | Every path under `src/shared/python` classified against the pinned Tools tree (`identical` / `diverged` / `ud-only` / `tools-only`, plus `spelling_only`), with authorship on both sides. `--check` fails when stale. |
-| `seam_rulings.v1.json` | hand-maintained | One ruling per top-level entry of the Tools shared tree: `tools-canonical`, `ud-canonical`, `split` or `deferred`, with status `pending-cleanup` / `cleaned` / `n/a`. |
-| (gate) `scripts/shared_tools/check_seam_drift.py` | CI job `seam-drift-gate` (needed by `quality-gate`) | Enforces the rulings: a cleaned package may not regrow a UD copy; a `ud-canonical` package needs a Tools ledger row. |
-| (gate) `scripts/shared_tools/check_tools_pins.py` | `vendor-freshness.yml` | Cargo `tools-core` rev == `vendor/ud-tools` gitlink == any `ud-tools @ git+...` pin in `pyproject.toml` / `requirements-tools.txt`; the release-wheel pin is reported. |
+| File                                              | Produced by                                                   | Purpose                                                                                                                                                                                                               |
+| ------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `divergence_inventory.v1.json` / `.md`            | `python -m scripts.shared_tools.divergence_inventory --write` | Every path under `src/shared/python` classified against the pinned Tools tree (`identical` / `diverged` / `ud-only` / `tools-only`, plus `spelling_only`), with authorship on both sides. `--check` fails when stale. |
+| `seam_rulings.v1.json`                            | hand-maintained                                               | One ruling per top-level entry of the Tools shared tree: `tools-canonical`, `ud-canonical`, `split` or `deferred`, with status `pending-cleanup` / `cleaned` / `n/a`.                                                 |
+| (gate) `scripts/shared_tools/check_seam_drift.py` | CI job `seam-drift-gate` (needed by `quality-gate`)           | Enforces the rulings: a cleaned package may not regrow a UD copy; a `ud-canonical` package needs a Tools ledger row.                                                                                                  |
+| (gate) `scripts/shared_tools/check_tools_pins.py` | `vendor-freshness.yml`                                        | Cargo `tools-core` rev == `vendor/ud-tools` gitlink == any `ud-tools @ git+...` pin in `pyproject.toml` / `requirements-tools.txt`; the release-wheel pin is reported.                                                |
 
 ## Where the Tools Code Comes From
 
@@ -57,15 +57,15 @@ exactly the `src.shared.python.` spelling and vanish as shadows are deleted.
 
 ## Ratchets
 
-* `scripts/config/shadow_modules.yaml` — one entry per UD name that still
+- `scripts/config/shadow_modules.yaml` — one entry per UD name that still
   shadows a Tools module (was 33, now 23); entries may only be removed.
-* `docs/shared_tools/seam_rulings.v1.json` — `status` may only move from
+- `docs/shared_tools/seam_rulings.v1.json` — `status` may only move from
   `pending-cleanup` to `cleaned`; the gate then enforces it.
 
 ## Roadmap
 
-* Phase 1 (this epic): inventory, rulings, gate, pin parity, consumption
+- Phase 1 (this epic): inventory, rulings, gate, pin parity, consumption
   mechanism; delete the small `tools-canonical` clusters.
-* Phase 2: delete `ai`, `chat`, `sidekick` overlaps; upstream `ud-canonical`
+- Phase 2: delete `ai`, `chat`, `sidekick` overlaps; upstream `ud-canonical`
   packages (Tools #4494); remove the submodule once Tools publishes a wheel
   per release (Tools #4920) and the pin becomes a version.
