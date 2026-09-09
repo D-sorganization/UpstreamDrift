@@ -2,6 +2,13 @@
 
 ## Current Continuation State
 
+Concurrent remote repairs through 7141feb79 are preserved by normal merge.
+The same provider pin and theme retirement are retained. Reviewed main
+use_start_file preserves the concurrent process-action fix without adding
+a second equivalent API. Realtime is split/pending-cleanup because both trees
+contain different transports and UD retains a distinct facade. Source and
+installed-wheel evidence keeps its original revision identity.
+
 Main 8fce9f238 (capture PR #9917) is integrated with its reviewed LoD fixes.
 Only root handoff and development-log conflicts needed resolution; both scopes
 are retained. All 79 provider/theme/fallback/manual checks pass again after the merge.
