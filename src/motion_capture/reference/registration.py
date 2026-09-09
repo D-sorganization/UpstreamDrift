@@ -123,6 +123,7 @@ class ReferenceRegistration(BaseModel):
     camera_fingerprint: str | None = None
     is_calibrated: bool = False
     max_gap_s: float = Field(default=0.25, gt=0, le=10)
+    mirror_lateral: bool = Field(default=False, strict=True)
     asset_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     camera: CameraSnapshot | None = None
     clock: ViewClock | None = None
@@ -181,6 +182,19 @@ class ReferenceRegistration(BaseModel):
     def scene_time(self, original_time: float) -> float:
         return self.clock.player_time(original_time) if self.clock else original_time
 
+    def place_points(
+        self, canonical: npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64]:
+        """Mirror canonical Y about zero, then rotate/scale/place in the camera world.
+
+        Reverses handedness for body and club together without modifying asset
+        geometry, semantic source labels or the proper scene rotation.
+        """
+        points = np.array(canonical, dtype=float, copy=True)
+        if self.mirror_lateral:
+            points[..., 1] *= -1
+        return self.transform.apply(canonical_z_up_to_adr0041_world(points))
+
 
 def transform_reference_motion(
     motion: ReferenceMotion, registration: ReferenceRegistration
@@ -207,9 +221,7 @@ def transform_reference_motion(
                 valid_mask[i, j] = True
 
     # 1. Convert coordinate convention: canonical z-up to ADR-0041 world
-    conv_pts = canonical_z_up_to_adr0041_world(raw_pts)
-    # 2. Apply registration transform: s * R @ p + t
-    transformed_pts = registration.transform.apply(conv_pts)
+    transformed_pts = registration.place_points(raw_pts)
     # Zero out invalid entries
     transformed_pts[~valid_mask] = 0.0
 
@@ -271,8 +283,7 @@ def sample_reference_motion(
                     a
                 ) + alpha * np.asarray(b)
                 out_valid[sample, joint] = True
-    converted = canonical_z_up_to_adr0041_world(out_pts)
-    transformed = registration.transform.apply(converted)
+    transformed = registration.place_points(out_pts)
     transformed[~out_valid] = 0
     return transformed, out_valid
 
@@ -281,6 +292,8 @@ def project_reference_to_camera(
     points_world: npt.NDArray[np.float64],
     valid_mask: npt.NDArray[np.bool_],
     camera: PinholeCamera | CameraCalibration,
+    *,
+    clip_image: bool = True,
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.bool_]]:
     """Project 3D world points onto camera image coordinates with clipping and distortion.
 
@@ -327,7 +340,7 @@ def project_reference_to_camera(
         & (projected[:, 1] < h)
     )
 
-    final_visible = flat_mask & in_front & in_image
+    final_visible = flat_mask & in_front & (in_image if clip_image else True)
     projected[~final_visible] = np.nan
 
     return projected.reshape(*shape_prefix, 2), final_visible.reshape(*shape_prefix)

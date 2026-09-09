@@ -13,16 +13,20 @@ import numpy.typing as npt
 
 from src.motion_capture.coaching import DrawingLayer
 from src.motion_capture.reconstruct.cameras import PinholeCamera
-from src.motion_capture.reconstruct.overlay3d import reference_track
 from src.motion_capture.reference.comparison import ComparisonLayer
 from src.motion_capture.reference.model import Asset, ReferenceMotion, ReferenceVideo
-from src.motion_capture.reference.registration import ReferenceRegistration
+from src.motion_capture.reference.registration import (
+    ReferenceRegistration,
+    sample_reference_motion,
+    project_reference_to_camera,
+)
 from src.motion_capture.rig.edits import CropRect
 from src.shared.python.pose_estimation.observations import CameraCalibration
 
 from .clips import ClipRendering, _rendered
 from .overlay import PoseTrack
 from .player import VideoReader
+from .reference_volumes import draw_segment_volumes
 
 Image: TypeAlias = npt.NDArray[np.uint8]
 Camera: TypeAlias = PinholeCamera | CameraCalibration | None
@@ -47,31 +51,34 @@ def _motion_image(
     if camera is None or not isinstance(ctx.asset, ReferenceMotion):
         return frame
     layer = ctx.layer
-    track = reference_track(
-        ctx.registration,
-        ctx.asset,
-        camera,
-        np.array([time]),
-        layer.colour_bgr,
-        label=ctx.asset.title,
-    )
-    drawn = frame.copy()
-    points, visible = track.px[0], track.visible[0]
+    world, mask = sample_reference_motion(ctx.asset, ctx.registration, np.array([time]))
+    projected, visibility = project_reference_to_camera(world, mask, camera)
+    club_edges = set(ctx.asset.club_edges)
+    body_edges = tuple(edge for edge in ctx.asset.edges if edge not in club_edges)
+    drawn = draw_segment_volumes(
+        frame, world[0], mask[0], body_edges, camera, layer
+    ).copy()
+    points, visible = projected[0], visibility[0]
+    if not layer.draw_club:
+        club_joints = {j for edge in club_edges for j in edge}
+        body_joints = {j for edge in body_edges for j in edge}
+        for joint in club_joints - body_joints:
+            visible[joint] = False
     pixels = [
         tuple(int(round(v)) for v in point) if valid else (0, 0)
         for point, valid in zip(points, visible, strict=True)
     ]
-    if layer.draw_skeleton:
-        for a, b in track.edges:
-            if visible[a] and visible[b]:
-                cv2.line(
-                    drawn,
-                    pixels[a],
-                    pixels[b],
-                    layer.colour_bgr,
-                    layer.line_width,
-                    cv2.LINE_AA,
-                )
+    for a, b in ctx.asset.edges:
+        enabled = layer.draw_club if (a, b) in club_edges else layer.draw_skeleton
+        if enabled and visible[a] and visible[b]:
+            cv2.line(
+                drawn,
+                pixels[a],
+                pixels[b],
+                layer.colour_bgr,
+                layer.line_width,
+                cv2.LINE_AA,
+            )
     if layer.draw_joints:
         for point, valid in zip(pixels, visible, strict=True):
             if valid:

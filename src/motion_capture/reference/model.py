@@ -64,6 +64,7 @@ class ReferenceMotion(ReferenceAsset):
     source_names: tuple[str, ...] = Field(min_length=1, max_length=256)
     joint_names: tuple[str, ...] = Field(min_length=1, max_length=256)
     edges: tuple[tuple[int, int], ...] = Field(default=(), max_length=1024)
+    club_edges: tuple[tuple[int, int], ...] = Field(default=(), max_length=64)
     time_s: tuple[float, ...] = Field(min_length=1, max_length=100_000)
     points_m: tuple[tuple[Point3 | None, ...], ...] = Field(
         min_length=1, max_length=100_000
@@ -99,6 +100,10 @@ class ReferenceMotion(ReferenceAsset):
             raise ValueError("Skeleton edges must connect two distinct existing joints")
         if len({tuple(sorted(edge)) for edge in self.edges}) != len(self.edges):
             raise ValueError("Skeleton edges must be unique")
+        if not set(self.club_edges).issubset(self.edges) or len(
+            set(self.club_edges)
+        ) != len(self.club_edges):
+            raise ValueError("Club edges must be unique members of skeleton edges")
         if not any(point is not None for row in self.points_m for point in row):
             raise ValueError("Reference contains no observed points")
         return self

@@ -25,9 +25,11 @@ def fingerprint(value: object) -> str:
 
 def asset_identity(asset: Asset) -> str:
     """Geometry, source and mapping identity; editable library notes are excluded."""
-    return fingerprint(
-        asset.model_dump(mode="json", exclude={"title", "notes", "archived"})
-    )
+    values = asset.model_dump(mode="json", exclude={"title", "notes", "archived"})
+    # Preserve bindings saved before optional club connectivity was introduced.
+    if not values.get("club_edges"):
+        values.pop("club_edges", None)
+    return fingerprint(values)
 
 
 class CameraSnapshot(BaseModel):
