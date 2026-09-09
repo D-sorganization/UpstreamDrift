@@ -1,5 +1,9 @@
 # SPEC.md — Repository Specification Document
 
+## Optimize Root Mean Square Calculation in OCP Tracking
+
+- Replaced `np.sum(error**2, axis=0)` with `np.einsum("i...,i...->...", error, error)` in `src/shared/python/optimization/ocp/tracking_ocp.py` to bypass intermediate array allocation overhead. (spec-exempt: micro-optimization)
+
 ## Capture Rig GUI: Docs, Parity Registry & Before/After Evidence (#9848)
 
 - Updated `docs/motion_capture/capture_rig.md` documenting responsive compact mode layout adaptation, single-column control dock tabification under 1400 px, and live preview dominance.
