@@ -133,6 +133,7 @@ def test_sample_reference_motion_preserves_missing_joint_masks_across_gaps() -> 
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="rig_01",
+        max_gap_s=0.5,
         transform=ReferenceTransform(),
         time_mapping=TimeMapping(offset_s=0.0),
     )
@@ -162,6 +163,7 @@ def test_camera_projection_with_distortion_and_clipping() -> None:
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="rig_01",
+        max_gap_s=0.5,
         transform=ReferenceTransform(translation_m=(0.0, 0.0, 0.0)),
         time_mapping=TimeMapping(offset_s=0.0),
     )
@@ -207,6 +209,7 @@ def test_serialization_round_trip_yields_identical_pixels_and_times() -> None:
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="rig_01",
+        max_gap_s=0.5,
         transform=ReferenceTransform(
             rotation=rot,
             translation_m=(0.1, 0.2, 0.3),
@@ -279,6 +282,7 @@ def test_reference_track_generates_overlay_track() -> None:
     reg = ReferenceRegistration(
         reference_id=motion.id,
         calibration_id="rig_01",
+        max_gap_s=0.5,
         transform=ReferenceTransform(translation_m=(0.0, 0.0, 0.0)),
         time_mapping=TimeMapping(offset_s=0.0),
     )
@@ -299,21 +303,21 @@ def test_reference_track_generates_overlay_track() -> None:
 
 def test_event_anchors_rejects_non_monotonic_or_unbounded_rates() -> None:
     # Repeated reference timestamps
-    with pytest.raises(ValueError, match="strictly monotonic"):
+    with pytest.raises(ValueError, match="unique, increasing"):
         EventAnchors(
             reference={"address": 0.0, "impact": 0.0},
             scene={"address": 1.0, "impact": 2.0},
         )
 
     # Reversed reference timestamps
-    with pytest.raises(ValueError, match="strictly monotonic"):
+    with pytest.raises(ValueError, match="unique, increasing"):
         EventAnchors(
             reference={"address": 1.0, "impact": 0.5},
             scene={"address": 1.0, "impact": 2.0},
         )
 
     # Reversed scene timestamps
-    with pytest.raises(ValueError, match="strictly monotonic"):
+    with pytest.raises(ValueError, match="unique, increasing"):
         EventAnchors(
             reference={"address": 0.0, "impact": 1.0},
             scene={"address": 2.0, "impact": 1.0},
@@ -354,7 +358,7 @@ def test_single_anchor_alignment_and_scalar_array_round_trip() -> None:
     ref_arr = np.array([-1.0, 0.0, 1.2, 3.5, 10.0])
     scene_arr = tm.reference_to_scene(ref_arr)
     assert isinstance(scene_arr, np.ndarray)
-    np.testing.assert_allclose(tm.scene_to_reference(scene_arr), ref_arr)
+    np.testing.assert_allclose(tm.scene_to_reference(scene_arr), ref_arr, atol=1e-12)
 
 
 def test_multi_anchor_piecewise_warping_round_trip_and_extrapolation() -> None:

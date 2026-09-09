@@ -25,7 +25,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.motion_capture.reconstruct.cameras import PinholeCamera
+from src.shared.python.pose_estimation.observations import CameraCalibration
+from src.motion_capture.reference.evidence import CameraSnapshot
+from src.motion_capture.reference.scene import session_camera, session_clock
 from src.motion_capture.reference.comparison import (
     ComparisonLayer,
     ComparisonSession,
@@ -73,7 +75,10 @@ class ReferenceComparisonDialog(QDialog):
 
         self.reader = VideoReader(view_media.recording)
         self.fps = self.reader.fps or 30.0
-        self._camera: PinholeCamera | None = None
+        self._camera: CameraCalibration | None = None
+        self._camera_snapshot: CameraSnapshot | None = None
+        self._camera_problem = ""
+        self._clock = session_clock(media.timing, view)
         self._load_camera()
 
         self.assets: list[Asset] = library.list(archived=False)
@@ -106,25 +111,12 @@ class ReferenceComparisonDialog(QDialog):
         self._show_frame(0)
 
     def _load_camera(self) -> None:
-        reconstruct_json = self.root / "reconstruct" / "reconstruction.json"
-        if reconstruct_json.is_file():
-            try:
-                from src.motion_capture.reconstruct.fit import Reconstruction
-
-                recon = Reconstruction.model_validate_json(
-                    reconstruct_json.read_text(encoding="utf-8")
-                )
-                for cam_dict in recon.cameras:
-                    if cam_dict.get("camera_id") == self.view:
-                        from src.shared.python.pose_estimation.observations import (
-                            CameraCalibration,
-                        )
-
-                        calib = CameraCalibration.from_dict(cam_dict)
-                        self._camera = PinholeCamera.from_calibration(calib)
-                        break
-            except (ValueError, OSError, KeyError):
-                self._camera = None
+        try:
+            self._camera_snapshot = session_camera(self.root, "", self.view)
+            self._camera = self._camera_snapshot.record()
+        except (ValueError, OSError, KeyError) as exc:
+            self._camera_problem = str(exc)
+            self._camera = None
 
     def _find_or_create_session(self) -> ComparisonSession:
         if self._current_asset is None:
@@ -145,6 +137,11 @@ class ReferenceComparisonDialog(QDialog):
                 raise ValueError(
                     "Saved comparison does not match this view and reference"
                 )
+            registration = saved.registration
+            if registration and registration.asset_sha256:
+                registration.validate_binding(
+                    self._current_asset, self._camera_snapshot, self._clock
+                )
             return saved
         return ComparisonSession(
             session_root=str(self.root),
@@ -154,7 +151,11 @@ class ReferenceComparisonDialog(QDialog):
             registration=ReferenceRegistration(
                 reference_id=self._current_asset.id,
                 calibration_id="calib_session",
-                is_calibrated=self._camera is not None,
+                is_calibrated=False,
+                assumption_labels=(
+                    "Manual reference-to-scene alignment",
+                    self._clock.source,
+                ),
             ),
             layer=ComparisonLayer(),
         )
@@ -247,12 +248,13 @@ class ReferenceComparisonDialog(QDialog):
             self.status_label.setText("No reference loaded")
             self.status_label.setStyleSheet(styling.chip_style("neutral"))
             return
+        self.status_label.setToolTip(self._camera_problem or self._clock.source)
         if self._current_asset.kind == "motion":
             if self._camera:
-                self.status_label.setText("3D Calibrated Projection")
+                self.status_label.setText("Camera Projection · Manual Alignment")
                 self.status_label.setStyleSheet(styling.chip_style("ok"))
             else:
-                self.status_label.setText("3D Uncalibrated (No camera match)")
+                self.status_label.setText("No Usable Camera · Projection Unavailable")
                 self.status_label.setStyleSheet(styling.chip_style("warning"))
         else:
             self.status_label.setText("2D Homography (No 3D claims)")
@@ -329,7 +331,7 @@ class ReferenceComparisonDialog(QDialog):
         img = self.reader.read(frame_idx)
         if img is None:
             return
-        t_scene = frame_idx / self.fps
+        t_scene = self._clock.player_time(frame_idx / self.fps)
         self.clock_label.setText(f"{t_scene:.3f}s (f{frame_idx})")
 
         if self._current_asset and self._session.registration:
@@ -363,6 +365,13 @@ class ReferenceComparisonDialog(QDialog):
         if self._current_asset is None:
             return False
         try:
+            registration = self._session.registration
+            if registration is None:
+                raise ValueError("Reference registration is unavailable")
+            registration = registration.bound(
+                self._current_asset, self._camera_snapshot, self._clock
+            )
+            self._session = self._session.changed(registration=registration)
             save_comparison_session(self._session, self.root)
             self.status_label.setText("Comparison Saved")
             return True
