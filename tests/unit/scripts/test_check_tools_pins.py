@@ -67,3 +67,23 @@ def test_main_on_this_checkout_is_consistent() -> None:
     """The Cargo pin must equal the vendor/ud-tools gitlink on every commit."""
     repo_root = Path(__file__).resolve().parents[3]
     assert pins.main(["--repo-root", str(repo_root)]) == 0
+
+
+def test_wheel_pin_is_reported_not_compared(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        'tools = [\n    "ud_tools @ https://github.com/D-sorganization/Tools/releases/'
+        'download/v1.15.0/ud_tools-1.15.0-py3-none-any.whl",\n]\n',
+        encoding="utf-8",
+    )
+    assert pins.read_pyproject_wheel_pins(pyproject) == [("1.15.0", "1.15.0")]
+    result = pins.check_pins(
+        [
+            pins.Pin("submodule gitlink", "vendor/ud-tools", _SHA),
+            pins.Pin("Cargo.toml tools-core", "Cargo.toml", _SHA),
+            pins.Pin(
+                "pyproject ud_tools wheel v1.15.0", "pyproject.toml", "WHEEL:1.15.0"
+            ),
+        ]
+    )
+    assert result == []
