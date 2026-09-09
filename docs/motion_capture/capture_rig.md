@@ -520,8 +520,8 @@ inside the capture library's `references` folder. Restoring an archive entry doe
 not copy or delete source media. Long operations run in a worker; wait for the
 current operation to finish before closing the dialog.
 
-Camera registration, synchronization and comparison exports are the next stages
-of epic #9863 (#9865/#9866); importing an asset does not claim those stages complete.
+Camera registration, synchronization and comparison exports follow import as
+separate steps of epic #9863; importing an asset does not align it to the player.
 
 ## Reference Comparison Timing and Evidence
 
@@ -548,6 +548,28 @@ sources. Exact source samples remain usable beside long gaps.
 
 Preview and export map original frame time into the recorded scene clock before
 sampling the reference. Without usable recorded timing, the saved clock is
-labelled `nominal-frame-rate-unverified`. Full event/spatial controls and complete
-render/export parity are tracked by #9883 and #9882; epic #9863 remains open until
-those interfaces and visual qualification are complete.
+labelled `nominal-frame-rate-unverified`. Full event/spatial controls and visual qualification are tracked by #9883;
+epic #9863 remains open until those interfaces are complete.
+
+## Comparison Preview and Export
+
+The comparison preview follows the saved swing trim and crop. Player pixels,
+detected pose, saved coaching references and the expert layer are composed in
+that order at original resolution, then cropped, padded at odd right/bottom
+edges and stamped with the source frame and scene time. Export Comparison Video
+uses the same composition. Motion opacity blends the projected skeleton; expert
+videos retain their image coverage under the saved homography. The default
+expert placement fits its aspect ratio within the player image. A 2-D alignment
+maps source expert pixels to source player pixels and does not infer a viewpoint.
+
+Choose a new AVI or MP4 destination. Output is silent, retains every selected
+source frame and includes a JSON sidecar with the reference geometry/mapping,
+drawings, registration, camera/clock evidence, selection, output dimensions and
+source hashes. Slow-motion exports change the playback rate without dropping
+frames. The supported output rate is at least one frame per second.
+
+Export verifies all encoded frames and rechecks source and camera evidence before
+publishing. Missing frames, changed linked media, invalid drawings or camera
+changes report a failure and leave the destination unpublished. Cancellation also
+publishes neither file. Comparison preview retains one expert decoder while the
+asset is selected; switching assets or closing releases it.

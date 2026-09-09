@@ -1,3 +1,10 @@
+## Comparison Rendering Qualification (#9882)
+
+Active isolated branch `fix/9882-comparison-rendering` extends timing PR #9885.
+Shared preview/export pixels, retained expert decoders, opacity/homography and
+strict staged publication are implemented. Canonical evidence and remaining
+#9883 controls are in `docs/development/HANDOFF.md`. Epic #9863 stays open.
+
 ## Reference Timing and Camera Evidence (#9881)
 
 Active isolated branch `fix/9881-reference-timing` builds on #9884 and preserves

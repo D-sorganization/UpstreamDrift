@@ -85,6 +85,7 @@ def export_swing(
         clip = ClipRange(
             edit.first, edit.last if edit.last is not None else reader.frame_count - 1
         )
+        width, height = reader.width, reader.height
     rendering = ClipRendering(
         crop=edit.crop,
         clock=False,
@@ -104,8 +105,8 @@ def export_swing(
             edit=edit.model_dump(mode="json"),
             drawings=drawings.model_dump(mode="json") if drawings else None,
             padding={
-                "right": edit.crop.width % 2 if edit.crop else 0,
-                "bottom": edit.crop.height % 2 if edit.crop else 0,
+                "right": (edit.crop.width if edit.crop else width) % 2,
+                "bottom": (edit.crop.height if edit.crop else height) % 2,
             },
         )
         staged_notes = staged.with_suffix(".json")

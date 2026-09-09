@@ -51,23 +51,27 @@ class ClipRendering:
     drawings: DrawingLayer | None = None
     cancelled: Callable[[], bool] = lambda: False
     progress: Callable[[int, int], None] = lambda done, total: None
+    overlay: Callable[[npt.NDArray[np.uint8], int], npt.NDArray[np.uint8]] | None = None
+    timestamp: Callable[[int, float], str] | None = None
 
     def size(self, width: int, height: int) -> tuple[int, int]:
         if self.crop:
             self.crop.validate_size(width, height)
             # Video encoders require even dimensions: pad, never cut source pixels.
             width, height = self.crop.width, self.crop.height
-            return width + width % 2, height + height % 2
-        return width, height
+        return width + width % 2, height + height % 2
 
     def image(self, frame: npt.NDArray[np.uint8]) -> npt.NDArray[np.uint8]:
-        if self.crop is None:
-            return frame
         crop = self.crop
-        cropped = frame[crop.y : crop.y + crop.height, crop.x : crop.x + crop.width]
+        cropped = (
+            frame[crop.y : crop.y + crop.height, crop.x : crop.x + crop.width]
+            if crop
+            else frame
+        )
+        height, width = cropped.shape[:2]
         return np.pad(
             cropped,
-            ((0, crop.height % 2), (0, crop.width % 2), (0, 0)),
+            ((0, height % 2), (0, width % 2), (0, 0)),
             mode="edge",
         )
 
@@ -178,10 +182,17 @@ def _rendered(
         )
     if rendering.drawings is not None:
         frame = render_layer(frame, rendering.drawings, index)
+    if rendering.overlay is not None:
+        frame = rendering.overlay(frame, index)
     frame = np.ascontiguousarray(rendering.image(frame))
     fps = reader.fps or 30.0
     return (
-        _stamp(frame, f"{label} f{index} t={index / fps:.3f}s")
+        _stamp(
+            frame,
+            rendering.timestamp(index, fps)
+            if rendering.timestamp
+            else f"{label} f{index} t={index / fps:.3f}s",
+        )
         if rendering.clock
         else frame
     )
