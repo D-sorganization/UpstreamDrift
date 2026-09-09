@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9862 · Saved Coaching References
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9862 (product #9849)
+- **Branch:** feat/9862-coaching-drawings
+- **Paths:** src/motion_capture/coaching, src/tools/capture_rig/coaching_canvas.py, coaching_dialog.py, coaching_export.py and related integration/tests/docs
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`156615443`)
+- **Summary:** Source-coordinate shape document and renderer; native draw/select/move/resize, numeric/keyboard edits, style/frame visibility, undo/redo, atomic save, library/editor entry, PNG and cancellable video export.
+- **Evidence:** Registry/atlas 49 passed; latest library/drawing/export suite 19 passed. Twelve-module mypy and storage/library follow-up pass. Full LoD clean (3,012 files). Visual review: references 496-px minimum, editor 465-px minimum. Copied captures retain validated reference layers.
+- **Next step:** Complete final integrated checks, generated map freshness, visual review and protected PR.
+
 ### DL-#9860 · Capture Editing and Library
 
 - **State:** in_review

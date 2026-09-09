@@ -90,5 +90,8 @@ def test_cancelled_navigation_keeps_unsaved_notes_and_archive_filter(
     assert dialog.notes.toPlainText() == "Unsaved coaching note"
     dialog.archived.setChecked(True)
     assert not dialog.archived.isChecked()
+    dialog.show()
+    dialog.reject()
+    assert dialog.isVisible() and dialog.notes.toPlainText() == "Unsaved coaching note"
     assert dialog.save_notes()
     dialog.close()

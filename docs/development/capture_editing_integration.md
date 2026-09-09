@@ -106,6 +106,32 @@ and five affected export/reconstruction modules pass mypy. The final 850x650 exp
 editor remains at a 492-px minimum width. Generated feature, workflow and atlas
 references now include selection/library/export integration.
 
-Remaining: protected CI and merge; coaching shape model/editing/export under #9862 and advanced reference
+Remaining: protected CI and merge for editing/library and coaching drawings; advanced reference
 import/registration/sync/comparison under #9863. Do not close epics based on this
 document or claim these remaining features already work.
+
+## Coaching Drawing Implementation
+
+The native coaching layer (#9862) implements lines, arrows, circles, ellipses and
+rectangles as strict versioned source-pixel geometry, stable IDs, style and
+inclusive frame visibility. Its immutable history supports move/resize, deletion,
+clear, undo/redo and keyboard/numeric edits. The existing ImageCanvas provides
+letterbox/zoom inversion; a single OpenCV renderer runs before crop in preview,
+PNG export and cancellable swing-video export. Portable sidecars remain independent
+of measured landmark corrections. Atomic JSON replacement preserves the prior
+document on write failure; output publication shares the existing no-overwrite
+media/sidecar publisher. Escape follows unsaved-change/export guards.
+
+Tools reuse is explicit: the Fabric editor informed tool/selection/style workflow;
+its JSON is not silently relabeled as the desktop schema. Browser components and
+FFmpeg-WASM are not embedded in the native dialog. Text/freehand and general-purpose
+timeline compositing are excluded from this bounded reference-drawing feature.
+These exclusions avoid two renderers disagreeing about timestamps or source pixels.
+Existing decoder, layout, clip exporter and atomic sidecar infrastructure are
+reused directly; external-reference imports/projection remain under #9863.
+
+Initial missing-module tests established RED; 18 focused drawing/editor/export
+checks passed, and ten source modules passed mypy with the repository's
+follow-imports=silent configuration. Integration caught a laptop-width regression
+from adding a button to a fixed row; that row now uses the existing wrapping
+FlowLayout. Physical camera/coach usability qualification is still required.
