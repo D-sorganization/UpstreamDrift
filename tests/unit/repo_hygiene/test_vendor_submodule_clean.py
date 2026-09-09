@@ -41,6 +41,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers.seam_guards import require_vendor_path
+
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -48,21 +50,10 @@ _VENDOR_PATH = "vendor/ud-tools"
 _VENDOR_DIR = _REPO_ROOT / "vendor" / "ud-tools"
 _IGNORE_SUBMODULES_FLAG = "--ignore-submodules=none"
 
-_MISSING_VENDOR_HINT = (
-    f"The vendor submodule is missing at {_VENDOR_DIR}. Run "
-    "`git submodule update --init vendor/ud-tools` to materialise it. In CI "
-    "this is a hard failure: the vendor-clean guard must never pass vacuously "
-    "(see UpstreamDrift issue #5623)."
-)
-
 
 def _require_vendor_dir() -> Path:
-    """Return the vendor submodule directory, or fail closed in CI."""
-    if _VENDOR_DIR.is_dir() and any(_VENDOR_DIR.iterdir()):
-        return _VENDOR_DIR
-    if os.environ.get("CI"):
-        raise AssertionError(_MISSING_VENDOR_HINT)
-    pytest.skip(_MISSING_VENDOR_HINT)
+    """Return the vendor submodule directory, or fail closed."""
+    return require_vendor_path(_VENDOR_DIR)
 
 
 def _dirty_submodule_entries(status_output: str) -> list[str]:

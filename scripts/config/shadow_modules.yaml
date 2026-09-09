@@ -37,8 +37,8 @@
 # guard therefore never blocked anything. This file restores the ledger and
 # records the four regressions explicitly rather than laundering them.
 #
-# Shadow count is currently 23 of 37 vendor modules. That number is the debt.
-# It should only ever go down. It moved 33 -> 23 on 2026-09-03 (UD #9406 PR-3:
+# Shadow count is currently 17 of 37 vendor modules. That number is the debt.
+# It should only ever go down. It moved 33 -> 17 on 2026-09-03 (UD #9406 PR-3:
 # logging_pkg, notes, plot_theme, chat_contracts, file_watcher, scripting,
 # safe_eval.py, safe_pandas_eval.py, deprecation.py, cors.py deleted; their
 # src.shared.python.* spellings resolve to the pinned Tools tree through
@@ -59,12 +59,6 @@ shadows:
   chat:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  codemap:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  compatibility.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   config:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
@@ -83,16 +77,7 @@ shadows:
   model_generation:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  plot_engine:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  programmatic_pid:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   reporting:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  rotation_transforms:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   sidekick:
@@ -117,9 +102,6 @@ shadows:
     tracking_issue: 8322
     sunset_date: "2026-12-31"
   import_aliases.py:
-    tracking_issue: 8322
-    sunset_date: "2026-12-31"
-  upstream_drift_tools:
     tracking_issue: 8322
     sunset_date: "2026-12-31"
 

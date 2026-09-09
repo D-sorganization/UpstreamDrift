@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "c0a395d59ec0a78aa70d4a989ccfc8f0a9605319",
+  "tools_pin": "eab74a901a7c8467e1997049a73e2cfd2df74428",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -11,18 +11,18 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 474,
-    "diverged": 288,
-    "ud-only": 1182,
-    "tools-only": 485,
-    "spelling-only": 151
+    "identical": 429,
+    "diverged": 275,
+    "ud-only": 1197,
+    "tools-only": 554,
+    "spelling-only": 126
   },
   "packages": {
     "README.md": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "README_PACKAGE.md": {
@@ -90,10 +90,10 @@
     },
     "ai": {
       "identical": 47,
-      "diverged": 70,
-      "ud-only": 21,
+      "diverged": 71,
+      "ud-only": 20,
       "tools-only": 0,
-      "spelling-only": 55
+      "spelling-only": 56
     },
     "analysis": {
       "identical": 0,
@@ -194,17 +194,17 @@
       "spelling-only": 0
     },
     "codemap": {
-      "identical": 8,
-      "diverged": 6,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 14,
       "spelling-only": 0
     },
     "compatibility.py": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "config": {
@@ -376,8 +376,8 @@
       "spelling-only": 0
     },
     "gui_launcher": {
-      "identical": 3,
-      "diverged": 5,
+      "identical": 4,
+      "diverged": 4,
       "ud-only": 3,
       "tools-only": 1,
       "spelling-only": 0
@@ -390,11 +390,11 @@
       "spelling-only": 0
     },
     "humanoid_character_builder": {
-      "identical": 16,
-      "diverged": 24,
+      "identical": 15,
+      "diverged": 25,
       "ud-only": 27,
       "tools-only": 0,
-      "spelling-only": 13
+      "spelling-only": 12
     },
     "import_aliases.py": {
       "identical": 0,
@@ -453,11 +453,11 @@
       "spelling-only": 0
     },
     "model_generation": {
-      "identical": 31,
-      "diverged": 49,
-      "ud-only": 18,
-      "tools-only": 0,
-      "spelling-only": 27
+      "identical": 27,
+      "diverged": 52,
+      "ud-only": 16,
+      "tools-only": 1,
+      "spelling-only": 16
     },
     "motion_matching": {
       "identical": 0,
@@ -490,7 +490,7 @@
     "optimization": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 17,
+      "ud-only": 27,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -530,10 +530,10 @@
       "spelling-only": 0
     },
     "plot_engine": {
-      "identical": 10,
-      "diverged": 3,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 1,
+      "tools-only": 14,
       "spelling-only": 0
     },
     "plot_labels.py": {
@@ -560,7 +560,7 @@
     "plotting": {
       "identical": 0,
       "diverged": 3,
-      "ud-only": 24,
+      "ud-only": 25,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -574,7 +574,7 @@
     "pose_estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 11,
+      "ud-only": 18,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -586,11 +586,11 @@
       "spelling-only": 0
     },
     "programmatic_pid": {
-      "identical": 10,
-      "diverged": 14,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 10
+      "tools-only": 24,
+      "spelling-only": 0
     },
     "putting_dynamics": {
       "identical": 0,
@@ -629,10 +629,10 @@
     },
     "rotation_transforms": {
       "identical": 0,
-      "diverged": 3,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 3
+      "tools-only": 3,
+      "spelling-only": 0
     },
     "safe_eval.py": {
       "identical": 0,
@@ -677,10 +677,10 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 246,
-      "diverged": 63,
+      "identical": 235,
+      "diverged": 74,
       "ud-only": 36,
-      "tools-only": 22,
+      "tools-only": 23,
       "spelling-only": 25
     },
     "signal_toolkit": {
@@ -715,14 +715,14 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 339,
+      "tools-only": 348,
       "spelling-only": 0
     },
     "tests": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 5,
+      "tools-only": 6,
       "spelling-only": 0
     },
     "theme": {
@@ -769,10 +769,10 @@
     },
     "upstream_drift_tools": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 1
+      "tools-only": 1,
+      "spelling-only": 0
     },
     "ux": {
       "identical": 0,
@@ -813,13 +813,13 @@
   "files": [
     {
       "path": "README.md",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "README.md",
       "subpackage": "",
-      "ud_bytes": 4629,
+      "ud_bytes": null,
       "tools_bytes": 4629,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -1632,8 +1632,8 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "gui",
-      "ud_bytes": 34148,
-      "tools_bytes": 34064,
+      "ud_bytes": 34225,
+      "tools_bytes": 34141,
       "byte_delta": 84,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -2268,9 +2268,9 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "",
-      "ud_bytes": 23225,
-      "tools_bytes": 23209,
-      "byte_delta": 16,
+      "ud_bytes": 25989,
+      "tools_bytes": 25953,
+      "byte_delta": 36,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": true
@@ -2385,15 +2385,15 @@
     },
     {
       "path": "ai/system_prompts.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "ai",
       "subpackage": "",
-      "ud_bytes": 5245,
-      "tools_bytes": 5245,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "ud_bytes": 5578,
+      "tools_bytes": 5574,
+      "byte_delta": 4,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "ai/tests/test_access_policy.py",
@@ -2485,11 +2485,11 @@
       "package": "ai",
       "subpackage": "tools",
       "ud_bytes": 909,
-      "tools_bytes": 897,
-      "byte_delta": 12,
+      "tools_bytes": 1192,
+      "byte_delta": -283,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "ai/tools/agent_control.py",
@@ -2505,13 +2505,13 @@
     },
     {
       "path": "ai/tools/cli_tools.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "ai",
       "subpackage": "tools",
-      "ud_bytes": 19743,
-      "tools_bytes": 19862,
-      "byte_delta": -119,
-      "byte_identical": false,
+      "ud_bytes": 20262,
+      "tools_bytes": 20262,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -2541,15 +2541,15 @@
     },
     {
       "path": "ai/tools/sidekick_analytics.py",
-      "classification": "ud-only",
+      "classification": "diverged",
       "package": "ai",
       "subpackage": "tools",
-      "ud_bytes": 7605,
-      "tools_bytes": null,
-      "byte_delta": null,
+      "ud_bytes": 8151,
+      "tools_bytes": 7858,
+      "byte_delta": 293,
       "byte_identical": false,
       "ud_has_child_copy_header": true,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "ai/types.py",
@@ -5517,180 +5517,180 @@
     },
     {
       "path": "codemap/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 762,
+      "ud_bytes": null,
       "tools_bytes": 762,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_js.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 5430,
+      "ud_bytes": null,
       "tools_bytes": 5430,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_markdown.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 1516,
+      "ud_bytes": null,
       "tools_bytes": 1516,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_python.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4440,
+      "ud_bytes": null,
       "tools_bytes": 4447,
-      "byte_delta": -7,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_rust.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 3220,
+      "ud_bytes": null,
       "tools_bytes": 3220,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_ts_common.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 3544,
+      "ud_bytes": null,
       "tools_bytes": 3693,
-      "byte_delta": -149,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/api.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 10316,
+      "ud_bytes": null,
       "tools_bytes": 10522,
-      "byte_delta": -206,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/cli.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4938,
-      "tools_bytes": 4938,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "ud_bytes": null,
+      "tools_bytes": 5128,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/db.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 6245,
+      "ud_bytes": null,
       "tools_bytes": 6245,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/embeddings.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 912,
+      "ud_bytes": null,
       "tools_bytes": 912,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/indexer.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 10033,
+      "ud_bytes": null,
       "tools_bytes": 10768,
-      "byte_delta": -735,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/mcp_server.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 2830,
-      "tools_bytes": 2832,
-      "byte_delta": -2,
+      "ud_bytes": null,
+      "tools_bytes": 2837,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/parsers.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 2533,
+      "ud_bytes": null,
       "tools_bytes": 2533,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/watcher.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4851,
+      "ud_bytes": null,
       "tools_bytes": 4941,
-      "byte_delta": -90,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "compatibility.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "compatibility.py",
       "subpackage": "",
-      "ud_bytes": 536,
+      "ud_bytes": null,
       "tools_bytes": 612,
-      "byte_delta": -76,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -5760,7 +5760,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 29272,
+      "ud_bytes": 30335,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -5784,7 +5784,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 33800,
+      "ud_bytes": 35112,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -5844,7 +5844,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 10731,
+      "ud_bytes": 13149,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -5868,7 +5868,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 7953,
+      "ud_bytes": 8435,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6576,7 +6576,7 @@
       "classification": "ud-only",
       "package": "data_io",
       "subpackage": "",
-      "ud_bytes": 11487,
+      "ud_bytes": 11773,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6936,7 +6936,7 @@
       "classification": "ud-only",
       "package": "engine_core",
       "subpackage": "",
-      "ud_bytes": 15663,
+      "ud_bytes": 15763,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7104,7 +7104,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 2941,
+      "ud_bytes": 3329,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7116,7 +7116,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 6351,
+      "ud_bytes": 13139,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7128,7 +7128,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 26008,
+      "ud_bytes": 34306,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7152,7 +7152,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 14979,
+      "ud_bytes": 17622,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7873,8 +7873,8 @@
       "package": "gui_launcher",
       "subpackage": "",
       "ud_bytes": 6655,
-      "tools_bytes": 6744,
-      "byte_delta": -89,
+      "tools_bytes": 6762,
+      "byte_delta": -107,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -7917,13 +7917,13 @@
     },
     {
       "path": "gui_launcher/tool_manifest.yaml",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "gui_launcher",
       "subpackage": "",
-      "ud_bytes": 11368,
-      "tools_bytes": 11367,
-      "byte_delta": 1,
-      "byte_identical": false,
+      "ud_bytes": 11031,
+      "tools_bytes": 11031,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -8316,7 +8316,7 @@
       "classification": "ud-only",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 25845,
+      "ud_bytes": 26108,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8328,9 +8328,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 2640,
+      "ud_bytes": 4544,
       "tools_bytes": 2627,
-      "byte_delta": 13,
+      "byte_delta": 1917,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -8388,12 +8388,12 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 4255,
+      "ud_bytes": 4631,
       "tools_bytes": 4251,
-      "byte_delta": 4,
+      "byte_delta": 380,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "humanoid_character_builder/generators/mesh_generator_factory.py",
@@ -8661,13 +8661,13 @@
     },
     {
       "path": "humanoid_character_builder/mesh/collision_generator.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "mesh",
-      "ud_bytes": 26190,
+      "ud_bytes": 19423,
       "tools_bytes": 26190,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": -6767,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -8917,8 +8917,8 @@
       "package": "import_aliases.py",
       "subpackage": "",
       "ud_bytes": 10943,
-      "tools_bytes": 11508,
-      "byte_delta": -565,
+      "tools_bytes": 12520,
+      "byte_delta": -1577,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9468,12 +9468,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "",
-      "ud_bytes": 2101,
+      "ud_bytes": 2149,
       "tools_bytes": 2089,
-      "byte_delta": 12,
+      "byte_delta": 60,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/_convenience.py",
@@ -9512,38 +9512,14 @@
       "spelling_only": true
     },
     {
-      "path": "model_generation/api/generation_handlers.py",
-      "classification": "ud-only",
-      "package": "model_generation",
-      "subpackage": "api",
-      "ud_bytes": 7541,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": true,
-      "spelling_only": false
-    },
-    {
-      "path": "model_generation/api/library_handlers.py",
-      "classification": "ud-only",
-      "package": "model_generation",
-      "subpackage": "api",
-      "ud_bytes": 16184,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": true,
-      "spelling_only": false
-    },
-    {
       "path": "model_generation/api/rest_api.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 1203,
-      "tools_bytes": 1203,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "ud_bytes": 1727,
+      "tools_bytes": 631,
+      "byte_delta": 1096,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -9552,9 +9528,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 15029,
+      "ud_bytes": 15287,
       "tools_bytes": 15081,
-      "byte_delta": -52,
+      "byte_delta": 206,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9576,34 +9552,34 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 8773,
+      "ud_bytes": 13001,
       "tools_bytes": 8761,
-      "byte_delta": 12,
+      "byte_delta": 4240,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/api/rest_api_fastapi.py",
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 4942,
+      "ud_bytes": 4940,
       "tools_bytes": 4967,
-      "byte_delta": -25,
+      "byte_delta": -27,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "model_generation/api/rest_api_flask.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 2585,
-      "tools_bytes": 2585,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "ud_bytes": 2583,
+      "tools_bytes": 2655,
+      "byte_delta": -72,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -9612,21 +9588,21 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 8862,
+      "ud_bytes": 9226,
       "tools_bytes": 8854,
-      "byte_delta": 8,
+      "byte_delta": 372,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/api/rest_api_routes.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 38936,
+      "ud_bytes": null,
       "tools_bytes": 39913,
-      "byte_delta": -977,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9636,9 +9612,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 3705,
+      "ud_bytes": 4192,
       "tools_bytes": 3735,
-      "byte_delta": -30,
+      "byte_delta": 457,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9672,12 +9648,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 7324,
+      "ud_bytes": 9372,
       "tools_bytes": 7312,
-      "byte_delta": 12,
+      "byte_delta": 2060,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/builders/manual_builder.py",
@@ -9708,12 +9684,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 25110,
+      "ud_bytes": 25483,
       "tools_bytes": 25102,
-      "byte_delta": 8,
+      "byte_delta": 381,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/canonical_model.py",
@@ -9804,9 +9780,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 21759,
+      "ud_bytes": 23452,
       "tools_bytes": 21758,
-      "byte_delta": 1,
+      "byte_delta": 1694,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9888,12 +9864,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 22423,
+      "ud_bytes": 29632,
       "tools_bytes": 22419,
-      "byte_delta": 4,
+      "byte_delta": 7213,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/core/__init__.py",
@@ -9960,12 +9936,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 23772,
+      "ud_bytes": 24420,
       "tools_bytes": 23768,
-      "byte_delta": 4,
+      "byte_delta": 652,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/core/validation.py",
@@ -10020,48 +9996,48 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6099,
+      "ud_bytes": 6322,
       "tools_bytes": 6095,
-      "byte_delta": 4,
+      "byte_delta": 227,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/editor_modifications.py",
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 22380,
+      "ud_bytes": 24993,
       "tools_bytes": 22376,
-      "byte_delta": 4,
+      "byte_delta": 2617,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/editor_types.py",
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 1824,
+      "ud_bytes": 2838,
       "tools_bytes": 1816,
-      "byte_delta": 8,
+      "byte_delta": 1022,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/frankenstein_editor.py",
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 21752,
+      "ud_bytes": 22074,
       "tools_bytes": 21744,
-      "byte_delta": 8,
+      "byte_delta": 330,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/text_editor.py",
@@ -10080,9 +10056,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6689,
+      "ud_bytes": 7355,
       "tools_bytes": 6764,
-      "byte_delta": -75,
+      "byte_delta": 591,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10197,13 +10173,13 @@
     },
     {
       "path": "model_generation/inertia/primitives.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "inertia",
-      "ud_bytes": 10773,
+      "ud_bytes": 11090,
       "tools_bytes": 10773,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 317,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -10308,9 +10284,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 5596,
+      "ud_bytes": 6318,
       "tools_bytes": 5714,
-      "byte_delta": -118,
+      "byte_delta": 604,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10389,13 +10365,13 @@
     },
     {
       "path": "model_generation/library/cache.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 11192,
+      "ud_bytes": 12936,
       "tools_bytes": 11192,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 1744,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -10416,9 +10392,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 30121,
+      "ud_bytes": 30932,
       "tools_bytes": 30690,
-      "byte_delta": -569,
+      "byte_delta": 242,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10428,9 +10404,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 17021,
+      "ud_bytes": 22012,
       "tools_bytes": 17044,
-      "byte_delta": -23,
+      "byte_delta": 4968,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11952,7 +11928,7 @@
       "classification": "ud-only",
       "package": "motion_pipeline",
       "subpackage": "",
-      "ud_bytes": 5788,
+      "ud_bytes": 9092,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12336,7 +12312,7 @@
       "classification": "ud-only",
       "package": "motion_pipeline",
       "subpackage": "sources",
-      "ud_bytes": 10040,
+      "ud_bytes": 20362,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13668,7 +13644,7 @@
       "classification": "ud-only",
       "package": "movement_optimizer",
       "subpackage": "tests",
-      "ud_bytes": 10055,
+      "ud_bytes": 10163,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14540,6 +14516,18 @@
       "spelling_only": false
     },
     {
+      "path": "optimization/backend_registry.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "",
+      "ud_bytes": 9090,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "optimization/batch_swing_optimizer.py",
       "classification": "ud-only",
       "package": "optimization",
@@ -14556,7 +14544,7 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "",
-      "ud_bytes": 13122,
+      "ud_bytes": 31877,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14568,7 +14556,7 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "",
-      "ud_bytes": 13026,
+      "ud_bytes": 13270,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14593,6 +14581,18 @@
       "package": "optimization",
       "subpackage": "examples",
       "ud_bytes": 42,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/examples/bioptim_tracking_example.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "examples",
+      "ud_bytes": 4421,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14628,7 +14628,103 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "",
-      "ud_bytes": 7510,
+      "ud_bytes": 18056,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/ocp/__init__.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 2349,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/ocp/_compat.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 5447,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/ocp/bioptim_model.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 11684,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/ocp/keypoint_map.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 2023,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/ocp/result.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 5869,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/ocp/swing_ocp.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 18294,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/ocp/symbolic_model.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 12390,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "optimization/ocp/tracking_ocp.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 23094,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14664,7 +14760,7 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "",
-      "ud_bytes": 18180,
+      "ud_bytes": 20779,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14784,7 +14880,7 @@
       "classification": "ud-only",
       "package": "pendulum_simulator",
       "subpackage": "",
-      "ud_bytes": 18225,
+      "ud_bytes": 27368,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16749,121 +16845,121 @@
     },
     {
       "path": "plot_engine/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 1212,
+      "ud_bytes": null,
       "tools_bytes": 1212,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/contour.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 2538,
+      "ud_bytes": null,
       "tools_bytes": 2538,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/matplotlib_renderer.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 17977,
+      "ud_bytes": null,
       "tools_bytes": 18042,
-      "byte_delta": -65,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/plotly_converter.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 13094,
+      "ud_bytes": null,
       "tools_bytes": 13094,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/protocols.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 1868,
+      "ud_bytes": null,
       "tools_bytes": 1868,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/pyqt6_widget.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 4886,
+      "ud_bytes": null,
       "tools_bytes": 6779,
-      "byte_delta": -1893,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/specs.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 3898,
+      "ud_bytes": null,
       "tools_bytes": 3898,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 40,
+      "ud_bytes": null,
       "tools_bytes": 40,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_matplotlib_renderer.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 15762,
+      "ud_bytes": null,
       "tools_bytes": 15762,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_plotly_converter.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 16539,
+      "ud_bytes": null,
       "tools_bytes": 16539,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -16881,36 +16977,36 @@
     },
     {
       "path": "plot_engine/tests/test_specs.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 13326,
+      "ud_bytes": null,
       "tools_bytes": 13326,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_trendline.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 8621,
+      "ud_bytes": null,
       "tools_bytes": 8621,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/trendline.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 6447,
+      "ud_bytes": null,
       "tools_bytes": 6322,
-      "byte_delta": 125,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -17436,7 +17532,7 @@
       "classification": "ud-only",
       "package": "plotting",
       "subpackage": "",
-      "ud_bytes": 2051,
+      "ud_bytes": 2189,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17509,6 +17605,18 @@
       "package": "plotting",
       "subpackage": "",
       "ud_bytes": 14655,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "plotting/mpl_canvas.py",
+      "classification": "ud-only",
+      "package": "plotting",
+      "subpackage": "",
+      "ud_bytes": 5046,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17796,7 +17904,7 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 1997,
+      "ud_bytes": 4706,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17832,7 +17940,7 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 12145,
+      "ud_bytes": 13418,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17844,7 +17952,31 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 10239,
+      "ud_bytes": 10008,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "pose_estimation/mediapipe_models.py",
+      "classification": "ud-only",
+      "package": "pose_estimation",
+      "subpackage": "",
+      "ud_bytes": 5823,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "pose_estimation/model_files.py",
+      "classification": "ud-only",
+      "package": "pose_estimation",
+      "subpackage": "",
+      "ud_bytes": 3732,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17857,6 +17989,18 @@
       "package": "pose_estimation",
       "subpackage": "",
       "ud_bytes": 20993,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "pose_estimation/openpose_dnn_estimator.py",
+      "classification": "ud-only",
+      "package": "pose_estimation",
+      "subpackage": "",
+      "ud_bytes": 5966,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17880,7 +18024,19 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 9455,
+      "ud_bytes": 9224,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "pose_estimation/openpose_models.py",
+      "classification": "ud-only",
+      "package": "pose_estimation",
+      "subpackage": "",
+      "ud_bytes": 3683,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17892,7 +18048,31 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 8074,
+      "ud_bytes": 12551,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "pose_estimation/rtmpose_models.py",
+      "classification": "ud-only",
+      "package": "pose_estimation",
+      "subpackage": "",
+      "ud_bytes": 5423,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "pose_estimation/rtmpose_onnx_estimator.py",
+      "classification": "ud-only",
+      "package": "pose_estimation",
+      "subpackage": "",
+      "ud_bytes": 9548,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17905,6 +18085,18 @@
       "package": "pose_estimation",
       "subpackage": "",
       "ud_bytes": 11143,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "pose_estimation/video_files.py",
+      "classification": "ud-only",
+      "package": "pose_estimation",
+      "subpackage": "",
+      "ud_bytes": 1805,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -18213,288 +18405,288 @@
     },
     {
       "path": "programmatic_pid/AGENT_INSTRUCTIONS.md",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 11539,
+      "ud_bytes": null,
       "tools_bytes": 11539,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2865,
+      "ud_bytes": null,
       "tools_bytes": 2813,
-      "byte_delta": 52,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/cli.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 25845,
+      "ud_bytes": null,
       "tools_bytes": 25805,
-      "byte_delta": 40,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/controls.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 6160,
+      "ud_bytes": null,
       "tools_bytes": 6148,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/document.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 9536,
+      "ud_bytes": null,
       "tools_bytes": 9499,
-      "byte_delta": 37,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/equipment.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 15222,
+      "ud_bytes": null,
       "tools_bytes": 15218,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/generator.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2842,
+      "ud_bytes": null,
       "tools_bytes": 2790,
-      "byte_delta": 52,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/geometry.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 4180,
+      "ud_bytes": null,
       "tools_bytes": 4176,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/instruments.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 1941,
+      "ud_bytes": null,
       "tools_bytes": 1933,
-      "byte_delta": 8,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/layout.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 8686,
+      "ud_bytes": null,
       "tools_bytes": 8674,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/profiles.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 3528,
+      "ud_bytes": null,
       "tools_bytes": 3528,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/py.typed",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 0,
+      "ud_bytes": null,
       "tools_bytes": 0,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/rendering.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 10633,
+      "ud_bytes": null,
       "tools_bytes": 10637,
-      "byte_delta": -4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/spec_loader.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 10159,
+      "ud_bytes": null,
       "tools_bytes": 10143,
-      "byte_delta": 16,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/streams.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 5360,
+      "ud_bytes": null,
       "tools_bytes": 5348,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 36,
+      "ud_bytes": null,
       "tools_bytes": 36,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_edge_cases.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 5416,
+      "ud_bytes": null,
       "tools_bytes": 5416,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_geometry.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 6054,
+      "ud_bytes": null,
       "tools_bytes": 6054,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_pipeline_e2e.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 10919,
+      "ud_bytes": null,
       "tools_bytes": 10919,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_types.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 4343,
+      "ud_bytes": null,
       "tools_bytes": 4343,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_validation.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 7631,
+      "ud_bytes": null,
       "tools_bytes": 7631,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/title_block.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 7550,
+      "ud_bytes": null,
       "tools_bytes": 7521,
-      "byte_delta": 29,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/types.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2922,
+      "ud_bytes": null,
       "tools_bytes": 2922,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/validation.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 6644,
+      "ud_bytes": null,
       "tools_bytes": 6623,
-      "byte_delta": 21,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -18777,39 +18969,39 @@
     },
     {
       "path": "rotation_transforms/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 802,
+      "ud_bytes": null,
       "tools_bytes": 794,
-      "byte_delta": 8,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "rotation_transforms/reference_frame_operations.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 7070,
+      "ud_bytes": null,
       "tools_bytes": 7066,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "rotation_transforms/rotation.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 6132,
+      "ud_bytes": null,
       "tools_bytes": 6128,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "safe_eval.py",
@@ -19777,8 +19969,8 @@
       "package": "sidekick",
       "subpackage": "calculators",
       "ud_bytes": 43504,
-      "tools_bytes": 44492,
-      "byte_delta": -988,
+      "tools_bytes": 44487,
+      "byte_delta": -983,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -19965,13 +20157,13 @@
     },
     {
       "path": "sidekick/lab/bio/c3d_reader.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": 34123,
       "tools_bytes": 34123,
       "byte_delta": 0,
-      "byte_identical": true,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -19993,7 +20185,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 3034,
+      "tools_bytes": 2409,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -20005,7 +20197,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 1134,
+      "tools_bytes": 1543,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -20018,6 +20210,18 @@
       "subpackage": "lab",
       "ud_bytes": null,
       "tools_bytes": 2085,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/lab/mocap/acquisition.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 13404,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -20293,8 +20497,8 @@
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 2143,
-      "tools_bytes": 2591,
-      "byte_delta": -448,
+      "tools_bytes": 4658,
+      "byte_delta": -2515,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -20349,13 +20553,13 @@
     },
     {
       "path": "sidekick/process_calculators/financial_calculator.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 14620,
-      "tools_bytes": 14620,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 14931,
+      "byte_delta": -311,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20373,13 +20577,13 @@
     },
     {
       "path": "sidekick/process_calculators/flare_calculator.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 10136,
-      "tools_bytes": 10136,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 10599,
+      "byte_delta": -463,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20413,8 +20617,8 @@
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 16939,
-      "tools_bytes": 17041,
-      "byte_delta": -102,
+      "tools_bytes": 17402,
+      "byte_delta": -463,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -20613,25 +20817,25 @@
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 7190,
-      "tools_bytes": 7190,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 7094,
+      "byte_delta": 96,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 37197,
-      "tools_bytes": 37197,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 37235,
+      "byte_delta": -38,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20653,33 +20857,33 @@
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 11999,
-      "tools_bytes": 12010,
-      "byte_delta": -11,
+      "tools_bytes": 12004,
+      "byte_delta": -5,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_units.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 1825,
-      "tools_bytes": 1825,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 1965,
+      "byte_delta": -140,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_validation.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 8321,
-      "tools_bytes": 8321,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 8318,
+      "byte_delta": 3,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20781,13 +20985,13 @@
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 31301,
-      "tools_bytes": 31301,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 31724,
+      "byte_delta": -423,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20846,18 +21050,6 @@
       "subpackage": "process_calculators",
       "ud_bytes": null,
       "tools_bytes": 31422,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/process_calculators/psa_package/References/IMG_20180807_100123236.jpg",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "process_calculators",
-      "ud_bytes": null,
-      "tools_bytes": 1888971,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -21765,13 +21957,13 @@
     },
     {
       "path": "sidekick/tests/calculators/thermo/test_steam_engine.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "tests",
       "ud_bytes": 5673,
-      "tools_bytes": 5673,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 5671,
+      "byte_delta": 2,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -21980,6 +22172,18 @@
       "spelling_only": false
     },
     {
+      "path": "sidekick/tests/process_calculators/test_pressure_drop_api_public_names.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "tests",
+      "ud_bytes": null,
+      "tools_bytes": 13871,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "sidekick/tests/process_calculators/test_pressure_drop_gas_properties.py",
       "classification": "identical",
       "package": "sidekick",
@@ -22129,8 +22333,8 @@
       "package": "sidekick",
       "subpackage": "tests",
       "ud_bytes": 5474,
-      "tools_bytes": 5606,
-      "byte_delta": -132,
+      "tools_bytes": 6633,
+      "byte_delta": -1159,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -22741,8 +22945,8 @@
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 31010,
-      "tools_bytes": 30991,
-      "byte_delta": 19,
+      "tools_bytes": 31522,
+      "byte_delta": -512,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -22909,8 +23113,8 @@
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 17447,
-      "tools_bytes": 17745,
-      "byte_delta": -298,
+      "tools_bytes": 17751,
+      "byte_delta": -304,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -23145,13 +23349,13 @@
     },
     {
       "path": "sidekick/ui/tools_sidebar/notes_tab.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 7426,
-      "tools_bytes": 7426,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 8730,
+      "byte_delta": -1304,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -23529,13 +23733,13 @@
     },
     {
       "path": "sidekick/ui/widgets/unit_aware_input.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 8587,
-      "tools_bytes": 8587,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 8708,
+      "byte_delta": -121,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -26648,6 +26852,18 @@
       "spelling_only": false
     },
     {
+      "path": "swing_sim/impact/contact.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact",
+      "ud_bytes": null,
+      "tools_bytes": 2574,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "swing_sim/impact/delivery.py",
       "classification": "tools-only",
       "package": "swing_sim",
@@ -26689,7 +26905,7 @@
       "package": "swing_sim",
       "subpackage": "impact",
       "ud_bytes": null,
-      "tools_bytes": 18174,
+      "tools_bytes": 18266,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -26810,6 +27026,102 @@
       "subpackage": "impact",
       "ud_bytes": null,
       "tools_bytes": 3616,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/impact_interval/__init__.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact_interval",
+      "ud_bytes": null,
+      "tools_bytes": 886,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/impact_interval/_rotation.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact_interval",
+      "ud_bytes": null,
+      "tools_bytes": 1554,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/impact_interval/solver.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact_interval",
+      "ud_bytes": null,
+      "tools_bytes": 13585,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/impact_interval/tests/__init__.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact_interval",
+      "ud_bytes": null,
+      "tools_bytes": 53,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/impact_interval/tests/test_contact_law.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact_interval",
+      "ud_bytes": null,
+      "tools_bytes": 1845,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/impact_interval/tests/test_contract_api.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact_interval",
+      "ud_bytes": null,
+      "tools_bytes": 661,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/impact_interval/tests/test_solver.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact_interval",
+      "ud_bytes": null,
+      "tools_bytes": 7121,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/impact_interval/types.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "impact_interval",
+      "ud_bytes": null,
+      "tools_bytes": 10928,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -27001,7 +27313,7 @@
       "package": "swing_sim",
       "subpackage": "putting",
       "ud_bytes": null,
-      "tools_bytes": 18909,
+      "tools_bytes": 19016,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -28485,13 +28797,13 @@
     },
     {
       "path": "tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "tests",
       "subpackage": "",
-      "ud_bytes": 36,
+      "ud_bytes": null,
       "tools_bytes": 36,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -28501,7 +28813,7 @@
       "package": "tests",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 13597,
+      "tools_bytes": 13413,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -28513,7 +28825,7 @@
       "package": "tests",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 2943,
+      "tools_bytes": 2944,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -28525,7 +28837,7 @@
       "package": "tests",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 6237,
+      "tools_bytes": 6209,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -28728,7 +29040,7 @@
       "classification": "ud-only",
       "package": "theme",
       "subpackage": "",
-      "ud_bytes": 866,
+      "ud_bytes": 1355,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -29613,15 +29925,15 @@
     },
     {
       "path": "upstream_drift_tools/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "upstream_drift_tools",
       "subpackage": "",
-      "ud_bytes": 853,
+      "ud_bytes": null,
       "tools_bytes": 849,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "ux/__init__.py",
@@ -29969,9 +30281,9 @@
         "commit": "128b8d9483fe6a60ccfea2f134aa54f95b32f5ec"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -29982,9 +30294,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -29995,9 +30307,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30008,9 +30320,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30021,9 +30333,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30034,9 +30346,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30047,9 +30359,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30060,9 +30372,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30073,9 +30385,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30086,9 +30398,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30099,9 +30411,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30112,9 +30424,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30125,9 +30437,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30138,9 +30450,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30151,9 +30463,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30164,9 +30476,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30177,9 +30489,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30190,9 +30502,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30203,9 +30515,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30216,9 +30528,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30229,9 +30541,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30242,9 +30554,9 @@
         "commit": "1d6af73d450be359b3459b466472fa7ef922fa37"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30255,9 +30567,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30268,9 +30580,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30281,9 +30593,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30294,9 +30606,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30307,9 +30619,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30320,9 +30632,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30333,9 +30645,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30346,9 +30658,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30359,9 +30671,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30372,9 +30684,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30385,9 +30697,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30398,9 +30710,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30411,9 +30723,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30424,9 +30736,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30437,9 +30749,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30450,9 +30762,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30463,9 +30775,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30476,9 +30788,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30489,9 +30801,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30502,9 +30814,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30515,9 +30827,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30528,9 +30840,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30541,9 +30853,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30554,9 +30866,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30567,9 +30879,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30580,9 +30892,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30593,9 +30905,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30606,9 +30918,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30619,9 +30931,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30632,9 +30944,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30645,9 +30957,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30658,9 +30970,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30671,9 +30983,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30684,9 +30996,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30697,9 +31009,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30710,9 +31022,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30723,9 +31035,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30736,9 +31048,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30749,9 +31061,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30762,9 +31074,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30775,9 +31087,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30788,9 +31100,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "ai/system_prompts.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30801,9 +31126,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30814,9 +31139,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30827,9 +31152,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30840,22 +31165,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "ai/tools/cli_tools.py",
-      "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30866,9 +31178,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30879,9 +31191,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "ai/tools/sidekick_analytics.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-05-29",
+        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30892,9 +31217,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30905,9 +31230,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30918,9 +31243,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30931,9 +31256,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30944,9 +31269,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30957,9 +31282,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30970,9 +31295,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30983,9 +31308,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -30996,9 +31321,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31009,9 +31334,9 @@
         "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31022,9 +31347,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31035,9 +31360,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31048,9 +31373,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31061,9 +31386,9 @@
         "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31074,9 +31399,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31087,9 +31412,9 @@
         "commit": "e3ea36a8bb2115081d1f7caa8f8aa7544afa74c4"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31100,9 +31425,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31113,9 +31438,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31126,9 +31451,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31139,9 +31464,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31152,9 +31477,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31165,9 +31490,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31178,9 +31503,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31191,9 +31516,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31204,9 +31529,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31217,9 +31542,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31230,9 +31555,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31243,9 +31568,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31256,9 +31581,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31269,9 +31594,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31282,100 +31607,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "codemap/_lang_python.py",
-      "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "codemap/_ts_common.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "codemap/api.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "codemap/indexer.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "codemap/mcp_server.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "codemap/watcher.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "compatibility.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31386,9 +31620,9 @@
         "commit": "b4ddf7b30a4fc64eb4c83781c2005c0eefb6e0fa"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31399,9 +31633,9 @@
         "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31412,9 +31646,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31425,9 +31659,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31438,9 +31672,9 @@
         "commit": "0782853295e005af68818617e4725eb980890f43"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31451,9 +31685,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31464,9 +31698,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31477,22 +31711,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "gui_launcher/tool_manifest.yaml",
-      "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-04",
-        "commit": "942c2dd23716ec3af9387aa141f517cc5af8dcac"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31503,9 +31724,9 @@
         "commit": "93f243f28792ddb48647836a5c515927900d81a4"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31516,9 +31737,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31529,9 +31750,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31542,9 +31763,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31555,9 +31776,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31568,9 +31789,9 @@
         "commit": "fd45b2bb68a5006bc70158e2a4b3948e72cb19eb"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31581,9 +31802,9 @@
         "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31594,9 +31815,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31607,9 +31828,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31620,9 +31841,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31633,9 +31854,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31646,9 +31867,9 @@
         "commit": "fd45b2bb68a5006bc70158e2a4b3948e72cb19eb"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31659,9 +31880,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31672,9 +31893,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31685,9 +31906,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31698,9 +31919,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31711,9 +31932,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31724,9 +31945,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31737,9 +31958,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/mesh/collision_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31750,9 +31984,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31763,9 +31997,9 @@
         "commit": "ef1c6ec70db25efaf8bcb021d4390d95224a6fbf"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31776,9 +32010,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31789,9 +32023,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31802,9 +32036,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31815,9 +32049,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31828,9 +32062,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31841,9 +32075,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31854,9 +32088,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31867,9 +32101,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31880,9 +32127,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31893,9 +32140,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31906,9 +32153,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_flask.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31919,22 +32179,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "model_generation/api/rest_api_routes.py",
-      "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31945,9 +32192,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31958,9 +32205,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31971,9 +32218,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31984,9 +32231,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -31997,9 +32244,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32010,9 +32257,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32023,9 +32270,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32036,9 +32283,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32049,9 +32296,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32062,9 +32309,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32075,9 +32322,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32088,9 +32335,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32101,9 +32348,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32114,9 +32361,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32127,9 +32374,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32140,9 +32387,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32153,9 +32400,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32166,9 +32413,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32179,9 +32426,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32192,9 +32439,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32205,9 +32452,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32218,9 +32465,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32231,9 +32478,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32244,9 +32491,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32257,9 +32504,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32270,9 +32517,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32283,9 +32530,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32296,9 +32543,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32309,9 +32556,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32322,9 +32569,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32335,9 +32582,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "model_generation/inertia/primitives.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32348,9 +32608,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32361,9 +32621,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "model_generation/library/cache.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32374,9 +32647,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32387,9 +32660,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32400,9 +32673,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32413,9 +32686,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32426,9 +32699,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32439,9 +32712,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32452,9 +32725,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32465,48 +32738,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "plot_engine/matplotlib_renderer.py",
-      "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "plot_engine/pyqt6_widget.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "plot_engine/trendline.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-05",
-        "commit": "e7ace0ecd9f3b19416ff246c556d2e3035a88eab"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32517,9 +32751,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32530,9 +32764,9 @@
         "commit": "8817e6c2833f8aa0a5c119abbd57cfde6a9d525d"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32543,191 +32777,9 @@
         "commit": "8817e6c2833f8aa0a5c119abbd57cfde6a9d525d"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/__init__.py",
-      "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/cli.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/controls.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/document.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/equipment.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/generator.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/geometry.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/instruments.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/layout.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/rendering.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/spec_loader.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/streams.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/title_block.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "programmatic_pid/validation.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32738,9 +32790,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32751,48 +32803,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "rotation_transforms/__init__.py",
-      "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "rotation_transforms/reference_frame_operations.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "rotation_transforms/rotation.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32803,9 +32816,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32816,9 +32829,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32829,9 +32842,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32842,9 +32855,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32855,9 +32868,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32868,9 +32881,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32881,9 +32894,9 @@
         "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32894,9 +32907,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/lab/bio/c3d_reader.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32907,9 +32933,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32920,9 +32946,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32933,9 +32959,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32946,9 +32972,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32959,9 +32985,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32972,9 +32998,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32985,9 +33011,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -32998,9 +33024,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33011,9 +33037,35 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/financial_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/flare_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33024,9 +33076,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33037,9 +33089,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33050,9 +33102,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33063,9 +33115,35 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33076,9 +33154,35 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_units.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_validation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33089,9 +33193,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33102,9 +33219,9 @@
         "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33115,9 +33232,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33128,9 +33245,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33141,9 +33258,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33154,9 +33271,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33167,9 +33284,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33180,9 +33297,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33193,9 +33310,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33206,9 +33323,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33219,9 +33336,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33232,9 +33349,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33245,9 +33362,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33258,9 +33375,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33271,9 +33388,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33284,9 +33401,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33297,9 +33414,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/tests/calculators/thermo/test_steam_engine.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33310,9 +33440,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33323,9 +33453,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33336,9 +33466,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33349,9 +33479,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33362,9 +33492,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33375,9 +33505,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33388,9 +33518,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33401,9 +33531,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33414,9 +33544,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33427,9 +33557,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33440,9 +33570,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33453,9 +33583,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33466,9 +33596,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/notes_tab.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33479,9 +33622,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33492,9 +33635,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33505,9 +33648,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33518,9 +33661,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33531,9 +33674,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33544,9 +33687,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33557,9 +33700,9 @@
         "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33570,9 +33713,22 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/unit_aware_input.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33583,9 +33739,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33596,9 +33752,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33609,9 +33765,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33622,9 +33778,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33635,9 +33791,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33648,9 +33804,9 @@
         "commit": "74e0b8657cd4e03a850af026a0ccf41d645af084"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33661,9 +33817,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33674,9 +33830,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
@@ -33687,22 +33843,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
-      }
-    },
-    {
-      "path": "upstream_drift_tools/__init__.py",
-      "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "date": "2026-09-07",
+        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     }
   ]

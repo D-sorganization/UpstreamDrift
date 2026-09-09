@@ -8,9 +8,11 @@ This module provides utilities for handling GitHub API rate limits:
 
 from __future__ import annotations
 
+import http.client
 import logging
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any
 
@@ -89,7 +91,7 @@ def make_request_with_backoff(
     initial_backoff: float = DEFAULT_INITIAL_BACKOFF,
     max_backoff: float = DEFAULT_MAX_BACKOFF,
     headers: dict[str, str] | None = None,
-) -> urllib.request.Response:
+) -> http.client.HTTPResponse:
     """Make a request with exponential backoff for rate-limit errors.
 
     Args:
@@ -109,6 +111,14 @@ def make_request_with_backoff(
     if headers is None:
         headers = {}
 
+    # urllib honours file:// and other local schemes, so an unvalidated URL
+    # here would let a caller read arbitrary files through what looks like an
+    # HTTP helper. Every caller (github_importer) passes a GitHub API URL, so
+    # requiring https costs nothing and closes that path.
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != "https" or not parsed.hostname:
+        raise ValueError(f"URL must be absolute HTTPS: {url}")
+
     backoff = initial_backoff
     last_error: Exception | None = None
 
@@ -118,7 +128,9 @@ def make_request_with_backoff(
             for key, value in headers.items():
                 req.add_header(key, value)
 
-            response = urllib.request.urlopen(req, timeout=10)  # nosec B310
+            # The scheme is validated at function entry, so the file://
+            # read this rule guards against cannot reach here.
+            response = urllib.request.urlopen(req, timeout=10)  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
 
             # Log rate-limit status on success
             rate_limit_info = extract_rate_limit_info(response)

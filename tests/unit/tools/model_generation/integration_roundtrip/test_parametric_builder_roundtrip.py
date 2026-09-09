@@ -32,9 +32,7 @@ class TestParametricBuilderRoundtrip:
         builder.add_humanoid_segments()
         result = builder.build()
 
-        assert result.solver_status == "success", (
-            f"Build failed: {result.error_message}"
-        )
+        assert result.success, f"Build failed: {result.error_message}"
         assert result.urdf_xml is not None
 
         parser = URDFParser(resolve_meshes=False)
@@ -69,7 +67,7 @@ class TestParametricBuilderRoundtrip:
         builder.add_humanoid_segments()
         result = builder.build()
 
-        assert result.solver_status == "success"
+        assert result.success
         total_mass = result.get_total_mass()
 
         # The sum of segment mass ratios may not be exactly 1.0 due to
@@ -93,10 +91,7 @@ class TestParametricBuilderRoundtrip:
         builder_tall.add_humanoid_segments()
         result_tall = builder_tall.build()
 
-        assert (
-            result_short.solver_status == "success"
-            and result_tall.solver_status == "success"
-        )
+        assert result_short.success and result_tall.success
 
         # Find a common link (e.g., left_thigh) and compare dimensions
         thigh_short = result_short.get_link("left_thigh")
@@ -117,7 +112,7 @@ class TestParametricBuilderRoundtrip:
         builder.add_humanoid_segments()
         result = builder.build()
 
-        assert result.solver_status == "success"
+        assert result.success
         assert result.urdf_xml is not None
 
         root = DefusedET.fromstring(result.urdf_xml)
@@ -167,7 +162,7 @@ class TestParametricBuilderRoundtrip:
         )
 
         result = builder.build()
-        assert result.solver_status == "success"
+        assert result.success
         assert result.urdf_xml is not None
 
         parser = URDFParser(resolve_meshes=False)

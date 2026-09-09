@@ -115,6 +115,8 @@ import enum
 import math
 from dataclasses import dataclass, field
 
+import numpy as np
+
 from src.shared.python.core.contracts import require
 
 from ..sand.provenance import PropertyProvenance, ProvenanceBasis, SandProvenance
@@ -186,6 +188,11 @@ SPIN_LEVER_ARM_FRACTION: float = 0.7
 centre. A modelling convention: it sets the spin lever arm and no measurement
 of the contact patch exists."""
 
+
+_EXIT_SPEED_AGREEMENT_TOLERANCE: float = 1e-6
+"""Relative and absolute tolerance for the two representations of the exit
+speed -- the solver's scalar and the norm of the supplied vector -- to agree
+within (issue #9542). They are one measurement, not two."""
 BALL_LAUNCH_MEASUREMENT_GAP = (
     "No published value exists anywhere for ball speed, launch angle or spin "
     "out of a bunker. An exhaustive enumeration of the sports-engineering "
@@ -483,6 +490,9 @@ class SandDelivery:
     verdict: ValidityVerdict
     displaced_mass_bounds_kg: tuple[float, float] | None = None
     displaced_mass_reason: str | None = None
+    exit_velocity_m_s: tuple[float, float, float] | None = None
+    exit_angular_velocity_rad_s: tuple[float, float, float] | None = None
+    exit_orientation: tuple[tuple[float, float, float], ...] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a strike that was not measured, or that cannot have happened.
@@ -523,8 +533,104 @@ class SandDelivery:
                 "a finite fraction in [0, 1] -- the lie sets how much of the "
                 "delivered momentum reaches the ball (issue #8704)",
             )
+        self._own_exit_kinematics()
+        self._require_exit_speed_consistency()
         self._require_bounds()
         self._require_admissible_ejecta()
+
+    def _own_exit_kinematics(self) -> None:
+        """Copy the optional exit vectors into the record, then validate them.
+
+        Issue #9542 (reopen), defect 4: a caller-supplied ``list`` used to be
+        stored by reference, so mutating it afterwards -- its first element to
+        ``NaN``, say -- invalidated a record that had validated the borrowed
+        reference at construction. The vectors are owned tuples now: the
+        record validates its own copy and the caller keeps theirs.
+        """
+        self._own_exit_vector("exit_velocity_m_s")
+        self._own_exit_vector("exit_angular_velocity_rad_s")
+        self._own_exit_orientation()
+
+    def _own_exit_vector(self, name: str) -> None:
+        """Own and validate one optional exit vector.
+
+        Args:
+            name: Attribute name of the ``3``-vector field.
+
+        Raises:
+            ValueError: If the field is not ``None`` and not a finite
+                3-element sequence of real numbers.
+        """
+        value = getattr(self, name)
+        if value is None:
+            return
+        try:
+            vector = tuple(float(component) for component in value)
+        except (TypeError, ValueError) as error:
+            raise ValueError(
+                f"{name} must be a finite 3-element sequence of floats, got {value!r}"
+            ) from error
+        if len(vector) != 3 or not all(math.isfinite(v) for v in vector):
+            raise ValueError(
+                f"{name} must be a finite 3-element sequence of floats, got {value!r}"
+            )
+        object.__setattr__(self, name, vector)
+
+    def _own_exit_orientation(self) -> None:
+        """Own and validate the optional exit orientation matrix.
+
+        Reuses the canonical rotation checks (finite, orthogonal, ``det +1``)
+        the solver applies to :class:`~bunkershot3d.solvers.shot.HeadKinematics`
+        and stores the caller's matrix as an owned tuple-of-tuples.
+
+        Raises:
+            ValueError: If the matrix is not a finite proper rotation.
+        """
+        if self.exit_orientation is None:
+            return
+        matrix = np.array(self.exit_orientation, dtype=float, copy=True)
+        if matrix.shape != (3, 3) or not np.all(np.isfinite(matrix)):
+            raise ValueError("exit_orientation must be a finite (3, 3) matrix")
+        if not np.allclose(matrix @ matrix.T, np.eye(3), atol=1e-6):
+            raise ValueError("exit_orientation is not an orthogonal matrix")
+        determinant = float(np.linalg.det(matrix))
+        if not math.isclose(determinant, 1.0, abs_tol=1e-5):
+            raise ValueError(
+                f"exit_orientation admits reflection (det = {determinant:.4g}); "
+                "must be a proper rotation (det = +1)"
+            )
+        object.__setattr__(
+            self,
+            "exit_orientation",
+            tuple(tuple(float(entry) for entry in row) for row in matrix),
+        )
+
+    def _require_exit_speed_consistency(self) -> None:
+        """Refuse a scalar exit speed and an exit vector that contradict it.
+
+        Issue #9542 (reopen), defect 3: the two are representations of the
+        same measured exit, so a delivery carrying both must not carry a
+        disagreement.
+
+        Raises:
+            ValueError: If ``|exit_velocity_m_s|`` differs from
+                ``exit_speed_m_s`` beyond :data:`_EXIT_SPEED_AGREEMENT_TOLERANCE`.
+        """
+        if self.exit_velocity_m_s is None:
+            return
+        magnitude = math.hypot(*self.exit_velocity_m_s)
+        if not math.isclose(
+            magnitude,
+            self.exit_speed_m_s,
+            rel_tol=_EXIT_SPEED_AGREEMENT_TOLERANCE,
+            abs_tol=_EXIT_SPEED_AGREEMENT_TOLERANCE,
+        ):
+            raise ValueError(
+                f"exit_speed_m_s {self.exit_speed_m_s:.6g} m/s and "
+                f"|exit_velocity_m_s| {magnitude:.6g} m/s contradict each "
+                "other; they are two representations of one measured exit "
+                "(issue #9542)"
+            )
 
     def _require_bounds(self) -> None:
         """Refuse an interval that does not bracket the value drawn from it.

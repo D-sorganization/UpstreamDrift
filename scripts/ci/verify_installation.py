@@ -60,6 +60,7 @@ def check_vendor_tools(repo_root: Path = _REPO_ROOT) -> tuple[bool, str]:
     Tools package either falls back to the diverged child copy or fails to
     import at all (``utils`` only exists in the submodule).
     """
+    # Pinned vendor/ud-tools provides shared dependencies including theme.colors
     vendor_root = vendor_shared_python_root(repo_root)
     if vendor_root.is_dir():
         return True, f"✓ vendor/ud-tools submodule present ({vendor_root})"

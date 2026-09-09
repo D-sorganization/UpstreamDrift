@@ -18,6 +18,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from src.shared.python.ai.tools.sidekick_analytics import SIDEKICK_ANALYTICS_TOOL_NAME
+
 logger = logging.getLogger(__name__)
 
 # ── Application context registry ────────────────────────────────────
@@ -51,6 +53,10 @@ _APP_CONTEXTS: dict[str, dict[str, Any]] = {
             "Performing drift-control decomposition",
             "Generating visualizations and reports",
             "Cross-engine comparison analysis",
+            # Name derived from the tool module, never retyped: the prompt and
+            # the registry must not be able to drift apart.
+            f"Summarizing stored simulation runs by id "
+            f"({SIDEKICK_ANALYTICS_TOOL_NAME})",
         ],
     },
     "tools": {

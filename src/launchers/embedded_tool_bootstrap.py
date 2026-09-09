@@ -40,6 +40,7 @@ FALLBACK_ADAPTER_MODULES = (
     "src.tools.sidekick._embed_adapter",
     "src.tools.pose_studio.gui",
     "src.tools.video_analyzer._embed_adapter",
+    "src.tools.capture_rig._embed_adapter",
     "src.tools.ball_flight_gui._embed_adapter",
     "src.tools.bunker_shot_gui._embed_adapter",
     "src.tools.putting_green_gui._embed_adapter",

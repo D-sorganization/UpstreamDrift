@@ -1,29 +1,62 @@
 #!/usr/bin/env python3
 """Register the ``spec-rows`` merge driver in this clone.
 
-Two halves have to arrive together, and **neither can be committed**:
+Both halves are written together and neither is committed. The *definition* of
+a merge driver lives in git config, which is per-clone; the attribute
+``SPEC.md merge=spec-rows`` goes in ``$GIT_COMMON_DIR/info/attributes`` rather
+than a committed ``.gitattributes``. Run once per clone; git config and
+``info/attributes`` are both shared across worktrees, so once is enough.
 
-* the attribute ``SPEC.md merge=spec-rows``, and
-* the driver *definition* in git config.
+**Wire this into your repository's existing hook-setup entry point** rather
+than relying on people to run it by hand -- in Repository_Management that is
+``scripts/install_workspace_hooks.py``; in Tools and UpstreamDrift it is
+``scripts/setup_hooks.py``, which registers the ``spec-rows`` driver the same
+way. A vendored copy of this file that nothing invokes leaves
+the driver inert, and this docstring is exactly where someone checks whether it
+is automatic, so do not let it name an entry point the repository does not
+have.
 
-A committed ``.gitattributes`` naming the driver is a footgun, not a
-convenience. Git does **not** fall back to the default driver when the named
-driver is unregistered — it aborts::
+Idempotent: re-running rewrites the same two config values.
 
-    $ git merge feature-b
-    fatal: custom merge driver spec-rows lacks command line.
+What git actually does, measured rather than assumed
+----------------------------------------------------
 
-so every clone that has not run this script — a CI checkout, a fresh clone,
-another agent's worktree — would fail to merge SPEC.md at all. That is
-strictly worse than the conflict the driver exists to avoid. The attribute
-therefore goes in ``$GIT_COMMON_DIR/info/attributes``, which is per-clone,
-uncommitted, shared across worktrees, and written here in the same breath as
-the config, so the two can never be out of step.
+An earlier version of this docstring claimed git *aborts* a merge when an
+attribute names an unregistered driver, and that a committed ``.gitattributes``
+would therefore make SPEC.md unmergeable in any clone without the driver. That
+was wrong, and it is corrected here because it was the stated reason for the
+whole per-clone design. The three states behave differently:
 
-Run once per clone (``scripts/install_workspace_hooks.py`` calls it for you);
-git config and ``info/attributes`` are both shared across a clone's worktrees,
-so once really is enough. Idempotent: re-running rewrites the same config and
-does not duplicate the attribute line.
+===============================================  ==========================
+clone state (attribute present in every case)    ``git merge`` result
+===============================================  ==========================
+no ``merge.spec-rows.*`` config at all           exit 1, ordinary ``UU``
+  (a fresh clone, a CI checkout)                 conflict -- graceful
+``.name`` set, ``.driver`` missing               **exit 128**, ``fatal:
+  (half-configured)                              custom merge driver
+                                                 spec-rows lacks command
+                                                 line`` -- merge aborts
+``.driver`` set, script absent from the          exit 1, ordinary ``UU``
+  worktree being merged (e.g. a checkout         conflict -- graceful
+  predating the driver's commit)
+===============================================  ==========================
+
+So an unconfigured clone degrades gracefully, and committing the attribute
+would have been survivable. The attribute still stays out of ``.gitattributes``
+-- keeping the two halves in one place, written and removed together, is what
+prevents the half-configured state -- but that is a tidiness argument, not the
+catastrophe previously described.
+
+**Removing this: unset BOTH keys.** Unsetting only ``merge.spec-rows.driver``
+and leaving ``merge.spec-rows.name`` behind produces the one state above that
+aborts merges. To disarm cleanly::
+
+    git config --unset merge.spec-rows.driver
+    git config --unset merge.spec-rows.name
+    # then delete the `SPEC.md merge=spec-rows` line from
+    # "$(git rev-parse --git-common-dir)/info/attributes"
+
+See Repository_Management#1520.
 """
 
 from __future__ import annotations
@@ -34,13 +67,28 @@ import sys
 from pathlib import Path
 
 DRIVER_NAME = "spec-rows"
+#: Path to the driver, RELATIVE to the top of the worktree.
+#:
+#: Git runs a merge driver with its working directory at the top of the
+#: worktree being merged, so a relative path resolves to that worktree's own
+#: copy of the script. An absolute path would pin the config -- which is shared
+#: by every worktree of the clone -- to whichever worktree happened to run the
+#: installer, and once that worktree is removed the script is gone. Per the
+#: table above that is the graceful case (exit 1, an ordinary conflict), not a
+#: fatal one, but it silently disables the driver and emits a confusing
+#: interpreter error, so the relative path is still correct.
+#: (Observed during the AffineDrift rollout, then measured.)
+DRIVER_SCRIPT = "scripts/spec_rows_merge_driver.py"
 ATTRIBUTE_LINE = f"SPEC.md merge={DRIVER_NAME}"
 ATTRIBUTE_BLOCK = f"""# Union SPEC.md change-log rows instead of conflicting on
 # adjacent inserts (Repository_Management#1520).
-# Deliberately NOT committed in .gitattributes:
-# git aborts a merge outright when a named driver is unregistered, so a clone
-# without the driver could not merge SPEC.md at all. Installed by
-# scripts/install_spec_merge_driver.py together with the driver definition.
+# Kept here rather than in a committed .gitattributes so that this line and the
+# merge.spec-rows.* config are written -- and removed -- together. A clone with
+# neither degrades gracefully (an ordinary conflict); a clone with only
+# merge.spec-rows.name set and no .driver aborts every SPEC.md merge with
+# "fatal: custom merge driver spec-rows lacks command line", so when removing
+# this, unset BOTH config keys as well as this line. Installed by
+# scripts/install_spec_merge_driver.py.
 {ATTRIBUTE_LINE}
 """
 ROOT = Path(__file__).resolve().parent.parent
@@ -58,21 +106,21 @@ def _git(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-#: Path to the driver, RELATIVE to the top of the worktree.
-#:
-#: Git runs a merge driver with its working directory at the top of the
-#: worktree being merged, so a relative path resolves to that worktree's own
-#: copy of the script. An absolute path would pin the config -- which is shared
-#: by every worktree of the clone -- to whichever worktree happened to run the
-#: installer; when that worktree is later removed, every SPEC.md merge in the
-#: clone aborts with `fatal: custom merge driver spec-rows lacks command line`.
-#: (Observed during the AffineDrift rollout.)
-DRIVER_SCRIPT = "scripts/spec_rows_merge_driver.py"
-
-
 def driver_command(repo_root: Path) -> str:
-    """Return the ``merge.spec-rows.driver`` command for ``repo_root``."""
-    del repo_root  # the command is deliberately worktree-relative
+    """Return the ``merge.spec-rows.driver`` command.
+
+    The script path is **worktree-relative on purpose**. Git config is shared by
+    every worktree of a clone, so an absolute path would pin the driver to
+    whichever worktree happened to run the installer; once that worktree is
+    removed the script is gone and the driver silently stops working. Per the
+    measured table in the module docstring that is the *graceful* failure (exit
+    1, an ordinary conflict) rather than the fatal one -- but it disables the
+    driver while leaving it configured, and emits a confusing interpreter error
+    that nobody will connect to this campaign. Git runs a merge driver with its
+    working directory at the top of the worktree being merged, so a relative
+    path resolves to that worktree's own copy and is correct for all of them.
+    """
+    del repo_root  # deliberately unused: the command must not be worktree-specific
     interpreter = Path(sys.executable).as_posix()
     return f'"{interpreter}" "{DRIVER_SCRIPT}" %O %A %B %P'
 

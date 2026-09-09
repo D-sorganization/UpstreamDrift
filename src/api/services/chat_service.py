@@ -352,6 +352,7 @@ class ChatService:
         # persisting messages for an abandoned session, which previously left
         # the daemon thread orphaned and contending for ``self._lock``.
         stop_event = threading.Event()
+        temp_ctx.metadata["stop_event"] = stop_event
 
         def _stream_to_queue() -> None:  # noqa: C901
             try:
@@ -497,7 +498,11 @@ class ChatService:
             finally:
                 chunk_queue.put(None)  # Sentinel
 
-        thread = threading.Thread(target=_stream_to_queue, daemon=True)
+        thread = threading.Thread(
+            target=_stream_to_queue,
+            name=f"ChatService-StreamWorker-{session_id}",
+            daemon=True,
+        )
         thread.start()
 
         # The ``finally`` below runs on normal completion, on consumer error,

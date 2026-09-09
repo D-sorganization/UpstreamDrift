@@ -111,49 +111,24 @@ jobs:
 
       - name: Post warning comment
         if: steps.check.outputs.needs_update == 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
-        with:
-          script: |
-            const body = `## -- SPEC.md Update Required
-
-            Source files were modified in this PR but \`SPEC.md\` was not updated.
-
-            **Per the [Specification-Driven Development Policy](${{ github.server_url }}/${{ vars.REPOSITORY_MANAGEMENT_REPOSITORY || format('{0}/Repository_Management', github.repository_owner) }}/blob/main/docs/SPECIFICATION_DRIVEN_DEVELOPMENT_POLICY.md):**
-            - Any PR that adds, removes, or changes functionality must update SPEC.md
-            - Update the relevant sections (features, architecture, tests, dependencies, etc.)
-            - Add ONE change-log row keyed by this PR: `| YYYY-MM-DD | #<pr> | summary |`
-            - Do NOT bump the `Spec Version` field and do NOT put a serial
-              version in the row: see Repository_Management#1520
-
-            **To resolve:**
-            1. Update \`SPEC.md\` to reflect your changes, OR
-            2. Add the \`spec-exempt\` label if this PR genuinely doesn't affect the spec (e.g., pure refactor with no behavior change)
-
-            *This check is enforced by the spec-check CI workflow.*`;
-
-            // Check if we already posted a comment
-            const comments = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const existingComment = comments.data.find(c =>
-              c.body.includes('SPEC.md Update Required') &&
-              c.user.type === 'Bot'
-            );
-
-            if (!existingComment) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: body,
-              });
-            }
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Same policy link the retired inline github-script interpolated.
+          SPEC_POLICY_URL: ${{ format('{0}/{1}/blob/main/docs/SPECIFICATION_DRIVEN_DEVELOPMENT_POLICY.md', github.server_url, vars.REPOSITORY_MANAGEMENT_REPOSITORY || format('{0}/Repository_Management', github.repository_owner)) }}
+        # Fail-safe reporting (scripts/post_spec_reminder.py): a posting
+        # failure prints the diagnostic into this job's log and stays green
+        # so the staleness step below deterministically fails the run.
+        run: |
+          python3 scripts/post_spec_reminder.py \
+            --repository "${{ github.repository }}" \
+            --issue-number "${{ github.event.pull_request.number }}" \
+            --policy-url "$SPEC_POLICY_URL"
 
       - name: Fail if spec is stale
-        if: steps.check.outputs.needs_update == 'true'
+        # always(): even if the posting step above hard-fails, the finding
+        # must still fail the run — a reporting failure never swallows it.
+        if: ${{ always() && steps.check.outputs.needs_update == 'true' }}
         shell: bash
         run: |
 

@@ -225,6 +225,15 @@ def _sand_delivery(
         exit_speed_m_s=result.exit_speed_m_s,
         bed_relative_density=sand.relative_density,
         verdict=result.verdict,
+        exit_velocity_m_s=tuple(float(v) for v in result.exit_velocity_m_s),
+        exit_angular_velocity_rad_s=(
+            tuple(float(w) for w in result.exit_angular_velocity_rad_s)
+            if hasattr(result, "exit_angular_velocity_rad_s")
+            else None
+        ),
+        exit_orientation=tuple(
+            tuple(float(x) for x in row) for row in result.exit_orientation
+        ),
     )
 
 

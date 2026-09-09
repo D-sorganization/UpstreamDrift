@@ -52,6 +52,10 @@ class EstimatorInfo:
         factory: Lazy constructor; receives keyword options (e.g.
             ``min_confidence``) and returns a ``PoseEstimator``. Must not
             import heavy dependencies until called.
+        capture_source: Whether the estimator is offered as a live capture
+            source to the web and desktop front ends (#7454 parity). Offline
+            comparison estimators register with ``False`` and stay reachable
+            through the registry for ingest and scripts.
     """
 
     name: str
@@ -61,6 +65,7 @@ class EstimatorInfo:
     install_hint: str
     skeleton: tuple[dict[str, Any], ...] = field(default_factory=tuple)
     factory: Callable[..., PoseEstimator] | None = None
+    capture_source: bool = True
 
     def __post_init__(self) -> None:
         if not self.name or not self.name.strip():
@@ -83,6 +88,11 @@ def register_estimator(info: EstimatorInfo) -> EstimatorInfo:
 def unregister_estimator(name: str) -> None:
     """Remove an estimator (test hygiene; missing names are a no-op)."""
     _REGISTRY.pop(name, None)
+
+
+def capture_source_estimators() -> tuple[EstimatorInfo, ...]:
+    """Registered estimators offered as capture sources, in registration order."""
+    return tuple(info for info in list_estimators() if info.capture_source)
 
 
 def list_estimators() -> tuple[EstimatorInfo, ...]:
@@ -185,6 +195,60 @@ _OPENPOSE_SKELETON: tuple[dict[str, Any], ...] = (
 )
 
 
+_BODY25_PARENTS: tuple[tuple[str, str | None], ...] = (
+    ("nose", None),
+    ("neck", "nose"),
+    ("right_shoulder", "neck"),
+    ("right_elbow", "right_shoulder"),
+    ("right_wrist", "right_elbow"),
+    ("left_shoulder", "neck"),
+    ("left_elbow", "left_shoulder"),
+    ("left_wrist", "left_elbow"),
+    ("mid_hip", "neck"),
+    ("right_hip", "mid_hip"),
+    ("right_knee", "right_hip"),
+    ("right_ankle", "right_knee"),
+    ("left_hip", "mid_hip"),
+    ("left_knee", "left_hip"),
+    ("left_ankle", "left_knee"),
+    ("right_eye", "nose"),
+    ("left_eye", "nose"),
+    ("right_ear", "right_eye"),
+    ("left_ear", "left_eye"),
+    ("left_big_toe", "left_ankle"),
+    ("left_small_toe", "left_big_toe"),
+    ("left_heel", "left_ankle"),
+    ("right_big_toe", "right_ankle"),
+    ("right_small_toe", "right_big_toe"),
+    ("right_heel", "right_ankle"),
+)
+_OPENPOSE_DNN_SKELETON: tuple[dict[str, Any], ...] = tuple(
+    {"name": name, "parent": parent} for name, parent in _BODY25_PARENTS
+)
+_COCO17_PARENTS: tuple[tuple[str, str | None], ...] = (
+    ("nose", None),
+    ("left_eye", "nose"),
+    ("right_eye", "nose"),
+    ("left_ear", "left_eye"),
+    ("right_ear", "right_eye"),
+    ("left_shoulder", "nose"),
+    ("right_shoulder", "nose"),
+    ("left_elbow", "left_shoulder"),
+    ("right_elbow", "right_shoulder"),
+    ("left_wrist", "left_elbow"),
+    ("right_wrist", "right_elbow"),
+    ("left_hip", "left_shoulder"),
+    ("right_hip", "right_shoulder"),
+    ("left_knee", "left_hip"),
+    ("right_knee", "right_hip"),
+    ("left_ankle", "left_knee"),
+    ("right_ankle", "right_knee"),
+)
+_RTMPOSE_COCO17_SKELETON: tuple[dict[str, Any], ...] = tuple(
+    {"name": name, "parent": parent} for name, parent in _COCO17_PARENTS
+)
+
+
 def _make_mediapipe(**options: Any) -> PoseEstimator:
     from src.shared.python.pose_estimation.mediapipe_estimator import (
         MediaPipeEstimator,
@@ -206,6 +270,31 @@ def _make_openpose(**options: Any) -> PoseEstimator:
     return OpenPoseEstimator()
 
 
+def _make_openpose_dnn(**options: Any) -> PoseEstimator:
+    from src.shared.python.pose_estimation.openpose_dnn_estimator import (
+        OpenPoseDnnEstimator,
+    )
+
+    return OpenPoseDnnEstimator(
+        input_height=int(options.get("input_height", 368)),
+        min_peak=float(options.get("min_peak", 0.05)),
+    )
+
+
+def _make_rtmpose_onnx(**options: Any) -> PoseEstimator:
+    from src.shared.python.pose_estimation.rtmpose_onnx_estimator import (
+        RtmposeOnnxEstimator,
+    )
+
+    kwargs: dict[str, Any] = {
+        "keypoint_set": str(options.get("keypoint_set", "coco17")),
+        "min_score": float(options.get("min_score", 0.3)),
+    }
+    if "session_factory" in options:
+        kwargs["session_factory"] = options["session_factory"]
+    return RtmposeOnnxEstimator(**kwargs)
+
+
 register_estimator(
     EstimatorInfo(
         name="mediapipe",
@@ -213,7 +302,9 @@ register_estimator(
         description="Real-time pose estimation using Google MediaPipe",
         probe_module="mediapipe",
         install_hint=(
-            "MediaPipe is not installed on the server (pip install mediapipe)"
+            "MediaPipe (>=0.10, Tasks API) is not installed on the server "
+            "(pip install mediapipe); fetch the pose model with "
+            "python3 -m src.shared.python.pose_estimation.mediapipe_models"
         ),
         skeleton=_MEDIAPIPE_SKELETON,
         factory=_make_mediapipe,
@@ -228,5 +319,39 @@ register_estimator(
         install_hint="OpenPose Python bindings are not installed on the server",
         skeleton=_OPENPOSE_SKELETON,
         factory=_make_openpose,
+    )
+)
+register_estimator(
+    EstimatorInfo(
+        name="openpose_dnn",
+        display_name="OpenPose BODY_25 (OpenCV DNN, CPU)",
+        description="OpenPose BODY_25 Caffe network run through cv2.dnn",
+        probe_module="cv2",
+        install_hint=(
+            "OpenCV is not installed; fetch the BODY_25 model with "
+            "python3 -m src.shared.python.pose_estimation.openpose_models"
+        ),
+        skeleton=_OPENPOSE_DNN_SKELETON,
+        factory=_make_openpose_dnn,
+        capture_source=False,  # offline comparison detector (#9628), CPU-only
+    )
+)
+
+
+register_estimator(
+    EstimatorInfo(
+        name="rtmpose_onnx",
+        display_name="RTMPose (ONNX Runtime, CPU)",
+        description="RTMPose SimCC body pose via onnxruntime (COCO-17/Halpe-26)",
+        probe_module="onnxruntime",
+        install_hint=(
+            "onnxruntime is not installed; install it with "
+            "`pip install onnxruntime` (extra `pose-onnx`); fetch the pinned "
+            "RTMPose model with "
+            "python3 -m src.shared.python.pose_estimation.rtmpose_models"
+        ),
+        skeleton=_RTMPOSE_COCO17_SKELETON,
+        factory=_make_rtmpose_onnx,
+        capture_source=False,  # #9648: not qualified until real takes
     )
 )
