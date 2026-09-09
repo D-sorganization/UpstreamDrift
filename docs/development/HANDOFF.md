@@ -81,3 +81,5 @@ non-algorithmic typing correction; host-load variability is not a performance cl
 ## Integration With Concurrent #9886
 
 Merged main c6f58aef9 and preserved legacy fingerprint fields, the explicit sampler gap keyword, the uncalibrated-ID guard, and all peer test scenarios. The shared immutable synchronizer retains stricter complete pairing/rate bounds; neighboring-frame sampling and typed geometry/camera/clock evidence remain authoritative. Removed the duplicate #9879 SPEC row, retaining PR #9884. CI had 14,769 passing tests and one duplicate-SPEC failure; the duplicate gate is rechecked after resolution.
+
+Concurrent remote merge 054655131 is preserved. Its explicit single-anchor affine inverse and error wording are retained alongside finite positive gap validation. All peer tests remain included; no remote history is rewritten.
