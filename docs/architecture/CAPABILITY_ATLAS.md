@@ -22,6 +22,8 @@ flowchart LR
   n5["Physics Engines"]
   n6["Session and Export Files"]
   n7["Tools Contracts"]
+  n8["Attributed Club Catalog"]
+  n9["Club Catalog Exchange"]
   n0 -->|"Camera and analysis controls"| n1
   n0 -->|"Available browser tools"| n2
   n2 -->|"REST and WebSocket requests"| n3
@@ -29,6 +31,7 @@ flowchart LR
   n6 -.->|"TRC marker file"| n4
   n4 -->|"Canonical motion and retargeting"| n5
   n1 -->|"Pinned mocap schema"| n7
+  n9 -->|"Attributed build records"| n8
 ```
 
 ## Capture Workflow
