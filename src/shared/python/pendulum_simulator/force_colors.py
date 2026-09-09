@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from src.shared.python.body_part_viz.axial_loads import (
     AxialLoadFrame,
     axial_force_from_proximal_reaction,
@@ -18,6 +20,7 @@ def pendulum_axial_loads(result: object, frame_idx: int) -> AxialLoadFrame | Non
     net-force output is not a transmitted section reaction and is not reused.
     The existing result validates frame indices and computes dynamics unchanged.
     """
+    links: tuple[tuple[str, str, str, str], ...]
     if isinstance(result, TripleSimulationResult):
         links = (
             ("arm", "shoulder", "wrist1", "shoulder"),
@@ -28,8 +31,9 @@ def pendulum_axial_loads(result: object, frame_idx: int) -> AxialLoadFrame | Non
         links = (("arm", "hub", "wrist", "shoulder"), ("club", "wrist", "tip", "wrist"))
     else:
         return None
-    positions = result.positions_at(frame_idx)
-    reactions = result.joint_forces_at(frame_idx)
+    qualified = cast(SimulationResult | TripleSimulationResult, result)
+    positions = qualified.positions_at(frame_idx)
+    reactions = qualified.joint_forces_at(frame_idx)
     values = {
         segment: axial_force_from_proximal_reaction(
             reactions[reaction], positions[proximal], positions[distal]

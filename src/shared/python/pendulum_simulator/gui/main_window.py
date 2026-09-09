@@ -186,7 +186,12 @@ class MainWindow(QMainWindow):
         from .base_pendulum_widget import BasePendulumWidget
 
         install_force_color_action(
-            view_menu, lambda: self.findChildren(BasePendulumWidget)
+            view_menu,
+            lambda: [
+                widget
+                for widget in self.findChildren(QWidget)
+                if isinstance(widget, BasePendulumWidget)
+            ],
         )
 
         # Quick theme submenu
