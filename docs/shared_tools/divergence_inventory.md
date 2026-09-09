@@ -23,6 +23,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `_contracts_level.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `_contracts_primitives.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `_contracts_validators.py` | 0 | 0 | 0 | 1 | 0 | 0 |
+| `_seam_redirect.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `ai` | 47 | 71 | 56 | 20 | 0 | 118 |
 | `analysis` | 0 | 0 | 0 | 18 | 0 | 0 |
 | `anthropometrics` | 0 | 0 | 0 | 38 | 0 | 0 |
@@ -79,7 +80,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `motion_matching` | 0 | 0 | 0 | 90 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
-| `notes` | 6 | 0 | 0 | 1 | 0 | 6 |
+| `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `optimization` | 0 | 0 | 0 | 28 | 0 | 0 |
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `pendulum_simulator` | 0 | 0 | 0 | 78 | 0 | 0 |
@@ -89,7 +90,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plot_engine` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `plot_labels.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `plot_style` | 0 | 0 | 0 | 34 | 0 | 0 |
-| `plot_theme` | 6 | 0 | 0 | 1 | 0 | 6 |
+| `plot_theme` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `plotting` | 0 | 3 | 0 | 25 | 0 | 3 |
 | `pose_editor` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `pose_estimation` | 0 | 0 | 0 | 18 | 0 | 0 |
@@ -114,7 +115,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `swing_sim` | 0 | 0 | 0 | 0 | 348 | 0 |
 | `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
-| `theme` | 21 | 1 | 0 | 4 | 0 | 22 |
+| `theme` | 0 | 0 | 0 | 4 | 22 | 0 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 26 | 0 | 0 |
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
@@ -126,7 +127,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **462** | **276** | **126** | **1207** | **520** | **738** |
+| **Total** | **429** | **275** | **126** | **1206** | **554** | **704** |
 
 ## Diverged Files by Package
 
@@ -134,7 +135,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `__init__.py` | +190 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
+| `__init__.py` | +712 |  | Dieter Olson 2026-09-02 | d-sorgcodexagent[bot] 2026-06-16 |
 
 ### Package `ai` (71 Diverged Files)
 
@@ -484,10 +485,4 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `signal_toolkit/io.py` | -18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `signal_toolkit/polynomial_generator.py` | -143 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `signal_toolkit/widget_processing.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-
-### Package `theme` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `theme/zoom.py` | -71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-17 |
 
