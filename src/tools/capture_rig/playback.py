@@ -138,6 +138,11 @@ class PlaybackPanel(QWidget):
         self.slider.valueChanged.connect(self.show_frame)
         self.status = QLabel("")
         self._build(self._transport())
+        self._resize_timer = QTimer(self)
+        self._resize_timer.setSingleShot(True)
+        self._resize_timer.setInterval(50)
+        self._resize_timer.timeout.connect(self._invalidate)
+        self.image.resized.connect(self._resize_timer.start)
 
     # -- construction ------------------------------------------------------
     def _transport(self) -> QHBoxLayout:
@@ -238,6 +243,7 @@ class PlaybackPanel(QWidget):
         first playable view drives the transport.
         """
         self.close_media()
+        self.setEnabled(True)
         self._media = media
         self.variants.load(media)
         self.view_combo.blockSignals(True)
@@ -304,12 +310,31 @@ class PlaybackPanel(QWidget):
     def close_media(self) -> None:
         """Stop and release every open reader."""
         self._timer.stop()
+        self._resize_timer.stop()
         self.play_button.setText("Play")
         for reader in self._readers.values():
             reader.close()
         self._readers = {}
         self._tracks = {}
         self._canvas = None
+
+    def clear_capture(self) -> None:
+        """Release prior capture state so invalid selection cannot replay old data."""
+        self.close_media()
+        self._media = None
+        self.variants.load(None)
+        self._offsets = {}
+        self._index = 0
+        for combo in (self.view_combo, self.set_combo):
+            combo.blockSignals(True)
+            combo.clear()
+            combo.blockSignals(False)
+        self.chooser.set_sources(())
+        self.slider.setRange(0, 0)
+        self.image.clear()
+        self.image.setText("No capture loaded. Choose a valid capture from Library.")
+        self.status.setText("No capture loaded")
+        self.setEnabled(False)
 
     # -- transport ---------------------------------------------------------
     def _on_view_changed(self, index: int) -> None:

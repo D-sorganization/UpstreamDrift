@@ -32,7 +32,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtGui import QImage, QMouseEvent, QPixmap
 from PyQt6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
@@ -170,12 +170,29 @@ class CanvasLabel(QLabel):
     is, never the pixmap, so a large frame cannot push the pane open.
     """
 
+    fullscreen_requested = pyqtSignal()
+    resized = pyqtSignal()
+
     def __init__(self, text: str = "", parent: QWidget | None = None) -> None:
         super().__init__(text, parent)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setMinimumSize(*CANVAS_MIN)
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
         self.setStyleSheet(styling.tile_style())
+        self.setAccessibleName("Video View — Double-Click for Full Screen")
+        self.setToolTip("Double-click for full screen. F11 toggles; Escape returns.")
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+    def resizeEvent(self, event: object) -> None:  # noqa: N802
+        super().resizeEvent(event)  # type: ignore[arg-type]
+        self.resized.emit()
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent | None) -> None:  # noqa: N802
+        if event is not None and event.button() == Qt.MouseButton.LeftButton:
+            self.fullscreen_requested.emit()
+            event.accept()
+            return
+        super().mouseDoubleClickEvent(event)
 
     def restyle(self) -> None:
         self.setStyleSheet(styling.tile_style())
