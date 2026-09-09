@@ -13,7 +13,7 @@
   "totals": {
     "identical": 429,
     "diverged": 275,
-    "ud-only": 1207,
+    "ud-only": 1212,
     "tools-only": 554,
     "spelling-only": 126
   },
@@ -189,7 +189,7 @@
     "club_data": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 5,
+      "ud-only": 10,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -924,7 +924,7 @@
       "classification": "ud-only",
       "package": "_seam_redirect.py",
       "subpackage": "",
-      "ud_bytes": 9439,
+      "ud_bytes": 10093,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -5544,7 +5544,55 @@
       "classification": "ud-only",
       "package": "club_data",
       "subpackage": "",
-      "ud_bytes": 803,
+      "ud_bytes": 1004,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "club_data/catalog.py",
+      "classification": "ud-only",
+      "package": "club_data",
+      "subpackage": "",
+      "ud_bytes": 8218,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "club_data/catalog_io.py",
+      "classification": "ud-only",
+      "package": "club_data",
+      "subpackage": "",
+      "ud_bytes": 5378,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "club_data/catalog_legacy.py",
+      "classification": "ud-only",
+      "package": "club_data",
+      "subpackage": "",
+      "ud_bytes": 2307,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "club_data/catalog_sources.py",
+      "classification": "ud-only",
+      "package": "club_data",
+      "subpackage": "",
+      "ud_bytes": 4708,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -5581,6 +5629,18 @@
       "package": "club_data",
       "subpackage": "",
       "ud_bytes": 25148,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "club_data/public_clubs.json",
+      "classification": "ud-only",
+      "package": "club_data",
+      "subpackage": "",
+      "ud_bytes": 9666,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14832,7 +14892,7 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "ocp",
-      "ud_bytes": 23094,
+      "ud_bytes": 23229,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -31735,9 +31795,9 @@
     {
       "path": "config/__init__.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "codex-scheduled-tasks[bot]",
+        "date": "2026-06-13",
+        "commit": "b4ddf7b30a4fc64eb4c83781c2005c0eefb6e0fa"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -31748,9 +31808,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "codex-scheduled-tasks[bot]",
+        "date": "2026-05-26",
+        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -31839,9 +31899,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-29",
+        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -33334,9 +33394,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-20",
+        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
       },
       "tools": {
         "author": "Dieter Olson",
