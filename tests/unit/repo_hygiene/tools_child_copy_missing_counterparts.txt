@@ -81,8 +81,6 @@ model_generation/library/_model_repository.py
 model_generation/library/_model_search.py
 model_generation/library/_model_types.py
 model_generation/tests/test_editor_tools_drift.py
-notes/test_notes_drift.py
-plot_theme/tests/test_plot_theme_drift.py
 reporting/_agentic_summary.py
 reporting/_jinja_template.py
 reporting/_registry.py
