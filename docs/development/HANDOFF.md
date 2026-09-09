@@ -35,3 +35,11 @@ Commit and publish a focused PR against main after #9890 merges; complete protec
 - SELF: Separate tested fleet-guide compatibility from instructor delivery without force pushes.
 
 PR #9893 is published. #9890 attempt 1 failed before tests on Google Chrome APT repository hash mismatches; attempt 2 was already running when inspected. Do not disable package verification. Central #1627 is at 1053f26, awaiting runners.
+
+## Concurrent Discovery Repair
+
+Merged peer b4ed1e7d2 normally, retaining its Sidekick discovery index and current
+CI installer work while preserving the centrally generated CLAUDE sections here.
+All 38 existing Sidekick documentation checks pass; the live guide checker and
+SPEC duplicate gate pass. The job-scoped installer replacement remains isolated
+in #9896. This PR still waits for #9890 so its final diff stays focused.
