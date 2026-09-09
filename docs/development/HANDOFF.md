@@ -7,7 +7,7 @@
 - Branch: `feat/capture-guided-setup`
 - Baseline commit: `54b9b0586` (main after qualified product merge #9896)
 - Implementation commit: `SELF`
-- Pull request: not created.
+- Pull request: #9910 (draft): https://github.com/D-sorganization/UpstreamDrift/pull/9910
 - Governing issue: #9898; epics #9897, #9902, #9906; development entry DL-#9898
 - Session: `capture-product-01a08427-guided-setup`, issue lease and presence active.
 
@@ -48,7 +48,7 @@ geometry, club data and wizard work remain open. Do not close #9898 or its epic 
 - TDD: profile module initially absent; revision-preservation regression then failed
   before implementing archived snapshots. Existing normal repo conftest is enabled.
 - `python3 -m pytest tests/tools/capture_rig/test_calibration_profiles.py tests/motion_capture/reconstruct/test_intrinsics.py -q --timeout=60`: 31 passed, including archive idempotency/corruption, geometry rejection and existing solver/CLI behavior.
-- Changed-file Ruff lint/format pass after reviewed dict-literal fixes. Focused mypy (`--follow-imports=silent --ignore-missing-imports`) passes for the new source module. Catalog, title, SPEC and tracked file-size checks pass; staged checks and normal hooks remain required.
+- Changed-file Ruff lint/format pass after reviewed dict-literal fixes. Focused mypy (`--follow-imports=silent --ignore-missing-imports`) passes for the new source module. Catalog, title, SPEC and tracked file-size checks pass; staged checks and all normal commit/pre-push hooks passed. The default shared mypy cache had incompatible NumPy stubs; the unchanged hooks passed in the task-qualified PRE_COMMIT_HOME cache.
 - Pinned Tools submodule initialized at eab74a901a7c8467e1997049a73e2cfd2df74428.
 
 ## Blockers and Risks
@@ -66,7 +66,7 @@ Last complete adoption inventory: 37/41. Do not restart live jobs or race closur
 
 ## Next Steps
 
-1. Complete final tests/type checks and normal hooks for this foundation.
+1. Continue #9910 with the player workflow; the foundation at b4abd67bb7b6629e0992364037b4f3fd0d0e816e is locally qualified and published.
 2. Implement common-reference observation sessions and compatible profile UI, then
    qualify consumers before closing #9898/#9900. Follow Tools geometry ownership.
 3. Execute #9899/#9901, club children #9903-#9905, and wizard children #9907-#9909.
