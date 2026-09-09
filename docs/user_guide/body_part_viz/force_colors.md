@@ -92,8 +92,22 @@ object bindings with original RGBA values. For meshcat-python pass
 `meshcat.SetProperty`. This adapter supports multiple geometries per segment and
 restores base RGBA on disable or missing data. Recreate it when base materials
 change. Its native meshcat-python command test qualifies transport, not browser
-raster output. Drake, Pinocchio, OpenSim and other host/source integrations remain
-tracked under #9833.
+raster output.
+
+Pinocchio and Drake expose **View → Segment Force Colors** (Ctrl+Shift+F).
+Both hosts own a `segment_force_colors` session and synchronize it on redraw.
+To attach a qualified source, first redraw the loaded model, then call
+`session.bind(MeshcatForceColors(set_property, bindings), model)` using the
+Pinocchio GUI's `model` or Drake GUI's `plant`. Submit an `AxialLoadFrame` with
+`session.set_frame(frame)` for the displayed simulation time. Bindings specify
+the actual native leaf paths and original RGBA values; they are never guessed.
+The session clears bindings on model replacement and restores base colors for
+stale frames. Rebind after changing materials. Both native GUIs have been tested
+for settings, redraw, binding, blue output and disabled restoration with Pinocchio
+4.1.0 and Drake 1.56.0. These hosts do not automatically infer axial forces.
+In particular, Drake's sampled reaction output requires explicit time alignment.
+OpenSim's current desktop GUI contains result plots, not an animated 3D scene;
+future scene consumers can use the same renderer and load contracts.
 
 The C3D/Simscape viewer exposes the same controls for user-defined shapes. Its
 `set_segment_axial_loads(loads, segment_indices)` method accepts a qualified
@@ -104,6 +118,6 @@ clears loads to prevent stale bindings. Motion capture alone supplies no axial l
 The shared policy, native renderer updates, controls and web scene wiring have
 local automated coverage. Native MuJoCo raster verification confirms blue tension,
 red compression and pixel-exact off restoration. PyQtGraph OpenGL object tests
-do not qualify GPU raster output. Remaining desktop host integrations are tracked
-in [epic #9833](https://github.com/D-sorganization/UpstreamDrift/issues/9833) and
+do not qualify GPU raster output. Delivery is tracked in
+[epic #9833](https://github.com/D-sorganization/UpstreamDrift/issues/9833) and
 [PR #9840](https://github.com/D-sorganization/UpstreamDrift/pull/9840).
