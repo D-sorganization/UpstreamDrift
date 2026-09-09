@@ -495,3 +495,5 @@ reruns. Do not restart the Actions runner or start WSL.
   ocp bioptim legs running (not skipping) in combined lanes.
 
 PR #9840 CI cycle 3: full unit gate passed 14,431 tests and failed only the companion feature-count expectation and shared divergence inventory. Updated counts for the new controls and regenerated the inventory with the pinned Tools tree. Both affected modules pass (34 tests). Await the refreshed remote gate before merging.
+
+Pinocchio and Drake now expose View > Segment Force Colors via a shared MeshcatForceColorSession. Both native GUI tests pass on isolated Linux (Pinocchio 4.1.0, Drake 1.56.0). Explicit bindings and synchronous caller-supplied axial frames are required; automatic native reaction inference is not claimed. Session regression covers stale frames, model replacement and toggling. OpenSim currently has result plots, not a 3D animation host.

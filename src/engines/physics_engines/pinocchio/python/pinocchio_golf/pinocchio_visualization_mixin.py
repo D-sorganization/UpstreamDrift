@@ -46,6 +46,7 @@ class PinocchioVisualizationMixin:
     """
 
     def _update_viewer(self: Any) -> None:
+        self.segment_force_colors.update(self.model, self.sim_time)
         if (
             self.model is None
             or self.data is None
