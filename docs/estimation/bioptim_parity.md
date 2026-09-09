@@ -120,6 +120,30 @@ Separate 16- and 32-substep optimizations reduced the observed discrepancies;
 the settings, source identity and limits are recorded in the
 [shooting refinement turnover](../development/shooting_convergence_9830_turnover.md).
 
+## Bioptim Runtime Qualification (#9842)
+
+The `bioptim` extra selects CasADi 3.6.7 with Bioptim 3.4.0 at revision
+fdafe4d9e50edb3f92a14f1980b08c3f81434545. The unchanged swing and tracking
+consumer modules pass all 13 tests on Linux, Python 3.11.15, NumPy 2.4.6,
+SciPy 1.17.1 and Pinocchio 4.1.0. This qualifies those numerical regression
+cases in that environment, not every platform or physical application.
+[PyPI lists 3.11–3.13 wheels](https://pypi.org/project/casadi/3.6.7/);
+wheel availability does not establish numerical qualification on those hosts.
+
+CasADi 3.8 removes legacy `MX_eye`, `SX_eye` and `DM_eye` exports. The private
+compatibility boundary supplies only missing names using the corresponding
+SDK class factories, preserving existing exports. Real subprocess controls
+check matrix values, types, shapes, symbolic Jacobians and idempotence on
+3.6.7 and 3.8. The optional CI install probe now imports the actual consumer.
+
+Import compatibility does not qualify the 3.8 solver stack: with aliases
+installed, the original eight-node, 1 s RK4 regression still returns an
+unsuccessful solve at its 500-iteration budget. A separate diagnostic with a
+1,000-iteration budget also fails, stopping at iteration 635. Neither proves
+the failure is solely iteration exhaustion. No fixture, tolerance or numerical
+acceptance threshold was relaxed. The general `optimal-control` extra retains
+its separate CasADi range; its 3.8 reference/backend evidence remains distinct.
+
 ## Follow-Ups
 
 - Fill the crocoddyl row on a conda-forge environment.
