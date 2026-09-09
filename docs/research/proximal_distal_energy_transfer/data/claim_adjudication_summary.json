@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "1d332fc867bcc119c7de18372efad26c79ac640f8996702adab9e1be16b64658",
+  "paper_source_digest": "2711476282ffac75ab1ea5d0fd8c7150c245f40df1088cb42b6c6d5dccf02aaa",
   "claim_count": 328,
   "outcome_counts": {
     "inconclusive": 5,
@@ -24,7 +24,7 @@
     "external_methods_or_measurement": 10,
     "external_modeling_or_simulation": 15,
     "external_review_or_synthesis": 10,
-    "project_derivation_or_document": 113,
+    "project_derivation_or_document": 118,
     "project_executable_or_generated": 299,
     "prospective_or_unexecuted": 15
   },
@@ -11274,6 +11274,7 @@
         "project_executable_or_data"
       ],
       "evidence_tiers": [
+        "project_derivation_or_document",
         "project_executable_or_generated"
       ],
       "source_independence": "project_only",
@@ -11290,10 +11291,24 @@
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
       "uncertainty_boundary": "The paths share one idealized model specification but not one dynamics operator.",
@@ -11313,6 +11328,7 @@
         "project_executable_or_data"
       ],
       "evidence_tiers": [
+        "project_derivation_or_document",
         "project_executable_or_generated"
       ],
       "source_independence": "project_only",
@@ -11329,10 +11345,24 @@
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
       "uncertainty_boundary": "The result is one manufactured state and a 10 ms horizon, not a population or complete downswing.",
@@ -11352,6 +11382,7 @@
         "project_executable_or_data"
       ],
       "evidence_tiers": [
+        "project_derivation_or_document",
         "project_executable_or_generated"
       ],
       "source_independence": "project_only",
@@ -11368,10 +11399,24 @@
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
       "uncertainty_boundary": "The supported pelvis tree is excluded because its reactions invalidate whole-model momentum conservation.",
@@ -11391,6 +11436,7 @@
         "project_executable_or_data"
       ],
       "evidence_tiers": [
+        "project_derivation_or_document",
         "project_executable_or_generated"
       ],
       "source_independence": "project_only",
@@ -11407,10 +11453,24 @@
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
       "uncertainty_boundary": "This is one three-component lead-hand-to-grip point constraint, not a simultaneous two-hand closure test; exact position, velocity, and virtual-power zeros are construction identities and not independent evidence.",
@@ -11430,6 +11490,7 @@
         "project_executable_or_data"
       ],
       "evidence_tiers": [
+        "project_derivation_or_document",
         "project_executable_or_generated"
       ],
       "source_independence": "project_only",
@@ -11446,10 +11507,24 @@
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "model_domain": "One synthetic subject-scaled closed state, a 10 ms manufactured trajectory, three inverse-dynamics formulations, and a free-club gravity-free zero-torque conservation rollout.",
       "uncertainty_boundary": "Human mechanics and strategy require governed empirical evidence outside this synthetic control.",
