@@ -19,17 +19,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9882 · Comparison Rendering and Export Qualification
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9882 (advanced reference epic #9863)
 - **Branch:** fix/9882-comparison-rendering
-- **PR:** pending
+- **PR:** #9888
 - **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py, reference_comparison.py, clips.py, swing_export.py, related tests/docs
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`; local qualification finishing)
+- **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)
 - **Summary:** Shared preview/export compositor, motion opacity, coverage-aware expert homography, retained decoders and strict staged publication.
 - **Evidence:** 48 comparison/coaching/export regressions pass; 33 renderer/state cases pass after adding three cancellation/homography checks. Five-module mypy, Ruff and architecture pass. Exact pre-encode pixel parity and complete real-container decoding are tested.
-- **Next step:** Finish no-growth checks, integrate parent #9885 and open protected PR. #9883 remains separate.
+- **Next step:** No-growth gates pass. Integrate parent #9885 and complete protected checks. #9883 remains separate.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 
