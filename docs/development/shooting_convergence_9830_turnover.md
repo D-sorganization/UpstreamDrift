@@ -139,7 +139,7 @@ results. It removes unsupported physical-realizability, controlled mesh
 convergence, convexity and equivalent-optimum claims. The old numbers are
 preserved; the tables have not been regenerated.
 
-## Remaining Acceptance and Delivery
+## Initial Delivery Checkpoint
 
 1. Native and degradation checks are complete as recorded above. A combined
    Windows collection of the new reference tests and existing mocked-SDK tests
@@ -237,6 +237,15 @@ dependency metadata, optional workflow and generated inventory are unchanged
 by this merge. Inventory freshness, pinned root Ruff (6,772 files) and the
 SPEC hook pass afterward. PR #9841 remains open; publishing through normal
 push hooks and protected CI/review remain pending.
+
+All normal push hooks then passed (including mypy, Bandit and the configured
+unit gate), but Git rejected publication because the remote had been rewritten
+to 4ca3e81f0. Its reference source/tests match the earlier implementation,
+apart from the subsequently fixed callback annotation. Merge 7e55b88ce
+preserves the current qualification work and incoming main capture-preview
+fix; reviewed conflicts retain current factual turnover and the corrected
+annotation. The automatic SPEC merge duplicated this PR's row; only the older
+duplicate is removed. No force push or other contributor's code removal occurs.
 
 Repository-pinned Ruff 0.15.17 passes root lint and format (6,771 files).
 An initial check accidentally used the shared environment's newer 0.16.4;
