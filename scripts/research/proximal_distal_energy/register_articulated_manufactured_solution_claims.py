@@ -16,7 +16,6 @@ ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
 DATE = "2026-08-21"
-CLAIM_IDS = {f"PD-CLAIM-{number}" for number in range(297, 302)}
 _AUTHORITY_CONTRACT_ARTIFACTS = (
     AUTHORITY_LOCK.relative_to(ROOT).as_posix(),
     AUTHORITY_LOCK.with_suffix(".in").relative_to(ROOT).as_posix(),
@@ -189,9 +188,7 @@ def _reconcile(
     claims: list[dict[str, Any]],
     selected: list[dict[str, Any]],
 ) -> None:
-    registry["claims"] = [
-        claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
-    ]
+    refreshed_claims = _refresh_claims(registry["claims"], claims)
     valid_ids = {candidate["candidate_id"] for candidate in inventory["candidates"]}
     reviews = {
         review["candidate_id"]: review
@@ -224,8 +221,6 @@ def _reconcile(
         "reviewer": "Codex technical audit",
         "last_verified_on": DATE,
     }
-    registry["candidate_reviews"] = list(reviews.values())
-    registry["claims"].extend(claims)
     entries = {
         item["release_claim_key"]: item for item in registry["release_claim_inventory"]
     }
@@ -234,6 +229,8 @@ def _reconcile(
         "published_status": "independent_numerical_controls_qualified",
         "audit_state": "reviewed_as_synthetic_operator_and_integrator_evidence",
     }
+    registry["claims"] = refreshed_claims
+    registry["candidate_reviews"] = list(reviews.values())
     registry["release_claim_inventory"] = list(entries.values())
     registry["paper"]["source_digest"] = inventory["source_digest"]
 
