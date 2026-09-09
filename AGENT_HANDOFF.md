@@ -485,3 +485,7 @@ reruns. Do not restart the Actions runner or start WSL.
   Note the local reproducer cannot exercise real casadi/bioptim (Python 3.14
   has no casadi wheel); CI lanes with the `[bioptim]` extra must show the
   ocp bioptim legs running (not skipping) in combined lanes.
+
+## Capture Product Review (#9851, #9857)
+
+See `docs/development/HANDOFF.md` and `docs/development/capture_product_review.md`. Bounded duplicate-frame cache and child startup recovery are covered by six focused tests. The camera suite passed 241 tests before the recovery change. GUI #9843 remains independently owned; hardware qualification remains outstanding.
