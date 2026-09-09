@@ -1,42 +1,64 @@
-# Reference Overlay Comparison Workspace Handoff
+# Comparison State Qualification Handoff
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: C:/Users/diete/Repositories/UpstreamDrift
-- Branch: feat/9866-reference-comparison-workspace
-- Baseline commit: 10caddd21 (calibrated reference scene registration #9871 merged)
+- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-registration
+- Branch: fix/reference-comparison-qualification
+- Baseline commit: 920a0c881
 - Implementation commit: SELF
-- Governing issue/epic: #9866, #9863
+- Pull request: #9884
+- Governing issue: #9879; epics #9863 and #9849
 
-## Objective and Status
+## Changes and Evidence
 
-Subepic #9866: Reference Overlay Comparison Workspace, Saved Layers & Reproducible Exports.
-Dual playback workspace (`ReferenceComparisonDialog`), synchronized scrubbing, event-anchor and
-offset alignment modes, layer styling (opacity, color palette, skeleton visibility), comparison
-session persistence (`.comparison.json`), and reproducible video/sidecar export pipeline
-(`export_comparison_video`, `build_comparison_sidecar`, `ComparisonExportWorker`) with cancellation.
-Focused unit and UI qualification passes.
+Nine state/path/loading regressions failed on merged main. The fix preserves
+unrelated registration/layer fields and blocks control signals during saved
+state restoration. Invalid, oversized and mismatched sidecars fail visibly;
+canonical UUID and filename-safe view validation prevent path traversal.
+The comparison dialog reuses SwingExportActions with a snapshotted job instead
+of duplicating worker lifetime handling. Failed saves and duplicate exports
+start no worker; Escape/window close cancels and waits asynchronously for the
+worker to finish before closing. The worker and progress dialog are disposed.
 
-## Files and Decisions
+Thirty-one focused comparison, swing export and coaching tests pass, including
+real-thread deferred-close/cancellation and failed-save tests. Three modified
+source modules pass mypy with follow-imports=silent. Ruff and architecture checks pass. DRY/LoD report no growth with existing
+baselines unchanged. Design-manual governance passes with release still
+blocked-inventory-required (2 QMD sources, no registered calculations).
+Protected CI remains pending.
 
-- `src/motion_capture/reference/comparison.py` (169 LOC): Schema data models (`ComparisonLayer`,
-  `ComparisonSession`), JSON persistence helpers, and signed sidecar builder.
-- `src/tools/capture_rig/reference_export.py` (248 LOC): Isolated heavy video rendering and
-  background worker (`ComparisonExportWorker`) to preserve <= 500 LOC limit.
-- `src/tools/capture_rig/reference_comparison.py` (419 LOC): Qt workspace dialog with dual preview,
-  alignment mode switching, synchronized scrub controls, and export actions.
-- `src/tools/capture_rig/library_dialog.py`: "Compare Reference…" action integration.
-- `src/tools/capture_rig/reference_library_dialog.py`: "Compare with capture…" button integration.
+## Remaining Product Work
 
-## Validation
+The other agent merged reference registration/workspace and responsive layout
+while this goal was paused. Its implementation is retained. Prior unmerged
+registration work remains preserved on feat/9865-reference-registration at
+8ad3f5be7; its schema is incompatible and must not be merged wholesale.
+Epic #9863 was reopened because its release acceptance is not yet met:
+#9881 timing/gaps/calibration identity; #9882 renderer/export parity; #9883
+spatial/event alignment controls, unsaved-change handling and visual evidence.
+The initial sidecars have hashes, not signatures; a loaded camera alone does
+not qualify manual spatial registration. No physical calibration or manual
+publication release claim is made. Fleet rollout #1579 is independently open.
 
-- 4 unit tests in `tests/motion_capture/test_reference_comparison.py` pass cleanly.
-- 3 UI tests in `tests/tools/capture_rig/test_reference_comparison_ui.py` pass cleanly.
-- `ruff check` and `ruff format` pass on all touched files.
-- All files strictly adhere to the <= 500 LOC budget.
+## Coordination
 
-## Next Steps
+Session capture-product-01a08427-comparison-qualification owns #9879 in this
+isolated worktree. Shared checkouts, vendor child code and peers remain intact.
+Read the central mailbox before scope expansion, commit and handoff. Publish
+through a topic PR referencing #9879 and normal branch protections.
 
-1. Create PR linked to #9866 and arm auto-merge.
-2. Advance to next subepic in backlog.
+## CI Follow-Up
+
+The final export presentation options exceeded the constructor parameter
+budget in CI after the earlier local architecture check. ExportJobSpec now
+groups the snapshot factory and dialog presentation; no budget is relaxed.
+Remote rebase 94367f82a was merged without overwriting peer changes.
+
+## Preserved Peer Packaging Work
+
+Remote a008a5439 bundled separate #9406 Tools packaging changes and an export
+parameter-budget waiver. The exact peer commit is preserved on remote branch
+preserve/9884-peer-tools-integration and handed back to #9406. Those packaging
+files are restored to their prior contents in this focused comparison PR.
+ExportJobSpec meets the original budget, so the unnecessary waiver is removed.

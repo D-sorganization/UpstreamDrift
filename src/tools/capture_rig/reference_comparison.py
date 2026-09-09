@@ -4,13 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from typing import Any
 
 import cv2
-import numpy as np
-import numpy.typing as npt
-from PyQt6.QtCore import QObject, Qt, QThread, QTimer, pyqtSignal
+from PyQt6.QtCore import QSignalBlocker, Qt, QTimer
 from PyQt6.QtGui import QCloseEvent, QColor
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -18,16 +14,13 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
     QDoubleSpinBox,
-    QFileDialog,
     QFormLayout,
     QHBoxLayout,
     QInputDialog,
     QLabel,
     QMessageBox,
-    QProgressDialog,
     QPushButton,
     QSlider,
-    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -43,12 +36,10 @@ from src.motion_capture.reference.comparison import (
 from src.motion_capture.reference.model import Asset
 from src.motion_capture.reference.registration import (
     ReferenceRegistration,
-    ReferenceTransform,
-    TimeMapping,
 )
 from src.motion_capture.reference.storage import ReferenceLibrary
 from src.tools.capture_rig.reference_export import (
-    ComparisonExportWorker,
+    ComparisonVideoExportOptions,
     draw_reference_overlay,
     export_comparison_video,
 )
@@ -58,6 +49,7 @@ from .annotate_widget import ImageCanvas
 from .flow_layout import FlowLayout
 from .player import VideoReader
 from .session import load_session
+from .swing_export_actions import ExportJob, ExportJobSpec, SwingExportActions
 
 
 class ReferenceComparisonDialog(QDialog):
@@ -86,12 +78,26 @@ class ReferenceComparisonDialog(QDialog):
 
         self.assets: list[Asset] = library.list(archived=False)
         self._current_asset: Asset | None = self.assets[0] if self.assets else None
-        self._session = self._find_or_create_session()
+        try:
+            self._session = self._find_or_create_session()
+        except (ValueError, OSError):
+            self.reader.close()
+            raise
 
         self.canvas = ImageCanvas()
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._advance)
-        self._worker: ComparisonExportWorker | None = None
+        self.exporter = SwingExportActions(
+            self,
+            root,
+            view=lambda: self.view,
+            save=self.save,
+            status=self._export_status,
+            job=ExportJobSpec(
+                self._export_job, "Export Comparison Video", "comparison.mp4"
+            ),
+            label="Export Comparison Video…",
+        )
 
         self.setWindowTitle(f"Reference Comparison · {view}")
         self.resize(1000, 720)
@@ -130,10 +136,16 @@ class ReferenceComparisonDialog(QDialog):
             )
         path = comparison_session_path(self.root, self.view, self._current_asset.id)
         if path.is_file():
-            try:
-                return load_comparison_session(path)
-            except (ValueError, OSError):
-                pass
+            saved = load_comparison_session(path)
+            if (saved.view, saved.reference_id, saved.reference_kind) != (
+                self.view,
+                self._current_asset.id,
+                self._current_asset.kind,
+            ):
+                raise ValueError(
+                    "Saved comparison does not match this view and reference"
+                )
+            return saved
         return ComparisonSession(
             session_root=str(self.root),
             view=self.view,
@@ -223,9 +235,7 @@ class ReferenceComparisonDialog(QDialog):
         save_btn.clicked.connect(self.save)
         buttons.add_widget(save_btn)
 
-        export_btn = QPushButton("Export Comparison Video…")
-        export_btn.clicked.connect(self.export_video)
-        buttons.add_widget(export_btn)
+        buttons.add_widget(self.exporter.button)
 
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.close)
@@ -250,14 +260,38 @@ class ReferenceComparisonDialog(QDialog):
 
     def _asset_changed(self, index: int) -> None:
         if 0 <= index < len(self.assets):
+            previous = self._current_asset
             self._current_asset = self.assets[index]
-            self._session = self._find_or_create_session()
+            try:
+                saved = self._find_or_create_session()
+            except (ValueError, OSError) as exc:
+                self._current_asset = previous
+                with QSignalBlocker(self.asset_selector):
+                    self.asset_selector.setCurrentIndex(
+                        self.assets.index(previous) if previous else -1
+                    )
+                self.status_label.setText(f"Cannot load comparison: {exc}")
+                return
+            self._session = saved
             self._update_status_label()
-            self.visible_check.setChecked(self._session.layer_visible)
-            self.opacity_spin.setValue(self._session.layer_opacity)
-            reg = self._session.registration
-            self.offset_spin.setValue(reg.time_mapping.offset_s if reg else 0.0)
-            self.scale_spin.setValue(reg.transform.scale if reg else 1.0)
+            registration = saved.registration
+            for control, value in (
+                (self.visible_check, saved.layer_visible),
+                (self.opacity_spin, saved.layer_opacity),
+                (
+                    self.offset_spin,
+                    registration.time_mapping.offset_s if registration else 0.0,
+                ),
+                (
+                    self.scale_spin,
+                    registration.transform.scale if registration else 1.0,
+                ),
+            ):
+                with QSignalBlocker(control):
+                    if isinstance(control, QCheckBox):
+                        control.setChecked(bool(value))
+                    else:
+                        control.setValue(float(value))
             self._show_frame(self.slider.value())
 
     def _layer_changed(self) -> None:
@@ -270,15 +304,16 @@ class ReferenceComparisonDialog(QDialog):
     def _reg_changed(self) -> None:
         if self._session.registration:
             reg = self._session.registration
-            new_reg = reg.model_validate(
-                {
-                    "reference_id": reg.reference_id,
-                    "calibration_id": reg.calibration_id,
-                    "transform": ReferenceTransform(scale=self.scale_spin.value()),
-                    "time_mapping": TimeMapping(offset_s=self.offset_spin.value()),
-                    "is_calibrated": bool(self._camera),
+            values = reg.model_dump()
+            if self.sender() is self.scale_spin:
+                values["transform"] = reg.transform.model_dump() | {
+                    "scale": self.scale_spin.value()
                 }
-            )
+            else:
+                values["time_mapping"] = reg.time_mapping.model_dump() | {
+                    "offset_s": self.offset_spin.value()
+                }
+            new_reg = reg.model_validate(values)
             self._session = self._session.changed(registration=new_reg)
             self._show_frame(self.slider.value())
 
@@ -336,58 +371,55 @@ class ReferenceComparisonDialog(QDialog):
             return False
 
     def export_video(self) -> None:
-        if self._current_asset is None or self._session.registration is None:
-            return
-        self.save()
-        name, _ = QFileDialog.getSaveFileName(
-            self,
-            "Export Comparison Video",
-            str(self.root / "comparison.mp4"),
-            "MP4 Video (*.mp4);;AVI Video (*.avi)",
-        )
-        if not name:
-            return
-        out = Path(name)
-        progress = QProgressDialog(
-            "Exporting comparison video…", "Cancel", 0, 100, self
-        )
-        progress.setWindowTitle("Exporting")
-        progress.setWindowModality(Qt.WindowModality.WindowModal)
+        self.exporter.choose_output()
 
-        worker = ComparisonExportWorker(
+    def _export_status(self, text: str) -> None:
+        self.status_label.setText(text)
+
+    def _export_job(self) -> ExportJob:
+        # Snapshot before the worker starts; later UI changes affect the next export.
+        asset, registration = self._current_asset, self._session.registration
+        if asset is None or registration is None:
+            raise ValueError("Choose a reference with a saved registration")
+        root, view, camera, layer = (
             self.root,
             self.view,
-            self._current_asset,
-            self._session.registration,
-            self._session.layer,
-            out,
             self._camera,
-            self,
+            self._session.layer,
         )
-        worker.progress.connect(
-            lambda done, tot: progress.setValue(int(done * 100 / tot))
-        )
-        progress.canceled.connect(worker.requestInterruption)
-        worker.finished.connect(lambda: self._export_finished(worker, progress, out))
-        worker.start()
 
-    def _export_finished(
-        self, worker: ComparisonExportWorker, progress: QProgressDialog, out: Path
-    ) -> None:
-        progress.close()
-        if worker.error:
-            QMessageBox.critical(self, "Export Failed", worker.error)
-        else:
-            QMessageBox.information(
-                self, "Export Complete", f"Comparison video saved to:\n{out}"
+        def run(
+            out: Path,
+            cancelled: Callable[[], bool],
+            progress: Callable[[int, int], None],
+        ) -> None:
+            export_comparison_video(
+                root,
+                view,
+                asset,
+                registration,
+                layer,
+                out,
+                options=ComparisonVideoExportOptions(
+                    camera=camera, cancelled=cancelled, progress=progress
+                ),
             )
+
+        return run
 
     def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: N802
         if event is None:
             return
         self._timer.stop()
+        if not self.exporter.can_close():
+            event.ignore()
+            return
         self.reader.close()
         event.accept()
+
+    def reject(self) -> None:
+        """Escape uses the same export cancellation guard as the close button."""
+        self.close()
 
 
 def show_reference_comparison(
