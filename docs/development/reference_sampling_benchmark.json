@@ -1,22 +1,22 @@
 {
   "python": "3.13.5",
   "platform": "Windows-11-10.0.26200-SP0",
-  "registration_sha256": "f129cd0257b6926ab2f0b87155787b9ad0d9b6dc4d3de9dce5d07936a32c96d7",
+  "registration_sha256": "31caac6277ba6420a285542bb56c865b3fb68876d5c37357f61829a5e0a37836",
   "workloads": [
     {
       "frames": 120,
       "joints": 17,
       "sample_one_frame": {
         "samples": 5,
-        "median_ms": 0.252,
-        "p95_ms": 0.344,
-        "max_ms": 0.356
+        "median_ms": 0.157,
+        "p95_ms": 0.168,
+        "max_ms": 0.17
       },
       "full_trajectory_control": {
         "samples": 5,
-        "median_ms": 17.959,
-        "p95_ms": 22.306,
-        "max_ms": 22.593
+        "median_ms": 17.934,
+        "p95_ms": 23.121,
+        "max_ms": 23.825
       }
     },
     {
@@ -24,15 +24,15 @@
       "joints": 17,
       "sample_one_frame": {
         "samples": 5,
-        "median_ms": 0.255,
-        "p95_ms": 0.361,
-        "max_ms": 0.384
+        "median_ms": 0.093,
+        "p95_ms": 0.144,
+        "max_ms": 0.15
       },
       "full_trajectory_control": {
         "samples": 5,
-        "median_ms": 168.654,
-        "p95_ms": 186.239,
-        "max_ms": 187.746
+        "median_ms": 172.309,
+        "p95_ms": 175.781,
+        "max_ms": 175.911
       }
     },
     {
@@ -40,15 +40,15 @@
       "joints": 17,
       "sample_one_frame": {
         "samples": 5,
-        "median_ms": 0.228,
-        "p95_ms": 0.276,
-        "max_ms": 0.281
+        "median_ms": 0.304,
+        "p95_ms": 0.345,
+        "max_ms": 0.355
       },
       "full_trajectory_control": {
         "samples": 5,
-        "median_ms": 2171.389,
-        "p95_ms": 2289.46,
-        "max_ms": 2314.547
+        "median_ms": 1486.035,
+        "p95_ms": 1830.537,
+        "max_ms": 1870.958
       }
     }
   ],

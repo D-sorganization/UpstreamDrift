@@ -255,9 +255,9 @@ def sample_reference_motion(
                 ) + alpha * np.asarray(b)
                 out_valid[sample, joint] = True
     converted = canonical_z_up_to_adr0041_world(out_pts)
-    out_pts = registration.transform.apply(converted)
-    out_pts[~out_valid] = 0
-    return out_pts, out_valid
+    transformed = registration.transform.apply(converted)
+    transformed[~out_valid] = 0
+    return transformed, out_valid
 
 
 def project_reference_to_camera(
