@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Any
 
 from PyQt6.QtCore import QSettings, Qt
+from PyQt6.QtGui import QResizeEvent, QShowEvent
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -79,6 +80,7 @@ from .library_actions import LibraryActions
 from . import multiview
 from .layout import LayoutBar, LayoutStore, PaneExtras
 from .panes import LOG_KEY, TileParts, build_host
+from .responsive import LayoutMode, apply_responsive_mode, resolve_layout_mode
 from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .playback import PlaybackPanel as PlaybackPanel  # re-export (moved, #9816)
 from .preview import PreviewPanel
@@ -625,6 +627,8 @@ class CaptureRigWidget(QWidget):
             settings=settings,
         )
         self._layout()
+        self._layout_mode: LayoutMode = resolve_layout_mode(max(self.width(), 0))
+        apply_responsive_mode(self.panes, self._layout_mode)
         self._apply_workflow(None)
         self.layout_bar.restore_last()
         styling.connect_theme_changed(self.restyle)
@@ -1098,6 +1102,27 @@ class CaptureRigWidget(QWidget):
         self.preview.stop()
         self.playback.close_media()
         self.runner.stop()
+
+    @property
+    def layout_mode(self) -> LayoutMode:
+        """The active layout mode (compact or roomy)."""
+        return self._layout_mode
+
+    def resizeEvent(self, a0: QResizeEvent | None) -> None:  # noqa: N802 - Qt override
+        """Adapt layout density when the window crosses the width threshold."""
+        super().resizeEvent(a0)
+        if a0 is not None:
+            new_mode = resolve_layout_mode(max(a0.size().width(), 0))
+            if new_mode != self._layout_mode:
+                self._layout_mode = new_mode
+                apply_responsive_mode(self.panes, new_mode)
+
+    def showEvent(self, a0: QShowEvent | None) -> None:  # noqa: N802 - Qt override
+        """Ensure initial responsive density matches shown width."""
+        super().showEvent(a0)
+        mode = resolve_layout_mode(max(self.width(), 0))
+        self._layout_mode = mode
+        apply_responsive_mode(self.panes, mode)
 
     def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
         self.shutdown()

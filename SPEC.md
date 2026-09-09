@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Capture Rig GUI: Adapt to Window Size & Guard Minimum Width (#9847)
+
+- `src.tools.capture_rig.responsive` introduces pure `resolve_layout_mode` classifying widths below 1400 px into `COMPACT` and at/above into `ROOMY`.
+- In compact mode, control docks (`rail` and `inputs`) collapse together as tabs into a single 240 px column on the left, keeping the majority of available width for the central live preview pane and ensuring no horizontal scrollbars on 1280 px displays.
+- `CaptureRigWidget` connects `resizeEvent` and `showEvent` to adapt layout density dynamically across display dimensions.
+- Standing regression guard asserts `CaptureRigWidget().minimumSizeHint().width() <= 900` px (down from historical 3276 px floor).
+
+
 ## Reference Overlay: Comparison Workspace, Saved Layers & Reproducible Exports (#9866)
 
 The reference overlay comparison workspace provides dual synchronized playback,
