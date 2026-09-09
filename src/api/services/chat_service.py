@@ -528,7 +528,41 @@ class ChatService:
                 yield item
         finally:
             stop_event.set()
+            # ``stop_event`` is only observed between adapter chunks. A
+            # provider parked inside a socket read (Ollama's
+            # ``iter_lines()``, the OpenAI SDK stream iterator) never gets
+            # there, so escalate by closing the provider stream itself --
+            # otherwise the join below expires and the worker leaks (#9509).
+            self._cancel_adapter_stream()
             thread.join(timeout=5.0)
+            if thread.is_alive():
+                logger.warning(
+                    "ChatService stream worker for session %s did not exit "
+                    "within 5s of cancellation; provider stream may not be "
+                    "interruptible",
+                    session_id,
+                )
+
+    def _cancel_adapter_stream(self) -> None:
+        """Force-close the adapter's in-flight stream, if it supports it.
+
+        Adapters opt in via ``BaseAgentAdapter.cancel_stream``. Providers
+        without an interruptible transport (CLI-backed adapters, test
+        stubs) simply report that there was nothing to cancel.
+
+        Postcondition: never raises -- this runs on the teardown path of an
+        already-failing or already-abandoned stream.
+        """
+        adapter = self._adapter
+        if adapter is None:
+            return
+        cancel = getattr(adapter, "cancel_stream", None)
+        if not callable(cancel):
+            return
+        try:
+            cancel()
+        except (OSError, RuntimeError, ValueError, AttributeError) as exc:
+            logger.debug("ChatService: adapter cancel_stream failed: %s", exc)
 
     def refresh_models(self) -> dict[str, Any]:
         """Poll the configured provider for available chat models.
