@@ -55,3 +55,5 @@ Explicit mypy --follow-imports=silent passes all four edited UI modules. Atlas f
 Rendering #9889 merged as a506a2958. Integrated that exact main tree; it equals the reviewed peer head. Retained the previously validated instructor UI and a single camera/clock validator. Both dependencies are now merged.
 
 Preserved remote rewrite e8a070d11 by a normal merge. Its product modules match our validated interface, but omitted evidence was retained: five gap-bound tests, benchmark, screenshots and canonical governance/handoff records. No force push.
+
+CI exposed the expanded fleet-managed AGENTS.md exceeding the unchanged 50 KiB documentation budget. Moved the detailed local infrastructure directory into docs/agents/shared-infrastructure.md, adjusted relative links and title case, and retained the required entry-point discovery workflow plus every managed block. Registered the directory in the catalog.
