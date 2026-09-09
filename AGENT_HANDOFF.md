@@ -1,11 +1,6 @@
-## Reference Synchronization, Sampling Gaps & Calibration Identity (#9881)
+## Reference Timing, Synchronization, Sampling Gaps & Calibration Identity (#9881)
 
-Branch `feat/9881-reference-sync-calibration` qualifies reference synchronization, sampling gap
-rejection, and calibration identity in `src.motion_capture.reference.registration`. Enforces strictly
-monotonic paired event anchors with bounded interval rates, exact single-anchor time offset
-alignment, mathematical forward/inverse round-trip fidelity, `max_gap_s` interpolation refusal,
-geometry fingerprint bindings, and lens distortion preservation across multi-camera projections.
-All focused and broader motion capture tests pass cleanly.
+Active isolated branch `fix/9881-reference-timing` qualifies reference synchronization, sampling gap rejection, and calibration identity in `src.motion_capture.reference`. Enforces strictly monotonic paired event anchors with bounded interval rates, exact single-anchor time offset alignment, mathematical forward/inverse round-trip fidelity, `max_gap_s` interpolation refusal, geometry fingerprint bindings, and lens distortion preservation across multi-camera projections. Builds on #9884 and #9886. See `docs/development/HANDOFF.md`.
 
 ## Comparison State Qualification (#9879)
 

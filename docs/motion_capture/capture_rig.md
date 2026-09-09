@@ -522,3 +522,32 @@ current operation to finish before closing the dialog.
 
 Camera registration, synchronization and comparison exports are the next stages
 of epic #9863 (#9865/#9866); importing an asset does not claim those stages complete.
+
+## Reference Comparison Timing and Evidence
+
+Open **Library → Compare Reference** and choose the capture camera and expert
+asset. A 3-D layer uses that camera's reconstruction and stored lens distortion;
+its status reads **Camera Projection · Manual Alignment**. Loading a camera
+alone does not establish the expert's placement or measurement accuracy. A 2-D
+expert remains an image reference. Missing camera evidence leaves projection
+unavailable and its reason appears in the status tooltip.
+
+Saved comparisons retain the reference geometry/mapping identity, actual camera
+parameters, clock evidence and visual alignment recipe. Library title/notes
+changes do not invalidate geometry. If camera parameters, geometry or recorded
+clock alignment changed, reopening refuses the stale registration and reports
+which alignment needs review. Originals remain unchanged.
+
+The backend supports affine offset/rate mapping or paired named events. Every
+event needs a time in both recordings; times increase together and interval
+rates stay between 0.25 and 4. One event aligns that instant while retaining the
+selected rate. Multiple events replace the affine offset with piecewise linear
+alignment. Missing joints remain masked; interpolation spans at most 0.25
+reference seconds by default, with an explicit saved gap allowance for sparse
+sources. Exact source samples remain usable beside long gaps.
+
+Preview and export map original frame time into the recorded scene clock before
+sampling the reference. Without usable recorded timing, the saved clock is
+labelled `nominal-frame-rate-unverified`. Full event/spatial controls and complete
+render/export parity are tracked by #9883 and #9882; epic #9863 remains open until
+those interfaces and visual qualification are complete.

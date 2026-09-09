@@ -17,6 +17,9 @@ from src.motion_capture.coaching import DrawingLayer, render_layer
 from src.motion_capture.coaching.storage import load_layer
 from src.motion_capture.provenance import write_json
 from src.motion_capture.reconstruct.cameras import PinholeCamera
+from src.shared.python.pose_estimation.observations import CameraCalibration
+from src.motion_capture.reference.evidence import CameraSnapshot
+from src.motion_capture.reference.scene import session_clock
 from src.motion_capture.reconstruct.overlay3d import reference_track
 from src.motion_capture.reference.comparison import (
     ComparisonExportSidecarSpec,
@@ -40,7 +43,7 @@ def draw_reference_overlay(
     asset: Asset,
     t_scene: float,
     registration: ReferenceRegistration,
-    camera: PinholeCamera | None,
+    camera: PinholeCamera | CameraCalibration | None,
     layer: ComparisonLayer,
 ) -> npt.NDArray[np.uint8]:
     """Render reference overlay (3D projection or 2D video frame) onto scene frame."""
@@ -95,7 +98,7 @@ def draw_reference_overlay(
 class ComparisonVideoExportOptions:
     """Options and callbacks for comparison video export."""
 
-    camera: PinholeCamera | None = None
+    camera: PinholeCamera | CameraCalibration | None = None
     speed: float = 1.0
     cancelled: Callable[[], bool] = lambda: False
     progress: Callable[[int, int], None] = lambda done, total: None
@@ -133,7 +136,7 @@ def _render_comparison_frames(
         img = reader.read(idx)
         if img is None:
             break
-        t_scene = idx / fps
+        t_scene = ctx.registration.scene_time(idx / fps)
         frame_times.append(t_scene)
 
         if ctx.track:
@@ -171,6 +174,19 @@ def _render_comparison_frames(
     return written, frame_times
 
 
+def _export_camera(
+    camera: PinholeCamera | CameraCalibration | None,
+) -> CameraSnapshot | None:
+    """Normalize supported camera adapters into one saved evidence record."""
+    if isinstance(camera, PinholeCamera):
+        camera = camera.to_calibration()
+    return (
+        CameraSnapshot.from_calibration(camera, provenance="Comparison export camera")
+        if camera
+        else None
+    )
+
+
 def export_comparison_video(
     root: Path,
     view: str,
@@ -190,6 +206,10 @@ def export_comparison_video(
         raise FileExistsError("Choose a new filename; video or sidecar already exists")
 
     media = load_session(root)
+    snapshot = _export_camera(opts.camera)
+    registration = registration.bound(
+        asset, snapshot, session_clock(media.timing, view)
+    )
     original = media.view(view)
     if original.recording is None:
         raise ValueError("Original recording is unavailable")
@@ -272,7 +292,7 @@ class ComparisonExportWorker(QThread):
         registration: ReferenceRegistration,
         layer: ComparisonLayer,
         out: Path,
-        camera: PinholeCamera | None,
+        camera: PinholeCamera | CameraCalibration | None,
         parent: QObject,
     ) -> None:
         super().__init__(parent)

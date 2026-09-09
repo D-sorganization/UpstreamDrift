@@ -1,64 +1,87 @@
-# Comparison State Qualification Handoff
+# Reference Timing and Camera Evidence Handoff
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-registration
-- Branch: fix/reference-comparison-qualification
-- Baseline commit: 920a0c881
+- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-timing
+- Branch: fix/9881-reference-timing
+- Baseline commit: a5dfc3542 (state qualification #9884)
 - Implementation commit: SELF
-- Pull request: #9884
-- Governing issue: #9879; epics #9863 and #9849
+- Governing issue: #9881; advanced epic #9863
+- Pull request: #9885; #9884 merged at 2c99bc83e
 
 ## Changes and Evidence
 
-Nine state/path/loading regressions failed on merged main. The fix preserves
-unrelated registration/layer fields and blocks control signals during saved
-state restoration. Invalid, oversized and mismatched sidecars fail visibly;
-canonical UUID and filename-safe view validation prevent path traversal.
-The comparison dialog reuses SwingExportActions with a snapshotted job instead
-of duplicating worker lifetime handling. Failed saves and duplicate exports
-start no worker; Escape/window close cancels and waits asynchronously for the
-worker to finish before closing. The worker and progress dialog are disposed.
+Twelve adverse timing regressions failed before implementation; the existing
+round-trip control passed. Event pairs now require complete, unique, increasing
+clocks and interval rates between 0.25 and 4. One anchor aligns its event and
+retains the rate about that pivot. Event maps are immutable; paired events
+replace the affine offset. The sampler searches original timestamps and touches
+only neighboring frames, preserves valid origin points, masks missing endpoints,
+and refuses gaps beyond max_gap_s (default 0.25 reference seconds). Exact
+samples remain valid. Existing sparse fixtures explicitly allow a 0.5-second
+gap to isolate missing-endpoint behavior.
 
-Thirty-one focused comparison, swing export and coaching tests pass, including
-real-thread deferred-close/cancellation and failed-save tests. Three modified
-source modules pass mypy with follow-imports=silent. Ruff and architecture checks pass. DRY/LoD report no growth with existing
-baselines unchanged. Design-manual governance passes with release still
-blocked-inventory-required (2 QMD sources, no registered calculations).
-Protected CI remains pending.
+CameraSnapshot and ViewClock preserve actual calibration/distortion and clock
+evidence. Shared calibration_for_view retains the existing variant/source
+selection while camera_for_view keeps the old ideal-pinhole API. Registration
+binds asset geometry/mapping identity, camera identity and clock evidence;
+notes are excluded. The dialog checks saved bindings on reopening, saves a
+manual alignment snapshot and uses the same scene clock as export. A legacy
+calibration flag alone no longer grants calibrated export status.
 
-## Remaining Product Work
+The combined comparison/backend/native suite passes 46 tests, including actual
+camera loading, stale calibration rejection and independent two-camera pixels.
+Architecture and DRY/LoD no-growth gates pass with unchanged baselines.
+Protected validation remains pending.
+Fourteen modified source modules pass mypy. Benchmark report and rerunnable script
+are included: 17 joints, 120/1200/12000 source frames; single-frame sampling
+medians 0.157/0.093/0.304 ms versus a full-trajectory workload control of
+17.934/172.309/1486.035 ms. This excludes load, decode, draw and display; no
+whole-app speedup, portable threshold, or Rust rewrite is claimed. Run in an
+installed environment or set this worktree's src directory on PYTHONPATH.
 
-The other agent merged reference registration/workspace and responsive layout
-while this goal was paused. Its implementation is retained. Prior unmerged
-registration work remains preserved on feat/9865-reference-registration at
-8ad3f5be7; its schema is incompatible and must not be merged wholesale.
-Epic #9863 was reopened because its release acceptance is not yet met:
-#9881 timing/gaps/calibration identity; #9882 renderer/export parity; #9883
-spatial/event alignment controls, unsaved-change handling and visual evidence.
-The initial sidecars have hashes, not signatures; a loaded camera alone does
-not qualify manual spatial registration. No physical calibration or manual
-publication release claim is made. Fleet rollout #1579 is independently open.
+## Remaining Work
+
+Local qualification passes; finish protected checks; #9884 must be
+integrated without overwriting its remote rebases. #9882 owns strict export
+failure behavior and complete renderer parity; #9883 owns spatial/event controls
+and visual qualification. No scientific calibration accuracy or manual
+publication release claim is made. Fleet adoption #1579 remains independent.
 
 ## Coordination
 
-Session capture-product-01a08427-comparison-qualification owns #9879 in this
-isolated worktree. Shared checkouts, vendor child code and peers remain intact.
-Read the central mailbox before scope expansion, commit and handoff. Publish
-through a topic PR referencing #9879 and normal branch protections.
+Session capture-product-01a08427-timing-qualification owns #9881. The separate
+state worktree remains on #9884. Vendor Tools is unchanged at eab74a901.
+Earlier incompatible registration branch 8ad3f5be7 is reference material only.
 
-## CI Follow-Up
+## Parent Qualification Integration
 
-The final export presentation options exceeded the constructor parameter
-budget in CI after the earlier local architecture check. ExportJobSpec now
-groups the snapshot factory and dialog presentation; no budget is relaxed.
-Remote rebase 94367f82a was merged without overwriting peer changes.
+Merged the state/export-lifetime branch through b2b72a099. Its remote peer
+packaging work is preserved separately for #9406; no parameter-budget waiver
+is required. The inherited projection/export callers pass seven additional
+regression tests. The current change passes 46 focused tests and 14-module
+mypy, architecture, Ruff and DRY/LoD no-growth checks.
 
-## Preserved Peer Packaging Work
+Main 2c99bc83e integrates state qualification #9884 and concurrent OCP work.
+The merge retains timing validation at saved-registration load.
 
-Remote a008a5439 bundled separate #9406 Tools packaging changes and an export
-parameter-budget waiver. The exact peer commit is preserved on remote branch
-preserve/9884-peer-tools-integration and handed back to #9406. Those packaging
-files are restored to their prior contents in this focused comparison PR.
-ExportJobSpec meets the original budget, so the unnecessary waiver is removed.
+## Protected CI Repair
+
+CI found export_comparison_video one line over its 100-line budget and newer
+NumPy typing rejected assigning a general transformed array back to the
+shape-inferred allocation variable. Camera conversion is now a separate helper;
+the transformed array retains its own variable. Sixteen focused timing/export
+regressions pass. Architecture passes with --base-ref origin/main, which checks
+the complete PR rather than the default local change scope. Use that explicit
+base for remaining product PRs. No limits or type exclusions were relaxed.
+The diagnostic benchmark was rerun and its source fingerprint updated after this
+non-algorithmic typing correction; host-load variability is not a performance claim.
+
+## Integration With Concurrent #9886
+
+Merged main c6f58aef9 and preserved legacy fingerprint fields, the explicit sampler gap keyword, the uncalibrated-ID guard, and all peer test scenarios. The shared immutable synchronizer retains stricter complete pairing/rate bounds; neighboring-frame sampling and typed geometry/camera/clock evidence remain authoritative. Removed the duplicate #9879 SPEC row, retaining PR #9884. CI had 14,769 passing tests and one duplicate-SPEC failure; the duplicate gate is rechecked after resolution.
+
+Concurrent remote merge 054655131 is preserved. Its explicit single-anchor affine inverse and error wording are retained alongside finite positive gap validation. All peer tests remain included; no remote history is rewritten.
+
+The SPEC merge driver restored a duplicate #9879 row during concurrent integration. Retain the canonical #9884 row and explicitly recheck the duplicate gate after each stacked merge. No implementation change.
