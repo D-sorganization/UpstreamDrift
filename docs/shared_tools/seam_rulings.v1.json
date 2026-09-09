@@ -164,8 +164,9 @@
     },
     "notes": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "6 identical files; the UD-only test_notes_drift.py is a drift test that becomes moot."
+      "status": "cleaned",
+      "rationale": "6 identical files; the UD-only test_notes_drift.py is a drift test that becomes moot.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "plot_engine": {
       "ruling": "tools-canonical",
@@ -174,8 +175,9 @@
     },
     "plot_theme": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "6 identical files; UD-only drift test becomes moot."
+      "status": "cleaned",
+      "rationale": "6 identical files; UD-only drift test becomes moot.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "plotting": {
       "ruling": "ud-canonical",
@@ -244,8 +246,9 @@
     },
     "theme": {
       "ruling": "split",
-      "status": "pending-cleanup",
-      "rationale": "22 overlapping files are tools-canonical: Tools' __init__ exports Colors/Sizes/Weights/get_qfont (fixes UD #8894), zoom.py has the int() guard, palette.py is newer; 4 UD-only modules (color_derivation, layout_metrics, sidekick_tokens, v1) are imported by launchers/tools and stay."
+      "status": "cleaned",
+      "rationale": "22 overlapping files are tools-canonical: Tools' __init__ exports Colors/Sizes/Weights/get_qfont (fixes UD #8894), zoom.py has the int() guard, palette.py is newer; 4 UD-only modules (color_derivation, layout_metrics, sidekick_tokens, v1) are imported by launchers/tools and stay.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "trusted_git.py": {
       "ruling": "tools-canonical",
