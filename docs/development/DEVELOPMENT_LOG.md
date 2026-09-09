@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (128 strict native contracts; native/rolling/publication CI passes at e93ef5224; stale PDF regression reproduced and repaired, all 11 publication tests pass with five inherited warnings; changed-file Ruff/format pass)
 - **Summary:** Actual reconciliation now preserves reviewed evidence/order and refuses changed science; six real-path failures become 11 passes. Current pinned engines regenerate deterministic provenance with unchanged numerical results; two expected-failure exemptions are removed. All 328 outcomes remain unchanged; the generated census/PDF is refreshed and reviewed.
-- **Next step:** Publish the scoped PDF expectation correction through normal hooks and recheck protected CI. Investigate the separate unchanged multiple-shooting reference-defect failure under #9762 without weakening thresholds. Physical and archival qualifications remain separate.
+- **Next step:** Published b557682c8 preserves the concurrent PDF correction; all normal hooks and 11 reconciled publication tests pass. Follow current-head CI and update from advanced main before protected merge. #9830 reproduces the separate shooting defect and finds an under-resolved reference plus substantial velocity mismatch; investigate without weakening thresholds. Physical and archival qualifications remain separate.
 
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 
