@@ -369,8 +369,10 @@ class PinocchioVisualizationMixin:
             joint_transform = self.data.oMi[i]
             com_world = joint_transform.act(inertia.lever)
 
+            com_transform = np.eye(4)
+            com_transform[:3, 3] = com_world
             self.viewer[f"overlays/coms/{self.model.names[i]}"].set_transform(
-                pin.SE3(np.eye(3), com_world).homogeneous
+                com_transform
             )
 
     # --- Vis Helpers ---

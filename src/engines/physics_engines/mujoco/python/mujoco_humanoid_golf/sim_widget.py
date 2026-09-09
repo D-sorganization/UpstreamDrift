@@ -82,6 +82,9 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     loading_finished = QtCore.pyqtSignal(bool)
 
     def _init_visualization_toggles(self) -> None:
+        from src.shared.python.body_part_viz import ForceColorScale
+
+        self.axial_color_scale = ForceColorScale()
         self.show_force_vectors = False
         self.show_torque_vectors = False
         self.force_scale = 0.1
@@ -185,6 +188,16 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.label = QtWidgets.QLabel(self)
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        from src.shared.python.body_part_viz.force_color_controls import (
+            install_force_color_action,
+        )
+
+        force_menu = QtWidgets.QMenu(self)
+        force_action = install_force_color_action(force_menu, lambda: [self])
+        force_button = QtWidgets.QToolButton(self)
+        force_button.setObjectName("segment_force_colors")
+        force_button.setDefaultAction(force_action)
+        layout.addWidget(force_button)
         layout.addWidget(self.label)
 
         self.setMouseTracking(True)
@@ -196,6 +209,15 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.timer.start(int(1000 / self.fps))
 
         self.loader_thread: ModelLoaderThread | None = None
+
+    def set_axial_color_scale(self, scale: Any) -> None:
+        """Apply the shared force-color settings and repaint the current frame."""
+        from src.shared.python.body_part_viz import ForceColorScale
+
+        if not isinstance(scale, ForceColorScale):
+            raise TypeError("scale must be ForceColorScale")
+        self.axial_color_scale = scale
+        self.render()
 
     @property
     def model(self) -> mujoco.MjModel | None:
