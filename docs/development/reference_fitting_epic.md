@@ -50,11 +50,11 @@ additional qualification runs, not the basis of this survey evidence.
 
 | Model               | Driver RMS (mm) | Iron RMS (mm) |
 | ------------------- | --------------: | ------------: |
-| golfer              |           49.23 |         49.92 |
+| golfer              |           48.51 |         49.69 |
 | double_pendulum     |           33.10 |         26.86 |
-| triple_pendulum     |           13.04 |         12.31 |
-| pinocchio_golfer    |          167.65 |        171.85 |
-| pinocchio_golfer_ik |          167.65 |        171.85 |
+| triple_pendulum     |            9.60 |          8.01 |
+| pinocchio_golfer    |          167.60 |        171.85 |
+| pinocchio_golfer_ik |          167.60 |        171.85 |
 | drake_golfer        |          131.69 |        138.96 |
 | simple_humanoid     |          196.30 |        188.12 |
 | human_subject       |          101.11 |         96.52 |
@@ -83,4 +83,24 @@ Final DbC audit: a manufactured incompatible capture first learned a negative
 segment length (RED). The shared continuous solver now bounds learned lengths
 strictly positive; a separate reference postcondition rejects negative/nonfinite
 solver output before asset creation. Ten focused tests pass (GREEN). Both full
-captures and the catalog are being rerun with this corrected solver.
+captures and the catalog were rerun with this corrected solver.
+
+## Final Corrected Qualification
+
+All 20 bundles from solver commit `2e84bb810` pass file-hash and finite-positive
+dimension verification. Driver full-rate: 654 frames, 9,800 retained observations,
+48.86 mm RMS and 100.54 mm maximum. Iron full-rate: 657 frames, 9,839 retained
+observations, 49.92 mm RMS and 96.62 mm maximum. Neither run rejects observations;
+both use 300 evaluations across three stages, which is not a convergence claim.
+
+All 177 reference, Capture Rig reference UI and existing articulated/image-space
+solver tests pass. All 26 documentation-governance tests pass after preserving
+the primary blocker order. Exact duplicate field-reference tables were removed
+to keep the development log within its byte budget; feature entries remain.
+
+A metadata-only follow-up adds capture/model/sample-rate library titles (RED/GREEN
+identity/title test and compositor test). Published library copies have matching
+display labels; the numerical bundles and their original hashes are unchanged.
+The final library is `../reference-fit-artifacts-9914/final-library`. Earlier
+provisional folders are not the final deliverable. PR #9918 follows protected CI;
+the inherited GUI LoD cleanup is owned by #9917 and will be integrated from main.

@@ -106,6 +106,9 @@ def test_identity_covers_actual_samples_and_not_source_location() -> None:
     )
     second = fit_reference(moved, profile, "double_pendulum")
     assert first.asset.id == second.asset.id
+    assert first.asset.title != second.asset.title
+    assert "capture" in second.asset.title
+    assert "30 Hz" in second.asset.title
     changed = replace(draft, points=draft.points + 0.01)
     third = fit_reference(changed, profile, "double_pendulum")
     assert first.asset.id != third.asset.id
