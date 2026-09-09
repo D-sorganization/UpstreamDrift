@@ -202,7 +202,7 @@ sit under the canvas.
 ### Panes, Layouts and Recording Controls
 
 The **live view is the middle of the tile** and every control sits in a dock
-around it (#9846). The centre holds the preview canvas with the record
+around it (#9846, #9847). The centre holds the preview canvas with the record
 transport under it — the thing you actually watch — and it keeps the spare
 width of the window; the **Workflow** rail and step details are docked on the
 left, **Settings** (Capture / Process / Match) under them, **Playback** and
@@ -210,6 +210,13 @@ left, **Settings** (Capture / Process / Match) under them, **Playback** and
 this the controls were the central widget and Qt squeezed the video docks to
 68 px each; now the video is the widest thing on screen at any window size,
 and the whole tile can be made about 420 px wide instead of 3276 px.
+
+When the window width falls below 1400 px, the widget automatically engages
+**compact mode** (`src/tools/capture_rig/responsive.py`): the Workflow and Settings
+docks tabify into a single 240 px column on the left, keeping the central live
+preview dominant (> 50% of window width, 656 px at 1280x800) with zero horizontal
+scrollbar. At 1400 px and wider, **roomy mode** restores the dual-column left
+dock structure.
 
 Each dock behaves like a pane: drag its title bar to another edge, tear it off
 to float it (onto a second monitor if you like), tab two together, or close
@@ -225,6 +232,9 @@ The **log is a drawer**, not a pane. The command output is a dock tabbed
 behind **Actions**, closed at start and opened by the **Log** button in the
 header — so it occupies no height of its own and can never take space from the
 video, which is what it used to do with a layout stretch of `1`.
+
+Measured before/after metrics and visual layout captures:
+[`evidence/capture_rig_responsive_evidence.md`](evidence/capture_rig_responsive_evidence.md).
 
 ### Appearance
 
