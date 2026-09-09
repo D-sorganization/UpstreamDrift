@@ -13,6 +13,8 @@ from src.tools.capture_rig.calibration_profiles import (
     ProfileHistory,
     check_profile,
     save_profile,
+    ProfileAssignment,
+    write_profile_set,
 )
 
 pytestmark = pytest.mark.unit
@@ -242,4 +244,40 @@ def test_invalid_camera_geometry_is_rejected_even_with_low_rms(
             setup=setup(),
             camera_id="face-on",
             intrinsics_path=path,
+        )
+
+
+def test_profile_set_requires_every_view_and_exports_only_verified_cameras(
+    tmp_path: Path,
+) -> None:
+    saved = save_profile(tmp_path / "profiles.json", profile(tmp_path))
+    assignment = ProfileAssignment("renamed-view", saved, setup(), True)
+    output = tmp_path / "intrinsics-selected.json"
+    with pytest.raises(ValueError, match="every view"):
+        write_profile_set(
+            output, [assignment], required_views=("renamed-view", "missing")
+        )
+    assert not output.exists()
+    write_profile_set(output, [assignment], required_views=("renamed-view",))
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert [camera["camera_id"] for camera in payload["cameras"]] == ["renamed-view"]
+    assert payload["profile_selections"][0]["profile_id"] == saved.profile_id
+    assert payload["profile_selections"][0]["setup"]["camera_identity"] == "serial-123"
+
+
+def test_profile_set_rejects_incompatible_or_duplicate_physical_cameras(
+    tmp_path: Path,
+) -> None:
+    saved = profile(tmp_path)
+    first = ProfileAssignment("front", saved, setup(), True)
+    other = ProfileAssignment("side", saved, setup(), True)
+    with pytest.raises(ValueError, match="physical camera"):
+        write_profile_set(
+            tmp_path / "x.json", [first, other], required_views=("front", "side")
+        )
+    with pytest.raises(ValueError, match="Confirm"):
+        write_profile_set(
+            tmp_path / "x.json",
+            [ProfileAssignment("front", saved, setup(), False)],
+            required_views=("front",),
         )
