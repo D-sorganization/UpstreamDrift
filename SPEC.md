@@ -4245,6 +4245,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-09 | #9913 | Add persistent swing/capture feedback, durable action history, detector/edit status, linked help and workflow navigation, and state-preserving Qt pop-out/redock/fullscreen controls. |
 | 2026-09-09 | #9911 | Keep preview discovery import and timeout failures within the existing error status. |
 | 2026-09-09 | #9898 | Add visible zoom-aware intrinsic profile review, verified rig exports and immutable revisions; track everyday-reference, club-catalog and guided-setup epics #9897/#9902/#9906. |
 | 2026-09-09 | #9889 | Unify comparison preview/export through the coaching compositor; apply motion opacity and coverage-aware expert homographies; retain decoders, preserve odd source pixels and verify complete staged output/input identity before publication. |

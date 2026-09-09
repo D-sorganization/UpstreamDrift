@@ -76,6 +76,8 @@ from .commands import (
     mode_text,
 )
 from .header import HeaderBar, StatusStrip
+from .journey import JourneyPanel
+from .journey_actions import JourneyActions
 from .calibration_actions import CalibrationActions
 from .library_actions import LibraryActions
 from . import multiview
@@ -636,6 +638,12 @@ class CaptureRigWidget(QWidget):
             recalibrate=self._recalibrate_board,
             busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
         )
+        self.journey = JourneyPanel()
+        self.journey_actions = JourneyActions(self)
+        self.journey.action_requested.connect(self.trigger)
+        self.journey.source_requested.connect(self._show_provenance)
+        self.journey.step_requested.connect(self.journey_actions.show_step)
+        self.rail.step_selected.connect(self.journey_actions.show_step)
         self._layout()
         self._layout_mode: LayoutMode = resolve_layout_mode(max(self.width(), 0))
         apply_responsive_mode(self.panes, self._layout_mode)
@@ -675,6 +683,12 @@ class CaptureRigWidget(QWidget):
             self.layout_store,
             extras=PaneExtras(read=self.pane_extras, apply=self.apply_pane_extras),
         )
+        self.preview.canvas.fullscreen_requested.connect(
+            lambda: self.panes.fullscreen("live")
+        )
+        self.playback.image.fullscreen_requested.connect(
+            lambda: self.panes.fullscreen("playback")
+        )
         self.log_toggle = self._log_toggle()
         self.header = HeaderBar(
             self.layout_bar,
@@ -693,6 +707,7 @@ class CaptureRigWidget(QWidget):
         layout.setContentsMargins(margin, margin, margin, margin)
         layout.setSpacing(LayoutMetrics.SPACING_SM)
         layout.addWidget(self.header)
+        layout.addWidget(self.journey)
         layout.addWidget(self.panes, 1)
 
     def _input_tabs(self) -> QTabWidget:
@@ -858,6 +873,8 @@ class CaptureRigWidget(QWidget):
 
     def _show_provenance(self, source: object) -> None:
         if self.media is not None and isinstance(source, Path):
+            self.panes.set_visible("results", True)
+            self.panes.docks["results"].raise_()
             self.provenance.show_path(self.media.root, source)
             self.results.setCurrentWidget(self.provenance)
 
@@ -928,39 +945,7 @@ class CaptureRigWidget(QWidget):
         )
 
     def trigger(self, action: str) -> None:
-        if action == "stop":
-            self.runner.stop()
-            return
-        if action == "load":
-            self.refresh_session()
-            return
-        if action == "preview":
-            self.toggle_preview()
-            return
-        if action == "record":
-            self.record_bar.toggle()  # countdown → start_take, or stop the take
-            return
-        if action == "annotate":
-            dialog = self.annotate_dialog()
-            if dialog is None:
-                self._append_log("load a session and pick a playable view first\n")
-                return
-            dialog.exec()
-            self.refresh_session()
-            return
-        if action == "import" and not self.capture.pending_import:
-            self.capture.choose_import_files()
-        if self.runner.busy:
-            self._append_log("a command is still running; press Stop first\n")
-            return
-        try:
-            argv = self.command_for(action)
-        except (ValueError, TypeError) as exc:
-            self._append_log(f"cannot run {action}: {exc}\n")
-            return
-        self.runner.run(argv)
-        self.library_actions.refresh()
-        self.calibration_actions.refresh()
+        self.journey_actions.trigger(action)
 
     def _on_command_finished(self, code: int) -> None:
         if self._take_running:
@@ -975,6 +960,7 @@ class CaptureRigWidget(QWidget):
             self._resume_preview = False
             self.toggle_preview(on=True)
         self.library_actions.command_finished(code)
+        self.journey_actions.complete(code)
 
     # -- recording ------------------------------------------------------------
     def start_take(self) -> None:
@@ -991,6 +977,7 @@ class CaptureRigWidget(QWidget):
             argv = self.command_for("record")
             session = self.capture.session_dir()
         except (ValueError, TypeError) as exc:
+            self.journey.notice(f"Cannot record: {exc}", retry="record")
             self._append_log(f"cannot record: {exc}\n")
             self.record_bar.recording_finished()
             return
@@ -1002,6 +989,7 @@ class CaptureRigWidget(QWidget):
         if views:
             self.preview.watch_snapshots(live_dir(session), views)
         self._take_running = True
+        self.journey_actions.begin("record")
         self.runner.run(argv)
         self.record_bar.recording_started()
 
@@ -1021,12 +1009,15 @@ class CaptureRigWidget(QWidget):
         try:
             self.preview.start(self.capture.selection())
         except (ValueError, TypeError) as exc:
+            self.journey.notice(f"Cannot preview: {exc}", retry="preview")
             self._append_log(f"cannot preview: {exc}\n")
 
     def _on_preview_state(self, active: bool) -> None:
         self.buttons["preview"].setText("Stop preview" if active else "Preview cameras")
         bound = len(self.preview.camera_ids()) if active else 0
         self.status_strip.set_cameras(bound)
+        if self.journey_actions.active_action is None:
+            self.journey.notice(self.preview.status.text())
 
     def _on_badge(self, readout: str) -> None:
         self.status_strip.set_recording(self.record_bar.phase, readout)
@@ -1054,10 +1045,12 @@ class CaptureRigWidget(QWidget):
             media = load_session(self.capture.session_dir())
         except (ValueError, TypeError, OSError) as exc:
             self.media = None
+            self.journey_actions.clear_capture(str(exc))
             self.session_label.setText(f"session not loadable: {exc}")
             self._apply_workflow(None)
             return None
         self.media = media
+        self.journey.set_capture(media)
         kind = "single-camera" if len(media.views) == 1 else "multi-camera"
         self.session_label.setText(
             f"{media.root} · plan {media.plan_name} · {len(media.views)} views ({kind})"
@@ -1101,7 +1094,16 @@ class CaptureRigWidget(QWidget):
         states = workflow.evaluate(media)
         self.workflow.refresh(states)
         enabled = workflow.enabled_actions(states) | ALWAYS_ENABLED
+        busy = self.journey_actions.active_action is not None
+        if busy:
+            enabled = frozenset({"stop"})
+        self.journey.set_steps(states, busy=busy)
         hints = workflow.action_hints(states, ALWAYS_ENABLED)
+        if busy:
+            hints = {
+                key: "Wait for the current action, or press Stop."
+                for key, _ in self._ACTIONS
+            }
         self.rail.set_states(states, enabled=enabled, hints=hints)
         for action, button in self.buttons.items():
             button.setEnabled(action in enabled)
@@ -1118,6 +1120,7 @@ class CaptureRigWidget(QWidget):
     def shutdown(self) -> None:
         """Release the cameras and the decoder; kill any running command."""
         self.layout_bar.save_last()
+        self.panes.redock_all()
         self.preview.stop()
         self.playback.close_media()
         self.runner.stop()
