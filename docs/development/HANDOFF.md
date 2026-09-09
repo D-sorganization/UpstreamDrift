@@ -59,7 +59,7 @@ Remote #9910 was rebased to c9225f18e during validation. Its five conflicting ca
 
 ## Publication Checkpoint
 
-Candidate dd8136f152bc8451bf1a2511ff6246bd309a52b5 is published as #9917. All445 capture/parity tests pass with zero skips (39.578s), and normal pre-push gates pass. Protected remote CI/review and merge remain required. Tools#5137 now passes101 mocap/authority/API tests; its normal commit is pending. Tools#5136 remains blocked by downstream Gasification repository-access and a Rust pre-checkout failure; the three #5139 permission checks passed unchanged after retry.
+Candidate dd8136f152bc8451bf1a2511ff6246bd309a52b5 is published as #9917. All445 capture/parity tests pass with zero skips (39.578s), and normal pre-push gates pass. Remote CI found seven deep UI-access chains, a155-line status renderer and a562-byte development-log overrun. Public panel methods and separate status-tree rendering now pass the unchanged LoD/function/document budgets;445 capture/parity tests pass again with zero skips (75.089s). Protected checks/review and merge remain required. Tools#5137 now passes101 mocap/authority/API tests; its normal commit is pending. Tools#5136 remains blocked by downstream Gasification repository-access and a Rust pre-checkout failure; the three #5139 permission checks passed unchanged after retry.
 
 ## Journey Qualification (#9913)
 

@@ -467,6 +467,10 @@ class ProcessPanel(QGroupBox):
         if intrinsics is not None and not self.start_edit.text().strip():
             self.start_edit.setText(str(intrinsics))
 
+    def use_start_file(self, path: Path) -> None:
+        """Apply an explicitly reviewed calibration revision."""
+        self.start_edit.setText(str(path))
+
     def board(self) -> tuple[str, float]:
         return self.board_edit.text().strip(), float(self.square_spin.value())
 
@@ -634,7 +638,7 @@ class CaptureRigWidget(QWidget):
             selection=self.capture.selection,
             session=lambda: self.media.root if self.media else None,
             library_root=lambda: self.library_actions.library().root,
-            apply=lambda path: self.process.start_edit.setText(str(path)),
+            apply=self.process.use_start_file,
             recalibrate=self._recalibrate_board,
             busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
         )
@@ -1017,7 +1021,7 @@ class CaptureRigWidget(QWidget):
         bound = len(self.preview.camera_ids()) if active else 0
         self.status_strip.set_cameras(bound)
         if self.journey_actions.active_action is None:
-            self.journey.notice(self.preview.status.text())
+            self.journey.notice(self.preview.status_text())
 
     def _on_badge(self, readout: str) -> None:
         self.status_strip.set_recording(self.record_bar.phase, readout)
