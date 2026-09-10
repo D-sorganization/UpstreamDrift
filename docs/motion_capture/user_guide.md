@@ -88,10 +88,11 @@ Bind each camera to a named view so takes are repeatable.
 
 **Do**
 
-1. Choose the plan file and a session folder.
-2. Pick a mode preset or leave 'plan default'; optionally restrict the views.
-3. Run *Plan check*: every view must resolve to a camera before recording.
-4. Importing existing video files instead? Use *Import videos* or the header *Library*, then review the swing selection before Detect.
+1. Open *Camera Setup* in the header to scan, name views and save a reusable plan; or choose an existing plan file.
+2. The next take is saved in your capture library; choose a different session folder if needed.
+3. Pick a mode preset or leave 'plan default'; optionally restrict the views.
+4. Run *Plan check*: every view must resolve to a camera before recording.
+5. Importing existing video files instead? Use *Import videos* or the header *Library*, then review the swing selection before Detect.
 
 Tile actions: plan_check, import.
 

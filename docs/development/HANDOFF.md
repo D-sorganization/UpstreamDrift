@@ -1,5 +1,10 @@
 # Common-Reference Calibration Handoff
 
+Active #9952: branch `feat/9952-camera-setup` adds the native camera plan editor.
+563 Capture Rig, 16 atlas/workflow and 15 goal tests pass; scoped typing is clean.
+See `camera_setup_delivery.md` for remaining package/PR qualification.
+PR #9950 at d5f44f211 remains the separate installed-runtime prerequisite.
+
 Current #9949: isolated `UpstreamDrift-common-calibration`, branch
 `fix/9949-installed-capture`. PR #9946 merged as126158943 before installed-package
 repairs; follow-up retains worker21710dee6/2d84f2fe0 and packagingf13701c5e.

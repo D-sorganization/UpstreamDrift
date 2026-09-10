@@ -80,6 +80,18 @@
       "view": "system"
     },
     {
+      "id": "capture.camera_setup",
+      "title": "Camera Setup",
+      "description": "Discover supported USB cameras, name views and save reusable recording plans.",
+      "evidence": "src/tools/capture_rig/camera_setup_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open Camera Setup in the header, or Set Up Cameras to Record in the wizard.",
+        "Scan or load a plan, choose unique views and camera modes, then Save and Use.",
+        "Run Plan Check and Preview before recording; review calibration separately."
+      ]
+    },
+    {
       "id": "capture.library",
       "title": "Capture Library",
       "description": "Find, import, open and edit captures; save swing notes and manage archive/storage.",
@@ -228,6 +240,15 @@
     }
   ],
   "edges": [
+    {
+      "source": "capture.camera_setup",
+      "target": "step.setup",
+      "artifact": "Versioned camera plan",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/camera_setup_actions.py",
+      "constraint": "Native ELP discovery on Windows; connection checks do not qualify modes or calibration",
+      "view": "workflow"
+    },
     {
       "source": "step.capture",
       "target": "calibration.references",
