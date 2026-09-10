@@ -1,4 +1,35 @@
-# Guided Capture Workflow Handoff
+# Shared Analysis Delivery Handoff
+
+## Completed Runtime (#9926)
+
+- Repository: D-sorganization/UpstreamDrift.
+- Worktree: C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942.
+- Branch: docs/9926-analysis-completion; record commit SELF.
+- Owner session: codex-unified-metrics-9942; preserve peer worktrees and Tools pin4dabe900.
+- Foundation #9933 merged at f04aa1a570e64c3db0b3d009351ab222656175b2.
+- Comparison drawings #9943 merged at 3fbd4b2da5f8661ec1f1e91b97884f781d83f1fd.
+- Metrics, Trace and native references #9945 merged at
+  2d41aba4159162f91c0cd1cc6919d0341755b492 on 2026-09-10T05:20:06Z.
+  Required quality-gate passed in CI Standard run34440058289; the run succeeded.
+  Children #9929/#9930/#9932/#9942 are closed. Optional queued jobs are not passing evidence.
+- Runtime includes common drawing/geometry/measurement controls, explicit model
+  placement and handedness, club/ellipsoid appearance, Trace marker import and
+  Pose Studio reference meshes. See [ledger](unified_analysis_9926.md) and
+  [reviewed contracts](../architecture/SHARED_ANALYSIS_CONTRACTS.md).
+- Qualification: all20 verified Tour Average assets passed actual shared analysis,
+  save/reopen and export; native30 and Trace17 tests passed. After integrating
+  main300d96a1 and biomechanics helper f58ee5b3, all88 combined tests passed.
+  Earlier broad suites, source typing, Ruff, LoD, budgets and generated-map
+  evidence are recorded in the ledger. No physical camera or anatomical accuracy
+  qualification is implied; unsupported native viewers and marker gaps are explicit.
+- External reproducible visual evidence: analysis-9926-artifacts/catalog-analysis-zcgqk8ta
+  and qualify_catalog_analysis.py; native-references-saep77qb and trace-appearance-l276j6ua.
+- Repair47bd32c11 was pushed after #9945 merged, so this branch preserves it via
+  417fd83ae: restored DL-#9926, shipped DL-#9907 and lost SPEC#9931/#9932/#9933
+  without modifying peer #9934 records. This closure changes documentation only.
+- Next: merge this final documentation record through normal protected CI, then
+  verify epic #9926 closure. No runtime implementation remains. The independently
+  owned #9915 catalog may index current contracts later; it is not a runtime dependency.
 
 ## Identity
 
@@ -405,3 +436,21 @@ source presence sessions were released; the issues remain open pending the bag/w
 - Compatibility: scientific/manual authority is unchanged. Catalog status does not prove runtime availability. Reviews declare inspected evidence; test execution remains separate. Existing communication and handoffs remain authoritative.
 - Current limits: candidate provider 18c36f5e8a700e70a21db96474b605dc84569558 combines the context engine with the merged shaft interfaces. Main f04aa1a57, capture planning and c487265f1 seam/UI repairs are preserved; the separate Tools #5144 launcher correction remains pending. Required CI rejects unpublished provider revisions; final published pin and protected delivery remain pending. Committed-HEAD integration controls, source/pin checks and regenerated views pass. Full-authorship inventory was regenerated again after the merge commit. The context job now uses repository-standard full-SHA actions, and docs/index.md registers the new map.
 - Ordered continuation: (1) complete provider package, integrity and normal hook checks; (2) publish and qualify protected Tools delivery; (3) pin consumers, run integration tests, record reviewed contracts, generate/inspect maps and qualify consumer CI; (4) reconcile fleet guide and epic against actual delivered PRs.
+
+# Unified Biomechanics Analysis (#9934)
+
+## Current Continuation State
+
+Branch `feat/9934-biomechanical-analysis` is implementing the shared
+calibrated trajectory contract, source-qualified orientation conversion,
+Cheetham-labelled golf channels, body/club COM, API conversion/compute/display
+routes, and desktop/web plot explorers. Focused biomechanics/API/display tests
+pass; Ruff lint and formatting pass after formatting. The work is not yet
+qualified for merge: native model transform adapters and full repository gates
+remain. Missing anatomy, mass, calibration or engine capability must remain
+unavailable rather than being inferred.
+
+- Epic: #9934; child issues: #9935–#9939.
+- Branch: `feat/9934-biomechanical-analysis`; base: `c487265f1`.
+- API: `/api/biomechanics/compute`, `/display`, `/convert`, `/bindings`, `/results`.
+- Next step: add/qualify native transform adapters, then run full CI gates and open PR.

@@ -18,6 +18,7 @@ from src.shared.python.analysis.orchestrator import AnalysisOrchestrator
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.dashboard.runner import SimulationRunner
 from src.shared.python.dashboard.widgets import ControlPanel, LivePlotWidget
+from src.shared.python.dashboard.biomechanics_widget import BiomechanicsWidget
 
 # Updated import to use generic export module
 from src.shared.python.data_io.export import (
@@ -137,6 +138,11 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
         # --- Right Panel: Analysis Tabs ---
         right_panel = QtWidgets.QTabWidget()
+        self.biomechanics_tab = BiomechanicsWidget(
+            configure=self.recorder.configure_biomechanics,
+            refresh=self.refresh_biomechanics,
+        )
+        right_panel.addTab(self.biomechanics_tab, "Biomechanics")
 
         # Tab 1: Detailed Plotting
         self.plotting_tab = QtWidgets.QWidget()
@@ -341,6 +347,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def refresh_static_plot(self) -> None:
         """Update the static plot based on selection."""
+        self.refresh_biomechanics()
         plot_type = self.plot_type_combo.currentText()
         self.static_canvas.fig.clear()
 
@@ -352,6 +359,34 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             logger.error(f"Error generating static plot '{plot_type}': {e}")
 
         self.static_canvas.draw()
+
+    def refresh_biomechanics(self) -> None:
+        """Analyze calibrated recorded samples through the shared metric service."""
+        from src.shared.python.biomechanics.golf_trajectory import (
+            compute_golf_metrics,
+            golf_trajectory_from_dict,
+        )
+
+        if self.runner.isRunning():
+            self._set_biomechanics_status(
+                "Stop the Recording Before Loading Biomechanics."
+            )
+            return
+        try:
+            payload = self.recorder.get_biomechanics_payload()
+            if payload is None:
+                self._set_biomechanics_status(
+                    "Import a Model Binding Before Recording at Least Two Samples."
+                )
+                return
+            metrics = compute_golf_metrics(golf_trajectory_from_dict(payload))
+            self.biomechanics_tab.set_result(metrics.to_dict())
+        except (ValueError, TypeError, KeyError, RuntimeError) as error:
+            self._set_biomechanics_status(f"Biomechanics Unavailable: {error}")
+
+    def _set_biomechanics_status(self, message: str) -> None:
+        """Delegate status presentation to the biomechanics tab."""
+        self.biomechanics_tab.set_status(message)
 
     def _dispatch_plot(self, plot_type: str) -> None:
         """Dispatch to the appropriate plotter method."""

@@ -446,3 +446,22 @@ rationale (issues #5984, #5985, #5986, #5987).
   via `src/shared/python/physics/rust_kernel.py` (which falls back to
   pure Python if the Rust wheel isn't installed). See section F for
   when to write Rust.
+
+## Shared Model and Video Analysis
+
+- `motion_capture.coaching.reference_distances` uses registered sampling for
+  metric point/plane readouts; missing motion remains unavailable.
+- `motion_capture.coaching.native_geometry.NativeGeometryRenderer` submits
+  scene-bound reference meshes through the existing `fsp_renderer.Viewport`
+  protocol. The world frame is explicit. Pose Studio supplies the qualified
+  native adapter; use shared geometry rather than another plane generator.
+- `tools.capture_rig.geometry_controls.GeometryControls` edits the same
+  immutable document in comparison, model analysis and Pose Studio.
+- `motion_capture.reference.trace_import` reads bounded Trace v2 marker motion
+  into the existing reference importer. See the Trace metadata contract in
+  `docs/motion_capture/reference_model_fitting.md`; do not infer FK from q-only
+  traces or duplicate the shared Trace reader.
+
+The [Shared Analysis Contracts](../architecture/SHARED_ANALYSIS_CONTRACTS.md)
+record units, frames, ownership, failure behavior and tests across these providers
+and consumers. Use the existing capability registry as the product map authority.
