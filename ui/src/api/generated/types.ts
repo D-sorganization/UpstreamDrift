@@ -739,6 +739,19 @@ export interface ControlStateRequest {
 }
 
 /**
+ * Explicit orientation representation and Euler conventions.
+ */
+export interface ConversionRequest {
+  values: unknown[];
+  source_representation: string;
+  target_representation: string;
+  source_sequence: string;
+  target_sequence: string;
+  source_degrees: boolean;
+  target_degrees: boolean;
+}
+
+/**
  * Request model for counterfactual / induced-acceleration analysis. Preconditions: - kind must be a known counterfactual kind (see ``src.shared.python.analysis.orchestrator`` — single source). See issue #7450.
  */
 export interface CounterfactualRequest {
@@ -1088,6 +1101,15 @@ export interface DatasetUnavailableStateV1 {
   code: "root_not_authorized" | "authority_unavailable" | "repository_mismatch" | "commit_mismatch" | "manifest_mismatch" | "content_mismatch" | "row_count_mismatch" | "backing_manifest_mismatch" | "dependency_unavailable" | "operation_unavailable" | "internal_execution_error";
   message: string;
   retryable: boolean;
+}
+
+/**
+ * Renderer options; science remains in the shared calculation layer.
+ */
+export interface DisplayRequest {
+  result: Record<string, unknown>;
+  selected?: string[] | null;
+  angle_unit: "deg" | "rad";
 }
 
 /**
