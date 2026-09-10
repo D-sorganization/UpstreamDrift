@@ -30,6 +30,7 @@ class GeometryControls(QWidget):
     """Edit one immutable world-metre document using the shared undo history."""
 
     changed = pyqtSignal(object)
+    pending_changed = pyqtSignal()
 
     def __init__(self, geometry: ReferenceGeometry) -> None:
         super().__init__()
@@ -53,6 +54,17 @@ class GeometryControls(QWidget):
         self.status.setWordWrap(True)
         self._build()
         self._sync()
+        self.title.textChanged.connect(self._notify_pending)
+        self.visible.toggled.connect(self._notify_pending)
+        for field in (
+            self.opacity,
+            self.extent,
+            *(spin for row in self.fields.values() for spin in row),
+        ):
+            field.valueChanged.connect(self._notify_pending)
+
+    def _notify_pending(self, *_values: object) -> None:
+        self.pending_changed.emit()
 
     @property
     def document(self) -> ReferenceGeometry:
@@ -61,7 +73,7 @@ class GeometryControls(QWidget):
     def _build(self) -> None:
         layout = QVBoxLayout(self)
         help_text = QLabel(
-            "World coordinates in metres. Plane anchors define its signed normal; extent changes only its visible area."
+            "World coordinates in metres (Y up). Plane anchors define its signed normal; extent changes only its visible area."
         )
         help_text.setWordWrap(True)
         layout.addWidget(help_text)
@@ -147,6 +159,7 @@ class GeometryControls(QWidget):
                 spin.setEnabled(name in values)
                 spin.setValue(values[name][axis] if name in values else 0)
         self._display_values = self._input_values()
+        self.pending_changed.emit()
 
     def _commit(self, geometry: ReferenceGeometry, identity: str | None = None) -> None:
         self.history.apply(geometry)
@@ -154,12 +167,18 @@ class GeometryControls(QWidget):
         self.status.clear()
         self.changed.emit(self.document)
 
-    def _replace(self, item: ReferencePlane | ReferencePoint) -> None:
+    def _replace(self, item: ReferencePlane | ReferencePoint) -> bool:
         field = "planes" if isinstance(item, ReferencePlane) else "points"
         values = self.document.model_dump()
         collection = [value for value in values[field] if value["id"] != item.id]
         values[field] = collection + [item.model_dump()]
-        self._commit(ReferenceGeometry.model_validate(values), item.id)
+        try:
+            document = ReferenceGeometry.model_validate(values)
+        except ValueError as exc:
+            self.status.setText(str(exc))
+            return False
+        self._commit(document, item.id)
+        return True
 
     def add_plane(self) -> None:
         """Add a world XY reference; users explicitly edit its metric anchors."""
@@ -212,11 +231,10 @@ class GeometryControls(QWidget):
         if item is None:
             return True
         try:
-            self._replace(type(item).model_validate(self._field_values(item)))
+            return self._replace(type(item).model_validate(self._field_values(item)))
         except ValueError as exc:
             self.status.setText(str(exc))
             return False
-        return True
 
     def delete_selected(self) -> None:
         """Remove the selected reference as one reversible edit."""

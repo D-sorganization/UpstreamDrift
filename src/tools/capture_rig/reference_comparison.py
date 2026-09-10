@@ -377,6 +377,7 @@ class ReferenceComparisonDialog(QDialog):
         tabs.addTab(self._scroll(self._appearance_page()), "Appearance and Notes")
         self.geometry_controls = GeometryControls(self._geometry)
         self.geometry_controls.changed.connect(self._geometry_changed)
+        self.geometry_controls.pending_changed.connect(self._pending_changed)
         tabs.addTab(self._scroll(self.geometry_controls), "3D References")
         tabs.currentChanged.connect(lambda: self._show_frame(self.slider.value()))
         return tabs
