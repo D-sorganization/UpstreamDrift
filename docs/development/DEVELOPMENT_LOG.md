@@ -32,7 +32,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9952 · Native Camera Setup
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9952; parent #9906
 - **Branch:** feat/9952-camera-setup
@@ -86,17 +86,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9912 · Impact Shaft Provider Integration
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9912; parent #9703
 - **Branch:** feat/9912-impact-provider-pin
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9916
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (Tools 4dabe900c; main 5ada5e6a6; inventory repair SELF)
-- **Summary:** Qualify the exact Tools shaft/theme provider; see PROVIDER_PIN_RESULTS.json.
-- **Evidence:** 271 controls pass after preserving concurrent eacd69858 and restoring the pinned inventory. Existing inventory RED is retained. Isolated 32a8b36ec wheel and Qt construction pass with gui-tools; web assets omitted. Earlier evidence retained.
-- **Next step:** Advance to the reviewed Tools #5143 descendant and qualify that exact pin; retain #8942 review exception and physical gates.
+- **Last verified:** 2026-09-10 (PR #9916 and #9920 merged). Main pin e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0 consistent across pins.
+- **Summary:** Qualify Tools shaft/theme provider; see PROVIDER_PIN_RESULTS.json.
+- **Next step:** Coordinate final reviewed Tools friction pin with context/capture owners.
 
 ### DL-#9914 · C3D Reference Fitting
 

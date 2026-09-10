@@ -4174,6 +4174,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | 2026-09-09 | #9903 | Extend the club-data authority with optional attributed component properties, deterministic build/revision identity, explicit inference gates, validated JSON/CSV exchange and an unverified legacy adapter. Offline manufacturer examples, deterministic review and player override projection implement #9904; player bag UI remains #9905. |
 | 2026-09-09 | #9923 | My Clubs provides searchable catalog/custom entries, measured/estimated/unknown length and head mass, stable unit controls, notes, archive/restore and explicit capture assignment. Portable snapshots preserve previous revisions and editable-copy lineage; model reports retain equipment evidence without applying unsupported club constraints. Wizard integration remains tracked in #9906. |
+| 2026-09-10 | #9962 | Record merged impact-provider history, unchanged coordinated pins and explicit scientific/consumer takeover requirements. |
 | 2026-09-10 | #9931 | Guided capture outcomes share validated prerequisite metadata with the capability atlas; standard Qt navigation reuses editors and readiness, preserves capture-owned progress, checks calibration/model associations and imports safe map selections. Epic #9906; 600 integrated regressions pass. |
 | 2026-09-09 | #9875 | Industrial readiness execution index (epic #9539): src/config/industrial_readiness.json reconciles the four priority children against 10caddd219ce213a914fa295661929e4fbf1b686 rather than the audit snapshot — U1 (#9477) and U2 (#9407) merged with SHAs, tests and user-visible acceptance evidence; U3 (#8820, dashboard exports still carry no engine/model/run identity) and U4 (#9417, deploy/ empty and no artifact beyond the wheel) re-confirmed open with a dependency and an ordered narrow-PR plan. industrial_readiness_loader.py enforces the contract that keeps the record honest (no completion claim without a 40-char merge SHA, a test path and acceptance evidence; no open entry without an owner and plan; every cited path must exist; every open issue must appear in an acceptance blocker list; 
 elease_status cannot read 
@@ -5760,6 +5761,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Publish manifest.json, capabilities.json, and screenshots.json from import-free companion publication builder (#9416 #9434).
 - MotionRetargeting._solve_frame_ik evaluates mj_forward once per IK iteration and batches marker Jacobian/error rows into single array operations (#8922 #9828).
 - TrajectoryResultMixin memoizes all_* batch accessors, evaluates all_energies in a single pass, and derives total energy arithmetically (#8928 #9831).
+
+- Replaced `np.linalg.norm(diff, axis=1).max()` with `np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff)))` in `src/tools/capture_rig/model_frame_source.py` to optimize maximum bounding radius calculation. (spec-exempt: micro-optimization)
+
+- Fixed `bioptim` parameter bounds shape mismatch in `src/shared/python/optimization/ocp/parameter_ocp.py` by using `BoundsList.add` with `InterpolationType.CONSTANT` and 2D arrays instead of tuple assignment.
 
 ## Independently Refined Swing Defect Reference (#9830)
 

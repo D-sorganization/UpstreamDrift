@@ -1,10 +1,5 @@
 # Native Camera Setup Delivery
 
-Turnover: #9950 merged as9c8afeaab. #9954's required quality gate passed, but
-GitHub now reports a merge conflict against main. Resolve and requalify normally.
-See [Capture Product Turnover](capture_product_turnover.md) for the active branch
-and installed candidate; this guide's earlier validation is retained below.
-
 PR #9954 addresses issue #9952, child of #9906, implements the missing fresh-install recording setup.
 The header and first wizard page open the same native editor. Existing rig plan,
 USB topology, mode parsing, connection validation and atomic document APIs remain

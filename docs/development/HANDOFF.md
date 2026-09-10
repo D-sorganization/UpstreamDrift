@@ -1,3 +1,40 @@
+# Impact Program Handoff Checkpoint — 2026-09-10
+
+- Worktree: C:/Users/diete/Repositories/UpstreamDrift-impact-provider.
+- Branch: docs/9700-impact-handoff; checkpoint SELF; ready PR #9962.
+- Root handoff impact summary was compacted after CI found its 50 KB budget exceeded; detailed receipts remain linked.
+- Governing epic #9700; this change updates turnover only. Main baseline:
+  9c8afeaabf60f2751ebbd61b32dac98d32546c3e. Preserve peer capture work below.
+- Provider PR #9916 merged as c487265f1ebc9c61a2e124267ad9cd1c96a6c007;
+  follow-up #9920 merged as 08c8529ef78b9d7c336e0598721fb01bf814934d.
+- Current main gitlink, requirements-tools.txt and Cargo.toml agree on Tools
+  e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0. The clean submodule was checked
+  out at that existing pin after switching branches. No pin or runtime changed.
+  Earlier PROVIDER_PIN_RESULTS.json is historical evidence for its recorded
+  source; it does not qualify this newer main pin or the friction candidate.
+- Tools normal contact #5146/#5149/#5152, prescribed loads #5154, complex FRF
+  #5156 and calibration #5159 are merged. Friction #5162 is pending final
+  integration/hosted qualification at this checkpoint. Coordinate the next
+  combined pin with the context/capture owner, then qualify exact consumer
+  contracts, built wheel and installed runtime. Do not alter installed CaptureRig.
+- AffineDrift force-regularity #4356 merged as
+  963867d7c78e544799ef4b6070eb1779e64c0452 after all 15 checks passed.
+- Resume: inspect the live Tools #5162 and canonical HANDOFF, update local main
+  without discarding work, read policy/context inventory, claim the next child
+  issue and register presence. Preserve #8557 authority, reviewed claim outcomes,
+  numerical ceilings and manufactured-data limits. No new solver qualification
+  is claimed by this documentation-only checkpoint.
+
+The program remains open. Next work must retain TDD, explicit contracts, shared
+provider mechanics and independent reference controls. Prioritize event-resolved
+force/work accuracy, general sliding/reversal/recontact, spatial and modal
+convergence, measured shaft/grip/contact identification, calibrated structural
+and acoustic transfer, then controlled blinded perception. Force spectrum,
+radiated pressure and perceived sweetness are separate quantities. Synthetic
+convergence cannot establish a player-dependent sound or heavy-hit effect.
+
+## Preserved Capture Handoff
+
 # Common-Reference Calibration Handoff
 
 **User-requested transfer:** read [Capture Product Turnover](capture_product_turnover.md)
@@ -6,19 +43,18 @@ remaining work, validation, branches and live application. Source and turnover
 changes are being committed for the successor; do not start a duplicate epic.
 
 Active #9899: `feat/9899-calibration-revision-status`, draft PR #9959,
-builds on unchanged #9954. Camera source hashing uses shared provenance;
+builds on #9954 (which merged to main). Camera source hashing uses shared provenance;
 command and wizard regression tests cover same-path changes, absent source,
 matching/legacy outputs and downstream blocking. See
 `capture_calibration_revision_delivery.md`. The numerical ruler provider is
-Tools #5169 at3d7beb203; its worker/editor integration is still outstanding.
+Tools #5169 at 3d7beb203; its worker/editor integration is still outstanding.
 Preserve the installed candidate runtime and the peer camera/impact work.
 
-Active #9952/#9909: `feat/9952-camera-setup`, PR #9954, adds the native camera
-editor and guided acceptance. All566 Capture Rig and30 isolated calibration
+Active #9952/#9909: `feat/9952-camera-setup`, PR #9954, added the native camera
+editor and guided acceptance (merged to main). All 566 Capture Rig and 30 isolated calibration
 checks pass; searchable player examples were visually reviewed with the app theme.
 See `camera_setup_delivery.md`. Runtime prerequisite #9950 merged as
-9c8afeaabf60f2751ebbd61b32dac98d32546c3e. #9954 now needs conflict resolution
-against that main; preserve its tested source and both turnover histories.
+9c8afeaabf60f2751ebbd61b32dac98d32546c3e.
 
 Current #9949: `fix/9949-installed-capture`, PR #9950. Installed worker,
 packaging, new-take identity and library indexing repairs remain intact. PR #9946
