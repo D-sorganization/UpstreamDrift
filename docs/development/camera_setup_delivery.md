@@ -50,3 +50,23 @@ state; they are not media-integrity certificates. External replacement with
 unchanged size/modification time requires manual review. Reference alignment
 retains its camera, clock and asset-binding validation. Generate the atlas from
 canonical LF source bytes so its input hashes agree with CI checkouts.
+
+## Final Local Acceptance Update
+
+At f7e7f1663, all 566 Capture Rig tests pass on Python 3.12, including the
+three guided restart/comparison cases and searchable in-app examples. Every
+help link targets an existing workflow step. The independent worker suite now
+passes 30 checks after adding a persisted calibration-to-overlay test: new
+non-planar points pass through `start_cameras_from` and
+`project_reference_to_camera` and agree with independent OpenCV projections
+within 0.00001 pixels. The accepted calibration bytes remain unchanged.
+This checks coordinate and lens integration, not a detector/body-model job or
+physical calibration accuracy. The initial added test lacked capture bundle
+metadata; adding the existing synthetic bundle fixture corrected that test
+setup without changing production code or tolerances.
+
+PR #9955 at 63cb27402 has passed the full unit and quality gates. Its optional
+SDK/authority jobs are still queued as of 2026-09-10 10:46 UTC. The prior
+statement about scalar bounds describes the prerequisite failure; the fix
+is not merged yet. Hold the current acceptance additions for the next
+integration of #9955 and #9950, then validate and publish #9954 normally.
