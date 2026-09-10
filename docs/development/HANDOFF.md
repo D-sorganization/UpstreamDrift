@@ -4,7 +4,7 @@
 
 Active worktree `C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942`,
 branch `feat/9942-metric-simulation-analysis`. Readouts72585f629, Trace5034f7a22,
-topology b6d3c28c6; native geometry785269090; main integration d40956742; surface audit SELF. Session codex-unified-metrics-9942
+topology b6d3c28c6; native geometry785269090; main integration d40956742; surface audit a5472765b; map freshness SELF. Session codex-unified-metrics-9942
 presence through06:12UTC. Preserve Tools4dabe900 and peer ownership.
 
 Implemented test first: shared registered-world point/plane readouts in both
@@ -28,7 +28,9 @@ PR #9943 merged normally at3fbd4b2da5f8661ec1f1e91b97884f781d83f1fd on
 2026-09-10T04:10:20Z; #9932 closed. Both quality-gate and hosted-routing guard
 passed. Native30 and atlas/parity50 tests pass. Capability map updated;
 merged main3fbd4b2da integrated with current metric controls preserved. Next:
-combined regressions (running), reviewed context boundaries and protected delivery.
+reviewed context boundaries and protected delivery. Combined600 tests had only
+one generated-map hash failure after formatting; all behavior tests passed.
+Regenerated atlas; all56 atlas/parity/measurement tests then passed.
 The ledger now records qualified and unsupported native surfaces explicitly;
 context owner was notified via Repository Management receipt5612957242.
 
