@@ -46,6 +46,17 @@ def _dispatch(request: dict[str, Any]) -> dict[str, Any]:
     from shared.python.sidekick.lab.mocap.reference_placements import common_reference
 
     action = request.get("action")
+    if action in {"inspect_reuse", "adopt_layout"}:
+        from src.tools.capture_rig.reference_calibration.reuse import (
+            inspect_reuse,
+            adopt_layout,
+        )
+
+        return (
+            inspect_reuse(request)
+            if action == "inspect_reuse"
+            else adopt_layout(request)
+        )
     if action == "catalog":
         return {
             "targets": [

@@ -83,6 +83,8 @@ class CalibrationActions(QObject):
                 self._repeat()
             if dialog.reference_requested:
                 return self._references(root)
+            if dialog.reuse_requested:
+                return self._reuse_layout()
         except (ValueError, OSError, sqlite3.Error, KeyError) as exc:
             QMessageBox.warning(self._host, "Camera Calibration", str(exc))
         return None
@@ -112,3 +114,15 @@ class CalibrationActions(QObject):
         if folder:
             load_bundle(Path(folder))
             self._recalibrate(Path(folder))
+
+    def _reuse_layout(self) -> Path | None:
+        from .reference_calibration.reuse_dialog import ReuseCalibrationDialog
+
+        session = self._session()
+        if session is None:
+            raise ValueError("Open or record a capture before reusing a camera layout")
+        dialog = ReuseCalibrationDialog(self._plan(), session, self._root(), self._host)
+        dialog.exec()
+        if dialog.output_path is not None:
+            self._apply(dialog.output_path)
+        return dialog.output_path

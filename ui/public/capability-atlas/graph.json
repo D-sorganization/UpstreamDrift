@@ -506,7 +506,7 @@
       "tiles": [
         "capture_rig"
       ],
-      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints. Common-reference calibration #9898/#9900 adds capture-owned paper/ruler observations, original-frame point editing, repeated placements, asynchronous canonical camera estimation, reviewable result history and shared native/generated help; lens profiles remain required. Guided cross-capture reuse and physical accuracy qualification remain pending under #9897. Model-only analysis and Draw on Comparison reuse the coaching editor, appearance, club/ellipsoid/handedness controls and scene-bound metric planes/points. Comparison drawing PNGs preserve original pixels; video applies the saved crop. These desktop routes do not establish web parity.",
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints. Common-reference calibration #9898/#9900 adds capture-owned paper/ruler observations, original-frame point editing, repeated placements, asynchronous canonical camera estimation, reviewable result history and shared native/generated help; lens profiles remain required. Guided cross-capture reuse requires explicit optics/scene confirmation, retains portable original evidence and revalidates it before processing. Physical accuracy and packaged-runtime qualification remain pending under #9897. Model-only analysis and Draw on Comparison reuse the coaching editor, appearance, club/ellipsoid/handedness controls and scene-bound metric planes/points. Comparison drawing PNGs preserve original pixels; video applies the saved crop. These desktop routes do not establish web parity.",
       "id": "tools.capture_rig"
     },
     {
@@ -1699,6 +1699,17 @@
       ]
     },
     {
+      "id": "calibration.reuse",
+      "title": "Reuse Calibration for a New Swing",
+      "description": "Explicit review and a portable copy of the original camera estimate and observation evidence.",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open the new swing and choose Calibration, then Reuse a Camera Layout. Select an original reviewed estimate from an earlier capture.",
+        "Review the source settings and confirm unchanged optics, camera positions, ball origin and target direction. Use for This Swing retains source evidence; changed conditions require recalibration."
+      ]
+    },
+    {
       "id": "step.setup",
       "title": "Set up Cameras and Plan",
       "description": "Bind each camera to a named view so takes are repeatable.",
@@ -2360,6 +2371,24 @@
       "evidence": "src/tools/capture_rig/reference_export.py",
       "constraint": "The shared compositor retains geometry, layer order and source identity",
       "view": "workflow"
+    },
+    {
+      "source": "calibration.layout",
+      "target": "calibration.reuse",
+      "artifact": "Original reviewed result and archived observations",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse.py",
+      "constraint": "Same named views, physical cameras and recorded image sizes; fresh operator confirmation of unchanged optics and scene",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.reuse",
+      "target": "step.reconstruct",
+      "artifact": "Capture-owned reviewed layout assignment",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_evidence.py",
+      "constraint": "Processing revalidates copied source evidence; this is reuse, not a new numerical solve or accuracy certification",
+      "view": "workflow"
     }
   ],
   "capture_goals": {
@@ -2612,8 +2641,8 @@
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "db5eb204851a75488a7d353b80f0ef717271b2e8a63d74d30f1f1a471ca219c8",
-    "src/config/capability_connections.json": "481434318faa51dc066c343e5b0cade0efe79eb53eb26ed9b212c9090a0be6f5",
+    "src/config/feature_parity.json": "78a91ca1278e31417576b4f98ac25861a7e59f6246cba8fc002cd80690e33d1b",
+    "src/config/capability_connections.json": "f5c85b9ac994c596d41a66819aa5c3bfae73408a902b4f33f876bd31dbd6e198",
     "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e"
   }
 }
