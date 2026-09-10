@@ -22,6 +22,13 @@ failures. Live test applications still use their frozen earlier checkouts.
 
 ## Implemented Workflow
 
+- First-capture library registration (#9950): successful completion now creates
+  the catalog entry even if Library has never been opened. The capture header
+  refreshes after registration to show the persisted identity immediately.
+  Both missing registration and stale identity were reproduced by regression
+  tests; 29 library/capture/wizard/journey checks now pass. The first installed
+  registration probe passes; the final identity-refresh wheel remains pending.
+
 - Installed storage (#9949/#9950): new recordings resolve to unique destinations
   in the player's selected library rather than the application installation.
   Empty explicit destinations remain usable; existing takes select a fresh

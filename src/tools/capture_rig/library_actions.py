@@ -117,9 +117,9 @@ class LibraryActions(QObject):
 
     def command_finished(self, code: int) -> None:
         session = self._session()
-        if code == 0 and session is not None and self._library is not None:
+        if code == 0 and session is not None:
             try:
-                self._library.register(session)
+                self.library().register(session)
             except (ValueError, OSError, sqlite3.Error) as exc:
                 self._error(exc)
         self.refresh()
