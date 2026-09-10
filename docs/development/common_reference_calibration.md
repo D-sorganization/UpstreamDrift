@@ -4,7 +4,7 @@
 
 Epic #9897; children #9898 and #9900. Branch
 `feat/9898-common-reference-sessions` in the isolated
-`UpstreamDrift-common-calibration` worktree. PR #9946 checkpointa4e3ecfa0 passed every normal push hook and integrates main276998030 (#9945/#9947 analysis delivery). It is reachable through Calibration in this worktree,
+`UpstreamDrift-common-calibration` worktree. PR #9946 checkpoint54d1807ea passed every normal push hook and integrates main276998030 (#9945/#9947 analysis delivery). It is reachable through Calibration in this worktree,
 but the running test application still uses the earlier merged wizard source.
 
 Tools #5140 merged as0a561daff18302ee143b214fe6a6138455d8c542. Its complete tree
@@ -24,7 +24,8 @@ private-checkout404 and rate-shard timeouts remain failures, not passing evidenc
   its paint transform, avoiding allocation of a zoom-expanded bitmap.25 focused
   pan/point/selector/coaching/annotation tests and12 crop/comparison consumer checks
   passed on Python3.12; configured mypy passed. Native640×580 fit/pan views were
-  inspected in the temporary `capture-point-pan-native-k4m5afs8` directory.
+  inspected in the temporary `capture-point-pan-native-k4m5afs8` directory. The
+  final calibration-dialog/atlas group16 passed and all normal push hooks passed.
 
 - Original-video frame selection now uses the existing VideoReader and ImageCanvas,
   with timeline, Play/Pause, source clock, frame stepping, numeric selection and
@@ -158,21 +159,19 @@ Thirteen catalog/library/dialog tests,29 isolated provider checks and19 library/
   alone cannot establish camera poses. A wholly held-out placement cannot seed
   its own transform. Pixel residuals do not certify metric physical accuracy.
 - Guided reuse now copies original reviewed results, revisions and archived frames into a new capture. It requires matching view names, identities and recorded sizes, plus fresh manual optics/scene confirmation. View remapping and subsets are deliberately unsupported; calibration/recording orchestration still needs end-to-end acceptance.
-- Original-frame selection currently uses a numbered field and point editor;
-  a standard scrubber/thumbnail selection flow remains a UX follow-up in #9897.
 - Saved revisions assume a single dialog writer. Cancelling marking may retain
   unused archived frames. Do not delete evidence automatically. Referenced lens
   files must stay available; portable profile packaging remains to be qualified.
 - #9900 manual calculation inventory, physical multi-camera/zoom evidence and
   packaged-runtime qualification are not approved by synthetic tests.
-- Final provider pin, packaged qualification, PR/CI/protected merge and physical-camera acceptance remain pending. Current main and generated metadata are integrated; new reuse refinements are being qualified.
+- Final provider pin, packaged qualification, PR/CI/protected merge and physical-camera acceptance remain pending. Current main and generated metadata are integrated; named reuse, visual frame selection and precision panning are implemented and locally qualified.
 
 ## Concurrent Work and Live Applications
 
 Session `capture-product-01a08427-common-calibration` owns the reference package,
 calibration actions/profiles/evidence, scoped lazy swing-export imports and
-reconstruction lens boundary. Presence and #9898 lease renewed through05:51UTC
-on2026-09-10. #9900 lease renewed through07:03UTC (receipt5613456756). Impact sequencing message35dd44d5 was
+reconstruction lens boundary. Presence renewed through08:29UTC, #9898 lease through
+08:11UTC and #9900 lease through08:29UTC on2026-09-10. Impact sequencing message35dd44d5 was
 acknowledged; there are no active scope conflicts in the last complete inbox.
 
 Preserve live app PID54812 (`Capture Rig — main 56552f245`), older app61500 and

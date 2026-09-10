@@ -2,7 +2,7 @@
 
 Active #9898/#9900: read `docs/development/common_reference_calibration.md` and
 DL-#9898. PR #9946 in isolated `UpstreamDrift-common-calibration`;
-Visual frame selection committed2b4471eb9; provider qualification blocks merge.
+Frame selection/pan pushed54d1807ea; provider qualification blocks merge.
 Preserve apps54812/61500, atlas2963 and provider-pin ownership.
 See canonical checkpoint for validation and remaining acceptance.
 
