@@ -851,6 +851,7 @@ class TestCIEnvironmentCompatibility:
 
         assert job["name"] == "quality-gate"
         assert set(job["needs"]) == {
+            "agent-context",
             "pick-runner",
             "changed-paths",
             "code-quality",

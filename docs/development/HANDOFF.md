@@ -464,6 +464,20 @@ source presence sessions were released; the issues remain open pending the bag/w
 4. Verify final Tools/Gas fleet policy replacements after their owner merges them.
 5. Keep the full goal active; no unsupported equipment model constraint is claimed.
 
+## Verified Agent Context: #9915
+
+- Identity: UpstreamDrift, `C:/Users/diete/Repositories/.context-implementation/UpstreamDrift`; branch `feat/issue-9915-agent-context`; commit `SELF`; PR #9920; DL-#9915; session `context-01a0879e-ud`; fleet epic #1629.
+- Implemented: twelve components, five reviewed integration contracts, twelve navigation tasks, generated module graph/offline browser and required source/review/provider checks. Existing atlas, scientific authorities and peer handoffs are preserved.
+- Published provider: Tools #5141 merged as `e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`, byte-identical to qualified34b142e28. Both Linux aggregates and quality passed. The gitlink, Cargo.toml and requirements-tools.txt now use this same revision. The new required installation regression failed against the old v1.15.0 wheel and passes after alignment.
+- Source integration: main276998030 is integrated. Its registry changes invalidated two atlas reviews; inspected shared-analysis contracts, preserved pixel/frame/scene limits and updated both reviews after31 atlas/workflow/goal tests passed. Existing documentation/CI regression repairs remain unchanged.
+- Final-pin validation:107 provider/catalog/seam tests, six context tests and twelve navigation tasks pass (median2423.645ms, max15593 characters). Source/view checks and all three pin surfaces pass. Full-authority divergence inventory regenerated. The source graph verifies3543 files/39589 symbols and two MotionPipeline caller candidates. Tools wheel builds and installed CodeMap verifies the same graph in an isolated interpreter; candidate/squash source trees are identical.
+- Concurrent integration: remote60318e4c4 selects the same provider and adds the atlas-required NumPy dependency to the context CI environment. The minimal validation environment reproduces successful atlas/source checks after that dependency is installed. Retained the more specific reviewed contracts and regenerated views; all application source files remain identical to wheel source6dab98fce.
+- Installed consumer: normal Python3.12 wheel build at6dab98fce includes the frontend bundle; SHA256 `8f5b62979229ef0c2372ea9080cc0a34a51105604bf170c94828f5e6f0d06e42`. In an isolated declared gui-tools environment, the actual manifest resolves and constructs FunctionGeneratorWidget, installed aliases/origins pass, synthetic shaft round-trip and altered-source rejection pass, and frontend index presence is verified. All31 unmodified calibration/reference tests pass against installed modules with OpenCV5.0.0.93; pip check passes. Later merge changes only CI/docs, so wheel source and provider are unchanged. Local exact records: `.context-implementation/ud-e83-installed-qualification.json` and `ud-e83-installed-calibration.xml`.
+- Limits: protected application CI remains pending. Lexical graphs are scoped navigation evidence; scientific/physical approval is separate. No subscription is needed. No peer-owned worktree was modified.
+- Merge metadata: the concurrent merge retained two versions of our own #9920 SPEC row; CI rejected the duplicate. Kept the complete current row and preserved all peer rows; concurrent equivalent repair4ded98ad6 is integrated and the unchanged SPEC checker passes.
+- Documentation budget: shortened only the context log entry; peer records and the51,200-byte limit are preserved.
+- Next: publish through normal hooks, require green protected CI, then reconcile the fleet delivery audit and epic.
+
 # Unified Biomechanics Analysis (#9934)
 
 ## Current Continuation State
