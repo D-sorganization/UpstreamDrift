@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9916
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (Tools 4dabe900c; main 90c3d0b77; repair SELF)
+- **Last verified:** 2026-09-09 (Tools 4dabe900c; main 5ada5e6a6; inventory repair SELF)
 - **Summary:** Qualify the exact Tools shaft/theme provider; see PROVIDER_PIN_RESULTS.json.
-- **Evidence:** 271 post-main90 source checks pass. Isolated 32a8b36ec wheel and Qt construction pass with gui-tools; web assets omitted. Earlier evidence retained.
+- **Evidence:** 271 controls pass after preserving concurrent eacd69858 and restoring the pinned inventory. Existing inventory RED is retained. Isolated 32a8b36ec wheel and Qt construction pass with gui-tools; web assets omitted. Earlier evidence retained.
 - **Next step:** Advance to the reviewed Tools #5143 descendant and qualify that exact pin; retain #8942 review exception and physical gates.
 
 ### DL-#9914 · C3D Reference Fitting

@@ -2,6 +2,13 @@
 
 ## Current Continuation State
 
+Concurrent eacd69858 is preserved, including player/equipment main 5ada5e6a6.
+An inherited inventory mismatch was reproduced by the existing test; regeneration
+from the actual pinned checkout with full authorship restores the omitted
+shaft/provider entries. All 271 integration controls pass. Provider source,
+Cargo/gitlink and seam repairs are unchanged; #5144 reviewed-pin qualification
+remains pending. Evidence is in PROVIDER_PIN_RESULTS.json.
+
 Main 90c3d0b77 brings reviewed reference fitting/display #9918/#9922 and club
 catalog #9919. Six conflicts are documentation/inventory only; both task
 scopes are retained and the inventory is regenerated from the real trees.
