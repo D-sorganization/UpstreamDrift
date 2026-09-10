@@ -25,7 +25,7 @@ Next: finish type/focused checks, document and commit readout implementation;
 implement explicit Trace v2 marker-motion import and shared native viewport
 reference geometry; update capability/context maps; qualify #9942 protected CI.
 Trace HDF5 metadata round-trips scalars only, so marker names and coordinate
-frame must use an explicit portable contract. Trace import is now implemented locally through the existing importer and mapping UI: nine tests pass for clocks/names/gaps/provenance, decoded bounds, external-link rejection and opening model analysis. Five-source mypy and 126 reference/import regressions pass. Topology/club metadata and native viewport geometry remain incomplete. The #9943 worktree separately repairs a newly introduced fleet optional-path
+frame must use an explicit portable contract. Trace import is now implemented locally through the existing importer and mapping UI: nine tests pass for clocks/names/gaps/provenance, decoded bounds, external-link rejection and opening model analysis. Five-source mypy and 126 reference/import regressions pass. Explicit edges_json/club_edges_json now preserve skeleton and club roles through mapping and shared appearance controls; 17 focused tests pass. Topology implementation SELF; topology mypy passes three source files. Native viewport geometry remains incomplete. The #9943 worktree separately repairs a newly introduced fleet optional-path
 checker failure; preserve that CI fix and integrate it when committed.
 
 ## Unified Analysis Comparison Drawings (#9932)

@@ -26,10 +26,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #9933 (merged); #9943 (draft, protected CI running)
 - **Paths:** src/motion_capture/coaching; src/tools/capture_rig
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (SELF #9942; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions and five-source Trace mypy)
+- **Last verified:** 2026-09-10 (SELF #9942; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions, five-source Trace mypy and 17 topology/import tests)
 - **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
 - **Evidence:** Comparison launch/save, PNG parity, snapshot video, cancellation and camera-evidence tests pass; Ruff/format, budgets and LoD pass; Driver comparison drawing UI and PNG inspected.
-- **Next step:** Add explicit skeleton/club topology preservation to the Trace import for #9942.
+- **Next step:** Integrate shared world reference geometry with the native simulation viewport for #9942.
 
 ### DL-#9907 · Guided Capture Outcomes
 

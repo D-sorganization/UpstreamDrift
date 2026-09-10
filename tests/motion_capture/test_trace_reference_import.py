@@ -88,3 +88,63 @@ def test_trace_external_links_are_not_followed(tmp_path: Path):
         handle["markers"] = h5py.ExternalLink("outside.h5", "markers")
     with pytest.raises(ValueError, match="links"):
         load_motion_draft(path)
+
+
+def club_trace(path: Path) -> None:
+    trace = Trace(
+        t=np.array([0, 0.1]),
+        q=np.zeros((2, 1)),
+        v=np.zeros((2, 1)),
+        markers=np.ones((2, 3, 3)),
+        backend="test",
+        meta={
+            "frame": "world_Zup",
+            "marker_names_json": '["wrist", "grip", "head"]',
+            "edges_json": "[[0,1],[1,2]]",
+            "club_edges_json": "[[1,2]]",
+        },
+    )
+    write_trace(trace, path)
+
+
+def test_declared_body_and_club_connections_survive_mapping(tmp_path: Path):
+    from src.motion_capture.reference.importers import finish_motion_import
+
+    path = tmp_path / "club.h5"
+    club_trace(path)
+    draft = load_motion_draft(path)
+    assert draft.edges == ((0, 1), (1, 2))
+    assert draft.club_edges == ((1, 2),)
+    asset = finish_motion_import(
+        draft,
+        title="Club",
+        units="m",
+        axes=("+X", "+Y", "+Z"),
+        joint_names=draft.names,
+        edges=draft.edges,
+    )
+    assert asset.club_edges == ((1, 2),)
+    assert asset.edges == ((0, 1), (1, 2))
+
+
+@pytest.mark.parametrize(
+    "edges,clubs",
+    [
+        ("[[-1,1]]", "[]"),
+        ("[[0,3]]", "[]"),
+        ("[[0,0]]", "[]"),
+        ("[[true,1]]", "[]"),
+        ("[[0,1],[0,1]]", "[]"),
+        ("[[0,1]]", "[[1,2]]"),
+    ],
+)
+def test_invalid_topology_is_rejected(tmp_path: Path, edges: str, clubs: str):
+    import h5py
+
+    path = tmp_path / "bad-topology.h5"
+    club_trace(path)
+    with h5py.File(path, "a") as handle:
+        handle.attrs["meta_edges_json"] = edges
+        handle.attrs["meta_club_edges_json"] = clubs
+    with pytest.raises(ValueError, match="connections"):
+        load_motion_draft(path)

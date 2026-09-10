@@ -51,6 +51,34 @@ def _names(encoded: object, count: int) -> tuple[str, ...]:
     return tuple(names)
 
 
+def _connections(
+    encoded: object, count: int, limit: int
+) -> tuple[tuple[int, int], ...]:
+    if encoded is None:
+        return ()
+    try:
+        pairs = json.loads(encoded) if isinstance(encoded, str) else None
+    except json.JSONDecodeError as exc:
+        raise ValueError("Trace connections must be JSON index pairs") from exc
+    if not isinstance(pairs, list) or len(pairs) > limit:
+        raise ValueError("Trace connections exceed the supported edge count")
+    result = []
+    for pair in pairs:
+        if (
+            not isinstance(pair, list)
+            or len(pair) != 2
+            or any(type(index) is not int or not 0 <= index < count for index in pair)
+            or pair[0] == pair[1]
+        ):
+            raise ValueError(
+                "Trace connections require two different valid marker indices"
+            )
+        result.append((pair[0], pair[1]))
+    if len(set(result)) != len(result):
+        raise ValueError("Trace connections must be unique")
+    return tuple(result)
+
+
 def load_trace_draft(path: Path, digest: str) -> MotionDraft:
     """Preserve trace coordinates and time, requiring explicit mapping of unknown axes."""
     from src.shared.python.simulation_backends.protocol import Trace
@@ -79,6 +107,12 @@ def load_trace_draft(path: Path, digest: str) -> MotionDraft:
             "Trace requires increasing finite times and finite-or-missing marker coordinates"
         )
     names = _names(trace.meta.get("marker_names_json"), count)
+    edges = _connections(trace.meta.get("edges_json"), count, 1024)
+    club_edges = _connections(trace.meta.get("club_edges_json"), count, 64)
+    if not set(club_edges).issubset(edges):
+        raise ValueError(
+            "Trace club connections must be included in skeleton connections"
+        )
     identity = str(trace.meta.get("model_identity", "")).strip()
     identity = f"{trace.backend} / {identity}" if identity else trace.backend
     source = ReferenceSource(path=str(path), sha256=digest, format="simulation-trace/2")
@@ -91,4 +125,6 @@ def load_trace_draft(path: Path, digest: str) -> MotionDraft:
         True,
         trace.meta.get("frame") == "world_Zup",
         identity,
+        edges,
+        club_edges,
     )
