@@ -4,13 +4,18 @@
 
 Active worktree `C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942`,
 branch `feat/9942-metric-simulation-analysis`. Readouts72585f629, Trace5034f7a22,
-topology b6d3c28c6; native geometry785269090; main integration d40956742; surface audit a5472765b; map freshness5a2e8d2c1; PR tracking f0fe99bd9; Trace persistence qualification SELF. Session codex-unified-metrics-9942
+topology b6d3c28c6; native geometry785269090; main integration d40956742; surface audit a5472765b; map freshness5a2e8d2c1; PR tracking f0fe99bd9; Trace persistence qualification b6325dfe8; contract review SELF. Session codex-unified-metrics-9942
 presence through06:12UTC. Preserve Tools4dabe900 and peer ownership.
 PR #9945 is draft, protected CI running. Normal push hooks passed including
 isolated mypy14 files, Bandit and unit tests. Separate local combined mypy
 crashed in its pyparsing cache; earlier focused checks and isolated hook passed.
 Context review input: external analysis-9926-artifacts/context-boundary-9942.md;
-sent to #9915 owner in RM receipt5613103149. No catalog runtime is pinned yet.
+sent to #9915 owner in RM receipt5613103149. No catalog runtime is pinned yet. #9920 remains conflicted at6e939bc6; owner
+notified in RM receipt5613321367. Current shared contracts are documented in
+docs/architecture/SHARED_ANALYSIS_CONTRACTS.md. Catalog20 audit passed atb6325dfe8;
+external outputs catalog-analysis-zcgqk8ta and qualify_catalog_analysis.py.
+CI run34437835071 attempt1 was cancelled by @dieterolson; scoped retry attempt2
+is active on the same head. No workflow or protection change.
 Trace appearance qualification now directly saves/reopens club visibility,
 ellipsoid opacity, handedness, drawings and planes on a nondegenerate moving
 marker fixture; all17 Trace/import integration tests pass.

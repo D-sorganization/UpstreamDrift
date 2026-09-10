@@ -461,3 +461,7 @@ rationale (issues #5984, #5985, #5986, #5987).
   into the existing reference importer. See the Trace metadata contract in
   `docs/motion_capture/reference_model_fitting.md`; do not infer FK from q-only
   traces or duplicate the shared Trace reader.
+
+The [Shared Analysis Contracts](../architecture/SHARED_ANALYSIS_CONTRACTS.md)
+record units, frames, ownership, failure behavior and tests across these providers
+and consumers. Use the existing capability registry as the product map authority.
