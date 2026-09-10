@@ -1,8 +1,7 @@
 # Common-Reference Calibration Handoff
 
 Current #9898/#9900: isolated `UpstreamDrift-common-calibration`, branch
-`feat/9898-common-reference-sessions`, pushed checkpoint54d1807ea. Normal commit/push hooks passed; PR #9946. Session `capture-product-01a08427-common-calibration` has presence through08:29UTC and
-#9898 lease through08:11UTC2026-09-10; #9900 lease through08:29UTC.
+`feat/9898-common-reference-sessions`, pushed checkpoint 457521222; comparison recovery SELF. Prior normal hooks passed; PR #9946. Session `capture-product-01a08427-common-calibration` has presence through 08:49 UTC and #9909 lease through 08:40 UTC on 2026-09-10.
 See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
 [operator guide](../motion_capture/common_reference_calibration.md).
 

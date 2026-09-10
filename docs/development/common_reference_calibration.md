@@ -4,19 +4,23 @@
 
 Epic #9897; children #9898 and #9900. Branch
 `feat/9898-common-reference-sessions` in the isolated
-`UpstreamDrift-common-calibration` worktree. PR #9946 checkpoint54d1807ea passed every normal push hook and integrates main276998030 (#9945/#9947 analysis delivery). It is reachable through Calibration in this worktree,
+`UpstreamDrift-common-calibration` worktree. PR #9946 checkpoint 457521222 passed every normal push hook and integrates main276998030 (#9945/#9947 analysis delivery). It is reachable through Calibration in this worktree,
 but the running test application still uses the earlier merged wizard source.
 
-Tools #5140 merged as0a561daff18302ee143b214fe6a6138455d8c542. Its complete tree
-is identical to qualified branchc98402cb1 and includes numerical #5136, which was
-closed as redundant. The local vendor checkout uses0a561daff for development.
-Do not commit this pin alone: the impact owner verified it would regress the
-function-generator launcher. Main's interim pin remains4dabe900c. The context
-owner owns the final combined gitlink/Cargo/pip/catalog alignment after Tools
-#5144, then the impact owner qualifies the exact installed consumer. Historical
-private-checkout404 and rate-shard timeouts remain failures, not passing evidence.
+Tools #5141 published the combined provider as
+`e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`, with both Linux aggregates and
+required quality checks passing. The context owner retains final consumer
+Gitlink/Cargo/pip/catalog alignment and installed-launcher qualification.
+The local vendor checkout remains 0a561daff for development; do not commit it
+alone because it lacks the launcher correction. Integrate the owner's published
+consumer delivery before final PR qualification. Historical failures remain failures.
 
 ## Implemented Workflow
+
+- Saved comparison recovery (#9909): malformed JSON or unreadable text now
+  produces a file-specific review action without aborting capture status checks.
+  Existing valid alignments remain eligible and original files are preserved.
+  Both corruption regressions and the focused wizard suite pass.
 
 - Wizard journey qualification #9909 found that a missing reviewed calibration
   aborted unrelated status checks. Editing-only routes now skip calibration

@@ -187,3 +187,41 @@ def test_empty_calibration_file_cannot_be_treated_as_reviewed(tmp_path) -> None:
     write_document(path, {"cameras": []})
     with pytest.raises(ValueError, match="every camera"):
         CalibrationReview.confirmed(root, path)
+
+
+@pytest.mark.parametrize("content", [b"{broken", b"\xff\xfe"])
+def test_unreadable_comparison_keeps_capture_steps_available(tmp_path, content) -> None:
+    root, library, media = _capture(tmp_path)
+    save_edits(root, SessionEdits())
+    comparisons = root / "comparisons"
+    comparisons.mkdir()
+    broken = comparisons / "unreadable.json"
+    broken.write_bytes(content)
+    from hashlib import sha256
+    from src.motion_capture.reference.model import ReferenceSource, ReferenceVideo
+    from src.motion_capture.reference.storage import ReferenceLibrary
+
+    recording = media.views[0].recording
+    assert recording is not None
+    ReferenceLibrary(library.root / "references").save(
+        ReferenceVideo(
+            title="Expert",
+            source=ReferenceSource(
+                path=str(recording),
+                sha256=sha256(recording.read_bytes()).hexdigest(),
+                format="video",
+            ),
+            width=16,
+            height=16,
+            frames=5,
+            fps=30,
+        )
+    )
+    evidence = inspect_capture(
+        resolve(load_catalog(), ["compare_video"]), media, library.root
+    )
+    assert evidence.states["capture.library"].status == "done"
+    assert evidence.states["capture.selection"].status == "done"
+    assert "unreadable.json" in evidence.states["compare.video"].reason
+    assert "review" in evidence.states["compare.video"].reason.lower()
+    assert broken.read_bytes() == content
