@@ -17,6 +17,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#1616 · Mermaid C4 Architecture Maps
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #1616
+- **Branch:** docs/1616-c4-architecture-map
+- **PR:** #9963
+- **Paths:** docs/architecture/C4.md, scripts/architecture_map_contract.py
+- **Started:** 2026-09-10
+- **Summary:** Baseline adoption of Mermaid C4 architecture maps in UpstreamDrift.
+
 ### DL-#9899 · Calibration Revision Status
 
 - **State:** in_review

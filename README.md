@@ -238,6 +238,7 @@ The [documentation hub](docs/README.md) is the entry point. Frequently used
 sections:
 
 - [Project map](docs/architecture/PROJECT_MAP.md) — every feature, module, and integration.
+- [Architecture map](docs/architecture/C4.md) — maintainable Mermaid C4Context and C4Container views and feature-evidence map.
 - [User guide](docs/user_guide/README.md) — installation, running simulations, using the interface.
 - [Engines](docs/engines/README.md) — engine documentation and comparison.
 - [API reference](docs/api/README.md) — code interfaces and REST endpoints.
