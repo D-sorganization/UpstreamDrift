@@ -51,5 +51,21 @@ def test_declared_club_reaches_shared_appearance_controls(tmp_path: Path):
     assert analysis.appearance.club.isEnabled()
     analysis.appearance.club.setChecked(False)
     assert not analysis.model_source.recipe.appearance.draw_club
-    analysis.save()
+    analysis.appearance.ellipsoids.setChecked(True)
+    analysis.appearance.volume_alpha.setValue(0.37)
+    analysis.spatial.mirror.setChecked(True)
+    analysis.tool.setCurrentText("Line")
+    analysis.add_center()
+    analysis.geometry_controls.add_plane()
+    assert analysis.save()
     analysis.close()
+    reopened = ModelAnalysisDialog(asset, tmp_path / "analysis")
+    assert not reopened.appearance.club.isChecked()
+    assert reopened.appearance.ellipsoids.isChecked()
+    assert reopened.appearance.volume_alpha.value() == pytest.approx(0.37)
+    assert reopened.spatial.mirror.isChecked()
+    assert reopened.model_source.recipe.registration.mirror_lateral
+    assert reopened.model_source.recipe.asset.club_edges == ((1, 2),)
+    assert len(reopened.canvas.layer.shapes) == 1
+    assert len(reopened.geometry_controls.document.planes) == 1
+    reopened.close()

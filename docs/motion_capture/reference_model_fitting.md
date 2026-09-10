@@ -209,8 +209,8 @@ pairs `[[1,2]]` preserves a wrist-to-grip connection and a separately controllab
 shaft. Invalid, duplicate, out-of-range or self connections are rejected. Club
 pairs must also appear in the skeleton connections. The mapping dialog prefills
 these connections; removing a connection also removes its club classification.
-Names alone never imply connectivity. Native simulation viewport geometry
-remains tracked in #9942; state-only backends need a marker-kinematics export.
+Names alone never imply connectivity. Pose Studio reference geometry is
+described below; state-only backends need a marker-kinematics export.
 
 ## Native Pose References
 
