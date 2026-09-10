@@ -73,11 +73,6 @@ select outcomes and **Save Selected Capture Plan**. In the desktop wizard, use
 goal IDs and the map revision before changing your choices. A plan contains
 selections, not commands or recording paths.
 
-The source is `src/config/capability_connections.json`. Executable prerequisites
-are separate from informational architecture arrows. Run
-`python3 -m scripts.generate_capability_atlas` to regenerate the browser reference,
-graph data and Mermaid diagrams; CI checks freshness.
-
 ## Current Route Scope
 
 In Calibration, **Paper / Ruler References…** opens the
@@ -93,12 +88,64 @@ matching remain in Match; incompatible selections receive an explanation rather
 than another variant's completion status. Expert projection uses the existing
 comparison tool's default reconstructed cameras.
 
-Progress fingerprints inspect bounded metadata and media size/modification time,
-avoiding video decoding or hashing during navigation. They are UI invalidation
-tokens, not media-integrity certificates. Replacing media while preserving its
-size and modification time requires manual review. Reference alignment retains
-its existing camera, clock and asset-binding checks. Body models record club
-context without applying unsupported club constraints.
+After changing your selection, camera settings or model choices, refresh status
+and review the affected analysis steps. For video edited outside the application,
+import the edited file as a new capture. Body models retain club information as
+context; they currently do not fit or constrain a club segment.
+
+## Example: Prepare a Swing for Review
+
+1. Choose **Trim and Crop a Swing** in Capture Wizard.
+2. Open **Capture Library**, import the recording and give the take a clear title
+   and swing notes. Cameras and calibration are not needed for imported video.
+3. Open **Swing Editor**, mark the first and last swing frames, adjust the crop
+   if needed, and save. The original video remains available.
+4. Return to the wizard and choose **Refresh Status**. The saved selection is
+   recognized; simply visiting the editor does not complete this step.
+5. Use **Save and Close**. Later, select the same take in Library and choose
+   **Resume This Capture's Saved Workflow** in the wizard.
+
+## Example: Compare a Player With an Instructor Reference
+
+1. Choose **Compare with an Expert Video**. You can also select **Trim and Crop
+   a Swing** and **Add Coaching Lines and Shapes** for the same take.
+2. Select the player's capture and save its swing selection.
+3. Import the expert video in the reference library, then open **Expert
+   Comparison** and select the player's camera view and the reference.
+4. Align the swing events with the time controls, adjust visibility or opacity,
+   and save the comparison. Refresh the wizard to see the saved alignment.
+5. If you selected coaching drawings, open that step, add the reference shapes
+   and save them. Use the comparison or drawing tool's export controls when
+   preparing a video or still for the player.
+
+A video comparison is an image alignment. It does not reconstruct the expert's
+3-D swing or create a new camera angle. For that workflow, choose **Project an
+Expert into Reconstructed Cameras** and follow its additional requirements.
+
+## Example: Prepare Calibrated Body-Model Analysis
+
+1. Choose **Fit a Body Model to a Reconstruction**. Import synchronized camera
+   recordings or use **Camera Setup** to prepare a new take.
+2. Review **My Clubs** and assign the club used for this swing. Enter measurements
+   you know and leave the rest unknown. A saved capture keeps its own club
+   snapshot even if the player's bag is edited later.
+3. Open **Review or Repeat Calibration**. Confirm the actual camera identities,
+   lens, optical zoom, focus and image settings. Use compatible profiles or
+   recalibrate; the [common-reference guide](common_reference_calibration.md)
+   explains paper/ruler placements and their limits.
+4. Save the swing selection, run the selected detector from the analysis
+   controls, and review the observations before reconstructing. The wizard's
+   **Go to …** links return you to missing prerequisites.
+5. Run reconstruction and body-model fitting using the existing controls.
+   Return to the wizard and refresh status after each job. An unavailable
+   runtime or failed job needs attention; opening a page does not run it.
+6. Save your workflow before leaving. On reopening it, review calibration again.
+   Changed zoom or camera settings require renewed review or recalibration;
+   editing and video comparison remain available independently.
+
+These steps organize the workflow. A completed software job does not by itself
+establish physical camera accuracy or the quality of a model fit. Review the
+result diagnostics before using measurements.
 
 ## Interface Qualification
 

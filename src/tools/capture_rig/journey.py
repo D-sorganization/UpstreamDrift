@@ -189,6 +189,34 @@ class JourneyPanel(QFrame):
             "A finished command does not itself certify the quality of a model. "
             "Open <b>Capture Status</b> and review the outputs and provenance.</p>",
         ]
+        content.extend(
+            [
+                "<h2>Example: Prepare a Swing for Review</h2>",
+                "<p>Choose <b>Trim and Crop a Swing</b> in Capture Wizard. Open "
+                '<a href="step:setup">Library</a>, import your video and name the take. '
+                "Add swing notes, save the first and last swing frames in Swing Editor, "
+                "then return to the wizard and Refresh Status. Save and Close keeps your "
+                "place; select the same take to resume. Imported video needs no cameras.</p>",
+                "<h2>Example: Compare With an Instructor Reference</h2>",
+                "<p>Choose <b>Compare with an Expert Video</b>, select the player's take "
+                "and save its swing selection. Import the expert video in the reference "
+                "library. In Expert Comparison, select a camera view, align swing events "
+                "with the time controls, adjust opacity and save. Refresh Status recognizes "
+                "the saved alignment. Add Coaching Lines and Shapes is an optional outcome. "
+                "Video alignment does not create a new camera angle or a 3-D expert.</p>",
+                "<h2>Example: Prepare Calibrated Body-Model Analysis</h2>",
+                "<p>Choose <b>Fit a Body Model to a Reconstruction</b>. Import synchronized "
+                "views or prepare Camera Setup. Assign the swing's club in My Clubs, leaving "
+                "unknown measurements blank. Review or Repeat Calibration checks camera "
+                "identities, optical zoom, focus and image settings. Save the swing selection, "
+                '<a href="step:detect">detect joints</a>, review observations, then '
+                '<a href="step:reconstruct">reconstruct</a> and fit the body model. '
+                "Refresh Status after each job; Go to links return to missing prerequisites. "
+                "Review calibration again after resuming or changing zoom. Club information "
+                "is retained as context; current body models do not fit a club segment. "
+                "Review diagnostics before using measurements.</p>",
+            ]
+        )
         for step in workflow.STEPS:
             content.append(
                 f'<h2><a href="step:{step.key}">{escape(step.title)}</a></h2>'
