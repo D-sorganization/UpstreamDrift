@@ -4,7 +4,9 @@ Active #9907/#9908 under epic #9906 in `feat/9907-capture-goal-wizard`, worktree
 `UpstreamDrift-capture-wizard`. Typed route metadata, the generated atlas plan
 exchange, a standard Qt wizard, existing-screen navigation, background evidence
 inspection and capture-owned resume are implemented. Focused tests and scoped
-mypy pass;510 broad Capture Rig/parity/atlas regressions pass. Implementation commit455022ede; main integration is being qualified. No wizard PR yet.
+mypy pass; 600 integrated Capture Rig/parity/atlas/provider regressions pass.
+Implementation455022ede integrates main c487265f1 via a74d5ebd2. PR #9931 is
+draft while remote CI runs; normal commit/push hooks passed.
 Canonical state: `docs/development/HANDOFF.md`. Bag PR #9923 merged as
 5ada5e6a6827bfb94a00d1801f6b475afb885885; #9905 stays open for this wizard entry.
 Preserve live Capture Rig PID61500, other agents' work and standing governance.
