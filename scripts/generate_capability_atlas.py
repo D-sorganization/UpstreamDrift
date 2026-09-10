@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from scripts.capability_atlas.model import build
+from scripts.capability_atlas.goals import prerequisite_mermaid, routes
 from scripts.capability_atlas.render import (
     catalog,
     document,
@@ -32,6 +33,7 @@ def outputs(root: Path) -> dict[Path, str]:
         "WORKFLOW_TABLE": edge_table(graph, "workflow"),
         "FEATURES": catalog(graph),
         "TILES": tile_catalog(graph),
+        "CAPTURE_GOALS": routes(graph),
         "FEATURE_COUNT": str(len(graph["features"])),
         "TILE_COUNT": str(len(graph["tiles"])),
     }.items():
@@ -42,6 +44,7 @@ def outputs(root: Path) -> dict[Path, str]:
         public / "graph.json": json.dumps(graph, indent=2, ensure_ascii=False) + "\n",
         public / "system.mmd": mermaid(graph, "system"),
         public / "capture-workflow.mmd": mermaid(graph, "workflow"),
+        public / "capture-goals.mmd": prerequisite_mermaid(graph),
         root / "docs/architecture/CAPABILITY_ATLAS.md": document(graph),
     }
 

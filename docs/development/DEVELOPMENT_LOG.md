@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9907 · Guided Capture Outcomes
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9907; #9908; epic #9906
+- **Branch:** feat/9907-capture-goal-wizard
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9931
+- **Paths:** `src/tools/capture_rig`; capability graph/generator; matching tests and guide.
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-10 (a74d5ebd2; 600 integrated regressions, normal push hooks, scoped mypy and Qt/browser review pass)
+- **Summary:** Standard Qt outcome wizard shares typed map metadata and existing editors/readiness; capture-owned resume, optional My Clubs, background status and safe map-plan import.
+- **Next step:** Complete remote CI and merge #9931; retain advanced-route limits and calibration/fleet follow-up.
+
 ### DL-#9912 · Impact Shaft Provider Integration
 
 - **State:** in_review
@@ -36,13 +49,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** shipped
 - **Owner:** codex
 - **Issue:** #9914
-- **PR:** #9918 (merged)
+- **PR:** #9918
 - **Branch:** feat/c3d-reference-overlay-9914
 - **Paths:** src/motion_capture
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`6f2d63325` merge; protected CI, 20 club assets)
+- **Last verified:** 2026-09-09 (`6f2d63325`; merged reference/Capture Rig suite, 20 club assets)
 - **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
-- **Next step:** Retain fitting and display regressions.
+- **Next step:** Reference implementation merged6f2d63325; completion docs merged in #9922.
 
 ### DL-#9905 · Player Bag and Capture Equipment
 
@@ -50,12 +63,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #9905; epic #9902
 - **Branch:** feat/9905-player-club-bag
-- **PR:** not created
+- **PR:** #9923 (merged5ada5e6a6827; wizard entry under #9906)
 - **Paths:** club_data/player_clubs.py; rig/capture_notes.py and equipment.py; Capture Rig bag/editor/library; model/session.py; matching tests, guide and generated maps.
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (working tree;652 broad regressions and69 focused/map/parity checks pass; visual QA and3020-file LoD pass)
+- **Last verified:** 2026-09-09 (SELF main integration;741 standard capture/reference/model/map tests pass,2 deselected; visual QA and3031-file LoD pass)
 - **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence without unsupported club constraints. Dialog visual review passed with Segoe UI.
-- **Next step:** Finish broad qualification and publish; connect wizard entry under #9906 before closing #9905.
+- **Next step:** Publish the implemented wizard entry under #9906 before closing #9905.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
@@ -238,16 +251,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9830 · Independent Shooting Accuracy
 
-- **State:** shipped
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9830
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9841
 - **Branch:** fix/9830-independent-shooting-convergence
-- **Paths:** src/shared/python/optimization; docs/development/shooting_convergence_9830_turnover.md
+- **Paths:** optimization reference/defect contracts and docs/development/shooting_convergence_9830_turnover.md
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-09 (merged 28d9bf79e)
-- **Summary:** Adaptive reference defects; 21 native Bioptim/Casadi 3.6.7 passes. Casadi 3.8 failure and physical limits remain in the linked turnover.
-- **Next step:** Preserve recorded runtime/physical limits.
+- **Last verified:** 2026-09-09 (75 reference/live tests pass in 101.48 s; all three formerly skipped native comparisons pass in 2.78 s after Pinocchio installation; 13 degradation/registry tests pass; root lint/format and two-module mypy pass)
+- **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
+- **Next step:** Publish c2a8d5b6e through normal hooks and follow #9841 protected CI. It integrates main 438bd3282 without changing validated optimization paths; regenerated inventory passes ten tests, root pinned Ruff and SPEC pass. The combined Bioptim 3.6.7 OCP, real factory/isolation and dependency suite passes 21 tests in 162.06 s. The 3.8 RK4 solve remains unsuccessful even at a 1,000-iteration budget; factory compatibility does not qualify that solver combination. Physical/acoustic validation remains open.
 
 ### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
 
@@ -256,11 +269,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #9825
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9826
 - **Branch:** fix/9825-preserve-reviewed-claims
-- **Paths:** docs/development/claim_preservation_9825_turnover.md; manufactured registration and evidence
+- **Paths:** manufactured claim registration, integration/native contracts, governed research evidence, canonical publication and claim_preservation_9825_turnover.md.
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-09 (merged a410ae705)
-- **Summary:** Preserves 328 reviewed outcomes; 128 strict contracts and 11 publication controls pass. Linked turnover retains full provenance and physical limits.
-- **Next step:** Preserve reviewed claim boundaries.
+- **Last verified:** 2026-09-08 (128 strict native contracts; native/rolling/publication CI passes at e93ef5224; stale PDF regression reproduced and repaired, all 11 publication tests pass with five inherited warnings; changed-file Ruff/format pass)
+- **Summary:** Actual reconciliation now preserves reviewed evidence/order and refuses changed science; six real-path failures become 11 passes. Current pinned engines regenerate deterministic provenance with unchanged numerical results; two expected-failure exemptions are removed. All 328 outcomes remain unchanged; the generated census/PDF is refreshed and reviewed.
+- **Next step:** PR #9826 merged as a410ae705 from fced8c0d6 at 2026-09-09T01:12:29Z. Merge is verified; queued auxiliary jobs are not claimed passed. Continue numerical follow-up #9830 and the separate physical/acoustic qualifications; preserve historical evidence.
 
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 
