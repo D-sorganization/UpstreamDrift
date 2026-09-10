@@ -8,6 +8,7 @@ owners' module identities. No imports or aliases are changed in the GUI process.
 from __future__ import annotations
 
 import json
+from importlib import metadata
 import logging
 import sys
 from argparse import ArgumentParser
@@ -21,23 +22,42 @@ SCHEMA = "capture-reference-worker/1"
 LOGGER = logging.getLogger(__name__)
 
 
+PROVIDER_FILE = Path("shared/python/sidekick/lab/mocap/reference_placements.py")
+WORKER_FILE = Path("src/tools/capture_rig/reference_calibration/worker.py")
+
+
+def _provider_root(root: Path) -> Path:
+    vendor = root / "vendor" / "ud-tools" / "src"
+    if vendor.exists():
+        return vendor
+    try:
+        distribution = metadata.distribution("upstream-drift")
+    except metadata.PackageNotFoundError as exc:
+        raise ValueError("The selected Tools provider is unavailable") from exc
+    files = {str(path).replace("\\", "/") for path in distribution.files or ()}
+    if Path(distribution.locate_file("")).resolve() != root or not {
+        PROVIDER_FILE.as_posix(),
+        WORKER_FILE.as_posix(),
+    }.issubset(files):
+        raise ValueError("The installed provider does not belong to this application")
+    return root
+
+
 def _configure_provider() -> None:
     root = Path(__file__).resolve().parents[4]
-    vendor = root / "vendor" / "ud-tools" / "src"
-    if not (
-        vendor / "shared/python/sidekick/lab/mocap/reference_placements.py"
-    ).is_file():
+    provider = _provider_root(root)
+    if not (provider / PROVIDER_FILE).is_file():
         raise ValueError(
             "The selected Tools provider does not support reference placements"
         )
     paths = [
-        vendor,
-        vendor / "shared/python",
-        vendor / "python/src",
+        provider,
+        provider / "shared/python",
+        provider / "python/src",
         root,
         root / "src",
     ]
-    sys.path[:0] = [str(path) for path in paths]
+    sys.path[:0] = list(dict.fromkeys(str(path) for path in paths))
 
 
 def _dispatch(request: dict[str, Any]) -> dict[str, Any]:

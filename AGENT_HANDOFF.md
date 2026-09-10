@@ -2,7 +2,7 @@
 
 Active #9898/#9900: read `docs/development/common_reference_calibration.md` and
 DL-#9898. PR #9946 in isolated `UpstreamDrift-common-calibration`;
-Provider merge732553479 local; final qualification pending.
+Installed-worker repair SELF; corrected wheel pending.
 Preserve apps54812/61500, atlas2963 and provider-pin ownership.
 See canonical checkpoint for validation and remaining acceptance.
 
