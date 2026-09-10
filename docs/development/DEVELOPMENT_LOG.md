@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9905 · Player Bag and Capture Equipment
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9905; epic #9902
+- **Branch:** feat/9905-player-club-bag
+- **PR:** not created
+- **Paths:** club_data/player_clubs.py; rig/capture_notes.py and equipment.py; Capture Rig bag/editor/library; model/session.py; matching tests, guide and generated maps.
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (working tree;652 broad regressions and69 focused/map/parity checks pass; visual QA and3020-file LoD pass)
+- **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence without unsupported club constraints. Dialog visual review passed with Segoe UI.
+- **Next step:** Finish broad qualification and publish; connect wizard entry under #9906 before closing #9905.
+
 ### DL-#9915 · Verified Agent Context
 
 - **State:** in_review
@@ -29,19 +42,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-09; five context/pin/CI tests and 12/12 navigation tasks pass against provider candidate82151279f. Boundary tests pass. CI remediation registers agent_context in the canonical documentation catalog and uses existing full-SHA action pins and explicit unit/integration suite markers. Final published provider and peer #9916 seam repairs remain pending.
 - **Summary:** Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Parent epic Repository_Management#1629 remains active; no subscription infrastructure is required.
 - **Next step:** PR #9920 carries the candidate pin and a required provider-publication gate. Repin the final merged provider and verify all required checks.
-
-### DL-#9914 · C3D Reference Fitting
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #9914
-- **PR:** #9918
-- **Branch:** feat/c3d-reference-overlay-9914
-- **Paths:** src/motion_capture
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`a523a77f2`; reference/Capture Rig suite, 20 club assets)
-- **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
-- **Next step:** Qualify and merge #9918; #9917 integrated.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 

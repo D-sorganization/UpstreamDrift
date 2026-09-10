@@ -1,30 +1,91 @@
-# C3D Reference Fitting Handoff
+# Player Bag and Capture Equipment Handoff
 
-- Repository/worktree: `D-sorganization/UpstreamDrift`, `../UpstreamDrift-reference-9914`.
-- Branch: `feat/c3d-reference-overlay-9914`; baseline `7c09642df`; commit SELF.
-- Governing epic: #9914; PR #9918; development entry DL-#9914.
-- Complete: marker profiles, URDF and compiled-MJCF tree adapters, root seed,
-  existing continuous fit orchestration, saved jobs and library assets,
-  fixed placement estimator, standalone keyframe graphic, operator guide.
-  Expanded scope adds measured club edges, shared 3D ellipsoid projection with
-  adjustable alpha/radius, and saved reversible handedness before scene placement.
-- Validation: RED observed before each new module; 177 combined reference/UI/solver tests pass;
-  new two-camera renderer, preview, identity and custom-model contracts pass
-  on combined main 18c8f922e. Normal pre-push gates pass on 74e867786.
-  Exact commands are in the epic document.
-- Evidence: Corrected positive-length model survey bundles under `../reference-fit-artifacts-9914`.
-  Twenty corrected bundles verified; first driver fit was withdrawn for a negative length.
-  Tracked survey evidence: docs/development/reference_fit_qualification.json. Native OpenSim adapter and MyoSuite anatomy
-  are unavailable, explicitly recorded rather than replaced with a fallback.
-- Display evidence: `reference_display_qualification.json` records twenty club
-  assets derived from exactly unchanged qualified body coordinates. The external
-  `reference-display-library.zip` contains assets and a reproduction script.
-  Full reference/Capture Rig selection and targeted missing-club preview tests pass.
-- Coordination: `codex-reference-9914-20260909`, lease and reference UI paths
-  registered. #9917 integrated, concurrent branch fixes preserved in d874062a5.
-- Next: normal push and protected PR #9918 checks. Do not close before merge.
+## Identity
 
-# Attributed Club Catalog Handoff
+- Repository: D-sorganization/UpstreamDrift.
+- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-bag.
+- Branch: feat/9905-player-club-bag; baseecab78b11 (catalog PR #9919).
+- Implementation: uncommitted working tree; PR not created.
+- Governing issue: #9905, epic #9902; development entry DL-#9905.
+- Session: capture-product-01a08427-player-bag; lease through01:00UTC; scoped presence renewed through01:45UTC.
+
+## Current Work
+
+PlayerClub/PlayerBag/CaptureClubSnapshot extend the existing club-data authority.
+Catalog bases and player overrides stay separately inspectable. Capture snapshots
+bind to the portable capture ID and verify a content revision. The equipment adapter
+uses the existing atomic document writer, keeps prior capture selections in
+`equipment_revisions`, rejects stale bag saves and reports corrupt records.
+
+My Clubs now opens from the header and selected library capture. Catalog search
+exposes source links; custom clubs, measured/estimated/unknown quantities, canonical
+unit controls, notes, archive/restore and assignment have visible outcomes and help.
+Editable copies rebind equipment to their new capture ID. Portable notes moved to
+rig/capture_notes.py with compatible library re-exports; rig/equipment.py is the
+headless reader. Model session write_fit stores the exact selected club, eligible
+SI context and withheld reasons in hashed provenance, with no applied club constraint.
+
+652 capture/model/catalog/inventory tests pass. Initial editor TDD failed on the
+missing module before implementation. Visual review passed at760x600 /640x500;
+Windows offscreen QA required explicitly loading Segoe UI, with no production font
+change. Evidence: TEMP/player-bag-visual-katpe_dp/\*-font.png. Full Ruff lint/format
+(6880 files), scoped mypy and architecture/doc budgets pass. Five new LoD chains
+were repaired using the player identity facade and local evidence values. The3020-file
+LoD scan passes with490 baseline occurrences and60 reductions. Final69 focused tests
+plus map/parity checks pass (11 existing warnings). Wizard entry remains
+required under #9906 before #9905 closes. No implementation commit yet.
+
+Only byte-identical repeated Field Reference tables were removed from the development
+log to make room for the new entry: all four original tables had SHA256
+43401899f2017f08b0f33e6d9c818eb210f76476f5874f176b242f7d2dbcc725.
+The first remains; every feature entry and unique description is preserved.
+
+## Completed Parent Work
+
+Capture UX #9917 merged to remote main8fce9f238ce89876dd363fb41b4ba1169a87d1b6
+at2026-09-09T22:53:40Z. All445 capture/parity tests and protected checks passed.
+The live test app is childPID61500, venv launcherPID30900, running in the separate
+UpstreamDrift-capture-setup checkout. It is source-identical to the merged capture
+code. Initial source launch needed PYTHONPATH pointing at that checkout's root,
+src and src/shared/python. The oldPID50860 app exited. Preserve the current window.
+
+Catalog/source PR #9919 merged2026-09-09T23:35:01Z atmain01831aa4c580ecb5065477c8219168064b629443.
+Its original unit gate passed14929 tests but failed only generated divergence
+inventory freshness. Concurrent remote commit ecab78b11 regenerated that inventory;
+it was preserved by fast-forward and protected CI passed before merge. Auxiliary
+manufactured authority/rolling jobs were still queued when inspected. Catalog and
+source presence sessions were released; the issues remain open pending the bag/wizard.
+
+## Remaining Goal and Coordination
+
+- Everyday reference calibration #9897 (#9898-#9901), club bag #9902, wizard #9906
+  (#9907-#9909) and fleet adoption remain active. Existing product/editing/drawing/
+  overlay epics shipped through #9896. Gasification mapping is planned for future
+  cheaper agents per user direction; do not implement that mapping now.
+- Reference task #9914/#9918 owns headless fitting and a positive-length solver fix
+  in reconstruct/model/fit.py. Do not edit that path without coordination.
+- Current fitting models end at wrists/hands. #9914 owner explicitly confirmed no
+  overlap with our session.py/write_fit changes. Their fit.py and new reference
+  appearance/volumes/control files remain theirs. No invented club constraint.
+- Tools #5136 numerical repair and #5140 moving-reference solver remain unmerged.
+  Rust pre-checkout retry passed. Both rate shards in run34407390506 timed out at99%;
+  Python3.11 leaves TestHoldFraction::test_matches_the_hand_counted_fixture unreported.
+  Evidence is on Tools#5114; its prior Qt-cleanup candidate remains unqualified.
+- Tools private Gasification checkout fails; user was asked via async input to have
+  the Actions credential owner restore read access. Current App cannot inspect/update
+  secrets (403). Never bypass the contract check or paste/mint a temporary secret.
+- Fleet audit remains39/41. Context/Obsidian task owns replacements Tools#5138 and
+  Gasification#4944 and agreed to sync the central agent-communication block in both
+  AGENTS/CLAUDE. Authority537f9ad087dd3afdda60d28dd2e54d1ac7583864. Verify after merge.
+- Goal stays active; no scientific accuracy/publication approval is implied by tests.
+
+## Next Steps
+
+1. Commit/publish the qualified #9905 change with normal hooks; merge only green protected CI.
+2. Connect My Clubs to the goal wizard under #9906; retain #9905 open until that entry exists.
+3. Continue everyday-reference calibration consumers and qualification after Tools gates clear.
+4. Verify final Tools/Gas fleet policy replacements after their owner merges them.
+5. Keep the full goal active; no unsupported equipment model constraint is claimed.
 
 ## Verified Agent Context: #9915
 
@@ -35,80 +96,3 @@
 - Compatibility: scientific/manual authority is unchanged. Catalog status does not prove runtime availability. Reviews declare inspected evidence; test execution remains separate. Existing communication and handoffs remain authoritative.
 - Current limits: candidate provider82151279fae003f015a6733f384770ee4d2aec32 is locally qualified against Tools PR #5141. Required CI rejects unpublished provider revisions; final published pin and protected delivery remain pending. Preserve the parallel shaft-provider ancestry and UD #9916 seam repairs. The context job now uses repository-standard full-SHA actions, and docs/index.md registers the new map.
 - Ordered continuation: (1) complete provider package, integrity and normal hook checks; (2) publish and qualify protected Tools delivery; (3) pin consumers, run integration tests, record reviewed contracts, generate/inspect maps and qualify consumer CI; (4) reconcile fleet guide and epic against actual delivered PRs.
-
-## Identity and Scope
-
-- Repository: D-sorganization/UpstreamDrift.
-- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-clubs`.
-- Branch: `feat/9903-player-club-catalog`; implementation commit: SELF.
-- Base: `18c8f922e87c92f6f518da05c0819f71ce3193ba` (merged capture-profile PR #9910).
-- Issues: #9903 and #9904; epic #9902; entries DL-#9903 and DL-#9904.
-- Pull request: #9919 (open); head167320881 published through normal hooks.
-- Session: `capture-product-01a08427-club-catalog`; central lease and presence active.
-
-Extend the existing club-data authority so unknown measurements, source attribution,
-custom builds and conflicting claims survive exchange and cannot silently become
-model inputs. The larger capture-product goal remains active: everyday calibration
-#9897, club sources/bag #9902, guided wizard #9906 and fleet rollout all remain open.
-Gasification mapping is planned for future cheaper agents, per user direction.
-
-## Implementation and Compatibility
-
-- `club_data/catalog.py`: immutable optional attributed claims, component identity,
-  source/license metadata, deterministic build IDs and content revisions; explicit
-  SI consumption rejects unverified/suggested values, ambiguous MOI and conflicts.
-- `catalog_io.py`: bounded versioned JSON/CSV, validates all records before returning,
-  no automatic overwrite. CSV has flat identity/property columns and JSON source cells.
-- `catalog_legacy.py`: old default-filled ClubSpecification values stay unverified;
-  do not infer which values were measured. The old loader behavior is unchanged.
-- Public facade retains legacy names lazily; catalog imports avoid PyQt/pandas/openpyxl.
-- Unit factors reuse the pinned Tools `sidekick.utils.unit_constants` authority.
-- Guide and generated capability map describe the data contract only. The bag/capture
-  UI remains #9905 and the qualified public source catalog/update process is implemented under #9904 and awaits publication qualification.
-- No scientific solver or calculation inventory approval is claimed. Existing
-  `blocked-inventory-required` manual release state and UP-D0/UP-D1 remain authoritative.
-
-## Validation
-
-- TDD: first test collection failed because `club_data.catalog` did not exist.
-- `python3 -m pytest tests/unit/test_club_catalog.py tests/unit/test_club_data_loader.py -q --no-cov -o addopts=''`: 63 passed, 8 existing import deprecation warnings.
-- `python3 -m mypy src/shared/python/club_data/catalog.py src/shared/python/club_data/catalog_io.py src/shared/python/club_data/catalog_legacy.py --follow-imports=silent --ignore-missing-imports`: passes after exchange typing corrections.
-- Scoped Ruff lint/format, architecture, map and document budgets pass. Whole-source
-  LoD reports three unchanged main capture chains fixed by pending PR #9917; no club
-  source violations. Normal commit/pre-push hooks remain to run. PR #9919 is published.
-
-## Concurrent Work and Risks
-
-Capture UX PR #9917 is owned separately in `UpstreamDrift-capture-setup`. Preserve
-the currently launched app in `UpstreamDrift-ubuntu-ci`, PID50860. Reference agent
-#9914 owns headless C3D fitting; impact agent #9912 owns provider pinning. Shared
-SPEC/development-log conflicts must preserve each issue's entry.
-
-This isolated worktree contains only task-owned changes. Do not alter other agents'
-branches or the vendored Tools checkout. Capture UX #9917 merged to remote main at8fce9f238ce89876dd363fb41b4ba1169a87d1b6 and is integrated by normal merge; source files were conflict-free. Its445 capture/parity tests passed; generated maps are regenerated after combining source registries. Latest visible test launch is Python child PID61500 (venv launcher PID30900) in UpstreamDrift-capture-setup (old PID50860 exited).
-
-The shared reference solver is Tools PR
-#5140; numerical repair is #5136. Their CI is still pending and private downstream
-Gasification checkout remains an external credential issue. Fleet adoption is39/41,
-with replacement owners now confirmed: context/Obsidian task will carry the canonical policy in Tools#5138 and Gasification#4944; audit adoption after merge.
-
-## Next Steps
-
-1. Complete staged validation and normal hooks; publish #9903 contract PR.
-2. Integrate qualified public source entries/update procedure (#9904).
-3. Add bag editing and capture-bound source snapshots (#9905), then verify visible
-   workflow evidence before closing the contract issue and epic.
-4. Continue #9917 protected merge, shared calibration consumer UI, wizard and fleet rollout.
-
-## Change Log
-
-- SELF: implement and qualify optional attributed club contracts and lossless exchange;
-  update DL-#9903, SPEC, public facade and generated architecture references.
-
-- SELF: add three offline manufacturer builds with per-field source/units/status, read-only deterministic review command and separate player overrides. 69 catalog/source/legacy tests and two-module mypy pass; source review uses Titleist T150 2023 and PING G440 MAX HL official tables. Read-only CLI regression also passes. Update DL-#9904 and preserve earlier entries.
-
-- SELF: integrate capture UX501092b27; preserve both issue-keyed logs and all source. Regenerate conflicting map outputs from combined registries.
-
-- SELF: integrate remote main8fce9f238 (tree-identical to501092b27); mark DL-#9913 shipped. Full LoD now passes3013 files with no baseline growth. Preserve club continuation and regenerated maps.
-
-- SELF: publish #9919 at167320881 with118 combined catalog/map/parity tests, full Ruff lint/format (6869 files), LoD and normal hooks passing. Source issues remain open until player workflow #9905 qualifies. Bag implementation is isolated in UpstreamDrift-player-bag, feat/9905-player-club-bag; preserve live Capture Rig childPID61500.

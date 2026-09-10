@@ -80,6 +80,7 @@ from .journey import JourneyPanel
 from .journey_actions import JourneyActions
 from .calibration_actions import CalibrationActions
 from .library_actions import LibraryActions
+from .equipment_actions import EquipmentActions
 from . import multiview
 from .layout import LayoutBar, LayoutStore, PaneExtras
 from .panes import LOG_KEY, TileParts, build_host
@@ -633,6 +634,12 @@ class CaptureRigWidget(QWidget):
             busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
             settings=settings,
         )
+        self.equipment_actions = EquipmentActions(
+            self,
+            library=self.library_actions.library,
+            current_session=lambda: self.media.root if self.media else None,
+            busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
+        )
         self.calibration_actions = CalibrationActions(
             self,
             selection=self.capture.selection,
@@ -699,6 +706,7 @@ class CaptureRigWidget(QWidget):
             toggles=(
                 self.library_actions.library_button,
                 self.library_actions.edit_button,
+                self.equipment_actions.button,
                 self.calibration_actions.button,
                 self.log_toggle,
             ),
@@ -1026,6 +1034,7 @@ class CaptureRigWidget(QWidget):
     def _on_badge(self, readout: str) -> None:
         self.status_strip.set_recording(self.record_bar.phase, readout)
         self.library_actions.refresh()
+        self.equipment_actions.refresh()
         self.calibration_actions.refresh()
 
     def _append_log(self, text: str) -> None:
@@ -1094,6 +1103,7 @@ class CaptureRigWidget(QWidget):
 
     def _apply_workflow(self, media: SessionMedia | None) -> None:
         self.library_actions.refresh()
+        self.equipment_actions.refresh()
         self.calibration_actions.refresh()
         states = workflow.evaluate(media)
         self.workflow.refresh(states)

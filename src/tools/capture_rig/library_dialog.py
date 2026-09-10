@@ -33,6 +33,7 @@ from src.motion_capture.rig.edits import has_analysis
 from . import styling
 from .capture_library import CaptureLibrary, LibraryEntry, read_notes
 from .flow_layout import FlowLayout
+from .equipment_dialog import EquipmentDialog, capture_equipment_text
 from .swing_editor import SwingEditor
 from .coaching_dialog import show_coaching
 from .reference_library_dialog import ReferenceLibraryDialog
@@ -122,6 +123,8 @@ class LibraryDialog(QDialog):
         )
         self.status = QLabel()
         self.status.setWordWrap(True)
+        self.equipment_label = QLabel(capture_equipment_text(None))
+        self.equipment_label.setWordWrap(True)
         self.archive_button = QPushButton("Archive")
         self.archive_button.clicked.connect(self.archive_selected)
         self._build()
@@ -156,12 +159,14 @@ class LibraryDialog(QDialog):
         form.addWidget(QLabel("Swing notes"))
         form.addWidget(self.notes, 1)
         form.addWidget(self._button("Save title and notes", self.save_notes))
+        form.addWidget(self.equipment_label)
         splitter.addWidget(detail)
         splitter.setSizes([520, 340])
         layout.addWidget(splitter, 1)
         actions = FlowLayout(spacing=6)
         for text, callback in (
             ("Open capture", self.open_selected),
+            ("My Clubs…", self.show_equipment),
             ("Edit swing…", self.edit_selected),
             ("Draw References…", self.draw_selected),
             ("Expert References…", self.show_references),
@@ -215,6 +220,7 @@ class LibraryDialog(QDialog):
         self._rows, self._selected, self._baseline = rows, None, ("", "")
         self.title.clear()
         self.notes.clear()
+        self.equipment_label.setText(capture_equipment_text(None))
         self.table.blockSignals(True)
         self.table.setRowCount(len(rows))
         for i, row in enumerate(rows):
@@ -263,6 +269,7 @@ class LibraryDialog(QDialog):
             self.table.blockSignals(False)
             return
         self._selected = entry.root
+        self.equipment_label.setText(capture_equipment_text(entry.root))
         try:
             notes = read_notes(entry.root)
             self.title.setText(notes.title)
@@ -274,6 +281,13 @@ class LibraryDialog(QDialog):
             self.title.clear()
             self.notes.clear()
             self.status.setText(str(exc))
+
+    def show_equipment(self) -> None:
+        try:
+            EquipmentDialog(self.library.root, self._selected, self).exec()
+            self.equipment_label.setText(capture_equipment_text(self._selected))
+        except (OSError, ValueError) as exc:
+            self.status.setText(f"My Clubs could not be opened: {exc}")
 
     def save_notes(self) -> bool:
         if self._selected is None:

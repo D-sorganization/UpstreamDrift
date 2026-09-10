@@ -506,7 +506,7 @@
       "tiles": [
         "capture_rig"
       ],
-      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls.",
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints.",
       "id": "tools.capture_rig"
     },
     {
@@ -1606,7 +1606,7 @@
     {
       "id": "clubs.catalog",
       "title": "Attributed Club Catalog",
-      "description": "Optional component quantities, source claims and build revisions; bag UI tracked in #9905.",
+      "description": "Optional component quantities, source claims and build revisions.",
       "evidence": "src/shared/python/club_data/catalog.py",
       "view": "system"
     },
@@ -1616,6 +1616,13 @@
       "description": "Validated JSON/CSV and offline manufacturer examples; source review preserves player overrides.",
       "evidence": "src/shared/python/club_data/catalog_io.py",
       "view": "system"
+    },
+    {
+      "id": "clubs.bag",
+      "title": "My Clubs",
+      "description": "Catalog/custom clubs, notes, archive and capture-owned equipment snapshots.",
+      "evidence": "src/tools/capture_rig/equipment_dialog.py",
+      "view": "workflow"
     },
     {
       "id": "step.setup",
@@ -2160,15 +2167,42 @@
       "artifact": "Attributed build records",
       "kind": "contract",
       "evidence": "src/shared/python/club_data/catalog_io.py",
-      "constraint": "Catalog contract only; player bag and model binding remain #9905",
+      "constraint": "Validated source claims; player overrides retain catalog provenance",
       "view": "system"
+    },
+    {
+      "source": "clubs.catalog",
+      "target": "clubs.bag",
+      "artifact": "Attributed build and player overrides",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/club_editor.py",
+      "constraint": "Unknown and estimated quantities remain explicit; catalog base is preserved",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "clubs.bag",
+      "artifact": "Selected capture identity",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/library_dialog.py",
+      "constraint": "Assignment is explicit; existing snapshots and reports remain unchanged",
+      "view": "workflow"
+    },
+    {
+      "source": "clubs.bag",
+      "target": "step.fit_model",
+      "artifact": "Selected club snapshot and eligible SI context",
+      "kind": "workflow",
+      "evidence": "src/motion_capture/reconstruct/model/session.py",
+      "constraint": "Current body models apply no club constraints; equipment is recorded in provenance",
+      "view": "workflow"
     }
   ],
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "2f0cab648bc01ef4d6fde999eb4b18bcedf1ee4e9bb36b361ce8e9c097992524",
-    "src/config/capability_connections.json": "66b60272e7bd8d9fbdb6a0825ea274588cc9f3cc90d8f267f510e1a4da150924",
+    "src/config/feature_parity.json": "67a61afcf68e697beeb6bbbef2107a72ff27cd6fdfb950d68c9ddbf40587d724",
+    "src/config/capability_connections.json": "b4b6fe55d40da41fa76878837d0568beebfd74ef15a938add173ae17e06ae502",
     "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e"
   }
 }
