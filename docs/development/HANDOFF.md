@@ -1,7 +1,7 @@
 # Impact Program Handoff Checkpoint — 2026-09-10
 
 - Worktree: C:/Users/diete/Repositories/UpstreamDrift-impact-provider.
-- Branch: docs/9700-impact-handoff; checkpoint SELF; PR not created.
+- Branch: docs/9700-impact-handoff; checkpoint SELF; ready PR #9962.
 - Governing epic #9700; this change updates turnover only. Main baseline:
   9c8afeaabf60f2751ebbd61b32dac98d32546c3e. Preserve peer capture work below.
 - Provider PR #9916 merged as c487265f1ebc9c61a2e124267ad9cd1c96a6c007;
