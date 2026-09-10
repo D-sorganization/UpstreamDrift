@@ -24,6 +24,11 @@ private-checkout404 and rate-shard timeouts remain failures, not passing evidenc
   Review/Repeat recovery action.19 evidence/planner/native-wizard tests pass,
   including switching from reconstruction to editing and finishing after the
   reviewed file disappears. Configured mypy and architecture checks pass.
+  Readiness now retains prerequisite IDs separately from user-facing titles;
+  blocked pages offer named Go to buttons inside their scrollable instructions.
+  Links route only to declared prerequisite pages, disable while busy and hide
+  after satisfaction.28 planner/wizard tests, configured mypy and a native660×560
+  screenshot/click check passed (`capture-wizard-links-native-tn3p0v9p` in TEMP).
 
 - Precision marking adds Pan Image, middle-button drag and Fit Image. Panning
   uses the existing source-pixel transform, clamps to image edges and never emits

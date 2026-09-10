@@ -25,6 +25,12 @@ they do not start a job automatically. Return with **Capture Wizard** after
 working in those controls, then **Refresh Status**. Inspection runs in the
 background so the window remains responsive.
 
+When a prerequisite needs attention, its named **Go to …** button takes you
+directly to that wizard page. Complete or review the input, then return to the
+next step. These links disappear once the input is satisfied and pause while an
+operation is running. A missing reviewed calibration blocks calibrated analysis;
+editing-only routes remain available without loading calibration evidence.
+
 - **Ready for Your Action:** inputs are available; open the tool and complete the step.
 - **Needs Attention:** the explanation identifies missing or changed inputs.
 - **Available / Reviewed:** the required saved artifact or reviewed input is present.

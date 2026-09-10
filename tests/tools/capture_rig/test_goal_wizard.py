@@ -6,7 +6,7 @@ pytest.importorskip("PyQt6")
 from PyQt6.QtWidgets import QWizard
 
 from src.tools.capture_rig.goal_catalog import load_catalog
-from src.tools.capture_rig.goal_planner import Readiness
+from src.tools.capture_rig.goal_planner import Readiness, evaluate
 from src.tools.capture_rig.goal_wizard import CaptureWizard
 from tests.tools.capture_rig.test_pane_layout import _app
 
@@ -105,4 +105,35 @@ def test_small_window_keeps_navigation_visible() -> None:
     wizard.next()
     app.processEvents()
     assert wizard.button(QWizard.WizardButton.BackButton).isVisible()
+    wizard.close()
+
+
+def test_blocked_step_links_use_titles_and_return_to_the_required_page() -> None:
+    app = _app()
+    wizard = CaptureWizard(load_catalog())
+    wizard.choose(["edit"])
+    wizard.show()
+    wizard.next()
+    route = wizard.route
+    states = evaluate(route, {}, view_count=1, calibration_compatible=False)
+    wizard.update_evidence(
+        "Practice Swing", dict(zip(route.step_ids, states, strict=True))
+    )
+    wizard.navigate("capture.selection")
+    page = wizard.step_pages["capture.selection"]
+    button = page.prerequisite_buttons["capture.library"]
+    assert button.isVisible() and button.isEnabled()
+    assert "capture.library" not in page.status.text()
+    assert wizard.step_pages["capture.library"].title() in button.text()
+    button.click()
+    assert wizard.current_step == "capture.library"
+    wizard.update_evidence("Practice Swing", {}, busy=True)
+    assert not button.isEnabled()
+    wizard.update_evidence(
+        "Practice Swing",
+        {"capture.library": Readiness("done"), "capture.selection": Readiness("ready")},
+    )
+    wizard.navigate("capture.selection")
+    app.processEvents()
+    assert not button.isVisible()
     wizard.close()
