@@ -14,6 +14,13 @@ Preserve identifiers and the `parity`, `gap` and `exempt` distinctions.
 Curated architecture connections live in `capability_connections.json`.
 Registry metadata is not a runtime health or scientific approval signal.
 
+The same connections authority now contains `capture_goals` with schema
+`capture-goals/1`. The atlas uses `CaptureGoalCatalog` and `validate_bindings`
+to check unique identifiers, known nodes and workflow keys, valid navigation
+actions and acyclic prerequisites. Its saved plans carry a catalog revision;
+the capture wizard evaluates current inputs when opening them. Architecture
+data-flow edges remain distinct from executable goal prerequisites.
+
 ## Lifecycle and Failures
 
 Run `python3 -m scripts.generate_capability_atlas` after relevant registry

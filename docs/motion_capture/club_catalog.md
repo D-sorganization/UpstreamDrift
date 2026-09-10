@@ -137,3 +137,12 @@ complete club database or measurements of a player's equipment.
 catalog revision without mutating the catalog or override records. Unknown overrides
 can deliberately suppress an unsuitable nominal value. `summarize_record` displays
 missing values as **Unknown** and lists conflicts instead of choosing a winner.
+
+## Local Responsiveness Check
+
+On the Windows/Python3.13 development host, an already-running Qt application
+opened a bag of1,000 catalog-backed clubs (3.47MB) in157ms and filtered it in1.3ms.
+This is a single local smoke measurement, excluding Python startup and network
+storage latency. It does not establish fleet-wide performance. The measured bag
+path does not justify a Rust rewrite; retain the existing shared Qt/unit components
+and profile actual playback or inference delays before changing those backends.

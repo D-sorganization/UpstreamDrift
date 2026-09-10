@@ -1,32 +1,42 @@
 {
   "reviews": {
     "capture-atlas": {
-      "fingerprint": "bad7c86563a37162f88e1d7c7ba319ac7297a5fac474d39effa614542cf4768e",
+      "fingerprint": "1ee0b59c171a929ff02026059eb7bd31ca84a50ebabe70edefa607d7080740a8",
       "inputs": {
-        "docs/agent_context/contracts/capture-atlas.md": "fd8106825354c65141300395169b3142323642464cf4c59d60294764e008a95a",
-        "scripts/capability_atlas/model.py": "49b7423d277ffc751a5b4d3faa3b7adb72373977d7e68ceeed6e1b7baa1d7b68",
-        "scripts/capability_atlas/render.py": "78b5dfe306e355a85ae3d43bbb0362673c711216a9bb8fa14ecbe0dbeac61550",
-        "src/config/capability_connections.json": "b4b6fe55d40da41fa76878837d0568beebfd74ef15a938add173ae17e06ae502",
+        "docs/agent_context/contracts/capture-atlas.md": "2503ea25b72e5667bb364c8264f701010bf7f1688f13cd6a12ded80a459bc370",
+        "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
+        "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
+        "scripts/capability_atlas/render.py": "50329f3dea4d265c205d090c037452ac1d1bad80ce3f35109e71729edc344976",
+        "src/config/capability_connections.json": "bbff606295ce574fde2a1b5f24346f9a3d884896ffee312b8963205889e6451f",
+        "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
+        "src/tools/capture_rig/goal_planner.py": "a67f7983c361175439d99c2508c257707aaf07271fb3711047b47e87950ff019",
         "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e",
         "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be",
+        "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
+        "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414",
         "tests/tools/capture_rig/test_workflow.py": "f583fecf6ebe50173a9e5b5108f4b105ec8636cec926ce665393fcd90669dbe2"
       },
-      "rationale": "Reviewed merged main5ada5e6a6 equipment workflow edges: explicit capture assignment, immutable snapshots, provenance and current absence of body-model club constraints. Updated contract preserves that limit; 15 atlas/workflow tests pass."
+      "rationale": "Reviewed merged pure prerequisite resolver, allowed navigation bindings, optional steps, incompatible camera-route rejection and workflow-owned readiness. Saved plans do not prove artifact completion or calibration. Added planner/catalog/render sources and tests to this boundary. All30 atlas/workflow/goal-catalog/goal-planner tests pass."
     },
     "launcher-atlas": {
-      "fingerprint": "33800fdda00c119f3243a8fe659bd6ad29a6894cbf488a17dd173701fc30345a",
+      "fingerprint": "0670d571500941fbf598d7dc91f521799d2e71bd2f3deee46383158963c871e4",
       "inputs": {
-        "docs/agent_context/contracts/launcher-atlas.md": "9cc9ae26bbf66ed47cc7877a7ae1fd14b08000fff4eca950f6a7a1a469ff279b",
-        "scripts/capability_atlas/model.py": "49b7423d277ffc751a5b4d3faa3b7adb72373977d7e68ceeed6e1b7baa1d7b68",
-        "scripts/capability_atlas/render.py": "78b5dfe306e355a85ae3d43bbb0362673c711216a9bb8fa14ecbe0dbeac61550",
-        "src/config/capability_connections.json": "b4b6fe55d40da41fa76878837d0568beebfd74ef15a938add173ae17e06ae502",
+        "docs/agent_context/contracts/launcher-atlas.md": "cb12607bcdc38e10ac6c802368a9de7b3e424b0d7db9aa7dd22edf01cbe9e9fe",
+        "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
+        "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
+        "scripts/capability_atlas/render.py": "50329f3dea4d265c205d090c037452ac1d1bad80ce3f35109e71729edc344976",
+        "src/config/capability_connections.json": "bbff606295ce574fde2a1b5f24346f9a3d884896ffee312b8963205889e6451f",
         "src/config/feature_parity.json": "67a61afcf68e697beeb6bbbef2107a72ff27cd6fdfb950d68c9ddbf40587d724",
         "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
         "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
         "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
-        "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be"
+        "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
+        "src/tools/capture_rig/goal_planner.py": "a67f7983c361175439d99c2508c257707aaf07271fb3711047b47e87950ff019",
+        "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be",
+        "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
+        "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Reviewed merged main5ada5e6a6 equipment and player-club nodes in capability_connections.json and generated atlas. Registry ownership and parity semantics are unchanged; 15 atlas/workflow tests pass."
+      "rationale": "Reviewed merged capture-goals/1 authority, CaptureGoalCatalog schema validation and node/workflow binding validation. Atlas prerequisite routes remain distinct from architecture data-flow edges. Existing registry IDs and gap states remain authoritative. Atlas, capture workflow, goal catalog and goal planner suites pass all30 tests."
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",

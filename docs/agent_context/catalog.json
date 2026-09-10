@@ -33,7 +33,10 @@
       "sources": [
         "scripts/capability_atlas/model.py",
         "scripts/capability_atlas/render.py",
-        "src/config/capability_connections.json"
+        "src/config/capability_connections.json",
+        "scripts/capability_atlas/goals.py",
+        "src/tools/capture_rig/goal_catalog.py",
+        "src/tools/capture_rig/goal_planner.py"
       ],
       "documentation": ["docs/architecture/CAPABILITY_ATLAS.md"],
       "tests": ["tests/scripts/test_capability_atlas.py"],
@@ -290,9 +293,16 @@
         "src/config/feature_parity.json",
         "src/config/launcher_manifest.json",
         "src/config/launcher_manifest_loader.py",
-        "src/config/models.yaml"
+        "src/config/models.yaml",
+        "scripts/capability_atlas/goals.py",
+        "src/tools/capture_rig/goal_catalog.py",
+        "src/tools/capture_rig/goal_planner.py"
       ],
-      "tests": ["tests/scripts/test_capability_atlas.py"]
+      "tests": [
+        "tests/scripts/test_capability_atlas.py",
+        "tests/tools/capture_rig/test_goal_catalog.py",
+        "tests/tools/capture_rig/test_goal_planner.py"
+      ]
     },
     {
       "id": "capture-atlas",
@@ -304,11 +314,16 @@
         "scripts/capability_atlas/model.py",
         "scripts/capability_atlas/render.py",
         "src/config/capability_connections.json",
-        "src/tools/capture_rig/workflow.py"
+        "src/tools/capture_rig/workflow.py",
+        "scripts/capability_atlas/goals.py",
+        "src/tools/capture_rig/goal_catalog.py",
+        "src/tools/capture_rig/goal_planner.py"
       ],
       "tests": [
         "tests/scripts/test_capability_atlas.py",
-        "tests/tools/capture_rig/test_workflow.py"
+        "tests/tools/capture_rig/test_workflow.py",
+        "tests/tools/capture_rig/test_goal_catalog.py",
+        "tests/tools/capture_rig/test_goal_planner.py"
       ]
     }
   ],
