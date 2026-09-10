@@ -124,12 +124,19 @@ def resolve(catalog: CaptureGoalCatalog, selected: Iterable[str]) -> CaptureRout
 class Readiness:
     status: State
     reason: str = ""
+    prerequisites: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.status not in {"done", "ready", "blocked", "skipped"}:
             raise ValueError("Unknown capture readiness status")
         if not isinstance(self.reason, str):
             raise TypeError("Capture readiness reason must be text")
+        if not isinstance(self.prerequisites, tuple) or any(
+            not isinstance(key, str) for key in self.prerequisites
+        ):
+            raise TypeError(
+                "Readiness prerequisites must be a tuple of step identifiers"
+            )
 
 
 def evaluate(
@@ -178,7 +185,9 @@ def evaluate(
         ]
         if missing:
             state = Readiness(
-                "blocked", f"Complete or refresh prerequisite: {', '.join(missing)}"
+                "blocked",
+                f"Complete or refresh prerequisite: {', '.join(missing)}",
+                tuple(missing),
             )
         result[step.id] = state
     return tuple(result[step.id] for step in route.steps)
