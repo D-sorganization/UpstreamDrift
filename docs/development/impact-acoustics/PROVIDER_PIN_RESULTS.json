@@ -157,7 +157,7 @@
     },
     "realtime": "Explicit review exception under #8942, expires 2026-10-09. Pre-existing seven-file UD facade and different transport preserved; migration remains open. No guard logic changed.",
     "catalog": "Compare to independently resolved committed HEAD gitlink; no frozen revision literal or index/working-tree substitution.",
-    "wheel": "Rebuild at this exact candidate remains required; earlier wheel evidence retains its original revisions.",
+    "wheel": "32a8b36ec wheel with declared gui-tools extra passes isolated installed checks; web assets omitted. Final reviewed Tools #5143 descendant still requires exact-pin qualification.",
     "exact_pin_source_controls": {
       "tests": 271,
       "failures": 0,
@@ -169,6 +169,52 @@
       "source_index_tree": "ef55dd7c77df18c9e7f6bd29ea6352d9af1b0ccf",
       "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
       "note": "Committed-source catalog assertion observes HEAD gitlink; rerun after committing the new gitlink."
+    },
+    "main90_source_controls": {
+      "tests": 271,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 103.097,
+      "warnings": 20,
+      "junit_sha256": "3da7fded4154be9540191728e4b016320d8383177e304340cfe4ba2f9bc3bf7b",
+      "source_index_tree": "f89a8a06e03ecd0177022441b30bc39f189f9c72",
+      "main": "90c3d0b770cd0ced3e14c947c68a29555f14e877",
+      "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf"
+    },
+    "installed_ui_wheel": {
+      "consumer_revision": "32a8b36eccec093f29186e7f33bd501f95ae405e",
+      "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
+      "wheel_sha256": "001ce49f29577be24091eeadf6c439845ef85a928d79256c0df519e5a3b60725",
+      "wheel_bytes": 210520353,
+      "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
+      "origins": {
+        "shared.python.golf_club.shaft_model_data": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
+        "shared.python.theme.api": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py",
+        "shared.python.theme.color_derivation": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\theme\\color_derivation.py",
+        "shared.python.theme.layout_metrics": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\theme\\layout_metrics.py",
+        "src.shared.python.realtime": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\realtime\\__init__.py",
+        "shared.python.ui.function_generator_widget": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\ui\\function_generator_widget.py",
+        "shared.python.ui.toast": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\ui\\toast.py"
+      },
+      "versions": {
+        "upstream-drift": "2.1.3",
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "pydantic": "2.13.5"
+      },
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "checks_passed": true,
+      "gui_widget_constructed": true,
+      "installed_extra": "gui-tools",
+      "qualification": "Python provider and offscreen Qt widget installation; web UI assets omitted; physical qualification open",
+      "pip_check": "passed; no broken requirements found"
+    },
+    "merged_numerical_provider": {
+      "pr": 5133,
+      "head": "0cd6dce22f5762ee0c6342000fb035eaa76579d5",
+      "merge": "2c9a8d6c963cec2f140f2ee17469d27e506a3ba1",
+      "launcher_followup_issue": 5143
     }
   }
 }

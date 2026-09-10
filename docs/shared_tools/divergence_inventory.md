@@ -38,7 +38,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `chat` | 40 | 17 | 10 | 1 | 0 | 57 |
 | `chat_contracts` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `cli_utils.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `club_data` | 0 | 0 | 0 | 5 | 0 | 0 |
+| `club_data` | 0 | 0 | 0 | 10 | 0 | 0 |
 | `codemap` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `compatibility.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `config` | 0 | 2 | 0 | 13 | 0 | 2 |
@@ -127,7 +127,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **424** | **278** | **124** | **1204** | **655** | **702** |
+| **Total** | **424** | **278** | **124** | **1209** | **655** | **702** |
 
 ## Diverged Files by Package
 

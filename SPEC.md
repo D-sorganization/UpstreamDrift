@@ -4162,6 +4162,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | 2026-09-09 | #9893 | Retain generated fleet guidance with precise optional/external path checks and exact managed-notice handling; required local paths and substantive duplicates remain enforced. |
 | 2026-09-09 | #9890 | Add instructor placement, independent expert event pairing, notes, undo/reset and guarded stale-evidence review; keep responsive comparison workflow and capability diagrams aligned. |
+
+| 2026-09-09 | #9903 | Extend the club-data authority with optional attributed component properties, deterministic build/revision identity, explicit inference gates, validated JSON/CSV exchange and an unverified legacy adapter. Offline manufacturer examples, deterministic review and player override projection implement #9904; player bag UI remains #9905. |
 | 2026-09-09 | #9875 | Industrial readiness execution index (epic #9539): src/config/industrial_readiness.json reconciles the four priority children against 10caddd219ce213a914fa295661929e4fbf1b686 rather than the audit snapshot — U1 (#9477) and U2 (#9407) merged with SHAs, tests and user-visible acceptance evidence; U3 (#8820, dashboard exports still carry no engine/model/run identity) and U4 (#9417, deploy/ empty and no artifact beyond the wheel) re-confirmed open with a dependency and an ordered narrow-PR plan. industrial_readiness_loader.py enforces the contract that keeps the record honest (no completion claim without a 40-char merge SHA, a test path and acceptance evidence; no open entry without an owner and plan; every cited path must exist; every open issue must appear in an acceptance blocker list; 
 elease_status cannot read 
 eady while anything is outstanding, and is locked). scripts/generate_industrial_readiness_index.py renders docs/operations/industrial-readiness-index.md under a byte-for-byte freshness gate. 25 tests in 	ests/config/industrial_readiness/. |
@@ -4262,6 +4264,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-09 | #9914 | Add reproducible C3D reference fitting with explicit marker profiles, native URDF/MJCF kinematics, retained observations and fit diagnostics, reference-library output, and fixed spatial alignment for the existing camera comparison pipeline. |
 | 2026-09-09 | #9913 | Add persistent swing/capture feedback, durable history, linked detector/help/workflow status and retained Qt views; bounded renderers and panel methods preserve architecture rules. |
 | 2026-09-09 | #9911 | Keep preview discovery import and timeout failures within the existing error status. |
 | 2026-09-09 | #9898 | Add visible zoom-aware intrinsic profile review, verified rig exports and immutable revisions; track everyday-reference, club-catalog and guided-setup epics #9897/#9902/#9906. |

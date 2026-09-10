@@ -1,0 +1,9 @@
+{
+  "schema_version": "reference-fit-job/1.0",
+  "source": "data/C3D_TA_Driver.c3d",
+  "output": "../reference-runs/tour-driver",
+  "models": ["golfer"],
+  "stride": 12,
+  "max_iterations": 50,
+  "fit_lengths": true
+}
