@@ -15,6 +15,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PyQt6")
 
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QSettings
 
 from src.motion_capture.rig.binding import locate_plan
 from src.motion_capture.rig.plan import RigPlan
@@ -217,11 +218,17 @@ def test_locate_plan_binds_views_to_cameras_with_indices(tmp_path: Path) -> None
         locate_plan(plan, cams[:1])
 
 
-def test_tile_prefills_the_lab_plan_and_a_fresh_session_and_toggles_preview() -> None:
+def test_tile_prefills_the_lab_plan_and_a_fresh_session_and_toggles_preview(
+    tmp_path: Path,
+) -> None:
     _app()
-    widget = gui.CaptureRigWidget()
+    settings = QSettings(str(tmp_path / "preview.ini"), QSettings.Format.IniFormat)
+    library = tmp_path / "library"
+    settings.setValue("capture/library_root", str(library))
+    widget = gui.CaptureRigWidget(settings=settings)
     assert widget.capture.plan_edit.text().endswith("lab_three_view_sonnet.json")
-    assert "sessions" in widget.capture.session_edit.text()
+    assert widget.capture.session_dir().parent == library / "captures"
+    assert not widget.capture.session_dir().exists()
     assert "preview" in widget.enabled_actions()
     widget.preview._factory = _synthetic  # no cameras on the test host
     widget.toggle_preview(on=True)

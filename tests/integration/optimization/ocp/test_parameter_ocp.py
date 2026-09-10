@@ -35,6 +35,7 @@ from src.shared.python.optimization._swing_models import (  # noqa: E402
     ClubModel,
     GolferModel,
 )
+from src.shared.python.optimization.ocp.bioptim_model import make_swing_bio_model  # noqa: E402
 from src.shared.python.optimization.ocp.parameter_ocp import (  # noqa: E402
     ParameterOcpOptions,
     add_parameter_block,
@@ -230,3 +231,20 @@ def test_parameter_ocp_result_adapter() -> None:
     assert map_result.success == result.success
     assert "arm_length" in map_result.parameters
     assert map_result.coefficients.shape == (2 * 7 * times.size,)
+
+
+def test_free_parameter_bounds_are_single_column_constants() -> None:
+    """A shared scalar parameter has one bound, not endpoint/state columns."""
+    biopt = _compat.require_bioptim()
+    model = make_swing_bio_model(parameters=("arm_length",))
+    specs = [
+        SharedParameterSpec(name="arm_length", initial=0.6, lower=0.45, upper=0.75),
+        SharedParameterSpec(name="club_length", initial=1.15, locked=True),
+    ]
+    bundle = add_parameter_block(model, specs, bioptim=biopt)
+    bounds = bundle.parameter_bounds["arm_length"]
+    assert bounds.min.shape == (1, 1)
+    assert bounds.max.shape == (1, 1)
+    assert bounds.min.type == biopt.InterpolationType.CONSTANT
+    np.testing.assert_array_equal(bounds.min, [[0.45]])
+    np.testing.assert_array_equal(bounds.max, [[0.75]])
