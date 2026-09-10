@@ -36,7 +36,7 @@ class ModelAnalysisDialog(CoachingDialog):
         self.status.setText("Virtual Camera · Source Geometry and Timing Preserved")
 
     def _inspectors(self) -> None:
-        recipe = self.model_source.reader.recipe
+        recipe = self.model_source.recipe
         tabs = QTabWidget()
         tabs.setMaximumHeight(240)
         self.appearance = MotionAppearanceControls(
@@ -67,14 +67,14 @@ class ModelAnalysisDialog(CoachingDialog):
         layout.insertWidget(0, tabs)
 
     def _replace(self, **changes: object) -> None:
-        current = self.model_source.reader.recipe
+        current = self.model_source.recipe
         recipe = ModelViewRecipe.model_validate(current.model_dump() | changes)
         self.model_source.replace_recipe(recipe)
         self.reader = self.model_source.reader
         self._show_frame(self.slider.value())
 
     def _appearance_changed(self) -> None:
-        current = self.model_source.reader.recipe
+        current = self.model_source.recipe
         self._replace(appearance=self.appearance.updated(current.appearance))
 
     def _placement_changed(self, registration: ReferenceRegistration) -> None:

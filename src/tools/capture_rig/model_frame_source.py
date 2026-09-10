@@ -150,7 +150,8 @@ class ModelFrameSource:
         """Return actual asset-clock seconds for an in-range display frame."""
         if type(index) is not int or not 0 <= index < self.frame_count:
             raise ValueError("Model frame index is outside the display timeline")
-        return self.recipe.asset.time_s[0] + index / self.fps
+        asset = self.recipe.asset
+        return asset.time_s[0] + index / self.fps
 
     def read(self, index: int) -> np.ndarray | None:
         """Return a fresh BGR frame, or None beyond the display timeline."""
@@ -161,7 +162,8 @@ class ModelFrameSource:
         if index >= self.frame_count:
             return None
         recipe = self.recipe
-        time = recipe.registration.time_mapping.reference_to_scene(self.time_at(index))
+        mapping = recipe.registration.time_mapping
+        time = mapping.reference_to_scene(self.time_at(index))
         context = ComparisonRenderContext(
             "virtual-model-view",
             recipe.asset,

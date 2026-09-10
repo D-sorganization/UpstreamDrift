@@ -1,6 +1,7 @@
 # Unified Model and Video Analysis
 
 Tracking: [Epic #9926](https://github.com/D-sorganization/UpstreamDrift/issues/9926).
+Review: [PR #9933](https://github.com/D-sorganization/UpstreamDrift/pull/9933).
 First bounded delivery: [Story #9929](https://github.com/D-sorganization/UpstreamDrift/issues/9929).
 Model-only delivery: [Story #9930](https://github.com/D-sorganization/UpstreamDrift/issues/9930).
 This is an implementation ledger; unchecked integration paths are not shipped
@@ -100,6 +101,13 @@ minimum-rate contracts. Whole-repository Ruff and format checks passed across
 6,923 files. The actual Driver window, ellipsoids, drawing and PNG output were
 visually inspected. These checks do not close the parent epic's remaining
 comparison drawing, measurement, simulation and functionality-map work.
+
+After merging current main (including its unchanged Tools provider selection),
+25 affected playback, source, drawing and export regressions passed. CI exposed
+seven deep model-adapter attribute chains and a nine-parameter encoder helper;
+explicit recipe delegation and a validated encoding-options object resolve
+these without baseline exemptions. Repo-wide LoD and architecture budgets pass
+locally. The required single #9933 SPEC row and development-log state are included.
 
 ## Coordination
 

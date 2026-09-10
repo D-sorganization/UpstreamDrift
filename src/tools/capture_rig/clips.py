@@ -43,6 +43,20 @@ TEXT_COLOUR = (255, 255, 255)
 
 
 @dataclass(frozen=True)
+class FrameEncoding:
+    """Output timing; a missing rate uses the frame source's nominal clock."""
+
+    speed: float = 1.0
+    fps: float | None = None
+
+    def __post_init__(self) -> None:
+        if not 0 < self.speed <= 1:
+            raise ValueError("Encoding speed must be in (0, 1]")
+        if self.fps is not None and (not np.isfinite(self.fps) or self.fps <= 0):
+            raise ValueError("Encoding frame rate must be finite and positive")
+
+
+@dataclass(frozen=True)
 class ClipRendering:
     """Optional crop and cancellable export; defaults retain coaching clips."""
 
@@ -204,8 +218,7 @@ def write_frame_clip(
     clip: ClipRange,
     out: Path,
     *,
-    speed: float = 1.0,
-    fps: float | None = None,
+    encoding: FrameEncoding = FrameEncoding(),
     track: PoseTrack | None = None,
     min_confidence: float = 0.5,
     label: str = "Analysis",
@@ -216,7 +229,8 @@ def write_frame_clip(
     Every available frame is retained. Strict rendering rejects incomplete
     ranges and missing frames. The writer is always released on cancellation.
     """
-    if not 0 < speed <= 1 or reader.frame_count <= 0:
+    speed, fps = encoding.speed, encoding.fps
+    if reader.frame_count <= 0:
         raise ValueError("Encoding requires frames and a speed in (0, 1]")
     source_fps = fps or reader.fps or 30.0
     if not np.isfinite(source_fps) or source_fps <= 0:
@@ -308,8 +322,7 @@ def export_clip(
             reader,
             clip,
             out,
-            speed=speed,
-            fps=reader.fps or view.fps or 30.0,
+            encoding=FrameEncoding(speed=speed, fps=reader.fps or view.fps or 30.0),
             track=track,
             min_confidence=min_confidence,
             label=label or view.view,

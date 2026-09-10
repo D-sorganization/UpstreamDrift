@@ -34,8 +34,9 @@ class ModelAnalysisDocument(BaseModel):
 
     @model_validator(mode="after")
     def matching_drawings(self) -> Self:
-        width, height = self.recipe.camera.image_size_px
-        expected = (self.recipe.asset.id, width, height, self.recipe.frame_count)
+        recipe = self.recipe
+        width, height = recipe.camera.image_size_px
+        expected = (recipe.asset.id, width, height, recipe.frame_count)
         actual = (
             self.drawings.view,
             self.drawings.width,
@@ -82,6 +83,11 @@ class ModelCoachingSource:
     @property
     def dirty(self) -> bool:
         return self.reader.recipe != self._saved_recipe
+
+    @property
+    def recipe(self) -> ModelViewRecipe:
+        """Expose the analysis contract without exposing decoder internals."""
+        return self.reader.recipe
 
     def replace_recipe(self, recipe: ModelViewRecipe) -> None:
         """Replace display settings without changing source identity or pixel grid."""

@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9926 · Unified Model and Video Analysis
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9926; children #9929, #9930, #9932
+- **Branch:** feat/9926-unified-analysis
+- **PR:** #9933
+- **Paths:** src/motion_capture/coaching; src/tools/capture_rig
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (7ff55ef8d; local regression, visual and push gates)
+- **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
+- **Evidence:** Capture Rig and geometry regressions, Ruff/format, budgets, scoped mypy and normal push hooks passed; full Driver model UI and PNG inspected.
+- **Next step:** Resolve protected CI; complete comparison drawings, measurements, simulation routes and maps before closing the epic.
+
 ### DL-#9912 · Impact Shaft Provider Integration
 
 - **State:** in_review
