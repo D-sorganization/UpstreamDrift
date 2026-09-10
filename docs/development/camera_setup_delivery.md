@@ -26,3 +26,27 @@ remain separate hardware acceptance; no synthetic test qualifies physical accura
 The prerequisite installed-runtime PR is #9950 at d5f44f211. Its standard CI
 passes; scalar optimization bounds fail separately under #9953. A missing-file
 research CI job passed on rerun; no workspace-interference cause is established.
+
+## Guided Workflow Acceptance
+
+Issue #9909 adds three actual Qt integration checks in
+`tests/tools/capture_rig/test_guided_capture_acceptance.py`. They cover measured
+and unknown club lengths across restart, immutable capture snapshots after bag
+changes, fresh calibration confirmation, changed zoom blocking reuse while
+editing remains usable, and actual video import/comparison save recognized by
+the wizard. No detector or body solver is replaced by these UI tests; numerical
+qualification remains in the existing pipeline test suites.
+
+## Map Maintenance and Progress Identity
+
+The source is `src/config/capability_connections.json`. Executable prerequisites
+are separate from informational architecture arrows. Run
+`python3 -m scripts.generate_capability_atlas` to regenerate the browser reference,
+graph data and Mermaid diagrams; CI checks freshness.
+
+Progress fingerprints inspect bounded metadata and media size/modification time
+rather than decoding or hashing video during navigation. They invalidate UI
+state; they are not media-integrity certificates. External replacement with
+unchanged size/modification time requires manual review. Reference alignment
+retains its camera, clock and asset-binding validation. Generate the atlas from
+canonical LF source bytes so its input hashes agree with CI checkouts.
