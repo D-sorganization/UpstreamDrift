@@ -165,8 +165,13 @@ def add_parameter_block(
         )
         lower = -inf if spec.lower is None else float(spec.lower)
         upper = inf if spec.upper is None else float(spec.upper)
-        parameter_bounds[spec.name] = (np.array([lower]), np.array([upper]))
-        parameter_init.add(spec.name, np.array([float(spec.initial)]))
+        parameter_bounds.add(
+            spec.name,
+            min_bound=np.array([[lower]]),
+            max_bound=np.array([[upper]]),
+            interpolation=biopt.InterpolationType.CONSTANT,
+        )
+        parameter_init.add(spec.name, np.array([[float(spec.initial)]]))
 
         if spec.prior is not None and spec.prior_scale is not None:
             param_obj = biopt.ObjectiveFcn.Parameter
