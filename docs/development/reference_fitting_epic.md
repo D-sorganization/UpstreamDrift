@@ -1,6 +1,6 @@
 # C3D Reference Fitting Epic
 
-Governing issue: #9914. State: in_progress. Owner: codex.
+Governing issue: #9914. State: shipped. Owner: codex.
 Branch: `feat/c3d-reference-overlay-9914`.
 
 ## Acceptance and Execution Plan
@@ -130,3 +130,7 @@ observed club centroids. `../reference-fit-artifacts-9914/display-library` and
 `reference-display-library.zip` are the expanded deliverables. The archive
 includes a reproduction script and a driver/iron visual comparison. Synthetic
 illustration cameras do not establish registration to a particular player.
+
+## Completion
+
+PR #9918 merged as `6f2d63325f6260de99527a08551f7e116abdec28` on 2026-09-09 after the protected `quality-gate` and full `unit-test-gate` passed for candidate `d3f1ba600`. Epic #9914 is closed with the club, volume and handedness acceptance criteria included. Optional native-stack workflows were still queued at merge; local MuJoCo forward-kinematics parity and the documented model support limits remain the applicable native evidence. The expanded archive contains 160 integrity-checked files, including all corrected numerical bundles and the display playback.

@@ -11,7 +11,7 @@ See `docs/development/reference_fitting_epic.md` and the operator guide
 Reference fitting and the expanded club/ellipsoid/handedness controls reuse the
 existing compositor. #9917 is integrated; other capture work remains with its
 owner. Reference/Capture Rig regressions pass. Twenty qualified numerical bundles
-and twenty club display assets are ready; merged as 6f2d63325f6260de99527a08551f7e116abdec28; completion docs follow. Existing
+and twenty club display assets are ready; merged as 6f2d63325f6260de99527a08551f7e116abdec28; completion docs merged in #9922 at90c3d0b77. Existing
 camera data and the original main worktree's user changes are untouched.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)

@@ -19,7 +19,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9914 · C3D Reference Fitting
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9914
 - **PR:** #9918
@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`a523a77f2`; reference/Capture Rig suite, 20 club assets)
 - **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
-- **Next step:** Qualify and merge #9918; #9917 integrated.
+- **Next step:** Completed in #9918 at6f2d63325; completion evidence merged through #9922/90c3d0b77.
 
 ### DL-#9905 · Player Bag and Capture Equipment
 
