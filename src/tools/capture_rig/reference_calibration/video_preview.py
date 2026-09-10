@@ -77,8 +77,11 @@ class VideoPreview(QObject):
             )
         scale = PREVIEW_EDGE / max(frame.shape[:2])
         if scale < 1:
-            frame = cv2.resize(
-                frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA
+            frame = np.asarray(
+                cv2.resize(
+                    frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA
+                ),
+                dtype=np.uint8,
             )
         return PreviewFrame(index, frame, reader.frame_count, reader.fps)
 

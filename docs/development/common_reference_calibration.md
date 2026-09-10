@@ -17,6 +17,12 @@ consumer delivery before final PR qualification. Historical failures remain fail
 
 ## Implemented Workflow
 
+- Calibration type qualification preserves uint8 preview images after downscaling
+  and accepts Qt's optional close-event argument. Eleven decoder/frame-selection
+  and layout-reuse tests pass, including a 2560×1440 source resized to 1280×720.
+  The broader import-following check previously reported eleven errors in eight
+  modules; unrelated imported-module findings remain separate from this repair.
+
 - Saved comparison recovery (#9909): malformed JSON or unreadable text now
   produces a file-specific review action without aborting capture status checks.
   Existing valid alignments remain eligible and original files are preserved.

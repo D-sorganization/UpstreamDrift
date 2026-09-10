@@ -282,6 +282,7 @@ class ReuseCalibrationDialog(QDialog):
         self.client.cancel()
         super().reject()
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(self, event: QCloseEvent | None) -> None:
         self.reject()
-        event.accept()
+        if event is not None:
+            event.accept()
