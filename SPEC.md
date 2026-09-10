@@ -4266,6 +4266,8 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-10 | #9945 | Shared metric readouts, Trace v2 marker/club import and scene-bound native reference geometry. |
+| 2026-09-09 | #9941 | Add calibrated cross-model joint convention conversion, gap-safe golf metrics including event-defined X-Factor stretch and shaft twist velocity, explicit COM/missing-data contracts, model link adapters, and configurable desktop/web plots and API surfaces (#9934). |
 | 2026-09-09 | #9914 | Add reproducible C3D reference fitting with explicit marker profiles, native URDF/MJCF kinematics, retained observations and fit diagnostics, reference-library output, and fixed spatial alignment for the existing camera comparison pipeline. |
 | 2026-09-09 | #9913 | Add persistent swing/capture feedback, durable history, linked detector/help/workflow status and retained Qt views; bounded renderers and panel methods preserve architecture rules. |
 | 2026-09-09 | #9911 | Keep preview discovery import and timeout failures within the existing error status. |
