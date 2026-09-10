@@ -17,12 +17,18 @@ import sqlite3
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict
+
+from src.motion_capture.rig.capture_notes import (
+    CaptureNotes as CaptureNotes,
+    NOTES_FILE as NOTES_FILE,
+    MAX_NOTES_BYTES as MAX_NOTES_BYTES,
+    read_notes as read_notes,
+)
 
 from src.motion_capture.rig.bundle import (
     MANIFEST_FILE,
@@ -33,29 +39,9 @@ from src.motion_capture.rig.bundle import (
 from src.motion_capture.rig.documents import write_document
 from src.motion_capture.rig.edits import EDITS_FILE, has_analysis
 
-NOTES_FILE = "capture_notes.json"
 RENAME_FILE = ".recording-rename.json"
-MAX_NOTES_BYTES = 200_000
 _UNSAFE_NAME = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 _RESERVED = re.compile(r"^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)", re.IGNORECASE)
-
-
-class CaptureNotes(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid")
-    schema_version: Literal["capture-notes/1.0.0"] = "capture-notes/1.0.0"
-    capture_id: str = Field(default_factory=lambda: str(uuid4()), min_length=1)
-    title: str = Field(min_length=1, max_length=200)
-    notes: str = Field(default="", max_length=50_000)
-    archived: bool = Field(default=False, strict=True)
-    created_utc: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
-    source_capture: str | None = None
-
-    @field_validator("title")
-    @classmethod
-    def clean_title(cls, value: str) -> str:
-        if not value.strip() or any(ord(c) < 32 for c in value):
-            raise ValueError("Capture title must contain visible text on one line")
-        return value.strip()
 
 
 class RenameIntent(BaseModel):
@@ -64,13 +50,6 @@ class RenameIntent(BaseModel):
     view: str
     source: str
     target: str
-
-
-def read_notes(root: Path) -> CaptureNotes:
-    path = root / NOTES_FILE
-    if path.stat().st_size > MAX_NOTES_BYTES:
-        raise ValueError("Capture notes file is too large")
-    return CaptureNotes.model_validate_json(path.read_text(encoding="utf-8"))
 
 
 @dataclass(frozen=True)
@@ -236,6 +215,12 @@ class CaptureLibrary:
                 if (root / filename).is_file():
                     shutil.copyfile(root / filename, destination / filename)
             copy_layers(root, destination, tuple(entry.view for entry in entries))
+            # Equipment depends on portable notes; rebind after the new ID exists.
+            from .equipment import load_capture_club, save_capture_club
+
+            equipment = load_capture_club(root)
+            if equipment is not None:
+                save_capture_club(destination, equipment.club)
             self.register(destination)
         except (ValueError, OSError, sqlite3.Error):
             # Only this operation's freshly-created child is removed on failure.
