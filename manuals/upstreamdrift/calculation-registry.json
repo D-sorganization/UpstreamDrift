@@ -24,6 +24,11 @@
       "id": "UP-D1-reference-kinematics-inventory",
       "owner": "UpstreamDrift issue #9914",
       "resolution": "Classify reference fitting, URDF/MJCF kinematic adapters, and selected-pose similarity registration under src/motion_capture/reference before a manual coverage claim. Surface-marker proxy fits and synthetic FK parity do not qualify anatomical accuracy, camera calibration, global optimality, or native dynamics."
+    },
+    {
+      "id": "UP-D1-scalar-parameter-bounds-inventory",
+      "owner": "UpstreamDrift issue #9953",
+      "resolution": "Classify shared scalar parameter bounds in src/shared/python/optimization/ocp/parameter_ocp.py before a manual coverage claim. Explicit constant interpolation preserves one bound per shared parameter; numerical recovery tests do not qualify anatomical accuracy or global optimality."
     }
   ],
   "calculations": []
