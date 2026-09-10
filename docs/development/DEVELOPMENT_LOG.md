@@ -177,18 +177,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Report discovery imports/timeouts through preview status.
 - **Next step:** Retain the preview recovery regressions.
 
-### DL-#9898 · Common Reference Sessions and Calibration Profiles
+### DL-#9898 · Common Reference Calibration
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #9898/#9900/#9909; epics #9897/#9906
+- **Issue:** #9898/#9900/#9909
 - **Branch:** feat/9898-common-reference-sessions
 - **PR:** #9946
-- **Paths:** reference_calibration, calibration/wizard controls, reconstruction lens adapter and associated tests/docs
+- **Paths:** reference_calibration, wizard, lens adapter
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (58f42ff94 hooks pass;5c9167e4d recovery passes31 checks plus fresh-window resume; CI89704dd29; registry order SELF)
-- **Summary:** Original-frame paper/ruler marking, reviewed reusable camera layouts, isolated canonical solver, distortion-preserving overlays and guided recovery. Detailed tests, historical failures and limits: [checkpoint](common_reference_calibration.md).
-- **Next step:** Fix CI type/duplication/doc budgets, integrate the separately owned published consumer, then qualify and merge #9946. Scientific manual/physical approval remains separate.
+- **Last verified:** 2026-09-10 (732553479;28 pin/context checks pass)
+- **Summary:** Reviewed paper/ruler calibration and guided recovery. [Evidence and limits](common_reference_calibration.md).
+- **Next step:** Merge #9949 package repairs; #9946 merged126158943 before these fixes. Installed startup/wizard,29 calibration tests and pip check pass;660 source integration tests pass. Scientific release remains separate.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 

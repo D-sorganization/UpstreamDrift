@@ -2,20 +2,78 @@
 
 ## Scope and Delivery State
 
-Epic #9897; children #9898 and #9900. Branch
-`feat/9898-common-reference-sessions` in the isolated
-`UpstreamDrift-common-calibration` worktree. PR #9946 checkpoint 457521222 passed every normal push hook and integrates main276998030 (#9945/#9947 analysis delivery). It is reachable through Calibration in this worktree,
-but the running test application still uses the earlier merged wizard source.
+Epic #9897; children #9898 and #9900. PR #9946 merged as `126158943` before the
+installed-package repairs below. Issue #9949 delivers those repairs from branch
+`fix/9949-installed-capture` in the isolated `UpstreamDrift-common-calibration`
+worktree; merge `e623b3c69` integrates current main without application changes.
+The calibration delivery integrates published
+main `08c8529ef` through merge `732553479`, including the combined Tools provider
+`e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`. The checked-out provider, Gitlink,
+Python requirement and Rust dependency agree. Twenty-eight pin/context/atlas/
+governance tests pass. All 660 capture/reconstruction tests pass against this provider. The package
+probe found the installed-worker issue described below.
 
-Tools #5141 published the combined provider as
-`e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`, with both Linux aggregates and
-required quality checks passing. The context owner retains final consumer
-Gitlink/Cargo/pip/catalog alignment and installed-launcher qualification.
-The local vendor checkout remains 0a561daff for development; do not commit it
-alone because it lacks the launcher correction. Integrate the owner's published
-consumer delivery before final PR qualification. Historical failures remain failures.
+The context owner qualified a frontend-inclusive installed wheel at source
+`6dab98fce`: launcher, dependency and 31 calibration/reference checks passed.
+The impact owner independently verified wheel/test-report hashes and zero
+failures/skips. This is provider/installation evidence, not qualification of the
+full current #9946 wheel or physical camera accuracy. Historical failures remain
+failures. Live test applications still use their frozen earlier checkouts.
 
 ## Implemented Workflow
+
+- First-capture library registration (#9950): successful completion now creates
+  the catalog entry even if Library has never been opened. The capture header
+  refreshes after registration to show the persisted identity immediately.
+  Both missing registration and stale identity were reproduced by regression
+  tests; 29 library/capture/wizard/journey checks now pass. The first installed
+  registration probe passes. The final frontend-inclusive wheel from91115df6e
+  passes installed automatic registration, persisted header identity, startup,
+  wizard, selected storage and pip checks. SHA256:
+  `65ac434204e696d0dd33e0644faf8f3a4d05ce55dc9a9b601545a37084c3db8b`.
+  The installed registration probe uses an unchanged copied test fixture to
+  create synthetic videos and real bundle/catalog records outside the checkout;
+  application modules resolve from the installed distribution.
+
+- Installed storage (#9949/#9950): new recordings resolve to unique destinations
+  in the player's selected library rather than the application installation.
+  Empty explicit destinations remain usable; existing takes select a fresh
+  destination without modifying their media. Fourteen GUI/library/wizard tests
+  and configured mypy for both changed modules pass. The rebuilt installed
+  window/wizard selects the configured player-library destination outside the
+  application, creates no capture prematurely, and passes worker catalog and
+  pip checks. Frontend-inclusive wheel SHA256:
+  `55aacd817e75004f9355fd46aa9903e2de3bed47f65d3dbad239e799214f2310`.
+  Prior numerical wheel evidence below retains its own scope.
+  The broader post-storage run passed665 tests and failed one obsolete preview
+  assertion expecting a checkout `sessions` directory. Its replacement verifies
+  the configured library destination; all eight preview tests then pass.
+
+- Installed-worker qualification: the normal frontend-inclusive wheel built from
+  c432788c3 failed its actual installed catalog request because it required a
+  repository vendor directory. Resolution now accepts the provider recorded in
+  the owning application distribution, while rejecting unrelated distributions
+  and incomplete source checkouts. Eight source-worker/ownership checks pass. Metadata paths are normalized for
+  the standard-library path protocol. The corrected installed worker returns all
+  four reference targets; 29 installed persistence/solve/reuse tests pass.
+  The subsequent GUI probe exposed a second packaging defect: the unanchored
+  motion-matching scratch ignore removed the tracked reference-loader package.
+  A source-package exception fixes that omission; the artifact regression fails
+  against the old wheel and passes against the rebuilt wheel. The final installed
+  capture window and edit wizard open with `No Capture Selected`; all 29 installed
+  calibration checks pass again. Offscreen visual inspection uses the system
+  Segoe UI font because the offscreen platform has no automatic font discovery.
+  Frontend-inclusive wheel source: 2d84f2fe0 plus this ignore exception (SELF).
+  SHA256: `12705ae63e13131d52eef90712f18421e6a09221ee148172ca79febf7367e637`.
+  Logs, JUnit, module origins and screenshot are in the task's temporary
+  `capture-9946-installed-qualification` directory. These checks establish package
+  startup and synthetic calibration behavior, not physical-camera accuracy.
+  Original failing wheel SHA256: `5be3ecb354963958e44016e6de34ecd1677df3437e600f973b54a19875710fca`.
+
+- Comparison journey qualification: thirteen wizard-evidence tests pass, including
+  a persisted, capture-bound expert-video registration that completes the entire
+  comparison route despite an unrelated damaged comparison file. The damaged
+  file remains untouched. These tests do not claim a calibrated 3-D viewpoint.
 
 - CI repair: the developer log now links to this detailed checkpoint within its
   50 KiB budget. Projection pixels are explicitly floating point before camera
@@ -201,7 +259,7 @@ Thirteen catalog/library/dialog tests,29 isolated provider checks and19 library/
   files must stay available; portable profile packaging remains to be qualified.
 - #9900 manual calculation inventory, physical multi-camera/zoom evidence and
   packaged-runtime qualification are not approved by synthetic tests.
-- Final provider pin, packaged qualification, PR/CI/protected merge and physical-camera acceptance remain pending. Current main and generated metadata are integrated; named reuse, visual frame selection and precision panning are implemented and locally qualified.
+- The published provider is integrated; full current-wheel qualification, PR/CI/protected merge and physical-camera acceptance remain pending. Current main and generated metadata are integrated; named reuse, visual frame selection and precision panning are implemented and locally qualified.
 
 ## Concurrent Work and Live Applications
 

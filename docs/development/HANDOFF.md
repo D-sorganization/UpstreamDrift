@@ -1,12 +1,17 @@
 # Common-Reference Calibration Handoff
 
-Active #9953: isolated `UpstreamDrift-parameter-bounds`, branch
-`fix/9953-scalar-bounds`, corrects shared scalar bounds passed to pinned Bioptim.
-30 OCP tests pass with two optional Pinocchio skips; five parameter tests pass.
-No bounds or tolerances changed. This unblocks optional CI for capture PR #9950.
+Current #9949: `fix/9949-installed-capture`, PR #9950. Installed worker,
+packaging, new-take identity and library indexing repairs remain intact. PR #9946
+merged as126158943 before these installed-package repairs; installed startup,
+wizard and29 calibration checks passed, as did pip check.
 
-Current #9898/#9900: isolated `UpstreamDrift-common-calibration`, branch
-`feat/9898-common-reference-sessions`, pushed checkpoint 89704dd29; registry blocker-order repair SELF. Prior normal hooks passed; PR #9946. Session `capture-product-01a08427-common-calibration` has presence through 08:49 UTC and #9909 lease through 08:40 UTC on 2026-09-10.
+PR #9955 merged at32410babfd1e4741fa0c53bf05dd8403a51bf233 after all CI checks
+passed, including actual Bioptim OCP tests and both manufactured authority checks.
+Its scalar-bound API fix is now integrated into #9950 without changing numerical
+bounds or tolerances. The only merge conflict was this handoff; both delivery
+records are preserved here. Next: validate and publish the integrated #9950 head,
+then advance native camera setup and guided acceptance in #9954.
+
 See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
 [operator guide](../motion_capture/common_reference_calibration.md).
 
