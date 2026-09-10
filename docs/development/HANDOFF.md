@@ -1,7 +1,7 @@
 # Common-Reference Calibration Handoff
 
 Active #9952/#9909: `feat/9952-camera-setup`, PR #9954, adds the native camera
-editor and guided acceptance. All566 Capture Rig and30 isolated calibration
+editor and guided acceptance. All 566 Capture Rig and 30 isolated calibration
 checks pass; searchable player examples were visually reviewed with the app theme.
 See `camera_setup_delivery.md`. Runtime prerequisite #9950 is published at
 0c531a4003d397e82ce32660bef31e8e9408671b and awaiting CI.
