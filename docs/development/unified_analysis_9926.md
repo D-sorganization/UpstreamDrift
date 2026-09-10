@@ -30,8 +30,9 @@ production files passed. Full Tour Average Driver motion was visually inspected
 at 0.567 seconds in the common editor and its 960×540 PNG using an explicitly
 synthetic background and virtual camera. This is rendering evidence, not a
 comparison against measured player motion. Artifacts are in the external
-`analysis-9926-artifacts/comparison-visual-9von8rml` directory. Protected CI and
-review still gate story closure.
+`analysis-9926-artifacts/comparison-visual-9von8rml` directory. Normal push hooks passed. [PR #9943](https://github.com/D-sorganization/UpstreamDrift/pull/9943)
+is draft; protected CI and review still gate story closure. Child #9942 now
+tracks shared metric readouts and simulation analysis.
 
 The capability registry now records model-only analysis, shared drawing-editor
 contracts and metric-reference routes. Existing executable capture-goal metadata
