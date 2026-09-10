@@ -211,3 +211,19 @@ pairs must also appear in the skeleton connections. The mapping dialog prefills
 these connections; removing a connection also removes its club classification.
 Names alone never imply connectivity. Native simulation viewport geometry
 remains tracked in #9942; state-only backends need a marker-kinematics export.
+
+## Native Pose References
+
+Open Pose Studio and choose **3D References…**. Add a point or a plane using
+three non-collinear anchors, then adjust opacity and extent. The shared editor
+uses Y-up metres; the Pose Studio viewport converts to canonical Z-up. A
+horizontal plane at editor Y=0.8 appears at viewport Z=0.8. References stay in
+the world while the pose changes. This static scene evaluates visibility at
+zero seconds; omit time limits for persistent references.
+
+Close the editor to keep references visible. Choose **Save References…** to
+retain the JSON across application sessions and **Load References…** to restore
+it. Loading rejects a document bound to a different scene. These are reference
+locations and planes, not inferred anatomical measurements. Animated club,
+handedness and translucent ellipsoid controls remain in Analyze Model and
+Compare Reference; simulation Trace v2 imports use those same controls.
