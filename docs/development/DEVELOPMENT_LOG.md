@@ -161,7 +161,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-10 (Python3.12 scoped51, Python3.13 broad594, history/Qt7, projection/Qt25, OpenCV5 projection20 and atlas/parity49 pass; native640×560 reviewed; unchanged Simscape real-log timeout keeps broader Python3.12 run failed)
 - **Summary:** Original-frame reference observations feed canonical Tools fixed-intrinsics estimation through isolated IPC, explicit anchor/optics review, immutable result history and provenance. Lens distortion is corrected once for fitting and retained for overlays. Generated guide shares native help text. Final combined provider pin remains separately owned and pending.
-- **Next step:** PR #9946 source checkpoint54d1807ea passed normal hooks and integrates main276998030. Named library/frame selection and precision pan are implemented. #9909 adds19 passing wizard checks isolating missing calibration from editing-only status. Finish coordinated provider and journey acceptance. No physical-accuracy or manual publication approval claimed.
+- **Next step:** PR #9946 source checkpoint 457521222 passed normal hooks and integrates main276998030. Named library/frame selection, precision pan and prerequisite links are implemented. #9909 has 40 passing guidance checks; comparison recovery SELF adds two corruption regressions with 22 focused wizard tests passing. Finish coordinated provider and journey acceptance. No physical-accuracy or manual publication approval claimed.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 

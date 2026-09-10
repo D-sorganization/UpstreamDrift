@@ -121,7 +121,16 @@ def _references(media: SessionMedia, library: ReferenceLibrary) -> dict[str, Rea
     for path in sorted((media.root / "comparisons").glob("*.json")):
         if ".before-review-" in path.name:
             continue
-        saved = load_comparison_session(path)
+        try:
+            saved = load_comparison_session(path)
+        except (ValueError, OSError) as exc:
+            # Its kind cannot be trusted until parsed; retain any valid alignment.
+            for key in ("compare.video", "compare.projected"):
+                if evidence[key].status != "done":
+                    evidence[key] = Readiness(
+                        "ready", f"Review saved comparison {path.name}: {exc}"
+                    )
+            continue
         key = (
             "compare.video" if saved.reference_kind == "video" else "compare.projected"
         )
