@@ -30,23 +30,14 @@ class ValidationResult:
     changelog_entries: tuple[dict[str, str], ...]
 
 
-def validate_architecture_map(path: Path) -> ValidationResult:
-    """Validate a docs/architecture/C4.md file against the contract."""
-    if not path.is_file():
-        raise ArchitectureMapContractError(
-            f"Architecture map file does not exist: {path}"
-        )
-
-    text = path.read_text(encoding="utf-8")
-
-    # Check for C4Context mermaid blocks
+def _check_mermaid_views(text: str) -> tuple[int, int]:
+    """Validate and return count of C4Context and C4Container mermaid views."""
     context_matches = re.findall(
         r"```mermaid\s*\n\s*(?:C4Context|graph|flowchart)?[\s\S]*?C4Context[\s\S]*?```",
         text,
         re.IGNORECASE,
     )
     if not context_matches:
-        # Fallback check if C4Context appears inside a mermaid block
         blocks = re.findall(r"```mermaid\s*\n([\s\S]*?)```", text)
         context_matches = [b for b in blocks if "C4Context" in b]
 
@@ -55,7 +46,6 @@ def validate_architecture_map(path: Path) -> ValidationResult:
             "Architecture map missing required 'C4Context' view block in mermaid format."
         )
 
-    # Check for C4Container mermaid blocks
     blocks = re.findall(r"```mermaid\s*\n([\s\S]*?)```", text)
     container_matches = [b for b in blocks if "C4Container" in b]
     if not container_matches:
@@ -63,13 +53,16 @@ def validate_architecture_map(path: Path) -> ValidationResult:
             "Architecture map missing required 'C4Container' view block in mermaid format."
         )
 
-    # Check for Feature Map section
+    return len(context_matches), len(container_matches)
+
+
+def _parse_feature_map(text: str) -> list[dict[str, str]]:
+    """Extract and validate Feature Map table entries."""
     if "Feature Map" not in text:
         raise ArchitectureMapContractError(
             "Architecture map missing required 'Feature Map' section."
         )
 
-    # Extract Feature Map table entries
     feature_entries: list[dict[str, str]] = []
     in_feature_map = False
     for line in text.splitlines():
@@ -100,8 +93,11 @@ def validate_architecture_map(path: Path) -> ValidationResult:
         raise ArchitectureMapContractError(
             "Feature Map table is empty or missing required columns (Capability, Component, Interface, Evidence)."
         )
+    return feature_entries
 
-    # Check for Architecture Change Log section
+
+def _parse_change_log(text: str) -> list[dict[str, str]]:
+    """Extract and validate Architecture Change Log table entries."""
     if "Change Log" not in text:
         raise ArchitectureMapContractError(
             "Architecture map missing required 'Architecture Change Log' section."
@@ -136,11 +132,25 @@ def validate_architecture_map(path: Path) -> ValidationResult:
         raise ArchitectureMapContractError(
             "Architecture Change Log table is empty or missing required columns."
         )
+    return changelog_entries
+
+
+def validate_architecture_map(path: Path) -> ValidationResult:
+    """Validate a docs/architecture/C4.md file against the contract."""
+    if not path.is_file():
+        raise ArchitectureMapContractError(
+            f"Architecture map file does not exist: {path}"
+        )
+
+    text = path.read_text(encoding="utf-8")
+    num_context, num_container = _check_mermaid_views(text)
+    feature_entries = _parse_feature_map(text)
+    changelog_entries = _parse_change_log(text)
 
     return ValidationResult(
         is_valid=True,
-        context_views=len(context_matches),
-        container_views=len(container_matches),
+        context_views=num_context,
+        container_views=num_container,
         feature_map_entries=tuple(feature_entries),
         changelog_entries=tuple(changelog_entries),
     )
