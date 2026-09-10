@@ -13,14 +13,16 @@ from collections.abc import Sequence, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Literal, TYPE_CHECKING
 from uuid import uuid4
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
-from src.motion_capture.reconstruct.intrinsics import IntrinsicsRecord
 from src.motion_capture.rig.documents import write_document
+
+if TYPE_CHECKING:
+    from src.motion_capture.reconstruct.intrinsics import IntrinsicsRecord
 
 _Label = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)
@@ -45,6 +47,9 @@ class CameraSetup(BaseModel):
 
 
 def _record(data: bytes, camera_id: str, size: tuple[int, int]) -> IntrinsicsRecord:
+    # Placement bookkeeping does not need the reconstruction/physics runtime.
+    from src.motion_capture.reconstruct.intrinsics import IntrinsicsRecord
+
     payload = json.loads(data)
     if isinstance(payload, dict):
         payload = payload.get("cameras")
@@ -264,7 +269,10 @@ class ProfileAssignment:
 
 
 def validate_profile_set(
-    data: bytes, expected: Mapping[str, tuple[str, tuple[int, int]]]
+    data: bytes,
+    expected: Mapping[str, tuple[str, tuple[int, int]]],
+    *,
+    capture_root: Path | None = None,
 ) -> None:
     """Recheck a reviewed export against recorded camera identities and sizes.
 
@@ -272,6 +280,14 @@ def validate_profile_set(
     The caller must still obtain current operator confirmation of lens settings.
     """
     payload = json.loads(data)
+    intrinsic_data = data
+    if (
+        isinstance(payload, dict)
+        and payload.get("schema_version") == "capture-reference-solve/1"
+    ):
+        from .reference_calibration.evidence import reviewed_intrinsics
+
+        intrinsic_data = reviewed_intrinsics(payload, capture_root)
     selections = (
         payload.get("profile_selections") if isinstance(payload, dict) else None
     )
@@ -300,7 +316,7 @@ def validate_profile_set(
             raise ValueError(
                 "Calibration selection needs a dated operator confirmation"
             )
-        _record(data, view, setup.image_size_px)
+        _record(intrinsic_data, view, setup.image_size_px)
 
 
 def write_profile_set(

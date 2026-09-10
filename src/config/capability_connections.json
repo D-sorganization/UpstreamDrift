@@ -2,6 +2,28 @@
   "version": 1,
   "nodes": [
     {
+      "id": "calibration.references",
+      "title": "Paper and Ruler Placements",
+      "description": "Capture-owned original frames, identified reference points, measured dimensions and repeatable observation revisions.",
+      "evidence": "src/tools/capture_rig/reference_calibration/dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open a capture and choose Calibration, then Paper / Ruler References. Review the recorded camera and optical settings.",
+        "Keep the reference stationary across camera views. Name each new placement, mark the same physical corners and save a revision."
+      ]
+    },
+    {
+      "id": "calibration.layout",
+      "title": "Reviewed Camera Layout",
+      "description": "Canonical fixed-intrinsics estimation with explicit world anchor, fit/validation residuals and preserved lens distortion.",
+      "evidence": "src/tools/capture_rig/reference_calibration/solver.py",
+      "view": "workflow",
+      "instructions": [
+        "Use compatible lens profiles and overlapping paper observations from multiple cameras and placements. Confirm the ball/target anchor.",
+        "Estimate camera positions, inspect independent validation and limitations, then use the reviewed layout for Match. Changed optics require a new session."
+      ]
+    },
+    {
       "id": "operator",
       "title": "Operator",
       "description": "Record, review, compare and export.",
@@ -150,6 +172,42 @@
     }
   ],
   "edges": [
+    {
+      "source": "step.capture",
+      "target": "calibration.references",
+      "artifact": "Original frames and fixed camera settings",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/operations.py",
+      "constraint": "Calibration marking retains original pixels independently of swing trims and crops",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.references",
+      "target": "calibration.layout",
+      "artifact": "Identified placements and held-out observations",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_calibration/worker.py",
+      "constraint": "Requires the compatible Tools provider, multiple overlapping paper placements and an explicit world anchor; ruler endpoints alone cannot locate cameras",
+      "view": "workflow"
+    },
+    {
+      "source": "step.intrinsics",
+      "target": "calibration.layout",
+      "artifact": "Reviewed lens profiles with distortion",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/calibration_profiles.py",
+      "constraint": "Physical identity, zoom, focus, resolution and crop must match the recording",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.layout",
+      "target": "step.reconstruct",
+      "artifact": "Reviewed camera poses and complete intrinsics",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/lens.py",
+      "constraint": "Review does not certify physical accuracy; original distorted observations are corrected once before the ideal-pixel fit",
+      "view": "workflow"
+    },
     {
       "source": "operator",
       "target": "desktop",

@@ -39,7 +39,7 @@ class CalibrationReview:
     def confirmed(cls, root: Path, path: Path) -> CalibrationReview:
         # Called only after CalibrationDialog validated all ProfileAssignments.
         data = read_document(path)
-        validate_profile_set(data, _camera_set(root))
+        validate_profile_set(data, _camera_set(root), capture_root=root)
         return cls(
             read_notes(root).capture_id,
             path.resolve(),
@@ -57,7 +57,11 @@ class CalibrationReview:
             == sha256(read_document(media.root / PLAN_FILE)).hexdigest()
         )
         if matches:
-            validate_profile_set(read_document(self.path), _camera_set(media.root))
+            validate_profile_set(
+                read_document(self.path),
+                _camera_set(media.root),
+                capture_root=media.root,
+            )
         return matches
 
 

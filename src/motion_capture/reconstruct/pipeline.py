@@ -39,6 +39,7 @@ from .fit import (
 )
 from .initialize import initialize_cameras, subject_frame
 from .layouts import to_reconstruct_layout
+from .lens import LensCorrection, correct_camera_views, retain_camera_lenses
 from ..provenance import write_stamped
 from ..variants import ensure_variant, register_variant
 from .skeleton import JOINT_NAMES
@@ -86,6 +87,7 @@ class MatchSpec:
     variant: str = ""
     camera_source: str | None = None
     exclude_joints: tuple[str, ...] = ()
+    lens_corrections: Mapping[str, LensCorrection] | None = None
 
 
 def start_cameras_from(path: Path) -> list[PinholeCamera]:
@@ -130,9 +132,8 @@ def reconstruct_session(
 ) -> SessionReconstruction:
     """Run layout -> clean -> fit on ``<session>/<observation_set>``; write results.
 
-    ``match`` says which observation set and views to use, which variant the
-    outputs belong to, which joints to exclude and where the cameras came
-    from (recorded in the provenance) (#9793).
+    ``match`` selects views, observation set, output variant and exclusions;
+    its camera source is recorded in provenance (#9793).
 
     Start from ``start_cameras`` (a previous take) or, for the first take of a
     new setup, from ``intrinsics`` alone: placement is then initialised from
@@ -164,6 +165,9 @@ def reconstruct_session(
     missing = [i for i in ids if i not in all_views]
     require(not missing, "start cameras without observations", missing)
     views_used = {v: all_views[v] for v in ids}
+    views_used, corrections = correct_camera_views(
+        views_used, start_cameras, match.lens_corrections
+    )
     root = ensure_variant(session_dir, match.variant)
     out_dir = root / RECONSTRUCT_DIR
     obs_dir = out_dir / "observations"
@@ -175,6 +179,7 @@ def reconstruct_session(
     if start_cameras is None:
         assert intrinsics is not None
         start_cameras = _initial_cameras(out_dir, ids, intrinsics, scale_anchor)
+    start_cameras = retain_camera_lenses(start_cameras, corrections)
     record: Reconstruction = fit_bundle(
         out_dir,
         base=session_dir,
@@ -205,6 +210,11 @@ def reconstruct_session(
         "anchors": list(measurements),
         "scale_anchor": list(scale_anchor),
         "acceleration_sigma_px": acceleration_sigma_px,
+        "lens_corrections": {
+            view: correction.signature
+            for view, correction in corrections.items()
+            if view in ids
+        },
     }
     _write_summary(session_dir, out_dir, obs_set_dir, summary, parameters)
     return summary

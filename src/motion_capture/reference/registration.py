@@ -311,7 +311,7 @@ def project_reference_to_camera(
         matrix = camera.matrix
         r_w2c = camera.rotation_world_from_camera.T
         t_w2c = -r_w2c @ camera.translation_world_from_camera_m
-        distortion = None
+        distortion = camera.distortion
         w, h = camera.image_size_px
     else:
         matrix = camera.intrinsics.matrix
@@ -324,14 +324,21 @@ def project_reference_to_camera(
     pts_cam = flat_pts @ r_w2c.T + t_w2c
     in_front = pts_cam[:, 2] > 1.0e-5
 
-    # Safe projection via project_pinhole
-    projected = project_pinhole(
-        flat_pts,
-        matrix,
-        rotation_world_to_camera=r_w2c,
-        translation_world_to_camera=t_w2c,
-        distortion=distortion,
-    )
+    # Preserve the pure NumPy/JAX 4/5-term path; OpenCV owns extended lens models.
+    if distortion is not None and len(distortion) > 5:
+        from src.motion_capture.reconstruct.lens import project_raw_camera_points
+
+        projected = project_raw_camera_points(pts_cam, matrix, distortion)
+    else:
+        projected = project_pinhole(
+            flat_pts,
+            matrix,
+            rotation_world_to_camera=r_w2c,
+            translation_world_to_camera=t_w2c,
+            distortion=distortion
+            if distortion is not None and len(distortion)
+            else None,
+        )
 
     in_image = (
         (projected[:, 0] >= 0)

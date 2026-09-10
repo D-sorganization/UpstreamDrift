@@ -1,4 +1,37 @@
-# Guided Capture Workflow Handoff
+# Common-Reference Calibration Handoff
+
+Current #9898/#9900: isolated `UpstreamDrift-common-calibration`, branch
+`feat/9898-common-reference-sessions`, HEAD3482a5a39. Reviewed branch checkpoint; no PR yet. Session `capture-product-01a08427-common-calibration` has presence and
+#9898 lease through05:51UTC2026-09-10; #9900 lease through05:25UTC.
+See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
+[operator guide](../motion_capture/common_reference_calibration.md).
+
+Implemented original-frame marking, revisions, isolated Tools solve, result
+history/review, source hashes, distortion-preserving reconstruction/overlays and
+shared native/generated help. Broad Python3.13 regression594 passed; history/Qt7,
+projection/Qt25, OpenCV5 projection20 and atlas/parity49 passed. Production
+Python3.12 scoped51 now passes after installing missing declared dependencies
+and eliminating repeated PNG decode/player imports. The separate unchanged
+Simscape real-log test still times out at180s; its broad Python3.12 run remains
+failed. See the active checkpoint for exact logs. Native small layout fits640×560;
+Calibrate Again and Add Another Placement remain visible. Final hooks and
+current-main/provider integration are next; no physical accuracy claim is made.
+
+Tools #5140 merged0a561daff (tree identical to candidatec984, includes #5136).
+Local vendor0a is development-only: it would regress the launcher compared with
+main's interim4dabe900c. Context owner owns final gitlink/Cargo/pip/catalog alignment
+after Tools #5144; impact owner qualifies the exact installed consumer. No bypass
+of historical private404/rate-shard failures. Update final metadata and integrate
+main normally before PR/CI/protected merge. Cross-capture calibration reuse,
+packaged-runtime and physical accuracy acceptance remain open.
+
+Preserve live app54812 (`Capture Rig — main 56552f245`), older61500 and atlas2963.
+They use frozen earlier checkouts, not this branch. Analysis owner controls
+comparison/coaching/model work; context owner controls catalog/provider alignment.
+Wizard #9931 merged56552f245; #9907/#9905 closed. Everything below this marker is
+preserved historical wizard context, not the current implementation state.
+
+## Preserved Wizard Context
 
 ## Identity
 

@@ -1056,6 +1056,7 @@ def cmd_compare(args: argparse.Namespace) -> int:
 
 
 def cmd_reconstruct(args: argparse.Namespace) -> int:
+    from src.motion_capture.reconstruct.lens import lens_corrections_from
     from src.motion_capture.reconstruct.pipeline import (
         MatchSpec,
         intrinsics_from,
@@ -1079,6 +1080,7 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
         measurements=tuple(args.anchor),
         acceleration_sigma_px=args.accel_sigma_px,
         match=MatchSpec(
+            lens_corrections=lens_corrections_from(args.cameras or args.intrinsics),
             observation_set=args.observations,
             views=tuple(wanted) or None,
             variant=args.variant,

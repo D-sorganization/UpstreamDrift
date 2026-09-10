@@ -153,7 +153,12 @@ class CalibrationDialog(QDialog):
     """A scrollable rig-wide review with an explicit recalibration exit."""
 
     def __init__(
-        self, plan: RigPlan, root: Path, parent: QWidget | None = None
+        self,
+        plan: RigPlan,
+        root: Path,
+        parent: QWidget | None = None,
+        *,
+        reference_available: bool = False,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Camera Calibration")
@@ -161,6 +166,8 @@ class CalibrationDialog(QDialog):
         self.root, self.plan = root, plan
         self.output_path: Path | None = None
         self.recalibrate_requested = False
+        self.reference_requested = False
+        self._reference_available = reference_available
         layout = QVBoxLayout(self)
         explanation = QLabel(
             "Review each camera's lens settings before reusing calibration. Optical zoom and "
@@ -186,8 +193,15 @@ class CalibrationDialog(QDialog):
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
         apply = QPushButton("Use Reviewed Revisions")
         repeat = QPushButton("Recalibrate Again…")
+        reference = QPushButton("Paper / Ruler References…")
+        reference.setEnabled(self._reference_available)
+        reference.setToolTip(
+            "Mark common references in the selected capture. Open or record a capture first."
+        )
         buttons.addButton(apply, QDialogButtonBox.ButtonRole.AcceptRole)
         buttons.addButton(repeat, QDialogButtonBox.ButtonRole.ActionRole)
+        buttons.addButton(reference, QDialogButtonBox.ButtonRole.ActionRole)
+        reference.clicked.connect(self._reference)
         apply.clicked.connect(self._apply)
         repeat.clicked.connect(self._repeat)
         buttons.rejected.connect(self.reject)
@@ -208,4 +222,8 @@ class CalibrationDialog(QDialog):
 
     def _repeat(self) -> None:
         self.recalibrate_requested = True
+        self.accept()
+
+    def _reference(self) -> None:
+        self.reference_requested = True
         self.accept()
