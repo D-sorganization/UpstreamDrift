@@ -176,3 +176,40 @@ def test_failed_optional_runtime_restores_controls_and_explains_recovery(
     assert wizard.step_pages["step.detect"].open_button.isEnabled()
     assert not wizard.step_pages["step.detect"].isComplete()
     assert not capture_host.runner.busy
+
+
+def test_unavailable_calibration_keeps_native_editing_and_recovery_links_usable(
+    capture_host, tmp_path
+) -> None:
+    from tests.tools.capture_rig.test_wizard_evidence import _reviewed_calibration
+
+    root = _bundle(tmp_path)
+    capture_host._open_library_capture(root)
+    actions = capture_host.wizard_actions
+    actions.show()
+    review, path = _reviewed_calibration(root, tmp_path)
+    capture_host.process.start_edit.setText(str(path))
+    actions.review = review
+    wizard = actions.dialog
+    path.unlink()
+    wizard.choose(["reconstruct"])
+    wizard.next()
+    _ready(actions)
+    calibration = wizard.step_pages["step.intrinsics"]
+    assert calibration.open_button.isEnabled()
+    assert "calibration" in calibration.status.text().lower()
+    assert not calibration.isComplete()
+    assert wizard.step_pages["capture.library"].isComplete()
+    wizard.restart()
+    wizard.choose(["edit"])
+    wizard.next()
+    _ready(actions)
+    selection = wizard.step_pages["capture.selection"]
+    assert selection.open_button.isEnabled()
+    save_edits(root, SessionEdits())
+    actions.refresh()
+    _ready(actions)
+    wizard.next()
+    _ready(actions)
+    assert selection.isComplete()
+    assert wizard.button(QWizard.WizardButton.FinishButton).isEnabled()
