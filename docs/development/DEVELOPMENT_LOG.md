@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-10
 - **Last verified:** 2026-09-10 (30 OCP tests pass; two optional Pinocchio checks skipped)
 - **Summary:** Explicit constant interpolation gives each shared parameter a single-column bound, preserving limits and locked values.
-- **Evidence:** New actual-SDK regression failed with (1,3) before the fix; all five parameter tests pass after it, including unchanged numerical recovery tests. CasADi 3.6.7 and pinned Bioptim fdafe4d9; no tolerance changes.
+- **Evidence:** New actual-SDK regression failed with (1,3) before the fix; all five parameter tests pass after it, including unchanged numerical recovery tests. The optimization unit suite also passes after its bounds stub adopted the SDK add API. CasADi 3.6.7 and pinned Bioptim fdafe4d9; no tolerance changes.
 - **Next step:** Normal hooks, CI including Linux optional engines, and protected merge.
 
 ### DL-#9926 · Unified Model and Video Analysis
