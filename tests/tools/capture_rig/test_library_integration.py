@@ -7,12 +7,34 @@ from pathlib import Path
 import pytest
 
 from src.tools.capture_rig.gui import CaptureRigWidget
+from src.tools.capture_rig.capture_library import CaptureLibrary
 from src.tools.capture_rig.library_actions import LIBRARY_ROOT_KEY
 from src.tools.capture_rig.record_bar import Phase
 from tests.motion_capture.rig.test_ingest import _bundle
 from tests.tools.capture_rig.test_pane_layout import _app, _settings
 
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
+
+
+def test_successful_capture_is_indexed_before_the_library_is_opened(
+    tmp_path: Path,
+) -> None:
+    _app()
+    settings = _settings(tmp_path)
+    library_root = tmp_path / "player-library"
+    settings.setValue(LIBRARY_ROOT_KEY, str(library_root))
+    widget = CaptureRigWidget(settings=settings)
+    root = _bundle(tmp_path)
+    try:
+        assert widget.library_actions._library is None
+        widget.capture.set_session_path(root)
+        widget._on_command_finished(0)
+        entries = CaptureLibrary(library_root).catalog_entries()
+        assert len(entries) == 1
+        assert entries[0].root == root.resolve()
+        assert entries[0].capture_id in widget.journey.identity.toolTip()
+    finally:
+        widget.shutdown()
 
 
 def test_new_recordings_use_the_selected_library_without_reserving_files(

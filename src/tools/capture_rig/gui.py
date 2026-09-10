@@ -969,6 +969,7 @@ class CaptureRigWidget(QWidget):
             self._resume_preview = False
             self.toggle_preview(on=True)
         self.library_actions.command_finished(code)
+        self.journey.set_capture(self.media)
         self.journey_actions.complete(code)
 
     # -- recording ------------------------------------------------------------
