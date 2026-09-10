@@ -46,6 +46,7 @@ class MotionDraft:
     source_units: str
     units_declared: bool
     canonical: bool = False
+    model_identity: str | None = None
 
 
 def _from_markers(source: ReferenceSource, trajectory: MarkerTrajectory) -> MotionDraft:
@@ -84,6 +85,10 @@ def load_motion_draft(path: Path) -> MotionDraft:
     if path.suffix.lower() == ".c3d":
         source = ReferenceSource(path=str(path), sha256=digest, format="c3d")
         draft = _from_markers(source, C3DAdapter().load(path))
+    elif path.suffix.lower() in {".h5", ".hdf5"}:
+        from .trace_import import load_trace_draft
+
+        draft = load_trace_draft(path, digest)
     else:
         draft = _load_json(path, digest)
     if sha256_of(path) != digest:
@@ -142,6 +147,8 @@ def finish_motion_import(
     """Apply the user-confirmed units, signed axis permutation and joint mapping."""
     if len({axis[-1] for axis in axes}) != 3:
         raise ValueError("Assign each source axis exactly once")
+    if draft.source.format == "simulation-trace/2" and units != "m":
+        raise ValueError("Simulation trace marker coordinates already use metres")
     if draft.canonical and (units != "m" or axes != ("+X", "+Y", "+Z")):
         raise ValueError(
             "Canonical body targets already use metres and right-handed Z-up axes"
