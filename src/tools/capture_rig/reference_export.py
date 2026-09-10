@@ -18,6 +18,7 @@ import numpy.typing as npt
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 
 from src.motion_capture.coaching.storage import load_layer, layer_path
+from src.motion_capture.coaching import DrawingLayer
 from src.motion_capture.provenance import write_json
 from src.motion_capture.reconstruct.cameras import PinholeCamera
 from src.shared.python.pose_estimation.observations import CameraCalibration
@@ -61,6 +62,18 @@ class ComparisonVideoExportOptions:
     speed: float = 1.0
     cancelled: Callable[[], bool] = lambda: False
     progress: Callable[[int, int], None] = lambda done, total: None
+    drawings: DrawingLayer | None = None
+
+
+def _with_drawing_snapshot(
+    context: ComparisonRenderContext, drawings: DrawingLayer | None
+) -> ComparisonRenderContext:
+    if drawings is None:
+        return context
+    original = context.drawings
+    if original is None or original.with_shapes(()) != drawings.with_shapes(()):
+        raise ValueError("Drawing snapshot belongs to another source")
+    return replace(context, drawings=drawings)
 
 
 def _camera_snapshot(
@@ -226,6 +239,7 @@ def export_comparison_video(
         raise ValueError("Reference source changed or is unavailable; import it again")
     with VideoReader(source) as reader:
         ctx, clip = _render_recipe(root, view, asset, registration, layer, reader)
+        ctx = _with_drawing_snapshot(ctx, opts.drawings)
         fps, width, height = reader.fps, reader.width, reader.height
         if fps * opts.speed < 1:
             raise ValueError("Comparison speed needs an output rate of at least 1 fps")

@@ -13,6 +13,26 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def test_shared_analysis_routes_have_implementation_evidence():
+    graph = build(ROOT)
+    nodes = {node["id"]: node for node in graph["nodes"]}
+    assert nodes["capture.model_analysis"]["evidence"].endswith(
+        "model_analysis_dialog.py"
+    )
+    assert nodes["capture.world_references"]["evidence"].endswith(
+        "geometry_controls.py"
+    )
+    edges = {(edge["source"], edge["target"]) for edge in graph["edges"]}
+    assert {
+        ("capture.experts", "capture.model_analysis"),
+        ("capture.model_analysis", "capture.references"),
+        ("capture.comparison", "capture.references"),
+        ("capture.model_analysis", "capture.world_references"),
+        ("capture.comparison", "capture.world_references"),
+        ("capture.world_references", "comparison.outputs"),
+    } <= edges
+
+
 def test_complete_registry_coverage_and_workflow_branches():
     graph = build(ROOT)
     assert len(graph["features"]) >= 42

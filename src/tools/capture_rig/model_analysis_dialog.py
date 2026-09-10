@@ -16,6 +16,7 @@ from .model_coaching_source import ModelCoachingSource
 from .model_frame_source import ModelFrameSource, ModelViewRecipe
 from .reference_appearance import MotionAppearanceControls
 from .reference_controls import SpatialControls
+from .reference_readout import ReferenceReadout
 
 
 class ModelAnalysisDialog(CoachingDialog):
@@ -29,6 +30,8 @@ class ModelAnalysisDialog(CoachingDialog):
         initial.close()
         self.geometry_controls: GeometryControls | None = None
         self.spatial: SpatialControls | None = None
+        self._scene_id = asset_identity(asset)
+        self.readout = ReferenceReadout()
         super().__init__(root, asset.id, parent, media=self.model_source)
         self.setWindowTitle(f"Model Analysis · {asset.title}[*]")
         self.resize(1000, 900)
@@ -58,6 +61,7 @@ class ModelAnalysisDialog(CoachingDialog):
             ("Appearance", self.appearance),
             ("Placement and Handedness", self.spatial),
             ("3D References", self.geometry_controls),
+            ("Measurements", self.readout),
         ):
             area = QScrollArea()
             area.setWidgetResizable(True)
@@ -65,6 +69,19 @@ class ModelAnalysisDialog(CoachingDialog):
             tabs.addTab(area, label)
         layout = cast(QVBoxLayout, self.layout())
         layout.insertWidget(0, tabs)
+
+    def _show_frame(self, frame: int) -> None:
+        super()._show_frame(frame)
+        recipe = self.model_source.recipe
+        scene_id = self._scene_id
+        geometry = recipe.geometry or ReferenceGeometry(scene_id=scene_id)
+        self.readout.set_context(
+            recipe.asset,
+            recipe.registration,
+            geometry,
+            self.model_source.time_at(frame),
+            scene_id,
+        )
 
     def _replace(self, **changes: object) -> None:
         current = self.model_source.recipe

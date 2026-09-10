@@ -29,7 +29,7 @@ from PyQt6.QtWidgets import (
 from src.motion_capture.coaching import Drawing
 
 from . import styling
-from .coaching_canvas import CoachingCanvas
+from .coaching_canvas import CoachingCanvas, FrameFinalizer
 from .coaching_source import CaptureCoachingSource, CoachingSource
 from .flow_layout import FlowLayout
 from .session import load_session
@@ -44,6 +44,7 @@ class CoachingDialog(QDialog):
         parent: QWidget | None = None,
         *,
         media: CoachingSource | None = None,
+        finalize: FrameFinalizer | None = None,
     ) -> None:
         super().__init__(parent)
         self.root, self.view = root, view
@@ -51,7 +52,7 @@ class CoachingDialog(QDialog):
         self.reader = self.media.reader
         saved = self.media.drawings
         self._saved = saved
-        self.canvas = CoachingCanvas(saved)
+        self.canvas = CoachingCanvas(saved, finalize=finalize)
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._advance)
         self.canvas.interaction_started.connect(self._stop)
