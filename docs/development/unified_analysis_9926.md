@@ -168,6 +168,8 @@ TDD covers known transforms, point/plane distances, missing samples, wrong-scene
 rejection and playback in both windows. The 513-test Capture Rig/geometry run
 passed; ten focused regressions passed after the final cache/type corrections.
 The full Driver's frame200 at0.556s was visually inspected with the shared panel
-and plane. Final mypy is still running. Trace v2 import, native simulation
+and plane. Readout mypy passes four source files. The initial Trace v2 importer passes
+126 reference/import regressions and mypy on five source files. Explicit club
+and skeleton topology preservation, native simulation
 reference geometry, final capability/context-map updates and protected delivery
 remain open for #9942 and the parent epic.
