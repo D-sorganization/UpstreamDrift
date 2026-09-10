@@ -1,0 +1,176 @@
+{
+  "schema": "reference-display-qualification/1.0",
+  "entries": [
+    {
+      "base_fit_manifest": "final-driver-catalog\\double_pendulum\\manifest.json",
+      "base_manifest_sha256": "1dcaf55cd2a397d6d08645b54b64c0bcf2518d4b6fc027a8281fafc677309628",
+      "reference_id": "db76635a-441d-5dbf-a387-662f2ce23785",
+      "reference_sha256": "a87d0303eddb0b68170a566e531b3a8fda367122e822362db62657e590ea0ae9",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-driver-catalog\\drake_golfer\\manifest.json",
+      "base_manifest_sha256": "58d44e68571a607ab7db9b1ccb74b9369abdc668e3c0531d54ed81b169157475",
+      "reference_id": "6ff98950-ac45-5031-a00f-815ac5390e85",
+      "reference_sha256": "12633f6de87f6199c36f728487172b8d1afe046c41af8102c1bb2981e50418d8",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-driver-catalog\\golfer\\manifest.json",
+      "base_manifest_sha256": "ddb7389141f685d4ca0f273e4c8026c9c51118592054b21be96fb9467b87edd2",
+      "reference_id": "fee9563e-d34e-56ef-ad68-1e97656d76dd",
+      "reference_sha256": "79b9f60e43ede1c561a86c37d72f79a189c81d90880f50a4039e1f84da0dd416",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-driver-catalog\\human_subject\\manifest.json",
+      "base_manifest_sha256": "acc9ab54d679ca1e587f3ba749c96e64b11c932b856717337adf855684dd543a",
+      "reference_id": "454fbf3c-54f4-552c-b8ad-0046d1f62998",
+      "reference_sha256": "a56c10a1fe082f151b16df32e573362d3205347f2814055fbcf0b21d0e4916b6",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-driver-catalog\\mujoco_humanoid\\manifest.json",
+      "base_manifest_sha256": "ed8004df303f6ba8ed777a3065af03429526de59deb901f76c01691a8d2d64b6",
+      "reference_id": "073d6f49-7cec-5747-b7e0-5122bceefe41",
+      "reference_sha256": "93a80e5cb8163969fde4b32856f204364bd35dbcab503598ec793a385900f083",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-driver-catalog\\pinocchio_golfer\\manifest.json",
+      "base_manifest_sha256": "b9d04d9e0af2f690cef724b8cd167037e03cfcc71f0b2512a91e6ae48223e11b",
+      "reference_id": "83963fa8-8ad3-5b86-b1f6-1093de03bc09",
+      "reference_sha256": "49d95199a17805ef251dc9c2fe64b601494ef3026897adbc8409f84fb7172dbd",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-driver-catalog\\pinocchio_golfer_ik\\manifest.json",
+      "base_manifest_sha256": "d14a471b94c423b6a8a20c86e9a73e848c20a4e1d8a2c4de31938dba6dd3777d",
+      "reference_id": "b581c74c-bd5b-5fa7-b561-f2ffc4a81837",
+      "reference_sha256": "615126c175efd37607d71d23a46ce99a2dead0d64593003e2dd923734eeb8856",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-driver-catalog\\simple_humanoid\\manifest.json",
+      "base_manifest_sha256": "535f108d3a43e180cba2c90a14b4f3a57b56c0d6252682278c9dba824ad3b6d0",
+      "reference_id": "f3b49661-80e6-56ee-92b2-e94075275995",
+      "reference_sha256": "83227c1297992bf6fd9440fad7f953ba0ca52340a0d594746b4f849e478b5d5a",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-driver-catalog\\triple_pendulum\\manifest.json",
+      "base_manifest_sha256": "aab3fb682525b501213b60c3c2c9c864bd1514ecffb73258f657bbbc795074d9",
+      "reference_id": "bc3124ff-04ce-5584-9a32-62e0a57ae65a",
+      "reference_sha256": "852b3f118f3d02a9a4b3ac627fd91fca9ea89399ccf4b6a5b63b9c25c6163345",
+      "club_valid_samples": 106
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\double_pendulum\\manifest.json",
+      "base_manifest_sha256": "906653dc7733e624c6cf4d3581788648a83fdfb016a0262d226659cced8bd1f4",
+      "reference_id": "01cd7d23-d71c-5a30-ae46-75f14b611e75",
+      "reference_sha256": "d8250f83051bc2bef3a91f72e9f8b9a0cb18809ddffe60b88b2c512b1a40f698",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\drake_golfer\\manifest.json",
+      "base_manifest_sha256": "47a035e5b22523c00aea645b71a2ea21d45edaf0b7808ee59d9774f651dade97",
+      "reference_id": "5a87b780-71b3-535a-9800-24b384b49ca3",
+      "reference_sha256": "920ee9ad4fee9c6a98e97ac86fafcd828ab9cfc74fb4b8b6170fa8d5b7a6e4d3",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\golfer\\manifest.json",
+      "base_manifest_sha256": "2aba81526912235f7fb9448d77946db4ab59c384b2c4f9808c13b8ec7d909407",
+      "reference_id": "a0b57090-7155-5c60-83f7-d4bbf9b9a3d4",
+      "reference_sha256": "caabd78ee17178150aa689822baf92bafa99210c01d94e00deec721c9144b66a",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\human_subject\\manifest.json",
+      "base_manifest_sha256": "f38591b2e74432c913b99dc34a73b96096c058f773327e9bf8a7cad0e59a5cd4",
+      "reference_id": "f5bc2bc0-a530-5def-97db-aa4de0dd1fae",
+      "reference_sha256": "711d8cfd2a36dcc4231be4d40da92cf7fccda81d761ef175884f5617ce752fd0",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\mujoco_humanoid\\manifest.json",
+      "base_manifest_sha256": "16d4c8961a093f7c59454381659b18e5da024147f10bec8c16fa7130e3f95965",
+      "reference_id": "72d314bd-abeb-508d-bac9-b346cc311a23",
+      "reference_sha256": "bad7aeeff1d1a574178bedf2265c406b1377fb249cf96b01eb1aeeeed5f166fc",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\pinocchio_golfer\\manifest.json",
+      "base_manifest_sha256": "9846cf82a8c032ebef57dadb24ea4e71285b007a082596f040d125a6903cf3c5",
+      "reference_id": "9733137d-be01-57ad-8eb3-1fa7b8c3ac6e",
+      "reference_sha256": "aca550e38097a33131f5453e6f18a10d06f4f266735b1920df5e700f943d82fd",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\pinocchio_golfer_ik\\manifest.json",
+      "base_manifest_sha256": "a42e8a7497d36d919be8a6ecd95eaf41bb85d8a14538ccc6bfa38ab255d5b9ce",
+      "reference_id": "0e867a52-fc71-54e6-a243-45c597cb5183",
+      "reference_sha256": "9ec02c8054ee8087ddcc09401753fdc4ba55d0e09ff57e076039b6f211b77a6b",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\simple_humanoid\\manifest.json",
+      "base_manifest_sha256": "0c3a6144ac29586beb76383333c7d8c8caa944e0f0db2edb216f585abe494cb1",
+      "reference_id": "b3454f45-7c4d-5918-abf3-6100bd813571",
+      "reference_sha256": "531e66708077c98840d49796fb9924cfee833a78046d71eb3d74ce5834257126",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-iron-catalog\\triple_pendulum\\manifest.json",
+      "base_manifest_sha256": "5266771c8861b472139e48a3157a7794f0d0d49fe3ef2577c6b0acf7e12c4b97",
+      "reference_id": "cc5563a7-6d93-5d3e-bafc-94ac0806a2de",
+      "reference_sha256": "37ef2e188fba7e7ca6d14ad91fd6f85d83f2587cff898dc4ef02e7d019f4cb0a",
+      "club_valid_samples": 109
+    },
+    {
+      "base_fit_manifest": "final-driver-full\\golfer\\manifest.json",
+      "base_manifest_sha256": "a4d8b9b9af6886d29a10b20573b1c307f0ad118f05ad1f890a4c717dcae4fb77",
+      "reference_id": "500edc0e-3cd6-56e6-acd9-42f31638b733",
+      "reference_sha256": "cdfa3af99bcb16c156f31c49353283345e2a1e03a29e4aafcf1c85e1989ce0ea",
+      "club_valid_samples": 1251
+    },
+    {
+      "base_fit_manifest": "final-iron-full\\golfer\\manifest.json",
+      "base_manifest_sha256": "1ca86b9cd97609de548ffe393003f6902861414c4539a376c41e90d8db061a14",
+      "reference_id": "80a68d87-7e6f-58b3-917d-c04eee3ce783",
+      "reference_sha256": "c6321c06385ebcac6c0b404244f4720602aac33c85af91644d1ecef94e74431e",
+      "club_valid_samples": 1297
+    }
+  ],
+  "profile": {
+    "schema_version": "reference-marker-profile/1.0",
+    "name": "tour-average-surface-proxies/1.0",
+    "axes": ["+X", "-Z", "+Y"],
+    "units": "m",
+    "joints": {
+      "mid_hip": ["WaistLeft", "WaistRight"],
+      "neck": ["BackTop"],
+      "nose": ["HeadFront"],
+      "left_shoulder": ["LShoulderBack"],
+      "right_shoulder": ["RShoulderBack"],
+      "left_elbow": ["LElbowOut"],
+      "right_elbow": ["RElbowOut"],
+      "left_wrist": ["LWristTop"],
+      "right_wrist": ["RWristTop"],
+      "left_hip": ["WaistLeft"],
+      "right_hip": ["WaistRight"],
+      "left_knee": ["LKneeOut"],
+      "right_knee": ["RKneeOut"],
+      "left_ankle": ["LAnkleOut"],
+      "right_ankle": ["RAnkleOut"]
+    },
+    "club": {
+      "grip": ["Marker_3:3:1", "Marker_3:3:2", "Marker_3:3:3"],
+      "head": ["Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3"]
+    },
+    "notes": "Surface proxies, not anatomical centers. Waist markers approximate hips; BackTop approximates neck. Posterior shoulder markers avoid the occluded RShoulderTop. Club centroids are measured display geometry, excluded from body fitting; sentinel markers are excluded."
+  },
+  "script_sha256": "ecfdb79049ce6c5ea23d49ad11aac2728c02be4f22aaa11c514e5378539554f9",
+  "fitting_code_sha256": "91f2ff5a91725fa40931cf6d14d7527155ddba6cd37cfc406c4823376e8e5373",
+  "note": "Body geometry exactly retained from qualified fit bundles; club endpoints are observed cluster centroids. Illustration cameras are not user calibrations."
+}

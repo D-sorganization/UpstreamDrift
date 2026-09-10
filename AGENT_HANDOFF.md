@@ -2,6 +2,18 @@
 
 Active #9905 in `feat/9905-player-club-bag`, worktree UpstreamDrift-player-bag. My Clubs UI, capture assignment/library display and immutable model context are implemented;652 broad regressions and69 focused/map/parity checks pass. Parent catalog #9919 merged01831aa4c; capture UX #9917 merged8fce9f238. Canonical state is `docs/development/HANDOFF.md`. Preserve live Capture Rig childPID61500 and standing manual governance. Wizard integration and broader goal remain open.
 
+## C3D Reference Fitting (#9914)
+
+Current work is isolated in `../UpstreamDrift-reference-9914`, branch
+`feat/c3d-reference-overlay-9914`; implementation commit SELF; PR #9918.
+See `docs/development/reference_fitting_epic.md` and the operator guide
+`docs/motion_capture/reference_model_fitting.md`. DL-#9914 records current state.
+Reference fitting and the expanded club/ellipsoid/handedness controls reuse the
+existing compositor. #9917 is integrated; other capture work remains with its
+owner. Reference/Capture Rig regressions pass. Twenty qualified numerical bundles
+and twenty club display assets are ready; merged as 6f2d63325f6260de99527a08551f7e116abdec28; completion docs follow. Existing
+camera data and the original main worktree's user changes are untouched.
+
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
 Isolated branch `fix/9894-ubuntu-ci-sources` replaces four standard CI APT

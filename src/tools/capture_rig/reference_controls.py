@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 from PyQt6.QtCore import QSignalBlocker, pyqtSignal
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QDoubleSpinBox,
     QFormLayout,
     QHBoxLayout,
@@ -68,6 +69,7 @@ class SpatialControls(QWidget):
             number(f"Scene {axis} Rotation (deg)", (-180, 180), 1) for axis in "XYZ"
         ]
         self.scale = number("Model Scale", (0.001, 100), 0.05)
+        self.mirror = QCheckBox("Flip Left / Right Handedness")
         self.image_x = number("Move Image X (px)", (-10000, 10000), 1)
         self.image_y = number("Move Image Y (px)", (-10000, 10000), 1)
         self.image_angle = number("Rotate Image (deg)", (-180, 180), 1)
@@ -81,6 +83,7 @@ class SpatialControls(QWidget):
         layout.addWidget(self.problem)
         layout.addStretch()
         self.set_registration(registration)
+        self.mirror.toggled.connect(self._edited)
         for field in (
             *self.translation,
             *self.rotation,
@@ -112,6 +115,10 @@ class SpatialControls(QWidget):
         ):
             self.form.addRow(label, field)
         self.form.addRow("Model Scale", self.scale)
+        self.mirror.setToolTip(
+            "Reflect reference lateral coordinates before scene placement. Source labels and camera calibration stay fixed."
+        )
+        self.form.addRow(self.mirror)
         button = QPushButton("Apply Model Placement")
         button.clicked.connect(self.apply_placement)
         self.form.addRow(button)
@@ -140,6 +147,8 @@ class SpatialControls(QWidget):
     def set_registration(self, registration: ReferenceRegistration) -> None:
         self.registration = registration
         transform = registration.transform
+        with QSignalBlocker(self.mirror):
+            self.mirror.setChecked(registration.mirror_lateral)
         angles = np.rad2deg(rotation_matrix_to_euler(np.asarray(transform.rotation)))
         for field, value in zip(
             (*self.translation, *self.rotation, self.scale),
@@ -180,7 +189,13 @@ class SpatialControls(QWidget):
             "scale": self.scale.value(),
             "is_calibrated": False,
         }
-        return self._apply({"transform": values, "is_calibrated": False})
+        return self._apply(
+            {
+                "transform": values,
+                "is_calibrated": False,
+                "mirror_lateral": self.mirror.isChecked(),
+            }
+        )
 
     def apply_image(self) -> bool:
         width, height = self.scene_size
