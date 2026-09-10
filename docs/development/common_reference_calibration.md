@@ -32,6 +32,9 @@ failures. Live test applications still use their frozen earlier checkouts.
   pip checks. Frontend-inclusive wheel SHA256:
   `55aacd817e75004f9355fd46aa9903e2de3bed47f65d3dbad239e799214f2310`.
   Prior numerical wheel evidence below retains its own scope.
+  The broader post-storage run passed665 tests and failed one obsolete preview
+  assertion expecting a checkout `sessions` directory. Its replacement verifies
+  the configured library destination; all eight preview tests then pass.
 
 - Installed-worker qualification: the normal frontend-inclusive wheel built from
   c432788c3 failed its actual installed catalog request because it required a
