@@ -159,7 +159,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #9946
 - **Paths:** reference_calibration, calibration/wizard controls, reconstruction lens adapter and associated tests/docs
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (58f42ff94 hooks pass;5c9167e4d recovery passes31 checks plus fresh-window resume; CI repair SELF)
+- **Last verified:** 2026-09-10 (58f42ff94 hooks pass;5c9167e4d recovery passes31 checks plus fresh-window resume; CI89704dd29; registry order SELF)
 - **Summary:** Original-frame paper/ruler marking, reviewed reusable camera layouts, isolated canonical solver, distortion-preserving overlays and guided recovery. Detailed tests, historical failures and limits: [checkpoint](common_reference_calibration.md).
 - **Next step:** Fix CI type/duplication/doc budgets, integrate the separately owned published consumer, then qualify and merge #9946. Scientific manual/physical approval remains separate.
 

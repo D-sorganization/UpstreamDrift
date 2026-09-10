@@ -21,7 +21,9 @@ consumer delivery before final PR qualification. Historical failures remain fail
   50 KiB budget. Projection pixels are explicitly floating point before camera
   skew is applied. Club and measured-reference editors share native Save/Cancel
   wiring. Seventeen projection/editor/calibration tests pass; the calculation
-  and editor validation behavior are unchanged.
+  and editor validation behavior are unchanged. The registry retains the primary
+  inventory blocker first, as required by its existing contract; all calibration
+  and peer blockers remain present and scientific release remains blocked.
 
 - Missing-output recovery (#9909) records a removed recording or pose-output
   path in the input revision instead of failing the whole wizard inspection.
