@@ -23,6 +23,12 @@ Replace QUERY and COMPONENT with the relevant concept and returned component ID.
 Reinstall after changing the provider pin with `python3 -m pip install --force-reinstall ./vendor/ud-tools/packages/agent-context`. A runtime built from another Tools
 revision is not verified merely because the submodule itself is clean.
 
+The application Tools dependency in `requirements-tools.txt` and the Rust
+`Cargo.toml` revision must match the same gitlink. The required context tests
+reject an older release wheel or a different source revision. The small context
+package remains independently installable; it does not require installing the
+full application Tools package.
+
 ## Navigating Code Graphs
 
 The component map includes a generated Mermaid graph of registered integrations.
