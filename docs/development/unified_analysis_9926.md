@@ -47,17 +47,25 @@ without that camera file retain their existing identity.
 
 ## Reuse and Surface Audit
 
-| Surface              | Existing Infrastructure                                                                 | Required Integration                                                                      | Status                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Capture Coaching     | `CoachingDialog`, `CoachingCanvas`, immutable `DrawingLayer`, bounded `History`         | Share the drawing editor with model comparison; keep original pixel coordinates           | Pending                                                                    |
-| Reference Comparison | `ReferenceComparisonDialog`, placement, event pairing, appearance, `ComparisonRenderer` | Editable shared world planes and points; measurement readout and drawing tools            | Plane/point editor merged in #9933; drawing tools and measurements pending |
-| Comparison Export    | Shared compositor, camera/clock snapshots, input hashes, export sidecar                 | Include exact geometry document and validate source evidence                              | Geometry recipe merged in #9933 with regression and visual qualification   |
-| Model-Only Analysis  | `ReferenceMotion`, `ReferenceTimeline`, fit artifacts and model registry                | Use common controls and a clearly virtual camera without inventing capture media          | Shared editor, controls, persistence and verified exports merged in #9933  |
-| Pose Studio          | Canonical poses, live kinematics, `View3D`, existing club bone                          | Consume shared analysis references and model/trace handoff                                | Pending                                                                    |
-| Simulation Traces    | `simulation_backends.protocol.Trace` v2 optional metric markers, `trace_io`             | Explicit marker topology and unit/frame adapter into common analysis                      | Pending                                                                    |
-| Native Viewports     | `Viewport` mesh protocol, `FspRenderer`, provider capability evaluation                 | Render the same reference geometry with explicit unsupported-capability reasons           | Pending                                                                    |
-| Native Engines       | Pose interchange adapters and engine registry                                           | Qualify actual available model/trace routes; do not claim optional SDK support from mocks | Pending                                                                    |
-| Functionality Maps   | Capability connections, generated agent-context maps                                    | Record real edges after integration; coordinate with #9907 and #9915 owners               | Pending                                                                    |
+| Surface              | Existing Infrastructure                                 | Integrated Route                                                        | Qualification                                                                                              |
+| -------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Capture Coaching     | CoachingDialog/Canvas, DrawingLayer, History            | Common drawing editor and original-pixel exports                        | Merged #9933/#9943; capture regression coverage                                                            |
+| Reference Comparison | Registration, event pairing, ComparisonRenderer         | Common drawings, geometry, appearance and Measurements tab              | Drawing/geometry merged; metric tests pass, #9942 protected delivery pending                               |
+| Comparison Export    | Shared compositor and immutable source/camera snapshots | Saved drawings and geometry with clock/crop parity                      | Merged #9943; PNG/video, cancellation and changed-evidence tests                                           |
+| Model-Only Analysis  | ReferenceMotion/Timeline and fit artifacts              | Same editor and controls with explicit virtual camera                   | Merged #9933; added measurements/Trace regression tests pass                                               |
+| Pose Studio          | Canonical poses/FK, View3D and existing club bone       | Shared reference editor, mesh renderer and save/load                    | Native30 tests and visual plane/editor review; #9942 protected delivery pending                            |
+| Simulation Traces    | Trace v2 metric markers and trace_io                    | Explicit axes/names/topology into reference library and common analysis | Trace126 and topology17 tests pass; q-only traces report missing marker channels                           |
+| Native Viewports     | Existing Viewport mesh protocol                         | Scene-bound adapter with explicit coordinate frame                      | Pose Studio qualified; other renderer SDKs are not claimed from the protocol alone                         |
+| Native Models        | Existing fitted ReferenceMotion assets and catalog      | Analyze Model or Compare Reference regardless of fit adapter            | See model-by-model fitting qualification in reference_model_fitting.md; unavailable model reasons retained |
+| Functionality Maps   | Capability registry and generated atlas                 | Measurements, Trace and native-reference contract edges                 | Atlas/parity50 tests pass; peer-owned context boundaries await #9915 coordination                          |
+
+The native pose editor is static and uses scene time zero. Dynamic simulation
+analysis uses the Trace marker route and the shared playback/export workspace.
+Direct control injection into every optional engine's separate native viewer is
+not implemented: those viewers differ in coordinate frames, camera contracts and
+SDK availability. A `Viewport`-compatible renderer can use the shared adapter only
+after its frame and mesh behavior are qualified; unsupported objects fail the
+protocol contract instead of silently dropping references.
 
 ## Contracts and Coordinate Ownership
 
@@ -90,8 +98,8 @@ alpha, clock bounds, behind-camera geometry, original-image immutability,
 numeric edits, undo/redo, reopening and export recipe reuse.
 
 The existing drawing, appearance, reference-comparison and video-export tests
-are regression targets. Full protected CI, broader visual checks,
-simulation integration and capability-map updates remain completion gates.
+are regression targets. Final combined qualification, reviewed context boundaries
+and protected delivery remain completion gates.
 
 Local qualification to date: 46 combined geometry, coaching, comparison, display
 and export tests passed before the additional pending-edit/precision regression
@@ -170,9 +178,9 @@ passed; ten focused regressions passed after the final cache/type corrections.
 The full Driver's frame200 at0.556s was visually inspected with the shared panel
 and plane. Readout mypy passes four source files. The initial Trace v2 importer passes
 126 reference/import regressions and mypy on five source files. Explicit club
-and skeleton topology preservation, native simulation
-reference geometry, final capability/context-map updates and protected delivery
-remain open for #9942 and the parent epic.
+and skeleton topology preservation and native Pose Studio reference geometry are
+implemented and tested. Capability maps are updated; reviewed context boundaries
+and protected delivery remain open for #9942 and the parent epic.
 
 ## Native Reference Geometry
 
