@@ -275,6 +275,22 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """Get the current state (positions, velocities)."""
         return self.q.copy(), self.v.copy()
 
+    def get_link_transforms(self) -> dict[str, np.ndarray]:
+        """Return frame poses without advancing the Pinocchio model."""
+        if not self.is_initialized:
+            raise RuntimeError("Engine must be initialized")
+        assert self.model is not None and self.data is not None
+        pin.forwardKinematics(self.model, self.data, self.q)
+        pin.updateFramePlacements(self.model, self.data)
+        result: dict[str, np.ndarray] = {}
+        for frame in self.model.frames:
+            pose = self.data.oMf[frame.id]
+            transform = np.eye(4)
+            transform[:3, :3] = pose.rotation
+            transform[:3, 3] = pose.translation
+            result[frame.name] = transform
+        return result
+
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state and refresh derived kinematics."""
         if q is None:
