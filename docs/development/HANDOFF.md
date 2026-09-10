@@ -22,7 +22,8 @@
   Full reference/Capture Rig selection and targeted missing-club preview tests pass.
 - Coordination: `codex-reference-9914-20260909`, lease and reference UI paths
   registered. #9917 integrated, concurrent branch fixes preserved in d874062a5.
-- Next: normal push and protected PR #9918 checks. Do not close before merge.
+- Shipped: PR #9918 merged as `6f2d63325` after protected CI passed; epic #9914 closed.
+- Next: retain the fitting/display regressions and documented native support boundaries.
 
 # Attributed Club Catalog Handoff
 
