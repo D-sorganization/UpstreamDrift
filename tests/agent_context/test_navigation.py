@@ -2,8 +2,12 @@
 
 from pathlib import Path
 
+import pytest
+
 from agent_context.catalog import load_catalog
 from agent_context.service import ContextService
+
+pytestmark = pytest.mark.integration
 
 ROOT = Path(__file__).resolve().parents[2]
 

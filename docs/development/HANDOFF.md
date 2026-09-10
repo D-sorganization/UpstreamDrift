@@ -33,7 +33,7 @@
 - Implemented locally: Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities.
 - Validation: five context/pin/CI tests pass; 12/12 candidate navigation tasks pass (max13462 characters; concurrent Windows median6176ms, not a speedup benchmark). Existing boundary tests pass against the candidate: 41 tests plus15 atlas/workflow checks after current-main merge.
 - Compatibility: scientific/manual authority is unchanged. Catalog status does not prove runtime availability. Reviews declare inspected evidence; test execution remains separate. Existing communication and handoffs remain authoritative.
-- Current limits: candidate provider82151279fae003f015a6733f384770ee4d2aec32 is locally qualified against Tools PR #5141. Required CI rejects unpublished provider revisions; final published pin and protected delivery remain pending. Preserve the parallel shaft-provider ancestry and UD #9916 seam repairs.
+- Current limits: candidate provider82151279fae003f015a6733f384770ee4d2aec32 is locally qualified against Tools PR #5141. Required CI rejects unpublished provider revisions; final published pin and protected delivery remain pending. Preserve the parallel shaft-provider ancestry and UD #9916 seam repairs. The context job now uses repository-standard full-SHA actions, and docs/index.md registers the new map.
 - Ordered continuation: (1) complete provider package, integrity and normal hook checks; (2) publish and qualify protected Tools delivery; (3) pin consumers, run integration tests, record reviewed contracts, generate/inspect maps and qualify consumer CI; (4) reconcile fleet guide and epic against actual delivered PRs.
 
 ## Identity and Scope
