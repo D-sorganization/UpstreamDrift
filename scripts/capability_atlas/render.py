@@ -8,6 +8,7 @@ from collections import defaultdict
 from urllib.parse import quote
 
 from .model import Graph
+from .goals import prerequisite_mermaid
 
 REPO_URL = "https://github.com/D-sorganization/UpstreamDrift"
 
@@ -225,6 +226,18 @@ def document(graph: Graph) -> str:
         "",
         "| Feature | Registry Status | Source Surfaces |",
         "| --- | --- | --- |",
+    ]
+    section = lines.index("## Feature Surfaces")
+    lines[section:section] = [
+        "## Guided Capture Goals",
+        "",
+        "Select outcomes in the interactive atlas and open its saved plan in Capture Wizard.",
+        "These are executable prerequisites; the architecture arrows above describe data flow.",
+        "",
+        "```mermaid",
+        prerequisite_mermaid(graph).rstrip(),
+        "```",
+        "",
     ]
     for item in graph["features"]:
         links = [
