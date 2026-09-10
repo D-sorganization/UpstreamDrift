@@ -536,7 +536,11 @@ def build_phase_masks(
         else:
             mask = (time_array >= phase.start_s) & (time_array < phase.end_s)
         masks[phase.name] = mask
-    coverage = np.asarray(list(masks.values())).sum(axis=0)  # ⚡ Bolt: np.asarray().sum(axis=0) avoids np.stack overhead and is ~2.2x faster than np.sum(np.stack(...), axis=0)
+    coverage = np.asarray(
+        list(masks.values())
+    ).sum(
+        axis=0
+    )  # ⚡ Bolt: np.asarray().sum(axis=0) avoids np.stack overhead and is ~2.2x faster than np.sum(np.stack(...), axis=0)
     if not np.all(coverage == 1):
         raise ValueError("phase masks must be nonoverlapping and exhaustive")
     return masks
