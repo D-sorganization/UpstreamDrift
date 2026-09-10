@@ -160,6 +160,8 @@ def test_optional_and_explicit_hub_paths_keep_required_local_checks(
         "Read `docs/required.md` before editing.\n"
         "Read `docs/codemap.md` before release.\n"
         "Read `docs/mandatory.md`. Check `docs/optional.md` when present.\n"
+        "When `docs/agent_context/catalog.json` exists, read `docs/contract.md`.\n"
+        "If `docs/optional.json` exists, inspect its content.\n"
     )
     errors: list[str] = []
     checker._assert_path_references_exist(text, errors)
@@ -167,6 +169,7 @@ def test_optional_and_explicit_hub_paths_keep_required_local_checks(
         "CLAUDE.md references a missing path: docs/required.md",
         "CLAUDE.md references a missing path: docs/codemap.md",
         "CLAUDE.md references a missing path: docs/mandatory.md",
+        "CLAUDE.md references a missing path: docs/contract.md",
     ]
 
 
