@@ -169,6 +169,14 @@ class JourneyPanel(QFrame):
         browser.anchorClicked.connect(lambda url: self.step_requested.emit(url.path()))
         content = [
             "<h1>Capture a Swing</h1>",
+            "<p>Open <b>Capture Wizard</b> to choose an outcome and follow only its required steps. "
+            "Use <b>Open Step Controls</b> to work in the existing screen, then return with "
+            "<b>Capture Wizard</b> and <b>Refresh Status</b>. Next becomes available when "
+            "the step has its required evidence. My Clubs is optional for body-model fitting.</p>",
+            "<p><b>Save and Close</b> stores your place with this capture. Reopen the wizard "
+            "and choose <b>Resume This Capture’s Saved Workflow</b>. Changed inputs or a changed "
+            "capability map require reviewing the outcomes again. Calibration settings need "
+            "fresh confirmation after closing the wizard. Back and Cancel preserve saved work.</p>",
             "<p>One capture contains synchronized camera views of one take. "
             "Name it and add swing notes in <b>Library</b>. Use <b>Edit Swing</b> "
             "to select the swing before detecting joints. Detection creates "
