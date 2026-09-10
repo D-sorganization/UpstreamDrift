@@ -153,3 +153,21 @@ Owner session: `codex-unified-analysis-20260910`, isolated branch
 the coaching contracts and comparison UI. Active work is on `feat/9932-comparison-drawings`. Equipment/session fitting, capture
 goal-planner, Simscape matching and agent-context edits remain owned by their
 active peer sessions. Do not edit their worktrees or rewrite their branches.
+
+## Shared Metric Readouts (#9942)
+
+The same Measurements panel now appears in model-only and video-comparison
+analysis. Choose a motion landmark and a saved point or plane. Readouts use
+registered world metres and the same source timing, coordinate conversion,
+scale, translation and handedness as rendering. Missing samples remain
+unavailable. Plane values are signed distances to the infinite plane, independent
+of its display extent. This is geometric reference analysis, not anatomical
+rotation or inverse dynamics.
+
+TDD covers known transforms, point/plane distances, missing samples, wrong-scene
+rejection and playback in both windows. The 513-test Capture Rig/geometry run
+passed; ten focused regressions passed after the final cache/type corrections.
+The full Driver's frame200 at0.556s was visually inspected with the shared panel
+and plane. Final mypy is still running. Trace v2 import, native simulation
+reference geometry, final capability/context-map updates and protected delivery
+remain open for #9942 and the parent epic.

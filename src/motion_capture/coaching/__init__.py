@@ -2,6 +2,7 @@
 
 from .drawing import DEFAULT_DRAWING_COLOUR, Drawing, DrawingLayer, History
 from .geometry import ReferenceGeometry, ReferencePlane, ReferencePoint
+from .measurements import reference_distances
 from .render import render_layer
 
 __all__ = [
@@ -13,4 +14,5 @@ __all__ = [
     "ReferencePlane",
     "ReferencePoint",
     "render_layer",
+    "reference_distances",
 ]

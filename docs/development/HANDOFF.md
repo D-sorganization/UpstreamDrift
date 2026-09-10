@@ -1,5 +1,35 @@
 # Guided Capture Workflow Handoff
 
+## Shared Measurements and Simulation (#9942)
+
+Active worktree `C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942`,
+branch `feat/9942-metric-simulation-analysis`, base114801638, implementation SELF. Parent #9926 remains active; #9943 drawing PR is still under CI.
+Session `codex-unified-metrics-9942` owns readouts and simulation import, with
+Repository Management presence through05:19UTC. The original shared session
+holds the #9942 lease through05:17UTC. Preserve other agents and Tools4dabe900.
+
+Implemented test first: public `coaching.reference_distances`, shared
+`ReferenceReadout`, Measurements tabs in model analysis and comparison.
+Distances consume the same registered sampler as rendering, preserve NaN gaps,
+validate scene/landmark/reference identity, and account for handedness. Fixed
+world points use Euclidean metres; planes reuse ReferencePlane.distances.
+No anatomical metric framework is duplicated from #9934.
+
+Validation: 513 Capture Rig/geometry tests passed before the scene-identity
+cache and type-only correction; ten focused regressions then passed. LoD no-growth
+and architecture checks passed; scoped mypy initially found a heterogeneous
+reference inference and dtype issue, corrected explicitly, final type verdict
+pending. Visual Driver frame200/654 at0.556s inspected in external
+`analysis-9926-artifacts/metric-readout-ftgfnr50/model-metric-readout.png`.
+
+Next: finish type/focused checks, document and commit readout implementation;
+implement explicit Trace v2 marker-motion import and shared native viewport
+reference geometry; update capability/context maps; qualify #9942 protected CI.
+Trace HDF5 metadata round-trips scalars only, so marker names and coordinate
+frame must use an explicit portable contract. No simulation import is implemented
+yet. The #9943 worktree separately repairs a newly introduced fleet optional-path
+checker failure; preserve that CI fix and integrate it when committed.
+
 ## Unified Analysis Comparison Drawings (#9932)
 
 - Repository/worktree: D-sorganization/UpstreamDrift, `C:/Users/diete/Repositories/UpstreamDrift-analysis-drawings-9932`.
