@@ -77,6 +77,7 @@ class SimulationService:
         self._active_joint_names: list[str] = []
         self._last_recorder: GenericPhysicsRecorder | None = None
         self._last_recording_meta: dict[str, Any] = {}
+        self._biomechanics_binding: Any = None
 
     @property
     def stats(self) -> SimulationStats:
@@ -97,6 +98,20 @@ class SimulationService:
     def active_joint_names(self) -> list[str]:
         """Joint names of the engine used by the active recorder."""
         return list(self._active_joint_names)
+
+    def get_biomechanics_payload(self) -> dict[str, Any] | None:
+        """Expose recorded calibrated geometry without leaking recorder internals."""
+        if self._active_recorder is None:
+            return None
+        return self._active_recorder.get_biomechanics_payload()
+
+    def configure_biomechanics(self, payload: dict[str, Any]) -> None:
+        """Validate and retain a model binding for the next simulation recording."""
+        from src.shared.python.biomechanics.model_bindings import (
+            model_binding_from_dict,
+        )
+
+        self._biomechanics_binding = model_binding_from_dict(payload)
 
     def _counterfactual_recorder(self) -> GenericPhysicsRecorder | None:
         """Return the active recorder, including legacy test seam fallback."""
@@ -401,6 +416,8 @@ class SimulationService:
         self._begin_last_run(request)
         engine = self._prepare_engine(request)
         recorder = GenericPhysicsRecorder(engine)
+        if self._biomechanics_binding is not None:
+            recorder.configure_biomechanics(self._biomechanics_binding)
 
         if request.analysis_config:
             recorder.set_analysis_config(request.analysis_config)
