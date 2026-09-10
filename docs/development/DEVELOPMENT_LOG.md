@@ -19,17 +19,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9926 · Unified Model and Video Analysis
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9926; children #9929, #9930, #9932, #9942
 - **Branch:** feat/9942-metric-simulation-analysis; feat/9932-comparison-drawings
-- **PR:** #9933 (merged); #9943 (merged 3fbd4b2da); #9945 (final review, protected CI pending)
+- **PR:** #9933, #9943 and #9945 merged; final documentation closure references #9926
 - **Paths:** src/motion_capture/coaching; src/tools/capture_rig; src/tools/pose_studio
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (SELF merge tracking repair;88 combined integration tests pass; preserved remote f58ee5b3/main300d96a1; reviewed contracts4824f370a; catalog20 runtime audit pass; Traceb6325dfe8 persistence17 pass; PR trackingf0fe99bd9; isolated push mypy14/Bandit/unit tests pass; map5a2e8d2c1; combined600 had only stale atlas hash, regenerated and56 focused tests pass; main d40956742; native785269090; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions, five-source Trace mypy and 17 topology/import tests; native30 tests and four-source mypy, visual plane/editor inspected)
+- **Last verified:** 2026-09-10 (SELF completion record; #9945 merged2d41aba41; CI34440058289 succeeded;88 combined integration tests pass; preserved remote f58ee5b3/main300d96a1; reviewed contracts4824f370a; catalog20 runtime audit pass; Traceb6325dfe8 persistence17 pass; PR trackingf0fe99bd9; isolated push mypy14/Bandit/unit tests pass; map5a2e8d2c1; combined600 had only stale atlas hash, regenerated and56 focused tests pass; main d40956742; native785269090; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions, five-source Trace mypy and 17 topology/import tests; native30 tests and four-source mypy, visual plane/editor inspected)
 - **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
 - **Evidence:** Comparison launch/save, PNG parity, snapshot video, cancellation and camera-evidence tests pass; Ruff/format, budgets and LoD pass; Driver comparison drawing UI and PNG inspected.
-- **Next step:** Verify protected CI and merge #9945, then close the parent epic after the completion audit.
+- **Next step:** Merge the documentation closure record and verify epic #9926 closure; runtime delivery is complete.
 
 ### DL-#9934 · Cross-Model Biomechanics Analysis
 

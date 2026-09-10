@@ -4267,6 +4267,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-10 | #9926 | Record protected delivery of unified model/video analysis, all-model Tour Average display qualification and shared simulation/reference contracts; restore records lost during main integration. |
 | 2026-09-10 | #9945 | Shared metric readouts, Trace v2 marker/club import and scene-bound native reference geometry. |
 | 2026-09-10 | #9932 | Shared comparison drawing editor, reproducible exports, camera-bound geometry and analysis capability routes. |
 | 2026-09-09 | #9933 | Reuse coaching drawings and playback for model-only analysis; persist virtual camera, club/ellipsoid appearance, placement and handedness. Share scene-bound metric planes/points with comparison and verified exports. Parent #9926 integration remains open. |
