@@ -5761,6 +5761,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - MotionRetargeting._solve_frame_ik evaluates mj_forward once per IK iteration and batches marker Jacobian/error rows into single array operations (#8922 #9828).
 - TrajectoryResultMixin memoizes all_* batch accessors, evaluates all_energies in a single pass, and derives total energy arithmetically (#8928 #9831).
 
+- Replaced `np.linalg.norm(diff, axis=1).max()` with `np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff)))` in `src/tools/capture_rig/model_frame_source.py` to optimize maximum bounding radius calculation. (spec-exempt: micro-optimization)
+
+- Fixed `bioptim` parameter bounds shape mismatch in `src/shared/python/optimization/ocp/parameter_ocp.py` by using `BoundsList.add` with `InterpolationType.CONSTANT` and 2D arrays instead of tuple assignment.
+
 ## Independently Refined Swing Defect Reference (#9830)
 
 `casadi_backend.dynamics_defect` defaults to adaptive DOP853 endpoint
