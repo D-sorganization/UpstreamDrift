@@ -31,7 +31,7 @@
     caption{text-align:left;font-weight:700;margin-bottom:14px}th,td{padding:12px;border-bottom:1px solid #2b465a;vertical-align:top}th{font-weight:600}td{color:#b7cbd8}td small{color:#8cd3d6}
     .note{padding:15px 20px;background:#172c3c;border-left:3px solid #d6b36a;border-radius:0 10px 10px 0;color:#cbd8e1;font-size:14px}
     .toolbar{display:flex;gap:16px;flex-wrap:wrap;align-items:end;margin:22px 0}.field{display:flex;flex-direction:column;gap:7px;flex:1;min-width:220px;font-size:13px;color:#aec3d1}
-    input,select{background:#142838;border:1px solid #476071;border-radius:9px;color:#edf5fa;padding:12px 14px;width:100%}.field:last-of-type{max-width:270px}
+    input,select,button{background:#142838;border:1px solid #476071;border-radius:9px;color:#edf5fa;padding:12px 14px;width:100%}.field:last-of-type{max-width:270px}
     .count{color:#a4bdce;font-size:13px;min-width:140px}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
     article{background:#102334;border:1px solid #294354;border-radius:14px;padding:22px}article p{color:#adbfce;font-size:14px}article small{color:#8da9bc;overflow-wrap:anywhere}
     .badge{display:inline-block;border:1px solid #496579;border-radius:5px;padding:2px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#c6d8e5}
@@ -64,6 +64,9 @@
       <div class="diagram workflow" tabindex="0" role="region" aria-label="Capture Workflow; Scroll Horizontally to Follow the Stages">{{WORKFLOW_SVG}}</div>
       <p class="note"><strong>One camera:</strong> 2-D events, tempo and normalized motion. <strong>Multiple cameras:</strong> calibrate lenses, check synchronization and geometric observability, then reconstruct. Fit completion and low residuals do not establish physical validity.</p>
       <details><summary>Read the Workflow as a Table</summary>{{WORKFLOW_TABLE}}</details>
+      <h3>Plan a Capture Outcome</h3>
+      <p><a href="capture-goals.mmd" download>Download Goal Prerequisites</a></p>
+      {{CAPTURE_GOALS}}
     </section>
     <section id="catalog" aria-labelledby="catalog-heading">
       <p class="eyebrow">03 / Find a Capability</p><h2 id="catalog-heading">Explore the Feature Catalog</h2>
@@ -94,6 +97,17 @@
   search.addEventListener('input', filterEntries);
   status.addEventListener('change', filterEntries);
   filterEntries();
+  document.getElementById('save-capture-plan').addEventListener('click', () => {
+    const goals = [...document.querySelectorAll('input[name="capture-goal"]:checked')].map(item => item.value).sort();
+    const feedback = document.getElementById('capture-plan-status');
+    if (!goals.length) { feedback.textContent = 'Select at least one capture outcome first.'; return; }
+    const request = {schema_version: 'capture-goal-request/1', goals, catalog_revision: document.getElementById('capture-goals').dataset.revision};
+    const url = URL.createObjectURL(new Blob([JSON.stringify(request, null, 2) + '\n'], {type: 'application/json'}));
+    const link = document.createElement('a');
+    link.href = url; link.download = 'capture-plan.json'; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    feedback.textContent = 'Capture plan prepared. Open it in the desktop capture wizard to review the required steps.';
+  });
 </script>
 </body>
 </html>

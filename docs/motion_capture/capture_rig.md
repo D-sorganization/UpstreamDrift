@@ -1,5 +1,7 @@
 # Camera Rig Capture
 
+For a guided route through the app, see [Guided Swing Capture](capture_wizard.md).
+
 Version: 1.0.0
 
 Issues: #9590 (child of #9422); Tools #4706

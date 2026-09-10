@@ -81,6 +81,7 @@ from .journey_actions import JourneyActions
 from .calibration_actions import CalibrationActions
 from .library_actions import LibraryActions
 from .equipment_actions import EquipmentActions
+from .wizard_actions import WizardActions
 from . import multiview
 from .layout import LayoutBar, LayoutStore, PaneExtras
 from .panes import LOG_KEY, TileParts, build_host
@@ -651,6 +652,7 @@ class CaptureRigWidget(QWidget):
         )
         self.journey = JourneyPanel()
         self.journey_actions = JourneyActions(self)
+        self.wizard_actions = WizardActions(self)
         self.journey.action_requested.connect(self.trigger)
         self.journey.source_requested.connect(self._show_provenance)
         self.journey.step_requested.connect(self.journey_actions.show_step)
@@ -705,6 +707,7 @@ class CaptureRigWidget(QWidget):
             self.layout_bar,
             toggles=(
                 self.library_actions.library_button,
+                self.wizard_actions.button,
                 self.library_actions.edit_button,
                 self.equipment_actions.button,
                 self.calibration_actions.button,

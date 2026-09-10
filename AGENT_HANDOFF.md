@@ -1,6 +1,13 @@
-# Player Bag and Capture Equipment Continuation
+# Guided Capture Workflow Continuation
 
-Active #9905 in `feat/9905-player-club-bag`, worktree UpstreamDrift-player-bag. My Clubs UI, capture assignment/library display and immutable model context are implemented;652 broad regressions and69 focused/map/parity checks pass. Parent catalog #9919 merged01831aa4c; capture UX #9917 merged8fce9f238. Canonical state is `docs/development/HANDOFF.md`. Preserve live Capture Rig childPID61500 and standing manual governance. Wizard integration and broader goal remain open.
+Active #9907/#9908 under epic #9906 in `feat/9907-capture-goal-wizard`, worktree
+`UpstreamDrift-capture-wizard`. Typed route metadata, the generated atlas plan
+exchange, a standard Qt wizard, existing-screen navigation, background evidence
+inspection and capture-owned resume are implemented. Focused tests and scoped
+mypy pass;510 broad Capture Rig/parity/atlas regressions pass. No wizard PR or merge yet.
+Canonical state: `docs/development/HANDOFF.md`. Bag PR #9923 merged as
+5ada5e6a6827bfb94a00d1801f6b475afb885885; #9905 stays open for this wizard entry.
+Preserve live Capture Rig PID61500, other agents' work and standing governance.
 
 ## C3D Reference Fitting (#9914)
 

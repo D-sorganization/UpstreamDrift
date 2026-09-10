@@ -17,18 +17,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9907 · Guided Capture Outcomes
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9907; #9908; epic #9906
+- **Branch:** feat/9907-capture-goal-wizard
+- **PR:** Not opened yet
+- **Paths:** `src/tools/capture_rig`; capability graph/generator; matching tests and guide.
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-10 (SELF; focused planner/Qt/evidence tests, scoped mypy and small-window visual review pass)
+- **Summary:** Standard Qt outcome wizard shares typed map metadata and existing editors/readiness; capture-owned resume, optional My Clubs, background status and safe map-plan import.
+- **Next step:** Complete broad regression/CI qualification, publish and merge; retain advanced-route limits and calibration/fleet follow-up.
+
 ### DL-#9914 · C3D Reference Fitting
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9914
 - **PR:** #9918
 - **Branch:** feat/c3d-reference-overlay-9914
 - **Paths:** src/motion_capture
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`a523a77f2`; reference/Capture Rig suite, 20 club assets)
+- **Last verified:** 2026-09-09 (`6f2d63325`; merged reference/Capture Rig suite, 20 club assets)
 - **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
-- **Next step:** Qualify and merge #9918; #9917 integrated.
+- **Next step:** Reference implementation merged6f2d63325; completion docs merged in #9922.
 
 ### DL-#9905 · Player Bag and Capture Equipment
 
@@ -36,12 +49,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #9905; epic #9902
 - **Branch:** feat/9905-player-club-bag
-- **PR:** #9923 (draft until qualified integration is published)
+- **PR:** #9923 (merged5ada5e6a6827; wizard entry under #9906)
 - **Paths:** club_data/player_clubs.py; rig/capture_notes.py and equipment.py; Capture Rig bag/editor/library; model/session.py; matching tests, guide and generated maps.
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (SELF main integration;741 standard capture/reference/model/map tests pass,2 deselected; visual QA and3031-file LoD pass)
 - **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence without unsupported club constraints. Dialog visual review passed with Segoe UI.
-- **Next step:** Finish broad qualification and publish; connect wizard entry under #9906 before closing #9905.
+- **Next step:** Publish the implemented wizard entry under #9906 before closing #9905.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
