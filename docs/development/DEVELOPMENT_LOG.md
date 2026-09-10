@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9907 · Guided Capture Outcomes
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9907; #9908; epic #9906
 - **Branch:** feat/9907-capture-goal-wizard
-- **PR:** Not opened yet
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9931
 - **Paths:** `src/tools/capture_rig`; capability graph/generator; matching tests and guide.
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (SELF; focused planner/Qt/evidence tests, scoped mypy and small-window visual review pass)
+- **Last verified:** 2026-09-10 (a74d5ebd2; 600 integrated regressions, normal push hooks, scoped mypy and Qt/browser review pass)
 - **Summary:** Standard Qt outcome wizard shares typed map metadata and existing editors/readiness; capture-owned resume, optional My Clubs, background status and safe map-plan import.
-- **Next step:** Complete broad regression/CI qualification, publish and merge; retain advanced-route limits and calibration/fleet follow-up.
+- **Next step:** Complete remote CI and merge #9931; retain advanced-route limits and calibration/fleet follow-up.
 
 ### DL-#9912 · Impact Shaft Provider Integration
 

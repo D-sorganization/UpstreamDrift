@@ -7,8 +7,8 @@
 - Branch: feat/9907-capture-goal-wizard; base fd9434ce9b98a008741b2afca62f8654fd34c6e1.
 - Issues: #9907/#9908; epic #9906; bag completion entry #9905.
 - Session: capture-product-01a08427-goal-wizard; presence through02:51UTC, leases02:22/02:50UTC.
-- Implementation455022ede committed with all normal hooks passing. Main c487265f1
-  integration is being qualified; Tools pin4dabe900c. No wizard PR yet. See DL-#9907.
+- Implementation455022ede integrates main c487265f1 via a74d5ebd2; Tools pin4dabe900c.
+  PR #9931 is draft while remote CI runs. Normal commit/push hooks passed.
 
 ## Current Work
 
@@ -53,7 +53,12 @@ warnings in149.17s; TEMP/capture-wizard-regression.log and XML. First invocation
 JUnit argument and did not run tests; the corrected run passed.
 Visual evidence: TEMP/capture-wizard-visual-iowk4w5o/\*-classic.png,760x610 and
 660x560, inspected after loading Segoe UI for the Windows offscreen environment.
-No production font override was introduced. Final docs/CI qualification remains.
+No production font override was introduced. Integrated main regression passes
+600 checks,6113 existing warnings in149.75s; TEMP/capture-wizard-main-tests.log/XML.
+The integrated3032-file LoD scan passes with490 baseline occurrences and60
+reductions; architecture/document budgets pass. Chromium verified empty-selection
+feedback and an actual capture-plan.json download with the selected drawing goal.
+Remote CI qualification remains.
 
 ## Completed Parents and Remaining Goal
 
