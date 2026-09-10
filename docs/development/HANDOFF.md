@@ -458,3 +458,21 @@ source presence sessions were released; the issues remain open pending the bag/w
 3. Continue everyday-reference calibration consumers and qualification after Tools gates clear.
 4. Verify final Tools/Gas fleet policy replacements after their owner merges them.
 5. Keep the full goal active; no unsupported equipment model constraint is claimed.
+
+# Unified Biomechanics Analysis (#9934)
+
+## Current Continuation State
+
+Branch `feat/9934-biomechanical-analysis` is implementing the shared
+calibrated trajectory contract, source-qualified orientation conversion,
+Cheetham-labelled golf channels, body/club COM, API conversion/compute/display
+routes, and desktop/web plot explorers. Focused biomechanics/API/display tests
+pass; Ruff lint and formatting pass after formatting. The work is not yet
+qualified for merge: native model transform adapters and full repository gates
+remain. Missing anatomy, mass, calibration or engine capability must remain
+unavailable rather than being inferred.
+
+- Epic: #9934; child issues: #9935–#9939.
+- Branch: `feat/9934-biomechanical-analysis`; base: `c487265f1`.
+- API: `/api/biomechanics/compute`, `/display`, `/convert`, `/bindings`, `/results`.
+- Next step: add/qualify native transform adapters, then run full CI gates and open PR.

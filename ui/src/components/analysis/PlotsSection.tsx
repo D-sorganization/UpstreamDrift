@@ -9,6 +9,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAnalysisPlots } from '@/api/useAnalysisPlots';
 import { PlotDataChart } from './PlotDataChart';
+import { BiomechanicsExplorer } from './BiomechanicsExplorer';
 
 export function PlotsSection() {
   const { plotTypes, plotData, loadState, error, fetchPlotTypes, fetchPlotData } =
@@ -33,6 +34,7 @@ export function PlotsSection() {
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+      <details className="mb-4"><summary>Biomechanics and Convention Plots</summary><BiomechanicsExplorer /></details>
       <div className="flex items-center justify-between mb-3 gap-3">
         <h3 className="text-sm font-semibold text-gray-300">Static Plots</h3>
         <div className="flex items-center gap-2">
