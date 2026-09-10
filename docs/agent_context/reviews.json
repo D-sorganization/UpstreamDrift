@@ -1,32 +1,32 @@
 {
   "reviews": {
     "capture-atlas": {
-      "fingerprint": "c5614a1163e54dba20c20956c262ca85be80f67aaaadeba2b78008ec7b8be5b3",
+      "fingerprint": "bad7c86563a37162f88e1d7c7ba319ac7297a5fac474d39effa614542cf4768e",
       "inputs": {
-        "docs/agent_context/contracts/capture-atlas.md": "1494a286aadad0a55ca17eafbde14d8336da31c3dbb6436aab5d43d6f8da456f",
+        "docs/agent_context/contracts/capture-atlas.md": "fd8106825354c65141300395169b3142323642464cf4c59d60294764e008a95a",
         "scripts/capability_atlas/model.py": "49b7423d277ffc751a5b4d3faa3b7adb72373977d7e68ceeed6e1b7baa1d7b68",
         "scripts/capability_atlas/render.py": "78b5dfe306e355a85ae3d43bbb0362673c711216a9bb8fa14ecbe0dbeac61550",
-        "src/config/capability_connections.json": "66b60272e7bd8d9fbdb6a0825ea274588cc9f3cc90d8f267f510e1a4da150924",
+        "src/config/capability_connections.json": "b4b6fe55d40da41fa76878837d0568beebfd74ef15a938add173ae17e06ae502",
         "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e",
         "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be",
         "tests/tools/capture_rig/test_workflow.py": "f583fecf6ebe50173a9e5b5108f4b105ec8636cec926ce665393fcd90669dbe2"
       },
-      "rationale": "Reviewed main 01831aa4c adding club catalog system nodes to the shared atlas inputs. Capture workflow declarations and artifact-exchange semantics are unchanged; 15 atlas/workflow tests pass."
+      "rationale": "Reviewed merged main5ada5e6a6 equipment workflow edges: explicit capture assignment, immutable snapshots, provenance and current absence of body-model club constraints. Updated contract preserves that limit; 15 atlas/workflow tests pass."
     },
     "launcher-atlas": {
-      "fingerprint": "31c73e1cc19425c4dcbdd8aed31cec9120793b1421aff0d39aff36364bc9881b",
+      "fingerprint": "33800fdda00c119f3243a8fe659bd6ad29a6894cbf488a17dd173701fc30345a",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "9cc9ae26bbf66ed47cc7877a7ae1fd14b08000fff4eca950f6a7a1a469ff279b",
         "scripts/capability_atlas/model.py": "49b7423d277ffc751a5b4d3faa3b7adb72373977d7e68ceeed6e1b7baa1d7b68",
         "scripts/capability_atlas/render.py": "78b5dfe306e355a85ae3d43bbb0362673c711216a9bb8fa14ecbe0dbeac61550",
-        "src/config/capability_connections.json": "66b60272e7bd8d9fbdb6a0825ea274588cc9f3cc90d8f267f510e1a4da150924",
-        "src/config/feature_parity.json": "2f0cab648bc01ef4d6fde999eb4b18bcedf1ee4e9bb36b361ce8e9c097992524",
+        "src/config/capability_connections.json": "b4b6fe55d40da41fa76878837d0568beebfd74ef15a938add173ae17e06ae502",
+        "src/config/feature_parity.json": "67a61afcf68e697beeb6bbbef2107a72ff27cd6fdfb950d68c9ddbf40587d724",
         "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
         "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
         "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
         "tests/scripts/test_capability_atlas.py": "9c0c31abc56569259913dc996a6ef3a94192316e969c0e65b441ac0346eae0be"
       },
-      "rationale": "Reviewed main 01831aa4c club catalog nodes and exchange edge in capability_connections.json and its generated atlas. Registry ownership, parity distinctions and generator semantics are unchanged; 15 atlas/workflow tests pass."
+      "rationale": "Reviewed merged main5ada5e6a6 equipment and player-club nodes in capability_connections.json and generated atlas. Registry ownership and parity semantics are unchanged; 15 atlas/workflow tests pass."
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",

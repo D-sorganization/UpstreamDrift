@@ -2,8 +2,53 @@
 
 The existing `src.shared.python.club_data` package owns both the historical
 Excel loader and the optional, attributed catalog. Importing catalog records
-does not load PyQt, pandas or openpyxl. Player bag controls and capture binding
-are tracked separately in #9905; this contract does not claim those screens exist.
+does not load PyQt, pandas or openpyxl. Capture Rig's **My Clubs** entry opens
+the player bag; the same entry is available from **Library**.
+
+## Record a Club and Assign It to a Swing
+
+1. Open **My Clubs** in the capture header, or select a capture in **Library**
+   and choose **My Clubs** there. The dialog identifies the current selection.
+2. Choose **Add from Catalog** to search a particular build and inspect its
+   linked sources. The starter catalog is deliberately small and incomplete.
+   Choose **Add Custom** for any other club; type and number may remain partial.
+3. Give it a recognizable name. For playing length and head mass, choose
+   **Measured** or **Estimated** only when you have that information. Unit
+   changes preserve the canonical quantity. **Unknown** explicitly suppresses
+   an unsuitable nominal value; **Use Original** restores the source value.
+4. Add notes about the shaft, grip, fitting or measurement method, then **Save**.
+   Cancel closes the draft without writing. Other attributed properties remain
+   intact even though this editor does not expose every advanced property.
+5. Select the saved club and choose **Assign to This Capture**. The confirmation
+   names the capture and its ID. Library details show its selected club revision.
+   Without an open capture, the bag remains editable and assignment explains
+   how to continue. **Help** describes the full workflow inside the app.
+
+Double-click a bag entry to edit it. **Archive / Restore** keeps old clubs and
+their capture history; **Show Archived** reveals them. If another dialog changed
+the bag, saving stops with **Reload Bag** guidance instead of replacing its edits.
+
+## Capture History and Model Context
+
+The library root owns `player_clubs.json`. Each capture owns `capture_club.json`,
+bound to its portable capture ID and a digest of the full selected club record.
+Earlier selections remain in `equipment_revisions`. Editing a catalog or bag
+does not rewrite these snapshots. Assign again to explicitly change a capture's
+current selection. An editable capture copy receives its own identity and a
+rebound copy of the selected club; source evidence and old analyses stay intact.
+
+Model fit reports retain the exact equipment selection, club number, eligible
+SI length/head mass and reasons for withheld values in their provenance. The
+equipment file is hashed with the other inputs. Current articulated body models
+observe hands and arms, not a club segment: their reports explicitly record no
+applied equipment constraints. Club length never replaces arm length. Existing
+reports remain unchanged after reassignment; rerun analysis when new context
+should be attached. Club dimensions alone cannot calibrate cameras.
+
+Legacy captures remain unassigned. Corrupt equipment or mismatched capture IDs
+produce an actionable error and are not silently replaced. The bag's revision
+check protects stale dialogs; it is not a database transaction across concurrent
+processes. Keep one active bag editor when working on shared network storage.
 
 ## Identity and Evidence
 
@@ -58,8 +103,9 @@ across rows. Import returns records without overwriting a player's library.
 checks, unknowns, configuration IDs, provenance, source conflicts, inertia-frame
 requirements, explicit estimates, JSON/CSV round trips and legacy defaults.
 `tests/unit/test_club_data_loader.py` retains the old loader's compatibility checks.
-The public source catalog/update workflow (#9904) and player-facing bag/capture
-integration (#9905) remain required before epic #9902 can close.
+Player workflow tests cover editing, persistence, assignment, lineage, source
+inspection, stale dialogs and saved model context. Wizard integration remains
+part of #9905/#9906 before epic #9902 can close.
 
 ## Offline Examples and Contributor Review
 

@@ -24,7 +24,9 @@ Change workflow declarations at their source, then regenerate the capability
 atlas. Missing discoverable steps fail generation. The reference map explains
 the workflow; current runtime state and enabled actions come from the application.
 An atlas edge must not be presented as an automatic processing connection when
-the user must export and import an artifact.
+the user must export and import an artifact. Equipment assignment preserves
+a capture-owned snapshot and provenance; the current body models do not apply
+club constraints. Preserve that limit when projecting the equipment graph.
 
 ## Evidence
 
