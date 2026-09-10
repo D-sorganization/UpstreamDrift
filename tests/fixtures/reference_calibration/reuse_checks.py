@@ -192,7 +192,10 @@ def test_processing_revalidates_assignment_evidence(reuse_case, tamper):
         document["source_evidence"]["root"] = "../source"
     with pytest.raises(ValueError):
         validate_profile_set(
-            json.dumps(document).encode(), expected, capture_root=target
+            json.dumps(document).encode(),
+            expected,
+            capture_root=target,
+            verify_reference_frames=True,
         )
 
 
@@ -212,3 +215,20 @@ def test_cli_rejects_another_capture_before_reconstruction(reuse_case):
                 cameras=path, intrinsics=None, session=target, anchor=[], views=""
             )
         )
+
+
+def test_foreground_review_does_not_read_all_archived_frames(reuse_case, monkeypatch):
+    from src.tools.capture_rig.reference_calibration import reuse_evidence
+    from src.motion_capture.reconstruct.pipeline import start_cameras_from
+
+    request, _, target, expected = reuse_case
+    accepted = _preview_and_adopt(request)
+    path = target / accepted["result_path"]
+
+    def frame_read_forbidden(*args, **kwargs):
+        raise ValueError("Full frame verification belongs off the UI thread")
+
+    monkeypatch.setattr(reuse_evidence, "verify_frame", frame_read_forbidden)
+    validate_profile_set(path.read_bytes(), expected, capture_root=target)
+    with pytest.raises(ValueError, match="Full frame verification"):
+        start_cameras_from(path, capture_root=target)

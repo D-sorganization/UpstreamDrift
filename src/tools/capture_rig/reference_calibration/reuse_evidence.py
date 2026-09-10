@@ -77,7 +77,9 @@ def source_result_path(root: Path, relative: str) -> Path:
     return target
 
 
-def assigned_intrinsics(payload: dict[str, Any], root: Path | None) -> bytes:
+def assigned_intrinsics(
+    payload: dict[str, Any], root: Path | None, *, verify_frames: bool = False
+) -> bytes:
     """Reject stale or rebound copies before the new swing enters processing."""
     if root is None or payload.get("capture_id") != read_notes(root).capture_id:
         raise ValueError("Review this camera layout for the selected capture")
@@ -109,7 +111,11 @@ def assigned_intrinsics(payload: dict[str, Any], root: Path | None) -> bytes:
     ):
         if payload.get(key) != original.get(key):
             raise ValueError("Reused camera layout differs from its original review")
-    return reviewed_source(source, original)
+    return (
+        reviewed_source(source, original)
+        if verify_frames
+        else reviewed_intrinsics(original, source)
+    )
 
 
 def validate_reference_layout(payload: dict[str, Any], root: Path | None) -> None:
@@ -131,4 +137,6 @@ def validate_reference_layout(payload: dict[str, Any], root: Path | None) -> Non
         )
         for entry in index.recordings
     }
-    validate_profile_set(data, expected, capture_root=root)
+    validate_profile_set(
+        data, expected, capture_root=root, verify_reference_frames=True
+    )
