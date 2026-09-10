@@ -107,8 +107,9 @@ left to future cheaper agents at the user's request.
 
 ## Runtime and Coordination
 
-The live installed window is **Capture Rig — Candidate 7c7950574**, last verified
-responding as PID 61800 (launcher 37212). Its dedicated runtime is
+The installed candidate is **Capture Rig — Candidate 7c7950574**, previously
+verified responding as PID 61800 (launcher 37212). The final turnover lookup no
+longer found that PID; do not assume it is running. Its dedicated runtime is
 `%TEMP%/capture-reference-py312-runtime`; do not reinstall it while the app runs.
 Camera preview is paused. Installed wheel SHA-256 is
 `493f8e0cd19974313cf501dbf728dd937e62b4fe4f3fd52f8ceb6994f53109ad`.
@@ -130,3 +131,9 @@ Automatic approval rejected deleting task caches/runtimes. No deletion workaroun
 was used; do not retry those rejected targets. Local logs and the supplementary
 `%TEMP%/capture-product-resume-checkpoint.json` aid recovery, but this committed
 turnover and current external state are authoritative.
+
+The status/lineage source and first complete turnover are committed and pushed
+as `c63fa425880756d50cacf25aacdcbb25d9ab0dbb`; subsequent changes are handoff
+clarifications. Tools has a concurrent scheduled-agent main merge at `4c5010e55`;
+preserve it together with this task's turnover commit `62073ac6d`. Regenerate the
+handoff manifest if resolving that merge changes its recorded evidence.
