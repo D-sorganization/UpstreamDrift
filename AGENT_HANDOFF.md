@@ -1,12 +1,12 @@
-# Impact Shaft Provider Integration
+# Common-Reference Calibration Continuation
 
-Canonical continuation: [docs/development/HANDOFF.md](docs/development/HANDOFF.md).
-Development entry: DL-#9912. Branch: feat/9912-impact-provider-pin.
-Issue #9912 is a child of #9703/#9701; PR #9916. Current commit is SELF.
+Active #9898/#9900: read `docs/development/common_reference_calibration.md` and
+DL-#9898. PR #9946 in isolated `UpstreamDrift-common-calibration`;
+Registry order SELF; CI89704dd29 pushed; consumer qualification pending.
+Preserve apps54812/61500, atlas2963 and provider-pin ownership.
+See canonical checkpoint for validation and remaining acceptance.
 
-The candidate Tools pin is 4dabe900c6ef7767b565c778cda9d9449bed28cf. UD #9916 qualifies the provider and theme pin; see PROVIDER_PIN_RESULTS.json and docs/development/HANDOFF.md.
-
-## Incoming Main Integration
+Analysis #9945/#9947 merged; canonical handoff preserves provider and analysis scopes.
 
 Concurrent eacd69858 integrates main 5ada5e6a6 and its player/equipment work.
 Provider source and pin are unchanged. The inherited inventory omitted provider

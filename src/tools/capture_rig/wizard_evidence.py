@@ -39,7 +39,7 @@ class CalibrationReview:
     def confirmed(cls, root: Path, path: Path) -> CalibrationReview:
         # Called only after CalibrationDialog validated all ProfileAssignments.
         data = read_document(path)
-        validate_profile_set(data, _camera_set(root))
+        validate_profile_set(data, _camera_set(root), capture_root=root)
         return cls(
             read_notes(root).capture_id,
             path.resolve(),
@@ -57,7 +57,12 @@ class CalibrationReview:
             == sha256(read_document(media.root / PLAN_FILE)).hexdigest()
         )
         if matches:
-            validate_profile_set(read_document(self.path), _camera_set(media.root))
+            validate_profile_set(
+                read_document(self.path),
+                _camera_set(media.root),
+                capture_root=media.root,
+                verify_reference_frames=True,
+            )
         return matches
 
 
@@ -116,7 +121,16 @@ def _references(media: SessionMedia, library: ReferenceLibrary) -> dict[str, Rea
     for path in sorted((media.root / "comparisons").glob("*.json")):
         if ".before-review-" in path.name:
             continue
-        saved = load_comparison_session(path)
+        try:
+            saved = load_comparison_session(path)
+        except (ValueError, OSError) as exc:
+            # Its kind cannot be trusted until parsed; retain any valid alignment.
+            for key in ("compare.video", "compare.projected"):
+                if evidence[key].status != "done":
+                    evidence[key] = Readiness(
+                        "ready", f"Review saved comparison {path.name}: {exc}"
+                    )
+            continue
         key = (
             "compare.video" if saved.reference_kind == "video" else "compare.projected"
         )
@@ -215,8 +229,12 @@ def inspect_capture(
             navigation[step.id] = Readiness(
                 "skipped", "You skipped this optional step."
             )
-    compatible = bool(review and review.matches(media, start_file))
+    compatible, calibration_problem = _calibration_status(
+        route, media, review, start_file
+    )
     invalid = _invalidated(media, route, compatible, model_name)
+    if calibration_problem is not None:
+        invalid["intrinsics"] = calibration_problem
     current = replace(media, intrinsics=start_file) if compatible else media
     evidence = workflow_evidence(route, current, navigation, invalidated=invalid)
     states = evaluate(
@@ -230,6 +248,24 @@ def inspect_capture(
         revision,
         dict(zip(route.step_ids, states, strict=True)),
     )
+
+
+def _calibration_status(
+    route: CaptureRoute,
+    media: SessionMedia,
+    review: CalibrationReview | None,
+    start_file: Path | None,
+) -> tuple[bool, str | None]:
+    """Keep failed calibration evidence local to the routes that require it."""
+    if "step.intrinsics" not in route.step_ids or review is None:
+        return False, None
+    try:
+        return review.matches(media, start_file), None
+    except (ValueError, OSError) as exc:
+        return (
+            False,
+            f"Calibration evidence is unavailable: {exc}. Review or repeat calibration.",
+        )
 
 
 def _invalidated(

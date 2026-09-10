@@ -11,6 +11,11 @@
       "resolution": "Inventory and classify every in-scope calculation and module before any coverage or release claim."
     },
     {
+      "id": "UP-D1-common-reference-calibration-inventory",
+      "owner": "UpstreamDrift issue #9900",
+      "resolution": "Inventory the canonical Tools fixed-intrinsics placement-solver consumer in src/tools/capture_rig/reference_calibration/solver.py and OpenCV ideal-pixel adapter in src/motion_capture/reconstruct/lens.py. Classify world-anchor, profile, distortion, held-out residual and source-provenance assumptions before manual coverage or physical-accuracy claims. Independent synthetic projection and UI evidence do not constitute camera hardware or publication approval."
+    },
+    {
       "id": "UP-D1-segment-axial-force-inventory",
       "owner": "UpstreamDrift issue #9833",
       "resolution": "Inventory the display projection in src/shared/python/body_part_viz/axial_loads.py and the native/analytical source adapters before a manual coverage claim. Projection is proximal parent-on-segment reaction onto the declared segment axis, tension positive; it is not a stress or human-safety metric."

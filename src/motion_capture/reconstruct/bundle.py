@@ -248,6 +248,7 @@ class _Problem:
                     Rotation.from_rotvec(rotvec).as_matrix(),
                     trans,
                     cam.image_size_px,
+                    distortion=cam.distortion,
                 )
             )
         n_j = self.n_t * self.n_k * 3

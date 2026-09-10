@@ -2,6 +2,28 @@
   "version": 1,
   "nodes": [
     {
+      "id": "calibration.references",
+      "title": "Paper and Ruler Placements",
+      "description": "Capture-owned original frames, identified reference points, measured dimensions and repeatable observation revisions.",
+      "evidence": "src/tools/capture_rig/reference_calibration/dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open a capture and choose Calibration, then Paper / Ruler References. Review the recorded camera and optical settings.",
+        "Keep the reference stationary across camera views. Name each new placement, choose a clear original frame with the video timeline, mark the same physical corners and save a revision."
+      ]
+    },
+    {
+      "id": "calibration.layout",
+      "title": "Reviewed Camera Layout",
+      "description": "Canonical fixed-intrinsics estimation with explicit world anchor, fit/validation residuals and preserved lens distortion.",
+      "evidence": "src/tools/capture_rig/reference_calibration/solver.py",
+      "view": "workflow",
+      "instructions": [
+        "Use compatible lens profiles and overlapping paper observations from multiple cameras and placements. Confirm the ball/target anchor.",
+        "Estimate camera positions, inspect independent validation and limitations, then use the reviewed layout for Match. Changed optics require a new session."
+      ]
+    },
+    {
       "id": "operator",
       "title": "Operator",
       "description": "Record, review, compare and export.",
@@ -173,6 +195,17 @@
       ]
     },
     {
+      "id": "calibration.reuse",
+      "title": "Reuse Calibration for a New Swing",
+      "description": "Explicit review and a portable copy of the original camera estimate and observation evidence.",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open the new swing and choose Calibration, then Reuse a Camera Layout. From Capture Library lists saved calibrations by capture name, review date and scene, including archived captures.",
+        "Review the source settings and confirm unchanged optics, camera positions, ball origin and target direction. Use for This Swing retains source evidence; changed conditions require recalibration."
+      ]
+    },
+    {
       "id": "analysis.measurements",
       "title": "Registered Metric Readouts",
       "description": "Shared point and signed plane distances from the displayed registered motion; missing samples stay unavailable.",
@@ -195,6 +228,42 @@
     }
   ],
   "edges": [
+    {
+      "source": "step.capture",
+      "target": "calibration.references",
+      "artifact": "Original frames and fixed camera settings",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/operations.py",
+      "constraint": "Calibration marking retains original pixels independently of swing trims and crops",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.references",
+      "target": "calibration.layout",
+      "artifact": "Identified placements and held-out observations",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_calibration/worker.py",
+      "constraint": "Requires the compatible Tools provider, multiple overlapping paper placements and an explicit world anchor; ruler endpoints alone cannot locate cameras",
+      "view": "workflow"
+    },
+    {
+      "source": "step.intrinsics",
+      "target": "calibration.layout",
+      "artifact": "Reviewed lens profiles with distortion",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/calibration_profiles.py",
+      "constraint": "Physical identity, zoom, focus, resolution and crop must match the recording",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.layout",
+      "target": "step.reconstruct",
+      "artifact": "Reviewed camera poses and complete intrinsics",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/lens.py",
+      "constraint": "Review does not certify physical accuracy; original distorted observations are corrected once before the ideal-pixel fit",
+      "view": "workflow"
+    },
     {
       "source": "operator",
       "target": "desktop",
@@ -589,6 +658,33 @@
       "kind": "file",
       "evidence": "src/tools/capture_rig/reference_export.py",
       "constraint": "The shared compositor retains geometry, layer order and source identity",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.layout",
+      "target": "calibration.reuse",
+      "artifact": "Original reviewed result and archived observations",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse.py",
+      "constraint": "Same named views, physical cameras and recorded image sizes; fresh operator confirmation of unchanged optics and scene",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.reuse",
+      "target": "step.reconstruct",
+      "artifact": "Capture-owned reviewed layout assignment",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_evidence.py",
+      "constraint": "Processing revalidates copied source evidence; this is reuse, not a new numerical solve or accuracy certification",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "calibration.reuse",
+      "artifact": "Named saved calibrations and capture identity",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_catalog.py",
+      "constraint": "Catalog metadata is not evidence approval; selecting an estimate verifies archived source evidence before fresh optics/scene confirmation",
       "view": "workflow"
     },
     {

@@ -7,7 +7,6 @@ from typing import cast
 from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
-    QDialogButtonBox,
     QFormLayout,
     QHBoxLayout,
     QLabel,
@@ -28,6 +27,8 @@ from src.shared.python.club_data.catalog import (
     SpecificationSource,
 )
 from src.shared.python.club_data.player_clubs import PlayerClub
+
+from .dialog_controls import save_cancel_buttons
 
 from . import styling
 
@@ -175,12 +176,7 @@ class ClubEditorDialog(QDialog):
         layout.addWidget(hint)
         layout.addWidget(self.notes, 1)
         layout.addWidget(self.status)
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Save
-            | QDialogButtonBox.StandardButton.Cancel
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
+        buttons = save_cancel_buttons(self)
         layout.addWidget(buttons)
         styling.apply_theme(self)
 

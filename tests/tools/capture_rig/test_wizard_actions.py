@@ -176,3 +176,86 @@ def test_failed_optional_runtime_restores_controls_and_explains_recovery(
     assert wizard.step_pages["step.detect"].open_button.isEnabled()
     assert not wizard.step_pages["step.detect"].isComplete()
     assert not capture_host.runner.busy
+
+
+def test_unavailable_calibration_keeps_native_editing_and_recovery_links_usable(
+    capture_host, tmp_path
+) -> None:
+    from tests.tools.capture_rig.test_wizard_evidence import _reviewed_calibration
+
+    root = _bundle(tmp_path)
+    capture_host._open_library_capture(root)
+    actions = capture_host.wizard_actions
+    actions.show()
+    review, path = _reviewed_calibration(root, tmp_path)
+    capture_host.process.start_edit.setText(str(path))
+    actions.review = review
+    wizard = actions.dialog
+    path.unlink()
+    wizard.choose(["reconstruct"])
+    wizard.next()
+    _ready(actions)
+    calibration = wizard.step_pages["step.intrinsics"]
+    assert calibration.open_button.isEnabled()
+    assert "calibration" in calibration.status.text().lower()
+    assert not calibration.isComplete()
+    assert wizard.step_pages["capture.library"].isComplete()
+    wizard.restart()
+    wizard.choose(["edit"])
+    wizard.next()
+    _ready(actions)
+    selection = wizard.step_pages["capture.selection"]
+    assert selection.open_button.isEnabled()
+    save_edits(root, SessionEdits())
+    actions.refresh()
+    _ready(actions)
+    wizard.next()
+    _ready(actions)
+    assert selection.isComplete()
+    assert wizard.button(QWizard.WizardButton.FinishButton).isEnabled()
+
+
+def test_saved_edit_journey_resumes_in_a_fresh_capture_window(
+    capture_host, tmp_path
+) -> None:
+    root = _bundle(tmp_path)
+    capture_host._open_library_capture(root)
+    actions = capture_host.wizard_actions
+    actions.show()
+    wizard = actions.dialog
+    wizard.choose(["edit"])
+    wizard.next()
+    _ready(actions)
+    wizard.next()
+    _ready(actions)
+    save_edits(root, SessionEdits())
+    actions.refresh()
+    _ready(actions)
+    actions.save()
+    saved = (root / "capture_workflow.json").read_bytes()
+    edits = (root / "swing_edits.json").read_bytes()
+    wizard.close()
+    _ready(actions)
+    capture_host.close()
+
+    reopened = CaptureRigWidget(settings=_settings(tmp_path))
+    resumed = reopened.wizard_actions
+    try:
+        reopened._open_library_capture(root)
+        resumed.show()
+        _ready(resumed)
+        resumed.resume()
+        _ready(resumed)
+        assert resumed.dialog is not wizard
+        assert resumed.dialog.current_step == "capture.selection"
+        assert resumed.dialog.button(QWizard.WizardButton.FinishButton).isEnabled()
+        assert resumed.review is None
+        assert (root / "capture_workflow.json").read_bytes() == saved
+        assert (root / "swing_edits.json").read_bytes() == edits
+    finally:
+        if resumed.dialog is not None:
+            resumed.dialog.close()
+        _ready(resumed)
+        reopened.close()
+        reopened.deleteLater()
+        _app().processEvents()

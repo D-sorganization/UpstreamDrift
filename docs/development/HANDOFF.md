@@ -1,3 +1,38 @@
+# Common-Reference Calibration Handoff
+
+Current #9898/#9900: isolated `UpstreamDrift-common-calibration`, branch
+`feat/9898-common-reference-sessions`, pushed checkpoint 89704dd29; registry blocker-order repair SELF. Prior normal hooks passed; PR #9946. Session `capture-product-01a08427-common-calibration` has presence through 08:49 UTC and #9909 lease through 08:40 UTC on 2026-09-10.
+See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
+[operator guide](../motion_capture/common_reference_calibration.md).
+
+Implemented original-frame marking, revisions, isolated Tools solve, result
+history/review, source hashes, distortion-preserving reconstruction/overlays and
+shared native/generated help. Broad Python3.13 regression594 passed; history/Qt7,
+projection/Qt25, OpenCV5 projection20 and atlas/parity49 passed. Production
+Python3.12 scoped51 now passes after installing missing declared dependencies
+and eliminating repeated PNG decode/player imports. The separate unchanged
+Simscape real-log test still times out at180s; its broad Python3.12 run remains
+failed. See the active checkpoint for exact logs. Native small layout fits640×560;
+Calibrate Again and Add Another Placement remain visible. Main276998030 is
+integrated; final provider qualification remains pending. No physical accuracy claim is made.
+
+Tools #5140 merged0a561daff (tree identical to candidatec984, includes #5136).
+Local vendor0a is development-only: it would regress the launcher compared with
+main's interim4dabe900c. Context owner owns final gitlink/Cargo/pip/catalog alignment
+after Tools #5144; impact owner qualifies the exact installed consumer. No bypass
+of historical private404/rate-shard failures. Update final metadata and integrate
+main normally before PR/CI/protected merge. Cross-capture reuse is now implemented with portable source evidence and native review;27 isolated checks and18 pipeline/lens/Qt boundary tests pass. Reuse committed f6298fb0c; types passed. Foreground image reads are now deferred to background/processing checks, with28 isolated tests passing. All push hooks passed on1e4984765. Named catalog selection passes13 library/dialog tests,29 isolated provider checks and19 integration tests; native archived-source selection/review/assignment at640×560 was inspected. Packaged-runtime and physical accuracy acceptance remain open.
+
+Preserve live app54812 (`Capture Rig — main 56552f245`), older61500 and atlas2963.
+They use frozen earlier checkouts, not this branch. Analysis owner controls
+comparison/coaching/model work; context owner controls catalog/provider alignment.
+Wizard #9931 merged56552f245; #9907/#9905 closed. Additional owners' delivery states
+are preserved below. The canonical calibration checkpoint records visual frame
+selection, Pan Image/Fit Image, their tests and native review. Catalog #9903/#9904
+closed after87 contract/source/equipment tests; parent #9902 remains open for journey acceptance.
+
+## Preserved Main Integration Context
+
 # Shared Analysis Delivery Handoff
 
 ## Completed Runtime (#9926)
@@ -30,6 +65,8 @@
 - Next: merge this final documentation record through normal protected CI, then
   verify epic #9926 closure. No runtime implementation remains. The independently
   owned #9915 catalog may index current contracts later; it is not a runtime dependency.
+
+## Preserved Wizard Context
 
 ## Identity
 

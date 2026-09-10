@@ -574,6 +574,15 @@ changes report a failure and leave the destination unpublished. Cancellation als
 publishes neither file. Comparison preview retains one expert decoder while the
 asset is selected; switching assets or closing releases it.
 
+## Calibrate With Common References
+
+Open **Calibration → Paper / Ruler References…** for capture-owned US Letter,
+A4, yardstick or metre-stick observations. Follow the dialog's Help tab or the
+[common-reference guide](common_reference_calibration.md). Repeated placements
+share fixed camera settings; estimation requires compatible lens profiles,
+identified paper corners and an explicit world anchor. Review the saved fit and
+validation evidence before selecting the camera layout for Match.
+
 ## Align an Expert With a Player
 
 Open Capture Library, select a capture and choose Compare Reference, then select
