@@ -96,6 +96,64 @@ flowchart LR
 Dashed connections exchange files explicitly. Single-view analysis is
 2-D; calibrated reconstruction requires multiple views and geometric observability.
 
+## Guided Capture Goals
+
+Select outcomes in the interactive atlas and open its saved plan in Capture Wizard.
+These are executable prerequisites; the architecture arrows above describe data flow.
+
+```mermaid
+flowchart LR
+  accTitle: Capture Goal Prerequisites
+  accDescr: Required inputs for guided capture outcomes. Optional steps may be skipped.
+  s0["Capture Library"]
+  s1["Swing Selection"]
+  s0 --> s1
+  s2["Coaching References"]
+  s1 --> s2
+  s3["Expert Reference Library"]
+  s0 --> s3
+  s4["Expert Comparison"]
+  s1 --> s4
+  s3 --> s4
+  s5["Detect the Pose in Every View"]
+  s1 --> s5
+  s6["Analyse the Single View"]
+  s5 --> s6
+  s7["Calibrate the Camera and Lens Profile"]
+  s0 --> s7
+  s8["Review Joint Reliability"]
+  s5 --> s8
+  s9["Reconstruct in 3-D"]
+  s8 --> s9
+  s7 --> s9
+  s10["My Clubs (Optional)"]
+  s0 --> s10
+  s11["Fit the Articulated Golfer"]
+  s9 --> s11
+  s10 --> s11
+  s12["Export to the Motion Pipeline"]
+  s9 --> s12
+  s13["Expert Comparison"]
+  s9 --> s13
+  s3 --> s13
+  g0(["Trim and Crop a Swing"])
+  s1 --> g0
+  g1(["Add Coaching Lines and Shapes"])
+  s2 --> g1
+  g2(["Compare with an Expert Video"])
+  s4 --> g2
+  g3(["Measure Single-View Swing Timing"])
+  s6 --> g3
+  g4(["Reconstruct Multiple Views in 3-D"])
+  s9 --> g4
+  g5(["Fit a Body Model to a Reconstruction"])
+  s11 --> g5
+  g6(["Export Reconstructed Motion"])
+  s12 --> g6
+  g7(["Project an Expert into Reconstructed Cameras"])
+  s13 --> g7
+```
+
 ## Feature Surfaces
 
 | Feature | Registry Status | Source Surfaces |

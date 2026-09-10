@@ -2,7 +2,7 @@
 
 Generated from catalog.json and current source evidence. Edit the sources and regenerate.
 
-Source fingerprint: `056d9fe11725d64227ce3df6043762daf408af666c1c80db976878da4842ddda`.
+Source fingerprint: `efe79d738159327d495bf18a007a64ec7a614b9c58c8f8bb6e29b781fc05043d`.
 
 This map covers registered components. A source match is not scientific approval or proof that tests passed.
 
@@ -29,7 +29,7 @@ ID: `capability-atlas` · Owner: UpstreamDrift: scripts/capability_atlas · Stat
 
 Generate the existing product map from launcher, parity and capture workflow authorities. Keep gaps and file exchanges explicit.
 
-- **Sources:** [model.py](../../scripts/capability_atlas/model.py), [render.py](../../scripts/capability_atlas/render.py), [capability_connections.json](../../src/config/capability_connections.json)
+- **Sources:** [model.py](../../scripts/capability_atlas/model.py), [render.py](../../scripts/capability_atlas/render.py), [capability_connections.json](../../src/config/capability_connections.json), [goals.py](../../scripts/capability_atlas/goals.py), [goal_catalog.py](../../src/tools/capture_rig/goal_catalog.py), [goal_planner.py](../../src/tools/capture_rig/goal_planner.py)
 - **Documentation:** [CAPABILITY_ATLAS.md](../../docs/architecture/CAPABILITY_ATLAS.md)
 - **Tests:** [test_capability_atlas.py](../../tests/scripts/test_capability_atlas.py)
 - **Public Interfaces:** `build` in [scripts/capability_atlas/model.py](../../scripts/capability_atlas/model.py)
@@ -205,7 +205,7 @@ flowchart LR
 
 ## Provenance and Limits
 
-- 47 source files hashed with SHA-256; UTF-8 line endings normalized.
+- 52 source files hashed with SHA-256; UTF-8 line endings normalized.
 - Generated documents omit absolute paths and commit IDs to remain reproducible across worktrees.
 - Live CLI/MCP results include checkout identity and current revision.
 - Read integration contracts and their tests before modifying a boundary.

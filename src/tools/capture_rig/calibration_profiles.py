@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Sequence
+from collections.abc import Sequence, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -261,6 +261,46 @@ class ProfileAssignment:
     profile: CalibrationProfile
     setup: CameraSetup
     settings_confirmed: bool
+
+
+def validate_profile_set(
+    data: bytes, expected: Mapping[str, tuple[str, tuple[int, int]]]
+) -> None:
+    """Recheck a reviewed export against recorded camera identities and sizes.
+
+    This validates intrinsic reuse metadata, not physical camera placement.
+    The caller must still obtain current operator confirmation of lens settings.
+    """
+    payload = json.loads(data)
+    selections = (
+        payload.get("profile_selections") if isinstance(payload, dict) else None
+    )
+    if (
+        not isinstance(selections, list)
+        or len(selections) != len(expected)
+        or not expected
+    ):
+        raise ValueError("Select a reviewed calibration profile for every camera")
+    seen: set[str] = set()
+    for item in selections:
+        if not isinstance(item, dict):
+            raise ValueError("Invalid calibration profile selection")
+        view = item.get("view")
+        if not isinstance(view, str) or view not in expected or view in seen:
+            raise ValueError("Calibration profile views do not match this capture")
+        seen.add(view)
+        setup = CameraSetup.model_validate(item.get("setup"))
+        if (setup.camera_identity, setup.image_size_px) != expected[view]:
+            raise ValueError(f"{view}: camera identity or recorded image size changed")
+        confirmed = item.get("confirmed_utc")
+        if (
+            not isinstance(confirmed, str)
+            or datetime.fromisoformat(confirmed).utcoffset() is None
+        ):
+            raise ValueError(
+                "Calibration selection needs a dated operator confirmation"
+            )
+        _record(data, view, setup.image_size_px)
 
 
 def write_profile_set(

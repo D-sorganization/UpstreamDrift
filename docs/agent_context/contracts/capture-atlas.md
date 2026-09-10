@@ -28,6 +28,14 @@ the user must export and import an artifact. Equipment assignment preserves
 a capture-owned snapshot and provenance; the current body models do not apply
 club constraints. Preserve that limit when projecting the equipment graph.
 
+Guided outcomes reuse `capture_goals` from the connections authority and the
+pure `goal_planner` prerequisite resolver. `goal_catalog.validate_bindings`
+checks node IDs, allowed navigation actions and workflow keys without launching
+Qt or hardware. Single-view and multi-view routes can be incompatible; resolving
+such a selection fails rather than silently weakening camera requirements.
+Optional steps remain explicit. Readiness stays with the existing workflow and
+artifact evidence; visiting a page alone never marks an operation complete.
+
 ## Evidence
 
 - [Capture State Authority](../../../src/tools/capture_rig/workflow.py)
