@@ -17,6 +17,11 @@ consumer delivery before final PR qualification. Historical failures remain fail
 
 ## Implemented Workflow
 
+- Comparison journey qualification: thirteen wizard-evidence tests pass, including
+  a persisted, capture-bound expert-video registration that completes the entire
+  comparison route despite an unrelated damaged comparison file. The damaged
+  file remains untouched. These tests do not claim a calibrated 3-D viewpoint.
+
 - CI repair: the developer log now links to this detailed checkpoint within its
   50 KiB budget. Projection pixels are explicitly floating point before camera
   skew is applied. Club and measured-reference editors share native Save/Cancel
