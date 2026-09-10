@@ -14,6 +14,11 @@
       "id": "UP-D1-segment-axial-force-inventory",
       "owner": "UpstreamDrift issue #9833",
       "resolution": "Inventory the display projection in src/shared/python/body_part_viz/axial_loads.py and the native/analytical source adapters before a manual coverage claim. Projection is proximal parent-on-segment reaction onto the declared segment axis, tension positive; it is not a stress or human-safety metric."
+    },
+    {
+      "id": "UP-D1-reference-kinematics-inventory",
+      "owner": "UpstreamDrift issue #9914",
+      "resolution": "Classify reference fitting, URDF/MJCF kinematic adapters, and selected-pose similarity registration under src/motion_capture/reference before a manual coverage claim. Surface-marker proxy fits and synthetic FK parity do not qualify anatomical accuracy, camera calibration, global optimality, or native dynamics."
     }
   ],
   "calculations": []

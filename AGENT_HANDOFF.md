@@ -1,7 +1,14 @@
-## Verified Agent Context (#9915)
+## C3D Reference Fitting (#9914)
 
-Implementation and validation state: `docs/development/HANDOFF.md`, section
-Verified Agent Context. Component map: `docs/agent_context/README.md`.
+Current work is isolated in `../UpstreamDrift-reference-9914`, branch
+`feat/c3d-reference-overlay-9914`; implementation commit SELF; PR #9918.
+See `docs/development/reference_fitting_epic.md` and the operator guide
+`docs/motion_capture/reference_model_fitting.md`. DL-#9914 records current state.
+Reference fitting and the expanded club/ellipsoid/handedness controls reuse the
+existing compositor. #9917 is integrated; other capture work remains with its
+owner. Reference/Capture Rig regressions pass. Twenty qualified numerical bundles
+and twenty club display assets are ready; final push/CI gates remain. Existing
+camera data and the original main worktree's user changes are untouched.
 
 # Attributed Club Catalog Continuation
 
@@ -622,3 +629,8 @@ The final host CI type check passes after menu contracts and the native COM matr
 See `docs/development/HANDOFF.md` and `docs/development/capture_product_review.md`. Bounded duplicate-frame cache and child startup recovery are covered by six focused tests. The camera suite passed 241 tests before the recovery change. GUI #9843 remains independently owned; hardware qualification remains outstanding.
 
 Expert reference imports are in draft PR #9870 (30 integrated tests, 49 atlas/registry tests and scoped quality gates passed). Registration/time mapping #9865 and native comparison #9866 remain next. Preserve native drawing dependency #9869.
+
+## Verified Agent Context (#9915)
+
+Implementation and validation state: `docs/development/HANDOFF.md`, section
+Verified Agent Context. Component map: `docs/agent_context/README.md`.
