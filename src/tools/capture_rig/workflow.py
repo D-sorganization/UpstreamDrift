@@ -70,7 +70,8 @@ SETUP = Step(
         "All cameras on the same capture mode; 1280x720@120 or 1920x1200@60 for swings.",
     ),
     instructions=(
-        "Choose the plan file and a session folder.",
+        "Open *Camera Setup* in the header to scan, name views and save a reusable plan; or choose an existing plan file.",
+        "The next take is saved in your capture library; choose a different session folder if needed.",
         "Pick a mode preset or leave 'plan default'; optionally restrict the views.",
         "Run *Plan check*: every view must resolve to a camera before recording.",
         "Importing existing video files instead? Use *Import videos* or the header *Library*, then review the swing selection before Detect.",

@@ -13,6 +13,11 @@ groups the camera recordings for one take; give it a recognizable title and
 swing notes. Every wizard step displays that title and its stable capture ID.
 Importing and editing existing videos does not require connected cameras.
 
+To record a new take, choose **Set Up Cameras to Record** on the first wizard
+page, or **Camera Setup** in the main header. Name views, select cameras and
+save a reusable setup without editing JSON. Follow the
+[camera setup guide](camera_setup.md) before Preview and Plan Check.
+
 Use **Open Swing Editor** to select the first and last swing frames and crop the
 image. Save even when keeping the full recording. When analysis already exists,
 the editor offers a separate editable copy so earlier results remain available.

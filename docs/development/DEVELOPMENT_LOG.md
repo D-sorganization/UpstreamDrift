@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9952 · Native Camera Setup
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9952; parent #9906
+- **Branch:** feat/9952-camera-setup
+- **Paths:** src/tools/capture_rig/camera_setup\*.py; wizard/header; capability registry; tests and camera setup guide.
+- **Started:** 2026-09-10
+- **Last verified:** 2026-09-10 (563 Capture Rig tests, 16 atlas/workflow and 15 goal tests, six-module mypy and Ruff pass)
+- **Summary:** Background discovery, stable named bindings, immutable plan revisions and optional wizard entry reuse the rig pipeline.
+- **Next step:** Installed-package qualification and protected PR delivery; no physical-camera accuracy claim.
+
 ### DL-#9926 · Unified Model and Video Analysis
 
 - **State:** shipped

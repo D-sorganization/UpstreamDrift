@@ -79,6 +79,7 @@ from .header import HeaderBar, StatusStrip
 from .journey import JourneyPanel
 from .journey_actions import JourneyActions
 from .calibration_actions import CalibrationActions
+from .camera_setup_actions import CameraSetupActions, default_plan_path
 from .library_actions import LibraryActions, new_capture_path as default_session_dir
 from .equipment_actions import EquipmentActions
 from .wizard_actions import WizardActions
@@ -102,7 +103,6 @@ PLAN_DEFAULT = "plan default"
 AUTO_EXPOSURE_CHOICES = ("camera default", "on", "off")
 ALWAYS_ENABLED = frozenset({"stop", "load", "preview"})
 DEFAULT_EXPORT_LAYOUT = "three_across"  # a sensible default for the lab rig
-LAB_PLAN = Path("docs/motion_capture/plans/lab_three_view_sonnet.json")
 WINDOW_SIZE = (1600, 900)
 
 
@@ -178,12 +178,6 @@ def stop_file(session: Path) -> Path:
     return session / ".stop"
 
 
-def default_plan_path() -> Path | None:
-    """The lab plan shipped in docs when it exists, so Record works out of the box."""
-    candidate = commands.repo_root() / LAB_PLAN
-    return candidate if candidate.is_file() else None
-
-
 class CapturePanel(QGroupBox):
     """Plan, mode, views and UVC controls for the camera commands."""
 
@@ -191,7 +185,7 @@ class CapturePanel(QGroupBox):
         self, parent: QWidget | None = None, *, settings: QSettings | None = None
     ) -> None:
         super().__init__("Capture", parent)
-        self.plan_edit = QLineEdit(str(default_plan_path() or ""))
+        self.plan_edit = QLineEdit(str(default_plan_path(settings) or ""))
         self.session_edit = QLineEdit(str(default_session_dir(settings)))
         self.mode_combo = QComboBox()
         self.mode_combo.addItem(PLAN_DEFAULT, None)
@@ -645,6 +639,7 @@ class CaptureRigWidget(QWidget):
             busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
         )
         self.journey = JourneyPanel()
+        self.camera_setup_actions = CameraSetupActions(self, settings)
         self.journey_actions = JourneyActions(self)
         self.wizard_actions = WizardActions(self)
         self.journey.action_requested.connect(self.trigger)
@@ -700,6 +695,7 @@ class CaptureRigWidget(QWidget):
         self.header = HeaderBar(
             self.layout_bar,
             toggles=(
+                self.camera_setup_actions.button,
                 self.library_actions.library_button,
                 self.wizard_actions.button,
                 self.library_actions.edit_button,
