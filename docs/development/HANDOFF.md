@@ -4,7 +4,7 @@
 
 Active worktree `C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942`,
 branch `feat/9942-metric-simulation-analysis`. Readouts72585f629, Trace5034f7a22,
-topology b6d3c28c6; native geometry SELF. Session codex-unified-metrics-9942
+topology b6d3c28c6; native geometry785269090; main integration SELF. Session codex-unified-metrics-9942
 presence through06:12UTC. Preserve Tools4dabe900 and peer ownership.
 
 Implemented test first: shared registered-world point/plane readouts in both
@@ -26,8 +26,9 @@ canonical viewport, not every optional backend renderer or physical accuracy.
 
 PR #9943 merged normally at3fbd4b2da5f8661ec1f1e91b97884f781d83f1fd on
 2026-09-10T04:10:20Z; #9932 closed. Both quality-gate and hosted-routing guard
-passed. Next: finish native regressions, integrate merged main, update #9942
-capability/context maps, qualify protected delivery and audit parent #9926.
+passed. Native30 and atlas/parity50 tests pass. Capability map updated;
+merged main3fbd4b2da integrated with current metric controls preserved. Next:
+combined regressions, reviewed context boundaries, protected delivery and parent audit.
 
 ## Unified Analysis Comparison Drawings (#9932)
 
@@ -39,6 +40,7 @@ capability/context maps, qualify protected delivery and audit parent #9926.
 - Validation: `python3 -m pytest tests/tools/capture_rig tests/motion_capture/test_geometry*.py -q --no-cov --timeout=60` passed 504 tests; atlas/parity tests passed 50. Whole-repo Ruff/format, architecture budget and LoD checks passed. Scoped mypy passed seven source files.
 - Visual evidence: full Driver at 0.567s, synthetic 960×540 background/virtual camera, common editor and PNG inspected in external `analysis-9926-artifacts/comparison-visual-9von8rml`. No physical camera qualification implied.
 - Compatibility: old geometry with incomplete camera fingerprints must be reviewed/recreated; no silent rebinding. PNG uses original pixels while comparison video applies saved crop. Preserve Tools pin4dabe900 and peer worktrees.
+- CI repair SELF: fleet sync #9944 introduced a conditional context-catalog path. The docs checker now recognizes only explicit When/If-path-exists clauses, while retaining required paths in the same sentence. Red reproduction and 27 checker tests passed; managed policy blocks unchanged.
 - Next: qualify PR #9943 through protected CI/review/merge; then implement child #9942 metric readouts and simulation integration with #9934 interfaces, context map registration and final epic audit. Normal push hooks passed. No external blocker; user-owned original worktree remains untouched.
 
 ## Identity
