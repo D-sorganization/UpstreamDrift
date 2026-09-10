@@ -65,7 +65,7 @@ def _is_document(path: Path) -> bool:
 def _is_excluded(path: Path) -> bool:
     return any(
         part in EXCLUDED_PARTS or (part.startswith(".") and part != ".github")
-        for part in path.parts
+        for part in path.relative_to(ROOT).parts
     )
 
 
