@@ -258,6 +258,10 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 
 ## Impact Dynamics and Acoustics: #9700
 
+- Current checkpoint: docs/9700-impact-handoff, SELF; canonical HANDOFF has takeover order and source/CI boundaries. #9916 and #9920 are merged. Existing main provider pin is e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0 across gitlink/Python/Rust; this checkpoint does not change or newly qualify it.
+- Tools contact/load/FRF/calibration foundations and Affine theory #4356 are merged. Friction #5162 still requires final integration/hosted qualification at this checkpoint; coordinate subsequent pin and installed-wheel checks with the context/capture owner. Physical/radiation/perception acceptance remains open.
+- The following earlier delivery records retain their historical source/validation identities; use the current canonical handoff for continuation.
+
 - #9841/#9842 follow-up: the CI-stub callback annotation is corrected, with 67 reference tests passing. Bioptim now selects CasADi 3.6.7; the combined real OCP, matrix/import isolation and dependency suite passes 21 tests in 162.06 s. Exact missing factory aliases repair 3.8 imports, but its RK4 solve remains unsuccessful even at a 1,000-iteration budget; no numerical qualification is claimed for that combination. Inventory regeneration passes ten tests; c2a8d5b6e integrates main 438bd3282 without changing validated optimization paths. Root Ruff 0.15.17 and SPEC pass. Tools #5106 merged as 287767dfa6; #5114 tracks the separate unfinished GUI shard behind #5103. Publish through normal hooks and follow protected CI; physical/acoustic qualification remains open.
 - Claim-preservation #9826 merged as a410ae7059883d7f27f5fb12405b61859267457c from fced8c0d6 at 2026-09-09T01:12:29Z; merge verified, remaining queued auxiliary checks not claimed passed.
 - Theory AffineDrift #4258/#4282/#4298 and integration plan #9706 are merged. Tools T1 #5077 and T2 #5082 (80d580d57) are merged; T2 golf source/tests match reviewed e47fde4e and prior 476eaa98.

@@ -74,17 +74,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9912 · Impact Shaft Provider Integration
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9912; parent #9703
 - **Branch:** feat/9912-impact-provider-pin
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9916
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (Tools 4dabe900c; main 5ada5e6a6; inventory repair SELF)
+- **Last verified:** 2026-09-10 (c487265f1ebc9c61a2e124267ad9cd1c96a6c007; turnover SELF): PR9916 and follow-up9920 are merged. Historical provider qualification below is unchanged; main now records e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0 consistently across all three pins.
 - **Summary:** Qualify the exact Tools shaft/theme provider; see PROVIDER_PIN_RESULTS.json.
 - **Evidence:** 271 controls pass after preserving concurrent eacd69858 and restoring the pinned inventory. Existing inventory RED is retained. Isolated 32a8b36ec wheel and Qt construction pass with gui-tools; web assets omitted. Earlier evidence retained.
-- **Next step:** Advance to the reviewed Tools #5143 descendant and qualify that exact pin; retain #8942 review exception and physical gates.
+- **Next step:** Coordinate the final reviewed Tools friction descendant with context/capture owners and qualify the exact consumer/wheel/runtime; see canonical HANDOFF. Physical and acoustic gates remain open.
 
 ### DL-#9914 · C3D Reference Fitting
 
