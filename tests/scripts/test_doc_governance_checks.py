@@ -60,6 +60,7 @@ def test_doc_size_budget_allows_owned_unexpired_exception(
     assert check_doc_size_budget.main() == 0
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize("parent", [".worktrees", "build", "vendor"])
 def test_doc_budget_checks_repositories_under_excluded_parent_names(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, parent: str
@@ -72,6 +73,7 @@ def test_doc_budget_checks_repositories_under_excluded_parent_names(
     assert check_doc_size_budget.main() == 1
 
 
+@pytest.mark.unit
 def test_doc_budget_preserves_internal_exclusions_and_github_documents(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
