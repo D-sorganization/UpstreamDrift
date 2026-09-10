@@ -26,6 +26,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .analytics import SwingDataUnavailable, summarize_swing
 from .cameras import PinholeCamera
+from .camera_source import CameraSourceEvidence
 from .clean import CleanReport, clean_view
 from .bundle import compact_frames, observations_from_views
 from .measurements import expand_measurements, gauge
@@ -76,6 +77,7 @@ class SessionReconstruction(BaseModel):
     observation_set: str = "observations"
     variant: str = ""
     camera_source: str | None = None
+    camera_source_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -88,6 +90,7 @@ class MatchSpec:
     camera_source: str | None = None
     exclude_joints: tuple[str, ...] = ()
     lens_corrections: Mapping[str, LensCorrection] | None = None
+    camera_evidence: CameraSourceEvidence | None = None
 
 
 def start_cameras_from(
@@ -161,6 +164,8 @@ def reconstruct_session(
     elif scale_anchor[0] not in measured:
         measured = {scale_anchor[0]: scale_anchor[1], **measured}
     match = match or MatchSpec()
+    if match.camera_evidence is not None:
+        match.camera_evidence.verify()
     exclude_joints = match.exclude_joints
     unknown = [j for j in exclude_joints if j not in JOINT_NAMES]
     require(not unknown, "exclude_joints must name fit joints", unknown)
@@ -216,6 +221,9 @@ def reconstruct_session(
         observation_set=match.observation_set,
         variant=match.variant,
         camera_source=match.camera_source,
+        camera_source_sha256=match.camera_evidence.sha256
+        if match.camera_evidence is not None
+        else None,
     )
     parameters = {
         "anchors": list(measurements),
@@ -227,6 +235,8 @@ def reconstruct_session(
             if view in ids
         },
     }
+    if match.camera_evidence is not None:
+        match.camera_evidence.verify()
     _write_summary(session_dir, out_dir, obs_set_dir, summary, parameters)
     return summary
 
