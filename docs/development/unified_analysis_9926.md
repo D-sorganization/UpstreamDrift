@@ -67,6 +67,9 @@ SDK availability. A `Viewport`-compatible renderer can use the shared adapter on
 after its frame and mesh behavior are qualified; unsupported objects fail the
 protocol contract instead of silently dropping references.
 
+The reviewed [shared analysis contracts](../architecture/SHARED_ANALYSIS_CONTRACTS.md)
+record public boundaries, failure behavior, ownership and executable evidence.
+
 ## Contracts and Coordinate Ownership
 
 - Screen drawings stay in original source-image pixels and retain their existing
