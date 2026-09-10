@@ -23,6 +23,7 @@ from .calibration_profiles import validate_profile_set
 from .goal_catalog import workflow_evidence
 from .goal_planner import CaptureRoute, Readiness, evaluate
 from .session import SessionMedia
+from .result_evidence import model_revision_problem
 from .wizard_storage import input_revision, read_document
 
 
@@ -326,4 +327,6 @@ def _invalidated(
             invalid["fit_model"] = (
                 "The saved fit uses another or unverified model. Select its model or fit the currently selected model."
             )
+        elif problem := model_revision_problem(media):
+            invalid["fit_model"] = problem
     return invalid

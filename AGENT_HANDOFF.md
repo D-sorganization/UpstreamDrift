@@ -1,10 +1,8 @@
 # Common-Reference Calibration Continuation
 
-Active #9898/#9900: read `docs/development/common_reference_calibration.md` and
-DL-#9898. Follow-up #9949 in `UpstreamDrift-common-calibration`;
-Wheel SELF: startup/wizard and29 calibration checks pass; CI pending.
-Preserve apps54812/61500, atlas2963 and provider-pin ownership.
-See canonical checkpoint for validation and remaining acceptance.
+User-requested transfer: read `docs/development/capture_product_turnover.md`.
+Active #9959; #9950 merged; #9954 needs conflict resolution. Tools #5169 awaits
+private checkout access. Preserve candidate PID61800 and peer work. Goal incomplete.
 
 Analysis #9945/#9947 merged; canonical handoff preserves provider and analysis scopes.
 

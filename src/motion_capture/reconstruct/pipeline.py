@@ -158,11 +158,7 @@ def reconstruct_session(
     reports, ``reconstruction.json`` and the summary.
     """
     require(acceleration_sigma_px > 0, "acceleration_sigma_px must be positive")
-    measured = expand_measurements(measurements)
-    if scale_anchor is None:
-        scale_anchor = gauge(measured)  # the first measurement sets the scale
-    elif scale_anchor[0] not in measured:
-        measured = {scale_anchor[0]: scale_anchor[1], **measured}
+    measured, scale_anchor = _measurements_with_gauge(measurements, scale_anchor)
     match = match or MatchSpec()
     if match.camera_evidence is not None:
         match.camera_evidence.verify()
@@ -229,16 +225,35 @@ def reconstruct_session(
         "anchors": list(measurements),
         "scale_anchor": list(scale_anchor),
         "acceleration_sigma_px": acceleration_sigma_px,
-        "lens_corrections": {
-            view: correction.signature
-            for view, correction in corrections.items()
-            if view in ids
-        },
+        "lens_corrections": _lens_signatures(corrections, ids),
     }
     if match.camera_evidence is not None:
         match.camera_evidence.verify()
     _write_summary(session_dir, out_dir, obs_set_dir, summary, parameters)
     return summary
+
+
+def _measurements_with_gauge(
+    measurements: Sequence[str], scale_anchor: tuple[str, float] | None
+) -> tuple[dict[str, float], tuple[str, float]]:
+    """Expand measured dimensions while preserving the caller's scale anchor."""
+    measured = expand_measurements(measurements)
+    if scale_anchor is None:
+        scale_anchor = gauge(measured)
+    elif scale_anchor[0] not in measured:
+        measured = {scale_anchor[0]: scale_anchor[1], **measured}
+    return measured, scale_anchor
+
+
+def _lens_signatures(
+    corrections: Mapping[str, LensCorrection], ids: Sequence[str]
+) -> dict[str, str]:
+    """Record only the lens profiles contributing to this reconstruction."""
+    return {
+        view: correction.signature
+        for view, correction in corrections.items()
+        if view in ids
+    }
 
 
 def _write_swing_summary(

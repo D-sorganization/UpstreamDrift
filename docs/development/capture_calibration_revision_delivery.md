@@ -4,6 +4,11 @@ Tracked by calibration epic #9899 and the guided capture workflow. This branch
 builds on camera setup PR #9954; both changes must reach protected main before
 the combined product is considered delivered.
 
+Delivery PR: #9959. The successor starts with
+[Capture Product Turnover](capture_product_turnover.md). All 26 focused controls
+pass; the extracted-helper/model subset passes six. CI architecture and document
+size failures were reproduced and corrected without widening either budget.
+
 ## Player Behavior
 
 A reconstruction records the SHA-256 of the selected camera calibration source.
@@ -12,6 +17,12 @@ currently reviewed. A matching result remains complete. A changed calibration or
 legacy result without that evidence requires **Reconstruct Again**. Model steps
 inherit that prerequisite through the existing workflow planner and its links.
 The status check does not delete or rewrite previous results.
+
+After a new reconstruction is available, triangulated model fits are checked
+against the reconstruction-summary fingerprint already recorded by the model
+writer. An old fit remains stale until refitted. The check reads only the known
+capture-relative summary; it never follows arbitrary paths from result metadata.
+Image-space fits retain their separate observation/camera input contract.
 
 The command captures source identity before loading cameras and lens correction,
 then verifies it before reconstruction and before publishing the summary. A

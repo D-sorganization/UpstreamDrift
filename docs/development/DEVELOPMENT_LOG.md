@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9899 · Calibration Revision Status
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9899
 - **Branch:** feat/9899-calibration-revision-status
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9959
-- **Paths:** motion_capture/reconstruct/camera_source.py and pipeline.py; rig command; capture_rig/wizard_evidence.py; matching tests and delivery note.
+- **Paths:** reconstruct; rig command; capture_rig result evidence; tests.
 - **Started:** 2026-09-10
-- **Last verified:** 2026-09-10 (23 pipeline/wizard controls passed before the added refresh scenario; seven current source/refresh controls pass; Ruff passes)
-- **Summary:** Record and verify calibration source bytes; stale or unverified reconstruction no longer completes the calibrated route. Existing results remain intact and model steps inherit actionable prerequisites.
-- **Next step:** Complete source publication and protected CI after #9954; ruler-scale worker/editor integration remains under this epic after Tools #5169.
+- **Last verified:** 2026-09-10 (26 controls; six refactor checks; budgets pass)
+- **Summary:** Calibration and reconstruction fingerprints invalidate stale outputs; preserve results.
+- **Next step:** See capture_product_turnover.md; resolve #9954/#9959, then ruler UI.
 
 ### DL-#9952 · Native Camera Setup
 
