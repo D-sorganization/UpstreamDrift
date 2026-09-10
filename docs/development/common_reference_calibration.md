@@ -17,6 +17,12 @@ consumer delivery before final PR qualification. Historical failures remain fail
 
 ## Implemented Workflow
 
+- CI repair: the developer log now links to this detailed checkpoint within its
+  50 KiB budget. Projection pixels are explicitly floating point before camera
+  skew is applied. Club and measured-reference editors share native Save/Cancel
+  wiring. Seventeen projection/editor/calibration tests pass; the calculation
+  and editor validation behavior are unchanged.
+
 - Missing-output recovery (#9909) records a removed recording or pose-output
   path in the input revision instead of failing the whole wizard inspection.
   Thirty-one planner/wizard tests pass, including removed pose output with editing

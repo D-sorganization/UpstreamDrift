@@ -154,14 +154,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #9898/#9900; #9909 journey qualification; epics #9897/#9906
+- **Issue:** #9898/#9900/#9909; epics #9897/#9906
 - **Branch:** feat/9898-common-reference-sessions
-- **PR:** #9946; prior profile integration merged
-- **Paths:** src/tools/capture_rig/reference_calibration, calibration actions/profiles/evidence, swing_export.py, src/motion_capture/reconstruct, rig/**main**.py, tests/fixtures/reference_calibration, related Qt/reconstruction tests, docs/development/common_reference_calibration.md
+- **PR:** #9946
+- **Paths:** reference_calibration, calibration/wizard controls, reconstruction lens adapter and associated tests/docs
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (Python3.12 scoped51, Python3.13 broad594, history/Qt7, projection/Qt25, OpenCV5 projection20 and atlas/parity49 pass; native640×560 reviewed; unchanged Simscape real-log timeout keeps broader Python3.12 run failed)
-- **Summary:** Original-frame reference observations feed canonical Tools fixed-intrinsics estimation through isolated IPC, explicit anchor/optics review, immutable result history and provenance. Lens distortion is corrected once for fitting and retained for overlays. Generated guide shares native help text. Final combined provider pin remains separately owned and pending.
-- **Next step:** PR #9946 source checkpoint 457521222 passed normal hooks and integrates main276998030. Named library/frame selection, precision pan and prerequisite links are implemented. #9909 has 40 passing guidance checks; comparison recovery8656d08a9 adds two corruption regressions with 22 focused wizard tests passing. Calibration typing58f42ff94 adds explicit uint8 resize and Qt close-event compatibility;11 frame/reuse tests pass. Missing-output recovery SELF has31 passing planner/wizard checks and a passing fresh-window editing resume test. Finish coordinated provider and journey acceptance. No physical-accuracy or manual publication approval claimed.
+- **Last verified:** 2026-09-10 (58f42ff94 hooks pass;5c9167e4d recovery passes31 checks plus fresh-window resume; CI repair SELF)
+- **Summary:** Original-frame paper/ruler marking, reviewed reusable camera layouts, isolated canonical solver, distortion-preserving overlays and guided recovery. Detailed tests, historical failures and limits: [checkpoint](common_reference_calibration.md).
+- **Next step:** Fix CI type/duplication/doc budgets, integrate the separately owned published consumer, then qualify and merge #9946. Scientific manual/physical approval remains separate.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 
