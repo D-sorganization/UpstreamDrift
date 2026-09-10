@@ -1380,7 +1380,7 @@ jobs:
       - name: Initialize the Pinned Context Provider
         run: git submodule update --init vendor/ud-tools
       - name: Install Dependency-Free Context Package and Test Tools
-        run: python3 -m pip install ./vendor/ud-tools/packages/agent-context pytest PyYAML pydantic
+        run: python3 -m pip install ./vendor/ud-tools/packages/agent-context pytest PyYAML pydantic numpy
       - name: Check Source, Contracts, Pins and Generated Views
         run: python3 -m agent_context --root . check
       - name: Validate Real Navigation Tasks
