@@ -4,7 +4,7 @@
 
 Epic #9897; children #9898 and #9900. Branch
 `feat/9898-common-reference-sessions` in the isolated
-`UpstreamDrift-common-calibration` worktree. Implementation d15013a2c was pushed with all normal hooks passing; current main3fbd4b2da is integrated through f4da52c65. No PR yet. It is reachable through Calibration in this worktree,
+`UpstreamDrift-common-calibration` worktree. Implementation d15013a2c was pushed with all normal hooks passing; current main3fbd4b2da is integrated through f4da52c65. PR #9946 is open;1e4984765 passed every normal push hook. It is reachable through Calibration in this worktree,
 but the running test application still uses the earlier merged wizard source.
 
 Tools #5140 merged as0a561daff18302ee143b214fe6a6138455d8c542. Its complete tree
@@ -121,7 +121,14 @@ tamper rejection and capture identity at the CLI. Seven dialog/profile tests and
 and assignment were exercised at640×560; screenshots and synthetic assignment
 are in `TEMP/capture-reuse-native-ugzr1gl3`. The first small-window test exposed
 an814px minimum width; shorter controls with wrapped guidance fixed it.
-The repository configured isolated mypy hook passes8 changed source files. The final worker/Qt/atlas group passes19 tests (including27 nested provider checks). Final audit found full archived-frame reads in foreground confirmation. A red test reproduced the pause risk; full image checks now run in the worker, background wizard inspection and camera reader. Foreground confirmation verifies bounded documents only. The updated isolated suite passes28 checks in27.82s; required push hooks remain to run. The broader global mypy invocation was stopped before producing a result and is not passing evidence.
+The repository configured isolated mypy hook passes8 changed source files. The final worker/Qt/atlas group passes19 tests (including27 nested provider checks). Final audit found full archived-frame reads in foreground confirmation. A red test reproduced the pause risk; full image checks now run in the worker, background wizard inspection and camera reader. Foreground confirmation verifies bounded documents only. The updated isolated suite passes28 checks in27.82s; every normal push hook passed on1e4984765. The broader global mypy invocation was stopped before producing a result and is not passing evidence.
+
+Named library selection now uses capture names, review dates and scene labels,
+including archived captures. `CaptureLibrary.catalog_entries` reads metadata
+without walking storage or requiring source video availability; the existing
+library manager still adds its storage diagnostics through `list`. The worker
+lists bounded result metadata and verifies complete evidence only after selection.
+Thirteen catalog/library/dialog tests,29 isolated provider checks and19 library/Qt/atlas integration tests pass. The configured isolated mypy hook passes five source files. Native library selection, full review and assignment were exercised at640×560 in `TEMP/capture-reuse-native-3l2a4f2e`, including an archived capture whose original video is offline. Earlier running test apps remain untouched.
 
 ## Limits and Remaining Acceptance
 

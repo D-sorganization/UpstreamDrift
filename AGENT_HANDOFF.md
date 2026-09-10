@@ -1,7 +1,9 @@
 # Common-Reference Calibration Continuation
 
 Active #9898/#9900: read `docs/development/common_reference_calibration.md` and
-DL-#9898. Review checkpoint in isolated `UpstreamDrift-common-calibration`.
+DL-#9898. PR #9946 in isolated `UpstreamDrift-common-calibration`;
+head1e4984765 pushed with every normal hook passing. Named library selection
+is being added; coordinated provider qualification still blocks merge.
 Preserve apps54812/61500, atlas2963 and coordinated provider-pin ownership.
 Portable calibration reuse is implemented; canonical checkpoint lists passing
 provider/Qt/pipeline checks and the remaining dependency/qualification gates.

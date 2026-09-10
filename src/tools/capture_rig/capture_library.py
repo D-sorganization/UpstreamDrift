@@ -16,7 +16,7 @@ import shutil
 import sqlite3
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
@@ -142,13 +142,18 @@ class CaptureLibrary:
         write_document(root / NOTES_FILE, updated.model_dump(mode="json"))
         return updated
 
-    def list(
+    def catalog_entries(
         self,
         *,
         query: str = "",
-        archived: bool = False,
+        archived: bool | None = False,
         cancelled: Callable[[], bool] = lambda: False,
     ) -> builtins.list[LibraryEntry]:
+        """Read names, notes and identities without scanning footage or storage.
+
+        Selectors can include archived captures with ``archived=None``. Media may
+        be offline while portable calibration evidence remains usable.
+        """
         with self._connect() as connection:
             paths = [
                 Path(row[0])
@@ -161,12 +166,9 @@ class CaptureLibrary:
             try:
                 notes = read_notes(root)
                 if (
-                    notes.archived != archived
-                    or query.casefold()
-                    not in f"{notes.title}\n{notes.notes}".casefold()
-                ):
+                    archived is not None and notes.archived != archived
+                ) or query.casefold() not in f"{notes.title}\n{notes.notes}".casefold():
                     continue
-                managed, external = _storage(root, cancelled)
                 entries.append(
                     LibraryEntry(
                         root,
@@ -174,14 +176,38 @@ class CaptureLibrary:
                         notes.title,
                         notes.notes,
                         notes.archived,
-                        managed,
-                        external,
                     )
                 )
             except InterruptedError:
                 raise
             except (ValueError, OSError) as exc:
                 entries.append(LibraryEntry(root, title=root.name, problem=str(exc)))
+        return entries
+
+    def list(
+        self,
+        *,
+        query: str = "",
+        archived: bool = False,
+        cancelled: Callable[[], bool] = lambda: False,
+    ) -> builtins.list[LibraryEntry]:
+        """Add storage/recording diagnostics for the existing library manager."""
+        entries = []
+        for entry in self.catalog_entries(
+            query=query, archived=archived, cancelled=cancelled
+        ):
+            if entry.problem:
+                entries.append(entry)
+                continue
+            try:
+                managed, external = _storage(entry.root, cancelled)
+                entries.append(
+                    replace(entry, managed_bytes=managed, external_bytes=external)
+                )
+            except InterruptedError:
+                raise
+            except (ValueError, OSError) as exc:
+                entries.append(replace(entry, problem=str(exc)))
         return entries
 
     def editable_copy(self, root: Path) -> Path:
