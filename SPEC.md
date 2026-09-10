@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Installed Capture Runtime (#9949)
+
+The installed calibration worker resolves only its owning distribution's bundled
+provider. Unrelated distributions and incomplete checkouts fail explicitly. Wheel
+assembly preserves tracked motion-matching reference loaders while retaining
+scratch-output exclusions. Installed startup, wizard and calibration checks run
+outside the source checkout; synthetic tests do not establish physical accuracy.
+
 ## Impact Shaft Provider Integration (#9912)
 
 The exact vendor/ud-tools pin provides golf_club.distributed_shaft/1 through the
@@ -4267,6 +4275,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-10 | #9950 | Restore installed Capture Rig startup by preserving reference-loader packaging and resolving the owning bundled calibration provider. Default new recordings to unique player-library destinations and preserve existing takes. Index successful captures automatically and refresh their visible identity. Installed and source regression evidence is recorded separately from physical-camera qualification. |
 | 2026-09-10 | #9955 | Pass explicit constant scalar bounds to Bioptim shared parameter estimation, preserving numerical limits, priors and locked values. The SDK-shape regression and existing numerical recovery tests pass; scientific inventory remains release-blocked. |
 | 2026-09-10 | #9946 | Extend zoom-aware profile review with capture-owned paper/ruler placements, responsive original-video frame selection, original-pixel point editing with bounded pan/zoom rendering, repeated revisions, isolated canonical Tools layout estimation, reviewed result history, named library calibration reuse with portable evidence and processing checks, generated help and distortion-preserving reconstruction. Unavailable calibration blocks its dependent wizard steps while editing remains usable; named prerequisite links guide recovery, and unreadable comparison files produce local review actions. Preview resizing retains uint8 images and layout reuse matches Qt close-event typing. Missing media changes workflow revisions without aborting status, and saved editing routes resume in a fresh window. CI repairs share native editor buttons, declare projection pixel type and keep the developer log within budget, preserving primary inventory-blocker ordering. Numerical inventory remains blocked under #9900; final shared-provider pin and physical qualification remain pending. |
 | 2026-09-09 | #9920 | Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Require a published provider revision before merging a paired consumer. Register the documentation map and use full-SHA CI actions. Validate candidate navigation before the mandatory publication gate. Preserve merged shaft/seam integration and align the combined context provider candidate; existing docs/publication gate tests locate the aggregate by name and retain their failure assertions. Track merged capture-goal planner inputs and reviewed atlas contracts. Documentation budgets apply inside the repository regardless of checkout parent names. Enforce matching pip, source and Rust provider revisions; pin published Tools e83bd2e4. |
