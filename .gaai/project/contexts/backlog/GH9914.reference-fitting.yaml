@@ -1,7 +1,8 @@
 id: GH9914
 title: Reproducible C3D Reference Model Fitting and Camera Overlay
-status: in_review
+status: completed
 owner: codex
 issue: https://github.com/D-sorganization/UpstreamDrift/issues/9914
 plan: docs/development/reference_fitting_epic.md
 authorization: Explicit repository-owner request for end-to-end implementation
+merge_commit: 6f2d63325f6260de99527a08551f7e116abdec28

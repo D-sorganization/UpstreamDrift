@@ -1,14 +1,13 @@
-## C3D Reference Fitting (#9914)
+## C3D Reference Fitting (#9914, Shipped)
 
-Current work is isolated in `../UpstreamDrift-reference-9914`, branch
-`feat/c3d-reference-overlay-9914`; implementation commit SELF; PR #9918.
-See `docs/development/reference_fitting_epic.md` and the operator guide
-`docs/motion_capture/reference_model_fitting.md`. DL-#9914 records current state.
-Reference fitting and the expanded club/ellipsoid/handedness controls reuse the
-existing compositor. #9917 is integrated; other capture work remains with its
-owner. Reference/Capture Rig regressions pass. Twenty qualified numerical bundles
-and twenty club display assets are ready; final push/CI gates remain. Existing
-camera data and the original main worktree's user changes are untouched.
+PR #9918 merged as `6f2d63325`; epic #9914 is closed with club graphics,
+translucent segment ellipsoids and reversible handedness included. Protected
+CI and all normal push hooks passed. The operator guide is
+`docs/motion_capture/reference_model_fitting.md`; exact fit and display evidence
+is linked from `docs/development/reference_fitting_epic.md`.
+`../reference-fit-artifacts-9914/reference-display-library.zip` contains 20
+club-enabled reference assets, 20 verified numerical bundles and playback.
+Existing camera data and user changes in the original worktree are untouched.
 
 # Attributed Club Catalog Continuation
 
