@@ -1,5 +1,6 @@
 # SPEC.md — Repository Specification Document
 
+
 ## Impact Shaft Provider Integration (#9912)
 
 The exact vendor/ud-tools pin provides golf_club.distributed_shaft/1 through the
@@ -5748,6 +5749,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Publish manifest.json, capabilities.json, and screenshots.json from import-free companion publication builder (#9416 #9434).
 - MotionRetargeting._solve_frame_ik evaluates mj_forward once per IK iteration and batches marker Jacobian/error rows into single array operations (#8922 #9828).
 - TrajectoryResultMixin memoizes all_* batch accessors, evaluates all_energies in a single pass, and derives total energy arithmetically (#8928 #9831).
+
+- Replaced `np.linalg.norm(diff, axis=1).max()` with `np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff)))` in `src/tools/capture_rig/model_frame_source.py` to optimize maximum bounding radius calculation. (spec-exempt: micro-optimization)
 
 ## Independently Refined Swing Defect Reference (#9830)
 
