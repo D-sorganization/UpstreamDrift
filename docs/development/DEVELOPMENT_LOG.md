@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9953 · Scalar Parameter Bounds
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9953
+- **Branch:** fix/9953-scalar-bounds
+- **Paths:** src/shared/python/optimization/ocp/parameter_ocp.py; parameter OCP tests; calculation inventory.
+- **Started:** 2026-09-10
+- **Last verified:** 2026-09-10 (30 OCP tests pass; two optional Pinocchio checks skipped)
+- **Summary:** Explicit constant interpolation gives each shared parameter a single-column bound, preserving limits and locked values.
+- **Evidence:** New actual-SDK regression failed with (1,3) before the fix; all five parameter tests pass after it, including unchanged numerical recovery tests. CasADi 3.6.7 and pinned Bioptim fdafe4d9; no tolerance changes.
+- **Next step:** Normal hooks, CI including Linux optional engines, and protected merge.
+
 ### DL-#9926 · Unified Model and Video Analysis
 
 - **State:** shipped
