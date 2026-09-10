@@ -8,8 +8,8 @@ Epic #9897; children #9898 and #9900. Branch
 main `08c8529ef` through merge `732553479`, including the combined Tools provider
 `e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`. The checked-out provider, Gitlink,
 Python requirement and Rust dependency agree. Twenty-eight pin/context/atlas/
-governance tests pass. The complete capture/reconstruction suite is being
-requalified against this provider before pushing the integration.
+governance tests pass. All 660 capture/reconstruction tests pass against this provider. The package
+probe found the installed-worker issue described below.
 
 The context owner qualified a frontend-inclusive installed wheel at source
 `6dab98fce`: launcher, dependency and 31 calibration/reference checks passed.
@@ -19,6 +19,14 @@ full current #9946 wheel or physical camera accuracy. Historical failures remain
 failures. Live test applications still use their frozen earlier checkouts.
 
 ## Implemented Workflow
+
+- Installed-worker qualification: the normal frontend-inclusive wheel built from
+  c432788c3 failed its actual installed catalog request because it required a
+  repository vendor directory. Resolution now accepts the provider recorded in
+  the owning application distribution, while rejecting unrelated distributions
+  and incomplete source checkouts. Source-worker and ownership tests pass; the
+  corrected wheel must be rebuilt and probed before packaged readiness is claimed.
+  Original failing wheel SHA256: `5be3ecb354963958e44016e6de34ecd1677df3437e600f973b54a19875710fca`.
 
 - Comparison journey qualification: thirteen wizard-evidence tests pass, including
   a persisted, capture-bound expert-video registration that completes the entire
