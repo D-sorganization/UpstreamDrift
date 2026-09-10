@@ -63,6 +63,7 @@ from .flow_layout import FlowLayout
 from .geometry_controls import GeometryControls
 from .coaching_dialog import CoachingDialog
 from .comparison_coaching_source import ComparisonCoachingSource
+from .reference_readout import ReferenceReadout
 from .reference_controls import SpatialControls, TimeControls
 from .reference_appearance import MotionAppearanceControls
 from .reference_timeline import ReferenceTimeline
@@ -382,6 +383,8 @@ class ReferenceComparisonDialog(QDialog):
         self.geometry_controls.changed.connect(self._geometry_changed)
         self.geometry_controls.pending_changed.connect(self._pending_changed)
         tabs.addTab(self._scroll(self.geometry_controls), "3D References")
+        self.readout = ReferenceReadout()
+        tabs.addTab(self._scroll(self.readout), "Measurements")
         tabs.currentChanged.connect(lambda: self._show_frame(self.slider.value()))
         return tabs
 
@@ -684,6 +687,15 @@ class ReferenceComparisonDialog(QDialog):
 
         if self._current_asset and self._session.registration and self._renderer:
             context = self._render_context()
+            self.readout.set_context(
+                self._current_asset
+                if isinstance(self._current_asset, ReferenceMotion)
+                else None,
+                context.registration,
+                self._geometry,
+                t_scene,
+                self._geometry.scene_id,
+            )
             try:
                 img = self._renderer.image(
                     self.reader, frame_idx, context, self._camera
