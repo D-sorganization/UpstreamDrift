@@ -90,10 +90,21 @@ class MatchSpec:
     lens_corrections: Mapping[str, LensCorrection] | None = None
 
 
-def start_cameras_from(path: Path) -> list[PinholeCamera]:
+def start_cameras_from(
+    path: Path, *, capture_root: Path | None = None
+) -> list[PinholeCamera]:
     """Camera records from a JSON list, or the ``cameras`` of a reconstruction."""
     require(path.is_file(), "camera start file must exist", str(path))
     payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, dict) and payload.get("schema_version") in {
+        "capture-reference-solve/1",
+        "capture-reference-assignment/1",
+    }:
+        from src.tools.capture_rig.reference_calibration.reuse_evidence import (
+            validate_reference_layout,
+        )
+
+        validate_reference_layout(payload, capture_root)
     records = payload["cameras"] if isinstance(payload, dict) else payload
     require(bool(isinstance(records, list) and records), "no camera records in file")
     return cameras_from_records(records)

@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox,
     QFileDialog,
     QFormLayout,
+    QGridLayout,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -167,6 +168,7 @@ class CalibrationDialog(QDialog):
         self.output_path: Path | None = None
         self.recalibrate_requested = False
         self.reference_requested = False
+        self.reuse_requested = False
         self._reference_available = reference_available
         layout = QVBoxLayout(self)
         explanation = QLabel(
@@ -194,13 +196,22 @@ class CalibrationDialog(QDialog):
         apply = QPushButton("Use Reviewed Revisions")
         repeat = QPushButton("Recalibrate Again…")
         reference = QPushButton("Paper / Ruler References…")
+        reuse = QPushButton("Reuse a Camera Layout…")
+        reuse.setEnabled(self._reference_available)
+        reuse.setToolTip(
+            "Review a previous capture's camera layout for the selected swing."
+        )
+        reuse.clicked.connect(self._reuse)
         reference.setEnabled(self._reference_available)
         reference.setToolTip(
             "Mark common references in the selected capture. Open or record a capture first."
         )
         buttons.addButton(apply, QDialogButtonBox.ButtonRole.AcceptRole)
-        buttons.addButton(repeat, QDialogButtonBox.ButtonRole.ActionRole)
-        buttons.addButton(reference, QDialogButtonBox.ButtonRole.ActionRole)
+        actions = QGridLayout()
+        actions.addWidget(reference, 0, 0)
+        actions.addWidget(reuse, 0, 1)
+        actions.addWidget(repeat, 1, 0, 1, 2)
+        layout.addLayout(actions)
         reference.clicked.connect(self._reference)
         apply.clicked.connect(self._apply)
         repeat.clicked.connect(self._repeat)
@@ -226,4 +237,8 @@ class CalibrationDialog(QDialog):
 
     def _reference(self) -> None:
         self.reference_requested = True
+        self.accept()
+
+    def _reuse(self) -> None:
+        self.reuse_requested = True
         self.accept()

@@ -193,6 +193,17 @@
         "Enter point coordinates or plane origin, normal, extent and opacity in the displayed world frame.",
         "Save after reviewing camera and scene identity; changed evidence requires review."
       ]
+    },
+    {
+      "id": "calibration.reuse",
+      "title": "Reuse Calibration for a New Swing",
+      "description": "Explicit review and a portable copy of the original camera estimate and observation evidence.",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open the new swing and choose Calibration, then Reuse a Camera Layout. Select an original reviewed estimate from an earlier capture.",
+        "Review the source settings and confirm unchanged optics, camera positions, ball origin and target direction. Use for This Swing retains source evidence; changed conditions require recalibration."
+      ]
     }
   ],
   "edges": [
@@ -626,6 +637,24 @@
       "kind": "file",
       "evidence": "src/tools/capture_rig/reference_export.py",
       "constraint": "The shared compositor retains geometry, layer order and source identity",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.layout",
+      "target": "calibration.reuse",
+      "artifact": "Original reviewed result and archived observations",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse.py",
+      "constraint": "Same named views, physical cameras and recorded image sizes; fresh operator confirmation of unchanged optics and scene",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.reuse",
+      "target": "step.reconstruct",
+      "artifact": "Capture-owned reviewed layout assignment",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_evidence.py",
+      "constraint": "Processing revalidates copied source evidence; this is reuse, not a new numerical solve or accuracy certification",
       "view": "workflow"
     }
   ],

@@ -86,9 +86,29 @@ sensor crop. Optical zoom changes the lens calibration, not just the framing.
 Use a lens profile calibrated at those settings, or recalibrate the lens first.
 The application records manual settings; it cannot detect unreported ring or
 camera movement. Repeated placements refine one fixed setup, not changing zoom.
-Lens profiles can be reused when compatible, but reference sessions and reviewed
-layouts currently belong to their capture. Guided transfer to another capture
-is not yet available.
+## Reuse Calibration for a New Swing
+
+Open the new swing, choose **Calibration → Reuse a Camera Layout…**, then select
+an original **reviewed-….json** estimate from the earlier capture's
+**reference_calibration/results** folder. The views, physical camera identities
+and recorded image sizes must match. Review the source swing, lens/zoom/focus,
+sensor mode, anchor offset, fit/validation errors and limitations.
+
+Confirm that the lens settings and camera positions were unchanged when the new
+swing was recorded, including the ball origin and target direction. Then choose
+**Use for This Swing**. The app copies the original observation revision,
+reviewed result and archived reference frames into the new capture before
+publishing a separate assignment. This preserves the original capture identity
+and review date; it does not run another camera solve. Original captures can
+subsequently be moved or archived without breaking that saved evidence.
+
+Processing rechecks the assignment and its evidence even when started outside
+the wizard. Changed or missing evidence requires a new review. A camera move,
+zoom/focus change or changed ball origin needs recalibration. Renamed views and
+partial rig transfers are not supported by this reuse flow; use matching view
+names or calibrate the new configuration. Only original reviewed estimates can
+be selected, not assignments made by this flow. Cancellation publishes no usable
+partial assignment; completed evidence copies may remain for recovery.
 
 ## Storage and Recovery
 

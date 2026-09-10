@@ -1075,7 +1075,9 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
     wanted = [v.strip() for v in args.views.split(",") if v.strip()]
     summary = reconstruct_session(
         args.session,
-        start_cameras=start_cameras_from(args.cameras) if args.cameras else None,
+        start_cameras=start_cameras_from(args.cameras, capture_root=args.session)
+        if args.cameras
+        else None,
         intrinsics=intrinsics_from(args.intrinsics) if args.intrinsics else None,
         measurements=tuple(args.anchor),
         acceleration_sigma_px=args.accel_sigma_px,
