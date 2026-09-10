@@ -1,3 +1,39 @@
+# Impact Shaft Provider Integration
+
+Canonical continuation: [docs/development/HANDOFF.md](docs/development/HANDOFF.md).
+Development entry: DL-#9912. Branch: feat/9912-impact-provider-pin.
+Issue #9912 is a child of #9703/#9701; PR #9916. Current commit is SELF.
+
+The candidate Tools pin is 4dabe900c6ef7767b565c778cda9d9449bed28cf. UD #9916 qualifies the provider and theme pin; see PROVIDER_PIN_RESULTS.json and docs/development/HANDOFF.md.
+
+## Incoming Main Integration
+
+Concurrent eacd69858 integrates main 5ada5e6a6 and its player/equipment work.
+Provider source and pin are unchanged. The inherited inventory omitted provider
+files; the existing test failed, then full-authorship regeneration restored it.
+All 271 integration controls pass again. Tools launcher follow-up is PR #5144;
+final reviewed-pin qualification and physical/acoustic work remain open.
+
+Main 90c3d0b77 is integrated, preserving merged C3D fitting and club/volume/handedness overlays (#9918/#9922) and attributed club catalog (#9919). Both task scopes remain in canonical HANDOFF.md. All 271 integration controls pass.
+Main 8fce9f238 is integrated with capture PR #9917 LoD fixes and capture journey implementation preserved. Canonical HANDOFF.md retains the incoming capture handoff.
+
+## Preserved Repository Context
+
+The previous base handoff is preserved at [Full Base Handoff](https://github.com/D-sorganization/UpstreamDrift/blob/6e3610a9b/AGENT_HANDOFF.md). Canonical handoff retains incoming text below.
+
+## Standing Constraints
+
+- Read AGENTS.md and CLAUDE.md; maintain issue leases and session presence.
+- Shared physics belongs in Tools. Do not copy or edit vendored source.
+- Use topic branches and normal hooks; preserve protected CI and reviews.
+- UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
+  manuals/upstreamdrift QMD is the editable authority; generated LaTeX, PDF,
+  DOCX and HTML remain non-editable artifacts. Run the configured
+  scripts.check_design_manual_governance checks before changing calculations.
+- Numerical convergence, measured calibration and perceptual evidence are
+  distinct; source hashes alone do not qualify a physical model.
+- Refresh this file, canonical handoff and DL-#9912 in implementation commits.
+
 # Player Bag and Capture Equipment Continuation
 
 Active #9905 in `feat/9905-player-club-bag`, worktree UpstreamDrift-player-bag. My Clubs UI, capture assignment/library display and immutable model context are implemented;652 broad regressions and69 focused/map/parity checks pass. Parent catalog #9919 merged01831aa4c; capture UX #9917 merged8fce9f238. Canonical state is `docs/development/HANDOFF.md`. Preserve live Capture Rig childPID61500 and standing manual governance. Wizard integration and broader goal remain open.

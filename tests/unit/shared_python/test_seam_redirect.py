@@ -75,6 +75,19 @@ def test_theme_exports_fix_8894() -> None:
     assert toast.THEME_AVAILABLE is True
 
 
+@pytest.mark.parametrize("prefix", ["src.shared.python", "shared.python"])
+def test_function_generator_uses_tools_without_hiding_ud_widgets(prefix: str) -> None:
+    widget = importlib.import_module(f"{prefix}.ui.function_generator_widget")
+    assert _VENDOR_SHARED in Path(widget.__file__).resolve().parents
+    assert widget.FunctionGeneratorWidget.__module__ == widget.__name__
+    toast = importlib.import_module(f"{prefix}.ui.toast")
+    assert Path(toast.__file__).resolve().parent == (_UD_SHARED / "ui").resolve()
+    assert toast.THEME_AVAILABLE is True
+    other = "shared.python" if prefix.startswith("src.") else "src.shared.python"
+    assert widget is importlib.import_module(f"{other}.ui.function_generator_widget")
+    assert toast is importlib.import_module(f"{other}.ui.toast")
+
+
 def test_unknown_submodule_still_raises_module_not_found() -> None:
     with pytest.raises(ModuleNotFoundError):
         importlib.import_module("src.shared.python.logging_pkg.does_not_exist")
