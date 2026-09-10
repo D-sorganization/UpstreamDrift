@@ -23,6 +23,7 @@ from .calibration_profiles import validate_profile_set
 from .goal_catalog import workflow_evidence
 from .goal_planner import CaptureRoute, Readiness, evaluate
 from .session import SessionMedia
+from .result_evidence import model_revision_problem
 from .wizard_storage import input_revision, read_document
 
 
@@ -233,6 +234,8 @@ def inspect_capture(
         route, media, review, start_file
     )
     invalid = _invalidated(media, route, compatible, model_name)
+    if compatible and review is not None:
+        invalid.update(reconstruction_invalidation(media, review))
     if calibration_problem is not None:
         invalid["intrinsics"] = calibration_problem
     current = replace(media, intrinsics=start_file) if compatible else media
@@ -248,6 +251,31 @@ def inspect_capture(
         revision,
         dict(zip(route.step_ids, states, strict=True)),
     )
+
+
+def reconstruction_invalidation(
+    media: SessionMedia, review: CalibrationReview
+) -> dict[str, str]:
+    """Require a new result when its recorded calibration bytes do not match.
+
+    Old results remain available in the library. Missing lineage is unverified,
+    rather than evidence that the old result used the newly reviewed calibration.
+    Downstream steps inherit the reconstruction prerequisite through the planner.
+    """
+    if media.reconstruction is None:
+        return {}
+    recorded = media.reconstruction.get("camera_source_sha256")
+    if recorded == review.calibration_sha256:
+        return {}
+    reason = (
+        "Calibration changed" if recorded else "Calibration association is unverified"
+    )
+    return {
+        "reconstruct": (
+            f"{reason}. Reconstruct again with the reviewed camera layout. "
+            "Previous results remain available for reference."
+        )
+    }
 
 
 def _calibration_status(
@@ -299,4 +327,6 @@ def _invalidated(
             invalid["fit_model"] = (
                 "The saved fit uses another or unverified model. Select its model or fit the currently selected model."
             )
+        elif problem := model_revision_problem(media):
+            invalid["fit_model"] = problem
     return invalid

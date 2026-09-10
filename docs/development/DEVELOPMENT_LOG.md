@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9952 · Native Camera Setup
+### DL-#9899 · Calibration Revision Status
 
 - **State:** in_review
+- **Owner:** codex
+- **Issue:** #9899
+- **Branch:** feat/9899-calibration-revision-status
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9959
+- **Paths:** reconstruct; rig command; capture_rig result evidence; tests.
+- **Started:** 2026-09-10
+- **Last verified:** 2026-09-10 (26 controls; six refactor checks; budgets pass)
+- **Summary:** Calibration and reconstruction fingerprints invalidate stale outputs; preserve results.
+- **Next step:** See capture_product_turnover.md; resolve #9954/#9959, then ruler UI.
+
+### DL-#9952 · Native Camera Setup
+
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9952; parent #9906
 - **Branch:** feat/9952-camera-setup
@@ -80,10 +93,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9916
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (c487265f1ebc9c61a2e124267ad9cd1c96a6c007; turnover SELF): PR9916 and follow-up9920 are merged. Historical provider qualification below is unchanged; main now records e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0 consistently across all three pins.
-- **Summary:** Qualify the exact Tools shaft/theme provider; see PROVIDER_PIN_RESULTS.json.
-- **Evidence:** 271 controls pass after preserving concurrent eacd69858 and restoring the pinned inventory. Existing inventory RED is retained. Isolated 32a8b36ec wheel and Qt construction pass with gui-tools; web assets omitted. Earlier evidence retained.
-- **Next step:** Coordinate the final reviewed Tools friction descendant with context/capture owners and qualify the exact consumer/wheel/runtime; see canonical HANDOFF. Physical and acoustic gates remain open.
+- **Last verified:** 2026-09-10 (PR #9916 and #9920 merged). Main pin e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0 consistent across pins.
+- **Summary:** Qualify Tools shaft/theme provider; see PROVIDER_PIN_RESULTS.json.
+- **Next step:** Coordinate final reviewed Tools friction pin with context/capture owners.
 
 ### DL-#9914 · C3D Reference Fitting
 

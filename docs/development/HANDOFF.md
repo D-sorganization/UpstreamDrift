@@ -37,11 +37,24 @@ convergence cannot establish a player-dependent sound or heavy-hit effect.
 
 # Common-Reference Calibration Handoff
 
-Active #9952/#9909: `feat/9952-camera-setup`, PR #9954, adds the native camera
-editor and guided acceptance. All 566 Capture Rig and 30 isolated calibration
+**User-requested transfer:** read [Capture Product Turnover](capture_product_turnover.md)
+first. It supersedes older in-flight statements below and identifies the exact
+remaining work, validation, branches and live application. Source and turnover
+changes are being committed for the successor; do not start a duplicate epic.
+
+Active #9899: `feat/9899-calibration-revision-status`, draft PR #9959,
+builds on #9954 (which merged to main). Camera source hashing uses shared provenance;
+command and wizard regression tests cover same-path changes, absent source,
+matching/legacy outputs and downstream blocking. See
+`capture_calibration_revision_delivery.md`. The numerical ruler provider is
+Tools #5169 at 3d7beb203; its worker/editor integration is still outstanding.
+Preserve the installed candidate runtime and the peer camera/impact work.
+
+Active #9952/#9909: `feat/9952-camera-setup`, PR #9954, added the native camera
+editor and guided acceptance (merged to main). All 566 Capture Rig and 30 isolated calibration
 checks pass; searchable player examples were visually reviewed with the app theme.
-See `camera_setup_delivery.md`. Runtime prerequisite #9950 is published at
-0c531a4003d397e82ce32660bef31e8e9408671b and awaiting CI.
+See `camera_setup_delivery.md`. Runtime prerequisite #9950 merged as
+9c8afeaabf60f2751ebbd61b32dac98d32546c3e.
 
 Current #9949: `fix/9949-installed-capture`, PR #9950. Installed worker,
 packaging, new-take identity and library indexing repairs remain intact. PR #9946

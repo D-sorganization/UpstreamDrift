@@ -1073,6 +1073,9 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
     except ValueError as exc:
         raise SystemExit(f"--anchor: {exc}") from exc
     wanted = [v.strip() for v in args.views.split(",") if v.strip()]
+    from src.motion_capture.reconstruct.camera_source import CameraSourceEvidence
+
+    camera_evidence = CameraSourceEvidence.capture(args.cameras or args.intrinsics)
     summary = reconstruct_session(
         args.session,
         start_cameras=start_cameras_from(args.cameras, capture_root=args.session)
@@ -1082,6 +1085,7 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
         measurements=tuple(args.anchor),
         acceleration_sigma_px=args.accel_sigma_px,
         match=MatchSpec(
+            camera_evidence=camera_evidence,
             lens_corrections=lens_corrections_from(args.cameras or args.intrinsics),
             observation_set=args.observations,
             views=tuple(wanted) or None,
