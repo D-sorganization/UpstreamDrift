@@ -18,6 +18,7 @@ class RigProcessRunner(QWidget):
 
     output = pyqtSignal(str)
     finished = pyqtSignal(int)
+    busy_changed = pyqtSignal(bool)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -32,6 +33,11 @@ class RigProcessRunner(QWidget):
         self._process.readyReadStandardOutput.connect(self._drain)
         self._process.finished.connect(self._on_finished)
         self._process.errorOccurred.connect(self._on_error)
+        self._process.stateChanged.connect(
+            lambda state: self.busy_changed.emit(
+                state != QProcess.ProcessState.NotRunning
+            )
+        )
 
     @property
     def busy(self) -> bool:

@@ -63,9 +63,9 @@ class CalibrationActions(QObject):
             mode=selected.mode, views=selected.views or None, controls=selected.controls
         )
 
-    def show(self) -> None:
+    def show(self) -> Path | None:
         if self._busy():
-            return
+            return None
         try:
             root = self._root() / "calibration"
             root.mkdir(parents=True, exist_ok=True)
@@ -73,10 +73,12 @@ class CalibrationActions(QObject):
             dialog.exec()
             if dialog.output_path is not None:
                 self._apply(dialog.output_path)
-            elif dialog.recalibrate_requested:
+                return dialog.output_path
+            if dialog.recalibrate_requested:
                 self._repeat()
         except (ValueError, OSError, sqlite3.Error, KeyError) as exc:
             QMessageBox.warning(self._host, "Camera Calibration", str(exc))
+        return None
 
     def _repeat(self) -> None:
         folder = QFileDialog.getExistingDirectory(

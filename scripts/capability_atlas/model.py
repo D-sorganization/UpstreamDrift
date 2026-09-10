@@ -12,6 +12,8 @@ from typing import Any
 import yaml
 
 from src.config.feature_parity_loader import FeatureParityRegistry
+from src.tools.capture_rig.goal_catalog import validate_bindings
+from src.tools.capture_rig.goal_planner import CaptureGoalCatalog
 
 SOURCES = (
     "src/config/models.yaml",
@@ -97,6 +99,7 @@ def build(root: Path) -> Graph:
         "tiles": tiles,
         "nodes": connections["nodes"] + workflow_nodes(root),
         "edges": connections["edges"],
+        "capture_goals": connections["capture_goals"],
         "inputs": {
             path: hashlib.sha256((root / path).read_bytes()).hexdigest()
             for path in SOURCES
@@ -122,6 +125,16 @@ def validate_graph(graph: Graph, root: Path) -> None:
     ids = [node["id"] for node in graph["nodes"]]
     if len(set(ids)) != len(ids):
         raise ValueError("Duplicate graph node IDs")
+    goals = CaptureGoalCatalog.model_validate(graph["capture_goals"])
+    validate_bindings(
+        goals,
+        ids,
+        (
+            node["id"].removeprefix("step.")
+            for node in graph["nodes"]
+            if node["id"].startswith("step.") and "actions" in node
+        ),
+    )
     for node in graph["nodes"]:
         if not node["id"] or not node["title"]:
             raise ValueError("Nodes need an ID and title")
