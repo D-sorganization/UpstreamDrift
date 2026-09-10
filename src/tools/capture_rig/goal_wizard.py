@@ -123,6 +123,19 @@ class CaptureStepPage(QWizardPage):
         layout.addWidget(self.status)
         content = QWidget()
         instructions = QVBoxLayout(content)
+        self.prerequisite_buttons: dict[str, QPushButton] = {}
+        self._prerequisite_titles: dict[str, str] = {}
+        for key in step.requires:
+            required_page = owner.step_pages[key]
+            title = required_page.title()
+            self._prerequisite_titles[key] = title
+            button = QPushButton(f"Go to {title}")
+            button.clicked.connect(
+                lambda _checked=False, target=key: owner.navigate(target)
+            )
+            button.hide()
+            self.prerequisite_buttons[key] = button
+            instructions.addWidget(button)
         for text in description.instructions:
             instructions.addWidget(_label(f"• {text}"))
         instructions.addStretch()
@@ -163,7 +176,17 @@ class CaptureStepPage(QWizardPage):
             "blocked": "Needs Attention",
             "skipped": "Skipped",
         }
-        self.status.setText(f"{labels[self.state.status]}\n{self.state.reason}")
+        reason = self.state.reason
+        missing = [
+            key for key in self.state.prerequisites if key in self.prerequisite_buttons
+        ]
+        if missing:
+            titles = ", ".join(self._prerequisite_titles[key] for key in missing)
+            reason = f"Complete or refresh these required steps: {titles}. Use the links below."
+        for key, button in self.prerequisite_buttons.items():
+            button.setVisible(key in missing)
+            button.setEnabled(not busy)
+        self.status.setText(f"{labels[self.state.status]}\n{reason}")
         self.open_button.setEnabled(not busy)
         self.completeChanged.emit()
 

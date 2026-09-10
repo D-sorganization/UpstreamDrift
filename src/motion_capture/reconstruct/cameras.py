@@ -44,6 +44,7 @@ class PinholeCamera:
     rotation_world_from_camera: Array  # 3x3
     translation_world_from_camera_m: Array  # (3,)
     image_size_px: tuple[int, int]
+    distortion: Array | None = None  # metadata; project() uses ideal pixel space
 
     def __post_init__(self) -> None:
         k = np.asarray(self.matrix, dtype=float)
@@ -57,6 +58,18 @@ class PinholeCamera:
         object.__setattr__(self, "matrix", k)
         object.__setattr__(self, "rotation_world_from_camera", r)
         object.__setattr__(self, "translation_world_from_camera_m", t)
+        if self.distortion is not None:
+            distortion = np.asarray(self.distortion, dtype=float).copy()
+            require(
+                distortion.ndim == 1 and np.isfinite(distortion).all(),
+                "invalid distortion",
+            )
+            require(
+                len(distortion) in {0, 4, 5, 8, 12, 14},
+                "unsupported pinhole distortion",
+            )
+            distortion.setflags(write=False)
+            object.__setattr__(self, "distortion", distortion)
 
     @property
     def position_m(self) -> Array:
@@ -96,10 +109,10 @@ class PinholeCamera:
         return inside
 
     def to_calibration(self) -> CameraCalibration:
-        """The ADR-0041 record for this camera (no distortion)."""
+        """The ADR-0041 record, retaining original lens metadata for overlays."""
         return CameraCalibration(
             camera_id=self.camera_id,
-            intrinsics=CameraIntrinsics(matrix=self.matrix),
+            intrinsics=CameraIntrinsics(matrix=self.matrix, distortion=self.distortion),
             extrinsics=CameraExtrinsics(
                 rotation_world_from_camera=self.rotation_world_from_camera,
                 translation_world_from_camera_m=self.translation_world_from_camera_m,
@@ -121,6 +134,7 @@ class PinholeCamera:
                 extrinsics.translation_world_from_camera_m, dtype=float
             ),
             image_size_px=record.image_size_px,
+            distortion=intrinsics.distortion,
         )
 
 

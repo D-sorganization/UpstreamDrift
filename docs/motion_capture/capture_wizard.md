@@ -25,6 +25,12 @@ they do not start a job automatically. Return with **Capture Wizard** after
 working in those controls, then **Refresh Status**. Inspection runs in the
 background so the window remains responsive.
 
+When a prerequisite needs attention, its named **Go to …** button takes you
+directly to that wizard page. Complete or review the input, then return to the
+next step. These links disappear once the input is satisfied and pause while an
+operation is running. A missing reviewed calibration blocks calibrated analysis;
+editing-only routes remain available without loading calibration evidence.
+
 - **Ready for Your Action:** inputs are available; open the tool and complete the step.
 - **Needs Attention:** the explanation identifies missing or changed inputs.
 - **Available / Reviewed:** the required saved artifact or reviewed input is present.
@@ -68,6 +74,12 @@ are separate from informational architecture arrows. Run
 graph data and Mermaid diagrams; CI checks freshness.
 
 ## Current Route Scope
+
+In Calibration, **Paper / Ruler References…** opens the
+[common-reference workflow](common_reference_calibration.md). After using a
+reviewed camera layout, return to the wizard and refresh status. Paper placement
+estimation requires a compatible lens calibration for the recorded zoom and
+focus; it does not replace lens calibration or joint detection.
 
 Single-view timing and multi-view reconstruction require separate sessions.
 Guided reconstruction/model/export routes use the default triangulated match,

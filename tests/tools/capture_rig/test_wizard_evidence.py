@@ -133,8 +133,7 @@ def test_old_detection_or_model_identity_never_marks_a_new_fit_done(tmp_path) ->
     assert evidence.states["step.fit_model"].status == "blocked"
 
 
-def test_review_is_invalidated_by_changed_calibration_plan_or_capture(tmp_path) -> None:
-    root, _, media = _capture(tmp_path)
+def _reviewed_calibration(root: Path, tmp_path: Path) -> tuple[CalibrationReview, Path]:
     path = root / "intrinsics-selected-test.json"
     camera = json.loads(calibration(tmp_path / "lens.json").read_text())[0]
     plan, index, _ = load_bundle(root)
@@ -153,11 +152,33 @@ def test_review_is_invalidated_by_changed_calibration_plan_or_capture(tmp_path) 
             }
         )
     write_document(path, {"cameras": cameras, "profile_selections": selections})
-    review = CalibrationReview.confirmed(root, path)
+    return CalibrationReview.confirmed(root, path), path
+
+
+def test_review_is_invalidated_by_changed_calibration_plan_or_capture(tmp_path) -> None:
+    root, _, media = _capture(tmp_path)
+    review, path = _reviewed_calibration(root, tmp_path)
     assert review.matches(media, path)
     path.write_text("changed", encoding="utf-8")
     assert not review.matches(media, path)
     assert not review.matches(media, root / "another.json")
+
+
+@pytest.mark.parametrize("goal", ["edit", "reconstruct"])
+def test_missing_reviewed_calibration_only_blocks_dependent_work(tmp_path, goal):
+    root, library, media = _capture(tmp_path)
+    review, path = _reviewed_calibration(root, tmp_path)
+    path.unlink()
+    route = resolve(load_catalog(), [goal])
+    evidence = inspect_capture(
+        route, media, library.root, review=review, start_file=path
+    )
+    assert evidence.states["capture.library"].status == "done"
+    assert evidence.states["capture.selection"].status == "ready"
+    if goal == "reconstruct":
+        assert evidence.states["step.intrinsics"].status == "blocked"
+        assert "calibration" in evidence.states["step.intrinsics"].reason.lower()
+        assert evidence.states["step.reconstruct"].status == "blocked"
 
 
 def test_empty_calibration_file_cannot_be_treated_as_reviewed(tmp_path) -> None:
@@ -166,3 +187,61 @@ def test_empty_calibration_file_cannot_be_treated_as_reviewed(tmp_path) -> None:
     write_document(path, {"cameras": []})
     with pytest.raises(ValueError, match="every camera"):
         CalibrationReview.confirmed(root, path)
+
+
+@pytest.mark.parametrize("content", [b"{broken", b"\xff\xfe"])
+def test_unreadable_comparison_keeps_capture_steps_available(tmp_path, content) -> None:
+    root, library, media = _capture(tmp_path)
+    save_edits(root, SessionEdits())
+    comparisons = root / "comparisons"
+    comparisons.mkdir()
+    broken = comparisons / "unreadable.json"
+    broken.write_bytes(content)
+    from hashlib import sha256
+    from src.motion_capture.reference.model import ReferenceSource, ReferenceVideo
+    from src.motion_capture.reference.storage import ReferenceLibrary
+
+    recording = media.views[0].recording
+    assert recording is not None
+    ReferenceLibrary(library.root / "references").save(
+        ReferenceVideo(
+            title="Expert",
+            source=ReferenceSource(
+                path=str(recording),
+                sha256=sha256(recording.read_bytes()).hexdigest(),
+                format="video",
+            ),
+            width=16,
+            height=16,
+            frames=5,
+            fps=30,
+        )
+    )
+    evidence = inspect_capture(
+        resolve(load_catalog(), ["compare_video"]), media, library.root
+    )
+    assert evidence.states["capture.library"].status == "done"
+    assert evidence.states["capture.selection"].status == "done"
+    assert "unreadable.json" in evidence.states["compare.video"].reason
+    assert "review" in evidence.states["compare.video"].reason.lower()
+    assert broken.read_bytes() == content
+
+
+def test_removed_pose_output_changes_revision_without_blocking_editing(
+    tmp_path,
+) -> None:
+    root, library, media = _capture(tmp_path)
+    save_edits(root, SessionEdits())
+    output = root / "observations" / "a.json"
+    output.parent.mkdir()
+    output.write_text("{}", encoding="utf-8")
+    media = replace(
+        media, views=(replace(media.views[0], observations=output), media.views[1])
+    )
+    before = input_revision(media)
+    output.unlink()
+    evidence = inspect_capture(resolve(load_catalog(), ["edit"]), media, library.root)
+    assert evidence.input_revision != before
+    assert evidence.states["capture.library"].status == "done"
+    assert evidence.states["capture.selection"].status == "done"
+    assert input_revision(media) == evidence.input_revision

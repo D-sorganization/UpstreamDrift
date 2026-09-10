@@ -8,15 +8,10 @@ import hashlib
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from src.motion_capture.rig.documents import write_document
-from src.motion_capture.rig.edits import ViewEdit, load_edits
-from src.motion_capture.coaching import DrawingLayer
-
-from .clips import ClipRange, ClipRendering, export_clip
-from .player import VideoReader
-from .session import load_session
+if TYPE_CHECKING:
+    from src.motion_capture.coaching import DrawingLayer
 
 
 def _digest(path: Path, cancelled: Callable[[], bool]) -> str:
@@ -59,6 +54,13 @@ def export_swing(
     Cancellation/decode errors publish nothing. Publication of video and sidecar
     is recoverable on ordinary errors, not a cross-file power-loss transaction.
     """
+    from src.motion_capture.rig.documents import write_document
+    from src.motion_capture.rig.edits import ViewEdit, load_edits
+
+    from .clips import ClipRange, ClipRendering, export_clip
+    from .player import VideoReader
+    from .session import load_session
+
     out = out.resolve()
     sidecar = out.with_suffix(".json")
     if out.suffix.lower() not in (".avi", ".mp4"):

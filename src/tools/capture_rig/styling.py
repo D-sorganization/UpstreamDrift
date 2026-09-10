@@ -17,6 +17,7 @@ import re
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
+from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QWidget
 
 from src.shared.python.core.contracts import require
@@ -27,6 +28,18 @@ from src.shared.python.theme.style_constants import Styles
 from src.shared.python.theme.theme_manager import ThemeManager
 
 Palette = Mapping[str, str]
+
+
+def reference_marker_colors() -> tuple[tuple[int, int, int], tuple[int, int, int]]:
+    """BGR marker and contrasting outline from the current application palette."""
+    palette = get_current_colors()
+    foreground = palette["accent"]
+    outline = contrast_text(foreground, palette)
+    front, back = QColor(foreground), QColor(outline)
+    return (
+        (front.blue(), front.green(), front.red()),
+        (back.blue(), back.green(), back.red()),
+    )
 
 
 def help_document_style() -> str:
