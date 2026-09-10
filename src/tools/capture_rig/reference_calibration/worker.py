@@ -35,7 +35,7 @@ def _provider_root(root: Path) -> Path:
     except metadata.PackageNotFoundError as exc:
         raise ValueError("The selected Tools provider is unavailable") from exc
     files = {str(path).replace("\\", "/") for path in distribution.files or ()}
-    if Path(distribution.locate_file("")).resolve() != root or not {
+    if Path(str(distribution.locate_file(""))).resolve() != root or not {
         PROVIDER_FILE.as_posix(),
         WORKER_FILE.as_posix(),
     }.issubset(files):
