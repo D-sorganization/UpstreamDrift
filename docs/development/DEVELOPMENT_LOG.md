@@ -107,7 +107,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/issue-9915-agent-context
 - **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `scripts/check_doc_size_budget.py`, `tests/ci`, `tests/scripts`
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10; published provider e83bd2e4 aligns all three install paths.107 provider/seam, six context and31 atlas/goal tests pass;12/12 navigation tasks and source/view/pin checks pass. Concurrent60318e4c4 is integrated; atlas/source checks pass in its minimal NumPy-enabled CI environment. Normal wheel build includes frontend; isolated installed launcher and31 calibration controls pass with pip check. See HANDOFF.md for exact wheel evidence.
+- **Last verified:** 2026-09-10; final e83bd2e4 pins pass107 provider/seam, six context,31 atlas and12 navigation controls. The frontend-inclusive installed wheel passes launcher,31 calibration tests and pip check. Handoff records revisions and hashes.
 - **Summary:** Twelve components and five reviewed integrations reuse the atlas and capture goals. Main276998030 is integrated; a required regression rejects divergent pip/source/Rust providers.
 - **Next step:** Qualify final published Tools pins and required CI on PR #9920.
 
