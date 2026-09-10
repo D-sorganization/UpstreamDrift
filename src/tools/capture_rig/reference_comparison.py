@@ -43,7 +43,7 @@ from src.motion_capture.reference.comparison import (
     load_comparison_session,
     save_comparison_session,
 )
-from src.motion_capture.reference.model import Asset
+from src.motion_capture.reference.model import Asset, ReferenceMotion
 from src.motion_capture.coaching.storage import load_layer
 from src.motion_capture.rig.edits import ViewEdit, load_edits
 from src.motion_capture.reference.registration import (
@@ -59,6 +59,7 @@ from . import styling
 from .annotate_widget import ImageCanvas
 from .flow_layout import FlowLayout
 from .reference_controls import SpatialControls, TimeControls
+from .reference_appearance import MotionAppearanceControls
 from .reference_timeline import ReferenceTimeline
 from .player import VideoReader
 from .overlay import PoseTrack
@@ -368,7 +369,7 @@ class ReferenceComparisonDialog(QDialog):
             timing_layout.addWidget(expert_page, 1)
         timing_layout.addWidget(self.timing, 2)
         tabs.addTab(self._scroll(timing_page), "Timing")
-        tabs.addTab(self._scroll(self._appearance_page()), "Notes")
+        tabs.addTab(self._scroll(self._appearance_page()), "Appearance and Notes")
         tabs.currentChanged.connect(lambda: self._show_frame(self.slider.value()))
         return tabs
 
@@ -398,6 +399,12 @@ class ReferenceComparisonDialog(QDialog):
         self.opacity_spin.setAccessibleName("Reference Opacity")
         self.opacity_spin.valueChanged.connect(self._layer_changed)
         form.addRow("Opacity", self.opacity_spin)
+        if isinstance(self._current_asset, ReferenceMotion):
+            self.motion_appearance = MotionAppearanceControls(
+                self._session.layer, has_club=bool(self._current_asset.club_edges)
+            )
+            self.motion_appearance.changed.connect(self._motion_appearance_changed)
+            form.addRow(self.motion_appearance)
         self.notes = QPlainTextEdit(self._session.notes)
         self.notes.setAccessibleName("Comparison Lesson Notes")
         self.notes.setPlaceholderText(
@@ -607,6 +614,13 @@ class ReferenceComparisonDialog(QDialog):
         self._session = self._session.with_layer(
             opacity=self.opacity_spin.value(),
             visible=self.visible_check.isChecked(),
+        )
+        self._show_frame(self.slider.value())
+
+    def _motion_appearance_changed(self) -> None:
+        self._remember()
+        self._session = self._session.changed(
+            layer=self.motion_appearance.updated(self._session.layer)
         )
         self._show_frame(self.slider.value())
 

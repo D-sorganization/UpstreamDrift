@@ -28,7 +28,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09; five context/pin/CI tests and 12/12 navigation tasks pass against provider candidate82151279f. Boundary tests pass; final provider publication and current-head CI remain pending.
 - **Summary:** Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Parent epic Repository_Management#1629 remains active; no subscription infrastructure is required.
-- **Next step:** Publish the paired consumer PR with the candidate pin; required provider-publication gate prevents premature merge. Repin the final merged provider and verify all required checks.
+- **Next step:** PR #9920 carries the candidate pin and a required provider-publication gate. Repin the final merged provider and verify all required checks.
+
+### DL-#9914 · C3D Reference Fitting
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9914
+- **PR:** #9918
+- **Branch:** feat/c3d-reference-overlay-9914
+- **Paths:** src/motion_capture
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`a523a77f2`; reference/Capture Rig suite, 20 club assets)
+- **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
+- **Next step:** Qualify and merge #9918; #9917 integrated.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
@@ -469,24 +482,6 @@ Entries stay here for 90 days after merge, then move to the archive.
 
 Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
 
-## Field Reference
-
-| Field           | Required                   | Notes                                                          |
-| --------------- | -------------------------- | -------------------------------------------------------------- |
-| `State`         | Always                     | One of the six states above                                    |
-| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
-| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
-| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
-| `PR`            | Always                     | Number and state, or `not created`                             |
-| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
-| `Started`       | Always                     | Drives cycle time                                              |
-| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
-| `Summary`       | Always                     | One or two sentences                                           |
-| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
-| `Parked`        | When `parked`              | Date plus reason                                               |
-
-Never place credentials, tokens, or customer data in a development log.
-
 ### DL-#9499 · Spec Check Reminder Fail-Safe Extraction
 
 - **State:** in_review
@@ -508,24 +503,6 @@ Entries stay here for 90 days after merge, then move to the archive.
 ## Archive
 
 Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
-
-## Field Reference
-
-| Field           | Required                   | Notes                                                          |
-| --------------- | -------------------------- | -------------------------------------------------------------- |
-| `State`         | Always                     | One of the six states above                                    |
-| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
-| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
-| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
-| `PR`            | Always                     | Number and state, or `not created`                             |
-| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
-| `Started`       | Always                     | Drives cycle time                                              |
-| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
-| `Summary`       | Always                     | One or two sentences                                           |
-| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
-| `Parked`        | When `parked`              | Date plus reason                                               |
-
-Never place credentials, tokens, or customer data in a development log.
 
 ### DL-#9542 · Bunker Exit State Consistency, Provenance, and Result Envelope
 
@@ -625,24 +602,6 @@ Entries stay here for 90 days after merge, then move to the archive.
 ## Archive
 
 Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
-
-## Field Reference
-
-| Field           | Required                   | Notes                                                          |
-| --------------- | -------------------------- | -------------------------------------------------------------- |
-| `State`         | Always                     | One of the six states above                                    |
-| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
-| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
-| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
-| `PR`            | Always                     | Number and state, or `not created`                             |
-| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
-| `Started`       | Always                     | Drives cycle time                                              |
-| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
-| `Summary`       | Always                     | One or two sentences                                           |
-| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
-| `Parked`        | When `parked`              | Date plus reason                                               |
-
-Never place credentials, tokens, or customer data in a development log.
 
 ### DL-#9249 · UI: Pin @vitejs/Plugin-React to ^5 Until Vite 8
 
