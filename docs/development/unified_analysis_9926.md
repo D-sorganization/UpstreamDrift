@@ -16,13 +16,33 @@ guided capture wizard. Independent queued jobs had no result at merge time;
 they are not represented as passing evidence. Historical qualification notes
 below retain the checks and limitations observed during implementation.
 
-Story #9932 is in progress in `feat/9932-comparison-drawings`. Test-first canvas
-finalization preserves drawing/reference/selection-handle order and rejects
-changed pixel grids. The comparison frame adapter matches the existing export
-compositor pixel for pixel, including detected-pose overlays. Thirteen focused
-canvas, source, coaching and model-dialog regressions pass. The comparison
-launch action, persistence/export source adapter and visual qualification are
-still pending; this seam alone does not complete the story.
+Story #9932 is implemented locally in `feat/9932-comparison-drawings`.
+**Draw on Comparison…** saves the current recipe and opens the common editor
+with the current frame, detected pose, drawings, world geometry and reference.
+Saving and closing reloads drawings in the parent comparison. The compositor
+preserves layer order and selection handles stay outside exported pixels.
+PNG export retains the original uncropped grid; video applies the saved crop.
+Export workers snapshot drawings and reject changed source or scene evidence.
+
+Local qualification: 504 Capture Rig/geometry tests and 50 atlas/parity tests
+passed; Ruff, formatting, architecture budgets, LoD no-growth and mypy on seven
+production files passed. Full Tour Average Driver motion was visually inspected
+at 0.567 seconds in the common editor and its 960×540 PNG using an explicitly
+synthetic background and virtual camera. This is rendering evidence, not a
+comparison against measured player motion. Artifacts are in the external
+`analysis-9926-artifacts/comparison-visual-9von8rml` directory. Protected CI and
+review still gate story closure.
+
+The capability registry now records model-only analysis, shared drawing-editor
+contracts and metric-reference routes. Existing executable capture-goal metadata
+and desktop parity limitations are preserved. Measurement readouts, simulation
+integration and reviewed agent-context boundaries remain parent-epic work.
+
+Camera-bound geometry now fingerprints `reconstruct/reconstruction.json`, the
+actual projection-camera evidence, in addition to the reconstruction summary.
+Existing geometry saved with the older incomplete camera fingerprint requires
+explicit review/recreation when rejected; it is not silently rebound. Scenes
+without that camera file retain their existing identity.
 
 ## Reuse and Surface Audit
 
@@ -129,6 +149,6 @@ locally. The required single #9933 SPEC row and development-log state are includ
 
 Owner session: `codex-unified-analysis-20260910`, isolated branch
 `feat/9926-unified-analysis`. Repository Management lease and presence cover
-the coaching contracts and comparison UI. Equipment/session fitting, capture
+the coaching contracts and comparison UI. Active work is on `feat/9932-comparison-drawings`. Equipment/session fitting, capture
 goal-planner, Simscape matching and agent-context edits remain owned by their
 active peer sessions. Do not edit their worktrees or rewrite their branches.
