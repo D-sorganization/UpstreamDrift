@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from src.motion_capture.coaching.geometry_storage import geometry_path, load_geometry
+
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -118,8 +120,16 @@ def _render_recipe(
     if edit.crop:
         edit.crop.validate_size(reader.width, reader.height)
     drawings = load_layer(root, view, reader.width, reader.height, reader.frame_count)
+    geometry = load_geometry(root)
     return ComparisonRenderContext(
-        view, asset, registration, layer, crop=edit.crop, drawings=drawings
+        view,
+        asset,
+        registration,
+        layer,
+        crop=edit.crop,
+        drawings=drawings,
+        geometry=geometry if geometry.planes or geometry.points else None,
+        scene_id=geometry.scene_id,
     ), clip
 
 
@@ -151,6 +161,7 @@ def _export_metadata(
     metadata.update(
         reference_asset=ctx.asset.model_dump(mode="json"),
         drawings=ctx.drawings.model_dump(mode="json") if ctx.drawings else None,
+        geometry=ctx.geometry.model_dump(mode="json") if ctx.geometry else None,
         selection={"first": clip.first, "last": clip.last},
         render_recipe={
             "version": "comparison-compositor/1.0.0",
@@ -158,6 +169,7 @@ def _export_metadata(
                 "player",
                 "detected_pose",
                 "drawings",
+                "scene_geometry",
                 "reference",
                 "crop",
                 "edge_padding",
@@ -213,6 +225,7 @@ def export_comparison_video(
         source,
         root / EDITS_FILE,
         layer_path(root, view),
+        geometry_path(root),
         root / "recordings.json",
         root / "observations" / "observations.json",
     }
