@@ -156,3 +156,18 @@ The main merge preserves #9918 and all other owners.741 standard regressions pas
 3031-file LoD, architecture and document budgets pass. No source behavior was
 changed to satisfy qualification. Normal integration commit/push is next, then
 restore PR#9923 to ready and follow protected CI.
+
+## Concurrent Publication Reconciliation
+
+While fd9434ce9 passed push hooks, another writer rewrote the remote branch to
+e43362934 on main90c3d0b77. Python/tests/scripts/config/UI are identical to the
+741-test candidate. This normal merge retains that completed-reference metadata,
+uses the corrected PR-keyed SPEC row#9923, preserves our current qualification
+records and fixes an automatic duplicate DL-#9905 entry. No force-push is used.
+Both Tools updates are now published after every normal push hook: #5136 at
+45f3bd8b9 and #5140 atc98402cb1. Fresh #5136 private Gasification checkout still
+fails before tests (run34420243464/job102695209434); other jobs were running.
+
+Next isolated worktree: UpstreamDrift-capture-wizard, feat/9907-capture-goal-wizard,
+basefd9434ce9, lease/presence through02:22UTC. Submodule eab74a9 initialized.
+No wizard implementation yet. Its local instructions match this checkout.
