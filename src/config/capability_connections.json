@@ -62,35 +62,58 @@
       "title": "Capture Library",
       "description": "Find, import, open and edit captures; save swing notes and manage archive/storage.",
       "evidence": "src/tools/capture_rig/library_dialog.py",
-      "view": "workflow"
+      "view": "workflow",
+      "instructions": [
+        "Import existing videos, or select a recorded capture and open it.",
+        "Name the swing and add notes so you can recognize this take later."
+      ]
     },
     {
       "id": "capture.selection",
       "title": "Swing Selection",
       "description": "Preview source frames, mark in/out and crop before inference.",
       "evidence": "src/tools/capture_rig/swing_editor.py",
-      "view": "workflow"
+      "view": "workflow",
+      "instructions": [
+        "Play or step through the recording to find the swing. Select its first and last frames.",
+        "Crop around the player if needed, then Save. Keep the full range to use the entire recording.",
+        "When analysis already exists, the editor offers a separate editable copy so earlier results remain available."
+      ]
     },
     {
       "id": "capture.references",
       "title": "Coaching References",
       "description": "Saved lines, arrows, circles, ellipses and rectangles in original camera pixels.",
       "evidence": "src/tools/capture_rig/coaching_dialog.py",
-      "view": "workflow"
+      "view": "workflow",
+      "instructions": [
+        "Choose a camera view and pause at the frame you want to discuss.",
+        "Draw lines, arrows, circles, ellipses or rectangles. Select a shape to adjust it, or use Undo.",
+        "Save your references before returning. Use the editor’s export controls to share an annotated image or video."
+      ]
     },
     {
       "id": "capture.experts",
       "title": "Expert Reference Library",
       "description": "Import linked 2D video or validated C3D/model marker motion with explicit units, axes and joint names.",
       "evidence": "src/tools/capture_rig/reference_library_dialog.py",
-      "view": "workflow"
+      "view": "workflow",
+      "instructions": [
+        "Import an expert video or a C3D/model motion file. Check the units and axes when importing motion.",
+        "Give the reference a recognizable name and notes. Choose it in Expert Comparison."
+      ]
     },
     {
       "id": "capture.comparison",
       "title": "Expert Comparison",
       "description": "Place an expert video or model, pair swing events, and review through the selected camera.",
       "evidence": "src/tools/capture_rig/reference_comparison.py",
-      "view": "workflow"
+      "view": "workflow",
+      "instructions": [
+        "Choose an expert reference and align it with the player in the camera view.",
+        "Pair matching swing events to synchronize playback, then adjust placement and opacity.",
+        "Save the comparison before returning. Review the alignment carefully before exporting it."
+      ]
     },
     {
       "id": "comparison.outputs",
@@ -118,7 +141,12 @@
       "title": "My Clubs",
       "description": "Catalog/custom clubs, notes, archive and capture-owned equipment snapshots.",
       "evidence": "src/tools/capture_rig/equipment_dialog.py",
-      "view": "workflow"
+      "view": "workflow",
+      "instructions": [
+        "Search the catalog or add a custom club. Enter only the specifications you know; keep estimates and unknown values explicit.",
+        "Assign the selected club to this capture. Editing your bag later preserves the capture’s saved club details.",
+        "Skip this step if the club details are unavailable. Current body models record equipment context without applying a club constraint."
+      ]
     }
   ],
   "edges": [
@@ -464,5 +492,206 @@
       "constraint": "Current body models apply no club constraints; equipment is recorded in provenance",
       "view": "workflow"
     }
-  ]
+  ],
+  "capture_goals": {
+    "schema_version": "capture-goals/1",
+    "steps": [
+      {
+        "id": "capture.library",
+        "action": "library",
+        "node_id": null,
+        "requires": [],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "capture.selection",
+        "action": "edit",
+        "node_id": null,
+        "requires": ["capture.library"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "capture.references",
+        "action": "draw",
+        "node_id": null,
+        "requires": ["capture.selection"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "capture.experts",
+        "action": "references",
+        "node_id": null,
+        "requires": ["capture.library"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "compare.video",
+        "action": "compare_reference",
+        "node_id": "capture.comparison",
+        "requires": ["capture.selection", "capture.experts"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.detect",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["capture.selection"],
+        "workflow_key": "detect",
+        "minimum_views": 1,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.analyze_2d",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.detect"],
+        "workflow_key": "analyze_2d",
+        "minimum_views": 1,
+        "maximum_views": 1,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.intrinsics",
+        "action": "calibration",
+        "node_id": null,
+        "requires": ["capture.library"],
+        "workflow_key": "intrinsics",
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.review",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.detect"],
+        "workflow_key": "review",
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.reconstruct",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.review", "step.intrinsics"],
+        "workflow_key": "reconstruct",
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": true,
+        "optional": false
+      },
+      {
+        "id": "clubs.bag",
+        "action": "my_clubs",
+        "node_id": null,
+        "requires": ["capture.library"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": true
+      },
+      {
+        "id": "step.fit_model",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.reconstruct", "clubs.bag"],
+        "workflow_key": "fit_model",
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": true,
+        "optional": false
+      },
+      {
+        "id": "step.export",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.reconstruct"],
+        "workflow_key": "export",
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": true,
+        "optional": false
+      },
+      {
+        "id": "compare.projected",
+        "action": "compare_reference",
+        "node_id": "capture.comparison",
+        "requires": ["step.reconstruct", "capture.experts"],
+        "workflow_key": null,
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": true,
+        "optional": false
+      }
+    ],
+    "goals": [
+      {
+        "id": "edit",
+        "title": "Trim and Crop a Swing",
+        "steps": ["capture.selection"]
+      },
+      {
+        "id": "draw",
+        "title": "Add Coaching Lines and Shapes",
+        "steps": ["capture.references"]
+      },
+      {
+        "id": "compare_video",
+        "title": "Compare with an Expert Video",
+        "steps": ["compare.video"]
+      },
+      {
+        "id": "analyze_2d",
+        "title": "Measure Single-View Swing Timing",
+        "steps": ["step.analyze_2d"]
+      },
+      {
+        "id": "reconstruct",
+        "title": "Reconstruct Multiple Views in 3-D",
+        "steps": ["step.reconstruct"]
+      },
+      {
+        "id": "fit_model",
+        "title": "Fit a Body Model to a Reconstruction",
+        "steps": ["step.fit_model"]
+      },
+      {
+        "id": "export_motion",
+        "title": "Export Reconstructed Motion",
+        "steps": ["step.export"]
+      },
+      {
+        "id": "project_reference",
+        "title": "Project an Expert into Reconstructed Cameras",
+        "steps": ["compare.projected"]
+      }
+    ]
+  }
 }
