@@ -31,7 +31,7 @@
     caption{text-align:left;font-weight:700;margin-bottom:14px}th,td{padding:12px;border-bottom:1px solid #2b465a;vertical-align:top}th{font-weight:600}td{color:#b7cbd8}td small{color:#8cd3d6}
     .note{padding:15px 20px;background:#172c3c;border-left:3px solid #d6b36a;border-radius:0 10px 10px 0;color:#cbd8e1;font-size:14px}
     .toolbar{display:flex;gap:16px;flex-wrap:wrap;align-items:end;margin:22px 0}.field{display:flex;flex-direction:column;gap:7px;flex:1;min-width:220px;font-size:13px;color:#aec3d1}
-    input,select{background:#142838;border:1px solid #476071;border-radius:9px;color:#edf5fa;padding:12px 14px;width:100%}.field:last-of-type{max-width:270px}
+    input,select,button{background:#142838;border:1px solid #476071;border-radius:9px;color:#edf5fa;padding:12px 14px;width:100%}.field:last-of-type{max-width:270px}
     .count{color:#a4bdce;font-size:13px;min-width:140px}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
     article{background:#102334;border:1px solid #294354;border-radius:14px;padding:22px}article p{color:#adbfce;font-size:14px}article small{color:#8da9bc;overflow-wrap:anywhere}
     .badge{display:inline-block;border:1px solid #496579;border-radius:5px;padding:2px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#c6d8e5}
@@ -321,6 +321,16 @@
 <tr><th scope="row">29. Capture Library → My Clubs</th><td>Selected capture identity<br><small>workflow</small></td><td>Assignment is explicit; existing snapshots and reports remain unchanged <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_dialog.py">Source</a></td></tr>
 <tr><th scope="row">30. My Clubs → Fit the Articulated Golfer</th><td>Selected club snapshot and eligible SI context<br><small>workflow</small></td><td>Current body models apply no club constraints; equipment is recorded in provenance <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/session.py">Source</a></td></tr>
 </tbody></table></div></details>
+      <h3>Plan a Capture Outcome</h3>
+      <p><a href="capture-goals.mmd" download>Download Goal Prerequisites</a></p>
+      <div id="capture-goals" data-revision="a053ee73122b20c612cfc402ecb5f90a47b60f9c2e89bb1637785162a661c206"><p>Select outcomes and save a plan for the desktop capture wizard. The wizard checks current inputs when the plan is opened. Some single-view and multi-view outcomes need separate sessions.</p><div class="cards"><article id="goal-edit"><h3>Trim and Crop a Swing</h3><p>Use an existing video or record a new capture.</p><ol><li>Capture Library</li><li>Swing Selection</li></ol><label><input type="checkbox" name="capture-goal" value="edit" style="width:auto"> Select Trim and Crop a Swing</label></article>
+<article id="goal-draw"><h3>Add Coaching Lines and Shapes</h3><p>Use an existing video or record a new capture.</p><ol><li>Capture Library</li><li>Swing Selection</li><li>Coaching References</li></ol><label><input type="checkbox" name="capture-goal" value="draw" style="width:auto"> Select Add Coaching Lines and Shapes</label></article>
+<article id="goal-compare_video"><h3>Compare with an Expert Video</h3><p>Use an existing video or record a new capture.</p><ol><li>Capture Library</li><li>Expert Reference Library</li><li>Swing Selection</li><li>Expert Comparison</li></ol><label><input type="checkbox" name="capture-goal" value="compare_video" style="width:auto"> Select Compare with an Expert Video</label></article>
+<article id="goal-analyze_2d"><h3>Measure Single-View Swing Timing</h3><p>Single-view analysis only.</p><ol><li>Capture Library</li><li>Swing Selection</li><li>Detect the Pose in Every View</li><li>Analyse the Single View</li></ol><label><input type="checkbox" name="capture-goal" value="analyze_2d" style="width:auto"> Select Measure Single-View Swing Timing</label></article>
+<article id="goal-reconstruct"><h3>Reconstruct Multiple Views in 3-D</h3><p>At least 2 camera views. Compatible calibration and optical settings are required.</p><ol><li>Capture Library</li><li>Swing Selection</li><li>Calibrate the Camera and Lens Profile</li><li>Detect the Pose in Every View</li><li>Review Joint Reliability</li><li>Reconstruct in 3-D</li></ol><label><input type="checkbox" name="capture-goal" value="reconstruct" style="width:auto"> Select Reconstruct Multiple Views in 3-D</label></article>
+<article id="goal-fit_model"><h3>Fit a Body Model to a Reconstruction</h3><p>At least 2 camera views. Compatible calibration and optical settings are required.</p><ol><li>Capture Library</li><li>Swing Selection</li><li>My Clubs (Optional)</li><li>Calibrate the Camera and Lens Profile</li><li>Detect the Pose in Every View</li><li>Review Joint Reliability</li><li>Reconstruct in 3-D</li><li>Fit the Articulated Golfer</li></ol><label><input type="checkbox" name="capture-goal" value="fit_model" style="width:auto"> Select Fit a Body Model to a Reconstruction</label></article>
+<article id="goal-export_motion"><h3>Export Reconstructed Motion</h3><p>At least 2 camera views. Compatible calibration and optical settings are required.</p><ol><li>Capture Library</li><li>Swing Selection</li><li>Calibrate the Camera and Lens Profile</li><li>Detect the Pose in Every View</li><li>Review Joint Reliability</li><li>Reconstruct in 3-D</li><li>Export to the Motion Pipeline</li></ol><label><input type="checkbox" name="capture-goal" value="export_motion" style="width:auto"> Select Export Reconstructed Motion</label></article>
+<article id="goal-project_reference"><h3>Project an Expert into Reconstructed Cameras</h3><p>At least 2 camera views. Compatible calibration and optical settings are required.</p><ol><li>Capture Library</li><li>Expert Reference Library</li><li>Swing Selection</li><li>Calibrate the Camera and Lens Profile</li><li>Detect the Pose in Every View</li><li>Review Joint Reliability</li><li>Reconstruct in 3-D</li><li>Expert Comparison</li></ol><label><input type="checkbox" name="capture-goal" value="project_reference" style="width:auto"> Select Project an Expert into Reconstructed Cameras</label></article></div><p><button type="button" id="save-capture-plan">Save Selected Capture Plan</button></p><p id="capture-plan-status" role="status" aria-live="polite"></p></div>
     </section>
     <section id="catalog" aria-labelledby="catalog-heading">
       <p class="eyebrow">03 / Find a Capability</p><h2 id="catalog-heading">Explore the Feature Catalog</h2>
@@ -449,6 +459,17 @@
   search.addEventListener('input', filterEntries);
   status.addEventListener('change', filterEntries);
   filterEntries();
+  document.getElementById('save-capture-plan').addEventListener('click', () => {
+    const goals = [...document.querySelectorAll('input[name="capture-goal"]:checked')].map(item => item.value).sort();
+    const feedback = document.getElementById('capture-plan-status');
+    if (!goals.length) { feedback.textContent = 'Select at least one capture outcome first.'; return; }
+    const request = {schema_version: 'capture-goal-request/1', goals, catalog_revision: document.getElementById('capture-goals').dataset.revision};
+    const url = URL.createObjectURL(new Blob([JSON.stringify(request, null, 2) + '\n'], {type: 'application/json'}));
+    const link = document.createElement('a');
+    link.href = url; link.download = 'capture-plan.json'; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    feedback.textContent = 'Capture plan prepared. Open it in the desktop capture wizard to review the required steps.';
+  });
 </script>
 </body>
 </html>

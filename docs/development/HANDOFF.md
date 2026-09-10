@@ -1,91 +1,94 @@
-# Player Bag and Capture Equipment Handoff
+# Guided Capture Workflow Handoff
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift.
-- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-bag.
-- Branch: feat/9905-player-club-bag; main integration includes6f2d63325 (reference PR #9918).
-- Implementation: b206ae943; draft PR #9923. Main/reference integration is being qualified.
-- Governing issue: #9905, epic #9902; development entry DL-#9905.
-- Session: capture-product-01a08427-player-bag; lease through01:00UTC; scoped presence renewed through01:45UTC.
+- Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-wizard.
+- Branch: feat/9907-capture-goal-wizard; base fd9434ce9b98a008741b2afca62f8654fd34c6e1.
+- Issues: #9907/#9908; epic #9906; bag completion entry #9905.
+- Session: capture-product-01a08427-goal-wizard; presence through02:51UTC, leases02:22/02:50UTC.
+- Implementation is uncommitted; no wizard PR yet. See DL-#9907.
 
 ## Current Work
 
-PlayerClub/PlayerBag/CaptureClubSnapshot extend the existing club-data authority.
-Catalog bases and player overrides stay separately inspectable. Capture snapshots
-bind to the portable capture ID and verify a content revision. The equipment adapter
-uses the existing atomic document writer, keeps prior capture selections in
-`equipment_revisions`, rejects stale bag saves and reports corrupt records.
+The existing capability_connections.json now owns typed executable goal metadata,
+separate from architecture data-flow edges. The standard-library DAG planner
+rejects cycles, unknown bindings and incompatible camera routes, deduplicates
+shared prerequisites and rejects changed capture/input/graph resumes. The atlas
+renders goal choices, downloads validated portable plan JSON and generates a
+separate capture-goals.mmd from the same source.
 
-My Clubs now opens from the header and selected library capture. Catalog search
-exposes source links; custom clubs, measured/estimated/unknown quantities, canonical
-unit controls, notes, archive/restore and assignment have visible outcomes and help.
-Editable copies rebind equipment to their new capture ID. Portable notes moved to
-rig/capture_notes.py with compatible library re-exports; rig/equipment.py is the
-headless reader. Model session write_fit stores the exact selected club, eligible
-SI context and withheld reasons in hashed provenance, with no applied club constraint.
+Capture Wizard is reachable in the app header. Standard Qt Classic Back/Next/
+Finish/Cancel keeps navigation inside the window; Aero clipped the smaller layout
+and was replaced after visual review. Existing Library, Edit Swing, Drawing,
+Expert Library/Comparison, My Clubs, Calibration and workflow controls are reused.
+Opening a step never starts a hidden analysis job. Status inspection runs in a
+single standard-library worker; Qt updates are polled on the UI thread. Bookmarks
+are capture-owned, atomic and preserve malformed existing files. Optional skips
+persist; lens confirmation is renewed after closing the wizard.
 
-652 capture/model/catalog/inventory tests pass. Initial editor TDD failed on the
-missing module before implementation. Visual review passed at760x600 /640x500;
-Windows offscreen QA required explicitly loading Segoe UI, with no production font
-change. Evidence: TEMP/player-bag-visual-katpe_dp/\*-font.png. Full Ruff lint/format
-(6880 files), scoped mypy and architecture/doc budgets pass. Five new LoD chains
-were repaired using the player identity facade and local evidence values. The3020-file
-LoD scan passes with490 baseline occurrences and60 reductions. Final69 focused tests
-plus map/parity checks pass (11 existing warnings). Wizard entry remains
-required under #9906 before #9905 closes. Normal commit and push hooks passed for b206ae943.
+The existing workflow.evaluate remains the readiness authority. Supplemental
+checks inspect saved edits, explicit detector/edit association, model provenance,
+reference bindings, drawings and equipment snapshots. The calibration profile
+consumer rechecks intrinsic quality, camera IDs and recorded dimensions. No
+physical accuracy claim is made. Guided model paths presently use the default
+triangulated match/all views/default observations; unsupported advanced selections
+receive an explicit explanation. Named variants/image-space matching remain in
+the existing controls. User guide: docs/motion_capture/capture_wizard.md.
 
-Only byte-identical repeated Field Reference tables were removed from the development
-log to make room for the new entry: all four original tables had SHA256
-43401899f2017f08b0f33e6d9c818eb210f76476f5874f176b242f7d2dbcc725.
-The first remains; every feature entry and unique description is preserved.
+## Validation
 
-## Completed Parent Work
+Initial TDD failed on missing planner/catalog/wizard modules, then implementation
+passed. Planner/catalog15, Qt navigation5, evidence/calibration34 and real host
+navigation/resume4 checks pass in their recorded focused runs. Existing detector
+activity tests remain compatible. Scoped mypy with the repository hook's
+--follow-imports=silent passes9 source files. An expanded import-following run
+found8 unrelated pre-existing dependency errors plus one local variable type
+error; the local error was repaired. Full Ruff lint/format (6917 files), architecture and document budgets pass.
+The3037-file LoD scan passes with490 baseline occurrences and60 reductions;
+20 new chains were removed through component methods/local delegates, no waivers.
+Broad tests/tools/capture_rig + parity + atlas regressions:510 passed,5893 existing
+warnings in149.17s; TEMP/capture-wizard-regression.log and XML. First invocation had an invalid PowerShell
+JUnit argument and did not run tests; the corrected run passed.
+Visual evidence: TEMP/capture-wizard-visual-iowk4w5o/\*-classic.png,760x610 and
+660x560, inspected after loading Segoe UI for the Windows offscreen environment.
+No production font override was introduced. Final docs/CI qualification remains.
 
-Capture UX #9917 merged to remote main8fce9f238ce89876dd363fb41b4ba1169a87d1b6
-at2026-09-09T22:53:40Z. All445 capture/parity tests and protected checks passed.
-The live test app is childPID61500, venv launcherPID30900, running in the separate
-UpstreamDrift-capture-setup checkout. It is source-identical to the merged capture
-code. Initial source launch needed PYTHONPATH pointing at that checkout's root,
-src and src/shared/python. The oldPID50860 app exited. Preserve the current window.
+## Completed Parents and Remaining Goal
 
-Catalog/source PR #9919 merged2026-09-09T23:35:01Z atmain01831aa4c580ecb5065477c8219168064b629443.
-Its original unit gate passed14929 tests but failed only generated divergence
-inventory freshness. Concurrent remote commit ecab78b11 regenerated that inventory;
-it was preserved by fast-forward and protected CI passed before merge. Auxiliary
-manufactured authority/rolling jobs were still queued when inspected. Catalog and
-source presence sessions were released; the issues remain open pending the bag/wizard.
-
-## Remaining Goal and Coordination
-
-- Everyday reference calibration #9897 (#9898-#9901), club bag #9902, wizard #9906
-  (#9907-#9909) and fleet adoption remain active. Existing product/editing/drawing/
-  overlay epics shipped through #9896. Gasification mapping is planned for future
-  cheaper agents per user direction; do not implement that mapping now.
-- Reference task #9914/#9918 owns headless fitting and a positive-length solver fix
-  in reconstruct/model/fit.py. Do not edit that path without coordination.
-- Current fitting models end at wrists/hands. #9914 owner explicitly confirmed no
-  overlap with our session.py/write_fit changes. Their fit.py and new reference
-  appearance/volumes/control files remain theirs. No invented club constraint.
-- Tools #5136 numerical repair and #5140 moving-reference solver remain unmerged.
-  Rust pre-checkout retry passed. Both rate shards in run34407390506 timed out at99%;
-  Python3.11 leaves TestHoldFraction::test_matches_the_hand_counted_fixture unreported.
-  Evidence is on Tools#5114; its prior Qt-cleanup candidate remains unqualified.
-- Tools private Gasification checkout fails; user was asked via async input to have
-  the Actions credential owner restore read access. Current App cannot inspect/update
-  secrets (403). Never bypass the contract check or paste/mint a temporary secret.
-- Fleet audit remains39/41. Context/Obsidian task owns replacements Tools#5138 and
-  Gasification#4944 and agreed to sync the central agent-communication block in both
-  AGENTS/CLAUDE. Authority537f9ad087dd3afdda60d28dd2e54d1ac7583864. Verify after merge.
-- Goal stays active; no scientific accuracy/publication approval is implied by tests.
+- Capture UX #9913/#9917 merged8fce9f238; club catalog #9919 merged01831aa4c.
+- Player bag #9923 merged5ada5e6a6827bfb94a00d1801f6b475afb885885 at2026-09-10T00:19:44Z.
+  Its merged implementation is byte-identical to the741-test qualified source.
+  A concurrent remote branch rewrite was reconciled by normal merge/push f7e2f27af,
+  preserving completion docs. No force-push. #9905 remains open for wizard entry.
+- Reference #9918 merged6f2d63325; completion docs #9922 merged90c3d0b77.
+  Do not edit reference fit.py/appearance/volumes without its owner's coordination.
+- Tools numerical PR5136 head45f3bd8b9 and moving-reference PR5140 headc98402cb1
+  include main2c9a8d6c9 and passed normal commit/push hooks. Qualification:19/12
+  numerical tests and101/24 moving-reference/API/OpenCV5 tests. Private Gasification
+  checkout still fails; rate shards are running. User has been asked to have the
+  Actions credential owner restore private-repo access; no response yet. Do not
+  bypass checks or mint/store a temporary secret. Claims through01:49/02:03UTC.
+- Everyday-reference calibration #9897/#9898-9901 remains open, including geometry,
+  repeatable player UI and hardware qualification. Club epic9902 and wizard9906
+  must close only after remaining acceptance and remote merges.
+- Fleet adoption39/41 remains pending owner replacements Tools5138/Gas4944. The
+  Obsidian/context task owns those changes and agreed to sync canonical blocks in
+  AGENTS and CLAUDE. Do not duplicate its work. Gas mapping planning is complete;
+  implementation is deferred to future cheaper agents per user instruction.
+- Preserve live Capture Rig PID61500 and launcher30900, source capture-setup501092b27
+  (matches9917), runtime TEMP/upstreamdrift-capture-test-runtime. It does not include
+  the new bag or wizard. Do not kill or edit that live source while the user tests.
+- Automatic approval review rejected deleting a temporary clean-export folder
+  with 'blocked by policy'; it remains in place. Do not retry by another route.
 
 ## Next Steps
 
-1. Commit/publish the qualified #9905 change with normal hooks; merge only green protected CI.
-2. Connect My Clubs to the goal wizard under #9906; retain #9905 open until that entry exists.
-3. Continue everyday-reference calibration consumers and qualification after Tools gates clear.
-4. Verify final Tools/Gas fleet policy replacements after their owner merges them.
-5. Keep the full goal active; no unsupported equipment model constraint is claimed.
+Finish broad regressions, fresh map/inventory/docs and visual qualification. Commit
+and push normally, open a focused PR, update SPEC to its actual PR number, follow
+protected CI and merge only when qualified. Connect #9905 closure to this PR. Keep
+all remaining calibration/fleet work active. The historical parent records below
+are retained for their unique qualification evidence, not current wizard status.
 
 ## Integrated Reference Fitting Handoff
 
@@ -148,7 +151,7 @@ Wizard discovery: workflow.py already owns pure Step requirements/readiness and
 SessionMedia rules. The simulation config SetupWizardViewModel serves a separate
 canonical-core configuration contract. #9907 should add goal/dependency metadata
 to the graph authority and reuse capture rules; #9908 should use standard Qt
-Back/Next and existing action adapters. No wizard code has been written yet.
+Back/Next and existing action adapters. That parent checkpoint preceded the wizard implementation above.
 
 ## Qualified Integration
 
