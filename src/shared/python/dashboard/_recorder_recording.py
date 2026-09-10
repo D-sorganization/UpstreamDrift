@@ -43,6 +43,7 @@ class _RecordingMixin:
         self._record_realtime_analysis(idx, q, v, tau, M)
         self._store_basic_data(idx, t, q, v, ke, tau)
         self._record_ground_forces(idx)
+        self.record_biomechanics(float(t))  # type: ignore[attr-defined]
 
         self.current_idx += 1
 
