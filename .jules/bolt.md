@@ -60,7 +60,7 @@
 ## 2024-05-18 - Optimized Bounding Sphere Radius Calculation
 **Learning:** In 3D rendering and physical modeling tools (e.g., `src/tools/capture_rig/model_frame_source.py`), determining the maximum bounding radius typically involves computing Euclidean distance of all points to a center. Calling `np.linalg.norm(..., axis=1).max()` performs intermediate square-root operations and temporary array allocations. Precomputing the distance vectors and extracting the max norm directly using `np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff)))` results in an efficient, ~2.7x faster computation.
 **Action:** Replace `np.linalg.norm(diff, axis=1).max()` with `np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff)))` whenever maximum point distances are required.
-## 2026-09-10 - bioptim BoundsList tuple assignment creates 3-element lists
+## 2026-09-10 - Bioptim BoundsList Tuple Assignment Creates 3-Element Lists
 **Learning:** Assigning a tuple to `bioptim.BoundsList` via `parameter_bounds[name] = (np.array([min]), np.array([max]))` (as opposed to using the `.add()` method with interpolation types) inadvertently creates bounds arrays of shape `(1, 3)` due to bioptim's default 3-node interpolation. This causes broadcast errors during OCP initialization when bounds vectors are collapsed into a single column array `(N, 1)`.
 **Action:** Use `parameter_bounds.add(name, min_bound=np.array([[val]]), max_bound=np.array([[val]]), interpolation=biopt.InterpolationType.CONSTANT)` and explicitly provide 2D column arrays (e.g., `[[val]]`) for parameters instead of tuple assignment.
 ## 2024-05-19 - Optimize Norm Calculation in JCS

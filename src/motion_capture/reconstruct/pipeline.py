@@ -26,6 +26,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .analytics import SwingDataUnavailable, summarize_swing
 from .cameras import PinholeCamera
+from .camera_source import CameraSourceEvidence
 from .clean import CleanReport, clean_view
 from .bundle import compact_frames, observations_from_views
 from .measurements import expand_measurements, gauge
@@ -76,6 +77,7 @@ class SessionReconstruction(BaseModel):
     observation_set: str = "observations"
     variant: str = ""
     camera_source: str | None = None
+    camera_source_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -88,6 +90,7 @@ class MatchSpec:
     camera_source: str | None = None
     exclude_joints: tuple[str, ...] = ()
     lens_corrections: Mapping[str, LensCorrection] | None = None
+    camera_evidence: CameraSourceEvidence | None = None
 
 
 def start_cameras_from(
@@ -155,12 +158,10 @@ def reconstruct_session(
     reports, ``reconstruction.json`` and the summary.
     """
     require(acceleration_sigma_px > 0, "acceleration_sigma_px must be positive")
-    measured = expand_measurements(measurements)
-    if scale_anchor is None:
-        scale_anchor = gauge(measured)  # the first measurement sets the scale
-    elif scale_anchor[0] not in measured:
-        measured = {scale_anchor[0]: scale_anchor[1], **measured}
+    measured, scale_anchor = _measurements_with_gauge(measurements, scale_anchor)
     match = match or MatchSpec()
+    if match.camera_evidence is not None:
+        match.camera_evidence.verify()
     exclude_joints = match.exclude_joints
     unknown = [j for j in exclude_joints if j not in JOINT_NAMES]
     require(not unknown, "exclude_joints must name fit joints", unknown)
@@ -216,19 +217,43 @@ def reconstruct_session(
         observation_set=match.observation_set,
         variant=match.variant,
         camera_source=match.camera_source,
+        camera_source_sha256=match.camera_evidence.sha256
+        if match.camera_evidence is not None
+        else None,
     )
     parameters = {
         "anchors": list(measurements),
         "scale_anchor": list(scale_anchor),
         "acceleration_sigma_px": acceleration_sigma_px,
-        "lens_corrections": {
-            view: correction.signature
-            for view, correction in corrections.items()
-            if view in ids
-        },
+        "lens_corrections": _lens_signatures(corrections, ids),
     }
+    if match.camera_evidence is not None:
+        match.camera_evidence.verify()
     _write_summary(session_dir, out_dir, obs_set_dir, summary, parameters)
     return summary
+
+
+def _measurements_with_gauge(
+    measurements: Sequence[str], scale_anchor: tuple[str, float] | None
+) -> tuple[dict[str, float], tuple[str, float]]:
+    """Expand measured dimensions while preserving the caller's scale anchor."""
+    measured = expand_measurements(measurements)
+    if scale_anchor is None:
+        scale_anchor = gauge(measured)
+    elif scale_anchor[0] not in measured:
+        measured = {scale_anchor[0]: scale_anchor[1], **measured}
+    return measured, scale_anchor
+
+
+def _lens_signatures(
+    corrections: Mapping[str, LensCorrection], ids: Sequence[str]
+) -> dict[str, str]:
+    """Record only the lens profiles contributing to this reconstruction."""
+    return {
+        view: correction.signature
+        for view, correction in corrections.items()
+        if view in ids
+    }
 
 
 def _write_swing_summary(
