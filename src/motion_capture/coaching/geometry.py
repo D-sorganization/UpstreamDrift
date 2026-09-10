@@ -123,6 +123,7 @@ class ReferenceGeometry(BaseModel):
     schema_version: Literal["analysis-geometry/1.0.0"] = "analysis-geometry/1.0.0"
     scene_id: str = Field(min_length=1, max_length=200)
     frame: Literal["world"] = "world"
+    convention: Literal["adr0041_y_up_right_handed"] = "adr0041_y_up_right_handed"
     units: Literal["m"] = "m"
     planes: tuple[ReferencePlane, ...] = Field(default=(), max_length=200)
     points: tuple[ReferencePoint, ...] = Field(default=(), max_length=2000)

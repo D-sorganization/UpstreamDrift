@@ -101,3 +101,10 @@ def test_geometry_reuses_bounded_drawing_history() -> None:
     assert history.current == original and history.can_redo
     history.redo()
     assert history.current == edited
+
+
+def test_geometry_names_its_axis_convention() -> None:
+    geometry = ReferenceGeometry(scene_id="scene")
+    assert geometry.convention == "adr0041_y_up_right_handed"
+    with pytest.raises(ValueError):
+        ReferenceGeometry(scene_id="scene", convention="canonical_z_up")

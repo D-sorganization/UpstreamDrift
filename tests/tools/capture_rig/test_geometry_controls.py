@@ -4,7 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from src.motion_capture.coaching import ReferenceGeometry, ReferencePoint
+from src.motion_capture.coaching import (
+    ReferenceGeometry,
+    ReferencePoint,
+    ReferencePlane,
+)
 from src.tools.capture_rig.geometry_controls import GeometryControls
 from tests.tools.capture_rig.test_pane_layout import _app
 
@@ -79,4 +83,20 @@ def test_opening_and_saving_preserves_sub_display_precision(tmp_path: Path) -> N
     controls.fields["position_m"][1].setValue(4)
     controls.apply_selected()
     assert controls.document.points[0].position_m == (0.123456789, 4, 3)
+    controls.close()
+
+
+def test_geometry_budget_failure_is_shown_without_discarding_document() -> None:
+    _app()
+    original = ReferenceGeometry(
+        scene_id="scene",
+        planes=tuple(
+            ReferencePlane(origin_m=(0, 0, 0), along_m=(1, 0, 0), across_m=(0, 1, 0))
+            for _ in range(200)
+        ),
+    )
+    controls = GeometryControls(original)
+    controls.add_plane()
+    assert controls.document == original
+    assert "200" in controls.status.text()
     controls.close()

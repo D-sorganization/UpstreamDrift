@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from .clips import verify_frame_clip as _verify_encoded
+
 from src.motion_capture.coaching.geometry_storage import geometry_path, load_geometry
 
 from collections.abc import Callable
@@ -85,20 +87,6 @@ def _input_hashes(
     paths: set[Path], cancelled: Callable[[], bool]
 ) -> dict[Path, str | None]:
     return {path: _digest(path, cancelled) if path.exists() else None for path in paths}
-
-
-def _verify_encoded(
-    path: Path, frames: int, size: tuple[int, int], cancelled: Callable[[], bool]
-) -> None:
-    """Require the staged container to decode completely before publication."""
-    with VideoReader(path) as reader:
-        if reader.frame_count != frames or (reader.width, reader.height) != size:
-            raise ValueError("Encoded comparison dimensions or frame count differ")
-        for index in range(frames):
-            if cancelled():
-                raise InterruptedError("Comparison export cancelled")
-            if reader.read(index) is None:
-                raise ValueError(f"Could not verify encoded frame {index}")
 
 
 def _render_recipe(
