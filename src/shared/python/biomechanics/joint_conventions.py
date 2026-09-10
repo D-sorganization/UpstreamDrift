@@ -112,12 +112,12 @@ def matrix_to_orientations(
     convention: RotationConvention = RotationConvention(),
 ) -> OrientationResult:
     """Convert validated rotations, reporting each Euler singular frame."""
-    matrices = _rotation_matrix(matrices)
-    batch = matrices.shape[:-2]
-    rotations = Rotation.from_matrix(matrices.reshape(-1, 3, 3))
+    matrices_arr = cast(np.ndarray, _rotation_matrix(matrices))
+    batch = matrices_arr.shape[:-2]
+    rotations = Rotation.from_matrix(matrices_arr.reshape(-1, 3, 3))
     singular = np.zeros(batch, dtype=bool)
     if representation == "matrix":
-        values = matrices.copy()
+        values = matrices_arr.copy()
     elif representation == "euler":
         with warnings.catch_warnings():
             warnings.filterwarnings(
