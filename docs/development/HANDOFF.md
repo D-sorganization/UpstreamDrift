@@ -1,8 +1,8 @@
 # Common-Reference Calibration Handoff
 
 Current #9898/#9900: isolated `UpstreamDrift-common-calibration`, branch
-`feat/9898-common-reference-sessions`, pushed checkpoint3be2bbff3. Normal commit/push hooks passed; PR #9946. Session `capture-product-01a08427-common-calibration` has presence and
-#9898 lease through08:11UTC2026-09-10; #9900 lease through07:03UTC.
+`feat/9898-common-reference-sessions`, pushed checkpoint54d1807ea. Normal commit/push hooks passed; PR #9946. Session `capture-product-01a08427-common-calibration` has presence through08:29UTC and
+#9898 lease through08:11UTC2026-09-10; #9900 lease through08:29UTC.
 See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
 [operator guide](../motion_capture/common_reference_calibration.md).
 
@@ -14,8 +14,8 @@ Python3.12 scoped51 now passes after installing missing declared dependencies
 and eliminating repeated PNG decode/player imports. The separate unchanged
 Simscape real-log test still times out at180s; its broad Python3.12 run remains
 failed. See the active checkpoint for exact logs. Native small layout fits640×560;
-Calibrate Again and Add Another Placement remain visible. Final hooks and
-current-main/provider integration are next; no physical accuracy claim is made.
+Calibrate Again and Add Another Placement remain visible. Main276998030 is
+integrated; final provider qualification remains pending. No physical accuracy claim is made.
 
 Tools #5140 merged0a561daff (tree identical to candidatec984, includes #5136).
 Local vendor0a is development-only: it would regress the launcher compared with
@@ -27,8 +27,10 @@ main normally before PR/CI/protected merge. Cross-capture reuse is now implement
 Preserve live app54812 (`Capture Rig — main 56552f245`), older61500 and atlas2963.
 They use frozen earlier checkouts, not this branch. Analysis owner controls
 comparison/coaching/model work; context owner controls catalog/provider alignment.
-Wizard #9931 merged56552f245; #9907/#9905 closed. Everything below this marker is
-preserved historical wizard context, not the current implementation state.
+Wizard #9931 merged56552f245; #9907/#9905 closed. Additional owners' delivery states
+are preserved below. The canonical calibration checkpoint records visual frame
+selection, Pan Image/Fit Image, their tests and native review. Catalog #9903/#9904
+closed after87 contract/source/equipment tests; parent #9902 remains open for journey acceptance.
 
 ## Preserved Main Integration Context
 
