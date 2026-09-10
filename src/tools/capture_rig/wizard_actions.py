@@ -86,6 +86,7 @@ class WizardActions(QObject):
                 self.dialog.save_requested.connect(self.save)
                 self.dialog.resume_requested.connect(self.resume)
                 self.dialog.plan_requested.connect(self.open_plan)
+                self.dialog.camera_setup_requested.connect(self.open_camera_setup)
                 self.dialog.helpRequested.connect(host.journey.show_help)
                 self.dialog.finished.connect(self._closed)
             if host.media is not None:
@@ -239,6 +240,16 @@ class WizardActions(QObject):
         except (ValueError, OSError, sqlite3.Error) as exc:
             dialog.show()
             self._notice(f"Cannot open this step: {exc}")
+
+    def open_camera_setup(self) -> None:
+        dialog = self.dialog
+        if dialog is not None:
+            dialog.hide()
+        setup_actions = self.host.camera_setup_actions
+        setup_actions.show()
+        if dialog is not None:
+            dialog.show()
+            self.refresh()
 
     def _open_editor(self, action: str) -> None:
         host = self.host
