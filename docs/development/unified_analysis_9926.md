@@ -31,7 +31,7 @@ at 0.567 seconds in the common editor and its 960×540 PNG using an explicitly
 synthetic background and virtual camera. This is rendering evidence, not a
 comparison against measured player motion. Artifacts are in the external
 `analysis-9926-artifacts/comparison-visual-9von8rml` directory. Normal push hooks passed. [PR #9943](https://github.com/D-sorganization/UpstreamDrift/pull/9943)
-is draft; protected CI and review still gate story closure. Child #9942 now
+merged normally at `3fbd4b2da5f8661ec1f1e91b97884f781d83f1fd`; #9932 is closed. Child #9942 now
 tracks shared metric readouts and simulation analysis.
 
 The capability registry now records model-only analysis, shared drawing-editor
@@ -173,3 +173,23 @@ and plane. Readout mypy passes four source files. The initial Trace v2 importer 
 and skeleton topology preservation, native simulation
 reference geometry, final capability/context-map updates and protected delivery
 remain open for #9942 and the parent epic.
+
+## Native Reference Geometry
+
+Pose Studio's **3D References…** button opens the same editor as model/video
+analysis. Points and translucent planes render beside the existing canonical
+FK skeleton through the shared mesh viewport protocol. Closing and reopening
+retains the scene; Save/Load References persists its versioned JSON. Coordinates
+remain ADR-0041 Y-up metres in the editor and convert explicitly to the native
+Z-up viewport. The static editor evaluates visibility at time zero. Documents
+from other scenes are rejected rather than silently rebound.
+
+The native point is a fixed-size location glyph, not a measured anatomical
+ellipsoid. The existing animated analysis appearance controls continue to own
+club display, model handedness and body ellipsoids. This native qualification
+covers Pose Studio, not every optional engine's own graphical application.
+
+Native visual evidence: `analysis-9926-artifacts/native-references-saep77qb`.
+The plane and shared controls were inspected on the canonical reference pose.
+Partial submission failures roll back new mesh handles and preserve prior
+references; replacing references leaves other viewport objects alone.

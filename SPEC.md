@@ -4266,7 +4266,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
-| 2026-09-10 | #9942 | Shared registered-world point and plane readouts in model and video analysis. |
+| 2026-09-10 | #9942 | Shared metric readouts, Trace v2 marker/club import and scene-bound native reference geometry. |
 | 2026-09-10 | #9932 | Shared comparison drawing editor, reproducible exports, camera-bound geometry and analysis capability routes. |
 | 2026-09-09 | #9933 | Reuse coaching drawings and playback for model-only analysis; persist virtual camera, club/ellipsoid appearance, placement and handedness. Share scene-bound metric planes/points with comparison and verified exports. Parent #9926 integration remains open. |
 | 2026-09-09 | #9914 | Add reproducible C3D reference fitting with explicit marker profiles, native URDF/MJCF kinematics, retained observations and fit diagnostics, reference-library output, and fixed spatial alignment for the existing camera comparison pipeline. |

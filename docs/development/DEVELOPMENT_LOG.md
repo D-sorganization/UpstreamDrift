@@ -23,13 +23,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #9926; children #9929, #9930, #9932, #9942
 - **Branch:** feat/9942-metric-simulation-analysis; feat/9932-comparison-drawings
-- **PR:** #9933 (merged); #9943 (draft, protected CI running)
-- **Paths:** src/motion_capture/coaching; src/tools/capture_rig
+- **PR:** #9933 (merged); #9943 (merged 3fbd4b2da)
+- **Paths:** src/motion_capture/coaching; src/tools/capture_rig; src/tools/pose_studio
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (SELF #9942; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions, five-source Trace mypy and 17 topology/import tests)
+- **Last verified:** 2026-09-10 (SELF #9942; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions, five-source Trace mypy and 17 topology/import tests; native30 tests and four-source mypy, visual plane/editor inspected)
 - **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
 - **Evidence:** Comparison launch/save, PNG parity, snapshot video, cancellation and camera-evidence tests pass; Ruff/format, budgets and LoD pass; Driver comparison drawing UI and PNG inspected.
-- **Next step:** Integrate shared world reference geometry with the native simulation viewport for #9942.
+- **Next step:** Qualify native references, update capability/context maps and deliver #9942 through protected CI.
 
 ### DL-#9907 · Guided Capture Outcomes
 

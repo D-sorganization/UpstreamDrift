@@ -23,10 +23,15 @@ flowchart LR
   n6["Session and Export Files"]
   n7["Tools Contracts"]
   n8["Coaching References"]
-  n9["Expert Comparison"]
-  n10["Attributed Club Catalog"]
-  n11["Club Catalog Exchange"]
-  n12["Model Analysis"]
+  n9["Expert Reference Library"]
+  n10["Expert Comparison"]
+  n11["Attributed Club Catalog"]
+  n12["Club Catalog Exchange"]
+  n13["Model Analysis"]
+  n14["Metric Reference Planes and Points"]
+  n15["Registered Metric Readouts"]
+  n16["Simulation Trace Import"]
+  n17["Pose Studio World References"]
   n0 -->|"Camera and analysis controls"| n1
   n0 -->|"Available browser tools"| n2
   n2 -->|"REST and WebSocket requests"| n3
@@ -34,9 +39,15 @@ flowchart LR
   n6 -.->|"TRC marker file"| n4
   n4 -->|"Canonical motion and retargeting"| n5
   n1 -->|"Pinned mocap schema"| n7
-  n11 -->|"Attributed build records"| n10
-  n12 -->|"Shared drawing editor"| n8
-  n9 -->|"Draw on Comparison"| n8
+  n12 -->|"Attributed build records"| n11
+  n13 -->|"Shared drawing editor"| n8
+  n10 -->|"Draw on Comparison"| n8
+  n5 -->|"Trace v2 HDF5 marker channels"| n16
+  n16 -->|"Validated reference asset"| n9
+  n13 -->|"Registered motion, world references and scene clock"| n15
+  n10 -->|"Registered motion, camera scene and time"| n15
+  n14 -->|"Shared GeometryControls and ReferenceGeometry"| n17
+  n1 -->|"Pose Studio 3D References button"| n17
 ```
 
 ## Capture Workflow

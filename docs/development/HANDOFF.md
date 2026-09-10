@@ -3,30 +3,31 @@
 ## Shared Measurements and Simulation (#9942)
 
 Active worktree `C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942`,
-branch `feat/9942-metric-simulation-analysis`, base114801638, readout commit72585f629; Trace import commit5034f7a22; qualification update SELF. Parent #9926 remains active; #9943 drawing PR is still under CI.
-Session `codex-unified-metrics-9942` owns readouts and simulation import, with
-Repository Management presence through05:19UTC. The original shared session
-holds the #9942 lease through05:17UTC. Preserve other agents and Tools4dabe900.
+branch `feat/9942-metric-simulation-analysis`. Readouts72585f629, Trace5034f7a22,
+topology b6d3c28c6; native geometry SELF. Session codex-unified-metrics-9942
+presence through06:12UTC. Preserve Tools4dabe900 and peer ownership.
 
-Implemented test first: public `coaching.reference_distances`, shared
-`ReferenceReadout`, Measurements tabs in model analysis and comparison.
-Distances consume the same registered sampler as rendering, preserve NaN gaps,
-validate scene/landmark/reference identity, and account for handedness. Fixed
-world points use Euclidean metres; planes reuse ReferencePlane.distances.
-No anatomical metric framework is duplicated from #9934.
+Implemented test first: shared registered-world point/plane readouts in both
+analysis windows; Trace v2 marker import with explicit units/axes/topology and
+club roles; native geometry adapter using existing fsp_renderer.Viewport.
+Pose Studio now opens the same GeometryControls via 3D References, keeps meshes
+through editor close/reopen, and saves scene-bound portable documents. Native
+Z-up conversion reuses reference registration. Static pose scene time is zero.
+Point glyphs and translucent planes coexist with the canonical FK skeleton.
+No anatomical metric framework or new FK solver is introduced.
 
-Validation: 513 Capture Rig/geometry tests passed before the scene-identity
-cache and type-only correction; ten focused regressions then passed. LoD no-growth
-and architecture checks passed; scoped mypy initially found a heterogeneous
-reference inference and dtype issue, corrected explicitly, readout type check now passes four source files. Visual Driver frame200/654 at0.556s inspected in external
-`analysis-9926-artifacts/metric-readout-ftgfnr50/model-metric-readout.png`.
+Readout qualification: 513 Capture Rig/geometry regressions then ten focused
+tests and four-source mypy. Trace: 126 reference/import regressions, five-source
+mypy; topology17 focused tests and three-source mypy. Native30 tests and
+four-source mypy pass, including point/partial-failure/entry regressions.
+Visual native plane/editor inspected in external
+`analysis-9926-artifacts/native-references-saep77qb`. This qualifies Pose Studio's
+canonical viewport, not every optional backend renderer or physical accuracy.
 
-Next: finish type/focused checks, document and commit readout implementation;
-implement explicit Trace v2 marker-motion import and shared native viewport
-reference geometry; update capability/context maps; qualify #9942 protected CI.
-Trace HDF5 metadata round-trips scalars only, so marker names and coordinate
-frame must use an explicit portable contract. Trace import is now implemented locally through the existing importer and mapping UI: nine tests pass for clocks/names/gaps/provenance, decoded bounds, external-link rejection and opening model analysis. Five-source mypy and 126 reference/import regressions pass. Explicit edges_json/club_edges_json now preserve skeleton and club roles through mapping and shared appearance controls; 17 focused tests pass. Topology implementation SELF; topology mypy passes three source files. Native viewport geometry remains incomplete. The #9943 worktree separately repairs a newly introduced fleet optional-path
-checker failure; preserve that CI fix and integrate it when committed.
+PR #9943 merged normally at3fbd4b2da5f8661ec1f1e91b97884f781d83f1fd on
+2026-09-10T04:10:20Z; #9932 closed. Both quality-gate and hosted-routing guard
+passed. Next: finish native regressions, integrate merged main, update #9942
+capability/context maps, qualify protected delivery and audit parent #9926.
 
 ## Unified Analysis Comparison Drawings (#9932)
 
