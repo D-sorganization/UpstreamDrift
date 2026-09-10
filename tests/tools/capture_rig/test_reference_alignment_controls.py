@@ -18,6 +18,22 @@ from src.tools.capture_rig.reference_comparison import ReferenceComparisonDialog
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
 
 
+def test_handedness_flip_is_pending_until_applied_and_restorable() -> None:
+    app = _app()
+    asset = synthetic_motion()
+    reg = ReferenceRegistration(reference_id=asset.id, calibration_id="manual")
+    panel = SpatialControls(reg, "motion", (640, 480))
+    panel.mirror.setChecked(True)
+    assert panel.pending
+    assert not panel.registration.mirror_lateral
+    assert panel.apply_placement()
+    assert panel.registration.mirror_lateral
+    panel.set_registration(reg)
+    assert not panel.mirror.isChecked()
+    panel.close()
+    app.processEvents()
+
+
 def test_spatial_apply_preserves_time_and_uses_shared_rotation() -> None:
     app = _app()
     asset = synthetic_motion()

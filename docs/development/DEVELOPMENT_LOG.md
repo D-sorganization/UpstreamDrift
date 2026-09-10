@@ -17,16 +17,29 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9914 · C3D Reference Fitting
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9914
+- **PR:** #9918
+- **Branch:** feat/c3d-reference-overlay-9914
+- **Paths:** src/motion_capture
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`a523a77f2`; reference/Capture Rig suite, 20 club assets)
+- **Summary:** Fits, club/volume/handedness display; see [evidence](reference_fitting_epic.md).
+- **Next step:** Qualify and merge #9918; #9917 integrated.
+
 ### DL-#9905 · Player Bag and Capture Equipment
 
 - **State:** in_progress
 - **Owner:** codex
 - **Issue:** #9905; epic #9902
 - **Branch:** feat/9905-player-club-bag
-- **PR:** not created
+- **PR:** #9923 (draft until qualified integration is published)
 - **Paths:** club_data/player_clubs.py; rig/capture_notes.py and equipment.py; Capture Rig bag/editor/library; model/session.py; matching tests, guide and generated maps.
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (working tree;652 broad regressions and69 focused/map/parity checks pass; visual QA and3020-file LoD pass)
+- **Last verified:** 2026-09-09 (SELF main integration;741 standard capture/reference/model/map tests pass,2 deselected; visual QA and3031-file LoD pass)
 - **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence without unsupported club constraints. Dialog visual review passed with Segoe UI.
 - **Next step:** Finish broad qualification and publish; connect wizard entry under #9906 before closing #9905.
 
