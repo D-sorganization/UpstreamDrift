@@ -33075,9 +33075,9 @@
     {
       "path": "gui_launcher/tool_manifest.yaml",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "174da8aa11ce223992094c79395ecb54b55f7a10"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-09-10",
+        "commit": "c487265f1ebc9c61a2e124267ad9cd1c96a6c007"
       },
       "tools": {
         "author": "codex-scheduled",

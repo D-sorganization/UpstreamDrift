@@ -286,7 +286,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher/launcher.py` | -159 |  | Dieter Olson 2026-08-01 | codex-scheduled 2026-09-09 |
 | `gui_launcher/launcher_web.py` | -107 |  | Dieter Olson 2026-08-01 | codex-scheduled 2026-09-09 |
 | `gui_launcher/registry.py` | -75 |  | Dieter Olson 2026-08-01 | codex-scheduled 2026-09-09 |
-| `gui_launcher/tool_manifest.yaml` | -23 |  | d-sorgclaudeagent[bot] 2026-09-07 | codex-scheduled 2026-09-09 |
+| `gui_launcher/tool_manifest.yaml` | -23 |  | d-sorgcodexagent[bot] 2026-09-10 | codex-scheduled 2026-09-09 |
 | `gui_launcher/tools_sidebar_integration.py` | +10123 |  | Dieter Olson 2026-05-29 | codex-scheduled 2026-09-09 |
 
 ### Package `humanoid_character_builder` (25 Diverged Files)
