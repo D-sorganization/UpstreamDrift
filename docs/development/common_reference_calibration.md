@@ -22,6 +22,17 @@ failures. Live test applications still use their frozen earlier checkouts.
 
 ## Implemented Workflow
 
+- Installed storage (#9949/#9950): new recordings resolve to unique destinations
+  in the player's selected library rather than the application installation.
+  Empty explicit destinations remain usable; existing takes select a fresh
+  destination without modifying their media. Fourteen GUI/library/wizard tests
+  and configured mypy for both changed modules pass. The rebuilt installed
+  window/wizard selects the configured player-library destination outside the
+  application, creates no capture prematurely, and passes worker catalog and
+  pip checks. Frontend-inclusive wheel SHA256:
+  `55aacd817e75004f9355fd46aa9903e2de3bed47f65d3dbad239e799214f2310`.
+  Prior numerical wheel evidence below retains its own scope.
+
 - Installed-worker qualification: the normal frontend-inclusive wheel built from
   c432788c3 failed its actual installed catalog request because it required a
   repository vendor directory. Resolution now accepts the provider recorded in

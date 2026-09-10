@@ -20,6 +20,22 @@ from .swing_editor import SwingEditor
 LIBRARY_ROOT_KEY = "capture/library_root"
 
 
+def library_root(settings: QSettings | None = None) -> Path:
+    """Resolve player storage without creating a catalog or capture directory."""
+    selected = settings if settings is not None else default_settings()
+    base = QStandardPaths.writableLocation(
+        QStandardPaths.StandardLocation.AppLocalDataLocation
+    )
+    fallback = Path(base) if base else Path.home() / "UpstreamDrift"
+    root = selected.value(LIBRARY_ROOT_KEY, str(fallback / "capture-library"), type=str)
+    return Path(root or fallback / "capture-library").expanduser().resolve()
+
+
+def new_capture_path(settings: QSettings | None = None) -> Path:
+    """Return a unique destination in the player's library without reserving it."""
+    return library_root(settings) / "captures" / str(uuid4())
+
+
 class LibraryActions(QObject):
     def __init__(
         self,
@@ -54,19 +70,19 @@ class LibraryActions(QObject):
 
     def library(self) -> CaptureLibrary:
         if self._library is None:
-            base = QStandardPaths.writableLocation(
-                QStandardPaths.StandardLocation.AppLocalDataLocation
-            )
-            root = self._settings.value(
-                LIBRARY_ROOT_KEY, str(Path(base) / "capture-library"), type=str
-            )
-            self._library = CaptureLibrary(Path(root))
+            self._library = CaptureLibrary(library_root(self._settings))
         return self._library
 
     def refresh(self) -> None:
         idle = not self._busy()
         self.library_button.setEnabled(idle)
         self.edit_button.setEnabled(idle and self._session() is not None)
+
+    def recording_destination(self, requested: Path) -> Path:
+        """Keep an empty selected destination; preserve existing takes in place."""
+        if requested.exists() and any(requested.iterdir()):
+            return new_capture_path(self._settings)
+        return requested
 
     def _error(self, exc: Exception) -> None:
         QMessageBox.warning(self._host, "Capture library", str(exc))
