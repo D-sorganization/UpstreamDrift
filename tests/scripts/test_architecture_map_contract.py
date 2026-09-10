@@ -11,7 +11,7 @@ from scripts.architecture_map_contract import (
     validate_architecture_map,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 C4_PATH = ROOT / "docs" / "architecture" / "C4.md"
 
 

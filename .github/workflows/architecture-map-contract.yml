@@ -10,7 +10,7 @@ on:
     paths:
       - "docs/architecture/C4.md"
       - "scripts/architecture_map_contract.py"
-      - "tests/test_architecture_map_contract.py"
+      - "tests/scripts/test_architecture_map_contract.py"
       - ".github/workflows/architecture-map-contract.yml"
   push:
     branches:
@@ -18,7 +18,7 @@ on:
     paths:
       - "docs/architecture/C4.md"
       - "scripts/architecture_map_contract.py"
-      - "tests/test_architecture_map_contract.py"
+      - "tests/scripts/test_architecture_map_contract.py"
       - ".github/workflows/architecture-map-contract.yml"
 
 permissions:
@@ -53,4 +53,4 @@ jobs:
         run: python scripts/architecture_map_contract.py --path docs/architecture/C4.md
 
       - name: Run Focused Contract Tests
-        run: pytest --noconftest -c /dev/null -o pythonpath=. tests/test_architecture_map_contract.py -v
+        run: pytest --noconftest -c /dev/null -o pythonpath=. tests/scripts/test_architecture_map_contract.py -v
