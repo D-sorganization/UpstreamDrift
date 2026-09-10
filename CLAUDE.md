@@ -470,6 +470,10 @@ for k in ['core', 'graphql']:
 
 Use repo-local context before broad exploration:
 
+- When `docs/agent_context/catalog.json` exists, use `agent-context --root . search` and focused `context` requests. Read public interfaces, provider and consumer relationships, integration contracts and relevant tests before changing a boundary.
+- Require current source hashes, checkout identity and pinned provider verification. A timestamp, a successful registry lookup or a peer note is not proof of current implementation. If the tool is unavailable or evidence is stale, read source directly and report the gap.
+- Update semantic contracts with implementation changes, run their integration tests, record a specific review rationale and regenerate views. `agent-context --root . check` must pass in the required quality gate. Never automatically renew reviews just to clear a freshness failure.
+- Keep mechanical inventories generated from existing registries and retrieve only relevant context. Use the existing presence/mailbox, handoff and development log for coordination; do not introduce a second message store. See the [adoption guide](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agent-context.md).
 - Read `AGENTS.md` first, then check `docs/codemap.md` or `docs/operations/codemap_freshness_runbook.md` when present.
 - If `.codemap/` exists, treat it as a generated local cache for navigation; verify important claims against source files before editing.
 - If `.codemap/` is missing or stale, use source search (`rg`), focused file reads, and tests as the fallback. Report the missing/stale index as a rollout gap instead of blocking unrelated work.
