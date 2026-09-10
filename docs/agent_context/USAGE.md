@@ -77,7 +77,8 @@ For fleet policy and adoption, see the
 
 The [existing capability atlas](../architecture/CAPABILITY_ATLAS.md) remains the product-wide feature and workflow map. Regenerate it with `python3 -m scripts.generate_capability_atlas` after changing its source registries.
 
-CI also verifies that the provider commit is published on Tools main. A paired
+CI runs context checks and navigation tests before verifying that the provider
+commit is published on Tools main. A paired
 consumer PR may test a candidate pin, but remains blocked until that provider
 is merged and the final published revision is pinned. Local source verification
 checks checkout identity; it does not imply release approval.

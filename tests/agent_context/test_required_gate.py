@@ -40,3 +40,8 @@ def test_candidate_provider_cannot_merge_before_tools_publication() -> None:
         "merge-base --is-ancestor HEAD refs/remotes/origin/main" in publication["run"]
     )
     assert not publication.get("continue-on-error", False)
+    assert "if" not in publication
+    names = [step.get("name") for step in steps]
+    assert names.index("Validate Real Navigation Tasks") < names.index(
+        "Require Published Tools Revision"
+    )

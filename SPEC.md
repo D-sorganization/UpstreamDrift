@@ -4247,7 +4247,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
-| 2026-09-09 | #9920 | Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Require a published provider revision before merging a paired consumer. Register the documentation map and use full-SHA CI actions. |
+| 2026-09-09 | #9920 | Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Require a published provider revision before merging a paired consumer. Register the documentation map and use full-SHA CI actions. Validate candidate navigation before the mandatory publication gate. |
 | 2026-09-09 | #9914 | Add reproducible C3D reference fitting with explicit marker profiles, native URDF/MJCF kinematics, retained observations and fit diagnostics, reference-library output, and fixed spatial alignment for the existing camera comparison pipeline. |
 | 2026-09-09 | #9913 | Add persistent swing/capture feedback, durable history, linked detector/help/workflow status and retained Qt views; bounded renderers and panel methods preserve architecture rules. |
 | 2026-09-09 | #9911 | Keep preview discovery import and timeout failures within the existing error status. |

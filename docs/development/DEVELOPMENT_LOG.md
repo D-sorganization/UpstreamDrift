@@ -41,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09; five context/pin/CI tests and 12/12 navigation tasks pass against provider candidate82151279f. Boundary tests pass. CI remediation registers agent_context in the canonical documentation catalog and uses existing full-SHA action pins and explicit unit/integration suite markers. Final published provider and peer #9916 seam repairs remain pending.
 - **Summary:** Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Parent epic Repository_Management#1629 remains active; no subscription infrastructure is required.
-- **Next step:** PR #9920 carries the candidate pin and a required provider-publication gate. Repin the final merged provider and verify all required checks.
+- **Next step:** Candidate CI now validates source/navigation before its unchanged publication requirement. PR #9920 carries the candidate pin and a required provider-publication gate. Repin the final merged provider and verify all required checks.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
