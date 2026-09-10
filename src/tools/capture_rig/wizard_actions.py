@@ -245,7 +245,8 @@ class WizardActions(QObject):
         dialog = self.dialog
         if dialog is not None:
             dialog.hide()
-        self.host.camera_setup_actions.show()
+        setup_actions = self.host.camera_setup_actions
+        setup_actions.show()
         if dialog is not None:
             dialog.show()
             self.refresh()

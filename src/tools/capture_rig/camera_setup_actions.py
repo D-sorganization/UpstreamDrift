@@ -52,7 +52,8 @@ class CameraSetupActions(QObject):
                 "Finish or stop the current capture operation before changing camera setup."
             )
             return
-        path = host.capture.plan_edit.text().strip()
+        capture = host.capture
+        path = capture.plan_edit.text().strip()
         plan, warning = None, ""
         if path:
             try:
