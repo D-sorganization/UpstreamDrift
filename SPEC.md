@@ -1,5 +1,17 @@
 # SPEC.md — Repository Specification Document
 
+## Impact Shaft Provider Integration (#9912)
+
+The exact vendor/ud-tools pin provides golf_club.distributed_shaft/1 through the
+existing Tools resolution boundary. Preserve full coupled section coefficients,
+integrated inertia, canonical serialization and explicit source/calibration
+identities. Unsupported versions, incomplete records, scalar coercion and
+qualification promotion fail at the provider boundary. Byte identity remains
+distinct from physical validation. Resolved theme defaults and custom tokens
+must survive the same provider update. Engine adapters and studies remain under
+#9703/#9704; this integration does not claim their completion.
+
+
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
 Standard Qt/Xvfb dependency jobs share `scripts/ci/install_ubuntu_dependencies.sh`.
@@ -4144,6 +4156,12 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
+
+| 2026-09-09 | #9916 | Reconcile Cargo/catalog/inventory provenance and retired waivers. Correct the moved launcher target; retire four byte-identical UI files through the existing split resolver, preserving 27 UD-only widgets. Record the explicit #8942 realtime migration exception for review. Qualify the explicit distributed-shaft wire and resolved theme through the exact Tools vendor pin, with synthetic refusal/source controls and clean installed-wheel provider evidence (#9912). Repair to 00d17e7f9 passes 79 provider/theme/fallback/manual controls; retire the obsolete color child and record pending realtime migration. Final reviewed pin and physical qualification remain required. |
+| 2026-09-09 | #9896 | Qualify instructor comparison controls, retain central guide compatibility, and isolate Ubuntu dependency sources/indexes/caches; preserve scoped evidence from #9890/#9893 (#9883, #9892, #9894). |
+
+| 2026-09-09 | #9893 | Retain generated fleet guidance with precise optional/external path checks and exact managed-notice handling; required local paths and substantive duplicates remain enforced. |
+| 2026-09-09 | #9890 | Add instructor placement, independent expert event pairing, notes, undo/reset and guarded stale-evidence review; keep responsive comparison workflow and capability diagrams aligned. |
 
 | 2026-09-09 | #9903 | Extend the club-data authority with optional attributed component properties, deterministic build/revision identity, explicit inference gates, validated JSON/CSV exchange and an unverified legacy adapter. Offline manufacturer examples, deterministic review and player override projection implement #9904; player bag UI remains #9905. |
 | 2026-09-09 | #9923 | My Clubs provides searchable catalog/custom entries, measured/estimated/unknown length and head mass, stable unit controls, notes, archive/restore and explicit capture assignment. Portable snapshots preserve previous revisions and editable-copy lineage; model reports retain equipment evidence without applying unsupported club constraints. Wizard integration remains tracked in #9906. |
