@@ -18,6 +18,13 @@ private-checkout404 and rate-shard timeouts remain failures, not passing evidenc
 
 ## Implemented Workflow
 
+- Wizard journey qualification #9909 found that a missing reviewed calibration
+  aborted unrelated status checks. Editing-only routes now skip calibration
+  inspection; dependent routes retain a local blocked calibration status and a
+  Review/Repeat recovery action.19 evidence/planner/native-wizard tests pass,
+  including switching from reconstruction to editing and finishing after the
+  reviewed file disappears. Configured mypy and architecture checks pass.
+
 - Precision marking adds Pan Image, middle-button drag and Fit Image. Panning
   uses the existing source-pixel transform, clamps to image edges and never emits
   a point mark. The shared ImageCanvas caches the original pixmap and lets Qt clip

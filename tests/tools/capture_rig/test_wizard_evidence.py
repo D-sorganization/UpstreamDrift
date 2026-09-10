@@ -133,8 +133,7 @@ def test_old_detection_or_model_identity_never_marks_a_new_fit_done(tmp_path) ->
     assert evidence.states["step.fit_model"].status == "blocked"
 
 
-def test_review_is_invalidated_by_changed_calibration_plan_or_capture(tmp_path) -> None:
-    root, _, media = _capture(tmp_path)
+def _reviewed_calibration(root: Path, tmp_path: Path) -> tuple[CalibrationReview, Path]:
     path = root / "intrinsics-selected-test.json"
     camera = json.loads(calibration(tmp_path / "lens.json").read_text())[0]
     plan, index, _ = load_bundle(root)
@@ -153,11 +152,33 @@ def test_review_is_invalidated_by_changed_calibration_plan_or_capture(tmp_path) 
             }
         )
     write_document(path, {"cameras": cameras, "profile_selections": selections})
-    review = CalibrationReview.confirmed(root, path)
+    return CalibrationReview.confirmed(root, path), path
+
+
+def test_review_is_invalidated_by_changed_calibration_plan_or_capture(tmp_path) -> None:
+    root, _, media = _capture(tmp_path)
+    review, path = _reviewed_calibration(root, tmp_path)
     assert review.matches(media, path)
     path.write_text("changed", encoding="utf-8")
     assert not review.matches(media, path)
     assert not review.matches(media, root / "another.json")
+
+
+@pytest.mark.parametrize("goal", ["edit", "reconstruct"])
+def test_missing_reviewed_calibration_only_blocks_dependent_work(tmp_path, goal):
+    root, library, media = _capture(tmp_path)
+    review, path = _reviewed_calibration(root, tmp_path)
+    path.unlink()
+    route = resolve(load_catalog(), [goal])
+    evidence = inspect_capture(
+        route, media, library.root, review=review, start_file=path
+    )
+    assert evidence.states["capture.library"].status == "done"
+    assert evidence.states["capture.selection"].status == "ready"
+    if goal == "reconstruct":
+        assert evidence.states["step.intrinsics"].status == "blocked"
+        assert "calibration" in evidence.states["step.intrinsics"].reason.lower()
+        assert evidence.states["step.reconstruct"].status == "blocked"
 
 
 def test_empty_calibration_file_cannot_be_treated_as_reviewed(tmp_path) -> None:

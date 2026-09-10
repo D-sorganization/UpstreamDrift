@@ -220,8 +220,12 @@ def inspect_capture(
             navigation[step.id] = Readiness(
                 "skipped", "You skipped this optional step."
             )
-    compatible = bool(review and review.matches(media, start_file))
+    compatible, calibration_problem = _calibration_status(
+        route, media, review, start_file
+    )
     invalid = _invalidated(media, route, compatible, model_name)
+    if calibration_problem is not None:
+        invalid["intrinsics"] = calibration_problem
     current = replace(media, intrinsics=start_file) if compatible else media
     evidence = workflow_evidence(route, current, navigation, invalidated=invalid)
     states = evaluate(
@@ -235,6 +239,24 @@ def inspect_capture(
         revision,
         dict(zip(route.step_ids, states, strict=True)),
     )
+
+
+def _calibration_status(
+    route: CaptureRoute,
+    media: SessionMedia,
+    review: CalibrationReview | None,
+    start_file: Path | None,
+) -> tuple[bool, str | None]:
+    """Keep failed calibration evidence local to the routes that require it."""
+    if "step.intrinsics" not in route.step_ids or review is None:
+        return False, None
+    try:
+        return review.matches(media, start_file), None
+    except (ValueError, OSError) as exc:
+        return (
+            False,
+            f"Calibration evidence is unavailable: {exc}. Review or repeat calibration.",
+        )
 
 
 def _invalidated(
