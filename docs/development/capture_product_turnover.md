@@ -9,12 +9,12 @@ authoritative. Do not recreate epics or replace existing implementations.
 
 ## Active Branches and PRs
 
-| Work                                  | Location and Branch                                                                   | State at Turnover                                                                                                                                                                                       |
-| ------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Installed runtime repairs             | `Worktrees/UpstreamDrift-parameter-bounds`, `fix/9949-installed-capture`              | PR #9950 merged as `9c8afeaabf60f2751ebbd61b32dac98d32546c3e`; local branch is retained.                                                                                                                |
-| Camera setup and guided help          | `feat/9952-camera-setup` at `7c7950574e47abcc42bad432c267d03031e62aa5`                | PR #9954 has a merge conflict after #9950 landed. Its required quality gate passed. Resolve the merge normally, preserve both sets of records, and rerun required checks.                               |
-| Calibration and model revision status | `Worktrees/UpstreamDrift-common-calibration`, `feat/9899-calibration-revision-status` | PR #9959, based on #9954. Initial implementation `1229dd7aa` is published; final turnover commit adds model-lineage validation and CI size fixes. Use current HEAD for the final revision.              |
-| Canonical ruler scale                 | `Worktrees/Tools-calibration-numerics`, `feat/5168-linear-reference-scale`            | Tools PR #5169; implementation and API repair `3d7beb203a71dcfa47d77ebe9fa318d181924867`, followed by turnover documentation. All checks except the private Gasification checkout passed at inspection. |
+| Work                                  | Location and Branch                                                                   | State at Turnover                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Installed runtime repairs             | `Worktrees/UpstreamDrift-parameter-bounds`, `fix/9949-installed-capture`              | PR #9950 merged as `9c8afeaabf60f2751ebbd61b32dac98d32546c3e`; local branch is retained.                                                                                                                                                                                 |
+| Camera setup and guided help          | `feat/9952-camera-setup` at `7c7950574e47abcc42bad432c267d03031e62aa5`                | PR #9954 has a merge conflict after #9950 landed. Its required quality gate passed. Resolve the merge normally, preserve both sets of records, and rerun required checks.                                                                                                |
+| Calibration and model revision status | `Worktrees/UpstreamDrift-common-calibration`, `feat/9899-calibration-revision-status` | PR #9959, based on #9954. Initial implementation `1229dd7aa` is published; final turnover commit adds model-lineage validation and CI size fixes. Use current HEAD for the final revision.                                                                               |
+| Canonical ruler scale                 | `Worktrees/Tools-calibration-numerics`, `feat/5168-linear-reference-scale`            | Tools PR #5169 merged as `d4ab52a926cbd74d10b881a700c0c4f12f89728f`; implementation and API repair `3d7beb203a71dcfa47d77ebe9fa318d181924867`, followed by turnover documentation. The private Gasification checkout check still fails; merge alone does not qualify it. |
 
 All paths above are relative to `C:/Users/diete/Repositories`. PR #9955's Bioptim
 scalar-bound fix is already merged as `32410babfd1e4741fa0c53bf05dd8403a51bf233`.
@@ -30,12 +30,12 @@ worktree's current branch with the retained camera-setup branch.
    `reconstruct_session` exceeding 100 lines and the development log exceeding
    51,200 bytes. Local fixes extract measurement/lens helpers and shorten only
    this task's log entry; both budgets now pass. Do not increase the budgets.
-3. Resolve Tools #5169's private consumer checkout access with its existing
+3. Tools #5169 is merged, but still resolve its private consumer checkout access with its existing
    workflow owner. Job `102883109039`, run `34479121462`, failed while retrieving
    the Gasification repository's default branch with HTTP Not Found, before
    consumer tests. This is not a ruler numerical failure. Do not disable the
    consumer gate, expose tokens, or treat skipped tests as qualification.
-4. After Tools #5169 is merged, coordinate the provider update: gitlink,
+4. Coordinate the merged Tools #5169 provider update: gitlink,
    `requirements-tools.txt`, Rust revision and generated source/context evidence
    must agree. Never edit `vendor/ud-tools` source as a substitute for the provider.
 5. Complete the ruler consumer under #9899. Reuse the existing isolated
