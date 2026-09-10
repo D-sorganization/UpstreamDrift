@@ -111,7 +111,7 @@ class ReferencePointEditor(QDialog):
             "Mark the same physical corners in every camera: Origin is your marked corner; "
             "Along Arrow follows the marked long edge; Opposite and Across Width follow around the sheet. "
             "For a ruler, use the labelled measurement endpoints. Leave hidden points unmarked. "
-            "These are reference observations, not camera calibration. Ctrl+wheel zooms."
+            "These are reference observations, not camera calibration. Ctrl+wheel zooms; Pan Image or middle-drag moves the view. Fit Image resets it."
         )
         self.instructions.setWordWrap(True)
         self.buttons = QDialogButtonBox(
@@ -151,6 +151,15 @@ class ReferencePointEditor(QDialog):
         controls.addWidget(self.clear)
         layout.addLayout(controls)
         history = QHBoxLayout()
+        self.pan = QPushButton("Pan Image")
+        self.pan.setCheckable(True)
+        self.pan.setAutoDefault(False)
+        self.pan.toggled.connect(self.canvas.set_pan_mode)
+        self.fit = QPushButton("Fit Image")
+        self.fit.setAutoDefault(False)
+        self.fit.clicked.connect(self._fit_image)
+        history.addWidget(self.pan)
+        history.addWidget(self.fit)
         undo = self.undo_stack.createUndoAction(self, "Undo")
         redo = self.undo_stack.createRedoAction(self, "Redo")
         assert undo is not None and redo is not None
@@ -167,6 +176,10 @@ class ReferencePointEditor(QDialog):
         assert save is not None
         save.setAutoDefault(False)
         layout.addWidget(self.buttons)
+
+    def _fit_image(self) -> None:
+        self.pan.setChecked(False)
+        self.canvas.set_zoom(1)
 
     def _inside(self, point: Pixel) -> bool:
         height, width = self._frame.shape[:2]

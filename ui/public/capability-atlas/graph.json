@@ -2725,8 +2725,8 @@
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "58919fe692c94e31e04157f923198a699d82dd69165f77fcc5c39b0c8c3df973",
-    "src/config/capability_connections.json": "c010dc93bd23e8b1902d3ab3f0c32572ddd7c995aaaf064ded4cfcfa18e7d4cb",
+    "src/config/feature_parity.json": "6233784ffbdacb611108ef64ba223f90a5e57746a45d8fbf77da9d94017383c3",
+    "src/config/capability_connections.json": "69d5254570ee33d33ee1994db47b93de6d41a86590883067ca98a917381c821c",
     "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e"
   }
 }
