@@ -263,8 +263,9 @@
     },
     "ui": {
       "ruling": "split",
-      "status": "pending-cleanup",
-      "rationale": "4 identical Tools files; 27 UD-only widgets (toast, shortcuts_overlay, preferences_dialog, ...) stay."
+      "status": "cleaned",
+      "rationale": "Provider integration #9912 retires four byte-identical overlapping files (__init__, auto_complete, hover_copy_browser, window_icon) through the existing split namespace resolver. This exposes the moved canonical Function Generator widget while preserving all 27 UD-only widgets and both import spellings. No UI source is copied or independently modified.",
+      "cleaned_in": "UD #9916 (candidate 2026-09-09)"
     },
     "upstream_drift_tools": {
       "ruling": "tools-canonical",

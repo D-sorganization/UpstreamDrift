@@ -109,5 +109,66 @@
       "commits": ["343d05b5d", "f417cd8fe", "7141feb79"],
       "resolution": "Same pin and color retirement preserved. Reviewed main use_start_file serves the same process action as concurrent set_start_path; no duplicate API added. Realtime split/pending-cleanup retained from actual two-copy inventory; no Tools-only claim. Earlier source/wheel provenance remains unchanged."
     }
+  },
+  "migration_repair": {
+    "previous_published_consumer": "d2760f05c242d3e2a3fe76ad5e725b16e5b2cb51",
+    "provider_candidate": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
+    "ci_failure": {
+      "job": 102684248047,
+      "run": 34417056484,
+      "failed": 6,
+      "passed": 14890,
+      "skipped": 672,
+      "warnings": 1116,
+      "seconds": 482.9,
+      "causes": [
+        "catalog frozen pin literal",
+        "Cargo/gitlink mismatch",
+        "inventory metadata pin drift",
+        "realtime overlap absent from explicit migration ledger",
+        "retired color child still waived",
+        "Function Generator manifest names removed module"
+      ]
+    },
+    "migration_controls_at_00d17e7f9": {
+      "tests": 106,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 52.302,
+      "warnings": 12,
+      "junit_sha256": "2aa467caa3a06f3b9c6547af2dd82d54354dffc47f487aca8386c98a2a158434"
+    },
+    "ui_split_controls_at_00d17e7f9": {
+      "tests": 105,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 11.32,
+      "warnings": 8,
+      "junit_sha256": "63551f0ea3c4f21ac81acd611ef2cb2a7f333870d15374abf531a1f80be3f499"
+    },
+    "runtime_red_green": "Corrected YAML alone still fails real import. Two new import/origin/UD-widget controls fail before UI split, then pass. Offscreen widget construction resolves the canonical vendor source and succeeds.",
+    "ui_retired_byte_identical_sha256": {
+      "__init__.py": "78a92af3dc4830eb2f169a6a56018dadf3182c31c77554f00a28c896907494c7",
+      "auto_complete.py": "a1e29015fc67bfd9b34e950e7637e99b94df0214e5e7d7a40c346e69fac6cbec",
+      "hover_copy_browser.py": "7ce092a3d94b2bac64aa5386b37ab2ac17acd7028ef161c81aa66a03545c6f6f",
+      "window_icon.py": "9b8a63952858d19ace109e571ec548bf2f2d25af33a0eb2ab8fe1b506430b9b9"
+    },
+    "realtime": "Explicit review exception under #8942, expires 2026-10-09. Pre-existing seven-file UD facade and different transport preserved; migration remains open. No guard logic changed.",
+    "catalog": "Compare to independently resolved committed HEAD gitlink; no frozen revision literal or index/working-tree substitution.",
+    "wheel": "Rebuild at this exact candidate remains required; earlier wheel evidence retains its original revisions.",
+    "exact_pin_source_controls": {
+      "tests": 271,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 71.655,
+      "warnings": 20,
+      "junit_sha256": "2f2a8e182c46cc80272d3f2fdfe3262f5d9889c7e031f9ca2e28d97b52bda772",
+      "source_index_tree": "ef55dd7c77df18c9e7f6bd29ea6352d9af1b0ccf",
+      "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
+      "note": "Committed-source catalog assertion observes HEAD gitlink; rerun after committing the new gitlink."
+    }
   }
 }

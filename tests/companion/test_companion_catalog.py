@@ -289,7 +289,14 @@ def test_catalog_pins_exact_provider_and_input_provenance() -> None:
 
     assert len(source["commit"]) == 40
     assert tools["pin_kind"] == "gitlink"
-    assert tools["pinned_commit"] == "eab74a901a7c8467e1997049a73e2cfd2df74428"
+    committed_pin = subprocess.check_output(
+        ["git", "rev-parse", "HEAD:vendor/ud-tools"],
+        cwd=REPO_ROOT,
+        text=True,
+        timeout=30,
+    ).strip()
+    assert re.fullmatch(r"[0-9a-f]{40}", committed_pin)
+    assert tools["pinned_commit"] == committed_pin
     assert tools["vendor_path"] == "vendor/ud-tools"
     assert {item["path"] for item in source["inputs"]} == {
         "docs/api/contracts/upstreamdrift-companion-compatibility-v1.json",
