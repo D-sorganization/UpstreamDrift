@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from math import copysign, hypot
 
 import numpy as np
@@ -19,13 +20,21 @@ from src.motion_capture.coaching import (
 
 from .annotate_widget import ImageCanvas
 
+FrameFinalizer = Callable[[npt.NDArray[np.uint8], int], npt.NDArray[np.uint8]]
+
 
 class CoachingCanvas(ImageCanvas):
     changed = pyqtSignal()
     interaction_started = pyqtSignal()
 
-    def __init__(self, layer: DrawingLayer) -> None:
+    def __init__(
+        self,
+        layer: DrawingLayer,
+        *,
+        finalize: FrameFinalizer | None = None,
+    ) -> None:
         super().__init__()
+        self._finalize = finalize
         self.history = History(layer)
         self.tool = "select"
         self.colour = DEFAULT_DRAWING_COLOUR
@@ -93,6 +102,16 @@ class CoachingCanvas(ImageCanvas):
 
         document = self._preview or self.layer
         image = render_layer(self._source, document, self.frame)
+        if self._finalize is not None:
+            image = self._finalize(image, self.frame)
+            if (
+                not isinstance(image, np.ndarray)
+                or image.dtype != np.uint8
+                or image.shape != self._source.shape
+            ):
+                raise ValueError(
+                    "Comparison overlays must preserve the original BGR pixel grid"
+                )
         shape = next(
             (item for item in document.shapes if item.id == self.selected), None
         )
