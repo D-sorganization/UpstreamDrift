@@ -1,0 +1,77 @@
+{
+  "reviews": {
+    "capture-atlas": {
+      "fingerprint": "32877dc0b95fc0a931553dff70bb17b682310d946845670ab353865b1da6f876",
+      "inputs": {
+        "docs/agent_context/contracts/capture-atlas.md": "f247f8c3e26b102c1cffb1a132c7dd1a7610377c846cf330953d0ccbf90baec4",
+        "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
+        "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
+        "scripts/capability_atlas/render.py": "50329f3dea4d265c205d090c037452ac1d1bad80ce3f35109e71729edc344976",
+        "src/config/capability_connections.json": "255b0c53e0deacab316d82d3ed5fdf452dca445109ec2da18d5bd32f7b25b441",
+        "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
+        "src/tools/capture_rig/goal_planner.py": "a67f7983c361175439d99c2508c257707aaf07271fb3711047b47e87950ff019",
+        "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e",
+        "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
+        "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
+        "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414",
+        "tests/tools/capture_rig/test_workflow.py": "f583fecf6ebe50173a9e5b5108f4b105ec8636cec926ce665393fcd90669dbe2"
+      },
+      "rationale": "Reviewed main276998030 connections and feature-parity changes: model/comparison drawing routes, metric references, Trace marker import and Pose Studio geometry preserve explicit pixel/frame/scene constraints. No workflow or goal resolver behavior changed. All31 atlas/workflow/goal tests pass; this review covers atlas projection, not physical qualification."
+    },
+    "launcher-atlas": {
+      "fingerprint": "cf8e238d275c6c79a0546788c09a0a6d1fa900c3740664f742c09de1e2e8b832",
+      "inputs": {
+        "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
+        "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
+        "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
+        "scripts/capability_atlas/render.py": "50329f3dea4d265c205d090c037452ac1d1bad80ce3f35109e71729edc344976",
+        "src/config/capability_connections.json": "255b0c53e0deacab316d82d3ed5fdf452dca445109ec2da18d5bd32f7b25b441",
+        "src/config/feature_parity.json": "f9dee68f2cc878875138976887c33031cf8e0db387b50ff99ca348783ee60f61",
+        "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
+        "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
+        "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
+        "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
+        "src/tools/capture_rig/goal_planner.py": "a67f7983c361175439d99c2508c257707aaf07271fb3711047b47e87950ff019",
+        "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
+        "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
+        "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
+      },
+      "rationale": "Reviewed main276998030 registry changes, atlas AST projection and new shared-analysis evidence test. Desktop-only status, scene/frame constraints and missing marker-data limits are retained; product graph edges remain distinct from executable prerequisites. All31 atlas/workflow/goal tests pass. Linked the existing shared-analysis contract authority."
+    },
+    "model-backends": {
+      "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
+      "inputs": {
+        "docs/agent_context/contracts/model-backends.md": "b816f8f612a186b8e2a06b9d5ab075d52e421979700afde51b0c210eb1974254",
+        "src/shared/python/simulation_backends/factory.py": "49f90d5525a84b3bdbd0989264e25b77c7ccc235c6d91a5bf7dbcd1f18c31711",
+        "src/shared/python/simulation_backends/mjcf.py": "985f5abcedea3354d4bf2f8c530748dc861754e024e4b43a59ecd984175dddff",
+        "src/shared/python/simulation_backends/model_params.py": "78aeb9c060f4b455b34b5dff5fcfe49847e7a2a3e545ec71060528a55e16be10",
+        "src/shared/python/simulation_backends/protocol.py": "d4330b8cce3d25f754ea134dcf07c3bf8e72ef18a745d816b08c1709b9d44f1f",
+        "tests/unit/simulation_backends/test_foundation.py": "cab3b398da6f172ea3d33203d1514ef29c1928179131a697943f44de8e775b48"
+      },
+      "rationale": "Reviewed SI parameter ownership, declared degree fields, lazy backend capabilities and the shared analytical/MJCF renderers including mjcf.py. Existing test_foundation.py passed in the 41-test boundary run on 2026-09-09; GPU readiness is not inferred."
+    },
+    "pipeline-api": {
+      "fingerprint": "22730716b0211732fb18c91d7d40a56dd0a9f9b316b7a58198c38dcec3edfef7",
+      "inputs": {
+        "docs/agent_context/contracts/pipeline-api.md": "f9402d270806ae313e121d36387e396302ffd5484a593f071ed3b0f042921079",
+        "src/shared/python/motion_pipeline/api.py": "6d5a080c01c13c28ba6e723695881612720c53dbb4d17573352e71bd79aea75f",
+        "src/shared/python/motion_pipeline/contracts.py": "9c8a9ac26c0d63b174e43093e3c53e1dea6422b82918c7ef79be05cf2097837c",
+        "src/shared/python/motion_pipeline/orchestrator.py": "a99ef34d57df202ad4bc5e2f4b7a04b974e80d559e47f9c97b0dece57ca9b1b8",
+        "tests/unit/motion_pipeline/orchestrator/test_api.py": "089d48d3a01b5287348b3217c93ed2b4f0923d6b28732055541aa196b92016aa"
+      },
+      "rationale": "Reviewed configuration validation, orchestration ownership and API error behavior against the current contracts and API sources. Existing test_api.py passed in the 41-test boundary run on 2026-09-09; this does not qualify optional simulation engines."
+    },
+    "pose-conventions": {
+      "fingerprint": "c1d86bdd40d3b50e9b856385ce92f8fcbd0c311fbc6f69bf96eafb2430d78d05",
+      "inputs": {
+        "docs/agent_context/contracts/pose-conventions.md": "e83c61880f6c564fd6e545eba3981009ae59e9a945f1b65616063c5fd2ae7f1b",
+        "src/shared/python/pose_interchange/adapters/mujoco.py": "582e537a802ea60f13a91c22188dad2d38b6312661bb92aba123bd2922d515ec",
+        "src/shared/python/pose_interchange/canonical.py": "57812fb94fb2551de828191880760787324228794aa2a2f06e4005d412c13487",
+        "src/shared/python/pose_interchange/protocol.py": "7cc8d1181169d8b425e53f26ef664b9fd09ecc41e663b9615fc95b6e12309b7f",
+        "tests/unit/pose_interchange/adapters/test_mujoco_protocol.py": "ea910a2a4cdcc1b026f9f6e56376226a15343cac5484f286db3edf3ea6a0ebc7"
+      },
+      "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
+    }
+  },
+  "version": 1
+}

@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts import check_doc_catalog, check_doc_size_budget, check_docs_governance
 
 
@@ -56,6 +58,34 @@ def test_doc_size_budget_allows_owned_unexpired_exception(
     )
 
     assert check_doc_size_budget.main() == 0
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("parent", [".worktrees", "build", "vendor"])
+def test_doc_budget_checks_repositories_under_excluded_parent_names(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, parent: str
+) -> None:
+    root = tmp_path / parent / "repository"
+    _write(root / "docs" / "large.md", "x" * (check_doc_size_budget.MAX_BYTES + 1))
+    monkeypatch.setattr(check_doc_size_budget, "ROOT", root)
+    monkeypatch.setattr(check_doc_size_budget, "CONFIG_PATH", root / "budget.json")
+
+    assert check_doc_size_budget.main() == 1
+
+
+@pytest.mark.unit
+def test_doc_budget_preserves_internal_exclusions_and_github_documents(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    large = "x" * (check_doc_size_budget.MAX_BYTES + 1)
+    for folder in (".cache", "vendor", "build"):
+        _write(tmp_path / folder / "large.md", large)
+    monkeypatch.setattr(check_doc_size_budget, "ROOT", tmp_path)
+    monkeypatch.setattr(check_doc_size_budget, "CONFIG_PATH", tmp_path / "budget.json")
+    assert check_doc_size_budget.main() == 0
+
+    _write(tmp_path / ".github" / "large.md", large)
+    assert check_doc_size_budget.main() == 1
 
 
 def test_doc_catalog_requires_every_docs_directory_with_metadata(
