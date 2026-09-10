@@ -24,7 +24,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `_contracts_primitives.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `_contracts_validators.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `_seam_redirect.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `ai` | 47 | 71 | 55 | 20 | 0 | 118 |
+| `ai` | 47 | 71 | 56 | 20 | 0 | 118 |
 | `analysis` | 0 | 0 | 0 | 18 | 0 | 0 |
 | `anthropometrics` | 0 | 0 | 0 | 38 | 0 | 0 |
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
@@ -38,7 +38,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `chat` | 40 | 17 | 10 | 1 | 0 | 57 |
 | `chat_contracts` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `cli_utils.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `club_data` | 0 | 0 | 0 | 10 | 0 | 0 |
+| `club_data` | 0 | 0 | 0 | 11 | 0 | 0 |
 | `codemap` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `compatibility.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `config` | 0 | 2 | 0 | 13 | 0 | 2 |
@@ -62,10 +62,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
-| `golf_club` | 0 | 0 | 0 | 0 | 100 | 0 |
+| `golf_club` | 0 | 0 | 0 | 0 | 38 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
+| `gui_launcher` | 3 | 5 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `humanoid_character_builder` | 15 | 25 | 12 | 27 | 0 | 40 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
@@ -99,7 +99,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `putting_dynamics` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `realtime` | 0 | 2 | 0 | 5 | 0 | 2 |
+| `realtime` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `reporting` | 0 | 2 | 0 | 5 | 0 | 2 |
 | `rotation_transforms` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
@@ -108,18 +108,18 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `scripting` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
-| `sidekick` | 234 | 75 | 24 | 36 | 37 | 309 |
+| `sidekick` | 235 | 74 | 25 | 36 | 23 | 309 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
-| `swing_sim` | 0 | 0 | 0 | 0 | 367 | 0 |
+| `swing_sim` | 0 | 0 | 0 | 0 | 348 | 0 |
 | `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
-| `theme` | 0 | 0 | 0 | 3 | 23 | 0 |
+| `theme` | 0 | 0 | 0 | 3 | 22 | 0 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 26 | 0 | 0 |
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
-| `ui` | 0 | 0 | 0 | 27 | 5 | 0 |
+| `ui` | 0 | 0 | 0 | 27 | 4 | 0 |
 | `upstream_drift` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `upstream_drift_tools` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ux` | 0 | 0 | 0 | 7 | 0 | 0 |
@@ -127,7 +127,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **424** | **278** | **124** | **1209** | **655** | **702** |
+| **Total** | **424** | **276** | **126** | **1212** | **558** | **700** |
 
 ## Diverged Files by Package
 
@@ -174,7 +174,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/gui/_provider_registry_data.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/_providers_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-21 |
 | `ai/gui/_rag_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `ai/gui/assistant_panel.py` | -5889 |  | Dieter Olson 2026-09-04 | d-sorgclaudeagent[bot] 2026-09-07 |
+| `ai/gui/assistant_panel.py` | +84 | yes | Dieter Olson 2026-09-04 | Dieter Olson 2026-09-04 |
 | `ai/gui/assistant_widgets.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/history_sidebar.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/session_manager.py` | -207 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
@@ -279,13 +279,14 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 |---|---:|:---:|---|---|
 | `data_processor_io/rust_engine.py` | -80 |  | Dieter Olson 2026-08-07 | Dieter Olson 2026-08-20 |
 
-### Package `gui_launcher` (4 Diverged Files)
+### Package `gui_launcher` (5 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `gui_launcher/launcher.py` | -159 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `gui_launcher/launcher_web.py` | -107 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-05 |
 | `gui_launcher/registry.py` | -75 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
+| `gui_launcher/tool_manifest.yaml` | -23 |  | Dieter Olson 2026-09-09 | Dieter Olson 2026-09-05 |
 | `gui_launcher/tools_sidebar_integration.py` | +10123 |  | Dieter Olson 2026-05-29 | Dieter Olson 2026-08-20 |
 
 ### Package `humanoid_character_builder` (25 Diverged Files)
@@ -389,13 +390,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plotting/export.py` | +1736 |  | d-sorgclaudeagent[bot] 2026-08-29 | Dieter Olson 2026-08-28 |
 | `plotting/identity.py` | +120 |  | d-sorgclaudeagent[bot] 2026-08-29 | Dieter Olson 2026-08-28 |
 
-### Package `realtime` (2 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `realtime/__init__.py` | +1579 |  | Dieter Olson 2026-05-27 | Dieter Olson 2026-09-07 |
-| `realtime/transport_file.py` | -2971 |  | Dieter Olson 2026-06-09 | d-sorgcodexagent[bot] 2026-09-08 |
-
 ### Package `reporting` (2 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
@@ -403,13 +397,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-05-15 |
 | `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 
-### Package `sidekick` (75 Diverged Files)
+### Package `sidekick` (74 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `sidekick/__main__.py` | +32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/agent/action_service.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-06-15 |
-| `sidekick/calculators/electrical/glass_interface.py` | -9103 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-07 |
+| `sidekick/calculators/electrical/glass_interface.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/calculators/thermo/steam_engine.py` | -983 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `sidekick/calculators/thermo/thermo_properties.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/data_io.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
@@ -454,7 +448,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/standalone/window.py` | -45 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/tab_context_menu.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/tests/calculators/conversion/test_conversion_accuracy_3384_3388_3389.py` | +2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-12 |
-| `sidekick/tests/calculators/electrical/test_electrical_model.py` | -809 |  | Dieter Olson 2026-08-01 | codex-scheduled 2026-09-08 |
 | `sidekick/tests/calculators/thermo/test_steam_engine.py` | +2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `sidekick/tests/process_calculators/test_analysis_utils.py` | -22 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-02 |
 | `sidekick/tests/process_calculators/test_multi_param_analysis.py` | -15 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |

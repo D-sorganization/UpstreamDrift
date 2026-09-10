@@ -4,6 +4,9 @@ from importlib import import_module
 from typing import Any
 
 _EXPORTS = {
+    "PlayerClub": "player_clubs",
+    "PlayerBag": "player_clubs",
+    "CaptureClubSnapshot": "player_clubs",
     "ClubIdentity": "catalog",
     "ClubRecord": "catalog",
     "PropertyClaim": "catalog",
