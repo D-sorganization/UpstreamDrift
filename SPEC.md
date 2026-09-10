@@ -8,6 +8,10 @@ assembly preserves tracked motion-matching reference loaders while retaining
 scratch-output exclusions. Installed startup, wizard and calibration checks run
 outside the source checkout; synthetic tests do not establish physical accuracy.
 
+## Optimize Norm Calculation in JCS (spec-exempt: micro-optimization)
+
+Replace `np.linalg.norm` with `np.sqrt(np.einsum)` in joint coordinate system parity calculation for measurable performance improvement.
+
 ## Impact Shaft Provider Integration (#9912)
 
 The exact vendor/ud-tools pin provides golf_club.distributed_shaft/1 through the
