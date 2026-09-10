@@ -1,5 +1,9 @@
 # AGENTS.md — Discovery Workflow & Shared-Infrastructure Directory
 
+## Verified Development Context
+
+Start with [Agent Context](docs/agent_context/README.md) and its [Usage Guide](docs/agent_context/USAGE.md). Use focused CLI/MCP retrieval to find public interfaces, providers, consumers and integration tests. The generated map covers registered boundaries; inspect source for unregistered areas. Source hashes, dependency pins and boundary review must be current before relying on an integration claim.
+
 > **Read this first.** This file exists because we kept reinventing
 > infrastructure that already lived in the repo (FK solvers, skeleton
 > renderers, reference golfer poses, mocap loaders, theme constants).

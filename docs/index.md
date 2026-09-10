@@ -28,19 +28,21 @@ separated from current guidance.
 ### Stable
 
 - [`adapters/`](adapters/authoring_guide.md) - 1 page
-- [`adr/`](adr/README.md) - 51 pages
+- [`adr/`](adr/README.md) - 53 pages
+- [`agent_context/`](agent_context/README.md) - 7 pages
+- [`agents/`](agents/shared-infrastructure.md) - 1 page
 - [`api/`](api/README.md) - 7 pages
-- [`architecture/`](architecture/) - 19 pages
+- [`architecture/`](architecture/) - 20 pages
 - [`audits/`](audits/) - 7 pages
 - [`code-quality/`](code-quality/function-design-review.md) - 1 page
 - [`codemap/`](codemap/README.md) - 3 pages
 - [`conformance/`](conformance/) - no Markdown pages
 - [`conventions/`](conventions/) - 3 pages
 - [`deployment/`](deployment/interim_setup.md) - 1 page
-- [`development/`](development/README.md) - 118 pages
+- [`development/`](development/README.md) - 133 pages
 - [`engineering/`](engineering/) - 2 pages
 - [`engines/`](engines/README.md) - 15 pages
-- [`estimation/`](estimation/synthetic-ground-truth-rig.md) - 1 page
+- [`estimation/`](estimation/) - 2 pages
 - [`examples/`](examples/) - no Markdown pages
 - [`governance/`](governance/) - 6 pages
 - [`help/`](help/) - 5 pages
@@ -53,6 +55,7 @@ separated from current guidance.
 - [`portfolio/`](portfolio/golf_modeling_demo.md) - 1 page
 - [`references/`](references/README.md) - 1 page
 - [`reviews/`](reviews/) - 3 pages
+- [`shared_tools/`](shared_tools/README.md) - 2 pages
 - [`sidekick/`](sidekick/README.md) - 3 pages
 - [`simulation_backends/`](simulation_backends/README.md) - 4 pages
 - [`specs/`](specs/README.md) - 4 pages
@@ -61,7 +64,7 @@ separated from current guidance.
 - [`testing/`](testing/) - 8 pages
 - [`troubleshooting/`](troubleshooting/README.md) - 6 pages
 - [`tutorials/`](tutorials/README.md) - 6 pages
-- [`user_guide/`](user_guide/README.md) - 30 pages
+- [`user_guide/`](user_guide/README.md) - 31 pages
 - [`validation/`](validation/cross_engine_v1.md) - 1 page
 - [`workflows/`](workflows/) - 2 pages
 
@@ -74,11 +77,11 @@ separated from current guidance.
 - [`design/`](design/) - 2 pages
 - [`golf-model/`](golf-model/INPUT_POSE_INVESTIGATION.md) - 1 page
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
-- [`motion_capture/`](motion_capture/) - 7 pages
+- [`motion_capture/`](motion_capture/) - 18 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
 - [`plans/`](plans/README.md) - 17 pages
 - [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
-- [`research/`](research/) - 32 pages
+- [`research/`](research/) - 33 pages
 - [`sg_optimizer/`](sg_optimizer/README.md) - 3 pages
 - [`status/`](status/) - no Markdown pages
 - [`technical_debt/`](technical_debt/TODO_FIXME_REGISTER.md) - 1 page
@@ -90,7 +93,7 @@ separated from current guidance.
 - [`assessments/`](assessments/README.md) - 294 pages
 - [`audit_reports/`](audit_reports/induced_acceleration_audit.md) - 1 page
 - [`historical/`](historical/README.md) - 4 pages
-- [`issues/`](issues/README.md) - 56 pages
+- [`issues/`](issues/README.md) - 57 pages
 - [`review_archive/`](review_archive/) - 24 pages
 - [`status_quo_analysis/`](status_quo_analysis/running_log.md) - 1 page
 
@@ -158,6 +161,7 @@ repository, which made them effectively unreachable.
 | `conventions/`          | @architecture-team    | stable    | Cross-subsystem data contracts and naming conventions, including canonical pose/state interchange.                                  |
 | `deployment/`           | @platform-team        | stable    | Deployment procedures, packaging notes, and release environment guidance.                                                           |
 | `design/`               | @architecture-team    | draft     | Feature design sketches and deeper design rationale before ADR promotion.                                                           |
+| `agent_context/`        | @engineering-team     | stable    | Verified module graphs, integration contracts, source evidence and agent navigation.                                                |
 | `agents/`               | @engineering-team     | stable    | Shared infrastructure discovery references for agent and contributor workflows.                                                     |
 | `development/`          | @engineering-team     | stable    | Developer workflow notes, implementation reports, and local contribution guidance.                                                  |
 | `engineering/`          | @engineering-team     | stable    | Engineering practices and cross-cutting technical standards.                                                                        |
