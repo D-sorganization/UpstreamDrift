@@ -67,6 +67,9 @@ motion_matching_training/
 # removed by #9415.
 /motion_matching/
 motion_matching/
+# The tracked reference-loader package is application code, not run output.
+# Hatchling respects these rules even for files already tracked by Git.
+!/src/shared/python/motion_matching/
 /reports/*.json
 /reports/**/*.json
 reports/*.json

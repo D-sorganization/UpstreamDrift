@@ -211,6 +211,19 @@ def test_wheel_version_matches_project_and_tag() -> None:
         )
 
 
+def test_wheel_includes_capture_reference_loaders() -> None:
+    """Scratch-directory ignores must not remove the capture reference provider."""
+    with zipfile.ZipFile(_wheel_artifact()) as wheel:
+        names = set(wheel.namelist())
+    required = {
+        "src/shared/python/motion_matching/__init__.py",
+        "src/shared/python/motion_matching/loaders/__init__.py",
+        "src/shared/python/motion_matching/loaders/body_json.py",
+        "src/motion_capture/reference/importers.py",
+    }
+    assert required <= names, f"Missing capture reference modules: {required - names}"
+
+
 def test_wheel_excludes_sidekick_tests() -> None:
     """Test suites must not ship inside the wheel (#8018)."""
     with zipfile.ZipFile(_wheel_artifact()) as wheel:
