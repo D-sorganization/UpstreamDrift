@@ -1,11 +1,17 @@
 # Common-Reference Calibration Handoff
 
-Current #9949: isolated `UpstreamDrift-common-calibration`, branch
-`fix/9949-installed-capture`. PR #9946 merged as126158943 before installed-package
-repairs; follow-up retains worker21710dee6/2d84f2fe0 and packagingf13701c5e.
-Installed startup/wizard and29 calibration checks pass, as does pip check.
-Main is integrated through e623b3c69 with application bytes unchanged.
-Session `capture-product-01a08427-common-calibration` holds #9949 through10:27 UTC.
+Current #9949: `fix/9949-installed-capture`, PR #9950. Installed worker,
+packaging, new-take identity and library indexing repairs remain intact. PR #9946
+merged as126158943 before these installed-package repairs; installed startup,
+wizard and29 calibration checks passed, as did pip check.
+
+PR #9955 merged at32410babfd1e4741fa0c53bf05dd8403a51bf233 after all CI checks
+passed, including actual Bioptim OCP tests and both manufactured authority checks.
+Its scalar-bound API fix is now integrated into #9950 without changing numerical
+bounds or tolerances. The only merge conflict was this handoff; both delivery
+records are preserved here. Next: validate and publish the integrated #9950 head,
+then advance native camera setup and guided acceptance in #9954.
+
 See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
 [operator guide](../motion_capture/common_reference_calibration.md).
 
