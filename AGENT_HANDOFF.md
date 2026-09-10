@@ -656,4 +656,4 @@ Expert reference imports are in draft PR #9870 (30 integrated tests, 49 atlas/re
 
 ## Verified Agent Context (#9915)
 
-[Component map](docs/agent_context/README.md).
+[Component map](docs/agent_context/README.md). CI tests repaired.

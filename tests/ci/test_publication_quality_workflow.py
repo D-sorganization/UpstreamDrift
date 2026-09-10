@@ -60,10 +60,15 @@ def test_publication_job_runs_the_complete_revision_bound_validator() -> None:
 def test_required_quality_gate_fails_closed_on_publication_result() -> None:
     _, workflow = _workflow()
     gate = workflow["jobs"]["quality-gate"]
-    script = gate["steps"][0]["run"]
+    aggregate = next(
+        step
+        for step in gate["steps"]
+        if step.get("name") == "Aggregate quality gate results"
+    )
+    script = aggregate["run"]
 
     assert "publication-quality" in gate["needs"]
-    assert gate["steps"][0]["env"]["PUBLICATION_QUALITY"] == (
+    assert aggregate["env"]["PUBLICATION_QUALITY"] == (
         "${{ needs.publication-quality.result }}"
     )
     assert script.count("failed=0") == 1
