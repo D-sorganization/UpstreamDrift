@@ -4,10 +4,15 @@ Canonical continuation: [docs/development/HANDOFF.md](docs/development/HANDOFF.m
 Development entry: DL-#9912. Branch: feat/9912-impact-provider-pin.
 Issue #9912 is a child of #9703/#9701; PR #9916. Current commit is SELF.
 
-The candidate Tools pin is 4dabe900c6ef7767b565c778cda9d9449bed28cf.
 The candidate Tools pin is 4dabe900c6ef7767b565c778cda9d9449bed28cf. UD #9916 qualifies the provider and theme pin; see PROVIDER_PIN_RESULTS.json and docs/development/HANDOFF.md.
 
 ## Incoming Main Integration
+
+Concurrent eacd69858 integrates main 5ada5e6a6 and its player/equipment work.
+Provider source and pin are unchanged. The inherited inventory omitted provider
+files; the existing test failed, then full-authorship regeneration restored it.
+All 271 integration controls pass again. Tools launcher follow-up is PR #5144;
+final reviewed-pin qualification and physical/acoustic work remain open.
 
 Main 90c3d0b77 is integrated, preserving merged C3D fitting and club/volume/handedness overlays (#9918/#9922) and attributed club catalog (#9919). Both task scopes remain in canonical HANDOFF.md. All 271 integration controls pass.
 Main 8fce9f238 is integrated with capture PR #9917 LoD fixes and capture journey implementation preserved. Canonical HANDOFF.md retains the incoming capture handoff.

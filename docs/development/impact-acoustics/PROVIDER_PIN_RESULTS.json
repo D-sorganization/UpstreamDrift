@@ -215,6 +215,30 @@
       "head": "0cd6dce22f5762ee0c6342000fb035eaa76579d5",
       "merge": "2c9a8d6c963cec2f140f2ee17469d27e506a3ba1",
       "launcher_followup_issue": 5143
+    },
+    "concurrent_equipment_merge": {
+      "concurrent_head": "eacd6985872c1c69009f6f4a1d690edf0333cb97",
+      "main": "5ada5e6a6827bfb94a00d1801f6b475afb885885",
+      "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
+      "inventory_red": {
+        "tests": 10,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 38.546,
+        "junit_sha256": "2161ea9492ae350f6e8285461edb5dd55c0ec04dddb551004dc22b75c062dc23"
+      },
+      "post_regeneration_controls": {
+        "tests": 271,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 70.719,
+        "junit_sha256": "6f5851b8ea6598f56672bd50bad3a096188014f695211f3ccd5168106d59a139"
+      },
+      "restored_inventory_sha256": "d8c34fd599923c900b06d9ebc5c68c3be31359af81f53bbb3a86153ee5baf2c3",
+      "resolution": "Preserve concurrent main/equipment and handoff commits by fast-forward. Provider source, Cargo/gitlink and seam repairs are unchanged. Existing inventory test fails for omitted shaft/provider files; regenerate with full authorship from actual pinned checkout. No --no-authorship or guard changes.",
+      "wheel": "The previously isolated 32a8b36ec / 4dabe900c artifact retains its original provenance. Final reviewed Tools #5144 pin is still pending."
     }
   }
 }
