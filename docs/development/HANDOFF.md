@@ -1,5 +1,10 @@
 # Common-Reference Calibration Handoff
 
+Active #9953: isolated `UpstreamDrift-parameter-bounds`, branch
+`fix/9953-scalar-bounds`, corrects shared scalar bounds passed to pinned Bioptim.
+30 OCP tests pass with two optional Pinocchio skips; five parameter tests pass.
+No bounds or tolerances changed. This unblocks optional CI for capture PR #9950.
+
 Current #9898/#9900: isolated `UpstreamDrift-common-calibration`, branch
 `feat/9898-common-reference-sessions`, pushed checkpoint 89704dd29; registry blocker-order repair SELF. Prior normal hooks passed; PR #9946. Session `capture-product-01a08427-common-calibration` has presence through 08:49 UTC and #9909 lease through 08:40 UTC on 2026-09-10.
 See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
