@@ -8,12 +8,21 @@ The candidate Tools pin is 4dabe900c6ef7767b565c778cda9d9449bed28cf.
 UD #9916 fixes six provider-migration failures and a further runtime UI
 shadow: four byte-identical files are retired through the existing split
 resolver, preserving 27 UD-only widgets. Offscreen widget construction works.
-Exact-pin combined source suite: 271 tests pass; wheel rebuild remains. Realtime debt has an explicit #8942 review exception
+All 271 source controls pass after main 90c3d0b77 integration. The isolated
+32a8b36ec wheel passes provider and Qt widget checks with gui-tools installed. Realtime debt has an explicit #8942 review exception
 through 2026-10-09; it is not resolved. See PROVIDER_PIN_RESULTS.json.
-Tools 0cd6dce22 passed every scientific lane; private consumer access and
-review remain. Physical/acoustic qualification remains open.
+Tools #5133 is merged as 2c9a8d6c from 0cd6dce22. Post-merge launcher
+correction #5143 needs a separate reviewed provider revision. Physical and
+acoustic qualification remains open.
 
 ## Incoming Main Integration
+
+Main 90c3d0b77 is now being integrated normally, preserving merged C3D fitting
+and club/volume/handedness overlays (#9918/#9922) and attributed club catalog
+(#9919). Conflicts are limited to six shared documentation/inventory files.
+Both task scopes remain in canonical HANDOFF.md; its numerical/regression
+evidence retains the original owners. All 271 integration controls pass.
+[Incoming Main Handoff](https://github.com/D-sorganization/UpstreamDrift/blob/90c3d0b770cd0ced3e14c947c68a29555f14e877/AGENT_HANDOFF.md).
 
 Main 8fce9f238 is integrated after capture PR #9917 merged. Its LoD fixes and
 capture journey implementation are preserved. Only the root handoff and
