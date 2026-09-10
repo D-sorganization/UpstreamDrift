@@ -51,6 +51,16 @@ first. It supersedes older in-flight statements below and identifies the exact
 remaining work, validation, branches and live application. Source and turnover
 changes are being committed for the successor; do not start a duplicate epic.
 
+Issue #8365 (claude, worktree `_issue_worktrees/UpstreamDrift-conductor-issue-8365`,
+branch `conductor/issue-8365`, PR #9960, commit SELF): added
+`src/tools/launch_monitor_model/launch_monitor_data.py`, importing the public
+Launch-Monitor-Data shot and aggregate exports with declared units, corpus
+identity and per-cell lineage, exported through the façade and registered
+app-local in the ADR-0046 Stage 2 parity gate and ADR-0048. Validation:
+`tests/unit/launch_monitor/test_launch_monitor_data_exports.py` 17 pass,
+`test_canonical_layer_parity.py` 40 pass, ruff/mypy/pre-commit clean on changed
+files. Workbench dialog wiring for the public exports is a follow-up. See DL-#8365.
+
 Active #9899: `feat/9899-calibration-revision-status`, draft PR #9959,
 builds on #9954 (which merged to main). Camera source hashing uses shared provenance;
 command and wizard regression tests cover same-path changes, absent source,

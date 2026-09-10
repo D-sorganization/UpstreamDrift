@@ -28,6 +28,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-10
 - **Summary:** Baseline adoption of Mermaid C4 architecture maps in UpstreamDrift.
 
+### DL-#8365 · Launch-Monitor-Data Export Import
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8365
+- **Branch:** conductor/issue-8365
+- **PR:** #9960
+- **Paths:** src/tools/launch_monitor_model/launch_monitor_data.py; `src/tools/launch_monitor_model/__init__.py`; tests/unit/launch_monitor/test_launch_monitor_data_exports.py; tests/unit/launch_monitor/test_canonical_layer_parity.py; docs/adr/0048-launch-monitor-port-plan.md
+- **Started:** 2026-09-10
+- **Last verified:** 2026-09-10 (17 new tests plus 40 parity tests pass; ruff, mypy and pre-commit clean on changed files)
+- **Summary:** Import public Launch-Monitor-Data shot and aggregate exports with declared units, corpus identity and per-cell lineage; aggregates cannot enter shot-level fits.
+- **Evidence:** Before the change a SI `load_shots()` frame was detected as Full Swing and 45 m/s became 20.1 m/s; after it the SI column is kept, native columns use corpus units, and aggregate rows are refused by regression alone or pooled.
+- **Next step:** Open the PR with `Closes #8365` and let CI run the parity gate against the vendored pin.
+
 ### DL-#9899 · Calibration Revision Status
 
 - **State:** in_review
