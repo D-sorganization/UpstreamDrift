@@ -263,6 +263,16 @@ import shot-level exports into `.lmproject` files for regression. Published
 aggregate means and standard deviations are reference observations, not
 synthetic shots, and must not be expanded into fabricated row-level data.
 
+Import both published shapes with
+`src.tools.launch_monitor_model.import_launch_monitor_data_export` rather than
+a vendor profile: shot-level `load_shots()` frames (SI or native columns) keep
+the unit their column name or the canonical registry declares, and the
+long-format `upstreamdrift_aggregate_metrics.csv` becomes one
+`observation_kind = "aggregate"` row per source, monitor, model, software,
+environment, cohort and club with every published cell retained under
+`source::<metric>::<column>`. The flexible analysis refuses to fit those rows
+at shot level, alone or pooled with imported shots.
+
 ### 5. Compare Monitors
 
 For defensible bias, scale, and agreement analysis, import paired measurements
