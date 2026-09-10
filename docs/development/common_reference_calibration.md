@@ -24,7 +24,8 @@ failures. Live test applications still use their frozen earlier checkouts.
   c432788c3 failed its actual installed catalog request because it required a
   repository vendor directory. Resolution now accepts the provider recorded in
   the owning application distribution, while rejecting unrelated distributions
-  and incomplete source checkouts. Source-worker and ownership tests pass; the
+  and incomplete source checkouts. Eight source-worker/ownership checks pass. Metadata paths are normalized for
+  the standard-library path protocol. The
   corrected wheel must be rebuilt and probed before packaged readiness is claimed.
   Original failing wheel SHA256: `5be3ecb354963958e44016e6de34ecd1677df3437e600f973b54a19875710fca`.
 
