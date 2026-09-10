@@ -93,7 +93,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/issue-9915-agent-context
 - **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `scripts/check_doc_size_budget.py`, `tests/ci`, `tests/scripts`
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10; 30 atlas/goal, eight CI-contract, 14 documentation and five context tests pass; 12/12 navigation tasks pass. Budget validation now rejects oversized docs in hidden-parent worktrees. See HANDOFF.md for evidence.
+- **Last verified:** 2026-09-10; 30 atlas/goal, eight CI-contract, 14 documentation and five context tests pass; 12/12 navigation tasks pass. Documentation unit markers fix the reproduced suite ratchet. See HANDOFF.md for evidence.
 - **Summary:** Twelve components and five reviewed integrations reuse the atlas and capture goals. Main f04aa1a57 is integrated; provider18c36f5e8 remains a candidate.
 - **Next step:** Qualify final published Tools pins and required CI on PR #9920.
 
