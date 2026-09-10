@@ -19,10 +19,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9953 · Scalar Parameter Bounds
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9953
 - **Branch:** fix/9953-scalar-bounds
+- **PR:** #9955
 - **Paths:** src/shared/python/optimization/ocp/parameter_ocp.py; parameter OCP tests; calculation inventory.
 - **Started:** 2026-09-10
 - **Last verified:** 2026-09-10 (30 OCP tests pass; two optional Pinocchio checks skipped)
