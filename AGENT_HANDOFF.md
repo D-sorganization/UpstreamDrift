@@ -656,5 +656,4 @@ Expert reference imports are in draft PR #9870 (30 integrated tests, 49 atlas/re
 
 ## Verified Agent Context (#9915)
 
-Implementation and validation state: `docs/development/HANDOFF.md`, section
-Verified Agent Context. Component map: `docs/agent_context/README.md`.
+[Component map](docs/agent_context/README.md).
