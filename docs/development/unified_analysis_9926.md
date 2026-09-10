@@ -16,7 +16,7 @@ guided capture wizard. Independent queued jobs had no result at merge time;
 they are not represented as passing evidence. Historical qualification notes
 below retain the checks and limitations observed during implementation.
 
-Story #9932 is implemented locally in `feat/9932-comparison-drawings`.
+Story #9932 shipped in #9943.
 **Draw on Comparison…** saves the current recipe and opens the common editor
 with the current frame, detected pose, drawings, world geometry and reference.
 Saving and closing reloads drawings in the parent comparison. The compositor
@@ -37,8 +37,7 @@ tracks shared metric readouts and simulation analysis.
 The capability registry now records model-only analysis, shared drawing-editor
 contracts and metric-reference routes. Existing executable capture-goal metadata
 and desktop parity limitations are preserved. Measurement readouts, simulation
-integration and reviewed shared contracts are implemented in #9945; protected
-delivery remains required.
+integration and reviewed shared contracts shipped in #9945.
 
 Camera-bound geometry now fingerprints `reconstruct/reconstruction.json`, the
 actual projection-camera evidence, in addition to the reconstruction summary.
@@ -51,10 +50,10 @@ without that camera file retain their existing identity.
 | Surface              | Existing Infrastructure                                 | Integrated Route                                                        | Qualification                                                                                              |
 | -------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Capture Coaching     | CoachingDialog/Canvas, DrawingLayer, History            | Common drawing editor and original-pixel exports                        | Merged #9933/#9943; capture regression coverage                                                            |
-| Reference Comparison | Registration, event pairing, ComparisonRenderer         | Common drawings, geometry, appearance and Measurements tab              | Drawing/geometry merged; metric tests pass, #9942 protected delivery pending                               |
+| Reference Comparison | Registration, event pairing, ComparisonRenderer         | Common drawings, geometry, appearance and Measurements tab              | Drawing/geometry merged; metric tests pass, #9945 merged; required quality gate passed                     |
 | Comparison Export    | Shared compositor and immutable source/camera snapshots | Saved drawings and geometry with clock/crop parity                      | Merged #9943; PNG/video, cancellation and changed-evidence tests                                           |
 | Model-Only Analysis  | ReferenceMotion/Timeline and fit artifacts              | Same editor and controls with explicit virtual camera                   | Merged #9933; added measurements/Trace regression tests pass                                               |
-| Pose Studio          | Canonical poses/FK, View3D and existing club bone       | Shared reference editor, mesh renderer and save/load                    | Native30 tests and visual plane/editor review; #9942 protected delivery pending                            |
+| Pose Studio          | Canonical poses/FK, View3D and existing club bone       | Shared reference editor, mesh renderer and save/load                    | Native30 tests and visual plane/editor review; #9945 merged; required quality gate passed                  |
 | Simulation Traces    | Trace v2 metric markers and trace_io                    | Explicit axes/names/topology into reference library and common analysis | Trace126 and topology17 tests pass; q-only traces report missing marker channels                           |
 | Native Viewports     | Existing Viewport mesh protocol                         | Scene-bound adapter with explicit coordinate frame                      | Pose Studio qualified; other renderer SDKs are not claimed from the protocol alone                         |
 | Native Models        | Existing fitted ReferenceMotion assets and catalog      | Analyze Model or Compare Reference regardless of fit adapter            | See model-by-model fitting qualification in reference_model_fitting.md; unavailable model reasons retained |
@@ -183,7 +182,7 @@ The full Driver's frame200 at0.556s was visually inspected with the shared panel
 and plane. Readout mypy passes four source files. The initial Trace v2 importer passes
 126 reference/import regressions and mypy on five source files. Explicit club
 and skeleton topology preservation and native Pose Studio reference geometry are
-implemented and tested. Capability maps are updated; protected delivery remains open for #9942 and the parent epic.
+implemented and tested. Capability maps are updated; #9945 passed protected CI and merged.
 
 ## Native Reference Geometry
 
@@ -223,4 +222,14 @@ independently owned #9915 catalog can index these same contracts when its runtim
 lands; it is not required to run the implemented analysis routes. No claim of
 catalog registration or optional native SDK qualification is made here.
 
-Final closure still requires protected checks and the normal merge of #9945.
+## Protected Delivery
+
+PR #9945 merged at `2d41aba4159162f91c0cd1cc6919d0341755b492` on
+2026-09-10T05:20:06Z. [CI Standard run34440058289](https://github.com/D-sorganization/UpstreamDrift/actions/runs/34440058289)
+succeeded, including the required quality gate, unit gate and Python3.11/3.12
+matrix. Independent optional queued jobs are not represented as passing.
+After integrating main300d96a1 and the biomechanics API helper typing fix
+f58ee5b3, all88 combined biomechanics/API/display and analysis integration tests
+passed. All four implementation children are closed. This final documentation
+record reconciles the shipped ledger and preserves tracking records lost in the
+concurrent main merge. Its protected merge closes the parent epic.
