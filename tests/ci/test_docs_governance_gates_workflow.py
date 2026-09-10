@@ -61,13 +61,18 @@ def test_docs_governance_paths_drive_a_dedicated_protected_job() -> None:
 def test_required_quality_gate_fails_closed_on_docs_governance_result() -> None:
     _, workflow = _workflow()
     gate = workflow["jobs"]["quality-gate"]
-    script = gate["steps"][0]["run"]
+    aggregate = next(
+        step
+        for step in gate["steps"]
+        if step.get("name") == "Aggregate quality gate results"
+    )
+    script = aggregate["run"]
 
     assert "docs-governance-gates" in gate["needs"]
-    assert gate["steps"][0]["env"]["DOCS_GOVERNANCE_GATES"] == (
+    assert aggregate["env"]["DOCS_GOVERNANCE_GATES"] == (
         "${{ needs.docs-governance-gates.result }}"
     )
-    assert gate["steps"][0]["env"]["DOCS_CHANGED"] == (
+    assert aggregate["env"]["DOCS_CHANGED"] == (
         "${{ needs.changed-paths.outputs.docs }}"
     )
     assert 'docs_expected="success"' in script
