@@ -86,7 +86,7 @@ class PlacementPanel(QWidget):
             "Move only the reference, then select the corresponding original frame in each camera."
         )
         layout.addWidget(self.add_placement)
-        mark = QPushButton("Open Frame and Mark Points…")
+        mark = QPushButton("Choose Frame and Mark Points…")
         mark.clicked.connect(self._request_frame)
         layout.addWidget(mark)
         layout.addWidget(self.table, 1)

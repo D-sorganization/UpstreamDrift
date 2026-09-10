@@ -4,7 +4,7 @@
 
 Epic #9897; children #9898 and #9900. Branch
 `feat/9898-common-reference-sessions` in the isolated
-`UpstreamDrift-common-calibration` worktree. Implementation d15013a2c was pushed with all normal hooks passing; current main3fbd4b2da is integrated through f4da52c65. PR #9946 is open;1e4984765 passed every normal push hook. It is reachable through Calibration in this worktree,
+`UpstreamDrift-common-calibration` worktree. Implementation d15013a2c was pushed with all normal hooks passing; current main3fbd4b2da is integrated through f4da52c65. PR #9946 is open;3be2bbff3 passed every normal push hook. It is reachable through Calibration in this worktree,
 but the running test application still uses the earlier merged wizard source.
 
 Tools #5140 merged as0a561daff18302ee143b214fe6a6138455d8c542. Its complete tree
@@ -17,6 +17,19 @@ owner owns the final combined gitlink/Cargo/pip/catalog alignment after Tools
 private-checkout404 and rate-shard timeouts remain failures, not passing evidence.
 
 ## Implemented Workflow
+
+- Original-video frame selection now uses the existing VideoReader and ImageCanvas,
+  with timeline, Play/Pause, source clock, frame stepping, numeric selection and
+  F11/double-click full screen. One background decoder retains only the latest
+  pending seek. Closing schedules decoder cleanup after an active read without
+  blocking Qt. Previewing does not archive evidence, and an undisplayed seek
+  cannot be accepted. The selected original frame enters the existing worker
+  archive/point-edit path; swing crop/trim metadata remains irrelevant to these pixels.
+  Fourteen Python3.12 selector/dialog/point-editor checks and the configured mypy
+  hook passed, including real-video selection through saved observations. Native
+  synthetic video was visually reviewed at640×560 and full screen, then restored
+  and accepted at the same source frame. Artifacts are in the local temporary
+  `capture-frame-selector-native-jmapf0rl` directory; no camera was opened.
 
 - Capture-owned immutable reference sessions reuse canonical Tools US Letter,
   A4, yardstick and metre-stick geometry. Measured dimensions create distinct

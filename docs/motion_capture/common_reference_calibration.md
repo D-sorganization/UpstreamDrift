@@ -27,8 +27,15 @@ those physical identities the same in every camera view; do not substitute the
 screen's upper-left corner when the camera angle changes.
 
 In **Reference Placements**, name the stationary position, select a camera and
-an original recording frame number (starting at zero), then use **Open Frame and
-Mark Points…**. Click the requested point or enter its original pixel coordinates
+use **Choose Frame and Mark Points…**. Scrub the original video, use Play/Pause,
+step Previous/Next or enter a frame number (starting at zero). The frame number
+and source time identify the displayed image. Double-click the video or press F11
+for full screen; Escape returns to the window. Choose **Use This Frame** when the
+reference is clear and stationary. Previewing saves no evidence; Cancel preserves
+existing observations. Playback follows the source clock and may skip preview
+frames on slow hardware; pause and step to select an individual frame.
+
+In the point editor, click the requested point or enter its original pixel coordinates
 and choose **Set Point**. The selector advances to the next unmarked point.
 Use Ctrl+mouse-wheel to zoom, Clear Point to remove a mark and standard Undo/Redo
 to revise it. Save Points retains partial work; Cancel keeps prior observations.

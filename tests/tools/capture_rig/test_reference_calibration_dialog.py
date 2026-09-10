@@ -147,6 +147,9 @@ def test_original_frame_to_marked_saved_placement_through_real_worker(
     from src.tools.capture_rig.reference_calibration.point_editor import (
         ReferencePointEditor,
     )
+    from src.tools.capture_rig.reference_calibration.frame_selector import (
+        ReferenceFrameSelector,
+    )
     from tests.motion_capture.rig.test_ingest import _bundle
 
     root = _bundle(tmp_path)
@@ -180,11 +183,25 @@ def test_original_frame_to_marked_saved_placement_through_real_worker(
         return QDialog.DialogCode.Accepted
 
     monkeypatch.setattr(ReferencePointEditor, "exec", mark)
-    dialog._open_frame({"view": "a", "frame_index": 2})
+
+    def choose(selector):
+        qtbot.waitUntil(lambda: selector.use.isEnabled(), timeout=10000)
+        selector.slider.setValue(2)
+        qtbot.waitUntil(
+            lambda: selector.displayed_index == 2 and selector.use.isEnabled(),
+            timeout=10000,
+        )
+        assert not list((root / "reference_calibration" / "frames").glob("*.png"))
+        selector.use.click()
+        return QDialog.DialogCode.Accepted
+
+    monkeypatch.setattr(ReferenceFrameSelector, "exec", choose)
+    dialog._choose_frame({"view": "a", "frame_index": 0})
     qtbot.waitUntil(lambda: len(dialog._session["samples"]) == 1, timeout=30000)
     sample = dialog._session["samples"][0]
     assert sample["observation"]["point_ids"] == ["origin", "along-arrow"]
     assert sample["observation"]["frame_sequence"] == 2
+    assert dialog.placements.frame_number.value() == 2
     assert (root / sample["source_frame"]).is_file()
     dialog._request(
         "target",
