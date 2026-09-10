@@ -3,7 +3,7 @@
 ## Shared Measurements and Simulation (#9942)
 
 Active worktree `C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942`,
-branch `feat/9942-metric-simulation-analysis`, base114801638, implementation SELF. Parent #9926 remains active; #9943 drawing PR is still under CI.
+branch `feat/9942-metric-simulation-analysis`, base114801638, readout commit72585f629; Trace import implementation SELF. Parent #9926 remains active; #9943 drawing PR is still under CI.
 Session `codex-unified-metrics-9942` owns readouts and simulation import, with
 Repository Management presence through05:19UTC. The original shared session
 holds the #9942 lease through05:17UTC. Preserve other agents and Tools4dabe900.
@@ -18,16 +18,14 @@ No anatomical metric framework is duplicated from #9934.
 Validation: 513 Capture Rig/geometry tests passed before the scene-identity
 cache and type-only correction; ten focused regressions then passed. LoD no-growth
 and architecture checks passed; scoped mypy initially found a heterogeneous
-reference inference and dtype issue, corrected explicitly, final type verdict
-pending. Visual Driver frame200/654 at0.556s inspected in external
+reference inference and dtype issue, corrected explicitly, readout type check now passes four source files. Visual Driver frame200/654 at0.556s inspected in external
 `analysis-9926-artifacts/metric-readout-ftgfnr50/model-metric-readout.png`.
 
 Next: finish type/focused checks, document and commit readout implementation;
 implement explicit Trace v2 marker-motion import and shared native viewport
 reference geometry; update capability/context maps; qualify #9942 protected CI.
 Trace HDF5 metadata round-trips scalars only, so marker names and coordinate
-frame must use an explicit portable contract. No simulation import is implemented
-yet. The #9943 worktree separately repairs a newly introduced fleet optional-path
+frame must use an explicit portable contract. Trace import is now implemented locally through the existing importer and mapping UI: nine tests pass for clocks/names/gaps/provenance, decoded bounds, external-link rejection and opening model analysis. Type check pending. Topology/club metadata and native viewport geometry remain incomplete. The #9943 worktree separately repairs a newly introduced fleet optional-path
 checker failure; preserve that CI fix and integrate it when committed.
 
 ## Unified Analysis Comparison Drawings (#9932)

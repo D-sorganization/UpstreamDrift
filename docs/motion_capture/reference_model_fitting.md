@@ -179,3 +179,30 @@ placement, then save the comparison. Undo and reset remain available; the
 source capture, fitted joint angles and camera calibration are unchanged.
 Saved comparisons and export sidecars retain all display choices. Existing
 assets without club connectivity remain valid and show no club toggle capability.
+
+## Analyze a Simulation Trace
+
+In the reference library, choose **Import Motion…** and select a Trace v2
+`.h5` or `.hdf5` file produced by the shared simulation serializer. The importer
+requires one rollout with marker trajectories. A state-only trace is rejected
+with an explanation; joint coordinates alone are not treated as marker positions.
+
+Trace marker coordinates use metres. The mapping dialog preserves this unit
+contract. Scalar metadata `frame="world_Zup"` declares canonical right-handed
+Z-up coordinates; without that declaration, confirm the source-axis mapping.
+Optional scalar metadata `marker_names_json` contains a JSON string array in
+marker-column order. Without names, the dialog displays `marker_0`, `marker_1`,
+and so on for explicit mapping. These index labels do not identify anatomy.
+The backend and optional `model_identity` appear in the model identity field.
+
+Confirm names and skeleton connections in the existing mapping dialog, import,
+then choose **Analyze Model…**. The shared editor supports timeline playback,
+drawings, appearance, placement/handedness, metric reference geometry and current
+point/plane distances. Camera projection remains a separate comparison setup.
+Missing marker samples remain missing. Import checks both the source file and
+its decoded dataset budget and rejects linked external HDF5 datasets.
+
+The initial Trace route does not infer skeleton or club connections from names.
+Explicit topology/club metadata and native simulation viewport geometry remain
+tracked in #9942; do not assume that a state-only backend can produce a full
+humanoid overlay through this import alone.
