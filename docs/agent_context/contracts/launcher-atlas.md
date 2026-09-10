@@ -21,6 +21,13 @@ actions and acyclic prerequisites. Its saved plans carry a catalog revision;
 the capture wizard evaluates current inputs when opening them. Architecture
 data-flow edges remain distinct from executable goal prerequisites.
 
+The registry now includes model-only analysis, comparison drawings, metric
+reference readouts, Trace v2 imports and Pose Studio world references. Preserve
+their explicit desktop-only status and evidence paths; these entries do not
+establish web parity or scientific qualification. The existing
+[Shared Analysis Contracts](../../architecture/SHARED_ANALYSIS_CONTRACTS.md)
+describe the underlying sampling and geometry boundaries.
+
 ## Lifecycle and Failures
 
 Run `python3 -m scripts.generate_capability_atlas` after relevant registry

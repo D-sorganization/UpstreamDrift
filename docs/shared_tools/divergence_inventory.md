@@ -25,12 +25,12 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `_contracts_validators.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `_seam_redirect.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `ai` | 47 | 71 | 55 | 20 | 0 | 118 |
-| `analysis` | 0 | 0 | 0 | 18 | 0 | 0 |
+| `analysis` | 0 | 0 | 0 | 19 | 0 | 0 |
 | `anthropometrics` | 0 | 0 | 0 | 38 | 0 | 0 |
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `biomechanics` | 0 | 0 | 0 | 26 | 0 | 0 |
+| `biomechanics` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `body_part_viz` | 0 | 0 | 0 | 34 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `canonical_core` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -47,7 +47,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `control_interface.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `core` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
-| `dashboard` | 0 | 0 | 0 | 12 | 0 | 0 |
+| `dashboard` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `data_io` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `data_processing` | 3 | 1 | 0 | 1 | 0 | 4 |
 | `data_processor` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -127,7 +127,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **423** | **279** | **124** | **1210** | **656** | **702** |
+| **Total** | **423** | **279** | **124** | **1215** | **656** | **702** |
 
 ## Diverged Files by Package
 

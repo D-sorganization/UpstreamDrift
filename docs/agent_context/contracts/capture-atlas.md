@@ -36,6 +36,13 @@ such a selection fails rather than silently weakening camera requirements.
 Optional steps remain explicit. Readiness stays with the existing workflow and
 artifact evidence; visiting a page alone never marks an operation complete.
 
+Model analysis and comparison now share drawing and scene-bound metric
+reference routes in the connections authority. Their edges retain distinctions
+between virtual-camera pixels, calibrated metric projection and geometric
+readouts. Trace imports require marker channels and explicit axes; an atlas
+edge must not imply inferred FK from generalized coordinates alone. These
+architecture routes do not add executable goal prerequisites or relax readiness.
+
 ## Evidence
 
 - [Capture State Authority](../../../src/tools/capture_rig/workflow.py)

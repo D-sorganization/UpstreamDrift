@@ -35,6 +35,12 @@ def geometry_scene_id(root: Path) -> str:
     ):
         path = root / name
         evidence[name] = sha256_of(path) if path.is_file() else None
+    # Camera matrices live in reconstruction.json, separate from the session
+    # summary. Omit an absent new key to retain identities of camera-free scenes.
+    camera_name = "reconstruct/reconstruction.json"
+    camera_path = root / camera_name
+    if camera_path.is_file():
+        evidence[camera_name] = sha256_of(camera_path)
     return fingerprint(evidence)
 
 

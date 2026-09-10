@@ -297,7 +297,10 @@ class ReferenceLibraryDialog(QDialog):
         if not self._leave():
             return
         name, _ = QFileDialog.getOpenFileName(
-            self, "Import Motion Reference", "", "Motion references (*.c3d *.json)"
+            self,
+            "Import Motion Reference",
+            "",
+            "Motion references (*.c3d *.json *.h5 *.hdf5)",
         )
         if name:
             self._start(lambda: load_motion_draft(Path(name)), self._map_motion)
