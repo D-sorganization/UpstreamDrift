@@ -22,14 +22,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** codex
 - **Issue:** #9926; children #9929, #9930, #9932
-- **Branch:** feat/9926-unified-analysis
-- **PR:** #9933
+- **Branch:** feat/9932-comparison-drawings
+- **PR:** #9933 (merged); #9932 follow-up pending
 - **Paths:** src/motion_capture/coaching; src/tools/capture_rig
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (7ff55ef8d; local regression, visual and push gates)
+- **Last verified:** 2026-09-10 (f04aa1a570e64c3db0b3d009351ab222656175b2; protected quality gate and 497 combined local regressions)
 - **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
 - **Evidence:** Capture Rig and geometry regressions, Ruff/format, budgets, scoped mypy and normal push hooks passed; full Driver model UI and PNG inspected.
-- **Next step:** Resolve protected CI; complete comparison drawings, measurements, simulation routes and maps before closing the epic.
+- **Next step:** Complete comparison drawings (#9932), measurements, simulation routes and maps before closing the epic; coordinate metric interfaces with #9934.
 
 ### DL-#9907 · Guided Capture Outcomes
 

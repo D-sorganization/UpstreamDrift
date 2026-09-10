@@ -1,26 +1,42 @@
 # Unified Model and Video Analysis
 
 Tracking: [Epic #9926](https://github.com/D-sorganization/UpstreamDrift/issues/9926).
-Review: [PR #9933](https://github.com/D-sorganization/UpstreamDrift/pull/9933).
+Merged Foundation: [PR #9933](https://github.com/D-sorganization/UpstreamDrift/pull/9933),
+`f04aa1a570e64c3db0b3d009351ab222656175b2`.
 First bounded delivery: [Story #9929](https://github.com/D-sorganization/UpstreamDrift/issues/9929).
 Model-only delivery: [Story #9930](https://github.com/D-sorganization/UpstreamDrift/issues/9930).
 This is an implementation ledger; unchecked integration paths are not shipped
 capabilities. Reference fitting, club display, handedness, and ellipsoid display
 from #9914 remain the foundation.
 
+Stories #9929 and #9930 are complete: required protected CI passed at
+`ca71d2c1515c9f19b1ab8d851d594974933817dc` before the normal merge. The combined
+Capture Rig and geometry regression run passed 497 tests after integrating the
+guided capture wizard. Independent queued jobs had no result at merge time;
+they are not represented as passing evidence. Historical qualification notes
+below retain the checks and limitations observed during implementation.
+
+Story #9932 is in progress in `feat/9932-comparison-drawings`. Test-first canvas
+finalization preserves drawing/reference/selection-handle order and rejects
+changed pixel grids. The comparison frame adapter matches the existing export
+compositor pixel for pixel, including detected-pose overlays. Thirteen focused
+canvas, source, coaching and model-dialog regressions pass. The comparison
+launch action, persistence/export source adapter and visual qualification are
+still pending; this seam alone does not complete the story.
+
 ## Reuse and Surface Audit
 
-| Surface              | Existing Infrastructure                                                                 | Required Integration                                                                      | Status                                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Capture Coaching     | `CoachingDialog`, `CoachingCanvas`, immutable `DrawingLayer`, bounded `History`         | Share the drawing editor with model comparison; keep original pixel coordinates           | Pending                                                                                                      |
-| Reference Comparison | `ReferenceComparisonDialog`, placement, event pairing, appearance, `ComparisonRenderer` | Editable shared world planes and points; measurement readout and drawing tools            | Plane/point editor and compositor implemented locally; qualification ongoing                                 |
-| Comparison Export    | Shared compositor, camera/clock snapshots, input hashes, export sidecar                 | Include exact geometry document and validate source evidence                              | Implemented locally; full regression and visual qualification pending                                        |
-| Model-Only Analysis  | `ReferenceMotion`, `ReferenceTimeline`, fit artifacts and model registry                | Use common controls and a clearly virtual camera without inventing capture media          | Shared coaching editor, controls, persistence and verified exports implemented locally; protected CI pending |
-| Pose Studio          | Canonical poses, live kinematics, `View3D`, existing club bone                          | Consume shared analysis references and model/trace handoff                                | Pending                                                                                                      |
-| Simulation Traces    | `simulation_backends.protocol.Trace` v2 optional metric markers, `trace_io`             | Explicit marker topology and unit/frame adapter into common analysis                      | Pending                                                                                                      |
-| Native Viewports     | `Viewport` mesh protocol, `FspRenderer`, provider capability evaluation                 | Render the same reference geometry with explicit unsupported-capability reasons           | Pending                                                                                                      |
-| Native Engines       | Pose interchange adapters and engine registry                                           | Qualify actual available model/trace routes; do not claim optional SDK support from mocks | Pending                                                                                                      |
-| Functionality Maps   | Capability connections, generated agent-context maps                                    | Record real edges after integration; coordinate with #9907 and #9915 owners               | Pending                                                                                                      |
+| Surface              | Existing Infrastructure                                                                 | Required Integration                                                                      | Status                                                                     |
+| -------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Capture Coaching     | `CoachingDialog`, `CoachingCanvas`, immutable `DrawingLayer`, bounded `History`         | Share the drawing editor with model comparison; keep original pixel coordinates           | Pending                                                                    |
+| Reference Comparison | `ReferenceComparisonDialog`, placement, event pairing, appearance, `ComparisonRenderer` | Editable shared world planes and points; measurement readout and drawing tools            | Plane/point editor merged in #9933; drawing tools and measurements pending |
+| Comparison Export    | Shared compositor, camera/clock snapshots, input hashes, export sidecar                 | Include exact geometry document and validate source evidence                              | Geometry recipe merged in #9933 with regression and visual qualification   |
+| Model-Only Analysis  | `ReferenceMotion`, `ReferenceTimeline`, fit artifacts and model registry                | Use common controls and a clearly virtual camera without inventing capture media          | Shared editor, controls, persistence and verified exports merged in #9933  |
+| Pose Studio          | Canonical poses, live kinematics, `View3D`, existing club bone                          | Consume shared analysis references and model/trace handoff                                | Pending                                                                    |
+| Simulation Traces    | `simulation_backends.protocol.Trace` v2 optional metric markers, `trace_io`             | Explicit marker topology and unit/frame adapter into common analysis                      | Pending                                                                    |
+| Native Viewports     | `Viewport` mesh protocol, `FspRenderer`, provider capability evaluation                 | Render the same reference geometry with explicit unsupported-capability reasons           | Pending                                                                    |
+| Native Engines       | Pose interchange adapters and engine registry                                           | Qualify actual available model/trace routes; do not claim optional SDK support from mocks | Pending                                                                    |
+| Functionality Maps   | Capability connections, generated agent-context maps                                    | Record real edges after integration; coordinate with #9907 and #9915 owners               | Pending                                                                    |
 
 ## Contracts and Coordinate Ownership
 
