@@ -1,5 +1,13 @@
 # Common-Reference Calibration Handoff
 
+Active #9899: `feat/9899-calibration-revision-status`, draft PR #9959,
+builds on unchanged #9954. Camera source hashing uses shared provenance;
+command and wizard regression tests cover same-path changes, absent source,
+matching/legacy outputs and downstream blocking. See
+`capture_calibration_revision_delivery.md`. The numerical ruler provider is
+Tools #5169 at3d7beb203; its worker/editor integration is still outstanding.
+Preserve the installed candidate runtime and the peer camera/impact work.
+
 Active #9952/#9909: `feat/9952-camera-setup`, PR #9954, adds the native camera
 editor and guided acceptance. All566 Capture Rig and30 isolated calibration
 checks pass; searchable player examples were visually reviewed with the app theme.

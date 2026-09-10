@@ -71,6 +71,14 @@ def test_rig_reconstruct_command(tmp_path: Path) -> None:
     )
     assert code == 0
     assert (session / RECONSTRUCT_DIR / "session_reconstruction.json").is_file()
+    from src.motion_capture.provenance import sha256_of
+
+    document = json.loads(
+        (session / RECONSTRUCT_DIR / "session_reconstruction.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert document["camera_source_sha256"] == sha256_of(cameras)
 
 
 def test_contracts(tmp_path: Path) -> None:
