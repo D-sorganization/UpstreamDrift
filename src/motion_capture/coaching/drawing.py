@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from math import hypot, isclose
 from pathlib import Path
-from typing import Literal, Self
+from typing import Generic, Literal, Self, TypeVar
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -141,13 +141,16 @@ class DrawingLayer(BaseModel):
         return cls.model_validate_json(path.read_text(encoding="utf-8"))
 
 
-class History:
+Snapshot = TypeVar("Snapshot", bound=BaseModel)
+
+
+class History(Generic[Snapshot]):
     """Bounded immutable snapshots; one drag creates one undo step."""
 
-    def __init__(self, layer: DrawingLayer) -> None:
+    def __init__(self, layer: Snapshot) -> None:
         self.current = layer
-        self._past: list[DrawingLayer] = []
-        self._future: list[DrawingLayer] = []
+        self._past: list[Snapshot] = []
+        self._future: list[Snapshot] = []
 
     @property
     def can_undo(self) -> bool:
@@ -157,7 +160,7 @@ class History:
     def can_redo(self) -> bool:
         return bool(self._future)
 
-    def apply(self, layer: DrawingLayer) -> None:
+    def apply(self, layer: Snapshot) -> None:
         if layer != self.current:
             self._past = (self._past + [self.current])[-MAX_HISTORY:]
             self.current = layer

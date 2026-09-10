@@ -30,6 +30,31 @@ def settle(dialog: ReferenceLibraryDialog) -> None:
     assert dialog._worker is None
 
 
+def test_library_opens_model_analysis_without_a_capture(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.tools.capture_rig.model_analysis_dialog import ModelAnalysisDialog
+
+    _app()
+    library = ReferenceLibrary(tmp_path)
+    asset = motion()
+    library.save(asset)
+    opened = []
+
+    def inspect(dialog: ModelAnalysisDialog) -> int:
+        opened.append(dialog.model_source.reader.recipe.asset.id)
+        dialog.close()
+        return 0
+
+    monkeypatch.setattr(ModelAnalysisDialog, "exec", inspect)
+    dialog = ReferenceLibraryDialog(library)
+    settle(dialog)
+    dialog.analyze_model()
+    assert opened == [asset.id]
+    assert not list(tmp_path.rglob("recordings.json"))
+    dialog.close()
+
+
 def test_notes_archive_and_reopen(tmp_path: Path) -> None:
     app = _app()
     library = ReferenceLibrary(tmp_path)

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from .clips import verify_frame_clip as _verify_encoded
+
+from src.motion_capture.coaching.geometry_storage import geometry_path, load_geometry
+
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -14,6 +18,7 @@ import numpy.typing as npt
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 
 from src.motion_capture.coaching.storage import load_layer, layer_path
+from src.motion_capture.coaching import DrawingLayer
 from src.motion_capture.provenance import write_json
 from src.motion_capture.reconstruct.cameras import PinholeCamera
 from src.shared.python.pose_estimation.observations import CameraCalibration
@@ -57,6 +62,18 @@ class ComparisonVideoExportOptions:
     speed: float = 1.0
     cancelled: Callable[[], bool] = lambda: False
     progress: Callable[[int, int], None] = lambda done, total: None
+    drawings: DrawingLayer | None = None
+
+
+def _with_drawing_snapshot(
+    context: ComparisonRenderContext, drawings: DrawingLayer | None
+) -> ComparisonRenderContext:
+    if drawings is None:
+        return context
+    original = context.drawings
+    if original is None or original.with_shapes(()) != drawings.with_shapes(()):
+        raise ValueError("Drawing snapshot belongs to another source")
+    return replace(context, drawings=drawings)
 
 
 def _camera_snapshot(
@@ -85,20 +102,6 @@ def _input_hashes(
     return {path: _digest(path, cancelled) if path.exists() else None for path in paths}
 
 
-def _verify_encoded(
-    path: Path, frames: int, size: tuple[int, int], cancelled: Callable[[], bool]
-) -> None:
-    """Require the staged container to decode completely before publication."""
-    with VideoReader(path) as reader:
-        if reader.frame_count != frames or (reader.width, reader.height) != size:
-            raise ValueError("Encoded comparison dimensions or frame count differ")
-        for index in range(frames):
-            if cancelled():
-                raise InterruptedError("Comparison export cancelled")
-            if reader.read(index) is None:
-                raise ValueError(f"Could not verify encoded frame {index}")
-
-
 def _render_recipe(
     root: Path,
     view: str,
@@ -118,8 +121,16 @@ def _render_recipe(
     if edit.crop:
         edit.crop.validate_size(reader.width, reader.height)
     drawings = load_layer(root, view, reader.width, reader.height, reader.frame_count)
+    geometry = load_geometry(root)
     return ComparisonRenderContext(
-        view, asset, registration, layer, crop=edit.crop, drawings=drawings
+        view,
+        asset,
+        registration,
+        layer,
+        crop=edit.crop,
+        drawings=drawings,
+        geometry=geometry if geometry.planes or geometry.points else None,
+        scene_id=geometry.scene_id,
     ), clip
 
 
@@ -151,6 +162,7 @@ def _export_metadata(
     metadata.update(
         reference_asset=ctx.asset.model_dump(mode="json"),
         drawings=ctx.drawings.model_dump(mode="json") if ctx.drawings else None,
+        geometry=ctx.geometry.model_dump(mode="json") if ctx.geometry else None,
         selection={"first": clip.first, "last": clip.last},
         render_recipe={
             "version": "comparison-compositor/1.0.0",
@@ -158,6 +170,7 @@ def _export_metadata(
                 "player",
                 "detected_pose",
                 "drawings",
+                "scene_geometry",
                 "reference",
                 "crop",
                 "edge_padding",
@@ -213,6 +226,7 @@ def export_comparison_video(
         source,
         root / EDITS_FILE,
         layer_path(root, view),
+        geometry_path(root),
         root / "recordings.json",
         root / "observations" / "observations.json",
     }
@@ -225,6 +239,7 @@ def export_comparison_video(
         raise ValueError("Reference source changed or is unavailable; import it again")
     with VideoReader(source) as reader:
         ctx, clip = _render_recipe(root, view, asset, registration, layer, reader)
+        ctx = _with_drawing_snapshot(ctx, opts.drawings)
         fps, width, height = reader.fps, reader.width, reader.height
         if fps * opts.speed < 1:
             raise ValueError("Comparison speed needs an output rate of at least 1 fps")

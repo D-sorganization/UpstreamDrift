@@ -4,6 +4,8 @@ Active #9898/#9900: read `docs/development/common_reference_calibration.md` and
 DL-#9898. Review checkpoint in isolated `UpstreamDrift-common-calibration`.
 Preserve apps54812/61500, atlas2963 and coordinated provider-pin ownership.
 
+Comparison drawings #9932 merged through #9943; see the canonical handoff.
+
 ## C3D Reference Fitting (#9914)
 
 Current work is isolated in `../UpstreamDrift-reference-9914`, branch
