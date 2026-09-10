@@ -2,9 +2,11 @@
 
 ## Scope and Delivery State
 
-Epic #9897; children #9898 and #9900. Branch
-`feat/9898-common-reference-sessions` in the isolated
-`UpstreamDrift-common-calibration` worktree. PR #9946 now integrates published
+Epic #9897; children #9898 and #9900. PR #9946 merged as `126158943` before the
+installed-package repairs below. Issue #9949 delivers those repairs from branch
+`fix/9949-installed-capture` in the isolated `UpstreamDrift-common-calibration`
+worktree; merge `e623b3c69` integrates current main without application changes.
+The calibration delivery integrates published
 main `08c8529ef` through merge `732553479`, including the combined Tools provider
 `e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`. The checked-out provider, Gitlink,
 Python requirement and Rust dependency agree. Twenty-eight pin/context/atlas/

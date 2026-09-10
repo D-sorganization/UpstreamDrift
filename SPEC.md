@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Installed Capture Runtime (#9949)
+
+The installed calibration worker resolves only its owning distribution's bundled
+provider. Unrelated distributions and incomplete checkouts fail explicitly. Wheel
+assembly preserves tracked motion-matching reference loaders while retaining
+scratch-output exclusions. Installed startup, wizard and calibration checks run
+outside the source checkout; synthetic tests do not establish physical accuracy.
+
 ## Impact Shaft Provider Integration (#9912)
 
 The exact vendor/ud-tools pin provides golf_club.distributed_shaft/1 through the
