@@ -4,16 +4,19 @@
 
 Epic #9897; children #9898 and #9900. Branch
 `feat/9898-common-reference-sessions` in the isolated
-`UpstreamDrift-common-calibration` worktree. PR #9946 checkpoint 457521222 passed every normal push hook and integrates main276998030 (#9945/#9947 analysis delivery). It is reachable through Calibration in this worktree,
-but the running test application still uses the earlier merged wizard source.
+`UpstreamDrift-common-calibration` worktree. PR #9946 now integrates published
+main `08c8529ef` through merge `732553479`, including the combined Tools provider
+`e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`. The checked-out provider, Gitlink,
+Python requirement and Rust dependency agree. Twenty-eight pin/context/atlas/
+governance tests pass. The complete capture/reconstruction suite is being
+requalified against this provider before pushing the integration.
 
-Tools #5141 published the combined provider as
-`e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`, with both Linux aggregates and
-required quality checks passing. The context owner retains final consumer
-Gitlink/Cargo/pip/catalog alignment and installed-launcher qualification.
-The local vendor checkout remains 0a561daff for development; do not commit it
-alone because it lacks the launcher correction. Integrate the owner's published
-consumer delivery before final PR qualification. Historical failures remain failures.
+The context owner qualified a frontend-inclusive installed wheel at source
+`6dab98fce`: launcher, dependency and 31 calibration/reference checks passed.
+The impact owner independently verified wheel/test-report hashes and zero
+failures/skips. This is provider/installation evidence, not qualification of the
+full current #9946 wheel or physical camera accuracy. Historical failures remain
+failures. Live test applications still use their frozen earlier checkouts.
 
 ## Implemented Workflow
 
@@ -206,7 +209,7 @@ Thirteen catalog/library/dialog tests,29 isolated provider checks and19 library/
   files must stay available; portable profile packaging remains to be qualified.
 - #9900 manual calculation inventory, physical multi-camera/zoom evidence and
   packaged-runtime qualification are not approved by synthetic tests.
-- Final provider pin, packaged qualification, PR/CI/protected merge and physical-camera acceptance remain pending. Current main and generated metadata are integrated; named reuse, visual frame selection and precision panning are implemented and locally qualified.
+- The published provider is integrated; full current-wheel qualification, PR/CI/protected merge and physical-camera acceptance remain pending. Current main and generated metadata are integrated; named reuse, visual frame selection and precision panning are implemented and locally qualified.
 
 ## Concurrent Work and Live Applications
 
