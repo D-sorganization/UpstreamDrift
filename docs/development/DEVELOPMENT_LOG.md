@@ -17,19 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9953 · Scalar Parameter Bounds
+### DL-#9952 · Native Camera Setup
 
 - **State:** in_review
 - **Owner:** codex
-- **Issue:** #9953
-- **Branch:** fix/9953-scalar-bounds
-- **PR:** #9955
-- **Paths:** src/shared/python/optimization/ocp/parameter_ocp.py; parameter OCP tests; calculation inventory.
+- **Issue:** #9952; parent #9906
+- **Branch:** feat/9952-camera-setup
+- **PR:** #9954
+- **Paths:** src/tools/capture_rig/camera_setup\*.py; wizard/header; capability registry; tests and camera setup guide.
 - **Started:** 2026-09-10
-- **Last verified:** 2026-09-10 (30 OCP tests pass; two optional Pinocchio checks skipped)
-- **Summary:** Explicit constant interpolation gives each shared parameter a single-column bound, preserving limits and locked values.
-- **Evidence:** New actual-SDK regression failed with (1,3) before the fix; all five parameter tests pass after it, including unchanged numerical recovery tests. The optimization unit suite also passes after its bounds stub adopted the SDK add API. CasADi 3.6.7 and pinned Bioptim fdafe4d9; no tolerance changes.
-- **Next step:** Normal hooks, CI including Linux optional engines, and protected merge.
+- **Last verified:** 2026-09-10 (563 Capture Rig tests, 16 atlas/workflow and 15 goal tests, six-module mypy and Ruff pass)
+- **Summary:** Background discovery, stable named bindings, immutable plan revisions and optional wizard entry reuse the rig pipeline.
+- **Next step:** Installed package passes; complete #9950/#9953 dependency and protected PR delivery.
 
 ### DL-#9926 · Unified Model and Video Analysis
 
@@ -472,6 +471,21 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Address review feedback on PR #9725 and merge when approved.
 
 ## Shipped (Last 90 Days)
+
+### DL-#9953 · Scalar Parameter Bounds
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9953
+- **Branch:** fix/9953-scalar-bounds
+- **PR:** #9955
+- **Paths:** src/shared/python/optimization/ocp/parameter_ocp.py; parameter OCP tests; calculation inventory.
+- **Started:** 2026-09-10
+- **Last verified:** 2026-09-10 (30 OCP tests pass; two optional Pinocchio checks skipped)
+- **Summary:** Explicit constant interpolation gives each shared parameter a single-column bound, preserving limits and locked values.
+- **Evidence:** New actual-SDK regression failed with (1,3) before the fix; all five parameter tests pass after it, including unchanged numerical recovery tests. The optimization unit suite also passes after its bounds stub adopted the SDK add API. CasADi 3.6.7 and pinned Bioptim fdafe4d9; no tolerance changes.
+- **Evidence:** All CI passed, including Linux Bioptim OCP and both manufactured checks. Merged as32410babfd1e4741fa0c53bf05dd8403a51bf233.
+- **Next step:** None for #9953; capture integration continues in #9950/#9954.
 
 ### DL-#9882 · Comparison Rendering and Export Qualification
 

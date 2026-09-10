@@ -1,6 +1,7 @@
 # Camera Rig Capture
 
 For a guided route through the app, see [Guided Swing Capture](capture_wizard.md).
+Create reusable recording plans with the native [Camera Setup](camera_setup.md) editor.
 
 Version: 1.0.0
 
