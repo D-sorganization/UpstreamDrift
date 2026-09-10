@@ -27,38 +27,32 @@ from PyQt6.QtWidgets import (
 )
 
 from src.motion_capture.coaching import Drawing
-from src.motion_capture.coaching.storage import load_layer, save_layer
 
 from . import styling
-from .coaching_canvas import CoachingCanvas
-from .coaching_export import export_still
+from .coaching_canvas import CoachingCanvas, FrameFinalizer
+from .coaching_source import CaptureCoachingSource, CoachingSource
 from .flow_layout import FlowLayout
-from .player import VideoReader
 from .session import load_session
-from .swing_export_actions import SwingExportActions
+from .swing_export_actions import ExportJobSpec, SwingExportActions
 
 
 class CoachingDialog(QDialog):
-    def __init__(self, root: Path, view: str, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        root: Path,
+        view: str,
+        parent: QWidget | None = None,
+        *,
+        media: CoachingSource | None = None,
+        finalize: FrameFinalizer | None = None,
+    ) -> None:
         super().__init__(parent)
-        source = load_session(root).view(view).recording
-        if source is None:
-            raise ValueError("This camera has no original recording")
         self.root, self.view = root, view
-        self.reader = VideoReader(source)
-        try:
-            saved = load_layer(
-                root,
-                view,
-                self.reader.width,
-                self.reader.height,
-                self.reader.frame_count,
-            )
-        except (OSError, ValueError):
-            self.reader.close()
-            raise
+        self.media = media or CaptureCoachingSource(root, view)
+        self.reader = self.media.reader
+        saved = self.media.drawings
         self._saved = saved
-        self.canvas = CoachingCanvas(saved)
+        self.canvas = CoachingCanvas(saved, finalize=finalize)
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._advance)
         self.canvas.interaction_started.connect(self._stop)
@@ -107,6 +101,11 @@ class CoachingDialog(QDialog):
             save=self.save,
             status=self.status.setText,
             drawings=lambda: self.canvas.layer,
+            job=ExportJobSpec(
+                lambda: self.media.export_job(self.canvas.layer),
+                "Export Annotated Analysis",
+                "analysis.mp4",
+            ),
             label="Export Annotated Swing…",
         )
         self._build()
@@ -118,7 +117,7 @@ class CoachingDialog(QDialog):
     def _build(self) -> None:
         layout = QVBoxLayout(self)
         help_text = QLabel(
-            "Choose a tool and drag on the video. Select a stroke to move it; drag its white handles to resize. Arrow keys nudge, Delete removes, Ctrl+Z undoes. Drawings are visual references, not measured landmarks."
+            "Choose a tool and drag on the image. Select a stroke to move it; drag its white handles to resize. Arrow keys nudge, Delete removes, Ctrl+Z undoes. Drawings are visual references, not measured landmarks."
         )
         help_text.setWordWrap(True)
         layout.addWidget(help_text)
@@ -249,7 +248,10 @@ class CoachingDialog(QDialog):
             self.stroke_width.setValue(selected.stroke)
             self.stroke_width.blockSignals(False)
         self.colour.setText(f"Colour {self.canvas.colour}…")
-        self.setWindowModified(layer != self._saved)
+        self.setWindowModified(self._has_unsaved())
+
+    def _has_unsaved(self) -> bool:
+        return self.canvas.layer != self._saved or self.media.dirty
 
     def add_center(self) -> None:
         kind = self.tool.currentText().lower()
@@ -297,7 +299,7 @@ class CoachingDialog(QDialog):
             return
         self.canvas.set_frame(image, frame)
         self.clock.setText(
-            f"Source Frame {frame} / {self.reader.frame_count - 1} · {frame / (self.reader.fps or 30):.3f} s"
+            f"Source Frame {frame} / {self.reader.frame_count - 1} · {self.media.time_at(frame):.3f} s"
         )
         self._sync()
 
@@ -322,7 +324,7 @@ class CoachingDialog(QDialog):
 
     def save(self) -> bool:
         try:
-            save_layer(self.root, self.canvas.layer)
+            self.media.save(self.canvas.layer)
             self._saved = self.canvas.layer
             self.status.setText(
                 "References Saved · Original Video and Pose Data Preserved"
@@ -343,9 +345,7 @@ class CoachingDialog(QDialog):
         )
         if name and self.save():
             try:
-                export_still(
-                    self.root, self.canvas.layer, self.slider.value(), Path(name)
-                )
+                self.media.still(self.canvas.layer, self.slider.value(), Path(name))
                 self.status.setText(f"Reference Image and Sidecar Saved: {name}")
             except (ValueError, OSError, cv2.error) as exc:
                 self.status.setText(str(exc))
@@ -357,7 +357,7 @@ class CoachingDialog(QDialog):
         if not self.exporter.can_close():
             event.ignore()
             return
-        if self.canvas.layer != self._saved:
+        if self._has_unsaved():
             answer = QMessageBox.question(
                 self,
                 "Unsaved References",

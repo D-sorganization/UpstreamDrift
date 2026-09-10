@@ -506,7 +506,7 @@
       "tiles": [
         "capture_rig"
       ],
-      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints. Common-reference calibration #9898/#9900 adds capture-owned paper/ruler observations, original-frame point editing, repeated placements, asynchronous canonical camera estimation, reviewable result history and shared native/generated help; lens profiles remain required. Guided cross-capture reuse and physical accuracy qualification remain pending under #9897.",
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints. Common-reference calibration #9898/#9900 adds capture-owned paper/ruler observations, original-frame point editing, repeated placements, asynchronous canonical camera estimation, reviewable result history and shared native/generated help; lens profiles remain required. Guided cross-capture reuse and physical accuracy qualification remain pending under #9897. Model-only analysis and Draw on Comparison reuse the coaching editor, appearance, club/ellipsoid/handedness controls and scene-bound metric planes/points. Comparison drawing PNGs preserve original pixels; video applies the saved crop. These desktop routes do not establish web parity.",
       "id": "tools.capture_rig"
     },
     {
@@ -1675,6 +1675,30 @@
       ]
     },
     {
+      "id": "capture.model_analysis",
+      "title": "Model Analysis",
+      "description": "Analyze reference motion with the shared timeline, drawings, appearance and metric references.",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Select a motion asset in the reference library and choose Analyze Model.",
+        "Adjust club visibility, ellipsoids, opacity, placement and handedness; add drawings or 3D references.",
+        "Save the portable analysis recipe or export a still or video. The camera is virtual."
+      ]
+    },
+    {
+      "id": "capture.world_references",
+      "title": "Metric Reference Planes and Points",
+      "description": "Scene-bound reference geometry in metres with explicit ADR-0041 axes.",
+      "evidence": "src/tools/capture_rig/geometry_controls.py",
+      "view": "workflow",
+      "instructions": [
+        "Open 3D References in model analysis or comparison.",
+        "Enter point coordinates or plane origin, normal, extent and opacity in the displayed world frame.",
+        "Save after reviewing camera and scene identity; changed evidence requires review."
+      ]
+    },
+    {
       "id": "step.setup",
       "title": "Set up Cameras and Plan",
       "description": "Bind each camera to a named view so takes are repeatable.",
@@ -2282,6 +2306,60 @@
       "evidence": "src/motion_capture/reconstruct/model/session.py",
       "constraint": "Current body models apply no club constraints; equipment is recorded in provenance",
       "view": "workflow"
+    },
+    {
+      "source": "capture.experts",
+      "target": "capture.model_analysis",
+      "artifact": "Selected marker motion",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_library_dialog.py",
+      "constraint": "Motion assets only; no recording is required",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.model_analysis",
+      "target": "capture.references",
+      "artifact": "Shared drawing editor",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "constraint": "Drawings use the original virtual-camera pixel grid",
+      "view": "system"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "capture.references",
+      "artifact": "Draw on Comparison",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Save registration first; editor and PNG retain original pixels, video applies saved crop",
+      "view": "system"
+    },
+    {
+      "source": "capture.model_analysis",
+      "target": "capture.world_references",
+      "artifact": "Shared geometry controls",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "constraint": "Virtual camera is explicit; illustrative volumes are not anatomical meshes",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "capture.world_references",
+      "artifact": "Shared geometry controls",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Metric projection requires camera evidence; geometry is bound to the scene",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.world_references",
+      "target": "comparison.outputs",
+      "artifact": "Saved world geometry",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_export.py",
+      "constraint": "The shared compositor retains geometry, layer order and source identity",
+      "view": "workflow"
     }
   ],
   "capture_goals": {
@@ -2534,8 +2612,8 @@
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "be83fc1c31c64120aa53f5016c480168a4a4a09db514200a77620d2f38b2268f",
-    "src/config/capability_connections.json": "87930f159202719c0e09678afc273052f5b6097644bc66b4edd9bda794b9feda",
+    "src/config/feature_parity.json": "6803ea5380f374e14dd108f07e934b77d917593ba30b12d58f235eb4d8aee4c2",
+    "src/config/capability_connections.json": "88e5647bc819f7e3198803dfd0a84986ee34fc1fd6a5b9c1ec7b42481e648395",
     "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e"
   }
 }
