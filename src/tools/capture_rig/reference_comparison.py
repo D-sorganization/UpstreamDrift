@@ -61,6 +61,8 @@ from . import styling
 from .annotate_widget import ImageCanvas
 from .flow_layout import FlowLayout
 from .geometry_controls import GeometryControls
+from .coaching_dialog import CoachingDialog
+from .comparison_coaching_source import ComparisonCoachingSource
 from .reference_controls import SpatialControls, TimeControls
 from .reference_appearance import MotionAppearanceControls
 from .reference_timeline import ReferenceTimeline
@@ -291,6 +293,7 @@ class ReferenceComparisonDialog(QDialog):
         buttons = FlowLayout(spacing=6)
         for label, slot in (
             ("Save Comparison", self.save),
+            ("Draw on Comparison…", self.edit_drawings),
             ("Undo Change", self.undo_change),
             ("Reset Alignment", self.reset_alignment),
         ):
@@ -680,21 +683,7 @@ class ReferenceComparisonDialog(QDialog):
         self.clock_label.setText(f"{t_scene:.3f}s (f{frame_idx})")
 
         if self._current_asset and self._session.registration and self._renderer:
-            registration = self._session.registration
-            registration = registration.model_copy(update={"clock": self._clock})
-            context = ComparisonRenderContext(
-                self.view,
-                self._current_asset,
-                registration,
-                self._session.layer,
-                crop=self._edit.crop,
-                drawings=self._drawings,
-                track=self._track,
-                geometry=self._geometry
-                if self._geometry.planes or self._geometry.points
-                else None,
-                scene_id=self._geometry.scene_id,
-            )
+            context = self._render_context()
             try:
                 img = self._renderer.image(
                     self.reader, frame_idx, context, self._camera
@@ -708,6 +697,58 @@ class ReferenceComparisonDialog(QDialog):
         if self.expert_timeline:
             self.expert_timeline.follow(t_scene)
         self._pending_changed()
+
+    def _render_context(self) -> ComparisonRenderContext:
+        asset, registration = self._current_asset, self._session.registration
+        if asset is None or registration is None:
+            raise ValueError("Choose a reference with a saved registration")
+        registration = registration.model_copy(update={"clock": self._clock})
+        geometry = self._geometry
+        return ComparisonRenderContext(
+            self.view,
+            asset,
+            registration,
+            self._session.layer,
+            crop=self._edit.crop,
+            drawings=self._drawings,
+            track=self._track,
+            geometry=geometry if geometry.planes or geometry.points else None,
+            scene_id=geometry.scene_id,
+        )
+
+    def edit_drawings(self) -> None:
+        """Open the existing original-pixel editor over this saved comparison."""
+        self._timer.stop()
+        self.play_button.setText("Play")
+        if not self.save():
+            return
+        source = None
+        try:
+            self._load_render_sources()
+            context = self._render_context()
+            registration = context.registration
+            registration.validate_binding(
+                self.library.load(context.asset.id), self._camera_snapshot, self._clock
+            )
+            source = ComparisonCoachingSource(self.root, context, self._camera)
+            reader = source.reader
+            dialog = CoachingDialog(
+                self.root, self.view, self, media=source, finalize=reader.finalize
+            )
+            dialog.setWindowTitle(f"Draw on Comparison · {context.asset.title}[*]")
+            dialog.slider.setValue(self.slider.value())
+            dialog.status.setText(
+                "Edit in Original Pixels · Stills Keep This Grid; Video Applies the Saved Crop"
+            )
+            dialog.exec()
+            self._load_render_sources()
+            self._show_frame(self.slider.value())
+        except (ValueError, OSError, cv2.error) as exc:
+            self.status_label.setText(f"Cannot edit comparison drawings: {exc}")
+        finally:
+            if source is not None:
+                reader = source.reader
+                reader.close()
 
     def _toggle_play(self) -> None:
         if self._timer.isActive():

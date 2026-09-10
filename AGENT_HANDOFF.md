@@ -1,5 +1,9 @@
 # Guided Capture Workflow Continuation
 
+## Comparison Drawings (#9932)
+
+PR #9943; tracking SELF. [Canonical State](docs/development/HANDOFF.md).
+
 Active #9907/#9908 under epic #9906 in `feat/9907-capture-goal-wizard`, worktree
 `UpstreamDrift-capture-wizard`. Typed route metadata, the generated atlas plan
 exchange, a standard Qt wizard, existing-screen navigation, background evidence

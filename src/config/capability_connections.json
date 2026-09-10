@@ -147,6 +147,30 @@
         "Assign the selected club to this capture. Editing your bag later preserves the capture’s saved club details.",
         "Skip this step if the club details are unavailable. Current body models record equipment context without applying a club constraint."
       ]
+    },
+    {
+      "id": "capture.model_analysis",
+      "title": "Model Analysis",
+      "description": "Analyze reference motion with the shared timeline, drawings, appearance and metric references.",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Select a motion asset in the reference library and choose Analyze Model.",
+        "Adjust club visibility, ellipsoids, opacity, placement and handedness; add drawings or 3D references.",
+        "Save the portable analysis recipe or export a still or video. The camera is virtual."
+      ]
+    },
+    {
+      "id": "capture.world_references",
+      "title": "Metric Reference Planes and Points",
+      "description": "Scene-bound reference geometry in metres with explicit ADR-0041 axes.",
+      "evidence": "src/tools/capture_rig/geometry_controls.py",
+      "view": "workflow",
+      "instructions": [
+        "Open 3D References in model analysis or comparison.",
+        "Enter point coordinates or plane origin, normal, extent and opacity in the displayed world frame.",
+        "Save after reviewing camera and scene identity; changed evidence requires review."
+      ]
     }
   ],
   "edges": [
@@ -490,6 +514,60 @@
       "kind": "workflow",
       "evidence": "src/motion_capture/reconstruct/model/session.py",
       "constraint": "Current body models apply no club constraints; equipment is recorded in provenance",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.experts",
+      "target": "capture.model_analysis",
+      "artifact": "Selected marker motion",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_library_dialog.py",
+      "constraint": "Motion assets only; no recording is required",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.model_analysis",
+      "target": "capture.references",
+      "artifact": "Shared drawing editor",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "constraint": "Drawings use the original virtual-camera pixel grid",
+      "view": "system"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "capture.references",
+      "artifact": "Draw on Comparison",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Save registration first; editor and PNG retain original pixels, video applies saved crop",
+      "view": "system"
+    },
+    {
+      "source": "capture.model_analysis",
+      "target": "capture.world_references",
+      "artifact": "Shared geometry controls",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "constraint": "Virtual camera is explicit; illustrative volumes are not anatomical meshes",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "capture.world_references",
+      "artifact": "Shared geometry controls",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Metric projection requires camera evidence; geometry is bound to the scene",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.world_references",
+      "target": "comparison.outputs",
+      "artifact": "Saved world geometry",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_export.py",
+      "constraint": "The shared compositor retains geometry, layer order and source identity",
       "view": "workflow"
     }
   ],

@@ -1,26 +1,63 @@
 # Unified Model and Video Analysis
 
 Tracking: [Epic #9926](https://github.com/D-sorganization/UpstreamDrift/issues/9926).
-Review: [PR #9933](https://github.com/D-sorganization/UpstreamDrift/pull/9933).
+Merged Foundation: [PR #9933](https://github.com/D-sorganization/UpstreamDrift/pull/9933),
+`f04aa1a570e64c3db0b3d009351ab222656175b2`.
 First bounded delivery: [Story #9929](https://github.com/D-sorganization/UpstreamDrift/issues/9929).
 Model-only delivery: [Story #9930](https://github.com/D-sorganization/UpstreamDrift/issues/9930).
 This is an implementation ledger; unchecked integration paths are not shipped
 capabilities. Reference fitting, club display, handedness, and ellipsoid display
 from #9914 remain the foundation.
 
+Stories #9929 and #9930 are complete: required protected CI passed at
+`ca71d2c1515c9f19b1ab8d851d594974933817dc` before the normal merge. The combined
+Capture Rig and geometry regression run passed 497 tests after integrating the
+guided capture wizard. Independent queued jobs had no result at merge time;
+they are not represented as passing evidence. Historical qualification notes
+below retain the checks and limitations observed during implementation.
+
+Story #9932 is implemented locally in `feat/9932-comparison-drawings`.
+**Draw on Comparison…** saves the current recipe and opens the common editor
+with the current frame, detected pose, drawings, world geometry and reference.
+Saving and closing reloads drawings in the parent comparison. The compositor
+preserves layer order and selection handles stay outside exported pixels.
+PNG export retains the original uncropped grid; video applies the saved crop.
+Export workers snapshot drawings and reject changed source or scene evidence.
+
+Local qualification: 504 Capture Rig/geometry tests and 50 atlas/parity tests
+passed; Ruff, formatting, architecture budgets, LoD no-growth and mypy on seven
+production files passed. Full Tour Average Driver motion was visually inspected
+at 0.567 seconds in the common editor and its 960×540 PNG using an explicitly
+synthetic background and virtual camera. This is rendering evidence, not a
+comparison against measured player motion. Artifacts are in the external
+`analysis-9926-artifacts/comparison-visual-9von8rml` directory. Normal push hooks passed. [PR #9943](https://github.com/D-sorganization/UpstreamDrift/pull/9943)
+is draft; protected CI and review still gate story closure. Child #9942 now
+tracks shared metric readouts and simulation analysis.
+
+The capability registry now records model-only analysis, shared drawing-editor
+contracts and metric-reference routes. Existing executable capture-goal metadata
+and desktop parity limitations are preserved. Measurement readouts, simulation
+integration and reviewed agent-context boundaries remain parent-epic work.
+
+Camera-bound geometry now fingerprints `reconstruct/reconstruction.json`, the
+actual projection-camera evidence, in addition to the reconstruction summary.
+Existing geometry saved with the older incomplete camera fingerprint requires
+explicit review/recreation when rejected; it is not silently rebound. Scenes
+without that camera file retain their existing identity.
+
 ## Reuse and Surface Audit
 
-| Surface              | Existing Infrastructure                                                                 | Required Integration                                                                      | Status                                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Capture Coaching     | `CoachingDialog`, `CoachingCanvas`, immutable `DrawingLayer`, bounded `History`         | Share the drawing editor with model comparison; keep original pixel coordinates           | Pending                                                                                                      |
-| Reference Comparison | `ReferenceComparisonDialog`, placement, event pairing, appearance, `ComparisonRenderer` | Editable shared world planes and points; measurement readout and drawing tools            | Plane/point editor and compositor implemented locally; qualification ongoing                                 |
-| Comparison Export    | Shared compositor, camera/clock snapshots, input hashes, export sidecar                 | Include exact geometry document and validate source evidence                              | Implemented locally; full regression and visual qualification pending                                        |
-| Model-Only Analysis  | `ReferenceMotion`, `ReferenceTimeline`, fit artifacts and model registry                | Use common controls and a clearly virtual camera without inventing capture media          | Shared coaching editor, controls, persistence and verified exports implemented locally; protected CI pending |
-| Pose Studio          | Canonical poses, live kinematics, `View3D`, existing club bone                          | Consume shared analysis references and model/trace handoff                                | Pending                                                                                                      |
-| Simulation Traces    | `simulation_backends.protocol.Trace` v2 optional metric markers, `trace_io`             | Explicit marker topology and unit/frame adapter into common analysis                      | Pending                                                                                                      |
-| Native Viewports     | `Viewport` mesh protocol, `FspRenderer`, provider capability evaluation                 | Render the same reference geometry with explicit unsupported-capability reasons           | Pending                                                                                                      |
-| Native Engines       | Pose interchange adapters and engine registry                                           | Qualify actual available model/trace routes; do not claim optional SDK support from mocks | Pending                                                                                                      |
-| Functionality Maps   | Capability connections, generated agent-context maps                                    | Record real edges after integration; coordinate with #9907 and #9915 owners               | Pending                                                                                                      |
+| Surface              | Existing Infrastructure                                                                 | Required Integration                                                                      | Status                                                                     |
+| -------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Capture Coaching     | `CoachingDialog`, `CoachingCanvas`, immutable `DrawingLayer`, bounded `History`         | Share the drawing editor with model comparison; keep original pixel coordinates           | Pending                                                                    |
+| Reference Comparison | `ReferenceComparisonDialog`, placement, event pairing, appearance, `ComparisonRenderer` | Editable shared world planes and points; measurement readout and drawing tools            | Plane/point editor merged in #9933; drawing tools and measurements pending |
+| Comparison Export    | Shared compositor, camera/clock snapshots, input hashes, export sidecar                 | Include exact geometry document and validate source evidence                              | Geometry recipe merged in #9933 with regression and visual qualification   |
+| Model-Only Analysis  | `ReferenceMotion`, `ReferenceTimeline`, fit artifacts and model registry                | Use common controls and a clearly virtual camera without inventing capture media          | Shared editor, controls, persistence and verified exports merged in #9933  |
+| Pose Studio          | Canonical poses, live kinematics, `View3D`, existing club bone                          | Consume shared analysis references and model/trace handoff                                | Pending                                                                    |
+| Simulation Traces    | `simulation_backends.protocol.Trace` v2 optional metric markers, `trace_io`             | Explicit marker topology and unit/frame adapter into common analysis                      | Pending                                                                    |
+| Native Viewports     | `Viewport` mesh protocol, `FspRenderer`, provider capability evaluation                 | Render the same reference geometry with explicit unsupported-capability reasons           | Pending                                                                    |
+| Native Engines       | Pose interchange adapters and engine registry                                           | Qualify actual available model/trace routes; do not claim optional SDK support from mocks | Pending                                                                    |
+| Functionality Maps   | Capability connections, generated agent-context maps                                    | Record real edges after integration; coordinate with #9907 and #9915 owners               | Pending                                                                    |
 
 ## Contracts and Coordinate Ownership
 
@@ -113,6 +150,6 @@ locally. The required single #9933 SPEC row and development-log state are includ
 
 Owner session: `codex-unified-analysis-20260910`, isolated branch
 `feat/9926-unified-analysis`. Repository Management lease and presence cover
-the coaching contracts and comparison UI. Equipment/session fitting, capture
+the coaching contracts and comparison UI. Active work is on `feat/9932-comparison-drawings`. Equipment/session fitting, capture
 goal-planner, Simscape matching and agent-context edits remain owned by their
 active peer sessions. Do not edit their worktrees or rewrite their branches.

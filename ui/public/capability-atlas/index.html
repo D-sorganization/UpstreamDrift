@@ -55,37 +55,41 @@
     </div>
     <section id="system" aria-labelledby="system-heading">
       <div class="section-head"><div><p class="eyebrow">01 / Platform Structure</p><h2 id="system-heading">One Platform, Connected Workspaces</h2><p>A C4-style context and container view. Desktop camera work, browser tools, analysis services and shared contracts have distinct responsibilities.</p></div><a href="system.mmd" download>Download Mermaid Diagram ↗</a></div>
-      <div class="diagram" tabindex="0" role="region" aria-label="System Network; Scroll Horizontally to Explore"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 555" role="img" aria-labelledby="system-title system-desc">
+      <div class="diagram" tabindex="0" role="region" aria-label="System Network; Scroll Horizontally to Explore"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 730" role="img" aria-labelledby="system-title system-desc">
 <title id="system-title">System Capability Network</title>
 <desc id="system-desc">Connections are detailed in the adjacent table. Dashed arrows represent file exchange, not automatic execution.</desc>
 <defs><marker id="arrow-system" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#76b9bf"/></marker></defs>
-<path d="M245,279 C275,279 252,279 282,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Camera and analysis controls: Local desktop workflow</title></path>
-<text x="254" y="268" fill="#c3d9df" font-size="11">1</text>
-<path d="M245,279 C275,279 252,454 282,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Available browser tools: Feature parity registry lists gaps and exemptions</title></path>
-<text x="254" y="268" fill="#c3d9df" font-size="11">2</text>
-<path d="M500,454 C530,454 507,454 537,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>REST and WebSocket requests: Requires a reachable authorized backend</title></path>
-<text x="509" y="443" fill="#c3d9df" font-size="11">3</text>
-<path d="M500,279 C530,279 507,104 537,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)" stroke-dasharray="5 4"><title>Session bundles and video: Camera media remains local</title></path>
-<text x="509" y="268" fill="#c3d9df" font-size="11">4</text>
+<path d="M245,629 C275,629 252,454 282,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Camera and analysis controls: Local desktop workflow</title></path>
+<text x="254" y="618" fill="#c3d9df" font-size="11">1</text>
+<path d="M245,629 C275,629 252,629 282,629" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Available browser tools: Feature parity registry lists gaps and exemptions</title></path>
+<text x="254" y="618" fill="#c3d9df" font-size="11">2</text>
+<path d="M500,629 C530,629 507,454 537,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>REST and WebSocket requests: Requires a reachable authorized backend</title></path>
+<text x="509" y="618" fill="#c3d9df" font-size="11">3</text>
+<path d="M500,454 C530,454 507,104 537,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)" stroke-dasharray="5 4"><title>Session bundles and video: Camera media remains local</title></path>
+<text x="509" y="443" fill="#c3d9df" font-size="11">4</text>
 <path d="M755,104 C785,104 762,104 792,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)" stroke-dasharray="5 4"><title>TRC marker file: User exports and imports; not a live automatic connection</title></path>
 <text x="764" y="93" fill="#c3d9df" font-size="11">5</text>
 <path d="M1010,104 C1040,104 1017,104 1047,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Canonical motion and retargeting: Backend and model-dependent capability; validate units and conventions</title></path>
 <text x="1019" y="93" fill="#c3d9df" font-size="11">6</text>
-<path d="M500,279 C530,279 507,279 537,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Pinned mocap schema: Fail-closed optional Tools contract bridge</title></path>
-<text x="509" y="268" fill="#c3d9df" font-size="11">7</text>
-<path d="M245,104 C275,104 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Attributed build records: Validated source claims; player overrides retain catalog provenance</title></path>
-<text x="254" y="93" fill="#c3d9df" font-size="11">8</text>
+<path d="M500,454 C530,454 507,279 537,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Pinned mocap schema: Fail-closed optional Tools contract bridge</title></path>
+<text x="509" y="443" fill="#c3d9df" font-size="11">7</text>
+<path d="M245,454 C275,454 252,279 282,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Attributed build records: Validated source claims; player overrides retain catalog provenance</title></path>
+<text x="254" y="443" fill="#c3d9df" font-size="11">8</text>
+<path d="M245,279 C275,279 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Shared drawing editor: Drawings use the original virtual-camera pixel grid</title></path>
+<text x="254" y="268" fill="#c3d9df" font-size="11">9</text>
+<path d="M245,104 C275,104 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-system)"><title>Draw on Comparison: Save registration first; editor and PNG retain original pixels, video applies saved crop</title></path>
+<text x="254" y="93" fill="#c3d9df" font-size="11">10</text>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/motion_capture/capture_rig.md" aria-label="Operator source">
-<rect x="35" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="50" y="255" fill="#edf5f7" font-size="15">Operator</text>
+<rect x="35" y="575" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="605" fill="#edf5f7" font-size="15">Operator</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_host.py" aria-label="Desktop Workbench source">
-<rect x="290" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="305" y="255" fill="#edf5f7" font-size="15">Desktop Workbench</text>
+<rect x="290" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="305" y="430" fill="#edf5f7" font-size="15">Desktop Workbench</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/App.tsx" aria-label="Web and Tauri source">
-<rect x="290" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="305" y="430" fill="#edf5f7" font-size="15">Web and Tauri</text>
+<rect x="290" y="575" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="305" y="605" fill="#edf5f7" font-size="15">Web and Tauri</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/server.py" aria-label="Application API source">
 <rect x="545" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
@@ -107,13 +111,25 @@
 <rect x="545" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
 <text x="560" y="255" fill="#edf5f7" font-size="15">Tools Contracts</text>
 </a>
-<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/club_data/catalog.py" aria-label="Attributed Club Catalog source">
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/coaching_dialog.py" aria-label="Coaching References source">
 <rect x="290" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="305" y="80" fill="#edf5f7" font-size="15">Attributed Club Catalog</text>
+<text x="305" y="80" fill="#edf5f7" font-size="15">Coaching References</text>
+</a>
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py" aria-label="Expert Comparison source">
+<rect x="35" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="80" fill="#edf5f7" font-size="15">Expert Comparison</text>
+</a>
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/club_data/catalog.py" aria-label="Attributed Club Catalog source">
+<rect x="290" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="305" y="255" fill="#edf5f7" font-size="15">Attributed Club Catalog</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/club_data/catalog_io.py" aria-label="Club Catalog Exchange source">
-<rect x="35" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="50" y="80" fill="#edf5f7" font-size="15">Club Catalog Exchange</text>
+<rect x="35" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="430" fill="#edf5f7" font-size="15">Club Catalog Exchange</text>
+</a>
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/model_analysis_dialog.py" aria-label="Model Analysis source">
+<rect x="35" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="255" fill="#edf5f7" font-size="15">Model Analysis</text>
 </a>
 </svg></div>
       <div class="legend"><span><b>Solid</b> — runtime or contract connection</span><span><b>Dashed</b> — explicit file exchange</span><span><b>Numbers</b> — connection table below</span></div>
@@ -127,11 +143,13 @@
 <tr><th scope="row">6. Motion Pipeline → Physics Engines</th><td>Canonical motion and retargeting<br><small>contract</small></td><td>Backend and model-dependent capability; validate units and conventions <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/motion_pipeline">Source</a></td></tr>
 <tr><th scope="row">7. Desktop Workbench → Tools Contracts</th><td>Pinned mocap schema<br><small>contract</small></td><td>Fail-closed optional Tools contract bridge <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/rig/tools_bridge.py">Source</a></td></tr>
 <tr><th scope="row">8. Club Catalog Exchange → Attributed Club Catalog</th><td>Attributed build records<br><small>contract</small></td><td>Validated source claims; player overrides retain catalog provenance <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/club_data/catalog_io.py">Source</a></td></tr>
+<tr><th scope="row">9. Model Analysis → Coaching References</th><td>Shared drawing editor<br><small>contract</small></td><td>Drawings use the original virtual-camera pixel grid <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/model_analysis_dialog.py">Source</a></td></tr>
+<tr><th scope="row">10. Expert Comparison → Coaching References</th><td>Draw on Comparison<br><small>contract</small></td><td>Save registration first; editor and PNG retain original pixels, video applies saved crop <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
 </tbody></table></div></details>
     </section>
     <section id="workflow" aria-labelledby="workflow-heading">
       <div class="section-head"><div><p class="eyebrow">02 / Capture to Analysis</p><h2 id="workflow-heading">Choose the Path Your Evidence Supports</h2><p>Record or import, inspect observations, then follow the single-view or calibrated multi-view path. Each stage has a defined input and output.</p></div><a href="capture-workflow.mmd" download>Download Workflow Diagram ↗</a></div>
-      <div class="diagram workflow" tabindex="0" role="region" aria-label="Capture Workflow; Scroll Horizontally to Follow the Stages"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2320 555" role="img" aria-labelledby="workflow-title workflow-desc">
+      <div class="diagram workflow" tabindex="0" role="region" aria-label="Capture Workflow; Scroll Horizontally to Follow the Stages"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2575 730" role="img" aria-labelledby="workflow-title workflow-desc">
 <title id="workflow-title">Workflow Capability Network</title>
 <desc id="workflow-desc">Connections are detailed in the adjacent table. Dashed arrows represent file exchange, not automatic execution.</desc>
 <defs><marker id="arrow-workflow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#76b9bf"/></marker></defs>
@@ -155,11 +173,11 @@
 <text x="1274" y="268" fill="#c3d9df" font-size="11">9</text>
 <path d="M1520,279 C1550,279 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joints_3d_m.npy: Fit residuals are not independent physical validation</title></path>
 <text x="1529" y="268" fill="#c3d9df" font-size="11">10</text>
-<path d="M1775,279 C1805,279 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joint_angles.json: Model-dependent inverse dynamics; inspect replay drift and assumptions</title></path>
+<path d="M1775,279 C1805,279 1782,454 1812,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joint_angles.json: Model-dependent inverse dynamics; inspect replay drift and assumptions</title></path>
 <text x="1784" y="268" fill="#c3d9df" font-size="11">11</text>
 <path d="M1520,279 C1550,279 1527,454 1557,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reconstruction artifacts: TRC uses millimetres; canonical JSON states units</title></path>
 <text x="1529" y="268" fill="#c3d9df" font-size="11">12</text>
-<path d="M1775,454 C1805,454 1782,454 1812,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>TRC / canonical JSON: Explicit artifact import into motion pipeline</title></path>
+<path d="M1775,454 C1805,454 1782,629 1812,629" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>TRC / canonical JSON: Explicit artifact import into motion pipeline</title></path>
 <text x="1784" y="443" fill="#c3d9df" font-size="11">13</text>
 <path d="M1265,104 C1295,104 1272,104 1302,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Annotated clips and metrics: Coaching reference; single-view outputs are not 3-D</title></path>
 <text x="1274" y="93" fill="#c3d9df" font-size="11">14</text>
@@ -181,23 +199,31 @@
 <text x="254" y="93" fill="#c3d9df" font-size="11">22</text>
 <path d="M1520,104 C1550,104 1527,104 1557,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>C3D, canonical marker animation or expert video: Missing motion samples stay masked; no automatic 2D-to-3D conversion or invented camera calibration</title></path>
 <text x="1529" y="93" fill="#c3d9df" font-size="11">23</text>
-<path d="M1775,104 C1805,104 1782,104 1812,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Expert video / marker animation: 2D image alignment or camera-projected 3D motion; manual registration is explicit</title></path>
+<path d="M1775,104 C1805,104 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Expert video / marker animation: 2D image alignment or camera-projected 3D motion; manual registration is explicit</title></path>
 <text x="1784" y="93" fill="#c3d9df" font-size="11">24</text>
-<path d="M755,104 C785,104 1782,104 1812,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Saved trim, crop, drawings and original clock: Preview and export share the same composition pipeline</title></path>
+<path d="M755,104 C785,104 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Saved trim, crop, drawings and original clock: Preview and export share the same composition pipeline</title></path>
 <text x="764" y="93" fill="#c3d9df" font-size="11">25</text>
-<path d="M1520,279 C1550,279 1782,104 1812,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Camera intrinsics, distortion and pose: Changed camera or motion evidence requires manual review</title></path>
+<path d="M1520,279 C1550,279 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Camera intrinsics, distortion and pose: Changed camera or motion evidence requires manual review</title></path>
 <text x="1529" y="268" fill="#c3d9df" font-size="11">26</text>
-<path d="M2030,104 C2060,104 2037,104 2067,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Comparison video + reproducible sidecar: Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published</title></path>
-<text x="2039" y="93" fill="#c3d9df" font-size="11">27</text>
+<path d="M2030,279 C2060,279 2292,104 2322,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Comparison video + reproducible sidecar: Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published</title></path>
+<text x="2039" y="268" fill="#c3d9df" font-size="11">27</text>
 <path d="M245,279 C275,279 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Attributed build and player overrides: Unknown and estimated quantities remain explicit; catalog base is preserved</title></path>
 <text x="254" y="268" fill="#c3d9df" font-size="11">28</text>
 <path d="M245,104 C275,104 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected capture identity: Assignment is explicit; existing snapshots and reports remain unchanged</title></path>
 <text x="254" y="93" fill="#c3d9df" font-size="11">29</text>
 <path d="M500,104 C530,104 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected club snapshot and eligible SI context: Current body models apply no club constraints; equipment is recorded in provenance</title></path>
 <text x="509" y="93" fill="#c3d9df" font-size="11">30</text>
+<path d="M1775,104 C1805,104 1782,104 1812,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected marker motion: Motion assets only; no recording is required</title></path>
+<text x="1784" y="93" fill="#c3d9df" font-size="11">31</text>
+<path d="M2030,104 C2060,104 2037,104 2067,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Shared geometry controls: Virtual camera is explicit; illustrative volumes are not anatomical meshes</title></path>
+<text x="2039" y="93" fill="#c3d9df" font-size="11">32</text>
+<path d="M2030,279 C2060,279 2037,104 2067,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Shared geometry controls: Metric projection requires camera evidence; geometry is bound to the scene</title></path>
+<text x="2039" y="268" fill="#c3d9df" font-size="11">33</text>
+<path d="M2285,104 C2315,104 2292,104 2322,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Saved world geometry: The shared compositor retains geometry, layer order and source identity</title></path>
+<text x="2294" y="93" fill="#c3d9df" font-size="11">34</text>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/motion_pipeline" aria-label="Motion Pipeline source">
-<rect x="1820" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1835" y="430" fill="#edf5f7" font-size="15">Motion Pipeline</text>
+<rect x="1820" y="575" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="605" fill="#edf5f7" font-size="15">Motion Pipeline</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/provenance.py" aria-label="Session and Export Files source">
 <rect x="1310" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
@@ -220,12 +246,12 @@
 <text x="1580" y="80" fill="#edf5f7" font-size="15">Expert Reference Library</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py" aria-label="Expert Comparison source">
-<rect x="1820" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1835" y="80" fill="#edf5f7" font-size="15">Expert Comparison</text>
+<rect x="1820" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="255" fill="#edf5f7" font-size="15">Expert Comparison</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_export.py" aria-label="Comparison Deliverables source">
-<rect x="2075" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="2090" y="80" fill="#edf5f7" font-size="15">Comparison Deliverables</text>
+<rect x="2330" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="2345" y="80" fill="#edf5f7" font-size="15">Comparison Deliverables</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/club_data/catalog.py" aria-label="Attributed Club Catalog source">
 <rect x="35" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
@@ -234,6 +260,15 @@
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/equipment_dialog.py" aria-label="My Clubs source">
 <rect x="290" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
 <text x="305" y="80" fill="#edf5f7" font-size="15">My Clubs</text>
+</a>
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/model_analysis_dialog.py" aria-label="Model Analysis source">
+<rect x="1820" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="80" fill="#edf5f7" font-size="15">Model Analysis</text>
+</a>
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/geometry_controls.py" aria-label="Metric Reference Planes and Points source">
+<rect x="2075" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="2090" y="80" fill="#edf5f7" font-size="15">Metric Reference Planes</text>
+<text x="2090" y="101" fill="#edf5f7" font-size="15">and Points</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Set up Cameras and Plan source">
 <rect x="35" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
@@ -277,9 +312,9 @@
 <text x="1580" y="276" fill="#edf5f7" font-size="15">Golfer</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Kinetics and Model Comparison source">
-<rect x="1820" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1835" y="255" fill="#edf5f7" font-size="15">Kinetics and Model</text>
-<text x="1835" y="276" fill="#edf5f7" font-size="15">Comparison</text>
+<rect x="1820" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="430" fill="#edf5f7" font-size="15">Kinetics and Model</text>
+<text x="1835" y="451" fill="#edf5f7" font-size="15">Comparison</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Export to the Motion Pipeline source">
 <rect x="1565" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
@@ -320,6 +355,10 @@
 <tr><th scope="row">28. Attributed Club Catalog → My Clubs</th><td>Attributed build and player overrides<br><small>workflow</small></td><td>Unknown and estimated quantities remain explicit; catalog base is preserved <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/club_editor.py">Source</a></td></tr>
 <tr><th scope="row">29. Capture Library → My Clubs</th><td>Selected capture identity<br><small>workflow</small></td><td>Assignment is explicit; existing snapshots and reports remain unchanged <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_dialog.py">Source</a></td></tr>
 <tr><th scope="row">30. My Clubs → Fit the Articulated Golfer</th><td>Selected club snapshot and eligible SI context<br><small>workflow</small></td><td>Current body models apply no club constraints; equipment is recorded in provenance <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/session.py">Source</a></td></tr>
+<tr><th scope="row">31. Expert Reference Library → Model Analysis</th><td>Selected marker motion<br><small>workflow</small></td><td>Motion assets only; no recording is required <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_library_dialog.py">Source</a></td></tr>
+<tr><th scope="row">32. Model Analysis → Metric Reference Planes and Points</th><td>Shared geometry controls<br><small>workflow</small></td><td>Virtual camera is explicit; illustrative volumes are not anatomical meshes <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/model_analysis_dialog.py">Source</a></td></tr>
+<tr><th scope="row">33. Expert Comparison → Metric Reference Planes and Points</th><td>Shared geometry controls<br><small>workflow</small></td><td>Metric projection requires camera evidence; geometry is bound to the scene <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
+<tr><th scope="row">34. Metric Reference Planes and Points → Comparison Deliverables</th><td>Saved world geometry<br><small>file</small></td><td>The shared compositor retains geometry, layer order and source identity <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_export.py">Source</a></td></tr>
 </tbody></table></div></details>
       <h3>Plan a Capture Outcome</h3>
       <p><a href="capture-goals.mmd" download>Download Goal Prerequisites</a></p>
