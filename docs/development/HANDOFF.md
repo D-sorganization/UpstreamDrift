@@ -4,13 +4,16 @@
 
 Active worktree `C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942`,
 branch `feat/9942-metric-simulation-analysis`. Readouts72585f629, Trace5034f7a22,
-topology b6d3c28c6; native geometry785269090; main integration d40956742; surface audit a5472765b; map freshness5a2e8d2c1; PR tracking SELF. Session codex-unified-metrics-9942
+topology b6d3c28c6; native geometry785269090; main integration d40956742; surface audit a5472765b; map freshness5a2e8d2c1; PR tracking f0fe99bd9; Trace persistence qualification SELF. Session codex-unified-metrics-9942
 presence through06:12UTC. Preserve Tools4dabe900 and peer ownership.
 PR #9945 is draft, protected CI running. Normal push hooks passed including
 isolated mypy14 files, Bandit and unit tests. Separate local combined mypy
 crashed in its pyparsing cache; earlier focused checks and isolated hook passed.
 Context review input: external analysis-9926-artifacts/context-boundary-9942.md;
 sent to #9915 owner in RM receipt5613103149. No catalog runtime is pinned yet.
+Trace appearance qualification now directly saves/reopens club visibility,
+ellipsoid opacity, handedness, drawings and planes on a nondegenerate moving
+marker fixture; all17 Trace/import integration tests pass.
 
 Implemented test first: shared registered-world point/plane readouts in both
 analysis windows; Trace v2 marker import with explicit units/axes/topology and

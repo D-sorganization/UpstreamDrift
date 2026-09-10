@@ -95,7 +95,12 @@ def club_trace(path: Path) -> None:
         t=np.array([0, 0.1]),
         q=np.zeros((2, 1)),
         v=np.zeros((2, 1)),
-        markers=np.ones((2, 3, 3)),
+        markers=np.array(
+            [
+                ((0, 0, 1.2), (0.2, 0.1, 1), (0.8, 0.2, 0.2)),
+                ((0.1, 0.1, 1.3), (0.3, 0.2, 1.1), (0.9, 0.3, 0.3)),
+            ]
+        ),
         backend="test",
         meta={
             "frame": "world_Zup",
