@@ -1470,8 +1470,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.3                                              |
-| **Spec Version**        | 1.0.719                                            |
-| **Last Spec Update**    | 2026-09-03                                         |
+| **Spec Version**        | 1.0.720                                            |
+| **Last Spec Update**    | 2026-09-10                                         |
 
 ## 2. Purpose & Mission
 
@@ -4979,6 +4979,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ### Module Map Changelog
 
+- Replaced `np.sum(np.stack(...), axis=0)` with `np.asarray(...).sum(axis=0)` in `src/shared/python/biomechanics/drift_control_transfer.py` to optimize sequence of arrays summation. (spec-exempt: micro-optimization)
 - Security: Fixed timing attack vulnerability in API key verification by using `secrets.compare_digest` in `ModelGenerationAPI._check_api_key`.
 
 - `golf_camera_system.py`: Replaced `np.linalg.norm` with `math.hypot` for 3D and 2D vectors.
