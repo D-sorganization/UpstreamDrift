@@ -143,6 +143,11 @@ class CaptureStepPage(QWizardPage):
         self.open_button = QPushButton(ACTION_LABELS[step.action])
         self.open_button.clicked.connect(lambda: owner.action_requested.emit(step.id))
         layout.addWidget(self.open_button)
+        self.camera_setup_button: QPushButton | None = None
+        if step.id == "capture.library":
+            self.camera_setup_button = QPushButton("Set Up Cameras to Record")
+            self.camera_setup_button.clicked.connect(owner.camera_setup_requested)
+            layout.addWidget(self.camera_setup_button)
         refresh = QPushButton("Refresh Status")
         refresh.clicked.connect(owner.refresh_requested)
         layout.addWidget(refresh)
@@ -188,6 +193,8 @@ class CaptureStepPage(QWizardPage):
             button.setEnabled(not busy)
         self.status.setText(f"{labels[self.state.status]}\n{reason}")
         self.open_button.setEnabled(not busy)
+        if self.camera_setup_button is not None:
+            self.camera_setup_button.setEnabled(not busy)
         self.completeChanged.emit()
 
 
@@ -198,6 +205,7 @@ class CaptureWizard(QWizard):
     save_requested = pyqtSignal()
     resume_requested = pyqtSignal()
     plan_requested = pyqtSignal()
+    camera_setup_requested = pyqtSignal()
 
     def __init__(
         self, catalog: CaptureGoalCatalog, parent: QWidget | None = None

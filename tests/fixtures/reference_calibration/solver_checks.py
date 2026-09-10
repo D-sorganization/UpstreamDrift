@@ -185,3 +185,54 @@ def test_solver_requires_fresh_operator_confirmation(tmp_path, confirmation):
     with pytest.raises(ValueError, match="Confirm"):
         solve_reference(request)
     assert not (tmp_path / "reference_calibration/results").exists()
+
+
+def test_reviewed_layout_projects_independent_points_through_overlay_consumer(tmp_path):
+    """Persisted calibration reaches reference overlays with the same lens and frame."""
+    import cv2
+
+    from src.motion_capture.reconstruct.pipeline import start_cameras_from
+    from src.motion_capture.reference.registration import project_reference_to_camera
+
+    request, camera_poses, placements = make_request(tmp_path)
+    solved = solve_reference(request)
+    request["parameters"].update(
+        result_id=solved["result"]["layout_id"],
+        reviewed=True,
+        result_sha256=solved["result_sha256"],
+    )
+    accepted = accept_result(request)
+    path = tmp_path / accepted["result_path"]
+    original = path.read_bytes()
+    from reuse_checks import _write_target_bundle
+
+    expected_views = {
+        item["view"]: (
+            item["setup"]["camera_identity"],
+            tuple(item["setup"]["image_size_px"]),
+        )
+        for item in accepted["result"]["profile_selections"]
+    }
+    _write_target_bundle(tmp_path, expected_views)
+    cameras = start_cameras_from(path, capture_root=tmp_path)
+    # New non-planar points are not reference corners used by the camera solve.
+    points = np.array([[0.02, 0.08, 0.12], [0.18, -0.04, 0.22], [-0.08, 0.14, 0.05]])
+    anchor_rotation, anchor_translation = placements["p0"]
+    world = anchor_rotation.apply(points) + anchor_translation
+    for camera in cameras:
+        rotation, translation = camera_poses[camera.camera_id]
+        expected, _ = cv2.projectPoints(
+            world,
+            rotation.as_rotvec(),
+            translation,
+            camera.matrix,
+            np.array([0.04, -0.02, 0.001, -0.002, 0.0]),
+        )
+        projected, visible = project_reference_to_camera(
+            points, np.ones(len(points), dtype=bool), camera, clip_image=False
+        )
+        assert visible.all()
+        np.testing.assert_allclose(
+            projected, expected.reshape(-1, 2), atol=1e-5, rtol=0
+        )
+    assert path.read_bytes() == original
