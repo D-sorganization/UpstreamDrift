@@ -25,9 +25,10 @@ import numpy.typing as npt
 
 from src.motion_capture.rig.edits import CropRect
 from src.motion_capture.coaching import DrawingLayer, render_layer
-from src.shared.python.core.contracts import require
+from src.shared.python.core.contracts import PreconditionError, require
 
 from .overlay import PoseTrack, draw_pose
+from .frame_source import FrameSource
 from .player import VideoReader, clamp_index
 from .session import SessionMedia, ViewMedia, flatten_numbers, load_session
 
@@ -39,6 +40,20 @@ EVENT_KEYS = {
 }
 MIN_OUT_FPS = 1.0
 TEXT_COLOUR = (255, 255, 255)
+
+
+@dataclass(frozen=True)
+class FrameEncoding:
+    """Output timing; a missing rate uses the frame source's nominal clock."""
+
+    speed: float = 1.0
+    fps: float | None = None
+
+    def __post_init__(self) -> None:
+        if not 0 < self.speed <= 1:
+            raise ValueError("Encoding speed must be in (0, 1]")
+        if self.fps is not None and (not np.isfinite(self.fps) or self.fps <= 0):
+            raise ValueError("Encoding frame rate must be finite and positive")
 
 
 @dataclass(frozen=True)
@@ -160,7 +175,7 @@ def _stamp(frame: npt.NDArray[np.uint8], text: str) -> npt.NDArray[np.uint8]:
 
 
 def _rendered(
-    reader: VideoReader,
+    reader: FrameSource,
     index: int,
     track: PoseTrack | None,
     *,
@@ -198,6 +213,86 @@ def _rendered(
     )
 
 
+def write_frame_clip(
+    reader: FrameSource,
+    clip: ClipRange,
+    out: Path,
+    *,
+    encoding: FrameEncoding = FrameEncoding(),
+    track: PoseTrack | None = None,
+    min_confidence: float = 0.5,
+    label: str = "Analysis",
+    rendering: ClipRendering = ClipRendering(),
+) -> dict[str, Any]:
+    """Encode a frame source with shared overlays; caller owns staging and source.
+
+    Every available frame is retained. Strict rendering rejects incomplete
+    ranges and missing frames. The writer is always released on cancellation.
+    """
+    speed, fps = encoding.speed, encoding.fps
+    if reader.frame_count <= 0:
+        raise ValueError("Encoding requires frames and a speed in (0, 1]")
+    source_fps = fps or reader.fps or 30.0
+    if not np.isfinite(source_fps) or source_fps <= 0:
+        raise ValueError("Frame rate must be finite and positive")
+    if rendering.strict and clip.last >= reader.frame_count:
+        raise ValueError("Selection exceeds the decodable recording")
+    last = clamp_index(clip.last, reader.frame_count)
+    rate = max(source_fps * speed, MIN_OUT_FPS)
+    writer = _writer(out, rate, rendering.size(reader.width, reader.height))
+    written = 0
+    try:
+        for index in range(clip.first, last + 1):
+            if rendering.cancelled():
+                raise InterruptedError("Swing export cancelled")
+            frame = _rendered(
+                reader,
+                index,
+                track,
+                min_confidence=min_confidence,
+                label=label,
+                rendering=rendering,
+            )
+            if frame is None:
+                if rendering.strict:
+                    raise ValueError(f"Could not decode source frame {index}")
+                break
+            writer.write(frame)
+            written += 1
+            rendering.progress(written, clip.frames)
+    finally:
+        writer.release()
+    require(written > 0, "no frame of the range decoded", (clip.first, last))
+    return {
+        "file": str(out),
+        "first": clip.first,
+        "last": last,
+        "frames": written,
+        "fps": rate,
+        "speed": speed,
+    }
+
+
+def verify_frame_clip(
+    path: Path, frames: int, size: tuple[int, int], cancelled: Callable[[], bool]
+) -> None:
+    """Require a staged container to decode completely before publication."""
+    if frames <= 0 or min(size) <= 0:
+        raise ValueError("Encoded clip dimensions and frame count must be positive")
+    try:
+        reader = VideoReader(path)
+    except PreconditionError as exc:
+        raise ValueError("Could not open the encoded analysis video") from exc
+    with reader:
+        if reader.frame_count != frames or (reader.width, reader.height) != size:
+            raise ValueError("Encoded comparison dimensions or frame count differ")
+        for index in range(frames):
+            if cancelled():
+                raise InterruptedError("Comparison export cancelled")
+            if reader.read(index) is None:
+                raise ValueError(f"Could not verify encoded frame {index}")
+
+
 def export_clip(
     view: ViewMedia,
     clip: ClipRange,
@@ -223,42 +318,18 @@ def export_clip(
     track_path = observations or view.observations
     track = PoseTrack.load(track_path) if track_path else None
     with VideoReader(view.playable) as reader:
-        if rendering.strict and clip.last >= reader.frame_count:
-            raise ValueError("Selection exceeds the decodable recording")
-        last = clamp_index(clip.last, reader.frame_count)
-        rate = max((reader.fps or view.fps or 30.0) * speed, MIN_OUT_FPS)
-        writer = _writer(out, rate, rendering.size(reader.width, reader.height))
-        written = 0
-        try:
-            for index in range(clip.first, last + 1):
-                if rendering.cancelled():
-                    raise InterruptedError("Swing export cancelled")
-                frame = _rendered(
-                    reader,
-                    index,
-                    track,
-                    min_confidence=min_confidence,
-                    label=label or view.view,
-                    rendering=rendering,
-                )
-                if frame is None:
-                    if rendering.strict:
-                        raise ValueError(f"Could not decode source frame {index}")
-                    break
-                writer.write(frame)
-                written += 1
-                rendering.progress(written, clip.frames)
-        finally:
-            writer.release()
-    require(written > 0, "no frame of the range decoded", (clip.first, last))
-    return {
-        "file": str(out),
+        result = write_frame_clip(
+            reader,
+            clip,
+            out,
+            encoding=FrameEncoding(speed=speed, fps=reader.fps or view.fps or 30.0),
+            track=track,
+            min_confidence=min_confidence,
+            label=label or view.view,
+            rendering=rendering,
+        )
+    return result | {
         "view": view.view,
-        "first": clip.first,
-        "last": last,
-        "frames": written,
-        "fps": rate,
-        "speed": speed,
         "overlay": str(track_path) if track_path else None,
     }
 

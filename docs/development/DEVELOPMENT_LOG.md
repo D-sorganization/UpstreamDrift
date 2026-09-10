@@ -17,9 +17,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9926 · Unified Model and Video Analysis
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9926; children #9929, #9930, #9932
+- **Branch:** feat/9926-unified-analysis
+- **PR:** #9933
+- **Paths:** src/motion_capture/coaching; src/tools/capture_rig
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (7ff55ef8d; local regression, visual and push gates)
+- **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
+- **Evidence:** Capture Rig and geometry regressions, Ruff/format, budgets, scoped mypy and normal push hooks passed; full Driver model UI and PNG inspected.
+- **Next step:** Resolve protected CI; complete comparison drawings, measurements, simulation routes and maps before closing the epic.
+
 ### DL-#9907 · Guided Capture Outcomes
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9907; #9908; epic #9906
 - **Branch:** feat/9907-capture-goal-wizard
@@ -28,7 +42,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-10 (a74d5ebd2; 600 integrated regressions, normal push hooks, scoped mypy and Qt/browser review pass)
 - **Summary:** Standard Qt outcome wizard shares typed map metadata and existing editors/readiness; capture-owned resume, optional My Clubs, background status and safe map-plan import.
-- **Next step:** Complete remote CI and merge #9931; retain advanced-route limits and calibration/fleet follow-up.
+- **Next step:** Shipped in #9931; retain advanced-route limits and calibration/fleet follow-up.
 
 ### DL-#9912 · Impact Shaft Provider Integration
 
