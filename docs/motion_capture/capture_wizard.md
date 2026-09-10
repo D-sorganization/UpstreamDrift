@@ -69,6 +69,12 @@ graph data and Mermaid diagrams; CI checks freshness.
 
 ## Current Route Scope
 
+In Calibration, **Paper / Ruler References…** opens the
+[common-reference workflow](common_reference_calibration.md). After using a
+reviewed camera layout, return to the wizard and refresh status. Paper placement
+estimation requires a compatible lens calibration for the recorded zoom and
+focus; it does not replace lens calibration or joint detection.
+
 Single-view timing and multi-view reconstruction require separate sessions.
 Guided reconstruction/model/export routes use the default triangulated match,
 all views and the default observation set. Named variants and image-space

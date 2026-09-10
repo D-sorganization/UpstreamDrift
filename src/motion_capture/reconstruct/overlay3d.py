@@ -6,7 +6,8 @@ its landmarks (``model/landmarks_fit.npy``, edges through the landmark map).
 A view the variant never used is still renderable ("held out"): its camera
 comes from the variant's own reconstruction when present, else from the
 variant the cameras were borrowed from, else from the session's default
-variant. Qt- and OpenCV-free; drawing lives in the tool package.
+variant. Qt-free; extended calibrated lenses load OpenCV only for projection.
+Drawing lives in the tool package.
 """
 
 from __future__ import annotations
@@ -59,8 +60,13 @@ def project_track(points_world: Array, camera: PinholeCamera) -> tuple[Array, Ma
     require(pts.ndim == 3 and pts.shape[2] == 3, "points must be (T, K, 3)", pts.shape)
     t, k = pts.shape[:2]
     flat = pts.reshape(-1, 3)
-    px, in_front = camera.project(np.nan_to_num(flat))
     finite = np.isfinite(flat).all(axis=1) & (np.abs(flat).sum(axis=1) > 0)
+    if camera.distortion is not None and np.any(camera.distortion):
+        from ..reference.registration import project_reference_to_camera
+
+        px, visible = project_reference_to_camera(np.nan_to_num(flat), finite, camera)
+        return px.reshape(t, k, 2), visible.reshape(t, k)
+    px, in_front = camera.project(np.nan_to_num(flat))
     visible = in_front & finite & camera.in_image(px)
     return px.reshape(t, k, 2), visible.reshape(t, k)
 

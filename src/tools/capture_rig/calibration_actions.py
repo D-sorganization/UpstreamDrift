@@ -69,16 +69,41 @@ class CalibrationActions(QObject):
         try:
             root = self._root() / "calibration"
             root.mkdir(parents=True, exist_ok=True)
-            dialog = CalibrationDialog(self._plan(), root, self._host)
+            dialog = CalibrationDialog(
+                self._plan(),
+                root,
+                self._host,
+                reference_available=self._session() is not None,
+            )
             dialog.exec()
             if dialog.output_path is not None:
                 self._apply(dialog.output_path)
                 return dialog.output_path
             if dialog.recalibrate_requested:
                 self._repeat()
+            if dialog.reference_requested:
+                return self._references(root)
         except (ValueError, OSError, sqlite3.Error, KeyError) as exc:
             QMessageBox.warning(self._host, "Camera Calibration", str(exc))
         return None
+
+    def _references(self, profiles_root: Path) -> Path | None:
+        from .capture_library import CaptureLibrary
+        from .reference_calibration.dialog import ReferenceCalibrationDialog
+
+        session = self._session()
+        if session is None:
+            raise ValueError(
+                "Open or record a capture before marking common references"
+            )
+        CaptureLibrary(self._root()).register(session)
+        dialog = ReferenceCalibrationDialog(
+            self._plan(), session, profiles_root, self._host
+        )
+        dialog.exec()
+        if dialog.output_path is not None:
+            self._apply(dialog.output_path)
+        return dialog.output_path
 
     def _repeat(self) -> None:
         folder = QFileDialog.getExistingDirectory(

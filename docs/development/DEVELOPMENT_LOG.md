@@ -122,18 +122,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Report discovery imports/timeouts through preview status.
 - **Next step:** Retain the preview recovery regressions.
 
-### DL-#9898 · Calibration Profile Compatibility
+### DL-#9898 · Common Reference Sessions and Calibration Profiles
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #9898; epic #9897 (goal also includes #9902 and #9906)
-- **Branch:** feat/capture-guided-setup
-- **PR:** #9910 (draft)
-- **Paths:** src/tools/capture_rig/calibration_profiles.py, tests/tools/capture_rig/test_calibration_profiles.py, docs/development/capture_setup_execution_plan.md
+- **Issue:** #9898/#9900; epic #9897
+- **Branch:** feat/9898-common-reference-sessions
+- **PR:** not created (prior profile integration merged)
+- **Paths:** src/tools/capture_rig/reference_calibration, calibration actions/profiles/evidence, swing_export.py, src/motion_capture/reconstruct, rig/**main**.py, tests/fixtures/reference_calibration, related Qt/reconstruction tests, docs/development/common_reference_calibration.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`b4abd67bb`)
-- **Summary:** Versioned camera/lens profiles reject incompatible settings; full reference workflow remains open.
-- **Next step:** Qualify UI/consumers, then add reference sessions under #9898/#9900.
+- **Last verified:** 2026-09-10 (Python3.12 scoped51, Python3.13 broad594, history/Qt7, projection/Qt25, OpenCV5 projection20 and atlas/parity49 pass; native640×560 reviewed; unchanged Simscape real-log timeout keeps broader Python3.12 run failed)
+- **Summary:** Original-frame reference observations feed canonical Tools fixed-intrinsics estimation through isolated IPC, explicit anchor/optics review, immutable result history and provenance. Lens distortion is corrected once for fitting and retained for overlays. Generated guide shares native help text. Final combined provider pin remains separately owned and pending.
+- **Next step:** Normal commit/PR and current-main integration once the coordinated combined provider is published; continue cross-capture reuse and #9901 acceptance. No physical-accuracy or manual publication approval claimed.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 

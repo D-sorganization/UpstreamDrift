@@ -171,6 +171,9 @@ def fit_bundle(
         start_cameras = cameras_from_records(truth.cameras)
     ids = [c.camera_id for c in start_cameras]
     require(all(i in views for i in ids), "start cameras must match the views", ids)
+    from .lens import correct_camera_views
+
+    views, _ = correct_camera_views(views, start_cameras)
     # Detector layouts (MediaPipe 33, BODY_25) are mapped onto the 15-joint
     # reconstruct skeleton; midpoints carry the minimum parent confidence.
     views = {
