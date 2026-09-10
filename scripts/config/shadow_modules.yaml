@@ -37,8 +37,9 @@
 # guard therefore never blocked anything. This file restores the ledger and
 # records the four regressions explicitly rather than laundering them.
 #
-# Shadow count is currently 17 of 37 vendor modules. That number is the debt.
-# It should only ever go down. It moved 33 -> 17 on 2026-09-03 (UD #9406 PR-3:
+# This coarse top-level ledger has 18 named overlaps after the explicit
+# realtime exception below. Cleaned split roots can still contain UD-only
+# files. The ledger moved 33 -> 17 on 2026-09-03 (UD #9406 PR-3:
 # logging_pkg, notes, plot_theme, chat_contracts, file_watcher, scripting,
 # safe_eval.py, safe_pandas_eval.py, deprecation.py, cors.py deleted; their
 # src.shared.python.* spellings resolve to the pinned Tools tree through
@@ -112,6 +113,15 @@ shadows:
   plotting:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
+
+  # Explicit provider-migration exception for review in #9916. UD's seven-file
+  # realtime facade predates the two-file Tools provider added in #5090;
+  # deleting it would remove publish/subscribe and registry APIs. No new UD
+  # source copy is added. Keep the split/pending-cleanup ruling and #8942
+  # migration visible; this entry does not claim the overlap is resolved.
+  realtime:
+    tracking_issue: 8942
+    sunset_date: "2026-10-09"
 
   # ── ADR-0046 Stage 1 canonical launch-monitor layer — CLEARED 2026-09-02 ──
   #

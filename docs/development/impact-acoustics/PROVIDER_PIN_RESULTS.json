@@ -1,0 +1,244 @@
+{
+  "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+  "suite": "tests/shared_contracts",
+  "passed": 24,
+  "failures": 0,
+  "skipped": 0,
+  "warnings": 5,
+  "source_mode": "vendored",
+  "installed_wheel_validation": {
+    "consumer_revision": "b6107f8e2559afffb8e360098f793d88c2ec2886",
+    "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+    "wheel_sha256": "6f6f259ff9679f921a5a05e515abcb4bb466589221ce6c7aefdc43b9ca656653",
+    "wheel_bytes": 210496037,
+    "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
+    "origins": {
+      "shared.python.golf_club.shaft_model_data": "C:\\Users\\diete\\.cache\\codex-impact\\provider9912-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
+      "shared.python.theme.api": "C:\\Users\\diete\\.cache\\codex-impact\\provider9912-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py"
+    },
+    "versions": {
+      "upstream-drift": "2.1.3",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pydantic": "2.13.5"
+    },
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "checks_passed": true,
+    "qualification": "Python provider installation only; UI build omitted; physical qualification open",
+    "pip_check_passed": true
+  },
+  "physical_qualification": "unqualified",
+  "junit_sha256": "0b8c97e710e11222856075cb67f0fdec7964fa86aac72f9848058dc38232b7b5",
+  "main_merge_validation": {
+    "incoming_main": "18c8f922e87c92f6f518da05c0819f71ce3193ba",
+    "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+    "passed": 24,
+    "warnings": 5,
+    "skipped": 0,
+    "junit_sha256": "c988059dead011439698cf24289c000b6c68c2dc3fa6050d055912ec3bd4841d",
+    "conflicts": "four shared documentation files; both scopes preserved",
+    "source_diff_from_main": "only existing candidate gitlink and two provider test/fixture files",
+    "documentation_audit": {
+      "main": "18c8f922e87c92f6f518da05c0819f71ce3193ba",
+      "baseline_findings": 37,
+      "current_findings": 36,
+      "new_findings": [],
+      "spec_extra_rows": [],
+      "spec_missing_rows": [],
+      "validator_revision": "ad9bcb8855199cdb4319775c17cda5db8b060779"
+    }
+  },
+  "current_repair": {
+    "provider_revision": "00d17e7f91fe8541bc8882ee745fda58ee2ad7af",
+    "tests": 79,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 36.212,
+    "warnings": 8,
+    "junit_sha256": "4f10dc27ccc6ea2a4e2f6d0b6f19a841f443d6524f9cab4f48c5c42269a21d44",
+    "seam_gate": "passed with 15 existing/pending notes",
+    "theme": "obsolete color_derivation child retired; public string controls and source origins verified",
+    "realtime": "split/pending-cleanup under #8942; facade unchanged",
+    "wheel": {
+      "consumer_revision": "efe44846e4ec1634071703833d292e2793674426",
+      "provider_revision": "00d17e7f91fe8541bc8882ee745fda58ee2ad7af",
+      "wheel_sha256": "8e09cd2c6e6c6ddb008c0bff9839514aa3e07f7c95f031da629bbe34ad4c3ce8",
+      "wheel_bytes": 210512623,
+      "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
+      "origins": {
+        "shared.python.golf_club.shaft_model_data": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
+        "shared.python.theme.api": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py",
+        "shared.python.theme.color_derivation": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\shared\\python\\theme\\color_derivation.py",
+        "shared.python.theme.layout_metrics": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\src\\shared\\python\\theme\\layout_metrics.py",
+        "src.shared.python.realtime": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-repair-installed\\Lib\\site-packages\\src\\shared\\python\\realtime\\__init__.py"
+      },
+      "versions": {
+        "upstream-drift": "2.1.3",
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "pydantic": "2.13.5"
+      },
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "checks_passed": true,
+      "qualification": "Python provider installation only; UI build omitted; physical qualification open",
+      "pip_check_passed": true
+    },
+    "protected_provider_review": "pending",
+    "capture_main_merge": {
+      "main": "8fce9f238ce89876dd363fb41b4ba1169a87d1b6",
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 36.888,
+      "warnings": 8,
+      "junit_sha256": "8db6deb02d3708b5e75c7f11be8feb57863d8db7fcbbdf7158ad5b40e315217e",
+      "doc_audit": {
+        "main": "8fce9f238ce89876dd363fb41b4ba1169a87d1b6",
+        "baseline_findings": 37,
+        "current_findings": 36,
+        "new_findings": [],
+        "spec_extra_rows": [],
+        "spec_missing_rows": [],
+        "validator_revision": "ad9bcb8855199cdb4319775c17cda5db8b060779"
+      },
+      "conflicts": "root handoff and development log only; both scopes retained",
+      "wheel_scope": "Installed provider wheel from efe44846e; capture merge leaves provider pin and shared ownership changes intact."
+    },
+    "concurrent_remote_merge": {
+      "head": "7141feb79ffff0e745d960e2a5866fb62374c9f0",
+      "commits": ["343d05b5d", "f417cd8fe", "7141feb79"],
+      "resolution": "Same pin and color retirement preserved. Reviewed main use_start_file serves the same process action as concurrent set_start_path; no duplicate API added. Realtime split/pending-cleanup retained from actual two-copy inventory; no Tools-only claim. Earlier source/wheel provenance remains unchanged."
+    }
+  },
+  "migration_repair": {
+    "previous_published_consumer": "d2760f05c242d3e2a3fe76ad5e725b16e5b2cb51",
+    "provider_candidate": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
+    "ci_failure": {
+      "job": 102684248047,
+      "run": 34417056484,
+      "failed": 6,
+      "passed": 14890,
+      "skipped": 672,
+      "warnings": 1116,
+      "seconds": 482.9,
+      "causes": [
+        "catalog frozen pin literal",
+        "Cargo/gitlink mismatch",
+        "inventory metadata pin drift",
+        "realtime overlap absent from explicit migration ledger",
+        "retired color child still waived",
+        "Function Generator manifest names removed module"
+      ]
+    },
+    "migration_controls_at_00d17e7f9": {
+      "tests": 106,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 52.302,
+      "warnings": 12,
+      "junit_sha256": "2aa467caa3a06f3b9c6547af2dd82d54354dffc47f487aca8386c98a2a158434"
+    },
+    "ui_split_controls_at_00d17e7f9": {
+      "tests": 105,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 11.32,
+      "warnings": 8,
+      "junit_sha256": "63551f0ea3c4f21ac81acd611ef2cb2a7f333870d15374abf531a1f80be3f499"
+    },
+    "runtime_red_green": "Corrected YAML alone still fails real import. Two new import/origin/UD-widget controls fail before UI split, then pass. Offscreen widget construction resolves the canonical vendor source and succeeds.",
+    "ui_retired_byte_identical_sha256": {
+      "__init__.py": "78a92af3dc4830eb2f169a6a56018dadf3182c31c77554f00a28c896907494c7",
+      "auto_complete.py": "a1e29015fc67bfd9b34e950e7637e99b94df0214e5e7d7a40c346e69fac6cbec",
+      "hover_copy_browser.py": "7ce092a3d94b2bac64aa5386b37ab2ac17acd7028ef161c81aa66a03545c6f6f",
+      "window_icon.py": "9b8a63952858d19ace109e571ec548bf2f2d25af33a0eb2ab8fe1b506430b9b9"
+    },
+    "realtime": "Explicit review exception under #8942, expires 2026-10-09. Pre-existing seven-file UD facade and different transport preserved; migration remains open. No guard logic changed.",
+    "catalog": "Compare to independently resolved committed HEAD gitlink; no frozen revision literal or index/working-tree substitution.",
+    "wheel": "32a8b36ec wheel with declared gui-tools extra passes isolated installed checks; web assets omitted. Final reviewed Tools #5143 descendant still requires exact-pin qualification.",
+    "exact_pin_source_controls": {
+      "tests": 271,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 71.655,
+      "warnings": 20,
+      "junit_sha256": "2f2a8e182c46cc80272d3f2fdfe3262f5d9889c7e031f9ca2e28d97b52bda772",
+      "source_index_tree": "ef55dd7c77df18c9e7f6bd29ea6352d9af1b0ccf",
+      "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
+      "note": "Committed-source catalog assertion observes HEAD gitlink; rerun after committing the new gitlink."
+    },
+    "main90_source_controls": {
+      "tests": 271,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 103.097,
+      "warnings": 20,
+      "junit_sha256": "3da7fded4154be9540191728e4b016320d8383177e304340cfe4ba2f9bc3bf7b",
+      "source_index_tree": "f89a8a06e03ecd0177022441b30bc39f189f9c72",
+      "main": "90c3d0b770cd0ced3e14c947c68a29555f14e877",
+      "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf"
+    },
+    "installed_ui_wheel": {
+      "consumer_revision": "32a8b36eccec093f29186e7f33bd501f95ae405e",
+      "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
+      "wheel_sha256": "001ce49f29577be24091eeadf6c439845ef85a928d79256c0df519e5a3b60725",
+      "wheel_bytes": 210520353,
+      "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
+      "origins": {
+        "shared.python.golf_club.shaft_model_data": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
+        "shared.python.theme.api": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py",
+        "shared.python.theme.color_derivation": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\theme\\color_derivation.py",
+        "shared.python.theme.layout_metrics": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\theme\\layout_metrics.py",
+        "src.shared.python.realtime": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\realtime\\__init__.py",
+        "shared.python.ui.function_generator_widget": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\shared\\python\\ui\\function_generator_widget.py",
+        "shared.python.ui.toast": "C:\\Users\\diete\\.cache\\codex-impact\\provider9916-ui-installed\\Lib\\site-packages\\src\\shared\\python\\ui\\toast.py"
+      },
+      "versions": {
+        "upstream-drift": "2.1.3",
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "pydantic": "2.13.5"
+      },
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "checks_passed": true,
+      "gui_widget_constructed": true,
+      "installed_extra": "gui-tools",
+      "qualification": "Python provider and offscreen Qt widget installation; web UI assets omitted; physical qualification open",
+      "pip_check": "passed; no broken requirements found"
+    },
+    "merged_numerical_provider": {
+      "pr": 5133,
+      "head": "0cd6dce22f5762ee0c6342000fb035eaa76579d5",
+      "merge": "2c9a8d6c963cec2f140f2ee17469d27e506a3ba1",
+      "launcher_followup_issue": 5143
+    },
+    "concurrent_equipment_merge": {
+      "concurrent_head": "eacd6985872c1c69009f6f4a1d690edf0333cb97",
+      "main": "5ada5e6a6827bfb94a00d1801f6b475afb885885",
+      "provider_revision": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
+      "inventory_red": {
+        "tests": 10,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 38.546,
+        "junit_sha256": "2161ea9492ae350f6e8285461edb5dd55c0ec04dddb551004dc22b75c062dc23"
+      },
+      "post_regeneration_controls": {
+        "tests": 271,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 70.719,
+        "junit_sha256": "6f5851b8ea6598f56672bd50bad3a096188014f695211f3ccd5168106d59a139"
+      },
+      "restored_inventory_sha256": "d8c34fd599923c900b06d9ebc5c68c3be31359af81f53bbb3a86153ee5baf2c3",
+      "resolution": "Preserve concurrent main/equipment and handoff commits by fast-forward. Provider source, Cargo/gitlink and seam repairs are unchanged. Existing inventory test fails for omitted shaft/provider files; regenerate with full authorship from actual pinned checkout. No --no-authorship or guard changes.",
+      "wheel": "The previously isolated 32a8b36ec / 4dabe900c artifact retains its original provenance. Final reviewed Tools #5144 pin is still pending."
+    }
+  }
+}

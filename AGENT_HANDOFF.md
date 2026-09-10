@@ -4,7 +4,7 @@ Active #9907/#9908 under epic #9906 in `feat/9907-capture-goal-wizard`, worktree
 `UpstreamDrift-capture-wizard`. Typed route metadata, the generated atlas plan
 exchange, a standard Qt wizard, existing-screen navigation, background evidence
 inspection and capture-owned resume are implemented. Focused tests and scoped
-mypy pass;510 broad Capture Rig/parity/atlas regressions pass. No wizard PR or merge yet.
+mypy pass;510 broad Capture Rig/parity/atlas regressions pass. Implementation commit455022ede; main integration is being qualified. No wizard PR yet.
 Canonical state: `docs/development/HANDOFF.md`. Bag PR #9923 merged as
 5ada5e6a6827bfb94a00d1801f6b475afb885885; #9905 stays open for this wizard entry.
 Preserve live Capture Rig PID61500, other agents' work and standing governance.
@@ -20,6 +20,26 @@ existing compositor. #9917 is integrated; other capture work remains with its
 owner. Reference/Capture Rig regressions pass. Twenty qualified numerical bundles
 and twenty club display assets are ready; merged as 6f2d63325f6260de99527a08551f7e116abdec28; completion docs follow. Existing
 camera data and the original main worktree's user changes are untouched.
+
+## Integrated Main Provider Context
+
+Main c487265f1 merges #9916 and pins Tools4dabe900c6ef7767b565c778cda9d9449bed28cf.
+The provider owner's full source/wheel evidence and continuation are preserved in
+[Canonical Handoff](docs/development/HANDOFF.md). Reviewed-pin follow-up #5144,
+physical/acoustic work and the separate manual program remain open.
+
+## Standing Constraints
+
+- Read AGENTS.md and CLAUDE.md; maintain issue leases and session presence.
+- Shared physics belongs in Tools. Do not copy or edit vendored source.
+- Use topic branches and normal hooks; preserve protected CI and reviews.
+- UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
+  manuals/upstreamdrift QMD is the editable authority; generated LaTeX, PDF,
+  DOCX and HTML remain non-editable artifacts. Run the configured
+  scripts.check_design_manual_governance checks before changing calculations.
+- Numerical convergence, measured calibration and perceptual evidence are
+  distinct; source hashes alone do not qualify a physical model.
+- Refresh this file, canonical handoff and DL-#9912 in implementation commits.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 

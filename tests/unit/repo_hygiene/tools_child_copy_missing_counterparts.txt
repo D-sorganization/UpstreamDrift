@@ -120,7 +120,6 @@ sidekick/process_calculators/syngas_compression_display.py
 sidekick/process_calculators/syngas_compression_tabs_mixin.py
 sidekick/process_calculators/syngas_compression_worker.py
 signal_toolkit/signal_processing.py
-theme/color_derivation.py
 theme/sidekick_tokens.py
 theme/v1.py
 ui/adapters/__init__.py

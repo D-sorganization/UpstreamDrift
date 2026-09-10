@@ -244,10 +244,16 @@
       "status": "cleaned",
       "rationale": "Tools' shared-tree test package; UD carries only an identical __init__.py. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
+    "realtime": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "Tools now owns the persistent file transport ported for UD #8942. UD still owns the publish/subscribe facade, channel registry, protocol and WebSocket integration; its __init__.py exports a different API and cannot be replaced by the Tools package initializer. The two transport_file.py implementations differ in handle lifetime, polling and incremental reads. Preserve the current UD API until the #8942 migration qualifies transport behavior and a facade-compatible import route; no retirement is claimed by provider update #9912.",
+      "follow_up": "D-sorganization/UpstreamDrift#8942"
+    },
     "theme": {
       "ruling": "split",
       "status": "cleaned",
-      "rationale": "22 overlapping files are tools-canonical: Tools' __init__ exports Colors/Sizes/Weights/get_qfont (fixes UD #8894), zoom.py has the int() guard, palette.py is newer; 4 UD-only modules (color_derivation, layout_metrics, sidekick_tokens, v1) are imported by launchers/tools and stay.",
+      "rationale": "Tools owns the shared theme implementation. Provider update #9912 retires the obsolete color_derivation.py overlap: both normal downstream imports and isolated provider contracts already resolve its three public string-domain helpers to Tools. The copies are not byte-identical (UD has an extra private non-string guard); no private out-of-domain equivalence is claimed. Existing malformed-string controls remain. The 3 UD-only modules (layout_metrics, sidekick_tokens, v1) stay; preserve their import origins and APIs.",
       "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "trusted_git.py": {
@@ -257,8 +263,9 @@
     },
     "ui": {
       "ruling": "split",
-      "status": "pending-cleanup",
-      "rationale": "4 identical Tools files; 27 UD-only widgets (toast, shortcuts_overlay, preferences_dialog, ...) stay."
+      "status": "cleaned",
+      "rationale": "Provider integration #9912 retires four byte-identical overlapping files (__init__, auto_complete, hover_copy_browser, window_icon) through the existing split namespace resolver. This exposes the moved canonical Function Generator widget while preserving all 27 UD-only widgets and both import spellings. No UI source is copied or independently modified.",
+      "cleaned_in": "UD #9916 (candidate 2026-09-09)"
     },
     "upstream_drift_tools": {
       "ruling": "tools-canonical",
