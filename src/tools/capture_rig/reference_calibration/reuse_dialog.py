@@ -8,9 +8,11 @@ from typing import Any
 from PyQt6.QtGui import QCloseEvent
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
+    QHBoxLayout,
     QLabel,
     QPushButton,
     QTextBrowser,
@@ -100,16 +102,12 @@ class ReuseCalibrationDialog(QDialog):
         )
         title.setWordWrap(True)
         layout.addWidget(title)
-        self.browse = QPushButton("Choose a Reviewed Layout…")
-        self.browse.setToolTip(
-            "Choose an original reviewed layout from another capture"
-        )
-        self.browse.clicked.connect(self._browse)
-        layout.addWidget(self.browse)
+        self._source_controls(layout)
         self.evidence = QTextBrowser()
         self.evidence.setPlainText(
-            "Select a reviewed-….json file in the source capture's reference_calibration/results "
-            "folder. The same named views, physical cameras and recorded image sizes are required. "
+            "Choose From Capture Library to find a saved calibration by swing name and date. "
+            "Open Layout File also accepts an original reviewed estimate from another location. "
+            "The same named views, physical cameras and recorded image sizes are required. "
             "The original evidence will be copied into this swing, so the original can later be archived."
         )
         layout.addWidget(self.evidence, 1)
@@ -136,9 +134,35 @@ class ReuseCalibrationDialog(QDialog):
         layout.addWidget(buttons)
         self._refresh()
 
+    def _source_controls(self, layout: QVBoxLayout) -> None:
+        row = QHBoxLayout()
+        self.library_button = QPushButton("From Capture Library…")
+        self.library_button.clicked.connect(self._library)
+        self.browse = QPushButton("Open Layout File…")
+        self.browse.setToolTip(
+            "Open an original reviewed estimate from another location"
+        )
+        self.browse.clicked.connect(self._browse)
+        row.addWidget(self.library_button)
+        row.addWidget(self.browse)
+        layout.addLayout(row)
+        self.saved_layouts = QComboBox()
+        self.saved_layouts.setAccessibleName("Saved Calibrations")
+        self.saved_layouts.setMinimumContentsLength(20)
+        self.saved_layouts.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self.saved_layouts.addItem(
+            "Choose From Capture Library to Load Saved Calibrations"
+        )
+        self.saved_layouts.activated.connect(self._choose_saved)
+        layout.addWidget(self.saved_layouts)
+
     def _refresh(self, *_: Any) -> None:
         busy = self.client.busy
         self.browse.setEnabled(not busy)
+        self.library_button.setEnabled(not busy)
+        self.saved_layouts.setEnabled(not busy and self.saved_layouts.count() > 1)
         self.settings.setEnabled(not busy and bool(self._digest))
         self.scene.setEnabled(not busy and bool(self._digest))
         self.use.setEnabled(
@@ -156,18 +180,39 @@ class ReuseCalibrationDialog(QDialog):
             "Reviewed Camera Layout (reviewed-*.json)",
         )
         if selected:
-            self._source, self._digest = selected, ""
-            self.settings.setChecked(False)
-            self.scene.setChecked(False)
-            self.evidence.clear()
-            self._request("inspect_reuse")
+            self.saved_layouts.setCurrentIndex(0)
+            self._select_source(selected)
+
+    def _reset_review(self) -> None:
+        self._source, self._digest = "", ""
+        self.settings.setChecked(False)
+        self.scene.setChecked(False)
+        self.evidence.clear()
+
+    def _library(self) -> None:
+        self._reset_review()
+        self.saved_layouts.clear()
+        self.saved_layouts.addItem("Loading Saved Calibrations…")
+        self._request("reuse_choices")
+
+    def _choose_saved(self, index: int) -> None:
+        selected = self.saved_layouts.itemData(index)
+        if selected:
+            self._select_source(selected)
+
+    def _select_source(self, selected: str) -> None:
+        self._reset_review()
+        self._source = selected
+        self._request("inspect_reuse")
 
     def _request(self, action: str) -> None:
         self._action = action
         self.status.setText(
-            "Checking original evidence…"
-            if action == "inspect_reuse"
-            else "Copying and verifying calibration evidence for this swing…"
+            {
+                "reuse_choices": "Reading saved calibration names from Capture Library…",
+                "inspect_reuse": "Checking original evidence…",
+                "adopt_layout": "Copying and verifying calibration evidence for this swing…",
+            }[action]
         )
         try:
             self.client.request(
@@ -179,6 +224,7 @@ class ReuseCalibrationDialog(QDialog):
                         "source_path": self._source,
                         "source_sha256": self._digest,
                         "expected_cameras": self.expected,
+                        "library_root": str(self.library_root),
                         "settings_confirmed": self.settings.isChecked(),
                         "scene_confirmed": self.scene.isChecked(),
                     },
@@ -194,7 +240,9 @@ class ReuseCalibrationDialog(QDialog):
     def _completed(self, result: dict[str, Any]) -> None:
         if self._closed:
             return
-        if self._action == "inspect_reuse":
+        if self._action == "reuse_choices":
+            self._show_choices(result)
+        elif self._action == "inspect_reuse":
             self._digest = result["source_sha256"]
             self.evidence.setPlainText(review_text(result))
             self.status.setText(
@@ -204,6 +252,22 @@ class ReuseCalibrationDialog(QDialog):
         else:
             self.output_path = self.root / result["result_path"]
             self.accept()
+
+    def _show_choices(self, result: dict[str, Any]) -> None:
+        self.saved_layouts.clear()
+        self.saved_layouts.addItem("Select a Saved Calibration…")
+        for choice in result["choices"]:
+            self.saved_layouts.addItem(choice["label"], choice["path"])
+        self.status.setText(
+            "Choose a saved calibration above to review its evidence."
+            if result["choices"]
+            else "No reviewed calibrations found. Choose Open Layout File, or calibrate a capture first."
+        )
+        if result["problems"]:
+            self.evidence.setPlainText(
+                "Some Results Could Not Be Listed\n\n" + "\n".join(result["problems"])
+            )
+        self._refresh()
 
     def _failed(self, error: str) -> None:
         if not self._closed:

@@ -86,8 +86,10 @@ The application records manual settings; it cannot detect unreported ring or
 camera movement. Repeated placements refine one fixed setup, not changing zoom.
 ## Reuse Calibration for a New Swing
 
-Open the new swing, choose **Calibration → Reuse a Camera Layout…**, then select
-an original **reviewed-….json** estimate from the earlier capture's
+Open the new swing, choose **Calibration → Reuse a Camera Layout…**, then choose
+**From Capture Library…**. Select the source capture by name, review date and
+scene; archived captures are included. **Open Layout File…** also accepts an
+original **reviewed-….json** estimate from an earlier capture's
 **reference_calibration/results** folder. The views, physical camera identities
 and recorded image sizes must match. Review the source swing, lens/zoom/focus,
 sensor mode, anchor offset, fit/validation errors and limitations.

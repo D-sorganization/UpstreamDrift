@@ -111,6 +111,7 @@ flowchart LR
   n13 -.->|"Saved world geometry"| n9
   n1 -.->|"Original reviewed result and archived observations"| n14
   n14 -.->|"Capture-owned reviewed layout assignment"| n21
+  n4 -->|"Named saved calibrations and capture identity"| n14
 ```
 
 Dashed connections exchange files explicitly. Single-view analysis is

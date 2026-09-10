@@ -74,6 +74,34 @@ def test_cancel_cannot_apply_a_late_worker_result(qtbot, tmp_path, monkeypatch):
     assert dialog.output_path is None
 
 
+def test_named_library_choice_opens_review_without_confirming_for_player(
+    qtbot, tmp_path, monkeypatch
+):
+    dialog = make_dialog(qtbot, tmp_path)
+    calls = []
+    monkeypatch.setattr(dialog.client, "request", calls.append)
+    dialog.library_button.click()
+    assert calls[-1]["action"] == "reuse_choices"
+    dialog._completed(
+        {
+            "choices": [
+                {
+                    "label": "Paper Calibration · Earlier Today",
+                    "path": str(tmp_path / "reviewed.json"),
+                }
+            ],
+            "problems": [],
+        }
+    )
+    assert "Paper Calibration" in dialog.saved_layouts.itemText(1)
+    dialog.saved_layouts.setCurrentIndex(1)
+    dialog.saved_layouts.activated.emit(1)
+    assert calls[-1]["action"] == "inspect_reuse"
+    assert not dialog.settings.isChecked() and not dialog.scene.isChecked()
+    assert not dialog.use.isEnabled()
+    dialog.reject()
+
+
 def test_small_reuse_review_and_entry_point_fit_standard_dialog(qtbot, tmp_path):
     dialog = make_dialog(qtbot, tmp_path)
     dialog.resize(640, 560)

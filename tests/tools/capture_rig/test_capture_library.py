@@ -15,6 +15,27 @@ from tests.motion_capture.rig.test_ingest import _bundle
 pytestmark = pytest.mark.unit
 
 
+def test_catalog_metadata_can_list_archived_captures_without_media_scan(
+    tmp_path, monkeypatch
+):
+    import src.tools.capture_rig.capture_library as module
+
+    root = _bundle(tmp_path)
+    library = CaptureLibrary(tmp_path / "library")
+    original = library.register(root)
+    library.update(root, title="Paper Calibration", archived=True)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Metadata selectors must not scan recordings or storage")
+
+    monkeypatch.setattr(module, "_storage", forbidden)
+    rows = library.catalog_entries(archived=None)
+    assert len(rows) == 1
+    assert rows[0].capture_id == original.capture_id
+    assert rows[0].title == "Paper Calibration" and rows[0].archived
+    assert not library.catalog_entries(archived=False)
+
+
 def test_notes_title_archive_and_search_survive_reopening(tmp_path: Path) -> None:
     root = _bundle(tmp_path)
     library = CaptureLibrary(tmp_path / "library")

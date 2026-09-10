@@ -232,3 +232,27 @@ def test_foreground_review_does_not_read_all_archived_frames(reuse_case, monkeyp
     validate_profile_set(path.read_bytes(), expected, capture_root=target)
     with pytest.raises(ValueError, match="Full frame verification"):
         start_cameras_from(path, capture_root=target)
+
+
+def test_library_choices_use_named_archived_captures_and_report_bad_results(reuse_case):
+    from uuid import uuid4
+    from src.tools.capture_rig.capture_library import CaptureLibrary
+    from src.tools.capture_rig.reference_calibration.reuse_catalog import (
+        list_reviewed_layouts,
+    )
+
+    request, source, target, expected = reuse_case
+    _write_target_bundle(source, expected)
+    library = CaptureLibrary(target.parent / "library")
+    library.register(source)
+    library.register(target)
+    library.update(source, title="Paper Calibration Take", archived=True)
+    broken = source / "reference_calibration/results" / f"reviewed-{uuid4()}.json"
+    broken.write_text("{broken", encoding="utf-8")
+    request["parameters"]["library_root"] = str(library.root)
+    found = list_reviewed_layouts(request)
+    assert len(found["choices"]) == 1
+    assert "Paper Calibration Take" in found["choices"][0]["label"]
+    assert "Archived" in found["choices"][0]["label"]
+    assert found["choices"][0]["path"] == request["parameters"]["source_path"]
+    assert found["problems"]

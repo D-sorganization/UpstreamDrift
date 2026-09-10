@@ -1,7 +1,7 @@
 # Common-Reference Calibration Handoff
 
 Current #9898/#9900: isolated `UpstreamDrift-common-calibration`, branch
-`feat/9898-common-reference-sessions`, implementation d15013a2c. Normal commit/push hooks passed; no PR yet. Session `capture-product-01a08427-common-calibration` has presence and
+`feat/9898-common-reference-sessions`, implementation d15013a2c. Normal commit/push hooks passed; PR #9946. Session `capture-product-01a08427-common-calibration` has presence and
 #9898 lease through05:51UTC2026-09-10; #9900 lease through07:03UTC.
 See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
 [operator guide](../motion_capture/common_reference_calibration.md).
@@ -22,7 +22,7 @@ Local vendor0a is development-only: it would regress the launcher compared with
 main's interim4dabe900c. Context owner owns final gitlink/Cargo/pip/catalog alignment
 after Tools #5144; impact owner qualifies the exact installed consumer. No bypass
 of historical private404/rate-shard failures. Update final metadata and integrate
-main normally before PR/CI/protected merge. Cross-capture reuse is now implemented with portable source evidence and native review;27 isolated checks and18 pipeline/lens/Qt boundary tests pass. Reuse committed f6298fb0c; types passed. Foreground image reads are now deferred to background/processing checks, with28 isolated tests passing. Final push hooks, packaged-runtime and physical accuracy acceptance remain open.
+main normally before PR/CI/protected merge. Cross-capture reuse is now implemented with portable source evidence and native review;27 isolated checks and18 pipeline/lens/Qt boundary tests pass. Reuse committed f6298fb0c; types passed. Foreground image reads are now deferred to background/processing checks, with28 isolated tests passing. All push hooks passed on1e4984765. Named catalog selection passes13 library/dialog tests,29 isolated provider checks and19 integration tests; native archived-source selection/review/assignment at640×560 was inspected. Packaged-runtime and physical accuracy acceptance remain open.
 
 Preserve live app54812 (`Capture Rig — main 56552f245`), older61500 and atlas2963.
 They use frozen earlier checkouts, not this branch. Analysis owner controls
