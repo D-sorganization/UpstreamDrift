@@ -86,7 +86,7 @@ def test_add_parameter_block_degradation_without_bioptim(
 def test_add_parameter_block_wires_bioptim_structures() -> None:
     mock_biopt = MagicMock()
     mock_param_list = MagicMock()
-    mock_bounds_list = {}
+    mock_bounds_list = MagicMock(spec=["add"])
     mock_init_list = MagicMock()
     mock_obj_list = MagicMock()
 
@@ -139,9 +139,13 @@ def test_add_parameter_block_wires_bioptim_structures() -> None:
         scaling="scaling_arm_length",
     )
 
-    # Bounds set
-    np.testing.assert_allclose(mock_bounds_list["arm_length"][0], [0.4])
-    np.testing.assert_allclose(mock_bounds_list["arm_length"][1], [0.8])
+    # One shared scalar bound; locked parameters receive no optimization entry.
+    mock_bounds_list.add.assert_called_once()
+    bounds_call = mock_bounds_list.add.call_args
+    assert bounds_call.args == ("arm_length",)
+    np.testing.assert_allclose(bounds_call.kwargs["min_bound"], [0.4])
+    np.testing.assert_allclose(bounds_call.kwargs["max_bound"], [0.8])
+    assert bounds_call.kwargs["interpolation"] is mock_biopt.InterpolationType.CONSTANT
 
     # Initial guess set
     mock_init_list.add.assert_called_once()
