@@ -19,16 +19,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9934 · Unified Biomechanical Analysis
 
-- **State:** in_progress
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9926; children #9929, #9930, #9932, #9942
+- **Branch:** feat/9942-metric-simulation-analysis; feat/9932-comparison-drawings
+- **PR:** #9933 (merged); #9943 (merged 3fbd4b2da); #9945 (final review, protected CI pending)
+- **Paths:** src/motion_capture/coaching; src/tools/capture_rig; src/tools/pose_studio
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-10 (SELF final delivery record; reviewed contracts4824f370a; catalog20 runtime audit pass; Traceb6325dfe8 persistence17 pass; PR trackingf0fe99bd9; isolated push mypy14/Bandit/unit tests pass; map5a2e8d2c1; combined600 had only stale atlas hash, regenerated and56 focused tests pass; main d40956742; native785269090; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions, five-source Trace mypy and 17 topology/import tests; native30 tests and four-source mypy, visual plane/editor inspected)
+- **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
+- **Evidence:** Comparison launch/save, PNG parity, snapshot video, cancellation and camera-evidence tests pass; Ruff/format, budgets and LoD pass; Driver comparison drawing UI and PNG inspected.
+- **Next step:** Verify protected CI and merge #9945, then close the parent epic after the completion audit.
+
+### DL-#9934 · Cross-Model Biomechanics Analysis
+
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9934
 - **Branch:** feat/9934-biomechanical-analysis
+- **PR:** #9941
 - **Paths:** src/shared/python/biomechanics, src/api/routes/biomechanics.py, src/shared/python/analysis/biomechanics_display.py, src/shared/python/dashboard, ui/src/components/analysis
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (focused biomechanics/API/display suite; Ruff)
+- **Last verified:** 2026-09-10 (merged in #9941)
 - **Summary:** Shared calibrated conventions and golf metrics across model inputs with explicit availability and configurable displays.
-- **Evidence:** Focused 63-test suite passes; API compute/convert/display and web plot tests pass. Native model qualification remains open.
-- **Next step:** Qualify engine transform adapters and run protected repository gates.
+- **Evidence:** Focused 63-test suite passes; API compute/convert/display and web plot tests pass.
+- **Next step:** Complete.
 
 ### DL-#9912 · Impact Shaft Provider Integration
 

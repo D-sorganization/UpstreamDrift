@@ -41,9 +41,7 @@ class ConversionRequest(BaseModel):
     target_degrees: bool = False
 
 
-@router.post("/compute")
-def compute(payload: dict[str, Any]) -> dict[str, Any]:
-    """Compute SI channels with definitions, availability and source provenance."""
+def _compute_biomechanics(payload: dict[str, Any]) -> dict[str, Any]:
     from src.shared.python.biomechanics.golf_trajectory import (
         compute_golf_metrics,
         golf_trajectory_from_dict,
@@ -54,6 +52,12 @@ def compute(payload: dict[str, Any]) -> dict[str, Any]:
         return compute_golf_metrics(trajectory).to_dict()
     except (ValueError, TypeError, KeyError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/compute")
+def compute(payload: dict[str, Any]) -> dict[str, Any]:
+    """Compute SI channels with definitions, availability and source provenance."""
+    return _compute_biomechanics(payload)
 
 
 @router.post("/display")
@@ -97,7 +101,7 @@ def session_results(service: Any = Depends(get_simulation_service)) -> dict[str,
             status_code=409,
             detail="No calibrated segment recording. Configure model bindings before recording, or import a canonical trajectory.",
         )
-    return compute(payload)
+    return _compute_biomechanics(payload)
 
 
 @router.post("/bindings")
