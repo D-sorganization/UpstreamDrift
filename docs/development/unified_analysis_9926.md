@@ -37,7 +37,8 @@ tracks shared metric readouts and simulation analysis.
 The capability registry now records model-only analysis, shared drawing-editor
 contracts and metric-reference routes. Existing executable capture-goal metadata
 and desktop parity limitations are preserved. Measurement readouts, simulation
-integration and reviewed agent-context boundaries remain parent-epic work.
+integration and reviewed shared contracts are implemented in #9945; protected
+delivery remains required.
 
 Camera-bound geometry now fingerprints `reconstruct/reconstruction.json`, the
 actual projection-camera evidence, in addition to the reconstruction summary.
@@ -57,7 +58,7 @@ without that camera file retain their existing identity.
 | Simulation Traces    | Trace v2 metric markers and trace_io                    | Explicit axes/names/topology into reference library and common analysis | Trace126 and topology17 tests pass; q-only traces report missing marker channels                           |
 | Native Viewports     | Existing Viewport mesh protocol                         | Scene-bound adapter with explicit coordinate frame                      | Pose Studio qualified; other renderer SDKs are not claimed from the protocol alone                         |
 | Native Models        | Existing fitted ReferenceMotion assets and catalog      | Analyze Model or Compare Reference regardless of fit adapter            | See model-by-model fitting qualification in reference_model_fitting.md; unavailable model reasons retained |
-| Functionality Maps   | Capability registry and generated atlas                 | Measurements, Trace and native-reference contract edges                 | Atlas/parity50 tests pass; peer-owned context boundaries await #9915 coordination                          |
+| Functionality Maps   | Capability registry and generated atlas                 | Measurements, Trace and native-reference contract edges                 | Atlas/parity50 tests pass; shared contracts reviewed; optional catalog indexing remains with #9915         |
 
 The native pose editor is static and uses scene time zero. Dynamic simulation
 analysis uses the Trace marker route and the shared playback/export workspace.
@@ -182,8 +183,7 @@ The full Driver's frame200 at0.556s was visually inspected with the shared panel
 and plane. Readout mypy passes four source files. The initial Trace v2 importer passes
 126 reference/import regressions and mypy on five source files. Explicit club
 and skeleton topology preservation and native Pose Studio reference geometry are
-implemented and tested. Capability maps are updated; reviewed context boundaries
-and protected delivery remain open for #9942 and the parent epic.
+implemented and tested. Capability maps are updated; protected delivery remains open for #9942 and the parent epic.
 
 ## Native Reference Geometry
 
@@ -204,3 +204,23 @@ Native visual evidence: `analysis-9926-artifacts/native-references-saep77qb`.
 The plane and shared controls were inspected on the canonical reference pose.
 Partial submission failures roll back new mesh handles and preserve prior
 references; replacing references leaves other viewport objects alone.
+
+## Final Runtime Qualification
+
+At b6325dfe8, all20 hash-verified Tour Average display assets passed the actual
+shared analysis/save/reopen/export route: nine catalog variants each for Driver
+and Iron, plus full-rate golfer fits. Every route retained drawings, planes,
+club controls, ellipsoid opacity and handedness and produced metric readouts.
+Forty original/mirrored stills and the per-asset qualification report are in the
+external `analysis-9926-artifacts/catalog-analysis-zcgqk8ta` directory. The
+reproduction script is `analysis-9926-artifacts/qualify_catalog_analysis.py`.
+Additional observed-club frames at Driver0.838889s and Iron0.891365s were visually
+inspected. Source club gaps and the separate measured shaft connector are retained.
+
+The current context boundary requirement is satisfied by reviewed
+SHARED_ANALYSIS_CONTRACTS.md and the authoritative capability registry. The
+independently owned #9915 catalog can index these same contracts when its runtime
+lands; it is not required to run the implemented analysis routes. No claim of
+catalog registration or optional native SDK qualification is made here.
+
+Final closure still requires protected checks and the normal merge of #9945.
