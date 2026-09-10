@@ -37,6 +37,7 @@ from src.launchers.launcher_constants import (
     GRID_COLUMNS,
     LAYOUT_CONFIG_FILE,
     REPOS_ROOT,
+    STARTUP_TIMEOUT_SEC,
     _lazy_load_engine_manager,
     logger,
 )
@@ -110,15 +111,6 @@ __all__ = [
     "STARTUP_TIMEOUT_SEC",
     "main",
 ]
-
-# Async startup is normally well under a second; 30s is a generous ceiling
-# that comfortably covers cold-disk Docker probes and slow first-run
-# registry imports while still surfacing a true hang (e.g. crashed worker
-# thread) before the user concludes the app is broken.  See issue #5490.
-STARTUP_TIMEOUT_SEC: int = 30
-assert STARTUP_TIMEOUT_SEC > 0, (
-    "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
-)
 
 
 class UpstreamDriftLauncher(QMainWindow):
@@ -400,6 +392,12 @@ class UpstreamDriftLauncher(QMainWindow):
         self._popped_out_windows: list[Any] = []
         self._dependency_status_cache: dict[str, tuple[bool, str]] = {}
         self._dependency_probe_workers: dict[str, Any] = {}
+        if self.loading and startup_results is None:
+            # Issue #8360: the async worker owns registry/engine loading in
+            # loading mode. Falling back here re-ran that work synchronously
+            # on the GUI thread while the splash was visible, so a slow or
+            # hung import froze the splash with no timer able to fire.
+            return
         self.orchestrator.initialize_from_results(startup_results)
 
     def _init_managers(self) -> None:
