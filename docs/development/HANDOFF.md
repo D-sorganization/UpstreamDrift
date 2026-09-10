@@ -1,3 +1,12 @@
+# Architecture Map Contract Handoff Checkpoint — 2026-09-10
+
+- Worktree: C:/Users/diete/Repositories/UpstreamDrift
+- Branch: docs/1616-c4-architecture-map; checkpoint SELF; PR pending.
+- Governing issue: Repository_Management #1616 (Parent epic #1594).
+- Objectives: Adopt Mermaid C4 architecture-map contract (C4Context, C4Container, Feature Map, Change Log) in UpstreamDrift.
+- Verification: scripts/architecture_map_contract.py passes; pytest tests/test_architecture_map_contract.py passes 4/4; SPEC.md change log passes 642 rows.
+- Preserved peer handoffs below.
+
 # Impact Program Handoff Checkpoint — 2026-09-10
 
 - Worktree: C:/Users/diete/Repositories/UpstreamDrift-impact-provider.

@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#1616 · Maintainable Mermaid C4 Architecture Maps
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #1616
+- **Branch:** docs/1616-c4-architecture-map
+- **PR:** not created
+- **Paths:** docs/architecture/C4.md; scripts/architecture_map_contract.py; tests/test_architecture_map_contract.py; .github/workflows/architecture-map-contract.yml; AGENTS.md; README.md; SPEC.md
+- **Started:** 2026-09-10
+- **Last verified:** 2026-09-10 (C4.md validated, contract tests 4/4 pass, SPEC change log 642 rows valid)
+- **Summary:** Baseline adoption of maintainable Mermaid C4 architecture maps (C4Context, C4Container, Feature Map, Change Log) in UpstreamDrift.
+- **Next step:** Open PR, enable auto-merge, verify CI passes green.
+
 ### DL-#9899 · Calibration Revision Status
 
 - **State:** in_review
