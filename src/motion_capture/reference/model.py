@@ -19,7 +19,13 @@ class ReferenceSource(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
     path: str = Field(min_length=1, max_length=4096)
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    format: Literal["c3d", "body_target_json_v1", "video", "marker-trajectory/1.0.0"]
+    format: Literal[
+        "c3d",
+        "body_target_json_v1",
+        "video",
+        "marker-trajectory/1.0.0",
+        "simulation-trace/2",
+    ]
 
 
 class ReferenceAsset(BaseModel):

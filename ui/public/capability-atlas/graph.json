@@ -506,7 +506,7 @@
       "tiles": [
         "capture_rig"
       ],
-      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints. Common-reference calibration #9898/#9900 adds capture-owned paper/ruler observations, original-frame point editing, repeated placements, asynchronous canonical camera estimation, reviewable result history and shared native/generated help; lens profiles remain required. Guided cross-capture reuse requires explicit optics/scene confirmation, retains portable original evidence and revalidates it before processing. Physical accuracy and packaged-runtime qualification remain pending under #9897. Model-only analysis and Draw on Comparison reuse the coaching editor, appearance, club/ellipsoid/handedness controls and scene-bound metric planes/points. Comparison drawing PNGs preserve original pixels; video applies the saved crop. These desktop routes do not establish web parity.",
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints. Common-reference calibration #9898/#9900 adds capture-owned paper/ruler observations, original-frame point editing, repeated placements, asynchronous canonical camera estimation, reviewable result history and shared native/generated help; lens profiles remain required. Guided cross-capture reuse requires explicit optics/scene confirmation, retains portable original evidence and revalidates it before processing. Physical accuracy and packaged-runtime qualification remain pending under #9897. Model-only analysis and Draw on Comparison reuse the coaching editor, appearance, club/ellipsoid/handedness controls and scene-bound metric planes/points. Comparison drawing PNGs preserve original pixels; video applies the saved crop. Shared metric readouts and Trace v2 marker/club imports use the same controls (#9942). These desktop routes do not establish web parity.",
       "id": "tools.capture_rig"
     },
     {
@@ -613,7 +613,7 @@
       "api": null,
       "web": null,
       "issue": null,
-      "reason": "Interactive 3D pose editing; desktop-only candidate pending #7460.",
+      "reason": "Interactive 3D pose editing and shared scene-bound native reference points/planes (#9942); desktop-only candidate pending #7460.",
       "pending_decision": true,
       "tiles": [
         "pose_studio"
@@ -1694,7 +1694,7 @@
       "view": "workflow",
       "instructions": [
         "Open 3D References in model analysis or comparison.",
-        "Enter point coordinates or plane origin, normal, extent and opacity in the displayed world frame.",
+        "Enter point coordinates or three non-collinear plane anchors, extent and opacity in the displayed world frame.",
         "Save after reviewing camera and scene identity; changed evidence requires review."
       ]
     },
@@ -1708,6 +1708,27 @@
         "Open the new swing and choose Calibration, then Reuse a Camera Layout. From Capture Library lists saved calibrations by capture name, review date and scene, including archived captures.",
         "Review the source settings and confirm unchanged optics, camera positions, ball origin and target direction. Use for This Swing retains source evidence; changed conditions require recalibration."
       ]
+    },
+    {
+      "id": "analysis.measurements",
+      "title": "Registered Metric Readouts",
+      "description": "Shared point and signed plane distances from the displayed registered motion; missing samples stay unavailable.",
+      "evidence": "src/tools/capture_rig/reference_readout.py",
+      "view": "system"
+    },
+    {
+      "id": "simulation.trace_import",
+      "title": "Simulation Trace Import",
+      "description": "Bounded Trace v2 marker motion with explicit axes, names and optional club topology.",
+      "evidence": "src/motion_capture/reference/trace_import.py",
+      "view": "system"
+    },
+    {
+      "id": "pose.world_references",
+      "title": "Pose Studio World References",
+      "description": "Shared scene editor and native mesh adapter beside canonical FK; explicit Y-up to Z-up conversion.",
+      "evidence": "src/tools/pose_studio/reference_geometry.py",
+      "view": "system"
     },
     {
       "id": "step.setup",
@@ -2398,6 +2419,60 @@
       "evidence": "src/tools/capture_rig/reference_calibration/reuse_catalog.py",
       "constraint": "Catalog metadata is not evidence approval; selecting an estimate verifies archived source evidence before fresh optics/scene confirmation",
       "view": "workflow"
+    },
+    {
+      "source": "engines",
+      "target": "simulation.trace_import",
+      "artifact": "Trace v2 HDF5 marker channels",
+      "kind": "contract",
+      "evidence": "src/motion_capture/reference/trace_import.py",
+      "constraint": "Marker channels and metres required; named scalar metadata declares axes and topology; no q-only FK guessing",
+      "view": "system"
+    },
+    {
+      "source": "simulation.trace_import",
+      "target": "capture.experts",
+      "artifact": "Validated reference asset",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_import.py",
+      "constraint": "Confirm mapping; unknown frame requires explicit axes; gaps remain masked",
+      "view": "system"
+    },
+    {
+      "source": "capture.model_analysis",
+      "target": "analysis.measurements",
+      "artifact": "Registered motion, world references and scene clock",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "constraint": "Same sampler as rendering; signed distances in metres",
+      "view": "system"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "analysis.measurements",
+      "artifact": "Registered motion, camera scene and time",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Geometric readouts only; not anatomical metrics",
+      "view": "system"
+    },
+    {
+      "source": "capture.world_references",
+      "target": "pose.world_references",
+      "artifact": "Shared GeometryControls and ReferenceGeometry",
+      "kind": "contract",
+      "evidence": "src/tools/pose_studio/reference_geometry.py",
+      "constraint": "Scene-bound JSON; static pose clock zero; no implicit camera-scene rebinding",
+      "view": "system"
+    },
+    {
+      "source": "desktop",
+      "target": "pose.world_references",
+      "artifact": "Pose Studio 3D References button",
+      "kind": "contract",
+      "evidence": "src/tools/pose_studio/gui.py",
+      "constraint": "Canonical viewport qualified; optional engine-native renderers are not implied",
+      "view": "system"
     }
   ],
   "capture_goals": {
@@ -2650,8 +2725,8 @@
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "78a91ca1278e31417576b4f98ac25861a7e59f6246cba8fc002cd80690e33d1b",
-    "src/config/capability_connections.json": "617c85bde75c491f0652cbe6f620ac996a1a3bc65525b3fb47e21207513acf9a",
+    "src/config/feature_parity.json": "58919fe692c94e31e04157f923198a699d82dd69165f77fcc5c39b0c8c3df973",
+    "src/config/capability_connections.json": "c010dc93bd23e8b1902d3ab3f0c32572ddd7c995aaaf064ded4cfcfa18e7d4cb",
     "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e"
   }
 }

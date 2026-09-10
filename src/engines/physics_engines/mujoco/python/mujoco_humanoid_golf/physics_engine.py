@@ -247,6 +247,21 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
             return np.array([]), np.array([])
         return self.data.qpos.copy(), self.data.qvel.copy()
 
+    def get_link_transforms(self) -> dict[str, np.ndarray]:
+        """Return body link poses without advancing the simulation."""
+        self.require_initialized("get_link_transforms")
+        assert self.model is not None and self.data is not None
+        result: dict[str, np.ndarray] = {}
+        for index in range(int(self.model.nbody)):
+            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, index)
+            if not name:
+                continue
+            transform = np.eye(4)
+            transform[:3, :3] = np.asarray(self.data.xmat[index]).reshape(3, 3)
+            transform[:3, 3] = self.data.xpos[index]
+            result[str(name)] = transform
+        return result
+
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:  # type: ignore[override]
         """Set the current state.
 

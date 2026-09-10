@@ -32,20 +32,38 @@ preserved historical wizard context, not the current implementation state.
 
 ## Preserved Main Integration Context
 
-# Guided Capture Workflow Handoff
+# Shared Analysis Delivery Handoff
 
-## Unified Analysis Comparison Drawings (#9932)
+## Completed Runtime (#9926)
 
-- Repository/worktree: D-sorganization/UpstreamDrift, `C:/Users/diete/Repositories/UpstreamDrift-analysis-drawings-9932`.
-- Branch: `feat/9932-comparison-drawings`; implementation b2cf97b5e83a6e9c31752c3f3f25598b8c6f3ff8; tracking commit SELF (root handoff now links here to meet its size budget); PR #9943 is draft with protected CI running.
-- Epic #9926 remains active; #9929/#9930 merged in #9933 at f04aa1a570e64c3db0b3d009351ab222656175b2.
-- DL-#9926 updated. Common comparison editor launch/save/reload, immutable export drawings, original-grid PNG, cropped video and camera-scene identity checks are implemented.
-- Source: comparison_coaching_source.py, comparison_frame_source.py, reference_comparison.py, reference_export.py, shared coaching canvas and geometry_storage.py. Capability registry and generated atlas register these paths; capture_goals preserved.
-- Validation: `python3 -m pytest tests/tools/capture_rig tests/motion_capture/test_geometry*.py -q --no-cov --timeout=60` passed 504 tests; atlas/parity tests passed 50. Whole-repo Ruff/format, architecture budget and LoD checks passed. Scoped mypy passed seven source files.
-- Visual evidence: full Driver at 0.567s, synthetic 960×540 background/virtual camera, common editor and PNG inspected in external `analysis-9926-artifacts/comparison-visual-9von8rml`. No physical camera qualification implied.
-- Compatibility: old geometry with incomplete camera fingerprints must be reviewed/recreated; no silent rebinding. PNG uses original pixels while comparison video applies saved crop. Preserve Tools pin4dabe900 and peer worktrees.
-- CI repair SELF: fleet sync #9944 introduced a conditional context-catalog path. The docs checker now recognizes only explicit When/If-path-exists clauses, while retaining required paths in the same sentence. Red reproduction and 27 checker tests passed; managed policy blocks unchanged.
-- Next: qualify PR #9943 through protected CI/review/merge; then implement child #9942 metric readouts and simulation integration with #9934 interfaces, context map registration and final epic audit. Normal push hooks passed. No external blocker; user-owned original worktree remains untouched.
+- Repository: D-sorganization/UpstreamDrift.
+- Worktree: C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942.
+- Branch: docs/9926-analysis-completion; record commit SELF.
+- Owner session: codex-unified-metrics-9942; preserve peer worktrees and Tools pin4dabe900.
+- Foundation #9933 merged at f04aa1a570e64c3db0b3d009351ab222656175b2.
+- Comparison drawings #9943 merged at 3fbd4b2da5f8661ec1f1e91b97884f781d83f1fd.
+- Metrics, Trace and native references #9945 merged at
+  2d41aba4159162f91c0cd1cc6919d0341755b492 on 2026-09-10T05:20:06Z.
+  Required quality-gate passed in CI Standard run34440058289; the run succeeded.
+  Children #9929/#9930/#9932/#9942 are closed. Optional queued jobs are not passing evidence.
+- Runtime includes common drawing/geometry/measurement controls, explicit model
+  placement and handedness, club/ellipsoid appearance, Trace marker import and
+  Pose Studio reference meshes. See [ledger](unified_analysis_9926.md) and
+  [reviewed contracts](../architecture/SHARED_ANALYSIS_CONTRACTS.md).
+- Qualification: all20 verified Tour Average assets passed actual shared analysis,
+  save/reopen and export; native30 and Trace17 tests passed. After integrating
+  main300d96a1 and biomechanics helper f58ee5b3, all88 combined tests passed.
+  Earlier broad suites, source typing, Ruff, LoD, budgets and generated-map
+  evidence are recorded in the ledger. No physical camera or anatomical accuracy
+  qualification is implied; unsupported native viewers and marker gaps are explicit.
+- External reproducible visual evidence: analysis-9926-artifacts/catalog-analysis-zcgqk8ta
+  and qualify_catalog_analysis.py; native-references-saep77qb and trace-appearance-l276j6ua.
+- Repair47bd32c11 was pushed after #9945 merged, so this branch preserves it via
+  417fd83ae: restored DL-#9926, shipped DL-#9907 and lost SPEC#9931/#9932/#9933
+  without modifying peer #9934 records. This closure changes documentation only.
+- Next: merge this final documentation record through normal protected CI, then
+  verify epic #9926 closure. No runtime implementation remains. The independently
+  owned #9915 catalog may index current contracts later; it is not a runtime dependency.
 
 ## Preserved Wizard Context
 
@@ -444,3 +462,21 @@ source presence sessions were released; the issues remain open pending the bag/w
 3. Continue everyday-reference calibration consumers and qualification after Tools gates clear.
 4. Verify final Tools/Gas fleet policy replacements after their owner merges them.
 5. Keep the full goal active; no unsupported equipment model constraint is claimed.
+
+# Unified Biomechanics Analysis (#9934)
+
+## Current Continuation State
+
+Branch `feat/9934-biomechanical-analysis` is implementing the shared
+calibrated trajectory contract, source-qualified orientation conversion,
+Cheetham-labelled golf channels, body/club COM, API conversion/compute/display
+routes, and desktop/web plot explorers. Focused biomechanics/API/display tests
+pass; Ruff lint and formatting pass after formatting. The work is not yet
+qualified for merge: native model transform adapters and full repository gates
+remain. Missing anatomy, mass, calibration or engine capability must remain
+unavailable rather than being inferred.
+
+- Epic: #9934; child issues: #9935–#9939.
+- Branch: `feat/9934-biomechanical-analysis`; base: `c487265f1`.
+- API: `/api/biomechanics/compute`, `/display`, `/convert`, `/bindings`, `/results`.
+- Next step: add/qualify native transform adapters, then run full CI gates and open PR.

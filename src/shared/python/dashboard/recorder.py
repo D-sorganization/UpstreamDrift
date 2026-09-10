@@ -67,6 +67,8 @@ class GenericPhysicsRecorder(
         self.is_recording = False
         self.data: dict[str, Any] = {}
         self._buffers_initialized = False
+        self._biomechanics_recorder: Any = None
+        self._biomechanics_source: Any = None
 
         self.analysis_config = {
             "ztcf": False,
@@ -86,6 +88,29 @@ class GenericPhysicsRecorder(
 
         if self._buffers_initialized:
             self._ensure_buffers_allocated()
+
+    def configure_biomechanics(self, binding: Any, source: Any = None) -> None:
+        """Bind model anatomy before recording; source exposes link transforms."""
+        from src.shared.python.biomechanics.model_bindings import TrajectoryRecorder
+
+        if self.is_recording or self.current_idx:
+            raise ValueError("Configure biomechanics before starting a fresh recording")
+        source = self.engine if source is None else source
+        if not callable(getattr(source, "get_link_transforms", None)):
+            raise ValueError("Biomechanics source must expose get_link_transforms")
+        self._biomechanics_recorder = TrajectoryRecorder(binding, self.max_samples)
+        self._biomechanics_source = source
+
+    def record_biomechanics(self, time: float) -> None:
+        """Sample synchronized geometry through the public source protocol."""
+        if self._biomechanics_recorder is not None:
+            self._biomechanics_recorder.sample(time, self._biomechanics_source)
+
+    def get_biomechanics_payload(self) -> dict[str, Any] | None:
+        """Return calibrated samples, or None when no usable recording exists."""
+        if self._biomechanics_recorder is None or self.current_idx < 2:
+            return None
+        return self._biomechanics_recorder.to_payload()
 
     def _ensure_buffers_allocated(self) -> None:
         """Allocate buffers for enabled analysis features if missing."""
@@ -222,6 +247,11 @@ class GenericPhysicsRecorder(
 
     def reset(self) -> None:
         self._reset_buffers()
+        if self._biomechanics_recorder is not None:
+            from src.shared.python.biomechanics.model_bindings import TrajectoryRecorder
+
+            binding = self._biomechanics_recorder.binding
+            self._biomechanics_recorder = TrajectoryRecorder(binding, self.max_samples)
         logger.info("Recorder reset.")
 
 

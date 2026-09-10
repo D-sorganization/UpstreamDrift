@@ -80,6 +80,7 @@ class ReferenceMappingDialog(QDialog):
             form.addRow(f"Reference {target} from", box)
             self.axes.append(box)
         self.model_identity = QLineEdit()
+        self.model_identity.setText(draft.model_identity or "")
         form.addRow("Model identity (optional)", self.model_identity)
         layout.addLayout(form)
         self.names = QTableWidget(len(draft.names), 2)
@@ -101,7 +102,16 @@ class ReferenceMappingDialog(QDialog):
         self.edges = QPlainTextEdit()
         self.edges.setMaximumHeight(80)
         self.edges.setPlaceholderText("pelvis, spine\nspine, shoulder")
+        self.edges.setPlainText(
+            "\n".join(f"{draft.names[a]}, {draft.names[b]}" for a, b in draft.edges)
+        )
         layout.addWidget(self.edges)
+        if draft.club_edges:
+            layout.addWidget(
+                QLabel(
+                    "Declared club connections retain club display controls when kept."
+                )
+            )
         self.confirm = QCheckBox(
             "I confirm these units, axes and marker-to-joint names"
         )
@@ -118,9 +128,10 @@ class ReferenceMappingDialog(QDialog):
             create_button("Cancel", self.reject), QDialogButtonBox.ButtonRole.RejectRole
         )
         layout.addWidget(buttons)
-        if draft.canonical:
+        if draft.canonical or draft.source.format == "simulation-trace/2":
             self.units.setCurrentText("m")
             self.units.setEnabled(False)
+        if draft.canonical:
             for target, box in zip("XYZ", self.axes, strict=True):
                 box.setCurrentText("+" + target)
                 box.setEnabled(False)

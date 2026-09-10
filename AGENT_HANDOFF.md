@@ -2,32 +2,24 @@
 
 Active #9898/#9900: read `docs/development/common_reference_calibration.md` and
 DL-#9898. PR #9946 in isolated `UpstreamDrift-common-calibration`;
-head3be2bbff3 pushed with every normal hook passing. Named library selection
-is implemented; visual frame selection is in validation. Provider qualification blocks merge.
-Preserve apps54812/61500, atlas2963 and coordinated provider-pin ownership.
-Portable calibration reuse is implemented; canonical checkpoint lists passing
-provider/Qt/pipeline checks and the remaining dependency/qualification gates.
+Visual frame selection committed2b4471eb9; provider qualification blocks merge.
+Preserve apps54812/61500, atlas2963 and provider-pin ownership.
+See canonical checkpoint for validation and remaining acceptance.
 
-Comparison drawings #9932 merged through #9943; see the canonical handoff.
+Analysis #9945/#9947 merged; canonical handoff preserves provider and analysis scopes.
 
-## C3D Reference Fitting (#9914)
+Concurrent eacd69858 integrates main 5ada5e6a6 and its player/equipment work.
+Provider source and pin are unchanged. The inherited inventory omitted provider
+files; the existing test failed, then full-authorship regeneration restored it.
+All 271 integration controls pass again. Tools launcher follow-up is PR #5144;
+final reviewed-pin qualification and physical/acoustic work remain open.
 
-Current work is isolated in `../UpstreamDrift-reference-9914`, branch
-`feat/c3d-reference-overlay-9914`; implementation commit SELF; PR #9918.
-See `docs/development/reference_fitting_epic.md` and the operator guide
-`docs/motion_capture/reference_model_fitting.md`. DL-#9914 records current state.
-Reference fitting and the expanded club/ellipsoid/handedness controls reuse the
-existing compositor. #9917 is integrated; other capture work remains with its
-owner. Reference/Capture Rig regressions pass. Twenty qualified numerical bundles
-and twenty club display assets are ready; merged as 6f2d63325f6260de99527a08551f7e116abdec28; completion docs follow. Existing
-camera data and the original main worktree's user changes are untouched.
+Main 90c3d0b77 is integrated, preserving merged C3D fitting and club/volume/handedness overlays (#9918/#9922) and attributed club catalog (#9919). Both task scopes remain in canonical HANDOFF.md. All 271 integration controls pass.
+Main 8fce9f238 is integrated with capture PR #9917 LoD fixes and capture journey implementation preserved. Canonical HANDOFF.md retains the incoming capture handoff.
 
-## Integrated Main Provider Context
+## Preserved Repository Context
 
-Main c487265f1 merges #9916 and pins Tools4dabe900c6ef7767b565c778cda9d9449bed28cf.
-The provider owner's full source/wheel evidence and continuation are preserved in
-[Canonical Handoff](docs/development/HANDOFF.md). Reviewed-pin follow-up #5144,
-physical/acoustic work and the separate manual program remain open.
+The previous base handoff is preserved at [Full Base Handoff](https://github.com/D-sorganization/UpstreamDrift/blob/6e3610a9b/AGENT_HANDOFF.md). Canonical handoff retains incoming text below.
 
 ## Standing Constraints
 
@@ -41,6 +33,10 @@ physical/acoustic work and the separate manual program remain open.
 - Numerical convergence, measured calibration and perceptual evidence are
   distinct; source hashes alone do not qualify a physical model.
 - Refresh this file, canonical handoff and DL-#9912 in implementation commits.
+
+# Player Bag and Capture Equipment Continuation
+
+Active #9905 in `feat/9905-player-club-bag`, worktree UpstreamDrift-player-bag. My Clubs UI, capture assignment/library display and immutable model context are implemented;652 broad regressions and69 focused/map/parity checks pass. Parent catalog #9919 merged01831aa4c; capture UX #9917 merged8fce9f238. Canonical state is `docs/development/HANDOFF.md`. Preserve live Capture Rig childPID61500 and standing manual governance. Wizard integration and broader goal remain open.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 

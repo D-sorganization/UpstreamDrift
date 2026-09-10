@@ -24,6 +24,7 @@ import numpy as np
 import numpy.typing as npt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -66,6 +67,39 @@ class View3D(QtWidgets.QWidget):
     """
 
     landmark_picked = QtCore.pyqtSignal(str)
+
+    def add_mesh(
+        self, vertices: np.ndarray, faces: np.ndarray, *, color: tuple, alpha: float
+    ) -> object:
+        """Implement the shared native viewport protocol in canonical world metres."""
+        points, triangles = np.asarray(vertices, dtype=float), np.asarray(faces)
+        if (
+            points.ndim != 2
+            or points.shape[1] != 3
+            or not np.isfinite(points).all()
+            or triangles.ndim != 2
+            or triangles.shape[1] != 3
+            or triangles.dtype.kind not in "iu"
+            or len(triangles) == 0
+            or np.any(triangles < 0)
+            or np.any(triangles >= len(points))
+            or not np.isfinite(alpha)
+            or not 0 <= alpha <= 1
+        ):
+            raise ValueError(
+                "Mesh requires finite XYZ vertices, valid triangle indices and opacity"
+            )
+        mesh = Poly3DCollection(points[triangles], facecolor=color, alpha=alpha)
+        self._ax.add_collection3d(mesh)
+        self._canvas.draw_idle()
+        return mesh
+
+    def remove_mesh(self, handle: object) -> None:
+        """Remove only a mesh submitted to this viewport."""
+        if not isinstance(handle, Poly3DCollection) or handle.axes is not self._ax:
+            raise ValueError("Mesh does not belong to this viewport")
+        handle.remove()
+        self._canvas.draw_idle()
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)
