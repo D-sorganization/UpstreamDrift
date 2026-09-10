@@ -44,7 +44,7 @@ def project_raw_camera_points(
     projected, _ = cv2.projectPoints(
         points, np.zeros(3), np.zeros(3), projection_matrix, distortion
     )
-    pixels = projected.reshape(-1, 2)
+    pixels = np.asarray(projected, dtype=float).reshape(-1, 2)
     pixels[:, 0] += matrix[0, 1] * (pixels[:, 1] - matrix[1, 2]) / matrix[1, 1]
     return np.asarray(pixels, dtype=float)
 

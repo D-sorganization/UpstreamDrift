@@ -4,13 +4,14 @@ from typing import Any
 
 from PyQt6.QtWidgets import (
     QDialog,
-    QDialogButtonBox,
     QDoubleSpinBox,
     QFormLayout,
     QLabel,
     QLineEdit,
     QWidget,
 )
+
+from ..dialog_controls import save_cancel_buttons
 
 MILLIMETRES_PER_METRE = 1000.0
 
@@ -38,12 +39,7 @@ class MeasuredTargetDialog(QDialog):
         )
         if not self._line:
             form.addRow("Width Across the Sheet", self.reference_width)
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Save
-            | QDialogButtonBox.StandardButton.Cancel
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
+        buttons = save_cancel_buttons(self)
         form.addRow(buttons)
 
     def _dimension(self, metres: float) -> QDoubleSpinBox:
