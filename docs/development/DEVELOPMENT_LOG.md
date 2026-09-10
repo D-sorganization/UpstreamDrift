@@ -107,8 +107,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/issue-9915-agent-context
 - **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `scripts/check_doc_size_budget.py`, `tests/ci`, `tests/scripts`
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10; 31 atlas/goal, eight CI-contract, 14 documentation and five context tests pass; 12/12 navigation tasks pass. Main276998030 invalidated two atlas reviews; inspected contracts and regenerated views now pass. Documentation unit markers fix the reproduced suite ratchet. See HANDOFF.md for evidence.
-- **Summary:** Twelve components and five reviewed integrations reuse the atlas and capture goals. Main276998030 is integrated; provider18c36f5e8 remains a candidate.
+- **Last verified:** 2026-09-10; published provider e83bd2e4 aligns all three install paths.107 provider/seam, six context and31 atlas/goal tests pass;12/12 navigation tasks and source/view/pin checks pass. See HANDOFF.md for scoped graph and packaging evidence.
+- **Summary:** Twelve components and five reviewed integrations reuse the atlas and capture goals. Main276998030 is integrated; a required regression rejects divergent pip/source/Rust providers.
 - **Next step:** Qualify final published Tools pins and required CI on PR #9920.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
