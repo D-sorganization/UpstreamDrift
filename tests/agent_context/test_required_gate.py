@@ -2,7 +2,11 @@
 
 from pathlib import Path
 
+import pytest
 import yaml
+
+
+pytestmark = pytest.mark.unit
 
 
 def test_context_gate_is_required_even_for_docs_only_changes() -> None:

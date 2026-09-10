@@ -36,6 +36,7 @@ For symbol-level calls and imports, use the existing CodeMap in the configured
 project environment: `codemap --repo . rebuild`, then `codemap --repo . search SYMBOL`
 and `codemap --repo . who-calls QUALIFIED_SYMBOL`. Its Python API exposes
 `imports_of(path, repo_root=...)` and `neighbors(symbol, hops=1, repo_root=...)`.
+Install the optional CodeMap environment following the [Tools CodeMap guide](https://github.com/D-sorganization/Tools/blob/main/docs/codemap.md); the small agent-context package does not install it.
 These lexical edges are best-effort candidates, especially for dynamic dispatch
 and plugins. Verify the actual call sites. Stale queries fail; partial parser
 coverage must be resolved or inspected directly in source. Do not commit the
