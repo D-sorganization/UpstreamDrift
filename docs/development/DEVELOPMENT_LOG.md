@@ -98,6 +98,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence without unsupported club constraints. Dialog visual review passed with Segoe UI.
 - **Next step:** Finish broad qualification and publish; connect wizard entry under #9906 before closing #9905.
 
+### DL-#9915 · Verified Agent Context
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9915
+- **PR:** #9920
+- **Branch:** feat/issue-9915-agent-context
+- **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `scripts/check_doc_size_budget.py`, `tests/ci`, `tests/scripts`
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-10; final e83bd2e4 pins pass107 provider/seam, six context,31 atlas and12 navigation controls. The frontend-inclusive installed wheel passes launcher,31 calibration tests and pip check. Concurrent SPEC dedup4ded98ad6 is integrated; checker passes. Handoff records revisions and hashes.
+- **Summary:** Twelve components and five reviewed integrations reuse the atlas and capture goals. Main276998030 is integrated; a required regression rejects divergent pip/source/Rust providers.
+- **Next step:** Qualify final published Tools pins and required CI on PR #9920.
+
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
 - **State:** shipped

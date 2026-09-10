@@ -1368,10 +1368,37 @@ jobs:
   # competing check runs under the same required context - on PR #8728 this
   # aggregate reported `failure` while the other two reported `success` and the
   # PR merged anyway. They are now `lod-quality-gate` and `docs-quality-gate`.
+  agent-context:
+    name: agent-context
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Initialize the Pinned Context Provider
+        run: git submodule update --init vendor/ud-tools
+      - name: Install Dependency-Free Context Package and Test Tools
+        run: python3 -m pip install ./vendor/ud-tools/packages/agent-context pytest PyYAML pydantic numpy
+      - name: Check Source, Contracts, Pins and Generated Views
+        run: python3 -m agent_context --root . check
+      - name: Validate Real Navigation Tasks
+        run: |
+          python3 -m pytest --confcutdir=tests/agent_context -o addopts= tests/agent_context -q
+          python3 -m agent_context --root . evaluate
+      - name: Require Published Tools Revision
+        run: |
+          git -C vendor/ud-tools fetch --no-tags origin main:refs/remotes/origin/main
+          git -C vendor/ud-tools merge-base --is-ancestor HEAD refs/remotes/origin/main
+      - name: Check the Existing Capability Atlas
+        run: python3 -m scripts.generate_capability_atlas --check
+
   quality-gate:
     name: quality-gate
     needs:
       [
+        agent-context,
         pick-runner,
         changed-paths,
         code-quality,
@@ -1404,6 +1431,10 @@ jobs:
       'd-sorg-fleet-docker' }}
     timeout-minutes: 5
     steps:
+      - name: Require Current Agent Context
+        env:
+          CONTEXT_RESULT: ${{ needs.agent-context.result }}
+        run: test "$CONTEXT_RESULT" = "success"
       - name: Aggregate quality gate results
         shell: bash
         env:
