@@ -19,8 +19,16 @@ from pathlib import Path
 
 import numpy as np
 import numpy.typing as npt
-from PyQt6.QtCore import QPoint, Qt, pyqtSignal
-from PyQt6.QtGui import QImage, QKeyEvent, QMouseEvent, QPixmap, QWheelEvent
+from PyQt6.QtCore import QPoint, QPointF, QRectF, Qt, pyqtSignal
+from PyQt6.QtGui import (
+    QImage,
+    QKeyEvent,
+    QMouseEvent,
+    QPainter,
+    QPaintEvent,
+    QPixmap,
+    QWheelEvent,
+)
 from PyQt6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -67,14 +75,46 @@ class ImageCanvas(QLabel):
         self._image: npt.NDArray[np.uint8] | None = None
         self._zoom = 1.0
         self._drawn: tuple[int, int] = (0, 0)  # drawn pixmap size
+        self._source_pixmap = QPixmap()
+        self._pan = QPointF()
+        self._pan_mode = False
+        self._drag: QPointF | None = None
 
     @property
     def zoom(self) -> float:
         return self._zoom
 
     def set_image(self, frame_bgr: npt.NDArray[np.uint8]) -> None:
+        if self._image is None or self._image.shape != frame_bgr.shape:
+            self._pan = QPointF()
         self._image = np.ascontiguousarray(frame_bgr, dtype=np.uint8)
+        self._source_pixmap = bgr_to_pixmap(self._image)
         self._render()
+
+    def set_pan_mode(self, active: bool) -> None:
+        """Use left-drag navigation instead of marking; middle-drag also pans."""
+        self._pan_mode = active
+        self._drag = None
+        self.setCursor(
+            Qt.CursorShape.OpenHandCursor if active else Qt.CursorShape.ArrowCursor
+        )
+
+    def pan_by(self, dx: float, dy: float) -> None:
+        """Move the image in viewport pixels, bounded by its visible edges."""
+        self._pan += QPointF(dx, dy)
+        self._clamp_pan()
+        self.update()
+
+    def _clamp_pan(self) -> None:
+        dw, dh = self._drawn
+        max_x, max_y = (
+            max(0.0, (dw - self.width()) / 2),
+            max(0.0, (dh - self.height()) / 2),
+        )
+        self._pan = QPointF(
+            max(-max_x, min(max_x, self._pan.x())),
+            max(-max_y, min(max_y, self._pan.y())),
+        )
 
     def set_zoom(self, factor: float) -> None:
         """Precondition: ``0 < factor <= MAX_ZOOM``; 1.0 fits the widget."""
@@ -94,22 +134,36 @@ class ImageCanvas(QLabel):
             return
         fit_w, fit_h = self._fit_size()
         w, h = int(fit_w * self._zoom), int(fit_h * self._zoom)
-        pixmap = bgr_to_pixmap(self._image).scaled(
-            w,
-            h,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation,
+        self._drawn = (w, h)
+        self._clamp_pan()
+        self.update()
+
+    def paintEvent(self, event: QPaintEvent | None) -> None:  # noqa: N802 - Qt
+        super().paintEvent(event)
+        if self._source_pixmap.isNull():
+            return
+        dw, dh = self._drawn
+        target = QRectF(
+            (self.width() - dw) / 2 + self._pan.x(),
+            (self.height() - dh) / 2 + self._pan.y(),
+            dw,
+            dh,
         )
-        self._drawn = (pixmap.width(), pixmap.height())
-        self.setPixmap(pixmap)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+        # Qt clips to the viewport; zoom never allocates an enlarged bitmap.
+        painter.drawPixmap(
+            target, self._source_pixmap, QRectF(self._source_pixmap.rect())
+        )
+        painter.end()
 
     def image_point_from_widget(self, pos: QPoint) -> tuple[float, float] | None:
         """Image pixel under a widget position, or ``None`` outside the image."""
         if self._image is None or self._drawn == (0, 0):
             return None
         dw, dh = self._drawn
-        x0 = (self.width() - dw) / 2
-        y0 = (self.height() - dh) / 2
+        x0 = (self.width() - dw) / 2 + self._pan.x()
+        y0 = (self.height() - dh) / 2 + self._pan.y()
         u, v = pos.x() - x0, pos.y() - y0
         if not (0 <= u < dw and 0 <= v < dh):
             return None
@@ -117,11 +171,36 @@ class ImageCanvas(QLabel):
         return (u + 0.5) * w / dw - 0.5, (v + 0.5) * h / dh - 0.5
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:  # noqa: N802 - Qt
+        if event is not None and (
+            event.button() == Qt.MouseButton.MiddleButton
+            or (self._pan_mode and event.button() == Qt.MouseButton.LeftButton)
+        ):
+            self._drag = event.position()
+            self.setCursor(Qt.CursorShape.ClosedHandCursor)
+            event.accept()
+            return
         if event is not None and event.button() == Qt.MouseButton.LeftButton:
             point = self.image_point_from_widget(event.position().toPoint())
             if point is not None:
                 self.clicked.emit(*point)
         super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event: QMouseEvent | None) -> None:  # noqa: N802 - Qt
+        if event is not None and self._drag is not None:
+            delta = event.position() - self._drag
+            self.pan_by(delta.x(), delta.y())
+            self._drag = event.position()
+            event.accept()
+            return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent | None) -> None:  # noqa: N802 - Qt
+        if self._drag is not None:
+            self.set_pan_mode(self._pan_mode)
+            if event is not None:
+                event.accept()
+            return
+        super().mouseReleaseEvent(event)
 
     def wheelEvent(self, event: QWheelEvent | None) -> None:  # noqa: N802 - Qt
         if event is None:

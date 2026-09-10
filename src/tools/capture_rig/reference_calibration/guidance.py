@@ -39,7 +39,10 @@ frames on slow hardware; pause and step to select an individual frame.
 
 In the point editor, click the requested point or enter its original pixel coordinates
 and choose **Set Point**. The selector advances to the next unmarked point.
-Use Ctrl+mouse-wheel to zoom, Clear Point to remove a mark and standard Undo/Redo
+Use Ctrl+mouse-wheel to zoom. Select **Pan Image** and drag, or drag with the middle
+mouse button, to reach corners near the image edges. Pan mode does not mark points;
+turn it off to resume marking. **Fit Image** restores the whole image and mark mode.
+Use Clear Point to remove a mark and standard Undo/Redo
 to revise it. Save Points retains partial work; Cancel keeps prior observations.
 Swing trims and crops do not alter these original calibration coordinates.
 
