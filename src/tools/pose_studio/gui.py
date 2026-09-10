@@ -101,6 +101,9 @@ class MainWidget(QtWidgets.QWidget):
 
         self.joint_panel = JointPanel()
         self.view_3d = View3D()
+        self.references_dialog: QtWidgets.QDialog | None = None
+        self.btn_references = QtWidgets.QPushButton("3D References…")
+        self.btn_references.clicked.connect(self._on_references)
 
         self.btn_save = QtWidgets.QPushButton("Save Pose...")
         self.btn_save.setToolTip(_SAVE_TOOLTIP)
@@ -163,6 +166,7 @@ class MainWidget(QtWidgets.QWidget):
         footer = QtWidgets.QHBoxLayout()
         footer.addWidget(self.btn_undo)
         footer.addWidget(self.btn_redo)
+        footer.addWidget(self.btn_references)
         footer.addStretch(1)
         footer.addWidget(self.btn_load)
         footer.addWidget(self.btn_save)
@@ -171,6 +175,14 @@ class MainWidget(QtWidgets.QWidget):
     def _wire_signals(self) -> None:
         self.engine_picker.engine_selected.connect(self._on_engine_selected)
         self.joint_panel.angle_edited.connect(self._on_angle_edited)
+
+    def _on_references(self) -> None:
+        from .reference_geometry import ReferenceGeometryDialog
+
+        if self.references_dialog is None:
+            self.references_dialog = ReferenceGeometryDialog(self.view_3d)
+        self.references_dialog.show()
+        self.references_dialog.raise_()
 
     # ---- handlers ------------------------------------------------------
 

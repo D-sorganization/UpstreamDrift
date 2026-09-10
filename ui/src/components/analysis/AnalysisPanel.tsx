@@ -20,6 +20,7 @@ import {
 } from 'recharts';
 import { Download, BarChart2, Activity, TrendingUp } from 'lucide-react';
 import { apiFetch } from '@/api/fetch';
+import { BiomechanicsExplorer } from './BiomechanicsExplorer';
 
 /** Analysis metric from the backend. */
 interface AnalysisMetric {
@@ -76,7 +77,7 @@ export function AnalysisPanel({
 }: Props) {
   const [statistics, setStatistics] = useState<AnalysisStatistics | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'metrics' | 'plots' | 'export'>(
+  const [activeTab, setActiveTab] = useState<'metrics' | 'plots' | 'export' | 'biomechanics'>(
     'metrics',
   );
   const pollRef = useRef<NodeJS.Timeout | null>(null);
@@ -183,6 +184,7 @@ export function AnalysisPanel({
     <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
       {/* Tab header */}
       <div className="flex border-b border-gray-700">
+        <button className="px-4 py-2 text-sm" onClick={() => setActiveTab('biomechanics')} aria-label="View biomechanics">Biomechanics</button>
         <button
           onClick={() => setActiveTab('metrics')}
           className={`flex items-center gap-1 px-4 py-2 text-sm font-medium transition-colors ${
@@ -230,6 +232,7 @@ export function AnalysisPanel({
 
       {/* Tab content */}
       <div className="p-4">
+        {activeTab === 'biomechanics' && <BiomechanicsExplorer />}
         {activeTab === 'metrics' && (
           <div>
             {!statistics ? (
