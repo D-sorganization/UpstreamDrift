@@ -73,6 +73,17 @@ def test_help_search_and_link_navigate_to_existing_workflow(tmp_path: Path) -> N
     browser = dialog.findChild(QTextBrowser)
     search = dialog.findChild(QLineEdit)
     assert browser is not None and search is not None
+    help_text = browser.toPlainText()
+    assert "Example: Prepare a Swing for Review" in help_text
+    assert "Example: Compare With an Instructor Reference" in help_text
+    assert "Example: Prepare Calibrated Body-Model Analysis" in help_text
+    assert "current body models do not fit a club segment" in help_text
+    import re
+    from src.tools.capture_rig.workflow import STEPS
+
+    linked_steps = re.findall(r'href="step:([^"\s]+)"', browser.toHtml())
+    assert linked_steps
+    assert set(linked_steps) <= {step.key for step in STEPS}
     search.setText("detector")
     search.returnPressed.emit()
     assert browser.textCursor().selectedText().lower() == "detector"

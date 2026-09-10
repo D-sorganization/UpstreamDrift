@@ -60,69 +60,71 @@ flowchart LR
   n1["Reviewed Camera Layout"]
   n2["Motion Pipeline"]
   n3["Session and Export Files"]
-  n4["Capture Library"]
-  n5["Swing Selection"]
-  n6["Coaching References"]
-  n7["Expert Reference Library"]
-  n8["Expert Comparison"]
-  n9["Comparison Deliverables"]
-  n10["Attributed Club Catalog"]
-  n11["My Clubs"]
-  n12["Model Analysis"]
-  n13["Metric Reference Planes and Points"]
-  n14["Reuse Calibration for a New Swing"]
-  n15["Set up Cameras and Plan"]
-  n16["Calibrate the Camera and Lens Profile"]
-  n17["Record or Import the Swing Take"]
-  n18["Detect the Pose in Every View"]
-  n19["Annotate or Correct Points by Hand"]
-  n20["Review Joint Reliability"]
-  n21["Reconstruct in 3-D"]
-  n22["Analyse the Single View"]
-  n23["Fit the Articulated Golfer"]
-  n24["Kinetics and Model Comparison"]
-  n25["Export to the Motion Pipeline"]
-  n17 -.->|"Original frames and fixed camera settings"| n0
+  n4["Camera Setup"]
+  n5["Capture Library"]
+  n6["Swing Selection"]
+  n7["Coaching References"]
+  n8["Expert Reference Library"]
+  n9["Expert Comparison"]
+  n10["Comparison Deliverables"]
+  n11["Attributed Club Catalog"]
+  n12["My Clubs"]
+  n13["Model Analysis"]
+  n14["Metric Reference Planes and Points"]
+  n15["Reuse Calibration for a New Swing"]
+  n16["Set up Cameras and Plan"]
+  n17["Calibrate the Camera and Lens Profile"]
+  n18["Record or Import the Swing Take"]
+  n19["Detect the Pose in Every View"]
+  n20["Annotate or Correct Points by Hand"]
+  n21["Review Joint Reliability"]
+  n22["Reconstruct in 3-D"]
+  n23["Analyse the Single View"]
+  n24["Fit the Articulated Golfer"]
+  n25["Kinetics and Model Comparison"]
+  n26["Export to the Motion Pipeline"]
+  n4 -.->|"Versioned camera plan"| n16
+  n18 -.->|"Original frames and fixed camera settings"| n0
   n0 -->|"Identified placements and held-out observations"| n1
-  n16 -.->|"Reviewed lens profiles with distortion"| n1
-  n1 -.->|"Reviewed camera poses and complete intrinsics"| n21
-  n15 -->|"Resolved plan / imported views"| n17
-  n17 -.->|"Separate chessboard take"| n16
-  n17 -.->|"Recorded swing videos"| n18
-  n17 -.->|"Video frames"| n19
-  n18 -.->|"2-D observations"| n20
-  n19 -.->|"Converted observation set"| n20
-  n18 -.->|"Single-view observations"| n22
-  n16 -.->|"intrinsics.json"| n21
-  n20 -.->|"Reviewed multi-view observations"| n21
-  n21 -.->|"joints_3d_m.npy"| n23
-  n23 -.->|"joint_angles.json"| n24
-  n21 -.->|"Reconstruction artifacts"| n25
-  n25 -.->|"TRC / canonical JSON"| n2
-  n22 -.->|"Annotated clips and metrics"| n3
-  n4 -->|"Existing session / imported videos"| n17
-  n17 -.->|"Original camera recordings"| n5
-  n5 -.->|"swing_edits.json"| n18
-  n5 -.->|"Swing video + provenance"| n3
-  n4 -->|"Original camera view + saved drawing layer"| n6
-  n5 -->|"Original camera view + saved drawing layer"| n6
-  n6 -.->|"Annotated PNG / swing video + portable drawing sidecar"| n3
-  n4 -->|"Saved reference assets, titles, notes and archive state"| n7
-  n3 -.->|"C3D, canonical marker animation or expert video"| n7
-  n7 -->|"Expert video / marker animation"| n8
-  n5 -->|"Saved trim, crop, drawings and original clock"| n8
-  n21 -->|"Camera intrinsics, distortion and pose"| n8
-  n8 -.->|"Comparison video + reproducible sidecar"| n9
-  n10 -->|"Attributed build and player overrides"| n11
-  n4 -->|"Selected capture identity"| n11
-  n11 -->|"Selected club snapshot and eligible SI context"| n23
-  n7 -->|"Selected marker motion"| n12
-  n12 -->|"Shared geometry controls"| n13
-  n8 -->|"Shared geometry controls"| n13
-  n13 -.->|"Saved world geometry"| n9
-  n1 -.->|"Original reviewed result and archived observations"| n14
-  n14 -.->|"Capture-owned reviewed layout assignment"| n21
-  n4 -->|"Named saved calibrations and capture identity"| n14
+  n17 -.->|"Reviewed lens profiles with distortion"| n1
+  n1 -.->|"Reviewed camera poses and complete intrinsics"| n22
+  n16 -->|"Resolved plan / imported views"| n18
+  n18 -.->|"Separate chessboard take"| n17
+  n18 -.->|"Recorded swing videos"| n19
+  n18 -.->|"Video frames"| n20
+  n19 -.->|"2-D observations"| n21
+  n20 -.->|"Converted observation set"| n21
+  n19 -.->|"Single-view observations"| n23
+  n17 -.->|"intrinsics.json"| n22
+  n21 -.->|"Reviewed multi-view observations"| n22
+  n22 -.->|"joints_3d_m.npy"| n24
+  n24 -.->|"joint_angles.json"| n25
+  n22 -.->|"Reconstruction artifacts"| n26
+  n26 -.->|"TRC / canonical JSON"| n2
+  n23 -.->|"Annotated clips and metrics"| n3
+  n5 -->|"Existing session / imported videos"| n18
+  n18 -.->|"Original camera recordings"| n6
+  n6 -.->|"swing_edits.json"| n19
+  n6 -.->|"Swing video + provenance"| n3
+  n5 -->|"Original camera view + saved drawing layer"| n7
+  n6 -->|"Original camera view + saved drawing layer"| n7
+  n7 -.->|"Annotated PNG / swing video + portable drawing sidecar"| n3
+  n5 -->|"Saved reference assets, titles, notes and archive state"| n8
+  n3 -.->|"C3D, canonical marker animation or expert video"| n8
+  n8 -->|"Expert video / marker animation"| n9
+  n6 -->|"Saved trim, crop, drawings and original clock"| n9
+  n22 -->|"Camera intrinsics, distortion and pose"| n9
+  n9 -.->|"Comparison video + reproducible sidecar"| n10
+  n11 -->|"Attributed build and player overrides"| n12
+  n5 -->|"Selected capture identity"| n12
+  n12 -->|"Selected club snapshot and eligible SI context"| n24
+  n8 -->|"Selected marker motion"| n13
+  n13 -->|"Shared geometry controls"| n14
+  n9 -->|"Shared geometry controls"| n14
+  n14 -.->|"Saved world geometry"| n10
+  n1 -.->|"Original reviewed result and archived observations"| n15
+  n15 -.->|"Capture-owned reviewed layout assignment"| n22
+  n5 -->|"Named saved calibrations and capture identity"| n15
 ```
 
 Dashed connections exchange files explicitly. Single-view analysis is

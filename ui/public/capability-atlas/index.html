@@ -190,251 +190,258 @@
     </section>
     <section id="workflow" aria-labelledby="workflow-heading">
       <div class="section-head"><div><p class="eyebrow">02 / Capture to Analysis</p><h2 id="workflow-heading">Choose the Path Your Evidence Supports</h2><p>Record or import, inspect observations, then follow the single-view or calibrated multi-view path. Each stage has a defined input and output.</p></div><a href="capture-workflow.mmd" download>Download Workflow Diagram ↗</a></div>
-      <div class="diagram workflow" tabindex="0" role="region" aria-label="Capture Workflow; Scroll Horizontally to Follow the Stages"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2575 730" role="img" aria-labelledby="workflow-title workflow-desc">
+      <div class="diagram workflow" tabindex="0" role="region" aria-label="Capture Workflow; Scroll Horizontally to Follow the Stages"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2830 730" role="img" aria-labelledby="workflow-title workflow-desc">
 <title id="workflow-title">Workflow Capability Network</title>
 <desc id="workflow-desc">Connections are detailed in the adjacent table. Dashed arrows represent file exchange, not automatic execution.</desc>
 <defs><marker id="arrow-workflow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#76b9bf"/></marker></defs>
-<path d="M500,279 C530,279 507,104 537,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Original frames and fixed camera settings: Calibration marking retains original pixels independently of swing trims and crops</title></path>
-<text x="509" y="268" fill="#c3d9df" font-size="11">1</text>
-<path d="M755,104 C785,104 762,454 792,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Identified placements and held-out observations: Requires the compatible Tools provider, multiple overlapping paper placements and an explicit world anchor; ruler endpoints alone cannot locate cameras</title></path>
+<path d="M245,104 C275,104 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Versioned camera plan: Native ELP discovery on Windows; connection checks do not qualify modes or calibration</title></path>
+<text x="254" y="93" fill="#c3d9df" font-size="11">1</text>
+<path d="M755,104 C785,104 762,104 792,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Original frames and fixed camera settings: Calibration marking retains original pixels independently of swing trims and crops</title></path>
 <text x="764" y="93" fill="#c3d9df" font-size="11">2</text>
-<path d="M755,629 C785,629 762,454 792,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reviewed lens profiles with distortion: Physical identity, zoom, focus, resolution and crop must match the recording</title></path>
-<text x="764" y="618" fill="#c3d9df" font-size="11">3</text>
-<path d="M1010,454 C1040,454 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reviewed camera poses and complete intrinsics: Review does not certify physical accuracy; original distorted observations are corrected once before the ideal-pixel fit</title></path>
-<text x="1019" y="443" fill="#c3d9df" font-size="11">4</text>
-<path d="M245,454 C275,454 252,279 282,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Resolved plan / imported views: Check plan before recording; importing existing files is supported</title></path>
-<text x="254" y="443" fill="#c3d9df" font-size="11">5</text>
-<path d="M500,279 C530,279 507,629 537,629" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Separate chessboard take: Multi-view lens calibration; once per camera/mode, not each swing</title></path>
-<text x="509" y="268" fill="#c3d9df" font-size="11">6</text>
-<path d="M500,279 C530,279 762,279 792,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Recorded swing videos: One observation set per estimator</title></path>
-<text x="509" y="268" fill="#c3d9df" font-size="11">7</text>
-<path d="M500,279 C530,279 507,454 537,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Video frames: Sparse manual points; mark occlusion rather than invent coordinates</title></path>
-<text x="509" y="268" fill="#c3d9df" font-size="11">8</text>
-<path d="M1010,279 C1040,279 1017,454 1047,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>2-D observations: Review confidence, coverage, jitter and provenance</title></path>
-<text x="1019" y="268" fill="#c3d9df" font-size="11">9</text>
-<path d="M755,454 C785,454 1017,454 1047,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Converted observation set: Run annotations-to-observations; optional merge with detector output</title></path>
-<text x="764" y="443" fill="#c3d9df" font-size="11">10</text>
-<path d="M1010,279 C1040,279 1017,279 1047,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Single-view observations: 2-D normalized measurements, not metric depth</title></path>
-<text x="1019" y="268" fill="#c3d9df" font-size="11">11</text>
-<path d="M755,629 C785,629 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>intrinsics.json: Two or more views plus measured segments; reuse calibrated camera placement when appropriate</title></path>
-<text x="764" y="618" fill="#c3d9df" font-size="11">12</text>
-<path d="M1265,454 C1295,454 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reviewed multi-view observations: Reliability review does not prove geometric observability</title></path>
-<text x="1274" y="443" fill="#c3d9df" font-size="11">13</text>
-<path d="M1520,279 C1550,279 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joints_3d_m.npy: Fit residuals are not independent physical validation</title></path>
+<path d="M1010,104 C1040,104 1017,454 1047,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Identified placements and held-out observations: Requires the compatible Tools provider, multiple overlapping paper placements and an explicit world anchor; ruler endpoints alone cannot locate cameras</title></path>
+<text x="1019" y="93" fill="#c3d9df" font-size="11">3</text>
+<path d="M1010,629 C1040,629 1017,454 1047,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reviewed lens profiles with distortion: Physical identity, zoom, focus, resolution and crop must match the recording</title></path>
+<text x="1019" y="618" fill="#c3d9df" font-size="11">4</text>
+<path d="M1265,454 C1295,454 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reviewed camera poses and complete intrinsics: Review does not certify physical accuracy; original distorted observations are corrected once before the ideal-pixel fit</title></path>
+<text x="1274" y="443" fill="#c3d9df" font-size="11">5</text>
+<path d="M500,104 C530,104 507,104 537,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Resolved plan / imported views: Check plan before recording; importing existing files is supported</title></path>
+<text x="509" y="93" fill="#c3d9df" font-size="11">6</text>
+<path d="M755,104 C785,104 762,629 792,629" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Separate chessboard take: Multi-view lens calibration; once per camera/mode, not each swing</title></path>
+<text x="764" y="93" fill="#c3d9df" font-size="11">7</text>
+<path d="M755,104 C785,104 1017,104 1047,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Recorded swing videos: One observation set per estimator</title></path>
+<text x="764" y="93" fill="#c3d9df" font-size="11">8</text>
+<path d="M755,104 C785,104 762,454 792,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Video frames: Sparse manual points; mark occlusion rather than invent coordinates</title></path>
+<text x="764" y="93" fill="#c3d9df" font-size="11">9</text>
+<path d="M1265,104 C1295,104 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>2-D observations: Review confidence, coverage, jitter and provenance</title></path>
+<text x="1274" y="93" fill="#c3d9df" font-size="11">10</text>
+<path d="M1010,454 C1040,454 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Converted observation set: Run annotations-to-observations; optional merge with detector output</title></path>
+<text x="1019" y="443" fill="#c3d9df" font-size="11">11</text>
+<path d="M1265,104 C1295,104 1272,104 1302,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Single-view observations: 2-D normalized measurements, not metric depth</title></path>
+<text x="1274" y="93" fill="#c3d9df" font-size="11">12</text>
+<path d="M1010,629 C1040,629 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>intrinsics.json: Two or more views plus measured segments; reuse calibrated camera placement when appropriate</title></path>
+<text x="1019" y="618" fill="#c3d9df" font-size="11">13</text>
+<path d="M1520,279 C1550,279 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reviewed multi-view observations: Reliability review does not prove geometric observability</title></path>
 <text x="1529" y="268" fill="#c3d9df" font-size="11">14</text>
-<path d="M1775,279 C1805,279 1782,454 1812,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joint_angles.json: Model-dependent inverse dynamics; inspect replay drift and assumptions</title></path>
+<path d="M1775,279 C1805,279 1782,454 1812,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joints_3d_m.npy: Fit residuals are not independent physical validation</title></path>
 <text x="1784" y="268" fill="#c3d9df" font-size="11">15</text>
-<path d="M1520,279 C1550,279 1527,454 1557,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reconstruction artifacts: TRC uses millimetres; canonical JSON states units</title></path>
-<text x="1529" y="268" fill="#c3d9df" font-size="11">16</text>
-<path d="M1775,454 C1805,454 1782,629 1812,629" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>TRC / canonical JSON: Explicit artifact import into motion pipeline</title></path>
-<text x="1784" y="443" fill="#c3d9df" font-size="11">17</text>
-<path d="M1265,279 C1295,279 1272,104 1302,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Annotated clips and metrics: Coaching reference; single-view outputs are not 3-D</title></path>
-<text x="1274" y="268" fill="#c3d9df" font-size="11">18</text>
-<path d="M245,104 C275,104 252,279 282,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Existing session / imported videos: Sidecar notes survive catalog rebuild; archived captures remain on disk</title></path>
-<text x="254" y="93" fill="#c3d9df" font-size="11">19</text>
-<path d="M500,279 C530,279 507,279 537,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Original camera recordings: Keep an address hold for calibration and the finish for analysis</title></path>
-<text x="509" y="268" fill="#c3d9df" font-size="11">20</text>
-<path d="M755,279 C785,279 762,279 792,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>swing_edits.json: Only selected frames and crop reach inference; original pixels and clocks are retained</title></path>
-<text x="764" y="268" fill="#c3d9df" font-size="11">21</text>
-<path d="M755,279 C785,279 1272,104 1302,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Swing video + provenance: Separate output; source hash, exact recipe and any encoder padding are recorded</title></path>
-<text x="764" y="268" fill="#c3d9df" font-size="11">22</text>
-<path d="M245,104 C275,104 762,104 792,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Original camera view + saved drawing layer: Visual references remain separate from measured pose observations</title></path>
-<text x="254" y="93" fill="#c3d9df" font-size="11">23</text>
-<path d="M755,279 C785,279 762,104 792,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Original camera view + saved drawing layer: Visual references remain separate from measured pose observations</title></path>
-<text x="764" y="268" fill="#c3d9df" font-size="11">24</text>
-<path d="M1010,104 C1040,104 1272,104 1302,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Annotated PNG / swing video + portable drawing sidecar: Draw at source resolution before crop; retain original frame numbers and preserve media</title></path>
-<text x="1019" y="93" fill="#c3d9df" font-size="11">25</text>
-<path d="M245,104 C275,104 1527,104 1557,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Saved reference assets, titles, notes and archive state: Import and manage reference assets, then open Compare Reference for the selected camera view</title></path>
-<text x="254" y="93" fill="#c3d9df" font-size="11">26</text>
-<path d="M1520,104 C1550,104 1527,104 1557,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>C3D, canonical marker animation or expert video: Missing motion samples stay masked; no automatic 2D-to-3D conversion or invented camera calibration</title></path>
-<text x="1529" y="93" fill="#c3d9df" font-size="11">27</text>
-<path d="M1775,104 C1805,104 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Expert video / marker animation: 2D image alignment or camera-projected 3D motion; manual registration is explicit</title></path>
+<path d="M2030,454 C2060,454 2037,629 2067,629" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joint_angles.json: Model-dependent inverse dynamics; inspect replay drift and assumptions</title></path>
+<text x="2039" y="443" fill="#c3d9df" font-size="11">16</text>
+<path d="M1775,279 C1805,279 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reconstruction artifacts: TRC uses millimetres; canonical JSON states units</title></path>
+<text x="1784" y="268" fill="#c3d9df" font-size="11">17</text>
+<path d="M2030,279 C2060,279 2037,454 2067,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>TRC / canonical JSON: Explicit artifact import into motion pipeline</title></path>
+<text x="2039" y="268" fill="#c3d9df" font-size="11">18</text>
+<path d="M1520,104 C1550,104 1527,104 1557,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Annotated clips and metrics: Coaching reference; single-view outputs are not 3-D</title></path>
+<text x="1529" y="93" fill="#c3d9df" font-size="11">19</text>
+<path d="M245,279 C275,279 507,104 537,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Existing session / imported videos: Sidecar notes survive catalog rebuild; archived captures remain on disk</title></path>
+<text x="254" y="268" fill="#c3d9df" font-size="11">20</text>
+<path d="M755,104 C785,104 762,279 792,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Original camera recordings: Keep an address hold for calibration and the finish for analysis</title></path>
+<text x="764" y="93" fill="#c3d9df" font-size="11">21</text>
+<path d="M1010,279 C1040,279 1017,104 1047,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>swing_edits.json: Only selected frames and crop reach inference; original pixels and clocks are retained</title></path>
+<text x="1019" y="268" fill="#c3d9df" font-size="11">22</text>
+<path d="M1010,279 C1040,279 1527,104 1557,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Swing video + provenance: Separate output; source hash, exact recipe and any encoder padding are recorded</title></path>
+<text x="1019" y="268" fill="#c3d9df" font-size="11">23</text>
+<path d="M245,279 C275,279 1017,279 1047,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Original camera view + saved drawing layer: Visual references remain separate from measured pose observations</title></path>
+<text x="254" y="268" fill="#c3d9df" font-size="11">24</text>
+<path d="M1010,279 C1040,279 1017,279 1047,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Original camera view + saved drawing layer: Visual references remain separate from measured pose observations</title></path>
+<text x="1019" y="268" fill="#c3d9df" font-size="11">25</text>
+<path d="M1265,279 C1295,279 1527,104 1557,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Annotated PNG / swing video + portable drawing sidecar: Draw at source resolution before crop; retain original frame numbers and preserve media</title></path>
+<text x="1274" y="268" fill="#c3d9df" font-size="11">26</text>
+<path d="M245,279 C275,279 1782,104 1812,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Saved reference assets, titles, notes and archive state: Import and manage reference assets, then open Compare Reference for the selected camera view</title></path>
+<text x="254" y="268" fill="#c3d9df" font-size="11">27</text>
+<path d="M1775,104 C1805,104 1782,104 1812,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>C3D, canonical marker animation or expert video: Missing motion samples stay masked; no automatic 2D-to-3D conversion or invented camera calibration</title></path>
 <text x="1784" y="93" fill="#c3d9df" font-size="11">28</text>
-<path d="M755,279 C785,279 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Saved trim, crop, drawings and original clock: Preview and export share the same composition pipeline</title></path>
-<text x="764" y="268" fill="#c3d9df" font-size="11">29</text>
-<path d="M1520,279 C1550,279 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Camera intrinsics, distortion and pose: Changed camera or motion evidence requires manual review</title></path>
-<text x="1529" y="268" fill="#c3d9df" font-size="11">30</text>
-<path d="M2030,279 C2060,279 2292,104 2322,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Comparison video + reproducible sidecar: Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published</title></path>
-<text x="2039" y="268" fill="#c3d9df" font-size="11">31</text>
-<path d="M245,279 C275,279 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Attributed build and player overrides: Unknown and estimated quantities remain explicit; catalog base is preserved</title></path>
-<text x="254" y="268" fill="#c3d9df" font-size="11">32</text>
-<path d="M245,104 C275,104 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected capture identity: Assignment is explicit; existing snapshots and reports remain unchanged</title></path>
-<text x="254" y="93" fill="#c3d9df" font-size="11">33</text>
-<path d="M500,104 C530,104 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected club snapshot and eligible SI context: Current body models apply no club constraints; equipment is recorded in provenance</title></path>
-<text x="509" y="93" fill="#c3d9df" font-size="11">34</text>
-<path d="M1775,104 C1805,104 1782,104 1812,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected marker motion: Motion assets only; no recording is required</title></path>
-<text x="1784" y="93" fill="#c3d9df" font-size="11">35</text>
-<path d="M2030,104 C2060,104 2037,104 2067,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Shared geometry controls: Virtual camera is explicit; illustrative volumes are not anatomical meshes</title></path>
+<path d="M2030,104 C2060,104 2037,279 2067,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Expert video / marker animation: 2D image alignment or camera-projected 3D motion; manual registration is explicit</title></path>
+<text x="2039" y="93" fill="#c3d9df" font-size="11">29</text>
+<path d="M1010,279 C1040,279 2037,279 2067,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Saved trim, crop, drawings and original clock: Preview and export share the same composition pipeline</title></path>
+<text x="1019" y="268" fill="#c3d9df" font-size="11">30</text>
+<path d="M1775,279 C1805,279 2037,279 2067,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Camera intrinsics, distortion and pose: Changed camera or motion evidence requires manual review</title></path>
+<text x="1784" y="268" fill="#c3d9df" font-size="11">31</text>
+<path d="M2285,279 C2315,279 2547,104 2577,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Comparison video + reproducible sidecar: Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published</title></path>
+<text x="2294" y="268" fill="#c3d9df" font-size="11">32</text>
+<path d="M245,454 C275,454 252,279 282,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Attributed build and player overrides: Unknown and estimated quantities remain explicit; catalog base is preserved</title></path>
+<text x="254" y="443" fill="#c3d9df" font-size="11">33</text>
+<path d="M245,279 C275,279 252,279 282,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected capture identity: Assignment is explicit; existing snapshots and reports remain unchanged</title></path>
+<text x="254" y="268" fill="#c3d9df" font-size="11">34</text>
+<path d="M500,279 C530,279 1782,454 1812,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected club snapshot and eligible SI context: Current body models apply no club constraints; equipment is recorded in provenance</title></path>
+<text x="509" y="268" fill="#c3d9df" font-size="11">35</text>
+<path d="M2030,104 C2060,104 2037,104 2067,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Selected marker motion: Motion assets only; no recording is required</title></path>
 <text x="2039" y="93" fill="#c3d9df" font-size="11">36</text>
-<path d="M2030,279 C2060,279 2037,104 2067,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Shared geometry controls: Metric projection requires camera evidence; geometry is bound to the scene</title></path>
-<text x="2039" y="268" fill="#c3d9df" font-size="11">37</text>
-<path d="M2285,104 C2315,104 2292,104 2322,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Saved world geometry: The shared compositor retains geometry, layer order and source identity</title></path>
-<text x="2294" y="93" fill="#c3d9df" font-size="11">38</text>
-<path d="M1010,454 C1040,454 1017,104 1047,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Original reviewed result and archived observations: Same named views, physical cameras and recorded image sizes; fresh operator confirmation of unchanged optics and scene</title></path>
-<text x="1019" y="443" fill="#c3d9df" font-size="11">39</text>
-<path d="M1265,104 C1295,104 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Capture-owned reviewed layout assignment: Processing revalidates copied source evidence; this is reuse, not a new numerical solve or accuracy certification</title></path>
-<text x="1274" y="93" fill="#c3d9df" font-size="11">40</text>
-<path d="M245,104 C275,104 1017,104 1047,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Named saved calibrations and capture identity: Catalog metadata is not evidence approval; selecting an estimate verifies archived source evidence before fresh optics/scene confirmation</title></path>
-<text x="254" y="93" fill="#c3d9df" font-size="11">41</text>
+<path d="M2285,104 C2315,104 2292,104 2322,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Shared geometry controls: Virtual camera is explicit; illustrative volumes are not anatomical meshes</title></path>
+<text x="2294" y="93" fill="#c3d9df" font-size="11">37</text>
+<path d="M2285,279 C2315,279 2292,104 2322,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Shared geometry controls: Metric projection requires camera evidence; geometry is bound to the scene</title></path>
+<text x="2294" y="268" fill="#c3d9df" font-size="11">38</text>
+<path d="M2540,104 C2570,104 2547,104 2577,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Saved world geometry: The shared compositor retains geometry, layer order and source identity</title></path>
+<text x="2549" y="93" fill="#c3d9df" font-size="11">39</text>
+<path d="M1265,454 C1295,454 1272,454 1302,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Original reviewed result and archived observations: Same named views, physical cameras and recorded image sizes; fresh operator confirmation of unchanged optics and scene</title></path>
+<text x="1274" y="443" fill="#c3d9df" font-size="11">40</text>
+<path d="M1520,454 C1550,454 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Capture-owned reviewed layout assignment: Processing revalidates copied source evidence; this is reuse, not a new numerical solve or accuracy certification</title></path>
+<text x="1529" y="443" fill="#c3d9df" font-size="11">41</text>
+<path d="M245,279 C275,279 1272,454 1302,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Named saved calibrations and capture identity: Catalog metadata is not evidence approval; selecting an estimate verifies archived source evidence before fresh optics/scene confirmation</title></path>
+<text x="254" y="268" fill="#c3d9df" font-size="11">42</text>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/dialog.py" aria-label="Paper and Ruler Placements source">
-<rect x="545" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="560" y="80" fill="#edf5f7" font-size="15">Paper and Ruler</text>
-<text x="560" y="101" fill="#edf5f7" font-size="15">Placements</text>
+<rect x="800" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="815" y="80" fill="#edf5f7" font-size="15">Paper and Ruler</text>
+<text x="815" y="101" fill="#edf5f7" font-size="15">Placements</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/solver.py" aria-label="Reviewed Camera Layout source">
-<rect x="800" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="815" y="430" fill="#edf5f7" font-size="15">Reviewed Camera Layout</text>
+<rect x="1055" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1070" y="430" fill="#edf5f7" font-size="15">Reviewed Camera Layout</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/motion_pipeline" aria-label="Motion Pipeline source">
-<rect x="1820" y="575" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1835" y="605" fill="#edf5f7" font-size="15">Motion Pipeline</text>
+<rect x="2075" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="2090" y="430" fill="#edf5f7" font-size="15">Motion Pipeline</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/provenance.py" aria-label="Session and Export Files source">
-<rect x="1310" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1325" y="80" fill="#edf5f7" font-size="15">Session and Export Files</text>
+<rect x="1565" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1580" y="80" fill="#edf5f7" font-size="15">Session and Export Files</text>
+</a>
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/camera_setup_dialog.py" aria-label="Camera Setup source">
+<rect x="35" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="80" fill="#edf5f7" font-size="15">Camera Setup</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_dialog.py" aria-label="Capture Library source">
-<rect x="35" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="50" y="80" fill="#edf5f7" font-size="15">Capture Library</text>
+<rect x="35" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="255" fill="#edf5f7" font-size="15">Capture Library</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/swing_editor.py" aria-label="Swing Selection source">
-<rect x="545" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="560" y="255" fill="#edf5f7" font-size="15">Swing Selection</text>
+<rect x="800" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="815" y="255" fill="#edf5f7" font-size="15">Swing Selection</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/coaching_dialog.py" aria-label="Coaching References source">
-<rect x="800" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="815" y="80" fill="#edf5f7" font-size="15">Coaching References</text>
+<rect x="1055" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1070" y="255" fill="#edf5f7" font-size="15">Coaching References</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_library_dialog.py" aria-label="Expert Reference Library source">
-<rect x="1565" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1580" y="80" fill="#edf5f7" font-size="15">Expert Reference Library</text>
+<rect x="1820" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="80" fill="#edf5f7" font-size="15">Expert Reference Library</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py" aria-label="Expert Comparison source">
-<rect x="1820" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1835" y="255" fill="#edf5f7" font-size="15">Expert Comparison</text>
+<rect x="2075" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="2090" y="255" fill="#edf5f7" font-size="15">Expert Comparison</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_export.py" aria-label="Comparison Deliverables source">
-<rect x="2330" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="2345" y="80" fill="#edf5f7" font-size="15">Comparison Deliverables</text>
+<rect x="2585" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="2600" y="80" fill="#edf5f7" font-size="15">Comparison Deliverables</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/club_data/catalog.py" aria-label="Attributed Club Catalog source">
-<rect x="35" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="50" y="255" fill="#edf5f7" font-size="15">Attributed Club Catalog</text>
+<rect x="35" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="430" fill="#edf5f7" font-size="15">Attributed Club Catalog</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/equipment_dialog.py" aria-label="My Clubs source">
-<rect x="290" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="305" y="80" fill="#edf5f7" font-size="15">My Clubs</text>
+<rect x="290" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="305" y="255" fill="#edf5f7" font-size="15">My Clubs</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/model_analysis_dialog.py" aria-label="Model Analysis source">
-<rect x="1820" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1835" y="80" fill="#edf5f7" font-size="15">Model Analysis</text>
+<rect x="2075" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="2090" y="80" fill="#edf5f7" font-size="15">Model Analysis</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/geometry_controls.py" aria-label="Metric Reference Planes and Points source">
-<rect x="2075" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="2090" y="80" fill="#edf5f7" font-size="15">Metric Reference Planes</text>
-<text x="2090" y="101" fill="#edf5f7" font-size="15">and Points</text>
+<rect x="2330" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="2345" y="80" fill="#edf5f7" font-size="15">Metric Reference Planes</text>
+<text x="2345" y="101" fill="#edf5f7" font-size="15">and Points</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/reuse_dialog.py" aria-label="Reuse Calibration for a New Swing source">
-<rect x="1055" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1070" y="80" fill="#edf5f7" font-size="15">Reuse Calibration for a</text>
-<text x="1070" y="101" fill="#edf5f7" font-size="15">New Swing</text>
+<rect x="1310" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1325" y="430" fill="#edf5f7" font-size="15">Reuse Calibration for a</text>
+<text x="1325" y="451" fill="#edf5f7" font-size="15">New Swing</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Set up Cameras and Plan source">
-<rect x="35" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="50" y="430" fill="#edf5f7" font-size="15">Set up Cameras and Plan</text>
+<rect x="290" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="305" y="80" fill="#edf5f7" font-size="15">Set up Cameras and Plan</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Calibrate the Camera and Lens Profile source">
-<rect x="545" y="575" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="560" y="605" fill="#edf5f7" font-size="15">Calibrate the Camera and</text>
-<text x="560" y="626" fill="#edf5f7" font-size="15">Lens Profile</text>
+<rect x="800" y="575" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="815" y="605" fill="#edf5f7" font-size="15">Calibrate the Camera and</text>
+<text x="815" y="626" fill="#edf5f7" font-size="15">Lens Profile</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Record or Import the Swing Take source">
-<rect x="290" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="305" y="255" fill="#edf5f7" font-size="15">Record or Import the</text>
-<text x="305" y="276" fill="#edf5f7" font-size="15">Swing Take</text>
+<rect x="545" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="560" y="80" fill="#edf5f7" font-size="15">Record or Import the</text>
+<text x="560" y="101" fill="#edf5f7" font-size="15">Swing Take</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Detect the Pose in Every View source">
-<rect x="800" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="815" y="255" fill="#edf5f7" font-size="15">Detect the Pose in Every</text>
-<text x="815" y="276" fill="#edf5f7" font-size="15">View</text>
+<rect x="1055" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1070" y="80" fill="#edf5f7" font-size="15">Detect the Pose in Every</text>
+<text x="1070" y="101" fill="#edf5f7" font-size="15">View</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Annotate or Correct Points by Hand source">
-<rect x="545" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="560" y="430" fill="#edf5f7" font-size="15">Annotate or Correct</text>
-<text x="560" y="451" fill="#edf5f7" font-size="15">Points by Hand</text>
+<rect x="800" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="815" y="430" fill="#edf5f7" font-size="15">Annotate or Correct</text>
+<text x="815" y="451" fill="#edf5f7" font-size="15">Points by Hand</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Review Joint Reliability source">
-<rect x="1055" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1070" y="430" fill="#edf5f7" font-size="15">Review Joint Reliability</text>
+<rect x="1310" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1325" y="255" fill="#edf5f7" font-size="15">Review Joint Reliability</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Reconstruct in 3-D source">
-<rect x="1310" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1325" y="255" fill="#edf5f7" font-size="15">Reconstruct in 3-D</text>
+<rect x="1565" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1580" y="255" fill="#edf5f7" font-size="15">Reconstruct in 3-D</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Analyse the Single View source">
-<rect x="1055" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1070" y="255" fill="#edf5f7" font-size="15">Analyse the Single View</text>
+<rect x="1310" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1325" y="80" fill="#edf5f7" font-size="15">Analyse the Single View</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Fit the Articulated Golfer source">
-<rect x="1565" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1580" y="255" fill="#edf5f7" font-size="15">Fit the Articulated</text>
-<text x="1580" y="276" fill="#edf5f7" font-size="15">Golfer</text>
+<rect x="1820" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="430" fill="#edf5f7" font-size="15">Fit the Articulated</text>
+<text x="1835" y="451" fill="#edf5f7" font-size="15">Golfer</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Kinetics and Model Comparison source">
-<rect x="1820" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1835" y="430" fill="#edf5f7" font-size="15">Kinetics and Model</text>
-<text x="1835" y="451" fill="#edf5f7" font-size="15">Comparison</text>
+<rect x="2075" y="575" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="2090" y="605" fill="#edf5f7" font-size="15">Kinetics and Model</text>
+<text x="2090" y="626" fill="#edf5f7" font-size="15">Comparison</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Export to the Motion Pipeline source">
-<rect x="1565" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1580" y="430" fill="#edf5f7" font-size="15">Export to the Motion</text>
-<text x="1580" y="451" fill="#edf5f7" font-size="15">Pipeline</text>
+<rect x="1820" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="255" fill="#edf5f7" font-size="15">Export to the Motion</text>
+<text x="1835" y="276" fill="#edf5f7" font-size="15">Pipeline</text>
 </a>
 </svg></div>
       <p class="note"><strong>One camera:</strong> 2-D events, tempo and normalized motion. <strong>Multiple cameras:</strong> calibrate lenses, check synchronization and geometric observability, then reconstruct. Fit completion and low residuals do not establish physical validity.</p>
       <details><summary>Read the Workflow as a Table</summary><div class="table-scroll"><table><caption>Capability Connections</caption>
 <thead><tr><th scope="col"># / Connection</th><th scope="col">Artifact</th><th scope="col">Meaning and Limits</th></tr></thead><tbody>
-<tr><th scope="row">1. Record or Import the Swing Take → Paper and Ruler Placements</th><td>Original frames and fixed camera settings<br><small>file</small></td><td>Calibration marking retains original pixels independently of swing trims and crops <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/operations.py">Source</a></td></tr>
-<tr><th scope="row">2. Paper and Ruler Placements → Reviewed Camera Layout</th><td>Identified placements and held-out observations<br><small>contract</small></td><td>Requires the compatible Tools provider, multiple overlapping paper placements and an explicit world anchor; ruler endpoints alone cannot locate cameras <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/worker.py">Source</a></td></tr>
-<tr><th scope="row">3. Calibrate the Camera and Lens Profile → Reviewed Camera Layout</th><td>Reviewed lens profiles with distortion<br><small>file</small></td><td>Physical identity, zoom, focus, resolution and crop must match the recording <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/calibration_profiles.py">Source</a></td></tr>
-<tr><th scope="row">4. Reviewed Camera Layout → Reconstruct in 3-D</th><td>Reviewed camera poses and complete intrinsics<br><small>file</small></td><td>Review does not certify physical accuracy; original distorted observations are corrected once before the ideal-pixel fit <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/lens.py">Source</a></td></tr>
-<tr><th scope="row">5. Set up Cameras and Plan → Record or Import the Swing Take</th><td>Resolved plan / imported views<br><small>workflow</small></td><td>Check plan before recording; importing existing files is supported <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py">Source</a></td></tr>
-<tr><th scope="row">6. Record or Import the Swing Take → Calibrate the Camera and Lens Profile</th><td>Separate chessboard take<br><small>file</small></td><td>Multi-view lens calibration; once per camera/mode, not each swing <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/intrinsics.py">Source</a></td></tr>
-<tr><th scope="row">7. Record or Import the Swing Take → Detect the Pose in Every View</th><td>Recorded swing videos<br><small>file</small></td><td>One observation set per estimator <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/rig/ingest.py">Source</a></td></tr>
-<tr><th scope="row">8. Record or Import the Swing Take → Annotate or Correct Points by Hand</th><td>Video frames<br><small>file</small></td><td>Sparse manual points; mark occlusion rather than invent coordinates <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/annotate/guide.py">Source</a></td></tr>
-<tr><th scope="row">9. Detect the Pose in Every View → Review Joint Reliability</th><td>2-D observations<br><small>file</small></td><td>Review confidence, coverage, jitter and provenance <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py">Source</a></td></tr>
-<tr><th scope="row">10. Annotate or Correct Points by Hand → Review Joint Reliability</th><td>Converted observation set<br><small>file</small></td><td>Run annotations-to-observations; optional merge with detector output <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/annotate/to_observations.py">Source</a></td></tr>
-<tr><th scope="row">11. Detect the Pose in Every View → Analyse the Single View</th><td>Single-view observations<br><small>file</small></td><td>2-D normalized measurements, not metric depth <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/analytics2d.py">Source</a></td></tr>
-<tr><th scope="row">12. Calibrate the Camera and Lens Profile → Reconstruct in 3-D</th><td>intrinsics.json<br><small>file</small></td><td>Two or more views plus measured segments; reuse calibrated camera placement when appropriate <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/pipeline.py">Source</a></td></tr>
-<tr><th scope="row">13. Review Joint Reliability → Reconstruct in 3-D</th><td>Reviewed multi-view observations<br><small>file</small></td><td>Reliability review does not prove geometric observability <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/pipeline.py">Source</a></td></tr>
-<tr><th scope="row">14. Reconstruct in 3-D → Fit the Articulated Golfer</th><td>joints_3d_m.npy<br><small>file</small></td><td>Fit residuals are not independent physical validation <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/fit.py">Source</a></td></tr>
-<tr><th scope="row">15. Fit the Articulated Golfer → Kinetics and Model Comparison</th><td>joint_angles.json<br><small>file</small></td><td>Model-dependent inverse dynamics; inspect replay drift and assumptions <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/dynamics.py">Source</a></td></tr>
-<tr><th scope="row">16. Reconstruct in 3-D → Export to the Motion Pipeline</th><td>Reconstruction artifacts<br><small>file</small></td><td>TRC uses millimetres; canonical JSON states units <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/export.py">Source</a></td></tr>
-<tr><th scope="row">17. Export to the Motion Pipeline → Motion Pipeline</th><td>TRC / canonical JSON<br><small>file</small></td><td>Explicit artifact import into motion pipeline <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/export.py">Source</a></td></tr>
-<tr><th scope="row">18. Analyse the Single View → Session and Export Files</th><td>Annotated clips and metrics<br><small>file</small></td><td>Coaching reference; single-view outputs are not 3-D <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/clips.py">Source</a></td></tr>
-<tr><th scope="row">19. Capture Library → Record or Import the Swing Take</th><td>Existing session / imported videos<br><small>workflow</small></td><td>Sidecar notes survive catalog rebuild; archived captures remain on disk <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_actions.py">Source</a></td></tr>
-<tr><th scope="row">20. Record or Import the Swing Take → Swing Selection</th><td>Original camera recordings<br><small>file</small></td><td>Keep an address hold for calibration and the finish for analysis <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/swing_editor.py">Source</a></td></tr>
-<tr><th scope="row">21. Swing Selection → Detect the Pose in Every View</th><td>swing_edits.json<br><small>file</small></td><td>Only selected frames and crop reach inference; original pixels and clocks are retained <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/rig/ingest.py">Source</a></td></tr>
-<tr><th scope="row">22. Swing Selection → Session and Export Files</th><td>Swing video + provenance<br><small>file</small></td><td>Separate output; source hash, exact recipe and any encoder padding are recorded <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/swing_export.py">Source</a></td></tr>
-<tr><th scope="row">23. Capture Library → Coaching References</th><td>Original camera view + saved drawing layer<br><small>workflow</small></td><td>Visual references remain separate from measured pose observations <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/coaching_dialog.py">Source</a></td></tr>
-<tr><th scope="row">24. Swing Selection → Coaching References</th><td>Original camera view + saved drawing layer<br><small>workflow</small></td><td>Visual references remain separate from measured pose observations <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/coaching_dialog.py">Source</a></td></tr>
-<tr><th scope="row">25. Coaching References → Session and Export Files</th><td>Annotated PNG / swing video + portable drawing sidecar<br><small>file</small></td><td>Draw at source resolution before crop; retain original frame numbers and preserve media <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/coaching_export.py">Source</a></td></tr>
-<tr><th scope="row">26. Capture Library → Expert Reference Library</th><td>Saved reference assets, titles, notes and archive state<br><small>workflow</small></td><td>Import and manage reference assets, then open Compare Reference for the selected camera view <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_dialog.py">Source</a></td></tr>
-<tr><th scope="row">27. Session and Export Files → Expert Reference Library</th><td>C3D, canonical marker animation or expert video<br><small>file</small></td><td>Missing motion samples stay masked; no automatic 2D-to-3D conversion or invented camera calibration <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reference/importers.py">Source</a></td></tr>
-<tr><th scope="row">28. Expert Reference Library → Expert Comparison</th><td>Expert video / marker animation<br><small>workflow</small></td><td>2D image alignment or camera-projected 3D motion; manual registration is explicit <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
-<tr><th scope="row">29. Swing Selection → Expert Comparison</th><td>Saved trim, crop, drawings and original clock<br><small>workflow</small></td><td>Preview and export share the same composition pipeline <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
-<tr><th scope="row">30. Reconstruct in 3-D → Expert Comparison</th><td>Camera intrinsics, distortion and pose<br><small>workflow</small></td><td>Changed camera or motion evidence requires manual review <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
-<tr><th scope="row">31. Expert Comparison → Comparison Deliverables</th><td>Comparison video + reproducible sidecar<br><small>file</small></td><td>Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_export.py">Source</a></td></tr>
-<tr><th scope="row">32. Attributed Club Catalog → My Clubs</th><td>Attributed build and player overrides<br><small>workflow</small></td><td>Unknown and estimated quantities remain explicit; catalog base is preserved <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/club_editor.py">Source</a></td></tr>
-<tr><th scope="row">33. Capture Library → My Clubs</th><td>Selected capture identity<br><small>workflow</small></td><td>Assignment is explicit; existing snapshots and reports remain unchanged <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_dialog.py">Source</a></td></tr>
-<tr><th scope="row">34. My Clubs → Fit the Articulated Golfer</th><td>Selected club snapshot and eligible SI context<br><small>workflow</small></td><td>Current body models apply no club constraints; equipment is recorded in provenance <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/session.py">Source</a></td></tr>
-<tr><th scope="row">35. Expert Reference Library → Model Analysis</th><td>Selected marker motion<br><small>workflow</small></td><td>Motion assets only; no recording is required <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_library_dialog.py">Source</a></td></tr>
-<tr><th scope="row">36. Model Analysis → Metric Reference Planes and Points</th><td>Shared geometry controls<br><small>workflow</small></td><td>Virtual camera is explicit; illustrative volumes are not anatomical meshes <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/model_analysis_dialog.py">Source</a></td></tr>
-<tr><th scope="row">37. Expert Comparison → Metric Reference Planes and Points</th><td>Shared geometry controls<br><small>workflow</small></td><td>Metric projection requires camera evidence; geometry is bound to the scene <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
-<tr><th scope="row">38. Metric Reference Planes and Points → Comparison Deliverables</th><td>Saved world geometry<br><small>file</small></td><td>The shared compositor retains geometry, layer order and source identity <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_export.py">Source</a></td></tr>
-<tr><th scope="row">39. Reviewed Camera Layout → Reuse Calibration for a New Swing</th><td>Original reviewed result and archived observations<br><small>file</small></td><td>Same named views, physical cameras and recorded image sizes; fresh operator confirmation of unchanged optics and scene <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/reuse.py">Source</a></td></tr>
-<tr><th scope="row">40. Reuse Calibration for a New Swing → Reconstruct in 3-D</th><td>Capture-owned reviewed layout assignment<br><small>file</small></td><td>Processing revalidates copied source evidence; this is reuse, not a new numerical solve or accuracy certification <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/reuse_evidence.py">Source</a></td></tr>
-<tr><th scope="row">41. Capture Library → Reuse Calibration for a New Swing</th><td>Named saved calibrations and capture identity<br><small>contract</small></td><td>Catalog metadata is not evidence approval; selecting an estimate verifies archived source evidence before fresh optics/scene confirmation <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/reuse_catalog.py">Source</a></td></tr>
+<tr><th scope="row">1. Camera Setup → Set up Cameras and Plan</th><td>Versioned camera plan<br><small>file</small></td><td>Native ELP discovery on Windows; connection checks do not qualify modes or calibration <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/camera_setup_actions.py">Source</a></td></tr>
+<tr><th scope="row">2. Record or Import the Swing Take → Paper and Ruler Placements</th><td>Original frames and fixed camera settings<br><small>file</small></td><td>Calibration marking retains original pixels independently of swing trims and crops <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/operations.py">Source</a></td></tr>
+<tr><th scope="row">3. Paper and Ruler Placements → Reviewed Camera Layout</th><td>Identified placements and held-out observations<br><small>contract</small></td><td>Requires the compatible Tools provider, multiple overlapping paper placements and an explicit world anchor; ruler endpoints alone cannot locate cameras <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/worker.py">Source</a></td></tr>
+<tr><th scope="row">4. Calibrate the Camera and Lens Profile → Reviewed Camera Layout</th><td>Reviewed lens profiles with distortion<br><small>file</small></td><td>Physical identity, zoom, focus, resolution and crop must match the recording <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/calibration_profiles.py">Source</a></td></tr>
+<tr><th scope="row">5. Reviewed Camera Layout → Reconstruct in 3-D</th><td>Reviewed camera poses and complete intrinsics<br><small>file</small></td><td>Review does not certify physical accuracy; original distorted observations are corrected once before the ideal-pixel fit <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/lens.py">Source</a></td></tr>
+<tr><th scope="row">6. Set up Cameras and Plan → Record or Import the Swing Take</th><td>Resolved plan / imported views<br><small>workflow</small></td><td>Check plan before recording; importing existing files is supported <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py">Source</a></td></tr>
+<tr><th scope="row">7. Record or Import the Swing Take → Calibrate the Camera and Lens Profile</th><td>Separate chessboard take<br><small>file</small></td><td>Multi-view lens calibration; once per camera/mode, not each swing <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/intrinsics.py">Source</a></td></tr>
+<tr><th scope="row">8. Record or Import the Swing Take → Detect the Pose in Every View</th><td>Recorded swing videos<br><small>file</small></td><td>One observation set per estimator <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/rig/ingest.py">Source</a></td></tr>
+<tr><th scope="row">9. Record or Import the Swing Take → Annotate or Correct Points by Hand</th><td>Video frames<br><small>file</small></td><td>Sparse manual points; mark occlusion rather than invent coordinates <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/annotate/guide.py">Source</a></td></tr>
+<tr><th scope="row">10. Detect the Pose in Every View → Review Joint Reliability</th><td>2-D observations<br><small>file</small></td><td>Review confidence, coverage, jitter and provenance <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py">Source</a></td></tr>
+<tr><th scope="row">11. Annotate or Correct Points by Hand → Review Joint Reliability</th><td>Converted observation set<br><small>file</small></td><td>Run annotations-to-observations; optional merge with detector output <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/annotate/to_observations.py">Source</a></td></tr>
+<tr><th scope="row">12. Detect the Pose in Every View → Analyse the Single View</th><td>Single-view observations<br><small>file</small></td><td>2-D normalized measurements, not metric depth <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/analytics2d.py">Source</a></td></tr>
+<tr><th scope="row">13. Calibrate the Camera and Lens Profile → Reconstruct in 3-D</th><td>intrinsics.json<br><small>file</small></td><td>Two or more views plus measured segments; reuse calibrated camera placement when appropriate <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/pipeline.py">Source</a></td></tr>
+<tr><th scope="row">14. Review Joint Reliability → Reconstruct in 3-D</th><td>Reviewed multi-view observations<br><small>file</small></td><td>Reliability review does not prove geometric observability <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/pipeline.py">Source</a></td></tr>
+<tr><th scope="row">15. Reconstruct in 3-D → Fit the Articulated Golfer</th><td>joints_3d_m.npy<br><small>file</small></td><td>Fit residuals are not independent physical validation <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/fit.py">Source</a></td></tr>
+<tr><th scope="row">16. Fit the Articulated Golfer → Kinetics and Model Comparison</th><td>joint_angles.json<br><small>file</small></td><td>Model-dependent inverse dynamics; inspect replay drift and assumptions <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/dynamics.py">Source</a></td></tr>
+<tr><th scope="row">17. Reconstruct in 3-D → Export to the Motion Pipeline</th><td>Reconstruction artifacts<br><small>file</small></td><td>TRC uses millimetres; canonical JSON states units <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/export.py">Source</a></td></tr>
+<tr><th scope="row">18. Export to the Motion Pipeline → Motion Pipeline</th><td>TRC / canonical JSON<br><small>file</small></td><td>Explicit artifact import into motion pipeline <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/export.py">Source</a></td></tr>
+<tr><th scope="row">19. Analyse the Single View → Session and Export Files</th><td>Annotated clips and metrics<br><small>file</small></td><td>Coaching reference; single-view outputs are not 3-D <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/clips.py">Source</a></td></tr>
+<tr><th scope="row">20. Capture Library → Record or Import the Swing Take</th><td>Existing session / imported videos<br><small>workflow</small></td><td>Sidecar notes survive catalog rebuild; archived captures remain on disk <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_actions.py">Source</a></td></tr>
+<tr><th scope="row">21. Record or Import the Swing Take → Swing Selection</th><td>Original camera recordings<br><small>file</small></td><td>Keep an address hold for calibration and the finish for analysis <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/swing_editor.py">Source</a></td></tr>
+<tr><th scope="row">22. Swing Selection → Detect the Pose in Every View</th><td>swing_edits.json<br><small>file</small></td><td>Only selected frames and crop reach inference; original pixels and clocks are retained <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/rig/ingest.py">Source</a></td></tr>
+<tr><th scope="row">23. Swing Selection → Session and Export Files</th><td>Swing video + provenance<br><small>file</small></td><td>Separate output; source hash, exact recipe and any encoder padding are recorded <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/swing_export.py">Source</a></td></tr>
+<tr><th scope="row">24. Capture Library → Coaching References</th><td>Original camera view + saved drawing layer<br><small>workflow</small></td><td>Visual references remain separate from measured pose observations <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/coaching_dialog.py">Source</a></td></tr>
+<tr><th scope="row">25. Swing Selection → Coaching References</th><td>Original camera view + saved drawing layer<br><small>workflow</small></td><td>Visual references remain separate from measured pose observations <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/coaching_dialog.py">Source</a></td></tr>
+<tr><th scope="row">26. Coaching References → Session and Export Files</th><td>Annotated PNG / swing video + portable drawing sidecar<br><small>file</small></td><td>Draw at source resolution before crop; retain original frame numbers and preserve media <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/coaching_export.py">Source</a></td></tr>
+<tr><th scope="row">27. Capture Library → Expert Reference Library</th><td>Saved reference assets, titles, notes and archive state<br><small>workflow</small></td><td>Import and manage reference assets, then open Compare Reference for the selected camera view <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_dialog.py">Source</a></td></tr>
+<tr><th scope="row">28. Session and Export Files → Expert Reference Library</th><td>C3D, canonical marker animation or expert video<br><small>file</small></td><td>Missing motion samples stay masked; no automatic 2D-to-3D conversion or invented camera calibration <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reference/importers.py">Source</a></td></tr>
+<tr><th scope="row">29. Expert Reference Library → Expert Comparison</th><td>Expert video / marker animation<br><small>workflow</small></td><td>2D image alignment or camera-projected 3D motion; manual registration is explicit <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
+<tr><th scope="row">30. Swing Selection → Expert Comparison</th><td>Saved trim, crop, drawings and original clock<br><small>workflow</small></td><td>Preview and export share the same composition pipeline <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
+<tr><th scope="row">31. Reconstruct in 3-D → Expert Comparison</th><td>Camera intrinsics, distortion and pose<br><small>workflow</small></td><td>Changed camera or motion evidence requires manual review <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
+<tr><th scope="row">32. Expert Comparison → Comparison Deliverables</th><td>Comparison video + reproducible sidecar<br><small>file</small></td><td>Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_export.py">Source</a></td></tr>
+<tr><th scope="row">33. Attributed Club Catalog → My Clubs</th><td>Attributed build and player overrides<br><small>workflow</small></td><td>Unknown and estimated quantities remain explicit; catalog base is preserved <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/club_editor.py">Source</a></td></tr>
+<tr><th scope="row">34. Capture Library → My Clubs</th><td>Selected capture identity<br><small>workflow</small></td><td>Assignment is explicit; existing snapshots and reports remain unchanged <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_dialog.py">Source</a></td></tr>
+<tr><th scope="row">35. My Clubs → Fit the Articulated Golfer</th><td>Selected club snapshot and eligible SI context<br><small>workflow</small></td><td>Current body models apply no club constraints; equipment is recorded in provenance <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/session.py">Source</a></td></tr>
+<tr><th scope="row">36. Expert Reference Library → Model Analysis</th><td>Selected marker motion<br><small>workflow</small></td><td>Motion assets only; no recording is required <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_library_dialog.py">Source</a></td></tr>
+<tr><th scope="row">37. Model Analysis → Metric Reference Planes and Points</th><td>Shared geometry controls<br><small>workflow</small></td><td>Virtual camera is explicit; illustrative volumes are not anatomical meshes <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/model_analysis_dialog.py">Source</a></td></tr>
+<tr><th scope="row">38. Expert Comparison → Metric Reference Planes and Points</th><td>Shared geometry controls<br><small>workflow</small></td><td>Metric projection requires camera evidence; geometry is bound to the scene <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_comparison.py">Source</a></td></tr>
+<tr><th scope="row">39. Metric Reference Planes and Points → Comparison Deliverables</th><td>Saved world geometry<br><small>file</small></td><td>The shared compositor retains geometry, layer order and source identity <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_export.py">Source</a></td></tr>
+<tr><th scope="row">40. Reviewed Camera Layout → Reuse Calibration for a New Swing</th><td>Original reviewed result and archived observations<br><small>file</small></td><td>Same named views, physical cameras and recorded image sizes; fresh operator confirmation of unchanged optics and scene <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/reuse.py">Source</a></td></tr>
+<tr><th scope="row">41. Reuse Calibration for a New Swing → Reconstruct in 3-D</th><td>Capture-owned reviewed layout assignment<br><small>file</small></td><td>Processing revalidates copied source evidence; this is reuse, not a new numerical solve or accuracy certification <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/reuse_evidence.py">Source</a></td></tr>
+<tr><th scope="row">42. Capture Library → Reuse Calibration for a New Swing</th><td>Named saved calibrations and capture identity<br><small>contract</small></td><td>Catalog metadata is not evidence approval; selecting an estimate verifies archived source evidence before fresh optics/scene confirmation <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/reference_calibration/reuse_catalog.py">Source</a></td></tr>
 </tbody></table></div></details>
       <h3>Plan a Capture Outcome</h3>
       <p><a href="capture-goals.mmd" download>Download Goal Prerequisites</a></p>
