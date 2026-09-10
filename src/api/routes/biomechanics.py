@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -97,7 +97,7 @@ def session_results(service: Any = Depends(get_simulation_service)) -> dict[str,
             status_code=409,
             detail="No calibrated segment recording. Configure model bindings before recording, or import a canonical trajectory.",
         )
-    return compute(payload)
+    return cast(dict[str, Any], compute(payload))
 
 
 @router.post("/bindings")
