@@ -45,6 +45,8 @@ from src.motion_capture.reference.comparison import (
 )
 from src.motion_capture.reference.model import Asset, ReferenceMotion
 from src.motion_capture.coaching.storage import load_layer
+from src.motion_capture.coaching import ReferenceGeometry
+from src.motion_capture.coaching.geometry_storage import load_geometry, save_geometry
 from src.motion_capture.rig.edits import ViewEdit, load_edits
 from src.motion_capture.reference.registration import (
     ReferenceRegistration,
@@ -58,6 +60,7 @@ from src.tools.capture_rig.reference_export import (
 from . import styling
 from .annotate_widget import ImageCanvas
 from .flow_layout import FlowLayout
+from .geometry_controls import GeometryControls
 from .reference_controls import SpatialControls, TimeControls
 from .reference_appearance import MotionAppearanceControls
 from .reference_timeline import ReferenceTimeline
@@ -104,6 +107,8 @@ class ReferenceComparisonDialog(QDialog):
         try:
             self._session = self._find_or_create_session()
             self._load_render_sources()
+            self._geometry = load_geometry(self.root)
+            self._saved_geometry = self._geometry
         except (ValueError, OSError):
             self.reader.close()
             raise
@@ -370,6 +375,10 @@ class ReferenceComparisonDialog(QDialog):
         timing_layout.addWidget(self.timing, 2)
         tabs.addTab(self._scroll(timing_page), "Timing")
         tabs.addTab(self._scroll(self._appearance_page()), "Appearance and Notes")
+        self.geometry_controls = GeometryControls(self._geometry)
+        self.geometry_controls.changed.connect(self._geometry_changed)
+        self.geometry_controls.pending_changed.connect(self._pending_changed)
+        tabs.addTab(self._scroll(self.geometry_controls), "3D References")
         tabs.currentChanged.connect(lambda: self._show_frame(self.slider.value()))
         return tabs
 
@@ -519,6 +528,8 @@ class ReferenceComparisonDialog(QDialog):
     def _dirty(self) -> bool:
         return (
             self._session != self._saved_session
+            or self._geometry != self._saved_geometry
+            or self.geometry_controls.pending
             or self.spatial.pending
             or self.timing.pending
             or self.notes.toPlainText() != self._session.notes
@@ -527,7 +538,17 @@ class ReferenceComparisonDialog(QDialog):
     def _pending_changed(self) -> None:
         self.setWindowModified(self._dirty())
 
+    def _geometry_changed(self, geometry: ReferenceGeometry) -> None:
+        self._geometry = geometry
+        self._show_frame(self.slider.value())
+        self._pending_changed()
+
     def _apply_pending(self) -> bool:
+        if (
+            self.geometry_controls.pending
+            and not self.geometry_controls.apply_selected()
+        ):
+            return False
         if len(self.notes.toPlainText()) > 50000:
             return False
         if self.spatial.pending:
@@ -669,6 +690,10 @@ class ReferenceComparisonDialog(QDialog):
                 crop=self._edit.crop,
                 drawings=self._drawings,
                 track=self._track,
+                geometry=self._geometry
+                if self._geometry.planes or self._geometry.points
+                else None,
+                scene_id=self._geometry.scene_id,
             )
             try:
                 img = self._renderer.image(
@@ -724,6 +749,8 @@ class ReferenceComparisonDialog(QDialog):
                 with backup.open("xb") as stream:
                     stream.write(path.read_bytes())
             save_comparison_session(saved, self.root)
+            save_geometry(self.root, self._geometry)
+            self._saved_geometry = self._geometry
             self._stale_original = None
             self._session = saved
             self.spatial.registration = registration

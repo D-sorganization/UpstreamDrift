@@ -115,6 +115,7 @@ class ReferenceLibraryDialog(QDialog):
         for title, callback in (
             ("Save title and notes", self.save_notes),
             ("Compare with capture…", self.compare_with_capture),
+            ("Analyze Model…", self.analyze_model),
             ("Archive / restore", self.archive_selected),
             ("Open source", self.open_source),
         ):
@@ -271,6 +272,22 @@ class ReferenceLibraryDialog(QDialog):
         from .reference_comparison import show_reference_comparison
 
         show_reference_comparison(capture_path, self.library, self)
+
+    def analyze_model(self) -> None:
+        """Open model playback and drawing tools without requiring a capture."""
+        if not isinstance(self._asset, ReferenceMotion):
+            self.status.setText("Select a motion reference for model analysis.")
+            return
+        if not self._leave():
+            return
+        from .model_analysis_dialog import ModelAnalysisDialog
+
+        try:
+            ModelAnalysisDialog(
+                self._asset, self.library.root / "analysis" / self._asset.id, self
+            ).exec()
+        except (ValueError, OSError) as exc:
+            self.status.setText(f"Model Analysis Unavailable: {exc}")
 
     def archive_selected(self) -> None:
         if self._asset is not None and self._leave():

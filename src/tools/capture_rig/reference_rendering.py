@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 import numpy.typing as npt
 
-from src.motion_capture.coaching import DrawingLayer
+from src.motion_capture.coaching import DrawingLayer, ReferenceGeometry
 from src.motion_capture.reconstruct.cameras import PinholeCamera
 from src.motion_capture.reference.comparison import ComparisonLayer
 from src.motion_capture.reference.model import Asset, ReferenceMotion, ReferenceVideo
@@ -24,6 +24,7 @@ from src.motion_capture.rig.edits import CropRect
 from src.shared.python.pose_estimation.observations import CameraCalibration
 
 from .clips import ClipRendering, _rendered
+from .geometry_rendering import render_geometry
 from .overlay import PoseTrack
 from .player import VideoReader
 from .reference_volumes import draw_segment_volumes
@@ -43,6 +44,12 @@ class ComparisonRenderContext:
     crop: CropRect | None = None
     track: PoseTrack | None = None
     drawings: DrawingLayer | None = None
+    geometry: ReferenceGeometry | None = None
+    scene_id: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.geometry is not None and self.geometry.scene_id != self.scene_id:
+            raise ValueError("Reference geometry belongs to a different scene")
 
 
 def _motion_image(
@@ -152,6 +159,8 @@ class ComparisonRenderer:
         """Draw reference pixels after detected pose and drawings, before crop."""
         if ctx.asset.id != self.asset.id:
             raise ValueError("Renderer belongs to a different reference asset")
+        if ctx.geometry is not None:
+            frame = render_geometry(frame, ctx.geometry, camera, time)
         if not ctx.layer.visible or ctx.layer.opacity <= 0:
             return frame
         asset = self.asset
