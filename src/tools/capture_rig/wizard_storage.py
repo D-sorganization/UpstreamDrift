@@ -51,7 +51,11 @@ def input_revision(media: SessionMedia) -> str:
             if media_path is None:
                 digest.update(b"missing")
                 continue
-            stat = media_path.stat()
+            try:
+                stat = media_path.stat()
+            except FileNotFoundError:
+                digest.update(json.dumps([str(media_path), "missing"]).encode())
+                continue
             digest.update(
                 json.dumps([str(media_path), stat.st_size, stat.st_mtime_ns]).encode()
             )

@@ -225,3 +225,23 @@ def test_unreadable_comparison_keeps_capture_steps_available(tmp_path, content) 
     assert "unreadable.json" in evidence.states["compare.video"].reason
     assert "review" in evidence.states["compare.video"].reason.lower()
     assert broken.read_bytes() == content
+
+
+def test_removed_pose_output_changes_revision_without_blocking_editing(
+    tmp_path,
+) -> None:
+    root, library, media = _capture(tmp_path)
+    save_edits(root, SessionEdits())
+    output = root / "observations" / "a.json"
+    output.parent.mkdir()
+    output.write_text("{}", encoding="utf-8")
+    media = replace(
+        media, views=(replace(media.views[0], observations=output), media.views[1])
+    )
+    before = input_revision(media)
+    output.unlink()
+    evidence = inspect_capture(resolve(load_catalog(), ["edit"]), media, library.root)
+    assert evidence.input_revision != before
+    assert evidence.states["capture.library"].status == "done"
+    assert evidence.states["capture.selection"].status == "done"
+    assert input_revision(media) == evidence.input_revision
