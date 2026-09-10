@@ -3,7 +3,7 @@
 ## Unified Analysis Comparison Drawings (#9932)
 
 - Repository/worktree: D-sorganization/UpstreamDrift, `C:/Users/diete/Repositories/UpstreamDrift-analysis-drawings-9932`.
-- Branch: `feat/9932-comparison-drawings`; implementation b2cf97b5e83a6e9c31752c3f3f25598b8c6f3ff8; tracking commit SELF; PR #9943 is draft with protected CI running.
+- Branch: `feat/9932-comparison-drawings`; implementation b2cf97b5e83a6e9c31752c3f3f25598b8c6f3ff8; tracking commit SELF (root handoff now links here to meet its size budget); PR #9943 is draft with protected CI running.
 - Epic #9926 remains active; #9929/#9930 merged in #9933 at f04aa1a570e64c3db0b3d009351ab222656175b2.
 - DL-#9926 updated. Common comparison editor launch/save/reload, immutable export drawings, original-grid PNG, cropped video and camera-scene identity checks are implemented.
 - Source: comparison_coaching_source.py, comparison_frame_source.py, reference_comparison.py, reference_export.py, shared coaching canvas and geometry_storage.py. Capability registry and generated atlas register these paths; capture_goals preserved.
