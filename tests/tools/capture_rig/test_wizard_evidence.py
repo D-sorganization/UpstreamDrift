@@ -190,7 +190,10 @@ def test_empty_calibration_file_cannot_be_treated_as_reviewed(tmp_path) -> None:
 
 
 @pytest.mark.parametrize("content", [b"{broken", b"\xff\xfe"])
-def test_unreadable_comparison_keeps_capture_steps_available(tmp_path, content) -> None:
+@pytest.mark.parametrize("saved_alignment", [False, True])
+def test_unreadable_comparison_keeps_capture_steps_available(
+    tmp_path, content, saved_alignment
+) -> None:
     root, library, media = _capture(tmp_path)
     save_edits(root, SessionEdits())
     comparisons = root / "comparisons"
@@ -203,27 +206,50 @@ def test_unreadable_comparison_keeps_capture_steps_available(tmp_path, content) 
 
     recording = media.views[0].recording
     assert recording is not None
-    ReferenceLibrary(library.root / "references").save(
-        ReferenceVideo(
-            title="Expert",
-            source=ReferenceSource(
-                path=str(recording),
-                sha256=sha256(recording.read_bytes()).hexdigest(),
-                format="video",
-            ),
-            width=16,
-            height=16,
-            frames=5,
-            fps=30,
-        )
+    asset = ReferenceVideo(
+        title="Expert",
+        source=ReferenceSource(
+            path=str(recording),
+            sha256=sha256(recording.read_bytes()).hexdigest(),
+            format="video",
+        ),
+        width=16,
+        height=16,
+        frames=5,
+        fps=30,
     )
+    ReferenceLibrary(library.root / "references").save(asset)
+    if saved_alignment:
+        from src.motion_capture.reference import session_clock
+        from src.motion_capture.reference.comparison import (
+            ComparisonSession,
+            save_comparison_session,
+        )
+        from src.motion_capture.reference.registration import ReferenceRegistration
+
+        registration = ReferenceRegistration(
+            reference_id=asset.id, calibration_id="unavailable"
+        ).bound(asset, None, session_clock(media.timing, "a"))
+        save_comparison_session(
+            ComparisonSession(
+                session_root=str(root),
+                view="a",
+                reference_id=asset.id,
+                reference_kind="video",
+                registration=registration,
+            ),
+            root,
+        )
     evidence = inspect_capture(
         resolve(load_catalog(), ["compare_video"]), media, library.root
     )
     assert evidence.states["capture.library"].status == "done"
     assert evidence.states["capture.selection"].status == "done"
-    assert "unreadable.json" in evidence.states["compare.video"].reason
-    assert "review" in evidence.states["compare.video"].reason.lower()
+    if saved_alignment:
+        assert all(state.status == "done" for state in evidence.states.values())
+    else:
+        assert "unreadable.json" in evidence.states["compare.video"].reason
+        assert "review" in evidence.states["compare.video"].reason.lower()
     assert broken.read_bytes() == content
 
 

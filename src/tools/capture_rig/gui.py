@@ -79,7 +79,7 @@ from .header import HeaderBar, StatusStrip
 from .journey import JourneyPanel
 from .journey_actions import JourneyActions
 from .calibration_actions import CalibrationActions
-from .library_actions import LibraryActions
+from .library_actions import LibraryActions, new_capture_path as default_session_dir
 from .equipment_actions import EquipmentActions
 from .wizard_actions import WizardActions
 from . import multiview
@@ -184,21 +184,15 @@ def default_plan_path() -> Path | None:
     return candidate if candidate.is_file() else None
 
 
-def default_session_dir() -> Path:
-    """A fresh ``sessions/<timestamp>`` under the repo for the next take."""
-    from datetime import datetime
-
-    stamp = datetime.now().strftime("%Y-%m-%dT%H-%M")
-    return commands.repo_root() / "sessions" / f"{stamp}-take"
-
-
 class CapturePanel(QGroupBox):
     """Plan, mode, views and UVC controls for the camera commands."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, parent: QWidget | None = None, *, settings: QSettings | None = None
+    ) -> None:
         super().__init__("Capture", parent)
         self.plan_edit = QLineEdit(str(default_plan_path() or ""))
-        self.session_edit = QLineEdit(str(default_session_dir()))
+        self.session_edit = QLineEdit(str(default_session_dir(settings)))
         self.mode_combo = QComboBox()
         self.mode_combo.addItem(PLAN_DEFAULT, None)
         for mode in MODE_PRESETS:
@@ -586,7 +580,7 @@ class CaptureRigWidget(QWidget):
         self.workflow = WorkflowPanel()
         self.rail = StepRail(labels=dict(self._ACTIONS))
         self.rail.action_triggered.connect(self.trigger)
-        self.capture = CapturePanel()
+        self.capture = CapturePanel(settings=settings)
         self.process = ProcessPanel()
         self.match = MatchPanel()
         self.preview = PreviewPanel()
@@ -975,6 +969,7 @@ class CaptureRigWidget(QWidget):
             self._resume_preview = False
             self.toggle_preview(on=True)
         self.library_actions.command_finished(code)
+        self.journey.set_capture(self.media)
         self.journey_actions.complete(code)
 
     # -- recording ------------------------------------------------------------
@@ -989,9 +984,14 @@ class CaptureRigWidget(QWidget):
             self.record_bar.recording_finished()
             return
         try:
+            self.capture.selection()
+            target = self.library_actions.recording_destination(
+                self.capture.session_dir()
+            )
+            self.capture.set_session_path(target)
             argv = self.command_for("record")
             session = self.capture.session_dir()
-        except (ValueError, TypeError) as exc:
+        except (ValueError, TypeError, OSError) as exc:
             self.journey.notice(f"Cannot record: {exc}", retry="record")
             self._append_log(f"cannot record: {exc}\n")
             self.record_bar.recording_finished()
