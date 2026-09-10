@@ -47,6 +47,8 @@ class MotionDraft:
     units_declared: bool
     canonical: bool = False
     model_identity: str | None = None
+    edges: tuple[tuple[int, int], ...] = ()
+    club_edges: tuple[tuple[int, int], ...] = ()
 
 
 def _from_markers(source: ReferenceSource, trajectory: MarkerTrajectory) -> MotionDraft:
@@ -173,6 +175,7 @@ def finish_motion_import(
         source_names=draft.names,
         joint_names=joint_names,
         edges=edges,
+        club_edges=tuple(edge for edge in draft.club_edges if edge in edges),
         model_identity=model_identity,
         time_s=draft.time_s,
         points_m=tuple(

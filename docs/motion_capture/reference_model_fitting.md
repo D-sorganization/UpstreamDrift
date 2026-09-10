@@ -202,7 +202,12 @@ point/plane distances. Camera projection remains a separate comparison setup.
 Missing marker samples remain missing. Import checks both the source file and
 its decoded dataset budget and rejects linked external HDF5 datasets.
 
-The initial Trace route does not infer skeleton or club connections from names.
-Explicit topology/club metadata and native simulation viewport geometry remain
-tracked in #9942; do not assume that a state-only backend can produce a full
-humanoid overlay through this import alone.
+Trace connections are explicit optional scalar metadata: `edges_json` holds a
+JSON array of zero-based marker-column pairs, and `club_edges_json` identifies
+which of those pairs belong to the club. For example, `[[0,1],[1,2]]` with club
+pairs `[[1,2]]` preserves a wrist-to-grip connection and a separately controllable
+shaft. Invalid, duplicate, out-of-range or self connections are rejected. Club
+pairs must also appear in the skeleton connections. The mapping dialog prefills
+these connections; removing a connection also removes its club classification.
+Names alone never imply connectivity. Native simulation viewport geometry
+remains tracked in #9942; state-only backends need a marker-kinematics export.

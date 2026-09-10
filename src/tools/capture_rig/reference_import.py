@@ -102,7 +102,16 @@ class ReferenceMappingDialog(QDialog):
         self.edges = QPlainTextEdit()
         self.edges.setMaximumHeight(80)
         self.edges.setPlaceholderText("pelvis, spine\nspine, shoulder")
+        self.edges.setPlainText(
+            "\n".join(f"{draft.names[a]}, {draft.names[b]}" for a, b in draft.edges)
+        )
         layout.addWidget(self.edges)
+        if draft.club_edges:
+            layout.addWidget(
+                QLabel(
+                    "Declared club connections retain club display controls when kept."
+                )
+            )
         self.confirm = QCheckBox(
             "I confirm these units, axes and marker-to-joint names"
         )
