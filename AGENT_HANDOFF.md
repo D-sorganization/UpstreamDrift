@@ -1,8 +1,8 @@
 # Common-Reference Calibration Continuation
 
 User-requested transfer: read `docs/development/capture_product_turnover.md`.
-Active #9959; #9950 merged; #9954 needs conflict resolution. Tools #5169 awaits
-private checkout access. Preserve candidate PID61800 and peer work. Goal incomplete.
+Active #9959; #9950 merged; #9954 needs conflict resolution. Tools #5169 merged;
+private checkout qualification is unresolved. Preserve candidate PID61800 and peer work. Goal incomplete.
 
 Analysis #9945/#9947 merged; canonical handoff preserves provider and analysis scopes.
 
