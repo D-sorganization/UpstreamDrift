@@ -17,6 +17,13 @@ consumer delivery before final PR qualification. Historical failures remain fail
 
 ## Implemented Workflow
 
+- Missing-output recovery (#9909) records a removed recording or pose-output
+  path in the input revision instead of failing the whole wizard inspection.
+  Thirty-one planner/wizard tests pass, including removed pose output with editing
+  still available. A fresh Capture Rig window also resumes a saved editing route
+  without changing its edits or progress file; this is an application-instance
+  test, not a physical camera journey.
+
 - Calibration type qualification preserves uint8 preview images after downscaling
   and accepts Qt's optional close-event argument. Eleven decoder/frame-selection
   and layout-reuse tests pass, including a 2560×1440 source resized to 1280×720.
