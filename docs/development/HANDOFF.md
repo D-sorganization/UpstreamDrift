@@ -4,8 +4,15 @@
 
 Active worktree `C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942`,
 branch `feat/9942-metric-simulation-analysis`. Readouts72585f629, Trace5034f7a22,
-topology b6d3c28c6; native geometry785269090; main integration d40956742; surface audit a5472765b; map freshness5a2e8d2c1; PR tracking f0fe99bd9; Trace persistence qualification b6325dfe8; contract review4824f370a; final delivery record SELF. Session codex-unified-metrics-9942
+topology b6d3c28c6; native geometry785269090; main integration d40956742; surface audit a5472765b; map freshness5a2e8d2c1; PR tracking f0fe99bd9; Trace persistence qualification b6325dfe8; contract review4824f370a; final delivery record73b1d0bb4; remote integration repair SELF. Session codex-unified-metrics-9942
 presence through06:12UTC. Preserve Tools4dabe900 and peer ownership.
+Remote writers advanced the branch through44d96c5ff/main300d96a1 and
+f58ee5b3 (biomechanics API helper typing). Local checkout fast-forwarded to
+preserve those commits. Repaired the merge-mislabelled DL-#9926 heading and
+restored the shipped DL-#9907 record and lost SPEC rows #9931/#9932/#9933
+from73b1d0bb4; #9934 and the current #9945 SPEC row remain preserved.
+Current remote CI is34440058289; 88 combined biomechanics/API/display, metric/Trace and Pose Studio integration
+tests pass. The API helper typing repair is preserved.
 PR #9945 contains the completed runtime scope and is entering review; protected CI remains required. Normal push hooks passed including
 isolated mypy14 files, Bandit and unit tests. Separate local combined mypy
 crashed in its pyparsing cache; earlier focused checks and isolated hook passed.
