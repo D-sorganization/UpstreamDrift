@@ -3,14 +3,14 @@
 ## Unified Analysis Comparison Drawings (#9932)
 
 - Repository/worktree: D-sorganization/UpstreamDrift, `C:/Users/diete/Repositories/UpstreamDrift-analysis-drawings-9932`.
-- Branch: `feat/9932-comparison-drawings`; implementation commit SELF; PR not created.
+- Branch: `feat/9932-comparison-drawings`; implementation b2cf97b5e83a6e9c31752c3f3f25598b8c6f3ff8; tracking commit SELF; PR #9943 is draft with protected CI running.
 - Epic #9926 remains active; #9929/#9930 merged in #9933 at f04aa1a570e64c3db0b3d009351ab222656175b2.
 - DL-#9926 updated. Common comparison editor launch/save/reload, immutable export drawings, original-grid PNG, cropped video and camera-scene identity checks are implemented.
 - Source: comparison_coaching_source.py, comparison_frame_source.py, reference_comparison.py, reference_export.py, shared coaching canvas and geometry_storage.py. Capability registry and generated atlas register these paths; capture_goals preserved.
 - Validation: `python3 -m pytest tests/tools/capture_rig tests/motion_capture/test_geometry*.py -q --no-cov --timeout=60` passed 504 tests; atlas/parity tests passed 50. Whole-repo Ruff/format, architecture budget and LoD checks passed. Scoped mypy passed seven source files.
 - Visual evidence: full Driver at 0.567s, synthetic 960×540 background/virtual camera, common editor and PNG inspected in external `analysis-9926-artifacts/comparison-visual-9von8rml`. No physical camera qualification implied.
 - Compatibility: old geometry with incomplete camera fingerprints must be reviewed/recreated; no silent rebinding. PNG uses original pixels while comparison video applies saved crop. Preserve Tools pin4dabe900 and peer worktrees.
-- Next: normal commit/push hooks, create PR Fixes #9932 / Refs #9926, protected CI/review/merge; then metric readouts and simulation integration with #9934 interfaces, context map registration and final epic audit. No external blocker; user-owned original worktree remains untouched.
+- Next: qualify PR #9943 through protected CI/review/merge; then implement child #9942 metric readouts and simulation integration with #9934 interfaces, context map registration and final epic audit. Normal push hooks passed. No external blocker; user-owned original worktree remains untouched.
 
 ## Identity
 
