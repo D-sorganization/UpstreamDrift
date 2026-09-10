@@ -27,7 +27,13 @@ failures. Live test applications still use their frozen earlier checkouts.
   refreshes after registration to show the persisted identity immediately.
   Both missing registration and stale identity were reproduced by regression
   tests; 29 library/capture/wizard/journey checks now pass. The first installed
-  registration probe passes; the final identity-refresh wheel remains pending.
+  registration probe passes. The final frontend-inclusive wheel from91115df6e
+  passes installed automatic registration, persisted header identity, startup,
+  wizard, selected storage and pip checks. SHA256:
+  `65ac434204e696d0dd33e0644faf8f3a4d05ce55dc9a9b601545a37084c3db8b`.
+  The installed registration probe uses an unchanged copied test fixture to
+  create synthetic videos and real bundle/catalog records outside the checkout;
+  application modules resolve from the installed distribution.
 
 - Installed storage (#9949/#9950): new recordings resolve to unique destinations
   in the player's selected library rather than the application installation.
