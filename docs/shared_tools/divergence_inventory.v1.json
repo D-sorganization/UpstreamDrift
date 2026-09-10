@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+  "tools_pin": "4dabe900c6ef7767b565c778cda9d9449bed28cf",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 428,
+    "identical": 424,
     "diverged": 278,
     "ud-only": 1204,
-    "tools-only": 651,
+    "tools-only": 655,
     "spelling-only": 124
   },
   "packages": {
@@ -754,10 +754,10 @@
       "spelling-only": 0
     },
     "ui": {
-      "identical": 4,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 27,
-      "tools-only": 1,
+      "tools-only": 5,
       "spelling-only": 0
     },
     "upstream_drift": {
@@ -924,7 +924,7 @@
       "classification": "ud-only",
       "package": "_seam_redirect.py",
       "subpackage": "",
-      "ud_bytes": 10093,
+      "ud_bytes": 10127,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7393,7 +7393,7 @@
       "package": "golf_club",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 10053,
+      "tools_bytes": 10304,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -8748,8 +8748,8 @@
       "classification": "identical",
       "package": "gui_launcher",
       "subpackage": "",
-      "ud_bytes": 11031,
-      "tools_bytes": 11031,
+      "ud_bytes": 11008,
+      "tools_bytes": 11008,
       "byte_delta": 0,
       "byte_identical": true,
       "ud_has_child_copy_header": false,
@@ -30789,13 +30789,13 @@
     },
     {
       "path": "ui/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "ui",
       "subpackage": "",
-      "ud_bytes": 2031,
+      "ud_bytes": null,
       "tools_bytes": 2031,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -30837,13 +30837,13 @@
     },
     {
       "path": "ui/auto_complete.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "ui",
       "subpackage": "",
-      "ud_bytes": 2620,
+      "ud_bytes": null,
       "tools_bytes": 2620,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -30909,13 +30909,13 @@
     },
     {
       "path": "ui/hover_copy_browser.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "ui",
       "subpackage": "",
-      "ud_bytes": 4960,
+      "ud_bytes": null,
       "tools_bytes": 4960,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -31161,13 +31161,13 @@
     },
     {
       "path": "ui/window_icon.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "ui",
       "subpackage": "",
-      "ud_bytes": 6562,
+      "ud_bytes": null,
       "tools_bytes": 6562,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },

@@ -26,10 +26,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9916
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (Tools 00d17e7f9; main 8fce9f238; merge SELF)
+- **Last verified:** 2026-09-09 (Tools 4dabe900c; main 8fce9f238; repair SELF)
 - **Summary:** Qualify the exact Tools shaft/theme provider; see PROVIDER_PIN_RESULTS.json.
-- **Evidence:** 79 contracts and seam gate pass after main merge; clean installed-provider and pip checks pass.
-- **Next step:** Await protected provider review and final pin.
+- **Evidence:** 271 exact-pin source checks pass; wheel rebuild pending. Earlier evidence retained.
+- **Next step:** Qualify the corrected exact pin and wheel; retain #8942 review exception and physical gates.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 

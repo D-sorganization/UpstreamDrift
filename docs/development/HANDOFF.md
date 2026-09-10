@@ -2,6 +2,19 @@
 
 ## Current Continuation State
 
+The latest candidate is Tools 4dabe900c6ef7767b565c778cda9d9449bed28cf. Six protected unit-gate
+failures at d2760f05c are repaired locally: Cargo/gitlink consistency, current
+inventory metadata, immutable catalog provenance, obsolete color waiver,
+explicit pre-existing realtime migration debt and the moved launcher target.
+The corrected manifest exposed a real UI import failure. Two new tests fail
+before retiring four byte-identical UI copies through the existing namespace
+resolver. All 27 UD-only widgets remain; 105 UI controls and real offscreen
+widget construction pass. Before that UI repair, all 106 migration controls
+passed. Exact new-pin combined source suite passes 271 tests in 71.66 s (20 existing deprecation warnings); installed wheel must be refreshed.
+Realtime #8942 remains pending under a deliberate review exception expiring
+2026-10-09; no guard logic was weakened and no migration completion is claimed.
+Earlier source/wheel records below retain their actual revision identities.
+
 Concurrent remote repairs through 7141feb79 are preserved by normal merge.
 The same provider pin and theme retirement are retained. Reviewed main
 use_start_file preserves the concurrent process-action fix without adding

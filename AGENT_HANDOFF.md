@@ -4,15 +4,14 @@ Canonical continuation: [docs/development/HANDOFF.md](docs/development/HANDOFF.m
 Development entry: DL-#9912. Branch: feat/9912-impact-provider-pin.
 Issue #9912 is a child of #9703/#9701; PR #9916. Current commit is SELF.
 
-The existing vendor mechanism selects Tools 00d17e7f91fe8541bc8882ee745fda58ee2ad7af for review.
-The repaired provider/theme/fallback/manual contract set passes all 79 tests.
-The obsolete theme color child is retired; UD-only theme modules stay local.
-Realtime has a split/pending-cleanup ruling tied to #8942; its API is preserved.
-The efe44846e Python-only wheel at this pin installs cleanly: shaft wire,
-source tamper refusal, theme/layout/realtime ownership and pip check pass.
-The 79-contract suite also passes after main 8fce9f238. Protected review remains.
-Tools #5133 has a Python 3.11 momentum-oracle failure under investigation.
-Do not merge this consumer before the provider is reviewed and green.
+The candidate Tools pin is 4dabe900c6ef7767b565c778cda9d9449bed28cf.
+UD #9916 fixes six provider-migration failures and a further runtime UI
+shadow: four byte-identical files are retired through the existing split
+resolver, preserving 27 UD-only widgets. Offscreen widget construction works.
+Exact-pin combined source suite: 271 tests pass; wheel rebuild remains. Realtime debt has an explicit #8942 review exception
+through 2026-10-09; it is not resolved. See PROVIDER_PIN_RESULTS.json.
+Tools 0cd6dce22 passed every scientific lane; private consumer access and
+review remain. Physical/acoustic qualification remains open.
 
 ## Incoming Main Integration
 
