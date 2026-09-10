@@ -174,7 +174,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-10 (732553479;28 pin/context checks pass)
 - **Summary:** Reviewed paper/ruler calibration and guided recovery. [Evidence and limits](common_reference_calibration.md).
-- **Next step:** Rebuild/probe installed-worker repair SELF, preserving remote-doc merge6b1939e2f;660 integration tests pass. Then push and merge #9946. Scientific release remains separate.
+- **Next step:** Push package-ignore repair SELF and follow #9946 CI; installed startup/wizard and29 calibration tests pass.660 source integration tests pass. Scientific release remains separate.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 

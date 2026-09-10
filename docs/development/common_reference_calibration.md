@@ -25,8 +25,20 @@ failures. Live test applications still use their frozen earlier checkouts.
   repository vendor directory. Resolution now accepts the provider recorded in
   the owning application distribution, while rejecting unrelated distributions
   and incomplete source checkouts. Eight source-worker/ownership checks pass. Metadata paths are normalized for
-  the standard-library path protocol. The
-  corrected wheel must be rebuilt and probed before packaged readiness is claimed.
+  the standard-library path protocol. The corrected installed worker returns all
+  four reference targets; 29 installed persistence/solve/reuse tests pass.
+  The subsequent GUI probe exposed a second packaging defect: the unanchored
+  motion-matching scratch ignore removed the tracked reference-loader package.
+  A source-package exception fixes that omission; the artifact regression fails
+  against the old wheel and passes against the rebuilt wheel. The final installed
+  capture window and edit wizard open with `No Capture Selected`; all 29 installed
+  calibration checks pass again. Offscreen visual inspection uses the system
+  Segoe UI font because the offscreen platform has no automatic font discovery.
+  Frontend-inclusive wheel source: 2d84f2fe0 plus this ignore exception (SELF).
+  SHA256: `12705ae63e13131d52eef90712f18421e6a09221ee148172ca79febf7367e637`.
+  Logs, JUnit, module origins and screenshot are in the task's temporary
+  `capture-9946-installed-qualification` directory. These checks establish package
+  startup and synthetic calibration behavior, not physical-camera accuracy.
   Original failing wheel SHA256: `5be3ecb354963958e44016e6de34ecd1677df3437e600f973b54a19875710fca`.
 
 - Comparison journey qualification: thirteen wizard-evidence tests pass, including
