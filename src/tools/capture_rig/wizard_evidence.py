@@ -61,6 +61,7 @@ class CalibrationReview:
                 read_document(self.path),
                 _camera_set(media.root),
                 capture_root=media.root,
+                verify_reference_frames=True,
             )
         return matches
 

@@ -43,7 +43,9 @@ def _inspect(request: dict[str, Any]) -> tuple[Path, str, bytes, dict[str, Any]]
         view: (item[0], tuple(item[1]))
         for view, item in parameters["expected_cameras"].items()
     }
-    validate_profile_set(data, expected, capture_root=root)
+    validate_profile_set(
+        data, expected, capture_root=root, verify_reference_frames=True
+    )
     target = Path(request["workspace"])
     if read_notes(target).capture_id != request["capture_id"]:
         raise ValueError("Selected capture identity changed; reopen calibration")

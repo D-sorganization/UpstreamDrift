@@ -22,7 +22,7 @@ Local vendor0a is development-only: it would regress the launcher compared with
 main's interim4dabe900c. Context owner owns final gitlink/Cargo/pip/catalog alignment
 after Tools #5144; impact owner qualifies the exact installed consumer. No bypass
 of historical private404/rate-shard failures. Update final metadata and integrate
-main normally before PR/CI/protected merge. Cross-capture reuse is now implemented with portable source evidence and native review;27 isolated checks and18 pipeline/lens/Qt boundary tests pass. Final types/hooks, packaged-runtime and physical accuracy acceptance remain open.
+main normally before PR/CI/protected merge. Cross-capture reuse is now implemented with portable source evidence and native review;27 isolated checks and18 pipeline/lens/Qt boundary tests pass. Reuse committed f6298fb0c; types passed. Foreground image reads are now deferred to background/processing checks, with28 isolated tests passing. Final push hooks, packaged-runtime and physical accuracy acceptance remain open.
 
 Preserve live app54812 (`Capture Rig — main 56552f245`), older61500 and atlas2963.
 They use frozen earlier checkouts, not this branch. Analysis owner controls

@@ -273,11 +273,14 @@ def validate_profile_set(
     expected: Mapping[str, tuple[str, tuple[int, int]]],
     *,
     capture_root: Path | None = None,
+    verify_reference_frames: bool = False,
 ) -> None:
     """Recheck a reviewed export against recorded camera identities and sizes.
 
     This validates intrinsic reuse metadata, not physical camera placement.
     The caller must still obtain current operator confirmation of lens settings.
+    Enable full archived-image checks in background evidence/processing work;
+    foreground confirmation checks only bounded layout and revision documents.
     """
     payload = json.loads(data)
     intrinsic_data = data
@@ -285,18 +288,25 @@ def validate_profile_set(
         isinstance(payload, dict)
         and payload.get("schema_version") == "capture-reference-solve/1"
     ):
-        from .reference_calibration.reuse_evidence import reviewed_source
+        from .reference_calibration.evidence import reviewed_intrinsics
 
         if capture_root is None:
             raise ValueError("Review this camera layout for the selected capture")
-        intrinsic_data = reviewed_source(capture_root, payload)
+        if verify_reference_frames:
+            from .reference_calibration.reuse_evidence import reviewed_source
+
+            intrinsic_data = reviewed_source(capture_root, payload)
+        else:
+            intrinsic_data = reviewed_intrinsics(payload, capture_root)
     elif (
         isinstance(payload, dict)
         and payload.get("schema_version") == "capture-reference-assignment/1"
     ):
         from .reference_calibration.reuse_evidence import assigned_intrinsics
 
-        intrinsic_data = assigned_intrinsics(payload, capture_root)
+        intrinsic_data = assigned_intrinsics(
+            payload, capture_root, verify_frames=verify_reference_frames
+        )
     selections = (
         payload.get("profile_selections") if isinstance(payload, dict) else None
     )

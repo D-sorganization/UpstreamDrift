@@ -78,7 +78,7 @@ fix. Actual OpenCV5.0.0 passed20 lens/reference-projection tests, including
 Full Ruff and format pass (6941 files), mypy28 source modules plus20 projection
 modules pass, and LoD reports no growth across3050 source files. The actual
 working-tree architecture check covered41 changed Python paths and passed.
-Normal commit and push hooks passed on d15013a2c; normal merge hooks passed on f4da52c65. Reuse refinements need their own final hooks. Generated help/atlas freshness and
+Normal commit and push hooks passed on d15013a2c; normal merge hooks passed on f4da52c65. Reuse checkpoint f6298fb0c passed normal commit hooks; the foreground verification refinement needs final push hooks. Generated help/atlas freshness and
 manual governance pass; the calculation inventory remains release-blocked.
 
 Native Python3.12 setup, placement, solve and Help pages were inspected at850×720
@@ -121,7 +121,7 @@ tamper rejection and capture identity at the CLI. Seven dialog/profile tests and
 and assignment were exercised at640×560; screenshots and synthetic assignment
 are in `TEMP/capture-reuse-native-ugzr1gl3`. The first small-window test exposed
 an814px minimum width; shorter controls with wrapped guidance fixed it.
-The repository configured isolated mypy hook passes8 changed source files. The final worker/Qt/atlas group passes19 tests (including27 nested provider checks); normal commit/push hooks remain to run. The broader global mypy invocation was stopped before producing a result and is not passing evidence.
+The repository configured isolated mypy hook passes8 changed source files. The final worker/Qt/atlas group passes19 tests (including27 nested provider checks). Final audit found full archived-frame reads in foreground confirmation. A red test reproduced the pause risk; full image checks now run in the worker, background wizard inspection and camera reader. Foreground confirmation verifies bounded documents only. The updated isolated suite passes28 checks in27.82s; required push hooks remain to run. The broader global mypy invocation was stopped before producing a result and is not passing evidence.
 
 ## Limits and Remaining Acceptance
 
