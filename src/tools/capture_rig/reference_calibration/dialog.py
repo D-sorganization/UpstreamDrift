@@ -29,6 +29,7 @@ from ..calibration_dialog import CameraProfilePanel
 from ..calibration_profiles import CalibrationProfile
 from .client import ReferenceWorkerClient
 from .frame_loader import FrameLoader
+from .frame_selector import ReferenceFrameSelector
 from .placement_panel import PlacementPanel
 from .point_editor import ReferencePointEditor
 from .solve_panel import SolvePanel
@@ -119,7 +120,7 @@ class ReferenceCalibrationDialog(QDialog):
         setup_layout.addWidget(self.start)
         self.tabs.addTab(self._scroll_page(setup), "Camera Setup")
         self.placements = PlacementPanel()
-        self.placements.frame_requested.connect(self._open_frame)
+        self.placements.frame_requested.connect(self._choose_frame)
         self.placements.revision_requested.connect(self._revise)
         self.placements.target_requested.connect(
             lambda parameters: self._request("target", parameters=parameters)
@@ -341,6 +342,49 @@ class ReferenceCalibrationDialog(QDialog):
                 )
             self._request("result", parameters={"result_id": str(result_id)})
         except ValueError as exc:
+            self._failed(str(exc))
+
+    def _choose_frame(self, parameters: dict[str, Any]) -> None:
+        from src.motion_capture.rig.bundle import load_bundle
+
+        panel = self.placements
+        placement = panel.marking_parameters()["placement_id"]
+        if not placement:
+            self._failed(
+                "Name this physical placement before choosing its camera frame."
+            )
+            return
+        try:
+            _, recordings, _ = load_bundle(self.root)
+            recording = next(
+                (
+                    entry
+                    for entry in recordings.recordings
+                    if entry.view == parameters["view"]
+                ),
+                None,
+            )
+            if recording is None:
+                raise ValueError(
+                    "This view has no original recording. Restore it in Capture Library"
+                )
+            selector = ReferenceFrameSelector(
+                self.root / recording.file,
+                context=f"{self.capture_title} · {parameters['view']} · {placement}",
+                initial_index=parameters["frame_index"],
+                parent=self,
+            )
+            if (
+                selector.exec() == QDialog.DialogCode.Accepted
+                and selector.selected_frame is not None
+            ):
+                panel.frame_number.setValue(selector.selected_frame)
+                self._open_frame({**parameters, "frame_index": selector.selected_frame})
+            else:
+                self.status.setText(
+                    "Frame selection cancelled. Existing observations remain unchanged."
+                )
+        except (ValueError, OSError) as exc:
             self._failed(str(exc))
 
     def _open_frame(self, parameters: dict[str, Any]) -> None:

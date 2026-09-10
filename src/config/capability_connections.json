@@ -9,7 +9,7 @@
       "view": "workflow",
       "instructions": [
         "Open a capture and choose Calibration, then Paper / Ruler References. Review the recorded camera and optical settings.",
-        "Keep the reference stationary across camera views. Name each new placement, mark the same physical corners and save a revision."
+        "Keep the reference stationary across camera views. Name each new placement, choose a clear original frame with the video timeline, mark the same physical corners and save a revision."
       ]
     },
     {
