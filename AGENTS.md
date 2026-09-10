@@ -284,6 +284,14 @@ xlsx parser, neither of which Rust can help with.
 
 ---
 
+### 5O. Maintainable Architecture Maps
+
+- The canonical architecture map lives at `docs/architecture/C4.md`.
+- It contains non-placeholder Mermaid `C4Context` and `C4Container` views, a Feature Map tied to components and test evidence, and an Architecture Change Log.
+- Run `python scripts/architecture_map_contract.py` to validate contract conformance before opening architectural PRs.
+
+---
+
 ## H. How to update this file
 
 Found a shared module you wished you'd known about? Add it to section

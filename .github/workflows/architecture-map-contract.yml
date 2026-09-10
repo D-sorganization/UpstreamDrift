@@ -1,0 +1,56 @@
+# architecture-map-contract.yml — C4 Architecture Map Contract Enforcement
+#
+# PURPOSE: Validates docs/architecture/C4.md against the maintainable Mermaid C4 contract.
+# DEPLOYMENT: Enforces structural completeness and runs focused unit tests.
+
+name: Architecture Map Contract
+
+on:
+  pull_request:
+    paths:
+      - "docs/architecture/C4.md"
+      - "scripts/architecture_map_contract.py"
+      - "tests/test_architecture_map_contract.py"
+      - ".github/workflows/architecture-map-contract.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/architecture/C4.md"
+      - "scripts/architecture_map_contract.py"
+      - "tests/test_architecture_map_contract.py"
+      - ".github/workflows/architecture-map-contract.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: architecture-map-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  validate-map:
+    name: Validate Architecture Map Contract
+    runs-on: ${{ vars.RUNNER_TARGET == 'local' && 'd-sorg-fleet' || 'ubuntu-latest' }}
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.4.0
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install pytest pytest-asyncio pytest-timeout
+
+      - name: Validate C4 Architecture Map
+        run: python scripts/architecture_map_contract.py --path docs/architecture/C4.md
+
+      - name: Run Focused Contract Tests
+        run: pytest --noconftest -c /dev/null -o pythonpath=. tests/test_architecture_map_contract.py -v
