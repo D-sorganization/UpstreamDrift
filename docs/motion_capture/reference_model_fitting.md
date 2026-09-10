@@ -179,3 +179,51 @@ placement, then save the comparison. Undo and reset remain available; the
 source capture, fitted joint angles and camera calibration are unchanged.
 Saved comparisons and export sidecars retain all display choices. Existing
 assets without club connectivity remain valid and show no club toggle capability.
+
+## Analyze a Simulation Trace
+
+In the reference library, choose **Import Motion…** and select a Trace v2
+`.h5` or `.hdf5` file produced by the shared simulation serializer. The importer
+requires one rollout with marker trajectories. A state-only trace is rejected
+with an explanation; joint coordinates alone are not treated as marker positions.
+
+Trace marker coordinates use metres. The mapping dialog preserves this unit
+contract. Scalar metadata `frame="world_Zup"` declares canonical right-handed
+Z-up coordinates; without that declaration, confirm the source-axis mapping.
+Optional scalar metadata `marker_names_json` contains a JSON string array in
+marker-column order. Without names, the dialog displays `marker_0`, `marker_1`,
+and so on for explicit mapping. These index labels do not identify anatomy.
+The backend and optional `model_identity` appear in the model identity field.
+
+Confirm names and skeleton connections in the existing mapping dialog, import,
+then choose **Analyze Model…**. The shared editor supports timeline playback,
+drawings, appearance, placement/handedness, metric reference geometry and current
+point/plane distances. Camera projection remains a separate comparison setup.
+Missing marker samples remain missing. Import checks both the source file and
+its decoded dataset budget and rejects linked external HDF5 datasets.
+
+Trace connections are explicit optional scalar metadata: `edges_json` holds a
+JSON array of zero-based marker-column pairs, and `club_edges_json` identifies
+which of those pairs belong to the club. For example, `[[0,1],[1,2]]` with club
+pairs `[[1,2]]` preserves a wrist-to-grip connection and a separately controllable
+shaft. Invalid, duplicate, out-of-range or self connections are rejected. Club
+pairs must also appear in the skeleton connections. The mapping dialog prefills
+these connections; removing a connection also removes its club classification.
+Names alone never imply connectivity. Pose Studio reference geometry is
+described below; state-only backends need a marker-kinematics export.
+
+## Native Pose References
+
+Open Pose Studio and choose **3D References…**. Add a point or a plane using
+three non-collinear anchors, then adjust opacity and extent. The shared editor
+uses Y-up metres; the Pose Studio viewport converts to canonical Z-up. A
+horizontal plane at editor Y=0.8 appears at viewport Z=0.8. References stay in
+the world while the pose changes. This static scene evaluates visibility at
+zero seconds; omit time limits for persistent references.
+
+Close the editor to keep references visible. Choose **Save References…** to
+retain the JSON across application sessions and **Load References…** to restore
+it. Loading rejects a document bound to a different scene. These are reference
+locations and planes, not inferred anatomical measurements. Animated club,
+handedness and translucent ellipsoid controls remain in Analyze Model and
+Compare Reference; simulation Trace v2 imports use those same controls.

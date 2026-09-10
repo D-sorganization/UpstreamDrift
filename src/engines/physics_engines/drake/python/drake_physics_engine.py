@@ -244,6 +244,21 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         v = self.plant.GetVelocities(self.plant_context)
         return q, v
 
+    def get_link_transforms(self) -> dict[str, np.ndarray]:
+        """Return every non-world body pose without advancing Drake."""
+        if not self.plant_context:
+            raise RuntimeError("Engine must be initialized")
+        result: dict[str, np.ndarray] = {}
+        indices = self.plant.GetBodyIndices(self.plant.world_model_instance())
+        for index in indices:
+            body = self.plant.get_body(index)
+            pose = self.plant.EvalBodyPoseInWorld(self.plant_context, body)
+            transform = np.eye(4)
+            transform[:3, :3] = pose.rotation().matrix()
+            transform[:3, 3] = pose.translation()
+            result[body.name()] = transform
+        return result
+
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state."""
         if q is None:
