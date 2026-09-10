@@ -15,19 +15,22 @@ from PyQt6.QtWidgets import QWidget
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
 
 
-def video(path: Path) -> None:
-    writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"MJPG"), 30, (64, 48))
+def video(path: Path, size: tuple[int, int] = (64, 48)) -> None:
+    writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"MJPG"), 30, size)
     assert writer.isOpened()
     for index in range(8):
-        writer.write(np.full((48, 64, 3), (index * 20, 80, 160), dtype=np.uint8))
+        writer.write(
+            np.full((size[1], size[0], 3), (index * 20, 80, 160), dtype=np.uint8)
+        )
     writer.release()
 
 
-def test_preview_reads_original_frame_and_releases_decoder(qtbot, tmp_path):
+@pytest.mark.parametrize("size", [(64, 48), (2560, 1440)])
+def test_preview_reads_original_frame_and_releases_decoder(qtbot, tmp_path, size):
     from src.tools.capture_rig.reference_calibration.video_preview import VideoPreview
 
     path = tmp_path / "source.avi"
-    video(path)
+    video(path, size)
     host = QWidget()
     qtbot.addWidget(host)
     loader = VideoPreview(path, host)
@@ -37,6 +40,9 @@ def test_preview_reads_original_frame_and_releases_decoder(qtbot, tmp_path):
     qtbot.waitUntil(lambda: bool(frames), timeout=10000)
     assert frames[-1].index == 4 and frames[-1].frame_count == 8
     assert frames[-1].fps == pytest.approx(30)
+    assert frames[-1].image.dtype == np.uint8
+    scale = min(1.0, 1280 / max(size))
+    assert frames[-1].image.shape == (round(size[1] * scale), round(size[0] * scale), 3)
     assert frames[-1].image[10, 10, 0] == pytest.approx(80, abs=6)
     loader.close()
     with pytest.raises(ValueError, match="closed"):
