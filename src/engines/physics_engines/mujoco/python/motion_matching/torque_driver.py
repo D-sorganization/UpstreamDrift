@@ -137,6 +137,7 @@ class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
             raise ValueError("model has no actuators (nu == 0)")
 
         self._piecewise: PiecewisePolynomialTorque | None = None
+        self._theta: NDArray[np.float64]
         if isinstance(theta, PiecewisePolynomialTorque):
             if theta.n_channels != nu:
                 raise ValueError(
@@ -176,7 +177,7 @@ class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
                 scale_powers = T_s ** np.arange(COEFFS_PER_JOINT, dtype=np.float64)
                 arr = p_coeffs / scale_powers[None, :]
 
-            self._theta = arr.copy()
+            self._theta = np.asarray(arr, dtype=np.float64).copy()
             self._basis = basis
         self._t0 = float(t0)
         self._installed = False
