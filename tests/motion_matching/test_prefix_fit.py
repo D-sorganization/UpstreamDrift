@@ -281,7 +281,7 @@ def test_build_anatomical_marker_weights_hierarchy() -> None:
     assert weights[2] == 40.0  # Head
     assert weights[3] == 20.0  # Shoulder
     assert weights[4] == 5.0  # Elbow
-    assert weights[5] == 1.0  # Clubhead
+    assert weights[5] == 25.0  # Clubhead
     assert weights[6] == 15.0  # Custom override
 
 

@@ -67,19 +67,24 @@ parser.add_argument(
     default=5.0,
     help="Maximum acceptable pelvis yaw error percentage (default 5.0%%)",
 )
+parser.add_argument(
+    "--club-marker-weight",
+    type=float,
+    default=25.0,
+    help="Weight penalty on clubhead markers (e.g. Marker_2:2:*, Marker_3:3:*, club)",
+)
 args = parser.parse_args()
 if not np.isfinite(args.finite_difference_step) or args.finite_difference_step <= 0:
     parser.error("finite-difference-step must be finite and positive")
+if not np.isfinite(args.club_marker_weight) or args.club_marker_weight <= 0:
+    parser.error("club-marker-weight must be finite and positive")
 if not np.isfinite(args.smoothness_weight) or args.smoothness_weight < 0:
     parser.error("smoothness-weight must be finite and non-negative")
 if not np.isfinite(args.terminal_weight) or args.terminal_weight < 0:
     parser.error("terminal-weight must be finite and non-negative")
 if not np.isfinite(args.pelvis_yaw_weight) or args.pelvis_yaw_weight < 0:
     parser.error("pelvis-yaw-weight must be finite and non-negative")
-if (
-    not np.isfinite(args.pelvis_yaw_max_error_pct)
-    or args.pelvis_yaw_max_error_pct <= 0
-):
+if not np.isfinite(args.pelvis_yaw_max_error_pct) or args.pelvis_yaw_max_error_pct <= 0:
     parser.error("pelvis-yaw-max-error-pct must be finite and positive")
 sys.path.insert(0, str(args.repo))
 from src.shared.python.motion_matching.prefix_fit import (
@@ -297,8 +302,15 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
         report["stage"]["parameters"] = stage.parameters.tolist()
         save_report()
 
+    custom_marker_weights = {}
+    if args.club_marker_weight is not None:
+        for lbl in labels:
+            lower = lbl.lower()
+            if "marker_2" in lower or "marker_3" in lower or "club" in lower:
+                custom_marker_weights[lbl] = args.club_marker_weight
+
     marker_weights = (
-        build_anatomical_marker_weights(labels)
+        build_anatomical_marker_weights(labels, custom_weights=custom_marker_weights)
         if args.anatomical_weights
         else np.ones(len(labels))
     )
@@ -319,6 +331,7 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
     report["regularization"] = {
         "smoothness_weight": args.smoothness_weight,
         "anatomical_weights": args.anatomical_weights,
+        "club_marker_weight": args.club_marker_weight,
         "marker_weights": marker_weights.tolist(),
         "terminal_weight": args.terminal_weight,
         "time_weight_scale": args.time_weight_scale,

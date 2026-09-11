@@ -115,8 +115,10 @@ DEFAULT_ANATOMICAL_WEIGHTS: dict[str, float] = {
     "arm": 5.0,
     "elbow": 5.0,
     "wrist": 5.0,
+    "marker_2": 25.0,
+    "marker_3": 25.0,
+    "club": 25.0,
     "marker": 1.0,
-    "club": 1.0,
 }
 
 
