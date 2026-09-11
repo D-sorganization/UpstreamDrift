@@ -615,4 +615,13 @@ reason.
 fleet hooks as `development-log`. Run it directly with
 `python shared_scripts/development_log.py --repo-root .`.
 
+### The Fail-Open vs. Fail-Closed Split
+
+- **Coordination stays fail-open.** A lease-check API error should let the agent proceed and risk duplication rather than halt the fleet. Duplicated work is reclaimed by the redundant-PR closer.
+- **Documentation enforcement is fail-closed.** A validator that skips on error trains agents to produce output that trips it. Orphaned work is reclaimed by nobody.
+
+### Escape Hatch
+
+If implementation files changed but no material development-log update is required, stage the log with `No material development-log change — <reason>` recorded in it. Note that **staging** is what satisfies the check — an earlier commit's phrase must not.
+
 <!-- END FLEET-MANAGED: development-logs -->
