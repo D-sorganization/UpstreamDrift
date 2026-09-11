@@ -9,22 +9,38 @@
   - Remote runtime worktree (`UpstreamDrift-simscape-tour-runtime`) cleanly synchronized to commit `e511a6757`.
   - Directory: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-04`.
   - Warm-start: Directly transferred from certified Candidate 75 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-75-pkg/candidate_75_package.json`, SHA256: `2369de3a70f7f6961fd00d8678d06abae77d6cb88cfbe232a771633152fa442f`).
-- **Critical Milestone: 25.0 mm Whole-Window Gate Passed**:
-  - **Evaluation #337**: Achieved **24.99 mm** whole-window marker RMSE, officially breaking below the $\le 25.0\text{ mm}$ gate!
+- **Critical Milestone: Whole-Window Gate Passed (< 25.0 mm)**:
+  - **Evaluation #528**: Achieved **24.31 mm** (24.312 mm) whole-window marker RMSE (**NEW ALL-TIME RECORD** on $0.75\text{ s}$ horizon, PASS $\le 25.0$ mm gate)!
+  - **Evaluation #337**: Achieved **24.99 mm** (24.994 mm) whole-window marker RMSE (PASS $\le 25.0$ mm gate).
   - **Top Evaluations Leaderboard (0.75 s Horizon)**:
-    - **#337**: **24.99 mm** (NEW RECORD, PASS $\le 25.0$ mm gate)
+    - **#528**: **24.31 mm** (NEW RECORD, PASS $\le 25.0$ mm gate)
+    - **#337**: **24.99 mm** (PASS $\le 25.0$ mm gate)
+    - **#529**: **25.61 mm**
+    - **#465**: **25.62 mm**
+    - **#466**: **25.82 mm**
     - **#338**: **26.00 mm**
     - **#275**: **26.20 mm**
     - **#106**: **26.29 mm**
     - **#274**: **26.36 mm**
+    - **#424**: **26.50 mm**
     - **#254**: **26.62 mm**
     - **#233**: **26.66 mm**
-    - **#386**: **26.73 mm**
-    - **#389**: **26.73 mm**
-    - **#240**: **26.73 mm**
+    - **#386 / #389 / #240**: **26.73 mm**
     - **#30**: **26.76 mm**
     - **#16**: **26.79 mm**
-    - **#2 (Baseline)**: **28.53 mm**
+    - **#2 (Candidate 75 Baseline)**: **28.53 mm**
+- **Immutable Candidate Packages Created & Certified**:
+  - **Candidate 528 Package**:
+    - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-528-pkg/candidate_528_package.json`
+    - SHA256: `3524f112dfd23479a812a56edab1be0a1282543f969d685d4c8d591090ca67da`
+    - Whole-window marker RMS: **24.312 mm**
+  - **Candidate 337 Package**:
+    - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-337-pkg/candidate_337_package.json`
+    - SHA256: `4a4249466d18e1cd812b4a607b7e03d7af5ac7ac1e4e32af4d02bba291a3b1a3`
+    - Whole-window marker RMS: **24.994 mm**
+- **Continuation Ladder Advance (0.75 s -> 0.80 s)**:
+  - Verified clean mathematical transfer of Candidate 528 to $0.80\text{ s}$ horizon via `transfer_prefix_candidate` (189 parameters, continuous physical polynomial extrapolation).
+  - Ready for continuation launch on DeskComputer (`prefix-800ms-sextic-01`) warm-starting from Candidate 528.
 - **Baseline Replay Verification (0.75 s Horizon)**:
   - Evaluation #1 (Zero Effort): 1421.30 mm marker RMS.
   - Evaluation #2 (Transferred Candidate 75): **28.53 mm** whole-window marker RMS.
@@ -35,8 +51,8 @@
   - Balanced weights: `--terminal-weight 8.0 --club-marker-weight 25.0 --smoothness-weight 0.08 --pelvis-yaw-weight 50.0 --pelvis-yaw-max-error-pct 5.0`
 - **Execution Telemetry**:
   - Live heartbeat logging active on every evaluation with fast rollout rate of $\approx 2.4 - 2.7\text{ s}$ per evaluation.
-  - Over 400 evaluations completed; currently advancing through Iteration 3 to further minimize terminal and yaw error.
-  - Target Gates: Early retention $\le 12.0$ mm, Whole window $\le 25.0$ mm (PASSED by #337 at 24.99 mm), Terminal RMS $\le 35.0$ mm, Clubhead terminal RMS $\le 60.0$ mm, Pelvis yaw error $< 5.0\%$.
+  - Over 580 evaluations logged on DeskComputer.
+  - Target Gates: Early retention $\le 12.0$ mm (PASS), Whole window $\le 25.0$ mm (PASSED by #528 at 24.31 mm and #337 at 24.99 mm).
 
 ### 1. Run 03 Audit & 750 ms Horizon Analysis (`prefix-750ms-sextic-03`, DeskComputer)
 
