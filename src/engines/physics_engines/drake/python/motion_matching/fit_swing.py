@@ -231,7 +231,7 @@ def fit_swing_drake(
             )
             raise ValueError(msg)
         # Clip to the bound box defensively so SLSQP starts feasible.
-        theta0 = np.clip(theta0, lb, ub).astype(np.float64)
+        theta0 = np.clip(theta0, lb, ub).astype(np.float64).reshape(-1)
     else:
         theta0 = np.zeros(n_dim, dtype=np.float64)
 
