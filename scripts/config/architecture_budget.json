@@ -384,7 +384,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/physics-team",
       "issue": 9967,
-      "reason": "Issue #9967: SimOut.__init__ supports comprehensive backward-compatible and canonical state variables.",
+      "reason": "Issue #9967: SimOut canonical dataclass coordinates 19 state and energy trajectory fields matching Simscape contract.",
       "expires_on": "2026-10-31"
     },
     {
@@ -393,7 +393,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/physics-team",
       "issue": 9967,
-      "reason": "Issue #9967: SimOut.__init__ parameter list reflects comprehensive Simscape output fields and metadata.",
+      "reason": "Issue #9967: SimOut coordinates all 19 kinematic, kinetic, energy, and work output fields across simulation steps.",
       "expires_on": "2026-10-31"
     },
     {
@@ -402,7 +402,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/physics-team",
       "issue": 9967,
-      "reason": "Issue #9967: simulate_with_coefficients coordinates forward dynamics, RK4 step integration, and output assembly.",
+      "reason": "Issue #9967: simulate_with_coefficients executes continuous Bernstein torque evaluation with RK4 internal stage integration for Pinocchio ABA.",
       "expires_on": "2026-10-31"
     },
     {
