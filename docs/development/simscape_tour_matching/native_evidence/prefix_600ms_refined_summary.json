@@ -1,0 +1,34 @@
+{
+  "duration_s": 0.6,
+  "samples": 217,
+  "markers": 25,
+  "rms_mm": 9.062024357648596,
+  "p95_mm": 19.457409061928967,
+  "max_mm": 42.595898941517724,
+  "baseline_rms_mm": 881.5627472709072,
+  "optimizer_converged": false,
+  "accepted_numerically": false,
+  "evaluations": 877,
+  "max_per_marker_rms_mm": 18.864213721595657,
+  "force_controls_N": {
+    "TranslationInputX": [
+      -0.9896312952665798, 0.6309253322113184, -10.480426749389204,
+      -37.76873561098382
+    ],
+    "TranslationInputY": [
+      3.1179222125750083, 12.92505992095261, 16.068061816370104,
+      -1.5560940152101188
+    ],
+    "TranslationInputZ": [
+      766.3764007127971, 749.4661609690097, 750.109391184184, 770.8962300826997
+    ]
+  },
+  "force_ranges_N": {
+    "TranslationInputX": [-37.76873561098381, -0.8358059429508968],
+    "TranslationInputY": [-1.5560940152101157, 11.07569884652033],
+    "TranslationInputZ": [754.4335120059576, 770.8962300826998]
+  },
+  "max_abs_torque_control_bound_Nm": 172.72014167262572,
+  "max_abs_torque_Nm": 172.72014167262572,
+  "max_torque_change_Nm": 39.94907194914154
+}

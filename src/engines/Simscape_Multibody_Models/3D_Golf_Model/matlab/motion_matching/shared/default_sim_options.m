@@ -25,6 +25,8 @@ function opts = default_sim_options()
 %     .joint_names       string array Optional override for joint ordering;
 %                                     when empty (default) the joints are
 %                                     discovered via getPolynomialParameterInfo.
+%     .retain_raw_output logical Retain raw output for native signal audits.
+%                                     Default false; true bypasses the cache.
 %
 %   Postconditions:
 %     - All documented fields are present.
@@ -34,6 +36,7 @@ function opts = default_sim_options()
 
     opts = struct();
     opts.model_name        = "GolfSwing3D_Kinetic";
+    opts.retain_raw_output = false;
     opts.simulation_time   = 0.3;
     opts.sample_rate       = 1000;
     opts.solver            = "ode23t";

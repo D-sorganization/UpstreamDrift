@@ -1,0 +1,24 @@
+{
+  "matlab": "R2025b Update 5",
+  "red": {
+    "failed": 2,
+    "cause": "MATLAB:UndefinedFunction audit_golf_actuator_torques",
+    "log": "C:/Users/diete/SimscapeTour9921/actuator-audit-red.log"
+  },
+  "green": {
+    "passed": 2,
+    "exit_code": 0,
+    "log": "C:/Users/diete/SimscapeTour9921/actuator-audit-green.log"
+  },
+  "coverage": [
+    "polynomial comparison at nonuniform native timestamps",
+    "known actuator perturbation produces measured error",
+    "missing actuator log cannot be replaced with reaction torque"
+  ],
+  "saved_candidate": {
+    "run": "prefix-100ms-01",
+    "verified_logged_coordinates": 16,
+    "unlogged_coordinates": 11,
+    "max_error_Nm": 0
+  }
+}

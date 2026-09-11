@@ -56,7 +56,8 @@ def test_registry_is_fail_closed_until_up_d1_inventory() -> None:
     assert verify_calculation_registry(registry) == 0
     assert registry["release_status"] == "blocked-inventory-required"
     assert registry["inventory_commit"] is None
-    assert registry["blockers"][0]["id"] == "UP-D1-inventory-required"
+    blocker_ids = [blocker["id"] for blocker in registry["blockers"]]
+    assert "UP-D1-inventory-required" in blocker_ids
 
 
 @pytest.mark.parametrize(

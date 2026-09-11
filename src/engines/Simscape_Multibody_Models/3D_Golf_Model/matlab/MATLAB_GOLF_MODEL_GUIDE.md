@@ -1,5 +1,9 @@
 # MATLAB Golf Model — Architecture & User Guide
 
+## Required MATLAB Release
+
+MATLAB R2025b is the required execution, model-save and validation release for the Simscape golf model and tour-average matching epic #9921. The user has the complete required licensed feature set in R2025b. R2026a is not a requirement; do not select it from PATH or use its successful probes as R2025b acceptance evidence. On DeskComputer and ControlTower launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly. Preserve historical reports with their actual release; run acceptance checks in R2025b. The full forward-dynamics matching goal remains active with this constraint.
+
 This document is the entry point for working with the Simscape Multibody
 golf-swing model, the dataset generator that exercises it at scale, and the
 motion-matching pipeline that fits it to measured swing data.

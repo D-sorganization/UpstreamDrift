@@ -1,0 +1,24 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "migration": [
+    {
+      "file": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-simscape-tour-runtime\\src\\engines\\Simscape_Multibody_Models\\3D_Golf_Model\\matlab\\src\\model\\Kinetically_Driven_Gimbal_Joint.slx",
+      "changed": false
+    },
+    {
+      "file": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-simscape-tour-runtime\\src\\engines\\Simscape_Multibody_Models\\3D_Golf_Model\\matlab\\src\\model\\Kinetically_Driven_Universal_Joint.slx",
+      "changed": false
+    },
+    {
+      "file": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-simscape-tour-runtime\\src\\engines\\Simscape_Multibody_Models\\3D_Golf_Model\\matlab\\src\\model\\Kinetically_Driven_Revolute_Joint.slx",
+      "changed": false
+    }
+  ],
+  "names": [
+    "test_joint_target_priorities/gimbalInstancesRespectIndependentPriorities",
+    "test_joint_target_priorities/everySelectorReachesItsPrimitive"
+  ],
+  "passed": [true, true],
+  "failed": [false, false],
+  "incomplete": [false, false]
+}

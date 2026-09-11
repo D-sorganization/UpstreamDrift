@@ -1,3 +1,30 @@
+# Simscape Tour-Average Fit Continuation
+
+## Active 6Th-Order Polynomial (Sextic) Continuation — 1.2s Milestone & 1.3s Horizon
+
+`prefix-1200ms-sextic-01` has completed with native fit and independent cold replay exit codes zero on DeskComputer R2025b (runtime `0715f95f3`). Over 433 samples and 25 markers across 0–1.20 s:
+
+- **Marker Accuracy**: Overall RMS is **311.617528 mm**, p95 **643.184442 mm**, max **2149.570454 mm** (580 evaluations computed).
+- **Sub-window Fidelity**: Across the shared [0, 0.8] s window, marker RMS is **87.427014 mm**; across the shared [0, 1.0] s window, marker RMS is **192.206387 mm**; across the shared [0, 1.1] s window, marker RMS is **245.850057 mm**. The extension [1.1, 1.2] s deepens the downswing power phase (708.109788 mm).
+- **Cold Validation & Audit**: Independent cold replay reproduces marker coordinates with zero error; initial states pass with q error 7.246e-13 and qd error 3.986e-14. All 27 actuator channels (24 torques, 3 forces) audit to within floating-point precision ($3.411\times 10^{-13}$ N force error, $2.842\times 10^{-14}$ Nm torque error).
+- **Archive & Evidence**: The 138-file bundle archive is verified locally and remotely with identical SHA256 `b6cfe04e478eef2fbbeb66f1cf061c9362443cc964cbda18c629108141550c98`. Evidence is committed in `native_evidence/prefix_1200ms_*` and receipt `prefix_1200ms_sextic_bundle_receipt.json`.
+- **3D Video Overlay**: Generated and verified at `c:\Users\diete\Repositories\simscape-tour-checkpoints\prefix-1200ms-sextic-01\prefix_1200ms_overlay.mp4` (433 frames, 30 fps) and GIF (433 frames, 20 fps) displaying the synchronized Simscape model skeleton and C3D target markers over the first 1.20 s of motion.
+
+Continuation has advanced to **`prefix-1300ms-sextic-01`** (1.30 s horizon, 469 samples, 25 markers, degree-6 Bernstein basis with 189 parameters). Transferred from `prefix-1200ms-sextic-01/first_prefix_fit.json` with identical global t0 initial state and fixed geometry. Actively running in background on DeskComputer R2025b.
+
+## Worktree Cleanup Complete; Bounded Resumption Ready
+
+All 20 user-approved completed worktree directories are removed, with original branches preserved. C: free space is about 30.4 GiB. Verified submodule-history backups are retained locally; borrowed-object dependencies discovered during removal were restored and relocated to stable `.git/retained-submodule-objects`. Do not delete that active object storage. Final checks show no missing alternate targets; the unrelated pre-existing unreadable `_wt_claude_model` was preserved. See RESUME_AND_STORAGE.md and its cleanup receipts for exact recovery paths and verification.
+
+Read [Resumption Plan](docs/development/simscape_tour_matching/RESUMPTION_PLAN.md). Next proposed bounded assignment is 0.7 s cubic continuation from the verified 0.6 s / 9.062024 mm candidate, followed by cold replay, all-27 audit, interval-specific comparison and archive. A lower-cost coding agent can run the established scripts; a strong reviewer should decide subsequent horizons, model/geometry changes and acceptance. No new fitting process or agent has been launched. R2025b and the unfinished full-swing objective are unchanged.
+
+## Saved Checkpoint and Storage Review — 2026-09-10
+
+- **Archive root**: `C:/Users/diete/Repositories/simscape-tour-checkpoints`
+- **Completed checkpoints**: `prefix-50ms-01`, `prefix-100ms-linear-01`, `prefix-200ms-linear-01`, `prefix-300ms-quadratic-01`, `prefix-300ms-quadratic-02-refined`, `prefix-400ms-quadratic-01`, `prefix-500ms-cubic-01`, `prefix-600ms-cubic-01-refined`, `prefix-700ms-cubic-01`, `prefix-800ms-quartic-01`, `prefix-900ms-sextic-01`, `prefix-1000ms-sextic-01`, `prefix-1100ms-sextic-01`, `prefix-1200ms-sextic-01`
+- **Experimental**: `calibrated-100ms-linear-01`
+- **Active candidate**: `prefix-1300ms-sextic-01` (running in background on DeskComputer)
+
 # Common-Reference Calibration Continuation
 
 User-requested transfer: read `docs/development/capture_product_turnover.md`.
@@ -624,26 +651,6 @@ reruns. Do not restart the Actions runner or start WSL.
   Note the local reproducer cannot exercise real casadi/bioptim (Python 3.14
   has no casadi wheel); CI lanes with the `[bioptim]` extra must show the
   ocp bioptim legs running (not skipping) in combined lanes.
-
-PR #9840 CI cycle 3: full unit gate passed 14,431 tests and failed only the companion feature-count expectation and shared divergence inventory. Updated counts for the new controls and regenerated the inventory with the pinned Tools tree. Both affected modules pass (34 tests). Await the refreshed remote gate before merging.
-
-Pinocchio and Drake now expose View > Segment Force Colors via a shared MeshcatForceColorSession. Both native GUI tests pass on isolated Linux (Pinocchio 4.1.0, Drake 1.56.0). Explicit bindings and synchronous caller-supplied axial frames are required; automatic native reaction inference is not claimed. Session regression covers stale frames, model replacement and toggling. OpenSim currently has result plots, not a 3D animation host.
-
-Final native-host CI exposed optional Qt menu return annotations. Menus now use explicit QMenu construction after validating the menu bar. Pinocchio synchronizes force colors in its GUI coordinator override, leaving the legacy visualization mixin unchanged; native Linux host tests still pass (2 tests). Current required gate remains red until the type correction is validated remotely.
-
-The final host CI type check passes after menu contracts and the native COM matrix correction. The DRY gate then identified duplicated menu setup; install_force_color_menu now owns that validated setup for both GUIs. Native GUI tests pass after extraction. Await the corrected head's aggregate quality gate before closing the epic.
-
-## Capture Editing and Reference Work
-
-- Product #9849 now includes trim/crop #9860, library/notes #9861 and coaching drawings #9862; separate advanced reference epic #9863 has children #9864–#9866. All are active goal scope.
-- Isolated branch feat/9860-swing-editing contains the edit recipe, ingestion mapping, native editor and visible capture library with notes, imports, archive/storage, rename recovery and editable copies. See docs/development/capture_editing_integration.md for reuse audit and remaining work. Selected-swing export and downstream trimmed-timeline qualification are implemented; PR #9868 is open after normal push checks; protected CI/merge remains.
-- Preserve the concurrent #9843 GUI dock/layout work; new header entry points use existing wrapping layout without changing dock policy. Raw recordings and prior analyses must remain intact.
-
-## Capture Product Review (#9851, #9857)
-
-See `docs/development/HANDOFF.md` and `docs/development/capture_product_review.md`. Bounded duplicate-frame cache and child startup recovery are covered by six focused tests. The camera suite passed 241 tests before the recovery change. GUI #9843 remains independently owned; hardware qualification remains outstanding.
-
-Expert reference imports are in draft PR #9870 (30 integrated tests, 49 atlas/registry tests and scoped quality gates passed). Registration/time mapping #9865 and native comparison #9866 remain next. Preserve native drawing dependency #9869.
 
 ## Verified Agent Context (#9915)
 

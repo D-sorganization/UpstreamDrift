@@ -1,0 +1,26 @@
+{
+  "schema": "simscape-tour-bundle-receipt/1",
+  "archive": "attached-pose-01-bundle.zip",
+  "sha256": "4fa110a222601c04f13b01ff922b1e0db60d92507eac9db09b2c8a94b8e9e39e",
+  "files": {
+    "attached-pose-green.ps1": "58ce6aa41177f755ab3865fc0626ea72f6aab3c730a685484158ff0c31a1c2d0",
+    "attached-pose-red.ps1": "9a7f012efd9d4b549b066cb55b21e03d6043ddc7bb237bb254c02049bf9c78a3",
+    "fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "green-exit.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "green.log": "297cb45d24b57afa4b5beeb5f8d21a16823c480b06af6c5abeb5039d5738eb11",
+    "green.mat": "3d06113f533cefd2a27e6225c5f13e5aa263ac39319ad0f36547e3e8c1de2f1f",
+    "red-exit.txt": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+    "red.log": "4f4cdb6dc810fb6b14deb0f620f021f76c017eb45f05d4529a03681af4278b2e",
+    "red.mat": "23b5b022a97260212f7d0ed08cf28fca9e0d6a5eb2ca175ba88a3297bed4b178",
+    "test_fit_golf_pose_seed.m": "00f8a4a381885fb4da4cf2a8377580c4c0f361b486bc95e7f1a3c18cf0871e60"
+  },
+  "matlab_release": "R2025b",
+  "runtime_base": "59e944b44",
+  "runtime_patches": "Published 0715f95f3 sensor patches plus fit_golf_pose_seed.m and its test in this archive.",
+  "tests_passed": 3,
+  "red_exit": 1,
+  "green_exit": 0,
+  "qualification": "Synthetic native pose regression only; fixed attachments, not dynamics or a global optimum.",
+  "local_archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\attached-pose-01-bundle.zip",
+  "remote_archive": "C:/Users/diete/SimscapeTour9921/attached-pose-01-bundle.zip"
+}

@@ -4,6 +4,10 @@
 
 Start with [Agent Context](docs/agent_context/README.md) and its [Usage Guide](docs/agent_context/USAGE.md). Use focused CLI/MCP retrieval to find public interfaces, providers, consumers and integration tests. The generated map covers registered boundaries; inspect source for unregistered areas. Source hashes, dependency pins and boundary review must be current before relying on an integration claim.
 
+## Required MATLAB Release
+
+MATLAB R2025b is the required execution, model-save and validation release for the Simscape golf model and tour-average matching epic #9921. The user has the complete required licensed feature set in R2025b. R2026a is not a requirement; do not select it from PATH or use its successful probes as R2025b acceptance evidence. On DeskComputer and ControlTower launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly. Preserve historical reports with their actual release; run acceptance checks in R2025b. The full forward-dynamics matching goal remains active with this constraint.
+
 > **Read this first.** This file exists because we kept reinventing
 > infrastructure that already lived in the repo (FK solvers, skeleton
 > renderers, reference golfer poses, mocap loaders, theme constants).
