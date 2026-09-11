@@ -2,10 +2,27 @@
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
-### 0. Run 04 Audit & Status (`prefix-750ms-sextic-04`, DeskComputer)
+### 0. Run 05 Active Execution (`prefix-750ms-sextic-05`, DeskComputer)
 
 - **Execution Status**:
-  - Run 04 completed on DeskComputer (775 logged evaluations in `evaluations.jsonl`, final optimizer evaluation RMS: 26.72 mm). No lingering background process.
+  - Actively running on DeskComputer under MATLAB R2025b (PID: 72088 / 79452, MATLAB PID: 90616).
+  - Warm-started directly from Candidate 528 immutable package (`candidate_528_package.json`, 24.312 mm).
+  - Directory: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-05`.
+  - Baseline Replay: Evaluation #1 (Zero Effort): 1421.30 mm; Evaluation #2 (Candidate 528 transferred): **24.31 mm**.
+- **Tuned Pareto Objective (Enforcing Failing Terminal, Clubhead, and Yaw Gates)**:
+  - `--duration 0.75 --basis sextic`
+  - `--terminal-weight 15.0` (steepened terminal frame tracking vs previous 8.0)
+  - `--club-marker-weight 35.0` (steepened clubhead marker tracking vs previous 25.0)
+  - `--pelvis-yaw-weight 75.0` (steepened yaw enforcement vs previous 50.0)
+  - `--pelvis-yaw-max-error-pct 5.0`
+  - `--finite-difference-step 0.001 --smoothness-weight 0.08 --max-nfev 250`
+- **Telemetry**:
+  - Live heartbeat recording to `heartbeat.json` on every evaluation (~3.1 - 3.5s per rollout).
+
+### 1. Run 04 Audit & Status (`prefix-750ms-sextic-04`, DeskComputer)
+
+- **Execution Status**:
+  - Run 04 completed on DeskComputer (775 logged evaluations in `evaluations.jsonl`, final optimizer evaluation RMS: 26.72 mm).
   - Spawning architecture established via `Invoke-CimMethod -ClassName Win32_Process -MethodName Create`, successfully decoupling detached processes from SSH session job objects.
   - Directory: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-04`.
   - Seed: Transferred from verified Candidate 75 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-75-pkg/candidate_75_package.json`, SHA256: `2369de3a70f7f6961fd00d8678d06abae77d6cb88cfbe232a771633152fa442f`).
@@ -45,14 +62,6 @@
     - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-337-pkg/candidate_337_package.json`
     - SHA256: `4a4249466d18e1cd812b4a607b7e03d7af5ac7ac1e4e32af4d02bba291a3b1a3`
     - Whole-window marker RMS: **24.994 mm**
-- **Next Horizon Execution Strategy (Pareto-Tuning Run 05 on 0.75 s)**:
-  - Warm-start directly from `candidate_528_package.json` on DeskComputer (`prefix-750ms-sextic-05`).
-  - Target the failing terminal and yaw gates:
-    - Increase terminal frame weight: `--terminal-weight 15.0`
-    - Increase clubhead marker weight: `--club-marker-weight 35.0`
-    - Increase pelvis yaw weight: `--pelvis-yaw-weight 75.0`
-    - Maintain finite-difference step at `0.001` with `max-nfev 250`.
-  - All 5 gates must be satisfied or explicitly audited before advancing horizon to $0.80\text{ s}$.
 
 ### 1. Run 03 Audit & 750 ms Horizon Analysis (`prefix-750ms-sextic-03`, DeskComputer)
 
