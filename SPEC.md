@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Citing Sg_Optimizer Condition Models and Coefficients (#8849)
+
+Resolve uncited condition-model empirical constants in `src/shared/python/sg_optimizer/course/conditions.py` to maintain total numerical traceability per `docs/sg_optimizer/data_sources.md`:
+- `RoughModel`: Document and tag empirical coefficients including `dispersion_multiplier` (`1.0 + 0.4 * severity`, calibrated to ShotLink driving accuracy decay), `flyer_probability` (`4.0 * r * (1.0 - r) * 0.25`, peak 0.25 at medium rough), and `spin_reduction` (`0.5 * severity`, TrackMan rough decay).
+- `TreeModel`: Document Phase 1 tree density penalization parameters including forced punch-out threshold (`> 0.85`), distance multiplier (`max(0.05, 1.0 - 0.9 * penalization)`), and dispersion multiplier (`1.0 + 0.6 * penalization`).
+- `GreenModel`: Document Stimpmeter leave distribution modifier (`1.0 + 0.08 * max(0.0, stimp - 10.0)`) and effective green depth multiplier (`1.0 - 0.06 * max(0.0, stimp - 10.0)`).
+- Regression Testing: `test_conditions_coefficients_documented_in_data_sources` validates that empirical formulas and constants in `conditions.py` remain documented in `docs/sg_optimizer/data_sources.md`.
+
 ## Automated Cross-Engine Parity Benchmark Suite and Tolerance Gate (#9969)
 
 Implement cross-engine forward-dynamics parity verification and tolerance gating across Simscape, MuJoCo, Pinocchio, and Drake (`tests/cross_engine/test_four_engine_parity.py`):

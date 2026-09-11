@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.sg_optimizer.course.conditions import (
     CourseConditions,
@@ -74,3 +76,30 @@ def test_yaml_preset_form(tmp_path):
     c = CourseConditions.from_yaml(path)
     assert c.rough.severity == pytest.approx(RoughModel.preset("heavy").severity)
     assert c.greens.stimp == pytest.approx(GreenModel.preset("masters").stimp)
+
+
+def test_conditions_coefficients_documented_in_data_sources():
+    """Verify that empirical constants in conditions.py are tracked in data_sources.md."""
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[4]
+    doc_path = repo_root / "docs" / "sg_optimizer" / "data_sources.md"
+    assert doc_path.exists(), f"{doc_path} must exist"
+    doc_text = doc_path.read_text(encoding="utf-8")
+
+    # RoughModel coefficients
+    assert "0.08r - 0.12r²" in doc_text
+    assert "0.4 * severity" in doc_text
+    assert "flyer_probability" in doc_text
+    assert "0.5 * severity" in doc_text
+
+    # TreeModel coefficients
+    assert "is_forced_punch_out" in doc_text
+    assert "0.85" in doc_text
+    assert "0.9 * penalization" in doc_text
+    assert "0.6 * penalization" in doc_text
+
+    # GreenModel coefficients
+    assert "0.015" in doc_text
+    assert "0.08 * max(0.0, stimp - 10.0)" in doc_text
+    assert "0.06 * max(0.0, stimp - 10.0)" in doc_text
