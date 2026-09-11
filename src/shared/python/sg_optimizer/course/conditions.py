@@ -3,6 +3,10 @@
 Conditions are **orthogonal to geometry**: the same hole raster can be played
 under benign or punitive conditions and produce different strategies. Do not
 encode "this is heavy rough" as a separate lie code (spec pitfall #14).
+
+All numeric coefficients and empirical parameter formulas in these models
+trace to citations and calibration estimates documented in
+``docs/sg_optimizer/data_sources.md``.
 """
 
 from __future__ import annotations
