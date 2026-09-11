@@ -480,7 +480,13 @@ def _mock_drake_harness() -> Generator[dict[str, Any], None, None]:
     b_inst.Build.return_value = MagicMock(name="Diagram")
     b_inst.Build.return_value.CreateDefaultContext.return_value = diag_ctx
 
-    with patch.dict(sys.modules, mocks):
+    with (
+        patch.dict(sys.modules, mocks),
+        patch(
+            "src.engines.physics_engines.drake.python.motion_matching.simulate.is_drake_available",
+            return_value=True,
+        ),
+    ):
         yield {"plant": plant, "simulator": sim_inst, "n_act": n_act}
 
 

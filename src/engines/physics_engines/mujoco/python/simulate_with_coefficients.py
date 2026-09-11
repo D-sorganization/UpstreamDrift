@@ -39,6 +39,19 @@ DEFAULT_GOLFER_XML: Path = (
     Path(__file__).resolve().parents[1] / "models" / "generated" / "golfer.xml"
 )
 
+
+def is_mujoco_available() -> bool:
+    """Return whether a functional MuJoCo C++ runtime (mujoco) is available."""
+    try:
+        import mujoco  # noqa: PLC0415
+    except ImportError:
+        return False
+    if type(mujoco).__module__ == "unittest.mock":
+        return False
+    model_cls = getattr(mujoco, "MjModel", None)
+    return callable(model_cls) and type(model_cls).__module__ != "unittest.mock"
+
+
 # Canonical 27 actuation channels from CROSS_ENGINE_GOLF_EQUIVALENCE_SPEC §3
 CANONICAL_COORDINATE_NAMES: tuple[str, ...] = (
     "TranslationInputX",
@@ -170,6 +183,7 @@ __all__ = [
     "SimOptions",
     "SimOut",
     "get_mujoco_canonical_joint_map",
+    "is_mujoco_available",
     "polynomial_torque_bounds",
     "simulate_with_coefficients",
     "synthesize_target_from_coefficients",

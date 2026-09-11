@@ -590,6 +590,9 @@ def biomech_mode(request: pytest.FixtureRequest) -> str:
 
 def pytest_configure(config: pytest.Config) -> None:
     """Dynamically adjust system path based on selected Tools mode."""
+    config.addinivalue_line(
+        "markers", "cross_engine: cross-engine physics parity tests"
+    )
     mode = config.getoption("--tools-mode")
     root_dir = Path(__file__).resolve().parent.parent
     local_path = str((root_dir / "src/shared/python").resolve())
