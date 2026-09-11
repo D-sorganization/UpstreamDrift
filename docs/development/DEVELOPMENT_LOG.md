@@ -63,7 +63,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #9933, #9943 and #9945 merged; final documentation closure references #9926
 - **Paths:** src/motion_capture/coaching; src/tools/capture_rig; src/tools/pose_studio
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (SELF completion record; #9945 merged2d41aba41; CI34440058289 succeeded;88 combined integration tests pass; preserved remote f58ee5b3/main300d96a1; reviewed contracts4824f370a; catalog20 runtime audit pass; Traceb6325dfe8 persistence17 pass; PR trackingf0fe99bd9; isolated push mypy14/Bandit/unit tests pass; map5a2e8d2c1; combined600 had only stale atlas hash, regenerated and56 focused tests pass; main d40956742; native785269090; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions, five-source Trace mypy and 17 topology/import tests; native30 tests and four-source mypy, visual plane/editor inspected)
+- **Last verified:** 2026-09-10 (SELF; #9945 merged; CI succeeded; 88 combined integration tests, Capture Rig regressions, and Trace persistence pass).
 - **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
 - **Evidence:** Comparison launch/save, PNG parity, snapshot video, cancellation and camera-evidence tests pass; Ruff/format, budgets and LoD pass; Driver comparison drawing UI and PNG inspected.
 - **Next step:** Merge the documentation closure record and verify epic #9926 closure; runtime delivery is complete.
@@ -130,8 +130,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** club_data/player_clubs.py; rig/capture_notes.py and equipment.py; Capture Rig bag/editor/library; model/session.py; matching tests, guide and generated maps.
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (working tree;652 broad regressions and69 focused/map/parity checks pass; visual QA and3020-file LoD pass)
-- **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence without unsupported club constraints. Dialog visual review passed with Segoe UI.
+- **Last verified:** 2026-09-09 (652 broad regressions and 69 focused checks pass; visual QA and LoD pass).
+- **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence.
 - **Next step:** Finish broad qualification and publish; connect wizard entry under #9906 before closing #9905.
 
 ### DL-#9915 · Verified Agent Context
@@ -143,9 +143,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/issue-9915-agent-context
 - **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `scripts/check_doc_size_budget.py`, `tests/ci`, `tests/scripts`
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10; final e83bd2e4 pins pass107 provider/seam, six context,31 atlas and12 navigation controls. The frontend-inclusive installed wheel passes launcher,31 calibration tests and pip check. Concurrent SPEC dedup4ded98ad6 is integrated; checker passes. Handoff records revisions and hashes.
+- **Last verified:** 2026-09-10 (final e83bd2e4 pins pass provider/seam, context, atlas and navigation controls; wheel passes launcher and calibration tests).
 - **Summary:** Twelve components and five reviewed integrations reuse the atlas and capture goals. Main276998030 is integrated; a required regression rejects divergent pip/source/Rust providers.
 - **Next step:** Qualify final published Tools pins and required CI on PR #9920.
+
+### DL-#9921 · Native Simscape Tour-Average Matching
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9921; implementation #9924, #9925, #9927
+- **Branch:** feat/9921-simscape-tour-matching
+- **PR:** #9948 (draft)
+- **Paths:** Simscape MATLAB motion_matching/shared, model initialization, shared Python prefix_fit, tests and simscape_tour_matching docs
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-10 (SELF; 115 Python tests, Ruff/mypy, R2025b native marker-oracle tests pass; continuous polynomial forward fits up to 1.2 s archived with exact cold marker replay, all-27 actuator audit, and zero exit).
+- **Summary:** Reproducible forward-dynamics matching with fixed geometry and continuous polynomial torques; native starting pose verified, full swing fit outstanding.
+- **Next step:** Continue from verified 1.2 s candidate toward full swing horizon; cold replay and all-27 audit.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 

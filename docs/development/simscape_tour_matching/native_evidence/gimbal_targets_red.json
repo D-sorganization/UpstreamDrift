@@ -1,0 +1,8 @@
+{
+  "source_revision": "d4e5d2b114dfdfc8bc460049c77aaa69020cdbb3",
+  "matlab": "26.1.0.3203278 (R2026a)",
+  "names": "test_gimbal_initial_targets/shippedPrimitiveUsesInstanceTargets",
+  "passed": false,
+  "failed": true,
+  "incomplete": false
+}

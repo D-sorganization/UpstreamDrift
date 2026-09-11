@@ -1,0 +1,13 @@
+{
+  "duration_s": 1.2,
+  "samples": 433,
+  "markers": 25,
+  "rms_mm": 311.61752787326367,
+  "p95_mm": 643.1844419297407,
+  "max_mm": 2149.5704536342,
+  "evaluations": 580,
+  "shared_0_to_800ms_rms_mm": 87.42701356219267,
+  "shared_0_to_1000ms_rms_mm": 192.20638693714335,
+  "shared_0_to_1100ms_rms_mm": 245.8500568466753,
+  "extension_1100_to_1200ms_rms_mm": 708.1097883186327
+}

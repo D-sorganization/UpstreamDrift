@@ -1,0 +1,281 @@
+{
+  "archive": "connected-marker-poses-03-bundle.zip",
+  "sha256": "c2919c1bd7cf14f465dd0380f087a8ee39624aaa827d85ec376ed7dbc08d87aa",
+  "native_exit_code": 1,
+  "qualification": "Partial validity-masked pose diagnostic; no global optimum or forward-dynamics claim.",
+  "failure_identifier": "fit_golf_pose_seed:constraints",
+  "failed_frame_index": 445,
+  "completed_samples": 37,
+  "requested_samples": 55,
+  "samples": [
+    {
+      "frame_index": 1,
+      "time_s": 0,
+      "rms_mm": 5.80632445497998e-14,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 13,
+      "time_s": 0.03333333333333333,
+      "rms_mm": 0.1261463418596947,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 25,
+      "time_s": 0.06666666666666667,
+      "rms_mm": 0.2926980266401871,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 37,
+      "time_s": 0.1,
+      "rms_mm": 0.523875059354125,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 49,
+      "time_s": 0.13333333333333333,
+      "rms_mm": 0.8400019699335156,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 61,
+      "time_s": 0.16666666666666666,
+      "rms_mm": 1.1930462217243873,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 73,
+      "time_s": 0.2,
+      "rms_mm": 1.6306256705436157,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 85,
+      "time_s": 0.23333333333333334,
+      "rms_mm": 2.1493732374393666,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 97,
+      "time_s": 0.26666666666666666,
+      "rms_mm": 2.7769222856895794,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 109,
+      "time_s": 0.3,
+      "rms_mm": 3.5561433565652227,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 121,
+      "time_s": 0.3333333333333333,
+      "rms_mm": 4.582916575120093,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 133,
+      "time_s": 0.36666666666666664,
+      "rms_mm": 5.771083088331646,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 145,
+      "time_s": 0.4,
+      "rms_mm": 7.277424808606292,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 157,
+      "time_s": 0.43333333333333335,
+      "rms_mm": 9.07620865458094,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 169,
+      "time_s": 0.4666666666666667,
+      "rms_mm": 11.085157427224726,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 181,
+      "time_s": 0.5,
+      "rms_mm": 13.254569127284332,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 193,
+      "time_s": 0.5333333333333333,
+      "rms_mm": 15.654418424563197,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 205,
+      "time_s": 0.5666666666666667,
+      "rms_mm": 18.068075333558415,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 217,
+      "time_s": 0.6,
+      "rms_mm": 20.576058453071216,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 229,
+      "time_s": 0.6333333333333333,
+      "rms_mm": 22.94759859774827,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 241,
+      "time_s": 0.6666666666666666,
+      "rms_mm": 25.279711740431818,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 253,
+      "time_s": 0.7,
+      "rms_mm": 27.49232176416883,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 265,
+      "time_s": 0.7333333333333333,
+      "rms_mm": 29.51736618521522,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 277,
+      "time_s": 0.7666666666666667,
+      "rms_mm": 31.453450932358155,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 289,
+      "time_s": 0.8,
+      "rms_mm": 33.30403167779303,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 301,
+      "time_s": 0.8333333333333334,
+      "rms_mm": 35.035866922267495,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 313,
+      "time_s": 0.8666666666666667,
+      "rms_mm": 36.48048860120302,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 325,
+      "time_s": 0.9,
+      "rms_mm": 37.87503871799582,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 337,
+      "time_s": 0.9333333333333333,
+      "rms_mm": 38.950882878667706,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 349,
+      "time_s": 0.9666666666666667,
+      "rms_mm": 39.9032516618291,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 361,
+      "time_s": 1,
+      "rms_mm": 40.78533611749931,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 373,
+      "time_s": 1.0333333333333334,
+      "rms_mm": 41.4900966895937,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 385,
+      "time_s": 1.0666666666666667,
+      "rms_mm": 41.92723449628509,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 397,
+      "time_s": 1.1,
+      "rms_mm": 41.51941149780951,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 409,
+      "time_s": 1.1333333333333333,
+      "rms_mm": 40.382379059609676,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 421,
+      "time_s": 1.1666666666666667,
+      "rms_mm": 38.91372159573903,
+      "valid_marker_count": 25
+    },
+    {
+      "frame_index": 433,
+      "time_s": 1.2,
+      "rms_mm": 35.64418199535255,
+      "valid_marker_count": 25
+    }
+  ],
+  "files": {
+    "attached_pose_probe.m": "c718ee295eb30e1a7de6b28a7d9043b7b108844643db1733774e31261af499ab",
+    "capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "exit-code.txt": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+    "fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "frame-00001.json": "721d14079198c44f3a62bf7e08d067286440fe0d422abe883b675205a47f55c7",
+    "frame-00013.json": "5ff8e55eb7bd68af522c8fbfeb97d7eb529650c0bd9caedde454fa5f6e01ee52",
+    "frame-00025.json": "da0011b64236c23199b49f63276512cc9b5efb8705320ac5a88682b91c6d9071",
+    "frame-00037.json": "1315cf8ca8a311965ed1e5b8c776a4b998cbcea24d062134d8e365c7d6e5c675",
+    "frame-00049.json": "54baadd1bc2b152c56c056494af88d4057844d717bbb78da56d92c2d08fd00c8",
+    "frame-00061.json": "6e851b63cb058fd7161b26aefa467357d344c1d6ddca391ebbc7cfc33fda76c7",
+    "frame-00073.json": "2817a797e7517af17ca4965c3632181cd61b8930ac81b82d2ace5b13856b1028",
+    "frame-00085.json": "9a47331a0ab2ce38ecc7d1992f1892516c064b25d4ce6e6cfb93e6ee6222191d",
+    "frame-00097.json": "110831542fd902334fee61e37746b9db603d9ba4841ef5c2051106b248c931c5",
+    "frame-00109.json": "1ee02a443438cae8c213e6826471215b85d24c7755d52546878165dd63ab6313",
+    "frame-00121.json": "1d88fa32bf58a695f167c2bbd13405be147fdfa845f88fdf131ec6dd770b8419",
+    "frame-00133.json": "cdf05741fc0f6fec649f02352f961d6f45171eae59532772c5aa1f2d3bc355ef",
+    "frame-00145.json": "f60a52520c8cd2e124a52f84eb6116cb56a69d4e81b5f82017b27a555a40c946",
+    "frame-00157.json": "4ced1eb6d08544796cf7f8025e3c58b1812ff639aa749aafaab90e15499aa492",
+    "frame-00169.json": "dd7430b6436fcc2efa9ca1042e7f65ee21b44b0d11d526031d1a289314e21a44",
+    "frame-00181.json": "8dcdcf5e8dc253e2354b84cd03079ffe6b30315d0519d68135ca2e9a6f5cc292",
+    "frame-00193.json": "19f54b28426735fbc92f095e506bda0317f21ff85933967e01bab68f2f14be90",
+    "frame-00205.json": "55208bf8f16dc5285814702c975ff82eb9ebaf92f6246d223ef6754683cb0533",
+    "frame-00217.json": "4677436ecd610f487b82741e02d79cd7df60279038c0750ca1d2202c8e52feb3",
+    "frame-00229.json": "6994282a46a4a26b69f4d2886832295cd19c68ba67abaaa3714c1342e0cbb06a",
+    "frame-00241.json": "8cc91f3af82904a8827f09629aeacd5bc77ec67c41279bba58d6e53cf0a2ec90",
+    "frame-00253.json": "e2c8b4c0cdb381b0954dc7cc2999412af5a3596a5acef4a23ca22fd385dfa2f9",
+    "frame-00265.json": "42fc8fefef6f95ad8eaf16069ba00d2d7a0ba49773001ed7c19ebf852a5d8342",
+    "frame-00277.json": "035f4c7d0d2b4d6cc3a6da0041e1b2b93566e9b922e255547727c27d59456f1f",
+    "frame-00289.json": "938f32d4af1fc84095c6d0dec4dc2dce3be1b93ad043d438b752f1cc36875e16",
+    "frame-00301.json": "062d8e554b2999e9230050572cf484c8386be3c4290ea889ca48f68e3fadb4a4",
+    "frame-00313.json": "6122c319d17cf5a5f3b0cac2d7d1bc73670bd5d2932dc440295f4557bf3d3ef6",
+    "frame-00325.json": "146a5186fd476f4dfe5cc1926bb8ca041b82838e683920e149c49036decc322b",
+    "frame-00337.json": "2362eda3db916b4a7a35ae731aadc1add8528b2ff35c7577bb80a1629eacbca2",
+    "frame-00349.json": "bf30ac3375f376eb069204c7a6c6c6dcbc99385c1f94a61b4b69b60487092f96",
+    "frame-00361.json": "99f3fca5aa70cbd5175bd57c3e6204fda3e1433d1326957e31daf0d1604fd18d",
+    "frame-00373.json": "a139a9a96d3e39d03e05e1fe7e28eb90a62b32ca39e35643c2db098cd2da96e7",
+    "frame-00385.json": "21c053926a8d8ba195e270d5dbd9932f7c8b6087eaa219bb631c2c78789ff391",
+    "frame-00397.json": "3c190fbc4cca1e656001f8254edfb1d39c4c0b332e616e5ff7fad3a690eb965d",
+    "frame-00409.json": "94ef8d566248109aad80bb0938cc6d6d73e5b0e2e51a445cbb0a6a3164d6db1a",
+    "frame-00421.json": "0adfde43fa80b867df5c408f21dfdbc38bb85483b45d817b98df4eba7936de05",
+    "frame-00433.json": "7ab8555f5b2769828c8bf3a5457e5e1a9b285824a44ae3932e1ef9378fbfef09",
+    "initial_state.json": "dea77a4d19c879b88671f5336735080b054deb6131dedb065b9810ec0ae708cc",
+    "launch.ps1": "070695cdc55d60d459f2ea11274738231a1ddc3d0ea73daac53fe386c5978118",
+    "probe.log": "4699fd8450595f661908fe44dd7a06d52c527e78176599ba2edc55648cbf77ae",
+    "select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff"
+  }
+}

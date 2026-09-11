@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-simscape-prefix-fit-inventory",
+      "owner": "UpstreamDrift issue #9921",
+      "resolution": "Inventory prefix_fit.py normalized/Bernstein polynomial conversion, weighted growing-prefix least squares, resample_logged_signal.m physical-clock interpolation, extract_golf_joint_kinematics.m direct-sensor unit conversion build_golf_kinematics.m native-frame snapshot, capture_fit_sim_options.m complete-horizon torque gating and repaired referenced-joint initialization pathways before a manual coverage claim. Native workspace, timestamp, joint mapping and initialization tests and a 20 ms live baseline are recorded; geometric calibration and qualified full-swing replay remain outstanding."
+    },
+    {
       "id": "UP-D1-inventory-required",
       "owner": "UpstreamDrift issue #9067",
       "resolution": "Inventory and classify every in-scope calculation and module before any coverage or release claim."

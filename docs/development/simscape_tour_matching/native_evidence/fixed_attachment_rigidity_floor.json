@@ -1,0 +1,31 @@
+{
+  "qualification": "independent-body rigid relaxation, conditional on fixed attachments; not forward dynamics",
+  "source_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+  "state_sha256": "dea77a4d19c879b88671f5336735080b054deb6131dedb065b9810ec0ae708cc",
+  "payload_sha256": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+  "diagnostic_sha256": "528b948e141bbee12e368fd36cbaa01fc73d92b05451bba26cebae97bc442a07",
+  "frames": 654,
+  "markers": 25,
+  "rms_mm": 17.3930498167109,
+  "body_rms_mm": {
+    "Clubhead": 2.2593978600561715,
+    "Hip": 3.8714808648368697,
+    "Hub": 34.423065763174236,
+    "LF": 0.0,
+    "LS": 8.890893521216864,
+    "LScap": 4.5033554418549215,
+    "RF": 0.0,
+    "RS": 6.483379356260044,
+    "RScap": 0.0
+  },
+  "prefix_rms_mm": {
+    "0.3": 0.4532541597872706,
+    "0.6": 4.065022072358301,
+    "1.0": 13.790908464777457
+  },
+  "limitations": [
+    "Offsets and body assignments are fixed; recalibration can change this bound.",
+    "Every body pose is independent per frame; no connectivity, dynamics or continuity constraints.",
+    "One-marker bodies have zero residual and no rotation identifiability."
+  ]
+}

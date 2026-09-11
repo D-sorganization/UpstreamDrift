@@ -1,0 +1,16 @@
+{
+  "source_revision": "2d3903bfd066df4ddf94dee845833fa82d024197",
+  "patch": "direct sensor contract against aggregate-only implementation",
+  "matlab": "26.1.0.3203278 (R2026a)",
+  "names": [
+    "test_extract_golf_joint_kinematics/convertsNativeDegreesAndPreservesJointOrder",
+    "test_extract_golf_joint_kinematics/translationsRemainMetres",
+    "test_extract_golf_joint_kinematics/missingSignalsStayMissing",
+    "test_extract_golf_joint_kinematics/usesScalarSensorRatherThanMiswiredAggregate",
+    "test_extract_golf_joint_kinematics/rejectsUnknownCoordinates"
+  ],
+  "passed": [false, false, false, false, true],
+  "failed": [true, true, true, true, false],
+  "incomplete": [false, false, false, false, false],
+  "duration_s": [2.2606734, 0.3113206, 0.1117365, 0.1432191, 0.1494505]
+}

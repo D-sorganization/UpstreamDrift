@@ -1,0 +1,19 @@
+{
+  "names": [
+    "test_resample_logged_signal/usesPhysicalTimeEvenForEqualRowCounts",
+    "test_resample_logged_signal/numericArraysRequireMatchingSolverClock",
+    "test_resample_logged_signal/neverExtrapolatesEarlyStoppedMotion",
+    "test_resample_logged_signal/singleSampleDoesNotInventConstantMotion",
+    "test_resample_logged_signal/supportsStructureWithTime",
+    "test_resample_logged_signal/rejectsAmbiguousClockAndWrongDimensions",
+    "test_resample_logged_signal/ownClockOverridesSolverClock",
+    "test_resample_logged_signal/supportsTimeLastVectorTimeseries"
+  ],
+  "passed": [false, false, false, false, false, false, false, false],
+  "failed": [true, true, true, true, true, true, true, true],
+  "incomplete": [true, true, true, true, true, false, true, true],
+  "duration_s": [
+    0.0594278, 0.000813, 0.0049171, 0.0046534, 0.0009788, 1.1182176, 0.0051873,
+    0.017977
+  ]
+}

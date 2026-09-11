@@ -1,0 +1,13 @@
+{
+  "red": {
+    "command": "python -m pytest tests/engines/simscape/test_tour_fit_state.py -q --no-cov",
+    "outcome": "collection failed: missing tour_fit_state module"
+  },
+  "green": {
+    "command": "python -m pytest tests/engines/simscape/test_tour_fit_state.py tests/engines/simscape/test_tour_checkpoints.py tests/motion_matching/test_prefix_fit.py -q --no-cov",
+    "passed": 34
+  },
+  "ruff": "scoped checks passed",
+  "mypy": "tour_fit_state.py passed",
+  "native_fit": "prefix_100ms_fit_r2025b.json"
+}

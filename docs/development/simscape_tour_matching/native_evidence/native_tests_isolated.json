@@ -1,0 +1,70 @@
+{
+  "source_revision": "d1c0ab39132b18e662be4c41d3e2f1956e426776",
+  "patch": "lazy discovery when joint order is explicit",
+  "matlab": "26.1.0.3203278 (R2026a)",
+  "names": [
+    "test_simulation_input_workspace/coefficientOverridesReachModelWorkspace",
+    "test_simulation_input_workspace/requestedRawEvidenceIsRetained",
+    "test_simulation_input_workspace/defaultOutputDoesNotRetainRawEvidence",
+    "test_simulation_input_workspace/initialAndGeometryOverridesReachModelWorkspace",
+    "test_simulation_input_workspace/rawEvidenceBypassesCache",
+    "test_resample_logged_signal/usesPhysicalTimeEvenForEqualRowCounts",
+    "test_resample_logged_signal/numericArraysRequireMatchingSolverClock",
+    "test_resample_logged_signal/neverExtrapolatesEarlyStoppedMotion",
+    "test_resample_logged_signal/singleSampleDoesNotInventConstantMotion",
+    "test_resample_logged_signal/supportsStructureWithTime",
+    "test_resample_logged_signal/rejectsAmbiguousClockAndWrongDimensions",
+    "test_resample_logged_signal/ownClockOverridesSolverClock",
+    "test_resample_logged_signal/supportsTimeLastVectorTimeseries"
+  ],
+  "passed": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "failed": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "incomplete": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "duration_s": [
+    7.0530985, 0.5650025, 0.44290709999999994, 0.28937340000000006, 0.6492017,
+    0.0445566, 0.1235868, 0.0202041, 0.0235543, 0.0070716, 0.0202615, 0.0084923,
+    0.0203257
+  ]
+}

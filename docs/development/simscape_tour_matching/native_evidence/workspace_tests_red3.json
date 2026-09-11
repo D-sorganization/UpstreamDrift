@@ -1,0 +1,11 @@
+{
+  "names": [
+    "test_simulation_input_workspace/coefficientOverridesReachModelWorkspace",
+    "test_simulation_input_workspace/requestedRawEvidenceIsRetained",
+    "test_simulation_input_workspace/defaultOutputDoesNotRetainRawEvidence"
+  ],
+  "passed": [false, false, true],
+  "failed": [true, true, false],
+  "incomplete": [false, true, false],
+  "duration_s": [7.5659755, 0.76734360000000013, 0.52398289999999992]
+}

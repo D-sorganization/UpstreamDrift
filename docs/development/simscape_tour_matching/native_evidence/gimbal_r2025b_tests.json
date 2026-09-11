@@ -1,0 +1,40 @@
+{
+  "source_revision": "d4e5d2b114dfdfc8bc460049c77aaa69020cdbb3",
+  "source_patch": "six target bindings saved natively in R2025b",
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "migration": {
+    "file": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-simscape-tour-runtime\\src\\engines\\Simscape_Multibody_Models\\3D_Golf_Model\\matlab\\src\\model\\Kinetically_Driven_Gimbal_Joint.slx",
+    "changed": true,
+    "parameters": [
+      "RxPositionTargetValue",
+      "RxVelocityTargetValue",
+      "RyPositionTargetValue",
+      "RyVelocityTargetValue",
+      "RzPositionTargetValue",
+      "RzVelocityTargetValue"
+    ],
+    "before": [
+      "LSStartPositionX",
+      "LSStartVelocityX",
+      "LSStartPositionY",
+      "LSStartVelocityY",
+      "LSStartPositionZ",
+      "LSStartVelocityZ"
+    ],
+    "after": [
+      "StartPositionX",
+      "StartVelocityX",
+      "StartPositionY",
+      "StartVelocityY",
+      "StartPositionZ",
+      "StartVelocityZ"
+    ]
+  },
+  "names": [
+    "test_gimbal_initial_targets/shippedPrimitiveUsesInstanceTargets",
+    "test_gimbal_initial_targets/migrationIsIdempotent"
+  ],
+  "passed": [true, true],
+  "failed": [false, false],
+  "incomplete": [false, false]
+}

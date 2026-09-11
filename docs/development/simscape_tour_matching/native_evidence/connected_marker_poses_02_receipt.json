@@ -1,0 +1,298 @@
+{
+  "qualification": "Partial local connected-kinematics experiment; stopped on unsatisfied final native constraints, not an accepted full trajectory.",
+  "archive": "connected-marker-poses-02-bundle.zip",
+  "sha256": "876be065dc3d32b05cffa6ccc4bc44d57031a0dcc1497b28ceeeac89e4a7d962",
+  "native_exit_code": 1,
+  "completed_samples": 38,
+  "requested_samples": 55,
+  "failed_frame_index": 457,
+  "failed_time_s": 1.2666666666666666,
+  "failure_identifier": "fit_golf_pose_seed:constraints",
+  "samples": [
+    {
+      "frame_index": 1,
+      "time_s": 0,
+      "rms_mm": 5.80632445497998e-14,
+      "exitflag": 1
+    },
+    {
+      "frame_index": 13,
+      "time_s": 0.03333333333333333,
+      "rms_mm": 0.1261463418596947,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 25,
+      "time_s": 0.06666666666666667,
+      "rms_mm": 0.2926980266401871,
+      "exitflag": 1
+    },
+    {
+      "frame_index": 37,
+      "time_s": 0.1,
+      "rms_mm": 0.523875059354125,
+      "exitflag": 1
+    },
+    {
+      "frame_index": 49,
+      "time_s": 0.13333333333333333,
+      "rms_mm": 0.8400019699335156,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 61,
+      "time_s": 0.16666666666666666,
+      "rms_mm": 1.1930462217243873,
+      "exitflag": 1
+    },
+    {
+      "frame_index": 73,
+      "time_s": 0.2,
+      "rms_mm": 1.6306256705436157,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 85,
+      "time_s": 0.23333333333333334,
+      "rms_mm": 2.1493732374393666,
+      "exitflag": 1
+    },
+    {
+      "frame_index": 97,
+      "time_s": 0.26666666666666666,
+      "rms_mm": 2.7769222856895794,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 109,
+      "time_s": 0.3,
+      "rms_mm": 3.5561433565652227,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 121,
+      "time_s": 0.3333333333333333,
+      "rms_mm": 4.582916575120093,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 133,
+      "time_s": 0.36666666666666664,
+      "rms_mm": 5.771083088331646,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 145,
+      "time_s": 0.4,
+      "rms_mm": 7.277424808606292,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 157,
+      "time_s": 0.43333333333333335,
+      "rms_mm": 9.07620865458094,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 169,
+      "time_s": 0.4666666666666667,
+      "rms_mm": 11.085157427224726,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 181,
+      "time_s": 0.5,
+      "rms_mm": 13.254569127284332,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 193,
+      "time_s": 0.5333333333333333,
+      "rms_mm": 15.654418424563197,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 205,
+      "time_s": 0.5666666666666667,
+      "rms_mm": 18.068075333558415,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 217,
+      "time_s": 0.6,
+      "rms_mm": 20.576058453071216,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 229,
+      "time_s": 0.6333333333333333,
+      "rms_mm": 22.94759859774827,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 241,
+      "time_s": 0.6666666666666666,
+      "rms_mm": 25.279711740431818,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 253,
+      "time_s": 0.7,
+      "rms_mm": 27.49232176416883,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 265,
+      "time_s": 0.7333333333333333,
+      "rms_mm": 29.51736618521522,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 277,
+      "time_s": 0.7666666666666667,
+      "rms_mm": 31.453450932358155,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 289,
+      "time_s": 0.8,
+      "rms_mm": 33.30403167779303,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 301,
+      "time_s": 0.8333333333333334,
+      "rms_mm": 35.035866922267495,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 313,
+      "time_s": 0.8666666666666667,
+      "rms_mm": 36.48048860120302,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 325,
+      "time_s": 0.9,
+      "rms_mm": 37.87503871799582,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 337,
+      "time_s": 0.9333333333333333,
+      "rms_mm": 38.950882878667706,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 349,
+      "time_s": 0.9666666666666667,
+      "rms_mm": 39.9032516618291,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 361,
+      "time_s": 1,
+      "rms_mm": 40.78533611749931,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 373,
+      "time_s": 1.0333333333333334,
+      "rms_mm": 41.4900966895937,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 385,
+      "time_s": 1.0666666666666667,
+      "rms_mm": 41.92723449628509,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 397,
+      "time_s": 1.1,
+      "rms_mm": 41.51941149780951,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 409,
+      "time_s": 1.1333333333333333,
+      "rms_mm": 40.382379059609676,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 421,
+      "time_s": 1.1666666666666667,
+      "rms_mm": 38.91372159573903,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 433,
+      "time_s": 1.2,
+      "rms_mm": 35.64418199535255,
+      "exitflag": 3
+    },
+    {
+      "frame_index": 445,
+      "time_s": 1.2333333333333334,
+      "rms_mm": 255.9424904506053,
+      "exitflag": 3
+    }
+  ],
+  "files": {
+    "attached_pose_probe.m": "70b07e0bb026842e0c4633bf3203011a8f64d2a9ee4797aa39bb4445ddf63669",
+    "capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "exit-code.txt": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+    "fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "frame-00001.json": "5e381cfd7c3b53d3e7c3d0bb37521d512dd898b6e06c5e4088868780fa02eafc",
+    "frame-00013.json": "b12daa1edbe9e55fcffbb02a27122a3f4b62d7d0c1f9bd229d9a8491b219e352",
+    "frame-00025.json": "74f18517d6fcae6a5a1a3ec7792f10af2b924ba541e95353df03096191f1436e",
+    "frame-00037.json": "3d453c236fd1972349fe1aa4893c49b726b55527c2bcb478b9bd49ef016746c7",
+    "frame-00049.json": "db70f19d383e25f06ccdc7f91a31107a9509aeae90eabd55aa3ffd8ad9d9cc4c",
+    "frame-00061.json": "a26c10f0307ca096e63ac1d2c75950eb78012b7b2e825b9e2246ffa406bee543",
+    "frame-00073.json": "101c7bc8c9f5ad696b9198ba074cadc3e7e0266393362f2c94e522daff9083a6",
+    "frame-00085.json": "f277fc34580af18485cff4ce44acd6b8f5e6a81e641fbb726b99dccd7b7c4c87",
+    "frame-00097.json": "0f5060bada7641df9d25e4eb77576da36a2d5dff79ca8d659a1d27c499bd4c2b",
+    "frame-00109.json": "4207fa6bc731349502c44379f165ead45f7bb27f10601dc4512e0babd201570b",
+    "frame-00121.json": "c103cfebec5f60b9f1d0a67a71110cae3bdf38def959134ce95f015d3706fce5",
+    "frame-00133.json": "9390145e24d0cc51539659562e4973f2af834a942c1ac4ad009974173f5e588b",
+    "frame-00145.json": "d8f5cc5c2455d71372ca2b03c27c4710d161c72346c9411fb5a081890da2e66c",
+    "frame-00157.json": "053a7d4fcfb53f5acc1f0e8dd98cae5944acae522b486f6782a1ca70565ce181",
+    "frame-00169.json": "5b92024da9380eee24c1139306f10e110d17a0927d84541e1d4df81893c0d120",
+    "frame-00181.json": "76cf65b7d0d6beba3e516b88723032884ec13dc1e23f36aac573f6d311fbce80",
+    "frame-00193.json": "26a1cb31c3afbd7d695bfa129aac52805d4071101a8bafaaed94b136cbf453e3",
+    "frame-00205.json": "ff4fe09f0ba03a122d4b6107150f74adc619c9bfccae9eef863438cdcc25e7d8",
+    "frame-00217.json": "4148f4c0b0ace10be95644179ce48af646fb35d0f0cff2ef321ce486aaa6c439",
+    "frame-00229.json": "d9caec185f820370758db340a54bad162bdc31203003701c63917301dba50f2e",
+    "frame-00241.json": "53b063a79e1aab55640619f84d8c050dc84e1acaf052ee9139eb5109695826ef",
+    "frame-00253.json": "d4732a26a80ee526a116ebe93c00acdf89f16cd572a965ff8b7d9c301d0f8ac7",
+    "frame-00265.json": "f15a052ed74ff5ea0213bf8f9d9facc4777fbccc98ad72de0c085db42167a095",
+    "frame-00277.json": "d95ef17bfe612f1aacc92d40bc75cec3496a2c808869595ec579dd4da406a62e",
+    "frame-00289.json": "f9be1fa25b17c2f5a361b5d32c65e3447af1e29e192fe6b2b853a19061b29e3e",
+    "frame-00301.json": "ad84689c6bae524c85f7a5457d8a494d38b66f707c4e4f85ac749f53b748e0b9",
+    "frame-00313.json": "76406b6f9af2a825cc174f9ec1456dbe41df3367820ebb77515ff680783748e2",
+    "frame-00325.json": "66cec110e3f20f2a3b624bde8f41c7d5d1d053a01d9fb0655588d367e7efcdbd",
+    "frame-00337.json": "3934b1dfd68518fa6b28009b49d1d8cca70bf2eef7968c6372dc90b043976c49",
+    "frame-00349.json": "5729d26bee291bd7884e87dee457a8ea3eeba83a40d156eae38be265619052b3",
+    "frame-00361.json": "039922b0e9c98ce508ebba4879fa61967df579968a9b9913828437eb469b2da8",
+    "frame-00373.json": "e9b92ae6d05f7614488e87117478d22ccc05df86b747d41ba37b293a7c3d71c8",
+    "frame-00385.json": "ce8e09190ab7b357d427590bee6e695e1ddf9f8f523ad6fdf0146d08a51cc2af",
+    "frame-00397.json": "9738d9149308dc80d799a31e11b39b0ae1f5053ed299278232f279c38cb5fd63",
+    "frame-00409.json": "58e9ff01f5a4ab29f5870366272547968fcec47585ac015dc7b5355f981d7c49",
+    "frame-00421.json": "6017ad4d7b2d4a5345611fc7f43a13739271e1baa5414d4b599e3bdcfd33b29f",
+    "frame-00433.json": "9d8995fc066ecc4e9949f0a82ee3b2eaa4a09a53b8d70fd3d33d02197932267c",
+    "frame-00445.json": "adf5187493849b1d759af52025f9e0a1f1972edb4ae8ccbad82a2abba3dfb9dd",
+    "initial_state.json": "dea77a4d19c879b88671f5336735080b054deb6131dedb065b9810ec0ae708cc",
+    "launch.ps1": "bd219f4a6334c59a3acc6531373139ad624bebb36d33b8b96436bbe31d2cfa0b",
+    "probe.log": "80e7471f25cfbc3e135bbaf634b3b06bb382c83ed1f5dd12c90c3ad64715457c"
+  },
+  "data_validity_correction": {
+    "defect": "Original attached_pose_probe ignored capture.valid and fitted invalid zero placeholders. Affected pose errors cannot support geometry or feasibility claims. Archives preserved; corrected masked rerun required.",
+    "affected_samples": [
+      {
+        "frame_index": 445,
+        "invalid_labels": ["Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3"]
+      }
+    ],
+    "forward_fitter_affected": false
+  }
+}

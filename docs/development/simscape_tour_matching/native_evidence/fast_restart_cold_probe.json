@@ -1,0 +1,46 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "source_revision": "23176ad571cbd56028b43ba35123cd8185f890c3",
+  "runs": [
+    {
+      "requested_LSX_Nm": 0,
+      "elapsed_s": 46.847816,
+      "status": "success",
+      "fast_restart": "on",
+      "measured_LSX_Nm": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    },
+    {
+      "requested_LSX_Nm": 2,
+      "elapsed_s": 2.0842908,
+      "status": "success",
+      "fast_restart": "on",
+      "measured_LSX_Nm": [
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+      ]
+    },
+    {
+      "requested_LSX_Nm": 0,
+      "elapsed_s": 2.028699,
+      "status": "success",
+      "fast_restart": "on",
+      "measured_LSX_Nm": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    },
+    {
+      "requested_LSX_Nm": 0,
+      "elapsed_s": 16.2048284,
+      "status": "success",
+      "fast_restart": "off",
+      "measured_LSX_Nm": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    }
+  ],
+  "repeat_max_q_error": 0,
+  "cold_max_q_error": 0,
+  "status": "success"
+}

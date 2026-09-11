@@ -1,0 +1,23 @@
+{
+  "archive": "calibrated-initial-state-01-bundle.zip",
+  "sha256": "b4b626e4123f4dc0836b79e26e90b28e59697a0e86ebded4e0634fcf4a11a59a",
+  "native_red_exit_code": 1,
+  "native_green_exit_code": 0,
+  "runtime_base": "59e944b44",
+  "runtime_patches": "Instrumented model at 0715f95f3, pose helper/selector at be4c4b5af, initial_velocity_seed.m in this archive.",
+  "qualification": "Cold 50 ms native initialization only; target residual is 12.207266 mm RMS, not full fit acceptance.",
+  "files": {
+    "attachment_candidate.json": "b72201847a5b6de4d3a0eacf5def0b844fbdd96400b869796a4ca89ef21c3cc7",
+    "calibrated-initial-green.ps1": "f927a228af2aa6918a6b470349f122a28821e4d806a988a6aa212896745f5853",
+    "calibrated-initial-red.ps1": "24e7cb82098997f921b315a59266fdc6782fe266c1efb6ce6e082b0303fd05e9",
+    "driver_marker_payload.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "green-exit.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "green.log": "0e42fa0e65fc19953bb7a99acc708327a648c3b3d78d4f5da886e5e61c3d4e9f",
+    "initial_pose.json": "bf3c03a4eec1c40e6887ab61d23693ce4b6d2a1868d3e3819e3363dbef81a0db",
+    "initial_velocity_seed.json": "013e0f712cbea07930ae630e2effaf2a9abea99adeffaf85b6a78d80ec5f2288",
+    "initial_velocity_seed.m": "5f89b65a81e4a90f1831ce4c632308fe9c44c63a0eec7817a05d8b9d69912a60",
+    "initial_velocity_seed.mat": "8666d9da5cfd774e3650d59c502fdc6e3afeb0b2854044477911aefdb6b799c7",
+    "red-exit.txt": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+    "red.log": "9b7fe842d9193be093e5bf592c05ec74f52276ba0e4e5e6eb50e7df4a9f2f13f"
+  }
+}
