@@ -85,6 +85,17 @@ CONFIG_DIR = _get_config_dir()
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
 GRID_COLUMNS = 4  # Changed to 3x4 grid (12 tiles total)
 
+# Async startup is normally well under a second; 30s is a generous ceiling
+# that comfortably covers cold-disk Docker probes and slow first-run
+# registry imports while still surfacing a true hang (e.g. crashed worker
+# thread) before the user concludes the app is broken.  See issue #5490.
+# Shared by the launcher's own skeleton timeout and the splash watchdog in
+# ``startup_session`` so both bounds cannot drift apart (issue #8360).
+STARTUP_TIMEOUT_SEC: int = 30
+assert STARTUP_TIMEOUT_SEC > 0, (
+    "STARTUP_TIMEOUT_SEC must be > 0 to schedule a recovery timer"
+)
+
 # Tile sizing constants for the resizable launcher tile system.
 # Reference (1.0x) values match the original hard-coded layout.
 TILE_SCALE_MIN = 0.25

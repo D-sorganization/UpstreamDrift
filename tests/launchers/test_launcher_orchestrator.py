@@ -95,3 +95,25 @@ def test_get_model():
     orchestrator.registry.get_model.return_value = "registry_model"
     assert orchestrator.get_model("unknown_model") == "registry_model"
     orchestrator.registry.get_model.assert_called_once_with("unknown_model")
+
+
+@pytest.mark.unit
+@patch("src.launchers.launcher_orchestrator._lazy_load_model_registry")
+@patch("src.launchers.launcher_orchestrator._lazy_load_engine_manager")
+def test_supplied_results_are_authoritative_even_when_degraded(
+    mock_engine_loader, mock_registry_loader
+):
+    """Issue #8360: a worker that degraded to ``None`` must not trigger a
+    second, GUI-thread load of the same phase."""
+    results = StartupResults()
+    results.registry = None
+    results.engine_manager = None
+
+    orchestrator = LauncherOrchestrator()
+    orchestrator.initialize_from_results(results)
+
+    mock_registry_loader.assert_not_called()
+    mock_engine_loader.assert_not_called()
+    assert orchestrator.registry is None
+    assert orchestrator.engine_manager is None
+    assert orchestrator.available_models == {}
