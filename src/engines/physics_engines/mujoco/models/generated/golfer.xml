@@ -1,0 +1,227 @@
+<?xml version="1.0" ?>
+<mujoco model="golfer">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="false"/>
+  <option timestep="0.002" gravity="0 0 -9.80665" integrator="RK4"/>
+  <visual>
+    <global offwidth="1024" offheight="1024"/>
+    <map znear="0.01" zfar="50"/>
+    <headlight diffuse="0.8 0.8 0.8" ambient="0.3 0.3 0.3"/>
+  </visual>
+  <asset>
+    <material name="ground_mat" rgba="0.4 0.6 0.3 1.0"/>
+  </asset>
+  <worldbody>
+    <geom name="floor" type="plane" size="10 10 0.1" material="ground_mat"/>
+    <light directional="true" pos="0 0 3" dir="0 0 -1"/>
+    <camera name="side" pos="-5 -2 1.5" euler="0.15 0 0.35" mode="fixed"/>
+    <camera name="front" pos="0 -5 1.5" euler="0.15 0 1.57" mode="fixed"/>
+    <body name="pelvis" pos="0 0 0.9" euler="0 0 0">
+      <freejoint name="pelvis_free"/>
+      <inertial pos="0 0 0" mass="11.7" diaginertia="0.1337 0.1337 0.1337"/>
+      <geom name="pelvis_geom" type="capsule" size="0.15 0.2" rgba="0.8 0.6 0.4 1"/>
+      <body name="lumbar1" pos="0 0 0.12">
+        <joint name="lumbar1_dof0" type="hinge" axis="1 0 0" range="-0.7 0.52" damping="2"/>
+        <joint name="lumbar1_dof1" type="hinge" axis="0 1 0" range="-0.35 0.35" damping="2"/>
+        <inertial pos="0 0 0" mass="2" diaginertia="0.015 0.015 0.002"/>
+        <geom name="lumbar1_geom" type="capsule" size="0.08 0.12" rgba="0.75 0.55 0.35 1"/>
+        <body name="lumbar2" pos="0 0 0.12">
+          <joint name="lumbar2_dof0" type="hinge" axis="1 0 0" range="-0.7 0.52" damping="2"/>
+          <joint name="lumbar2_dof1" type="hinge" axis="0 1 0" range="-0.35 0.35" damping="2"/>
+          <inertial pos="0 0 0" mass="2" diaginertia="0.015 0.015 0.002"/>
+          <geom name="lumbar2_geom" type="capsule" size="0.08 0.12" rgba="0.74 0.54 0.34 1"/>
+          <body name="lumbar3" pos="0 0 0.12">
+            <joint name="lumbar3_dof0" type="hinge" axis="1 0 0" range="-0.7 0.52" damping="2"/>
+            <joint name="lumbar3_dof1" type="hinge" axis="0 1 0" range="-0.35 0.35" damping="2"/>
+            <inertial pos="0 0 0" mass="2" diaginertia="0.015 0.015 0.002"/>
+            <geom name="lumbar3_geom" type="capsule" size="0.08 0.12" rgba="0.73 0.53 0.33 1"/>
+            <body name="thorax1" pos="0 0 0.12">
+              <joint name="thorax1" type="hinge" axis="0 0 1" range="-1 1" damping="1.5"/>
+              <inertial pos="0 0 0" mass="6" diaginertia="0.0733 0.0667 0.0333"/>
+              <geom name="thorax1_geom" type="capsule" size="0.08 0.1" rgba="0.7 0.5 0.3 1"/>
+              <body name="thorax2" pos="0 0 0.1">
+                <joint name="thorax2" type="hinge" axis="0 0 1" range="-1 1" damping="1.5"/>
+                <inertial pos="0 0 0" mass="6" diaginertia="0.0733 0.0667 0.0333"/>
+                <geom name="thorax2_geom" type="capsule" size="0.08 0.1" rgba="0.68 0.48 0.28 1"/>
+                <body name="thorax3" pos="0 0 0.1">
+                  <joint name="thorax3" type="hinge" axis="0 0 1" range="-1 1" damping="1.5"/>
+                  <inertial pos="0 0 0" mass="6" diaginertia="0.0734 0.0666 0.0334"/>
+                  <geom name="thorax3_geom" type="capsule" size="0.08 0.1" rgba="0.66 0.46 0.26 1"/>
+                  <body name="head" pos="0 0 0.15">
+                    <inertial pos="0 0 0" mass="5" diaginertia="0.03 0.03 0.03"/>
+                    <geom name="head_geom" type="sphere" size="0.12" rgba="0.75 0.6 0.5 1"/>
+                  </body>
+                  <body name="scapula_right" pos="0 -0.18 0.28">
+                    <joint name="scapula_right_dof0" type="hinge" axis="0 0 1" range="-0.35 0.7" damping="1"/>
+                    <joint name="scapula_right_dof1" type="hinge" axis="0 1 0" range="-0.52 0.52" damping="1"/>
+                    <inertial pos="0 0 0" mass="1.5" diaginertia="0.005 0.005 0.002"/>
+                    <geom name="scapula_right_geom" type="box" size="0.12 0.08 0.05" rgba="0.62 0.42 0.22 1"/>
+                    <body name="upper_arm_right" pos="0 -0.04 0.1">
+                      <joint name="upper_arm_right_dof0" type="hinge" axis="0 1 0" range="-1.57 3.1416" damping="1.5"/>
+                      <joint name="upper_arm_right_dof1" type="hinge" axis="1 0 0" range="-0.52 2.09" damping="1.5"/>
+                      <joint name="upper_arm_right_dof2" type="hinge" axis="0 0 1" range="-1.57 1.57" damping="1.5"/>
+                      <inertial pos="0 0 0" mass="2.5" diaginertia="0.018 0.018 0.004"/>
+                      <geom name="upper_arm_right_geom" type="capsule" size="0.05 0.14" rgba="0.58 0.38 0.18 1"/>
+                      <body name="forearm_right" pos="0 0 -0.26">
+                        <joint name="forearm_right_dof0" type="hinge" axis="0 1 0" range="0 2.62" damping="3"/>
+                        <joint name="forearm_right_dof1" type="hinge" axis="1 0 0" range="-1.57 1.57" damping="3"/>
+                        <inertial pos="0 0 0" mass="1.5" diaginertia="0.008 0.008 0.0015"/>
+                        <geom name="forearm_right_geom" type="capsule" size="0.045 0.13" rgba="0.54 0.34 0.14 1"/>
+                        <body name="hand_right" pos="0 0 -0.19">
+                          <joint name="hand_right_dof0" type="hinge" axis="0 1 0" range="-1.22 1.22" damping="1.5"/>
+                          <joint name="hand_right_dof1" type="hinge" axis="0 0 1" range="-0.52 0.7" damping="1.5"/>
+                          <inertial pos="0 0 0" mass="0.5" diaginertia="0.001 0.001 0.0005"/>
+                          <geom name="hand_right_geom" type="capsule" size="0.04 0.095" rgba="0.5 0.3 0.12 1"/>
+                          <site name="hand_right_grip" pos="0 0 -0.05" size="0.01"/>
+                          <body name="fingers_right" pos="0 0 -0.05">
+                            <joint name="fingers_right" type="hinge" axis="0 1 0" range="0 1.57" damping="0.5"/>
+                            <inertial pos="0 0 0" mass="0.2" diaginertia="0.0003 0.0003 0.0001"/>
+                            <geom name="fingers_right_geom" type="box" size="0.05 0.08 0.02" rgba="0.46 0.26 0.1 1"/>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                  <body name="scapula_left" pos="0 0.18 0.28">
+                    <joint name="scapula_left_dof0" type="hinge" axis="0 0 1" range="-0.35 0.7" damping="1"/>
+                    <joint name="scapula_left_dof1" type="hinge" axis="0 1 0" range="-0.52 0.52" damping="1"/>
+                    <inertial pos="0 0 0" mass="1.5" diaginertia="0.005 0.005 0.002"/>
+                    <geom name="scapula_left_geom" type="box" size="0.12 0.08 0.05" rgba="0.62 0.42 0.22 1"/>
+                    <body name="upper_arm_left" pos="0 0.04 0.1">
+                      <joint name="upper_arm_left_dof0" type="hinge" axis="0 1 0" range="-1.57 3.1416" damping="1.5"/>
+                      <joint name="upper_arm_left_dof1" type="hinge" axis="1 0 0" range="-0.52 2.09" damping="1.5"/>
+                      <joint name="upper_arm_left_dof2" type="hinge" axis="0 0 1" range="-1.57 1.57" damping="1.5"/>
+                      <inertial pos="0 0 0" mass="2.5" diaginertia="0.018 0.018 0.004"/>
+                      <geom name="upper_arm_left_geom" type="capsule" size="0.05 0.14" rgba="0.58 0.38 0.18 1"/>
+                      <body name="forearm_left" pos="0 0 -0.26">
+                        <joint name="forearm_left_dof0" type="hinge" axis="0 1 0" range="0 2.62" damping="3"/>
+                        <joint name="forearm_left_dof1" type="hinge" axis="1 0 0" range="-1.57 1.57" damping="3"/>
+                        <inertial pos="0 0 0" mass="1.5" diaginertia="0.008 0.008 0.0015"/>
+                        <geom name="forearm_left_geom" type="capsule" size="0.045 0.13" rgba="0.54 0.34 0.14 1"/>
+                        <body name="hand_left" pos="0 0 -0.19">
+                          <joint name="hand_left_dof0" type="hinge" axis="0 1 0" range="-1.22 1.22" damping="1.5"/>
+                          <joint name="hand_left_dof1" type="hinge" axis="0 0 1" range="-0.52 0.7" damping="1.5"/>
+                          <inertial pos="0 0 0" mass="0.5" diaginertia="0.001 0.001 0.0005"/>
+                          <geom name="hand_left_geom" type="capsule" size="0.04 0.095" rgba="0.5 0.3 0.12 1"/>
+                          <site name="hand_left_grip" pos="0 0 -0.05" size="0.01"/>
+                          <body name="fingers_left" pos="0 0 -0.05">
+                            <joint name="fingers_left" type="hinge" axis="0 1 0" range="0 1.57" damping="0.5"/>
+                            <inertial pos="0 0 0" mass="0.2" diaginertia="0.0003 0.0003 0.0001"/>
+                            <geom name="fingers_left_geom" type="box" size="0.05 0.08 0.02" rgba="0.46 0.26 0.1 1"/>
+                          </body>
+                          <body name="club_shaft" pos="0 0 -0.12">
+                            <inertial pos="0 0 0" mass="0.12" diaginertia="0.02 0.02 0.0001"/>
+                            <geom name="club_shaft_geom" type="capsule" size="0.015 0.5" rgba="0.2 0.2 0.2 1"/>
+                            <site name="mid_hands" pos="0 0 0.05" size="0.01"/>
+                            <body name="club_head" pos="0 0 -0.5">
+                              <inertial pos="0 0 0" mass="0.23" diaginertia="0.025 0.025 0.0001"/>
+                              <geom name="club_head_geom" type="box" size="0.12 0.08 0.04" rgba="0.15 0.15 0.15 1"/>
+                              <site name="clubhead" pos="0 0 0" size="0.01"/>
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="right_thigh" pos="0 -0.09 -0.05">
+        <joint name="right_thigh_dof0" type="hinge" axis="0 1 0" range="-1.57 1.57" damping="2.5"/>
+        <joint name="right_thigh_dof1" type="hinge" axis="1 0 0" range="-0.87 0.52" damping="2.5"/>
+        <joint name="right_thigh_dof2" type="hinge" axis="0 0 1" range="-0.7 0.7" damping="2.5"/>
+        <inertial pos="0 0 0" mass="7.05" diaginertia="0.1058 0.1058 0.0203"/>
+        <geom name="right_thigh_geom" type="capsule" size="0.06 0.215" rgba="0.42 0.32 0.18 1"/>
+        <body name="right_shank" pos="0 0 -0.43">
+          <joint name="right_shank" type="hinge" axis="0 1 0" range="0 2.62" damping="5"/>
+          <inertial pos="0 0 0" mass="3.53" diaginertia="0.0401 0.0401 0.0042"/>
+          <geom name="right_shank_geom" type="capsule" size="0.05 0.215" rgba="0.38 0.28 0.16 1"/>
+          <body name="right_foot" pos="0 0 -0.43">
+            <joint name="right_foot_dof0" type="hinge" axis="1 0 0" range="-0.7 0.52" damping="2"/>
+            <joint name="right_foot_dof1" type="hinge" axis="0 1 0" range="-0.35 0.35" damping="2"/>
+            <inertial pos="0 0 0" mass="1.37" diaginertia="0.0034 0.009 0.009"/>
+            <geom name="right_foot_geom" type="box" size="0.26 0.1 0.07" rgba="0.34 0.24 0.14 1"/>
+            <body name="right_toes" pos="0.12 0 -0.02">
+              <joint name="right_toes" type="hinge" axis="0 1 0" range="-0.35 0.52" damping="0.5"/>
+              <inertial pos="0 0 0" mass="0.3" diaginertia="0.0005 0.0005 0.0002"/>
+              <geom name="right_toes_geom" type="box" size="0.1 0.08 0.03" rgba="0.32 0.22 0.12 1"/>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="left_thigh" pos="0 0.09 -0.05">
+        <joint name="left_thigh_dof0" type="hinge" axis="0 1 0" range="-1.57 1.57" damping="2.5"/>
+        <joint name="left_thigh_dof1" type="hinge" axis="1 0 0" range="-0.87 0.52" damping="2.5"/>
+        <joint name="left_thigh_dof2" type="hinge" axis="0 0 1" range="-0.7 0.7" damping="2.5"/>
+        <inertial pos="0 0 0" mass="7.05" diaginertia="0.1058 0.1058 0.0203"/>
+        <geom name="left_thigh_geom" type="capsule" size="0.06 0.215" rgba="0.42 0.32 0.18 1"/>
+        <body name="left_shank" pos="0 0 -0.43">
+          <joint name="left_shank" type="hinge" axis="0 1 0" range="0 2.62" damping="5"/>
+          <inertial pos="0 0 0" mass="3.53" diaginertia="0.0401 0.0401 0.0042"/>
+          <geom name="left_shank_geom" type="capsule" size="0.05 0.215" rgba="0.38 0.28 0.16 1"/>
+          <body name="left_foot" pos="0 0 -0.43">
+            <joint name="left_foot_dof0" type="hinge" axis="1 0 0" range="-0.7 0.52" damping="2"/>
+            <joint name="left_foot_dof1" type="hinge" axis="0 1 0" range="-0.35 0.35" damping="2"/>
+            <inertial pos="0 0 0" mass="1.37" diaginertia="0.0034 0.009 0.009"/>
+            <geom name="left_foot_geom" type="box" size="0.26 0.1 0.07" rgba="0.34 0.24 0.14 1"/>
+            <body name="left_toes" pos="0.12 0 -0.02">
+              <joint name="left_toes" type="hinge" axis="0 1 0" range="-0.35 0.52" damping="0.5"/>
+              <inertial pos="0 0 0" mass="0.3" diaginertia="0.0005 0.0005 0.0002"/>
+              <geom name="left_toes_geom" type="box" size="0.1 0.08 0.03" rgba="0.32 0.22 0.12 1"/>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <weld name="right_hand_grip_weld" body1="hand_right" body2="club_shaft" relpose="0 0 0 1 0 0 0" active="true"/>
+  </equality>
+  <actuator>
+    <motor name="act_lumbar1_dof0" joint="lumbar1_dof0" gear="1"/>
+    <motor name="act_lumbar1_dof1" joint="lumbar1_dof1" gear="1"/>
+    <motor name="act_lumbar2_dof0" joint="lumbar2_dof0" gear="1"/>
+    <motor name="act_lumbar2_dof1" joint="lumbar2_dof1" gear="1"/>
+    <motor name="act_lumbar3_dof0" joint="lumbar3_dof0" gear="1"/>
+    <motor name="act_lumbar3_dof1" joint="lumbar3_dof1" gear="1"/>
+    <motor name="act_thorax1" joint="thorax1" gear="1"/>
+    <motor name="act_thorax2" joint="thorax2" gear="1"/>
+    <motor name="act_thorax3" joint="thorax3" gear="1"/>
+    <motor name="act_scapula_right_dof0" joint="scapula_right_dof0" gear="1"/>
+    <motor name="act_scapula_right_dof1" joint="scapula_right_dof1" gear="1"/>
+    <motor name="act_upper_arm_right_dof0" joint="upper_arm_right_dof0" gear="1"/>
+    <motor name="act_upper_arm_right_dof1" joint="upper_arm_right_dof1" gear="1"/>
+    <motor name="act_upper_arm_right_dof2" joint="upper_arm_right_dof2" gear="1"/>
+    <motor name="act_forearm_right_dof0" joint="forearm_right_dof0" gear="1"/>
+    <motor name="act_forearm_right_dof1" joint="forearm_right_dof1" gear="1"/>
+    <motor name="act_hand_right_dof0" joint="hand_right_dof0" gear="1"/>
+    <motor name="act_hand_right_dof1" joint="hand_right_dof1" gear="1"/>
+    <motor name="act_fingers_right" joint="fingers_right" gear="1"/>
+    <motor name="act_scapula_left_dof0" joint="scapula_left_dof0" gear="1"/>
+    <motor name="act_scapula_left_dof1" joint="scapula_left_dof1" gear="1"/>
+    <motor name="act_upper_arm_left_dof0" joint="upper_arm_left_dof0" gear="1"/>
+    <motor name="act_upper_arm_left_dof1" joint="upper_arm_left_dof1" gear="1"/>
+    <motor name="act_upper_arm_left_dof2" joint="upper_arm_left_dof2" gear="1"/>
+    <motor name="act_forearm_left_dof0" joint="forearm_left_dof0" gear="1"/>
+    <motor name="act_forearm_left_dof1" joint="forearm_left_dof1" gear="1"/>
+    <motor name="act_hand_left_dof0" joint="hand_left_dof0" gear="1"/>
+    <motor name="act_hand_left_dof1" joint="hand_left_dof1" gear="1"/>
+    <motor name="act_fingers_left" joint="fingers_left" gear="1"/>
+    <motor name="act_right_thigh_dof0" joint="right_thigh_dof0" gear="1"/>
+    <motor name="act_right_thigh_dof1" joint="right_thigh_dof1" gear="1"/>
+    <motor name="act_right_thigh_dof2" joint="right_thigh_dof2" gear="1"/>
+    <motor name="act_right_shank" joint="right_shank" gear="1"/>
+    <motor name="act_right_foot_dof0" joint="right_foot_dof0" gear="1"/>
+    <motor name="act_right_foot_dof1" joint="right_foot_dof1" gear="1"/>
+    <motor name="act_right_toes" joint="right_toes" gear="1"/>
+    <motor name="act_left_thigh_dof0" joint="left_thigh_dof0" gear="1"/>
+    <motor name="act_left_thigh_dof1" joint="left_thigh_dof1" gear="1"/>
+    <motor name="act_left_thigh_dof2" joint="left_thigh_dof2" gear="1"/>
+    <motor name="act_left_shank" joint="left_shank" gear="1"/>
+    <motor name="act_left_foot_dof0" joint="left_foot_dof0" gear="1"/>
+    <motor name="act_left_foot_dof1" joint="left_foot_dof1" gear="1"/>
+    <motor name="act_left_toes" joint="left_toes" gear="1"/>
+  </actuator>
+</mujoco>
