@@ -12,6 +12,7 @@ so it always reflects what is *actually* bound at runtime.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 from collections.abc import Callable
 
@@ -37,6 +38,49 @@ from src.launchers.about_dialog import (
 
 if TYPE_CHECKING:
     from PyQt6.QtWidgets import QWidget
+
+
+def open_model_doc(path: str | Path, parent: QWidget | None = None) -> None:
+    """Open a calculation sheet or model document in the in-app document reader."""
+    from src.shared.python.ui.qt.widgets.document_reader import show_document
+
+    doc_path = Path(path)
+    if not doc_path.is_absolute():
+        repo_root = Path(__file__).resolve().parents[2]
+        doc_path = repo_root / doc_path
+    show_document(doc_path, parent)
+
+
+def attach_tool_help_menu(
+    window: QWidget,
+    doc_label: str,
+    doc_path: str | Path,
+    *,
+    show_shortcuts: Callable[[], None] | None = None,
+) -> QMenu | None:
+    """Attach the standardized Help menu with calculation doc affordance to a tool window."""
+    menubar = getattr(window, "menuBar", None)
+    if callable(menubar):
+        mb = menubar()
+        if mb is not None:
+            return build_help_menu(
+                mb,
+                window,
+                show_shortcuts=show_shortcuts,
+                doc_target=(doc_label, doc_path),
+            )
+    return None
+
+
+def _open_document_reader_file_dialog(parent: QWidget) -> None:
+    from PyQt6.QtWidgets import QFileDialog
+    from src.shared.python.ui.qt.widgets.document_reader import show_document
+
+    path, _ = QFileDialog.getOpenFileName(
+        parent, "Open Document", "", "Documents (*.md *.pdf *.tex);;All Files (*.*)"
+    )
+    if path:
+        show_document(path)
 
 
 def _add_action(
@@ -78,6 +122,7 @@ def build_help_menu(
     parent: QWidget,
     *,
     show_shortcuts: Callable[[], None] | None = None,
+    doc_target: tuple[str, str | Path] | None = None,
 ) -> QMenu:
     """Build (or extend) the top-level Help menu on ``menubar``.
 
@@ -92,11 +137,26 @@ def build_help_menu(
         show_shortcuts: Override for the keyboard-shortcuts handler. When
             ``None`` the built-in :func:`show_keyboard_shortcuts_modal`
             is used.
+        doc_target: Optional tuple of (label, doc_path) linking directly to
+            a supporting calculation sheet or model document.
 
     Returns:
         The newly created Help :class:`QMenu`.
     """
     menu = menubar.addMenu("&Help")
+    assert menu is not None, "Failed to create Help menu"
+
+    if doc_target is not None:
+        doc_label, doc_path = doc_target
+        _add_action(
+            menu,
+            parent,
+            f"&{doc_label.lstrip('&')}",
+            tooltip=f"Open {doc_label} documentation in the document reader",
+            status_tip=f"Opens {doc_label} documentation",
+            handler=lambda: open_model_doc(doc_path, parent),
+        )
+        menu.addSeparator()
 
     _add_action(
         menu,
@@ -116,24 +176,13 @@ def build_help_menu(
         handler=open_motion_match_loaders_doc,
     )
     menu.addSeparator()
-
-    def open_document_reader_file_dialog() -> None:
-        from PyQt6.QtWidgets import QFileDialog
-        from src.shared.python.ui.qt.widgets.document_reader import show_document
-
-        path, _ = QFileDialog.getOpenFileName(
-            parent, "Open Document", "", "Documents (*.md *.pdf *.tex);;All Files (*.*)"
-        )
-        if path:
-            show_document(path)
-
     _add_action(
         menu,
         parent,
         "&Open Document Reader...",
         tooltip="Open a local PDF, Markdown, or LaTeX document",
         status_tip="Opens local document for troubleshooting",
-        handler=open_document_reader_file_dialog,
+        handler=lambda: _open_document_reader_file_dialog(parent),
     )
     menu.addSeparator()
     _add_action(
@@ -196,13 +245,16 @@ class KeyboardShortcutsDialog(QDialog):
         rows = collect_shortcut_rows(parent)
         table = QTableWidget(len(rows), 2)
         table.setHorizontalHeaderLabels(["Shortcut", "Action"])
-        table.verticalHeader().setVisible(False)
+        v_header = table.verticalHeader()
+        assert v_header is not None
+        v_header.setVisible(False)
         table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         for r, (key, label) in enumerate(rows):
             table.setItem(r, 0, QTableWidgetItem(key))
             table.setItem(r, 1, QTableWidgetItem(label))
         header = table.horizontalHeader()
+        assert header is not None
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         layout.addWidget(table)

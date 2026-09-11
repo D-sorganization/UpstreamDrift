@@ -37,7 +37,8 @@ from src.shared.python.golf_viz import (
     grid_surface_mesh,
     roll_mode_colors,
 )
-from src.shared.python.ui import HoverCopyTextBrowser
+from src.launchers.help_menu import build_help_menu
+from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.tools.putting_green_gui._scene_builder import (
     PuttConfig,
     PuttScene,
@@ -363,6 +364,16 @@ class PuttingGreenWindow(QMainWindow):
         status = QStatusBar()
         self.setStatusBar(status)
         status.showMessage("Configure putting parameters and run simulation")
+        menubar = self.menuBar()
+        assert menubar is not None
+        build_help_menu(
+            menubar,
+            self,
+            doc_target=(
+                "Putting Kinematics & Kinetics Review",
+                "docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md",
+            ),
+        )
 
     def closeEvent(self, event: Any) -> None:
         self._widget.cleanup()
