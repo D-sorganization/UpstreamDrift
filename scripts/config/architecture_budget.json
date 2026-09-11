@@ -431,6 +431,15 @@
       "issue": 9968,
       "reason": "Issue #9968: _record_rollout coordinates Drake MultibodyPlant state logging, forward kinematics transforms, and energy accounting buffers.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/urdf_exporter.py",
+      "symbol": "_add_revolute_joint",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: XML joint builder requires explicit URDF kinematic and dynamic attributes.",
+      "expires_on": "2026-10-31"
     }
   ]
 }
