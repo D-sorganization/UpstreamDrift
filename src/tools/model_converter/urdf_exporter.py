@@ -13,10 +13,16 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 
 from defusedxml import minidom
-from tools.model_converter.schema_validator import CanonicalModel, Segment
+from tools.model_converter.schema_validator import (
+    CanonicalModel,
+    JointDof,
+    JointDof as JointDofSpec,
+    RootBody,
+    Segment,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -104,35 +110,187 @@ def _add_visual(
     color.set("rgba", _format_floats(rgba))
 
 
+def _add_joint_element(
+    robot: ET.Element,
+    *,
+    name: str,
+    joint_type: str,
+    parent: str,
+    child: str,
+    origin_xyz: tuple[float, float, float] | str,
+    origin_rpy: tuple[float, float, float] | str,
+) -> ET.Element:
+    """Create a base URDF joint element with parent, child, and origin configured.
+
+    Preconditions:
+        - robot is a valid ElementTree Element
+        - name, joint_type, parent, and child are non-empty strings
+    Postconditions:
+        - Joint element appended to robot with parent, child, and origin tags
+    """
+    joint = ET.SubElement(robot, "joint")
+    joint.set("name", name)
+    joint.set("type", joint_type)
+
+    p_elem = ET.SubElement(joint, "parent")
+    p_elem.set("link", parent)
+
+    c_elem = ET.SubElement(joint, "child")
+    c_elem.set("link", child)
+
+    orig = ET.SubElement(joint, "origin")
+    orig.set(
+        "xyz",
+        origin_xyz if isinstance(origin_xyz, str) else _format_floats(origin_xyz),
+    )
+    orig.set(
+        "rpy",
+        origin_rpy if isinstance(origin_rpy, str) else _format_floats(origin_rpy),
+    )
+    return joint
+
+
+def _add_revolute_joint(
+    robot: ET.Element,
+    *,
+    name: str,
+    parent: str,
+    child: str,
+    origin_xyz: tuple[float, float, float] | str,
+    origin_rpy: tuple[float, float, float] | str,
+    dof: JointDofSpec,
+    damping: float,
+    effort: float = 1000.0,
+    velocity: float = 10.0,
+) -> ET.Element:
+    """Add a revolute joint to the URDF robot element.
+
+    Preconditions:
+        - robot is a valid ElementTree Element
+        - name, parent, and child are non-empty strings
+        - dof is a valid JointDofSpec instance
+        - damping >= 0.0
+    Postconditions:
+        - Revolute joint element appended to robot with origin, axis, limit, and dynamics
+    """
+    joint = _add_joint_element(
+        robot,
+        name=name,
+        joint_type="revolute",
+        parent=parent,
+        child=child,
+        origin_xyz=origin_xyz,
+        origin_rpy=origin_rpy,
+    )
+
+    ax = ET.SubElement(joint, "axis")
+    ax.set("xyz", _format_floats(dof.axis))
+
+    lim = ET.SubElement(joint, "limit")
+    lim.set("lower", f"{dof.limits[0]:g}")
+    lim.set("upper", f"{dof.limits[1]:g}")
+    lim.set(
+        "effort",
+        f"{effort:.1f}" if effort == int(effort) else f"{effort:g}",
+    )
+    lim.set(
+        "velocity",
+        f"{velocity:.1f}" if velocity == int(velocity) else f"{velocity:g}",
+    )
+
+    dyn = ET.SubElement(joint, "dynamics")
+    dyn.set("damping", f"{damping:g}")
+
+    return joint
+
+
+def _add_dummy_link(robot: ET.Element, name: str) -> ET.Element:
+    """Add an intermediate dummy link with minimal mass/inertia to URDF robot.
+
+    Preconditions:
+        - robot is a valid ElementTree Element
+        - name is a non-empty string
+    Postconditions:
+        - Dummy link element appended to robot with minimal mass and inertia
+    """
+    link = ET.SubElement(robot, "link")
+    link.set("name", name)
+    _add_inertial(link, 0.001, 0.0001, 0.0001, 0.0001)
+    return link
+
+
+def _add_body_link(robot: ET.Element, body: RootBody | Segment) -> ET.Element:
+    """Add a link with inertial and visual elements to the URDF robot.
+
+    Preconditions:
+        - robot is a valid ElementTree Element
+        - body has name, mass, inertia, and geometry specifications
+    Postconditions:
+        - Link element appended to robot with inertial and visual sub-elements
+    """
+    link = ET.SubElement(robot, "link")
+    link.set("name", body.name)
+    _add_inertial(
+        link,
+        body.mass,
+        body.inertia.ixx,
+        body.inertia.iyy,
+        body.inertia.izz,
+        body.inertia.ixy,
+        body.inertia.ixz,
+        body.inertia.iyz,
+    )
+    _add_visual(
+        link,
+        body.geometry.geom_type,
+        body.geometry.size,
+        body.geometry.visual_rgba,
+        f"mat_{body.name}",
+    )
+    return link
+
+
+def _add_fixed_joint(
+    robot: ET.Element,
+    *,
+    name: str,
+    parent: str,
+    child: str,
+    origin_xyz: tuple[float, float, float] | str,
+    origin_rpy: tuple[float, float, float] | str,
+) -> ET.Element:
+    """Add a fixed joint to the URDF robot element.
+
+    Preconditions:
+        - robot is a valid ElementTree Element
+        - name, parent, and child are non-empty strings
+    Postconditions:
+        - Fixed joint element appended to robot with origin
+    """
+    return _add_joint_element(
+        robot,
+        name=name,
+        joint_type="fixed",
+        parent=parent,
+        child=child,
+        origin_xyz=origin_xyz,
+        origin_rpy=origin_rpy,
+    )
+
+
 def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
-    """Generate URDF XML string from canonical model and optionally save to disk."""
+    """Generate URDF XML string from canonical model and optionally save to disk.
+
+    Preconditions:
+        - model is a valid CanonicalModel instance
+    Postconditions:
+        - Returns valid URDF XML string conforming to schema and physics contracts
+    """
     robot = ET.Element("robot")
     robot.set("name", "golfer")
 
     # Pelvis root link
-    pelvis_link = ET.SubElement(robot, "link")
-    root = model.root
-    root_inertia = root.inertia
-    root_geom = root.geometry
-
-    pelvis_link.set("name", root.name)
-    _add_inertial(
-        pelvis_link,
-        root.mass,
-        root_inertia.ixx,
-        root_inertia.iyy,
-        root_inertia.izz,
-        root_inertia.ixy,
-        root_inertia.ixz,
-        root_inertia.iyz,
-    )
-    _add_visual(
-        pelvis_link,
-        root_geom.geom_type,
-        root_geom.size,
-        root_geom.visual_rgba,
-        f"mat_{root.name}",
-    )
+    _add_body_link(robot, model.root)
 
     # Process segments in order
     club_segments = {"club_shaft", "club_head"}
@@ -147,84 +305,40 @@ def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
     mid_hands_link = ET.SubElement(robot, "link")
     mid_hands_link.set("name", "mid_hands")
 
-    mid_joint = ET.SubElement(robot, "joint")
-    mid_joint.set("name", "thorax3_to_mid_hands")
-    mid_joint.set("type", "fixed")
-    p_elem = ET.SubElement(mid_joint, "parent")
-    p_elem.set("link", "thorax3")
-    c_elem = ET.SubElement(mid_joint, "child")
-    c_elem.set("link", "mid_hands")
-    orig_elem = ET.SubElement(mid_joint, "origin")
-    orig_elem.set("xyz", "0.0 0.0 -0.17")
-    orig_elem.set("rpy", "0.0 0.0 0.0")
+    _add_fixed_joint(
+        robot,
+        name="thorax3_to_mid_hands",
+        parent="thorax3",
+        child="mid_hands",
+        origin_xyz="0.0 0.0 -0.17",
+        origin_rpy="0.0 0.0 0.0",
+    )
 
     # club_shaft link + joint welded to mid_hands
     shaft_seg = model.get_segment("club_shaft")
     if shaft_seg:
-        shaft_link = ET.SubElement(robot, "link")
-        shaft_link.set("name", shaft_seg.name)
-        _add_inertial(
-            shaft_link,
-            shaft_seg.mass,
-            shaft_seg.inertia.ixx,
-            shaft_seg.inertia.iyy,
-            shaft_seg.inertia.izz,
-            shaft_seg.inertia.ixy,
-            shaft_seg.inertia.ixz,
-            shaft_seg.inertia.iyz,
+        _add_body_link(robot, shaft_seg)
+        _add_fixed_joint(
+            robot,
+            name="mid_hands_to_club_shaft",
+            parent="mid_hands",
+            child=shaft_seg.name,
+            origin_xyz="0.0 0.0 -0.05",
+            origin_rpy="0.0 0.0 0.0",
         )
-        _add_visual(
-            shaft_link,
-            shaft_seg.geometry.geom_type,
-            shaft_seg.geometry.size,
-            shaft_seg.geometry.visual_rgba,
-            f"mat_{shaft_seg.name}",
-        )
-
-        shaft_joint = ET.SubElement(robot, "joint")
-        shaft_joint.set("name", "mid_hands_to_club_shaft")
-        shaft_joint.set("type", "fixed")
-        p_elem = ET.SubElement(shaft_joint, "parent")
-        p_elem.set("link", "mid_hands")
-        c_elem = ET.SubElement(shaft_joint, "child")
-        c_elem.set("link", shaft_seg.name)
-        orig_elem = ET.SubElement(shaft_joint, "origin")
-        orig_elem.set("xyz", "0.0 0.0 -0.05")
-        orig_elem.set("rpy", "0.0 0.0 0.0")
 
     # club_head link + joint welded to club_shaft
     head_seg = model.get_segment("club_head")
     if head_seg:
-        head_link = ET.SubElement(robot, "link")
-        head_link.set("name", head_seg.name)
-        _add_inertial(
-            head_link,
-            head_seg.mass,
-            head_seg.inertia.ixx,
-            head_seg.inertia.iyy,
-            head_seg.inertia.izz,
-            head_seg.inertia.ixy,
-            head_seg.inertia.ixz,
-            head_seg.inertia.iyz,
+        _add_body_link(robot, head_seg)
+        _add_fixed_joint(
+            robot,
+            name="club_shaft_to_club_head",
+            parent="club_shaft",
+            child=head_seg.name,
+            origin_xyz=head_seg.origin.xyz,
+            origin_rpy=head_seg.origin.rpy,
         )
-        _add_visual(
-            head_link,
-            head_seg.geometry.geom_type,
-            head_seg.geometry.size,
-            head_seg.geometry.visual_rgba,
-            f"mat_{head_seg.name}",
-        )
-
-        head_joint = ET.SubElement(robot, "joint")
-        head_joint.set("name", "club_shaft_to_club_head")
-        head_joint.set("type", "fixed")
-        p_elem = ET.SubElement(head_joint, "parent")
-        p_elem.set("link", "club_shaft")
-        c_elem = ET.SubElement(head_joint, "child")
-        c_elem.set("link", head_seg.name)
-        orig_elem = ET.SubElement(head_joint, "origin")
-        orig_elem.set("xyz", _format_floats(head_seg.origin.xyz))
-        orig_elem.set("rpy", _format_floats(head_seg.origin.rpy))
 
     # Convert to pretty XML string
     raw_xml = ET.tostring(robot, encoding="utf-8")
@@ -247,252 +361,95 @@ def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
 
 
 def _export_segment(robot: ET.Element, seg: Segment) -> None:
-    """Export a standard segment and its joint(s) to URDF."""
+    """Export a standard segment and its joint(s) to URDF.
+
+    Preconditions:
+        - robot is a valid ElementTree Element
+        - seg is a valid Segment specification
+    Postconditions:
+        - Joint(s), intermediate links (if multi-DOF), and segment link appended to robot
+    """
     jt = seg.joint.joint_type
 
     if jt == "revolute":
-        joint = ET.SubElement(robot, "joint")
-        joint.set("name", f"{seg.parent}_to_{seg.name}")
-        joint.set("type", "revolute")
-        p_elem = ET.SubElement(joint, "parent")
-        p_elem.set("link", seg.parent)
-        c_elem = ET.SubElement(joint, "child")
-        c_elem.set("link", seg.name)
-        orig = ET.SubElement(joint, "origin")
-        orig.set("xyz", _format_floats(seg.origin.xyz))
-        orig.set("rpy", _format_floats(seg.origin.rpy))
-        ax = ET.SubElement(joint, "axis")
-        dof = seg.joint.dofs[0]
-        ax.set("xyz", _format_floats(dof.axis))
-        lim = ET.SubElement(joint, "limit")
-        lim.set("lower", f"{dof.limits[0]:g}")
-        lim.set("upper", f"{dof.limits[1]:g}")
-        lim.set("effort", "1000.0")
-        lim.set("velocity", "10.0")
-        dyn = ET.SubElement(joint, "dynamics")
-        dyn.set("damping", f"{seg.joint.damping:g}")
-
-        link = ET.SubElement(robot, "link")
-        link.set("name", seg.name)
-        _add_inertial(
-            link,
-            seg.mass,
-            seg.inertia.ixx,
-            seg.inertia.iyy,
-            seg.inertia.izz,
-            seg.inertia.ixy,
-            seg.inertia.ixz,
-            seg.inertia.iyz,
+        _add_revolute_joint(
+            robot,
+            name=f"{seg.parent}_to_{seg.name}",
+            parent=seg.parent,
+            child=seg.name,
+            origin_xyz=seg.origin.xyz,
+            origin_rpy=seg.origin.rpy,
+            dof=seg.joint.dofs[0],
+            damping=seg.joint.damping,
         )
-        _add_visual(
-            link,
-            seg.geometry.geom_type,
-            seg.geometry.size,
-            seg.geometry.visual_rgba,
-            f"mat_{seg.name}",
-        )
-
     elif jt == "universal":
         # Decompose into 2 revolute joints with 1 intermediate dummy link
         inter_name = f"{seg.name}_intermediate"
-
-        # Joint 1: parent -> intermediate
-        j1 = ET.SubElement(robot, "joint")
-        j1.set("name", f"{seg.parent}_to_{inter_name}")
-        j1.set("type", "revolute")
-        p1 = ET.SubElement(j1, "parent")
-        p1.set("link", seg.parent)
-        c1 = ET.SubElement(j1, "child")
-        c1.set("link", inter_name)
-        orig1 = ET.SubElement(j1, "origin")
-        orig1.set("xyz", _format_floats(seg.origin.xyz))
-        orig1.set("rpy", _format_floats(seg.origin.rpy))
-        ax1 = ET.SubElement(j1, "axis")
-        dof1 = seg.joint.dofs[0]
-        ax1.set("xyz", _format_floats(dof1.axis))
-        lim1 = ET.SubElement(j1, "limit")
-        lim1.set("lower", f"{dof1.limits[0]:g}")
-        lim1.set("upper", f"{dof1.limits[1]:g}")
-        lim1.set("effort", "1000.0")
-        lim1.set("velocity", "10.0")
-        dyn1 = ET.SubElement(j1, "dynamics")
-        dyn1.set("damping", f"{seg.joint.damping:g}")
-
-        # Intermediate link (massless / small mass)
-        inter_link = ET.SubElement(robot, "link")
-        inter_link.set("name", inter_name)
-        _add_inertial(inter_link, 0.001, 0.0001, 0.0001, 0.0001)
-
-        # Joint 2: intermediate -> segment
-        j2 = ET.SubElement(robot, "joint")
-        j2.set("name", f"{inter_name}_to_{seg.name}")
-        j2.set("type", "revolute")
-        p2 = ET.SubElement(j2, "parent")
-        p2.set("link", inter_name)
-        c2 = ET.SubElement(j2, "child")
-        c2.set("link", seg.name)
-        orig2 = ET.SubElement(j2, "origin")
-        orig2.set("xyz", "0.0 0.0 0.0")
-        orig2.set("rpy", "0.0 0.0 0.0")
-        ax2 = ET.SubElement(j2, "axis")
-        dof2 = seg.joint.dofs[1]
-        ax2.set("xyz", _format_floats(dof2.axis))
-        lim2 = ET.SubElement(j2, "limit")
-        lim2.set("lower", f"{dof2.limits[0]:g}")
-        lim2.set("upper", f"{dof2.limits[1]:g}")
-        lim2.set("effort", "1000.0")
-        lim2.set("velocity", "10.0")
-        dyn2 = ET.SubElement(j2, "dynamics")
-        dyn2.set("damping", f"{seg.joint.damping:g}")
-
-        # Segment link
-        link = ET.SubElement(robot, "link")
-        link.set("name", seg.name)
-        _add_inertial(
-            link,
-            seg.mass,
-            seg.inertia.ixx,
-            seg.inertia.iyy,
-            seg.inertia.izz,
-            seg.inertia.ixy,
-            seg.inertia.ixz,
-            seg.inertia.iyz,
+        _add_revolute_joint(
+            robot,
+            name=f"{seg.parent}_to_{inter_name}",
+            parent=seg.parent,
+            child=inter_name,
+            origin_xyz=seg.origin.xyz,
+            origin_rpy=seg.origin.rpy,
+            dof=seg.joint.dofs[0],
+            damping=seg.joint.damping,
         )
-        _add_visual(
-            link,
-            seg.geometry.geom_type,
-            seg.geometry.size,
-            seg.geometry.visual_rgba,
-            f"mat_{seg.name}",
+        _add_dummy_link(robot, inter_name)
+        _add_revolute_joint(
+            robot,
+            name=f"{inter_name}_to_{seg.name}",
+            parent=inter_name,
+            child=seg.name,
+            origin_xyz="0.0 0.0 0.0",
+            origin_rpy="0.0 0.0 0.0",
+            dof=seg.joint.dofs[1],
+            damping=seg.joint.damping,
         )
-
     elif jt == "gimbal":
         # Decompose into 3 revolute joints with 2 intermediate dummy links
         gz_name = f"{seg.name}_gimbal_z"
         gy_name = f"{seg.name}_gimbal_y"
-
-        # Joint 1: parent -> gimbal_z
-        j1 = ET.SubElement(robot, "joint")
-        j1.set("name", f"{seg.parent}_to_{gz_name}")
-        j1.set("type", "revolute")
-        p1 = ET.SubElement(j1, "parent")
-        p1.set("link", seg.parent)
-        c1 = ET.SubElement(j1, "child")
-        c1.set("link", gz_name)
-        orig1 = ET.SubElement(j1, "origin")
-        orig1.set("xyz", _format_floats(seg.origin.xyz))
-        orig1.set("rpy", _format_floats(seg.origin.rpy))
-        ax1 = ET.SubElement(j1, "axis")
-        dof1 = seg.joint.dofs[0]
-        ax1.set("xyz", _format_floats(dof1.axis))
-        lim1 = ET.SubElement(j1, "limit")
-        lim1.set("lower", f"{dof1.limits[0]:g}")
-        lim1.set("upper", f"{dof1.limits[1]:g}")
-        lim1.set("effort", "1000.0")
-        lim1.set("velocity", "10.0")
-        dyn1 = ET.SubElement(j1, "dynamics")
-        dyn1.set("damping", f"{seg.joint.damping:g}")
-
-        gz_link = ET.SubElement(robot, "link")
-        gz_link.set("name", gz_name)
-        _add_inertial(gz_link, 0.001, 0.0001, 0.0001, 0.0001)
-
-        # Joint 2: gimbal_z -> gimbal_y
-        j2 = ET.SubElement(robot, "joint")
-        j2.set("name", f"{gz_name}_to_{gy_name}")
-        j2.set("type", "revolute")
-        p2 = ET.SubElement(j2, "parent")
-        p2.set("link", gz_name)
-        c2 = ET.SubElement(j2, "child")
-        c2.set("link", gy_name)
-        orig2 = ET.SubElement(j2, "origin")
-        orig2.set("xyz", "0.0 0.0 0.0")
-        orig2.set("rpy", "0.0 0.0 0.0")
-        ax2 = ET.SubElement(j2, "axis")
-        dof2 = seg.joint.dofs[1]
-        ax2.set("xyz", _format_floats(dof2.axis))
-        lim2 = ET.SubElement(j2, "limit")
-        lim2.set("lower", f"{dof2.limits[0]:g}")
-        lim2.set("upper", f"{dof2.limits[1]:g}")
-        lim2.set("effort", "1000.0")
-        lim2.set("velocity", "10.0")
-        dyn2 = ET.SubElement(j2, "dynamics")
-        dyn2.set("damping", f"{seg.joint.damping:g}")
-
-        gy_link = ET.SubElement(robot, "link")
-        gy_link.set("name", gy_name)
-        _add_inertial(gy_link, 0.001, 0.0001, 0.0001, 0.0001)
-
-        # Joint 3: gimbal_y -> segment
-        j3 = ET.SubElement(robot, "joint")
-        j3.set("name", f"{gy_name}_to_{seg.name}")
-        j3.set("type", "revolute")
-        p3 = ET.SubElement(j3, "parent")
-        p3.set("link", gy_name)
-        c3 = ET.SubElement(j3, "child")
-        c3.set("link", seg.name)
-        orig3 = ET.SubElement(j3, "origin")
-        orig3.set("xyz", "0.0 0.0 0.0")
-        orig3.set("rpy", "0.0 0.0 0.0")
-        ax3 = ET.SubElement(j3, "axis")
-        dof3 = seg.joint.dofs[2]
-        ax3.set("xyz", _format_floats(dof3.axis))
-        lim3 = ET.SubElement(j3, "limit")
-        lim3.set("lower", f"{dof3.limits[0]:g}")
-        lim3.set("upper", f"{dof3.limits[1]:g}")
-        lim3.set("effort", "1000.0")
-        lim3.set("velocity", "10.0")
-        dyn3 = ET.SubElement(j3, "dynamics")
-        dyn3.set("damping", f"{seg.joint.damping:g}")
-
-        link = ET.SubElement(robot, "link")
-        link.set("name", seg.name)
-        _add_inertial(
-            link,
-            seg.mass,
-            seg.inertia.ixx,
-            seg.inertia.iyy,
-            seg.inertia.izz,
-            seg.inertia.ixy,
-            seg.inertia.ixz,
-            seg.inertia.iyz,
+        _add_revolute_joint(
+            robot,
+            name=f"{seg.parent}_to_{gz_name}",
+            parent=seg.parent,
+            child=gz_name,
+            origin_xyz=seg.origin.xyz,
+            origin_rpy=seg.origin.rpy,
+            dof=seg.joint.dofs[0],
+            damping=seg.joint.damping,
         )
-        _add_visual(
-            link,
-            seg.geometry.geom_type,
-            seg.geometry.size,
-            seg.geometry.visual_rgba,
-            f"mat_{seg.name}",
+        _add_dummy_link(robot, gz_name)
+        _add_revolute_joint(
+            robot,
+            name=f"{gz_name}_to_{gy_name}",
+            parent=gz_name,
+            child=gy_name,
+            origin_xyz="0.0 0.0 0.0",
+            origin_rpy="0.0 0.0 0.0",
+            dof=seg.joint.dofs[1],
+            damping=seg.joint.damping,
         )
-
+        _add_dummy_link(robot, gy_name)
+        _add_revolute_joint(
+            robot,
+            name=f"{gy_name}_to_{seg.name}",
+            parent=gy_name,
+            child=seg.name,
+            origin_xyz="0.0 0.0 0.0",
+            origin_rpy="0.0 0.0 0.0",
+            dof=seg.joint.dofs[2],
+            damping=seg.joint.damping,
+        )
     elif jt == "fixed":
-        joint = ET.SubElement(robot, "joint")
-        joint.set("name", f"{seg.parent}_to_{seg.name}")
-        joint.set("type", "fixed")
-        p_elem = ET.SubElement(joint, "parent")
-        p_elem.set("link", seg.parent)
-        c_elem = ET.SubElement(joint, "child")
-        c_elem.set("link", seg.name)
-        orig = ET.SubElement(joint, "origin")
-        orig.set("xyz", _format_floats(seg.origin.xyz))
-        orig.set("rpy", _format_floats(seg.origin.rpy))
+        _add_fixed_joint(
+            robot,
+            name=f"{seg.parent}_to_{seg.name}",
+            parent=seg.parent,
+            child=seg.name,
+            origin_xyz=seg.origin.xyz,
+            origin_rpy=seg.origin.rpy,
+        )
 
-        link = ET.SubElement(robot, "link")
-        link.set("name", seg.name)
-        _add_inertial(
-            link,
-            seg.mass,
-            seg.inertia.ixx,
-            seg.inertia.iyy,
-            seg.inertia.izz,
-            seg.inertia.ixy,
-            seg.inertia.ixz,
-            seg.inertia.iyz,
-        )
-        _add_visual(
-            link,
-            seg.geometry.geom_type,
-            seg.geometry.size,
-            seg.geometry.visual_rgba,
-            f"mat_{seg.name}",
-        )
+    _add_body_link(robot, seg)
