@@ -47,14 +47,16 @@ def verify_native_initial_state(
         raise ValueError(
             "native initial state or marker projection differs from its declaration"
         )
-    distances = np.linalg.norm(prediction - target, axis=1)
+    diff = prediction - target
+    # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
+    sq_distances = np.einsum("ij,ij->i", diff, diff)
     return {
         "initial_state_verified": True,
         "initial_q_max_error": q_error,
         "initial_qd_max_error": qd_error,
         "initial_projection_max_error_m": projection_error,
-        "initial_target_rms_m": float(np.sqrt(np.mean(distances**2))),
-        "initial_target_max_error_m": float(np.max(distances)),
+        "initial_target_rms_m": float(np.sqrt(np.mean(sq_distances))),
+        "initial_target_max_error_m": float(np.sqrt(np.max(sq_distances))),
     }
 
 

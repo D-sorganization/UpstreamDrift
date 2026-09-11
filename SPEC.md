@@ -5773,6 +5773,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Replaced `np.linalg.norm(diff, axis=1).max()` with `np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff)))` in `src/tools/capture_rig/model_frame_source.py` to optimize maximum bounding radius calculation. (spec-exempt: micro-optimization)
 
 - Fixed `bioptim` parameter bounds shape mismatch in `src/shared/python/optimization/ocp/parameter_ocp.py` by using `BoundsList.add` with `InterpolationType.CONSTANT` and 2D arrays instead of tuple assignment.
+- Replaced `np.linalg.norm(prediction - target, axis=1)` with `np.einsum('ij,ij->i', diff, diff)` in `src/engines/Simscape_Multibody_Models/python/tour_fit_state.py` to optimize calculation of array magnitudes when computing RMS and max initial target errors. (spec-exempt: micro-optimization)
 
 ## Independently Refined Swing Defect Reference (#9830)
 
