@@ -591,6 +591,9 @@ def test_loading_mode_does_not_load_registry_on_gui_thread(qapp) -> None:
     with (
         patch("src.launchers.upstream_drift_launcher.DockerCheckThread"),
         patch(
+            "src.launchers.launcher_sidekick_sidebar.SidekickSidebarManager._install_sidekick_import_paths"
+        ),
+        patch(
             "src.launchers.launcher_orchestrator._lazy_load_model_registry"
         ) as registry_loader,
         patch(
