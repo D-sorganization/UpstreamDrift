@@ -341,6 +341,69 @@
       "issue": 9762,
       "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/model_converter/mjcf_exporter.py",
+      "symbol": "export_mjcf",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: export_mjcf handles comprehensive hierarchical MuJoCo model construction and elements formatting.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/schema_validator.py",
+      "symbol": "validate_canonical_model",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: validate_canonical_model comprehensively checks units, topology, and physical invariants.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/urdf_exporter.py",
+      "symbol": "export_urdf",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: export_urdf orchestrates whole URDF assembly from canonical spec.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/urdf_exporter.py",
+      "symbol": "_export_segment",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: _export_segment decomposes multi-DOF joints into revolute chains.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: SimOut.__init__ supports comprehensive backward-compatible and canonical state variables.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: SimOut.__init__ parameter list reflects comprehensive Simscape output fields and metadata.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "simulate_with_coefficients",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: simulate_with_coefficients coordinates forward dynamics, RK4 step integration, and output assembly.",
+      "expires_on": "2026-10-31"
     }
   ]
 }

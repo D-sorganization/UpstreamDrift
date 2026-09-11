@@ -117,6 +117,13 @@ for _pkg in ("chat", "sidekick", "ai", "shared.python", "src.shared.python"):
             if _v_path not in _pkg_mod.__path__:
                 _pkg_mod.__path__.append(_v_path)
 
+_local_tools_path = str((_Path(__file__).resolve().parents[1] / "tools").resolve())
+with contextlib.suppress(ImportError):
+    import tools
+
+    if hasattr(tools, "__path__") and _local_tools_path not in tools.__path__:
+        tools.__path__.insert(0, _local_tools_path)
+
 
 def _ensure_importable_package(module_name: str, package_path: str) -> None:
     try:
