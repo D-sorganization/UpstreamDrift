@@ -59,13 +59,13 @@ parser.add_argument(
     "--pelvis-yaw-weight",
     type=float,
     default=25.0,
-    help="Weight penalty on pelvis yaw error (enforcing < 5% error)",
+    help="Weight penalty on pelvis yaw error (enforcing < 5%% error)",
 )
 parser.add_argument(
     "--pelvis-yaw-max-error-pct",
     type=float,
     default=5.0,
-    help="Maximum acceptable pelvis yaw error percentage (default 5.0%)",
+    help="Maximum acceptable pelvis yaw error percentage (default 5.0%%)",
 )
 args = parser.parse_args()
 if not np.isfinite(args.finite_difference_step) or args.finite_difference_step <= 0:
