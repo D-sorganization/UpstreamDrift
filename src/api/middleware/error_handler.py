@@ -38,11 +38,11 @@ def _handle_common_exceptions(e: Exception, func_name: str) -> None:
     if isinstance(e, NotImplementedError):
         raise HTTPException(status_code=501, detail=str(e)) from e
     if isinstance(e, (RuntimeError, TypeError, KeyError, AttributeError, OSError)):
-        logger.exception("Unhandled error in %s: %s", func_name, e)
+        logger.error("Unhandled error in %s: %s", func_name, e)
         raise HTTPException(status_code=500, detail="Internal server error") from e
     # Exhaustive fallback: any exception type not listed above still produces a
     # well-formed 500 response rather than silently returning None.
-    logger.exception("Unexpected error type in %s: %s", func_name, e)
+    logger.error("Unexpected error type in %s: %s", func_name, e)
     raise HTTPException(status_code=500, detail="Internal server error") from e
 
 

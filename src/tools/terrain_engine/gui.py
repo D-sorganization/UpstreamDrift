@@ -189,7 +189,7 @@ class TerrainExplorerWidget(QWidget):
 
     def _show_error(self, title: str, exc: Exception) -> None:
         """Log exception and display a user-friendly message/dialog instead of aborting."""
-        logger.exception("Terrain Engine error: %s", exc)
+        logger.error("Terrain Engine error: %s", exc)
         msg = f"{title}: {exc}"
         if hasattr(self, "query_result"):
             self.query_result.setText(msg)

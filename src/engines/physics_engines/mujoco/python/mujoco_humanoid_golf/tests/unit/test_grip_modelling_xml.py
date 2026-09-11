@@ -3,7 +3,7 @@ from pathlib import Path
 
 def test_inline_hand_includes_tag_ordering(tmp_path):
     """
-    Test that _inline_hand_includes correctly extracts <contact>, <tendon>,
+    Test that inline_hand_includes correctly extracts <contact>, <tendon>,
     <actuator>, and <equality> blocks from inlined hand XMLs and appends
     them to the end of the scene XML to avoid MuJoCo parser buffer overruns.
     """
@@ -30,30 +30,32 @@ def test_inline_hand_includes_tag_ordering(tmp_path):
 </equality>
 """
 
-    # Inject a dummy implementation of _inline_hand_includes from the actual source
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab import (  # noqa: E501
-        GripModellingTab,
+    # Inject a dummy implementation of inline_hand_includes from the actual source
+    # We need to mock _get_hand_content which is used inside inline_hand_includes
+    # but inline_hand_includes is a top-level function, so we should mock it on the module
+    import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf._grip_modelling_xml as mod
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf._grip_modelling_xml import (
+        inline_hand_includes,
     )
 
-    class DummyTab:
-        def _get_hand_content(self, folder, filename, pattern, is_both):
-            return mock_get_hand_content(folder, filename, pattern, is_both)
+    # Save original
+    original_get = mod.get_hand_content
+    mod.get_hand_content = mock_get_hand_content
 
-    tab = DummyTab()
-    tab._inline_hand_includes = GripModellingTab._inline_hand_includes.__get__(
-        tab, DummyTab
-    )
+    try:
+        scene_xml = """<mujoco model="test">
+        <include file="right_hand.xml"/>
+        <worldbody>
+            <geom name="scene_geom"/>
+        </worldbody>
+    </mujoco>"""
 
-    scene_xml = """<mujoco model="test">
-    <include file="right_hand.xml"/>
-    <worldbody>
-        <geom name="scene_geom"/>
-    </worldbody>
-</mujoco>"""
-
-    result = tab._inline_hand_includes(
-        scene_xml, Path("dummy_scene.xml"), tmp_path, False
-    )
+        result = inline_hand_includes(
+            scene_xml, Path("dummy_scene.xml"), tmp_path, False
+        )
+    finally:
+        # Restore
+        mod.get_hand_content = original_get
 
     # Verify the include was removed
     assert '<include file="right_hand.xml"/>' not in result

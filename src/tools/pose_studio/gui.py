@@ -319,7 +319,7 @@ class MainWidget(QtWidgets.QWidget):
 
     def _report_file_failure(self, title: str, exc: Exception) -> None:
         """Surface a save/load failure to the user, not just to the log."""
-        logger.exception(title)
+        logger.error(title)
         QtWidgets.QMessageBox.warning(self, title, f"{title}: {exc}")
 
     def confirm_close(self) -> bool:
