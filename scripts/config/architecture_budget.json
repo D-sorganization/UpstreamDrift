@@ -404,6 +404,15 @@
       "issue": 9967,
       "reason": "Issue #9967: simulate_with_coefficients coordinates forward dynamics, RK4 step integration, and output assembly.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/urdf_exporter.py",
+      "symbol": "_add_revolute_joint",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: XML joint builder requires explicit URDF kinematic and dynamic attributes.",
+      "expires_on": "2026-10-31"
     }
   ]
 }
