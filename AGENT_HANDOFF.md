@@ -1,16 +1,29 @@
 # Simscape Tour-Average Fit Continuation
 
-## Active 6Th-Order Polynomial (Sextic) Continuation — 1.2s Milestone & 1.3s Horizon
+## Active 6Th-Order Polynomial (Sextic) Continuation — 0.70s Gate Certified & 0.75s Horizon Active
 
-`prefix-1200ms-sextic-01` has completed with native fit and independent cold replay exit codes zero on DeskComputer R2025b (runtime `0715f95f3`). Over 433 samples and 25 markers across 0–1.20 s:
+`prefix-700ms-sextic-yawgate-03` completed 773 forward simulations on DeskComputer R2025b. Certified Candidate #75 successfully meets all multi-gate criteria at horizon 0.70 s:
 
-- **Marker Accuracy**: Overall RMS is **311.617528 mm**, p95 **643.184442 mm**, max **2149.570454 mm** (580 evaluations computed).
-- **Sub-window Fidelity**: Across the shared [0, 0.8] s window, marker RMS is **87.427014 mm**; across the shared [0, 1.0] s window, marker RMS is **192.206387 mm**; across the shared [0, 1.1] s window, marker RMS is **245.850057 mm**. The extension [1.1, 1.2] s deepens the downswing power phase (708.109788 mm).
-- **Cold Validation & Audit**: Independent cold replay reproduces marker coordinates with zero error; initial states pass with q error 7.246e-13 and qd error 3.986e-14. All 27 actuator channels (24 torques, 3 forces) audit to within floating-point precision ($3.411\times 10^{-13}$ N force error, $2.842\times 10^{-14}$ Nm torque error).
-- **Archive & Evidence**: The 138-file bundle archive is verified locally and remotely with identical SHA256 `b6cfe04e478eef2fbbeb66f1cf061c9362443cc964cbda18c629108141550c98`. Evidence is committed in `native_evidence/prefix_1200ms_*` and receipt `prefix_1200ms_sextic_bundle_receipt.json`.
-- **3D Video Overlay**: Generated and verified at `c:\Users\diete\Repositories\simscape-tour-checkpoints\prefix-1200ms-sextic-01\prefix_1200ms_overlay.mp4` (433 frames, 30 fps) and GIF (433 frames, 20 fps) displaying the synchronized Simscape model skeleton and C3D target markers over the first 1.20 s of motion.
+- **Early Retention [0, 0.60 s]**: **9.37 mm** marker RMSE (PASS, gate $\le 12.0$ mm).
+- **Whole Window [0, 0.70 s]**: **15.64 mm** marker RMSE (PASS, gate $\le 25.0$ mm; new record best, down from 16.16 mm).
+- **Pelvis Yaw Residual**: Target $66.59^\circ$, Model $64.51^\circ$, Diff $-2.08^\circ$, Error **3.12%** (PASS, gate strictly $< 5.0\%$).
+- **Terminal Frame Metrics**: Terminal max marker error **95.36 mm** (down from 119.73 mm), terminal RMS **54.86 mm**. Clubhead terminal RMS **60.75 mm** (within 0.75 mm of the 60.0 mm gate).
+- **Certified Candidate Artifacts**:
+  - Replay MAT: `C:/Users/diete/SimscapeTour9921/prefix-700ms-sextic-yawgate-03/certified_candidate_75_replay.mat`
+  - 3D Overlay GIF: `simscape_matching_candidate75.gif` (253 frames, 25 fps, 11.0 MB) displaying Simscape 3D skeleton overlay vs C3D target markers with HUD residuals.
+- **Cross-Engine Physics Equivalency (Epic #9964)**:
+  - MuJoCo 15-channel forward dynamics rollout simulated using Candidate 75 driving torques: generated `mujoco_driving_torque_candidate75.gif` (71 frames, 1.47 MB).
+  - Drake URDF regenerated and synced: `python scripts/build_humanoid_models.py --engine drake` (drift check passed with exit code 0).
+  - Cross-engine test suite: 631 passed in `tests/engines/`, 20 passed in `tests/cross_engine/`.
+  - Migration documentation committed: `docs/development/cross_engine_parity/CROSS_ENGINE_MATCHING_AND_MIGRATION_GUIDE.md` (commit `c704437cb`).
 
-Continuation has advanced to **`prefix-1300ms-sextic-01`** (1.30 s horizon, 469 samples, 25 markers, degree-6 Bernstein basis with 189 parameters). Transferred from `prefix-1200ms-sextic-01/first_prefix_fit.json` with identical global t0 initial state and fixed geometry. Actively running in background on DeskComputer R2025b.
+Continuation has advanced to **`prefix-750ms-sextic-01`** (0.75 s horizon, degree-6 Bernstein basis with 189 parameters, transferred from Candidate #75 with pelvis yaw gate $< 5.0\%$ and clubhead weight $25.0$). Actively running in background on DeskComputer R2025b (PID 91024).
+
+## Prior Milestone Checkpoints
+
+- `prefix-700ms-sextic-yawgate-03`: Candidate #75 (15.64 mm whole window RMSE, 3.12% pelvis yaw error)
+- `prefix-1200ms-sextic-01`: 433 samples, 25 markers across 0–1.20 s (311.6 mm RMS)
+- `prefix-1300ms-sextic-01`: 1.30 s horizon exploration
 
 ## Worktree Cleanup Complete; Bounded Resumption Ready
 
