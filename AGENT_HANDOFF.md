@@ -2,19 +2,19 @@
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
-### 0. Run 04 Active Execution (`prefix-750ms-sextic-04`, DeskComputer)
+### 0. Run 04 Audit & Status (`prefix-750ms-sextic-04`, DeskComputer)
 
-- **Launch Architecture**:
-  - Resolved Windows OpenSSH child-process termination by spawning via `Invoke-CimMethod -ClassName Win32_Process -MethodName Create`, decoupling long-running optimization from SSH session tokens.
-  - Remote runtime worktree (`UpstreamDrift-simscape-tour-runtime`) cleanly synchronized to commit `e511a6757`.
+- **Execution Status**:
+  - Run 04 completed on DeskComputer (775 logged evaluations in `evaluations.jsonl`, final optimizer evaluation RMS: 26.72 mm). No lingering background process.
+  - Spawning architecture established via `Invoke-CimMethod -ClassName Win32_Process -MethodName Create`, successfully decoupling detached processes from SSH session job objects.
   - Directory: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-04`.
-  - Warm-start: Directly transferred from certified Candidate 75 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-75-pkg/candidate_75_package.json`, SHA256: `2369de3a70f7f6961fd00d8678d06abae77d6cb88cfbe232a771633152fa442f`).
-- **Critical Milestone: Whole-Window Gate Passed (< 25.0 mm)**:
-  - **Evaluation #528**: Achieved **24.31 mm** (24.312 mm) whole-window marker RMSE (**NEW ALL-TIME RECORD** on $0.75\text{ s}$ horizon, PASS $\le 25.0$ mm gate)!
-  - **Evaluation #337**: Achieved **24.99 mm** (24.994 mm) whole-window marker RMSE (PASS $\le 25.0$ mm gate).
+  - Seed: Transferred from verified Candidate 75 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-75-pkg/candidate_75_package.json`, SHA256: `2369de3a70f7f6961fd00d8678d06abae77d6cb88cfbe232a771633152fa442f`).
+- **Exploratory Milestone: Whole-Window Record (< 25.0 mm)**:
+  - **Evaluation #528**: Achieved **24.31 mm** (24.312 mm) whole-window marker RMSE (**NEW ALL-TIME RECORD** on $0.75\text{ s}$ horizon, breaking below the $\le 25.0$ mm gate).
+  - **Evaluation #337**: Achieved **24.99 mm** (24.994 mm) whole-window marker RMSE (also passed $\le 25.0$ mm gate).
   - **Top Evaluations Leaderboard (0.75 s Horizon)**:
-    - **#528**: **24.31 mm** (NEW RECORD, PASS $\le 25.0$ mm gate)
-    - **#337**: **24.99 mm** (PASS $\le 25.0$ mm gate)
+    - **#528**: **24.31 mm** (NEW RECORD, whole-window pass $\le 25.0$ mm)
+    - **#337**: **24.99 mm** (whole-window pass $\le 25.0$ mm)
     - **#529**: **25.61 mm**
     - **#465**: **25.62 mm**
     - **#466**: **25.82 mm**
@@ -28,8 +28,15 @@
     - **#386 / #389 / #240**: **26.73 mm**
     - **#30**: **26.76 mm**
     - **#16**: **26.79 mm**
-    - **#2 (Candidate 75 Baseline)**: **28.53 mm**
-- **Immutable Candidate Packages Created & Certified**:
+    - **#2 (Candidate 75 Baseline Replay)**: **28.53 mm**
+- **Honest 5-Gate Audit of Candidate 528 (Exploratory Record, Not Fully Certified)**:
+  - Early Retention $[0, 0.60\text{ s}]$: **9.73 mm** (PASS, gate $\le 12.0\text{ mm}$)
+  - Whole Window $[0, 0.75\text{ s}]$: **24.31 mm** (PASS, gate $\le 25.0\text{ mm}$)
+  - Terminal RMS ($t=0.75\text{ s}$): **103.31 mm** (FAIL vs $35.0\text{ mm}$ gate; improved from 135.28 mm baseline)
+  - Clubhead Terminal RMS ($t=0.75\text{ s}$): **124.64 mm** (FAIL vs $60.0\text{ mm}$ gate; improved from 170.81 mm baseline)
+  - Pelvis Yaw at $0.75\text{ s}$: Model $52.19^\circ$ vs Target $62.46^\circ$ (diff $-10.28^\circ$, error **16.45%**, FAIL vs $5.0\%$ gate; cut in half from 37.77% baseline)
+  - Gate Summary: **2/5 gates passed**. Candidate 528 is preserved as an exploratory record package, not an unreserved certified gate-passing swing.
+- **Immutable Candidate Packages Created**:
   - **Candidate 528 Package**:
     - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-528-pkg/candidate_528_package.json`
     - SHA256: `3524f112dfd23479a812a56edab1be0a1282543f969d685d4c8d591090ca67da`
@@ -38,21 +45,14 @@
     - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-337-pkg/candidate_337_package.json`
     - SHA256: `4a4249466d18e1cd812b4a607b7e03d7af5ac7ac1e4e32af4d02bba291a3b1a3`
     - Whole-window marker RMS: **24.994 mm**
-- **Continuation Ladder Advance (0.75 s -> 0.80 s)**:
-  - Verified clean mathematical transfer of Candidate 528 to $0.80\text{ s}$ horizon via `transfer_prefix_candidate` (189 parameters, continuous physical polynomial extrapolation).
-  - Ready for continuation launch on DeskComputer (`prefix-800ms-sextic-01`) warm-starting from Candidate 528.
-- **Baseline Replay Verification (0.75 s Horizon)**:
-  - Evaluation #1 (Zero Effort): 1421.30 mm marker RMS.
-  - Evaluation #2 (Transferred Candidate 75): **28.53 mm** whole-window marker RMS.
-  - Early retention on $[0, 0.60\text{ s}]$ preserved at **9.37 mm** (PASS, gate $\le 12.0$ mm).
-- **Optimization Parameters**:
-  - `--duration 0.75 --basis sextic`
-  - `--finite-difference-step 0.001 --max-nfev 250`
-  - Balanced weights: `--terminal-weight 8.0 --club-marker-weight 25.0 --smoothness-weight 0.08 --pelvis-yaw-weight 50.0 --pelvis-yaw-max-error-pct 5.0`
-- **Execution Telemetry**:
-  - Live heartbeat logging active on every evaluation with fast rollout rate of $\approx 2.4 - 2.7\text{ s}$ per evaluation.
-  - Over 580 evaluations logged on DeskComputer.
-  - Target Gates: Early retention $\le 12.0$ mm (PASS), Whole window $\le 25.0$ mm (PASSED by #528 at 24.31 mm and #337 at 24.99 mm).
+- **Next Horizon Execution Strategy (Pareto-Tuning Run 05 on 0.75 s)**:
+  - Warm-start directly from `candidate_528_package.json` on DeskComputer (`prefix-750ms-sextic-05`).
+  - Target the failing terminal and yaw gates:
+    - Increase terminal frame weight: `--terminal-weight 15.0`
+    - Increase clubhead marker weight: `--club-marker-weight 35.0`
+    - Increase pelvis yaw weight: `--pelvis-yaw-weight 75.0`
+    - Maintain finite-difference step at `0.001` with `max-nfev 250`.
+  - All 5 gates must be satisfied or explicitly audited before advancing horizon to $0.80\text{ s}$.
 
 ### 1. Run 03 Audit & 750 ms Horizon Analysis (`prefix-750ms-sextic-03`, DeskComputer)
 
@@ -106,10 +106,13 @@
   - Horner's scheme numerical evaluation verified.
   - 117 tests passing across `tests/parity/` and engine unit suites.
 - **Visual Artifacts**:
-  - **Simscape Matching Animation (dual-view 3D)**: `simscape_matlab_matching_tour_average.gif` (Oblique + Down-The-Line synchronized views with C3D tour marker cloud).
-  - **3-Pane Cross-Engine Forward Simulation**: `cross_engine_forward_simulation_comparison.gif` (Simscape Multibody vs Canonical 25-DOF MuJoCo vs Superimposed Co-Registration under identical driving torques).
-  - **Side-by-Side Simscape vs MuJoCo**: `canonical_simscape_vs_mujoco_humanoid_overlay.gif`
-  - **Superimposed Co-Registration**: `canonical_simscape_vs_mujoco_superimposed_overlay.gif`
+  - **Candidate 528 Matching Animation (dual-view 3D)**: `simscape_matlab_matching_candidate528.gif` (1.29 MB: Oblique + Down-The-Line synchronized views with C3D tour marker cloud, pelvis yaw residual tracking, and live error HUD).
+  - **Candidate 528 Canonical Simscape vs MuJoCo Overlay**: `canonical_simscape_vs_mujoco_candidate528_overlay.gif` (2.06 MB: Side-by-side Simscape Multibody vs Canonical 25-DOF MuJoCo under Candidate 528 torques).
+  - **Candidate 528 3-Pane Cross-Engine Forward Simulation**: `cross_engine_forward_simulation_candidate528.gif` (1.37 MB: Simscape Multibody vs Canonical MuJoCo vs Superimposed Co-Registration).
+  - **Baseline Matching Animation (dual-view 3D)**: `simscape_matlab_matching_tour_average.gif` (1.55 MB: Oblique + Down-The-Line synchronized views with C3D tour marker cloud).
+  - **Baseline 3-Pane Cross-Engine Forward Simulation**: `cross_engine_forward_simulation_comparison.gif` (Simscape Multibody vs Canonical 25-DOF MuJoCo vs Superimposed Co-Registration under identical driving torques).
+  - **Side-by-Side Simscape vs MuJoCo**: `canonical_simscape_vs_mujoco_humanoid_overlay.gif` (4.77 MB)
+  - **Superimposed Co-Registration**: `canonical_simscape_vs_mujoco_superimposed_overlay.gif` (4.07 MB)
 
 ## Coordinated Matching Recovery & Gate Verification (2026-09-11 Earlier Summary)
 
