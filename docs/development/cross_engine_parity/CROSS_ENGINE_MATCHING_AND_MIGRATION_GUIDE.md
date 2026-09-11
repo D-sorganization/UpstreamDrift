@@ -124,27 +124,34 @@ def simulate_with_coefficients(
 - **Pinocchio**: [`src.engines.physics_engines.pinocchio.python.motion_matching.simulate`](file:///C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour/src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py)
 - **Drake**: [`src.engines.physics_engines.drake.python.motion_matching.simulate`](file:///C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour/src/engines/physics_engines/drake/python/motion_matching/simulate.py)
 
-### 4.2 Cross-Engine Parity Acceptance Gate
+### 4.2 Cross-Engine Parity Acceptance Gate & Physical Qualification Ladder
 
-When driving each engine with a certified Simscape polynomial $\theta^*$:
+To prevent premature optimization on structurally non-equivalent models, open-source physics engines must pass through a strict qualification ladder before serving as search surrogates:
 
-1. **Grip Trajectory RMSE**: $< 5.0\text{ mm}$ vs Simscape.
-2. **Clubhead Trajectory RMSE**: $< 10.0\text{ mm}$ vs Simscape.
-3. **Joint Angle Trajectory RMSE**: $< 0.05\text{ rad}$ ($< 2.8^\circ$) vs Simscape.
+1. **Torque Representation & Coefficient Order Parity**:
+   - Simscape outputs native polynomial coefficients in highest-power-first order ($[t^6, t^5, \dots, t^0]$).
+   - The canonical cross-engine torque driver interface expects lowest-power-first order ($[t^0, t^1, \dots, t^6]$).
+   - Engine adapters must reverse native order ($\theta_{canonical} = \theta_{simscape}[:, ::-1]$) and verify exact physical effort at $t=0$ and throughout the swing ($\Delta \tau < 10^{-9}\text{ N}\cdot\text{m}$).
+2. **Dual-Grip Closed Loop Verification**:
+   - The Simscape model includes a closed parallel kinematic chain through both arms to the club.
+   - MuJoCo utilizes equality weld constraints between the left hand and the club. Drake and Pinocchio must incorporate closed-loop constraints (e.g. Pinocchio constrained dynamics or Drake constraint forces) rather than single-arm open chains.
+3. **Short Trajectory Parity Ladder**:
+   - **Static / t=0 Parity**: Forward kinematics and gravity torques match within $1.0\text{ mm}$.
+   - **Perturbation Parity (20–50 ms)**: Same joint accelerations under individual channel impulses.
+   - **Early Takeaway Parity (100–600 ms)**: Grip RMSE $< 5.0\text{ mm}$, Clubhead RMSE $< 10.0\text{ mm}$ vs Simscape oracle.
 4. **Energy Conservation**: $\int \tau \cdot \dot{q} \, dt \approx \Delta T + \Delta V$ within $1.0\%$.
 
 ---
 
-## 5. Parallel Fleet Execution Strategy
+## 5. Parallel Fleet Execution Strategy & Work Split
 
-To match the entire swing efficiently without resource contention:
+In accordance with the Codex-Gemini coordination review (2026-09-11):
 
 1. **Simscape Primary Lane (`DeskComputer`)**:
-   - Executes full forward dynamics optimization using MATLAB Engine R2025b.
-   - Advances progressively: $0.70\text{ s} \to 0.75\text{ s} \to 0.80\text{ s} \to \dots \to 1.814\text{ s}$.
-2. **Simscape Secondary / Parallel Lane (`ControlTower`)**:
-   - `ControlTower` (100.69.12.6) has MATLAB R2025b and R2026a ready for parallel downswing exploration.
+   - Dedicated ownership of Simscape transition repair ($0.70\text{ s} \to 0.75\text{ s} \to \dots$).
+   - Strict candidate promotion using immutable candidate packages, explicit evaluation numbers, and automated multi-gate certification.
+2. **Numerical Diagnostics Lane (`ControlTower`)**:
+   - Focuses on finite-difference sensitivities, solver tolerances, bounds, and directional derivative checks before committing extensive optimization budgets.
 3. **Open-Source Engine Fleet (`brick`, `pi5-nvme`, `oglaptop`)**:
-   - MuJoCo, Pinocchio, and Drake run in pure C++/Python without MATLAB license limits.
-   - These engines execute forward dynamics simulations and gradient-based trajectory matching at $10\times$ to $50\times$ real-time speed.
-   - Any polynomial found by an open-source engine is cross-validated on Simscape to confirm total parity.
+   - Implements the qualification ladder (MuJoCo first, followed by Pinocchio and Drake).
+   - Once short-trajectory physical equivalence is verified against Simscape, engines will run distributed parallel gradient sweeps with solutions cross-validated on Simscape.

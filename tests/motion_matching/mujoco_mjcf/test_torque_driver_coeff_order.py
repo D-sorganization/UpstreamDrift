@@ -78,3 +78,44 @@ def test_handcomputed_full_polynomial() -> None:
         1.0 + 2.0 * t + 3.0 * t**2 + 4.0 * t**3 + 5.0 * t**4 + 6.0 * t**5 + 7.0 * t**6
     )
     assert _evaluate_polynomial(theta, t)[0] == pytest.approx(expected, abs=1e-12)
+
+
+def test_simscape_to_canonical_conversion_parity_at_zero_and_nonzero_times() -> None:
+    """Simscape native theta is highest-power-first; canonical torque driver is lowest-power-first.
+
+    Converting via theta[:, ::-1] must yield exact physical torque parity at t=0
+    and throughout the continuous trajectory.
+    """
+    from src.shared.python.motion_matching.prefix_fit import bernstein_to_simscape
+
+    # Arbitrary 3-joint Bernstein control points
+    controls = np.array(
+        [
+            [-40.94, -44.95, -48.81, -52.54, -56.16, -59.70, -63.18],
+            [10.0, 12.0, 15.0, 20.0, 25.0, 30.0, 35.0],
+            [-5.0, 0.0, 5.0, 10.0, 5.0, 0.0, -5.0],
+        ],
+        dtype=np.float64,
+    )
+    duration_s = 0.70
+
+    # Highest-power-first native Simscape format [t^6, ..., t^0]
+    simscape_theta = bernstein_to_simscape(controls, duration_s=duration_s)
+    # Canonical lowest-power-first format [t^0, ..., t^6]
+    canonical_theta = simscape_theta[:, ::-1]
+
+    # At t=0, physical torque must equal control point c_0
+    np.testing.assert_allclose(
+        _evaluate_polynomial(canonical_theta, 0.0),
+        controls[:, 0],
+        atol=1e-10,
+    )
+
+    # At t=0.35s (midpoint, s=0.5)
+    weights = np.array([1, 6, 15, 20, 15, 6, 1]) * (0.5**6)
+    expected_mid = np.sum(controls * weights, axis=1)
+    np.testing.assert_allclose(
+        _evaluate_polynomial(canonical_theta, 0.35),
+        expected_mid,
+        atol=1e-10,
+    )

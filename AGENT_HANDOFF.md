@@ -1,23 +1,37 @@
 # Simscape Tour-Average Fit Continuation
 
-## Active 6Th-Order Polynomial (Sextic) Continuation — 0.70s Gate Certified & 0.75s Horizon Active
+## Coordinated Matching Recovery & Gate Verification (2026-09-11)
 
-`prefix-700ms-sextic-yawgate-03` completed 773 forward simulations on DeskComputer R2025b. Certified Candidate #75 successfully meets all multi-gate criteria at horizon 0.70 s:
+Following the Codex-Gemini coordination review ([#9921](https://github.com/D-sorganization/UpstreamDrift/issues/9921#issuecomment-5640205185) & [#9964](https://github.com/D-sorganization/UpstreamDrift/issues/9964#issuecomment-5640205414)), the work split and gate verification standards have been hardened:
+
+### 1. Candidate 75 Verified Gate Audit (0.70 s Horizon)
 
 - **Early Retention [0, 0.60 s]**: **9.37 mm** marker RMSE (PASS, gate $\le 12.0$ mm).
 - **Whole Window [0, 0.70 s]**: **15.64 mm** marker RMSE (PASS, gate $\le 25.0$ mm; new record best, down from 16.16 mm).
 - **Pelvis Yaw Residual**: Target $66.59^\circ$, Model $64.51^\circ$, Diff $-2.08^\circ$, Error **3.12%** (PASS, gate strictly $< 5.0\%$).
-- **Terminal Frame Metrics**: Terminal max marker error **95.36 mm** (down from 119.73 mm), terminal RMS **54.86 mm**. Clubhead terminal RMS **60.75 mm** (within 0.75 mm of the 60.0 mm gate).
-- **Certified Candidate Artifacts**:
+- **Terminal Frame Metrics**: Terminal max marker error **95.36 mm**, terminal RMS **54.86 mm** (FAIL vs published 35 mm terminal gate).
+- **Clubhead Terminal RMS**: **60.75 mm** (FAIL vs published 60.0 mm clubhead gate).
+- **Immutable Candidate Package**:
+  - Saved to: `C:/Users/diete/SimscapeTour9921/candidates/candidate-75-pkg/candidate_75_package.json`
+  - Package SHA256: `b68d732e2f24b3170611c28920837f7b5b1c2539aeb7dbecf8f8d2bd36058021`
   - Replay MAT: `C:/Users/diete/SimscapeTour9921/prefix-700ms-sextic-yawgate-03/certified_candidate_75_replay.mat`
-  - 3D Overlay GIF: `simscape_matching_candidate75.gif` (253 frames, 25 fps, 11.0 MB) displaying Simscape 3D skeleton overlay vs C3D target markers with HUD residuals.
-- **Cross-Engine Physics Equivalency (Epic #9964)**:
-  - MuJoCo 15-channel forward dynamics rollout simulated using Candidate 75 driving torques: generated `mujoco_driving_torque_candidate75.gif` (71 frames, 1.47 MB).
-  - Drake URDF regenerated and synced: `python scripts/build_humanoid_models.py --engine drake` (drift check passed with exit code 0).
-  - Cross-engine test suite: 631 passed in `tests/engines/`, 20 passed in `tests/cross_engine/`.
-  - Migration documentation committed: `docs/development/cross_engine_parity/CROSS_ENGINE_MATCHING_AND_MIGRATION_GUIDE.md` (commit `c704437cb`).
+  - Replay JSON: `C:/Users/diete/SimscapeTour9921/prefix-700ms-sextic-yawgate-03/candidate_75_prediction.json`
 
-Continuation has advanced to **`prefix-750ms-sextic-01`** (0.75 s horizon, degree-6 Bernstein basis with 189 parameters, transferred from Candidate #75 with pelvis yaw gate $< 5.0\%$ and clubhead weight $25.0$). Actively running in background on DeskComputer R2025b (PID 91024).
+### 2. Execution & Candidate Transfer Repair
+
+- Repaired `first_prefix_fit.py` to support explicit `--transfer-evaluation` parameter. The launcher now warm-starts strictly from verified Candidate #75 (evaluation 75) rather than the unaccepted final optimizer step (which had 60.92 mm terminal RMS and failed yaw acceptance at 5.63%).
+- Rebuilt automated gate checks in `first_prefix_fit.py` covering all 5 gates (`early_retention_pass`, `whole_window_pass`, `terminal_rmse_pass`, `clubhead_terminal_pass`, and `pelvis_yaw_pass`).
+
+### 3. Cross-Engine Parity & Physical Qualification (Epic #9964)
+
+- **Coefficient Order Parity**: Fixed regression where Simscape native polynomial coefficients (highest-power-first: `[t^6, ..., t^0]`) must be reversed (`theta[:, ::-1]`) when passed to the canonical lowest-power-first (`[t^0, ..., t^6]`) torque evaluators. Added red/green regression tests in `test_torque_driver_coeff_order.py` asserting exact physical torque at $t=0$ and $t=0.35\text{ s}$.
+- **Full Humanoid Skeleton Visualization**: Created `render_humanoid_overlay.py` with Design-by-Contract data containers (`HumanoidTrajectoryData`, `HumanoidSkeletalTopology`) and unit test suite (`test_render_humanoid_overlay.py`). Previews now render the complete 20-body skeleton matching Simscape's visual standard.
+- **Physical Model Qualification Ladder**: Open-source engines (MuJoCo, Pinocchio, Drake) are sequenced for physical qualification: (1) actuator gears & coefficient order, (2) closed-loop dual-grip constraints, (3) short trajectory acceleration parity, before running full search sweeps.
+
+### 4. Work Split Ownership
+
+- **DeskComputer**: Simscape transition repair ($0.70\text{ s} \to 0.75\text{ s}$ continuation) with supervised execution and immutable candidate packaging.
+- **ControlTower**: Derivative, sensitivity, finite-difference step, and numerical qualification.
 
 ## Prior Milestone Checkpoints
 

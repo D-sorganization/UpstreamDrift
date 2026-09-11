@@ -19,6 +19,12 @@ starts = parser.add_mutually_exclusive_group()
 starts.add_argument("--checkpoint", type=Path)
 starts.add_argument("--transfer-report", type=Path)
 parser.add_argument(
+    "--transfer-evaluation",
+    type=int,
+    default=None,
+    help="Evaluation number within transfer-report to warm-start from (default: final stage)",
+)
+parser.add_argument(
     "--basis", default="constant", help="Bernstein degree name: constant through sextic"
 )
 parser.add_argument("--initial-state", type=Path, required=True)
@@ -180,13 +186,39 @@ initial_parameters = (
 )
 if args.transfer_report:
     transfer_raw = args.transfer_report.read_bytes()
-    initial_parameters = np.asarray(
-        transfer_prefix_candidate(json.loads(transfer_raw), report)
-    )
+    source_dict = json.loads(transfer_raw)
+    if args.transfer_evaluation is not None:
+        eval_match = next(
+            (
+                e
+                for e in source_dict.get("evaluations", [])
+                if e.get("number") == args.transfer_evaluation
+            ),
+            None,
+        )
+        if eval_match is None:
+            raise ValueError(
+                f"Evaluation {args.transfer_evaluation} not found in {args.transfer_report}"
+            )
+        efforts = np.asarray(eval_match["efforts"], dtype=float)
+        scales_arr = np.asarray(source_dict["effort_scales"], dtype=float)
+        source_dict = dict(source_dict)
+        source_dict["stage"] = {
+            "parameters": (1.0 + efforts / scales_arr).tolist(),
+            "rmse_m": eval_match.get("rmse_m", 0.0),
+        }
+        transfer_semantics = f"candidate #{args.transfer_evaluation} (RMSE: {eval_match.get('rmse_m', 0.0)*1000:.2f} mm); fresh objective"
+    else:
+        transfer_semantics = (
+            "torque candidate only; fresh objective and evaluation history"
+        )
+
+    initial_parameters = np.asarray(transfer_prefix_candidate(source_dict, report))
     report["candidate_transfer"] = {
         "source_report_sha256": hashlib.sha256(transfer_raw).hexdigest(),
         "source_path": str(args.transfer_report),
-        "semantics": "torque candidate only; fresh objective and evaluation history",
+        "transfer_evaluation": args.transfer_evaluation,
+        "semantics": transfer_semantics,
     }
 report["initial_parameters"] = initial_parameters.tolist()
 import matlab
@@ -364,12 +396,45 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
         ),
     )
     final_stage = fit.stages[-1]
+    final_pred = np.asarray(forward(fit.parameters, requested))
+
+    # Evaluate clubhead terminal marker RMSE
+    club_indices = [
+        idx
+        for idx, lbl in enumerate(labels)
+        if any(
+            marker_tag in lbl.lower() for marker_tag in ("marker_2", "marker_3", "club")
+        )
+    ]
+    if club_indices:
+        club_dists = np.linalg.norm(
+            (final_pred[-1, club_indices] - observed[-1, club_indices]), axis=-1
+        )
+        club_terminal_rmse_m = float(np.sqrt(np.mean(club_dists**2)))
+    else:
+        club_terminal_rmse_m = 0.0
+
     report["accepted_numerically"] = fit.accepted
     report["terminal_rmse_m"] = final_stage.terminal_rmse_m
     report["terminal_max_m"] = final_stage.terminal_max_m
+    report["clubhead_terminal_rmse_m"] = club_terminal_rmse_m
     report["pelvis_yaw_diff_deg"] = final_stage.pelvis_yaw_diff_deg
     report["pelvis_yaw_error_pct"] = final_stage.pelvis_yaw_error_pct
-    report["final_prediction_m"] = forward(fit.parameters, requested).tolist()
+
+    # Verification against all 5 declared gates
+    report["gates"] = {
+        "early_retention_pass": bool(
+            final_stage.rmse_m <= 0.012 if float(requested[-1]) <= 0.60 else True
+        ),
+        "whole_window_pass": bool(final_stage.rmse_m <= 0.025),
+        "terminal_rmse_pass": bool(final_stage.terminal_rmse_m <= 0.035),
+        "clubhead_terminal_pass": bool(club_terminal_rmse_m <= 0.060),
+        "pelvis_yaw_pass": bool(
+            final_stage.pelvis_yaw_error_pct < args.pelvis_yaw_max_error_pct
+        ),
+    }
+    report["all_gates_pass"] = all(report["gates"].values())
+    report["final_prediction_m"] = final_pred.tolist()
     report["status"] = "exploratory-fit-computed"
     engine.workspace["fit_replay_path"] = str(root / "final_native_replay.mat")
     engine.eval(
