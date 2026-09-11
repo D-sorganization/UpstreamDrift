@@ -69,6 +69,12 @@ parser.add_argument(
     default=True,
     help="Enforce C^0 torque continuity at transition from backswing",
 )
+parser.add_argument(
+    "--transfer-report",
+    type=Path,
+    default=None,
+    help="Previous shorter downswing candidate report to warm start from",
+)
 args = parser.parse_args()
 
 if not np.isfinite(args.finite_difference_step) or args.finite_difference_step <= 0:
@@ -236,6 +242,27 @@ end
     initial_parameters = np.ones(len(scales))
     lower_bounds = np.zeros(len(scales))
     upper_bounds = 2.0 * np.ones(len(scales))
+
+    if args.transfer_report is not None and args.transfer_report.exists():
+        transfer_source = json.loads(args.transfer_report.read_text())
+        old_params = np.asarray(
+            transfer_source.get("final_parameters", []), dtype=float
+        )
+        old_dur = float(transfer_source.get("downswing_duration_s", 0.0))
+        if len(old_params) == len(scales) and old_dur > 0 and down_duration >= old_dur:
+            ratio = down_duration / old_dur
+            values = old_params.reshape(n_coords, control_count)
+            result = np.empty_like(values)
+            for level in range(control_count):
+                result[:, level] = values[:, 0]
+                values = (1 - ratio) * values[:, :-1] + ratio * values[:, 1:]
+            initial_parameters = np.clip(result.ravel(), 0.0, 2.0)
+            logger.info(
+                "Transferred warm-start candidate from %s (ratio %.4f)",
+                args.transfer_report,
+                ratio,
+            )
+            report["transferred_from"] = str(args.transfer_report)
 
     # If enforcing C0 continuity:
     # effort = scales * (p - 1) => p = 1 + effort / scale
