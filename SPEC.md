@@ -5774,6 +5774,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Fixed `bioptim` parameter bounds shape mismatch in `src/shared/python/optimization/ocp/parameter_ocp.py` by using `BoundsList.add` with `InterpolationType.CONSTANT` and 2D arrays instead of tuple assignment.
 - Replaced `np.linalg.norm(prediction - target, axis=1)` with `np.einsum('ij,ij->i', diff, diff)` in `src/engines/Simscape_Multibody_Models/python/tour_fit_state.py` to optimize calculation of array magnitudes when computing RMS and max initial target errors. (spec-exempt: micro-optimization)
+- Replaced `np.linalg.norm` with `np.sqrt(ndarray.dot(ndarray))` for small 1D arrays across multiple modules for measurable performance improvement (#9979). (spec-exempt: micro-optimization)
 
 ## Independently Refined Swing Defect Reference (#9830)
 
