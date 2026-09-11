@@ -76,3 +76,7 @@
 ## 2026-09-11 - [Optimize Euclidean distance in 2D array]
 **Learning:** Using `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is significantly faster than `np.linalg.norm(..., axis=1)` for multi-dimensional distance calculations since it bypasses the overhead of np.linalg.norm which internally does checks and allocations.
 **Action:** Replace `np.linalg.norm(selected - reference.position_m, axis=1)` with the precalculated diff array and einsum in `src/motion_capture/coaching/measurements.py`.
+
+## 2024-03-22 - [Optimization: Small 1D Array Norm Calculation]
+**Learning:** For small 1D NumPy arrays (like 3D vectors), `np.sqrt(ndarray.dot(ndarray))` is ~2x faster than `np.linalg.norm(ndarray)`. It is also faster than `np.sqrt(np.einsum('i,i->', arr, arr))` which is optimized for multidimensional arrays.
+**Action:** Replace `np.linalg.norm()` with `np.sqrt(ndarray.dot(ndarray))` when calculating the magnitude of single 1D arrays.

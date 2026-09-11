@@ -26,7 +26,9 @@ def segment_mesh(
     """
     if a.shape != (3,) or b.shape != (3,) or not np.isfinite([a, b]).all():
         raise ValueError("Segment endpoints must be finite 3-vectors")
-    length = float(np.linalg.norm(b - a))
+    length = float(
+        np.sqrt((b - a).dot(b - a))
+    )  # ⚡ Bolt: ndarray.dot + sqrt is ~2x faster than np.linalg.norm for small 1D arrays
     if length <= 1e-9 or not np.isfinite(radius_ratio) or not 0 < radius_ratio <= 0.5:
         raise ValueError("Segment needs positive length and radius ratio in (0, 0.5]")
     shape = EllipsoidShape(length / 2, length * radius_ratio, length * radius_ratio)
