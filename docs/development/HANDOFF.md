@@ -120,6 +120,38 @@ closed after87 contract/source/equipment tests; parent #9902 remains open for jo
 
 # Shared Analysis Delivery Handoff
 
+## Bounded Launcher Splash (#8360)
+
+- Repository: D-sorganization/UpstreamDrift.
+- Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8360.
+- Branch: conductor/issue-8360; record commit SELF. PR: not created.
+- Issue: #8360 (splash stalls when an optional provider fails); development-log entry DL-#8360.
+- Completed: `startup_phases.py` (pure-Python `StartupTimeline`, `run_bounded`,
+  closed outcome/category sets, `probe_tools_provider` resolving Tools through
+  `tools_repo_path.resolve_tools_repo` and checking the Rate standalone entry
+  point `src/rate_of_closure/launch_pyqt6.py` without importing it);
+  `AsyncStartupWorker` runs registry/engines/Docker/Tools-provider phases under
+  explicit timeouts and only the registry is required; `StartupSession` owns the
+  splash <-> worker <-> shell handshake with a `STARTUP_TIMEOUT_SEC` watchdog,
+  worker-generation isolation and `sip.isdeleted` guards; `StartupFailureDialog`
+  offers Retry / Continue without provider / Copy diagnostics / Close;
+  `UpstreamDriftLauncher(loading=True)` no longer lazy-loads the registry and
+  engine manager on the GUI thread; `LauncherOrchestrator` treats supplied
+  results as authoritative. `STARTUP_TIMEOUT_SEC` moved to `launcher_constants`
+  (re-exported unchanged from `upstream_drift_launcher`).
+- Validation: `tests/unit/launchers/test_startup_phases.py` (30 pass),
+  `tests/launchers/test_startup_session.py` (23 pass), orchestrator/startup/
+  launcher suites pass except pre-existing unrelated failures
+  (`test_golf_launcher_startup_timeout.py` patches a non-existent
+  `_lazy_load_model_registry` attribute; theme-colour assertions; vendored
+  theme/API import mismatches). `pre-commit run --files`, ruff, error-handling
+  ratchet and file-size budget pass. mypy was run on the changed modules.
+- Assumptions: the vendored `vendor/ud-tools` submodule was initialized at the
+  pinned SHA to run tests; no tracked content changed.
+- Next: open the PR with `Fixes #8360`; run the clean-checkout Windows smoke
+  matrix (editable-Tools, vendored-Tools, absent-Tools, broken-Rate) and record
+  the outcome in DL-#8360.
+
 ## Completed Runtime (#9926)
 
 - Repository: D-sorganization/UpstreamDrift.
