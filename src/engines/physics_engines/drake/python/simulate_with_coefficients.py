@@ -113,35 +113,35 @@ def get_drake_canonical_joint_map(plant: Any) -> EngineJointMap:
     Resolves the 27 canonical actuation channels into native Drake DOF velocity
     indices and sign conventions.
     """
-    mapping_spec: list[tuple[str, str, float]] = [
-        ("TranslationInputX", "root_trans_x", 1.0),
-        ("TranslationInputY", "root_trans_y", 1.0),
-        ("TranslationInputZ", "root_trans_z", 1.0),
-        ("HipInputX", "root_rot_x", 1.0),
-        ("HipInputY", "root_rot_y", 1.0),
-        ("HipInputZ", "root_rot_z", 1.0),
-        ("SpineInputX", "pelvis_to_lumbar1_intermediate", 1.0),
-        ("SpineInputY", "lumbar1_intermediate_to_lumbar1", 1.0),
-        ("TorsoInput", "lumbar3_to_thorax1", 1.0),
-        ("LEInput", "upper_arm_left_to_forearm_left_intermediate", 1.0),
-        ("LFInput", "forearm_left_intermediate_to_forearm_left", 1.0),
-        ("LScapInputX", "thorax3_to_scapula_left_intermediate", 1.0),
-        ("LScapInputY", "scapula_left_intermediate_to_scapula_left", 1.0),
-        ("LSInputX", "scapula_left_to_upper_arm_left_gimbal_z", 1.0),
-        ("LSInputY", "upper_arm_left_gimbal_z_to_upper_arm_left_gimbal_y", 1.0),
-        ("LSInputZ", "upper_arm_left_gimbal_y_to_upper_arm_left", 1.0),
-        ("LWInputX", "forearm_left_to_hand_left_intermediate", 1.0),
-        ("LWInputY", "hand_left_intermediate_to_hand_left", 1.0),
-        ("REInput", "upper_arm_right_to_forearm_right_intermediate", 1.0),
-        ("RFInput", "forearm_right_intermediate_to_forearm_right", 1.0),
-        ("RScapInputX", "thorax3_to_scapula_right_intermediate", 1.0),
-        ("RScapInputY", "scapula_right_intermediate_to_scapula_right", 1.0),
-        ("RSInputX", "scapula_right_to_upper_arm_right_gimbal_z", 1.0),
-        ("RSInputY", "upper_arm_right_gimbal_z_to_upper_arm_right_gimbal_y", 1.0),
-        ("RSInputZ", "upper_arm_right_gimbal_y_to_upper_arm_right", 1.0),
-        ("RWInputX", "forearm_right_to_hand_right_intermediate", 1.0),
-        ("RWInputY", "hand_right_intermediate_to_hand_right", 1.0),
-    ]
+    channel_to_joint: dict[str, str] = {
+        "TranslationInputX": "root_trans_x",
+        "TranslationInputY": "root_trans_y",
+        "TranslationInputZ": "root_trans_z",
+        "HipInputX": "root_rot_x",
+        "HipInputY": "root_rot_y",
+        "HipInputZ": "root_rot_z",
+        "SpineInputX": "pelvis_to_lumbar1_intermediate",
+        "SpineInputY": "lumbar1_intermediate_to_lumbar1",
+        "TorsoInput": "lumbar3_to_thorax1",
+        "LEInput": "upper_arm_left_to_forearm_left_intermediate",
+        "LFInput": "forearm_left_intermediate_to_forearm_left",
+        "LScapInputX": "thorax3_to_scapula_left_intermediate",
+        "LScapInputY": "scapula_left_intermediate_to_scapula_left",
+        "LSInputX": "scapula_left_to_upper_arm_left_gimbal_z",
+        "LSInputY": "upper_arm_left_gimbal_z_to_upper_arm_left_gimbal_y",
+        "LSInputZ": "upper_arm_left_gimbal_y_to_upper_arm_left",
+        "LWInputX": "forearm_left_to_hand_left_intermediate",
+        "LWInputY": "hand_left_intermediate_to_hand_left",
+        "REInput": "upper_arm_right_to_forearm_right_intermediate",
+        "RFInput": "forearm_right_intermediate_to_forearm_right",
+        "RScapInputX": "thorax3_to_scapula_right_intermediate",
+        "RScapInputY": "scapula_right_intermediate_to_scapula_right",
+        "RSInputX": "scapula_right_to_upper_arm_right_gimbal_z",
+        "RSInputY": "upper_arm_right_gimbal_z_to_upper_arm_right_gimbal_y",
+        "RSInputZ": "upper_arm_right_gimbal_y_to_upper_arm_right",
+        "RWInputX": "forearm_right_to_hand_right_intermediate",
+        "RWInputY": "hand_right_intermediate_to_hand_right",
+    }
 
     coord_names: list[str] = []
     dof_indices: list[int] = []
@@ -152,7 +152,8 @@ def get_drake_canonical_joint_map(plant: Any) -> EngineJointMap:
         plant.HasJointActuatorNamed
     )
 
-    for cname, target_name, sign in mapping_spec:
+    for cname, target_name in channel_to_joint.items():
+        sign = 1.0
         coord_names.append(cname)
         signs.append(sign)
 
