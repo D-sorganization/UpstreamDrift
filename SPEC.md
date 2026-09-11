@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Reconciling In-App Help System and Content Mappings (#8843)
+
+Reconcile the in-app help system root paths and UI component documentation mappings:
+- Root Documentation Paths: Point `USER_MANUAL_PATH` in `src/shared/python/gui_pkg/help_system.py` to the genuine `docs/user_guide/user_manual.md` path (fixing `# User Manual Not Found`), and replace invalid `../USER_MANUAL.md` links with relative paths to `user_manual.md`.
+- Topic and Component Resolution: Reconcile `UI_HELP_TOPICS`, `FEATURE_HELP`, and `HELP_TOPICS` in `src/shared/python/gui_pkg/help_content.py` so that all 35 registered UI components resolve to non-null feature help entries. Add entries for `getting_started`, `docker_setup`, `wsl_setup`, `matlab_integration`, `data_export`, `urdf_generator`, `model_explorer`, `ball_flight`, and `configuration`.
+- Dynamic Help File Search: Extend `get_help_topic_content` in `src/shared/python/gui_pkg/help_system.py` to search `docs/help/` and `docs/user_guide/` by topic identifier and registered `help_file` name, falling back to manual section extraction. Update `list_help_topics` to include user guide documentation files.
+- Regression Verification: Assert `USER_MANUAL_PATH` exists, all 35 UI components resolve help content, and all registered topics load without error in `tests/unit/launchers/test_help_paths_and_theme_menu.py`.
+
 ## Reconciling Analysis Tools Help Documentation With Real APIs (#8844)
 
 Reconcile `docs/help/analysis_tools.md` to document real UpstreamDrift analysis APIs, replacing fabricated classes and incorrect import roots:
