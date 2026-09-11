@@ -1,6 +1,25 @@
 # Simscape Tour-Average Fit Continuation
 
-## Active Horizon Execution & Parity Turnover (2026-09-11 Evening Update)
+## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
+
+### 0. Run 04 Active Execution (`prefix-750ms-sextic-04`, DeskComputer)
+
+- **Launch Architecture**:
+  - Resolved Windows OpenSSH child-process termination by spawning via `Invoke-CimMethod -ClassName Win32_Process -MethodName Create`, decoupling long-running optimization from SSH session tokens.
+  - Remote runtime worktree (`UpstreamDrift-simscape-tour-runtime`) cleanly synchronized to commit `e511a6757`.
+  - Directory: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-04`.
+  - Warm-start: Directly transferred from certified Candidate 75 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-75-pkg/candidate_75_package.json`, SHA256: `2369de3a70f7f6961fd00d8678d06abae77d6cb88cfbe232a771633152fa442f`).
+- **Baseline Replay Verification (0.75 s Horizon)**:
+  - Evaluation #1 (Zero Effort): 1421.30 mm marker RMS.
+  - Evaluation #2 (Transferred Candidate 75): **28.53 mm** whole-window marker RMS.
+  - Early retention on $[0, 0.60\text{ s}]$ preserved at **9.37 mm** (PASS, gate $\le 12.0$ mm).
+- **Optimization Parameters**:
+  - `--duration 0.75 --basis sextic`
+  - `--finite-difference-step 0.001 --max-nfev 250`
+  - Balanced weights: `--terminal-weight 8.0 --club-marker-weight 25.0 --smoothness-weight 0.08 --pelvis-yaw-weight 50.0 --pelvis-yaw-max-error-pct 5.0`
+- **Execution Telemetry**:
+  - Live heartbeat logging active on every evaluation with fast rollout rate of $\approx 2.7\text{ s}$ per evaluation.
+  - Target Gates: Early retention $\le 12.0$ mm, Whole window $\le 25.0$ mm, Terminal RMS $\le 35.0$ mm, Clubhead terminal RMS $\le 60.0$ mm, Pelvis yaw error $< 5.0\%$.
 
 ### 1. Run 03 Audit & 750 ms Horizon Analysis (`prefix-750ms-sextic-03`, DeskComputer)
 
