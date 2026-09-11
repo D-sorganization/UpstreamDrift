@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Automated Cross-Engine Parity Benchmark Suite and Tolerance Gate (#9969)
+
+Implement cross-engine forward-dynamics parity verification and tolerance gating across Simscape, MuJoCo, Pinocchio, and Drake (`tests/cross_engine/test_four_engine_parity.py`):
+- `test_four_engine_parity.py`: Core parity benchmark suite asserting that when driven by identical certified 6th-order continuous Bernstein polynomial torque profiles \(\theta^* \in \mathbb{R}^{27 \times 7}\), Simscape Multibody oracle baseline and native physics engines (MuJoCo, Pinocchio, Drake) produce equivalent forward-dynamics trajectories.
+- Parity Tolerance Gate: Enforces strict physical equivalence thresholds matching `CROSS_ENGINE_GOLF_EQUIVALENCE_SPEC.md` §5.1: grip point trajectory RMSE \(< 5.0\,\text{mm}\), clubhead point trajectory RMSE \(< 10.0\,\text{mm}\).
+- Dynamic Availability Guards: Integrates `is_mujoco_available()`, `is_pinocchio_available()`, and `is_drake_available()` allowing test suites to execute gracefully on any host platform by skipping missing native shared libraries without false-positive failures.
+- Simscape Canonical Baseline Fixture: Checks in canonical ground-truth trajectory fixture `tests/fixtures/cross_engine_parity/simscape_canonical_baseline.npz` enabling bit-accurate, deterministic parity evaluation in headless CI and offline environments.
 ## Drake MultibodyPlant Continuous Torque Harness (#9968)
 
 Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the Drake MultibodyPlant simulation harness (`src.engines.physics_engines.drake.python`):
