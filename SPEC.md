@@ -18,6 +18,16 @@ Implement 6th-order continuous Bernstein and power polynomial torque forward dyn
 - Runtime availability probe (`is_pinocchio_available`): Cleanly detects presence of functional compiled Pinocchio C++ bindings versus missing/mocked runtimes.
 - Verification & Test Suite: Unit tests validating endpoint interpolation, partition of unity, power-conversion equivalence, energy conservation on harmonic oscillators, and parameter bounds under `tests/unit/engines/pinocchio/`.
 
+## MuJoCo Continuous-Torque Simulation Harness and Parity Driver (#9966)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the MuJoCo physics simulation harness (`src.engines.physics_engines.mujoco.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point evaluating continuous 6th-order Bernstein basis torques through MuJoCo's process-global `mjcb_control` callback. Supports conversion to canonical power polynomial basis at instantiation for $O(1)$ Horner evaluation inside the integration step loop.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`, `metadata`).
+- `PolynomialTorqueDriver`: Context manager safely scoping process-global `mjcb_control` registration with bounds checks, control clipping, and support for flat array, matrix, or `PiecewisePolynomialTorque` inputs.
+- Runtime availability probe (`is_mujoco_available`): Cleanly detects presence of functional compiled MuJoCo C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit and parity tests under `tests/unit/engines/mujoco/` (`pytestmark = pytest.mark.unit`) validating parameter bounds, Bernstein evaluation properties, control range clipping, Horner equivalence, and forward dynamics trajectories.
+
+
 ## Document #8556-Conditional Parameters in Model Completion Falsification Matrix (#8920)
 
 Document in `MODEL_COMPLETION_FALSIFICATION_MATRIX.md` that #8556 serves not only as a human-validation gate but also supplies parameters on which three model-tier claims are conditionally anchored:
