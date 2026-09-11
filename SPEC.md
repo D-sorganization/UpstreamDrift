@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Pinocchio Articulated-Body Continuous Torque Harness (#9967)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the Pinocchio rigid-body simulation harness (`src.engines.physics_engines.pinocchio.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point integrating ABA forward dynamics with fixed-step RK4 matching Simscape timegrids. Supports 6th-order continuous Bernstein basis torque evaluation via converted Horner schemes and direct basis calculation.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`).
+- `EngineJointMap` & `get_pinocchio_canonical_joint_map`: Resolves 27 canonical actuation channels into native Pinocchio generalized coordinate velocity indices (`idx_v`) and sign conventions.
+- Runtime availability probe (`is_pinocchio_available`): Cleanly detects presence of functional compiled Pinocchio C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit tests validating endpoint interpolation, partition of unity, power-conversion equivalence, energy conservation on harmonic oscillators, and parameter bounds under `tests/unit/engines/pinocchio/`.
+
 ## MuJoCo Continuous-Torque Simulation Harness and Parity Driver (#9966)
 
 Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the MuJoCo physics simulation harness (`src.engines.physics_engines.mujoco.python`):
