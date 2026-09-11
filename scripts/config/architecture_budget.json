@@ -433,6 +433,15 @@
       "expires_on": "2026-10-31"
     },
     {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_drake",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: fit_swing_drake coordinates optimization objective, parameter bounds, SLSQP minimize loop, and result validation.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "src/tools/model_converter/urdf_exporter.py",
       "symbol": "_add_revolute_joint",
       "rule": "parameters",
