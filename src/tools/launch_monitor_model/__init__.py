@@ -226,6 +226,14 @@ from shared.python.launch_monitor.profiles import (
     normalize_header,
 )
 from src.tools.launch_monitor_model.project import LaunchMonitorProject
+from src.tools.launch_monitor_model.launch_monitor_data import (
+    AGGREGATE_EXPORT_PROFILE_ID,
+    LAUNCH_MONITOR_DATA_PUBLISHER,
+    SHOT_EXPORT_PROFILE_ID,
+    ExportKind,
+    detect_launch_monitor_data_export,
+    import_launch_monitor_data_export,
+)
 from shared.python.launch_monitor.relationships import (
     CorrelationResult,
     DependencyEdge,
@@ -285,6 +293,7 @@ from shared.python.launch_monitor.treatment import (
 )
 
 __all__ = [
+    "AGGREGATE_EXPORT_PROFILE_ID",
     "IDENTITY_COLUMNS",
     "METRICS",
     "PROFILES",
@@ -320,6 +329,7 @@ __all__ = [
     "FlexibleAnalysisRequest",
     "FlexibleAnalysisResult",
     "ExpectedStrokesBaselineLike",
+    "ExportKind",
     "ExpectedStrokesBaselineV2",
     "ExpectedStrokesStateLike",
     "ExpectedStrokesStateV2",
@@ -329,6 +339,7 @@ __all__ = [
     "ImportOptions",
     "ImportProfile",
     "ImportedSession",
+    "LAUNCH_MONITOR_DATA_PUBLISHER",
     "LaunchMonitorProject",
     "LAUNCH_MONITOR_CONFORMANCE_BUNDLE_VERSION",
     "LaunchMonitorConformanceBundleV1",
@@ -367,6 +378,7 @@ __all__ = [
     "PlayerCovariationScanResultV1",
     "PlayerIdentityV2",
     "PooledAssociationV1",
+    "SHOT_EXPORT_PROFILE_ID",
     "SessionIdentityV2",
     "SourceFileReferenceV2",
     "RegressionEstimate",
@@ -402,10 +414,12 @@ __all__ = [
     "compute_pca",
     "compute_vif",
     "contract_v2_json_schema",
+    "detect_launch_monitor_data_export",
     "detect_profile",
     "dataset_content_sha256",
     "dataset_job_contract_json_schema",
     "fit_predictive_model",
+    "import_launch_monitor_data_export",
     "import_session",
     "load_private_corpus",
     "launch_monitor_conformance_bundle_json_schema",

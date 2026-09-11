@@ -54,6 +54,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Background discovery, stable named bindings, immutable plan revisions and optional wizard entry reuse the rig pipeline.
 - **Next step:** Installed package passes; complete #9950/#9953 dependency and protected PR delivery.
 
+### DL-#8360 · Bounded Launcher Splash and Optional-Provider Degradation
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8360 (related #8339, #8358, #8359)
+- **Branch:** conductor/issue-8360
+- **PR:** #9951
+- **Paths:** src/launchers/startup.py, src/launchers/startup_phases.py, src/launchers/startup_session.py, src/launchers/startup_failure_dialog.py, src/launchers/upstream_drift_launcher_main.py, src/launchers/launcher_orchestrator.py
+- **Started:** 2026-09-10
+- **Last verified:** 2026-09-10 (30 phase tests, 23 session/worker/dialog tests, orchestrator and related launcher suites pass locally on Windows; pre-commit, ruff, ratchet and size budget pass)
+- **Summary:** Bounded, timestamped startup phases with a StartupSession watchdog; optional Tools/Rate provider degrades the shell instead of stalling the splash; Retry / Continue / Copy diagnostics / Close dialog replaces quit-on-error.
+- **Evidence:** Deterministic tests inject successful, missing, exception-raising and never-completing providers and prove bounded splash lifetime, degraded shell startup, stale-generation isolation and deleted-widget guards.
+- **Next step:** Open the PR and run the clean-checkout Windows smoke (editable-Tools, vendored-Tools, absent-Tools, broken-Rate).
+
 ### DL-#9926 · Unified Model and Video Analysis
 
 - **State:** shipped
@@ -840,73 +854,50 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** `#9533`
 - **Branch:** `claude/issue-9533-test-extras`
-- **PR:** #9716 (open, in_review)
+- **PR:** #9716
 - **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`, `requirements*.lock`, `environment.yml`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`289b3aa`)
-- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools` and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed them and ~24 CI tests failed on import. Both now resolve through the `dev` extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml` workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR, since Windows/WSL cannot regenerate correctly (#9533).
-- **Next step:** Dispatch `.github/workflows/lock-refresh.yml` from `main` once this PR merges, then confirm the `ci-standard.yml` dependency-consistency freshness gate and the 24 previously failing tests go green.
+- **Last verified:** 2026-09-08
+- **Summary:** `openpyxl` and `imageio` resolve through `dev` extra; lock regeneration delegated to `lock-refresh.yml`.
 
 ### DL-#9733 · Fail Fast on the Uninitialized Vendored Tools Fallback
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #9733
 - **Branch:** `claude/issue-9733-fail-fast`
-- **PR:** #9743 (open; `Fixes #9733`)
+- **PR:** #9743
 - **Paths:** `src/__init__.py`, `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`160f9b759`)
-- **Summary:** When `vendor/ud-tools` is uninitialized, `src/__init__.py`'s
-  fallback registration mistook UpstreamDrift's own aliased `shared.python` copy
-  for an installed Tools distribution, installed `_VendoredToolsFallbackFinder`,
-  and livelocked pytest collection in meta-path `find_spec` recursion. The
-  registration probe now raises an actionable ImportError naming the remediation
-  command before any finder is installed; the initialized path is unchanged.
-- **Next step:** Record CI on PR #9743; on green, protected squash merge
-  closes #9733.
+- **Last verified:** 2026-09-08
+- **Summary:** Uninitialized `vendor/ud-tools` raises actionable ImportError naming remediation command before finder installation.
+
+## Shipped (Last 90 Days)
 
 ### DL-#8943 · Cache API CPU Work Off the Event Loop
 
-- **State:** in_review
-- **Owner:** W3_8943 (agent `claude`)
+- **State:** shipped
+- **Owner:** claude
 - **Issue:** #8943
 - **Branch:** `claude/issue-8943-api-cache`
-- **PR:** #9727 (open)
-- **Paths:** `src/api/routes/analysis_plots.py`, `src/api/routes/model_explorer.py`,
-  `src/api/routes/models.py`, `src/api/routes/launch_monitor_analytics.py`,
-  `src/api/routes/_route_utils.py`
+- **PR:** #9727
+- **Paths:** `src/api/routes/analysis_plots.py`, `src/api/routes/model_explorer.py`, `src/api/routes/models.py`, `src/api/routes/launch_monitor_analytics.py`, `src/api/routes/_route_utils.py`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`SELF`)
-- **Summary:** `GET /analysis/plot-data/{plot_type}` now builds the
-  `AnalysisOrchestrator` once per recorder identity (LRU invalidated when the
-  recorder is replaced) and serves per-plot-type results from an LRU, computed
-  under `anyio.to_thread.run_sync`. Model-explorer and models URDF handlers read
-  and parse through `functools.lru_cache` helpers keyed by
-  `(resolved_path, st_mtime_ns, st_size)` (shared `urdf_file_key` helper), also
-  run in a worker thread. `launch_monitor_analytics` defers `import pandas` into
-  its seven handlers so API boot no longer pays the pandas import.
-- **Next step:** Merge the PR and confirm CI route/lazy-import gates pass on
-  `main`.
+- **Last verified:** 2026-09-08
+- **Summary:** `GET /analysis/plot-data/{plot_type}` builds orchestrator once per recorder identity and serves results from an LRU off the event loop. Model explorer and models URDF handlers use LRU cache in worker threads.
 
 ### DL-#9631 · Vendor Pin Carries the Tools#5048 Alias-Predicate Fix
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** claude
-- **Issue:** `#9631`
+- **Issue:** #9631
 - **Branch:** `claude/issue-9631-vendor-pin`
-- **PR:** #9722 (open; `Fixes #9631`)
+- **PR:** #9722
 - **Paths:** `vendor/ud-tools`, `tests/unit/repo_hygiene/test_pinned_import_alias_contract.py`
-- **Started:** `2026-09-08`
-- **Last verified:** `2026-09-08` (`e4c47751f`)
-- **Summary:** The `vendor/ud-tools` pin `eab74a901a` already carries the Tools#5049
-  flattened-install fix (`f8b94bfe` is an ancestor), so the v2.1.2 wheel defect is fixed at
-  the pin; this entry lands the repository's own TDD contract test asserting the pinned
-  predicate in both layouts and records that the pin must not be rewound.
-- **Next step:** maintainer re-cuts the 2.1.3 release via tag/workflow dispatch after the PR merges.
-
-## Shipped (Last 90 Days)
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08
+- **Summary:** Pinned `vendor/ud-tools` carries Tools#5049 flattened-install fix; added TDD contract test asserting pinned predicate in both layouts.
