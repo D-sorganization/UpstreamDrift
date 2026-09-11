@@ -32,7 +32,7 @@ from src.shared.python.motion_matching.validate_theta import validate_theta
 
 from .torque_driver import PolynomialTorqueDriver
 
-ModelVariant = Literal["upper", "full", "advanced"]
+ModelVariant = Literal["upper", "full", "advanced", "canonical"]
 
 __all__ = [
     "SimOptions",
@@ -52,11 +52,13 @@ _GRIP_BODY_BY_VARIANT: dict[str, str] = {
     "upper": "club",
     "full": "club",
     "advanced": "club",
+    "canonical": "club_grip",
 }
 _CLUBHEAD_BODY_BY_VARIANT: dict[str, str] = {
     "upper": "clubhead",
     "full": "clubhead",
     "advanced": "clubhead",
+    "canonical": "clubhead",
 }
 
 
@@ -180,8 +182,14 @@ def _load_model_xml(variant: ModelVariant) -> str:
         )
 
         return ADVANCED_BIOMECHANICAL_GOLF_SWING_XML
+    if variant == "canonical":
+        from src.engines.physics_engines.mujoco._golf_swing_canonical_xml import (
+            CANONICAL_GOLF_HUMANOID_XML,
+        )
+
+        return CANONICAL_GOLF_HUMANOID_XML
     raise ValueError(
-        f"unknown variant {variant!r}; expected 'upper', 'full', or 'advanced'"
+        f"unknown variant {variant!r}; expected 'upper', 'full', 'advanced', or 'canonical'"
     )
 
 
