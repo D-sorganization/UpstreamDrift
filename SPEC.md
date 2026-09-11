@@ -12,6 +12,11 @@ outside the source checkout; synthetic tests do not establish physical accuracy.
 
 Replace `np.linalg.norm` with `np.sqrt(np.einsum)` in joint coordinate system parity calculation for measurable performance improvement.
 
+## Optimize Euclidean Distance in Coaching Measurements (Spec-Exempt: Micro-Optimization)
+
+Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` in `src/motion_capture/coaching/measurements.py` for multi-dimensional distance calculations to bypass `np.linalg.norm` overhead.
+
+
 ## Impact Shaft Provider Integration (#9912)
 
 The exact vendor/ud-tools pin provides golf_club.distributed_shaft/1 through the
@@ -5797,3 +5802,4 @@ regressions pass. Missing legacy matrix factories use exact SDK class
 factories without replacing native exports. The install probe imports the
 consumer; matrix compatibility on 3.8 does not imply solver qualification.
 The general optimal-control extra retains its separate version range (#9842).
+- Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` in `src/motion_capture/coaching/measurements.py` to optimize multi-dimensional distance calculation. (spec-exempt: micro-optimization)
