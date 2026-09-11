@@ -632,6 +632,8 @@ def simulate_with_coefficients(  # noqa: C901
         rk4_coeffs = coeffs
 
     # ----- Initial state ----------------------------------------------- #
+    q0: npt.NDArray[np.float64]
+    qd0: npt.NDArray[np.float64]
     if initial_pose is None:
         q0 = pin.neutral(model)
         qd0 = np.zeros(n_joints, dtype=np.float64)
@@ -639,12 +641,12 @@ def simulate_with_coefficients(  # noqa: C901
         q0_in = initial_pose.get("q")
         qd0_in = initial_pose.get("qd")
         q0 = (
-            np.asarray(q0_in, dtype=np.float64).copy()
+            np.asarray(q0_in, dtype=np.float64).reshape(-1).copy()
             if q0_in is not None
             else pin.neutral(model)
         )
         qd0 = (
-            np.asarray(qd0_in, dtype=np.float64).copy()
+            np.asarray(qd0_in, dtype=np.float64).reshape(-1).copy()
             if qd0_in is not None
             else np.zeros(n_joints, dtype=np.float64)
         )
@@ -656,6 +658,7 @@ def simulate_with_coefficients(  # noqa: C901
         raise ValueError(msg)
 
     # ----- Allocate output buffers ------------------------------------- #
+    # Pinocchio keeps a fixed-step *integration clock*, not an output grid:
     n_steps = int(round(opts.t_final / opts.dt))
     if not np.isclose(n_steps * opts.dt, opts.t_final, rtol=1e-9, atol=1e-12):
         n_steps = int(np.ceil(opts.t_final / opts.dt))
@@ -686,12 +689,14 @@ def simulate_with_coefficients(  # noqa: C901
     t_start = _time.perf_counter()
 
     q = q0.copy()
-    qd = qd0.copy()
+    qd: npt.NDArray[np.float64] = qd0.copy()
     for i in range(1, n_samples):
         t_i = t_grid[i - 1] - opts.t0
-        q, qd, tau_i, k1_qdd = _rk4_step(
+        q_next, qd_next, tau_i, k1_qdd = _rk4_step(
             pin, model, data, rk4_coeffs, q, qd, t_i, opts.dt
         )
+        q = q_next
+        qd = qd_next
         if not (np.all(np.isfinite(q)) and np.all(np.isfinite(qd))):
             msg = (
                 f"Integration diverged at step {i} (t={t_grid[i]:.4f}); "
