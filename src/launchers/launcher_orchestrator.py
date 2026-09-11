@@ -33,10 +33,21 @@ class LauncherOrchestrator:
         self.build_available_models()
 
     def init_registry(self, startup_results: StartupResults | None) -> None:
-        """Initialize the model registry from startup results or lazy fallback."""
-        if startup_results and startup_results.registry is not None:
+        """Initialize the model registry from startup results or lazy fallback.
+
+        The lazy fallback runs only when *no* results were supplied. Results
+        whose registry is ``None`` mean the async worker already failed or
+        timed out on that phase; repeating the load on the GUI thread would
+        re-block the very startup the worker was protecting (issue #8360).
+        """
+        if startup_results is not None:
             self.registry = startup_results.registry
-            logger.info("Using pre-loaded model registry from async startup")
+            if self.registry is not None:
+                logger.info("Using pre-loaded model registry from async startup")
+            else:
+                logger.warning(
+                    "Async startup delivered no model registry; running degraded"
+                )
             return
 
         try:
@@ -47,10 +58,19 @@ class LauncherOrchestrator:
             self.registry = None
 
     def init_engine_manager(self, startup_results: StartupResults | None) -> None:
-        """Initialize the engine manager from startup results or lazy fallback."""
-        if startup_results and startup_results.engine_manager is not None:
+        """Initialize the engine manager from startup results or lazy fallback.
+
+        Mirrors :meth:`init_registry`: supplied results are authoritative,
+        even when the worker's engine phase degraded to ``None``.
+        """
+        if startup_results is not None:
             self.engine_manager = startup_results.engine_manager
-            logger.info("Using pre-loaded engine manager from async startup")
+            if self.engine_manager is not None:
+                logger.info("Using pre-loaded engine manager from async startup")
+            else:
+                logger.warning(
+                    "Async startup delivered no engine manager; running degraded"
+                )
             return
 
         try:
