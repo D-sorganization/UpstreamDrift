@@ -2,22 +2,33 @@
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Evening Update)
 
-### 1. Active Run: `prefix-750ms-sextic-03` (DeskComputer)
+### 1. Run 03 Audit & 750 ms Horizon Analysis (`prefix-750ms-sextic-03`, DeskComputer)
 
-- **Status**: Actively executing on DeskComputer under supervised Python PID `93544` and MATLAB Engine PID `83752`.
-- **Run Directory**: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-03`
-- **Telemetry**: Evaluated >316 iterations, ~2.8-3.1s per forward Simscape rollout, 3.95 GB RAM, >1317s MATLAB CPU.
-- **Biomechanical Braking Profile**: Warm-started from Candidate 203 with HipInputZ control points adjusted (`[-14.87, -22.48, -30.52, -36.0, -24.0, -4.0, +16.0] Nm`) to decelerate pelvis rotation near top of backswing and hit target $62.5^\circ$ ($\Delta\theta < 2\%$, satisfying strictly $< 5.0\%$ gate).
-- **Gradient Resolution Fix**: `--finite-difference-step 0.001` (replacing the sub-noise $10^{-5}$ step that caused premature `xtol` stagnation). Completed Jacobian 1, took first trust-region step (Evaluation #150 at 199.47 mm RMSE), currently advancing through Jacobian 2.
-- **Supervision**: Autonomous background task actively tracking heartbeat, configured for automatic result extraction and 5-gate audit upon termination.
+- **Execution**: Completed 774 forward Simscape rollouts on DeskComputer, terminated on `xtol`.
+- **Top Evaluations by Marker RMSE**:
+  - Evaluation #609: **179.51 mm** whole-window marker RMSE (preserved braking profile on HipInputZ).
+  - Evaluation #406: **195.86 mm** marker RMSE.
+  - Evaluation #603: **196.34 mm** marker RMSE.
+  - Evaluation #150: **199.47 mm** marker RMSE.
+- **Direct 750 ms Continuation from Candidate 75 Replay (Gold Standard Baseline)**:
+  - **Early Retention [0, 0.60 s]**: **9.37 mm** (PASS, gate $\le 12.0$ mm).
+  - **Whole Window [0, 0.75 s]**: **28.53 mm** (narrowly missing 25.0 mm gate).
+  - **Terminal RMS (0.75 s)**: **135.28 mm** (target $\le 35.0$ mm).
+  - **Clubhead Terminal RMS (0.75 s)**: **170.81 mm** (target $\le 60.0$ mm).
+  - **Pelvis Yaw Residual**: Model $38.87^\circ$ vs Target $62.46^\circ$ (Diff $-23.59^\circ$, error **37.77%**).
+- **Key Biomechanical & Numerical Finding**:
+  - In a single degree-6 polynomial representation across the swing, late-horizon torque adjustments cannot be made by localized control point edits without coupling into earlier times via the global Bernstein basis polynomials ($B_{i,6}(t/T)$ has wide global support).
+  - To decelerate the pelvis from $-530^\circ/\text{s}$ at $0.70\text{ s}$ down to $-41^\circ/\text{s}$ at $0.75\text{ s}$ to hit target $62.46^\circ$, an angular deceleration of $\approx +10,600^\circ/\text{s}^2$ ($\approx +28\text{ Nm}$ net braking torque on HipInputZ) is required.
+  - Continuation to 0.75 s must warm-start strictly from Candidate 75 with balanced weights (`terminal_weight=8.0`, `pelvis_yaw_weight=50.0`, `smoothness_weight=0.08`) and finite-difference step `0.001` to prevent gradient noise stagnation while protecting the 9.37 mm early retention corridor.
 
-### 2. Prior Milestone: Candidate 203 (0.75 s, Run 2) Audit
+### 2. Prior Milestone: Candidate 75 (0.70 s) Certified Audit
 
-- **Whole Window [0, 0.75 s]**: **28.53 mm** marker RMSE.
-- **Early Retention [0, 0.60 s]**: **PASS** (maintained).
-- **Terminal Frame Metrics**: Terminal RMS **135.28 mm**, clubhead terminal RMS **170.81 mm**.
-- **Pelvis Yaw Residual**: Model $38.87^\circ$ vs Target $62.46^\circ$ (Diff $-23.59^\circ$, error **37.76%** due to continuous accelerating torque with zero deceleration).
-- **Immutable Package**: Saved to `C:/Users/diete/SimscapeTour9921/candidates/candidate-seed-03/candidate_seed_03_package.json`.
+- **Early Retention [0, 0.60 s]**: **9.37 mm** marker RMSE (PASS, gate $\le 12.0$ mm).
+- **Whole Window [0, 0.70 s]**: **15.64 mm** marker RMSE (PASS, gate $\le 25.0$ mm).
+- **Pelvis Yaw Residual**: Target $66.59^\circ$, Model $64.51^\circ$, Diff $-2.08^\circ$, Error **3.12%** (PASS, gate strictly $< 5.0\%$).
+- **Terminal RMS**: **54.86 mm** (vs 35 mm gate).
+- **Clubhead Terminal RMS**: **60.75 mm** (vs 60 mm gate).
+- **Immutable Package**: Saved to `C:/Users/diete/SimscapeTour9921/candidates/candidate-75-pkg/candidate_75_package.json`.
 
 ### 3. Canonical 25-DOF Floating Humanoid MuJoCo Model Landed (Commit `7e3555c2a`)
 
