@@ -1,6 +1,40 @@
 # Simscape Tour-Average Fit Continuation
 
-## Coordinated Matching Recovery & Gate Verification (2026-09-11)
+## Active Horizon Execution & Parity Turnover (2026-09-11 Evening Update)
+
+### 1. Active Run: `prefix-750ms-sextic-03` (DeskComputer)
+
+- **Status**: Actively executing on DeskComputer under supervised Python PID `93544` and MATLAB Engine PID `83752`.
+- **Run Directory**: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-03`
+- **Telemetry**: Evaluated >125 iterations, ~2.5s per forward Simscape rollout, 3.9 GB RAM.
+- **Biomechanical Braking Profile**: Warm-started from Candidate 203 with HipInputZ control points adjusted (`[-14.87, -22.48, -30.52, -36.0, -24.0, -4.0, +16.0] Nm`) to decelerate pelvis rotation near top of backswing and hit target $62.5^\circ$ ($\Delta\theta < 2\%$, satisfying strictly $< 5.0\%$ gate).
+- **Gradient Resolution Fix**: `--finite-difference-step 0.001` (replacing the sub-noise $10^{-5}$ step that caused premature `xtol` stagnation).
+
+### 2. Prior Milestone: Candidate 203 (0.75 s, Run 2) Audit
+
+- **Whole Window [0, 0.75 s]**: **28.53 mm** marker RMSE.
+- **Early Retention [0, 0.60 s]**: **PASS** (maintained).
+- **Terminal Frame Metrics**: Terminal RMS **135.28 mm**, clubhead terminal RMS **170.81 mm**.
+- **Pelvis Yaw Residual**: Model $38.87^\circ$ vs Target $62.46^\circ$ (Diff $-23.59^\circ$, error **37.76%** due to continuous accelerating torque with zero deceleration).
+- **Immutable Package**: Saved to `C:/Users/diete/SimscapeTour9921/candidates/candidate-seed-03/candidate_seed_03_package.json`.
+
+### 3. Canonical 25-DOF Floating Humanoid MuJoCo Model Landed (Commit `7e3555c2a`)
+
+- **Topology**: Exact 1-to-1 match of Simscape `GolfSwing3D_Kinetic.slx` and `golf_humanoid_topology.yaml`:
+  - 6-DOF floating base (`pelvis_floating`)
+  - 19 internal revolute joints in exact `q_order`
+  - 19 `<motor>` actuators with ascending-order polynomial driver
+  - Closed dual-arm loop via `<equality><weld>` between right hand and club grip
+- **Modules**:
+  - `src/engines/physics_engines/mujoco/_golf_swing_canonical_xml.py`
+  - Registered in `scripts/build_humanoid_models.py` (passes `--check`)
+  - Supported via `SimOptions(variant="canonical")` in `simulate_with_coefficients`
+  - Unit test: `test_canonical_humanoid_simulate_happy_path` passing in `test_simulate.py`.
+- **Visual Overlays**:
+  - Side-by-Side: `canonical_simscape_vs_mujoco_humanoid_overlay.gif`
+  - Superimposed: `canonical_simscape_vs_mujoco_superimposed_overlay.gif`
+
+## Coordinated Matching Recovery & Gate Verification (2026-09-11 Earlier Summary)
 
 Following the Codex-Gemini coordination review ([#9921](https://github.com/D-sorganization/UpstreamDrift/issues/9921#issuecomment-5640205185) & [#9964](https://github.com/D-sorganization/UpstreamDrift/issues/9964#issuecomment-5640205414)), the work split and gate verification standards have been hardened:
 
