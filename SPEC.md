@@ -1,5 +1,11 @@
 # SPEC.md — Repository Specification Document
 
+## Native R2025b Simscape Tour-Driver Matching (#9948)
+
+Develop native R2025b Simscape tour-driver matching and replay evidence under epic #9921.
+Provide bounded prefix fitting with verified archives, strict function and line budgets,
+suite marker categorization, and refreshed motion-matching leaderboard evidence.
+
 ## Installed Capture Runtime (#9949)
 
 The installed calibration worker resolves only its owning distribution's bundled
