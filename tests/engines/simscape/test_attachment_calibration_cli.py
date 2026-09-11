@@ -8,6 +8,8 @@ import sys
 import numpy as np
 import pytest
 
+pytestmark = [pytest.mark.integration]
+
 ROOT = Path(__file__).resolve().parents[3]
 RUNNER = (
     ROOT
