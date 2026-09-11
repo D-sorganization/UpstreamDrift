@@ -1,5 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## Adopting Shared Help Menu and Calculation Sheet Affordances in GUI Tools (#8846)
+
+Adopt `src/launchers/help_menu.py:build_help_menu` across GUI tool windows and provide direct navigation to calculation sheets and model documentation:
+- Reusable Help Menu Extension: Enhance `build_help_menu(menubar, parent, *, show_shortcuts=None, doc_target=None)` with support for an optional `doc_target: tuple[str, str | Path] | None` parameter, creating a primary action that directly launches the tool's calculation sheet or model document in the in-app document reader (`show_document`). Add helper `open_model_doc(path, parent)`.
+- Tool Window Adoption: Adopt `build_help_menu` with dedicated calculation sheets and model docs across standalone tool windows:
+  - `BallFlightWindow` (`src/tools/ball_flight_gui/gui.py`): links to `docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md`.
+  - `BunkerShotWindow` (`src/tools/bunker_shot_gui/gui.py`): links to `docs/bunkershot3d/credibility.md`.
+  - `PuttingGreenWindow` (`src/tools/putting_green_gui/gui.py`): links to `docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md`.
+  - `SwingFlightWindow` (`src/tools/swing_flight_pipeline/gui.py`): links to `docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md`.
+  - `EnvironmentWindow` (`src/tools/golf_environment/gui.py`): links to `docs/architecture/PROJECT_MAP.md`.
+  - `VideoAnalyzerWindow` (`src/tools/video_analyzer/gui.py`): links to `docs/tutorials/content/04_video_analysis.md`.
+  - `LaunchMonitorAnalyticsWindow` (`src/tools/launch_monitor_analytics/gui.py`): links to `docs/user_guide/user_manual.md`.
+  - `SimulationBackendsWindow` (`src/tools/simulation_backends_launcher/gui.py`): links to `docs/engines/pendulum.md`.
+- Regression & Hygiene Testing: Verify `doc_target` handling in `tests/launchers/test_help_menu.py`, and add `TestToolHelpAffordances` in `tests/unit/launchers/test_help_paths_and_theme_menu.py` ensuring all tool windows expose a `&Help` menu with the expected calculation sheet actions.
+
 ## Reconciling In-App Help System and Content Mappings (#8843)
 
 Reconcile the in-app help system root paths and UI component documentation mappings:
