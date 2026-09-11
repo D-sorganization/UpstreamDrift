@@ -459,10 +459,25 @@ def _mock_drake_harness() -> Generator[dict[str, Any], None, None]:
         def get_output_port(self, idx: int) -> Any:
             return self._ports[idx] if self._ports else MagicMock()
 
+    class _MockDiagramBuilder:
+        def __init__(self) -> None:
+            pass
+
+        def Build(self) -> Any:
+            diag = MagicMock(name="Diagram")
+            diag.CreateDefaultContext.return_value = diag_ctx
+            return diag
+
+        def Connect(self, *args: Any, **kwargs: Any) -> Any:
+            pass
+
+        def AddSystem(self, s: Any) -> Any:
+            return s
+
     framework = mocks["pydrake.systems.framework"]
     framework.LeafSystem = _MockLeafSystem
     framework.BasicVector = MagicMock(side_effect=lambda n: MagicMock())
-    framework.DiagramBuilder = MagicMock(return_value=MagicMock())
+    framework.DiagramBuilder = _MockDiagramBuilder
 
     sim_inst = MagicMock(name="Simulator")
     diag_ctx = MagicMock(name="DiagramContext")
@@ -475,10 +490,6 @@ def _mock_drake_harness() -> Generator[dict[str, Any], None, None]:
     plant_ctx = MagicMock(name="PlantContext")
     plant.GetMyMutableContextFromRoot.return_value = plant_ctx
     plant.GetMyContextFromRoot.return_value = plant_ctx
-
-    b_inst = framework.DiagramBuilder.return_value
-    b_inst.Build.return_value = MagicMock(name="Diagram")
-    b_inst.Build.return_value.CreateDefaultContext.return_value = diag_ctx
 
     with patch.dict(sys.modules, mocks):
         yield {"plant": plant, "simulator": sim_inst, "n_act": n_act}
