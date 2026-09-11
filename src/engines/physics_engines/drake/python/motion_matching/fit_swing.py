@@ -32,7 +32,7 @@ import logging
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -259,7 +259,7 @@ def fit_swing_drake(
     res = minimize(
         _objective,
         theta0,
-        method=opts.method,
+        method=cast(Any, opts.method),
         bounds=bounds,
         options={"maxiter": opts.max_iterations, "ftol": opts.tolerance},
     )
