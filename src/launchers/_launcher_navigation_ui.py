@@ -659,6 +659,7 @@ class LauncherNavigationUIMixin:
             ("Simulation &Controls", "simulation_controls"),
             ("Motion &Capture", "motion_capture"),
             ("&Visualization", "visualization"),
+            # Topic analysis_tools loads docs/help/analysis_tools.md
             ("&Analysis Tools", "analysis_tools"),
         ):
             action = QAction(label, self.launcher)
