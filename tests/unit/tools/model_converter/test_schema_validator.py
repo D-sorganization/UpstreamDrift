@@ -5,6 +5,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 import pytest
+
+pytestmark = pytest.mark.unit
+
 import numpy as np
 
 REPO_ROOT = Path(__file__).parents[4]

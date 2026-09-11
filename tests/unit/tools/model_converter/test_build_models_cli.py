@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+import pytest
+
+pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).parents[4]
 if str(REPO_ROOT) not in sys.path:
