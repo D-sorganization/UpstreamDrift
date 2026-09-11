@@ -140,54 +140,33 @@ def evaluate_bernstein_torque(
     """
     coeffs_arr = np.asarray(coeffs, dtype=np.float64)
     if coeffs_arr.ndim != 2:
-        msg = f"coeffs must be 2D (n_joints, 7); got ndim={coeffs_arr.ndim}"
-        raise ValueError(msg)
+        raise ValueError(f"coeffs must be 2D (n_joints, 7); got ndim={coeffs_arr.ndim}")
     if coeffs_arr.shape[1] != COEFFS_PER_JOINT:
-        msg = (
-            f"coeffs must have {COEFFS_PER_JOINT} columns "
-            f"(degree {POLY_DEGREE}); got shape {coeffs_arr.shape}"
+        raise ValueError(
+            f"coeffs must have {COEFFS_PER_JOINT} columns; got shape {coeffs_arr.shape}"
         )
-        raise ValueError(msg)
     if not np.isfinite(t):
         raise ValueError(f"t must be finite, got {t!r}")
     if T_s <= 0.0:
         raise ValueError(f"T_s must be positive, got {T_s!r}")
 
     s = (t - t0) / T_s
-    basis = np.array(
-        [
-            comb(POLY_DEGREE, k) * (s**k) * ((1.0 - s) ** (POLY_DEGREE - k))
-            for k in range(COEFFS_PER_JOINT)
-        ],
-        dtype=np.float64,
+    k_vals = np.arange(COEFFS_PER_JOINT, dtype=np.float64)
+    b_weights = np.array(
+        [comb(POLY_DEGREE, k) for k in range(COEFFS_PER_JOINT)], dtype=np.float64
     )
+    basis = b_weights * (s**k_vals) * ((1.0 - s) ** (POLY_DEGREE - k_vals))
     return coeffs_arr @ basis
 
 
 def _quat_to_rotmat_series(quats: NDArray[np.float64]) -> NDArray[np.float64]:
     """Convert (N, 4) unit quaternions [w, x, y, z] to (N, 3, 3) rotation matrices."""
+    from scipy.spatial.transform import Rotation as _Rotation
+
     q = np.asarray(quats, dtype=np.float64)
     if q.ndim != 2 or q.shape[1] != 4:
         raise ValueError(f"quats must have shape (N, 4); got {q.shape}")
-    n = q.shape[0]
-    rots = np.empty((n, 3, 3), dtype=np.float64)
-    w = q[:, 0]
-    x = q[:, 1]
-    y = q[:, 2]
-    z = q[:, 3]
-
-    rots[:, 0, 0] = 1.0 - 2.0 * (y * y + z * z)
-    rots[:, 0, 1] = 2.0 * (x * y - z * w)
-    rots[:, 0, 2] = 2.0 * (x * z + y * w)
-
-    rots[:, 1, 0] = 2.0 * (x * y + z * w)
-    rots[:, 1, 1] = 1.0 - 2.0 * (x * x + z * z)
-    rots[:, 1, 2] = 2.0 * (y * z - x * w)
-
-    rots[:, 2, 0] = 2.0 * (x * z - y * w)
-    rots[:, 2, 1] = 2.0 * (y * z + x * w)
-    rots[:, 2, 2] = 1.0 - 2.0 * (x * x + y * y)
-    return rots
+    return _Rotation.from_quat(q[:, [1, 2, 3, 0]]).as_matrix()
 
 
 # ---------------------------------------------------------------------------
@@ -359,28 +338,16 @@ class SimOut:
             raise ValueError(msg)
         n = t_vec.shape[0]
 
-        q_mat = (
-            np.asarray(q, dtype=np.float64)
-            if q is not None
-            else np.zeros((n, 0), dtype=np.float64)
-        )
-        qd_mat = (
-            np.asarray(qd, dtype=np.float64)
-            if qd is not None
-            else np.zeros((n, 0), dtype=np.float64)
-        )
-        nv = qd_mat.shape[1] if qd_mat.ndim == 2 else 0
+        def _as_2d_buffer(val: Any, default_cols: int) -> NDArray[np.float64]:
+            if val is not None:
+                return np.asarray(val, dtype=np.float64)
+            return np.zeros((n, default_cols), dtype=np.float64)
 
-        qdd_mat = (
-            np.asarray(qdd, dtype=np.float64)
-            if qdd is not None
-            else np.zeros((n, nv), dtype=np.float64)
-        )
-        tau_mat = (
-            np.asarray(tau, dtype=np.float64)
-            if tau is not None
-            else np.zeros((n, nv), dtype=np.float64)
-        )
+        q_mat = _as_2d_buffer(q, 0)
+        qd_mat = _as_2d_buffer(qd, 0)
+        nv = qd_mat.shape[1] if qd_mat.ndim == 2 else 0
+        qdd_mat = _as_2d_buffer(qdd, nv)
+        tau_mat = _as_2d_buffer(tau, nv)
 
         grip_mat = grip if grip is not None else grip_position
         if grip_mat is None:
@@ -432,16 +399,13 @@ class SimOut:
             )
             raise ValueError(msg)
 
-        ke_vec = (
-            np.asarray(kinetic_energy, dtype=np.float64)
-            if kinetic_energy is not None
-            else np.zeros(n, dtype=np.float64)
-        )
-        pe_vec = (
-            np.asarray(potential_energy, dtype=np.float64)
-            if potential_energy is not None
-            else np.zeros(n, dtype=np.float64)
-        )
+        def _as_1d_energy(val: Any) -> NDArray[np.float64]:
+            if val is not None:
+                return np.asarray(val, dtype=np.float64)
+            return np.zeros(n, dtype=np.float64)
+
+        ke_vec = _as_1d_energy(kinetic_energy)
+        pe_vec = _as_1d_energy(potential_energy)
         if ke_vec.ndim != 1 or ke_vec.shape[0] != n:
             raise ValueError(
                 f"SimOut.kinetic_energy must have shape ({n},); got {ke_vec.shape}"
@@ -455,20 +419,24 @@ class SimOut:
             meta if meta is not None else (metadata if metadata is not None else {})
         )
 
-        object.__setattr__(self, "time", t_vec)
-        object.__setattr__(self, "q", q_mat)
-        object.__setattr__(self, "qd", qd_mat)
-        object.__setattr__(self, "qdd", qdd_mat)
-        object.__setattr__(self, "tau", tau_mat)
-        object.__setattr__(self, "grip", grip_mat)
-        object.__setattr__(self, "grip_quat", g_quat)
-        object.__setattr__(self, "clubhead", head_mat)
-        object.__setattr__(self, "club_quat", c_quat)
-        object.__setattr__(self, "solver_status", solver_status)
-        object.__setattr__(self, "duration_s", float(duration_s))
-        object.__setattr__(self, "kinetic_energy", ke_vec)
-        object.__setattr__(self, "potential_energy", pe_vec)
-        object.__setattr__(self, "meta", meta_dict)
+        sim_fields = {
+            "time": t_vec,
+            "q": q_mat,
+            "qd": qd_mat,
+            "qdd": qdd_mat,
+            "tau": tau_mat,
+            "grip": grip_mat,
+            "grip_quat": g_quat,
+            "clubhead": head_mat,
+            "club_quat": c_quat,
+            "solver_status": solver_status,
+            "duration_s": float(duration_s),
+            "kinetic_energy": ke_vec,
+            "potential_energy": pe_vec,
+            "meta": meta_dict,
+        }
+        for field_name, field_val in sim_fields.items():
+            object.__setattr__(self, field_name, field_val)
 
     @property
     def t(self) -> NDArray[np.float64]:
