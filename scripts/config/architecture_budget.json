@@ -379,6 +379,69 @@
       "expires_on": "2026-10-31"
     },
     {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: SimOut canonical dataclass coordinates 19 state and energy trajectory fields matching Simscape contract.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: SimOut coordinates all 19 kinematic, kinetic, energy, and work output fields across simulation steps.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "simulate_with_coefficients",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: simulate_with_coefficients executes continuous Bernstein torque evaluation with RK4 internal stage integration for Pinocchio ABA.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: SimOut.__init__ handles comprehensive backward-compatible keyword aliases and canonical Simscape fields.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: SimOut.__init__ parameter list reflects canonical multibody states, kinetic/potential energy, and metadata.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
+      "symbol": "_record_rollout",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: _record_rollout coordinates Drake MultibodyPlant state logging, forward kinematics transforms, and energy accounting buffers.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_drake",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: fit_swing_drake coordinates optimization objective, parameter bounds, SLSQP minimize loop, and result validation.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "src/tools/model_converter/urdf_exporter.py",
       "symbol": "_add_revolute_joint",
       "rule": "parameters",

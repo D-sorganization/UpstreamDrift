@@ -34,6 +34,10 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.piecewise_polynomial import (
+    PiecewisePolynomialTorque,
+    bernstein_to_power_matrix,
+)
 from src.shared.python.motion_matching.polynomial_torque import (
     COEFFS_PER_JOINT,
     evaluate_polynomial_torque,
@@ -90,19 +94,26 @@ def _evaluate_polynomial(
 
 
 class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
-    """Per-joint 6th-order polynomial torque, applied via ``mjcb_control``.
+    """Per-joint polynomial torque, applied via ``mjcb_control``.
+
+    Supports both 6th-order power basis polynomials and Bernstein basis
+    control points (or direct PiecewisePolynomialTorque objects).
 
     Args:
         model: a compiled ``mujoco.MjModel``.
-        theta: ``(n_joints, 7)`` coefficient matrix or a flat
-            ``(n_joints*7,)`` vector. ``n_joints`` must equal
-            ``model.nu``. Layout: column 0 = A (t^0), ..., column 6 = G
-            (t^6).
+        theta: ``(n_joints, 7)`` coefficient matrix, flat
+            ``(n_joints*7,)`` vector, or a :class:`PiecewisePolynomialTorque`.
+            ``n_joints`` must equal ``model.nu``.
         t0: reference time in seconds; the polynomial is evaluated at
             ``data.time - t0``.
         clip_to_ctrlrange: if ``True`` and the model declares
             ``ctrlrange`` on its actuators, clip the torque to that range
             before writing ``data.ctrl``. Default ``True``.
+        basis: ``"power"`` (default) or ``"bernstein"``. If ``"bernstein"``,
+            coefficients are converted to canonical ascending power basis
+            at instantiation time, preserving O(1) Horner-scheme callback speed.
+        T_s: Horizon duration in seconds, required when converting Bernstein
+            basis defined on normalized time s in [0, 1]. Defaults to 1.0.
 
     Use as a context manager to scope the global callback safely::
 
@@ -115,29 +126,59 @@ class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
     def __init__(
         self,
         model: Any,
-        theta: NDArray[np.float64],
+        theta: NDArray[np.float64] | PiecewisePolynomialTorque,
         t0: float = 0.0,
         clip_to_ctrlrange: bool = True,
+        basis: str = "power",
+        T_s: float = 1.0,
     ) -> None:
         nu = int(model.nu)
         if nu <= 0:
             raise ValueError("model has no actuators (nu == 0)")
-        arr = np.asarray(theta, dtype=np.float64)
-        if arr.ndim == 1:
-            if arr.shape[0] != nu * COEFFS_PER_JOINT:
+
+        self._piecewise: PiecewisePolynomialTorque | None = None
+        self._theta: NDArray[np.float64]
+        if isinstance(theta, PiecewisePolynomialTorque):
+            if theta.n_channels != nu:
                 raise ValueError(
-                    "flat theta must have length "
-                    f"nu*{COEFFS_PER_JOINT} = {nu * COEFFS_PER_JOINT}; "
-                    f"got {arr.shape[0]}"
+                    f"PiecewisePolynomialTorque has {theta.n_channels} channels; "
+                    f"expected model.nu = {nu}"
                 )
-            arr = arr.reshape(nu, COEFFS_PER_JOINT)
-        elif arr.shape != (nu, COEFFS_PER_JOINT):
-            raise ValueError(
-                f"theta must have shape ({nu}, {COEFFS_PER_JOINT}); got {arr.shape}"
-            )
-        if not np.all(np.isfinite(arr)):
-            raise ValueError("theta must be finite (no NaN/inf)")
-        self._theta: NDArray[np.float64] = arr.copy()
+            self._piecewise = theta
+            self._theta = np.zeros((nu, COEFFS_PER_JOINT), dtype=np.float64)
+            self._basis = "piecewise"
+        else:
+            arr = np.asarray(theta, dtype=np.float64)
+            if arr.ndim == 1:
+                if arr.shape[0] != nu * COEFFS_PER_JOINT:
+                    raise ValueError(
+                        "flat theta must have length "
+                        f"nu*{COEFFS_PER_JOINT} = {nu * COEFFS_PER_JOINT}; "
+                        f"got {arr.shape[0]}"
+                    )
+                arr = arr.reshape(nu, COEFFS_PER_JOINT)
+            elif arr.shape != (nu, COEFFS_PER_JOINT):
+                raise ValueError(
+                    f"theta must have shape ({nu}, {COEFFS_PER_JOINT}); got {arr.shape}"
+                )
+            if not np.all(np.isfinite(arr)):
+                raise ValueError("theta must be finite (no NaN/inf)")
+
+            if basis == "bernstein":
+                # Convert Bernstein control points c_k to power coefficients p_j:
+                # tau(s) = sum_j p_j s^j where s = (t - t0) / T_s.
+                # So in terms of local time t_loc = t - t0:
+                # tau(t_loc) = sum_j (p_j / T_s^j) * t_loc^j.
+                if T_s <= 0:
+                    raise ValueError(f"T_s must be > 0 for Bernstein basis; got {T_s}")
+                m_bern = bernstein_to_power_matrix(COEFFS_PER_JOINT - 1)
+                p_coeffs = arr @ m_bern
+                # Rescale by 1 / (T_s ^ j)
+                scale_powers = T_s ** np.arange(COEFFS_PER_JOINT, dtype=np.float64)
+                arr = p_coeffs / scale_powers[None, :]
+
+            self._theta = np.asarray(arr, dtype=np.float64).copy()
+            self._basis = basis
         self._t0 = float(t0)
         self._installed = False
         self._clip = bool(clip_to_ctrlrange)
@@ -167,6 +208,8 @@ class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
 
         Useful for tests / debugging without installing the global callback.
         """
+        if self._piecewise is not None:
+            return self._piecewise.evaluate(t)
         return _evaluate_polynomial(self._theta, t - self._t0)
 
     def install(self) -> None:
@@ -179,29 +222,38 @@ class PolynomialTorqueDriver(AbstractContextManager["PolynomialTorqueDriver"]):
         t0 = self._t0
         lo = self._ctrl_lo
         hi = self._ctrl_hi
+        piecewise = self._piecewise
 
-        def _cb(_m: Any, d: Any) -> None:
-            t = d.time - t0
-            # Horner's method on a fixed (7,) shape — no allocations beyond
-            # the temporary scalar product. This is the inner-loop hot path.
-            # Coefficients are ascending in power (column k = t^k), so we
-            # fold from the highest power (column 6) down to the constant
-            # term (column 0) — matching the canonical cross-engine
-            # convention (#7688).
-            ctrl = theta[:, 6] * t
-            ctrl += theta[:, 5]
-            ctrl *= t
-            ctrl += theta[:, 4]
-            ctrl *= t
-            ctrl += theta[:, 3]
-            ctrl *= t
-            ctrl += theta[:, 2]
-            ctrl *= t
-            ctrl += theta[:, 1]
-            ctrl *= t
-            ctrl += theta[:, 0]
-            np.clip(ctrl, lo, hi, out=ctrl)
-            d.ctrl[:] = ctrl
+        if piecewise is not None:
+
+            def _cb(_m: Any, d: Any) -> None:
+                ctrl = piecewise.evaluate(d.time)
+                np.clip(ctrl, lo, hi, out=ctrl)
+                d.ctrl[:] = ctrl
+        else:
+
+            def _cb(_m: Any, d: Any) -> None:
+                t = d.time - t0
+                # Horner's method on a fixed (7,) shape — no allocations beyond
+                # the temporary scalar product. This is the inner-loop hot path.
+                # Coefficients are ascending in power (column k = t^k), so we
+                # fold from the highest power (column 6) down to the constant
+                # term (column 0) — matching the canonical cross-engine
+                # convention (#7688).
+                ctrl = theta[:, 6] * t
+                ctrl += theta[:, 5]
+                ctrl *= t
+                ctrl += theta[:, 4]
+                ctrl *= t
+                ctrl += theta[:, 3]
+                ctrl *= t
+                ctrl += theta[:, 2]
+                ctrl *= t
+                ctrl += theta[:, 1]
+                ctrl *= t
+                ctrl += theta[:, 0]
+                np.clip(ctrl, lo, hi, out=ctrl)
+                d.ctrl[:] = ctrl
 
         mujoco.set_mjcb_control(_cb)
         self._installed = True

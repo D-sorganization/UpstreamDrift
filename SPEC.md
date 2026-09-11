@@ -1,5 +1,33 @@
 # SPEC.md — Repository Specification Document
 
+## Drake MultibodyPlant Continuous Torque Harness (#9968)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the Drake MultibodyPlant simulation harness (`src.engines.physics_engines.drake.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point evaluating continuous 6th-order Bernstein basis torques through Drake `MultibodyPlant` and `DiagramBuilder`. Supports both direct Bernstein basis calculation and power basis conversion.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`, `metadata`).
+- `EngineJointMap` & `get_drake_canonical_joint_map`: Resolves 27 canonical actuation channels into native Drake generalized coordinate velocity indices and plant actuators.
+- Runtime availability probe (`is_drake_available`): Cleanly detects presence of functional compiled Drake C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit and contract tests under `tests/unit/engines/drake/` (`pytestmark = pytest.mark.unit`) validating canonical coordinates, parameter bounds, Bernstein evaluation properties, joint map mapping, energy accounting, and target synthesis.
+
+## Pinocchio Articulated-Body Continuous Torque Harness (#9967)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the Pinocchio rigid-body simulation harness (`src.engines.physics_engines.pinocchio.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point integrating ABA forward dynamics with fixed-step RK4 matching Simscape timegrids. Supports 6th-order continuous Bernstein basis torque evaluation via converted Horner schemes and direct basis calculation.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`).
+- `EngineJointMap` & `get_pinocchio_canonical_joint_map`: Resolves 27 canonical actuation channels into native Pinocchio generalized coordinate velocity indices (`idx_v`) and sign conventions.
+- Runtime availability probe (`is_pinocchio_available`): Cleanly detects presence of functional compiled Pinocchio C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit tests validating endpoint interpolation, partition of unity, power-conversion equivalence, energy conservation on harmonic oscillators, and parameter bounds under `tests/unit/engines/pinocchio/`.
+
+## MuJoCo Continuous-Torque Simulation Harness and Parity Driver (#9966)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the MuJoCo physics simulation harness (`src.engines.physics_engines.mujoco.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point evaluating continuous 6th-order Bernstein basis torques through MuJoCo's process-global `mjcb_control` callback. Supports conversion to canonical power polynomial basis at instantiation for $O(1)$ Horner evaluation inside the integration step loop.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`, `metadata`).
+- `PolynomialTorqueDriver`: Context manager safely scoping process-global `mjcb_control` registration with bounds checks, control clipping, and support for flat array, matrix, or `PiecewisePolynomialTorque` inputs.
+- Runtime availability probe (`is_mujoco_available`): Cleanly detects presence of functional compiled MuJoCo C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit and parity tests under `tests/unit/engines/mujoco/` (`pytestmark = pytest.mark.unit`) validating parameter bounds, Bernstein evaluation properties, control range clipping, Horner equivalence, and forward dynamics trajectories.
+
+
 ## Document #8556-Conditional Parameters in Model Completion Falsification Matrix (#8920)
 
 Document in `MODEL_COMPLETION_FALSIFICATION_MATRIX.md` that #8556 serves not only as a human-validation gate but also supplies parameters on which three model-tier claims are conditionally anchored:
