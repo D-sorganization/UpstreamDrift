@@ -73,18 +73,33 @@ def parse_args() -> argparse.Namespace:
 def load_cubic_candidate(checkpoint_dir: Path) -> tuple[np.ndarray, list[str]]:
     fit_path = checkpoint_dir / "first_prefix_fit.json"
     data = json.loads(fit_path.read_text())
-    # Retrieve joint names and efforts/parameters
-    efforts = np.array(data["evaluations"][-1]["efforts"])
-    # If cubic Bernstein was used, the native Simscape replay has the powers
-    mat_path = checkpoint_dir / "final_native_replay.mat"
-    import scipy.io
-
-    mat = scipy.io.loadmat(str(mat_path))
-    theta = np.array(mat["fit_theta"]).ravel()
-    # theta is shape (n_joints * 7,) in Simscape descending power order
-    n_joints = len(theta) // 7
-    theta_matrix = theta.reshape(n_joints, 7)
     labels = data["labels"]
+    mat_path = checkpoint_dir / "final_native_replay.mat"
+
+    if mat_path.exists():
+        try:
+            import h5py
+            with h5py.File(str(mat_path), "r") as f:
+                theta = np.array(f["fit_theta"]).ravel()
+                n_joints = len(theta) // 7
+                return theta.reshape(n_joints, 7), labels
+        except Exception as e:
+            logger.warning("Could not read mat via h5py (%s); trying scipy or json fallback", e)
+            try:
+                import scipy.io
+                mat = scipy.io.loadmat(str(mat_path))
+                theta = np.array(mat["fit_theta"]).ravel()
+                n_joints = len(theta) // 7
+                return theta.reshape(n_joints, 7), labels
+            except Exception as e2:
+                logger.warning("scipy loadmat failed (%s); falling back to json Bernstein conversion", e2)
+
+    from src.shared.python.motion_matching.prefix_fit import bernstein_to_simscape
+    efforts = np.array(data["evaluations"][-1]["efforts"])
+    duration_s = float(data.get("duration_s", 0.60))
+    n_joints = len(labels)
+    efforts_matrix = efforts.reshape(n_joints, -1)
+    theta_matrix = bernstein_to_simscape(efforts_matrix, duration_s=duration_s)
     return theta_matrix, labels
 
 
