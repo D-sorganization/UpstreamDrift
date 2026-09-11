@@ -2,7 +2,23 @@
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
-### 0. Run 05 Completed Audit & Yaw Gate Breakthrough (`prefix-750ms-sextic-05`, DeskComputer)
+### 0. Active Live Horizon: Run 06 (`prefix-750ms-sextic-06`, DeskComputer)
+
+- **Launch Status**:
+  - Actively running on DeskComputer under MATLAB R2025b FastRestart.
+  - Spawning: Detached CIM process (`Invoke-CimMethod -ClassName Win32_Process -MethodName Create`) with live heartbeat logging.
+  - Directory: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-06`.
+  - Warm-Start Seed: `C:/Users/diete/SimscapeTour9921/candidates/candidate-run05-final-pkg/candidate_run05_final_package.json`.
+  - Objective Formulation: Heightened terminal and clubhead Pareto weights to conquer terminal gates while locking pelvis yaw pass:
+    - `--terminal-weight 40.0`
+    - `--club-marker-weight 70.0`
+    - `--pelvis-yaw-weight 75.0` (preserves $< 0.54\%$ pelvis yaw error)
+    - `--pelvis-yaw-max-error-pct 5.0`
+    - `--smoothness-weight 0.08`
+    - `--max-nfev 300`
+  - Current Evaluations: Active progression, top early evaluations achieving $23.91\text{ mm}$ whole-window marker RMSE.
+
+### 0.1 Run 05 Completed Audit & Yaw Gate Breakthrough (`prefix-750ms-sextic-05`, DeskComputer)
 
 - **Execution Status**:
   - Run 05 completed normally on DeskComputer (394 logged evaluations in `evaluations.jsonl`, clean exit).
@@ -20,6 +36,14 @@
   5. Pelvis Yaw Residual: **$-0.34^\circ$**, error **0.54%** (PASS, gate $< 5.0\%$)
   - **Summary**: **3/5 gates passed** (Early retention, Whole window, Pelvis yaw).
   - Accurately documented as an exploratory record with confirmed yaw gate compliance.
+- **Visual Artifacts Rendered & Verified**:
+  - `simscape_matlab_matching_run05.gif` (2.73 MB, dual-view 3D skeleton motion matching against tour C3D markers).
+  - `canonical_simscape_vs_mujoco_run05_overlay.gif` (2.45 MB, side-by-side forward dynamics rollout in Simscape vs canonical 25-DOF MuJoCo model under identical sextic polynomial torques).
+  - `cross_engine_forward_simulation_run05.gif` (1.60 MB, 3-pane cross-engine synchronized motion).
+- **Immutable Candidate Package**:
+  - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-run05-final-pkg/candidate_run05_final_package.json`
+  - SHA256: `c78ccd8da8e353d79c35fb267a7a6b5442037124a7336671561d83ec6130e1ab`
+  - Extracted Prediction: `candidate_run05_final_prediction.json` (271 frames, 25 markers)
 
 ### 1. Run 04 Audit & Status (`prefix-750ms-sextic-04`, DeskComputer)
 
