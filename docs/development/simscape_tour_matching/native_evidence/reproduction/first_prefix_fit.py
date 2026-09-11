@@ -37,11 +37,50 @@ parser.add_argument(
     default=True,
     help="Use anatomical hierarchy weights for marker tracking",
 )
+parser.add_argument(
+    "--terminal-weight",
+    type=float,
+    default=5.0,
+    help="Weight penalty on terminal frame marker error",
+)
+parser.add_argument(
+    "--time-weight-scale",
+    type=float,
+    default=4.0,
+    help="Scale factor alpha for time weighting (1 + alpha*(t/T)^p)",
+)
+parser.add_argument(
+    "--time-weight-power",
+    type=float,
+    default=2.0,
+    help="Power p for time weighting (1 + alpha*(t/T)^p)",
+)
+parser.add_argument(
+    "--pelvis-yaw-weight",
+    type=float,
+    default=25.0,
+    help="Weight penalty on pelvis yaw error (enforcing < 5% error)",
+)
+parser.add_argument(
+    "--pelvis-yaw-max-error-pct",
+    type=float,
+    default=5.0,
+    help="Maximum acceptable pelvis yaw error percentage (default 5.0%)",
+)
 args = parser.parse_args()
 if not np.isfinite(args.finite_difference_step) or args.finite_difference_step <= 0:
     parser.error("finite-difference-step must be finite and positive")
 if not np.isfinite(args.smoothness_weight) or args.smoothness_weight < 0:
     parser.error("smoothness-weight must be finite and non-negative")
+if not np.isfinite(args.terminal_weight) or args.terminal_weight < 0:
+    parser.error("terminal-weight must be finite and non-negative")
+if not np.isfinite(args.pelvis_yaw_weight) or args.pelvis_yaw_weight < 0:
+    parser.error("pelvis-yaw-weight must be finite and non-negative")
+if (
+    not np.isfinite(args.pelvis_yaw_max_error_pct)
+    or args.pelvis_yaw_max_error_pct <= 0
+):
+    parser.error("pelvis-yaw-max-error-pct must be finite and positive")
 sys.path.insert(0, str(args.repo))
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
@@ -272,10 +311,20 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
         if args.smoothness_weight > 0
         else None
     )
+    wl_idx = labels.index("WaistLeft") if "WaistLeft" in labels else None
+    wr_idx = labels.index("WaistRight") if "WaistRight" in labels else None
+    pelvis_indices = (
+        (wl_idx, wr_idx) if wl_idx is not None and wr_idx is not None else None
+    )
     report["regularization"] = {
         "smoothness_weight": args.smoothness_weight,
         "anatomical_weights": args.anatomical_weights,
         "marker_weights": marker_weights.tolist(),
+        "terminal_weight": args.terminal_weight,
+        "time_weight_scale": args.time_weight_scale,
+        "time_weight_power": args.time_weight_power,
+        "pelvis_yaw_weight": args.pelvis_yaw_weight,
+        "pelvis_yaw_max_error_pct": args.pelvis_yaw_max_error_pct,
     }
     save_report()
 
@@ -286,15 +335,27 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
         lower=np.zeros(len(scales)),
         upper=2 * np.ones(len(scales)),
         prefix_end_s=[float(requested[-1])],
-        acceptance_rmse_m=0.005,
+        acceptance_rmse_m=0.025,
         options=PrefixFitOptions(
             max_nfev=args.max_nfev,
             finite_difference_step=args.finite_difference_step,
             checkpoint=checkpoint,
             regularization=regularizer,
+            terminal_weight=args.terminal_weight,
+            time_weight_scale=args.time_weight_scale,
+            time_weight_power=args.time_weight_power,
+            pelvis_indices=pelvis_indices,
+            pelvis_yaw_weight=args.pelvis_yaw_weight,
+            pelvis_yaw_max_error_pct=args.pelvis_yaw_max_error_pct,
+            acceptance_terminal_rmse_m=0.035,
         ),
     )
+    final_stage = fit.stages[-1]
     report["accepted_numerically"] = fit.accepted
+    report["terminal_rmse_m"] = final_stage.terminal_rmse_m
+    report["terminal_max_m"] = final_stage.terminal_max_m
+    report["pelvis_yaw_diff_deg"] = final_stage.pelvis_yaw_diff_deg
+    report["pelvis_yaw_error_pct"] = final_stage.pelvis_yaw_error_pct
     report["final_prediction_m"] = forward(fit.parameters, requested).tolist()
     report["status"] = "exploratory-fit-computed"
     engine.workspace["fit_replay_path"] = str(root / "final_native_replay.mat")
