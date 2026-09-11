@@ -90,6 +90,11 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
+      # build_hooks.py refuses `pip install -e .` in CI unless the pinned Tools
+      # package roots exist under vendor/ud-tools; the checkout above skips
+      # submodules, so materialize them here (see #8361).
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Initialize artifact directories
         run: |
           mkdir -p test-results coverage
