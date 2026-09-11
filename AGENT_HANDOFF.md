@@ -289,7 +289,11 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 - Historical source-specific receipts remain in [provider turnover](docs/development/impact_provider_import_turnover.md), [renderer review](docs/development/renderer_reference_9783_turnover.md), [claim preservation](docs/development/claim_preservation_9825_turnover.md), [shooting convergence](docs/development/shooting_convergence_9830_turnover.md) and [program design](docs/development/impact_acoustics_program.md). Bioptim/CasADi 3.6.7 qualification does not qualify the unsuccessful 3.8 RK4 case.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
-evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
+evidence. Its per-workstream/milestone status ledger (verified 2026-09-11; A, M0, M1
+complete, all other rows open with their blocking gate) lives in
+`docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md`;
+the release manifest and checksums were regenerated for that edit.
+UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
 recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
