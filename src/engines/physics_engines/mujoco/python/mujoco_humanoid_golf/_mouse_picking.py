@@ -50,7 +50,9 @@ class MousePickingRay:
         ray_dir = forward.copy()
         ray_dir += right * x_ndc * np.tan(np.deg2rad(fovy / 2)) * aspect
         ray_dir += up * y_ndc * np.tan(np.deg2rad(fovy / 2))
-        ray_dir = ray_dir / np.linalg.norm(ray_dir)
+        ray_dir = (
+            ray_dir / np.sqrt(ray_dir.dot(ray_dir))
+        )  # ⚡ Bolt: ndarray.dot + sqrt is ~2x faster than np.linalg.norm for small 1D arrays
 
         return ray_origin, ray_dir
 
