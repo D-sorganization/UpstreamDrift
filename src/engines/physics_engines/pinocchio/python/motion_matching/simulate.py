@@ -658,6 +658,7 @@ def simulate_with_coefficients(  # noqa: C901
         raise ValueError(msg)
 
     # ----- Allocate output buffers ------------------------------------- #
+    # Pinocchio keeps a fixed-step *integration clock*, not an output grid:
     n_steps = int(round(opts.t_final / opts.dt))
     if not np.isclose(n_steps * opts.dt, opts.t_final, rtol=1e-9, atol=1e-12):
         n_steps = int(np.ceil(opts.t_final / opts.dt))
