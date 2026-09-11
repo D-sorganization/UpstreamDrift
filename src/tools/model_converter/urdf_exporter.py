@@ -111,23 +111,27 @@ def export_urdf(model: CanonicalModel, out_path: Path | None = None) -> str:
 
     # Pelvis root link
     pelvis_link = ET.SubElement(robot, "link")
-    pelvis_link.set("name", model.root.name)
+    root = model.root
+    root_inertia = root.inertia
+    root_geom = root.geometry
+
+    pelvis_link.set("name", root.name)
     _add_inertial(
         pelvis_link,
-        model.root.mass,
-        model.root.inertia.ixx,
-        model.root.inertia.iyy,
-        model.root.inertia.izz,
-        model.root.inertia.ixy,
-        model.root.inertia.ixz,
-        model.root.inertia.iyz,
+        root.mass,
+        root_inertia.ixx,
+        root_inertia.iyy,
+        root_inertia.izz,
+        root_inertia.ixy,
+        root_inertia.ixz,
+        root_inertia.iyz,
     )
     _add_visual(
         pelvis_link,
-        model.root.geometry.geom_type,
-        model.root.geometry.size,
-        model.root.geometry.visual_rgba,
-        f"mat_{model.root.name}",
+        root_geom.geom_type,
+        root_geom.size,
+        root_geom.visual_rgba,
+        f"mat_{root.name}",
     )
 
     # Process segments in order
