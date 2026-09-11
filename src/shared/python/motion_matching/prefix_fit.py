@@ -89,8 +89,8 @@ def bernstein_effort_range(control_torques: Array) -> Array:
     """
     coefficients = bernstein_to_simscape(control_torques, duration_s=1.0)
     result = np.empty((len(coefficients), 2))
-    row: Array
-    for index, row in enumerate(coefficients):
+    for index in range(len(coefficients)):
+        row = coefficients[index]
         roots = np.roots(np.polyder(row))
         interior = roots.real[
             (np.abs(roots.imag) < 1e-10) & (roots.real > 0) & (roots.real < 1)
