@@ -43,7 +43,7 @@ __MWOPC_PART_BEGIN__ /metadata/coreProperties.xml
   <dcterms:created xsi:type="dcterms:W3CDTF">2025-05-08T04:10:41Z</dcterms:created>
   <dc:creator>diete</dc:creator>
   <cp:lastModifiedBy>diete</cp:lastModifiedBy>
-  <dcterms:modified xsi:type="dcterms:W3CDTF">2026-01-08T19:21:32Z</dcterms:modified>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">2026-09-10T01:37:39Z</dcterms:modified>
   <cp:revision>3.0</cp:revision>
   <cp:version>R2025b</cp:version>
 </cp:coreProperties>
@@ -66,11 +66,11 @@ __MWOPC_PART_BEGIN__ /metadata/mwcorePropertiesReleaseInfo.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Version information for MathWorks R2025b Release -->
 <MathWorks_version_info>
-  <version>25.2.0.2998904</version>
+  <version>25.2.0.3177638</version>
   <release>R2025b</release>
-  <description></description>
-  <date>Aug 21 2025</date>
-  <checksum>3277779261</checksum>
+  <description>Update 5</description>
+  <date>Feb 24 2026</date>
+  <checksum>615859867</checksum>
 </MathWorks_version_info>
 
 __MWOPC_PART_BEGIN__ /simulink/_rels/blockdiagram.xml.rels
@@ -337,7 +337,7 @@ __MWOPC_PART_BEGIN__ /simulink/blockdiagram.xml
 <?xml version="1.0" encoding="utf-8"?>
 <ModelInformation Version="1.0">
   <Subsystem>
-    <P Name="ModelUUID">201343cd-7cd0-44b3-9af3-34c4e31797e7</P>
+    <P Name="ModelUUID">686e1153-13c8-470d-8b71-3eecef18e519</P>
     <P Name="LastSavedArchitecture">win64</P>
     <UserParameters>
       <P Name="PhysicalModelingChecksum">986989398</P>
@@ -1377,9 +1377,27 @@ __MWOPC_PART_BEGIN__ /simulink/modelDictionary.xml
 </MF0>
 __MWOPC_PART_BEGIN__ /simulink/modelMask.xml
 <?xml version="1.0" encoding="utf-8"?>
-<Mask>
+<Mask SelfModifiable="on">
   <Type>Kinetically_Driven_Universal_Joint</Type>
-  <Display RunInitForIconRedraw="off"/>
+  <Display RunInitForIconRedraw="on"/>
+  <Initialization>% Joint target priority binding, issue #9927.
+jointMaskAxes = {&apos;Rx&apos;,&apos;Ry&apos;};
+jointTargetAxes = {&apos;Rx&apos;,&apos;Ry&apos;};
+jointPrimitive = [gcb &apos;/Kinetically Driven Universal Joint&apos;];
+for jointAxisIndex = 1:numel(jointMaskAxes)
+  for jointQuantity = {&apos;Position&apos;,&apos;Velocity&apos;}
+    jointMaskKey = [jointMaskAxes{jointAxisIndex} jointQuantity{1} &apos;TargetPriority&apos;];
+    jointPriority = get_param(gcb, jointMaskKey);
+    assert(ismember(jointPriority, {&apos;None&apos;,&apos;Low&apos;,&apos;High&apos;}), &apos;Invalid joint target priority&apos;);
+    jointTargetKey = [jointTargetAxes{jointAxisIndex} jointQuantity{1} &apos;Target&apos;];
+    if strcmp(jointPriority, &apos;None&apos;)
+      set_param(jointPrimitive, [jointTargetKey &apos;Specify&apos;], &apos;off&apos;);
+    else
+      set_param(jointPrimitive, [jointTargetKey &apos;Specify&apos;], &apos;on&apos;, ...
+        [jointTargetKey &apos;Priority&apos;], jointPriority);
+    end
+  end
+end</Initialization>
   <MaskParameter Name="StartPositionX" Type="edit" ShowTooltip="off">
     <Prompt>Initial Angle X (deg)</Prompt>
     <Value>0</Value>
@@ -1494,8 +1512,7 @@ __MWOPC_PART_BEGIN__ /simulink/modelMask.xml
 __MWOPC_PART_BEGIN__ /simulink/systems/system_root.xml
 <?xml version="1.0" encoding="utf-8"?>
 <System>
-  <P Name="Location">[-1, -8, 1921, 1033]</P>
-  <P Name="Open">on</P>
+  <P Name="Location">[30, 30, 1010, 750]</P>
   <P Name="ZoomFactor">30</P>
   <P Name="ReportName">simulink-default.rpt</P>
   <P Name="SIDHighWatermark">9394</P>
@@ -2043,7 +2060,6 @@ Converter</P>
     <InstanceData>
       <P Name="LogSimulationData">off</P>
       <P Name="SimscapeInstrumentationLogging">off</P>
-      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_20"/>
       <P Name="SourceFile">foundation.mechanical.sources.torque</P>
       <P Name="InternalSimscapePortConfiguration">{&quot;Bottom&quot;:[],&quot;Left&quot;:[{&quot;id&quot;:&quot;R&quot;,&quot;label&quot;:&quot;R&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Right&quot;:[{&quot;id&quot;:&quot;S&quot;,&quot;label&quot;:&quot;S&quot;,&quot;type&quot;:&quot;input&quot;},{&quot;id&quot;:&quot;C&quot;,&quot;label&quot;:&quot;C&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Top&quot;:[]}</P>
       <P Name="SscBlockScalableBuild">off</P>
@@ -2052,6 +2068,7 @@ Converter</P>
       <P Name="ComponentVariantNames">[&quot;torque&quot;]</P>
       <P Name="ClassName">torque</P>
       <P Name="SchemaVersion">1</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_20"/>
     </InstanceData>
   </Block>
   <Block BlockType="Reference" Name="Ideal Torque Source Y" SID="19">
@@ -2066,7 +2083,6 @@ Converter</P>
     <InstanceData>
       <P Name="LogSimulationData">off</P>
       <P Name="SimscapeInstrumentationLogging">off</P>
-      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_19"/>
       <P Name="SourceFile">foundation.mechanical.sources.torque</P>
       <P Name="InternalSimscapePortConfiguration">{&quot;Bottom&quot;:[],&quot;Left&quot;:[{&quot;id&quot;:&quot;R&quot;,&quot;label&quot;:&quot;R&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Right&quot;:[{&quot;id&quot;:&quot;S&quot;,&quot;label&quot;:&quot;S&quot;,&quot;type&quot;:&quot;input&quot;},{&quot;id&quot;:&quot;C&quot;,&quot;label&quot;:&quot;C&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Top&quot;:[]}</P>
       <P Name="SscBlockScalableBuild">off</P>
@@ -2075,6 +2091,7 @@ Converter</P>
       <P Name="ComponentVariantNames">[&quot;torque&quot;]</P>
       <P Name="ClassName">torque</P>
       <P Name="SchemaVersion">1</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_19"/>
     </InstanceData>
   </Block>
   <Block BlockType="Reference" Name="Kinetically Driven Universal Joint" SID="21">
@@ -2090,7 +2107,6 @@ Joint</P>
     <InstanceData>
       <P Name="LogSimulationData">off</P>
       <P Name="SimscapeInstrumentationLogging">off</P>
-      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_21"/>
       <P Name="JointMode">Normal</P>
       <P Name="CompositeWrenchDir">BaseOnFollower</P>
       <P Name="CompositeWrenchFrame">FollowerFrame</P>
@@ -2098,12 +2114,12 @@ Joint</P>
       <P Name="SenseConstraintTorque">on</P>
       <P Name="SenseTotalForce">on</P>
       <P Name="SenseTotalTorque">on</P>
-      <P Name="RxPositionTargetSpecify">on</P>
+      <P Name="RxPositionTargetSpecify">off</P>
       <P Name="RxPositionTargetPriority">High</P>
       <P Name="RxPositionTargetValue">StartPositionX</P>
       <P Name="RxPositionTargetValue_conf">compiletime</P>
       <P Name="RxPositionTargetValueUnits">deg</P>
-      <P Name="RxVelocityTargetSpecify">on</P>
+      <P Name="RxVelocityTargetSpecify">off</P>
       <P Name="RxVelocityTargetPriority">High</P>
       <P Name="RxVelocityTargetValue">StartVelocityX</P>
       <P Name="RxVelocityTargetValue_conf">compiletime</P>
@@ -2151,12 +2167,12 @@ Joint</P>
       <P Name="RxSenseTorqueForce">on</P>
       <P Name="RxSenseLowerLimitTorqueForce">off</P>
       <P Name="RxSenseUpperLimitTorqueForce">off</P>
-      <P Name="RyPositionTargetSpecify">on</P>
+      <P Name="RyPositionTargetSpecify">off</P>
       <P Name="RyPositionTargetPriority">Low</P>
       <P Name="RyPositionTargetValue">StartPositionY</P>
       <P Name="RyPositionTargetValue_conf">compiletime</P>
       <P Name="RyPositionTargetValueUnits">deg</P>
-      <P Name="RyVelocityTargetSpecify">on</P>
+      <P Name="RyVelocityTargetSpecify">off</P>
       <P Name="RyVelocityTargetPriority">Low</P>
       <P Name="RyVelocityTargetValue">StartVelocityY</P>
       <P Name="RyVelocityTargetValue_conf">compiletime</P>
@@ -2204,6 +2220,7 @@ Joint</P>
       <P Name="RySenseTorqueForce">on</P>
       <P Name="RySenseLowerLimitTorqueForce">off</P>
       <P Name="RySenseUpperLimitTorqueForce">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_21"/>
     </InstanceData>
   </Block>
   <Block BlockType="Reference" Name="Mechanical&#xA;Rotational Reference" SID="22">
@@ -2220,7 +2237,6 @@ Rotational Reference</P>
     <InstanceData>
       <P Name="LogSimulationData">off</P>
       <P Name="SimscapeInstrumentationLogging">off</P>
-      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_22"/>
       <P Name="SourceFile">foundation.mechanical.rotational.reference</P>
       <P Name="InternalSimscapePortConfiguration">{&quot;Bottom&quot;:[],&quot;Left&quot;:[{&quot;id&quot;:&quot;W&quot;,&quot;label&quot;:&quot;&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Right&quot;:[],&quot;Top&quot;:[]}</P>
       <P Name="SscBlockScalableBuild">off</P>
@@ -2229,6 +2245,7 @@ Rotational Reference</P>
       <P Name="ComponentVariantNames">[&quot;reference&quot;]</P>
       <P Name="ClassName">reference</P>
       <P Name="SchemaVersion">1</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_22"/>
     </InstanceData>
   </Block>
   <Block BlockType="Reference" Name="Mechanical&#xA;Rotational Reference1" SID="23">
@@ -2245,7 +2262,6 @@ Rotational Reference</P>
     <InstanceData>
       <P Name="LogSimulationData">off</P>
       <P Name="SimscapeInstrumentationLogging">off</P>
-      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_23"/>
       <P Name="SourceFile">foundation.mechanical.rotational.reference</P>
       <P Name="InternalSimscapePortConfiguration">{&quot;Bottom&quot;:[],&quot;Left&quot;:[{&quot;id&quot;:&quot;W&quot;,&quot;label&quot;:&quot;&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Right&quot;:[],&quot;Top&quot;:[]}</P>
       <P Name="SscBlockScalableBuild">off</P>
@@ -2254,6 +2270,7 @@ Rotational Reference</P>
       <P Name="ComponentVariantNames">[&quot;reference&quot;]</P>
       <P Name="ClassName">reference</P>
       <P Name="SchemaVersion">1</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_23"/>
     </InstanceData>
   </Block>
   <Block BlockType="Reference" Name="Rotation Transform" SID="24">
@@ -2305,7 +2322,6 @@ Interface</P>
     <InstanceData>
       <P Name="LogSimulationData">off</P>
       <P Name="SimscapeInstrumentationLogging">off</P>
-      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_25"/>
       <P Name="SourceFile">foundation.mechanical.interface.rotational</P>
       <P Name="InternalSimscapePortConfiguration">{&quot;Bottom&quot;:[],&quot;Left&quot;:[{&quot;id&quot;:&quot;t&quot;,&quot;label&quot;:&quot;t&quot;,&quot;type&quot;:&quot;output&quot;},{&quot;id&quot;:&quot;C&quot;,&quot;label&quot;:&quot;C&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Right&quot;:[{&quot;id&quot;:&quot;w&quot;,&quot;label&quot;:&quot;w&quot;,&quot;type&quot;:&quot;input&quot;},{&quot;id&quot;:&quot;R&quot;,&quot;label&quot;:&quot;R&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Top&quot;:[]}</P>
       <P Name="SscBlockScalableBuild">off</P>
@@ -2314,6 +2330,7 @@ Interface</P>
       <P Name="ComponentVariantNames">[&quot;rotational&quot;]</P>
       <P Name="ClassName">rotational</P>
       <P Name="SchemaVersion">1</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_25"/>
     </InstanceData>
   </Block>
   <Block BlockType="Reference" Name="Rotational Multibody&#xA;Interface2" SID="26">
@@ -2331,7 +2348,6 @@ Interface</P>
     <InstanceData>
       <P Name="LogSimulationData">off</P>
       <P Name="SimscapeInstrumentationLogging">off</P>
-      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_26"/>
       <P Name="SourceFile">foundation.mechanical.interface.rotational</P>
       <P Name="InternalSimscapePortConfiguration">{&quot;Bottom&quot;:[],&quot;Left&quot;:[{&quot;id&quot;:&quot;t&quot;,&quot;label&quot;:&quot;t&quot;,&quot;type&quot;:&quot;output&quot;},{&quot;id&quot;:&quot;C&quot;,&quot;label&quot;:&quot;C&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Right&quot;:[{&quot;id&quot;:&quot;w&quot;,&quot;label&quot;:&quot;w&quot;,&quot;type&quot;:&quot;input&quot;},{&quot;id&quot;:&quot;R&quot;,&quot;label&quot;:&quot;R&quot;,&quot;type&quot;:&quot;foundation.mechanical.rotational.rotational&quot;}],&quot;Top&quot;:[]}</P>
       <P Name="SscBlockScalableBuild">off</P>
@@ -2340,6 +2356,7 @@ Interface</P>
       <P Name="ComponentVariantNames">[&quot;rotational&quot;]</P>
       <P Name="ClassName">rotational</P>
       <P Name="SchemaVersion">1</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_26"/>
     </InstanceData>
   </Block>
   <Block BlockType="Reference" Name="Simulink-PS&#xA;Converter2" SID="28">
@@ -2456,7 +2473,6 @@ Sensor</P>
     <InstanceData>
       <P Name="LogSimulationData">off</P>
       <P Name="SimscapeInstrumentationLogging">off</P>
-      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_32"/>
       <P Name="MeasurementFrame">World</P>
       <P Name="RotationSequence">XYX</P>
       <P Name="SenseAngle">off</P>
@@ -2501,6 +2517,7 @@ Sensor</P>
       <P Name="SenseAzimDDot">off</P>
       <P Name="SenseDistDDot">off</P>
       <P Name="SenseIncDDot">off</P>
+      <P Name="SimscapeInstrumentationVariables" Ref="bdmxdata:SimscapeInstrumentationVariables_32"/>
     </InstanceData>
   </Block>
   <Block BlockType="Reference" Name="World Frame" SID="33">
@@ -2889,7 +2906,7 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
   <Object PropName="BdWindowsInfo" ObjectID="1" ClassName="Simulink.BDWindowsInfo">
     <Object PropName="WindowsInfo" ObjectID="2" ClassName="Simulink.WindowInfo">
       <P Name="IsActive" Class="logical">1</P>
-      <P Name="Location" Class="double">[-1.0, -8.0, 1922.0, 1041.0]</P>
+      <P Name="Location" Class="double">[30.0, 30.0, 980.0, 720.0]</P>
       <Object PropName="ModelBrowserInfo" ObjectID="3" ClassName="Simulink.ModelBrowserInfo">
         <P Name="Visible" Class="logical">0</P>
         <P Name="DockPosition" Class="char">Left</P>
@@ -2906,10 +2923,10 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
         <P Name="IsTabbed" Class="logical">1</P>
         <P Name="ViewObjType" Class="char">SimulinkTopLevel</P>
         <P Name="LoadSaveID" Class="char">0</P>
-        <P Name="Extents" Class="double">[1882.0, 805.0]</P>
+        <P Name="Extents" Class="double">[940.0, 484.0]</P>
         <P Name="ZoomFactor" Class="double">0.3</P>
         <P Name="Offset" Class="double">[429.23437499999886, -1211.0833333333339]</P>
-        <P Name="SceneRectInView" Class="double">[429.23437499999886, -1211.0833333333339, 6273.3333333333339, 2683.3333333333335]</P>
+        <P Name="SceneRectInView" Class="double">[429.23437499999886, -1211.0833333333339, 3133.3333333333335, 1613.3333333333335]</P>
       </Object>
       <Array PropName="DockComponentsInfo" Type="Simulink.DockComponentInfo" Dimension="1*2">
         <Object ObjectID="6">
@@ -2938,11 +2955,11 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
           <P Name="Minimized" Class="char">Unset</P>
         </Object>
       </Array>
-      <P Name="WindowState" Class="char">AAAA/wAAAAD9AAAAAwAAAAAAAAC9AAAB+PwCAAAABPsAAAAWAEQAbwBjAGsAVwBpAGQAZwBlAHQAMwEAAAAxAAAB+AAAAAAAAAAA+wAAABYARABvAGMAawBXAGkAZABnAGUAdAA0AAAAAAD/////AAAAAAAAAAD7AAAAUgBHAEwAVQBFADIAIAB0AHIAZQBlACAAYwBvAG0AcABvAG4AZQBuAHQALwBHAEwAVQBFADIAIAB0AHIAZQBlACAAYwBvAG0AcABvAG4AZQBuAHQAAAAAAP////8AAABjAP////sAAABgAFMAaQBtAHUAbABpAG4AawA6AEUAZABpAHQAbwByADoAUgBlAGYAZQByAGUAbgBjAGUAZABGAGkAbABlAHMALwBSAGUAZgBlAHIAZQBuAGMAZQBkACAARgBpAGwAZQBzAAAAAAD/////AAAAjAD///8AAAABAAAAAAAAAAD8AgAAAAH7AAAAVABHAEwAVQBFADIAOgBQAHIAbwBwAGUAcgB0AHkASQBuAHMAcABlAGMAdABvAHIALwBQAHIAbwBwAGUAcgB0AHkAIABJAG4AcwBwAGUAYwB0AG8AcgAAAAAA/////wAAAawA////AAAAAwAAAAAAAAAA/AEAAAAB+/////8AAAAAAP////8AAAJ5AP///wAAB4AAAANiAAAAAQAAAAIAAAABAAAAAvwAAAAA</P>
+      <P Name="WindowState" Class="char">AAAA/wAAAAD9AAAAAwAAAAAAAAC9AAAB+PwCAAAABPsAAAAWAEQAbwBjAGsAVwBpAGQAZwBlAHQAMwEAAAAxAAAB+AAAAAAAAAAA+wAAABYARABvAGMAawBXAGkAZABnAGUAdAA0AAAAAAD/////AAAAAAAAAAD7AAAAUgBHAEwAVQBFADIAIAB0AHIAZQBlACAAYwBvAG0AcABvAG4AZQBuAHQALwBHAEwAVQBFADIAIAB0AHIAZQBlACAAYwBvAG0AcABvAG4AZQBuAHQAAAAAAP////8AAABjAP////sAAABgAFMAaQBtAHUAbABpAG4AawA6AEUAZABpAHQAbwByADoAUgBlAGYAZQByAGUAbgBjAGUAZABGAGkAbABlAHMALwBSAGUAZgBlAHIAZQBuAGMAZQBkACAARgBpAGwAZQBzAAAAAAD/////AAAAjAD///8AAAABAAAAAAAAAAD8AgAAAAH7AAAAVABHAEwAVQBFADIAOgBQAHIAbwBwAGUAcgB0AHkASQBuAHMAcABlAGMAdABvAHIALwBQAHIAbwBwAGUAcgB0AHkAIABJAG4AcwBwAGUAYwB0AG8AcgAAAAAA/////wAAAawA////AAAAAwAAAAAAAAAA/AEAAAAB+/////8AAAAAAP////8AAAJ5AP///wAAA9IAAAIhAAAAAQAAAAIAAAABAAAAAvwAAAAA</P>
       <Array PropName="PersistedApps" Type="Cell" Dimension="0*1"/>
       <P Name="WindowUuid" Class="char">6f355876-10f5-494d-ab5e-9b249b52ec7e</P>
     </Object>
-    <P Name="BDUuid" Class="char">64a246c8-f5ef-438e-8afc-f7cae986356c</P>
+    <P Name="BDUuid" Class="char">28b8504a-de89-45e6-8cac-a95e6daeedf6</P>
   </Object>
 </WindowsInfo>
 

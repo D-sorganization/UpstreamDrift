@@ -1,0 +1,16 @@
+{
+  "source_revision": "2d3903bfd066df4ddf94dee845833fa82d024197",
+  "patch": "native degree conversion and explicit missing signals",
+  "matlab": "26.1.0.3203278 (R2026a)",
+  "names": [
+    "test_extract_golf_joint_kinematics/convertsNativeDegreesAndPreservesJointOrder",
+    "test_extract_golf_joint_kinematics/translationsRemainMetres",
+    "test_extract_golf_joint_kinematics/missingSignalsStayMissing",
+    "test_extract_golf_joint_kinematics/usesScalarSensorRatherThanMiswiredAggregate",
+    "test_extract_golf_joint_kinematics/rejectsUnknownCoordinates"
+  ],
+  "passed": [true, true, true, true, true],
+  "failed": [false, false, false, false, false],
+  "incomplete": [false, false, false, false, false],
+  "duration_s": [0.4827989, 0.055467, 0.0070452, 0.0257156, 0.1041196]
+}

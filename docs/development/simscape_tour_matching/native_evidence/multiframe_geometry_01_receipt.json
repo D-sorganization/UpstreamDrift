@@ -1,0 +1,332 @@
+{
+  "archive": "multiframe-geometry-01-bundle.zip",
+  "sha256": "78f6dfbf4a26aba7c4af9a93dd831d0230f1db34fcb36072a204919a3ccbec9a",
+  "native_exit_code": 0,
+  "qualification": "Fixed-offset local pose comparison at 13 times, 0-1.2 s; initial states not forward qualified; no anatomical/global-optimum claim.",
+  "baseline_geometry_in": [14.5, 12],
+  "baseline_sampled_rms_mm": 25.762390436132,
+  "cases": [
+    {
+      "geometry_in": [13.5, 12],
+      "sampled_rms_mm": 27.299574184093515,
+      "initial_rms_mm": 8.465671363413202,
+      "samples": [
+        {
+          "time_s": 0,
+          "rms_mm": 8.465671363413202
+        },
+        {
+          "time_s": 0.1,
+          "rms_mm": 8.35987725809262
+        },
+        {
+          "time_s": 0.2,
+          "rms_mm": 8.140207241047547
+        },
+        {
+          "time_s": 0.3,
+          "rms_mm": 8.439762590236183
+        },
+        {
+          "time_s": 0.4,
+          "rms_mm": 10.643122608109707
+        },
+        {
+          "time_s": 0.5,
+          "rms_mm": 15.74694048469443
+        },
+        {
+          "time_s": 0.6,
+          "rms_mm": 22.47249241363912
+        },
+        {
+          "time_s": 0.7,
+          "rms_mm": 28.875094222170844
+        },
+        {
+          "time_s": 0.8,
+          "rms_mm": 34.39679946674184
+        },
+        {
+          "time_s": 0.9,
+          "rms_mm": 38.918360253894306
+        },
+        {
+          "time_s": 1,
+          "rms_mm": 41.985970812169185
+        },
+        {
+          "time_s": 1.1,
+          "rms_mm": 43.02725297225492
+        },
+        {
+          "time_s": 1.2,
+          "rms_mm": 37.382469894728935
+        }
+      ]
+    },
+    {
+      "geometry_in": [15.5, 12],
+      "sampled_rms_mm": 26.106391415543825,
+      "initial_rms_mm": 8.07518041207808,
+      "samples": [
+        {
+          "time_s": 0,
+          "rms_mm": 8.07518041207808
+        },
+        {
+          "time_s": 0.1,
+          "rms_mm": 8.245395728328143
+        },
+        {
+          "time_s": 0.2,
+          "rms_mm": 8.758973925289348
+        },
+        {
+          "time_s": 0.3,
+          "rms_mm": 9.537195267601904
+        },
+        {
+          "time_s": 0.4,
+          "rms_mm": 11.154511357248078
+        },
+        {
+          "time_s": 0.5,
+          "rms_mm": 14.861938936185926
+        },
+        {
+          "time_s": 0.6,
+          "rms_mm": 20.939601400608623
+        },
+        {
+          "time_s": 0.7,
+          "rms_mm": 27.503023794980066
+        },
+        {
+          "time_s": 0.8,
+          "rms_mm": 33.18206068524638
+        },
+        {
+          "time_s": 0.9,
+          "rms_mm": 37.62087774709904
+        },
+        {
+          "time_s": 1,
+          "rms_mm": 40.3110916595022
+        },
+        {
+          "time_s": 1.1,
+          "rms_mm": 40.742104420140834
+        },
+        {
+          "time_s": 1.2,
+          "rms_mm": 34.89596801996527
+        }
+      ]
+    },
+    {
+      "geometry_in": [14.5, 11],
+      "sampled_rms_mm": 27.522377121686347,
+      "initial_rms_mm": 8.901674188299188,
+      "samples": [
+        {
+          "time_s": 0,
+          "rms_mm": 8.901674188299188
+        },
+        {
+          "time_s": 0.1,
+          "rms_mm": 8.717880253178677
+        },
+        {
+          "time_s": 0.2,
+          "rms_mm": 8.266283640948474
+        },
+        {
+          "time_s": 0.3,
+          "rms_mm": 8.177624582465386
+        },
+        {
+          "time_s": 0.4,
+          "rms_mm": 9.984745680269135
+        },
+        {
+          "time_s": 0.5,
+          "rms_mm": 14.970964213448427
+        },
+        {
+          "time_s": 0.6,
+          "rms_mm": 22.01774322703584
+        },
+        {
+          "time_s": 0.7,
+          "rms_mm": 28.763411416744233
+        },
+        {
+          "time_s": 0.8,
+          "rms_mm": 34.444576022852836
+        },
+        {
+          "time_s": 0.9,
+          "rms_mm": 39.08274973714696
+        },
+        {
+          "time_s": 1,
+          "rms_mm": 42.44415513629262
+        },
+        {
+          "time_s": 1.1,
+          "rms_mm": 43.738740302827125
+        },
+        {
+          "time_s": 1.2,
+          "rms_mm": 38.631545415858035
+        }
+      ]
+    },
+    {
+      "geometry_in": [14.5, 13],
+      "sampled_rms_mm": 26.2548502338101,
+      "initial_rms_mm": 8.750138636090842,
+      "samples": [
+        {
+          "time_s": 0,
+          "rms_mm": 8.750138636090842
+        },
+        {
+          "time_s": 0.1,
+          "rms_mm": 8.960780798504523
+        },
+        {
+          "time_s": 0.2,
+          "rms_mm": 9.58602782028242
+        },
+        {
+          "time_s": 0.3,
+          "rms_mm": 10.558321785534956
+        },
+        {
+          "time_s": 0.4,
+          "rms_mm": 12.39051439346339
+        },
+        {
+          "time_s": 0.5,
+          "rms_mm": 16.176998150689585
+        },
+        {
+          "time_s": 0.6,
+          "rms_mm": 21.899433979449928
+        },
+        {
+          "time_s": 0.7,
+          "rms_mm": 28.04542794125031
+        },
+        {
+          "time_s": 0.8,
+          "rms_mm": 33.519293966137944
+        },
+        {
+          "time_s": 0.9,
+          "rms_mm": 37.786047513084824
+        },
+        {
+          "time_s": 1,
+          "rms_mm": 40.123993934021534
+        },
+        {
+          "time_s": 1.1,
+          "rms_mm": 40.27114431927648
+        },
+        {
+          "time_s": 1.2,
+          "rms_mm": 33.712204342767855
+        }
+      ]
+    }
+  ],
+  "files": {
+    "case-01/attached_pose_probe.m": "c718ee295eb30e1a7de6b28a7d9043b7b108844643db1733774e31261af499ab",
+    "case-01/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-01/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-01/frame-00001.json": "0cfe28471fc9c5d78868de42645b74b60cf655653de91fcf35c54c76a23b01bc",
+    "case-01/frame-00037.json": "da62af392e965ed23c9b529490e7b0575a9df7c551e3c7b80924ec10eee59139",
+    "case-01/frame-00073.json": "ce89a31942237ee7b2d8129b009a6ee7423b78465f21e5711bd66430b95eff9a",
+    "case-01/frame-00109.json": "e82e66e38f1995180070b400d2ec18401937f639b7df1ad1f6dccadae4853ba2",
+    "case-01/frame-00145.json": "f4bc56a8149ca891c1809a54ef0e169ffb532c1750dc517d5f13e0687fbe916b",
+    "case-01/frame-00181.json": "739b050e25a50ed7f22c15243be08bba426f87637ec25f25698b25a4b18ba82c",
+    "case-01/frame-00217.json": "ecd58b24d4739df3a4be46b698ba1424bf2f7e5eac298a22d892d3bcadefc140",
+    "case-01/frame-00253.json": "70ee108bdb4b70b2e4b25485b71026d657348c33ec04574bf5be80182aac19e0",
+    "case-01/frame-00289.json": "a350cbc3612c0eba1665d79469c88f2a4389baa81453fc494fd11f2c3d1d3630",
+    "case-01/frame-00325.json": "8960b7141cad4afa62ee45f2cb7a486ff764e100ebcb0aef251d5a042e57adc8",
+    "case-01/frame-00361.json": "3fe845f30ce292b05836e7877d3ccff0791febee79d230d702b540a54ddd128d",
+    "case-01/frame-00397.json": "de9416ce48c5cbc91f4c3e92582baba9511ee3a9eb1449ccaeaac20cdf5a1a35",
+    "case-01/frame-00433.json": "9b2b0cc9bf5493868af7c2383cb104da7242b031b3e397abd35dcefc8b856174",
+    "case-01/initial_state.json": "2ca9bfbdb0154b3044eda9376c2abcf6a5fb3b4f3a1b0b01f64e30f4ae66648e",
+    "case-01/select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff",
+    "case-02/attached_pose_probe.m": "c718ee295eb30e1a7de6b28a7d9043b7b108844643db1733774e31261af499ab",
+    "case-02/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-02/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-02/frame-00001.json": "9a23d682cbba563c023e713fdce0aa7d788ad333a80d62f6175d409d0b29b34a",
+    "case-02/frame-00037.json": "1f5528a3c3e96e1e2a4479efb813883f9db72d0b79306518d825078f7e200c90",
+    "case-02/frame-00073.json": "c9aefeceb11349107878dda27ecbe715e3b28ecc685b9958de07331ee9a9975e",
+    "case-02/frame-00109.json": "7623d8dc1b3f90b489f572beec770717a4f7c827f2a9a6aa1074f1429068bc36",
+    "case-02/frame-00145.json": "584eb9921274337466d6282a880eb78cd7f768184194a4a0e95607299d1bbba1",
+    "case-02/frame-00181.json": "c15ae3320ad036c47718fd13a12e5c2f7bf491c0a060fdb2e2f86d7dc5c032d5",
+    "case-02/frame-00217.json": "5b3f64dd2cd6bc4819d4e90ca85ac7884d156cc20ccbbc97c09d0e4fa75733d7",
+    "case-02/frame-00253.json": "72a90ebbf1f1234840aeba0528014dc4b433fd19c7b81f779164a091cfe28d2c",
+    "case-02/frame-00289.json": "6a5df1b495861043fa817b8cf08fcaf23f37eb853ee47f17ffd68697412c8ab1",
+    "case-02/frame-00325.json": "521161535be785b6f3f244fce9723ec93fbe9042003114077bd0e0e1c934f3ba",
+    "case-02/frame-00361.json": "d7c6ff05b02743bfc64248b0160629f98e76db029ae02bea9ff32956a8b5356a",
+    "case-02/frame-00397.json": "b625d0f87c35dfe47f62c569a88a7554bb3a18ebb39e8ccb6efffa1db8eb0aff",
+    "case-02/frame-00433.json": "7d61a6898406a2cc45477058d9acb29eede8426d3359e8020b9f31738ef25128",
+    "case-02/initial_state.json": "be14e845e6ccd42d72a74c966897c58faece000844e0e38c57caa5a985742d42",
+    "case-02/select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff",
+    "case-03/attached_pose_probe.m": "c718ee295eb30e1a7de6b28a7d9043b7b108844643db1733774e31261af499ab",
+    "case-03/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-03/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-03/frame-00001.json": "aaabce5c33f780ebde0d171b94a2999c92d1c71b82b784407a83e64f52436f50",
+    "case-03/frame-00037.json": "6aa5c8386cdfdae4746dbcbdd229d4b8a28585338e00aa6ade9d846334ef281a",
+    "case-03/frame-00073.json": "31a7705c4790a05643431a74446b4eb61b07931d5792cc14d9ec565888043fb0",
+    "case-03/frame-00109.json": "439b13c1f82eb08763e1ae18286ce57a27fa7e2c6b6a752f14904a2de71d8d8b",
+    "case-03/frame-00145.json": "7f162cb02fb130ff5bb07dd5d4ceaf44100d567357a6eb6e4e245ce524062b55",
+    "case-03/frame-00181.json": "539d5bdefbcb4c94711e2b33c57efadc4f282555bbcbf833634b7108155f870b",
+    "case-03/frame-00217.json": "d0e352a67aa4102d137d00ea68297560b699ebb373eb476354f6ab489f8ba205",
+    "case-03/frame-00253.json": "6ff7a4b41c48c981ed1b422a4a4090faa6d50ac5e9f190a4be44c517f7b84b48",
+    "case-03/frame-00289.json": "7a0ccbfedbda82303614b23692a3e94f8d892c32dc6ee417dab9c6c070b6ab22",
+    "case-03/frame-00325.json": "1d73abe7d9af89eced76943cdce2928f2f58d426d06352b6021f814e0ffa9bdc",
+    "case-03/frame-00361.json": "7b4fab536796fe236d9abe73c0aa0c42f3a99ee1569524cf065cde7af3c3ec1f",
+    "case-03/frame-00397.json": "b71e96e432b3cc618bf425f39ec6ccf67557120b147ecfe81e0d7c86ad51d8bf",
+    "case-03/frame-00433.json": "cd89c8c49218e0215d2d4cb24d54270aff302e4ebb6fb3ecd0dc99f6e55dfea8",
+    "case-03/initial_state.json": "68cc71a2663ed925c63a6be2e0f12b1f629d7b0712e5926d786b7a3567a4e9e9",
+    "case-03/select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff",
+    "case-04/attached_pose_probe.m": "c718ee295eb30e1a7de6b28a7d9043b7b108844643db1733774e31261af499ab",
+    "case-04/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-04/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-04/frame-00001.json": "d3a6be01b0c640d7f4c6ccfed0f17bd4029657f1d55f961e8929af6ded14b987",
+    "case-04/frame-00037.json": "7a721a31080673153cc7c518909836d985385fa26adbb2843eefcda50df3e4e5",
+    "case-04/frame-00073.json": "08338719e7204718440c5e6679d7ac09d11e5c45d5b45340f7093aea282264dc",
+    "case-04/frame-00109.json": "731f5b4ae12d43725211f11f19fd8ae87445d7684fc2014caf0fa3e75ecb0322",
+    "case-04/frame-00145.json": "7e3628a3f744341175014a14b9c031f789f42d27d5ad7504defac718010538b9",
+    "case-04/frame-00181.json": "6eb36c2b606302023c41a4159d570a079acd3b14e2ec564fca17f16354b8e4eb",
+    "case-04/frame-00217.json": "8041e78b16c9253e9d63ce953d942cd00f107508acacfafbb8878f199117d8ef",
+    "case-04/frame-00253.json": "379708d24307706f3e11947edf73049113980ba3b616e5dad1281f5a0a3f9831",
+    "case-04/frame-00289.json": "8f6429c90ec25318e07bbaa009fc4f079af50cfd3ad5cb4817e98d60cc2c1fa7",
+    "case-04/frame-00325.json": "8de8971dffc8ef4de5e07bf6ffd8d4e8e073280274897ec2ce9a7822ea10bcb2",
+    "case-04/frame-00361.json": "d070634450fcf6eaf00b7e34552bffaf23ae90c5877eba4e6d27a6a3b83c7a5f",
+    "case-04/frame-00397.json": "efd52af6fa5dbd86d65911f789a0636f3a9fe174de054c9bf81e51f80e1a1836",
+    "case-04/frame-00433.json": "681a0199b8514ef5c5508ddee5786b143c267b7943193c0c2234114e20df6669",
+    "case-04/initial_state.json": "e7e3c4fbfc1d87d8f8f3fe226f0204c09ddcfa990c4bc4998bda5dd5b42cafc2",
+    "case-04/select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff",
+    "case-01-receipt.json": "1e1003ff1eab7d62afa1ecc15616d9fbed8550b204eb2b6e4b02e96ec98b0a3b",
+    "case-02-receipt.json": "57f8f96866ddc446822b50c2682f36ce02b5fd0509f234bd6798bc797daf09f0",
+    "case-03-receipt.json": "839a238d43155b10d87cf993e0ce1cc2fe2cb3a21d7daa199720d93c61f0ec39",
+    "case-04-receipt.json": "60e342c6fcd8b95bc0bd9cec5ff06569453d9571a7cd5af16b3c4e4dfc52c18d",
+    "exit-code.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "experiment.m": "c2c7f90167d9db2ddc6c2fca0c0038e4d63b10c8520e7dca5470330cdfd8d42d",
+    "launch.ps1": "0ae6224f6a17a7be15602f032a48bd6ed3bcafbc44290fcf3136c7dec6a34e83",
+    "probe.log": "0e42fa0e65fc19953bb7a99acc708327a648c3b3d78d4f5da886e5e61c3d4e9f",
+    "seed-01.json": "2ca9bfbdb0154b3044eda9376c2abcf6a5fb3b4f3a1b0b01f64e30f4ae66648e",
+    "seed-02.json": "be14e845e6ccd42d72a74c966897c58faece000844e0e38c57caa5a985742d42",
+    "seed-03.json": "68cc71a2663ed925c63a6be2e0f12b1f629d7b0712e5926d786b7a3567a4e9e9",
+    "seed-04.json": "e7e3c4fbfc1d87d8f8f3fe226f0204c09ddcfa990c4bc4998bda5dd5b42cafc2"
+  }
+}

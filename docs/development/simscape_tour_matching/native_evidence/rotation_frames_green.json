@@ -1,0 +1,15 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "names": [
+    "test_project_body_markers/offsetsRotateWithAssignedBodies",
+    "test_project_body_markers/rejectsUnknownBody",
+    "test_project_body_markers/rejectsReflectedOrScaledFrames",
+    "test_project_body_markers/rejectsMismatchedAttachments",
+    "test_intrinsic_xyz_to_rotm/mapsIntrinsicAxesInOrder",
+    "test_intrinsic_xyz_to_rotm/rejectsMissingOrientation",
+    "test_golf_kinematic_frames/framesMatchIndependentForwardReplay"
+  ],
+  "passed": [true, true, true, true, true, true, true],
+  "failed": [false, false, false, false, false, false, false],
+  "incomplete": [false, false, false, false, false, false, false]
+}

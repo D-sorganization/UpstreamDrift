@@ -1,0 +1,31 @@
+{
+  "bundle_name": "first-prefix-50ms-20260910.zip",
+  "bundle_sha256": "97ebd8b261b58deda873d29ddb099fbcad4ec2ef93c180441305df78dd3635e3",
+  "local_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\first-prefix-20260910\\first-prefix-50ms-20260910.zip",
+  "remote_path": "C:/Users/diete/SimscapeTour9921/checkpoints/first-prefix-25/first-prefix-50ms-20260910.zip",
+  "manifest": {
+    "schema": "simscape-continuation-bundle/1",
+    "source_base": "0d8b3400421c8c71807356eba4d9b7cdb273c33f",
+    "required_matlab": "R2025b",
+    "source_c3d_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+    "qualification": "exploratory 50 ms only; optimizer evaluation limit; not full-swing qualified",
+    "files": {
+      "run/driver_marker_payload.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+      "run/native_pose_seed_waist.json": "eff17bfdbe2d64eaf85af09ecf8de91c065b355cef2425922dec33bd14e588c3",
+      "run/first_prefix_fit.json": "56e0ff8fb6fdfba07912fa7dbf3fb70197da89899d4c85955865726f8303dcab",
+      "run/first_prefix_fit.py": "6a1bf696e5e9ae5957a1fdde9edfc60699ea607583043606fee37d31c073b31c",
+      "original_run/first_prefix_fit.py": "681c6f39b9fc28f6a5c126bd32f5096070716c4dd74d6376a0c56bbb7313995a",
+      "original_run/native_pose_seed_waist.m": "edfe31eef7c14bd6f5080b0ca9c87fbca8b047f00b2e416a831933368ca75822",
+      "original_run/native_pose_seed_waist_target.json": "888916a5dfa688c8be7ad69b73b157cca9aea49ac98ddc6202351f1d3e21cfda",
+      "original_run/native_pose_seed.json": "36562283fae26011e8051d0cf4cd2953d21846cc0fe4143edcea007e3345c5fa",
+      "python_engine_r2025b.json": "5d25f922ede723a9d9879cbabe440efc4213cd0bb963a3bbf75eaeb3cb3cb81c",
+      "first_prefix_fit_r2025b.png": "310d38468759246bcdd47ed5fb87a26b2ac0806c670af178916915de453389b3",
+      "CHECKPOINTS.md": "9dcae5a1e52cd5a9dadf5e409f79ca40b72535ff880256f69a0fa94cbc037c2a",
+      "source_patches/src/shared/python/motion_matching/prefix_fit.py": "12ac5e2a8399205d77d99fd11cbbc414283c00b5ab5e6aae579b1e03af95b193",
+      "source_patches/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/simulate_golf_markers.m": "58983c53ea135d8c9e79c428993c03fb5a1b96536e2e29da7d30ee4897ec3fc1",
+      "source_patches/src/engines/Simscape_Multibody_Models/python/tour_checkpoints.py": "dd8f6554b83a6b69763571956a024ab0968fe0c6d2017e2fa4145e7416f5a872",
+      "source_patches/src/engines/Simscape_Multibody_Models/python/__init__.py": "cb733f4766f6514532e9abe1bc0d74dbd5e70ff9279bd5d64f80eae552a3f777",
+      "checkpoints/evaluation-00283-56e0ff8fb6fdfba07912fa7dbf3fb70197da89899d4c85955865726f8303dcab.json": "38ab94e2421a069aa63e122da6e0d70001a9a982ce4d42329dbf0e0bc44aae16"
+    }
+  }
+}

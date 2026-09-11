@@ -1,0 +1,6 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "names": "test_simulate_golf_markers/rejectsNonIncreasingClock",
+  "passed": false,
+  "failed": true
+}

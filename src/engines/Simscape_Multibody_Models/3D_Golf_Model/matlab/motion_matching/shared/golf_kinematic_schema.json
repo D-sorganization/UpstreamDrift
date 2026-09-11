@@ -1,0 +1,247 @@
+{
+  "model_name": "GolfSwing3D_Kinetic",
+  "world_port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+  "coordinates": [
+    {
+      "name": "TranslationInputX",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "primitive": "Px"
+    },
+    {
+      "name": "TranslationInputY",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "primitive": "Py"
+    },
+    {
+      "name": "TranslationInputZ",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "primitive": "Pz"
+    },
+    {
+      "name": "HipInputX",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "primitive": "Rx"
+    },
+    {
+      "name": "HipInputY",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "primitive": "Ry"
+    },
+    {
+      "name": "HipInputZ",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "primitive": "Rz"
+    },
+    {
+      "name": "SpineInputX",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Rx"
+    },
+    {
+      "name": "SpineInputY",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Ry"
+    },
+    {
+      "name": "TorsoInput",
+      "block_path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Kinetically Driven Revolute",
+      "primitive": "Rz"
+    },
+    {
+      "name": "LEInput",
+      "block_path": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "primitive": "Rz"
+    },
+    {
+      "name": "LFInput",
+      "block_path": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "primitive": "Rz"
+    },
+    {
+      "name": "LScapInputX",
+      "block_path": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Rx"
+    },
+    {
+      "name": "LScapInputY",
+      "block_path": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Ry"
+    },
+    {
+      "name": "LSInputX",
+      "block_path": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "primitive": "Rx"
+    },
+    {
+      "name": "LSInputY",
+      "block_path": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "primitive": "Ry"
+    },
+    {
+      "name": "LSInputZ",
+      "block_path": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "primitive": "Rz"
+    },
+    {
+      "name": "LWInputX",
+      "block_path": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Rx"
+    },
+    {
+      "name": "LWInputY",
+      "block_path": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Ry"
+    },
+    {
+      "name": "REInput",
+      "block_path": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "primitive": "Rz"
+    },
+    {
+      "name": "RFInput",
+      "block_path": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "primitive": "Rz"
+    },
+    {
+      "name": "RScapInputX",
+      "block_path": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Rx"
+    },
+    {
+      "name": "RScapInputY",
+      "block_path": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Ry"
+    },
+    {
+      "name": "RSInputX",
+      "block_path": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "primitive": "Rx"
+    },
+    {
+      "name": "RSInputY",
+      "block_path": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "primitive": "Ry"
+    },
+    {
+      "name": "RSInputZ",
+      "block_path": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "primitive": "Rz"
+    },
+    {
+      "name": "RWInputX",
+      "block_path": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Rx"
+    },
+    {
+      "name": "RWInputY",
+      "block_path": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "primitive": "Ry"
+    }
+  ],
+  "frames": [
+    {
+      "name": "Spine",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Transform\nSensor/F",
+      "source": "SpineLogs.GlobalPosition",
+      "rotation_source": "SpineLogs.Rotation_Transform"
+    },
+    {
+      "name": "Torso",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Transform\nSensor/F",
+      "source": "TorsoLogs.GlobalPosition",
+      "rotation_source": "TorsoLogs.Rotation_Transform"
+    },
+    {
+      "name": "LE",
+      "port": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Transform\nSensor/F",
+      "source": "LELogs.LEJoint.GlobalPosition",
+      "rotation_source": "LELogs.LEJoint.Rotation_Transform"
+    },
+    {
+      "name": "LF",
+      "port": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Transform\nSensor/F",
+      "source": "LFLogs.GlobalPosition",
+      "rotation_source": "LFLogs.Rotation_Transform"
+    },
+    {
+      "name": "LScap",
+      "port": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Transform\nSensor/F",
+      "source": "LScapLogs.GlobalPosition",
+      "rotation_source": "LScapLogs.Rotation_Transform"
+    },
+    {
+      "name": "LS",
+      "port": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Transform\nSensor/F",
+      "source": "LSLogs.GlobalPosition",
+      "rotation_source": "LSLogs.Rotation_Transform"
+    },
+    {
+      "name": "LW",
+      "port": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Transform\nSensor/F",
+      "source": "LWLogs.LWJoint.GlobalPosition",
+      "rotation_source": "LWLogs.LWJoint.Rotation_Transform"
+    },
+    {
+      "name": "RE",
+      "port": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Transform\nSensor/F",
+      "source": "RELogs.REJoint.GlobalPosition",
+      "rotation_source": "RELogs.REJoint.Rotation_Transform"
+    },
+    {
+      "name": "RF",
+      "port": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Transform\nSensor/F",
+      "source": "RFLogs.GlobalPosition",
+      "rotation_source": "RFLogs.Rotation_Transform"
+    },
+    {
+      "name": "RScap",
+      "port": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Transform\nSensor/F",
+      "source": "RScapLogs.GlobalPosition",
+      "rotation_source": "RScapLogs.Rotation_Transform"
+    },
+    {
+      "name": "RS",
+      "port": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Transform\nSensor/F",
+      "source": "RSLogs.GlobalPosition",
+      "rotation_source": "RSLogs.Rotation_Transform"
+    },
+    {
+      "name": "RW",
+      "port": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Transform\nSensor/F",
+      "source": "RWLogs.RWJoint.GlobalPosition",
+      "rotation_source": "RWLogs.RWJoint.Rotation_Transform"
+    },
+    {
+      "name": "Hub",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Transform\nSensor/F",
+      "source": "HipLogs.HUBGlobalPosition",
+      "rotation_source": ""
+    },
+    {
+      "name": "Clubhead",
+      "port": "GolfSwing3D_Kinetic/Clubhead/Transform\nSensor10/F",
+      "source": "ClubLogs.CHGlobalPosition",
+      "rotation_source": ""
+    },
+    {
+      "name": "Grip",
+      "port": "GolfSwing3D_Kinetic/Midpoint/Transform\nSensor8/F",
+      "source": "MidpointCalcsLogs.MPGlobalPosition",
+      "rotation_source": ""
+    },
+    {
+      "name": "Hip",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint/F",
+      "source": "",
+      "rotation_source": ""
+    }
+  ],
+  "dependent_coordinates": [
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "REInput",
+    "RWInputX",
+    "RWInputY"
+  ]
+}

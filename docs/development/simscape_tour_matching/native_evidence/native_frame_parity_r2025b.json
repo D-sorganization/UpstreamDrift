@@ -1,0 +1,619 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "source_revision": "d7e3b0ad5836726f41544ddcdc2bf70c1754e7f6",
+  "frames": [
+    {
+      "name": "Spine",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Transform\nSensor/F",
+      "source": "SpineLogs.GlobalPosition"
+    },
+    {
+      "name": "Torso",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Transform\nSensor/F",
+      "source": "TorsoLogs.GlobalPosition"
+    },
+    {
+      "name": "LE",
+      "port": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Transform\nSensor/F",
+      "source": "LELogs.LEJoint.GlobalPosition"
+    },
+    {
+      "name": "LF",
+      "port": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Transform\nSensor/F",
+      "source": "LFLogs.GlobalPosition"
+    },
+    {
+      "name": "LScap",
+      "port": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Transform\nSensor/F",
+      "source": "LScapLogs.GlobalPosition"
+    },
+    {
+      "name": "LS",
+      "port": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Transform\nSensor/F",
+      "source": "LSLogs.GlobalPosition"
+    },
+    {
+      "name": "LW",
+      "port": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Transform\nSensor/F",
+      "source": "LWLogs.LWJoint.GlobalPosition"
+    },
+    {
+      "name": "RE",
+      "port": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Transform\nSensor/F",
+      "source": "RELogs.REJoint.GlobalPosition"
+    },
+    {
+      "name": "RF",
+      "port": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Transform\nSensor/F",
+      "source": "RFLogs.GlobalPosition"
+    },
+    {
+      "name": "RScap",
+      "port": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Transform\nSensor/F",
+      "source": "RScapLogs.GlobalPosition"
+    },
+    {
+      "name": "RS",
+      "port": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Transform\nSensor/F",
+      "source": "RSLogs.GlobalPosition"
+    },
+    {
+      "name": "RW",
+      "port": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Transform\nSensor/F",
+      "source": "RWLogs.RWJoint.GlobalPosition"
+    },
+    {
+      "name": "Hub",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Transform\nSensor/F",
+      "source": "HipLogs.HUBGlobalPosition"
+    },
+    {
+      "name": "Clubhead",
+      "port": "GolfSwing3D_Kinetic/Clubhead/Transform\nSensor10/F",
+      "source": "ClubLogs.CHGlobalPosition"
+    },
+    {
+      "name": "Grip",
+      "port": "GolfSwing3D_Kinetic/Midpoint/Transform\nSensor8/F",
+      "source": "MidpointCalcsLogs.MPGlobalPosition"
+    }
+  ],
+  "coordinate_names": [
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+    "SpineInputX",
+    "SpineInputY",
+    "TorsoInput",
+    "LEInput",
+    "LFInput",
+    "LScapInputX",
+    "LScapInputY",
+    "LSInputX",
+    "LSInputY",
+    "LSInputZ",
+    "LWInputX",
+    "LWInputY",
+    "REInput",
+    "RFInput",
+    "RScapInputX",
+    "RScapInputY",
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "RWInputX",
+    "RWInputY"
+  ],
+  "times": [0, 0.01, 0.02],
+  "construct_s": 35.262514,
+  "output_variables": [
+    {
+      "ID": "Spine.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Spine.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Spine.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Torso.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Torso.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Torso.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LE.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LE.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LE.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LF.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LF.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LF.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LScap.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LScap.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LScap.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LS.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LS.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LS.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LW.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LW.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "LW.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RE.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RE.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RE.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RF.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RF.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RF.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RScap.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RScap.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RScap.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RS.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RS.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RS.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RW.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RW.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "RW.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Hub.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Hub.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Hub.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Transform Sensor/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Clubhead.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Clubhead/Transform Sensor10/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Clubhead.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Clubhead/Transform Sensor10/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Clubhead.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Clubhead/Transform Sensor10/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Grip.Translation.x",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Midpoint/Transform Sensor8/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Grip.Translation.y",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Midpoint/Transform Sensor8/F",
+      "Unit": "m"
+    },
+    {
+      "ID": "Grip.Translation.z",
+      "Base": "GolfSwing3D_Kinetic/Hips and Torso Inputs/World Frame1/W",
+      "Follower": "GolfSwing3D_Kinetic/Midpoint/Transform Sensor8/F",
+      "Unit": "m"
+    }
+  ],
+  "flags": [1, 1, 1],
+  "target_flags": [
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  ],
+  "solve_s": [0.0061847, 0.0021584, 0.0015013],
+  "expected_m": [
+    [
+      [
+        -8.3266726846886741e-17, 1.3010426069826053e-17, -0.15092161771647733,
+        -0.1706849385090459, 0.050800000000000144, -0.091816309776153543,
+        -0.19044825930161421, -0.22401676210074109, -0.24526328441900033,
+        0.050800000000000053, 0.07921501456542282, -0.26650980673725949,
+        0.050800000000000033, -1.2641864135294407, -0.22797260259842594
+      ],
+      [
+        -0.1828800000000001, -0.15239999999999998, -0.2977980665271413,
+        -0.19442848366283072, -0.30480000000000007, -0.48624276157498858,
+        -0.091058900798520179, -0.037617886794780918, -0.066535878791707109,
+        -0.30480000000000013, -0.065247679037822817, -0.095453870788633377,
+        -0.30480000000000007, -0.16809726174950199, -0.10822300523065004
+      ],
+      [
+        0.3167574516881963, 0.26396454307349682, 0.65399882895051109,
+        0.797306122867145, 0.52792908614699408, 0.42183897134889314,
+        0.94061341678377919, 0.59365953987216658, 0.76780079009234148,
+        0.52792908614699385, 0.607448093113469, 0.94194204031251627,
+        0.527929086146994, 0.93886210373049561, 0.92076178765199335
+      ]
+    ],
+    [
+      [
+        1.0005178713255687e-7, 7.7880076794204857e-8, -0.15031658594062713,
+        -0.1686771264516532, 0.050798427283631195, -0.093649128092756842,
+        -0.18703766696267907, -0.22170169159674077, -0.24241272359050056,
+        0.050798427283631126, 0.081368706046425376, -0.26312375558426021,
+        0.050798427283631077, -1.2613254778010854, -0.22477733346954454
+      ],
+      [
+        -0.18287966002685982, -0.15239971084372492, -0.29665894408836252,
+        -0.19314369814850263, -0.305183249806015, -0.4855411120082479,
+        -0.0896284522086427, -0.035920980334839162, -0.064684356519871922,
+        -0.30518324980601508, -0.065854335392021748, -0.093447732704904765,
+        -0.305183249806015, -0.15853867501957553, -0.10650724348191612
+      ],
+      [
+        0.31626215769954436, 0.26346921974575155, 0.65416369097140259,
+        0.79755240883355982, 0.52721226430672, 0.42175163047766562,
+        0.94094112669571728, 0.59413982745848826, 0.76837117178031777,
+        0.52721226430671986, 0.606604510664816, 0.94260251610214707,
+        0.52721226430671986, 0.94388742542085424, 0.92125372013457141
+      ]
+    ],
+    [
+      [
+        3.9445913429375948e-7, 3.0689241253898832e-7, -0.14970741713335595,
+        -0.16667259854826516, 0.050793697945013434, -0.09547898578043193,
+        -0.18363777996317404, -0.2193683396280825, -0.23955547862229873,
+        0.050793697945013358, 0.083514869155926513, -0.2597426176165149,
+        0.050793697945013358, -1.2583942545947204, -0.22159068546173988
+      ],
+      [
+        -0.18287865763354383, -0.15239885780577797, -0.29552279383009328,
+        -0.19186924003694864, -0.30556517691158608, -0.48482398609701083,
+        -0.088215686243803978, -0.034216789136219936, -0.0628372090046468,
+        -0.30556517691158608, -0.06647692052192436, -0.091457628873073751,
+        -0.305565176911586, -0.14897190707791275, -0.10480575690146993
+      ],
+      [
+        0.31479098426520391, 0.26199796008158971, 0.6533558382683764,
+        0.79681650676539317, 0.52551982402955622, 0.42070292975587786,
+        0.94027717526241028, 0.59364033807436722, 0.76795669125381871,
+        0.5255198240295561, 0.60477971685775433, 0.9422730444332702,
+        0.52551982402955622, 0.947945412839149, 0.92075496944978252
+      ]
+    ]
+  ],
+  "predicted_m": [
+    [
+      [
+        -8.3266726846886741e-17, 1.3010426069826053e-17, -0.15092161771647739,
+        -0.17068493850904604, 0.050800000000000151, -0.091816309776153557,
+        -0.19044825930161433, -0.22401676210059429, -0.24526328441885356,
+        0.050800000000000053, 0.0792150145655736, -0.26650980673711261,
+        0.050800000000000033, -1.2641864135294418, -0.22797260259842611
+      ],
+      [
+        -0.1828800000000001, -0.15239999999999998, -0.2977980665271413,
+        -0.19442848366283075, -0.30480000000000007, -0.48624276157498869,
+        -0.091058900798520151, -0.037617886794895333, -0.06653587879182575,
+        -0.30480000000000007, -0.065247679037887155, -0.095453870788756182,
+        -0.30480000000000007, -0.16809726174950146, -0.10822300523065001
+      ],
+      [
+        0.3167574516881963, 0.26396454307349682, 0.65399882895051131,
+        0.79730612286714519, 0.52792908614699408, 0.42183897134889314,
+        0.94061341678377941, 0.59365953987196274, 0.76780079009213664,
+        0.52792908614699385, 0.60744809311327308, 0.94194204031231088,
+        0.527929086146994, 0.938862103730496, 0.92076178765199357
+      ]
+    ],
+    [
+      [
+        1.0005178717765968e-7, 7.7880076801143764e-8, -0.15031658594062719,
+        -0.16867712645165336, 0.05079842728363114, -0.093649128092756911,
+        -0.18703766696267923, -0.22170169159674061, -0.24241272359050053,
+        0.050798427283631126, 0.081368706046425057, -0.26312375558426027,
+        0.050798427283631022, -1.2613254778010861, -0.22477733346954476
+      ],
+      [
+        -0.18287966002685971, -0.15239971084372492, -0.29665894408836246,
+        -0.19314369814850252, -0.30518324980601491, -0.48554111200824779,
+        -0.089628452208642587, -0.035920980334838482, -0.064684356519871214,
+        -0.30518324980601497, -0.0658543353920215, -0.093447732704904016,
+        -0.30518324980601491, -0.15853867501957469, -0.10650724348191597
+      ],
+      [
+        0.31626215769954436, 0.26346921974575155, 0.65416369097140248,
+        0.79755240883355971, 0.52721226430672, 0.42175163047766556,
+        0.94094112669571717, 0.59413982745848815, 0.76837117178031722,
+        0.52721226430671986, 0.6066045106648158, 0.9426025161021464,
+        0.52721226430671986, 0.943887425420854, 0.9212537201345713
+      ]
+    ],
+    [
+      [
+        3.9445913430763727e-7, 3.0689241253812096e-7, -0.14970741713335589,
+        -0.16667259854826516, 0.050793697945013434, -0.095478985780431833,
+        -0.18363777996317412, -0.219368339628082, -0.2395554786222982,
+        0.050793697945013372, 0.083514869155926541, -0.25974261761651429,
+        0.050793697945013372, -1.25839425459472, -0.22159068546173993
+      ],
+      [
+        -0.18287865763354383, -0.152398857805778, -0.29552279383009328,
+        -0.19186924003694858, -0.305565176911586, -0.48482398609701077,
+        -0.088215686243803881, -0.034216789136219922, -0.062837209004646677,
+        -0.30556517691158608, -0.066476920521924179, -0.091457628873073432,
+        -0.305565176911586, -0.14897190707791247, -0.10480575690146983
+      ],
+      [
+        0.31479098426520369, 0.26199796008158971, 0.653355838268376,
+        0.79681650676539273, 0.525519824029556, 0.42070292975587753,
+        0.94027717526240973, 0.59364033807436689, 0.767956691253818,
+        0.52551982402955588, 0.604779716857754, 0.94227304443326942,
+        0.525519824029556, 0.94794541283914824, 0.920754969449782
+      ]
+    ]
+  ],
+  "max_error_m": 2.0539125955565396e-13,
+  "status": "success"
+}

@@ -1,0 +1,616 @@
+[
+  {
+    "worktree": "C:/Users/diete/Repositories/.context-implementation/UpstreamDrift",
+    "HEAD": "d9e3d1addd3ab4d9a5c24f8a4dd4e15c8c4da3ae",
+    "branch": "refs/heads/feat/issue-9915-agent-context",
+    "bytes": 1070518224,
+    "gib": 1.0,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "feat/issue-9915-agent-context",
+      "headRefOid": "d9e3d1addd3ab4d9a5c24f8a4dd4e15c8c4da3ae",
+      "mergedAt": "2026-09-10T07:46:25Z",
+      "number": 9920
+    },
+    "ignored_file_count": 29212,
+    "ignored_top_paths": [
+      ".codemap",
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests",
+      "ui"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 39,
+    "noncache_ignored_examples": [
+      "ui/dist/app-icon.svg",
+      "ui/dist/assets/AnalysisTools-Tl4s4c4N.js",
+      "ui/dist/assets/BallFlight-DQK26oB3.js",
+      "ui/dist/assets/CanonicalCoreShell-BvHDh6Zs.js",
+      "ui/dist/assets/CharacterBuilder-DiJqc5y9.js",
+      "ui/dist/assets/Chat-Dvu3jGB7.js",
+      "ui/dist/assets/Dashboard-DY7uHnwI.js",
+      "ui/dist/assets/DataExplorer-Bw_iDeuX.js",
+      "ui/dist/assets/DatasetGenerator-C5uRElGf.js",
+      "ui/dist/assets/HelpfulField-Bc0a6EUG.js",
+      "ui/dist/assets/ImpactExplorer-BpNxgxNR.js",
+      "ui/dist/assets/MocapSkeleton3D-CBcZXAot.js",
+      "ui/dist/assets/ModelExplorer-CAkO7GzB.js",
+      "ui/dist/assets/MotionCapture-DOV2LJ6z.js",
+      "ui/dist/assets/PuttingGreen-B3JGkSvx.js"
+    ]
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9810",
+    "HEAD": "24ad9a0778fec59b5979119ae435c7e4a3f790ca",
+    "branch": "refs/heads/claude/9810-layout-model",
+    "bytes": 624661330,
+    "gib": 0.58,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "claude/9810-layout-model",
+      "headRefOid": "24ad9a0778fec59b5979119ae435c7e4a3f790ca",
+      "mergedAt": "2026-09-08T20:47:44Z",
+      "number": 9820
+    },
+    "ignored_file_count": 1681,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9813",
+    "HEAD": "3a40b1c0a45005b6834481e308ee0d76d78f062a",
+    "branch": "refs/heads/claude/9813-multiview-panes",
+    "bytes": 596745195,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "claude/9813-multiview-panes",
+      "headRefOid": "3a40b1c0a45005b6834481e308ee0d76d78f062a",
+      "mergedAt": "2026-09-08T21:35:24Z",
+      "number": 9823
+    },
+    "ignored_file_count": 552,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9815",
+    "HEAD": "c9bde4f2e2fd37a609110a7937950dfd3f96a129",
+    "branch": "refs/heads/claude/9815-multipicture",
+    "bytes": 598220568,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "claude/9815-multipicture",
+      "headRefOid": "c9bde4f2e2fd37a609110a7937950dfd3f96a129",
+      "mergedAt": "2026-09-08T21:03:52Z",
+      "number": 9821
+    },
+    "ignored_file_count": 414,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9816",
+    "HEAD": "78a3f91768df76e07a68bd51ec1814c432f33dfb",
+    "branch": "refs/heads/claude/9816-capture-rig-theme",
+    "bytes": 598809817,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "claude/9816-capture-rig-theme",
+      "headRefOid": "78a3f91768df76e07a68bd51ec1814c432f33dfb",
+      "mergedAt": "2026-09-08T20:29:40Z",
+      "number": 9819
+    },
+    "ignored_file_count": 523,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9846",
+    "HEAD": "dfeae3099fe038c88c6964a44d4a8e3da0171bf3",
+    "branch": "refs/heads/claude/9846-video-central",
+    "bytes": 598961968,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "claude/9846-video-central",
+      "headRefOid": "dfeae3099fe038c88c6964a44d4a8e3da0171bf3",
+      "mergedAt": "2026-09-09T04:35:21Z",
+      "number": 9858
+    },
+    "ignored_file_count": 409,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_ingest",
+    "HEAD": "0c455b578de865b2dbbc1b0eb3a42ff6e82f6842",
+    "branch": "refs/heads/claude/9602-ingest-observations",
+    "bytes": 601925672,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "claude/9602-ingest-observations",
+      "headRefOid": "0c455b578de865b2dbbc1b0eb3a42ff6e82f6842",
+      "mergedAt": "2026-09-07T03:00:23Z",
+      "number": 9609
+    },
+    "ignored_file_count": 1840,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_p1merge",
+    "HEAD": "99de5a28e97616b3b831f83a516d1e3c1030dadc",
+    "branch": "refs/heads/docs/release-runbook-tagging",
+    "bytes": 926747279,
+    "gib": 0.86,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "docs/release-runbook-tagging",
+      "headRefOid": "99de5a28e97616b3b831f83a516d1e3c1030dadc",
+      "mergedAt": "2026-09-08T04:05:39Z",
+      "number": 9749
+    },
+    "ignored_file_count": 18859,
+    "ignored_top_paths": [
+      ".hypothesis",
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "apps",
+      "installer",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_ud_9477",
+    "HEAD": "fa1cee09ac3490536b0ba0a4a2c4d57311951434",
+    "branch": "refs/heads/fix/9477-physics-metrics-actuation",
+    "bytes": 774183746,
+    "gib": 0.72,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "fix/9477-physics-metrics-actuation",
+      "headRefOid": "fa1cee09ac3490536b0ba0a4a2c4d57311951434",
+      "mergedAt": "2026-09-05T07:02:25Z",
+      "number": 9540
+    },
+    "ignored_file_count": 13140,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_ud_9495_thread",
+    "HEAD": "c235acd82f4084cfdf33ea6cfd152668c440b7a8",
+    "branch": "refs/heads/fix/9233-research-source-sha256-drift",
+    "bytes": 590268691,
+    "gib": 0.55,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "fix/9233-research-source-sha256-drift",
+      "headRefOid": "c235acd82f4084cfdf33ea6cfd152668c440b7a8",
+      "mergedAt": "2026-09-05T01:38:13Z",
+      "number": 9534
+    },
+    "ignored_file_count": 2766,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-analysis-drawings-9932",
+    "HEAD": "1cc539e5482c312cb75ce06ca7cbb68ff5b01a35",
+    "branch": "refs/heads/feat/9932-comparison-drawings",
+    "bytes": 855528347,
+    "gib": 0.8,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "feat/9932-comparison-drawings",
+      "headRefOid": "1cc539e5482c312cb75ce06ca7cbb68ff5b01a35",
+      "mergedAt": "2026-09-10T04:10:20Z",
+      "number": 9943
+    },
+    "ignored_file_count": 13390,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942",
+    "HEAD": "b24d76a179a03ff972aedc25dd961f7111061737",
+    "branch": "refs/heads/docs/9926-analysis-completion",
+    "bytes": 858613072,
+    "gib": 0.8,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "docs/9926-analysis-completion",
+      "headRefOid": "b24d76a179a03ff972aedc25dd961f7111061737",
+      "mergedAt": "2026-09-10T05:28:22Z",
+      "number": 9947
+    },
+    "ignored_file_count": 13667,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-claim-preservation",
+    "HEAD": "fced8c0d62fcfadffb414b1ea850c0624ddc8713",
+    "branch": "refs/heads/fix/9825-preserve-reviewed-claims",
+    "bytes": 854700067,
+    "gib": 0.8,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "fix/9825-preserve-reviewed-claims",
+      "headRefOid": "fced8c0d62fcfadffb414b1ea850c0624ddc8713",
+      "mergedAt": "2026-09-09T01:12:29Z",
+      "number": 9826
+    },
+    "ignored_file_count": 6004,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      ".venv",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin",
+    "HEAD": "37790892f50d38b007b85bbb87aa58e9ceab2beb",
+    "branch": "refs/heads/feat/9912-impact-provider-pin",
+    "bytes": 592557308,
+    "gib": 0.55,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "feat/9912-impact-provider-pin",
+      "headRefOid": "37790892f50d38b007b85bbb87aa58e9ceab2beb",
+      "mergedAt": "2026-09-10T01:32:10Z",
+      "number": 9916
+    },
+    "ignored_file_count": 2740,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-reference",
+    "HEAD": "aa08217c520c68867945b999a8c77425e6b3ae2b",
+    "branch": "refs/heads/fix/9783-reviewed-renderer-reference",
+    "bytes": 551615611,
+    "gib": 0.51,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "fix/9783-reviewed-renderer-reference",
+      "headRefOid": "aa08217c520c68867945b999a8c77425e6b3ae2b",
+      "mergedAt": "2026-09-08T14:47:47Z",
+      "number": 9784
+    },
+    "ignored_file_count": 971,
+    "ignored_top_paths": [
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-reference-9914",
+    "HEAD": "0862e298e165fc5f0ee7e800c73960d71958807d",
+    "branch": "refs/heads/docs/reference-9914-shipped",
+    "bytes": 713545302,
+    "gib": 0.66,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "docs/reference-9914-shipped",
+      "headRefOid": "0862e298e165fc5f0ee7e800c73960d71958807d",
+      "mergedAt": "2026-09-10T00:04:15Z",
+      "number": 9922
+    },
+    "ignored_file_count": 4620,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-9407-install-path",
+    "HEAD": "6e0c93dbf55f42d758cc134c14ea3d12370abc08",
+    "branch": "refs/heads/fix/9415-artifact-dir-hygiene",
+    "bytes": 548766074,
+    "gib": 0.51,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "fix/9415-artifact-dir-hygiene",
+      "headRefOid": "6e0c93dbf55f42d758cc134c14ea3d12370abc08",
+      "mergedAt": "2026-09-04T00:13:13Z",
+      "number": 9496
+    },
+    "ignored_file_count": 992,
+    "ignored_top_paths": [
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capability-atlas",
+    "HEAD": "2d9fb871ff058d8df02618dafc0c2044b126e804",
+    "branch": "refs/heads/feat/9850-capability-atlas",
+    "bytes": 1006683493,
+    "gib": 0.94,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "feat/9850-capability-atlas",
+      "headRefOid": "2d9fb871ff058d8df02618dafc0c2044b126e804",
+      "mergedAt": "2026-09-09T05:40:14Z",
+      "number": 9856
+    },
+    "ignored_file_count": 28401,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests",
+      "ui"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-setup",
+    "HEAD": "501092b27387a120a629e48f85ae061488f8f859",
+    "branch": "refs/heads/feat/9913-capture-journey",
+    "bytes": 681381888,
+    "gib": 0.63,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "feat/9913-capture-journey",
+      "headRefOid": "501092b27387a120a629e48f85ae061488f8f859",
+      "mergedAt": "2026-09-09T22:53:40Z",
+      "number": 9917
+    },
+    "ignored_file_count": 4418,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-swing-editing",
+    "HEAD": "4909ee460b6c932bc3f98d3bff20a77bafc745e6",
+    "branch": "refs/heads/feat/9860-swing-editing",
+    "bytes": 690131525,
+    "gib": 0.64,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0,
+    "merged_pr": {
+      "headRefName": "feat/9860-swing-editing",
+      "headRefOid": "4909ee460b6c932bc3f98d3bff20a77bafc745e6",
+      "mergedAt": "2026-09-09T08:01:49Z",
+      "number": 9868
+    },
+    "ignored_file_count": 4755,
+    "ignored_top_paths": [
+      ".mypy_cache",
+      ".pytest_cache",
+      ".ruff_cache",
+      "__pycache__",
+      "scripts",
+      "shared_scripts",
+      "src",
+      "tests"
+    ],
+    "ignored_check_exit": 0,
+    "noncache_ignored_count": 0,
+    "noncache_ignored_examples": []
+  }
+]

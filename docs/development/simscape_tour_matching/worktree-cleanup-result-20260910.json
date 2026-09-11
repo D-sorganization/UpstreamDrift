@@ -1,0 +1,208 @@
+{
+  "date_utc": "2026-09-10T14:30:22.8245695Z",
+  "free_before_bytes": 20287082496,
+  "free_after_bytes": 22718685184,
+  "branches_preserved": true,
+  "results": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.context-implementation\\UpstreamDrift",
+      "head": "d9e3d1addd3ab4d9a5c24f8a4dd4e15c8c4da3ae",
+      "branch": "refs/heads/feat/issue-9915-agent-context",
+      "merged_pr": 9920,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 1070518224
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9810",
+      "head": "24ad9a0778fec59b5979119ae435c7e4a3f790ca",
+      "branch": "refs/heads/claude/9810-layout-model",
+      "merged_pr": 9820,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 624661330
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9813",
+      "head": "3a40b1c0a45005b6834481e308ee0d76d78f062a",
+      "branch": "refs/heads/claude/9813-multiview-panes",
+      "merged_pr": 9823,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 596745195
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9815",
+      "head": "c9bde4f2e2fd37a609110a7937950dfd3f96a129",
+      "branch": "refs/heads/claude/9815-multipicture",
+      "merged_pr": 9821,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 598220568
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9816",
+      "head": "78a3f91768df76e07a68bd51ec1814c432f33dfb",
+      "branch": "refs/heads/claude/9816-capture-rig-theme",
+      "merged_pr": 9819,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 598809817
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9846",
+      "head": "dfeae3099fe038c88c6964a44d4a8e3da0171bf3",
+      "branch": "refs/heads/claude/9846-video-central",
+      "merged_pr": 9858,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 598961968
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_ingest",
+      "head": "0c455b578de865b2dbbc1b0eb3a42ff6e82f6842",
+      "branch": "refs/heads/claude/9602-ingest-observations",
+      "merged_pr": 9609,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 601925672
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_p1merge",
+      "head": "99de5a28e97616b3b831f83a516d1e3c1030dadc",
+      "branch": "refs/heads/docs/release-runbook-tagging",
+      "merged_pr": 9749,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 926747279
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_ud_9477",
+      "head": "fa1cee09ac3490536b0ba0a4a2c4d57311951434",
+      "branch": "refs/heads/fix/9477-physics-metrics-actuation",
+      "merged_pr": 9540,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 774183746
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_ud_9495_thread",
+      "head": "c235acd82f4084cfdf33ea6cfd152668c440b7a8",
+      "branch": "refs/heads/fix/9233-research-source-sha256-drift",
+      "merged_pr": 9534,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 590268691
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-analysis-drawings-9932",
+      "head": "1cc539e5482c312cb75ce06ca7cbb68ff5b01a35",
+      "branch": "refs/heads/feat/9932-comparison-drawings",
+      "merged_pr": 9943,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 855528347
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-analysis-metrics-9942",
+      "head": "b24d76a179a03ff972aedc25dd961f7111061737",
+      "branch": "refs/heads/docs/9926-analysis-completion",
+      "merged_pr": 9947,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 858613072
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-claim-preservation",
+      "head": "fced8c0d62fcfadffb414b1ea850c0624ddc8713",
+      "branch": "refs/heads/fix/9825-preserve-reviewed-claims",
+      "merged_pr": 9826,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 854700067
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-provider-pin",
+      "head": "37790892f50d38b007b85bbb87aa58e9ceab2beb",
+      "branch": "refs/heads/feat/9912-impact-provider-pin",
+      "merged_pr": 9916,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 592557308
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-reference",
+      "head": "aa08217c520c68867945b999a8c77425e6b3ae2b",
+      "branch": "refs/heads/fix/9783-reviewed-renderer-reference",
+      "merged_pr": 9784,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 551615611
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914",
+      "head": "0862e298e165fc5f0ee7e800c73960d71958807d",
+      "branch": "refs/heads/docs/reference-9914-shipped",
+      "merged_pr": 9922,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 713545302
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-9407-install-path",
+      "head": "6e0c93dbf55f42d758cc134c14ea3d12370abc08",
+      "branch": "refs/heads/fix/9415-artifact-dir-hygiene",
+      "merged_pr": 9496,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 548766074
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-capability-atlas",
+      "head": "2d9fb871ff058d8df02618dafc0c2044b126e804",
+      "branch": "refs/heads/feat/9850-capability-atlas",
+      "merged_pr": 9856,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 1006683493
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-capture-setup",
+      "head": "501092b27387a120a629e48f85ae061488f8f859",
+      "branch": "refs/heads/feat/9913-capture-journey",
+      "merged_pr": 9917,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 681381888
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-swing-editing",
+      "head": "4909ee460b6c932bc3f98d3bff20a77bafc745e6",
+      "branch": "refs/heads/feat/9860-swing-editing",
+      "merged_pr": 9868,
+      "status": "failed",
+      "exit_code": 128,
+      "output": "fatal: working trees containing submodules cannot be moved or removed",
+      "logical_bytes": 690131525
+    }
+  ]
+}

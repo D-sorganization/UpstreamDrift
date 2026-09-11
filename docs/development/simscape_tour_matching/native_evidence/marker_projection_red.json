@@ -1,0 +1,12 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "names": [
+    "test_project_body_markers/offsetsRotateWithAssignedBodies",
+    "test_project_body_markers/rejectsUnknownBody",
+    "test_project_body_markers/rejectsReflectedOrScaledFrames",
+    "test_project_body_markers/rejectsMismatchedAttachments"
+  ],
+  "passed": [false, false, false, false],
+  "failed": [true, true, true, true],
+  "incomplete": [true, false, false, false]
+}

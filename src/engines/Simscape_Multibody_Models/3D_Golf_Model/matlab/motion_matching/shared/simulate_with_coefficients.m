@@ -6,9 +6,9 @@ function sim_out = simulate_with_coefficients(theta, opts)
 %   and returns a canonical struct with fields:
 %
 %     .time          (N,1) double   simulation timegrid (s)
-%     .q             (N, n_joints)  joint angles (rad)
-%     .qd            (N, n_joints)  joint angular velocities (rad/s)
-%     .qdd           (N, n_joints)  joint angular accelerations (rad/s^2)
+%     .q             (N, n_joints)  generalized positions (rad or m)
+%     .qd            (N, n_joints)  generalized velocities (rad/s or m/s)
+%     .qdd           (N, n_joints)  generalized accelerations (rad/s^2 or m/s^2)
 %     .tau           (N, n_joints)  joint torques (N*m)
 %     .omega         (N, n_joints)  alias for qd, kept for cost-function clarity
 %     .r_butt        (N,3)          butt position (m)
@@ -17,7 +17,10 @@ function sim_out = simulate_with_coefficients(theta, opts)
 %     .v_clubhead    (N,3)          clubhead linear velocity (m/s)
 %     .omega_club    (N,3)          club angular velocity (rad/s)
 %     .joint_names   (1,n_joints) string  joint ordering
+%     .coordinate_units optional native schema units per coordinate (rad or m)
+%     .joint_signal_names optional native source names for q/qd/qdd audit
 %     .solver_status (1,1) string   "success" | "warning" | "failed"
+%     .raw_output    optional Simulink.SimulationOutput when requested for audit
 %
 %   THETA is a real, finite vector of length n_joints*7 ordered
 %   [A B C D E F G] per joint, joints in canonical order from
@@ -119,17 +122,18 @@ function sim_out = simulate_with_coefficients(theta, opts)
     % FastRestart: never compatible with parallel_safe path.
     use_fast_restart = logical(opts.fast_restart) && ~logical(opts.parallel_safe);
     if use_fast_restart
-        try
-            simIn = simIn.setModelParameter('FastRestart', 'on');
-        catch ME
-            local_log(opts, "Verbose", "could not enable FastRestart: %s", ME.message);
-        end
+        simIn = simIn.setModelParameter('FastRestart', 'on');
+    else
+        % Explicitly release any compilation retained by an earlier fit call.
+        % Omitting this leaves the model in FastRestart despite opts=false.
+        simIn = simIn.setModelParameter('FastRestart', 'off');
     end
 
     % Push every coefficient to the model workspace.
     var_names = fieldnames(coeff_struct);
     for i = 1:numel(var_names)
-        simIn = simIn.setVariable(var_names{i}, coeff_struct.(var_names{i}));
+        simIn = simIn.setVariable(var_names{i}, coeff_struct.(var_names{i}), ...
+            'Workspace', model_name);
     end
 
     % Per-call starting-pose / input overrides (e.g. from Stage-1
@@ -139,7 +143,8 @@ function sim_out = simulate_with_coefficients(theta, opts)
     if isfield(opts, "input_overrides") && isstruct(opts.input_overrides)
         ov_names = fieldnames(opts.input_overrides);
         for i = 1:numel(ov_names)
-            simIn = simIn.setVariable(ov_names{i}, opts.input_overrides.(ov_names{i}));
+            simIn = simIn.setVariable(ov_names{i}, opts.input_overrides.(ov_names{i}), ...
+                'Workspace', model_name);
         end
     end
 
@@ -165,6 +170,9 @@ function sim_out = simulate_with_coefficients(theta, opts)
 
     % ---- 6. Extract canonical struct --------------------------------------
     sim_out = extract_sim_out(simOut, joint_names, opts);
+    if isfield(opts, 'retain_raw_output') && opts.retain_raw_output
+        sim_out.raw_output = simOut;
+    end
     sim_out.cache_hit = false;
     sim_out.duration_s = toc(t_start);
     sim_out.theta_length = numel(theta);
@@ -208,7 +216,8 @@ end
 %% =====================================================================
 function tf = local_use_cache(opts)
     tf = isfield(opts, "use_cache") && logical(opts.use_cache) ...
-        && isfield(opts, "cache_dir") && strlength(string(opts.cache_dir)) > 0;
+        && isfield(opts, "cache_dir") && strlength(string(opts.cache_dir)) > 0 ...
+        && ~(isfield(opts, 'retain_raw_output') && opts.retain_raw_output);
 end
 
 %% =====================================================================

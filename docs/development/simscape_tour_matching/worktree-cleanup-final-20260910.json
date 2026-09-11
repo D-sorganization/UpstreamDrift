@@ -1,0 +1,302 @@
+{
+  "date_utc": "2026-09-10T14:41:15.0713287Z",
+  "free_before_bytes": 24865574912,
+  "free_after_bytes": 39606149120,
+  "branches_preserved": true,
+  "results": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\.context-implementation\\UpstreamDrift",
+      "head": "d9e3d1addd3ab4d9a5c24f8a4dd4e15c8c4da3ae",
+      "branch": "refs/heads/feat/issue-9915-agent-context",
+      "merged_pr": 9920,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 1070518224,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-0-git.zip",
+          "sha256": "5DA63B648EEBE9A3BB2D1BC5307CE528428DA04B1579662E008A621CA923862D"
+        },
+        {
+          "source": "C:\\Users\\diete\\Repositories\\.context-implementation\\UpstreamDrift\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-0-ignored.zip",
+          "sha256": "C752FE00863903C46767253973DAD44352FD6DF7CAEF59F37CBA2678AA3E26B0"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9810",
+      "head": "24ad9a0778fec59b5979119ae435c7e4a3f790ca",
+      "branch": "refs/heads/claude/9810-layout-model",
+      "merged_pr": 9820,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 624661330,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9810\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\_wt_claude_9810-0-git.zip",
+          "sha256": "17FB69170C8568D3227C986AABA4A8BD5780A98AF4B07FEA4CE5C3FFEC6D6EC9"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9813",
+      "head": "3a40b1c0a45005b6834481e308ee0d76d78f062a",
+      "branch": "refs/heads/claude/9813-multiview-panes",
+      "merged_pr": 9823,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 596745195,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9813\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\_wt_claude_9813-0-git.zip",
+          "sha256": "513069CF2F43B8B8EE38E922D03C2A40784EF92943CECE25A41FD31A74B4EB7A"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9815",
+      "head": "c9bde4f2e2fd37a609110a7937950dfd3f96a129",
+      "branch": "refs/heads/claude/9815-multipicture",
+      "merged_pr": 9821,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 598220568,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9815\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\_wt_claude_9815-0-git.zip",
+          "sha256": "5FB2A654EAAFCA43DC62BC6E7829D64ED1276FDE820911377CDA2A1C5601D1EE"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9816",
+      "head": "78a3f91768df76e07a68bd51ec1814c432f33dfb",
+      "branch": "refs/heads/claude/9816-capture-rig-theme",
+      "merged_pr": 9819,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 598809817,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9816\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\_wt_claude_9816-0-git.zip",
+          "sha256": "554FBEBE2A2A2C2A79896344D8C299730E9C3BD4839F8F4FA7AD3692EABD5F28"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_9846",
+      "head": "dfeae3099fe038c88c6964a44d4a8e3da0171bf3",
+      "branch": "refs/heads/claude/9846-video-central",
+      "merged_pr": 9858,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 598961968,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9846\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\_wt_claude_9846-0-git.zip",
+          "sha256": "4B869EABCE9B12550FCF1F07DF3A0141FC9B610DD624EB531BD90550E61D82EF"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_ingest",
+      "head": "0c455b578de865b2dbbc1b0eb3a42ff6e82f6842",
+      "branch": "refs/heads/claude/9602-ingest-observations",
+      "merged_pr": 9609,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 601925672,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_ingest\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\_wt_claude_ingest-0-git.zip",
+          "sha256": "C473C478AABBCB1A21F4366D468B9635189437EEA86A973DE729C29982858393"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\_wt_claude_p1merge",
+      "head": "99de5a28e97616b3b831f83a516d1e3c1030dadc",
+      "branch": "refs/heads/docs/release-runbook-tagging",
+      "merged_pr": 9749,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 926747279,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_p1merge\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\_wt_claude_p1merge-0-git.zip",
+          "sha256": "DC19168C96A539A41BF4213FFEEEE284F23E65BCE218753377B8522CA12CF22D"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-analysis-drawings-9932",
+      "head": "1cc539e5482c312cb75ce06ca7cbb68ff5b01a35",
+      "branch": "refs/heads/feat/9932-comparison-drawings",
+      "merged_pr": 9943,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 855528347,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-analysis-drawings-9932\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-analysis-drawings-9932-0-git.zip",
+          "sha256": "8521CEEC9F8D757D1E4D52CC5E7C260EF799102B98257B4CC3A3921CB271FEDD"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-analysis-metrics-9942",
+      "head": "b24d76a179a03ff972aedc25dd961f7111061737",
+      "branch": "refs/heads/docs/9926-analysis-completion",
+      "merged_pr": 9947,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 858613072,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-analysis-metrics-9942\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-analysis-metrics-9942-0-git.zip",
+          "sha256": "D988DF4FF906E05B0AA763AF1CD3255F32352024908CD7B57D000F9C1129B62E"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-claim-preservation",
+      "head": "fced8c0d62fcfadffb414b1ea850c0624ddc8713",
+      "branch": "refs/heads/fix/9825-preserve-reviewed-claims",
+      "merged_pr": 9826,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 854700067,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-impact-claim-preservation\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-impact-claim-preservation-0-git.zip",
+          "sha256": "56DDE423F99057D29EB93688EDA1F6B5BB505ED26783D51D4380653629344C71"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-provider-pin",
+      "head": "37790892f50d38b007b85bbb87aa58e9ceab2beb",
+      "branch": "refs/heads/feat/9912-impact-provider-pin",
+      "merged_pr": 9916,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 592557308,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-impact-provider-pin\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-impact-provider-pin-0-git.zip",
+          "sha256": "B398144A90BB7F034FD8666A5B4AB91B9C8B851AFC5C223D5E05225BDB55A0E9"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-impact-reference",
+      "head": "aa08217c520c68867945b999a8c77425e6b3ae2b",
+      "branch": "refs/heads/fix/9783-reviewed-renderer-reference",
+      "merged_pr": 9784,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 551615611,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-impact-reference\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-impact-reference-0-git.zip",
+          "sha256": "5F0774B794F3D26D1355E9578AB4806A8A1C4990C846E0F0CBC56A9426E7BBCF"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914",
+      "head": "0862e298e165fc5f0ee7e800c73960d71958807d",
+      "branch": "refs/heads/docs/reference-9914-shipped",
+      "merged_pr": 9922,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 713545302,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-reference-9914\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-reference-9914-0-git.zip",
+          "sha256": "4EBD5CBEABDEF35342A51A3FE6BD4C008895E01135524BEC44EFCE83BAEDE2B4"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-9407-install-path",
+      "head": "6e0c93dbf55f42d758cc134c14ea3d12370abc08",
+      "branch": "refs/heads/fix/9415-artifact-dir-hygiene",
+      "merged_pr": 9496,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 548766074,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-9407-install-path\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-9407-install-path-0-git.zip",
+          "sha256": "31B622BDACF3BAA1549895870A5AB7AF32A8C640E4AB693E0CC53DE61AFD2DE8"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-capability-atlas",
+      "head": "2d9fb871ff058d8df02618dafc0c2044b126e804",
+      "branch": "refs/heads/feat/9850-capability-atlas",
+      "merged_pr": 9856,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 1006683493,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-capability-atlas\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-capability-atlas-0-git.zip",
+          "sha256": "E32910AFC03FEDAF6A951C4A050DB6DBA234BE8AE6CFC413F2E84C7D0935129D"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-capture-setup",
+      "head": "501092b27387a120a629e48f85ae061488f8f859",
+      "branch": "refs/heads/feat/9913-capture-journey",
+      "merged_pr": 9917,
+      "status": "removed",
+      "exit_code": 0,
+      "output": "",
+      "logical_bytes": 681381888,
+      "submodule_backups": [
+        {
+          "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-capture-setup\\modules\\vendor\\ud-tools",
+          "archive": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\completed-worktree-submodule-backups\\UpstreamDrift-capture-setup-0-git.zip",
+          "sha256": "F83AC37355BD19AD729483629BF83C7C234FB983B15157E45A07A7BED09FAEA4"
+        }
+      ]
+    }
+  ]
+}
