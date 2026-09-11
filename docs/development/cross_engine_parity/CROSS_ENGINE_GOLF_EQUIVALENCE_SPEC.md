@@ -159,3 +159,11 @@ class EngineJointMap:
   - Implement `simulate_with_coefficients` in `src/engines/physics_engines/drake/python/`.
 - **WP5: Automated Cross-Engine Parity CI / CD Gate** (`Repository_Management`)
   - Nightly test asserting identical forward dynamics across all 4 engines.
+
+---
+
+## 7. Revision History & Implementation Changelog
+
+| Date       | Issue / PR | Author / Engine          | Description                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :--------- | :--------- | :----------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-11 | #9966      | MuJoCo / `UpstreamDrift` | **WP2/WP3**: Implement continuous-torque forward-dynamics simulator harness in `src/engines/physics_engines/mujoco/python/`. Added support for 6th-order Bernstein basis and power basis torque drivers, energy accounting (`kinetic_energy`, `potential_energy`), canonical site extraction (`mid_hands`, `clubhead`), `EngineJointMap` actuator mapping, and contract tests under `tests/unit/engines/mujoco/`. |
