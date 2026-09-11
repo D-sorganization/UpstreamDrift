@@ -5,13 +5,24 @@ Provides the splash screen, async startup worker, and startup result container.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
+from PyQt6 import sip
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap, QMouseEvent, QKeyEvent
 from PyQt6.QtWidgets import QApplication, QSplashScreen
 
+from src.launchers.startup_phases import (
+    OUTCOME_OK,
+    ProviderProbeResult,
+    StartupPhaseError,
+    StartupPhaseRecord,
+    StartupTimeline,
+    format_phase_diagnostics,
+    probe_tools_provider,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import secure_run
 
@@ -20,6 +31,21 @@ logger = get_logger(__name__)
 # Constants
 REPOS_ROOT = Path(__file__).parent.parent.parent.resolve()
 ASSETS_DIR = Path(__file__).parent / "assets"
+
+# Named startup phases (issue #8360). One source for the worker, the splash
+# text, the diagnostics and the tests.
+PHASE_REGISTRY = "Loading model registry"
+PHASE_ENGINES = "Initializing engine manager"
+PHASE_DOCKER = "Checking Docker status"
+PHASE_TOOLS_PROVIDER = "Checking Tools provider (Rate of Closure)"
+
+# Per-phase hard bounds in seconds. Every phase that can block (imports,
+# filesystem discovery, subprocess probes) settles within its bound; the
+# registry is the only required phase, everything else degrades.
+REGISTRY_PHASE_TIMEOUT_S = 20.0
+ENGINE_PHASE_TIMEOUT_S = 20.0
+DOCKER_PHASE_TIMEOUT_S = 15.0
+PROVIDER_PHASE_TIMEOUT_S = 5.0
 
 # Theme availability check
 try:
@@ -88,6 +114,11 @@ class StartupResults:
         self.ai_available: bool = False
         self.docker_available: bool = False
         self.startup_time_ms: int = 0
+        # Issue #8360: structured per-phase diagnostics and the optional
+        # Tools/Rate provider probe, so the shell can report *which* phase
+        # degraded instead of inferring it from splash behaviour.
+        self.phases: tuple[StartupPhaseRecord, ...] = ()
+        self.tools_provider: ProviderProbeResult | None = None
 
     @classmethod
     def from_dict(cls, data: dict) -> StartupResults:
@@ -101,7 +132,29 @@ class StartupResults:
         results.ai_available = data.get("ai_available", False)
         results.docker_available = data.get("docker_available", False)
         results.startup_time_ms = data.get("startup_time_ms", 0)
+        results.phases = tuple(data.get("phases", ()))
+        results.tools_provider = data.get("tools_provider")
         return results
+
+    @property
+    def is_degraded(self) -> bool:
+        """True when any recorded phase settled other than ``ok``."""
+        return any(phase.outcome != OUTCOME_OK for phase in self.phases)
+
+    def degraded_summary(self) -> str:
+        """One-line, user-facing summary of the degraded phases (or ``""``)."""
+        degraded = [p for p in self.phases if p.outcome != OUTCOME_OK]
+        if not degraded:
+            return ""
+        parts = [
+            f"{p.name}: {p.outcome}" + (f" [{p.category}]" if p.category else "")
+            for p in degraded
+        ]
+        return "Startup degraded - " + "; ".join(parts)
+
+    def format_diagnostics(self) -> str:
+        """Copyable timestamped diagnostics for every recorded phase."""
+        return format_phase_diagnostics(self.phases, total_ms=self.startup_time_ms)
 
 
 class SplashScreen(QSplashScreen):
@@ -269,10 +322,21 @@ class SplashScreen(QSplashScreen):
         self._draw_progress_bar(painter, accent, bg_bar)
         self._draw_version_labels(painter, text_quaternary)
 
+    def is_alive(self) -> bool:
+        """False once the underlying C++ splash widget has been deleted."""
+        return not sip.isdeleted(self)
+
     def show_message(self, message: str, progress: int) -> None:
-        """Update the displayed loading message and progress percentage."""
+        """Update the displayed loading message and progress percentage.
+
+        A late worker callback arriving after the splash was deleted is a
+        no-op (issue #8360) instead of ``RuntimeError: wrapped C/C++ object
+        ... has been deleted``.
+        """
         if message is None:
             raise ValueError("message must be provided")
+        if not self.is_alive():
+            return
         self.loading_message = message
         self.progress = progress
         self.showMessage(
@@ -280,6 +344,12 @@ class SplashScreen(QSplashScreen):
         )
         self.repaint()
         QApplication.processEvents()
+
+    def show_degraded(self, summary: str) -> None:
+        """Switch from "waiting" to an explicit degraded/failed state."""
+        if not summary:
+            raise ValueError("summary must be non-empty")
+        self.show_message(f"Startup problem: {summary}", self.progress)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         """Allow the user to dismiss the splash screen by clicking it."""
@@ -294,7 +364,13 @@ class SplashScreen(QSplashScreen):
 
 
 class AsyncStartupWorker(QThread):
-    """Background worker for async application startup."""
+    """Background worker for async application startup.
+
+    Every phase runs through :class:`StartupTimeline` with an explicit
+    timeout (issue #8360). Only the model registry is required; the engine
+    manager, Docker probe and optional Tools/Rate provider degrade to
+    ``None``/``False``/unavailable and the shell still opens.
+    """
 
     progress_signal = pyqtSignal(str, int)
     finished_signal = pyqtSignal(object)
@@ -306,52 +382,96 @@ class AsyncStartupWorker(QThread):
         super().__init__()
         self.repos_root = repos_root
         self.results = StartupResults()
+        self.timeline = StartupTimeline()
+
+    def diagnostics_text(self) -> str:
+        """Timestamped diagnostics including any phase still running."""
+        return self.timeline.format_diagnostics()
+
+    # -- phase bodies (run on bounded helper threads) -------------------------
+
+    def _load_registry(self) -> Any:
+        from src.shared.python.config.model_registry import ModelRegistry
+
+        return ModelRegistry(self.repos_root / "src/config/models.yaml")
+
+    def _load_engine_manager(self) -> Any:
+        from src.shared.python.engine_core.engine_manager import EngineManager
+
+        return EngineManager(self.repos_root)
+
+    def _probe_docker(self) -> bool:
+        # Use the WSL-aware resolver so Windows hosts running Docker
+        # inside WSL pass the probe instead of hitting WinError 2 on
+        # a non-existent native ``docker.exe``.
+        from src.launchers.docker_manager import get_docker_cmd
+
+        docker_cmd = get_docker_cmd() + ["--version"]
+        # check=False so an absent Docker (a normal non-zero exit) does
+        # not travel through secure_run's ERROR-logging exception path:
+        # "Docker not installed" is expected degradation, not a failure
+        # (#6613). Timeouts/other errors still raise and settle the phase.
+        probe = secure_run(docker_cmd, timeout=10.0, check=False)
+        if probe.returncode != 0:
+            logger.debug("Docker not available (probe exit code %s)", probe.returncode)
+        return probe.returncode == 0
+
+    def _probe_tools_provider(self) -> ProviderProbeResult:
+        return probe_tools_provider(self.repos_root, os.environ.get("TOOLS_REPO_PATH"))
+
+    @staticmethod
+    def _docker_outcome(available: bool) -> tuple[str, str, str]:
+        return OUTCOME_OK, "", "available" if available else "not available"
+
+    # -- worker entry point -----------------------------------------------------
+
+    def _finish_timeline(self) -> None:
+        self.results.phases = self.timeline.records
+        self.results.startup_time_ms = self.timeline.elapsed_ms()
 
     def run(self) -> None:
-        """Execute asynchronous startup tasks in a background thread."""
+        """Execute bounded startup phases in a background thread."""
+        timeline = self.timeline
         try:
-            self.progress_signal.emit("Loading model registry...", 10)
-            from src.shared.python.config.model_registry import ModelRegistry
+            self.progress_signal.emit(f"{PHASE_REGISTRY}...", 10)
+            self.results.registry = timeline.run_phase(
+                PHASE_REGISTRY,
+                self._load_registry,
+                timeout_s=REGISTRY_PHASE_TIMEOUT_S,
+                required=True,
+            )
 
-            registry = ModelRegistry(self.repos_root / "src/config/models.yaml")
-            self.results.registry = registry
+            self.progress_signal.emit(f"{PHASE_ENGINES}...", 30)
+            self.results.engine_manager = timeline.run_phase(
+                PHASE_ENGINES,
+                self._load_engine_manager,
+                timeout_s=ENGINE_PHASE_TIMEOUT_S,
+            )
 
-            self.progress_signal.emit("Initializing engine manager...", 30)
-            try:
-                from src.shared.python.engine_core.engine_manager import EngineManager
+            self.progress_signal.emit(f"{PHASE_DOCKER}...", 55)
+            self.results.docker_available = bool(
+                timeline.run_phase(
+                    PHASE_DOCKER,
+                    self._probe_docker,
+                    timeout_s=DOCKER_PHASE_TIMEOUT_S,
+                    outcome_of=self._docker_outcome,
+                )
+            )
 
-                self.results.engine_manager = EngineManager(self.repos_root)
-            except ImportError as e:
-                logger.warning(f"Engine manager init failed: {e}")
-                self.results.engine_manager = None
+            self.progress_signal.emit(f"{PHASE_TOOLS_PROVIDER}...", 80)
+            self.results.tools_provider = timeline.run_phase(
+                PHASE_TOOLS_PROVIDER,
+                self._probe_tools_provider,
+                timeout_s=PROVIDER_PHASE_TIMEOUT_S,
+                outcome_of=ProviderProbeResult.phase_outcome,
+            )
+        except StartupPhaseError as exc:
+            self._finish_timeline()
+            logger.error("Startup failed in phase %r: %s", exc.record.name, exc)
+            self.error_signal.emit(str(exc))
+            return
 
-            self.progress_signal.emit("Checking Docker status...", 60)
-            try:
-                # Use the WSL-aware resolver so Windows hosts running Docker
-                # inside WSL pass the probe instead of hitting WinError 2 on
-                # a non-existent native ``docker.exe``.
-                from src.launchers.docker_manager import get_docker_cmd
-
-                docker_cmd = get_docker_cmd() + ["--version"]
-                # check=False so an absent Docker (a normal non-zero exit) does
-                # not travel through secure_run's ERROR-logging exception path:
-                # "Docker not installed" is expected degradation, not a failure
-                # (#6613). Timeouts/other errors still raise and are caught below.
-                probe = secure_run(docker_cmd, timeout=10.0, check=False)
-                self.results.docker_available = probe.returncode == 0
-                if probe.returncode != 0:
-                    logger.debug(
-                        "Docker not available (probe exit code %s)", probe.returncode
-                    )
-            except Exception as e:  # noqa: BLE001
-                self.results.docker_available = False
-                logger.debug(f"Docker probe failed: {e}")
-
-            self.progress_signal.emit("Ready", 100)
-            self.msleep(
-                500
-            )  # QThread.msleep: non-blocking within the Qt thread scheduler
-            self.finished_signal.emit(self.results)
-        except Exception as e:  # noqa: BLE001
-            logger.error(f"Startup failed: {e}")
-            self.error_signal.emit(str(e))
+        self._finish_timeline()
+        self.progress_signal.emit("Ready", 100)
+        self.msleep(500)  # QThread.msleep: non-blocking within the Qt thread scheduler
+        self.finished_signal.emit(self.results)
