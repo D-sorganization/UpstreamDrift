@@ -97,26 +97,30 @@ def export_mjcf(model: CanonicalModel, out_path: Path | None = None) -> str:
 
     # Root body (pelvis)
     pelvis_body = ET.SubElement(worldbody, "body")
-    pelvis_body.set("name", model.root.name)
-    pelvis_body.set("pos", _format_floats(model.root.position))
-    pelvis_body.set("euler", _format_floats(model.root.orientation))
+    root = model.root
+    root_inertia = root.inertia
+    root_geom = root.geometry
+
+    pelvis_body.set("name", root.name)
+    pelvis_body.set("pos", _format_floats(root.position))
+    pelvis_body.set("euler", _format_floats(root.orientation))
 
     freejoint = ET.SubElement(pelvis_body, "freejoint")
-    freejoint.set("name", f"{model.root.name}_free")
+    freejoint.set("name", f"{root.name}_free")
 
     inertial = ET.SubElement(pelvis_body, "inertial")
     inertial.set("pos", "0 0 0")
-    inertial.set("mass", f"{model.root.mass:g}")
+    inertial.set("mass", f"{root.mass:g}")
     inertial.set(
         "diaginertia",
-        f"{model.root.inertia.ixx:g} {model.root.inertia.iyy:g} {model.root.inertia.izz:g}",
+        f"{root_inertia.ixx:g} {root_inertia.iyy:g} {root_inertia.izz:g}",
     )
 
     geom = ET.SubElement(pelvis_body, "geom")
-    geom.set("name", f"{model.root.name}_geom")
-    geom.set("type", model.root.geometry.geom_type)
-    geom.set("size", _format_floats(model.root.geometry.size))
-    geom.set("rgba", _format_floats(model.root.geometry.visual_rgba))
+    geom.set("name", f"{root.name}_geom")
+    geom.set("type", root_geom.geom_type)
+    geom.set("size", _format_floats(root_geom.size))
+    geom.set("rgba", _format_floats(root_geom.visual_rgba))
 
     actuator_joints: list[str] = []
 
