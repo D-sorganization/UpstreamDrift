@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Document #8556-Conditional Parameters in Model Completion Falsification Matrix (#8920)
+
+Document in `MODEL_COMPLETION_FALSIFICATION_MATRIX.md` that #8556 serves not only as a human-validation gate but also supplies parameters on which three model-tier claims are conditionally anchored:
+- Grip stiffness and damping (\(k_{\text{grip}} = 1800\,\text{N/m}\), \(c_{\text{grip}} = 18\,\text{N}\cdot\text{s/m}\)) setting top-tier force scales (#8912);
+- Normal force anchoring the \(\mu = 0.35\) Coulomb cone (currently spring tension, not compressive squeeze) (#8915);
+- Tension-only unilaterality direction in distributed contact (`articulated_distributed_grip.py:186-200`).
+Cites `bilateral_wrench_identifiability.py` for why resultant-only net-wrench closure cannot substitute for bilateral six-axis measurements.
+
 ## Installed Capture Runtime (#9949)
 
 The installed calibration worker resolves only its owning distribution's bundled
