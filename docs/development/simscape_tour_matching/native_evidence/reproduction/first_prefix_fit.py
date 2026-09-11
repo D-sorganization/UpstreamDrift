@@ -119,8 +119,15 @@ if (root / "first_prefix_fit.json").exists():
     raise FileExistsError("Use a fresh run directory; preserve earlier reports")
 if args.max_nfev < 1:
     raise ValueError("max-nfev must be positive")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
 logger = logging.getLogger(__name__)
+logger.info("Initializing first_prefix_fit...")
+logger.info("Run directory: %s", root)
+logger.info("Target duration: %.2fs, Basis: %s", args.duration, args.basis)
+sys.stdout.flush()
 capture = json.loads((root / "driver_marker_payload.json").read_text())
 seed = json.loads(args.initial_state.read_text())
 basis = f"{args.basis}-bernstein-6"
@@ -224,10 +231,14 @@ report["initial_parameters"] = initial_parameters.tolist()
 import matlab
 import matlab.engine
 
+logger.info("Starting MATLAB R2025b engine...")
+sys.stdout.flush()
 engine = matlab.engine.start_matlab("-nodesktop -nosplash")
 try:
     assert engine.version("-release") == "2025b"
     report["matlab_root"] = engine.matlabroot()
+    logger.info("MATLAB R2025b engine ready. Root: %s", report["matlab_root"])
+    sys.stdout.flush()
     engine_dir = (
         args.repo / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab"
     )
@@ -296,21 +307,39 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
             and np.isfinite(prediction).all()
         )
         distance = np.linalg.norm(prediction - observed[: len(clock)], axis=2)
-        report["evaluations"].append(
-            {
-                "number": len(report["evaluations"]) + 1,
-                "elapsed_s": time.monotonic() - started,
-                "rmse_m": float(np.sqrt(np.nanmean(distance**2))),
-                "efforts": effort.tolist(),
-            }
+        eval_num = len(report["evaluations"]) + 1
+        eval_rmse = float(np.sqrt(np.nanmean(distance**2)))
+        eval_entry = {
+            "number": eval_num,
+            "elapsed_s": time.monotonic() - started,
+            "rmse_m": eval_rmse,
+            "efforts": effort.tolist(),
+        }
+        report["evaluations"].append(eval_entry)
+
+        # Write heartbeat file on every evaluation for live supervision
+        heartbeat_data = {
+            "evaluation": eval_num,
+            "timestamp": time.time(),
+            "rmse_mm": eval_rmse * 1000.0,
+            "elapsed_s": eval_entry["elapsed_s"],
+        }
+        try:
+            (root / "heartbeat.json").write_text(json.dumps(heartbeat_data, indent=2))
+        except (OSError, ValueError):
+            pass
+
+        logger.info(
+            "Evaluation %d: marker RMS %.2f mm (elapsed %.2fs)",
+            eval_num,
+            eval_rmse * 1000.0,
+            eval_entry["elapsed_s"],
         )
-        if len(report["evaluations"]) % 5 == 0:
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+        if eval_num % 5 == 0 or eval_num == 1:
             save_report()
-            logger.info(
-                "Evaluation %d: marker RMS %.9g m",
-                report["evaluations"][-1]["number"],
-                report["evaluations"][-1]["rmse_m"],
-            )
         return prediction
 
     baseline = forward(np.ones(len(scales)), requested)
