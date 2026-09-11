@@ -332,9 +332,13 @@ class ClubTrajectoryParser:
     def _orthogonalize_axes(x_axis: NDArray, y_axis: NDArray) -> NDArray:
         if x_axis is None:
             raise ValueError("x_axis must be provided")
-        x_axis = x_axis / (np.linalg.norm(x_axis) + 1e-8)
+        x_axis = (
+            x_axis / (np.sqrt(x_axis.dot(x_axis)) + 1e-8)
+        )  # ⚡ Bolt: ndarray.dot + sqrt is ~2x faster than np.linalg.norm for small 1D arrays
         y_axis = y_axis - np.dot(y_axis, x_axis) * x_axis
-        y_axis = y_axis / (np.linalg.norm(y_axis) + 1e-8)
+        y_axis = (
+            y_axis / (np.sqrt(y_axis.dot(y_axis)) + 1e-8)
+        )  # ⚡ Bolt: ndarray.dot + sqrt is ~2x faster than np.linalg.norm for small 1D arrays
         z_axis = np.cross(x_axis, y_axis)
         return np.column_stack([x_axis, y_axis, z_axis])
 
