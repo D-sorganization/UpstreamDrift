@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.contracts import ContractViolationError
 from src.shared.python.sg_optimizer.course.conditions import (
     CourseConditions,
