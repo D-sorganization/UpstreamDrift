@@ -371,6 +371,203 @@ feature, module, and tool in the UpstreamDrift Golf Modeling Suite.
         ],
         "see_also": ["engine_selection", "analysis_tools"],
     },
+    # -------------------------------------------------------------------------
+    # Getting Started
+    # -------------------------------------------------------------------------
+    "getting_started": {
+        "title": "Getting Started",
+        "short": "Introduction to the UpstreamDrift Suite and Unified Launcher",
+        "description": """
+UpstreamDrift is a biomechanical golf swing analysis and multi-engine simulation platform.
+
+**Launching Options:**
+- Web UI: `upstream-drift` or `python launch_golf_suite.py`
+- Classic Desktop GUI: `upstream-drift --classic` or `python launch_golf_suite.py --classic`
+- API-only Headless Server: `upstream-drift --api-only`
+
+**Primary Workflow:**
+1. Select a physics engine tile from the launcher grid (e.g. MuJoCo, Drake, Pinocchio).
+2. Choose a biomechanical model from the model selector.
+3. Configure initial conditions and numerical parameters.
+4. Launch the simulation and inspect kinetics, kinematics, and energy metrics.
+""",
+        "tips": [
+            "Double-click any tile to launch immediately with default settings",
+            "Use the search filter (Ctrl+F) to find models and engine variants quickly",
+            "Refer to the User Manual for end-to-end guidance",
+        ],
+        "see_also": ["engine_selection", "simulation_controls", "configuration"],
+    },
+    # -------------------------------------------------------------------------
+    # Docker Setup
+    # -------------------------------------------------------------------------
+    "docker_setup": {
+        "title": "Docker Setup and Containerized Engines",
+        "short": "Run simulation engines inside reproducible Docker containers",
+        "description": """
+UpstreamDrift provides Docker containers for isolated runtime environments.
+
+**Features:**
+- Pre-packaged native dependencies for Linux-based physics engines
+- Isolated environment profiles configured via docker/profiles.yaml
+- Support for headless batch execution and API server hosting
+
+**Usage:**
+- Toggle "Docker Mode" in the launcher navigation settings
+- Rebuild containers with specific feature profiles as detailed in docs/user_guide/installing_optional_features.md
+""",
+        "tips": [
+            "Use Docker containers when host dependency compilation is unavailable",
+            "Ensure the Docker daemon is running before launching containerized engines",
+        ],
+        "see_also": ["wsl_setup", "configuration"],
+    },
+    # -------------------------------------------------------------------------
+    # WSL Setup
+    # -------------------------------------------------------------------------
+    "wsl_setup": {
+        "title": "WSL Integration",
+        "short": "Execute Linux physics engines under Windows Subsystem for Linux",
+        "description": """
+UpstreamDrift integrates with Windows Subsystem for Linux (WSL) to run native Linux engine binaries.
+
+**Capabilities:**
+- Seamless bridging between Windows GUI launcher and WSL execution environment
+- Full support for Linux-specific packages (e.g., Pinocchio, CasADi, Bioptim)
+- Shared filesystem access across Windows and WSL filesystems
+""",
+        "tips": [
+            "WSL 2 with Ubuntu 22.04 or 24.04 LTS is recommended",
+            "Configure WSL GUI forwarding (WSLg) for direct OpenGL/X11 rendering",
+        ],
+        "see_also": ["docker_setup", "engine_selection"],
+    },
+    # -------------------------------------------------------------------------
+    # MATLAB Integration
+    # -------------------------------------------------------------------------
+    "matlab_integration": {
+        "title": "MATLAB and Simscape Integration",
+        "short": "Simscape Multibody models and Simulink co-simulation",
+        "description": """
+UpstreamDrift supports high-fidelity Simscape Multibody golf models.
+
+**Setup Instructions:**
+1. Open MATLAB (R2023a or newer).
+2. Add `src/shared/matlab/` to the path and execute `setup_golf_suite()`.
+3. Open model files from `src/engines/Simscape_Multibody_Models/` (e.g., 2D_Golf_Model).
+4. Run simulations from Simulink or programmatic MATLAB scripts.
+""",
+        "tips": [
+            "Run setup_golf_suite() upon opening MATLAB to configure paths and parameters",
+            "Simscape models serve as the gold-standard multibody oracle baseline",
+        ],
+        "see_also": ["engine_selection", "data_export"],
+    },
+    # -------------------------------------------------------------------------
+    # Data Export
+    # -------------------------------------------------------------------------
+    "data_export": {
+        "title": "Simulation Data Export",
+        "short": "Export trajectories, joint angles, forces, and plots",
+        "description": """
+Export simulation telemetry and analysis results for downstream processing.
+
+**Supported Formats:**
+- CSV: High-precision tabular joint trajectories, velocities, and torques
+- JSON: Structured simulation output conforming to SimOut contracts
+- PNG/PDF: Publication-ready vector and raster visualizations
+- Video / Animation: Rendered 3D simulation sequences
+""",
+        "tips": [
+            "Enable recording prior to running simulations to capture complete telemetry",
+            "Use CSV export for spreadsheet analysis and JSON for programmatic pipelines",
+        ],
+        "see_also": ["simulation_controls", "analysis_tools"],
+    },
+    # -------------------------------------------------------------------------
+    # URDF Generator
+    # -------------------------------------------------------------------------
+    "urdf_generator": {
+        "title": "URDF Generator and Anthropometrics",
+        "short": "Generate subject-specific humanoid and golf club URDF models",
+        "description": """
+The URDF generation system constructs parametric biomechanical models.
+
+**Features:**
+- Subject-specific segment dimensions and inertial properties from height and mass
+- Multiple validated regression estimators (de Leva, Dempster, Zatsiorsky-Seluyanov)
+- Lossless round-tripping of `<inertial>` tags across MuJoCo, Drake, and Pinocchio
+- Support for primitive meshes, MakeHuman OBJ exports, and SMPL-X parametric models
+""",
+        "tips": [
+            "Refer to docs/user_guide/anthropometrics.md for quickstart examples",
+            "DeLevaEstimator is the default sex-specific segment estimator",
+        ],
+        "see_also": ["model_explorer", "engine_selection"],
+    },
+    # -------------------------------------------------------------------------
+    # Model Explorer
+    # -------------------------------------------------------------------------
+    "model_explorer": {
+        "title": "Model Explorer",
+        "short": "Inspect, visualize, and edit skeletal and physical URDF models",
+        "description": """
+The Model Explorer provides interactive 3D inspection and editing of robot and humanoid models.
+
+**Features:**
+- Load URDF and MJCF models with real-time 3D rendering
+- Inspect joint limits, coordinate frames, inertia ellipsoids, and visual geometry
+- Modify segment mass and inertia properties with validation
+- Save modified models for immediate simulation in any supported engine
+""",
+        "tips": [
+            "Use Left-Click + Drag to rotate and Right-Click + Drag to pan in 3D viewport",
+            "Review the Properties Panel to check joint limits before running dynamic simulations",
+        ],
+        "see_also": ["urdf_generator", "visualization"],
+    },
+    # -------------------------------------------------------------------------
+    # Ball Flight / Shot Tracer
+    # -------------------------------------------------------------------------
+    "ball_flight": {
+        "title": "Ball Flight and Launch Analytics",
+        "short": "Simulate ball trajectory, aerodynamics, and launch monitor metrics",
+        "description": """
+Simulate aerodynamic golf ball flight dynamics and analyze launch monitor data.
+
+**Key Capabilities:**
+- Full 3D trajectory calculation with aerodynamic lift, drag, and Magnus effect
+- Analysis of ball speed, launch angle, launch direction, backspin, and sidespin
+- Multi-vendor launch monitor data harmonization (TrackMan, Foresight, FlightScope, Garmin)
+- Dispersion modeling, carry distance estimation, and descent angle analysis
+""",
+        "tips": [
+            "Check docs/user_guide/launch_monitor_analytics.md for data source profiles",
+            "Backspin significantly affects apex height and landing angle",
+        ],
+        "see_also": ["analysis_tools", "data_export"],
+    },
+    # -------------------------------------------------------------------------
+    # Configuration
+    # -------------------------------------------------------------------------
+    "configuration": {
+        "title": "Configuration and Setup",
+        "short": "Manage physics parameters, settings, and environment validation",
+        "description": """
+Configure global physics parameters and validate canonical suite settings.
+
+**Features:**
+- Central PhysicsParameterRegistry (`src.shared.python.physics_parameters`)
+- Standard units and physical constants (USGA ball specs, NIST gravity)
+- Setup Wizard deterministic validation API for pre-run configuration checks
+- Persistent user preferences stored in `~/.upstreamdrift/prefs.json`
+""",
+        "tips": [
+            "Refer to docs/user_guide/configuration.md for programmatic registry examples",
+            "Use the Setup Wizard to diagnose missing configuration fields before simulation",
+        ],
+        "see_also": ["getting_started", "engine_selection"],
+    },
 }
 
 
@@ -416,7 +613,7 @@ HELP_TOPICS: dict[str, HelpTopic] = {
         short_description="Introduction to UpstreamDrift",
         help_file="getting_started.md",
         manual_section="Getting Started",
-        related_topics=["engine_selection", "simulation_controls"],
+        related_topics=["engine_selection", "simulation_controls", "configuration"],
     ),
     "engine_selection": HelpTopic(
         id="engine_selection",
@@ -457,6 +654,78 @@ HELP_TOPICS: dict[str, HelpTopic] = {
         help_file="analysis_tools.md",
         manual_section="Visualization and Analysis",
         related_topics=["simulation_controls", "visualization"],
+    ),
+    "docker_setup": HelpTopic(
+        id="docker_setup",
+        title="Docker Setup",
+        short_description="Running containerized simulation engines",
+        help_file="installing_optional_features.md",
+        manual_section="Launching the Suite",
+        related_topics=["wsl_setup", "configuration"],
+    ),
+    "wsl_setup": HelpTopic(
+        id="wsl_setup",
+        title="WSL Setup",
+        short_description="Running simulation engines under WSL",
+        help_file="launchers.md",
+        manual_section="Launching the Suite",
+        related_topics=["docker_setup", "engine_selection"],
+    ),
+    "matlab_integration": HelpTopic(
+        id="matlab_integration",
+        title="MATLAB Integration",
+        short_description="Simscape Multibody models and Simulink co-simulation",
+        help_file="installation.md",
+        manual_section="Launching the Suite",
+        related_topics=["engine_selection", "data_export"],
+    ),
+    "data_export": HelpTopic(
+        id="data_export",
+        title="Data Export",
+        short_description="Exporting simulation trajectories and analysis data",
+        help_file="analysis_tools.md",
+        manual_section="Data Explorer",
+        related_topics=["simulation_controls", "analysis_tools"],
+    ),
+    "urdf_generator": HelpTopic(
+        id="urdf_generator",
+        title="URDF Generator",
+        short_description="Parametric humanoid and golf club URDF generation",
+        help_file="anthropometrics.md",
+        manual_section="Model Explorer",
+        related_topics=["model_explorer", "engine_selection"],
+    ),
+    "model_explorer": HelpTopic(
+        id="model_explorer",
+        title="Model Explorer",
+        short_description="Inspecting and editing URDF and MJCF models",
+        help_file="character_builder_quickstart.md",
+        manual_section="Model Explorer",
+        related_topics=["urdf_generator", "visualization"],
+    ),
+    "ball_flight": HelpTopic(
+        id="ball_flight",
+        title="Ball Flight & Launch Monitor Analytics",
+        short_description="Ball trajectory aerodynamics and launch data",
+        help_file="launch_monitor_analytics.md",
+        manual_section="Data Explorer",
+        related_topics=["analysis_tools", "data_export"],
+    ),
+    "project_map": HelpTopic(
+        id="project_map",
+        title="Project Map",
+        short_description="Complete architectural map of UpstreamDrift",
+        help_file="launchers.md",
+        manual_section="Launching the Suite",
+        related_topics=["engine_selection", "analysis_tools"],
+    ),
+    "configuration": HelpTopic(
+        id="configuration",
+        title="Configuration",
+        short_description="Suite parameters and configuration settings",
+        help_file="configuration.md",
+        manual_section="Troubleshooting & Diagnostics",
+        related_topics=["getting_started", "engine_selection"],
     ),
 }
 

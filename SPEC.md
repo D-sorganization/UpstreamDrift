@@ -1,10 +1,72 @@
 # SPEC.md — Repository Specification Document
 
-## Native R2025b Simscape Tour-Driver Matching (#9948)
+## Reconciling In-App Help System and Content Mappings (#8843)
 
-Develop native R2025b Simscape tour-driver matching and replay evidence under epic #9921.
-Provide bounded prefix fitting with verified archives, strict function and line budgets,
-suite marker categorization, and refreshed motion-matching leaderboard evidence.
+Reconcile the in-app help system root paths and UI component documentation mappings:
+- Root Documentation Paths: Point `USER_MANUAL_PATH` in `src/shared/python/gui_pkg/help_system.py` to the genuine `docs/user_guide/user_manual.md` path (fixing `# User Manual Not Found`), and replace invalid `../USER_MANUAL.md` links with relative paths to `user_manual.md`.
+- Topic and Component Resolution: Reconcile `UI_HELP_TOPICS`, `FEATURE_HELP`, and `HELP_TOPICS` in `src/shared/python/gui_pkg/help_content.py` so that all 35 registered UI components resolve to non-null feature help entries. Add entries for `getting_started`, `docker_setup`, `wsl_setup`, `matlab_integration`, `data_export`, `urdf_generator`, `model_explorer`, `ball_flight`, and `configuration`.
+- Dynamic Help File Search: Extend `get_help_topic_content` in `src/shared/python/gui_pkg/help_system.py` to search `docs/help/` and `docs/user_guide/` by topic identifier and registered `help_file` name, falling back to manual section extraction. Update `list_help_topics` to include user guide documentation files.
+- Regression Verification: Assert `USER_MANUAL_PATH` exists, all 35 UI components resolve help content, and all registered topics load without error in `tests/unit/launchers/test_help_paths_and_theme_menu.py`.
+
+## Reconciling Analysis Tools Help Documentation With Real APIs (#8844)
+
+Reconcile `docs/help/analysis_tools.md` to document real UpstreamDrift analysis APIs, replacing fabricated classes and incorrect import roots:
+- Headless and GUI Plot Orchestration: Replaces fabricated `EnergyAnalyzer`, `PhaseDiagramPlotter`, `ForceAnalyzer`, `register_custom_plot`, and `DataExporter` with `AnalysisOrchestrator` (`src.shared.python.analysis`), `PlotData`, and `EnergyMetricsMixin`.
+- Segment Timing and Kinematic Sequence: Documents real `SegmentTimingAnalyzer` (`src.shared.python.biomechanics.kinematic_sequence`) and `SegmentTimingResult`.
+- Jacobian Diagnostics and Manipulability: Replaces fabricated `JacobianAnalyzer` with actual spatial algebra functions `check_jacobian_conditioning`, `compute_manipulability_index`, and `compute_manipulability_ellipsoid` (`src.shared.python.spatial_algebra.manipulability`).
+- Cross-Engine Validation: Replaces fabricated validator with `CrossEngineValidator` (`src.shared.python.engine_core.cross_engine_validator`).
+- Regression Testing: `test_analysis_tools_doc_symbols_exist` in `tests/unit/shared_python/test_analysis_orchestrator.py` verifies absence of fabricated symbols and presence of genuine API symbols.
+
+## Citing Sg_Optimizer Condition Models and Coefficients (#8849)
+
+Resolve uncited condition-model empirical constants in `src/shared/python/sg_optimizer/course/conditions.py` to maintain total numerical traceability per `docs/sg_optimizer/data_sources.md`:
+- `RoughModel`: Document and tag empirical coefficients including `dispersion_multiplier` (`1.0 + 0.4 * severity`, calibrated to ShotLink driving accuracy decay), `flyer_probability` (`4.0 * r * (1.0 - r) * 0.25`, peak 0.25 at medium rough), and `spin_reduction` (`0.5 * severity`, TrackMan rough decay).
+- `TreeModel`: Document Phase 1 tree density penalization parameters including forced punch-out threshold (`> 0.85`), distance multiplier (`max(0.05, 1.0 - 0.9 * penalization)`), and dispersion multiplier (`1.0 + 0.6 * penalization`).
+- `GreenModel`: Document Stimpmeter leave distribution modifier (`1.0 + 0.08 * max(0.0, stimp - 10.0)`) and effective green depth multiplier (`1.0 - 0.06 * max(0.0, stimp - 10.0)`).
+- Regression Testing: `test_conditions_coefficients_documented_in_data_sources` validates that empirical formulas and constants in `conditions.py` remain documented in `docs/sg_optimizer/data_sources.md`.
+
+## Automated Cross-Engine Parity Benchmark Suite and Tolerance Gate (#9969)
+
+Implement cross-engine forward-dynamics parity verification and tolerance gating across Simscape, MuJoCo, Pinocchio, and Drake (`tests/cross_engine/test_four_engine_parity.py`):
+- `test_four_engine_parity.py`: Core parity benchmark suite asserting that when driven by identical certified 6th-order continuous Bernstein polynomial torque profiles \(\theta^* \in \mathbb{R}^{27 \times 7}\), Simscape Multibody oracle baseline and native physics engines (MuJoCo, Pinocchio, Drake) produce equivalent forward-dynamics trajectories.
+- Parity Tolerance Gate: Enforces strict physical equivalence thresholds matching `CROSS_ENGINE_GOLF_EQUIVALENCE_SPEC.md` §5.1: grip point trajectory RMSE \(< 5.0\,\text{mm}\), clubhead point trajectory RMSE \(< 10.0\,\text{mm}\).
+- Dynamic Availability Guards: Integrates `is_mujoco_available()`, `is_pinocchio_available()`, and `is_drake_available()` allowing test suites to execute gracefully on any host platform by skipping missing native shared libraries without false-positive failures.
+- Simscape Canonical Baseline Fixture: Checks in canonical ground-truth trajectory fixture `tests/fixtures/cross_engine_parity/simscape_canonical_baseline.npz` enabling bit-accurate, deterministic parity evaluation in headless CI and offline environments.
+## Drake MultibodyPlant Continuous Torque Harness (#9968)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the Drake MultibodyPlant simulation harness (`src.engines.physics_engines.drake.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point evaluating continuous 6th-order Bernstein basis torques through Drake `MultibodyPlant` and `DiagramBuilder`. Supports both direct Bernstein basis calculation and power basis conversion.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`, `metadata`).
+- `EngineJointMap` & `get_drake_canonical_joint_map`: Resolves 27 canonical actuation channels into native Drake generalized coordinate velocity indices and plant actuators.
+- Runtime availability probe (`is_drake_available`): Cleanly detects presence of functional compiled Drake C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit and contract tests under `tests/unit/engines/drake/` (`pytestmark = pytest.mark.unit`) validating canonical coordinates, parameter bounds, Bernstein evaluation properties, joint map mapping, energy accounting, and target synthesis.
+
+## Pinocchio Articulated-Body Continuous Torque Harness (#9967)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the Pinocchio rigid-body simulation harness (`src.engines.physics_engines.pinocchio.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point integrating ABA forward dynamics with fixed-step RK4 matching Simscape timegrids. Supports 6th-order continuous Bernstein basis torque evaluation via converted Horner schemes and direct basis calculation.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`).
+- `EngineJointMap` & `get_pinocchio_canonical_joint_map`: Resolves 27 canonical actuation channels into native Pinocchio generalized coordinate velocity indices (`idx_v`) and sign conventions.
+- Runtime availability probe (`is_pinocchio_available`): Cleanly detects presence of functional compiled Pinocchio C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit tests validating endpoint interpolation, partition of unity, power-conversion equivalence, energy conservation on harmonic oscillators, and parameter bounds under `tests/unit/engines/pinocchio/`.
+
+## MuJoCo Continuous-Torque Simulation Harness and Parity Driver (#9966)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the MuJoCo physics simulation harness (`src.engines.physics_engines.mujoco.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point evaluating continuous 6th-order Bernstein basis torques through MuJoCo's process-global `mjcb_control` callback. Supports conversion to canonical power polynomial basis at instantiation for $O(1)$ Horner evaluation inside the integration step loop.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`, `metadata`).
+- `PolynomialTorqueDriver`: Context manager safely scoping process-global `mjcb_control` registration with bounds checks, control clipping, and support for flat array, matrix, or `PiecewisePolynomialTorque` inputs.
+- Runtime availability probe (`is_mujoco_available`): Cleanly detects presence of functional compiled MuJoCo C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit and parity tests under `tests/unit/engines/mujoco/` (`pytestmark = pytest.mark.unit`) validating parameter bounds, Bernstein evaluation properties, control range clipping, Horner equivalence, and forward dynamics trajectories.
+
+
+## Document #8556-Conditional Parameters in Model Completion Falsification Matrix (#8920)
+
+Document in `MODEL_COMPLETION_FALSIFICATION_MATRIX.md` that #8556 serves not only as a human-validation gate but also supplies parameters on which three model-tier claims are conditionally anchored:
+- Grip stiffness and damping (\(k_{\text{grip}} = 1800\,\text{N/m}\), \(c_{\text{grip}} = 18\,\text{N}\cdot\text{s/m}\)) setting top-tier force scales (#8912);
+- Normal force anchoring the \(\mu = 0.35\) Coulomb cone (currently spring tension, not compressive squeeze) (#8915);
+- Tension-only unilaterality direction in distributed contact (`articulated_distributed_grip.py:186-200`).
+Cites `bilateral_wrench_identifiability.py` for why resultant-only net-wrench closure cannot substitute for bilateral six-axis measurements.
 
 ## Installed Capture Runtime (#9949)
 
@@ -14,9 +76,14 @@ assembly preserves tracked motion-matching reference loaders while retaining
 scratch-output exclusions. Installed startup, wizard and calibration checks run
 outside the source checkout; synthetic tests do not establish physical accuracy.
 
-## Optimize Norm Calculation in JCS (spec-exempt: micro-optimization)
+## Optimize Norm Calculation in JCS (Spec-Exempt: Micro-Optimization)
 
 Replace `np.linalg.norm` with `np.sqrt(np.einsum)` in joint coordinate system parity calculation for measurable performance improvement.
+
+## Optimize Euclidean Distance in Coaching Measurements (Spec-Exempt: Micro-Optimization)
+
+Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` in `src/motion_capture/coaching/measurements.py` for multi-dimensional distance calculations to bypass `np.linalg.norm` overhead.
+
 
 ## Impact Shaft Provider Integration (#9912)
 
@@ -4175,6 +4242,10 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| Date | PR | Changes |
+| --- | --- | --- |
+| 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |
+| 2026-09-10 | #8360 | Bound the launcher splash: every async startup phase (registry, engines, Docker, optional Tools/Rate provider) runs under an explicit timeout with timestamped structured diagnostics; optional-provider failure degrades the shell instead of blocking it; a StartupSession watchdog plus Retry / Continue without provider / Copy diagnostics / Close dialog replaces the quit-on-error path; loading-mode construction no longer loads the registry on the GUI thread. |
 | 2026-09-09 | #9941 | Add calibrated cross-model joint convention conversion, gap-safe golf metrics including event-defined X-Factor stretch and shaft twist velocity, explicit COM/missing-data contracts, model link adapters, and configurable desktop/web plots and API surfaces (#9934). |
 | 2026-09-09 | #9924 | Establish capture audits and tested bounded growing-prefix fitting with native Simscape polynomial conversion; qualify DeskComputer execution and repair model-workspace overrides, raw retention, physical-clock resampling and direct joint-sensor unit conversion under #9925. Restore independent referenced-joint targets and priority controls under #9927 with native migration tests, model snapshots and successful closed-chain replay. Qualify a reusable native kinematics snapshot against 16 frame positions and 12 logged orientations, with tested fixed body-marker projection and explicit Fast Restart release for independent replay. Add a tested complete-horizon capture configuration so the one-second torque gate cannot truncate a fitted swing. R2025b is the sole required licensed execution and acceptance release; R2026a evidence is historical only. Add a native-clock marker oracle and resolved finite-difference control for actual prefix fitting; calibrate a waist-constrained pose seed and begin 25-marker torque replay. Extract and test native pose seeding, and save a bounded nine-candidate arm-length sweep without claiming anatomical identification. Test a native marker-velocity tangent map and preserve the disabled-target initialization regression for repair. Qualify session-scoped initial velocity targets with cold/warm/error cleanup and exact nonzero-rate forward initialization. Consume qualified geometry, rates and fixed attachments through a tested identity contract; save the 0.1 s torque fit and exact independent cold replay with verified archives. Add tested low-degree polynomial controls and explicit candidate transfer for longer-prefix experiments. Test explicit actuator-log auditing and verify the sixteen available channels on the saved prefix. Save the 0.2 s continuous linear-torque fit with exact cold replay, actuator-log parity and verified archives. Qualify 22 sensed actuator channels with explicit world-to-hip-base force conversion and separate SI error units. Test same-curve candidate transfer across all nondecreasing polynomial degrees zero through six for subsequent native fitting. Quantify the conditional fixed-attachment rigidity floor with tested independent-body relaxation before assessing long-horizon fit limits. Enable the five missing native revolute effort sensors and qualify all 27 channels with unchanged full native state/marker replay. Extend native pose seeding with tested fixed marker attachments for connected-model feasibility diagnostics; preserve origin-proxy compatibility. Correct diagnostic capture-validity selection with tests distinguishing missing zeros from valid origins. Verify native frame export against all saved pose markers and reuse the tested shared offset estimator for multiframe attachment candidates with explicit invalidation of forward-state qualification. Separate tested native-initial-state consistency from target-marker fitting error and support requalifying fixed multiframe attachments with a fresh tangent velocity. Full tour-swing qualification remains open under epic #9921. |
 | 2026-09-09 | #9916 | Reconcile Cargo/catalog/inventory provenance and retired waivers. Correct the moved launcher target; retire four byte-identical UI files through the existing split resolver, preserving 27 UD-only widgets. Record the explicit #8942 realtime migration exception for review. Qualify the explicit distributed-shaft wire and resolved theme through the exact Tools vendor pin, with synthetic refusal/source controls and clean installed-wheel provider evidence (#9912). Repair to 00d17e7f9 passes 79 provider/theme/fallback/manual controls; retire the obsolete color child and record pending realtime migration. Final reviewed pin and physical qualification remain required. |
@@ -4284,8 +4355,8 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
-| ---------- | ---------- | ---------- |
 | 2026-09-10 | #1616 | Adopt maintainable Mermaid C4 architecture-map contract (C4Context, C4Container, Feature Map, Change Log, validator and workflow) (#1616). |
+| 2026-09-10 | #8365 | Import the public Launch-Monitor-Data canonical exports into the launch-monitor statistics core (#8365). `src/tools/launch_monitor_model/launch_monitor_data.py` detects the two published shapes by exact header membership and refuses everything else: shot-level `load_shots()` frames map SI columns with the registry unit and native `_mph`/`_deg`/`_yd` columns with the corpus unit, never a profile default, reject a metric declared in both unit systems or any column whose unit would have to be assumed, carry `observation_kind`, and derive the private-corpus `shot_id`/`session_id` identity; the long-format `upstreamdrift_aggregate_metrics.csv` is pivoted to one `observation_kind="aggregate"` row per source/monitor/model/software/environment/cohort/club group with every published cell retained verbatim under `source::<metric>::<column>`, refusing non-`group_mean` rows, rows claiming to be shots, unknown metrics, registry-incompatible `canonical_unit`, non-numeric means and repeated metrics. Seventeen focused tests pin detection, unit fidelity, lineage, deterministic pivoting, every refusal, `.lmproject` round-trip and that imported aggregates are refused by shot-level regression alone or pooled with shots. The module is registered app-local in the ADR-0046 Stage 2 parity gate and ADR-0048; no Tools module changes. |
 | 2026-09-10 | #9959 | Bind capture reconstruction to selected calibration bytes, verify source stability during processing, and require reconstruction again after calibration changes or missing legacy lineage. Preserve earlier results, verify triangulated-model reconstruction lineage, and use existing wizard prerequisite links. Extract measurement/lens helpers within unchanged budgets; record successor turnover. |
 | 2026-09-10 | #9954 | Add native camera setup discovery, named views, connection feedback and separate saved plan revisions. Link header and wizard controls, preserve current captures, and generate matching help and architecture maps. Installed editor qualification passes; live hardware accuracy remains separate. |
 | 2026-09-10 | #9950 | Restore installed Capture Rig startup by preserving reference-loader packaging and resolving the owning bundled calibration provider. Default new recordings to unique player-library destinations and preserve existing takes. Index successful captures automatically and refresh their visible identity. Installed and source regression evidence is recorded separately from physical-camera qualification. |
@@ -5776,6 +5847,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Replaced `np.linalg.norm(diff, axis=1).max()` with `np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff)))` in `src/tools/capture_rig/model_frame_source.py` to optimize maximum bounding radius calculation. (spec-exempt: micro-optimization)
 
 - Fixed `bioptim` parameter bounds shape mismatch in `src/shared/python/optimization/ocp/parameter_ocp.py` by using `BoundsList.add` with `InterpolationType.CONSTANT` and 2D arrays instead of tuple assignment.
+- Replaced `np.linalg.norm(prediction - target, axis=1)` with `np.einsum('ij,ij->i', diff, diff)` in `src/engines/Simscape_Multibody_Models/python/tour_fit_state.py` to optimize calculation of array magnitudes when computing RMS and max initial target errors. (spec-exempt: micro-optimization)
+- Replaced `np.linalg.norm` with `np.sqrt(ndarray.dot(ndarray))` for small 1D arrays across multiple modules for measurable performance improvement (#9979). (spec-exempt: micro-optimization)
 
 ## Independently Refined Swing Defect Reference (#9830)
 
@@ -5798,3 +5871,4 @@ regressions pass. Missing legacy matrix factories use exact SDK class
 factories without replacing native exports. The install probe imports the
 consumer; matrix compatibility on 3.8 does not imply solver qualification.
 The general optimal-control extra retains its separate version range (#9842).
+- Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` in `src/motion_capture/coaching/measurements.py` to optimize multi-dimensional distance calculation. (spec-exempt: micro-optimization)

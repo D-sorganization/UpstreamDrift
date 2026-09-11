@@ -383,6 +383,21 @@ def get_unavailable_engines() -> list[str]:
     return [name for name in _MODULE_MAPPING if not is_engine_available(name)]
 
 
+def is_mujoco_available() -> bool:
+    """Return whether MuJoCo physics engine is available."""
+    return is_engine_available("mujoco")
+
+
+def is_pinocchio_available() -> bool:
+    """Return whether Pinocchio physics engine is available."""
+    return is_engine_available("pinocchio")
+
+
+def is_drake_available() -> bool:
+    """Return whether Drake physics engine is available."""
+    return is_engine_available("drake")
+
+
 def __getattr__(name: str) -> Any:
     """Lazy evaluation of _AVAILABLE variables without evaluating missing ones prematurely."""
     if name.endswith("_AVAILABLE"):

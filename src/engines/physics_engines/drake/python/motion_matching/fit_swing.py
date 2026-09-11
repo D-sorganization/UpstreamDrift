@@ -32,7 +32,7 @@ import logging
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -231,7 +231,7 @@ def fit_swing_drake(
             )
             raise ValueError(msg)
         # Clip to the bound box defensively so SLSQP starts feasible.
-        theta0 = np.clip(theta0, lb, ub).astype(np.float64)
+        theta0 = np.clip(theta0, lb, ub).astype(np.float64).reshape(-1)
     else:
         theta0 = np.zeros(n_dim, dtype=np.float64)
 
@@ -259,7 +259,7 @@ def fit_swing_drake(
     res = minimize(
         _objective,
         theta0,
-        method=opts.method,
+        method=cast(Any, opts.method),
         bounds=bounds,
         options={"maxiter": opts.max_iterations, "ftol": opts.tolerance},
     )

@@ -160,6 +160,54 @@ class TestThemeMenuHasNoDuplicates:
         )
 
 
+class TestInAppHelpSystem:
+    """#8843 — In-app help system roots and component mappings."""
+
+    def test_user_manual_path_exists(self) -> None:
+        from src.shared.python.gui_pkg import help_system
+
+        assert help_system.USER_MANUAL_PATH.exists()
+        content = help_system.get_user_manual_content()
+        assert "# User Manual Not Found" not in content
+        assert "UpstreamDrift User Manual" in content
+
+    def test_all_ui_help_topics_resolve_to_feature_help(self) -> None:
+        from src.shared.python.gui_pkg import help_content
+
+        missing: list[str] = []
+        for component_id, topic_id in help_content.UI_HELP_TOPICS.items():
+            help_dict = help_content.get_component_help(component_id)
+            if help_dict is None:
+                missing.append(f"{component_id} -> {topic_id}")
+            else:
+                assert "title" in help_dict
+                assert "description" in help_dict
+        assert not missing, f"Components resolve to no feature help: {missing}"
+
+    def test_all_registered_topics_resolve_content(self) -> None:
+        from src.shared.python.gui_pkg import help_content, help_system
+
+        missing: list[str] = []
+        for topic_id in help_content.HELP_TOPICS:
+            content = help_system.get_help_topic_content(topic_id)
+            if "Topic Not Found" in content or "Error Loading" in content:
+                missing.append(topic_id)
+            assert "../USER_MANUAL.md" not in content, (
+                f"Topic {topic_id} contains dead ../USER_MANUAL.md link"
+            )
+        assert not missing, f"Topics could not be loaded: {missing}"
+
+    def test_list_help_topics_includes_getting_started(self) -> None:
+        from src.shared.python.gui_pkg import help_system
+
+        topics = help_system.list_help_topics()
+        topic_ids = [t[0] for t in topics]
+        assert "getting_started" in topic_ids
+        assert "analysis_tools" in topic_ids
+        assert "simulation_controls" in topic_ids
+        assert "user_manual" not in topic_ids
+
+
 @pytest.fixture
 def qapp():
     from PyQt6.QtWidgets import QApplication

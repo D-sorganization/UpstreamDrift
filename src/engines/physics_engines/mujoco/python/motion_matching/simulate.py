@@ -20,7 +20,8 @@ Parallel fits MUST use ``multiprocessing`` rather than threads.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 import numpy as np
@@ -67,7 +68,8 @@ class SimOptions:
     """Forward-sim options for ``simulate_with_coefficients``.
 
     Attributes:
-        variant: Which MJCF variant to instantiate.
+        variant: Which MJCF variant to instantiate. Ignored if ``xml_path``
+            is provided.
         T_s: Total simulation horizon in seconds.
         dt: Simulation timestep. ``None`` means use the model's own
             ``opt.timestep`` (recommended).
@@ -82,6 +84,10 @@ class SimOptions:
             output. ``False`` saves a tiny copy per frame.
         rng_seed: Reserved for future stochastic options; currently
             unused but accepted to match the cross-engine signature.
+        xml_path: Optional path to an MJCF XML file overriding ``variant``.
+        compute_energy: If ``True``, compute kinetic and potential energy
+            at each output frame.
+        basis: ``"power"`` (default) or ``"bernstein"``.
     """
 
     variant: ModelVariant = "full"
@@ -92,6 +98,9 @@ class SimOptions:
     clip_torque_to_ctrlrange: bool = True
     compute_qdd: bool = True
     rng_seed: int = 0
+    xml_path: str | Path | None = None
+    compute_energy: bool = True
+    basis: Literal["power", "bernstein"] = "power"
 
 
 @dataclass(frozen=True)
@@ -119,6 +128,9 @@ class SimOut:
             ``"failed"`` if any frame produced a non-finite state.
         duration_s: wall-clock seconds spent in the rollout (excluding
             model compile).
+        kinetic_energy: ``(N,)`` system kinetic energy in Joules.
+        potential_energy: ``(N,)`` system potential energy in Joules.
+        meta: Diagnostics and engine metadata dictionary.
     """
 
     time: NDArray[np.float64]
@@ -132,6 +144,52 @@ class SimOut:
     club_quat: NDArray[np.float64]
     solver_status: str = "success"
     duration_s: float = 0.0
+    kinetic_energy: NDArray[np.float64] = field(
+        default_factory=lambda: np.zeros(0, dtype=np.float64)
+    )
+    potential_energy: NDArray[np.float64] = field(
+        default_factory=lambda: np.zeros(0, dtype=np.float64)
+    )
+    meta: dict[str, Any] = field(default_factory=dict)
+
+    # Aliases for cross-engine parity compatibility
+    @property
+    def t(self) -> NDArray[np.float64]:
+        return self.time
+
+    @property
+    def grip_position(self) -> NDArray[np.float64]:
+        return self.grip
+
+    @property
+    def grip_rotation(self) -> NDArray[np.float64]:
+        """Return (N, 3, 3) rotation matrices from grip_quat."""
+        import mujoco
+
+        n = self.grip_quat.shape[0]
+        rots: NDArray[np.float64] = np.zeros((n, 3, 3), dtype=np.float64)
+        mat: NDArray[np.float64] = np.zeros(9, dtype=np.float64)
+        for i in range(n):
+            mujoco.mju_quat2Mat(mat, self.grip_quat[i])
+            rots[i] = mat.reshape(3, 3)
+        return rots
+
+    @property
+    def clubhead_position(self) -> NDArray[np.float64]:
+        return self.clubhead
+
+    @property
+    def clubhead_rotation(self) -> NDArray[np.float64]:
+        """Return (N, 3, 3) rotation matrices from club_quat."""
+        import mujoco
+
+        n = self.club_quat.shape[0]
+        rots: NDArray[np.float64] = np.zeros((n, 3, 3), dtype=np.float64)
+        mat: NDArray[np.float64] = np.zeros(9, dtype=np.float64)
+        for i in range(n):
+            mujoco.mju_quat2Mat(mat, self.club_quat[i])
+            rots[i] = mat.reshape(3, 3)
+        return rots
 
     # ------------------------------------------------------------------ DRY
     # The cost function in src/shared/python/motion_matching/cost.py expects
@@ -325,14 +383,23 @@ def simulate_with_coefficients(  # noqa: C901
 
     import mujoco
 
-    xml = _load_model_xml(options.variant)
-    model = mujoco.MjModel.from_xml_string(xml)
+    if options.xml_path is not None:
+        xml_p = Path(options.xml_path)
+        if not xml_p.exists():
+            raise FileNotFoundError(f"model XML not found at {xml_p}")
+        model = mujoco.MjModel.from_xml_path(str(xml_p))
+    else:
+        xml = _load_model_xml(options.variant)
+        model = mujoco.MjModel.from_xml_string(xml)
 
     # Optional override of the model timestep.
     if options.dt is not None:
         if options.dt <= 0:
             raise ValueError(f"dt must be > 0; got {options.dt}")
         model.opt.timestep = float(options.dt)
+
+    if options.compute_energy:
+        model.opt.enableflags |= mujoco.mjtEnableBit.mjENBL_ENERGY
 
     # Spec §2.2: enforce length + finiteness against the compiled model's
     # actuator count (``nu``). Bounds are enforced separately by the
@@ -344,8 +411,35 @@ def simulate_with_coefficients(  # noqa: C901
     _apply_initial_pose(data, initial_pose, model.nq)
     mujoco.mj_forward(model, data)
 
-    grip_bid = _resolve_body_id(model, _GRIP_BODY_BY_VARIANT[options.variant])
-    head_bid = _resolve_body_id(model, _CLUBHEAD_BODY_BY_VARIANT[options.variant])
+    # Resolve grip and clubhead: prefer canonical sites 'mid_hands' and 'clubhead',
+    # falling back to candidate bodies per variant or general names.
+    grip_site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "mid_hands")
+    club_site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "clubhead")
+
+    grip_bid = -1
+    head_bid = -1
+    if grip_site_id < 0 or club_site_id < 0:
+        variant_key = (
+            options.variant if options.variant in _GRIP_BODY_BY_VARIANT else "full"
+        )
+        grip_body_name = _GRIP_BODY_BY_VARIANT.get(variant_key, "club")
+        head_body_name = _CLUBHEAD_BODY_BY_VARIANT.get(variant_key, "clubhead")
+        try:
+            grip_bid = _resolve_body_id(model, grip_body_name)
+        except RuntimeError:
+            for alt in ("club_grip", "hand_right", "hand_left"):
+                bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, alt)
+                if bid >= 0:
+                    grip_bid = bid
+                    break
+        try:
+            head_bid = _resolve_body_id(model, head_body_name)
+        except RuntimeError:
+            for alt in ("club_head", "clubhead", "club_shaft"):
+                bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, alt)
+                if bid >= 0:
+                    head_bid = bid
+                    break
 
     # Output grid + per-frame sample stride.
     t_grid = _output_grid(options.T_s, options.output_rate_hz)
@@ -362,24 +456,44 @@ def simulate_with_coefficients(  # noqa: C901
     out_grip_q = np.zeros((n_out, 4), dtype=np.float64)
     out_head = np.zeros((n_out, 3), dtype=np.float64)
     out_head_q = np.zeros((n_out, 4), dtype=np.float64)
+    out_ke = np.zeros(n_out, dtype=np.float64)
+    out_pe = np.zeros(n_out, dtype=np.float64)
+
+    def _sample_kinematics(dest_idx: int) -> None:
+        if grip_site_id >= 0:
+            out_grip[dest_idx] = data.site_xpos[grip_site_id]
+            mujoco.mju_mat2Quat(out_grip_q[dest_idx], data.site_xmat[grip_site_id])
+        elif grip_bid >= 0:
+            out_grip[dest_idx] = data.xpos[grip_bid]
+            out_grip_q[dest_idx] = data.xquat[grip_bid]
+
+        if club_site_id >= 0:
+            out_head[dest_idx] = data.site_xpos[club_site_id]
+            mujoco.mju_mat2Quat(out_head_q[dest_idx], data.site_xmat[club_site_id])
+        elif head_bid >= 0:
+            out_head[dest_idx] = data.xpos[head_bid]
+            out_head_q[dest_idx] = data.xquat[head_bid]
+
+        if options.compute_energy:
+            mujoco.mj_energyPos(model, data)
+            mujoco.mj_energyVel(model, data)
+            out_pe[dest_idx] = data.energy[0]
+            out_ke[dest_idx] = data.energy[1]
 
     # Capture frame 0 (post mj_forward, pre any mj_step).
     out_q[0] = data.qpos
     out_qd[0] = data.qvel
     if options.compute_qdd:
         out_qdd[0] = data.qacc
-    out_grip[0] = data.xpos[grip_bid]
-    out_grip_q[0] = data.xquat[grip_bid]
-    out_head[0] = data.xpos[head_bid]
-    out_head_q[0] = data.xquat[head_bid]
-    # Tau at t=0 isn't computed by mj_forward (no ctrl callback yet); evaluate
-    # the polynomial directly.
+    _sample_kinematics(0)
 
     driver = PolynomialTorqueDriver(
         model,
         theta,
         t0=options.t0,
         clip_to_ctrlrange=options.clip_torque_to_ctrlrange,
+        basis=options.basis,
+        T_s=options.T_s,
     )
     out_tau[0] = driver.evaluate(0.0)
     if options.clip_torque_to_ctrlrange:
@@ -404,9 +518,6 @@ def simulate_with_coefficients(  # noqa: C901
         with driver:
             for i in range(1, n_out):
                 t_target = float(t_grid[i])
-                # Step until data.time >= t_target (the model timestep may
-                # not divide evenly into 1/output_rate_hz).
-                # Guard against infinite loops with a generous safety cap.
                 max_substeps = int(np.ceil(options.T_s / model.opt.timestep) + 16)
                 substeps = 0
                 while data.time + 1e-12 < t_target and substeps < max_substeps:
@@ -424,16 +535,28 @@ def simulate_with_coefficients(  # noqa: C901
                 if options.compute_qdd:
                     out_qdd[i] = data.qacc
                 out_tau[i] = data.ctrl
-                out_grip[i] = data.xpos[grip_bid]
-                out_grip_q[i] = data.xquat[grip_bid]
-                out_head[i] = data.xpos[head_bid]
-                out_head_q[i] = data.xquat[head_bid]
+                _sample_kinematics(i)
     finally:
-        # Belt-and-suspenders: even if the context manager already cleared,
-        # this guarantees no leftover global callback escapes the function.
         driver.uninstall()
 
     duration_s = time.perf_counter() - t_start
+
+    meta = {
+        "n_joints": nu,
+        "model_nq": nq,
+        "model_nv": nv,
+        "model_nu": nu,
+        "variant": options.variant if options.xml_path is None else "custom",
+        "xml_path": str(options.xml_path) if options.xml_path is not None else None,
+        "grip_site_id": int(grip_site_id),
+        "club_site_id": int(club_site_id),
+        "grip_body_id": int(grip_bid),
+        "head_body_id": int(head_bid),
+        "timestep": float(model.opt.timestep),
+        "compute_energy": bool(options.compute_energy),
+        "basis": str(options.basis),
+        "duration_s": float(duration_s),
+    }
 
     return SimOut(
         time=t_grid,
@@ -447,6 +570,9 @@ def simulate_with_coefficients(  # noqa: C901
         club_quat=out_head_q,
         solver_status=solver_status,
         duration_s=duration_s,
+        kinetic_energy=out_ke,
+        potential_energy=out_pe,
+        meta=meta,
     )
 
 

@@ -715,6 +715,7 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "parity: cross-implementation parity and contract checks (engine-vs-engine and Python-vs-Rust equivalence); run in a dedicated parity CI lane",
+    "cross_engine: cross-engine physics parity tests",
     "e2e: full-stack smoke tests; nightly + release gate only",
     "gate: production validation gate",
     "core_only: tests that must pass in a default install with no optional engine extras",
