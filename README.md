@@ -185,17 +185,19 @@ python launch_upstream_drift.py
 This starts the local API server on port 8000 and opens the web interface in
 your browser. The other entry points:
 
-| Command                                           | Opens                        |
-| ------------------------------------------------- | ---------------------------- |
-| `python launch_upstream_drift.py`                 | Web interface, recommended   |
-| `python launch_upstream_drift.py --classic`       | PyQt6 desktop application    |
-| `python launch_upstream_drift.py --api-only`      | API server with no interface |
-| `python launch_upstream_drift.py --engine <name>` | A single engine directly     |
-| `python -m src.tools.pose_studio`                 | Pose Studio, standalone      |
+| Command                                           | Opens                                                 |
+| ------------------------------------------------- | ----------------------------------------------------- |
+| `python launch_upstream_drift.py`                 | Web interface (recommended default entry point)       |
+| `python launch_upstream_drift.py --classic`       | PyQt6 desktop application (canonical reference model) |
+| `python launch_upstream_drift.py --api-only`      | API server with no interface                          |
+| `python launch_upstream_drift.py --engine <name>` | A single engine directly                              |
+| `python -m src.tools.pose_studio`                 | Pose Studio, standalone                               |
 
 `upstream-drift` is installed as a console script and accepts the same
-arguments. The desktop application remains supported for users who prefer a
-native window.
+arguments. The PyQt6 desktop application serves as the canonical feature-parity
+reference model against which web capabilities are tracked (see
+[`docs/development/feature_parity_matrix.md`](docs/development/feature_parity_matrix.md)).
+The desktop application remains supported for users who prefer a native window.
 
 `launch_golf_suite.py` is a deprecated compatibility shim retained for existing
 scripts. New work should use `launch_upstream_drift.py`.

@@ -32,14 +32,14 @@ separated from current guidance.
 - [`agent_context/`](agent_context/README.md) - 7 pages
 - [`agents/`](agents/shared-infrastructure.md) - 1 page
 - [`api/`](api/README.md) - 7 pages
-- [`architecture/`](architecture/) - 20 pages
+- [`architecture/`](architecture/) - 22 pages
 - [`audits/`](audits/) - 7 pages
 - [`code-quality/`](code-quality/function-design-review.md) - 1 page
 - [`codemap/`](codemap/README.md) - 3 pages
 - [`conformance/`](conformance/) - no Markdown pages
 - [`conventions/`](conventions/) - 3 pages
 - [`deployment/`](deployment/interim_setup.md) - 1 page
-- [`development/`](development/README.md) - 133 pages
+- [`development/`](development/README.md) - 146 pages
 - [`engineering/`](engineering/) - 2 pages
 - [`engines/`](engines/README.md) - 15 pages
 - [`estimation/`](estimation/) - 2 pages
@@ -77,7 +77,7 @@ separated from current guidance.
 - [`design/`](design/) - 2 pages
 - [`golf-model/`](golf-model/INPUT_POSE_INVESTIGATION.md) - 1 page
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
-- [`motion_capture/`](motion_capture/) - 18 pages
+- [`motion_capture/`](motion_capture/) - 21 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
 - [`plans/`](plans/README.md) - 17 pages
 - [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
@@ -85,7 +85,6 @@ separated from current guidance.
 - [`sg_optimizer/`](sg_optimizer/README.md) - 3 pages
 - [`status/`](status/) - no Markdown pages
 - [`technical_debt/`](technical_debt/TODO_FIXME_REGISTER.md) - 1 page
-- [`ui/`](ui/FEATURE_PARITY_MATRIX.md) - 1 page
 - [`ux/`](ux/field_metadata.md) - 1 page
 
 ### Archived
@@ -96,6 +95,7 @@ separated from current guidance.
 - [`issues/`](issues/README.md) - 57 pages
 - [`review_archive/`](review_archive/) - 24 pages
 - [`status_quo_analysis/`](status_quo_analysis/running_log.md) - 1 page
+- [`ui/`](ui/FEATURE_PARITY_MATRIX.md) - 1 page
 
 <!-- END GENERATED: docs-map -->
 
@@ -202,7 +202,7 @@ repository, which made them effectively unreachable.
 | `testing/`              | @quality-team         | stable    | Testing strategy, validation guidance, and quality assurance references.                                                            |
 | `troubleshooting/`      | @support-team         | stable    | Troubleshooting guides for installation, runtime, and development issues.                                                           |
 | `tutorials/`            | @developer-experience | stable    | Step-by-step learning paths and task walkthroughs for users.                                                                        |
-| `ui/`                   | @ui-team              | draft     | Launcher/UI feature parity matrix and frontend-facing notes.                                                                        |
+| `ui/`                   | @ui-team              | archived  | Obsolete UI feature parity matrix snapshot; superseded by docs/development/feature_parity_matrix.md.                                |
 | `user_guide/`           | @docs-team            | stable    | User-facing guides for common workflows and product capabilities.                                                                   |
 | `ux/`                   | @ui-team              | draft     | UX infrastructure for epic #5968: field metadata registry, copy style, walkthrough specs, and contributor guidance.                 |
 | `validation/`           | @quality-team         | stable    | Cross-engine validation artifacts, differential reports, and machine-readable evidence snapshots.                                   |
@@ -213,6 +213,10 @@ repository, which made them effectively unreachable.
 Issue #8840 recorded four consolidations that this catalog described as pending
 rather than performing. Each is now decided. Dated entries, newest first; a
 decision recorded here is final unless a later dated entry supersedes it.
+
+### 2026-09-11 -- `docs/ui/FEATURE_PARITY_MATRIX.md` Superseded by Generated Parity Matrix: DONE
+
+`docs/ui/FEATURE_PARITY_MATRIX.md` was an orphaned hand-written snapshot from 2026-06-12 that contradicted the machine-generated parity matrix in `docs/development/feature_parity_matrix.md` (issue #8833). The file's body was replaced with an explicit pointer to `docs/development/feature_parity_matrix.md`, the catalog entry for `ui/` was marked `archived`, and `scripts/generate_docs_map.py` regenerated to group it under Archived.
 
 ### 2026-09-03 -- `strategic/` Into `plans/`: DONE
 
