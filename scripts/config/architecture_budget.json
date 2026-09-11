@@ -343,7 +343,7 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "tools/model_converter/mjcf_exporter.py",
+      "path": "src/tools/model_converter/mjcf_exporter.py",
       "symbol": "export_mjcf",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/physics-team",
@@ -352,7 +352,7 @@
       "expires_on": "2026-10-31"
     },
     {
-      "path": "tools/model_converter/schema_validator.py",
+      "path": "src/tools/model_converter/schema_validator.py",
       "symbol": "validate_canonical_model",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/physics-team",
@@ -361,7 +361,7 @@
       "expires_on": "2026-10-31"
     },
     {
-      "path": "tools/model_converter/urdf_exporter.py",
+      "path": "src/tools/model_converter/urdf_exporter.py",
       "symbol": "export_urdf",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/physics-team",
@@ -370,7 +370,7 @@
       "expires_on": "2026-10-31"
     },
     {
-      "path": "tools/model_converter/urdf_exporter.py",
+      "path": "src/tools/model_converter/urdf_exporter.py",
       "symbol": "_export_segment",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/physics-team",
