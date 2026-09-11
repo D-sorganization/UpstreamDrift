@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Drake MultibodyPlant Continuous Torque Harness (#9968)
+
+Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the Drake MultibodyPlant simulation harness (`src.engines.physics_engines.drake.python`):
+- `simulate_with_coefficients`: Canonical forward-dynamics simulation entry point evaluating continuous 6th-order Bernstein basis torques through Drake `MultibodyPlant` and `DiagramBuilder`. Supports both direct Bernstein basis calculation and power basis conversion.
+- `SimOut`: Canonical dataclass matching Simscape multibody contracts (`time`, `q`, `qd`, `qdd`, `tau`, `grip`, `grip_quat`, `clubhead`, `club_quat`, `solver_status`, `duration_s`, `kinetic_energy`, `potential_energy`, `meta`) while preserving backward-compatible property aliases (`t`, `grip_position`, `grip_rotation`, `clubhead_position`, `clubhead_rotation`, `metadata`).
+- `EngineJointMap` & `get_drake_canonical_joint_map`: Resolves 27 canonical actuation channels into native Drake generalized coordinate velocity indices and plant actuators.
+- Runtime availability probe (`is_drake_available`): Cleanly detects presence of functional compiled Drake C++ bindings versus missing/mocked runtimes.
+- Verification & Test Suite: Unit and contract tests under `tests/unit/engines/drake/` (`pytestmark = pytest.mark.unit`) validating canonical coordinates, parameter bounds, Bernstein evaluation properties, joint map mapping, energy accounting, and target synthesis.
+
 ## Pinocchio Articulated-Body Continuous Torque Harness (#9967)
 
 Implement 6th-order continuous Bernstein and power polynomial torque forward dynamics for the Pinocchio rigid-body simulation harness (`src.engines.physics_engines.pinocchio.python`):
