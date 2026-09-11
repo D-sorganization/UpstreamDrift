@@ -57,3 +57,9 @@ exclusions:
       Library package (adapter + analysis API) backing the Tools-provided
       video_analyzer tile; the launchable app resolves inside the
       vendor/ud-tools gitlink (provider: tools), not this package.
+  - package: model_converter
+    reason: >-
+      Headless CLI and export library (python -m src.tools.model_converter.build_models)
+      generating URDF and MJCF physics engine models from canonical specification;
+      build-time orchestrator with no GUI launcher tile.
+    issue: "#9965"
