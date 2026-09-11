@@ -89,8 +89,8 @@ def bernstein_effort_range(control_torques: Array) -> Array:
     """
     coefficients = bernstein_to_simscape(control_torques, duration_s=1.0)
     result = np.empty((len(coefficients), 2))
-    row: Array
-    for index, row in enumerate(coefficients):
+    for index in range(len(coefficients)):
+        row = coefficients[index]
         roots = np.roots(np.polyder(row))
         interior = roots.real[
             (np.abs(roots.imag) < 1e-10) & (roots.real > 0) & (roots.real < 1)
@@ -238,6 +238,10 @@ class PrefixStage:
     evaluations: int
     optimizer_converged: bool
     message: str
+    terminal_rmse_m: float = 0.0
+    terminal_max_m: float = 0.0
+    pelvis_yaw_diff_deg: float = 0.0
+    pelvis_yaw_error_pct: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -308,6 +312,13 @@ class PrefixFitOptions:
     checkpoint: Callable[[PrefixStage], None] | None = None
     finite_difference_step: float | None = None
     regularization: Callable[[Array], Array] | None = None
+    terminal_weight: float = 0.0
+    time_weight_power: float = 0.0
+    time_weight_scale: float = 0.0
+    pelvis_indices: tuple[int, int] | None = None
+    pelvis_yaw_weight: float = 0.0
+    pelvis_yaw_max_error_pct: float = 5.0
+    acceptance_terminal_rmse_m: float | None = None
 
 
 def _run_prefix_stage(
@@ -325,7 +336,16 @@ def _run_prefix_stage(
     observed = np.isfinite(measured).all(axis=2) & (target.weights > 0)
     if len(time) < 2 or not observed.any():
         raise ValueError("prefix needs at least two times and an observed marker")
-    root_weights = np.sqrt(np.broadcast_to(target.weights, observed.shape)[observed])
+
+    # Time weighting: weight increases towards the horizon
+    if options.time_weight_scale > 0 and options.time_weight_power > 0:
+        s = np.clip(time / end, 0.0, 1.0)
+        time_mult = 1.0 + options.time_weight_scale * (s**options.time_weight_power)
+    else:
+        time_mult = np.ones(len(time), dtype=float)
+
+    base_weights = time_mult[:, None] * target.weights[None, :]
+    root_weights = np.sqrt(base_weights[observed])
     evaluations = 0
 
     def residual(
@@ -340,6 +360,35 @@ def _run_prefix_stage(
         evaluations += 1
         delta = (prediction - stage_measured)[stage_observed]
         marker_residuals = (delta * stage_weights[:, None]).ravel()
+        res_list = [marker_residuals]
+
+        # Dedicated terminal-frame penalty
+        if options.terminal_weight > 0 and stage_observed[-1].any():
+            term_obs = stage_observed[-1]
+            term_w = np.sqrt(target.weights[term_obs]) * options.terminal_weight
+            term_delta = (prediction[-1] - stage_measured[-1])[term_obs]
+            res_list.append((term_delta * term_w[:, None]).ravel())
+
+        # Dedicated pelvis yaw penalty (< 5% error enforcement)
+        if options.pelvis_indices is not None and options.pelvis_yaw_weight > 0:
+            wl_i, wr_i = options.pelvis_indices
+            v_p = prediction[:, wr_i, :2] - prediction[:, wl_i, :2]
+            v_t = stage_measured[:, wr_i, :2] - stage_measured[:, wl_i, :2]
+            norm_p = np.linalg.norm(v_p, axis=1, keepdims=True) + 1e-9
+            norm_t = np.linalg.norm(v_t, axis=1, keepdims=True) + 1e-9
+            u_p = v_p / norm_p
+            u_t = v_t / norm_t
+            sin_diff = u_p[:, 1] * u_t[:, 0] - u_p[:, 0] * u_t[:, 1]
+            yaw_weights = options.pelvis_yaw_weight * (
+                time_mult if options.time_weight_scale > 0 else 1.0
+            )
+            res_list.append((sin_diff * yaw_weights).ravel())
+            if options.terminal_weight > 0:
+                res_list.append(
+                    sin_diff[-1:]
+                    * (options.pelvis_yaw_weight * options.terminal_weight)
+                )
+
         if options.regularization is not None:
             reg_residuals = np.asarray(
                 options.regularization(parameters), dtype=float
@@ -347,8 +396,9 @@ def _run_prefix_stage(
             if reg_residuals.size > 0:
                 if not np.isfinite(reg_residuals).all():
                     raise ValueError("regularization residuals must be finite")
-                return np.concatenate([marker_residuals, reg_residuals])
-        return marker_residuals
+                res_list.append(reg_residuals)
+
+        return np.concatenate(res_list) if len(res_list) > 1 else marker_residuals
 
     diff_step_arr = (
         np.full_like(values, options.finite_difference_step)
@@ -369,6 +419,30 @@ def _run_prefix_stage(
     new_values = optimum.x.copy()
     prediction = _predicted(forward, new_values, time, measured.shape)
     distances = np.linalg.norm((prediction - measured)[observed], axis=1)
+
+    # Compute terminal frame metrics
+    term_obs = observed[-1]
+    if term_obs.any():
+        term_dists = np.linalg.norm((prediction[-1] - measured[-1])[term_obs], axis=1)
+        terminal_rmse_m = float(np.sqrt(np.mean(term_dists**2)))
+        terminal_max_m = float(np.max(term_dists))
+    else:
+        terminal_rmse_m = 0.0
+        terminal_max_m = 0.0
+
+    # Compute pelvis yaw metrics (< 5% error requirement)
+    pelvis_yaw_diff_deg = 0.0
+    pelvis_yaw_error_pct = 0.0
+    if options.pelvis_indices is not None:
+        wl_i, wr_i = options.pelvis_indices
+        v_p_term = prediction[-1, wr_i, :2] - prediction[-1, wl_i, :2]
+        v_t_term = measured[-1, wr_i, :2] - measured[-1, wl_i, :2]
+        yaw_target = np.degrees(np.arctan2(v_t_term[1], v_t_term[0]))
+        yaw_pred = np.degrees(np.arctan2(v_p_term[1], v_p_term[0]))
+        diff_deg = float((yaw_pred - yaw_target + 180) % 360 - 180)
+        pelvis_yaw_diff_deg = diff_deg
+        pelvis_yaw_error_pct = float(abs(diff_deg) / max(abs(yaw_target), 1.0) * 100.0)
+
     stage = PrefixStage(
         end_s=float(time[-1]),
         parameters=_readonly(new_values),
@@ -378,6 +452,10 @@ def _run_prefix_stage(
         evaluations=evaluations + 1,
         optimizer_converged=bool(optimum.success),
         message=str(optimum.message),
+        terminal_rmse_m=terminal_rmse_m,
+        terminal_max_m=terminal_max_m,
+        pelvis_yaw_diff_deg=pelvis_yaw_diff_deg,
+        pelvis_yaw_error_pct=pelvis_yaw_error_pct,
     )
     return stage, new_values
 
@@ -431,8 +509,17 @@ def fit_prefixes(
         if opt.checkpoint is not None:
             opt.checkpoint(stage)
     final = stages[-1]
+    accepted = bool(final.optimizer_converged and final.rmse_m <= acceptance_rmse_m)
+    if opt.pelvis_indices is not None:
+        accepted = accepted and bool(
+            final.pelvis_yaw_error_pct <= opt.pelvis_yaw_max_error_pct
+        )
+    if opt.acceptance_terminal_rmse_m is not None:
+        accepted = accepted and bool(
+            final.terminal_rmse_m <= opt.acceptance_terminal_rmse_m
+        )
     return PrefixFit(
         _readonly(values),
         tuple(stages),
-        final.optimizer_converged and final.rmse_m <= acceptance_rmse_m,
+        accepted,
     )

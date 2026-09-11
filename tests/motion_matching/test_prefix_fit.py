@@ -362,3 +362,52 @@ def test_prefix_fit_rejects_non_finite_regularization() -> None:
             acceptance_rmse_m=0.01,
             options=PrefixFitOptions(regularization=lambda p: np.array([np.nan])),
         )
+
+
+def test_prefix_fit_pelvis_yaw_penalty_and_gate() -> None:
+    # 2 markers: WaistLeft (idx 0) and WaistRight (idx 1)
+    time = np.array([0.0, 1.0])
+    target_yaw_deg = 60.0
+    th_t = np.radians(target_yaw_deg)
+    # Waist vector of length 0.28m oriented at target_yaw_deg
+    wl_pos = np.array([-0.14 * np.cos(th_t), -0.14 * np.sin(th_t), 0.0])
+    wr_pos = np.array([0.14 * np.cos(th_t), 0.14 * np.sin(th_t), 0.0])
+    points = np.zeros((2, 2, 3))
+    points[0, 0] = [-0.14, 0.0, 0.0]
+    points[0, 1] = [0.14, 0.0, 0.0]
+    points[1, 0] = wl_pos
+    points[1, 1] = wr_pos
+
+    target = MarkerTarget(time, points, np.ones(2))
+
+    # Forward model: param is yaw angle in radians at t=1
+    def forward(parameters: np.ndarray, requested: np.ndarray) -> np.ndarray:
+        pred = np.zeros((len(requested), 2, 3))
+        pred[0, 0] = [-0.14, 0.0, 0.0]
+        pred[0, 1] = [0.14, 0.0, 0.0]
+        if len(requested) > 1:
+            th = float(parameters[0])
+            pred[1, 0] = [-0.14 * np.cos(th), -0.14 * np.sin(th), 0.0]
+            pred[1, 1] = [0.14 * np.cos(th), 0.14 * np.sin(th), 0.0]
+        return pred
+
+    # Start with an initial guess 10 degrees off (target 60 deg = ~1.047 rad, guess 50 deg = ~0.873 rad)
+    guess_th = np.radians(50.0)
+    fit = fit_prefixes(
+        target,
+        forward,
+        initial=np.array([guess_th]),
+        lower=np.zeros(1),
+        upper=np.pi * np.ones(1),
+        prefix_end_s=(1.0,),
+        acceptance_rmse_m=0.01,
+        options=PrefixFitOptions(
+            pelvis_indices=(0, 1),
+            pelvis_yaw_weight=50.0,
+            pelvis_yaw_max_error_pct=5.0,
+        ),
+    )
+    assert fit.accepted
+    stage = fit.stages[0]
+    assert stage.pelvis_yaw_error_pct < 5.0
+    assert abs(stage.pelvis_yaw_diff_deg) < 1.0  # Well within 1 degree
