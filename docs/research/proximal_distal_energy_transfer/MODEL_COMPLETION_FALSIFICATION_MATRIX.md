@@ -106,3 +106,23 @@ simulation, or method paper into causal human validation.
 Publication language must preserve these statuses. A visually similar curve,
 successful trajectory fit, or higher force magnitude is not a substitute for
 the registered estimand and intervention.
+
+## #8556-Conditional Parameters
+
+Issue [#8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556) serves as the human-validation gate requiring synchronized bilateral six-axis grip wrenches. In addition to serving as a validation gate, several key _model-tier_ parameters and claims are conditionally anchored to the missing #8556 experimental dataset:
+
+1. **Grip Stiffness and Damping (`k_grip`, `c_grip`):**
+
+   - The top-tier Kelvin-Voigt grip interface currently assumes a nominal total stiffness of \(k*{\text{grip}} = 1800\,\text{N/m}\) and damping of \(c*{\text{grip}} = 18\,\text{N}\cdot\text{s/m}\) (`articulated_distributed_grip.py`), setting the overall force scale of the unactuated articulated response (#8912).
+   - _Outcome sensitivity:_ In one-factor stiffness sweeps across the ladder (\(1.8\times 10^3\), \(1.8\times 10^4\), \(1.8\times 10^5\,\text{N/m}\)), higher stiffness dramatically scales peak station forces toward realistic downswing magnitudes (from \(\sim 4\,\text{N}\) up into \(\mathcal{O}(100\text{--}500\,\text{N})\)), altering the relative free-flight response of the club relative to hand carriages.
+
+2. **Coulomb Friction Cone Anchor Normal Force (\(\mu\)):**
+
+   - The friction cone (\(\mu = 0.35\)) is currently anchored to the internal spring tension of the grip fibers rather than measured physiological compressive/squeeze normal force (#8915).
+   - _Outcome sensitivity:_ Anchoring friction to fiber tension means that as radial fiber displacement approaches zero, the cone collapses to zero, producing false-positive slip indications even under negligible shear force. True frictional grip stability requires empirical normal pressure distribution from #8556.
+
+3. **Tension-Only Unilaterality Direction:**
+   - The distributed contact model (`articulated_distributed_grip.py:186-200`) assumes unilateral tension-only registration where fibers can pull but not push the club, which represents the opposite physical unilaterality from compressive hand-shaft contact.
+   - _Outcome sensitivity:_ Club stabilization under compressive deceleration relies directly on the contact unilaterality orientation.
+
+As established by the analytical rank deficiency proof in `bilateral_wrench_identifiability.py` ("net-wrench closure does not establish force allocation", `README.md:200-204`), net resultant external forces and moments measured at the overall club or wrists cannot mathematically substitute for synchronized bilateral six-axis grip wrench measurements. Consequently, parameters (a), (b), and (c) remain uncalibrated model assumptions until #8556 data acquisition is completed.

@@ -36,6 +36,12 @@
       "owner": "@physics-team",
       "reason": "Comprehensive data dictionary for proximal distal energy transfer research release; staged for section decomposition.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+      "owner": "@physics-team",
+      "reason": "Falsification matrix tracking model-tier and empirical completion gates for proximal distal energy transfer; staged for decomposition.",
+      "expires_on": "2026-09-30"
     }
   ]
 }
