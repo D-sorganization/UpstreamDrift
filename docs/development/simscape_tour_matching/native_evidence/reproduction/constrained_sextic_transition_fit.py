@@ -26,6 +26,9 @@ from typing import Any
 
 import numpy as np
 from scipy.optimize import least_squares
+repo_root = Path(__file__).resolve().parents[5]
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
 
 from src.shared.python.motion_matching.constrained_sextic import (
     COEFFS_PER_ACTUATOR,
