@@ -250,7 +250,12 @@ def _make_tools_checkout(root: Path, *, with_entry: bool = True) -> Path:
     return tools
 
 
-def test_probe_reports_missing_checkout_when_nothing_resolves(tmp_path: Path) -> None:
+def test_probe_reports_missing_checkout_when_nothing_resolves(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "src.launchers.tools_repo_path._find_sibling_tools_root", lambda _repo: None
+    )
     repo = tmp_path / "deep" / "UpstreamDrift"
     repo.mkdir(parents=True)
     result = probe_tools_provider(repo, None)
