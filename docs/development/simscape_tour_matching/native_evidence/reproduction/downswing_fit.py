@@ -79,6 +79,7 @@ if not np.isfinite(args.smoothness_weight) or args.smoothness_weight < 0:
 sys.path.insert(0, str(args.repo))
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
+    PrefixFitOptions,
     PrefixStage,
     fit_prefixes,
     bernstein_to_simscape,
@@ -311,9 +312,11 @@ end
         upper=upper_bounds,
         prefix_end_s=[down_duration],
         acceptance_rmse_m=0.005,
-        max_nfev=args.max_nfev,
-        finite_difference_step=args.finite_difference_step,
-        regularization=regularizer,
+        options=PrefixFitOptions(
+            max_nfev=args.max_nfev,
+            finite_difference_step=args.finite_difference_step,
+            regularization=regularizer,
+        ),
     )
 
     report["accepted_numerically"] = fit.accepted

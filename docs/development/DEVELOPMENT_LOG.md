@@ -63,7 +63,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #9933, #9943 and #9945 merged; final documentation closure references #9926
 - **Paths:** src/motion_capture/coaching; src/tools/capture_rig; src/tools/pose_studio
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (SELF completion record; #9945 merged2d41aba41; CI34440058289 succeeded;88 combined integration tests pass; preserved remote f58ee5b3/main300d96a1; reviewed contracts4824f370a; catalog20 runtime audit pass; Traceb6325dfe8 persistence17 pass; PR trackingf0fe99bd9; isolated push mypy14/Bandit/unit tests pass; map5a2e8d2c1; combined600 had only stale atlas hash, regenerated and56 focused tests pass; main d40956742; native785269090; 513 Capture Rig/geometry regressions, ten focused readout tests, four-source mypy, 126 reference/import regressions, five-source Trace mypy and 17 topology/import tests; native30 tests and four-source mypy, visual plane/editor inspected)
+- **Last verified:** 2026-09-10 (SELF; #9945 merged; CI succeeded; 88 combined integration tests, Capture Rig regressions, and Trace persistence pass).
 - **Summary:** Shared geometry and model-only coaching; see [ledger](unified_analysis_9926.md).
 - **Evidence:** Comparison launch/save, PNG parity, snapshot video, cancellation and camera-evidence tests pass; Ruff/format, budgets and LoD pass; Driver comparison drawing UI and PNG inspected.
 - **Next step:** Merge the documentation closure record and verify epic #9926 closure; runtime delivery is complete.
@@ -130,8 +130,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** club_data/player_clubs.py; rig/capture_notes.py and equipment.py; Capture Rig bag/editor/library; model/session.py; matching tests, guide and generated maps.
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (working tree;652 broad regressions and69 focused/map/parity checks pass; visual QA and3020-file LoD pass)
-- **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence without unsupported club constraints. Dialog visual review passed with Segoe UI.
+- **Last verified:** 2026-09-09 (652 broad regressions and 69 focused checks pass; visual QA and LoD pass).
+- **Summary:** My Clubs supports catalog/custom entries, partial measurements, notes, archive and capture assignment. Captures preserve club snapshots and editable-copy lineage; fit provenance retains evidence.
 - **Next step:** Finish broad qualification and publish; connect wizard entry under #9906 before closing #9905.
 
 ### DL-#9915 · Verified Agent Context
@@ -143,7 +143,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/issue-9915-agent-context
 - **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `scripts/check_doc_size_budget.py`, `tests/ci`, `tests/scripts`
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10; final e83bd2e4 pins pass107 provider/seam, six context,31 atlas and12 navigation controls. The frontend-inclusive installed wheel passes launcher,31 calibration tests and pip check. Concurrent SPEC dedup4ded98ad6 is integrated; checker passes. Handoff records revisions and hashes.
+- **Last verified:** 2026-09-10 (final e83bd2e4 pins pass provider/seam, context, atlas and navigation controls; wheel passes launcher and calibration tests).
 - **Summary:** Twelve components and five reviewed integrations reuse the atlas and capture goals. Main276998030 is integrated; a required regression rejects divergent pip/source/Rust providers.
 - **Next step:** Qualify final published Tools pins and required CI on PR #9920.
 
@@ -156,9 +156,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #9948 (draft)
 - **Paths:** Simscape MATLAB motion_matching/shared, model initialization, shared Python prefix_fit, tests and simscape_tour_matching docs
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-10 (SELF; 23 Python tests, scoped Ruff/mypy and two R2025b native marker-oracle tests pass; first 50 ms candidate saved with 0.177 mm RMS and durable checkpoints; independent R2025b cold replay matches every marker coordinate exactly; three native geometry perturbations qualify active inch bindings; translated-pose TestCase passes and nine geometry seed candidates are saved; best geometry reproduces initial state and 15 native frames; native velocity-map and pose tests pass; session initialization passes cold/warm/error cleanup and qualified 50 ms q/qd replay; four checkpoint tests pass including strict declared fit identity; ten qualified-state contracts pass; 0.1 s fit reaches 0.356 mm RMS and independent cold replay has zero marker difference; 77-file archive verified; 47 tests qualify linear torque conversion and explicit candidate transfer; two native actuator-audit tests pass; 0.2 s linear fit reaches 0.860 mm RMS, exact cold replay and zero error on all 16 logged varying efforts; 104-file archive verified; three native frame-aware audit tests pass and 22 sensed efforts qualify; 0.3 s fit reaches 2.056 mm RMS, exact cold replay and qualified 22-channel audit; 61-file archive verified; five new CLI tests and full 52-test selection pass; all 28 degree-transfer pairs and expanded 80-test selection pass; interior-effort extrema tests and complete 82-test selection pass; profile-range plot visually checked; seven rigid-attachment relaxation tests and complete 89-test selection pass; full-capture fixed-attachment floor saved with hashes; refined 0.3 s RMS 1.695 mm, exact cold replay and 22-channel audit; 128-file archive verified; empty historical fitting exit receipts corrected to unknown; five native instrumentation/audit tests pass, isolated replay preserves every native state and marker sample, all 27 efforts qualify; 36-file archive verified; 0.4 s quadratic RMS 3.119775 mm, exact cold replay, 22-channel audit and explicit fit/validation exit zero; 148-file archive verified; three native attached-pose tests pass after recorded red cases; test archive verified; 19 connected-pose samples archived with explicit exit zero and an outlier subsequently traced to ignored capture validity; two validity-selection tests pass, corrected integration failed final constraints at 1.233 s with partial poses preserved; 0.5 s forward RMS 5.875584 mm, exact cold replay, all-27 audit and 100-file archive verified)
+- **Last verified:** 2026-09-10 (SELF; 115 Python tests, Ruff/mypy, R2025b native marker-oracle tests pass; continuous polynomial forward fits up to 1.2 s archived with exact cold marker replay, all-27 actuator audit, and zero exit).
 - **Summary:** Reproducible forward-dynamics matching with fixed geometry and continuous polynomial torques; native starting pose verified, full swing fit outstanding.
-- **Next step:** Resume after storage review from archived refined 0.6 s candidate (9.062024 mm RMS); extend modestly with identity-checked transfer and fresh cold/all-27 audit. Both latest pipelines completed with explicit exit zeros and exact cold marker parity. Calibrated 0.1 s remains a distinct experiment (12.191880 mm RMS); full-swing acceptance remains open. See RESUMPTION_PLAN.md for a bounded lower-cost-agent assignment: 0.7 s cubic continuation, unchanged identity, independent replay/all-27 audit and review before further extension. Cleanup receipts and recovery locations are in RESUME_AND_STORAGE.md and current AGENT_HANDOFF.md.
+- **Next step:** Continue from verified 1.2 s candidate toward full swing horizon; cold replay and all-27 audit.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 

@@ -300,6 +300,88 @@ def _validate_fit_inputs(
     return values.copy(), lo, hi, ends
 
 
+@dataclass(frozen=True)
+class PrefixFitOptions:
+    """Optional configuration for prefix fitting execution."""
+
+    max_nfev: int = 100
+    checkpoint: Callable[[PrefixStage], None] | None = None
+    finite_difference_step: float | None = None
+    regularization: Callable[[Array], Array] | None = None
+
+
+def _run_prefix_stage(
+    target: MarkerTarget,
+    forward: Forward,
+    end: float,
+    values: Array,
+    bounds: tuple[Array, Array],
+    options: PrefixFitOptions,
+) -> tuple[PrefixStage, Array]:
+    """Optimize a single growing prefix stage and compute evaluation metrics."""
+    lo, hi = bounds
+    mask = target.time <= end
+    time, measured = target.time[mask], target.points[mask]
+    observed = np.isfinite(measured).all(axis=2) & (target.weights > 0)
+    if len(time) < 2 or not observed.any():
+        raise ValueError("prefix needs at least two times and an observed marker")
+    root_weights = np.sqrt(np.broadcast_to(target.weights, observed.shape)[observed])
+    evaluations = 0
+
+    def residual(
+        parameters: Array,
+        stage_time: Array = time,
+        stage_measured: Array = measured,
+        stage_observed: NDArray[np.bool_] = observed,
+        stage_weights: Array = root_weights,
+    ) -> Array:
+        nonlocal evaluations
+        prediction = _predicted(forward, parameters, stage_time, stage_measured.shape)
+        evaluations += 1
+        delta = (prediction - stage_measured)[stage_observed]
+        marker_residuals = (delta * stage_weights[:, None]).ravel()
+        if options.regularization is not None:
+            reg_residuals = np.asarray(
+                options.regularization(parameters), dtype=float
+            ).ravel()
+            if reg_residuals.size > 0:
+                if not np.isfinite(reg_residuals).all():
+                    raise ValueError("regularization residuals must be finite")
+                return np.concatenate([marker_residuals, reg_residuals])
+        return marker_residuals
+
+    diff_step_arr = (
+        np.full_like(values, options.finite_difference_step)
+        if options.finite_difference_step is not None
+        else None
+    )
+    optimum = least_squares(
+        residual,
+        values,
+        bounds=(lo, hi),
+        max_nfev=options.max_nfev,
+        ftol=1e-10,
+        xtol=1e-10,
+        gtol=1e-10,
+        x_scale="jac",
+        diff_step=diff_step_arr,
+    )
+    new_values = optimum.x.copy()
+    prediction = _predicted(forward, new_values, time, measured.shape)
+    distances = np.linalg.norm((prediction - measured)[observed], axis=1)
+    stage = PrefixStage(
+        end_s=float(time[-1]),
+        parameters=_readonly(new_values),
+        rmse_m=float(np.sqrt(np.mean(distances**2))),
+        p95_m=float(np.percentile(distances, 95)),
+        max_m=float(distances.max()),
+        evaluations=evaluations + 1,
+        optimizer_converged=bool(optimum.success),
+        message=str(optimum.message),
+    )
+    return stage, new_values
+
+
 def fit_prefixes(
     target: MarkerTarget,
     forward: Forward,
@@ -309,10 +391,7 @@ def fit_prefixes(
     upper: Array,
     prefix_end_s: Sequence[float],
     acceptance_rmse_m: float,
-    max_nfev: int = 100,
-    checkpoint: Callable[[PrefixStage], None] | None = None,
-    finite_difference_step: float | None = None,
-    regularization: Callable[[Array], Array] | None = None,
+    options: PrefixFitOptions | None = None,
 ) -> PrefixFit:
     """Fit growing prefixes using bounded least squares and prior warm starts.
 
@@ -329,10 +408,11 @@ def fit_prefixes(
     Acceptance requires optimizer convergence and a full-duration distance RMSE
     below the supplied threshold; physical qualification remains the caller's job.
     """
-    if finite_difference_step is not None and (
-        isinstance(finite_difference_step, bool)
-        or not np.isfinite(finite_difference_step)
-        or finite_difference_step <= 0
+    opt = options if options is not None else PrefixFitOptions()
+    if opt.finite_difference_step is not None and (
+        isinstance(opt.finite_difference_step, bool)
+        or not np.isfinite(opt.finite_difference_step)
+        or opt.finite_difference_step <= 0
     ):
         raise ValueError("finite_difference_step must be finite and positive")
     values, lo, hi, ends = _validate_fit_inputs(
@@ -342,76 +422,14 @@ def fit_prefixes(
         prefix_end_s,
         target,
         acceptance_rmse_m,
-        max_nfev,
+        opt.max_nfev,
     )
     stages: list[PrefixStage] = []
     for end in ends:
-        mask = target.time <= end
-        time, measured = target.time[mask], target.points[mask]
-        observed = np.isfinite(measured).all(axis=2) & (target.weights > 0)
-        if len(time) < 2 or not observed.any():
-            raise ValueError("prefix needs at least two times and an observed marker")
-        root_weights = np.sqrt(
-            np.broadcast_to(target.weights, observed.shape)[observed]
-        )
-        evaluations = 0
-
-        def residual(
-            parameters: Array,
-            stage_time: Array = time,
-            stage_measured: Array = measured,
-            stage_observed: NDArray[np.bool_] = observed,
-            stage_weights: Array = root_weights,
-        ) -> Array:
-            nonlocal evaluations
-            prediction = _predicted(
-                forward, parameters, stage_time, stage_measured.shape
-            )
-            evaluations += 1
-            delta = (prediction - stage_measured)[stage_observed]
-            marker_residuals = (delta * stage_weights[:, None]).ravel()
-            if regularization is not None:
-                reg_residuals = np.asarray(
-                    regularization(parameters), dtype=float
-                ).ravel()
-                if reg_residuals.size > 0:
-                    if not np.isfinite(reg_residuals).all():
-                        raise ValueError("regularization residuals must be finite")
-                    return np.concatenate([marker_residuals, reg_residuals])
-            return marker_residuals
-
-        diff_step_arr = (
-            np.full_like(values, finite_difference_step)
-            if finite_difference_step is not None
-            else None
-        )
-        optimum = least_squares(
-            residual,
-            values,
-            bounds=(lo, hi),
-            max_nfev=max_nfev,
-            ftol=1e-10,
-            xtol=1e-10,
-            gtol=1e-10,
-            x_scale="jac",
-            diff_step=diff_step_arr,
-        )
-        values = optimum.x.copy()
-        prediction = _predicted(forward, values, time, measured.shape)
-        distances = np.linalg.norm((prediction - measured)[observed], axis=1)
-        stage = PrefixStage(
-            end_s=float(time[-1]),
-            parameters=_readonly(values),
-            rmse_m=float(np.sqrt(np.mean(distances**2))),
-            p95_m=float(np.percentile(distances, 95)),
-            max_m=float(distances.max()),
-            evaluations=evaluations + 1,
-            optimizer_converged=bool(optimum.success),
-            message=str(optimum.message),
-        )
+        stage, values = _run_prefix_stage(target, forward, end, values, (lo, hi), opt)
         stages.append(stage)
-        if checkpoint is not None:
-            checkpoint(stage)
+        if opt.checkpoint is not None:
+            opt.checkpoint(stage)
     final = stages[-1]
     return PrefixFit(
         _readonly(values),

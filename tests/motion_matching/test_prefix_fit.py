@@ -5,6 +5,7 @@ import pytest
 
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
+    PrefixFitOptions,
     PrefixStage,
     bernstein_to_simscape,
     fit_prefixes,
@@ -58,7 +59,7 @@ def test_resolved_difference_step_escapes_quantized_oracle_plateau() -> None:
         upper=2 * np.ones(1),
         prefix_end_s=(1.0,),
         acceptance_rmse_m=1e-4,
-        finite_difference_step=0.01,
+        options=PrefixFitOptions(finite_difference_step=0.01),
     )
     assert fitted.accepted
     assert fitted.parameters[0] == pytest.approx(0.4, abs=1e-4)
@@ -76,7 +77,7 @@ def test_rejects_unresolved_difference_step(step: float) -> None:
             upper=2 * np.ones(1),
             prefix_end_s=(1.0,),
             acceptance_rmse_m=0.01,
-            finite_difference_step=step,
+            options=PrefixFitOptions(finite_difference_step=step),
         )
 
 
@@ -205,7 +206,7 @@ def test_checkpoint_snapshots_and_target_are_immutable() -> None:
         upper=np.ones(1),
         prefix_end_s=(0.5, 1.0),
         acceptance_rmse_m=0.01,
-        checkpoint=checkpoints.append,
+        options=PrefixFitOptions(checkpoint=checkpoints.append),
     )
     assert fit.accepted
     assert len(checkpoints) == 2
@@ -337,7 +338,7 @@ def test_prefix_fit_with_regularization_favors_smooth_solution() -> None:
         upper=5 * np.ones(3),
         prefix_end_s=(1.0,),
         acceptance_rmse_m=0.01,
-        regularization=reg,
+        options=PrefixFitOptions(regularization=reg),
     )
     assert fit.accepted
     p = fit.parameters
@@ -359,5 +360,5 @@ def test_prefix_fit_rejects_non_finite_regularization() -> None:
             upper=np.ones(1),
             prefix_end_s=(1.0,),
             acceptance_rmse_m=0.01,
-            regularization=lambda p: np.array([np.nan]),
+            options=PrefixFitOptions(regularization=lambda p: np.array([np.nan])),
         )

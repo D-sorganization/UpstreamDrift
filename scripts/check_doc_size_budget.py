@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from dataclasses import dataclass
 from datetime import date
@@ -70,11 +71,14 @@ def _is_excluded(path: Path) -> bool:
 
 
 def _iter_documents() -> list[Path]:
-    return sorted(
-        path
-        for path in ROOT.rglob("*")
-        if path.is_file() and _is_document(path) and not _is_excluded(path)
-    )
+    documents: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(ROOT):
+        dirnames[:] = [d for d in dirnames if not _is_excluded(Path(dirpath) / d)]
+        for filename in filenames:
+            file_path = Path(dirpath) / filename
+            if _is_document(file_path) and not _is_excluded(file_path):
+                documents.append(file_path)
+    return sorted(documents)
 
 
 def _load_config() -> tuple[int, dict[str, BudgetException]]:
