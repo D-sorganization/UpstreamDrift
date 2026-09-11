@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Reconciling Analysis Tools Help Documentation With Real APIs (#8844)
+
+Reconcile `docs/help/analysis_tools.md` to document real UpstreamDrift analysis APIs, replacing fabricated classes and incorrect import roots:
+- Headless and GUI Plot Orchestration: Replaces fabricated `EnergyAnalyzer`, `PhaseDiagramPlotter`, `ForceAnalyzer`, `register_custom_plot`, and `DataExporter` with `AnalysisOrchestrator` (`src.shared.python.analysis`), `PlotData`, and `EnergyMetricsMixin`.
+- Segment Timing and Kinematic Sequence: Documents real `SegmentTimingAnalyzer` (`src.shared.python.biomechanics.kinematic_sequence`) and `SegmentTimingResult`.
+- Jacobian Diagnostics and Manipulability: Replaces fabricated `JacobianAnalyzer` with actual spatial algebra functions `check_jacobian_conditioning`, `compute_manipulability_index`, and `compute_manipulability_ellipsoid` (`src.shared.python.spatial_algebra.manipulability`).
+- Cross-Engine Validation: Replaces fabricated validator with `CrossEngineValidator` (`src.shared.python.engine_core.cross_engine_validator`).
+- Regression Testing: `test_analysis_tools_doc_symbols_exist` in `tests/unit/shared_python/test_analysis_orchestrator.py` verifies absence of fabricated symbols and presence of genuine API symbols.
+
 ## Citing Sg_Optimizer Condition Models and Coefficients (#8849)
 
 Resolve uncited condition-model empirical constants in `src/shared/python/sg_optimizer/course/conditions.py` to maintain total numerical traceability per `docs/sg_optimizer/data_sources.md`:
@@ -59,7 +68,7 @@ assembly preserves tracked motion-matching reference loaders while retaining
 scratch-output exclusions. Installed startup, wizard and calibration checks run
 outside the source checkout; synthetic tests do not establish physical accuracy.
 
-## Optimize Norm Calculation in JCS (spec-exempt: micro-optimization)
+## Optimize Norm Calculation in JCS (Spec-Exempt: Micro-Optimization)
 
 Replace `np.linalg.norm` with `np.sqrt(np.einsum)` in joint coordinate system parity calculation for measurable performance improvement.
 
