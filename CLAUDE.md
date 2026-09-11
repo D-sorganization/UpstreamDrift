@@ -470,6 +470,7 @@ for k in ['core', 'graphql']:
 
 Use repo-local context before broad exploration:
 
+- When `docs/agent_context/catalog.json` exists, use `agent-context --root . search` and focused `context` requests. Read public interfaces, provider and consumer relationships, integration contracts and relevant tests before changing a boundary.
 - Require current source hashes, checkout identity and pinned provider verification. A timestamp, a successful registry lookup or a peer note is not proof of current implementation. If the tool is unavailable or evidence is stale, read source directly and report the gap.
 - Update semantic contracts with implementation changes, run their integration tests, record a specific review rationale and regenerate views. `agent-context --root . check` must pass in the required quality gate. Never automatically renew reviews just to clear a freshness failure.
 - Keep mechanical inventories generated from existing registries and retrieve only relevant context. Use the existing presence/mailbox, handoff and development log for coordination; do not introduce a second message store. See the [adoption guide](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agent-context.md).
@@ -584,6 +585,15 @@ reason.
 `shared_scripts/development_log.py` is the portable checker, wired into the
 fleet hooks as `development-log`. Run it directly with
 `python shared_scripts/development_log.py --repo-root .`.
+
+### The Fail-Open vs. Fail-Closed Split
+
+- **Coordination stays fail-open.** A lease-check API error should let the agent proceed and risk duplication rather than halt the fleet. Duplicated work is reclaimed by the redundant-PR closer.
+- **Documentation enforcement is fail-closed.** A validator that skips on error trains agents to produce output that trips it. Orphaned work is reclaimed by nobody.
+
+### Escape Hatch
+
+If implementation files changed but no material development-log update is required, stage the log with `No material development-log change — <reason>` recorded in it. Note that **staging** is what satisfies the check — an earlier commit's phrase must not.
 
 <!-- END FLEET-MANAGED: development-logs -->
 
