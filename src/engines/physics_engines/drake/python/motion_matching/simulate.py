@@ -776,22 +776,21 @@ def simulate_with_coefficients(  # noqa: C901
         )
         raise TypeError(msg)
 
-    # ---- 1. Lazy pydrake imports (CLAUDE.md: explicit only) ------------
-    if not is_drake_available():
+    try:
+        from pydrake.multibody.plant import (  # noqa: PLC0415
+            AddMultibodyPlantSceneGraph,
+        )
+        from pydrake.systems.analysis import Simulator  # noqa: PLC0415
+        from pydrake.systems.framework import DiagramBuilder  # noqa: PLC0415
+        from pydrake.systems.primitives import (  # noqa: PLC0415
+            VectorLogSink,
+        )
+    except ImportError as exc:
         msg = (
             "Drake runtime (pydrake) is required for "
             "simulate_with_coefficients. Install via pydrake or Drake container."
         )
-        raise ImportError(msg)
-
-    from pydrake.multibody.plant import (  # noqa: PLC0415
-        AddMultibodyPlantSceneGraph,
-    )
-    from pydrake.systems.analysis import Simulator  # noqa: PLC0415
-    from pydrake.systems.framework import DiagramBuilder  # noqa: PLC0415
-    from pydrake.systems.primitives import (  # noqa: PLC0415
-        VectorLogSink,
-    )
+        raise ImportError(msg) from exc
 
     t_start = _time.perf_counter()
 
