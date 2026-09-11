@@ -85,6 +85,18 @@ function sim_out = extract_sim_out(simOut, joint_names, opts)
         sim_out.qdd(:, j) = local_pull_signal(simOut, jname, suffix_acc, time, 1);
         sim_out.tau(:, j) = local_pull_signal(simOut, jname, suffix_tau, time, 1);
     end
+    if string(opts.model_name) == "GolfSwing3D_Kinetic" && ...
+            (isprop(simOut, 'CombinedSignalBus') || isfield(simOut, 'CombinedSignalBus'))
+        bus = simOut.CombinedSignalBus;
+        if isstruct(bus) && isfield(bus, 'HipLogs')
+            native = extract_golf_joint_kinematics(bus, joint_names, time);
+            sim_out.q = native.q;
+            sim_out.qd = native.qd;
+            sim_out.qdd = native.qdd;
+            sim_out.coordinate_units = native.coordinate_units;
+            sim_out.joint_signal_names = native.source_names;
+        end
+    end
     sim_out.omega = sim_out.qd;  % alias for clarity
 
     % --- 5. Populate club kinematics ---------------------------------------
@@ -219,7 +231,7 @@ function vec = local_pull_signal(simOut, base_name, suffixes, time, n_cols)
         name = char(base_name) + string(suffixes(s));
         v = local_lookup(simOut, name, time);
         if ~isempty(v)
-            vec = local_to_columns(v, time, n_cols);
+            vec = resample_logged_signal(v, time, n_cols, local_solver_time(simOut));
             return;
         end
     end
@@ -232,7 +244,7 @@ function vec = local_pull_named(simOut, names, time, n_cols)
     for k = 1:numel(names)
         v = local_lookup(simOut, char(names(k)), time);
         if ~isempty(v)
-            vec = local_to_columns(v, time, n_cols);
+            vec = resample_logged_signal(v, time, n_cols, local_solver_time(simOut));
             return;
         end
     end
@@ -261,7 +273,7 @@ function v = local_lookup(simOut, name, time) %#ok<INUSD>
             try
                 el = ls.getElement(name);
                 if ~isempty(el) && isprop(el, 'Values')
-                    v = local_extract_values(el.Values);
+                    v = el.Values;
                     if ~isempty(v), return; end
                 end
             catch
@@ -274,9 +286,6 @@ function v = local_lookup(simOut, name, time) %#ok<INUSD>
     try
         if isprop(simOut, name) || isfield(simOut, name)
             v = simOut.(name);
-            if isstruct(v)
-                v = local_extract_values(v);
-            end
         end
     catch
     end
@@ -288,7 +297,7 @@ function v = local_dig(bus, name)
     v = [];
     if ~isstruct(bus), return; end
     if isfield(bus, name)
-        v = local_extract_values(bus.(name));
+        v = bus.(name);
         return;
     end
     f = fieldnames(bus);
@@ -302,69 +311,10 @@ function v = local_dig(bus, name)
 end
 
 %% ----------------------------------------------------------------------
-function v = local_extract_values(x)
-%LOCAL_EXTRACT_VALUES  Pull numeric data from timeseries / struct-with-Data.
-    v = [];
-    try
-        if isnumeric(x)
-            v = double(x);
-        elseif isa(x, 'timeseries')
-            v = double(x.Data);
-        elseif isstruct(x)
-            if isfield(x, 'Data')
-                v = double(x.Data);
-            elseif isfield(x, 'signals') && isfield(x.signals, 'values')
-                v = double(x.signals.values);
-            end
-        end
-    catch
-        v = [];
-    end
-    if ~isempty(v) && ndims(v) > 2  % squeeze trailing singletons
-        v = squeeze(v);
-    end
-end
-
-%% ----------------------------------------------------------------------
-function out = local_to_columns(v, time, n_cols)
-%LOCAL_TO_COLUMNS  Coerce a raw signal sample to (N, n_cols) matching time.
-    N = numel(time);
-    if isempty(v)
-        out = nan(N, n_cols);
-        return;
-    end
-    if isvector(v) && n_cols == 1
-        out = local_resample(v(:), N);
-    else
-        % shape (N, n_cols) or (n_cols, N)
-        sz = size(v);
-        if sz(1) == n_cols && sz(2) ~= n_cols
-            v = v.';
-        end
-        if size(v, 2) > n_cols
-            v = v(:, 1:n_cols);
-        elseif size(v, 2) < n_cols
-            pad = nan(size(v,1), n_cols - size(v,2));
-            v = [v, pad];
-        end
-        out = nan(N, n_cols);
-        for c = 1:n_cols
-            out(:, c) = local_resample(v(:, c), N);
-        end
-    end
-end
-
-%% ----------------------------------------------------------------------
-function y = local_resample(x, N)
-%LOCAL_RESAMPLE  Resample a vector to length N by linear interp on its index.
-    x = x(:);
-    n = numel(x);
-    if n == N
-        y = x;
-    elseif n == 0
-        y = nan(N, 1);
-    else
-        ix = linspace(1, n, N).';
-        y = interp1((1:n).', x, ix, 'linear', 'extrap');
+function time = local_solver_time(simOut)
+% Array logs may use tout only when its length matches their rows.
+    time = [];
+    if isprop(simOut, 'tout') || isfield(simOut, 'tout')
+        time = double(simOut.tout(:));
     end
 end

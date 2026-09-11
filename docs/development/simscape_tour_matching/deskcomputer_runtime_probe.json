@@ -1,0 +1,322 @@
+{
+  "version": "26.1.0.3203278 (R2026a)",
+  "release": "2026a",
+  "toolboxes": [
+    {
+      "Name": "Aircraft Control Toolbox: AC:ACActuator:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:48"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: AC:ACCoord:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:51"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: AC:ACData:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:50"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: AC:ACDemoFuns:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:54"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: AC:ACDynamics:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:45"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: AC:ACGraphics:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:53"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: AC:Aero:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:51"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: AC:Aircraft:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:46"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: AC:Pilots:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:54"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Common:Control:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:56"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Common:Database:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:39"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Common:General:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:26"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Common:Graphics:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:35"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Common:Math:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:11"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Common:SimulinkIF:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:44"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Common:Time:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:41"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:AC:ACActuator:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:54"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:AC:Aero:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:54"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:AC:Aircraft:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:52:48"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:Common:Control:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:40"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:Common:Database:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:45"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:Common:General:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:45"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:Common:Graphics:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:44"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:Common:Help:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:44"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: Demos:Common:Math:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:45"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: SC:Actuator:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:48"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: SC:Coord:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:51"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: SC:DemoFuns:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:56"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: SC:Dynamics:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:53:59"
+    },
+    {
+      "Name": "Aircraft Control Toolbox: SC:Ephem:",
+      "Version": "1.6.1",
+      "Release": "19-Jul-2001",
+      "Date": "15:54:02"
+    },
+    {
+      "Name": "Audio Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Computer Vision Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Curve Fitting Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "DSP System Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Fuzzy Logic Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Image Acquisition Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Image Processing Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "MATLAB",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "19-Nov-2025"
+    },
+    {
+      "Name": "Mapping Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Optimization Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Parallel Computing Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Robotics System Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Robotics Toolbox for MATLAB",
+      "Version": "10.4",
+      "Release": "",
+      "Date": "24-Sep-2020"
+    },
+    {
+      "Name": "Signal Processing Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "SimEvents",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "01-May-2025"
+    },
+    {
+      "Name": "Simscape",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Simscape Multibody",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Simulink",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Simulink Design Optimization",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Stateflow",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Symbolic Math Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    },
+    {
+      "Name": "Wavelet Toolbox",
+      "Version": "26.1",
+      "Release": "(R2026a)",
+      "Date": "20-Nov-2025"
+    }
+  ],
+  "simulink": 1,
+  "simscape": 1,
+  "multibody": 1,
+  "optimization": 1
+}

@@ -1,0 +1,266 @@
+{
+  "schema": "golf-actuator-audit/2",
+  "entries": [
+    {
+      "coordinate": "TranslationInputX",
+      "source": "CombinedSignalBus.HipLogs.TranslationForceXInput",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "N",
+      "requested_start": -0.37961842598777107,
+      "requested_end": -16.374939105612331,
+      "max_abs_error": 3.5527136788005009e-15
+    },
+    {
+      "coordinate": "TranslationInputY",
+      "source": "CombinedSignalBus.HipLogs.TranslationForceYInput",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "N",
+      "requested_start": 385.64359808496164,
+      "requested_end": 392.3982617875854,
+      "max_abs_error": 5.6843418860808015e-14
+    },
+    {
+      "coordinate": "TranslationInputZ",
+      "source": "CombinedSignalBus.HipLogs.TranslationForceZInput",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "N",
+      "requested_start": 661.741673687062,
+      "requested_end": 642.06331941278029,
+      "max_abs_error": 2.2737367544323206e-13
+    },
+    {
+      "coordinate": "HipInputX",
+      "source": "CombinedSignalBus.HipLogs.HipTorqueXInput",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 4.837379116963314,
+      "requested_end": 29.156746025158988,
+      "max_abs_error": 7.1054273576010019e-15
+    },
+    {
+      "coordinate": "HipInputY",
+      "source": "CombinedSignalBus.HipLogs.HipTorqueYInput",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 172.68002759619176,
+      "requested_end": 166.75930263203728,
+      "max_abs_error": 2.8421709430404007e-14
+    },
+    {
+      "coordinate": "HipInputZ",
+      "source": "CombinedSignalBus.HipLogs.HipTorqueZInput",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -14.885489612674153,
+      "requested_end": -41.689761820963028,
+      "max_abs_error": 7.1054273576010019e-15
+    },
+    {
+      "coordinate": "SpineInputX",
+      "source": "CombinedSignalBus.SpineLogs.ActuatorTorqueX",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -11.39797272464258,
+      "requested_end": -3.901313765048565,
+      "max_abs_error": 1.7763568394002505e-15
+    },
+    {
+      "coordinate": "SpineInputY",
+      "source": "CombinedSignalBus.SpineLogs.ActuatorTorqueY",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -40.929050327225269,
+      "requested_end": -54.101213863874051,
+      "max_abs_error": 7.1054273576010019e-15
+    },
+    {
+      "coordinate": "LScapInputX",
+      "source": "CombinedSignalBus.LScapLogs.ActuatorTorqueX",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -6.8096297604766765,
+      "requested_end": 3.8936714697732651,
+      "max_abs_error": 1.7763568394002505e-15
+    },
+    {
+      "coordinate": "LScapInputY",
+      "source": "CombinedSignalBus.LScapLogs.ActuatorTorqueY",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 15.254501425505929,
+      "requested_end": 2.0252282975944613,
+      "max_abs_error": 1.7763568394002505e-15
+    },
+    {
+      "coordinate": "LSInputX",
+      "source": "CombinedSignalBus.LSLogs.ActuatorTorqueX",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -3.8501973020093949,
+      "requested_end": -3.85684147483536,
+      "max_abs_error": 8.8817841970012523e-16
+    },
+    {
+      "coordinate": "LSInputY",
+      "source": "CombinedSignalBus.LSLogs.ActuatorTorqueY",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 10.409083659655627,
+      "requested_end": 13.681938224672896,
+      "max_abs_error": 1.7763568394002505e-15
+    },
+    {
+      "coordinate": "LSInputZ",
+      "source": "CombinedSignalBus.LSLogs.ActuatorTorqueZ",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 4.7400532819507735,
+      "requested_end": 6.8962886985176386,
+      "max_abs_error": 8.8817841970012523e-16
+    },
+    {
+      "coordinate": "LWInputX",
+      "source": "CombinedSignalBus.LWLogs.LWJoint.ActuatorTorqueX",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 3.0676743098663195,
+      "requested_end": -1.8275381906019978,
+      "max_abs_error": 1.7763568394002505e-15
+    },
+    {
+      "coordinate": "LWInputY",
+      "source": "CombinedSignalBus.LWLogs.LWJoint.ActuatorTorqueY",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -3.1027946324866384,
+      "requested_end": -3.5985020580994176,
+      "max_abs_error": 4.4408920985006262e-16
+    },
+    {
+      "coordinate": "RScapInputX",
+      "source": "CombinedSignalBus.RScapLogs.ActuatorTorqueX",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 2.3877774793921169,
+      "requested_end": 18.350552036609088,
+      "max_abs_error": 3.5527136788005009e-15
+    },
+    {
+      "coordinate": "RScapInputY",
+      "source": "CombinedSignalBus.RScapLogs.ActuatorTorqueY",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -4.2462195555099225,
+      "requested_end": -25.552175889898862,
+      "max_abs_error": 7.1054273576010019e-15
+    },
+    {
+      "coordinate": "RSInputX",
+      "source": "CombinedSignalBus.RSLogs.ActuatorTorqueX",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -1.0392671247359209,
+      "requested_end": 3.0732743072897417,
+      "max_abs_error": 8.8817841970012523e-16
+    },
+    {
+      "coordinate": "RSInputY",
+      "source": "CombinedSignalBus.RSLogs.ActuatorTorqueY",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": -5.5479030777398242,
+      "requested_end": 0.619919175353357,
+      "max_abs_error": 8.8817841970012523e-16
+    },
+    {
+      "coordinate": "RSInputZ",
+      "source": "CombinedSignalBus.RSLogs.ActuatorTorqueZ",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 6.905942519912367,
+      "requested_end": -1.341596881224838,
+      "max_abs_error": 1.7763568394002505e-15
+    },
+    {
+      "coordinate": "RWInputX",
+      "source": "CombinedSignalBus.RWLogs.RWJoint.ActuatorTorqueX",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 8.7676317796017589,
+      "requested_end": 4.0534385235662551,
+      "max_abs_error": 1.7763568394002505e-15
+    },
+    {
+      "coordinate": "RWInputY",
+      "source": "CombinedSignalBus.RWLogs.RWJoint.ActuatorTorqueY",
+      "sample_count": 418,
+      "start_s": 0,
+      "end_s": 0.4,
+      "unit": "Nm",
+      "requested_start": 3.3619851416482049,
+      "requested_end": 3.9623425454208938,
+      "max_abs_error": 4.4408920985006262e-16
+    }
+  ],
+  "unlogged_coordinates": [
+    "TorsoInput",
+    "LEInput",
+    "LFInput",
+    "REInput",
+    "RFInput"
+  ],
+  "force_command_frame": "world",
+  "force_measurement_frame": "hip_joint_base",
+  "world_to_hip_base": [
+    [1, 0, 0],
+    [-0, 0.86602540378443871, 0.49999999999999994],
+    [0, -0.49999999999999994, 0.86602540378443871]
+  ],
+  "max_force_error_N": 2.2737367544323206e-13,
+  "max_torque_error_Nm": 2.8421709430404007e-14,
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "source_candidate": "C:/Users/diete/SimscapeTour9921/prefix-400ms-quadratic-01",
+  "plane_tilt_deg": 30
+}

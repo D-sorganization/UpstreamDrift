@@ -1,0 +1,17 @@
+[
+  {
+    "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-capture-performance\\modules\\vendor\\ud-tools\\objects\\info\\alternates",
+    "before": "C:/Users/diete/Repositories/UpstreamDrift/.git/worktrees/UpstreamDrift-capability-atlas/modules/vendor/ud-tools/objects\n",
+    "after": "C:/Users/diete/Repositories/UpstreamDrift/.git/retained-submodule-objects/UpstreamDrift-capability-atlas_modules_vendor_ud-tools_objects\n"
+  },
+  {
+    "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-swing-editing\\modules\\vendor\\ud-tools\\objects\\info\\alternates",
+    "before": "C:/Users/diete/Repositories/UpstreamDrift/.git/worktrees/UpstreamDrift-capability-atlas/modules/vendor/ud-tools/objects\n",
+    "after": "C:/Users/diete/Repositories/UpstreamDrift/.git/retained-submodule-objects/UpstreamDrift-capability-atlas_modules_vendor_ud-tools_objects\n"
+  },
+  {
+    "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-coaching-drawings\\modules\\vendor\\ud-tools\\objects\\info\\alternates",
+    "before": "C:/Users/diete/Repositories/UpstreamDrift/.git/worktrees/UpstreamDrift-swing-editing/modules/vendor/ud-tools/objects\n",
+    "after": "C:/Users/diete/Repositories/UpstreamDrift/.git/retained-submodule-objects/UpstreamDrift-swing-editing_modules_vendor_ud-tools_objects\n"
+  }
+]

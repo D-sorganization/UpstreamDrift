@@ -1,0 +1,44 @@
+{
+  "archive": "connected-marker-reseed-01-bundle.zip",
+  "sha256": "049cee95c8f212e1d3eac34d0d5bfb8e6cf6e79b872dafc483a10009e4df8dcf",
+  "native_exit_code": 0,
+  "qualification": "Historical unmasked diagnostic; invalid capture zeros contaminate two target frames. Preserve as defect evidence; do not use as a fit result.",
+  "samples": [
+    {
+      "time_s": 1.2333333333333334,
+      "rms_mm": 254.5151606447031
+    },
+    {
+      "time_s": 1.2666666666666666,
+      "rms_mm": 28.903795530045286
+    },
+    {
+      "time_s": 1.5,
+      "rms_mm": 403.3824929988916
+    }
+  ],
+  "files": {
+    "case-01/attached_pose_probe.m": "70b07e0bb026842e0c4633bf3203011a8f64d2a9ee4797aa39bb4445ddf63669",
+    "case-01/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-01/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-01/frame-00445.json": "0dac7a6ccbec5068aa96b9334e18c7f4980edd9917b48659fd84103e3220267e",
+    "case-01/initial_state.json": "0ad4557687549afded35793aba8c5320346eb7ce48bfa0ea64d292f947df9ea7",
+    "case-02/attached_pose_probe.m": "70b07e0bb026842e0c4633bf3203011a8f64d2a9ee4797aa39bb4445ddf63669",
+    "case-02/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-02/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-02/frame-00457.json": "fd7578b1194a841535cee5d6b427e64d3c535afff4933900622fb1e14d65daae",
+    "case-02/initial_state.json": "0ad4557687549afded35793aba8c5320346eb7ce48bfa0ea64d292f947df9ea7",
+    "case-03/attached_pose_probe.m": "70b07e0bb026842e0c4633bf3203011a8f64d2a9ee4797aa39bb4445ddf63669",
+    "case-03/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-03/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-03/frame-00541.json": "e5647465897ea42d51d8fb72e85ae7b707899602d7ee3a953ff8e89a22efd3bd",
+    "case-03/initial_state.json": "cbc78ff5ad70f88364d8d8cc54c53ffcb1bd77b56e18fc8d506f5e3c2cc937ca",
+    "exit-code.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "experiment.m": "b99757c357c6576b7a0b3367777b98fbc42b860265ef3f414411ed1799c24d06",
+    "launch.ps1": "1bf516ce517c3e9180c83f42bbc82560e4440e6376d5b1fbc53e58be0a3e8852",
+    "probe.log": "0e42fa0e65fc19953bb7a99acc708327a648c3b3d78d4f5da886e5e61c3d4e9f",
+    "seed-01.json": "0ad4557687549afded35793aba8c5320346eb7ce48bfa0ea64d292f947df9ea7",
+    "seed-02.json": "0ad4557687549afded35793aba8c5320346eb7ce48bfa0ea64d292f947df9ea7",
+    "seed-03.json": "cbc78ff5ad70f88364d8d8cc54c53ffcb1bd77b56e18fc8d506f5e3c2cc937ca"
+  }
+}

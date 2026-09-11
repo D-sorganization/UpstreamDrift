@@ -1,0 +1,561 @@
+{
+  "qualification": "Local connected-kinematic poses only; not a global lower bound or forward dynamics. The 1.5 s isolated large residual requires alternate seeding.",
+  "samples": [
+    {
+      "time_s": 0,
+      "rms_mm": 5.80632445497998e-14,
+      "exitflag": 1,
+      "worst_markers": [
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 1.576213700060856e-13
+        },
+        {
+          "label": "Marker_3:3:2",
+          "error_mm": 1.5704757352569648e-13
+        },
+        {
+          "label": "Marker_3:3:3",
+          "error_mm": 1.570092458683775e-13
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 5.551115123125783e-14
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 4.163336342344337e-14
+        }
+      ]
+    },
+    {
+      "time_s": 0.1,
+      "rms_mm": 0.5238790637694445,
+      "exitflag": 1,
+      "worst_markers": [
+        {
+          "label": "RWristTop",
+          "error_mm": 1.611545056083696
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 0.9021976413190561
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 0.8192284031541047
+        },
+        {
+          "label": "Marker_3:3:2",
+          "error_mm": 0.7039728878820967
+        },
+        {
+          "label": "Marker_3:3:3",
+          "error_mm": 0.6723608501663713
+        }
+      ]
+    },
+    {
+      "time_s": 0.2,
+      "rms_mm": 1.630709819208396,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "RWristTop",
+          "error_mm": 4.050459574885236
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 2.6842140885703083
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 2.583263369240615
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 2.463348991685663
+        },
+        {
+          "label": "LElbowOut",
+          "error_mm": 2.1727938561236972
+        }
+      ]
+    },
+    {
+      "time_s": 0.3,
+      "rms_mm": 3.55623680531118,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 7.096718032381414
+        },
+        {
+          "label": "RWristTop",
+          "error_mm": 6.146674308048434
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 5.494973594053102
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 4.699895825862786
+        },
+        {
+          "label": "LElbowOut",
+          "error_mm": 4.619139526164962
+        }
+      ]
+    },
+    {
+      "time_s": 0.4,
+      "rms_mm": 7.277506058601445,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 15.540955541681246
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 11.30501554578038
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 9.918801293406712
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 9.813299802713594
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 9.579402159264324
+        }
+      ]
+    },
+    {
+      "time_s": 0.5,
+      "rms_mm": 13.254617203440315,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 29.466344355446285
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 21.59812742568326
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 21.25557544500489
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 20.738811218884077
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 16.926698213952502
+        }
+      ]
+    },
+    {
+      "time_s": 0.6,
+      "rms_mm": 20.57610578238873,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 45.65288564446825
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 36.570647118263814
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 34.60476457820893
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 33.42025184317303
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 26.625895271678324
+        }
+      ]
+    },
+    {
+      "time_s": 0.7,
+      "rms_mm": 27.492350746737635,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 55.375857632313384
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 53.093812430385555
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 50.46319170950449
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 43.57718778301365
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 35.75459881394556
+        }
+      ]
+    },
+    {
+      "time_s": 0.8,
+      "rms_mm": 33.304037085160886,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 68.62050242448136
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 66.23487394495419
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 55.082082949418535
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 49.900789923466945
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 44.069070559377124
+        }
+      ]
+    },
+    {
+      "time_s": 0.9,
+      "rms_mm": 37.875793650024434,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 81.4032370614374
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 78.11636572042293
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 53.599329759659334
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 52.44040872620057
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 49.8797617476476
+        }
+      ]
+    },
+    {
+      "time_s": 1,
+      "rms_mm": 40.79458662959967,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 87.44726103201648
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 84.22715882952289
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 61.64281353927406
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 59.49685332135919
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 57.49003123697156
+        }
+      ]
+    },
+    {
+      "time_s": 1.1,
+      "rms_mm": 41.51964309079671,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 88.79317131740858
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 83.01683360034649
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 68.0589859206378
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 59.39178542486283
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 58.71531946690235
+        }
+      ]
+    },
+    {
+      "time_s": 1.2,
+      "rms_mm": 35.677209349055516,
+      "exitflag": 2,
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 69.390356524878
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 66.7676630062425
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 53.0575524254801
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 52.95931033689577
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 47.775618523196044
+        }
+      ]
+    },
+    {
+      "time_s": 1.3,
+      "rms_mm": 22.980517225605272,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 39.33961737893385
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 39.0937644605924
+        },
+        {
+          "label": "BackRight",
+          "error_mm": 33.33009691276916
+        },
+        {
+          "label": "RWristTop",
+          "error_mm": 33.17883056387052
+        },
+        {
+          "label": "WaistRight",
+          "error_mm": 29.089548546697042
+        }
+      ]
+    },
+    {
+      "time_s": 1.4,
+      "rms_mm": 43.23831387608629,
+      "exitflag": 2,
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 91.61556571146036
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 75.1057090506996
+        },
+        {
+          "label": "LElbowOut",
+          "error_mm": 66.11950742414639
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 59.9580173346636
+        },
+        {
+          "label": "RElbowOut",
+          "error_mm": 56.618263386926714
+        }
+      ]
+    },
+    {
+      "time_s": 1.5,
+      "rms_mm": 426.3957916549264,
+      "exitflag": 2,
+      "worst_markers": [
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 926.2377807268701
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 838.8786063975195
+        },
+        {
+          "label": "Marker_3:3:2",
+          "error_mm": 793.1375508186405
+        },
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 784.5471106879615
+        },
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 770.9071751444138
+        }
+      ]
+    },
+    {
+      "time_s": 1.6,
+      "rms_mm": 51.77733286846258,
+      "exitflag": 2,
+      "worst_markers": [
+        {
+          "label": "RUArmHigh",
+          "error_mm": 115.45956985351842
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 104.02678936618362
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 72.64073218829002
+        },
+        {
+          "label": "WaistRBack",
+          "error_mm": 68.10755580285634
+        },
+        {
+          "label": "RShoulderBack",
+          "error_mm": 63.04519376017404
+        }
+      ]
+    },
+    {
+      "time_s": 1.7,
+      "rms_mm": 50.37058183330069,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "RUArmHigh",
+          "error_mm": 113.52474687810658
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 109.7806078923678
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 75.86201728861474
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 65.20273404313816
+        },
+        {
+          "label": "WaistRBack",
+          "error_mm": 63.98463839953966
+        }
+      ]
+    },
+    {
+      "time_s": 1.8,
+      "rms_mm": 51.37667590718757,
+      "exitflag": 3,
+      "worst_markers": [
+        {
+          "label": "RUArmHigh",
+          "error_mm": 112.7196977165692
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 108.7443465105911
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 78.01319174843873
+        },
+        {
+          "label": "LUArmHigh",
+          "error_mm": 75.50801498297531
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 67.47099529329
+        }
+      ]
+    }
+  ],
+  "archive": "connected-marker-poses-01-bundle.zip",
+  "sha256": "f630aa9946c7aa0a25b27f567aaa50dfc0b001e02d2b92ea4f9c83c4282d6ba8",
+  "native_exit_code": 0,
+  "runtime_base": "59e944b44",
+  "pose_source_revision": "8ab3352f9",
+  "files": {
+    "attached_pose_probe.m": "70b07e0bb026842e0c4633bf3203011a8f64d2a9ee4797aa39bb4445ddf63669",
+    "capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "exit-code.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "frame-00001.json": "99418c74d06dfa1cbb73932e117e8e371c86596bbb1bf596a1145f3ae13d67c3",
+    "frame-00037.json": "16ad2066620d30616020683074c528254733231d346b35a1555b54d6d83dfff7",
+    "frame-00073.json": "b403ae5daf31a56d72dd256ed3cbf0fcd8ac71de6e50f8f81b14eea2cf1b2204",
+    "frame-00109.json": "85649783d5bbe8e6b37c268caea8ebac0c2522544406f7495a0dec39b222161a",
+    "frame-00145.json": "df99b7470f75e6c7765099396fdfd320d7a18c3c10ddabd48b435543faf2abbb",
+    "frame-00181.json": "1c74d5fcdccbf32778db21c3508b83486d5752d97532c989c30d93dd6444500b",
+    "frame-00217.json": "b04c85cf2ef92384a5dae482efb1dbb03e4b6679c11f86c4d8b77de4fbfea07d",
+    "frame-00253.json": "65e96cdf96c1aacb07f42ffb25578fd3ab8fc344e72167fb26e0140ef3297c9f",
+    "frame-00289.json": "367d03d8b129996253dfb7020d4df0ec587da825d19241c6157e7a84860a9f3e",
+    "frame-00325.json": "61d155ef4c32902a915a0f2fe6919a79b62fb1ee96ad3870eb023e426b5176fe",
+    "frame-00361.json": "b08f5cec5d545d3c0f5ac92c8b4027f91bf71cdb8afb47565f5fde68c225a8e2",
+    "frame-00397.json": "ffe6d6af00926067f2dc2e13e713435f96d2b70c86078faae60317e4b7c5549b",
+    "frame-00433.json": "315ab6da80e1371cdb3b4230d0d17e321fe1e85147658eb128295a9af38a4c5d",
+    "frame-00469.json": "89c4984d38f8fbe8a9b31030d2a5cf41fcb1b29196cca5d9a29bb7720847228f",
+    "frame-00505.json": "0da1736a14e5a37a2e5520d108d1076d8a650bda409cdf6d07bf7573fecad756",
+    "frame-00541.json": "bc1b3d53e42bbac022c772638d512fbdd345f4b40e79d602c89d587c7d9821af",
+    "frame-00577.json": "7f1f5a70c03cd40474fc72cd6019799b365a978b6814c22649c62066a2377ed2",
+    "frame-00613.json": "3ec4c1d0653944f9295d8a5ef2b9b6ee9660898cefb05a35b50759672e452cd1",
+    "frame-00649.json": "5323f7c8a6533a627a1d92b9ce633205c24d5eb5b5fef4f55551e79c1d4f5a51",
+    "initial_state.json": "dea77a4d19c879b88671f5336735080b054deb6131dedb065b9810ec0ae708cc",
+    "launch.ps1": "1e69a9365d0d9c330d1af071ba0970ccd0c1bdc3c263e84351176e14f5b6ef60",
+    "probe.log": "0e42fa0e65fc19953bb7a99acc708327a648c3b3d78d4f5da886e5e61c3d4e9f"
+  },
+  "data_validity_correction": {
+    "defect": "Original attached_pose_probe ignored capture.valid and fitted invalid zero placeholders. Affected pose errors cannot support geometry or feasibility claims. Archives preserved; corrected masked rerun required.",
+    "affected_samples": [
+      {
+        "frame_index": 541,
+        "invalid_labels": ["Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3"]
+      }
+    ],
+    "forward_fitter_affected": false
+  }
+}

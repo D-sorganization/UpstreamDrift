@@ -25,9 +25,8 @@ function [coeff_struct, joint_names, coeff_letters] = theta_to_polynomial_struct
         joint_names_override string = string.empty(1, 0)
     end
 
-    param_info = getPolynomialParameterInfo();
-
     if isempty(joint_names_override)
+        param_info = getPolynomialParameterInfo();
         joint_names = string(param_info.joint_names);
     else
         joint_names = string(joint_names_override(:)).';

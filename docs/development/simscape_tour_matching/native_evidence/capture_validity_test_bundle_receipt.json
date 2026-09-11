@@ -1,0 +1,21 @@
+{
+  "archive": "capture-validity-01-bundle.zip",
+  "sha256": "93423762b2e2180fdc16b15961192e83c41af8bb7ca5d2d4942961fff5d5f058",
+  "matlab_release": "R2025b",
+  "red_exit": 1,
+  "green_exit": 0,
+  "tests_passed": 2,
+  "files": {
+    "green-exit.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "green.log": "ada6e9b0f0839d62f6081b80d00eb953c9fe90ba2dfeca550e543b66511adf36",
+    "green.mat": "52b034b8bc213482b4cdd60fbde2cae9147d1ff136a4e09d6b4b696fb6fe7fa6",
+    "red-exit.txt": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+    "red.log": "790c46d44ba200b6045d560361340586944179e098faf97dbfab59949939124f",
+    "red.mat": "c1066244473fb8108ea759c50d65e1da673a2b015afe6ffa0398453056be9b29",
+    "select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff",
+    "test_select_capture_marker_frame.m": "eb03cf299b1d47c5399c57cbb342a17a143c64326eef966ee4e97c7c66862bcc",
+    "validity-green.ps1": "841a0677689bced9f923b5142b4529b302dfca41bc93f7fe2fd715123374b7c3",
+    "validity-red.ps1": "ef11e3dced61ce247b0c02dfc4cd6776b4731785a9864293d5b216699658d528"
+  },
+  "qualification": "Capture observation-selection regression only; corrected connected-pose integration still running."
+}

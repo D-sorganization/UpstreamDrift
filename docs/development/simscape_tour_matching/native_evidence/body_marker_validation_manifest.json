@@ -1,0 +1,33 @@
+{
+  "source_base": "23176ad571cbd56028b43ba35123cd8185f890c3",
+  "implementation_revision": "SELF (commit containing this manifest)",
+  "matlab_release": "R2025b",
+  "host": "DeskComputer",
+  "hash_convention": "SHA256 of UTF-8 source with LF line endings",
+  "source_hashes": {
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/build_golf_kinematics.m": "9a5c62832eb056bf20d6fa12b8dfd5e84fbf80986d25e8d3670826a75a1ba419",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/golf_kinematic_schema.json": "d79d63984ff80631e85fce173b88b282ebe9db0918ed6735e5c8f5c52a1d6ae6",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/intrinsic_xyz_to_rotm.m": "21392231db0846c8b8707ac96290227ab3a3f9667044dc101789b3256010eaf4",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/project_body_markers.m": "54ceb57059d62f850b1506ba3ad829ccf7815c3b90989777d5cc242ff9603974",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/simulate_with_coefficients.m": "8975ba7fd39f38e4f3a954b680162f15587c9d9d68a3f8981ecc1c825a858574",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/compute_skeleton_fk.m": "e87264cbfed5696bc96dcf863a5642b13fac0f99621c4f95097a77b7c6cac91d",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/tests/test_golf_kinematic_frames.m": "47bd842014365f5e2df1d24f9a9ce7f1f94bd545d5d2877c085a57336d8b98e2",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/tests/test_intrinsic_xyz_to_rotm.m": "575f159a880e98a6afc4b59bf6122057b86aa2f0eb2b2704b964501f54c6be90",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/tests/test_project_body_markers.m": "9d92b183729fa859de3fa7f44a4de6af9d9c5c3f23093d8279d06fb67a966451",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/tests/test_simulation_input_workspace.m": "8ce3b89c00f547d30afef0cfc5aaac00f3caffc8173c08d8144f0a0ad49185f6"
+  },
+  "evidence": {
+    "rotation_frames_green.json": "Seven passing tests; 16 native positions and 12 native rotation logs compared at three timestamps.",
+    "fast_restart_green.json": "Six model-workspace wrapper tests pass.",
+    "fast_restart_cold_probe.json": "Four native replay calls: zero, 2, zero Nm warm; zero Nm cold. Exact warm/cold q equality; process exit 0. Its source_revision field records the base checkout; wrapper patches are enumerated here.",
+    "marker_projection_red.json": "Projector tests fail before implementation.",
+    "rotation_frames_red.json": "Rotation/frame tests fail before implementation.",
+    "fast_restart_red.json": "Fast Restart false request leaves compiled state on before repair."
+  },
+  "limitations": [
+    "No calibrated capture marker attachments yet.",
+    "No optimized torque-driven capture match yet.",
+    "Hip and club rotations come from native joint/frame kinematics; no independent rotation matrix logs exist for them.",
+    "Calculation inventory remains a pre-existing release blocker."
+  ]
+}

@@ -337,7 +337,7 @@ function R = rotXYZ_deg(rx_deg, ry_deg, rz_deg)
     if isnan(rx_deg); rx_deg = 0; end
     if isnan(ry_deg); ry_deg = 0; end
     if isnan(rz_deg); rz_deg = 0; end
-    R = rotX_deg(rx_deg) * rotY_deg(ry_deg) * rotZ_deg(rz_deg);
+    R = intrinsic_xyz_to_rotm(deg2rad([rx_deg, ry_deg, rz_deg]));
 end
 
 %% =====================================================================
