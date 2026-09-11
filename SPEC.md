@@ -5796,3 +5796,4 @@ regressions pass. Missing legacy matrix factories use exact SDK class
 factories without replacing native exports. The install probe imports the
 consumer; matrix compatibility on 3.8 does not imply solver qualification.
 The general optimal-control extra retains its separate version range (#9842).
+- Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` in `src/motion_capture/coaching/measurements.py` to optimize multi-dimensional distance calculation. (spec-exempt: micro-optimization)
