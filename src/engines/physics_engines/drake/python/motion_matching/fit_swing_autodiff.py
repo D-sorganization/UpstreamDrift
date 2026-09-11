@@ -441,7 +441,7 @@ def build_polynomial_torque_system_autodiff(
 
 
 def _build_autodiff_plant(
-    urdf_path: Path | None,
+    urdf_path: Path | str | None,
     time_step_s: float,
 ) -> tuple[Any, Any, int, int, int]:
     """Return ``(plant_ad, plant_float, n_q, n_v, n_actuators)``.
