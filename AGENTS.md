@@ -625,3 +625,28 @@ fleet hooks as `development-log`. Run it directly with
 If implementation files changed but no material development-log update is required, stage the log with `No material development-log change — <reason>` recorded in it. Note that **staging** is what satisfies the check — an earlier commit's phrase must not.
 
 <!-- END FLEET-MANAGED: development-logs -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: agent-lanes -->
+
+## Agent Lanes and Collision Prevention
+
+`Agent Redundant PR Closer` exists because Claude, Codex, and Antigravity can collide when uncoordinated. Collision resolution is a backstop; every redundant PR it closes has already consumed CI minutes and agent credit. Lanes prevent collisions before they happen instead of cleaning up after them.
+
+### Lane Matrix
+
+| Platform           | Lane                                                                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Codex**          | High-frequency sweeps: PR queue, red CI, issue triage, dependency bumps. Wired as hourly crons in `config/codex_fleet_automations.json`. |
+| **Claude**         | Multi-file refactors, spec and plan work, PR review response, cross-repo migrations.                                                     |
+| **Antigravity**    | Local interactive work, browser and UI verification, MATLAB and notebook work.                                                           |
+| **Local / Ollama** | Offline drafting, bulk mechanical edits.                                                                                                 |
+
+### Policies
+
+1. **Defer out-of-lane work**: An agent asked to do work assigned to another lane should defer rather than race.
+2. **Unattended execution boundary**: Unattended agents only act in portfolios explicitly configured in `config/fleet_manifest.yaml` under `portfolios.<name>.unattended_agents`. Portfolios with empty lists (e.g. `personal`) require interactive human direction.
+3. **Lease before edit**: Every agent must check for active claims or leases on an issue before starting implementation and post its own claim/lease to prevent concurrent duplicate work.
+
+<!-- END FLEET-MANAGED: agent-lanes -->
