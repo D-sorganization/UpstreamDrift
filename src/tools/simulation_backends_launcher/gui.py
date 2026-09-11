@@ -744,7 +744,7 @@ class MainWidget(QtWidgets.QWidget):
 
     def _report_failure(self, headline: str, exc: Exception) -> None:
         """Surface an action failure in the status/report panes and log it."""
-        logger.exception(headline)
+        logger.error(headline)
         self._report_failure_text(headline, str(exc))
 
     def _report_failure_text(self, headline: str, detail: str) -> None:

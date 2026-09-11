@@ -639,7 +639,7 @@ class MainWidget(QWidget):
         if not verb:
             raise ValueError("verb must be a non-empty string")
         message = f"Failed to {verb}: {exc}"
-        logger.exception("Failed to %s", verb)
+        logger.error("Failed to %s", verb)
         self.set_action_status(message, error=True)
         QMessageBox.warning(self, "Job Action Failed", message)
 
@@ -799,8 +799,8 @@ class SubmitDialog(QDialog):
             )
             self.controller.submit_job(config)
             self.accept()
-        except Exception as e:
-            logger.exception(f"Failed to submit training job: {e}")
+        except Exception as e:  # noqa: BLE001
+            logger.error(f"Failed to submit training job: {e}")
 
 
 def build_default_controller() -> TrainingDashboardController:

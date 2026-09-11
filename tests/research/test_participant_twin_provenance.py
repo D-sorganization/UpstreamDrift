@@ -152,8 +152,8 @@ def test_barrier_refuses_every_held_out_outcome() -> None:
     record = _record()
     barrier = build_holdout_barrier(record)
     outcomes = dict.fromkeys(record["split"]["trajectory_roles"], 1.0)
-    calibration = sorted(barrier.calibration_trajectories)[0]
-    evaluation = sorted(barrier.evaluation_trajectories)[0]
+    calibration = min(barrier.calibration_trajectories)
+    evaluation = min(barrier.evaluation_trajectories)
 
     assert barrier.calibration_outcome(calibration, outcomes) == 1.0
     with pytest.raises(HeldOutAccessError, match="held out"):

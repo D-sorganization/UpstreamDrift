@@ -492,7 +492,7 @@ class UnitConverterWidget(BaseCalculatorWindow):
             return
         saved = [r for r in self.rows if r.is_saved]
         if len(saved) >= 3:
-            oldest = sorted(saved, key=lambda x: x.last_used)[0]
+            oldest = min(saved, key=lambda x: x.last_used)
             oldest.is_saved = False
         conv.is_saved = True
         self._rebuild_ui_and_save()
