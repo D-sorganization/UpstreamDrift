@@ -18,6 +18,9 @@ def export_matlab_parameters(
     model: CanonicalModel, out_path: Path | None = None
 ) -> str:
     """Generate MATLAB script initializing canonical model parameters for Simscape."""
+    root = model.root
+    position = root.position
+    inertia = root.inertia
     lines: list[str] = [
         "% ============================================================================",
         "% InitModelParameters.m - Simscape Multibody Canonical Model Parameters",
@@ -34,9 +37,9 @@ def export_matlab_parameters(
         f"    params.TotalMass = {model.total_mass:.6f};",
         "",
         "    % Pelvis (Root)",
-        f"    params.Pelvis.Mass = {model.root.mass:.6f};",
-        f"    params.Pelvis.Position = [{model.root.position[0]:g}, {model.root.position[1]:g}, {model.root.position[2]:g}];",
-        f"    params.Pelvis.Inertia = [{model.root.inertia.ixx:g}, {model.root.inertia.iyy:g}, {model.root.inertia.izz:g}];",
+        f"    params.Pelvis.Mass = {root.mass:.6f};",
+        f"    params.Pelvis.Position = [{position[0]:g}, {position[1]:g}, {position[2]:g}];",
+        f"    params.Pelvis.Inertia = [{inertia.ixx:g}, {inertia.iyy:g}, {inertia.izz:g}];",
         "",
         "    % Segments",
     ]
