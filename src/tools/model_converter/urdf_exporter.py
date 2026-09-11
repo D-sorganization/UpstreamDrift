@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only
 
 from defusedxml import minidom
 from tools.model_converter.schema_validator import (
