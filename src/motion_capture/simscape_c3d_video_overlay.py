@@ -256,6 +256,98 @@ def load_overlay_dataset(
     )
 
 
+def _draw_overlay_skeletons(
+    ax: Any,
+    resolved_bones: list[tuple[int, int]],
+    model_coords: NDArray[np.float64],
+    target_coords: NDArray[np.float64],
+    valid_mask: NDArray[np.bool_],
+) -> None:
+    """Draw model and target skeletal bones."""
+    for idx_a, idx_b in resolved_bones:
+        p_a = model_coords[idx_a]
+        p_b = model_coords[idx_b]
+        ax.plot(
+            [p_a[0], p_b[0]],
+            [p_a[1], p_b[1]],
+            [p_a[2], p_b[2]],
+            color="chocolate",
+            linewidth=2.0,
+            alpha=0.8,
+        )
+
+    for idx_a, idx_b in resolved_bones:
+        if valid_mask[idx_a] and valid_mask[idx_b]:
+            p_a = target_coords[idx_a]
+            p_b = target_coords[idx_b]
+            ax.plot(
+                [p_a[0], p_b[0]],
+                [p_a[1], p_b[1]],
+                [p_a[2], p_b[2]],
+                color="deepskyblue",
+                linestyle="--",
+                linewidth=1.2,
+                alpha=0.5,
+            )
+
+
+def _draw_residual_vectors(
+    ax: Any,
+    marker_count: int,
+    valid_mask: NDArray[np.bool_],
+    residuals: NDArray[np.float64],
+    threshold_mm: float,
+    model_coords: NDArray[np.float64],
+    target_coords: NDArray[np.float64],
+) -> None:
+    """Draw residual error vectors connecting model to target when exceeding threshold."""
+    for idx in range(marker_count):
+        if valid_mask[idx] and residuals[idx] > threshold_mm:
+            m_pt = model_coords[idx]
+            t_pt = target_coords[idx]
+            ax.plot(
+                [m_pt[0], t_pt[0]],
+                [m_pt[1], t_pt[1]],
+                [m_pt[2], t_pt[2]],
+                color="crimson",
+                linewidth=1.5,
+                alpha=0.7,
+            )
+
+
+def _draw_hud_overlay(
+    ax: Any,
+    labels: list[str],
+    frame_index: int,
+    frame_count: int,
+    t_s: float,
+    frame_rms: float,
+    residuals: NDArray[np.float64],
+) -> tuple[str, float]:
+    """Render HUD text overlay and return (worst_name, worst_err)."""
+    worst_idx = int(np.nanargmax(residuals)) if np.any(np.isfinite(residuals)) else 0
+    worst_name = labels[worst_idx]
+    worst_err = (
+        float(residuals[worst_idx]) if np.isfinite(residuals[worst_idx]) else 0.0
+    )
+
+    hud_text = (
+        f"Time: {t_s:0.3f} s (Frame {frame_index + 1}/{frame_count})\n"
+        f"Instantaneous RMS: {frame_rms:5.1f} mm\n"
+        f"Max Error: {worst_name} ({worst_err:5.1f} mm)"
+    )
+    ax.text2D(
+        0.03,
+        0.93,
+        hud_text,
+        transform=ax.transAxes,
+        fontsize=9,
+        family="monospace",
+        bbox={"boxstyle": "round,pad=0.4", "facecolor": "white", "alpha": 0.8},
+    )
+    return worst_name, worst_err
+
+
 def render_overlay_frame(
     dataset: OverlayDataset,
     frame_index: int,
@@ -307,48 +399,18 @@ def render_overlay_frame(
 
     # 3. Skeletal bones
     resolved_bones = topology.filter_bones_for_labels(dataset.labels)
-
-    # Draw model skeleton bones (orange lines)
-    for idx_a, idx_b in resolved_bones:
-        p_a = model_coords[idx_a]
-        p_b = model_coords[idx_b]
-        ax.plot(
-            [p_a[0], p_b[0]],
-            [p_a[1], p_b[1]],
-            [p_a[2], p_b[2]],
-            color="chocolate",
-            linewidth=2.0,
-            alpha=0.8,
-        )
-
-    # Draw target skeleton bones (faint cyan lines)
-    for idx_a, idx_b in resolved_bones:
-        if valid_mask[idx_a] and valid_mask[idx_b]:
-            p_a = target_coords[idx_a]
-            p_b = target_coords[idx_b]
-            ax.plot(
-                [p_a[0], p_b[0]],
-                [p_a[1], p_b[1]],
-                [p_a[2], p_b[2]],
-                color="deepskyblue",
-                linestyle="--",
-                linewidth=1.2,
-                alpha=0.5,
-            )
+    _draw_overlay_skeletons(ax, resolved_bones, model_coords, target_coords, valid_mask)
 
     # 4. Residual error vectors (red lines connecting model to target)
-    for idx in range(dataset.marker_count):
-        if valid_mask[idx] and residuals[idx] > error_threshold_mm:
-            m_pt = model_coords[idx]
-            t_pt = target_coords[idx]
-            ax.plot(
-                [m_pt[0], t_pt[0]],
-                [m_pt[1], t_pt[1]],
-                [m_pt[2], t_pt[2]],
-                color="crimson",
-                linewidth=1.5,
-                alpha=0.7,
-            )
+    _draw_residual_vectors(
+        ax,
+        dataset.marker_count,
+        valid_mask,
+        residuals,
+        error_threshold_mm,
+        model_coords,
+        target_coords,
+    )
 
     # Bounding box & views
     all_pts = np.vstack([target_coords[valid_mask], model_coords])
@@ -367,25 +429,14 @@ def render_overlay_frame(
     ax.legend(loc="upper right", fontsize=8)
 
     # HUD Overlay
-    worst_idx = int(np.nanargmax(residuals)) if np.any(np.isfinite(residuals)) else 0
-    worst_name = dataset.labels[worst_idx]
-    worst_err = (
-        float(residuals[worst_idx]) if np.isfinite(residuals[worst_idx]) else 0.0
-    )
-
-    hud_text = (
-        f"Time: {t_s:0.3f} s (Frame {frame_index + 1}/{dataset.frame_count})\n"
-        f"Instantaneous RMS: {frame_rms:5.1f} mm\n"
-        f"Max Error: {worst_name} ({worst_err:5.1f} mm)"
-    )
-    ax.text2D(
-        0.03,
-        0.93,
-        hud_text,
-        transform=ax.transAxes,
-        fontsize=9,
-        family="monospace",
-        bbox={"boxstyle": "round,pad=0.4", "facecolor": "white", "alpha": 0.8},
+    worst_name, worst_err = _draw_hud_overlay(
+        ax,
+        dataset.labels,
+        frame_index,
+        dataset.frame_count,
+        t_s,
+        frame_rms,
+        residuals,
     )
 
     return {
