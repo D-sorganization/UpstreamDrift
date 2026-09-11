@@ -424,3 +424,30 @@ def test_list_theta_accepted_by_dbc_precondition() -> None:
     )
     assert isinstance(out, SimOut)
     assert out.q.shape[0] > 0
+
+
+def test_canonical_humanoid_simulate_happy_path() -> None:
+    """Canonical 25-DOF / 19-actuator floating humanoid simulates cleanly."""
+    import mujoco
+    from src.engines.physics_engines.mujoco._golf_swing_canonical_xml import (
+        CANONICAL_GOLF_HUMANOID_XML,
+    )
+
+    model = mujoco.MjModel.from_xml_string(CANONICAL_GOLF_HUMANOID_XML)
+    assert model.nv == 25, f"Expected 25 DOFs, got {model.nv}"
+    assert model.nu == 19, f"Expected 19 actuators, got {model.nu}"
+    assert model.nq == 26, f"Expected 26 qpos coordinates, got {model.nq}"
+
+    nu = int(model.nu)
+    theta = np.zeros(nu * 7, dtype=np.float64)
+    opts = SimOptions(variant="canonical", T_s=0.1, output_rate_hz=100.0)
+    out = simulate_with_coefficients(theta, opts)
+
+    assert out.solver_status == "success"
+    assert out.q.shape == (11, 26)
+    assert out.qd.shape == (11, 25)
+    assert out.tau.shape == (11, 19)
+    assert out.grip.shape == (11, 3)
+    assert out.clubhead.shape == (11, 3)
+    # Under gravity, clubhead drops
+    assert out.clubhead[-1, 2] < out.clubhead[0, 2]
