@@ -40,6 +40,9 @@ class _ConfigStub:
         assert name == "--tools-mode"
         return self._tools_mode
 
+    def addinivalue_line(self, name: str, value: str) -> None:
+        pass
+
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
