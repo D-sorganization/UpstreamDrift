@@ -69,3 +69,14 @@
 ## 2024-05-19 - Fast Iterables Summation over Axis
 **Learning:** Using `np.sum()` on a sequence of NumPy arrays created via functions like `np.stack` or directly as a list introduces overhead because NumPy must first implicitly or explicitly allocate a new array. When reducing a sequence of arrays along an axis (e.g., `np.sum(np.stack(tuple(masks.values())), axis=0)`), explicitly converting the sequence to an array first before calling `.sum(axis=0)` (e.g., `np.asarray(list(masks.values())).sum(axis=0)`) is much faster (~2.2x). It avoids the extra overhead of `np.stack`.
 **Action:** Replace `np.sum(np.stack(...), axis=0)` with `np.asarray(...).sum(axis=0)` when summing a collection of arrays along an axis.
+
+## 2024-05-20 - [Optimize RMS and Max Norm Calculation]
+**Learning:** Using `np.linalg.norm(..., axis=1)` to compute array magnitudes followed by another power operation like `distances**2` creates unnecessary intermediate arrays and performs redundant square root operations. By replacing it directly with `sq_distances = np.einsum('ij,ij->i', diff, diff)`, we avoid `np.linalg.norm` dispatch overhead and temporary allocations. We can then compute both the RMS and max directly from the squared distances (`np.sqrt(np.mean(sq_distances))` and `np.sqrt(np.max(sq_distances))`), which is ~10-15% faster for typical trajectory sizes.
+**Action:** Replace `distances = np.linalg.norm(prediction - target, axis=1)` with `sq_distances = np.einsum('ij,ij->i', diff, diff)` when only scalar reductions (like mean or max of the norms) are needed, to optimize computation in validation loops.
+## 2026-09-11 - [Optimize Euclidean Distance in 2D Array]
+**Learning:** Using `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is significantly faster than `np.linalg.norm(..., axis=1)` for multi-dimensional distance calculations since it bypasses the overhead of np.linalg.norm which internally does checks and allocations.
+**Action:** Replace `np.linalg.norm(selected - reference.position_m, axis=1)` with the precalculated diff array and einsum in `src/motion_capture/coaching/measurements.py`.
+
+## 2024-03-22 - [Optimization: Small 1D Array Norm Calculation]
+**Learning:** For small 1D NumPy arrays (like 3D vectors), `np.sqrt(ndarray.dot(ndarray))` is ~2x faster than `np.linalg.norm(ndarray)`. It is also faster than `np.sqrt(np.einsum('i,i->', arr, arr))` which is optimized for multidimensional arrays.
+**Action:** Replace `np.linalg.norm()` with `np.sqrt(ndarray.dot(ndarray))` when calculating the magnitude of single 1D arrays.

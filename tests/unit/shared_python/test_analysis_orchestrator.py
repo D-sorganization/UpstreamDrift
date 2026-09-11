@@ -456,3 +456,42 @@ def test_section_crossings_flat_segment_excluded() -> None:
     data = np.array([0.0, 0.0, 1.0])
     # left==right on the first segment -> excluded; rising cross on the second.
     assert AnalysisOrchestrator._section_crossings(data, 0.0, "both") == [1]
+
+
+def test_analysis_tools_doc_symbols_exist() -> None:
+    """Regression test for #8844: help/analysis_tools.md must cite real APIs."""
+    repo_root = Path(__file__).resolve().parents[3]
+    doc_path = repo_root / "docs" / "help" / "analysis_tools.md"
+    assert doc_path.exists()
+    content = doc_path.read_text(encoding="utf-8")
+
+    # None of the fabricated classes should appear in the doc
+    fabricated_symbols = [
+        "EnergyAnalyzer",
+        "PhaseDiagramPlotter",
+        "KinematicSequenceAnalyzer",
+        "ForceAnalyzer",
+        "JacobianAnalyzer",
+        "DataExporter",
+        "BaseAnalyzer",
+        "register_custom_plot",
+        "from shared.python",
+    ]
+    for symbol in fabricated_symbols:
+        assert symbol not in content, (
+            f"Fabricated symbol '{symbol}' found in {doc_path}"
+        )
+
+    # Verify real classes and functions are cited
+    real_symbols = [
+        "AnalysisOrchestrator",
+        "EnergyMetricsMixin",
+        "SegmentTimingAnalyzer",
+        "check_jacobian_conditioning",
+        "compute_manipulability_index",
+        "CrossEngineValidator",
+    ]
+    for symbol in real_symbols:
+        assert symbol in content, (
+            f"Expected real symbol '{symbol}' missing from {doc_path}"
+        )

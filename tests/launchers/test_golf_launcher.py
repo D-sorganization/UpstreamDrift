@@ -488,9 +488,11 @@ def test_close_event_excludes_background_api(mock_dialog_cls, qapp) -> None:
 @patch("src.launchers.upstream_drift_launcher_main.sys.exit")
 @patch("src.launchers.upstream_drift_launcher_main._install_global_ui_zoom")
 @patch("src.launchers.upstream_drift_launcher_main.SplashScreen")
+@patch("src.launchers.upstream_drift_launcher_main.StartupSession")
 @patch("src.launchers.upstream_drift_launcher.UpstreamDriftLauncher")
 def test_upstream_drift_launcher_main(
-    _mock_launcher,
+    mock_launcher,
+    mock_session_cls,
     mock_splash_cls,
     _mock_zoom,
     mock_exit,
@@ -501,7 +503,6 @@ def test_upstream_drift_launcher_main(
     mock_app.instance.return_value = None
     mock_app.return_value.exec.return_value = 0
     mock_splash = mock_splash_cls.return_value
-    mock_worker_instance = mock_worker.return_value
 
     with (
         patch("src.launchers.upstream_drift_launcher_main.QIcon"),
@@ -509,9 +510,17 @@ def test_upstream_drift_launcher_main(
     ):
         main()
         mock_app.assert_called()
-        mock_worker.assert_called()
         mock_exit.assert_called()
 
-    progress_callback = mock_worker_instance.progress_signal.connect.call_args[0][0]
-    progress_callback("Loading model registry...", 10)
-    mock_splash.show_message.assert_called_once_with("Loading model registry...", 10)
+    # Issue #8360: the splash/worker/shell handshake is owned by a bounded
+    # StartupSession rather than ad-hoc closures that could quit the app.
+    mock_session_cls.assert_called_once()
+    kwargs = mock_session_cls.call_args.kwargs
+    assert kwargs["splash"] is mock_splash
+    assert kwargs["shell"] is mock_launcher.return_value
+    kwargs["worker_factory"]()
+    mock_worker.assert_called_once()
+    mock_session_cls.return_value.start.assert_called_once()
+    mock_app.return_value.aboutToQuit.connect.assert_called_once_with(
+        mock_session_cls.return_value.shutdown
+    )

@@ -130,6 +130,9 @@ them.
 cheap: 16 of the 26 external import statements resolve through the facade, so
 Stage 2 re-pointing is mostly a rewrite of this one file rather than 26 edits.
 
+`launch_monitor_data.py` is `app-local` (#8365): it imports the public
+Launch-Monitor-Data exports and has no Tools twin.
+
 `trends.py` and `dispersion.py` both collide by name with Tools functions that
 compute something else. G0 pinned the dispersion case numerically (D7: Tools'
 1-D `rms_yards` 8.397 versus UD's 2-D `radial_rmse` 11.365, 35% apart and not a

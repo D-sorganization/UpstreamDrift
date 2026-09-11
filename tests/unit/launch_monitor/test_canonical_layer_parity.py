@@ -180,6 +180,7 @@ WAVE_3B_MODULES = (
 APP_LOCAL_MODULES = frozenset(
     {
         "__init__",  # the re-export façade and the canonical-layer bootstrap
+        "launch_monitor_data",  # #8365 public-export import; no Tools twin
         "project",  # workbench project file I/O; never had a Tools twin
         "strokes_gained_baseline",  # ADR-0048 P12's deliberate exclusion
     }
