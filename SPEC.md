@@ -1,11 +1,11 @@
 # SPEC.md — Repository Specification Document
 
-## Launcher Dialog, UI Setup, and Process Manager Unit-Gate Debt Burndown (#8766)
+## Shared Python, Security Contracts, Physics Engines, and Motion Matching Unit-Gate Debt Burndown (#8766)
 
-Burn down 52 quarantined test node IDs under the `launcher_lifecycle_and_sources` cluster in `scripts/config/unit_gate_quarantine.json`:
-- Retired Passing Quarantined Tests: Un-quarantine 52 passing launcher dialog, process manager, UI setup, diagnostics, and library widget unit tests across `tests/launchers/test_launcher_dialogs.py` (9 tests), `tests/launchers/test_launcher_process_manager.py` (17 tests), `tests/launchers/test_launcher_ui_setup.py` (21 tests), `tests/launchers/test_launcher_diagnostics.py` (1 test), and `tests/launchers/test_library_widget.py` (4 tests).
-- Validated Desktop Shell and Process Invariants: Verify launcher process lifecycle management (signal relay, process cancellation, headless detection, stdout handling), dialog display interactions, diagnostic environment checks, and library widget container integration execute deterministically.
-- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 408 to 356 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+Burn down 40 quarantined test node IDs across the shared Python, security contracts, physics engines, and motion matching clusters in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 40 passing headless tests across `tests/unit/shared_python/test_ai_sample_tools.py` (12 tests), `tests/unit/shared_python/ai/adapters/test_ai_adapters_base.py` (2 tests), `tests/unit/shared_python/test_ai_tool_registry.py` (2 tests), `tests/tools/sidekick_tool/test_embed_adapter.py` (1 test), `tests/unit/launcher/test_sidekick_extension_overlay.py` (1 test), `tests/unit/shared_python/test_analysis_orchestrator.py` (1 test), `tests/unit/shared_python/test_engine_loaders_coverage.py` (1 test), `tests/unit/shared_python/test_output_manager.py` (1 test), `tests/unit/test_secure_subprocess.py` (3 tests), `tests/unit/test_contracts_module.py` (2 tests), `tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_joint_analysis.py` (8 tests), `tests/unit/motion_matching/test_checkpoint_artifact_loading.py` (4 tests), `tests/reinforcement_learning/wave6_rl/test_trajectory_funnel_benchmark_coverage.py` (1 test), and `tests/unit/engines/pinocchio/test_synthesize_target.py` (1 test).
+- Validated System Invariants: Ensure subprocess security controls, interface contracts, MuJoCo joint analysis, motion matching checkpoint artifacts, RL trajectory benchmarks, and Pinocchio kinematics synthesis execute cleanly and deterministically in headless CI environments.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 408 to 368 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
 
 ## Bunker Shot and API Route Unit-Gate Debt Burndown (#8766)
 
@@ -4385,7 +4385,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-12 | #10015 | Burn down 52 quarantined launcher dialog, UI setup, process manager, diagnostics, and library widget tests in scripts/config/unit_gate_quarantine.json under the launcher_lifecycle_and_sources cluster (#8766). |
+| 2026-09-12 | #10015 | Burn down 40 quarantined shared Python, security contracts, physics engines, and motion matching tests in scripts/config/unit_gate_quarantine.json (#8766). |
 | 2026-09-12 | #10013 | Burn down 30 quarantined bunker shot solver, workbench GUI, and report tests in scripts/config/unit_gate_quarantine.json under the bunker_shot_model_and_workbench cluster (#8766). |
 | 2026-09-12 | #10012 | Burn down all 11 quarantined teleoperation, device, and provider tests in scripts/config/unit_gate_quarantine.json under the deployment_devices_and_configuration cluster (#8766). |
 | 2026-09-12 | #10010 | Burn down 43 quarantined packaging and governance tests in scripts/config/unit_gate_quarantine.json under the packaging_ci_and_repository_governance cluster, anchor test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and sync monolith refactor register (#8766). |
