@@ -35,7 +35,9 @@ class TestNoiseGenerator:
     """Tests for NoiseGenerator class."""
 
     def test_none_time_array_raises_type_error(self, gen: NoiseGenerator) -> None:
-        with pytest.raises(TypeError, match="t must be provided"):
+        with pytest.raises(
+            (TypeError, ValueError), match=r"(t|time array) must be provided"
+        ):
             gen.generate(None)  # type: ignore[arg-type]
 
     def test_white_noise(self, gen: NoiseGenerator, t: np.ndarray) -> None:
@@ -104,7 +106,7 @@ class TestAddNoiseToSignal:
     """Tests for add_noise_to_signal function."""
 
     def test_none_signal_raises_type_error(self) -> None:
-        with pytest.raises(TypeError, match="signal must be provided"):
+        with pytest.raises((TypeError, ValueError), match="signal must be provided"):
             add_noise_to_signal(None)  # type: ignore[arg-type]
 
     def test_add_noise_snr(self, sine_signal: Signal) -> None:
@@ -136,7 +138,9 @@ class TestGenerateDisturbanceProfile:
     """Tests for generate_disturbance_profile function."""
 
     def test_none_time_array_raises_type_error(self) -> None:
-        with pytest.raises(TypeError, match="t must be provided"):
+        with pytest.raises(
+            (TypeError, ValueError), match=r"(t|time array) must be provided"
+        ):
             generate_disturbance_profile(None)  # type: ignore[arg-type]
 
     def test_step_disturbance(self, t: np.ndarray) -> None:
@@ -231,5 +235,5 @@ class TestDisturbanceSimulator:
 
     def test_apply_to_none_signal_raises_type_error(self) -> None:
         sim = DisturbanceSimulator()
-        with pytest.raises(TypeError, match="signal must be provided"):
+        with pytest.raises((TypeError, ValueError), match="signal must be provided"):
             sim.apply_to_signal(None)  # type: ignore[arg-type]

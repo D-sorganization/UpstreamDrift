@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Signal Toolkit Unit-Gate Debt Burndown (#8766)
+
+Burn down 16 quarantined test node IDs across the signal toolkit cluster in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 16 tests across `tests/unit/shared_python/test_signal_toolkit_core.py` (3 tests), `tests/unit/shared_python/test_signal_toolkit_calculus.py` (4 tests), `tests/unit/shared_python/test_signal_toolkit_filters.py` (1 test), `tests/unit/shared_python/test_signal_toolkit_limits.py` (3 tests), and `tests/unit/shared_python/test_signal_toolkit_noise.py` (5 tests).
+- Robust Subprocess and Contract Validation: In `test_signal_toolkit_core.py`, anchor child interpreter execution under `python -O` to repo root to survive test isolation directory changes; in `filters.py`, `limits.py`, and `noise.py`, enforce strict preconditions for alpha parameter range, saturation bounds, rate limiter positivity, deadband threshold, and noise amplitude; in `calculus.py` and `noise.py` tests, accept `ValueError` from input validation contracts.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 343 to 327 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## Launcher Diagnostics, Artifacts, Pipeline, and Tools Model Sources Debt Burndown (#8766)
 
 Burn down 20 quarantined test node IDs across launcher diagnostics, checkpoint loading, golf state environment constants, motion pipeline orchestration, TRC adapters, and tools launcher model sources in `scripts/config/unit_gate_quarantine.json`:

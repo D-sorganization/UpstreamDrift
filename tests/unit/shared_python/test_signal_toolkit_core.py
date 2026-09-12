@@ -75,12 +75,16 @@ class TestSignal:
             "else:\n"
             "    print('ACCEPTED')\n"
         )
+        from pathlib import Path
+
+        repo_root = Path(__file__).resolve().parents[3]
         result = subprocess.run(
             [sys.executable, "-O", "-c", program],
             capture_output=True,
             text=True,
             timeout=60,
             check=False,
+            cwd=repo_root,
         )
         assert "REJECTED" in result.stdout, (
             f"invalid Signal accepted under -O: stdout={result.stdout!r} "

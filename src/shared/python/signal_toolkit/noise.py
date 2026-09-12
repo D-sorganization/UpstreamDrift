@@ -81,6 +81,8 @@ class NoiseGenerator:
             Signal containing the noise.
         """
         t = _validate_time_array(t)
+        if amplitude < 0:
+            raise ValueError("amplitude must be non-negative")
         n = len(t)
 
         if noise_type == NoiseType.WHITE:
