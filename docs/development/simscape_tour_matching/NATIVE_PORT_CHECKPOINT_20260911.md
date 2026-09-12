@@ -1,5 +1,65 @@
 # Native Port Implementation Checkpoint
 
+## Run16 Completed and Independently Replayed; User Planning Check-In
+
+Updated 2026-09-12 UTC. This section supersedes historical LIVE entries below.
+Session22441 exited zero; run16 is terminal. No run17 has been launched.
+The wider node-box trial stopped at12 iterations /13 evaluations without
+convergence or acceptance. Independent replay reproduces all reported marker
+metrics: whole30.956978 mm, early10.810453 mm, terminal96.757316 mm and
+club74.940059 mm through0.85 s. Yaw3.559596% passes its gate, but physical
+scaled defect0.002278590 exceeds1e-4 and terminal pointwise shooting/replay
+gap is38.007483 mm. Do not promote this candidate as a matched swing.
+
+Canonical candidate92f64ee67187836f1290319df6ff4d7bff4c4763451aa863dc4e109d1872c91d.
+Raw candidate SHA4cc867f8ce1a57e9ee42f274d7078ac57fce89f1b23ff6fa92d8910389c7c161.
+Independent replay3.514833 s; closure pose/rate maxima2.86220e-11 /5.35150e-11.
+The replay receipt's historical generic baseline-only qualification wording is
+not a description of this optimized candidate; it remains unaccepted.
+Fresh bound audit reconstructs original chart states and classifies77 active
+bounds:11 effort controls and66 node coordinates, including26 of42 at0.8 s.
+Thus widening the numerical box helped terminal error compared with run15,
+but neither trial converged; this does not establish a constrained optimum.
+Exact raw files and all13 evaluation snapshots are in
+native_evidence/ms_fit_9967_16/raw-run.zip. Adjacent JSON is for review;
+use the ZIP for raw byte hashes. Independent trajectory NPZ is also preserved.
+
+### Next Pinocchio Assignment
+
+1. Read this checkpoint, current repo guidance and issue9967 lease. Confirm no
+   live matching job or existing run17 output before launch. Preserve runtime14.
+2. Reuse driver16 with the SAME common run12-derived initial point, geometry,
+   capture, node box0.05, effort bounds,0.8 s polynomial basis and0.85 s horizon.
+   Change only budgets to --max-iterations60 --max-nfev100. Use a new output:
+   /mnt/c/Users/diete/native-ms-fit-9967-17. Full command is the run16 command
+   below with these output/budget substitutions. This is a fresh deterministic
+   solve from the common initial point, not an exact solver-state resume.
+3. Preserve every checkpoint and the exit reason. Independently replay the
+   returned global degree-six controls from original q0/qd0. Evaluate full
+   physical continuity, closure, all marker gates, yaw and pointwise replay gap.
+   Iteration limits, a small segmented cost or a feasible projection alone are
+   not acceptance. Do not declare progress solely from a lower objective.
+4. If convergence fails, inspect feasibility history, active bounds and chart
+   validity before another parameter change. A qualified chart-recentering
+   method or better constrained step scaling may be needed; each is a separate
+   TDD change with derivative and restart checks. Do not repeatedly widen boxes.
+5. Extend verified coverage incrementally only after resolving this bottleneck.
+   Final target remains1.8138888889 s, with one global sextic per effort channel.
+   Final controls require fresh R2025b replay and native cross-engine checks.
+   Missing club observations at the final two frames remain missing, never zero.
+
+### OpenSim Program and Handoff
+
+OpenSim scope is part of the ongoing program; epic10003 is open and its
+parallel planning lane is complete. See the separate worktree
+../UpstreamDrift-opensim-10003/docs/development/opensim_tour_matching/EPIC_10003.md
+and HANDOFF.md for OS-0 through OS-6, sequential lower-level-agent prompts,
+TDD/DbC/LoD/DRY contracts and per-stage evidence gates. No OpenSim native
+implementation or job has started. This is the user's requested plan/epic
+check-in. The goal remains active and incomplete. Pinocchio assignments remain
+in CONSTRAINED_SHOOTING_NEXT_AGENT.md and this checkpoint; do not duplicate
+already implemented shared fitting infrastructure.
+
 ## Run15 Rejected; Shooting-Chart Bounds Identified and Audited
 
 Updated 2026-09-12 UTC. Session77080 exited zero after12 solver iterations and
