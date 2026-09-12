@@ -1,5 +1,33 @@
 # Native Drake Matching Handoff
 
+## Run18 Fitted-Candidate Extension Fails the Full-State Gate
+
+Updated 2026-09-12 UTC. Both new parity runs are terminal. No fitting or shared engine source changed. The earlier 0.8-second baseline qualification remains valid within its stated scope; **0.85-second run18 full-state parity is not qualified**.
+
+Canonical candidate `917d2d29b66bc2ab947a6ea75255c35e47134e6a2d51cde7e1e69847cad379f7` (raw `a3fa5c4ccb503c33fef9d72a061718ccbd3fa8b2449cd07959d09f42f564fd10`) was replayed with its original q0/qd0 and global sextic, using all307 actual capture samples through0.85 seconds and the identical observed mask:7675 observed marker instances,25 at the endpoint. The model, URDF, sidecar and immutable runtime02 remained unchanged.
+
+| Comparison                           | Default Integration | Tighter Integration |
+| ------------------------------------ | ------------------: | ------------------: |
+| Relative / Absolute Tolerance        |       1e-11 / 1e-13 |       1e-12 / 1e-14 |
+| Maximum Step (s)                     |             0.00025 |              0.0001 |
+| Maximum q Difference                 |            1.476e-7 |            3.808e-7 |
+| Maximum Rate Difference              |            1.460e-4 |            3.294e-4 |
+| Maximum Observed Marker Distance (m) |            2.864e-8 |            7.456e-8 |
+| Observed Marker RMS Distance (m)     |            2.140e-9 |            5.539e-9 |
+| Drake Closure Pose / Rate            | 5.91e-12 / 9.10e-11 | 9.09e-13 / 5.75e-12 |
+| Pinocchio / Drake Runtime (s)        |        3.33 / 11.57 |       11.54 / 30.66 |
+| Full-State Parity                    |              Failed |              Failed |
+
+The unchanged absolute rate gate is1e-4. Both failures peak at `LSInputX`, time0.7861111111111111s, where qd is about400.447rad/s. Relative rate differences are3.646e-7 and8.225e-7. Raw generalized-coordinate mass condition is about6.646e7, with positive minimum eigenvalue1.384e-6. This condition is unit-dependent and does not independently establish physical instability or an engine defect. Within-engine default-to-tight rate differences are3.323e-4 for Pinocchio and1.431e-4 for Drake. Therefore this single refinement did not establish convergence of the rate comparison. Tiny marker differences do not satisfy the failed full-state gate, and no criteria were relaxed.
+
+Both engines reproduce the unaccepted candidate's roughly103.94884mm terminal C3D RMS. Cross-engine agreement does not make that swing a match, and this work adds no extended-horizon MATLAB qualification.
+
+Artifacts: `evidence/run18/default-parity.json`, `tight-parity.json`, `diagnostic.json`, and `raw-evidence.zip`. The ZIP includes both fresh Pinocchio state references, both failed Drake receipts/trajectories, actual target/masks, exact candidate, model/URDF/sidecar, executed runners, runtime sources with per-file hashes, and both environment distribution inventories. The first archive attempt could not invoke pip in the Pinocchio environment; it was superseded by a complete exclusive archive ending `-02.zip` using read-only distribution metadata. No package was installed into that environment.
+
+Reproduction uses `reproduction/replay_candidate_parity.py`; provide the same model/candidate/target, `--expected-candidate` above, and exclusive output paths. Generate a fresh Pinocchio reference first, then add `--reference`, `--urdf`, and `--sidecar` for Drake. Optional `--rtol`, `--atol`, `--max-step` reproduce the tighter trial. Actual executed versions are preserved in the ZIP; defaults never rewrite candidate coverage. An intentionally incorrect expected candidate was verified to fail before output-directory creation. `reproduction/diagnose_run18.py` localizes the maximum discrepancies without another integration run.
+
+Next agent: retain both failed results and the current rate gate. Do not launch further tolerance sweeps by default. Coordinate with root to examine state-specific dynamics and coordinate conditioning near the left-shoulder rapid rotation if full-state certification is required. Any change of state metric, coordinate chart or acceptance criteria needs an explicit scientific justification and separate qualification; it must not silently promote these results. Continue using the native adapter for diagnostic replay with an unqualified full-state status, while root pursues the actual fit. No further job is running in this lane.
+
 ## Status and Ownership
 
 Issue #10022, under epic #9921; branch `feat/10022-native-drake-equivalence`, based on `842756bd3`. Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-drake-native-10022`. All qualification jobs are terminal. No native matching fit or MATLAB job was started by this lane. MATLAB R2025b is the required release.
