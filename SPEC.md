@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## AI Adapters, Setup Wizard, and Launcher Tools Unit-Gate Debt Burndown (#8766)
+
+Burn down 16 quarantined test node IDs across AI adapters, setup wizard, launcher bootstrap, and tools clusters in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 16 passing tests across `tests/reinforcement_learning/wave6_rl/test_trajectory_funnel_benchmark_coverage.py` (1 test), `tests/unit/config/test_setup_wizard.py` (2 tests), `tests/unit/sidekick/lab/bio/test_c3d_io.py` (1 test), `tests/unit/test_launch_upstream_drift_bootstrap.py` (2 tests), `tests/unit/tools/model_generation/test_rest_api_fastapi.py` (1 test), `tests/unit/sidekick/test_data_io.py` (1 test), and `tests/unit/shared_python/ai/adapters/` (8 tests across Gemini and Ollama).
+- Validated System Invariants: Ensure reinforcement learning funnel exports, setup wizard embedding, launcher bootstrap repo resolution, FastAPI model generation parameter parsing, Bio C3D export path validation, sidekick CSV/JSON serialization, and Gemini/Ollama provider adapters execute deterministically and cleanly.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 379 to 363 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## Motion Pipeline API Source Formats and Matrix Reconciliation (#8875)
 
 Reconcile advertised source formats in the motion pipeline orchestrator API with runtime registered adapters, drop the misleading auto-generated claim from formats documentation, and record architecture budget exceptions for pre-existing create_app handlers:
