@@ -45,6 +45,7 @@ class MultipleShootingOptions:
     pelvis_yaw_weight: float = 0.0
     pelvis_yaw_max_error_pct: float = 5.0
     regularization: Callable[[Array], Array] | None = None
+    callback: Callable[[Array, Array, float], None] | None = None
 
     def __post_init__(self) -> None:
         nodes = np.asarray(self.shooting_nodes, dtype=float)
@@ -209,7 +210,10 @@ def fit_multiple_shooting(
             if reg_res is not None and len(reg_res) > 0:
                 res_parts.append(reg_res)
 
-        return np.concatenate(res_parts)
+        full_res = np.concatenate(res_parts)
+        if options.callback is not None:
+            options.callback(theta, full_res, float(np.sum(full_res**2)))
+        return full_res
 
     diff_step = (
         np.full_like(x0, options.finite_difference_step)
