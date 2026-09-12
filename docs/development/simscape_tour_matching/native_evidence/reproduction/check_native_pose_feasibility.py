@@ -17,6 +17,33 @@ from src.shared.python.motion_matching.marker_projection import project_markers
 from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
 
 
+def pose_schedule(
+    capture_time: list[float], requested: list[float], duration: float, direction: str
+) -> np.ndarray:
+    """Return exact capture indices; never replace a missing sample by a neighbor."""
+    clock, times = np.asarray(capture_time), np.asarray(requested)
+    if (
+        direction not in ("independent", "forward", "backward")
+        or clock.ndim != 1
+        or times.ndim != 1
+        or not times.size
+        or not np.isfinite(clock).all()
+        or not np.isfinite(times).all()
+        or np.any(np.diff(clock) <= 0)
+        or np.any(np.diff(times) <= 0)
+        or times[0] <= 0
+        or times[-1] != duration
+    ):
+        raise ValueError("Invalid capture clock or pose schedule")
+    indices = []
+    for time in times:
+        matches = np.flatnonzero(np.isclose(clock, time, atol=1e-12, rtol=0))
+        if len(matches) != 1:
+            raise ValueError("Exact target sample is missing or ambiguous")
+        indices.append(int(matches[0]))
+    return np.asarray(indices[::-1] if direction == "backward" else indices)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("model", "candidate", "target", "output"):
@@ -24,6 +51,13 @@ def main() -> None:
     parser.add_argument("--translation-radius", type=float, default=0.2)
     parser.add_argument("--rotation-radius", type=float, default=0.5)
     parser.add_argument("--seed-report", type=Path)
+    parser.add_argument("--times", type=float, nargs="+", default=[0.6, 0.7, 0.8])
+    parser.add_argument(
+        "--direction",
+        choices=["independent", "forward", "backward"],
+        default="independent",
+    )
+    parser.add_argument("--max-iterations", type=int, default=100)
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
@@ -45,7 +79,10 @@ def main() -> None:
     payload = json.loads(args.target.read_text())
     if payload["source_sha256"] != doc["capture_sha256"]:
         raise ValueError("Capture mismatch")
-    clock = np.array([0.0, 0.6, 0.7, 0.8])
+    schedule = pose_schedule(
+        payload["time_s"], args.times, doc["duration_s"], args.direction
+    )
+    clock = np.r_[0.0, np.asarray(payload["time_s"])[np.sort(schedule)]]
     replay = replay_candidate(
         raw, candidate, clock, rtol=1e-11, atol=1e-13, max_step=0.00025
     )
@@ -82,22 +119,33 @@ def main() -> None:
         if args.seed_report
         else None,
         "poses": [],
+        "direction": args.direction,
+        "requested_times_s": args.times,
+        "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
-    for i, time in enumerate(clock[1:], start=1):
-        matches = np.flatnonzero(
-            np.isclose(payload["time_s"], time, atol=1e-12, rtol=0)
-        )
-        if len(matches) != 1:
-            raise ValueError("Exact target sample is missing or ambiguous")
-        k = int(matches[0])
+    previous = None
+    for k in schedule:
+        time = payload["time_s"][k]
+        i = int(np.flatnonzero(clock == time)[0])
         target = np.asarray(payload["points_world_m"])[k, indices]
         valid = np.asarray(payload["valid"], dtype=bool)[k, indices]
         initial = replay.integration.state[i, : len(names)]
         radius = np.full(len(names), args.rotation_radius)
         radius[:3] = args.translation_radius
-        start = initial if seeds is None else seeds[float(time)]
+        start = initial
+        if previous is not None and args.direction != "independent":
+            start = previous
+        elif seeds is not None:
+            start = seeds[float(time)]
         fitted = fit_marker_pose(
-            start, initial - radius, initial + radius, target, valid, forward, closure
+            start,
+            initial - radius,
+            initial + radius,
+            target,
+            valid,
+            forward,
+            closure,
+            max_iterations=args.max_iterations,
         )
         row = asdict(fitted)
         row["coordinates"] = fitted.coordinates.tolist()
@@ -120,6 +168,12 @@ def main() -> None:
         )
         report["poses"].append(row)
         args.output.write_text(json.dumps(report, indent=2) + "\n")
+        if args.direction != "independent":
+            if not fitted.closure_satisfied or not fitted.optimizer_converged:
+                raise ValueError(
+                    "Continuation stopped at an unqualified pose; partial receipt saved"
+                )
+            previous = fitted.coordinates
 
 
 if __name__ == "__main__":
