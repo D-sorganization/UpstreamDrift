@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "time_s": 0.6,
+      "column": 0,
+      "marker_relative": 9.120160544233673e-9,
+      "state_relative": 5.500947120613189e-7
+    },
+    {
+      "time_s": 0.6,
+      "column": 14,
+      "marker_relative": 1.3667527091007526e-8,
+      "state_relative": 1.2910693378667334e-7
+    },
+    {
+      "time_s": 0.7,
+      "column": 0,
+      "marker_relative": 3.358382796003434e-7,
+      "state_relative": 3.015022991912983e-5
+    },
+    {
+      "time_s": 0.7,
+      "column": 14,
+      "marker_relative": 4.4231975270623416e-7,
+      "state_relative": 2.8098617473149273e-5
+    },
+    {
+      "kind": "early_effort",
+      "coordinate": "TranslationInputX",
+      "bernstein_control": 0,
+      "column": 0,
+      "marker_relative": 3.4038139819126933e-7,
+      "state_relative": 3.0715688541967193e-7
+    },
+    {
+      "kind": "early_effort",
+      "coordinate": "HipInputZ",
+      "bernstein_control": 1,
+      "column": 36,
+      "marker_relative": 1.6767895051639023e-6,
+      "state_relative": 8.466782050465023e-6
+    }
+  ]
+}

@@ -1,5 +1,49 @@
 # Native Port Implementation Checkpoint
 
+## All Seven Effort Controls Qualified; Run08 Is Live
+
+Updated 2026-09-12 UTC. Driver08 uses first_control=0: all 189 physical Bernstein
+controls (27 effort channels times seven) can vary. B2-B6 keep their exact
+previous bounds relative to the original root-force02 parent; newly released
+B0/B1 corrections each have +/-2 N or N m bounds according to channel type.
+This removes fixed initial effort/slope anchors while preserving the original
+q0/qd0, model, marker attachments, global polynomial degree and early RMS gate.
+Chart references remain run04's continuous states; run07 torques and both saved
+physical nodes are restored with the existing reconstruction checks.
+
+Audit-only session 56624 exited zero. Existing effort/sensitivity tests: twelve
+passed. Native first-window centered finite differences (physical step 1e-5)
+for TranslationInputX B0 and HipInputZ B1 agree with the new 189-column analytic
+calculation: marker relative errors 3.40381e-7 and 1.67679e-6, end-state relative
+errors 3.07157e-7 and 8.46678e-6. Both restored-node composition checks also pass,
+with maximum state relative error 3.01503e-5. All are below 1e-3, for these
+selected probes only. Audit receipts/config/window ledger are in
+native_evidence/ms_all_controls_audit_9967_08, with raw copies locally and on
+ControlTower as native-ms-all-controls-audit-9967-08.
+
+LIVE fit: unified session 8567, confirmed ControlTower WSL PID 2136729.
+Output C:/Users/diete/native-ms-fit-9967-08. Command:
+run_native_ms_pilot_9967_08.py --output /mnt/c/Users/diete/native-ms-fit-9967-08
+--max-nfev 12 --defect-weight 100. Runtime remains
+/home/dieterolson/native-ms-pilot-9967-07 with the callback-capable shared solver;
+Python remains /home/dieterolson/simscape-pinocchio-9967/.venv/bin/python.
+PYTHONPATH selects that runtime; OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1.
+Driver reruns qualification before fitting and saves complete evaluation
+snapshots. Old runtimes and runs are preserved.
+
+Driver SHA-256 6c5c57f57a1e17d8f34fad41a238391e84d54ec0ae4de0b2a0e8719951d570dd.
+Exact driver is archived in native_evidence and local simscape-tour-checkpoints;
+dependencies are the existing runtime07 bundle. This is a newly expanded search
+family, not a same-settings continuation. No gate is weakened: final early
+RMS <=12 mm, whole <=25 mm, terminal <=35 mm, club <=60 mm, yaw <=5 percent,
+scaled defects <=1e-4 and optimizer convergence remain required.
+
+Next action: poll session 8567/PID 2136729. On termination preserve all outputs,
+independently replay the returned profile, and report whether B0/B1 actually
+moved and whether early tracking remains acceptable. If this family stalls,
+do not call more prefix iteration a solution to the full 1.813889 s goal.
+Full-swing optimization and final R2025b qualification remain open.
+
 ## Run07 Verified; Anchored-Coefficient Continuation Has Diminishing Returns
 
 Updated 2026-09-12 UTC. Session 12123 exited zero; run07 is terminal after
