@@ -1,5 +1,42 @@
 # Native Port Implementation Checkpoint
 
+## P4 Bounded ControlTower Refinement Is Live
+
+Actual native refinement launched in exec session 65632; verified WSL worker
+PID 1859278 on ControlTower. Do not duplicate/restart while this handle lives.
+Runner: /home/dieterolson/native-refinement-9967-01/refine_native_candidate.py
+under the existing Pinocchio venv. Output directory:
+C:/Users/diete/native-refinement-9967-01. Its config.json, evaluations.jsonl,
+best.json, returned.json or failure.json preserve progress and distinct outcomes.
+At the latest observation, evaluation 4 completed; integration is ~3.3–3.4 s.
+These initial evaluations are finite differences, not a converged improvement.
+
+This bounded experiment uses the packaged .80 s candidate, fixed geometry,
+initial state and 25 attachments, adjusting only the t^6 term of each of 27
+inputs. Correction is 10*(x-1)*(t/.8)^6 with x in [.8,1.2], i.e. at most +/-2
+N or Nm at .8 s. The basis is fixed for the run and final inputs remain global
+sextics. Shared fit_prefixes executes one full prefix, max_nfev=3 (finite
+differences add calls), relative diff step 1e-3, terminal weight 10. Numerical
+acceptance still requires whole/terminal/yaw gates plus explicit early <=12 mm
+and club cluster <=60 mm; final R2025b acceptance remains separate.
+
+New increment_native_candidate helper reuses normalized_to_simscape; its new
+test progressed red-to-green and all 11 candidate tests pass. It creates a new
+identity without retiming the original controls. The runner is committed under
+native_evidence/reproduction/refine_native_candidate.py. Source bundle with
+module hashes is archived locally as native-refinement-bundle-9967-01.zip and
+deployed separately from the qualified baseline bundle. Each evaluation is
+logged, best early-retaining score is saved atomically, and returned optimizer
+candidate is kept separate. Exceptions preserve failure evidence; no finite
+penalty plateau masks solver failure.
+
+Next: poll session 65632 and inspect last JSONL records/best checkpoint. Wait
+for terminal exit before treating returned.json as complete. Archive outputs,
+independently replay any improved candidate, compare all gates, then decide
+whether to widen correction bounds/add t^4/t^5 directions. Gemini's separate
+DeskComputer multiple-shooting run is untouched; coordination findings below
+still apply to its boundary and acceptance behavior.
+
 ## P4 Capture Baseline and Active-Agent Review
 
 All commits through e618aa3d4 are pushed; corrected type checks and remaining

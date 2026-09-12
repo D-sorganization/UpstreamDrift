@@ -4,7 +4,10 @@ from copy import deepcopy
 
 import pytest
 
-from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
+from src.shared.python.motion_matching.native_candidate import (
+    NativeReplayCandidate,
+    increment_native_candidate,
+)
 
 pytestmark = pytest.mark.unit
 NAMES = ("x", "y", "z", "a")
@@ -70,3 +73,17 @@ def test_missing_or_unrecognized_fields_rejected(document: dict) -> None:
     document.pop("capture_sha256")
     with pytest.raises(ValueError):
         NativeReplayCandidate.from_document(document, NAMES, HASH)
+
+
+def test_increment_keeps_one_absolute_time_profile(document: dict) -> None:
+    import numpy as np
+
+    candidate = NativeReplayCandidate.from_document(document, NAMES, HASH)
+    increment = np.zeros((4, 7))
+    increment[3, 6] = 2
+    updated = increment_native_candidate(candidate, increment, basis_duration_s=0.8)
+    coefficients = updated.document["coefficients"]
+    for t in (0.0, 0.6, 0.8, 1.0):
+        assert np.polyval(coefficients[3], t) == pytest.approx(2 * (t / 0.8) ** 6)
+    assert candidate.document["coefficients"][3][0] == 0
+    assert candidate.sha256 != updated.sha256
