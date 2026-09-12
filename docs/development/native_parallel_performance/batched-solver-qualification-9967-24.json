@@ -1,0 +1,34 @@
+{
+  "qualification": "fixed-input, bounded full multiple-shooting solver assembly",
+  "date_utc": "2026-09-12",
+  "source_driver_sha256": "e3d448284682fb57e08a6ba8d54fc5265bdec25d8cd4a75ecaddf4a9c6990258",
+  "generated_guarded_driver_sha256": "0daaf1c0410cfbbc891dc0ce6fe8b9bc44b6d7c45cc0088ac7c5d30244695a8c",
+  "runtime": "/home/dieterolson/native-ms-pilot-9967-21",
+  "environment": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "arguments": {
+    "horizon_s": 0.85,
+    "nodes_s": [0.2, 0.4, 0.6, 0.7, 0.8, 0.85],
+    "basis_duration_s": 0.8,
+    "max_nfev": 2,
+    "max_iterations": 1,
+    "batch_workers": [0, 2]
+  },
+  "outputs": {
+    "sequential": "C:/Users/diete/native-ms-solver-batch-seq-9967-24",
+    "parallel": "C:/Users/diete/native-ms-solver-batch-par-9967-24"
+  },
+  "result": {
+    "all_artifacts_equal_except_timing": true,
+    "semantic_windows_equal_after_omitting_sensitivity_s": true,
+    "candidate_sha256": "dbfcc0f748cacdd11515f1478ad4a9ae72609594519fb1c752d24aee7ece9d60",
+    "function_evaluations": 2,
+    "accepted": false,
+    "optimizer_converged": false,
+    "sequential_window_sensitivity_seconds": 44.52302451105788,
+    "parallel_window_sensitivity_seconds": 43.348640043928754
+  },
+  "scope_limit": "This proves one frozen, short full solver residual/constraint/Jacobian assembly receipt. It does not establish a whole-fit speedup, convergence, acceptance, or a matched swing."
+}

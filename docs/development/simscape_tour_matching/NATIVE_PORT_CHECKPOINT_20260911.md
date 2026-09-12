@@ -49,9 +49,15 @@ a bounded trial remain pending. No follow-on optimization has been launched.
 The parent-side `NativeSensitivityBatchAdapter` now implements the exact
 `segmented_forward_batch` callable. It leaves candidate/tangent construction in
 the driver and maps ordered worker outputs to parent solver arrays;31 focused
-tests pass. The remaining performance acceptance gate is a fixed-input full
-solver residual/Jacobian and constraint-assembly comparison, followed only then
-by one separately recorded bounded fit.
+tests pass. The fixed-input full solver residual/Jacobian and constraint-assembly
+comparison now passes: generated guarded run20 source replayed the frozen 0.85 s
+six-window, two-evaluation SLSQP receipt sequentially and with two spawned
+workers. All result artifacts match exactly except measured sensitivity timing;
+the returned candidate is `dbfcc0f...`. The recorded receipt is
+`../native_parallel_performance/batched-solver-qualification-9967-24.json`.
+This is not a speed, convergence or matching claim. The remaining prerequisite
+for one bounded fit is the reviewed smooth closure-feasible transition
+initializer; do not repeat a blind control-bound continuation.
 
 ## Run 20 Saved Evaluation 44 Audit
 
