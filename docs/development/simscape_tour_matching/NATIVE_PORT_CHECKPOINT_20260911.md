@@ -46,6 +46,13 @@ two workers). This qualifies worker transport, not solver residual/constraint
 assembly, repeated cache behavior or a whole-fit speedup. Those solver gates and
 a bounded trial remain pending. No follow-on optimization has been launched.
 
+The parent-side `NativeSensitivityBatchAdapter` now implements the exact
+`segmented_forward_batch` callable. It leaves candidate/tangent construction in
+the driver and maps ordered worker outputs to parent solver arrays;31 focused
+tests pass. The remaining performance acceptance gate is a fixed-input full
+solver residual/Jacobian and constraint-assembly comparison, followed only then
+by one separately recorded bounded fit.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.

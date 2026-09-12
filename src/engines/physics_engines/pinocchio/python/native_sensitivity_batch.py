@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import pickle
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -22,6 +23,9 @@ from src.engines.physics_engines.pinocchio.python.native_sensitivity import (
     replay_marker_sensitivities,
 )
 from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
+from src.shared.python.motion_matching.native_window_executor import (
+    NativeWindowExecutor,
+)
 
 Array = NDArray[np.float64]
 
@@ -175,3 +179,39 @@ def evaluate_trusted_native_sensitivity_request(
     ):
         value.setflags(write=False)
     return result
+
+
+class NativeSensitivityBatchAdapter:
+    """Parent-side adapter from shooting cache misses to a persistent executor.
+
+    ``make_request`` belongs to the native driver because it alone owns the
+    current candidate construction and retracted node tangent.  This adapter
+    owns no cache, dynamics, state transform, residual assembly, or optimizer.
+    It is safe to pass as ``MultipleShootingOptions.segmented_forward_batch``.
+    """
+
+    def __init__(
+        self,
+        make_request: Callable[
+            [Array, Array, Array | None], NativeSensitivityWindowRequest
+        ],
+        executor: NativeWindowExecutor[NativeSensitivityWindowResult],
+    ) -> None:
+        if not callable(make_request):
+            raise TypeError("make_request must be callable")
+        if not isinstance(executor, NativeWindowExecutor):
+            raise TypeError("executor must be a NativeWindowExecutor")
+        self._make_request = make_request
+        self._executor = executor
+
+    def __call__(
+        self, requests: Sequence[tuple[Array, Array, Array | None]]
+    ) -> tuple[tuple[Array, Array], ...]:
+        payloads = tuple(
+            serialize_trusted_native_sensitivity_request(
+                self._make_request(theta, clock, state)
+            )
+            for theta, clock, state in requests
+        )
+        results = self._executor.evaluate(payloads)
+        return tuple((result.markers_m, result.endpoint_state) for result in results)
