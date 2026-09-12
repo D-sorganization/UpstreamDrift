@@ -1,0 +1,701 @@
+{
+  "qualification": "Native pose branch diagnosis only; no dynamic fit or equivalence claim",
+  "input_sha256": {
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "/mnt/c/Users/diete/native-ms-fit-9967-04/returned-candidate.json": "8c1d52d9938d8f9ddaa33aac4c10a589c724ffd644fa59aef2f817583193e62d",
+    "/mnt/c/Users/diete/native-pose-forward-9967-01.json": "e0516641c9b4e0e12b4dd222a58ef66b5694065876435661e0890386182c8dfb",
+    "/mnt/c/Users/diete/native-pose-backward-9967-02.json": "c9643217143ceb3d54d45c5a36e0aa2369cde3015d456a55572e10f0ff5b5772"
+  },
+  "runner_sha256": "c710596e27bf992f9cf05dcf95145f63d389c4f5b81e1b748c8527904f0bf0a6",
+  "frames": [
+    {
+      "time_s": 0.6,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 7.039144851945846e-7,
+          "rotation_matrix_max_difference": 7.243024893410777e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 5.691836255314583e-7,
+          "rotation_matrix_max_difference": 7.720599686400487e-6
+        },
+        {
+          "frame": "RE",
+          "position_difference_m": 2.3286398214309658e-7,
+          "rotation_matrix_max_difference": 1.464484163826718e-6
+        },
+        {
+          "frame": "RS",
+          "position_difference_m": 2.3191159419642403e-7,
+          "rotation_matrix_max_difference": 1.3628618636823964e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.2974919673224751e-7,
+          "rotation_matrix_max_difference": 1.3652680186382327e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 5.691836255314583e-7,
+          "rotation_matrix_max_difference": 7.720599686400487e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 7.039144851945846e-7,
+          "rotation_matrix_max_difference": 7.243024893410777e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.7051271387734008e-7,
+          "rotation_matrix_max_difference": 5.9468208170598835e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 6.185433359622964e-8,
+          "rotation_matrix_max_difference": 2.7512722450828697e-6
+        },
+        {
+          "frame": "RE",
+          "position_difference_m": 2.3286398214309658e-7,
+          "rotation_matrix_max_difference": 1.464484163826718e-6
+        }
+      ]
+    },
+    {
+      "time_s": 0.625,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 5.70616494207656e-7,
+          "rotation_matrix_max_difference": 4.95589115229178e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 4.2809931662528495e-7,
+          "rotation_matrix_max_difference": 5.304304097508705e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 1.730842587963773e-7,
+          "rotation_matrix_max_difference": 1.270751515958235e-6
+        },
+        {
+          "frame": "Grip",
+          "position_difference_m": 1.6190980905429467e-7,
+          "rotation_matrix_max_difference": 1.270751515958235e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 1.616597013627699e-7,
+          "rotation_matrix_max_difference": 1.270751546766924e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 4.2809931662528495e-7,
+          "rotation_matrix_max_difference": 5.304304097508705e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 5.70616494207656e-7,
+          "rotation_matrix_max_difference": 4.95589115229178e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.305921539281002e-7,
+          "rotation_matrix_max_difference": 4.242027844325591e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 8.150468297630046e-8,
+          "rotation_matrix_max_difference": 2.1523261634626145e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 1.616597013627699e-7,
+          "rotation_matrix_max_difference": 1.270751546766924e-6
+        }
+      ]
+    },
+    {
+      "time_s": 0.65,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 5.866446443671991e-7,
+          "rotation_matrix_max_difference": 5.396662335455105e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 4.575838411811385e-7,
+          "rotation_matrix_max_difference": 5.637146393011605e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 1.9998917449055087e-7,
+          "rotation_matrix_max_difference": 1.374080694394042e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 1.8645100681028464e-7,
+          "rotation_matrix_max_difference": 1.3740808436635277e-6
+        },
+        {
+          "frame": "Grip",
+          "position_difference_m": 1.8504973161230104e-7,
+          "rotation_matrix_max_difference": 1.374080694394042e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 4.575838411811385e-7,
+          "rotation_matrix_max_difference": 5.637146393011605e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 5.866446443671991e-7,
+          "rotation_matrix_max_difference": 5.396662335455105e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.3653877585677796e-7,
+          "rotation_matrix_max_difference": 4.241000117199967e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 8.00036002701345e-8,
+          "rotation_matrix_max_difference": 2.2380825501766566e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 1.8645100681028464e-7,
+          "rotation_matrix_max_difference": 1.3740808436635277e-6
+        }
+      ]
+    },
+    {
+      "time_s": 0.675,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 6.268751183990694e-7,
+          "rotation_matrix_max_difference": 5.822707890346113e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 4.819838307134227e-7,
+          "rotation_matrix_max_difference": 5.954875619329503e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.3095554817548116e-7,
+          "rotation_matrix_max_difference": 1.9202934152806606e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.165597516358652e-7,
+          "rotation_matrix_max_difference": 1.9202933955186907e-6
+        },
+        {
+          "frame": "Grip",
+          "position_difference_m": 2.151465228615808e-7,
+          "rotation_matrix_max_difference": 1.9202934152806606e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 4.819838307134227e-7,
+          "rotation_matrix_max_difference": 5.954875619329503e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 6.268751183990694e-7,
+          "rotation_matrix_max_difference": 5.822707890346113e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.382329520601438e-7,
+          "rotation_matrix_max_difference": 3.984626454789364e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 8.637128569210145e-8,
+          "rotation_matrix_max_difference": 2.440770583977958e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.3095554817548116e-7,
+          "rotation_matrix_max_difference": 1.9202934152806606e-6
+        }
+      ]
+    },
+    {
+      "time_s": 0.7,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 6.403516736685157e-7,
+          "rotation_matrix_max_difference": 6.576890514975453e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 5.010026572599968e-7,
+          "rotation_matrix_max_difference": 6.576890514975453e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.4802273679648424e-7,
+          "rotation_matrix_max_difference": 1.7843848078569202e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.317700749181253e-7,
+          "rotation_matrix_max_difference": 1.7843848199583512e-6
+        },
+        {
+          "frame": "Grip",
+          "position_difference_m": 2.2843013348322123e-7,
+          "rotation_matrix_max_difference": 1.7843848078569202e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 5.010026572599968e-7,
+          "rotation_matrix_max_difference": 6.576890514975453e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 6.403516736685157e-7,
+          "rotation_matrix_max_difference": 6.576890514975453e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.4556563282717305e-7,
+          "rotation_matrix_max_difference": 3.6469651066850517e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 8.75412348641908e-8,
+          "rotation_matrix_max_difference": 2.551668735695234e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.317700749181253e-7,
+          "rotation_matrix_max_difference": 1.7843848199583512e-6
+        }
+      ]
+    },
+    {
+      "time_s": 0.725,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 6.568001508043305e-7,
+          "rotation_matrix_max_difference": 7.110634226425994e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 5.250279145036408e-7,
+          "rotation_matrix_max_difference": 7.110634226425994e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.3957333652318403e-7,
+          "rotation_matrix_max_difference": 1.508806328653911e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.2265510221051548e-7,
+          "rotation_matrix_max_difference": 1.5088065581370103e-6
+        },
+        {
+          "frame": "Grip",
+          "position_difference_m": 2.2106930236248374e-7,
+          "rotation_matrix_max_difference": 1.508806328653911e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 5.250279145036408e-7,
+          "rotation_matrix_max_difference": 7.110634226425994e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 6.568001508043305e-7,
+          "rotation_matrix_max_difference": 7.110634226425994e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.6278882563383816e-7,
+          "rotation_matrix_max_difference": 3.1141784733179634e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 8.856384367033334e-8,
+          "rotation_matrix_max_difference": 2.6529080366377578e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.2265510221051548e-7,
+          "rotation_matrix_max_difference": 1.5088065581370103e-6
+        }
+      ]
+    },
+    {
+      "time_s": 0.75,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 6.649179994934875e-7,
+          "rotation_matrix_max_difference": 7.3301994880647925e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 5.223852233179005e-7,
+          "rotation_matrix_max_difference": 7.3301994880647925e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.3766587337765755e-7,
+          "rotation_matrix_max_difference": 1.4205660029964484e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.2138330250385533e-7,
+          "rotation_matrix_max_difference": 1.4205660000543574e-6
+        },
+        {
+          "frame": "Grip",
+          "position_difference_m": 2.1901324386248348e-7,
+          "rotation_matrix_max_difference": 1.4205660029964484e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 5.223852233179005e-7,
+          "rotation_matrix_max_difference": 7.3301994880647925e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 6.649179994934875e-7,
+          "rotation_matrix_max_difference": 7.3301994880647925e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.6796290186347687e-7,
+          "rotation_matrix_max_difference": 2.7148368842433435e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 8.969382542442109e-8,
+          "rotation_matrix_max_difference": 2.686510293836708e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.3766587337765755e-7,
+          "rotation_matrix_max_difference": 1.4205660029964484e-6
+        }
+      ]
+    },
+    {
+      "time_s": 0.775,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 6.412891660896045e-7,
+          "rotation_matrix_max_difference": 7.170969849645825e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 4.771000705996096e-7,
+          "rotation_matrix_max_difference": 7.170969849645825e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.4193957814924235e-7,
+          "rotation_matrix_max_difference": 1.5571152293669677e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.2666696709203316e-7,
+          "rotation_matrix_max_difference": 1.5571152524596066e-6
+        },
+        {
+          "frame": "Grip",
+          "position_difference_m": 2.2000540326207151e-7,
+          "rotation_matrix_max_difference": 1.5571152293669677e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 4.771000705996096e-7,
+          "rotation_matrix_max_difference": 7.170969849645825e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 6.412891660896045e-7,
+          "rotation_matrix_max_difference": 7.170969849645825e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 9.564553134431832e-8,
+          "rotation_matrix_max_difference": 2.5991393067248403e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.515298408037727e-7,
+          "rotation_matrix_max_difference": 2.5579096504246834e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.2666696709203316e-7,
+          "rotation_matrix_max_difference": 1.5571152524596066e-6
+        }
+      ]
+    },
+    {
+      "time_s": 0.8,
+      "largest_position_differences": [
+        {
+          "frame": "LS",
+          "position_difference_m": 6.291463759158385e-7,
+          "rotation_matrix_max_difference": 7.706110360161667e-6
+        },
+        {
+          "frame": "LE",
+          "position_difference_m": 5.243484938511107e-7,
+          "rotation_matrix_max_difference": 7.706110360161667e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.7552650366079237e-7,
+          "rotation_matrix_max_difference": 1.7078611663778887e-6
+        },
+        {
+          "frame": "RW",
+          "position_difference_m": 2.5613646868202756e-7,
+          "rotation_matrix_max_difference": 1.7078611455056958e-6
+        },
+        {
+          "frame": "Grip",
+          "position_difference_m": 2.543980567862356e-7,
+          "rotation_matrix_max_difference": 1.7078611663778887e-6
+        }
+      ],
+      "largest_rotation_differences": [
+        {
+          "frame": "LE",
+          "position_difference_m": 5.243484938511107e-7,
+          "rotation_matrix_max_difference": 7.706110360161667e-6
+        },
+        {
+          "frame": "LS",
+          "position_difference_m": 6.291463759158385e-7,
+          "rotation_matrix_max_difference": 7.706110360161667e-6
+        },
+        {
+          "frame": "LF",
+          "position_difference_m": 1.6179836872123912e-7,
+          "rotation_matrix_max_difference": 2.9464166838022443e-6
+        },
+        {
+          "frame": "LScap",
+          "position_difference_m": 6.25329550663255e-8,
+          "rotation_matrix_max_difference": 2.5005328166405327e-6
+        },
+        {
+          "frame": "LW",
+          "position_difference_m": 2.7552650366079237e-7,
+          "rotation_matrix_max_difference": 1.7078611663778887e-6
+        }
+      ]
+    }
+  ],
+  "initial_coordinate_distances": {
+    "forward": {
+      "root_translation_norm_m": 0.012448230768643721,
+      "rotation_raw_norm_rad": 0.34365970511525507,
+      "rotation_wrapped_norm_rad": 0.34365970511525507
+    },
+    "backward": {
+      "root_translation_norm_m": 0.012448236156263828,
+      "rotation_raw_norm_rad": 4.721578086828244,
+      "rotation_wrapped_norm_rad": 4.4680814212344355
+    }
+  },
+  "coordinate_differences_at_start": [
+    {
+      "name": "TranslationInputX",
+      "forward": 1.17294847918605,
+      "backward": 1.1729485245521414,
+      "dynamic": 1.176920258107067
+    },
+    {
+      "name": "TranslationInputY",
+      "forward": 0.5621619911421164,
+      "backward": 0.5621619659310229,
+      "dynamic": 0.5735974081643124
+    },
+    {
+      "name": "TranslationInputZ",
+      "forward": 0.8645128559170403,
+      "backward": 0.8645128417656571,
+      "dynamic": 0.8616120527523212
+    },
+    {
+      "name": "HipInputX",
+      "forward": -0.44910579585652793,
+      "backward": -0.44910580370551817,
+      "dynamic": -0.36508544720148584
+    },
+    {
+      "name": "HipInputY",
+      "forward": -0.703139168935543,
+      "backward": -0.7031391278090239,
+      "dynamic": -0.7113378282801803
+    },
+    {
+      "name": "HipInputZ",
+      "forward": -0.6357075237113752,
+      "backward": -0.6357071394095446,
+      "dynamic": -0.5941775750355729
+    },
+    {
+      "name": "SpineInputX",
+      "forward": -0.279345385581612,
+      "backward": -0.27934539242922385,
+      "dynamic": -0.32804567589855554
+    },
+    {
+      "name": "SpineInputY",
+      "forward": -0.06340781643349128,
+      "backward": -0.06340762907396899,
+      "dynamic": 0.038802665355330605
+    },
+    {
+      "name": "TorsoInput",
+      "forward": -0.5484114074798173,
+      "backward": -0.5484120605391805,
+      "dynamic": -0.5194044522373416
+    },
+    {
+      "name": "LEInput",
+      "forward": 0.6250313952310742,
+      "backward": 0.625028694577378,
+      "dynamic": 0.7237574087010007
+    },
+    {
+      "name": "LFInput",
+      "forward": 2.4779244279004407,
+      "backward": 2.477938393482536,
+      "dynamic": 2.380556386039622
+    },
+    {
+      "name": "LScapInputX",
+      "forward": 0.8385020196910007,
+      "backward": 0.8385039517420265,
+      "dynamic": 0.9268055880043135
+    },
+    {
+      "name": "LScapInputY",
+      "forward": -0.7824438367934909,
+      "backward": -0.7824413336769817,
+      "dynamic": -0.874964312586748
+    },
+    {
+      "name": "LSInputX",
+      "forward": 0.03475249768633934,
+      "backward": 3.1763318785990844,
+      "dynamic": -0.0965834962831446
+    },
+    {
+      "name": "LSInputY",
+      "forward": -2.091713507237391,
+      "backward": -1.0498886780559467,
+      "dynamic": -2.1808918186246964
+    },
+    {
+      "name": "LSInputZ",
+      "forward": -2.3363240918738164,
+      "backward": 0.8052546851987922,
+      "dynamic": -2.390394790224122
+    },
+    {
+      "name": "LWInputX",
+      "forward": 0.46937421454429096,
+      "backward": 0.4693738084448977,
+      "dynamic": 0.4137164203552302
+    },
+    {
+      "name": "LWInputY",
+      "forward": -1.7279548407357235,
+      "backward": -1.727962493204524,
+      "dynamic": -1.6820757072999728
+    },
+    {
+      "name": "REInput",
+      "forward": 0.7075518509201533,
+      "backward": 0.7075518590466353,
+      "dynamic": 0.7309779096855388
+    },
+    {
+      "name": "RFInput",
+      "forward": 1.6433566180131027,
+      "backward": 1.6433551691416255,
+      "dynamic": 1.7479348903640324
+    },
+    {
+      "name": "RScapInputX",
+      "forward": 0.8670532074522964,
+      "backward": 0.8670517620712893,
+      "dynamic": 0.8351697650571639
+    },
+    {
+      "name": "RScapInputY",
+      "forward": 0.5718647670350793,
+      "backward": 0.5718642035367761,
+      "dynamic": 0.4978855187993556
+    },
+    {
+      "name": "RSInputX",
+      "forward": -1.329743208421153,
+      "backward": -1.3297412337553747,
+      "dynamic": -1.3652571784046583
+    },
+    {
+      "name": "RSInputY",
+      "forward": -0.6132315892175344,
+      "backward": -0.6132294567287251,
+      "dynamic": -0.6354955118026162
+    },
+    {
+      "name": "RSInputZ",
+      "forward": 0.9224204712272652,
+      "backward": 0.9224221647776759,
+      "dynamic": 0.858729749983634
+    },
+    {
+      "name": "RWInputX",
+      "forward": -1.234105534457355,
+      "backward": -1.234105425306618,
+      "dynamic": -1.2734635725238157
+    },
+    {
+      "name": "RWInputY",
+      "forward": 0.3828254764697849,
+      "backward": 0.3828238297670199,
+      "dynamic": 0.3462196115130696
+    }
+  ]
+}

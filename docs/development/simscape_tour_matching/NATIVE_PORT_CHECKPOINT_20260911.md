@@ -1,5 +1,51 @@
 # Native Port Implementation Checkpoint
 
+## Forward Coordinate Branch Selected; Tangent Rates Audited
+
+Updated 2026-09-12 UTC. Native frame comparison of the nine forward/backward
+pose pairs finds maximum named-frame origin difference 7.03915e-7 m and maximum
+rotation-matrix entry difference 7.72060e-6. These are nearly identical named
+frame placements at the sampled times, despite raw coordinate differences near
+pi; this does not prove identical internal mobilizer frames or effort semantics.
+At 0.6 s, the forward pose is 0.343660 rad in raw rotational-coordinate norm
+from the current dynamic state; backward is 4.72158 rad (wrapped 4.46808 rad).
+Both root translation differences are about 0.0124482 m. Select the forward
+continuation branch for the next initializer; do not average the coordinates.
+
+A default not-a-knot CubicSpline through that branch supplies a diagnostic rate
+estimate. At each of the nine original poses, native closure-rate responses to
+27 unit coordinate rates give a rank-six velocity constraint matrix J. Projecting
+the estimate by v - lstsq(J, J v) yields rate closure at most 3.10863e-15 while
+retaining the original qualified position closure. Correction norms range
+0.00263 to 0.01626 in mixed coordinate-rate units. This unscaled projection is
+an explicit diagnostic metric, not a kinetic-energy or physiological optimum.
+The saved q/qd states are assembled seed proposals, not dynamic fit results.
+
+Crucially, ordinary coordinate-spline midpoint pose closure ranges 1.77e-5 to
+6.29e-5, above the 1e-7 tolerance. Do not use that spline as a qualified motion
+or feed its accelerations to an unconstrained inverse dynamics procedure.
+Only the original sampled q with projected qd pass the position/rate checks.
+
+Artifacts: native-pose-branch-audit-9967-01.json and
+native-pose-rate-audit-9967-01.json in native_evidence; original bytes and the
+exact audit scripts are in local simscape-tour-checkpoints and ControlTower
+C:/Users/diete. Each report hashes inputs and its runner. Both native commands
+exited zero using the unchanged native-pose-9967-01 runtime and Pinocchio venv.
+Reproduce with audit_native_pose_branches_9967_01.py and
+audit_native_pose_rates_9967_01.py, PYTHONPATH=/home/dieterolson/native-pose-9967-01,
+OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1. Output guards prohibit overwrite.
+
+Next implementation: initialize native shooting nodes from the saved forward
+q/qd states, initially at 0.6 and 0.7 s, retaining the original q0/qd0 for the
+first window and one global sextic. Build separate scaled closure charts at
+each node and qualify their composed state/effort derivatives. The existing
+pilot hardcodes a single chart at 0.6 and cannot consume these states unchanged.
+Extend that adapter through tests; reuse the shared shooting solver and native
+window APIs. State boxes must be explicit around the new references, with all
+changed seeds and bounds recorded. Do not transplant into the old +/-0.02 chart
+or claim a same-initialization continuation. Dynamic defects and final continuous
+replay remain decisive, and the full capture remains the objective.
+
 ## Bidirectional Transition Pose Continuation Qualified at Nine Samples
 
 Updated 2026-09-12 UTC. Extended the existing reproduction runner with explicit
