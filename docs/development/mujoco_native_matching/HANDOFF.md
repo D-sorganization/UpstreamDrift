@@ -1,5 +1,19 @@
 # Native MuJoCo Matching Handoff
 
+## Run18 Effort Audit Addendum
+
+[Run18 Effort Correction Audit](RUN18_EFFORT_AUDIT.md) and
+`evidence/run18-effort-report.json` independently verify 65 saturated correction
+controls across 23 channels. All active entries are ±2, not the eight widened
+±10 entries. The report distinguishes world forces, root-base forces and joint
+generalized torques, and records actual polynomial extrema and time samples.
+Eleven otherwise ±2 torque boxes allow corrections greater than2 after the
+0.8-second Bernstein basis interval because run18 covers0.85 seconds. These
+are numerical correction boxes, not total physical limits or feasibility proof.
+The audit made no runtime or physics changes; the parent owns live run19 and
+any subsequent optimization decision. Exact raw inputs/script/report and three
+passing extrema tests are retained in `evidence/raw-run18-effort-audit.zip`.
+
 ## Native Import and Export Sequence Fixed
 
 The root MuJoCo package now exposes `Engine` lazily. Importing the native
