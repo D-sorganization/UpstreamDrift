@@ -112,6 +112,16 @@ global effort coefficients, forward dynamics or an accepted match. The next
 implementation stage is a derivative-aware smooth path fit that rechecks pose,
 rate and acceleration closure before reaction-eliminated effort initialization.
 
+A finer50 ms continuation through0.85 s is now preserved in
+`native_evidence/marker_pose_sequence_fine_9967_23/receipt.json`. It remains
+on a closure-valid branch but static RMS rises smoothly from22.636 mm at0.6 s
+to31.141 mm at0.7 s and40.732 mm at0.85 s. This is the current local static
+kinematic floor for the fixed native geometry, markers and attachments; it
+explains why forward matching gets worse after transition but does not prove
+that it is a global floor or excuse relaxing final acceptance. The next work
+must examine marker attachments/geometry and smooth-path dynamic compatibility
+before another torque optimization.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.

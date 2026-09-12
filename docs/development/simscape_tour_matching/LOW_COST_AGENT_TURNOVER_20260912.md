@@ -97,6 +97,14 @@ preserve this warning. The next agent must not identify torque from this result.
 First fit a smooth derivative-aware path through the retained poses, then prove
 position, velocity and acceleration closure along its samples.
 
+The 50 ms continuation receipt through0.85 s is
+`native_evidence/marker_pose_sequence_fine_9967_23/receipt.json`. It records
+one closure-valid branch and a rising static residual:22.636 mm at0.6 s,
+31.141 mm at0.7 s and40.732 mm at0.85 s. Treat this as a local diagnostic of
+the current fixed geometry/attachment identity, not a license to weaken the
+25 mm final whole-motion gate. Before dynamics, audit attachment/geometry error
+and construct a smooth path with qd/qdd closure evidence.
+
 Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
 Never silently change geometry, add feedback/state resets, or relax criteria.
 Use one bounded fit at a time after qualification; independently forward replay
