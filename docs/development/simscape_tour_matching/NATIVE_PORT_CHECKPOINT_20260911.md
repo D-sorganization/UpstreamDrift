@@ -1,5 +1,51 @@
 # Native Port Implementation Checkpoint
 
+## Pose-Seeded Three-Window Native Trial Is Live
+
+Updated 2026-09-12 UTC. Reused the existing shared retraction, sensitivity and
+shooting implementation; fourteen existing retraction/shooting tests pass.
+Experimental driver05 now selects a separate closure chart for each internal
+node at 0.6 and 0.7 s, using the saved forward-branch pose and projected-rate
+audit states. Each chart has its own reference and scaled tangent basis; its
+cache key includes node time. No spline interpolation is inserted into dynamics.
+
+Native audit-only session 9414 exited zero. Both nonzero chart probes (columns
+0 and 14, coordinate 14 displaced by .005) passed centered finite-difference
+composition checks. Marker relative errors are at most 1.60388e-6, end-state
+relative errors at most 7.56904e-5, below the 1e-3 audit gate. The checks cover
+0.6-0.7 and 0.7-0.8 s. They qualify these probes, not every optimizer iterate.
+Receipt: native_evidence/ms_pose_audit_9967_05/derivative-audit.json, with config
+and window ledger alongside. Exact raw output is local/ControlTower
+native-ms-pose-audit-9967-05.
+
+LIVE optimization: unified session 45470; confirmed ControlTower WSL PID 2113959.
+Output C:/Users/diete/native-ms-fit-9967-05. Command uses
+run_native_ms_pilot_9967_05.py --output /mnt/c/Users/diete/native-ms-fit-9967-05
+--max-nfev 12 --defect-weight 1. Runtime remains
+/home/dieterolson/native-ms-pilot-9967-01, Python remains
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python, with that runtime as
+PYTHONPATH and OPENBLAS_NUM_THREADS=1, OMP_NUM_THREADS=1.
+
+The global sextic starts from run04 and retains the original root-force02 parent
+and exact expanded lower/upper torque vectors recorded in run04. B0/B1 remain
+fixed. Each new node has 42 local variables bounded +/-0.02 and chart radius
+0.5, with the existing state/closure scaling. This is an explicitly different
+state initialization and three-window problem, not a same-settings restart.
+Original q0/qd0, model geometry and final acceptance gates remain unchanged.
+Defect weight 1 does not relax the final 1e-4 scaled defect gate.
+
+Driver SHA-256:
+3280a41fc7af7c7b41c8ec2c5c6f71350fb656b77d1776dc97bf58b922ef4ea7.
+Exact driver is saved in local simscape-tour-checkpoints and ControlTower
+C:/Users/diete, with an archived driver bundle in native_evidence. Runtime
+dependency chain remains the previously qualified native-ms-pilot-9967-01.
+
+Next action: poll session 45470/PID 2113959; preserve any terminal result or
+failure and independently replay the returned coefficients from the original
+initial state. Compare continuous and segmented residuals plus both node defects.
+Do not claim success from the good static pose path or from reset-dependent
+segmented tracking. Full capture and final R2025b qualification remain open.
+
 ## Forward Coordinate Branch Selected; Tangent Rates Audited
 
 Updated 2026-09-12 UTC. Native frame comparison of the nine forward/backward
