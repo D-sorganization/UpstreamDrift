@@ -1,5 +1,37 @@
 # Native Port Implementation Checkpoint
 
+## Selected Run16 History Independently Audited While Run17 Runs
+
+Updated 2026-09-12 UTC. Read the Run17 live-process section immediately below
+for the active solver identity. The previous turn made progress by launching
+and preserving its controlled larger-budget configuration. No new solver was
+launched in this audit turn; run17 remains the one ongoing fit.
+
+A separate read-only replay experiment (session59514 exited zero) replays
+run16 saved evaluations1,7 and13 with original q0/qd0 and every saved physical
+shooting state. Candidate, config and capture identities are checked. Findings:
+
+| Evaluation | Callback Cost | Continuous Terminal RMS | Shooting Terminal RMS | Pointwise Gap | Max Scaled Defect |
+| ---------- | ------------- | ----------------------- | --------------------- | ------------- | ----------------- |
+| 1          | 41.858400     | 117.611447 mm           | 117.611445 mm         | 0.000006 mm   | 1.92242e-8        |
+| 7          | 35.717634     | 359.917928 mm           | 106.343909 mm         | 358.718968 mm | 0.00647676        |
+| 13         | 35.038818     | 96.757316 mm            | 104.831777 mm         | 38.007483 mm  | 0.00227859        |
+
+These are residual evaluations, not guaranteed accepted solver iterates. They
+show that an improving objective can accompany worse continuous motion until
+feasibility is restored. The final audit exactly reproduces run16 returned
+candidate identity, whole/terminal marker RMS, maximum defect and pointwise gap.
+No production code or active runtime was changed. Raw script and receipt are in
+native_evidence/ms_fit_9967_16/history-audit.zip; adjacent JSON is for review.
+Source SHA1b393f48e933b9ee21ea7807dfa10c5859be1c472ab42780d10bd52d73c65c23.
+
+A live run17 timing sample gives median sensitivity seconds by window:
+0-.2:3.893; .2-.4:4.029; .4-.6:4.025; .6-.7:1.954;
+.7-.8:2.097; .8-.85:0.982. This is about17 s sensitivity work per
+six-window evaluation, excluding other solver work. It suggests a potential
+future benefit from qualified process-level window parallelism, not a measured
+parallel speedup. Keep runtime14 unchanged during the current experiment.
+
 ## Run17 Is Live: Controlled Larger-Budget Constrained Solve
 
 Updated 2026-09-12 UTC. The previous goal turn made progress by independently

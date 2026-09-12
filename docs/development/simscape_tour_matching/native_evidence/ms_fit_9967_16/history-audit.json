@@ -1,0 +1,60 @@
+{
+  "qualification": "Selected residual evaluations, not accepted optimizer iterates; independent primal replay, no fit modification",
+  "runner_sha256": "1b393f48e933b9ee21ea7807dfa10c5859be1c472ab42780d10bd52d73c65c23",
+  "rows": [
+    {
+      "evaluation": 1,
+      "candidate_sha256": "396cedc65a444e1bdb88c0dfeea3d6193fa94147255ba757be76a4e19f506082",
+      "snapshot_sha256": "e378dcf8352e04436ded638771331a590963c8496a161bd6b3b7d5301b377aa0",
+      "callback_cost": 41.85839993516157,
+      "whole_rms_m": 0.030471036706509757,
+      "terminal_rms_m": 0.11761144685965937,
+      "terminal_segmented_rms_m": 0.11761144461497629,
+      "terminal_pointwise_gap_m": 6.303672522792716e-9,
+      "defect_norms": {
+        "0.2": 7.685676334487037e-10,
+        "0.4": 2.1891818099726353e-9,
+        "0.6": 2.116374357391713e-9,
+        "0.7": 4.355592659816081e-9,
+        "0.8": 1.9224162999585e-8
+      },
+      "max_scaled_defect": 1.9224162999585e-8
+    },
+    {
+      "evaluation": 7,
+      "candidate_sha256": "4a766d195971385a92199a62d722b14b7a0af88ab02e2b5c95f618851b17c858",
+      "snapshot_sha256": "a299bfa81d8a9f68ee77908287995c036b53036cd3f27c12b71da738acf71a54",
+      "callback_cost": 35.71763401321706,
+      "whole_rms_m": 0.10133817127632719,
+      "terminal_rms_m": 0.359917928376514,
+      "terminal_segmented_rms_m": 0.10634390872222402,
+      "terminal_pointwise_gap_m": 0.3587189682236178,
+      "defect_norms": {
+        "0.2": 0.0008132076173663892,
+        "0.4": 0.000883741696926909,
+        "0.6": 0.006476761832093147,
+        "0.7": 0.001436366953491094,
+        "0.8": 0.0007271517813910492
+      },
+      "max_scaled_defect": 0.006476761832093147
+    },
+    {
+      "evaluation": 13,
+      "candidate_sha256": "92f64ee67187836f1290319df6ff4d7bff4c4763451aa863dc4e109d1872c91d",
+      "snapshot_sha256": "b1cd489b3b47a4eee81c9374078a72ef0825883c8e7a23893f420cf04f4080a2",
+      "callback_cost": 35.03881825378219,
+      "whole_rms_m": 0.03095697831512523,
+      "terminal_rms_m": 0.09675731575392008,
+      "terminal_segmented_rms_m": 0.10483177748428843,
+      "terminal_pointwise_gap_m": 0.038007483038538944,
+      "defect_norms": {
+        "0.2": 0.00012773583073644453,
+        "0.4": 0.00031914769823940367,
+        "0.6": 0.0008482379691569611,
+        "0.7": 0.00023903250483967093,
+        "0.8": 0.0022785902234184613
+      },
+      "max_scaled_defect": 0.0022785902234184613
+    }
+  ]
+}
