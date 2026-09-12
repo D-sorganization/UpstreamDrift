@@ -1113,6 +1113,10 @@ class TestCIEnvironmentCompatibility:
         assert smoke["env"]["UPSTREAM_DRIFT_WHEEL"] == (
             "dist/${{ needs.build.outputs.wheel_filename }}"
         )
+        verify_tag = next(
+            step for step in steps if step.get("name") == "Verify release tag is signed"
+        )
+        assert 'git verify-tag "${GITHUB_REF_NAME}"' in verify_tag["run"]
 
     def test_ci_standard_pr_scoped_tests_cannot_bypass_coverage_for_source(
         self,
