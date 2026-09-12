@@ -80,7 +80,7 @@ def export_native_urdf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
 
     for link in body_links.values():
         massless(link)
-    coordinates = []
+    coordinates: list[str] = []
     for joint in order_native_tree(spec["joints"]):
         parent = body_links[joint["parent"]]
         placement = joint["parent_to_base"]
@@ -91,7 +91,12 @@ def export_native_urdf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
             child = f"primitive_{len(coordinates)}"
             coordinates.append(name)
             massless(child)
-            axis = tuple(float(i == "xyz".index(kind[1].lower())) for i in range(3))
+            axis_index = "xyz".index(kind[1].lower())
+            axis = (
+                float(axis_index == 0),
+                float(axis_index == 1),
+                float(axis_index == 2),
+            )
             bound = sys.float_info.max
             joints.append(
                 Joint(
@@ -118,7 +123,7 @@ def export_native_urdf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
         spec["coordinate_order"]
     ):
         raise ValueError("Native coordinate inventory not preserved")
-    solid_links = {}
+    solid_links: dict[str, str] = {}
     for body in spec["bodies"]:
         for solid in body["solids"]:
             name = f"solid_{len(solid_links)}"
@@ -136,7 +141,7 @@ def export_native_urdf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
                 )
             )
             fixed(body_links[body["name"]], name, solid["placement"])
-    frame_links = {}
+    frame_links: dict[str, str] = {}
     for frame in spec["frames"]:
         if frame["name"] in frame_links:
             raise ValueError("Duplicate native frame")
