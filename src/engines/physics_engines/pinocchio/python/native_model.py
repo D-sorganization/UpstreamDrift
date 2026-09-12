@@ -47,6 +47,21 @@ class NativeClosureTrajectoryResiduals(NamedTuple):
     acceleration: NDArray[np.float64]
 
 
+class NativeClosureTrajectoryLinearization(NamedTuple):
+    """Detached partial derivatives of all weld levels at one native state.
+
+    Rows concatenate pose, rate, and acceleration residuals in that order.
+    Position and rate derivatives use explicitly configured centered differences;
+    acceleration's partial with respect to supplied acceleration is exact.
+    """
+
+    names: tuple[str, ...]
+    residual: NDArray[np.float64]
+    dq: NDArray[np.float64]
+    dv: NDArray[np.float64]
+    da: NDArray[np.float64]
+
+
 def depth_first_joints(
     joints: Sequence[Mapping[str, Any]],
 ) -> list[Mapping[str, Any]]:
@@ -322,6 +337,96 @@ class NativePinocchioModel:
         for value in (position, rate, acceleration):
             value.setflags(write=False)
         return NativeClosureTrajectoryResiduals(position, rate, acceleration)
+
+    def closure_trajectory_linearization(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        accelerations: Mapping[str, float],
+        *,
+        finite_difference_step: float,
+    ) -> NativeClosureTrajectoryLinearization:
+        """Differentiate the weld oracle at one state without inverse dynamics.
+
+        The finite differences are local to one 27-coordinate node, which
+        avoids treating a full spline trajectory as a black-box function. The
+        returned acceleration partial is the exact constraint Jacobian because
+        the oracle defines that residual as ``J * (a - a0)``. The final base
+        probe restores the backend data to the reported state.
+        """
+        names = tuple(coordinates)
+        if (
+            not np.isfinite(finite_difference_step)
+            or finite_difference_step <= 0.0
+            or set(rates) != set(names)
+            or set(accelerations) != set(names)
+        ):
+            raise ValueError(
+                "Expected finite positive step and matching state inventories"
+            )
+
+        def flatten(value: NativeClosureTrajectoryResiduals) -> NDArray[np.float64]:
+            return np.concatenate((value.position, value.rate, value.acceleration))
+
+        position = dict(coordinates)
+        velocity = dict(rates)
+        acceleration = dict(accelerations)
+        base = flatten(
+            self.closure_trajectory_residuals(position, velocity, acceleration)
+        )
+        derivative_shape = (base.size, len(names))
+        dq = np.empty(derivative_shape, dtype=float)
+        dv = np.empty(derivative_shape, dtype=float)
+        for index, name in enumerate(names):
+            plus_position = dict(position)
+            minus_position = dict(position)
+            plus_position[name] += finite_difference_step
+            minus_position[name] -= finite_difference_step
+            dq[:, index] = (
+                flatten(
+                    self.closure_trajectory_residuals(
+                        plus_position, velocity, acceleration
+                    )
+                )
+                - flatten(
+                    self.closure_trajectory_residuals(
+                        minus_position, velocity, acceleration
+                    )
+                )
+            ) / (2.0 * finite_difference_step)
+            plus_velocity = dict(velocity)
+            minus_velocity = dict(velocity)
+            plus_velocity[name] += finite_difference_step
+            minus_velocity[name] -= finite_difference_step
+            dv[:, index] = (
+                flatten(
+                    self.closure_trajectory_residuals(
+                        position, plus_velocity, acceleration
+                    )
+                )
+                - flatten(
+                    self.closure_trajectory_residuals(
+                        position, minus_velocity, acceleration
+                    )
+                )
+            ) / (2.0 * finite_difference_step)
+        linear = self.closure_position_linearization(position)
+        self.closure_trajectory_residuals(position, velocity, acceleration)
+        da = np.zeros(derivative_shape, dtype=float)
+        da[-linear.jacobian.shape[0] :, :] = linear.jacobian
+        if (
+            linear.names != names
+            or not np.isfinite(base).all()
+            or not np.isfinite(dq).all()
+            or not np.isfinite(dv).all()
+            or not np.isfinite(da).all()
+        ):
+            raise ValueError("Invalid native weld trajectory linearization")
+        base.setflags(write=False)
+        dq.setflags(write=False)
+        dv.setflags(write=False)
+        da.setflags(write=False)
+        return NativeClosureTrajectoryLinearization(names, base, dq, dv, da)
 
     def marker_derivatives(
         self,

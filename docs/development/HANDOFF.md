@@ -11,8 +11,11 @@ unqualified: it preserves weld position by construction and reduces acceleration
 closure from1.3366819 to0.1041854 after two bounded iterations. This commit adds
 the exact cubic-spline chain rule from each retracted node chart into qd/qdd;
 it has no new optimizer or physical-match claim. Next, qualify structured
-node-level residual derivatives before any further bounded fit. Preserve older
-live-job text as historical only.
+node-level residual derivatives before any further bounded fit. The present
+increment implements local centered q/v residual derivatives, exact
+acceleration-J blocks, and their composition into a trust-constr Jacobian; it
+has unit tests only, no ControlTower receipt. Preserve older live-job text as
+historical only.
 
 - Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 - Branch: feat/9967-native-simscape-pinocchio; checkpoint SELF; PR not created.
@@ -25,9 +28,9 @@ live-job text as historical only.
   receipts. Root reran six identification tests and two comparator tests: pass.
   Strict scalar-rate reconstruction still fails; full swing is not matched.
 - Detailed executable next-agent plan: [Lower-Cost Agent Turnover](simscape_tour_matching/LOW_COST_AGENT_TURNOVER_20260912.md).
-- Next: qualify node-level finite-difference residual derivatives composed with
-  the exact spline/retraction derivatives, then run only the four-node bounded
-  jacobian-enabled probe and independently audit its trajectory. Optional
+- Next: qualify the composed chart Jacobian against direct chart perturbations,
+  then run only the four-node bounded jacobian-enabled probe and independently
+  audit its trajectory. Optional
   window-executor module/tests are integrated from621efab7a; root reran five
   tests successfully. No other agent-owned worktree was edited.
 - Preserved all earlier handoffs below. Archives retain raw identity-bearing

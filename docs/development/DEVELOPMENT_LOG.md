@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching; native engine adapters; docs/development/simscape_tour_matching; docs/development/drake_native_matching; docs/development/native_parallel_performance
 - **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (SELF; focused spline-chain and collocation tests plus Ruff pass; exact cubic-spline qd/qdd Jacobians now retain both target and source node-chart axes. Earlier evidence remains: Drake rejects spline finite-difference qdd; Pinocchio's 6-by-27 weld Jacobian, 21-dimensional retracted node chart, and matching three-level residual oracle are qualified on ControlTower; the four-node bounded preflight reduces acceleration closure to0.1041854 but is unqualified; run20 terminal and independently rejected.)
+- **Last verified:** 2026-09-12 (SELF; focused residual-linearization, spline-chain and collocation tests plus Ruff pass. Local q/v centered trajectory residual derivatives, exact acceleration-J blocks, and the full source-node chart composition are implemented, but lack a ControlTower receipt. Earlier evidence remains: Drake rejects spline finite-difference qdd; Pinocchio's 6-by-27 weld Jacobian, 21-dimensional retracted node chart, and matching three-level residual oracle are qualified on ControlTower; the four-node bounded preflight reduces acceleration closure to0.1041854 but is unqualified; run20 terminal and independently rejected.)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
-- **Next step:** Qualify node-level finite-difference residual derivatives composed with the exact spline/retraction maps before one bounded four-node jacobian-enabled collocation probe.
+- **Next step:** Qualify the assembled four-node chart residual Jacobian against direct perturbations before one bounded jacobian-enabled collocation probe.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps
 

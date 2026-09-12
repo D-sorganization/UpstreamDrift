@@ -95,6 +95,13 @@ the cubic spline maps into every local retraction chart. The next derivative
 stage must compose this map with a _node-level_ residual linearization; do not
 return to a global finite-difference Jacobian of the full trajectory.
 
+The runner now consumes the structured path Jacobian. Its native oracle method
+`closure_trajectory_linearization` uses centered differences only at one q/v
+node and uses the exact weld J for the supplied-acceleration partial. The next
+agent must first compare this assembled Jacobian with direct perturbations of
+the four-node chart, saving a receipt before launching its two-iteration probe.
+This code has unit coverage but no ControlTower qualification receipt yet.
+
 The first native retraction prerequisite is complete:
 `NativePinocchioModel.closure_position_linearization` returns the6-by-27 weld
 position Jacobian in the supplied coordinate order. The ControlTower receipt
