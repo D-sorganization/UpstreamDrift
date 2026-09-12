@@ -14,8 +14,11 @@ it has no new optimizer or physical-match claim. Next, qualify structured
 node-level residual derivatives before any further bounded fit. The present
 increment implements local centered q/v residual derivatives, exact
 acceleration-J blocks, and their composition into a trust-constr Jacobian; it
-has unit tests only, no ControlTower receipt. Preserve older live-job text as
-historical only.
+has unit tests and a ControlTower two-iteration smoke receipt at
+`simscape_tour_matching/native_evidence/retracted_collocation_jacobian_probe_9967_25.json`.
+The residual is0.1490535 and remains unqualified; accepted chart bounds remain
+±0.01 while a0.2 trial retraction radius prevents internal trust-constr probes
+from crashing. Preserve older live-job text as historical only.
 
 - Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 - Branch: feat/9967-native-simscape-pinocchio; checkpoint SELF; PR not created.
