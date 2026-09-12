@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-11
 - **Last verified:** 2026-09-12 (SELF; focused residual-linearization, spline-chain and collocation tests plus Ruff pass. A ControlTower two-iteration structured-Jacobian smoke receipt returns0.1490535 closure and remains unqualified; its0.2 trial retraction radius only prevents internal out-of-bound probes while accepted chart bounds remain±0.01. Earlier evidence remains: Drake rejects spline finite-difference qdd; Pinocchio's 6-by-27 weld Jacobian, 21-dimensional retracted node chart, and matching three-level residual oracle are qualified on ControlTower; run20 terminal and independently rejected.)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
-- **Next step:** Qualify the assembled four-node chart residual Jacobian against direct perturbations before one bounded jacobian-enabled collocation probe.
+- **Next step:** Diagnose why the qualified four-node Jacobian probe increases closure from0.1041854 to0.1490535 before another bounded collocation run.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps
 

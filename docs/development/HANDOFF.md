@@ -18,7 +18,10 @@ has unit tests and a ControlTower two-iteration smoke receipt at
 `simscape_tour_matching/native_evidence/retracted_collocation_jacobian_probe_9967_25.json`.
 The residual is0.1490535 and remains unqualified; accepted chart bounds remain
 ±0.01 while a0.2 trial retraction radius prevents internal trust-constr probes
-from crashing. Preserve older live-job text as historical only.
+from crashing. A complete 84-column centered chart check now records maximum
+absolute error7.90135e-6 and scaled relative error6.23290e-6; this qualifies
+the local derivative assembly, not the fitted trajectory. Preserve older
+live-job text as historical only.
 
 - Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 - Branch: feat/9967-native-simscape-pinocchio; checkpoint SELF; PR not created.
