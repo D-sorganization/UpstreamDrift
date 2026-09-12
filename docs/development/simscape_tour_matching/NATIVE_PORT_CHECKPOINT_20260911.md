@@ -156,6 +156,19 @@ pose0.00126302, rate0.0172004, acceleration0.724940 maximum absolute closure.
 Do not increase that blind finite-difference budget. It confirms the generic
 contract and shows that this problem requires constraint derivatives and
 manifold continuation/retraction before a dynamic path or torque fit.
+
+The first required native manifold derivative is now qualified. The new
+`NativePinocchioModel.closure_position_linearization` exposes the exact6-by-27
+Pinocchio weld Jacobian in the caller's native coordinate order, after its
+explicit zero-rate/zero-effort constraint-data refresh. ControlTower receipt
+`native_evidence/closure_jacobian_9967_24/receipt.json` checks the archived
+initial smooth-path state with centered1e-6 differences: position closure is
+5.32629e-13 and maximum Jacobian discrepancy1.98424e-10. The executable is
+`qualify_native_closure_jacobian.py`. This is kinematic node-chart evidence
+only; it does not yet differentiate rate/acceleration closure or qualify a
+trajectory. Use it with the existing `node_retraction.retract_node` to keep
+each collocation node on the weld manifold before adding those remaining
+derivatives.
 identification. The next path stage is an explicit acceleration projection with
 reported correction magnitude, followed by derivative-consistency review; no
 torque fit or forward replay may be inferred from this failed diagnostic.
