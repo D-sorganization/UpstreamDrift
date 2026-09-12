@@ -70,3 +70,11 @@ def test_changed_urdf_bytes_rejected(bundle: tuple) -> None:
     xml, meta, raw = bundle
     with pytest.raises(ValueError, match="URDF"):
         validate_native_urdf_bundle(xml + b" ", json.dumps(meta).encode(), raw)
+
+
+def test_shared_contract_is_legacy_public_contract() -> None:
+    from src.shared.python.motion_matching.native_urdf_contract import (
+        validate_native_urdf_bundle as shared_contract,
+    )
+
+    assert shared_contract is validate_native_urdf_bundle
