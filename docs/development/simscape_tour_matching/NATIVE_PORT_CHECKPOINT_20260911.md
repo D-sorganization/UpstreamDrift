@@ -1,5 +1,29 @@
 # Native Port Implementation Checkpoint
 
+## First Run07 Evaluation Snapshot Integrity Verified
+
+Updated 2026-09-12 UTC. Retrieved evaluation-00001.json, config.json and the
+ledger from live run07. File hash matches its ledger, candidate schema/canonical
+hash validate, config hash matches exact bytes, and both 0.6/0.7 node states
+contain 54 finite values. Integrity receipt is in
+native_evidence/ms_first_checkpoint_9967_07. This checks package completeness,
+not a replay or fit gate. Raw copies remain local and on ControlTower.
+The committed raw snapshot ZIP preserves exact hashed bytes; adjacent JSON
+copies are repository-formatted and must not be substituted in byte-hash checks.
+
+First evaluation file SHA-256
+a495f9bde422be412e70e12e0c5ee8f35ee4bdceb44673c5c2de87f936fcd338.
+Its canonical candidate is
+55e61866b205fbd17d997e60c0f236f2a03ab3dfec00cc7242ffd190c8fa783c.
+That differs from run06 because recovering/evaluating Bernstein coefficients
+changes absolute coefficients by at most 1.42109e-14; all other candidate fields
+are identical. Do not claim byte-identical coefficient restoration. The original
+run06 candidate and node receipts remain preserved and the physical-node
+reconstruction/defect checks are recorded below.
+
+Run07 remains the active process identified below. Poll it next; saved residual
+evaluations are not independent continuous matches or accepted optimizer steps.
+
 ## Run07 Restores Run06 and Saves Complete Evaluation Snapshots
 
 Updated 2026-09-12 UTC. Restart audit session 79088 exited zero. Driver07 keeps
