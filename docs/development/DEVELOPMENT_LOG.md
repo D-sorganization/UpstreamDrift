@@ -17,20 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8695 · DRY Duplication Quarantine Tightening
+### DL-#8766 · Packaging and Governance Unit-Gate Debt Burndown
 
 - **State:** in_progress
-- **Owner:** claude
-- **Issue:** #8695
-- **Branch:** conductor/issue-8695
-- **PR:** #10005
-- **Paths:** scripts/config/dry_duplication_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
-- **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (`c893a73ad`)
-- **Summary:** Pruned 72 dead quarantined fingerprints across supported scanner runtimes (666 -> 594); no entry raised, baseline not regenerated.
-- **Next step:** Update PR #10005, pass CI, and merge.
+- **Owner:** antigravity
+- **Issue:** #8766
+- **Branch:** fix/packaging-unit-gate-quarantine-burndown
+- **PR:** #10010
+- **Paths:** scripts/config/unit_gate_quarantine.json, tests/scripts/test_check_vendor_updates.py, tests/unit/scripts/test_check_gitignore_dotenv.py, docs/development/monolith_refactor_register.md, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-12 (`c578ca942`)
+- **Summary:** Burned down 43 quarantined packaging and governance unit tests in unit_gate_quarantine.json, anchored test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and synced monolith refactor register.
+- **Next step:** Open PR #10010, pass all CI gates, and squash-merge to main.
 
 ## Shipped (Last 90 Days)
+
+### DL-#8695 · DRY Duplication Quarantine Tightening
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #8695
+- **PR:** #10005 (merged)
+- **Paths:** scripts/config/dry_duplication_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-11
+- **Last verified:** 2026-09-12 (`c578ca942`)
+- **Summary:** Pruned 72 dead quarantined fingerprints across supported scanner runtimes (666 -> 594); no entry raised, baseline not regenerated.
+- **Evidence:** All CI passed; merged to main at c578ca942.
 
 ### DL-#9747 · Signed Release Tag Enforcement and Verification
 
