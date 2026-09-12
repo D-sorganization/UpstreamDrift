@@ -1,5 +1,52 @@
 # Native Port Implementation Checkpoint
 
+## Run 03 Finished: Independent Replay and Typing Check Complete
+
+Updated 2026-09-12 UTC. This supersedes live-run statements below. Session
+17132 exited zero after 249 forward evaluations. The returned candidate is
+60bbe60ec6a57f7a5c4dd277b15de96fa1760ca006bad6509cb215c3e743e379.
+A fresh ControlTower process reproduced every reported marker metric exactly:
+whole RMS 30.8867 mm, early RMS 10.8177 mm, terminal RMS 94.8294 mm and terminal
+club cluster RMS 66.0119 mm. Whole/terminal/club gates fail; optimizer budget
+was exhausted, so numerical acceptance and convergence remain false.
+No replacement optimization has been launched in this workstream.
+
+Fresh adapter/residual evaluation took 3.43346 s. Maximum closure pose/rate
+residuals were 8.06172e-12 / 1.37587e-10. All run artifacts, source config,
+ledger, separate best and returned candidates, independent receipt, portable
+arrays and chart are in native_evidence/refinement_9967_03/. Original copies
+remain on ControlTower and in local simscape-tour-checkpoints. Benchmark's
+historical baseline qualification string is preserved verbatim and does not
+mean the supplied candidate had no prior optimizer history.
+
+![Run 03 Observed Marker Errors](native_evidence/refinement_9967_03/marker-errors.png)
+
+The shaping expansion improved club error but only modestly improved terminal
+all-marker error under this small budget. It does not establish convergence,
+a global optimum, or failure of global sextic controls. There were just four
+optimizer function evaluations plus numerical Jacobian probes/replays. Retain
+all raw marker errors, including the known rigid head/back model mismatch.
+
+A direct native_model.py mypy invocation exposed incomplete local Pinocchio
+stubs and pre-existing constructor variable/field typing errors that the
+normal push hook skipped. Fixed the optional C++ boundary using an explicitly
+dynamic import, distinguished joint specifications from numeric joint IDs and
+typed the frame map. No dynamics formula changed. Direct check now passes:
+python3 -m mypy src/engines/physics_engines/pinocchio/python/native_model.py
+--follow-imports=silent. Derivative/topology/URDF-binding targeted suite:
+12 passed (suite-marker advisory on two existing tests remains report-only).
+The local derivative receipt below predates this typing-only source revision;
+it must retain its actual deployed source hashes.
+
+Next: audit force-versus-torque correction scales in physical units before
+another expensive search. Current +/-2 bounds were exploratory corrections,
+not measured physical limits; equal numerical values in N and Nm are not equal
+physical authority. Quantify their attainable COM impulse/displacement and
+compare to feasible pose diagnostics before choosing new scales. Separately
+continue the staged trajectory-sensitivity validation below to improve
+Jacobian accuracy and computation cost. Do not claim a trajectory speedup
+from the local acceleration derivative timings alone.
+
 ## Local Constrained-Dynamics Derivatives Verified
 
 Updated 2026-09-12 UTC. Previous goal turn made progress by launching expanded
