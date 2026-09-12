@@ -10,10 +10,33 @@ from src.shared.python.motion_matching.prefix_fit import (
     bernstein_to_simscape,
     fit_prefixes,
     normalized_to_simscape,
+    reexpress_bernstein_basis,
 )
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_reexpress_bernstein_basis_preserves_continuous_torque() -> None:
+    """Re-expressing Bernstein controls to a different basis duration must preserve identical torque."""
+    rng = np.random.default_rng(42)
+    controls = rng.normal(size=(5, 7))
+    t_source = 0.80
+    t_target = 1.813889
+
+    controls_target = reexpress_bernstein_basis(
+        controls, source_duration_s=t_source, target_duration_s=t_target
+    )
+
+    # Evaluate physical torque polynomials
+    coeff_source = bernstein_to_simscape(controls, duration_s=t_source)
+    coeff_target = bernstein_to_simscape(controls_target, duration_s=t_target)
+
+    t_eval = np.linspace(0.0, t_source, 100)
+    for j in range(5):
+        tau_src = np.polyval(coeff_source[j], t_eval)
+        tau_tgt = np.polyval(coeff_target[j], t_eval)
+        np.testing.assert_allclose(tau_tgt, tau_src, atol=1e-12, rtol=1e-12)
 
 
 def test_low_degree_controls_export_continuous_torque_in_physical_time() -> None:

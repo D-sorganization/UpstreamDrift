@@ -115,6 +115,7 @@ def test_multiple_shooting_eliminates_defect_on_toy_oscillator() -> None:
     assert result.accepted
     assert result.theta[0] == pytest.approx(2.5, abs=1e-3)
     assert result.max_defect_norm < 1e-3
+    assert result.segmented_rmse_m < 1e-3
     assert result.unsegmented_rmse_m < 1e-3
 
     verif = verify_unsegmented_forward_rollout(
@@ -124,3 +125,42 @@ def test_multiple_shooting_eliminates_defect_on_toy_oscillator() -> None:
     )
     assert verif["rmse_m"] < 1e-3
     assert verif["terminal_rmse_m"] < 1e-3
+
+
+def test_multiple_shooting_rejects_nan_in_unsegmented_rollout() -> None:
+    """If unsegmented rollout diverges or produces NaN, result must be rejected."""
+    time = np.linspace(0.0, 1.0, 51)
+    points = np.zeros((len(time), 1, 3))
+    target = MarkerTarget(time, points, np.ones(1))
+
+    def segmented_forward(
+        theta: np.ndarray,
+        t_span: np.ndarray,
+        initial_state: np.ndarray | None,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        return np.zeros((len(t_span), 1, 3)), np.zeros(2)
+
+    def unsegmented_forward_nan(theta: np.ndarray, t_all: np.ndarray) -> np.ndarray:
+        pred = np.zeros((len(t_all), 1, 3))
+        pred[len(t_all) // 2 :] = np.nan
+        return pred
+
+    options = MultipleShootingOptions(
+        shooting_nodes=(0.5, 1.0),
+        state_dim=2,
+    )
+
+    result = fit_multiple_shooting(
+        target=target,
+        segmented_forward=segmented_forward,
+        unsegmented_forward=unsegmented_forward_nan,
+        initial_theta=np.array([1.0]),
+        lower_theta=np.array([0.0]),
+        upper_theta=np.array([5.0]),
+        initial_states={0.5: np.zeros(2)},
+        state_bounds={0.5: (np.full(2, -10.0), np.full(2, 10.0))},
+        options=options,
+    )
+
+    assert not result.accepted
+    assert result.unsegmented_rmse_m == float("inf")

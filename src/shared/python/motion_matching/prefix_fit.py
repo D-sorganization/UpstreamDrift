@@ -81,6 +81,44 @@ def bernstein_to_simscape(control_torques: Array, *, duration_s: float) -> Array
     return normalized_to_simscape(power, duration_s=duration_s)
 
 
+def reexpress_bernstein_basis(
+    control_torques: Array,
+    *,
+    source_duration_s: float,
+    target_duration_s: float,
+) -> Array:
+    """Re-express degree-6 Bernstein controls from one basis duration to another.
+
+    Guarantees that the continuous physical torque tau(t) is strictly identical
+    across [0, min(source_duration_s, target_duration_s)]:
+        tau_target(t) == tau_source(t) for all t.
+    """
+    c_src = np.asarray(control_torques, dtype=float)
+    if c_src.ndim != 2 or c_src.shape[1] != COEFFS_PER_JOINT:
+        raise ValueError(
+            f"control_torques must have shape (joints, {COEFFS_PER_JOINT})"
+        )
+    if source_duration_s <= 0 or target_duration_s <= 0:
+        raise ValueError("Basis durations must be strictly positive")
+
+    native_descending = bernstein_to_simscape(c_src, duration_s=source_duration_s)
+    native_ascending = native_descending[:, ::-1]
+
+    powers_target = native_ascending * (
+        target_duration_s ** np.arange(COEFFS_PER_JOINT)
+    )
+
+    degree = COEFFS_PER_JOINT - 1
+    m_mat = np.zeros((COEFFS_PER_JOINT, COEFFS_PER_JOINT), dtype=float)
+    for k in range(degree + 1):
+        for j in range(k, degree + 1):
+            m_mat[j, k] = comb(degree, k) * comb(degree - k, j - k) * ((-1) ** (j - k))
+
+    inv_m = np.linalg.inv(m_mat.T)
+    c_target = powers_target @ inv_m
+    return np.ascontiguousarray(c_target, dtype=float)
+
+
 def bernstein_effort_range(control_torques: Array) -> Array:
     """Numerical min/max on the full basis interval, including stationary points.
 
