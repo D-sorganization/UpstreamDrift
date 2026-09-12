@@ -1,5 +1,16 @@
 # Native Port Implementation Checkpoint
 
+## Second Native Replay Terminal Success
+
+Session 88805 has now exited successfully (code zero). Its MAT is complete at
+1,889,946,594 bytes; companion report is copied to the local checkpoint archive
+as `native-tight-replay-9967-02.mat.json`. The live job is now EXPORT session
+31614, explicit R2025b on DeskComputer. Log is `native-tight-export-9967-02.log`;
+output is `native-tight-reference-9967-02.json`, both under SimscapeTour9921.
+Poll this existing handle; on success copy the exported JSON to the archive
+and ControlTower, then rerun the continuous and independent marker diagnostics
+against this second reference. Prior live-replay notes below are historical.
+
 ## Native Effort Profile Contract Started
 
 The prior 5c6ec3c8c commit is pushed; all its normal push checks passed.
