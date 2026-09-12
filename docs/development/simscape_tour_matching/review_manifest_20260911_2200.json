@@ -1,0 +1,23 @@
+{
+  "qualification": "Audit snapshots and historical initial FK/free-fall receipt; full dynamics unqualified",
+  "artifacts": [
+    {
+      "sha256": "3c692a6ba6dccdde7edf4796701588d7b7dc88becc0d4deb90a98c8e39a42d02",
+      "path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\review_run_ms_optimization_080s_20260911.py"
+    },
+    {
+      "sha256": "65961671250ccd342235d316c7478c5c6c586339d1a537e6584028da12f7cb50",
+      "path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\review_cold_replay_evals_20260911.py"
+    },
+    {
+      "sha256": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-pinocchio-native\\docs\\development\\simscape_tour_matching\\native_evidence\\native_geometry_spec_9967.json"
+    },
+    {
+      "sha256": "5740f3f76083c525ea2544bc3ab97d02352dce4a010ea42af5c69c75a68fc3a1",
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-pinocchio-native\\docs\\development\\simscape_tour_matching\\native_evidence\\native_pinocchio_initial_check_9967.json"
+    }
+  ],
+  "reviewed_commit": "58df3af67b5cef1cdea335253df672cd1c8771d0",
+  "reviewed_at": "2026-09-11T22:05:34.5720499-07:00"
+}

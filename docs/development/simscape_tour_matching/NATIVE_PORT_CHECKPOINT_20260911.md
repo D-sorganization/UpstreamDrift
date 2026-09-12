@@ -1,5 +1,26 @@
 # Native Port Implementation Checkpoint
 
+## Current Resume Point: 22:02 PDT Review
+
+Read `REVIEW_AND_EXECUTION_HANDOFF_20260911_2200.md` first. It supersedes the
+historical next-step lists below and reviews Gemini commit 58df3af67 plus its
+actual DeskComputer runner. The purported multiple-shooting run was single
+shooting and changed the warm-start polynomial time basis; it passed 0/5 gates.
+Repair identity and acceptance before further long optimization runs.
+
+The full native geometry now assembles in Pinocchio: all 27 scalar coordinates,
+31 uncommented solids, native fixed transforms and a 6D right-hand closure.
+Actual ControlTower execution matched the initial 25-marker native fixture
+with RMS 2.895e-13 m; zero-effort/zero-velocity free fall passed with maximum
+acceleration discrepancy 8.786e-13. Source, portable geometry and the historical
+receipt are preserved under `native_evidence`. These results qualify initial
+FK and an invariant only. Multi-pose FK, native effort mapping, damping/limits,
+acceleration parity and constraint-consistent continuous integration remain.
+
+Current targeted native conversion suite: 16 tests passed. Ruff check and
+format check passed for the seven new/modified Python implementation and test
+files. The full matching goal remains incomplete.
+
 ## Complete Native Solid Port Coverage and Fixed Transforms
 
 All 31 uncommented solids now have connector mappings measured in R2025b on
