@@ -1,5 +1,29 @@
 # Native Port Implementation Checkpoint
 
+## P3 Writer Precision Prepared
+
+All prior commits through 20fea65c1 are pushed; normal push checks passed.
+The existing shared model-generation URDFWriter now accepts numeric_precision
+from 1 through 17, retaining the previous default of 6. All its numeric XML
+fields use that option. Native export must request numeric_precision=17 and
+expand_composite_joints=False, with explicit massless primitive links.
+
+Five new tests progressed red-to-green, including exact binary64 XML round
+trip for mass, inertia, COM and joint origin, preservation of zero link mass,
+and rejection of invalid precision. The combined new and existing URDF
+round-trip suite passes 34 tests. Ruff lint/format passed. No native tree has
+yet been exported/reloaded; precision support alone is not P3 acceptance.
+
+Next single implementation: convert the native spec into shared Link/Joint
+objects with explicit primitive and fixed solid/frame links, preserve all
+native transforms and per-solid inertias, and export through this writer.
+Record the explicit weld and actuation/gravity/provenance metadata separately.
+Audit URDF joint-limit representation: do not silently invent physical limits
+or inherit the generic exporter's effort/velocity bounds. Tests must reject
+lost primitives/closure and artificial intermediate mass; actual Pinocchio
+reload must preserve mass, COM, FK, input responses and continuous replay.
+No native process remains live.
+
 ## P2 Packaged Adapter Passed on ControlTower
 
 Actual execution completed with exit code zero in the existing ControlTower
