@@ -28,6 +28,10 @@ Reproduction uses `reproduction/replay_candidate_parity.py`; provide the same mo
 
 Next agent: retain both failed results and the current rate gate. Do not launch further tolerance sweeps by default. Coordinate with root to examine state-specific dynamics and coordinate conditioning near the left-shoulder rapid rotation if full-state certification is required. Any change of state metric, coordinate chart or acceptance criteria needs an explicit scientific justification and separate qualification; it must not silently promote these results. Continue using the native adapter for diagnostic replay with an unqualified full-state status, while root pursues the actual fit. No further job is running in this lane.
 
+### Shoulder Coordinate Chart Addendum
+
+Read-only extraction from the four existing trajectories localizes the discrepancy in a native `Rx,Ry,Rz` left-shoulder gimbal. At0.786111s the angles are approximately [68.29837,-94.58857,-65.61646]degrees and scalar rates [400.44671,41.88588,397.09131]rad/s. The middle angle is4.589degrees from−90degrees; its absolute cosine is0.08000005. The angular-rate map has singular values [1.41308,1,0.056614], condition24.96. The corresponding relative physical angular speed is52.7732rad/s. This shows coordinate amplification near, but not exactly at, the Euler singularity. It does not by itself explain the fitting difficulty or prove physical instability. No integration or tolerance change was performed for this diagnostic. Raw state summaries and the exact extraction script are preserved in `evidence/run18/raw-shoulder-chart.zip`; formatted review data are in `shoulder-chart.json`.
+
 ## Status and Ownership
 
 Issue #10022, under epic #9921; branch `feat/10022-native-drake-equivalence`, based on `842756bd3`. Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-drake-native-10022`. All qualification jobs are terminal. No native matching fit or MATLAB job was started by this lane. MATLAB R2025b is the required release.
