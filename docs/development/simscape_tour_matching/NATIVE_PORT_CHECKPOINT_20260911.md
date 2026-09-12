@@ -1,5 +1,42 @@
 # Native Port Implementation Checkpoint
 
+## P3 Actual URDF Round Trip Passed on ControlTower
+
+NativeUrdfModel now calls Pinocchio buildModelFromXML on the exported tree,
+restores native gravity/unbounded limits, maps scalar q/v and body/reference
+frames, and attaches the original weld via the shared closure initializer.
+It does NOT rebuild bodies or inertias from the source JSON. Mandatory sidecar
+validation binds URDF/source hashes, coordinate inventory, closure, gravity and
+frame mappings before native construction. Eight binding tests progressed
+red-to-green; the combined binding/accessor/adapter suite passes 14 tests.
+Ruff passes on all changed code and the reproduction runner.
+
+Actual ControlTower diagnostic completed exit zero and passed. Total mass is
+77.60581783574676 kg; COM difference 1.11e-16 m; maximum six-state frame-matrix
+difference 1.11e-15; maximum scaled moving-state acceleration difference
+2.63e-10; maximum scaled baseline/27-unit-input response difference 2.49e-11.
+The URDF-loaded closed model replayed the saved 0.80 s candidate: q difference
+6.46e-8 and qd difference 7.21e-5 versus qualified diagnostic, integration
+4.096 s, maximum closure pose/rate residuals 2.62e-11 / 2.47e-9. Mixed-coordinate
+differences are not marker metres. Receipt: native_evidence/native_urdf_roundtrip_9967.json.
+
+Reproduction: check_native_urdf_roundtrip.py in native_evidence/reproduction;
+arguments --urdf, --sidecar, --model, --candidate, --fixture, --reference, --output.
+The source bundle is archived locally as native-urdf-bundle-9967-01.zip and
+extracted on ControlTower to /home/dieterolson/native-urdf-9967-01. It preserves
+module paths with a namespace-only package graph and source manifest. Inputs
+are native-golf-9967-01.urdf/.sidecar.json, native_geometry_spec_9967.json,
+native_replay_candidate_9967.json, native-rollout-reference-9967-01.json and
+native-continuous-800ms-9967-tight-01.json, all in ControlTower's user directory.
+Output native-urdf-roundtrip-9967-01.json is archived locally and summarized here.
+
+Next: wire a repeatable matcher to the qualified candidate/adapter, preserve
+absolute-second global sextics and assess full observed-swing tracking from
+the saved best candidates. Also qualify MuJoCo/Drake loaders against the same
+URDF+sidecar when extending interchange; their native execution is not proven
+by Pinocchio's result. The isolated bundle is not full application packaging.
+No native process remains live. Full-swing C3D acceptance remains outstanding.
+
 ## P3 Native Tree Exported and Parsed
 
 `motion_matching/native_urdf.py` now exports the native spec through the shared

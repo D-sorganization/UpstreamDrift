@@ -102,7 +102,11 @@ class NativePinocchioModel:
             self._frames[frame["name"]] = self.model.addFrame(
                 pin.Frame(frame["name"], joint, placement, pin.FrameType.OP_FRAME)
             )
-        closure = specification["closure"]
+        self._initialize_closure(specification["closure"])
+
+    def _initialize_closure(self, closure: Mapping[str, Any]) -> None:
+        """Attach the native weld using this model's body-frame placements."""
+        pin = self._pin
         joint_a, pose_a = self._bodies[closure["body_a"]]
         joint_b, pose_b = self._bodies[closure["body_b"]]
         constraint = pin.RigidConstraintModel(
