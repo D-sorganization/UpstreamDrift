@@ -7,8 +7,12 @@ ordered executable plan, exact audit commands, immutable inputs, acceptance
 criteria and stop conditions. The user requests delegation after this groundwork
 checkpoint. Do not expand the current turn into another optimizer run. Run20
 continues; latest observed evaluation32 cost29.99290425 is not audited acceptance.
-The MuJoCo agent is completing only its bounded executor qualification. Its
-production solver integration is explicitly left for the next agent after review.
+The optional persistent executor from agent commit621efab7a is now integrated
+in SELF. Root reran five unit tests: pass. Its one native sequential/executor
+qualification returned exactly equal primal states/markers and full Jacobians
+(21.30037 s versus11.18647 s). No optimizer or runtime was changed. Production
+solver/cache integration is explicitly left for the next agent. Read the
+performance HANDOFF for indexed failures, cleanup and hung-worker limitations.
 
 ## Run 20 Live; Run 19 Rejected and Archived
 

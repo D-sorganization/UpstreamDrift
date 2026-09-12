@@ -146,9 +146,12 @@ resets, prescribed motion, hidden PD corrections or independent segment clocks.
 
 ## Third Task: Integrate the Parallel Executor
 
-The current MuJoCo agent owns a NEW native_window_executor module and tests;
-check its lane HANDOFF and final commit before duplicating this work. Root owns
-shared solver integration. The prior benchmark already found 20.18865 s versus
+The MuJoCo agent completed native_window_executor.py and five tests in
+621efab7a, integrated into this root checkpoint SELF. Root reran all five tests:
+pass. Native isolated qualification reports 21.30037 s sequential versus
+11.18647 s executor, with exact primal and full Jacobian agreement. Read the
+performance HANDOFF and executor-report.json. No solver integration is done;
+that remains the next bounded implementation. Do not recreate the executor. The prior benchmark already found 20.18865 s versus
 10.99769 s for six windows, with every primal/Jacobian entry identical. It is
 one sample, not a promised full-fit speedup.
 

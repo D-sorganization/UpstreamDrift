@@ -12,8 +12,8 @@
   Strict scalar-rate reconstruction still fails; full swing is not matched.
 - Detailed executable next-agent plan: [Lower-Cost Agent Turnover](simscape_tour_matching/LOW_COST_AGENT_TURNOVER_20260912.md).
 - Next: poll run20 and independently audit its returned continuous trajectory.
-  Parallel agent owns only a new optional window-executor module/tests; root
-  retains solver integration. No other agent-owned worktree was edited.
+  Optional window-executor module/tests are integrated from621efab7a; root
+  reran five tests successfully. Next agent owns qualified solver integration. No other agent-owned worktree was edited.
 - Preserved all earlier handoffs below. Archives retain raw identity-bearing
   bytes; formatted JSON is for review. Current commit introduces no active
   runtime or physics changes.
