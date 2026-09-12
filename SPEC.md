@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Launcher Process Manager and Embed Adapters Unit-Gate Debt Burndown (#8766)
+
+Burn down 23 quarantined test node IDs across launcher process manager, tool bootstrap, embed adapters, and window icon in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 23 passing tests across `tests/launchers/test_launcher_process_manager.py` (17 tests), `tests/launchers/wave8_misc/test_embedded_tool_bootstrap.py` (1 test), `tests/ui/tools/launch_monitor/test_embed_adapter.py` (1 test), `tests/ui/tools/model_explorer/test_embed_adapter.py` (1 test), `tests/ui/tools/simulation_backends/test_embed_adapter.py` (1 test), `tests/ui/tools/starting_pose_matcher/test_embed_adapter.py` (1 test), and `tests/unit/ui/test_window_icon.py` (1 test).
+- Validated System Invariants: Ensure launcher process manager lifecycle (cleanup, module launching across unified and separate terminals, Windows PYTHONPATH propagation, VcXsrv X11 server startup and error handling, log writing), first-party embedded tool bootstrapping, UI tool embed adapter registrations, and Windows application user model ID settings execute cleanly and deterministically in headless CI environments without creating UI widgets or canvas leaks.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 363 to 340 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## AI Adapters, Setup Wizard, and Launcher Tools Unit-Gate Debt Burndown (#8766)
 
 Burn down 16 quarantined test node IDs across AI adapters, setup wizard, launcher bootstrap, and tools clusters in `scripts/config/unit_gate_quarantine.json`:
