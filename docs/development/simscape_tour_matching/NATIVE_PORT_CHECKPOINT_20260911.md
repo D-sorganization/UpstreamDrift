@@ -1,5 +1,62 @@
 # Native Port Implementation Checkpoint
 
+## Explicit Equality Backend Implemented; Native Audit Is Live
+
+Updated 2026-09-12 UTC. Source77eb87cca and type fix5c6765de4 are pushed.
+MultipleShootingOptions now supports solver='slsqp', preserving least_squares
+as default. The new equality_least_squares.py helper splits the existing
+assembled residual/Jacobian into marker objective and projected continuity
+constraints; it shares evaluations between objective/constraint calls, uses
+analytic derivatives and fixed full-row-rank projections, and preserves bounds.
+No native simulation or polynomial implementation was duplicated.
+
+max_iterations and hard max_nfev are distinct. Evaluation-budget exhaustion
+returns a previously evaluated fallback (prefer feasible lower objective;
+otherwise smaller projected violation) with success FALSE. It is not an accepted
+iterate or fit certificate. Callbacks retain assembled residual snapshots;
+for SLSQP they include UNWEIGHTED physical defects, while the actual constrained
+objective excludes those rows. defect_weight is ignored in this backend.
+optimality is None because SLSQP provides no comparable least_squares metric.
+Full physical scaled defects, convergence, finite continuous replay and explicit
+application gates still determine acceptance; projected equalities alone do not.
+
+TDD: missing helper and solver option tests failed first, then33 combined
+equality/shooting/retraction tests pass. Tests include competing marker objective,
+non-square projections, objective/constraint finite differences, assembled
+transformed-node Jacobians, hard budget, invalid/dependent projection, and
+rejecting nonzero physical defects even when projected constraints converge.
+Ruff, direct mypy, actual repo mypy hook and normal push checks passed. An initial
+push type failure was corrected before native audit launch. No completed native
+runtime was edited; fresh runtime14 was finalized before its first execution.
+
+LIVE AUDIT ONLY: session15469, confirmed ControlTower-Runner PID2208970.
+Runner C:/Users/diete/audit_native_constraints_9967_14.py SHA-256:
+9b24997a71ef5539098af071e0a0c2b378b240aeed81254ab5419a8041284a38.
+It invokes run_native_ms_constrained_9967_14.py (SHA-256
+368fddbe90824afcb2d5bcb5633459379d675f00facdd9afcac38071e6024af1)
+but intercepts the constrained solver with native derivative checks. No fitting.
+Output C:/Users/diete/native-ms-constrained-audit-9967-14.
+
+Runtime /home/dieterolson/native-ms-pilot-9967-14 copies runtime13 plus hashed
+equality helper and shared shooting solver. PYTHONPATH is runtime14;
+Python /home/dieterolson/simscape-pinocchio-9967/.venv/bin/python;
+OPENBLAS_NUM_THREADS=1, OMP_NUM_THREADS=1. Exact staging/finalization scripts,
+runtime files/manifest, runner and audit are in native-ms-constrained-bundle-9967-14.zip.
+Same run12 duration-only0.85 s starting candidate, continuous references,
+original physical bounds, q0/qd0 and single sextic with0.8 s basis as run13.
+Projection is the existing fixed scaled chart basis transpose,42 rows per node.
+
+Next: poll this exact audit session/PID and inspect constraint-audit.json plus
+initial-defects.json and derivative-audit.json. Require full rank210 of projected
+equalities, small full physical initialization defects, and credible finite-
+difference agreement in feasible directions. Do not claim success from process
+exit alone or extrapolate the unit tests to native correctness. Only then
+consider one bounded constrained fit with max_iterations12 and max_nfev24,
+followed by independent continuous replay and all physical/marker gates.
+The full1.8138888889 s goal and final R2025b/cross-engine qualification remain
+incomplete. Previous turn measured conditioning; this turn implements its
+evidence-driven algorithm change and begins native qualification.
+
 ## Run13 Replayed; Conditioning Evidence Changes the Next Step
 
 Updated 2026-09-12 UTC. Fit session41782 and conditioning session69936 both
