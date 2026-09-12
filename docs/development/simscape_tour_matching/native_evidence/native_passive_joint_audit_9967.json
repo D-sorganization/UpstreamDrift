@@ -1,0 +1,1303 @@
+{
+  "primitive_count": 27,
+  "qualification": "Uncompiled native inventory only; active solver workspace still requires parity validation",
+  "primitives": [
+    {
+      "coordinate": "TranslationInputX",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "PxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "PxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "PxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "PxDampingCoefficient",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "PxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "PxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "TranslationInputY",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "PyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "PyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "PyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "PyDampingCoefficient",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "PySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "PyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "TranslationInputZ",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "PzMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "PzUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "PzTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "PzDampingCoefficient",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "PzSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "PzLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "HipInputX",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RxDampingCoefficient",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "HipInputY",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RyDampingCoefficient",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "HipInputZ",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RzMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RzUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RzTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RzDampingCoefficient",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RzSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RzLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "TorsoInput",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "MotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "UpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "TorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "DampingCoefficient",
+          "expression": "Dampening*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "SpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "LowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "SpineInputX",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RxDampingCoefficient",
+          "expression": "DampeningX*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "SpineInputY",
+      "joint": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RyDampingCoefficient",
+          "expression": "DampeningY*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LScapInputX",
+      "joint": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RxDampingCoefficient",
+          "expression": "DampeningX*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LScapInputY",
+      "joint": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RyDampingCoefficient",
+          "expression": "DampeningY*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "RScapInputX",
+      "joint": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RxDampingCoefficient",
+          "expression": "DampeningX*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "RScapInputY",
+      "joint": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RyDampingCoefficient",
+          "expression": "DampeningY*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LSInputX",
+      "joint": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RxDampingCoefficient",
+          "expression": "DampeningX*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LSInputY",
+      "joint": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RyDampingCoefficient",
+          "expression": "DampeningY*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LSInputZ",
+      "joint": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RzMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RzUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RzTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RzDampingCoefficient",
+          "expression": "DampeningZ*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RzSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RzLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "RSInputX",
+      "joint": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RxDampingCoefficient",
+          "expression": "DampeningX*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "RSInputY",
+      "joint": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RyDampingCoefficient",
+          "expression": "DampeningY*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "RSInputZ",
+      "joint": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RzMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RzUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RzTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RzDampingCoefficient",
+          "expression": "DampeningZ*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RzSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RzLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LEInput",
+      "joint": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "MotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "UpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "TorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "DampingCoefficient",
+          "expression": "Dampening*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "SpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "LowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "REInput",
+      "joint": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "MotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "UpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "TorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "DampingCoefficient",
+          "expression": "Dampening*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "SpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "LowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LFInput",
+      "joint": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "MotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "UpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "TorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "DampingCoefficient",
+          "expression": "Dampening*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "SpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "LowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "RFInput",
+      "joint": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "MotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "UpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "TorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "DampingCoefficient",
+          "expression": "Dampening*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "SpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "LowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LWInputX",
+      "joint": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RxDampingCoefficient",
+          "expression": "DampeningX*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "LWInputY",
+      "joint": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RyDampingCoefficient",
+          "expression": "DampeningY*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "RWInputX",
+      "joint": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RxMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RxUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RxTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RxDampingCoefficient",
+          "expression": "DampeningX*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RxSpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RxLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    },
+    {
+      "coordinate": "RWInputY",
+      "joint": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "MotionActuationMode": {
+          "name": "RyMotionActuationMode",
+          "expression": "ComputedMotion",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "UpperLimitSpecify": {
+          "name": "RyUpperLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "TorqueActuationMode": {
+          "name": "RyTorqueActuationMode",
+          "expression": "InputTorque",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        },
+        "DampingCoefficient": {
+          "name": "RyDampingCoefficient",
+          "expression": "DampeningY*LocalDampeningEnable*DampeningGlobalGain",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "SpringStiffness": {
+          "name": "RySpringStiffness",
+          "expression": "0",
+          "resolved_numeric": true,
+          "numeric_value": 0,
+          "resolution_error": ""
+        },
+        "LowerLimitSpecify": {
+          "name": "RyLowerLimitSpecify",
+          "expression": "off",
+          "resolved_numeric": false,
+          "numeric_value": [],
+          "resolution_error": "Simulink:Data:SlResolveNotResolved"
+        }
+      }
+    }
+  ],
+  "inventory_sha256": "5614950f352fe796f4c88fca9c06acf5ef9a37704fddb12265b52aed125d755c"
+}
