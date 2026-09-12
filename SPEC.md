@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Headless and API Integration Unit-Gate Debt Burndown (#8766)
+
+Burn down 32 quarantined test node IDs across headless shared Python, AI adapters, motion pipeline, security, and setup wizard clusters in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 32 passing headless tests across `tests/ci/test_ci_infrastructure.py` (1 test), `tests/reinforcement_learning/wave6_rl/test_trajectory_funnel_benchmark_coverage.py` (1 test), `tests/test_build_humanoid_models.py` (1 test), `tests/test_setup_biomech_workspace.py` (1 test), `tests/unit/config/test_setup_wizard.py` (2 tests), `tests/unit/engines/pinocchio/test_synthesize_target.py` (1 test), `tests/unit/motion_matching/test_checkpoint_artifact_loading.py` (4 tests), `tests/unit/motion_pipeline/sources/test_trc_adapter.py` (1 test), `tests/unit/sidekick/lab/bio/test_c3d_io.py` (1 test), `tests/unit/test_launch_upstream_drift_bootstrap.py` (2 tests), `tests/unit/test_secure_subprocess.py` (3 tests), `tests/unit/tools/model_generation/test_rest_api_fastapi.py` (1 test), `tests/unit/api/test_routes_data_explorer.py` (1 test), `tests/unit/motion_pipeline/orchestrator/test_orchestrator.py` (1 test), `tests/unit/sidekick/test_data_io.py` (1 test), `tests/unit/test_start_api_server.py` (2 tests), and `tests/unit/shared_python/ai/adapters/` (8 tests across Gemini and Ollama).
+- Validated System Invariants: Ensure CI environment compatibility, reinforcement learning funnel exports, canonical humanoid constants, setup wizard embedding, surrogate checkpoint loading contracts, TRC parser fallbacks, API routes data explorer pagination, API security server startup validation, and Gemini/Ollama provider adapters execute deterministically in headless CI environments.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 379 to 347 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## Motion Pipeline API Source Formats and Matrix Reconciliation (#8875)
 
 Reconcile advertised source formats in the motion pipeline orchestrator API with runtime registered adapters, drop the misleading auto-generated claim from formats documentation, and record architecture budget exceptions for pre-existing create_app handlers:
