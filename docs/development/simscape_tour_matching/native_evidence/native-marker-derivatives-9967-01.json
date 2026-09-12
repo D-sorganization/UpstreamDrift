@@ -1,0 +1,78 @@
+{
+  "qualification": "native local marker derivative audit; no integrated sensitivity qualification",
+  "pinocchio_version": "4.1.0",
+  "candidate_sha256": "60bbe60ec6a57f7a5c4dd277b15de96fa1760ca006bad6509cb215c3e743e379",
+  "input_sha256": {
+    "model": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "candidate": "33c4f13674b796886f5fd3aaf56ebdbcf6e703abbd7f1c304b120e8896ab8c96"
+  },
+  "runner_sha256": "b1d4db68037dbf388acf83450d13f772c207241f28809b8e55c1b8c627398e8f",
+  "samples": [
+    {
+      "time_s": 0.0,
+      "analytic_s": 0.002910638984758407,
+      "shape": [25, 3, 27],
+      "steps": [
+        {
+          "step": 1e-5,
+          "numeric_s": 0.007939458009786904,
+          "max_abs_error": 4.032052469682412e-11
+        },
+        {
+          "step": 1e-6,
+          "numeric_s": 0.008729162975214422,
+          "max_abs_error": 2.486154060399315e-10
+        },
+        {
+          "step": 1e-7,
+          "numeric_s": 0.00792517903028056,
+          "max_abs_error": 2.978349927795776e-9
+        }
+      ]
+    },
+    {
+      "time_s": 0.6,
+      "analytic_s": 0.0008594199898652732,
+      "shape": [25, 3, 27],
+      "steps": [
+        {
+          "step": 1e-5,
+          "numeric_s": 0.007840935024432838,
+          "max_abs_error": 3.937461467984349e-11
+        },
+        {
+          "step": 1e-6,
+          "numeric_s": 0.007862721045967191,
+          "max_abs_error": 3.316137364706151e-10
+        },
+        {
+          "step": 1e-7,
+          "numeric_s": 0.007645614037755877,
+          "max_abs_error": 2.8682455299744447e-9
+        }
+      ]
+    },
+    {
+      "time_s": 0.8,
+      "analytic_s": 0.0010289889760315418,
+      "shape": [25, 3, 27],
+      "steps": [
+        {
+          "step": 1e-5,
+          "numeric_s": 0.007662907999474555,
+          "max_abs_error": 5.66645619315409e-11
+        },
+        {
+          "step": 1e-6,
+          "numeric_s": 0.007755285012535751,
+          "max_abs_error": 5.837934025088032e-10
+        },
+        {
+          "step": 1e-7,
+          "numeric_s": 0.007671671046409756,
+          "max_abs_error": 3.430610573396109e-9
+        }
+      ]
+    }
+  ]
+}

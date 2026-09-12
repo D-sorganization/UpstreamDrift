@@ -1,5 +1,62 @@
 # Native Port Implementation Checkpoint
 
+## Complete Native Sensitivity Direction Verified
+
+Updated 2026-09-12 UTC. Previous goal turn made progress: force-scale audit,
+corrected search and committed evidence. This turn implements and verifies the
+next sensitivity stages while root-force run 02 remains live (session 94653).
+Its latest observed evaluation 201 had terminal RMS 84.3354 mm, whole RMS
+29.7553 mm, early RMS 10.9194 mm and club RMS 55.9030 mm. These are evaluated
+trial metrics, not a returned/independently accepted candidate.
+
+NativePinocchioModel.marker_derivatives reuses shared project_markers validation
+and Pinocchio aligned frame Jacobians, accounting for rotated marker offsets and
+native coordinate-column order. Tree partial derivatives are not projected onto
+the weld manifold; the dynamics sensitivity supplies that constraint consistency.
+Three boundary tests were red then green. Actual native audit on all 25 markers
+and 27 columns at 0,0.6,0.8 s passed three central step sizes; maximum discrepancy
+at step 1e-6 was 5.84e-10. Receipt native-marker-derivatives-9967-01.json.
+
+New shared forward_sensitivity.integrate_sensitivities integrates x'=f and
+S'=df/dx\*S+df/dp through existing integrate_forward. It validates dimensions and
+finite values, preserves initial sensitivities, and returns detached readonly
+state/sensitivity arrays. Analytic polynomial-acceleration and exponential
+state-coupling tests went red then green. Combined candidate, local derivative
+and sensitivity tests: 28 passed. Direct mypy on native_model.py and
+forward_sensitivity.py passed; ruff passed.
+
+The complete native audit (session 42709, terminal exit zero) integrated one
+world-force B4 sensitivity through 0.8 s and compared the actual marker derivative
+to the independently recorded small-force central replay. Relative discrepancy
+1.46013e-6; primal marker maximum difference 2.39944e-10 m; sampled closure bound
+9.37455e-11. Receipt native-trajectory-sensitivity-9967-01.json. This qualifies
+ONE direction at run 03, not the full optimizer Jacobian. All inputs and actual
+source hashes are preserved. No optimizer uses this new path yet.
+
+Timing: augmented integration 32.9031 s, 112466 RHS evaluations, versus ordinary
+replay integration 3.15391 s. Do not claim a speedup for one direction. Next audit
+must measure the whole parameter block and physically adequate sensitivity
+tolerances, preserve primal/closure accuracy, and compare actual total time with
+the numerical Jacobian. Tight error control includes sensitivity variables and
+can cost substantially more than a primal replay. Shared fitter residual masks,
+weights and terminal terms also need a verified derivative before integration.
+
+Reproduction runners: check_native_marker_derivatives.py and
+check_native_trajectory_sensitivity.py in native_evidence/reproduction.
+Both require --model and --candidate paths used below plus NEW --output paths;
+the trajectory audit additionally requires --reference
+/mnt/c/Users/diete/native-force-difference-9967-01.json. Runtimes:
+/home/dieterolson/native-marker-derivative-9967-01 and
+/home/dieterolson/native-sensitivity-9967-01, respectively. Same Pinocchio venv.
+Source bundles archived locally and on ControlTower:
+native-marker-derivative-bundle-9967-01.zip SHA-256
+a69ad5a2c92aa3b21d4be614c729c49760ded337f0bdbe8fd2af8b49ee4cb99d;
+native-sensitivity-bundle-9967-01.zip SHA-256
+6ca43493c566e5f963baf5b09ca393ffbf30673cecf284bf4f4b85d646abe05a.
+Each contains a per-file source manifest. These remain isolated namespace
+deployments, not full application qualification. Next immediate action: observe
+root-force run 02's exact handle and independently replay its terminal return.
+
 ## Physical Difference Step Was Too Large; Corrected Search Is Live
 
 Updated 2026-09-12 UTC. This supersedes the root-force live status below.

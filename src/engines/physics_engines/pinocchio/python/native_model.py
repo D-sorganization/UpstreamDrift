@@ -9,7 +9,9 @@ from importlib import import_module
 from typing import Any, NamedTuple
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
+
+from src.shared.python.motion_matching.marker_projection import project_markers
 
 
 class NativeAccelerationDerivatives(NamedTuple):
@@ -19,6 +21,14 @@ class NativeAccelerationDerivatives(NamedTuple):
     dq: NDArray[np.float64]
     dv: NDArray[np.float64]
     deffort: NDArray[np.float64]
+
+
+class NativeMarkerDerivatives(NamedTuple):
+    """World positions and marker-by-xyz-by-coordinate tree derivatives."""
+
+    names: tuple[str, ...]
+    positions_m: NDArray[np.float64]
+    dposition_dq: NDArray[np.float64]
 
 
 def depth_first_joints(
@@ -184,6 +194,50 @@ class NativePinocchioModel:
         ):
             raise ValueError("Invalid native closure residuals")
         return pose, velocity
+
+    def marker_derivatives(
+        self,
+        coordinates: Mapping[str, float],
+        bodies: Sequence[str],
+        offsets: ArrayLike,
+    ) -> NativeMarkerDerivatives:
+        """Differentiate fixed markers in native scalar-coordinate order.
+
+        These are partial derivatives on the tree configuration. The trajectory
+        sensitivity must enforce the weld; no independent marker projection or
+        closure correction is applied here. Pinocchio's aligned frame Jacobian
+        orders linear rows before angular rows and acts at the frame origin.
+        """
+        frames = self.frame_poses(coordinates)
+        positions = project_markers(frames, bodies, offsets)
+        local = np.asarray(offsets, dtype=float)
+        names = tuple(coordinates)
+        columns = [self._velocity_indices[name] for name in names]
+        self._pin.computeJointJacobians(
+            self.model, self.data, self.configuration(coordinates)
+        )
+        derivatives = []
+        for body, offset in zip(bodies, local, strict=True):
+            raw = np.asarray(
+                self._pin.getFrameJacobian(
+                    self.model,
+                    self.data,
+                    self._frames[body],
+                    self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+                ),
+                dtype=float,
+            )
+            if raw.shape != (6, self.model.nv) or not np.isfinite(raw).all():
+                raise ValueError("Invalid native frame Jacobian")
+            lever = frames[body][:3, :3] @ offset
+            point = raw[:3] + np.cross(raw[3:].T, lever).T
+            derivatives.append(point[:, columns])
+        jacobian = np.asarray(derivatives)
+        if not np.isfinite(jacobian).all() or not np.isfinite(positions).all():
+            raise ValueError("Native marker linearization is nonfinite")
+        positions.setflags(write=False)
+        jacobian.setflags(write=False)
+        return NativeMarkerDerivatives(names, positions, jacobian)
 
     def _velocity_vector(self, values: Mapping[str, float]) -> NDArray[np.float64]:
         if set(values) != set(self._velocity_indices):
