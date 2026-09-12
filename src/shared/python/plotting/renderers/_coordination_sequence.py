@@ -141,13 +141,35 @@ class CoordinationSequenceMixin(BaseRenderer):
 
         title = "Kinematic Sequence (Normalized)"
         if analyzer_result:
-            score = analyzer_result.efficiency_score * 100
-            title += f"\nEfficiency Score: {score:.1f}%"
-            if not analyzer_result.is_valid_sequence:
+            if (
+                hasattr(analyzer_result, "efficiency_score")
+                and analyzer_result.efficiency_score is not None
+            ):
+                score = analyzer_result.efficiency_score * 100
+                title += f"\nEfficiency Score: {score:.1f}%"
+            elif (
+                hasattr(analyzer_result, "sequence_consistency")
+                and analyzer_result.sequence_consistency is not None
+            ):
+                score = analyzer_result.sequence_consistency * 100
+                title += f"\nConsistency: {score:.1f}%"
+            if (
+                hasattr(analyzer_result, "is_valid_sequence")
+                and not analyzer_result.is_valid_sequence
+            ):
                 title += " (Out of Order)"
 
         ax.set_title(title, fontsize=14, fontweight="bold")
-        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        xlabel = "Time (s)"
+        if analyzer_result and getattr(analyzer_result, "methodology", None):
+            meth = analyzer_result.methodology
+            citation_str = (
+                meth.format_citation()
+                if hasattr(meth, "format_citation")
+                else str(meth)
+            )
+            xlabel += f"\nMethodology: {citation_str}"
+        ax.set_xlabel(xlabel, fontsize=11, fontweight="bold")
         ax.set_ylabel("Normalized Velocity", fontsize=12, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
