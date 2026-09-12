@@ -56,6 +56,12 @@ solver receipt only; it makes no whole-fit speed, convergence, acceptance or
 swing-match claim. The next gate is a separately recorded bounded fit only after
 the smooth closure-feasible transition initializer is selected.
 
+`tests/unit/motion_matching/test_prepare_batched_solver_driver.py` locks the
+generator contract: it must move all driver actions inside a spawn-safe main
+entry point, preserve the callback counter as a `nonlocal`, add the explicit
+worker option and produce syntactically valid Python. The test uses a minimal
+anchored fixture, so it verifies the transformation without running physics.
+
 Discovery found a per-call `ProcessPoolExecutor` in
 `src/shared/python/sidekick/process_calculators/multi_param_analysis.py`, tied to
 calculator/UI parameter handling. No reusable persistent motion-window executor
