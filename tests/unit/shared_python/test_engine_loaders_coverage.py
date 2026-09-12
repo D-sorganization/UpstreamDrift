@@ -103,9 +103,7 @@ def test_load_drake_missing(tmp_path: object) -> None:
                 },
             ),
         ):
-            from src.shared.python.engine_core.engine_loaders import (
-                load_drake_engine,
-            )
+            from shared.python.engine_core.engine_loaders import load_drake_engine
 
             # load_drake_engine catches ImportError and raises GolfModelingError
             with pytest.raises(Exception) as excinfo:

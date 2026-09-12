@@ -449,24 +449,6 @@
       "issue": 9965,
       "reason": "Issue #9965: XML joint builder requires explicit URDF kinematic and dynamic attributes.",
       "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/shared/python/motion_pipeline/api.py",
-      "symbol": "create_app",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8875,
-      "reason": "Issue #8875: pre-existing motion pipeline API create_app function exceeds function-lines budget; PR #8875 only reconciled advertised source formats in docstrings.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/shared/python/motion_pipeline/api.py",
-      "symbol": "create_app.run_pipeline",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 8875,
-      "reason": "Issue #8875: pre-existing motion pipeline API run_pipeline route handler exceeds function-lines budget; PR #8875 only reconciled advertised source formats in docstrings.",
-      "expires_on": "2026-10-31"
     }
   ]
 }

@@ -83,3 +83,7 @@
 ## 2025-01-08 - Fast Row-wise Norms with np.einsum
 **Learning:** `np.linalg.norm(arr, axis=1)` creates unnecessary intermediate array allocations, causing performance bottlenecks in tight loops.
 **Action:** Replace `np.linalg.norm(diff, axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` when performing row-wise Euclidean distance computations for measurable speedups (~30% faster). Ensure formatting does not wrap inline `# ⚡ Bolt:` comments incorrectly.
+
+## 2026-09-12 - Handling JSON Arrays with dict.get() Defaults
+**Learning:** Returning `existing.get("data", [])` on an API response that can sometimes be parsed as a pure JSON list (`[]`) will crash with `AttributeError: 'list' object has no attribute 'get'`, since `existing` is a list, not a dict.
+**Action:** Always verify the type of the parsed response before using dict methods like `get()` when the API endpoint might return a top-level JSON array instead of an object payload. Use conditional checks like `existing if isinstance(existing, list) else existing.get("data", [])`.
