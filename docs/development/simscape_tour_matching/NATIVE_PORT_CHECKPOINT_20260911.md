@@ -1,5 +1,39 @@
 # Native Port Implementation Checkpoint
 
+## Step-Stopping Experiment Qualified; Run09 Is Live
+
+Updated 2026-09-12 UTC. Restart audit session 6346 exited zero in a new isolated
+runtime /home/dieterolson/native-ms-pilot-9967-09, copied from runtime07 and
+updated only to tested solver revision 47049e7f8. Driver09 restores run08's
+coefficients and physical nodes in the original charts, checking all 189 controls
+against recorded bounds. The obsolete zero-B0/B1 restart assertion is removed;
+it would wrongly reject the already authorized free early controls.
+
+Fresh restored defect checks reproduce run08's saved values. Native node and
+early-effort derivative audits pass, maximum relative marker/state differences
+1.66608e-6/5.10304e-5, below 1e-3 for the tested probes. Evidence is in
+native_evidence/ms_step_audit_9967_09, mirrored raw locally/ControlTower as
+native-ms-step-audit-9967-09. This does not qualify every optimizer iterate.
+
+LIVE fit: unified session 62709, confirmed ControlTower WSL PID 2142229.
+Output C:/Users/diete/native-ms-fit-9967-09. Command:
+run_native_ms_pilot_9967_09.py --output /mnt/c/Users/diete/native-ms-fit-9967-09
+--max-nfev 12 --defect-weight 100. Driver explicitly sets step_tolerance=None;
+cost and gradient tolerances, objective, initial state, bounds, charts and all
+acceptance gates are unchanged. Runtime09 is PYTHONPATH, Python remains
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python, with single BLAS/OMP
+threads. Complete evaluation snapshots remain enabled.
+
+Driver hash 506729dfccfd0fdf333e953ab869b70f0583b76136e86b17b76523f623c58b9a.
+Exact driver, solver source and staging script are archived in native_evidence
+and local simscape-tour-checkpoints. No old runtime was overwritten.
+
+Next: poll session 62709/PID 2142229 and inspect termination reason, evaluation
+steps and optimality. Independently replay any returned coefficients before
+promotion. If disabling xtol only reveals cost stagnation or numerical noise,
+record that and investigate conditioning; do not treat removing a stopping
+criterion as a solution. Full capture and final R2025b qualification stay open.
+
 ## Run08 Stops on Step Size; Configurable Step Tolerance Added
 
 Updated 2026-09-12 UTC. Run08 session 8567 exited zero after only four evaluations
