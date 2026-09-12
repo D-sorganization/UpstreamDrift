@@ -122,6 +122,15 @@ that it is a global floor or excuse relaxing final acceptance. The next work
 must examine marker attachments/geometry and smooth-path dynamic compatibility
 before another torque optimization.
 
+The first sampled smooth initializer is complete in
+`native_evidence/smooth_pose_sequence_9967_23/receipt.json`. A cubic path was
+fit through the18 retained static poses and each sampled q/qd was reprojected
+through the native weld. At those samples pose closure is2.59331e-10, rate
+closure2.17763e-13 and the finite-difference rate-residual change8.71157e-12.
+This makes it suitable to investigate reaction-eliminated global-sextic effort
+initialization. The receipt deliberately labels its qdd as finite difference;
+it is not a constrained-dynamics acceleration qualification or forward match.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.
