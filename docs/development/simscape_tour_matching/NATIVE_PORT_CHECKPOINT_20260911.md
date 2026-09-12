@@ -1,5 +1,77 @@
 # Native Port Implementation Checkpoint
 
+## Analytic Joint-Torque Refinement Is Running
+
+Updated 2026-09-12 UTC. Previous goal turn made progress by independently
+replaying the improved root-force result and qualifying one sensitivity direction.
+This turn qualifies and connects the 81-control block to the shared optimizer.
+Current live run: native-analytic-fit-9967-01 on ControlTower, unified session
+12513, WSL PID 1954758. First optimizer trial reduced terminal RMS from 84.0761
+to 75.9347 mm (whole 28.3953 mm, early 10.7753 mm, club 47.7935 mm). These are
+live trial metrics, not a terminal/independently accepted result.
+
+NativeEffortProfile.bernstein_control_jacobian reuses the shared Bernstein
+conversion and includes world-to-base force rotation. Its columns are native
+coordinate-major, ascending selected Bernstein index. Six tests were red then
+green for rotation, force/torque separation, ordering and invalid basis inputs.
+Actual 81-column audit at run 03 with single-thread BLAS took 12.4247 s.
+Primal marker difference was 1.16159e-8 m. Selected independent checks: world-Y
+B4 relative error 1.474e-6; LSInputX B4 8.046e-6 at 3e-5 Nm; RWInputX B4
+1.928e-5 at 3e-5 Nm. Both torque checks also passed at 1e-4 Nm.
+
+The first block audit (native-trajectory-sensitivity-9967-02.json) deliberately
+remains failed: its wrist finite-difference check at 1e-6 Nm differed by 0.226%.
+Intermediate physical probes and tighter sensitivity tolerance passed in
+native-trajectory-sensitivity-9967-03.json. Do not hide the failure or claim every
+column was independently finite-differenced. Full arrays are in same-name NPZs
+on ControlTower and in local simscape-tour-checkpoints; receipts hash each NPZ.
+Runtime for both: /home/dieterolson/native-sensitivity-9967-02. Audit 03 used
+the separate copied check_native_trajectory_sensitivity_9967_03.py, whose actual
+hash is in the receipt, with --all-controls --rtol 1e-10 --atol 1e-12,
+--probe-coordinate LSInputX --probe-coordinate RWInputX --probe-step 0.0001
+--probe-step 0.00003. OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1 were explicit.
+
+New native_sensitivity.replay_marker_sensitivities is the reusable adapter.
+It validates ordinary continuous replay, integrates the full selected block,
+checks sampled closure and agreement of primal markers, then returns physical
+N/Nm derivatives. A two-kilogram free-mass analytic sextic response test went
+red then green. Native adapter audit exited zero (session 11670): every column
+matches audited block 03 exactly, total 15.9810 s including independent replay,
+sensitivity 12.7817 s. Receipt native-sensitivity-adapter-9967-01.json.
+
+Shared PrefixFitOptions now accepts optional marker_jacobian; it applies the
+same missing-marker, marker-weight, time-weight and terminal-weight operations
+as its residual. Independent central differences of the actual residual validate
+this composition. Active yaw penalties or arbitrary regularization explicitly
+reject this new callback until their derivatives are implemented; existing
+finite-difference execution is preserved. The current native objective has
+neither active penalty. Existing positional option order is preserved.
+Combined adapter, effort-basis, control-subspace and shared-prefix tests:
+53 passed. Direct mypy for native adapter, effort profile and shared fitter passed.
+
+Current runner --analytic-jacobian caches by canonical candidate plus full clock
+hash and writes jacobians.jsonl separately. Each uncached Jacobian entails one
+additional primal replay and one sensitivity integration; count those as well
+as evaluations.jsonl when comparing cost. First full-clock Jacobian cost 16.5464 s
+and agreed with primal markers within 3.42e-9 m. No feedback or interior resets.
+
+Run command uses the usual Python venv and model/target paths below, candidate
+/mnt/c/Users/diete/native-root-force-9967-02/returned-candidate.json,
+--shaping bernstein456 --amplitude-scale 10 --analytic-jacobian --max-nfev 8,
+and --output_dir /mnt/c/Users/diete/native-analytic-fit-9967-01. All 81 force/torque
+controls are active; corrections are +/-2 N/Nm relative to the root-force return.
+Original early, whole, terminal, club and convergence gates remain unchanged.
+Dedicated runtime /home/dieterolson/native-analytic-refinement-9967-02;
+source bundle native-analytic-refinement-bundle-9967-02.zip SHA-256
+148846240f77e2f501476644ba6c31d26da0229bca7803aeef840eda64327832.
+Bundle 01 (adapter audit) SHA-256
+5e7a9ca98aa94efea484d44b3ae433cb23bc97c1587a5eb7f3e4325be3dc9b80;
+bundle 02 only reorders the new optional field to preserve positional API and
+clarifies its documentation. All bundles carry exact per-file hashes and are
+archived locally and remotely. Namespace-only deployment remains the scope.
+Next: inspect session 12513, archive terminal logs including Jacobian ledger,
+and independently replay/plot the returned candidate before promotion.
+
 ## Root-Force Run 02 Finished and Independently Reproduced
 
 Updated 2026-09-12 UTC. Session 94653 exited zero after 233 actual forward

@@ -1,0 +1,16 @@
+{
+  "qualification": "reusable sensitivity adapter versus audited block; no optimizer acceptance",
+  "candidate_sha256": "60bbe60ec6a57f7a5c4dd277b15de96fa1760ca006bad6509cb215c3e743e379",
+  "accepted_audit": true,
+  "input_sha256": {
+    "model": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "candidate": "33c4f13674b796886f5fd3aaf56ebdbcf6e703abbd7f1c304b120e8896ab8c96",
+    "reference_report": "a15e35a6baed2e4cf393c98f0c90a11298ce12ff5fe034d37b5fd8e76fde917c",
+    "reference_jacobian": "6f3fb40630beea2453c037b247a28c917759767c289e58a825fbbd59b46b93d7"
+  },
+  "runner_sha256": "aacb5b9930c32d62ed06d430a2a2b5ec775b1c2d78f2483e9eafab5c12e27529",
+  "total_elapsed_s": 15.980957711988594,
+  "sensitivity_elapsed_s": 12.78169654001249,
+  "max_relative_column_difference": 0.0,
+  "primal_marker_max_abs_difference_m": 1.1615832892775124e-8
+}
