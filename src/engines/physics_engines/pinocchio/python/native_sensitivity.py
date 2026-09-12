@@ -165,7 +165,7 @@ def replay_marker_sensitivities(
             raise ValueError("Native acceleration derivative coordinate order differs")
         a = np.block([[np.zeros((n, n)), np.eye(n)], [local.dq, local.dv]])
         inputs = profile.bernstein_control_jacobian(
-            t, basis_duration_s=basis_duration, first_control=first_control
+            t, basis_duration_s=float(basis_duration), first_control=first_control
         )
         b = np.vstack(
             (
