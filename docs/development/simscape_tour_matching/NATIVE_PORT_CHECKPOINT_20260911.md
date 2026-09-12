@@ -1,5 +1,56 @@
 # Native Port Implementation Checkpoint
 
+## Run 03: Expanded Sextic Shaping Is Live
+
+Updated 2026-09-12 UTC. Previous goal turn made progress by verifying native
+Hub topology and measuring pair spacing over the whole capture. This turn
+implemented tested Bernstein increment/recovery helpers and launched a bounded
+forward optimization with the unchanged native model, markers and initial state.
+Source commit 6efa138fd. The new candidate test first failed on missing helpers,
+then all 16 candidate tests passed, including analytic B4/B5/B6 values and exact
+identity of a pure t^6 correction in the two representations.
+
+ControlTower WSL PID 1911742 is live in exec session 17132. Do not duplicate or
+restart it while its actual handle/process lives. Initial evaluation exactly
+reproduces run 02 candidate SHA
+90d801cad282dba88170442dc7a57e4757aef04780bf267f311bd1a098f498b7
+and all four errors (whole 31.5031 mm, early 10.9514 mm, terminal 96.8489 mm,
+club cluster 78.6801 mm). No new improvement has yet been qualified.
+
+Run 03 frees Bernstein controls 4, 5 and 6 for each of 27 effort channels,
+81 parameters, in coordinate-major ascending-control order. Controls 0..3
+remain zero. Correction controls are 10\*(x-1), x in [.8,1.2], relative to the
+ORIGINAL baseline candidate; the run 02 returned candidate initializes x.
+This retains a single global degree-six polynomial and bounds correction
+magnitude by 2 N/Nm on [0,.80] through Bernstein convexity. It is not a bound
+on total effort or extrapolation beyond .80. Geometry, initial q/qd, marker
+assignments, capture identity, native integration and all acceptance gates
+are unchanged. max_nfev=4, relative finite-difference step .001; 81 finite-
+difference perturbations per Jacobian add calls beyond the four-step budget.
+
+Runtime: /home/dieterolson/native-refinement-9967-03/refine_native_candidate.py
+Python: /home/dieterolson/simscape-pinocchio-9967/.venv/bin/python
+Output: C:/Users/diete/native-refinement-9967-03
+Arguments: --model /mnt/c/Users/diete/native_geometry_spec_9967.json
+--candidate /mnt/c/Users/diete/native_replay_candidate_9967.json
+--target /mnt/c/Users/diete/driver_marker_payload_9967.json
+--restart-candidate /mnt/c/Users/diete/native-refinement-9967-02/returned-candidate.json
+--shaping bernstein456 --output_dir /mnt/c/Users/diete/native-refinement-9967-03
+--max-nfev 4
+
+Archive native-refinement-bundle-9967-03.zip is preserved locally under
+simscape-tour-checkpoints and on ControlTower under C:/Users/diete; its
+source_manifest.json hashes the bundled modules and runner. This remains a
+namespace diagnostic deployment rather than a full application import claim.
+Config/ledger/best/returned/failure behavior is retained from previous runs.
+
+Next: poll session 17132 and the actual worker; do not infer termination from
+a missing early output file or a polling timeout. At terminal exit archive all
+artifacts, independently replay the returned candidate, report every gate and
+per-marker/local-window behavior. Preserve the run 02 accepted-as-seed identity
+if new exploratory parameters worsen early retention. No full swing, changed
+geometry, extra head DOF or new R2025b acceptance is established by this run.
+
 ## Full-Capture Hub Topology and Pair Audit
 
 Updated 2026-09-12 UTC. Previous goal turn made progress by measuring native
