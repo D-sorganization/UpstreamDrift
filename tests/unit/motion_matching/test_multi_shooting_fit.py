@@ -164,3 +164,46 @@ def test_multiple_shooting_rejects_nan_in_unsegmented_rollout() -> None:
 
     assert not result.accepted
     assert result.unsegmented_rmse_m == float("inf")
+
+
+def test_multiple_shooting_window_cache_avoids_redundant_evaluations() -> None:
+    """Window 0 must not be re-simulated when only window 1 initial state is perturbed."""
+    time = np.linspace(0.0, 1.0, 21)
+    points = np.zeros((len(time), 1, 3))
+    target = MarkerTarget(time, points, np.ones(1))
+
+    call_counts = {0: 0, 1: 0}
+
+    def segmented_forward(
+        theta: np.ndarray,
+        t_span: np.ndarray,
+        initial_state: np.ndarray | None,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        win_idx = 0 if initial_state is None else 1
+        call_counts[win_idx] += 1
+        return np.zeros((len(t_span), 1, 3)), np.zeros(2)
+
+    def unsegmented_forward(theta: np.ndarray, t_all: np.ndarray) -> np.ndarray:
+        return np.zeros((len(t_all), 1, 3))
+
+    options = MultipleShootingOptions(
+        shooting_nodes=(0.5, 1.0),
+        state_dim=2,
+        max_nfev=5,
+    )
+
+    fit_multiple_shooting(
+        target=target,
+        segmented_forward=segmented_forward,
+        unsegmented_forward=unsegmented_forward,
+        initial_theta=np.array([1.0]),
+        lower_theta=np.array([0.0]),
+        upper_theta=np.array([2.0]),
+        initial_states={0.5: np.zeros(2)},
+        state_bounds={0.5: (np.full(2, -1.0), np.full(2, 1.0))},
+        options=options,
+    )
+
+    # Window 0 should have strictly fewer calls than Window 1 because
+    # perturbations to the state vector at t=0.5s hit the cache for Window 0
+    assert call_counts[0] < call_counts[1]

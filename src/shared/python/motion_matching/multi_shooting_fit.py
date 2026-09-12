@@ -136,8 +136,11 @@ def fit_multiple_shooting(
         w_obs = np.isfinite(w_points).all(axis=2) & (target.weights > 0)
         window_data.append((t_start, t_end, w_time, w_points, w_obs))
 
+    window_cache: dict[int, tuple[bytes, bytes | None, Array, Array]] = {}
+
     def residual(p: Array) -> Array:
         theta = p[:theta_dim]
+        theta_bytes = theta.tobytes()
         states = {}
         for node in internal_nodes:
             s_lo, s_hi = state_offsets[node]
@@ -150,7 +153,19 @@ def fit_multiple_shooting(
         for i in range(n_windows):
             t_start, t_end, w_time, w_points, w_obs = window_data[i]
             init_s = None if i == 0 else states[t_start]
-            pred_markers, end_s = segmented_forward(theta, w_time, init_s)
+            init_s_bytes = None if init_s is None else init_s.tobytes()
+
+            cached = window_cache.get(i)
+            if (
+                cached is not None
+                and cached[0] == theta_bytes
+                and cached[1] == init_s_bytes
+            ):
+                pred_markers, end_s = cached[2], cached[3]
+            else:
+                pred_markers, end_s = segmented_forward(theta, w_time, init_s)
+                window_cache[i] = (theta_bytes, init_s_bytes, pred_markers, end_s)
+
             end_states.append(end_s)
 
             # Marker residuals
