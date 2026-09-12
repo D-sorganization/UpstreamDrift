@@ -4,10 +4,14 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 
 from src.engines.physics_engines.pinocchio.python.native_replay import replay_candidate
+from src.engines.physics_engines.pinocchio.python.native_sensitivity import (
+    replay_marker_sensitivities,
+)
 from src.shared.python.motion_matching.native_candidate import (
     NativeReplayCandidate,
     increment_native_bernstein,
@@ -53,6 +57,7 @@ def main() -> None:
     parser.add_argument("--root-forces-only", action="store_true")
     parser.add_argument("--amplitude-scale", type=float, default=10.0)
     parser.add_argument("--finite-difference-step", type=float, default=1e-3)
+    parser.add_argument("--analytic-jacobian", action="store_true")
     args = parser.parse_args()
     args.output_dir.mkdir(exist_ok=False)
     raw = args.model.read_bytes()
@@ -117,6 +122,7 @@ def main() -> None:
         "restart_candidate_sha256": restart_hash,
         "initial_parameters": initial.tolist(),
         "finite_difference_step": args.finite_difference_step,
+        "analytic_jacobian": args.analytic_jacobian,
         "qualification": "bounded exploratory refinement, not native acceptance",
         "input_sha256": {
             k: hashlib.sha256(getattr(args, k).read_bytes()).hexdigest()
@@ -181,9 +187,47 @@ def main() -> None:
             temporary.replace(args.output_dir / "best.json")
         return prediction
 
+    jacobian_key = None
+    cached_jacobian = None
+
+    def marker_jacobian(x: np.ndarray, time: np.ndarray) -> np.ndarray:
+        nonlocal jacobian_key, cached_jacobian
+        candidate = candidate_for(x)
+        clock_hash = hashlib.sha256(
+            np.asarray(time, dtype=np.float64).tobytes()
+        ).hexdigest()
+        key = (candidate.sha256, clock_hash)
+        if key != jacobian_key:
+            started = perf_counter()
+            result = replay_marker_sensitivities(
+                raw, candidate, time, first_control=first_control
+            )
+            cached_jacobian = (
+                result.marker_jacobian[:, :, :, :parameter_count] * args.amplitude_scale
+            )
+            cached_jacobian.setflags(write=False)
+            record = {
+                "candidate_sha256": candidate.sha256,
+                "clock_sha256": clock_hash,
+                "parameter_count": parameter_count,
+                "total_elapsed_s": perf_counter() - started,
+                "sensitivity_elapsed_s": result.sensitivity_elapsed_s,
+                "sensitivity_evaluations": result.sensitivity_evaluations,
+                "primal_marker_max_abs_difference_m": result.primal_marker_max_abs_difference_m,
+                "additional_primal_replays": 1,
+                "sensitivity_integrations": 1,
+            }
+            with (args.output_dir / "jacobians.jsonl").open("a") as stream:
+                stream.write(json.dumps(record) + "\n")
+            jacobian_key = key
+        if cached_jacobian is None:
+            raise ValueError("Native Jacobian cache was not populated")
+        return cached_jacobian
+
     opts = PrefixFitOptions(
         max_nfev=args.max_nfev,
         finite_difference_step=args.finite_difference_step,
+        marker_jacobian=marker_jacobian if args.analytic_jacobian else None,
         terminal_weight=10.0,
         acceptance_terminal_rmse_m=0.035,
         pelvis_indices=(

@@ -321,6 +321,7 @@ class PrefixFitOptions:
     pelvis_yaw_weight: float = 0.0
     pelvis_yaw_max_error_pct: float = 5.0
     acceptance_terminal_rmse_m: float | None = None
+    marker_jacobian: Forward | None = None
 
 
 def _run_prefix_stage(
@@ -407,6 +408,34 @@ def _run_prefix_stage(
         if options.finite_difference_step is not None
         else None
     )
+
+    def jacobian(parameters: Array) -> Array:
+        if options.marker_jacobian is None:
+            raise ValueError("Missing marker_jacobian callback")
+        derivative = np.asarray(options.marker_jacobian(parameters, time), dtype=float)
+        if (
+            derivative.shape != (*measured.shape, parameters.size)
+            or not np.isfinite(derivative).all()
+        ):
+            raise ValueError(
+                "marker_jacobian must return finite time-marker-xyz-parameter derivatives"
+            )
+        rows = [
+            (derivative[observed] * root_weights[:, None, None]).reshape(
+                -1, parameters.size
+            )
+        ]
+        if options.terminal_weight > 0 and observed[-1].any():
+            term_weights = (
+                np.sqrt(target.weights[observed[-1]]) * options.terminal_weight
+            )
+            rows.append(
+                (derivative[-1, observed[-1]] * term_weights[:, None, None]).reshape(
+                    -1, parameters.size
+                )
+            )
+        return np.concatenate(rows, axis=0)
+
     optimum = least_squares(
         residual,
         values,
@@ -417,6 +446,7 @@ def _run_prefix_stage(
         gtol=1e-10,
         x_scale="jac",
         diff_step=diff_step_arr,
+        jac=jacobian if options.marker_jacobian is not None else "2-point",
     )
     new_values = optimum.x.copy()
     prediction = _predicted(forward, new_values, time, measured.shape)
@@ -484,11 +514,23 @@ def fit_prefixes(
     choose parameter scaling and a step resolvable by the native solver.
     None preserves SciPy's default. At zero SciPy uses its default fallback.
 
+    Optional ``marker_jacobian(parameters, time)`` returns finite derivatives in
+    time-marker-xyz-parameter order. The fitter applies the same observation,
+    marker, time and terminal weights as the residual. Active yaw penalties or
+    regularization currently require the finite-difference path and are rejected
+    when this callback is supplied.
+
     Each stage is re-evaluated outside the optimizer and optionally checkpointed.
     Acceptance requires optimizer convergence and a full-duration distance RMSE
     below the supplied threshold; physical qualification remains the caller's job.
     """
     opt = options if options is not None else PrefixFitOptions()
+    if opt.marker_jacobian is not None and (
+        opt.regularization is not None or opt.pelvis_yaw_weight > 0
+    ):
+        raise ValueError(
+            "marker_jacobian does not yet support yaw or regularization residuals"
+        )
     if opt.finite_difference_step is not None and (
         isinstance(opt.finite_difference_step, bool)
         or not np.isfinite(opt.finite_difference_step)

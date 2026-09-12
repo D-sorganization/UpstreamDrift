@@ -3,11 +3,12 @@
 from collections.abc import Sequence
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 
 from src.shared.python.motion_matching.polynomial_torque import (
     evaluate_polynomial_torque,
 )
+from src.shared.python.motion_matching.prefix_fit import bernstein_to_simscape
 
 
 class NativeEffortProfile:
@@ -50,6 +51,9 @@ class NativeEffortProfile:
         rotation.setflags(write=False)
         self._rotation = rotation
         self._names = names
+        self._bernstein = bernstein_to_simscape(np.eye(7), duration_s=1.0)[:, ::-1]
+        self._force_map = np.eye(len(names))
+        self._force_map[:3, :3] = rotation
 
     def evaluate(self, time_s: float) -> dict[str, float]:
         """Return finite native primitive forces/torques at absolute seconds."""
@@ -61,3 +65,33 @@ class NativeEffortProfile:
         if not np.isfinite(values).all():
             raise ValueError("Native effort evaluation overflowed")
         return dict(zip(self._names, map(float, values), strict=True))
+
+    def bernstein_control_jacobian(
+        self, time_s: float, *, basis_duration_s: float, first_control: int = 4
+    ) -> NDArray[np.float64]:
+        """Differentiate primitive efforts by physical Bernstein input controls.
+
+        Columns are input-coordinate-major then ascending control index through
+        six. Force columns include the world-to-base map; torque columns retain
+        primitive conjugacy. These are physical controls, without optimizer scale.
+        """
+        if not np.isfinite(time_s) or time_s < 0:
+            raise ValueError("Native profile time must be finite nonnegative seconds")
+        if not np.isfinite(basis_duration_s) or basis_duration_s <= 0:
+            raise ValueError("Basis duration must be finite and positive")
+        if (
+            isinstance(first_control, bool)
+            or not isinstance(first_control, int)
+            or not 0 <= first_control <= 6
+        ):
+            raise ValueError("Invalid first Bernstein control")
+        basis = evaluate_polynomial_torque(self._bernstein, time_s / basis_duration_s)[
+            first_control:
+        ]
+        result = np.einsum("ij,k->ijk", self._force_map, basis).reshape(
+            len(self._names), -1
+        )
+        if not np.isfinite(result).all():
+            raise ValueError("Native Bernstein derivative overflowed")
+        result.setflags(write=False)
+        return result
