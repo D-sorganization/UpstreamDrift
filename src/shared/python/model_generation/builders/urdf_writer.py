@@ -51,6 +51,15 @@ class URDFWriter:
     indent: str = URDF_INDENT
     expand_composite_joints: bool = True
     include_comments: bool = False
+    numeric_precision: int = 6
+
+    def __post_init__(self) -> None:
+        """Allow binary64 interchange precision without changing default output."""
+        if (
+            type(self.numeric_precision) is not int
+            or not 1 <= self.numeric_precision <= 17
+        ):
+            raise ValueError("numeric_precision must be an integer from 1 to 17")
 
     def write(
         self,
@@ -137,15 +146,17 @@ class URDFWriter:
         lines.append(f"{indent2}<inertial>")
         com = link.inertia.center_of_mass
         lines.append(
-            f'{indent3}<origin xyz="{com[0]:.6g} {com[1]:.6g} {com[2]:.6g}" '
+            f'{indent3}<origin xyz="{com[0]:.{self.numeric_precision}g} {com[1]:.{self.numeric_precision}g} {com[2]:.{self.numeric_precision}g}" '
             f'rpy="0 0 0"/>'
         )
-        lines.append(f'{indent3}<mass value="{link.inertia.mass:.6g}"/>')
         lines.append(
-            f'{indent3}<inertia ixx="{link.inertia.ixx:.6g}" '
-            f'ixy="{link.inertia.ixy:.6g}" ixz="{link.inertia.ixz:.6g}" '
-            f'iyy="{link.inertia.iyy:.6g}" iyz="{link.inertia.iyz:.6g}" '
-            f'izz="{link.inertia.izz:.6g}"/>'
+            f'{indent3}<mass value="{link.inertia.mass:.{self.numeric_precision}g}"/>'
+        )
+        lines.append(
+            f'{indent3}<inertia ixx="{link.inertia.ixx:.{self.numeric_precision}g}" '
+            f'ixy="{link.inertia.ixy:.{self.numeric_precision}g}" ixz="{link.inertia.ixz:.{self.numeric_precision}g}" '
+            f'iyy="{link.inertia.iyy:.{self.numeric_precision}g}" iyz="{link.inertia.iyz:.{self.numeric_precision}g}" '
+            f'izz="{link.inertia.izz:.{self.numeric_precision}g}"/>'
         )
         lines.append(f"{indent2}</inertial>")
 
@@ -153,10 +164,10 @@ class URDFWriter:
         if link.visual_geometry:
             lines.append(f"{indent2}<visual>")
             lines.append(
-                f'{indent3}<origin xyz="{link.visual_origin.xyz[0]:.6g} '
-                f'{link.visual_origin.xyz[1]:.6g} {link.visual_origin.xyz[2]:.6g}" '
-                f'rpy="{link.visual_origin.rpy[0]:.6g} '
-                f'{link.visual_origin.rpy[1]:.6g} {link.visual_origin.rpy[2]:.6g}"/>'
+                f'{indent3}<origin xyz="{link.visual_origin.xyz[0]:.{self.numeric_precision}g} '
+                f'{link.visual_origin.xyz[1]:.{self.numeric_precision}g} {link.visual_origin.xyz[2]:.{self.numeric_precision}g}" '
+                f'rpy="{link.visual_origin.rpy[0]:.{self.numeric_precision}g} '
+                f'{link.visual_origin.rpy[1]:.{self.numeric_precision}g} {link.visual_origin.rpy[2]:.{self.numeric_precision}g}"/>'
             )
             lines.extend(self._write_geometry(link.visual_geometry, level + 2))
             if link.visual_material:
@@ -169,10 +180,10 @@ class URDFWriter:
         if link.collision_geometry:
             lines.append(f"{indent2}<collision>")
             lines.append(
-                f'{indent3}<origin xyz="{link.collision_origin.xyz[0]:.6g} '
-                f'{link.collision_origin.xyz[1]:.6g} {link.collision_origin.xyz[2]:.6g}" '
-                f'rpy="{link.collision_origin.rpy[0]:.6g} '
-                f'{link.collision_origin.rpy[1]:.6g} {link.collision_origin.rpy[2]:.6g}"/>'
+                f'{indent3}<origin xyz="{link.collision_origin.xyz[0]:.{self.numeric_precision}g} '
+                f'{link.collision_origin.xyz[1]:.{self.numeric_precision}g} {link.collision_origin.xyz[2]:.{self.numeric_precision}g}" '
+                f'rpy="{link.collision_origin.rpy[0]:.{self.numeric_precision}g} '
+                f'{link.collision_origin.rpy[1]:.{self.numeric_precision}g} {link.collision_origin.rpy[2]:.{self.numeric_precision}g}"/>'
             )
             lines.extend(self._write_geometry(link.collision_geometry, level + 2))
             lines.append(f"{indent2}</collision>")
@@ -204,17 +215,17 @@ class URDFWriter:
 
         # Origin
         lines.append(
-            f'{indent2}<origin xyz="{joint.origin.xyz[0]:.6g} '
-            f'{joint.origin.xyz[1]:.6g} {joint.origin.xyz[2]:.6g}" '
-            f'rpy="{joint.origin.rpy[0]:.6g} '
-            f'{joint.origin.rpy[1]:.6g} {joint.origin.rpy[2]:.6g}"/>'
+            f'{indent2}<origin xyz="{joint.origin.xyz[0]:.{self.numeric_precision}g} '
+            f'{joint.origin.xyz[1]:.{self.numeric_precision}g} {joint.origin.xyz[2]:.{self.numeric_precision}g}" '
+            f'rpy="{joint.origin.rpy[0]:.{self.numeric_precision}g} '
+            f'{joint.origin.rpy[1]:.{self.numeric_precision}g} {joint.origin.rpy[2]:.{self.numeric_precision}g}"/>'
         )
 
         # Axis (not for fixed joints)
         if joint.joint_type != JointType.FIXED:
             lines.append(
-                f'{indent2}<axis xyz="{joint.axis[0]:.6g} '
-                f'{joint.axis[1]:.6g} {joint.axis[2]:.6g}"/>'
+                f'{indent2}<axis xyz="{joint.axis[0]:.{self.numeric_precision}g} '
+                f'{joint.axis[1]:.{self.numeric_precision}g} {joint.axis[2]:.{self.numeric_precision}g}"/>'
             )
 
         # Limits (for revolute and prismatic)
@@ -223,17 +234,17 @@ class URDFWriter:
             JointType.PRISMATIC,
         ):
             lines.append(
-                f'{indent2}<limit lower="{joint.limits.lower:.6g}" '
-                f'upper="{joint.limits.upper:.6g}" '
-                f'effort="{joint.limits.effort:.6g}" '
-                f'velocity="{joint.limits.velocity:.6g}"/>'
+                f'{indent2}<limit lower="{joint.limits.lower:.{self.numeric_precision}g}" '
+                f'upper="{joint.limits.upper:.{self.numeric_precision}g}" '
+                f'effort="{joint.limits.effort:.{self.numeric_precision}g}" '
+                f'velocity="{joint.limits.velocity:.{self.numeric_precision}g}"/>'
             )
 
         # Dynamics
         if joint.dynamics and joint.joint_type != JointType.FIXED:
             lines.append(
-                f'{indent2}<dynamics damping="{joint.dynamics.damping:.6g}" '
-                f'friction="{joint.dynamics.friction:.6g}"/>'
+                f'{indent2}<dynamics damping="{joint.dynamics.damping:.{self.numeric_precision}g}" '
+                f'friction="{joint.dynamics.friction:.{self.numeric_precision}g}"/>'
             )
 
         lines.append(f"{indent}</joint>")
@@ -255,15 +266,17 @@ class URDFWriter:
         if geometry.geometry_type == GeometryType.BOX:
             size = geometry.dimensions
             lines.append(
-                f'{indent2}<box size="{size[0]:.6g} {size[1]:.6g} {size[2]:.6g}"/>'
+                f'{indent2}<box size="{size[0]:.{self.numeric_precision}g} {size[1]:.{self.numeric_precision}g} {size[2]:.{self.numeric_precision}g}"/>'
             )
         elif geometry.geometry_type == GeometryType.CYLINDER:
             lines.append(
-                f'{indent2}<cylinder radius="{geometry.dimensions[0]:.6g}" '
-                f'length="{geometry.dimensions[1]:.6g}"/>'
+                f'{indent2}<cylinder radius="{geometry.dimensions[0]:.{self.numeric_precision}g}" '
+                f'length="{geometry.dimensions[1]:.{self.numeric_precision}g}"/>'
             )
         elif geometry.geometry_type == GeometryType.SPHERE:
-            lines.append(f'{indent2}<sphere radius="{geometry.dimensions[0]:.6g}"/>')
+            lines.append(
+                f'{indent2}<sphere radius="{geometry.dimensions[0]:.{self.numeric_precision}g}"/>'
+            )
         elif geometry.geometry_type == GeometryType.CAPSULE:
             # URDF doesn't have capsule, use cylinder approximation. Warn:
             # the exported geometry is a different shape from the one the
@@ -274,15 +287,15 @@ class URDFWriter:
                 " (URDF has no native capsule support)"
             )
             lines.append(
-                f'{indent2}<cylinder radius="{geometry.dimensions[0]:.6g}" '
-                f'length="{geometry.dimensions[1]:.6g}"/>'
+                f'{indent2}<cylinder radius="{geometry.dimensions[0]:.{self.numeric_precision}g}" '
+                f'length="{geometry.dimensions[1]:.{self.numeric_precision}g}"/>'
             )
         elif geometry.geometry_type == GeometryType.MESH:
             mesh_filename = self._validate_mesh_filename(geometry.mesh_filename or "")
             scale = geometry.mesh_scale
             lines.append(
                 f'{indent2}<mesh filename="{self._escape(mesh_filename)}" '
-                f'scale="{scale[0]:.6g} {scale[1]:.6g} {scale[2]:.6g}"/>'
+                f'scale="{scale[0]:.{self.numeric_precision}g} {scale[1]:.{self.numeric_precision}g} {scale[2]:.{self.numeric_precision}g}"/>'
             )
 
         lines.append(f"{indent}</geometry>")
