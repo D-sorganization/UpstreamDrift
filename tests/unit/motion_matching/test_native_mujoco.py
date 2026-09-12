@@ -131,3 +131,76 @@ def test_rotating_rigid_pair_has_centripetal_acceleration(specification: dict) -
     assert acceleration["aPx"] == pytest.approx(2.4, abs=1e-12)
     assert acceleration["bPx"] == pytest.approx(-1.6, abs=1e-12)
     assert all(np.linalg.norm(value) < 1e-12 for value in model.closure_errors())
+
+
+def test_validated_bundle_conversion_preserves_dynamics(specification: dict) -> None:
+    raw = json.dumps(specification).encode()
+    xml, metadata = _bundle_fixture(specification, raw)
+    model = NativeMujocoModel.from_native_bundle(
+        xml.encode(), json.dumps(metadata).encode(), raw
+    )
+    direct = NativeMujocoModel(raw)
+    q = dict.fromkeys(specification["coordinate_order"], 0.0)
+    effort = dict(q, aPx=10.0)
+    assert model.accelerations(q, q, effort) == direct.accelerations(q, q, effort)
+    assert model.xml == direct.xml
+    np.testing.assert_array_equal(model.model.body_mass, direct.model.body_mass)
+    for name, pose in model.frame_poses(q).items():
+        np.testing.assert_array_equal(pose, direct.frame_poses(q)[name])
+    assert (
+        model.metadata["bundle_conversion"]
+        == "validated canonical geometry to MJCF; not direct URDF parsing"
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation", ["urdf", "model", "sidecar_hash", "closure", "gravity"]
+)
+def test_bundle_rejected_before_engine_construction(
+    specification: dict, monkeypatch: pytest.MonkeyPatch, mutation: str
+) -> None:
+    import src.engines.physics_engines.mujoco.python.native_model as module
+
+    raw = json.dumps(specification).encode()
+    xml, metadata = _bundle_fixture(specification, raw)
+    xml_bytes = xml.encode()
+    if mutation == "urdf":
+        xml_bytes += b" "
+    elif mutation == "model":
+        raw += b" "
+    elif mutation == "sidecar_hash":
+        metadata["urdf_sha256"] = "0" * 64
+    elif mutation == "closure":
+        metadata["closure"] = {}
+    else:
+        metadata["gravity_m_s2"] = [0, 0, 0]
+
+    def forbidden_import(name: str) -> None:
+        pytest.fail("Invalid bundle reached native engine construction")
+
+    monkeypatch.setattr(module, "import_module", forbidden_import)
+    with pytest.raises(ValueError):
+        NativeMujocoModel.from_native_bundle(
+            xml_bytes, json.dumps(metadata).encode(), raw
+        )
+
+
+def _bundle_fixture(specification: dict, raw: bytes) -> tuple[str, dict]:
+    import hashlib
+
+    xml = '<robot name="fixture"/>'
+    return xml, {
+        "schema_version": 1,
+        "requires_sidecar": True,
+        "model_sha256": hashlib.sha256(raw).hexdigest(),
+        "urdf_sha256": hashlib.sha256(xml.encode()).hexdigest(),
+        "limit_semantics": "restore-unbounded-before-dynamics",
+        "closure": specification["closure"],
+        "coordinate_order": specification["coordinate_order"],
+        "native_joints": specification["joints"],
+        "gravity_m_s2": specification["gravity_m_s2"],
+        "body_links": {body["name"]: body["name"] for body in specification["bodies"]},
+        "frame_links": {
+            frame["name"]: frame["name"] for frame in specification["frames"]
+        },
+    }
