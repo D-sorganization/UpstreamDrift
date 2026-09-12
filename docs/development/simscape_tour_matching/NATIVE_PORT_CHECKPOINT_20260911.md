@@ -1,5 +1,35 @@
 # Native Port Implementation Checkpoint
 
+## Terminal Replay Gap Diagnosed While Run11 Continues
+
+Updated 2026-09-12 13:23 UTC. Run11 remains live under session 43742 / PID
+2176887; evaluation13 is saved. Do not start a duplicate. A fresh final-window
+audit exposes why run10's lower shooting cost did not improve its continuous
+terminal pose. At 0.8 s, run08 segmented/continuous terminal RMS are
+60.817135/61.019909 mm; their marker-position disagreement is 0.543270 mm RMS.
+For run10 the corresponding values are 59.611758/65.558829 mm and
+28.947629 mm. Thus reducing the segmented terminal cost from 9.246810 to
+8.883904 concealed a worse continuous terminal fit. The difference between two
+RMS-to-target values is NOT the pointwise trajectory disagreement.
+
+The final-window replay uses saved physical state at 0.7 s; continuous endpoints
+come from candidate-identified independent replay NPZ files. Capture/model hashes
+are checked. Exact audit runner and receipt are archived in
+native-terminal-gap-audit-bundle-9967-01.zip. Receipt:
+native-terminal-gap-audit-9967-01.json. Initial audit invocation failed before
+writing output because run08's NPZ is named visual-replay.npz; the corrected
+runner explicitly uses that actual filename and finished zero.
+
+This demonstrates a material objective/replay mismatch despite small scaled
+node defects. After run11 returns and is independently replayed, audit its same
+gap. Do NOT continue another unchanged weight100 budget merely because cost
+decreases. Next controlled experiment should prioritize continuity (for example
+a qualified penalty continuation to weight1000, preserving all other settings),
+or a properly tested equality/augmented-Lagrangian formulation if conditioning
+prevents that. Exact defect gates and continuous replay remain mandatory.
+This finding supersedes the earlier generic budget-continuation recommendation;
+it does not justify interrupting or relabeling the already bounded run11.
+
 ## Run11 Exact Restart Qualified; Bounded Continuation Is Live
 
 Updated 2026-09-12 UTC. Audit session 13674 exited zero before fit launch.

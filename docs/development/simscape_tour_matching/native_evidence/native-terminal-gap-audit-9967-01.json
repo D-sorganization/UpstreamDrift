@@ -1,0 +1,23 @@
+{
+  "qualification": "Fresh final shooting-window replay versus saved independently replayed continuous endpoint; no optimization",
+  "rows": [
+    {
+      "run": "08",
+      "candidate_sha256": "4fd0f6a8291f247e458b7b23d2d4866a5e29963e9ab5c4cb853e764408d4552f",
+      "terminal_segmented_rms_m": 0.06081713458074169,
+      "terminal_continuous_rms_m": 0.06101990863750496,
+      "segmented_vs_continuous_terminal_rms_m": 0.0005432698617013771,
+      "weighted_terminal_cost": 9.246809646530117,
+      "observed_count": 25
+    },
+    {
+      "run": "10",
+      "candidate_sha256": "ff2f0d09d9ac6ebccaa81c278041c08e534e511acccc0ba352955983554118a7",
+      "terminal_segmented_rms_m": 0.05961175769115015,
+      "terminal_continuous_rms_m": 0.06555882922226675,
+      "segmented_vs_continuous_terminal_rms_m": 0.02894762915924062,
+      "weighted_terminal_cost": 8.883904137571,
+      "observed_count": 25
+    }
+  ]
+}
