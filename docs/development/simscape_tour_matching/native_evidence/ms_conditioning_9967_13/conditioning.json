@@ -1,0 +1,54 @@
+{
+  "qualification": "Linearized column-normalized Jacobian conditioning at run13 initial point; no proposed step has been forward-replayed or accepted",
+  "parameter_count": 399,
+  "residual_count": 23745,
+  "initial_cost": 41.85839993555997,
+  "nonzero_columns": 399,
+  "column_norm_min": 62.77702229519794,
+  "column_norm_max": 85540.37684576475,
+  "largest_scaled_singular_values": [
+    7.535520597946062, 7.082513084494661, 6.240333164892517, 5.3338327513582815,
+    4.689658133182467, 4.073303911471686, 4.046673598153103, 3.2464218532173934,
+    2.9336745991411615, 2.868960391851792
+  ],
+  "smallest_scaled_singular_values": [
+    2.7669571970298075e-9, 2.6494115155326382e-9, 2.30322761891046e-9,
+    1.8100945680454076e-9, 1.3080050658218188e-9, 1.137192923597314e-9,
+    8.600180979739377e-10, 7.031787072975132e-10, 4.515034829698621e-10,
+    3.099299120506126e-10
+  ],
+  "linearized_trials": [
+    {
+      "relative_cutoff": 0.0001,
+      "retained_rank": 210,
+      "predicted_full_step_cost": 41.84922211075839,
+      "first_bound_fraction": 0.0093158570393327,
+      "max_effort_control_step": 0.0077580548708882585,
+      "max_node_coordinate_step": 0.0004959146212517043
+    },
+    {
+      "relative_cutoff": 1e-6,
+      "retained_rank": 258,
+      "predicted_full_step_cost": 9.558076757416732,
+      "first_bound_fraction": 3.126980773453074e-8,
+      "max_effort_control_step": 135.9614311480965,
+      "max_node_coordinate_step": 15.908594679288722
+    },
+    {
+      "relative_cutoff": 1e-8,
+      "retained_rank": 361,
+      "predicted_full_step_cost": 8.777569916165243,
+      "first_bound_fraction": 2.7714689451826784e-8,
+      "max_effort_control_step": 385.6656084653251,
+      "max_node_coordinate_step": 11.131775560159612
+    },
+    {
+      "relative_cutoff": 1e-10,
+      "retained_rank": 396,
+      "predicted_full_step_cost": 8.746418914642833,
+      "first_bound_fraction": 4.959395914138019e-9,
+      "max_effort_control_step": 1998.5307878681542,
+      "max_node_coordinate_step": 19.278306030841915
+    }
+  ]
+}
