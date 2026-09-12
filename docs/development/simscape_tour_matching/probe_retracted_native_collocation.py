@@ -17,6 +17,11 @@ from src.shared.python.motion_matching.node_retraction import (
     retract_node,
     scaled_tangent_basis,
 )
+from src.shared.python.motion_matching.constrained_trajectory import (
+    compose_chart_residual_jacobian,
+    spline_chart_derivative_jacobians,
+    spline_node_derivative_maps,
+)
 
 
 def main() -> None:
@@ -25,9 +30,16 @@ def main() -> None:
     parser.add_argument("--path", type=Path, required=True)
     parser.add_argument("--nodes", type=int, default=4)
     parser.add_argument("--max-iterations", type=int, default=2)
+    parser.add_argument("--finite-difference-step", type=float, default=1e-6)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if args.output.exists() or args.nodes < 4 or args.max_iterations < 1:
+    if (
+        args.output.exists()
+        or args.nodes < 4
+        or args.max_iterations < 1
+        or not np.isfinite(args.finite_difference_step)
+        or args.finite_difference_step <= 0.0
+    ):
         raise ValueError(
             "Output must be new with at least four nodes and one iteration"
         )
@@ -58,9 +70,9 @@ def main() -> None:
         raise ValueError("Native node chart dimension changed")
     dimension = bases[0].shape[1]
 
-    def nodes(flat: np.ndarray) -> np.ndarray:
+    def nodes(flat: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         chart = flat.reshape(args.nodes, dimension)
-        values = []
+        retractions = []
         for reference, basis, coordinate in zip(references, bases, chart, strict=True):
 
             def closure(value: np.ndarray) -> np.ndarray:
@@ -69,7 +81,7 @@ def main() -> None:
             def jacobian(value: np.ndarray) -> np.ndarray:
                 return model.closure_position_linearization(mapping(value)).jacobian
 
-            values.append(
+            retractions.append(
                 retract_node(
                     reference,
                     basis,
@@ -79,15 +91,41 @@ def main() -> None:
                     state_scales=scales,
                     residual_scales=np.ones(6),
                     radius=0.1,
-                ).state
+                )
             )
-        return np.asarray(values)
+        return (
+            np.asarray([item.state for item in retractions]),
+            np.asarray([item.state_jacobian for item in retractions]),
+        )
+
+    first, second = spline_node_derivative_maps(times)
+
+    def state(
+        flat: np.ndarray,
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+    ]:
+        q, node_jacobians = nodes(flat)
+        spline = CubicSpline(times, q, axis=0)
+        qd, qdd = spline_chart_derivative_jacobians(first, second, node_jacobians)
+        return (
+            q,
+            np.asarray(spline(times, 1)),
+            np.asarray(spline(times, 2)),
+            node_jacobians,
+            qd,
+            qdd,
+        )
 
     def residual(flat: np.ndarray) -> np.ndarray:
-        q = nodes(flat)
-        spline = CubicSpline(times, q, axis=0)
+        q, velocity, acceleration, _, _, _ = state(flat)
         result = []
-        for qi, vi, ai in zip(q, spline(times, 1), spline(times, 2), strict=True):
+        for qi, vi, ai in zip(q, velocity, acceleration, strict=True):
             value = model.closure_trajectory_residuals(
                 mapping(qi), mapping(vi), mapping(ai)
             )
@@ -95,16 +133,37 @@ def main() -> None:
             result.extend(value.acceleration)
         return np.asarray(result)
 
+    def jacobian(flat: np.ndarray) -> np.ndarray:
+        q, velocity, acceleration, node_jacobians, qd, qdd = state(flat)
+        local = [
+            model.closure_trajectory_linearization(
+                mapping(qi),
+                mapping(vi),
+                mapping(ai),
+                finite_difference_step=args.finite_difference_step,
+            )
+            for qi, vi, ai in zip(q, velocity, acceleration, strict=True)
+        ]
+        derivative = compose_chart_residual_jacobian(
+            np.asarray([item.dq[6:] for item in local]),
+            np.asarray([item.dv[6:] for item in local]),
+            np.asarray([item.da[6:] for item in local]),
+            node_jacobians,
+            qd,
+            qdd,
+        )
+        return derivative.reshape(args.nodes * 12, args.nodes * dimension)
+
     initial = np.zeros(args.nodes * dimension)
     result = minimize(
         lambda x: float(x @ x),
         initial,
         method="trust-constr",
-        constraints={"type": "eq", "fun": residual},
+        constraints={"type": "eq", "fun": residual, "jac": jacobian},
         bounds=Bounds(-0.01 * np.ones_like(initial), 0.01 * np.ones_like(initial)),
         options={"maxiter": args.max_iterations, "gtol": 1e-12},
     )
-    values = nodes(np.asarray(result.x))
+    values, _ = nodes(np.asarray(result.x))
     defect = residual(np.asarray(result.x))
     args.output.write_text(
         json.dumps(
@@ -115,6 +174,8 @@ def main() -> None:
                 "optimizer_converged": bool(result.success),
                 "message": str(result.message),
                 "rate_acceleration_closure_max_abs": float(np.max(abs(defect))),
+                "residual_derivative": "node-level centered q/v differences with exact acceleration Jacobian",
+                "finite_difference_step": args.finite_difference_step,
                 "coordinates": values.tolist(),
                 "scope": "Bounded retracted-node preflight only; no marker objective, effort fit, or forward replay.",
             },

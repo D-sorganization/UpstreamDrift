@@ -98,6 +98,56 @@ def spline_chart_derivative_jacobians(
     )
 
 
+def compose_chart_residual_jacobian(
+    local_q: Array,
+    local_v: Array,
+    local_a: Array,
+    node_jacobians: Array,
+    qd_jacobian: Array,
+    qdd_jacobian: Array,
+) -> Array:
+    """Compose node residual partials with local retraction and spline maps.
+
+    Partial arrays are indexed ``(node, residual, q)``; node Jacobians are
+    ``(node, q, chart)``; and qd/qdd maps are ``(target, q, source, chart)``.
+    The returned derivative is ``(target, residual, source, chart)``.
+    """
+    q, v, a, node, qd, qdd = (
+        np.asarray(value, dtype=float)
+        for value in (
+            local_q,
+            local_v,
+            local_a,
+            node_jacobians,
+            qd_jacobian,
+            qdd_jacobian,
+        )
+    )
+    if (
+        q.shape != v.shape
+        or q.shape != a.shape
+        or q.ndim != 3
+        or node.ndim != 3
+        or node.shape[0] != q.shape[0]
+        or node.shape[1] != q.shape[2]
+        or qd.shape != qdd.shape
+        or qd.ndim != 4
+        or qd.shape[:2] != (q.shape[0], q.shape[2])
+        or qd.shape[2:] != (node.shape[0], node.shape[2])
+        or not all(np.isfinite(value).all() for value in (q, v, a, node, qd, qdd))
+    ):
+        raise ValueError("Invalid finite residual partials or chart derivative maps")
+    local = np.einsum("irq,iqc->irc", q, node)
+    direct = np.zeros((q.shape[0], q.shape[1], node.shape[0], node.shape[2]))
+    indices = np.arange(q.shape[0])
+    direct[indices, :, indices, :] = local
+    return (
+        direct
+        + np.einsum("irq,iqjc->irjc", v, qd)
+        + np.einsum("irq,iqjc->irjc", a, qdd)
+    )
+
+
 def _closure_values(
     positions: Array,
     rates: Array,

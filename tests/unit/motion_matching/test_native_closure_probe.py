@@ -8,6 +8,8 @@ import numpy as np
 import pytest
 
 from src.engines.physics_engines.pinocchio.python.native_model import (
+    NativeClosurePositionLinearization,
+    NativeClosureTrajectoryResiduals,
     NativePinocchioModel,
 )
 
@@ -153,3 +155,49 @@ def test_trajectory_closure_uses_zero_effort_constrained_acceleration_as_drift()
     np.testing.assert_array_equal(residual.rate, [2.0, 3.0])
     np.testing.assert_array_equal(residual.acceleration, [30.0, 72.0])
     assert captured["efforts"] == {"hip": 0.0, "shoulder": 0.0}
+
+
+@pytest.mark.unit
+def test_trajectory_linearization_uses_local_differences_and_exact_acceleration() -> (
+    None
+):
+    """Only local q/v sensitivity is differenced; the acceleration block is J."""
+    model = object.__new__(NativePinocchioModel)
+
+    def residual(
+        self: NativePinocchioModel,
+        coordinates: dict[str, float],
+        rates: dict[str, float],
+        accelerations: dict[str, float],
+    ) -> NativeClosureTrajectoryResiduals:
+        q = np.asarray([coordinates["hip"], coordinates["shoulder"]])
+        v = np.asarray([rates["hip"], rates["shoulder"]])
+        a = np.asarray([accelerations["hip"], accelerations["shoulder"]])
+        return NativeClosureTrajectoryResiduals(
+            q, q + 2.0 * v, 3.0 * q + 5.0 * v + 7.0 * a
+        )
+
+    model.closure_trajectory_residuals = MethodType(residual, model)  # type: ignore[method-assign]
+    model.closure_position_linearization = MethodType(  # type: ignore[method-assign]
+        lambda self, coordinates: NativeClosurePositionLinearization(
+            ("hip", "shoulder"), np.zeros(2), 7.0 * np.eye(2)
+        ),
+        model,
+    )
+
+    result = model.closure_trajectory_linearization(
+        {"hip": 1.0, "shoulder": 2.0},
+        {"hip": 3.0, "shoulder": 5.0},
+        {"hip": 7.0, "shoulder": 11.0},
+        finite_difference_step=1e-5,
+    )
+
+    np.testing.assert_allclose(
+        result.dq, np.vstack((np.eye(2), np.eye(2), 3.0 * np.eye(2)))
+    )
+    np.testing.assert_allclose(
+        result.dv, np.vstack((np.zeros((2, 2)), 2.0 * np.eye(2), 5.0 * np.eye(2)))
+    )
+    np.testing.assert_allclose(
+        result.da, np.vstack((np.zeros((4, 2)), 7.0 * np.eye(2)))
+    )

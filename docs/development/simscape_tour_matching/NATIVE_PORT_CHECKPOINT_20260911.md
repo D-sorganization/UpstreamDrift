@@ -203,6 +203,16 @@ This is local preflight evidence only: it has no marker objective, no full
 window continuation, no torque profile, and no forward replay. Do not expand
 the same blind finite-difference solve; next add chart-space derivatives and
 continue the window only after recording their qualification.
+
+The next implementation increment is present but has no ControlTower receipt
+yet. `NativePinocchioModel.closure_trajectory_linearization` returns local
+centered q/v derivatives of the three-level residual and the exact
+acceleration partial J. The shared `compose_chart_residual_jacobian` composes
+those local blocks with the full target-q-source-chart spline/retraction maps.
+`probe_retracted_native_collocation.py` now supplies this structured Jacobian
+to trust-constr with its finite-difference step recorded in the output. First
+qualify that Jacobian against a direct bounded chart perturbation on the same
+four-node window; do not interpret its availability as an accepted solve.
 identification. The next path stage is an explicit acceleration projection with
 reported correction magnitude, followed by derivative-consistency review; no
 torque fit or forward replay may be inferred from this failed diagnostic.
