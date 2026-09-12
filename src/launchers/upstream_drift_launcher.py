@@ -387,6 +387,7 @@ class UpstreamDriftLauncher(QMainWindow):
         self.sidekick_sidebar = None
         self.sidekick_window = None
         self._sidekick_popped_out = False
+        self.embedded_host: Any | None = None
         self._sidekick_action_service = None
         self._sidekick_action_service_host = None
         self._popped_out_windows: list[Any] = []
@@ -600,6 +601,7 @@ class UpstreamDriftLauncher(QMainWindow):
         self.loading = False
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
+        bootstrap_embeddable_tools()
         self._load_layout()
 
         from PyQt6.QtCore import QTimer as _QTimer

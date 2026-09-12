@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Embedded-Host Workspace Layout and Dock Geometry Persistence (#8899)
+
+Persist embedded-host workspace tabs, dock areas, active tab focus, and dock splitter geometries across launcher restarts (`src/launchers/embedded_host.py`, `src/launchers/launcher_layout_manager.py`, `src/launchers/launcher_layout_persistence.py`, `src/launchers/upstream_drift_launcher.py`):
+- Workspace State Snapshot & Restore: Wire `EmbeddedHostWidget.state_snapshot()` and `EmbeddedHostWidget.restore_state()` into the launcher lifecycle. `state_snapshot()` serializes ordered tabs, dock areas, active tab index, and dock layout bytes (`"dock_geometry"`). `restore_state()` idempotently re-opens tabs and docks, sets the active tab index, and reapplies dock geometry while gracefully logging and skipping tools that are no longer registered.
+- Dock Geometry & Qt State Methods: Implement `saveState() -> QByteArray` and `restoreState(state: QByteArray) -> bool` on `EmbeddedHostWidget` delegating to its internal `QMainWindow` host window, capturing and restoring dock widget positions, floating states, and splitter sizes.
+- Schema & Persistence Wiring: Extend `LayoutManager`'s save/load layout schema with `"workspace"` and `"dock_state"` keys. In `save_layout_state()`, query `embedded_host.state_snapshot()` and `dock_window.saveState()`. In `load_layout_state()`, restore the workspace and dock state after model layout loads. Ensure `bootstrap_embeddable_tools()` runs prior to `_load_layout()` in `update_startup_results()`.
+- Automated Verification: Unit tests in `tests/launchers/test_embedded_host_workspace_persistence.py` verifying state snapshot structure, tab order and active tab round-tripping, dock area and dock geometry preservation, schema serialization in `LayoutManager`, `save_layout_state`/`load_layout_state` wiring, and graceful fallback when `embedded_host` is `None`.
+
 ## Consolidated Live Keyboard Shortcuts Modal and Label Introspection (#8902)
 
 Unify keyboard shortcut discovery and eliminate misleading static/unbound shortcut listings and raw `"(shortcut)"` placeholder rows in `UpstreamDriftLauncher` (`src/launchers/launcher_dialogs.py`, `src/launchers/launcher_ui_setup.py`, `src/launchers/_launcher_top_bar_ui.py`):
