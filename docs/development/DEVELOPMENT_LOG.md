@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** antigravity
 - **Issue:** #8766
 - **Branch:** fix/8766-burndown-launcher-quarantine-43
-- **PR:** not created
+- **PR:** #10023
 - **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
 - **Last verified:** 2026-09-12 (`3c17225ef`)

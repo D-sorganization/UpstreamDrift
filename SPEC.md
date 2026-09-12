@@ -4400,7 +4400,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-12 | #10019 | Burn down 43 quarantined launcher process management, UI setup, library widget, and diagnostics tests in scripts/config/unit_gate_quarantine.json (#8766). |
+| 2026-09-12 | #10023 | Burn down 43 quarantined launcher process management, UI setup, library widget, and diagnostics tests in scripts/config/unit_gate_quarantine.json (#8766). |
 | 2026-09-12 | #10018 | Reconcile motion pipeline API advertised source formats and OpenAPI schemas with registered adapters, clarify format support documentation, register architecture budget exceptions, and pay down 156 unmarked test entries (#8875). |
 | 2026-09-12 | #10015 | Burn down 29 quarantined shared Python and physics engines tests in scripts/config/unit_gate_quarantine.json (#8766). |
 | 2026-09-12 | #10013 | Burn down 30 quarantined bunker shot solver, workbench GUI, and report tests in scripts/config/unit_gate_quarantine.json under the bunker_shot_model_and_workbench cluster (#8766). |
