@@ -1,0 +1,54 @@
+{
+  "qualification": "unoptimized full-profile extrapolation diagnostics",
+  "candidate_sha256": "a35fc26831dd76cfe6869ca80f77a5d4d7cdbd85d6185e88c411fbfb5f0c6689",
+  "phases": [
+    {
+      "start_s": 0,
+      "end_s": 0.6,
+      "observed_rms_m": 0.010012695105787102,
+      "observations": 5425
+    },
+    {
+      "start_s": 0.6,
+      "end_s": 0.8,
+      "observed_rms_m": 0.04387882092544177,
+      "observations": 1825
+    },
+    {
+      "start_s": 0.8,
+      "end_s": 1.0,
+      "observed_rms_m": 0.3602541318570315,
+      "observations": 1825
+    },
+    {
+      "start_s": 1.0,
+      "end_s": 1.2,
+      "observed_rms_m": 0.6648626185834502,
+      "observations": 1825
+    },
+    {
+      "start_s": 1.2,
+      "end_s": 1.5,
+      "observed_rms_m": 1.0682366105826036,
+      "observations": 2648
+    },
+    {
+      "start_s": 1.5,
+      "end_s": 1.8138888888888889,
+      "observed_rms_m": 4.610080617417757,
+      "observations": 2748
+    }
+  ],
+  "club_last_any_observation_s": 1.8083333333333333,
+  "club_last_all_observed_s": 1.8083333333333333,
+  "final_club_observation_count": 0,
+  "final_missing_labels": [
+    "Marker_2:2:1",
+    "Marker_2:2:2",
+    "Marker_2:2:3",
+    "Marker_3:3:1",
+    "Marker_3:3:2",
+    "Marker_3:3:3"
+  ],
+  "modeled_marker_last_all_observed_s": 1.8083333333333333
+}
