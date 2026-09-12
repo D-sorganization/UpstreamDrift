@@ -73,6 +73,15 @@ zero qd. See `native_evidence/closure_probe_9967_22/receipt.json` (model
 `b817fea...`). This is a single-state oracle qualification, not a
 trajectory-level closure proof or a C3D match.
 
+`NativeConstrainedPoseOracle` now connects that engine-owned marker/closure
+contract to the shared `fit_marker_pose` solver. It accepts only the fixed
+native coordinate order plus named marker bodies/offsets, validates all shapes
+and finiteness, and returns copied marker positions or weld-pose residuals. It
+does not contain a second IK implementation, smooth independent poses, infer
+derivatives, identify torque, or claim a trajectory. The immediate next task is
+one fixed capture-frame constrained-pose receipt, then a separately qualified
+smooth path across such frames.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.
