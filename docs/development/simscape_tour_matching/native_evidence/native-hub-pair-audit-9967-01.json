@@ -1,0 +1,156 @@
+{
+  "qualification": "observed pair-spacing audit; pair-only bounds allow independent pose each frame, not full-marker acceptance",
+  "candidate_sha256": "90d801cad282dba88170442dc7a57e4757aef04780bf267f311bd1a098f498b7",
+  "native_hub_body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+  "native_hub_solids": [
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/Head",
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/Neck",
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoTop",
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/ZeroMassShoulderReference"
+  ],
+  "capture_samples": 654,
+  "capture_end_s": 1.8138888888888889,
+  "pairs": [
+    {
+      "labels": ["BackTop", "BackLeft"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.20384777531199139,
+      "distance_min_m": 0.1872108601082963,
+      "distance_max_m": 0.21182129956339257,
+      "distance_std_m": 0.007170969754493609,
+      "best_fixed_length_pair_rms_m": 0.0035854848772468046
+    },
+    {
+      "labels": ["BackTop", "BackRight"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.19678282350626294,
+      "distance_min_m": 0.17447301325204007,
+      "distance_max_m": 0.20583675054278575,
+      "distance_std_m": 0.010155537072311021,
+      "best_fixed_length_pair_rms_m": 0.0050777685361555105
+    },
+    {
+      "labels": ["BackTop", "HeadTop"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.30474884062853075,
+      "distance_min_m": 0.2913675281646871,
+      "distance_max_m": 0.31370891239743787,
+      "distance_std_m": 0.007116463047400984,
+      "best_fixed_length_pair_rms_m": 0.003558231523700492
+    },
+    {
+      "labels": ["BackTop", "HeadFront"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.33046479266563605,
+      "distance_min_m": 0.31221502306794596,
+      "distance_max_m": 0.34476877172976167,
+      "distance_std_m": 0.011559145493787934,
+      "best_fixed_length_pair_rms_m": 0.005779572746893967
+    },
+    {
+      "labels": ["BackTop", "HeadSide"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.2518367185761451,
+      "distance_min_m": 0.2022679572638056,
+      "distance_max_m": 0.293091355180137,
+      "distance_std_m": 0.030573318932889608,
+      "best_fixed_length_pair_rms_m": 0.015286659466444804
+    },
+    {
+      "labels": ["BackLeft", "BackRight"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.1841450497663902,
+      "distance_min_m": 0.17198127794315798,
+      "distance_max_m": 0.19567787152107202,
+      "distance_std_m": 0.0037981049507622355,
+      "best_fixed_length_pair_rms_m": 0.0018990524753811177
+    },
+    {
+      "labels": ["BackLeft", "HeadTop"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.4904919378544258,
+      "distance_min_m": 0.4580890361642796,
+      "distance_max_m": 0.516856240706282,
+      "distance_std_m": 0.016998280600568745,
+      "best_fixed_length_pair_rms_m": 0.008499140300284373
+    },
+    {
+      "labels": ["BackLeft", "HeadFront"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.4899243897595617,
+      "distance_min_m": 0.4249104215979903,
+      "distance_max_m": 0.5225279013133988,
+      "distance_std_m": 0.03408995362660727,
+      "best_fixed_length_pair_rms_m": 0.017044976813303636
+    },
+    {
+      "labels": ["BackLeft", "HeadSide"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.40898312916418605,
+      "distance_min_m": 0.3496823888117725,
+      "distance_max_m": 0.4592864474158854,
+      "distance_std_m": 0.037220722437227065,
+      "best_fixed_length_pair_rms_m": 0.018610361218613532
+    },
+    {
+      "labels": ["BackRight", "HeadTop"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.4865646270466369,
+      "distance_min_m": 0.4557219362952715,
+      "distance_max_m": 0.503962660565416,
+      "distance_std_m": 0.016882126737156035,
+      "best_fixed_length_pair_rms_m": 0.008441063368578017
+    },
+    {
+      "labels": ["BackRight", "HeadFront"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.48875354623195594,
+      "distance_min_m": 0.42670102563452855,
+      "distance_max_m": 0.5187035823918952,
+      "distance_std_m": 0.03212501950589456,
+      "best_fixed_length_pair_rms_m": 0.01606250975294728
+    },
+    {
+      "labels": ["BackRight", "HeadSide"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.43830563538176925,
+      "distance_min_m": 0.39568124415687894,
+      "distance_max_m": 0.464631862293932,
+      "distance_std_m": 0.021603381207618604,
+      "best_fixed_length_pair_rms_m": 0.010801690603809302
+    },
+    {
+      "labels": ["HeadTop", "HeadFront"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.15559181109825915,
+      "distance_min_m": 0.15500674442266876,
+      "distance_max_m": 0.15658955996172372,
+      "distance_std_m": 0.00019835825202125398,
+      "best_fixed_length_pair_rms_m": 9.917912601062699e-5
+    },
+    {
+      "labels": ["HeadTop", "HeadSide"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.13385617638541475,
+      "distance_min_m": 0.132891119110912,
+      "distance_max_m": 0.13499180108950715,
+      "distance_std_m": 0.00027299831579376147,
+      "best_fixed_length_pair_rms_m": 0.00013649915789688073
+    },
+    {
+      "labels": ["HeadFront", "HeadSide"],
+      "observed_frames": 654,
+      "distance_mean_m": 0.17792407647201577,
+      "distance_min_m": 0.17687670954579834,
+      "distance_max_m": 0.1787200357622902,
+      "distance_std_m": 0.0003222425658835059,
+      "best_fixed_length_pair_rms_m": 0.00016112128294175294
+    }
+  ],
+  "input_sha256": {
+    "candidate": "ba0d754c4932c98118c6f2f6d5132e4a4816631ffb84e04b8307541915fc651f",
+    "model": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "capture": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87"
+  }
+}
