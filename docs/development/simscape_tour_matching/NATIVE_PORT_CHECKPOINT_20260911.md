@@ -1,5 +1,53 @@
 # Native Port Implementation Checkpoint
 
+## Finite Native Node Retraction Implemented and Qualified
+
+Updated 2026-09-12 UTC. Prior sensitivity commit 1cb37d543 is confirmed pushed.
+This turn adds shared node_retraction.retract_node: solve closure plus fixed
+scaled tangent coordinates, then differentiate that implicit square system.
+The chart requires positive state/residual scales, an orthonormal tangent basis,
+closure-valid reference and finite radius. It rejects failed residual contracts,
+rank loss and excessive final displacement. No retraction occurs inside any
+forward integration; this is solely an optimizer node parameterization.
+NodeRetraction.closure_max_abs is the maximum SCALED residual component; callers
+must retain physical closure residuals separately, as the native audit does.
+
+TDD: missing-module red observed, then analytic ellipse position and derivative,
+independent derivative, radius, nontangent basis, rank and bad-scale tests pass:
+8 passed, ruff and direct mypy passed. Native runtime audit tested chart step .1
+in all 42 tangent columns at the .600 s node. Physical closure maximum across
+those results is 7.99361e-15; derivative relative errors for columns 0/14/41 are
+1.81409e-9 / 2.28571e-9 / 7.89367e-10. Receipt
+native_evidence/native-node-retraction-audit-9967-01.json preserves all columns
+and explicit scales. These are finite node tests, not a swing optimization.
+
+State scales are .1 per native position (m or rad by channel), 1 per rate
+(m/s or rad/s); pose residual scales .01 and rate residual scales .1 in their
+native component units. Dimensionless chart radius .5. Basis is recomputed from
+the scaled closure Jacobian; do not use the previous unscaled basis with these
+scales. The oracle currently uses qualified centered 1e-6 finite differences;
+this node-only cost is separate from trajectory analytic derivatives.
+
+Runtime /home/dieterolson/native-node-retraction-9967-01 is isolated from earlier
+runtimes and adds only node_retraction.py. Audit command completed with exit zero.
+Local simscape-tour-checkpoints and ControlTower C:/Users/diete contain
+check_native_node_retraction_9967_01.py and the raw receipt. Local
+native-node-retraction-bundle-9967-01.zip preserves the new module and runner;
+dependencies are the preceding native-window-sensitivity runtime bundles.
+Reproduce with the existing venv, explicit PYTHONPATH and single-thread BLAS.
+The audit starts from native-node-tangent-audit-9967-01.npz, whose hash is below,
+and the same native model/candidate .600 s node. Outputs refuse overwrite.
+
+Next single action: wire a bounded native multiple-shooting pilot to the shared
+solver after inspecting Gemini's latest changes/ownership. Reuse these native
+facades: exact-window replay, window state/effort sensitivities and node retraction.
+Include chain rule through state_jacobian and retraction.state_jacobian in marker
+and scaled defect derivatives. Test an analytic segmented system and zero-defect
+native replay first. Fit only one controlled .8 s pilot with unchanged physical
+model, global sextic and documented bounds, and independently replay its returned
+coefficients from the original initial state. Shared solver acceptance must include
+fit gates, not only convergence/defects. Full-capture matching remains required.
+
 ## Native Node Tangents and Window Sensitivities Qualified
 
 Updated 2026-09-12 UTC. Previous window commit cf08782da is confirmed pushed.
