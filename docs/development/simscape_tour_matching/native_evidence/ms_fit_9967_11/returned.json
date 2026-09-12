@@ -1,0 +1,25 @@
+{
+  "candidate_sha256": "7a751619cbd9fa8c88caa29588334b2867c992435cb7bd9ae2946bb93f91ba4f",
+  "metrics": {
+    "whole": 0.029360093743281884,
+    "early": 0.010228241417088318,
+    "terminal": 0.1295142509709855,
+    "club": 0.028648340699005882,
+    "yaw_pct": 60.11720047493444
+  },
+  "accepted": false,
+  "optimizer_converged": false,
+  "max_scaled_defect_norm": 0.0010217009411185587,
+  "message": "The maximum number of function evaluations is exceeded.",
+  "defect_norms": {
+    "0.2": 0.000615041131928111,
+    "0.4": 0.0010217009411185587,
+    "0.6": 0.0008921209905776468,
+    "0.7": 0.00074310844669413
+  },
+  "optimality": 13.185138600439307,
+  "function_evaluations": 24,
+  "active_bound_count": 0,
+  "segmented_rms": 0.02309936853244515,
+  "unsegmented_rms": 0.029360093743281884
+}

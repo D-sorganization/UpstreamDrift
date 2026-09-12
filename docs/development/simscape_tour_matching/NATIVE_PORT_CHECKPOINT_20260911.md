@@ -1,5 +1,43 @@
 # Native Port Implementation Checkpoint
 
+## Run11 Rejected After Replay; Controlled Continuity Trial Is Live
+
+Updated 2026-09-12 UTC. Session 43742 exited zero; run11 completed its
+24-evaluation budget without convergence or acceptance. Canonical candidate
+7a751619cbd9fa8c88caa29588334b2867c992435cb7bd9ae2946bb93f91ba4f independently
+replays EXACTLY at whole RMS 29.360094 mm, early 10.228241 mm, terminal
+129.514251 mm, club 28.648341 mm and reported yaw error 60.117200 percent.
+Independent replay is 3.35625 s; closure pose/rate 2.12745e-11/8.56399e-11.
+Raw candidate hash 6a9aa1d81e0c4f66e2ad8410a09f98523723335dd881063b99c5aa1bebff44b7.
+Full raw run, source config, all24 evaluation snapshots, independently replayed
+NPZ and inspected marker-errors.png are in native_evidence/ms_fit_9967_11.
+
+Segmented whole RMS is 23.099369 mm. Fresh final-window terminal RMS is
+58.341272 mm, versus continuous 129.514251 mm; the two terminal poses differ
+by 118.984255 mm RMS. The optimizer reduces a disconnected trajectory cost
+while continuous replay gets worse. Optimality13.185139, zero active bounds,
+four scaled defects 0.000615041/0.001021701/0.000892121/0.000743108 still fail
+1e-4. Stop unchanged weight100 continuation. Receipt and exact audit runner
+are in this run's terminal-gap-audit.zip. Do not promote this candidate.
+
+LIVE controlled run12: session2134, confirmed ControlTower-Runner PID2178469.
+Output C:/Users/diete/native-ms-fit-9967-12. Uses the SAME archived driver11,
+runtime09 and verified run10 starting torques/physical nodes as run11 (not the
+bad run11 return). Same model, bounds, charts, 24-evaluation budget and sextic
+basis. Only --defect-weight changes from100 to1000. Because residual weighting
+is linear, its squared-cost penalty increases100-fold. Restart/selected
+derivative audits rerun before fitting; shared source is unchanged.
+
+Exact command is the run11 command below with output suffix12 and
+--defect-weight 1000. Poll session2134/PID2178469, preserve terminal results,
+independently replay, and measure segmented-versus-continuous terminal marker
+disagreement. Compare against run11 as the controlled weight experiment and
+against run08/run10 as alternative starting candidates. Never compare raw
+scalar costs across different weights as matching improvement. If the stronger
+penalty cannot reduce physical replay gaps, investigate an explicitly constrained
+or augmented-Lagrangian formulation with tests before another weight/budget loop.
+Full swing and final R2025b qualification remain incomplete.
+
 ## Terminal Replay Gap Diagnosed While Run11 Continues
 
 Updated 2026-09-12 13:23 UTC. Run11 remains live under session 43742 / PID
