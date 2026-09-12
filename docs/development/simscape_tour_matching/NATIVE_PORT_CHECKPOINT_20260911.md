@@ -145,6 +145,17 @@ shown to equal the derivative of the projected qd, it is not a dynamic path,
 torque initializer, or forward match. The next required implementation is a
 derivative-consistent collocation trajectory that jointly preserves pose, rate,
 and acceleration closure before reaction-eliminated effort identification.
+
+A tested shared C2 collocation scaffold is now present at
+`src/shared/python/motion_matching/constrained_trajectory.py`; it derives qd
+and qdd from one position spline and evaluates all three weld levels. Its
+first bounded native Drake probe is preserved in
+`../drake_native_matching/evidence/smooth_native_collocation_probe_9967_24/receipt.json`.
+After two finite-difference trust-constr iterations it remains unqualified:
+pose0.00126302, rate0.0172004, acceleration0.724940 maximum absolute closure.
+Do not increase that blind finite-difference budget. It confirms the generic
+contract and shows that this problem requires constraint derivatives and
+manifold continuation/retraction before a dynamic path or torque fit.
 identification. The next path stage is an explicit acceleration projection with
 reported correction magnitude, followed by derivative-consistency review; no
 torque fit or forward replay may be inferred from this failed diagnostic.
