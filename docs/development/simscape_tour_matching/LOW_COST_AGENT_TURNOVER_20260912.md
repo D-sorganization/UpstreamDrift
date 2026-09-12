@@ -79,6 +79,15 @@ the same immutable candidate/model/attachment identity for sparse transition
 frames, warm-starting each solve from the preceding feasible pose and recording
 any reachability or branch failure before trajectory smoothing.
 
+Frame216/t=0.6 s provides the required initial reachability distinction:
+`marker_pose_transition_9967_23/local-bound-receipt.json` is closure-feasible
+but527.809 mm RMS in the ±0.05 local chart; the isolated ±0.5 static probe is
+closure-feasible at27.1366 mm RMS. This rejects the claim that the current
+transition error is simply an impossible weld configuration. It does not meet
+the final gate and must never be used as a dynamic solution. Continue poses
+gradually from t=0, preserve bounds and branch identity, and stop to diagnose
+if residuals or closure fail rather than expanding a torque fit.
+
 Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
 Never silently change geometry, add feedback/state resets, or relax criteria.
 Use one bounded fit at a time after qualification; independently forward replay

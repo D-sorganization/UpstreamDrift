@@ -87,6 +87,19 @@ in one iteration because archived run19 q0 is the target's calibrated initial
 state. This only proves wiring/identity at the initial frame, not later
 reachability or transition tracking.
 
+The first transition-frame diagnostic is also complete at frame216/t=0.6 s,
+with the same model, run19 candidate, attachments and25 observed markers. The
+local ±0.05 coordinate chart converges with closure1.90450e-14 but marker
+RMS527.809 mm. An explicitly separate ±0.5 static search converges with
+closure6.12878e-15 and RMS27.1366 mm. Receipts are
+`native_evidence/marker_pose_transition_9967_23/`. Thus the large transition
+error is not immediate closed-chain infeasibility; it is not solved either:
+the wide static result fails the eventual25 mm whole-motion gate, has no
+continuation guarantee, no derivative/acceleration qualification and no
+forward torque replay. Do not use it as a dynamic candidate. It establishes the
+next action: continuation across sparse frames from preceding feasible poses,
+with branch, bounds and marker-residual evidence retained before smoothing.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.
