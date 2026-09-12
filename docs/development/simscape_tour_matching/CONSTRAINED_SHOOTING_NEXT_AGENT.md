@@ -1,5 +1,9 @@
 # Constrained Shooting Implementation Assignment
 
+> Current executable turnover: [Lower-Cost Agent Turnover](LOW_COST_AGENT_TURNOVER_20260912.md).
+> Read it and the top native checkpoint first. Historical run instructions below
+> are not authorization to repeat completed work or duplicate the live optimizer.
+
 ## Current Implementation Checkpoint
 
 Backend77eb87cca plus type fix5c6765de4 is implemented and pushed;33 relevant

@@ -10,6 +10,7 @@
 - Integrated reaction-identification feasibility and parallel-window benchmark
   receipts. Root reran six identification tests and two comparator tests: pass.
   Strict scalar-rate reconstruction still fails; full swing is not matched.
+- Detailed executable next-agent plan: [Lower-Cost Agent Turnover](simscape_tour_matching/LOW_COST_AGENT_TURNOVER_20260912.md).
 - Next: poll run20 and independently audit its returned continuous trajectory.
   Parallel agent owns only a new optional window-executor module/tests; root
   retains solver integration. No other agent-owned worktree was edited.
