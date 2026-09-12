@@ -1,5 +1,39 @@
 # Native Port Implementation Checkpoint
 
+## P2 Packaged Adapter Passed on ControlTower
+
+Actual execution completed with exit code zero in the existing ControlTower
+WSL environment: Python 3.12.3, Pinocchio 4.1.0, NumPy 2.5.3, SciPy 1.18.1.
+On the saved 867-sample clock through .80 s, the packaged adapter reproduces
+qualified diagnostic q and qd exactly (maximum differences both zero).
+Total adapter call took 3.80991 s; integration took 3.56810 s. Maximum sampled
+closure pose/rate residuals are 1.23770e-11 / 1.69879e-9.
+Receipt: `native_evidence/native_adapter_check_9967.json`.
+
+Deployment is explicitly a namespace-only diagnostic bundle, not the complete
+application package graph. Eight production modules are unmodified and hashed
+in its source manifest. Local archive `native-adapter-bundle-9967-01.zip` lives
+under simscape-tour-checkpoints; remote copy is in ControlTower's user directory,
+extracted to `/home/dieterolson/native-adapter-9967-01`. The runner source is
+`native_evidence/reproduction/run_packaged_native_candidate.py`, copied to the
+bundle root. Invoke it using the established Pinocchio venv Python, arguments
+--model /mnt/c/Users/diete/native_geometry_spec_9967.json
+--candidate /mnt/c/Users/diete/native_replay_candidate_9967.json
+--reference /mnt/c/Users/diete/native-continuous-800ms-9967-tight-01.json
+--output a NEW receipt path. The original receipt output was
+`/mnt/c/Users/diete/native-adapter-check-9967-01.json`; never overwrite it.
+
+Next is P3 interchange. Existing shared model-generation URDFWriter is reusable
+but writes inertias with only six significant digits and its composite-joint
+expansion introduces INTERMEDIATE_LINK_MASS. Preserve native precision and
+explicitly expand massless primitive links instead of using that default
+expansion unchanged. Existing dtack exporter also imposes generic effort and
+velocity bounds, so it is not an exact native interchange path as-is. Add red
+round-trip tests before adapting the shared writer. Preserve closure, gravity,
+native coordinate/effort identity and provenance in a sidecar, then prove actual
+Pinocchio reload pulse/trajectory parity. No full-swing acceptance is implied.
+No diagnostic job remains live.
+
 ## P2 Replay Adapter Implemented: Native Execution Pending
 
 `src/engines/physics_engines/pinocchio/python/native_replay.py` now consumes

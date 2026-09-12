@@ -1,0 +1,39 @@
+{
+  "qualification": "packaged adapter versus qualified diagnostic; no C3D acceptance",
+  "deployment": "namespace-only source bundle; full application imports not tested",
+  "candidate_sha256": "39e77b31af411463018ee9ac3cb9cb0d6d29984355b95413f63245d3575659ec",
+  "source_manifest": {
+    "deployment": "namespace-only diagnostic bundle",
+    "source_commit": "eb7479f75",
+    "files": {
+      "src/engines/physics_engines/pinocchio/python/native_model.py": "520500303388f234e75e552e76e0e9d9c963f1e46d88b0699afa7477c83d5519",
+      "src/engines/physics_engines/pinocchio/python/native_replay.py": "98a2068be54be776977da5540732f078dc3c1e3face3076efc55cd592a7ff989",
+      "src/shared/python/motion_matching/native_candidate.py": "e298f2a2801782543988c969516cba3697151808aa53f5a7662149a727e579f8",
+      "src/shared/python/motion_matching/native_effort_profile.py": "94ca956fda7b389682f4b1419e477edf7d344e08aa3d92c5a5032339a6b7289f",
+      "src/shared/python/motion_matching/polynomial_torque.py": "d8982bd8a6899adef0bdef13ba5c7836d49918fc0ca941ff97d2e2f5ac6cd2cd",
+      "src/shared/python/motion_matching/validate_theta.py": "915826be1bf30731856410d83e2bdcc5fdd57b82de1e3252cb906073b362fd76",
+      "src/shared/python/motion_matching/continuous_forward.py": "eab6aaedceb2325e557e9ca4bd53b0dec61c546efe884dc121a03aafd197814d",
+      "src/shared/python/motion_matching/marker_projection.py": "ce4c55e41e9fdf58f193927b20de77bd0fde815eb358b161c4c660d2fe2bef19"
+    }
+  },
+  "versions": {
+    "python": "3.12.3",
+    "pinocchio": "4.1.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+  },
+  "samples": 867,
+  "duration_s": 0.8,
+  "adapter_elapsed_s": 3.8099055450293235,
+  "integration_elapsed_s": 3.568096137023531,
+  "q_max_difference": 0.0,
+  "qd_max_difference": 0.0,
+  "closure_pose_max_abs": 1.2376988323110102e-11,
+  "closure_velocity_max_abs": 1.6987904416509991e-9,
+  "input_sha256": {
+    "model": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "candidate": "628b07db531a548829cbff503573bc617a0d4294f51f8c4fadaec80b995231ee",
+    "reference": "0a19866d7d6c2083ddc164edeadab351435e11c5f0786ca449f986c73109a0a1"
+  },
+  "passed": true
+}
