@@ -1,0 +1,28 @@
+{
+  "candidate_sha256": "c7a279ba040e087c24153d17c93d80de6df27d30945e4c3b7fac0d34b718a715",
+  "metrics": {
+    "whole": 0.031552172831812594,
+    "early": 0.010596878706414925,
+    "terminal": 0.11471641043424337,
+    "club": 0.06933911962287306,
+    "yaw_pct": 31.329591463368132
+  },
+  "accepted": false,
+  "optimizer_converged": false,
+  "max_scaled_defect_norm": 4.5468066786847895e-5,
+  "message": "Iteration limit reached",
+  "defect_norms": {
+    "0.2": 4.5468066786847895e-5,
+    "0.4": 4.102948795306997e-5,
+    "0.6": 2.070526055496526e-5,
+    "0.7": 3.151420409314003e-6,
+    "0.8": 2.7459981401513013e-6
+  },
+  "optimality": null,
+  "function_evaluations": 61,
+  "active_bound_count": 117,
+  "terminal_replay_gap_m": 0.023366983124373575,
+  "previous_terminal_rms_m": 0.05886803423265339,
+  "segmented_rms": 0.03093426514398844,
+  "unsegmented_rms": 0.031552172831812594
+}

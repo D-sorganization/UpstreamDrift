@@ -1,5 +1,64 @@
 # Native Port Implementation Checkpoint
 
+## Run17 Completed and Rejected; Next Step Is Solver Variable Scaling
+
+Updated 2026-09-12 UTC. All historical LIVE entries below are superseded.
+Session60582 exited zero; PID2248513 is gone. Run17 stopped at60 iterations /
+61 residual evaluations, accepted=false and optimizer_converged=false. No new
+fit has launched. The larger-budget experiment did not produce a matched swing.
+
+Independent replay session75036 exited zero and exactly reproduces whole
+31.552173 mm, early10.596879 mm, terminal114.716410 mm and club69.339120 mm
+through0.85 s. Yaw31.329591% fails. Maximum full scaled defect4.54681e-5 now
+passes1e-4, but pointwise terminal shooting/replay gap23.366983 mm remains
+material; local defect tolerance alone does not ensure a continuous marker match.
+Previous0.8 s terminal RMS58.868034 mm; segmented whole30.934265 mm.
+Closure pose/rate8.90196e-12 /3.98792e-11, independent replay4.239442 s.
+Canonical candidatec7a279ba040e087c24153d17c93d80de6df27d30945e4c3b7fac0d34b718a715.
+Raw candidate SHA11ca391af0d31b5f6cdbf00e904d9dd2ef87b4c50801bd93c4fced366b206cd0.
+
+Fresh bound reconstruction agrees within5.32908e-15. All117 active bounds
+are accounted for:46 effort controls and71 node coordinates. Node counts at
+0.2/0.4/0.6/0.7/0.8 s are10/7/13/17/24. These remain numerical search bounds,
+not biological or native Simscape physical limits. Exact raw outputs, all61
+snapshots and bound-audit source are preserved in ms_fit_9967_17/raw-run.zip;
+adjacent JSON and independent trajectory support review. The generic replay
+receipt baseline-only wording is historical; this candidate is optimized and
+unaccepted. Do not promote it based on passing the local continuity gate.
+
+### Next Controlled Implementation Assignment
+
+Do not launch another unchanged budget increase. Test explicit decision-variable
+scaling in the existing equality backend, preserving all physical constraints,
+original model, q0/qd0, target, torque bounds and global degree-six definition.
+This is a numerical-conditioning hypothesis, not a promised tracking gain.
+
+1. Read repo guidance and renew issue9967 ownership. Inspect existing optimizer
+   scaling utilities and reuse public boundaries before adding code. Use TDD:
+   known constrained optimum under differing units; equivalence of physical
+   residuals/constraints/bounds; analytic chain rule checked by central finite
+   differences; invalid/nonfinite/nonpositive scales; physical callback values;
+   unchanged evaluation-budget and rejected-result semantics.
+2. Add optional positive variable scales with identity behavior by default.
+   In scaled variables y, x=x0+diag(scale)\*y. Transform bounds and both objective
+   and constraint derivatives consistently. Return physical x and physical-bound
+   diagnostics. Do not loosen equalities or alter physical tolerance semantics.
+   Preserve DbC checks and reuse current residual/Jacobian cache and callbacks.
+3. Run focused shared solver/shooting tests, lint/type checks and normal hooks.
+   Deploy a NEW immutable runtime; never edit runtime14. On the native common
+   initial point, audit transformed derivatives and compare constraint/feasible
+   objective conditioning for identity versus chosen scales. A candidate is
+   half physical box width, giving roughly2 effort versus0.05 node scale.
+   Document the exact vector and rationale; qualify before any fit.
+4. Only after qualification, run one same-budget native comparison using the
+   same run17 problem. Archive source/config hashes and all checkpoints.
+   Independently replay and check all gates, including terminal pointwise gap.
+   If bounds still dominate a converged solution, investigate chart validity,
+   recentering and effort limits separately. Do not silently widen them.
+5. Full1.8138888889 s matching, geometry/length calibration where justified,
+   portable native-model application integration and final R2025b/cross-engine
+   replay remain outstanding. This assignment does not replace those outcomes.
+
 ## Live Run17 Evaluation22 Independently Replayed
 
 Updated 2026-09-12 UTC. Run17 remains live at ControlTower-Runner PID2248513;
