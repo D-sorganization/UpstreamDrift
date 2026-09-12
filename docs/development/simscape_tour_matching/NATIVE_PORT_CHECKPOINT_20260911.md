@@ -1,5 +1,42 @@
 # Native Port Implementation Checkpoint
 
+## P3 Native Tree Exported and Parsed
+
+`motion_matching/native_urdf.py` now exports the native spec through the shared
+17-digit writer. It explicitly represents 27 scalar primitives, 31 original
+solids and 16 reference frames; primitive/body/frame helper links have zero
+mass. Individual solid inertias and transforms are retained rather than
+recomputed from approximate shapes. Weld closure and original names/maps are
+preserved in a mandatory sidecar. Four tests progressed red-to-green; Ruff
+passed. These tests cover mass accounting, zero passive damping, metadata,
+missing closure/coordinates and invalid transforms.
+
+Actual ControlTower Pinocchio loaded the exported URDF successfully, with
+nq=nv=27 and total mass 77.60581783574676 kg. Session 65331 exited zero.
+Receipt: `native_evidence/native_urdf_parse_9967.json`. This is parsing and
+mass evidence ONLY: closure was not attached and dynamics remain unqualified.
+Artifacts on both local checkpoint archive and ControlTower user directory:
+`native-golf-9967-01.urdf`, `native-golf-9967-01.sidecar.json`.
+Reproduce locally via export_native_urdf(original_model_bytes); write XML with
+write_bytes(xml.encode()) to preserve the sidecar's exact urdf_sha256.
+
+The installed parser rejects literal infinite limits (negative probe archived
+as probe_urdf_infinite_limits_9967.py). URDF uses finite binary64-maximum limit
+placeholders. The sidecar requires restore-unbounded-before-dynamics; qualified
+loaders MUST restore infinite position/velocity/effort limits and attach the
+native weld before execution. No generic +/-pi, +/-1 m, 1000 Nm or damping
+defaults are inherited. General parser limit rules are documented upstream:
+https://github.com/ros/urdfdom . The actual installed parser probe governs this
+runtime; other engines need their own compatibility checks.
+
+Next single action: implement a sidecar-bound Pinocchio URDF loader that checks
+URDF/model identity, maps all native scalar q/v indices and frame names, sets
+gravity and restores unbounded limits, builds the 6D weld from the mapped body
+frames, then uses existing NativePinocchioModel public replay operations.
+Do not rebuild dynamics from the JSON instead of loading the URDF when claiming
+round-trip parity. Verify mass/COM, six native FK/acceleration states, input
+pulses, then the saved candidate replay. No process remains live.
+
 ## P3 Writer Precision Prepared
 
 All prior commits through 20fea65c1 are pushed; normal push checks passed.
