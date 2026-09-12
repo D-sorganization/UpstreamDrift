@@ -139,6 +139,19 @@ class CoordinationSequenceMixin(BaseRenderer):
                         markersize=8,
                     )
 
+        title, xlabel = self._format_kinematic_sequence_labels(analyzer_result)
+        ax.set_title(title, fontsize=14, fontweight="bold")
+        ax.set_xlabel(xlabel, fontsize=11, fontweight="bold")
+        ax.set_ylabel("Normalized Velocity", fontsize=12, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
+    @staticmethod
+    def _format_kinematic_sequence_labels(
+        analyzer_result: Any | None,
+    ) -> tuple[str, str]:
+        """Format title and xlabel annotations for kinematic sequence plot."""
         title = "Kinematic Sequence (Normalized)"
         if analyzer_result:
             if (
@@ -159,7 +172,6 @@ class CoordinationSequenceMixin(BaseRenderer):
             ):
                 title += " (Out of Order)"
 
-        ax.set_title(title, fontsize=14, fontweight="bold")
         xlabel = "Time (s)"
         if analyzer_result and getattr(analyzer_result, "methodology", None):
             meth = analyzer_result.methodology
@@ -169,11 +181,8 @@ class CoordinationSequenceMixin(BaseRenderer):
                 else str(meth)
             )
             xlabel += f"\nMethodology: {citation_str}"
-        ax.set_xlabel(xlabel, fontsize=11, fontweight="bold")
-        ax.set_ylabel("Normalized Velocity", fontsize=12, fontweight="bold")
-        ax.legend(loc="best")
-        ax.grid(True, alpha=0.3, linestyle="--")
-        fig.tight_layout()
+
+        return title, xlabel
 
     def plot_kinematic_sequence_bars(
         self,
