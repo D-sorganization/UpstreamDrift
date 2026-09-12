@@ -162,7 +162,6 @@
     "tests/unit/ai/gui/test_chat_session_manager.py::test_list_sessions_sorts_mixed_timezone_timestamps",
     "tests/unit/api/test_realtime_rate_limit_default.py::test_realtime_publish_default_allows_high_frequency",
     "tests/unit/api/test_route_uniqueness.py::test_no_duplicate_method_path_pairs",
-    "tests/unit/api/test_routes_data_explorer.py::test_list_datasets_pagination_offset_limit",
     "tests/unit/api/test_routes_theme.py::test_theme_route_imports_without_desktop_theme_manager",
     "tests/unit/config/test_setup_wizard.py::test_embed_adapter_registers_on_import",
     "tests/unit/config/test_setup_wizard.py::test_launcher_opens_registered_setup_wizard_instead_of_adapter_script",
@@ -358,8 +357,6 @@
     "tests/unit/test_security_and_module_fixes.py::TestPhysicsModuleDocstrings::test_shared_physics_module_has_docstring[src/shared/python/physics/topography.py]",
     "tests/unit/test_sim_gui_honest_messaging_6641.py::test_bunker_gui_uses_preview_label",
     "tests/unit/test_sim_gui_honest_messaging_6641.py::test_putting_gui_uses_preview_label",
-    "tests/unit/test_start_api_server.py::test_validate_security_no_issues",
-    "tests/unit/test_start_api_server.py::test_validate_security_with_critical",
     "tests/unit/test_type_stubs.py::test_myosuite_dynamics_mixin_declares_attrs",
     "tests/unit/test_type_stubs.py::test_no_type_ignore_import_untyped_for_yaml_in_config",
     "tests/unit/test_unreal_integration/test_mesh_loader.py::TestMeshLoaderGLTF::test_gltf_with_skeleton",
@@ -374,13 +371,8 @@
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_nothing_was_refused_in_the_dynamic_sweep",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_the_window_is_a_fraction_of_the_swept_domain",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_the_window_is_measured_on_attack_angle_and_firmness",
-    "tests/unit/tools/model_generation/test_rest_api_fastapi.py::test_path_param_value_is_captured",
     "tests/unit/tools/starting_pose_matcher/test_body_style_switch.py::test_library_shapes_scrub_meets_30_fps",
     "tests/unit/tools/starting_pose_matcher/test_body_style_switch.py::test_scrub_in_library_mode_updates_without_error",
-    "tests/unit/ui/dialogs/test_install_prompt.py::TestInstallWorker::test_worker_emits_finished_on_failure",
-    "tests/unit/ui/dialogs/test_install_prompt.py::TestInstallWorker::test_worker_emits_finished_on_success",
-    "tests/unit/ui/dialogs/test_install_prompt.py::TestInstallWorker::test_worker_handles_unexpected_exception",
-    "tests/unit/ui/test_window_icon.py::test_apply_window_icon_declares_app_user_model_id",
     "tests/unreal_integration/wave6_unreal/test_skeleton_and_golf_state.py::TestEnvironmentState::test_air_density_defaults_use_canonical_constant"
   ]
 }

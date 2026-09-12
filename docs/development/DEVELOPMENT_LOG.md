@@ -22,13 +22,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #8766
-- **Branch:** fix/launcher-unit-gate-quarantine-burndown
-- **PR:** #10015
+- **Branch:** fix/api-and-ui-quarantine-burndown
+- **PR:** #10017
 - **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`853814bbf`)
-- **Summary:** Progressive burndown of the 465-test quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), and 57 bunker shot and API route tests (#10013). Current tranche burns down 29 quarantined headless tests across shared Python and physics engines (MuJoCo joint analysis), ratcheting debt from 408 to 379.
-- **Next step:** Pass all CI gates on PR #10015 and squash-merge to main.
+- **Last verified:** 2026-09-12 (`8864e46d7`)
+- **Summary:** Progressive burndown of the 465-test quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), and 29 shared python/physics tests (#10015). Current tranche burns down 8 quarantined headless tests across API routes, FastAPI model generation, install prompt dialogs, and window icon, ratcheting debt from 379 to 371.
+- **Next step:** Pass all CI gates on PR #10017 and squash-merge to main.
 
 ## Shipped (Last 90 Days)
 
