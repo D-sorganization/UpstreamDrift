@@ -1,0 +1,29 @@
+{
+  "parent_candidate_sha256": "60bbe60ec6a57f7a5c4dd277b15de96fa1760ca006bad6509cb215c3e743e379",
+  "basis_duration_s": 0.8,
+  "powers": [4, 5, 6],
+  "representation": "degree-six Bernstein correction",
+  "free_control_indices": [4, 5, 6],
+  "parameter_order": "coordinate-major, ascending control index",
+  "amplitude_scale": 125.0,
+  "active_coordinates": [
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ"
+  ],
+  "root_forces_only": true,
+  "correction_bound_per_control": 25.0,
+  "correction_units": "N",
+  "dimensionless_center": 1.0,
+  "bounds": [0.8, 1.2],
+  "max_nfev": 12,
+  "restart_candidate_sha256": null,
+  "initial_parameters": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+  "finite_difference_step": 0.001,
+  "qualification": "bounded exploratory refinement, not native acceptance",
+  "input_sha256": {
+    "model": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "candidate": "33c4f13674b796886f5fd3aaf56ebdbcf6e703abbd7f1c304b120e8896ab8c96",
+    "target": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87"
+  }
+}

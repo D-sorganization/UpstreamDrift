@@ -52,6 +52,7 @@ def main() -> None:
     parser.add_argument("--shaping", choices=("sixth", "bernstein456"), default="sixth")
     parser.add_argument("--root-forces-only", action="store_true")
     parser.add_argument("--amplitude-scale", type=float, default=10.0)
+    parser.add_argument("--finite-difference-step", type=float, default=1e-3)
     args = parser.parse_args()
     args.output_dir.mkdir(exist_ok=False)
     raw = args.model.read_bytes()
@@ -115,7 +116,7 @@ def main() -> None:
         "max_nfev": args.max_nfev,
         "restart_candidate_sha256": restart_hash,
         "initial_parameters": initial.tolist(),
-        "finite_difference_step": 1e-3,
+        "finite_difference_step": args.finite_difference_step,
         "qualification": "bounded exploratory refinement, not native acceptance",
         "input_sha256": {
             k: hashlib.sha256(getattr(args, k).read_bytes()).hexdigest()
@@ -182,7 +183,7 @@ def main() -> None:
 
     opts = PrefixFitOptions(
         max_nfev=args.max_nfev,
-        finite_difference_step=1e-3,
+        finite_difference_step=args.finite_difference_step,
         terminal_weight=10.0,
         acceptance_terminal_rmse_m=0.035,
         pelvis_indices=(

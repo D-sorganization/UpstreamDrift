@@ -1,5 +1,50 @@
 # Native Port Implementation Checkpoint
 
+## Physical Difference Step Was Too Large; Corrected Search Is Live
+
+Updated 2026-09-12 UTC. This supersedes the root-force live status below.
+Root-force run 01 (session 81736) exited zero after 23 actual evaluations and
+returned the exact run 03 candidate unchanged. It exhausted 12 optimizer
+evaluations without an accepted step. Complete artifacts are preserved in
+native_evidence/root_force_9967_01/. Do not restart this terminal handle.
+
+The native finite-difference audit exited zero (session 32416). At fixed run 03,
+perturbing world force coordinate 1, Bernstein control 4, gives the following
+central marker derivative norms at output times 0,0.6,0.7,0.8 s:
+
+| Physical Step (N) | Derivative Norm (m/N) | Relative Change From Previous |
+| ----------------- | --------------------- | ----------------------------- |
+| 0.125             | 6.24575               | N/A                           |
+| 0.0125            | 38.01678              | 1.09295                       |
+| 0.00125           | 47.39844              | 0.24194                       |
+| 0.000125          | 47.50927              | 0.00355563                    |
+| 0.0000125         | 47.51057              | 0.0000386148                  |
+
+The original search step 0.125 N was demonstrably outside this local linear
+regime. This is one direction at one candidate; it does not qualify all columns
+or prove that corrected steps alone solve matching. See immutable receipt
+native-force-difference-9967-01.json and reproduction/check_native_force_difference.py.
+It preserves the full derivative arrays, central/even residuals and source hashes.
+
+Root-force run 02 is now live: session 94653, WSL PID 1941356, output
+C:/Users/diete/native-root-force-9967-02. Same run 03 base, frozen torques,
+nine variables and +/-25 N bounds, but --finite-difference-step 1e-7 gives
+0.0000125 N at the initial point. --max-nfev 24. Initial evaluation again
+reproduced run 03 exactly; no acceptance claim yet. The runner now exposes the
+existing shared fitter's validated step option instead of hardcoding 0.001.
+Combined subspace/shared-prefix tests: 38 passed, including existing invalid
+difference-step contracts. The earlier control mapping had red-to-green tests.
+
+Dedicated runtime: /home/dieterolson/native-root-force-runtime-9967-02.
+Use the same model/candidate/target paths and Python executable below, adding
+--finite-difference-step 1e-7 --max-nfev 24 and a NEW output path to reproduce.
+Bundle native-root-force-bundle-9967-02.zip, SHA-256
+f4b05cda0aaa5d2ff17cfaae0c560a30e3d30c89b6ecc667bc30be4ac77a43d6,
+is archived locally and on ControlTower with per-file hashes. It preserves the
+same namespace deployment boundary. Next action: inspect session 94653, preserve
+terminal results, independently replay any returned improvement, then qualify
+all relevant derivative directions before expanding the control search.
+
 ## Root-Force Authority Verified and Isolated Search Started
 
 Updated 2026-09-12 UTC. The previous goal turn made progress by committing and
