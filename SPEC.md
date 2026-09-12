@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Force Plate Stitching, DbC Contracts, Pinocchio Oracle, and Launcher Diagnostics Unit-Gate Debt Burndown (#8766)
+
+Burn down 9 quarantined test node IDs across force plate stitching, DbC contracts, Pinocchio synthesize oracle isolation, and launcher diagnostics in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 9 passing headless tests across `tests/unit/sidekick/lab/bio/test_force_plate_stitching.py` (5 tests: `test_below_threshold_defaults_to_origin`, `test_empty_dataframe`, `test_missing_columns`, `test_multi_plate_stitching`, `test_single_plate_processing`), `tests/unit/test_contracts_module.py` (2 tests: `TestContractLevelGetSet::test_set_level_updates_module_alias`, `TestInvariant::test_failing_invariant_raises_invariant_error`), `tests/unit/engines/pinocchio/test_synthesize_target.py` (1 test: `test_import_does_not_load_pinocchio`), and `tests/launchers/test_launcher_diagnostics.py` (1 test: `test_reset_layout_config_overwrites_existing_backup`).
+- Validated System Invariants: Verify multi-plate force/moment combination, center-of-pressure calculations, ground height threshold clamping, Design by Contract level dynamic aliasing, invariant validation error hierarchy, deferred import isolation for Pinocchio physics without optional dependencies, and safe layout config backup handling execute deterministically in headless CI environments.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 363 to 354 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## AI Adapters, Setup Wizard, and Launcher Tools Unit-Gate Debt Burndown (#8766)
 
 Burn down 16 quarantined test node IDs across AI adapters, setup wizard, launcher bootstrap, and tools clusters in `scripts/config/unit_gate_quarantine.json`:
