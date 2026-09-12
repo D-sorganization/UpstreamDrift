@@ -21,8 +21,12 @@ generalized-coordinate mass condition is about 6.65e7 with positive minimum
 eigenvalue 1.38e-6; this quantity is unit-dependent. Diagnose native Euler
 coordinate amplification and integration convergence before calling this a
 physical model mismatch or changing representation/gates. No third tolerance
-sweep or model alteration was performed. The agent is saving a bounded
-existing-state shoulder-coordinate addendum; collect it before the next fit.
+sweep or model alteration was performed. Existing-state shoulder evidence is
+integrated as `a5b817840`: Rx/Ry/Rz middle angle -94.58857 degrees, rate-map
+condition 24.96, relative physical angular speed 52.7732 rad/s. This supports
+coordinate amplification, not a sole-cause claim. The exact extractor and raw
+report are archived in Drake's run18 evidence. Both agents have finished;
+no fitting or qualification jobs remain live. All root work is committed.
 
 Updated 2026-09-12 UTC. This section supersedes historical LIVE statuses below.
 Run 18 session 94942 exited 0 and ControlTower PID 2294114 is absent. No new
