@@ -61,6 +61,7 @@ def replay_marker_sensitivities(
     time_s: Array,
     *,
     first_control: int = 4,
+    basis_duration_s: float | None = None,
     initial_state: Array | None = None,
     initial_sensitivity: Array | None = None,
     model_factory: Callable[
@@ -82,7 +83,21 @@ def replay_marker_sensitivities(
     the augmented trajectory must additionally agree in marker positions within
     1e-7 m and sampled weld components within 1e-7. These are numerical checks,
     not C3D fit acceptance. Geometry and initial state are fixed.
+    basis_duration_s defaults to candidate coverage for compatibility. Supply
+    the original basis duration when extending coverage without rebasing controls.
     """
+    basis_duration = (
+        candidate.document["duration_s"]
+        if basis_duration_s is None
+        else basis_duration_s
+    )
+    if (
+        isinstance(basis_duration, bool)
+        or not isinstance(basis_duration, (int, float, np.floating))
+        or not np.isfinite(basis_duration)
+        or basis_duration <= 0
+    ):
+        raise ValueError("Invalid Bernstein basis duration")
     if (
         isinstance(first_control, bool)
         or not isinstance(first_control, int)
@@ -150,7 +165,7 @@ def replay_marker_sensitivities(
             raise ValueError("Native acceleration derivative coordinate order differs")
         a = np.block([[np.zeros((n, n)), np.eye(n)], [local.dq, local.dv]])
         inputs = profile.bernstein_control_jacobian(
-            t, basis_duration_s=doc["duration_s"], first_control=first_control
+            t, basis_duration_s=basis_duration, first_control=first_control
         )
         b = np.vstack(
             (
