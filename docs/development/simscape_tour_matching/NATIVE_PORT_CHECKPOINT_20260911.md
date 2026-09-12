@@ -1,5 +1,30 @@
 # Native Port Implementation Checkpoint
 
+## Later-Capture Rigidity Spot Checks
+
+Updated 2026-09-12 UTC. The raw driver_marker_payload.json from preserved
+prefix-1200ms-sextic-01 was checked against the candidate capture SHA. Despite
+its historical folder name it contains observations through 1.813889 s.
+The same fixed-attachment relaxation was evaluated at 1.0, 1.2, 1.5 and 1.8 s,
+without forward simulation or extending the candidate's 0.80 s validity claim.
+All-marker lower bounds: 27.4147, 19.0406, 21.0997 and 21.2227 mm respectively.
+Observed modeled-marker counts: 25, 25, 22 and 25. Missing samples stayed masked.
+
+Receipt native_evidence/native-marker-rigidity-full-9967-01.json records these
+seven spot checks including the earlier .60/.70/.80 values. Its filename does
+not imply every capture frame was evaluated. None of these sampled lower bounds
+alone proves the 35 mm all-marker gate impossible. They identify an unavoidable
+fixed-offset contribution which remains relevant throughout the capture.
+Reproduce with check_marker_rigidity.py --candidate returned-candidate.json
+--capture-payload driver_marker_payload.json --times 0.6 0.7 0.8 1.0 1.2 1.5 1.8
+--output a_new_receipt.json. This is a geometry/observation diagnostic only.
+
+The next action remains a documented attachment/native-topology audit and
+multiframe calibration feasibility check, not dropping markers to force a pass.
+The first push of the diagnostic commits was rejected by hooks reporting files
+modified while this follow-up CLI work was being edited; retry normal hooks only
+after committing this update. Do not bypass hooks or claim that first push passed.
+
 ## Native Pose Feasibility and Fixed-Marker Rigidity
 
 Updated 2026-09-12 UTC. Previous goal turn made progress: run 02 finished,
