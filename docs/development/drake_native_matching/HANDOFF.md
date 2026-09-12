@@ -12,6 +12,20 @@ failed diagnostic is expected and blocks effort identification; first project
 or otherwise construct acceleration compatibility, report correction and
 derivative consistency, then repeat the unchanged `J*qdd+gamma` gate.
 
+The first diagnostic projection is complete in
+`evidence/smooth_native_acceleration_projection_9967_24/receipt.json`.
+Minimum-norm instantaneous corrections reduce the same 18 Drake acceleration
+closure residuals to3.99680e-15 maximum absolute residual, from1.33668, with
+coordinate correction maximum0.500529 and RMS0.0710317. The executable source
+is `reproduction/project_smooth_native_acceleration.py`. This is evidence that
+the Drake closure convention and Jacobian are usable; it is **not** a
+trajectory. The projected qdd does not establish qdd=d(qd)/dt, a continuous
+branch, effort identification, or forward motion. Do not pass it to
+`reaction_identification.py` or fit torques from it. The next implementation
+must construct a derivative-consistent collocation trajectory that preserves
+pose, velocity, and acceleration closure together before the existing
+reaction-eliminated global-sextic initializer may run.
+
 The single identified-profile replay has marker difference8.84e-9m but scalar-rate difference3.37e-4, so its existing full-state reconstruction gate **fails**. No new fitting, model change, tolerance sweep or gate relaxation occurred. The report preserves all prerequisites and a sequential path toward a bounded linear initializer after a smooth native C3D trajectory is available. Root review is required before broad production integration. Exact results are in `evidence/reaction-identification/`; all study jobs are terminal.
 
 ## Reconstructed-Seed Angular-Velocity Diagnostic

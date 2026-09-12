@@ -64,6 +64,17 @@ its qd and zero qd. The next required qualification is therefore a _trajectory_
 test across smoothed constrained marker-pose seeds, including pose, rate and
 acceleration closure. Do not skip that test for a torque fit.
 
+The sampled cubic pose/rate path now has an explicit negative acceleration
+qualification: `../drake_native_matching/evidence/smooth_native_acceleration_9967_24/receipt.json`
+reports maximum Drake `J*qdd+gamma`1.33668 and RMS0.24240. A separately
+archived instantaneous minimum-norm correction in
+`../drake_native_matching/evidence/smooth_native_acceleration_projection_9967_24/receipt.json`
+reduces the local residual to3.99680e-15 but changes qdd by as much as0.500529
+(RMS0.0710317). This validates the diagnostic projection convention only;
+it is not derivative-consistent and must never be treated as an inverse-
+dynamics input or a torque profile. Build and qualify a joint collocation path
+for q, qd, and qdd before the reaction-eliminated global-sextic initializer.
+
 Use `NativeConstrainedPoseOracle` with the existing shared
 `fit_marker_pose`; it is the only permitted bridge from the native model to
 the static constrained-pose stage. Pass the exact candidate coordinate order,
