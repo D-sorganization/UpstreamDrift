@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Integrations Health Panel Feedback, Empty State, and Contrast (#8904)
+
+Resolve collection failure masking, transient clipboard feedback, empty state guidance, and dark-mode contrast deficits in `IntegrationsHealthPanel` (`src/launchers/integrations_health_panel.py`):
+- Probe Failure State: Update `refresh()` so that probe/collection exceptions do not reset records to empty or display misleading `0/0 OK` success counts. Instead, set the status label to `"Probe failed — see logs"` while retaining previously displayed integration records and re-enabling the refresh button.
+- Transient Action Feedback: Update `_copy_diagnostics()` to display `"Copy failed — see logs"` on clipboard or formatting failures, and on both success (`"Copied!"`) and failure schedule `QTimer.singleShot(2000, self._update_status_label)` to restore the live `{healthy}/{total} OK` count after 2 seconds.
+- Spanning Empty State: In `_populate_table()`, if zero integration records are returned, insert an informative placeholder row spanning all columns (`"No integrations configured yet. Add one in Settings → MCP Servers."`) with center alignment. Call `_table.clearSpans()` prior to rebuilding rows to avoid stale span layouts.
+- Text Contrast Compliance: Pair every background badge colour with an explicit, high-contrast foreground text colour (`_STATUS_TEXT_COLOURS` mapping `#11111b` for light/pastel badges like healthy, configured, warning, error, and unknown, and `#ffffff` for dark `unconfigured` badges), satisfying accessibility contrast requirements across both dark and light UI themes.
+- Automated Verification: Unit tests in `tests/unit/launcher/test_integrations_health_panel.py` verifying exception retention, status label failure states, empty table spanning placeholder, clipboard feedback and timer recovery, and high-contrast foreground color assignment.
+
 ## Defer Database Session Acquisition in Auth Dependencies (#8940)
 
 Eliminate sync database session allocation, connection pool checkout, and `SELECT 1` pre-ping overhead on unauthenticated or auth-disabled API requests (~9 sessions/second under normal UI polling):
