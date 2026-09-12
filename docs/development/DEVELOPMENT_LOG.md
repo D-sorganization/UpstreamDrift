@@ -17,20 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9747 · Signed Release Tag Enforcement and Verification
+### DL-#8695 · DRY Duplication Quarantine Tightening
 
-- **State:** in_review
+- **State:** in_progress
 - **Owner:** claude
-- **Issue:** #9747
-- **Branch:** chore/9747-signed-release-tag-verification
-- **PR:** #10008
-- **Paths:** .github/workflows/release.yml, docs/operations/release-runbook.md, tests/ci/test_ci_infrastructure.py, SPEC.md, docs/development/DEVELOPMENT_LOG.md
-- **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`ac85a52ff`)
-- **Summary:** Enforce cryptographic signature verification on production release tags in release.yml and update release runbook.
-- **Next step:** Merge PR and close issue #9747.
+- **Issue:** #8695
+- **Branch:** conductor/issue-8695
+- **PR:** #10005
+- **Paths:** scripts/config/dry_duplication_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-11
+- **Last verified:** 2026-09-12 (`c893a73ad`)
+- **Summary:** Pruned 72 dead quarantined fingerprints across supported scanner runtimes (666 -> 594); no entry raised, baseline not regenerated.
+- **Next step:** Update PR #10005, pass CI, and merge.
 
 ## Shipped (Last 90 Days)
+
+### DL-#9747 · Signed Release Tag Enforcement and Verification
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #9747
+- **PR:** #10008 (merged)
+- **Paths:** .github/workflows/release.yml, docs/operations/release-runbook.md, tests/ci/test_ci_infrastructure.py, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-12 (`c893a73ad`)
+- **Summary:** Enforce cryptographic signature verification on production release tags in release.yml and update release runbook.
+- **Evidence:** All CI passed including quality-gate and unit-test-gate; merged to main at c893a73ad.
 
 ### DL-#9953 · Scalar Parameter Bounds
 
