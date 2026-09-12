@@ -1,5 +1,39 @@
 # Native Port Implementation Checkpoint
 
+## Shorter-Window Audit Completed; Next Trial Is Ready
+
+Updated 2026-09-12 13:05 UTC. This section supersedes historical LIVE labels
+below. Session 33109 exited zero; PID 2161235 is absent. No fit is running in
+this lane. Five-window diagnostic receipts and an exact raw ZIP are preserved
+in native_evidence/ms_short_window_audit_9967_10.
+
+All four initial scaled defects are below 1.89e-10. Local derivative audit
+reports passed. The assembled audit contains 357 variables and 22266 residuals,
+initial cost 13.2940430656. At h=1e-5, random and gradient cost-slope relative
+errors are 0.2097 and 0.3408 percent; gradient error at h=1e-6 is 0.0344 percent.
+The weak random direction becomes noisier at smaller h. This supports a bounded
+five-window trial, not blanket derivative certification or improved fit evidence.
+Partition, chart references, duplicated boundary samples and direction dimension
+changed; these numbers are not an isolated causal comparison with audit02.
+
+Next agent: use the archived driver10 and runtime09 already described below.
+Check leases, source hashes, output-directory absence and active processes first.
+Run one bounded driver10 optimization in a NEW output directory; do not run the
+audit wrapper expecting a fit. Preserve every complete evaluation checkpoint.
+Independently replay the returned candidate from the original initial state,
+report every acceptance gate and compare against run08. If progress stalls,
+inspect physical node defects, scaling and active bounds before another run.
+Then extend the horizon toward 1.0 s and ultimately 1.8138888889 s. Preserve one
+global degree-six effort profile; flexible controls may only seed a subsequently
+reoptimized and independently validated sextic. Final R2025b qualification and
+MuJoCo/Drake/OpenSim native replay remain outstanding.
+
+OpenSim planning is complete in epic #10003 and its separate worktree handoff.
+Its OS-0 runtime/topology qualification is the first bounded implementation
+assignment after the requested user check-in. This is additional program scope;
+the goal remains active. The goal API cannot edit an active objective string,
+so the added scope is recorded in these durable program documents.
+
 ## Smaller-Step Audit Completed; Shorter Early Windows Under Audit
 
 Updated 2026-09-12 UTC. Session 6242 exited zero. At h=1e-7, the assembled
