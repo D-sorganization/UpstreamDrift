@@ -72,6 +72,32 @@ def spline_node_derivative_maps(times: Array) -> tuple[Array, Array]:
     return first, second
 
 
+def spline_chart_derivative_jacobians(
+    first: Array, second: Array, node_jacobians: Array
+) -> tuple[Array, Array]:
+    """Return qd/qdd Jacobians indexed by target, q, source, and chart axes.
+
+    ``node_jacobians[source, q, chart]`` is the local retraction derivative.
+    Each returned array has shape ``(target_node, q, source_node, chart)``.
+    """
+    one, two, nodes = (
+        np.asarray(value, dtype=float) for value in (first, second, node_jacobians)
+    )
+    if (
+        one.shape != two.shape
+        or one.ndim != 2
+        or one.shape[0] != one.shape[1]
+        or nodes.ndim != 3
+        or nodes.shape[0] != one.shape[0]
+        or not all(np.isfinite(value).all() for value in (one, two, nodes))
+    ):
+        raise ValueError("Invalid finite spline maps or node chart Jacobians")
+    return (
+        np.einsum("ij,jka->ikja", one, nodes),
+        np.einsum("ij,jka->ikja", two, nodes),
+    )
+
+
 def _closure_values(
     positions: Array,
     rates: Array,

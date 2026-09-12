@@ -6,9 +6,13 @@ checkpoint. The turnover's Third Task is complete: the shared batch seam,
 trusted worker adapter, and a frozen two-evaluation full solver assembly receipt
 match exactly for workers=0 and workers=2 apart from timing telemetry. Read
 `native_parallel_performance/batched-solver-qualification-9967-24.json` before
-use. The next native task is a reviewed smooth closure-feasible transition
-initializer followed by one bounded fit; preserve older live-job text as
-historical only.
+use. The four-node retracted collocation preflight is also complete and remains
+unqualified: it preserves weld position by construction and reduces acceleration
+closure from1.3366819 to0.1041854 after two bounded iterations. This commit adds
+the exact cubic-spline chain rule from each retracted node chart into qd/qdd;
+it has no new optimizer or physical-match claim. Next, qualify structured
+node-level residual derivatives before any further bounded fit. Preserve older
+live-job text as historical only.
 
 - Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 - Branch: feat/9967-native-simscape-pinocchio; checkpoint SELF; PR not created.
@@ -21,9 +25,11 @@ historical only.
   receipts. Root reran six identification tests and two comparator tests: pass.
   Strict scalar-rate reconstruction still fails; full swing is not matched.
 - Detailed executable next-agent plan: [Lower-Cost Agent Turnover](simscape_tour_matching/LOW_COST_AGENT_TURNOVER_20260912.md).
-- Next: poll run20 and independently audit its returned continuous trajectory.
-  Optional window-executor module/tests are integrated from621efab7a; root
-  reran five tests successfully. Next agent owns qualified solver integration. No other agent-owned worktree was edited.
+- Next: qualify node-level finite-difference residual derivatives composed with
+  the exact spline/retraction derivatives, then run only the four-node bounded
+  jacobian-enabled probe and independently audit its trajectory. Optional
+  window-executor module/tests are integrated from621efab7a; root reran five
+  tests successfully. No other agent-owned worktree was edited.
 - Preserved all earlier handoffs below. Archives retain raw identity-bearing
   bytes; formatted JSON is for review. Current commit introduces no active
   runtime or physics changes.
