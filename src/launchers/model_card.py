@@ -64,128 +64,10 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
-# Tile image file names
-_IMG_SIMSCAPE = "simscape_multibody.png"
-_IMG_MATLAB = "matlab_logo.png"
+from .model_card_images import MODEL_IMAGES
+from .model_card_skeleton import SkeletonCard
 
-# Maps display names to tile image files in assets/
-MODEL_IMAGES = {
-    # Physics Engines - Current names from models.yaml
-    "MuJoCo": "mujoco_humanoid.png",
-    "Drake": "drake.png",
-    "Pinocchio": "pinocchio.png",
-    "OpenSim": "opensim.png",
-    "MyoSuite": "myosim.png",
-    # MATLAB/Simscape
-    "Matlab Models": _IMG_MATLAB,
-    # Tools
-    "Motion Capture": "c3d_viewer_modern.png",
-    "Model Explorer": "urdf_icon.png",
-    "Putting Green": "putting_green_modern.png",
-    "Video Analyzer": "video_analyzer_modern.png",
-    "Data Explorer": "data_explorer_modern.png",
-    "OpenPose": "openpose.png",
-    "MediaPipe": "mediapipe.png",
-    "Project Map": "project_map.png",
-    "Movement Optimizer": "movement_optimizer.png",
-    # Legacy names (backward compatibility)
-    "MuJoCo Humanoid": "mujoco_humanoid.png",
-    "MuJoCo Dashboard": "mujoco_hand.png",
-    "Drake Dashboard": "drake.png",
-    "Pinocchio Dashboard": "pinocchio.png",
-    "Drake Golf Model": "drake.png",
-    "Pinocchio Golf Model": "pinocchio.png",
-    "OpenSim Golf": "opensim.png",
-    "MyoSim Suite": "myosim.png",
-    "OpenPose Analysis": "openpose.jpg",
-    "Matlab Simscape": _IMG_MATLAB,
-    "Matlab Simscape 2D": _IMG_MATLAB,
-    "Matlab Simscape 3D": _IMG_MATLAB,
-    "Dataset Generator GUI": _IMG_MATLAB,
-    "Golf Swing Analysis GUI": _IMG_MATLAB,
-    "MATLAB Code Analyzer": _IMG_MATLAB,
-    "URDF Generator": "urdf_icon.png",
-    "C3D Motion Viewer": "c3d_viewer_modern.png",
-    "Shot Tracer": "golf_icon.png",
-    # New launcher tiles
-    "Cross Engine": "cross_engine.svg",
-    "Exercise Dashboard": "exercise_dashboard.svg",
-    "Swing Optimizer": "swing_optimizer.svg",
-    "Injury Analysis": "injury_analysis.svg",
-    "Terrain Engine": "putting_green_modern.png",
-    "BunkerShot 3D": "bunkershot3d.svg",
-    "Pendulum": "pendulum.svg",
-    "Chat Assistant": "golf_logo.png",
-    "Character Builder": "urdf_icon.png",
-    "Pose Studio": "pose_studio.svg",
-    "Dataset Generator": "data_explorer_modern.png",
-    "Golf Simulation Suite": "golf_logo.png",
-    "Motion-Match Preview": "motion_target_preview.svg",
-    "Starting-Pose Matcher (legacy)": "motion_target_preview.svg",
-    "Data Processor": "data_explorer_modern.png",
-    "Video Processor": "video_analyzer_modern.png",
-}
-
-
-class SkeletonCard(QFrame):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setObjectName("SkeletonCard")
-        self.setMinimumSize(180, 240)
-        self.setStyleSheet("""
-            #SkeletonCard {
-                background-color: rgba(255, 255, 255, 0.03);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                border-radius: 16px;
-            }
-        """)
-
-        # Qt only allows one QGraphicsEffect per widget, and a real pulse
-        # needs a QGraphicsOpacityEffect (setWindowOpacity() is a no-op on
-        # a non top-level widget -- issue #8906), so the opacity effect
-        # replaces the drop shadow as the card's active effect.
-        self.effect = QGraphicsOpacityEffect(self)
-        self.effect.setOpacity(0.35)
-        self.setGraphicsEffect(self.effect)
-
-        self._pulse_opacity: float = 0.35
-
-        pulse_up = QPropertyAnimation(self, b"pulseOpacity")
-        pulse_up.setDuration(1000)
-        pulse_up.setStartValue(0.35)
-        pulse_up.setEndValue(0.85)
-        pulse_up.setEasingCurve(QEasingCurve.Type.InOutSine)
-
-        pulse_down = QPropertyAnimation(self, b"pulseOpacity")
-        pulse_down.setDuration(1000)
-        pulse_down.setStartValue(0.85)
-        pulse_down.setEndValue(0.35)
-        pulse_down.setEasingCurve(QEasingCurve.Type.InOutSine)
-
-        self._anim = QSequentialAnimationGroup(self)
-        self._anim.addAnimation(pulse_up)
-        self._anim.addAnimation(pulse_down)
-        self._anim.setLoopCount(-1)
-        self._anim.start()
-
-    @pyqtProperty(float)
-    def pulseOpacity(self) -> float:
-        return self._pulse_opacity
-
-    @pulseOpacity.setter  # type: ignore[no-redef]
-    def pulseOpacity(self, value: float) -> None:
-        self._pulse_opacity = value
-        self.effect.setOpacity(value)
-
-    def hideEvent(self, event: QHideEvent | None) -> None:
-        """Stop the pulse animation once the skeleton is hidden.
-
-        Without this, `_anim`'s loop-forever animation keeps running after
-        the card is torn down (e.g. by `_rebuild_grid`'s grid-teardown
-        loop), leaking a timer for the lifetime of the process (#8906).
-        """
-        self._anim.stop()
-        super().hideEvent(event)
+__all__ = ["MODEL_IMAGES", "DraggableModelCard", "SkeletonCard"]
 
 
 class DraggableModelCard(QFrame):
@@ -750,27 +632,21 @@ class DraggableModelCard(QFrame):
         )
         btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn.setFixedSize(24, 24)
-        btn.setStyleSheet(
-            "QPushButton#CardFavoriteButton {"
-            "  background: rgba(255, 255, 255, 0.1);"
-            "  color: " + ("#ffb700" if is_fav else "#aaaaaa") + ";"
-            "  border: none;"
-            "  border-radius: 12px;"
-            "  font-size: 13px;"
-            "  font-weight: bold;"
-            "}"
-            "QPushButton#CardFavoriteButton:hover {"
-            "  background: rgba(255, 255, 255, 0.2);"
-            "  color: #ffb700;"
-            "}"
-            "QPushButton#CardFavoriteButton:focus {"
-            "  border: 1px solid #ffb700;"
-            "}"
-        )
+        self._apply_favorite_button_style(btn, is_fav)
         btn.clicked.connect(self._toggle_favorite)
         btn.hide()
         self._btn_favorite = btn
         return btn
+
+    @staticmethod
+    def _apply_favorite_button_style(btn: QPushButton, is_fav: bool) -> None:
+        """Apply styles to favorite button based on favorited state."""
+        color = "#ffb700" if is_fav else "#aaaaaa"
+        btn.setStyleSheet(
+            f"QPushButton#CardFavoriteButton {{ background: rgba(255, 255, 255, 0.1); color: {color}; border: none; border-radius: 12px; font-size: 13px; font-weight: bold; }}"
+            f"QPushButton#CardFavoriteButton:hover {{ background: rgba(255, 255, 255, 0.2); color: #ffb700; }}"
+            f"QPushButton#CardFavoriteButton:focus {{ border: 1px solid #ffb700; }}"
+        )
 
     def _toggle_favorite(self) -> None:
         """Toggle whether this model is marked as favorite."""
@@ -782,23 +658,7 @@ class DraggableModelCard(QFrame):
             self._btn_favorite.setText("☆")
             self._btn_favorite.setToolTip("Add to favorites")
             self._btn_favorite.setAccessibleName(f"Add {self.model.name} to favorites")
-            self._btn_favorite.setStyleSheet(
-                "QPushButton#CardFavoriteButton {"
-                "  background: rgba(255, 255, 255, 0.1);"
-                "  color: #aaaaaa;"
-                "  border: none;"
-                "  border-radius: 12px;"
-                "  font-size: 13px;"
-                "  font-weight: bold;"
-                "}"
-                "QPushButton#CardFavoriteButton:hover {"
-                "  background: rgba(255, 255, 255, 0.2);"
-                "  color: #ffb700;"
-                "}"
-                "QPushButton#CardFavoriteButton:focus {"
-                "  border: 1px solid #ffb700;"
-                "}"
-            )
+            self._apply_favorite_button_style(self._btn_favorite, False)
             if hasattr(self.parent_launcher, "show_toast"):
                 self.parent_launcher.show_toast(
                     f"Removed {self.model.name} from favorites", "info"
@@ -810,23 +670,7 @@ class DraggableModelCard(QFrame):
             self._btn_favorite.setAccessibleName(
                 f"Remove {self.model.name} from favorites"
             )
-            self._btn_favorite.setStyleSheet(
-                "QPushButton#CardFavoriteButton {"
-                "  background: rgba(255, 255, 255, 0.1);"
-                "  color: #ffb700;"
-                "  border: none;"
-                "  border-radius: 12px;"
-                "  font-size: 13px;"
-                "  font-weight: bold;"
-                "}"
-                "QPushButton#CardFavoriteButton:hover {"
-                "  background: rgba(255, 255, 255, 0.2);"
-                "  color: #ffb700;"
-                "}"
-                "QPushButton#CardFavoriteButton:focus {"
-                "  border: 1px solid #ffb700;"
-                "}"
-            )
+            self._apply_favorite_button_style(self._btn_favorite, True)
             if hasattr(self.parent_launcher, "show_toast"):
                 self.parent_launcher.show_toast(
                     f"Added {self.model.name} to favorites", "success"
