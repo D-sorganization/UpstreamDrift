@@ -10,6 +10,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.motion_matching.native_effort_profile import NativeEffortProfile
+from src.shared.python.motion_matching.prefix_fit import normalized_to_simscape
 
 _FIELDS = frozenset(
     {
@@ -115,3 +116,25 @@ class NativeReplayCandidate:
     def sha256(self) -> str:
         """Hash all candidate content, independent of caller dictionary ordering."""
         return hashlib.sha256(self._canonical_json.encode("utf-8")).hexdigest()
+
+
+def increment_native_candidate(
+    candidate: NativeReplayCandidate,
+    normalized_increment: np.ndarray,
+    *,
+    basis_duration_s: float,
+) -> NativeReplayCandidate:
+    """Add an ascending normalized polynomial without retiming existing inputs.
+
+    The basis duration is explicit and independent of integration coverage.
+    Return a new candidate identity; preserve the original state and attachments.
+    """
+    data = candidate.document
+    delta = normalized_to_simscape(normalized_increment, duration_s=basis_duration_s)
+    original = np.asarray(data["coefficients"], dtype=float)
+    if delta.shape != original.shape:
+        raise ValueError("Increment must preserve native coordinate count")
+    data["coefficients"] = (original + delta).tolist()
+    return NativeReplayCandidate.from_document(
+        data, data["coordinate_names"], data["model_sha256"]
+    )
