@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Consolidated Live Keyboard Shortcuts Modal and Label Introspection (#8902)
+
+Unify keyboard shortcut discovery and eliminate misleading static/unbound shortcut listings and raw `"(shortcut)"` placeholder rows in `UpstreamDriftLauncher` (`src/launchers/launcher_dialogs.py`, `src/launchers/launcher_ui_setup.py`, `src/launchers/_launcher_top_bar_ui.py`):
+- Modal Consolidation: Repoint global `Ctrl+?` and the Help menu shortcut actions directly to the live `KeyboardShortcutsDialog` modal (`show_keyboard_shortcuts_modal` in `src/launchers/help_menu.py`), retiring the disconnected static `ShortcutsOverlay` from the primary launcher path.
+- Human-Readable Shortcut Names: Set descriptive `objectName` properties on all registered `QShortcut` instances at construction (`"User Manual"`, `"Keyboard Shortcuts"`, `"Preferences"`, `"Quit Application"`, `"Search Models"`, `"Clear Search"`, `"Zoom In"`, `"Zoom Out"`, and dynamic Sidekick feature menu labels), enabling `collect_shortcut_rows` in `help_menu.py` to scrape real, meaningful action names without falling back to `"(shortcut)"`.
+- Automated Verification: Unit tests in `tests/launchers/test_help_menu.py`, `tests/launchers/test_launcher_dialogs.py`, and `tests/launchers/test_launcher_ui_setup.py` asserting modal invocation, absence of `"(shortcut)"` placeholders, and non-empty `objectName` registration across all global shortcuts.
+
 ## Background Worker for Windows Dependency Verification (#8898)
 
 Eliminate synchronous native module imports on the GUI thread during Windows runtime dependency verification in `SettingsDialog` (`src/launchers/settings_dialog.py`):
