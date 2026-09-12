@@ -1,0 +1,56 @@
+[
+  {
+    "file": "replay-001.json",
+    "score": 13.943140232734784,
+    "candidate_sha256": "cee9337c959620f9a5f24eb3175d4229bf7bcb12193a87e1d8d983fa2155daf6",
+    "whole_rms_m": 0.02377620927455759,
+    "early_rms_m": 0.010027858154321565,
+    "terminal_rms_m": 0.06279741718186084,
+    "terminal_club_cluster_rms_m": 0.030451066296288323
+  },
+  {
+    "file": "replay-01.json",
+    "score": 13.869058156956026,
+    "candidate_sha256": "e3cdbc892eb428f3051b7620cb5fcf0db6f7b9c5cd13ec3acee3ed819b07cf32",
+    "whole_rms_m": 0.02371110565909042,
+    "early_rms_m": 0.010019330266555252,
+    "terminal_rms_m": 0.06263239965486059,
+    "terminal_club_cluster_rms_m": 0.030426915617390304
+  },
+  {
+    "file": "replay-02.json",
+    "score": 13.822219202769723,
+    "candidate_sha256": "499535d5eed7f74f27f836f267f7ef1956f58c5e28bb08a4b6b13a44da7c6048",
+    "whole_rms_m": 0.023650135130400637,
+    "early_rms_m": 0.010012687921369874,
+    "terminal_rms_m": 0.06254939795181678,
+    "terminal_club_cluster_rms_m": 0.030590078492858573
+  },
+  {
+    "file": "replay-04.json",
+    "score": 14.025280876687312,
+    "candidate_sha256": "08ff64e549e0a95105cdc176ed52c38e23b6f522e104f9b8c41cf0803f40e30b",
+    "whole_rms_m": 0.023610242581760123,
+    "early_rms_m": 0.010008886713812575,
+    "terminal_rms_m": 0.0632384414528924,
+    "terminal_club_cluster_rms_m": 0.03183815621281104
+  },
+  {
+    "file": "replay-10.json",
+    "score": 24.79348954278487,
+    "candidate_sha256": "6fe89102e7df00dfb8335c9a69f1ec51d2c1498ab1d892f987b0ace918fdd4df",
+    "whole_rms_m": 0.02594689099142066,
+    "early_rms_m": 0.010092931336555644,
+    "terminal_rms_m": 0.08928453890503786,
+    "terminal_club_cluster_rms_m": 0.05191944577746886
+  },
+  {
+    "file": "replay-100.json",
+    "score": 1493.6395255369775,
+    "candidate_sha256": "392c1f3ed0e9d1088d63ed589dd0b9cd8a3c077748c9a2383d50e19b9dd0c81f",
+    "whole_rms_m": 0.23811597503076604,
+    "early_rms_m": 0.05792237325133794,
+    "terminal_rms_m": 0.6584793629661961,
+    "terminal_club_cluster_rms_m": 1.2850806300758548
+  }
+]
