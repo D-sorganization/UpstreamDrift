@@ -4356,6 +4356,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #10008 | Enforce cryptographic signature verification on release tags in release.yml, update release runbook commands and requirements, and add automated regression tests (#9747). |
 | 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |
 | 2026-09-10 | #8360 | Bound the launcher splash: every async startup phase (registry, engines, Docker, optional Tools/Rate provider) runs under an explicit timeout with timestamped structured diagnostics; optional-provider failure degrades the shell instead of blocking it; a StartupSession watchdog plus Retry / Continue without provider / Copy diagnostics / Close dialog replaces the quit-on-error path; loading-mode construction no longer loads the registry on the GUI thread. |
 | 2026-09-09 | #9941 | Add calibrated cross-model joint convention conversion, gap-safe golf metrics including event-defined X-Factor stretch and shaft twist velocity, explicit COM/missing-data contracts, model link adapters, and configurable desktop/web plots and API surfaces (#9934). |

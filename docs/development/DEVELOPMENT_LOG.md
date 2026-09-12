@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9747 · Signed Release Tag Enforcement and Verification
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** claude
 - **Issue:** #9747
 - **Branch:** chore/9747-signed-release-tag-verification
-- **PR:** not created
+- **PR:** #10008
 - **Paths:** .github/workflows/release.yml, docs/operations/release-runbook.md, tests/ci/test_ci_infrastructure.py, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`e001711c3`)
+- **Last verified:** 2026-09-12 (`ac85a52ff`)
 - **Summary:** Enforce cryptographic signature verification on production release tags in release.yml and update release runbook.
-- **Next step:** Open PR to main and verify CI checks.
+- **Next step:** Merge PR and close issue #9747.
 
 ## Shipped (Last 90 Days)
 
