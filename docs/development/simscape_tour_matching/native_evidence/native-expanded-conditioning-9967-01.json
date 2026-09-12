@@ -1,0 +1,7 @@
+{
+  "candidate_sha256": "5c99cda5ea6e6f04be4c18aa878234c92ef9b389b2a6fd21dfe8f45e20d5da5d",
+  "artifact_sha256": "f6e78cac887cad3464925855388e6824a2f65a11e50eb83dcff206a3bb56084b",
+  "sensitivity_elapsed_s": 17.86437450896483,
+  "primal_marker_max_abs_difference_m": 2.2699681578863817e-9,
+  "runner_sha256": "711d2cdc2018aafb2c73ced98e66e990110634c77dc3758ce3a983f6441dbf06"
+}

@@ -1,0 +1,38 @@
+{
+  "qualification": "local unbounded linear analysis, not fit acceptance",
+  "rows": [
+    {
+      "cutoff": 0.0001,
+      "rank": 5,
+      "largest_singular": 1445919.9245564674,
+      "smallest_retained": 425.08526686284637,
+      "before_score": 13.952558333214116,
+      "linear_score": 13.92257195273522,
+      "max_abs_effort_step": 0.00036926759692675244,
+      "step_l2": 0.0011219805836266685
+    },
+    {
+      "cutoff": 1e-6,
+      "rank": 27,
+      "largest_singular": 1445919.9245564674,
+      "smallest_retained": 1.5506331710088617,
+      "before_score": 13.952558333214116,
+      "linear_score": 9.46887100068703,
+      "max_abs_effort_step": 2.9244843590793943,
+      "step_l2": 9.372691740852048
+    },
+    {
+      "cutoff": 1e-8,
+      "rank": 88,
+      "largest_singular": 1445919.9245564674,
+      "smallest_retained": 0.015006022860458774,
+      "before_score": 13.952558333214116,
+      "linear_score": 5.198182278191021,
+      "max_abs_effort_step": 50.53434977835002,
+      "step_l2": 147.3179343525413
+    }
+  ],
+  "column_norm_min": 0.5239708315257242,
+  "column_norm_max": 76758.07898946077,
+  "artifact_sha256": "f6e78cac887cad3464925855388e6824a2f65a11e50eb83dcff206a3bb56084b"
+}
