@@ -208,6 +208,104 @@ class TestInAppHelpSystem:
         assert "user_manual" not in topic_ids
 
 
+class TestToolHelpAffordances:
+    """#8846 — GUI tool windows must expose a Help menu and calculation docs."""
+
+    def test_build_help_menu_with_doc_target(self, qapp) -> None:
+        from PyQt6.QtWidgets import QMainWindow
+        from src.launchers.help_menu import build_help_menu
+
+        win = QMainWindow()
+        try:
+            bar = win.menuBar()
+            menu = build_help_menu(
+                bar,
+                win,
+                doc_target=(
+                    "Ball Flight Model Documentation",
+                    "docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md",
+                ),
+            )
+            labels = [a.text() for a in menu.actions() if not a.isSeparator()]
+            assert "&Ball Flight Model Documentation" in labels
+            assert "&User Guide" in labels
+            assert "&Motion-Match Loaders" in labels
+            assert "&About" in labels
+        finally:
+            win.deleteLater()
+
+    @pytest.mark.parametrize(
+        ("module_path", "window_cls_name", "expected_doc_action"),
+        [
+            (
+                "src.tools.ball_flight_gui.gui",
+                "BallFlightWindow",
+                "&Ball Flight Model Documentation",
+            ),
+            (
+                "src.tools.bunker_shot_gui.gui",
+                "BunkerShotWindow",
+                "&BunkerShot3D Credibility Statement",
+            ),
+            (
+                "src.tools.putting_green_gui.gui",
+                "PuttingGreenWindow",
+                "&Putting Kinematics & Kinetics Review",
+            ),
+            (
+                "src.tools.swing_flight_pipeline.gui",
+                "SwingFlightWindow",
+                "&Ball Flight Model Documentation",
+            ),
+            (
+                "src.tools.golf_environment.gui",
+                "EnvironmentWindow",
+                "&Environment & Architecture Map",
+            ),
+            (
+                "src.tools.video_analyzer.gui",
+                "VideoAnalyzerWindow",
+                "&Video Analysis Tutorial",
+            ),
+            (
+                "src.tools.launch_monitor_analytics.gui",
+                "LaunchMonitorAnalyticsWindow",
+                "&User Manual",
+            ),
+            (
+                "src.tools.simulation_backends_launcher.gui",
+                "SimulationBackendsWindow",
+                "&Double Pendulum Dynamics",
+            ),
+        ],
+    )
+    def test_tool_window_exposes_help_menu_and_doc_affordance(
+        self, qapp, module_path: str, window_cls_name: str, expected_doc_action: str
+    ) -> None:
+        import importlib
+
+        mod = importlib.import_module(module_path)
+        cls = getattr(mod, window_cls_name)
+        win = cls()
+        try:
+            bar = win.menuBar()
+            assert bar is not None
+            menus = [action.menu() for action in bar.actions() if action.menu()]
+            help_menus = [m for m in menus if m.title() == "&Help"]
+            assert len(help_menus) == 1, f"Expected 1 &Help menu in {window_cls_name}"
+            help_menu = help_menus[0]
+            action_texts = [
+                a.text() for a in help_menu.actions() if not a.isSeparator()
+            ]
+            assert expected_doc_action in action_texts, (
+                f"{window_cls_name} missing expected doc action {expected_doc_action}"
+            )
+            assert "&User Guide" in action_texts
+            assert "&About" in action_texts
+        finally:
+            win.deleteLater()
+
+
 @pytest.fixture
 def qapp():
     from PyQt6.QtWidgets import QApplication

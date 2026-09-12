@@ -1876,6 +1876,7 @@
     "tests/launchers/test_help_menu.py::test_add_action_without_shortcut",
     "tests/launchers/test_help_menu.py::test_build_help_menu_creates_expected_actions",
     "tests/launchers/test_help_menu.py::test_build_help_menu_uses_custom_show_shortcuts",
+    "tests/launchers/test_help_menu.py::test_build_help_menu_with_doc_target",
     "tests/launchers/test_help_menu.py::test_collect_shortcut_rows_dedupes",
     "tests/launchers/test_help_menu.py::test_collect_shortcut_rows_returns_actions_and_shortcuts",
     "tests/launchers/test_help_menu.py::test_collect_shortcut_rows_skips_actions_without_shortcuts",
