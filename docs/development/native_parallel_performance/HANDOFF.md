@@ -7,10 +7,13 @@ The optional engine-neutral executor is now implemented in
 multiple-shooting solver now exposes an optional `segmented_forward_batch`
 boundary. It receives only ordered cache misses and returns results in that
 order; parent-owned cache, residual/defect assembly, analytic Jacobians and the
-sequential default remain unchanged. No native driver has yet bound this seam to
-the executor, so this is not a native solver qualification or a fit speed claim.
-No runtime19/runtime20 or sensitivity source was changed, and no optimizer was
-launched.
+sequential default remain unchanged. The worker-side transport now lives in
+`native_sensitivity_batch.py`: private runner-created payloads reconstruct and
+validate the model/candidate in every spawned worker, then return primal markers,
+endpoint state and sensitivity arrays. A native driver has not yet bound this
+seam to a persistent executor, so this is not a native solver qualification or a
+fit speed claim. No runtime19/runtime20 or sensitivity source was changed, and
+no optimizer was launched.
 
 Discovery found a per-call `ProcessPoolExecutor` in
 `src/shared/python/sidekick/process_calculators/multi_param_analysis.py`, tied to

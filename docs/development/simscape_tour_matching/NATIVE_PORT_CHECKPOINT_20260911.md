@@ -36,10 +36,12 @@ analytic Jacobians and sequential default behavior. Two TDD tests first failed
 without the boundary, then passed: repeated candidates submit one two-window
 batch followed by no empty/cache-hit submission; analytic Jacobian assembly is
 unchanged; malformed result counts and nonfinite batch output are rejected.
-Focused multiple-shooting plus executor tests (28) and Ruff/mypy pass. The
-native driver has not yet supplied the required trusted byte serialization and
-module-level worker evaluator, so ControlTower fixed-input assembly qualification
-and a solver trial remain pending. No follow-on optimization has been launched.
+Focused multiple-shooting plus executor tests (30) and Ruff/mypy pass. The
+native driver now has a reusable trusted byte serialization and module-level
+worker evaluator in `native_sensitivity_batch.py`; its unit tests verify model
+identity reconstruction and output contracts. ControlTower fixed-input assembly
+qualification and a solver trial remain pending. No follow-on optimization has
+been launched.
 
 ## Run 20 Saved Evaluation 44 Audit
 
