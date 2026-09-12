@@ -4363,6 +4363,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #10009 | Normalize timestamps in ChatSessionManager.list_sessions() for mixed naive/aware datetimes, re-export decomposed AI assistant submodules under __all__ in assistant_panel.py, and burn down 5 quarantined test node IDs in unit_gate_quarantine.json (#8766). |
 | 2026-09-12 | #10005 | Tightened the DRY duplication quarantine ledger: deleted 72 fingerprints whose occurrence count had fallen below 2 across all supported scanner runtimes (Python 3.11, 3.12, 3.13, 3.14), reducing quarantined debt from 666 to 594. No entry was raised or added; the baseline was not regenerated (#8695). |
 | 2026-09-12 | #10008 | Enforce cryptographic signature verification on release tags in release.yml, update release runbook commands and requirements, and add automated regression tests (#9747). |
 | 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |

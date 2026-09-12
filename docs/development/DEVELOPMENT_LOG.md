@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #8766
 - **Branch:** fix/ai-chat-session-tz-and-submodules
-- **PR:** pending
+- **PR:** #10009
 - **Paths:** src/shared/python/ai/gui/session_manager.py, src/shared/python/ai/gui/assistant_panel.py, scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
 - **Last verified:** 2026-09-12 (`c578ca942`)
