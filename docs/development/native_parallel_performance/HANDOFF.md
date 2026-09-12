@@ -3,9 +3,14 @@
 ## Executor Implementation Checkpoint
 
 The optional engine-neutral executor is now implemented in
-`src/shared/python/motion_matching/native_window_executor.py`. **It is not wired
-into the solver.** No runtime19/runtime20 or sensitivity source was changed,
-and no optimizer was launched. The root agent owns subsequent solver integration.
+`src/shared/python/motion_matching/native_window_executor.py`. The shared
+multiple-shooting solver now exposes an optional `segmented_forward_batch`
+boundary. It receives only ordered cache misses and returns results in that
+order; parent-owned cache, residual/defect assembly, analytic Jacobians and the
+sequential default remain unchanged. No native driver has yet bound this seam to
+the executor, so this is not a native solver qualification or a fit speed claim.
+No runtime19/runtime20 or sensitivity source was changed, and no optimizer was
+launched.
 
 Discovery found a per-call `ProcessPoolExecutor` in
 `src/shared/python/sidekick/process_calculators/multi_param_analysis.py`, tied to

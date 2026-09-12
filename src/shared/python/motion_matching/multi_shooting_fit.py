@@ -32,6 +32,10 @@ Array: TypeAlias = NDArray[np.float64]
 SegmentedForward: TypeAlias = Callable[
     [Array, Array, Array | None], tuple[Array, Array]
 ]
+SegmentedForwardBatch: TypeAlias = Callable[
+    [Sequence[tuple[Array, Array, Array | None]]],
+    Sequence[tuple[Array, Array]],
+]
 UnsegmentedForward: TypeAlias = Callable[[Array, Array], Array]
 
 
@@ -77,10 +81,15 @@ class MultipleShootingOptions:
     equality_tolerance: float = 1e-8
     constraint_projection: Callable[[float], Array] | None = None
     variable_scales: Array | None = None
+    segmented_forward_batch: SegmentedForwardBatch | None = None
 
     def __post_init__(self) -> None:
         if self.solver not in ("least_squares", "slsqp"):
             raise ValueError("Unknown shooting solver")
+        if self.segmented_forward_batch is not None and not callable(
+            self.segmented_forward_batch
+        ):
+            raise ValueError("Segmented forward batch must be callable")
         if self.variable_scales is not None and self.solver != "slsqp":
             raise ValueError("Explicit variable scales require the slsqp backend")
         if (
@@ -246,7 +255,12 @@ def fit_multiple_shooting(
         res_parts = []
         end_states = []
 
-        # 1. Evaluate segmented forward dynamics on each window
+        # 1. Evaluate segmented forward dynamics on each window. The optional
+        # batch boundary receives only cache misses; it is responsible solely
+        # for independent window execution. Cache ownership and residual
+        # assembly stay in this coordinating process.
+        evaluated: dict[int, tuple[Array, Array]] = {}
+        misses: list[tuple[int, Array, Array, Array | None, bytes, bytes | None]] = []
         for i in range(n_windows):
             t_start, t_end, w_time, w_points, w_obs = window_data[i]
             init_s = None if i == 0 else states[t_start]
@@ -258,11 +272,45 @@ def fit_multiple_shooting(
                 and cached[0] == theta_bytes
                 and cached[1] == init_s_bytes
             ):
-                pred_markers, end_s = cached[2], cached[3]
+                evaluated[i] = (cached[2], cached[3])
             else:
-                pred_markers, end_s = segmented_forward(theta, w_time, init_s)
-                window_cache[i] = (theta_bytes, init_s_bytes, pred_markers, end_s)
+                misses.append((i, theta, w_time, init_s, theta_bytes, init_s_bytes))
 
+        if not misses:
+            fresh: list[tuple[Array, Array]] = []
+        elif options.segmented_forward_batch is None:
+            fresh = [
+                segmented_forward(theta, clock, state)
+                for _index, theta, clock, state, _theta_bytes, _state_bytes in misses
+            ]
+        else:
+            fresh = list(
+                options.segmented_forward_batch(
+                    [
+                        (theta, clock, state)
+                        for _index, theta, clock, state, *_ in misses
+                    ]
+                )
+            )
+        if len(fresh) != len(misses):
+            raise ValueError("Segmented batch result count differs from cache misses")
+        for miss, result in zip(misses, fresh, strict=True):
+            i, _theta, _clock, _state, miss_theta_bytes, miss_state_bytes = miss
+            pred_markers, end_s = (np.asarray(part, dtype=float) for part in result)
+            if not np.isfinite(pred_markers).all() or not np.isfinite(end_s).all():
+                raise ValueError("Segmented batch returned nonfinite values")
+            window_cache[i] = (
+                miss_theta_bytes,
+                miss_state_bytes,
+                pred_markers,
+                end_s,
+            )
+            evaluated[i] = (pred_markers, end_s)
+
+        # Existing marker/defect assembly intentionally stays ordered and local.
+        for i in range(n_windows):
+            t_start, t_end, w_time, w_points, w_obs = window_data[i]
+            pred_markers, end_s = evaluated[i]
             end_states.append(end_s)
 
             # Marker residuals

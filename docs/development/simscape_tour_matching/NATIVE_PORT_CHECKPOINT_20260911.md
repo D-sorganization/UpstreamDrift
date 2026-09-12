@@ -29,12 +29,17 @@ Compared with run19, whole RMS improves30.7911 to29.9412 mm and terminal
 worsen. Thus selected bound expansion alone did not resolve transition. Do not
 claim a best accepted candidate or choose solely by one metric.
 
-The next agent should now start Third Task in LOW_COST_AGENT_TURNOVER_20260912.md:
-qualify solver/cache integration of the already tested optional executor, using
-fixed inputs. First/Second Tasks there are completed for run20 and retained as
-a reusable audit procedure. After that, the smooth loop-feasible target-path
-initializer remains the substantive matching work; obtain formulation review
-before a broad run. No follow-on optimization has been launched.
+The solver/cache portion of Third Task is now implemented at the shared boundary:
+`MultipleShootingOptions.segmented_forward_batch` receives only ordered cache
+misses, while the parent retains cache ownership, residual/defect assembly,
+analytic Jacobians and sequential default behavior. Two TDD tests first failed
+without the boundary, then passed: repeated candidates submit one two-window
+batch followed by no empty/cache-hit submission; analytic Jacobian assembly is
+unchanged; malformed result counts and nonfinite batch output are rejected.
+Focused multiple-shooting plus executor tests (28) and Ruff/mypy pass. The
+native driver has not yet supplied the required trusted byte serialization and
+module-level worker evaluator, so ControlTower fixed-input assembly qualification
+and a solver trial remain pending. No follow-on optimization has been launched.
 
 ## Run 20 Saved Evaluation 44 Audit
 

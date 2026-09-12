@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching; native engine adapters; docs/development/simscape_tour_matching; docs/development/drake_native_matching; docs/development/native_parallel_performance
 - **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (SELF; six identification, two comparator and five executor tests pass; native executor outputs identical; run20 terminal and independently rejected)
+- **Last verified:** 2026-09-12 (SELF; 28 focused solver/executor tests, Ruff and mypy pass; cache-miss batch seam added; run20 terminal and independently rejected)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
-- **Next step:** Integrate the existing native window executor with shared solver/cache assembly under equivalence tests.
+- **Next step:** Bind the native solver driver to the tested batch seam and qualify fixed-input assembled outputs on ControlTower.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps
 
