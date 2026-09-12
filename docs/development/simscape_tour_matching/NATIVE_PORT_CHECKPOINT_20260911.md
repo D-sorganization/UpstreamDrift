@@ -1,5 +1,49 @@
 # Native Port Implementation Checkpoint
 
+## First Analytic Fit Reproduced; Same-Bounds Continuation Is Live
+
+Updated 2026-09-12 UTC. Analytic run 01 (session 12513) exited zero after eight
+optimizer steps: ten ordinary forward calls and eight uncached Jacobians.
+Returned canonical candidate:
+b392749ce4ead3cb983554eebc6cff70687f2fc45960a3a8c1f5abf631f2154c.
+Independent fresh-process replay reproduced every reported metric exactly:
+whole RMS 25.3087 mm, early RMS 10.0916 mm, terminal RMS 68.3857 mm,
+terminal club cluster RMS 36.2898 mm. Whole and terminal gates still fail;
+optimizer budget exhausted, convergence and numerical acceptance remain false.
+This is the current independently replayed return, not an accepted tour swing.
+
+Artifacts and visual: native_evidence/analytic_fit_9967_01/. Preserve both
+evaluations.jsonl and jacobians.jsonl. Eight Jacobians took 133.4717 s total,
+including eight additional primal replays; ten ordinary integrations took
+33.1616 s. This is measured component time, not a separately measured whole
+process wall clock. Final independent adapter/residual replay took 3.41509 s;
+closure pose/rate maxima 1.71713e-11 / 2.24770e-10. All 25 modeled markers and
+289 timestamps retained. Raw candidate file SHA-256
+b61da31af8da7818120aae9926d5f5a0b21c8a95f4b5cf092711995b0825027d.
+Original raw copies remain in local simscape-tour-checkpoints/native-analytic-fit-9967-01
+and ControlTower C:/Users/diete/native-analytic-fit-9967-01. Benchmark receipt's
+historical baseline wording is preserved but does not remove optimizer history.
+
+![Analytic Run 01 Observed Marker Errors](native_evidence/analytic_fit_9967_01/marker-errors.png)
+
+Continuation is LIVE: native-analytic-fit-9967-02, unified session 53679,
+ControlTower WSL PID 1955098. It uses the SAME native-analytic-refinement-9967-02
+runtime and bundle below, root-force run 02 as --candidate, analytic run 01's
+returned-candidate.json as --restart-candidate, and --max-nfev 24. All other
+arguments, physical correction bounds, target weights and acceptance gates are
+unchanged. No bounds were recentered. Output must remain separate at
+/mnt/c/Users/diete/native-analytic-fit-9967-02.
+
+Polynomial basis round-trip changed the restart's canonical hash to
+66c5a94a607260eaf8d9f14aa116fbf21976b0c3fbceda48d7ce88146da8f847;
+initial reported metrics agree with the prior return within 1e-11 m. Preserve
+both identities; do not claim bitwise-equal restart coefficients. This is ordinary
+floating-point conversion, not evidence of changed geometry/initial state.
+Next: inspect this exact handle, retain failed trials and Jacobian costs,
+independently replay the terminal return, and assess whether remaining residuals
+need longer optimization, additional sextic controls or constant geometry
+calibration. Full-swing and R2025b candidate acceptance remain outstanding.
+
 ## Analytic Joint-Torque Refinement Is Running
 
 Updated 2026-09-12 UTC. Previous goal turn made progress by independently
