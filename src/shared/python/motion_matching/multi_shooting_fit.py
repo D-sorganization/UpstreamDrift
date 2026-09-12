@@ -165,7 +165,30 @@ def fit_multiple_shooting(
             defect = end_states[i] - states[node]
             res_parts.append(options.defect_weight * defect)
 
-        # 3. Regularization
+        # 3. Terminal frame & pelvis yaw residuals
+        if options.terminal_weight > 0:
+            last_w_time, last_w_points, last_w_obs = (
+                window_data[-1][2],
+                window_data[-1][3],
+                window_data[-1][4],
+            )
+            if len(last_w_points) > 0 and np.any(last_w_obs[-1]):
+                term_delta = (pred_markers[-1] - last_w_points[-1])[last_w_obs[-1]]
+                res_parts.append(options.terminal_weight * term_delta.ravel())
+
+        if options.pelvis_indices is not None and options.pelvis_yaw_weight > 0:
+            wl_i, wr_i = options.pelvis_indices
+            if pred_markers.shape[1] > max(wl_i, wr_i) and len(window_data[-1][3]) > 0:
+                obs_term = window_data[-1][3][-1]
+                v_p = pred_markers[-1, wr_i, :2] - pred_markers[-1, wl_i, :2]
+                v_t = obs_term[wr_i, :2] - obs_term[wl_i, :2]
+                norm_p = float(np.linalg.norm(v_p))
+                norm_t = float(np.linalg.norm(v_t))
+                if norm_p > 1e-6 and norm_t > 1e-6:
+                    sin_yaw = (v_p[1] * v_t[0] - v_p[0] * v_t[1]) / (norm_p * norm_t)
+                    res_parts.append(np.array([options.pelvis_yaw_weight * sin_yaw]))
+
+        # 4. Regularization
         if options.regularization is not None:
             reg_res = options.regularization(theta)
             if reg_res is not None and len(reg_res) > 0:
