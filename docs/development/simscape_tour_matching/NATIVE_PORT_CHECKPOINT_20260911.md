@@ -1,5 +1,76 @@
 # Native Port Implementation Checkpoint
 
+## Expanded Trial Replayed; Next-Agent Work Packages
+
+Updated 2026-09-12 UTC. Supersedes live-job statements below. Expanded run 01
+has returned its budget-exhausted result; its old unified handle is unavailable.
+A new independent process completed successfully and reproduced every metric:
+whole RMS 23.783870 mm, early RMS 10.028952 mm, terminal RMS 62.819025 mm,
+terminal club RMS 30.462522 mm. Numerical acceptance and convergence are false.
+The terminal improvement over analytic run 02 is only 0.683268 mm. Do not call
+this a full-swing solution or infer that more iterations alone will solve it.
+
+Canonical candidate: 5c99cda5ea6e6f04be4c18aa878234c92ef9b389b2a6fd21dfe8f45e20d5da5d.
+Raw candidate SHA-256: 0685a0379140b7248e56ce24ef67a5e67d658c4215883a347f6c6860dbd2164d.
+All run files, fresh replay receipt and inspected error plot are preserved under
+native_evidence/expanded_fit_9967_01/. Original bytes remain in
+C:/Users/diete/Repositories/simscape-tour-checkpoints/native-expanded-fit-9967-01
+and ControlTower C:/Users/diete/native-expanded-fit-9967-01. Fresh replay took
+4.041516 s; closure pose/rate maxima were 2.88605e-11 / 2.15317e-10.
+The receipt's historical baseline qualification wording does not erase this
+candidate's optimization history. Source commit 4abd23ef0 is confirmed pushed.
+
+![Expanded Run 01 Observed Marker Errors](native_evidence/expanded_fit_9967_01/marker-errors.png)
+
+The active objective includes OpenSim epic #10003, native Pinocchio/Simscape
+matching and eventual separately qualified engine adapters. MATLAB R2025b is
+required. The goal tool cannot edit objective text; this document and the linked
+epics record the expanded scope without replacing the active goal. OpenSim plan:
+../UpstreamDrift-opensim-10003/docs/development/opensim_tour_matching/EPIC_10003.md
+(relative to this checkout root, a sibling worktree). Its HANDOFF.md contains
+the bounded OS-0 prompt. Planning is complete; user check-in precedes OS-0.
+
+### Next-Agent Prompt and Sequential Gates
+
+Read AGENTS.md, CLAUDE.md, this checkpoint and the reproduction runners. Check
+central claims and Gemini's current branch before editing. Work on #9967 in
+an isolated topic branch and preserve all existing runtime bundles and jobs.
+Do not start several new optimizers before identifying the next hypothesis.
+
+1. **P-1: Audit Alternative Seeds.** Inspect Gemini's current multiple-shooting
+   implementation and candidate_ms_080s_package.json without editing its files.
+   Record source/model/capture hashes, coefficient order, absolute clock, root
+   force frame, q0/qd0 and node closure. Write failing import-contract tests for
+   mismatches before an adapter. Reuse shared candidate/polynomial APIs. Done:
+   one independently replayed compatible seed or explicit mismatch report.
+   Optimizer convergence or small window defects alone are not acceptance.
+2. **P-2: Diagnose the Remaining Error.** Compare that seed with the expanded
+   candidate using identical masks and tolerances. Assess weighted sensitivity
+   conditioning, active bounds and constrained static-pose residuals at the
+   transition. Separate head/torso rigidity limitations from controllable error.
+   Test diagnostic scaling and synthetic known-rank cases first. Done: measured
+   evidence selecting one next experiment, with its predicted benefit and cost.
+3. **P-3: Execute One Bounded Improvement.** Prefer a better manifold-consistent
+   multiple-shooting initialization if P-2 supports it. Reuse Gemini's shared
+   pathway; require exact window boundaries, absolute-clock polynomial inputs,
+   closure-valid states and scaled q/v defects. If geometry is selected instead,
+   calibrate constant lengths/offsets on multiple poses with held-out validation;
+   issue a new native spec hash and requalify in R2025b. Do not add a head joint
+   silently. Save red/green contract tests and native small-case evidence before
+   a real run. Done: independently replayed improvement or retained negative result.
+4. **P-4: Extend and Finalize.** Extend through the complete observed capture,
+   retaining early regression gates and single continuous replay. Final inputs
+   must be one degree-six polynomial per effort channel. Piecewise cubics may
+   seed a fit; conversion alone is not dynamically equivalent. Reoptimize the
+   final sextic and validate the full replay. Qualify the actual final candidate
+   in R2025b, then each other engine separately. Never relax gates to close work.
+
+For every package, record failing/passing commands, native versus mocked tests,
+source/runtime hashes, immutable run and parent IDs, metrics with masks/units,
+process status, exact resume command, commit/push status and one next action.
+Keep optimizer access behind the engine facade (LoD), validate boundaries (DbC),
+and reuse shared transforms, objectives and polynomial evaluation (DRY).
+
 ## Expanded Sextic Trial Is Live After Verified Continuation
 
 Updated 2026-09-12 UTC. Previous goal turn made progress through the analytic
