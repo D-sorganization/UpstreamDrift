@@ -12,10 +12,13 @@ from __future__ import annotations
 
 import importlib
 import os
+from pathlib import Path
 import types
 from unittest.mock import patch
 
 import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 pytestmark = pytest.mark.unit
 
@@ -346,7 +349,8 @@ class TestBarePassExceptionHandlers:
         """Return (lineno, exception_type) for except blocks that only contain pass."""
         import ast
 
-        with open(filepath) as fh:
+        full_path = REPO_ROOT / filepath
+        with open(full_path, encoding="utf-8") as fh:
             src = fh.read()
         tree = ast.parse(src)
         results = []
@@ -449,7 +453,14 @@ class TestPhysicsModuleDocstrings:
         """Shared physics module must have a module-level docstring."""
         import ast
 
-        with open(module_path, encoding="utf-8") as fh:
+        full_path = REPO_ROOT / module_path
+        if (
+            not full_path.exists()
+            and module_path == "src/shared/python/physics/aerodynamics.py"
+        ):
+            # Package refactored from module to directory
+            full_path = REPO_ROOT / "src/shared/python/physics/aerodynamics/__init__.py"
+        with open(full_path, encoding="utf-8") as fh:
             content = fh.read()
         tree = ast.parse(content)
         docstring = ast.get_docstring(tree)
@@ -460,7 +471,8 @@ class TestPhysicsModuleDocstrings:
         """Engine physics module must have a module-level docstring."""
         import ast
 
-        with open(module_path, encoding="utf-8") as fh:
+        full_path = REPO_ROOT / module_path
+        with open(full_path, encoding="utf-8") as fh:
             content = fh.read()
         tree = ast.parse(content)
         docstring = ast.get_docstring(tree)
@@ -474,7 +486,15 @@ class TestPhysicsModuleDocstrings:
         passing = 0
         for path in all_modules:
             try:
-                with open(path, encoding="utf-8") as fh:
+                full_path = REPO_ROOT / path
+                if (
+                    not full_path.exists()
+                    and path == "src/shared/python/physics/aerodynamics.py"
+                ):
+                    full_path = (
+                        REPO_ROOT / "src/shared/python/physics/aerodynamics/__init__.py"
+                    )
+                with open(full_path, encoding="utf-8") as fh:
                     content = fh.read()
                 tree = ast.parse(content)
                 ds = ast.get_docstring(tree)
