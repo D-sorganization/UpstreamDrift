@@ -34,6 +34,14 @@ full raw sensitivity output only. It does not yet qualify
 `fit_multiple_shooting` residual/constraint assembly with this executor,
 repeated solver cache behavior, or a whole-fit speedup.
 
+`NativeSensitivityBatchAdapter` is now the parent-side production binding. The
+native driver supplies its existing candidate/tangent-aware request factory and
+one persistent `NativeWindowExecutor`; the adapter serializes only cache-miss
+windows and returns ordered `(markers, endpoint_state)` pairs required by the
+shared solver. A focused test proves ordered solver-array output. This preserves
+driver ownership of node retraction and makes worker lifecycle explicit. The
+next gate remains one fixed-input full solver residual/Jacobian comparison.
+
 Discovery found a per-call `ProcessPoolExecutor` in
 `src/shared/python/sidekick/process_calculators/multi_param_analysis.py`, tied to
 calculator/UI parameter handling. No reusable persistent motion-window executor

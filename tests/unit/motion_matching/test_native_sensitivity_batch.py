@@ -10,6 +10,9 @@ import pytest
 from src.engines.physics_engines.pinocchio.python import (
     native_sensitivity_batch as batch,
 )
+from src.shared.python.motion_matching.native_window_executor import (
+    NativeWindowExecutor,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -41,6 +44,20 @@ def _request() -> batch.NativeSensitivityWindowRequest:
     }
     return batch.NativeSensitivityWindowRequest(
         raw, document, np.array([0.0, 0.4]), np.zeros(6), np.zeros((6, 2)), 0, 0.8
+    )
+
+
+def _fake_worker_result(_payload: bytes) -> batch.NativeSensitivityWindowResult:
+    values = np.ones((2, 1, 3))
+    return batch.NativeSensitivityWindowResult(
+        values,
+        np.ones((2, 6)),
+        np.ones(6),
+        np.ones((2, 1, 3, 2)),
+        np.ones((2, 6, 2)),
+        0.1,
+        1,
+        0.0,
     )
 
 
@@ -95,3 +112,20 @@ def test_request_contracts_and_wrong_payload_are_rejected():
         batch.evaluate_trusted_native_sensitivity_request(b"not a request")
     with pytest.raises(TypeError, match="immutable bytes"):
         batch.evaluate_trusted_native_sensitivity_request(bytearray(b"x"))
+
+
+def test_parent_adapter_preserves_order_and_returns_solver_arrays():
+    request = _request()
+    with NativeWindowExecutor(_fake_worker_result) as executor:
+        adapter = batch.NativeSensitivityBatchAdapter(
+            lambda theta, clock, state: request, executor
+        )
+        output = adapter(
+            [
+                (np.zeros(1), np.array([0.0, 0.4]), None),
+                (np.zeros(1), np.array([0.4, 0.8]), np.zeros(6)),
+            ]
+        )
+    assert len(output) == 2
+    assert output[0][0].shape == (2, 1, 3)
+    assert output[1][1].shape == (6,)
