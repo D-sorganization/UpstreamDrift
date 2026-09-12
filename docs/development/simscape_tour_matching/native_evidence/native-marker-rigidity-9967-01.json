@@ -1,0 +1,166 @@
+{
+  "qualification": "fixed-offset rigid-frame lower bound; joints and closures relaxed; no forward-fit acceptance",
+  "candidate_sha256": "90d801cad282dba88170442dc7a57e4757aef04780bf267f311bd1a098f498b7",
+  "input_sha256": {
+    "candidate": "ba0d754c4932c98118c6f2f6d5132e4a4816631ffb84e04b8307541915fc651f",
+    "trajectory": "7dedccebb5806db47709640b28c5863b96e04ad03bac8a28a475a1eea935ef0e"
+  },
+  "poses": [
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.010847255117879751,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.0022213270087920113
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.02182214881089855
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.0020229895439399306
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.004409591788548619
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.0020526928335670505
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.001231413424229964
+        }
+      ],
+      "time_s": 0.6
+    },
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.01616948845048379,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.0027267223641636194
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.0325402154004438
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.0029304944791831507
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.007277774356418162
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.002943717579369555
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.0014683669037695675
+        }
+      ],
+      "time_s": 0.7
+    },
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.021423016383261443,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.0032257541834300016
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.043147778992729965
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.004037767067602104
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.00992179048617343
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.003313274450283621
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.0013030264670789138
+        }
+      ],
+      "time_s": 0.8
+    }
+  ]
+}

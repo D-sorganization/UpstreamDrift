@@ -1,5 +1,87 @@
 # Native Port Implementation Checkpoint
 
+## Native Pose Feasibility and Fixed-Marker Rigidity
+
+Updated 2026-09-12 UTC. Previous goal turn made progress: run 02 finished,
+independent forward replay passed, and artifacts were committed/pushed. This
+turn implemented a tested static diagnostic and executed three native local
+pose-fit experiments on ControlTower. All diagnostic processes exited zero;
+no replacement forward optimizer is running in this workstream.
+
+Three radii were examined, always centered on the original run 02 replay q:
+01: translation +/-0.2 m, rotations +/-0.5 rad, replay seed;
+02: +/-0.4 m / +/-1.0 rad, seeded from 01;
+03: +/-0.8 m / +/-3.2 rad, seeded from 02. Geometry, attachments and six-DOF
+grip closure remained unchanged. These are search envelopes, not newly imposed
+physical native joint limits. Actual native limits were previously audited off.
+
+| Time   | Forward RMS | Narrow Pose RMS | Wide Pose RMS |
+| ------ | ----------: | --------------: | ------------: |
+| 0.60 s |  32.7013 mm |      20.5761 mm |    20.5761 mm |
+| 0.70 s |  55.4121 mm |      27.4923 mm |    27.4923 mm |
+| 0.80 s |  96.8489 mm |      39.4278 mm |    36.8367 mm |
+
+All final local solves converged; closure maximum <=2.66e-13 and no active
+search bounds in experiment 03. Experiment 02 had LFInput on its bound at
+0.80 s, which is why the third probe was run. These are feasible static poses,
+not dynamically realizable trajectories or proven global minima. The best
+found 0.80 s pose still misses the 35 mm terminal gate. Do not declare that
+no solution exists solely because these local searches missed it.
+
+### Rigidity Finding
+
+The current candidate assigns BackTop, BackLeft, BackRight, HeadTop, HeadFront
+and HeadSide to one Hub frame with fixed offsets. A separate optimistic
+lower-bound diagnostic gives every attachment frame an independent rigid pose,
+removing ALL joint and grip constraints. It reuses the existing proper-rotation
+Kabsch solver, permits translation/rotation but no scaling/outlier removal.
+
+| Time   | All 25 Markers' RMS Lower Bound | Hub Six-Marker RMS Lower Bound |
+| ------ | ------------------------------: | -----------------------------: |
+| 0.60 s |                      10.8473 mm |                     21.8221 mm |
+| 0.70 s |                      16.1695 mm |                     32.5402 mm |
+| 0.80 s |                      21.4230 mm |                     43.1478 mm |
+
+These are lower bounds only for the CURRENT fixed offsets/assignments and
+observed equal-weight markers. They do not apply to recalibrated constellations
+or a changed model variant. They establish that torque changes alone cannot
+remove all error in the current head/back constellation. They do NOT prove
+the 35 mm all-marker gate impossible: 21.423 mm is below it. The local constrained
+pose result and the optimistic lower bound are deliberately separate evidence.
+Do not silently drop head markers or add a neck joint to the native-equivalent
+model. Audit mapping, native topology and raw C3D rigid-cluster consistency;
+any calibrated/model variant must be explicit and requalified.
+
+### Artifacts and Next Execution
+
+Receipts are native_evidence/native-pose-feasibility-9967-01.json through -03.json
+and native-marker-rigidity-9967-01.json. Later pose receipts include per-marker
+errors, active bounds and seed-report hashes. The original remote receipts
+remain under C:/Users/diete on ControlTower; local copies and source bundle
+native-pose-bundle-9967-01.zip are under simscape-tour-checkpoints. Actual runtime
+was /home/dieterolson/native-pose-9967-01 using the existing Pinocchio venv.
+Script check_native_pose_feasibility.py reproduces each radius/seed experiment;
+wide diagnostic copy on ControlTower is check_native_pose_feasibility_wide_9967.py.
+The second/third runs used --seed-report pointing to the preceding receipt,
+--translation-radius and --rotation-radius as above. Original deployment
+manifest precedes these CLI additions; the committed runner is the updated
+source for wide runs. Do not mislabel that bundle as the later runner revision.
+
+Pure constrained-pose and rigidity tests went red on missing implementation,
+then green; combined pose/rigidity/plot tests: 11 passed. Native solves provide
+separate runtime evidence. The rigidity command check_marker_rigidity.py runs
+locally from the candidate-only JSON and its visual-replay.npz; it validates
+candidate/marker identity and refuses to overwrite the output report.
+
+Next: extend rigidity diagnostics to the full capture (including raw observation
+masks) before another long torque run. Review whether native head/back rigidity
+and fixed attachments can meet the intended full-swing tolerances. Investigate
+multiple pose seeds and bounded multiframe geometry/attachment calibration
+with held-out poses; preserve the original model baseline and model/candidate
+hashes. Do not fit independent lengths per time sample. Then resume torque
+optimization from an explicitly selected calibrated/native variant and verify
+both grip closure and native R2025b parity for any physical changes.
+
 ## Run 02 Finished and Independently Replayed
 
 Updated 2026-09-12 07:38 UTC. This supersedes all live-run statements below.

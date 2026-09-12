@@ -21,6 +21,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("model", "candidate", "target", "output"):
         parser.add_argument(f"--{name}", type=Path, required=True)
+    parser.add_argument("--translation-radius", type=float, default=0.2)
+    parser.add_argument("--rotation-radius", type=float, default=0.5)
+    parser.add_argument("--seed-report", type=Path)
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
@@ -31,6 +34,14 @@ def main() -> None:
         json.loads(args.candidate.read_text()), names, hashlib.sha256(raw).hexdigest()
     )
     doc = candidate.document
+    seeds = None
+    if args.seed_report is not None:
+        prior = json.loads(args.seed_report.read_text())
+        if prior["candidate_sha256"] != candidate.sha256:
+            raise ValueError("Seed report has a different candidate")
+        seeds = {
+            row["time_s"]: np.asarray(row["coordinates"]) for row in prior["poses"]
+        }
     payload = json.loads(args.target.read_text())
     if payload["source_sha256"] != doc["capture_sha256"]:
         raise ValueError("Capture mismatch")
@@ -65,8 +76,11 @@ def main() -> None:
             k: hashlib.sha256(getattr(args, k).read_bytes()).hexdigest()
             for k in ("model", "candidate", "target")
         },
-        "local_translation_bound_m": 0.2,
-        "local_rotation_bound_rad": 0.5,
+        "local_translation_bound_m": args.translation_radius,
+        "local_rotation_bound_rad": args.rotation_radius,
+        "seed_report_sha256": hashlib.sha256(args.seed_report.read_bytes()).hexdigest()
+        if args.seed_report
+        else None,
         "poses": [],
     }
     for i, time in enumerate(clock[1:], start=1):
@@ -79,14 +93,26 @@ def main() -> None:
         target = np.asarray(payload["points_world_m"])[k, indices]
         valid = np.asarray(payload["valid"], dtype=bool)[k, indices]
         initial = replay.integration.state[i, : len(names)]
-        radius = np.full(len(names), 0.5)
-        radius[:3] = 0.2
+        radius = np.full(len(names), args.rotation_radius)
+        radius[:3] = args.translation_radius
+        start = initial if seeds is None else seeds[float(time)]
         fitted = fit_marker_pose(
-            initial, initial - radius, initial + radius, target, valid, forward, closure
+            start, initial - radius, initial + radius, target, valid, forward, closure
         )
         row = asdict(fitted)
         row["coordinates"] = fitted.coordinates.tolist()
         row["time_s"] = float(time)
+        row["near_bound_coordinates"] = [
+            name
+            for name, delta, limit in zip(
+                names, abs(fitted.coordinates - initial), radius, strict=True
+            )
+            if limit - delta < 1e-5
+        ]
+        row["marker_labels"] = doc["marker_labels"]
+        row["marker_errors_m"] = np.where(
+            valid, np.linalg.norm(forward(fitted.coordinates) - target, axis=1), np.nan
+        ).tolist()
         row["initial_marker_rms_m"] = float(
             np.sqrt(
                 np.mean(np.sum((forward(initial)[valid] - target[valid]) ** 2, axis=1))
