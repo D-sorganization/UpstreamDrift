@@ -136,6 +136,15 @@ Drake1.57 environment. The finite-difference qdd fails acceleration closure:
 maximum `J*qdd+gamma` is1.33668 and RMS0.24240 over18 samples; receipt
 `../drake_native_matching/evidence/smooth_native_acceleration_9967_24/receipt.json`.
 This rejects using the current spline directly for reaction-eliminated effort
+identification. The companion pointwise projection receipt,
+`../drake_native_matching/evidence/smooth_native_acceleration_projection_9967_24/receipt.json`,
+reduces its sampled Drake `J*qdd+gamma` maximum to3.99680e-15 with a
+minimum-norm coordinate correction maximum0.500529 and RMS0.0710317. It checks
+the closure convention only. Because the projected acceleration has not been
+shown to equal the derivative of the projected qd, it is not a dynamic path,
+torque initializer, or forward match. The next required implementation is a
+derivative-consistent collocation trajectory that jointly preserves pose, rate,
+and acceleration closure before reaction-eliminated effort identification.
 identification. The next path stage is an explicit acceleration projection with
 reported correction magnitude, followed by derivative-consistency review; no
 torque fit or forward replay may be inferred from this failed diagnostic.
