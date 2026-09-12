@@ -2,6 +2,45 @@
 
 ## Run 19 Live: Recentered Charts With a Distinct Reconstructed Seed
 
+Effort-bound audit integrated as `e917c9a2f`; root reran its three extrema tests,
+all pass. `docs/development/mujoco_native_matching/RUN18_EFFORT_AUDIT.md`
+contains the complete 27-channel table and raw/source receipts. Independent
+recovery confirms 65 saturated controls across 23 channels: 16 root-force and
+49 joint-torque controls. Every saturation is at a +/-2 correction bound; none
+of the eight widened +/-10 entries is active. Total forces/torques are different
+quantities (world Fz about 752--843 N, HipInputY about 164--172 Nm). Eleven
+torque channels whose controls are all bounded +/-2 exceed 2 Nm correction in
+the extrapolated 0.8--0.85 s interval; the Bernstein convex-hull bound applies
+only within its 0.8 s basis interval. This is not a physical-limit violation.
+Use this evidence after run19 to design one bounded continuation of actually
+saturated controls, with separate declared torque/force magnitude checks if
+physical limits are introduced. Do not alter the live run or reuse a tighter
+bound on correction coefficients as a claimed actuator capability.
+
+Progress addendum: PID 2330720 verified live at 4:58 elapsed. Saved evaluation 6
+was independently replayed (audit session 38056 exited 0): whole 31.546855 mm,
+terminal 105.761778 mm, segmented terminal 101.229504 mm, pointwise gap
+10.557738 mm and max scaled defect 2.34566e-4. It fails marker and continuity
+gates; lower callback cost 33.30522 is not continuous fit improvement. Exact
+snapshot/config/runner are in raw-evaluation6-audit.zip. This is a residual
+evaluation, not an accepted optimizer iterate; let the bounded solve finish.
+
+Drake physical-rate diagnostic is integrated as `50010ee50`. One replay pair
+using actual world frame angular Jacobians reproduces the strict rate failure,
+but physical body angular-velocity vector differences peak at 1.47290e-5 rad/s;
+relative shoulder difference is 1.48139e-5 rad/s (2.80710e-7 relative). This
+supports coordinate amplification without establishing exact restart. Read
+Drake's `evidence/reconstructed-seed` report/raw archive. No Drake jobs remain.
+
+Read-only Gemini inspection: worktree `UpstreamDrift-simscape-tour` is clean at
+`6fee8b5ea`; latest `candidate_transition_080s_diffstep_package.json` reports
+whole 32.202380 mm, early 11.188804 mm, terminal 95.968351 mm, club 69.149303 mm,
+yaw 1.033985%, converged true, accepted false, 2/5 gates. This is its reported
+0.8 s result, not root's independent qualification. Package includes degree six
+and basis 1.813889 but lacks model/capture/source hashes, q0/qd0 and explicit
+force/coefficient conventions. Do not silently translate or compare its metrics
+as the same model/input. Request producer provenance in the coordination issue.
+
 Updated 2026-09-12 UTC. This section supersedes terminal/live claims below.
 Run 19 is the sole live fit: session 60944, ControlTower-Runner PID 2330720,
 output `C:/Users/diete/native-ms-fit-9967-19`. Do not restart on a polling timeout.
