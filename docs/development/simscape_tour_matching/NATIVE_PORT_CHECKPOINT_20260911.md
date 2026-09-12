@@ -36,12 +36,27 @@ chart centers and variable scales. Do not call a warm start plus bound change
 an exact one-factor experiment or use a numerical correction bound as a total
 physical effort limit. Do not launch a second optimizer before run19 ends.
 
-MuJoCo agent is completing a bounded read-only common rigid-registration
-diagnostic of run18 residuals; this is not forward replay or altered acceptance.
-Its preliminary result leaves about 99.5 mm of the 103.95 mm terminal error
-after best common rigid alignment, so global pose correction alone does not
-explain the failure. Collect its exact source/receipt and final commit before
-using that result for the continuation decision.
+MuJoCo's read-only rigid-registration diagnostic is integrated as `34dfe0737`;
+root reran all three tests successfully. It reuses existing Kabsch and observed
+RMS helpers; its exact source, inputs and transforms are archived in
+`docs/development/mujoco_native_matching/RUN18_GLOBAL_RIGID_AUDIT.md` and
+the adjacent evidence directory. At 0.6/0.7/0.8/0.85 s the original RMS is
+27.750/48.001/58.551/103.949 mm; best common rigid alignment leaves
+22.825/37.746/56.339/99.505 mm. Thus a simple global pose adjustment does not
+explain terminal failure. This is not a forward-reachable correction and does
+not exclude root actuation changing articulation through dynamics. No accepted
+metrics were altered. The MuJoCo lane has no active computation.
+
+Drake agent owns a bounded feasibility study of a loop-aware polynomial torque
+initializer, not a second fit: project M*qdd+h-B*tau into null(J) to eliminate
+weld reactions, with the existing native Bernstein effort mapping. First test
+an analytic closed-weld toy, then known qualified baseline states/accelerations.
+Rank deficiency and reaction-force nonuniqueness must be explicit. This is not
+ordinary tree inverse dynamics, a Simscape motion-prescription workaround, or
+proof that target C3D velocities/accelerations are dynamically feasible. A
+smooth closure-feasible reference and independent forward validation would be
+required before using it for target matching. No core/runtime changes authorized
+for this diagnostic; collect its report before broader implementation.
 
 ## Run 19 Live: Recentered Charts With a Distinct Reconstructed Seed
 
