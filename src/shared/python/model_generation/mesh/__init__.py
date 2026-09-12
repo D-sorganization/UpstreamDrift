@@ -1,32 +1,32 @@
-# mypy: ignore-errors
 """Mesh processing utilities for model generation.
 
 Re-exports mesh processing components from humanoid_character_builder.mesh.
 """
 
-try:
-    from shared.python.humanoid_character_builder.mesh import (
-        CollisionGeometry,
-        CollisionGeometryGenerator,
-        MeshExportConfig,
-        MeshProcessor,
-        MeshSegmentResult,
-        PrimitiveMeshGenerator,
-    )
-    from shared.python.humanoid_character_builder.mesh.lod import (
-        LODGenerationResult,
-        LODGenerator,
-        LODLevel,
-    )
-    from shared.python.humanoid_character_builder.mesh.mesh_inertia import (
-        InertiaMode,
-        InertiaResult,
-        MeshInertiaCalculator,
-        PrimitiveInertiaCalculator,
-        PrimitiveShape,
-    )
-except ImportError:  # pragma: no cover
-    pass
+from __future__ import annotations
+
+from src.shared.python.humanoid_character_builder.mesh.collision_geometry import (
+    CollisionGeometry,
+    CollisionGeometryGenerator,
+)
+from src.shared.python.humanoid_character_builder.mesh.inertia_calculator import (
+    InertiaMode,
+    InertiaResult,
+    MeshInertiaCalculator,
+)
+from src.shared.python.humanoid_character_builder.mesh.mesh_processor import (
+    LODGenerationResult,
+    LODGenerator,
+    LODLevel,
+    MeshExportConfig,
+    MeshProcessor,
+    MeshSegmentResult,
+    PrimitiveMeshGenerator,
+)
+from src.shared.python.humanoid_character_builder.mesh.primitive_inertia import (
+    PrimitiveInertiaCalculator,
+    PrimitiveShape,
+)
 
 __all__: list[str] = [
     "CollisionGeometry",

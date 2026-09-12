@@ -1,6 +1,13 @@
 # SPEC.md — Repository Specification Document
 
-## Adopting Shared Help Menu and Calculation Sheet Affordances in GUI Tools (#8846)
+## Restoring Model Generation Facades and First-Party Import Resolvability (#8641)
+
+Restore the `src.shared.python.model_generation.humanoid` and `src.shared.python.model_generation.mesh` facades, repairing first-party import paths and removing silent error suppressions:
+- Humanoid Model Generation Facade (`src/shared/python/model_generation/humanoid/__init__.py`): Repoints all 34 advertised public exports directly to canonical submodules in `src.shared.python.humanoid_character_builder` (`core.anthropometry`, `core.body_parameters`, `core.segment_definitions`, `generators.urdf_config`, `generators.urdf_generator`, `interfaces.api`, `mesh.inertia_calculator`, `mesh.primitive_inertia`, `presets.loader`). Removes `# mypy: ignore-errors` and eliminates the silent `try/except ImportError: pass` block.
+- Mesh Processing Facade (`src/shared/python/model_generation/mesh/__init__.py`): Repoints all 14 advertised public exports directly to canonical submodules in `src.shared.python.humanoid_character_builder.mesh` (`collision_geometry`, `inertia_calculator`, `mesh_processor`, `primitive_inertia`). Removes `# mypy: ignore-errors` and eliminates the silent `try/except ImportError: pass` block.
+- Humanoid Character Builder CLI (`src/shared/python/humanoid_character_builder/__main__.py`): Corrects `CharacterBuilder` import from non-existent `core.builder` to `interfaces.api`.
+- Automated Verification (`tests/unit/shared_python/test_model_generation_facades.py`): Adds regression suite asserting full resolvability of all symbols in `model_generation.humanoid.__all__` and `model_generation.mesh.__all__`, as well as CLI entry point imports.
+
 
 Adopt `src/launchers/help_menu.py:build_help_menu` across GUI tool windows and provide direct navigation to calculation sheets and model documentation:
 - Reusable Help Menu Extension: Enhance `build_help_menu(menubar, parent, *, show_shortcuts=None, doc_target=None)` with support for an optional `doc_target: tuple[str, str | Path] | None` parameter, creating a primary action that directly launches the tool's calculation sheet or model document in the in-app document reader (`show_document`). Add helper `open_model_doc(path, parent)`.
