@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Accessible Model Card Actions and Grid Navigation (#8901)
+
+Harden model card touch and keyboard accessibility and implement arrow-key grid navigation in `src/launchers/model_card.py`:
+- WCAG 2.5.8 Compliant Target Size: Increase info (`_btn_info`) and favorite (`_btn_favorite`) button fixed sizes to $24 \times 24$ px with `border-radius: 12px`, satisfying the WCAG 2.5.8 minimum target size standard for touch and mouse interactions.
+- Keyboard Focus & Accessible Semantics: Remove `Qt.FocusPolicy.NoFocus` and assign `Qt.FocusPolicy.StrongFocus` to both action buttons. Set descriptive `accessibleName` attributes (`"About {self.model.name}"`, `"Add {self.model.name} to favorites"` / `"Remove {self.model.name} from favorites"`) that update dynamically upon toggling favorite state.
+- Focus-Mirrored Visibility: Implement `_show_action_buttons()`, `_hide_action_buttons()`, `focusInEvent()`, and `focusOutEvent()` on `DraggableModelCard`. Action buttons reveal automatically when the card or any of its child buttons receive keyboard focus (e.g. Tab navigation) and hide only when keyboard focus and mouse hover both leave the card subtree.
+- Context Menu & Touch Affordance: Implement `contextMenuEvent()` on `DraggableModelCard`, exposing `"Launch"`, `"Add to / Remove from favorites"`, and `"Model Details..."` actions via standard `QMenu` at the trigger position, enabling both right-click and touch long-press workflows.
+- Arrow-Key Grid Navigation: Implement directional arrow-key navigation (`Qt.Key.Key_Left`, `Qt.Key.Key_Right`, `Qt.Key.Key_Up`, `Qt.Key.Key_Down`) in `keyPressEvent()`. Query parent launcher `grid_layout` (`QGridLayout`), resolve current tile `(row, col)` coordinates, and shift focus and model selection to the adjacent tile widget.
+- Automated Verification: Unit tests in `tests/launchers/test_model_card_accessibility.py` verifying button target sizes $\ge 24 \times 24$ px, `StrongFocus` policy, dynamic accessible names, focus-driven visibility, context menu action dispatch, and arrow-key grid navigation.
+
 ## Hardened Toast Notification System and Accessibility (#8900)
 
 Harden and stabilize the shared toast notification system (`src/shared/python/ui/toast.py`) against unbounded stacking, missing user controls, static geometry drift, and non-compliant accessibility encoding:
