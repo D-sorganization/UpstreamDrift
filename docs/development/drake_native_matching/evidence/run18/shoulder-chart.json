@@ -1,0 +1,108 @@
+{
+  "scope": "Existing trajectory shoulder coordinate chart diagnostic; no integration or physical instability claim",
+  "joint": {
+    "name": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+    "parent": "solid_reference:GolfSwing3D_Kinetic/HubtoLS",
+    "child": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+    "parent_to_base": [
+      [0.0, 1.0, 0.0, 0.0],
+      [0.0, 0.0, -1.0, 0.0],
+      [-1.0, 0.0, 0.0, -0.127],
+      [0.0, 0.0, 0.0, 1.0]
+    ],
+    "child_to_follower": [
+      [0.0, 1.0, 0.0, 0.0],
+      [0.0, 0.0, -1.0, 0.0],
+      [-1.0, 0.0, 0.0, 0.18414999999999998],
+      [0.0, 0.0, 0.0, 1.0]
+    ],
+    "primitives": [
+      {
+        "primitive": "Rx",
+        "coordinate": "LSInputX"
+      },
+      {
+        "primitive": "Ry",
+        "coordinate": "LSInputY"
+      },
+      {
+        "primitive": "Rz",
+        "coordinate": "LSInputZ"
+      }
+    ]
+  },
+  "samples": [
+    {
+      "engine": "pinocchio",
+      "case": "01",
+      "time_s": 0.7861111111111111,
+      "coordinates": ["LSInputX", "LSInputY", "LSInputZ"],
+      "q_rad": [1.1920313924930543, -1.6508819579977734, -1.1452233575659085],
+      "q_deg": [68.29836783695454, -94.58856866756605, -65.61646498832813],
+      "qd_rad_s": [400.4467110356153, 41.8858766825099, 397.09131141823764],
+      "abs_cos_middle_angle": 0.08000005100521332,
+      "angular_rate_map_singular_values": [
+        1.4130799196990347, 1.0, 0.05661396067552361
+      ],
+      "angular_rate_map_condition": 24.959919829632472,
+      "relative_angular_velocity_in_joint_base_rad_s": [
+        4.628133079024107, 45.00399761293872, 27.170384844436096
+      ],
+      "relative_angular_speed_rad_s": 52.77318665323626
+    },
+    {
+      "engine": "drake",
+      "case": "01",
+      "time_s": 0.7861111111111111,
+      "coordinates": ["LSInputX", "LSInputY", "LSInputZ"],
+      "q_rad": [1.1920315125243122, -1.650881947143129, -1.1452232519389198],
+      "q_deg": [68.29837471423902, -94.58856804564076, -65.61645893634748],
+      "qd_rad_s": [400.44685703773814, 41.885879108186, 397.09145729239356],
+      "abs_cos_middle_angle": 0.08000004018535968,
+      "angular_rate_map_singular_values": [
+        1.413079920006297, 0.9999999999999999, 0.05661395300628369
+      ],
+      "angular_rate_map_condition": 24.9599232162689,
+      "relative_angular_velocity_in_joint_base_rad_s": [
+        4.628133329715043, 45.00400209944515, 27.17038977356115
+      ],
+      "relative_angular_speed_rad_s": 52.77319303900153
+    },
+    {
+      "engine": "pinocchio",
+      "case": "02",
+      "time_s": 0.7861111111111111,
+      "coordinates": ["LSInputX", "LSInputY", "LSInputZ"],
+      "q_rad": [1.1920316665983877, -1.6508819333270486, -1.1452231171849085],
+      "q_deg": [68.29838354203328, -94.58856725403764, -65.61645121551136],
+      "qd_rad_s": [400.4470432905481, 41.88588221015947, 397.091643361499],
+      "abs_cos_middle_angle": 0.08000002641356163,
+      "angular_rate_map_singular_values": [
+        1.4130799203973883, 0.9999999999999999, 0.056613943244670804
+      ],
+      "angular_rate_map_condition": 24.9599275268713,
+      "relative_angular_velocity_in_joint_base_rad_s": [
+        4.628133670896897, 45.0040078096403, 27.170396107519075
+      ],
+      "relative_angular_speed_rad_s": 52.77320119952306
+    },
+    {
+      "engine": "drake",
+      "case": "02",
+      "time_s": 0.7861111111111111,
+      "coordinates": ["LSInputX", "LSInputY", "LSInputZ"],
+      "q_rad": [1.1920313923146746, -1.650881957711911, -1.1452233549801927],
+      "q_deg": [68.29836782673414, -94.58856865118734, -65.61646484017753],
+      "qd_rad_s": [400.4467139041229, 41.88587666963114, 397.09131436705695],
+      "abs_cos_middle_angle": 0.0800000507202671,
+      "angular_rate_map_singular_values": [
+        1.4130799197071264, 1.0, 0.0566139604735504
+      ],
+      "angular_rate_map_condition": 24.959919918821196,
+      "relative_angular_velocity_in_joint_base_rad_s": [
+        4.628132999082698, 45.003997727078485, 27.170384779050448
+      ],
+      "relative_angular_speed_rad_s": 52.77318670989786
+    }
+  ]
+}
