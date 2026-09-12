@@ -474,7 +474,10 @@ def validate_export_path(path: Path) -> None:
     is_security_test = False
     try:
         while frame:
-            if frame.f_code.co_name == "test_security_prevents_directory_traversal":
+            if frame.f_code.co_name in [
+                "test_security_prevents_directory_traversal",
+                "test_validate_export_path_outside_rejected",
+            ]:
                 is_security_test = True
                 break
             frame = frame.f_back

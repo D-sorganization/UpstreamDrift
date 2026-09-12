@@ -9,17 +9,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.shared.python.motion_pipeline import preprocessing, scaling
-from src.shared.python.motion_pipeline.ik import base as ik_base
 from src.shared.python.motion_pipeline.orchestrator import (
     HookExecutionError,
-    InvalidInputError,
     MotionPipeline,
     Stage,
     StageResult,
     _detect_format,
 )
-from src.shared.python.motion_pipeline.sources import loader as sources_loader
 
 from ._local_fixtures import make_minimal_config
 
@@ -161,10 +157,22 @@ def test_unexpected_pipeline_stage_failures_log_tracebacks(
     def fail_make_solver(*_args: object, **_kwargs: object) -> object:
         raise RuntimeError("ik boom")
 
-    monkeypatch.setattr(sources_loader, "load_source", fail_load_source)
-    monkeypatch.setattr(preprocessing, "apply_preprocessing", fail_preprocessing)
-    monkeypatch.setattr(scaling, "scale_skeleton", fail_scaling)
-    monkeypatch.setattr(ik_base, "make_ik_solver", fail_make_solver)
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.sources.loader.load_source",
+        fail_load_source,
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.preprocessing.apply_preprocessing",
+        fail_preprocessing,
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.scaling.scale_skeleton",
+        fail_scaling,
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_pipeline.ik.base.make_ik_solver",
+        fail_make_solver,
+    )
 
     stage_cases: tuple[tuple[Callable[[MotionPipeline], StageResult], str], ...] = (
         (
@@ -176,16 +184,13 @@ def test_unexpected_pipeline_stage_failures_log_tracebacks(
             "Preprocessing failed: preprocessing boom",
         ),
         (
-            lambda pipeline: pipeline._run_scaling(
-                object(),  # type: ignore[arg-type]
-                SimpleNamespace(),  # type: ignore[arg-type]
-            ),
+            lambda pipeline: pipeline._run_scaling(object(), SimpleNamespace()),
             "Scaling failed: scaling boom",
         ),
         (
             lambda pipeline: pipeline._run_inverse_kinematics(
-                object(),  # type: ignore[arg-type]
-                SimpleNamespace(),  # type: ignore[arg-type]
+                object(),
+                SimpleNamespace(),
             ),
             "IK failed: ik boom",
         ),
@@ -222,7 +227,7 @@ def test_motion_pipeline_fire_hooks_strict_raises_diagnostic() -> None:
 def test_motion_pipeline_default_skeleton_raises() -> None:
     """No skeleton supplied should raise a clear runtime error."""
     p = MotionPipeline(make_minimal_config())
-    with pytest.raises((RuntimeError, InvalidInputError), match="skeleton"):
+    with pytest.raises(RuntimeError, match="skeleton"):
         p._get_default_skeleton()
 
 

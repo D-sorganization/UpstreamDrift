@@ -124,6 +124,8 @@ class DataWriter:
                 raise ImportError("PyArrow is required for Parquet files")
             df.to_parquet(path, index=False, **kwargs)
         elif fmt == "json":
+            # Explicitly force date_format="iso" to prevent Pandas 2.x '_pandas_datetime_CAPI' attribute errors when serializing dates
+            kwargs.setdefault("date_format", "iso")
             df.to_json(path, orient="records", indent=2, **kwargs)
         elif fmt == "pickle":
             raise ValueError(
