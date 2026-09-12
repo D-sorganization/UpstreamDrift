@@ -75,9 +75,10 @@ qualification evidence covers the specified0.8 s baseline only; read the latest
 Pinocchio checkpoint and engine HANDOFF.md files for exact measured quantities.
 Stock simulator modes, full-swing fitting and engine sensitivities remain
 unqualified. MuJoCo's validated bundle conversion factory is integrated as
-23f2d0235, with another passing 168-case/0.8 s qualification. Its agent owns a
-reproduced eager-import exporter integration fix. Drake's agent is checking
-run 18 at 0.85 s; that extension is not yet qualified. OpenSim implementation
+23f2d0235, with another passing 168-case/0.8 s qualification. The native entry
+import fix is integrated as 8ac65c486; 23 root regression tests pass. Drake's
+run 18 extension at 0.85 s failed the rate gate at two matched integration
+tolerances; its agent is archiving the discrepancy. OpenSim implementation
 has not started.
 
 Each lane must commit incrementally and keep its HANDOFF.md current with source,

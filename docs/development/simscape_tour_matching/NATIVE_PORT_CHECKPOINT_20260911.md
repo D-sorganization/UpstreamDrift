@@ -2,6 +2,17 @@
 
 ## Run 18 Verified and Rejected; Native Bundle Integration
 
+Integration addendum: MuJoCo import fix is now integrated as `8ac65c486`.
+The root engine facade lazily exposes the generic Engine, avoiding unrelated
+GUI/model imports during native adapter import. Two fresh-process regressions
+first reproduced failure under the old initializer; root now passes all 23
+selected import, live dynamics and bundle-binding tests. This fixes the native
+entry sequence, not arbitrary Tools alias collisions. Drake's first run 18
+comparison and one tighter matched-tolerance comparison both fail the absolute
+rate gate (1.46002e-4 and 3.29386e-4 versus 1e-4). Marker differences remain
+below 1e-7 m. No gate was relaxed; 0.85 s full-state parity is not qualified.
+The Drake agent is archiving the two failures and bounded localization evidence.
+
 Updated 2026-09-12 UTC. This section supersedes historical LIVE statuses below.
 Run 18 session 94942 exited 0 and ControlTower PID 2294114 is absent. No new
 fit has been launched. The full 1.8138888889 s matching goal remains active.
