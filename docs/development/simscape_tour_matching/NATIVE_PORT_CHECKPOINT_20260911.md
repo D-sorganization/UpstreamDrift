@@ -1,5 +1,44 @@
 # Native Port Implementation Checkpoint
 
+## P4 Capture Baseline and Active-Agent Review
+
+All commits through e618aa3d4 are pushed; corrected type checks and remaining
+push hooks passed. Actual ControlTower candidate-to-C3D evaluation completed
+exit zero using the packaged adapter on 289 capture timestamps through .80 s.
+25 modeled attachments / 38 capture labels, 7,225 observed marker samples:
+whole RMS 43.8225 mm, early through .60 s RMS 9.86004 mm, terminal RMS
+202.559 mm, terminal six-marker club-cluster RMS 265.370 mm. Adapter plus
+residual took 3.48981 s, integration 3.35972 s. Receipt is
+native_evidence/native_c3d_baseline_9967.json; runner is
+native_evidence/reproduction/benchmark_native_marker_residual.py. This is the
+packaged candidate baseline, NOT a newly optimized or accepted swing.
+
+Inputs on ControlTower: native_geometry_spec_9967.json,
+native_replay_candidate_9967.json, driver_marker_payload_9967.json. The target
+payload came from local archive prefix-1200ms-sextic-01/driver_marker_payload.json
+and carries the same driver source SHA. Baseline uses its first .80 s and
+explicit validity mask; it makes no claim about all-marker/full-capture coverage.
+
+Gemini's latest plan and actual DeskComputer run_real_ms_080s.py were inspected.
+The runner now genuinely calls fit_multiple_shooting with 189 controls + 54
+node-state variables. Active Python launcher/worker PIDs 33608/76992 and MATLAB
+73720 were observed; do not interrupt them. This supersedes the earlier
+single-shooting-only finding for this NEW runner, not historical evidence.
+New defect: it simulates win_duration+.001 and returns final q/qd as the
+boundary state, advancing nominal .60 to .601 s. Its runtime library accepted
+flag still allows any finite replay RMS; the runner copies it even if gates
+fail. Node closure/assembled-state identity also needs explicit verification.
+
+Findings and corrective instructions were sent to issue #9964:
+https://github.com/D-sorganization/UpstreamDrift/issues/9964#issuecomment-5644311396
+and Gemini brain CODEX_LIVE_MS_REVIEW_20260912.txt. Read-only source snapshots
+are archived as review_run_real_ms_080s_20260912.py and
+review_multi_shooting_fit_20260912.py. No external fitting process was changed.
+Next: coordinate correction of exact node boundaries/acceptance, then connect
+the qualified ControlTower adapter to a bounded reproducible optimization run
+with immutable sextic basis and preserved best feasible candidate. Do not
+duplicate the active DeskComputer run or call its 12-hour schedule a guarantee.
+
 ## P3 Actual URDF Round Trip Passed on ControlTower
 
 NativeUrdfModel now calls Pinocchio buildModelFromXML on the exported tree,
