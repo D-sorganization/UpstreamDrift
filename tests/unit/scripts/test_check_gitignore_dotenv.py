@@ -50,8 +50,13 @@ class TestCheckGitignoreDotenv:
 @pytest.mark.unit
 class TestCheckGitignoreDotenvScript:
     def test_script_exits_zero_on_real_repo(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
         result = subprocess.run(
-            [sys.executable, "scripts/ci/check_gitignore_dotenv.py"],
+            [
+                sys.executable,
+                str(repo_root / "scripts" / "ci" / "check_gitignore_dotenv.py"),
+            ],
+            cwd=str(repo_root),
             capture_output=True,
             text=True,
             check=False,

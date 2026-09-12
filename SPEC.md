@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Packaging and Governance Unit-Gate Debt Burndown (#8766)
+
+Burn down 43 quarantined test node IDs under the `packaging_ci_and_repository_governance` cluster in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 40 previously unmasked packaging, release, workflow boundary, and build hook unit tests (including all 29 node IDs in `tests/unit/test_build_hooks.py`) verified 100% passing against current repository code.
+- Script and Workflow Test Path Isolation: Anchor relative paths in `tests/unit/scripts/test_check_gitignore_dotenv.py` and `tests/scripts/test_check_vendor_updates.py` to the repository root so subprocess executions and workflow asset lookups remain robust against test runner working-directory variations.
+- Monolith Refactor Register Synchronization: Regenerate `docs/development/monolith_refactor_register.md` via `scripts/gen_monolith_register.py --write` to synchronize tracked oversized files and allow `tests/scripts/test_monolith_register.py` to pass without quarantine.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 519 to 476 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## Signed Release Tag Enforcement and Verification (#9747)
 
 Enforce cryptographic signing on production release tags in `.github/workflows/release.yml` and synchronize operational release procedures in `docs/operations/release-runbook.md`:
@@ -4356,6 +4364,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #10010 | Burn down 43 quarantined packaging and governance tests in scripts/config/unit_gate_quarantine.json under the packaging_ci_and_repository_governance cluster, anchor test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and sync monolith refactor register (#8766). |
 | 2026-09-12 | #10005 | Tightened the DRY duplication quarantine ledger: deleted 72 fingerprints whose occurrence count had fallen below 2 across all supported scanner runtimes (Python 3.11, 3.12, 3.13, 3.14), reducing quarantined debt from 666 to 594. No entry was raised or added; the baseline was not regenerated (#8695). |
 | 2026-09-12 | #10008 | Enforce cryptographic signature verification on release tags in release.yml, update release runbook commands and requirements, and add automated regression tests (#9747). |
 | 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |
