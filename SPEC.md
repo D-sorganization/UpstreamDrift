@@ -4437,6 +4437,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #10014 | Bolt optimization: Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum(...)) in bundle adjustment routines to bypass temporary allocations, resulting in a ~7% speedup for array diff operations. (spec-exempt: micro-optimization) |
 | 2026-09-12 | #10018 | Reconcile motion pipeline API advertised source formats and OpenAPI schemas with registered adapters, clarify format support documentation, register architecture budget exceptions, and pay down 156 unmarked test entries (#8875). |
 | 2026-09-12 | #10015 | Burn down 29 quarantined shared Python and physics engines tests in scripts/config/unit_gate_quarantine.json (#8766). |
 | 2026-09-12 | #10013 | Burn down 30 quarantined bunker shot solver, workbench GUI, and report tests in scripts/config/unit_gate_quarantine.json under the bunker_shot_model_and_workbench cluster (#8766). |
@@ -6072,4 +6073,3 @@ factories without replacing native exports. The install probe imports the
 consumer; matrix compatibility on 3.8 does not imply solver qualification.
 The general optimal-control extra retains its separate version range (#9842).
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` in `src/motion_capture/coaching/measurements.py` to optimize multi-dimensional distance calculation. (spec-exempt: micro-optimization)
-| 2026-11-20 | #1593 | Bolt optimization: Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum(...)) in bundle adjustment routines to bypass temporary allocations, resulting in a ~7% speedup for array diff operations. (spec-exempt: micro-optimization) |
