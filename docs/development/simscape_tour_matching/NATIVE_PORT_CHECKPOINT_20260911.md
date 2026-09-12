@@ -1,5 +1,28 @@
 # Native Port Implementation Checkpoint
 
+## Tight Native Replay in Progress
+
+September 12 UTC: isolated DeskComputer R2025b replay launched using
+`native_evidence/reproduction/replay_native_tolerance_diagnostic.m`.
+It uses the shared forward wrapper with the saved 0.80 s coefficients,
+geometry and initial targets, rtol 1e-10, atol 1e-12 and maximum step 0.0001 s.
+No source model is saved. It records loaded model defaults separately from
+requested settings; defaults are not asserted to be historical run settings.
+
+Live handle at this checkpoint: exec session 65188; MATLAB worker PID 87304,
+launcher PID 37060 on DeskComputer. Existing PID 73720 is not ours and must
+not be interrupted. Latest process check showed worker CPU 114.95 s; no
+output MAT yet. Poll the same handle/process before any restart.
+Log/output stem: `C:/Users/diete/SimscapeTour9921/native-tight-replay-9967-01`.
+Source MAT: `prefix-800ms-sextic-01/final_native_replay.mat` in that directory.
+Runtime root: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour-runtime`.
+
+Next after successful exit: retain MAT and companion report, run
+`export_native_pose_samples` with full_trajectory=true and the same native
+geometry spec, then compare Pinocchio on the exported native clock. An output
+file alone is not proof of successful terminal execution. The new diagnostic
+is not an optimization run and cannot qualify full-swing tracking.
+
 ## Continuous Integration Convergence: September 12 UTC
 
 The requested OpenSim planning check-in has been delivered. OpenSim code
