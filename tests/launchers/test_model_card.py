@@ -24,6 +24,7 @@ def mock_model() -> MagicMock:
     model.description = "Test Description"
     model.engine_type = "mujoco"
     model.launcher = None
+    model.path = "virtual/mujoco_unified"
     return model
 
 
@@ -105,6 +106,7 @@ def test_find_image_path(mock_assets_dir, mock_model, parent_launcher, qapp) -> 
 
 def test_get_status_info(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
+    card._target_resolvable = True
 
     mock_model.type = "custom_humanoid"
     status, _ = card._get_status_info()
