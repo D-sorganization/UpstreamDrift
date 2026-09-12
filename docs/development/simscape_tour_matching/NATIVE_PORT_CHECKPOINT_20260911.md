@@ -1,5 +1,58 @@
 # Native Port Implementation Checkpoint
 
+## Run12 Replayed: Continuity Recovered; Horizon Extension Remains
+
+Updated 2026-09-12 UTC. Session2134 exited zero. No native fit is running in
+this lane. Candidate510b7a35152d9bd050be5b95e432c4619171f6a6385e683eab070566eeae02a3
+independently reproduces whole RMS23.154869 mm, early10.153892 mm,
+terminal59.362801 mm and club26.933878 mm through0.8 s. Reported yaw8.676164%.
+Acceptance/convergence remain FALSE: terminal/yaw gates fail and24 evaluations
+exhausted. Optimality155.162102; zero active bounds. All four scaled defects
+PASS1e-4: 2.41797e-5/2.04988e-5/1.59750e-5/1.30544e-5.
+
+Fresh final-window terminal RMS59.361001 mm agrees with continuous59.362801 mm;
+POINTWISE terminal replay gap is0.871292 mm, versus run11's118.984255 mm.
+This controlled weight1000 versus100 comparison supports stronger continuity
+weighting for this formulation. It is not proof of global convergence or a
+full-swing match. Independent replay3.34637 s, closure2.77203e-11/1.49464e-10.
+Raw candidate hash d2b9a801b70568d11ceda8631d68f8e467c413c8186256293e433f92a3eb5350.
+Raw run, all24 checkpoints, reports, independent NPZ and inspected error visual
+are preserved in native_evidence/ms_fit_9967_12. Retain run08/run10 as alternate
+seeds; run12 is the latest candidate with qualified small shooting defects.
+
+Shared solver commit ee2caf504 adds terminal_replay_gap_m to MultipleShootingFit,
+using observed pointwise Euclidean RMS rather than subtracting RMS-to-target.
+None means no observed/common terminal clock; infinity marks nonfinite observed
+endpoint. Default None preserves old direct dataclass construction. Reporting
+only; acceptance gates unchanged. TDD: three initial cases failed on missing
+field, then25 combined shooting/retraction tests pass, including opposite equal-RMS
+poses, missing observations, zero-weight markers, unequal clocks and nonfinite
+replay. Ruff/mypy and normal push checks passed. Runtime09/run12 did NOT receive
+this source change; new runners must stage a fresh pinned runtime to use it.
+
+An UNOPTIMIZED duration-only extension of run12 to1.0 s completed in4.22264 s.
+Canonical992d26b7d47d8668817d1bd01013042524b505dcd655aad5a2fa991e9d3f2b44;
+physical polynomial coefficients and initial state are unchanged. Whole165.473624
+mm, terminal649.689203 mm, club849.635080 mm; native closure still passes.
+Instantaneous RMS at0.85/0.90/0.95 s is117.611445/267.299776/496.233430 mm.
+All25 modeled markers are observed at these checked frames. This diagnoses the
+need to fit the later interval; extrapolating an early fit is insufficient.
+Exact candidate, receipt, NPZ and phase summary are in ms12_extension_1000ms.
+
+Next bounded task: qualify a0.85 s exploratory horizon extension seeded from
+run12, preserving original initial state and a single global sixth-order effort
+law. Use continuity weight1000, retain early/0.8 s diagnostics and all full-swing
+acceptance requirements; do not call extending the horizon acceptance. Add a new
+0.8 s physical shooting node from continuous run12 replay, qualify its retraction
+and window derivatives, and audit initialization/target clock before fitting.
+Reuse the shared fitter; parameterize the experiment runner's horizon/node list
+with tests instead of growing a separate optimizer implementation. Polynomial
+basis changes must preserve the physical torque function at restart; explicitly
+document bounds if rebasing. Keep the canonical capture end1.8138888889 s as the
+actual final objective. Final candidate R2025b replay and other-engine native
+qualification remain required. The previous turn made progress by rejecting
+disconnected fitting; this turn verifies the corrective continuity experiment.
+
 ## Run11 Rejected After Replay; Controlled Continuity Trial Is Live
 
 Updated 2026-09-12 UTC. Session 43742 exited zero; run11 completed its
