@@ -522,7 +522,9 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
 
     def _apply_theme_best_effort(self) -> None:
         try:
-            from src.shared.python.theme import apply_theme_to_window
+            from src.shared.python.theme import (  # type: ignore[attr-defined]
+                apply_theme_to_window,
+            )
         except ImportError:
             return
         if apply_theme_to_window is None:
@@ -1601,9 +1603,7 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
         menu_bar = self.menuBar()
         assert menu_bar is not None
         file_menu = menu_bar.addMenu("&File")
-        help_menu = menu_bar.addMenu("&Help")
         assert file_menu is not None
-        assert help_menu is not None
         load_corpus_action = QtGui.QAction("Load &Private Corpus", self)
         load_corpus_action.setStatusTip(
             "Load every source in the authorized private shot corpus."
@@ -1617,9 +1617,17 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
         quit_action.setShortcut(QtGui.QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
-        about_action = QtGui.QAction("&About Launch Monitor Analytics", self)
-        about_action.triggered.connect(self._show_about)
-        help_menu.addAction(about_action)
+
+        from src.launchers.help_menu import build_help_menu
+
+        build_help_menu(
+            menu_bar,
+            self,
+            doc_target=(
+                "User Manual",
+                "docs/user_guide/user_manual.md",
+            ),
+        )
 
     def _show_about(self) -> None:
         QtWidgets.QMessageBox.about(

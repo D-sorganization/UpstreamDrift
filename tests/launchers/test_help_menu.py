@@ -74,6 +74,21 @@ def test_build_help_menu_creates_expected_actions(parent_window, qapp) -> None:
     assert "&About" in labels
 
 
+def test_build_help_menu_with_doc_target(parent_window, qapp) -> None:
+    bar = parent_window.menuBar()
+    menu = help_menu.build_help_menu(
+        bar,
+        parent_window,
+        doc_target=(
+            "Ball Flight Model Documentation",
+            "docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md",
+        ),
+    )
+    labels = [a.text() for a in menu.actions() if not a.isSeparator()]
+    assert "&Ball Flight Model Documentation" in labels
+    assert "&User Guide" in labels
+
+
 def test_build_help_menu_uses_custom_show_shortcuts(parent_window, qapp) -> None:
     bar = parent_window.menuBar()
     custom = MagicMock()
