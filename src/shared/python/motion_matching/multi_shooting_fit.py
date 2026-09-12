@@ -18,6 +18,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import least_squares
 
+from src.shared.python.motion_matching.marker_replay_report import observed_rms
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
     _readonly,
@@ -92,6 +93,9 @@ class MultipleShootingFit:
     accepted requires the explicit application acceptance callback as well as
     finite continuous replay, optimizer convergence and bounded state defects.
     A missing callback never qualifies a fit.
+    terminal_replay_gap_m is observed-marker pointwise RMS between the last
+    shooting window and continuous replay. None means absent endpoint evidence;
+    infinity means a nonfinite observed endpoint. It is diagnostic, not a gate.
     """
 
     theta: Array
@@ -106,6 +110,7 @@ class MultipleShootingFit:
     optimality: float
     function_evaluations: int
     active_bound_count: int
+    terminal_replay_gap_m: float | None = None
 
 
 def fit_multiple_shooting(
@@ -411,6 +416,7 @@ def fit_multiple_shooting(
     else:
         segmented_rmse = 0.0
 
+    terminal_segmented = pred_markers[-1].copy()
     # Evaluate unsegmented forward simulation across all time
     unsegmented_pred = unsegmented_forward(opt_theta, target.time)
     obs_all = np.isfinite(target.points).all(axis=2) & (target.weights > 0)
@@ -423,6 +429,17 @@ def fit_multiple_shooting(
         unsegmented_rmse = float(np.sqrt(np.mean(unseg_dists**2)))
     else:
         unsegmented_rmse = float("inf")
+
+    # Pointwise disagreement is not the difference of two RMS-to-target values.
+    # Missing observations or unequal endpoint clocks provide no gap evidence.
+    terminal_replay_gap = None
+    if w_time[-1] == target.time[-1] and np.any(obs_all[-1]):
+        gap_errors = np.linalg.norm(terminal_segmented - unsegmented_pred[-1], axis=1)
+        terminal_replay_gap = (
+            observed_rms(gap_errors, obs_all[-1])
+            if np.isfinite(gap_errors[obs_all[-1]]).all()
+            else float("inf")
+        )
 
     accepted = bool(
         optimum.success
@@ -446,6 +463,7 @@ def fit_multiple_shooting(
         optimality=float(optimum.optimality),
         function_evaluations=int(optimum.nfev),
         active_bound_count=int(np.count_nonzero(optimum.active_mask)),
+        terminal_replay_gap_m=terminal_replay_gap,
     )
 
 

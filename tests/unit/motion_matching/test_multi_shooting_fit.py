@@ -27,6 +27,65 @@ from src.shared.python.motion_matching.prefix_fit import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    ("observed_terminal", "finite_replay", "shooting_end", "expected_gap"),
+    [
+        (True, True, 1.0, 10.0),
+        (False, True, 1.0, None),
+        (True, False, 1.0, float("inf")),
+        (True, True, 0.5, None),
+    ],
+)
+def test_terminal_replay_gap_is_pointwise_and_masked(
+    observed_terminal: bool,
+    finite_replay: bool,
+    shooting_end: float,
+    expected_gap: float | None,
+) -> None:
+    """Equal RMS-to-target values can hide opposite terminal marker positions."""
+    time = np.array([0.0, 0.5, 1.0])
+    points = np.zeros((3, 2, 3))
+    if not observed_terminal:
+        points[-1, 0] = np.nan
+    target = MarkerTarget(time, points, np.array([1.0, 0.0]))
+
+    def segmented(
+        theta: np.ndarray, clock: np.ndarray, state: np.ndarray | None
+    ) -> tuple[np.ndarray, np.ndarray]:
+        pred = np.zeros((len(clock), 2, 3))
+        pred[:, 0] = [3.0, 4.0, 0.0]
+        pred[:, 1] = 1000.0  # Zero-weight marker must not affect the gap.
+        return pred, np.zeros(1)
+
+    def continuous(theta: np.ndarray, clock: np.ndarray) -> np.ndarray:
+        pred = np.zeros((len(clock), 2, 3))
+        pred[:, 0] = [-3.0, -4.0, 0.0]
+        if not finite_replay:
+            pred[-1, 0] = np.nan
+        return pred
+
+    result = fit_multiple_shooting(
+        target,
+        segmented,
+        continuous,
+        initial_theta=np.zeros(1),
+        lower_theta=-np.ones(1),
+        upper_theta=np.ones(1),
+        initial_states={0.5: np.zeros(1)},
+        state_bounds={0.5: (-np.ones(1), np.ones(1))},
+        options=MultipleShootingOptions(
+            shooting_nodes=(0.5, 1.0) if shooting_end == 1.0 else (0.5,)
+        ),
+    )
+    if finite_replay:
+        assert result.segmented_rmse_m == pytest.approx(5.0)
+        assert result.unsegmented_rmse_m == pytest.approx(5.0)
+    if expected_gap is None:
+        assert result.terminal_replay_gap_m is None
+    else:
+        assert result.terminal_replay_gap_m == pytest.approx(expected_gap)
+
+
 def test_multiple_shooting_options_validation() -> None:
     # Valid options
     opts = MultipleShootingOptions(
