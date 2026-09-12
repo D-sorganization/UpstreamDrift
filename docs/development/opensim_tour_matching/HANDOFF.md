@@ -4,6 +4,17 @@ Updated: 2026-09-12 UTC. Epic: [#10003](https://github.com/D-sorganization/Upstr
 Plan: [EPIC_10003.md](EPIC_10003.md). Status: planning complete; prepared for the requested user check-in.
 No OpenSim implementation or native solver job has started in this workstream.
 
+## Current Cross-Engine Evidence
+
+The latest independently replayed Pinocchio candidate is
+5c99cda5ea6e6f04be4c18aa878234c92ef9b389b2a6fd21dfe8f45e20d5da5d:
+23.783870 mm whole-prefix RMS and 62.819025 mm terminal RMS through 0.80 s.
+It fails acceptance. Read the latest Pinocchio checkpoint instead of treating
+historical epic metrics as the current best. Its P-1 through P-4 packages now
+cover alternative-seed audit, conditioning/feasibility diagnosis, one controlled
+improvement, and full-capture/final-sextic qualification. OpenSim remains at the
+requested planning check-in, with OS-0 the first implementation assignment.
+
 ## Checkout and Ownership
 
 - Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003`.
