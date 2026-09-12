@@ -1,5 +1,21 @@
 # Native Port Implementation Checkpoint
 
+## Run 20 Saved Evaluation 44 Audit
+
+Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.
+Read-only audit session85985 exited0. Saved evaluation44 independently replays
+at whole32.896477 mm and terminal133.589162 mm, versus segmented terminal
+95.877355 mm. The terminal pointwise gap is65.749435 mm and maximum full scaled
+continuity defect1.541224e-4 fails1e-4. Callback cost29.95454 is therefore not
+continuous fit improvement over run19. This is a residual evaluation, not an
+accepted iterate or terminal result. Let the existing bounded solve finish.
+Candidate canonical SHA:
+`5ddc46705f245d4e0d92a731cc65cf7d9e9ee5074f71407657b17a614d1d7324`.
+Exact snapshot/config/audit script/report are preserved in
+`native_evidence/ms_bound_continuation_9967_20/raw-evaluation44-audit.zip`;
+adjacent evaluation44-audit.json is the readable receipt. No optimizer or
+runtime modification occurred. Next agent must still audit the returned result.
+
 ## Current Turnover for the Next Agent
 
 Read [Lower-Cost Agent Turnover](LOW_COST_AGENT_TURNOVER_20260912.md) for the
