@@ -102,3 +102,33 @@ def test_rejects_non_provenance_value(qt_app) -> None:
 
     with pytest.raises(TypeError):
         ProvenanceValueLabel(object())  # type: ignore[arg-type]
+
+
+def test_label_carries_citation(qt_app) -> None:
+    from src.shared.python.ui.provenance_value import ProvenanceValueLabel
+
+    citation_text = (
+        'Putnam (1993). "Sequential motions of body segments in striking and '
+        'throwing skills". DOI: 10.1016/0021-9290(93)90084-R'
+    )
+    record = ProvenanceRecord(
+        formula="timing gap = peak(segment_i) - peak(segment_{i-1})",
+        inputs=("kinematics.pelvis_velocity", "kinematics.torso_velocity"),
+        source="kinematic_sequence:run-1",
+        computed_at=datetime(2026, 9, 12, 12, 0, tzinfo=timezone.utc),
+        engine="kinematic_analyzer",
+        run_id="run-1",
+        citation=citation_text,
+    )
+    pv = ProvenanceValue(
+        value=0.045, record=record, display_units="s", label="Pelvis-Torso Gap"
+    )
+    widget = ProvenanceValueLabel(pv)
+    tip = widget.toolTip()
+    assert f"citation: {citation_text}" in tip
+
+    payload = record.to_dict()
+    assert payload["citation"] == citation_text
+
+    reconstructed = ProvenanceRecord.from_dict(payload)
+    assert reconstructed.citation == citation_text

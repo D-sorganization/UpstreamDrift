@@ -757,13 +757,19 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             f"Retained Source Fields: {source_fields}\n"
             f"Import Warnings: {len(warnings)}\n\n"
             f"Recorded Treatment Actions: {len(self.project.audit_log)}\n\n"
-            "Scientific Interpretation\n"
-            "-------------------------\n"
+            "Scientific Interpretation & Traceability\n"
+            "-----------------------------------------\n"
             "Relationships describe association, not causation. Identity-derived "
             "metrics are marked by the metric registry. Matched shots are required "
             "for monitor bias and agreement claims; unmatched comparisons remain "
             "descriptive. Original source columns and per-file SHA-256 provenance "
-            "are retained in the project."
+            "are retained in the project.\n\n"
+            "Methodology & Formula Traceability:\n"
+            "- Longitudinal trends: Theil-Sen robust linear regression with Mann-Kendall test\n"
+            "- Dispersion: 95% bivariate normal confidence ellipse (Hotelling T^2)\n"
+            "- Multicollinearity: Variance Inflation Factor (VIF = 1 / (1 - R_i^2))\n"
+            "- Strokes Gained: SG = verified E(start state) - 1 - verified E(finish state) "
+            "(Broadie 2011/2014, DOI: 10.1287/inte.1110.0594)\n"
         )
 
     # ---- shared action-bar plumbing (#9470) -----------------------------
