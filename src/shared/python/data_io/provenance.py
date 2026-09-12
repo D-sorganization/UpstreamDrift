@@ -79,6 +79,47 @@ class ProvenanceInfo:
     drake_version: str | None = None
     pinocchio_version: str | None = None
 
+    @staticmethod
+    def _get_environment_versions() -> tuple[
+        str, str, str | None, str | None, str | None
+    ]:
+        """Detect versions of Python, NumPy, MuJoCo, Drake, and Pinocchio."""
+        import sys
+
+        python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        numpy_version = str(getattr(np, "__version__", "unknown"))
+
+        def _detect_version(
+            module_name: str, package_names: tuple[str, ...]
+        ) -> str | None:
+            if module_name in sys.modules:
+                mod = sys.modules[module_name]
+                return (
+                    str(getattr(mod, "__version__", "unknown"))
+                    if mod is not None
+                    else None
+                )
+            from importlib.metadata import PackageNotFoundError, version
+
+            for pkg in package_names:
+                try:
+                    return version(pkg)
+                except (PackageNotFoundError, ImportError):
+                    continue
+            return None
+
+        mujoco_version = _detect_version("mujoco", ("mujoco",))
+        drake_version = _detect_version("pydrake", ("drake",))
+        pinocchio_version = _detect_version("pinocchio", ("pin",))
+
+        return (
+            python_version,
+            numpy_version,
+            mujoco_version,
+            drake_version,
+            pinocchio_version,
+        )
+
     @classmethod
     def capture(
         cls,
@@ -94,24 +135,15 @@ class ProvenanceInfo:
             parameters: Optional analysis parameters to record
             engine_name: Optional physics engine name (e.g. MuJoCo, Drake, Pinocchio)
             run_id: Optional unique identifier for this simulation run
-                    parameters: Optional analysis parameters to record
 
-                Returns:
-                    ProvenanceInfo with automatically captured metadata
-
-                Example:
-                    >>> provenance = ProvenanceInfo.capture(
-                    ...     model_path="models/humanoid.xml",
-                    ...     parameters={"dt": 0.001, "integrator": "RK4"}
-                    ... )
+        Returns:
+            ProvenanceInfo with automatically captured metadata
         """
         now_utc = datetime.now(timezone.utc)  # noqa: UP017 (mypy compatibility)
         now_local = datetime.now().astimezone()
 
-        # Git information (best effort)
         git_sha, git_branch, git_dirty = cls._get_git_info()
 
-        # Model file hash
         model_hash = None
         model_path_str = None
         if model_path is not None:
@@ -120,55 +152,7 @@ class ProvenanceInfo:
                 model_hash = cls._hash_file(model_path_obj)
                 model_path_str = str(model_path_obj)
 
-        # Environment versions
-        import sys
-
-        python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-        numpy_version = str(getattr(np, "__version__", "unknown"))
-
-        # MuJoCo version (if available)
-        mujoco_version = None
-        if "mujoco" in sys.modules:
-            mod = sys.modules["mujoco"]
-            mujoco_version = (
-                str(getattr(mod, "__version__", "unknown")) if mod is not None else None
-            )
-        else:
-            try:
-                from importlib.metadata import PackageNotFoundError, version
-
-                mujoco_version = version("mujoco")
-            except (PackageNotFoundError, ImportError):
-                pass
-
-        # Engine versions (if available)
-        drake_version = None
-        if "pydrake" in sys.modules:
-            mod = sys.modules["pydrake"]
-            drake_version = (
-                str(getattr(mod, "__version__", "unknown")) if mod is not None else None
-            )
-        else:
-            try:
-                from importlib.metadata import PackageNotFoundError, version
-
-                drake_version = version("drake")
-            except (PackageNotFoundError, ImportError):
-                pass
-
-        pinocchio_version = None
-        if "pinocchio" in sys.modules:
-            mod = sys.modules["pinocchio"]
-            pinocchio_version = (
-                str(getattr(mod, "__version__", "unknown")) if mod is not None else None
-            )
-        else:
-            try:
-                from importlib.metadata import PackageNotFoundError, version
-
-                pinocchio_version = version("pin")
-            except (PackageNotFoundError, ImportError):
-                pass
+        py_v, np_v, mj_v, dk_v, pin_v = cls._get_environment_versions()
 
         return cls(
             timestamp_utc=now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -181,11 +165,11 @@ class ProvenanceInfo:
             model_file_path=model_path_str,
             model_file_hash=model_hash,
             parameters=parameters or {},
-            python_version=python_version,
-            numpy_version=numpy_version,
-            mujoco_version=mujoco_version,
-            drake_version=drake_version,
-            pinocchio_version=pinocchio_version,
+            python_version=py_v,
+            numpy_version=np_v,
+            mujoco_version=mj_v,
+            drake_version=dk_v,
+            pinocchio_version=pin_v,
         )
 
     @staticmethod
