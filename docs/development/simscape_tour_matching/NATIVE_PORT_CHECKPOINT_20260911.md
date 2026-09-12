@@ -1,5 +1,30 @@
 # Native Port Implementation Checkpoint
 
+## Independent Native Cartesian Samples and Second Tolerance Run
+
+ControlTower session 16047 completed, exit zero. The marker diagnostic now
+also projects the independently exported R2025b KinematicsSolver transforms
+directly; its reference side does not call Pinocchio FK at those six states.
+Maximum marker distances at t approximately 0, .4, .6, .7, .75, .8 seconds:
+1.75e-15, 1.74e-9, 5.72e-8, 6.49e-7, 2.13e-6, 6.17e-6 metres.
+Receipt: `native_evidence/native_independent_marker_difference_9967.json`.
+All-clock shared-FK metrics and the six independent samples have distinct
+scope in that receipt. This does not establish full-swing C3D fitting.
+
+Second cold R2025b tolerance run is LIVE at this checkpoint: exec session
+88805, DeskComputer launcher PID 94352 and worker PID 81844. Existing PID
+73720 is unrelated. Command is the same diagnostic with fourth argument 0.1:
+RelTol=1e-11, AbsTol=1e-13, MaxStep=0.0001. Log/output stem is
+`C:/Users/diete/SimscapeTour9921/native-tight-replay-9967-02`.
+No success is claimed until that handle exits successfully. Poll it rather
+than starting a duplicate. The helper now accepts a positive finite scale
+at most one; its default preserves the first tight run's settings.
+
+Next: after successful terminal exit, export this second MAT with the same
+`export_native_pose_samples(...,spec_path,true)` invocation to a new -02 JSON.
+Compare identical polynomial inputs against it and quantify native tolerance
+convergence in marker metres. Preserve the prior references and all settings.
+
 ## Cartesian Trajectory Difference Through 0.80 Seconds
 
 ControlTower diagnostic session 67568 completed with exit code zero. Using

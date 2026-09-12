@@ -50,6 +50,29 @@ def main() -> None:
         ]
         differences.append(np.linalg.norm(positions[1] - positions[0], axis=1))
     error = np.asarray(differences)
+    # Independent native KinematicsSolver transforms at the exported sample
+    # states: the reference side does not pass through Pinocchio FK.
+    independent = []
+    native = data["reference"]
+    for t, transforms in zip(native["time_s"], native["poses"], strict=True):
+        index = int(np.searchsorted(clock, t))
+        if index >= len(clock) or clock[index] != t:
+            raise ValueError("Native pose sample is missing from replay clock")
+        reference_frames = dict(zip(native["frame_names"], transforms, strict=True))
+        predicted_frames = model.frame_poses(
+            dict(zip(names, data["replay"]["q"][index], strict=True))
+        )
+        delta = project(
+            predicted_frames, seed["body_names"], seed["offsets_m"]
+        ) - project(reference_frames, seed["body_names"], seed["offsets_m"])
+        distances = np.linalg.norm(delta, axis=1)
+        independent.append(
+            {
+                "time_s": t,
+                "marker_distances_m": distances.tolist(),
+                "maximum_distance_m": float(distances.max()),
+            }
+        )
     receipt = {
         "qualification": "same-clock Cartesian discrepancy through shared qualified FK; not independent native marker validation or C3D fit",
         "samples": len(clock),
@@ -63,6 +86,7 @@ def main() -> None:
             )
         ),
         "terminal_marker_distances_m": error[-1].tolist(),
+        "independent_native_pose_samples": independent,
         "sha256": {
             name: hashlib.sha256(getattr(args, name).read_bytes()).hexdigest()
             for name in ("module", "projection", "spec", "seed", "reference", "replay")
