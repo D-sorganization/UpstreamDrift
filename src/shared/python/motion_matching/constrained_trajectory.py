@@ -60,6 +60,18 @@ def _validate_samples(times: Array, coordinates: Array) -> tuple[Array, Array]:
     return clock, values
 
 
+def spline_node_derivative_maps(times: Array) -> tuple[Array, Array]:
+    """Return linear maps from node values to cubic-spline qd and qdd at nodes."""
+    clock = np.asarray(times, dtype=float)
+    if clock.ndim != 1 or clock.size < 4 or not np.all(np.diff(clock) > 0):
+        raise ValueError("Expected at least four strictly increasing finite times")
+    identity = np.eye(clock.size)
+    spline = CubicSpline(clock, identity, axis=0)
+    first = np.asarray(spline(clock, 1), dtype=float)
+    second = np.asarray(spline(clock, 2), dtype=float)
+    return first, second
+
+
 def _closure_values(
     positions: Array,
     rates: Array,
