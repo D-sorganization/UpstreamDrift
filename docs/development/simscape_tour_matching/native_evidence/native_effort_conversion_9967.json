@@ -1,0 +1,8 @@
+{
+  "qualification": "native effort conversion only; adapter integration pending",
+  "samples": 1001,
+  "duration_s": 0.8,
+  "max_abs_effort_difference": 0.0,
+  "reference_sha256": "a9a0fa8eb20aa1b1a4e8a4c885cc13d2d1cfe750755357eee0de25354373ee56",
+  "spec_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248"
+}

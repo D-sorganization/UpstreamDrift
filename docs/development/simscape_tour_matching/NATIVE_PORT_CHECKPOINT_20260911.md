@@ -1,5 +1,37 @@
 # Native Port Implementation Checkpoint
 
+## Second Tolerance Comparison Complete: Proceed to P2
+
+All jobs are terminal, exit zero: export 31614, continuous replay 19541,
+summary extraction 20657 and marker diagnostic 1659. Second native export has
+148,148 samples through 0.80 s. Coefficients, geometry and initial q/qd are
+exactly unchanged from the first tight export. Native tolerances alone tighten
+from 1e-10/1e-12 to 1e-11/1e-13, with MaxStep still 0.0001 s.
+
+Maximum projected marker difference falls from 6.17217e-6 to 1.35908e-6 m;
+time-weighted RMS falls from 4.66791e-7 to 1.02711e-7 m. Six independent
+native KinematicsSolver samples confirm the latter result, including transition
+and the terminal state. Pinocchio integration takes 3.972 s; maximum mixed
+q/qd discrepancies are 1.35352e-5 / 0.0146977. This is converging continuous
+agreement for this exact 0.80 s candidate, not full-swing C3D acceptance or
+equivalence under every possible parameter change. Further tightening of the
+same candidate is not the next priority: errors are far below fitting budgets.
+
+Receipts: `native_evidence/native_marker_convergence_second_9967.json`,
+`native_continuous_convergence_second_9967.json`, and
+`native_tight_replay_second_9967.json`. Full native -02 export is on both hosts
+and in the local checkpoint archive. Full Pinocchio -02 replay remains on
+ControlTower under the same user directory and naming convention as -01.
+Input hashes are preserved in receipts. No live diagnostic needs restarting.
+
+The native effort converter also exactly reproduces the original diagnostic's
+forces/torques at 1,001 times over [0,.8]; receipt is
+`native_evidence/native_effort_conversion_9967.json`. Next: P2 candidate identity
+and closed-chain engine adapter, with tests rejecting coefficient/time/frame
+ambiguity, followed by native-qualified replay using the shared converter.
+Then P3 URDF tree plus closure/actuation metadata and actual reload checks.
+All commits through 948856377 were pushed with normal checks passing.
+
 ## Second Native Replay Terminal Success
 
 Session 88805 has now exited successfully (code zero). Its MAT is complete at
