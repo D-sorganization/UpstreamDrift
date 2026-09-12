@@ -1,6 +1,32 @@
 # Native Port Implementation Checkpoint
 
-## Tight Native Replay in Progress
+## Tight Native Replay Completed
+
+The replay below finished with exit code zero, as did export session 73644
+and ControlTower replay session 61132. None of these jobs remains live.
+The subsequent live-process notes are historical. Native report is
+`native_evidence/native_tight_replay_report_9967.json`; Pinocchio result is
+`native_evidence/native_continuous_tight_reference_9967.json`.
+
+Loaded R2025b defaults were ode23t, RelTol=1e-3, AbsTol=1e-5, MaxStep=0.001.
+Tight replay used 1e-10, 1e-12, 0.0001 respectively and took 169.087 s
+inside the replay wrapper. Export produced 68,205 raw native samples through
+0.80 s. On this reference, Pinocchio integration took 3.825 s and maximum
+q/qd discrepancy dropped to 6.21233e-5 / 0.0673489, from 0.671626 / 491.816.
+These are mixed-coordinate maxima, not marker metres. This strongly supports
+a numerical contribution to the earlier discrepancy, but does not alone prove
+historical solver settings or final continuous equivalence. Marker metrics and
+another native tolerance-convergence run remain required.
+
+Raw tight MAT (904,020,813 bytes) remains on DeskComputer at the stem below.
+`native-tight-reference-9967-01.json` is preserved there, in the local
+`simscape-tour-checkpoints` archive, and ControlTower's user directory.
+Full Pinocchio output remains at
+`C:/Users/diete/native-continuous-tight-reference-800ms-9967-01.json` on
+ControlTower; compact summary is archived locally and committed. Input hashes
+are included in the compact receipt. Do not overwrite these evidence files.
+
+## Tight Native Replay Launch History
 
 September 12 UTC: isolated DeskComputer R2025b replay launched using
 `native_evidence/reproduction/replay_native_tolerance_diagnostic.m`.
