@@ -1,5 +1,32 @@
 # Native Port Implementation Checkpoint
 
+## Assembled Residual Audit Shows Strong Step-Size Sensitivity
+
+Updated 2026-09-12 UTC. Global Jacobian audit session 13381 exited zero. It
+evaluated 273 parameters and 22008 residual rows at restored run08, initial
+cost 13.2551506127. Residual directional errors decrease to roughly 1e-6 at
+small tested steps, but squared-cost slopes do not yet robustly agree.
+
+For the scaled gradient direction, predicted slope is 2028.1533; finite
+difference slopes at h=1e-4, 1e-5 and 1e-6 are -7929863.84, -77544.42 and
+1252.4143. Corresponding residual derivative relative errors are 9.367e-4,
+9.368e-6 and 1.007e-6. For the deterministic random direction, predicted
+slope 15.9521 versus 4.4580 at h=1e-6 still disagrees materially despite
+3.342e-6 relative residual derivative error. Do not declare the entire gradient
+qualified from residual relative error alone. Curvature and/or numerical
+sensitivity require a smaller-step check before attributing this to a bug.
+
+Receipts and raw evaluation packages are in native_evidence/ms_global_jac_audit_9967_01
+and raw local/ControlTower native-ms-global-jac-audit-9967-01. No optimization
+was performed by this audit, and its saved perturbations are not fit candidates.
+
+LIVE follow-up: unified session 6242, runner audit_native_global_jac_9967_02.py,
+output C:/Users/diete/native-ms-global-jac-audit-9967-02. Same point, residual
+assembly, directions, runtime09 and solver; only h values change to 1e-7 and
+1e-8. Poll this exact process and inspect cost slope as well as residual-vector
+agreement. No new native fit should start until the derivative interpretation
+is resolved. Full-swing matching remains incomplete.
+
 ## Run09 Replayed; Complete Residual Derivative Audit Is Live
 
 Updated 2026-09-12 UTC. Run09 session 62709 exited zero after exhausting twelve
