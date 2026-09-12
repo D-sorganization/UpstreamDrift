@@ -1,5 +1,46 @@
 # Native Port Implementation Checkpoint
 
+## Native Shooting Window Implemented and Qualified
+
+Updated 2026-09-12 UTC. Previous goal turn made progress through bounded replay
+experiments. This turn implements replay_window in the native replay module.
+Both public full-candidate and window APIs share one private integration path;
+full coverage remains mandatory for replay_candidate. Window states must be
+finite native q/rate vectors and pass native closure before integration.
+The window uses local solver time with explicit absolute-time effort evaluation;
+returned timestamps are the exact requested absolute clock, not a later stop.
+No assembly projection, target feedback or node reset inside a window occurs.
+
+Six new tests first failed because replay_window was absent, then passed.
+Combined replay and existing sensitivity regression suite: 11 passed. Ruff and
+direct mypy passed. Actual ControlTower audit session 44711 exited zero:
+first terminal and second initial both 0.600 s; split versus continuous .8 s
+marker maximum difference 7.98073e-12 m, q 8.09917e-11, qd 1.35782e-8.
+Closure pose/rate maxima 2.52871e-11 / 5.65850e-11. Receipt:
+native_evidence/native-window-audit-9967-01.json. This qualifies an exact split
+of candidate 499535d5eed7f74f27f836f267f7ef1956f58c5e28bb08a4b6b13a44da7c6048,
+not an optimized multiple-shooting solution or full-swing marker acceptance.
+
+Runtime is /home/dieterolson/native-window-9967-01 on ControlTower, copied to a
+new directory from native-expanded-sextic-9967-01 with only native_replay.py
+replaced. Original runtimes remain intact. The receipt hashes the actual adapter
+and standalone check_native_window_9967_01.py. Both script and receipt are in
+local simscape-tour-checkpoints and ControlTower C:/Users/diete. Local bundle
+native-window-bundle-9967-01.zip preserves that adapter and script; its dependencies
+are the previously hashed native-expanded-sextic-bundle-9967-01.zip. Reproduce
+with the existing Pinocchio venv, PYTHONPATH pointing at the isolated runtime,
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1, and the named script. Use new output
+names for repeated audits; the current runner refuses receipt overwrite.
+
+Next single action: add analytic shooting-window derivatives with respect to
+initial state, reusing forward_sensitivity's initial_sensitivity contract and
+native acceleration/marker derivatives. Test a known analytic system first,
+then finite-difference tangent directions at native closure-valid nodes. Do not
+perturb independent q/v arbitrarily off the 6D weld manifold. Decide and test
+node tangent coordinates/retraction or explicit closure constraints before
+connecting an optimizer. Coordinate the shared MS acceptance/defect repair with
+Gemini. The latest forward-tested fit and all remaining gates stay as below.
+
 ## Bounded Linear Step Tested Against Native Replay
 
 Updated 2026-09-12 UTC. Previous turn made progress with conditioning evidence.

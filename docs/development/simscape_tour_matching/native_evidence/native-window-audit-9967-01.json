@@ -1,0 +1,15 @@
+{
+  "qualification": "native split replay audit only; no optimized shooting nodes or full-swing acceptance",
+  "candidate_sha256": "499535d5eed7f74f27f836f267f7ef1956f58c5e28bb08a4b6b13a44da7c6048",
+  "boundary_s": 0.6,
+  "first_terminal_s": 0.6,
+  "second_initial_s": 0.6,
+  "marker_max_abs_m": 7.980727190215475e-12,
+  "q_max_abs": 8.099165782482487e-11,
+  "qd_max_abs": 1.3578230095845356e-8,
+  "closure_pose_max_abs": 2.5287105742719113e-11,
+  "closure_rate_max_abs": 5.658495894067528e-11,
+  "runner_sha256": "2de9a0aebedbcf6e7a586b7f8172a3b18a01bbf32f06d30f35008f0acdb3fb10",
+  "adapter_sha256": "ec83b0d2cda2a04b0795a21a9c44c87d6d52043df0dd55655908475b985a453a",
+  "passed": true
+}

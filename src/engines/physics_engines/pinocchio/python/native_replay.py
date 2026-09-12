@@ -58,13 +58,70 @@ def replay_candidate(
     max_step: float = 0.001,
     closure_tolerance: float = 1e-7,
 ) -> NativeReplayResult:
-    """Verify model identity, then integrate without feedback or state resets.
+    """Replay full candidate coverage without intermediate state resets."""
+    return _replay_native(
+        model_bytes,
+        candidate,
+        time_s,
+        initial_state=None,
+        model_factory=model_factory,
+        rtol=rtol,
+        atol=atol,
+        max_step=max_step,
+        closure_tolerance=closure_tolerance,
+    )
 
-    The output clock must span the candidate's full declared duration. Build a
-    new candidate identity to change that duration; coefficients remain in
-    absolute seconds. Closure tolerance is a maximum component bound on native
-    six-component pose/rate residuals, not a Cartesian marker-fit threshold.
+
+def replay_window(
+    model_bytes: bytes,
+    candidate: NativeReplayCandidate,
+    time_s: Array,
+    initial_state: Array,
+    *,
+    model_factory: Callable[
+        [Mapping[str, Any]], NativeReplayEngine
+    ] = NativePinocchioModel,
+    rtol: float = 1e-9,
+    atol: float = 1e-11,
+    max_step: float = 0.001,
+    closure_tolerance: float = 1e-7,
+) -> NativeReplayResult:
+    """Replay a shooting window on the unchanged absolute polynomial clock.
+
+    The supplied state belongs exactly to time_s[0] and must already satisfy
+    native position/rate closure. No assembly projection or target reset occurs.
+    This is a window result, not full-candidate acceptance. Its integration
+    retains the absolute clock and actual supplied initial state for provenance.
     """
+    if initial_state is None:
+        raise ValueError("A shooting window requires an explicit initial state")
+    return _replay_native(
+        model_bytes,
+        candidate,
+        time_s,
+        initial_state=initial_state,
+        model_factory=model_factory,
+        rtol=rtol,
+        atol=atol,
+        max_step=max_step,
+        closure_tolerance=closure_tolerance,
+    )
+
+
+def _replay_native(
+    model_bytes: bytes,
+    candidate: NativeReplayCandidate,
+    time_s: Array,
+    *,
+    initial_state: Array | None,
+    model_factory: Callable[
+        [Mapping[str, Any]], NativeReplayEngine
+    ] = NativePinocchioModel,
+    rtol: float = 1e-9,
+    atol: float = 1e-11,
+    max_step: float = 0.001,
+    closure_tolerance: float = 1e-7,
+) -> NativeReplayResult:
     spec = json.loads(model_bytes)
     names = spec["coordinate_order"]
     checked = NativeReplayCandidate.from_document(
@@ -76,10 +133,12 @@ def replay_candidate(
         clock.ndim != 1
         or clock.size < 2
         or not np.isfinite(clock).all()
-        or clock[0] != 0
+        or clock[0] < 0
         or np.any(np.diff(clock) <= 0)
-        or clock[-1] != data["duration_s"]
+        or clock[-1] > data["duration_s"]
     ):
+        raise ValueError("Requested clock must be within candidate coverage")
+    if initial_state is None and (clock[0] != 0 or clock[-1] != data["duration_s"]):
         raise ValueError("Requested clock must provide full candidate coverage")
     if not np.isfinite(closure_tolerance) or closure_tolerance <= 0:
         raise ValueError("Closure tolerance must be finite and positive")
@@ -120,8 +179,14 @@ def replay_candidate(
             raise ValueError("Native closure residual exceeds the replay bound")
         return errors
 
-    initial = np.asarray(data["q0"] + data["qd0"], dtype=float)
-    derivative(0.0, initial)
+    initial = np.array(
+        data["q0"] + data["qd0"] if initial_state is None else initial_state,
+        dtype=float,
+        copy=True,
+    )
+    if initial.shape != (2 * n,) or not np.isfinite(initial).all():
+        raise ValueError("Initial state must be a finite native q/rate vector")
+    derivative(float(clock[0]), initial)
     closure()
     project_markers(
         engine.frame_poses(coordinates(initial[:n])),
@@ -129,8 +194,16 @@ def replay_candidate(
         data["marker_offsets_m"],
     )
     integration = integrate_forward(
-        initial, clock, derivative, rtol=rtol, atol=atol, max_step=max_step
+        initial,
+        clock - clock[0],
+        lambda t, state: derivative(t + float(clock[0]), state),
+        rtol=rtol,
+        atol=atol,
+        max_step=max_step,
     )
+    absolute_clock = clock.copy()
+    absolute_clock.setflags(write=False)
+    integration = integration._replace(time=absolute_clock)
     markers, errors = [], []
     for t, state in zip(integration.time, integration.state, strict=True):
         derivative(float(t), state)
