@@ -30,6 +30,23 @@ tests: `export_native_urdf` resolves an older Tools-aliased `URDFWriter` that la
 `numeric_precision`. No exporter or Tools dependency was changed in this lane.
 Consuming the existing qualified bundle works; regenerating that bundle through
 the affected full-package exporter needs a separate shared-boundary fix.
+This is import-order dependent: a standalone export and isolated pytest probe
+pass with the local writer, whereas collecting `test_native_mujoco.py` with that
+probe resolves the writer from
+`vendor/ud-tools/src/shared/python/model_generation/builders/urdf_writer.py`.
+Its module name remains `src.shared.python.model_generation.builders.urdf_writer`
+but its signature lacks `numeric_precision`. Exact reproduction from this worktree:
+
+```powershell
+python3 -m pytest tests/unit/motion_matching/test_native_mujoco.py `
+  C:/Users/diete/Repositories/simscape-tour-checkpoints/test_native_urdf_import_probe_10021.py `
+  --noconftest -q -s --tb=short
+```
+
+The preserved probe imports `native_urdf`, reports its `URDFWriter` module,
+source file and signature using `inspect`, then exports the original native
+geometry bytes. The failure occurs even when live simulation tests are
+deselected; collecting the engine test is sufficient. Parent lane owns this fix.
 
 ## Scope and Ownership
 
