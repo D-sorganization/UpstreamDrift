@@ -1,5 +1,42 @@
 # Native Port Implementation Checkpoint
 
+## Actual Forward-Replay Visual and Transition Diagnosis
+
+Updated 2026-09-12 UTC. Run 02 remains live; do not restart it. The previous
+continuation made progress by implementing/test-driving restart support and
+launching the verified ControlTower worker. This turn added a reproducible
+visual of the independently replayed, completed run 01 candidate (not live FD
+samples). The new six-test marker report suite passes after its missing-module
+red test. Pure plotting requires no Pinocchio runtime.
+
+![Run 01 Observed Marker Errors](native_evidence/refinement_9967_01/marker-errors.png)
+
+The visual exposes an important limitation of aggregate early retention:
+instantaneous across-marker RMS is 14.5953 mm at 0.50 s, 30.3753 at 0.60 s,
+50.5658 at 0.70 s, 74.1305 at 0.75 s and 132.142 at 0.80 s. The early-window
+average 10.5434 mm does not imply close tracking at its endpoint. Do not state
+that the first 0.60 s is exactly solved, or that divergence starts only at 0.70 s.
+Inspect short-window/endpoint residuals as well as the unchanged acceptance
+gates before extending the horizon. The curve is evidence of accumulating
+trajectory error; it does not alone identify torque, geometry or singularity
+as its cause. A constraint-aware kinematic floor remains necessary if torque
+refinement stalls. Run 02 latest exploratory terminal RMS is about 103 mm;
+no returned/accepted run 02 result has yet been verified.
+
+Portable arrays, exact source receipt and PNG are committed beside run 01:
+visual-replay.npz, visual-replay.json and marker-errors.png. Fresh forward
+replay uses the same returned candidate and matches all earlier aggregate
+metrics. The archive contains absolute times, SI target/prediction, validity
+mask, labels and canonical candidate hash. Missing observations stay missing.
+
+Reproduce: run native_evidence/reproduction/benchmark_native_marker_residual.py
+with the original model/target and run 01 returned-candidate.json, a new
+--output receipt path and --trajectory-output archive.npz. Then run
+native_evidence/reproduction/plot_native_marker_replay.py --trajectory archive.npz
+--output plot.png with repository root on PYTHONPATH and MPLBACKEND=Agg.
+Both commands refuse to overwrite their output artifacts. The chart shows
+actual forward marker errors, not IK/prescribed motion or engine-parity error.
+
 ## P4 Restart Run 02 Is Live
 
 Updated 2026-09-12 UTC. Previous goal turn made progress: run 01 finished,

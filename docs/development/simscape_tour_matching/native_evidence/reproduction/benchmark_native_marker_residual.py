@@ -16,9 +16,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("model", "candidate", "target", "output"):
         parser.add_argument(f"--{name}", type=Path, required=True)
+    parser.add_argument("--trajectory-output", type=Path)
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
+    if args.trajectory_output is not None and args.trajectory_output.exists():
+        raise FileExistsError(args.trajectory_output)
     raw = args.model.read_bytes()
     spec = json.loads(raw)
     candidate = NativeReplayCandidate.from_document(
@@ -85,6 +88,17 @@ def main() -> None:
         },
     }
     args.output.write_text(json.dumps(receipt, indent=2) + "\n")
+    if args.trajectory_output is not None:
+        with args.trajectory_output.open("xb") as stream:
+            np.savez_compressed(
+                stream,
+                time_s=time,
+                target_m=points,
+                prediction_m=result.markers_m,
+                valid=valid,
+                labels=np.asarray(doc["marker_labels"]),
+                candidate_sha256=np.asarray(candidate.sha256),
+            )
 
 
 if __name__ == "__main__":
