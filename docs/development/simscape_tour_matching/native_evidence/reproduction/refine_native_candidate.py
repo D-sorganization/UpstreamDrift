@@ -10,8 +10,8 @@ import numpy as np
 from src.engines.physics_engines.pinocchio.python.native_replay import replay_candidate
 from src.shared.python.motion_matching.native_candidate import (
     NativeReplayCandidate,
-    increment_native_candidate,
-    recover_native_increment,
+    increment_native_bernstein,
+    recover_native_bernstein,
 )
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
@@ -26,6 +26,7 @@ def main() -> None:
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--max-nfev", type=int, default=3)
     parser.add_argument("--restart-candidate", type=Path)
+    parser.add_argument("--shaping", choices=("sixth", "bernstein456"), default="sixth")
     args = parser.parse_args()
     args.output_dir.mkdir(exist_ok=False)
     raw = args.model.read_bytes()
@@ -49,7 +50,9 @@ def main() -> None:
     target = MarkerTarget(clock, points, np.ones(len(indices)))
     n = len(doc["coordinate_names"])
     basis_duration = doc["duration_s"]
-    initial = np.ones(n)
+    first_control = 6 if args.shaping == "sixth" else 4
+    parameter_count = n * (7 - first_control)
+    initial = np.ones(parameter_count)
     restart_hash = None
     if args.restart_candidate is not None:
         restart = NativeReplayCandidate.from_document(
@@ -57,17 +60,20 @@ def main() -> None:
             spec["coordinate_order"],
             hashlib.sha256(raw).hexdigest(),
         )
-        delta = recover_native_increment(base, restart, basis_duration_s=basis_duration)
-        if np.any(delta[:, :6] != 0):
-            raise ValueError("This run permits only sixth-power corrections")
-        initial += delta[:, 6] / 10
+        delta = recover_native_bernstein(base, restart, basis_duration_s=basis_duration)
+        if np.any(delta[:, :first_control] != 0):
+            raise ValueError("Restart contains corrections outside the selected basis")
+        initial += delta[:, first_control:].ravel() / 10
         if np.any(initial < 0.8) or np.any(initial > 1.2):
             raise ValueError("Restart exceeds original correction bounds")
         restart_hash = restart.sha256
     config = {
         "parent_candidate_sha256": base.sha256,
         "basis_duration_s": basis_duration,
-        "powers": [6],
+        "powers": list(range(first_control, 7)),
+        "representation": "degree-six Bernstein correction",
+        "free_control_indices": list(range(first_control, 7)),
+        "parameter_order": "coordinate-major, ascending control index",
         "amplitude_scale": 10.0,
         "dimensionless_center": 1.0,
         "bounds": [0.8, 1.2],
@@ -93,8 +99,8 @@ def main() -> None:
 
     def candidate_for(x: np.ndarray) -> NativeReplayCandidate:
         increment = np.zeros((n, 7))
-        increment[:, 6] = 10 * (x - 1)
-        return increment_native_candidate(
+        increment[:, first_control:] = 10 * (x.reshape(n, -1) - 1)
+        return increment_native_bernstein(
             base, increment, basis_duration_s=basis_duration
         )
 
@@ -153,8 +159,8 @@ def main() -> None:
             target,
             forward,
             initial=initial,
-            lower=np.full(n, 0.8),
-            upper=np.full(n, 1.2),
+            lower=np.full(parameter_count, 0.8),
+            upper=np.full(parameter_count, 1.2),
             prefix_end_s=[doc["duration_s"]],
             acceptance_rmse_m=0.025,
             options=opts,
