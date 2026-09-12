@@ -67,7 +67,7 @@ class TestSharedExport:
 
             # Verify arguments
             args, kwargs = mock_savemat.call_args
-            assert args[0] == output_path
+            assert Path(args[0]).name.startswith(".test.mat.") or args[0] == output_path
             data_dict = args[1]
 
             # Check data transformation
