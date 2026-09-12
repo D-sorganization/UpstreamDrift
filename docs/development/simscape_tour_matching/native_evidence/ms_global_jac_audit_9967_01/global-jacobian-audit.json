@@ -1,0 +1,56 @@
+{
+  "qualification": "Assembled residual directional derivative audit at restored run08 initial point; no optimization performed",
+  "parameter_count": 273,
+  "residual_count": 22008,
+  "initial_cost": 13.255150612697477,
+  "checks": [
+    {
+      "direction": "random",
+      "h": 0.0001,
+      "residual_relative_error": 0.0001432268690729896,
+      "predicted_cost_slope": 15.952076977811972,
+      "finite_difference_cost_slope": -177129.28370197458,
+      "cost_slope_relative_error": 1.000090058948156
+    },
+    {
+      "direction": "random",
+      "h": 1e-5,
+      "residual_relative_error": 1.640514248944848e-6,
+      "predicted_cost_slope": 15.952076977811972,
+      "finite_difference_cost_slope": -1750.43990989856,
+      "cost_slope_relative_error": 1.0091131817136965
+    },
+    {
+      "direction": "random",
+      "h": 1e-6,
+      "residual_relative_error": 3.3424291254592965e-6,
+      "predicted_cost_slope": 15.952076977811972,
+      "finite_difference_cost_slope": 4.457960514514525,
+      "cost_slope_relative_error": 2.5783351884508927
+    },
+    {
+      "direction": "gradient",
+      "h": 0.0001,
+      "residual_relative_error": 0.000936722842961743,
+      "predicted_cost_slope": 2028.1532853240396,
+      "finite_difference_cost_slope": -7929863.843635685,
+      "cost_slope_relative_error": 1.000255761426087
+    },
+    {
+      "direction": "gradient",
+      "h": 1e-5,
+      "residual_relative_error": 9.367868597136657e-6,
+      "predicted_cost_slope": 2028.1532853240396,
+      "finite_difference_cost_slope": -77544.42307897874,
+      "cost_slope_relative_error": 1.0261547278939502
+    },
+    {
+      "direction": "gradient",
+      "h": 1e-6,
+      "residual_relative_error": 1.0065039078645622e-6,
+      "predicted_cost_slope": 2028.1532853240396,
+      "finite_difference_cost_slope": 1252.4143414527346,
+      "cost_slope_relative_error": 0.6193948106434879
+    }
+  ]
+}
