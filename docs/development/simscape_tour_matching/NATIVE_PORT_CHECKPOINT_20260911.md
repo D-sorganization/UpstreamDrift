@@ -1,5 +1,74 @@
 # Native Port Implementation Checkpoint
 
+## P4 Refinement Finished: Improved Seed, Acceptance Failed
+
+Updated 2026-09-12 UTC. This section supersedes the live-run section below.
+Session 65632 exited zero after 86 evaluations; our refinement worker is done.
+Returned candidate canonical SHA256:
+2ebf34b2d77c56201b7a8f5d97d41c0cde3e7f79709008a5ec02a746ffd2b9a7.
+Independent fresh-process replay reproduces all four marker metrics exactly:
+
+| Metric                    |   Original |   Returned |  Gate |
+| ------------------------- | ---------: | ---------: | ----: |
+| Whole Prefix RMS          | 43.8225 mm | 34.4259 mm | 25 mm |
+| Early Through 0.60 s RMS  | 9.86004 mm | 10.5434 mm | 12 mm |
+| Terminal RMS              | 202.559 mm | 132.142 mm | 35 mm |
+| Terminal Club Cluster RMS | 265.370 mm | 177.079 mm | 60 mm |
+
+Terminal error improved about 34.8%, but this is NOT an accepted match.
+Optimizer convergence is false: max_nfev=3 exhausted. No claim about a full
+swing or this new candidate's R2025b agreement is made. The fresh replay took
+3.47455 s including residual evaluation; closure pose/velocity maxima were
+3.31405e-11 / 9.69919e-11. It used 289 timestamps, 25 attached markers and
+7,225 observed samples through 0.80 s, not all 38 capture labels.
+
+Complete small artifacts are committed in native_evidence/refinement_9967_01/:
+config, every evaluation, best exploratory sample, returned candidate, separate
+candidate-only JSON, and independent replay receipt. The reused benchmark's
+qualification string says baseline; here it means a measurement-only replay,
+not a statement that no optimizer preceded the candidate. Original receipt is
+preserved verbatim. Candidate file hashes differ from canonical semantic hashes.
+Raw archive and identical remote run folder remain at the paths below.
+
+### Next-Agent Execution Prompt
+
+1. Read this checkpoint, PINOCCHIO_EXECUTION_PLAN.md and repository rules.
+   Inspect git status and central issue #9967 lease. Preserve other agents'
+   running jobs. Our run 01 is terminal; never overwrite its output directory.
+2. Reproduce returned-candidate.json using the committed benchmark runner and
+   exact model/target hashes in independent-replay.json. Use the qualified
+   ControlTower namespace bundle and native Pinocchio venv recorded below.
+   All four RMS values must reproduce before another optimization starts.
+3. First continue the same 27 t^6 correction directions from the original
+   base with a larger bounded evaluation budget (e.g. max_nfev=12), initializing
+   from the returned correction. Do not recenter bounds on the new seed:
+   preserve original absolute +/-2 N/Nm envelope at 0.80 s. Add restart-vector
+   support with a failing test, then minimal implementation. Preserve fixed
+   0.80 s basis and original q0/qd0, geometry, frames and capture identity.
+4. Record bound activity and cost reduction per evaluation. If progress stalls
+   or bounds saturate, stop increasing budget blindly. Compare transition IK
+   feasibility and residuals per marker; inspect force/torque sensitivity and
+   conditioning. Test t^4/t^5 directions with explicit scaling and early-motion
+   constraints in a separate run; these can disturb early tracking more strongly.
+5. Keep best early-feasible evaluation separate from optimizer return and
+   accepted result. Early <=12 mm alone is not acceptance. Enforce whole,
+   terminal, club and yaw gates before promotion. Preserve failure diagnostics;
+   do not turn integrator failures into a constant finite penalty.
+6. Before horizon extension, replay an improved accepted prefix in R2025b with
+   the qualified tight settings. Extend in small steps from a single initial
+   state, retaining a fixed global polynomial basis and all earlier gates.
+   Produce time-error plots and target/model overlays from actual replay;
+   a visualization of target or prescribed kinematics is not forward-fit proof.
+7. Coordinate Gemini's boundary-time and acceptance fixes already posted on
+   #9964. Do not use its current multiple-shooting result as acceptance until
+   exact boundary time, closure-consistent state defects and a gate-passing
+   unsegmented replay are verified. Separate MuJoCo/Drake native parity remains
+   required; URDF tree alone omits the grip loop and cannot establish parity.
+8. Commit source, tests, small receipts and updated turnover after each bounded
+   stage. Record live handles while running and terminal exit when complete.
+   OpenSim has separate epic #10003 and staged handoff; implementation begins
+   with OS-0 qualification after the user's requested planning check-in.
+
 ## P4 Bounded ControlTower Refinement Is Live
 
 Actual native refinement launched in exec session 65632; verified WSL worker

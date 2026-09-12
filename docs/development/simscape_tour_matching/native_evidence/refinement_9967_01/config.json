@@ -1,0 +1,16 @@
+{
+  "parent_candidate_sha256": "39e77b31af411463018ee9ac3cb9cb0d6d29984355b95413f63245d3575659ec",
+  "basis_duration_s": 0.8,
+  "powers": [6],
+  "amplitude_scale": 10.0,
+  "dimensionless_center": 1.0,
+  "bounds": [0.8, 1.2],
+  "max_nfev": 3,
+  "finite_difference_step": 0.001,
+  "qualification": "bounded exploratory refinement, not native acceptance",
+  "input_sha256": {
+    "model": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "candidate": "628b07db531a548829cbff503573bc617a0d4294f51f8c4fadaec80b995231ee",
+    "target": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87"
+  }
+}
