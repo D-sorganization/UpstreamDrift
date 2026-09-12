@@ -1,12 +1,13 @@
 """Bounded least-squares objectives with explicit projected equality rows."""
 
 from collections.abc import Callable
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import OptimizeResult, minimize
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 class _EvaluationBudgetExceeded(Exception):
@@ -71,7 +72,7 @@ def solve_equality_least_squares(
         raise ValueError("Invalid equality location, budget or tolerance")
     end = equality_start + p.shape[1]
     cache_key: bytes | None = None
-    cache_r = np.empty(0)
+    cache_r: Array = np.empty(0)
     cache_j: Array | None = None
     count = 0
     best_x = x0.copy()
