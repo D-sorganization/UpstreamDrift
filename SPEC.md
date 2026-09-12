@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Launcher Diagnostics, Artifacts, Pipeline, and Tools Model Sources Debt Burndown (#8766)
+
+Burn down 20 quarantined test node IDs across launcher diagnostics, checkpoint loading, golf state environment constants, motion pipeline orchestration, TRC adapters, and tools launcher model sources in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 20 tests across `tests/launchers/test_launcher_diagnostics.py` (1 test), `tests/unit/motion_matching/test_checkpoint_artifact_loading.py` (4 tests), `tests/unreal_integration/wave6_unreal/test_skeleton_and_golf_state.py` (1 test), `tests/unit/motion_pipeline/orchestrator/test_orchestrator.py` (2 tests), `tests/unit/motion_pipeline/sources/test_trc_adapter.py` (1 test), and `tests/launchers/test_launcher_model_sources.py` (11 tests).
+- Robust Path and Monkeypatch Hardening: Direct module object monkeypatching for `_checkpoint_artifacts`, `model_source_providers`, `trc_adapter`, and motion pipeline sources/preprocessing/scaling/ik loaders; anchor AST source file path resolution in `test_skeleton_and_golf_state.py` to repo root to survive `_prevent_repo_root_io` test runner directory isolation; update error expectation in `test_orchestrator.py` to accept domain-specific `InvalidInputError`.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 363 to 343 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## AI Adapters, Setup Wizard, and Launcher Tools Unit-Gate Debt Burndown (#8766)
 
 Burn down 16 quarantined test node IDs across AI adapters, setup wizard, launcher bootstrap, and tools clusters in `scripts/config/unit_gate_quarantine.json`:
