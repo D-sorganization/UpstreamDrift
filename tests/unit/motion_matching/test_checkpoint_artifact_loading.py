@@ -7,6 +7,7 @@ import sys
 
 import pytest
 
+from src.shared.python.motion_matching import _checkpoint_artifacts
 from src.shared.python.motion_matching._checkpoint_artifacts import (
     load_checkpoint_dict,
     load_surrogate_checkpoint,
@@ -34,7 +35,8 @@ def test_load_checkpoint_dict_uses_weights_only_true(
         return {"state_dict": {}, "config": {}, "schema_version": "1.0"}
 
     monkeypatch.setattr(
-        "src.shared.python.motion_matching._checkpoint_artifacts._load_weights_only_checkpoint",
+        _checkpoint_artifacts,
+        "_load_weights_only_checkpoint",
         fake_load,
     )
 
@@ -94,7 +96,8 @@ def test_load_checkpoint_dict_rejects_non_dict_payload(
     ckpt.write_bytes(b"placeholder")
 
     monkeypatch.setattr(
-        "src.shared.python.motion_matching._checkpoint_artifacts._load_weights_only_checkpoint",
+        _checkpoint_artifacts,
+        "_load_weights_only_checkpoint",
         lambda path, *, map_location=None: ["state_dict"],
     )
 
@@ -111,7 +114,8 @@ def test_load_checkpoint_dict_rejects_missing_required_keys(
     ckpt.write_bytes(b"placeholder")
 
     monkeypatch.setattr(
-        "src.shared.python.motion_matching._checkpoint_artifacts._load_weights_only_checkpoint",
+        _checkpoint_artifacts,
+        "_load_weights_only_checkpoint",
         lambda path, *, map_location=None: {"state_dict": {}},
     )
 
@@ -128,7 +132,8 @@ def test_load_surrogate_checkpoint_enforces_required_artifact_keys(
     ckpt.write_bytes(b"placeholder")
 
     monkeypatch.setattr(
-        "src.shared.python.motion_matching._checkpoint_artifacts._load_weights_only_checkpoint",
+        _checkpoint_artifacts,
+        "_load_weights_only_checkpoint",
         lambda path, *, map_location=None: {"model_state_dict": {}},
     )
 
