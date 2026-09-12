@@ -1,5 +1,40 @@
 # Native Port Implementation Checkpoint
 
+## Variable Scaling Implemented and Locally Qualified
+
+Updated 2026-09-12 UTC. Previous goal turn made progress by completing and
+independently rejecting run17. No native fit is live and no runtime18 is deployed.
+The optional variable_scales implementation is now in equality_least_squares.py
+and MultipleShootingOptions. None preserves the prior variables; explicit scales
+use x=initial+scale\*y, scale both objective and constraint Jacobian columns,
+transform bounds, and return physical x/jac/active-bound diagnostics. Residual
+caching, callbacks, projected equality tolerances, full physical defect checks
+and acceptance rules are unchanged. The least_squares backend rejects this
+option rather than silently ignoring it. Ordering is theta followed by internal
+node optimization coordinates in increasing time order.
+
+TDD evidence:10 new equality tests first failed on the missing keyword;
+shared integration cases then failed on the missing option. After implementation,
+45 focused equality/shooting/node-retraction tests pass. They include a known
+constrained optimum with units1000 and0.001, physical initial/residual/result
+values, physical budget fallback, affine bounds, centered objective/constraint
+Jacobians, invalid scales, transformed node integration and omitted-physical-
+defect rejection. Ruff passes and direct mypy reports no issues in both source
+files. Governance check passes its current inventory check; manual release still
+reports blocked-inventory-required, unrelated to solver scientific acceptance.
+
+Next action: commit/push this implementation with normal hooks, then copy
+runtime14 to a NEW immutable runtime18 and replace only the two tested source
+modules. Preserve a source-hashed bundle. Adapt driver16 to supply and record
+half-box-width scales (efforts use their actual half-width, nodes0.05). Keep the
+run17 physical problem/budgets unchanged. Before a fit, perform a native audit
+of the scaled objective/constraint chain rule and compare identity versus scaled
+constraint and feasible-objective conditioning at the common initial point.
+Do not treat toy tests as native qualification or scaling as a guaranteed gain.
+Only after that audit should one controlled same-budget native trial launch.
+The older detailed next-assignment section below remains the acceptance guide;
+do not reimplement the now-complete optional scaling API.
+
 ## Run17 Completed and Rejected; Next Step Is Solver Variable Scaling
 
 Updated 2026-09-12 UTC. All historical LIVE entries below are superseded.
