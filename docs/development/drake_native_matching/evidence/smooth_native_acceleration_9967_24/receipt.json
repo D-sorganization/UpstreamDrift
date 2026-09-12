@@ -1,0 +1,8 @@
+{
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "path_sha256": "decbdeb43d7695f96bf491ec69b47845b3c1f2c6fead2978bcd5198a7c0ecd4e",
+  "samples": 18,
+  "acceleration_closure_max_abs": 1.336681893545176,
+  "acceleration_closure_rms": 0.24239738270076114,
+  "scope": "Independent Drake acceleration-compatibility diagnostic of finite-difference native qdd; not inverse dynamics, torque identification, or forward validation."
+}
