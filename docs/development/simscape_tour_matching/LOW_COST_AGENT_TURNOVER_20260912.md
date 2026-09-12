@@ -114,6 +114,13 @@ Drake receipt1.336681893545. Use this Pinocchio oracle inside the next chart
 solver; retain Drake for independent final residual verification. The result is
 negative evidence for the current cubic qdd, not a repaired trajectory.
 
+`native_evidence/retracted_collocation_probe_9967_24/receipt.json` is the
+first saved chart-solver preflight: four nodes,21 variables per node,±0.01
+chart bounds and two iterations produce0.1041854 combined rate/acceleration
+closure. It is unqualified and has no marker objective or forward replay.
+Preserve it as the baseline when adding chart-space derivatives; do not run an
+unbounded continuation from this receipt.
+
 Use `NativeConstrainedPoseOracle` with the existing shared
 `fit_marker_pose`; it is the only permitted bridge from the native model to
 the static constrained-pose stage. Pass the exact candidate coordinate order,
