@@ -1,5 +1,70 @@
 # Native Port Implementation Checkpoint
 
+## Run 19 Live: Recentered Charts With a Distinct Reconstructed Seed
+
+Updated 2026-09-12 UTC. This section supersedes terminal/live claims below.
+Run 19 is the sole live fit: session 60944, ControlTower-Runner PID 2330720,
+output `C:/Users/diete/native-ms-fit-9967-19`. Do not restart on a polling timeout.
+Runtime `/home/dieterolson/native-ms-pilot-9967-19` copies immutable runtime18
+and adds only `native_restart.py` from commit `944fe4d94`. No native physics or
+existing runtime was edited. Driver is
+`C:/Users/diete/run_native_ms_recentered_9967_19b.py`; run with the existing Pin
+venv, PYTHONPATH pointing at runtime19, OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1.
+Arguments: `--horizon .85 --nodes .2 .4 .6 .7 .8 .85 --basis-duration .8
+--max-nfev 100 --max-iterations 60 --equality-tolerance 1e-7 --node-bound .05`.
+
+### Restart Contract and Explicit Numerical Limitation
+
+The new shared `prepare_native_restart` reuses native Bernstein recovery and
+increment functions. It rejects changed non-control identity, malformed bounds,
+and actual control-bound violations. Only explicitly tolerated numerical bound
+roundoff is snapped; original parent and effort bounds remain fixed. Returned
+controls are immutable and their reconstructed candidate has an explicit hash.
+Eleven new tests failed on the missing module before implementation; all 35
+restart/candidate/retraction tests now pass, plus Ruff and direct mypy.
+
+The strict run19 preflight terminated with exit 1 before optimization: snapping
+30 controls by at most 5.99520e-14 and reconstructing the polynomial produced
+candidate `c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049`.
+Against original run18 `917d2d29...`, independent replay differences are q
+3.55906e-7, qd 3.31409e-4 and markers 6.93357e-8 m. The qd comparison exceeds
+1e-4; strict numerical restart equivalence is FALSE. Preserve that failed
+receipt; do not change its result or claim an exact one-factor restart.
+
+Run19b's audit (session 42785, exit 0) instead qualifies this explicitly distinct
+reconstructed candidate for its own trial. Sampled effort-profile difference
+from run18 is 1.27898e-13; q/marker proximity checks pass. It does not require
+or claim strict source-state parity. Its own continuous replay supplies all new
+chart centers; no prior static states or intermediate target resets are used.
+The original native q0/qd0, model, capture, degree-six basis, absolute effort
+bounds, node box and all FINAL fit acceptance gates remain unchanged. Thus this
+is a chart-recentered trial with a documented numerical seed perturbation.
+
+All 12 composed derivative checks pass the existing 1e-3 threshold (maximum
+relative error 6.81866e-4). Early effort probes choose available interior B0/B1
+columns rather than stepping outside a saturated bound. Initial scaled defects
+are below 8.211e-9. The fit repeats these checks before optimization. Neither a
+preflight nor a smaller callback cost is fit acceptance; independently replay
+the returned candidate, inspect all full-state defects and pointwise gap, and
+apply unchanged observed-marker/club/yaw/optimizer gates.
+
+### Evidence and Resume Assignment
+
+`native_evidence/ms_recenter_9967_19` preserves failed strict restart receipt,
+passing distinct-seed derivative/config/defect receipts, exact raw archives,
+runtime module+manifest, staging/generation scripts and both drivers. Raw ZIPs
+retain hashes when adjacent JSON is reformatted. Source and parent inputs are
+the previously archived run18 and original root-force candidate; no new data.
+
+Next: poll session 60944 or exact PID 2330720, inspect actual fit progress, then
+perform independent final replay/bound audit/plot without changing live files.
+Do not expand effort bounds in this run. Drake agent is archiving one bounded
+physical angular-velocity comparison of source and reconstructed seeds; strict
+state parity remains failed. MuJoCo agent owns a read-only active-effort-bound
+and actual-effort magnitude audit to inform a separate future continuation.
+No agent is running another optimizer. Full 1.8138888889 s matching, geometry
+calibration when justified and extended native engine parity remain unmet.
+
 ## Run 18 Verified and Rejected; Native Bundle Integration
 
 Integration addendum: MuJoCo import fix is now integrated as `8ac65c486`.

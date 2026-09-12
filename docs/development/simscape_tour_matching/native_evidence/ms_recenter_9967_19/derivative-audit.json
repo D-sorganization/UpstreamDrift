@@ -1,0 +1,81 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "time_s": 0.2,
+      "column": 0,
+      "marker_relative": 8.978488253909623e-7,
+      "state_relative": 8.44100352523724e-7
+    },
+    {
+      "time_s": 0.2,
+      "column": 14,
+      "marker_relative": 1.303324762544996e-7,
+      "state_relative": 9.886320903249157e-8
+    },
+    {
+      "time_s": 0.4,
+      "column": 0,
+      "marker_relative": 3.2355448841130654e-8,
+      "state_relative": 1.6258789525341517e-7
+    },
+    {
+      "time_s": 0.4,
+      "column": 14,
+      "marker_relative": 7.778267880147729e-8,
+      "state_relative": 9.389223350520646e-8
+    },
+    {
+      "time_s": 0.6,
+      "column": 0,
+      "marker_relative": 7.929009198064201e-9,
+      "state_relative": 4.879783508080325e-7
+    },
+    {
+      "time_s": 0.6,
+      "column": 14,
+      "marker_relative": 4.465896016076872e-8,
+      "state_relative": 7.157019087238121e-7
+    },
+    {
+      "time_s": 0.7,
+      "column": 0,
+      "marker_relative": 2.1231777014764858e-7,
+      "state_relative": 9.819923355721771e-6
+    },
+    {
+      "time_s": 0.7,
+      "column": 14,
+      "marker_relative": 5.674921678108795e-7,
+      "state_relative": 2.5599599430132375e-5
+    },
+    {
+      "time_s": 0.8,
+      "column": 0,
+      "marker_relative": 9.125788130528138e-9,
+      "state_relative": 3.5366600317796823e-6
+    },
+    {
+      "time_s": 0.8,
+      "column": 14,
+      "marker_relative": 8.809068024150489e-9,
+      "state_relative": 9.325987340728567e-7
+    },
+    {
+      "kind": "early_effort",
+      "coordinate": "TranslationInputX",
+      "bernstein_control": 0,
+      "column": 0,
+      "marker_relative": 8.75001569356174e-5,
+      "state_relative": 0.00013074200341690518
+    },
+    {
+      "kind": "early_effort",
+      "coordinate": "TranslationInputX",
+      "bernstein_control": 1,
+      "column": 1,
+      "marker_relative": 0.000421799070613305,
+      "state_relative": 0.0006818655303252505
+    }
+  ]
+}
