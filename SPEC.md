@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Signed Release Tag Enforcement and Verification (#9747)
+
+Enforce cryptographic signing on production release tags in `.github/workflows/release.yml` and synchronize operational release procedures in `docs/operations/release-runbook.md`:
+- Automated Release Tag Verification Gate: Insert a fail-closed `Verify release tag is signed` step into the `build` job in `.github/workflows/release.yml` executing `git verify-tag "${GITHUB_REF_NAME}"`. Runs on every pushed `v*.*.*` tag before installing build tools or compiling packages. Any unsigned or lightweight tag immediately fails the release build.
+- Runbook Alignment: Update `docs/operations/release-runbook.md` release and recovery commands to prescribe `git tag -s` (signed tags). Document release operator requirements including local GPG/SSH signing key setup, `tag.gpgSign true` configuration, and the workflow's verification gate.
+- Verification & Test Coverage: Contract test in `tests/ci/test_ci_infrastructure.py` asserting that the `build` job of `.github/workflows/release.yml` contains the `Verify release tag is signed` step executing `git verify-tag "${GITHUB_REF_NAME}"`.
+
 ## Accessible Model Card Actions and Grid Navigation (#8901)
 
 Harden model card touch and keyboard accessibility and implement arrow-key grid navigation in `src/launchers/model_card.py`:
@@ -4349,6 +4356,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #10008 | Enforce cryptographic signature verification on release tags in release.yml, update release runbook commands and requirements, and add automated regression tests (#9747). |
 | 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |
 | 2026-09-10 | #8360 | Bound the launcher splash: every async startup phase (registry, engines, Docker, optional Tools/Rate provider) runs under an explicit timeout with timestamped structured diagnostics; optional-provider failure degrades the shell instead of blocking it; a StartupSession watchdog plus Retry / Continue without provider / Copy diagnostics / Close dialog replaces the quit-on-error path; loading-mode construction no longer loads the registry on the GUI thread. |
 | 2026-09-09 | #9941 | Add calibrated cross-model joint convention conversion, gap-safe golf metrics including event-defined X-Factor stretch and shaft twist velocity, explicit COM/missing-data contracts, model link adapters, and configurable desktop/web plots and API surfaces (#9934). |
