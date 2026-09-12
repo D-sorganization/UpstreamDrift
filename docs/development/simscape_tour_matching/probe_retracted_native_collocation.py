@@ -69,6 +69,7 @@ def main() -> None:
     if any(basis.shape != bases[0].shape for basis in bases):
         raise ValueError("Native node chart dimension changed")
     dimension = bases[0].shape[1]
+    retraction_radius = 0.2
 
     def nodes(flat: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         chart = flat.reshape(args.nodes, dimension)
@@ -90,7 +91,9 @@ def main() -> None:
                     jacobian,
                     state_scales=scales,
                     residual_scales=np.ones(6),
-                    radius=0.1,
+                    # Trust-constr may evaluate trial points outside accepted
+                    # bounds; accepted chart values remain constrained to0.01.
+                    radius=retraction_radius,
                 )
             )
         return (
@@ -176,6 +179,7 @@ def main() -> None:
                 "rate_acceleration_closure_max_abs": float(np.max(abs(defect))),
                 "residual_derivative": "node-level centered q/v differences with exact acceleration Jacobian",
                 "finite_difference_step": args.finite_difference_step,
+                "retraction_trial_radius": retraction_radius,
                 "coordinates": values.tolist(),
                 "scope": "Bounded retracted-node preflight only; no marker objective, effort fit, or forward replay.",
             },
