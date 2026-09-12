@@ -23,6 +23,13 @@ absolute error7.90135e-6 and scaled relative error6.23290e-6; this qualifies
 the local derivative assembly, not the fitted trajectory. Preserve older
 live-job text as historical only.
 
+The current matched ControlTower comparison is saved as
+`native_evidence/retracted_collocation_compare_{fd,jac}_9967_25.json`. Both
+start at0.4876762. With two evaluations, SciPy's internal differences reach
+0.1041854, while the qualified supplied Jacobian reaches0.1490535. Diagnose
+the trust-constr formulation before increasing its budget; retain the supplied
+Jacobian as the validated fast derivative source.
+
 - Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 - Branch: feat/9967-native-simscape-pinocchio; checkpoint SELF; PR not created.
 - Issues: #9967, #10021, #10022; parent #9921; OpenSim planning #10003.
