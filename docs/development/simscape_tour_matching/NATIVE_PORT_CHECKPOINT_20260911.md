@@ -1,5 +1,42 @@
 # Native Port Implementation Checkpoint
 
+## Run17 Is Live: Controlled Larger-Budget Constrained Solve
+
+Updated 2026-09-12 UTC. The previous goal turn made progress by independently
+verifying run16 and committing raw evidence, the inspected plot and handoffs.
+This section supersedes the no-run17 statement below. Before launch, remote
+process inspection found no matching driver, and run17 output did not exist.
+
+LIVE: session60582, confirmed ControlTower-Runner PID2248513. Output directory
+C:/Users/diete/native-ms-fit-9967-17. Driver16 SHA matches the archived source:
+ca44f7455664ae4009fe05f336b3fba3a3964c31efc1a27cec414efb32df30a1.
+A parsed comparison of saved run16/run17 configurations finds exactly two
+changed fields: max_iterations12 ->60 and max_nfev24 ->100. No model, chart,
+initial point, polynomial basis or effort bound changed. Derivative qualification
+runs before fitting, with exclusive output creation and per-evaluation snapshots.
+
+Exact launch, over SSH to controltower, is:
+
+```text
+wsl -d ControlTower-Runner -- env
+PYTHONPATH=/home/dieterolson/native-ms-pilot-9967-14
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python
+/mnt/c/Users/diete/run_native_ms_constrained_9967_16.py
+--output /mnt/c/Users/diete/native-ms-fit-9967-17
+--horizon .85 --nodes .2 .4 .6 .7 .8 .85 --basis-duration .8
+--max-nfev 100 --max-iterations 60 --equality-tolerance 1e-7 --node-bound .05
+```
+
+Join these wrapped lines with spaces when executing. Do not relaunch while
+PID2248513 is alive or infer termination from an SSH observation timeout.
+Poll session60582 or this exact remote PID. On terminal exit, preserve raw
+outputs, independently replay returned controls and audit full continuity,
+convergence and every acceptance metric before promotion. A budget stop remains
+unaccepted. If the job fails, save its error and last complete snapshot before
+making a new output directory. The run16 next-assignment analysis below still
+applies after this budget experiment; full-capture/final R2025b proof is pending.
+
 ## Run16 Completed and Independently Replayed; User Planning Check-In
 
 Updated 2026-09-12 UTC. This section supersedes historical LIVE entries below.
