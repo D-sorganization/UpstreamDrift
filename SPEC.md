@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Model Sources, Diagnostics, and Motion Pipeline Unit-Gate Debt Burndown (#8766)
+
+Burn down 18 quarantined test node IDs across model source providers, launcher diagnostics, and motion matching/pipeline clusters in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 18 passing headless tests across `tests/launchers/test_launcher_model_sources.py` (11 tests), `tests/launchers/test_launcher_diagnostics.py` (1 test), `tests/unit/motion_matching/test_checkpoint_artifact_loading.py` (4 tests), `tests/unit/motion_pipeline/orchestrator/test_orchestrator.py` (1 test), and `tests/unit/motion_pipeline/sources/test_trc_adapter.py` (1 test).
+- Validated System Invariants: Ensure model source provider path containment, vendor vs sibling resolution, path escape rejection (`path`, `python_paths`, `working_dir`), registry display name and artifact uniqueness, layout configuration backup restoration, motion matching checkpoint artifact validation under PyTorch safe weights loading, pipeline orchestrator failure logging, and TRC motion capture coordinate conversion execute cleanly and deterministically in headless CI environments.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 363 to 345 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## AI Adapters, Setup Wizard, and Launcher Tools Unit-Gate Debt Burndown (#8766)
 
 Burn down 16 quarantined test node IDs across AI adapters, setup wizard, launcher bootstrap, and tools clusters in `scripts/config/unit_gate_quarantine.json`:

@@ -22,12 +22,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #8766
-- **Branch:** fix/8766-burndown-ai-adapters-tools-14
-- **PR:** #10026
+- **Branch:** fix/8766-burndown-model-sources-motion-18
+- **PR:** #10028
 - **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`3c17225ef`)
-- **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), and 29 shared Python / physics tests (#10015). This tranche burns down 16 quarantined tests across AI adapters (Gemini, Ollama), launcher bootstrap repo resolution, sidekick data I/O, and setup wizard, ratcheting debt from 379 to 363.
+- **Last verified:** 2026-09-12 (`3aeb48e4c`)
+- **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), and 16 AI adapter / bootstrap tests (#10026). This tranche burns down 18 quarantined tests across model source providers, launcher diagnostics, and motion matching / pipeline orchestrators, ratcheting debt from 363 to 345.
 - **Next step:** Open PR, monitor CI checks, and merge.
 
 ## Shipped (Last 90 Days)
