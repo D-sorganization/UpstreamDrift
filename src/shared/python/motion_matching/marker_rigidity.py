@@ -1,12 +1,57 @@
 """Optimistic marker error bound with every attachment frame independently rigid."""
 
 from collections.abc import Sequence
+from itertools import combinations
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.body_part_viz.fitters._kabsch import kabsch_rotation
+
+
+def marker_pair_statistics(
+    points_m: NDArray[np.float64],
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+) -> list[dict[str, Any]]:
+    """Audit spacing over time, independent of any chosen constant offsets.
+
+    For two points and freely varying rigid pose, the best constant separation
+    is mean observed separation. Each endpoint's residual is half the length
+    mismatch, giving an optimal pair RMS of distance standard deviation / 2.
+    This pair-only bound must not be labeled as the all-marker fit error.
+    """
+    points, mask = np.asarray(points_m), np.asarray(valid)
+    if (
+        points.ndim != 3
+        or points.shape[2] != 3
+        or mask.shape != points.shape[:2]
+        or mask.dtype != np.bool_
+        or len(labels) != points.shape[1]
+        or len(set(labels)) != len(labels)
+        or not np.isfinite(points[mask]).all()
+    ):
+        raise ValueError("Invalid marker trajectories, labels or observation mask")
+    rows = []
+    for i, j in combinations(range(len(labels)), 2):
+        observed = mask[:, i] & mask[:, j]
+        if not observed.any():
+            continue
+        distances = np.linalg.norm(points[observed, i] - points[observed, j], axis=1)
+        std = float(np.std(distances))
+        rows.append(
+            {
+                "labels": [labels[i], labels[j]],
+                "observed_frames": int(observed.sum()),
+                "distance_mean_m": float(distances.mean()),
+                "distance_min_m": float(distances.min()),
+                "distance_max_m": float(distances.max()),
+                "distance_std_m": std,
+                "best_fixed_length_pair_rms_m": std / 2,
+            }
+        )
+    return rows
 
 
 def rigid_marker_lower_bound(

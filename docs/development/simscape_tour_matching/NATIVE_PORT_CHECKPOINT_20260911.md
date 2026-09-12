@@ -1,5 +1,59 @@
 # Native Port Implementation Checkpoint
 
+## Full-Capture Hub Topology and Pair Audit
+
+Updated 2026-09-12 UTC. Previous goal turn made progress by measuring native
+closed-pose feasibility and fixed-offset rigidity. This turn verified the
+native geometry inventory and measured spacing over ALL 654 capture samples.
+Receipt: native_evidence/native-hub-pair-audit-9967-01.json, reproduced by
+native_evidence/reproduction/check_hub_marker_pairs.py. It validates model,
+candidate and capture hashes and preserves actual masks. All 15 Hub pairs
+have 654 observed frames, through 1.813889 s, in this payload.
+
+The native Hub frame belongs to COMRod's rigid aggregate, which contains the
+Head, Neck, UpperTorsoTop and ZeroMassShoulderReference solids. The exported
+native joint inventory has no separate head joint. Thus the current six-marker
+Hub assignment is consistent with the rigid native topology; a different fixed
+head offset cannot reproduce all observed head/back relative motion.
+
+Across the capture, each of the three head-to-head pair distance ranges is
+<=2.101 mm (standard deviation <=0.323 mm). HeadSide-to-BackLeft distance ranges
+from 349.682 to 459.286 mm: span 109.604 mm, standard deviation 37.221 mm.
+HeadFront-to-BackLeft spans 97.617 mm. Back-to-back pairs also vary, by up to
+31.364 mm. The data support relative head/back motion and some within-back
+constellation variation; this audit does not attribute that variation uniquely
+to anatomy, averaging or marker measurement effects.
+
+For any fixed separation, the best independently posed two-marker RMS is
+std(observed distance)/2: 18.610 mm for HeadSide/BackLeft. This bound permits
+recalibration of that pair's constant separation, unlike the previous fixed-
+offset instantaneous bound. It applies ONLY to that pair across time and must
+not be mislabeled as all-25-marker RMS or proof of failure of the 35 mm gate.
+No rigid offset or constant segment-length change can eliminate this pair's
+length variation. The analytical pair-bound tests went red then green; all
+four rigidity tests pass, including masks and rigid-transform invariance.
+
+### Next Native Matching Step
+
+Keep the verified 27-input native-equivalent model as the baseline. The gate
+has not been proved unreachable, and substantial forward error still exceeds
+the best found static pose error. Resume native torque refinement with a
+bounded expansion from only the t^6 correction to t^4/t^5/t^6 shaping directions,
+while preserving one global sextic, original initial state, geometry and marker
+assignments. Reuse bernstein_to_simscape and the existing candidate/forward
+adapter. A convenient bounded experiment uses only Bernstein control entries
+4, 5, 6 free, earlier entries zero, initialized from run 02's t^6 correction.
+Test physical-time equivalence and restart/bound semantics before launching;
+record that bounds on [0,.8] do not bound extrapolation to the full capture.
+Use all raw observed markers and existing acceptance gates, plus local-window
+and per-marker diagnostics. Do not optimize away the head errors by omission.
+
+A separate neck/head model variant may improve representational capacity, but
+it must be explicitly distinct from the native-equivalent baseline and must
+modify/qualify the MATLAB R2025b model too. Do not silently introduce extra
+Pinocchio joints and retain the old equivalence claim. This topology proposal
+has been communicated for coordination; no such variant has been implemented.
+
 ## Later-Capture Rigidity Spot Checks
 
 Updated 2026-09-12 UTC. The raw driver_marker_payload.json from preserved
