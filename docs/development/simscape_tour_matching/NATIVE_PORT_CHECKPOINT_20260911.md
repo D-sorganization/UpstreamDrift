@@ -191,6 +191,18 @@ Drake diagnostic1.336681893545 to displayed precision, establishing a common
 fast residual convention for the next Pinocchio chart solver. This does not
 repair the path or identify a torque; the same nonzero acceleration defect
 still blocks reaction-eliminated effort identification.
+
+The first bounded retracted-node solve is preserved in
+`native_evidence/retracted_collocation_probe_9967_24/receipt.json` with its
+runner `probe_retracted_native_collocation.py`. It uses the first four path
+nodes, the qualified21-dimensional node charts, explicit±0.01 chart bounds,
+and exactly two trust-constr iterations. It remains unqualified, but the
+combined rate/acceleration residual falls to0.1041854 without a pose-closure
+violation, compared with the original full-path acceleration residual1.33668.
+This is local preflight evidence only: it has no marker objective, no full
+window continuation, no torque profile, and no forward replay. Do not expand
+the same blind finite-difference solve; next add chart-space derivatives and
+continue the window only after recording their qualification.
 identification. The next path stage is an explicit acceleration projection with
 reported correction magnitude, followed by derivative-consistency review; no
 torque fit or forward replay may be inferred from this failed diagnostic.
