@@ -1,5 +1,42 @@
 # Native Port Implementation Checkpoint
 
+## Pose-Seeded Trial Rejected After Independent Replay
+
+Updated 2026-09-12 UTC. Run05 session 45470 exited zero after exhausting its
+12-evaluation budget. It is not accepted or converged. Canonical candidate
+d86eeb0df74be186dfcd4de6bd36489953087eba5aa48696491700d313a87c5c.
+Fresh independent continuous replay exactly reproduces whole RMS 34.346993 mm,
+early 10.489817 mm, terminal 150.536308 mm and club 68.505984 mm. Reported yaw
+error is 62.5328 percent. Adapter time 3.57916 s, closure pose/rate maxima
+5.31141e-11/4.04759e-10. Segmented RMS is 21.417456 mm, but maximum scaled
+state defect is 27.708215, far above 0.0001. Do not promote this profile over
+run04, whose independently replayed whole/terminal errors remain better.
+
+Fresh per-window replay independently reproduces defect norms 4.099374 at
+0.6 s and 27.708215 at 0.7 s. The latter contains a rate-coordinate norm of
+25.8854, dominated by SpineInputY (-14.2385 rad/s), HipInputX (-10.8392 rad/s),
+LSInputX (9.5811 rad/s) and LScapInputY (6.2984 rad/s). The attractive static
+pose path and its tangent-consistent rates are not dynamically connected by
+the fitted sextic. The small boxes around those pose seeds also strongly limit
+node movement. Increasing the same budget is not the next default action.
+
+Evidence is native_evidence/ms_fit_9967_05: config, candidate, nodes, derivative
+audit, window ledger, return, independent replay/arrays and node-defect audit.
+Exact raw copies remain in local simscape-tour-checkpoints/native-ms-fit-9967-05
+and ControlTower C:/Users/diete/native-ms-fit-9967-05. Raw candidate byte hash
+17ec2e719a73fa48774e065f8574cedc1ce523740c0e9694121242d13b21cd90.
+No native optimizer is currently running under this checkpoint.
+
+Next controlled comparison: initialize the SAME three-window formulation from
+run04's continuous states at 0.6 and 0.7 s, so initial dynamic defects are near
+zero. Rebuild separate charts there and verify closure/composed derivatives.
+This isolates the additional window from the infeasible pose initialization.
+Start with the established higher continuity penalty, explicitly record all
+settings, and include the newly added per-node/optimality diagnostics in a new
+isolated runtime. Retain original initial state and exact sextic torque bounds.
+The pose path remains a feasibility reference, not a hard reset requirement.
+Full swing and final R2025b qualification are still incomplete.
+
 ## Shooting Result Diagnostics Added Without Changing the Live Runtime
 
 Updated 2026-09-12 UTC. The shared MultipleShootingFit result now includes the

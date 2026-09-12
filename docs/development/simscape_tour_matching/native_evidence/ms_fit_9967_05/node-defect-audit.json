@@ -1,0 +1,82 @@
+{
+  "candidate_sha256": "d86eeb0df74be186dfcd4de6bd36489953087eba5aa48696491700d313a87c5c",
+  "qualification": "Fresh native window defect diagnosis; mixed coordinate units explicitly scaled by 0.1 for q and 1 for qd",
+  "nodes": [
+    {
+      "node_time_s": 0.6,
+      "scaled_norm": 4.099374376193623,
+      "position_coordinate_norm": 0.26731423672091104,
+      "rate_coordinate_norm": 3.1079221613200883,
+      "largest_scaled_components": [
+        {
+          "coordinate": "RWInputY",
+          "kind": "qd",
+          "difference": 1.3039353850257724,
+          "scaled_difference": 1.3039353850257724
+        },
+        {
+          "coordinate": "LSInputY",
+          "kind": "qd",
+          "difference": -1.2519369537995533,
+          "scaled_difference": -1.2519369537995533
+        },
+        {
+          "coordinate": "RFInput",
+          "kind": "qd",
+          "difference": 1.1851206846649704,
+          "scaled_difference": 1.1851206846649704
+        },
+        {
+          "coordinate": "LSInputX",
+          "kind": "q",
+          "difference": -0.09080027105909244,
+          "scaled_difference": -0.9080027105909244
+        },
+        {
+          "coordinate": "LWInputX",
+          "kind": "qd",
+          "difference": -0.9019843044100038,
+          "scaled_difference": -0.9019843044100038
+        }
+      ]
+    },
+    {
+      "node_time_s": 0.7,
+      "scaled_norm": 27.70821528649451,
+      "position_coordinate_norm": 0.9883802734737421,
+      "rate_coordinate_norm": 25.885432927875186,
+      "largest_scaled_components": [
+        {
+          "coordinate": "SpineInputY",
+          "kind": "qd",
+          "difference": -14.238517761549705,
+          "scaled_difference": -14.238517761549705
+        },
+        {
+          "coordinate": "HipInputX",
+          "kind": "qd",
+          "difference": -10.839206821231784,
+          "scaled_difference": -10.839206821231784
+        },
+        {
+          "coordinate": "LSInputX",
+          "kind": "qd",
+          "difference": 9.581139906271021,
+          "scaled_difference": 9.581139906271021
+        },
+        {
+          "coordinate": "LScapInputY",
+          "kind": "qd",
+          "difference": 6.298397170511355,
+          "scaled_difference": 6.298397170511355
+        },
+        {
+          "coordinate": "HipInputZ",
+          "kind": "qd",
+          "difference": -5.954193054749551,
+          "scaled_difference": -5.954193054749551
+        }
+      ]
+    }
+  ]
+}

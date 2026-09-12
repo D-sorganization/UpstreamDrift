@@ -1,0 +1,22 @@
+{
+  "qualification": "observed-marker baseline only; no optimizer run or fit acceptance",
+  "candidate_sha256": "d86eeb0df74be186dfcd4de6bd36489953087eba5aa48696491700d313a87c5c",
+  "duration_s": 0.8,
+  "modeled_marker_count": 25,
+  "capture_marker_count": 38,
+  "observed_marker_samples": 7225,
+  "sample_count": 289,
+  "whole_rms_m": 0.03434699298466788,
+  "early_rms_m": 0.010489816788852066,
+  "terminal_rms_m": 0.1505363081033007,
+  "terminal_club_cluster_rms_m": 0.0685059839144105,
+  "adapter_and_residual_elapsed_s": 3.5791588270221837,
+  "integration_elapsed_s": 3.427428276045248,
+  "closure_pose_max_abs": 5.3114068698774504e-11,
+  "closure_velocity_max_abs": 4.0475889306890167e-10,
+  "input_sha256": {
+    "model": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "candidate": "17ec2e719a73fa48774e065f8574cedc1ce523740c0e9694121242d13b21cd90",
+    "target": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87"
+  }
+}
