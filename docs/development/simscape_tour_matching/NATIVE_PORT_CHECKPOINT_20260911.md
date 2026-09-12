@@ -1,5 +1,38 @@
 # Native Port Implementation Checkpoint
 
+## Bound Expansion Returned; OpenSim Planning Check-In
+
+Updated 2026-09-12 UTC. Run04 is no longer live: PID 2072566 is absent and
+returned.json, returned-candidate.json and returned-nodes.json exist on
+ControlTower. Raw output was copied to the local
+simscape-tour-checkpoints/native-ms-fit-9967-04 directory. This inspection did
+not recover the process exit status or independently replay the new candidate.
+
+Returned canonical candidate:
+616678d8f5dbc0c80c4d7398ae650e4d8f0f558a514a98f4f7065f8db0e66819.
+Reported whole RMS is 23.424635 mm, early 9.942595 mm, terminal 62.646370 mm,
+club 35.700131 mm and yaw 9.060111 percent. Scaled defect 0.130512 fails
+the 0.0001 gate. Segmented RMS is 23.302635 mm. Both acceptance and optimizer
+convergence are false; the evaluation budget was exhausted. The targeted bound
+expansion made a small gain and did not resolve transition matching.
+
+Next single action: independently replay run04 from its saved original initial
+state, save the fresh receipt and trajectory, and compare all reported metrics.
+Then audit how far the eight released controls moved. Preserve explicit run04
+bounds on any restart. Do not repeat identical optimization budgets by default.
+The latest independently verified candidate remains run03, documented below.
+The full capture remains unmatched; baseline cross-engine parity is limited to
+the qualified 0.8 s interval and exact baseline inputs.
+
+OpenSim is added to the active program as epic
+[10003](https://github.com/D-sorganization/UpstreamDrift/issues/10003).
+Its separate planning lane has completed OS-0 through OS-6 specifications and
+the lower-agent execution prompt in the OpenSim worktree's
+docs/development/opensim_tour_matching/EPIC_10003.md and HANDOFF.md.
+This is the requested user check-in after planning; no native OpenSim
+implementation or solve has started. Pinocchio's P-1 through P-4 assignments
+remain below, with the newer evidence at the top taking precedence.
+
 ## Continuation Verified; Eight Active Torque Bounds Released in a Trial
 
 Updated 2026-09-12 UTC. Run03 session7978/PID2062554 exited zero after its24-

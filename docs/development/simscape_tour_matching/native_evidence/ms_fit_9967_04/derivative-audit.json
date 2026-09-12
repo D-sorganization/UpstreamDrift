@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "column": 0,
+      "marker_relative": 2.627153956176637e-7,
+      "state_relative": 3.4397758667406105e-6
+    },
+    {
+      "column": 14,
+      "marker_relative": 3.7214928703042443e-7,
+      "state_relative": 4.132689455295022e-6
+    }
+  ]
+}
