@@ -62,3 +62,15 @@ def test_plot_exposes_observed_rms_in_mm_and_missing_frames() -> None:
     np.testing.assert_allclose(rms_line.get_ydata(), [10, np.nan, 10], equal_nan=True)
     assert "aaaaaaaaaaaa" in figure._suptitle.get_text()
     plt.close(figure)
+
+
+def test_observed_rms_distinguishes_missing_from_zero() -> None:
+    from src.shared.python.motion_matching.marker_replay_report import observed_rms
+
+    assert observed_rms(np.array([np.nan]), np.array([False])) is None
+    assert observed_rms(np.zeros(1), np.array([True])) == 0.0
+    assert observed_rms(np.array([0.1, 0.3]), np.array([True, True])) == pytest.approx(
+        np.sqrt(0.05)
+    )
+    with pytest.raises(ValueError):
+        observed_rms(np.array([np.nan]), np.array([True]))

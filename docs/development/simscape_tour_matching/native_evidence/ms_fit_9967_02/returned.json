@@ -1,0 +1,16 @@
+{
+  "candidate_sha256": "89c4479029064705a6f7fba62513ba485e2e6be0c2f9c22d1eee573546e08dc4",
+  "metrics": {
+    "whole": 0.02351435006426375,
+    "early": 0.009958642089817277,
+    "terminal": 0.06280130509695736,
+    "club": 0.035704479655046875,
+    "yaw_pct": 7.710139519742776
+  },
+  "accepted": false,
+  "optimizer_converged": false,
+  "max_scaled_defect_norm": 0.16569573175238206,
+  "message": "The maximum number of function evaluations is exceeded.",
+  "segmented_rms": 0.023418724683666143,
+  "unsegmented_rms": 0.02351435006426375
+}

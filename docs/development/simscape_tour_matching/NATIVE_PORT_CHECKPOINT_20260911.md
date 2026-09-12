@@ -1,5 +1,58 @@
 # Native Port Implementation Checkpoint
 
+## Lower-Penalty Return and Full-Horizon Diagnostic Verified
+
+Updated 2026-09-12 UTC. Previous turn made progress through first-MS verification
+and run02 launch. Run02 session82127/PID2047465 exited zero. Independent replay
+reproduces whole23.514350mm/early9.958642mm/terminal62.801305mm/club35.704480mm.
+Yaw7.71014percent fails; scaled defect .165696 fails1e-4. Segmented RMS23.418725mm.
+Optimizer budget exhausted; acceptance false. Canonical candidate
+89c4479029064705a6f7fba62513ba485e2e6be0c2f9c22d1eee573546e08dc4.
+It improves whole/yaw but worsens terminal/club versus run01; retain both rather
+than claim a universally better fit. Artifacts: native_evidence/ms_fit_9967_02;
+raw local simscape-tour-checkpoints/native-ms-fit-9967-02 and ControlTower same.
+
+Full-duration diagnostic changes ONLY run01 candidate duration to1.813888888889s,
+leaving absolute torque coefficients unchanged. Candidate
+a35fc26831dd76cfe6869ca80f77a5d4d7cdbd85d6185e88c411fbfb5f0c6689
+is an extrapolation, not a full-swing optimized profile. First reporting attempt
+session42533 exited1 after integration because terminal club observations were
+absent (ValueError: Requested metric has no observations); no successful receipt
+was written. Preserve that as a reporting failure, not a dynamics failure.
+
+A red-to-green shared observed_rms helper now distinguishes missing observations
+(None) from zero error and rejects invalid observed errors. Benchmark reports
+explicit terminal observation counts and null for absent categories. Seven
+report tests and ruff pass; do not treat null as passing an acceptance gate.
+Revised full diagnostic session43417 exited0: all654frames,16174observed modeled
+marker samples,19terminalmarkers and0terminalclubmarkers. Whole RMS1.964282m,
+terminal RMS8.470900m, early10.012695mm. Integration17.0832s; closure pose/rate
+maxima1.46821e-9/1.16983e-8 pass current1e-7 component bound. Native dynamics
+therefore remain integrable over this full capture for this candidate, while
+its motion diverges badly. This does not establish full-horizon Simscape parity.
+Receipt native_evidence/native-full-extrapolation-9967-02.json; raw receipt/NPZ
+local simscape-tour-checkpoints and ControlTower C:/Users/diete. Runtime
+native-full-report-9967-01 is isolated with only reporting helper added; runner
+benchmark_native_full_9967_02.py. Original failed runner/output retained.
+
+LIVE continuation run03: session7978, confirmed WSL PID2062554. Output
+C:/Users/diete/native-ms-fit-9967-03; same native-ms-pilot-9967-01 runtime.
+run_native_ms_pilot_9967_03.py --max-nfev24 --defect-weight1
+--restart-directory /mnt/c/Users/diete/native-ms-fit-9967-02.
+Restores returned coefficients AND physical node, converts to the ORIGINAL node
+chart, verifies reconstruction<1e-7 and original torque/node bounds. Only floating
+roundoff within1e-8 is clipped back to existing bounds; no recentering. Config
+records restart candidate/node hashes after restoration. Derivative audit reruns
+at its declared original reference probe; no claim it audits every restart node.
+Driver saves returned physical nodes again. Local bundle SHA-256
+b078e977dae408b5d5289e3fc09e8a71f5eeefe4f82957682505d96512d38242.
+
+Next: poll7978/PID2062554; preserve terminal result and independently replay.
+Then increase continuity penalty only if the segmented trajectory improves, using
+saved torques/nodes. Full-capture optimization must follow; the extrapolation
+failure shows why matching a prefix alone cannot finish the task. Final frame
+club coverage must remain explicit in every full-swing acceptance policy.
+
 ## First Native MS Return Verified; Lower-Penalty Trial Is Live
 
 Updated 2026-09-12 UTC. Previous turn made progress by launching the native pilot.
