@@ -6,6 +6,15 @@ No OpenSim implementation or native solver job has started in this workstream.
 
 ## Current Cross-Engine Evidence
 
+Latest checkpoint, 2026-09-12 13:05 UTC: the historical run04 status below is
+superseded. Run08 independently replays at 23.301337 mm whole-prefix RMS and
+61.019909 mm terminal RMS through 0.8 s; it fails acceptance. Run09 gives
+essentially no improvement. A completed five-window derivative diagnostic
+supports a bounded trial with nodes at 0.2, 0.4, 0.6 and 0.7 s, but no such fit
+has run yet. Full 1.813889 s capture matching remains incomplete. Read the top
+of the Pinocchio checkpoint for current hashes and exact evidence. Do not use
+these prefix numbers as evidence of OpenSim equivalence or full-swing success.
+
 The latest independently replayed Pinocchio candidate recorded here is
 9f5716a7585cb8f9a3bf3a1f5a07446591e4e6562fe07bef7ca0851d0bbb85e0:
 23.477716 mm whole-prefix RMS and 62.777453 mm terminal RMS through 0.80 s.
