@@ -65,6 +65,7 @@ class GenericPhysicsRecorder(
         self.growth_factor = 1.5
         self.current_idx = 0
         self.is_recording = False
+        self.run_id: str = self._generate_run_id()
         self.data: dict[str, Any] = {}
         self._buffers_initialized = False
         self._biomechanics_recorder: Any = None
@@ -237,6 +238,11 @@ class GenericPhysicsRecorder(
             f"Initialized recorder buffers: nq={nq}, nv={nv}, max_samples={self.max_samples}"
         )
 
+    def _generate_run_id(self) -> str:
+        import uuid
+
+        return str(uuid.uuid4())
+
     def start(self) -> None:
         self.is_recording = True
         logger.info("Recording started.")
@@ -247,6 +253,7 @@ class GenericPhysicsRecorder(
 
     def reset(self) -> None:
         self._reset_buffers()
+        self.run_id = self._generate_run_id()
         if self._biomechanics_recorder is not None:
             from src.shared.python.biomechanics.model_bindings import TrajectoryRecorder
 

@@ -1,5 +1,17 @@
 # SPEC.md — Repository Specification Document
 
+## Unified Engine Dashboard Export Provenance (#8820)
+
+Stamp physics engine identity, model path, model file hash, unique run ID, and timestamp into dashboard exports and physics recordings across all formats:
+- `ProvenanceInfo` Identity Metadata: Extends `ProvenanceInfo` dataclass (`src.shared.python.data_io.provenance`) with `engine_name: str | None`, `run_id: str | None`, `drake_version: str | None`, and `pinocchio_version: str | None`. Captures unique simulation run IDs and automatically formats engine name and run ID into CSV comment headers via `# Engine: <engine_name>` and `# Run ID: <run_id>`.
+- `GenericPhysicsRecorder` & Playback Integration: Assigns a persistent UUID `run_id` per recorder session, regenerated on `.reset()`. Populates `engine_name`, `run_id`, `model_file_path`, `model_file_hash`, and a structured `ProvenanceInfo` object into `get_data_dict()`.
+- Multiformat Export Serialization:
+  - CSV (`_export_csv`): Prepends `#` comment provenance headers using `add_provenance_header_file`, preserving downstream tabular parsing in pandas (`pd.read_csv`) and numpy.
+  - JSON (`_export_json`): Serializes structured provenance metadata under a top-level `"provenance"` key.
+  - MATLAB & HDF5: Accepts `provenance` in `export_to_matlab` and `export_to_hdf5` and atomic writers, associating run identity, engine, and model metadata sidecars with binary artifacts.
+- Engine Disambiguation: Ensures MuJoCo, Drake, and Pinocchio dashboard exports from identical trajectories produce distinct, byte-level distinguishable metadata headers and provenance sidecars.
+- Automated Verification: Unit tests in `tests/unit/test_dashboard_export_provenance.py` asserting engine, run ID, model path, and timestamp stamping, as well as CSV comment row parseability and cross-engine distinction.
+
 ## Surfacing MethodCitation Metadata and Formula Traceability (#8847)
 
 Surface peer-reviewed methodology citations (`MethodCitation`: Putnam 1993, Cheetham et al. 2001, McHardy & Pollard 2005, Hosea et al. 1990) and mathematical derivation formulas across analysis services, visualization renderers, injury metrics, and UI provenance labels:
