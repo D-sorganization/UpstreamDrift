@@ -6,29 +6,24 @@ No OpenSim implementation or native solver job has started in this workstream.
 
 ## Current Cross-Engine Evidence
 
-Latest checkpoint, 2026-09-12 13:05 UTC: the historical run04 status below is
-superseded. Run08 independently replays at 23.301337 mm whole-prefix RMS and
-61.019909 mm terminal RMS through 0.8 s; it fails acceptance. Run09 gives
-essentially no improvement. A completed five-window derivative diagnostic
-supports a bounded trial with nodes at 0.2, 0.4, 0.6 and 0.7 s, but no such fit
-has run yet. Full 1.813889 s capture matching remains incomplete. Read the top
-of the Pinocchio checkpoint for current hashes and exact evidence. Do not use
-these prefix numbers as evidence of OpenSim equivalence or full-swing success.
+Updated 2026-09-12 UTC at the requested planning check-in. The authoritative
+Pinocchio checkpoint is commit7f2310661 on feat/9967-native-simscape-pinocchio,
+NATIVE_PORT_CHECKPOINT_20260911.md in the sibling worktree listed below.
+Read its top section before acting; historical epic metrics are not current.
 
-The latest independently replayed Pinocchio candidate recorded here is
-9f5716a7585cb8f9a3bf3a1f5a07446591e4e6562fe07bef7ca0851d0bbb85e0:
-23.477716 mm whole-prefix RMS and 62.777453 mm terminal RMS through 0.80 s.
-It fails acceptance. Read the latest Pinocchio checkpoint instead of treating
-historical epic metrics as the current best. Its P-1 through P-4 packages now
-cover alternative-seed audit, conditioning/feasibility diagnosis, one controlled
-improvement, and full-capture/final-sextic qualification. OpenSim remains at the
-requested planning check-in, with OS-0 the first implementation assignment.
+Run16 has completed and independently replays through0.85 s at30.956978 mm
+whole RMS and96.757316 mm terminal RMS. It fails convergence and continuity
+(max scaled defect0.002278590, required1e-4); it is not an accepted swing.
+No run17 is launched at this checkpoint. The next controlled Pinocchio trial
+changes only solver budgets, preserving the existing model and search bounds.
+Full1.8138888889 s capture matching remains incomplete. Native R2025b parity
+is qualified for the original0.8 s baseline only. No OpenSim equivalence follows.
 
-The subsequent eight-control bound expansion (run04) has returned, reporting
-23.424635 mm whole-prefix RMS, 62.646370 mm terminal RMS and scaled defect
-0.130512 (required at most 0.0001). It is not accepted or converged and still
-needs independent replay. Do not treat its small improvement as a solved
-transition. The current Pinocchio checkpoint owns exact run identities.
+The parallel OpenSim planning lane is complete. OS-0 remains the first
+implementation assignment; no OpenSim native installation or solver job has
+started. Execute the epic's stages sequentially, preserving failing-then-passing
+test evidence, source/input hashes, contracts, independent replay and an updated
+handoff at every checkpoint. Keep the existing Pinocchio environment isolated.
 
 ## Checkout and Ownership
 
