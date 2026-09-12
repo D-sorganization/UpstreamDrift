@@ -6,6 +6,7 @@ oracles.  It deliberately does not identify efforts or integrate dynamics.
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -67,17 +68,18 @@ def _closure_values(
     rate_closure: RateClosure,
     acceleration_closure: AccelerationClosure,
 ) -> tuple[Array, Array, Array]:
-    position = np.asarray([position_closure(q) for q in positions], dtype=float)
-    rate = np.asarray(
-        [rate_closure(q, v) for q, v in zip(positions, rates, strict=True)], dtype=float
-    )
-    acceleration = np.asarray(
-        [
-            acceleration_closure(q, v, a)
-            for q, v, a in zip(positions, rates, accelerations, strict=True)
-        ],
-        dtype=float,
-    )
+    position_values: list[Array] = [position_closure(cast(Array, q)) for q in positions]
+    rate_values: list[Array] = [
+        rate_closure(cast(Array, q), cast(Array, v))
+        for q, v in zip(positions, rates, strict=True)
+    ]
+    acceleration_values: list[Array] = [
+        acceleration_closure(cast(Array, q), cast(Array, v), cast(Array, a))
+        for q, v, a in zip(positions, rates, accelerations, strict=True)
+    ]
+    position = np.asarray(position_values, dtype=np.float64)
+    rate = np.asarray(rate_values, dtype=np.float64)
+    acceleration = np.asarray(acceleration_values, dtype=np.float64)
     if (
         position.ndim != 2
         or rate.shape != position.shape
