@@ -2,7 +2,28 @@
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
-### 0. Run 06 Completed Audit: All-Time Record & Terminal Error Reduction (`prefix-750ms-sextic-06`, DeskComputer)
+### 0. Active Live Horizon: 0.80 s Continuation (`prefix-800ms-sextic-01`, DeskComputer)
+
+- **Execution Status**:
+  - Actively running on DeskComputer under MATLAB R2025b FastRestart.
+  - Spawning: Detached CIM process (`Invoke-CimMethod -ClassName Win32_Process -MethodName Create`) with live heartbeat logging.
+  - Directory: `C:/Users/diete/SimscapeTour9921/prefix-800ms-sextic-01`.
+  - Warm-Start Seed: Candidate Eval #79 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_package.json`).
+  - **Baseline Transfer Audit on 0.80 s**:
+    - Evaluated before optimization using De Casteljau's left subdivision and degree elevation:
+    - Early Retention RMSE ($[0, 0.60\text{ s}]$): **$9.852\text{ mm}$** (PASS $\le 12.0\text{ mm}$, exactly preserved).
+    - Whole-Window RMSE ($[0, 0.80\text{ s}]$): **$45.109\text{ mm}$** (raw baseline).
+    - Pelvis Yaw at $0.80\text{ s}$: Model $37.23^\circ$ vs Target $58.45^\circ$ (diff $-21.22^\circ$, error $36.30\%$).
+  - **Objective Formulation**:
+    - `--duration 0.80 --basis sextic`
+    - `--finite-difference-step 0.001 --smoothness-weight 0.08 --anatomical-weights`
+    - `--club-marker-weight 70.0 --terminal-weight 40.0`
+    - `--time-weight-scale 4.0 --time-weight-power 2.0`
+    - `--pelvis-yaw-weight 75.0 --pelvis-yaw-max-error-pct 5.0`
+    - `--max-nfev 250`
+  - Current Evaluations: Actively evaluating, $\approx 3.7\text{ s}$ per forward rollout.
+
+### 0.1 Run 06 Completed Audit: All-Time Record & Terminal Error Reduction (`prefix-750ms-sextic-06`, DeskComputer)
 
 - **Execution Status**:
   - Run 06 completed normally on DeskComputer (204 logged evaluations in `evaluations.jsonl`, `xtol` termination satisfied).
