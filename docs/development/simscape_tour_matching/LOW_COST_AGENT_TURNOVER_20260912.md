@@ -57,6 +57,13 @@ qualifying it against a known constrained ControlTower state; then use local
 marker-pose solves as seeds for a smooth trajectory. Do not infer trajectory
 feasibility from independent poses alone.
 
+The ControlTower single-state qualification is complete in
+`native_evidence/closure_probe_9967_22/receipt.json`: direct constrained
+dynamics and the probe agree exactly at the archived run19 candidate for both
+its qd and zero qd. The next required qualification is therefore a _trajectory_
+test across smoothed constrained marker-pose seeds, including pose, rate and
+acceleration closure. Do not skip that test for a torque fit.
+
 Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
 Never silently change geometry, add feedback/state resets, or relax criteria.
 Use one bounded fit at a time after qualification; independently forward replay

@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching; native engine adapters; docs/development/simscape_tour_matching; docs/development/drake_native_matching; docs/development/native_parallel_performance
 - **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (SELF; 32 focused solver/executor tests, Ruff and mypy pass; fixed six-window worker parity, parent batch adapter, guarded-driver regression and a two-evaluation full solver assembly receipt complete; run20 terminal and independently rejected)
+- **Last verified:** 2026-09-12 (SELF; 37 focused solver/executor/closure tests, Ruff and mypy pass; fixed six-window worker parity, parent batch adapter, guarded-driver regression, native single-state closure-probe runtime receipt and a two-evaluation full solver assembly receipt complete; run20 terminal and independently rejected)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
 - **Next step:** Qualify the new native closure-residual probe on ControlTower, build a smooth closure-feasible transition initializer from constrained marker poses, then run one separately recorded bounded fit through the qualified batch seam.
 
