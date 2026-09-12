@@ -1,5 +1,16 @@
 # SPEC.md — Repository Specification Document
 
+## Surfacing MethodCitation Metadata and Formula Traceability (#8847)
+
+Surface peer-reviewed methodology citations (`MethodCitation`: Putnam 1993, Cheetham et al. 2001, McHardy & Pollard 2005, Hosea et al. 1990) and mathematical derivation formulas across analysis services, visualization renderers, injury metrics, and UI provenance labels:
+- `MethodCitation` Formatting: Adds `format_citation(self) -> str` and `to_dict(self) -> dict[str, Any]` to `MethodCitation` in `src.shared.python.analysis.dataclasses`, rendering standardized academic citations with title, publication year, author list, and DOI/notes.
+- Provenance Tooltip Affordance: Extends `ProvenanceRecord` in `src.shared.python.ux.provenance` with optional `citation: str | None = None` and renders `citation: ...` in `ProvenanceValue.describe()`, allowing tooltips and whatsThis popovers to display exact peer-reviewed literature alongside formulas and calculation inputs.
+- Kinematic Sequence API Output: Surfaces methodology metadata (`methodology: dict`) and formatted citation string (`citation: str`) in the REST API response from `_populate_kinematic_sequence` (`src.api.services.analysis_service`).
+- Visual Kinematic Sequence Annotation: Annotates coordination sequence velocity plots (`plot_kinematic_sequence` in `src.shared.python.plotting.renderers._coordination_sequence`) with formatted methodology citations when `analyzer_result` carries methodology.
+- Spinal Load Citation Aggregation: Adds `get_citations(self) -> list[MethodCitation]` and `format_citations(self) -> list[str]` to `SpinalLoadResult` (`src.shared.python.injury.spinal_load_analysis`), collecting and formatting citations across composite metrics (Spinal Load, X-Factor, Crunch Factor).
+- Workbench Scientific Traceability: Surfaces explicit methodology and formula definitions (including strokes gained `SG = verified E(start) - 1 - verified E(finish)` with Broadie 2011/2014 DOI, Theil-Sen regression, and Hotelling $T^2$ dispersion) in the Launch Monitor Analytics workbench report (`src.tools.launch_monitor_analytics.gui`).
+- Automated Verification: Unit tests in `tests/unit/test_method_citations.py` and `tests/unit/ui/test_provenance_value.py` validating formatting, dictionary serialization, API serialization, plot annotation, and tooltip provenance rendering.
+
 ## Restoring Model Generation Facades and First-Party Import Resolvability (#8641)
 
 Restore the `src.shared.python.model_generation.humanoid` and `src.shared.python.model_generation.mesh` facades, repairing first-party import paths and removing silent error suppressions:

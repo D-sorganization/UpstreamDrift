@@ -534,6 +534,9 @@ class AnalysisService:
             "is_valid_sequence": timing.is_valid_sequence,
             "timing_gaps": timing.timing_gaps,
         }
+        if timing.methodology is not None:
+            sequence["methodology"] = timing.methodology.to_dict()
+            sequence["citation"] = timing.methodology.format_citation()
         for peak in timing.peaks:
             sequence[f"{peak.name}_peak"] = {
                 "velocity": peak.peak_velocity,
