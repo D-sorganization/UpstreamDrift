@@ -38,13 +38,16 @@ The final goal remains the full1.8138888889 s C3D swing driven continuously by
 one global sixth-order effort polynomial per channel, with native engine
 behavior consistent with Simscape R2025b.
 
-First perform Third Task below: integrate the existing tested optional window
-executor with the existing shared solver/cache. Use TDD to prove identical
-assembled residuals, full Jacobians, ordering, cache behavior and failure cleanup
-against sequential mode. Preserve original model/input identities and immutable
-runtimes; do not build another fitter. Then follow the reviewed smooth native
-closure-feasible target-path/torque-initializer stages. If a mathematical choice
-is unresolved, report evidence and request review before a broad expensive run.
+Third Task's integration and fixed-input full assembly receipt are complete.
+The guarded run20 derivative driver submitted the existing tested batch seam to
+the shared solver, and workers=0/2 returned the same two-evaluation frozen
+0.85 s result byte-for-byte except timing telemetry. Read
+`../native_parallel_performance/batched-solver-qualification-9967-24.json` and
+the performance handoff before using it. Preserve original identities and
+immutable runtimes; do not build another fitter. Next, follow the reviewed
+smooth native closure-feasible target-path/torque-initializer stages. If a
+mathematical choice is unresolved, report evidence and request review before a
+broad expensive run.
 
 Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
 Never silently change geometry, add feedback/state resets, or relax criteria.

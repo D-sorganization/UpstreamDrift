@@ -40,7 +40,21 @@ one persistent `NativeWindowExecutor`; the adapter serializes only cache-miss
 windows and returns ordered `(markers, endpoint_state)` pairs required by the
 shared solver. A focused test proves ordered solver-array output. This preserves
 driver ownership of node retraction and makes worker lifecycle explicit. The
-next gate remains one fixed-input full solver residual/Jacobian comparison.
+fixed-input full solver gate is now complete. A guarded copy of immutable run20
+driver source ran with workers=0 and workers=2 in the isolated ControlTower
+runtime `native-ms-pilot-9967-21`. Both used the same 0.85 s horizon, six
+shooting windows, one SLSQP iteration and two function evaluations. Every
+artifact was byte-identical except `windows.jsonl` timing fields; the remaining
+window records, both residual snapshots, constraints, returned nodes and returned
+candidate were exact. The shared returned candidate is
+`dbfcc0f748cacdd11515f1478ad4a9ae72609594519fb1c752d24aee7ece9d60`.
+The reproducible receipt is
+`batched-solver-qualification-9967-24.json`; its raw outputs remain at the two
+recorded ControlTower paths. The generator creates a guarded main entry point,
+which is required for safe spawned workers. This qualifies one short assembled
+solver receipt only; it makes no whole-fit speed, convergence, acceptance or
+swing-match claim. The next gate is a separately recorded bounded fit only after
+the smooth closure-feasible transition initializer is selected.
 
 Discovery found a per-call `ProcessPoolExecutor` in
 `src/shared/python/sidekick/process_calculators/multi_param_analysis.py`, tied to
