@@ -1,5 +1,41 @@
 # Native Port Implementation Checkpoint
 
+## Run06 Independently Verified; Small Continuous Improvement
+
+Updated 2026-09-12 UTC. Run06 session 86970 exited zero after twelve function
+evaluations. Independent fresh replay exactly reproduces candidate
+907e231f16d91e9c9b4df5d327989e31e55dc35cd73238cefd55977aa6e0bfa5:
+whole RMS 23.327157 mm, early 9.954182 mm, terminal 61.484553 mm and club
+32.128360 mm. Reported yaw error is 8.948090 percent. This improves whole,
+terminal and club errors over run04 but still fails acceptance and convergence.
+Segmented RMS is 23.400160 mm. Scaled defects are 0.001654262 at 0.6 s and
+0.001112279 at 0.7 s, above the 0.0001 gate. Optimality is 26659.63599 and
+active-bound count is zero. These optimizer diagnostics refer to SciPy's scaled
+bounded problem; they do not establish a physical error floor.
+
+Independent adapter time was 3.43036 s, integration 3.29158 s. Native closure
+pose/rate maxima are 5.08444e-11/1.96994e-10. Original candidate byte SHA-256
+58f425cd78332bd81f2864fc1e01c298972f041d6bfdb35e1f88215542f697b9.
+All run artifacts are in native_evidence/ms_fit_9967_06, including returned
+physical nodes, diagnostics, independent receipt and trajectory. Raw copies
+remain in local simscape-tour-checkpoints and ControlTower native-ms-fit-9967-06.
+No native fit is currently live from this run.
+
+Next bounded continuation should preserve the original run06 chart references
+(run04 continuous states), restore BOTH returned coefficients and node chart
+coordinates, verify exact physical-node reconstruction and original bounds,
+and continue the same objective with an explicit budget. Do not regenerate
+charts from a different trajectory and label the restart identical. Adopt the
+new checkpoint_callback from 1d84cfc8e in a new isolated runtime so each saved
+evaluation contains candidate coefficients, physical nodes, fixed configuration
+identity and cost. An evaluated or low-cost checkpoint is not accepted; replay
+the returned candidate independently and preserve all final gates.
+
+The next comparison is justified by the small measured improvement and large
+remaining optimality, not a claim that additional iterations will solve the
+swing. If progress stalls, inspect recorded steps/conditioning rather than
+repeat an unchanged budget indefinitely. Full capture remains unmatched.
+
 ## Gemini Evaluation Callback Integrated With Physical-State Snapshots
 
 Updated 2026-09-12 UTC. Read Gemini's new c7c1abb65 commit and integrated its
