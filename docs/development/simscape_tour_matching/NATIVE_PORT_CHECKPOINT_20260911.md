@@ -1,5 +1,54 @@
 # Native Port Implementation Checkpoint
 
+## Continuation Verified; Eight Active Torque Bounds Released in a Trial
+
+Updated 2026-09-12 UTC. Run03 session7978/PID2062554 exited zero after its24-
+evaluation budget. Independent fresh replay reproduces whole23.477716mm,
+early9.956256mm, terminal62.777453mm, club35.210534mm exactly. Yaw8.957019percent
+fails; scaled defect .131877 fails1e-4. Segmented RMS23.382749mm. Convergence and
+acceptance false. Canonical candidate
+9f5716a7585cb8f9a3bf3a1f5a07446591e4e6562fe07bef7ca0851d0bbb85e0.
+Only a small gain versus run02; do not repeat the same settings indefinitely.
+Evidence is native_evidence/ms_fit_9967_03 (returned nodes, candidate, config,
+window ledger, independent receipt/arrays, plot and effort-bound audit). Raw local
+simscape-tour-checkpoints/native-ms-fit-9967-03 and ControlTower same. Fresh replay
+4.13130s, closure pose/rate3.75109e-11/7.92859e-11. Raw candidate SHA-256
+60f2953fa194a08b85126a8467af690e157ae44a9a9d742f2483debb8fdffc6c.
+
+Audit recovers physical Bernstein corrections versus the original root-force02
+parent: eight controls exceed1.99 magnitude within the +/-2 search box. B6 of
+HipInputY,HipInputZ,LEInput,LFInput,LScapInputY,LWInputX,REInput; B5 of RScapInputY.
+These are numerical search limits, not native model hard limits or physiological
+claims. This evidence motivates a bounded authority experiment rather than a
+claim that widening every torque or adding iterations will necessarily work.
+
+LIVE run04: unified session3268, confirmed ControlTower WSL PID2072566. Output
+C:/Users/diete/native-ms-fit-9967-04. Same native-ms-pilot-9967-01 runtime;
+run_native_ms_pilot_9967_04.py --max-nfev12 --defect-weight1
+--restart-directory /mnt/c/Users/diete/native-ms-fit-9967-03.
+Restores run03 torques and physical node. Only the eight audited controls have
+bounds widened to +/-10 N/Nm RELATIVE TO THE SAME original parent; remaining127
+stay +/-2. B0/B1 remain fixed. The driver asserts exactly eight selected controls
+and records explicit lower/upper vectors in config. Original model, initial state,
+node box/radius, objective and continuous acceptance gates are unchanged. This
+is an explicitly expanded search family, not a same-bounds continuation.
+
+Driver04/local bundle is archived in simscape-tour-checkpoints and driver on
+ControlTower. Bundle native-ms-pilot-bundle-9967-04.zip SHA-256
+44b514eb55749bfc095c83d1809feebfdb60e2a37e5b6b13441dec6a247c064f.
+Dependency/runtime chain unchanged. Native composition audit reruns before fit;
+startup asserts restored node/candidate identities and original pre-expansion
+bounds. No production source changed for this numerical bound experiment.
+
+Next action: poll3268/PID2072566, preserve return/failure, independently replay.
+Inspect whether the released controls move and whether segmented/continuous
+errors improve. Do not accept a candidate with failed continuity, terminal or
+yaw gates. Any continuation must read the explicit expanded bounds from run04
+config; driver03's +/-2 restart guard is intentionally incompatible with a
+returned profile outside that old box. Never clip a real expanded correction
+back to2 and claim the restart is identical. Full capture, .8-1.0 extension,
+geometry assessment and final R2025b qualification remain open.
+
 ## Full-Capture Coverage and Phase Errors Recorded
 
 Updated 2026-09-12 UTC. Previous goal turn made progress through run02 replay,

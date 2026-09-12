@@ -1,0 +1,48 @@
+{
+  "candidate_sha256": "9f5716a7585cb8f9a3bf3a1f5a07446591e4e6562fe07bef7ca0851d0bbb85e0",
+  "max_correction": 1.9999843388927565,
+  "near_bound_controls": [
+    {
+      "name": "HipInputY",
+      "bernstein_control": 6,
+      "correction": 1.999888304314286
+    },
+    {
+      "name": "HipInputZ",
+      "bernstein_control": 6,
+      "correction": 1.9999818747878928
+    },
+    {
+      "name": "LEInput",
+      "bernstein_control": 6,
+      "correction": 1.9998800106321957
+    },
+    {
+      "name": "LFInput",
+      "bernstein_control": 6,
+      "correction": 1.9994117806671072
+    },
+    {
+      "name": "LScapInputY",
+      "bernstein_control": 6,
+      "correction": 1.9983891809448924
+    },
+    {
+      "name": "LWInputX",
+      "bernstein_control": 6,
+      "correction": -1.995065712327424
+    },
+    {
+      "name": "REInput",
+      "bernstein_control": 6,
+      "correction": 1.9963196093812456
+    },
+    {
+      "name": "RScapInputY",
+      "bernstein_control": 5,
+      "correction": 1.9999843388927565
+    }
+  ],
+  "controlled_coefficient_count": 135,
+  "fixed_initial_effort_and_slope": true
+}
