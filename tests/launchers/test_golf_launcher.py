@@ -32,6 +32,9 @@ def patch_launcher_ui() -> Generator[None, None, None]:
     with (
         patch("src.launchers.upstream_drift_launcher.DockerCheckThread"),
         patch("src.launchers.upstream_drift_launcher.QTimer"),
+        patch(
+            "src.launchers.launcher_sidekick_sidebar.SidekickSidebarManager._install_sidekick_import_paths"
+        ),
     ):
         yield
 
@@ -128,18 +131,24 @@ def test_window_icon_declares_app_user_model_id(qapp) -> None:
 
 
 def test_init_registry_exception(qapp) -> None:
-    with patch(
-        "src.launchers.launcher_orchestrator._lazy_load_model_registry",
-        side_effect=ImportError("test"),
+    with (
+        patch_launcher_ui(),
+        patch(
+            "src.launchers.launcher_orchestrator._lazy_load_model_registry",
+            side_effect=ImportError("test"),
+        ),
     ):
         launcher = UpstreamDriftLauncher()
         assert launcher.registry is None
 
 
 def test_init_engine_manager_exception(qapp) -> None:
-    with patch(
-        "src.launchers.launcher_orchestrator._lazy_load_engine_manager",
-        side_effect=RuntimeError("test"),
+    with (
+        patch_launcher_ui(),
+        patch(
+            "src.launchers.launcher_orchestrator._lazy_load_engine_manager",
+            side_effect=RuntimeError("test"),
+        ),
     ):
         launcher = UpstreamDriftLauncher()
         assert launcher.engine_manager is None
@@ -150,7 +159,8 @@ def test_build_available_models(qapp, startup_results) -> None:
     model2 = MagicMock(id="m2", type="utility")
     startup_results.registry.get_all_models.return_value = [model1, model2]
 
-    launcher = UpstreamDriftLauncher(startup_results)
+    with patch_launcher_ui():
+        launcher = UpstreamDriftLauncher(startup_results)
     assert "m1" in launcher.available_models
     assert "m2" in launcher.special_app_lookup
 
