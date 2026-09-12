@@ -4,11 +4,38 @@ The input is a portable native_spec geometry export. Actuator routing, damping,
 limits and time integration require separate qualification before swing fitting.
 """
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+
+
+def depth_first_joints(
+    joints: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    """Keep each subtree contiguous for Pinocchio's compact joint indexing.
+
+    Preserve native identities while rejecting duplicate/disconnected bodies.
+    A merely topological, breadth-first order is insufficient for this backend.
+    """
+    children: dict[str, list[Mapping[str, Any]]] = {}
+    body_names = {"world"}
+    for joint in joints:
+        child = joint["child"]
+        if child in body_names:
+            raise ValueError("Native joint tree has duplicate children or a cycle")
+        body_names.add(child)
+        children.setdefault(joint["parent"], []).append(joint)
+    pending = list(reversed(children.get("world", [])))
+    ordered = []
+    while pending:
+        joint = pending.pop()
+        ordered.append(joint)
+        pending.extend(reversed(children.get(joint["child"], [])))
+    if len(ordered) != len(joints):
+        raise ValueError("Native joint tree is disconnected or cyclic")
+    return ordered
 
 
 class NativePinocchioModel:
@@ -33,7 +60,7 @@ class NativePinocchioModel:
             "Ry": pin.JointModelRY,
             "Rz": pin.JointModelRZ,
         }
-        for joint in specification["joints"]:
+        for joint in depth_first_joints(specification["joints"]):
             parent, parent_pose = self._bodies[joint["parent"]]
             placement = parent_pose * self._transform(joint["parent_to_base"])
             for primitive in joint["primitives"]:

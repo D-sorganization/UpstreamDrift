@@ -1,6 +1,63 @@
 # Native Port Implementation Checkpoint
 
-## Current Finding: Acceleration Parity Fails
+## Current Result: Acceleration Parity Repaired and Verified
+
+The failure below is now resolved for the tested states and inputs. The port
+added joints in breadth-first order, interleaving left/right subtrees. This
+violated Pinocchio's compact subtree indexing assumption: even with positive
+individual body inertias, CRBA produced a negative mass-matrix eigenvalue
+(-0.41694). The constrained stationary mobility was also indefinite.
+The depth-first requirement is explicit in the
+[Pinocchio Model API](https://docs.ros.org/en/ros2_packages/rolling/api/pinocchio/generated/structpinocchio_1_1ModelTpl.html).
+
+`NativePinocchioModel` now orders the input tree depth-first before adding
+joints. It preserves coordinate identities, geometry, masses, inertias, effort
+mapping and closure. Invalid/disconnected trees are rejected. New unit tests
+failed before implementation and pass afterward (2 tests). No native physical
+parameters were changed to achieve agreement.
+
+Actual execution evidence after correction:
+
+- DeskComputer R2025b ran baseline plus all 27 unit input cases, each at exactly
+  the same assembled initial q and zero qd. All cases completed and include
+  complete actuator-log audits. Raw case files are in
+  `C:/Users/diete/SimscapeTour9921/native-input-pulses-9967-01` on DeskComputer,
+  copied to local `simscape-tour-checkpoints/native-input-pulses-9967-01` and
+  ControlTower `C:/Users/diete/native-input-pulses-9967-01`.
+- Actual ControlTower Pinocchio stationary response comparison passes with
+  `--require-parity`: baseline max discrepancy 5.10e-12 and maximum scaled
+  response discrepancy 9.68e-12. Receipt: `native_input_pulse_parity_9967.json`.
+- The same six moving-state acceleration tests through 0.80 s now pass.
+  Maximum absolute discrepancy 3.63e-9, maximum scaled discrepancy 2.54e-10.
+  Receipt: `native_dynamics_parity_9967.json`. The original geometry comparison
+  still passes. These are mixed generalized-coordinate diagnostics; do not
+  label a mixed maximum exclusively as rad/s^2 or m/s^2.
+- Corrected mass matrix minimum eigenvalue is positive (2.259e-6). Constrained
+  mobility minimum eigenvalue is -1.79e-13, consistent with roundoff at the
+  constrained null directions. `native_mass_matrix_parity_9967.json` records
+  the dense KKT diagnostic and component inertias; it is not itself a full
+  native mass-matrix measurement.
+
+Reproduction: `export_native_input_pulses.m`, `check_native_input_pulses.py`,
+and `diagnose_pinocchio_pulse_solver.py` under `native_evidence/reproduction`.
+The pulse checker requires module/spec/cases/output paths and accepts
+`--require-parity` to fail if agreement or common-state conditions are violated.
+All native checks used production source copied to
+`ControlTower:C:/Users/diete/native_model_9967_dfs.py`. The pulse receipt records
+its hash and all 28 native case hashes. Raw historical failed receipts remain
+in `simscape-tour-checkpoints`; do not mistake them for the latest results.
+
+Next: implement and verify continuous forward integration with a single initial
+state and native polynomial effort mapping. Compare native time histories,
+closure residuals and solver-step convergence through transition, then extend
+to the full observed swing. Preserve no-feedback/no-target-reset acceptance.
+Pinocchio is now qualified for these sampled acceleration tests, not yet for
+continuous-rollout equivalence or full-swing matching. The portable native JSON
+retains the closure; plain URDF alone cannot carry the entire closed-loop
+execution contract. Export a tree plus explicit closure/actuation sidecar when
+adding interoperability, and test each engine's reconstruction independently.
+
+## Historical Failure: Acceleration Parity
 
 The next actual native check found a material dynamics mismatch. Do not run
 optimization on this Pinocchio model as a native-equivalent oracle yet.
