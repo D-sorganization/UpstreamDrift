@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8763 · DRY Quarantine Tranche 2 (Shadow-Package Duplication) Burndown
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #8763
+- **Branch:** conductor/issue-8763
+- **PR:** not created
+- **Paths:** scripts/config/dry_duplication_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-12 (`853814bbf`)
+- **Summary:** Tranche 2 (155 fingerprints shipped into the Tools-shadow packages model_generation, humanoid_character_builder, sidekick, security and ai by hollow merges) is recorded in dry_duplication_quarantine.json under owner @core with #8763 linked; the gate exits 0 on Python 3.11, 3.12 and 3.14 with 594 quarantined entries. The shadow packages carry Tools child-copy headers, so the remaining work is to deduplicate upstream in Tools, bump the vendor pin, and delete each tranche-2 entry as its count drops below 2 on every supported runtime.
+- **Next step:** Deduplicate one model_generation cluster upstream in Tools, bump vendor/ud-tools, and delete its fingerprints from dry_duplication_quarantine.json.
+
 ### DL-#8766 · Bunker Shot and API Route Unit-Gate Debt Burndown
 
 - **State:** in_progress
