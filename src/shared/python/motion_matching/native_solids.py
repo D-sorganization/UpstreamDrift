@@ -19,6 +19,7 @@ _UNIT_FACTORS = {
     "length": {"m": 1.0, "in": 0.0254, "mm": 0.001, "cm": 0.01},
     "mass": {"kg": 1.0, "g": 0.001, "lbm": 0.45359237},
     "density": {"kg/m^3": 1.0},
+    "angle": {"rad": 1.0, "deg": pi / 180.0},
 }
 
 
@@ -53,6 +54,18 @@ class NativeParameters:
         if unit not in _UNIT_FACTORS[quantity]:
             raise ValueError(f"Unsupported {quantity} unit {unit} for {name}")
         return float(value) * _UNIT_FACTORS[quantity][unit]
+
+    def vector(self, name: str, quantity: str, size: int) -> NDArray[np.float64]:
+        parameter = self._values[name]
+        if not parameter.get("resolved_numeric"):
+            raise ValueError(f"Unresolved native vector {name}")
+        value = np.asarray(parameter["numeric_value"], dtype=float)
+        if value.shape != (size,) or not np.all(np.isfinite(value)):
+            raise ValueError(f"Invalid native vector {name}")
+        unit = self.text(name + "Units")
+        if unit not in _UNIT_FACTORS[quantity]:
+            raise ValueError(f"Unsupported {quantity} unit {unit} for {name}")
+        return value * _UNIT_FACTORS[quantity][unit]
 
 
 @dataclass(frozen=True)

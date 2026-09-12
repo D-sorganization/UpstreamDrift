@@ -1,0 +1,38 @@
+{
+  "matlab_release": "2025b",
+  "block": "GolfSwing3D_Kinetic/LUpperArm",
+  "translation_m": [0, 0, 0],
+  "rotation_intrinsic_xyz_rad": [-0, 0, -0],
+  "qualification": "native isolated custom-frame pose only",
+  "original_port_layout": true,
+  "measurements": [
+    {
+      "identity": "Frame1",
+      "kind": "named_frame",
+      "path": "native_solid_probe/solid/Top of Left Arm",
+      "translation_m": [0, 0, 0],
+      "rotation_intrinsic_xyz_rad": [-0, 0, -0]
+    },
+    {
+      "identity": "Frame2",
+      "kind": "named_frame",
+      "path": "native_solid_probe/solid/Bottom of Left Arm",
+      "translation_m": [0.36829999999999996, 0, 0],
+      "rotation_intrinsic_xyz_rad": [1.5707963267948963, 0, 0]
+    },
+    {
+      "identity": "LConn1",
+      "kind": "physical_port",
+      "path": "native_solid_probe/sensor_LConn1/F",
+      "translation_m": [0, 0, 0],
+      "rotation_intrinsic_xyz_rad": [-0, 0, -0]
+    },
+    {
+      "identity": "RConn1",
+      "kind": "physical_port",
+      "path": "native_solid_probe/sensor_RConn1/F",
+      "translation_m": [0.36829999999999996, 0, 0],
+      "rotation_intrinsic_xyz_rad": [1.5707963267948963, 0, 0]
+    }
+  ]
+}
