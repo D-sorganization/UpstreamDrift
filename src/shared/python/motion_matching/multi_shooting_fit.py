@@ -197,28 +197,51 @@ def fit_multiple_shooting(
         idx_lo, idx_hi = state_offsets[node]
         opt_states[node] = optimum.x[idx_lo:idx_hi].copy()
 
-    # Compute final defect norm
+    # Compute final defect norm and segmented RMSE across windows
     defects = []
-    for i, node in enumerate(internal_nodes):
+    seg_dists_list = []
+    for i in range(n_windows):
         t_start, t_end, w_time, w_points, w_obs = window_data[i]
         init_s = None if i == 0 else opt_states[t_start]
-        _, end_s = segmented_forward(opt_theta, w_time, init_s)
-        defects.append(float(np.linalg.norm(end_s - opt_states[node])))
+        pred_markers, end_s = segmented_forward(opt_theta, w_time, init_s)
+        if i < len(internal_nodes):
+            node = internal_nodes[i]
+            defects.append(float(np.linalg.norm(end_s - opt_states[node])))
+        if np.any(w_obs):
+            seg_dists_list.append((pred_markers - w_points)[w_obs])
+
     max_defect = float(max(defects)) if len(defects) > 0 else 0.0
+    if seg_dists_list:
+        seg_dists = np.concatenate(seg_dists_list, axis=0)
+        segmented_rmse = float(np.sqrt(np.mean(np.sum(seg_dists**2, axis=-1))))
+    else:
+        segmented_rmse = 0.0
 
     # Evaluate unsegmented forward simulation across all time
     unsegmented_pred = unsegmented_forward(opt_theta, target.time)
     obs_all = np.isfinite(target.points).all(axis=2) & (target.weights > 0)
     unseg_dists = np.linalg.norm((unsegmented_pred - target.points)[obs_all], axis=1)
-    unsegmented_rmse = float(np.sqrt(np.mean(unseg_dists**2)))
 
-    accepted = bool(optimum.success and max_defect <= options.defect_tolerance)
+    is_finite = bool(
+        np.isfinite(unsegmented_pred).all() and np.isfinite(unseg_dists).all()
+    )
+    if is_finite and len(unseg_dists) > 0:
+        unsegmented_rmse = float(np.sqrt(np.mean(unseg_dists**2)))
+    else:
+        unsegmented_rmse = float("inf")
+
+    accepted = bool(
+        optimum.success
+        and is_finite
+        and max_defect <= options.defect_tolerance
+        and unsegmented_rmse < float("inf")
+    )
 
     return MultipleShootingFit(
         theta=_readonly(opt_theta),
         intermediate_states=opt_states,
         max_defect_norm=max_defect,
-        segmented_rmse_m=0.0,
+        segmented_rmse_m=segmented_rmse,
         unsegmented_rmse_m=unsegmented_rmse,
         optimizer_converged=bool(optimum.success),
         accepted=accepted,
