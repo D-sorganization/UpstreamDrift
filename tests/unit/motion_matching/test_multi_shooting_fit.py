@@ -207,3 +207,38 @@ def test_multiple_shooting_window_cache_avoids_redundant_evaluations() -> None:
     # Window 0 should have strictly fewer calls than Window 1 because
     # perturbations to the state vector at t=0.5s hit the cache for Window 0
     assert call_counts[0] < call_counts[1]
+
+
+def test_multiple_shooting_callback_invoked() -> None:
+    """Callback should receive theta, residuals, and cost at each function evaluation."""
+    time = np.linspace(0.0, 1.0, 11)
+    points = np.zeros((len(time), 1, 3))
+    target = MarkerTarget(time, points, np.ones(1))
+
+    callback_evals = []
+
+    def cb(theta: np.ndarray, residuals: np.ndarray, cost: float) -> None:
+        callback_evals.append((theta.copy(), len(residuals), cost))
+
+    options = MultipleShootingOptions(
+        shooting_nodes=(0.5, 1.0),
+        state_dim=2,
+        max_nfev=3,
+        callback=cb,
+    )
+
+    fit_multiple_shooting(
+        target=target,
+        segmented_forward=lambda th, t, s: (np.zeros((len(t), 1, 3)), np.zeros(2)),
+        unsegmented_forward=lambda th, t: np.zeros((len(t), 1, 3)),
+        initial_theta=np.array([1.0]),
+        lower_theta=np.array([0.0]),
+        upper_theta=np.array([2.0]),
+        initial_states={0.5: np.zeros(2)},
+        state_bounds={0.5: (np.full(2, -1.0), np.full(2, 1.0))},
+        options=options,
+    )
+
+    assert len(callback_evals) > 0
+    assert callback_evals[0][1] > 0
+    assert isinstance(callback_evals[0][2], float)
