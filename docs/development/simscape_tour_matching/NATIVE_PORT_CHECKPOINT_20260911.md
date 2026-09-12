@@ -100,6 +100,18 @@ forward torque replay. Do not use it as a dynamic candidate. It establishes the
 next action: continuation across sparse frames from preceding feasible poses,
 with branch, bounds and marker-residual evidence retained before smoothing.
 
+That sparse continuation is now complete fromt=0 through0.6 s using one fixed
+±0.15 coordinate chart per adjacent seed. Receipt:
+`native_evidence/marker_pose_sequence_9967_23/receipt.json`. RMS is
+0.524/1.631/3.556/7.544/14.894/25.235 mm at0.1/0.2/0.3/0.4/0.5/0.6 s;
+all weld residuals are at most1.649e-11. The0.1 s SLSQP solve reaches its
+100-iteration limit despite0.524 mm residual and valid closure, so its status
+is a warning, not convergence. This shows a static pose continuation can cross
+the prior transition location. It does not provide a C1/C2 path, valid qd/qdd,
+global effort coefficients, forward dynamics or an accepted match. The next
+implementation stage is a derivative-aware smooth path fit that rechecks pose,
+rate and acceleration closure before reaction-eliminated effort initialization.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.
