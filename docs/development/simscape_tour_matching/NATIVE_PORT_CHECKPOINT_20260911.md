@@ -1,5 +1,25 @@
 # Native Port Implementation Checkpoint
 
+## Gemini Evaluation Callback Integrated With Physical-State Snapshots
+
+Updated 2026-09-12 UTC. Read Gemini's new c7c1abb65 commit and integrated its
+MultipleShootingOptions.callback(theta, residual, cost) interface in this shared
+solver branch. Added optional checkpoint_callback(theta, physical_states, cost)
+so a caller can persist both torques and decoded shooting nodes with its fixed
+configuration. Both receive independent read-only array copies, preventing an
+observer from corrupting optimizer/cache data even if it resets write flags.
+Callbacks run at residual evaluations, including rejected proposals and finite
+difference probes; they are NOT accepted-iteration notifications. Exceptions
+propagate. The hook itself performs no file writes or acceptance decisions.
+
+The new mutation-isolation/physical-state test first failed on the absent
+callback argument, then passed. Combined shooting/retraction tests: fifteen
+passed; Ruff and mypy pass. These changes are local shared-source integration;
+run06's isolated runtime is unchanged and has no new checkpoint callback.
+Next driver must persist immutable complete evaluation packages plus a manifest,
+not call a low segmented cost an accepted candidate. Gemini's branch is untouched.
+Run06 was confirmed live at PID 2121045, elapsed 3m30s/CPU 3m49s at last check.
+
 ## Continuous Three-Window Initialization Qualified; Run06 Is Live
 
 Updated 2026-09-12 UTC. New isolated runtime
