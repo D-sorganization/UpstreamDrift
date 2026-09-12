@@ -1,5 +1,67 @@
 # Native Port Implementation Checkpoint
 
+## Current Finding: Acceleration Parity Fails
+
+The next actual native check found a material dynamics mismatch. Do not run
+optimization on this Pinocchio model as a native-equivalent oracle yet.
+`native_evidence/native_dynamics_check_9967.json` preserves the failure:
+maximum absolute generalized acceleration discrepancies at the six samples
+are approximately 54.49, 21.24, 277.24, 396.25, 13267.89 and 22555.82
+(translation channels in m/s^2, rotation channels in rad/s^2; do not present
+the combined maximum as a single physical unit). FK still passes.
+
+Evidence that narrows the issue:
+
+- All 27 native actuator logs are present. Existing
+  `audit_golf_actuator_torques` agrees with the polynomial efforts after rotating
+  the three world forces into hip-base axes: max force error 3.41e-13 N,
+  max torque error 2.84e-14 Nm. This verifies the existing log audit, not an
+  independent virtual-work/pulse qualification of every actuator route.
+- Full primitive audit (including unprefixed Revolute parameter names) records
+  zero stiffness/damping, disabled limits, InputTorque and ComputedMotion in
+  `native_passive_joint_audit_9967.json`. This is uncompiled inventory evidence.
+- Native total mass 77.60581783574678 kg versus Pinocchio 77.60581783574676 kg.
+  Native initial world COM [0.9366603077856251, 0.055828222965153544,
+  1.3489299522131155] matches Pinocchio within about 6e-15 m.
+- Native q/qd satisfy the Pinocchio grip pose/velocity constraint to numerical
+  precision. J times the acceleration difference is around 1e-9 or smaller:
+  the discrepancy is predominantly within the allowed motion, not a gross
+  closure violation. Do not infer that all constraint-force conventions pass.
+- Native finite-difference checks broadly support the logged derivatives
+  before transition (sampled qdd discrepancies around 0.02-0.03 rad/s^2 versus
+  the much larger Pinocchio mismatch). Rapid-transition finite differences
+  are less accurate and are diagnostic only.
+- The inertia-signature diagnostic matches 10 of 12 attached sensor groups
+  to native COM/inertia signatures. The two hand sensors do not match the
+  fully weld-collapsed groups used in this diagnostic. Sensor extent can stop
+  at joints while the Pinocchio tree aggregates welded bodies; this is not
+  yet proof of an inertia error. Resolve sensor routing and extent before
+  drawing a conclusion. Symmetric groups have duplicate numeric signatures.
+
+Reproduction files are `export_native_pose_samples.m` (optional fourth
+argument: geometry specification), `check_native_pose_samples.py` with
+`--check-accelerations`, and `check_native_inertia_samples.py`. All under
+`native_evidence/reproduction`. Native R2025b exports 01, 02 and 03 completed;
+03 fixes initial-sample extraction for timeseries whose time axis is last.
+The tracked dynamics fixture comes from native export 03. Raw executed files
+remain in local `simscape-tour-checkpoints`; the acceleration receipt hashes
+refer to raw export 01 and the then-executed module, not reformatted JSON.
+Both exports represent the same saved candidate states; 03 adds diagnostics.
+Native log: `DeskComputer:C:/Users/diete/SimscapeTour9921/native-dynamics-samples-9967-03.log`.
+Pinocchio diagnostic intentionally exits nonzero because parity fails.
+
+Next decisive experiment: native zero-effort and 27 single-channel force/torque
+pulses at the same initial pose with zero rates. Export the actual assembled
+q/qd and qdd for every pulse. Compare baseline-subtracted acceleration response
+columns with Pinocchio to isolate inertia/actuation from gravity and velocity
+bias. Reuse R2025b `simulate_with_coefficients`, native initial-state overrides,
+the actuator audit and explicit SI extraction. Keep polynomial and primitive
+effort frames distinct. If the response matrix differs, inspect actuator
+virtual work and body-group inertias before time integration. If it matches,
+isolate gravity and velocity-dependent bias next. No inverse dynamics is
+required for this experiment. Do not change physics to fit the observed
+accelerations without locating and testing the discrepancy.
+
 ## Six Native Poses Verified Through Transition
 
 The new `export_native_pose_samples.m` diagnostic ran successfully in a fresh
