@@ -682,9 +682,11 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
     def _setup_search_shortcuts(self) -> None:
         """Setup keyboard shortcuts for search."""
         shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self.launcher)
+        shortcut_search.setObjectName("Search Models")
         shortcut_search.activated.connect(self._focus_search)
 
         shortcut_escape = QShortcut(QKeySequence("Esc"), self.launcher)
+        shortcut_escape.setObjectName("Clear Search")
         shortcut_escape.activated.connect(self._clear_search)
 
     def _focus_search(self) -> None:
