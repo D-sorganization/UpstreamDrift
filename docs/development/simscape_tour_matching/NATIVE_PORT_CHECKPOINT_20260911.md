@@ -1,5 +1,40 @@
 # Native Port Implementation Checkpoint
 
+## Run11 Exact Restart Qualified; Bounded Continuation Is Live
+
+Updated 2026-09-12 UTC. Audit session 13674 exited zero before fit launch.
+Driver11 restores run10 coefficients and all four returned physical states in
+the ORIGINAL run08 charts. Maximum physical-state reconstruction error is
+6.66134e-15. Initial defects reproduce run10 within 4.4e-12 absolute difference.
+Ten selected derivative probes pass the existing 1e-3 relative threshold;
+maximum marker/state relative errors are 1.82043e-4 / 3.52751e-4. This is
+selected-direction qualification, not certification of the entire Jacobian.
+Audit receipts and raw package: native_evidence/ms_restart_audit_9967_11.
+
+LIVE fit: unified session 43742, confirmed WSL PID 2176887 with exact driver11
+command. Output C:/Users/diete/native-ms-fit-9967-11. Driver
+C:/Users/diete/run_native_ms_pilot_9967_11.py SHA-256:
+a1bd6020ab5d41e42a599e451d10fbc31114cdbf85ed8440a415c83d468e7d74.
+Archive native-ms-pilot-driver-9967-11.zip contains the exact script.
+
+Runtime /home/dieterolson/native-ms-pilot-9967-09; Python
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python; PYTHONPATH is that
+runtime; OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1. Arguments:
+--output /mnt/c/Users/diete/native-ms-fit-9967-11 --max-nfev 24
+--defect-weight 100. Driver reruns restart and derivative checks before fitting.
+Shared solver, physics, objective, chart references, bounds, original initial
+state and global sixth-order effort representation remain unchanged. Only
+starting coefficients/nodes and evaluation budget change from run10.
+
+Next: poll this exact session/PID. Preserve terminal raw package and independently
+replay returned-candidate.json with benchmark_native_marker_visual_9967.py into
+new independent-replay.json/.npz files in its output directory. Compare ALL
+metrics and defects against both run08 and run10. Budget exhaustion alone is
+not acceptance. If plateau or terminal regression persists, do not repeat another
+unchanged continuation. Full-capture matching and final R2025b validation remain
+outstanding. The previous turn made progress via a completed, independently
+replayed five-window experiment; this turn qualifies its full-state restart.
+
 ## Run10 Completed and Independently Replayed: Mixed Improvement
 
 Updated 2026-09-12 UTC. Session 49870 exited zero. This supersedes the LIVE
