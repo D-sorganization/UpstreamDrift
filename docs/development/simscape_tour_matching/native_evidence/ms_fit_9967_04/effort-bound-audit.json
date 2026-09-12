@@ -1,0 +1,63 @@
+{
+  "candidate_sha256": "616678d8f5dbc0c80c4d7398ae650e4d8f0f558a514a98f4f7065f8db0e66819",
+  "released_controls": [
+    {
+      "coordinate": "HipInputY",
+      "bernstein_control": 6,
+      "previous": 1.999888304314286,
+      "returned": 1.9964184736552522,
+      "change": -0.0034698306590339456
+    },
+    {
+      "coordinate": "HipInputZ",
+      "bernstein_control": 6,
+      "previous": 1.9999818747878928,
+      "returned": 2.0319952937082983,
+      "change": 0.032013418920405545
+    },
+    {
+      "coordinate": "LEInput",
+      "bernstein_control": 6,
+      "previous": 1.9998800106321957,
+      "returned": 2.127871573418547,
+      "change": 0.1279915627863515
+    },
+    {
+      "coordinate": "LFInput",
+      "bernstein_control": 6,
+      "previous": 1.9994117806671072,
+      "returned": 2.029457354979253,
+      "change": 0.030045574312145717
+    },
+    {
+      "coordinate": "LScapInputY",
+      "bernstein_control": 6,
+      "previous": 1.9983891809448924,
+      "returned": 2.1939892663277405,
+      "change": 0.19560008538284812
+    },
+    {
+      "coordinate": "LWInputX",
+      "bernstein_control": 6,
+      "previous": -1.995065712327424,
+      "returned": -2.0205741066204688,
+      "change": -0.025508394293044745
+    },
+    {
+      "coordinate": "REInput",
+      "bernstein_control": 6,
+      "previous": 1.9963196093812456,
+      "returned": 2.0565520533625623,
+      "change": 0.06023244398131666
+    },
+    {
+      "coordinate": "RScapInputY",
+      "bernstein_control": 5,
+      "previous": 1.9999843388927565,
+      "returned": 2.1015787313255787,
+      "change": 0.1015943924328222
+    }
+  ],
+  "max_absolute_change": 0.19560008538284812,
+  "within_recorded_bounds": true
+}

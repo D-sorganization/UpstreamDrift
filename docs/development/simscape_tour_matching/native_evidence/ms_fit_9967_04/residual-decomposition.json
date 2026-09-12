@@ -1,0 +1,135 @@
+{
+  "candidate_sha256": "616678d8f5dbc0c80c4d7398ae650e4d8f0f558a514a98f4f7065f8db0e66819",
+  "qualification": "Diagnostic only: independently aligning each frame changes model pose and is not an admissible trajectory or accepted fit.",
+  "frames": [
+    {
+      "time_s": 0.6,
+      "raw_rms_m": 0.02557663655129828,
+      "centroid_offset_m": [
+        0.001691390693732031, 0.006090166705878364, -0.006483268564619893
+      ],
+      "translation_removed_rms_m": 0.0239202975109421,
+      "rigid_alignment_removed_rms_m": 0.022893205863902973,
+      "largest_marker_errors": [
+        {
+          "label": "WaistLeft",
+          "error_m": 0.04172276777148818
+        },
+        {
+          "label": "LShoulderTop",
+          "error_m": 0.04157401304456848
+        },
+        {
+          "label": "LWristTop",
+          "error_m": 0.03800124536520734
+        },
+        {
+          "label": "HeadSide",
+          "error_m": 0.03529533741060593
+        },
+        {
+          "label": "WaistRight",
+          "error_m": 0.03131139515487625
+        },
+        {
+          "label": "HeadFront",
+          "error_m": 0.03071918441104173
+        },
+        {
+          "label": "LShoulderBack",
+          "error_m": 0.030548066797074936
+        },
+        {
+          "label": "RElbowOut",
+          "error_m": 0.02678099156587402
+        }
+      ]
+    },
+    {
+      "time_s": 0.7,
+      "raw_rms_m": 0.04200430909341746,
+      "centroid_offset_m": [
+        0.006738277105686419, 0.015197733328665142, -0.006478142673608245
+      ],
+      "translation_removed_rms_m": 0.038026571936390696,
+      "rigid_alignment_removed_rms_m": 0.037453858233144295,
+      "largest_marker_errors": [
+        {
+          "label": "WaistLeft",
+          "error_m": 0.061671073624501964
+        },
+        {
+          "label": "LShoulderTop",
+          "error_m": 0.061313276110112995
+        },
+        {
+          "label": "RElbowOut",
+          "error_m": 0.05979438546910197
+        },
+        {
+          "label": "HeadSide",
+          "error_m": 0.058361656807529604
+        },
+        {
+          "label": "Marker_2:2:3",
+          "error_m": 0.05075554017518587
+        },
+        {
+          "label": "HeadFront",
+          "error_m": 0.04782618823748222
+        },
+        {
+          "label": "LShoulderBack",
+          "error_m": 0.04641743627131521
+        },
+        {
+          "label": "LWristTop",
+          "error_m": 0.04636165465671632
+        }
+      ]
+    },
+    {
+      "time_s": 0.8,
+      "raw_rms_m": 0.0626463695163297,
+      "centroid_offset_m": [
+        0.008095974983011622, -7.252022269477187e-5, 0.01428105408988678
+      ],
+      "translation_removed_rms_m": 0.06045716696596033,
+      "rigid_alignment_removed_rms_m": 0.056799733622563874,
+      "largest_marker_errors": [
+        {
+          "label": "LElbowOut",
+          "error_m": 0.12474717841404866
+        },
+        {
+          "label": "LUArmHigh",
+          "error_m": 0.10051150607720782
+        },
+        {
+          "label": "HeadTop",
+          "error_m": 0.0916159966670538
+        },
+        {
+          "label": "RElbowOut",
+          "error_m": 0.086173130495026
+        },
+        {
+          "label": "HeadFront",
+          "error_m": 0.08556924808688048
+        },
+        {
+          "label": "HeadSide",
+          "error_m": 0.08320426414151136
+        },
+        {
+          "label": "RUArmHigh",
+          "error_m": 0.07224258182597204
+        },
+        {
+          "label": "LShoulderBack",
+          "error_m": 0.0716684767666199
+        }
+      ]
+    }
+  ]
+}
