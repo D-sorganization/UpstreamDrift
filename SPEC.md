@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Defer Database Session Acquisition in Auth Dependencies (#8940)
+
+Eliminate sync database session allocation, connection pool checkout, and `SELECT 1` pre-ping overhead on unauthenticated or auth-disabled API requests (~9 sessions/second under normal UI polling):
+- Session Factory Dependency: Introduce `get_db_factory(request: Request = None) -> Callable[[], ContextManager[Session]]` and context manager `db_session_scope() -> Generator[Session, None, None]` in `src/api/database.py`. Resolves DB sessions lazily on demand rather than eagerly during FastAPI dependency resolution.
+- Auth-Disabled Mode Bypass: Update `_global_auth_dependency`, `_ws_compatible_auth_dependency`, and `_request_time_quota_dependency` in `src/api/route_registry.py` as well as `require_cloud_auth` in `src/api/auth/dependencies.py` to evaluate `is_auth_disabled()` prior to acquiring any database session. In local/auth-disabled mode, dependencies return/yield `None` without touching `SessionLocal` or database connection pools.
+- Test Override Interoperability: `get_db_factory` inspects `request.app.dependency_overrides` and wraps any `app.dependency_overrides[get_db]` or `app.dependency_overrides[get_db_factory]` seamlessly, ensuring complete backward compatibility with existing tests.
+- Automated Verification: Unit tests in `tests/unit/api/test_global_auth_enforcement.py` asserting zero `SessionLocal` constructions across global auth, quota, health, and capability probe routes when auth is disabled.
+
 ## Unified Engine Dashboard Export Provenance (#8820)
 
 Stamp physics engine identity, model path, model file hash, unique run ID, and timestamp into dashboard exports and physics recordings across all formats:
