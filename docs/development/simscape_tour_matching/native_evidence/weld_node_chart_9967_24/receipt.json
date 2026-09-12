@@ -1,0 +1,12 @@
+{
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "path_sha256": "decbdeb43d7695f96bf491ec69b47845b3c1f2c6fead2978bcd5198a7c0ecd4e",
+  "sample": 0,
+  "coordinate_count": 27,
+  "chart_dimension": 21,
+  "chart_step": 0.001,
+  "closure_max_abs": 3.9397418818573667e-16,
+  "scaled_displacement": 0.001,
+  "state_jacobian_shape": [27, 21],
+  "scope": "Local weld-node chart qualification only; no trajectory, effort identification, or forward replay."
+}

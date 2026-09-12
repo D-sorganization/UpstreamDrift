@@ -169,6 +169,16 @@ only; it does not yet differentiate rate/acceleration closure or qualify a
 trajectory. Use it with the existing `node_retraction.retract_node` to keep
 each collocation node on the weld manifold before adding those remaining
 derivatives.
+
+That node-chart construction is now also qualified on ControlTower in
+`native_evidence/weld_node_chart_9967_24/receipt.json`. With translational
+coordinates scaled0.1m and rotational coordinates1rad, the exact native
+Jacobian produces an orthonormal21-dimensional chart. A nonzero0.001 chart
+step retracted through `node_retraction.retract_node` to weld residual
+3.93974e-16, scaled displacement0.001 and state-Jacobian shape27-by-21. The
+runner is `qualify_native_weld_node_chart.py`. This preserves pose closure at
+every node; it still does not supply the rate/acceleration derivative blocks,
+marker objective, dynamic trajectory, torque identification, or forward match.
 identification. The next path stage is an explicit acceleration projection with
 reported correction magnitude, followed by derivative-consistency review; no
 torque fit or forward replay may be inferred from this failed diagnostic.

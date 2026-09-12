@@ -97,6 +97,15 @@ smooth-path node. Use this exact position Jacobian with the existing shared
 finite-difference approximation. Rate and acceleration constraint derivatives
 remain required before a qualified trajectory or effort fit.
 
+The full position-level retraction chart is qualified separately in
+`native_evidence/weld_node_chart_9967_24/receipt.json`: 27 coordinates reduce
+to21 tangent coordinates and a nonzero0.001 chart displacement retracts at
+3.93974e-16 weld residual. Reproduce with
+`qualify_native_weld_node_chart.py`. This is the approved position-node
+parameterization for the next collocation stage; retain its0.1m translational
+and1rad rotational state scales unless a separately qualified scale change is
+recorded.
+
 Use `NativeConstrainedPoseOracle` with the existing shared
 `fit_marker_pose`; it is the only permitted bridge from the native model to
 the static constrained-pose stage. Pass the exact candidate coordinate order,

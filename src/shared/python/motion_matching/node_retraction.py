@@ -18,6 +18,36 @@ class NodeRetraction(NamedTuple):
     scaled_displacement: float
 
 
+def scaled_tangent_basis(jacobian: Array, state_scales: Array) -> Array:
+    """Return an orthonormal chart basis tangent in scaled state coordinates.
+
+    If physical perturbations are `dx = scales * dy`, this returns N with
+    J*diag(scales)*N=0. The weld must have full row rank; otherwise choosing a
+    chart would silently hide a singular closure.
+    """
+    matrix = np.asarray(jacobian, dtype=float)
+    scales = np.asarray(state_scales, dtype=float)
+    if (
+        matrix.ndim != 2
+        or not matrix.shape[0]
+        or matrix.shape[0] >= matrix.shape[1]
+        or scales.shape != (matrix.shape[1],)
+        or not np.isfinite(matrix).all()
+        or not np.isfinite(scales).all()
+        or np.any(scales <= 0)
+    ):
+        raise ValueError("Invalid closure Jacobian or positive state scales")
+    _, singular, right = np.linalg.svd(matrix * scales[None, :], full_matrices=True)
+    if singular[-1] <= 1e-10 * singular[0]:
+        raise ValueError("Closure Jacobian lost row rank")
+    rank = matrix.shape[0]
+    basis = right[rank:].T.copy()
+    if basis.shape != (matrix.shape[1], matrix.shape[1] - rank):
+        raise ValueError("Invalid tangent basis dimension")
+    basis.setflags(write=False)
+    return basis
+
+
 def retract_node(
     reference: Array,
     basis: Array,
