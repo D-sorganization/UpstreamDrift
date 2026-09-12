@@ -4,6 +4,7 @@ Stock mj_step uses compliant equality constraints and is not this adapter's
 execution path. Mass, bias, kinematics and Jacobian derivatives come from MuJoCo.
 """
 
+import hashlib
 from collections.abc import Mapping
 from importlib import import_module
 from typing import Any
@@ -12,10 +13,32 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.native_mjcf import export_native_mjcf
+from src.shared.python.motion_matching.native_urdf_contract import (
+    validate_native_urdf_bundle,
+)
 
 
 class NativeMujocoModel:
     """Match the public native acceleration/frame protocol without feedback."""
+
+    @classmethod
+    def from_native_bundle(
+        cls, urdf_bytes: bytes, sidecar_bytes: bytes, model_bytes: bytes
+    ) -> "NativeMujocoModel":
+        """Validate the portable bundle, then convert canonical geometry to MJCF.
+
+        This is not direct MuJoCo URDF parsing. The shared contract checks bundle
+        identities and native semantics before any engine construction. Dynamics
+        still uses the explicit rigid closure adapter, not stock mj_step.
+        """
+        metadata = validate_native_urdf_bundle(urdf_bytes, sidecar_bytes, model_bytes)
+        engine = cls(model_bytes)
+        engine.metadata.update(
+            bundle_conversion="validated canonical geometry to MJCF; not direct URDF parsing",
+            urdf_sha256=metadata["urdf_sha256"],
+            sidecar_sha256=hashlib.sha256(sidecar_bytes).hexdigest(),
+        )
+        return engine
 
     def __init__(self, model_bytes: bytes) -> None:
         mj: Any = import_module("mujoco")
