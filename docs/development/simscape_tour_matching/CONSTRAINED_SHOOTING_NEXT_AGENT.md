@@ -6,8 +6,9 @@ Backend77eb87cca plus type fix5c6765de4 is implemented and pushed;33 relevant
 tests and normal push checks pass. Do not repeat the implementation plan below
 as if it were unstarted. The native audit completed; its rank, slope agreement
 and numerical limits are recorded at the TOP of NATIVE_PORT_CHECKPOINT_20260911.md.
-The first bounded constrained fit (run15) is live there; poll that exact job and
-independently replay its result. Historical design steps below
+The current job and exact next action are recorded there; do not infer liveness
+from historical design instructions below. Independently replay each result.
+Historical design steps below
 remain useful acceptance and review requirements, not instructions to duplicate
 the new equality_least_squares.py backend.
 
