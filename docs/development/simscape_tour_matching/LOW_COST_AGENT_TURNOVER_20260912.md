@@ -75,6 +75,18 @@ it is not derivative-consistent and must never be treated as an inverse-
 dynamics input or a torque profile. Build and qualify a joint collocation path
 for q, qd, and qdd before the reaction-eliminated global-sextic initializer.
 
+The reusable scaffold is
+`src/shared/python/motion_matching/constrained_trajectory.py`, tested on a
+synthetic holonomic path. The native Drake runner is
+`../drake_native_matching/reproduction/collocate_smooth_native_path.py`.
+Its first two-iteration receipt is deliberately a failed preflight at
+`../drake_native_matching/evidence/smooth_native_collocation_probe_9967_24/receipt.json`:
+the finite-difference trust-constr baseline stops with position0.00126302,
+rate0.0172004 and acceleration0.724940 maximum absolute closure. Do not make
+this a longer blind run. Add and test all three constraint derivatives plus
+manifold continuation/retraction, retaining the same receipt/gates, before
+using its output in reaction-eliminated sextic identification.
+
 Use `NativeConstrainedPoseOracle` with the existing shared
 `fit_marker_pose`; it is the only permitted bridge from the native model to
 the static constrained-pose stage. Pass the exact candidate coordinate order,

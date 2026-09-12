@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-11
 - **Last verified:** 2026-09-12 (SELF; 42 focused solver/executor/closure tests, Ruff and mypy pass; fixed six-window worker parity, parent batch adapter, guarded-driver regression, native single-state closure probe, fine constrained-pose continuation through0.85 s, sampled smooth q/qd closure, and a two-evaluation full solver assembly receipt complete; Drake rejects the spline finite-difference qdd and records an instantaneous-projection diagnostic; run20 terminal and independently rejected)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
-- **Next step:** Build and qualify a derivative-consistent collocation path through the sparse native poses, jointly enforcing pose, rate, and acceleration weld closure. Use it only as a reaction-eliminated global-sextic initializer before one bounded forward fit through the qualified batch seam.
+- **Next step:** Add analytic derivatives and manifold continuation/retraction to the tested derivative-consistent collocation scaffold. The first finite-difference native Drake preflight is deliberately failed and archived; do not extend it blindly. Qualify pose, rate, and acceleration weld closure before using the path as a reaction-eliminated global-sextic initializer and then one bounded forward fit through the qualified batch seam.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps
 

@@ -26,6 +26,19 @@ must construct a derivative-consistent collocation trajectory that preserves
 pose, velocity, and acceleration closure together before the existing
 reaction-eliminated global-sextic initializer may run.
 
+`src/shared/python/motion_matching/constrained_trajectory.py` now supplies the
+tested C2 node-spline closure contract and a generic collocation baseline. Its
+first isolated native Drake probe is intentionally unqualified and retained at
+`evidence/smooth_native_collocation_probe_9967_24/receipt.json`: two
+finite-difference trust-constr iterations ended at pose0.00126302,
+rate0.0172004, and acceleration0.724940 maximum absolute closure, with the
+function-evaluation budget exhausted. The executable is
+`reproduction/collocate_smooth_native_path.py`. Do not expand that blind
+black-box budget: its trial moved an initially pose-closed seed away from pose
+closure while seeking the coupled conditions. The next implementation must add
+derivatives of all three constraint blocks and continuation/retraction on the
+native weld manifold, then qualify each stage before an effort fit.
+
 The single identified-profile replay has marker difference8.84e-9m but scalar-rate difference3.37e-4, so its existing full-state reconstruction gate **fails**. No new fitting, model change, tolerance sweep or gate relaxation occurred. The report preserves all prerequisites and a sequential path toward a bounded linear initializer after a smooth native C3D trajectory is available. Root review is required before broad production integration. Exact results are in `evidence/reaction-identification/`; all study jobs are terminal.
 
 ## Reconstructed-Seed Angular-Velocity Diagnostic
