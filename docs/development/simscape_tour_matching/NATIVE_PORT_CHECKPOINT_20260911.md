@@ -1,5 +1,43 @@
 # Native Port Implementation Checkpoint
 
+## Run04 Independently Replayed and Residuals Diagnosed
+
+Updated 2026-09-12 UTC. Independent replay session 54372 exited zero. Its
+candidate identity and all four marker RMS metrics exactly match run04's return.
+The adapter took 4.6633 s, including 4.4810 s integration. Closure pose/rate
+maxima are 2.13184e-11 and 7.95790e-11. This proves reproducibility of the
+0.8 s candidate, not fit acceptance or new Simscape parity. Evidence is in
+native_evidence/ms_fit_9967_04 and raw local/ControlTower directories of the same
+run. Original candidate byte hash is
+8c1d52d9938d8f9ddaa33aac4c10a589c724ffd644fa59aef2f817583193e62d.
+
+Recovering Bernstein corrections against the original root-force02 parent
+confirms all controls remain within the explicit run04 bounds. The largest
+change from run03 is only 0.195600 N m (LScapInputY B6). None of the eight
+released controls approached the new +/-10 bounds. Their returned corrections
+are recorded individually in effort-bound-audit.json. This bounded trial does
+not support further blind bound expansion as the principal remedy.
+
+Residual decomposition from the independently saved arrays gives raw RMS at
+0.6/0.7/0.8 s of 25.577/42.004/62.646 mm. Subtracting each frame's separate
+predicted and observed centroids gives 23.920/38.027/60.457 mm; an additional
+proper Kabsch rotation gives 22.893/37.454/56.800 mm. These alignments are
+diagnostics only, not allowable trajectory edits or claimed fits. At 0.8 s,
+LElbowOut is 124.747 mm, LUArmHigh 100.512 mm, and head errors are 83-92 mm.
+A whole-body pose correction alone therefore leaves substantial articulated
+and/or geometry error. See residual-decomposition.json; computations use only
+valid modeled markers at each named frame, equally weighted, with a determinant
+correction enforcing a proper rotation in the centered SVD alignment.
+
+Next bounded assignment: run the existing closure-constrained static pose
+fitter at 0.6, 0.7 and 0.8 s seeded from run04's states; compare its achieved
+error and per-marker residuals with the prior static multi-start evidence.
+Preserve model, marker attachments and all observations. A static fit is a
+feasibility diagnostic, not a forward result or global lower-bound proof.
+Use the resulting state path to decide between a better shooting initializer
+and fixed-geometry calibration before launching another identical torque fit.
+No optimizer is currently launched by this checkpoint. Full swing remains open.
+
 ## Bound Expansion Returned; OpenSim Planning Check-In
 
 Updated 2026-09-12 UTC. Run04 is no longer live: PID 2072566 is absent and
