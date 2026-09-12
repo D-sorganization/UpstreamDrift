@@ -1,5 +1,35 @@
 # Native Port Implementation Checkpoint
 
+## P2 Replay Adapter Implemented: Native Execution Pending
+
+`src/engines/physics_engines/pinocchio/python/native_replay.py` now consumes
+exact model bytes, revalidates the candidate identity, checks the root force
+primitive inventory, rejects partial/nonfinite clocks, and integrates once
+with NativeEffortProfile and integrate_forward. It checks initial and sampled
+weld pose/velocity residuals through the new public NativePinocchioModel
+closure_errors accessor, and projects markers through the shared helper.
+Its result contains read-only samples, candidate hash and sampled closure
+maxima. It does not assert C3D fit acceptance or check every internal integrator
+trial state's closure; only the initial and requested output states are gated.
+
+Two accessor tests and four adapter tests progressed red-to-green. Analytic
+sextic forcing, changed model bytes, broken initial closure and partial coverage
+are covered. The combined candidate/effort/integration/projection/adapter suite
+passes 34 tests; Ruff passed after import sorting. Fake-engine contract evidence
+does not replace actual Pinocchio execution. No native job is live.
+
+Next single action: stage an isolated runtime bundle on ControlTower containing
+unmodified native_model.py/native_replay.py and shared native_candidate.py,
+native_effort_profile.py, polynomial_torque.py, validate_theta.py,
+continuous_forward.py and marker_projection.py, preserving module paths and
+source hashes. Avoid importing the unrelated full launcher/UI package graph.
+Use the existing Pinocchio 4.1.0/SciPy environment and exact original model bytes
+bound by native_replay_candidate_9967.json. Run replay_candidate on the saved
+native clock (or first a capture-rate full 0.80 s clock), compare against the
+qualified diagnostic, and save dependency/source/candidate/runtime receipts.
+If deployment uses a namespace-only diagnostic bundle, say so explicitly and
+do not claim full application-package integration. P3 URDF reload remains next.
+
 ## P2 Candidate Package Implemented
 
 `motion_matching/native_candidate.py` provides a versioned validated JSON
