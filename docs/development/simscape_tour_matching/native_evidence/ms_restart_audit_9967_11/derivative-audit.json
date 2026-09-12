@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "time_s": 0.2,
+      "column": 0,
+      "marker_relative": 2.814785361640701e-7,
+      "state_relative": 1.8174614973771562e-7
+    },
+    {
+      "time_s": 0.2,
+      "column": 14,
+      "marker_relative": 5.989745404568897e-8,
+      "state_relative": 3.256768767349194e-8
+    },
+    {
+      "time_s": 0.4,
+      "column": 0,
+      "marker_relative": 2.8141275026557985e-8,
+      "state_relative": 2.1942210355695515e-7
+    },
+    {
+      "time_s": 0.4,
+      "column": 14,
+      "marker_relative": 6.86320346441826e-8,
+      "state_relative": 1.1589334399195073e-7
+    },
+    {
+      "time_s": 0.6,
+      "column": 0,
+      "marker_relative": 5.121605658960112e-9,
+      "state_relative": 2.410806211481643e-7
+    },
+    {
+      "time_s": 0.6,
+      "column": 14,
+      "marker_relative": 5.4300867921804805e-8,
+      "state_relative": 7.329383922276064e-7
+    },
+    {
+      "time_s": 0.7,
+      "column": 0,
+      "marker_relative": 2.1819105442682944e-7,
+      "state_relative": 9.813945210059752e-6
+    },
+    {
+      "time_s": 0.7,
+      "column": 14,
+      "marker_relative": 2.987292870114351e-7,
+      "state_relative": 1.1336430126901088e-5
+    },
+    {
+      "kind": "early_effort",
+      "coordinate": "TranslationInputX",
+      "bernstein_control": 0,
+      "column": 0,
+      "marker_relative": 0.00018204266884330807,
+      "state_relative": 0.00035275034470594823
+    },
+    {
+      "kind": "early_effort",
+      "coordinate": "HipInputZ",
+      "bernstein_control": 1,
+      "column": 36,
+      "marker_relative": 1.2558220298600692e-5,
+      "state_relative": 8.912801991740252e-6
+    }
+  ]
+}
