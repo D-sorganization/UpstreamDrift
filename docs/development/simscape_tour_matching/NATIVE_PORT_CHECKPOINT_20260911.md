@@ -1,5 +1,42 @@
 # Native Port Implementation Checkpoint
 
+## Run08 Stops on Step Size; Configurable Step Tolerance Added
+
+Updated 2026-09-12 UTC. Run08 session 8567 exited zero after only four evaluations
+with xtol termination. Optimizer convergence is true, fit acceptance false.
+Independent continuous replay exactly reproduces canonical
+4fd0f6a8291f247e458b7b23d2d4866a5e29963e9ab5c4cb853e764408d4552f:
+whole 23.301337 mm, early 9.969404 mm, terminal 61.019909 mm and club
+31.017396 mm. Yaw 8.997975 percent; scaled defects 0.001502205 and 0.001033074
+fail 0.0001. Optimality remains 1037.5900; no active bounds. Small-step
+termination is not proof of a good fit or a stationary solution.
+
+Fresh replay adapter time 3.36028 s, native closure pose/rate maxima
+2.80072e-11/1.37629e-10. Raw candidate hash
+1e4fa961595d621f310eb26875aa9378feb83a7abb68d5bf302e441cdeb4338d.
+Recovering coefficients against the original parent shows maximum B0/B1 movement
+only 0.000190538 N or N m. Thus this four-evaluation solve barely explored the
+new controls; it does not establish they cannot help. Complete raw run and
+independent receipt are in native_evidence/ms_fit_9967_08 and mirrored raw
+local/ControlTower native-ms-fit-9967-08 directories. No run08 process is live.
+
+Shared MultipleShootingOptions now has step_tolerance (default 1e-8, preserving
+existing behavior), passed to SciPy xtol. None explicitly disables step-size
+stopping. Invalid/nonfinite/nonpositive/bool or sub-machine-epsilon values fail
+the contract. Cost and gradient tolerances, finite evaluation budget and fit
+gates remain unchanged. Seven test cases first failed on the missing option;
+combined shooting/retraction tests now pass 21 cases, with Ruff and mypy clean.
+No existing remote runtime was edited.
+
+Next controlled run: restore run08 coefficients AND physical nodes in the same
+original charts and bounds, use an isolated runtime with step_tolerance=None,
+and retain full evaluation snapshots plus all acceptance gates. Remove the old
+restart guard requiring zero B0/B1 corrections: those controls are now explicitly
+free and must instead be checked against the recorded bounds. Qualify the
+restored defects and derivative probes before fitting. This is a stopping-rule
+experiment, not a promise that longer optimization will overcome conditioning.
+Full-swing matching and final R2025b validation remain incomplete.
+
 ## All Seven Effort Controls Qualified; Run08 Is Live
 
 Updated 2026-09-12 UTC. Driver08 uses first_control=0: all 189 physical Bernstein

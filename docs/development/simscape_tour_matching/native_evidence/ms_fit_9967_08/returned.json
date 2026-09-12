@@ -1,0 +1,23 @@
+{
+  "candidate_sha256": "4fd0f6a8291f247e458b7b23d2d4866a5e29963e9ab5c4cb853e764408d4552f",
+  "metrics": {
+    "whole": 0.023301337207702177,
+    "early": 0.00996940361121431,
+    "terminal": 0.06101990863750496,
+    "club": 0.031017395860029155,
+    "yaw_pct": 8.997975324488431
+  },
+  "accepted": false,
+  "optimizer_converged": true,
+  "max_scaled_defect_norm": 0.0015022053230006357,
+  "message": "`xtol` termination condition is satisfied.",
+  "defect_norms": {
+    "0.6": 0.0015022053230006357,
+    "0.7": 0.001033073658637449
+  },
+  "optimality": 1037.59004539385,
+  "function_evaluations": 4,
+  "active_bound_count": 0,
+  "segmented_rms": 0.023375325046205434,
+  "unsegmented_rms": 0.023301337207702177
+}
