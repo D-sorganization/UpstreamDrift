@@ -19,7 +19,8 @@ def _records(value: Any) -> list[dict[str, Any]]:
     raise ValueError("Expected native record or array of records")
 
 
-def _active_blocks(document: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+def uncommented_blocks(document: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+    """Exclude commented ancestry; this does not qualify compiled variants."""
     if document.get("schema_version") != 2:
         raise ValueError("Stable physical endpoints require inventory schema 2")
     records = _records(document["blocks"])
@@ -98,7 +99,7 @@ def physical_connection_components(
     signal nets are included; consumers must identify frame ports from native
     component metadata. No ports are merged merely because they share a block.
     """
-    blocks = _active_blocks(document)
+    blocks = uncommented_blocks(document)
     all_blocks = {item["path"] for item in _records(document["blocks"])}
     graph: dict[str, set[str]] = {}
     connections = []

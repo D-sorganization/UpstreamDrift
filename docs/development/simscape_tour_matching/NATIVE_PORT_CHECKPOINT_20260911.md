@@ -1,5 +1,45 @@
 # Native Port Implementation Checkpoint
 
+## Complete Native Solid Port Coverage and Fixed Transforms
+
+All 31 uncommented solids now have connector mappings measured in R2025b on
+ControlTower: 51 physical ports, with exact coverage checked against the source
+inventory. The final batch used one frozen probe source, hashed inventory and
+hashed block list; its terminal exit code is zero. Results and per-file hashes
+are recorded in `native_solid_port_bindings_20260911.json`. Raw probes, frozen
+source, native log and start/finish receipts are archived at
+`C:/Users/diete/Repositories/simscape-tour-checkpoints/native-solid-ports-20260911-02`
+and `ControlTower:C:/Users/diete/native-solid-ports-20260911-02`.
+
+`bind_solid_ports` compares separately measured named-frame and physical-port
+poses, retaining aliases if frames coincide. It rejects unmatched ports and
+requires original-layout R2025b evidence. The receipt additionally checks that
+every expected solid and every physical connector was covered. It does not
+certify inertia or dynamics. A native upper-arm connector fixture is committed.
+
+The native probe now supports cylinders/spheres with or without custom frames.
+The first exploratory batch stopped at cylinder 14 (no custom frame); that
+terminal failure was repaired, then all 31 solids were rerun in the final frozen
+batch. Do not resume either batch: both are terminal and complete for their
+documented scope. The final batch is the authoritative connector evidence.
+
+`rigid_transform` converts all 14 exported rigid-transform records (13 without
+commented ancestry). It preserves intrinsic follower-axis versus extrinsic
+base-axis sequence order, as specified by the MathWorks Rigid Transform block.
+The targeted graph/solid/transform suite has 12 passing tests; Ruff passes.
+Fixed-transform conversion has unit/source-documentation evidence; it still
+needs full-model native FK comparison.
+
+Next assembly decision: test cutting the native
+`GolfSwing3D_Kinetic/Grip/RightHandOnClubForce` weld to form the Pinocchio tree,
+then reimpose that exact six-dimensional closure. Its hand-side standoff has
+0.01 kg native mass, avoiding an invented massless leaf for the actuated wrist.
+Prove that the cut removes the loop without losing any of the 27 joint
+primitives. The native hip is Bushing (Px, Py, Pz, Rx, Ry, Rz), not quaternion
+Six-DOF; preserve its translation/rotation and virtual-work conventions.
+Assemble fixed frames/inertias first, check loop consistency and native FK,
+then implement constraint-consistent forward integration and pulse parity.
+
 ## Solid Properties and First Native Frame Parity
 
 `native_solids.py` now converts native CalculateFromGeometry cylinders and

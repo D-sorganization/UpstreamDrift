@@ -1,0 +1,287 @@
+{
+  "qualification": "native solid connector mapping only; not dynamics parity",
+  "matlab_release": "2025b",
+  "run": {
+    "source_sha256": "CD7523D2CBC40EE27ECB815CD73F44701D8F78C588B7D2BCBE1165175141D1A5",
+    "inventory_sha256": "5614950F352FE796F4C88FCA9C06ACF5EF9A37704FDDB12265B52AED125D755C",
+    "list_sha256": "80DC375F09B97880D0E6791D9364DE68D84E310847F085597C26BE49311E53F4",
+    "started_at": "2026-09-11T21:38:12.7431453-07:00",
+    "exit_code": 0,
+    "finished_at": "2026-09-11T21:39:10.2788099-07:00"
+  },
+  "archive_directory": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-solid-ports-20260911-02",
+  "solid_count": 31,
+  "physical_port_count": 51,
+  "bindings": {
+    "GolfSwing3D_Kinetic/Club/Clubface Vector": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Club/Clubhead": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/Club/Rigid Shaft/Rigid Shaft": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Grip/1.5\" Bottom": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Grip/1.5\" Top": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Grip/2.5\" Butt": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Grip/GhostGripSegment": {
+      "LConn1": ["Frame1"]
+    },
+    "GolfSwing3D_Kinetic/Grip/LHand": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/Grip/LHandStandoff": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Grip/RHand": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/Grip/RHandStandoff": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/Head": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/Neck": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoTop": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/ZeroMassHipReference": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/Hips and Torso Inputs/ZeroMassShoulderReference": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/HubtoLS": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/HubtoRS": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/LUpperArm": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Left Forearm/LUpperForearm": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Left Shoulder Joint/Spherical Solid1": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/RUpperArm": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": {
+      "RConn1": ["R"]
+    },
+    "GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Right Forearm/RUpperForearm": {
+      "LConn1": ["Frame1"],
+      "RConn1": ["Frame2"]
+    },
+    "GolfSwing3D_Kinetic/Right Shoulder Joint/Spherical Solid1": {
+      "RConn1": ["R"]
+    }
+  },
+  "probes": [
+    {
+      "block": "GolfSwing3D_Kinetic/Club/Clubface Vector",
+      "file": "solid-001.json",
+      "sha256": "e674625f56855e778f060b279a4b93a1a0e3a2c41019754a059a52604cded803"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Club/Clubhead",
+      "file": "solid-002.json",
+      "sha256": "40234da3a73a57d1c053acb12fa8111b5c52beb854fd202feffa9dfab7d70062"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Club/Rigid Shaft/Rigid Shaft",
+      "file": "solid-003.json",
+      "sha256": "06ec5577f84a5dd4aecbbf7de55d6a2f775deec8657ff5d15455884e5eef1ed8"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Grip/1.5\" Bottom",
+      "file": "solid-004.json",
+      "sha256": "3e41cf41494b25db93fab24f53e29dd1827aa8d88f28d5825e975c2f600bc20d"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Grip/1.5\" Top",
+      "file": "solid-005.json",
+      "sha256": "ce18139b5f7ac35d1f9f4f02f482f1138976c270a271fd4858fed9f78ebf0582"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Grip/2.5\" Butt",
+      "file": "solid-006.json",
+      "sha256": "630cd5f56df005cc44ca9180e1144315ee8d72dc7196d65b573124e511325c2c"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Grip/GhostGripSegment",
+      "file": "solid-007.json",
+      "sha256": "735df0ba3d52223e2addfcbaf8bad969c86f2ca1e16eb87dd254a17971fb24ed"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Grip/LHand",
+      "file": "solid-008.json",
+      "sha256": "6bd30021d041293fcadbe530d18848603ccfb598d6a187660a45d6bd2ab886ac"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Grip/LHandStandoff",
+      "file": "solid-009.json",
+      "sha256": "e1757d3de30a38bb6704700a89b5b690ba020cc3d3c4de3e66cc6e8750faf386"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Grip/RHand",
+      "file": "solid-010.json",
+      "sha256": "d88ced69f9bd62779d9ee492d0e9f160e6966111d9cf1c211a4267bab3380496"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Grip/RHandStandoff",
+      "file": "solid-011.json",
+      "sha256": "60404cfd2b0b04f0f42faea8dc849f71defa339197eac4097350aa21bb460326"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "file": "solid-012.json",
+      "sha256": "819d46f486ccfbbcefeda77626d351dcd0f46dbef1c402003832b6b6d65780ed"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Head",
+      "file": "solid-013.json",
+      "sha256": "fc214e6fa3c59472f3b44ffee408ab11d9db8f2463e46b05dbdb9af4fb2d87e4"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+      "file": "solid-014.json",
+      "sha256": "d7ce8f74daeed47b22af0e9cc0257d68e45c1c10556a381988f6a459bac3f9a0"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Neck",
+      "file": "solid-015.json",
+      "sha256": "c06292b66ed0c9d1e0536dae4e892fedb491d08b885f8556598684114c61e2c6"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase",
+      "file": "solid-016.json",
+      "sha256": "9a3f008a4a264877c8f13ff46041c548614b005e5e2efe9d0e4b3ea437a35fdf"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoTop",
+      "file": "solid-017.json",
+      "sha256": "416f86e8e348d34aaed82ccae8dad70f2a70530acd77ba71c4e8dfc7b6d1c81f"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Hips and Torso Inputs/ZeroMassHipReference",
+      "file": "solid-018.json",
+      "sha256": "7b5564154b00c12ee2dd874de05ed58548c757f606ac6b9a53c718078da0469a"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Hips and Torso Inputs/ZeroMassShoulderReference",
+      "file": "solid-019.json",
+      "sha256": "045c20575825eb9485dbe93f67daf49035a3b9b777c12d1eef4b50b6a3c0a264"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/HubtoLS",
+      "file": "solid-020.json",
+      "sha256": "7fe2c456ad7ce52ba4cba70573d0f29e4664014085c1969c090af742845180fd"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/HubtoRS",
+      "file": "solid-021.json",
+      "sha256": "ea647559a8467b528fe0b18a98ece113d4e031e90da8f3e4b9f52445000382a1"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/LUpperArm",
+      "file": "solid-022.json",
+      "sha256": "db32ae0a0688c0fbf93b83df0f3aede9c1261b9bf4ea49056a6541ba25c28a69"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid",
+      "file": "solid-023.json",
+      "sha256": "152cae4849d46e27efdc175d3cbbba48c057e37670e6c2ed9c592ec389c8fdbe"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Left Forearm/LLowerForearm",
+      "file": "solid-024.json",
+      "sha256": "67bc0688db8ea552cae5ac99061ad9af334b60db6c63ad374964d8408f10f25b"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Left Forearm/LUpperForearm",
+      "file": "solid-025.json",
+      "sha256": "cbc73f717d448248221a75e9eb16a9dbaec8d188d9b2211a53fee9e66823726a"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Left Shoulder Joint/Spherical Solid1",
+      "file": "solid-026.json",
+      "sha256": "8d8157eebf6460e84e631be92ca1cdede1e4cc509d4710455835951e4120ba8b"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/RUpperArm",
+      "file": "solid-027.json",
+      "sha256": "cde40f7b73e918bd90f590483842a65a23f013a53fcc35ca5037e3f50b28babb"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
+      "file": "solid-028.json",
+      "sha256": "f543d053ca6a01f893fa7e9d9c80c388fad16043670a6d0b362e74b7b8abec04"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
+      "file": "solid-029.json",
+      "sha256": "a730833231cb32de7bbd3ef8d3eaa8b1b96621dd1cf4fafa02930c055a300fca"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Right Forearm/RUpperForearm",
+      "file": "solid-030.json",
+      "sha256": "77ced30f7e28e569285dcc0b26cda9d14bced428483f8b6ba415ebc5f455e27a"
+    },
+    {
+      "block": "GolfSwing3D_Kinetic/Right Shoulder Joint/Spherical Solid1",
+      "file": "solid-031.json",
+      "sha256": "4c9038eb4684d746fc85dd5d80492ff80ff656d79d394941bc24ecc550748ce2"
+    }
+  ]
+}
