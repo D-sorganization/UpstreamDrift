@@ -1,5 +1,47 @@
 # Native Port Implementation Checkpoint
 
+## Continuous Three-Window Initialization Qualified; Run06 Is Live
+
+Updated 2026-09-12 UTC. New isolated runtime
+/home/dieterolson/native-ms-pilot-9967-06 copies the existing native-ms-pilot-9967-01
+runtime and updates only the shared solver to the tested diagnostics revision
+8d6d0a1ac. Old runtimes are preserved. Solver source byte hash
+f1759dd4e64b36f7bfceab030cd2ec7f111e5518fedba52b570c3444ba1346f3.
+The experiment driver selects run04's continuous states at 0.6 and 0.7 s as
+separate chart references. Original q0/qd0, global sextic, model, marker mapping,
+run04 bounds and local chart scales/boxes remain unchanged.
+
+Audit-only session 31313 exited zero. Independent window evaluations reproduce
+initial scaled defects 6.60583e-14 and 8.50428e-11 at 0.6 and 0.7 s. The driver
+asserts both are below 1e-4 before optimizing. Composed node derivative probes
+at both nodes pass: maximum marker relative error 3.26806e-7, end-state relative
+error 1.95999e-5, below the 1e-3 audit threshold. These are local probe checks,
+not certification of every future state. Receipt directory is
+native_evidence/ms_continuous_audit_9967_06, mirrored raw locally/ControlTower as
+native-ms-continuous-audit-9967-06.
+
+LIVE fit: unified session 86970, confirmed ControlTower WSL PID 2121045.
+Output C:/Users/diete/native-ms-fit-9967-06. Command:
+run_native_ms_pilot_9967_06.py --output /mnt/c/Users/diete/native-ms-fit-9967-06
+--max-nfev 12 --defect-weight 100. PYTHONPATH is the new runtime above; Python
+is /home/dieterolson/simscape-pinocchio-9967/.venv/bin/python, with
+OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1. This changes both node initialization
+and continuity penalty from run05, so interpret it as a controlled practical
+comparison, not a single-factor attribution experiment.
+
+Driver hash ccf490f50e71c061da89edf5dcbe025a8a8bede67ab43aee1230b0d2fc33bfdc.
+Exact driver, solver copy and staging script are preserved in the local raw
+checkpoint directory and an archived bundle in native_evidence. Driver records
+the actual solver source hash, and will serialize per-node defects, optimality,
+function evaluations and active-bound count. It reruns initialization/derivative
+audits before each fit. No acceptance thresholds have been weakened.
+
+Next action: poll session 86970/PID 2121045, preserve terminal output and replay
+returned coefficients independently. Compare to run04 and inspect whether
+continuity remains satisfied, which bounds are active, and whether optimality
+improves. Do not restart a live job or infer termination from an observation
+timeout. Full capture and final R2025b qualification remain open.
+
 ## Pose-Seeded Trial Rejected After Independent Replay
 
 Updated 2026-09-12 UTC. Run05 session 45470 exited zero after exhausting its
