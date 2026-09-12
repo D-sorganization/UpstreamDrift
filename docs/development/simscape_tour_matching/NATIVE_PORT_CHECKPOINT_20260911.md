@@ -1,5 +1,53 @@
 # Native Port Implementation Checkpoint
 
+## Bounded Linear Step Tested Against Native Replay
+
+Updated 2026-09-12 UTC. Previous turn made progress with conditioning evidence.
+Its commit 4ba84aac8 is now confirmed pushed after all hooks passed. This turn
+solved a column-normalized bounded linear subproblem at the expanded candidate,
+then tested actual continuous forward replay at six step fractions. No runtime
+physics, initial state, objective, or original correction bounds changed.
+
+The BVLS diagnostic converged in 673 iterations with optimality 4.60913e-11.
+Predicted full-step score is 8.15180 versus 13.95256 before; maximum change from
+the current controls is 3.78471 N/Nm. Total correction remains within +/-2 N/Nm
+relative to the original root-force02 parent. It is possible to move nearly
+4 units between opposite bounds without changing that original bound policy.
+
+Actual scores for fractions .001/.01/.02/.04/.1/1 are recorded in
+native_evidence/bounded_trial_9967_01/summary.json. The .01 step gives 13.86906;
+.1 gives 24.79349 and 1 gives 1493.63953. The full-step linear prediction is
+therefore unreliable over this direction's large excursion. No candidate has
+been accepted based on that prediction. All six replays completed normally;
+the first four session 6349 and bracket session 23145 exited zero.
+
+Best sampled fraction is .02: score 13.822219, whole RMS 23.650135 mm,
+early RMS 10.012688 mm, terminal RMS 62.549398 mm and terminal club 30.590078 mm.
+Canonical candidate: 499535d5eed7f74f27f836f267f7ef1956f58c5e28bb08a4b6b13a44da7c6048.
+This is a selected forward-tested experiment, not a converged fit; terminal gate
+still fails. It slightly improves the weighted objective but not every marker
+metric. Do not discard the preceding seeds. Artifact candidate-02.json and its
+replay-02.json/.npz plus plot are in bounded_trial_9967_01. Original bytes remain
+in simscape-tour-checkpoints/native-bounded-trial-9967-01 and the same named
+ControlTower user directory. Remote uses native-expanded-sextic-9967-01 namespace
+and benchmark_native_marker_visual_9967.py with the same tight tolerances.
+
+Diagnostic scripts and proposal receipt are retained in local
+simscape-tour-checkpoints: propose_bounded_native_9967_01.py,
+build_bounded_trials_9967_01.py, build_bounded_bracket_9967_01.py, and
+native-bounded-proposal-9967-01.json. Candidate generation reused tested native
+increment/recovery functions and asserted original bounds and frozen B0/B1.
+This was an experimental numerical evaluation; no production optimizer was changed.
+
+Next action: implement and test an exact-clock native shooting-window adapter
+with closure-valid initial nodes and initial-state sensitivities. Coordinate the
+shared MS solver repair with Gemini rather than duplicating it. Test a small
+constrained system first, then a split of this same .8 s trajectory whose zero-
+defect state reproduces the single replay. The observed tiny useful line-search
+step supports changing initialization/conditioning before another long identical
+single-shooting budget. Full-capture extension and R2025b final qualification
+remain open; this prefix result does not satisfy the goal.
+
 ## Latest-Candidate Conditioning Measured
 
 Updated 2026-09-12 UTC. Previous turn made progress through alternative-seed
