@@ -1,0 +1,31 @@
+{
+  "qualification": "Unoptimized absolute-time polynomial extension; not full-horizon fit",
+  "candidate_sha256": "992d26b7d47d8668817d1bd01013042524b505dcd655aad5a2fa991e9d3f2b44",
+  "frames": [
+    {
+      "time_s": 0.8,
+      "observed_marker_count": 25,
+      "marker_rms_m": 0.05936280149645342
+    },
+    {
+      "time_s": 0.85,
+      "observed_marker_count": 25,
+      "marker_rms_m": 0.1176114446178437
+    },
+    {
+      "time_s": 0.9,
+      "observed_marker_count": 25,
+      "marker_rms_m": 0.2672997760156931
+    },
+    {
+      "time_s": 0.95,
+      "observed_marker_count": 25,
+      "marker_rms_m": 0.49623342952939614
+    },
+    {
+      "time_s": 1.0,
+      "observed_marker_count": 25,
+      "marker_rms_m": 0.6496892028191738
+    }
+  ]
+}
