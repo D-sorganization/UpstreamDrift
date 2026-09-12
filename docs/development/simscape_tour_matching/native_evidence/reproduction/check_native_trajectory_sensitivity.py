@@ -27,6 +27,7 @@ def main() -> None:
     for name in ("model", "candidate", "reference", "output"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--all-controls", action="store_true")
+    parser.add_argument("--first-control", type=int, choices=(2, 4), default=4)
     parser.add_argument("--rtol", type=float, default=1e-11)
     parser.add_argument("--atol", type=float, default=1e-13)
     parser.add_argument("--probe-coordinate", action="append", default=[])
@@ -41,7 +42,8 @@ def main() -> None:
     spec = json.loads(raw)
     names = spec["coordinate_order"]
     n = len(names)
-    parameter_count = 3 * n if args.all_controls else 1
+    control_count = 7 - args.first_control
+    parameter_count = control_count * n if args.all_controls else 1
     if args.probe_coordinate and not args.all_controls:
         raise ValueError("Additional coordinate probes require --all-controls")
     if any(name not in names for name in args.probe_coordinate):
@@ -95,7 +97,7 @@ def main() -> None:
         a = np.block([[np.zeros((n, n)), np.eye(n)], [local.dq, local.dv]])
         if args.all_controls:
             effort_jacobian = profile.bernstein_control_jacobian(
-                t, basis_duration_s=doc["duration_s"]
+                t, basis_duration_s=doc["duration_s"], first_control=args.first_control
             )
         else:
             delta = direction_profile.evaluate(t)
@@ -144,7 +146,9 @@ def main() -> None:
             state_jacobian=result.state_parameter_jacobian,
         )
     reference_column = (
-        3 * names.index(reference["coordinate"]) + reference["bernstein_control"] - 4
+        control_count * names.index(reference["coordinate"])
+        + reference["bernstein_control"]
+        - args.first_control
         if args.all_controls
         else 0
     )
@@ -155,6 +159,7 @@ def main() -> None:
         "qualification": "native sensitivity block audit; selected replay columns only; not optimizer qualification",
         "candidate_sha256": candidate.sha256,
         "parameter_count": parameter_count,
+        "first_control": args.first_control,
         "rtol": args.rtol,
         "atol": args.atol,
         "jacobian_artifact_sha256": hashlib.sha256(
@@ -184,14 +189,14 @@ def main() -> None:
     }
     args.output.write_text(json.dumps(report, indent=2) + "\n")
     for name in args.probe_coordinate:
-        column = 3 * names.index(name)
+        column = control_count * names.index(name)
         expected = all_derivatives[:, :, :, column]
         for step in probe_steps:
             started = perf_counter()
             samples = []
             for sign in (1, -1):
                 controls = np.zeros((n, 7))
-                controls[names.index(name), 4] = sign * step
+                controls[names.index(name), args.first_control] = sign * step
                 trial = increment_native_bernstein(
                     candidate, controls, basis_duration_s=doc["duration_s"]
                 )
@@ -208,7 +213,7 @@ def main() -> None:
             report["coordinate_probes"].append(
                 {
                     "coordinate": name,
-                    "control": 4,
+                    "control": args.first_control,
                     "step": step,
                     "relative_difference": probe_error,
                     "analytic_norm": float(np.linalg.norm(expected)),
