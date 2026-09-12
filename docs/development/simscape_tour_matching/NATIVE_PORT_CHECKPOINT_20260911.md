@@ -1,5 +1,41 @@
 # Native Port Implementation Checkpoint
 
+## Smaller-Step Audit Completed; Shorter Early Windows Under Audit
+
+Updated 2026-09-12 UTC. Session 6242 exited zero. At h=1e-7, the assembled
+gradient-direction cost slope is 2031.0706 versus analytic 2028.1533 (0.1436
+percent relative difference). At h=1e-8 the difference rises to 1.326 percent.
+Random-direction slope errors are 33.50 percent and 4.412 percent respectively;
+residual-vector errors worsen as h shrinks. This supports strong curvature and
+limited numerical resolution in the current formulation, not a proven wiring
+error or a blanket gradient qualification. Weak directions remain uncertain.
+Evidence and raw packages are in ms_global_jac_audit_9967_02.
+
+The next diagnostic subdivides the long 0-0.6 s prefix. Driver10 defines nodes
+at 0.2, 0.4, 0.6, 0.7 and final 0.8 s, with four independent closure charts.
+References and zero chart coordinates come from run08's continuous trajectory;
+all initial dynamic defects must pass 1e-4 before the audit continues. All 189
+effort controls, their existing parent/bounds, initial physical state, model and
+final gates remain unchanged. This changes window partition and initialization;
+it is not a byte-identical restart of prior node variables. Inclusive window
+boundaries also duplicate their marker samples under the existing shared cost.
+
+LIVE diagnostic: unified session 33109, confirmed ControlTower WSL PID 2161235,
+output C:/Users/diete/native-ms-short-window-audit-9967-10. Runner
+audit_native_short_windows_9967_10.py invokes run_native_ms_pilot_9967_10.py
+inside its own process and intercepts optimization with a directional Jacobian
+audit. It performs no fit. Runtime09/Python/thread settings are unchanged.
+It tests local charts, first-window B0/B1 derivatives, then the full assembled
+residual at h=1e-4, 1e-5 and 1e-6. Directions follow the same deterministic
+construction but have more node variables; do not claim identical directions.
+
+Driver SHA-256 2785648d08d46aa3c1bc52a997086f4c44e9e1c5c039a8f70b52728618350dbc;
+audit runner 55cc85f8619dcdd42bf16afccdc8714d388b227095ea7a1e7de2cdadadb38116.
+Exact scripts are archived and present locally/ControlTower. Next action:
+poll session 33109/PID 2161235 and inspect global-jacobian-audit.json together
+with initial-defects.json. Only launch a fit if the diagnostic supports the
+formulation. Full capture remains unmatched; no new fit is currently running.
+
 ## Assembled Residual Audit Shows Strong Step-Size Sensitivity
 
 Updated 2026-09-12 UTC. Global Jacobian audit session 13381 exited zero. It
