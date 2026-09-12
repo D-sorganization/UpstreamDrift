@@ -1,5 +1,74 @@
 # Native Port Implementation Checkpoint
 
+## Run 02 Finished and Independently Replayed
+
+Updated 2026-09-12 07:38 UTC. This supersedes all live-run statements below.
+Exec session 48221 exited zero after 338 evaluations; our optimization is now
+terminal. No replacement job has been launched. Independent fresh-process
+replay exactly reproduces the returned candidate's four RMS metrics.
+Canonical candidate SHA256:
+90d801cad282dba88170442dc7a57e4757aef04780bf267f311bd1a098f498b7.
+
+| Metric                    | Run 01 Returned | Run 02 Returned | Acceptance Gate |
+| ------------------------- | --------------: | --------------: | --------------: |
+| Whole 0.80 s Prefix RMS   |      34.4259 mm |      31.5031 mm |           25 mm |
+| Early Through 0.60 s RMS  |      10.5434 mm |      10.9514 mm |           12 mm |
+| Terminal RMS              |      132.142 mm |      96.8489 mm |           35 mm |
+| Terminal Club Cluster RMS |      177.079 mm |      78.6801 mm |           60 mm |
+
+Numerical acceptance and optimizer convergence both remain false; max_nfev=12
+was exhausted. Fresh replay plus residual took 3.40328 s; closure pose/velocity
+maxima were 3.52597e-11 / 1.76122e-10. This is improvement, not a completed
+prefix/full-swing match. No new R2025b acceptance run has been made.
+
+Five controls are within 0.0001 of their original [0.8,1.2] optimizer bounds:
+TranslationInputZ (upper), LScapInputX (lower), LSInputZ (upper), LWInputX
+(lower), RWInputX (upper). The associated sixth-power correction at 0.80 s
+is approximately +/-2 N or Nm. These are correction bounds relative to the
+original candidate, not total physical-effort bounds. Earlier no-bound
+observations do not apply to the final returned result. Improvement resumed
+late in the run, so an earlier apparent plateau was not a proven minimum.
+
+Artifacts: native_evidence/refinement_9967_02/ contains config, every evaluation,
+best exploratory sample, optimizer return, candidate-only JSON, fresh replay
+receipt, portable trajectory arrays and the new marker-error PNG. The original
+remote folder C:/Users/diete/native-refinement-9967-02 and local checkpoint
+archive remain intact. The benchmark's old baseline qualification string is
+preserved as emitted; it denotes a measurement-only diagnostic, not absence
+of an optimizer upstream. Canonical hashes identify semantics independently
+of pretty-printed file bytes.
+
+![Run 02 Observed Marker Errors](native_evidence/refinement_9967_02/marker-errors.png)
+
+### Next Bounded Work
+
+1. Recheck central claim and remote processes; do not infer another agent's
+   worker is ours. Reproduce this returned candidate before using it as a seed.
+2. Run a constraint-aware static marker-fit diagnostic at 0.60, 0.70 and 0.80 s
+   with original geometry/attachments and both grips retained. Start from the
+   corresponding replay states; use multiple local seeds if needed. Reuse the
+   existing FK/projection and inspect existing Pinocchio IK APIs before adding
+   code. Report optimization success and actual closure residual separately.
+   A found feasible pose demonstrates reachability; failure of a local search
+   does not prove an irreducible error floor. This is IK diagnosis, not inverse
+   dynamics, and it does not qualify a forward swing.
+3. Inspect finite-difference sensitivity across smaller steps before changing
+   the model. Existing shared estimation.identifiability finite_difference_jacobian
+   is available; do not duplicate it. Preserve actual module dependencies and
+   source hashes if bundling it for the remote diagnostic.
+4. If pose reachability is good and derivatives are stable, compare two small,
+   explicitly separate experiments from the original-base-relative run 02 seed:
+   selected saturated correction bounds widened modestly versus additional
+   t^4/t^5 shaping directions within a declared global sextic basis. Do not
+   expand all controls blindly or recenter original bounds at the new seed.
+   Use unchanged marker gates, per-marker/local-window diagnostics, effort
+   extrema and native closure checks. Bernstein controls can span the new
+   directions using existing bernstein_to_simscape; conversion never changes
+   the physical polynomial or original time origin.
+5. Promote only after independent unsegmented replay and R2025b validation.
+   Do not extend beyond 0.80 s based solely on the improving aggregate score.
+   Preserve failed and partial experiments with their real status.
+
 ## Actual Forward-Replay Visual and Transition Diagnosis
 
 Updated 2026-09-12 UTC. Run 02 remains live; do not restart it. The previous
