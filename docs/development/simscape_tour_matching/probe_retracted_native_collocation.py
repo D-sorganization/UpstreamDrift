@@ -31,6 +31,7 @@ def main() -> None:
     parser.add_argument("--nodes", type=int, default=4)
     parser.add_argument("--max-iterations", type=int, default=2)
     parser.add_argument("--finite-difference-step", type=float, default=1e-6)
+    parser.add_argument("--chart-check-step", type=float, default=1e-6)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if (
@@ -39,6 +40,8 @@ def main() -> None:
         or args.max_iterations < 1
         or not np.isfinite(args.finite_difference_step)
         or args.finite_difference_step <= 0.0
+        or not np.isfinite(args.chart_check_step)
+        or args.chart_check_step <= 0.0
     ):
         raise ValueError(
             "Output must be new with at least four nodes and one iteration"
@@ -158,6 +161,16 @@ def main() -> None:
         return derivative.reshape(args.nodes * 12, args.nodes * dimension)
 
     initial = np.zeros(args.nodes * dimension)
+    assembled = jacobian(initial)
+    direct = np.empty_like(assembled)
+    for column in range(initial.size):
+        direction = np.zeros_like(initial)
+        direction[column] = args.chart_check_step
+        direct[:, column] = (
+            residual(initial + direction) - residual(initial - direction)
+        ) / (2.0 * args.chart_check_step)
+    jacobian_difference = assembled - direct
+    jacobian_scale = np.maximum(np.maximum(abs(assembled), abs(direct)), 1.0)
     result = minimize(
         lambda x: float(x @ x),
         initial,
@@ -179,6 +192,11 @@ def main() -> None:
                 "rate_acceleration_closure_max_abs": float(np.max(abs(defect))),
                 "residual_derivative": "node-level centered q/v differences with exact acceleration Jacobian",
                 "finite_difference_step": args.finite_difference_step,
+                "chart_check_step": args.chart_check_step,
+                "chart_jacobian_max_abs_error": float(np.max(abs(jacobian_difference))),
+                "chart_jacobian_max_relative_error": float(
+                    np.max(abs(jacobian_difference) / jacobian_scale)
+                ),
                 "retraction_trial_radius": retraction_radius,
                 "coordinates": values.tolist(),
                 "scope": "Bounded retracted-node preflight only; no marker objective, effort fit, or forward replay.",
