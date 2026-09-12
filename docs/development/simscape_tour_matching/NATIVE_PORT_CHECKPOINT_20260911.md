@@ -1,5 +1,47 @@
 # Native Port Implementation Checkpoint
 
+## P4 Restart Run 02 Is Live
+
+Updated 2026-09-12 UTC. Previous goal turn made progress: run 01 finished,
+independent replay confirmed improvement, artifacts and turnover were pushed.
+This continuation added tested restart support in commit 90def342a. All 15
+native-candidate tests pass (new restart tests first failed on missing helper).
+Restart rejects non-control identity changes; its original +/-2 correction
+bounds remain centered on the original base, not on the improved seed.
+
+Actual ControlTower WSL worker PID 1885136 is live in exec session 48221.
+Do not restart or duplicate while that handle/process remains live. Run 02
+first evaluation exactly reproduced run 01 returned candidate SHA and all four
+RMS metrics, confirming the restart did not change the saved controls.
+No coordinates were initially near the original bounds (within 0.0001).
+
+Runtime: /home/dieterolson/native-refinement-9967-02/refine_native_candidate.py
+Python: /home/dieterolson/simscape-pinocchio-9967/.venv/bin/python
+Output: C:/Users/diete/native-refinement-9967-02
+Arguments: --model /mnt/c/Users/diete/native_geometry_spec_9967.json
+--candidate /mnt/c/Users/diete/native_replay_candidate_9967.json
+--target /mnt/c/Users/diete/driver_marker_payload_9967.json
+--restart-candidate /mnt/c/Users/diete/native-refinement-9967-01/returned-candidate.json
+--output_dir /mnt/c/Users/diete/native-refinement-9967-02 --max-nfev 12
+Run in ControlTower-Runner WSL through SSH controltower; preserve original
+0.80 s basis and native integration tolerances. Full command remains visible
+with pgrep -af refine_native_candidate.py. Finite-difference evaluations are
+additional to max_nfev; expect several hundred replays, not twelve.
+
+Source bundle native-refinement-bundle-9967-02.zip is archived locally under
+C:/Users/diete/Repositories/simscape-tour-checkpoints and on ControlTower under
+C:/Users/diete. source_manifest.json hashes all bundled modules and the runner.
+The package remains a namespace-only diagnostic deployment, not proof of full
+application import integration. Each evaluation now saves parameters and
+near_bound_count; returned optimizer parameters are saved explicitly.
+
+Next: poll session 48221, inspect actual PID and output ledger. On terminal
+exit archive config, evaluations, best and returned/failure without overwriting
+run 01. Independently replay the returned candidate and compare all gates.
+If it stalls, use recorded bound activity and sensitivities to decide the next
+parameterization; do not simply increase budget. R2025b acceptance remains
+pending for any improved candidate. Gemini jobs have not been interrupted.
+
 ## P4 Refinement Finished: Improved Seed, Acceptance Failed
 
 Updated 2026-09-12 UTC. This section supersedes the live-run section below.
