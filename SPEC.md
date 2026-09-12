@@ -4378,6 +4378,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #8763 | Recorded tranche 2 of the DRY duplication quarantine as tracked work: the 155 fingerprint groups that hollow merges (#8322, the Aug 12 sentinel batch) shipped into the Tools-shadow packages are held in `scripts/config/dry_duplication_quarantine.json` with owner and linked issue rather than folded into the baseline; the gate exits 0 on every supported runtime. Opened DL-#8763 so the tranche is paid down upstream in Tools cluster by cluster, shrinking the ledger back toward the #8695 set. |
 | 2026-09-12 | #10013 | Burn down 30 quarantined bunker shot solver, workbench GUI, and report tests in scripts/config/unit_gate_quarantine.json under the bunker_shot_model_and_workbench cluster (#8766). |
 | 2026-09-12 | #10012 | Burn down all 11 quarantined teleoperation, device, and provider tests in scripts/config/unit_gate_quarantine.json under the deployment_devices_and_configuration cluster (#8766). |
 | 2026-09-12 | #10010 | Burn down 43 quarantined packaging and governance tests in scripts/config/unit_gate_quarantine.json under the packaging_ci_and_repository_governance cluster, anchor test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and sync monolith refactor register (#8766). |

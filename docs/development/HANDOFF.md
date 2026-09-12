@@ -1,3 +1,20 @@
+# DRY Quarantine Tranche 2 Handoff Checkpoint — 2026-09-12
+
+- Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8763
+- Branch: conductor/issue-8763; checkpoint SELF; PR not created.
+- Governing issue: #8763 (tranche 2 of the DRY duplication quarantine). Entry DL-#8763.
+- State found: the 155 tranche-2 fingerprints are already held in
+  `scripts/config/dry_duplication_quarantine.json` (issue field `#8695, #8763`,
+  reason names the hollow merges); no code or ledger change was needed. This
+  checkpoint records the tranche as tracked work (DL-#8763, SPEC row).
+- Verification: `python3 scripts/ci/check_dry_duplication_gate.py` exits 0 on
+  3.11, 3.12 and 3.14 (594 quarantined; 130 single-runtime stale entries are
+  expected, see the #8695 checkpoint below).
+- Blocker: the affected packages carry Tools child-copy headers, so dedup
+  cannot land here. Next: dedup one model_generation cluster upstream in
+  Tools, bump `vendor/ud-tools`, delete its fingerprints from the ledger.
+- Preserved peer handoffs below.
+
 # DRY Quarantine Tightening Handoff Checkpoint — 2026-09-12
 
 - Worktree: C:/Users/diete/Repositories/UpstreamDrift
