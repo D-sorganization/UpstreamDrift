@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.core.error_utils import GolfSuiteError, ValidationError
@@ -557,12 +558,12 @@ class AnalysisService:
     def _normalize_segment_velocity_trajectories(
         self,
         segment_velocities: Any,
-    ) -> dict[str, np.ndarray] | None:
+    ) -> dict[str, NDArray[np.float64]] | None:
         """Return per-segment 1-D trajectories; reject instantaneous samples."""
         if not isinstance(segment_velocities, dict):
             return None
 
-        normalized: dict[str, np.ndarray] = {}
+        normalized: dict[str, NDArray[np.float64]] = {}
         trajectory_length: int | None = None
         for name, values in segment_velocities.items():
             arr = np.asarray(values, dtype=float).reshape(-1)
@@ -579,9 +580,9 @@ class AnalysisService:
     def _resolve_sequence_times(
         self,
         request: AnalysisRequest,
-        segment_velocities: dict[str, np.ndarray],
+        segment_velocities: dict[str, NDArray[np.float64]],
         request_data: dict[str, Any] | None = None,
-    ) -> np.ndarray | None:
+    ) -> NDArray[np.float64] | None:
         """Resolve a timebase for segment velocity trajectories."""
         trajectory_length = len(next(iter(segment_velocities.values())))
         if request_data is None:
