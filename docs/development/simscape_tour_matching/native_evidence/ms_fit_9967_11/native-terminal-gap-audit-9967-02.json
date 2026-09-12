@@ -1,0 +1,14 @@
+{
+  "qualification": "Fresh final shooting-window replay versus saved independently replayed continuous endpoint; no optimization",
+  "rows": [
+    {
+      "run": "11",
+      "candidate_sha256": "7a751619cbd9fa8c88caa29588334b2867c992435cb7bd9ae2946bb93f91ba4f",
+      "terminal_segmented_rms_m": 0.05834127227422304,
+      "terminal_continuous_rms_m": 0.1295142509709855,
+      "segmented_vs_continuous_terminal_rms_m": 0.1189842551766602,
+      "weighted_terminal_cost": 8.509260126437566,
+      "observed_count": 25
+    }
+  ]
+}
