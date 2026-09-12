@@ -1,5 +1,48 @@
 # Native Port Implementation Checkpoint
 
+## Run 19 Remains Live; Selected Bound Continuation Prepared
+
+Updated 2026-09-12 UTC. Root head before this checkpoint is `3bac5d466`.
+Previous goal turn was progress: restart implementation, native audits and a
+new fit. Run19 session 60944 / ControlTower-Runner PID 2330720 remains live,
+verified at 14:36 elapsed. No new fit or runtime modification has been made.
+Continue polling the same handle; a timeout is not terminal.
+
+Independent saved evaluation24 audit (session 35766, exit 0) reports whole
+30.772098 mm, terminal 100.066833 mm, segmented terminal 100.591036 mm,
+pointwise gap 1.443762 mm and max scaled defect 1.81140e-4. It remains rejected;
+callback cost 32.74014 is not an accepted objective value. Canonical candidate
+`80fce1ce5b5d30a018507c2a6d0de921bb558f139863067957541b8fd809a196`, snapshot
+SHA `2f80452342e1946d26932707b8b82d53f6ab32a4a18f5d1afce1803ab673ab24`.
+The exact snapshot/config/audit runner and report are archived under
+`native_evidence/ms_recenter_9967_19/raw-evaluation24-audit.zip`.
+
+`widen_control_envelope` is now implemented in shared `native_restart.py` for
+the NEXT experiment only. Sixteen new tests first failed on the missing public
+function, then all 51 envelope/restart/candidate/retraction tests passed; Ruff
+and direct mypy also pass. The caller explicitly selects numerical intervals
+and a factor greater than one. Selected intervals widen about their original
+centers; unselected bounds remain exact and input arrays are untouched. Empty
+selection, malformed/nonfinite bounds, invalid factors and overflow fail.
+This helper does not infer actuator capabilities or change any fit gate. It
+has NOT been copied into runtime19, and no expansion is active in run19.
+
+After the bounded run ends, independently replay/audit its returned candidate
+and classify its actual active controls. If it still fails with saturated
+correction bounds, use the new helper for one explicitly manifested continuation,
+preserving the original parent polynomial, model, original q0/qd0, single sextic,
+target masks and fit gates. Record selected entries, old/new intervals, seed,
+chart centers and variable scales. Do not call a warm start plus bound change
+an exact one-factor experiment or use a numerical correction bound as a total
+physical effort limit. Do not launch a second optimizer before run19 ends.
+
+MuJoCo agent is completing a bounded read-only common rigid-registration
+diagnostic of run18 residuals; this is not forward replay or altered acceptance.
+Its preliminary result leaves about 99.5 mm of the 103.95 mm terminal error
+after best common rigid alignment, so global pose correction alone does not
+explain the failure. Collect its exact source/receipt and final commit before
+using that result for the continuation decision.
+
 ## Run 19 Live: Recentered Charts With a Distinct Reconstructed Seed
 
 Effort-bound audit integrated as `e917c9a2f`; root reran its three extrema tests,
