@@ -131,6 +131,15 @@ This makes it suitable to investigate reaction-eliminated global-sextic effort
 initialization. The receipt deliberately labels its qdd as finite difference;
 it is not a constrained-dynamics acceleration qualification or forward match.
 
+That limitation is now independently measured with an isolated ControlTower
+Drake1.57 environment. The finite-difference qdd fails acceleration closure:
+maximum `J*qdd+gamma` is1.33668 and RMS0.24240 over18 samples; receipt
+`../drake_native_matching/evidence/smooth_native_acceleration_9967_24/receipt.json`.
+This rejects using the current spline directly for reaction-eliminated effort
+identification. The next path stage is an explicit acceleration projection with
+reported correction magnitude, followed by derivative-consistency review; no
+torque fit or forward replay may be inferred from this failed diagnostic.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.
