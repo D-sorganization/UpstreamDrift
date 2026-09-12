@@ -1,5 +1,46 @@
 # Native Port Implementation Checkpoint
 
+## Run09 Replayed; Complete Residual Derivative Audit Is Live
+
+Updated 2026-09-12 UTC. Run09 session 62709 exited zero after exhausting twelve
+evaluations. Disabling xtol produced essentially no gain: independent replay
+exactly reproduces candidate
+ee198df3f3f988dc43c5ee2963ae46ce5c8cfee7318312ed1c4fad176e630978,
+whole 23.301379 mm, early 9.969446 mm, terminal 61.017789 mm and club
+31.008385 mm. Terminal gain over run08 is only 0.002120 mm; whole error slightly
+worsens. Yaw 9.005488 percent, defects 0.001505960/0.001033638, optimality
+55978.7233, no active bounds. Acceptance and convergence are false. Do not
+repeat this unchanged continuation as a remedy.
+
+Replay adapter time 3.51441 s; closure pose/rate maxima
+2.84818e-11/8.45466e-11. Raw candidate hash
+08b107d69fc01aade19aeff0cd216294ca821d2566ecda8309090f21352ba8c0.
+Complete raw output and independent replay are preserved in ms_fit_9967_09.
+
+A separate native effort-response audit along run08 at 0, 0.4, 0.6, 0.65,
+0.7, 0.75 and 0.8 s finds rank 21 at relative SVD cutoff 1e-10 throughout.
+The retained raw-coordinate condition ratio decreases from about 146042 to
+86905, rather than abruptly deteriorating at transition. Mixed units and the
+stated cutoff limit this diagnostic; it is not the trajectory optimizer's
+condition number or proof of a cause. Receipt:
+native-effort-conditioning-9967-01.json. No model geometry was changed.
+
+LIVE derivative audit: unified session 13381, ControlTower WSL PID 2144193,
+output C:/Users/diete/native-ms-global-jac-audit-9967-01. Exact runner
+audit_native_global_jac_9967_01.py intercepts least_squares only in its own
+process, using run09's driver and runtime09 at the restored run08 point. It
+compares the assembled residual Jacobian against centered differences in a
+deterministic random direction and a scaled gradient direction at 1e-4, 1e-5,
+1e-6. This includes all windows, transformed nodes, defect and terminal rows.
+It exits without performing an optimization. Existing jobs/runtimes are not
+modified. At last check PID was live, elapsed 2m02s/CPU 2m13s.
+
+Next action: poll session 13381/PID 2144193 and inspect global-jacobian-audit.json.
+If derivatives disagree, diagnose before more fits. If they agree, evaluate
+shorter windows in the long 0-0.6 s prefix and measured Jacobian conditioning.
+Do not infer either conclusion until the audit completes. Full swing remains
+unmatched; the tested stop-rule change did not solve it.
+
 ## Step-Stopping Experiment Qualified; Run09 Is Live
 
 Updated 2026-09-12 UTC. Restart audit session 6346 exited zero in a new isolated
