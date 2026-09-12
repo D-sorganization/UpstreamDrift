@@ -122,6 +122,8 @@ class LayoutManager:
         self.current_category_filter = "All"
         self.favorites: list[str] = []
         self.launch_stats: dict[str, dict[str, Any]] = {}
+        self.workspace: dict[str, Any] | None = None
+        self.dock_state: str | None = None
 
     def record_launch(self, model_id: str) -> None:
         """Increment launch count and record the last launched time for history tracking."""
@@ -213,6 +215,15 @@ class LayoutManager:
                 "favorites": self.favorites,
                 "launch_stats": self.launch_stats,
             }
+            if "workspace" in window_state:
+                layout_data["workspace"] = window_state["workspace"]
+            elif self.workspace is not None:
+                layout_data["workspace"] = self.workspace
+
+            if "dock_state" in window_state:
+                layout_data["dock_state"] = window_state["dock_state"]
+            elif self.dock_state is not None:
+                layout_data["dock_state"] = self.dock_state
 
             with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(layout_data, f, indent=2)
@@ -270,6 +281,9 @@ class LayoutManager:
                     logger.warning(
                         "Invalid tile_scale %r in saved layout: %s", raw_scale, exc
                     )
+
+            self.workspace = layout_data.get("workspace")
+            self.dock_state = layout_data.get("dock_state")
 
             return layout_data
 
