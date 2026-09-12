@@ -21,7 +21,10 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.core.contracts import precondition
-from src.shared.python.data_io.provenance import ProvenanceInfo
+from src.shared.python.data_io.provenance import (
+    ProvenanceInfo,
+    add_provenance_header_file,
+)
 from src.shared.python.engine_core.engine_availability import (
     C3D_AVAILABLE,
     EZC3D_AVAILABLE,
@@ -96,9 +99,11 @@ def _write_provenance_sidecar(
     artifact_path: Path,
     checksum_sha256: str,
     export_format: str,
+    provenance: ProvenanceInfo | None = None,
 ) -> Path:
     """Write provenance metadata for a binary export artifact."""
-    provenance = ProvenanceInfo.capture(parameters={"export_format": export_format})
+    if provenance is None:
+        provenance = ProvenanceInfo.capture(parameters={"export_format": export_format})
     sidecar_path = _provenance_sidecar_path(artifact_path)
     payload = {
         "artifact": {
@@ -117,6 +122,7 @@ def _write_artifact_atomic(
     output_path: Path,
     writer: Callable[[Path], None],
     export_format: str,
+    provenance: ProvenanceInfo | None = None,
 ) -> ExportOutcome:
     """Write an export artifact via temporary file, replace, and sidecar."""
     temp_path: Path | None = None
@@ -136,6 +142,7 @@ def _write_artifact_atomic(
             output_path,
             checksum_sha256,
             export_format,
+            provenance=provenance,
         )
         return ExportOutcome(
             success=True,
@@ -264,13 +271,13 @@ def _write_hdf5_subgroup(
 
 
 @precondition(
-    lambda output_path, data_dict, compress=True, return_outcome=False: (
+    lambda output_path, data_dict, compress=True, return_outcome=False, provenance=None: (
         output_path is not None and len(output_path) > 0
     ),
     "Output path must be a non-empty string",
 )
 @precondition(
-    lambda output_path, data_dict, compress=True, return_outcome=False: (
+    lambda output_path, data_dict, compress=True, return_outcome=False, provenance=None: (
         data_dict is not None
     ),
     "Data dictionary must not be None",
@@ -280,6 +287,7 @@ def export_to_matlab(
     data_dict: dict[str, Any],
     compress: bool = True,
     return_outcome: bool = False,
+    provenance: ProvenanceInfo | None = None,
 ) -> bool | ExportOutcome:
     """Export recording to MATLAB .mat format.
 
@@ -314,6 +322,7 @@ def export_to_matlab(
             Path(output_path),
             write_matlab,
             "matlab",
+            provenance=provenance,
         )
         if not outcome.success:
             logger.error(f"Failed to export to MATLAB: {outcome.error}")
@@ -326,13 +335,13 @@ def export_to_matlab(
 
 
 @precondition(
-    lambda output_path, data_dict, compression="gzip", return_outcome=False: (
+    lambda output_path, data_dict, compression="gzip", return_outcome=False, provenance=None: (
         output_path is not None and len(output_path) > 0
     ),
     "Output path must be a non-empty string",
 )
 @precondition(
-    lambda output_path, data_dict, compression="gzip", return_outcome=False: (
+    lambda output_path, data_dict, compression="gzip", return_outcome=False, provenance=None: (
         data_dict is not None
     ),
     "Data dictionary must not be None",
@@ -342,6 +351,7 @@ def export_to_hdf5(
     data_dict: dict[str, Any],
     compression: str = "gzip",
     return_outcome: bool = False,
+    provenance: ProvenanceInfo | None = None,
 ) -> bool | ExportOutcome:
     """Export recording to HDF5 format.
 
@@ -369,6 +379,7 @@ def export_to_hdf5(
             Path(output_path),
             write_hdf5,
             "hdf5",
+            provenance=provenance,
         )
         if not outcome.success:
             logger.error(f"Failed to export to HDF5: {outcome.error}")
@@ -558,10 +569,15 @@ def _export_to_c3d_py(
     return True
 
 
-def _export_json(output_path: Path, data_dict: dict[str, Any]) -> bool:
+def _export_json(
+    output_path: Path,
+    data_dict: dict[str, Any],
+    provenance: ProvenanceInfo | None = None,
+) -> bool:
     """Export data dictionary to JSON format.
 
     Converts numpy arrays to lists for JSON serialization.
+    Embeds provenance information when provided.
     """
     if output_path is None:
         raise ValueError("output_path must be provided")
@@ -569,6 +585,8 @@ def _export_json(output_path: Path, data_dict: dict[str, Any]) -> bool:
 
     json_data = {}
     for k, v in data_dict.items():
+        if k == "provenance":
+            continue
         if isinstance(v, np.ndarray):
             json_data[k] = v.tolist()
         elif isinstance(v, dict):
@@ -578,6 +596,14 @@ def _export_json(output_path: Path, data_dict: dict[str, Any]) -> bool:
             }
         else:
             json_data[k] = v
+
+    if provenance is not None:
+        json_data["provenance"] = asdict(provenance)
+    elif "provenance" in data_dict:
+        prov_val = data_dict["provenance"]
+        json_data["provenance"] = (
+            asdict(prov_val) if isinstance(prov_val, ProvenanceInfo) else prov_val
+        )
 
     with open(output_path, "w") as f:
         json.dump(json_data, f, indent=2)
@@ -596,7 +622,7 @@ def _flatten_dict_for_csv(data_dict: dict[str, Any]) -> dict[str, Any]:  # noqa:
     n_times = len(data_dict.get("times", []))
 
     for k, v in data_dict.items():
-        if k == "times":
+        if k in ("times", "provenance"):
             continue
 
         # Handle direct arrays matching time length
@@ -625,15 +651,31 @@ def _flatten_dict_for_csv(data_dict: dict[str, Any]) -> dict[str, Any]:  # noqa:
     return flat_data
 
 
-def _export_csv(output_path: Path, data_dict: dict[str, Any]) -> bool:
-    """Export data dictionary to CSV format."""
+def _export_csv(
+    output_path: Path,
+    data_dict: dict[str, Any],
+    provenance: ProvenanceInfo | None = None,
+) -> bool:
+    """Export data dictionary to CSV format, prepending provenance header if provided."""
     if output_path is None:
         raise ValueError("output_path must be provided")
     import pandas as pd
 
     flat_data = _flatten_dict_for_csv(data_dict)
     df = pd.DataFrame(flat_data)
-    df.to_csv(output_path, index=False)
+    csv_text = df.to_csv(index=False)
+
+    prov = provenance
+    if prov is None and "provenance" in data_dict:
+        candidate = data_dict["provenance"]
+        if isinstance(candidate, ProvenanceInfo):
+            prov = candidate
+
+    with open(output_path, "w") as f:
+        if prov is not None:
+            add_provenance_header_file(f, prov)
+        f.write(csv_text)
+
     return True
 
 
@@ -641,6 +683,7 @@ def export_recording_all_formats(
     base_path: str,
     data_dict: dict[str, Any],
     formats: list | None = None,
+    provenance: ProvenanceInfo | None = None,
 ) -> dict[str, bool]:
     """Export recording in multiple formats.
 
@@ -648,6 +691,7 @@ def export_recording_all_formats(
         base_path: Base file path (without extension).
         data_dict: Data dictionary to export.
         formats: List of format strings. Defaults to ["json", "csv", "mat", "hdf5"].
+        provenance: Optional ProvenanceInfo instance to attach to export artifacts.
 
     Returns:
         Dictionary mapping format names to success booleans.
@@ -660,6 +704,12 @@ def export_recording_all_formats(
     if not isinstance(data_dict, dict):
         raise TypeError(f"data_dict must be a dict, got {type(data_dict).__name__}")
 
+    prov = provenance
+    if prov is None and "provenance" in data_dict:
+        candidate = data_dict["provenance"]
+        if isinstance(candidate, ProvenanceInfo):
+            prov = candidate
+
     if formats is None:
         formats = ["json", "csv", "mat", "hdf5"]
     base_path_obj = Path(base_path)
@@ -670,14 +720,18 @@ def export_recording_all_formats(
             output_path = base_path_obj.with_suffix(f".{fmt}")
 
             if fmt == "json":
-                success = _export_json(output_path, data_dict)
+                success = _export_json(output_path, data_dict, provenance=prov)
             elif fmt == "csv":
-                success = _export_csv(output_path, data_dict)
+                success = _export_csv(output_path, data_dict, provenance=prov)
             elif fmt == "mat":
-                success = bool(export_to_matlab(str(output_path), data_dict))
+                success = bool(
+                    export_to_matlab(str(output_path), data_dict, provenance=prov)
+                )
             elif fmt in ["hdf5", "h5"]:
                 output_path = base_path_obj.with_suffix(".h5")
-                success = bool(export_to_hdf5(str(output_path), data_dict))
+                success = bool(
+                    export_to_hdf5(str(output_path), data_dict, provenance=prov)
+                )
             else:
                 success = False
 

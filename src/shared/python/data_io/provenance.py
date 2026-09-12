@@ -30,6 +30,7 @@ with open('results.csv', 'w') as f:
 
 import hashlib
 import subprocess
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -60,6 +61,10 @@ class ProvenanceInfo:
     git_branch: str | None = None
     git_is_dirty: bool = False  # True if uncommitted changes exist
 
+    # Engine & Run identity (#8820)
+    engine_name: str | None = None
+    run_id: str | None = None
+
     # Model metadata
     model_file_path: str | None = None
     model_file_hash: str | None = None  # SHA256 of model file
@@ -71,18 +76,24 @@ class ProvenanceInfo:
     python_version: str | None = None
     numpy_version: str | None = None
     mujoco_version: str | None = None
+    drake_version: str | None = None
+    pinocchio_version: str | None = None
 
     @classmethod
     def capture(
         cls,
         model_path: Path | str | None = None,
         parameters: dict[str, Any] | None = None,
+        engine_name: str | None = None,
+        run_id: str | None = None,
     ) -> "ProvenanceInfo":
-        """Automaticall
-        y capture provenance information.
+        """Automatically capture provenance information.
 
-                Args:
-                    model_path: Optional path to model file (URDF, MJCF, etc.)
+        Args:
+            model_path: Optional path to model file (URDF, MJCF, etc.)
+            parameters: Optional analysis parameters to record
+            engine_name: Optional physics engine name (e.g. MuJoCo, Drake, Pinocchio)
+            run_id: Optional unique identifier for this simulation run
                     parameters: Optional analysis parameters to record
 
                 Returns:
@@ -130,18 +141,51 @@ class ProvenanceInfo:
             except (PackageNotFoundError, ImportError):
                 pass
 
+        # Engine versions (if available)
+        drake_version = None
+        if "pydrake" in sys.modules:
+            mod = sys.modules["pydrake"]
+            drake_version = (
+                str(getattr(mod, "__version__", "unknown")) if mod is not None else None
+            )
+        else:
+            try:
+                from importlib.metadata import PackageNotFoundError, version
+
+                drake_version = version("drake")
+            except (PackageNotFoundError, ImportError):
+                pass
+
+        pinocchio_version = None
+        if "pinocchio" in sys.modules:
+            mod = sys.modules["pinocchio"]
+            pinocchio_version = (
+                str(getattr(mod, "__version__", "unknown")) if mod is not None else None
+            )
+        else:
+            try:
+                from importlib.metadata import PackageNotFoundError, version
+
+                pinocchio_version = version("pin")
+            except (PackageNotFoundError, ImportError):
+                pass
+
         return cls(
             timestamp_utc=now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
             timestamp_local=now_local.isoformat(),
             git_commit_sha=git_sha,
             git_branch=git_branch,
             git_is_dirty=git_dirty,
+            engine_name=engine_name,
+            run_id=run_id or str(uuid.uuid4()),
             model_file_path=model_path_str,
             model_file_hash=model_hash,
             parameters=parameters or {},
             python_version=python_version,
             numpy_version=numpy_version,
             mujoco_version=mujoco_version,
+            drake_version=drake_version,
+            pinocchio_version=pinocchio_version,
         )
 
     @staticmethod
@@ -230,6 +274,12 @@ class ProvenanceInfo:
         lines.append(f"# Generated: {self.timestamp_utc} (UTC)")
         lines.append(f"# Local time: {self.timestamp_local}")
 
+        # Engine & Run identity (#8820)
+        if self.engine_name:
+            lines.append(f"# Engine: {self.engine_name}")
+        if self.run_id:
+            lines.append(f"# Run ID: {self.run_id}")
+
         # Model information
         if self.model_file_path:
             lines.append(f"# Model file: {self.model_file_path}")
@@ -252,6 +302,10 @@ class ProvenanceInfo:
         lines.append(f"#   NumPy: {self.numpy_version}")
         if self.mujoco_version:
             lines.append(f"#   MuJoCo: {self.mujoco_version}")
+        if self.drake_version:
+            lines.append(f"#   Drake: {self.drake_version}")
+        if self.pinocchio_version:
+            lines.append(f"#   Pinocchio: {self.pinocchio_version}")
 
         # Reproducibility warning if git is dirty
         if self.git_is_dirty:
@@ -309,6 +363,8 @@ def add_provenance_to_csv(
     provenance: ProvenanceInfo | None = None,
     model_path: Path | str | None = None,
     parameters: dict[str, Any] | None = None,
+    engine_name: str | None = None,
+    run_id: str | None = None,
 ) -> ProvenanceInfo:
     """Prepend provenance header to existing CSV file.
 
@@ -317,6 +373,8 @@ def add_provenance_to_csv(
         provenance: Optional pre-captured provenance (if None, auto-capture)
         model_path: Optional model path (used if provenance is None)
         parameters: Optional parameters (used if provenance is None)
+        engine_name: Optional engine name (used if provenance is None)
+        run_id: Optional run ID (used if provenance is None)
 
     Returns:
         ProvenanceInfo that was added
@@ -330,7 +388,10 @@ def add_provenance_to_csv(
         raise ValueError("filepath must be provided")
     if provenance is None:
         provenance = ProvenanceInfo.capture(
-            model_path=model_path, parameters=parameters
+            model_path=model_path,
+            parameters=parameters,
+            engine_name=engine_name,
+            run_id=run_id,
         )
 
     # Read existing file
