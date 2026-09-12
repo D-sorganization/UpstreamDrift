@@ -32,6 +32,7 @@ def main() -> None:
     parser.add_argument("--max-iterations", type=int, default=2)
     parser.add_argument("--finite-difference-step", type=float, default=1e-6)
     parser.add_argument("--chart-check-step", type=float, default=1e-6)
+    parser.add_argument("--use-constraint-jacobian", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if (
@@ -171,11 +172,15 @@ def main() -> None:
         ) / (2.0 * args.chart_check_step)
     jacobian_difference = assembled - direct
     jacobian_scale = np.maximum(np.maximum(abs(assembled), abs(direct)), 1.0)
+    constraint: dict[str, object] = {"type": "eq", "fun": residual}
+    if args.use_constraint_jacobian:
+        constraint["jac"] = jacobian
+    initial_defect = residual(initial)
     result = minimize(
         lambda x: float(x @ x),
         initial,
         method="trust-constr",
-        constraints={"type": "eq", "fun": residual, "jac": jacobian},
+        constraints=constraint,
         bounds=Bounds(-0.01 * np.ones_like(initial), 0.01 * np.ones_like(initial)),
         options={"maxiter": args.max_iterations, "gtol": 1e-12},
     )
@@ -190,6 +195,10 @@ def main() -> None:
                 "optimizer_converged": bool(result.success),
                 "message": str(result.message),
                 "rate_acceleration_closure_max_abs": float(np.max(abs(defect))),
+                "initial_rate_acceleration_closure_max_abs": float(
+                    np.max(abs(initial_defect))
+                ),
+                "used_constraint_jacobian": args.use_constraint_jacobian,
                 "residual_derivative": "node-level centered q/v differences with exact acceleration Jacobian",
                 "finite_difference_step": args.finite_difference_step,
                 "chart_check_step": args.chart_check_step,
