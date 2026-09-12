@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching; native engine adapters; docs/development/simscape_tour_matching; docs/development/drake_native_matching; docs/development/native_parallel_performance
 - **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (SELF; focused solver/executor/closure tests, Ruff and mypy pass; fixed six-window worker parity, parent batch adapter, guarded-driver regression, native single-state closure probe, fine constrained-pose continuation through0.85 s, sampled smooth q/qd closure, and a two-evaluation full solver assembly receipt complete; Drake rejects the spline finite-difference qdd, while Pinocchio's 6-by-27 weld Jacobian, 21-dimensional retracted node chart, and matching three-level residual oracle are qualified on ControlTower; run20 terminal and independently rejected)
+- **Last verified:** 2026-09-12 (SELF; focused spline-chain and collocation tests plus Ruff pass; exact cubic-spline qd/qdd Jacobians now retain both target and source node-chart axes. Earlier evidence remains: Drake rejects spline finite-difference qdd; Pinocchio's 6-by-27 weld Jacobian, 21-dimensional retracted node chart, and matching three-level residual oracle are qualified on ControlTower; the four-node bounded preflight reduces acceleration closure to0.1041854 but is unqualified; run20 terminal and independently rejected.)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
-- **Next step:** Add chart-space rate and acceleration closure derivatives to the qualified 21-dimensional Pinocchio node chart and residual oracle. The four-node, two-iteration preflight reaches0.1041854 residual but is deliberately unqualified; do not extend it blindly. Qualify all three weld levels before using the path as a reaction-eliminated global-sextic initializer and then one bounded forward fit through the qualified batch seam.
+- **Next step:** Qualify node-level finite-difference residual derivatives composed with the exact spline/retraction maps before one bounded four-node jacobian-enabled collocation probe.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps
 

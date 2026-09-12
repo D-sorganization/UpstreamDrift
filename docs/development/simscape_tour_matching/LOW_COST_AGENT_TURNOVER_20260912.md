@@ -87,6 +87,14 @@ this a longer blind run. Add and test all three constraint derivatives plus
 manifold continuation/retraction, retaining the same receipt/gates, before
 using its output in reaction-eliminated sextic identification.
 
+The shared scaffold now also exposes
+`spline_chart_derivative_jacobians(first, second, node_jacobians)`. Its output
+retains all four axes `(target_node, q_coordinate, source_node, chart_coordinate)`
+instead of summing source-node effects. This is the approved exact chain from
+the cubic spline maps into every local retraction chart. The next derivative
+stage must compose this map with a _node-level_ residual linearization; do not
+return to a global finite-difference Jacobian of the full trajectory.
+
 The first native retraction prerequisite is complete:
 `NativePinocchioModel.closure_position_linearization` returns the6-by-27 weld
 position Jacobian in the supplied coordinate order. The ControlTower receipt
