@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9967 · Native Multi-Engine Golf Matching
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9967 (parent #9921; engine lanes #10021 and #10022)
+- **Branch:** feat/9967-native-simscape-pinocchio
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching; native engine adapters; docs/development/simscape_tour_matching; docs/development/drake_native_matching; docs/development/native_parallel_performance
+- **Started:** 2026-09-11
+- **Last verified:** 2026-09-12 (SELF; six identification and two parallel comparator tests pass; run19 independently rejected; run20 active)
+- **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
+- **Next step:** Independently replay and audit run20 after session43223 terminates.
+
 ### DL-#1616 · Mermaid C4 Architecture Maps
 
 - **State:** in_progress

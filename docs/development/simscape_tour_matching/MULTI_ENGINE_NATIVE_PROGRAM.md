@@ -63,14 +63,19 @@ proof of every engine application entry point.
 
 ## Current Evidence and Next Work
 
-Pinocchio native initial/moving and continuous0.8 s baseline parity against tight
-R2025b is qualified; final full-swing matching is not. Run 18 is terminal and
-independently rejected through 0.85 s: terminal RMS 103.948841 mm, full scaled
-defect 5.84673e-6, iteration limit. Run 19 is live on ControlTower PID 2330720,
-using recentered charts and an explicitly distinct reconstructed seed. Strict
-source-state restart parity failed and remains recorded; its own chart derivative
-audit passes. Original effort bounds and final fit gates are unchanged. Read the
-top native checkpoint for exact process handles, limitations and next actions.
+Pinocchio native initial/moving and continuous 0.8 s baseline parity against
+R2025b is qualified; full-swing matching is not. Run19 ended unaccepted at its
+iteration limit: whole 30.791102 mm, terminal 99.988650 mm, continuity defect
+1.091819e-5. Run20 is live, session43223 / ControlTower-Runner PID2348439,
+with 71 selected correction intervals widened from +/-2 to +/-4. Its distinct
+reconstructed seed passed derivative checks but failed strict source-state
+rate parity, preserved explicitly. The top native checkpoint records exact
+source identities, immutable runtimes, archives and ordered continuation steps.
+The two-worker sensitivity study measured 1.83572x speedup with identical full
+outputs; production batching is not yet integrated. The loop-reaction-eliminated
+sextic study supports an initializer pathway but still requires a smooth native
+target trajectory and independent forward acceptance. Both reports are linked
+from the checkpoint. No second optimizer or runtime change is active.
 MuJoCo and Drake custom rigid baseline adapters are now integrated into the
 root branch as06576fa4a and9ff486f11. Their source-hashed R2025b and Pinocchio
 qualification evidence covers the specified0.8 s baseline only; read the latest
@@ -80,7 +85,7 @@ unqualified. MuJoCo's validated bundle conversion factory is integrated as
 23f2d0235, with another passing 168-case/0.8 s qualification. The native entry
 import fix is integrated as 8ac65c486; 23 root regression tests pass. Drake's
 run 18 extension at 0.85 s failed the rate gate at two matched integration
-tolerances; its agent is archiving the discrepancy. OpenSim implementation
+tolerances; the discrepancy is archived and remains unresolved. OpenSim implementation
 has not started.
 
 Each lane must commit incrementally and keep its HANDOFF.md current with source,

@@ -1,0 +1,159 @@
+{
+  "qualification": "Fixed-input performance diagnostic only; no optimizer or production integration",
+  "sequential_seconds": 20.188647389004473,
+  "two_worker_seconds_including_startup_ipc_shutdown": 10.99769471498439,
+  "observed_speedup": 1.8357162943882577,
+  "shared_input_setup_seconds": 0.549101626034826,
+  "sequential": [
+    {
+      "seconds": 4.600158206012566,
+      "sensitivity_seconds": 3.6609818619908765,
+      "rhs_evaluations": 9869,
+      "pid": 2348610,
+      "peak_rss_kib": 164084
+    },
+    {
+      "seconds": 4.6766838890034705,
+      "sensitivity_seconds": 3.7603441280080006,
+      "rhs_evaluations": 9833,
+      "pid": 2348610,
+      "peak_rss_kib": 188052
+    },
+    {
+      "seconds": 4.67932766902959,
+      "sensitivity_seconds": 3.743339199980255,
+      "rhs_evaluations": 9833,
+      "pid": 2348610,
+      "peak_rss_kib": 213636
+    },
+    {
+      "seconds": 2.3683612309978344,
+      "sensitivity_seconds": 1.8931588220293634,
+      "rhs_evaluations": 4913,
+      "pid": 2348610,
+      "peak_rss_kib": 218736
+    },
+    {
+      "seconds": 2.6252633969997987,
+      "sensitivity_seconds": 2.102104532008525,
+      "rhs_evaluations": 5429,
+      "pid": 2348610,
+      "peak_rss_kib": 227296
+    },
+    {
+      "seconds": 1.2372540629585274,
+      "sensitivity_seconds": 1.000566850998439,
+      "rhs_evaluations": 2471,
+      "pid": 2348610,
+      "peak_rss_kib": 227296
+    }
+  ],
+  "parallel": [
+    {
+      "seconds": 4.831544508982915,
+      "sensitivity_seconds": 3.6049331199610606,
+      "rhs_evaluations": 9869,
+      "pid": 2348626,
+      "peak_rss_kib": 227552
+    },
+    {
+      "seconds": 5.009513885015622,
+      "sensitivity_seconds": 3.752114557020832,
+      "rhs_evaluations": 9833,
+      "pid": 2348623,
+      "peak_rss_kib": 227424
+    },
+    {
+      "seconds": 4.653266035020351,
+      "sensitivity_seconds": 3.7249409969663247,
+      "rhs_evaluations": 9833,
+      "pid": 2348626,
+      "peak_rss_kib": 227552
+    },
+    {
+      "seconds": 2.3549362649791874,
+      "sensitivity_seconds": 1.8730956169893034,
+      "rhs_evaluations": 4913,
+      "pid": 2348623,
+      "peak_rss_kib": 227424
+    },
+    {
+      "seconds": 2.587248630996328,
+      "sensitivity_seconds": 2.0877389879897237,
+      "rhs_evaluations": 5429,
+      "pid": 2348623,
+      "peak_rss_kib": 227424
+    },
+    {
+      "seconds": 1.206063958001323,
+      "sensitivity_seconds": 0.9673705689492635,
+      "rhs_evaluations": 2471,
+      "pid": 2348626,
+      "peak_rss_kib": 227552
+    }
+  ],
+  "comparisons": [
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    }
+  ],
+  "exact_array_equality": true,
+  "candidate_sha256": "c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049",
+  "source_hashes": {
+    "/mnt/c/Users/diete/native-ms-fit-9967-19/config.json": "fb4c03db1056262e7524e6c3beca190f3439ce73c2bd85ff4aa337d6990f38d3",
+    "/mnt/c/Users/diete/native-ms-fit-9967-19/evaluation-00001.json": "2726692b79cf0b49df9205f2e6830a316b8fbf49d2aa592c8f7b1a3072dfc509",
+    "/mnt/c/Users/diete/native-ms-fit-9967-19/initial-candidate.json": "826178448b60d3ff1048a5066a9267f28e351ce26567524b5d62d98acd44c2bc",
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "/mnt/c/Users/diete/driver_marker_payload_9967.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "/mnt/c/Users/diete/run_native_ms_recentered_9967_19b.py": "48f074bf0497596d4e2d1dc96eb5fa0ac94dcbb58bc33a0ae21bcaab49017c0b",
+    "/mnt/c/Users/diete/window_benchmark_10021.py": "6f988ea34772b27c43fc8a6518360692b3fe48b8d6e24ae009a0eba5edbba8bb",
+    "/home/dieterolson/native-ms-pilot-9967-19/src/engines/physics_engines/pinocchio/python/native_sensitivity.py": "00e70d444265fbea856c203ade7473fcf42a640f9519ccb51ce7783bb8679cbf"
+  },
+  "arrays_sha256": "07f594daf3d7059167785c6c0cbb6edc5f048e5067e0109fdc924048db98358d",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "logical_cpus": 16,
+  "thread_environment": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "notes": [
+    "One sequential pass then one two-worker spawn pass; no timing distribution or cache-order control.",
+    "Parallel wall includes input/output serialization, worker imports, startup and shutdown.",
+    "RSS is per-process high-water mark in KiB on Linux; not simultaneous aggregate memory.",
+    "All marker samples, all primal states, and full marker/state Jacobians compared exactly."
+  ]
+}

@@ -1,3 +1,22 @@
+# Native Multi-Engine Matching Checkpoint
+
+- Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
+- Branch: feat/9967-native-simscape-pinocchio; checkpoint SELF; PR not created.
+- Issues: #9967, #10021, #10022; parent #9921; OpenSim planning #10003.
+- Development entry: DL-#9967. MATLAB release remains R2025b.
+- Current evidence and exact continuation: [Native Checkpoint](simscape_tour_matching/NATIVE_PORT_CHECKPOINT_20260911.md).
+- Run19 is terminal and rejected; run20 session43223/PID2348439 is the sole
+  optimizer on ControlTower. Never duplicate it or modify its runtime.
+- Integrated reaction-identification feasibility and parallel-window benchmark
+  receipts. Root reran six identification tests and two comparator tests: pass.
+  Strict scalar-rate reconstruction still fails; full swing is not matched.
+- Next: poll run20 and independently audit its returned continuous trajectory.
+  Parallel agent owns only a new optional window-executor module/tests; root
+  retains solver integration. No other agent-owned worktree was edited.
+- Preserved all earlier handoffs below. Archives retain raw identity-bearing
+  bytes; formatted JSON is for review. Current commit introduces no active
+  runtime or physics changes.
+
 # Architecture Map Contract Handoff Checkpoint — 2026-09-10
 
 - Worktree: C:/Users/diete/Repositories/UpstreamDrift
