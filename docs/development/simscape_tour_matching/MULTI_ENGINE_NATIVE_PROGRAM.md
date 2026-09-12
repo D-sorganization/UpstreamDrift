@@ -53,7 +53,7 @@ record. The top of NATIVE_PORT_CHECKPOINT_20260911.md owns current Pinocchio sta
 
 MuJoCo's stock compliant weld and Drake's discrete SAP weld are not automatically
 the same dynamics/integration contract as the verified continuous native model.
-Both agents are investigating clearly named rigid constrained adapters built
+Both agents have qualified clearly named rigid constrained adapters built
 from their engine's actual mass, bias and closure Jacobian/Jdot quantities.
 Such an adapter must be independently qualified. It must not be presented as
 proof that unmodified mj_step or a stock Drake simulator is equivalent. Preserve
@@ -64,16 +64,21 @@ proof of every engine application entry point.
 ## Current Evidence and Next Work
 
 Pinocchio native initial/moving and continuous0.8 s baseline parity against tight
-R2025b is qualified; final full-swing matching is not. Run17 is terminal and
-rejected through0.85 s. Optional variable scaling is implemented in3cab80075,
-with45 focused tests, Ruff, mypy and normal commit/push checks passing. Native
-scaled qualification and a controlled fitting comparison are next for root.
+R2025b is qualified; final full-swing matching is not. Run 18 is terminal and
+independently rejected through 0.85 s: terminal RMS 103.948841 mm, full scaled
+defect 5.84673e-6, iteration limit. Optional variable scaling improved continuity
+but left 126 correction bounds active. Root's next controlled experiment is
+qualified chart recentering; read checkpoint 46a05ff67 for exact constraints.
 MuJoCo and Drake custom rigid baseline adapters are now integrated into the
 root branch as06576fa4a and9ff486f11. Their source-hashed R2025b and Pinocchio
 qualification evidence covers the specified0.8 s baseline only; read the latest
 Pinocchio checkpoint and engine HANDOFF.md files for exact measured quantities.
 Stock simulator modes, full-swing fitting and engine sensitivities remain
-unqualified. OpenSim implementation has not started.
+unqualified. MuJoCo's validated bundle conversion factory is integrated as
+23f2d0235, with another passing 168-case/0.8 s qualification. Its agent owns a
+reproduced eager-import exporter integration fix. Drake's agent is checking
+run 18 at 0.85 s; that extension is not yet qualified. OpenSim implementation
+has not started.
 
 Each lane must commit incrementally and keep its HANDOFF.md current with source,
 model, capture and candidate hashes; exact environment/commands; live versus
