@@ -18,7 +18,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ("model", "candidate", "reference", "output"):
         parser.add_argument("--" + key, type=Path, required=True)
+    parser.add_argument("--urdf", type=Path)
+    parser.add_argument("--sidecar", type=Path)
     args = parser.parse_args()
+    if (args.urdf is None) != (args.sidecar is None):
+        parser.error(
+            "Provide both --urdf and --sidecar for validated-bundle conversion"
+        )
     raw = args.model.read_bytes()
     spec = json.loads(raw)
     names = spec["coordinate_order"]
@@ -36,7 +42,15 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=False)
     reference = np.load(args.reference / "reference.npz")
     clock, state = reference["time_s"], reference["state"]
-    engine = NativeMujocoModel(raw)
+
+    def factory(_: dict) -> NativeMujocoModel:
+        if args.urdf is not None:
+            return NativeMujocoModel.from_native_bundle(
+                args.urdf.read_bytes(), args.sidecar.read_bytes(), raw
+            )
+        return NativeMujocoModel(raw)
+
+    engine = factory(spec)
     frames, accelerations = [], []
     n = len(names)
     for time in meta["pulse_times_s"]:
@@ -61,13 +75,16 @@ def main() -> None:
         raw,
         candidate,
         clock,
-        model_factory=lambda _: NativeMujocoModel(raw),
+        model_factory=factory,
         rtol=1e-11,
         atol=1e-13,
         max_step=0.00025,
     )
     delta = np.asarray(accelerations) - reference["accelerations"]
     report = {
+        "construction": engine.metadata.get(
+            "bundle_conversion", "canonical geometry to MJCF"
+        ),
         "execution_mode": "MuJoCo M/bias/J/Jdot explicit rigid KKT; stock mj_step unqualified",
         "integrator": "existing shared native_replay and DOP853; rtol=1e-11 atol=1e-13 max_step=0.00025",
         "model_sha256": engine.model_sha256,
@@ -115,6 +132,14 @@ def main() -> None:
         Path("src/engines/physics_engines/mujoco/python/native_mjcf.py"),
         Path("src/engines/physics_engines/pinocchio/python/native_replay.py"),
     ]
+    if args.urdf is not None:
+        paths.extend(
+            [
+                args.urdf,
+                args.sidecar,
+                Path("src/shared/python/motion_matching/native_urdf_contract.py"),
+            ]
+        )
     report["input_and_source_sha256"] = {
         str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in paths
     }

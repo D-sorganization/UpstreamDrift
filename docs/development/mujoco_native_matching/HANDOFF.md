@@ -1,5 +1,36 @@
 # Native MuJoCo Matching Handoff
 
+## Validated Portable Bundle Factory Qualified
+
+`NativeMujocoModel.from_native_bundle(urdf_bytes, sidecar_bytes, model_bytes)`
+now accepts the same three artifacts as the Pinocchio and Drake lanes. The
+shared `native_urdf_contract.validate_native_urdf_bundle` rejects mismatched
+hashes and closure/frame/coordinate/gravity semantics before engine construction.
+The existing byte-based constructor is unchanged. This is **validated canonical
+geometry conversion to MJCF, not direct MuJoCo URDF parsing**. The exact supplied
+URDF and sidecar hashes are retained in engine metadata.
+
+New immutable run `native-mujoco-bundle-10021-01` passes the same 168 moving pulse
+cases and 0.8 s baseline, with unchanged results: scaled acceleration error
+3.85410e-10 and continuous marker error 2.84716e-9 m. Receipt and exact output,
+source, URDF and sidecar bytes are saved under `evidence/bundle-report.json`
+and `evidence/raw-bundle-qualified-run.zip`. Previous qualification artifacts
+are untouched. Add `--urdf <raw-root>/native-golf-9967-01.urdf --sidecar
+<raw-root>/native-golf-9967-01.sidecar.json` to the Pinocchio-reference command
+below to reproduce the factory qualification in a new output directory.
+
+Six new tests first failed on the absent factory; all 12 live tests pass after
+implementation. They include valid conversion mass/frame/acceleration identity
+and five malformed bundle variants rejected before runtime import. The small
+synthetic tests exercise identity/semantic contracts, not URDF parsing; the
+new real native run consumes the actual qualified exported URDF and sidecar.
+
+A separate existing package integration problem was encountered while preparing
+tests: `export_native_urdf` resolves an older Tools-aliased `URDFWriter` that lacks
+`numeric_precision`. No exporter or Tools dependency was changed in this lane.
+Consuming the existing qualified bundle works; regenerating that bundle through
+the affected full-package exporter needs a separate shared-boundary fix.
+
 ## Scope and Ownership
 
 Issue [#10021](https://github.com/D-sorganization/UpstreamDrift/issues/10021), branch
@@ -31,8 +62,9 @@ integrator. It does not implement a second fitter.
 This converter consumes the canonical native geometry artifact. It does not
 claim a direct MuJoCo URDF-parser roundtrip; native multi-axis joints are composed
 on bodies to avoid assigning nonphysical masses to intermediate URDF links.
-URDF plus sidecar remains the fleet interchange source; a future bundle facade
-must preserve all its semantics and distinguish conversion from direct parsing.
+URDF plus sidecar remains the fleet interchange source; the validated factory
+described above preserves the shared identity contract and distinguishes
+conversion from direct parsing.
 
 ## Qualification Results
 
@@ -115,9 +147,9 @@ is implemented or implicitly claimed by these tests.
 2. Integrate the qualified adapter through the shared model-factory protocol;
    preserve the candidate's source/model/capture hashes and world-force mapping.
    Do not route matching through the older generic MuJoCo golfer model.
-3. Add a bundle facade using the shared sidecar validator if required, with tests
-   rejecting every altered source/sidecar/frame identity. Do not call conversion
-   of native geometry a direct URDF-parser roundtrip.
+3. Use the qualified bundle factory for portable model ingestion. Do not call
+   conversion of native geometry a direct URDF-parser roundtrip. Keep malformed
+   identity and semantic rejection tests green when extending the shared contract.
 4. Qualify acceleration sensitivities before any analytic-gradient fitting. Keep
    the parent-owned solver and six-degree polynomial layout. Evaluate current
    fitted candidates independently and retain missing-marker masks.
