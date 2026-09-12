@@ -61,9 +61,14 @@ No optimizer is live. The older live-run instructions below are retained for
 reproduction only. Do NOT restart the run or repeat the completed audit.
 Read the top native checkpoint and `native_evidence/ms_fit_9967_20/` for results:
 whole29.941228 mm, terminal98.417488 mm, continuity1.202905e-4; unaccepted.
-Begin Third Task: integrate and qualify the existing executor with solver/cache
-assembly. The final candidate19193da3... is a documented experimental seed,
-not an accepted swing. No new fit is running or preselected.
+Third Task's shared solver/cache seam is complete in commit81e1784c4: use
+`MultipleShootingOptions.segmented_forward_batch` to submit only ordered cache
+misses. Two new TDD tests prove repeated candidates do not resubmit cached
+windows, analytic Jacobian assembly remains parent-owned, and malformed batch
+results fail. The native runner still needs a trusted byte request adapter and
+fixed-input ControlTower qualification before it may use workers=2. The final
+candidate19193da3... is a documented experimental seed, not an accepted swing.
+No new fit is running or preselected.
 
 ## Mission and Current Truth
 
