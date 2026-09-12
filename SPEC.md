@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Checkpoint Artifact Loading and Launcher Diagnostics Unit-Gate Debt Burndown (#8766)
+
+Burn down 5 quarantined test node IDs across motion matching checkpoint artifact loading and launcher diagnostics in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 5 passing headless tests across `tests/launchers/test_launcher_diagnostics.py` (1 test: `test_reset_layout_config_overwrites_existing_backup`) and `tests/unit/motion_matching/test_checkpoint_artifact_loading.py` (4 tests: `test_load_checkpoint_dict_rejects_missing_required_keys`, `test_load_checkpoint_dict_rejects_non_dict_payload`, `test_load_checkpoint_dict_uses_weights_only_true`, `test_load_surrogate_checkpoint_enforces_required_artifact_keys`).
+- Validated System Invariants: Ensure checkpoint artifact loading strictly validates required dict keys, non-dict payloads, and safe PyTorch `weights_only=True` loading behavior, and launcher diagnostics safely backs up and overwrites layout configuration files.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 363 to 358 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## AI Adapters, Setup Wizard, and Launcher Tools Unit-Gate Debt Burndown (#8766)
 
 Burn down 16 quarantined test node IDs across AI adapters, setup wizard, launcher bootstrap, and tools clusters in `scripts/config/unit_gate_quarantine.json`:
