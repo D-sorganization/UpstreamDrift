@@ -1,5 +1,11 @@
 # Native Drake Matching Handoff
 
+## Reaction-Eliminated Initializer Feasibility Study
+
+The bounded study is complete; see [Reaction-Eliminated Polynomial Identification Feasibility](REACTION_IDENTIFICATION_FEASIBILITY.md). Six tests pass. With a known closure-feasible baseline path, independent Drake projected dynamics recover189 global sextic controls using41 training samples, with40 held-out same-state acceleration checks. Native stacked rank is189 only for this sampled trajectory; the closed-weld toy is underdetermined as expected.
+
+The single identified-profile replay has marker difference8.84e-9m but scalar-rate difference3.37e-4, so its existing full-state reconstruction gate **fails**. No new fitting, model change, tolerance sweep or gate relaxation occurred. The report preserves all prerequisites and a sequential path toward a bounded linear initializer after a smooth native C3D trajectory is available. Root review is required before broad production integration. Exact results are in `evidence/reaction-identification/`; all study jobs are terminal.
+
 ## Reconstructed-Seed Angular-Velocity Diagnostic
 
 Updated 2026-09-12 UTC. One bounded Pinocchio replay pair compared original run18 candidate `917d2d29b66bc2ab947a6ea75255c35e47134e6a2d51cde7e1e69847cad379f7` with explicitly distinct reconstructed seed `c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049`. All307 actual capture samples, observation masks and initial q/qd are identical. Both replay sources use immutable Pinocchio runtime19; actual Drake frame angular Jacobians from unchanged runtime02 then map the saved scalar states/rates into world-expressed body angular velocities. No Drake integration, fit, parameter sweep or model change was performed for this diagnostic.

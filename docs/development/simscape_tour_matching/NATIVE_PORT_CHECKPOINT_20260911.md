@@ -1,62 +1,94 @@
 # Native Port Implementation Checkpoint
 
-## Run 19 Remains Live; Selected Bound Continuation Prepared
+## Run 20 Live; Run 19 Rejected and Archived
 
-Updated 2026-09-12 UTC. Root head before this checkpoint is `3bac5d466`.
-Previous goal turn was progress: restart implementation, native audits and a
-new fit. Run19 session 60944 / ControlTower-Runner PID 2330720 remains live,
-verified at 14:36 elapsed. No new fit or runtime modification has been made.
-Continue polling the same handle; a timeout is not terminal.
+Updated 2026-09-12 UTC. Integration checkpoint SELF; branch
+`feat/9967-native-simscape-pinocchio`, worktree
+`C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native`.
+The active goal includes native MuJoCo and Drake equivalence, Pinocchio and
+R2025b Simscape matching, and the staged OpenSim epic #10003. Full swing is
+not matched. Read this current section before historical entries below.
 
-Independent saved evaluation24 audit (session 35766, exit 0) reports whole
-30.772098 mm, terminal 100.066833 mm, segmented terminal 100.591036 mm,
-pointwise gap 1.443762 mm and max scaled defect 1.81140e-4. It remains rejected;
-callback cost 32.74014 is not an accepted objective value. Canonical candidate
-`80fce1ce5b5d30a018507c2a6d0de921bb558f139863067957541b8fd809a196`, snapshot
-SHA `2f80452342e1946d26932707b8b82d53f6ab32a4a18f5d1afce1803ab673ab24`.
-The exact snapshot/config/audit runner and report are archived under
-`native_evidence/ms_recenter_9967_19/raw-evaluation24-audit.zip`.
+Run 19 ended at the 60-iteration limit (61 evaluations), accepted=false and
+optimizer_converged=false. Independent continuous replay from original q0/qd0
+reports whole 30.791102 mm, early 10.667481 mm, terminal 99.988650 mm,
+club 56.556950 mm and yaw 16.764308%. Full scaled continuity defect is
+1.091819e-5, with a 1.194107 mm pointwise terminal gap. Club and continuity now
+pass, but other gates and convergence do not. Returned canonical identity:
+`b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f`.
+All 61 raw snapshots, config, bound audit, independent replay and inspected
+plot are archived in `native_evidence/ms_fit_9967_19/`. The generic replay
+runner's historical baseline-only wording does not describe this optimized,
+unaccepted candidate. No new MATLAB validation was run for this candidate.
 
-`widen_control_envelope` is now implemented in shared `native_restart.py` for
-the NEXT experiment only. Sixteen new tests first failed on the missing public
-function, then all 51 envelope/restart/candidate/retraction tests passed; Ruff
-and direct mypy also pass. The caller explicitly selects numerical intervals
-and a factor greater than one. Selected intervals widen about their original
-centers; unselected bounds remain exact and input arrays are untouched. Empty
-selection, malformed/nonfinite bounds, invalid factors and overflow fail.
-This helper does not infer actuator capabilities or change any fit gate. It
-has NOT been copied into runtime19, and no expansion is active in run19.
+Run 20 is the sole optimizer: session 43223, ControlTower-Runner PID 2348439;
+output `C:/Users/diete/native-ms-fit-9967-20`; immutable runtime
+`/home/dieterolson/native-ms-pilot-9967-20`. Driver:
+`C:/Users/diete/run_native_ms_bound_continuation_9967_20.py`. Resume by polling
+this process/output, never launching a duplicate because a wait times out.
+Latest observed callback is evaluation 16, cost 30.13388646; a lower callback
+cost is not an independently verified continuous fit improvement.
 
-After the bounded run ends, independently replay/audit its returned candidate
-and classify its actual active controls. If it still fails with saturated
-correction bounds, use the new helper for one explicitly manifested continuation,
-preserving the original parent polynomial, model, original q0/qd0, single sextic,
-target masks and fit gates. Record selected entries, old/new intervals, seed,
-chart centers and variable scales. Do not call a warm start plus bound change
-an exact one-factor experiment or use a numerical correction bound as a total
-physical effort limit. Do not launch a second optimizer before run19 ends.
+Run 20 explicitly widens 71 saturated run19 effort intervals from +/-2 to +/-4;
+other intervals, including eight +/-10 entries, are unchanged. These are
+numerical correction bounds, not physical actuator limits. Variable scales
+remain frozen to run19. Original parent, model, q0/qd0, target/masks, single
+sextic, 0.8 s basis and all acceptance gates are unchanged. Chart centers use
+the reconstructed source's own continuous replay. Warm start, chart recentering
+and bounds change together are not a one-factor experiment.
 
-MuJoCo's read-only rigid-registration diagnostic is integrated as `34dfe0737`;
-root reran all three tests successfully. It reuses existing Kabsch and observed
-RMS helpers; its exact source, inputs and transforms are archived in
-`docs/development/mujoco_native_matching/RUN18_GLOBAL_RIGID_AUDIT.md` and
-the adjacent evidence directory. At 0.6/0.7/0.8/0.85 s the original RMS is
-27.750/48.001/58.551/103.949 mm; best common rigid alignment leaves
-22.825/37.746/56.339/99.505 mm. Thus a simple global pose adjustment does not
-explain terminal failure. This is not a forward-reachable correction and does
-not exclude root actuation changing articulation through dynamics. No accepted
-metrics were altered. The MuJoCo lane has no active computation.
+Preflight session 5587 exited 0: all 12 derivative checks passed (maximum
+relative error 1.196781e-4), and initial full scaled defects were below
+4.5100e-9. Strict source-state comparison remains FAILED: q difference
+3.776193e-7, scalar-rate difference 3.202742e-4 exceeds 1e-4, marker difference
+7.243619e-8 m. There was no bound snapping. The independently identified
+reconstructed seed is
+`b9d610b405ac8e614aca1b3a771065d8b13466417fa0b2946bdf88b9b22f4048`.
+It is a distinct seed trial, not exact numerical restart or full-state parity.
+Exact preflight, source/config, bounds, runtime and driver bytes are in
+`native_evidence/ms_bound_continuation_9967_20/`.
 
-Drake agent owns a bounded feasibility study of a loop-aware polynomial torque
-initializer, not a second fit: project M*qdd+h-B*tau into null(J) to eliminate
-weld reactions, with the existing native Bernstein effort mapping. First test
-an analytic closed-weld toy, then known qualified baseline states/accelerations.
-Rank deficiency and reaction-force nonuniqueness must be explicit. This is not
-ordinary tree inverse dynamics, a Simscape motion-prescription workaround, or
-proof that target C3D velocities/accelerations are dynamically feasible. A
-smooth closure-feasible reference and independent forward validation would be
-required before using it for target matching. No core/runtime changes authorized
-for this diagnostic; collect its report before broader implementation.
+## Parallel Studies Integrated in This Checkpoint
+
+Drake study commits 151659026 and cleanup 10d68e35a are integrated together
+without committing generated bytecode. Read
+`../drake_native_matching/REACTION_IDENTIFICATION_FEASIBILITY.md`.
+A reaction-eliminated degree-six linear system has rank 189 on the known
+baseline, with held-out acceleration difference below 2e-7. It does not require
+zero loop reactions. The identified profile's continuous marker difference is
+8.84e-9 m, but its scalar-rate difference 3.37e-4 FAILS the unchanged 1e-4
+full-state gate. Six analytic tests pass on root. This is an initializer
+feasibility study, not target C3D matching or production inverse dynamics.
+A smooth closure-feasible native target path with consistent derivatives is
+still required; the report gives seven sequential implementation gates.
+
+MuJoCo lane's bounded performance study ef4ef2888 is integrated. Read
+`../native_parallel_performance/HANDOFF.md`. Six sensitivity windows took
+20.18865 s sequentially and 10.99769 s using two spawned workers, including
+startup/IPC/shutdown. All primal states/markers and complete state/marker
+Jacobians were exactly equal. This is one ordered pair, not a whole-solver
+speedup measurement. Large arrays remain in two checkpoint locations with
+recorded hashes; small inputs and exact runner are archived in Git. Both
+parallel studies are terminal; neither modified the live optimizer/runtime.
+
+## Ordered Next Actions
+
+1. Poll run20 session 43223 or its exact output. At termination independently
+   replay the returned polynomial, audit bounds/continuity, and generate and
+   inspect its marker overlay. Do not accept callback cost or segmented fit.
+2. Implement optional persistent two-worker window evaluation through the
+   shared solver contracts, using TDD for ordering, identical assembled
+   residuals/Jacobians, cache behavior, worker failures and cleanup. Preserve
+   sequential fallback and parent-owned optimizer/retraction/assembly. Qualify
+   on an isolated runtime before one bounded fit; do not patch runtime20.
+3. Develop the native smooth target-trajectory prerequisite for the loop-aware
+   polynomial initializer. Test closure at position, rate and acceleration
+   levels and continuous coordinate branches before identifying controls.
+4. Replay the next accepted candidate through both native engine adapters and
+   R2025b. Baseline adapter parity does not certify final fitted controls,
+   full swing, stock mj_step, stock Drake SAP, or engine sensitivities.
+5. Maintain issue9964 coordination and each lane's HANDOFF.md. OpenSim epic
+   #10003 remains planned with OS-0 implementation pending.
 
 ## Run 19 Live: Recentered Charts With a Distinct Reconstructed Seed
 
