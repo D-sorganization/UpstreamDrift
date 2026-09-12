@@ -138,3 +138,31 @@ def increment_native_candidate(
     return NativeReplayCandidate.from_document(
         data, data["coordinate_names"], data["model_sha256"]
     )
+
+
+def recover_native_increment(
+    base: NativeReplayCandidate,
+    updated: NativeReplayCandidate,
+    *,
+    basis_duration_s: float,
+) -> np.ndarray:
+    """Recover ascending normalized controls relative to an unchanged base.
+
+    Reject changes to geometry identity, initial state, capture, attachments or
+    clock. A restart must not silently recenter its original physical bounds.
+    """
+    original, revised = base.document, updated.document
+    for key in original.keys() - {"coefficients"}:
+        if original[key] != revised[key]:
+            raise ValueError(f"Restart changes non-control identity: {key}")
+    coefficients = np.asarray(original["coefficients"], dtype=float)
+    scale = normalized_to_simscape(
+        np.ones_like(coefficients), duration_s=basis_duration_s
+    )
+    with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
+        delta = (
+            np.asarray(revised["coefficients"], dtype=float) - coefficients
+        ) / scale
+    if not np.isfinite(delta).all():
+        raise ValueError("Restart increment is non-finite")
+    return delta[:, ::-1].copy()

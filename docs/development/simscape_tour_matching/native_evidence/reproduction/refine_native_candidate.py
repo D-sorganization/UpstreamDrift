@@ -1,7 +1,6 @@
 """Bounded reproducible native sextic refinement; preserve every evaluation."""
 
 import argparse
-from dataclasses import asdict
 import hashlib
 import json
 from pathlib import Path
@@ -12,6 +11,7 @@ from src.engines.physics_engines.pinocchio.python.native_replay import replay_ca
 from src.shared.python.motion_matching.native_candidate import (
     NativeReplayCandidate,
     increment_native_candidate,
+    recover_native_increment,
 )
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
@@ -25,6 +25,7 @@ def main() -> None:
     for name in ("model", "candidate", "target", "output_dir"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--max-nfev", type=int, default=3)
+    parser.add_argument("--restart-candidate", type=Path)
     args = parser.parse_args()
     args.output_dir.mkdir(exist_ok=False)
     raw = args.model.read_bytes()
@@ -48,6 +49,21 @@ def main() -> None:
     target = MarkerTarget(clock, points, np.ones(len(indices)))
     n = len(doc["coordinate_names"])
     basis_duration = doc["duration_s"]
+    initial = np.ones(n)
+    restart_hash = None
+    if args.restart_candidate is not None:
+        restart = NativeReplayCandidate.from_document(
+            json.loads(args.restart_candidate.read_text()),
+            spec["coordinate_order"],
+            hashlib.sha256(raw).hexdigest(),
+        )
+        delta = recover_native_increment(base, restart, basis_duration_s=basis_duration)
+        if np.any(delta[:, :6] != 0):
+            raise ValueError("This run permits only sixth-power corrections")
+        initial += delta[:, 6] / 10
+        if np.any(initial < 0.8) or np.any(initial > 1.2):
+            raise ValueError("Restart exceeds original correction bounds")
+        restart_hash = restart.sha256
     config = {
         "parent_candidate_sha256": base.sha256,
         "basis_duration_s": basis_duration,
@@ -56,6 +72,8 @@ def main() -> None:
         "dimensionless_center": 1.0,
         "bounds": [0.8, 1.2],
         "max_nfev": args.max_nfev,
+        "restart_candidate_sha256": restart_hash,
+        "initial_parameters": initial.tolist(),
         "finite_difference_step": 1e-3,
         "qualification": "bounded exploratory refinement, not native acceptance",
         "input_sha256": {
@@ -103,6 +121,8 @@ def main() -> None:
             "club_cluster_rms_m": club_rms,
             "score": score,
             "integration_s": result.integration.elapsed_s,
+            "parameters": x.tolist(),
+            "near_bound_count": int(np.sum((x < 0.8001) | (x > 1.1999))),
         }
         with (args.output_dir / "evaluations.jsonl").open("a") as stream:
             stream.write(json.dumps(last) + "\n")
@@ -132,7 +152,7 @@ def main() -> None:
         fit = fit_prefixes(
             target,
             forward,
-            initial=np.ones(n),
+            initial=initial,
             lower=np.full(n, 0.8),
             upper=np.full(n, 1.2),
             prefix_end_s=[doc["duration_s"]],
@@ -152,6 +172,7 @@ def main() -> None:
             "metrics": last,
             "optimizer_converged": fit.stages[-1].optimizer_converged,
             "optimizer_message": fit.stages[-1].message,
+            "parameters": fit.parameters.tolist(),
         }
         (args.output_dir / "returned.json").write_text(json.dumps(report, indent=2))
     except (ValueError, RuntimeError, FloatingPointError) as error:
