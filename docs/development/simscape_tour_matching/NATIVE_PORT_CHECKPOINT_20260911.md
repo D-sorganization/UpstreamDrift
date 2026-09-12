@@ -1,5 +1,60 @@
 # Native Port Implementation Checkpoint
 
+## New Feasible Terminal Pose Meets the Marker Threshold
+
+Updated 2026-09-12 UTC. Reused the existing qualified static-pose runner and
+unchanged native geometry/marker attachments, seeded from run04's continuous
+states. First solve (session 94811, exit zero) exhausted 100 iterations at
+0.6 and 0.8 s; its 0.8 s closure error 4.66603e-5 was unacceptable despite
+33.441 mm RMS. Preserve that failed qualification; do not use its pose as proof.
+The second solve restarted from the saved pose report with identical bounds and
+another 100-iteration budget. It exited zero and all three pose solves converged.
+
+| Time  | Feasible Pose RMS | Closure Maximum | Iterations |
+| ----- | ----------------: | --------------: | ---------: |
+| 0.6 s |      20.576050 mm |     1.69144e-13 |         20 |
+| 0.7 s |      27.492318 mm |     2.76862e-14 |          1 |
+| 0.8 s |      33.304031 mm |     2.13718e-15 |         79 |
+
+No search bounds are active. The native limits remain off; the search envelope
+is +/-0.8 m for root translations and +/-3.2 rad for other coordinates, centered
+on run04's forward pose. The 0.8 s result improves the previous feasible static
+36.83675 mm result and meets the 35 mm all-marker terminal threshold. This
+refutes treating that earlier local minimum as a geometry-imposed failure of
+the threshold. It does not establish physiological plausibility, the yaw gate,
+a smooth path to the pose, or dynamic attainability with a global sextic.
+
+Large coordinate differences from the previous static solution include left
+shoulder Y (2.790 rad), left forearm (-2.569 rad), left elbow (1.254 rad), and
+left shoulder Z (-0.834 rad). Do not interpolate these raw values blindly:
+check equivalent coordinate branches, closure, and the connecting motion.
+
+Artifacts: native_evidence/native-pose-ms04-9967-01.json and -02.json; exact
+raw copies in local simscape-tour-checkpoints and ControlTower C:/Users/diete.
+The unchanged committed runner is reproduction/check_native_pose_feasibility.py,
+copied to ControlTower as check_native_pose_feasibility_ms04_9967.py. Execution:
+WSL ControlTower-Runner, PYTHONPATH=/home/dieterolson/native-pose-9967-01,
+OPENBLAS_NUM_THREADS=1, OMP_NUM_THREADS=1, Python at
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python. Arguments:
+--model /mnt/c/Users/diete/native_geometry_spec_9967.json
+--candidate /mnt/c/Users/diete/native-ms-fit-9967-04/returned-candidate.json
+--target /mnt/c/Users/diete/driver_marker_payload_9967.json
+--translation-radius 0.8 --rotation-radius 3.2
+--output /mnt/c/Users/diete/native-pose-ms04-9967-01.json.
+Second invocation adds --seed-report pointing to that output and uses the
+new -02.json output. Existing outputs are never overwritten.
+
+Next assignment: qualify a dense closure-constrained pose continuation across
+0.6-0.8 s toward the new terminal solution before using it as a shooting seed.
+Extend the existing runner with explicit sample clocks and tests for exact
+capture samples, endpoints and seed identities; reuse fit_marker_pose. Compare
+both forward and backward continuations to expose branch jumps. Preserve all
+markers and independently evaluate closure/pose errors. Only after a smooth
+feasible path exists, estimate tangent-consistent rates and initialize additional
+shooting nodes. Keep one global sextic and require final continuous replay.
+No new native geometry calibration is justified solely by the earlier local
+36.8 mm result. Full-swing fitting and final R2025b qualification remain open.
+
 ## Run04 Independently Replayed and Residuals Diagnosed
 
 Updated 2026-09-12 UTC. Independent replay session 54372 exited zero. Its
