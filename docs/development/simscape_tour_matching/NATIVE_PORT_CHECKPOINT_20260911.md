@@ -1,5 +1,58 @@
 # Native Port Implementation Checkpoint
 
+## Native Multiple-Shooting Pilot Is Live
+
+Updated 2026-09-12 UTC. Previous shared-solver commit c6eb97d09 is confirmed
+pushed. This turn assembled the native pilot from the tested shared solver and
+native window/sensitivity/retraction facades. Before optimization, independent
+perturbed-node replays qualified the composed chain rule at a nonzero chart
+coordinate: columns 0/14 marker relative errors 2.62715e-7 / 3.72149e-7;
+endpoint-state relative errors 3.43978e-6 / 4.13269e-6. All pass the 1e-3 gate.
+Audit session 28356 exited zero. Evidence is native_evidence/ms_pilot_audit_9967_01.
+
+LIVE run native-ms-fit-9967-01: unified session 84162, independently confirmed
+ControlTower WSL PID 2040534 executing run_native_ms_pilot_9967_01.py. Output
+C:/Users/diete/native-ms-fit-9967-01. Command uses the existing native Pinocchio
+venv with PYTHONPATH=/home/dieterolson/native-ms-pilot-9967-01,
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1, and --max-nfev 6. Do not infer completion
+from an old process record: poll this handle or inspect this exact PID/command.
+
+135 physical Bernstein B2-B6 controls retain original +/-2 N/Nm correction bounds
+relative to root-force02; seed is bounded-trial candidate-02. Node coordinates
+are 42 chart variables, each bounded +/- .02, inside chart radius .5. Same model,
+initial state, absolute polynomial clock, 25 marker targets and .6/.8 windows.
+Defect weight 100 with position scales .1 and rate scales 1; defect gate 1e-4
+in scaled Euclidean norm. Terminal weight 10. Continuous acceptance checks all
+five current gates: whole25mm/early12mm/terminal35mm/club60mm/yaw5percent, alongside
+solver convergence and state defects. No gate has been relaxed to launch this.
+
+The window adapter uses a tangent extension of physical-state derivatives:
+node-sensitive columns multiplied by the pseudoinverse of the retraction
+Jacobian, then composed inside the shared solver with that same Jacobian.
+The native audit above verifies the composition; it does not certify arbitrary
+off-manifold physical-state perturbations. Replay cache keys include candidate,
+absolute window clock and state bytes. Current pilot retains only the most
+recent window result, so alternating windows can recompute sensitivities;
+record that cost before production performance claims or a cache refactor.
+
+Raw pilot runner and audit are local simscape-tour-checkpoints and ControlTower
+C:/Users/diete. Bundle native-ms-pilot-bundle-9967-01.zip SHA-256
+55c34b32230ab7346978728883c1c563736c06da3a2600d40eadc6887f8481b9
+contains the exact driver and shared solver; dependencies are the qualified
+native-node-retraction runtime bundle chain. Runtime is an isolated copy with
+only the shared solver added. Original runtimes and Gemini files untouched.
+The driver writes config, derivative-audit and windows.jsonl incrementally;
+a normal return writes returned-candidate.json and returned.json. A crash may
+leave only partial ledgers; preserve the actual process error and do not call it
+a successful fit. Inputs/output paths are immutable and refuse overwrite.
+
+Next single action: poll session 84162/PID 2040534, preserve terminal result or
+failure, then independently replay any returned candidate using the established
+benchmark runner and marker plotter. Compare with current best score13.822219,
+whole23.650135mm/early10.012688mm/terminal62.549398mm/club30.590078mm. Large segmented
+improvement with poor continuous replay or nonzero defects is not success.
+Full-capture matching and final per-engine/R2025b qualification remain required.
+
 ## Shared Multiple-Shooting Integration Contracts Added
 
 Updated 2026-09-12 UTC. Prior retraction commit f8de17600 is confirmed pushed.

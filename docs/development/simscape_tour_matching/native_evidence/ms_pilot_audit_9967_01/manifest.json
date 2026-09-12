@@ -1,0 +1,10 @@
+{
+  "bundle_sha256": "55c34b32230ab7346978728883c1c563736c06da3a2600d40eadc6887f8481b9",
+  "source_commit": "c6eb97d09",
+  "qualification": "composed native derivative pilot audit passed; optimization result pending",
+  "files": {
+    "config.json": "70e8e3192275e5bdc663d13e5fb988f324e30a61d384b482aaf4a32860d6454c",
+    "derivative-audit.json": "2c52df27b8d9be260b45cbeb4b14139e9a91e33d3a7eb162770b38ec0620ce14",
+    "windows.jsonl": "3d3791e303dd2994aa76db1d3e87c37891cc6abd0f8b72bfb4a36fd95a72db95"
+  }
+}
