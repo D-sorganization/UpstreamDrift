@@ -231,6 +231,7 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch) -> None:
     original = module.least_squares
 
     def checked(fun, x0, **kwargs):
+        assert kwargs["xtol"] is None
         h = 1e-5
         fd = np.column_stack(
             [
@@ -259,6 +260,7 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch) -> None:
     for allowed in [True, False]:
         opts = MultipleShootingOptions(
             shooting_nodes=(0.5, 1.0),
+            step_tolerance=None,
             max_nfev=30,
             window_jacobian=window_jac,
             state_transform_jacobian=lambda t, z: np.array([[1.0], [2.0]]),
@@ -354,3 +356,9 @@ def test_evaluation_callbacks_preserve_physical_node_snapshots() -> None:
     assert evaluations[0][1] == evaluations[0][2] == checkpoints[0][2]
     assert result.theta[0] < 2
     assert np.max(abs(result.intermediate_states[0.5])) < 1
+
+
+@pytest.mark.parametrize("value", [0, -1, np.nan, np.inf, True, 1e-30])
+def test_invalid_step_tolerance_is_rejected(value) -> None:
+    with pytest.raises(ValueError, match="step tolerance"):
+        MultipleShootingOptions(shooting_nodes=(1.0,), step_tolerance=value)

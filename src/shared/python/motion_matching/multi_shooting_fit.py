@@ -39,6 +39,7 @@ class MultipleShootingOptions:
     defect_weight: float = 100.0
     defect_tolerance: float = 1e-3
     max_nfev: int = 150
+    step_tolerance: float | None = 1e-8
     finite_difference_step: float | None = None
     terminal_weight: float = 0.0
     pelvis_indices: tuple[int, int] | None = None
@@ -73,6 +74,15 @@ class MultipleShootingOptions:
             raise ValueError("defect_weight must be non-negative")
         if self.defect_tolerance <= 0:
             raise ValueError("defect_tolerance must be positive")
+        if self.step_tolerance is not None and (
+            isinstance(self.step_tolerance, bool)
+            or not isinstance(self.step_tolerance, (int, float, np.floating))
+            or not np.isfinite(self.step_tolerance)
+            or self.step_tolerance <= np.finfo(float).eps
+        ):
+            raise ValueError(
+                "Invalid step tolerance; use None to disable step stopping"
+            )
 
 
 @dataclass(frozen=True)
@@ -367,7 +377,7 @@ def fit_multiple_shooting(
         bounds=(x_lower, x_upper),
         max_nfev=options.max_nfev,
         ftol=1e-8,
-        xtol=1e-8,
+        xtol=options.step_tolerance,
         gtol=1e-8,
         x_scale="jac",
         diff_step=diff_step,
