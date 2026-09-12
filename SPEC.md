@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Launcher UI, Process Manager, and Library Widget Unit-Gate Debt Burndown (#8766)
+
+Burn down 67 quarantined test node IDs across launcher UI setup, process manager, library widget, and golf launcher in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine all 67 tests across `tests/launchers/test_golf_launcher.py` (25 tests), `tests/launchers/test_launcher_ui_setup.py` (21 tests), `tests/launchers/test_launcher_process_manager.py` (17 tests), and `tests/launchers/test_library_widget.py` (4 tests).
+- Theme Mock Alignment: Update test mock patch target in `test_update_launch_button_tolerates_theme_without_success_hover` to `src.shared.python.theme.get_current_colors` matching `upstream_drift_launcher.py` module imports.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 298 to 231 node IDs across 10 clusters) and execute all 127 launcher unit tests with 100% pass rate.
+
 ## Security Handlers and Physics Module Docstrings Unit-Gate Debt Burndown (#8766)
 
 Burn down 32 quarantined test node IDs across exception handling and physics module docstrings in `scripts/config/unit_gate_quarantine.json`:
