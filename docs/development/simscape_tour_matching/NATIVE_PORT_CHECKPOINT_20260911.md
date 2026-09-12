@@ -1,5 +1,16 @@
 # Native Port Implementation Checkpoint
 
+## Parallel MuJoCo and Drake Scope Added
+
+Updated 2026-09-12 UTC. The user explicitly added MuJoCo and Drake native
+equivalence implementation to the active goal and authorized parallel agents.
+See MULTI_ENGINE_NATIVE_PROGRAM.md for ownership, exact issues/worktrees,
+shared contracts, acceptance gates and turnover requirements. MuJoCo10021 and
+Drake10022 are active implementation lanes; equivalence is not yet established.
+Root retains shared solver/Pinocchio ownership. Scaling commit3cab80075 is
+pushed;45 focused tests and normal commit/push checks pass. Native scaling
+qualification is next, and no new fitting job is live.
+
 ## Variable Scaling Implemented and Locally Qualified
 
 Updated 2026-09-12 UTC. Previous goal turn made progress by completing and
