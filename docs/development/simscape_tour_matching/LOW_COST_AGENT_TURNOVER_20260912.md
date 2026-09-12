@@ -64,6 +64,13 @@ its qd and zero qd. The next required qualification is therefore a _trajectory_
 test across smoothed constrained marker-pose seeds, including pose, rate and
 acceleration closure. Do not skip that test for a torque fit.
 
+Use `NativeConstrainedPoseOracle` with the existing shared
+`fit_marker_pose`; it is the only permitted bridge from the native model to
+the static constrained-pose stage. Pass the exact candidate coordinate order,
+captured marker-body attachments and offsets. Save one independent receipt per
+frame, including observed mask, marker RMS, SLSQP status and weld residual. The
+adapter does not make independent frames a valid trajectory.
+
 Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
 Never silently change geometry, add feedback/state resets, or relax criteria.
 Use one bounded fit at a time after qualification; independently forward replay
