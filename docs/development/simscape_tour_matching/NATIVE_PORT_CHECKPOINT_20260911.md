@@ -1,5 +1,35 @@
 # Native Port Implementation Checkpoint
 
+## P2 Candidate Package Implemented
+
+`motion_matching/native_candidate.py` provides a versioned validated JSON
+snapshot with content identity. Ten tests progressed from missing-module red
+to green: detached snapshots, input-sensitive identity, wrong model hash,
+coordinate reordering, coefficient/time/force-frame ambiguity, invalid initial
+state/marker offsets/duration and missing provenance. Ruff passed. The snapshot
+is a package contract, not a native-physics certificate or engine adapter.
+
+`native_evidence/native_replay_candidate_9967.json` packages the saved 0.80 s
+candidate with 27 coordinates and 25 fixed seed attachments. model_sha256 is
+the BYTE hash of the original `native_geometry_spec_9967.json` in the local
+checkpoint archive / ControlTower user directory, not a prettified re-export.
+source_sha256 identifies `native-rollout-reference-9967-01.json`; capture_sha256
+identifies the driver C3D. The package owns q0/qd0 from native measured initial
+state, native highest-power-first coefficients and absolute-second duration.
+Recompute candidate identity through the parser after serialization; do not
+confuse the snapshot's canonical hash with a pretty-printed file-byte hash.
+
+Next single implementation: native engine replay adapter consuming this package
+and model bytes, verifying model hash, coordinate/primitive inventory, marker
+frames and initial grip pose/velocity closure before integrating. Reuse
+NativeEffortProfile, integrate_forward and project_markers. Reject partial
+coverage and nonfinite outputs; include final closure checks and immutable
+receipts. NativePinocchioModel needs a public closure-residual accessor so the
+adapter does not inspect its internal constraint-data objects. Test these
+contracts with a fake engine, then execute this exact package on ControlTower
+and compare with the qualified diagnostic before optimizer integration.
+No native job is live. P2 adapter and P3 URDF interchange remain incomplete.
+
 ## Second Tolerance Comparison Complete: Proceed to P2
 
 All jobs are terminal, exit zero: export 31614, continuous replay 19541,
