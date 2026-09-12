@@ -1,4 +1,4 @@
-"""Prepare a bounded native polynomial restart without shifting its envelope."""
+"""Prepare native restarts and explicit numerical control-envelope continuation."""
 
 from typing import NamedTuple
 
@@ -71,3 +71,44 @@ def prepare_native_restart(
         float(np.max(snap)),
         int(np.count_nonzero(snap)),
     )
+
+
+def widen_control_envelope(
+    lower: NDArray[np.float64],
+    upper: NDArray[np.float64],
+    selected: NDArray[np.bool_],
+    *,
+    factor: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Widen selected numerical intervals about their unchanged centers.
+
+    Selection and factor are explicit experimental policy, never inferred from
+    fit failure. Unselected intervals remain bit-identical. These bounds apply
+    to correction controls; they do not declare total physical actuator limits
+    or bound polynomial values outside a Bernstein basis interval. Callers must
+    preserve prior envelopes and record this change in a new run manifest.
+    """
+    if isinstance(factor, (bool, np.bool_)) or not np.isfinite(factor) or factor <= 1:
+        raise ValueError("Expansion factor must be finite and greater than one")
+    lo, hi = (np.array(value, dtype=float, copy=True) for value in (lower, upper))
+    mask = np.asarray(selected)
+    if (
+        not lo.size
+        or hi.shape != lo.shape
+        or mask.shape != lo.shape
+        or mask.dtype != np.bool_
+        or not mask.any()
+        or not np.isfinite(lo).all()
+        or not np.isfinite(hi).all()
+        or np.any(lo >= hi)
+    ):
+        raise ValueError("Invalid bounds or explicit control selection")
+    with np.errstate(over="ignore", invalid="ignore"):
+        increment = (factor - 1) * (hi[mask] / 2 - lo[mask] / 2)
+        lo[mask] -= increment
+        hi[mask] += increment
+    if not np.isfinite(lo).all() or not np.isfinite(hi).all():
+        raise ValueError("Expanded control bounds must remain finite")
+    lo.setflags(write=False)
+    hi.setflags(write=False)
+    return lo, hi
