@@ -15,12 +15,30 @@ Pinocchio objective. Read `NATIVE_PORT_CHECKPOINT_20260911.md` for current
 evidence and `REVIEW_AND_EXECUTION_HANDOFF_20260911_2200.md` for the matching
 strategy and known Gemini runner defects.
 
-Native geometry, initial mass/COM, 27 stationary input responses, and six
-moving-state accelerations through 0.80 seconds have been compared with actual
-R2025b execution. The essential fix is depth-first joint insertion, committed
-as d03983d08. Those checks do not establish continuous rollout or full-swing
-matching. Existing native JSON preserves a tree plus explicit grip closure;
-plain URDF cannot preserve that entire execution contract by itself.
+## Verified Stage Status
+
+Updated 2026-09-12 UTC after inspecting actual receipts. The detailed stages
+below remain the execution contracts; this table supersedes their old baseline
+status. Native R2025b equivalence and C3D matching are distinct requirements.
+
+| Requirement                   | Current Evidence                                                                                                                                                        | Remaining Work                                                                                                                            |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| P1 Native Continuous Dynamics | Tightened R2025b comparison through 0.80 s; projected marker discrepancy <=1.36 micrometres for the exact baseline; independent native frame checks recorded separately | Extend qualification when horizon or physical configuration changes                                                                       |
+| P2 Packaged Native Adapter    | Actual ControlTower replay matches qualified diagnostic q/qd exactly; native_adapter_check_9967.json                                                                    | Full application imports/dependency deployment still untested on ControlTower; namespace bundle evidence is narrower                      |
+| P3 Portable Tree Plus Closure | Actual URDF reload, sidecar-bound weld/effort mapping, mass/COM, pulses, moving accelerations and 0.80 s replay pass; native_urdf_roundtrip_9967.json                   | MuJoCo and Drake require their own native importers and physics evidence; plain URDF is insufficient                                      |
+| P4 Actual Fitting Oracle      | ~3.5 s complete native evaluation; bounded run 01 improved terminal RMS 203 to 132 mm; fresh replay confirmed; run 02 is live                                           | Evaluate returned run 02, optimizer convergence, all gates and native replay before promotion                                             |
+| P5 Full Observed Swing        | No accepted full-swing candidate                                                                                                                                        | Resolve transition, audit kinematic floor if fitting stalls, extend without state resets, retain global sextic controls and verify R2025b |
+| OpenSim                       | Epic #10003 and staged turnover pushed; latest plan 1a68091b6                                                                                                           | Begin OS-0 runtime/capture qualification after requested planning check-in; no OpenSim parity claim                                       |
+
+Receipts live in native_evidence/. Run 01 portable arrays and the error plot
+are in native_evidence/refinement_9967_01/. The plot exposes instantaneous RMS
+of 30.4 mm at 0.60 s despite early-window average RMS 10.54 mm. Inspect local
+windows/endpoints before horizon extension; the first 0.60 s is not exactly
+solved. A chart of simulated versus measured markers is separate from a chart
+of inter-engine numerical discrepancy. Preserve that distinction in reports.
+
+Current live handle and commands are authoritative only after rechecking:
+NATIVE_PORT_CHECKPOINT_20260911.md records run 02 session 48221 and WSL PID 1885136. Do not create another optimization until inspecting that worker.
 
 ## Rules for Each Assigned Stage
 
