@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## CORS Configuration Unit-Gate Debt Burndown (#8766)
+
+Burn down 13 quarantined test node IDs across CORS middleware configuration in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine all 13 tests in `tests/unit/test_cors.py`.
+- Modern FastAPI Compatibility & Contract Alignment: Update test mock application creation to provide `FastAPI` mock spec (`MagicMock(spec=FastAPI)`) satisfying the `require(isinstance(app, FastAPI), ...)` precondition in canonical `cors.py`; align test assertions with canonical vendor defaults (`allow_credentials=False`, `allow_methods=["GET", "POST", "OPTIONS"]`, and wildcard origin validation when credentials are enabled).
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 343 to 330 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## Launcher Diagnostics, Artifacts, Pipeline, and Tools Model Sources Debt Burndown (#8766)
 
 Burn down 20 quarantined test node IDs across launcher diagnostics, checkpoint loading, golf state environment constants, motion pipeline orchestration, TRC adapters, and tools launcher model sources in `scripts/config/unit_gate_quarantine.json`:
