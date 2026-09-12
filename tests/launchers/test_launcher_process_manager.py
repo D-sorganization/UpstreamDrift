@@ -685,50 +685,54 @@ def test_launch_module_unified_nt_pythonpath(mock_secure_popen, manager) -> None
     repo_str = str(manager.repo_root)
     src_str = str(manager.repo_root / "src")
 
-    with patch("src.launchers.launcher_process_manager.os.name", "nt"):
-        # True, True branch (neither in path, passed via explicit env)
-        manager.launch_module(
-            "Test", "my_module", PureWindowsPath("."), env={"PYTHONPATH": "some_other"}
-        )
-        env_passed = mock_secure_popen.call_args[1]["env"]
-        assert repo_str in env_passed["PYTHONPATH"]
-        assert src_str in env_passed["PYTHONPATH"]
-        assert "some_other" in env_passed["PYTHONPATH"]
+    with patch("threading.Thread"):
+        with patch("src.launchers.launcher_process_manager.os.name", "nt"):
+            # True, True branch (neither in path, passed via explicit env)
+            manager.launch_module(
+                "Test",
+                "my_module",
+                PureWindowsPath("."),
+                env={"PYTHONPATH": "some_other"},
+            )
+            env_passed = mock_secure_popen.call_args[1]["env"]
+            assert repo_str in env_passed["PYTHONPATH"]
+            assert src_str in env_passed["PYTHONPATH"]
+            assert "some_other" in env_passed["PYTHONPATH"]
 
-        # False, False branch
-        manager.launch_module(
-            "Test",
-            "my_module",
-            PureWindowsPath("."),
-            env={"PYTHONPATH": f"{repo_str};{src_str}"},
-        )
-        env_passed = mock_secure_popen.call_args[1]["env"]
-        # Shouldn't duplicate
-        assert env_passed["PYTHONPATH"] == f"{repo_str};{src_str}"
+            # False, False branch
+            manager.launch_module(
+                "Test",
+                "my_module",
+                PureWindowsPath("."),
+                env={"PYTHONPATH": f"{repo_str};{src_str}"},
+            )
+            env_passed = mock_secure_popen.call_args[1]["env"]
+            # Shouldn't duplicate
+            assert env_passed["PYTHONPATH"] == f"{repo_str};{src_str}"
 
-        # False, True branch
-        manager.launch_module(
-            "Test",
-            "my_module",
-            PureWindowsPath("."),
-            env={"PYTHONPATH": f"{repo_str};foo"},
-        )
-        env_passed = mock_secure_popen.call_args[1]["env"]
-        assert env_passed["PYTHONPATH"] == f"{src_str};{repo_str};foo"
+            # False, True branch
+            manager.launch_module(
+                "Test",
+                "my_module",
+                PureWindowsPath("."),
+                env={"PYTHONPATH": f"{repo_str};foo"},
+            )
+            env_passed = mock_secure_popen.call_args[1]["env"]
+            assert env_passed["PYTHONPATH"] == f"{src_str};{repo_str};foo"
 
-        # True, False branch
-        manager.launch_module(
-            "Test",
-            "my_module",
-            PureWindowsPath("."),
-            env={"PYTHONPATH": f"{src_str};foo"},
-        )
-        env_passed = mock_secure_popen.call_args[1]["env"]
-        assert env_passed["PYTHONPATH"] == f"{repo_str};{src_str};foo"
+            # True, False branch
+            manager.launch_module(
+                "Test",
+                "my_module",
+                PureWindowsPath("."),
+                env={"PYTHONPATH": f"{src_str};foo"},
+            )
+            env_passed = mock_secure_popen.call_args[1]["env"]
+            assert env_passed["PYTHONPATH"] == f"{repo_str};{src_str};foo"
 
-    with patch("os.name", "posix"):
-        manager.launch_module("Test", "my_module", PureWindowsPath("."))
-        assert mock_secure_popen.called
+        with patch("os.name", "posix"):
+            manager.launch_module("Test", "my_module", PureWindowsPath("."))
+            assert mock_secure_popen.called
 
 
 @patch(_SECURE_POPEN)
