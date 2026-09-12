@@ -309,3 +309,48 @@ def test_missing_acceptance_does_not_qualify_finite_bad_fit() -> None:
     )
     assert result.optimizer_converged
     assert not result.accepted
+
+
+def test_evaluation_callbacks_preserve_physical_node_snapshots() -> None:
+    target = MarkerTarget(np.array([0.0, 0.5, 1.0]), np.zeros((3, 1, 3)), np.ones(1))
+    evaluations = []
+    checkpoints = []
+
+    def observe(theta, residual, cost):
+        evaluations.append((theta.copy(), float(residual @ residual), cost))
+        # Observers own their copies even if they deliberately make them writable.
+        theta.setflags(write=True)
+        theta[:] = 999
+        residual.setflags(write=True)
+        residual[:] = 999
+
+    def checkpoint(theta, states, cost):
+        checkpoints.append(
+            (theta.copy(), {t: x.copy() for t, x in states.items()}, cost)
+        )
+        states[0.5].setflags(write=True)
+        states[0.5][:] = 999
+
+    result = fit_multiple_shooting(
+        target,
+        lambda theta, clock, state: (np.zeros((len(clock), 1, 3)), np.zeros(2)),
+        lambda theta, clock: np.zeros((len(clock), 1, 3)),
+        initial_theta=np.array([1.0]),
+        lower_theta=np.array([0.0]),
+        upper_theta=np.array([2.0]),
+        initial_states={0.5: np.array([0.25])},
+        state_bounds={0.5: (np.array([-1.0]), np.array([1.0]))},
+        options=MultipleShootingOptions(
+            shooting_nodes=(0.5, 1.0),
+            max_nfev=3,
+            state_transform=lambda time, z: np.array([z[0], 2 * z[0]]),
+            callback=observe,
+            checkpoint_callback=checkpoint,
+        ),
+    )
+    assert len(evaluations) == len(checkpoints) > 0
+    np.testing.assert_array_equal(checkpoints[0][1][0.5], [0.25, 0.5])
+    np.testing.assert_array_equal(checkpoints[0][0], [1.0])
+    assert evaluations[0][1] == evaluations[0][2] == checkpoints[0][2]
+    assert result.theta[0] < 2
+    assert np.max(abs(result.intermediate_states[0.5])) < 1

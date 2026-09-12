@@ -45,6 +45,10 @@ class MultipleShootingOptions:
     pelvis_yaw_weight: float = 0.0
     pelvis_yaw_max_error_pct: float = 5.0
     regularization: Callable[[Array], Array] | None = None
+    callback: Callable[[Array, Array, float], None] | None = None
+    checkpoint_callback: (
+        Callable[[Array, Mapping[float, Array], float], None] | None
+    ) = None
     state_transform: Callable[[float, Array], Array] | None = None
     defect_scales: Array | None = None
     acceptance: Callable[[Array], bool] | None = None
@@ -253,7 +257,19 @@ def fit_multiple_shooting(
             if reg_res is not None and len(reg_res) > 0:
                 res_parts.append(reg_res)
 
-        return np.concatenate(res_parts)
+        full_res = np.concatenate(res_parts)
+        # Every evaluation, including rejected trials and finite differences, may
+        # be observed. These snapshots are not acceptance or convergence events.
+        cost = float(full_res @ full_res)
+        if options.callback is not None:
+            options.callback(_readonly(theta), _readonly(full_res), cost)
+        if options.checkpoint_callback is not None:
+            options.checkpoint_callback(
+                _readonly(theta),
+                {time: _readonly(state) for time, state in states.items()},
+                cost,
+            )
+        return full_res
 
     def analytic_jacobian(p: Array) -> Array:
         if options.window_jacobian is None:
