@@ -59,6 +59,15 @@ This is not a speed, convergence or matching claim. The remaining prerequisite
 for one bounded fit is the reviewed smooth closure-feasible transition
 initializer; do not repeat a blind control-bound continuation.
 
+The first required native primitive for that initializer is now available:
+`NativePinocchioModel.closure_residuals(coordinates, rates=None)` refreshes the
+actual 6D weld through constrained dynamics with explicit zero efforts and
+returns its pose/rate residuals. It validates complete finite native coordinate
+and rate inventories and does not correct state, invoke inverse dynamics or
+change a replay. Unit contracts cover the static zero-rate probe and rejection
+of incomplete/nonfinite inputs. It still needs a separate ControlTower
+trajectory-level qualification before any C3D path is treated as feasible.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.
