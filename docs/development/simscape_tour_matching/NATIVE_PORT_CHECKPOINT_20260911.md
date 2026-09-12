@@ -179,6 +179,18 @@ step retracted through `node_retraction.retract_node` to weld residual
 runner is `qualify_native_weld_node_chart.py`. This preserves pose closure at
 every node; it still does not supply the rate/acceleration derivative blocks,
 marker objective, dynamic trajectory, torque identification, or forward match.
+
+Pinocchio now also owns a no-inverse-dynamics three-level weld residual oracle:
+`closure_trajectory_residuals(q,v,a)` evaluates pose, `J*v`, and
+`J*(a-a0)`, where a0 is the actual zero-effort constrained forward
+acceleration. The ControlTower receipt
+`native_evidence/trajectory_residuals_9967_24/receipt.json` repeats the18
+smooth-path samples and returns pose2.59331e-10, rate2.17740e-13, and
+acceleration1.336681893544. The acceleration value matches the independent
+Drake diagnostic1.336681893545 to displayed precision, establishing a common
+fast residual convention for the next Pinocchio chart solver. This does not
+repair the path or identify a torque; the same nonzero acceleration defect
+still blocks reaction-eliminated effort identification.
 identification. The next path stage is an explicit acceleration projection with
 reported correction magnitude, followed by derivative-consistency review; no
 torque fit or forward replay may be inferred from this failed diagnostic.

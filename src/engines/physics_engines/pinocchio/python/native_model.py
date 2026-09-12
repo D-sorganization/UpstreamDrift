@@ -39,6 +39,14 @@ class NativeClosurePositionLinearization(NamedTuple):
     jacobian: NDArray[np.float64]
 
 
+class NativeClosureTrajectoryResiduals(NamedTuple):
+    """Pose, velocity, and acceleration weld residuals at one native state."""
+
+    position: NDArray[np.float64]
+    rate: NDArray[np.float64]
+    acceleration: NDArray[np.float64]
+
+
 def depth_first_joints(
     joints: Sequence[Mapping[str, Any]],
 ) -> list[Mapping[str, Any]]:
@@ -261,6 +269,59 @@ class NativePinocchioModel:
         position.setflags(write=False)
         jacobian.setflags(write=False)
         return NativeClosurePositionLinearization(names, position, jacobian)
+
+    def closure_trajectory_residuals(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        accelerations: Mapping[str, float],
+    ) -> NativeClosureTrajectoryResiduals:
+        """Evaluate all weld levels without treating the loop as inverse dynamics.
+
+        The zero-effort constrained forward acceleration supplies `a0`, so the
+        acceleration residual is J*(a-a0), equivalent to J*a+gamma when
+        J*a0+gamma=0. This preserves the loop reaction rather than assuming it
+        vanishes. It is a kinematic/dynamic residual oracle, never a fitter.
+        """
+        names = tuple(coordinates)
+        if (
+            set(rates) != set(names)
+            or set(accelerations) != set(names)
+            or not np.isfinite(tuple(rates.values())).all()
+            or not np.isfinite(tuple(accelerations.values())).all()
+        ):
+            raise ValueError(
+                "Provide finite native coordinate, rate, and acceleration inventories"
+            )
+        zero_efforts = {name: 0.0 for name in names}
+        drift_values = self.accelerations(coordinates, rates, zero_efforts)
+        position, _ = self.closure_errors()
+        raw = np.asarray(
+            self._pin.getConstraintsJacobian(
+                self.model, self.data, self.constraints, self.constraint_data
+            ),
+            dtype=float,
+        )
+        indices = [self._velocity_indices[name] for name in names]
+        jacobian = raw[:, indices]
+        rate_vector = np.asarray([rates[name] for name in names], dtype=float)
+        acceleration_vector = np.asarray(
+            [accelerations[name] for name in names], dtype=float
+        )
+        drift = np.asarray([drift_values[name] for name in names], dtype=float)
+        rate = jacobian @ rate_vector
+        acceleration = jacobian @ (acceleration_vector - drift)
+        if (
+            raw.ndim != 2
+            or jacobian.shape != (position.size, len(names))
+            or not np.isfinite(position).all()
+            or not np.isfinite(rate).all()
+            or not np.isfinite(acceleration).all()
+        ):
+            raise ValueError("Invalid native weld trajectory residuals")
+        for value in (position, rate, acceleration):
+            value.setflags(write=False)
+        return NativeClosureTrajectoryResiduals(position, rate, acceleration)
 
     def marker_derivatives(
         self,

@@ -106,6 +106,14 @@ parameterization for the next collocation stage; retain its0.1m translational
 and1rad rotational state scales unless a separately qualified scale change is
 recorded.
 
+The fast native trajectory residual oracle is now qualified in
+`native_evidence/trajectory_residuals_9967_24/receipt.json`. It uses only
+constrained forward dynamics with zero efforts to retain the weld reaction and
+reports the same18-sample acceleration closure1.336681893544 as the independent
+Drake receipt1.336681893545. Use this Pinocchio oracle inside the next chart
+solver; retain Drake for independent final residual verification. The result is
+negative evidence for the current cubic qdd, not a repaired trajectory.
+
 Use `NativeConstrainedPoseOracle` with the existing shared
 `fit_marker_pose`; it is the only permitted bridge from the native model to
 the static constrained-pose stage. Pass the exact candidate coordinate order,
