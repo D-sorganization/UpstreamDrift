@@ -186,6 +186,9 @@
     "tests/unit/test_safe_eval.py::TestSafeEval::test_safe_eval_does_not_call_python_eval",
     "tests/unit/test_safe_eval.py::TestSafeEval::test_safe_eval_supports_star_args_without_eval",
     "tests/unit/test_script_size_contracts_2515.py::TestSyngasCompressionCalculatorSize::test_loc_within_budget",
+    "tests/unit/test_secure_subprocess.py::TestSecureSubprocess::test_secure_popen_hides_windows_by_default_on_windows",
+    "tests/unit/test_secure_subprocess.py::TestSecureSubprocess::test_secure_popen_preserves_explicit_creationflags",
+    "tests/unit/test_secure_subprocess.py::TestSecureSubprocess::test_secure_run_hides_windows_by_default_on_windows",
     "tests/unit/test_sim_gui_honest_messaging_6641.py::test_bunker_gui_uses_preview_label",
     "tests/unit/test_sim_gui_honest_messaging_6641.py::test_putting_gui_uses_preview_label",
     "tests/unit/test_start_api_server.py::test_validate_security_no_issues",
@@ -208,6 +211,7 @@
     "tests/unit/tools/starting_pose_matcher/test_body_style_switch.py::test_scrub_in_library_mode_updates_without_error",
     "tests/unit/ui/dialogs/test_install_prompt.py::TestInstallWorker::test_worker_emits_finished_on_failure",
     "tests/unit/ui/dialogs/test_install_prompt.py::TestInstallWorker::test_worker_emits_finished_on_success",
-    "tests/unit/ui/dialogs/test_install_prompt.py::TestInstallWorker::test_worker_handles_unexpected_exception"
+    "tests/unit/ui/dialogs/test_install_prompt.py::TestInstallWorker::test_worker_handles_unexpected_exception",
+    "tests/unit/ui/test_window_icon.py::test_apply_window_icon_declares_app_user_model_id"
   ]
 }
