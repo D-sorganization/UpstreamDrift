@@ -11,7 +11,18 @@ entry sequence, not arbitrary Tools alias collisions. Drake's first run 18
 comparison and one tighter matched-tolerance comparison both fail the absolute
 rate gate (1.46002e-4 and 3.29386e-4 versus 1e-4). Marker differences remain
 below 1e-7 m. No gate was relaxed; 0.85 s full-state parity is not qualified.
-The Drake agent is archiving the two failures and bounded localization evidence.
+The two failures and bounded localization evidence are integrated as
+`ff7a2e1de`, under `docs/development/drake_native_matching/evidence/run18`.
+Both peaks occur at 0.7861111111 s in LSInputX, near 400.447 rad/s; relative
+cross-engine discrepancies are 3.65e-7 and 8.23e-7. Within-engine coarse/fine
+rate changes are 3.32e-4 for Pinocchio and 1.43e-4 for Drake, so reference
+convergence at the existing absolute rate gate is not established. The raw
+generalized-coordinate mass condition is about 6.65e7 with positive minimum
+eigenvalue 1.38e-6; this quantity is unit-dependent. Diagnose native Euler
+coordinate amplification and integration convergence before calling this a
+physical model mismatch or changing representation/gates. No third tolerance
+sweep or model alteration was performed. The agent is saving a bounded
+existing-state shoulder-coordinate addendum; collect it before the next fit.
 
 Updated 2026-09-12 UTC. This section supersedes historical LIVE statuses below.
 Run 18 session 94942 exited 0 and ControlTower PID 2294114 is absent. No new
