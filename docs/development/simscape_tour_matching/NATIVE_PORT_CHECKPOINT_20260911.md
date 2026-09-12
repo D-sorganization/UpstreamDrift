@@ -1,5 +1,22 @@
 # Native Port Implementation Checkpoint
 
+## Native Effort Profile Contract Started
+
+The prior 5c6ec3c8c commit is pushed; all its normal push checks passed.
+New `motion_matching/native_effort_profile.py` explicitly converts the native
+highest-power-first absolute-second sextic to the existing shared evaluator's
+lowest-power-first representation, and rotates only the first three world
+forces into the native hip base. It owns copies of coefficients/rotation and
+does not normalize by replay horizon. Five tests progressed from missing-module
+red to green; Ruff lint/format passed. It is a P2 building block, not yet wired
+into the qualified native replay runner or a complete candidate package.
+
+Second native tolerance run session 88805 is still live at this checkpoint.
+Latest worker PID 81844 CPU=519.84 s and its new MAT file was being written
+(891,468,896 bytes observed). Do not consume a partially written artifact or
+restart on the basis of its size. Await terminal success, then export and
+compare as described below. No error output has been received.
+
 ## Independent Native Cartesian Samples and Second Tolerance Run
 
 ControlTower session 16047 completed, exit zero. The marker diagnostic now
