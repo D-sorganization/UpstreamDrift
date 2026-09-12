@@ -68,6 +68,7 @@ def clean_import_app():
         env_mod.get_environment.cache_clear()
 
 
+@pytest.mark.unit
 def test_cloud_mode_requires_auth(clean_import_app) -> None:
     """In cloud mode, non-public endpoints return 401 when unauthenticated."""
     with (
@@ -91,6 +92,7 @@ def test_cloud_mode_requires_auth(clean_import_app) -> None:
         assert response.status_code in (200, 503)
 
 
+@pytest.mark.unit
 def test_local_mode_bypasses_auth(clean_import_app) -> None:
     """In local mode, all endpoints bypass auth (no 401)."""
     with (
@@ -106,3 +108,34 @@ def test_local_mode_bypasses_auth(clean_import_app) -> None:
 
         response = client.get("/health")
         assert response.status_code == 200
+
+
+@pytest.mark.unit
+def test_local_mode_zero_db_session_allocations(clean_import_app) -> None:
+    """In local mode, requests across routers must not allocate DB sessions (#8940)."""
+    with (
+        patch.dict(os.environ, get_local_env()),
+        TestClient(clean_import_app) as client,
+        patch("src.api.database.SessionLocal") as mock_session_local,
+    ):
+        mock_session_local.assert_not_called()
+
+        # 1. Global auth dependency protected route
+        response = client.get("/api/v1/engines")
+        assert response.status_code != 401
+        assert mock_session_local.call_count == 0
+
+        # 2. Another non-public router
+        response = client.get("/api/v1/tools/data-explorer/datasets")
+        assert response.status_code != 401
+        assert mock_session_local.call_count == 0
+
+        # 3. Public router (health)
+        response = client.get("/health")
+        assert response.status_code == 200
+        assert mock_session_local.call_count == 0
+
+        # 4. Capability probe route guarded with require_cloud_auth
+        response = client.post("/api/v1/capabilities/refresh")
+        assert response.status_code != 401
+        assert mock_session_local.call_count == 0

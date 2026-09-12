@@ -1,7 +1,7 @@
 """Authentication dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable, Generator
-from typing import TypeVar
+from typing import ContextManager, TypeVar
 
 from src.api.utils.datetime_compat import UTC
 
@@ -10,7 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
-from src.api.database import get_db
+from src.api.database import get_db, get_db_factory
 from src.shared.python.config.environment import is_auth_disabled
 
 from .models import APIKey, User, UserRole
@@ -243,7 +243,7 @@ async def authenticate_bearer_request(request: Request, db: Session) -> User:
 
 async def require_cloud_auth(
     request: Request,
-    db: Session = Depends(get_db),
+    db_factory: Callable[[], ContextManager[Session]] = Depends(get_db_factory),
 ) -> User | None:
     """Require a valid bearer token in cloud mode; no-op in local mode.
 
@@ -256,7 +256,8 @@ async def require_cloud_auth(
     """
     if is_auth_disabled():
         return None
-    return await authenticate_bearer_request(request, db)
+    with db_factory() as db:
+        return await authenticate_bearer_request(request, db)
 
 
 def _usage_quota_exceeded(current_user: User, resource_type: str) -> HTTPException:
