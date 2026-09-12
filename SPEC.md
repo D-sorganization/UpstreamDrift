@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Hardened Toast Notification System and Accessibility (#8900)
+
+Harden and stabilize the shared toast notification system (`src/shared/python/ui/toast.py`) against unbounded stacking, missing user controls, static geometry drift, and non-compliant accessibility encoding:
+- Visible Toast Capping: Cap visible toasts at `MAX_VISIBLE_TOASTS = 4` in `ToastManager`. When exceeded, dismiss the oldest active toast and reposition the remaining toasts so notifications never walk off the screen.
+- Early Dismissal and Hover Controls: Implement `Toast.mousePressEvent` to dismiss on click, with pointing hand cursor indicating clickability. Implement `Toast.enterEvent` to pause the auto-dismiss timer and record remaining duration, and `Toast.leaveEvent` to resume the timer with the remaining duration.
+- Visual and Semantic Type Encoding (WCAG 1.4.1): Render `_get_icon()` into a leading `QLabel` alongside the message in `Toast._setup_ui()`. Set `accessibleName` on both `Toast` and message label with semantic type prefix (`"Success:"`, `"Error:"`, `"Warning:"`, `"Info:"`) so notification type is never encoded by background color alone.
+- Window Anchoring and Deactivation Handling: Drop `Qt.WindowType.WindowStaysOnTopHint`. Install an internal event filter on `ToastManager.parent` to automatically invoke `reposition_all()` on `Move` and `Resize` events. On `WindowDeactivate` and `Hide`, conceal active toasts so they never float over other desktop applications, unhiding and repositioning them on `WindowActivate` and `Show`. Dismiss active toasts on `Close`.
+- Automated Verification: Unit tests in `tests/unit/ui/test_toast.py` verifying icon glyphs, accessible naming, window flags, click-to-dismiss, hover pause and resume, toast stack capping, window move/resize anchoring, and application deactivation hiding.
+
+
 ## Embedded-Host Workspace Layout and Dock Geometry Persistence (#8899)
 
 Persist embedded-host workspace tabs, dock areas, active tab focus, and dock splitter geometries across launcher restarts (`src/launchers/embedded_host.py`, `src/launchers/launcher_layout_manager.py`, `src/launchers/launcher_layout_persistence.py`, `src/launchers/upstream_drift_launcher.py`):
