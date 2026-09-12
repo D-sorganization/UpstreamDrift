@@ -1,5 +1,16 @@
 # Native Port Implementation Checkpoint
 
+## Alternative Seed Audit Completed
+
+Updated 2026-09-12 UTC. P-1 found no improved alternative seed: Gemini's seeded
+Bernstein profile converts to native run03 within 1.14e-12 coefficient difference.
+Its accepted=true contradicts four failed fit gates. Both downloaded MS runners
+still return a .601 s state for the .600 s node. See
+[GEMINI_MS_AUDIT_20260912.md](GEMINI_MS_AUDIT_20260912.md) for evidence, provenance
+and red-test repair instructions. Current best remains expanded run01 below.
+Next action: coordinate these repairs with Gemini, then diagnose the native
+weighted Jacobian conditioning and feasible geometry before another large fit.
+
 ## Expanded Trial Replayed; Next-Agent Work Packages
 
 Updated 2026-09-12 UTC. Supersedes live-job statements below. Expanded run 01
