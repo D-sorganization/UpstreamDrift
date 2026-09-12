@@ -1,5 +1,23 @@
 # Native Port Implementation Checkpoint
 
+## Current Independently Replayed Prefix Visual
+
+Updated 2026-09-12 UTC. The generated and visually inspected plot below is run06
+(canonical 907e231f16d9...), the current independently replayed prefix candidate.
+It covers 0-0.8 s only and does not depict a matched full capture. Error grows
+after roughly 0.5-0.6 s; the largest terminal errors are left elbow/upper arm
+and head markers. The exact NPZ source is ms_fit_9967_06/visual-replay.npz.
+Reproduce using reproduction/plot_native_marker_replay.py with that trajectory
+and a new --output filename. The plot title explicitly retains unaccepted status.
+
+![Run06 Independent Marker Replay](native_evidence/ms_fit_9967_06/marker-errors.png)
+
+Run07 remains live at the latest confirmed process check: PID 2126196, elapsed
+4m00s and CPU time 4m21s. Its evaluation 12 objective is 13.3498121 versus
+13.4068491 initially, about a 0.4 percent reduction. That segmented penalized
+objective is not a continuous match or acceptance result. Keep polling the
+existing session 12123; do not replace run06 based on an intermediate cost.
+
 ## First Run07 Evaluation Snapshot Integrity Verified
 
 Updated 2026-09-12 UTC. Retrieved evaluation-00001.json, config.json and the
