@@ -1,5 +1,50 @@
 # Native Port Implementation Checkpoint
 
+## First Native MS Return Verified; Lower-Penalty Trial Is Live
+
+Updated 2026-09-12 UTC. Previous turn made progress by launching the native pilot.
+Run01 session84162/PID2040534 exited zero. Returned canonical candidate
+fdbb2db6dca60aae8eb1d50a4790da780f627d5ab019c1c3dc0e458900b9603c
+independently reproduces whole23.649549mm, early10.012695mm,
+terminal62.546037mm and terminalclub30.586249mm exactly. Pelvis yaw9.822914percent
+fails its5percent gate; terminal also fails. Optimizer did not converge (six-
+evaluation budget exhausted). Scaled defect norm3.55689e-5 passes1e-4 gate.
+Segmented RMS23.65757mm is almost identical to continuous23.64955mm. Terminal
+improvement over prior seed is only .003361mm; no meaningful fit breakthrough.
+
+Complete artifacts and inspected error plot are in native_evidence/ms_fit_9967_01;
+original raw bytes local simscape-tour-checkpoints/native-ms-fit-9967-01 and
+ControlTower C:/Users/diete/native-ms-fit-9967-01. Fresh replay took3.45705s,
+closure pose/rate maxima1.71167e-11/9.15952e-11. Raw returned candidate SHA-256
+3df84217f3b99ba14fe3509dd618db50c7bb3c59b5265b5994b22cd648e3a07d.
+Preserve the benchmark receipt's historical baseline wording but do not interpret
+it as erasing this candidate's optimizer history. This remains an unaccepted .8s
+prefix; full-swing and R2025b fit qualification remain incomplete.
+
+LIVE run02: session82127, independently confirmed ControlTower WSL PID2047465.
+Output C:/Users/diete/native-ms-fit-9967-02. Same native-ms-pilot-9967-01 runtime,
+venv/absolute target clock, original seed and model,135effort controls,42node
+coordinates, original torque/node bounds and six-evaluation budget. Driver is
+run_native_ms_pilot_9967_02.py with --defect-weight1. It reduces the optimization
+penalty from100 to1 as an intermediate initialization experiment; final scaled
+continuity gate1e-4 and all five continuous fit gates are UNCHANGED. Low segmented
+error with failed continuous replay is not success. Do not promote it blindly.
+
+Driver02 also retains four recent window results (same exact keys), reducing
+repeated primal/Jacobian work, and writes returned-nodes.json for reproducible
+continuation. Native derivative audit reruns before fitting. Driver01 remains
+immutable. Exact new driver local and ControlTower; local bundle
+native-ms-pilot-bundle-9967-02.zip SHA-256 60fd40e35322aaa8610c5048f14dc7e33e222767c291b4e0611d8994319553e1.
+Dependencies are unchanged pilot01 runtime/bundle chain. No production module
+was changed in this numerical experiment. If the trial improves segmented motion,
+use saved physical nodes and coefficients for a controlled increasing-penalty
+continuation; keep the original torque parent bounds and final continuous gates.
+
+Next single action: poll82127/PID2047465, save its terminal evidence, independently
+replay any returned coefficients, compare segmented errors and scaled defects.
+If this also barely moves, do not assume another identical short budget will
+solve transition; examine search optimality, active bounds and node freedom.
+
 ## Native Multiple-Shooting Pilot Is Live
 
 Updated 2026-09-12 UTC. Previous shared-solver commit c6eb97d09 is confirmed
