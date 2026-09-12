@@ -45,12 +45,7 @@ class PipelineRequest(BaseModel):
 
     # Adapter configuration
     source_format: str = Field(
-        ...,
-        description=(
-            "Source format (alphapose_json, bvh, c3d, csv, deeplabcut, hmr2, "
-            "hrnet_json, mediapipe_json, opencap_session, openpose_json, "
-            "opensim_sto_mot, trc, auto, passthrough)"
-        ),
+        ..., description="Source format (c3d, trc, bvh, json, mat, fbx)"
     )
     adapter_options: dict[str, Any] = Field(
         default_factory=dict, description="Format-specific adapter options"
@@ -205,7 +200,7 @@ def create_app() -> FastAPI:
 Process motion capture data through the full pipeline:
 adapter → preprocessing → scaling → IK → motion-matching
 
-Accepts file uploads in registered mocap source formats or with auto-detection.
+Accepts file uploads in supported formats (C3D, TRC, BVH, JSON, MAT, FBX).
 Returns MotionMatchingResult with matched trajectory and error metrics.
         """,
         responses={
@@ -217,14 +212,7 @@ Returns MotionMatchingResult with matched trajectory and error metrics.
     )
     async def run_pipeline(
         file: UploadFile = File(..., description="Motion capture file"),
-        source_format: str = Form(
-            ...,
-            description=(
-                "Source format (alphapose_json, bvh, c3d, csv, deeplabcut, hmr2, "
-                "hrnet_json, mediapipe_json, opencap_session, openpose_json, "
-                "opensim_sto_mot, trc, auto, passthrough)"
-            ),
-        ),
+        source_format: str = Form(..., description="Source format"),
         ik_backend: str = Form(default="geometric", description="IK backend"),
         matching_backend: str = Form(default="mujoco", description="Matching backend"),
         matching_model_urdf: str | None = Form(

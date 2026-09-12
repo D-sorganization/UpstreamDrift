@@ -1,25 +1,25 @@
 # Motion Pipeline — Format Matrix
 
-> Hand-maintained format support matrix for motion capture sources and source-specific quirks.
+> Auto-generated format support matrix for motion capture sources. Hand-written notes on each source's quirks.
 
 ## Format Support Matrix
 
-| Format              | Extension              | Adapter                 | 3D Support                  | Confidence | Temporal | Notes                                                                     |
-| ------------------- | ---------------------- | ----------------------- | --------------------------- | ---------- | -------- | ------------------------------------------------------------------------- |
-| **BVH**             | `.bvh`                 | `BVHAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | Euler order varies (XYZ vs ZXY)                                           |
-| **TRC**             | `.trc`                 | `TRCAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | OpenSim / Vicon Nexus / Theia, Y-up                                       |
-| **OpenCap Session** | directory              | `OpenCapSessionAdapter` | ✅ Yes                      | ❌ No      | ✅ Yes   | Augmented-marker TRC to canonical observations                            |
-| **OpenSim STO/MOT** | `.sto`, `.mot`         | `STOMotAdapter`         | n/a (joint angles)          | ❌ No      | ✅ Yes   | `inDegrees` flag honored                                                  |
-| **OpenPose**        | `.json`                | `OpenPoseJSONAdapter`   | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | BODY_25 or COCO_18 schema                                                 |
-| **AlphaPose**       | `.json`                | `AlphaPoseJSONAdapter`  | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 multi-frame                                                       |
-| **HRNet**           | `.json`                | `HRNetJSONAdapter`      | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 single-person                                                     |
-| **MediaPipe**       | `.json`                | `MediaPipeJSONAdapter`  | partial 3D (relative depth) | ✅ Yes     | ✅ Yes   | 33 landmarks, normalized coords                                           |
-| **DeepLabCut**      | `.h5`, `.hdf5`, `.csv` | `DeepLabCutAdapter`     | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | Custom bodyparts (`schema="custom"`), `fps` option (default 30)           |
-| **4D-Humans/HMR2**  | `.csv` (sidecar)       | `HMR2Adapter`           | ✅ Yes                      | ❌ No      | ✅ Yes   | 22 SMPL body joints in meters (`schema="custom"`), sidecar `joints3d.csv` |
-| **CSV**             | `.csv`                 | `CSVAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | columns: `frame, time, x_*/y_*/z_*`                                       |
-| **C3D**             | `.c3d`                 | `C3DAdapter`            | ✅ Yes                      | ✅ Yes     | ✅ Yes   | Binary, requires `ezc3d`                                                  |
-| **FBX**             | `.fbx`                 | _planned_               | ✅ Yes                      | ❌ No      | ✅ Yes   | Proprietary, Blender conversion                                           |
-| **Qualisys**        | `.qtm`                 | _planned_               | ✅ Yes                      | ✅ Yes     | ✅ Yes   | Native QTM format                                                         |
+| Format              | Extension      | Adapter                 | 3D Support                  | Confidence | Temporal | Notes                                          |
+| ------------------- | -------------- | ----------------------- | --------------------------- | ---------- | -------- | ---------------------------------------------- |
+| **BVH**             | `.bvh`         | `BVHAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | Euler order varies (XYZ vs ZXY)                |
+| **TRC**             | `.trc`         | `TRCAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | OpenSim / Vicon Nexus / Theia, Y-up            |
+| **OpenCap Session** | directory      | `OpenCapSessionAdapter` | ✅ Yes                      | ❌ No      | ✅ Yes   | Augmented-marker TRC to canonical observations |
+| **OpenSim STO/MOT** | `.sto`, `.mot` | `STOMotAdapter`         | n/a (joint angles)          | ❌ No      | ✅ Yes   | `inDegrees` flag honored                       |
+| **OpenPose**        | `.json`        | `OpenPoseJSONAdapter`   | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | BODY_25 or COCO_18 schema                      |
+| **AlphaPose**       | `.json`        | `AlphaPoseJSONAdapter`  | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 multi-frame                            |
+| **HRNet**           | `.json`        | `HRNetJSONAdapter`      | ❌ 2D only                  | ✅ Yes     | ✅ Yes   | COCO-17 single-person                          |
+| **MediaPipe**       | `.json`        | `MediaPipeJSONAdapter`  | partial 3D (relative depth) | ✅ Yes     | ✅ Yes   | 33 landmarks, normalized coords                |
+| **DeepLabCut**      | `.h5`, `.hdf5`, `.csv` | `DeepLabCutAdapter` | ❌ 2D only              | ✅ Yes     | ✅ Yes   | Custom bodyparts (`schema="custom"`), `fps` option (default 30) |
+| **4D-Humans/HMR2**  | `.csv` (sidecar) | `HMR2Adapter`         | ✅ Yes                      | ❌ No      | ✅ Yes   | 22 SMPL body joints in meters (`schema="custom"`), sidecar `joints3d.csv` |
+| **CSV**             | `.csv`         | `CSVAdapter`            | ✅ Yes                      | ❌ No      | ✅ Yes   | columns: `frame, time, x_*/y_*/z_*`            |
+| **C3D**             | `.c3d`         | `C3DAdapter`            | ✅ Yes                      | ✅ Yes     | ✅ Yes   | Binary, requires `ezc3d`                       |
+| **FBX**             | `.fbx`         | _planned_               | ✅ Yes                      | ❌ No      | ✅ Yes   | Proprietary, Blender conversion                |
+| **Qualisys**        | `.qtm`         | _planned_               | ✅ Yes                      | ✅ Yes     | ✅ Yes   | Native QTM format                              |
 
 > The full canonical list of shipped adapters lives in
 > `src/shared/python/motion_pipeline/sources/` and is exercised by
@@ -119,7 +119,7 @@
   joints, positions in **meters**, timestamps from the `time` column.
 - **Conservative Sniffing**: a CSV is claimed only when its header matches
   the sidecar column contract exactly, or when it has the joint-triplet
-  shape _and_ a sibling `metadata.json` names the 4D-Humans tool; generic
+  shape *and* a sibling `metadata.json` names the 4D-Humans tool; generic
   `frame,timestamp,x_*` trajectory CSVs stay with `CSVAdapter`.
 - **Schema**: SMPL is not a `SchemaName` literal member, so the sequence
   uses `schema_name="custom"` with joint names preserved verbatim.
