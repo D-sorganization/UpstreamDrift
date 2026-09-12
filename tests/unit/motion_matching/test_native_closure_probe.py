@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from types import MethodType
+from types import MethodType, SimpleNamespace
 
 import numpy as np
 import pytest
@@ -63,3 +63,47 @@ def test_closure_probe_rejects_incomplete_or_nonfinite_state(
 
     with pytest.raises(ValueError, match="exactly native coordinate and rate"):
         model.closure_residuals(coordinates, rates)
+
+
+@pytest.mark.unit
+def test_closure_linearization_uses_refreshed_native_weld_jacobian() -> None:
+    """The returned Jacobian follows named native coordinate order and is detached."""
+    model = object.__new__(NativePinocchioModel)
+    model._velocity_indices = {"hip": 2, "shoulder": 0}
+    model.model = SimpleNamespace(nv=3)
+    model.data = object()
+    model.constraints = [object()]
+    model.constraint_data = [object()]
+    captured: dict[str, object] = {}
+
+    class Pin:
+        @staticmethod
+        def getConstraintsJacobian(
+            model_value: object,
+            data_value: object,
+            constraints_value: list[object],
+            constraint_data_value: list[object],
+        ) -> np.ndarray:
+            captured.update(
+                model=model_value,
+                data=data_value,
+                constraints=constraints_value,
+                constraint_data=constraint_data_value,
+            )
+            return np.arange(18.0).reshape(6, 3)
+
+    model._pin = Pin()
+    model.closure_residuals = MethodType(  # type: ignore[method-assign]
+        lambda self, coordinates, rates=None: (np.arange(6.0), np.zeros(6)), model
+    )
+
+    result = model.closure_position_linearization({"hip": 1.0, "shoulder": -2.0})
+
+    assert result.names == ("hip", "shoulder")
+    np.testing.assert_array_equal(result.position, np.arange(6.0))
+    np.testing.assert_array_equal(
+        result.jacobian,
+        [[2.0, 0.0], [5.0, 3.0], [8.0, 6.0], [11.0, 9.0], [14.0, 12.0], [17.0, 15.0]],
+    )
+    assert not result.jacobian.flags.writeable
+    assert captured["model"] is model.model

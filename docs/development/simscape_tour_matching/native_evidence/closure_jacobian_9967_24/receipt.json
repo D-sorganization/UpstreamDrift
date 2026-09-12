@@ -1,0 +1,10 @@
+{
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "path_sha256": "decbdeb43d7695f96bf491ec69b47845b3c1f2c6fead2978bcd5198a7c0ecd4e",
+  "sample": 0,
+  "finite_difference_step": 1e-6,
+  "jacobian_shape": [6, 27],
+  "position_closure_max_abs": 5.326294960639187e-13,
+  "finite_difference_max_abs": 1.9842403288190753e-10,
+  "scope": "Kinematic weld Jacobian qualification only; no trajectory, effort identification, or forward replay."
+}

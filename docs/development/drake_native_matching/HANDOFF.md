@@ -39,6 +39,16 @@ closure while seeking the coupled conditions. The next implementation must add
 derivatives of all three constraint blocks and continuation/retraction on the
 native weld manifold, then qualify each stage before an effort fit.
 
+Pinocchio now supplies the first exact native chart input:
+`NativePinocchioModel.closure_position_linearization`. Its isolated
+ControlTower finite-difference receipt is
+`../simscape_tour_matching/native_evidence/closure_jacobian_9967_24/receipt.json`:
+the6-by-27 Jacobian differs by at most1.98424e-10 at the initial smooth-path
+node. Use this Jacobian and the existing shared `retract_node` helper to
+eliminate pose closure from the collocation chart. This is insufficient for
+the remaining rate/acceleration derivatives and must not promote the failed
+collocation probe.
+
 The single identified-profile replay has marker difference8.84e-9m but scalar-rate difference3.37e-4, so its existing full-state reconstruction gate **fails**. No new fitting, model change, tolerance sweep or gate relaxation occurred. The report preserves all prerequisites and a sequential path toward a bounded linear initializer after a smooth native C3D trajectory is available. Root review is required before broad production integration. Exact results are in `evidence/reaction-identification/`; all study jobs are terminal.
 
 ## Reconstructed-Seed Angular-Velocity Diagnostic

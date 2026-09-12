@@ -87,6 +87,16 @@ this a longer blind run. Add and test all three constraint derivatives plus
 manifold continuation/retraction, retaining the same receipt/gates, before
 using its output in reaction-eliminated sextic identification.
 
+The first native retraction prerequisite is complete:
+`NativePinocchioModel.closure_position_linearization` returns the6-by-27 weld
+position Jacobian in the supplied coordinate order. The ControlTower receipt
+`native_evidence/closure_jacobian_9967_24/receipt.json` records5.32629e-13
+position closure and1.98424e-10 maximum centered-difference error at the first
+smooth-path node. Use this exact position Jacobian with the existing shared
+`node_retraction.retract_node`; do not replace it with another full-chart
+finite-difference approximation. Rate and acceleration constraint derivatives
+remain required before a qualified trajectory or effort fit.
+
 Use `NativeConstrainedPoseOracle` with the existing shared
 `fit_marker_pose`; it is the only permitted bridge from the native model to
 the static constrained-pose stage. Pass the exact candidate coordinate order,

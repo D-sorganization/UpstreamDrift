@@ -31,6 +31,14 @@ class NativeMarkerDerivatives(NamedTuple):
     dposition_dq: NDArray[np.float64]
 
 
+class NativeClosurePositionLinearization(NamedTuple):
+    """Weld pose residual and Jacobian in an explicit native coordinate order."""
+
+    names: tuple[str, ...]
+    position: NDArray[np.float64]
+    jacobian: NDArray[np.float64]
+
+
 def depth_first_joints(
     joints: Sequence[Mapping[str, Any]],
 ) -> list[Mapping[str, Any]]:
@@ -222,6 +230,37 @@ class NativePinocchioModel:
         efforts = {name: 0.0 for name in names}
         self.accelerations(position, velocity, efforts)
         return self.closure_errors()
+
+    def closure_position_linearization(
+        self, coordinates: Mapping[str, float]
+    ) -> NativeClosurePositionLinearization:
+        """Refresh and return the weld pose residual and its native q Jacobian.
+
+        The constraint backend refreshes its data through the zero-rate,
+        zero-effort diagnostic probe. The returned Jacobian is kinematic only;
+        it is suitable for a local node chart, never for inverse dynamics.
+        """
+        names = tuple(coordinates)
+        position, _ = self.closure_residuals(coordinates)
+        raw = np.asarray(
+            self._pin.getConstraintsJacobian(
+                self.model, self.data, self.constraints, self.constraint_data
+            ),
+            dtype=float,
+        )
+        indices = [self._velocity_indices[name] for name in names]
+        jacobian = raw[:, indices].copy()
+        if (
+            position.shape != (6,)
+            or raw.shape != (6, self.model.nv)
+            or jacobian.shape != (6, len(names))
+            or not np.isfinite(position).all()
+            or not np.isfinite(jacobian).all()
+        ):
+            raise ValueError("Invalid native weld position linearization")
+        position.setflags(write=False)
+        jacobian.setflags(write=False)
+        return NativeClosurePositionLinearization(names, position, jacobian)
 
     def marker_derivatives(
         self,
