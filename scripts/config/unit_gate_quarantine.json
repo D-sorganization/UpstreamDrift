@@ -6,6 +6,7 @@
     "tests/bunkershot3d/solvers/test_envelope_context.py::test_guards_survive_python_dash_o",
     "tests/bunkershot3d/solvers/test_shot.py::TestPerformanceBudget::test_a_full_wedge_shot_fits_the_budget",
     "tests/bunkershot3d/solvers/test_shot.py::TestTheDefaultWindowCoversAWholeShot::test_the_truncation_guard_survives_python_dash_o",
+    "tests/ci/test_ci_infrastructure.py::TestCIEnvironmentCompatibility::test_physics_validation_script_targets_collect_tests",
     "tests/config/wave5_config/test_provider_adapter.py::TestBuildProviderTile::test_runtime_unavailable_marks_status",
     "tests/deployment/test_teleoperation.py::test_teleop_interface_clutch",
     "tests/deployment/test_teleoperation.py::test_teleop_modes",

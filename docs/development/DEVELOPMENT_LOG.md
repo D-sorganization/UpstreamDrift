@@ -27,7 +27,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** scripts/config/unit_gate_quarantine.json, tests/scripts/test_check_vendor_updates.py, tests/unit/scripts/test_check_gitignore_dotenv.py, docs/development/monolith_refactor_register.md, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
 - **Last verified:** 2026-09-12 (`c578ca942`)
-- **Summary:** Burned down 44 quarantined packaging and governance unit tests in unit_gate_quarantine.json, anchored test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and synced monolith refactor register.
+- **Summary:** Burned down 43 quarantined packaging and governance unit tests in unit_gate_quarantine.json, anchored test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and synced monolith refactor register.
 - **Next step:** Open PR #10010, pass all CI gates, and squash-merge to main.
 
 ## Shipped (Last 90 Days)
