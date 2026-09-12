@@ -1,5 +1,70 @@
 # Native Port Implementation Checkpoint
 
+## Local Constrained-Dynamics Derivatives Verified
+
+Updated 2026-09-12 UTC. Previous goal turn made progress by launching expanded
+run 03. It remains live (session 17132, WSL PID 1911742); do not replace it.
+This turn independently probed installed Pinocchio 4.1.0's
+computeConstraintDynamicsDerivatives, which requires constraintDynamics first.
+New public acceleration_derivatives refreshes dynamics, maps scalar native
+coordinate order explicitly, validates matrices, and returns detached readonly
+q/rate/primitive-effort derivative blocks. Two unit tests went red then green;
+combined derivative/closure boundary suite: 4 passed. Commit 81f848c54.
+
+Actual ControlTower audit on run 02's continuous states at 0,.60,.80 s exited
+zero. It reuses shared estimation.residuals.finite_difference_jacobian rather
+than another finite-difference implementation. At central step 1e-5, maximum
+scaled discrepancies across q/v/effort blocks and all three states are below
+9.59e-5. Step 1e-4 shows q nonlinearity up to 2.03e-4 scaled discrepancy;
+step 1e-6 is noisier, up to 1.29e-3. Do not assume smaller finite differences
+are automatically more accurate. Scaling is abs(error)/max(1,abs(reference)),
+with blocks reported separately in native units.
+
+Warm analytic calls took ~0.214–0.224 ms versus ~8 ms for the full local central
+finite-difference matrix; the first analytic call took 4.23 ms. These are LOCAL
+acceleration timings, not end-to-end trajectory-gradient or fitting speedups.
+No analytic Jacobian is used by the running optimizer. Receipt:
+native_evidence/native-derivatives-9967-01.json; reproduction runner:
+native_evidence/reproduction/check_native_derivatives.py. Original copies are
+on ControlTower under C:/Users/diete and in local simscape-tour-checkpoints.
+Independent runtime /home/dieterolson/native-derivative-9967-01 and source bundle
+native-derivative-bundle-9967-01.zip preserve hashes; run 03's deployed native
+module was not modified. This remains a namespace diagnostic deployment.
+
+### Next Sensitivity Implementation Stage
+
+1. Add a native marker-position Jacobian with explicit scalar coordinate order.
+   Reuse Pinocchio frame Jacobians and existing marker offsets/projection.
+   Test angular cross-product sign on an offset point, ordering, finite values
+   and detached arrays; compare actual FK finite differences on native states.
+2. Implement an augmented state/sensitivity integrator reusing integrate_forward.
+   Test an analytic polynomial-forced system (for example q''=theta\*t^2 gives
+   dq/dtheta=t^4/12 from fixed initial state), full absolute clock, failed RHS,
+   fixed initial sensitivities and non-finite output. Do not introduce resets.
+3. For native fitting, form Sdot=A*S+B*du/dtheta from the qualified local blocks.
+   Include the world-force to native-base rotation and the actual Bernstein
+   control basis in du/dtheta. Preserve the original candidate time origin.
+4. Independently compare integrated marker derivatives against several complete
+   perturbed forward replays at multiple step sizes. Check primal replay error,
+   closure, sensitivity finiteness and total wall time. Local derivative checks
+   alone do not qualify this trajectory Jacobian or its behavior near singular
+   coordinate charts. Record thread settings and avoid noisy small-matrix BLAS
+   oversubscription if observed; do not alter running job environments.
+5. Only then add an optional Jacobian to the shared prefix fitter, matching ALL
+   enabled residual terms and masks exactly. Unsupported yaw/regularization
+   derivatives must fail explicitly rather than silently disappearing. Cache
+   primal/Jacobian pairs by the full immutable candidate/clock identity and
+   count actual integrations separately from optimizer callbacks.
+6. Benchmark equal-budget fitting from a preserved seed before claiming faster
+   convergence. Keep finite-difference fitting available as a reference.
+
+Run 03 latest saved best exploratory sample was evaluation 157: whole RMS
+30.8489 mm, early 10.8104 mm, terminal 94.5785 mm, club cluster 67.3016 mm.
+This is not the returned optimizer candidate or an accepted match. Some other
+finite-difference probes have much larger terminal error; preserve the ledger
+and wait for terminal exit before judging the result. The current 1e-3 control
+perturbation has not been qualified as an accurate trajectory derivative.
+
 ## Run 03: Expanded Sextic Shaping Is Live
 
 Updated 2026-09-12 UTC. Previous goal turn made progress by verifying native
