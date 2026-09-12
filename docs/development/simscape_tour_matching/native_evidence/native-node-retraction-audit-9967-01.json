@@ -1,0 +1,243 @@
+{
+  "qualification": "finite native node retraction audit; not optimized swing",
+  "node_time_s": 0.6,
+  "state_scales": [
+    0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+    0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+  ],
+  "residual_scales": [
+    0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
+  ],
+  "radius": 0.5,
+  "chart_step": 0.1,
+  "rows": [
+    {
+      "column": 0,
+      "closure_max_abs": 1.3322676295501878e-15,
+      "scaled_displacement": 0.1000000066963189
+    },
+    {
+      "column": 1,
+      "closure_max_abs": 2.4424906541753444e-15,
+      "scaled_displacement": 0.10000000688536655
+    },
+    {
+      "column": 2,
+      "closure_max_abs": 2.220446049250313e-15,
+      "scaled_displacement": 0.10000002355698251
+    },
+    {
+      "column": 3,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.10000002761524916
+    },
+    {
+      "column": 4,
+      "closure_max_abs": 8.881784197001252e-16,
+      "scaled_displacement": 0.10000002381293947
+    },
+    {
+      "column": 5,
+      "closure_max_abs": 1.9984014443252818e-15,
+      "scaled_displacement": 0.10000000265394547
+    },
+    {
+      "column": 6,
+      "closure_max_abs": 1.3322676295501878e-15,
+      "scaled_displacement": 0.10000003004830399
+    },
+    {
+      "column": 7,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.10000002180366031
+    },
+    {
+      "column": 8,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.10000000539580263
+    },
+    {
+      "column": 9,
+      "closure_max_abs": 3.3306690738754696e-15,
+      "scaled_displacement": 0.10000000627467137
+    },
+    {
+      "column": 10,
+      "closure_max_abs": 8.881784197001252e-16,
+      "scaled_displacement": 0.10000000217215987
+    },
+    {
+      "column": 11,
+      "closure_max_abs": 1.1102230246251565e-15,
+      "scaled_displacement": 0.1000000248410332
+    },
+    {
+      "column": 12,
+      "closure_max_abs": 1.3322676295501878e-15,
+      "scaled_displacement": 0.100000031102878
+    },
+    {
+      "column": 13,
+      "closure_max_abs": 1.1102230246251565e-15,
+      "scaled_displacement": 0.10000001967787132
+    },
+    {
+      "column": 14,
+      "closure_max_abs": 2.220446049250313e-15,
+      "scaled_displacement": 0.10000000265955968
+    },
+    {
+      "column": 15,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 16,
+      "closure_max_abs": 1.1102230246251565e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 17,
+      "closure_max_abs": 4.440892098500626e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 18,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 19,
+      "closure_max_abs": 2.220446049250313e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 20,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 21,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 22,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 23,
+      "closure_max_abs": 1.1102230246251565e-15,
+      "scaled_displacement": 0.1
+    },
+    {
+      "column": 24,
+      "closure_max_abs": 2.220446049250313e-15,
+      "scaled_displacement": 0.10000001013500921
+    },
+    {
+      "column": 25,
+      "closure_max_abs": 1.3322676295501878e-15,
+      "scaled_displacement": 0.10000001691974582
+    },
+    {
+      "column": 26,
+      "closure_max_abs": 2.4424906541753444e-15,
+      "scaled_displacement": 0.1000000009636394
+    },
+    {
+      "column": 27,
+      "closure_max_abs": 1.2212453270876722e-15,
+      "scaled_displacement": 0.10000000471005656
+    },
+    {
+      "column": 28,
+      "closure_max_abs": 7.993605777301127e-15,
+      "scaled_displacement": 0.10000000024116233
+    },
+    {
+      "column": 29,
+      "closure_max_abs": 3.9968028886505635e-15,
+      "scaled_displacement": 0.10000000318372425
+    },
+    {
+      "column": 30,
+      "closure_max_abs": 3.552713678800501e-15,
+      "scaled_displacement": 0.10000000111700076
+    },
+    {
+      "column": 31,
+      "closure_max_abs": 1.9984014443252818e-15,
+      "scaled_displacement": 0.10000001128153437
+    },
+    {
+      "column": 32,
+      "closure_max_abs": 1.3322676295501878e-15,
+      "scaled_displacement": 0.1000000052799896
+    },
+    {
+      "column": 33,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.10000000455639638
+    },
+    {
+      "column": 34,
+      "closure_max_abs": 8.881784197001252e-16,
+      "scaled_displacement": 0.10000000479500351
+    },
+    {
+      "column": 35,
+      "closure_max_abs": 3.1086244689504383e-15,
+      "scaled_displacement": 0.10000000096432297
+    },
+    {
+      "column": 36,
+      "closure_max_abs": 2.6645352591003757e-15,
+      "scaled_displacement": 0.10000000083993786
+    },
+    {
+      "column": 37,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.10000000460134977
+    },
+    {
+      "column": 38,
+      "closure_max_abs": 2.6645352591003757e-15,
+      "scaled_displacement": 0.10000000114247064
+    },
+    {
+      "column": 39,
+      "closure_max_abs": 1.7763568394002505e-15,
+      "scaled_displacement": 0.10000000038565741
+    },
+    {
+      "column": 40,
+      "closure_max_abs": 2.4424906541753444e-15,
+      "scaled_displacement": 0.10000001408582551
+    },
+    {
+      "column": 41,
+      "closure_max_abs": 3.552713678800501e-15,
+      "scaled_displacement": 0.100000005268158
+    }
+  ],
+  "derivatives": [
+    {
+      "column": 0,
+      "relative_error": 1.8140893962209219e-9
+    },
+    {
+      "column": 14,
+      "relative_error": 2.2857062738344806e-9
+    },
+    {
+      "column": 41,
+      "relative_error": 7.89366826783134e-10
+    }
+  ],
+  "passed": true,
+  "runner_sha256": "ccdd78146f970f35d0f26df330244354b44c8e1b6802c661e217d4b72b546108"
+}
