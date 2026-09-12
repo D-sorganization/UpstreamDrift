@@ -1,5 +1,50 @@
 # Native Port Implementation Checkpoint
 
+## Native Equality Audit Completed; First Constrained Fit Is Live
+
+Updated 2026-09-12 UTC. Audit session15469 exited zero. Its399-variable
+constraint Jacobian has full rank210 (270 raw physical defect rows projected
+into five42-dimensional charts); singular range229.563771..0.0570544.
+Initial projected maximum1.29738e-8, full physical scaled-defect norm1.99600e-8.
+These are small but not identically zero. Raw receipts and all diagnostic
+evaluation snapshots are preserved in native_evidence/ms_constraint_audit_9967_14.
+
+At h=1e-5, feasible random/gradient cost-slope relative errors are7.05545e-6 /
+5.51597e-7. At h=1e-6 they are4.75442e-5 /1.25841e-6. Projected constraint
+direction differences are noisier: max9.11706e-5 /6.07289e-5 at h=1e-5,
+and0.00107552 /0.00217581 at h=1e-6 despite predicted tangent derivatives near
+zero. The corresponding finite-difference constraint residual changes are a
+few1e-9. This supports numerical-resolution limits in that null direction,
+not blanket exact derivative certification. Existing nonzero chart derivative
+probes also passed. The first solver trial uses equality_tolerance1e-7 rather
+than a threshold comparable to the measured initial/noise level1e-8.
+
+LIVE FIRST CONSTRAINED FIT: session77080, confirmed ControlTower-Runner PID2223534.
+Output C:/Users/diete/native-ms-fit-9967-15. Driver
+run_native_ms_constrained_9967_15.py SHA-256:
+ab3f9a1302f85d0612dfc4536feb632cf155227fcba3b5d9684e4cb290e5128d.
+It preserves the audited driver14 and only exposes the equality tolerance as
+a configurable argument. Exact driver in native-ms-constrained-driver-9967-15.zip.
+Runtime14 is unchanged, with solver source77eb87cca plus5c6765de4.
+
+Command: PYTHONPATH=/home/dieterolson/native-ms-pilot-9967-14,
+OPENBLAS_NUM_THREADS=1, OMP_NUM_THREADS=1,
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python,
+/mnt/c/Users/diete/run_native_ms_constrained_9967_15.py,
+--output /mnt/c/Users/diete/native-ms-fit-9967-15 --horizon .85
+--nodes .2 .4 .6 .7 .8 .85 --basis-duration .8 --max-nfev 24
+--max-iterations 12 --equality-tolerance 1e-7.
+No penalty tuning: SLSQP excludes defect rows from its objective and imposes
+the projected equalities. All full physical and continuous marker gates remain.
+
+Next: poll session77080/PID2223534; preserve either returned result or exact
+failure. On a returned candidate, independently replay and compare all markers,
+full physical defects and pointwise endpoint gap with run13 and the common
+run12-derived0.85 s starting point. Budget fallback is explicitly unaccepted;
+do not treat it as a converged optimizer step. Do not change bounds/geometry or
+start a duplicate if observation times out. Full1.8138888889 s matching, final
+R2025b qualification and other-engine native proof remain incomplete.
+
 ## Explicit Equality Backend Implemented; Native Audit Is Live
 
 Updated 2026-09-12 UTC. Source77eb87cca and type fix5c6765de4 are pushed.

@@ -1,0 +1,50 @@
+{
+  "qualification": "Native projected-equality and feasible-direction audit only; no optimization",
+  "variables": 399,
+  "projected_equalities": 210,
+  "physical_defect_rows": 270,
+  "constraint_jacobian_rank": 210,
+  "initial_projected_max_abs": 1.2973767092640509e-8,
+  "initial_physical_defect_norm": 1.9960007116175635e-8,
+  "marker_objective": 41.85839993516157,
+  "constraint_singular_max": 229.5637712732215,
+  "constraint_singular_min": 0.05705440315131275,
+  "checks": [
+    {
+      "direction": "feasible_random",
+      "h": 1e-5,
+      "predicted_cost_slope": -0.007274354083963221,
+      "fd_cost_slope": -0.00727430276015184,
+      "cost_slope_relative_error": 7.055445856635594e-6,
+      "constraint_direction_error_max_abs": 9.117055460717575e-5,
+      "predicted_constraint_direction_max_abs": 1.5265566588595902e-16
+    },
+    {
+      "direction": "feasible_random",
+      "h": 1e-6,
+      "predicted_cost_slope": -0.007274354083963221,
+      "fd_cost_slope": -0.0072746999535411305,
+      "cost_slope_relative_error": 4.754417090989502e-5,
+      "constraint_direction_error_max_abs": 0.0010755243869538388,
+      "predicted_constraint_direction_max_abs": 1.5265566588595902e-16
+    },
+    {
+      "direction": "feasible_gradient",
+      "h": 1e-5,
+      "predicted_cost_slope": 0.07969013101938636,
+      "fd_cost_slope": 0.07969008706254499,
+      "cost_slope_relative_error": 5.515970523935319e-7,
+      "constraint_direction_error_max_abs": 6.0728879685975436e-5,
+      "predicted_constraint_direction_max_abs": 5.551115123125783e-17
+    },
+    {
+      "direction": "feasible_gradient",
+      "h": 1e-6,
+      "predicted_cost_slope": 0.07969013101938636,
+      "fd_cost_slope": 0.07969023130272035,
+      "cost_slope_relative_error": 1.2584143921380378e-6,
+      "constraint_direction_error_max_abs": 0.002175807055646003,
+      "predicted_constraint_direction_max_abs": 5.551115123125783e-17
+    }
+  ]
+}
