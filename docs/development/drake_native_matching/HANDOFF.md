@@ -49,6 +49,13 @@ eliminate pose closure from the collocation chart. This is insufficient for
 the remaining rate/acceleration derivatives and must not promote the failed
 collocation probe.
 
+The native position chart itself is now qualified in
+`../simscape_tour_matching/native_evidence/weld_node_chart_9967_24/receipt.json`:
+the weld reduces27 coordinates to21 and a bounded nonzero retraction closes at
+3.93974e-16. The next collocation implementation must consume this chart for
+positions, while Drake remains the independent source for rate/acceleration
+closure evidence.
+
 The single identified-profile replay has marker difference8.84e-9m but scalar-rate difference3.37e-4, so its existing full-state reconstruction gate **fails**. No new fitting, model change, tolerance sweep or gate relaxation occurred. The report preserves all prerequisites and a sequential path toward a bounded linear initializer after a smooth native C3D trajectory is available. Root review is required before broad production integration. Exact results are in `evidence/reaction-identification/`; all study jobs are terminal.
 
 ## Reconstructed-Seed Angular-Velocity Diagnostic
