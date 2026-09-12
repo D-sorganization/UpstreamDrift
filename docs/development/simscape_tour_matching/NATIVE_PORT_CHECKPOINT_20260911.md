@@ -1,5 +1,58 @@
 # Native Port Implementation Checkpoint
 
+## Native Engine Lanes Integrated; Transition Pose Seeds Compared
+
+Updated 2026-09-12 UTC. Run18 remains the sole active fit (session94942,
+ControlTower-Runner PID2294114); last observed evaluation16. No new fit was
+started. This turn integrated reviewed engine work and added independent local
+pose evidence while that solve continued.
+
+Reviewed and cherry-picked MuJoCobcb86ea4e as06576fa4a and Drakea837d4bdd as
+9ff486f11. Their branches are pushed and clean, normal checks pass and no engine
+qualification jobs remain live. Root reran20 engine/shared-binding tests: all
+pass. Drake live tests remain qualified in its isolated CT environment; root
+local tests do not claim the Drake native library exists locally. Read each
+engine HANDOFF.md and exact raw evidence archive under docs/development.
+
+Qualified scope is native rigid constrained dynamics with each engine's own
+mass/bias/J/Jdot and the shared DOP853 integrator, through0.8 s baseline only.
+MuJoCo direct R2025b marker component max1.26345e-6 m; independent Pinocchio
+marker max2.84716e-9 m and168 pulse comparisons pass. Drake direct R2025b
+moving acceleration max2.901e-9 and continuous frame-position max1.002e-6 m;
+independent Pinocchio marker max7.696e-9 m. Both preserve27 coordinates and16
+frames; Drake additionally reports31-solid mass/inertia/COM inventory. These
+are different measured quantities; do not present frame-position and marker
+component maxima as identical metrics. Stock mj_step / discrete SAP, arbitrary
+geometry, full swing and sensitivities remain outside this qualification.
+Reference-specific native coefficients differ from2af root-force baseline;
+exact same-input guards and separately saved candidates prevent mixing them.
+
+### Local Pose Evidence at the New Horizon
+
+Two read-only static experiments using the existing tested fit_marker_pose
+function both completed successfully; no fitting runtime was edited. Isolated
+/home/dieterolson/native-transition-pose-9967-01 copies runtime18 and adds the
+existing static-pose module. First uses independent run17 dynamic states as
+initial poses. Second continues from previously saved static forward0.8 s pose,
+with unchanged local +/-0.2 m translations and +/-0.5 rad rotations around
+each starting pose. Exact source/target/model identities and scripts are saved
+in native_evidence/transition_pose_9967_01/raw-pose-audits.zip.
+
+| Time    | Dynamic-Seed Static RMS | Static-Continuation RMS |
+| ------- | ----------------------- | ----------------------- |
+| 0.8 s   | 40.551980 mm            | 33.304031 mm            |
+| 0.825 s | 41.935970 mm            | 34.602530 mm            |
+| 0.85 s  | 60.290122 mm            | 35.773374 mm            |
+
+All six solves converged with pose closure below1.1e-13. The second branch
+invalidates treating the first local optimum as a global geometric floor.
+Neither is a forward trajectory or proof of dynamic reachability. The0.85 s
+pose is close to, but above, the35 mm gate; do not relax that gate or claim
+impossibility from a local solve. Retain distinct static/dynamic qualifications.
+Use these as seed/geometry diagnostics after run18, not as reset states that
+silently replace the continuous swing. Length/attachment calibration remains
+an explicit unmet part of the broader goal when justified by model constraints.
+
 ## Scaled Native Audits Passed; Run18 Is Live
 
 Updated 2026-09-12 UTC. Audit18b session36203 exited zero, confirming actual
