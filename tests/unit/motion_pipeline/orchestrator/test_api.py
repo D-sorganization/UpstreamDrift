@@ -145,3 +145,52 @@ def test_run_config_malformed_json_returns_422(client: TestClient) -> None:
         data={"config": "{not valid json"},
     )
     assert r.status_code == 422
+
+
+@pytest.mark.parametrize("fmt", ["mat", "fbx", "json"])
+def test_run_pipeline_unsupported_historical_formats_return_400(
+    client: TestClient, fmt: str
+) -> None:
+    """Historical/unsupported formats like mat, fbx, generic json return 400 (#8875)."""
+    r = client.post(
+        "/api/v1/motion-pipeline/run",
+        files={"file": ("x.dat", b"\x00" * 8, "application/octet-stream")},
+        data={"source_format": fmt},
+    )
+    assert r.status_code == 400
+    assert f"Unknown source_format {fmt!r}" in r.json()["detail"]
+
+
+def test_pipeline_request_source_format_schema_lists_registered_formats(
+    client: TestClient,
+) -> None:
+    """The OpenAPI schema and PipelineRequest describe registered formats accurately (#8875)."""
+    # 1. PipelineRequest model JSON schema
+    req_schema = PipelineRequest.model_json_schema()
+    desc = (
+        req_schema.get("properties", {}).get("source_format", {}).get("description", "")
+    )
+    assert "c3d" in desc
+    assert "trc" in desc
+    assert "bvh" in desc
+    assert " fbx" not in desc
+    assert " mat," not in desc
+    assert ", mat" not in desc
+
+    # 2. OpenAPI generated schema for run endpoint
+    r = client.get("/openapi.json")
+    assert r.status_code == 200
+    schemas = r.json().get("components", {}).get("schemas", {})
+    body_schema = schemas.get("Body_run_pipeline_api_v1_motion_pipeline_run_post", {})
+    run_desc = (
+        body_schema.get("properties", {})
+        .get("source_format", {})
+        .get("description", "")
+    )
+    assert "c3d" in run_desc
+    assert "trc" in run_desc
+    assert "bvh" in run_desc
+    assert " fbx" not in run_desc
+    assert " mat," not in run_desc
+    assert ", mat" not in run_desc
+    assert "json, mat, fbx" not in run_desc
