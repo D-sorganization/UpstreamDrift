@@ -1,5 +1,45 @@
 # Native Port Implementation Checkpoint
 
+## Run10 Completed and Independently Replayed: Mixed Improvement
+
+Updated 2026-09-12 UTC. Session 49870 exited zero. This supersedes the LIVE
+section below; no fit remains running in this lane. Canonical candidate
+ff2f0d09d9ac6ebccaa81c278041c08e534e511acccc0ba352955983554118a7 has
+whole-prefix RMS 23.155827 mm, early RMS 10.063296 mm, terminal RMS 65.558829 mm,
+club RMS 27.463230 mm and yaw error 7.430064 percent through 0.8 s.
+Independent replay exactly reproduces all four RMS metrics in 3.39015 s.
+Closure pose/rate maxima are 2.43298e-11 / 2.66644e-10.
+
+Acceptance and convergence are FALSE. Twelve evaluations exhausted the budget;
+optimality 28.439889, active bounds zero. Four scaled defects at 0.2, 0.4,
+0.6 and 0.7 s are 0.000617079, 0.001183612, 0.001025670 and 0.000823366;
+all exceed 1e-4. Segmented RMS is 23.165090 mm. Continuous RMS is the evidence
+used above. Whole RMS improves 0.145510 mm versus run08, but terminal RMS
+worsens 4.538921 mm. This is a tradeoff, not a solved transition. Do not replace
+run08 as a universally best candidate or call a lower scalar objective success.
+
+All twelve evaluation packages, settings, raw candidate and independent replay
+are archived in native_evidence/ms_fit_9967_10/raw-run.zip. Adjacent formatted
+JSON is for review; exact receipt hashes refer to raw bytes in the ZIP.
+Raw candidate hash: 8a613d001692d6fe9c6634f0008e40cb200a3c8c6038ffa20b65b852767ee5c1.
+marker-errors.png was generated from the fresh replay and visually inspected.
+Error rises continuously after the early prefix; largest terminal residuals
+remain left elbow, head and upper-arm markers. The plot is explicitly unaccepted.
+
+Next bounded task: prepare an exact run10 continuation, retaining driver10's
+original run08 chart references, model, objective and global sextic bounds.
+Restore BOTH returned torque coefficients and returned physical nodes. Recover
+chart coordinates from those physical nodes and retraction; verify reconstruction
+and initial window defects against this receipt before fitting. Add a failing
+restart-contract test if changing the reusable restart pathway. Do not reset
+nodes to zero or recenter charts and claim an identical continuation. Save one
+24-evaluation budget with complete checkpoints, then independently replay and
+compare every gate. This trial made objective progress and did not converge;
+continuation can establish whether the shorter-window formulation has settled.
+If terminal error remains worse or progress plateaus, stop repeating budgets
+and inspect constrained feasibility/terminal objective tradeoffs. Keep all
+earlier candidates available. Full 1.813889 s matching remains incomplete.
+
 ## Five-Window Fit Started After Diagnostic Qualification
 
 Updated 2026-09-12 UTC. Run10 is LIVE: unified exec session 49870, confirmed
