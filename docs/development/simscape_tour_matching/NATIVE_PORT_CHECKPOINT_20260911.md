@@ -79,8 +79,13 @@ native coordinate order plus named marker bodies/offsets, validates all shapes
 and finiteness, and returns copied marker positions or weld-pose residuals. It
 does not contain a second IK implementation, smooth independent poses, infer
 derivatives, identify torque, or claim a trajectory. The immediate next task is
-one fixed capture-frame constrained-pose receipt, then a separately qualified
-smooth path across such frames.
+additional transition-frame constrained-pose receipts, then a separately
+qualified smooth path across such frames. The t=0 receipt is complete in
+`native_evidence/marker_pose_seed_9967_23/receipt.json`: all25 observed markers
+fit at2.89808e-13 m RMS with weld pose residual5.54112e-13 m; SLSQP converged
+in one iteration because archived run19 q0 is the target's calibrated initial
+state. This only proves wiring/identity at the initial frame, not later
+reachability or transition tracking.
 
 ## Run 20 Saved Evaluation 44 Audit
 
