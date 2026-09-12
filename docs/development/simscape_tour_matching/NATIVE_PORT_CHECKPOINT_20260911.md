@@ -1,5 +1,45 @@
 # Native Port Implementation Checkpoint
 
+## Full-Capture Coverage and Phase Errors Recorded
+
+Updated 2026-09-12 UTC. Previous goal turn made progress through run02 replay,
+full-duration diagnostic and continuation launch. Commit bb4204b9d now confirmed
+pushed after all hooks passed. Continuation run03 remains live: session7978,
+ControlTower WSL PID2062554, confirmed CPU progress and 25 completed window
+calculations at the latest check (elapsed4m18s). No returned.json yet; retain the
+same process and do not restart from the absence of a result. The 24-evaluation
+budget is not a count of window integrations or a convergence guarantee.
+
+Full-capture coverage audit of the actual modeled-marker mask confirms all six
+club markers last observed together at1.8083333333333333s. They are absent at the
+last two capture samples; final capture time1.8138888888888889s still has19body
+markers. The final missing labels are exactly Marker_2:2:1/2/3 and Marker_3:3:1/2/3.
+Do not move the capture endpoint backward or fill those samples as observations.
+When full-swing gates are configured, explicitly report both the capture endpoint
+and last-observed complete club-cluster timestamp. Use that named timestamp for
+a last-observed club diagnostic; never label it an observed final-frame club error.
+
+Using the unchanged run01 torque profile, observed RMS by inclusive diagnostic
+interval is10.013mm(0-.6),43.879mm(.6-.8),360.254mm(.8-1.0),664.863mm(1.0-1.2),
+1068.237mm(1.2-1.5),4610.081mm(1.5-end). Boundary frames overlap by design in this
+phase table, so its counts must not be summed as unique sample coverage. Receipt
+native_evidence/native-full-coverage-diagnostic-9967-01.json preserves counts,
+exact intervals and candidate identity. The inspected full-horizon plot is
+native_evidence/native-full-extrapolation-9967-02.png. Raw plot/receipt and the
+underlying full NPZ remain in local simscape-tour-checkpoints.
+
+![Unoptimized Full-Horizon Extrapolation](native_evidence/native-full-extrapolation-9967-02.png)
+
+This establishes .8-1.0s as the next extension interval once a useful transition
+seed is available; it does not establish a new fit. Full capture remains the
+objective, not repeated polishing of .8s forever. After current run03 terminates,
+compare segmented gain and continuity; if useful, continue penalty restoration
+from saved torques/nodes, then add a node/window toward1.0s with a fixed full-swing
+polynomial time convention. Keep explicit masks and early-motion gates. If there
+is no useful gain, diagnose active bounds/optimality and geometry feasibility
+before another identical budget. Current runtime/next poll instructions below
+remain authoritative.
+
 ## Lower-Penalty Return and Full-Horizon Diagnostic Verified
 
 Updated 2026-09-12 UTC. Previous turn made progress through first-MS verification
