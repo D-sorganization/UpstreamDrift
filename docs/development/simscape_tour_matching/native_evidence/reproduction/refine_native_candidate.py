@@ -23,6 +23,8 @@ from src.shared.python.motion_matching.prefix_fit import (
     fit_prefixes,
 )
 
+_SHAPING_FIRST_CONTROL = {"sixth": 6, "bernstein456": 4, "bernstein23456": 2}
+
 
 def control_matrix(
     parameters: np.ndarray,
@@ -34,7 +36,7 @@ def control_matrix(
     """Expand dimensionless search parameters without changing frozen efforts."""
     if not np.isfinite(amplitude_scale) or amplitude_scale <= 0:
         raise ValueError("Amplitude scale must be finite and positive")
-    if coordinate_count < 3 or first_control not in (4, 6):
+    if coordinate_count < 3 or first_control not in _SHAPING_FIRST_CONTROL.values():
         raise ValueError("Unsupported native control inventory")
     active = 3 if root_forces_only else coordinate_count
     values = np.asarray(parameters, dtype=float)
@@ -53,7 +55,9 @@ def main() -> None:
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--max-nfev", type=int, default=3)
     parser.add_argument("--restart-candidate", type=Path)
-    parser.add_argument("--shaping", choices=("sixth", "bernstein456"), default="sixth")
+    parser.add_argument(
+        "--shaping", choices=tuple(_SHAPING_FIRST_CONTROL), default="sixth"
+    )
     parser.add_argument("--root-forces-only", action="store_true")
     parser.add_argument("--amplitude-scale", type=float, default=10.0)
     parser.add_argument("--finite-difference-step", type=float, default=1e-3)
@@ -81,7 +85,7 @@ def main() -> None:
     target = MarkerTarget(clock, points, np.ones(len(indices)))
     n = len(doc["coordinate_names"])
     basis_duration = doc["duration_s"]
-    first_control = 6 if args.shaping == "sixth" else 4
+    first_control = _SHAPING_FIRST_CONTROL[args.shaping]
     active = 3 if args.root_forces_only else n
     parameter_count = active * (7 - first_control)
     initial = np.ones(parameter_count)

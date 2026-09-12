@@ -1,5 +1,70 @@
 # Native Port Implementation Checkpoint
 
+## Expanded Sextic Trial Is Live After Verified Continuation
+
+Updated 2026-09-12 UTC. Previous goal turn made progress through the analytic
+optimizer and same-bounds restart. Analytic run 02 (session 53679) has now exited
+zero after 26 ordinary forward calls. Returned candidate
+27cf1e7e868429881f5a59e135f46923fffe103df3d229d34c29f3ad72530673
+independently reproduces all metrics exactly: whole RMS 23.9077 mm, early RMS
+10.0329 mm, terminal RMS 63.5023 mm, terminal club RMS 30.8466 mm. Whole RMS now
+meets its numerical threshold, but terminal error fails and optimizer convergence
+is false (24-step budget exhausted). Five controls are near bounds. Full-swing
+and R2025b acceptance remain unproven.
+
+Complete raw/returned/best/Jacobian ledgers, independent receipt, arrays and
+inspected plot are in native_evidence/analytic_fit_9967_02/. Original raw copies
+are in local simscape-tour-checkpoints/native-analytic-fit-9967-02 and
+ControlTower C:/Users/diete/native-analytic-fit-9967-02. This is the current
+independently replayed return; retain the earlier seeds and their identities.
+
+![Analytic Run 02 Observed Marker Errors](native_evidence/analytic_fit_9967_02/marker-errors.png)
+
+Next controlled experiment is LIVE: native-expanded-fit-9967-01, session 54373,
+ControlTower WSL PID 1960393. It frees Bernstein controls 2 through 6 (135 total),
+preserving the initial torque and its first time derivative. It remains one
+global degree-six polynomial per input. Previous controls 4 through 6 also fixed
+the second and third initial torque derivatives; those extra restrictions are
+now relaxed. No geometry, initial state, original correction bounds, objective,
+or early-motion acceptance gate changes. This is a hypothesis test, not proof
+that extra coefficients will resolve the remaining error.
+
+New --shaping bernstein23456 has a red-to-green test verifying zero constant and
+linear correction terms, finite degree-six representation and endpoint effort.
+Combined subspace/native sensitivity tests: 9 passed. The 135-column native
+audit exited zero (session 96904), with 14.0479 s sensitivity integration and
+1.16160e-8 m primal marker agreement. World-Y B4 reference still agrees to
+relative 1.474e-6; new LSInputX B2 agrees to 9.215e-6 at 1e-6 Nm and RWInputX B2
+to 1.656e-4. Both also passed at 3e-7 Nm. Receipt
+native-trajectory-sensitivity-9967-04.json hashes its full NPZ and actual runner.
+NPZ is archived on ControlTower and in local simscape-tour-checkpoints. It was
+run using the unchanged analytic runtime and copied
+check_native_trajectory_sensitivity_9967_04.py, with --first-control 2,
+--all-controls, --rtol 1e-10 --atol 1e-12 and explicit single-thread BLAS.
+
+Live run uses /home/dieterolson/native-expanded-sextic-9967-01, same Python venv
+and model/target paths below. --candidate remains the original root-force run 02
+return; --restart-candidate is analytic run 02's returned-candidate.json.
+Arguments: --shaping bernstein23456 --amplitude-scale 10 --analytic-jacobian
+--max-nfev 12 --output_dir /mnt/c/Users/diete/native-expanded-fit-9967-01.
+Corrections remain +/-2 N/Nm relative to that original parent, not recentered.
+Source bundle native-expanded-sextic-bundle-9967-01.zip SHA-256
+1999d1ee775dc617dd34e19cd5f83f92accca14cf7a5d50ffcec74add2b0dec2
+is archived locally and remotely with exact per-file hashes. Next action:
+observe session 54373, preserve its result and independently replay any return.
+If gains remain small, diagnose full sextic freedom, geometry feasibility and
+multiple-shooting initialization before simply increasing computation budgets.
+
+Coordination audit: Gemini's worktree has commits 9dd45e476 (inverse polynomial
+conversion), 9b35a13d7 (window memoization), and fdd64ade6 (terminal/yaw multiple
+shooting residuals); no live source was modified. Its inverse conversion and
+our recovery helper should be consolidated when branches are integrated, with
+existing round-trip tests retained. Central inbox retrieval failed with
+"Rejected identity change for capture-product-01a08427-reference"; it returned
+no readable messages, which is not evidence that no messages exist. Continue
+using the authorized issue #9964 comments and Gemini checkpoint breadcrumb;
+do not change another session's identity to work around that warning.
+
 ## First Analytic Fit Reproduced; Same-Bounds Continuation Is Live
 
 Updated 2026-09-12 UTC. Analytic run 01 (session 12513) exited zero after eight
