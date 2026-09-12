@@ -71,6 +71,14 @@ captured marker-body attachments and offsets. Save one independent receipt per
 frame, including observed mask, marker RMS, SLSQP status and weld residual. The
 adapter does not make independent frames a valid trajectory.
 
+The initial-frame smoke receipt is recorded in
+`native_evidence/marker_pose_seed_9967_23/receipt.json`: 25 observed markers,
+2.89808e-13 m RMS and5.54112e-13 m weld residual. It uses the archived run19
+initial state, so it verifies native identity and adapter wiring only. Next use
+the same immutable candidate/model/attachment identity for sparse transition
+frames, warm-starting each solve from the preceding feasible pose and recording
+any reachability or branch failure before trajectory smoothing.
+
 Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
 Never silently change geometry, add feedback/state resets, or relax criteria.
 Use one bounded fit at a time after qualification; independently forward replay
