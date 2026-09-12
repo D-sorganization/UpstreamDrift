@@ -1,5 +1,59 @@
 # Native Port Implementation Checkpoint
 
+## Root-Force Run 02 Finished and Independently Reproduced
+
+Updated 2026-09-12 UTC. Session 94653 exited zero after 233 actual forward
+evaluations. No optimization or audit job from this workstream remains live.
+The returned candidate canonical hash is
+2afaf8b21a05a44b071e7328e2d624bba5f6a999aa85920b53b61b43961e6673.
+A fresh ControlTower process reproduced all four reported marker metrics exactly:
+
+| Metric                         | Run 03  | Root-Force Run 02 |
+| ------------------------------ | ------- | ----------------- |
+| Whole RMS (mm)                 | 30.8867 | 29.7657           |
+| Early RMS Through 0.6 s (mm)   | 10.8177 | 10.9214           |
+| Terminal RMS at 0.8 s (mm)     | 94.8294 | 84.0761           |
+| Terminal Club Cluster RMS (mm) | 66.0119 | 55.5631           |
+
+The club threshold is now met, but whole and terminal gates fail. The optimizer
+exhausted its 24-evaluation budget; convergence and numerical acceptance remain
+false. No full-swing or native R2025b acceptance of this candidate is established.
+This is the current returned candidate with the best recorded weighted fit score,
+not an accepted representative tour swing. Preserve earlier candidates as seeds.
+
+Artifacts: native_evidence/root_force_9967_02/ contains returned-candidate.json,
+returned.json, best.json, config.json, all evaluations, independent-replay.json,
+visual-replay.npz and marker-errors.png. Original raw copies remain in local
+simscape-tour-checkpoints/native-root-force-9967-02 and ControlTower
+C:/Users/diete/native-root-force-9967-02. Candidate file byte SHA-256 in the raw
+independent receipt is 34357becc44fa891a402a0f68e0a795d8304074bc8cdcfb5f419157b7de2680e;
+canonical identity is insensitive to repository JSON formatting.
+
+![Root-Force Run 02 Observed Marker Errors](native_evidence/root_force_9967_02/marker-errors.png)
+
+Independent full adapter/residual evaluation took 3.55486 s, integration 3.40878 s;
+sampled closure pose/rate maxima 8.24429e-12 / 2.63179e-10. Same 25 markers,
+289 samples and 7225 observations. Plot was rendered and visually checked. The
+benchmark receipt retains its historical baseline-only qualification string;
+that string does not erase this candidate's actual optimizer history.
+
+Three force controls are near bounds: TranslationInputX B6 +24.9990 N,
+TranslationInputY B5 -24.9984 N and B6 -24.9980 N, relative to run 03. This is
+evidence that the selected subspace/bounds restrict this local solve, not a reason
+to widen every effort indiscriminately. Arms still have the largest individual
+terminal errors. All 24 torque profiles were frozen in this experiment.
+
+Next bounded assignment: qualify the full selected control sensitivity block
+using the new shared integrator and native derivative methods (details below).
+At minimum validate the known world-Y B4 direction and independent torque
+directions, compare primal/closure accuracy, then benchmark against the actual
+81-column replay cost. One-column integration is accurate but took 32.9 s;
+do not assume all-column sensitivity is faster. If useful, add an optional
+Jacobian path to shared fit_prefixes with exact residual masks/weights/terminal
+terms and cache by full candidate/clock identity. Otherwise use physically
+qualified finite differences. Resume joint-torque refinement from this returned
+candidate; preserve all raw marker errors and the known head/back rigidity limit.
+
 ## Complete Native Sensitivity Direction Verified
 
 Updated 2026-09-12 UTC. Previous goal turn made progress: force-scale audit,
