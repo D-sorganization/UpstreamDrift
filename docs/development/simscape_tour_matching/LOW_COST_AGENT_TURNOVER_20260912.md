@@ -88,6 +88,15 @@ the final gate and must never be used as a dynamic solution. Continue poses
 gradually from t=0, preserve bounds and branch identity, and stop to diagnose
 if residuals or closure fail rather than expanding a torque fit.
 
+The first sparse continuation is complete at
+`native_evidence/marker_pose_sequence_9967_23/receipt.json`, with one ±0.15
+chart between seven frames through0.6 s. Static RMS remains below26 mm at the
+last frame and all weld residuals are under1.65e-11. Frame36/t=0.1 s is
+closure-valid with0.524 mm residual but its SLSQP status is iteration-limit;
+preserve this warning. The next agent must not identify torque from this result.
+First fit a smooth derivative-aware path through the retained poses, then prove
+position, velocity and acceleration closure along its samples.
+
 Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
 Never silently change geometry, add feedback/state resets, or relax criteria.
 Use one bounded fit at a time after qualification; independently forward replay

@@ -1,0 +1,101 @@
+"""Build auditable, closure-constrained static native pose seeds by continuation."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+import numpy as np
+
+from src.engines.physics_engines.pinocchio.python.native_constrained_pose import (
+    NativeConstrainedPoseOracle,
+)
+from src.engines.physics_engines.pinocchio.python.native_model import NativePinocchioModel
+from src.shared.python.motion_matching.constrained_marker_pose import fit_marker_pose
+from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--model", type=Path, required=True)
+    parser.add_argument("--candidate", type=Path, required=True)
+    parser.add_argument("--payload", type=Path, required=True)
+    parser.add_argument("--frames", type=int, nargs="+", required=True)
+    parser.add_argument("--bound", type=float, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists() or not np.isfinite(args.bound) or args.bound <= 0:
+        raise ValueError("Output must be new and coordinate bound must be positive")
+    if args.frames != sorted(set(args.frames)):
+        raise ValueError("Frames must be unique and strictly ascending")
+    raw = args.model.read_bytes()
+    specification = json.loads(raw)
+    names = tuple(specification["coordinate_order"])
+    candidate = NativeReplayCandidate.from_document(
+        json.loads(args.candidate.read_text()), names, hashlib.sha256(raw).hexdigest()
+    )
+    payload = json.loads(args.payload.read_text())
+    labels = tuple(candidate.document["marker_labels"])
+    indices = [payload["labels"].index(label) for label in labels]
+    points = np.asarray(payload["points_world_m"], dtype=float)
+    valid = np.asarray(payload["valid"], dtype=bool)
+    if args.frames[0] < 0 or args.frames[-1] >= points.shape[0]:
+        raise ValueError("Frame is outside target payload")
+    model = NativePinocchioModel(specification)
+    oracle = NativeConstrainedPoseOracle(
+        model,
+        names,
+        candidate.document["marker_bodies"],
+        np.asarray(candidate.document["marker_offsets_m"], dtype=float),
+    )
+    current = np.asarray(candidate.document["q0"], dtype=float)
+    records = []
+    for frame in args.frames:
+        observed = valid[frame, indices]
+        result = fit_marker_pose(
+            current,
+            current - args.bound,
+            current + args.bound,
+            points[frame, indices],
+            observed,
+            oracle.forward,
+            oracle.closure,
+            max_iterations=100,
+        )
+        records.append(
+            {
+                "frame": frame,
+                "time_s": payload["time_s"][frame],
+                "observed_markers": int(observed.sum()),
+                "marker_rms_m": result.marker_rms_m,
+                "closure_max_abs": result.closure_max_abs,
+                "closure_satisfied": result.closure_satisfied,
+                "optimizer_converged": result.optimizer_converged,
+                "message": result.message,
+                "iterations": result.iterations,
+                "coordinates": result.coordinates.tolist(),
+            }
+        )
+        if not result.closure_satisfied:
+            raise ValueError("Continuation produced a closure-invalid static pose")
+        current = result.coordinates
+    args.output.write_text(
+        json.dumps(
+            {
+                "model_sha256": hashlib.sha256(raw).hexdigest(),
+                "candidate_sha256": candidate.sha256,
+                "capture_sha256": payload["source_sha256"],
+                "coordinate_bound": args.bound,
+                "records": records,
+                "scope": "Static closure-constrained poses only; not a smooth trajectory or dynamic fit.",
+            },
+            indent=2,
+        )
+        + "\n"
+    )
+
+
+if __name__ == "__main__":
+    main()
