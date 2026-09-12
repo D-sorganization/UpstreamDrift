@@ -1,5 +1,57 @@
 # Native Port Implementation Checkpoint
 
+## Configurable 0.85 s Extension Qualified; Run13 Is Live
+
+Updated 2026-09-12 UTC. Previous turn made progress by independently validating
+run12's continuity recovery and measuring unoptimized later-horizon failure.
+The next extension is now implemented with an explicit unchanged0.8 s effort
+basis and configurable horizon/node schedule. Source commits d4e31552a and
+405328ff2 are pushed. Native sensitivity previously implicitly used candidate
+coverage as its Bernstein duration; basis_duration_s now allows independent
+coverage without silently changing control derivatives or physical bounds.
+Default None preserves prior behavior. Numeric validation rejects invalid basis
+durations. The free-mass analytic sextic response tests failed first, then pass
+for original/shorter/longer bases, including window sensitivities.
+
+New shared sampled_shooting_windows validates actual capture nodes and returns
+detached readonly inclusive windows. Missing, unordered, duplicate/nonfinite
+nodes and invalid capture clocks are tested. Combined schedule, native candidate
+and sensitivity suite:31 pass; ruff/direct mypy and normal push checks pass.
+An explicit mypy scalar-type error was fixed in405328ff2 before runtime staging.
+No completed runtime was edited.
+
+Fresh runtime /home/dieterolson/native-ms-pilot-9967-13 copies runtime09 plus
+hashed native_sensitivity.py, shooting_schedule.py, multi_shooting_fit.py and
+marker_replay_report.py. Bundle native-ms-horizon-bundle-9967-13.zip preserves
+these exact files, manifest, staging script and run_native_ms_horizon_9967_13.py.
+Runner hash0d46c2d893d5f9c25a33873a52dc3e37f7f1e7278d4fc4867b64ef610fdd78de.
+
+Audit session73731 exited zero; native_evidence/ms_horizon_audit_9967_13 contains
+receipts and raw package. All5 initial scaled defects are below1.421e-9.
+Twelve selected marker/state derivative probes pass1e-3, maximum1.54633e-4 /
+1.81097e-4. New node0.8 s is included. This is selected derivative qualification,
+not an entire-Jacobian certificate. All chart references use continuous run12
+replay, with zero chart coordinates; this is an explicitly new initialization,
+not a claim to restore old run12 shooting variables byte-for-byte.
+
+LIVE: unified session41782, confirmed ControlTower-Runner PID2191645. Output
+C:/Users/diete/native-ms-fit-9967-13. Python remains
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python, PYTHONPATH runtime13,
+OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1. Script above, arguments:
+--output /mnt/c/Users/diete/native-ms-fit-9967-13 --horizon .85
+--nodes .2 .4 .6 .7 .8 .85 --basis-duration .8 --max-nfev 12
+--defect-weight 1000. It reruns audits before fitting. Same native model, q0/qd0,
+global sextic, original root-force02 effort parent and physical Bernstein bounds.
+Candidate coverage changes for both parent and seed; coefficients do not retime.
+
+Next action: poll session41782/PID2191645. Independently replay any returned
+candidate; compare0.8 and0.85 s markers, all acceptance gates and pointwise
+terminal replay gap. Runtime13 now reports terminal_replay_gap_m directly and
+the runner additionally records previous_terminal_rms_m at0.8 s. Preserve raw
+packages before formatting. Do not promote a partial horizon as full-swing
+acceptance. Canonical capture end1.8138888889 s and final R2025b qualification
+remain required. Lease renewed through2026-09-12T15:49:18.615385Z.
+
 ## Run12 Replayed: Continuity Recovered; Horizon Extension Remains
 
 Updated 2026-09-12 UTC. Session2134 exited zero. No native fit is running in
