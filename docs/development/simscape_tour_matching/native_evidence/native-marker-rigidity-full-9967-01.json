@@ -1,0 +1,374 @@
+{
+  "qualification": "fixed-offset rigid-frame lower bound; joints and closures relaxed; no forward-fit acceptance",
+  "candidate_sha256": "90d801cad282dba88170442dc7a57e4757aef04780bf267f311bd1a098f498b7",
+  "input_sha256": {
+    "candidate": "ba0d754c4932c98118c6f2f6d5132e4a4816631ffb84e04b8307541915fc651f",
+    "capture_payload": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87"
+  },
+  "poses": [
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.010847255117879751,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.0022213270087920113
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.02182214881089855
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.0020229895439399306
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.004409591788548619
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.0020526928335670505
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.001231413424229964
+        }
+      ],
+      "time_s": 0.6
+    },
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.01616948845048379,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.0027267223641636194
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.0325402154004438
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.0029304944791831507
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.007277774356418162
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.002943717579369555
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.0014683669037695675
+        }
+      ],
+      "time_s": 0.7
+    },
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.021423016383261443,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.0032257541834300016
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.043147778992729965
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.004037767067602104
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.00992179048617343
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.003313274450283621
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.0013030264670789138
+        }
+      ],
+      "time_s": 0.8
+    },
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.02741474937190413,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.004641550343598284
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.054922567854331646
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.008820227767069967
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.013902170623778071
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.004647677287678124
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.0017687105135889252
+        }
+      ],
+      "time_s": 1.0
+    },
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.01904061890741992,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.0034267466512183727
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.03718148894494884
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.006488300438768601
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.015455064257396614
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.003149435836268124
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.004832668660132353
+        }
+      ],
+      "time_s": 1.2
+    },
+    {
+      "observed_count": 22,
+      "rms_lower_bound_m": 0.021099703005542286,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.005617373185755451
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.03972042923659996
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.0017596703982428869
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.004860465555646187
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.00855098971246009
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 3,
+          "rms_lower_bound_m": 0.0008504455761519673
+        }
+      ],
+      "time_s": 1.5
+    },
+    {
+      "observed_count": 25,
+      "rms_lower_bound_m": 0.021222734921362993,
+      "groups": [
+        {
+          "frame": "Hip",
+          "count": 4,
+          "rms_lower_bound_m": 0.006387384019825599
+        },
+        {
+          "frame": "Hub",
+          "count": 6,
+          "rms_lower_bound_m": 0.04095981789257378
+        },
+        {
+          "frame": "LScap",
+          "count": 2,
+          "rms_lower_bound_m": 0.007748624152309616
+        },
+        {
+          "frame": "LS",
+          "count": 2,
+          "rms_lower_bound_m": 0.013582805914094604
+        },
+        {
+          "frame": "LF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RScap",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "RS",
+          "count": 2,
+          "rms_lower_bound_m": 0.01636904279903144
+        },
+        {
+          "frame": "RF",
+          "count": 1,
+          "rms_lower_bound_m": 0.0
+        },
+        {
+          "frame": "Clubhead",
+          "count": 6,
+          "rms_lower_bound_m": 0.0009762547069271732
+        }
+      ],
+      "time_s": 1.8
+    }
+  ]
+}
