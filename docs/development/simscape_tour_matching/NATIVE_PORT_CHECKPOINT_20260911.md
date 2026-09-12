@@ -1,5 +1,45 @@
 # Native Port Implementation Checkpoint
 
+## Run13 Replayed; Conditioning Evidence Changes the Next Step
+
+Updated 2026-09-12 UTC. Fit session41782 and conditioning session69936 both
+exited zero. No fit or diagnostic is running in this lane. Run13 canonical
+f9787350c574149d83bc092c1542b3065e6e72c08facf82294d08aae1de9babc independently
+replays EXACTLY through0.85 s: whole30.206118 mm, early10.311689 mm,
+terminal111.362182 mm and club106.482067 mm. Reported yaw12.245565%.
+The0.8 s endpoint RMS is58.653330 mm. Native replay3.52714 s, closure
+3.90992e-11/2.71248e-10. Raw candidate hash
+3716a67cc6e4babdebd1fc6f5fb3ffad656d82f971b98c91135faa74231e5115.
+All12 evaluation snapshots, independent replay, exact config and inspected
+marker-errors.png are preserved in native_evidence/ms_fit_9967_13.
+
+Acceptance/convergence FALSE;12 evaluations exhausted, optimality938.765486,
+active bounds zero. All5 local scaled defects pass1e-4 (max3.20464e-5), yet
+pointwise terminal replay gap is11.656173 mm. Terminal RMS improves6.249262 mm
+from the unoptimized117.611445 mm starting endpoint, insufficient for acceptance.
+This shows that the local defect threshold does not guarantee small accumulated
+replay disagreement at the extended horizon. Do not call this a solved extension.
+
+Separate conditioning audit at run13's INITIAL point:399 variables,23745 residuals,
+cost41.858400. All columns nonzero; raw norms62.777..85540.377. Column-normalized
+singular values7.53552..3.09930e-10 (condition ratio about2.43e10). At relative
+cutoff1e-4 only210 directions remain, predicting cost41.849222. At1e-6,
+258 directions predict9.558077 but require maximum135.96 N/Nm effort-control
+steps and15.91 node-coordinate steps, outside existing bounds. These are
+UNCONSTRAINED LINEAR predictions, not simulated or accepted steps; they do not
+prove bounded fitting impossible. Receipts and exact script are archived in
+native_evidence/ms_conditioning_9967_13/raw-audit.zip.
+
+Next action is the bounded TDD assignment in CONSTRAINED_SHOOTING_NEXT_AGENT.md:
+test an explicitly constrained backend with independent chart continuity rows,
+shared objective/Jacobian/cache and full physical replay diagnostics. Do not
+repeat unchanged penalty/budget continuation or increase weights blindly. The
+210 strong directions matching the chart dimension supports a penalty-conditioning
+hypothesis; the constrained formulation must itself be qualified before a native
+fit. Full1.8138888889 s matching and final R2025b/cross-engine evidence remain
+incomplete. This turn made progress by independently replaying the extension and
+measuring the numerical bottleneck that changes the implementation plan.
+
 ## Configurable 0.85 s Extension Qualified; Run13 Is Live
 
 Updated 2026-09-12 UTC. Previous turn made progress by independently validating
