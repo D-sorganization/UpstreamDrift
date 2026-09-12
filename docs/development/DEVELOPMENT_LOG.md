@@ -17,20 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8766 · Packaging and Governance Unit-Gate Debt Burndown
+### DL-#8766 · Deployment and Teleoperation Unit-Gate Debt Burndown
 
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #8766
-- **Branch:** fix/packaging-unit-gate-quarantine-burndown
-- **PR:** #10010
-- **Paths:** scripts/config/unit_gate_quarantine.json, tests/scripts/test_check_vendor_updates.py, tests/unit/scripts/test_check_gitignore_dotenv.py, docs/development/monolith_refactor_register.md, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Branch:** fix/deployment-unit-gate-quarantine-burndown
+- **PR:** #10012
+- **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`c578ca942`)
-- **Summary:** Burned down 43 quarantined packaging and governance unit tests in unit_gate_quarantine.json, anchored test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and synced monolith refactor register.
-- **Next step:** Open PR #10010, pass all CI gates, and squash-merge to main.
+- **Last verified:** 2026-09-12 (`dd05fb900`)
+- **Summary:** Burn down all 11 quarantined deployment, device, and teleoperation tests in unit_gate_quarantine.json under deployment_devices_and_configuration, retiring the cluster entirely.
+- **Next step:** Open PR #10012, pass all CI gates, and squash-merge to main.
 
 ## Shipped (Last 90 Days)
+
+### DL-#8766 · Packaging and Governance Unit-Gate Debt Burndown
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #8766
+- **PR:** #10010 (merged)
+- **Paths:** scripts/config/unit_gate_quarantine.json, tests/scripts/test_check_vendor_updates.py, tests/unit/scripts/test_check_gitignore_dotenv.py, docs/development/monolith_refactor_register.md, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-12 (`dd05fb900`)
+- **Summary:** Burned down 43 quarantined packaging and governance unit tests in unit_gate_quarantine.json, anchored test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and synced monolith refactor register.
+- **Evidence:** All CI passed; merged to main at dd05fb900.
 
 ### DL-#8695 · DRY Duplication Quarantine Tightening
 
