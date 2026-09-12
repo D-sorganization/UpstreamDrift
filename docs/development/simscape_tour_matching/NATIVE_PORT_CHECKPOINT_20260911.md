@@ -1,5 +1,30 @@
 # Native Port Implementation Checkpoint
 
+## Cartesian Trajectory Difference Through 0.80 Seconds
+
+ControlTower diagnostic session 67568 completed with exit code zero. Using
+the fixed 25 seed attachments, the qualified native-derived FK map projected
+both trajectories at all 68,205 identical native timestamps. Maximum marker
+distance is 6.17217e-6 m (0.00617217 mm); time-weighted RMS is 4.66791e-7 m
+(0.000466791 mm). Receipt: `native_evidence/native_marker_difference_9967.json`.
+This is engine-trajectory Cartesian agreement through 0.80 s, not a C3D fit
+score or independent native Cartesian output verification. The shared FK
+map has separate six-pose native verification; do not conflate the scopes.
+
+New shared `motion_matching/marker_projection.py` follows a red missing-module
+test, then six passing tests for rigid transforms, attachment order and invalid
+offsets/frames. Ruff lint and formatting passed. Reproduction runner is
+`native_evidence/reproduction/check_continuous_marker_difference.py`; its CLI
+requires module/projection/spec/seed/reference/replay/output paths, retains
+input hashes, rejects an existing output and requires identical sample clocks.
+It time-weights squared error to avoid bias from adaptive native sample density.
+
+Next: independently validate native Cartesian outputs and one further native
+tolerance level, then qualify the reusable matching adapter and URDF plus
+closure/actuation sidecar round trip. Do not silently replace the closed model
+with a URDF tree. Full observed-swing optimization and independent native
+acceptance remain outstanding. No diagnostic process remains live.
+
 ## Tight Native Replay Completed
 
 The replay below finished with exit code zero, as did export session 73644
