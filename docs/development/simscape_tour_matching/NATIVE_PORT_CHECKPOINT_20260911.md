@@ -1,5 +1,60 @@
 # Native Port Implementation Checkpoint
 
+## Root-Force Authority Verified and Isolated Search Started
+
+Updated 2026-09-12 UTC. The previous goal turn made progress by committing and
+pushing run 03 and refreshing the OpenSim plan. Current native force-authority
+audit exited zero on ControlTower (session 44824). See
+native_evidence/native-force-authority-9967-01.json and reproduction runner
+check_native_force_authority.py. It uses the existing run 03 namespace runtime,
+Pinocchio 4.1.0, and the qualified model with mass 77.60581783574678 kg.
+
+For the existing +/-2 N Bernstein controls 4,5,6, maximum terminal COM correction
+per world axis is 2*T^2*(3+2+1)/(56\*M) = 1.767172371 mm at T=0.8 s.
+Three native replays (baseline, run 03, and simultaneous positive root-force
+perturbation) verify the double-integrated force balance to 1.69e-13 m.
+Run 03's COM correction also matches its polynomial force integral to 5.53e-14 m.
+The static pose diagnostic's terminal COM is displaced from baseline by
+(+6.0832,-8.1619,+2.3778) mm. Static COM is neither a measured target nor a necessary
+condition for the best marker fit; this supports testing wider force authority,
+not claiming that root forces alone explain all marker error.
+
+An isolated root-force search is now live: unified session 81736, WSL PID
+1937679; output C:/Users/diete/native-root-force-9967-01 on ControlTower.
+It starts exactly from run 03's returned candidate, freezes all 24 torque
+polynomials, and changes nine world-force Bernstein controls 4,5,6. Bounds are
+dimensionless [0.8,1.2] with scale 125, hence +/-25 N corrections relative to run 03. These are exploratory bounds, not inferred physiological limits. The early
+RMS and final acceptance gates remain unchanged. max_nfev=12, relative numerical
+Jacobian step 0.001 (0.125 N at the starting point). Initial replay reproduced
+run 03's canonical hash and every metric. Early probes show strong nonlinear
+sensitivity to 0.125 N perturbations; qualify a smaller physical difference step
+before interpreting slow convergence as lack of controllability.
+
+Deployment: /home/dieterolson/native-refinement-9967-04, Python executable
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python. Source bundle is
+native-refinement-bundle-9967-04.zip in local simscape-tour-checkpoints and
+ControlTower C:/Users/diete; SHA-256
+773f276679f2a785f39f1ba7ace20112eb7061337e2e125c626ab4929e7e789e.
+Its manifest hashes every deployed module; full application remains unqualified.
+The first attempted output native-refinement-9967-04 already contained another
+completed one-step run and was correctly refused; that output was not changed.
+Do not confuse it with this newly deployed runtime or the distinct root-force run.
+
+Reproduce the current run by invoking the deployed refine_native_candidate.py
+with --model /mnt/c/Users/diete/native_geometry_spec_9967.json,
+--candidate /mnt/c/Users/diete/native-refinement-9967-03/returned-candidate.json,
+--target /mnt/c/Users/diete/driver_marker_payload_9967.json,
+--shaping bernstein456 --root-forces-only --amplitude-scale 125 --max-nfev 12,
+and a NEW --output_dir. Never restart merely because an observation times out.
+
+New root-only parameter mapping tests were red (missing function), then green:
+23 combined subspace/candidate tests pass. They verify frozen torques and early
+controls, historical full-space ordering, invalid scales and wrong dimensions.
+Runner uses the same shared fit_prefixes and candidate/Bernstein conversion APIs.
+Native force audit includes independent integral and simulator assertions.
+Next: inspect this exact live handle, preserve terminal evidence, audit physical
+finite-difference step size, and continue native trajectory-sensitivity gates.
+
 ## Run 03 Finished: Independent Replay and Typing Check Complete
 
 Updated 2026-09-12 UTC. This supersedes live-run statements below. Session
