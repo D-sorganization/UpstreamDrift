@@ -20,6 +20,7 @@ _UNIT_FACTORS = {
     "mass": {"kg": 1.0, "g": 0.001, "lbm": 0.45359237},
     "density": {"kg/m^3": 1.0},
     "angle": {"rad": 1.0, "deg": pi / 180.0},
+    "acceleration": {"m/s^2": 1.0},
 }
 
 
