@@ -1,5 +1,29 @@
 # Native Port Implementation Checkpoint
 
+## Five-Window Fit Started After Diagnostic Qualification
+
+Updated 2026-09-12 UTC. Run10 is LIVE: unified exec session 49870, confirmed
+ControlTower-Runner WSL PID 2172004 with exact driver10 command. Output is
+C:/Users/diete/native-ms-fit-9967-10. Remote runner SHA-256 was checked against
+2785648d08d46aa3c1bc52a997086f4c44e9e1c5c039a8f70b52728618350dbc before
+launch; output absence was checked and driver creation is exclusive.
+
+Command: runtime09 PYTHONPATH, OPENBLAS_NUM_THREADS=1, OMP_NUM_THREADS=1,
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python,
+/mnt/c/Users/diete/run_native_ms_pilot_9967_10.py,
+--output /mnt/c/Users/diete/native-ms-fit-9967-10 --max-nfev 12
+--defect-weight 100. No audit-only flag; local derivative gates rerun before
+optimization. One bounded trial, original model/initial state, global sextic,
+existing bounds and acceptance gates. No change to Gemini or MATLAB jobs.
+
+Next action: poll this exact session/PID. On completion, preserve raw output,
+inspect returned.json and independently replay returned-candidate.json with
+benchmark_native_marker_visual_9967.py into NEW report/trajectory paths.
+Do not infer success from evaluation checkpoints or optimizer termination.
+Compare all gates against run08 and record source/model/target/candidate hashes.
+The previous turn made progress by completing the diagnostic and committing
+evidence; this turn advances that evidence into a controlled optimization.
+
 ## Shorter-Window Audit Completed; Next Trial Is Ready
 
 Updated 2026-09-12 13:05 UTC. This section supersedes historical LIVE labels

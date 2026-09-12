@@ -1,5 +1,23 @@
 # Execution Prompt: Finish Four-Engine Tour Swing Matching
 
+## Current Entry Point: September 12
+
+Read the TOP of NATIVE_PORT_CHECKPOINT_20260911.md before the historical
+experiment sequence below. Native Pinocchio/URDF-plus-sidecar qualification
+through 0.8 s and multiple-shooting implementation have since completed.
+Do not redo those completed stages or restart historical jobs from this prompt.
+Run08 has independently verified 23.301337 mm prefix RMS and 61.019909 mm
+terminal RMS; it is unaccepted. Run09 did not meaningfully improve it.
+The five-window derivative audit supports the next bounded experiment.
+The current checkpoint identifies its exact process, output and replay steps.
+Full capture, final-candidate R2025b replay, application packaging and actual
+MuJoCo/Drake native import qualification remain required. OpenSim has its own
+OS-0..6 implementation plan in epic #10003 and separate owned worktree.
+
+Treat Sections 0 onward as historical diagnosis and retained design guidance.
+Use their still-unmet acceptance requirements, but reconcile experiment numbers
+and current ownership with the authoritative checkpoint before any execution.
+
 You are taking over a critical scientific implementation task. Execute it through measured acceptance, not just planning or long-running jobs. Read REVIEW_AND_TURNOVER_20260911.md and review_800ms_remote_receipt_20260911.json first. The final deliverable is the tour-average driver capture matched by 3D forward dynamics with a SINGLE global degree-six polynomial per actuation channel, and equivalent same-input behavior in Simscape R2025b, MuJoCo, Drake and Pinocchio. Then make the workflow reusable for other C3Ds, initial guesses and polynomial degrees. The current motion is not fully matched; do not repeat the claim that cross-engine physics is fully established merely because #9965–#9969 merged.
 
 ## 0. Immediate Checkpoint and First Experiments
