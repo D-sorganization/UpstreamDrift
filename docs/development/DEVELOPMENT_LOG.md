@@ -17,20 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8695 · DRY Duplication Quarantine Tightening
+### DL-#8766 · Burn Down AI Assistant & Chat Session Quarantine Debt
 
 - **State:** in_progress
 - **Owner:** claude
-- **Issue:** #8695
-- **Branch:** conductor/issue-8695
-- **PR:** #10005
-- **Paths:** scripts/config/dry_duplication_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
-- **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (`c893a73ad`)
-- **Summary:** Pruned 72 dead quarantined fingerprints across supported scanner runtimes (666 -> 594); no entry raised, baseline not regenerated.
-- **Next step:** Update PR #10005, pass CI, and merge.
+- **Issue:** #8766
+- **Branch:** fix/ai-chat-session-tz-and-submodules
+- **PR:** pending
+- **Paths:** src/shared/python/ai/gui/session_manager.py, src/shared/python/ai/gui/assistant_panel.py, scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-12 (`c578ca942`)
+- **Summary:** Normalize timestamps in ChatSessionManager.list_sessions() for mixed naive/aware datetimes, re-export decomposed AI assistant submodules in assistant_panel.py, and burn down 5 quarantined test node IDs in unit_gate_quarantine.json.
+- **Next step:** Open PR, pass CI, and merge.
 
 ## Shipped (Last 90 Days)
+
+### DL-#8695 · DRY Duplication Quarantine Tightening
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #8695
+- **PR:** #10005 (merged)
+- **Paths:** scripts/config/dry_duplication_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-11
+- **Last verified:** 2026-09-12 (`c578ca942`)
+- **Summary:** Pruned 72 dead quarantined fingerprints across supported scanner runtimes (666 -> 594); no entry raised, baseline not regenerated.
+- **Evidence:** All CI passed including phantom-guard, doc-governance, code-quality, unit-test-gate, optional-stack-check; merged to main at c578ca942.
 
 ### DL-#9747 · Signed Release Tag Enforcement and Verification
 

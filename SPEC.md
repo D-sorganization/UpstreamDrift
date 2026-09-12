@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## AI Assistant Submodule Re-Exports and Chat Session Timezone Sorting (#8766)
+
+Harden AI assistant backward-compatibility re-exports and robustly sort chat sessions with mixed timezone representations:
+- Timezone Normalization in Session Sorting: In `src/shared/python/ai/gui/session_manager.py`, normalize session timestamps to UTC within the `list_sessions()` sort key so conversations with mixed naive and timezone-aware ISO timestamps compare cleanly without raising `TypeError: can't compare offset-naive and offset-aware datetimes`.
+- Assistant Submodule Backward-Compatibility Re-exports: In `src/shared/python/ai/gui/assistant_panel.py`, import and re-export `MessageWidget` from `src.shared.python.ai.gui.assistant.transcript`, `StreamWorker` from `src.shared.python.ai.gui.assistant.streaming`, and `ChatInput` from `src.shared.python.ai.gui.assistant.composer` (alongside `AIAssistantPanel`) under `__all__`, preserving object identity contracts.
+- Quarantine Burn-down: Burn down and delete 5 resolved test node IDs from `scripts/config/unit_gate_quarantine.json` covering `test_list_sessions_sorts_mixed_timezone_timestamps` and `TestBackwardCompat` submodule assertions.
+
 ## Signed Release Tag Enforcement and Verification (#9747)
 
 Enforce cryptographic signing on production release tags in `.github/workflows/release.yml` and synchronize operational release procedures in `docs/operations/release-runbook.md`:

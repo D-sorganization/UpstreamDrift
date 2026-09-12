@@ -13,7 +13,7 @@ from typing import Any
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
-from src.shared.python.ai.gui.assistant_widgets import MessageWidget
+from src.shared.python.ai.gui.assistant.transcript import MessageWidget
 from src.shared.python.theme.style_constants import Styles
 
 

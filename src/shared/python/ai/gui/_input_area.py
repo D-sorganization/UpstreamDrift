@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from src.shared.python.ai.gui.assistant_widgets import ChatInput
+from src.shared.python.ai.gui.assistant.composer import ChatInput
 from src.shared.python.theme.style_constants import Styles
 
 

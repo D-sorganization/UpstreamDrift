@@ -2,7 +2,7 @@
 
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
@@ -144,7 +144,15 @@ class ChatSessionManager(QObject):
                 logger.warning(f"Failed to read session file {file_path}: {e}")
 
         # Sort by timestamp, newest first
-        sessions.sort(key=lambda x: x["timestamp"], reverse=True)
+        def _sort_key(item: dict[str, Any]) -> datetime:
+            ts = item.get("timestamp")
+            if not isinstance(ts, datetime):
+                return datetime.min.replace(tzinfo=timezone.utc)
+            if ts.tzinfo is None:
+                return ts.replace(tzinfo=timezone.utc)
+            return ts.astimezone(timezone.utc)
+
+        sessions.sort(key=_sort_key, reverse=True)
         return sessions
 
     def load_session(

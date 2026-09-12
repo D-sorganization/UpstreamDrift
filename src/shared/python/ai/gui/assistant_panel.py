@@ -39,10 +39,11 @@ from src.shared.python.ai.gui._input_area import InputArea
 from src.shared.python.ai.gui._message_display import MessageDisplayController
 from src.shared.python.ai.gui._panel_header import PanelHeaderController
 from src.shared.python.ai.gui._panel_tools import register_panel_tools
+from src.shared.python.ai.gui.assistant.composer import ChatInput
+from src.shared.python.ai.gui.assistant.streaming import StreamWorker
+from src.shared.python.ai.gui.assistant.transcript import MessageWidget
 from src.shared.python.ai.gui.assistant_widgets import (
     MainThreadToolDispatcher,
-    MessageWidget,
-    StreamWorker,
 )
 from src.shared.python.ai.gui.chat_export import (
     copy_thread_to_clipboard,
@@ -75,6 +76,13 @@ if TYPE_CHECKING:
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 
 logger = get_logger(__name__)
+
+__all__ = [
+    "AIAssistantPanel",
+    "ChatInput",
+    "MessageWidget",
+    "StreamWorker",
+]
 
 
 def _discover_project_root(start: Path) -> Path:
