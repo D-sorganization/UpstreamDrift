@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "file_sha256": "a495f9bde422be412e70e12e0c5ee8f35ee4bdceb44673c5c2de87f936fcd338",
+  "candidate_sha256": "55e61866b205fbd17d997e60c0f236f2a03ab3dfec00cc7242ffd190c8fa783c",
+  "config_sha256": "7ac0a5542b2a8d3221989ef75491e641f8fb035d6352ff7f5d74152b6544f3df",
+  "node_times_s": [0.6, 0.7],
+  "state_dimension": 54,
+  "qualification": "Package integrity and candidate schema verified; not forward replay or fit acceptance"
+}
