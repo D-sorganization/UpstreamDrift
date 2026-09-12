@@ -1,5 +1,36 @@
 # Native Port Implementation Checkpoint
 
+## Run07 Verified; Anchored-Coefficient Continuation Has Diminishing Returns
+
+Updated 2026-09-12 UTC. Session 12123 exited zero; run07 is terminal after
+24 evaluations. Independent fresh replay exactly reproduces canonical candidate
+bd35bdfe91223a474a323ec89c979396ad19fb4c294b1f8b80ee8216b7f94f31:
+whole RMS 23.304642 mm, early 9.967953 mm, terminal 61.081010 mm, club
+31.180013 mm. Yaw is 9.001915 percent. Acceptance and convergence remain false.
+Defects are 0.001554708 at 0.6 s and 0.001228151 at 0.7 s; both fail 0.0001.
+Optimality is 8227.6036, active-bound count zero. Segmented RMS 23.377558 mm.
+The extra budget improved terminal error only 0.403543 mm over run06.
+
+Replay adapter time is 3.32691 s; integration 3.20239 s; native closure pose/rate
+maxima 1.22936e-11/6.65183e-11. Raw candidate byte hash
+f1862afbf16d824dc826a2f95ad62ec261d2f0053e19cc3ad24d1d3902135190.
+Evidence is native_evidence/ms_fit_9967_07. A raw ZIP preserves all evaluations,
+config and hash ledger without repository formatting changing their bytes.
+Raw local/ControlTower native-ms-fit-9967-07 directories remain intact.
+
+Next controlled experiment: allow all seven Bernstein controls per effort
+channel while retaining a single global degree-six profile. The existing native
+effort and sensitivity APIs support first_control=0, but this exact 189-column
+native setup needs qualification before optimization. Preserve existing B2-B6
+bounds and parent; explicitly add bounded B0/B1 corrections and retain the
+original q0/qd0 plus early RMS gate. This releases algorithmic initial effort/
+slope anchors, not the initial physical state or the global polynomial degree.
+Audit selected B0/B1 force/torque columns against centered finite differences on
+the first window, retain per-node derivative/defect checks and save snapshots.
+Do not claim that this expanded family is a same-settings continuation or that
+it is guaranteed to solve transition. No new optimization has been launched.
+Full capture and final R2025b qualification remain incomplete.
+
 ## Current Independently Replayed Prefix Visual
 
 Updated 2026-09-12 UTC. The generated and visually inspected plot below is run06
