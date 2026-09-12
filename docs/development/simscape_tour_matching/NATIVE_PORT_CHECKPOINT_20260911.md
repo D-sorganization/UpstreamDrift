@@ -65,8 +65,13 @@ actual 6D weld through constrained dynamics with explicit zero efforts and
 returns its pose/rate residuals. It validates complete finite native coordinate
 and rate inventories and does not correct state, invoke inverse dynamics or
 change a replay. Unit contracts cover the static zero-rate probe and rejection
-of incomplete/nonfinite inputs. It still needs a separate ControlTower
-trajectory-level qualification before any C3D path is treated as feasible.
+of incomplete/nonfinite inputs. An isolated ControlTower runtime22 receipt now
+also passes at archived run19 candidate
+`b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f`:
+the probe and direct constrained dynamics agree exactly for recorded qd and
+zero qd. See `native_evidence/closure_probe_9967_22/receipt.json` (model
+`b817fea...`). This is a single-state oracle qualification, not a
+trajectory-level closure proof or a C3D match.
 
 ## Run 20 Saved Evaluation 44 Audit
 

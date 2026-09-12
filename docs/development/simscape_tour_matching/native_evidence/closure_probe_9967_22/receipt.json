@@ -1,0 +1,12 @@
+{
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "candidate_sha256": "b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f",
+  "recorded_rate": {
+    "pose_max_abs_difference": 0.0,
+    "rate_max_abs_difference": 0.0
+  },
+  "zero_rate": {
+    "pose_max_abs_difference": 0.0,
+    "rate_max_abs_difference": 0.0
+  }
+}
