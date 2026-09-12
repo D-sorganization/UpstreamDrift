@@ -258,155 +258,163 @@ def qapp() -> QApplication:
     return app
 
 
-def test_panel_probe_failure_retains_records_and_sets_error_status(
-    qapp: QApplication,
-) -> None:
-    """When provider raises, status label indicates failure and previous records stay."""
-    from src.launchers.integrations_health_data import IntegrationRecord
-    from src.launchers.integrations_health_panel import IntegrationsHealthPanel
+@pytest.mark.unit
+class TestIntegrationsHealthPanelUI:
+    """UI behavior tests for IntegrationsHealthPanel (#8904)."""
 
-    initial_records = [
-        IntegrationRecord(kind="cli", name="gh", status="healthy"),
-    ]
+    def test_panel_probe_failure_retains_records_and_sets_error_status(
+        self, qapp: QApplication
+    ) -> None:
+        """When provider raises, status label indicates failure and previous records stay."""
+        from src.launchers.integrations_health_data import IntegrationRecord
+        from src.launchers.integrations_health_panel import IntegrationsHealthPanel
 
-    panel = IntegrationsHealthPanel(status_provider=lambda: initial_records)
-    assert panel._status_label.text() == "1/1 OK"
-    assert panel._table.rowCount() == 1
+        initial_records = [
+            IntegrationRecord(kind="cli", name="gh", status="healthy"),
+        ]
 
-    def failing_provider() -> list[IntegrationRecord]:
-        raise RuntimeError("network down")
+        panel = IntegrationsHealthPanel(status_provider=lambda: initial_records)
+        assert panel._status_label.text() == "1/1 OK"
+        assert panel._table.rowCount() == 1
 
-    panel._status_provider = failing_provider
-    panel.refresh()
+        def failing_provider() -> list[IntegrationRecord]:
+            raise RuntimeError("network down")
 
-    assert panel._status_label.text() == "Probe failed — see logs"
-    assert len(panel._records) == 1
-    assert panel._table.rowCount() == 1
-    assert panel._refresh_btn.isEnabled()
+        panel._status_provider = failing_provider
+        panel.refresh()
 
+        assert panel._status_label.text() == "Probe failed — see logs"
+        assert len(panel._records) == 1
+        assert panel._table.rowCount() == 1
+        assert panel._refresh_btn.isEnabled()
 
-def test_panel_empty_records_shows_placeholder_spanning_row(qapp: QApplication) -> None:
-    """When 0 records exist, table displays an explanatory placeholder spanning columns."""
-    from src.launchers.integrations_health_panel import (
-        _COLUMNS,
-        IntegrationsHealthPanel,
-    )
+    def test_panel_empty_records_shows_placeholder_spanning_row(
+        self, qapp: QApplication
+    ) -> None:
+        """When 0 records exist, table displays an explanatory placeholder spanning columns."""
+        from src.launchers.integrations_health_panel import (
+            _COLUMNS,
+            IntegrationsHealthPanel,
+        )
 
-    panel = IntegrationsHealthPanel(status_provider=list)
-    assert panel._status_label.text() == "0/0 OK"
-    assert panel._table.rowCount() == 1
-    item = panel._table.item(0, 0)
-    assert item is not None
-    assert (
-        item.text()
-        == "No integrations configured yet. Add one in Settings → MCP Servers."
-    )
-    assert panel._table.rowSpan(0, 0) == 1
-    assert panel._table.columnSpan(0, 0) == len(_COLUMNS)
+        panel = IntegrationsHealthPanel(status_provider=list)
+        assert panel._status_label.text() == "0/0 OK"
+        assert panel._table.rowCount() == 1
+        item = panel._table.item(0, 0)
+        assert item is not None
+        assert (
+            item.text()
+            == "No integrations configured yet. Add one in Settings → MCP Servers."
+        )
+        assert panel._table.rowSpan(0, 0) == 1
+        assert panel._table.columnSpan(0, 0) == len(_COLUMNS)
 
+    def test_panel_status_cells_have_high_contrast_foreground(
+        self, qapp: QApplication
+    ) -> None:
+        """Status badges must have explicitly set foreground color with strong contrast."""
+        from src.launchers.integrations_health_data import IntegrationRecord
+        from src.launchers.integrations_health_panel import (
+            _STATUS_TEXT_COLOURS,
+            IntegrationsHealthPanel,
+        )
 
-def test_panel_status_cells_have_high_contrast_foreground(qapp: QApplication) -> None:
-    """Status badges must have explicitly set foreground color with strong contrast."""
-    from src.launchers.integrations_health_data import IntegrationRecord
-    from src.launchers.integrations_health_panel import (
-        _STATUS_TEXT_COLOURS,
-        IntegrationsHealthPanel,
-    )
+        records = [
+            IntegrationRecord(kind="cli", name="gh", status="healthy"),
+            IntegrationRecord(kind="api", name="openai", status="unconfigured"),
+        ]
+        panel = IntegrationsHealthPanel(status_provider=lambda: records)
 
-    records = [
-        IntegrationRecord(kind="cli", name="gh", status="healthy"),
-        IntegrationRecord(kind="api", name="openai", status="unconfigured"),
-    ]
-    panel = IntegrationsHealthPanel(status_provider=lambda: records)
+        assert panel._table.rowCount() == 2
+        # Row 0: healthy -> foreground #11111b
+        item_healthy = panel._table.item(0, 2)
+        assert item_healthy is not None
+        assert (
+            item_healthy.foreground().color().name() == _STATUS_TEXT_COLOURS["healthy"]
+        )
 
-    assert panel._table.rowCount() == 2
-    # Row 0: healthy -> foreground #11111b
-    item_healthy = panel._table.item(0, 2)
-    assert item_healthy is not None
-    assert item_healthy.foreground().color().name() == _STATUS_TEXT_COLOURS["healthy"]
+        # Row 1: unconfigured -> foreground #ffffff
+        item_unconfigured = panel._table.item(1, 2)
+        assert item_unconfigured is not None
+        assert (
+            item_unconfigured.foreground().color().name()
+            == _STATUS_TEXT_COLOURS["unconfigured"]
+        )
 
-    # Row 1: unconfigured -> foreground #ffffff
-    item_unconfigured = panel._table.item(1, 2)
-    assert item_unconfigured is not None
-    assert (
-        item_unconfigured.foreground().color().name()
-        == _STATUS_TEXT_COLOURS["unconfigured"]
-    )
+    def test_panel_copy_diagnostics_feedback_and_restores_label(
+        self, qapp: QApplication, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Copy diagnostics displays 'Copied!' and schedules restoration to '{healthy}/{total} OK'."""
+        from unittest.mock import MagicMock
 
+        from PyQt6.QtCore import QTimer
 
-def test_panel_copy_diagnostics_feedback_and_restores_label(
-    qapp: QApplication, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Copy diagnostics displays 'Copied!' and schedules restoration to '{healthy}/{total} OK'."""
-    from unittest.mock import MagicMock
+        from src.launchers.integrations_health_data import IntegrationRecord
+        from src.launchers.integrations_health_panel import IntegrationsHealthPanel
 
-    from PyQt6.QtCore import QTimer
+        records = [
+            IntegrationRecord(kind="cli", name="gh", status="healthy"),
+        ]
+        panel = IntegrationsHealthPanel(status_provider=lambda: records)
+        assert panel._status_label.text() == "1/1 OK"
 
-    from src.launchers.integrations_health_data import IntegrationRecord
-    from src.launchers.integrations_health_panel import IntegrationsHealthPanel
+        single_shots: list[tuple[int, object]] = []
 
-    records = [
-        IntegrationRecord(kind="cli", name="gh", status="healthy"),
-    ]
-    panel = IntegrationsHealthPanel(status_provider=lambda: records)
-    assert panel._status_label.text() == "1/1 OK"
+        def fake_single_shot(ms: int, cb: object) -> None:
+            single_shots.append((ms, cb))
 
-    single_shots: list[tuple[int, object]] = []
+        monkeypatch.setattr(QTimer, "singleShot", staticmethod(fake_single_shot))
 
-    def fake_single_shot(ms: int, cb: object) -> None:
-        single_shots.append((ms, cb))
+        mock_clipboard = MagicMock()
+        monkeypatch.setattr(
+            "PyQt6.QtWidgets.QApplication.clipboard", lambda: mock_clipboard
+        )
 
-    monkeypatch.setattr(QTimer, "singleShot", staticmethod(fake_single_shot))
+        panel._copy_diagnostics()
 
-    mock_clipboard = MagicMock()
-    monkeypatch.setattr(
-        "PyQt6.QtWidgets.QApplication.clipboard", lambda: mock_clipboard
-    )
+        assert mock_clipboard.setText.called
+        assert panel._status_label.text() == "Copied!"
+        assert len(single_shots) == 1
+        assert single_shots[0][0] == 2000
+        # Execute the restoration callback
+        callback = single_shots[0][1]
+        assert callable(callback)
+        callback()
+        assert panel._status_label.text() == "1/1 OK"
 
-    panel._copy_diagnostics()
+    def test_panel_copy_diagnostics_failure_handling(
+        self, qapp: QApplication, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """When copy_diagnostics fails, displays failure status and schedules restoration."""
+        from unittest.mock import MagicMock
 
-    assert mock_clipboard.setText.called
-    assert panel._status_label.text() == "Copied!"
-    assert len(single_shots) == 1
-    assert single_shots[0][0] == 2000
-    # Execute the restoration callback
-    callback = single_shots[0][1]
-    assert callable(callback)
-    callback()
-    assert panel._status_label.text() == "1/1 OK"
+        from PyQt6.QtCore import QTimer
 
+        from src.launchers.integrations_health_data import IntegrationRecord
+        from src.launchers.integrations_health_panel import IntegrationsHealthPanel
 
-def test_panel_copy_diagnostics_failure_handling(
-    qapp: QApplication, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """When copy_diagnostics fails, displays failure status and schedules restoration."""
-    from unittest.mock import MagicMock
+        records = [
+            IntegrationRecord(kind="cli", name="gh", status="healthy"),
+        ]
+        panel = IntegrationsHealthPanel(status_provider=lambda: records)
 
-    from PyQt6.QtCore import QTimer
+        single_shots: list[tuple[int, object]] = []
 
-    from src.launchers.integrations_health_data import IntegrationRecord
-    from src.launchers.integrations_health_panel import IntegrationsHealthPanel
+        def fake_single_shot(ms: int, cb: object) -> None:
+            single_shots.append((ms, cb))
 
-    records = [
-        IntegrationRecord(kind="cli", name="gh", status="healthy"),
-    ]
-    panel = IntegrationsHealthPanel(status_provider=lambda: records)
+        monkeypatch.setattr(QTimer, "singleShot", staticmethod(fake_single_shot))
+        monkeypatch.setattr(
+            "src.launchers.integrations_health_panel.copy_diagnostics",
+            MagicMock(side_effect=RuntimeError("serialization failed")),
+        )
 
-    single_shots: list[tuple[int, object]] = []
+        panel._copy_diagnostics()
 
-    def fake_single_shot(ms: int, cb: object) -> None:
-        single_shots.append((ms, cb))
-
-    monkeypatch.setattr(QTimer, "singleShot", staticmethod(fake_single_shot))
-    monkeypatch.setattr(
-        "src.launchers.integrations_health_panel.copy_diagnostics",
-        MagicMock(side_effect=RuntimeError("serialization failed")),
-    )
-
-    panel._copy_diagnostics()
-
-    assert panel._status_label.text() == "Copy failed — see logs"
-    assert len(single_shots) == 1
-    assert single_shots[0][0] == 2000
-    single_shots[0][1]()
-    assert panel._status_label.text() == "1/1 OK"
+        assert panel._status_label.text() == "Copy failed — see logs"
+        assert len(single_shots) == 1
+        assert single_shots[0][0] == 2000
+        callback = single_shots[0][1]
+        assert callable(callback)
+        callback()
+        assert panel._status_label.text() == "1/1 OK"
