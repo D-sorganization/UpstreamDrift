@@ -35,6 +35,27 @@ function result = asStructArray(value)
     end
 end
 
+function testPhysicalEndpointsAreStable(testCase)
+    model = "native_inventory_physical_test";
+    new_system(model);
+    cleanupModel = onCleanup(@() close_system(model, 0)); %#ok<NASGU>
+    add_block('sm_lib/Frames and Transforms/Rigid Transform', model + "/Frame");
+    add_block('sm_lib/Joints/Revolute Joint', model + "/Joint");
+    framePorts = get_param(model + "/Frame", 'PortHandles');
+    jointPorts = get_param(model + "/Joint", 'PortHandles');
+    add_line(model, framePorts.RConn(1), jointPorts.LConn(1));
+    output = string(tempname) + ".json";
+    cleanupOutput = onCleanup(@() deleteIfPresent(output)); %#ok<NASGU>
+    export_native_inventory(model, output);
+    result = jsondecode(fileread(output));
+    blocks = asStructArray(result.blocks);
+    joint = blocks(strcmp({blocks.path}, model + "/Joint"));
+    verifyEqual(testCase, joint.library_reference, 'sm_lib/Joints/Revolute Joint');
+    connections = asStructArray(joint.connectivity);
+    base = connections(strcmp({connections.Type}, 'LConn1'));
+    verifyEqual(testCase, string(base.DstEndpoint), model + "/Frame:RConn1");
+end
+
 function deleteIfPresent(path)
     if isfile(path)
         delete(path);

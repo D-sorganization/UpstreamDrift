@@ -1,0 +1,15 @@
+{
+  "qualification": "native uncompiled inventory and physical wire nets only; not engine parity",
+  "matlab_release": "2025b",
+  "remote_inventory": "DeskComputer:C:/Users/diete/SimscapeTour9921/native-inventory-v2-20260911.json",
+  "local_inventory": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-inventory-v2-20260911.json",
+  "inventory_sha256": "5614950f352fe796f4c88fca9c06acf5ef9a37704fddb12265b52aed125d755c",
+  "exporter_sha256": "73b05de22d4d5b3afbe9f0b1ab9c3d9bc6c7667d25f09e8fa8c5a8132920a408",
+  "native_exit_code": 0,
+  "native_test_count": 2,
+  "blocks": 3679,
+  "wire_nets": 436,
+  "wire_endpoints": 1473,
+  "graph_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-wire-nets-v2-20260911.json",
+  "graph_sha256": "9fde62d03f7396d539ed14e54806826efc333790ec7c4e1911841ee8d61ae58d"
+}
