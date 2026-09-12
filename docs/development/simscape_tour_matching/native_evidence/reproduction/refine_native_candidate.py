@@ -20,6 +20,29 @@ from src.shared.python.motion_matching.prefix_fit import (
 )
 
 
+def control_matrix(
+    parameters: np.ndarray,
+    coordinate_count: int,
+    first_control: int,
+    root_forces_only: bool,
+    amplitude_scale: float,
+) -> np.ndarray:
+    """Expand dimensionless search parameters without changing frozen efforts."""
+    if not np.isfinite(amplitude_scale) or amplitude_scale <= 0:
+        raise ValueError("Amplitude scale must be finite and positive")
+    if coordinate_count < 3 or first_control not in (4, 6):
+        raise ValueError("Unsupported native control inventory")
+    active = 3 if root_forces_only else coordinate_count
+    values = np.asarray(parameters, dtype=float)
+    if values.shape != (active * (7 - first_control),) or not np.isfinite(values).all():
+        raise ValueError("Invalid refinement parameters")
+    increment = np.zeros((coordinate_count, 7))
+    increment[:active, first_control:] = amplitude_scale * (
+        values.reshape(active, -1) - 1
+    )
+    return increment
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("model", "candidate", "target", "output_dir"):
@@ -27,6 +50,8 @@ def main() -> None:
     parser.add_argument("--max-nfev", type=int, default=3)
     parser.add_argument("--restart-candidate", type=Path)
     parser.add_argument("--shaping", choices=("sixth", "bernstein456"), default="sixth")
+    parser.add_argument("--root-forces-only", action="store_true")
+    parser.add_argument("--amplitude-scale", type=float, default=10.0)
     args = parser.parse_args()
     args.output_dir.mkdir(exist_ok=False)
     raw = args.model.read_bytes()
@@ -51,8 +76,12 @@ def main() -> None:
     n = len(doc["coordinate_names"])
     basis_duration = doc["duration_s"]
     first_control = 6 if args.shaping == "sixth" else 4
-    parameter_count = n * (7 - first_control)
+    active = 3 if args.root_forces_only else n
+    parameter_count = active * (7 - first_control)
     initial = np.ones(parameter_count)
+    control_matrix(
+        initial, n, first_control, args.root_forces_only, args.amplitude_scale
+    )
     restart_hash = None
     if args.restart_candidate is not None:
         restart = NativeReplayCandidate.from_document(
@@ -61,9 +90,9 @@ def main() -> None:
             hashlib.sha256(raw).hexdigest(),
         )
         delta = recover_native_bernstein(base, restart, basis_duration_s=basis_duration)
-        if np.any(delta[:, :first_control] != 0):
+        if np.any(delta[:, :first_control] != 0) or np.any(delta[active:] != 0):
             raise ValueError("Restart contains corrections outside the selected basis")
-        initial += delta[:, first_control:].ravel() / 10
+        initial += delta[:active, first_control:].ravel() / args.amplitude_scale
         if np.any(initial < 0.8) or np.any(initial > 1.2):
             raise ValueError("Restart exceeds original correction bounds")
         restart_hash = restart.sha256
@@ -74,7 +103,13 @@ def main() -> None:
         "representation": "degree-six Bernstein correction",
         "free_control_indices": list(range(first_control, 7)),
         "parameter_order": "coordinate-major, ascending control index",
-        "amplitude_scale": 10.0,
+        "amplitude_scale": args.amplitude_scale,
+        "active_coordinates": doc["coordinate_names"][:active],
+        "root_forces_only": args.root_forces_only,
+        "correction_bound_per_control": 0.2 * args.amplitude_scale,
+        "correction_units": "N"
+        if args.root_forces_only
+        else "N for first three, Nm for remaining",
         "dimensionless_center": 1.0,
         "bounds": [0.8, 1.2],
         "max_nfev": args.max_nfev,
@@ -98,8 +133,9 @@ def main() -> None:
     last = {}
 
     def candidate_for(x: np.ndarray) -> NativeReplayCandidate:
-        increment = np.zeros((n, 7))
-        increment[:, first_control:] = 10 * (x.reshape(n, -1) - 1)
+        increment = control_matrix(
+            x, n, first_control, args.root_forces_only, args.amplitude_scale
+        )
         return increment_native_bernstein(
             base, increment, basis_duration_s=basis_duration
         )
@@ -181,6 +217,9 @@ def main() -> None:
             "parameters": fit.parameters.tolist(),
         }
         (args.output_dir / "returned.json").write_text(json.dumps(report, indent=2))
+        (args.output_dir / "returned-candidate.json").write_text(
+            json.dumps(returned.document, indent=2) + "\n"
+        )
     except (ValueError, RuntimeError, FloatingPointError) as error:
         (args.output_dir / "failure.json").write_text(
             json.dumps({"error": str(error), "completed_evaluations": evaluations})
