@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Background Worker for Windows Dependency Verification (#8898)
+
+Eliminate synchronous native module imports on the GUI thread during Windows runtime dependency verification in `SettingsDialog` (`src/launchers/settings_dialog.py`):
+- Report Generator Extraction: Extract Windows host dependency inspection into `check_windows_dependencies_report() -> RuntimeDependencyReport` in `src/launchers/settings_runtime.py`, probing NumPy, SciPy, MuJoCo, PyQt6, Matplotlib, Pandas, and optional engines (Drake, Pinocchio, OpenSim, MyoSuite) and packaging results into `RuntimeDependencyReport`.
+- Background Worker Execution: In `SettingsDialog`, store the check button as `self.btn_check_windows_deps` and route `_check_windows_deps()` through `_start_runtime_dependency_check(worker_key="windows", button=self.btn_check_windows_deps, check_fn=_check_windows_dependencies_report)`.
+- UI State & Thread Safety: On click, disable the button and show `"Checking..."`, dispatching inspection to `RuntimeDependencyCheckWorker` off the Qt event loop. Upon completion or failure, restore the button state and present the formatted HTML report or error dialog without freezing the interface.
+- Automated Verification: Unit tests in `tests/launchers/test_settings_dialog.py` asserting non-blocking return, worker thread execution, button busy/disabled states, and report presentation.
+
 ## Integrations Health Panel Feedback, Empty State, and Contrast (#8904)
 
 Resolve collection failure masking, transient clipboard feedback, empty state guidance, and dark-mode contrast deficits in `IntegrationsHealthPanel` (`src/launchers/integrations_health_panel.py`):
