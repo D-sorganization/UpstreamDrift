@@ -1,5 +1,15 @@
 # Native Port Implementation Checkpoint
 
+## Current Turnover for the Next Agent
+
+Read [Lower-Cost Agent Turnover](LOW_COST_AGENT_TURNOVER_20260912.md) for the
+ordered executable plan, exact audit commands, immutable inputs, acceptance
+criteria and stop conditions. The user requests delegation after this groundwork
+checkpoint. Do not expand the current turn into another optimizer run. Run20
+continues; latest observed evaluation32 cost29.99290425 is not audited acceptance.
+The MuJoCo agent is completing only its bounded executor qualification. Its
+production solver integration is explicitly left for the next agent after review.
+
 ## Run 20 Live; Run 19 Rejected and Archived
 
 Updated 2026-09-12 UTC. Integration checkpoint SELF; branch
