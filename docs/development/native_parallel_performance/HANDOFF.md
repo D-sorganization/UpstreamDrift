@@ -1,5 +1,84 @@
 # Native Window Parallel Performance Handoff
 
+## Executor Implementation Checkpoint
+
+The optional engine-neutral executor is now implemented in
+`src/shared/python/motion_matching/native_window_executor.py`. **It is not wired
+into the solver.** No runtime19/runtime20 or sensitivity source was changed,
+and no optimizer was launched. The root agent owns subsequent solver integration.
+
+Discovery found a per-call `ProcessPoolExecutor` in
+`src/shared/python/sidekick/process_calculators/multi_param_analysis.py`, tied to
+calculator/UI parameter handling. No reusable persistent motion-window executor
+exists there. This new boundary uses Python's standard executor directly and
+reuses the caller's existing result contract, without duplicating physics,
+retraction, fitting, or residual assembly.
+
+The API is `NativeWindowExecutor(evaluate, workers=0)` with optional `workers=2`.
+The evaluator must be a module-level picklable callable accepting immutable
+`bytes`; its result type is preserved. Requests are **trusted internal transport
+only**. The shared module does not encode or decode payloads. Never expose the
+qualification script's pickle adapter to untrusted inputs. `evaluate(requests)`
+returns an ordered tuple, independent of completion order. The two-worker pool
+persists across batches. Explicit sequential mode is the default; failures never
+silently retry in another mode.
+
+Use a context manager or `close()`. Any evaluation/submission failure cancels
+queued tasks, waits for running tasks, closes the pool, and raises
+`WindowEvaluationError` with `window_index` and the original exception as cause.
+Use after failure/close is rejected. Shutdown is idempotent. There is no forced
+termination of a hung physics evaluation; external supervision remains necessary
+for a true hang. Own the executor in one coordinating thread. Set
+OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1 before construction and preserve
+those values while workers start. Use the application's guarded main entry point.
+
+### TDD and Native Qualification
+
+Five executor tests first failed on the missing module, then passed. They cover
+sequential/two-worker repeated ordered batches, explicit original-cause errors,
+cleanup without surviving owned children, reuse rejection, immutable bytes and
+thread-limit/configuration contracts. Together with the two earlier comparator
+tests, seven pass. Ruff and direct mypy on the new shared module pass.
+
+One final native sequential pass took 21.30037 seconds and one executor pass
+took 11.18647 seconds, including startup/IPC/shutdown. All full marker/state
+Jacobians and all primal marker/state arrays match both that sequential pass
+and the historical study **exactly**. Concatenated states/markers with shared
+boundary samples removed also match exactly. RHS counts match. This checks
+ordering implications for assembly; it does **not** qualify the solver's actual
+residual/defect assembly, cache integration, cancellation API, or whole-solve
+speed. Native repeated-batch timing is not claimed; repeated lifecycle behavior
+is covered by deterministic unit functions.
+
+Raw completed output: ControlTower
+`C:/Users/diete/native-window-executor-10021-01/report.json`, copied to local
+`C:/Users/diete/Repositories/simscape-tour-checkpoints/native-window-executor-10021-01`.
+Readable copy: `executor-report.json`. `raw-executor-qualification.zip` retains
+exact report, executor, qualifier and tests. The earlier large input/output NPZ
+and raw study archive remain unchanged at the locations below. No native
+qualification process remains active after this checkpoint.
+
+```powershell
+python3 -m pytest tests/unit/motion_matching/test_native_window_executor.py docs/development/native_parallel_performance/test_window_benchmark.py --noconftest -q --tb=short
+python3 -m ruff check src/shared/python/motion_matching/native_window_executor.py tests/unit/motion_matching/test_native_window_executor.py docs/development/native_parallel_performance/qualify_executor.py
+python3 -m mypy src/shared/python/motion_matching/native_window_executor.py --follow-imports=silent
+scp src/shared/python/motion_matching/native_window_executor.py controltower:C:/Users/diete/native_window_executor_10021.py
+scp docs/development/native_parallel_performance/qualify_executor.py controltower:C:/Users/diete/qualify_executor_10021.py
+# Requires the original archived window_benchmark_10021.py beside the qualifier.
+# Always select a NEW output path; do not overwrite the completed receipt.
+ssh controltower wsl -e env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=/home/dieterolson/native-ms-pilot-9967-19 /home/dieterolson/simscape-pinocchio-9967/.venv/bin/python /mnt/c/Users/diete/qualify_executor_10021.py --executor /mnt/c/Users/diete/native_window_executor_10021.py --study /mnt/c/Users/diete/native-window-performance-10021-01 --run /mnt/c/Users/diete/native-ms-fit-9967-19 --model /mnt/c/Users/diete/native_geometry_spec_9967.json --output /mnt/c/Users/diete/NEW-EXECUTOR-OUTPUT
+```
+
+The next agent should first read the root master turnover for current run state.
+Then implement the optional solver batch boundary with TDD, keeping sequential
+behavior as default. Construct one immutable request per independent window
+after parent-owned node retraction, evaluate only cache misses in a persistent
+pool, and restore original window ordering before existing residual/Jacobian
+assembly. Qualify identical assembled objective, constraints and Jacobians,
+including repeated candidates/cache hits and worker-error cleanup. Only after
+root review should a separately recorded bounded fitting trial be considered.
+Do not restart completed run19 or interrupt an unrelated live fit.
+
 ## Result and Scope
 
 ControlTower completed exactly one sequential six-window pass and one two-worker
