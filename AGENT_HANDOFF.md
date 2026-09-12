@@ -2,21 +2,39 @@
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
-### 0. Active Live Horizon: Run 06 (`prefix-750ms-sextic-06`, DeskComputer)
+### 0. Run 06 Completed Audit: All-Time Record & Terminal Error Reduction (`prefix-750ms-sextic-06`, DeskComputer)
 
-- **Launch Status**:
-  - Actively running on DeskComputer under MATLAB R2025b FastRestart.
-  - Spawning: Detached CIM process (`Invoke-CimMethod -ClassName Win32_Process -MethodName Create`) with live heartbeat logging.
-  - Directory: `C:/Users/diete/SimscapeTour9921/prefix-750ms-sextic-06`.
-  - Warm-Start Seed: `C:/Users/diete/SimscapeTour9921/candidates/candidate-run05-final-pkg/candidate_run05_final_package.json`.
-  - Objective Formulation: Heightened terminal and clubhead Pareto weights to conquer terminal gates while locking pelvis yaw pass:
-    - `--terminal-weight 40.0`
-    - `--club-marker-weight 70.0`
-    - `--pelvis-yaw-weight 75.0` (preserves $< 0.54\%$ pelvis yaw error)
-    - `--pelvis-yaw-max-error-pct 5.0`
-    - `--smoothness-weight 0.08`
-    - `--max-nfev 300`
-  - Current Evaluations: Active progression, top early evaluations achieving $23.91\text{ mm}$ whole-window marker RMSE.
+- **Execution Status**:
+  - Run 06 completed normally on DeskComputer (204 logged evaluations in `evaluations.jsonl`, `xtol` termination satisfied).
+  - Fast restart Simscape forward dynamics running under MATLAB R2025b.
+  - Warm-started from Candidate Run 05 package with heightened terminal Pareto weights (`--terminal-weight 40.0 --club-marker-weight 70.0 --pelvis-yaw-weight 75.0`).
+- **All-Time Milestone: Candidate Eval #79**:
+  - **Whole-Window Marker RMSE**: **23.859 mm** (**NEW ALL-TIME RECORD** on $0.75\text{ s}$ horizon, beating Candidate 528's $24.31\text{ mm}$ and Run 05's $24.12\text{ mm}$, **PASS $\le 25.0\text{ mm}$**).
+  - **Early Retention RMSE** ($[0, 0.60\text{ s}]$): **9.852 mm** (PASS $\le 12.0\text{ mm}$ and $\le 20.0\text{ mm}$).
+  - **Pelvis Yaw Residual**: **$-1.05^\circ$**, Error **1.68%** (PASS, gate strictly $< 5.0\%$).
+  - **Terminal Frame RMSE**: **94.690 mm** (improved by $3.23\text{ mm}$ from Run 05 and $8.62\text{ mm}$ from Candidate 528).
+  - **Clubhead Terminal RMSE**: **115.979 mm** (improved by $8.96\text{ mm}$ from Run 05 and $8.66\text{ mm}$ from Candidate 528).
+  - **Summary**: **3/5 gates passed** (Early retention, Whole window, Pelvis yaw).
+- **Run 06 Final Step Audit**:
+  - Whole-Window RMSE: **24.121 mm** (PASS $\le 25.0\text{ mm}$)
+  - Early Retention RMSE: **9.755 mm** (PASS $\le 12.0\text{ mm}$)
+  - Pelvis Yaw Residual: **$-0.34^\circ$**, Error **0.54%** (PASS $< 5.0\%$)
+  - Terminal Frame RMSE: **97.915 mm** (FAIL vs $35.0\text{ mm}$)
+  - Clubhead Terminal RMSE: **124.942 mm** (FAIL vs $60.0\text{ mm}$)
+  - **Summary**: **3/5 gates passed**.
+- **Visual Artifacts Rendered & Verified**:
+  - `simscape_matlab_matching_eval79.gif` (1.49 MB, dual-view 3D skeleton motion matching against tour C3D markers).
+  - `canonical_simscape_vs_mujoco_eval79_overlay.gif` (3.45 MB, side-by-side forward dynamics rollout in Simscape vs canonical 25-DOF MuJoCo model under identical sextic polynomial torques).
+  - `cross_engine_forward_simulation_eval79.gif` (3.40 MB, 3-pane cross-engine synchronized motion).
+- **Immutable Candidate Packages Created**:
+  - **Candidate Eval #79 Package**:
+    - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_package.json`
+    - Prediction: `C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_prediction.json`
+    - Whole-window marker RMS: **23.859 mm** (ALL-TIME RECORD)
+  - **Candidate Run 06 Final Package**:
+    - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-final-pkg/candidate_run06_final_package.json`
+    - Prediction: `C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-final-pkg/candidate_run06_final_prediction.json`
+    - Whole-window marker RMS: **24.121 mm** (Yaw error: **0.54%**)
 
 ### 0.1 Run 05 Completed Audit & Yaw Gate Breakthrough (`prefix-750ms-sextic-05`, DeskComputer)
 
