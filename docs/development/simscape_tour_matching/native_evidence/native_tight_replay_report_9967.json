@@ -1,0 +1,18 @@
+{
+  "release": "2025b",
+  "source_path": "C:/Users/diete/SimscapeTour9921/prefix-800ms-sextic-01/final_native_replay.mat",
+  "qualification": "tight native diagnostic; parity not accepted",
+  "elapsed_s": 169.0869954,
+  "loaded_model_settings": {
+    "Solver": "ode23t",
+    "RelTol": "1e-3",
+    "AbsTol": "1e-5",
+    "MaxStep": "0.001"
+  },
+  "requested_settings": {
+    "Solver": "ode23t",
+    "RelTol": "1e-10",
+    "AbsTol": "1e-12",
+    "MaxStep": "0.0001"
+  }
+}
