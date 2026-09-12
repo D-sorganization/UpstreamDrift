@@ -39,9 +39,12 @@ unchanged; malformed result counts and nonfinite batch output are rejected.
 Focused multiple-shooting plus executor tests (30) and Ruff/mypy pass. The
 native driver now has a reusable trusted byte serialization and module-level
 worker evaluator in `native_sensitivity_batch.py`; its unit tests verify model
-identity reconstruction and output contracts. ControlTower fixed-input assembly
-qualification and a solver trial remain pending. No follow-on optimization has
-been launched.
+identity reconstruction and output contracts. One isolated ControlTower fixed
+six-window worker qualification passed with exact markers, states and full
+Jacobians against archived sequential arrays (21.12844s sequential,11.14284s
+two workers). This qualifies worker transport, not solver residual/constraint
+assembly, repeated cache behavior or a whole-fit speedup. Those solver gates and
+a bounded trial remain pending. No follow-on optimization has been launched.
 
 ## Run 20 Saved Evaluation 44 Audit
 
