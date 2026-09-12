@@ -1,5 +1,26 @@
 # Native Port Implementation Checkpoint
 
+## Live Run17 Evaluation22 Independently Replayed
+
+Updated 2026-09-12 UTC. Run17 remains live at ControlTower-Runner PID2248513;
+this is an intermediate residual evaluation, not a returned or accepted fit.
+Separate read-only audit session62326 exited zero. Evaluation22 candidate
+80bc6b34394d1e7247af4e7a98a7cca7510d3f2f0f28d193a3c752f85c59e225
+replays at whole31.122249 mm and terminal106.807245 mm through0.85 s.
+Final shooting window terminal104.265129 mm; pointwise replay gap5.805916 mm.
+Maximum full scaled defect0.001926457 remains above1e-4, despite the gap
+shrinking from run16's38.007483 mm. Callback cost34.715259 is not acceptance.
+The first11 run17 callback costs exactly reproduce run16, supporting the
+controlled budget comparison. Preserve current solver/runtime; wait for its
+terminal result before changing the next experiment.
+
+Raw selected snapshot, exact config, audit script and receipt are preserved in
+native_evidence/ms_fit_9967_17/evaluation22-audit.zip. Snapshot SHA matches
+its audit receipt and evaluation ledger. This audit changes no production code
+or optimizer state. Gemini coordination issue9964 comment5646697290 records
+the active job identity. Final replay, every acceptance gate and full capture
+coverage are still outstanding. See the run17 launch section below to resume.
+
 ## Selected Run16 History Independently Audited While Run17 Runs
 
 Updated 2026-09-12 UTC. Read the Run17 live-process section immediately below
