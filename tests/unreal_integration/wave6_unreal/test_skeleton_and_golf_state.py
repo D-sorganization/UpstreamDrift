@@ -304,7 +304,12 @@ class TestEnvironmentState:
 
     def test_air_density_defaults_use_canonical_constant(self) -> None:
         canonical_air_density = float(AIR_DENSITY_SEA_LEVEL_KG_M3)
-        source_path = Path("src/unreal_integration/golf_state.py")
+        source_path = (
+            Path(__file__).resolve().parents[3]
+            / "src"
+            / "unreal_integration"
+            / "golf_state.py"
+        )
         tree = ast.parse(source_path.read_text(encoding="utf-8"))
 
         repeated_literals = [
