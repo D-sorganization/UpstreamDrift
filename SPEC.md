@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Launcher Lifecycle and UI Setup Unit-Gate Debt Burndown (#8766)
+
+Burn down 43 quarantined test node IDs across the launcher lifecycle and UI setup cluster in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 43 passing launcher process management, UI setup, library widget, and diagnostics tests across `tests/launchers/test_launcher_process_manager.py` (17 tests), `tests/launchers/test_launcher_ui_setup.py` (21 tests), `tests/launchers/test_library_widget.py` (4 tests), and `tests/launchers/test_launcher_diagnostics.py` (1 test).
+- Validated Desktop Shell Invariants: Verify process cleanup, unified and separate terminal execution, VcXsrv startup handling, multi-tab workspace layout, library document filtering and preview isolation, and configuration backup restore pass deterministically under offscreen Qt headless execution.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 379 to 336 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## Motion Pipeline API Source Formats and Matrix Reconciliation (#8875)
 
 Reconcile advertised source formats in the motion pipeline orchestrator API with runtime registered adapters, drop the misleading auto-generated claim from formats documentation, and record architecture budget exceptions for pre-existing create_app handlers:
@@ -4393,6 +4400,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #10019 | Burn down 43 quarantined launcher process management, UI setup, library widget, and diagnostics tests in scripts/config/unit_gate_quarantine.json (#8766). |
 | 2026-09-12 | #10018 | Reconcile motion pipeline API advertised source formats and OpenAPI schemas with registered adapters, clarify format support documentation, register architecture budget exceptions, and pay down 156 unmarked test entries (#8875). |
 | 2026-09-12 | #10015 | Burn down 29 quarantined shared Python and physics engines tests in scripts/config/unit_gate_quarantine.json (#8766). |
 | 2026-09-12 | #10013 | Burn down 30 quarantined bunker shot solver, workbench GUI, and report tests in scripts/config/unit_gate_quarantine.json under the bunker_shot_model_and_workbench cluster (#8766). |
