@@ -1,0 +1,41 @@
+{
+  "qualification": "multi-pose FK only; force/rollout parity unqualified",
+  "passed": true,
+  "samples": [
+    {
+      "time_s": 0,
+      "translation_max_m": 1.1102230246251565e-15,
+      "rotation_matrix_max_error": 1.1102230246251565e-15
+    },
+    {
+      "time_s": 0.400264500568983,
+      "translation_max_m": 1.3322676295501878e-15,
+      "rotation_matrix_max_error": 2.6367796834847468e-15
+    },
+    {
+      "time_s": 0.6002645005689832,
+      "translation_max_m": 4.440892098500626e-16,
+      "rotation_matrix_max_error": 1.4710455076283324e-15
+    },
+    {
+      "time_s": 0.7002645005689833,
+      "translation_max_m": 6.661338147750939e-16,
+      "rotation_matrix_max_error": 1.6653345369377348e-15
+    },
+    {
+      "time_s": 0.7499973623211109,
+      "translation_max_m": 4.440892098500626e-16,
+      "rotation_matrix_max_error": 8.881784197001252e-16
+    },
+    {
+      "time_s": 0.8,
+      "translation_max_m": 4.440892098500626e-16,
+      "rotation_matrix_max_error": 3.4416913763379853e-15
+    }
+  ],
+  "sha256": {
+    "module": "7010deb762f9e5ee76922e2c8ed4ae95ad470350b83285e70e49fd37b67a4915",
+    "spec": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "fixture": "8a7d0deb4a12c18fa93b4273dcb061ef90a863f1564f9c1f6a5ca207ed81cb25"
+  }
+}

@@ -1,5 +1,30 @@
 # Native Port Implementation Checkpoint
 
+## Six Native Poses Verified Through Transition
+
+The new `export_native_pose_samples.m` diagnostic ran successfully in a fresh
+DeskComputer MATLAB R2025b process. It loaded the saved 0.80 s native replay,
+selected actual raw states near 0, 0.4, 0.6, 0.7, 0.75 and 0.8 seconds, and
+queried all schema frame poses using the native KinematicsSolver. It did not
+interpolate coordinates or save the source model.
+
+`check_native_pose_samples.py` then executed the actual production Pinocchio
+module on ControlTower. All six comparisons passed: maximum position component
+error 1.333e-15 m and maximum rotation-matrix component error 3.442e-15.
+The fixture and receipt are `native_evidence/native_pose_samples_9967.json`
+and `native_evidence/native_multipose_check_9967.json`. The receipt hashes refer
+to the raw executed files, preserved under local `simscape-tour-checkpoints`
+as `native-pose-samples-9967-01.json`, `native-multipose-check-9967-01.json`,
+and `native_geometry_spec_9967.json`; tracked JSON may differ in formatting.
+
+Native log: `DeskComputer:C:/Users/diete/SimscapeTour9921/native-pose-samples-9967-01.log`.
+Both MATLAB and Pinocchio diagnostic exit codes were zero. The native query
+uses the saved replay's arm geometry and all exact measured joint coordinates.
+This supports multi-pose geometry/coordinate parity, not effort, inertia or
+continuous dynamics equivalence. Next: inspect native upstream effort routing
+and active passive-joint parameters, then compare same-state qdd under force
+pulses before integrating complete trajectories.
+
 ## Current Resume Point: 22:02 PDT Review
 
 Read `REVIEW_AND_EXECUTION_HANDOFF_20260911_2200.md` first. It supersedes the
