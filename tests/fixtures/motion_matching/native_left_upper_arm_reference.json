@@ -1,0 +1,83 @@
+{
+  "qualification": "native isolated custom-frame pose only",
+  "matlab_release": "2025b",
+  "inventory_sha256": "5614950f352fe796f4c88fca9c06acf5ef9a37704fddb12265b52aed125d755c",
+  "native_result_sha256": "f0ac4297098e81901a26c4ec1056c70591fe62e3af196377307d2517ca5eec5a",
+  "native_exit_code": 0,
+  "block": {
+    "path": "GolfSwing3D_Kinetic/LUpperArm",
+    "library_reference": "sm_lib/Body Elements/Cylindrical Solid",
+    "parameters": [
+      {
+        "name": "CylinderRadius",
+        "expression": "UpperArmRadius",
+        "resolved_numeric": true,
+        "numeric_value": 1.75,
+        "resolution_error": ""
+      },
+      {
+        "name": "CylinderRadiusUnits",
+        "expression": "in",
+        "resolved_numeric": false,
+        "numeric_value": [],
+        "resolution_error": "Simulink:Data:SlResolveNotResolved"
+      },
+      {
+        "name": "CylinderLength",
+        "expression": "UpperArmLength",
+        "resolved_numeric": true,
+        "numeric_value": 14.5,
+        "resolution_error": ""
+      },
+      {
+        "name": "CylinderLengthUnits",
+        "expression": "in",
+        "resolved_numeric": false,
+        "numeric_value": [],
+        "resolution_error": "Simulink:Data:SlResolveNotResolved"
+      },
+      {
+        "name": "InertiaType",
+        "expression": "CalculateFromGeometry",
+        "resolved_numeric": false,
+        "numeric_value": [],
+        "resolution_error": "Simulink:Data:SlResolveNotResolved"
+      },
+      {
+        "name": "BasedOnType",
+        "expression": "Mass",
+        "resolved_numeric": true,
+        "numeric_value": 5,
+        "resolution_error": ""
+      },
+      {
+        "name": "Mass",
+        "expression": "5",
+        "resolved_numeric": true,
+        "numeric_value": 5,
+        "resolution_error": ""
+      },
+      {
+        "name": "MassUnits",
+        "expression": "lbm",
+        "resolved_numeric": false,
+        "numeric_value": [],
+        "resolution_error": "Simulink:Data:SlResolveNotResolved"
+      },
+      {
+        "name": "SerializedFrames",
+        "expression": "<Frames><Frame><Id>Frame1</Id><Value><Name>Top of Left Arm</Name><Origin><Source>GeometricFeature</Source><FeatureName>top curve</FeatureName></Origin><PrimaryAxis><DefinedDirection>-X</DefinedDirection><Source>ReferenceFrame</Source><SourceDirection>+Z</SourceDirection><FeatureName></FeatureName></PrimaryAxis><SecondaryAxis><DefinedDirection>+Y</DefinedDirection><Source>ReferenceFrame</Source><SourceDirection>+X</SourceDirection><FeatureName></FeatureName></SecondaryAxis></Value></Frame><Frame><Id>Frame2</Id><Value><Name>Bottom of Left Arm</Name><Origin><Source>GeometricFeature</Source><FeatureName>bottom curve</FeatureName></Origin><PrimaryAxis><DefinedDirection>-X</DefinedDirection><Source>ReferenceFrame</Source><SourceDirection>+Z</SourceDirection><FeatureName></FeatureName></PrimaryAxis><SecondaryAxis><DefinedDirection>+Z</DefinedDirection><Source>ReferenceFrame</Source><SourceDirection>-X</SourceDirection><FeatureName></FeatureName></SecondaryAxis></Value></Frame></Frames>",
+        "resolved_numeric": false,
+        "numeric_value": [],
+        "resolution_error": "Simulink:Data:SlResolveNotResolved"
+      }
+    ]
+  },
+  "translation_m": [0, 0, 0.18414999999999998],
+  "rotation_intrinsic_xyz_rad": [1.5707963267948966, 0, -1.5707963267948966],
+  "rotation_matrix": [
+    [2.220446049250313e-16, 1.0, 0.0],
+    [-2.220446049250313e-16, 0.0, -1.0],
+    [-1.0, 2.220446049250313e-16, 2.220446049250313e-16]
+  ]
+}

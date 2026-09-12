@@ -1,5 +1,43 @@
 # Native Port Implementation Checkpoint
 
+## Solid Properties and First Native Frame Parity
+
+`native_solids.py` now converts native CalculateFromGeometry cylinders and
+spheres, using the existing shared primitive-inertia API. It explicitly handles
+mass versus density, SI conversion, nonnegative mass (including zero-mass visual
+solids), and reference-axis custom frames. Unsupported modes, unresolved active
+values and degenerate axes fail instead of receiving surrogate defaults.
+
+All 42 solid records, including commented descendants, parse. The 31 solids
+without commented ancestors sum to 77.60581783574676 kg and define 41 custom
+frames. This sum has not yet been verified against a native assembled-system
+inertia sensor, and is not a claim about independently moving body count.
+
+An independent ControlTower R2025b fixture reconstructed the source LUpperArm
+cylinder and queried its first custom frame through KinematicsSolver at a zero
+revolute angle. Native translation matches Python exactly; rotation-matrix max
+difference is 2.220446049250313e-16. The fixture and its input-inventory/output
+hashes are committed at
+`tests/fixtures/motion_matching/native_left_upper_arm_reference.json`.
+The reproducible native probe is
+`motion_matching/tests/export_native_solid_probe.m` under the MATLAB tree.
+Native log: `ControlTower:C:/Users/diete/native-solid-probe-green3-9967.log`.
+Raw output: `ControlTower:C:/Users/diete/native-solid-probe-9967.json`, also copied
+to the local `simscape-tour-checkpoints` directory. Native exit code was zero.
+The combined graph/solid suite now has eight passing tests; Ruff passes.
+
+Native API details established by execution: custom-frame lookup uses its display
+name (e.g. `Top of Left Arm`), not serialized ID `Frame1`; KinematicsSolver refuses
+queries between rigidly connected frames, so the isolated fixture uses a zero-angle
+revolute joint. The fixture validates the first custom frame only, not all 41
+frames or native inertia values. Do not broaden this claim in the handoff.
+
+Next: convert the remaining rigid-transform rotation sequences and native joint
+primitives; qualify the mapping between solid custom-frame names and physical
+wire endpoints; assemble the complete tree plus grip constraint. Preserve native
+Bushing Joint force/rotation conventions and both forearm rotation joints. Then
+compare full native poses before acceleration/rollout parity.
+
 ## Completed Inventory and Connection Graph
 
 Update after the initial checkpoint: both native export jobs completed with
