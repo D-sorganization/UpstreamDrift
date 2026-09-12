@@ -6,14 +6,20 @@ No OpenSim implementation or native solver job has started in this workstream.
 
 ## Current Cross-Engine Evidence
 
-The latest independently replayed Pinocchio candidate is
-5c99cda5ea6e6f04be4c18aa878234c92ef9b389b2a6fd21dfe8f45e20d5da5d:
-23.783870 mm whole-prefix RMS and 62.819025 mm terminal RMS through 0.80 s.
+The latest independently replayed Pinocchio candidate recorded here is
+9f5716a7585cb8f9a3bf3a1f5a07446591e4e6562fe07bef7ca0851d0bbb85e0:
+23.477716 mm whole-prefix RMS and 62.777453 mm terminal RMS through 0.80 s.
 It fails acceptance. Read the latest Pinocchio checkpoint instead of treating
 historical epic metrics as the current best. Its P-1 through P-4 packages now
 cover alternative-seed audit, conditioning/feasibility diagnosis, one controlled
 improvement, and full-capture/final-sextic qualification. OpenSim remains at the
 requested planning check-in, with OS-0 the first implementation assignment.
+
+The subsequent eight-control bound expansion (run04) has returned, reporting
+23.424635 mm whole-prefix RMS, 62.646370 mm terminal RMS and scaled defect
+0.130512 (required at most 0.0001). It is not accepted or converged and still
+needs independent replay. Do not treat its small improvement as a solved
+transition. The current Pinocchio checkpoint owns exact run identities.
 
 ## Checkout and Ownership
 
