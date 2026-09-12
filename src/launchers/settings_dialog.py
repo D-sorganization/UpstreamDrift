@@ -44,6 +44,7 @@ from src.launchers.settings_runtime import (
     RuntimeDependencyReport,
     WslScriptDialog,
     check_docker_dependencies_report as _check_docker_dependencies_report,
+    check_windows_dependencies_report as _check_windows_dependencies_report,
     check_wsl_dependencies_report as _check_wsl_dependencies_report,
     compare_version_strings as _compare_version_strings,
 )
@@ -417,12 +418,14 @@ class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget)
         self.chk_windows.setToolTip(
             "Run physics engines natively on your local Windows system."
         )
-        btn_check_win = QPushButton("Check Deps")
-        btn_check_win.setToolTip("Check Windows host environment dependencies")
-        btn_check_win.setFixedWidth(100)
-        btn_check_win.clicked.connect(self._check_windows_deps)
+        self.btn_check_windows_deps = QPushButton("Check Deps")
+        self.btn_check_windows_deps.setToolTip(
+            "Check Windows host environment dependencies"
+        )
+        self.btn_check_windows_deps.setFixedWidth(100)
+        self.btn_check_windows_deps.clicked.connect(self._check_windows_deps)
         grid_runtime.addWidget(self.chk_windows, 0, 0)
-        grid_runtime.addWidget(btn_check_win, 0, 1)
+        grid_runtime.addWidget(self.btn_check_windows_deps, 0, 1)
 
         # Row 1: Docker
         self.chk_docker = QCheckBox("Docker")
@@ -973,64 +976,11 @@ class SettingsWidget(SettingsCloseContract, SettingsAuxiliaryTabsMixin, QWidget)
 
     def _check_windows_deps(self) -> None:
         """Check the status of native Windows host packages against requirements."""
-        from PyQt6.QtWidgets import QMessageBox
-        import importlib.metadata
-        import sys
-
-        deps = [
-            ("NumPy", "numpy", ">=1.26.4", False),
-            ("SciPy", "scipy", ">=1.13.1", False),
-            ("MuJoCo", "mujoco", ">=3.6.0", False),
-            ("PyQt6", "PyQt6", ">=6.5.0", False),
-            ("Matplotlib", "matplotlib", ">=3.10.8", False),
-            ("Pandas", "pandas", ">=2.0.0", False),
-            ("Drake", "pydrake", ">=1.22.0", True),
-            ("Pinocchio", "pinocchio", ">=2.6.0", True),
-            ("OpenSim", "opensim", ">=4.4.0", True),
-            ("MyoSuite", "myosuite", ">=2.0.0", True),
-        ]
-
-        check_results = []
-        for name, import_name, req, is_opt in deps:
-            try:
-                __import__(import_name)
-                try:
-                    v = importlib.metadata.version(import_name)
-                except importlib.metadata.PackageNotFoundError:
-                    mod = sys.modules.get(import_name)
-                    v = getattr(mod, "__version__", None) or getattr(
-                        mod, "version", "Unknown"
-                    )
-
-                is_ok = self._compare_versions(v, req)
-                status = "ok" if is_ok else "error"
-                check_results.append(
-                    {"name": name, "required": req, "installed": v, "status": status}
-                )
-            except ImportError:
-                if is_opt:
-                    check_results.append(
-                        {
-                            "name": name,
-                            "required": req,
-                            "installed": "Missing (Use Docker/WSL)",
-                            "status": "warn",
-                        }
-                    )
-                else:
-                    check_results.append(
-                        {
-                            "name": name,
-                            "required": req,
-                            "installed": "Missing",
-                            "status": "error",
-                        }
-                    )
-
-        html = self._generate_dep_table_html(
-            "Windows Environment", "Native Windows", check_results
+        self._start_runtime_dependency_check(
+            worker_key="windows",
+            button=self.btn_check_windows_deps,
+            check_fn=_check_windows_dependencies_report,
         )
-        QMessageBox.information(self, "Windows Dependency Check", html)
 
     def _check_docker_deps(self) -> None:
         """Verify the built status of the Docker environment container and check package versions inside it."""
