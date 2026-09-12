@@ -1,7 +1,7 @@
 # OpenSim Matching Handoff
 
 Updated: 2026-09-12 UTC. Epic: [#10003](https://github.com/D-sorganization/UpstreamDrift/issues/10003).
-Plan: [EPIC_10003.md](EPIC_10003.md). Status: planning complete; user check-in pending.
+Plan: [EPIC_10003.md](EPIC_10003.md). Status: planning complete; prepared for the requested user check-in.
 No OpenSim implementation or native solver job has started in this workstream.
 
 ## Checkout and Ownership
