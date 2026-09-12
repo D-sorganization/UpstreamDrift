@@ -68,8 +68,12 @@ R2025b is qualified; final full-swing matching is not. Run17 is terminal and
 rejected through0.85 s. Optional variable scaling is implemented in3cab80075,
 with45 focused tests, Ruff, mypy and normal commit/push checks passing. Native
 scaled qualification and a controlled fitting comparison are next for root.
-No native MuJoCo or Drake equivalence is established yet; their assigned agents
-are implementing and qualifying it. OpenSim implementation has not started.
+MuJoCo and Drake custom rigid baseline adapters are now integrated into the
+root branch as06576fa4a and9ff486f11. Their source-hashed R2025b and Pinocchio
+qualification evidence covers the specified0.8 s baseline only; read the latest
+Pinocchio checkpoint and engine HANDOFF.md files for exact measured quantities.
+Stock simulator modes, full-swing fitting and engine sensitivities remain
+unqualified. OpenSim implementation has not started.
 
 Each lane must commit incrementally and keep its HANDOFF.md current with source,
 model, capture and candidate hashes; exact environment/commands; live versus
