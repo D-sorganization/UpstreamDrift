@@ -56,6 +56,12 @@ the weld reduces27 coordinates to21 and a bounded nonzero retraction closes at
 positions, while Drake remains the independent source for rate/acceleration
 closure evidence.
 
+Pinocchio's new `closure_trajectory_residuals` now independently reaches the
+same smooth-path acceleration residual1.336681893544 as Drake's
+1.336681893545 over18 samples. This supports using Pinocchio for the faster
+chart solve, with Drake retained as the independent final verifier. It is not
+an acceptance result and does not license effort identification.
+
 The single identified-profile replay has marker difference8.84e-9m but scalar-rate difference3.37e-4, so its existing full-state reconstruction gate **fails**. No new fitting, model change, tolerance sweep or gate relaxation occurred. The report preserves all prerequisites and a sequential path toward a bounded linear initializer after a smooth native C3D trajectory is available. Root review is required before broad production integration. Exact results are in `evidence/reaction-identification/`; all study jobs are terminal.
 
 ## Reconstructed-Seed Angular-Velocity Diagnostic
