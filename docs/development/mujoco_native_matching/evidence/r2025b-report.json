@@ -1,0 +1,243 @@
+{
+  "execution_mode": "MuJoCo M/bias/site Jacobian/Jdot with explicit rigid KKT closure; stock mj_step unqualified",
+  "integrator": "shared continuous_forward.integrate_forward DOP853; rtol=1e-11 atol=1e-13 max_step=0.00025; no resets or feedback",
+  "marker_reference": "MuJoCo FK at interpolated R2025b states; independent native FK checked at all 16 frames at six states",
+  "qualification": "native rigid adapter baseline through 0.8 seconds only; stock mj_step and swing fitting unqualified",
+  "passed": true,
+  "mujoco_version": "3.3.4",
+  "python": "3.13.5",
+  "inputs": {
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\gemini-ms-audit-20260912\\native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-mujoco-r2025b-reference-candidate-10021.json": "e914fa9fa3493dfb8ac04bbafc81e1700c089091173292e02bc40dc429135a50",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-tight-reference-9967-02.json": "f69eb1a6ad54a72666a01fdf84a21009bb56eb74510fcbdce39b4dbf1c69fad5",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-00.json": "1f2cbbadbd7326a07eda11560ca257bc6cb7dbcaeaf239476cbcb68e6ab75563",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-01.json": "b151435ff818a363661230f345a4303fb9f1b6c7ec2e89618a51bc2770e0ede1",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-02.json": "d7906a21581c8b979898334018f5c66ef63bb509911b9096aea948af1d5c5ccc",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-03.json": "22a9ea551db7ebbbdca81577a742681fdebe49d426d1949f2431c9ea3784da4a",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-04.json": "4235f11e4a2ebf9c5cfa613ccddb05d65e34a93198702227e1b1c2587c0a6e21",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-05.json": "06e909909fa9714b4ed67e9634bcbf020eb335a4c48a7d4df6d184198410980d",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-06.json": "bd0550c7d08ed54bfad0e063d8bfb96d026c1e57cef2e9de0af995b521607430",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-07.json": "ecfcdc4c1e76599993741d73a21bee64c71f97cd231e43c96445ef7d412483c0",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-08.json": "2abacc2ab7d6362bb6c44c6267f48e9fd7f7e4a2d687680e68d30e5204c3425c",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-09.json": "a787d8caaf73c2152fcbcc629fd26432913477c3ef2143250bfdc218c7d79327",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-10.json": "8a6e972ee04a8dd1aec236ddea327e4bd101eb7c52dff9d960a4d8c073a01b4f",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-11.json": "b5d8bc3e5ad7b95ea175c577113e1e449eb283f0eb69b8fe51be2c759fa46b72",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-12.json": "65a4245b9e35eb1aac865ba9e8e42519d2b289af5e7363540e4626f43aabbab7",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-13.json": "feadd59992708c5190bcd424cb67af65d8fd89464bcecdc191b687909627eed7",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-14.json": "e7579c50c1f83bca494fc55b0cc928f6dd75be12bf87f8f15b440c317a17d5ed",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-15.json": "58a0fe6232ca1f04228d809e755248b44103051072e1639ed31d994ab8533a71",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-16.json": "ff472f51c9b62367d001fb6f6b42c8b7823574b2d1eb1c3e56ce605b88cf3a63",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-17.json": "845a83c68f4c22359d2603df54d125571e24deb56737e5b5201b62f57c4fb5ff",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-18.json": "6f51ebb80e6de1248598039b29760a60aa9029ee8bb425f8e98c992a1cd0681f",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-19.json": "c41b9261717abf4ebf17ad8f78dd8e2e2ea7b0c9d6da27e13e43d5c4fafb1501",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-20.json": "be25b4a2a03f34418834f3d90b6f1830cb91a2db602bc9c010fedbdef848c1ab",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-21.json": "d8ee57c60b69d867d4f68b307462605fa2ac1a5032f90aadacdf94d0b91ee54b",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-22.json": "7b84c9d6aaabd41fdbb7579d6764e4b415216d8f9daf5f84807a8ce2a4e82e57",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-23.json": "8a2943839c09770a9f1496df5ac67c1e57edcb85ae109535d9f5ff4b5d1fe8f6",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-24.json": "9ac970c44ae343e75cc9a98a3c2b79aa6c98884d43ab610a7364f428be9f90ec",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-25.json": "dbd09e4825df02f18c81325aaa15b139727bb9350423626ef989815d02a0148e",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-26.json": "83263e3db874212ae79e029bbafe7f20fda2abe6ac4826e4e0298ed8ad68cd56",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-input-pulses-9967-01\\case-27.json": "4966ef6d1468f2ad510a05da5bb0d64ba422d27ebe226251b9f73b3c1f922f7d"
+  },
+  "source_sha256": {
+    "docs\\development\\mujoco_native_matching\\qualify_native_mujoco.py": "5b642ece9f422cb33541fa5360c357bdc1da446c899498dc3ac2f1ca9359f7cd",
+    "src\\engines\\physics_engines\\mujoco\\python\\native_model.py": "8dc51affe95c9c9b9c630b4c470ad2942f57ea6617d92d94a22c9b1710253dc9",
+    "src\\engines\\physics_engines\\mujoco\\python\\native_mjcf.py": "dcf2d042ef0da907466dd1e7b3639ec739475adfd5efa29f70f77a00ae21cdb7",
+    "src\\engines\\physics_engines\\pinocchio\\python\\native_replay.py": "8fac042fa812531d2746cd8901028d22e760983967003ddaa808b83952e3e31c"
+  },
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "candidate_sha256": "d318db49f049c95e3c62af325a4a6e96d98b830bc6b6168ff432356f494fd718",
+  "mass_kg": 77.60581783574678,
+  "coordinate_count": 27,
+  "pulses": [
+    {
+      "file": "case-00.json",
+      "maximum_absolute_acceleration_error": 1.5104364026297585e-12,
+      "maximum_scaled_acceleration_error": 1.5104364026297585e-12
+    },
+    {
+      "file": "case-01.json",
+      "maximum_absolute_acceleration_error": 1.499043944530598e-12,
+      "maximum_scaled_acceleration_error": 1.499043944530598e-12
+    },
+    {
+      "file": "case-02.json",
+      "maximum_absolute_acceleration_error": 7.892644870999277e-13,
+      "maximum_scaled_acceleration_error": 7.892644870999277e-13
+    },
+    {
+      "file": "case-03.json",
+      "maximum_absolute_acceleration_error": 2.3023943862554574e-12,
+      "maximum_scaled_acceleration_error": 2.3023943862554574e-12
+    },
+    {
+      "file": "case-04.json",
+      "maximum_absolute_acceleration_error": 6.6463501369185e-13,
+      "maximum_scaled_acceleration_error": 6.6463501369185e-13
+    },
+    {
+      "file": "case-05.json",
+      "maximum_absolute_acceleration_error": 6.017131237712192e-13,
+      "maximum_scaled_acceleration_error": 6.017131237712192e-13
+    },
+    {
+      "file": "case-06.json",
+      "maximum_absolute_acceleration_error": 4.506117701197354e-13,
+      "maximum_scaled_acceleration_error": 4.506117701197354e-13
+    },
+    {
+      "file": "case-07.json",
+      "maximum_absolute_acceleration_error": 1.2418677197700845e-12,
+      "maximum_scaled_acceleration_error": 1.2418677197700845e-12
+    },
+    {
+      "file": "case-08.json",
+      "maximum_absolute_acceleration_error": 3.845479490394155e-12,
+      "maximum_scaled_acceleration_error": 3.845479490394155e-12
+    },
+    {
+      "file": "case-09.json",
+      "maximum_absolute_acceleration_error": 5.402567282430937e-12,
+      "maximum_scaled_acceleration_error": 5.402567282430937e-12
+    },
+    {
+      "file": "case-10.json",
+      "maximum_absolute_acceleration_error": 7.350209330070356e-11,
+      "maximum_scaled_acceleration_error": 5.7766157181740196e-12
+    },
+    {
+      "file": "case-11.json",
+      "maximum_absolute_acceleration_error": 4.3351033873761935e-10,
+      "maximum_scaled_acceleration_error": 4.3351033873761935e-10
+    },
+    {
+      "file": "case-12.json",
+      "maximum_absolute_acceleration_error": 9.194423000735696e-12,
+      "maximum_scaled_acceleration_error": 4.875544412641375e-12
+    },
+    {
+      "file": "case-13.json",
+      "maximum_absolute_acceleration_error": 2.3288038164537284e-12,
+      "maximum_scaled_acceleration_error": 1.2048140263232199e-12
+    },
+    {
+      "file": "case-14.json",
+      "maximum_absolute_acceleration_error": 3.474127652225434e-10,
+      "maximum_scaled_acceleration_error": 4.7526658232892727e-11
+    },
+    {
+      "file": "case-15.json",
+      "maximum_absolute_acceleration_error": 1.7692514120426495e-12,
+      "maximum_scaled_acceleration_error": 6.552858451003762e-13
+    },
+    {
+      "file": "case-16.json",
+      "maximum_absolute_acceleration_error": 3.113456159553607e-10,
+      "maximum_scaled_acceleration_error": 6.222240061717729e-11
+    },
+    {
+      "file": "case-17.json",
+      "maximum_absolute_acceleration_error": 1.8847501337404537e-10,
+      "maximum_scaled_acceleration_error": 1.630899859605961e-10
+    },
+    {
+      "file": "case-18.json",
+      "maximum_absolute_acceleration_error": 1.975763552763965e-9,
+      "maximum_scaled_acceleration_error": 1.6335988117788247e-10
+    },
+    {
+      "file": "case-19.json",
+      "maximum_absolute_acceleration_error": 3.0309976750686474e-11,
+      "maximum_scaled_acceleration_error": 1.1034839708656818e-11
+    },
+    {
+      "file": "case-20.json",
+      "maximum_absolute_acceleration_error": 3.949347515685986e-10,
+      "maximum_scaled_acceleration_error": 5.977029171742609e-11
+    },
+    {
+      "file": "case-21.json",
+      "maximum_absolute_acceleration_error": 5.203393271813184e-12,
+      "maximum_scaled_acceleration_error": 1.895995574198512e-12
+    },
+    {
+      "file": "case-22.json",
+      "maximum_absolute_acceleration_error": 1.0199840971836238e-11,
+      "maximum_scaled_acceleration_error": 1.0857508870154054e-12
+    },
+    {
+      "file": "case-23.json",
+      "maximum_absolute_acceleration_error": 3.573177309590392e-10,
+      "maximum_scaled_acceleration_error": 6.2066340165048665e-12
+    },
+    {
+      "file": "case-24.json",
+      "maximum_absolute_acceleration_error": 4.779110440722434e-11,
+      "maximum_scaled_acceleration_error": 4.815022851535295e-12
+    },
+    {
+      "file": "case-25.json",
+      "maximum_absolute_acceleration_error": 3.7493919080588967e-10,
+      "maximum_scaled_acceleration_error": 5.3725912607660575e-12
+    },
+    {
+      "file": "case-26.json",
+      "maximum_absolute_acceleration_error": 1.9066614953544558e-10,
+      "maximum_scaled_acceleration_error": 3.703666196877336e-11
+    },
+    {
+      "file": "case-27.json",
+      "maximum_absolute_acceleration_error": 1.2866507859143894e-9,
+      "maximum_scaled_acceleration_error": 4.2752762441367054e-10
+    }
+  ],
+  "moving": [
+    {
+      "time_s": 0,
+      "maximum_absolute_acceleration_error": 3.50651241376454e-9,
+      "maximum_scaled_acceleration_error": 6.153113262766825e-10,
+      "maximum_frame_matrix_error": 2.220446049250313e-15
+    },
+    {
+      "time_s": 0.40000038142161315,
+      "maximum_absolute_acceleration_error": 1.0271516970306038e-10,
+      "maximum_scaled_acceleration_error": 2.867144171769361e-11,
+      "maximum_frame_matrix_error": 2.3314683517128287e-15
+    },
+    {
+      "time_s": 0.6000049672482765,
+      "maximum_absolute_acceleration_error": 9.89118120742205e-10,
+      "maximum_scaled_acceleration_error": 2.7236906279276672e-11,
+      "maximum_frame_matrix_error": 1.9984014443252818e-15
+    },
+    {
+      "time_s": 0.6999996760998212,
+      "maximum_absolute_acceleration_error": 1.7798811313696206e-9,
+      "maximum_scaled_acceleration_error": 3.6036225467348767e-10,
+      "maximum_frame_matrix_error": 4.551914400963142e-15
+    },
+    {
+      "time_s": 0.749999796469225,
+      "maximum_absolute_acceleration_error": 1.9094557046628324e-9,
+      "maximum_scaled_acceleration_error": 2.214808894207073e-11,
+      "maximum_frame_matrix_error": 8.659739592076221e-15
+    },
+    {
+      "time_s": 0.8,
+      "maximum_absolute_acceleration_error": 4.133653419557959e-10,
+      "maximum_scaled_acceleration_error": 1.299513329789902e-12,
+      "maximum_frame_matrix_error": 7.771561172376096e-15
+    }
+  ],
+  "continuous": {
+    "horizon_s": 0.8,
+    "sample_count": 801,
+    "q_max_abs": 1.334316168755123e-5,
+    "qd_max_abs": 0.012099628459850464,
+    "marker_max_abs_m": 1.2634494944152586e-6,
+    "marker_rms_m": 5.937551477781643e-8,
+    "elapsed_s": 7.193627999979071,
+    "closure_pose_max_abs": 1.2176327029017129e-11,
+    "closure_velocity_max_abs": 2.11400674743345e-10
+  }
+}
