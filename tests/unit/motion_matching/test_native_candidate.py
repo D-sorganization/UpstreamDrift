@@ -7,6 +7,7 @@ import pytest
 from src.shared.python.motion_matching.native_candidate import (
     NativeReplayCandidate,
     increment_native_candidate,
+    recover_native_increment,
 )
 
 pytestmark = pytest.mark.unit
@@ -87,3 +88,36 @@ def test_increment_keeps_one_absolute_time_profile(document: dict) -> None:
         assert np.polyval(coefficients[3], t) == pytest.approx(2 * (t / 0.8) ** 6)
     assert candidate.document["coefficients"][3][0] == 0
     assert candidate.sha256 != updated.sha256
+
+
+def test_restart_recovers_fixed_basis_without_recentering(document: dict) -> None:
+    import numpy as np
+
+    base = NativeReplayCandidate.from_document(document, NAMES, HASH)
+    delta = np.zeros((4, 7))
+    delta[:, 6] = [-2, -0.7, 0.4, 2]
+    updated = increment_native_candidate(base, delta, basis_duration_s=0.8)
+    recovered = recover_native_increment(base, updated, basis_duration_s=0.8)
+    np.testing.assert_allclose(recovered, delta, atol=1e-14)
+    # The optimizer coordinate remains relative to the original envelope.
+    np.testing.assert_allclose(1 + recovered[:, 6] / 10, [0.8, 0.93, 1.04, 1.2])
+    for t in (0.0, 0.6, 0.8, 1.0):
+        replay = increment_native_candidate(base, recovered, basis_duration_s=0.8)
+        assert np.polyval(replay.document["coefficients"][2], t) == pytest.approx(
+            0.4 * (t / 0.8) ** 6
+        )
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [("duration_s", 1.0), ("q0", [0.1] * 4), ("capture_sha256", "d" * 64)],
+)
+def test_restart_rejects_changed_noncontrol_identity(
+    document: dict, field, value
+) -> None:
+    base = NativeReplayCandidate.from_document(document, NAMES, HASH)
+    changed = deepcopy(document)
+    changed[field] = value
+    other = NativeReplayCandidate.from_document(changed, NAMES, HASH)
+    with pytest.raises(ValueError, match="non-control"):
+        recover_native_increment(base, other, basis_duration_s=0.8)
