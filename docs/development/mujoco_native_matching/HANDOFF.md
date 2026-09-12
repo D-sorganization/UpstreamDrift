@@ -1,5 +1,29 @@
 # Native MuJoCo Matching Handoff
 
+## Native Import and Export Sequence Fixed
+
+The root MuJoCo package now exposes `Engine` lazily. Importing the native
+adapter no longer loads the generic humanoid/GUI/model stack as a side effect.
+The exact combined pytest collection that previously selected the older vendor
+writer now resolves the local writer and exports successfully. Existing
+`from ...mujoco import Engine` consumers retain the same cached class export.
+No writer, precision setting, vendor tree or shared alias implementation changed.
+
+Two fresh-process regressions exercise the configured pytest import paths,
+native-adapter-then-export sequence, local writer identity and a COM value
+preserved within 1e-17, plus lazy `Engine` resolution/caching and unknown attribute
+failure. Both fail with the previous eager package initializer (including the
+original `numeric_precision` TypeError) and pass with the lazy facade. The
+combined import, bundle, native live, URDF export and identity suite passes
+27 tests. The validated bundle factory and completed qualification outputs are
+unchanged.
+
+Scope: this fixes the native import pathway. The Tools alias finder can still
+include downstream-owned `src` spellings in its alias list when unrelated
+canonical or top-level packages load. A fleet-wide alias ownership correction,
+if pursued, belongs in the Tools source and normal dependency-pin workflow;
+the change here does not claim to repair every arbitrary generic import order.
+
 ## Validated Portable Bundle Factory Qualified
 
 `NativeMujocoModel.from_native_bundle(urdf_bytes, sidecar_bytes, model_bytes)`
@@ -45,8 +69,10 @@ python3 -m pytest tests/unit/motion_matching/test_native_mujoco.py `
 
 The preserved probe imports `native_urdf`, reports its `URDFWriter` module,
 source file and signature using `inspect`, then exports the original native
-geometry bytes. The failure occurs even when live simulation tests are
-deselected; collecting the engine test is sufficient. Parent lane owns this fix.
+geometry bytes. Before the lazy-facade fix above, the failure occurred even when
+live simulation tests were deselected; collecting the engine test was sufficient.
+Preserve this historical reproduction as the regression trigger, not a current
+native blocker.
 
 ## Scope and Ownership
 
