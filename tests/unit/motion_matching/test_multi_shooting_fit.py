@@ -283,6 +283,11 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch) -> None:
             result.intermediate_states[0.5], [1.0, 2.0], atol=1e-5
         )
         assert result.max_defect_norm < 1e-5
+        assert result.defect_norms.keys() == {0.5}
+        assert result.defect_norms[0.5] == result.max_defect_norm
+        assert result.function_evaluations > 0
+        assert np.isfinite(result.optimality)
+        assert result.active_bound_count >= 0
 
 
 def test_missing_acceptance_does_not_qualify_finite_bad_fit() -> None:
