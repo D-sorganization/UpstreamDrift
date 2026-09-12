@@ -1,5 +1,57 @@
 # Native Port Implementation Checkpoint
 
+## Run15 Rejected; Shooting-Chart Bounds Identified and Audited
+
+Updated 2026-09-12 UTC. Session77080 exited zero after12 solver iterations and
+13 physical residual evaluations, without convergence or acceptance. Run15
+canonical a548e11df96c2b7d58aaf51bef9246fc466dc54fc972dc3beb45ef41e7b93d89
+independently reproduces whole40.725889 mm, early10.385589 mm, terminal196.897900
+mm and club82.941660 mm through0.85 s. Reported yaw107.146852%,0.8 s endpoint
+76.885157 mm, full scaled defect maximum0.000740345, terminal replay gap136.933627
+mm. This is an unconverged iterate, not proof that constrained fitting cannot
+work. Do not promote it. Independent replay3.57884 s, closure5.09124e-11 /
+9.21738e-11. Raw candidate hash224a69d5bfd6918924c694886ff02a3f0c4b6df00e1640e4a18909edc89411c0.
+All13 snapshots, reports, independently replayed NPZ and inspected visual are
+preserved in native_evidence/ms_fit_9967_15/raw-run.zip and adjacent review files.
+
+Fresh original-chart reconstruction agrees with saved physical nodes within
+8.8818e-15. It classifies exactly79 active bounds:5 effort controls and74 node
+coordinates. Node counts at0.2/0.4/0.6/0.7/0.8 s are8/8/6/19/33. Thus33 of42
+coordinates at the new0.8 s node saturate the arbitrary +/-0.02 chart box.
+These are numerical search bounds, not native Simscape joint limits. Active
+efforts: HipInputY B5,+2; TorsoInput B4,+2; RScapInputY B6,+2; RSInputZ B6,-2;
+RWInputX B5,+2 (all relative to the original effort parent). Full bound receipt
+and exact script are in the raw package. Initial JSON serialization of a NumPy
+integer failed before output; corrected conversion and rerun passed all checks.
+
+Controlled next trial changes ONLY the optimizer's node box to+/-0.05 from the
+same common run12-derived starting point. Runtime14, torque bounds, model,
+original q0/qd0, chart references, basis, equality tolerance and budgets stay
+fixed. Parameter-box corner norm0.05\*sqrt(42)=0.32404 is within existing radius0.5;
+actual physical retraction validity remains checked, not assumed globally.
+Driver16 exposes --node-bound and rejects nonpositive/nonfinite boxes or those
+whose parameter corners exceed the radius. Audit probes move chart coordinate14
+to80% of the configured bound (0.04 here), then check native window derivatives.
+
+Separate range audit session90171 exited zero; all12 selected probes pass1e-3,
+max marker/state relative errors1.54633e-4/1.81097e-4. Receipts in
+native_evidence/ms_node_range_audit_9967_16. Exact driver16 SHA-256:
+ca44f7455664ae4009fe05f336b3fba3a3964c31efc1a27cec414efb32df30a1,
+archived in native-ms-constrained-driver-9967-16.zip.
+
+LIVE fit: session22441, confirmed ControlTower-Runner PID2235466; output
+C:/Users/diete/native-ms-fit-9967-16. Runtime14/Python/thread settings below.
+Command: run_native_ms_constrained_9967_16.py --output
+/mnt/c/Users/diete/native-ms-fit-9967-16 --horizon .85
+--nodes .2 .4 .6 .7 .8 .85 --basis-duration .8 --max-nfev 24
+--max-iterations 12 --equality-tolerance 1e-7 --node-bound .05.
+Poll this exact process, preserve terminal/failure evidence, independently replay
+and compare physical feasibility and active bounds before deciding whether a
+longer solve is justified. No claim of constrained convergence has been made.
+Full1.8138888889 s matching and final R2025b/cross-engine proof remain required.
+This turn advances the goal by verifying the first constrained result and
+identifying the dominant numerical bounds with reproducible evidence.
+
 ## Native Equality Audit Completed; First Constrained Fit Is Live
 
 Updated 2026-09-12 UTC. Audit session15469 exited zero. Its399-variable
