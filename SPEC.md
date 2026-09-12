@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Security Handlers and Physics Module Docstrings Unit-Gate Debt Burndown (#8766)
+
+Burn down 32 quarantined test node IDs across exception handling and physics module docstrings in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine all 32 tests in `tests/unit/test_security_and_module_fixes.py` (4 bare-pass exception handler checks and 28 physics module docstring checks).
+- Path Isolation & Refactor Compatibility: Anchor relative file paths for AST inspection in `TestBarePassExceptionHandlers` and `TestPhysicsModuleDocstrings` to `REPO_ROOT` to survive `_prevent_repo_root_io` test runner directory isolation; handle the `src/shared/python/physics/aerodynamics` directory refactor gracefully by checking its `__init__.py`.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 330 to 298 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## CORS Configuration Unit-Gate Debt Burndown (#8766)
 
 Burn down 13 quarantined test node IDs across CORS middleware configuration in `scripts/config/unit_gate_quarantine.json`:
