@@ -56,7 +56,8 @@ class NativeUrdfModel(NativePinocchioModel):
         import pinocchio as pin
 
         self._pin = pin
-        self.model = pin.buildModelFromXML(urdf_bytes.decode("utf-8"))
+        # Pinocchio's extension object exposes fields absent from local stubs.
+        self.model: Any = pin.buildModelFromXML(urdf_bytes.decode("utf-8"))
         self.model.gravity.linear[:] = meta["gravity_m_s2"]
         self.model.lowerPositionLimit[:] = -np.inf
         self.model.upperPositionLimit[:] = np.inf
