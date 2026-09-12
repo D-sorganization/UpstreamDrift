@@ -1,0 +1,106 @@
+{
+  "qualification": "Native executor fixed-input equivalence only; no solver integration or fit acceptance",
+  "candidate_document_sorted_sha256": "c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049",
+  "source_candidate_sha256": "c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049",
+  "sequential_seconds": 21.300372690951917,
+  "two_worker_seconds_including_startup_ipc_shutdown": 11.186473891022615,
+  "comparisons": [
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    }
+  ],
+  "historical_reference_comparisons": [
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    }
+  ],
+  "concatenated_boundary_deduplicated_comparisons": {
+    "markers": {
+      "markers": 0.0
+    },
+    "states": {
+      "states": 0.0
+    }
+  },
+  "source_hashes": {
+    "/mnt/c/Users/diete/native_window_executor_10021.py": "2df784ad3f5de566bd4cda9e31939045322763052c2fe3498ca122db7f7c228c",
+    "/mnt/c/Users/diete/qualify_executor_10021.py": "c0fc5b1013a6dcfa3cc27ca7067f56d9830939375333e7b0f674902d2022164f",
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "/mnt/c/Users/diete/native-ms-fit-9967-19/initial-candidate.json": "826178448b60d3ff1048a5066a9267f28e351ce26567524b5d62d98acd44c2bc",
+    "/mnt/c/Users/diete/native-window-performance-10021-01/report.json": "aff1c51c654500227c9af6cd7065e9737b99383a345370fe03b40f50ba3d4e44"
+  },
+  "input_arrays_sha256": "07f594daf3d7059167785c6c0cbb6edc5f048e5067e0109fdc924048db98358d",
+  "sequential_rhs": [9869, 9833, 9833, 4913, 5429, 2471],
+  "parallel_rhs": [9869, 9833, 9833, 4913, 5429, 2471],
+  "notes": [
+    "Every full marker/state Jacobian equals sequential and historical native results exactly.",
+    "Concatenation checks ordering only; solver residual/defect assembly and caching remain unqualified.",
+    "Repeated batches and cleanup are tested with deterministic unit functions; this native qualification runs one batch per mode."
+  ]
+}
