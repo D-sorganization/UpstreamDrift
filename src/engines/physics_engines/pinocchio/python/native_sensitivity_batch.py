@@ -105,6 +105,7 @@ class NativeSensitivityWindowResult:
     """Native worker result consumed by parent-owned cache and assembly."""
 
     markers_m: Array
+    states: Array
     endpoint_state: Array
     marker_jacobian: Array
     state_jacobian: Array
@@ -157,15 +158,17 @@ def evaluate_trusted_native_sensitivity_request(
     )
     result = NativeSensitivityWindowResult(
         replay.replay.markers_m.copy(),
+        replay.replay.integration.state.copy(),
         replay.replay.integration.state[-1].copy(),
         replay.marker_jacobian.copy(),
-        replay.state_jacobian[-1].copy(),
+        replay.state_jacobian.copy(),
         float(replay.sensitivity_elapsed_s),
         int(replay.sensitivity_evaluations),
         float(replay.primal_marker_max_abs_difference_m),
     )
     for value in (
         result.markers_m,
+        result.states,
         result.endpoint_state,
         result.marker_jacobian,
         result.state_jacobian,

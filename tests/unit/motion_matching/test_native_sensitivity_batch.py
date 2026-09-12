@@ -74,6 +74,7 @@ def test_trusted_worker_reconstructs_validated_candidate_and_returns_arrays(
     np.testing.assert_array_equal(called["clock"], request.time_s)
     assert called["kwargs"]["first_control"] == 0
     assert result.endpoint_state.tolist() == [6, 7, 8, 9, 10, 11]
+    assert result.states.shape == (2, 6)
     assert result.marker_jacobian.shape == (2, 1, 3, 11)
     assert not result.markers_m.flags.writeable
 

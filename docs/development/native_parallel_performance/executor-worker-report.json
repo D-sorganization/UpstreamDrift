@@ -1,0 +1,50 @@
+{
+  "qualification": "Trusted native worker fixed-input equality only; no optimizer or solver assembly",
+  "arrays_sha256": "07f594daf3d7059167785c6c0cbb6edc5f048e5067e0109fdc924048db98358d",
+  "sequential_seconds": 21.128435663005803,
+  "two_worker_seconds_including_startup_ipc_shutdown": 11.142837351944763,
+  "comparisons": [
+    {
+      "markers_m": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers_m": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers_m": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers_m": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers_m": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    },
+    {
+      "markers_m": 0.0,
+      "states": 0.0,
+      "marker_jacobian": 0.0,
+      "state_jacobian": 0.0
+    }
+  ],
+  "candidate_document_sha256": "c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049",
+  "source_hashes": {
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "/mnt/c/Users/diete/native-window-performance-10021-01/arrays.npz": "07f594daf3d7059167785c6c0cbb6edc5f048e5067e0109fdc924048db98358d",
+    "/mnt/c/Users/diete/qualify_native_worker_9967_21.py": "e2ec7b3a79216b8ba6147d3d31b37fac21eaf433d6fa0cc6e947389dce73ecff"
+  }
+}

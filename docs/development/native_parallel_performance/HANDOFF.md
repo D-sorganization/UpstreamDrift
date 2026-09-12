@@ -15,6 +15,25 @@ seam to a persistent executor, so this is not a native solver qualification or a
 fit speed claim. No runtime19/runtime20 or sensitivity source was changed, and
 no optimizer was launched.
 
+## Trusted Worker Fixed-Input Qualification
+
+`qualify_native_worker.py` ran once in a fresh isolated ControlTower runtime
+`/home/dieterolson/native-ms-pilot-9967-21`, copied from immutable runtime20
+before adding only the new worker and executor modules. It used the archived
+run19 initial candidate and input array receipt
+`07f594daf3d7059167785c6c0cbb6edc5f048e5067e0109fdc924048db98358d`.
+No optimizer, model, existing runtime, or prior output was modified.
+
+Sequential execution took21.12844s; one two-worker batch including startup,
+IPC and shutdown took11.14284s. Every one of six windows matched both the new
+sequential worker result and archived sequential result exactly for markers,
+full states, marker Jacobians and state Jacobians. The readable receipt is
+`executor-worker-report.json`; the exact runner/source/report bytes are in
+`raw-worker-qualification.zip`. This qualifies trusted worker transport and
+full raw sensitivity output only. It does not yet qualify
+`fit_multiple_shooting` residual/constraint assembly with this executor,
+repeated solver cache behavior, or a whole-fit speedup.
+
 Discovery found a per-call `ProcessPoolExecutor` in
 `src/shared/python/sidekick/process_calculators/multi_param_analysis.py`, tied to
 calculator/UI parameter handling. No reusable persistent motion-window executor
