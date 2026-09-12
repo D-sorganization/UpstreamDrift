@@ -1,5 +1,51 @@
 # Native Port Implementation Checkpoint
 
+## Shared Multiple-Shooting Integration Contracts Added
+
+Updated 2026-09-12 UTC. Prior retraction commit f8de17600 is confirmed pushed.
+Gemini's branch advanced to 5053f96ab (candidate package commit), while its
+multi_shooting_fit.py remains the previously reviewed implementation. Imported
+that existing shared module and its tests into this isolated native branch;
+do not create a separate optimizer. Upstream provenance is Gemini commit
+5053f96ab with solver changes through 9b35a13d7/fdd64ade6. Gemini's files untouched.
+
+Extended MultipleShootingOptions with state_transform, state_transform_jacobian,
+defect_scales, window_jacobian and acceptance callbacks. Optimizer node coordinates
+can now differ from physical state dimension, enabling the native 42-to-54 chart.
+Residuals and final defects use explicit physical-state scales. Intermediate
+states in results are decoded physical states. Analytic window Jacobians are
+with respect to [effort parameters, physical initial state], then composed with
+the node transform derivative and assembled with matching marker/terminal/defect
+weights. Analytic yaw and arbitrary regularization remain explicitly unsupported;
+the native current objective has neither, with yaw retained as an acceptance gate.
+
+Acceptance now requires an explicit application callback on the final continuous
+prediction, in addition to convergence, finite output and bounded defects. Missing
+callback yields accepted=false. This intentionally corrects the previously false
+acceptance of finite poor fits. Existing callers must supply their full gate policy;
+do not substitute a permissive always-true callback in a real swing run.
+
+TDD: new chart/acceptance tests failed before fields and behavior existed; analytic
+callback test then failed before derivative support. Green tests compare the
+assembled analytic Jacobian directly with centered differences of the actual
+weighted residual, including terminal and scaled defects and 1-to-2 node mapping.
+Six shared solver tests pass; combined with retraction tests 14 pass. Ruff and
+direct mypy pass after explicit optional-callback validation. No native optimizer
+run is claimed from these analytic tests.
+
+Next single action: build the native pilot adapter around this shared solver,
+using existing replay_window, replay_marker_sensitivities, and retract_node.
+Cache matched primal and derivative calls by candidate/absolute clock/node.
+Validate composed node derivatives on the actual native pilot before optimization;
+window_jacobian's physical-state derivative and state_transform_jacobian must
+compose to the same qualified tangent directions. Use exact .600 boundary,
+original parent-relative effort bounds and a finite chart box inside radius .5.
+Set defect scales explicitly and report defect penalty versus actual closure.
+Freeze model/global sextic/initial state and run a small .8 s budget, then fresh
+full-candidate replay. Shared window data currently requires target samples at
+window boundaries; do not silently use a neighboring clock sample. Full-capture
+matching and final R2025b validation remain required beyond this pilot.
+
 ## Finite Native Node Retraction Implemented and Qualified
 
 Updated 2026-09-12 UTC. Prior sensitivity commit 1cb37d543 is confirmed pushed.
