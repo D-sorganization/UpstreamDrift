@@ -136,7 +136,7 @@ repos:
             src/launchers/|
             src/engines/physics_engines/mujoco/python/|
             src/engines/physics_engines/drake/python/src/|
-            src/engines/physics_engines/pinocchio/python/pinocchio_golf/|
+            src/engines/physics_engines/pinocchio/python/|
             src/bunkershot3d/backends/chrono/|
             src/shared/python/humanoid_character_builder/generators/|
             src/shared/python/assessment/|
