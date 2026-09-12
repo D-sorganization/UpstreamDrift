@@ -1,5 +1,59 @@
 # Native Port Implementation Checkpoint
 
+## Scaled Native Audits Passed; Run18 Is Live
+
+Updated 2026-09-12 UTC. Audit18b session36203 exited zero, confirming actual
+scaled objective/constraint callbacks at the native common initial point.
+Three of399 variables near bounds were excluded from centered probe directions;
+396 remained. Max cost-slope relative error1.10963e-6 and constraint-direction
+relative error1.03862e-4 pass1e-3. This qualifies the sampled directions, not
+every possible nonlinear step. Native selected window derivative checks also
+pass. Receipts and all10 snapshots are in ms_scaled_audit_9967_18b/raw-audit.zip.
+
+Conditioning audit18c session40405 exited zero. At the same initial point,
+all210 projected constraint directions and189 feasible marker directions have
+full numerical rank at the reported relative1e-8 threshold:
+
+| Variable Scaling          | Constraint Condition | Feasible Marker Jacobian Condition |
+| ------------------------- | -------------------- | ---------------------------------- |
+| Identity                  | 4023.59              | 355571.89                          |
+| Half Box                  | 48487.10             | 35000.52                           |
+| Combined Jacobian Columns | 987.94               | 1322204.94                         |
+
+Thus half-box scaling worsens constraint conditioning but improves the feasible
+marker map about10-fold. Combined-column scaling makes that map worse. These
+local numbers are not achieved fit quality or convergence evidence. They support
+one controlled half-box experiment, not a claim that scaling has solved fitting.
+Exact vectors, script and native data are in ms_scaling_conditioning_9967_18c.
+
+LIVE fit18: session94942, confirmed ControlTower-Runner PID2294114; output
+C:/Users/diete/native-ms-fit-9967-18. Before launch, no scaled driver or output
+existed. Runtime18 and scaled driver18 are unchanged from the passed audits.
+Launch uses the usual Pinocchio venv and single-thread BLAS environment:
+
+```text
+PYTHONPATH=/home/dieterolson/native-ms-pilot-9967-18
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python
+/mnt/c/Users/diete/run_native_ms_scaled_9967_18.py
+--output /mnt/c/Users/diete/native-ms-fit-9967-18
+--horizon .85 --nodes .2 .4 .6 .7 .8 .85 --basis-duration .8
+--max-nfev 100 --max-iterations 60 --equality-tolerance 1e-7 --node-bound .05
+```
+
+Use env with these assignments and join wrapped lines. This preserves run17's
+physical problem and budgets, changing only solver variable scaling. Every
+residual evaluation is saved, including rejected proposals. Poll this process;
+never restart solely after an observation timeout. On completion independently
+replay, audit physical defects/marker gates/yaw/pointwise gap and active bounds.
+Do not promote any candidate without all gates. Full capture remains unfinished.
+
+Shared validator extraction reviewed and integrated asd234d6133;9 binding tests
+and normal push checks pass. Runtime18 intentionally keeps its prior validator
+files because that extraction changes no semantics. Engine agents10021/10022
+continue native equivalence work; their final source-hashed evidence and commits
+still need root review/integration before program-wide equivalence is claimed.
+
 ## Runtime18 Staged; Corrected Scaled Callback Audit Is Live
 
 Updated 2026-09-12 UTC. Prior turn made progress with tested scaling code and
