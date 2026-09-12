@@ -7,6 +7,15 @@ global degree-six effort polynomial per channel, with geometry calibration where
 justified and independently verified native behavior. MATLAB acceptance requires
 R2025b. OpenSim is an additional staged implementation lane under epic10003.
 
+## Latest Terminal Result
+
+Run20 is finished and independently rejected: whole29.941228 mm,
+terminal98.417488 mm, continuity1.202905e-4, iteration limit. No optimizer is
+live. Read the top native checkpoint before older live-run descriptions below.
+The optional executor is implemented and qualified in isolation; solver/cache
+integration is the next bounded implementation, followed by the native smooth
+path prerequisite for better initialization. No new fit has been launched.
+
 ## Ownership and Resume Pointers
 
 | Lane                        | Issue       | Branch and Worktree                                                   | Owner                                          |

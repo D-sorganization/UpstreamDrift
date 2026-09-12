@@ -1,5 +1,41 @@
 # Native Port Implementation Checkpoint
 
+## Run 20 Terminal: Independent Audit Complete
+
+Current checkpoint SELF, 2026-09-12 UTC. Run20 session43223 exited0 after
+60 iterations/61 evaluations; no optimizer is live. All later sections headed
+Live describe historical checkpoints. Do not restart run20 or extend its budget.
+The returned candidate is unaccepted and optimizer_converged=false.
+Canonical SHA `19193da32ec5665e093b0617d41c4aed99f1d2fc35a3c62c446235db8a6491d3`;
+raw candidate SHA `e2f29f83711b4ed09bb926538231f01c7540e13e3c743a3abbdba840c6c32678`.
+
+Independent replay and bound audit both exited0. Whole RMS29.941228 mm,
+early10.123903 mm, terminal98.417488 mm, club41.593980 mm, yaw19.473411%.
+Maximum full scaled continuity defect1.202905e-4 fails1e-4; pointwise terminal
+gap6.371635 mm. Whole, terminal, yaw and convergence also fail. There are
+105 active bounds:58 effort controls and47 node coordinates. The independent
+replay matches returned marker metrics exactly; closure pose/rate maxima are
+4.74463e-11/9.06339e-11. Runtime about4.07 s. The benchmark's historical
+baseline-only text does not describe this optimized, unaccepted candidate.
+
+All61 raw snapshots, exact config, driver, bound audit, returned controls/nodes,
+independent trajectory and inspected plot are archived under
+`native_evidence/ms_fit_9967_20/`; use raw-run.zip for original hashed bytes.
+The plot shows increasing body error through transition, with left elbow near
+170 mm at0.85 s. This remains a partial prefix, not a full-swing match.
+
+Compared with run19, whole RMS improves30.7911 to29.9412 mm and terminal
+99.9887 to98.4175 mm; club improves56.5570 to41.5940 mm. Yaw and continuity
+worsen. Thus selected bound expansion alone did not resolve transition. Do not
+claim a best accepted candidate or choose solely by one metric.
+
+The next agent should now start Third Task in LOW_COST_AGENT_TURNOVER_20260912.md:
+qualify solver/cache integration of the already tested optional executor, using
+fixed inputs. First/Second Tasks there are completed for run20 and retained as
+a reusable audit procedure. After that, the smooth loop-feasible target-path
+initializer remains the substantive matching work; obtain formulation review
+before a broad run. No follow-on optimization has been launched.
+
 ## Run 20 Saved Evaluation 44 Audit
 
 Run20 PID2348439 was reverified live at 16:40 elapsed; do not restart it.

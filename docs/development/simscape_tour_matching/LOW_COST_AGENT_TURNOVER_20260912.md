@@ -1,5 +1,16 @@
 # Lower-Cost Agent Execution and Turnover
 
+## Current Override: Run 20 Is Finished
+
+Run20 session43223 exited0; independent final replay and bound audit are complete.
+No optimizer is live. The older live-run instructions below are retained for
+reproduction only. Do NOT restart the run or repeat the completed audit.
+Read the top native checkpoint and `native_evidence/ms_fit_9967_20/` for results:
+whole29.941228 mm, terminal98.417488 mm, continuity1.202905e-4; unaccepted.
+Begin Third Task: integrate and qualify the existing executor with solver/cache
+assembly. The final candidate19193da3... is a documented experimental seed,
+not an accepted swing. No new fit is running or preselected.
+
 ## Mission and Current Truth
 
 Continue the existing native golf matching program; do not rebuild the model

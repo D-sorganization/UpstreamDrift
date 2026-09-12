@@ -1,5 +1,10 @@
 # Native Multi-Engine Matching Checkpoint
 
+Current override SELF: run20 is TERMINAL and independently rejected; no optimizer
+is live. Exact final evidence and next action are at the top of the native
+checkpoint. Begin the turnover's Third Task (existing executor solver/cache
+integration). Preserve older live-job text as historical only.
+
 - Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 - Branch: feat/9967-native-simscape-pinocchio; checkpoint SELF; PR not created.
 - Issues: #9967, #10021, #10022; parent #9921; OpenSim planning #10003.
