@@ -32,6 +32,18 @@ def marker_errors(target: Array, prediction: Array, valid: NDArray[np.bool_]) ->
     return errors
 
 
+def observed_rms(errors: Array, selected: NDArray[np.bool_]) -> float | None:
+    """Return observed Euclidean RMS, or None when the selection has no data."""
+    values, mask = np.asarray(errors), np.asarray(selected)
+    if values.shape != mask.shape or mask.dtype != np.bool_:
+        raise ValueError("Error selection must be a matching boolean mask")
+    if not np.isfinite(values[mask]).all() or np.any(values[mask] < 0):
+        raise ValueError("Selected errors must be finite and nonnegative")
+    if not mask.any():
+        return None
+    return float(np.sqrt(np.mean(values[mask] ** 2)))
+
+
 def plot_marker_replay(
     time_s: Array,
     target: Array,

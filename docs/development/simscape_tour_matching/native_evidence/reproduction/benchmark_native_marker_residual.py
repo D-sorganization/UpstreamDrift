@@ -10,6 +10,10 @@ import numpy as np
 
 from src.engines.physics_engines.pinocchio.python.native_replay import replay_candidate
 from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
+from src.shared.python.motion_matching.marker_replay_report import (
+    marker_errors,
+    observed_rms,
+)
 
 
 def main() -> None:
@@ -46,13 +50,11 @@ def main() -> None:
     result = replay_candidate(
         raw, candidate, time, rtol=1e-11, atol=1e-13, max_step=0.00025
     )
-    squared = np.sum((result.markers_m - points) ** 2, axis=2)
+    errors = marker_errors(points, result.markers_m, valid)
     elapsed = perf_counter() - start
 
-    def rms(selected: np.ndarray) -> float:
-        if not selected.any():
-            raise ValueError("Requested metric has no observations")
-        return float(np.sqrt(np.mean(squared[selected])))
+    def rms(selected: np.ndarray) -> float | None:
+        return observed_rms(errors, selected)
 
     early = valid & (time[:, None] <= 0.6)
     terminal = np.zeros_like(valid)
@@ -74,6 +76,8 @@ def main() -> None:
         "capture_marker_count": len(target["labels"]),
         "observed_marker_samples": int(valid.sum()),
         "sample_count": len(time),
+        "terminal_observed_count": int(terminal.sum()),
+        "terminal_club_observed_count": int(club.sum()),
         "whole_rms_m": rms(valid),
         "early_rms_m": rms(early),
         "terminal_rms_m": rms(terminal),
