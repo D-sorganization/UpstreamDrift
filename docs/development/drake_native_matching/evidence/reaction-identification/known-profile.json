@@ -1,0 +1,7 @@
+{
+  "known_control_max_abs": 818.487575328681,
+  "recovered_control_max_abs_difference": 6.535265839602289e-8,
+  "native_power_coefficient_max_abs_difference": 3.0088772468461755e-5,
+  "sampled_primitive_effort_max_abs_difference": 3.974585816024501e-8,
+  "scope": "Comparison against known baseline after identification; known controls were not supplied to least-squares"
+}
