@@ -17,44 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8766 · Bunker Shot and API Route Unit-Gate Debt Burndown
+### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #8766
-- **Branch:** fix/bunker-shot-unit-gate-quarantine-burndown
-- **PR:** #10013
+- **Branch:** fix/launcher-unit-gate-quarantine-burndown
+- **PR:** #10015
 - **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`dc6c012d8`)
-- **Summary:** Burn down 57 quarantined unit tests across bunker_shot_model_and_workbench (18 passing tests) and api_routes_and_security (39 passing tests) in unit_gate_quarantine.json.
-- **Next step:** Pass all CI gates on PR #10013 and squash-merge to main.
+- **Last verified:** 2026-09-12 (`853814bbf`)
+- **Summary:** Progressive burndown of the 465-test quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), and 57 bunker shot and API route tests (#10013). Current tranche burns down 29 quarantined headless tests across shared Python and physics engines (MuJoCo joint analysis), ratcheting debt from 408 to 379.
+- **Next step:** Pass all CI gates on PR #10015 and squash-merge to main.
 
 ## Shipped (Last 90 Days)
-
-### DL-#8766 · Deployment and Teleoperation Unit-Gate Debt Burndown
-
-- **State:** shipped
-- **Owner:** antigravity
-- **Issue:** #8766
-- **PR:** #10012 (merged)
-- **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
-- **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`dc6c012d8`)
-- **Summary:** Burn down all 11 quarantined deployment, device, and teleoperation tests in unit_gate_quarantine.json under deployment_devices_and_configuration, retiring the cluster entirely.
-- **Evidence:** All CI passed; merged to main at dc6c012d8.
-
-### DL-#8766 · Packaging and Governance Unit-Gate Debt Burndown
-
-- **State:** shipped
-- **Owner:** antigravity
-- **Issue:** #8766
-- **PR:** #10010 (merged)
-- **Paths:** scripts/config/unit_gate_quarantine.json, tests/scripts/test_check_vendor_updates.py, tests/unit/scripts/test_check_gitignore_dotenv.py, docs/development/monolith_refactor_register.md, SPEC.md, docs/development/DEVELOPMENT_LOG.md
-- **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`dd05fb900`)
-- **Summary:** Burned down 43 quarantined packaging and governance unit tests in unit_gate_quarantine.json, anchored test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and synced monolith refactor register.
-- **Evidence:** All CI passed; merged to main at dd05fb900.
 
 ### DL-#8695 · DRY Duplication Quarantine Tightening
 
