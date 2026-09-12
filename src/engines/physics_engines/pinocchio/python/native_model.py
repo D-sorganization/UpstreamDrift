@@ -148,6 +148,27 @@ class NativePinocchioModel:
             for name, index in self._frames.items()
         }
 
+    def closure_errors(self) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Copy weld pose/rate residuals from the most recent acceleration call.
+
+        Call accelerations at the desired state first; frame_poses alone does
+        not refresh constrained dynamics data. Missing/nonfinite data fails.
+        """
+        if len(self.constraint_data) != 1:
+            raise ValueError("Expected exactly one native weld closure")
+        contact = self.constraint_data[0]
+        pose = np.array(contact.contact_placement_error.vector, dtype=float, copy=True)
+        velocity = np.array(
+            contact.contact_velocity_error.vector, dtype=float, copy=True
+        )
+        if (
+            pose.shape != (6,)
+            or velocity.shape != (6,)
+            or not np.isfinite(np.concatenate((pose, velocity))).all()
+        ):
+            raise ValueError("Invalid native closure residuals")
+        return pose, velocity
+
     def _velocity_vector(self, values: Mapping[str, float]) -> NDArray[np.float64]:
         if set(values) != set(self._velocity_indices):
             raise ValueError("Provide exactly the native primitive inventory")
