@@ -1,5 +1,19 @@
 # Native MuJoCo Matching Handoff
 
+## Run18 Global Pose Error Addendum
+
+[Global Marker Registration Diagnostic](RUN18_GLOBAL_RIGID_AUDIT.md) reuses the
+shared Kabsch and observed-RMS utilities on unchanged run18 independent replay.
+At0.85seconds, original103.949mm RMS becomes102.247mm after a common translation
+and99.505mm after best proper rigid registration;91.63%of squared error remains.
+At0.8seconds,92.59%remains. A common root-pose offset does not explain most late
+error, although root inputs may still affect articulation through dynamics.
+This is a counterfactual diagnostic, not a corrected trajectory, pure
+articulation estimate, acceptance change or reachability proof. Exact observed
+markers, target payload identity, transforms, tests and source-bound raw archive
+are retained under `evidence/run18-global-rigid-report.json` and
+`evidence/raw-run18-global-rigid-audit.zip`. No live fitting process was touched.
+
 ## Run18 Effort Audit Addendum
 
 [Run18 Effort Correction Audit](RUN18_EFFORT_AUDIT.md) and
