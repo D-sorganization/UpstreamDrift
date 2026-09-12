@@ -13,6 +13,8 @@ from src.shared.python.motion_pipeline.api import (  # noqa: E402
     create_app,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def client() -> TestClient:

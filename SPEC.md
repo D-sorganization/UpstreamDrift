@@ -6,6 +6,7 @@ Reconcile advertised source formats in the motion pipeline orchestrator API with
 - API Source Formats: Update `PipelineRequest.source_format` and `run_pipeline` form parameter descriptions in `src/shared/python/motion_pipeline/api.py` to document registered adapters (`alphapose_json`, `bvh`, `c3d`, `csv`, `deeplabcut`, `hmr2`, `hrnet_json`, `mediapipe_json`, `opencap_session`, `openpose_json`, `opensim_sto_mot`, `trc`, `auto`, `passthrough`) and eliminate misleading mentions of rejected `mat`, `fbx`, and generic `json` formats.
 - Documentation Integrity: Reconcile `docs/motion_pipeline/formats.md` to document that format support matrix is hand-maintained for capture sources and quirks.
 - Agent Context & Architecture Budget: Record reviewed `pipeline-api` contract boundary and render views, and add architecture budget exceptions for legacy `create_app` functions in `scripts/config/architecture_budget.json`.
+- Suite Marker Ratchet: Mark `tests/unit/motion_pipeline/orchestrator/test_api.py` with `pytestmark = pytest.mark.unit`, paying down 156 unmarked test entries in `scripts/config/suite_marker_baseline.json`.
 
 ## Shared Python and Physics Engines Unit-Gate Debt Burndown (#8766)
 
@@ -4392,7 +4393,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-12 | #10018 | Reconcile motion pipeline API advertised source formats and OpenAPI schemas with registered adapters, clarify format support documentation, and register architecture budget exceptions (#8875). |
+| 2026-09-12 | #10018 | Reconcile motion pipeline API advertised source formats and OpenAPI schemas with registered adapters, clarify format support documentation, register architecture budget exceptions, and pay down 156 unmarked test entries (#8875). |
 | 2026-09-12 | #10015 | Burn down 29 quarantined shared Python and physics engines tests in scripts/config/unit_gate_quarantine.json (#8766). |
 | 2026-09-12 | #10013 | Burn down 30 quarantined bunker shot solver, workbench GUI, and report tests in scripts/config/unit_gate_quarantine.json under the bunker_shot_model_and_workbench cluster (#8766). |
 | 2026-09-12 | #10012 | Burn down all 11 quarantined teleoperation, device, and provider tests in scripts/config/unit_gate_quarantine.json under the deployment_devices_and_configuration cluster (#8766). |
