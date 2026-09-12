@@ -1,5 +1,71 @@
 # Native Port Implementation Checkpoint
 
+## Run 18 Verified and Rejected; Native Bundle Integration
+
+Updated 2026-09-12 UTC. This section supersedes historical LIVE statuses below.
+Run 18 session 94942 exited 0 and ControlTower PID 2294114 is absent. No new
+fit has been launched. The full 1.8138888889 s matching goal remains active.
+
+The scaled solve reached its 60-iteration limit with 61 residual evaluations.
+Candidate `917d2d29b66bc2ab947a6ea75255c35e47134e6a2d51cde7e1e69847cad379f7`
+is rejected and optimizer convergence is false. Independent continuous replay
+from original q0/qd0 reproduces whole 30.846699 mm, early 10.604514 mm,
+terminal 103.948841 mm and terminal club 69.776967 mm. Yaw error is 18.354964%.
+Full scaled defect is 5.84673e-6 and terminal segmented/continuous pointwise
+gap is 0.151144 mm. Continuity improved materially compared with run 17, but
+marker accuracy still fails. Independent replay took 3.589 s; closure maxima
+are 5.31e-11 pose and 8.93e-11 velocity. The independent runner's historical
+"baseline only" label does not describe this optimized candidate: this is an
+unaccepted optimizer result, independently replayed without further fitting.
+
+Evidence is `native_evidence/ms_fit_9967_18/`: returned candidate/nodes/config,
+metrics, independent receipt/trajectory, inspected PNG, bound audit and raw ZIP
+containing all 61 snapshots plus audit runners. Evaluation 28's intermediate
+audit is retained in raw-run.zip; it was not an accepted iterate. Canonical
+candidate identity above differs from raw file SHA
+`a3fa5c4ccb503c33fef9d72a061718ccbd3fa8b2449cd07959d09f42f564fd10`.
+
+### Bound Diagnosis and Next Controlled Experiment
+
+Fresh reconstruction confirms 126 active bounds: 65 effort controls and 61
+node coordinates, distributed 3/8/9/17/24 at 0.2/0.4/0.6/0.7/0.8 s. Node
+reconstruction error is below 5.4e-15. These are numerical correction bounds,
+not native physical joint or total-effort limits. The saved 33.304 mm static
+pose at 0.8 s has position-only scaled distance 43.108 from the initial chart
+after individual 2\*pi wrapping, versus chart radius 0.5. Alternate Euler
+branches were not searched: this excludes that saved representation only,
+not all good poses or dynamically reachable solutions. Exact script, inputs
+and hashes are in raw-pose-chart-audit.zip. Do not use static states as hidden
+resets in forward replay.
+
+Next agent: implement a tested warm-start/recentering path using run 18's
+continuous replay states as new chart centers and its physical controls as
+initial controls. Preserve the original parent polynomial, absolute effort
+bounds, degree six, 0.8 s polynomial basis, 0.85 s coverage, q0/qd0 and all
+acceptance gates. First prove identical physical initialization/replay and
+qualified chart derivatives with TDD; then run one immutable bounded trial
+changing chart centers only. Inspect actual radius and active bounds before
+separately considering effort-bound continuation. Do not conflate recentering
+with geometry calibration or raise budgets without a new diagnostic reason.
+
+### Engine Integration and Active Ownership
+
+MuJoCo validated URDF/sidecar/model bundle factory integrated as 23f2d0235;
+precise import-order reproduction handoff as 055267f87. It converts validated
+canonical geometry to MJCF; this is not native MuJoCo URDF parsing. The new
+168-case/0.8 s qualification passes with unchanged prior results. Root reran
+26 MuJoCo live, Drake analytic and shared binding tests: all pass. An initial
+test command used a nonexistent Drake test filename and was corrected before
+the successful run. Drake native library tests remain in its isolated runtime.
+
+MuJoCo agent is fixing an import-order-dependent native exporter failure:
+eager generic engine imports can select the vendored writer lacking precision.
+Fresh standalone export succeeds; the exact failing collection sequence is
+in its HANDOFF. Do not lower precision or claim arbitrary import paths qualify.
+Drake agent is independently extending parity to this run 18 candidate at
+0.85 s in its unchanged isolated runtime. Neither agent is running a fit.
+Read lane handoffs and collect their final commits before claiming completion.
+
 ## Native Engine Lanes Integrated; Transition Pose Seeds Compared
 
 Updated 2026-09-12 UTC. Run18 remains the sole active fit (session94942,
