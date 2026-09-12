@@ -4,13 +4,17 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import json
+from math import comb
 import re
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.motion_matching.native_effort_profile import NativeEffortProfile
-from src.shared.python.motion_matching.prefix_fit import normalized_to_simscape
+from src.shared.python.motion_matching.prefix_fit import (
+    normalized_to_simscape,
+    bernstein_to_simscape,
+)
 
 _FIELDS = frozenset(
     {
@@ -166,3 +170,34 @@ def recover_native_increment(
     if not np.isfinite(delta).all():
         raise ValueError("Restart increment is non-finite")
     return delta[:, ::-1].copy()
+
+
+def increment_native_bernstein(
+    candidate: NativeReplayCandidate,
+    controls: np.ndarray,
+    *,
+    basis_duration_s: float,
+) -> NativeReplayCandidate:
+    """Add Bernstein controls using the existing absolute-time increment contract."""
+    normalized = bernstein_to_simscape(controls, duration_s=1.0)[:, ::-1]
+    return increment_native_candidate(
+        candidate, normalized, basis_duration_s=basis_duration_s
+    )
+
+
+def recover_native_bernstein(
+    base: NativeReplayCandidate,
+    updated: NativeReplayCandidate,
+    *,
+    basis_duration_s: float,
+) -> np.ndarray:
+    """Recover degree-six Bernstein controls relative to the unchanged base."""
+    power = recover_native_increment(base, updated, basis_duration_s=basis_duration_s)
+    controls = np.zeros_like(power)
+    degree = power.shape[1] - 1
+    for k in range(degree + 1):
+        for j in range(k + 1):
+            controls[:, k] += power[:, j] * comb(k, j) / comb(degree, j)
+    if not np.isfinite(controls).all():
+        raise ValueError("Recovered Bernstein controls are non-finite")
+    return controls

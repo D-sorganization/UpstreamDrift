@@ -8,6 +8,8 @@ from src.shared.python.motion_matching.native_candidate import (
     NativeReplayCandidate,
     increment_native_candidate,
     recover_native_increment,
+    increment_native_bernstein,
+    recover_native_bernstein,
 )
 
 pytestmark = pytest.mark.unit
@@ -121,3 +123,30 @@ def test_restart_rejects_changed_noncontrol_identity(
     other = NativeReplayCandidate.from_document(changed, NAMES, HASH)
     with pytest.raises(ValueError, match="non-control"):
         recover_native_increment(base, other, basis_duration_s=0.8)
+
+
+def test_bernstein_shaping_preserves_sextic_time_and_restart(document: dict) -> None:
+    import numpy as np
+
+    base = NativeReplayCandidate.from_document(document, NAMES, HASH)
+    controls = np.zeros((4, 7))
+    controls[0, 4:] = [2, -1, 0.7]
+    result = increment_native_bernstein(base, controls, basis_duration_s=0.8)
+    for t in (0, 0.3, 0.6, 0.8, 1.0):
+        s = t / 0.8
+        expected = 30 * s**4 * (1 - s) ** 2 - 6 * s**5 * (1 - s) + 0.7 * s**6
+        assert np.polyval(result.document["coefficients"][0], t) == pytest.approx(
+            expected, abs=1e-12
+        )
+    np.testing.assert_allclose(
+        recover_native_bernstein(base, result, basis_duration_s=0.8),
+        controls,
+        atol=1e-12,
+    )
+    controls[:] = 0
+    controls[:, 6] = 0.7
+    power = increment_native_candidate(base, controls, basis_duration_s=0.8)
+    assert (
+        increment_native_bernstein(base, controls, basis_duration_s=0.8).sha256
+        == power.sha256
+    )
