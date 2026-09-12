@@ -12,12 +12,16 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, TypeAlias
+from typing import Any, Literal, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.linalg import block_diag
 from scipy.optimize import least_squares
 
+from src.shared.python.motion_matching.equality_least_squares import (
+    solve_equality_least_squares,
+)
 from src.shared.python.motion_matching.marker_replay_report import observed_rms
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
@@ -33,7 +37,14 @@ UnsegmentedForward: TypeAlias = Callable[[Array, Array], Array]
 
 @dataclass(frozen=True)
 class MultipleShootingOptions:
-    """Configuration for constrained multiple-shooting fitting."""
+    """Configuration for multiple-shooting fitting.
+
+    slsqp uses max_iterations and a separate hard max_nfev residual budget.
+    Its fixed constraint_projection maps scaled physical defect rows to
+    independent equalities. defect_weight is ignored for that backend.
+    Callbacks still observe the assembled residual (including unweighted
+    physical defects); the constrained objective excludes those defect rows.
+    """
 
     shooting_nodes: tuple[float, ...]
     state_dim: int = 0
@@ -58,8 +69,22 @@ class MultipleShootingOptions:
         Callable[[Array, Array, Array | None], tuple[Array, Array]] | None
     ) = None
     state_transform_jacobian: Callable[[float, Array], Array] | None = None
+    solver: Literal["least_squares", "slsqp"] = "least_squares"
+    max_iterations: int = 50
+    equality_tolerance: float = 1e-8
+    constraint_projection: Callable[[float], Array] | None = None
 
     def __post_init__(self) -> None:
+        if self.solver not in ("least_squares", "slsqp"):
+            raise ValueError("Unknown shooting solver")
+        if (
+            isinstance(self.max_iterations, bool)
+            or not isinstance(self.max_iterations, int)
+            or self.max_iterations <= 0
+            or not np.isfinite(self.equality_tolerance)
+            or self.equality_tolerance <= 0
+        ):
+            raise ValueError("Invalid constrained iteration budget or tolerance")
         nodes = np.asarray(self.shooting_nodes, dtype=float)
         if (
             nodes.ndim != 1
@@ -96,6 +121,8 @@ class MultipleShootingFit:
     terminal_replay_gap_m is observed-marker pointwise RMS between the last
     shooting window and continuous replay. None means absent endpoint evidence;
     infinity means a nonfinite observed endpoint. It is diagnostic, not a gate.
+    optimality is None for SLSQP: its result has no comparable scaled
+    least_squares optimality measure. Full physical defects still gate acceptance.
     """
 
     theta: Array
@@ -107,7 +134,7 @@ class MultipleShootingFit:
     accepted: bool
     message: str
     defect_norms: dict[float, float]
-    optimality: float
+    optimality: float | None
     function_evaluations: int
     active_bound_count: int
     terminal_replay_gap_m: float | None = None
@@ -200,6 +227,7 @@ def fit_multiple_shooting(
         window_data.append((t_start, t_end, w_time, w_points, w_obs))
 
     window_cache: dict[int, tuple[bytes, bytes | None, Array, Array]] = {}
+    defect_factor = 1.0 if options.solver == "slsqp" else options.defect_weight
 
     def residual(p: Array) -> Array:
         theta = p[:theta_dim]
@@ -241,7 +269,7 @@ def fit_multiple_shooting(
         # 2. Defect residuals: d_i = end_state[i] - states[node_i]
         for i, node in enumerate(internal_nodes):
             defect = scaled_defect(end_states[i], states[node])
-            res_parts.append(options.defect_weight * defect)
+            res_parts.append(defect_factor * defect)
 
         # 3. Terminal frame & pelvis yaw residuals
         if options.terminal_weight > 0:
@@ -353,7 +381,7 @@ def fit_multiple_shooting(
                 if options.defect_scales is None
                 else options.defect_scales
             )
-            parts.append(options.defect_weight * delta / np.asarray(scales)[:, None])
+            parts.append(defect_factor * delta / np.asarray(scales)[:, None])
         if terminal_jac is not None:
             parts.append(terminal_jac)
         return np.concatenate(parts)
@@ -375,18 +403,49 @@ def fit_multiple_shooting(
         else None
     )
 
-    optimum = least_squares(
-        residual,
-        x0,
-        jac=analytic_jacobian if options.window_jacobian is not None else "2-point",
-        bounds=(x_lower, x_upper),
-        max_nfev=options.max_nfev,
-        ftol=1e-8,
-        xtol=options.step_tolerance,
-        gtol=1e-8,
-        x_scale="jac",
-        diff_step=diff_step,
-    )
+    if options.solver == "slsqp":
+        if options.window_jacobian is None or not internal_nodes:
+            raise ValueError(
+                "Constrained shooting requires analytic windows and internal nodes"
+            )
+        projections = []
+        for node in internal_nodes:
+            size = physical_state(node, np.asarray(initial_states[node])).size
+            projection = (
+                np.eye(size)
+                if options.constraint_projection is None
+                else np.asarray(options.constraint_projection(node), dtype=float)
+            )
+            if projection.ndim != 2 or projection.shape[1] != size:
+                raise ValueError(
+                    "Constraint projection must map scaled physical defects"
+                )
+            projections.append(projection)
+        optimum = solve_equality_least_squares(
+            residual,
+            analytic_jacobian,
+            x0,
+            x_lower,
+            x_upper,
+            equality_start=sum(int(w[4].sum()) * 3 for w in window_data),
+            projection=block_diag(*projections),
+            max_iterations=options.max_iterations,
+            max_evaluations=options.max_nfev,
+            constraint_tolerance=options.equality_tolerance,
+        )
+    else:
+        optimum = least_squares(
+            residual,
+            x0,
+            jac=analytic_jacobian if options.window_jacobian is not None else "2-point",
+            bounds=(x_lower, x_upper),
+            max_nfev=options.max_nfev,
+            ftol=1e-8,
+            xtol=options.step_tolerance,
+            gtol=1e-8,
+            x_scale="jac",
+            diff_step=diff_step,
+        )
 
     opt_theta = optimum.x[:theta_dim].copy()
     opt_states = {}
@@ -460,7 +519,9 @@ def fit_multiple_shooting(
         accepted=accepted,
         message=str(optimum.message),
         defect_norms=dict(zip(internal_nodes, defects, strict=True)),
-        optimality=float(optimum.optimality),
+        optimality=float(optimum.optimality)
+        if hasattr(optimum, "optimality")
+        else None,
         function_evaluations=int(optimum.nfev),
         active_bound_count=int(np.count_nonzero(optimum.active_mask)),
         terminal_replay_gap_m=terminal_replay_gap,

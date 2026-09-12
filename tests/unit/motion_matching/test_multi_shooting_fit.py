@@ -269,7 +269,9 @@ def test_multiple_shooting_window_cache_avoids_redundant_evaluations() -> None:
     assert call_counts[0] < call_counts[1]
 
 
-def test_transformed_nodes_and_explicit_acceptance(monkeypatch) -> None:
+@pytest.mark.parametrize("solver", ["least_squares", "slsqp", "slsqp_omitted"])
+def test_transformed_nodes_and_explicit_acceptance(monkeypatch, solver) -> None:
+    omitted_defect = solver == "slsqp_omitted"
     time = np.array([0.0, 0.5, 1.0])
     points = np.zeros((3, 1, 3))
     points[:, 0, 0] = 2 * time
@@ -280,7 +282,7 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch) -> None:
         x = x0 + theta[0] * (clock - clock[0])
         pred = np.zeros((len(clock), 1, 3))
         pred[:, 0, 0] = x
-        return pred, np.array([x[-1], 2 * x[-1]])
+        return pred, np.array([x[-1], 2 * x[-1] + (0.1 if omitted_defect else 0.0)])
 
     def full(theta, clock):
         return forward(theta, clock, None)[0]
@@ -303,6 +305,20 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch) -> None:
         return original(fun, x0, **kwargs)
 
     monkeypatch.setattr(module, "least_squares", checked)
+    original_equality = module.solve_equality_least_squares
+
+    def checked_equality(fun, jac, x0, lo, hi, **kwargs):
+        h = 1e-5
+        fd = np.column_stack(
+            [
+                (fun(x0 + direction * h) - fun(x0 - direction * h)) / (2 * h)
+                for direction in np.eye(len(x0))
+            ]
+        )
+        np.testing.assert_allclose(jac(x0), fd, atol=1e-7)
+        return original_equality(fun, jac, x0, lo, hi, **kwargs)
+
+    monkeypatch.setattr(module, "solve_equality_least_squares", checked_equality)
 
     def window_jac(theta, clock, state):
         dt = clock - clock[0]
@@ -319,6 +335,8 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch) -> None:
     for allowed in [True, False]:
         opts = MultipleShootingOptions(
             shooting_nodes=(0.5, 1.0),
+            solver="slsqp" if omitted_defect else solver,
+            constraint_projection=lambda time: np.array([[1.0, 0.0]]),
             step_tolerance=None,
             max_nfev=30,
             window_jacobian=window_jac,
@@ -339,15 +357,22 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch) -> None:
             state_bounds={0.5: (np.array([-2.0]), np.array([2.0]))},
             options=opts,
         )
-        assert result.accepted is allowed
+        assert result.accepted is (allowed and not omitted_defect)
         np.testing.assert_allclose(
             result.intermediate_states[0.5], [1.0, 2.0], atol=1e-5
         )
-        assert result.max_defect_norm < 1e-5
+        if omitted_defect:
+            assert result.optimizer_converged
+            assert result.max_defect_norm >= 0.049
+        else:
+            assert result.max_defect_norm < 1e-5
         assert result.defect_norms.keys() == {0.5}
         assert result.defect_norms[0.5] == result.max_defect_norm
         assert result.function_evaluations > 0
-        assert np.isfinite(result.optimality)
+        if solver == "least_squares":
+            assert np.isfinite(result.optimality)
+        else:
+            assert result.optimality is None
         assert result.active_bound_count >= 0
 
 
