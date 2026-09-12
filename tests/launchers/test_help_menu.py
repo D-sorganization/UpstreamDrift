@@ -155,3 +155,25 @@ def test_show_keyboard_shortcuts_modal_invokes_exec(parent_window, qapp) -> None
     with patch.object(help_menu.KeyboardShortcutsDialog, "exec", return_value=0) as ex:
         help_menu.show_keyboard_shortcuts_modal(parent_window)
         ex.assert_called_once()
+
+
+@pytest.mark.unit
+def test_collect_shortcut_rows_no_shortcut_placeholders_when_named(
+    parent_window, qapp
+) -> None:
+    """Verify scraped shortcut rows contain meaningful labels rather than (shortcut) (#8902)."""
+    sc1 = QShortcut(QKeySequence("Ctrl+F"), parent_window)
+    sc1.setObjectName("Search Models")
+
+    sc2 = QShortcut(QKeySequence("Esc"), parent_window)
+    sc2.setObjectName("Clear Search")
+
+    sc3 = QShortcut(QKeySequence("Ctrl+Q"), parent_window)
+    sc3.setObjectName("Quit Application")
+
+    rows = help_menu.collect_shortcut_rows(parent_window)
+    labels = {r[1] for r in rows}
+    assert "(shortcut)" not in labels
+    assert "Search Models" in labels
+    assert "Clear Search" in labels
+    assert "Quit Application" in labels

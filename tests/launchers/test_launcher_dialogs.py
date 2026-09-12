@@ -123,9 +123,23 @@ def test_init_ui_components_false(launcher) -> None:
 
 
 def test_setup_keyboard_shortcuts(launcher) -> None:
-    with patch("src.launchers.launcher_dialogs.QShortcut") as mock_shortcut:
+    created_shortcuts: list[MagicMock] = []
+
+    def make_shortcut(*args, **kwargs):
+        sc = MagicMock()
+        created_shortcuts.append(sc)
+        return sc
+
+    with patch(
+        "src.launchers.launcher_dialogs.QShortcut", side_effect=make_shortcut
+    ) as mock_shortcut:
         launcher._setup_keyboard_shortcuts()
         assert mock_shortcut.call_count >= 4
+        # Every created shortcut must have a non-empty, human-readable objectName set
+        for sc in created_shortcuts:
+            assert sc.setObjectName.called
+            name_arg = sc.setObjectName.call_args[0][0]
+            assert name_arg and name_arg != "(shortcut)"
 
 
 @patch("src.launchers.launcher_dialogs.HELP_SYSTEM_AVAILABLE", True)
@@ -168,25 +182,20 @@ def test_show_about_dialog(mock_about, launcher) -> None:
     mock_about.assert_called_once()
 
 
-@patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
+def test_show_shortcuts_modal(launcher) -> None:
+    with patch(
+        "src.launchers.launcher_dialogs.show_keyboard_shortcuts_modal"
+    ) as mock_modal:
+        launcher._show_shortcuts_modal()
+        mock_modal.assert_called_once_with(launcher)
+
+
 def test_show_shortcuts_overlay(launcher) -> None:
     with patch(
-        "src.shared.python.ui.shortcuts_overlay.ShortcutsOverlay"
-    ) as mock_overlay:
-        instance = MagicMock()
-        mock_overlay.return_value = instance
+        "src.launchers.launcher_dialogs.show_keyboard_shortcuts_modal"
+    ) as mock_modal:
         launcher._show_shortcuts_overlay()
-        instance.show.assert_called_once()
-        instance.setFocus.assert_called_once()
-
-
-@patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", False)
-def test_show_shortcuts_overlay_false(launcher) -> None:
-    with patch(
-        "src.shared.python.ui.shortcuts_overlay.ShortcutsOverlay"
-    ) as mock_overlay:
-        launcher._show_shortcuts_overlay()
-        mock_overlay.assert_not_called()
+        mock_modal.assert_called_once_with(launcher)
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
