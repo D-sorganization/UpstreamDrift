@@ -66,9 +66,11 @@ proof of every engine application entry point.
 Pinocchio native initial/moving and continuous0.8 s baseline parity against tight
 R2025b is qualified; final full-swing matching is not. Run 18 is terminal and
 independently rejected through 0.85 s: terminal RMS 103.948841 mm, full scaled
-defect 5.84673e-6, iteration limit. Optional variable scaling improved continuity
-but left 126 correction bounds active. Root's next controlled experiment is
-qualified chart recentering; read checkpoint 46a05ff67 for exact constraints.
+defect 5.84673e-6, iteration limit. Run 19 is live on ControlTower PID 2330720,
+using recentered charts and an explicitly distinct reconstructed seed. Strict
+source-state restart parity failed and remains recorded; its own chart derivative
+audit passes. Original effort bounds and final fit gates are unchanged. Read the
+top native checkpoint for exact process handles, limitations and next actions.
 MuJoCo and Drake custom rigid baseline adapters are now integrated into the
 root branch as06576fa4a and9ff486f11. Their source-hashed R2025b and Pinocchio
 qualification evidence covers the specified0.8 s baseline only; read the latest
