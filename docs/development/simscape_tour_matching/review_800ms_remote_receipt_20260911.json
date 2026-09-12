@@ -1,0 +1,42 @@
+{
+  "host": "DeskComputer",
+  "fit_path": "C:/Users/diete/SimscapeTour9921/prefix-800ms-sextic-01/first_prefix_fit.json",
+  "fit_sha256": "F7D39FA32DA20E83350A726E18B9F394B069D0736975E611C4BE01E67669A7FF",
+  "inspected_at": "2026-09-11T20:50:01.4732406-07:00",
+  "status": "exploratory-fit-computed",
+  "duration_s": 0.8,
+  "stage": {
+    "end_s": 0.8,
+    "rmse_m": 0.044042443955989524,
+    "p95_m": 0.09380074413569486,
+    "max_m": 0.38055288651003666,
+    "evaluations": 773,
+    "optimizer_converged": true,
+    "message": "`xtol` termination condition is satisfied.",
+    "terminal_rmse_m": 0.20054088393151812,
+    "terminal_max_m": 0.38055288651003666,
+    "pelvis_yaw_diff_deg": -0.24870814317014833,
+    "pelvis_yaw_error_pct": 0.4254076652411122
+  },
+  "gates": {
+    "early_retention_pass": true,
+    "whole_window_pass": false,
+    "terminal_rmse_pass": false,
+    "clubhead_terminal_pass": false,
+    "pelvis_yaw_pass": true
+  },
+  "all_gates_pass": false,
+  "clubhead_terminal_rmse_m": 0.2745392471038696,
+  "evaluation_count": 775,
+  "best_logged": {
+    "number": 559,
+    "rmse_m": 0.04322791008459274
+  },
+  "processes": [
+    {
+      "ProcessId": 14152,
+      "Name": "MATLABConnector.exe",
+      "CreationDate": "/Date(1788942928639)/"
+    }
+  ]
+}
