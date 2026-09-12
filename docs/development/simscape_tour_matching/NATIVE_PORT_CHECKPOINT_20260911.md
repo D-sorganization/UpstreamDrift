@@ -1,5 +1,36 @@
 # Native Port Implementation Checkpoint
 
+## Continuous Integration Convergence: September 12 UTC
+
+The requested OpenSim planning check-in has been delivered. OpenSim code
+implementation remains unstarted. Pinocchio continuation completed three
+additional native ControlTower runs, all terminal with exit code zero.
+Receipt: `native_evidence/native_continuous_convergence_9967.json`, including
+input hashes, artifact hashes, solver settings and per-coordinate errors.
+Raw JSON is preserved in `C:/Users/diete/Repositories/simscape-tour-checkpoints`
+and `C:/Users/diete` on ControlTower, using the receipt's exact filenames.
+
+Reducing maximum step from 0.001 to 0.00025 s and tightening rtol/atol from
+1e-9/1e-11 to 1e-11/1e-13 changes the 0.5992645 s Pinocchio trajectory by
+at most 6.84e-10 in q and 1.33e-8 in qd. Native-reference differences remain
+0.00278474 in q and 0.0699314 in qd. These are mixed generalized-coordinate
+maxima, not marker metres or a single angular unit.
+
+Both integrations also reach 0.80 s. Baseline versus tight differences are
+1.46e-7 in q and 1.62e-4 in qd, whereas tight versus saved native reference
+differences grow to 0.671626 and 491.816 respectively. Tight integration takes
+3.71 s, with maximum grip pose residual 1.24e-11 and velocity residual
+1.70e-9. This establishes continuous execution and numerical self-convergence
+at these settings, NOT native trajectory parity or a swing match.
+
+Next action: inspect the saved native replay's actual solver configuration,
+coefficient provenance and sampling; independently replay identical inputs
+in explicit R2025b with tighter solver tolerances. Compare marker errors and
+both engines' step convergence. Do not optimize against this unresolved
+reference discrepancy or attribute it to a physical mismatch without evidence.
+The default `capture_fit_sim_options` delegates solver settings to
+`default_sim_options`; its source alone does not establish saved-run settings.
+
 ## Program Expansion and First Continuous Diagnostic
 
 OpenSim is now part of the working program under
