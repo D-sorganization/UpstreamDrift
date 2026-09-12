@@ -5,10 +5,19 @@ limits and time integration require separate qualification before swing fitting.
 """
 
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 from numpy.typing import NDArray
+
+
+class NativeAccelerationDerivatives(NamedTuple):
+    """Detached derivatives in the stated native scalar-coordinate order."""
+
+    names: tuple[str, ...]
+    dq: NDArray[np.float64]
+    dv: NDArray[np.float64]
+    deffort: NDArray[np.float64]
 
 
 def depth_first_joints(
@@ -208,3 +217,36 @@ class NativePinocchioModel:
             name: float(acceleration[index])
             for name, index in self._velocity_indices.items()
         }
+
+    def acceleration_derivatives(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        primitive_efforts: Mapping[str, float],
+    ) -> NativeAccelerationDerivatives:
+        """Refresh constrained dynamics, then map Pinocchio derivatives.
+
+        Efforts are primitive-conjugate, before the upstream force-frame map.
+        These local derivatives require numerical qualification before use in
+        a trajectory sensitivity solver; this method does not integrate them.
+        """
+        self.accelerations(coordinates, rates, primitive_efforts)
+        raw = self._pin.computeConstraintDynamicsDerivatives(
+            self.model, self.data, self.constraints, self.constraint_data
+        )
+        names = tuple(coordinates)
+        indices = [self._velocity_indices[name] for name in names]
+        matrices = []
+        if len(raw) < 3:
+            raise ValueError("Native acceleration derivatives are missing")
+        for value in raw[:3]:
+            matrix = np.asarray(value, dtype=float)
+            if (
+                matrix.shape != (self.model.nv, self.model.nv)
+                or not np.isfinite(matrix).all()
+            ):
+                raise ValueError("Invalid native acceleration derivatives")
+            owned = matrix[np.ix_(indices, indices)].copy()
+            owned.setflags(write=False)
+            matrices.append(owned)
+        return NativeAccelerationDerivatives(names, *matrices)
