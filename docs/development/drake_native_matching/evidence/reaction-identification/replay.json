@@ -1,0 +1,32 @@
+{
+  "scope": "Known baseline reconstruction only, not C3D fit or general identifiability evidence",
+  "original_candidate_sha256": "2afaf8b21a05a44b071e7328e2d624bba5f6a999aa85920b53b61b43961e6673",
+  "identified_candidate_sha256": "2bca73b6c0533b685ed191c4b8ee1bc4df7c69b4053be202bc85e4c7d1db2c96",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "runner_sha256": "e8f2d9311dd3ca38f8f0b4feb471fab509548cf8c7a7dfcc82e62d1028fa7aee",
+  "degree": 6,
+  "initial_state_unchanged": true,
+  "duration_s": 0.8,
+  "samples": 81,
+  "q_max_abs": 1.8515509014882525e-7,
+  "rate_max_abs": 0.0003366435024645398,
+  "marker_max_vector_difference_m": 8.83744822971597e-9,
+  "closure_pose_max_abs": 2.3242796576340128e-11,
+  "closure_rate_max_abs": 1.666426996393966e-10,
+  "elapsed_s": 3.209815414971672,
+  "integration": {
+    "method": "DOP853",
+    "rtol": 1e-11,
+    "atol": 1e-13,
+    "max_step_s": 0.00025,
+    "initial_state_resets": 0
+  },
+  "gates": {
+    "q_max_abs": 1e-6,
+    "rate_max_abs": 0.0001,
+    "marker_max_vector_difference_m": 1e-7,
+    "closure_pose_max_abs": 1e-7,
+    "closure_rate_max_abs": 1e-7
+  },
+  "baseline_reconstruction_passed": false
+}
