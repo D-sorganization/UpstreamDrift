@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8684 · Coupled Grip, Shaft, Ground Rollup
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8684
+- **Branch:** conductor/issue-8684
+- **PR:** not created
+- **Paths:** docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md, MODEL_COMPLETION_FALSIFICATION_MATRIX.md
+- **Started:** 2026-09-11
+- **Last verified:** 2026-09-11 (`SELF`)
+- **Summary:** Parent rollup of child tiers #8685/#8797/#8715/#8723 answering the four #8684 questions; manifests re-pinned.
+- **Next step:** Open the PR with `Closes #8684`; confirm claim-evidence and release-bundle tests pass in CI.
+
 ### DL-#1616 · Mermaid C4 Architecture Maps
 
 - **State:** in_progress

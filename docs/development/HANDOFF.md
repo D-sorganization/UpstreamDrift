@@ -1,3 +1,26 @@
+# Coupled Grip, Shaft, and Ground Rollup Handoff Checkpoint (#8684) — 2026-09-11
+
+- Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8684.
+- Branch: conductor/issue-8684; checkpoint SELF; PR not created. Parent #8668.
+- Objective: close parent research issue #8684 by rolling up the executed
+  child tiers (#8685 grip discretization, #8797 friction/events, #8715 shaft,
+  #8723 ground) against its four registered questions. No new solver, atlas,
+  tolerance, or golden file; the required design was delivered by the children.
+- Changed: `COMPREHENSIVE_RESEARCH_PROGRAM.md` (child summaries plus the
+  four-question rollup and promotion boundary), four new tier rows in
+  `MODEL_COMPLETION_FALSIFICATION_MATRIX.md`, DL-#8684, and the re-pinned
+  `release_manifest.json`, `CHECKSUMS.sha256`, `claim_evidence_manifest.json`
+  via `qualify_open_release write`.
+- Validation: `qualify_open_release validate`,
+  `claim_evidence_integrity validate`,
+  `tests/research/test_proximal_distal_release_bundle.py`,
+  `tests/unit/research/test_proximal_distal_claim_evidence_integrity.py`,
+  `test_proximal_distal_terminology_contract.py`, doc size budget, and the
+  development-log validator; outcomes recorded in the PR body.
+- Open: stateful friction, calibrated equipment, unilateral foot contact,
+  uncertainty crossed with shaft/ground, the frozen #9306 smoke; human
+  promotion stays blocked on #8556. Peer handoffs below are preserved.
+
 # Architecture Map Contract Handoff Checkpoint — 2026-09-10
 
 - Worktree: C:/Users/diete/Repositories/UpstreamDrift
