@@ -2,26 +2,36 @@
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
-### 0. Active Live Horizon: 0.80 s Continuation (`prefix-800ms-sextic-01`, DeskComputer)
+### 0. 0.80 s Completed Audit & Candidate Eval #559 Package (`prefix-800ms-sextic-01`, DeskComputer)
 
 - **Execution Status**:
-  - Actively running on DeskComputer under MATLAB R2025b FastRestart.
-  - Spawning: Detached CIM process (`Invoke-CimMethod -ClassName Win32_Process -MethodName Create`) with live heartbeat logging.
-  - Directory: `C:/Users/diete/SimscapeTour9921/prefix-800ms-sextic-01`.
-  - Warm-Start Seed: Candidate Eval #79 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_package.json`).
-  - **Baseline Transfer Audit on 0.80 s**:
-    - Evaluated before optimization using De Casteljau's left subdivision and degree elevation:
-    - Early Retention RMSE ($[0, 0.60\text{ s}]$): **$9.852\text{ mm}$** (PASS $\le 12.0\text{ mm}$, exactly preserved).
-    - Whole-Window RMSE ($[0, 0.80\text{ s}]$): **$45.109\text{ mm}$** (raw baseline).
-    - Pelvis Yaw at $0.80\text{ s}$: Model $37.23^\circ$ vs Target $58.45^\circ$ (diff $-21.22^\circ$, error $36.30\%$).
-  - **Objective Formulation**:
-    - `--duration 0.80 --basis sextic`
-    - `--finite-difference-step 0.001 --smoothness-weight 0.08 --anatomical-weights`
-    - `--club-marker-weight 70.0 --terminal-weight 40.0`
-    - `--time-weight-scale 4.0 --time-weight-power 2.0`
-    - `--pelvis-yaw-weight 75.0 --pelvis-yaw-max-error-pct 5.0`
-    - `--max-nfev 250`
-  - Current Evaluations: Actively evaluating, $\approx 3.7\text{ s}$ per forward rollout.
+  - Run completed on DeskComputer (775 logged evaluations in `evaluations.jsonl`, `xtol` termination satisfied).
+  - Fast restart Simscape forward dynamics running under MATLAB R2025b.
+  - Warm-Started from Candidate Eval #79 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_package.json`).
+- **Best Logged Intermediate Milestone: Candidate Eval #559 ($0.80\text{ s}$)**:
+  - **Whole-Window Marker RMSE**: **43.228 mm** (FAIL vs $25.0\text{ mm}$ gate, best on $0.80\text{ s}$ horizon).
+  - **Early Retention RMSE** ($[0, 0.60\text{ s}]$): **9.851 mm** (PASS $\le 12.0\text{ mm}$, fully preserved).
+  - **Pelvis Yaw Residual**: **$+0.81^\circ$**, Error **1.38%** (PASS, gate strictly $< 5.0\%$).
+  - **Terminal Frame RMSE**: **195.214 mm** (FAIL vs $35.0\text{ mm}$).
+  - **Clubhead Terminal RMSE**: **283.236 mm** (FAIL vs $60.0\text{ mm}$).
+  - **Gates Passed**: **2/5 gates passed** (Early retention, Pelvis yaw).
+- **Run 080s Final Step Audit (Eval 775)**:
+  - Whole-Window RMSE: **209.196 mm** (FAIL)
+  - Early Retention RMSE: **96.672 mm** (FAIL)
+  - Terminal Frame RMSE: **435.615 mm** (FAIL)
+  - Clubhead Terminal RMSE: **486.635 mm** (FAIL)
+  - Pelvis Yaw Residual: **$-13.73^\circ$**, Error **23.49%** (FAIL)
+  - Gates Passed: **0/5 gates passed**.
+- **Cold Replay Verification (Independent MATLAB R2025b Forward Rollout)**:
+  - Receipt: `docs/development/simscape_tour_matching/native_evidence/reproduction/cold_replay_deliverable1_receipt.json`
+  - Eval 79 ($0.75\text{ s}$): Whole window **23.859 mm** (RECORD, PASS), Early **9.852 mm** (PASS), Yaw **1.675%** (PASS), Gates **3/5**.
+  - Eval 559 ($0.80\text{ s}$): Whole window **43.228 mm** (FAIL), Early **9.851 mm** (PASS), Yaw **1.378%** (PASS), Gates **2/5**.
+  - Eval 775 ($0.80\text{ s}$): Whole window **209.196 mm** (FAIL), Gates **0/5**.
+- **Immutable Candidate Packages Created**:
+  - **Candidate Eval #559 Package ($0.80\text{ s}$)**:
+    - Repo: `candidates/candidate_eval559_package.json`
+    - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-080s-eval559-pkg/candidate_eval559_package.json`
+    - Whole-window marker RMS: **43.228 mm**, Yaw error: **1.38%**, Early retention: **9.851 mm**
 
 ### 0.1 Run 06 Completed Audit: All-Time Record & Terminal Error Reduction (`prefix-750ms-sextic-06`, DeskComputer)
 
