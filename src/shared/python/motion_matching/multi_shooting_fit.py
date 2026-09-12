@@ -44,6 +44,9 @@ class MultipleShootingOptions:
     independent equalities. defect_weight is ignored for that backend.
     Callbacks still observe the assembled residual (including unweighted
     physical defects); the constrained objective excludes those defect rows.
+    Optional variable_scales apply only to slsqp, ordered as theta followed by
+    each internal node's optimization coordinates in increasing time order.
+    Physical node transforms, callback values and defect scales are unchanged.
     """
 
     shooting_nodes: tuple[float, ...]
@@ -73,10 +76,13 @@ class MultipleShootingOptions:
     max_iterations: int = 50
     equality_tolerance: float = 1e-8
     constraint_projection: Callable[[float], Array] | None = None
+    variable_scales: Array | None = None
 
     def __post_init__(self) -> None:
         if self.solver not in ("least_squares", "slsqp"):
             raise ValueError("Unknown shooting solver")
+        if self.variable_scales is not None and self.solver != "slsqp":
+            raise ValueError("Explicit variable scales require the slsqp backend")
         if (
             isinstance(self.max_iterations, bool)
             or not isinstance(self.max_iterations, int)
@@ -432,6 +438,7 @@ def fit_multiple_shooting(
             max_iterations=options.max_iterations,
             max_evaluations=options.max_nfev,
             constraint_tolerance=options.equality_tolerance,
+            variable_scales=options.variable_scales,
         )
     else:
         optimum = least_squares(

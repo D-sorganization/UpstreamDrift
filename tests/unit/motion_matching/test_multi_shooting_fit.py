@@ -269,7 +269,9 @@ def test_multiple_shooting_window_cache_avoids_redundant_evaluations() -> None:
     assert call_counts[0] < call_counts[1]
 
 
-@pytest.mark.parametrize("solver", ["least_squares", "slsqp", "slsqp_omitted"])
+@pytest.mark.parametrize(
+    "solver", ["least_squares", "slsqp", "slsqp_omitted", "slsqp_scaled"]
+)
 def test_transformed_nodes_and_explicit_acceptance(monkeypatch, solver) -> None:
     omitted_defect = solver == "slsqp_omitted"
     time = np.array([0.0, 0.5, 1.0])
@@ -335,7 +337,8 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch, solver) -> None:
     for allowed in [True, False]:
         opts = MultipleShootingOptions(
             shooting_nodes=(0.5, 1.0),
-            solver="slsqp" if omitted_defect else solver,
+            solver="least_squares" if solver == "least_squares" else "slsqp",
+            variable_scales=np.array([2.0, 0.05]) if solver == "slsqp_scaled" else None,
             constraint_projection=lambda time: np.array([[1.0, 0.0]]),
             step_tolerance=None,
             max_nfev=30,
@@ -446,3 +449,8 @@ def test_evaluation_callbacks_preserve_physical_node_snapshots() -> None:
 def test_invalid_step_tolerance_is_rejected(value) -> None:
     with pytest.raises(ValueError, match="step tolerance"):
         MultipleShootingOptions(shooting_nodes=(1.0,), step_tolerance=value)
+
+
+def test_variable_scales_require_constrained_backend() -> None:
+    with pytest.raises(ValueError, match="variable scales"):
+        MultipleShootingOptions(shooting_nodes=(1.0,), variable_scales=np.ones(1))
