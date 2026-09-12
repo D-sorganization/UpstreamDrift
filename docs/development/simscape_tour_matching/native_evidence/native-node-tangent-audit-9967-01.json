@@ -1,0 +1,55 @@
+{
+  "qualification": "local finite-difference closure tangent audit; no nonlinear node retraction or optimizer acceptance",
+  "candidate_sha256": "499535d5eed7f74f27f836f267f7ef1956f58c5e28bb08a4b6b13a44da7c6048",
+  "node_time_s": 0.6,
+  "node_closure_max_abs": 5.2523319027386606e-11,
+  "relative_jacobian_change": 6.60217112328661e-10,
+  "rows": [
+    {
+      "h": 3e-6,
+      "singular_values": [
+        9.955045448360034, 9.427045467721376, 3.189820539891071,
+        2.8649234575102973, 1.7742569280030143, 1.6750708071242775,
+        1.478016126454973, 0.9947169469718368, 0.7746899876969684,
+        0.4454998357100152, 0.2549232804141397, 0.1975421468675134
+      ],
+      "rank": 12,
+      "tangent_dimension": 42,
+      "max_linear_constraint": 1.1718266548952552e-15,
+      "probes": [
+        {
+          "step": 0.0001,
+          "max_closure": 2.4626511940795126e-9
+        },
+        {
+          "step": 1e-5,
+          "max_closure": 6.66862121079248e-11
+        }
+      ]
+    },
+    {
+      "h": 1e-6,
+      "singular_values": [
+        9.955045448889722, 9.427045467447904, 3.1898205399918895,
+        2.864923457478079, 1.7742569279111133, 1.6750708066992688,
+        1.4780161268864256, 0.9947169471006262, 0.7746899876467197,
+        0.4454998359180343, 0.25492328016305, 0.1975421469032514
+      ],
+      "rank": 12,
+      "tangent_dimension": 42,
+      "max_linear_constraint": 7.648757419715337e-16,
+      "probes": [
+        {
+          "step": 0.0001,
+          "max_closure": 2.462673398540005e-9
+        },
+        {
+          "step": 1e-5,
+          "max_closure": 6.670042296264e-11
+        }
+      ]
+    }
+  ],
+  "runner_sha256": "613a51150479c27d6ad1b0e86cc8b17e6364afa98370bb0910a463247cbd614f",
+  "npz_sha256": "05e7dfbfd0f8e9081da117fe300d606cfd8210208c9b0a38673766dc539ec339"
+}
