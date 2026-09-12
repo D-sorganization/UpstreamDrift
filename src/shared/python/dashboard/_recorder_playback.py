@@ -13,6 +13,7 @@ class _PlaybackMixin:
     data: dict[str, Any]
     current_idx: int
     engine: Any
+    run_id: str
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         if field_name is None:
@@ -63,6 +64,17 @@ class _PlaybackMixin:
         result: tuple[np.ndarray, np.ndarray] = self.data["counterfactuals"][cf_name]
         return result
 
+    def _resolve_engine_name(self) -> str:
+        """Resolve a human-readable engine name from the engine instance."""
+        if hasattr(self.engine, "get_capabilities"):
+            try:
+                caps = self.engine.get_capabilities()
+                if hasattr(caps, "engine_name") and caps.engine_name:
+                    return str(caps.engine_name)
+            except (RuntimeError, ValueError, TypeError, AttributeError):
+                pass
+        return type(self.engine).__name__
+
     def get_data_dict(self) -> dict[str, Any]:
         export_data: dict[str, Any] = {}
         for k, v in self.data.items():
@@ -77,6 +89,30 @@ class _PlaybackMixin:
             else:
                 export_data[k] = v
 
-        export_data["model_name"] = self.engine.model_name
+        export_data["model_name"] = getattr(self.engine, "model_name", "")
         export_data["num_frames"] = self.current_idx
+
+        # Provenance metadata (#8820)
+        engine_name = self._resolve_engine_name()
+        run_id = getattr(self, "run_id", None)
+        model_path = getattr(self.engine, "model_path", None)
+
+        export_data["engine_name"] = engine_name
+        if run_id:
+            export_data["run_id"] = run_id
+        if model_path:
+            export_data["model_file_path"] = str(model_path)
+
+        from src.shared.python.data_io.provenance import ProvenanceInfo
+
+        provenance = ProvenanceInfo.capture(
+            model_path=model_path,
+            engine_name=engine_name,
+            run_id=run_id,
+            parameters={"num_frames": self.current_idx},
+        )
+        export_data["provenance"] = provenance
+        if provenance.model_file_hash:
+            export_data["model_file_hash"] = provenance.model_file_hash
+
         return export_data
