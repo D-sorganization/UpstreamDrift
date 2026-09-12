@@ -200,7 +200,7 @@ def _post_reminder(repository: str, issue_number: int, policy_url: str) -> bool:
     comments_path = f"/repos/{repository}/issues/{issue_number}/comments"
     existing = _request("GET", comments_path, token)
     if _has_bot_reminder(
-        existing if isinstance(existing, list) else existing.get("data", [])
+        existing.get("data", []) if isinstance(existing, dict) else existing
     ):
         print(f"A {COMMENT_MARKER} reminder already exists; nothing to do.")
         return False

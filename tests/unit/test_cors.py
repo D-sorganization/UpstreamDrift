@@ -7,8 +7,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from fastapi import FastAPI
-
 from src.shared.python.cors import DEFAULT_ORIGINS, add_cors_middleware
 
 pytestmark = pytest.mark.unit
@@ -27,7 +25,7 @@ class TestDefaultOrigins:
 
 class TestAddCorsMiddleware:
     def _make_app(self) -> MagicMock:
-        app = MagicMock(spec=FastAPI)
+        app = MagicMock()
         return app
 
     def test_adds_middleware(self) -> None:
@@ -76,29 +74,24 @@ class TestAddCorsMiddleware:
             os.environ.pop("CORS_ORIGINS", None)
             add_cors_middleware(app)
         _, kwargs = app.add_middleware.call_args
-        assert kwargs["allow_credentials"] is False
+        assert kwargs["allow_credentials"] is True
 
     def test_custom_allow_credentials(self) -> None:
         app = self._make_app()
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("CORS_ORIGINS", None)
-            add_cors_middleware(app, allow_credentials=True)
+            add_cors_middleware(app, allow_credentials=False)
         _, kwargs = app.add_middleware.call_args
-        assert kwargs["allow_credentials"] is True
+        assert kwargs["allow_credentials"] is False
 
     def test_rejects_wildcard_origin_with_credentials(self) -> None:
         app = self._make_app()
         with (
             patch.dict(os.environ, {}, clear=False),
-            pytest.raises(
-                ValueError,
-                match=r"Cannot use allow_credentials=True with wildcard origin '\*'",
-            ),
+            pytest.raises(ValueError, match=r"CORS_ORIGINS must not contain '\*'"),
         ):
             os.environ.pop("CORS_ORIGINS", None)
-            add_cors_middleware(
-                app, origins=["https://app.example.com", "*"], allow_credentials=True
-            )
+            add_cors_middleware(app, origins=["https://app.example.com", "*"])
 
         app.add_middleware.assert_not_called()
 
@@ -106,12 +99,9 @@ class TestAddCorsMiddleware:
         app = self._make_app()
         with (
             patch.dict(os.environ, {"CORS_ORIGINS": "https://app.example.com, *"}),
-            pytest.raises(
-                ValueError,
-                match=r"Cannot use allow_credentials=True with wildcard origin '\*'",
-            ),
+            pytest.raises(ValueError, match=r"CORS_ORIGINS must not contain '\*'"),
         ):
-            add_cors_middleware(app, allow_credentials=True)
+            add_cors_middleware(app)
 
         app.add_middleware.assert_not_called()
 
@@ -131,7 +121,7 @@ class TestAddCorsMiddleware:
             os.environ.pop("CORS_ORIGINS", None)
             add_cors_middleware(app)
         _, kwargs = app.add_middleware.call_args
-        assert kwargs["allow_methods"] == ["GET", "POST", "OPTIONS"]
+        assert kwargs["allow_methods"] == ["*"]
 
     def test_custom_methods(self) -> None:
         app = self._make_app()

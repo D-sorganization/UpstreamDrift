@@ -34,6 +34,8 @@ class FileFormatDetector:
         ".mat": "matlab",
         ".db": "sqlite",
         ".sqlite": "sqlite",
+        ".pkl": "pickle",
+        ".pickle": "pickle",
     }
 
     @classmethod

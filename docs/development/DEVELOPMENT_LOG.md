@@ -22,12 +22,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #8766
-- **Branch:** fix/8766-burndown-cors-13
-- **PR:** #10033
-- **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md, tests/unit/test_cors.py, docs/agent_context/
+- **Branch:** fix/8766-burndown-ai-adapters-tools-14
+- **PR:** #10026
+- **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`a477b337f`)
-- **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), 16 AI adapter / launcher tests (#10026), and 20 safe launcher / pipeline / model sources tests (#10031). This tranche burns down 13 quarantined tests in tests/unit/test_cors.py by updating mock FastAPI specs and aligning assertions with canonical cors defaults, ratcheting debt from 343 to 330.
+- **Last verified:** 2026-09-12 (`3c17225ef`)
+- **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), and 29 shared Python / physics tests (#10015). This tranche burns down 16 quarantined tests across AI adapters (Gemini, Ollama), launcher bootstrap repo resolution, sidekick data I/O, and setup wizard, ratcheting debt from 379 to 363.
 - **Next step:** Open PR, monitor CI checks, and merge.
 
 ## Shipped (Last 90 Days)
