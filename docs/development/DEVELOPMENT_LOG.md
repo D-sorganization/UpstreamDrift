@@ -17,32 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8875 · Motion Pipeline Formats Documentation Reconcile
+### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #8875
-- **Branch:** fix/8875-motion-pipeline-formats-doc
-- **PR:** #10018
-- **Paths:** src/shared/python/motion_pipeline/api.py, docs/motion_pipeline/formats.md, tests/unit/motion_pipeline/orchestrator/test_api.py, docs/development/DEVELOPMENT_LOG.md, SPEC.md, docs/agent_context/
+- **Issue:** #8766
+- **Branch:** fix/8766-burndown-ai-adapters-tools-14
+- **PR:** #10026
+- **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`5d47f116c`)
-- **Summary:** Reconcile motion pipeline API docstrings and OpenAPI schemas to advertise registered source formats and auto/passthrough instead of rejected formats (mat, fbx, generic json); remove the misleading 'Auto-generated' claim from formats.md; and add unit test coverage asserting format validation and schema accuracy.
-- **Next step:** Address CI gates (SPEC freshness, agent-context review, architecture budget, and import fixes) and auto-merge PR #10018.
+- **Last verified:** 2026-09-12 (`3c17225ef`)
+- **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), and 29 shared Python / physics tests (#10015). This tranche burns down 16 quarantined tests across AI adapters (Gemini, Ollama), launcher bootstrap repo resolution, sidekick data I/O, and setup wizard, ratcheting debt from 379 to 363.
+- **Next step:** Open PR, monitor CI checks, and merge.
 
 ## Shipped (Last 90 Days)
 
-### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
+### DL-#8875 · Motion Pipeline Formats Documentation Reconcile
 
 - **State:** shipped
 - **Owner:** antigravity
-- **Issue:** #8766
-- **PR:** #10015 (merged)
-- **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Issue:** #8875
+- **PR:** #10018 (merged)
+- **Paths:** src/shared/python/motion_pipeline/api.py, docs/motion_pipeline/formats.md, tests/unit/motion_pipeline/orchestrator/test_api.py, docs/development/DEVELOPMENT_LOG.md, SPEC.md, docs/agent_context/
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`8864e46d7`)
-- **Summary:** Progressive burndown of the 465-test quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), and 57 bunker shot and API route tests (#10013). This tranche burns down 29 quarantined headless tests across shared Python and physics engines (MuJoCo joint analysis), ratcheting debt from 408 to 379.
-- **Evidence:** All CI passed; merged to main at 8864e46d7.
+- **Last verified:** 2026-09-12 (`3c17225ef`)
+- **Summary:** Reconcile motion pipeline API docstrings and OpenAPI schemas to advertise registered source formats and auto/passthrough instead of rejected formats (mat, fbx, generic json); remove the misleading 'Auto-generated' claim from formats.md; and add unit test coverage asserting format validation and schema accuracy.
+- **Evidence:** All CI passed including quality-gate and unit-test-gate; merged to main at 3c17225ef.
 
 ### DL-#8695 · DRY Duplication Quarantine Tightening
 
