@@ -1,5 +1,52 @@
 # Native Port Implementation Checkpoint
 
+## Bidirectional Transition Pose Continuation Qualified at Nine Samples
+
+Updated 2026-09-12 UTC. Extended the existing reproduction runner with explicit
+capture-sample scheduling, forward/backward continuation, a configurable iteration
+budget, and stop-on-unqualified-pose behavior. Six schedule tests first failed
+on the missing helper, then passed; combined with three existing constrained
+pose tests, nine passed. Ruff passes and mypy reports no issues for the runner.
+No new optimizer or model implementation was introduced.
+
+The first backward trial retained +/-3.2 rad envelopes around the continuous
+forward states. It saved qualified samples from 0.8 through 0.7 s, then exited
+one because the next initial pose lay outside the next envelope. Its partial
+receipt remains native-pose-backward-9967-01.json. This was a search-bound
+failure, not a closure failure or absent process. No clipping was used.
+
+Explicitly widening the diagnostic rotation envelope to +/-6.4 rad, with root
+translation envelope still +/-0.8 m and native joint limits unchanged, allowed
+both directions to finish. Backward session 73558 and forward command exited
+zero. All nine samples converge and satisfy closure. Both paths produce RMS
+20.5761, 22.3627, 24.1132, 25.8319, 27.4923, 29.0329, 30.5046, 31.9023,
+33.3040 mm at 0.6 through 0.8 s in 0.025 s increments. Maximum closure is
+2.53908e-13 backward and 3.56448e-13 forward. Maximum adjacent raw coordinate
+change is about 0.11514 across each 0.025 s step. This is sampled static
+continuation, not proof of closure between samples or dynamic feasibility.
+
+Despite matching marker costs, the two paths differ in raw coordinates by up
+to 3.14158 rad, even after individually wrapping rotations by 2 pi. Do not
+average them, label them equivalent, or differentiate across paths. Next action:
+compare native body-frame positions and orientations for the two paths and
+their proximity to the original forward state at 0.6 s. Determine whether this
+is equivalent coordinate representation or different articulated geometry.
+Choose one consistent branch; qualify interpolation/closure and tangent rates
+before supplying additional shooting nodes. The global sextic forward fit is
+still unaccepted.
+
+Receipts: native_evidence/native-pose-backward-9967-01.json, -02.json and
+native-pose-forward-9967-01.json. Raw copies are in local
+simscape-tour-checkpoints and ControlTower C:/Users/diete. Runner copied as
+check_native_pose_continuation_9967_01.py; its byte hash is in each receipt.
+Runtime/model/candidate/target are unchanged from the preceding pose audit.
+Exact new arguments: --times .6 .625 .65 .675 .7 .725 .75 .775 .8
+--max-iterations 300 --direction backward (or forward),
+--seed-report /mnt/c/Users/diete/native-pose-ms04-9967-02.json,
+--rotation-radius 6.4 --translation-radius 0.8. Use unique outputs as above.
+Each result is saved before an unqualified-pose stop; completed files are never
+overwritten. Historical independent mode retains the original behavior.
+
 ## New Feasible Terminal Pose Meets the Marker Threshold
 
 Updated 2026-09-12 UTC. Reused the existing qualified static-pose runner and
