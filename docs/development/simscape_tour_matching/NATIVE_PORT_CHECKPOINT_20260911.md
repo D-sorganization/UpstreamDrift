@@ -1,5 +1,23 @@
 # Native Port Implementation Checkpoint
 
+## Shooting Result Diagnostics Added Without Changing the Live Runtime
+
+Updated 2026-09-12 UTC. The shared MultipleShootingFit result now includes the
+scaled defect norm keyed by internal-node time, SciPy's final optimality,
+function-evaluation count and active-bound count. These expose why a run stalls;
+they do not change residuals, solver settings or acceptance. The result's sole
+in-repository constructor is updated. New required result fields may affect
+external code constructing the dataclass directly; named field consumers remain
+compatible. The native live runtime has not been overwritten and run05 does not
+automatically acquire these new fields.
+
+The transformed-node test first failed on the missing defect_norms field, then
+the combined shooting/retraction suite passed all fourteen tests. Ruff and mypy
+pass. A future runtime bundle must include this source revision and explicitly
+serialize the diagnostics; do not infer optimality from a missing receipt field.
+Run05 remains live at the last process check: PID 2113959, elapsed 3m12s with
+CPU time 3m29s. Follow the exact session/output instructions below.
+
 ## Pose-Seeded Three-Window Native Trial Is Live
 
 Updated 2026-09-12 UTC. Reused the existing shared retraction, sensitivity and

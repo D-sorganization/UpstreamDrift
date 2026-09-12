@@ -88,6 +88,10 @@ class MultipleShootingFit:
     optimizer_converged: bool
     accepted: bool
     message: str
+    defect_norms: dict[float, float]
+    optimality: float
+    function_evaluations: int
+    active_bound_count: int
 
 
 def fit_multiple_shooting(
@@ -412,6 +416,10 @@ def fit_multiple_shooting(
         optimizer_converged=bool(optimum.success),
         accepted=accepted,
         message=str(optimum.message),
+        defect_norms=dict(zip(internal_nodes, defects, strict=True)),
+        optimality=float(optimum.optimality),
+        function_evaluations=int(optimum.nfev),
+        active_bound_count=int(np.count_nonzero(optimum.active_mask)),
     )
 
 
