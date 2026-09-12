@@ -1,5 +1,43 @@
 # Native Port Implementation Checkpoint
 
+## Latest-Candidate Conditioning Measured
+
+Updated 2026-09-12 UTC. Previous turn made progress through alternative-seed
+provenance and acceptance audit. This turn adds a tested scaled-SVD diagnostic
+and actual 135-column sensitivities at expanded run01, rather than at an old seed.
+Remote extraction session 35091 exited zero using native-expanded-sextic-9967-01.
+Receipt native_evidence/native-expanded-conditioning-9967-01.json records candidate,
+runner, NPZ hash and primal agreement. NPZ and both executed analysis/extraction
+scripts are in local simscape-tour-checkpoints; NPZ/extraction also on ControlTower
+C:/Users/diete. Artifact SHA-256:
+f6e78cac887cad3464925855388e6824a2f65a11e50eb83dcff206a3bb56084b.
+
+Native residual/Jacobian rows use all valid marker Cartesian errors plus 10 times
+terminal errors, exactly the current unregularized objective. For physical scales
+10 N/Nm, largest singular value is 1.44592e6 and column norms span 0.52397 to
+76758.08. Relative cutoffs 1e-4 / 1e-6 / 1e-8 retain 5 / 27 / 88 directions;
+these are cutoff-dependent numerical ranks, not structural controllability ranks.
+Unbounded linear predictions reduce score 13.95256 to 13.92257 / 9.46887 / 5.19818,
+requiring maximum physical steps 0.000369 / 2.92448 / 50.53435 N/Nm respectively.
+Bounds and nonlinear replay were not applied to those proposals. Their lower
+linear scores are not achieved matches or global feasibility floors.
+
+Next single experiment: compare column-scaled or truncated-SVD bounded steps with
+current trust-region behavior at this same candidate, using fixed objective,
+original correction bounds and independent forward line search. First test bounds
+and nonlinear rejection on small analytic examples. Save predicted versus actual
+score reduction and early-motion retention. Do not blindly apply the 50 N/Nm
+unbounded proposal or silently recenter bounds. If local steps remain ineffective,
+use the corrected closure-valid multiple-shooting lane; coordinate ownership with
+Gemini. Geometry calibration remains a separate controlled alternative.
+
+New shared sensitivity_diagnostics.py validates matrix/residual dimensions,
+finite values, positive physical scales and explicit truncation, and returns
+readonly physical steps and residuals. Red import failure observed before code;
+10 tests pass, ruff passes. Analysis receipt is
+native_evidence/native-expanded-conditioning-analysis-9967-01.json. No improved
+candidate was generated in this diagnostic turn; best remains expanded run01.
+
 ## Alternative Seed Audit Completed
 
 Updated 2026-09-12 UTC. P-1 found no improved alternative seed: Gemini's seeded
