@@ -1,5 +1,59 @@
 # Lower-Cost Agent Execution and Turnover
 
+## Explicit Pause and Engine Transfer State
+
+The user explicitly requested stopping this agent and transferring to a cheaper
+agent. No further work or optimizer should be launched by the outgoing agent.
+Root checkpoint before this pause note is9fa847afc, pushed and clean; this
+pause document's checkpoint is SELF. Run20 PID2348439 is absent and its session
+exited0. All three delegated agents are completed; all their reported jobs ended.
+No claim is made about unrelated Gemini processes owned by other agents.
+
+| Lane               | Saved State                                                                            | First Remaining Task                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Pinocchio / Shared | Root branch; run20 independently rejected and fully archived                           | Integrate tested executor with solver/cache and prove equivalence                              |
+| MuJoCo             | Native rigid adapter and bundle factory qualified on baseline; integrated root         | Qualify final fitted candidate when available; stock mj_step remains separate                  |
+| Drake              | Native rigid adapter qualified on baseline; extended scalar-rate discrepancy preserved | Resolve coordinate-rate qualification scientifically; develop reviewed smooth-path initializer |
+| Simscape           | R2025b baseline evidence preserved; Gemini owns its worktree                           | Coordinate source identities and replay eventual final same-input candidate in R2025b          |
+| OpenSim            | Epic10003 and OS-0..6 plan only; branch docs/10003-opensim-matching-epic at9ab8165bc   | OS-0 runtime and native-model inventory, not immediate fitting                                 |
+
+OpenSim's own HANDOFF has older run16 status; its pointer to the TOP root native
+checkpoint is authoritative for current cross-engine state. Do not restart its
+historical run17 suggestion. Its status showed a metadata/line-ending refresh
+with no content diff; no user content was discarded. Drake and MuJoCo worktrees
+have no pending content changes. All relevant branch commits are pushed.
+
+## Copy-Paste Assignment
+
+Continue the golf matching program in
+C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native on
+feat/9967-native-simscape-pinocchio. Read AGENTS.md, CLAUDE.md, this full turnover,
+and the TOP of NATIVE_PORT_CHECKPOINT_20260911.md before doing anything.
+Check actual Git state and coordinate/transfer the issue9967 lease.
+
+The outgoing agent is paused. No optimizer is live; run20 is completed,
+independently audited, unaccepted, and archived. Do not restart it, repeat
+completed engine ports, or treat baseline equivalence as full-swing acceptance.
+The final goal remains the full1.8138888889 s C3D swing driven continuously by
+one global sixth-order effort polynomial per channel, with native engine
+behavior consistent with Simscape R2025b.
+
+First perform Third Task below: integrate the existing tested optional window
+executor with the existing shared solver/cache. Use TDD to prove identical
+assembled residuals, full Jacobians, ordering, cache behavior and failure cleanup
+against sequential mode. Preserve original model/input identities and immutable
+runtimes; do not build another fitter. Then follow the reviewed smooth native
+closure-feasible target-path/torque-initializer stages. If a mathematical choice
+is unresolved, report evidence and request review before a broad expensive run.
+
+Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
+Never silently change geometry, add feedback/state resets, or relax criteria.
+Use one bounded fit at a time after qualification; independently forward replay
+returned controls from original q0/qd0. Preserve all raw hashes and test receipts.
+Keep canonical and engine handoffs/development log current in each implementation
+commit, push through normal checks, and coordinate material changes on issue9964.
+OpenSim implementation is separate under epic10003 and begins at OS-0.
+
 ## Current Override: Run 20 Is Finished
 
 Run20 session43223 exited0; independent final replay and bound audit are complete.
