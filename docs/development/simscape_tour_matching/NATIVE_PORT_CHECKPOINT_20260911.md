@@ -1,5 +1,44 @@
 # Native Port Implementation Checkpoint
 
+## Run07 Restores Run06 and Saves Complete Evaluation Snapshots
+
+Updated 2026-09-12 UTC. Restart audit session 79088 exited zero. Driver07 keeps
+run04's continuous states as original chart references, restores run06's torque
+coefficients and both physical nodes, checks fixed B0/B1 and exact bounds, and
+reconstructs nodes from chart coordinates within 1e-7. Only floating roundoff
+within 1e-8 of node bounds may be clipped. Fresh window defects reproduce
+0.00165426241933298 and 0.0011122786719376583 exactly; these remain failed
+acceptance defects, not a newly feasible initial trajectory.
+
+Composed derivative probes now use the restored node coordinates plus the .005
+probe displacement. Maximum relative marker/state errors are 5.01369e-7 and
+3.80447e-5, below 1e-3. Receipt directory is
+native_evidence/ms_restart_audit_9967_07, mirrored raw locally/ControlTower as
+native-ms-restart-audit-9967-07. The checks qualify the tested probes only.
+
+LIVE run07: unified session 12123, confirmed ControlTower WSL PID 2126196.
+Output C:/Users/diete/native-ms-fit-9967-07. Command:
+run_native_ms_pilot_9967_07.py --output /mnt/c/Users/diete/native-ms-fit-9967-07
+--max-nfev 24 --defect-weight 100. New isolated runtime is
+/home/dieterolson/native-ms-pilot-9967-07, copied from runtime06 and updated to
+shared callback revision 1d84cfc8e. Python and thread environment stay unchanged.
+Original objective, final gates, parent torque bounds and chart boxes remain
+the same. No old runtime was overwritten.
+
+Each residual evaluation's callback saves a candidate document, canonical hash,
+physical node states, residual sum of squares and config hash. It writes a new
+evaluation-NNNNN.tmp file, closes it, renames to .json, then appends a hash entry
+to evaluations.jsonl. A .tmp file is incomplete; a JSON package is an evaluation,
+not an accepted iteration or continuous replay. Saved config and exact model/
+capture/runtime dependencies are required to resume. Checkpoint files must not
+be promoted just because their segmented cost is small.
+
+Driver SHA-256 ae110ab97c1a2cf13a232b1f43ced84cf00dda72773463eef98b767c8ee01100.
+The driver, updated solver and staging script are archived in native_evidence
+and local simscape-tour-checkpoints. First saved-evaluation integrity inspection
+is the immediate next check, followed by polling the live run and independently
+replaying its returned candidate. Full swing remains incomplete.
+
 ## Run06 Independently Verified; Small Continuous Improvement
 
 Updated 2026-09-12 UTC. Run06 session 86970 exited zero after twelve function

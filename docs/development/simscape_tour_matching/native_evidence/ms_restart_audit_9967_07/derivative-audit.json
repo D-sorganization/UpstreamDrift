@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "time_s": 0.6,
+      "column": 0,
+      "marker_relative": 2.872419914681181e-8,
+      "state_relative": 1.6569729435542628e-6
+    },
+    {
+      "time_s": 0.6,
+      "column": 14,
+      "marker_relative": 9.788532602204649e-9,
+      "state_relative": 1.2967196615352174e-7
+    },
+    {
+      "time_s": 0.7,
+      "column": 0,
+      "marker_relative": 4.2269940478365074e-7,
+      "state_relative": 3.804468894299056e-5
+    },
+    {
+      "time_s": 0.7,
+      "column": 14,
+      "marker_relative": 5.013688744157591e-7,
+      "state_relative": 3.079391892692209e-5
+    }
+  ]
+}
