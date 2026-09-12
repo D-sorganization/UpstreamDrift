@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Bunker Shot and API Route Unit-Gate Debt Burndown (#8766)
+
+Burn down 57 quarantined test node IDs across the `bunker_shot_model_and_workbench` and `api_routes_and_security` clusters in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 18 passing solver envelope, truncation guard, workbench embedding adapter, headless non-Qt import isolation, evaluation report, and test shot unit tests across `tests/bunkershot3d/` and `tests/tools/bunker_shot_gui/`, and 39 passing API route, WebSocket, diagnostics, model, engine, and security verification unit tests across `tests/unit/api/` and `tests/unit/api_security/`.
+- Scientific Workbench, API, and Security Invariant Adherence: Verify all un-quarantined solver, workbench, and API route tests execute with real physical parameters, non-invented physics guarantees (ADR 0032), fail-closed security contracts (bcrypt key verification), and strict error sanitization.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 465 to 408 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
 ## Deployment and Teleoperation Unit-Gate Debt Burndown (#8766)
 
 Burn down all 11 quarantined test node IDs under the `deployment_devices_and_configuration` cluster in `scripts/config/unit_gate_quarantine.json`:
@@ -4371,6 +4378,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #10013 | Burn down 30 quarantined bunker shot solver, workbench GUI, and report tests in scripts/config/unit_gate_quarantine.json under the bunker_shot_model_and_workbench cluster (#8766). |
 | 2026-09-12 | #10012 | Burn down all 11 quarantined teleoperation, device, and provider tests in scripts/config/unit_gate_quarantine.json under the deployment_devices_and_configuration cluster (#8766). |
 | 2026-09-12 | #10010 | Burn down 43 quarantined packaging and governance tests in scripts/config/unit_gate_quarantine.json under the packaging_ci_and_repository_governance cluster, anchor test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and sync monolith refactor register (#8766). |
 | 2026-09-12 | #10005 | Tightened the DRY duplication quarantine ledger: deleted 72 fingerprints whose occurrence count had fallen below 2 across all supported scanner runtimes (Python 3.11, 3.12, 3.13, 3.14), reducing quarantined debt from 666 to 594. No entry was raised or added; the baseline was not regenerated (#8695). |

@@ -17,20 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8766 · Deployment and Teleoperation Unit-Gate Debt Burndown
+### DL-#8766 · Bunker Shot and API Route Unit-Gate Debt Burndown
 
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #8766
-- **Branch:** fix/deployment-unit-gate-quarantine-burndown
-- **PR:** #10012
+- **Branch:** fix/bunker-shot-unit-gate-quarantine-burndown
+- **PR:** #10013
 - **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`dd05fb900`)
-- **Summary:** Burn down all 11 quarantined deployment, device, and teleoperation tests in unit_gate_quarantine.json under deployment_devices_and_configuration, retiring the cluster entirely.
-- **Next step:** Open PR #10012, pass all CI gates, and squash-merge to main.
+- **Last verified:** 2026-09-12 (`dc6c012d8`)
+- **Summary:** Burn down 57 quarantined unit tests across bunker_shot_model_and_workbench (18 passing tests) and api_routes_and_security (39 passing tests) in unit_gate_quarantine.json.
+- **Next step:** Pass all CI gates on PR #10013 and squash-merge to main.
 
 ## Shipped (Last 90 Days)
+
+### DL-#8766 · Deployment and Teleoperation Unit-Gate Debt Burndown
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #8766
+- **PR:** #10012 (merged)
+- **Paths:** scripts/config/unit_gate_quarantine.json, SPEC.md, docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-12 (`dc6c012d8`)
+- **Summary:** Burn down all 11 quarantined deployment, device, and teleoperation tests in unit_gate_quarantine.json under deployment_devices_and_configuration, retiring the cluster entirely.
+- **Evidence:** All CI passed; merged to main at dc6c012d8.
 
 ### DL-#8766 · Packaging and Governance Unit-Gate Debt Burndown
 
