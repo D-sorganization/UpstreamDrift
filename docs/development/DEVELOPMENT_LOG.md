@@ -23,12 +23,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** antigravity
 - **Issue:** #8875
 - **Branch:** fix/8875-motion-pipeline-formats-doc
-- **PR:** not created
-- **Paths:** src/shared/python/motion_pipeline/api.py, docs/motion_pipeline/formats.md, tests/unit/motion_pipeline/orchestrator/test_api.py, docs/development/DEVELOPMENT_LOG.md
+- **PR:** #10018
+- **Paths:** src/shared/python/motion_pipeline/api.py, docs/motion_pipeline/formats.md, tests/unit/motion_pipeline/orchestrator/test_api.py, docs/development/DEVELOPMENT_LOG.md, SPEC.md, docs/agent_context/
 - **Started:** 2026-09-12
-- **Last verified:** 2026-09-12 (`8864e46d7`)
+- **Last verified:** 2026-09-12 (`5d47f116c`)
 - **Summary:** Reconcile motion pipeline API docstrings and OpenAPI schemas to advertise registered source formats and auto/passthrough instead of rejected formats (mat, fbx, generic json); remove the misleading 'Auto-generated' claim from formats.md; and add unit test coverage asserting format validation and schema accuracy.
-- **Next step:** Push branch, open PR with Conventional Commits, and enable auto-merge.
+- **Next step:** Address CI gates (SPEC freshness, agent-context review, architecture budget, and import fixes) and auto-merge PR #10018.
 
 ## Shipped (Last 90 Days)
 
