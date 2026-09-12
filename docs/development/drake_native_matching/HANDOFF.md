@@ -1,5 +1,17 @@
 # Native Drake Matching Handoff
 
+## Reconstructed-Seed Angular-Velocity Diagnostic
+
+Updated 2026-09-12 UTC. One bounded Pinocchio replay pair compared original run18 candidate `917d2d29b66bc2ab947a6ea75255c35e47134e6a2d51cde7e1e69847cad379f7` with explicitly distinct reconstructed seed `c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049`. All307 actual capture samples, observation masks and initial q/qd are identical. Both replay sources use immutable Pinocchio runtime19; actual Drake frame angular Jacobians from unchanged runtime02 then map the saved scalar states/rates into world-expressed body angular velocities. No Drake integration, fit, parameter sweep or model change was performed for this diagnostic.
+
+The pair reproduces the failed strict restart comparison: maximum q difference3.559055e-7, rate difference3.314085e-4, observed marker vector difference6.933573e-8m. Maximum physical angular-velocity vector difference across14 native body groups (including world) is1.472903e-5rad/s. Relative left-shoulder angular velocity is defined as child-world angular velocity minus parent-world angular velocity, expressed in the same world basis. Its maximum difference is1.481394e-5rad/s at0.7861111111111111s, against source speed52.77319rad/s: relative difference2.807096e-7. At that same sample, scalar `LSInputX` rates differ3.314085e-4rad/s against400.44671rad/s.
+
+Physical angular differences are substantially smaller than scalar Euler-rate differences, consistent with coordinate amplification. This does not turn the two coefficient profiles into an exact restart, establish integration convergence, or justify relaxing the existing1e-4 scalar-rate gate. The reconstructed profile remains a distinct unaccepted seed requiring its own chart and derivative qualification; no fit acceptance changed.
+
+`evidence/reconstructed-seed/angular-diagnostic.json` provides every body's maximum difference, reference speed and relative error. `raw-evidence.zip` preserves both trajectories, body-angular arrays, both exact candidates, clock/masks, model assets, executed replay and diagnostic runners, both immutable runtime source trees, environment distribution inventories and per-file SHA256. All jobs are terminal. The exact extraction is `reproduction/diagnose_restart_angular.py`; its fixed experiment paths intentionally identify this bounded diagnostic, not a general candidate acceptance tool.
+
+Next agent: carry forward the separate candidate identity. Use these physical-velocity diagnostics to understand coordinate sensitivity, not as a replacement for current acceptance metrics. Root owns qualification of reconstructed charts and subsequent fitting. Do not repeat integrations or perform tolerance sweeps merely to recover the failed restart label.
+
 ## Run18 Fitted-Candidate Extension Fails the Full-State Gate
 
 Updated 2026-09-12 UTC. Both new parity runs are terminal. No fitting or shared engine source changed. The earlier 0.8-second baseline qualification remains valid within its stated scope; **0.85-second run18 full-state parity is not qualified**.
