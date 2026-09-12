@@ -1,5 +1,41 @@
 # Native Port Implementation Checkpoint
 
+## Completed Inventory and Connection Graph
+
+Update after the initial checkpoint: both native export jobs completed with
+exit code 0. Version 2 adds library references and stable physical endpoints,
+tested with an actual R2025b rigid-transform/revolute-joint connection.
+Both native tests pass. The Python reader has three passing contract tests
+covering subsystem traversal, joint-side separation, commented ancestors,
+dangling endpoints and duplicate block paths. Ruff checks pass.
+
+The real v2 export contains 3,679 blocks. The reader reconstructed 436 physical
+wire nets containing 1,473 endpoints, including correct traversal from the
+hip joint base through the nested subsystem to the upstream rigid transform.
+These counts include physical signal nets, not just mechanical frames.
+See `native_inventory_v2_receipt_20260911.json` for hashes and artifact locations.
+The local inventory and wire-net graph are in `simscape-tour-checkpoints` outside
+Git; the code and receipt are committed. There is no remaining inventory job
+to wait for from this checkpoint.
+
+The native library reference identifies the hip as a Bushing Joint. Preserve
+its native primitive/effort conventions when mapping to a Pinocchio tree;
+do not assume that a quaternion free joint has the same effort coordinates.
+All 138 multibody blocks, including commented descendants, have native library
+references. The earlier exporter field `source_block` was empty at runtime;
+use `library_reference` and the preserved `BlockFunction` parameter instead.
+
+Numeric expressions for the sampled physical properties resolved, including
+dimensions, mass, density, COM and inertia parameters. This is not proof those
+fields are the active inertia configuration: CalculateFromGeometry requires
+deriving inertia using the original BasedOnType enum, geometry and units.
+For example, the string `Mass` itself resolves to a workspace numeric value.
+Always interpret enums from `expression`, never from `numeric_value`.
+
+Next: reconstruct solid custom-frame transforms, explicit SI inertia and joint
+primitive transforms from this native inventory. Compare the resulting FK with
+native body-frame exports before implementing full constrained rollouts.
+
 ## Scope and Verified Results
 
 The preceding review was progress: it corrected the completed 0.80 s result and

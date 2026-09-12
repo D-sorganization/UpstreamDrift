@@ -22,11 +22,12 @@ function export_native_inventory(model, output)
             'block_type', get_param(path, 'BlockType'), ...
             'commented', get_param(path, 'Commented'), ...
             'source_block', optionalParameter(path, 'SourceBlock'), ...
+            'library_reference', optionalParameter(path, 'ReferenceBlock'), ...
             'parameters', {parameterInventory(path)}, ...
             'connectivity', connectionInventory(path));
         blocks{k} = block;
     end
-    result = struct('schema_version', 1, 'matlab_release', version('-release'), ...
+    result = struct('schema_version', 2, 'matlab_release', version('-release'), ...
         'matlab_version', version, 'model', model, ...
         'model_file', get_param(model, 'FileName'), ...
         'qualification', 'native uncompiled inventory only; not a physics certificate', ...
@@ -78,8 +79,38 @@ end
 function connections = connectionInventory(path)
     connections = get_param(path, 'PortConnectivity');
     for k = 1:numel(connections)
+        connections(k).SrcEndpoint = {};
+        connections(k).DstEndpoint = {};
+        if startsWith(connections(k).Type, {'LConn', 'RConn'})
+            connections(k).SrcEndpoint = portEndpoints(connections(k).SrcPort);
+            connections(k).DstEndpoint = portEndpoints(connections(k).DstPort);
+        end
         connections(k).SrcBlock = blockPaths(connections(k).SrcBlock);
         connections(k).DstBlock = blockPaths(connections(k).DstBlock);
+    end
+end
+
+function endpoints = portEndpoints(handles)
+    endpoints = cell(numel(handles), 1);
+    for k = 1:numel(handles)
+        assert(handles(k) > 0, 'nativeInventory:PortHandle', ...
+            'A physical connection must reference a live port');
+        parent = get_param(handles(k), 'Parent');
+        ports = get_param(parent, 'PortHandles');
+        kinds = fieldnames(ports);
+        endpoint = '';
+        for n = 1:numel(kinds)
+            index = find(ports.(kinds{n}) == handles(k));
+            if ~isempty(index)
+                assert(isscalar(index), 'nativeInventory:AmbiguousPort', ...
+                    'Port must have one stable identity');
+                endpoint = sprintf('%s:%s%d', parent, kinds{n}, index);
+                break;
+            end
+        end
+        assert(~isempty(endpoint), 'nativeInventory:MissingPort', ...
+            'Physical endpoint not found in parent PortHandles');
+        endpoints{k} = endpoint;
     end
 end
 
