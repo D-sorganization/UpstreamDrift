@@ -51,15 +51,15 @@
       "rationale": "Reviewed SI parameter ownership, declared degree fields, lazy backend capabilities and the shared analytical/MJCF renderers including mjcf.py. Existing test_foundation.py passed in the 41-test boundary run on 2026-09-09; GPU readiness is not inferred."
     },
     "pipeline-api": {
-      "fingerprint": "1df09c184ac30f839955834b759e7d5d5d9cca3650900d2dbee6cf1dda899612",
+      "fingerprint": "bb81e316001c42322cf9628984c7044a5431ad7d27f3b9b0b901ad0a4c023546",
       "inputs": {
         "docs/agent_context/contracts/pipeline-api.md": "f9402d270806ae313e121d36387e396302ffd5484a593f071ed3b0f042921079",
         "src/shared/python/motion_pipeline/api.py": "7c3aecd590c1b49bf839d846370697d071ca3fa81ca9673811fdbcde159d7f9e",
         "src/shared/python/motion_pipeline/contracts.py": "9c8a9ac26c0d63b174e43093e3c53e1dea6422b82918c7ef79be05cf2097837c",
         "src/shared/python/motion_pipeline/orchestrator.py": "a99ef34d57df202ad4bc5e2f4b7a04b974e80d559e47f9c97b0dece57ca9b1b8",
-        "tests/unit/motion_pipeline/orchestrator/test_api.py": "47b0d0420fccf903b264b087d916da4072dd63220fcd20bc0b38a19ee3c69ddd"
+        "tests/unit/motion_pipeline/orchestrator/test_api.py": "5d059d69c720182436454c0ec45efe567aa45b9b5aa527caab991fd782bd984d"
       },
-      "rationale": "Reconcile advertised source formats in motion pipeline API docstrings (#8875)"
+      "rationale": "Mark orchestrator test_api with unit marker (#8875)"
     },
     "pose-conventions": {
       "fingerprint": "c1d86bdd40d3b50e9b856385ce92f8fcbd0c311fbc6f69bf96eafb2430d78d05",
