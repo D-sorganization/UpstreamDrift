@@ -195,6 +195,34 @@ class NativePinocchioModel:
             raise ValueError("Invalid native closure residuals")
         return pose, velocity
 
+    def closure_residuals(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float] | None = None,
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Refresh and return weld pose/rate residuals at one native state.
+
+        The constrained-dynamics backend owns the constraint-data refresh, so
+        this intentionally invokes it with explicit zero primitive efforts.
+        It is a diagnostic/kinematic-trajectory oracle, never an inverse
+        dynamics substitute and never a state correction.  Omitted rates mean
+        an explicit zero-rate static probe; supplied rates retain their stated
+        values to support trajectory checks.
+        """
+        names = set(self._velocity_indices)
+        position = dict(coordinates)
+        velocity = {name: 0.0 for name in names} if rates is None else dict(rates)
+        if (
+            set(position) != names
+            or set(velocity) != names
+            or not np.isfinite(tuple(position.values())).all()
+            or not np.isfinite(tuple(velocity.values())).all()
+        ):
+            raise ValueError("Provide exactly native coordinate and rate inventories")
+        efforts = {name: 0.0 for name in names}
+        self.accelerations(position, velocity, efforts)
+        return self.closure_errors()
+
     def marker_derivatives(
         self,
         coordinates: Mapping[str, float],

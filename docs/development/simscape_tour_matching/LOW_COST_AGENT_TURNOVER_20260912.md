@@ -49,6 +49,14 @@ smooth native closure-feasible target-path/torque-initializer stages. If a
 mathematical choice is unresolved, report evidence and request review before a
 broad expensive run.
 
+The path stage now has an engine-owned residual probe:
+`NativePinocchioModel.closure_residuals`. Use it as the closure oracle for
+constrained marker poses and trajectory checks. It probes with zero primitive
+efforts and never projects, resets, or modifies forward replay state. Start by
+qualifying it against a known constrained ControlTower state; then use local
+marker-pose solves as seeds for a smooth trajectory. Do not infer trajectory
+feasibility from independent poses alone.
+
 Use TDD, DbC, LoD and DRY. Keep all acceptance gates and missing-marker masks.
 Never silently change geometry, add feedback/state resets, or relax criteria.
 Use one bounded fit at a time after qualification; independently forward replay

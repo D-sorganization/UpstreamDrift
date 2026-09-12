@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-11
 - **Last verified:** 2026-09-12 (SELF; 32 focused solver/executor tests, Ruff and mypy pass; fixed six-window worker parity, parent batch adapter, guarded-driver regression and a two-evaluation full solver assembly receipt complete; run20 terminal and independently rejected)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
-- **Next step:** Select and qualify a smooth closure-feasible transition initializer, then run one separately recorded bounded fit through the qualified batch seam.
+- **Next step:** Qualify the new native closure-residual probe on ControlTower, build a smooth closure-feasible transition initializer from constrained marker poses, then run one separately recorded bounded fit through the qualified batch seam.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps
 
