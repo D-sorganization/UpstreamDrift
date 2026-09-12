@@ -1,0 +1,31 @@
+{
+  "execution_mode": "drake-tree-custom-rigid-kkt",
+  "reference_release": "2025b",
+  "reference_sha256": "f69eb1a6ad54a72666a01fdf84a21009bb56eb74510fcbdce39b4dbf1c69fad5",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "runner_sha256": "94e2ea2d45c31c950325c40897e11f4c49f8111a765b07cb007a408f4ea3700f",
+  "time_s": [
+    0, 0.40000038142161315, 0.6000049672482765, 0.6999996760998212,
+    0.749999796469225, 0.8
+  ],
+  "acceleration_max_abs": 2.9010234214865704e-9,
+  "acceleration_max_scaled": 3.083888112771958e-10,
+  "frame_max_abs": 8.992806499463768e-15,
+  "moving_passed": true,
+  "reference_specific_candidate_sha256": "39e77b31af411463018ee9ac3cb9cb0d6d29984355b95413f63245d3575659ec",
+  "continuous_q_max_abs": 4.1015023442003695e-6,
+  "continuous_qd_max_abs": 0.00012914886841031148,
+  "continuous_frame_position_max_abs_m": 1.0020436635596944e-6,
+  "gates": {
+    "continuous_q_max_abs": 0.0001,
+    "continuous_qd_max_abs": 0.05,
+    "continuous_frame_position_max_abs_m": 1e-5,
+    "acceleration_max_scaled": 1e-7,
+    "frame_max_abs": 1e-10
+  },
+  "passed": true,
+  "scope": "Six recorded R2025b states and same-input continuous0.8s baseline; not full capture fit",
+  "closure_pose_max_abs": 3.1178931622504875e-12,
+  "closure_rate_max_abs": 6.028594249913071e-11,
+  "replay_elapsed_s": 13.414091669023037
+}
