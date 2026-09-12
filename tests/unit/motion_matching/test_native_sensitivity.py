@@ -93,3 +93,30 @@ def test_free_mass_matches_exact_sextic_force_response() -> None:
     )
     assert not result.marker_jacobian.flags.writeable
     assert result.primal_marker_max_abs_difference_m == 0
+
+    directions = np.eye(6)[:, [0, 3]]
+    window = replay_marker_sensitivities(
+        raw,
+        candidate,
+        np.array([0.6, 0.7, 0.8]),
+        model_factory=Mass,
+        max_step=0.02,
+        initial_state=np.zeros(6),
+        initial_sensitivity=directions,
+    )
+    assert window.marker_jacobian.shape == (3, 1, 3, 11)
+    np.testing.assert_allclose(window.marker_jacobian[:, 0, 0, -2], 1.0, atol=1e-12)
+    np.testing.assert_allclose(
+        window.marker_jacobian[:, 0, 0, -1], [0.0, 0.1, 0.2], atol=1e-12
+    )
+    np.testing.assert_array_equal(window.replay.integration.time, [0.6, 0.7, 0.8])
+    np.testing.assert_allclose(window.state_jacobian[-1, 0, -1], 0.2, atol=1e-12)
+    assert not window.state_jacobian.flags.writeable
+    with pytest.raises(ValueError, match="initial"):
+        replay_marker_sensitivities(
+            raw,
+            candidate,
+            np.array([0.0, 0.8]),
+            model_factory=Mass,
+            initial_sensitivity=directions,
+        )

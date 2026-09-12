@@ -1,5 +1,55 @@
 # Native Port Implementation Checkpoint
 
+## Native Node Tangents and Window Sensitivities Qualified
+
+Updated 2026-09-12 UTC. Previous window commit cf08782da is confirmed pushed.
+At the current candidate's .600 s node, the 12-component pose/rate closure
+Jacobian has rank 12 in 54 native variables, leaving 42 tangent directions.
+Centered probes at 3e-6 and 1e-6 give relative Jacobian change 6.60217e-10;
+smallest singular value .197542, largest 9.95505 under the stated raw SI scales.
+Tangent perturbations 1e-4 give maximum closure 2.46267e-9, while 1e-5 gives
+6.67004e-11. This is a local tangent audit, not finite-step closure retraction.
+Receipt native_evidence/native-node-tangent-audit-9967-01.json records all values.
+Raw node/basis/Jacobian NPZ SHA-256:
+05e7dfbfd0f8e9081da117fe300d606cfd8210208c9b0a38673766dc539ec339.
+
+replay_marker_sensitivities now optionally accepts an initial_state and
+initial_sensitivity directions for a window, appended after all effort columns.
+It reuses the existing augmented integrator and absolute-clock replay adapter,
+and exposes readonly state_jacobian for state-defect derivatives. Full-candidate
+calls remain unchanged in meaning. Callers must qualify tangent directions;
+this API does not claim to retract arbitrary off-manifold nodes automatically.
+The return tuple has an additional state_jacobian field; consumers should use
+named fields rather than assume the old tuple length.
+
+Red test observed unsupported initial_state before implementation. Analytic
+free-mass test verifies window position/rate derivatives and absolute clock;
+combined replay/sensitivity suite 11 passed, ruff and direct mypy passed.
+ControlTower audit session 31702 exited zero. Integration of 81 effort plus
+42 node columns over .6-.8 took 4.29793 s. Primal marker difference 7.91811e-12m.
+Selected tangent columns 0/14/41 versus independent centered 1e-5 node perturbation
+replays have relative errors 1.40268e-8 / 6.36715e-8 / 6.16714e-8. All selected
+checks pass 1e-3 gate; this does not FD-qualify all 42 columns or every node.
+Receipt native_evidence/native-window-sensitivity-audit-9967-01.json.
+
+Runtime /home/dieterolson/native-window-sensitivity-9967-01 is an isolated copy
+of native-window-9967-01 with native_sensitivity.py replaced. Scripts
+check_native_node_tangent_9967_01.py and check_native_window_sensitivity_9967_01.py
+and raw receipts/NPZ are in local simscape-tour-checkpoints and ControlTower
+C:/Users/diete. Local native-window-sensitivity-bundle-9967-01.zip preserves
+source and both scripts; dependencies are the prior qualified runtime bundles.
+Same Pinocchio venv, explicit PYTHONPATH, single-thread BLAS and tight tolerances
+apply. Existing output paths refuse overwrite. No optimizer or fit improved here.
+
+Next single action: implement a tested local node retraction (closure residual
+plus tangent-coordinate preservation), with explicit state/residual scaling,
+finite radius and rejection on rank loss or closure failure. Validate first on
+an analytic constrained system and then these native 42 directions. Couple its
+local derivative to the state Jacobian before using it in multiple shooting;
+freeze current model/effort basis and require final no-reset forward replay.
+Coordinate shared acceptance/defect changes with Gemini. The actual full-swing
+fit and per-engine final acceptance remain incomplete.
+
 ## Native Shooting Window Implemented and Qualified
 
 Updated 2026-09-12 UTC. Previous goal turn made progress through bounded replay

@@ -16,6 +16,7 @@ from src.engines.physics_engines.pinocchio.python.native_replay import (
     NativeReplayEngine,
     NativeReplayResult,
     replay_candidate,
+    replay_window,
 )
 from src.shared.python.motion_matching.forward_sensitivity import (
     integrate_sensitivities,
@@ -51,6 +52,7 @@ class NativeMarkerSensitivityResult(NamedTuple):
     sensitivity_elapsed_s: float
     sensitivity_evaluations: int
     primal_marker_max_abs_difference_m: float
+    state_jacobian: Array
 
 
 def replay_marker_sensitivities(
@@ -59,6 +61,8 @@ def replay_marker_sensitivities(
     time_s: Array,
     *,
     first_control: int = 4,
+    initial_state: Array | None = None,
+    initial_sensitivity: Array | None = None,
     model_factory: Callable[
         [Mapping[str, Any]], NativeSensitivityEngine
     ] = NativePinocchioModel,
@@ -67,6 +71,11 @@ def replay_marker_sensitivities(
     max_step: float = 0.00025,
 ) -> NativeMarkerSensitivityResult:
     """Integrate all selected native control columns with one initial state.
+
+    Optional initial_sensitivity columns are state tangent directions at the
+    supplied window initial_state; the caller must qualify their closure
+    consistency. Those columns follow all effort columns. Returned state_jacobian
+    supports shooting defects; the caller owns nonlinear node retraction.
 
     Columns are coordinate-major, ascending Bernstein index through six, in
     physical N/Nm. Ordinary replay validates model identity, full clock and weld;
@@ -80,19 +89,48 @@ def replay_marker_sensitivities(
         or not 0 <= first_control <= 6
     ):
         raise ValueError("Invalid first Bernstein control")
-    primal = replay_candidate(
-        model_bytes,
-        candidate,
-        time_s,
-        model_factory=model_factory,
-        rtol=1e-11,
-        atol=1e-13,
-        max_step=max_step,
-    )
+    if initial_sensitivity is not None and initial_state is None:
+        raise ValueError("initial_sensitivity requires an explicit initial_state")
+    if initial_state is None:
+        primal = replay_candidate(
+            model_bytes,
+            candidate,
+            time_s,
+            model_factory=model_factory,
+            rtol=1e-11,
+            atol=1e-13,
+            max_step=max_step,
+        )
+    else:
+        primal = replay_window(
+            model_bytes,
+            candidate,
+            time_s,
+            initial_state,
+            model_factory=model_factory,
+            rtol=1e-11,
+            atol=1e-13,
+            max_step=max_step,
+        )
     spec = json.loads(model_bytes)
     names = spec["coordinate_order"]
     n = len(names)
-    parameters = n * (7 - first_control)
+    effort_parameters = n * (7 - first_control)
+    node_directions = (
+        np.empty((2 * n, 0))
+        if initial_sensitivity is None
+        else np.asarray(initial_sensitivity, dtype=float)
+    )
+    if (
+        node_directions.ndim != 2
+        or node_directions.shape[0] != 2 * n
+        or not np.isfinite(node_directions).all()
+    ):
+        raise ValueError("Invalid initial_sensitivity directions")
+    parameters = effort_parameters + node_directions.shape[1]
+    initial_jacobian = np.column_stack(
+        (np.zeros((2 * n, effort_parameters)), node_directions)
+    )
     doc = candidate.document
     root = next(joint for joint in spec["joints"] if joint["parent"] == "world")
     profile = NativeEffortProfile(
@@ -114,21 +152,29 @@ def replay_marker_sensitivities(
         inputs = profile.bernstein_control_jacobian(
             t, basis_duration_s=doc["duration_s"], first_control=first_control
         )
-        b = np.vstack((np.zeros((n, parameters)), local.deffort @ inputs))
+        b = np.vstack(
+            (
+                np.zeros((n, parameters)),
+                np.column_stack(
+                    (local.deffort @ inputs, np.zeros((n, node_directions.shape[1])))
+                ),
+            )
+        )
         return np.concatenate((state[n:], [acceleration[name] for name in names])), a, b
 
     integrated = integrate_sensitivities(
-        np.asarray(doc["q0"] + doc["qd0"]),
-        time_s,
-        linearize,
+        primal.integration.state[0],
+        time_s - time_s[0],
+        lambda t, state: linearize(t + float(time_s[0]), state),
         parameters,
+        initial_sensitivity=initial_jacobian,
         rtol=rtol,
         atol=atol,
         max_step=max_step,
     )
     positions, derivatives = [], []
     for t, state, sensitivity in zip(
-        integrated.integration.time,
+        time_s,
         integrated.integration.state,
         integrated.state_parameter_jacobian,
         strict=True,
@@ -173,4 +219,5 @@ def replay_marker_sensitivities(
         integrated.integration.elapsed_s,
         integrated.integration.evaluations,
         difference,
+        integrated.state_parameter_jacobian,
     )

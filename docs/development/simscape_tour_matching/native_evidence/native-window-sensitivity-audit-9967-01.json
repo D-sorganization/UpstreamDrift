@@ -1,0 +1,22 @@
+{
+  "candidate_sha256": "499535d5eed7f74f27f836f267f7ef1956f58c5e28bb08a4b6b13a44da7c6048",
+  "qualification": "selected native tangent sensitivity qualification, not optimized shooting",
+  "sensitivity_elapsed_s": 4.297925268008839,
+  "primal_marker_max_abs_difference_m": 7.918110611626616e-12,
+  "rows": [
+    {
+      "column": 0,
+      "relative_error": 1.4026782889253108e-8
+    },
+    {
+      "column": 14,
+      "relative_error": 6.367154525499288e-8
+    },
+    {
+      "column": 41,
+      "relative_error": 6.167144745314369e-8
+    }
+  ],
+  "passed": true,
+  "runner_sha256": "a93fac727f76a15c6df4787507d940436a9a27afea415b87a79530c2a9da3261"
+}
