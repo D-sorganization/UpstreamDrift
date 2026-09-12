@@ -1,5 +1,15 @@
 # Constrained Shooting Implementation Assignment
 
+## Current Implementation Checkpoint
+
+Backend77eb87cca plus type fix5c6765de4 is implemented and pushed;33 relevant
+tests and normal push checks pass. Do not repeat the implementation plan below
+as if it were unstarted. The current next action is the native projected-equality
+audit recorded at the TOP of NATIVE_PORT_CHECKPOINT_20260911.md. Qualify its
+actual results before starting optimization. Historical design steps below
+remain useful acceptance and review requirements, not instructions to duplicate
+the new equality_least_squares.py backend.
+
 ## Evidence and Scope
 
 Read the top of NATIVE_PORT_CHECKPOINT_20260911.md and the raw run13 and
