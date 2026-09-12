@@ -5,6 +5,7 @@ limits and time integration require separate qualification before swing fitting.
 """
 
 from collections.abc import Mapping, Sequence
+from importlib import import_module
 from typing import Any, NamedTuple
 
 import numpy as np
@@ -51,7 +52,9 @@ class NativePinocchioModel:
     """Own per-instance Pinocchio data and preserve native primitive coordinates."""
 
     def __init__(self, specification: Mapping[str, Any]) -> None:
-        import pinocchio as pin
+        # The optional C++ runtime exposes APIs absent from local partial stubs.
+        # Keep that dynamic boundary explicit; public arrays/maps remain typed.
+        pin: Any = import_module("pinocchio")
 
         if specification.get("schema_version") != 1:
             raise ValueError("Unsupported native geometry schema")
@@ -69,10 +72,10 @@ class NativePinocchioModel:
             "Ry": pin.JointModelRY,
             "Rz": pin.JointModelRZ,
         }
-        for joint in depth_first_joints(specification["joints"]):
-            parent, parent_pose = self._bodies[joint["parent"]]
-            placement = parent_pose * self._transform(joint["parent_to_base"])
-            for primitive in joint["primitives"]:
+        for joint_spec in depth_first_joints(specification["joints"]):
+            parent, parent_pose = self._bodies[joint_spec["parent"]]
+            placement = parent_pose * self._transform(joint_spec["parent_to_base"])
+            for primitive in joint_spec["primitives"]:
                 name = primitive["coordinate"]
                 if name in self._coordinates or primitive["primitive"] not in factories:
                     raise ValueError("Duplicate or unsupported native coordinate")
@@ -82,12 +85,12 @@ class NativePinocchioModel:
                 self._coordinates[name] = self.model.joints[parent].idx_q
                 self._velocity_indices[name] = self.model.joints[parent].idx_v
                 placement = pin.SE3.Identity()
-            child = joint["child"]
+            child = joint_spec["child"]
             if child in self._bodies:
                 raise ValueError("Native body has multiple tree parents")
             self._bodies[child] = (
                 parent,
-                self._transform(joint["child_to_follower"]).inverse(),
+                self._transform(joint_spec["child_to_follower"]).inverse(),
             )
         if set(self._coordinates) != set(specification["coordinate_order"]):
             raise ValueError("Native coordinate inventory was not preserved")
@@ -102,7 +105,7 @@ class NativePinocchioModel:
                 self.model.appendBodyToJoint(
                     joint, inertia, body_pose * self._transform(solid["placement"])
                 )
-        self._frames = {}
+        self._frames: dict[str, int] = {}
         for frame in specification["frames"]:
             joint, body_pose = self._bodies[frame["body"]]
             placement = body_pose * self._transform(frame["placement"])
