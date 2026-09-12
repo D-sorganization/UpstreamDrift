@@ -1,3 +1,20 @@
+# DRY Quarantine Tightening Handoff Checkpoint — 2026-09-12
+
+- Worktree: C:/Users/diete/Repositories/UpstreamDrift
+- Branch: conductor/issue-8695; PR #10005.
+- Governing issue: #8695 (DRY duplication ratchet drift). Entry DL-#8695.
+- Change: deleted 72 entries from `scripts/config/dry_duplication_quarantine.json`
+  that occur fewer than twice under every supported runtime (666 → 594). The
+  ledger is a union of Python 3.11 and 3.12+ tokenizer fingerprints, so the
+  gate's single-runtime stale report (202 locally) overstates what can be
+  removed; 130 entries are live on exactly one family and were kept.
+- Verification: `python3 scripts/ci/check_dry_duplication_gate.py` exits 0 on
+  3.11, 3.12, 3.13 and 3.14; `tests/unit/scripts/test_dry_duplication_gate.py`
+  passes; `scripts/ci/check_spec_changelog_duplicates.py` exits 0.
+- Next: pay down the remaining 594 cluster by cluster (see DL-#8695 next step).
+  Follow-up worth filing: make `_stale_quarantine_entries` runtime-aware.
+- Preserved peer handoffs below.
+
 # Architecture Map Contract Handoff Checkpoint — 2026-09-10
 
 - Worktree: C:/Users/diete/Repositories/UpstreamDrift
