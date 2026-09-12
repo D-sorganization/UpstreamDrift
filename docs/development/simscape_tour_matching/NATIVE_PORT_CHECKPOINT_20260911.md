@@ -1,5 +1,46 @@
 # Native Port Implementation Checkpoint
 
+## Program Expansion and First Continuous Diagnostic
+
+OpenSim is now part of the working program under
+[Epic #10003](https://github.com/D-sorganization/UpstreamDrift/issues/10003).
+A parallel planning agent committed/pushed its detailed seven-stage epic and
+handoff as 0517dea90 in `Worktrees/UpstreamDrift-opensim-10003`, branch
+`docs/10003-opensim-matching-epic`. OpenSim implementation has not started;
+the requested user check-in is the next program milestone. Pinocchio's
+analogous lower-agent plan is `PINOCCHIO_EXECUTION_PLAN.md` in this directory.
+
+The shared `continuous_forward.py` helper was developed red-to-green with
+seven unit tests, including analytic nonconstant sextic forcing, absolute
+time, invalid clocks and invalid derivatives. It integrates one explicit
+Euclidean state equation from t=0 without target injection or feedback.
+Native adapters remain responsible for physical constraints and validation.
+
+Actual ControlTower Pinocchio first-prefix run completed in 0.739 s for
+9002 derivative evaluations, ending at the last native sample before 0.60 s:
+0.5992645005689832 s. Its maximum grip pose residual is 3.68e-11 and velocity
+residual 1.15e-10. Maximum coordinate difference from the saved native replay
+is 0.002785 and rate difference 0.06994 (mixed coordinate units; inspect
+per-coordinate values). This is preliminary evidence, not an accepted
+continuous-parity result or an end-to-end optimizer speedup benchmark.
+
+Raw result: `simscape-tour-checkpoints/native-continuous-600ms-9967-01.json`
+locally and `ControlTower:C:/Users/diete/native-continuous-600ms-9967-01.json`.
+Compact summary: `native_evidence/native_continuous_prefix_diagnostic_9967.json`.
+Reference: `native-rollout-reference-9967-01.json` in the local archive and on
+both remote hosts (under SimscapeTour9921 on DeskComputer, user root on
+ControlTower). It preserves exact native time/q/qd and saved polynomial
+coefficients, exported by a fresh R2025b process from the existing MAT replay.
+No new optimized or tighter-tolerance native replay has been run yet.
+
+Reproducer: `check_native_continuous_rollout.py` with module/integrator/spec/
+fixture/output paths and `--duration 0.6`. Source identities are in the raw
+receipt. ControlTower's isolated Pin environment now additionally has SciPy
+1.18.1. Next: derive marker errors, perform step/tolerance convergence, and
+compare a fresh tighter-tolerance R2025b baseline before extending the horizon.
+All native export and first-prefix diagnostic jobs from this checkpoint are
+terminal; do not restart them as if still active.
+
 ## Current Result: Acceleration Parity Repaired and Verified
 
 The failure below is now resolved for the tested states and inputs. The port

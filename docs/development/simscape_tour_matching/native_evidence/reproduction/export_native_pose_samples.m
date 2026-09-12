@@ -1,4 +1,4 @@
-function export_native_pose_samples(runtime_root,replay_path,output_path,spec_path)
+function export_native_pose_samples(runtime_root,replay_path,output_path,spec_path,full_trajectory)
 %EXPORT_NATIVE_POSE_SAMPLES Independent native FK at exact saved rollout states.
 % This diagnostic never saves or changes the source model on disk.
     arguments
@@ -6,6 +6,7 @@ function export_native_pose_samples(runtime_root,replay_path,output_path,spec_pa
         replay_path (1,1) string
         output_path (1,1) string
         spec_path (1,1) string = ""
+        full_trajectory (1,1) logical = false
     end
     assert(strcmp(version('-release'),'2025b'),'Require MATLAB R2025b.');
     assert(~isfile(output_path),'Refuse to overwrite an existing receipt.');
@@ -55,6 +56,11 @@ function export_native_pose_samples(runtime_root,replay_path,output_path,spec_pa
         'time_s',clock(indices),'coordinate_names',schema.coordinate_names, ...
         'q',joints.q(indices,:),'frame_names',string({schema.frames.name}), ...
         'poses',poses,'geometry_in',seed.geometry_in);
+    if full_trajectory
+        result.trajectory = struct('time_s',clock,'q',joints.q,'qd',joints.qd);
+        result.native_coefficients = reshape(saved.fit_theta,7,[])';
+        result.coefficient_convention = 'highest power first; absolute seconds; world force inputs';
+    end
     if strlength(spec_path)>0
         spec = jsondecode(fileread(spec_path));
         assert(isequal(string(spec.coordinate_order(:)),schema.coordinate_names(:)), ...
