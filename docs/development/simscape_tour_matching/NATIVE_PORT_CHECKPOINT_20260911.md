@@ -1,5 +1,47 @@
 # Native Port Implementation Checkpoint
 
+## Runtime18 Staged; Corrected Scaled Callback Audit Is Live
+
+Updated 2026-09-12 UTC. Prior turn made progress with tested scaling code and
+parallel native-engine assignments. Runtime18 copies runtime14 and changes only
+two source modules, verified against manifest hashes:
+
+- equality_least_squares.py:957824da301fa29d5ef6dfcb32fe5dbc83012359f1a8bd8452beee063d29fc45
+- multi_shooting_fit.py:aa3389db38600c7706ada8edc6485716f551385386f798f76a5343721c4a4ee9
+
+Path /home/dieterolson/native-ms-pilot-9967-18, same Pinocchio venv and single
+BLAS thread settings as before. Driver18 records actual half-box-width scales:
+effort half-widths from unchanged bounds, node scales0.05. All physical inputs,
+original q0/qd0,0.85 s coverage and0.8 s sextic basis remain the run17 problem.
+
+Initial audit18 session36816 exited1 after its centered random probe crossed a
+nearby effort bound. Native selected window derivative audit passed first; no
+optimization ran. Preserve raw-failed-audit.zip under ms_scaled_audit_9967_18.
+This is a probe-domain failure, not a failed model comparison. Corrected audit18b
+masks probe directions for variables with scaled room<=1e-4 on either side,
+then checks actual scaled objective and constraint callbacks by centered finite
+differences. It records the excluded count; these checks do not cover boundary
+coordinates. Bounds and solver code are unchanged. Full mathematical chain-rule
+coverage comes from local tests; native selected window checks are separate.
+
+LIVE audit18b: session36203, confirmed ControlTower-Runner PID2290561. Output
+C:/Users/diete/native-ms-scaled-audit-9967-18b. Run via env
+PYTHONPATH=/home/dieterolson/native-ms-pilot-9967-18 OPENBLAS_NUM_THREADS=1
+OMP_NUM_THREADS=1 and the existing Pinocchio venv Python, executing
+/mnt/c/Users/diete/audit_native_scaled_9967_18b.py. Poll exact process/session;
+do not rerun against existing output or edit runtime18. No fit has launched.
+
+Exact staging files, both audit scripts and scaled driver are archived in
+native_evidence/native-ms-scaled-bundle-9967-18.zip. On terminal audit exit,
+inspect derivative results AND conditioning report before authorizing the same-
+problem scaled fitting comparison. Preserve failure evidence if any check fails.
+Issue9967 lease renewed through17:37:05 UTC (receipt5646875703).
+
+MuJoCo10021 and Drake10022 agents report preliminary native pulse/moving parity;
+Drake additionally reports custom constrained0.8 s replay parity. Root has not
+yet independently reviewed their durable artifacts. Their engine-specific
+handoffs and commits must be inspected before publishing equivalence claims.
+
 ## Parallel MuJoCo and Drake Scope Added
 
 Updated 2026-09-12 UTC. The user explicitly added MuJoCo and Drake native
