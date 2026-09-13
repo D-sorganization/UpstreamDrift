@@ -14,13 +14,18 @@
   returned81 whole 26.4 mm, terminal 46.3 mm, club 16.0 mm, early 11.4 mm, yaw
   13.9 % (still rejected). That lane is the optimizer; this lane is the R2025b
   reference.
-- Next bounded task here: replay returned81's polynomial in MATLAB R2025b with
-  the existing qualified replay tooling and report same-input parity through
-  0.85 s on the five shared metrics. Do not resume horizon pushes with degrees
-  0–3 frozen; that is a basis-authority limit (see the archived HANDOFF).
-- Objective definitions differ between lanes (this lane: normalized trajectory
-  plus terminal, clubhead and shaft-inclination terms; native lane: run73 score).
-  Report the five uninterrupted metrics, never the cost, when comparing.
+- Completed independent MATLAB R2025b Update 5 forward replay audits on DeskComputer
+  for native candidates `returned81` and `returned83` (0–0.85 s continuous forward dynamics,
+  307 samples @ 360 Hz, zero resets). Replays executed via `replay_returned81_r2025b.m`
+  and `replay_returned83_r2025b.m`.
+- The audits establish that raw native polynomial coefficients driving `GolfSwing3D_Kinetic`
+  produce large tracking errors (returned81: whole 594 mm; returned83: whole 610 mm)
+  versus Pinocchio's fitted performance (returned81: whole 26.4 mm; returned83: whole 23.3 mm),
+  confirming that direct unadapted execution through Simscape requires the kinematic adapter
+  layer to map coordinate conventions and joint signs. Evidence recorded in
+  `docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81/` and `.../two_window_fit_9967_83/`.
+- Continuation 84 is actively running on ControlTower under systemd (`two-window-fit-84.service`)
+  with terminal weight 6.0 (36x penalty) and box factor 2.5 to drive terminal RMS <= 35 mm.
 
 ## Active Horizon Execution & Parity Turnover (2026-09-12 Live Continuation)
 
