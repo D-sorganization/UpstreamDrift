@@ -44,8 +44,9 @@ motion = export_native_motion(adapter, time_s, q, qd, qdd, primitive_efforts)
 q_copy, qd_copy, qdd_copy, effort_copy = restore_native_motion(adapter, motion)
 ```
 
-This milestone provides in-memory conversion. File serialization, user interface,
-complete frame transport and all-engine trajectory qualification remain open.
+The in-memory and versioned file conversion milestones are implemented. User
+interface, complete frame transport and all-engine trajectory qualification
+remain open. The file API and executable demonstration are documented below.
 Eighteen new tests cover branch/winding, quaternion sign, power, deep ownership,
 metadata and malformed/singular samples; RED was observed for missing module and
 public exports. Root independently passes89 related representation tests, Ruff
@@ -61,33 +62,110 @@ TDD red states were observed before implementation: absent joint_chart and frame
 
 The [Canonical Matching Handoff](../HANDOFF.md#representation-qualification) records one 0.85-second same-input parity pass (run58), followed by a tighter-step run59 that fails native velocity parity. The isolated pass therefore does not qualify robust trajectory convergence. Pointwise acceleration and effort audits do not establish trajectory or MATLAB equivalence. The manifold implementation is currently slower than the scalar reference in those experiments; no general speed improvement is established. Keep the scalar native baseline available for matching while qualifying alternate integration. Historical test counts below describe their original checkpoints rather than current total coverage.
 
-## Next Bounded Task: Native Motion Files and Consumers
+## Implemented Native Motion File API
 
-The validated in-memory envelope and batch converters above are implemented.
-Do not recreate them. Coordinate #10043 ownership before edits and #8867 before
-changing motion_pipeline consumers. Continue in these bounded TDD stages:
+`native_motion_io.py` now provides public lazy exports `NativeMotionDocument`,
+`save_native_motion(sequence, path, *, raw_model_sha256=None)` and
+`load_native_motion(path)`. Loading returns the frozen document with `.sequence`
+and `.raw_model_sha256`. The optional raw-file hash is caller-supplied provenance,
+separate from the canonical `sequence.specification_sha256`; it does not prove
+those source bytes are present or match the specification.
 
-1. Add `load_native_motion` and `save_native_motion` around the existing envelope,
-   with an explicit file schema and separately labeled raw model artifact hash.
-   Validate version, units, quaternion/frame conventions, coordinate inventory
-   and sample counts through the existing constructor. Do not infer conventions.
-   Keep CanonicalPose and initial-state formats unchanged. Test malformed files
-   and atomic writes that preserve the previous result on interruption.
-2. Roundtrip a real-specification multi-sample motion through disk and the public
-   export/restore API, including nonzero velocity/acceleration, both angle
-   branches/windings, quaternion sign equivalence and virtual-work preservation.
-   Preserve failure index/time; never silently skip a singular sample.
-3. Add a distinct motion import/export command or service alongside pose-only
-   routing. Record executable example and output location. The current in-memory
-   example is not a file-format or UI completion claim.
-4. Expose only supported fixed-frame pose/twist/wrench conversions by delegating
-   FixedFrameTransport. Do not apply a rotation alone to a twist at a shifted
-   origin or advertise moving-frame acceleration transport without its terms.
-5. Feed the restored named native sequence into real Pinocchio, MuJoCo and Drake
-   frame and acceleration providers. Archive runtime versions, input hashes and
-   transform/physical-velocity/acceleration/power discrepancies. A serializer or
-   FK roundtrip does not qualify alternate dynamics. Independent R2025b and
-   uninterrupted representative trajectory parity remain later acceptance gates.
+The `native-motion-file-v1` JSON contains the complete validated
+`native-motion-sequence-v1` record: timestamps, coordinate/primitive inventory,
+fixed frames, original per-sample native branches, quaternion/rate/acceleration/
+moment data and scalar conjugate efforts. Unknown fields/versions, duplicate JSON
+keys, nonfinite numbers and malformed inventories are rejected. A unique temporary
+sibling is flushed and fsynced before atomic replacement; failures propagate and
+clean the temporary file while preserving an existing target. The destination's
+parent directory must exist. Existing CanonicalPose initial-state formats remain
+unchanged.
+
+TDD observed missing-module and missing-public-export RED states. Twelve new I/O
+tests pass, including full nonzero-state roundtrip and injected replacement failure
+preserving the original file. The implementing agent passed36 combined I/O,
+sequence and public-surface tests; root independently passed101 related tests,
+Ruff and mypy. These are persistence/conversion checks, not engine dynamics parity.
+
+The multi-sample consumer suite additionally passes five checks, including all16
+native MuJoCo frames at three restored states with1e-12 absolute agreement.
+Drake and Pinocchio consumer cases explicitly skip locally because those runtimes
+are absent. Manufactured states need not satisfy the weld and are not integrated;
+this is frame/branch preservation, not alternate-joint dynamics qualification.
+
+## Runnable File Roundtrip Example
+
+Run this Python block from the repository root, for example through `python -`.
+It uses the real specification but deliberately manufactured kinematics and efforts
+for a file-contract demonstration. It is not a recorded C3D swing, constrained
+trajectory or accepted dynamics result. The output is
+`docs/development/simscape_tour_matching/native_evidence/motion_io_example/manufactured-motion.json`.
+
+```python
+import hashlib
+import json
+from pathlib import Path
+import numpy as np
+from src.shared.python.pose_interchange import (
+    NativeJointStateAdapter, export_native_motion, restore_native_motion,
+    save_native_motion, load_native_motion,
+)
+
+root = Path("docs/development/simscape_tour_matching/native_evidence")
+model_bytes = (root / "native_geometry_spec_9967.json").read_bytes()
+adapter = NativeJointStateAdapter(json.loads(model_bytes))
+time_s = np.array([0.0, 0.05, 0.1])
+t = time_s[:, None]
+channels = np.ones((1, len(adapter.coordinate_order)))
+q = (0.2 + 0.1 * t + 0.05 * t**2) * channels
+qd = (0.1 + 0.1 * t) * channels
+qdd = np.full_like(q, 0.1)
+primitive_efforts = np.full_like(q, 2.0)
+motion = export_native_motion(adapter, time_s, q, qd, qdd, primitive_efforts)
+output = root / "motion_io_example" / "manufactured-motion.json"
+output.parent.mkdir(parents=True, exist_ok=True)
+save_native_motion(
+    motion, output, raw_model_sha256=hashlib.sha256(model_bytes).hexdigest()
+)
+loaded = load_native_motion(output)
+assert loaded.sequence.times_s == tuple(time_s)
+assert loaded.sequence.native_reference == motion.native_reference
+assert loaded.raw_model_sha256 == hashlib.sha256(model_bytes).hexdigest()
+for actual, expected in zip(
+    restore_native_motion(adapter, loaded.sequence),
+    (q, qd, qdd, primitive_efforts), strict=True,
+):
+    np.testing.assert_allclose(actual, expected, rtol=0, atol=1e-12)
+print(output.resolve())
+```
+
+The exact block above was executed locally: all roundtrip assertions passed and
+the labeled manufactured JSON artifact was created. No physics runtime was used.
+
+A real-motion example still needs independently available primal q/qd and genuine
+qdd/primitive effort data. The inspected run72 archive has time, marker and state
+Jacobians and primal marker positions; `state_jacobian` is not the primal state
+trajectory. Do not treat it as q/qd or fabricate qdd. Retrieve archived primal
+state or replay with the actual engine under a separately authorized bounded job.
+
+## Next Bounded Tasks: Motion Consumers and Qualification
+
+1. Add a distinct motion import/export command or service alongside existing
+   pose-only routing, using the implemented file and batch APIs. Do not recreate
+   their serializers or conventions. Provide an executable user command and
+   output location. Coordinate #10043 ownership and #8867 before changing
+   motion_pipeline consumers.
+2. Add a real native-motion demonstration using archived/replayed primal states
+   and actual provider acceleration and primitive efforts. Verify branch,
+   quaternion-sign and virtual-work roundtrip; preserve source/runtime hashes.
+3. Expose only supported fixed-frame pose/twist/wrench conversion through
+   FixedFrameTransport. Full body motion needs FK and attachment composition;
+   joint-local quaternions are not world body poses. Moving-frame acceleration
+   requires transport terms not yet implemented.
+4. Feed restored named samples into real Pinocchio, MuJoCo and Drake frame and
+   acceleration providers. Archive input/runtime hashes and discrepancies.
+   Serializer/FK roundtrip is not alternate dynamics qualification. Independent
+   MATLAB R2025b and uninterrupted representative trajectory parity remain gates.
 
 ## Controlled Follow-On Implementation
 
@@ -106,7 +184,7 @@ changing motion_pipeline consumers. Continue in these bounded TDD stages:
 Run from the UpstreamDrift worktree:
 
 ```powershell
-python -m pytest tests/unit/pose_interchange/test_native_motion_sequence.py tests/unit/pose_interchange/test_joint_chart.py tests/unit/pose_interchange/test_frame_transport.py tests/unit/pose_interchange/test_public_surface.py tests/unit/pose_interchange/test_native_joint_state.py -q --no-cov -m unit
+python -m pytest tests/unit/pose_interchange/test_native_motion_io.py tests/unit/pose_interchange/test_native_motion_sequence.py tests/unit/pose_interchange/test_joint_chart.py tests/unit/pose_interchange/test_frame_transport.py tests/unit/pose_interchange/test_public_surface.py tests/unit/pose_interchange/test_native_joint_state.py -q --no-cov -m unit
 python -m mypy src/shared/python/pose_interchange/joint_chart.py src/shared/python/pose_interchange/frame_transport.py --follow-imports=silent
 python -m ruff check src/shared/python/pose_interchange/joint_chart.py src/shared/python/pose_interchange/frame_transport.py
 ```

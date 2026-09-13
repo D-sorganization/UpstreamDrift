@@ -76,6 +76,12 @@ if TYPE_CHECKING:
         restore_native_motion,
     )
 
+    from .native_motion_io import (
+        NativeMotionDocument,
+        load_native_motion,
+        save_native_motion,
+    )
+
 _EXPORT_MODULES = {
     "CONVENTION_TAG": "src.shared.python.pose_interchange.canonical",
     "CanonicalPose": "src.shared.python.pose_interchange.canonical",
@@ -107,6 +113,9 @@ _EXPORT_MODULES = {
     "NativeMotionSequence": ".native_motion_sequence",
     "export_native_motion": ".native_motion_sequence",
     "restore_native_motion": ".native_motion_sequence",
+    "NativeMotionDocument": ".native_motion_io",
+    "load_native_motion": ".native_motion_io",
+    "save_native_motion": ".native_motion_io",
 }
 
 
@@ -159,6 +168,9 @@ __all__ = [
     "NativeMotionSequence",
     "export_native_motion",
     "restore_native_motion",
+    "NativeMotionDocument",
+    "load_native_motion",
+    "save_native_motion",
     "SingularChartError",
     "CapabilityError",
     "JointSlot",

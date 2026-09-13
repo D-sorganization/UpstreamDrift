@@ -1,0 +1,352 @@
+{
+  "file_convention": "native-motion-file-v1",
+  "raw_model_sha256": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+  "sequence": {
+    "convention_tag": "native-motion-sequence-v1",
+    "coordinate_order": [
+      "TranslationInputX",
+      "TranslationInputY",
+      "TranslationInputZ",
+      "HipInputX",
+      "HipInputY",
+      "HipInputZ",
+      "SpineInputX",
+      "SpineInputY",
+      "TorsoInput",
+      "LEInput",
+      "LFInput",
+      "LScapInputX",
+      "LScapInputY",
+      "LSInputX",
+      "LSInputY",
+      "LSInputZ",
+      "LWInputX",
+      "LWInputY",
+      "REInput",
+      "RFInput",
+      "RScapInputX",
+      "RScapInputY",
+      "RSInputX",
+      "RSInputY",
+      "RSInputZ",
+      "RWInputX",
+      "RWInputY"
+    ],
+    "native_reference": [
+      [
+        0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+        0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2
+      ],
+      [
+        0.205125, 0.205125, 0.205125, 0.205125, 0.205125, 0.205125, 0.205125,
+        0.205125, 0.205125, 0.205125, 0.205125, 0.205125, 0.205125, 0.205125,
+        0.205125, 0.205125, 0.205125, 0.205125, 0.205125, 0.205125, 0.205125,
+        0.205125, 0.205125, 0.205125, 0.205125, 0.205125, 0.205125
+      ],
+      [
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002,
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002,
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002,
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002,
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002,
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002,
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002,
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002,
+        0.21050000000000002, 0.21050000000000002, 0.21050000000000002
+      ]
+    ],
+    "primitive_types": [
+      ["TranslationInputX", "Px"],
+      ["TranslationInputY", "Py"],
+      ["TranslationInputZ", "Pz"],
+      ["HipInputX", "Rx"],
+      ["HipInputY", "Ry"],
+      ["HipInputZ", "Rz"],
+      ["SpineInputX", "Rx"],
+      ["SpineInputY", "Ry"],
+      ["TorsoInput", "Rz"],
+      ["LEInput", "Rz"],
+      ["LFInput", "Rz"],
+      ["LScapInputX", "Rx"],
+      ["LScapInputY", "Ry"],
+      ["LSInputX", "Rx"],
+      ["LSInputY", "Ry"],
+      ["LSInputZ", "Rz"],
+      ["LWInputX", "Rx"],
+      ["LWInputY", "Ry"],
+      ["REInput", "Rz"],
+      ["RFInput", "Rz"],
+      ["RScapInputX", "Rx"],
+      ["RScapInputY", "Ry"],
+      ["RSInputX", "Rx"],
+      ["RSInputY", "Ry"],
+      ["RSInputZ", "Rz"],
+      ["RWInputX", "Rx"],
+      ["RWInputY", "Ry"]
+    ],
+    "rotation_groups": [
+      {
+        "axes": "XYZ",
+        "child_body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+        "child_to_follower": [
+          [1.0, 0.0, 0.0, 0.0],
+          [0.0, -1.0, 0.0, 0.0],
+          [0.0, 0.0, -1.0, 0.15239999999999998],
+          [0.0, 0.0, 0.0, 1.0]
+        ],
+        "coordinates": ["HipInputX", "HipInputY", "HipInputZ"],
+        "name": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+        "parent_body": "world",
+        "parent_to_base": [
+          [1.0, 0.0, 0.0, 0.0],
+          [0.0, 0.8660254037844387, -0.49999999999999994, 0.0],
+          [0.0, 0.49999999999999994, 0.8660254037844387, 0.0],
+          [0.0, 0.0, 0.0, 1.0]
+        ]
+      },
+      {
+        "axes": "XYZ",
+        "child_body": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+        "child_to_follower": [
+          [0.0, 1.0, 0.0, 0.0],
+          [0.0, 0.0, -1.0, 0.0],
+          [-1.0, 0.0, 0.0, 0.18414999999999998],
+          [0.0, 0.0, 0.0, 1.0]
+        ],
+        "coordinates": ["LSInputX", "LSInputY", "LSInputZ"],
+        "name": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+        "parent_body": "solid_reference:GolfSwing3D_Kinetic/HubtoLS",
+        "parent_to_base": [
+          [0.0, 1.0, 0.0, 0.0],
+          [0.0, 0.0, -1.0, 0.0],
+          [-1.0, 0.0, 0.0, -0.127],
+          [0.0, 0.0, 0.0, 1.0]
+        ]
+      },
+      {
+        "axes": "XYZ",
+        "child_body": "solid_reference:GolfSwing3D_Kinetic/RUpperArm",
+        "child_to_follower": [
+          [0.0, 1.0, 0.0, 0.0],
+          [0.0, 0.0, -1.0, 0.0],
+          [-1.0, 0.0, 0.0, 0.18414999999999998],
+          [0.0, 0.0, 0.0, 1.0]
+        ],
+        "coordinates": ["RSInputX", "RSInputY", "RSInputZ"],
+        "name": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+        "parent_body": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
+        "parent_to_base": [
+          [0.0, 1.0, 0.0, 0.0],
+          [0.0, 0.0, -1.0, 0.0],
+          [-1.0, 0.0, 0.0, -0.127],
+          [0.0, 0.0, 0.0, 1.0]
+        ]
+      }
+    ],
+    "specification_sha256": "db7cd60496edd1adef789b965bce897f12e20d9460b957a31d7fd99c8fd31518",
+    "states": [
+      {
+        "convention_tag": "native-joint-manifold-v1",
+        "rotations": {
+          "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint": {
+            "alpha_parent_rad_s2": [
+              0.12966759885791856, 0.06733843742071217, 0.1218264651349763
+            ],
+            "moment_parent_nm": [2.0, 1.6352576188650405, 2.0],
+            "omega_parent_rad_s": [
+              0.11986693307950613, 0.07853574066869164, 0.11591998277965039
+            ],
+            "quaternion_wxyz": [
+              0.9840922354201347, 0.10875532486514691, 0.08892148678893702,
+              0.10875532486514691
+            ]
+          },
+          "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven": {
+            "alpha_parent_rad_s2": [
+              0.12966759885791856, 0.06733843742071217, 0.1218264651349763
+            ],
+            "moment_parent_nm": [2.0, 1.6352576188650405, 2.0],
+            "omega_parent_rad_s": [
+              0.11986693307950613, 0.07853574066869164, 0.11591998277965039
+            ],
+            "quaternion_wxyz": [
+              0.9840922354201347, 0.10875532486514691, 0.08892148678893702,
+              0.10875532486514691
+            ]
+          },
+          "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven": {
+            "alpha_parent_rad_s2": [
+              0.12966759885791856, 0.06733843742071217, 0.1218264651349763
+            ],
+            "moment_parent_nm": [2.0, 1.6352576188650405, 2.0],
+            "omega_parent_rad_s": [
+              0.11986693307950613, 0.07853574066869164, 0.11591998277965039
+            ],
+            "quaternion_wxyz": [
+              0.9840922354201347, 0.10875532486514691, 0.08892148678893702,
+              0.10875532486514691
+            ]
+          }
+        },
+        "scalars": {
+          "LEInput": [0.2, 0.1, 0.1, 2.0],
+          "LFInput": [0.2, 0.1, 0.1, 2.0],
+          "LScapInputX": [0.2, 0.1, 0.1, 2.0],
+          "LScapInputY": [0.2, 0.1, 0.1, 2.0],
+          "LWInputX": [0.2, 0.1, 0.1, 2.0],
+          "LWInputY": [0.2, 0.1, 0.1, 2.0],
+          "REInput": [0.2, 0.1, 0.1, 2.0],
+          "RFInput": [0.2, 0.1, 0.1, 2.0],
+          "RScapInputX": [0.2, 0.1, 0.1, 2.0],
+          "RScapInputY": [0.2, 0.1, 0.1, 2.0],
+          "RWInputX": [0.2, 0.1, 0.1, 2.0],
+          "RWInputY": [0.2, 0.1, 0.1, 2.0],
+          "SpineInputX": [0.2, 0.1, 0.1, 2.0],
+          "SpineInputY": [0.2, 0.1, 0.1, 2.0],
+          "TorsoInput": [0.2, 0.1, 0.1, 2.0],
+          "TranslationInputX": [0.2, 0.1, 0.1, 2.0],
+          "TranslationInputY": [0.2, 0.1, 0.1, 2.0],
+          "TranslationInputZ": [0.2, 0.1, 0.1, 2.0]
+        },
+        "specification_sha256": "db7cd60496edd1adef789b965bce897f12e20d9460b957a31d7fd99c8fd31518"
+      },
+      {
+        "convention_tag": "native-joint-manifold-v1",
+        "rotations": {
+          "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint": {
+            "alpha_parent_rad_s2": [
+              0.13116282082272235, 0.06560578803354744, 0.12261668239606696
+            ],
+            "moment_parent_nm": [2.0, 1.6267243299520944, 2.0],
+            "omega_parent_rad_s": [
+              0.12638740179840136, 0.08185970447655744, 0.1220310117442465
+            ],
+            "quaternion_wxyz": [
+              0.9832447241116932, 0.11173673506473097, 0.09088243273960459,
+              0.11173673506473097
+            ]
+          },
+          "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven": {
+            "alpha_parent_rad_s2": [
+              0.13116282082272235, 0.06560578803354744, 0.12261668239606696
+            ],
+            "moment_parent_nm": [2.0, 1.6267243299520944, 2.0],
+            "omega_parent_rad_s": [
+              0.12638740179840136, 0.08185970447655744, 0.1220310117442465
+            ],
+            "quaternion_wxyz": [
+              0.9832447241116932, 0.11173673506473097, 0.09088243273960459,
+              0.11173673506473097
+            ]
+          },
+          "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven": {
+            "alpha_parent_rad_s2": [
+              0.13116282082272235, 0.06560578803354744, 0.12261668239606696
+            ],
+            "moment_parent_nm": [2.0, 1.6267243299520944, 2.0],
+            "omega_parent_rad_s": [
+              0.12638740179840136, 0.08185970447655744, 0.1220310117442465
+            ],
+            "quaternion_wxyz": [
+              0.9832447241116932, 0.11173673506473097, 0.09088243273960459,
+              0.11173673506473097
+            ]
+          }
+        },
+        "scalars": {
+          "LEInput": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "LFInput": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "LScapInputX": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "LScapInputY": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "LWInputX": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "LWInputY": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "REInput": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "RFInput": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "RScapInputX": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "RScapInputY": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "RWInputX": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "RWInputY": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "SpineInputX": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "SpineInputY": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "TorsoInput": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "TranslationInputX": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "TranslationInputY": [0.205125, 0.10500000000000001, 0.1, 2.0],
+          "TranslationInputZ": [0.205125, 0.10500000000000001, 0.1, 2.0]
+        },
+        "specification_sha256": "db7cd60496edd1adef789b965bce897f12e20d9460b957a31d7fd99c8fd31518"
+      },
+      {
+        "convention_tag": "native-joint-manifold-v1",
+        "rotations": {
+          "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint": {
+            "alpha_parent_rad_s2": [
+              0.13272780032910886, 0.06378727104153471, 0.12341688910884105
+            ],
+            "moment_parent_nm": [2.0, 1.6178129137471216, 2.0],
+            "omega_parent_rad_s": [
+              0.13298437781481592, 0.08509488828950566, 0.12818181760086864
+            ],
+            "quaternion_wxyz": [
+              0.9823312135101874, 0.11487196267713408, 0.09292067232327243,
+              0.11487196267713408
+            ]
+          },
+          "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven": {
+            "alpha_parent_rad_s2": [
+              0.13272780032910886, 0.06378727104153471, 0.12341688910884105
+            ],
+            "moment_parent_nm": [2.0, 1.6178129137471216, 2.0],
+            "omega_parent_rad_s": [
+              0.13298437781481592, 0.08509488828950566, 0.12818181760086864
+            ],
+            "quaternion_wxyz": [
+              0.9823312135101874, 0.11487196267713408, 0.09292067232327243,
+              0.11487196267713408
+            ]
+          },
+          "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven": {
+            "alpha_parent_rad_s2": [
+              0.13272780032910886, 0.06378727104153471, 0.12341688910884105
+            ],
+            "moment_parent_nm": [2.0, 1.6178129137471216, 2.0],
+            "omega_parent_rad_s": [
+              0.13298437781481592, 0.08509488828950566, 0.12818181760086864
+            ],
+            "quaternion_wxyz": [
+              0.9823312135101874, 0.11487196267713408, 0.09292067232327243,
+              0.11487196267713408
+            ]
+          }
+        },
+        "scalars": {
+          "LEInput": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "LFInput": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "LScapInputX": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "LScapInputY": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "LWInputX": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "LWInputY": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "REInput": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "RFInput": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "RScapInputX": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "RScapInputY": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "RWInputX": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "RWInputY": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "SpineInputX": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "SpineInputY": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "TorsoInput": [0.21050000000000002, 0.11000000000000001, 0.1, 2.0],
+          "TranslationInputX": [
+            0.21050000000000002, 0.11000000000000001, 0.1, 2.0
+          ],
+          "TranslationInputY": [
+            0.21050000000000002, 0.11000000000000001, 0.1, 2.0
+          ],
+          "TranslationInputZ": [
+            0.21050000000000002, 0.11000000000000001, 0.1, 2.0
+          ]
+        },
+        "specification_sha256": "db7cd60496edd1adef789b965bce897f12e20d9460b957a31d7fd99c8fd31518"
+      }
+    ],
+    "times_s": [0.0, 0.05, 0.1]
+  }
+}
