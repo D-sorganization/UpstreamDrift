@@ -43,7 +43,6 @@ from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: E
     TourCapture,
 )
 
-
 UNLOCK_FOR_GOLF = (
     "lumbar_extension",
     "lumbar_bending",
@@ -225,6 +224,8 @@ def main() -> int:  # noqa: PLR0915 - one bounded driver with explicit stages
     )
     receipt.update(
         rms_per_iteration_m=list(result.rms_per_iteration_m),
+        best_iteration=result.best_iteration,
+        per_marker_rms_m=result.per_marker_rms_m,
         offsets={
             k: {"body": b, "offset_m": list(o)} for k, (b, o) in result.offsets.items()
         },
