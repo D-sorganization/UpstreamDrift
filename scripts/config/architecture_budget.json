@@ -467,6 +467,42 @@
       "issue": 8875,
       "reason": "Issue #8875: pre-existing motion pipeline API run_pipeline route handler exceeds function-lines budget; PR #8875 only reconciled advertised source formats in docstrings.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/development/simscape_tour_matching/native_evidence/reproduction/constrained_sextic_transition_fit.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 9921,
+      "reason": "Issue #9921: reproduction script executes complete multi-stage transition fitting and diagnostic export workflow.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/multi_shooting_fit.py",
+      "symbol": "fit_multiple_shooting",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 9921,
+      "reason": "Issue #9921: multiple shooting optimizer coordinates interval partitioning, defect matching, and Pareto-tuning.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/multi_shooting_fit.py",
+      "symbol": "fit_multiple_shooting",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 9921,
+      "reason": "Issue #9921: multiple shooting optimizer requires options, target trajectories, initial guess, and telemetry callbacks.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/prefix_fit.py",
+      "symbol": "_run_prefix_stage",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 9921,
+      "reason": "Issue #9921: prefix stage coordinator handles De Casteljau continuity, bounds, and gate enforcement across ladder horizons.",
+      "expires_on": "2026-11-30"
     }
   ]
 }

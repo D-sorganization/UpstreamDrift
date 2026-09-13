@@ -83,7 +83,7 @@ def load_cubic_candidate(checkpoint_dir: Path) -> tuple[np.ndarray, list[str]]:
                 theta = np.array(f["fit_theta"]).ravel()
                 n_joints = len(theta) // 7
                 return theta.reshape(n_joints, 7), labels
-        except Exception as e:
+        except (OSError, KeyError, ValueError, TypeError, ImportError, AttributeError) as e:
             logger.warning("Could not read mat via h5py (%s); trying scipy or json fallback", e)
             try:
                 import scipy.io
@@ -91,7 +91,7 @@ def load_cubic_candidate(checkpoint_dir: Path) -> tuple[np.ndarray, list[str]]:
                 theta = np.array(mat["fit_theta"]).ravel()
                 n_joints = len(theta) // 7
                 return theta.reshape(n_joints, 7), labels
-            except Exception as e2:
+            except (OSError, KeyError, ValueError, TypeError, ImportError, AttributeError) as e2:
                 logger.warning("scipy loadmat failed (%s); falling back to json Bernstein conversion", e2)
 
     from src.shared.python.motion_matching.prefix_fit import bernstein_to_simscape
