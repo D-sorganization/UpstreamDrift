@@ -10,10 +10,33 @@ from src.shared.python.motion_matching.prefix_fit import (
     bernstein_to_simscape,
     fit_prefixes,
     normalized_to_simscape,
+    reexpress_bernstein_basis,
 )
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_reexpress_bernstein_basis_preserves_continuous_torque() -> None:
+    """Re-expressing Bernstein controls to a different basis duration must preserve identical torque."""
+    rng = np.random.default_rng(42)
+    controls = rng.normal(size=(5, 7))
+    t_source = 0.80
+    t_target = 1.813889
+
+    controls_target = reexpress_bernstein_basis(
+        controls, source_duration_s=t_source, target_duration_s=t_target
+    )
+
+    # Evaluate physical torque polynomials
+    coeff_source = bernstein_to_simscape(controls, duration_s=t_source)
+    coeff_target = bernstein_to_simscape(controls_target, duration_s=t_target)
+
+    t_eval = np.linspace(0.0, t_source, 100)
+    for j in range(5):
+        tau_src = np.polyval(coeff_source[j], t_eval)
+        tau_tgt = np.polyval(coeff_target[j], t_eval)
+        np.testing.assert_allclose(tau_tgt, tau_src, atol=1e-12, rtol=1e-12)
 
 
 def test_low_degree_controls_export_continuous_torque_in_physical_time() -> None:
@@ -281,7 +304,7 @@ def test_build_anatomical_marker_weights_hierarchy() -> None:
     assert weights[2] == 40.0  # Head
     assert weights[3] == 20.0  # Shoulder
     assert weights[4] == 5.0  # Elbow
-    assert weights[5] == 1.0  # Clubhead
+    assert weights[5] == 25.0  # Clubhead
     assert weights[6] == 15.0  # Custom override
 
 
@@ -362,3 +385,52 @@ def test_prefix_fit_rejects_non_finite_regularization() -> None:
             acceptance_rmse_m=0.01,
             options=PrefixFitOptions(regularization=lambda p: np.array([np.nan])),
         )
+
+
+def test_prefix_fit_pelvis_yaw_penalty_and_gate() -> None:
+    # 2 markers: WaistLeft (idx 0) and WaistRight (idx 1)
+    time = np.array([0.0, 1.0])
+    target_yaw_deg = 60.0
+    th_t = np.radians(target_yaw_deg)
+    # Waist vector of length 0.28m oriented at target_yaw_deg
+    wl_pos = np.array([-0.14 * np.cos(th_t), -0.14 * np.sin(th_t), 0.0])
+    wr_pos = np.array([0.14 * np.cos(th_t), 0.14 * np.sin(th_t), 0.0])
+    points = np.zeros((2, 2, 3))
+    points[0, 0] = [-0.14, 0.0, 0.0]
+    points[0, 1] = [0.14, 0.0, 0.0]
+    points[1, 0] = wl_pos
+    points[1, 1] = wr_pos
+
+    target = MarkerTarget(time, points, np.ones(2))
+
+    # Forward model: param is yaw angle in radians at t=1
+    def forward(parameters: np.ndarray, requested: np.ndarray) -> np.ndarray:
+        pred = np.zeros((len(requested), 2, 3))
+        pred[0, 0] = [-0.14, 0.0, 0.0]
+        pred[0, 1] = [0.14, 0.0, 0.0]
+        if len(requested) > 1:
+            th = float(parameters[0])
+            pred[1, 0] = [-0.14 * np.cos(th), -0.14 * np.sin(th), 0.0]
+            pred[1, 1] = [0.14 * np.cos(th), 0.14 * np.sin(th), 0.0]
+        return pred
+
+    # Start with an initial guess 10 degrees off (target 60 deg = ~1.047 rad, guess 50 deg = ~0.873 rad)
+    guess_th = np.radians(50.0)
+    fit = fit_prefixes(
+        target,
+        forward,
+        initial=np.array([guess_th]),
+        lower=np.zeros(1),
+        upper=np.pi * np.ones(1),
+        prefix_end_s=(1.0,),
+        acceptance_rmse_m=0.01,
+        options=PrefixFitOptions(
+            pelvis_indices=(0, 1),
+            pelvis_yaw_weight=50.0,
+            pelvis_yaw_max_error_pct=5.0,
+        ),
+    )
+    assert fit.accepted
+    stage = fit.stages[0]
+    assert stage.pelvis_yaw_error_pct < 5.0
+    assert abs(stage.pelvis_yaw_diff_deg) < 1.0  # Well within 1 degree

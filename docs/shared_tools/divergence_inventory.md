@@ -77,7 +77,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 27 | 52 | 16 | 16 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 94 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 96 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
@@ -127,7 +127,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **424** | **278** | **124** | **1219** | **661** | **702** |
+| **Total** | **424** | **278** | **124** | **1221** | **661** | **702** |
 
 ## Diverged Files by Package
 
@@ -365,7 +365,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/explorer/__init__.py` | -35 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `model_generation/explorer/model_explorer.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
 | `model_generation/export/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/humanoid/__init__.py` | +54 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `model_generation/humanoid/__init__.py` | +251 |  | Dieter Olson 2026-09-11 | Dieter Olson 2026-08-20 |
 | `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/inertia/calculator.py` | +27 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `model_generation/inertia/primitives.py` | +317 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
@@ -376,7 +376,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/library/model_library.py` | +242 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/repository.py` | +4968 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `model_generation/mesh/__init__.py` | +64 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
+| `model_generation/mesh/__init__.py` | +76 |  | Dieter Olson 2026-09-11 | Dieter Olson 2026-08-20 |
 | `model_generation/tests/test_contracts.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-03-15 |
 | `model_generation/tests/test_github_importer.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-04-19 |
 | `model_generation/tests/test_physics_validation.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-01-30 |
