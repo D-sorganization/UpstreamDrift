@@ -17,10 +17,10 @@ from typing import Any
 import numpy as np
 
 from src.engines.physics_engines.mujoco.python.native_mjcf import (
-    _inertia,
+    _add_weld_equality,
+    _attach_frame_site,
+    _attach_joint_element,
     _numbers,
-    _pose,
-    transform,
 )
 from src.shared.python.motion_matching.full_body_spec import (
     order_directed_tree,
@@ -73,33 +73,9 @@ def _build_full_body_kinematics(
         parent, child = joint["parent"], joint["child"]
         if parent not in elements:
             raise ValueError(f"Parent body {parent} not yet constructed in tree")
-        offset = np.linalg.inv(transform(joint["child_to_follower"]))
-        element = ET.SubElement(
-            elements[parent],
-            "body",
-            {
-                "name": child,
-                **_pose(offsets[parent] @ transform(joint["parent_to_base"])),
-            },
+        element, offset = _attach_joint_element(
+            elements[parent], bodies[child], joint, offsets[parent], coordinates
         )
-        for primitive in joint["primitives"]:
-            kind, name = primitive["primitive"], primitive["coordinate"]
-            if kind not in ("Px", "Py", "Pz", "Rx", "Ry", "Rz") or name in coordinates:
-                raise ValueError(f"Duplicate or unsupported coordinate: {name}")
-            coordinates.append(name)
-            ET.SubElement(
-                element,
-                "joint",
-                name=name,
-                type="slide" if kind[0] == "P" else "hinge",
-                axis=_numbers(np.eye(3)["xyz".index(kind[1])]),
-                limited="false",
-                damping="0",
-                armature="0",
-                frictionloss="0",
-                stiffness="0",
-            )
-        ET.SubElement(element, "inertial", _inertia(bodies[child], offset))
         elements[child], offsets[child] = element, offset
 
     if (
@@ -121,18 +97,11 @@ def _attach_full_body_sites(
     frame_sites: dict[str, str] = {}
     for i, frame in enumerate(spec["frames"]):
         if frame["name"] in frame_sites:
-            raise ValueError(f"Duplicate frame name {frame['name']}")
+            raise ValueError("Duplicate full-body frame")
         site = f"native_frame_{i}"
         frame_sites[frame["name"]] = site
-        body_name = frame["body"]
-        ET.SubElement(
-            elements[body_name],
-            "site",
-            {
-                "name": site,
-                "size": ".001",
-                **_pose(offsets[body_name] @ transform(frame["placement"])),
-            },
+        _attach_frame_site(
+            elements[frame["body"]], site, offsets[frame["body"]], frame["placement"]
         )
 
     contact_sites: dict[str, str] = {}
@@ -144,18 +113,18 @@ def _attach_full_body_sites(
         p_mjcf = offsets[b_name][:3, :3] @ p_body + offsets[b_name][:3, 3]
 
         geom_name = f"contact_{s_name}"
-        site_name = f"contact_site_{s_name}"
-        contact_sites[s_name] = site_name
-
         ET.SubElement(
             elements[b_name],
             "geom",
-            attrib={"class": "contact"},
             name=geom_name,
             type="sphere",
-            size=_numbers([radius]),
+            size=format(radius, ".17g"),
             pos=_numbers(p_mjcf),
+            attrib={"class": "contact"},
         )
+
+        site_name = f"contact_site_{s_name}"
+        contact_sites[s_name] = site_name
         ET.SubElement(
             elements[b_name],
             "site",
@@ -166,25 +135,13 @@ def _attach_full_body_sites(
 
     for suffix in ("a", "b"):
         closure_body = spec["closure"][f"body_{suffix}"]
-        ET.SubElement(
+        _attach_frame_site(
             elements[closure_body],
-            "site",
-            {
-                "name": f"native_closure_{suffix}",
-                "size": ".001",
-                **_pose(
-                    offsets[closure_body]
-                    @ transform(spec["closure"][f"placement_{suffix}"])
-                ),
-            },
+            f"native_closure_{suffix}",
+            offsets[closure_body],
+            spec["closure"][f"placement_{suffix}"],
         )
-    ET.SubElement(
-        ET.SubElement(root, "equality"),
-        "weld",
-        name="native_grip",
-        site1="native_closure_a",
-        site2="native_closure_b",
-    )
+    _add_weld_equality(root)
     return frame_sites, contact_sites
 
 

@@ -82,6 +82,78 @@ def _inertia(body: dict, follower: np.ndarray) -> dict[str, str]:
     }
 
 
+def _add_weld_equality(
+    root: ET.Element,
+    name: str = "native_grip",
+    site1: str = "native_closure_a",
+    site2: str = "native_closure_b",
+) -> ET.Element:
+    """Attach weld equality element between two sites."""
+    return ET.SubElement(
+        ET.SubElement(root, "equality"),
+        "weld",
+        name=name,
+        site1=site1,
+        site2=site2,
+    )
+
+
+def _attach_joint_element(
+    parent_element: ET.Element,
+    child_body: dict[str, Any],
+    joint: dict[str, Any],
+    parent_offset: np.ndarray,
+    coordinates: list[str],
+) -> tuple[ET.Element, np.ndarray]:
+    """Attach a rigid body child element, its scalar 1-DOF joints, and inertial data."""
+    offset = np.linalg.inv(transform(joint["child_to_follower"]))
+    element = ET.SubElement(
+        parent_element,
+        "body",
+        {
+            "name": joint["child"],
+            **_pose(parent_offset @ transform(joint["parent_to_base"])),
+        },
+    )
+    for primitive in joint["primitives"]:
+        kind, name = primitive["primitive"], primitive["coordinate"]
+        if kind not in ("Px", "Py", "Pz", "Rx", "Ry", "Rz") or name in coordinates:
+            raise ValueError(f"Duplicate or unsupported coordinate: {name}")
+        coordinates.append(name)
+        ET.SubElement(
+            element,
+            "joint",
+            name=name,
+            type="slide" if kind[0] == "P" else "hinge",
+            axis=_numbers(np.eye(3)["xyz".index(kind[1])]),
+            limited="false",
+            damping="0",
+            armature="0",
+            frictionloss="0",
+            stiffness="0",
+        )
+    ET.SubElement(element, "inertial", _inertia(child_body, offset))
+    return element, offset
+
+
+def _attach_frame_site(
+    element: ET.Element,
+    site_name: str,
+    body_offset: np.ndarray,
+    placement: Any,
+) -> ET.Element:
+    """Attach a marker frame site with relative rigid pose."""
+    return ET.SubElement(
+        element,
+        "site",
+        {
+            "name": site_name,
+            "size": ".001",
+            **_pose(body_offset @ transform(placement)),
+        },
+    )
+
+
 def _attach_native_sites_and_weld(
     root: ET.Element,
     elements: Mapping[str, ET.Element],
@@ -95,35 +167,18 @@ def _attach_native_sites_and_weld(
             raise ValueError("Duplicate native frame")
         site = f"native_frame_{i}"
         sites[frame["name"]] = site
-        ET.SubElement(
-            elements[frame["body"]],
-            "site",
-            {
-                "name": site,
-                "size": ".001",
-                **_pose(offsets[frame["body"]] @ transform(frame["placement"])),
-            },
+        _attach_frame_site(
+            elements[frame["body"]], site, offsets[frame["body"]], frame["placement"]
         )
     for suffix in ("a", "b"):
         body = spec["closure"][f"body_{suffix}"]
-        ET.SubElement(
+        _attach_frame_site(
             elements[body],
-            "site",
-            {
-                "name": f"native_closure_{suffix}",
-                "size": ".001",
-                **_pose(
-                    offsets[body] @ transform(spec["closure"][f"placement_{suffix}"])
-                ),
-            },
+            f"native_closure_{suffix}",
+            offsets[body],
+            spec["closure"][f"placement_{suffix}"],
         )
-    ET.SubElement(
-        ET.SubElement(root, "equality"),
-        "weld",
-        name="native_grip",
-        site1="native_closure_a",
-        site2="native_closure_b",
-    )
+    _add_weld_equality(root)
     return sites
 
 
@@ -148,36 +203,12 @@ def export_native_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
     if bodies["world"]["solids"]:
         raise ValueError("World solids require explicit static inertia support")
     elements, offsets = {"world": world}, {"world": np.eye(4)}
-    coordinates = []
+    coordinates: list[str] = []
     for joint in order_native_tree(spec["joints"]):
         parent, child = joint["parent"], joint["child"]
-        offset = np.linalg.inv(transform(joint["child_to_follower"]))
-        element = ET.SubElement(
-            elements[parent],
-            "body",
-            {
-                "name": child,
-                **_pose(offsets[parent] @ transform(joint["parent_to_base"])),
-            },
+        element, offset = _attach_joint_element(
+            elements[parent], bodies[child], joint, offsets[parent], coordinates
         )
-        for primitive in joint["primitives"]:
-            kind, name = primitive["primitive"], primitive["coordinate"]
-            if kind not in ("Px", "Py", "Pz", "Rx", "Ry", "Rz") or name in coordinates:
-                raise ValueError("Duplicate or unsupported native coordinate")
-            coordinates.append(name)
-            ET.SubElement(
-                element,
-                "joint",
-                name=name,
-                type="slide" if kind[0] == "P" else "hinge",
-                axis=_numbers(np.eye(3)["xyz".index(kind[1])]),
-                limited="false",
-                damping="0",
-                armature="0",
-                frictionloss="0",
-                stiffness="0",
-            )
-        ET.SubElement(element, "inertial", _inertia(bodies[child], offset))
         elements[child], offsets[child] = element, offset
     if (
         set(elements) != set(bodies)
