@@ -1,5 +1,24 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Latest Terminal Checkpoint: Run52
+
+Run52 handle44055 exited0. Both adaptive levels completed; both parity gates
+FAIL. Finest marker discrepancy1.17068e-6 m, native q6.06122e-6,
+native v0.00465279, closure pose2.13249e-10, closure rate4.22014e-9.
+Marker disagreement between adaptive levels is9.60936e-8 m. Halving max_step
+at unchanged tolerance provides little refinement; it is not a convergence proof.
+Times80.014/83.346 s versus scalar3.442 s. Boundary fix is verified on this
+replay. No root matching/replay process remains active at this checkpoint.
+
+Next representation diagnostic: compare physical body angular velocities and
+native chart conditioning at the maximum discrepancy; independently tighten the
+scalar reference and adaptive tolerances with explicit budgets. Keep existing
+gates. Do not infer that the remaining difference is entirely manifold error.
+Archive native_evidence/manifold_replay_9967_52 contains terminal receipt,
+reports and raw outputs; source/input archives are referenced in the receipt.
+The main implementation through c1cd4de8c was pushed successfully, with all
+pre-push checks passing. Full matching and all-engine/R2025b acceptance remain open.
+
 ## Current Authority: Run51 Terminal and Convergence Review
 
 Run51 handle24475 exited1. Its FIRST adaptive level completed the 0.85 s replay

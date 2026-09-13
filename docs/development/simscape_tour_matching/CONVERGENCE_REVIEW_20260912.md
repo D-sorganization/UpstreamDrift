@@ -13,8 +13,8 @@ section before older chronological entries and plans.
    pose fits and feedback tracking can follow the capture without producing a
    time-only polynomial that reproduces it. Run45 feedback RMS is 35.2 mm, while
    its time-only replay is 346.5 mm and compressed sextic replay is 655.5 mm.
-   Several actuator profiles lose over 94% relative L2 accuracy in sextic
-   approximation. These numbers are different experiments, not accepted matches.
+   Several actuator profiles have relative L2 approximation error above 0.94.
+   These numbers are different experiments, not accepted matches.
 2. A real gimbal singularity and an independent representation branch bug were
    found. Run41 failed near shoulder middle angle -pi/2. Run49 used the other
    Euler branch despite identical orientation, changing the native effort map.
@@ -33,6 +33,14 @@ section before older chronological entries and plans.
    is not supported by current evidence.
 
 ## Ordered Work for the Next Agent
+
+Run52 update: the boundary fix passes20 generic tests and88 real-runtime/shared
+tests (one optional skip). Both replay levels now complete. Finest marker error
+is1.17068e-6 m and native velocity error0.00465279; both gates still fail.
+The two adaptive levels differ by9.60936e-8 m in marker position. Before another
+same-tolerance run, inspect physical angular velocity and chart conditioning,
+then independently refine the scalar reference and adaptive tolerances within
+declared budgets. The first item's boundary-fix action below is now complete.
 
 1. Fix run51's output-boundary failure with a regression test and retain genuine
    step-underflow rejection. Re-run a bounded identical-input comparison using
