@@ -1,5 +1,17 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Dynamic Marker Tracking Pilot With Zero-Feedback Forward Replay (#10003)
+
+Implement constraint-aware dynamic marker tracking and zero-feedback forward simulation replay for the OpenSim golf humanoid model:
+- Dynamic Tracking Module (`src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py`):
+  - `MocoTrackingConfig`: Validated parameter dataclass specifying tracking horizon, mesh intervals, objective weights, and solver tolerances.
+  - `sanitize_trc_for_horizon`: Pure-Python observation-window filter that prunes unobserved/NaN markers (such as `RShoulderTop` which is unobserved until frame 525) to ensure spline continuity for CasADi.
+  - `build_moco_study`: Configures `opensim.MocoStudy` with `MocoControlGoal` and `MocoMarkerTrackingGoal`, sets `MocoCasADiSolver` parameters, and inserts warm-start initial guess from the OS-3b full IK state trajectory (`insertStatesTrajectory`).
+- Verification & Forward Simulation Replay (`docs/development/opensim_tour_matching/os4_moco_tracking_driver.py`):
+  - Solves dynamic tracking in 15 IPOPT iterations to `Solve_Succeeded` (objective: `8.508366e-02`).
+  - Performs zero-feedback forward simulation replay via `opensim.Manager` + `opensim.PrescribedController`, integrating to $t = 0.10$ s in 9.2 ms.
+  - Generates cryptographic receipt and solution trajectories in `evidence/os4_moco_tracking/receipt.json`.
+
 ## OpenSim Segment Scaling, Calibration Best-Iteration, and Full 654-Frame IK (#10003)
 
 Implement subject segment scaling, marker calibration best-iteration selection, and full 654-frame inverse kinematics feasibility matching the tour-average swing:
