@@ -1,5 +1,12 @@
 # Native MuJoCo Matching Handoff
 
+> **Current candidate to verify (2026-09-13):** native Pinocchio returned81
+> (`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81/returned-candidate.json`,
+> SHA256 dfafdff1…, 0–0.85 s, uninterrupted whole 26.366 mm / terminal 46.305 mm, still
+> rejected). Replay it same-input with this lane's qualified adapter and report the five
+> shared metrics (whole, early, terminal, clubhead, pelvis yaw) plus step-size convergence,
+> before any further work on the superseded 0.8 s baseline candidate.
+
 ## Run18 Global Pose Error Addendum
 
 [Global Marker Registration Diagnostic](RUN18_GLOBAL_RIGID_AUDIT.md) reuses the

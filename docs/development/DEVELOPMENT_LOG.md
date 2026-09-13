@@ -186,7 +186,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-10 (SELF; 115 Python tests, Ruff/mypy, R2025b native marker-oracle tests pass; continuous polynomial forward fits up to 1.2 s archived with exact cold marker replay, all-27 actuator audit, and zero exit).
 - **Summary:** Reproducible forward-dynamics matching with fixed geometry and continuous polynomial torques; native starting pose verified, full swing fit outstanding.
-- **Next step:** Continue from verified 1.2 s candidate toward full swing horizon; cold replay and all-27 audit.
+- **Next step:** Replay the native Pinocchio returned81 polynomial in MATLAB R2025b through the qualified replay tooling and report same-input parity through 0.85 s on the five shared metrics (the 1.2 s and overnight 1.15 s/1.233 s Simscape candidates never met gates).
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
