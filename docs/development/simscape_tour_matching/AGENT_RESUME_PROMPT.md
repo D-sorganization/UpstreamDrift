@@ -1,7 +1,7 @@
 # Copy-Ready Agent Resume Prompt
 
-Resume the original tour-average C3D forward-dynamics matching goal. This work
-was paused at the user's request for handoff, not completed. Pursue the full
+Resume the original tour-average C3D forward-dynamics matching goal. The work
+is in progress and not completed. Pursue the full
 objective after reading the current evidence; do not substitute a short prefix,
 feedback tracking, pose fitting or representation roundtrip for the final result.
 
@@ -16,8 +16,8 @@ Read AGENTS.md, CLAUDE.md, docs/development/HANDOFF.md, and the following files:
 
 1. docs/development/simscape_tour_matching/NEXT_AGENT_CONVERGENCE_EXECUTION.md.
 2. native_evidence/regularized_fit_9967_73/HANDOFF.md under that directory.
-3. native_evidence/two_window_preflight_9967_75/HANDOFF.md and
-   native_evidence/two_window_derivatives_9967_76/HANDOFF.md.
+3. native_evidence/two_window_floor_9967_77/HANDOFF.md, then the
+   two_window_fit_9967_78, \_79 and \_80 HANDOFF/receipts (latest trials).
 4. REPRESENTATION_HANDOFF.md, PINOCCHIO_MANIFOLD_HANDOFF.md, and
    docs/development/mujoco_native_matching/MUJOCO_MANIFOLD_HANDOFF.md.
 5. Existing Drake and OpenSim turnover documents linked from the main handoff.
@@ -44,74 +44,35 @@ URDF alone does not encode the closed loop; retain the canonical model specifica
 sidecar and explicit rigid-closure adapters. Do not silently substitute stock
 MuJoCo compliant equality dynamics, add inertias or release constrained joints.
 
-## Actual Starting Point
+## Actual Starting Point (Updated 2026-09-13)
 
-Run73 is the latest cleanly returned candidate, still rejected:0.85 seconds only,
-whole RMS28.105 mm, terminal65.398 mm, early10.860 mm. All ten Jacobian-primal
-checks passed, but optimization did not converge. Its canonical candidate SHA256 is
-786522cd5380a9f62602920b2cff6e6b404f7ceb99bfc6783f1f359b98a6457a.
-Use returned-candidate.json and sampled-markers-state.npz in that evidence folder.
-The NPZ contains actual307-by-54 q/qd states, markers and clock; it does not contain
-qdd. marker-comparison.png is the measured rejected-prefix visual.
+Run73 remains the last cleanly returned single-shooting candidate (0.85 s only,
+whole RMS28.105 mm, terminal65.398 mm, SHA256 786522cd…). Audit77 qualified every
+run76 derivative block against measured replay/retraction floors with unchanged
+gates (native_evidence/two_window_floor_9967_77): the integration is max-step
+limited, per-replay noise is step-sequence roundoff (q about1e-9, qd1.6e-8), and
+the two near-zero node blocks are structural zeros verified from chart
+orthonormality. Do not re-audit derivatives unless the fixture or providers change.
 
-The original remote model hash begins b817fea; the formatted repository copy begins
-0202c8b2. Preserve both raw and canonical identities rather than confusing formatting
-differences with physics changes. Read the recorded full hashes in the receipts.
+Two-window direct-node SLSQP trials78/79 reproduce run73's objective at zero
+displacement to1.9e-12 (once-only shared boundary, run73 effort penalty).
+Trial78 exhausted ten evaluations and returned the start; trial79 (primal-only
+residuals,15 iterations) returned5313c283… whose uninterrupted original-state
+replay gives whole27.563 mm, terminal55.470 mm, club23.27 mm but early11.359 mm
+and pelvis yaw11.3 %, with63 of123 variables at bounds and scaled continuity
+defect3.99e-4. Run80 (node recentered on returned79's integrated state) returned
+96c786ec… with whole26.797/terminal55.208 mm; run81 widens the physical box to
+±4 N/Nm. All are still REJECTED; read the latest receipt before deciding.
+The terminal weight (100x) only reshapes the last0.1 s; error growth from0.4 s
+is unchanged (two_window_fit_9967_79/marker-comparison.png).
 
-Run75 passes the two-window baseline at the saved0.6 s interior node: marker
-discrepancy5.369e-12 m against uninterrupted73, closure and full42-dimensional
-q/v retraction qualified. Use its saved basis, scales and retraction derivatives.
-Do not repeat fixture75 or rebuild static pose seeds unnecessarily.
-
-Run76 completed all16 signed trials with process exit0 but scientific status
-failed_derivative_gates. LS B6 at h1e-4 and mixed direction at h1e-6 passed all
-blocks; smaller steps failed some resolved checks. Node directions passed resolved
-blocks but failed relative checks on near-zero cross-continuity derivatives:
-analytic norms about5e-14/2e-17 versus finite-difference norms about1e-10/1e-11.
-Establish a measured, physical absolute-error floor or independently verify the
-structural-zero components; do not demand relative accuracy against zero and do
-not indiscriminately waive failed checks. No optimizer was launched.
-
-Run76 is the bounded native directional-derivative audit. Its terminal receipt
-and dedicated HANDOFF are authoritative. Inspect every direction, step size,
-marker block, q/qd endpoint block and continuity block. Weak or step-dependent
-results are not an unconditional pass. Do not start an optimizer merely because
-the augmented primal checks passed. Diagnose any failed or unresolved derivative
-at the exact saved fixture with a bounded experiment and an integration-error floor.
-
-## Immediate Execution Path
-
-1. Verify all prior processes are terminal from receipts/handles before any launch.
-   Do not restart a job because an observation timed out.
-2. Resolve run76's remaining derivative questions without another blind fit. Reuse
-   native_sensitivity, node_retraction and the recorded perturbation directions.
-3. Only after qualification, use the existing multi_shooting_fit SLSQP backend
-   for a bounded two-window trial. Set
-   window_jacobian_state_coordinates="node" to consume direct chart sensitivities;
-   do not multiply them by a pseudoinverse just to reconstruct ambient columns.
-   Retain physical endpoint rows and the negative next-node retraction derivative
-   in continuity. The new option defaults to legacy physical-state behavior.
-4. Preserve the exact run73 base coefficients and start with zero increments.
-   Derive equivalent bounds from saved optimizer parameters, recording roundoff;
-   do not silently reconstruct a different initial candidate. Use the same
-   control subset/objective initially to isolate the formulation change. Check
-   shared-boundary observation counting: current MS includes both window boundary
-   samples; document or explicitly test a once-only policy for objective parity.
-5. Initialize nodes from integrated states. Chart bounds protect local validity;
-   they must not recreate permanent tight boxes around static target poses.
-   Report projected rank, active bounds and predicted versus actual reduction.
-   Recenter charts only after an independently accepted step.
-6. Require useful uninterrupted improvement before expanding horizons, adding nodes
-   or unlocking controls. Final acceptance always uses original-state replay with
-   zero intermediate resets, then independent R2025b validation and visual review.
-
-Do not repeat run19's126 active bounds or run38's apparently good segmented fit
-with89.22 continuity defect and201.2 mm uninterrupted terminal error. Audit74 finds
-marker-Jacobian condition7.45e7, still3.77e7 after column normalization. Sampled
-rotation-chart conditions alone are much smaller; quaternions are not a proven cure
-for the complete trajectory-control conditioning. The fixed-attachment rigidity
-floor is17.393 mm RMS; three head markers share Hub. Keep that model limitation
-visible, and identify any physical variant separately rather than dropping markers.
+Preserve exact coefficients and absolute clock when restarting: apply Bernstein
+increments to the exact returned candidate (never reconstruct from the parent),
+recompute the physical box (±2 N/Nm over parent19) relative to the restart, and
+record the roundoff. Any change of box, node bound, weighting or horizon needs
+its own receipt. Use runtime78 (or a new qualified clone) and the run79/80
+driver pattern: primal replays for residuals, sensitivities only for Jacobians,
+systemd-run --user launches through run_job.py, receipts with driver hashes.
 
 ## Compute and Reproducibility
 

@@ -3,11 +3,11 @@
 ## Current Status
 
 Work RESUMED 2026-09-12 (claude, leases on #9967/#10043). The objective is
-incomplete. Jobs through79 are terminal; run80 (continuation from returned79
-with the node chart recentered on its integrated state) is RUNNING on
-ControlTower, launched2026-09-13 as systemd unit native-fit-80, output
-/mnt/c/Users/diete/native-two-window-fit-9967-80 (launch JSON
-two-window-launch-80.json). Poll before launching anything; do not restart it. Resume instructions:
+incomplete. Jobs through80 are terminal; run81 (continuation from returned80
+with the physical control box widened to ±4 N/Nm, the single documented change)
+is RUNNING on ControlTower, launched2026-09-13 as systemd unit native-fit-81,
+output /mnt/c/Users/diete/native-two-window-fit-9967-81 (launch JSON
+two-window-launch-81.json). Poll before launching anything; do not restart it. Resume instructions:
 [Agent Resume Prompt](simscape_tour_matching/AGENT_RESUME_PROMPT.md).
 
 The full matching goal is OPEN. Robust trajectory equivalence of the alternate
@@ -16,9 +16,9 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpoint12d716854 is pushed with
-all normal hooks passing. SELF archives terminal trial79 (improved uninterrupted
-replay, still rejected) and the run80 continuation driver. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpointa1580378f is pushed with
+all normal hooks passing. SELF archives terminal continuation80 (whole26.797/
+terminal55.208 mm uninterrupted, still rejected) and the run81 driver. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -321,9 +321,13 @@ effort15.070 versus18.300. Scaled continuity defect3.99e-4 exceeds the1e-4
 tolerance;63 of123 variables at bounds (39 controls in the inherited ±2 N/Nm
 run73 box,24 node chart coordinates at ±0.05). First-Jacobian linear model
 tracks accepted steps within2 %. Still REJECTED against25/35 mm gates; the
-error growth from0.4 s is unchanged (marker-comparison.png). Run80 restarts
-from exact returned79 with the node recentered on its integrated0.6 s state and
-the same physical box; a chart/box change would need its own receipt.
+error growth from0.4 s is unchanged (marker-comparison.png). Run80 (two_window_fit_9967_80, driver7bc33a45…) restarts from exact returned79
+with the node recentered on its integrated0.6 s state (parity7.1e-12) and is
+TERMINAL0: returned96c786ec… uninterrupted whole26.797 mm, terminal55.208 mm,
+early11.208 mm, club23.54 mm, yaw11.3 %, score with effort14.678; defect
+1.13e-3;41 of81 controls on the inherited ±2 N/Nm box,18 node coordinates at
+±0.05. Still REJECTED. Run81 (two_window_fit_9967_81, driver da0edf86…)
+continues from returned80 with the box widened to ±4 N/Nm as its single change.
 
 The archived run73 sampled rotation-chart audit gives peak condition2.680/17.886/
 2.889 for hip/left/right shoulder. These samples do not bound between-sample
@@ -337,13 +341,12 @@ for the existing-provider, two-window derivative preflight now that fit73 is ter
 It specifies integrated nodes, retraction/continuity chain-rule checks and bounded
 SLSQP acceptance without recreating the solver or accepting state-reset motion.
 
-1. Collect run80 when its launch JSON is terminal and archive it under
-   native_evidence/two_window_fit_9967_80 with the same receipts. If the
-   uninterrupted whole and terminal RMS improve again, decide separately (own
-   receipt each) whether to widen the inherited ±2 N/Nm box, relax the node box,
-   rebalance the terminal/early weighting, or extend the horizon beyond0.85 s
-   with integrated additional nodes. Early-motion and pelvis-yaw regressions must
-   be reported alongside any terminal gain.
+1. Collect run81 when its launch JSON is terminal and archive it under
+   native_evidence/two_window_fit_9967_81 with the same receipts. Then decide,
+   one receipt each, on relaxing the node box, rebalancing terminal/early
+   weighting (early RMS and pelvis yaw regress under the100x terminal weight),
+   or extending the horizon beyond0.85 s with additional integrated nodes.
+   Early-motion and pelvis-yaw regressions must be reported with any gain.
 
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives
