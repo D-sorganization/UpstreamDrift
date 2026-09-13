@@ -8,8 +8,9 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Prior checkpoint028f81ff1 is
-pushed; SELF adds tested effort regularization and run60/61 evidence. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpoint35e9c4b05 contains effort regularization and run60/runtime61 evidence;
+push pending normal hooks. SELF adds trial61 and a typing-only residual-list
+annotation required by the pinned mypy environment. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -26,7 +27,7 @@ Run59 is TERMINAL, original handle97788 exited0: same setup with smaller maximum
 step. It FAILS native velocity parity (0.000587270); marker maximum1.15187e-7 m,
 native q6.06676e-7, closure pose6.60249e-11/rate1.61521e-10. Elapsed61.2725 s.
 Therefore58's isolated pass is not robust convergence or representation acceptance.
-No root integration remains active. The pointwise acceleration/history audit
+Those representation runs are terminal. The pointwise acceleration/history audit
 found no sampled history dependence or substantial actuator-route mismatch:
 maximum routed native acceleration difference2.18034e-6 rad/s² at a reference
 539073.49 rad/s²; effort roundtrip1.25056e-12. Sampled unscaled inertia condition
@@ -58,9 +59,17 @@ efforts. Twelve new tests passed after RED; combined fitter/effort/control regre
 passes, as do Ruff and four-module mypy. Immutable ControlTower runtime61 passes
 96 focused/real Pinocchio tests; source archives/hashes are preserved in
 native_evidence/regularized_fit_runtime_9967_61. Existing runner behavior remains
-the default with zero penalty. Trial61 is active on ControlTower, WSL PID2779075 (agent exec25229). Its first
-analytic sensitivity gate passes with5.66e-8 m primal marker discrepancy. Inspect
-native_evidence/regularized_fit_9967_61 for its terminal receipt when available.
+the default with zero penalty. Trial61 is terminal0 in75.40 s: whole RMS29.813 mm, early10.707 mm,
+terminal75.846 mm, club23.930 mm, versus baseline30.791/10.667/99.989/56.557 mm.
+All three primal sensitivity gates pass. Max_nfev3 was reached; no numerical
+acceptance or convergence is claimed. Native effort cost barely changes
+(1.55060 to1.55026), so improvement cannot be attributed to the penalty alone.
+Exact evidence and convenient candidate: native_evidence/regularized_fit_9967_61.
+
+Run62 continues original baseline19 with restart61 and unchanged bounds/weights,
+max_nfev20. Active ControlTower WSL PID2781980, agent exec89645; output
+/mnt/c/Users/diete/native-regularized-fit-9967-62. Poll before any new launch.
+Runtime61 remains immutable; the local list annotation changes typing only.
 
 ## Why Earlier Attempts Stalled
 
@@ -81,9 +90,9 @@ native_evidence/regularized_fit_9967_61 for its terminal receipt when available.
 
 ## Ordered Next Work
 
-1. Inspect regularized native trial61 and its original process before launching
+1. Inspect regularized native trial62 and its original process before launching
    further optimization. Runtime61 is qualified with96 tests; B6 analytic fitting
-   uses max_nfev3, effort weight0.01, force/torque scales100 N/20 Nm. These are
+   uses max_nfev20 from restart61, effort weight0.01, force/torque scales100 N/20 Nm. These are
    numerical objective weights, not physical limits or acceptance changes.
    Preserve any sensitivity gate failure; max_nfev is not an RHS/time budget.
 2. Qualify the variant over further representative trajectories and against
