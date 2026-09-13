@@ -1,8 +1,33 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Current Run38 Rejection and Resume Decision
+
+Run38 is TERMINAL, handle40297 exited0. Independent final replay confirms
+candidate33cd116b4db6ac5cb4c283f4cf58edb90c900da2367cc6b6d6b9c2ec34495631
+(evaluation13): whole46.9835 mm, terminal201.203 mm, maximum scaled defect89.2180,
+terminal segmented/full gap189.738 mm. Iteration limit, not converged, not accepted.
+Derivative preflight passed, but the static-seeded tight state boxes did not
+restore dynamics: initial maximum defect89.4303 barely changed. Never extend this
+run's budget as the default next action or promote its candidate as a match.
+
+All13 raw evaluation snapshots, config and driver are archived in
+native_evidence/ms_fit_9967_38/raw-run.zip. Independent audits are
+native-run38-evaluation7-audit.json and native-run38-final-audit.json with
+reproduction scripts. No job launched by this session remains running.
+The branch through c7be0e83b was pushed successfully after all pre-push checks,
+including unit tests, type checks and Bandit. Later audit commits need a push.
+
+Next implementation decision: test a flexible continuous torque initializer
+using original q0/qd0 and constrained forward dynamics, rather than treating
+static-pose q/v as nearly feasible multiple-shooting nodes. Compare its uninterrupted
+replay against global sextic under identical geometry/markers. Keep polynomial
+compression and final sextic forward refinement explicit. The new state-seed
+selector remains useful, but local state retraction only enforces the loop;
+it does not make the inter-node trajectory dynamically consistent.
+
 ## Current Forward Trial — Pose-Seeded Shooting
 
-Run38 is now the active forward trial. Local handle40297; remote output directory
+Historical launch description follows; superseded by terminal rejection above. Local handle40297; remote output directory
 C:/Users/diete/native-ms-pose-seed-fit-9967-38. Revalidate its process/output before
 restarting. Command uses run_native_ms_pose_seed_9967_38.py, --state-seed
 C:/Users/diete/native-shooting-state-seed-9967-38.json, --max-iterations12,

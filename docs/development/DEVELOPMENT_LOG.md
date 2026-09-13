@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching; native engine adapters; docs/development/simscape_tour_matching; docs/development/drake_native_matching; docs/development/native_parallel_performance
 - **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (SELF; six shooting-state selector tests red then green, Ruff passes. Native run38 launched with run36 interior q/v guesses; original initial state and final forward gates unchanged. Initial defects archived remotely; derivative preflight pending.)
+- **Last verified:** 2026-09-12 (SELF; run38 terminal and independently rejected: whole46.98 mm, terminal201.20 mm, defect89.218. Derivative preflight passed. Branch through c7be0e83b pushed after all pre-push checks.)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
-- **Next step:** Poll live run38 handle40297; inspect derivative preflight and forward-fit receipts, independently replay returned candidate. See current HANDOFF.
+- **Next step:** Build a flexible continuous-effort initializer with constrained forward dynamics and original initial state; compare against sextic. Do not restart run38 or repeat static rigidity audits.
 - **Intermediate verification:** SELF; six regression tests and Ruff pass. ControlTower 13-point objective gives 1.26002 mm marker RMS and 61-point acceleration closure 3.89145e-4, but normalized initial Jacobian discrepancy 0.0401994 is unqualified.
 - **Scaled verification:** SELF; six regression tests and Ruff pass. ControlTower 276 evaluations yield 0.814073 mm marker RMS and dense acceleration closure 0.00878615 with an active chart bound. Physical qualification still fails.
 - **Initial-rate verification:** SELF; two regression tests pass. ControlTower has zero initial-rate error and 0.578439 mm marker RMS; dense acceleration 0.200508 remains infeasible. Initial combined Jacobian scaled discrepancy 4.20991e-6.

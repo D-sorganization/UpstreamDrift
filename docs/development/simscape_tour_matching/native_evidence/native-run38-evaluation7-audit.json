@@ -1,0 +1,42 @@
+{
+  "qualification": "Selected residual evaluations, not accepted optimizer iterates; independent primal replay, no fit modification",
+  "runner_sha256": "adb5edb47c2ab59099e3853a94fa9f42dd165592eed9abb5d55c7872bac11921",
+  "rows": [
+    {
+      "evaluation": 1,
+      "candidate_sha256": "b9d610b405ac8e614aca1b3a771065d8b13466417fa0b2946bdf88b9b22f4048",
+      "snapshot_sha256": "a5c3f5a724cb67da13dba15f2623f7616d8db93794e9abbf5986f282a6ec9cfd",
+      "callback_cost": 12342.494339861643,
+      "whole_rms_m": 0.030791102785971126,
+      "terminal_rms_m": 0.0999886622826712,
+      "terminal_segmented_rms_m": 0.055527911558501876,
+      "terminal_pointwise_gap_m": 0.0965655760901417,
+      "defect_norms": {
+        "0.2": 3.8528258718788937,
+        "0.4": 13.903030424085667,
+        "0.6": 55.197440567782316,
+        "0.7": 32.77555241181288,
+        "0.8": 89.4303431090049
+      },
+      "max_scaled_defect": 89.4303431090049
+    },
+    {
+      "evaluation": 7,
+      "candidate_sha256": "f11ed2df16831af6820e57de3f6e5d6c497050f5a99e911afca1ad9cd91784f8",
+      "snapshot_sha256": "cd47f4dd875a7b293258f14c724ddd1e11245521ba67892da791ca3da294fa0b",
+      "callback_cost": 12283.284764945649,
+      "whole_rms_m": 0.05743355776136553,
+      "terminal_rms_m": 0.2720879188087853,
+      "terminal_segmented_rms_m": 0.05287367624452025,
+      "terminal_pointwise_gap_m": 0.2634880589309057,
+      "defect_norms": {
+        "0.2": 3.845932020757075,
+        "0.4": 13.867297270879584,
+        "0.6": 55.067885658836694,
+        "0.7": 32.69797174764291,
+        "0.8": 89.21665185117044
+      },
+      "max_scaled_defect": 89.21665185117044
+    }
+  ]
+}
