@@ -1,5 +1,18 @@
 # Simscape Tour-Average Fit Continuation
 
+## Current State (2026-09-13, Supersedes the Sections Below)
+
+- No fitting job is running on DeskComputer or ControlTower. The sections below are
+  historical Simscape prefix audits (best gate-scored: run 06 at 0.75 s, 3 of 5 gates).
+- Authoritative status for the native lanes is `docs/development/HANDOFF.md`
+  (Pinocchio returned81: whole 26.366 mm, terminal 46.305 mm at 0.85 s, rejected;
+  MuJoCo and Drake are verifiers; OpenSim at OS-0). Overnight Simscape 1.15 s/1.233 s
+  extensions failed (whole 340–380 mm, clubhead 647–722 mm) and are archived on
+  branch feat/9921-simscape-tour-matching under
+  `native_evidence/stage3_impact_1233s_9921_failed/`.
+- The Simscape lane's next task is same-input R2025b replay of returned81, not another
+  horizon push with degrees 0–3 frozen.
+
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
 ### 0. Active Live Horizon: 0.80 s Continuation (`prefix-800ms-sextic-01`, DeskComputer)
