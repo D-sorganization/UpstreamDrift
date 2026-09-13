@@ -2,6 +2,16 @@
 
 ## Current Bound-Audit Correction (SELF)
 
+Latest initial-state experiment SELF: retracted_tracking_9967_29.json uses a
+clamped initial spline derivative equal to candidate qd0, with natural final
+second derivative. Sensitivity maps use homogeneous initial-rate conditions;
+TDD verifies the fixed derivative and finite-difference node sensitivity.
+ControlTower eight evaluations yield 0.578439 mm marker RMS, exactly zero
+initial-rate error, and initial combined Jacobian scaled discrepancy 4.20991e-6.
+Dense acceleration closure remains 0.200508 and is NOT accepted. This replaces
+the previous missing-initial-velocity limitation. Next enforce closure with
+explicit scales or hard constraints while retaining marker objective and q0/qd0.
+
 Latest marker-aware experiment SELF supersedes closure-only initialization:
 retracted_tracking_9967_28.json uses run19 candidate attachments and capture
 payload, checks node-time alignment and observation masks, and removes the
