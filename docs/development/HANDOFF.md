@@ -3,9 +3,9 @@
 ## Current Status
 
 Work RESUMED 2026-09-12 (claude, leases on #9967/#10043). The objective is
-incomplete. All numerical jobs through76 are terminal. Current lane: resolve
-run76's derivative-resolution questions with measured floors (audit77), then
-the bounded direct-node two-window SLSQP trial. Resume instructions:
+incomplete. All numerical jobs through77 are terminal. Audit77 qualifies every
+run76 derivative block against measured floors; the next lane is the bounded
+direct-node two-window SLSQP trial (once-only shared boundary for parity). Resume instructions:
 [Agent Resume Prompt](simscape_tour_matching/AGENT_RESUME_PROMPT.md).
 
 The full matching goal is OPEN. Robust trajectory equivalence of the alternate
@@ -14,9 +14,9 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpoint5574b4e2f is pushed with
-all normal hooks passing. SELF adds the derivative-resolution provider, the shared
-native node chart and the audit77 driver before its execution. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpointf96766c8e is pushed with
+all normal hooks passing. SELF archives terminal audit77, its reclassification and
+the once-only shared-boundary shooting option. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -246,7 +246,7 @@ do not widen C3D or replay gates. Call225.112 s, launch250.611 s, all16 trials
 complete. No optimizer or other numerical job remains active. Evidence:
 native_evidence/two_window_derivatives_9967_76.
 
-## Derivative Resolution Floors (Audit 77, in Progress)
+## Derivative Resolution Floors (Audit 77, Terminal)
 
 Local analysis of the archived run76 arrays already resolves the two failure
 classes. (a) Node-direction cross-continuity blocks: the zero-retraction
@@ -271,13 +271,26 @@ wrapper reused by drivers). Twenty new unit tests pass with Ruff and mypy.
 A pass now additionally requires the measured floor to be below the gate times
 the analytic norm; agreement inside noise is reported unresolved, never passed.
 
-Audit77 driver: native_evidence/two_window_floor_9967_77/floor.py. It measures
-per-block replay error at the exact fixture by tolerance variation (work
-1e-11/1e-13, tight1e-12/1e-14, loose1e-10/1e-12, max_step unchanged), reruns
-only the failed LSInputX h1e-5 and mixed h1e-7 trials at tight/loose tolerance
-plus mixed h1e-5 at work tolerance, reuses archived run76 Jacobians and
-classifies every block. Budget32 window replays. Requires a new runtime77
-(runtime73 plus current overlay) qualified before launch; not yet executed.
+Audit77 is TERMINAL0 (202.6 s launch,26 of32 budgeted window replays) on
+runtime77 (frozen73 file set refreshed from f96766c8e plus five new files;122
+qualification tests). Measured per-block replay error by tolerance variation at
+unchanged max_step: markers8.2e-10 m, endpoint q9.3e-10, qd1.6e-8. Loose and
+working replays coincide while both differ from tight by that amount: the
+integration is max-step limited and the non-reproducible part is step-sequence
+roundoff/constraint-solver noise, so tolerance alone does not shrink it. Base
+replays reproduce run76's primal arrays exactly. Every factor-one failure sits
+at the smallest step with absolute error1.02x–1.14x the single-pair floor;
+`reclassify.py` applies the tested `floor_safety_factor=2` to the same archived
+arrays and every direction/block then has a resolved pass (LSInputX h1e-4;
+mixed h1e-6 and h1e-5) or an orthonormality-verified structural zero, with no
+unexplained failure. Gates are unchanged. Evidence and turnover:
+native_evidence/two_window_floor_9967_77 (raw ZIP SHA2563d5768fc…).
+
+MultipleShootingOptions now also accepts shared_boundary_policy="once"
+(default "both"), which observes the capture sample shared by adjacent windows
+only in the earlier window so marker rows, Jacobian rows, segmented RMS and
+equality offsets match an uninterrupted single-window objective at zero
+defect. Four RED/GREEN tests;46 combined shooting tests, mypy and Ruff pass.
 
 The archived run73 sampled rotation-chart audit gives peak condition2.680/17.886/
 2.889 for hip/left/right shoulder. These samples do not bound between-sample
@@ -291,11 +304,12 @@ for the existing-provider, two-window derivative preflight now that fit73 is ter
 It specifies integrated nodes, retraction/continuity chain-rule checks and bounded
 SLSQP acceptance without recreating the solver or accepting state-reset motion.
 
-1. Qualify runtime77 remotely, execute audit77, archive its receipt/raw ZIP and
-   HANDOFF, and record per-block verdicts. Only a fully qualified verdict table
-   authorizes the bounded two-window direct-node SLSQP trial. A successful
-   numerical check at65 or one derivative direction at66 does not qualify the
-   complete optimizer Jacobian or full swing. Preserve unchanged agreement gates.
+1. Run the bounded two-window direct-node SLSQP trial (Stage3): exact run73
+   coefficients with zero increments, B4/B5/B6 subset, bounds derived from run73's
+   saved parameters, integrated0.6 node with zero chart coordinates, node mode
+   Jacobians, once-only shared boundary, effort penalty parity, small iteration
+   and evaluation budgets, then original-state replay. Report projected rank,
+   active bounds and predicted versus actual reduction before any horizon change.
 
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives

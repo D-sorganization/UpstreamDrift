@@ -55,12 +55,16 @@ def classify_derivative_block(
     replay_error: float,
     gate: float = 1e-3,
     expected_zero: bool = False,
+    floor_safety_factor: float = 1.0,
 ) -> DerivativeBlockVerdict:
     """Compare one analytic block against its central estimate at one step.
 
     The relative gate is unchanged. A pass additionally requires that the floor
     itself resolves the gate, so agreement inside numerical noise is reported as
-    unresolved. Failures are disagreements the floor cannot explain.
+    unresolved. Failures are disagreements the floor cannot explain. The
+    optional safety factor (at least one) widens only the floor, never the gate:
+    a replay error measured from one pair of replays bounds the per-replay
+    non-reproducible part only up to the unknown split between the pair.
     """
     a, c = np.asarray(analytic, dtype=float), np.asarray(central, dtype=float)
     if (
@@ -70,9 +74,13 @@ def classify_derivative_block(
         or not np.isfinite(c).all()
         or not np.isfinite(gate)
         or gate <= 0
+        or not np.isfinite(floor_safety_factor)
+        or floor_safety_factor < 1
     ):
-        raise ValueError("Blocks must be finite, equal-shaped, with a positive gate")
-    floor = central_difference_floor(replay_error, step)
+        raise ValueError(
+            "Blocks must be finite and equal-shaped, gate positive, safety factor >= 1"
+        )
+    floor = floor_safety_factor * central_difference_floor(replay_error, step)
     analytic_l2, central_l2 = float(np.linalg.norm(a)), float(np.linalg.norm(c))
     error = float(np.linalg.norm(c - a))
     relative = error / analytic_l2 if analytic_l2 > 0 else float("inf")

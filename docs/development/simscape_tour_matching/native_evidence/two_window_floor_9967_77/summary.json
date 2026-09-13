@@ -1,0 +1,72 @@
+{
+  "status": "unqualified_derivative_blocks",
+  "reclassification_status": "qualified_with_factor",
+  "exit_code": 0,
+  "elapsed_s": 202.62273931503296,
+  "window_replays": 26,
+  "archive_sha256": "3d5768fcc076add3a6f104bcad1b0ce7ecb7614f0263f69974646eb2183c381e",
+  "driver_sha256": "13c86e26b45cac34dcb312c1f87d8d760e7140e4daed8e0208dd8c5923b90327",
+  "runtime": "/home/dieterolson/native-two-window-floor-9967-77",
+  "overlay_commit": "f96766c8e86f957cff97f0dfc665729fe8047507",
+  "runtime_tests": [
+    {
+      "exit_code": 0,
+      "tail": "122 passed, 12 warnings in 11.29s"
+    },
+    {
+      "exit_code": 0,
+      "tail": "  --runtime RUNTIME"
+    }
+  ],
+  "output_hashes": {
+    "base-loose.npz": "b019646923a1c64679cb1276495b574d78905227743b3a6d4a8d3e462a0c3306",
+    "base-tight.npz": "8122af5cb8b7cf1cf4a696673f6641821094b5fb5fed07891d8c4c9486e35909",
+    "base-work.npz": "f190712365d76757b4e4800e2094058792f9ac38c093b8a284fe277a840d6fa0",
+    "comparison-LSInputX_B6-1e-05-loose.npz": "589d68934c3acf7225bfae95db730d7f48d156736552321a211c5f6ae76b9bdb",
+    "comparison-LSInputX_B6-1e-05-tight.npz": "e19baa108d493501160d6ced0429eb58a8f9a7ce60c58a89259aedf19cb10fa1",
+    "comparison-mixed-1e-05-work.npz": "3059ba1fc02a5f062ce020be59987f2914ea340435940fc220afda204665ba72",
+    "comparison-mixed-1e-07-loose.npz": "54f8bca5993cc461f7c35271db5cdefd1d7c87e00f1163b909607c4f83156f04",
+    "comparison-mixed-1e-07-tight.npz": "ed1a564b3b6e6a7eb3ff03a3b1ffac14e5504e8e7772211ed6fba6b4f726c424",
+    "LSInputX_B6-1e-05-loose-minus.npz": "17bbbc3cc8e2e65b91e36b288fadb818279eac42eeea73b6162dacb009bc0a52",
+    "LSInputX_B6-1e-05-loose-plus.npz": "4c4ccc033db2aea0a6f408d72686f1d6fd9cd60f5d1500eab8617f4b94f0354c",
+    "LSInputX_B6-1e-05-tight-minus.npz": "6b5403d479861c813eeb2b765d60b4fbd4c2fe73cfa86f73b30143fafb027471",
+    "LSInputX_B6-1e-05-tight-plus.npz": "afac37770c763f436683b8a6a9b6ed8e0a04a89879af637f1dfd94ee3ab7461d",
+    "mixed-1e-05-work-minus.npz": "019e61676effb65042024ac3a41afa6e303dc48a30d4b4a2d94d8abb8684ed7b",
+    "mixed-1e-05-work-plus.npz": "e4a19bcc23a5476eacfca4fe07439cd261ddff1b7b51458aa00ac9316ef13f43",
+    "mixed-1e-07-loose-minus.npz": "b2f6cc55a3993a5786b0fa6488a20e8ef4f648144a04a3ab828b22ae77dfaa2f",
+    "mixed-1e-07-loose-plus.npz": "230fc28739231bbdcc07804e46dda8fe5fbfc8a15fc086f5e37dedfcad3a3155",
+    "mixed-1e-07-tight-minus.npz": "2cedb6ffadf6ce835310491ecff3a55da0018b8471f34cce582e086e38968955",
+    "mixed-1e-07-tight-plus.npz": "151e4048eb8b98811721e52d63c3a58466728be6291a6fc4e61938c080431e3f",
+    "receipt.json": "4c7b70b5f931b6a92e4b0e1831f4b1a60605f481f42af66701735438f7838ac1"
+  },
+  "launch": {
+    "command": [
+      "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+      "/mnt/c/Users/diete/two_window_floor_77.py",
+      "--model",
+      "/mnt/c/Users/diete/native_geometry_spec_9967.json",
+      "--candidate",
+      "/mnt/c/Users/diete/native-regularized-fit-9967-73/returned-candidate.json",
+      "--samples",
+      "/mnt/c/Users/diete/native-regularized-fit-9967-73/evidence-replay/sampled-markers-state.npz",
+      "--audit76",
+      "/mnt/c/Users/diete/native-two-window-derivatives-9967-76",
+      "--audit76_summary",
+      "/mnt/c/Users/diete/two-window-summary-76.json",
+      "--output",
+      "/mnt/c/Users/diete/native-two-window-floor-9967-77",
+      "--runtime",
+      "/home/dieterolson/native-two-window-floor-9967-77"
+    ],
+    "environment": {
+      "PYTHONPATH": "/home/dieterolson/native-two-window-floor-9967-77",
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    },
+    "status": "terminal",
+    "pid": 2972754,
+    "start_time": 1789281177.482679,
+    "exit_code": 0,
+    "elapsed_s": 202.62273931503296
+  }
+}

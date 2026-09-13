@@ -61,6 +61,11 @@ class MultipleShootingOptions:
     node transform. The callback still receives the physical initial state and
     returns physical endpoint rows. The first fixed-state window has theta
     columns only. Physical transform derivatives remain required for defects.
+    shared_boundary_policy="both" retains the legacy residual, in which the
+    capture sample shared by adjacent windows is observed in each window. "once"
+    observes it only in the earlier window, so marker rows, their Jacobian rows,
+    segmented RMS and equality offsets match an uninterrupted single-window
+    objective at zero defect. Physical defects and terminal rows are unchanged.
     """
 
     shooting_nodes: tuple[float, ...]
@@ -94,10 +99,13 @@ class MultipleShootingOptions:
     segmented_forward_batch: SegmentedForwardBatch | None = None
     regularization_jacobian: Callable[[Array], Array] | None = None
     window_jacobian_state_coordinates: Literal["physical", "node"] = "physical"
+    shared_boundary_policy: Literal["both", "once"] = "both"
 
     def __post_init__(self) -> None:
         if self.window_jacobian_state_coordinates not in ("physical", "node"):
             raise ValueError("Invalid window Jacobian state coordinates")
+        if self.shared_boundary_policy not in ("both", "once"):
+            raise ValueError("Invalid shared boundary observation policy")
         if self.regularization_jacobian is not None and self.regularization is None:
             raise ValueError("regularization_jacobian requires regularization")
         if self.solver not in ("least_squares", "slsqp"):
@@ -255,6 +263,9 @@ def fit_multiple_shooting(
         w_time = target.time[mask]
         w_points = target.points[mask]
         w_obs = np.isfinite(w_points).all(axis=2) & (target.weights > 0)
+        if i > 0 and options.shared_boundary_policy == "once" and len(w_time):
+            # The earlier window already observed this shared capture sample.
+            w_obs[0] = False
         window_data.append((t_start, t_end, w_time, w_points, w_obs))
 
     window_cache: dict[int, tuple[bytes, bytes | None, Array, Array]] = {}
