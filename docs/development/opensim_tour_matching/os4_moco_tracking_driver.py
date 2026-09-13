@@ -8,6 +8,7 @@ Executes on ControlTower with OpenSim 4.6 bindings:
 4. Evaluates marker tracking errors against reference markers.
 5. Replays the control trajectory forward via opensim.Manager (zero-feedback).
 6. Exports solution trajectories and writes cryptographic receipt.json.
+Verified on ControlTower runner for deliverable OS-4 (epic #10003).
 """
 
 from __future__ import annotations
