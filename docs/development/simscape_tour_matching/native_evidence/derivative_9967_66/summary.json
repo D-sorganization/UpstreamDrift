@@ -1,0 +1,33 @@
+{
+  "status": "completed",
+  "original_exec_session": 72187,
+  "exit_code": 0,
+  "executed_driver_sha256": "f1b90e5f1860de62ce6f0974c67720462a1c98dc5b480c939caefdf9cac4969a",
+  "local_reproducer_sha256": "4d06ec88f2ab3e83d30f05431e4914248cf126937d6d169dda0ec3d109f749bf",
+  "source_difference": "Local reproducer binds synchronous factory closure explicitly to satisfy Ruff B023; exact executed driver retained unchanged as driver.py in raw-run.zip. Local reproducer was linted but not rerun.",
+  "archive_sha256": "696654a6e13647142e403d42edcdc3d5392ddf7ff7bb60f7e789bb24a611d4b9",
+  "archive_entries_verified": 22,
+  "started_utc": "2026-09-13T04:44:38.739471+00:00",
+  "ended_utc": "2026-09-13T04:45:33.395960+00:00",
+  "environment": {
+    "PYTHONPATH": "/home/dieterolson/native-regularized-fit-9967-61",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "launch_arguments": [
+    "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+    "/mnt/c/Users/diete/audit_direction_9967_66.py",
+    "--model",
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json",
+    "--checkpoint",
+    "/mnt/c/Users/diete/native-regularized-fit-9967-63/best.json",
+    "--sensitivity",
+    "/mnt/c/Users/diete/native-sensitivity-9967-64/sensitivity.npz",
+    "--receipt",
+    "/mnt/c/Users/diete/native-sensitivity-9967-64/receipt.json",
+    "--runtime",
+    "/home/dieterolson/native-regularized-fit-9967-61",
+    "--output",
+    "/mnt/c/Users/diete/native-derivative-9967-66"
+  ]
+}

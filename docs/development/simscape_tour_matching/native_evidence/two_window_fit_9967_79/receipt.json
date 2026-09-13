@@ -1,0 +1,37 @@
+{
+  "status": "terminal",
+  "residual_evaluations": 30,
+  "jacobians": 32,
+  "primal_windows": 58,
+  "restart_roundoff": {
+    "max_abs_recovered_minus_amplitude_x_minus_1": 3.930189507173054e-14,
+    "note": "Recovered Bernstein increment versus run73 parameter map; theta is applied to the exact run73 coefficients, never reconstructed from the parent"
+  },
+  "zero_retraction_shift": 4.7486459209267196e-12,
+  "effort_cost_zero": 1.545327758061792,
+  "effort_cost_run73": 1.5453277580617921,
+  "config_sha256": "783fa73ee72f5f86469604f1c077bbbc09eaab47f4550f4f968f7f8a2a504ee3",
+  "elapsed_s": 1509.2833642399637,
+  "zero_displacement_parity": {
+    "whole_rms_m": 0.02810547071042804,
+    "early_rms_m": 0.01086039686718395,
+    "terminal_rms_m": 0.06539791108607908,
+    "club_cluster_rms_m": 0.03004069012306446,
+    "pelvis_yaw_error_pct": 6.164015138537923,
+    "score": 16.754833624641805,
+    "effort_penalty_cost": 1.545327758061792,
+    "score_with_effort": 18.300161382703596,
+    "run73_score": 18.30016138273805,
+    "relative_score_difference": 1.882727509141357e-12,
+    "marker_max_abs_difference_vs_saved_m": 1.8112178423734804e-11,
+    "initial_scaled_defect_norm": 3.980355614456277e-11,
+    "projected_constraint_rank": 42,
+    "projected_constraint_singular_values": [
+      349.84677266870784, 1.0000000059342742
+    ],
+    "linear_model_objective_at_zero": 18.300161382703596
+  },
+  "parity_passed": true,
+  "returned_sha256": "5313c2833210c009503e341d7be49a0157ee6091aeefcfaa484305821d6daa3e",
+  "improved_uninterrupted": true
+}

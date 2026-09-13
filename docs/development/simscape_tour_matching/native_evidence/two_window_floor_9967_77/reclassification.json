@@ -1,0 +1,886 @@
+{
+  "receipt_sha256": "4c7b70b5f931b6a92e4b0e1831f4b1a60605f481f42af66701735438f7838ac1",
+  "factors": [1.0, 2.0],
+  "rows": [
+    {
+      "direction": "LSInputX_B6",
+      "step": 1e-5,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 2.8221497811160203e-5,
+          "floor_factor_1": 8.228580842049513e-5,
+          "relative_l2_error": 0.0001048204025250507
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 3.9063071921548736e-5,
+          "floor_factor_1": 9.263705917766357e-5,
+          "relative_l2_error": 7.346950037538896e-5
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0007577906970402579,
+          "floor_factor_1": 0.0016282226138159051,
+          "relative_l2_error": 1.710221067408663e-5
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0008525485840205485,
+          "floor_factor_1": 0.0018733048199008492,
+          "relative_l2_error": 1.910371229078575e-5
+        },
+        "continuity_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 3.902695400800834e-5,
+          "floor_factor_1": 9.23102292147345e-5,
+          "relative_l2_error": 0.0012090166026622715
+        },
+        "continuity_qd": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.00075672688218265,
+          "floor_factor_1": 0.0015754081074848768,
+          "relative_l2_error": 0.0016136804145249356
+        },
+        "continuity_scaled": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0008514375421204944,
+          "floor_factor_1": 0.0018259322404998394,
+          "relative_l2_error": 0.0014955730546343709
+        }
+      }
+    },
+    {
+      "direction": "LSInputX_B6",
+      "step": 0.0001,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 4.304468296870013e-6,
+          "floor_factor_1": 8.228580842049513e-6,
+          "relative_l2_error": 1.5987673742667496e-5
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 5.62869941070524e-6,
+          "floor_factor_1": 9.263705917766357e-6,
+          "relative_l2_error": 1.0586410979102656e-5
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0001091400209179081,
+          "floor_factor_1": 0.00016282226138159052,
+          "relative_l2_error": 2.463128193579718e-6
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0001227997122521131,
+          "floor_factor_1": 0.00018733048199008493,
+          "relative_l2_error": 2.7516676658970373e-6
+        },
+        "continuity_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 5.627713336912504e-6,
+          "floor_factor_1": 9.23102292147345e-6,
+          "relative_l2_error": 0.00017434101718404485
+        },
+        "continuity_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.00010899118805655907,
+          "floor_factor_1": 0.0001575408107484877,
+          "relative_l2_error": 0.00023241799606138786
+        },
+        "continuity_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0001226629317040252,
+          "floor_factor_1": 0.00018259322404998396,
+          "relative_l2_error": 0.00021546075476318896
+        }
+      }
+    },
+    {
+      "direction": "LSInputX_B6",
+      "step": 1e-5,
+      "tolerance": "tight",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 6.908327081021795e-5,
+          "floor_factor_1": 8.228580842049513e-5,
+          "relative_l2_error": 0.0002565893668198766
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 8.480664777859876e-5,
+          "floor_factor_1": 9.263705917766357e-5,
+          "relative_l2_error": 0.0001595036369212975
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0016746054077063672,
+          "floor_factor_1": 0.0016282226138159051,
+          "relative_l2_error": 3.7793357176879594e-5
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.001877104142073011,
+          "floor_factor_1": 0.0018733048199008492,
+          "relative_l2_error": 4.2061717234804205e-5
+        },
+        "continuity_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 8.469082601870392e-5,
+          "floor_factor_1": 9.23102292147345e-5,
+          "relative_l2_error": 0.00262363838922156
+        },
+        "continuity_qd": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0016550094770226508,
+          "floor_factor_1": 0.0015754081074848768,
+          "relative_l2_error": 0.00352922096704369
+        },
+        "continuity_scaled": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0018591153730222968,
+          "floor_factor_1": 0.0018259322404998394,
+          "relative_l2_error": 0.003265586399237244
+        }
+      }
+    },
+    {
+      "direction": "LSInputX_B6",
+      "step": 1e-5,
+      "tolerance": "loose",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 2.8225022385535694e-5,
+          "floor_factor_1": 8.240669708719756e-5,
+          "relative_l2_error": 0.00010483349351360278
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 3.910853937474236e-5,
+          "floor_factor_1": 9.243358944366455e-5,
+          "relative_l2_error": 7.355501518272888e-5
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.000770785967577048,
+          "floor_factor_1": 0.0016378601249549428,
+          "relative_l2_error": 1.7395494631457682e-5
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0008643256215557598,
+          "floor_factor_1": 0.0018806866304282828,
+          "relative_l2_error": 1.9367609435097988e-5
+        },
+        "continuity_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 3.902695400800834e-5,
+          "floor_factor_1": 9.23102292147345e-5,
+          "relative_l2_error": 0.0012090166026622715
+        },
+        "continuity_qd": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.00075672688218265,
+          "floor_factor_1": 0.0015754081074848768,
+          "relative_l2_error": 0.0016136804145249356
+        },
+        "continuity_scaled": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0008514375421204944,
+          "floor_factor_1": 0.0018259322404998394,
+          "relative_l2_error": 0.0014955730546343709
+        }
+      }
+    },
+    {
+      "direction": "node_position",
+      "step": 1e-5,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 1.2418512951931643e-6,
+          "floor_factor_1": 1.1111761973446564e-6,
+          "relative_l2_error": 1.8400109096498789e-7
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 4.915525966648896e-6,
+          "floor_factor_1": 0.00041141052651557877,
+          "relative_l2_error": 6.215843651448573e-7
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0002771109325769018,
+          "floor_factor_1": 0.00041141052651557877,
+          "relative_l2_error": 1.425799454319952e-6
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0002814368659336916,
+          "floor_factor_1": 0.00041141052651557877,
+          "relative_l2_error": 1.3412782450008184e-6
+        },
+        "continuity_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 7.919114212389418e-11,
+          "floor_factor_1": 1.6495563909512131e-9,
+          "relative_l2_error": 7.919114212389399e-10
+        },
+        "continuity_qd": {
+          "1.0": "structural_zero",
+          "2.0": "structural_zero",
+          "absolute_l2_error": 1.6645267486269498e-10,
+          "floor_factor_1": 2.6939457968678774e-9,
+          "relative_l2_error": 3332.529652555671
+        },
+        "continuity_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 8.092157956013808e-10,
+          "floor_factor_1": 1.6714095029323636e-8,
+          "relative_l2_error": 8.09215795601379e-10
+        }
+      }
+    },
+    {
+      "direction": "node_position",
+      "step": 0.0001,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 1.3684734426905299e-7,
+          "floor_factor_1": 1.1111761973446565e-7,
+          "relative_l2_error": 2.0276228513535822e-8
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 2.770630954954701e-7,
+          "floor_factor_1": 4.1141052651557876e-5,
+          "relative_l2_error": 3.503553627568943e-8
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 2.6157801500900043e-5,
+          "floor_factor_1": 4.1141052651557876e-5,
+          "relative_l2_error": 1.345879022504565e-7
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 2.6304124587597496e-5,
+          "floor_factor_1": 4.1141052651557876e-5,
+          "relative_l2_error": 1.2536079786877714e-7
+        },
+        "continuity_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 4.748032463753099e-11,
+          "floor_factor_1": 1.5154220834882477e-8,
+          "relative_l2_error": 4.748032463753088e-10
+        },
+        "continuity_qd": {
+          "1.0": "structural_zero",
+          "2.0": "structural_zero",
+          "absolute_l2_error": 8.374387472014477e-11,
+          "floor_factor_1": 2.531777290387138e-8,
+          "relative_l2_error": 1676.6263801708137
+        },
+        "continuity_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 4.821318879819682e-10,
+          "floor_factor_1": 1.53642541426685e-7,
+          "relative_l2_error": 4.821318879819672e-10
+        }
+      }
+    },
+    {
+      "direction": "node_velocity",
+      "step": 1e-5,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 1.3844392665494323e-6,
+          "floor_factor_1": 1.1111761973446564e-6,
+          "relative_l2_error": 3.070863319687656e-7
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 7.85606129409867e-6,
+          "floor_factor_1": 0.00041141052651557877,
+          "relative_l2_error": 5.925844463511295e-6
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.00046568336592591315,
+          "floor_factor_1": 0.00041141052651557877,
+          "relative_l2_error": 1.4883098093593682e-5
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.00047226345976825017,
+          "floor_factor_1": 0.00041141052651557877,
+          "relative_l2_error": 1.3897420065153839e-5
+        },
+        "continuity_q": {
+          "1.0": "structural_zero",
+          "2.0": "structural_zero",
+          "absolute_l2_error": 1.5265572344739355e-11,
+          "floor_factor_1": 1.4613785967079704e-10,
+          "relative_l2_error": 677203.1839761683
+        },
+        "continuity_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 1.8869317100177053e-10,
+          "floor_factor_1": 6.890576739798565e-10,
+          "relative_l2_error": 1.8869317100177053e-10
+        },
+        "continuity_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 2.427115215311183e-10,
+          "floor_factor_1": 1.615681862554224e-9,
+          "relative_l2_error": 2.427115215311183e-10
+        }
+      }
+    },
+    {
+      "direction": "node_velocity",
+      "step": 0.0001,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 1.0306918956870588e-7,
+          "floor_factor_1": 1.1111761973446565e-7,
+          "relative_l2_error": 2.2862064178903527e-8
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 5.933738977988938e-7,
+          "floor_factor_1": 4.1141052651557876e-5,
+          "relative_l2_error": 4.4758324756262127e-7
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 4.091942974373165e-5,
+          "floor_factor_1": 4.1141052651557876e-5,
+          "relative_l2_error": 1.3077724723943905e-6
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 4.1347420990346644e-5,
+          "floor_factor_1": 4.1141052651557876e-5,
+          "relative_l2_error": 1.2167413468651292e-6
+        },
+        "continuity_q": {
+          "1.0": "structural_zero",
+          "2.0": "structural_zero",
+          "absolute_l2_error": 3.2752750328389626e-12,
+          "floor_factor_1": 1.8583301164575478e-11,
+          "relative_l2_error": 145296.00532144774
+        },
+        "continuity_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 1.1128313911437554e-10,
+          "floor_factor_1": 1.3797410815060194e-10,
+          "relative_l2_error": 1.1128313911437554e-10
+        },
+        "continuity_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 1.1600292972689648e-10,
+          "floor_factor_1": 2.3145358657252476e-10,
+          "relative_l2_error": 1.1600292972689648e-10
+        }
+      }
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.006594136024061804,
+          "floor_factor_1": 0.008228580842049514,
+          "relative_l2_error": 0.0044273258298260084
+        },
+        "endpoint_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.008845968248272367,
+          "floor_factor_1": 0.009263705917766358,
+          "relative_l2_error": 0.004715479114254795
+        },
+        "endpoint_qd": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.1812946266466696,
+          "floor_factor_1": 0.16282226138159053,
+          "relative_l2_error": 0.0038117043120416204
+        },
+        "endpoint_scaled": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.20172470575492868,
+          "floor_factor_1": 0.18733048199008495,
+          "relative_l2_error": 0.003945449220094149
+        },
+        "continuity_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.00884132268930254,
+          "floor_factor_1": 0.009231022921493347,
+          "relative_l2_error": 0.005010867249815191
+        },
+        "continuity_qd": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.1794618368704924,
+          "floor_factor_1": 0.15754081074848886,
+          "relative_l2_error": 0.004109660423543748
+        },
+        "continuity_scaled": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.2000586153670184,
+          "floor_factor_1": 0.18259322404998496,
+          "relative_l2_error": 0.004247691158907533
+        }
+      }
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-6,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.00018225652027170156,
+          "floor_factor_1": 0.0008228580842049514,
+          "relative_l2_error": 0.00012236766073807473
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.00022893216339351584,
+          "floor_factor_1": 0.0009263705917766359,
+          "relative_l2_error": 0.00012203580261257698
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.005692772368536468,
+          "floor_factor_1": 0.016282226138159054,
+          "relative_l2_error": 0.00011969006134369323
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.006135849476946179,
+          "floor_factor_1": 0.018733048199008496,
+          "relative_l2_error": 0.00012000851577814687
+        },
+        "continuity_q": {
+          "1.0": "passed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.00022578859059996096,
+          "floor_factor_1": 0.0009231022921493346,
+          "relative_l2_error": 0.00012796689972510505
+        },
+        "continuity_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.005003284258242616,
+          "floor_factor_1": 0.015754081074848887,
+          "relative_l2_error": 0.00011457477345825575
+        },
+        "continuity_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.005489162243301436,
+          "floor_factor_1": 0.018259322404998495,
+          "relative_l2_error": 0.00011654717237698357
+        }
+      }
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "tight",
+      "blocks": {
+        "markers": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0015870853827756716,
+          "floor_factor_1": 0.008228580842049514,
+          "relative_l2_error": 0.001065574638385132
+        },
+        "endpoint_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0020603260603606305,
+          "floor_factor_1": 0.009263705917766358,
+          "relative_l2_error": 0.0010982884217431885
+        },
+        "endpoint_qd": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.05127490323611534,
+          "floor_factor_1": 0.16282226138159053,
+          "relative_l2_error": 0.0010780505378437152
+        },
+        "endpoint_scaled": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0552594781967525,
+          "floor_factor_1": 0.18733048199008495,
+          "relative_l2_error": 0.0010807970413850008
+        },
+        "continuity_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0020241521960431877,
+          "floor_factor_1": 0.009231022921493347,
+          "relative_l2_error": 0.001147199158341593
+        },
+        "continuity_qd": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.04461336555270359,
+          "floor_factor_1": 0.15754081074848886,
+          "relative_l2_error": 0.0010216421829302145
+        },
+        "continuity_scaled": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.0489905255862178,
+          "floor_factor_1": 0.18259322404998496,
+          "relative_l2_error": 0.0010401782598617212
+        }
+      }
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "loose",
+      "blocks": {
+        "markers": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.006594397107117029,
+          "floor_factor_1": 0.008240669708719757,
+          "relative_l2_error": 0.0044275011218961
+        },
+        "endpoint_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.00885788407713345,
+          "floor_factor_1": 0.009243358944366457,
+          "relative_l2_error": 0.004721831029675071
+        },
+        "endpoint_qd": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.18303311571771952,
+          "floor_factor_1": 0.1637860124954943,
+          "relative_l2_error": 0.0038482558988764196
+        },
+        "endpoint_scaled": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.20334043479774788,
+          "floor_factor_1": 0.1880686630428283,
+          "relative_l2_error": 0.003977050589237396
+        },
+        "continuity_q": {
+          "1.0": "unresolved_at_step",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.00884132268930254,
+          "floor_factor_1": 0.009231022921493347,
+          "relative_l2_error": 0.005010867249815191
+        },
+        "continuity_qd": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.1794618368704924,
+          "floor_factor_1": 0.15754081074848886,
+          "relative_l2_error": 0.004109660423543748
+        },
+        "continuity_scaled": {
+          "1.0": "failed",
+          "2.0": "unresolved_at_step",
+          "absolute_l2_error": 0.2000586153670184,
+          "floor_factor_1": 0.18259322404998496,
+          "relative_l2_error": 0.004247691158907533
+        }
+      }
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-5,
+      "tolerance": "work",
+      "blocks": {
+        "markers": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 3.163026171788879e-5,
+          "floor_factor_1": 8.228580842049513e-5,
+          "relative_l2_error": 2.1236667578098674e-5
+        },
+        "endpoint_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 3.362945343167816e-5,
+          "floor_factor_1": 9.263705917766357e-5,
+          "relative_l2_error": 1.79266961886115e-5
+        },
+        "endpoint_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.00037287211286062027,
+          "floor_factor_1": 0.0016282226138159051,
+          "relative_l2_error": 7.839604883606764e-6
+        },
+        "endpoint_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0005021231271572893,
+          "floor_factor_1": 0.0018733048199008492,
+          "relative_l2_error": 9.820816409273946e-6
+        },
+        "continuity_q": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 3.35841878706543e-5,
+          "floor_factor_1": 9.231022921493345e-5,
+          "relative_l2_error": 1.903401934603267e-5
+        },
+        "continuity_qd": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0003663299356599383,
+          "floor_factor_1": 0.0015754081074848885,
+          "relative_l2_error": 8.388923599547269e-6
+        },
+        "continuity_scaled": {
+          "1.0": "passed",
+          "2.0": "passed",
+          "absolute_l2_error": 0.0004969782583312005,
+          "floor_factor_1": 0.0018259322404998494,
+          "relative_l2_error": 1.0551958235889723e-5
+        }
+      }
+    }
+  ],
+  "excess_ratios": [
+    {
+      "direction": "LSInputX_B6",
+      "step": 1e-5,
+      "tolerance": "tight",
+      "block": "continuity_qd",
+      "error_over_floor": 1.0505274596211498
+    },
+    {
+      "direction": "LSInputX_B6",
+      "step": 1e-5,
+      "tolerance": "tight",
+      "block": "continuity_scaled",
+      "error_over_floor": 1.0181732551660152
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "work",
+      "block": "endpoint_qd",
+      "error_over_floor": 1.113451103727071
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "work",
+      "block": "endpoint_scaled",
+      "error_over_floor": 1.0768386629443765
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "work",
+      "block": "continuity_qd",
+      "error_over_floor": 1.139145063541663
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "work",
+      "block": "continuity_scaled",
+      "error_over_floor": 1.0956519137438105
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "loose",
+      "block": "endpoint_qd",
+      "error_over_floor": 1.1175137176183143
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "loose",
+      "block": "endpoint_scaled",
+      "error_over_floor": 1.081203170734732
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "loose",
+      "block": "continuity_qd",
+      "error_over_floor": 1.139145063541663
+    },
+    {
+      "direction": "mixed",
+      "step": 1e-7,
+      "tolerance": "loose",
+      "block": "continuity_scaled",
+      "error_over_floor": 1.0956519137438105
+    }
+  ],
+  "qualification": {
+    "1.0": {
+      "LSInputX_B6": {
+        "markers": true,
+        "endpoint_q": true,
+        "endpoint_qd": true,
+        "endpoint_scaled": true,
+        "continuity_q": true,
+        "continuity_qd": false,
+        "continuity_scaled": false
+      },
+      "node_position": {
+        "markers": true,
+        "endpoint_q": true,
+        "endpoint_qd": true,
+        "endpoint_scaled": true,
+        "continuity_q": true,
+        "continuity_qd": true,
+        "continuity_scaled": true
+      },
+      "node_velocity": {
+        "markers": true,
+        "endpoint_q": true,
+        "endpoint_qd": true,
+        "endpoint_scaled": true,
+        "continuity_q": true,
+        "continuity_qd": true,
+        "continuity_scaled": true
+      },
+      "mixed": {
+        "markers": true,
+        "endpoint_q": true,
+        "endpoint_qd": false,
+        "endpoint_scaled": false,
+        "continuity_q": true,
+        "continuity_qd": false,
+        "continuity_scaled": false
+      }
+    },
+    "2.0": {
+      "LSInputX_B6": {
+        "markers": true,
+        "endpoint_q": true,
+        "endpoint_qd": true,
+        "endpoint_scaled": true,
+        "continuity_q": true,
+        "continuity_qd": true,
+        "continuity_scaled": true
+      },
+      "node_position": {
+        "markers": true,
+        "endpoint_q": true,
+        "endpoint_qd": true,
+        "endpoint_scaled": true,
+        "continuity_q": true,
+        "continuity_qd": true,
+        "continuity_scaled": true
+      },
+      "node_velocity": {
+        "markers": true,
+        "endpoint_q": true,
+        "endpoint_qd": true,
+        "endpoint_scaled": true,
+        "continuity_q": true,
+        "continuity_qd": true,
+        "continuity_scaled": true
+      },
+      "mixed": {
+        "markers": true,
+        "endpoint_q": true,
+        "endpoint_qd": true,
+        "endpoint_scaled": true,
+        "continuity_q": true,
+        "continuity_qd": true,
+        "continuity_scaled": true
+      }
+    }
+  },
+  "max_error_over_floor": 1.139145063541663,
+  "status": "qualified_with_factor"
+}

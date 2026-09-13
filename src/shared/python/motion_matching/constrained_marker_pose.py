@@ -38,6 +38,8 @@ def fit_marker_pose(
     forward: Callable[[Array], Array],
     closure: Callable[[Array], Array],
     *,
+    forward_jacobian: Callable[[Array], Array] | None = None,
+    closure_jacobian: Callable[[Array], Array] | None = None,
     max_iterations: int = 100,
     closure_tolerance: float = 1e-7,
 ) -> MarkerPoseResult:
@@ -96,13 +98,47 @@ def fit_marker_pose(
         error = distances(q)
         return float(error @ error)
 
+    def cost_jacobian(q: Array) -> Array:
+        assert forward_jacobian is not None
+        derivative = np.asarray(forward_jacobian(q), dtype=float)
+        if (
+            derivative.shape != (*target.shape, start.size)
+            or not np.isfinite(derivative).all()
+        ):
+            raise ValueError(
+                "Marker Jacobian must have finite marker/xyz/coordinate shape"
+            )
+        prediction = np.asarray(forward(q), dtype=float)
+        distances(q)  # Preserve the forward oracle's validation and mask contract.
+        delta = prediction[observed] - target[observed]
+        return 2 * np.einsum("mi,mij->j", delta, derivative[observed])
+
+    def constraint_jacobian(q: Array) -> Array:
+        assert closure_jacobian is not None
+        derivative = np.asarray(closure_jacobian(q), dtype=float)
+        if (
+            derivative.shape != (initial_closure.size, start.size)
+            or not np.isfinite(derivative).all()
+        ):
+            raise ValueError(
+                "Closure Jacobian must have finite constraint/coordinate shape"
+            )
+        return derivative
+
+    constraints = {"type": "eq", "fun": constraint}
+    if closure_jacobian is not None:
+        constraint_jacobian(start)
+        constraints["jac"] = constraint_jacobian
+    if forward_jacobian is not None:
+        cost_jacobian(start)
     cost(start)
     optimum = minimize(
         cost,
         start,
         method="SLSQP",
         bounds=list(zip(lo, hi, strict=True)),
-        constraints={"type": "eq", "fun": constraint},
+        constraints=constraints,
+        jac=cost_jacobian if forward_jacobian is not None else None,
         options={"maxiter": max_iterations, "ftol": 1e-12},
     )
     coordinates = np.array(optimum.x, copy=True)

@@ -1,0 +1,13 @@
+{
+  "run": 51,
+  "exit_code": 1,
+  "local_handle": 24475,
+  "status": "failed_second_level_after_first_level_completed",
+  "error": "RuntimeError: Manifold integration step underflow at t=0.033333333333333326",
+  "first_level_passed": false,
+  "second_level_complete": false,
+  "runtime": "/home/dieterolson/native-manifold-10043-15",
+  "runtime_source_archive": "../manifold_adaptive_10043_15/raw-source.zip",
+  "exact_input_archive": "../manifold_replay_9967_50/raw-run.zip",
+  "acceptance": "No C3D, complete representation, or R2025b acceptance"
+}

@@ -1,0 +1,25 @@
+{
+  "status": "completed",
+  "candidate_sha256": "786522cd5380a9f62602920b2cff6e6b404f7ceb99bfc6783f1f359b98a6457a",
+  "qualification": "Exploratory/rejected 0\u20130.85 s prefix; no R2025b acceptance",
+  "whole_rms_m": 0.028105470710226108,
+  "terminal_rms_m": 0.06539791108645086,
+  "integration_elapsed_s": 13.385296064952854,
+  "integration_evaluations": 164231,
+  "elapsed_s": 13.554766170040239,
+  "state_shape": [307, 54],
+  "state_layout": "Each time row: native q then native qd in coordinate_names order; no qdd saved",
+  "replay_settings": {
+    "rtol": 1e-11,
+    "atol": 1e-13,
+    "max_step": 6.25e-5
+  },
+  "baseline_note": "Reuse measured run19 baseline from run62 visual, which used max_step .00025; no second baseline integration",
+  "input_hashes": {
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "/mnt/c/Users/diete/native-regularized-fit-9967-73/returned-candidate.json": "5539f942e1d0d56d46aa87e96154df9d012f0fad9a941f8d131904e9129f2f78",
+    "/mnt/c/Users/diete/driver_marker_payload_9967.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "/mnt/c/Users/diete/native-regularized-fit-9967-62/visual/sampled-markers.npz": "4c5608be0c57307570d3af288ac4507f03da3c1df19b5b5232d3e9d1f0c02126",
+    "/mnt/c/Users/diete/replay_returned_73.py": "6d9ea2820b8a53ce95b8d15b0c68a6440bf1d16e533357cc50daaa9e9f5a97d3"
+  }
+}

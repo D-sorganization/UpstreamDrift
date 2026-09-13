@@ -1,0 +1,7 @@
+{
+  "qualification": "Distinct reconstructed candidate trial; strict source-state comparison remains failed; no fit or engine parity gate changed",
+  "effort_profile_max_abs_difference": 1.2789769243681803e-13,
+  "source_state_parity_passed": false,
+  "source_candidate_sha256": "917d2d29b66bc2ab947a6ea75255c35e47134e6a2d51cde7e1e69847cad379f7",
+  "actual_seed_candidate_sha256": "c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049"
+}

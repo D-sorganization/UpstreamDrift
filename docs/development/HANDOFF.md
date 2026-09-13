@@ -1,614 +1,417 @@
-# Architecture Map Contract Handoff Checkpoint — 2026-09-10
-
-- Worktree: C:/Users/diete/Repositories/UpstreamDrift
-- Branch: docs/1616-c4-architecture-map; checkpoint SELF; PR pending.
-- Governing issue: Repository_Management #1616 (Parent epic #1594).
-- Objectives: Adopt Mermaid C4 architecture-map contract (C4Context, C4Container, Feature Map, Change Log) in UpstreamDrift.
-- Verification: scripts/architecture_map_contract.py passes; pytest tests/test_architecture_map_contract.py passes 4/4; SPEC.md change log passes 642 rows.
-- Preserved peer handoffs below.
-
-# Impact Program Handoff Checkpoint — 2026-09-10
-
-- Worktree: C:/Users/diete/Repositories/UpstreamDrift-impact-provider.
-- Branch: docs/9700-impact-handoff; checkpoint SELF; ready PR #9962.
-- Root handoff impact summary was compacted after CI found its 50 KB budget exceeded; detailed receipts remain linked.
-- Governing epic #9700; this change updates turnover only. Main baseline:
-  9c8afeaabf60f2751ebbd61b32dac98d32546c3e. Preserve peer capture work below.
-- Provider PR #9916 merged as c487265f1ebc9c61a2e124267ad9cd1c96a6c007;
-  follow-up #9920 merged as 08c8529ef78b9d7c336e0598721fb01bf814934d.
-- Current main gitlink, requirements-tools.txt and Cargo.toml agree on Tools
-  e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0. The clean submodule was checked
-  out at that existing pin after switching branches. No pin or runtime changed.
-  Earlier PROVIDER_PIN_RESULTS.json is historical evidence for its recorded
-  source; it does not qualify this newer main pin or the friction candidate.
-- Tools normal contact #5146/#5149/#5152, prescribed loads #5154, complex FRF
-  #5156 and calibration #5159 are merged. Friction #5162 is pending final
-  integration/hosted qualification at this checkpoint. Coordinate the next
-  combined pin with the context/capture owner, then qualify exact consumer
-  contracts, built wheel and installed runtime. Do not alter installed CaptureRig.
-- AffineDrift force-regularity #4356 merged as
-  963867d7c78e544799ef4b6070eb1779e64c0452 after all 15 checks passed.
-- Resume: inspect the live Tools #5162 and canonical HANDOFF, update local main
-  without discarding work, read policy/context inventory, claim the next child
-  issue and register presence. Preserve #8557 authority, reviewed claim outcomes,
-  numerical ceilings and manufactured-data limits. No new solver qualification
-  is claimed by this documentation-only checkpoint.
-
-The program remains open. Next work must retain TDD, explicit contracts, shared
-provider mechanics and independent reference controls. Prioritize event-resolved
-force/work accuracy, general sliding/reversal/recontact, spatial and modal
-convergence, measured shaft/grip/contact identification, calibrated structural
-and acoustic transfer, then controlled blinded perception. Force spectrum,
-radiated pressure and perceived sweetness are separate quantities. Synthetic
-convergence cannot establish a player-dependent sound or heavy-hit effect.
-
-## Preserved Capture Handoff
-
-# Common-Reference Calibration Handoff
-
-**User-requested transfer:** read [Capture Product Turnover](capture_product_turnover.md)
-first. It supersedes older in-flight statements below and identifies the exact
-remaining work, validation, branches and live application. Source and turnover
-changes are being committed for the successor; do not start a duplicate epic.
-
-Issue #8365 (claude, worktree `_issue_worktrees/UpstreamDrift-conductor-issue-8365`,
-branch `conductor/issue-8365`, PR #9960, commit SELF): added
-`src/tools/launch_monitor_model/launch_monitor_data.py`, importing the public
-Launch-Monitor-Data shot and aggregate exports with declared units, corpus
-identity and per-cell lineage, exported through the façade and registered
-app-local in the ADR-0046 Stage 2 parity gate and ADR-0048. Validation:
-`tests/unit/launch_monitor/test_launch_monitor_data_exports.py` 17 pass,
-`test_canonical_layer_parity.py` 40 pass, ruff/mypy/pre-commit clean on changed
-files. Workbench dialog wiring for the public exports is a follow-up. See DL-#8365.
-
-Active #9899: `feat/9899-calibration-revision-status`, draft PR #9959,
-builds on #9954 (which merged to main). Camera source hashing uses shared provenance;
-command and wizard regression tests cover same-path changes, absent source,
-matching/legacy outputs and downstream blocking. See
-`capture_calibration_revision_delivery.md`. The numerical ruler provider is
-Tools #5169 at 3d7beb203; its worker/editor integration is still outstanding.
-Preserve the installed candidate runtime and the peer camera/impact work.
-
-Active #9952/#9909: `feat/9952-camera-setup`, PR #9954, added the native camera
-editor and guided acceptance (merged to main). All 566 Capture Rig and 30 isolated calibration
-checks pass; searchable player examples were visually reviewed with the app theme.
-See `camera_setup_delivery.md`. Runtime prerequisite #9950 merged as
-9c8afeaabf60f2751ebbd61b32dac98d32546c3e.
-
-Current #9949: `fix/9949-installed-capture`, PR #9950. Installed worker,
-packaging, new-take identity and library indexing repairs remain intact. PR #9946
-merged as126158943 before these installed-package repairs; installed startup,
-wizard and29 calibration checks passed, as did pip check.
-
-PR #9955 merged at32410babfd1e4741fa0c53bf05dd8403a51bf233 after all CI checks
-passed, including actual Bioptim OCP tests and both manufactured authority checks.
-Its scalar-bound API fix is now integrated into #9950 without changing numerical
-bounds or tolerances. The only merge conflict was this handoff; both delivery
-records are preserved here. Next: validate and publish the integrated #9950 head,
-then advance native camera setup and guided acceptance in #9954.
-
-See [active checkpoint](common_reference_calibration.md), DL-#9898 and the
-[operator guide](../motion_capture/common_reference_calibration.md).
-
-Implemented original-frame marking, revisions, isolated Tools solve, result
-history/review, source hashes, distortion-preserving reconstruction/overlays and
-shared native/generated help. Broad Python3.13 regression594 passed; history/Qt7,
-projection/Qt25, OpenCV5 projection20 and atlas/parity49 passed. Production
-Python3.12 scoped51 now passes after installing missing declared dependencies
-and eliminating repeated PNG decode/player imports. The separate unchanged
-Simscape real-log test still times out at180s; its broad Python3.12 run remains
-failed. See the active checkpoint for exact logs. Native small layout fits640×560;
-Calibrate Again and Add Another Placement remain visible. Main276998030 is
-integrated; final provider qualification remains pending. No physical accuracy claim is made.
-
-Tools #5140 merged0a561daff (tree identical to candidatec984, includes #5136).
-Local vendor0a is development-only: it would regress the launcher compared with
-main's interim4dabe900c. Context owner owns final gitlink/Cargo/pip/catalog alignment
-after Tools #5144; impact owner qualifies the exact installed consumer. No bypass
-of historical private404/rate-shard failures. Update final metadata and integrate
-main normally before PR/CI/protected merge. Cross-capture reuse is now implemented with portable source evidence and native review;27 isolated checks and18 pipeline/lens/Qt boundary tests pass. Reuse committed f6298fb0c; types passed. Foreground image reads are now deferred to background/processing checks, with28 isolated tests passing. All push hooks passed on1e4984765. Named catalog selection passes13 library/dialog tests,29 isolated provider checks and19 integration tests; native archived-source selection/review/assignment at640×560 was inspected. Packaged-runtime and physical accuracy acceptance remain open.
-
-Preserve live app54812 (`Capture Rig — main 56552f245`), older61500 and atlas2963.
-They use frozen earlier checkouts, not this branch. Analysis owner controls
-comparison/coaching/model work; context owner controls catalog/provider alignment.
-Wizard #9931 merged56552f245; #9907/#9905 closed. Additional owners' delivery states
-are preserved below. The canonical calibration checkpoint records visual frame
-selection, Pan Image/Fit Image, their tests and native review. Catalog #9903/#9904
-closed after87 contract/source/equipment tests; parent #9902 remains open for journey acceptance.
-
-## Preserved Main Integration Context
-
-# Shared Analysis Delivery Handoff
-
-## Bounded Launcher Splash (#8360)
-
-- Repository: D-sorganization/UpstreamDrift.
-- Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8360.
-- Branch: conductor/issue-8360; record commit SELF. PR: not created.
-- Issue: #8360 (splash stalls when an optional provider fails); development-log entry DL-#8360.
-- Completed: `startup_phases.py` (pure-Python `StartupTimeline`, `run_bounded`,
-  closed outcome/category sets, `probe_tools_provider` resolving Tools through
-  `tools_repo_path.resolve_tools_repo` and checking the Rate standalone entry
-  point `src/rate_of_closure/launch_pyqt6.py` without importing it);
-  `AsyncStartupWorker` runs registry/engines/Docker/Tools-provider phases under
-  explicit timeouts and only the registry is required; `StartupSession` owns the
-  splash <-> worker <-> shell handshake with a `STARTUP_TIMEOUT_SEC` watchdog,
-  worker-generation isolation and `sip.isdeleted` guards; `StartupFailureDialog`
-  offers Retry / Continue without provider / Copy diagnostics / Close;
-  `UpstreamDriftLauncher(loading=True)` no longer lazy-loads the registry and
-  engine manager on the GUI thread; `LauncherOrchestrator` treats supplied
-  results as authoritative. `STARTUP_TIMEOUT_SEC` moved to `launcher_constants`
-  (re-exported unchanged from `upstream_drift_launcher`).
-- Validation: `tests/unit/launchers/test_startup_phases.py` (30 pass),
-  `tests/launchers/test_startup_session.py` (23 pass), orchestrator/startup/
-  launcher suites pass except pre-existing unrelated failures
-  (`test_golf_launcher_startup_timeout.py` patches a non-existent
-  `_lazy_load_model_registry` attribute; theme-colour assertions; vendored
-  theme/API import mismatches). `pre-commit run --files`, ruff, error-handling
-  ratchet and file-size budget pass. mypy was run on the changed modules.
-- Assumptions: the vendored `vendor/ud-tools` submodule was initialized at the
-  pinned SHA to run tests; no tracked content changed.
-- Next: open the PR with `Fixes #8360`; run the clean-checkout Windows smoke
-  matrix (editable-Tools, vendored-Tools, absent-Tools, broken-Rate) and record
-  the outcome in DL-#8360.
-
-## Completed Runtime (#9926)
-
-- Repository: D-sorganization/UpstreamDrift.
-- Worktree: C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942.
-- Branch: docs/9926-analysis-completion; record commit SELF.
-- Owner session: codex-unified-metrics-9942; preserve peer worktrees and Tools pin4dabe900.
-- Foundation #9933 merged at f04aa1a570e64c3db0b3d009351ab222656175b2.
-- Comparison drawings #9943 merged at 3fbd4b2da5f8661ec1f1e91b97884f781d83f1fd.
-- Metrics, Trace and native references #9945 merged at
-  2d41aba4159162f91c0cd1cc6919d0341755b492 on 2026-09-10T05:20:06Z.
-  Required quality-gate passed in CI Standard run34440058289; the run succeeded.
-  Children #9929/#9930/#9932/#9942 are closed. Optional queued jobs are not passing evidence.
-- Runtime includes common drawing/geometry/measurement controls, explicit model
-  placement and handedness, club/ellipsoid appearance, Trace marker import and
-  Pose Studio reference meshes. See [ledger](unified_analysis_9926.md) and
-  [reviewed contracts](../architecture/SHARED_ANALYSIS_CONTRACTS.md).
-- Qualification: all20 verified Tour Average assets passed actual shared analysis,
-  save/reopen and export; native30 and Trace17 tests passed. After integrating
-  main300d96a1 and biomechanics helper f58ee5b3, all88 combined tests passed.
-  Earlier broad suites, source typing, Ruff, LoD, budgets and generated-map
-  evidence are recorded in the ledger. No physical camera or anatomical accuracy
-  qualification is implied; unsupported native viewers and marker gaps are explicit.
-- External reproducible visual evidence: analysis-9926-artifacts/catalog-analysis-zcgqk8ta
-  and qualify_catalog_analysis.py; native-references-saep77qb and trace-appearance-l276j6ua.
-- Repair47bd32c11 was pushed after #9945 merged, so this branch preserves it via
-  417fd83ae: restored DL-#9926, shipped DL-#9907 and lost SPEC#9931/#9932/#9933
-  without modifying peer #9934 records. This closure changes documentation only.
-- Next: merge this final documentation record through normal protected CI, then
-  verify epic #9926 closure. No runtime implementation remains. The independently
-  owned #9915 catalog may index current contracts later; it is not a runtime dependency.
-
-## Preserved Wizard Context
-
-## Identity
-
-- Repository: D-sorganization/UpstreamDrift.
-- Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-wizard.
-- Branch: feat/9907-capture-goal-wizard; base fd9434ce9b98a008741b2afca62f8654fd34c6e1.
-- Issues: #9907/#9908; epic #9906; bag completion entry #9905.
-- Session: capture-product-01a08427-goal-wizard; presence through02:51UTC, leases02:22/02:50UTC.
-- Implementation455022ede integrates main c487265f1 via a74d5ebd2; Tools pin4dabe900c.
-  PR #9931 is draft while remote CI runs. Normal commit/push hooks passed.
-
-## Current Work
-
-The existing capability_connections.json now owns typed executable goal metadata,
-separate from architecture data-flow edges. The standard-library DAG planner
-rejects cycles, unknown bindings and incompatible camera routes, deduplicates
-shared prerequisites and rejects changed capture/input/graph resumes. The atlas
-renders goal choices, downloads validated portable plan JSON and generates a
-separate capture-goals.mmd from the same source.
-
-Capture Wizard is reachable in the app header. Standard Qt Classic Back/Next/
-Finish/Cancel keeps navigation inside the window; Aero clipped the smaller layout
-and was replaced after visual review. Existing Library, Edit Swing, Drawing,
-Expert Library/Comparison, My Clubs, Calibration and workflow controls are reused.
-Opening a step never starts a hidden analysis job. Status inspection runs in a
-single standard-library worker; Qt updates are polled on the UI thread. Bookmarks
-are capture-owned, atomic and preserve malformed existing files. Optional skips
-persist; lens confirmation is renewed after closing the wizard.
-
-The existing workflow.evaluate remains the readiness authority. Supplemental
-checks inspect saved edits, explicit detector/edit association, model provenance,
-reference bindings, drawings and equipment snapshots. The calibration profile
-consumer rechecks intrinsic quality, camera IDs and recorded dimensions. No
-physical accuracy claim is made. Guided model paths presently use the default
-triangulated match/all views/default observations; unsupported advanced selections
-receive an explicit explanation. Named variants/image-space matching remain in
-the existing controls. User guide: docs/motion_capture/capture_wizard.md.
-
-## Validation
-
-Initial TDD failed on missing planner/catalog/wizard modules, then implementation
-passed. Planner/catalog15, Qt navigation5, evidence/calibration34 and real host
-navigation/resume4 checks pass in their recorded focused runs. Existing detector
-activity tests remain compatible. Scoped mypy with the repository hook's
---follow-imports=silent passes9 source files. An expanded import-following run
-found8 unrelated pre-existing dependency errors plus one local variable type
-error; the local error was repaired. Full Ruff lint/format (6917 files), architecture and document budgets pass.
-The3037-file LoD scan passes with490 baseline occurrences and60 reductions;
-20 new chains were removed through component methods/local delegates, no waivers.
-Broad tests/tools/capture_rig + parity + atlas regressions:510 passed,5893 existing
-warnings in149.17s; TEMP/capture-wizard-regression.log and XML. First invocation had an invalid PowerShell
-JUnit argument and did not run tests; the corrected run passed.
-Visual evidence: TEMP/capture-wizard-visual-iowk4w5o/\*-classic.png,760x610 and
-660x560, inspected after loading Segoe UI for the Windows offscreen environment.
-No production font override was introduced. Integrated main regression passes
-600 checks,6113 existing warnings in149.75s; TEMP/capture-wizard-main-tests.log/XML.
-The integrated3032-file LoD scan passes with490 baseline occurrences and60
-reductions; architecture/document budgets pass. Chromium verified empty-selection
-feedback and an actual capture-plan.json download with the selected drawing goal.
-Remote CI qualification remains.
-
-## Completed Parents and Remaining Goal
-
-- Capture UX #9913/#9917 merged8fce9f238; club catalog #9919 merged01831aa4c.
-- Player bag #9923 merged5ada5e6a6827bfb94a00d1801f6b475afb885885 at2026-09-10T00:19:44Z.
-  Its merged implementation is byte-identical to the741-test qualified source.
-  A concurrent remote branch rewrite was reconciled by normal merge/push f7e2f27af,
-  preserving completion docs. No force-push. #9905 remains open for wizard entry.
-- Reference #9918 merged6f2d63325; completion docs #9922 merged90c3d0b77.
-  Do not edit reference fit.py/appearance/volumes without its owner's coordination.
-- Tools numerical PR5136 head45f3bd8b9 and moving-reference PR5140 headc98402cb1
-  include main2c9a8d6c9 and passed normal commit/push hooks. Qualification:19/12
-  numerical tests and101/24 moving-reference/API/OpenCV5 tests. Private Gasification
-  checkout still fails; rate shards are running. User has been asked to have the
-  Actions credential owner restore private-repo access; no response yet. Do not
-  bypass checks or mint/store a temporary secret. Claims through01:49/02:03UTC.
-- Everyday-reference calibration #9897/#9898-9901 remains open, including geometry,
-  repeatable player UI and hardware qualification. Club epic9902 and wizard9906
-  must close only after remaining acceptance and remote merges.
-- Fleet adoption39/41 remains pending owner replacements Tools5138/Gas4944. The
-  Obsidian/context task owns those changes and agreed to sync canonical blocks in
-  AGENTS and CLAUDE. Do not duplicate its work. Gas mapping planning is complete;
-  implementation is deferred to future cheaper agents per user instruction.
-- Preserve live Capture Rig PID61500 and launcher30900, source capture-setup501092b27
-  (matches9917), runtime TEMP/upstreamdrift-capture-test-runtime. It does not include
-  the new bag or wizard. Do not kill or edit that live source while the user tests.
-- Automatic approval review rejected deleting a temporary clean-export folder
-  with 'blocked by policy'; it remains in place. Do not retry by another route.
-
-## Next Steps
-
-Finish broad regressions, fresh map/inventory/docs and visual qualification. Commit
-and push normally, open a focused PR, update SPEC to its actual PR number, follow
-protected CI and merge only when qualified. Connect #9905 closure to this PR. Keep
-all remaining calibration/fleet work active. The historical parent records below
-are retained for their unique qualification evidence, not current wizard status.
-
-## Integrated Reference Fitting Handoff
-
-- Repository/worktree: `D-sorganization/UpstreamDrift`, `../UpstreamDrift-reference-9914`.
-- Branch: `feat/c3d-reference-overlay-9914`; baseline `7c09642df`; commit SELF.
-- Governing epic: #9914; PR #9918; development entry DL-#9914.
-- Complete: marker profiles, URDF and compiled-MJCF tree adapters, root seed,
-  existing continuous fit orchestration, saved jobs and library assets,
-  fixed placement estimator, standalone keyframe graphic, operator guide.
-  Expanded scope adds measured club edges, shared 3D ellipsoid projection with
-  adjustable alpha/radius, and saved reversible handedness before scene placement.
-- Validation: RED observed before each new module; 177 combined reference/UI/solver tests pass;
-  new two-camera renderer, preview, identity and custom-model contracts pass
-  on combined main 18c8f922e. Normal pre-push gates pass on 74e867786.
-  Exact commands are in the epic document.
-- Evidence: Corrected positive-length model survey bundles under `../reference-fit-artifacts-9914`.
-  Twenty corrected bundles verified; first driver fit was withdrawn for a negative length.
-  Tracked survey evidence: docs/development/reference_fit_qualification.json. Native OpenSim adapter and MyoSuite anatomy
-  are unavailable, explicitly recorded rather than replaced with a fallback.
-- Display evidence: `reference_display_qualification.json` records twenty club
-  assets derived from exactly unchanged qualified body coordinates. The external
-  `reference-display-library.zip` contains assets and a reproduction script.
-  Full reference/Capture Rig selection and targeted missing-club preview tests pass.
-- Coordination: `codex-reference-9914-20260909`, lease and reference UI paths
-  registered. #9917 integrated, concurrent branch fixes preserved in d874062a5.
-- Merged: PR #9918 at6f2d63325f6260de99527a08551f7e116abdec28; owner completing documentation.
-
-## Publication Checkpoint
-
-Player bag implementation b206ae943 published through all normal hooks as draft
-PR#9923. Current main merge retains #9918 reference/club/volume/handedness work,
-its unique DL-#9914 entry and handoff evidence; generated inventories/maps were
-rebuilt.3031-file LoD and architecture/doc budgets pass. Combined capture/model/
-reference/map regression passes741 tests with2 normal deselections and5488 existing
-warnings in515.50s. Keep the PR draft until the integration commit/push completes.
-Local warm Qt smoke:1,000 catalog-backed clubs,3,466,962bytes, dialog156.88ms,
-filter1.32ms. No production Rust or font change is justified by this measurement.
-
-Tools#5136 main integration committed45f3bd8b9 after normal hooks;19 calibration
-contracts/numerics and12 OpenCV5 numerical tests pass. Its normal push passed
-(log TEMP/tools-5136-merged-push.log) and fresh CI is running. Tools#5140 merged
-the same baseline locally;101 mocap/API and24 OpenCV5 checks pass. Its commit
-hook caught a duplicate #5132 SPEC row from the merge; consolidate both meanings
-into one row, then resume normal hooks.
-Live Capture Rig PID61500 remains open and unchanged in capture-setup.
-
-## Expanded Slow-Test Finding
-
-The first combined command overrode addopts to obtain a summary, unintentionally
-including the repository-marked slow real-log Simscape test. It exceeded the
-unchanged60-second limit in test_shoulder_gimbal_and_strut_validate_on_the_real_logs
-at test_simscape.py:120. A separate one-BLAS-thread diagnostic also timed out,
-so thread oversubscription alone is not an established cause. No marker, timeout
-or numerical tolerance changed. Logs: TEMP/player-bag-merged-tests.log and
-TEMP/player-bag-simscape-thread-test.log. Standard repository selection passed741 tests (2 deselected)
-with an explicit one-thread native budget and JUnit at
-TEMP/player-bag-merged-standard.xml; do not claim that expanded run passed.
-
-Wizard discovery: workflow.py already owns pure Step requirements/readiness and
-SessionMedia rules. The simulation config SetupWizardViewModel serves a separate
-canonical-core configuration contract. #9907 should add goal/dependency metadata
-to the graph authority and reuse capture rules; #9908 should use standard Qt
-Back/Next and existing action adapters. That parent checkpoint preceded the wizard implementation above.
-
-## Qualified Integration
-
-The main merge preserves #9918 and all other owners.741 standard regressions pass;
-3031-file LoD, architecture and document budgets pass. No source behavior was
-changed to satisfy qualification. Normal integration commit/push is next, then
-restore PR#9923 to ready and follow protected CI.
-
-## Preserved Incoming Main Handoff
-
-The following text records the incoming provider and earlier capture checkpoints.
-Their current-status wording describes those checkpoints; the wizard state above
-is authoritative for this branch. Preserve their source and qualification details.
-
-# Impact Shaft Provider Integration (#9912)
-
-## Current Continuation State
-
-Concurrent eacd69858 is preserved, including player/equipment main 5ada5e6a6.
-An inherited inventory mismatch was reproduced by the existing test; regeneration
-from the actual pinned checkout with full authorship restores the omitted
-shaft/provider entries. All 271 integration controls pass. Provider source,
-Cargo/gitlink and seam repairs are unchanged; #5144 reviewed-pin qualification
-remains pending. Evidence is in PROVIDER_PIN_RESULTS.json.
-
-Main 90c3d0b77 brings reviewed reference fitting/display #9918/#9922 and club
-catalog #9919. Six conflicts are documentation/inventory only; both task
-scopes are retained and the inventory is regenerated from the real trees.
-All 271 source controls pass after this merge. Tools numerical PR #5133
-was already squash-merged as 2c9a8d6c; launcher correction #5143 is a separate
-follow-up. Candidate 4dabe900c and the 32a8b36ec wheel remain accurately
-identified interim evidence, not that future reviewed revision.
-
-The latest candidate is Tools 4dabe900c6ef7767b565c778cda9d9449bed28cf. Six protected unit-gate
-failures at d2760f05c are repaired locally: Cargo/gitlink consistency, current
-inventory metadata, immutable catalog provenance, obsolete color waiver,
-explicit pre-existing realtime migration debt and the moved launcher target.
-The corrected manifest exposed a real UI import failure. Two new tests fail
-before retiring four byte-identical UI copies through the existing namespace
-resolver. All 27 UD-only widgets remain; 105 UI controls and real offscreen
-widget construction pass. Before that UI repair, all 106 migration controls
-passed. Exact new-pin combined source suite passes 271 tests in 71.66 s (20 existing deprecation warnings); the isolated 32a8b36ec wheel now passes provider, namespace and Qt construction checks with gui-tools installed. Its web assets are omitted.
-Realtime #8942 remains pending under a deliberate review exception expiring
-2026-10-09; no guard logic was weakened and no migration completion is claimed.
-Earlier source/wheel records below retain their actual revision identities.
-
-Concurrent remote repairs through 7141feb79 are preserved by normal merge.
-The same provider pin and theme retirement are retained. Reviewed main
-use_start_file preserves the concurrent process-action fix without adding
-a second equivalent API. Realtime is split/pending-cleanup because both trees
-contain different transports and UD retains a distinct facade. Source and
-installed-wheel evidence keeps its original revision identity.
-
-Main 8fce9f238 (capture PR #9917) is integrated with its reviewed LoD fixes.
-Only root handoff and development-log conflicts needed resolution; both scopes
-are retained. All 79 provider/theme/fallback/manual checks pass again after the merge.
-
-Current repair: 79 provider/theme/fallback/manual tests pass against 00d17e7f9,
-with eight existing deprecation warnings. The seam gate passes after actual
-retirement of the already-shadowed color child and an explicit realtime
-split/pending-cleanup ruling linked to #8942. Its facade remains local.
-No byte-identity or private non-string equivalence is claimed for the removed
-color child. The 608e85b24 wheel below is historical. The current 00d17e7f9 pin was built
-from efe44846e and installed into a fresh environment with all core dependencies.
-Shaft wire/digest/tamper and theme/layout/realtime import checks pass under
-site-packages; pip check passes. Wheel SHA256:
-8e09cd2c6e6c6ddb008c0bff9839514aa3e07f7c95f031da629bbe34ad4c3ce8.
-This is Python-provider evidence; UI assets and physical qualification remain
-excluded. Source checks after capture merge pass all 79 tests; development-log
-audit retains 36 inherited findings against main's 37, with no new findings
-and the exact union of both parents' SPEC issue rows.
-Root handoff again carries required UP-D0/UP-D1 references. The PR title now
-accurately uses chore for dependency qualification. Provider CI is still open.
-
-- Working directory: C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin.
-- Branch: feat/9912-impact-provider-pin; implementation commit b6107f8e2; PR #9916.
-- Original base: 6e3610a9b; incoming main: 18c8f922e; Tools candidate: 00d17e7f91fe8541bc8882ee745fda58ee2ad7af.
-- Governing issue #9912, development entry DL-#9912, parent #9703/#9701/#9700.
-- Pair: Tools #5133. Canonical shared source stays in Tools; the obsolete theme color child is retired.
-
-The new tests/shared_contracts/test_impact_shaft_provider.py exercises the strict
-golf_club.distributed_shaft/1 public input format and canonical theme API through
-the existing provider-resolution harness. The synthetic fixture verifies coupled
-stiffness, integrated mass, canonical roundtrip/digest, exact source-byte checks
-and preserved unqualified status. Adverse cases reject version changes, missing
-calibration fields, numeric strings and attempted qualification promotion.
-Theme coverage checks resolved defaults, custom tokens and independent output.
-
-Before changing the old eab74a901 pin, all six tests failed: five missing shaft
-module cases and one missing resolved-theme method. After selecting the exact
-candidate, all six pass; the whole provider suite passes all 24 cases with five
-existing import-alias deprecation warnings. Run with the established Python 3.12
-environment, REQUIRE_REAL_TOOLS_REPO=1, TOOLS_REPO_PATH pointing to this worktree's
-vendor/ud-tools, and pytest tests/shared_contracts --tools-mode=vendored -n 0
---no-cov. Numerical libraries use one native thread; Qt is offscreen.
-Pinned Ruff 0.15.17 check/format passes all 6,840 files, along with manual,
-document-catalog, size and title checks. Ten existing packaging/provenance tests
-pass. The local development-log validator file is absent despite synced policy;
-the central validator at ad9bcb885 reports 40 inherited findings versus 41 on
-base, with no new findings after normalizing shifted diagnostic line numbers.
-DL-#9830 and DL-#9825 now concisely record their verified merged results; detailed
-evidence remains in their existing turnover documents. Other owners' entries
-are preserved. The Python-only wheel built from b6107f8e2 installs with its full
-declared core dependencies into a clean environment outside the checkout. Both
-shaft and theme imports resolve under site-packages. Canonical wire/digest,
-coupled inputs, tamper refusal and theme ownership checks pass; pip check passes.
-Wheel SHA256: 6f6f259ff9679f921a5a05e515abcb4bb466589221ce6c7aefdc43b9ca656653.
-Runtime: Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, Pydantic 2.13.5.
-SKIP_UI_BUILD=1 is the existing Python-provider build path; this evidence does
-not qualify a UI/release artifact. The final reviewed provider pin remains pending.
-
-Main 18c8f922e is integrated with only four shared-document conflicts. Both
-owners' entries and all incoming implementation are preserved. The provider
-suite passes all 24 cases after merging (five existing alias warnings); manual,
-doc-size and scoped Ruff checks pass. Source diff from main consists solely of
-the candidate vendor pin and its two test/fixture files. Final reviewed Tools
-repinning and protected provider/consumer delivery remain pending.
-
-Post-merge audit removed one empty conflict-created heading while retaining
-the complete shipped #9894 entry. SPEC rows exactly equal the union of both
-parents, with no extras or omissions. The current main development-log audit
-has 36 inherited findings versus 37 on main, with no new findings; earlier
-40/41 counts above belong to the original base. Merge commit: 70243adfe.
-
-## Remaining Work
-
-1. Incorporate the reviewed Tools repair revision and rerun the provider checks.
-2. Repeat installed-consumer validation when the final provider pin changes.
-3. Finish protected checks on PR #9916 and its Tools #5133 pair before
-   merging in provider-then-consumer order.
-4. Continue the full #9703 engine adapters and registered #9704 studies.
-
-This pin does not close physical calibration, flexible impact, acoustic radiation
-or blinded sweetness qualification. Tools #5133 still has protected CI failures;
-private Gasification checkout access is separately unresolved. Current dirty
-files belong to this branch; other worktrees and user-owned source are untouched.
-The complete presence read found common handoff/SPEC/development-log overlap
-with capture-product sessions #9898/#9913, but no implementation-path overlap.
-Each session uses its own worktree; preserve their incoming metadata during
-merges. An unrelated rejected identity-change warning is retained in inbox evidence.
-
-## Preserved Incoming Handoff
-
-The following incoming handoff is preserved from main 18c8f922e, including its original ownership and historical status. The prior provider-branch handoff is retained at the immutable c315c4b74 revision.
-
-# Guided Capture Setup Handoff
-
-# C3D Reference Fitting Handoff
-
-# Player Bag and Capture Equipment Handoff
-
-## Identity
-
-- Repository: D-sorganization/UpstreamDrift.
-- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-bag.
-- Branch: feat/9905-player-club-bag; baseecab78b11 (catalog PR #9919).
-- Implementation: uncommitted working tree; PR not created.
-- Governing issue: #9905, epic #9902; development entry DL-#9905.
-- Session: capture-product-01a08427-player-bag; lease through01:00UTC; scoped presence renewed through01:45UTC.
-
-## Current Work
-
-PlayerClub/PlayerBag/CaptureClubSnapshot extend the existing club-data authority.
-Catalog bases and player overrides stay separately inspectable. Capture snapshots
-bind to the portable capture ID and verify a content revision. The equipment adapter
-uses the existing atomic document writer, keeps prior capture selections in
-`equipment_revisions`, rejects stale bag saves and reports corrupt records.
-
-My Clubs now opens from the header and selected library capture. Catalog search
-exposes source links; custom clubs, measured/estimated/unknown quantities, canonical
-unit controls, notes, archive/restore and assignment have visible outcomes and help.
-Editable copies rebind equipment to their new capture ID. Portable notes moved to
-rig/capture_notes.py with compatible library re-exports; rig/equipment.py is the
-headless reader. Model session write_fit stores the exact selected club, eligible
-SI context and withheld reasons in hashed provenance, with no applied club constraint.
-
-652 capture/model/catalog/inventory tests pass. Initial editor TDD failed on the
-missing module before implementation. Visual review passed at760x600 /640x500;
-Windows offscreen QA required explicitly loading Segoe UI, with no production font
-change. Evidence: TEMP/player-bag-visual-katpe_dp/\*-font.png. Full Ruff lint/format
-(6880 files), scoped mypy and architecture/doc budgets pass. Five new LoD chains
-were repaired using the player identity facade and local evidence values. The3020-file
-LoD scan passes with490 baseline occurrences and60 reductions. Final69 focused tests
-plus map/parity checks pass (11 existing warnings). Wizard entry remains
-required under #9906 before #9905 closes. No implementation commit yet.
-
-Only byte-identical repeated Field Reference tables were removed from the development
-log to make room for the new entry: all four original tables had SHA256
-43401899f2017f08b0f33e6d9c818eb210f76476f5874f176b242f7d2dbcc725.
-The first remains; every feature entry and unique description is preserved.
-
-## Completed Parent Work
-
-Capture UX #9917 merged to remote main8fce9f238ce89876dd363fb41b4ba1169a87d1b6
-at2026-09-09T22:53:40Z. All445 capture/parity tests and protected checks passed.
-The live test app is childPID61500, venv launcherPID30900, running in the separate
-UpstreamDrift-capture-setup checkout. It is source-identical to the merged capture
-code. Initial source launch needed PYTHONPATH pointing at that checkout's root,
-src and src/shared/python. The oldPID50860 app exited. Preserve the current window.
-
-Catalog/source PR #9919 merged2026-09-09T23:35:01Z atmain01831aa4c580ecb5065477c8219168064b629443.
-Its original unit gate passed14929 tests but failed only generated divergence
-inventory freshness. Concurrent remote commit ecab78b11 regenerated that inventory;
-it was preserved by fast-forward and protected CI passed before merge. Auxiliary
-manufactured authority/rolling jobs were still queued when inspected. Catalog and
-source presence sessions were released; the issues remain open pending the bag/wizard.
-
-## Remaining Goal and Coordination
-
-- Everyday reference calibration #9897 (#9898-#9901), club bag #9902, wizard #9906
-  (#9907-#9909) and fleet adoption remain active. Existing product/editing/drawing/
-  overlay epics shipped through #9896. Gasification mapping is planned for future
-  cheaper agents per user direction; do not implement that mapping now.
-- Reference task #9914/#9918 owns headless fitting and a positive-length solver fix
-  in reconstruct/model/fit.py. Do not edit that path without coordination.
-- Current fitting models end at wrists/hands. #9914 owner explicitly confirmed no
-  overlap with our session.py/write_fit changes. Their fit.py and new reference
-  appearance/volumes/control files remain theirs. No invented club constraint.
-- Tools #5136 numerical repair and #5140 moving-reference solver remain unmerged.
-  Rust pre-checkout retry passed. Both rate shards in run34407390506 timed out at99%;
-  Python3.11 leaves TestHoldFraction::test_matches_the_hand_counted_fixture unreported.
-  Evidence is on Tools#5114; its prior Qt-cleanup candidate remains unqualified.
-- Tools private Gasification checkout fails; user was asked via async input to have
-  the Actions credential owner restore read access. Current App cannot inspect/update
-  secrets (403). Never bypass the contract check or paste/mint a temporary secret.
-- Fleet audit remains39/41. Context/Obsidian task owns replacements Tools#5138 and
-  Gasification#4944 and agreed to sync the central agent-communication block in both
-  AGENTS/CLAUDE. Authority537f9ad087dd3afdda60d28dd2e54d1ac7583864. Verify after merge.
-- Goal stays active; no scientific accuracy/publication approval is implied by tests.
-
-## Next Steps
-
-1. Commit/publish the qualified #9905 change with normal hooks; merge only green protected CI.
-2. Connect My Clubs to the goal wizard under #9906; retain #9905 open until that entry exists.
-3. Continue everyday-reference calibration consumers and qualification after Tools gates clear.
-4. Verify final Tools/Gas fleet policy replacements after their owner merges them.
-5. Keep the full goal active; no unsupported equipment model constraint is claimed.
-
-## Verified Agent Context: #9915
-
-- Identity: UpstreamDrift, `C:/Users/diete/Repositories/.context-implementation/UpstreamDrift`; branch `feat/issue-9915-agent-context`; commit `SELF`; PR #9920; DL-#9915; session `context-01a0879e-ud`; fleet epic #1629.
-- Implemented: twelve components, five reviewed integration contracts, twelve navigation tasks, generated module graph/offline browser and required source/review/provider checks. Existing atlas, scientific authorities and peer handoffs are preserved.
-- Published provider: Tools #5141 merged as `e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0`, byte-identical to qualified34b142e28. Both Linux aggregates and quality passed. The gitlink, Cargo.toml and requirements-tools.txt now use this same revision. The new required installation regression failed against the old v1.15.0 wheel and passes after alignment.
-- Source integration: main276998030 is integrated. Its registry changes invalidated two atlas reviews; inspected shared-analysis contracts, preserved pixel/frame/scene limits and updated both reviews after31 atlas/workflow/goal tests passed. Existing documentation/CI regression repairs remain unchanged.
-- Final-pin validation:107 provider/catalog/seam tests, six context tests and twelve navigation tasks pass (median2423.645ms, max15593 characters). Source/view checks and all three pin surfaces pass. Full-authority divergence inventory regenerated. The source graph verifies3543 files/39589 symbols and two MotionPipeline caller candidates. Tools wheel builds and installed CodeMap verifies the same graph in an isolated interpreter; candidate/squash source trees are identical.
-- Concurrent integration: remote60318e4c4 selects the same provider and adds the atlas-required NumPy dependency to the context CI environment. The minimal validation environment reproduces successful atlas/source checks after that dependency is installed. Retained the more specific reviewed contracts and regenerated views; all application source files remain identical to wheel source6dab98fce.
-- Installed consumer: normal Python3.12 wheel build at6dab98fce includes the frontend bundle; SHA256 `8f5b62979229ef0c2372ea9080cc0a34a51105604bf170c94828f5e6f0d06e42`. In an isolated declared gui-tools environment, the actual manifest resolves and constructs FunctionGeneratorWidget, installed aliases/origins pass, synthetic shaft round-trip and altered-source rejection pass, and frontend index presence is verified. All31 unmodified calibration/reference tests pass against installed modules with OpenCV5.0.0.93; pip check passes. Later merge changes only CI/docs, so wheel source and provider are unchanged. Local exact records: `.context-implementation/ud-e83-installed-qualification.json` and `ud-e83-installed-calibration.xml`.
-- Limits: protected application CI remains pending. Lexical graphs are scoped navigation evidence; scientific/physical approval is separate. No subscription is needed. No peer-owned worktree was modified.
-- Merge metadata: the concurrent merge retained two versions of our own #9920 SPEC row; CI rejected the duplicate. Kept the complete current row and preserved all peer rows; concurrent equivalent repair4ded98ad6 is integrated and the unchanged SPEC checker passes.
-- Documentation budget: shortened only the context log entry; peer records and the51,200-byte limit are preserved.
-- Next: publish through normal hooks, require green protected CI, then reconcile the fleet delivery audit and epic.
-
-# Unified Biomechanics Analysis (#9934)
-
-## Current Continuation State
-
-Branch `feat/9934-biomechanical-analysis` is implementing the shared
-calibrated trajectory contract, source-qualified orientation conversion,
-Cheetham-labelled golf channels, body/club COM, API conversion/compute/display
-routes, and desktop/web plot explorers. Focused biomechanics/API/display tests
-pass; Ruff lint and formatting pass after formatting. The work is not yet
-qualified for merge: native model transform adapters and full repository gates
-remain. Missing anatomy, mass, calibration or engine capability must remain
-unavailable rather than being inferred.
-
-- Epic: #9934; child issues: #9935–#9939.
-- Branch: `feat/9934-biomechanical-analysis`; base: `c487265f1`.
-- API: `/api/biomechanics/compute`, `/display`, `/convert`, `/bindings`, `/results`.
-- Next step: add/qualify native transform adapters, then run full CI gates and open PR.
+# Native Multi-Engine Matching Handoff
+
+## Current Status
+
+Work RESUMED 2026-09-12 (claude, leases on #9967/#10043). The objective is
+incomplete. All numerical jobs through81 are terminal; no job is running.
+Best exploratory (still rejected) candidate is returned81 dfafdff1…: uninterrupted
+whole26.366 mm, terminal46.305 mm, club15.96 mm, early11.427 mm, yaw13.9 %.
+Next decisions (weighting, node box, horizon) each need their own receipt; see
+native_evidence/two_window_fit_9967_81/HANDOFF.md. Resume instructions:
+[Agent Resume Prompt](simscape_tour_matching/AGENT_RESUME_PROMPT.md).
+
+The full matching goal is OPEN. Robust trajectory equivalence of the alternate
+representation is not yet qualified. No accepted full-swing open-loop sixth-order
+candidate exists. MATLAB R2025b is the required reference release. Keep the
+original capture, physical model, initial state, actuator mapping and acceptance
+criteria; quaternion conversion does not change the required native torque family.
+
+Branch: feat/9967-native-simscape-pinocchio. Checkpoint1c2be9cbb is pushed with
+all normal hooks passing. SELF archives terminal continuation81 (whole26.366/
+terminal46.305 mm uninterrupted, still rejected). PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+under #9921. Check/renew the lease before new issue work. Workspace:
+C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
+
+Latest cleanly returned exploratory fit: run73,0.85 s only, whole RMS28.105 mm
+and terminal65.398 mm. It is rejected, not a full-swing match. See
+[Candidate](simscape_tour_matching/native_evidence/regularized_fit_9967_73/returned-candidate.json)
+and [Measured Comparison](simscape_tour_matching/native_evidence/regularized_fit_9967_73/marker-comparison.png).
+
+## Representation Qualification
+
+Run58 is terminal (handle2605 exited0). Local-chart DOP853 on native spherical
+Pinocchio PASSES all existing parity gates over the run19 0.85-second fixture:
+marker maximum2.62982e-8 m; native q maximum1.28599e-7; native rate
+maximum1.15849e-5; closure pose3.74372e-11 and rate9.40426e-11.
+Elapsed37.6895 s/9972 RHS calls versus7.2147 s for the tighter scalar reference.
+This is a same-input representation result, NOT a C3D fit or full R2025b parity.
+
+Run59 is TERMINAL, original handle97788 exited0: same setup with smaller maximum
+step. It FAILS native velocity parity (0.000587270); marker maximum1.15187e-7 m,
+native q6.06676e-7, closure pose6.60249e-11/rate1.61521e-10. Elapsed61.2725 s.
+Therefore58's isolated pass is not robust convergence or representation acceptance.
+Those representation runs are terminal. The pointwise acceleration/history audit
+found no sampled history dependence or substantial actuator-route mismatch:
+maximum routed native acceleration difference2.18034e-6 rad/s² at a reference
+539073.49 rad/s²; effort roundtrip1.25056e-12. Sampled unscaled inertia condition
+is about6.7e7 in both representations. These results support investigating
+conditioning/trajectory sensitivity, not declaring a physical-model mismatch.
+They do not establish global convergence. Detailed receipt:
+simscape_tour_matching/native_evidence/manifold_acceleration_10043_19.
+Remote runtime /home/dieterolson/native-manifold-10043-18; driver
+/mnt/c/Users/diete/compare_native_manifold_replay_9967_59.py; output
+/mnt/c/Users/diete/native-manifold-replay-9967-59. Horizon0.85, methoddop853,
+rtol1e-12, atol1e-14, max_step1/1440, max_evaluations100000. Scalar reference
+rtol1e-12, atol1e-14, max_step0.000125. Poll the existing handle/process before
+launching another run. All root runs through59 are terminal; none should restart.
+
+## Transition Sensitivity and Regularized Fitting
+
+Run60 completes six original-state replays. Repeated baseline results are exactly
+identical. A late LSInputX B6 perturbation of1e-6 Nm changes native rates by
+0.00750466 rad/s near0.786111 s but markers by only0.5386 micrometres. The
+1e-4 Nm trials produce about0.765 rad/s and50.8 micrometres. Central derivative
+estimates retain amplitude dependence; these are measured sensitivity evidence,
+not a waiver of parity gates. Exact inputs, executed source and raw trajectories
+are archived in native_evidence/perturbation_9967_60.
+
+Shared prefix and multiple-shooting fitters now accept checked analytic penalty
+Jacobians. NativeEffortPenalty reuses the native actuator/frame provider and
+seven-point quadrature to evaluate exact mean-square total degree-six primitive
+efforts. Twelve new tests passed after RED; combined fitter/effort/control regression77 tests
+passes, as do Ruff and four-module mypy. Immutable ControlTower runtime61 passes
+96 focused/real Pinocchio tests; source archives/hashes are preserved in
+native_evidence/regularized_fit_runtime_9967_61. Existing runner behavior remains
+the default with zero penalty. Trial61 is terminal0 in75.40 s: whole RMS29.813 mm, early10.707 mm,
+terminal75.846 mm, club23.930 mm, versus baseline30.791/10.667/99.989/56.557 mm.
+All three primal sensitivity gates pass. Max_nfev3 was reached; no numerical
+acceptance or convergence is claimed. Native effort cost barely changes
+(1.55060 to1.55026), so improvement cannot be attributed to the penalty alone.
+Exact evidence and convenient candidate: native_evidence/regularized_fit_9967_61.
+
+Run62 is terminal0 after468.965 s: whole28.6353 mm, early10.8248 mm,
+terminal66.7134 mm, club31.0615 mm. It reaches max_nfev20 with four active
+correction bounds; accepted/converged both false. Returned canonical candidate
+7467c5d82817251858255bdf0e560a712f0d20a366ee0094c364a6c14481e1d5.
+Native evidence folder regularized_fit_9967_62 contains the terminal receipt,
+measured replay arrays and marker-comparison.png (root visually inspected).
+Run63 is terminal1 after77.672 s and three forward evaluations. The B4/B5/B6
+trial fails the unchanged sensitivity-primal marker agreement gate on its third
+candidate, hash e057a7e977cfe2a163fe4c5e7e5767c17d5025b4ef7f33166672afbf658c358d.
+There is no returned accepted candidate. First two Jacobians passed. Diagnostic64
+PASSES at that exact candidate before its600 s wall budget: augmented solve
+409.086 s/1,222,535 evaluations, primal marker discrepancy8.9147861e-9 m against
+the unchanged1e-7 gate. Total launch466.239 s; diagnostic call/save419.190 s.
+The augmented settings were rtol1e-12/atol1e-14/max_step0.000125. The provider's
+independent primal remained rtol1e-11/atol1e-13; max_step applies to both. This
+supports an accuracy-dependent63 failure, not a derivative correctness or C3D
+acceptance claim. Cost is far above the default sensitivity calls. All jobs through69 are terminal; diagnostic70 is the next authorized experiment.
+Runtime65 adds the checked call-budget API and passes36 tests including nine
+real Pinocchio tests. Diagnostic65 changes only max_step to0.000125 relative
+to63, retaining augmented tolerances1e-10/1e-12: marker difference3.88459e-8 m,
+82931 sensitivity calls,27.0993 s (versus64's409.086 s). Gates are unchanged.
+Audit66 checks saved64 LSInputX B6 column41 against six original-state replays:
+relative errors9.11e-5/4.94e-4/9.53e-6 for1e-5/1e-4/1e-3 Nm, all below the
+existing1e-3 threshold. This verifies one direction, not the entire Jacobian.
+Raw sources/inputs/replays are preserved in sensitivity_9967_65 and derivative_9967_66.
+
+Runner now accepts --max-step for both forward and sensitivity paths and
+--max-sensitivity-evaluations; defaults preserve prior behavior. Five new parser
+checks went RED/GREEN;13 runner tests pass. Runtime68 qualifies32 tests including nine real Pinocchio tests, plus runner
+--help. Fit68 is TERMINAL1 after425.444 s, former PID2842183 / handle54657;
+output /mnt/c/Users/diete/native-regularized-fit-9967-68. Authorized fit68 retains original
+baseline19, restarts returned62, uses B4/B5/B6,max_nfev10,max_step0.000125,
+sensitivity budget100000, and unchanged weight0.01/scales/amplitude/bounds.
+Eight Jacobian checks pass, then the ninth candidate fails unchanged marker
+agreement (not its evaluation budget). Candidate canonical hash:
+c8885ace0b1021dea6e2fbd824286fd37eeff8cb91498147d2d585cb64bed039.
+The last unqualified checkpoint reports28.138 mm whole/65.565 mm terminal;
+it is not a returned solution. Exact evidence: native_evidence/regularized_fit_9967_68.
+All previous numerical runtimes remain immutable.
+
+Manufactured diagnostic67 confirms inactive sensitivity-column padding changes
+physical integration error under the existing combined error norm. This suggests
+an architecture improvement, not a proof of native model error. Keep it as a
+regression case for opt-in grouped DOP853 error control, now implemented through
+shared integrate_forward/integrate_sensitivities and the native provider/runner.
+The maximum of SciPy's existing physical and sensitivity block norms controls
+steps; default behavior is unchanged. The protected SciPy hook requires runtime
+qualification. Initial-step selection remains unchanged.57 focused tests pass
+after RED/GREEN, plus Ruff; no global accuracy guarantee is inferred.
+Diagnostic70 is TERMINAL1 on the exact failed68 candidate, max_step0.000125,
+rtol1e-10/atol1e-12,100000 sensitivity calls, separate_error_control=True.
+Runtime70 passes49 focused tests including nine real Pinocchio cases. Agreement
+fails narrowly at1.02308673e-7 m, t0.85, WaistRBack axis1; limit remains1e-7.
+Call35.969 s, launch40.103 s. Diagnostic71 is TERMINAL1: tighter augmented
+rtol3e-11/atol3e-13 yields1.02308684e-7 m, effectively unchanged, in34.025 s.
+Diagnostic72 is TERMINAL0: max_step0.0000625 with original70 tolerances yields
+2.506897942e-8 m agreement,164339 calls/53.916 s sensitivity (71.554 s call/save).
+Marker samples and state/marker sensitivity Jacobians are archived; primal q/qd
+trajectories were not saved. This qualifies one candidate, not all derivatives.
+Fit73 is TERMINAL0 after989.414 s, accepted/converged false, max_nfev10.
+All ten Jacobian checks pass; final whole28.10547 mm, terminal65.39791 mm,
+early10.86040 mm and club30.04069 mm. Settings: original19 baseline, B456,
+grouped control, max_step0.0000625,200000 sensitivity calls.
+Runtime73 qualifies62 tests plus runner help. Former PID2891462/handle55242
+are terminal. Output /mnt/c/Users/diete/native-regularized-fit-9967-73. A separate
+post-return replay saves actual q/qd (not qdd), markers and a rejected overlay.
+Final candidate canonical SHA256:
+786522cd5380a9f62602920b2cff6e6b404f7ceb99bfc6783f1f359b98a6457a. Four changed source modules pass mypy.
+Marker agreement failures now report discrepancy, time, marker and axis.
+
+The shared native motion sequence API is implemented and publicly exported.
+It converts complete batches with immutable time/model/frame/branch metadata
+and original per-sample references, reusing NativeJointStateAdapter. Root passes
+101 related tests including12 new strict atomic file-I/O tests. Public
+save_native_motion/load_native_motion preserve the validated sequence plus an
+optional distinct raw-model hash. UI and complete dynamic frame transport remain;
+Five new consumer checks pass, including actual MuJoCo all16 frames at three
+samples; Drake/Pinocchio consumer tests skip locally for missing runtimes.
+These are conversion checks, not alternate MuJoCo/Drake dynamics qualification. See dedicated
+REPRESENTATION_HANDOFF for runnable usage and the remaining ordered plan.
+
+## MuJoCo Spherical Export and Fitting Conditioning
+
+The opt-in native_spherical_mjcf exporter now reuses canonical MJCF geometry and
+shared group inventory to replace three XYZ triples with ball joints. Real local
+MuJoCo3.3.4 compiles nq30/nv27; five tests verify unchanged inertias/closure/scalars
+and all body/site poses across three manufactured states. This is kinematics
+qualification, not a dynamics adapter or stock mj_step acceptance. Next gates:
+tangent conventions, dual effort/convective acceleration, reused rigid-closure
+solve, then same-input trajectories. Dedicated turnover:
+../development/mujoco_native_matching/MUJOCO_MANIFOLD_HANDOFF.md.
+
+Offline audit74 uses saved72 Jacobians, existing valid masks, amplitude10 and
+terminal weight10. Marker-only23100-by-81 condition number is7.452e7; column
+normalization leaves3.767e7. Penalty rows/bounds are excluded. This supports
+checking correlated sensitivities, not claiming a proven cause of stagnation.
+Fit73 ended with only modest matching improvement. Inspect
+actual/predicted reduction and a mixed-control directional derivative before
+more compute. See native_evidence/sensitivity_condition_9967_74.
+
+## Fixed-Attachment Feasibility
+
+Audit69 uses existing rigid-body relaxation on all654 frames. Three head markers
+are attached to Hub; no independent native head joint exists. Fixed-offset lower
+bounds are17.393 mm whole swing/24.279 mm terminal, even with independent body
+poses and no dynamics/connectivity. Separating head as a hypothetical independent
+six-DOF body lowers this to4.471/9.177 mm, but changes the model. No marker/model
+changes were made. Current torque errors exceed the rigidity floor, so both
+optimization and physical approximation matter. Preserve original25/35 mm gates;
+never silently omit head markers. See native_evidence/rigidity_9967_69.
+
+## Reproducible Compute Limits
+
+`integrate_forward` and `integrate_sensitivities` now accept optional positive
+integer max_evaluations, checked before excess derivative/linearization calls.
+`replay_marker_sensitivities` exposes max_sensitivity_evaluations for the augmented
+solve only; its independent primal replay remains separate. DefaultsNone retain
+existing behavior. Seven new tests and native forwarding checks went RED/GREEN;
+27 related tests, Ruff and pinned mypy pass. This source update is NOT in immutable
+runtime61; qualify a new runtime before using it remotely. Budgets are not a
+numerical accuracy or wall-time guarantee. Exhaustion raises without partial data.
+
+## Why Earlier Attempts Stalled
+
+- Static pose fitting and feedback tracking did not produce an open-loop sextic
+  motion. Run45 feedback whole RMS35.2 mm becomes346.5 mm in time-only replay,
+  and655.5 mm after global-sixth-order compression. Do not promote the initializer.
+- An actual native gimbal singularity stopped run41. An independent inverse-angle
+  branch bug caused run49 to apply a different native effort map. Branch metadata
+  is now explicit and tested; true singular native actuator inverses remain rejected.
+- Native rate errors are amplified near the shoulder chart. Run52 physical
+  angular error0.000208 rad/s became native rate error0.00465 rad/s. Tight scalar
+  reference54 and manifold tolerance refinement led to passed58. Gates were not
+  relaxed. Run54/55 second-level budgets were insufficient even for their selected
+  maximum step; those failures are not proof of solver nonconvergence.
+- The Python manifold implementation remains slower than scalar Pinocchio. Keep
+  scalar native dynamics available as the fitting baseline while qualifying
+  alternate representations. Do not block fitting on all-engine alternate builders.
+
+## Two-Window Preflight and Direct Chart Derivatives
+
+Stage1 diagnostic75 is TERMINAL0. Window0 starts at original q0/qd0 and window1
+at the saved uninterrupted73 sample216 at0.6 s. Against uninterrupted73, maximum
+marker distance is5.369e-12 m, native q4.422e-11 and qd8.804e-9. First endpoint
+minus saved node is9.77e-14. Full pose/rate closure and the42-dimensional q/v
+node chart pass. Zero retraction shifts physical state by4.75e-12. Exact evidence:
+native_evidence/two_window_preflight_9967_75. This is fixture qualification, not
+an optimized segmented swing or a derivative pass.
+
+MultipleShootingOptions now accepts window_jacobian_state_coordinates="node"
+(default "physical"). Node mode takes theta followed by direct chart columns,
+retaining physical endpoint rows and the negative next-node transform derivative
+in continuity. No pseudoinverse extension is needed. Eleven new nonlinear tests
+went RED/GREEN; root passes44 combined shooting/node tests and source mypy/Ruff.
+
+Diagnostic76 is TERMINAL (former PID2923511/handle25121), on frozen runtime73. It checks
+81 control columns in window0 and81+42 in window1, then at most16 signed
+perturbation trials for control, node-position, node-velocity and mixed directions.
+Marker, q, qd and scaled endpoint/continuity checks retain1e-3 derivative gates
+with explicit weak-block reporting. Process exit0 is not scientific acceptance:
+status is failed_derivative_gates. LS B6 h1e-4 and mixed h1e-6 pass all blocks;
+smaller steps fail some resolved checks. Both node directions pass resolved blocks
+but near-zero cross-continuity derivatives fail relative checks (analytic norms
+about5e-14/2e-17 versus central estimates about1e-10/1e-11). Establish physical
+absolute-error floors/structural-zero treatment before declaring full qualification;
+do not widen C3D or replay gates. Call225.112 s, launch250.611 s, all16 trials
+complete. No optimizer or other numerical job remains active. Evidence:
+native_evidence/two_window_derivatives_9967_76.
+
+## Derivative Resolution Floors (Audit 77, Terminal)
+
+Local analysis of the archived run76 arrays already resolves the two failure
+classes. (a) Node-direction cross-continuity blocks: the zero-retraction
+Jacobian equals diag(scales)\*basis to1.6e-10 with scaled orthonormality defect
+3.1e-15, so the velocity response of the pure-position singular direction and
+the position response of the Dq null direction are structurally zero up to
+that defect; the archived retracted nodes match the linear prediction to
+1.2e-14 (h1e-5) and1.3e-12 (h1e-4), so the central estimates (1.7e-10/1.5e-11)
+are retraction roundoff divided by2h, not derivative error. (b) LSInputX h1e-5
+and mixed h1e-7 absolute errors are consistent with replay noise divided by
+step (endpoint q about4e-10 to2e-9 per replay); the archived perturbed
+coefficients reproduce the intended Bernstein increments to4.8e-10 (control)
+and4.3e-7 (mixed h1e-7) relative, and effort evaluation error is at most
+2.3e-6 relative to h, far below the observed4e-3 failures.
+
+New shared providers: `motion_matching/derivative_resolution.py`
+(central_difference_floor, classify_derivative_block with verdicts passed /
+structural_zero / unresolved_at_step / failed, qualify_direction and the
+orthonormality cross_block_norm_bound) and
+`pinocchio/python/native_node_chart.py` (closure/Jacobian/basis/retraction
+wrapper reused by drivers). Twenty new unit tests pass with Ruff and mypy.
+A pass now additionally requires the measured floor to be below the gate times
+the analytic norm; agreement inside noise is reported unresolved, never passed.
+
+Audit77 is TERMINAL0 (202.6 s launch,26 of32 budgeted window replays) on
+runtime77 (frozen73 file set refreshed from f96766c8e plus five new files;122
+qualification tests). Measured per-block replay error by tolerance variation at
+unchanged max_step: markers8.2e-10 m, endpoint q9.3e-10, qd1.6e-8. Loose and
+working replays coincide while both differ from tight by that amount: the
+integration is max-step limited and the non-reproducible part is step-sequence
+roundoff/constraint-solver noise, so tolerance alone does not shrink it. Base
+replays reproduce run76's primal arrays exactly. Every factor-one failure sits
+at the smallest step with absolute error1.02x–1.14x the single-pair floor;
+`reclassify.py` applies the tested `floor_safety_factor=2` to the same archived
+arrays and every direction/block then has a resolved pass (LSInputX h1e-4;
+mixed h1e-6 and h1e-5) or an orthonormality-verified structural zero, with no
+unexplained failure. Gates are unchanged. Evidence and turnover:
+native_evidence/two_window_floor_9967_77 (raw ZIP SHA2563d5768fc…).
+
+MultipleShootingOptions now also accepts shared_boundary_policy="once"
+(default "both"), which observes the capture sample shared by adjacent windows
+only in the earlier window so marker rows, Jacobian rows, segmented RMS and
+equality offsets match an uninterrupted single-window objective at zero
+defect. Four RED/GREEN tests;46 combined shooting tests, mypy and Ruff pass.
+
+## Two-Window Direct-Node SLSQP Trial 78 (Terminal, Unchanged Candidate)
+
+Run78 is TERMINAL0 (857.6 s,10 residual evaluations,22 sensitivity solves) on
+runtime78 (runtime77 plus the once-only shooting option;135 tests). Its
+zero-displacement parity gate passed: the segmented once-only objective with
+the run73 effort penalty reproduces run73's returned score18.30016 to1.9e-12
+relative, effort cost identical, markers within1.8e-11 m of the saved replay,
+initial scaled defect4.0e-11, projected continuity rank42 (singular values
+1.00–349.8). Theta bounds are10*(0.8−x73)..10*(1.2−x73) from run73's saved
+parameters (restart roundoff3.9e-14); node box ±0.05 chart units. SLSQP took
+four accepted backtracking steps; none met the1e-7 projected equality, so the
+backend fallback returned the start. The bounded iterate audit (uninterrupted
+original-state replays of each accepted iterate) shows the terminal-weighted
+objective falling18.30→17.30 and terminal RMS65.4→62.1 mm while whole RMS
+rises28.105→28.24 mm and early RMS10.86→11.07 mm: the run73 objective trades
+whole error for terminal error, and no returned improvement exists. Evidence:
+native_evidence/two_window_fit_9967_78 (HANDOFF, raw ZIPs fda4959f…/a5516909…).
+Run79 (two_window_fit_9967_79, driver SHA256 d45f9fe6…) keeps the formulation
+with primal-only residual replays and max_iterations15/max_nfev45. It is
+TERMINAL0 (30 evaluations,32 sensitivity solves,15 iterations, iteration limit).
+Returned candidate5313c283… uninterrupted from the original state: whole
+27.563 mm (run73 28.105), terminal55.470 mm (65.398), club23.27 mm (30.04),
+but early11.359 mm (10.860) and pelvis yaw11.3 % (6.2 %) worsen; score with
+effort15.070 versus18.300. Scaled continuity defect3.99e-4 exceeds the1e-4
+tolerance;63 of123 variables at bounds (39 controls in the inherited ±2 N/Nm
+run73 box,24 node chart coordinates at ±0.05). First-Jacobian linear model
+tracks accepted steps within2 %. Still REJECTED against25/35 mm gates; the
+error growth from0.4 s is unchanged (marker-comparison.png). Run80 (two_window_fit_9967_80, driver7bc33a45…) restarts from exact returned79
+with the node recentered on its integrated0.6 s state (parity7.1e-12) and is
+TERMINAL0: returned96c786ec… uninterrupted whole26.797 mm, terminal55.208 mm,
+early11.208 mm, club23.54 mm, yaw11.3 %, score with effort14.678; defect
+1.13e-3;41 of81 controls on the inherited ±2 N/Nm box,18 node coordinates at
+±0.05. Still REJECTED. Run81 (two_window_fit_9967_81, driver da0edf86…)
+continues from returned80 with the box widened to ±4 N/Nm as its single change
+and is TERMINAL0 (1738 s,31 evaluations): returned dfafdff1… uninterrupted
+whole26.366 mm, terminal46.305 mm, club15.96 mm, early11.427 mm, yaw13.9 %,
+score with effort12.238 (linear model12.421); defect1.61e-3;29 controls on
+the widened box,21 node coordinates at ±0.05. All continuations only reshape
+the last0.1 s; error growth0.4–0.75 s is unchanged from run73 (see
+two_window_fit_9967_81/marker-comparison.png). Still REJECTED.
+
+The archived run73 sampled rotation-chart audit gives peak condition2.680/17.886/
+2.889 for hip/left/right shoulder. These samples do not bound between-sample
+extrema or explain the full7.45e7 trajectory-control Jacobian condition by
+coordinate maps alone. See native_evidence/returned73_chart_audit.
+
+## Ordered Next Work
+
+Use [Next Agent Execution Plan](simscape_tour_matching/NEXT_AGENT_CONVERGENCE_EXECUTION.md)
+for the existing-provider, two-window derivative preflight now that fit73 is terminal.
+It specifies integrated nodes, retraction/continuity chain-rule checks and bounded
+SLSQP acceptance without recreating the solver or accepting state-reset motion.
+
+1. Decide, one receipt each, on rebalancing terminal/early weighting (early RMS
+   and pelvis yaw regress under the100x terminal weight), relaxing the ±0.05 node
+   box, or extending the horizon beyond0.85 s with additional integrated nodes on
+   actual capture samples (same-input replay check first). Continue from exact
+   returned81 with the run81 driver pattern; report early-motion and pelvis-yaw
+   regressions alongside any terminal gain; compare on uninterrupted metrics.
+
+2. Qualify the variant over further representative trajectories and against
+   MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives
+   before using the manifold variant in an optimizer. Preserve existing scalar API.
+3. Resume trajectory/control co-optimization using native constrained forward
+   dynamics. Reuse native profile, sensitivity, marker and shooting providers.
+   Start from integrated states, permit trajectory changes, and optimize a global
+   degree-six native effort basis. Do not repeat tight static-node boxes or simply
+   compress an arbitrary feedback torque trace. Existing seven-DOF bioptim tracking
+   is a different physical model and cannot silently replace this native model.
+4. Require uninterrupted original-state replay through1.813888889 s, all654 capture
+   frames and valid observations, closure, effort audit and independent R2025b
+   validation before accepting the final swing. Preserve per-marker/time residuals,
+   overlay animation, coefficient/time-basis metadata and exact input hashes.
+5. Implement/qualify remaining engine variants sequentially using canonical
+   pose_interchange providers, without inferring dynamics parity from pose roundtrips.
+
+## Engine and Representation Handoffs
+
+- [Pinocchio Manifold](simscape_tour_matching/PINOCCHIO_MANIFOLD_HANDOFF.md): native
+  spherical variant nq30/nv27, exact fixed transforms/inertia/weld reused. DOP853
+  integrates local tangent coordinates and carries physical endpoints unchanged;
+  no quaternion projection or target-state reset. Runtime18 passes96 tests with
+  one optional MuJoCo skip; root independently verified generic and real Pin tests.
+  Remote receipts qualify the numerical runtime bundle, not full GUI/application
+  deployment; retain the documented package boundaries when reproducing.
+- [Canonical Representations](simscape_tour_matching/REPRESENTATION_HANDOFF.md):
+  angle/quaternion/rate/convective-acceleration/effort conversions and fixed-frame
+  transport. Preserve units, named frames, branch/winding and model identity.
+  Moving-frame acceleration transport and #8867 convention consolidation remain open.
+- [MuJoCo](mujoco_native_matching/HANDOFF.md) and
+  [Drake](drake_native_matching/HANDOFF.md): native adapters and narrower receipts
+  exist; alternate quaternion builders/full trajectory equivalence remain open.
+  Drake's projected accelerations are not derivative-consistent trajectories.
+- OpenSim epic #10003: plan/handoff branch docs/10003-opensim-matching-epic,
+  documented plan commit1a68091b6. Implementation/runtime qualification is not
+  accepted. Inspect its branch and requested planning check-in before proceeding.
+
+The documented development-log validator path is absent in this checkout; no
+validator pass is claimed. Normal configured commit/push hooks still apply.
+
+## Evidence and Reproduction
+
+Evidence root: simscape_tour_matching/native_evidence. Preserve raw ZIP archives;
+formatted JSON raw hashes can differ without changing parsed physics. Original
+native model SHA256 b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248.
+Run19 fixture canonical candidate SHA256
+b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f.
+It is a rejected0.85 s C3D fit (whole30.79 mm, terminal99.99 mm), not the best full swing.
+
+ControlTower: ssh alias controltower; WSL ControlTower-Runner; Python
+/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python; runtime18 PYTHONPATH
+/home/dieterolson/native-manifold-10043-18; use one BLAS/OpenMP thread for comparable
+runs. Driver compare_native_manifold_replay.py records independent scalar settings.
+Raw run receipts identify exact archived source and inputs. Never overwrite runs.
+
+[Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives
+strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md)
+preserves previous matching and unrelated incoming project context. Its ACTIVE
+statements are historical, not current process evidence. Update this concise
+handoff and DEVELOPMENT_LOG with each implementation commit; append history only
+when needed. Do not reintroduce competing current-status sections.

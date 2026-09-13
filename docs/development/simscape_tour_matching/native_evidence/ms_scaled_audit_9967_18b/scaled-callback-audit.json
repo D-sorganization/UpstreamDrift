@@ -1,0 +1,57 @@
+{
+  "qualification": "Actual scaled SLSQP callback audit at native common initial point; no optimization or fit acceptance",
+  "passed": true,
+  "runner_sha256": "642afc688d68bd78039d8cc9247307cc2f3e01f18f708536a6075617cfe6de17",
+  "variables": 399,
+  "centered_probe_free_variables": 396,
+  "centered_probe_excluded_near_bound_variables": 3,
+  "objective": 41.85839993516157,
+  "constraint_jacobian_spectra": {
+    "identity": {
+      "largest": 229.5637712732214,
+      "smallest": 0.05705440315131386,
+      "condition": 4023.594299363641,
+      "rank": 210
+    },
+    "half_box": {
+      "largest": 276.9157565362608,
+      "smallest": 0.005711122836901791,
+      "condition": 48487.09517277411,
+      "rank": 210
+    }
+  },
+  "checks": [
+    {
+      "direction": "random",
+      "h": 1e-5,
+      "predicted_cost_slope": -0.572639069863937,
+      "fd_cost_slope": -0.5726392384275414,
+      "cost_relative": 2.943626512057603e-7,
+      "constraint_relative": 5.196526529351591e-6
+    },
+    {
+      "direction": "random",
+      "h": 1e-6,
+      "predicted_cost_slope": -0.572639069863937,
+      "fd_cost_slope": -0.5726384344484359,
+      "cost_relative": 1.1096265248816395e-6,
+      "constraint_relative": 0.00010386247232642239
+    },
+    {
+      "direction": "gradient",
+      "h": 1e-5,
+      "predicted_cost_slope": 8.062469487091535,
+      "fd_cost_slope": 8.06246950766365,
+      "cost_relative": 2.5515897652543563e-9,
+      "constraint_relative": 3.904719938842167e-6
+    },
+    {
+      "direction": "gradient",
+      "h": 1e-6,
+      "predicted_cost_slope": 8.062469487091535,
+      "fd_cost_slope": 8.062467713898513,
+      "cost_relative": 2.1993174976809827e-7,
+      "constraint_relative": 5.763875934967882e-5
+    }
+  ]
+}
