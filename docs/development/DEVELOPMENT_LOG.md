@@ -17,6 +17,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10003 · OpenSim Tour-Average Full-Body Matching
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10003 (parent #9921; sibling full-body epic #10062)
+- **Branch:** feat/full-body-opensim-epic
+- **PR:** #10071
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching; src/shared/python/motion_matching/tour_capture_contract.py; tests/opensim; docs/development/opensim_tour_matching
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-13 (SELF; 17 unit tests in tests/opensim pass locally with Ruff; OpenSim 4.6 runtime qualified on ControlTower; OS-3 IK on 33 frames reaches 6.5 cm marker RMS, unscaled model)
+- **Summary:** Frozen capture contract, marker-to-body map, TRC export verified by OpenSim, MarkerSet authoring with coordinate unlocking, and alternating placement/IK calibration are implemented test-first; runtime qualified; OS-3 kinematic feasibility measured. Moco tracking and sextic effort fitting not started.
+- **Next step:** Execute OS-2b/OS-3b from docs/development/opensim_tour_matching/NEXT_AGENT_PROMPT.md: golf model variant in the builder (unlocks, clamp ranges, club length), segment scaling, keep-best iteration, full 654-frame IK with per-frame RMS and overlay.
+- **Evidence:** docs/development/opensim_tour_matching/HANDOFF.md and evidence/os1_trc_receipt.json, os2_runtime_receipt.json, os3_stride20/, os3_unlocked_stride20/.
+
+### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10062 (children #10063 to #10070)
+- **Branch:** feat/full-body-opensim-epic
+- **PR:** #10071
+- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; tests/unit/motion_matching/test_full_body_spec.py; tests/unit/motion_matching/test_contact_law.py
+- **Started:** 2026-09-13
+- **Last verified:** 2026-09-13 (SELF; 19 unit tests pass with Ruff and mypy; full_body_spec_v1.json validates against the qualified upper-body spec, 41 coordinates, pelvis alignment residual 5.8 mm)
+- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, the shared ground-contact law with parity harness, and a committed full-body spec built from Rajagopal lower limbs are in place; per-engine builders, calibration and fitting remain.
+- **Next step:** Implement FB-3-P (#10065): Pinocchio full-body builder consuming full_body_spec_v1.json with the 1e-12 upper-body slice parity test and shared contact forces.
+- **Evidence:** docs/development/full_body_models/HANDOFF.md, build_receipt.json.
+
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 
 - **State:** in_progress
