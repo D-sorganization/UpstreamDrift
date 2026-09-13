@@ -66,6 +66,7 @@ def main() -> None:
     parser.add_argument("--max-iterations", type=int, default=2)
     parser.add_argument("--finite-difference-step", type=float, default=1e-6)
     parser.add_argument("--chart-check-step", type=float, default=1e-6)
+    parser.add_argument("--audit-only", action="store_true")
     parser.add_argument("--use-constraint-jacobian", action="store_true")
     parser.add_argument(
         "--solver", choices=("trust-constr", "least-squares"), default="trust-constr"
@@ -305,6 +306,49 @@ def main() -> None:
         ) / (2.0 * args.chart_check_step)
     jacobian_difference = assembled - direct
     jacobian_scale = np.maximum(np.maximum(abs(assembled), abs(direct)), 1.0)
+    physical_difference = (
+        jacobian_difference[:closure_rows].reshape(
+            len(closure_times), 3, 6, variable_count
+        )
+        * args.closure_scale
+    )
+    physical_reference = (
+        direct[:closure_rows].reshape(len(closure_times), 3, 6, variable_count)
+        * args.closure_scale
+    )
+    if args.audit_only:
+        args.output.write_text(
+            json.dumps(
+                {
+                    "scope": "Initial chart derivative audit only; no optimizer run",
+                    "model_sha256": hashlib.sha256(raw).hexdigest(),
+                    "path_sha256": hashlib.sha256(args.path.read_bytes()).hexdigest(),
+                    "runner_sha256": hashlib.sha256(
+                        Path(__file__).read_bytes()
+                    ).hexdigest(),
+                    "closure_scale": args.closure_scale,
+                    "chart_check_step": args.chart_check_step,
+                    "local_difference_step": args.finite_difference_step,
+                    "closure_samples": len(closure_times),
+                    "variables": variable_count,
+                    "physical_closure_max_abs_error": np.max(
+                        abs(physical_difference), axis=(0, 2, 3)
+                    ).tolist(),
+                    "physical_closure_reference_max_abs": np.max(
+                        abs(physical_reference), axis=(0, 2, 3)
+                    ).tolist(),
+                    "marker_max_abs_error_m": float(
+                        np.max(abs(jacobian_difference[closure_rows:]))
+                        * args.marker_scale_m
+                    )
+                    if tracking
+                    else None,
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        return
     constraint: dict[str, object] = {"type": "eq", "fun": residual}
     if args.use_constraint_jacobian:
         constraint["jac"] = jacobian
@@ -412,7 +456,7 @@ def main() -> None:
                 ),
                 "retraction_trial_radius": retraction_radius,
                 "coordinates": values.tolist(),
-                "scope": "Bounded path experiment; optional node marker tracking with fixed first pose. No initial velocity constraint, effort fit, or forward replay.",
+                "scope": "Bounded path experiment; initial-state enforcement is reported explicitly. No effort fit or forward replay.",
             },
             indent=2,
         )
