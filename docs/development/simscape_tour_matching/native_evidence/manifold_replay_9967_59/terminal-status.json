@@ -1,0 +1,10 @@
+{
+  "run": 59,
+  "exit_code": 0,
+  "handle": 97788,
+  "status": "complete_native_velocity_gate_failed",
+  "runtime": "/home/dieterolson/native-manifold-10043-18",
+  "runtime_source_archive": "../manifold_dop853_10043_18/raw-source.zip",
+  "exact_input_archive": "../manifold_replay_9967_50/raw-run.zip",
+  "interpretation": "Smaller max_step did not confirm58 isolated pass; robust representation convergence remains unproven."
+}
