@@ -30,4 +30,14 @@ def test_public_surface_keeps_canonical_v1_exports_and_adds_v2() -> None:
     assert "CanonicalState" in exported_names
     assert "canonical_state_zero" in exported_names
     assert pose_interchange.SCHEMA_VERSION == "1.0.0"
-    assert pose_interchange.__version__ == "2.0.0"
+    assert pose_interchange.__version__ == "2.1.0"
+
+
+def test_public_surface_exposes_native_joint_and_frame_transport() -> None:
+    assert {
+        "SerialRotationChart",
+        "SingularChartError",
+        "FixedFrameTransport",
+        "NativeJointStateAdapter",
+        "NativeManifoldState",
+    } <= set(pose_interchange.__all__)

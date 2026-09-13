@@ -1,5 +1,55 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Authoritative Checkpoint — Representation Foundation and Replay Failure
+
+This section supersedes next-action and running-job statements below. Runs42–45
+are terminal; run45 local handle15765 exited0. No root matching job remains live.
+The full matching goal remains OPEN: original C3D and initial state, original
+Simscape physics, final native-actuator sixth-order polynomials, equivalent
+MuJoCo/Drake/Pinocchio models, OpenSim staged work, and MATLAB R2025b acceptance.
+Representation epic #10043 extends this goal; no goal completion is claimed.
+
+Run42 retains the original branches of hip and shoulder gimbals during static
+pose fitting. Its cubic interpolant has a minimum shoulder singularity distance
+of 0.0432553 rad: the 0.05 rad sampled margin is NOT guaranteed between samples.
+Run43/44/45 feedback forward simulations reach the full 1.813888889 s capture,
+all-marker RMS35.2153 mm, final46.3179 mm, closure8.36e-10. These are feedback
+initializers, with forces up to5365 N and torques up to2832 Nm; no effort bounds.
+They are not accepted open-loop matches.
+
+Run43 sampled time-only effort replay RMS500.91 mm. Run44 increases sampling to
+2880 Hz: RMS391.081 mm. Run45 computes time-only efforts from a Hermite reference
+state rather than interpolating sampled forces: RMS346.534 mm, final578.568 mm.
+Thus sampling density alone has NOT resolved open-loop divergence. Run45 global
+sextic replay is RMS655.546 mm, final527.143 mm. Do not promote its coefficients.
+Reports and immutable raw archives are native*evidence/feedback_9967*{43,44,45}/.
+Plot native_evidence/native-feedback-comparison-9967-44.png explicitly separates
+feedback, sampled replay and unrefined sextic. It is a diagnostic, not acceptance.
+
+NEXT MATCHING ACTION: quantify first divergence in run45 against feedback,
+using identical initial state and a tolerance/max-step convergence pair. Compare
+reference-state acceleration with actual open-loop acceleration, conditioning,
+closure and input continuity at static spline knots. Preserve exact inputs and
+report phase-specific errors. Then use the successful feedback trajectory as a
+multiple-shooting initializer with dynamically integrated node states, generous
+feasibility restoration and explicit defect scaling; do not reuse run38's tight
+static-state boxes. Refine controls against marker residuals and defects jointly.
+Keep a flexible continuous profile as initialization, then optimize the global
+sixth-order coefficients in forward dynamics. Torque curve compression alone is
+not sufficient. Fit the full horizon with early-phase residuals retained, rather
+than freezing early polynomial coefficients (global coefficients affect all times).
+
+REPRESENTATIONS: shared pose_interchange now implements SerialRotationChart,
+FixedFrameTransport and NativeJointStateAdapter. See
+simscape_tour_matching/REPRESENTATION_HANDOFF.md and REPRESENTATION_EPIC_9921.md.
+Angles, wxyz orientations, screw-axis rate maps, convective acceleration, efforts
+and fixed-frame transport are explicit. A native MuJoCo frame roundtrip passes;
+this is not alternate-engine dynamic equivalence. Alternate manifold builders,
+live Pinocchio/Drake parity and R2025b trajectory acceptance remain outstanding.
+Preserve physical actuator coordinates: a native polynomial generally transforms
+to state-dependent moments. A quaternion cannot make a singular native effort
+inverse unique. Do not replace two-DOF joints with unconstrained spherical joints.
+
 ## Current Native Gimbal Failure — Next Path Constraint
 
 The feedback initializer reaches a native shoulder singularity at1.2379706 s.

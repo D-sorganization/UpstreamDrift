@@ -1,0 +1,24 @@
+{
+  "scope": "Cubic reference extrema at knots and all finite derivative roots; not actual forward-state margins",
+  "path_sha256": "f536b087cff5d81deaa0386a58c53f9386bece95b849525e789ef33774193588",
+  "coordinates": {
+    "HipInputY": {
+      "minimum_rad": -0.852495612372916,
+      "maximum_rad": -0.25775124501631796,
+      "sample_bound_violation_rad": 0.0,
+      "minimum_singularity_distance_rad": 0.7183007144219805
+    },
+    "LSInputY": {
+      "minimum_rad": -2.59075185679632,
+      "maximum_rad": -1.6140516359785781,
+      "sample_bound_violation_rad": 0.006744690816318455,
+      "minimum_singularity_distance_rad": 0.04325530918368159
+    },
+    "RSInputY": {
+      "minimum_rad": -1.3818023909862347,
+      "maximum_rad": 0.09492429159526172,
+      "sample_bound_violation_rad": 0.0,
+      "minimum_singularity_distance_rad": 0.18899393580866186
+    }
+  }
+}
