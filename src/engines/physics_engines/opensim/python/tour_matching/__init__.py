@@ -26,6 +26,12 @@ from src.engines.physics_engines.opensim.python.tour_matching.metrics import (
     SharedMetrics,
     compute_shared_metrics,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.moco_tracking import (
+    MocoTrackingConfig,
+    MocoTrackingResult,
+    build_moco_study,
+    sanitize_trc_for_horizon,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.scale import (
     DEFAULT_NOMINAL_LENGTHS_M,
     SegmentScaleResult,
@@ -41,16 +47,20 @@ __all__ = [
     "CalibrationResult",
     "GOLF_HUMANOID_MARKER_BODIES",
     "MarkerPlacement",
+    "MocoTrackingConfig",
+    "MocoTrackingResult",
     "SegmentScaleResult",
     "SharedMetrics",
     "attach_marker_set",
     "body_for",
+    "build_moco_study",
     "calibrate_marker_offsets",
     "compute_shared_metrics",
     "estimate_segment_scales",
     "labels_per_body",
     "locked_coordinates",
     "read_trc",
+    "sanitize_trc_for_horizon",
     "unlock_coordinates",
     "write_model",
     "write_trc",
