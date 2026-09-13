@@ -2,14 +2,19 @@
 
 ## Current Status
 
+Work is PAUSED at the user's explicit request for handoff. The objective is
+incomplete. All numerical jobs through76 are terminal; no further optimization
+is authorized until a new agent resumes the task. Copy-ready instructions:
+[Agent Resume Prompt](simscape_tour_matching/AGENT_RESUME_PROMPT.md).
+
 The full matching goal is OPEN. Robust trajectory equivalence of the alternate
 representation is not yet qualified. No accepted full-swing open-loop sixth-order
 candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpoint9797e3e8e is pushed with
-all normal hooks passing. SELF adds direct node-chart Jacobians and passed two-window fixture75. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpoint889de15a6 is pushed with
+all normal hooks passing. SELF archives terminal derivative audit76 and the user-requested pause handoff. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -225,12 +230,19 @@ retaining physical endpoint rows and the negative next-node transform derivative
 in continuity. No pseudoinverse extension is needed. Eleven new nonlinear tests
 went RED/GREEN; root passes44 combined shooting/node tests and source mypy/Ruff.
 
-Diagnostic76 is active, PID2923511/handle25121, on frozen runtime73. It checks
+Diagnostic76 is TERMINAL (former PID2923511/handle25121), on frozen runtime73. It checks
 81 control columns in window0 and81+42 in window1, then at most16 signed
 perturbation trials for control, node-position, node-velocity and mixed directions.
 Marker, q, qd and scaled endpoint/continuity checks retain1e-3 derivative gates
-with explicit weak-block reporting. No optimizer is authorized before this passes.
-Check the original handle/receipt before another launch.
+with explicit weak-block reporting. Process exit0 is not scientific acceptance:
+status is failed_derivative_gates. LS B6 h1e-4 and mixed h1e-6 pass all blocks;
+smaller steps fail some resolved checks. Both node directions pass resolved blocks
+but near-zero cross-continuity derivatives fail relative checks (analytic norms
+about5e-14/2e-17 versus central estimates about1e-10/1e-11). Establish physical
+absolute-error floors/structural-zero treatment before declaring full qualification;
+do not widen C3D or replay gates. Call225.112 s, launch250.611 s, all16 trials
+complete. No optimizer or other numerical job remains active. Evidence:
+native_evidence/two_window_derivatives_9967_76.
 
 The archived run73 sampled rotation-chart audit gives peak condition2.680/17.886/
 2.889 for hip/left/right shoulder. These samples do not bound between-sample
@@ -244,8 +256,9 @@ for the existing-provider, two-window derivative preflight now that fit73 is ter
 It specifies integrated nodes, retraction/continuity chain-rule checks and bounded
 SLSQP acceptance without recreating the solver or accepting state-reset motion.
 
-1. Observe derivative preflight76 on its original handle; fixture75 already
-   passes. Require qualified derivatives before another optimizer attempt. A successful
+1. After user-authorized resumption, inspect terminal76 block/step results and
+   resolve numerical-floor qualification. Fixture75 already passes. Do not repeat
+   its setup or launch an optimizer before derivative qualification. A successful
    numerical check at65 or one derivative direction at66 does not qualify the
    complete optimizer Jacobian or full swing. Preserve unchanged agreement gates.
 
