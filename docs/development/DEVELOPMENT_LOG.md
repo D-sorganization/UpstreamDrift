@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8866 · Remove Unwired Starting-Pose Matcher Skeleton Extractors
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8866
+- **Branch:** conductor/issue-8866
+- **PR:** not created
+- **Paths:** src/tools/starting_pose_matcher/skeleton_extractors/ (deleted), tests/tools/starting_pose_matcher/, tests/unit/tools/starting_pose_matcher/, scripts/config/full_src_mypy_baseline.json, scripts/config/suite_marker_baseline.json, scripts/ci/lod_baseline.txt, SPEC.md, docs/development/DEVELOPMENT_LOG.md, docs/development/HANDOFF.md
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-12 (`SELF`)
+- **Summary:** Deleted the six never-imported skeleton extractors (drake, mujoco, pinocchio, opensim, mediapipe, openpose; ~1,600 lines with their own hardcoded vocab maps) and their tests, and pruned the stale mypy / suite-marker baseline rows. The matcher's GUI remains wired to `JsonSkeletonExtractor` only, matching what `core.py` and the README state; cross-engine dispatch is deferred to #4367 on top of `pose_interchange` (#8867).
+- **Next step:** Open the PR with `Closes #8866` and confirm quality-gate and unit-test-gate pass.
+
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 
 - **State:** in_progress
