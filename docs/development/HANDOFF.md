@@ -1,5 +1,39 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Latest Status: Run56 Terminal, Higher-Order Integration in Development
+
+Run56 handle2338 exited0, all.85 s samples present. Tight adaptive RK4
+rtol1e-12/atol1e-14 completes181.850 s/52116 RHS calls. Marker difference
+1.47968e-7 m, native q7.67431e-7, native v0.000604599; closure pose3.42e-12,
+rate9.22e-11. Native velocity gate still FAILS; all other listed gates pass.
+This improves over52 but does not prove full equivalence or C3D matching.
+
+No root integration is active. Parallel representation agent is implementing
+a TDD local-chart DOP853 option using supported integrate/difference_rate,
+carrying actual integrated endpoints between charts with no physical resets or
+quaternion projection. Pin4.1 does not expose a coefficient-wise integrate
+Jacobian; do not invent one or confuse tangent dIntegrate with nq derivatives.
+Root will review and run an identical-input pilot only after its tests pass.
+
+## Scalar Refinement and Active Run56
+
+Runs54/55 are terminal exit1 with COMPLETED first levels and budget-limited
+second levels. Do not infer all levels failed from terminal stderr. Run54
+rtol1e-12/atol1e-14/max_step.000125 completes7.7567 s; native rates differ from
+run52 scalar baseline by5.52846e-5 and from manifold by0.00470807. Run55
+moderate1e-11 gives baseline rate difference0.000336151. Second-level step size
+.0000625 alone requires more than the100000-call budget; no solver-convergence
+claim follows from that failure. Future audit driver defaults only to54's
+completed settings. Exact experiment drivers are archived with each run.
+
+Run56 ACTIVE: handle2338; runtime native-manifold-10043-16; remote driver
+/mnt/c/Users/diete/compare_native_manifold_replay_9967_56.py; output
+/mnt/c/Users/diete/native-manifold-replay-9967-56. Same candidate/model/.85 s,
+adaptive rtol1e-12/atol1e-14/max_step1/720,100000 evaluations. Poll before restart.
+Parallel physical-velocity audit finds native error amplified near LS shoulder
+at.786111 s (condition24.93); physical angular discrepancy still0.000208rad/s.
+This supports tighter manifold tolerance, not relaxing native parity gates.
+
 ## Latest Terminal Checkpoint: Run52
 
 Run52 handle44055 exited0. Both adaptive levels completed; both parity gates
