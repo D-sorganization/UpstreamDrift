@@ -1,0 +1,50 @@
+{
+  "scope": "Same-input native representation prefix; not C3D or MATLAB acceptance",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "candidate_sha256": "b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f",
+  "runner_sha256": "4b3e8ac27e392d734aba89f809132cc55700c781dd7dffeb8dacf05c46773336",
+  "horizon_s": 0.85,
+  "scalar_elapsed_s": 3.6401185719878413,
+  "scalar_closure_pose_max_abs": 7.81446019005743e-11,
+  "scalar_closure_velocity_max_abs": 1.086023715402007e-9,
+  "runs": [
+    {
+      "max_step": 0.001388888888888889,
+      "elapsed_s": 8.955204111989588,
+      "evaluations": 2732,
+      "steps": 683,
+      "native_q_max_abs_difference": 4.012868453066028,
+      "native_v_max_abs_difference": 256.9592036375659,
+      "marker_max_distance_m": 0.23111111941860082,
+      "closure_pose_max_abs": 0.0002689155993986261,
+      "closure_velocity_max_abs": 0.00444296721530435,
+      "prefix_parity_gates_pass": false
+    },
+    {
+      "max_step": 0.0006944444444444445,
+      "elapsed_s": 17.968684456020128,
+      "evaluations": 5180,
+      "steps": 1295,
+      "native_q_max_abs_difference": 4.026148043634069,
+      "native_v_max_abs_difference": 258.52433418415893,
+      "marker_max_distance_m": 0.23368026837383957,
+      "closure_pose_max_abs": 4.467889185667353e-5,
+      "closure_velocity_max_abs": 0.000704545261877243,
+      "marker_max_distance_from_previous_step_m": 0.0037968723337919318,
+      "prefix_parity_gates_pass": false
+    },
+    {
+      "max_step": 0.00034722222222222224,
+      "elapsed_s": 31.67760726599954,
+      "evaluations": 10076,
+      "steps": 2519,
+      "native_q_max_abs_difference": 4.029283795195926,
+      "native_v_max_abs_difference": 258.95872306243075,
+      "marker_max_distance_m": 0.23405518884024643,
+      "closure_pose_max_abs": 9.005534704118342e-6,
+      "closure_velocity_max_abs": 0.0001437039467706569,
+      "marker_max_distance_from_previous_step_m": 0.0006783568434987176,
+      "prefix_parity_gates_pass": false
+    }
+  ]
+}

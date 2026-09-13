@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "recorded_utc": "2026-09-13T03:03:13.590436+00:00",
+  "runtime_root": "/home/dieterolson/native-manifold-10043-13",
+  "command": [
+    "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+    "-m",
+    "pytest",
+    "/home/dieterolson/native-manifold-10043-13/tests/unit/motion_matching/test_native_pinocchio_manifold.py",
+    "/home/dieterolson/native-manifold-10043-13/tests/unit/motion_matching/test_manifold_forward.py",
+    "/home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_joint_chart.py",
+    "/home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_native_joint_state.py",
+    "-q",
+    "-o",
+    "addopts=",
+    "--tb=short"
+  ],
+  "returncode": 0,
+  "stdout": "........................................................................ [ 92%]\n....s.                                                                   [100%]\n=============================== warnings summary ===============================\n../../../../home/dieterolson/native-manifold-10043-13/tests/unit/motion_matching/test_native_pinocchio_manifold.py:16\n  /home/dieterolson/native-manifold-10043-13/tests/unit/motion_matching/test_native_pinocchio_manifold.py:16: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    pytestmark = pytest.mark.unit\n\n../../../../home/dieterolson/native-manifold-10043-13/tests/unit/motion_matching/test_manifold_forward.py:11\n  /home/dieterolson/native-manifold-10043-13/tests/unit/motion_matching/test_manifold_forward.py:11: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    pytestmark = pytest.mark.unit\n\n../../../../home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_joint_chart.py:12\n  /home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_joint_chart.py:12: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    pytestmark = pytest.mark.unit\n\n../../../../home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_native_joint_state.py:14\n  /home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_native_joint_state.py:14: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    pytestmark = pytest.mark.unit\n\n../../../../home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_native_joint_state.py:136\n  /home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_native_joint_state.py:136: PytestUnknownMarkWarning: Unknown pytest.mark.live_simulation - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.live_simulation\n\n../../../../home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_native_joint_state.py:137\n  /home/dieterolson/native-manifold-10043-13/tests/unit/pose_interchange/test_native_joint_state.py:137: PytestUnknownMarkWarning: Unknown pytest.mark.requires_mujoco - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.requires_mujoco\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n77 passed, 1 skipped, 6 warnings in 0.69s\n",
+  "stderr": "",
+  "source_sha256": {
+    "src/shared/python/pose_interchange/joint_chart.py": "c9aaa9ca77d08f898d362cb140155aee8748e6ddd85c37b655f5c5232787f79a",
+    "src/shared/python/pose_interchange/native_joint_state.py": "e0e0b36b85903823977ba72cb494b794b3ca75006611fe0473bad7b586e15f33",
+    "src/engines/physics_engines/pinocchio/python/native_manifold_model.py": "6f675a76eeb9924d8c4343367dc076aa508e18b507df8edc788f64137ed7cc8a",
+    "tests/unit/pose_interchange/test_joint_chart.py": "ef18357e72425e844c2ec5cd1b2b32ba3dad145e405ec76475c19271d50a723b",
+    "tests/unit/pose_interchange/test_native_joint_state.py": "d229c19ba2968ce960a09fd67d4e0c575cf9940ca4dd66c9519188ba5f9b19ec",
+    "tests/unit/motion_matching/test_native_pinocchio_manifold.py": "fce7e3ea0d05f2f14df0d29621a548c61c0128ea1bddaa1493d1eaae077b8dc6"
+  },
+  "scope": "Branch-preserving inverse regression and prior manifold/order tests. Candidate rerun remains separate."
+}

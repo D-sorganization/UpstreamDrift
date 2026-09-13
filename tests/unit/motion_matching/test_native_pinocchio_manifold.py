@@ -124,13 +124,9 @@ def test_constrained_acceleration_and_weld_parity(models):
             atol=2e-9,
         )
         expected_pose, expected_rate = scalar.closure_errors()
-        contact = manifold.constraint_data[0]
-        np.testing.assert_allclose(
-            contact.contact_placement_error.vector, expected_pose, atol=2e-13
-        )
-        np.testing.assert_allclose(
-            contact.contact_velocity_error.vector, expected_rate, atol=2e-13
-        )
+        actual_pose, actual_rate = manifold.closure_errors()
+        np.testing.assert_allclose(actual_pose, expected_pose, atol=2e-13)
+        np.testing.assert_allclose(actual_rate, expected_rate, atol=2e-13)
 
 
 def test_native_efforts_are_mapped_at_actual_configuration(models):
@@ -150,4 +146,118 @@ def test_native_efforts_are_mapped_at_actual_configuration(models):
         [expected_qdd[n] for n in names],
         rtol=2e-9,
         atol=2e-9,
+    )
+
+
+def test_actual_engine_difference_rate_matches_centered_tangent_probe(models):
+    _, manifold = models
+    names = manifold.adapter.coordinate_order
+    native = dict.fromkeys(names, 0.2)
+    q, v, _ = manifold.native_state(
+        native, dict.fromkeys(names, 0.3), dict.fromkeys(names, 0.0)
+    )
+    anchor = manifold.integrate(q, -0.2 * v)
+    epsilon = 1e-6
+    expected = (
+        manifold.difference(anchor, manifold.integrate(q, epsilon * v))
+        - manifold.difference(anchor, manifold.integrate(q, -epsilon * v))
+    ) / (2 * epsilon)
+    np.testing.assert_allclose(
+        manifold.difference_rate(anchor, q, v), expected, atol=2e-10
+    )
+
+
+def test_actual_engine_noncommuting_rotation_integrates_at_fourth_order(models):
+    from scipy.spatial.transform import Rotation
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_forward,
+    )
+
+    _, manifold = models
+    q0 = manifold.pin.neutral(manifold.model)
+    qindex, vindex = next(iter(manifold._tree.spherical.values()))
+    v0 = np.zeros(manifold.model.nv)
+    v0[vindex] = 1.0
+    target = Rotation.from_rotvec([1, 0, 0]) * Rotation.from_rotvec([0, 1, 0])
+    errors = []
+
+    def acceleration(t, q, v):
+        a = np.zeros(manifold.model.nv)
+        a[vindex : vindex + 3] = [-2 * t * np.sin(t * t), 2, 2 * t * np.cos(t * t)]
+        return a
+
+    for h in (0.2, 0.1, 0.05):
+        result = integrate_manifold_forward(
+            q0,
+            v0,
+            np.array([0.0, 1.0]),
+            acceleration,
+            integrate=manifold.integrate,
+            difference_rate=manifold.difference_rate,
+            max_step=h,
+        )
+        actual = Rotation.from_quat(result.configuration[-1, qindex : qindex + 4])
+        errors.append(np.linalg.norm((target.inv() * actual).as_rotvec()))
+    assert 12 < errors[0] / errors[1] < 20
+    assert 12 < errors[1] / errors[2] < 20
+    assert errors[-1] < 3e-7
+
+
+def test_native_dynamics_preserves_middle_branch_when_nearest_inverse_flips(models):
+    _, manifold = models
+    names = manifold.adapter.coordinate_order
+    q = dict.fromkeys(names, 0.2)
+    reference = dict(q)
+    group = next(g for g in manifold.adapter.groups if g.coordinates[1] == "LSInputY")
+    for name, target, prior in zip(
+        group.coordinates, [2.8, -1.6, 2.8], [0, -2, 0], strict=True
+    ):
+        q[name], reference[name] = target, prior
+    rates = dict.fromkeys(names, 0.3)
+    efforts = dict.fromkeys(names, 1.5)
+    mq, mv, mapped_effort = manifold.native_state(q, rates, efforts)
+    restored_q, restored_v = manifold.native_coordinates(mq, mv, reference)
+    np.testing.assert_allclose(list(restored_q.values()), list(q.values()), atol=2e-13)
+    np.testing.assert_allclose(
+        list(restored_v.values()), list(rates.values()), atol=2e-12
+    )
+    expected = manifold.acceleration(mq, mv, mapped_effort)
+    actual = manifold.acceleration_from_native_efforts(mq, mv, efforts, reference)
+    np.testing.assert_allclose(actual, expected, rtol=2e-9, atol=2e-9)
+
+
+def test_actual_engine_adaptive_rotation_matches_exact_noncommuting_motion(models):
+    from scipy.spatial.transform import Rotation
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_adaptive,
+    )
+
+    _, manifold = models
+    q0 = manifold.pin.neutral(manifold.model)
+    qi, vi = next(iter(manifold._tree.spherical.values()))
+    v0 = np.zeros(manifold.model.nv)
+    v0[vi] = 1.0
+
+    def acceleration(t, q, v):
+        a = np.zeros(manifold.model.nv)
+        a[vi : vi + 3] = [-2 * t * np.sin(t * t), 2, 2 * t * np.cos(t * t)]
+        return a
+
+    result = integrate_manifold_adaptive(
+        q0,
+        v0,
+        np.array([0.0, 1.0]),
+        acceleration,
+        integrate=manifold.integrate,
+        difference_rate=manifold.difference_rate,
+        difference=manifold.difference,
+        rtol=1e-9,
+        atol=1e-11,
+        max_step=0.2,
+    )
+    target = Rotation.from_rotvec([1, 0, 0]) * Rotation.from_rotvec([0, 1, 0])
+    actual = Rotation.from_quat(result.configuration[-1, qi : qi + 4])
+    assert np.linalg.norm((target.inv() * actual).as_rotvec()) < 2e-8
+    np.testing.assert_allclose(
+        result.velocity[-1, vi : vi + 3], [np.cos(1), 2, np.sin(1)], atol=2e-8
     )

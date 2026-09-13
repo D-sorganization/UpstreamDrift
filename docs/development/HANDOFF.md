@@ -1,5 +1,71 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Branch Fix and Adaptive Replay Run51
+
+Run50 is terminal (handle80473 exited0) and archived. Preserving the native middle
+branch reduces finest-step marker disagreement from0.234 m to1.60268e-5 m, but
+state/rate/closure gates still FAIL (rate0.01845, closure velocity1.6457e-4).
+Do not treat the small marker error alone as equivalence. Fixed-step RK4 requires
+much finer local resolution near rapid shoulder motion.
+
+Shared SerialRotationChart.coordinates and NativeJointStateAdapter.restore now
+have additive preserve_middle_branch options. Generic nearest-angle defaults
+remain; NativeManifoldPinocchioModel explicitly preserves the reference interval
+between middle-angle poles for native dynamics. True singular crossings remain
+unqualified. Local-chart fixed RK4 and adaptive step-doubling share one kernel;
+independent noncommuting rotation tests verify fourth-order fixed convergence.
+Adaptive error scaling is documented in tangent units and is not identical to
+Euclidean solve_ivp scaling. It accepts fine states without physical projection,
+counts rejected attempts and enforces an explicit RHS evaluation budget.
+
+Final runtime native-manifold-10043-15 passes86 real-runtime/shared tests with one
+optional MuJoCo skip; root independently ran18 generic tests, Ruff and mypy.
+Exact source and receipts are manifold_integrator_10043_12, manifold_branch_10043_13,
+and manifold_adaptive_10043_15 under native_evidence. All are immutable.
+
+Run51 is ACTIVE at the latest verified poll: localhandle24475. Remote driver
+/mnt/c/Users/diete/compare_native_manifold_replay_9967_51.py; output
+/mnt/c/Users/diete/native-manifold-replay-9967-51. Uses runtime15, horizon.85,
+methodadaptive, rtol1e-10, atol1e-12, max_evaluations100000 per level, max_steps
+[1/720,1/1440]. Native reference completed3.62 s; adaptive levels pending.
+Poll the same process/handle. Budget exhaustion is explicit failure, not acceptance.
+Archive terminal output; compare every state/marker/closure gate before promotion.
+Run46 remains intentionally terminal and must not be described as running.
+
+Lease #9967 renewed as codex/native-manifold-replay-9967-51 until
+2026-09-13T05:13:35Z. Full tour matching, remaining engines and R2025b acceptance
+remain OPEN. No quaternion performance advantage has been established.
+
+## Run49 Trajectory Branch Defect and Run46 Terminal Status
+
+This section supersedes older live-job statements. Run46 was intentionally
+interrupted after29:57 wall time /33:16 CPU versus52.998 s baseline, to bound
+compute cost. Handle29712 exited1 with KeyboardInterrupt; PID2659573 was verified
+absent. Baseline, exact driver and terminal receipt are archived in
+native_evidence/convergence_9967_46. Strict-tolerance convergence is NOT determined;
+do not describe this interruption as solver nonconvergence or restart by default.
+
+The local-chart RK4 integrator has independent fourth-order rotation tests and
+real Pinocchio checks. It rebases coordinates per numerical step, never target
+states or physical state resets. Run48 (.2 s same native polynomial) passes all
+parity gates at3 step sizes; finest marker difference7.45e-12 m. Run49 (.85 s)
+fails: marker difference approaches0.234 m rather than zero. Both runs terminal,
+archived in native_evidence/manifold_replay_9967_48 and49 with exact source/inputs.
+The current Python manifold implementation is slower than scalar native replay;
+no speed improvement has been established.
+
+Root reproduced the cause on scalar run19 states at.786111111 s. LSXYZ original
+[1.1848704064,-1.6509766517,-1.1484230301] was restored near q0 as
+[-1.9567222472,-1.4906160018,-4.2900156836]. Same orientation, opposite middle-axis
+branch, DIFFERENT native actuator map. Nearest total angle distance is therefore
+invalid as the sole dynamics branch rule. The shared inverse is being extended
+with an explicit preserve_middle_branch option, enabled by the native dynamics
+adapter. Generic nearest-pose conversion remains available. Repeat the .85 s
+three-step comparison after the fix; do not promote failed49 or mask its error.
+
+Run19 itself is a rejected C3D fit, duration.85 s, whole30.79 mm, terminal99.99 mm.
+It is a same-input representation test fixture, not an accepted tour swing.
+
 ## Qualified Pinocchio Manifold Prototype
 
 The alternate NativeManifoldPinocchioModel is implemented and pointwise-qualified

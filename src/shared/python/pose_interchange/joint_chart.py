@@ -122,16 +122,31 @@ class SerialRotationChart:
             dtype=np.float64,
         )
 
-    def coordinates(self, quaternion_wxyz: ArrayLike, reference: ArrayLike) -> Array:
+    def coordinates(
+        self,
+        quaternion_wxyz: ArrayLike,
+        reference: ArrayLike,
+        *,
+        preserve_middle_branch: bool = False,
+    ) -> Array:
         """Nearest nonsingular Euler branch to explicit prior coordinates.
 
         Both Tait-Bryan branches and 2*pi winding are considered. Continuity
         requires sufficiently sampled motion; a quaternion alone loses winding.
+        With preserve_middle_branch=True, retain the reference middle-angle
+        interval between adjacent pi/2+k*pi poles before minimizing outer-angle
+        distance. This is essential for native scalar actuator semantics: the
+        other Euler branch changes the conjugate torque map despite equal pose.
+        A singular reference cannot define a nonsingular physical branch.
         """
         quaternion = _vector(quaternion_wxyz, 4)
         prior = _vector(reference)
         if not np.isclose(np.linalg.norm(quaternion), 1, atol=1e-10, rtol=0):
             raise ValueError("Expected a unit quaternion")
+        if not isinstance(preserve_middle_branch, bool):
+            raise ValueError("preserve_middle_branch must be boolean")
+        if preserve_middle_branch:
+            self._invertible_map(prior)
         matrix = quat_to_matrix(quaternion)
         # Detect lock before scipy chooses a nonunique angle and emits a warning.
         first_axis = "XYZ".index(self.axes[0])
@@ -149,6 +164,14 @@ class SerialRotationChart:
             item + 2 * np.pi * np.round((prior - item) / (2 * np.pi))
             for item in (primary, alternate)
         ]
+        if preserve_middle_branch:
+            branch = np.floor((prior[1] + np.pi / 2) / np.pi)
+            lower, upper = -np.pi / 2 + branch * np.pi, np.pi / 2 + branch * np.pi
+            candidates = [item for item in candidates if lower < item[1] < upper]
+            if not candidates:
+                raise SingularChartError(
+                    "No inverse on the reference middle-angle branch"
+                )
         result = min(candidates, key=lambda item: float(np.linalg.norm(item - prior)))
         self._invertible_map(result)
         return result

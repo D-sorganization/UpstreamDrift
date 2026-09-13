@@ -25,7 +25,8 @@ has **nq=30, nv=27**. Its representation identity is
   q, body-tangent velocity and conjugate effort. Spherical q is **xyzw**;
   spherical velocity and moment are expressed in the rotating follower frame.
 - `native_coordinates(q, v, reference_coordinates)` restores native angles/rates
-  using the explicit branch/winding reference.
+  preserving the explicit reference middle-angle interval between gimbal poles,
+  with nearest outer-axis winding.
 - `acceleration_from_native_efforts(q, v, primitive_efforts, reference_coordinates)`
   maps native efforts using the **current alternate configuration every call**.
   The reference only chooses a branch; it is never a tracking target or reset.
@@ -90,14 +91,148 @@ paths. Run45 raw feedback data are archived by the root matching work; its NPZ
 SHA is recorded in the saved-state receipt. `raw-source.zip` beside the receipts
 preserves exact tested source bytes despite later Git newline normalization.
 
+## Local-Chart Time Integrator Checkpoint
+
+`src/shared/python/motion_matching/manifold_forward.py` supplies
+`integrate_manifold_forward(initial_configuration, initial_velocity, time,
+acceleration, *, integrate, difference_rate, max_step=0.001)`.
+The result contains read-only `time`, `configuration[T,nq]`, `velocity[T,nv]`,
+`evaluations`, `steps` and `elapsed_s`. Every requested time is an integration
+boundary. The initial clock is zero and all sample times increase strictly.
+
+Each numerical step holds anchor q fixed, starts displacement u=0 and applies
+classical RK4 to `(u,v)`, with q=integrate(anchor,u),
+u_dot=difference_rate(anchor,q,v), and v_dot=acceleration(t,q,v).
+The next anchor is the integrated endpoint. This changes coordinates only;
+there is no weld projection, state reset, target-state replacement, quaternion
+normalization rule, or tracking correction in the solver. Engine retraction
+owns quaternion geometry. The method has no adaptive error estimate.
+
+`NativeManifoldPinocchioModel.difference_rate` uses the actual Pinocchio
+`dDifference(..., ARG1) @ v`; replacing this by v loses the noncommuting chart
+correction. `closure_errors()` exposes checked detached weld pose/rate residuals
+from the latest acceleration call through the existing scalar implementation.
+
+Evidence: `native_evidence/manifold_integrator_10043_12/qualification.json` and
+its exact `raw-source.zip`. Ten independent solver tests pass locally; all 17
+solver/native tests pass on real Pinocchio 4.1.0 in
+`/home/dieterolson/native-manifold-10043-12`. Missing-module and missing-adapter-
+method red states preceded implementation. Ruff and focused mypy pass.
+Independent exact noncommuting motion R(t)=Rx(t)Ry(t�) gives orientation errors
+4.04923e-5, 2.60661e-6 and 1.66814e-7 radians at h=0.2, 0.1 and 0.05 seconds.
+Refinement ratios 15.53 and 15.63 establish fourth-order behavior for this case.
+Actual Pinocchio spherical operations reproduce those errors. Additional tests
+cover the Euclidean harmonic oscillator order, exact constant acceleration,
+clock/output ownership, malformed callback outputs, and an actual Pinocchio
+centered tangent probe of dDifference.
+
+These are integrator order and adapter tests, not candidate replay acceptance.
+Root owns same-input run19 replay and will perform step-size convergence on the
+constrained golf problem. Run19 is itself a rejected C3D fit, suitable here only
+for a controlled representation comparison. The native inverse now explicitly preserves the reference middle-angle branch
+(see the correction below). Outer-axis winding remains nearest the reference;
+full-swing winding continuity and avoidance of actual singular crossings still
+require audit.
+
+```powershell
+ssh -o BatchMode=yes controltower 'wsl -d ControlTower-Runner -- env PYTHONPATH=/home/dieterolson/native-manifold-10043-12 /home/dieterolson/simscape-pinocchio-9967/.venv/bin/python -m pytest /home/dieterolson/native-manifold-10043-12/tests/unit/motion_matching/test_native_pinocchio_manifold.py /home/dieterolson/native-manifold-10043-12/tests/unit/motion_matching/test_manifold_forward.py -q -o addopts='
+```
+
+## Middle-Angle Branch Correction
+
+The first 0.85-second same-input attempt failed to converge with step refinement
+because nearest-angle inverse selection changed the left-shoulder middle branch
+near 0.786111 seconds. Equal orientation did not imply equal native actuator
+semantics. The scalar state `[1.1848704063696793, -1.650976651746636,
+-1.1484230300553964]` was restored on the opposite branch with middle angle
+`-1.490616001843157`; the corresponding native effort mapping was wrong.
+Root owns the rejected run49 receipt and the corrected run50 replay.
+
+`SerialRotationChart.coordinates(..., preserve_middle_branch=True)` now filters
+orientation-equivalent candidates to the reference interval between adjacent
+`pi/2 + k*pi` poles before choosing nearest outer-axis winding.
+`NativeJointStateAdapter.restore` exposes the same explicit option; its default
+nearest behavior is unchanged for generic pose users. Both inverse paths in
+`NativeManifoldPinocchioModel` explicitly opt in. Singular references/targets
+remain rejected; no pseudoinverse or state reset was introduced.
+
+TDD regressions cover target `[2.8,-1.6,2.8]`, reference `[0,-2,0]`, all six
+axis sequences, both middle-angle signs and positive/negative 2\*pi winding.
+The nearest default demonstrably selects a different branch while the explicit
+option preserves q/v/qdd/effort semantics. A real native Pinocchio test compares
+current-state applied effort acceleration to directly mapped original effort.
+
+Final fix runtime: `/home/dieterolson/native-manifold-10043-13`, a new clone of
+runtime12; earlier runtime11/12 evidence remains immutable. Live tests:
+**77 passed, one optional MuJoCo test skipped**. Local shared tests: 59 passed.
+Ruff/format and focused mypy pass. Exact changed source bytes and stdout are in
+`native_evidence/manifold_branch_10043_13/{qualification.json,raw-source.zip}`.
+These tests prove the branch correction at the tested states; corrected
+same-input trajectory convergence remains a separate root-owned gate.
+
+Preserving the interval does not authorize crossing an actual native gimbal
+singularity. A quaternion may remain regular while original actuator/rate
+coordinates become undefined. Detect and qualify that event explicitly rather
+than interpreting alternate-coordinate integration as proof of original-model
+fidelity through the singularity.
+
+## Adaptive Step-Doubling Checkpoint
+
+`integrate_manifold_adaptive` is additive; the fixed-step API remains available.
+Both use one extracted `_ChartStepper` RK4 kernel. The adaptive signature is:
+
+```python
+integrate_manifold_adaptive(
+    initial_configuration, initial_velocity, time, acceleration,
+    integrate=model.integrate,
+    difference_rate=model.difference_rate,
+    difference=model.difference,
+    rtol=1e-8, atol=1e-10, max_step=0.001, max_evaluations=1_000_000,
+)
+```
+
+Each attempted macrostep computes one full step and two half steps. It accepts
+only the fine two-half-step state; there is no extrapolation, tangent transport,
+constraint projection or target-state correction. Error estimates divide
+`difference(q_full,q_fine)` and `v_fine-v_full` by 15. Maximum componentwise
+scaled error controls acceptance and step adjustment, using exponent 1/5,
+safety factor 0.9 and a bounded change factor.
+
+Configuration error scales use `atol + rtol*max(abs(h*v_start),abs(h*v_fine))`;
+velocity scales use `atol + rtol*max(abs(v_start),abs(v_fine))`. Consequently atol
+applies to the declared tangent displacement/velocity component units (meters
+and m/s or radians and rad/s); relative scaling uses local displacement rather
+than global configuration. These are **not numerically equivalent to the same
+rtol/atol passed to Euclidean solve_ivp**. Compare resulting physical trajectories
+and closure residuals under refinement, not tolerance numbers alone.
+
+`evaluations` counts all RHS calls, including rejected trials; each trial costs
+12 calls. `steps` counts accepted macrosteps, each comprising two half steps.
+Explicit positive integer evaluation budgets prevent runaway attempts. Budget
+exhaustion, time underflow, malformed outputs and callback failures raise;
+partial results are not returned as successes. The integrator does not catch
+and reinterpret a singular native chart as ordinary truncation error.
+
+Final runtime `/home/dieterolson/native-manifold-10043-15` passes **86 tests,
+one optional MuJoCo test skipped**. The 18 generic tests include tighter-tolerance
+error reduction, independent noncommuting rotation, the prior fourth-order
+fixed tests, explicit budget enforcement, underflow and malformed output checks.
+The real Pinocchio adaptive case matches the independent noncommuting solution.
+Ruff/format and focused mypy pass. Exact source and receipt:
+`native_evidence/manifold_adaptive_10043_15/{qualification.json,raw-source.zip}`.
+Runtime14 was a superseded pre-mypy-cast checkpoint; runtime15 contains current
+source. Fixed12 and branch13 evidence remains preserved.
+
+Root owns candidate comparison with adaptive stepping and a bounded RHS budget.
+Successful adaptive test problems are not closure or full-swing acceptance.
+
 ## Next Controlled Steps
 
 1. Retain the passed production lazy-initializer qualification and verify full
    application import integration when enabling this variant in the launcher.
-2. Implement and test a Lie-group time integrator, or an explicit quaternion
-   derivative integrator with a documented stage-normalization policy. Never
-   feed nq30 into the existing Euclidean qdot=v path with nv27. Establish order
-   and step-size convergence independently before applying swing acceptance.
+2. Use the tested local-chart integrators above; establish step-size
+   convergence on the constrained same-input golf replay before acceptance.
+   Never feed nq30 into the existing Euclidean qdot=v path with nv27.
 3. First replay the same run19 native actuator polynomial on a short qualified
    prefix, with identical original q0/qd0, model, gravity, closure and tolerances.
    Every RHS evaluation must transform the native polynomial effort at its

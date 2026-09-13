@@ -1,5 +1,22 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Branch-Preserving Adaptive Manifold Replay
+
+Added tested native branch preservation after run49 exposed wrong actuator
+mapping. Run50 improves marker discrepancy to16micrometres but still fails
+closure/state gates. Added shared fixed/adaptive local-chart RK4 with independent
+order tests, budgets and contracts. Run51 adaptive comparison launched on
+ControlTower with fixed limits; no result claimed while active. Root reran
+18generic tests, Ruff and mypy; real runtime qualification records86passes.
+
+## 2026-09-12 - Manifold Replay Exposes Actuator Branch Bug
+
+Local-chart RK4 passes independent fourth-order and real engine checks. Same-input
+run48 .2 s passes, but run49 .85 s does not converge to scalar trajectory. Root
+identified opposite shoulder branch selection at.786111 s and requested explicit
+branch-preserving inverse regression. Run46 strict comparison intentionally
+interrupted at33CPUmin; terminal evidence archived, no convergence conclusion.
+
 ## 2026-09-12 - Native Pinocchio Spherical Prototype
 
 Integrated shared-construction alternate native builder with current-state effort

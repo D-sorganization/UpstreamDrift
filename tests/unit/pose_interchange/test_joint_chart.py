@@ -89,3 +89,30 @@ def test_inverse_acceleration_includes_convective_term() -> None:
     np.testing.assert_allclose(
         chart.coordinate_acceleration(q, v, alpha), a, atol=1e-14
     )
+
+
+@pytest.mark.parametrize("axes", ["XYZ", "XZY", "YXZ", "YZX", "ZXY", "ZYX"])
+@pytest.mark.parametrize("middle", [-1.6, 1.6])
+@pytest.mark.parametrize("winding", [-2 * np.pi, 0.0, 2 * np.pi])
+def test_explicit_middle_branch_beats_nearest_outer_angles(axes, middle, winding):
+    chart = SerialRotationChart(axes)
+    target = np.array([2.8, middle + winding, 2.8])
+    reference = np.array([0.0, np.sign(middle) * 2.0 + winding, 0.0])
+    quaternion = chart.quaternion(target)
+    nearest = chart.coordinates(quaternion, reference)
+    assert abs(nearest[1] - target[1]) > 0.01
+    actual = chart.coordinates(quaternion, reference, preserve_middle_branch=True)
+    np.testing.assert_allclose(actual, target, atol=2e-13)
+    np.testing.assert_allclose(
+        chart.rotation(actual), chart.rotation(target), atol=2e-14
+    )
+
+
+def test_middle_branch_reference_at_lock_is_rejected():
+    chart = SerialRotationChart("XYZ")
+    with pytest.raises(SingularChartError):
+        chart.coordinates(
+            chart.quaternion([0.1, 0.2, 0.3]),
+            [0, np.pi / 2, 0],
+            preserve_middle_branch=True,
+        )
