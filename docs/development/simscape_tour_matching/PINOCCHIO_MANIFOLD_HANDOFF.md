@@ -250,6 +250,20 @@ Receipt and source archive are in
 Root owns run51's partial-result archive and the run52 repeated candidate
 comparison. This correction alone does not establish trajectory acceptance.
 
+## Saved Run52 Velocity Diagnosis
+
+Read `native_evidence/manifold_velocity_10043_17/README.md` and its reproducible
+script/JSON before interpreting the remaining native-rate gap. The largest
+native difference is LSInputX, 0.0046527873 rad/s at 0.7861111111 s, with native
+rates near 398 rad/s. Actual frame angular-velocity error peaks at only
+0.00020800065 rad/s; frame-origin linear-velocity error peaks at 2.283562e-5 m/s.
+Left-shoulder chart condition 24.9304 produces measured inverse-rate amplification
+17.2521 (bound 17.6426), while a configuration-dependent map term also contributes.
+Both trajectories are on the same middle branch. This establishes sampled chart
+amplification, not scalar-reference accuracy or trajectory acceptance. Root owns
+scalar-reference and adaptive-tolerance convergence. No integrations were launched
+by this diagnostic and no production code changed.
+
 ## Next Controlled Steps
 
 1. Retain the passed production lazy-initializer qualification and verify full

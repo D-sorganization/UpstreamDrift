@@ -1,0 +1,37 @@
+{
+  "scope": "Scalar reference refinement; not C3D or R2025b acceptance",
+  "inputs_sha256": {
+    "model": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "candidate": "136454eaf5c14749d971d1ba6dfe5bf4a9b9903358656fa5adeb16e30138dbec",
+    "baseline": "43aa7e3f4deef87cc1a503c6814d4a25f9362805056109f7431e17006901cccc",
+    "manifold": "35556837d4d977d1b264e90f5e33a4c7f2b85f69809335063dd9e644a792bc77"
+  },
+  "runner_sha256": "569c3f3059fb2f0c2e3bf39e09669242c85eae9750f0a3d4c16c815e60b6b50a",
+  "max_acceleration_calls_per_level": 100000,
+  "runs": [
+    {
+      "rtol": 1e-12,
+      "atol": 1e-14,
+      "max_step": 0.000125,
+      "status": "complete",
+      "elapsed_s": 7.7566922339610755,
+      "evaluations": 87827,
+      "acceleration_calls": 88135,
+      "previous_q_max_abs": 6.012744968586503e-8,
+      "previous_v_max_abs": 5.5284640723129996e-5,
+      "manifold_q_max_abs": 6.121344597653788e-6,
+      "manifold_v_max_abs": 0.004708071915729306,
+      "manifold_marker_max_distance_m": 1.182151192166802e-6,
+      "closure_pose_max_abs": 1.3132966936199189e-11,
+      "closure_velocity_max_abs": 7.37419014740226e-11
+    },
+    {
+      "rtol": 1e-13,
+      "atol": 1e-15,
+      "max_step": 6.25e-5,
+      "status": "failed",
+      "error": "Scalar reference acceleration budget exhausted",
+      "acceleration_calls": 100001
+    }
+  ]
+}

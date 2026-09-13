@@ -1,0 +1,12 @@
+{
+  "run": 54,
+  "exit_code": 1,
+  "handle": 7120,
+  "status": "first_level_completed_second_level_exhausted_budget",
+  "runtime": "/home/dieterolson/native-manifold-10043-16",
+  "runtime_source_archive": "../manifold_boundary_10043_16/raw-source.zip",
+  "comparison_input_archive": "../manifold_replay_9967_52/raw-run.zip",
+  "physical_input_archive": "../manifold_replay_9967_50/raw-run.zip",
+  "limitation": "Second-level max_step alone requires more than 100000 DOP853 RHS calls; budget failure is not evidence of solver nonconvergence.",
+  "prior_attempt": "Run53 failed before integration/output directory creation because diagnostic expected state instead of native_state in manifold NPZ; corrected for54."
+}

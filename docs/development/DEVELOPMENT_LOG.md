@@ -1,5 +1,20 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Tighter Manifold Replay56
+
+Run56 completed181.85 s with52116 evaluations. Native rate discrepancy improves
+to0.000604599 but still fails the unchanged gate; marker/position/closure pass.
+Saved physical-velocity audit explains chart amplification without waiving error.
+Started bounded TDD high-order local-chart integrator to reduce evaluation cost.
+
+## 2026-09-12 - Scalar Reference and Physical Velocity Diagnostics
+
+Archived54/55 first-level scalar refinements and explicit second-level budget
+failures. The finest completed scalar changes native rate by5.53e-5 relative to
+baseline, insufficient to explain manifold discrepancy0.00471. Parallel saved
+state diagnostic finds chart amplification but nonzero body angular velocity
+error. Launched bounded tighter manifold56 without changing acceptance gates.
+
 ## 2026-09-12 - Run52 Completed Without Boundary Failure
 
 Both adaptive levels completed after the TDD boundary fix. Finest native velocity
