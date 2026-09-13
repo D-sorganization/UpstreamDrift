@@ -1,5 +1,13 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Pointwise Dynamics Audit Narrows Remaining Diagnosis
+
+All307 saved scalar states were checked through direct and actual-RHS manifold
+routes. Maximum native acceleration difference2.18e-6 at a539073rad/s² reference;
+effort roundtrip1.25e-12; exact zero same-state history difference in both models.
+No substantial sampled conversion/history defect was found. Updated next action
+to quantify perturbation growth and avoid further blind tolerance sweeps.
+
 ## 2026-09-12 - Run59 Does Not Confirm Robust Parity
 
 Smaller-step59 completes but native velocity error0.000587270 fails. Isolated58
