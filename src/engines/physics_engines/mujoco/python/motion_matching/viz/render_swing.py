@@ -129,10 +129,18 @@ class MujocoVizFitResult:
     duration_s: float = 0.0
     metadata: dict[str, Any] = field(default_factory=dict)
 
+    @property
+    def wall_clock_s(self) -> float:
+        """Alias for duration_s matching CanonicalFitResult (#4250)."""
+        return self.duration_s
+
     @classmethod
     def from_simout(cls, sim_out: _SimOutLike, **metadata: Any) -> FitResult:
         """Adapt a mujoco ``simulate.SimOut`` (or any duck-type match)."""
         tau = getattr(sim_out, "tau", None)
+        duration_s = float(
+            getattr(sim_out, "duration_s", getattr(sim_out, "wall_clock_s", 0.0))
+        )
         return cls(
             time=np.asarray(sim_out.time, dtype=np.float64),
             grip=np.asarray(sim_out.grip, dtype=np.float64),
@@ -140,7 +148,7 @@ class MujocoVizFitResult:
             club_quat=np.asarray(sim_out.club_quat, dtype=np.float64),
             tau=np.asarray(tau, dtype=np.float64) if tau is not None else None,
             solver_status=getattr(sim_out, "solver_status", "ok"),
-            duration_s=float(getattr(sim_out, "duration_s", 0.0)),
+            duration_s=duration_s,
             metadata=dict(metadata),
         )
 
@@ -419,7 +427,7 @@ def render_trajectory_overlay(
         _set_equal_3d(ax, all_xs, all_ys, all_zs)
         ax.set_xlabel("x [m]")
         ax.set_ylabel("y [m]")
-        ax.set_zlabel("z [m]")
+        ax.set_zlabel("z [m]")  # type: ignore[attr-defined]
         ax.legend(loc="upper left", fontsize=8)
 
     ax_meas.set_title("Measured")
