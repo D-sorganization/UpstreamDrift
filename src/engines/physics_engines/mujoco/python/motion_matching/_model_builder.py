@@ -237,7 +237,7 @@ def build_model(variant: Variant = "full_body") -> CompiledModel:
         club_grip_body_id=grip_id,
         club_head_body_id=head_id,
         xml_hash=_hash_xml(_xml_for(variant)),
-        make_data=lambda m=model: mujoco.MjData(m),
+        make_data=lambda: mujoco.MjData(model),
     )
 
 
