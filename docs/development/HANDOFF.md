@@ -8,8 +8,8 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpointd8fbfdaff is pushed with
-all normal hooks passing. SELF adds motion-file persistence and terminal sensitivity71/72 evidence. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpointb6179cda1 is pushed with
+all normal hooks passing. SELF adds opt-in spherical MuJoCo export and offline Jacobian conditioning audit74. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -146,6 +146,26 @@ Five new consumer checks pass, including actual MuJoCo all16 frames at three
 samples; Drake/Pinocchio consumer tests skip locally for missing runtimes.
 These are conversion checks, not alternate MuJoCo/Drake dynamics qualification. See dedicated
 REPRESENTATION_HANDOFF for runnable usage and the remaining ordered plan.
+
+## MuJoCo Spherical Export and Fitting Conditioning
+
+The opt-in native_spherical_mjcf exporter now reuses canonical MJCF geometry and
+shared group inventory to replace three XYZ triples with ball joints. Real local
+MuJoCo3.3.4 compiles nq30/nv27; five tests verify unchanged inertias/closure/scalars
+and all body/site poses across three manufactured states. This is kinematics
+qualification, not a dynamics adapter or stock mj_step acceptance. Next gates:
+tangent conventions, dual effort/convective acceleration, reused rigid-closure
+solve, then same-input trajectories. Dedicated turnover:
+../development/mujoco_native_matching/MUJOCO_MANIFOLD_HANDOFF.md.
+
+Offline audit74 uses saved72 Jacobians, existing valid masks, amplitude10 and
+terminal weight10. Marker-only23100-by-81 condition number is7.452e7; column
+normalization leaves3.767e7. Penalty rows/bounds are excluded. This supports
+checking correlated sensitivities, not claiming a proven cause of stagnation.
+Fit73 has passed five Jacobian checks at evaluation6, with only modest objective
+improvement (18.368819 to18.364114). Let its bounded run finish; then inspect
+actual/predicted reduction and a mixed-control directional derivative before
+more compute. See native_evidence/sensitivity_condition_9967_74.
 
 ## Fixed-Attachment Feasibility
 

@@ -6,7 +6,7 @@ Representation epic: [#10043](https://github.com/D-sorganization/UpstreamDrift/i
 
 ## Existing Infrastructure and Gaps
 
-`pose_interchange` is the canonical convention authority. Its existing canonical-v2 state supports a quaternion floating base but scalar internal joints. Existing Pinocchio, Drake and MuJoCo pose adapters do not by themselves replace native internal gimbal coordinates with quaternion joints. The native scalar golf models remain separate engine adapters with an explicit right-hand weld. An additional Pinocchio manifold builder now exists; MuJoCo and Drake alternate builders remain outstanding. Native specification `native_evidence/native_geometry_spec_9967.json` contains HipInputX/Y/Z after three translations and two shoulder XYZ triplets. Spine, scapula and wrist joints have only two rotations and must not become unconstrained spherical joints.
+`pose_interchange` is the canonical convention authority. Its existing canonical-v2 state supports a quaternion floating base but scalar internal joints. Existing Pinocchio, Drake and MuJoCo pose adapters do not by themselves replace native internal gimbal coordinates with quaternion joints. The native scalar golf models remain separate engine adapters with an explicit right-hand weld. An additional Pinocchio manifold builder exists. MuJoCo now has an opt-in spherical MJCF exporter with compiled frame/inertia parity; its dynamics adapter and the Drake alternate builder remain outstanding. Native specification `native_evidence/native_geometry_spec_9967.json` contains HipInputX/Y/Z after three translations and two shoulder XYZ triplets. Spine, scapula and wrist joints have only two rotations and must not become unconstrained spherical joints.
 
 Open issue [#8867](https://github.com/D-sorganization/UpstreamDrift/issues/8867) documents independent motion_pipeline and pose_interchange conventions. This work extends pose_interchange and reuses existing `se3` quaternion routines and `spatial_algebra.transforms.xtrans`; do not create another engine-specific convention stack. Migrating the existing motion_pipeline boundary remains separate work, requiring ownership coordination and parity tests.
 
@@ -147,6 +147,17 @@ qdd/primitive effort data. The inspected run72 archive has time, marker and stat
 Jacobians and primal marker positions; `state_jacobian` is not the primal state
 trajectory. Do not treat it as q/qd or fabricate qdd. Retrieve archived primal
 state or replay with the actual engine under a separately authorized bounded job.
+
+## MuJoCo Spherical Export Milestone
+
+The native_spherical_mjcf exporter reuses canonical geometry, scalar primitives
+and NativeJointStateAdapter inventory. Three eligible XYZ groups become ball
+joints; nq30/nv27. Five tests pass, including real MuJoCo3.3.4 compilation and
+three-sample body/site frame parity with unchanged masses, inertias and closure.
+This is an exporter/FK milestone. Tangent velocity, transformed efforts, rigid
+closure dynamics and trajectory parity are still unqualified. Continue from
+[MuJoCo Manifold Handoff](../mujoco_native_matching/MUJOCO_MANIFOLD_HANDOFF.md),
+not by recreating the scalar or spherical exporter.
 
 ## Next Bounded Tasks: Motion Consumers and Qualification
 
