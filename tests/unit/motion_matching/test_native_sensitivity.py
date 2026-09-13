@@ -84,6 +84,16 @@ def test_free_mass_matches_exact_sextic_force_response(
                 tuple(q), np.array([list(q.values())]), np.eye(3)[None]
             )
 
+    with pytest.raises(RuntimeError, match="evaluation budget.*1"):
+        replay_marker_sensitivities(
+            raw,
+            candidate,
+            np.array([0.0, 0.4, 0.8]),
+            model_factory=Mass,
+            max_step=0.02,
+            max_sensitivity_evaluations=1,
+        )
+
     result = replay_marker_sensitivities(
         raw,
         candidate,

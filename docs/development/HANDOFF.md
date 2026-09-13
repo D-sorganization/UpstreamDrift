@@ -8,13 +8,18 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpointaf8460cb9 is pushed with
-all normal hooks passing. SELF adds the tested in-memory motion-sequence API
-and final run62 evidence. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpoint9a136cef7 is pushed with
+all normal hooks passing. SELF adds terminal63/64 evidence and tested optional
+forward/sensitivity evaluation budgets. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
-## Latest Verified Result
+Latest cleanly returned exploratory fit: run62,0.85 s only, whole RMS28.635 mm
+and terminal66.713 mm. It is rejected, not a full-swing match. See
+[Candidate](simscape_tour_matching/native_evidence/regularized_fit_9967_62/returned-candidate.json)
+and [Measured Comparison](simscape_tour_matching/native_evidence/regularized_fit_9967_62/marker-comparison.png).
+
+## Representation Qualification
 
 Run58 is terminal (handle2605 exited0). Local-chart DOP853 on native spherical
 Pinocchio PASSES all existing parity gates over the run19 0.85-second fixture:
@@ -76,11 +81,14 @@ Run63 is terminal1 after77.672 s and three forward evaluations. The B4/B5/B6
 trial fails the unchanged sensitivity-primal marker agreement gate on its third
 candidate, hash e057a7e977cfe2a163fe4c5e7e5767c17d5025b4ef7f33166672afbf658c358d.
 There is no returned accepted candidate. First two Jacobians passed. Diagnostic64
-is authorized at this exact failing candidate using the existing sensitivity
-provider with rtol1e-12, atol1e-14 and max_step0.000125, unchanged agreement and
-closure gates. Inspect its actual process/receipt; do not restart optimization
-or weaken the gate. This diagnostic distinguishes numerical accuracy from fit
-quality at one fixed input. No further fitting is authorized by this checkpoint.
+PASSES at that exact candidate before its600 s wall budget: augmented solve
+409.086 s/1,222,535 evaluations, primal marker discrepancy8.9147861e-9 m against
+the unchanged1e-7 gate. Total launch466.239 s; diagnostic call/save419.190 s.
+The augmented settings were rtol1e-12/atol1e-14/max_step0.000125. The provider's
+independent primal remained rtol1e-11/atol1e-13; max_step applies to both. This
+supports an accuracy-dependent63 failure, not a derivative correctness or C3D
+acceptance claim. Cost is far above the default sensitivity calls. All jobs
+through64 are terminal; no optimizer or diagnostic remains active.
 Runtime61 remains immutable; the local list annotation changes typing only.
 
 The shared native motion sequence API is implemented and publicly exported.
@@ -89,6 +97,17 @@ and original per-sample references, reusing NativeJointStateAdapter. Root passes
 89 related tests. File I/O, UI and complete dynamic frame transport are next;
 this batch API does not qualify alternate MuJoCo/Drake dynamics. See dedicated
 REPRESENTATION_HANDOFF for runnable usage and the remaining ordered plan.
+
+## Reproducible Compute Limits
+
+`integrate_forward` and `integrate_sensitivities` now accept optional positive
+integer max_evaluations, checked before excess derivative/linearization calls.
+`replay_marker_sensitivities` exposes max_sensitivity_evaluations for the augmented
+solve only; its independent primal replay remains separate. DefaultsNone retain
+existing behavior. Seven new tests and native forwarding checks went RED/GREEN;
+27 related tests, Ruff and pinned mypy pass. This source update is NOT in immutable
+runtime61; qualify a new runtime before using it remotely. Budgets are not a
+numerical accuracy or wall-time guarantee. Exhaustion raises without partial data.
 
 ## Why Earlier Attempts Stalled
 
@@ -109,10 +128,18 @@ REPRESENTATION_HANDOFF for runnable usage and the remaining ordered plan.
 
 ## Ordered Next Work
 
-1. Inspect sensitivity diagnostic64 and its original process before selecting
-   another fit. Preserve63 failure and unchanged numerical/physical gates.
-   Runtime61 is qualified with96 tests; weights/scales are numerical objective
-   choices, not physical limits. max_nfev is not an RHS/time budget.
+1. Qualify a new runtime containing the tested call-budget API, then run one
+   fixed-candidate comparison at63's failing hash using original augmented
+   tolerances1e-10/1e-12, max_step0.000125 and a100000 sensitivity-call budget.
+   This isolates smaller step from64's expensive tolerance change. Keep both
+   numerical gates. If it cannot pass cheaply, stop optimizer retries and add
+   a manufactured physical-state accuracy test with added zero sensitivity
+   columns before changing adaptive error control. Current DOP853 uses one
+   error norm over54 states plus54\*81 sensitivities; adding parameters changes
+   the norm. Qualify blockwise control or a separate variational solve along
+   an accurate continuous primal trajectory, including directional derivatives.
+   Do not infer analytic Jacobian correctness merely from primal agreement.
+
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives
    before using the manifold variant in an optimizer. Preserve existing scalar API.

@@ -70,6 +70,7 @@ def replay_marker_sensitivities(
     rtol: float = 1e-10,
     atol: float = 1e-12,
     max_step: float = 0.00025,
+    max_sensitivity_evaluations: int | None = None,
 ) -> NativeMarkerSensitivityResult:
     """Integrate all selected native control columns with one initial state.
 
@@ -85,6 +86,8 @@ def replay_marker_sensitivities(
     not C3D fit acceptance. Geometry and initial state are fixed.
     basis_duration_s defaults to candidate coverage for compatibility. Supply
     the original basis duration when extending coverage without rebasing controls.
+    max_sensitivity_evaluations bounds augmented linearization calls only; the
+    independent primal replay is separate. Exhaustion raises without a Jacobian.
     """
     basis_duration = (
         candidate.document["duration_s"]
@@ -183,6 +186,7 @@ def replay_marker_sensitivities(
         lambda t, state: linearize(t + float(time_s[0]), state),
         parameters,
         initial_sensitivity=initial_jacobian,
+        max_evaluations=max_sensitivity_evaluations,
         rtol=rtol,
         atol=atol,
         max_step=max_step,
