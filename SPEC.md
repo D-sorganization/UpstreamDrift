@@ -4438,6 +4438,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-12 | #10020 | Optimize array magnitude calculations in joint_conventions.py and golf_trajectory.py using np.einsum (spec-exempt: micro-optimization) |
+| 2026-09-12 | #10011 | Optimize np.linalg.norm calculation in prefix_fit.py using np.einsum for RMS and Max calculations (spec-exempt: micro-optimization) |
 | 2026-09-12 | #10014 | Bolt optimization: Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum(...)) in bundle adjustment routines to bypass temporary allocations, resulting in a ~7% speedup for array diff operations. (spec-exempt: micro-optimization) |
 | 2026-09-12 | #10018 | Reconcile motion pipeline API advertised source formats and OpenAPI schemas with registered adapters, clarify format support documentation, register architecture budget exceptions, and pay down 156 unmarked test entries (#8875). |
 | 2026-09-12 | #10015 | Burn down 29 quarantined shared Python and physics engines tests in scripts/config/unit_gate_quarantine.json (#8766). |
