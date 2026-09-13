@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## DefusedXML in OpenSim OS-0 Runtime Audit (#10074)
+
+Mitigate Bandit B314 / B405 XML security findings in OpenSim OS-0 runtime audit:
+- Replace `xml.etree.ElementTree` with `defusedxml.ElementTree` in `docs/development/opensim_tour_matching/os0_runtime_audit.py`.
+- Ensure secure XML parsing for model XML inspection during OS-0 audit.
+- Keep UpstreamDrift `security-scans` quality gate green.
+
 ## Full-Body Model Specification Schema, Shared Contact Law, and Tour Capture Contract (#10063, #10064, #10003)
 
 Formalize full-body multibody model specifications, shared ground contact laws, and tour capture TRC/marker contracts across physics engines (OpenSim, MuJoCo, Pinocchio, Drake, Simscape):
