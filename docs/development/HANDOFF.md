@@ -1,5 +1,42 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Current Native Gimbal Failure — Next Path Constraint
+
+The feedback initializer reaches a native shoulder singularity at1.2379706 s.
+Run41 is TERMINAL, handle42983 exited1. Failure snapshot and independent mass
+matrix diagnostic are native-feedback-failure-9967-41.json and
+native-gimbal-failure-9967-41.json under native_evidence. LSInputY is
+-1.570796185 rad, only1.4165e-7 from -pi/2; minimum mass eigenvalue2.832e-16.
+The latest effort-response rank was1, versus21 initially. State remains finite.
+The export explicitly calls this Left Shoulder Joint/Gimbal Joint/Kinetically
+Driven with Rx/Ry/Rz primitives. Do not replace it with a quaternion joint while
+claiming the old native-equivalent dynamics or add unreviewed inertial padding.
+
+Run36's static path itself crosses this singularity: LSInputY -1.66287 at1.225 s
+and -1.48726 at1.25 s, from initial -1.92924. Better local marker fits therefore
+created a path that the native forward solver cannot safely traverse. NEXT:
+add tested numerical path bounds that retain the initial gimbal branch with
+an explicit singularity margin, regenerate the pose seed, and rerun the forward
+tracking initializer. These are optimization restrictions, not physical limits.
+Audit other native multi-rotation joints too. Retain all markers and report the
+tracking tradeoff; do not silently alter source topology or acceptance gates.
+
+New shared acceleration_effort allocator solves the actual constrained forward
+response a=a0+B\*u at the integrated state, reports unreachable acceleration,
+and leaves constraint reactions in the engine. Five tests went red then green;
+Ruff and mypy pass. No effort limits are enforced in this diagnostic initializer.
+Initial-state native check gave rank21, max effort658.76, and affine-response
+error1.893e-8. Original q0/qd0 are preserved and no intermediate reset is used.
+The driver run_native_feedback_initializer.py is designed to compare feedback,
+recorded cubic effort replay, and global sextic compression. Run41 failed before
+those output trajectories; do not claim any of them exist or match.
+
+Runtime /home/dieterolson/native-feedback-9967-39 is immutable; driver41 is
+C:/Users/diete/run_native_feedback_initializer_9967_41.py. Output directory is
+C:/Users/diete/native-feedback-initializer-9967-41. Run39 hit the same dynamics
+failure without a saved snapshot; run40 had a diagnostic-harness NameError,
+fixed in41. All are terminal. Full swing and cross-engine acceptance remain open.
+
 ## Current Run38 Rejection and Resume Decision
 
 Run38 is TERMINAL, handle40297 exited0. Independent final replay confirms
