@@ -82,6 +82,9 @@ the solver or relabeling provenance.
   reusing `NativeEffortProfile` actuator/frame mapping and Bernstein derivatives.
   Prefix and multiple-shooting fitters accept its checked analytic residual rows;
   numerical objective weights do not alter physical acceptance criteria.
+- `integrate_forward` / `integrate_sensitivities` — uninterrupted Euclidean
+  state and variational integration with optional actual-callback budgets;
+  exhaustion raises without returning a partial trajectory or Jacobian.
 - `validators.py`, `validate_theta.py` — DbC checks for inputs.
 - `metrics.py` — RMSE, peak-velocity match, etc.
 - `plot_trajectory_overlay.py`, `plot_error_timecourse.py`,

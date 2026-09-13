@@ -32,6 +32,7 @@ def integrate_sensitivities(
     rtol: float = 1e-9,
     atol: float = 1e-11,
     max_step: float = 0.001,
+    max_evaluations: int | None = None,
 ) -> ForwardSensitivityResult:
     """Integrate x'=f and S'=df/dx S + df/dp using shared forward integration.
 
@@ -39,6 +40,8 @@ def integrate_sensitivities(
     Engine adapters must supply constraint-consistent derivatives. Adaptive error
     control includes the augmented sensitivity variables; qualify primal replay
     accuracy and runtime before using the result as an optimizer Jacobian.
+    max_evaluations caps actual linearization callbacks through the shared
+    integrator, including rejected steps; exhaustion never returns partial data.
     """
     if (
         isinstance(parameter_count, bool)
@@ -80,6 +83,7 @@ def integrate_sensitivities(
         rtol=rtol,
         atol=atol,
         max_step=max_step,
+        max_evaluations=max_evaluations,
     )
     states = augmented.state[:, :n].copy()
     derivatives = augmented.state[:, n:].reshape((-1, n, parameter_count)).copy()

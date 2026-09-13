@@ -32,12 +32,15 @@ def integrate_forward(
     rtol: float = 1e-9,
     atol: float = 1e-11,
     max_step: float = 0.001,
+    max_evaluations: int | None = None,
 ) -> ContinuousForwardResult:
     """Integrate once from zero; return finite states at every requested time.
 
     The derivative receives absolute physical seconds and an internal trial
     state. It must return a finite vector of identical shape. Integration
     failure raises; partial trajectories are never returned as successful.
+    max_evaluations optionally caps actual derivative calls, including rejected
+    steps. Exhaustion raises before the next callback; it is not nonconvergence.
     """
     initial = np.array(initial_state, dtype=float, copy=True)
     clock = np.array(time, dtype=float, copy=True)
@@ -56,7 +59,21 @@ def integrate_forward(
             "Integration tolerances and max_step must be finite and positive"
         )
 
+    if max_evaluations is not None and (
+        isinstance(max_evaluations, bool)
+        or not isinstance(max_evaluations, int)
+        or max_evaluations <= 0
+    ):
+        raise ValueError("max_evaluations must be a positive integer or None")
+    evaluations = 0
+
     def checked_derivative(t: float, state: Array) -> Array:
+        nonlocal evaluations
+        if max_evaluations is not None and evaluations >= max_evaluations:
+            raise RuntimeError(
+                f"Forward evaluation budget exhausted ({max_evaluations})"
+            )
+        evaluations += 1
         value = np.asarray(derivative(t, state), dtype=float)
         if value.shape != initial.shape or not np.isfinite(value).all():
             raise ValueError(
