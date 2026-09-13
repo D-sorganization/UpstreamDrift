@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Full-Body Model Specification Schema, Shared Contact Law, and Tour Capture Contract (#10063, #10064, #10003)
+
+Formalize full-body multibody model specifications, shared ground contact laws, and tour capture TRC/marker contracts across physics engines (OpenSim, MuJoCo, Pinocchio, Drake, Simscape):
+- FB-1 Full-Body Specification Schema (`src/shared/python/motion_matching/full_body_spec.py`): Typed specifications for bodies, joints, contact attachments, and marker sets with Design-by-Contract validation, SPD inertia checks, topological tree ordering, Kabsch-based pelvis frame alignment, and byte-identical upper-body slice parity.
+- FB-2 Shared Ground Contact Law (`src/shared/python/motion_matching/contact_law.py`): Hunt-Crossley compliant normal contact with continuous cubic-spline transition and velocity-dependent dissipation, isotropic LuGre friction with dynamic bristle deflection and Stribeck velocity transitions, and engine parameter translation schemas.
+- OS-1..3 Tour Capture Contract and OpenSim Matching (`src/shared/python/motion_matching/tour_capture_contract.py`, `src/engines/physics_engines/opensim/python/tour_matching/`): Validated TRC motion capture parser, marker set and calibration schemas, and runtime matching adapters for OpenSim inverse kinematics and kinematics validation.
+
 ## Bandit Security Scan URL Open False Positive Audit (#9587)
 
 Audit and suppress Bandit false positive finding B310 in `scripts/post_spec_reminder.py`:
