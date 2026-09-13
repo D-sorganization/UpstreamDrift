@@ -267,7 +267,10 @@ class _Problem:
             diff = (px - self.obs.pixels[c]) * self.weights[c][..., None] / o.sigma_px
             out.append(np.nan_to_num(diff[self.mask[c]]).ravel())
         for s, (child, parent, _) in enumerate(self.segments):
-            seg = np.linalg.norm(joints[:, child] - joints[:, parent], axis=1)
+            diff = joints[:, child] - joints[:, parent]
+            seg = np.sqrt(
+                np.einsum("ij,ij->i", diff, diff)
+            )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
             out.append(self.seg_weights[:, s] * (seg - lengths[s]) / o.sigma_bone_m)
         out.append((lengths - self.prior) / o.sigma_prior_m)
         for a, b in self.sym:
@@ -354,7 +357,9 @@ class _Problem:
         rows, cols, vals, row = self._reprojection_blocks(cams, joints, x)
         for s, (child, parent, _) in enumerate(self.segments):
             d = joints[:, child] - joints[:, parent]
-            seg = np.maximum(np.linalg.norm(d, axis=1), 1e-9)
+            seg = np.maximum(
+                np.sqrt(np.einsum("ij,ij->i", d, d)), 1e-9
+            )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
             unit = d / seg[:, None] / o.sigma_bone_m
             for t_i in range(self.n_t):
                 sw = float(self.seg_weights[t_i, s])
@@ -478,7 +483,10 @@ def _segment_units(problem: _Problem, x: Array, options: BundleOptions) -> Array
     _, joints, lengths = problem.unpack(x)
     cols = []
     for s, (child, parent, _) in enumerate(problem.segments):
-        seg = np.linalg.norm(joints[:, child] - joints[:, parent], axis=1)
+        diff = joints[:, child] - joints[:, parent]
+        seg = np.sqrt(
+            np.einsum("ij,ij->i", diff, diff)
+        )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
         cols.append((seg - lengths[s]) / options.sigma_bone_m)
     return np.column_stack(cols)
 
