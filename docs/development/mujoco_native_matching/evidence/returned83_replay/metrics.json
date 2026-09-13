@@ -1,0 +1,12 @@
+{
+  "whole_rms_mm": 23.342583152150684,
+  "early_rms_mm": 10.761540226460319,
+  "terminal_rms_mm": 51.17455765530765,
+  "club_cluster_rms_mm": 30.030246289317997,
+  "pelvis_yaw_error_pct": 10.526133343072882,
+  "max_marker_diff_vs_pinocchio_mm": 8.154178665620293e-6,
+  "rms_marker_diff_vs_pinocchio_mm": 3.606342503958386e-7,
+  "closure_pose_max_abs": 9.680506766832735e-12,
+  "closure_velocity_max_abs": 2.6625512905553705e-10,
+  "elapsed_s": 6.741913800011389
+}
