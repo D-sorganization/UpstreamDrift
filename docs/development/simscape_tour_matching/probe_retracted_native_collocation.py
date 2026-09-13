@@ -77,7 +77,15 @@ def main() -> None:
     parser.add_argument("--candidate", type=Path)
     parser.add_argument("--payload", type=Path)
     parser.add_argument("--marker-scale-m", type=float, default=0.001)
+    parser.add_argument(
+        "--closure-scale",
+        type=float,
+        default=1.0,
+        help="Positive numerical residual scale, not an acceptance tolerance",
+    )
     args = parser.parse_args()
+    if not np.isfinite(args.closure_scale) or args.closure_scale <= 0:
+        raise ValueError("Closure scale must be finite and positive")
     tracking = args.candidate is not None
     if (
         tracking != (args.payload is not None)
@@ -241,7 +249,7 @@ def main() -> None:
             )
             result.extend(value.rate)
             result.extend(value.acceleration)
-        closure = np.asarray(result)
+        closure = np.asarray(result) / args.closure_scale
         return np.concatenate((closure, marker_terms(flat)[0])) if tracking else closure
 
     def jacobian(flat: np.ndarray) -> np.ndarray:
@@ -266,6 +274,7 @@ def main() -> None:
         closure = derivative.reshape(args.nodes * 12, args.nodes * dimension)[
             :, free_start:
         ]
+        closure = closure / args.closure_scale
         return np.vstack((closure, marker_terms(flat)[1])) if tracking else closure
 
     initial = np.zeros(variable_count)
@@ -282,7 +291,7 @@ def main() -> None:
     constraint: dict[str, object] = {"type": "eq", "fun": residual}
     if args.use_constraint_jacobian:
         constraint["jac"] = jacobian
-    initial_defect = residual(initial)
+    initial_defect = residual(initial)[: args.nodes * 12] * args.closure_scale
     started = perf_counter()
     if args.solver == "least-squares":
         result = least_squares(
@@ -311,7 +320,7 @@ def main() -> None:
     elapsed = perf_counter() - started
     chart_max = validate_chart_bounds(np.asarray(result.x), 0.01)
     values, _ = nodes(np.asarray(result.x))
-    defect = residual(np.asarray(result.x))[: args.nodes * 12]
+    defect = residual(np.asarray(result.x))[: args.nodes * 12] * args.closure_scale
     audit_times = np.linspace(times[0], times[-1], 20 * (args.nodes - 1) + 1)
     audit_spline = make_path_spline(times, values, initial_rate)
     audit_values = np.asarray(
@@ -328,6 +337,7 @@ def main() -> None:
         json.dumps(
             {
                 "nodes": args.nodes,
+                "closure_scale": args.closure_scale,
                 "marker_tracking": tracking,
                 "first_pose_fixed": tracking,
                 "initial_velocity_enforced": tracking,

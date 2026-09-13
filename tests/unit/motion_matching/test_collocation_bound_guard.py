@@ -9,6 +9,31 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("scale", ["0", "-1", "nan", "inf"])
+def test_invalid_closure_scale_fails_before_loading_model(
+    monkeypatch: pytest.MonkeyPatch, scale: str
+) -> None:
+    runner = Path(__file__).resolve().parents[3] / (
+        "docs/development/simscape_tour_matching/probe_retracted_native_collocation.py"
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            str(runner),
+            "--model",
+            "missing.json",
+            "--path",
+            "missing.json",
+            "--output",
+            "unused.json",
+            "--closure-scale",
+            scale,
+        ],
+    )
+    with pytest.raises(ValueError, match="Closure scale"):
+        runpy.run_path(str(runner))["main"]()
+
+
 def test_bound_guard_rejects_historical_infeasible_candidate() -> None:
     runner = Path(__file__).resolve().parents[3] / (
         "docs/development/simscape_tour_matching/probe_retracted_native_collocation.py"
