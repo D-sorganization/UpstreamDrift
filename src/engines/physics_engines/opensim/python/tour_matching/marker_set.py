@@ -11,7 +11,7 @@ guess them.
 from __future__ import annotations
 
 import math
-import xml.etree.ElementTree as ET  # nosec B405 - construction only; parsing is defused
+import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -41,7 +41,10 @@ def parse_model(osim_path: Path) -> ET.ElementTree:
 
 
 def _model(tree: ET.ElementTree) -> ET.Element:
-    model = tree.getroot().find("Model")
+    root = tree.getroot()
+    if root is None:
+        raise ValueError("Document has no root element")
+    model = root.find("Model")
     if model is None:
         raise ValueError("Document has no Model element")
     return model
@@ -89,8 +92,11 @@ def write_model(tree: ET.ElementTree, path: Path) -> Path:
     """Serialize the document with the upstream XML declaration; returns path."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    ET.indent(tree.getroot(), space="\t")
-    body = ET.tostring(tree.getroot(), encoding="utf-8", xml_declaration=False)
+    root = tree.getroot()
+    if root is None:
+        raise ValueError("Document has no root element")
+    ET.indent(root, space="\t")
+    body = ET.tostring(root, encoding="utf-8", xml_declaration=False)
     path.write_bytes(b'<?xml version="1.0" encoding="UTF-8" ?>\n' + body + b"\n")
     return path
 
