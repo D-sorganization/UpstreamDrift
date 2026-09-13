@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Bandit Security Scan URL Open False Positive Audit (#9587)
+
+Audit and suppress Bandit false positive finding B310 in `scripts/post_spec_reminder.py`:
+- Add `# nosec B310` annotation to `urllib.request.urlopen(request)` in `_request()`.
+- The target URL is strictly constructed by concatenating `_API_BASE = "https://api.github.com"` with internal API paths, ensuring only HTTPS requests to GitHub API can be made.
+- Satisfies whole-repository Bandit scan in `security-scans` CI job on push to `main`.
+
 ## MuJoCo FitResult Wall-Clock Duration Duck-Type Compatibility (#9921)
 
 Ensure cross-engine attribute compatibility for MuJoCo visualization and motion matching:
