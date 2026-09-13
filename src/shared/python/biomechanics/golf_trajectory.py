@@ -263,7 +263,9 @@ def angular_velocity(times: Array, rotations: Array) -> Array:
     if pairs.size:
         delta = rotations[pairs + 1] @ rotations[pairs].transpose(0, 2, 1)
         rv = Rotation.from_matrix(delta).as_rotvec()
-        rv[np.isclose(np.linalg.norm(rv, axis=1), np.pi, atol=1e-8)] = np.nan
+        rv[np.isclose(np.einsum("ij,ij->i", rv, rv), np.pi**2, atol=1e-8)] = (
+            np.nan
+        )  # ⚡ Bolt: np.einsum is faster than np.linalg.norm(..., axis=1)
         edges[pairs] = rv / np.diff(times)[pairs, None]
     result = np.full((n, 3), np.nan)
     for run in _runs(valid):
