@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching; native engine adapters; docs/development/simscape_tour_matching; docs/development/drake_native_matching; docs/development/native_parallel_performance
 - **Started:** 2026-09-11
-- **Last verified:** 2026-09-12 (SELF; run35 shared-provider fixed-pose calibration completed, four keypoint-offset provider tests pass. Heldout67.06 to62.42 mm but initial24.54 mm; calibration not adopted. Native topology audit was historical evidence, reconfirmed.)
+- **Last verified:** 2026-09-12 (SELF; optional pose Jacobians red then green, five tests and Ruff pass. Native four-pose derivative receipt37 closure-valid and converged; full static run36 final46.32 mm, no dynamic acceptance.)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
 - **Next step:** Audit completed full-capture static pose diagnostic 33: per-marker errors, active bounds and finer late-motion sampling, then resolve geometry versus dynamics before resuming forward multiple shooting. See current HANDOFF; old four-node next actions are historical.
 - **Intermediate verification:** SELF; six regression tests and Ruff pass. ControlTower 13-point objective gives 1.26002 mm marker RMS and 61-point acceleration closure 3.89145e-4, but normalized initial Jacobian discrepancy 0.0401994 is unqualified.

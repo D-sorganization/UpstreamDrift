@@ -24,6 +24,7 @@ def main() -> None:
     parser.add_argument("--payload", type=Path, required=True)
     parser.add_argument("--frames", type=int, nargs="+", required=True)
     parser.add_argument("--bound", type=float, required=True)
+    parser.add_argument("--use-derivatives", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.output.exists() or not np.isfinite(args.bound) or args.bound <= 0:
@@ -50,6 +51,18 @@ def main() -> None:
         candidate.document["marker_bodies"],
         np.asarray(candidate.document["marker_offsets_m"], dtype=float),
     )
+    def marker_jacobian(q: np.ndarray) -> np.ndarray:
+        return model.marker_derivatives(
+            dict(zip(names, q.tolist(), strict=True)),
+            candidate.document["marker_bodies"],
+            np.asarray(candidate.document["marker_offsets_m"], dtype=float),
+        ).dposition_dq
+
+    def closure_jacobian(q: np.ndarray) -> np.ndarray:
+        return model.closure_position_linearization(
+            dict(zip(names, q.tolist(), strict=True))
+        ).jacobian
+
     current = np.asarray(candidate.document["q0"], dtype=float)
     records = []
     for frame in args.frames:
@@ -62,6 +75,8 @@ def main() -> None:
             observed,
             oracle.forward,
             oracle.closure,
+            forward_jacobian=marker_jacobian if args.use_derivatives else None,
+            closure_jacobian=closure_jacobian if args.use_derivatives else None,
             max_iterations=100,
         )
         records.append(
@@ -88,6 +103,8 @@ def main() -> None:
                 "candidate_sha256": candidate.sha256,
                 "capture_sha256": payload["source_sha256"],
                 "coordinate_bound": args.bound,
+                "supplied_derivatives": args.use_derivatives,
+                "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 "records": records,
                 "scope": "Static closure-constrained poses only; not a smooth trajectory or dynamic fit.",
             },
