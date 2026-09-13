@@ -1,12 +1,13 @@
 # SPEC.md — Repository Specification Document
 
-## Native Simscape Tour-Matching 1.05s Downswing and 0.80s Transition Advancement (#9921)
+## Native Simscape Tour-Matching 1.15s Downswing Horizon and Impact Preparation (#9921)
 
 Advance continuous forward dynamics motion matching on the tour-average driver swing (`data/C3D_TA_Driver.c3d`, $T = 1.813889\text{ s}$, 654 frames @ 360 Hz) in Simscape Multibody R2025b (`GolfSwing3D_Kinetic.slx`):
+- 1.15s Downswing Horizon Candidate: Record `candidates/candidate_downswing_115s_locked_package.json` with degrees $k=0..3$ 100% frozen across all 27 native joint channels, achieving 11.27mm Gate 4 early retention ($[0, 0.60\text{ s}] \le 12.0\text{ mm}$, PASS), reducing pelvis yaw error from 159.94% to 38.05% ($-24.64^\circ$), and improving terminal marker RMSE to 465.20mm.
 - 1.05s Downswing Delivery Candidate: Record `candidates/candidate_downswing_105s_locked_package.json` with degrees $k=0..3$ 100% frozen across all 27 native joint channels, achieving 11.22mm Gate 4 early retention ($[0, 0.60\text{ s}] \le 12.0\text{ mm}$, PASS) and 8.44% pelvis yaw error at 1.05s.
-- 0.80s Transition Apex Candidate: Record `candidates/candidate_transition_conditioned_080s_package.json` and `candidates/candidate_transition_080s_diffstep_package.json`, passing Gate 4 (11.19mm $\le 12.0\text{ mm}$) and Gate 5 (1.03% to 2.21% pelvis yaw error $< 5.0\%$).
+- 1.233s Impact Continuation Preparation: Extract tour driver impact kinematics at $t=1.233\text{ s}$ (frame 444 @ 360 Hz), repair 1-frame optical occlusion on Marker_2:2 clubhead triad ($[1.5984, 0.3081, 1.8901]\text{ m}$), prove polynomial authority of $k=4, 5, 6$ activation scheme ($dB_6/dt = +0.481\text{ s}^{-1}$ terminal strike impulse), and pre-stage verified runner `scratch/run_impact_1233s_locked.py`.
 - Single Global Polynomial Basis & Defect Invariance: Enforce exactly one degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$ with 0.000000m defect norm across all candidate packages.
-- Turnover and Governance Sync: Document horizon continuation in `AGENT_HANDOFF.md` and record budget exception in `scripts/config/doc_size_budget.json`.
+- Turnover and Governance Sync: Document horizon continuation in `AGENT_HANDOFF.md` and maintain doc size and architecture budget compliance.
 
 ## Launcher UI, Process Manager, and Library Widget Unit-Gate Debt Burndown (#8766)
 
