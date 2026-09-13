@@ -22,6 +22,10 @@ from src.shared.python.motion_matching.prefix_fit import (
     PrefixFitOptions,
     fit_prefixes,
 )
+from src.shared.python.motion_matching.native_effort_profile import NativeEffortProfile
+from src.shared.python.motion_matching.native_effort_penalty import (
+    native_effort_penalty,
+)
 
 _SHAPING_FIRST_CONTROL = {"sixth": 6, "bernstein456": 4, "bernstein23456": 2}
 
@@ -62,7 +66,21 @@ def main() -> None:
     parser.add_argument("--amplitude-scale", type=float, default=10.0)
     parser.add_argument("--finite-difference-step", type=float, default=1e-3)
     parser.add_argument("--analytic-jacobian", action="store_true")
+    parser.add_argument("--effort-penalty-weight", type=float, default=0.0)
+    parser.add_argument("--force-penalty-scale", type=float, default=100.0)
+    parser.add_argument("--torque-penalty-scale", type=float, default=20.0)
     args = parser.parse_args()
+    if (
+        not np.isfinite(args.effort_penalty_weight)
+        or args.effort_penalty_weight < 0
+        or any(
+            not np.isfinite(s) or s <= 0
+            for s in (args.force_penalty_scale, args.torque_penalty_scale)
+        )
+    ):
+        raise ValueError(
+            "Require nonnegative effort penalty and positive numerical effort scales"
+        )
     args.output_dir.mkdir(exist_ok=False)
     raw = args.model.read_bytes()
     spec = json.loads(raw)
@@ -107,6 +125,12 @@ def main() -> None:
             raise ValueError("Restart exceeds original correction bounds")
         restart_hash = restart.sha256
     config = {
+        "effort_penalty_weight": args.effort_penalty_weight,
+        "effort_penalty_scales": {
+            "force_N": args.force_penalty_scale,
+            "torque_Nm": args.torque_penalty_scale,
+        },
+        "effort_penalty_kind": "weight times mean sum squared scaled total primitive efforts; numerical objective, not physical limits",
         "parent_candidate_sha256": base.sha256,
         "basis_duration_s": basis_duration,
         "powers": list(range(first_control, 7)),
@@ -134,6 +158,39 @@ def main() -> None:
         },
     }
     (args.output_dir / "config.json").write_text(json.dumps(config, indent=2))
+    penalty = None
+    if args.effort_penalty_weight > 0:
+        roots = [joint for joint in spec["joints"] if joint["parent"] == "world"]
+        if len(roots) != 1:
+            raise ValueError("Expected one native root for effort-frame mapping")
+        profile = NativeEffortProfile(
+            doc["coordinate_names"],
+            doc["coefficients"],
+            np.asarray(roots[0]["parent_to_base"])[:3, :3].T,
+        )
+        penalty = native_effort_penalty(
+            profile,
+            duration_s=basis_duration,
+            first_control=first_control,
+            effort_scales=np.r_[
+                np.full(3, args.force_penalty_scale),
+                np.full(n - 3, args.torque_penalty_scale),
+            ],
+            weight=args.effort_penalty_weight,
+        )
+
+    def effort_residual(x: np.ndarray) -> np.ndarray:
+        if penalty is None:
+            return np.zeros(0)
+        increments = np.zeros(penalty.matrix.shape[1])
+        increments[:parameter_count] = args.amplitude_scale * (x - 1)
+        return penalty.residual(increments)
+
+    def effort_jacobian(x: np.ndarray) -> np.ndarray:
+        if penalty is None:
+            raise ValueError("Missing effort penalty")
+        return penalty.matrix[:, :parameter_count] * args.amplitude_scale
+
     observed = np.isfinite(points).all(axis=2)
     early = observed & (clock[:, None] <= 0.6)
     club = np.array(
@@ -164,6 +221,8 @@ def main() -> None:
         terminal = float(np.sqrt(np.mean(error[-1, observed[-1]])))
         club_rms = float(np.sqrt(np.mean(error[-1, club & observed[-1]])))
         score = float(np.sum(error[observed]) + 100 * np.sum(error[-1, observed[-1]]))
+        effort_cost = float(effort_residual(x) @ effort_residual(x))
+        score += effort_cost
         evaluations += 1
         last = {
             "evaluation": evaluations,
@@ -173,6 +232,7 @@ def main() -> None:
             "terminal_rms_m": terminal,
             "club_cluster_rms_m": club_rms,
             "score": score,
+            "effort_penalty_cost": effort_cost,
             "integration_s": result.integration.elapsed_s,
             "parameters": x.tolist(),
             "near_bound_count": int(np.sum((x < 0.8001) | (x > 1.1999))),
@@ -232,6 +292,8 @@ def main() -> None:
         max_nfev=args.max_nfev,
         finite_difference_step=args.finite_difference_step,
         marker_jacobian=marker_jacobian if args.analytic_jacobian else None,
+        regularization=effort_residual if penalty is not None else None,
+        regularization_jacobian=effort_jacobian if penalty is not None else None,
         terminal_weight=10.0,
         acceptance_terminal_rmse_m=0.035,
         pelvis_indices=(
