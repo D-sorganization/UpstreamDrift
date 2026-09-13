@@ -1,0 +1,18 @@
+{
+  "scope": "Initial chart derivative audit only; no optimizer run",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "path_sha256": "decbdeb43d7695f96bf491ec69b47845b3c1f2c6fead2978bcd5198a7c0ecd4e",
+  "runner_sha256": "c390b3b758212a0fd95f09be451a5d9b576c810c8b469526871dc59412b67b91",
+  "closure_scale": 0.0001,
+  "chart_check_step": 1e-6,
+  "local_difference_step": 1e-6,
+  "closure_samples": 13,
+  "variables": 63,
+  "physical_closure_max_abs_error": [
+    6.860284331992357e-10, 1.039695900146853e-8, 4.0484299839590675e-6
+  ],
+  "physical_closure_reference_max_abs": [
+    0.003042354873192266, 0.300596305768508, 14.625636342486816
+  ],
+  "marker_max_abs_error_m": 1.0185274419427515e-9
+}

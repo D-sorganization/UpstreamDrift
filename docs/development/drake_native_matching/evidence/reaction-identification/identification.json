@@ -1,0 +1,22 @@
+{
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "runner_sha256": "4a2c1a2a20b31111082652683c4caa1778892e9e768145c6c5ad2e47cb18bea9",
+  "scope": "Loop reaction-eliminated global sextic identification feasibility only; no C3D optimization or identified-profile forward replay",
+  "state_closure_max_abs": 3.539479820346969e-11,
+  "acceleration_closure_max_abs": 1.3482632510442016e-9,
+  "samples": 81,
+  "controls": 189,
+  "basis": "Global Bernstein degree6 over0.8s; coordinate-major controls; exact shared native force map",
+  "rank_relative_cutoff": 1e-10,
+  "training_samples": 41,
+  "held_out_samples": 40,
+  "normalized_rank": 189,
+  "nullity": 0,
+  "normalized_singular_max": 2.5622722985330117,
+  "normalized_singular_min": 0.0004241850459991059,
+  "training_projected_max_abs": 6.845368716312805e-10,
+  "held_out_projected_max_abs": 4.6287595978355967e-10,
+  "held_out_acceleration_max_abs": 1.95856046047993e-7,
+  "held_out_acceleration_max_scaled": 4.192011167270277e-9,
+  "control_max_abs": 818.4875753286939
+}

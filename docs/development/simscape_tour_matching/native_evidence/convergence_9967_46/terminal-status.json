@@ -1,0 +1,8 @@
+{
+  "status": "interrupted-after-compute-budget-decision",
+  "exit_code": 1,
+  "signal": "SIGINT",
+  "process_absent": true,
+  "tight_result_available": false,
+  "convergence_conclusion": "not determined"
+}

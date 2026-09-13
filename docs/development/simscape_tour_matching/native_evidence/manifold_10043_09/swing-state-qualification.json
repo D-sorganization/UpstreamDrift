@@ -1,0 +1,66 @@
+{
+  "status": "passed",
+  "pinocchio_version": "4.1.0",
+  "specification_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "states_sha256": "c252735fe4546d15c60500ec22ba026bc864da50ed521d3d1f32ce63460a1f95",
+  "script_sha256": "51aa157d344ce4acaa63994497cc61c351b335e0330b08f6eca80378d949c03e",
+  "states_source": "/mnt/c/Users/diete/native-feedback-initializer-9967-45/feedback.npz",
+  "thresholds": {
+    "transform_abs": 1e-10,
+    "frame_velocity_abs": 1e-9,
+    "kinetic_energy_scaled": 1e-11,
+    "power_scaled": 1e-11,
+    "native_acceleration_atol": 2e-7,
+    "native_acceleration_rtol": 2e-8,
+    "closure_pose_abs": 1e-10,
+    "closure_rate_abs": 1e-9
+  },
+  "rows": [
+    {
+      "requested_time_s": 0.6,
+      "actual_time_s": 0.6,
+      "frame_index": 1728,
+      "max_transform_error": 5.551115123125783e-16,
+      "max_frame_velocity_error": 2.6645352591003757e-15,
+      "kinetic_energy_error_j": 0.0,
+      "power_error_w": 1.4210854715202004e-14,
+      "native_acceleration_max_error": 7.079976604984495e-10,
+      "native_acceleration_scaled_gate": 0.002935909038743618,
+      "closure_pose_error": 6.395335497877472e-16,
+      "closure_rate_error": 2.6645352591003757e-15,
+      "elapsed_seconds": 0.009906875027809292,
+      "passed": true
+    },
+    {
+      "requested_time_s": 0.9,
+      "actual_time_s": 0.9,
+      "frame_index": 2592,
+      "max_transform_error": 8.881784197001252e-16,
+      "max_frame_velocity_error": 6.8833827526759706e-15,
+      "kinetic_energy_error_j": 3.552713678800501e-15,
+      "power_error_w": 9.947598300641403e-14,
+      "native_acceleration_max_error": 2.395665887888754e-10,
+      "native_acceleration_scaled_gate": 0.0006366295763812799,
+      "closure_pose_error": 3.3238486572457426e-16,
+      "closure_rate_error": 6.217248937900877e-15,
+      "elapsed_seconds": 0.00801924301777035,
+      "passed": true
+    },
+    {
+      "requested_time_s": 1.3,
+      "actual_time_s": 1.3,
+      "frame_index": 3744,
+      "max_transform_error": 4.996003610813204e-16,
+      "max_frame_velocity_error": 1.4210854715202004e-14,
+      "kinetic_energy_error_j": 2.2737367544323206e-13,
+      "power_error_w": 3.637978807091713e-12,
+      "native_acceleration_max_error": 4.8789843276608735e-9,
+      "native_acceleration_scaled_gate": 0.002158511912222011,
+      "closure_pose_error": 5.273559367058351e-16,
+      "closure_rate_error": 3.552713678800501e-14,
+      "elapsed_seconds": 0.011977649002801627,
+      "passed": true
+    }
+  ],
+  "scope": "Pointwise saved feedback-state equivalence only; neither open-loop trajectory nor Simscape R2025b acceptance."
+}

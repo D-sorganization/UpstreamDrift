@@ -1,0 +1,24 @@
+{
+  "qualification": "Selected residual evaluations, not accepted optimizer iterates; independent primal replay, no fit modification",
+  "runner_sha256": "74b65f965837bdada309635127358d384aa9ad67f8d60489a296e7f7b8362deb",
+  "rows": [
+    {
+      "evaluation": 13,
+      "candidate_sha256": "33cd116b4db6ac5cb4c283f4cf58edb90c900da2367cc6b6d6b9c2ec34495631",
+      "snapshot_sha256": "31a08478360409ac775122afbca138d9e0a9b957894a70ec54dcd4b939958473",
+      "callback_cost": 12282.825624862213,
+      "whole_rms_m": 0.04698349429679837,
+      "terminal_rms_m": 0.20120299321196888,
+      "terminal_segmented_rms_m": 0.052525191163865656,
+      "terminal_pointwise_gap_m": 0.18973829666414138,
+      "defect_norms": {
+        "0.2": 3.854553499822224,
+        "0.4": 13.865036246640162,
+        "0.6": 55.064033437759974,
+        "0.7": 32.69500250659656,
+        "0.8": 89.21800375754773
+      },
+      "max_scaled_defect": 89.21800375754773
+    }
+  ]
+}

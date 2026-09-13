@@ -1,0 +1,136 @@
+{
+  "scope": "One Pinocchio replay pair; actual Drake world-expressed frame angular Jacobians; diagnostic only, no exact-restart or fit acceptance",
+  "source_candidate_sha256": "917d2d29b66bc2ab947a6ea75255c35e47134e6a2d51cde7e1e69847cad379f7",
+  "reconstructed_candidate_sha256": "c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "runner_sha256": "31e27b53429ba261eaa904efac9931fa0603ead4e35c0428332739cd99158aec",
+  "samples": 307,
+  "duration_s": 0.85,
+  "body_count": 14,
+  "all_body_max_vector_difference_rad_s": 1.4729028264478598e-5,
+  "per_body": [
+    {
+      "body": "world",
+      "time_of_max_difference_s": 0.0,
+      "max_vector_difference_rad_s": 0.0,
+      "reference_speed_at_max_rad_s": 0.0,
+      "relative_difference_at_max": null
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
+      "time_of_max_difference_s": 0.7944444444444444,
+      "max_vector_difference_rad_s": 5.75834331417072e-7,
+      "reference_speed_at_max_rad_s": 7.224467744469755,
+      "relative_difference_at_max": 7.970612532083992e-8
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
+      "time_of_max_difference_s": 0.7944444444444444,
+      "max_vector_difference_rad_s": 5.758474443613175e-7,
+      "reference_speed_at_max_rad_s": 7.224467744444758,
+      "relative_difference_at_max": 7.970794039520965e-8
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "time_of_max_difference_s": 0.85,
+      "max_vector_difference_rad_s": 2.7061493378937468e-6,
+      "reference_speed_at_max_rad_s": 11.05219455849724,
+      "relative_difference_at_max": 2.4485176437770747e-7
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+      "time_of_max_difference_s": 0.85,
+      "max_vector_difference_rad_s": 3.5294778653026304e-6,
+      "reference_speed_at_max_rad_s": 12.695922940483955,
+      "relative_difference_at_max": 2.780008890923601e-7
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase",
+      "time_of_max_difference_s": 0.8444444444444444,
+      "max_vector_difference_rad_s": 4.374133461019086e-6,
+      "reference_speed_at_max_rad_s": 12.421442190445347,
+      "relative_difference_at_max": 3.52143768328584e-7
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/HubtoLS",
+      "time_of_max_difference_s": 0.85,
+      "max_vector_difference_rad_s": 1.7281364287473952e-6,
+      "reference_speed_at_max_rad_s": 12.28201335910369,
+      "relative_difference_at_max": 1.4070465307436452e-7
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
+      "time_of_max_difference_s": 0.85,
+      "max_vector_difference_rad_s": 1.3496083611846895e-6,
+      "reference_speed_at_max_rad_s": 13.22996039549473,
+      "relative_difference_at_max": 1.0201151937267166e-7
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+      "time_of_max_difference_s": 0.7861111111111111,
+      "max_vector_difference_rad_s": 1.4729028264478598e-5,
+      "reference_speed_at_max_rad_s": 52.925171231425004,
+      "relative_difference_at_max": 2.7829911404675904e-7
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid",
+      "time_of_max_difference_s": 0.7861111111111111,
+      "max_vector_difference_rad_s": 1.4686549759727957e-5,
+      "reference_speed_at_max_rad_s": 51.56748856070991,
+      "relative_difference_at_max": 2.8480250191819253e-7
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm",
+      "time_of_max_difference_s": 0.7861111111111111,
+      "max_vector_difference_rad_s": 1.6320202499850657e-6,
+      "reference_speed_at_max_rad_s": 9.770350281907426,
+      "relative_difference_at_max": 1.6703804908685966e-7
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/RUpperArm",
+      "time_of_max_difference_s": 0.85,
+      "max_vector_difference_rad_s": 5.28698501209488e-7,
+      "reference_speed_at_max_rad_s": 5.506388046828019,
+      "relative_difference_at_max": 9.60154817846605e-8
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
+      "time_of_max_difference_s": 0.85,
+      "max_vector_difference_rad_s": 4.637724741838802e-7,
+      "reference_speed_at_max_rad_s": 5.520118866352173,
+      "relative_difference_at_max": 8.401494341196173e-8
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
+      "time_of_max_difference_s": 0.7944444444444444,
+      "max_vector_difference_rad_s": 2.9094151368460895e-7,
+      "reference_speed_at_max_rad_s": 8.604363343773784,
+      "relative_difference_at_max": 3.381325288815675e-8
+    }
+  ],
+  "shoulder_relative": {
+    "definition": "omega_child_world minus omega_parent_world, both expressed in world",
+    "max_vector_difference_rad_s": 1.4813939722103533e-5,
+    "time_s": 0.7861111111111111,
+    "reference_angular_speed_rad_s": 52.77318665323628,
+    "relative_difference": 2.8070959253310653e-7,
+    "source_vector_rad_s": [
+      0.2173708349633081, -52.708788926927404, -2.5972195352026626
+    ],
+    "reconstructed_vector_rad_s": [
+      0.2173732643670525, -52.70877432898969, -2.5972202067844092
+    ]
+  },
+  "scalar_rate_peak": {
+    "coordinate": "LSInputX",
+    "time_s": 0.7861111111111111,
+    "max_abs_difference": 0.0003314085161036928,
+    "source_rate": 400.4467110356153,
+    "reconstructed_rate": 400.4463796270992
+  },
+  "q_max_abs_difference": 3.5590550284680944e-7,
+  "observed_marker_max_vector_difference_m": 6.933573426383695e-8,
+  "initial_states_identical": true,
+  "full_state_restart_gate_passed": false,
+  "state_rate_gate": 0.0001
+}

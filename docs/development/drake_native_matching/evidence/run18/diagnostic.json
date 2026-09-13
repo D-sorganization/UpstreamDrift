@@ -1,0 +1,46 @@
+{
+  "runner_sha256": "405997c4b55a9e882403be15b827c88747ffdf4674ae2e0ab2261ce18f95977e",
+  "scope": "Rate discrepancy location and raw coordinate mass conditioning; no gate relaxation",
+  "cases": [
+    {
+      "label": "01",
+      "peak": {
+        "t_s": 0.7861111111111111,
+        "coordinate": "LSInputX",
+        "pin_qd": 400.4467110356153,
+        "drake_qd": 400.44685703773814,
+        "absolute_rate_difference": 0.00014600212284676672,
+        "relative_rate_difference": 3.64598132093989e-7,
+        "mass_eigenvalue_min": 1.3842122364548852e-6,
+        "mass_eigenvalue_max": 91.98919090573297,
+        "mass_condition_number": 66455987.37179715,
+        "units_note": "Raw native generalized-coordinate mass condition is unit-dependent, not a physical instability certificate"
+      }
+    },
+    {
+      "label": "02",
+      "peak": {
+        "t_s": 0.7861111111111111,
+        "coordinate": "LSInputX",
+        "pin_qd": 400.4470432905481,
+        "drake_qd": 400.4467139041229,
+        "absolute_rate_difference": 0.0003293864252214007,
+        "relative_rate_difference": 8.225467780078259e-7,
+        "mass_eigenvalue_min": 1.3842122305287511e-6,
+        "mass_eigenvalue_max": 91.98919088439933,
+        "mass_condition_number": 66455987.64089851,
+        "units_note": "Raw native generalized-coordinate mass condition is unit-dependent, not a physical instability certificate"
+      }
+    }
+  ],
+  "pin_coarse_fine": {
+    "q_max_abs": 3.473403829001853e-7,
+    "qd_max_abs": 0.0003322549328004243,
+    "marker_max_distance_m": 6.757340160065948e-8
+  },
+  "drake_coarse_fine": {
+    "q_max_abs": 1.8109029631396822e-7,
+    "qd_max_abs": 0.00014313361526774315,
+    "marker_max_distance_m": 3.563100251554113e-8
+  }
+}

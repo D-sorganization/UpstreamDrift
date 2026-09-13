@@ -3,9 +3,64 @@
 ## Executor Implementation Checkpoint
 
 The optional engine-neutral executor is now implemented in
-`src/shared/python/motion_matching/native_window_executor.py`. **It is not wired
-into the solver.** No runtime19/runtime20 or sensitivity source was changed,
-and no optimizer was launched. The root agent owns subsequent solver integration.
+`src/shared/python/motion_matching/native_window_executor.py`. The shared
+multiple-shooting solver now exposes an optional `segmented_forward_batch`
+boundary. It receives only ordered cache misses and returns results in that
+order; parent-owned cache, residual/defect assembly, analytic Jacobians and the
+sequential default remain unchanged. The worker-side transport now lives in
+`native_sensitivity_batch.py`: private runner-created payloads reconstruct and
+validate the model/candidate in every spawned worker, then return primal markers,
+endpoint state and sensitivity arrays. A native driver has not yet bound this
+seam to a persistent executor, so this is not a native solver qualification or a
+fit speed claim. No runtime19/runtime20 or sensitivity source was changed, and
+no optimizer was launched.
+
+## Trusted Worker Fixed-Input Qualification
+
+`qualify_native_worker.py` ran once in a fresh isolated ControlTower runtime
+`/home/dieterolson/native-ms-pilot-9967-21`, copied from immutable runtime20
+before adding only the new worker and executor modules. It used the archived
+run19 initial candidate and input array receipt
+`07f594daf3d7059167785c6c0cbb6edc5f048e5067e0109fdc924048db98358d`.
+No optimizer, model, existing runtime, or prior output was modified.
+
+Sequential execution took21.12844s; one two-worker batch including startup,
+IPC and shutdown took11.14284s. Every one of six windows matched both the new
+sequential worker result and archived sequential result exactly for markers,
+full states, marker Jacobians and state Jacobians. The readable receipt is
+`executor-worker-report.json`; the exact runner/source/report bytes are in
+`raw-worker-qualification.zip`. This qualifies trusted worker transport and
+full raw sensitivity output only. It does not yet qualify
+`fit_multiple_shooting` residual/constraint assembly with this executor,
+repeated solver cache behavior, or a whole-fit speedup.
+
+`NativeSensitivityBatchAdapter` is now the parent-side production binding. The
+native driver supplies its existing candidate/tangent-aware request factory and
+one persistent `NativeWindowExecutor`; the adapter serializes only cache-miss
+windows and returns ordered `(markers, endpoint_state)` pairs required by the
+shared solver. A focused test proves ordered solver-array output. This preserves
+driver ownership of node retraction and makes worker lifecycle explicit. The
+fixed-input full solver gate is now complete. A guarded copy of immutable run20
+driver source ran with workers=0 and workers=2 in the isolated ControlTower
+runtime `native-ms-pilot-9967-21`. Both used the same 0.85 s horizon, six
+shooting windows, one SLSQP iteration and two function evaluations. Every
+artifact was byte-identical except `windows.jsonl` timing fields; the remaining
+window records, both residual snapshots, constraints, returned nodes and returned
+candidate were exact. The shared returned candidate is
+`dbfcc0f748cacdd11515f1478ad4a9ae72609594519fb1c752d24aee7ece9d60`.
+The reproducible receipt is
+`batched-solver-qualification-9967-24.json`; its raw outputs remain at the two
+recorded ControlTower paths. The generator creates a guarded main entry point,
+which is required for safe spawned workers. This qualifies one short assembled
+solver receipt only; it makes no whole-fit speed, convergence, acceptance or
+swing-match claim. The next gate is a separately recorded bounded fit only after
+the smooth closure-feasible transition initializer is selected.
+
+`tests/unit/motion_matching/test_prepare_batched_solver_driver.py` locks the
+generator contract: it must move all driver actions inside a spawn-safe main
+entry point, preserve the callback counter as a `nonlocal`, add the explicit
+worker option and produce syntactically valid Python. The test uses a minimal
+anchored fixture, so it verifies the transformation without running physics.
 
 Discovery found a per-call `ProcessPoolExecutor` in
 `src/shared/python/sidekick/process_calculators/multi_param_analysis.py`, tied to

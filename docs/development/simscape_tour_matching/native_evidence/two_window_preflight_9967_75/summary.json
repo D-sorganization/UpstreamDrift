@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "exit_code": 0,
+  "archive_sha256": "56d6e76b03291db562656c6b3f98e7c2e35b158f863e2fa22eea9a5e5a75a09b",
+  "output_hashes": {
+    "comparison.npz": "8a80cf65a69b3de7f5998d3c39d491fa58c6df3d4096ef9df584bf2ad69ff015",
+    "node-chart.npz": "678e479b5c577fd934e7ec8b2fcaeffee138bad30ca4ec8c6efb49934135f511",
+    "receipt.json": "65be6aea7cc0e682be007a8e2e5dd5e2ff8abd062d639dff47e0e82c6313a137",
+    "window-0.npz": "9eb64d08e9355030c69e10259493d9a9231a19ba79d342f7bcdac2299cfde2f0",
+    "window-1.npz": "5ae9290bb450553d252e811976c7f92fa07fd378131486c3a43c95dbd96fa267"
+  },
+  "launch": {
+    "command": [
+      "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+      "/mnt/c/Users/diete/two_window_preflight_75.py",
+      "--model",
+      "/mnt/c/Users/diete/native_geometry_spec_9967.json",
+      "--candidate",
+      "/mnt/c/Users/diete/native-regularized-fit-9967-73/returned-candidate.json",
+      "--samples",
+      "/mnt/c/Users/diete/native-regularized-fit-9967-73/evidence-replay/sampled-markers-state.npz",
+      "--source_summary",
+      "/mnt/c/Users/diete/regularized-fit-summary-73.json",
+      "--target",
+      "/mnt/c/Users/diete/driver_marker_payload_9967.json",
+      "--output",
+      "/mnt/c/Users/diete/native-two-window-preflight-9967-75",
+      "--runtime",
+      "/home/dieterolson/native-regularized-fit-9967-73"
+    ],
+    "environment": {
+      "PYTHONPATH": "/home/dieterolson/native-regularized-fit-9967-73",
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    },
+    "status": "terminal",
+    "start_time": 1789278138.9784963,
+    "pid": 2916272,
+    "exit_code": 0,
+    "elapsed_s": 24.873596668243408
+  }
+}
