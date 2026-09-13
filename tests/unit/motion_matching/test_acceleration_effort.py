@@ -45,3 +45,43 @@ def test_rejects_invalid_scales(bad_scale: float) -> None:
             acceleration_scales=np.array([bad_scale]),
             effort_scales=np.ones(1),
         )
+
+
+def test_effort_penalty_trades_tracking_error_without_inventing_response_rank() -> None:
+    result = allocate_acceleration_effort(
+        np.diag([2.0, 0.0]),
+        np.zeros(2),
+        np.array([4.0, 3.0]),
+        acceleration_scales=np.ones(2),
+        effort_scales=np.ones(2),
+        effort_regularization=4.0,
+    )
+    np.testing.assert_allclose(result.effort, [1.0, 0.0])
+    np.testing.assert_allclose(result.acceleration_error, [-2.0, -3.0])
+    assert result.response_rank == 1
+
+
+def test_effort_penalty_respects_declared_scaling() -> None:
+    # min ((2*u-4)/2)^2 + (u/2)^2 gives u=1.6.
+    result = allocate_acceleration_effort(
+        np.array([[2.0]]),
+        np.zeros(1),
+        np.array([4.0]),
+        acceleration_scales=np.array([2.0]),
+        effort_scales=np.array([2.0]),
+        effort_regularization=1.0,
+    )
+    np.testing.assert_allclose(result.effort, [1.6])
+
+
+@pytest.mark.parametrize("penalty", [-1.0, float("nan"), float("inf")])
+def test_rejects_invalid_effort_regularization(penalty: float) -> None:
+    with pytest.raises(ValueError, match="regularization"):
+        allocate_acceleration_effort(
+            np.eye(1),
+            np.zeros(1),
+            np.ones(1),
+            acceleration_scales=np.ones(1),
+            effort_scales=np.ones(1),
+            effort_regularization=penalty,
+        )

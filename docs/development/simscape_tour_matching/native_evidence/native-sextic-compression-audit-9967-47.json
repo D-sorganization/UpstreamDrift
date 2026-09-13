@@ -1,0 +1,141 @@
+{
+  "scope": "Unweighted sixth-degree least squares of run45 primitive effort samples; approximation error, not trajectory acceptance",
+  "time_domain_s": [0.0, 1.8138888888888889],
+  "rows": [
+    {
+      "coordinate": "TranslationInputX",
+      "relative_l2_effort_error": 0.9950803161791253,
+      "rms_effort_error": 503.77003852306274
+    },
+    {
+      "coordinate": "TranslationInputY",
+      "relative_l2_effort_error": 0.8224507976494221,
+      "rms_effort_error": 542.5264928000639
+    },
+    {
+      "coordinate": "TranslationInputZ",
+      "relative_l2_effort_error": 0.6529659672788073,
+      "rms_effort_error": 573.7246552477425
+    },
+    {
+      "coordinate": "HipInputX",
+      "relative_l2_effort_error": 0.9659516968698042,
+      "rms_effort_error": 319.53251273053223
+    },
+    {
+      "coordinate": "HipInputY",
+      "relative_l2_effort_error": 0.8854453040269903,
+      "rms_effort_error": 323.35940077061395
+    },
+    {
+      "coordinate": "HipInputZ",
+      "relative_l2_effort_error": 0.8916360725232145,
+      "rms_effort_error": 163.6721706006951
+    },
+    {
+      "coordinate": "SpineInputX",
+      "relative_l2_effort_error": 0.8623579469231427,
+      "rms_effort_error": 124.39455664741723
+    },
+    {
+      "coordinate": "SpineInputY",
+      "relative_l2_effort_error": 0.9493479600962045,
+      "rms_effort_error": 196.29237294165145
+    },
+    {
+      "coordinate": "TorsoInput",
+      "relative_l2_effort_error": 0.8955836344902853,
+      "rms_effort_error": 163.19732311696305
+    },
+    {
+      "coordinate": "LEInput",
+      "relative_l2_effort_error": 0.9547839555085642,
+      "rms_effort_error": 20.851289186028445
+    },
+    {
+      "coordinate": "LFInput",
+      "relative_l2_effort_error": 0.9196506064773554,
+      "rms_effort_error": 18.970030654719515
+    },
+    {
+      "coordinate": "LScapInputX",
+      "relative_l2_effort_error": 0.8715003884873174,
+      "rms_effort_error": 48.24189943118117
+    },
+    {
+      "coordinate": "LScapInputY",
+      "relative_l2_effort_error": 0.8957782604852507,
+      "rms_effort_error": 43.507658840872736
+    },
+    {
+      "coordinate": "LSInputX",
+      "relative_l2_effort_error": 0.8789555473996697,
+      "rms_effort_error": 18.900609101560384
+    },
+    {
+      "coordinate": "LSInputY",
+      "relative_l2_effort_error": 0.8671514773231153,
+      "rms_effort_error": 18.189236264656106
+    },
+    {
+      "coordinate": "LSInputZ",
+      "relative_l2_effort_error": 0.8738495113290481,
+      "rms_effort_error": 18.680915672462458
+    },
+    {
+      "coordinate": "LWInputX",
+      "relative_l2_effort_error": 0.9706877100837636,
+      "rms_effort_error": 17.096989963288753
+    },
+    {
+      "coordinate": "LWInputY",
+      "relative_l2_effort_error": 0.8768078008350003,
+      "rms_effort_error": 6.345876265776154
+    },
+    {
+      "coordinate": "REInput",
+      "relative_l2_effort_error": 0.8744410340042814,
+      "rms_effort_error": 17.109947118979278
+    },
+    {
+      "coordinate": "RFInput",
+      "relative_l2_effort_error": 0.9197004284242919,
+      "rms_effort_error": 10.784044365883398
+    },
+    {
+      "coordinate": "RScapInputX",
+      "relative_l2_effort_error": 0.9287999910317853,
+      "rms_effort_error": 66.60862365568217
+    },
+    {
+      "coordinate": "RScapInputY",
+      "relative_l2_effort_error": 0.8863060491638987,
+      "rms_effort_error": 38.57647621493621
+    },
+    {
+      "coordinate": "RSInputX",
+      "relative_l2_effort_error": 0.9178187311387701,
+      "rms_effort_error": 20.897259808531334
+    },
+    {
+      "coordinate": "RSInputY",
+      "relative_l2_effort_error": 0.8718963941410037,
+      "rms_effort_error": 18.427353340010395
+    },
+    {
+      "coordinate": "RSInputZ",
+      "relative_l2_effort_error": 0.7367726407499883,
+      "rms_effort_error": 13.174483488871973
+    },
+    {
+      "coordinate": "RWInputX",
+      "relative_l2_effort_error": 0.8970322372845944,
+      "rms_effort_error": 23.64098919612259
+    },
+    {
+      "coordinate": "RWInputY",
+      "relative_l2_effort_error": 0.8797917955933068,
+      "rms_effort_error": 6.8603300232140345
+    }
+  ]
+}

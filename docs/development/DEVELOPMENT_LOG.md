@@ -1,5 +1,14 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Effort-Regularized Native Forward Initializer
+
+Added optional rank-preserving effort regularization with TDD (five new red tests,
+all10 allocator tests now pass), Ruff and mypy. Run47 full feedback RMS45.514 mm
+reduces peak sampled force to3292 N and torque to1288 Nm; no open-loop claim.
+Archived exact inputs and outputs. Measured poor global sextic approximation of
+run45 efforts and recorded requirement to optimize trajectory and controls jointly.
+Run46 strict comparison remains live. Parallel native manifold builder underway.
+
 ## 2026-09-12 -- Time-Only Replay Sensitivity Audit
 
 Measured run45 first divergence and launched fixed-input run46 tolerance pair

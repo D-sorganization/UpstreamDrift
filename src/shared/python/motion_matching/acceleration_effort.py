@@ -24,8 +24,15 @@ def allocate_acceleration_effort(
     acceleration_scales: Array,
     effort_scales: Array,
     rcond: float = 1e-8,
+    effort_regularization: float = 0.0,
 ) -> AccelerationEffortResult:
     """Minimize scaled acceleration error, then scaled effort norm.
+
+    With positive effort_regularization lambda, minimize squared scaled
+    acceleration error plus lambda times squared scaled effort norm, retaining
+    the same rcond-truncated response subspace. The reported rank remains the
+    physical response rank, not the rank of an augmented least-squares system.
+    Zero preserves the original lexicographic allocation.
 
     The engine supplies a0 and B from its constrained forward dynamics at the
     CURRENT state, so a=a0+B*u retains constraint reactions. This does not
@@ -61,10 +68,19 @@ def allocate_acceleration_effort(
         raise ValueError(
             "Finite data, positive scales and a relative rank cutoff are required"
         )
+    if not np.isfinite(effort_regularization) or effort_regularization < 0:
+        raise ValueError("Effort regularization must be finite and nonnegative")
     scaled = matrix * controls[None, :] / scales[:, None]
-    normalized, _, rank, _ = np.linalg.lstsq(
-        scaled, (desired - free) / scales, rcond=rcond
-    )
+    target = (desired - free) / scales
+    if effort_regularization == 0:
+        normalized, _, rank, _ = np.linalg.lstsq(scaled, target, rcond=rcond)
+    else:
+        left, singular, right = np.linalg.svd(scaled, full_matrices=False)
+        retained = singular > rcond * singular[0]
+        rank = int(np.count_nonzero(retained))
+        values = singular[retained]
+        weights = values / (values**2 + effort_regularization)
+        normalized = right[retained].T @ (weights * (left[:, retained].T @ target))
     effort = normalized * controls
     achieved = free + matrix @ effort
     error = achieved - desired
