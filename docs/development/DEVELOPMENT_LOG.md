@@ -17,6 +17,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10003 · OpenSim Tour-Average Full-Body Matching
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10003 (parent #9921; sibling full-body epic #10062)
+- **Branch:** docs/10003-opensim-matching-epic
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching; src/shared/python/motion_matching/tour_capture_contract.py; tests/opensim; docs/development/opensim_tour_matching
+- **Started:** 2026-09-12
+- **Last verified:** 2026-09-13 (SELF; 17 unit tests in tests/opensim pass locally with Ruff; OpenSim 4.6 runtime qualified on ControlTower; OS-3 IK on 33 frames reaches 6.5 cm marker RMS, unscaled model)
+- **Summary:** Frozen capture contract, marker-to-body map, TRC export verified by OpenSim, MarkerSet authoring with coordinate unlocking, and alternating placement/IK calibration are implemented test-first; runtime qualified; OS-3 kinematic feasibility measured. Moco tracking and sextic effort fitting not started.
+- **Next step:** Execute OS-2b/OS-3b from docs/development/opensim_tour_matching/NEXT_AGENT_PROMPT.md: golf model variant in the builder (unlocks, clamp ranges, club length), segment scaling, keep-best iteration, full 654-frame IK with per-frame RMS and overlay.
+- **Evidence:** docs/development/opensim_tour_matching/HANDOFF.md and evidence/os1_trc_receipt.json, os2_runtime_receipt.json, os3_stride20/, os3_unlocked_stride20/.
+
+### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
+
+- **State:** proposed
+- **Owner:** claude
+- **Issue:** #10062 (children #10063 to #10070)
+- **Branch:** docs/10003-opensim-matching-epic (design only; implementation branches per child)
+- **PR:** not created
+- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/tour_capture_contract.py
+- **Started:** 2026-09-13
+- **Last verified:** 2026-09-13 (SELF; design document and eight child issues filed; shared capture contract tested)
+- **Summary:** MuJoCo, Drake and Pinocchio gain separate full-body model specifications with lower limbs and a shared rigid-ground contact law, matched to the 38-marker capture; upper-body qualified models and Simscape parity stay untouched.
+- **Next step:** Implement FB-1 (#10063): full-body spec schema and validator with the slice-identity test against native_geometry_spec_9967.json.
+- **Evidence:** docs/development/full_body_models/EPIC_FULL_BODY_CONTACT.md.
+
 ### DL-#1616 · Mermaid C4 Architecture Maps
 
 - **State:** in_progress
