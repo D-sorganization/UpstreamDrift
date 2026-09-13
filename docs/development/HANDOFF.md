@@ -1,6 +1,45 @@
 # Native Multi-Engine Matching Checkpoint
 
-## Current Bound-Audit Correction (SELF)
+## Current Recovery Action — Full-Capture Static Diagnostic
+
+This section supersedes all earlier next-action, pause, and live-job statements
+for issue #9967. The goal remains active; MATLAB R2025b is required.
+The review found that recent four-node experiments optimize closure/markers,
+not torque-driven forward tracking. Do not extend that diagnostic sequence by
+default. Run20 remains rejected; no accepted full-swing candidate exists.
+
+A new read-only-model experiment uses the existing fit_native_marker_pose_sequence.py
+on ControlTower / ControlTower-Runner, runtime native-ms-pilot-9967-25, with
+run19 candidate, native_geometry_spec_9967.json, driver_marker_payload_9967.json,
+coordinate bound 0.15 and frames 0,18,...,648,653 (full 1.8138888889 s).
+Remote script: C:/Users/diete/fit_native_marker_pose_sequence_9967_33.py.
+Remote output: C:/Users/diete/native-full-pose-sequence-9967-33.json.
+Execution handle 47424 exited 0. Receipt archived locally at
+simscape_tour_matching/native_evidence/native-full-pose-sequence-9967-33.json.
+All 38 sampled poses satisfy closure (maximum 1.614e-11); one solve at 0.1 s
+reaches its iteration limit. Marker RMS: 20.91 mm at 0.6 s, 28.15 mm at 0.7 s,
+36.14 mm at 0.85 s, 44.08 mm at 1.2 s, 304.91 mm at 1.3 s, and 144.01 mm
+at the final frame. This is not a dynamic match. The late spike may reflect
+local movement bounds and sampling during rapid motion. Compare finer steps
+and inspect active bounds before attributing it to geometry. Differences from
+the historical fine receipt also require source/runtime comparison; do not
+claim exact reproduction merely because input model identities match.
+
+Next: independently recompute per-marker errors, identify
+transition/body/club contributors and compare against prior 0.85 s static evidence.
+Treat this as a local geometric diagnostic, not a global lower bound or a forward
+match. If geometry is adequate, return to constrained forward multiple shooting
+with a flexible continuous torque initializer and compare against global sextic
+inputs on identical horizons. If geometry is inadequate, investigate attachments
+and lengths before increasing torque budgets. Final acceptance requires one
+uninterrupted forward replay, then identical-input engine comparisons.
+
+Audits 32a/32b already exist locally. At chart/local steps 3e-6 the physical
+acceleration-Jacobian discrepancy is 1.5353e-6 versus reference maximum 14.6256;
+marker derivative discrepancy is 3.0523e-10 m. These initial-point checks weaken
+the prior scaled-error concern but do not qualify an entire fitted trajectory.
+
+## Historical Bound-Audit Corrections
 
 Latest intermediate-sample experiment SELF: retracted_tracking_9967_31.json
 optimizes all three closure levels at 13 times, audits 61 times, and preserves

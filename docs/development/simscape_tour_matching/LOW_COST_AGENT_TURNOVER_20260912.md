@@ -1,6 +1,6 @@
 # Lower-Cost Agent Execution and Turnover
 
-Current correction: read ../HANDOFF.md, Current Bound-Audit Correction first.
+Current correction: read ../HANDOFF.md, Current Recovery Action first. All pause, live-job and next-task statements below are historical unless repeated there.
 The historical supplied-Jacobian comparison violated 59 chart bounds. The new
 retracted_bounds_9967_26.json receipt verifies bounds but remains infeasible
 between spline nodes. The user has resumed execution; older pause text below
