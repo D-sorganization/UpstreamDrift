@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## MuJoCo FitResult Wall-Clock Duration Duck-Type Compatibility (#9921)
+
+Ensure cross-engine attribute compatibility for MuJoCo visualization and motion matching:
+- Add `wall_clock_s` property alias to `MujocoVizFitResult` pointing to `duration_s` per the cross-engine `CanonicalFitResult` standardization contract (#4250).
+- Update `MujocoVizFitResult.from_simout` to safely extract `wall_clock_s` when `duration_s` is absent on duck-typed objects.
+- Fix failing test `test_fitresult_from_simout_duck_type` in `tests/motion_matching/mujoco_mjcf/test_render_swing.py`.
+
 ## Native Simscape Tour-Matching 1.233s Tour Impact Continuation (#9921)
 
 Advance continuous forward dynamics motion matching on the tour-average driver swing (`data/C3D_TA_Driver.c3d`, $T = 1.813889\text{ s}$, 654 frames @ 360 Hz) in Simscape Multibody R2025b (`GolfSwing3D_Kinetic.slx`):
