@@ -6,7 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import numpy as np
-from scipy.interpolate import CubicSpline
+from scipy.interpolate import CubicSpline, CubicHermiteSpline
 from src.engines.physics_engines.pinocchio.python.native_model import (
     NativePinocchioModel,
 )
@@ -23,7 +23,13 @@ def main() -> None:
     for key in ("model", "candidate", "path", "payload", "output"):
         parser.add_argument("--" + key, type=Path, required=True)
     parser.add_argument("--frequency", type=float, default=20.0)
+    parser.add_argument("--effort-samples-per-frame", type=int, default=2)
+    parser.add_argument(
+        "--replay-input", choices=("sampled", "reference-state"), default="sampled"
+    )
     args = parser.parse_args()
+    if args.effort_samples_per_frame < 1:
+        raise ValueError("Effort samples per frame must be positive")
     if args.output.exists() or not np.isfinite(args.frequency) or args.frequency <= 0:
         raise ValueError(
             "New output directory and positive tracking frequency required"
@@ -104,7 +110,13 @@ def main() -> None:
         )
 
     args.output.mkdir()
-    dense_clock = np.linspace(0, horizon, 2 * (len(clock) - 1) + 1)
+    dense_clock = np.interp(
+        np.linspace(
+            0, len(clock) - 1, args.effort_samples_per_frame * (len(clock) - 1) + 1
+        ),
+        np.arange(len(clock)),
+        clock,
+    )
     try:
         feedback = integrate_forward(
             initial,
@@ -127,6 +139,7 @@ def main() -> None:
         )
         (args.output / "failure.json").write_text(json.dumps(latest, indent=2))
         raise
+    derivatives = []
     efforts = []
     affine_errors = []
     closure = []
@@ -134,7 +147,8 @@ def main() -> None:
     offsets = np.array(candidate.document["marker_offsets_m"])
     bodies = candidate.document["marker_bodies"]
     for time, state in zip(dense_clock, feedback.state, strict=True):
-        _, u, error = controlled(float(time), state)
+        derivative, u, error = controlled(float(time), state)
+        derivatives.append(derivative)
         efforts.append(u)
         affine_errors.append(error)
         closure.append(np.concatenate(model.closure_errors()))
@@ -163,7 +177,9 @@ def main() -> None:
         "path_sha256": hashlib.sha256(args.path.read_bytes()).hexdigest(),
         "candidate_sha256": candidate.sha256,
         "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "feedback": metrics(predicted[::2]),
+        "feedback": metrics(predicted[:: args.effort_samples_per_frame]),
+        "effort_sample_count": len(dense_clock),
+        "replay_input": args.replay_input,
         "feedback_elapsed_s": feedback.elapsed_s,
         "feedback_closure_max_abs": float(np.max(abs(np.array(closure)))),
         "affine_response_max_abs_error": max(affine_errors),
@@ -175,14 +191,23 @@ def main() -> None:
         time=dense_clock,
         state=feedback.state,
         primitive_efforts=efforts,
+        state_derivatives=np.asarray(derivatives),
         markers=predicted,
     )
     (args.output / "feedback-report.json").write_text(json.dumps(report, indent=2))
     curve = CubicSpline(dense_clock, efforts, axis=0)
+    reference_state = CubicHermiteSpline(
+        dense_clock, feedback.state, np.asarray(derivatives), axis=0
+    )
+
+    def time_only_effort(time: float) -> np.ndarray:
+        if args.replay_input == "reference-state":
+            return controlled(time, reference_state(time))[1]
+        return curve(time)
 
     def recorded(time: float, state: np.ndarray) -> np.ndarray:
         a = model.accelerations(
-            mapping(state[:n]), mapping(state[n:]), mapping(curve(time))
+            mapping(state[:n]), mapping(state[n:]), mapping(time_only_effort(time))
         )
         return np.r_[state[n:], [a[name] for name in names]]
 

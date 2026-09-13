@@ -12,9 +12,12 @@ import numpy as np
 from src.engines.physics_engines.pinocchio.python.native_constrained_pose import (
     NativeConstrainedPoseOracle,
 )
-from src.engines.physics_engines.pinocchio.python.native_model import NativePinocchioModel
+from src.engines.physics_engines.pinocchio.python.native_model import (
+    NativePinocchioModel,
+)
 from src.shared.python.motion_matching.constrained_marker_pose import fit_marker_pose
 from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
+from src.shared.python.motion_matching.gimbal_branch import gimbal_branch_interval
 
 
 def main() -> None:
@@ -25,6 +28,7 @@ def main() -> None:
     parser.add_argument("--frames", type=int, nargs="+", required=True)
     parser.add_argument("--bound", type=float, required=True)
     parser.add_argument("--use-derivatives", action="store_true")
+    parser.add_argument("--gimbal-margin", type=float)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.output.exists() or not np.isfinite(args.bound) or args.bound <= 0:
@@ -51,6 +55,7 @@ def main() -> None:
         candidate.document["marker_bodies"],
         np.asarray(candidate.document["marker_offsets_m"], dtype=float),
     )
+
     def marker_jacobian(q: np.ndarray) -> np.ndarray:
         return model.marker_derivatives(
             dict(zip(names, q.tolist(), strict=True)),
@@ -64,13 +69,28 @@ def main() -> None:
         ).jacobian
 
     current = np.asarray(candidate.document["q0"], dtype=float)
+    branch_bounds = {}
+    if args.gimbal_margin is not None:
+        for joint in specification["joints"]:
+            rotations = [
+                p for p in joint["primitives"] if p["primitive"] in ("Rx", "Ry", "Rz")
+            ]
+            if len(rotations) == 3 and len({p["primitive"] for p in rotations}) == 3:
+                name = rotations[1]["coordinate"]
+                branch_bounds[name] = gimbal_branch_interval(
+                    current[names.index(name)], args.gimbal_margin
+                )
     records = []
     for frame in args.frames:
         observed = valid[frame, indices]
+        lower, upper = current - args.bound, current + args.bound
+        for name, (lo, hi) in branch_bounds.items():
+            index = names.index(name)
+            lower[index], upper[index] = max(lower[index], lo), min(upper[index], hi)
         result = fit_marker_pose(
             current,
-            current - args.bound,
-            current + args.bound,
+            lower,
+            upper,
             points[frame, indices],
             observed,
             oracle.forward,
@@ -93,6 +113,10 @@ def main() -> None:
                 "coordinates": result.coordinates.tolist(),
             }
         )
+        if np.any(result.coordinates < lower - 1e-8) or np.any(
+            result.coordinates > upper + 1e-8
+        ):
+            raise ValueError("Returned pose violates numerical path-search bounds")
         if not result.closure_satisfied:
             raise ValueError("Continuation produced a closure-invalid static pose")
         current = result.coordinates
@@ -104,7 +128,11 @@ def main() -> None:
                 "capture_sha256": payload["source_sha256"],
                 "coordinate_bound": args.bound,
                 "supplied_derivatives": args.use_derivatives,
-                "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                "numerical_gimbal_branch_bounds": branch_bounds,
+                "gimbal_margin_rad": args.gimbal_margin,
+                "runner_sha256": hashlib.sha256(
+                    Path(__file__).read_bytes()
+                ).hexdigest(),
                 "records": records,
                 "scope": "Static closure-constrained poses only; not a smooth trajectory or dynamic fit.",
             },

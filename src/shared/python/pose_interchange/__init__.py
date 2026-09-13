@@ -56,6 +56,15 @@ from src.shared.python.pose_interchange.se3 import (
     se3_to_xyz_xyz_deg,
 )
 
+from .frame_transport import FixedFrameTransport
+from .joint_chart import SerialRotationChart, SingularChartError
+from .native_joint_state import (
+    NativeJointStateAdapter,
+    NativeManifoldState,
+    NativeRotationGroup,
+    RotationState,
+)
+
 # Public API version (SemVer MAJOR.MINOR.PATCH).
 #
 # Bump rules (per issue #5917, ADR-0012):
@@ -69,7 +78,7 @@ from src.shared.python.pose_interchange.se3 import (
 # 2.0.0 (CC-2, ADR-0026): adds the ``canonical-v2`` dynamic state surface
 # (``CanonicalState`` + manifold ops). The ``canonical-v1`` pose API below is
 # unchanged and remains valid for pose-only callers.
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 # Canonical *pose* (v1) schema version. Mirrors ``CONVENTION_TAG`` for
 # downstream consumers that prefer numeric comparison; the string tag
@@ -82,6 +91,13 @@ __all__ = [
     "CONVENTION_TAG_V2",
     "CanonicalPose",
     "CanonicalState",
+    "FixedFrameTransport",
+    "SerialRotationChart",
+    "NativeJointStateAdapter",
+    "NativeManifoldState",
+    "NativeRotationGroup",
+    "RotationState",
+    "SingularChartError",
     "CapabilityError",
     "JointSlot",
     "LiveKinematicsService",

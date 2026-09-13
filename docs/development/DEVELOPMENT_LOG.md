@@ -1,5 +1,16 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 — Gimbal-Safe Initializer and Representation Interchange
+
+Added tested gimbal-branch restrictions and archived runs42–45. Full feedback
+tracking reaches35.2153 mm RMS, but time-only replay remains346.534 mm in run45
+and global sextic655.546 mm: no accepted full swing. Increased sampling and
+reference-state effort evaluation do not resolve divergence. Updated authoritative
+handoff with bounded diagnosis and dynamically feasible shooting next steps.
+Created epic #10043 and integrated shared angle/quaternion, differential effort,
+frame and native-state interchange with dedicated representation turnover.
+Alternate manifold engine builders and R2025b dynamics parity remain open.
+
 State table for every feature in flight in this repository. Update entries
 **in place**; never append dated sections. One entry per feature, from proposal
 to ship. See the `development-logs` section of `AGENTS.md` for the binding rules
