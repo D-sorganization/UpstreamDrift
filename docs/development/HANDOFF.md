@@ -8,8 +8,8 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpointb6179cda1 is pushed with
-all normal hooks passing. SELF adds opt-in spherical MuJoCo export and offline Jacobian conditioning audit74. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpointa6e761e02 is pushed with
+all normal hooks passing. SELF adds the bounded two-window convergence execution plan. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -207,6 +207,11 @@ numerical accuracy or wall-time guarantee. Exhaustion raises without partial dat
   alternate representations. Do not block fitting on all-engine alternate builders.
 
 ## Ordered Next Work
+
+Use [Next Agent Execution Plan](simscape_tour_matching/NEXT_AGENT_CONVERGENCE_EXECUTION.md)
+for the existing-provider, two-window derivative preflight after fit73 is terminal.
+It specifies integrated nodes, retraction/continuity chain-rule checks and bounded
+SLSQP acceptance without recreating the solver or accepting state-reset motion.
 
 1. Observe fit73 on its original handle and preserve terminal results.
    Archive terminal results before another optimizer attempt. A successful
