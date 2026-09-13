@@ -189,6 +189,16 @@ def test_full_body_contact_adapter_applies_shared_contact_law(fb_spec: dict) -> 
         assert hasattr(s, "friction_force_n")
         assert hasattr(s, "penetration_m")
 
+    # Fresh model evaluation with nonzero rates verifies site Jacobians are populated
+    fresh_model = NativeMujocoFullBodyModel(json.dumps(fb_spec).encode("utf-8"))
+    v_nonzero = dict.fromkeys(fresh_model.coordinate_order, 0.5)
+    samples_with_vel = fresh_model.evaluate_contact_samples(q, v_nonzero)
+    assert len(samples_with_vel) == 4
+    for s in samples_with_vel.values():
+        if s.penetration_m > 0:
+            assert abs(s.penetration_rate_m_s) > 0.0
+            assert np.linalg.norm(s.friction_force_n) > 0.0
+
     # Evaluate accelerations with contact forces applied
     acc = model.accelerations(q, v, efforts)
     assert len(acc) == 41
