@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-09-12T19:21:16.833896",
+  "pid": 28804,
+  "evaluation": 0,
+  "duration_s": 1.15,
+  "basis_duration_s": 1.813889,
+  "defect_norm": 0.0,
+  "105s_reproduction": {
+    "whole_rmse_mm": 212.01725879132596,
+    "early_rmse_mm": 11.217516379964145,
+    "terminal_rmse_mm": 585.3097542612726,
+    "clubhead_terminal_rmse_mm": 695.8179082475791,
+    "pelvis_yaw_diff_deg": -12.99961065969498,
+    "pelvis_yaw_error_pct": 29.035455375748054,
+    "verified": true
+  },
+  "115s_initial": {
+    "whole_rmse_mm": 263.6087922098107,
+    "early_rmse_mm": 11.217516379964145,
+    "terminal_rmse_mm": 540.1352755744027,
+    "clubhead_terminal_rmse_mm": 738.9637440102492,
+    "pelvis_yaw_diff_deg": -103.57706851810269,
+    "pelvis_yaw_error_pct": 159.9376547292409
+  }
+}

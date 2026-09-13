@@ -1,5 +1,27 @@
 # Simscape Tour-Average Fit Continuation
 
+## Current State (2026-09-13, Supersedes the Sections Below)
+
+- No fitting job is running on DeskComputer or ControlTower. Overnight Stage 2/3
+  downswing and impact extensions (1.15 s and 1.233 s) FAILED the gates by more
+  than an order of magnitude (whole 340–380 mm, clubhead 647–722 mm, pelvis yaw
+  38–59 %) and the Stage 3 report crashed; they are archived, uncommitted-until-now,
+  under `docs/development/simscape_tour_matching/native_evidence/stage3_impact_1233s_9921_failed/`.
+- Best gate-scored Simscape candidate remains run 06 at 0.75 s (whole 23.9 mm,
+  early 9.9 mm, terminal 94.7 mm, 3 of 5 gates). Nothing beyond 0.75 s passes.
+- The native Pinocchio lane (branch feat/9967-native-simscape-pinocchio,
+  checkpoint 955c36207) holds the best 0.85 s uninterrupted candidate:
+  returned81 whole 26.4 mm, terminal 46.3 mm, club 16.0 mm, early 11.4 mm, yaw
+  13.9 % (still rejected). That lane is the optimizer; this lane is the R2025b
+  reference.
+- Next bounded task here: replay returned81's polynomial in MATLAB R2025b with
+  the existing qualified replay tooling and report same-input parity through
+  0.85 s on the five shared metrics. Do not resume horizon pushes with degrees
+  0–3 frozen; that is a basis-authority limit (see the archived HANDOFF).
+- Objective definitions differ between lanes (this lane: normalized trajectory
+  plus terminal, clubhead and shaft-inclination terms; native lane: run73 score).
+  Report the five uninterrupted metrics, never the cost, when comparing.
+
 ## Active Horizon Execution & Parity Turnover (2026-09-12 Live Continuation)
 
 ### 0. 1.05 s Downswing Delivery Certification & Audit (`candidate_downswing_105s_locked_package.json`, DeskComputer)
