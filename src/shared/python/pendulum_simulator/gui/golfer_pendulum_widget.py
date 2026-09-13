@@ -116,6 +116,7 @@ class GolferPendulumWidget(BasePendulumWidget):
 
         # Precompute club tip positions for trail rendering
         self._tip_positions_cache = self._precompute_club_tips(result)
+        self._set_trail_source(self._tip_positions_cache)
 
         # Pre-compute zero-torque counterfactual forces (#1148)
         self._zero_torque_forces = self._precompute_zero_torque_forces(result)
@@ -163,13 +164,11 @@ class GolferPendulumWidget(BasePendulumWidget):
         idx = max(0, min(idx, self._result.n_steps - 1))
         self._current_idx = idx
 
-        # Rebuild trail from precomputed cache
-        self._trail.clear()
+        # Slide the trail window over the precomputed cache (#8929)
         if self._tip_positions_cache is not None:
-            start = max(0, idx - self.TRAIL_LENGTH + 1)
-            for i in range(start, idx + 1):
-                self._trail.append(tuple(self._tip_positions_cache[i]))
+            self._set_trail_frame(idx)
         else:
+            self._trail.clear()
             pos = self._result.positions_at(idx)
             self._trail.append(pos["club_tip"])
 

@@ -23,10 +23,19 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections import deque
+from typing import Any
 
 import numpy as np
 from PyQt6.QtCore import QPoint, QPointF, Qt
-from PyQt6.QtGui import QBrush, QColor, QFont, QMouseEvent, QPainter, QPen
+from PyQt6.QtGui import (
+    QBrush,
+    QColor,
+    QFont,
+    QMouseEvent,
+    QPainter,
+    QPen,
+    QPolygonF,
+)
 from PyQt6.QtWidgets import QWidget
 
 from src.shared.python.body_part_viz import ForceColorScale
@@ -60,6 +69,9 @@ class BasePendulumWidget(QWidget):
     # Number of Catmull-Rom subdivisions per trail segment (#1116)
     SPLINE_SUBDIV = 4
 
+    # Number of alpha/width buckets the trail fade is quantized into (#8929)
+    TRAIL_ALPHA_BUCKETS = 12
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setMinimumSize(250, 300)
@@ -68,6 +80,14 @@ class BasePendulumWidget(QWidget):
 
         self._pixels_per_meter: float = 120.0
         self._trail: deque = deque(maxlen=self.TRAIL_LENGTH)
+
+        # Trail render caches (#8929): the Catmull-Rom spline is evaluated once
+        # per trajectory and sliced per frame; one pen per fade bucket.
+        self._trail_tips: np.ndarray | None = None
+        self._trail_spline: np.ndarray | None = None
+        self._trail_window: tuple[int, int] = (0, 0)
+        self._trail_fallback: tuple[np.ndarray, np.ndarray] | None = None
+        self._trail_pens: list[QPen] = self._build_trail_pens()
 
         # Zoom & pan state
         self._zoom: float = 1.0
@@ -380,6 +400,15 @@ class BasePendulumWidget(QWidget):
         """
         if not (x_world is not None):
             raise ValueError("x_world must be provided")
+        px, py = self._project(x_world, y_world)
+        return QPointF(px, py)
+
+    def _project(self, x_world: Any, y_world: Any) -> tuple[Any, Any]:
+        """Project world coordinates (scalars or arrays) to pixel coordinates.
+
+        Shared by ``_world_to_pixel`` and the vectorized trail path (#8929).
+        Post: returns ``(px, py)`` with the same shape as the inputs.
+        """
         base_ppm = self._pixels_per_meter
         cx = self.width() / 2.0 + self._pan_x
         cy = self.height() * self._shoulder_y_fraction() + self._pan_y
@@ -392,9 +421,7 @@ class BasePendulumWidget(QWidget):
         cos_tilt = float(np.cos(self._tilt_angle))
         y_proj = y_world * cos_tilt - depth * float(np.sin(self._tilt_angle))
 
-        px = cx + x_rot * base_ppm
-        py = cy - y_proj * base_ppm
-        return QPointF(px, py)
+        return cx + x_rot * base_ppm, cy - y_proj * base_ppm
 
     # ------------------------------------------------------------------
     # Shared drawing helpers
@@ -552,35 +579,108 @@ class BasePendulumWidget(QWidget):
         painter.setPen(QPen(QColor(160, 160, 160), 1))
         painter.drawEllipse(center, r_px, r_px)
 
+    def _build_trail_pens(self) -> list[QPen]:
+        """One pen per fade bucket, following the per-segment alpha/width ramp."""
+        pens: list[QPen] = []
+        for b in range(self.TRAIL_ALPHA_BUCKETS):
+            t = (b + 0.5) / self.TRAIL_ALPHA_BUCKETS
+            color = QColor(self.COLOR_TRAIL)
+            color.setAlpha(int(30 + 180 * t))
+            pen = QPen(color, 1.0 + 2.5 * t)
+            pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+            pens.append(pen)
+        return pens
+
+    def _set_trail_source(self, tips: np.ndarray | None) -> None:
+        """Precompute the smoothed trail for a whole tip trajectory (#8929).
+
+        Pre: ``tips`` is None or an ``(n, 2)`` array of world coordinates.
+        Post: ``_trail`` is empty; ``_trail_spline`` is set when ``n >= 4``.
+        """
+        self._trail.clear()
+        self._trail_window = (0, 0)
+        self._trail_tips = None
+        self._trail_spline = None
+        if tips is None:
+            return
+        tips = np.asarray(tips, dtype=float)
+        if not (tips.ndim == 2 and tips.shape[1] == 2):
+            raise ValueError(f"tips must have shape (n, 2), got {tips.shape}")
+        self._trail_tips = tips
+        if len(tips) >= 4:
+            pts = [tuple(p) for p in tips.tolist()]
+            self._trail_spline = np.asarray(
+                self._catmull_rom_smooth(pts, self.SPLINE_SUBDIV), dtype=float
+            )
+
+    def _set_trail_frame(self, idx: int) -> None:
+        """Slide the trail window so it ends at frame ``idx`` (#8929).
+
+        Pre: ``_set_trail_source`` was given a trajectory; ``0 <= idx < n``.
+        Post: ``_trail`` holds ``tips[max(0, idx - TRAIL_LENGTH + 1) .. idx]``.
+        """
+        tips = self._trail_tips
+        if tips is None:
+            raise ValueError("_set_trail_frame requires a trail source")
+        if not (0 <= idx < len(tips)):
+            raise ValueError(f"idx {idx} out of range [0, {len(tips)})")
+        start = max(0, idx - self.TRAIL_LENGTH + 1)
+        self._trail_window = (start, idx)
+        self._trail.clear()
+        self._trail.extend(map(tuple, tips[start : idx + 1].tolist()))
+
+    def _smoothed_trail(self) -> np.ndarray:
+        """Return the smoothed trail as an ``(N, 2)`` world-coordinate array.
+
+        Playback path: slice the precomputed trajectory spline for the current
+        window, so no smoothing runs per frame. Fallback (trail populated
+        directly by a caller): smooth once and reuse until the contents change.
+        """
+        start, end = self._trail_window
+        n = len(self._trail)
+        if self._trail_spline is not None and end - start + 1 == n:
+            sub = self.SPLINE_SUBDIV
+            return self._trail_spline[start * sub : end * sub + 1]
+
+        pts = np.asarray(list(self._trail), dtype=float).reshape(-1, 2)
+        cached = self._trail_fallback
+        if cached is None or not np.array_equal(cached[0], pts):
+            point_list = [tuple(p) for p in pts.tolist()]
+            if n >= 4:
+                point_list = self._catmull_rom_smooth(point_list, self.SPLINE_SUBDIV)
+            cached = (pts, np.asarray(point_list, dtype=float).reshape(-1, 2))
+            self._trail_fallback = cached
+        return cached[1]
+
     def _draw_trail(self, painter: QPainter) -> None:
-        """Draw Catmull-Rom smoothed tip trail with fade-in."""
+        """Draw the Catmull-Rom smoothed tip trail with a quantized fade-in.
+
+        The smoothed polyline comes from ``_smoothed_trail`` (cached, #8929),
+        is projected in one vectorized pass and drawn as one polyline per
+        alpha bucket instead of one pen and one line per segment.
+        """
         if not (painter is not None):
             raise ValueError("painter must be provided")
-        n = len(self._trail)
-        if n < 2:
+        if len(self._trail) < 2:
+            return
+        smooth = self._smoothed_trail()
+        n_pts = len(smooth)
+        if n_pts < 2:
             return
 
-        if n >= 4:
-            smooth = self._catmull_rom_smooth(list(self._trail), self.SPLINE_SUBDIV)
-        else:
-            smooth = list(self._trail)
+        px, py = self._project(smooth[:, 0], smooth[:, 1])
+        points = [QPointF(x, y) for x, y in zip(px.tolist(), py.tolist(), strict=True)]
 
-        ns = len(smooth)
-        for i in range(1, ns):
-            t = i / ns
-            alpha = int(30 + 180 * t)
-            width = 1.0 + 2.5 * t
-            color = QColor(self.COLOR_TRAIL)
-            color.setAlpha(alpha)
-            pen = QPen(color, width)
-            pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-            painter.setPen(pen)
-            x0, y0 = smooth[i - 1]
-            x1, y1 = smooth[i]
-            painter.drawLine(
-                self._world_to_pixel(x0, y0),
-                self._world_to_pixel(x1, y1),
-            )
+        n_buckets = min(self.TRAIL_ALPHA_BUCKETS, n_pts - 1)
+        edges = np.linspace(0, n_pts - 1, n_buckets + 1).round().astype(int)
+        for b in range(n_buckets):
+            lo, hi = int(edges[b]), int(edges[b + 1])
+            if hi <= lo:
+                continue
+            pen_idx = int((b + 0.5) * self.TRAIL_ALPHA_BUCKETS / n_buckets)
+            painter.setPen(self._trail_pens[pen_idx])
+            painter.drawPolyline(QPolygonF(points[lo : hi + 1]))
 
     @staticmethod
     def _catmull_rom_smooth(
