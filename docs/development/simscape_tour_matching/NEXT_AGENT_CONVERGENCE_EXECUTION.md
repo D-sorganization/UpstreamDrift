@@ -21,10 +21,12 @@ This evidence is not proof of a particular nonlinear failure mechanism.
 Stage1 is complete in diagnostic75; reuse its fixture. Stage2 is complete:
 diagnostic76 plus audit77 qualify every direction and block against measured
 replay/retraction floors with unchanged gates (see
-native_evidence/two_window_floor_9967_77/HANDOFF.md). Stage3 is authorized under
-the bounded settings below. No optimizer has run yet and no numerical jobs remain
-active. Use shared_boundary_policy="once" and
-window_jacobian_state_coordinates="node" for objective parity with fit73.
+native_evidence/two_window_floor_9967_77/HANDOFF.md). Stage3 trial78 is terminal with
+parity passed and an unchanged returned candidate (budget exhausted before a
+feasible iterate); trial79 repeats it with primal-only residuals and larger
+budgets. Use shared_boundary_policy="once" and
+window_jacobian_state_coordinates="node" for objective parity with fit73; see
+native_evidence/two_window_fit_9967_78/HANDOFF.md before any further change.
 The stages below remain the reusable procedure for other targets, not an instruction
 to repeat completed75 work.
 
