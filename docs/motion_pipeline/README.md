@@ -36,6 +36,17 @@ solver surfaces. OpenSim CMC, OpenSim RRA, and Drake trajectory optimization
 remain experimental backend-development classes until they produce real solves;
 they are not available through the default factory path.
 
+### Uploading C3D from the Motion Capture Tool
+
+The web Motion Capture page uploads C3D files through
+`POST /api/v1/tools/motion-capture/upload-c3d`. That route parses the file
+with the same `C3DAdapter` the pipeline uses (issue #8865), so both paths share
+one reader and one set of format quirks. By default the upload registers a
+playback-only recording; add `?run_pipeline=true` (optionally with
+`ik_backend`, `matching_backend`, `matching_model_urdf`) to also hand the
+parsed trajectory to the pipeline and receive the tracked-motion result in
+the response's `pipeline` field alongside the recording.
+
 ---
 
 ## When to Choose Each Engine
