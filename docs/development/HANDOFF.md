@@ -2,7 +2,8 @@
 
 ## Current Status
 
-The full matching goal is OPEN. No accepted full-swing open-loop sixth-order
+The full matching goal is OPEN. Robust trajectory equivalence of the alternate
+representation is not yet qualified. No accepted full-swing open-loop sixth-order
 candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
@@ -25,8 +26,14 @@ Run59 is TERMINAL, original handle97788 exited0: same setup with smaller maximum
 step. It FAILS native velocity parity (0.000587270); marker maximum1.15187e-7 m,
 native q6.06676e-7, closure pose6.60249e-11/rate1.61521e-10. Elapsed61.2725 s.
 Therefore58's isolated pass is not robust convergence or representation acceptance.
-No root integration remains active. A parallel read-only pointwise acceleration
-and same-state/history audit is in progress; collect its receipt before more fits.
+No root integration remains active. The pointwise acceleration/history audit
+found no sampled history dependence or substantial actuator-route mismatch:
+maximum routed native acceleration difference2.18034e-6 rad/s² at a reference
+539073.49 rad/s²; effort roundtrip1.25056e-12. Sampled unscaled inertia condition
+is about6.7e7 in both representations. These results support investigating
+conditioning/trajectory sensitivity, not declaring a physical-model mismatch.
+They do not prove perturbation growth or global convergence. Detailed receipt:
+simscape_tour_matching/native_evidence/manifold_acceleration_10043_19.
 Remote runtime /home/dieterolson/native-manifold-10043-18; driver
 /mnt/c/Users/diete/compare_native_manifold_replay_9967_59.py; output
 /mnt/c/Users/diete/native-manifold-replay-9967-59. Horizon0.85, methoddop853,
@@ -53,9 +60,10 @@ launching another run. All root runs through59 are terminal; none should restart
 
 ## Ordered Next Work
 
-1. Collect the pointwise acceleration/history audit. Distinguish numerical
-   sensitivity from a state/effort/dynamics defect before further tolerance runs.
-   Do not accept isolated58 or weaken a gate to hide failed59.
+1. Measure perturbation propagation on the rejected fixture using existing native
+   sensitivity/retraction providers and explicit small, constraint-consistent
+   perturbations. Record both physical and native-coordinate errors. Do not
+   continue blind tolerance sweeps, accept isolated58, or hide failed59.
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives
    before using the manifold variant in an optimizer. Preserve existing scalar API.
@@ -79,6 +87,8 @@ launching another run. All root runs through59 are terminal; none should restart
   integrates local tangent coordinates and carries physical endpoints unchanged;
   no quaternion projection or target-state reset. Runtime18 passes96 tests with
   one optional MuJoCo skip; root independently verified generic and real Pin tests.
+  Remote receipts qualify the numerical runtime bundle, not full GUI/application
+  deployment; retain the documented package boundaries when reproducing.
 - [Canonical Representations](simscape_tour_matching/REPRESENTATION_HANDOFF.md):
   angle/quaternion/rate/convective-acceleration/effort conversions and fixed-frame
   transport. Preserve units, named frames, branch/winding and model identity.
