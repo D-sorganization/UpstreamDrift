@@ -13,10 +13,17 @@ from importlib import import_module
 from typing import Any
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
     export_full_body_mjcf,
+)
+from src.engines.physics_engines.mujoco.python.native_model import (
+    _compute_closure_errors,
+    _evaluate_weld_closure,
+    _extract_frame_poses,
+    _pack_vector,
+    _prepare_forward_dynamics,
+    _solve_kkt_dynamics,
 )
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
@@ -86,26 +93,18 @@ class NativeMujocoFullBodyModel:
         self._errors: tuple[np.ndarray, np.ndarray] | None = None
 
     def _vector(self, values: Mapping[str, float]) -> np.ndarray:
-        if set(values) != set(self._indices):
-            raise ValueError("Provide exactly the model coordinate inventory")
-        result = np.zeros(self.model.nv)
-        for name, index in self._indices.items():
-            result[index] = values[name]
-        if not np.isfinite(result).all():
-            raise ValueError("Coordinates and rates must be finite")
-        return result
+        return _pack_vector(
+            self._indices,
+            values,
+            self.model.nv,
+            error_message="Coordinates and rates must be finite",
+        )
 
     def frame_poses(self, coordinates: Mapping[str, float]) -> dict[str, np.ndarray]:
         """Compute 4x4 forward kinematics poses for all defined frame sites."""
         self.data.qpos[:] = self._vector(coordinates)
         self._mj.mj_kinematics(self.model, self.data)
-        result = {}
-        for name, index in self._sites.items():
-            pose = np.eye(4)
-            pose[:3, :3] = self.data.site_xmat[index].reshape(3, 3)
-            pose[:3, 3] = self.data.site_xpos[index]
-            result[name] = pose
-        return result
+        return _extract_frame_poses(self.data, self._sites)
 
     def evaluate_contact_samples(
         self,
@@ -142,13 +141,10 @@ class NativeMujocoFullBodyModel:
     ) -> dict[str, float]:
         """Solve constrained dynamics with applied contact forces and dual-grip weld."""
         mj, model, data = self._mj, self.model, self.data
-        data.qpos[:] = self._vector(coordinates)
-        data.qvel[:] = self._vector(rates)
         effort = self._vector(primitive_efforts)
-
-        # Forward kinematics for kinematics and Jacobians
-        mj.mj_fwdPosition(model, data)
-        mj.mj_fwdVelocity(model, data)
+        _prepare_forward_dynamics(
+            mj, model, data, self._vector(coordinates), self._vector(rates)
+        )
 
         # Evaluate and apply contact forces
         samples = self.evaluate_contact_samples(coordinates, rates)
@@ -174,42 +170,14 @@ class NativeMujocoFullBodyModel:
         mass = np.zeros((model.nv, model.nv))
         mj.mj_fullM(model, mass, data.qM)
 
-        jacobians, derivatives = [], []
-        for site in self._closure:
-            jac, derivative = np.zeros((6, model.nv)), np.zeros((6, model.nv))
-            mj.mj_jacSite(model, data, jac[:3], jac[3:], site)
-            mj.mj_jacDot(
-                model,
-                data,
-                derivative[:3],
-                derivative[3:],
-                data.site_xpos[site],
-                int(model.site_bodyid[site]),
-            )
-            jacobians.append(jac)
-            derivatives.append(derivative)
-
-        jac = jacobians[0] - jacobians[1]
-        drift = (derivatives[0] - derivatives[1]) @ data.qvel
-
+        jac, drift = _evaluate_weld_closure(mj, model, data, self._closure)
         total_effort = effort + tau_contact - data.qfrc_bias
-        unconstrained = np.linalg.solve(mass, np.column_stack((total_effort, jac.T)))
-        free, response = unconstrained[:, 0], unconstrained[:, 1:]
-        multiplier = np.linalg.solve(jac @ response, -drift - jac @ free)
-        acceleration = free + response @ multiplier
+        acceleration = _solve_kkt_dynamics(mass, total_effort, jac, drift)
 
         if not np.isfinite(acceleration).all():
             raise FloatingPointError("Nonfinite full-body MuJoCo acceleration")
 
-        a, b = self._closure
-        ra, rb = (data.site_xmat[i].reshape(3, 3) for i in (a, b))
-        self._errors = (
-            np.r_[
-                data.site_xpos[a] - data.site_xpos[b],
-                Rotation.from_matrix(ra @ rb.T).as_rotvec(),
-            ],
-            jac @ data.qvel,
-        )
+        self._errors = _compute_closure_errors(data, self._closure, jac)
 
         return {
             name: float(acceleration[index]) for name, index in self._indices.items()

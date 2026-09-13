@@ -5,7 +5,7 @@ execution path. Mass, bias, kinematics and Jacobian derivatives come from MuJoCo
 """
 
 import hashlib
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from importlib import import_module
 from typing import Any
 
@@ -13,6 +13,107 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.native_mjcf import export_native_mjcf
+
+
+def _pack_vector(
+    indices: Mapping[str, int],
+    values: Mapping[str, float],
+    size: int,
+    error_message: str = "State and effort must be finite",
+) -> np.ndarray:
+    """Pack coordinate mapping into dense array preserving DOF ordering."""
+    if set(values) != set(indices):
+        raise ValueError("Provide exactly the model coordinate inventory")
+    result = np.zeros(size)
+    for name, index in indices.items():
+        result[index] = values[name]
+    if not np.isfinite(result).all():
+        raise ValueError(error_message)
+    return result
+
+
+def _extract_frame_poses(
+    data: Any,
+    sites: Mapping[str, int],
+) -> dict[str, np.ndarray]:
+    """Compute 4x4 forward kinematics poses for named frame sites."""
+    result = {}
+    for name, index in sites.items():
+        pose = np.eye(4)
+        pose[:3, :3] = data.site_xmat[index].reshape(3, 3)
+        pose[:3, 3] = data.site_xpos[index]
+        result[name] = pose
+    return result
+
+
+def _evaluate_weld_closure(
+    mj: Any,
+    model: Any,
+    data: Any,
+    closure_sites: Sequence[int],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute relative 6D closure Jacobian and velocity drift."""
+    jacobians, derivatives = [], []
+    for site in closure_sites:
+        jac, derivative = np.zeros((6, model.nv)), np.zeros((6, model.nv))
+        mj.mj_jacSite(model, data, jac[:3], jac[3:], site)
+        mj.mj_jacDot(
+            model,
+            data,
+            derivative[:3],
+            derivative[3:],
+            data.site_xpos[site],
+            int(model.site_bodyid[site]),
+        )
+        jacobians.append(jac)
+        derivatives.append(derivative)
+    jac = jacobians[0] - jacobians[1]
+    drift = (derivatives[0] - derivatives[1]) @ data.qvel
+    return jac, drift
+
+
+def _solve_kkt_dynamics(
+    mass: np.ndarray,
+    rhs_force: np.ndarray,
+    jac: np.ndarray,
+    drift: np.ndarray,
+) -> np.ndarray:
+    """Solve M a - J.T lambda = rhs_force, J a = -drift."""
+    unconstrained = np.linalg.solve(mass, np.column_stack((rhs_force, jac.T)))
+    free, response = unconstrained[:, 0], unconstrained[:, 1:]
+    multiplier = np.linalg.solve(jac @ response, -drift - jac @ free)
+    return free + response @ multiplier
+
+
+def _compute_closure_errors(
+    data: Any,
+    closure_sites: Sequence[int],
+    jac: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute 6D displacement/rotvec and velocity closure residuals."""
+    a, b = closure_sites
+    ra, rb = (data.site_xmat[i].reshape(3, 3) for i in (a, b))
+    return (
+        np.r_[
+            data.site_xpos[a] - data.site_xpos[b],
+            Rotation.from_matrix(ra @ rb.T).as_rotvec(),
+        ],
+        jac @ data.qvel,
+    )
+
+
+def _prepare_forward_dynamics(
+    mj: Any,
+    model: Any,
+    data: Any,
+    qpos: np.ndarray,
+    qvel: np.ndarray,
+) -> None:
+    """Set generalized coordinates/velocities and run position/velocity forward passes."""
+    data.qpos[:] = qpos
+    data.qvel[:] = qvel
+    mj.mj_fwdPosition(model, data)
+    mj.mj_fwdVelocity(model, data)
 
 
 class NativeMujocoModel:
@@ -48,14 +149,15 @@ class NativeMujocoModel:
         self.model_sha256 = self.metadata["model_sha256"]
         self.model = mj.MjModel.from_xml_string(self.xml)
         self.data = mj.MjData(self.model)
+        self.coordinate_order = list(self.metadata["coordinate_order"])
         self._indices = {}
-        for name in self.metadata["coordinate_order"]:
+        for name in self.coordinate_order:
             j = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_JOINT, name)
             if j < 0:
-                raise ValueError("Native coordinate missing from MuJoCo")
+                raise ValueError(f"Coordinate {name} missing from native model")
             self._indices[name] = int(self.model.jnt_dofadr[j])
         if self.model.nq != len(self._indices) or self.model.nv != len(self._indices):
-            raise ValueError("Native coordinates must remain scalar")
+            raise ValueError("All native coordinates must be scalar 1-DOF joints")
         self._sites = {
             name: self.model.site(site).id
             for name, site in self.metadata["frame_sites"].items()
@@ -64,25 +166,17 @@ class NativeMujocoModel:
         self._errors: tuple[np.ndarray, np.ndarray] | None = None
 
     def _vector(self, values: Mapping[str, float]) -> np.ndarray:
-        if set(values) != set(self._indices):
-            raise ValueError("Provide exactly the native coordinate inventory")
-        result = np.zeros(self.model.nv)
-        for name, index in self._indices.items():
-            result[index] = values[name]
-        if not np.isfinite(result).all():
-            raise ValueError("Native state and effort must be finite")
-        return result
+        return _pack_vector(
+            self._indices,
+            values,
+            self.model.nv,
+            error_message="Native state and effort must be finite",
+        )
 
     def frame_poses(self, coordinates: Mapping[str, float]) -> dict[str, np.ndarray]:
         self.data.qpos[:] = self._vector(coordinates)
         self._mj.mj_kinematics(self.model, self.data)
-        result = {}
-        for name, index in self._sites.items():
-            pose = np.eye(4)
-            pose[:3, :3] = self.data.site_xmat[index].reshape(3, 3)
-            pose[:3, 3] = self.data.site_xpos[index]
-            result[name] = pose
-        return result
+        return _extract_frame_poses(self.data, self._sites)
 
     def accelerations(
         self,
@@ -92,46 +186,17 @@ class NativeMujocoModel:
     ) -> dict[str, float]:
         """Solve M a - J.T lambda = effort-bias, J a = -Jdot v."""
         mj, model, data = self._mj, self.model, self.data
-        data.qpos[:] = self._vector(coordinates)
-        data.qvel[:] = self._vector(rates)
         effort = self._vector(primitive_efforts)
-        mj.mj_fwdPosition(model, data)
-        mj.mj_fwdVelocity(model, data)
+        _prepare_forward_dynamics(
+            mj, model, data, self._vector(coordinates), self._vector(rates)
+        )
         mass = np.zeros((model.nv, model.nv))
         mj.mj_fullM(model, mass, data.qM)
-        jacobians, derivatives = [], []
-        for site in self._closure:
-            jac, derivative = np.zeros((6, model.nv)), np.zeros((6, model.nv))
-            mj.mj_jacSite(model, data, jac[:3], jac[3:], site)
-            mj.mj_jacDot(
-                model,
-                data,
-                derivative[:3],
-                derivative[3:],
-                data.site_xpos[site],
-                int(model.site_bodyid[site]),
-            )
-            jacobians.append(jac)
-            derivatives.append(derivative)
-        jac = jacobians[0] - jacobians[1]
-        drift = (derivatives[0] - derivatives[1]) @ data.qvel
-        unconstrained = np.linalg.solve(
-            mass, np.column_stack((effort - data.qfrc_bias, jac.T))
-        )
-        free, response = unconstrained[:, 0], unconstrained[:, 1:]
-        multiplier = np.linalg.solve(jac @ response, -drift - jac @ free)
-        acceleration = free + response @ multiplier
+        jac, drift = _evaluate_weld_closure(mj, model, data, self._closure)
+        acceleration = _solve_kkt_dynamics(mass, effort - data.qfrc_bias, jac, drift)
         if not np.isfinite(acceleration).all():
             raise FloatingPointError("Nonfinite native MuJoCo acceleration")
-        a, b = self._closure
-        ra, rb = (data.site_xmat[i].reshape(3, 3) for i in (a, b))
-        self._errors = (
-            np.r_[
-                data.site_xpos[a] - data.site_xpos[b],
-                Rotation.from_matrix(ra @ rb.T).as_rotvec(),
-            ],
-            jac @ data.qvel,
-        )
+        self._errors = _compute_closure_errors(data, self._closure, jac)
         return {
             name: float(acceleration[index]) for name, index in self._indices.items()
         }
