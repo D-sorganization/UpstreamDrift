@@ -1,5 +1,27 @@
 # Native MuJoCo Matching Handoff
 
+## Run83 Candidate Replay Parity Across Engines (2026-09-13 UTC)
+
+`evidence/returned83_replay/metrics.json` records an independent continuous forward
+replay of the returned83 candidate (`cfaefcaebb6267e0e45ad42d88eed42d518e1cc70553f06c7008462858a8f56a`)
+using `NativeMujocoModel` rigid KKT constraint dynamics with DOP853 integration over
+all 307 actual capture samples through 0.85 s (runtime 6.742 s).
+
+Results show exact nanometer-level trajectory agreement with Pinocchio:
+
+- **Maximum Marker Difference vs Pinocchio:** 0.000008 mm (0.008 micrometres / 8.0 nanometres)
+- **RMS Marker Difference vs Pinocchio:** 0.000000 mm (0.000 micrometres)
+- **Closure Pose Max Abs:** 9.681e-12
+- **Closure Velocity Max Abs:** 2.663e-10
+
+Canonical Metrics (MuJoCo DOP853 vs Pinocchio):
+
+- **Whole RMS:** 23.343 mm (Pinocchio: 23.343 mm, Gate <= 25.0 mm: **PASS**)
+- **Early RMS ≤0.6 s:** 10.762 mm (Pinocchio: 10.762 mm, Gate <= 12.0 mm: **PASS**)
+- **Terminal RMS:** 51.175 mm (Pinocchio: 51.175 mm, Gate <= 35.0 mm: FAIL)
+- **Clubhead Cluster RMS:** 30.030 mm (Pinocchio: 30.030 mm, Gate <= 60.0 mm: **PASS**)
+- **Pelvis Yaw Error:** 10.53% (Pinocchio: 10.53%, Gate < 5.0%: FAIL)
+
 ## Run81 Candidate Replay Parity Across Engines
 
 `evidence/returned81_replay/metrics.json` records an independent continuous forward
