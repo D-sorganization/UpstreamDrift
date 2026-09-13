@@ -1,5 +1,44 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Qualified Pinocchio Manifold Prototype
+
+The alternate NativeManifoldPinocchioModel is implemented and pointwise-qualified
+with real Pinocchio4.1.0 on ControlTower. It preserves original solids, placements,
+frames and weld, replacing only eligible hip/shoulder rotational triples. nq30,
+nv27; native actuator efforts transform at the CURRENT alternate state. Root
+reviewed the construction hook and transformations and independently reran all
+five real-runtime tests successfully. Saved run45 states at0.6,0.9,1.3 s also
+pass: maximum native acceleration difference approximately4.9e-9. These are
+pointwise tests, NOT full-trajectory or MATLAB R2025b acceptance.
+
+The exact production lazy package initializer is qualified in final runtime
+/home/dieterolson/native-manifold-10043-09. No pose_interchange initializer shim
+remains. Original and formatted model JSON parse identically; hashes and exact
+source ZIP are in native_evidence/manifold_10043_09. Detailed reproduction and
+ordered next gates: simscape_tour_matching/PINOCCHIO_MANIFOLD_HANDOFF.md.
+
+NEXT REPRESENTATION ACTION: implement a tested manifold time integrator, then
+same-input run19 prefix replay against scalar native dynamics with convergence.
+Do not feed nq30 into the Euclidean qdot=v integrator with nv27. Then qualify
+full trajectory, tangent derivatives and R2025b parity before using it as an
+accepted replacement. MuJoCo/Drake alternate builders remain outstanding.
+
+Run47 is terminal and archived; run46 strict tolerance comparison remains live
+at the last verified poll (PID2659573, handle29712). Preserve that job and inspect
+its actual status; no strict convergence result is claimed. Full match remains OPEN.
+
+## Numerical Package Import Boundary
+
+The pose_interchange public facade now lazily loads exported providers. A new
+fresh-process test blocks application reference_pose imports while successfully
+loading SerialRotationChart and NativeJointStateAdapter. It failed before the
+change and now passes. All public symbols remain resolvable; the full local
+pose_interchange unit selection, Ruff and focused mypy pass. This removes the
+need for an empty/shimmed pose_interchange initializer in numeric remote runtimes.
+Copy the exact production initializer; do not treat prior shimmed qualification
+as proof of production packaging. The parallel manifold agent is requalifying
+with that exact initializer and real saved swing states before integration.
+
 ## Run47 Regularized Initializer and Polynomial Fit Limitation
 
 Run47 is terminal: handle36715 exited0. Optional effort_regularization now

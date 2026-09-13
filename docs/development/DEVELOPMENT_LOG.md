@@ -1,5 +1,21 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Native Pinocchio Spherical Prototype
+
+Integrated shared-construction alternate native builder with current-state effort
+conversion, contracts and TDD. Root independently reran five real Pinocchio4.1.0
+tests on ControlTower; saved swing-state qualification also passes. Exact source
+and receipts archived; original/formatted geometry parsed equality verified.
+Validated production lazy initializer, Ruff and mypy. Dedicated manifold handoff
+records missing time integration, trajectory, derivative and R2025b gates.
+
+## 2026-09-12 - Standalone Numerical Import Boundary
+
+Converted the pose_interchange facade to lazy public-provider loading, preserving
+all exported symbols and type-checking imports. Fresh-process application-blocked
+import test went red then green; full representation unit selection, Ruff and
+mypy pass. Removes remote numerical runtime need to replace the package initializer.
+
 ## 2026-09-12 - Effort-Regularized Native Forward Initializer
 
 Added optional rank-preserving effort regularization with TDD (five new red tests,
