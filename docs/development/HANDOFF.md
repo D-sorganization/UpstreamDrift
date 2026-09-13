@@ -2,6 +2,18 @@
 
 ## Current Bound-Audit Correction (SELF)
 
+Latest marker-aware experiment SELF supersedes closure-only initialization:
+retracted_tracking_9967_28.json uses run19 candidate attachments and capture
+payload, checks node-time alignment and observation masks, and removes the
+first chart from optimization. Nine evaluations take 0.89997 seconds, marker
+RMS is 0.578684 mm, initial-pose error 2.78888e-13, and chart maximum 0.00266590.
+The full combined initial Jacobian check has scaled error 8.84884e-6.
+Dense acceleration closure is 0.118483: optimizer success does NOT qualify
+this path. Closure/marker tradeoffs need explicit physical scales or hard
+closure constraints. Initial velocity is explicitly not enforced yet.
+Next implement initial-velocity conditions and scaled closure enforcement;
+preserve marker masks and q0. No global torque or full-swing claim is made.
+
 Latest experiment SELF: runner27 adds an explicit bounded least-squares option
 and automatically audits 61 samples between nodes. Receipt
 simscape_tour_matching/native_evidence/retracted_ls_9967_27.json records

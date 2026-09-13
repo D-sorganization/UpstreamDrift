@@ -19,6 +19,7 @@ from src.shared.python.motion_matching.node_retraction import (
     retract_node,
     scaled_tangent_basis,
 )
+from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
 from src.shared.python.motion_matching.constrained_trajectory import (
     compose_chart_residual_jacobian,
     spline_chart_derivative_jacobians,
@@ -53,7 +54,21 @@ def main() -> None:
         "--solver", choices=("trust-constr", "least-squares"), default="trust-constr"
     )
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--candidate", type=Path)
+    parser.add_argument("--payload", type=Path)
+    parser.add_argument("--marker-scale-m", type=float, default=0.001)
     args = parser.parse_args()
+    tracking = args.candidate is not None
+    if (
+        tracking != (args.payload is not None)
+        or not np.isfinite(args.marker_scale_m)
+        or args.marker_scale_m <= 0
+    ):
+        raise ValueError(
+            "Provide candidate and payload together and a positive marker scale"
+        )
+    if tracking and args.solver != "least-squares":
+        raise ValueError("Marker tracking currently requires least-squares")
     if (
         args.output.exists()
         or args.nodes < 4
@@ -83,6 +98,25 @@ def main() -> None:
         [0.1 if primitive[name].startswith("P") else 1.0 for name in names]
     )
     model = NativePinocchioModel(spec)
+    if tracking:
+        candidate = NativeReplayCandidate.from_document(
+            json.loads(args.candidate.read_text()),
+            names,
+            hashlib.sha256(raw).hexdigest(),
+        ).document
+        payload = json.loads(args.payload.read_text())
+        indices = [
+            payload["labels"].index(label) for label in candidate["marker_labels"]
+        ]
+        clock = np.asarray(payload["time_s"], dtype=float)
+        frames = [int(np.argmin(abs(clock - time))) for time in times]
+        if not np.allclose(clock[frames], times, atol=1e-8, rtol=0):
+            raise ValueError("Path nodes must coincide with capture times")
+        targets = np.asarray(payload["points_world_m"], dtype=float)[frames][:, indices]
+        masks = np.asarray(payload["valid"], dtype=bool)[frames][:, indices]
+        if not masks.any() or not np.isfinite(targets[masks]).all():
+            raise ValueError("Invalid observed marker targets")
+        references[0] = np.asarray(candidate["q0"], dtype=float)
 
     def mapping(value: np.ndarray) -> dict[str, float]:
         return dict(zip(names, value.tolist(), strict=True))
@@ -93,9 +127,13 @@ def main() -> None:
         raise ValueError("Native node chart dimension changed")
     dimension = bases[0].shape[1]
     retraction_radius = 0.2
+    free_start = dimension if tracking else 0
+    variable_count = args.nodes * dimension - free_start
 
     def nodes(flat: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        chart = flat.reshape(args.nodes, dimension)
+        chart = np.concatenate((np.zeros(free_start), flat)).reshape(
+            args.nodes, dimension
+        )
         retractions = []
         for reference, basis, coordinate in zip(references, bases, chart, strict=True):
 
@@ -148,6 +186,28 @@ def main() -> None:
             qdd,
         )
 
+    def marker_terms(flat: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        q, node_jacobians = nodes(flat)
+        errors, derivatives = [], []
+        for i, qi in enumerate(q):
+            value = model.marker_derivatives(
+                mapping(qi),
+                candidate["marker_bodies"],
+                np.asarray(candidate["marker_offsets_m"]),
+            )
+            errors.append(
+                (
+                    (value.positions_m - targets[i])[masks[i]] / args.marker_scale_m
+                ).ravel()
+            )
+            local = np.einsum("mkq,qa->mka", value.dposition_dq, node_jacobians[i])[
+                masks[i]
+            ].reshape(-1, dimension)
+            block = np.zeros((local.shape[0], args.nodes * dimension))
+            block[:, i * dimension : (i + 1) * dimension] = local / args.marker_scale_m
+            derivatives.append(block[:, free_start:])
+        return np.concatenate(errors), np.vstack(derivatives)
+
     def residual(flat: np.ndarray) -> np.ndarray:
         q, velocity, acceleration, _, _, _ = state(flat)
         result = []
@@ -157,7 +217,8 @@ def main() -> None:
             )
             result.extend(value.rate)
             result.extend(value.acceleration)
-        return np.asarray(result)
+        closure = np.asarray(result)
+        return np.concatenate((closure, marker_terms(flat)[0])) if tracking else closure
 
     def jacobian(flat: np.ndarray) -> np.ndarray:
         q, velocity, acceleration, node_jacobians, qd, qdd = state(flat)
@@ -178,9 +239,12 @@ def main() -> None:
             qd,
             qdd,
         )
-        return derivative.reshape(args.nodes * 12, args.nodes * dimension)
+        closure = derivative.reshape(args.nodes * 12, args.nodes * dimension)[
+            :, free_start:
+        ]
+        return np.vstack((closure, marker_terms(flat)[1])) if tracking else closure
 
-    initial = np.zeros(args.nodes * dimension)
+    initial = np.zeros(variable_count)
     assembled = jacobian(initial)
     direct = np.empty_like(assembled)
     for column in range(initial.size):
@@ -223,7 +287,7 @@ def main() -> None:
     elapsed = perf_counter() - started
     chart_max = validate_chart_bounds(np.asarray(result.x), 0.01)
     values, _ = nodes(np.asarray(result.x))
-    defect = residual(np.asarray(result.x))
+    defect = residual(np.asarray(result.x))[: args.nodes * 12]
     audit_times = np.linspace(times[0], times[-1], 20 * (args.nodes - 1) + 1)
     audit_spline = CubicSpline(times, values, axis=0)
     audit_values = np.asarray(
@@ -240,6 +304,19 @@ def main() -> None:
         json.dumps(
             {
                 "nodes": args.nodes,
+                "marker_tracking": tracking,
+                "first_pose_fixed": tracking,
+                "initial_velocity_enforced": False,
+                "marker_scale_m": args.marker_scale_m if tracking else None,
+                "marker_rms_m": float(
+                    np.sqrt(np.mean(marker_terms(result.x)[0] ** 2) * 3)
+                    * args.marker_scale_m
+                )
+                if tracking
+                else None,
+                "initial_pose_max_abs_error": float(
+                    np.max(abs(values[0] - references[0]))
+                ),
                 "times_s": times.tolist(),
                 "dense_audit_samples": len(audit_times),
                 "dense_position_max_abs": float(np.max(abs(audit_values[:, 0]))),
@@ -277,7 +354,7 @@ def main() -> None:
                 ),
                 "retraction_trial_radius": retraction_radius,
                 "coordinates": values.tolist(),
-                "scope": "Bounded retracted-node preflight only; no marker objective, effort fit, or forward replay.",
+                "scope": "Bounded path experiment; optional node marker tracking with fixed first pose. No initial velocity constraint, effort fit, or forward replay.",
             },
             indent=2,
         )
