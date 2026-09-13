@@ -1,5 +1,26 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Current Attachment Decision
+
+Run35 fixed-pose calibration is complete and NOT adopted. It uses the shared
+estimate_keypoint_offset provider, with four provider tests passing. Alternating
+frame training/heldout RMS changes66.06/67.06 to61.29/62.42 mm, but initial error
+rises from essentially zero to24.54 mm; maximum attachment movement47.27 mm.
+The heldout poses themselves were fitted to target, so this is not independent
+end-to-end validation. Original candidate offsets and native topology remain.
+Reproduction: native_evidence/reproduction/calibrate_pose_archive.py with --input
+native_evidence/native-calibration-inputs-9967-35.npz and a NEW --output path;
+set PYTHONPATH to repository root plus src. Receipt:
+native_evidence/native-attachment-crossvalidation-9967-35.json.
+
+The head/back limitation was already established in the historical checkpoint,
+Full-Capture Hub Topology and Pair Audit; recent audits reconfirm it. Native Hub
+belongs to COMRod's rigid aggregate including Head/Neck; no separate head joint
+exists. Stop repeating that diagnostic or treating it as a port bug. No proof
+establishes the all-marker acceptance gate is unreachable. Next improve late
+static continuation using actual active-bound evidence, then return to constrained
+forward torque refinement. Preserve original initial state and all marker errors.
+
 ## Current Transition Diagnosis
 
 Read [Transition Recovery](simscape_tour_matching/TRANSITION_RECOVERY_9967.md)
