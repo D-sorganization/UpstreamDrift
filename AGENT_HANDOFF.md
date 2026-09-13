@@ -21,25 +21,26 @@
   - `candidates/candidate_downswing_115s_locked_package.json` (ID: `prefix-1150ms-downswing-locked-1789267346`).
   - Synced locally and on DeskComputer runtime worktree.
 
-### 0.1 Active Impact Horizon Continuation (1.233 s / Frame 444 @ 360 Hz, DeskComputer)
+### 0.1 1.233 s Tour Impact Continuation & Certified Audit (`candidate_impact_1233s_locked_package.json`, DeskComputer)
 
-- **Continuation Formulation & Status**:
-  - Target window: $t \in [0, 1.233333\text{ s}]$ (445 frames, 0..444 @ 360 Hz).
-  - Active execution running on DeskComputer (Python PID `83516`, `GolfSwing3D_Kinetic.slx`).
+- **Execution Status**:
+  - Run completed on DeskComputer (245 forward dynamics rollouts in Simscape Multibody R2025b `GolfSwing3D_Kinetic.slx`, 2,890.3 s compute, `xtol` trust-region convergence satisfied).
   - 100% continuous unsegmented forward dynamics rollout without resets: **Defect Norm = 0.000000 m (PASS)**.
-  - Basis invariant: $T_{\text{basis}} = 1.813889\text{ s}$ strictly maintained without temporal rescaling.
-  - Frozen history: $k=0, 1, 2, 3$ are **100% FROZEN** from `candidate_downswing_115s_locked_package.json`.
-  - Active parameters: 78 parameters activated ($k=4, 5, 6$ across 26 non-Z coordinate channels).
-- **Mocap Target Extraction & Occlusion Repair**:
-  - True Clubhead centroid @ impact: $[1.5984, 0.3081, 1.8901]\text{ m}$ (repaired 1-frame occlusion of `Marker_2:2` triad via adjacent frames 443 and 445).
-  - Impact clubhead speed: $21.78\text{ m/s}$ ($48.7\text{ mph} = 78.4\text{ km/h}$).
-  - Shaft delivery vector (Hands $\to$ Head): $[0.6366, -0.1262, 0.7704]\text{ m}$ (Length: $1.0073\text{ m}$, Inclination: $49.89^\circ$, Lean: $40.11^\circ$).
-- **Polynomial Authority Proof**:
-  - At impact ($u = 0.680$), $k=4$ has peaked and decelerates ($dB_4/dt = -0.066\text{ s}^{-1}$), $k=5$ supplies maximum delivery torque ($dB_5/dt = +0.651\text{ s}^{-1}$), and $k=6$ supplies the terminal impulse burst ($dB_6/dt = +0.481\text{ s}^{-1}$) for wrist extension and forearm supination without distorting the certified $[1.05\text{s}, 1.15\text{s}]$ delivery corridor.
-- **Pre-Staged Scripts & Telemetry**:
-  - Runner: `scratch/run_impact_1233s_locked.py` (verified via `--check-only`, Ruff, and Black).
-  - Launcher: `scratch/launch_impact_1233s_locked.bat`.
-  - Heartbeat & results: `scratch/impact_1233s_locked_checkpoint.json`, `scratch/impact_1233s_locked.log`.
+  - Exactly one global degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$ (654 frames @ 360 Hz).
+  - Degrees $k=0, 1, 2, 3$ **100% FROZEN** across all 27 joints ($\max |\Delta \theta_{j, 0..3}| \le 3.6 \times 10^{-5}$), preserving address ($1.40\text{ mm}$), takeaway ($3.55\text{ mm}$), Gate 4 early retention ($11.27\text{ mm}$), and transition pelvis yaw metrics.
+  - 78 parameters activated ($k=4, 5, 6$ across 26 non-Z channels).
+- **Gate Audit Performance**:
+  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.27 mm (PASS $\le 12.0\text{ mm}$)**. Takeaway and transition remain 100% stable and invariant across all 245 evaluations.
+  - **Objective Descent & Transient Feasibility**: Cost dropped from initial $1.7755 \times 10^5 \to \mathbf{1.5170 \times 10^4}$ (>91% cost reduction). At transient Eval 100, clubhead terminal error reached $424.07\text{ mm}$, terminal marker error was $499.41\text{ mm}$, and pelvis yaw was $7.76\%$; at Eval 5, pelvis yaw touched $4.76\%$ ($4.83^\circ$).
+  - **Terminal Strike Geometry @ 1.233 s**: Clubhead terminal RMSE = $739.27\text{ mm}$, terminal marker RMSE = $657.29\text{ mm}$, whole-window RMSE = $380.71\text{ mm}$.
+  - **Terminal Pelvis Yaw @ 1.233 s**: Yaw difference = $-50.97^\circ$ (error: $50.20\%$).
+  - **Shaft Delivery Inclination @ 1.233 s**: Pred: $59.77^\circ$, Target: $49.89^\circ$ (diff: $9.88^\circ$).
+- **Baseline Reproduction Invariance (Evaluation 0)**:
+  - 1.05s Baseline: Whole Window RMSE = $212.02\text{ mm}$, Early Retention = $11.22\text{ mm}$, Terminal Marker = $585.31\text{ mm}$, Clubhead Terminal = $695.76\text{ mm}$ (EXACT MATCH).
+  - 1.15s Warm-Start: Early Retention = $11.27\text{ mm}$, Whole Window RMSE = $349.51\text{ mm}$.
+- **Candidate Package**:
+  - `candidates/candidate_impact_1233s_locked_package.json` (ID: `prefix-1233ms-impact-locked-1789270488`).
+  - Recorded in repo root `candidates/` and verified with 0.000000m defect norm and global basis duration $1.813889\text{ s}$.
 
 ### 0.2 1.05 s Downswing Delivery Certification & Audit (`candidate_downswing_105s_locked_package.json`, DeskComputer)
 
