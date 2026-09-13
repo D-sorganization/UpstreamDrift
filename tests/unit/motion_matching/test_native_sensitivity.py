@@ -19,8 +19,10 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize("basis_duration", [None, 0.4, 1.2])
+@pytest.mark.parametrize("separate_error_control", [False, True])
 def test_free_mass_matches_exact_sextic_force_response(
     basis_duration: float | None,
+    separate_error_control: bool,
 ) -> None:
     names = ["x", "y", "z"]
     raw = json.dumps(
@@ -94,6 +96,23 @@ def test_free_mass_matches_exact_sextic_force_response(
             max_sensitivity_evaluations=1,
         )
 
+    class BiasedMarkerMass(Mass):
+        def marker_derivatives(self, q, bodies, offsets) -> NativeMarkerDerivatives:
+            original = super().marker_derivatives(q, bodies, offsets)
+            return original._replace(positions_m=original.positions_m + [1e-6, 0, 0])
+
+    with pytest.raises(
+        ValueError,
+        match=r"max_abs_difference_m=1e-06.*time_s=0.*marker=com.*axis=0",
+    ):
+        replay_marker_sensitivities(
+            raw,
+            candidate,
+            np.array([0.0, 0.8]),
+            model_factory=BiasedMarkerMass,
+            max_step=0.02,
+        )
+
     result = replay_marker_sensitivities(
         raw,
         candidate,
@@ -101,6 +120,7 @@ def test_free_mass_matches_exact_sextic_force_response(
         model_factory=Mass,
         max_step=0.02,
         basis_duration_s=basis_duration,
+        separate_error_control=separate_error_control,
     )
     basis = 0.8 if basis_duration is None else basis_duration
     assert result.marker_jacobian.shape == (3, 1, 3, 9)

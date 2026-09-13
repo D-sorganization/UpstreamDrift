@@ -25,6 +25,7 @@ from src.shared.python.motion_matching.native_candidate import NativeReplayCandi
 from src.shared.python.motion_matching.native_effort_profile import NativeEffortProfile
 
 Array = NDArray[np.float64]
+_MARKER_AGREEMENT_BOUND_M = 1e-7
 
 
 class NativeSensitivityEngine(NativeReplayEngine, Protocol):
@@ -71,6 +72,7 @@ def replay_marker_sensitivities(
     atol: float = 1e-12,
     max_step: float = 0.00025,
     max_sensitivity_evaluations: int | None = None,
+    separate_error_control: bool = False,
 ) -> NativeMarkerSensitivityResult:
     """Integrate all selected native control columns with one initial state.
 
@@ -88,6 +90,8 @@ def replay_marker_sensitivities(
     the original basis duration when extending coverage without rebasing controls.
     max_sensitivity_evaluations bounds augmented linearization calls only; the
     independent primal replay is separate. Exhaustion raises without a Jacobian.
+    separate_error_control opts into independent physical-state and sensitivity
+    error blocks; marker and weld agreement checks remain unchanged.
     """
     basis_duration = (
         candidate.document["duration_s"]
@@ -187,6 +191,7 @@ def replay_marker_sensitivities(
         parameters,
         initial_sensitivity=initial_jacobian,
         max_evaluations=max_sensitivity_evaluations,
+        separate_error_control=separate_error_control,
         rtol=rtol,
         atol=atol,
         max_step=max_step,
@@ -226,10 +231,17 @@ def replay_marker_sensitivities(
         or not np.isfinite(jacobian).all()
     ):
         raise ValueError("Invalid native marker sensitivity arrays")
-    difference = float(np.max(np.abs(points - primal.markers_m)))
-    if difference > 1e-7:
+    absolute_difference = np.abs(points - primal.markers_m)
+    difference = float(np.max(absolute_difference))
+    if difference > _MARKER_AGREEMENT_BOUND_M:
+        frame, marker_index, axis = np.unravel_index(
+            np.argmax(absolute_difference), absolute_difference.shape
+        )
         raise ValueError(
-            "Sensitivity primal marker replay exceeds numerical agreement bound"
+            "Sensitivity primal marker replay exceeds numerical agreement bound: "
+            f"max_abs_difference_m={difference:.9g}, "
+            f"time_s={time_s[frame]:.9g}, marker={doc['marker_labels'][marker_index]}, "
+            f"axis={axis}, limit_m={_MARKER_AGREEMENT_BOUND_M:.9g}"
         )
     jacobian.setflags(write=False)
     return NativeMarkerSensitivityResult(

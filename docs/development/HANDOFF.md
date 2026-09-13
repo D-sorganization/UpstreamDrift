@@ -8,9 +8,9 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpointc52f2029f is pushed with
-all normal hooks passing. SELF adds cheaper sensitivity qualification65,
-selected derivative audit66, manufactured padding67 and runner accuracy controls. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpoint8d84ee8bf is pushed with
+all normal hooks passing. SELF adds terminal fit68 evidence and opt-in grouped
+physical/sensitivity error control. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -87,7 +87,7 @@ the unchanged1e-7 gate. Total launch466.239 s; diagnostic call/save419.190 s.
 The augmented settings were rtol1e-12/atol1e-14/max_step0.000125. The provider's
 independent primal remained rtol1e-11/atol1e-13; max_step applies to both. This
 supports an accuracy-dependent63 failure, not a derivative correctness or C3D
-acceptance claim. Cost is far above the default sensitivity calls. All jobs through67 are terminal; fit68 is the next authorized experiment.
+acceptance claim. Cost is far above the default sensitivity calls. All jobs through69 are terminal; diagnostic70 is the next authorized experiment.
 Runtime65 adds the checked call-budget API and passes36 tests including nine
 real Pinocchio tests. Diagnostic65 changes only max_step to0.000125 relative
 to63, retaining augmented tolerances1e-10/1e-12: marker difference3.88459e-8 m,
@@ -100,17 +100,34 @@ Raw sources/inputs/replays are preserved in sensitivity_9967_65 and derivative_9
 Runner now accepts --max-step for both forward and sensitivity paths and
 --max-sensitivity-evaluations; defaults preserve prior behavior. Five new parser
 checks went RED/GREEN;13 runner tests pass. Runtime68 qualifies32 tests including nine real Pinocchio tests, plus runner
---help. Fit68 is active on ControlTower, WSL PID2842183 / agent handle54657;
+--help. Fit68 is TERMINAL1 after425.444 s, former PID2842183 / handle54657;
 output /mnt/c/Users/diete/native-regularized-fit-9967-68. Authorized fit68 retains original
 baseline19, restarts returned62, uses B4/B5/B6,max_nfev10,max_step0.000125,
 sensitivity budget100000, and unchanged weight0.01/scales/amplitude/bounds.
-Preserve any gate or budget failure; do not retry automatically. Inspect actual
-PID/receipt before any launch. All previous numerical runtimes remain immutable.
+Eight Jacobian checks pass, then the ninth candidate fails unchanged marker
+agreement (not its evaluation budget). Candidate canonical hash:
+c8885ace0b1021dea6e2fbd824286fd37eeff8cb91498147d2d585cb64bed039.
+The last unqualified checkpoint reports28.138 mm whole/65.565 mm terminal;
+it is not a returned solution. Exact evidence: native_evidence/regularized_fit_9967_68.
+All previous numerical runtimes remain immutable.
 
 Manufactured diagnostic67 confirms inactive sensitivity-column padding changes
 physical integration error under the existing combined error norm. This suggests
 an architecture improvement, not a proof of native model error. Keep it as a
-regression case if separate state/variational error control becomes necessary.
+regression case for opt-in grouped DOP853 error control, now implemented through
+shared integrate_forward/integrate_sensitivities and the native provider/runner.
+The maximum of SciPy's existing physical and sensitivity block norms controls
+steps; default behavior is unchanged. The protected SciPy hook requires runtime
+qualification. Initial-step selection remains unchanged.57 focused tests pass
+after RED/GREEN, plus Ruff; no global accuracy guarantee is inferred.
+Diagnostic70 is TERMINAL1 on the exact failed68 candidate, max_step0.000125,
+rtol1e-10/atol1e-12,100000 sensitivity calls, separate_error_control=True.
+Runtime70 passes49 focused tests including nine real Pinocchio cases. Agreement
+fails narrowly at1.02308673e-7 m, t0.85, WaistRBack axis1; limit remains1e-7.
+Call35.969 s, launch40.103 s. No optimizer retry. Diagnostic71 is authorized in
+the same immutable runtime with rtol3e-11/atol3e-13 and150000 calls. Inspect its
+receipt/agent handle before any further launch. Four changed source modules pass mypy.
+Marker agreement failures now report discrepancy, time, marker and axis.
 
 The shared native motion sequence API is implemented and publicly exported.
 It converts complete batches with immutable time/model/frame/branch metadata
@@ -160,12 +177,10 @@ numerical accuracy or wall-time guarantee. Exhaustion raises without partial dat
 
 ## Ordered Next Work
 
-1. Observe authorized fit68 on its original handle and preserve its terminal
-   result. A successful numerical check at65 or one derivative direction at66
-   does not qualify the complete optimizer Jacobian or full swing. If68 aborts,
-   diagnose the exact candidate with a bounded experiment before further fitting.
-   Keep separate error-control/manufactured padding67 as the next solver design
-   option if repeated candidate failures make the current approach impractical.
+1. Observe modest tolerance refinement71 on the exact failed68 candidate.
+   Archive terminal results before another optimizer attempt. A successful
+   numerical check at65 or one derivative direction at66 does not qualify the
+   complete optimizer Jacobian or full swing. Preserve unchanged agreement gates.
 
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives

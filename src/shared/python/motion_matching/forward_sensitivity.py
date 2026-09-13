@@ -33,6 +33,7 @@ def integrate_sensitivities(
     atol: float = 1e-11,
     max_step: float = 0.001,
     max_evaluations: int | None = None,
+    separate_error_control: bool = False,
 ) -> ForwardSensitivityResult:
     """Integrate x'=f and S'=df/dx S + df/dp using shared forward integration.
 
@@ -42,7 +43,12 @@ def integrate_sensitivities(
     accuracy and runtime before using the result as an optimizer Jacobian.
     max_evaluations caps actual linearization callbacks through the shared
     integrator, including rejected steps; exhaustion never returns partial data.
+    separate_error_control optionally prevents dilution of physical-state error
+    by sensitivity columns, using separate physical and sensitivity block norms.
+    The default retains SciPy's original augmented-state error control.
     """
+    if not isinstance(separate_error_control, bool):
+        raise ValueError("separate_error_control must be boolean")
     if (
         isinstance(parameter_count, bool)
         or not isinstance(parameter_count, int)
@@ -84,6 +90,7 @@ def integrate_sensitivities(
         atol=atol,
         max_step=max_step,
         max_evaluations=max_evaluations,
+        error_block_sizes=(n, n * parameter_count) if separate_error_control else None,
     )
     states = augmented.state[:, :n].copy()
     derivatives = augmented.state[:, n:].reshape((-1, n, parameter_count)).copy()
