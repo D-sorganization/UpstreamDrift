@@ -7,11 +7,12 @@ capture with uninterrupted forward dynamics and global degree-six native actuato
 inputs. MATLAB R2025b remains the final reference. Read ../HANDOFF.md first for
 the latest terminal fit and any live process; do not restart an active job.
 
-Fit73 is the currently authorized bounded single-shooting experiment. It uses
+Fit73 is terminal0 and rejected after its bounded single-shooting experiment. It used
 grouped sensitivity control, max_step0.0000625 and200000 sensitivity calls per
 evaluation. Diagnostic72 passes its exact restart candidate at2.5069e-8 m marker
 agreement. Numerical reliability improved, but marker matching improvements
-remain small. Audit74's marker/terminal Jacobian condition is7.452e7 and remains
+remain small: whole28.10547 mm and terminal65.39791 mm over0.85 s. Its actual
+q/qd and marker samples are archived; no compute jobs remain active. Audit74's marker/terminal Jacobian condition is7.452e7 and remains
 3.767e7 after column normalization; penalty rows and bounds were excluded.
 This evidence is not proof of a particular nonlinear failure mechanism.
 

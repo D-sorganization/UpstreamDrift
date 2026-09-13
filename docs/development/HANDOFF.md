@@ -8,15 +8,15 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpointa6e761e02 is pushed with
-all normal hooks passing. SELF adds the bounded two-window convergence execution plan. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpoint22c550db5 is pushed with
+all normal hooks passing. SELF archives terminal fit73 and its measured state/marker replay. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
-Latest cleanly returned exploratory fit: run62,0.85 s only, whole RMS28.635 mm
-and terminal66.713 mm. It is rejected, not a full-swing match. See
-[Candidate](simscape_tour_matching/native_evidence/regularized_fit_9967_62/returned-candidate.json)
-and [Measured Comparison](simscape_tour_matching/native_evidence/regularized_fit_9967_62/marker-comparison.png).
+Latest cleanly returned exploratory fit: run73,0.85 s only, whole RMS28.105 mm
+and terminal65.398 mm. It is rejected, not a full-swing match. See
+[Candidate](simscape_tour_matching/native_evidence/regularized_fit_9967_73/returned-candidate.json)
+and [Measured Comparison](simscape_tour_matching/native_evidence/regularized_fit_9967_73/marker-comparison.png).
 
 ## Representation Qualification
 
@@ -129,11 +129,15 @@ Diagnostic72 is TERMINAL0: max_step0.0000625 with original70 tolerances yields
 2.506897942e-8 m agreement,164339 calls/53.916 s sensitivity (71.554 s call/save).
 Marker samples and state/marker sensitivity Jacobians are archived; primal q/qd
 trajectories were not saved. This qualifies one candidate, not all derivatives.
-Fit73 is authorized from failed68 candidate after72 qualification, original19
-baseline, B456/max_nfev10, grouped control, max_step0.0000625,200000 calls.
-Runtime73 qualifies62 tests plus runner help. Fit73 is active: PID2891462,
-handle55242; output /mnt/c/Users/diete/native-regularized-fit-9967-73. Inspect
-its receipt/handle before any further launch. Four changed source modules pass mypy.
+Fit73 is TERMINAL0 after989.414 s, accepted/converged false, max_nfev10.
+All ten Jacobian checks pass; final whole28.10547 mm, terminal65.39791 mm,
+early10.86040 mm and club30.04069 mm. Settings: original19 baseline, B456,
+grouped control, max_step0.0000625,200000 sensitivity calls.
+Runtime73 qualifies62 tests plus runner help. Former PID2891462/handle55242
+are terminal. Output /mnt/c/Users/diete/native-regularized-fit-9967-73. A separate
+post-return replay saves actual q/qd (not qdd), markers and a rejected overlay.
+Final candidate canonical SHA256:
+786522cd5380a9f62602920b2cff6e6b404f7ceb99bfc6783f1f359b98a6457a. Four changed source modules pass mypy.
 Marker agreement failures now report discrepancy, time, marker and axis.
 
 The shared native motion sequence API is implemented and publicly exported.
@@ -162,8 +166,7 @@ Offline audit74 uses saved72 Jacobians, existing valid masks, amplitude10 and
 terminal weight10. Marker-only23100-by-81 condition number is7.452e7; column
 normalization leaves3.767e7. Penalty rows/bounds are excluded. This supports
 checking correlated sensitivities, not claiming a proven cause of stagnation.
-Fit73 has passed five Jacobian checks at evaluation6, with only modest objective
-improvement (18.368819 to18.364114). Let its bounded run finish; then inspect
+Fit73 ended with only modest matching improvement. Inspect
 actual/predicted reduction and a mixed-control directional derivative before
 more compute. See native_evidence/sensitivity_condition_9967_74.
 
@@ -209,12 +212,12 @@ numerical accuracy or wall-time guarantee. Exhaustion raises without partial dat
 ## Ordered Next Work
 
 Use [Next Agent Execution Plan](simscape_tour_matching/NEXT_AGENT_CONVERGENCE_EXECUTION.md)
-for the existing-provider, two-window derivative preflight after fit73 is terminal.
+for the existing-provider, two-window derivative preflight now that fit73 is terminal.
 It specifies integrated nodes, retraction/continuity chain-rule checks and bounded
 SLSQP acceptance without recreating the solver or accepting state-reset motion.
 
-1. Observe fit73 on its original handle and preserve terminal results.
-   Archive terminal results before another optimizer attempt. A successful
+1. Use terminal73 as the next integrated-state fixture. Complete the two-window
+   derivative preflight before another optimizer attempt. A successful
    numerical check at65 or one derivative direction at66 does not qualify the
    complete optimizer Jacobian or full swing. Preserve unchanged agreement gates.
 
