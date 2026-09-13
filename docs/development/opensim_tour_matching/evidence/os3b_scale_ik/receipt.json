@@ -1,0 +1,139 @@
+{
+  "work_package": "OS-3b: segment scaling, calibration and full 654-frame IK",
+  "epic": "#10003",
+  "inputs": {
+    "osim_sha256": "344e8a86bd155e90d0882db4300c963b2665fe087b950245555fc38dc33b5ad7",
+    "trc_sha256": "95e1714d6e044280650638feaac07894c49da4e2c300ef572de54fe13401f67b"
+  },
+  "cal_stride": 20,
+  "iterations": 4,
+  "status": "complete",
+  "total_frames": 654,
+  "scaling": {
+    "scale_factors": {
+      "femur_r": 0.9922237590782061,
+      "femur_l": 1.0258735775039245,
+      "tibia_r": 0.9673512421353035,
+      "tibia_l": 0.9694478920768417,
+      "calcn_r": 1.0008261755860735,
+      "calcn_l": 1.055418960197093,
+      "humerus_r": 1.4567005142180642,
+      "humerus_l": 1.243623153053832,
+      "radius_r": 1.1641304709089288,
+      "radius_l": 1.1547149770999696,
+      "torso": 1.0418649386853418
+    },
+    "measured_lengths_m": {
+      "femur_r": 0.5407619486976224,
+      "femur_l": 0.5488423639645996,
+      "tibia_r": 0.4241835196763306,
+      "tibia_l": 0.42112816431818,
+      "calcn_r": 0.1622339230625025,
+      "calcn_l": 0.1690781174235743,
+      "humerus_r": 0.4170533572206318,
+      "humerus_l": 0.3560493087193121,
+      "radius_r": 0.2745019650403254,
+      "radius_l": 0.27228179160017285,
+      "torso": 0.48967652118211064
+    },
+    "nominal_lengths_m": {
+      "femur_r": 0.545,
+      "femur_l": 0.535,
+      "tibia_r": 0.4385,
+      "tibia_l": 0.4344,
+      "calcn_r": 0.1621,
+      "calcn_l": 0.1602,
+      "humerus_r": 0.2863,
+      "humerus_l": 0.2863,
+      "radius_r": 0.2358,
+      "radius_l": 0.2358,
+      "torso": 0.47
+    },
+    "rigid_residuals_m": {
+      "femur_r": 1.5643526679008056e-5,
+      "femur_l": 9.445513547870316e-6,
+      "tibia_r": 2.6295003816752268e-5,
+      "tibia_l": 1.3869260146558831e-5,
+      "calcn_r": 2.7249423928264664e-5,
+      "calcn_l": 2.2460881057644405e-5,
+      "humerus_r": 2.1238283188548392e-5,
+      "humerus_l": 6.541527906933819e-5,
+      "radius_r": 5.1992242753057354e-5,
+      "radius_l": 2.2059785706909273e-5,
+      "torso": 6.697173944707382e-6
+    },
+    "provenance": {
+      "femur_r": "waist_r centroid to RKneeOut (knee-hip proxy via waist)",
+      "femur_l": "waist_l centroid to LKneeOut (knee-hip proxy via waist)",
+      "tibia_r": "RKneeOut to RAnkleOut (knee-ankle)",
+      "tibia_l": "LKneeOut to LAnkleOut (knee-ankle)",
+      "calcn_r": "RAnkleOut to toe_r centroid (ankle-toe)",
+      "calcn_l": "LAnkleOut to toe_l centroid (ankle-toe)",
+      "humerus_r": "shoulder_r centroid (RShoulderBack fallback) to RElbowOut (shoulder-elbow)",
+      "humerus_l": "shoulder_l centroid to LElbowOut (shoulder-elbow)",
+      "radius_r": "RElbowOut to RWristTop (elbow-wrist)",
+      "radius_l": "LElbowOut to LWristTop (elbow-wrist)",
+      "torso": "waist centroid to shoulder centroid (waist-shoulder)"
+    },
+    "scaled_osim_sha256": "bba651fac7d08322071922531ec509b31b351b7bf24e0b3ec3a3f58fe263b5fd"
+  },
+  "calibration_frames": 33,
+  "qualification": "full 654-frame kinematic feasibility on subject-scaled model; not dynamics",
+  "calibration": {
+    "best_iteration": 3,
+    "rms_per_iteration_m": [
+      0.1925714998471918, 0.08962096012349165, 0.07177101423199814,
+      0.07744571760107079
+    ],
+    "per_marker_rms_m": {
+      "WaistLeft": 0.06905489550806108,
+      "WaistRight": 0.06376017197919485,
+      "WaistLBack": 0.04733547650715233,
+      "WaistRBack": 0.03822865206109887,
+      "BackTop": 0.05418522760882594,
+      "BackLeft": 0.08665046081247925,
+      "BackRight": 0.07633011253804006,
+      "HeadTop": 0.0624554362783904,
+      "HeadFront": 0.13843398773359417,
+      "HeadSide": 0.07485748382212509,
+      "LShoulderTop": 0.1109613557205739,
+      "LShoulderBack": 0.10250414413153573,
+      "LElbowOut": 0.07183779950935427,
+      "LUArmHigh": 0.07865526990994247,
+      "LWristTop": 0.044947553752730955,
+      "RShoulderTop": 0.12004652334892164,
+      "RShoulderBack": 0.079628344488667,
+      "RElbowOut": 0.14192727807755837,
+      "RUArmHigh": 0.14415262217581767,
+      "RWristTop": 0.13420967251969698,
+      "LKneeOut": 0.041449707070123396,
+      "LToeIn": 0.027780126461147216,
+      "LToeOut": 0.02230802345413132,
+      "LAnkleOut": 0.033761596679245595,
+      "RKneeOut": 0.032309153527711305,
+      "RToeIn": 0.02177317017344413,
+      "RToeOut": 0.017880639456717876,
+      "RAnkleOut": 0.024070544264542866,
+      "Marker_2:2:1": 0.02088968908867294,
+      "Marker_2:2:2": 0.01377906479880667,
+      "Marker_2:2:3": 0.017698078081807223,
+      "Marker_3:3:1": 0.0142529662107696,
+      "Marker_3:3:2": 0.012139040010904798,
+      "Marker_3:3:3": 0.014071974909295073
+    }
+  },
+  "shared_metrics": {
+    "whole_marker_rmse_m": 0.07851433583675457,
+    "early_marker_rmse_m": 0.04263623753268094,
+    "terminal_marker_rmse_m": 0.17121397017839793,
+    "club_marker_rmse_m": 0.020426568465718466,
+    "pelvis_yaw_rmse_rad": 0.18029554317259003
+  },
+  "overall_marker_rms_m": 0.06776448122117136,
+  "outputs": {
+    "scaled_model_sha256": "bba651fac7d08322071922531ec509b31b351b7bf24e0b3ec3a3f58fe263b5fd",
+    "calibrated_model_sha256": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
+    "ik_npz_sha256": "784d91039b3567ac62abba5d19b3ce09ea428faea185c3354e4672176ef0d0e3",
+    "overlay_gif": "overlay_7dd1da1764bd.gif"
+  }
+}
