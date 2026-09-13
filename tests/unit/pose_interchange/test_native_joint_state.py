@@ -156,3 +156,20 @@ def test_native_mujoco_frames_survive_representation_round_trip(
     assert actual.keys() == expected.keys()
     for name in actual:
         np.testing.assert_allclose(actual[name], expected[name], atol=1e-12)
+
+
+def test_explicit_branch_restore_preserves_native_rates_and_efforts(adapter):
+    q = dict.fromkeys(adapter.coordinate_order, 0.2)
+    reference = dict(q)
+    group = adapter.groups[1]
+    for name, value, prior in zip(
+        group.coordinates, [2.8, -1.6, 2.8], [0, -2, 0], strict=True
+    ):
+        q[name], reference[name] = value, prior
+    v, a, tau = (dict.fromkeys(q, value) for value in (0.3, 0.4, 2.0))
+    state = adapter.export(q, v, a, tau)
+    restored = adapter.restore(state, reference, preserve_middle_branch=True)
+    for actual, expected in zip(restored, (q, v, a, tau), strict=True):
+        np.testing.assert_allclose(
+            list(actual.values()), list(expected.values()), atol=2e-12
+        )

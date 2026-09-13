@@ -143,10 +143,16 @@ class NativeManifoldPinocchioModel:
         velocity: ArrayLike,
         reference_coordinates: Mapping[str, float],
     ) -> tuple[dict[str, float], dict[str, float]]:
-        """Restore a native branch and rates; reference carries winding history."""
+        """Restore native rates on the reference middle-angle gimbal branch.
+
+        Outer-axis winding is nearest the reference. Choosing a different middle
+        branch solely for angle proximity changes the native actuator map.
+        """
         q, v = self._configuration(configuration), self._tangent(velocity)
         native_q, native_v, _, _ = self.adapter.restore(
-            self._native_state(q, v, np.zeros(self.model.nv)), reference_coordinates
+            self._native_state(q, v, np.zeros(self.model.nv)),
+            reference_coordinates,
+            preserve_middle_branch=True,
         )
         return native_q, native_v
 
@@ -167,6 +173,31 @@ class NativeManifoldPinocchioModel:
             ),
             dtype=float,
         ).copy()
+
+    def difference_rate(
+        self, anchor: ArrayLike, configuration: ArrayLike, velocity: ArrayLike
+    ) -> Array:
+        """Derivative of difference(anchor,q) for q's body-tangent velocity.
+
+        The anchor is held fixed. This is the inverse local retraction Jacobian,
+        not an identity map except in Euclidean coordinates or at the anchor.
+        """
+        jacobian = np.asarray(
+            self.pin.dDifference(
+                self.model,
+                self._configuration(anchor),
+                self._configuration(configuration),
+                self.pin.ARG1,
+            ),
+            dtype=float,
+        )
+        if jacobian.shape != (self.model.nv, self.model.nv):
+            raise ValueError("Invalid manifold difference Jacobian")
+        return self._tangent(jacobian @ self._tangent(velocity)).copy()
+
+    def closure_errors(self) -> tuple[Array, Array]:
+        """Detached weld pose/rate errors from the most recent dynamics call."""
+        return self._tree.closure_errors()
 
     def frame_poses(self, configuration: ArrayLike) -> dict[str, Array]:
         """Detached world transforms of every native marker-reference frame."""
@@ -246,4 +277,6 @@ class NativeManifoldPinocchioModel:
         """Map forward result to native qdd, including the convective term."""
         q, v, tau = self.native_state(coordinates, rates, primitive_efforts)
         a = self.acceleration(q, v, tau)
-        return self.adapter.restore(self._native_state(q, v, a), coordinates)[2]
+        return self.adapter.restore(
+            self._native_state(q, v, a), coordinates, preserve_middle_branch=True
+        )[2]

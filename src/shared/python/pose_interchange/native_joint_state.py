@@ -175,11 +175,14 @@ class NativeJointStateAdapter:
         self,
         state: NativeManifoldState,
         reference_coordinates: Mapping[str, float],
+        *,
+        preserve_middle_branch: bool = False,
     ) -> tuple[dict[str, float], dict[str, float], dict[str, float], dict[str, float]]:
         """Recover native coordinates near a supplied branch reference.
 
         Singular inverse charts fail explicitly; a quaternion cannot create a
-        unique native Euler rate at gimbal lock.
+        unique native Euler rate at gimbal lock. preserve_middle_branch retains
+        the reference interval between middle-axis poles for actuator fidelity.
         """
         self._validate(reference_coordinates)
         if state.convention_tag != "native-joint-manifold-v1":
@@ -204,6 +207,7 @@ class NativeJointStateAdapter:
             q = chart.coordinates(
                 rotation_state.quaternion_wxyz,
                 [reference_coordinates[n] for n in group.coordinates],
+                preserve_middle_branch=preserve_middle_branch,
             )
             v = chart.coordinate_rate(q, rotation_state.omega_parent_rad_s)
             a = chart.coordinate_acceleration(q, v, rotation_state.alpha_parent_rad_s2)
