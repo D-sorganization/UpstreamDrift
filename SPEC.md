@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Segment Scaling, Calibration Best-Iteration, and Full 654-Frame IK (#10003)
+
+Implement subject segment scaling, marker calibration best-iteration selection, and full 654-frame inverse kinematics feasibility matching the tour-average swing:
+- Segment Scaling (`src/engines/physics_engines/opensim/python/tour_matching/scale.py`): Calculate segment lengths from frame 0 marker pairs (`femur`, `tibia`, `calcn`, `humerus`, `radius`, `torso`) with waist-proxy hip center and shoulder centroid with fallback to `RShoulderBack` for early `RShoulderTop` occlusion; verify rigid assumption (<0.1 mm residual); produce `src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim`.
+- Shared Metrics (`src/engines/physics_engines/opensim/python/tour_matching/metrics.py`): Standardize 5 shared cross-engine metrics: `whole_marker_rmse_m`, `early_marker_rmse_m` ($t \le 0.6\text{ s}$), `terminal_marker_rmse_m`, `club_marker_rmse_m`, and `pelvis_yaw_rmse_rad`.
+- Marker Calibration Best-Iteration Selection (`src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`): Retain and return `best_iteration` and `per_marker_rms_m` in `CalibrationResult`.
+- Full Kinematic Feasibility (`docs/development/opensim_tour_matching/os3b_scale_and_full_ik.py`): Run 654-frame IK on scaled model, generating 3D animated GIF overlay and receipt (`docs/development/opensim_tour_matching/evidence/os3b_scale_ik/receipt.json`), achieving 2.0 cm club marker RMSE and 4.2 cm early marker RMSE.
+
 ## OpenSim Golf Model Coordinates, Swing Ranges, and Calibrated Club Dimensions (#10003)
 
 Unlock golf swing coordinates, widen joint excursion limits, and calibrate driver dimensions for the OpenSim golf humanoid model (`scripts/build_humanoid_osim.py`, `src/engines/physics_engines/opensim/models/golf_humanoid.osim`):

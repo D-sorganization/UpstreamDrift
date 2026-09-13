@@ -95,10 +95,10 @@ SHA256 in the receipt (the driver does this for its inputs already).
 
 Copy-ready prompt: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
 
-- OS-2b: golf variant in the builder (unlock 17 coordinates, widen clamps,
-  club length from the capture's club markers), regenerated model, tests.
-- OS-3b: segment scaling from first-frame marker pairs; keep-best iteration;
-  full 654-frame IK; per-frame and per-marker RMS report; overlay animation.
+- OS-2b: [COMPLETE] golf variant in the builder (unlock 17 coordinates, widen clamps,
+  club length from the capture's club markers), regenerated model, tests merged in #10073.
+- OS-3b: [COMPLETE] segment scaling from first-frame marker pairs; keep-best iteration;
+  full 654-frame IK; per-frame and per-marker RMS report; overlay animation (PR #10075).
 - OS-4: MocoTrack pilot on the scaled model with the calibrated MarkerSet
   over a 0.85 s prefix, coordinate actuators only, receipts.
 - OS-5: global degree-six effort profile fit with uninterrupted replay,
