@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9967 - Native Multi-Engine Golf Matching
 
-- **State:** parked
-- **Owner:** codex
+- **State:** in_progress
+- **Owner:** claude
 - **Issue:** #9967 (parent #9921; representation #10043; engine lanes #10021 and #10022)
 - **Branch:** feat/9967-native-simscape-pinocchio
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching; src/shared/python/pose_interchange; native engine adapters; docs/development/simscape_tour_matching; docs/development/mujoco_native_matching
 - **Started:** 2026-09-11
-- **Last verified:** 2026-09-12;57 grouped/native/runner regressions,101 representation regressions,5 consumer checks and5 spherical-export tests pass. Consumer Drake/Pinocchio cases skip locally for missing runtimes; live MuJoCo executes. Focused Ruff/mypy and normal commit/push checks pass. Frozen runtime73 qualifies62 tests including9 real Pinocchio tests.
+- **Last verified:** 2026-09-12 (SELF;20 new derivative-resolution/node-chart unit tests plus40 shooting/node/sensitivity regressions pass locally with Ruff/mypy);57 grouped/native/runner regressions,101 representation regressions,5 consumer checks and5 spherical-export tests pass. Consumer Drake/Pinocchio cases skip locally for missing runtimes; live MuJoCo executes. Focused Ruff/mypy and normal commit/push checks pass. Frozen runtime73 qualifies62 tests including9 real Pinocchio tests.
 - **Summary:** Shared angle/quaternion/screw-axis state, rate, acceleration, dual-effort and fixed-frame conversion plus versioned atomic motion I/O are implemented. Pinocchio spherical dynamics has incomplete trajectory qualification. MuJoCo spherical MJCF export preserves tested compiled geometry/inertia/closure, but its dynamics adapter remains open. Fit73 is terminal0 after989.414 s, all10 Jacobian checks pass, accepted/converged false: whole28.10547 mm, terminal65.39791 mm over0.85 s. Actual307-by-54 q/qd samples and marker overlay are saved. No accepted full swing or independent full R2025b replay exists. Audit74 finds marker-Jacobian condition7.452e7,3.767e7 after column normalization. Fixed-attachment full-capture rigidity floor remains17.393 mm RMS; head markers share Hub.
-- **Next step:** Resume only on user instruction. Audit76 is terminal failed_derivative_gates: larger control steps pass, smaller steps and near-zero cross-block relative checks remain unresolved. Establish derivative error floors before a bounded existing SLSQP trial; read AGENT_RESUME_PROMPT.md. Fixture75 passes (marker5.369e-12 m vs uninterrupted73; full closure/node chart qualified). Direct node-chart Jacobian option adds11 RED/GREEN tests;44 root shooting/node regressions plus mypy/Ruff pass. Do not repeat static-node boxes or simply add single-shooting evaluations. Continue alternate-engine tangent/effort/rigid-closure gates separately.
+- **Next step:** Qualify runtime77 on ControlTower and execute native_evidence/two_window_floor_9967_77/floor.py to classify every run76 block against measured replay/retraction floors before the bounded direct-node SLSQP trial. Fixture75 passes (marker5.369e-12 m vs uninterrupted73; full closure/node chart qualified). Direct node-chart Jacobian option adds11 RED/GREEN tests;44 root shooting/node regressions plus mypy/Ruff pass. Do not repeat static-node boxes or simply add single-shooting evaluations. Continue alternate-engine tangent/effort/rigid-closure gates separately.
 - **Evidence:** HANDOFF.md is authoritative. See native_evidence/regularized_fit_9967_73, sensitivity_9967_70 through72, sensitivity_condition_9967_74 and dedicated REPRESENTATION_HANDOFF/MUJOCO_MANIFOLD_HANDOFF. Earlier notes remain in simscape_tour_matching/DEVELOPMENT_HISTORY_20260912.md and immutable raw archives.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps
