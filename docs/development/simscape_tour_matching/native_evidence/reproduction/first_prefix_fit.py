@@ -214,7 +214,7 @@ if args.transfer_report:
             "parameters": (1.0 + efforts / scales_arr).tolist(),
             "rmse_m": eval_match.get("rmse_m", 0.0),
         }
-        transfer_semantics = f"candidate #{args.transfer_evaluation} (RMSE: {eval_match.get('rmse_m', 0.0)*1000:.2f} mm); fresh objective"
+        transfer_semantics = f"candidate #{args.transfer_evaluation} (RMSE: {eval_match.get('rmse_m', 0.0) * 1000:.2f} mm); fresh objective"
     else:
         transfer_semantics = (
             "torque candidate only; fresh objective and evaluation history"
