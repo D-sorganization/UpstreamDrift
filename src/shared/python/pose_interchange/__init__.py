@@ -25,45 +25,95 @@ surface is documented in `docs/conventions/canonical-v2.md` and
 
 from __future__ import annotations
 
-from src.shared.python.pose_interchange.canonical import (
-    CONVENTION_TAG,
-    CanonicalPose,
-    canonical_from_reference_setup,
-    canonical_zero_pose,
-)
-from src.shared.python.pose_interchange.canonical_state import (
-    CONVENTION_TAG_V2,
-    CanonicalState,
-    canonical_state_zero,
-)
-from src.shared.python.pose_interchange.live_kinematics import (
-    CapabilityError,
-    LiveKinematicsService,
-    ServiceCapabilities,
-)
-from src.shared.python.pose_interchange.protocol import (
-    JointSlot,
-    PoseConventionAdapter,
-)
-from src.shared.python.pose_interchange.se3 import (
-    compose_se3,
-    euler_xyz_deg_to_quat_wxyz,
-    inverse_se3,
-    quat_exp,
-    quat_log,
-    quat_to_matrix,
-    se3_from_xyz_xyz_deg,
-    se3_to_xyz_xyz_deg,
-)
+from importlib import import_module
+from typing import TYPE_CHECKING, Any
 
-from .frame_transport import FixedFrameTransport
-from .joint_chart import SerialRotationChart, SingularChartError
-from .native_joint_state import (
-    NativeJointStateAdapter,
-    NativeManifoldState,
-    NativeRotationGroup,
-    RotationState,
-)
+# Numeric consumers must not import application reference-pose services.
+if TYPE_CHECKING:
+    from src.shared.python.pose_interchange.canonical import (
+        CONVENTION_TAG,
+        CanonicalPose,
+        canonical_from_reference_setup,
+        canonical_zero_pose,
+    )
+    from src.shared.python.pose_interchange.canonical_state import (
+        CONVENTION_TAG_V2,
+        CanonicalState,
+        canonical_state_zero,
+    )
+    from src.shared.python.pose_interchange.live_kinematics import (
+        CapabilityError,
+        LiveKinematicsService,
+        ServiceCapabilities,
+    )
+    from src.shared.python.pose_interchange.protocol import (
+        JointSlot,
+        PoseConventionAdapter,
+    )
+    from src.shared.python.pose_interchange.se3 import (
+        compose_se3,
+        euler_xyz_deg_to_quat_wxyz,
+        inverse_se3,
+        quat_exp,
+        quat_log,
+        quat_to_matrix,
+        se3_from_xyz_xyz_deg,
+        se3_to_xyz_xyz_deg,
+    )
+
+    from .frame_transport import FixedFrameTransport
+    from .joint_chart import SerialRotationChart, SingularChartError
+    from .native_joint_state import (
+        NativeJointStateAdapter,
+        NativeManifoldState,
+        NativeRotationGroup,
+        RotationState,
+    )
+
+_EXPORT_MODULES = {
+    "CONVENTION_TAG": "src.shared.python.pose_interchange.canonical",
+    "CanonicalPose": "src.shared.python.pose_interchange.canonical",
+    "canonical_from_reference_setup": "src.shared.python.pose_interchange.canonical",
+    "canonical_zero_pose": "src.shared.python.pose_interchange.canonical",
+    "CONVENTION_TAG_V2": "src.shared.python.pose_interchange.canonical_state",
+    "CanonicalState": "src.shared.python.pose_interchange.canonical_state",
+    "canonical_state_zero": "src.shared.python.pose_interchange.canonical_state",
+    "CapabilityError": "src.shared.python.pose_interchange.live_kinematics",
+    "LiveKinematicsService": "src.shared.python.pose_interchange.live_kinematics",
+    "ServiceCapabilities": "src.shared.python.pose_interchange.live_kinematics",
+    "JointSlot": "src.shared.python.pose_interchange.protocol",
+    "PoseConventionAdapter": "src.shared.python.pose_interchange.protocol",
+    "compose_se3": "src.shared.python.pose_interchange.se3",
+    "euler_xyz_deg_to_quat_wxyz": "src.shared.python.pose_interchange.se3",
+    "inverse_se3": "src.shared.python.pose_interchange.se3",
+    "quat_exp": "src.shared.python.pose_interchange.se3",
+    "quat_log": "src.shared.python.pose_interchange.se3",
+    "quat_to_matrix": "src.shared.python.pose_interchange.se3",
+    "se3_from_xyz_xyz_deg": "src.shared.python.pose_interchange.se3",
+    "se3_to_xyz_xyz_deg": "src.shared.python.pose_interchange.se3",
+    "FixedFrameTransport": ".frame_transport",
+    "SerialRotationChart": ".joint_chart",
+    "SingularChartError": ".joint_chart",
+    "NativeJointStateAdapter": ".native_joint_state",
+    "NativeManifoldState": ".native_joint_state",
+    "NativeRotationGroup": ".native_joint_state",
+    "RotationState": ".native_joint_state",
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Load the owning provider only when its public export is requested."""
+    module = _EXPORT_MODULES.get(name)
+    if module is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(import_module(module, __name__), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__))
+
 
 # Public API version (SemVer MAJOR.MINOR.PATCH).
 #

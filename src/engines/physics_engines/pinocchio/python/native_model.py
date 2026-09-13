@@ -105,27 +105,14 @@ class NativePinocchioModel:
         self._coordinates: dict[str, int] = {}
         self._velocity_indices: dict[str, int] = {}
         self._bodies: dict[str, tuple[int, Any]] = {"world": (0, pin.SE3.Identity())}
-        factories = {
-            "Px": pin.JointModelPX,
-            "Py": pin.JointModelPY,
-            "Pz": pin.JointModelPZ,
-            "Rx": pin.JointModelRX,
-            "Ry": pin.JointModelRY,
-            "Rz": pin.JointModelRZ,
-        }
+        coordinate_inventory: set[str] = set()
         for joint_spec in depth_first_joints(specification["joints"]):
             parent, parent_pose = self._bodies[joint_spec["parent"]]
             placement = parent_pose * self._transform(joint_spec["parent_to_base"])
-            for primitive in joint_spec["primitives"]:
-                name = primitive["coordinate"]
-                if name in self._coordinates or primitive["primitive"] not in factories:
-                    raise ValueError("Duplicate or unsupported native coordinate")
-                parent = self.model.addJoint(
-                    parent, factories[primitive["primitive"]](), placement, name
-                )
-                self._coordinates[name] = self.model.joints[parent].idx_q
-                self._velocity_indices[name] = self.model.joints[parent].idx_v
-                placement = pin.SE3.Identity()
+            parent, names = self._add_joint_primitives(parent, placement, joint_spec)
+            if coordinate_inventory.intersection(names):
+                raise ValueError("Duplicate native coordinate")
+            coordinate_inventory.update(names)
             child = joint_spec["child"]
             if child in self._bodies:
                 raise ValueError("Native body has multiple tree parents")
@@ -133,7 +120,7 @@ class NativePinocchioModel:
                 parent,
                 self._transform(joint_spec["child_to_follower"]).inverse(),
             )
-        if set(self._coordinates) != set(specification["coordinate_order"]):
+        if coordinate_inventory != set(specification["coordinate_order"]):
             raise ValueError("Native coordinate inventory was not preserved")
         for body in specification["bodies"]:
             joint, body_pose = self._bodies[body["name"]]
@@ -156,6 +143,33 @@ class NativePinocchioModel:
                 pin.Frame(frame["name"], joint, placement, pin.FrameType.OP_FRAME)
             )
         self._initialize_closure(specification["closure"])
+
+    def _add_joint_primitives(
+        self, parent: int, placement: Any, joint_spec: Mapping[str, Any]
+    ) -> tuple[int, set[str]]:
+        """Construct scalar primitives; variants reuse bodies, frames and weld."""
+        pin = self._pin
+        factories = {
+            "Px": pin.JointModelPX,
+            "Py": pin.JointModelPY,
+            "Pz": pin.JointModelPZ,
+            "Rx": pin.JointModelRX,
+            "Ry": pin.JointModelRY,
+            "Rz": pin.JointModelRZ,
+        }
+        names = set()
+        for primitive in joint_spec["primitives"]:
+            name = primitive["coordinate"]
+            if name in self._coordinates or primitive["primitive"] not in factories:
+                raise ValueError("Duplicate or unsupported native coordinate")
+            parent = self.model.addJoint(
+                parent, factories[primitive["primitive"]](), placement, name
+            )
+            self._coordinates[name] = self.model.joints[parent].idx_q
+            self._velocity_indices[name] = self.model.joints[parent].idx_v
+            placement = pin.SE3.Identity()
+            names.add(name)
+        return parent, names
 
     def _initialize_closure(self, closure: Mapping[str, Any]) -> None:
         """Attach the native weld using this model's body-frame placements."""
