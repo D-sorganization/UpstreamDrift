@@ -1,0 +1,16 @@
+{
+  "qualification": "Saved static pose versus initial shooting chart; no dynamic reachability or global impossibility claim",
+  "input_sha256": {
+    "pose": "cf5955e7f9af6689162de5e4cb7b78acc33e69ae2fd56d0a87bb032fbcff405c",
+    "initial": "ac5a6705afe11a50a1a7bce1af2ed191cce479eabdfd513604c2153cd3f7f267",
+    "config": "6bb7d4381680ecc0837713d0ebb8e0d212ab5983891f5be96ad929db20369517"
+  },
+  "runner_sha256": "357c4612b63c46f394875594c78f3df4acd3f354f93265a87a4bff366aec8493",
+  "time_s": 0.8,
+  "static_marker_rms_m": 0.03330403076929478,
+  "chart_radius": 0.5,
+  "position_only_scaled_displacement_norm": 56.4619762622304,
+  "position_only_wrapped_scaled_displacement_norm": 43.108145786674946,
+  "max_abs_wrapped_rotation_rad": 2.6635437055583218,
+  "limitation": "Velocities omitted, hence a lower bound on full displacement. Wrapping removes individual 2*pi shifts only; alternate Euler branches not searched. Radius checked against immutable runtime18 implementation."
+}

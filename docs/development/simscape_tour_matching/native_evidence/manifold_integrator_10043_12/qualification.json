@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "recorded_utc": "2026-09-13T02:56:36.195888+00:00",
+  "runtime_root": "/home/dieterolson/native-manifold-10043-12",
+  "command": [
+    "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+    "-m",
+    "pytest",
+    "/home/dieterolson/native-manifold-10043-12/tests/unit/motion_matching/test_native_pinocchio_manifold.py",
+    "/home/dieterolson/native-manifold-10043-12/tests/unit/motion_matching/test_manifold_forward.py",
+    "-q",
+    "-o",
+    "addopts="
+  ],
+  "returncode": 0,
+  "stdout": ".................                                                        [100%]\n=============================== warnings summary ===============================\n../../../../home/dieterolson/native-manifold-10043-12/tests/unit/motion_matching/test_native_pinocchio_manifold.py:16\n  /home/dieterolson/native-manifold-10043-12/tests/unit/motion_matching/test_native_pinocchio_manifold.py:16: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    pytestmark = pytest.mark.unit\n\n../../../../home/dieterolson/native-manifold-10043-12/tests/unit/motion_matching/test_manifold_forward.py:11\n  /home/dieterolson/native-manifold-10043-12/tests/unit/motion_matching/test_manifold_forward.py:11: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    pytestmark = pytest.mark.unit\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n17 passed, 2 warnings in 0.53s\n",
+  "stderr": "",
+  "source_sha256": {
+    "src/shared/python/motion_matching/manifold_forward.py": "b30f4b360f32a84fe07c2d7252df3bd31b5ad4608a86a6905b05f3319591e1cd",
+    "src/engines/physics_engines/pinocchio/python/native_manifold_model.py": "1bdc6b9b90aecd3762da9923b653c5ad3818af349cb3e5b454a0f9e014022cfb",
+    "tests/unit/motion_matching/test_manifold_forward.py": "d0cdafb5f5c90b6ce8b7dd2146b7fd5e40d9521d1687caeb626302a8b75181ad",
+    "tests/unit/motion_matching/test_native_pinocchio_manifold.py": "cb7b17470b49961c9597cdfdbef6ae5bbd87f0eb0c0dd254afc71e2d7d2ce84a"
+  },
+  "scope": "Integrator order/contracts and real Pinocchio tangent-operation qualification; no candidate trajectory or Simscape acceptance.",
+  "pinocchio_version": "4.1.0",
+  "noncommuting_rotation_convergence": {
+    "max_step_s": [0.2, 0.1, 0.05],
+    "independent_so3_error_rad": [
+      4.049229251094912e-5, 2.6066123735860134e-6, 1.668138963234487e-7
+    ],
+    "pinocchio_so3_error_rad": [
+      4.049229251102919e-5, 2.6066123730783303e-6, 1.66813896079883e-7
+    ],
+    "independent_refinement_ratios": [15.534451121799277, 15.625870692042621],
+    "pinocchio_refinement_ratios": [15.534451124855599, 15.625870711814612]
+  }
+}

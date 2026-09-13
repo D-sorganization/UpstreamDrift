@@ -1,9 +1,73 @@
 # Native Drake Matching Handoff
 
+> **Current candidate to verify (2026-09-13):** native Pinocchio returned81
+> (`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81/returned-candidate.json`,
+> SHA256 dfafdff1…, 0–0.85 s, uninterrupted whole 26.366 mm / terminal 46.305 mm, still
+> rejected). Replay it same-input with this lane's qualified adapter and report the five
+> shared metrics (whole, early, terminal, clubhead, pelvis yaw) plus step-size convergence,
+> before any further work on the superseded 0.8 s baseline candidate.
+
 ## Reaction-Eliminated Initializer Feasibility Study
 
 The bounded study is complete; see [Reaction-Eliminated Polynomial Identification Feasibility](REACTION_IDENTIFICATION_FEASIBILITY.md). Six tests pass. With a known closure-feasible baseline path, independent Drake projected dynamics recover189 global sextic controls using41 training samples, with40 held-out same-state acceleration checks. Native stacked rank is189 only for this sampled trajectory; the closed-weld toy is underdetermined as expected.
 
+The first C3D-derived smooth native pose/rate path is not yet an identification
+input. Isolated ControlTower Drake1.57 evaluated its finite-difference qdd and
+found acceleration closure max1.33668, RMS0.24240 over18 samples. The exact
+receipt is `evidence/smooth_native_acceleration_9967_24/receipt.json`. This
+failed diagnostic is expected and blocks effort identification; first project
+or otherwise construct acceleration compatibility, report correction and
+derivative consistency, then repeat the unchanged `J*qdd+gamma` gate.
+
+The first diagnostic projection is complete in
+`evidence/smooth_native_acceleration_projection_9967_24/receipt.json`.
+Minimum-norm instantaneous corrections reduce the same 18 Drake acceleration
+closure residuals to3.99680e-15 maximum absolute residual, from1.33668, with
+coordinate correction maximum0.500529 and RMS0.0710317. The executable source
+is `reproduction/project_smooth_native_acceleration.py`. This is evidence that
+the Drake closure convention and Jacobian are usable; it is **not** a
+trajectory. The projected qdd does not establish qdd=d(qd)/dt, a continuous
+branch, effort identification, or forward motion. Do not pass it to
+`reaction_identification.py` or fit torques from it. The next implementation
+must construct a derivative-consistent collocation trajectory that preserves
+pose, velocity, and acceleration closure together before the existing
+reaction-eliminated global-sextic initializer may run.
+
+`src/shared/python/motion_matching/constrained_trajectory.py` now supplies the
+tested C2 node-spline closure contract and a generic collocation baseline. Its
+first isolated native Drake probe is intentionally unqualified and retained at
+`evidence/smooth_native_collocation_probe_9967_24/receipt.json`: two
+finite-difference trust-constr iterations ended at pose0.00126302,
+rate0.0172004, and acceleration0.724940 maximum absolute closure, with the
+function-evaluation budget exhausted. The executable is
+`reproduction/collocate_smooth_native_path.py`. Do not expand that blind
+black-box budget: its trial moved an initially pose-closed seed away from pose
+closure while seeking the coupled conditions. The next implementation must add
+derivatives of all three constraint blocks and continuation/retraction on the
+native weld manifold, then qualify each stage before an effort fit.
+
+Pinocchio now supplies the first exact native chart input:
+`NativePinocchioModel.closure_position_linearization`. Its isolated
+ControlTower finite-difference receipt is
+`../simscape_tour_matching/native_evidence/closure_jacobian_9967_24/receipt.json`:
+the6-by-27 Jacobian differs by at most1.98424e-10 at the initial smooth-path
+node. Use this Jacobian and the existing shared `retract_node` helper to
+eliminate pose closure from the collocation chart. This is insufficient for
+the remaining rate/acceleration derivatives and must not promote the failed
+collocation probe.
+
+The native position chart itself is now qualified in
+`../simscape_tour_matching/native_evidence/weld_node_chart_9967_24/receipt.json`:
+the weld reduces27 coordinates to21 and a bounded nonzero retraction closes at
+3.93974e-16. The next collocation implementation must consume this chart for
+positions, while Drake remains the independent source for rate/acceleration
+closure evidence.
+
+Pinocchio's new `closure_trajectory_residuals` now independently reaches the
+same smooth-path acceleration residual1.336681893544 as Drake's
+1.336681893545 over18 samples. This supports using Pinocchio for the faster
+chart solve, with Drake retained as the independent final verifier. It is not
+an acceptance result and does not license effort identification.
 The single identified-profile replay has marker difference8.84e-9m but scalar-rate difference3.37e-4, so its existing full-state reconstruction gate **fails**. No new fitting, model change, tolerance sweep or gate relaxation occurred. The report preserves all prerequisites and a sequential path toward a bounded linear initializer after a smooth native C3D trajectory is available. Root review is required before broad production integration. Exact results are in `evidence/reaction-identification/`; all study jobs are terminal.
 
 ## Reconstructed-Seed Angular-Velocity Diagnostic

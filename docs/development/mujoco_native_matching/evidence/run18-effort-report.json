@@ -1,0 +1,1936 @@
+{
+  "qualification": "read-only effort audit; numerical correction bounds are not physical or biological actuator limits",
+  "candidate_sha256": "917d2d29b66bc2ab947a6ea75255c35e47134e6a2d51cde7e1e69847cad379f7",
+  "original_parent_sha256": "2afaf8b21a05a44b071e7328e2d624bba5f6a999aa85920b53b61b43961e6673",
+  "coverage_adjusted_base_sha256": "ba1d735f7f4c81a3df6cc62d66655e018387a679a15328ad6e3a6f4e5378c6e3",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "horizon_s": 0.85,
+  "basis_duration_s": 0.8,
+  "reconstruction_coefficient_max_abs": 3.410605131648481e-13,
+  "active_effort_controls": 65,
+  "active_channels": 23,
+  "sample_times_s": [0.0, 0.2, 0.4, 0.6, 0.7, 0.8, 0.85],
+  "world_to_root_primitive_force_rotation": [
+    [1.0, 0.0, 0.0],
+    [0.0, 0.8660254037844387, 0.49999999999999994],
+    [0.0, -0.49999999999999994, 0.8660254037844387]
+  ],
+  "channels": [
+    {
+      "coordinate": "TranslationInputX",
+      "unit": "N",
+      "command_frame": "world Cartesian force",
+      "active_controls": [
+        {
+          "index": 3,
+          "value": 1.9999999999999996,
+          "bound": "upper"
+        },
+        {
+          "index": 4,
+          "value": 1.9999999999999991,
+          "bound": "upper"
+        },
+        {
+          "index": 5,
+          "value": 2.0000000000000018,
+          "bound": "upper"
+        },
+        {
+          "index": 6,
+          "value": 2.0000000000000093,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        -1.7027937561497972, -0.9697765265076073, 1.024378612694742,
+        1.9999999999999996, 1.9999999999999991, 2.0000000000000018,
+        2.0000000000000093
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -41.77286271693529,
+        "minimum_time_s": 0.8104011507704901,
+        "maximum": -2.1411835064627036,
+        "maximum_time_s": 0.07825049328120488,
+        "maximum_absolute": 41.77286271693529
+      },
+      "parent_effort_extrema": {
+        "minimum": -43.772862294537575,
+        "minimum_time_s": 0.8104009752773554,
+        "maximum": -0.8357819988100258,
+        "maximum_time_s": 0.03794795050734686,
+        "maximum_absolute": 43.772862294537575
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -1.7027937561497972,
+        "minimum_time_s": 0.0,
+        "maximum": 2.0000000000000155,
+        "maximum_time_s": 0.8000056131058639,
+        "maximum_absolute": 2.0000000000000155
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -1.7027937561497972,
+        "minimum_time_s": 0.0,
+        "maximum": 2.0000000000000138,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 2.0000000000000138
+      },
+      "primitive_effort_extrema": {
+        "minimum": -41.77286271693529,
+        "minimum_time_s": 0.8104011507704901,
+        "maximum": -2.1411835064627036,
+        "maximum_time_s": 0.07825049328120488,
+        "maximum_absolute": 41.77286271693529
+      },
+      "command_samples": [
+        -2.6925728156285764, -3.6437035103594324, -13.053946859750308,
+        -29.39386991305553, -37.428355486774734, -41.723888699255184,
+        -40.97417671365017
+      ],
+      "primitive_samples": [
+        -2.6925728156285764, -3.6437035103594324, -13.053946859750308,
+        -29.39386991305553, -37.428355486774734, -41.723888699255184,
+        -40.97417671365017
+      ]
+    },
+    {
+      "coordinate": "TranslationInputY",
+      "unit": "N",
+      "command_frame": "world Cartesian force",
+      "active_controls": [
+        {
+          "index": 1,
+          "value": 2.000000000000001,
+          "bound": "upper"
+        },
+        {
+          "index": 2,
+          "value": 2.0000000000000018,
+          "bound": "upper"
+        },
+        {
+          "index": 3,
+          "value": 2.000000000000003,
+          "bound": "upper"
+        },
+        {
+          "index": 4,
+          "value": 2.0000000000000044,
+          "bound": "upper"
+        },
+        {
+          "index": 5,
+          "value": 2.0000000000000018,
+          "bound": "upper"
+        },
+        {
+          "index": 6,
+          "value": 2.000000000000008,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        0.12475054234327132, 2.000000000000001, 2.0000000000000018,
+        2.000000000000003, 2.0000000000000044, 2.0000000000000018,
+        2.000000000000008
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -59.248052049144604,
+        "minimum_time_s": 0.85,
+        "maximum": 12.761841051078608,
+        "maximum_time_s": 0.2775583689754346,
+        "maximum_absolute": 59.248052049144604
+      },
+      "parent_effort_extrema": {
+        "minimum": -61.248051937371045,
+        "minimum_time_s": 0.85,
+        "maximum": 10.911821627456192,
+        "maximum_time_s": 0.272124301838891,
+        "maximum_absolute": 61.248051937371045
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": 0.12475054234327132,
+        "minimum_time_s": 0.0,
+        "maximum": 2.0000000000000036,
+        "maximum_time_s": 0.8007457844869028,
+        "maximum_absolute": 2.0000000000000036
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": 0.12475054234327132,
+        "minimum_time_s": 0.0,
+        "maximum": 2.0000000000000018,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 2.0000000000000018
+      },
+      "primitive_effort_extrema": {
+        "minimum": 362.16821342866984,
+        "minimum_time_s": 0.7599133445011202,
+        "maximum": 387.14963532658925,
+        "maximum_time_s": 0.24920271996531304,
+        "maximum_absolute": 387.14963532658925
+      },
+      "command_samples": [
+        3.242620032592108, 11.870963949305185, 9.866561045648998,
+        -12.004489329709532, -31.316614424737452, -51.62110027991247,
+        -59.248052049144604
+      ],
+      "primitive_samples": [
+        385.5426764710626, 387.0282743516929, 385.09024426421223,
+        372.4361139950576, 364.29092109321783, 363.5386034506385,
+        370.41160098382335
+      ]
+    },
+    {
+      "coordinate": "TranslationInputZ",
+      "unit": "N",
+      "command_frame": "world Cartesian force",
+      "active_controls": [
+        {
+          "index": 1,
+          "value": -2.0000000000000417,
+          "bound": "lower"
+        },
+        {
+          "index": 2,
+          "value": -2.0000000000000426,
+          "bound": "lower"
+        },
+        {
+          "index": 3,
+          "value": -2.0000000000000444,
+          "bound": "lower"
+        },
+        {
+          "index": 4,
+          "value": -2.0000000000000444,
+          "bound": "lower"
+        },
+        {
+          "index": 5,
+          "value": -2.000000000000049,
+          "bound": "lower"
+        },
+        {
+          "index": 6,
+          "value": -2.00000000000006,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        -0.907487603740492, -2.0000000000000417, -2.0000000000000426,
+        -2.0000000000000444, -2.0000000000000444, -2.000000000000049,
+        -2.00000000000006
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": 751.9780006264426,
+        "minimum_time_s": 0.30716285058418197,
+        "maximum": 843.4438383662506,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 843.4438383662506
+      },
+      "parent_effort_extrema": {
+        "minimum": 753.9172222390788,
+        "minimum_time_s": 0.30424680130060233,
+        "maximum": 845.4438383011318,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 845.4438383011318
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -2.0000000000000555,
+        "minimum_time_s": 0.8012397544283416,
+        "maximum": -0.907487603740492,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 2.0000000000000555
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -2.000000000000054,
+        "minimum_time_s": 0.8,
+        "maximum": -0.907487603740492,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 2.000000000000054
+      },
+      "primitive_effort_extrema": {
+        "minimum": 644.8930106768158,
+        "minimum_time_s": 0.294383842581375,
+        "maximum": 760.0678167152013,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 760.0678167152013
+      },
+      "command_samples": [
+        765.4689702960351, 753.4954360083709, 753.0911035013806,
+        765.6646134280907, 782.8238094911254, 816.4875753286935,
+        843.4438383662506
+      ],
+      "primitive_samples": [
+        661.2942640687862, 646.6107072442285, 647.2627464734272,
+        669.0872506723731, 693.6036129189931, 732.9095322489654,
+        760.0678167152014
+      ]
+    },
+    {
+      "coordinate": "HipInputX",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 0,
+          "value": 2.0,
+          "bound": "upper"
+        },
+        {
+          "index": 1,
+          "value": -2.0,
+          "bound": "lower"
+        },
+        {
+          "index": 2,
+          "value": -2.0,
+          "bound": "lower"
+        },
+        {
+          "index": 3,
+          "value": -2.0,
+          "bound": "lower"
+        },
+        {
+          "index": 4,
+          "value": -1.9999999999999991,
+          "bound": "lower"
+        },
+        {
+          "index": 5,
+          "value": -1.9999999999999991,
+          "bound": "lower"
+        },
+        {
+          "index": 6,
+          "value": -1.9999999999999964,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        2.0, -2.0, -2.0, -2.0, -1.9999999999999991, -1.9999999999999991,
+        -1.9999999999999964
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": 6.839773165035277,
+        "minimum_time_s": 0.0,
+        "maximum": 64.15189755324305,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 64.15189755324305
+      },
+      "parent_effort_extrema": {
+        "minimum": 4.839773165035277,
+        "minimum_time_s": 0.0,
+        "maximum": 66.15189731482445,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 66.15189731482445
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -2.0,
+        "minimum_time_s": 0.7989389960740384,
+        "maximum": 2.0,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 2.0
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -2.0,
+        "minimum_time_s": 0.7989389960740384,
+        "maximum": 2.0,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 2.0
+      },
+      "primitive_effort_extrema": {
+        "minimum": 6.839773165035277,
+        "minimum_time_s": 0.0,
+        "maximum": 64.15189755324305,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 64.15189755324305
+      },
+      "command_samples": [
+        6.839773165035277, 15.014267321350658, 27.700026019175915,
+        42.781168779047334, 51.00864992163044, 59.665085894295274,
+        64.15189755324305
+      ],
+      "primitive_samples": [
+        6.839773165035277, 15.014267321350658, 27.700026019175915,
+        42.781168779047334, 51.00864992163044, 59.665085894295274,
+        64.15189755324305
+      ]
+    },
+    {
+      "coordinate": "HipInputY",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 3,
+          "value": 2.000000000000013,
+          "bound": "upper"
+        },
+        {
+          "index": 4,
+          "value": 2.0000000000000133,
+          "bound": "upper"
+        },
+        {
+          "index": 5,
+          "value": 2.000000000000016,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        -0.975548882718698, -0.8923883896550237, -0.4552715362555562,
+        2.000000000000013, 2.0000000000000133, 2.000000000000016,
+        3.098875870481713
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -10.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 10.0],
+      "total_effort_extrema": {
+        "minimum": 163.98518577199766,
+        "minimum_time_s": 0.85,
+        "maximum": 171.74459507784684,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 171.74459507784684
+      },
+      "parent_effort_extrema": {
+        "minimum": 160.4048377218716,
+        "minimum_time_s": 0.85,
+        "maximum": 172.72014396056554,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 172.72014396056554
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.975548882718698,
+        "minimum_time_s": 0.0,
+        "maximum": 3.5803480501260854,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 3.5803480501260854
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.975548882718698,
+        "minimum_time_s": 0.0,
+        "maximum": 3.098875870481705,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 3.098875870481705
+      },
+      "primitive_effort_extrema": {
+        "minimum": 163.98518577199766,
+        "minimum_time_s": 0.85,
+        "maximum": 171.74459507784684,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 171.74459507784684
+      },
+      "command_samples": [
+        171.74459507784684, 169.32364453503172, 168.06266299143695,
+        166.63316964407298, 165.68407504015534, 164.59766839885313,
+        163.98518577199766
+      ],
+      "primitive_samples": [
+        171.74459507784684, 169.32364453503172, 168.06266299143695,
+        166.63316964407298, 165.68407504015534, 164.59766839885313,
+        163.98518577199766
+      ]
+    },
+    {
+      "coordinate": "HipInputZ",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 3,
+          "value": 2.0000000000000036,
+          "bound": "upper"
+        },
+        {
+          "index": 4,
+          "value": 2.0000000000000053,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        0.02892840494478932, -1.999952841190232, 1.7315043771693839,
+        2.0000000000000036, 2.0000000000000053, 1.6913655597383936,
+        0.8954240333584096
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -10.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 10.0],
+      "total_effort_extrema": {
+        "minimum": -71.11323676832062,
+        "minimum_time_s": 0.85,
+        "maximum": -14.845392367092618,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 71.11323676832062
+      },
+      "parent_effort_extrema": {
+        "minimum": -71.68074428015808,
+        "minimum_time_s": 0.85,
+        "maximum": -14.874320772037407,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 71.68074428015808
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.49155586025781584,
+        "minimum_time_s": 0.077394866634485,
+        "maximum": 1.7314004482617138,
+        "maximum_time_s": 0.5285746802170151,
+        "maximum_absolute": 1.7314004482617138
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.49155586025781584,
+        "minimum_time_s": 0.077394866634485,
+        "maximum": 1.7314004482617138,
+        "maximum_time_s": 0.5285746802170151,
+        "maximum_absolute": 1.7314004482617138
+      },
+      "primitive_effort_extrema": {
+        "minimum": -71.11323676832062,
+        "minimum_time_s": 0.85,
+        "maximum": -14.845392367092618,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 71.11323676832062
+      },
+      "command_samples": [
+        -14.845392367092618, -27.333756309686407, -39.322627766849635,
+        -52.93762710459691, -60.1500557532807, -67.45994418065337,
+        -71.11323676832062
+      ],
+      "primitive_samples": [
+        -14.845392367092618, -27.333756309686407, -39.322627766849635,
+        -52.93762710459691, -60.1500557532807, -67.45994418065337,
+        -71.11323676832062
+      ]
+    },
+    {
+      "coordinate": "SpineInputX",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 3,
+          "value": -2.0000000000000004,
+          "bound": "lower"
+        },
+        {
+          "index": 4,
+          "value": -2.000000000000001,
+          "bound": "lower"
+        },
+        {
+          "index": 5,
+          "value": -2.000000000000001,
+          "bound": "lower"
+        },
+        {
+          "index": 6,
+          "value": 2.0,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        1.3693928732580982, -0.032595116687522685, -1.5317635777109513,
+        -2.0000000000000004, -2.000000000000001, -2.000000000000001, 2.0
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -10.023551869752394,
+        "minimum_time_s": 0.0,
+        "maximum": 20.45351523795749,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 20.45351523795749
+      },
+      "parent_effort_extrema": {
+        "minimum": -11.392944743010492,
+        "minimum_time_s": 0.0,
+        "maximum": 16.6985611085605,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 16.6985611085605
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -1.666276672430011,
+        "minimum_time_s": 0.46556147487327587,
+        "maximum": 3.7549541293969915,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 3.7549541293969915
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -1.666276672430011,
+        "minimum_time_s": 0.46556147487327587,
+        "maximum": 1.9999999999999982,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 1.9999999999999982
+      },
+      "primitive_effort_extrema": {
+        "minimum": -10.023551869752394,
+        "minimum_time_s": 0.0,
+        "maximum": 20.45351523795749,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 20.45351523795749
+      },
+      "command_samples": [
+        -10.023551869752394, -8.74239951196324, -4.853929727405366,
+        2.7065423159072495, 8.370406470485433, 15.836600843998456,
+        20.45351523795749
+      ],
+      "primitive_samples": [
+        -10.023551869752394, -8.74239951196324, -4.853929727405366,
+        2.7065423159072495, 8.370406470485433, 15.836600843998456,
+        20.45351523795749
+      ]
+    },
+    {
+      "coordinate": "SpineInputY",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 3,
+          "value": 1.9999999999999973,
+          "bound": "upper"
+        },
+        {
+          "index": 4,
+          "value": 1.9999999999999956,
+          "bound": "upper"
+        },
+        {
+          "index": 6,
+          "value": 1.9999999999999893,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        -0.7037506934205027, -0.2964951365867928, 1.9876069864027417,
+        1.9999999999999973, 1.9999999999999956, -0.6525276978107453,
+        1.9999999999999893
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -63.18938167844497,
+        "minimum_time_s": 0.8077390700652232,
+        "maximum": -41.64776054056001,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 63.18938167844497
+      },
+      "parent_effort_extrema": {
+        "minimum": -66.22767100973545,
+        "minimum_time_s": 0.85,
+        "maximum": -40.944009847139505,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 66.22767100973545
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.7037506934205027,
+        "minimum_time_s": 0.0,
+        "maximum": 3.346912260748253,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 3.346912260748253
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.7037506934205027,
+        "minimum_time_s": 0.0,
+        "maximum": 1.9999999999999964,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 1.9999999999999964
+      },
+      "primitive_effort_extrema": {
+        "minimum": -63.18938167844497,
+        "minimum_time_s": 0.8077390700652232,
+        "maximum": -41.64776054056001,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 63.18938167844497
+      },
+      "command_samples": [
+        -41.64776054056001, -46.954759711842485, -52.52316186916987,
+        -58.959647623587756, -61.766943942297615, -63.180159496696355,
+        -62.88075874898719
+      ],
+      "primitive_samples": [
+        -41.64776054056001, -46.954759711842485, -52.52316186916987,
+        -58.959647623587756, -61.766943942297615, -63.180159496696355,
+        -62.88075874898719
+      ]
+    },
+    {
+      "coordinate": "TorsoInput",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 4,
+          "value": 1.9999999999999964,
+          "bound": "upper"
+        },
+        {
+          "index": 6,
+          "value": -1.9999999999999716,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        -0.07074736481306942, -1.706385334103099, 1.6630209045142914,
+        1.9810549503688915, 1.9999999999999964, 1.5755178001530457,
+        -1.9999999999999716
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -75.0203087126595,
+        "minimum_time_s": 0.85,
+        "maximum": -14.74012448255166,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 75.0203087126595
+      },
+      "parent_effort_extrema": {
+        "minimum": -71.48105385975208,
+        "minimum_time_s": 0.85,
+        "maximum": -14.669377117738591,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 71.48105385975208
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -3.5392548529073915,
+        "minimum_time_s": 0.85,
+        "maximum": 1.5398545152284084,
+        "maximum_time_s": 0.4693621168766792,
+        "maximum_absolute": 3.5392548529073915
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -1.999999999999944,
+        "minimum_time_s": 0.8,
+        "maximum": 1.5398545152284084,
+        "maximum_time_s": 0.4693621168766792,
+        "maximum_absolute": 1.999999999999944
+      },
+      "primitive_effort_extrema": {
+        "minimum": -75.0203087126595,
+        "minimum_time_s": 0.85,
+        "maximum": -14.74012448255166,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 75.0203087126595
+      },
+      "command_samples": [
+        -14.74012448255166, -27.002359385307713, -38.7267324058416,
+        -52.322098111433405, -60.28157731984081, -69.60388300890432,
+        -75.0203087126595
+      ],
+      "primitive_samples": [
+        -14.74012448255166, -27.002359385307713, -38.7267324058416,
+        -52.322098111433405, -60.28157731984081, -69.60388300890432,
+        -75.0203087126595
+      ]
+    },
+    {
+      "coordinate": "LEInput",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 5,
+          "value": -2.0000000000000053,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        0.720707815863058, 0.6034307723284877, -1.8487176573021151,
+        -0.4014356849032623, 0.27543285327433864, -2.0000000000000053,
+        1.0321709803891528
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -10.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 10.0],
+      "total_effort_extrema": {
+        "minimum": 6.642244337130771,
+        "minimum_time_s": 0.7921210966713569,
+        "maximum": 13.765956914670301,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 13.765956914670301
+      },
+      "parent_effort_extrema": {
+        "minimum": 4.436217431583486,
+        "minimum_time_s": 0.85,
+        "maximum": 13.045249098807243,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 13.045249098807243
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.598745731965201,
+        "minimum_time_s": 0.38422558828021347,
+        "maximum": 2.5229942035161796,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 2.5229942035161796
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.598745731965201,
+        "minimum_time_s": 0.38422558828021347,
+        "maximum": 1.0321709803891592,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 1.0321709803891592
+      },
+      "primitive_effort_extrema": {
+        "minimum": 6.642244337130771,
+        "minimum_time_s": 0.7921210966713569,
+        "maximum": 13.765956914670301,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 13.765956914670301
+      },
+      "command_samples": [
+        13.765956914670301, 11.505644981950935, 9.832720808021621,
+        8.135421269583565, 7.1304167474785976, 6.647246822915091,
+        6.959211635099677
+      ],
+      "primitive_samples": [
+        13.765956914670301, 11.505644981950935, 9.832720808021621,
+        8.135421269583565, 7.1304167474785976, 6.647246822915091,
+        6.959211635099677
+      ]
+    },
+    {
+      "coordinate": "LFInput",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 3,
+          "value": -1.9999999999999996,
+          "bound": "lower"
+        },
+        {
+          "index": 5,
+          "value": -2.000000000000007,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        -0.026531082643003856, 1.6611783113423026, 1.8376745061721358,
+        -1.9999999999999996, 1.525325978612944, -2.000000000000007,
+        2.618290885622514
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -10.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 10.0],
+      "total_effort_extrema": {
+        "minimum": -3.9961459672482906,
+        "minimum_time_s": 0.7502318809584758,
+        "maximum": 4.362335699481651,
+        "maximum_time_s": 0.07057424597278247,
+        "maximum_absolute": 4.362335699481651
+      },
+      "parent_effort_extrema": {
+        "minimum": -7.272362713239135,
+        "minimum_time_s": 0.85,
+        "maximum": 4.141724644958167,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 7.272362713239135
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.055209182148204666,
+        "minimum_time_s": 0.5358523032409105,
+        "maximum": 4.908605160233183,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 4.908605160233183
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.055209182148204666,
+        "minimum_time_s": 0.5358523032409105,
+        "maximum": 2.618290885622524,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 2.618290885622524
+      },
+      "primitive_effort_extrema": {
+        "minimum": -3.9961459672482906,
+        "minimum_time_s": 0.7502318809584758,
+        "maximum": 4.362335699481651,
+        "maximum_time_s": 0.07057424597278247,
+        "maximum_absolute": 4.362335699481651
+      },
+      "command_samples": [
+        4.115193562315163, 3.589706151553324, 0.6779235909774695,
+        -2.504384600124885, -3.7603125222024767, -3.6601513775822347,
+        -2.363757553005957
+      ],
+      "primitive_samples": [
+        4.115193562315163, 3.589706151553324, 0.6779235909774695,
+        -2.504384600124885, -3.7603125222024767, -3.6601513775822347,
+        -2.363757553005957
+      ]
+    },
+    {
+      "coordinate": "LScapInputX",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 1,
+          "value": 1.9999999999999998,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        0.14338237520041464, 1.9999999999999998, -1.90265417140465,
+        -0.04118784139165754, 0.5472145416289109, -1.3246647170500268,
+        0.22438612368567945
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -6.638849377661019,
+        "minimum_time_s": 0.0,
+        "maximum": 6.946457453311526,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 6.946457453311526
+      },
+      "parent_effort_extrema": {
+        "minimum": -6.782231752861434,
+        "minimum_time_s": 0.0,
+        "maximum": 6.985685111915688,
+        "maximum_time_s": 0.7178158242216814,
+        "maximum_absolute": 6.985685111915688
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.36360803172414813,
+        "minimum_time_s": 0.663456657113077,
+        "maximum": 1.036065591028848,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 1.036065591028848
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.36360803172414813,
+        "minimum_time_s": 0.663456657113077,
+        "maximum": 0.5980651231172543,
+        "maximum_time_s": 0.07680901889244646,
+        "maximum_absolute": 0.5980651231172543
+      },
+      "primitive_effort_extrema": {
+        "minimum": -6.638849377661019,
+        "minimum_time_s": 0.0,
+        "maximum": 6.946457453311526,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 6.946457453311526
+      },
+      "command_samples": [
+        -6.638849377661019, -1.1433334167640457, 2.9960114957198023,
+        6.026644137834721, 6.629712185765458, 6.820266725332745,
+        6.946457453311526
+      ],
+      "primitive_samples": [
+        -6.638849377661019, -1.1433334167640457, 2.9960114957198023,
+        6.026644137834721, 6.629712185765458, 6.820266725332745,
+        6.946457453311526
+      ]
+    },
+    {
+      "coordinate": "LScapInputY",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 4,
+          "value": 2.0000000000000013,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        -1.1413528540426388, -0.1692286816468883, -0.03417995308322508,
+        0.4035686218450145, 2.0000000000000013, -0.936916487882768,
+        4.069434374397364
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -10.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 10.0],
+      "total_effort_extrema": {
+        "minimum": -11.810269292611535,
+        "minimum_time_s": 0.85,
+        "maximum": 14.240271877529258,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 14.240271877529258
+      },
+      "parent_effort_extrema": {
+        "minimum": -18.28773378388925,
+        "minimum_time_s": 0.85,
+        "maximum": 15.381624731571897,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 18.28773378388925
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -1.1413528540426388,
+        "minimum_time_s": 0.0,
+        "maximum": 6.477464491277713,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 6.477464491277713
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -1.1413528540426388,
+        "minimum_time_s": 0.0,
+        "maximum": 4.069434374397366,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 4.069434374397366
+      },
+      "primitive_effort_extrema": {
+        "minimum": -11.810269292611535,
+        "minimum_time_s": 0.85,
+        "maximum": 14.240271877529258,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 14.240271877529258
+      },
+      "command_samples": [
+        14.240271877529258, 9.902270456693351, 3.5215897349746417,
+        -4.362151310508674, -8.377546956683856, -11.315823562044143,
+        -11.810269292611535
+      ],
+      "primitive_samples": [
+        14.240271877529258, 9.902270456693351, 3.5215897349746417,
+        -4.362151310508674, -8.377546956683856, -11.315823562044143,
+        -11.810269292611535
+      ]
+    },
+    {
+      "coordinate": "LSInputX",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 5,
+          "value": -2.0,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        0.14829779154153178, 0.9435072889455679, 1.3066001670117138,
+        -1.4097626944878898, 1.608305671146912, -2.0, 0.7463979903441214
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -3.7794000666858873,
+        "minimum_time_s": 0.0,
+        "maximum": 10.091104710622758,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 10.091104710622758
+      },
+      "parent_effort_extrema": {
+        "minimum": -4.343610400009783,
+        "minimum_time_s": 0.15800909545905387,
+        "maximum": 7.87300620325242,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 7.87300620325242
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.2965970875787482,
+        "minimum_time_s": 0.6586310278374459,
+        "maximum": 2.218098507370295,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 2.218098507370295
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.2965970875787482,
+        "minimum_time_s": 0.6586310278374459,
+        "maximum": 0.7463979903441398,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 0.7463979903441398
+      },
+      "primitive_effort_extrema": {
+        "minimum": -3.7794000666858873,
+        "minimum_time_s": 0.0,
+        "maximum": 10.091104710622758,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 10.091104710622758
+      },
+      "command_samples": [
+        -3.7794000666858873, -3.7007820214636427, -2.8886329828386206,
+        0.1471007636210948, 2.7372197361203114, 6.8717305398587385,
+        10.091104710622758
+      ],
+      "primitive_samples": [
+        -3.7794000666858873, -3.7007820214636427, -2.8886329828386206,
+        0.1471007636210948, 2.7372197361203114, 6.8717305398587385,
+        10.091104710622758
+      ]
+    },
+    {
+      "coordinate": "LSInputY",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 2,
+          "value": -1.9999999999999996,
+          "bound": "lower"
+        },
+        {
+          "index": 3,
+          "value": -1.9999999999999991,
+          "bound": "lower"
+        },
+        {
+          "index": 5,
+          "value": -2.000000000000001,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        0.9716353700894107, 0.39391847868968977, -1.9999999999999996,
+        -1.9999999999999991, 1.2574435439767924, -2.000000000000001,
+        1.241827048138127
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": 11.357797110484979,
+        "minimum_time_s": 0.18740151595908908,
+        "maximum": 19.071909058712087,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 19.071909058712087
+      },
+      "parent_effort_extrema": {
+        "minimum": 10.622051960545242,
+        "minimum_time_s": 0.0,
+        "maximum": 16.168103513514072,
+        "maximum_time_s": 0.8399671964583486,
+        "maximum_absolute": 16.168103513514072
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.963258051479392,
+        "minimum_time_s": 0.3452967063668599,
+        "maximum": 2.907283603310474,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 2.907283603310474
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.963258051479392,
+        "minimum_time_s": 0.3452967063668599,
+        "maximum": 1.241827048138123,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 1.241827048138123
+      },
+      "primitive_effort_extrema": {
+        "minimum": 11.357797110484979,
+        "minimum_time_s": 0.18740151595908908,
+        "maximum": 19.071909058712087,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 19.071909058712087
+      },
+      "command_samples": [
+        11.593687330634653, 11.361227170968226, 12.438684733692016,
+        14.513117838980627, 15.570475210036022, 17.360057181531705,
+        19.071909058712087
+      ],
+      "primitive_samples": [
+        11.593687330634653, 11.361227170968226, 12.438684733692016,
+        14.513117838980627, 15.570475210036022, 17.360057181531705,
+        19.071909058712087
+      ]
+    },
+    {
+      "coordinate": "LSInputZ",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [],
+      "correction_controls": [
+        -0.16096464894115847, -0.5594235891150559, -0.6573852421532972,
+        -0.06030645966616699, -0.5643611734483598, -0.2971243652273623,
+        -0.09334835468117575
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": 4.521620354414452,
+        "minimum_time_s": 0.0,
+        "maximum": 11.198488353025212,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 11.198488353025212
+      },
+      "parent_effort_extrema": {
+        "minimum": 4.6825850033556105,
+        "minimum_time_s": 0.0,
+        "maximum": 11.223871884398461,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 11.223871884398461
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.4515006743449243,
+        "minimum_time_s": 0.21429188581732975,
+        "maximum": -0.02538353137324678,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 0.4515006743449243
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.4515006743449243,
+        "minimum_time_s": 0.21429188581732975,
+        "maximum": -0.09334835468117682,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 0.4515006743449243
+      },
+      "primitive_effort_extrema": {
+        "minimum": 4.521620354414452,
+        "minimum_time_s": 0.0,
+        "maximum": 11.198488353025212,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 11.198488353025212
+      },
+      "command_samples": [
+        4.521620354414452, 5.062829501596504, 6.003873424485972,
+        7.295443360390401, 8.38062123622515, 10.060875187661022,
+        11.198488353025212
+      ],
+      "primitive_samples": [
+        4.521620354414452, 5.062829501596504, 6.003873424485972,
+        7.295443360390401, 8.38062123622515, 10.060875187661022,
+        11.198488353025212
+      ]
+    },
+    {
+      "coordinate": "LWInputX",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 1,
+          "value": 2.0,
+          "bound": "upper"
+        },
+        {
+          "index": 3,
+          "value": 1.9999999999999982,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        -0.22282905059579106, 2.0, -0.08665867827097262, 1.9999999999999982,
+        -1.8479553960713595, -0.8361178951075061, -6.5472518550447205
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -10.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 10.0],
+      "total_effort_extrema": {
+        "minimum": -1.0151487897488791,
+        "minimum_time_s": 0.33754894677003944,
+        "maximum": 6.92175789788695,
+        "maximum_time_s": 0.8458270366960638,
+        "maximum_absolute": 6.92175789788695
+      },
+      "parent_effort_extrema": {
+        "minimum": -1.6020980608674753,
+        "minimum_time_s": 0.2991260060513062,
+        "maximum": 16.06307460527325,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 16.06307460527325
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -9.144781974678423,
+        "minimum_time_s": 0.85,
+        "maximum": 0.8492535643142471,
+        "maximum_time_s": 0.18215541532979843,
+        "maximum_absolute": 9.144781974678423
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -6.54725185504474,
+        "minimum_time_s": 0.8,
+        "maximum": 0.8492535643142471,
+        "maximum_time_s": 0.18215541532979843,
+        "maximum_absolute": 6.54725185504474
+      },
+      "primitive_effort_extrema": {
+        "minimum": -1.0151487897488791,
+        "minimum_time_s": 0.33754894677003944,
+        "maximum": 6.92175789788695,
+        "maximum_time_s": 0.8458270366960638,
+        "maximum_absolute": 6.92175789788695
+      },
+      "command_samples": [
+        2.717137956561516, -0.22491604860690106, -0.8455791843973177,
+        1.9869860564661819, 4.430168582848518, 6.570740063362101,
+        6.9182926305948875
+      ],
+      "primitive_samples": [
+        2.717137956561516, -0.22491604860690106, -0.8455791843973177,
+        1.9869860564661819, 4.430168582848518, 6.570740063362101,
+        6.9182926305948875
+      ]
+    },
+    {
+      "coordinate": "LWInputY",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 4,
+          "value": -2.0,
+          "bound": "lower"
+        },
+        {
+          "index": 6,
+          "value": -2.0,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        -0.21052574604538155, 0.404377385945928, 0.9399875622842709,
+        1.2977997447999676, -2.0, 0.333905833814498, -2.0
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -10.525898807612695,
+        "minimum_time_s": 0.85,
+        "maximum": -2.8260218629373033,
+        "maximum_time_s": 0.21133697925122785,
+        "maximum_absolute": 10.525898807612695
+      },
+      "parent_effort_extrema": {
+        "minimum": -7.322217837733389,
+        "minimum_time_s": 0.85,
+        "maximum": -3.1587626968613947,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 7.322217837733389
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -3.2036809698793127,
+        "minimum_time_s": 0.85,
+        "maximum": 0.5263595621562296,
+        "maximum_time_s": 0.24734739757380494,
+        "maximum_absolute": 3.2036809698793127
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -2.000000000000003,
+        "minimum_time_s": 0.8,
+        "maximum": 0.5263595621562296,
+        "maximum_time_s": 0.24734739757380494,
+        "maximum_absolute": 2.000000000000003
+      },
+      "primitive_effort_extrema": {
+        "minimum": -10.525898807612695,
+        "minimum_time_s": 0.85,
+        "maximum": -2.8260218629373033,
+        "maximum_time_s": 0.21133697925122785,
+        "maximum_absolute": 10.525898807612695
+      },
+      "command_samples": [
+        -3.369288442906776, -2.828354639900429, -3.5274437946197486,
+        -5.384861010334925, -6.617842579148746, -8.698019033118534,
+        -10.525898807612695
+      ],
+      "primitive_samples": [
+        -3.369288442906776, -2.828354639900429, -3.5274437946197486,
+        -5.384861010334925, -6.617842579148746, -8.698019033118534,
+        -10.525898807612695
+      ]
+    },
+    {
+      "coordinate": "REInput",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [],
+      "correction_controls": [
+        -0.08463960163007567, -0.6094652855923136, -1.4790218343399135,
+        1.2159126472017063, 1.2419346163279936, -0.6205899539340543,
+        2.817760966594239
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -10.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 10.0],
+      "total_effort_extrema": {
+        "minimum": 2.679362432208038,
+        "minimum_time_s": 0.028996749432882635,
+        "maximum": 17.731039225491006,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 17.731039225491006
+      },
+      "parent_effort_extrema": {
+        "minimum": 2.78545223123694,
+        "minimum_time_s": 0.0,
+        "maximum": 13.276731492979174,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 13.276731492979174
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.5075536915244103,
+        "minimum_time_s": 0.1573738714853422,
+        "maximum": 4.454307732511832,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 4.454307732511832
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.5075536915244103,
+        "minimum_time_s": 0.1573738714853422,
+        "maximum": 2.8177609665942365,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 2.8177609665942365
+      },
+      "primitive_effort_extrema": {
+        "minimum": 2.679362432208038,
+        "minimum_time_s": 0.028996749432882635,
+        "maximum": 17.731039225491006,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 17.731039225491006
+      },
+      "command_samples": [
+        2.7008126296068644, 3.7793545745770394, 7.436233704051204,
+        11.427014700207874, 13.38313816751737, 15.931607920783243,
+        17.731039225491006
+      ],
+      "primitive_samples": [
+        2.7008126296068644, 3.7793545745770394, 7.436233704051204,
+        11.427014700207874, 13.38313816751737, 15.931607920783243,
+        17.731039225491006
+      ]
+    },
+    {
+      "coordinate": "RFInput",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 3,
+          "value": -1.9999999999999991,
+          "bound": "lower"
+        },
+        {
+          "index": 4,
+          "value": 1.9999999999999991,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        0.011762400805019446, 1.984879765786352, 0.04698641076697463,
+        -1.9999999999999991, 1.9999999999999991, -0.6982021284923441,
+        -1.5839047257984546
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -11.356633845993628,
+        "minimum_time_s": 0.85,
+        "maximum": 7.056337206265969,
+        "maximum_time_s": 0.02685720206744233,
+        "maximum_absolute": 11.356633845993628
+      },
+      "parent_effort_extrema": {
+        "minimum": -9.593446479809602,
+        "minimum_time_s": 0.85,
+        "maximum": 6.988894726762096,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 9.593446479809602
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -1.7638174369498307,
+        "minimum_time_s": 0.8475202931371874,
+        "maximum": 0.7351826795919538,
+        "maximum_time_s": 0.11271744803749532,
+        "maximum_absolute": 1.7638174369498307
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -1.5839047257984382,
+        "minimum_time_s": 0.8,
+        "maximum": 0.7351826795919538,
+        "maximum_time_s": 0.11271744803749532,
+        "maximum_absolute": 1.5839047257984382
+      },
+      "primitive_effort_extrema": {
+        "minimum": -11.356633845993628,
+        "minimum_time_s": 0.85,
+        "maximum": 7.056337206265969,
+        "maximum_time_s": 0.02685720206744233,
+        "maximum_absolute": 11.356633845993628
+      },
+      "command_samples": [
+        7.0006571275671154, 5.504888328850075, 2.387389046153161,
+        -1.7739491406055494, -5.105128226597164, -9.275153154213648,
+        -11.356633845993628
+      ],
+      "primitive_samples": [
+        7.0006571275671154, 5.504888328850075, 2.387389046153161,
+        -1.7739491406055494, -5.105128226597164, -9.275153154213648,
+        -11.356633845993628
+      ]
+    },
+    {
+      "coordinate": "RScapInputX",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 4,
+          "value": -1.9999999999999982,
+          "bound": "lower"
+        },
+        {
+          "index": 5,
+          "value": -2.0,
+          "bound": "lower"
+        },
+        {
+          "index": 6,
+          "value": -2.0000000000000284,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        -0.41191850562291865, 0.7117340611758805, -0.7939192020022396,
+        1.0069258118443951, -1.9999999999999982, -2.0, -2.0000000000000284
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": 1.9824367274606152,
+        "minimum_time_s": 0.0,
+        "maximum": 28.235283622736556,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 28.235283622736556
+      },
+      "parent_effort_extrema": {
+        "minimum": 2.394355233083534,
+        "minimum_time_s": 0.0,
+        "maximum": 30.252599199933993,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 30.252599199933993
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -2.017315577197434,
+        "minimum_time_s": 0.85,
+        "maximum": 0.027037304496099868,
+        "maximum_time_s": 0.14680018488748547,
+        "maximum_absolute": 2.017315577197434
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -2.0000000000000586,
+        "minimum_time_s": 0.8,
+        "maximum": 0.027037304496099868,
+        "maximum_time_s": 0.14680018488748547,
+        "maximum_absolute": 2.0000000000000586
+      },
+      "primitive_effort_extrema": {
+        "minimum": 1.9824367274606152,
+        "minimum_time_s": 0.0,
+        "maximum": 28.235283622736556,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 28.235283622736556
+      },
+      "command_samples": [
+        1.9824367274606152, 9.647854127476341, 16.90958369629829,
+        23.100582280158363, 25.67194992148508, 27.667280659478827,
+        28.235283622736556
+      ],
+      "primitive_samples": [
+        1.9824367274606152, 9.647854127476341, 16.90958369629829,
+        23.100582280158363, 25.67194992148508, 27.667280659478827,
+        28.235283622736556
+      ]
+    },
+    {
+      "coordinate": "RScapInputY",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 2,
+          "value": 2.0000000000000027,
+          "bound": "upper"
+        },
+        {
+          "index": 4,
+          "value": -1.999999999999993,
+          "bound": "lower"
+        },
+        {
+          "index": 6,
+          "value": 2.000000000000042,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        0.7154466218106359, -1.9892723622407007, 2.0000000000000027,
+        -1.5107737306853757, -1.999999999999993, 7.185724086232494,
+        2.000000000000042
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -10.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 10.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -53.795745711216526,
+        "minimum_time_s": 0.85,
+        "maximum": -3.5663799183196154,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 53.795745711216526
+      },
+      "parent_effort_extrema": {
+        "minimum": -52.88442802803066,
+        "minimum_time_s": 0.85,
+        "maximum": -4.281826540130251,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 52.88442802803066
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.9113176831858747,
+        "minimum_time_s": 0.85,
+        "maximum": 3.393361052341413,
+        "maximum_time_s": 0.7172139937411005,
+        "maximum_absolute": 3.393361052341413
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.2512807206874508,
+        "minimum_time_s": 0.1408350872963358,
+        "maximum": 3.393361052341413,
+        "maximum_time_s": 0.7172139937411005,
+        "maximum_absolute": 3.393361052341413
+      },
+      "primitive_effort_extrema": {
+        "minimum": -53.795745711216526,
+        "minimum_time_s": 0.85,
+        "maximum": -3.5663799183196154,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 53.795745711216526
+      },
+      "command_samples": [
+        -3.5663799183196154, -13.643670939741046, -24.389014444817906,
+        -34.5427825027668, -39.782423809022504, -47.630544308619946,
+        -53.795745711216526
+      ],
+      "primitive_samples": [
+        -3.5663799183196154, -13.643670939741046, -24.389014444817906,
+        -34.5427825027668, -39.782423809022504, -47.630544308619946,
+        -53.795745711216526
+      ]
+    },
+    {
+      "coordinate": "RSInputX",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 2,
+          "value": 1.9999999999999996,
+          "bound": "upper"
+        },
+        {
+          "index": 6,
+          "value": 1.9999999999999574,
+          "bound": "upper"
+        }
+      ],
+      "correction_controls": [
+        -0.3208014245251525, -0.2161683972556684, 1.9999999999999996,
+        -0.08626179852204086, 0.577998854412682, -1.3334458027902407,
+        1.9999999999999574
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -1.3153179775706294,
+        "minimum_time_s": 0.0,
+        "maximum": 9.038894243905252,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 9.038894243905252
+      },
+      "parent_effort_extrema": {
+        "minimum": -0.9945165530454769,
+        "minimum_time_s": 0.0,
+        "maximum": 5.440189572596154,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 5.440189572596154
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.3208014245251525,
+        "minimum_time_s": 0.0,
+        "maximum": 3.5987046713091217,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 3.5987046713091217
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.3208014245251525,
+        "minimum_time_s": 0.0,
+        "maximum": 1.9999999999999558,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 1.9999999999999558
+      },
+      "primitive_effort_extrema": {
+        "minimum": -1.3153179775706294,
+        "minimum_time_s": 0.0,
+        "maximum": 9.038894243905252,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 9.038894243905252
+      },
+      "command_samples": [
+        -1.3153179775706294, 1.116046872644865, 3.271728672331232,
+        4.555326563484971, 5.397863417188673, 7.267362587524838,
+        9.038894243905252
+      ],
+      "primitive_samples": [
+        -1.3153179775706294, 1.116046872644865, 3.271728672331232,
+        4.555326563484971, 5.397863417188673, 7.267362587524838,
+        9.038894243905252
+      ]
+    },
+    {
+      "coordinate": "RSInputY",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [],
+      "correction_controls": [
+        0.15432105831947052, -0.11834755092037469, 0.34073280460550337,
+        -1.4623465360362449, 0.22765875333839247, -0.689982719024588,
+        0.8507445659947948
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -5.365346780086935,
+        "minimum_time_s": 0.0,
+        "maximum": -0.1534993956133377,
+        "maximum_time_s": 0.5206816301003286,
+        "maximum_absolute": 5.365346780086935
+      },
+      "parent_effort_extrema": {
+        "minimum": -5.519667838406406,
+        "minimum_time_s": 0.0,
+        "maximum": 0.2005902546570244,
+        "maximum_time_s": 0.501008418110024,
+        "maximum_absolute": 5.519667838406406
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.3929864521856907,
+        "minimum_time_s": 0.43595057598491616,
+        "maximum": 1.599988949189421,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 1.599988949189421
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.3929864521856907,
+        "minimum_time_s": 0.43595057598491616,
+        "maximum": 0.8507445659947637,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 0.8507445659947637
+      },
+      "primitive_effort_extrema": {
+        "minimum": -5.365346780086935,
+        "minimum_time_s": 0.0,
+        "maximum": -0.1534993956133377,
+        "maximum_time_s": 0.5206816301003286,
+        "maximum_absolute": 5.365346780086935
+      },
+      "command_samples": [
+        -5.365346780086935, -2.246702439556339, -0.4744081354803651,
+        -0.3038074980594745, -0.8910246287611105, -1.6240887922765497,
+        -1.7849609751257698
+      ],
+      "primitive_samples": [
+        -5.365346780086935, -2.246702439556339, -0.4744081354803651,
+        -0.3038074980594745, -0.8910246287611105, -1.6240887922765497,
+        -1.7849609751257698
+      ]
+    },
+    {
+      "coordinate": "RSInputZ",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 4,
+          "value": 1.9999999999999962,
+          "bound": "upper"
+        },
+        {
+          "index": 6,
+          "value": -2.000000000000014,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        0.2626103103138284, 0.8032433952945138, -1.0013778949630068,
+        -1.9999585433119362, 1.9999999999999962, 0.02696603324437774,
+        -2.000000000000014
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -20.7919870854958,
+        "minimum_time_s": 0.85,
+        "maximum": 7.029679577834759,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 20.7919870854958
+      },
+      "parent_effort_extrema": {
+        "minimum": -18.06166864760295,
+        "minimum_time_s": 0.85,
+        "maximum": 6.767069267520931,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 18.06166864760295
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -2.730318437892843,
+        "minimum_time_s": 0.85,
+        "maximum": 0.3452076945429873,
+        "maximum_time_s": 0.04322694554869626,
+        "maximum_absolute": 2.730318437892843
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -2.0000000000000173,
+        "minimum_time_s": 0.8,
+        "maximum": 0.3452076945429873,
+        "maximum_time_s": 0.04322694554869626,
+        "maximum_absolute": 2.0000000000000173
+      },
+      "primitive_effort_extrema": {
+        "minimum": -20.7919870854958,
+        "minimum_time_s": 0.85,
+        "maximum": 7.029679577834759,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 20.7919870854958
+      },
+      "command_samples": [
+        7.029679577834759, 2.956016354508283, -1.8655255091335068,
+        -7.506681483367744, -11.804323607768403, -17.51990304600384,
+        -20.7919870854958
+      ],
+      "primitive_samples": [
+        7.029679577834759, 2.956016354508283, -1.8655255091335068,
+        -7.506681483367744, -11.804323607768403, -17.51990304600384,
+        -20.7919870854958
+      ]
+    },
+    {
+      "coordinate": "RWInputX",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [
+        {
+          "index": 4,
+          "value": -1.9999999999999964,
+          "bound": "lower"
+        },
+        {
+          "index": 5,
+          "value": 2.0,
+          "bound": "upper"
+        },
+        {
+          "index": 6,
+          "value": -1.9999999999999716,
+          "bound": "lower"
+        }
+      ],
+      "correction_controls": [
+        0.4272665331391643, 1.3552773131235663, -1.4218598337845778,
+        1.944867590360369, -1.9999999999999964, 2.0, -1.9999999999999716
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": -3.4448549947786535,
+        "minimum_time_s": 0.85,
+        "maximum": 9.272461531587211,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 9.272461531587211
+      },
+      "parent_effort_extrema": {
+        "minimum": 0.5243032288056462,
+        "minimum_time_s": 0.8027434243617505,
+        "maximum": 8.845194998448047,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 8.845194998448047
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -4.054096714426638,
+        "minimum_time_s": 0.85,
+        "maximum": 0.6050128191885787,
+        "maximum_time_s": 0.060246732214754885,
+        "maximum_absolute": 4.054096714426638
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -1.9999999999999631,
+        "minimum_time_s": 0.8,
+        "maximum": 0.6050128191885787,
+        "maximum_time_s": 0.060246732214754885,
+        "maximum_absolute": 1.9999999999999631
+      },
+      "primitive_effort_extrema": {
+        "minimum": -3.4448549947786535,
+        "minimum_time_s": 0.85,
+        "maximum": 9.272461531587211,
+        "maximum_time_s": 0.0,
+        "maximum_absolute": 9.272461531587211
+      },
+      "command_samples": [
+        9.272461531587211, 6.688204302143526, 3.945684795061359,
+        1.6033785017259632, 0.4932515937051125, -1.475430114090166,
+        -3.4448549947786535
+      ],
+      "primitive_samples": [
+        9.272461531587211, 6.688204302143526, 3.945684795061359,
+        1.6033785017259632, 0.4932515937051125, -1.475430114090166,
+        -3.4448549947786535
+      ]
+    },
+    {
+      "coordinate": "RWInputY",
+      "unit": "Nm",
+      "command_frame": "joint generalized torque (not a Cartesian moment component)",
+      "active_controls": [],
+      "correction_controls": [
+        0.20588701334693926, -0.4075959379429327, -0.928220162426593,
+        -1.300377780900428, 1.9700783491167866, -0.5201729217021835,
+        1.9522264087292527
+      ],
+      "correction_lower": [-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0],
+      "correction_upper": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+      "total_effort_extrema": {
+        "minimum": 3.103721485823083,
+        "minimum_time_s": 0.20627920266634334,
+        "maximum": 11.989631561682504,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 11.989631561682504
+      },
+      "parent_effort_extrema": {
+        "minimum": 3.4038341612885326,
+        "minimum_time_s": 0.0,
+        "maximum": 8.76231640982242,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 8.76231640982242
+      },
+      "correction_extrema_full_horizon": {
+        "minimum": -0.5286937097901239,
+        "minimum_time_s": 0.24916406340932198,
+        "maximum": 3.227315151860091,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 3.227315151860091
+      },
+      "correction_extrema_basis_interval": {
+        "minimum": -0.5286937097901239,
+        "minimum_time_s": 0.24916406340932198,
+        "maximum": 1.9522264087292829,
+        "maximum_time_s": 0.8,
+        "maximum_absolute": 1.9522264087292829
+      },
+      "primitive_effort_extrema": {
+        "minimum": 3.103721485823083,
+        "minimum_time_s": 0.20627920266634334,
+        "maximum": 11.989631561682504,
+        "maximum_time_s": 0.85,
+        "maximum_absolute": 11.989631561682504
+      },
+      "command_samples": [
+        3.609721174635472, 3.104448224182689, 3.873780210404837,
+        5.937123844643519, 7.388344986527828, 9.858625996803433,
+        11.989631561682504
+      ],
+      "primitive_samples": [
+        3.609721174635472, 3.104448224182689, 3.873780210404837,
+        5.937123844643519, 7.388344986527828, 9.858625996803433,
+        11.989631561682504
+      ]
+    }
+  ],
+  "warning": "Bernstein convex-hull bounds apply on the basis interval only; coverage beyond it extrapolates the same global polynomial",
+  "input_sha256": {
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-ms-fit-9967-18\\config.json": "6bb7d4381680ecc0837713d0ebb8e0d212ab5983891f5be96ad929db20369517",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-ms-fit-9967-18\\returned-candidate.json": "a3fa5c4ccb503c33fef9d72a061718ccbd3fa8b2449cd07959d09f42f564fd10",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-ms-fit-9967-18\\bound-audit.json": "cc9983e8f2440fc83fc2b4430dfc8a8af90d12c5ee2686c14c5176efd744812a",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\native-root-force-9967-02\\returned-candidate.json": "34357becc44fa891a402a0f68e0a795d8304074bc8cdcfb5f419157b7de2680e",
+    "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\gemini-ms-audit-20260912\\native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-mujoco-native\\docs\\development\\mujoco_native_matching\\audit_effort_bounds.py": "e2e5de18dee15061a21b37e8567b593f97b786f83f60c0a9a9868fc3a8ce6423"
+  }
+}

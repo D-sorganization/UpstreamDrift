@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "exit_code": 0,
+  "archive_sha256": "b1c5d214b465d2bff1d3fa10543dcc2d000d86070a1af75736e9f6e1753a4f62",
+  "output_hashes": {
+    "receipt.json": "ea5925292df878c103b08682b990e3f56a4b5e8f26de1e7ca3ef3510fcc40a63",
+    "sensitivity.npz": "b082a434eb1906c1ca584cc215c79135dc4daeb3e6ac78e0d5df954e5ca05dff"
+  },
+  "launch": {
+    "command": [
+      "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+      "/mnt/c/Users/diete/diagnose_sensitivity_72.py",
+      "--model",
+      "/mnt/c/Users/diete/native_geometry_spec_9967.json",
+      "--checkpoint",
+      "/mnt/c/Users/diete/native-regularized-fit-9967-68/best.json",
+      "--target",
+      "/mnt/c/Users/diete/driver_marker_payload_9967.json",
+      "--output",
+      "/mnt/c/Users/diete/native-sensitivity-9967-72",
+      "--runtime",
+      "/home/dieterolson/native-sensitivity-9967-70"
+    ],
+    "environment": {
+      "PYTHONPATH": "/home/dieterolson/native-sensitivity-9967-70",
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    },
+    "status": "terminal",
+    "start_time": 1789276276.4679546,
+    "pid": 2886970,
+    "exit_code": 0,
+    "elapsed_s": 79.52162408828735
+  }
+}

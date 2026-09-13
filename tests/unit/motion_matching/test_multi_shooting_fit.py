@@ -9,6 +9,8 @@ Validates:
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import numpy as np
 import pytest
 
@@ -105,6 +107,9 @@ def test_multiple_shooting_options_validation() -> None:
 
     with pytest.raises(ValueError, match="defect_weight"):
         MultipleShootingOptions(shooting_nodes=(0.4, 0.8), defect_weight=-1.0)
+
+    with pytest.raises(ValueError, match="Segmented forward batch"):
+        MultipleShootingOptions(shooting_nodes=(0.4, 0.8), segmented_forward_batch=1)
 
 
 def test_multiple_shooting_eliminates_defect_on_toy_oscillator() -> None:
@@ -269,7 +274,102 @@ def test_multiple_shooting_window_cache_avoids_redundant_evaluations() -> None:
     assert call_counts[0] < call_counts[1]
 
 
-@pytest.mark.parametrize("solver", ["least_squares", "slsqp", "slsqp_omitted"])
+def test_batched_windows_submit_only_cache_misses_and_keep_analytic_jacobian(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The optional batch seam changes execution, never assembly or Jacobians."""
+    from src.shared.python.motion_matching import multi_shooting_fit as module
+
+    target = MarkerTarget(np.array([0.0, 0.5, 1.0]), np.zeros((3, 1, 3)), np.ones(1))
+    batch_sizes: list[int] = []
+    scalar_calls = 0
+    jacobian_calls = 0
+
+    def forward(theta, clock, state):
+        nonlocal scalar_calls
+        scalar_calls += 1
+        return np.zeros((len(clock), 1, 3)), np.zeros(1)
+
+    def batched(requests):
+        batch_sizes.append(len(requests))
+        return [forward(theta, clock, state) for theta, clock, state in requests]
+
+    def window_jacobian(theta, clock, state):
+        nonlocal jacobian_calls
+        jacobian_calls += 1
+        local_size = 1 if state is None else 2
+        return np.zeros((len(clock), 1, 3, local_size)), np.zeros((1, local_size))
+
+    def repeat_initial_residual(fun, x0, *, jac, **_kwargs):
+        first = fun(x0)
+        second = fun(x0)
+        np.testing.assert_array_equal(first, second)
+        np.testing.assert_array_equal(jac(x0), jac(x0))
+        return SimpleNamespace(
+            x=x0,
+            success=True,
+            message="controlled cache check",
+            optimality=0.0,
+            nfev=2,
+            active_mask=np.zeros_like(x0),
+        )
+
+    monkeypatch.setattr(module, "least_squares", repeat_initial_residual)
+    result = fit_multiple_shooting(
+        target,
+        forward,
+        lambda theta, clock: np.zeros((len(clock), 1, 3)),
+        initial_theta=np.zeros(1),
+        lower_theta=-np.ones(1),
+        upper_theta=np.ones(1),
+        initial_states={0.5: np.zeros(1)},
+        state_bounds={0.5: (-np.ones(1), np.ones(1))},
+        options=MultipleShootingOptions(
+            shooting_nodes=(0.5, 1.0),
+            window_jacobian=window_jacobian,
+            segmented_forward_batch=batched,
+            acceptance=lambda prediction: bool(np.isfinite(prediction).all()),
+        ),
+    )
+    assert batch_sizes == [2]
+    # Two batch requests and two final-metric windows; cache hits submitted none.
+    assert scalar_calls == 4
+    assert jacobian_calls == 4
+    assert result.accepted
+
+
+def test_batched_windows_reject_wrong_count_or_nonfinite_result() -> None:
+    target = MarkerTarget(np.array([0.0, 0.5, 1.0]), np.zeros((3, 1, 3)), np.ones(1))
+
+    def forward(theta, clock, state):
+        return np.zeros((len(clock), 1, 3)), np.zeros(1)
+
+    for batch in (
+        lambda requests: [],
+        lambda requests: [
+            (np.full((len(clock), 1, 3), np.nan), np.zeros(1))
+            for _theta, clock, _state in requests
+        ],
+    ):
+        with pytest.raises(ValueError, match="Segmented batch"):
+            fit_multiple_shooting(
+                target,
+                forward,
+                lambda theta, clock: np.zeros((len(clock), 1, 3)),
+                initial_theta=np.zeros(1),
+                lower_theta=-np.ones(1),
+                upper_theta=np.ones(1),
+                initial_states={0.5: np.zeros(1)},
+                state_bounds={0.5: (-np.ones(1), np.ones(1))},
+                options=MultipleShootingOptions(
+                    shooting_nodes=(0.5, 1.0), segmented_forward_batch=batch
+                ),
+            )
+
+
+@pytest.mark.parametrize(
+    "solver", ["least_squares", "slsqp", "slsqp_omitted", "slsqp_scaled"]
+)
 def test_transformed_nodes_and_explicit_acceptance(monkeypatch, solver) -> None:
     omitted_defect = solver == "slsqp_omitted"
     time = np.array([0.0, 0.5, 1.0])
@@ -335,7 +435,8 @@ def test_transformed_nodes_and_explicit_acceptance(monkeypatch, solver) -> None:
     for allowed in [True, False]:
         opts = MultipleShootingOptions(
             shooting_nodes=(0.5, 1.0),
-            solver="slsqp" if omitted_defect else solver,
+            solver="least_squares" if solver == "least_squares" else "slsqp",
+            variable_scales=np.array([2.0, 0.05]) if solver == "slsqp_scaled" else None,
             constraint_projection=lambda time: np.array([[1.0, 0.0]]),
             step_tolerance=None,
             max_nfev=30,
@@ -446,3 +547,8 @@ def test_evaluation_callbacks_preserve_physical_node_snapshots() -> None:
 def test_invalid_step_tolerance_is_rejected(value) -> None:
     with pytest.raises(ValueError, match="step tolerance"):
         MultipleShootingOptions(shooting_nodes=(1.0,), step_tolerance=value)
+
+
+def test_variable_scales_require_constrained_backend() -> None:
+    with pytest.raises(ValueError, match="variable scales"):
+        MultipleShootingOptions(shooting_nodes=(1.0,), variable_scales=np.ones(1))

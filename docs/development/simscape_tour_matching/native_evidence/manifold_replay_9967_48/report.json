@@ -1,0 +1,50 @@
+{
+  "scope": "Same-input native representation prefix; not C3D or MATLAB acceptance",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "candidate_sha256": "b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f",
+  "runner_sha256": "4b3e8ac27e392d734aba89f809132cc55700c781dd7dffeb8dacf05c46773336",
+  "horizon_s": 0.2,
+  "scalar_elapsed_s": 0.8104930320405401,
+  "scalar_closure_pose_max_abs": 2.552125177857259e-12,
+  "scalar_closure_velocity_max_abs": 3.279918003862292e-11,
+  "runs": [
+    {
+      "max_step": 0.001388888888888889,
+      "elapsed_s": 2.2981561689521186,
+      "evaluations": 728,
+      "steps": 182,
+      "native_q_max_abs_difference": 6.185367462663294e-8,
+      "native_v_max_abs_difference": 2.94112097387611e-6,
+      "marker_max_distance_m": 1.3893348112026575e-9,
+      "closure_pose_max_abs": 2.5479323512161054e-11,
+      "closure_velocity_max_abs": 4.899302352701085e-10,
+      "prefix_parity_gates_pass": true
+    },
+    {
+      "max_step": 0.0006944444444444445,
+      "elapsed_s": 4.150386340974364,
+      "evaluations": 1304,
+      "steps": 326,
+      "native_q_max_abs_difference": 4.584093105108877e-9,
+      "native_v_max_abs_difference": 2.1891527279827017e-7,
+      "marker_max_distance_m": 1.0288459465960553e-10,
+      "closure_pose_max_abs": 1.3234413565044241e-12,
+      "closure_velocity_max_abs": 3.41252165414474e-11,
+      "marker_max_distance_from_previous_step_m": 1.2864504023237956e-9,
+      "prefix_parity_gates_pass": true
+    },
+    {
+      "max_step": 0.00034722222222222224,
+      "elapsed_s": 7.845672229013871,
+      "evaluations": 2456,
+      "steps": 614,
+      "native_q_max_abs_difference": 3.317781605005621e-10,
+      "native_v_max_abs_difference": 1.5920261331459074e-8,
+      "marker_max_distance_m": 7.449891236450896e-12,
+      "closure_pose_max_abs": 8.343326030057974e-13,
+      "closure_velocity_max_abs": 5.763389765434113e-12,
+      "marker_max_distance_from_previous_step_m": 9.543656762127249e-11,
+      "prefix_parity_gates_pass": true
+    }
+  ]
+}

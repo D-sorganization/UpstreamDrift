@@ -1,0 +1,81 @@
+{
+  "qualification": "exploratory returned two-window candidate; R2025b acceptance pending",
+  "candidate_sha256": "786522cd5380a9f62602920b2cff6e6b404f7ceb99bfc6783f1f359b98a6457a",
+  "uninterrupted_metrics": {
+    "whole_rms_m": 0.028105470710226108,
+    "early_rms_m": 0.010860396867183951,
+    "terminal_rms_m": 0.06539791108645086,
+    "club_cluster_rms_m": 0.030040690123091792,
+    "pelvis_yaw_error_pct": 6.164015138454704,
+    "score": 16.75483362467626
+  },
+  "run73_metrics": {
+    "whole_rms_m": 0.028105470710226108,
+    "early_rms_m": 0.010860396867183951,
+    "terminal_rms_m": 0.06539791108645086,
+    "club_cluster_rms_m": 0.030040690123091792,
+    "score": 18.30016138273805
+  },
+  "improved_uninterrupted": false,
+  "accepted": false,
+  "optimizer_converged": false,
+  "message": "Physical residual evaluation budget exhausted; returned evaluated fallback",
+  "max_scaled_defect_norm": 3.980355614456277e-11,
+  "defect_norms": {
+    "0.6": 3.980355614456277e-11
+  },
+  "segmented_rms_m": 0.02810547071042804,
+  "unsegmented_rms_m": 0.02810547071022611,
+  "terminal_replay_gap_m": 8.77798437256683e-12,
+  "function_evaluations": 10,
+  "active_bound_count": 0,
+  "active_theta_lower": 0,
+  "active_theta_upper": 0,
+  "active_node_bounds": 0,
+  "theta_max_abs": 0.0,
+  "node_chart_norm": 0.0,
+  "costs": [
+    {
+      "evaluation": 1,
+      "cost": 18.300161382703596
+    },
+    {
+      "evaluation": 2,
+      "cost": 48.44460341005532
+    },
+    {
+      "evaluation": 3,
+      "cost": 18.94100075255848
+    },
+    {
+      "evaluation": 4,
+      "cost": 18.2605356065026
+    },
+    {
+      "evaluation": 5,
+      "cost": 40.49862824716893
+    },
+    {
+      "evaluation": 6,
+      "cost": 17.982228995053386
+    },
+    {
+      "evaluation": 7,
+      "cost": 24.289336501026362
+    },
+    {
+      "evaluation": 8,
+      "cost": 17.55400059599786
+    },
+    {
+      "evaluation": 9,
+      "cost": 32.875804939342274
+    },
+    {
+      "evaluation": 10,
+      "cost": 17.278914492119988
+    }
+  ],
+  "replay_closure_max": [5.8238969202781595e-12, 5.580513828817857e-11],
+  "replay_integration_s": 13.022936470981222
+}

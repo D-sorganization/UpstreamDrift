@@ -1,0 +1,9 @@
+{
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "path_sha256": "decbdeb43d7695f96bf491ec69b47845b3c1f2c6fead2978bcd5198a7c0ecd4e",
+  "samples": 18,
+  "position_closure_max_abs": 2.593314712052583e-10,
+  "rate_closure_max_abs": 2.177400345489197e-13,
+  "acceleration_closure_max_abs": 1.3366818935441913,
+  "scope": "Native residual-oracle qualification only; no trajectory correction, effort identification, or forward replay."
+}

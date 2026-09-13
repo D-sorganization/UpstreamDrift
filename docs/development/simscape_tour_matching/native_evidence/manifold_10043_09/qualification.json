@@ -1,0 +1,38 @@
+{
+  "status": "runtime-prototype-tests-passed",
+  "recorded_utc": "2026-09-13T02:46:49.301800+00:00",
+  "pinocchio_version": "4.1.0",
+  "runtime_root": "/home/dieterolson/native-manifold-10043-09",
+  "command": [
+    "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+    "-m",
+    "pytest",
+    "/home/dieterolson/native-manifold-10043-09/tests/unit/motion_matching/test_native_pinocchio_manifold.py",
+    "-q",
+    "-o",
+    "addopts="
+  ],
+  "returncode": 0,
+  "stdout": ".....                                                                    [100%]\n=============================== warnings summary ===============================\n../../../../home/dieterolson/native-manifold-10043-09/tests/unit/motion_matching/test_native_pinocchio_manifold.py:16\n  /home/dieterolson/native-manifold-10043-09/tests/unit/motion_matching/test_native_pinocchio_manifold.py:16: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    pytestmark = pytest.mark.unit\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n5 passed, 1 warning in 0.48s\n",
+  "stderr": "",
+  "source_sha256": {
+    "src/engines/physics_engines/pinocchio/python/native_model.py": "814a2654049ce03b16caf3e443a928fff4469d55dd213e6bdb55ffa63b79de2f",
+    "src/engines/physics_engines/pinocchio/python/native_manifold_model.py": "b83e99db1ddb2919e0b49fcfccbcbc650339b724c920493d2903fa5b9142750b",
+    "src/shared/python/pose_interchange/native_joint_state.py": "5f936b6b49dbe225f9eed8a4ec495cb74ef90f7dad1b9ad1455c813e624859a4",
+    "src/shared/python/pose_interchange/joint_chart.py": "338c387bc70a99fa7b1a9158b98fcf44dc2496c06ecfd5f32901d835b5168c4d",
+    "src/shared/python/pose_interchange/se3.py": "7bd20a24ca7f6566307c2f0dd7b9bc2a06ff19a66187ea9a7d47aa1d4be6a345",
+    "src/shared/python/math_utils/quaternion.py": "1ee45f15d87bb3ef41a6ca9e4104caddc1b97ff85bd9af89eb118e52cadfbe6d",
+    "docs/development/simscape_tour_matching/native_evidence/native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+    "tests/unit/motion_matching/test_native_pinocchio_manifold.py": "d957007ad87b15925d452936c37fe48a1d88f4bc08cc58c9ad674cf8e7d701bf",
+    "src/shared/python/pose_interchange/__init__.py": "dec36945e6c713ec4f39484d3017408599af2ab7f27608a28a24c88631b42416",
+    "docs/development/simscape_tour_matching/qualify_native_manifold.py": "51aa157d344ce4acaa63994497cc61c351b335e0330b08f6eca80378d949c03e"
+  },
+  "scope": "Random nonsingular states: FK, energy, frame velocity, power, native state restore, manifold integrate/difference, constrained acceleration and weld residuals. No trajectory or MATLAB acceptance. Current alternate-state native effort conversion validated with a displaced branch reference.",
+  "namespace_note": "Exact production lazy pose_interchange initializer used; no pose_interchange shim. Outer src/package namespaces inherit minimal qualification runtime. Numerical modules and production pose_interchange package initializer are hashed; real Pinocchio C++ runtime, no physics mocks. Full GUI/application integration remains untested.",
+  "model_identity": {
+    "parsed_specifications_equal": true,
+    "runtime_original_raw_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "repository_formatted_raw_sha256": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+    "canonical_json_sha256": "db7cd60496edd1adef789b965bce897f12e20d9460b957a31d7fd99c8fd31518"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "status": "terminal",
+  "residual_evaluations": 33,
+  "jacobians": 32,
+  "primal_windows": 64,
+  "restart_roundoff": {
+    "max_abs_increment_outside_box": 2.1760371282653068e-14,
+    "note": "Recovered increment of the restart over parent19 versus the run73 box; theta applies to the exact restart coefficients"
+  },
+  "reference_closure_max_abs": 1.5577761303120496e-11,
+  "zero_retraction_shift": 7.678746527517433e-12,
+  "effort_cost_zero": 1.5468895910686962,
+  "effort_cost_run73": 1.5453277580617921,
+  "config_sha256": "38e5200e3a831558212cad51b2239a19ba7973cd6a92b8cd0047a3b57dc7b455",
+  "elapsed_s": 1554.919886882999,
+  "restart_uninterrupted_metrics": {
+    "whole_rms_m": 0.027562628354060533,
+    "early_rms_m": 0.01135857047666594,
+    "terminal_rms_m": 0.05547013516264503,
+    "club_cluster_rms_m": 0.023270250877940366,
+    "pelvis_yaw_error_pct": 11.287601809669527,
+    "score": 13.523025585097944,
+    "score_with_effort": 15.06991517616664
+  },
+  "zero_displacement_parity": {
+    "whole_rms_m": 0.027562628354308054,
+    "early_rms_m": 0.011358570476665943,
+    "terminal_rms_m": 0.05547013516265506,
+    "club_cluster_rms_m": 0.02327025088118259,
+    "pelvis_yaw_error_pct": 11.287601809847988,
+    "score": 13.523025585205449,
+    "effort_penalty_cost": 1.5468895910686962,
+    "score_with_effort": 15.069915176274145,
+    "run73_score": 18.30016138273805,
+    "restart_score_with_effort": 15.06991517616664,
+    "relative_score_difference": 7.13375720193333e-12,
+    "marker_max_abs_difference_vs_saved_m": 3.183497909731159e-11,
+    "initial_scaled_defect_norm": 8.160479176273038e-11,
+    "projected_constraint_rank": 42,
+    "projected_constraint_singular_values": [
+      348.3913574632801, 1.0000000059223777
+    ],
+    "linear_model_objective_at_zero": 15.069915176274145
+  },
+  "parity_passed": true,
+  "returned_sha256": "96c786ec825535c7b88f99eaa4cbcacce175dea917f5ea27dd96316f7c247a0e",
+  "improved_uninterrupted": true
+}

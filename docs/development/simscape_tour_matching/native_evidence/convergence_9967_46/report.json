@@ -1,0 +1,57 @@
+{
+  "scope": "Fixed run45 time-only input convergence; not match acceptance",
+  "inputs_sha256": {
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "/mnt/c/Users/diete/native-gimbal-pose-sequence-9967-42.json": "f536b087cff5d81deaa0386a58c53f9386bece95b849525e789ef33774193588",
+    "/mnt/c/Users/diete/native-feedback-initializer-9967-45/feedback.npz": "c252735fe4546d15c60500ec22ba026bc864da50ed521d3d1f32ce63460a1f95"
+  },
+  "runner_sha256": "37b74dd8dfdfe0e8ec669c436d4ab1ee947b8142633d21a52cd315e521b0a030",
+  "runs": [
+    {
+      "label": "baseline",
+      "rtol": 1e-10,
+      "atol": 1e-12,
+      "max_step": 0.00025,
+      "evaluations": 115373,
+      "elapsed_s": 52.997891834995244,
+      "errors": [
+        {
+          "time_s": 0.6,
+          "q_max_abs": 2.382679047396863e-7,
+          "v_max_abs": 5.8946616095512105e-6,
+          "largest_coordinate": "HipInputX"
+        },
+        {
+          "time_s": 0.7,
+          "q_max_abs": 2.809847720497416e-6,
+          "v_max_abs": 6.90244749795843e-5,
+          "largest_coordinate": "HipInputX"
+        },
+        {
+          "time_s": 0.8,
+          "q_max_abs": 3.166526171549666e-5,
+          "v_max_abs": 0.0007561907009074886,
+          "largest_coordinate": "HipInputX"
+        },
+        {
+          "time_s": 0.9,
+          "q_max_abs": 0.0012811141603330523,
+          "v_max_abs": 0.06069324938648535,
+          "largest_coordinate": "LSInputX"
+        },
+        {
+          "time_s": 1.0,
+          "q_max_abs": 0.7624869404475703,
+          "v_max_abs": 23.345902223151768,
+          "largest_coordinate": "LSInputX"
+        },
+        {
+          "time_s": 1.1,
+          "q_max_abs": 2.666767584016469,
+          "v_max_abs": 20.633831044066465,
+          "largest_coordinate": "LSInputX"
+        }
+      ]
+    }
+  ]
+}

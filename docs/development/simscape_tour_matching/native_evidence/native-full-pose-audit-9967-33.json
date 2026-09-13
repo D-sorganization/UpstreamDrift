@@ -1,0 +1,1255 @@
+{
+  "scope": "Independent FK and local-bound audit of static poses; no dynamics",
+  "records": [
+    {
+      "time_s": 0.0,
+      "rms_mm": 2.898078904737307e-10,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 8.18417250969492e-10
+        },
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 8.104878642735582e-10
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 7.769959919910922e-10
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 2.813180110092179e-10
+        },
+        {
+          "label": "Marker_3:3:2",
+          "error_mm": 2.2960830596283954e-10
+        }
+      ]
+    },
+    {
+      "time_s": 0.05,
+      "rms_mm": 0.20613640138067188,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "RWristTop",
+          "error_mm": 0.6225218791409239
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 0.3311758999216771
+        },
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 0.2640563485075099
+        },
+        {
+          "label": "Marker_3:3:3",
+          "error_mm": 0.25978447117649855
+        },
+        {
+          "label": "Marker_3:3:2",
+          "error_mm": 0.25775136176467084
+        }
+      ]
+    },
+    {
+      "time_s": 0.1,
+      "rms_mm": 0.523874267836545,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "RWristTop",
+          "error_mm": 1.6105619179602766
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 0.9034122993134284
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 0.8185401888280882
+        },
+        {
+          "label": "Marker_3:3:2",
+          "error_mm": 0.705095044550666
+        },
+        {
+          "label": "Marker_3:3:3",
+          "error_mm": 0.6748204882140922
+        }
+      ]
+    },
+    {
+      "time_s": 0.15,
+      "rms_mm": 1.010188454060001,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "RWristTop",
+          "error_mm": 2.818035964029643
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 1.6908028533213466
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 1.6274448812452935
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 1.4295784408621357
+        },
+        {
+          "label": "Marker_3:3:2",
+          "error_mm": 1.335994045478706
+        }
+      ]
+    },
+    {
+      "time_s": 0.2,
+      "rms_mm": 1.6306061495275093,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "RWristTop",
+          "error_mm": 4.045923047703353
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 2.6749588326419267
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 2.580647713608867
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 2.4702764267027635
+        },
+        {
+          "label": "LElbowOut",
+          "error_mm": 2.1462092077582633
+        }
+      ]
+    },
+    {
+      "time_s": 0.25,
+      "rms_mm": 2.4502064378711794,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "RWristTop",
+          "error_mm": 5.257601182445321
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 4.5196575428137935
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 3.9240949474148854
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 3.466179265423487
+        },
+        {
+          "label": "LElbowOut",
+          "error_mm": 3.229013302609745
+        }
+      ]
+    },
+    {
+      "time_s": 0.3,
+      "rms_mm": 3.556128301911643,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 7.085125478868116
+        },
+        {
+          "label": "RWristTop",
+          "error_mm": 6.138656324320964
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 5.485574867339149
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 4.697588274104708
+        },
+        {
+          "label": "LElbowOut",
+          "error_mm": 4.575379505657803
+        }
+      ]
+    },
+    {
+      "time_s": 0.35,
+      "rms_mm": 5.1525444106918235,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 10.924769898781271
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 7.586159557937219
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 7.3948743220683335
+        },
+        {
+          "label": "RWristTop",
+          "error_mm": 6.555997115093403
+        },
+        {
+          "label": "LElbowOut",
+          "error_mm": 6.485952083912423
+        }
+      ]
+    },
+    {
+      "time_s": 0.4,
+      "rms_mm": 7.277416761278188,
+      "active_coordinates": [],
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 15.53641637413917
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 11.304130305162932
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 9.907746888833277
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 9.790371703441657
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 9.58462971851325
+        }
+      ]
+    },
+    {
+      "time_s": 0.45,
+      "rms_mm": 10.045262301744078,
+      "active_coordinates": ["LWInputY"],
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 22.134376920090837
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 16.143038348851018
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 14.765889119020601
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 14.676414966641063
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 12.345100935135921
+        }
+      ]
+    },
+    {
+      "time_s": 0.5,
+      "rms_mm": 13.295284894400691,
+      "active_coordinates": ["LFInput"],
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 28.323643335229185
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 21.641084216066105
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 21.416118051077284
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 20.885423570988344
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 17.206278345289775
+        }
+      ]
+    },
+    {
+      "time_s": 0.55,
+      "rms_mm": 16.98375063567474,
+      "active_coordinates": ["LFInput"],
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 35.90593946620523
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 28.990534299838792
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 27.636466248392846
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 27.56162373976971
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 22.525948423853926
+        }
+      ]
+    },
+    {
+      "time_s": 0.6,
+      "rms_mm": 20.90808120264454,
+      "active_coordinates": ["LFInput"],
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 42.043118639620054
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 37.352118057646564
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 35.16668917971908
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 33.63000515076334
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 27.834412652935015
+        }
+      ]
+    },
+    {
+      "time_s": 0.65,
+      "rms_mm": 24.620388858742754,
+      "active_coordinates": ["LFInput"],
+      "worst_markers": [
+        {
+          "label": "LWristTop",
+          "error_mm": 47.79294883388957
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 45.64779210982102
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 42.99880148751644
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 39.12228941839967
+        },
+        {
+          "label": "LUArmHigh",
+          "error_mm": 33.71769942097972
+        }
+      ]
+    },
+    {
+      "time_s": 0.7,
+      "rms_mm": 28.145979060274772,
+      "active_coordinates": ["LFInput"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 54.409969023430925
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 51.485430179334195
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 51.353403379333606
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 43.66982045330913
+        },
+        {
+          "label": "LUArmHigh",
+          "error_mm": 38.55132605290331
+        }
+      ]
+    },
+    {
+      "time_s": 0.75,
+      "rms_mm": 31.15471470954611,
+      "active_coordinates": ["LFInput"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 62.41117046510601
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 59.40758997952534
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 53.20835198825945
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 46.90653551430722
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 41.93615747140728
+        }
+      ]
+    },
+    {
+      "time_s": 0.8,
+      "rms_mm": 33.800158935494736,
+      "active_coordinates": ["LFInput"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 69.80523724143487
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 67.13025166212799
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 53.05441075488581
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 49.49365433538424
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 45.78432280035774
+        }
+      ]
+    },
+    {
+      "time_s": 0.85,
+      "rms_mm": 36.13666967618085,
+      "active_coordinates": ["LFInput"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 76.62181271714263
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 73.71404710807963
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 51.57720909609891
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 50.14293286054084
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 49.63899700799602
+        }
+      ]
+    },
+    {
+      "time_s": 0.9,
+      "rms_mm": 38.14500983087013,
+      "active_coordinates": ["LFInput", "LSInputZ"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 82.39648118646798
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 79.26556273641052
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 54.71344951731484
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 52.745502373426774
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 49.86308347135901
+        }
+      ]
+    },
+    {
+      "time_s": 0.95,
+      "rms_mm": 39.749174277864654,
+      "active_coordinates": ["LFInput", "LSInputZ"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 86.62415958228652
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 84.1880469047958
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 61.66720750849338
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 58.71330009321136
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 56.249469212212304
+        }
+      ]
+    },
+    {
+      "time_s": 1.0,
+      "rms_mm": 41.487120305682254,
+      "active_coordinates": ["LSInputZ", "LWInputX"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 91.06783597542643
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 88.2282806674016
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 67.13806926469353
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 66.943297721146
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 57.888074526548024
+        }
+      ]
+    },
+    {
+      "time_s": 1.05,
+      "rms_mm": 42.570929923484776,
+      "active_coordinates": ["LSInputZ"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 93.94743039564173
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 89.928505766669
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 71.74305815199483
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 69.1742111350926
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 57.34558477278151
+        }
+      ]
+    },
+    {
+      "time_s": 1.1,
+      "rms_mm": 42.22764556323803,
+      "active_coordinates": ["LSInputZ"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 93.2630657970938
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 86.9433645226359
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 73.339121876014
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 67.25848185204005
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 56.60695538547912
+        }
+      ]
+    },
+    {
+      "time_s": 1.15,
+      "rms_mm": 40.8036684264417,
+      "active_coordinates": ["HipInputZ", "LSInputX"],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 88.80940383214075
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 76.41051192990841
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 72.37252260071148
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 62.21475734495992
+        },
+        {
+          "label": "BackLeft",
+          "error_mm": 52.232603685236356
+        }
+      ]
+    },
+    {
+      "time_s": 1.2,
+      "rms_mm": 44.07823558754781,
+      "active_coordinates": [
+        "HipInputZ",
+        "TorsoInput",
+        "LFInput",
+        "LScapInputX",
+        "LSInputX",
+        "RSInputX",
+        "RSInputY",
+        "RSInputZ"
+      ],
+      "worst_markers": [
+        {
+          "label": "HeadSide",
+          "error_mm": 77.00027966408955
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 73.87144910577848
+        },
+        {
+          "label": "HeadFront",
+          "error_mm": 71.70360243283358
+        },
+        {
+          "label": "WaistRBack",
+          "error_mm": 66.28168857986259
+        },
+        {
+          "label": "WaistRight",
+          "error_mm": 63.02807010928423
+        }
+      ]
+    },
+    {
+      "time_s": 1.25,
+      "rms_mm": 79.65037986595364,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputZ",
+        "TorsoInput",
+        "LFInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LSInputY",
+        "LSInputZ",
+        "LWInputX",
+        "REInput",
+        "RFInput",
+        "RScapInputX",
+        "RSInputX",
+        "RWInputX",
+        "RWInputY"
+      ],
+      "worst_markers": [
+        {
+          "label": "WaistRBack",
+          "error_mm": 142.6708133015455
+        },
+        {
+          "label": "WaistLBack",
+          "error_mm": 129.6917717534859
+        },
+        {
+          "label": "RElbowOut",
+          "error_mm": 120.31185735202047
+        },
+        {
+          "label": "LUArmHigh",
+          "error_mm": 114.29168044114218
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 106.88033135045089
+        }
+      ]
+    },
+    {
+      "time_s": 1.3,
+      "rms_mm": 304.91132975369976,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputY",
+        "HipInputZ",
+        "SpineInputX",
+        "SpineInputY",
+        "TorsoInput",
+        "LFInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LSInputY",
+        "LWInputX",
+        "LWInputY",
+        "REInput",
+        "RFInput",
+        "RScapInputX",
+        "RSInputX",
+        "RWInputX"
+      ],
+      "worst_markers": [
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 731.4991198067962
+        },
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 731.4895715660264
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 665.6461346459555
+        },
+        {
+          "label": "RElbowOut",
+          "error_mm": 315.172824613565
+        },
+        {
+          "label": "LUArmHigh",
+          "error_mm": 290.79057122417527
+        }
+      ]
+    },
+    {
+      "time_s": 1.35,
+      "rms_mm": 427.19557314298953,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputZ",
+        "SpineInputX",
+        "SpineInputY",
+        "TorsoInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LSInputY",
+        "LWInputX",
+        "LWInputY",
+        "REInput",
+        "RFInput",
+        "RScapInputX",
+        "RScapInputY",
+        "RSInputX",
+        "RSInputY",
+        "RWInputX"
+      ],
+      "worst_markers": [
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 1054.6009733029139
+        },
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 1048.7130329926433
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 894.8390570658804
+        },
+        {
+          "label": "RElbowOut",
+          "error_mm": 476.4148974948006
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 407.409596485657
+        }
+      ]
+    },
+    {
+      "time_s": 1.4,
+      "rms_mm": 414.87780608549485,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputY",
+        "HipInputZ",
+        "SpineInputY",
+        "TorsoInput",
+        "LEInput",
+        "LScapInputY",
+        "LSInputX",
+        "LWInputX",
+        "LWInputY",
+        "REInput",
+        "RFInput",
+        "RScapInputX",
+        "RScapInputY",
+        "RSInputX",
+        "RSInputY",
+        "RWInputX"
+      ],
+      "worst_markers": [
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 982.0274818067039
+        },
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 973.976447579579
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 804.5329838093219
+        },
+        {
+          "label": "RElbowOut",
+          "error_mm": 482.8682584530209
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 418.32949505317026
+        }
+      ]
+    },
+    {
+      "time_s": 1.45,
+      "rms_mm": 193.62935129672852,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputY",
+        "HipInputZ",
+        "SpineInputX",
+        "SpineInputY",
+        "TorsoInput",
+        "LEInput",
+        "LFInput",
+        "LScapInputX",
+        "LSInputY",
+        "LWInputY",
+        "REInput",
+        "RFInput",
+        "RScapInputX",
+        "RWInputX"
+      ],
+      "worst_markers": [
+        {
+          "label": "RElbowOut",
+          "error_mm": 298.2647248636666
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 279.8536380224737
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 276.8522091596706
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 255.63190202800556
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 236.82408973798655
+        }
+      ]
+    },
+    {
+      "time_s": 1.5,
+      "rms_mm": 189.1585997039618,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputY",
+        "HipInputZ",
+        "SpineInputX",
+        "SpineInputY",
+        "TorsoInput",
+        "LFInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LSInputX",
+        "LWInputY",
+        "RFInput",
+        "RScapInputX",
+        "RSInputY",
+        "RWInputX",
+        "RWInputY"
+      ],
+      "worst_markers": [
+        {
+          "label": "WaistLeft",
+          "error_mm": 349.9230664188579
+        },
+        {
+          "label": "Marker_3:3:1",
+          "error_mm": 285.9849064483904
+        },
+        {
+          "label": "WaistLBack",
+          "error_mm": 254.72838615647873
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 252.9040212941268
+        },
+        {
+          "label": "RElbowOut",
+          "error_mm": 244.22636302442433
+        }
+      ]
+    },
+    {
+      "time_s": 1.55,
+      "rms_mm": 392.101505986049,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputZ",
+        "SpineInputX",
+        "SpineInputY",
+        "TorsoInput",
+        "LEInput",
+        "LFInput",
+        "LScapInputX",
+        "LSInputY",
+        "LWInputX",
+        "LWInputY",
+        "REInput",
+        "RFInput",
+        "RScapInputX",
+        "RScapInputY",
+        "RSInputY",
+        "RSInputZ"
+      ],
+      "worst_markers": [
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 919.6962759954425
+        },
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 893.8040769634916
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 831.6942153494825
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 355.1302934446298
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 314.63549796133145
+        }
+      ]
+    },
+    {
+      "time_s": 1.6,
+      "rms_mm": 297.37648583907463,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputY",
+        "HipInputZ",
+        "SpineInputX",
+        "SpineInputY",
+        "LEInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LSInputX",
+        "LSInputY",
+        "LWInputX",
+        "LWInputY",
+        "RFInput",
+        "RScapInputX",
+        "RScapInputY",
+        "RSInputY",
+        "RSInputZ"
+      ],
+      "worst_markers": [
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 623.8726906711073
+        },
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 615.6682708136374
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 579.732877292368
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 437.0288920910344
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 423.3656358194782
+        }
+      ]
+    },
+    {
+      "time_s": 1.65,
+      "rms_mm": 279.808500157508,
+      "active_coordinates": [
+        "HipInputZ",
+        "SpineInputX",
+        "LEInput",
+        "LFInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LSInputX",
+        "LSInputY",
+        "LWInputX",
+        "LWInputY",
+        "REInput",
+        "RScapInputY",
+        "RWInputX",
+        "RWInputY"
+      ],
+      "worst_markers": [
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 479.7699692273142
+        },
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 475.44405308433085
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 448.2663768725209
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 409.9995666013393
+        },
+        {
+          "label": "HeadSide",
+          "error_mm": 394.5250763826727
+        }
+      ]
+    },
+    {
+      "time_s": 1.7,
+      "rms_mm": 240.53826505947177,
+      "active_coordinates": [
+        "HipInputX",
+        "HipInputY",
+        "HipInputZ",
+        "SpineInputX",
+        "TorsoInput",
+        "LEInput",
+        "LFInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LSInputX",
+        "LSInputY",
+        "LWInputX",
+        "LWInputY",
+        "REInput",
+        "RFInput",
+        "RScapInputY",
+        "RSInputY"
+      ],
+      "worst_markers": [
+        {
+          "label": "Marker_2:2:3",
+          "error_mm": 362.00946200155687
+        },
+        {
+          "label": "Marker_2:2:2",
+          "error_mm": 357.2988622545142
+        },
+        {
+          "label": "Marker_2:2:1",
+          "error_mm": 340.9649972852605
+        },
+        {
+          "label": "BackRight",
+          "error_mm": 336.6506433914141
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 326.4704755114616
+        }
+      ]
+    },
+    {
+      "time_s": 1.75,
+      "rms_mm": 186.02666554157807,
+      "active_coordinates": [
+        "HipInputY",
+        "HipInputZ",
+        "SpineInputY",
+        "LEInput",
+        "LFInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LSInputX",
+        "LSInputY",
+        "LSInputZ",
+        "LWInputX",
+        "LWInputY",
+        "REInput",
+        "RFInput",
+        "RWInputX"
+      ],
+      "worst_markers": [
+        {
+          "label": "BackRight",
+          "error_mm": 278.8055900191144
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 254.68974461771094
+        },
+        {
+          "label": "LShoulderTop",
+          "error_mm": 253.1321310834957
+        },
+        {
+          "label": "HeadTop",
+          "error_mm": 245.81059085488732
+        },
+        {
+          "label": "RShoulderBack",
+          "error_mm": 234.0310520618197
+        }
+      ]
+    },
+    {
+      "time_s": 1.8,
+      "rms_mm": 153.31585792798356,
+      "active_coordinates": [
+        "HipInputZ",
+        "SpineInputX",
+        "SpineInputY",
+        "LEInput",
+        "LFInput",
+        "LScapInputX",
+        "LScapInputY",
+        "LWInputY",
+        "REInput",
+        "RFInput",
+        "RScapInputY",
+        "RSInputX",
+        "RWInputX"
+      ],
+      "worst_markers": [
+        {
+          "label": "LShoulderTop",
+          "error_mm": 269.68276399843285
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 252.01591746030422
+        },
+        {
+          "label": "RElbowOut",
+          "error_mm": 219.09104420537474
+        },
+        {
+          "label": "RShoulderBack",
+          "error_mm": 204.20930125176557
+        },
+        {
+          "label": "BackRight",
+          "error_mm": 198.71708553881965
+        }
+      ]
+    },
+    {
+      "time_s": 1.8138888888888889,
+      "rms_mm": 144.00942923719003,
+      "active_coordinates": [
+        "SpineInputX",
+        "SpineInputY",
+        "TorsoInput",
+        "LEInput",
+        "LFInput",
+        "LSInputY",
+        "LSInputZ",
+        "RFInput",
+        "RScapInputY",
+        "RSInputX",
+        "RSInputY",
+        "RSInputZ"
+      ],
+      "worst_markers": [
+        {
+          "label": "LShoulderTop",
+          "error_mm": 242.3153558887769
+        },
+        {
+          "label": "LWristTop",
+          "error_mm": 175.88452026848444
+        },
+        {
+          "label": "WaistLeft",
+          "error_mm": 172.91035856561183
+        },
+        {
+          "label": "RUArmHigh",
+          "error_mm": 170.02605502858475
+        },
+        {
+          "label": "BackRight",
+          "error_mm": 168.72044556388138
+        }
+      ]
+    }
+  ]
+}

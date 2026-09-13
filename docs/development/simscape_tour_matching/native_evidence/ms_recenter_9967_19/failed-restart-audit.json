@@ -1,0 +1,11 @@
+{
+  "qualification": "Restart reconstruction only; not fit acceptance",
+  "source_candidate_sha256": "917d2d29b66bc2ab947a6ea75255c35e47134e6a2d51cde7e1e69847cad379f7",
+  "reconstructed_candidate_sha256": "c89597f6ccc00eadcbcab3008b83fdc7eb30b25efa442aab5ecf69273b67d049",
+  "max_bound_snap": 5.995204332975845e-14,
+  "snapped_control_count": 30,
+  "q_max_abs": 3.5590550284680944e-7,
+  "qd_max_abs": 0.0003314085161036928,
+  "marker_max_distance_m": 6.933573426383695e-8,
+  "passed": false
+}
