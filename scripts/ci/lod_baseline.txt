@@ -372,9 +372,6 @@ src/tools/model_explorer/urdf_editor_window.py	self.code_editor.editor.validate_
 src/tools/model_explorer/urdf_editor_window.py	self.frankenstein.right_panel.tree	1
 src/tools/starting_pose_matcher/gui_playback.py	self._anim.event_source.start	1
 src/tools/starting_pose_matcher/gui_playback.py	self._anim.event_source.stop	1
-src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py	self._mujoco.MjModel.from_xml_path	1
-src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py	self._mujoco.MjModel.from_xml_string	1
-src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py	self._mujoco.mjtObj.mjOBJ_BODY	1
 src/tools/training_controller/controller.py	self._scheduler.registry.has	2
 src/tools/training_controller/controller.py	self._scheduler.registry.list	1
 src/tools/training_controller/gui.py	ax.xaxis.label.set_color	1
