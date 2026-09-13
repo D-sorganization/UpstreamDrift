@@ -20,10 +20,6 @@ from src.shared.python.motion_matching.node_retraction import (
     scaled_tangent_basis,
 )
 from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
-from src.shared.python.motion_matching.constrained_trajectory import (
-    compose_chart_residual_jacobian,
-    spline_chart_derivative_jacobians,
-)
 
 
 def validate_chart_bounds(values: np.ndarray, bound: float) -> float:
@@ -66,6 +62,7 @@ def main() -> None:
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--path", type=Path, required=True)
     parser.add_argument("--nodes", type=int, default=4)
+    parser.add_argument("--closure-subdivisions", type=int, default=1)
     parser.add_argument("--max-iterations", type=int, default=2)
     parser.add_argument("--finite-difference-step", type=float, default=1e-6)
     parser.add_argument("--chart-check-step", type=float, default=1e-6)
@@ -84,6 +81,8 @@ def main() -> None:
         help="Positive numerical residual scale, not an acceptance tolerance",
     )
     args = parser.parse_args()
+    if args.closure_subdivisions < 1:
+        raise ValueError("Closure subdivisions must be positive")
     if not np.isfinite(args.closure_scale) or args.closure_scale <= 0:
         raise ValueError("Closure scale must be finite and positive")
     tracking = args.candidate is not None
@@ -194,7 +193,22 @@ def main() -> None:
     derivative_spline = make_path_spline(
         times, np.eye(args.nodes), np.zeros(args.nodes) if tracking else None
     )
-    first, second = derivative_spline(times, 1), derivative_spline(times, 2)
+    closure_times = np.sort(
+        np.unique(
+            np.concatenate(
+                [
+                    np.linspace(left, right, args.closure_subdivisions + 1)
+                    for left, right in zip(times[:-1], times[1:], strict=True)
+                ]
+            )
+        )
+    )
+    position_map = derivative_spline(closure_times)
+    first, second = (
+        derivative_spline(closure_times, 1),
+        derivative_spline(closure_times, 2),
+    )
+    closure_rows = len(closure_times) * 18
 
     def state(
         flat: np.ndarray,
@@ -208,11 +222,12 @@ def main() -> None:
     ]:
         q, node_jacobians = nodes(flat)
         spline = make_path_spline(times, q, initial_rate)
-        qd, qdd = spline_chart_derivative_jacobians(first, second, node_jacobians)
+        qd = np.einsum("ij,jka->ikja", first, node_jacobians)
+        qdd = np.einsum("ij,jka->ikja", second, node_jacobians)
         return (
-            q,
-            np.asarray(spline(times, 1)),
-            np.asarray(spline(times, 2)),
+            np.asarray(spline(closure_times)),
+            np.asarray(spline(closure_times, 1)),
+            np.asarray(spline(closure_times, 2)),
             node_jacobians,
             qd,
             qdd,
@@ -247,6 +262,7 @@ def main() -> None:
             value = model.closure_trajectory_residuals(
                 mapping(qi), mapping(vi), mapping(ai)
             )
+            result.extend(value.position)
             result.extend(value.rate)
             result.extend(value.acceleration)
         closure = np.asarray(result) / args.closure_scale
@@ -263,15 +279,16 @@ def main() -> None:
             )
             for qi, vi, ai in zip(q, velocity, acceleration, strict=True)
         ]
-        derivative = compose_chart_residual_jacobian(
-            np.asarray([item.dq[6:] for item in local]),
-            np.asarray([item.dv[6:] for item in local]),
-            np.asarray([item.da[6:] for item in local]),
-            node_jacobians,
-            qd,
-            qdd,
+        qp = np.einsum("ij,jka->ikja", position_map, node_jacobians)
+        derivative = sum(
+            np.einsum("irq,iqjc->irjc", np.asarray(block), path_map)
+            for block, path_map in (
+                ([item.dq for item in local], qp),
+                ([item.dv for item in local], qd),
+                ([item.da for item in local], qdd),
+            )
         )
-        closure = derivative.reshape(args.nodes * 12, args.nodes * dimension)[
+        closure = derivative.reshape(closure_rows, args.nodes * dimension)[
             :, free_start:
         ]
         closure = closure / args.closure_scale
@@ -291,7 +308,7 @@ def main() -> None:
     constraint: dict[str, object] = {"type": "eq", "fun": residual}
     if args.use_constraint_jacobian:
         constraint["jac"] = jacobian
-    initial_defect = residual(initial)[: args.nodes * 12] * args.closure_scale
+    initial_defect = residual(initial)[:closure_rows] * args.closure_scale
     started = perf_counter()
     if args.solver == "least-squares":
         result = least_squares(
@@ -320,7 +337,7 @@ def main() -> None:
     elapsed = perf_counter() - started
     chart_max = validate_chart_bounds(np.asarray(result.x), 0.01)
     values, _ = nodes(np.asarray(result.x))
-    defect = residual(np.asarray(result.x))[: args.nodes * 12] * args.closure_scale
+    defect = residual(np.asarray(result.x))[:closure_rows] * args.closure_scale
     audit_times = np.linspace(times[0], times[-1], 20 * (args.nodes - 1) + 1)
     audit_spline = make_path_spline(times, values, initial_rate)
     audit_values = np.asarray(
@@ -337,6 +354,8 @@ def main() -> None:
         json.dumps(
             {
                 "nodes": args.nodes,
+                "closure_times_s": closure_times.tolist(),
+                "closure_levels": ["position", "rate", "acceleration"],
                 "closure_scale": args.closure_scale,
                 "marker_tracking": tracking,
                 "first_pose_fixed": tracking,
