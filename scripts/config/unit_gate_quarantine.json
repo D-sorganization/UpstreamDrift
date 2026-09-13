@@ -192,7 +192,6 @@
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestComparison::test_two_designs_are_ranked_with_an_interval",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestDesignerMetrics::test_carry_is_reported_for_a_greenside_shot",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestDesignerMetrics::test_no_metric_was_silently_dropped",
-    "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_a_steeper_blow_digs_deeper_and_carries_further",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_nothing_was_refused_in_the_dynamic_sweep",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_the_window_is_a_fraction_of_the_swept_domain",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_the_window_is_measured_on_attack_angle_and_firmness",
