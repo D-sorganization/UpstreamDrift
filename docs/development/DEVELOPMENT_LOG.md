@@ -28,7 +28,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-11
 - **Last verified:** 2026-09-12 (SELF; focused residual-linearization, spline-chain and collocation tests plus Ruff pass. A ControlTower two-iteration structured-Jacobian smoke receipt returns0.1490535 closure and remains unqualified; its0.2 trial retraction radius only prevents internal out-of-bound probes while accepted chart bounds remain±0.01. Earlier evidence remains: Drake rejects spline finite-difference qdd; Pinocchio's 6-by-27 weld Jacobian, 21-dimensional retracted node chart, and matching three-level residual oracle are qualified on ControlTower; run20 terminal and independently rejected.)
 - **Summary:** Native R2025b/Pinocchio/MuJoCo/Drake baseline adapters, global sextic forward matching and reproducible artifacts; full capture and strict extended state parity remain outstanding.
-- **Next step:** Add between-node closure and marker tracking to the path objective after the bound-audited 40-iteration run; see HANDOFF Current Bound-Audit Correction (SELF).
+- **Next step:** Integrate marker tracking and initial-state conditions after bounded least-squares receipt retracted_ls_9967_27.json; see HANDOFF Current Bound-Audit Correction (SELF).
+- **Latest experiment:** SELF; bounded least-squares uses 100 evaluations in 4.03187 seconds, with dense acceleration closure 4.64174e-5 and verified chart bounds. Budget-limited, no full swing acceptance.
 - **Bound-audit verification:** SELF; returned-chart regression passes. ControlTower 40 iterations in 1.35135 seconds reduce node closure to 0.03435334 with chart maximum 0.00997851. Dense pose/rate closure still fails; historical supplied-Jacobian candidate violated 59 bounds, invalidating earlier bounded-comparison claims.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps

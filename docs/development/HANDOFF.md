@@ -2,6 +2,17 @@
 
 ## Current Bound-Audit Correction (SELF)
 
+Latest experiment SELF: runner27 adds an explicit bounded least-squares option
+and automatically audits 61 samples between nodes. Receipt
+simscape_tour_matching/native_evidence/retracted_ls_9967_27.json records
+100 function evaluations in 4.03187 seconds, chart maximum 0.00999886834,
+dense pose 1.10441e-8, rate 7.98757e-7 and acceleration 4.64174e-5.
+The evaluation budget was reached; this is not convergence or swing acceptance.
+Least-squares minimizes closure only, unlike the displacement objective of
+trust-constr; the results are feasibility experiments, not equal-objective
+solver benchmarks. Next integrate marker tracking and initial-state conditions
+before extending the path toward transition. Preserve the saved candidate.
+
 This section supersedes the historical solver claims below. Run20 is terminal.
 The old Jacobian comparison returned 59 chart components outside ±0.01, with
 maximum 0.07306001724; it was not a valid bounded candidate. The finite-difference

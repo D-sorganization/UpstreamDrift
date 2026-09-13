@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy.interpolate import CubicSpline
-from scipy.optimize import Bounds, minimize
+from scipy.optimize import Bounds, minimize, least_squares
 
 from src.engines.physics_engines.pinocchio.python.native_model import (
     NativePinocchioModel,
@@ -49,6 +49,9 @@ def main() -> None:
     parser.add_argument("--finite-difference-step", type=float, default=1e-6)
     parser.add_argument("--chart-check-step", type=float, default=1e-6)
     parser.add_argument("--use-constraint-jacobian", action="store_true")
+    parser.add_argument(
+        "--solver", choices=("trust-constr", "least-squares"), default="trust-constr"
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if (
@@ -193,26 +196,55 @@ def main() -> None:
         constraint["jac"] = jacobian
     initial_defect = residual(initial)
     started = perf_counter()
-    result = minimize(
-        lambda x: float(x @ x),
-        initial,
-        method="trust-constr",
-        constraints=constraint,
-        bounds=Bounds(
-            -0.01 * np.ones_like(initial),
-            0.01 * np.ones_like(initial),
-            keep_feasible=True,
-        ),
-        options={"maxiter": args.max_iterations, "gtol": 1e-12},
-    )
+    if args.solver == "least-squares":
+        result = least_squares(
+            residual,
+            initial,
+            jac=jacobian if args.use_constraint_jacobian else "2-point",
+            bounds=(-0.01, 0.01),
+            max_nfev=args.max_iterations,
+            ftol=1e-12,
+            xtol=1e-12,
+            gtol=1e-12,
+        )
+    else:
+        result = minimize(
+            lambda x: float(x @ x),
+            initial,
+            method="trust-constr",
+            constraints=constraint,
+            bounds=Bounds(
+                -0.01 * np.ones_like(initial),
+                0.01 * np.ones_like(initial),
+                keep_feasible=True,
+            ),
+            options={"maxiter": args.max_iterations, "gtol": 1e-12},
+        )
     elapsed = perf_counter() - started
     chart_max = validate_chart_bounds(np.asarray(result.x), 0.01)
     values, _ = nodes(np.asarray(result.x))
     defect = residual(np.asarray(result.x))
+    audit_times = np.linspace(times[0], times[-1], 20 * (args.nodes - 1) + 1)
+    audit_spline = CubicSpline(times, values, axis=0)
+    audit_values = np.asarray(
+        [
+            model.closure_trajectory_residuals(
+                mapping(audit_spline(time)),
+                mapping(audit_spline(time, 1)),
+                mapping(audit_spline(time, 2)),
+            )
+            for time in audit_times
+        ]
+    )
     args.output.write_text(
         json.dumps(
             {
                 "nodes": args.nodes,
+                "times_s": times.tolist(),
+                "dense_audit_samples": len(audit_times),
+                "dense_position_max_abs": float(np.max(abs(audit_values[:, 0]))),
+                "dense_rate_max_abs": float(np.max(abs(audit_values[:, 1]))),
+                "dense_acceleration_max_abs": float(np.max(abs(audit_values[:, 2]))),
                 "model_sha256": hashlib.sha256(raw).hexdigest(),
                 "path_sha256": hashlib.sha256(args.path.read_bytes()).hexdigest(),
                 "runner_sha256": hashlib.sha256(
@@ -225,7 +257,10 @@ def main() -> None:
                 "chart_bounds_verified": True,
                 "chart_coordinates": np.asarray(result.x).tolist(),
                 "chart_dimension": dimension,
-                "iterations": int(result.nit),
+                "solver": args.solver,
+                "iterations": int(result.nit)
+                if args.solver == "trust-constr"
+                else None,
                 "optimizer_converged": bool(result.success),
                 "message": str(result.message),
                 "rate_acceleration_closure_max_abs": float(np.max(abs(defect))),
