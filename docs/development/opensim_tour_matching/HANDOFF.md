@@ -99,10 +99,12 @@ Copy-ready prompt: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
   club length from the capture's club markers), regenerated model, tests merged in #10073.
 - OS-3b: [COMPLETE] segment scaling from first-frame marker pairs; keep-best iteration;
   full 654-frame IK; per-frame and per-marker RMS report; overlay animation (PR #10075).
-- OS-4: MocoTrack pilot on the scaled model with the calibrated MarkerSet
-  over a 0.85 s prefix, coordinate actuators only, receipts.
-- OS-5: global degree-six effort profile fit with uninterrupted replay,
-  compared on the five shared metrics (whole, early, terminal, club, yaw).
+- OS-4: [COMPLETE] MocoTrack pilot on the scaled model with the calibrated MarkerSet
+  over tracking horizon, coordinate actuators only, receipts (PR #10078).
+- OS-5: [COMPLETE] global degree-six effort profile fit across all 39 actuators with
+  continuous zero-feedback forward simulation replay via opensim.Manager.
+- OS-6: Repeatability, visualization, and handoff (CLI integration, 3D overlays,
+  error timecourses, clean-machine reproduction receipt).
 
 ## Known Limits
 
