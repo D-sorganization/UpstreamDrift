@@ -115,100 +115,33 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def run_tracking_pilot(args: argparse.Namespace) -> int:
-    try:
-        import opensim
-    except ImportError as err:
-        logger.error("OpenSim 4.x Python bindings not found: %s", err)
-        return 1
-
-    t0 = time.time()
-    outdir: Path = args.outdir
-    outdir.mkdir(parents=True, exist_ok=True)
-
-    sanitized_trc = outdir / f"tour_sanitized_{int(args.horizon * 1000)}ms.trc"
-    logger.info("Sanitizing TRC for horizon [0.0, %.3fs]...", args.horizon)
-    retained_markers = sanitize_trc_for_horizon(
-        input_trc=args.trc,
-        output_trc=sanitized_trc,
-        t_start=0.0,
-        t_end=args.horizon,
-        max_missing_ratio=0.0,
-    )
-    logger.info("Retained %d markers: %s", len(retained_markers), retained_markers)
-
-    config = MocoTrackingConfig(
-        horizon_s=args.horizon,
-        t_start_s=0.0,
-        mesh_interval_s=args.mesh_interval,
-        effort_weight=1e-4,
-        marker_weight=10.0,
-        optim_max_iterations=args.max_iterations,
-        optim_convergence_tolerance=1e-2,
-        optim_constraint_tolerance=1e-2,
-        allow_unused_references=True,
-    )
-
-    logger.info("Building MocoStudy problem...")
-    study = build_moco_study(
-        model_path=str(args.model),
-        trc_path=str(sanitized_trc),
-        states_guess_path=str(args.ik_states),
-        config=config,
-    )
-
-    logger.info("Solving Moco dynamic tracking problem...")
-    t_solve_start = time.time()
-    solution = study.solve()
-    solve_duration_s = time.time() - t_solve_start
-
-    status = solution.getStatus()
-    success = solution.success()
-    try:
-        obj_val = float(solution.getObjective())
-    except (RuntimeError, ValueError):
-        obj_val = float("nan")
-    num_iters = int(solution.getNumIterations())
-
-    logger.info(
-        "Moco solve finished: success=%s, status=%s, objective=%.6e, iters=%d, time=%.1fs",
-        success,
-        status,
-        obj_val,
-        num_iters,
-        solve_duration_s,
-    )
-
-    states_path = outdir / "tracked_states.sto"
-    controls_path = outdir / "tracked_controls.sto"
-
-    if solution.isSealed():
-        solution.unseal()
-
-    solution.write(str(outdir / "moco_solution.sto"))
-
-    # Extract states table and controls table
-    states_table = solution.exportToStatesTable()
-    controls_table = solution.exportToControlsTable()
-    opensim.STOFileAdapter.write(states_table, str(states_path))
-    opensim.STOFileAdapter.write(controls_table, str(controls_path))
-
-    # Evaluate term breakdown
-    objective_terms: dict[str, float] = {}
+def _extract_objective_terms(solution: Any) -> dict[str, float]:
+    """Extract named objective term values from solved MocoSolution."""
+    terms: dict[str, float] = {}
     try:
         for i in range(solution.getNumObjectiveTerms()):
             name = solution.getObjectiveTermNames()[i]
             val = float(solution.getObjectiveTermByIndex(i))
-            objective_terms[name] = val
-        logger.info("Objective terms: %s", objective_terms)
+            terms[name] = val
+        logger.info("Objective terms: %s", terms)
     except (RuntimeError, ValueError, IndexError) as exc:
         logger.warning("Could not extract objective terms: %s", exc)
+    return terms
 
-    # Forward replay verification using opensim.Manager + PrescribedController
+
+def _run_forward_replay(
+    model_path: Path,
+    controls_path: Path,
+    states_table: Any,
+    horizon_s: float,
+) -> dict[str, Any]:
+    """Verify dynamic solution via independent forward simulation with Manager."""
+    import opensim
+
     replay_metrics: dict[str, Any] = {}
     try:
         logger.info("Running zero-feedback forward simulation replay via Manager...")
-        model = opensim.Model(str(args.model))
+        model = opensim.Model(str(model_path))
         controller = opensim.PrescribedController()
         controller.set_controls_file(str(controls_path))
         model.addController(controller)
@@ -232,7 +165,7 @@ def run_tracking_pilot(args: argparse.Namespace) -> int:
 
         manager = opensim.Manager(model)
         manager.initialize(state)
-        state_final = manager.integrate(args.horizon)
+        state_final = manager.integrate(horizon_s)
         replay_metrics["replay_success"] = True
         replay_metrics["final_time"] = float(state_final.getTime())
         logger.info(
@@ -243,10 +176,18 @@ def run_tracking_pilot(args: argparse.Namespace) -> int:
         logger.warning("Forward replay error: %s", replay_err)
         replay_metrics["replay_success"] = False
         replay_metrics["error"] = str(replay_err)
+    return replay_metrics
 
-    # Cryptographic receipt
-    total_elapsed_s = time.time() - t0
-    receipt = {
+
+def _build_receipt_dict(
+    args: argparse.Namespace,
+    config: MocoTrackingConfig,
+    retained_markers: list[str],
+    solution_info: dict[str, Any],
+    file_hashes: dict[str, str],
+) -> dict[str, Any]:
+    """Assemble cryptographic receipt schema for OS-4."""
+    return {
         "schema_version": "1.0.0",
         "deliverable": "OS-4",
         "title": "OpenSim Constraint-Aware Dynamic Marker Tracking Pilot",
@@ -272,27 +213,98 @@ def run_tracking_pilot(args: argparse.Namespace) -> int:
             "retained_markers_count": len(retained_markers),
             "retained_markers": retained_markers,
         },
-        "solution": {
+        "solution": solution_info,
+        "artifacts": file_hashes,
+    }
+
+
+def run_tracking_pilot(args: argparse.Namespace) -> int:
+    try:
+        import opensim
+    except ImportError as err:
+        logger.error("OpenSim 4.x Python bindings not found: %s", err)
+        return 1
+
+    t0 = time.time()
+    outdir: Path = args.outdir
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    sanitized_trc = outdir / f"tour_sanitized_{int(args.horizon * 1000)}ms.trc"
+    retained_markers = sanitize_trc_for_horizon(
+        input_trc=args.trc,
+        output_trc=sanitized_trc,
+        t_start=0.0,
+        t_end=args.horizon,
+        max_missing_ratio=0.0,
+    )
+
+    config = MocoTrackingConfig(
+        horizon_s=args.horizon,
+        t_start_s=0.0,
+        mesh_interval_s=args.mesh_interval,
+        effort_weight=1e-4,
+        marker_weight=10.0,
+        optim_max_iterations=args.max_iterations,
+        optim_convergence_tolerance=1e-2,
+        optim_constraint_tolerance=1e-2,
+        allow_unused_references=True,
+    )
+
+    study = build_moco_study(
+        model_path=str(args.model),
+        trc_path=str(sanitized_trc),
+        states_guess_path=str(args.ik_states),
+        config=config,
+    )
+
+    t_solve_start = time.time()
+    solution = study.solve()
+    solve_duration_s = time.time() - t_solve_start
+
+    status = solution.getStatus()
+    success = solution.success()
+    try:
+        obj_val = float(solution.getObjective())
+    except (RuntimeError, ValueError):
+        obj_val = float("nan")
+
+    if solution.isSealed():
+        solution.unseal()
+
+    states_path = outdir / "tracked_states.sto"
+    controls_path = outdir / "tracked_controls.sto"
+    solution.write(str(outdir / "moco_solution.sto"))
+    states_table = solution.exportToStatesTable()
+    controls_table = solution.exportToControlsTable()
+    opensim.STOFileAdapter.write(states_table, str(states_path))
+    opensim.STOFileAdapter.write(controls_table, str(controls_path))
+
+    objective_terms = _extract_objective_terms(solution)
+    replay = _run_forward_replay(args.model, controls_path, states_table, args.horizon)
+
+    receipt = _build_receipt_dict(
+        args,
+        config,
+        retained_markers,
+        {
             "success": success,
             "status": status,
             "objective_value": obj_val,
             "objective_terms": objective_terms,
-            "num_iterations": num_iters,
+            "num_iterations": int(solution.getNumIterations()),
             "solve_duration_s": solve_duration_s,
-            "total_elapsed_s": total_elapsed_s,
-            "replay": replay_metrics,
+            "total_elapsed_s": time.time() - t0,
+            "replay": replay,
         },
-        "artifacts": {
+        {
             "sanitized_trc_sha256": sha256_file(sanitized_trc),
             "tracked_states_sha256": sha256_file(states_path),
             "tracked_controls_sha256": sha256_file(controls_path),
         },
-    }
+    )
 
-    receipt_path = outdir / "receipt.json"
-    with receipt_path.open("w", encoding="utf-8") as f:
+    with (outdir / "receipt.json").open("w", encoding="utf-8") as f:
         json.dump(receipt, f, indent=2)
-    logger.info("Wrote receipt to %s", receipt_path)
 
     return 0 if success else 1
 
