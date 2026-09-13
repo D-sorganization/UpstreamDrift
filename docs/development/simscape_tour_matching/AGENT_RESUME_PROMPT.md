@@ -61,8 +61,10 @@ residuals,15 iterations) returned5313c283… whose uninterrupted original-state
 replay gives whole27.563 mm, terminal55.470 mm, club23.27 mm but early11.359 mm
 and pelvis yaw11.3 %, with63 of123 variables at bounds and scaled continuity
 defect3.99e-4. Run80 (node recentered on returned79's integrated state) returned
-96c786ec… with whole26.797/terminal55.208 mm; run81 widens the physical box to
-±4 N/Nm. All are still REJECTED; read the latest receipt before deciding.
+96c786ec… with whole26.797/terminal55.208 mm; run81 (box widened to ±4 N/Nm)
+returned dfafdff1… with whole26.366/terminal46.305 mm but early11.427 mm and
+pelvis yaw13.9 %. All are still REJECTED; all jobs are terminal. The next factor
+(weighting, node box or horizon) needs its own receipt; start from returned81.
 The terminal weight (100x) only reshapes the last0.1 s; error growth from0.4 s
 is unchanged (two_window_fit_9967_79/marker-comparison.png).
 
