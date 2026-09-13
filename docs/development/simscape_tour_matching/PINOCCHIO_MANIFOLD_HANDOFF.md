@@ -213,7 +213,7 @@ exhaustion, time underflow, malformed outputs and callback failures raise;
 partial results are not returned as successes. The integrator does not catch
 and reinterpret a singular native chart as ordinary truncation error.
 
-Final runtime `/home/dieterolson/native-manifold-10043-15` passes **86 tests,
+Initial adaptive runtime `/home/dieterolson/native-manifold-10043-15` passes **86 tests,
 one optional MuJoCo test skipped**. The 18 generic tests include tighter-tolerance
 error reduction, independent noncommuting rotation, the prior fourth-order
 fixed tests, explicit budget enforcement, underflow and malformed output checks.
@@ -225,6 +225,30 @@ source. Fixed12 and branch13 evidence remains preserved.
 
 Root owns candidate comparison with adaptive stepping and a bounded RHS budget.
 Successful adaptive test problems are not closure or full-swing acceptance.
+
+## Output-Boundary Roundoff Correction
+
+Run51's first adaptive level completed; its second level hit an artificial
+underflow at `t=0.033333333333333326`. The next output time was `1/30` seconds,
+only one representable floating-point increment later. A constant-velocity
+regression with `max_step=nextafter(1/30,0)` reproduced the exact failure, proving
+this case was an output-boundary residual rather than a physical singularity.
+
+The smallest correction extends an upcoming trial endpoint to the sample
+boundary when the remaining gap is at most four ULPs and the trial itself spans
+at least eight ULPs. This happens **before** evaluating any RK stages, so the
+physical state is integrated to the actual output time; no state is relabeled,
+reset or projected afterward. Truly unrepresentable requested steps and
+subnormal sample intervals still raise the original explicit underflow error.
+
+Latest runtime `/home/dieterolson/native-manifold-10043-16`: **88 passed, one
+optional MuJoCo test skipped**. All 20 generic integrator tests pass locally;
+Ruff/format and mypy pass. Exact source SHA for `manifold_forward.py` is
+`a92c3242b09af1e58d55f1fd3a8d7dd25dc5f125665df4977fb26d845edf4d72`.
+Receipt and source archive are in
+`native_evidence/manifold_boundary_10043_16/{qualification.json,raw-source.zip}`.
+Root owns run51's partial-result archive and the run52 repeated candidate
+comparison. This correction alone does not establish trajectory acceptance.
 
 ## Next Controlled Steps
 

@@ -298,3 +298,51 @@ def test_adaptive_underflow_and_bad_difference_fail_explicitly():
             lambda t, q, v: -q,
             **callbacks,
         )
+
+
+def test_adaptive_lands_on_boundary_without_one_ulp_residual_step():
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_adaptive,
+    )
+
+    boundary = 1.0 / 30.0
+    nearly_boundary = np.nextafter(boundary, 0.0)
+    assert nearly_boundary == 0.033333333333333326
+    evaluations = []
+
+    def acceleration(t, q, v):
+        evaluations.append(t)
+        return np.zeros(1)
+
+    result = integrate_manifold_adaptive(
+        np.zeros(1),
+        np.ones(1),
+        np.array([0.0, boundary]),
+        acceleration,
+        integrate=lambda q, u: q + u,
+        difference_rate=lambda a, q, v: v,
+        difference=lambda a, q: q - a,
+        max_step=nearly_boundary,
+    )
+    assert result.steps == 1
+    assert result.evaluations == 12
+    assert evaluations[-1] == boundary
+    np.testing.assert_allclose(result.configuration[-1], [boundary], rtol=0, atol=1e-17)
+
+
+def test_adaptive_genuine_tiny_requested_step_still_underflows():
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_adaptive,
+    )
+
+    with pytest.raises(RuntimeError, match="underflow"):
+        integrate_manifold_adaptive(
+            np.zeros(1),
+            np.ones(1),
+            np.array([0.0, 1.0]),
+            lambda t, q, v: np.zeros(1),
+            integrate=lambda q, u: q + u,
+            difference_rate=lambda a, q, v: v,
+            difference=lambda a, q: q - a,
+            max_step=np.nextafter(0.0, 1.0),
+        )

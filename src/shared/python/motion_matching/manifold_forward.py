@@ -19,6 +19,7 @@ Array = NDArray[np.float64]
 Acceleration = Callable[[float, Array, Array], Array]
 Retraction = Callable[[Array, Array], Array]
 DifferenceRate = Callable[[Array, Array, Array], Array]
+_BOUNDARY_ROUNDOFF_ULPS = 4
 
 
 class ManifoldForwardResult(NamedTuple):
@@ -197,6 +198,9 @@ def integrate_manifold_adaptive(
     accepted macrosteps (each contains two half steps). Every attempt uses 12
     RHS evaluations. Budget exhaustion or representational time underflow
     raises explicitly; partial trajectories are never returned as successes.
+    A trial ending within four ULPs of an output boundary includes that tiny
+    remainder before stage evaluation, provided the trial itself spans at least
+    eight ULPs. No accepted state is relabeled at a different physical time.
     Callback failures propagate. Constraint/trajectory acceptance still requires
     independent replay convergence beyond the local error estimate.
     """
@@ -221,6 +225,13 @@ def integrate_manifold_adaptive(
         boundary = float(clock[sample])
         while t < boundary:
             end = min(t + proposed_h, boundary)
+            # Roundoff may leave a one-ULP output-boundary sliver. Include it
+            # in this trial BEFORE evaluating stages, not by relabeling a state
+            # afterward. Do not enlarge a genuinely unrepresentable small step.
+            ulp = boundary - float(np.nextafter(boundary, -np.inf))
+            roundoff = _BOUNDARY_ROUNDOFF_ULPS * ulp
+            if 0 < boundary - end <= roundoff and end - t >= 2 * roundoff:
+                end = boundary
             h = end - t
             midpoint = t + h / 2
             if not t < midpoint < end:
