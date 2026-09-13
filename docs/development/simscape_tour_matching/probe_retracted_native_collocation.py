@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
+from time import perf_counter
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +24,20 @@ from src.shared.python.motion_matching.constrained_trajectory import (
     spline_chart_derivative_jacobians,
     spline_node_derivative_maps,
 )
+
+
+def validate_chart_bounds(values: np.ndarray, bound: float) -> float:
+    """Reject infeasible returned charts; return their maximum absolute value."""
+    array = np.asarray(values, dtype=float)
+    if (
+        array.size == 0
+        or not np.isfinite(array).all()
+        or not np.isfinite(bound)
+        or bound <= 0
+        or np.max(abs(array)) > bound + 1e-12
+    ):
+        raise ValueError("Returned state violates finite chart bounds")
+    return float(np.max(abs(array)))
 
 
 def main() -> None:
@@ -95,8 +111,8 @@ def main() -> None:
                     jacobian,
                     state_scales=scales,
                     residual_scales=np.ones(6),
-                    # Trust-constr may evaluate trial points outside accepted
-                    # bounds; accepted chart values remain constrained to0.01.
+                    # Bound feasibility is enforced by the solver and audited
+                    # independently before exporting a returned candidate.
                     radius=retraction_radius,
                 )
             )
@@ -176,20 +192,38 @@ def main() -> None:
     if args.use_constraint_jacobian:
         constraint["jac"] = jacobian
     initial_defect = residual(initial)
+    started = perf_counter()
     result = minimize(
         lambda x: float(x @ x),
         initial,
         method="trust-constr",
         constraints=constraint,
-        bounds=Bounds(-0.01 * np.ones_like(initial), 0.01 * np.ones_like(initial)),
+        bounds=Bounds(
+            -0.01 * np.ones_like(initial),
+            0.01 * np.ones_like(initial),
+            keep_feasible=True,
+        ),
         options={"maxiter": args.max_iterations, "gtol": 1e-12},
     )
+    elapsed = perf_counter() - started
+    chart_max = validate_chart_bounds(np.asarray(result.x), 0.01)
     values, _ = nodes(np.asarray(result.x))
     defect = residual(np.asarray(result.x))
     args.output.write_text(
         json.dumps(
             {
                 "nodes": args.nodes,
+                "model_sha256": hashlib.sha256(raw).hexdigest(),
+                "path_sha256": hashlib.sha256(args.path.read_bytes()).hexdigest(),
+                "runner_sha256": hashlib.sha256(
+                    Path(__file__).read_bytes()
+                ).hexdigest(),
+                "solver_elapsed_s": elapsed,
+                "function_evaluations": int(result.nfev),
+                "chart_max_abs": chart_max,
+                "chart_bound": 0.01,
+                "chart_bounds_verified": True,
+                "chart_coordinates": np.asarray(result.x).tolist(),
                 "chart_dimension": dimension,
                 "iterations": int(result.nit),
                 "optimizer_converged": bool(result.success),
