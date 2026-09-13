@@ -8,9 +8,9 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpoint9a136cef7 is pushed with
-all normal hooks passing. SELF adds terminal63/64 evidence and tested optional
-forward/sensitivity evaluation budgets. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpointc52f2029f is pushed with
+all normal hooks passing. SELF adds cheaper sensitivity qualification65,
+selected derivative audit66, manufactured padding67 and runner accuracy controls. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -87,9 +87,30 @@ the unchanged1e-7 gate. Total launch466.239 s; diagnostic call/save419.190 s.
 The augmented settings were rtol1e-12/atol1e-14/max_step0.000125. The provider's
 independent primal remained rtol1e-11/atol1e-13; max_step applies to both. This
 supports an accuracy-dependent63 failure, not a derivative correctness or C3D
-acceptance claim. Cost is far above the default sensitivity calls. All jobs
-through64 are terminal; no optimizer or diagnostic remains active.
-Runtime61 remains immutable; the local list annotation changes typing only.
+acceptance claim. Cost is far above the default sensitivity calls. All jobs through67 are terminal; fit68 is the next authorized experiment.
+Runtime65 adds the checked call-budget API and passes36 tests including nine
+real Pinocchio tests. Diagnostic65 changes only max_step to0.000125 relative
+to63, retaining augmented tolerances1e-10/1e-12: marker difference3.88459e-8 m,
+82931 sensitivity calls,27.0993 s (versus64's409.086 s). Gates are unchanged.
+Audit66 checks saved64 LSInputX B6 column41 against six original-state replays:
+relative errors9.11e-5/4.94e-4/9.53e-6 for1e-5/1e-4/1e-3 Nm, all below the
+existing1e-3 threshold. This verifies one direction, not the entire Jacobian.
+Raw sources/inputs/replays are preserved in sensitivity_9967_65 and derivative_9967_66.
+
+Runner now accepts --max-step for both forward and sensitivity paths and
+--max-sensitivity-evaluations; defaults preserve prior behavior. Five new parser
+checks went RED/GREEN;13 runner tests pass. Runtime68 qualifies32 tests including nine real Pinocchio tests, plus runner
+--help. Fit68 is active on ControlTower, WSL PID2842183 / agent handle54657;
+output /mnt/c/Users/diete/native-regularized-fit-9967-68. Authorized fit68 retains original
+baseline19, restarts returned62, uses B4/B5/B6,max_nfev10,max_step0.000125,
+sensitivity budget100000, and unchanged weight0.01/scales/amplitude/bounds.
+Preserve any gate or budget failure; do not retry automatically. Inspect actual
+PID/receipt before any launch. All previous numerical runtimes remain immutable.
+
+Manufactured diagnostic67 confirms inactive sensitivity-column padding changes
+physical integration error under the existing combined error norm. This suggests
+an architecture improvement, not a proof of native model error. Keep it as a
+regression case if separate state/variational error control becomes necessary.
 
 The shared native motion sequence API is implemented and publicly exported.
 It converts complete batches with immutable time/model/frame/branch metadata
@@ -97,6 +118,17 @@ and original per-sample references, reusing NativeJointStateAdapter. Root passes
 89 related tests. File I/O, UI and complete dynamic frame transport are next;
 this batch API does not qualify alternate MuJoCo/Drake dynamics. See dedicated
 REPRESENTATION_HANDOFF for runnable usage and the remaining ordered plan.
+
+## Fixed-Attachment Feasibility
+
+Audit69 uses existing rigid-body relaxation on all654 frames. Three head markers
+are attached to Hub; no independent native head joint exists. Fixed-offset lower
+bounds are17.393 mm whole swing/24.279 mm terminal, even with independent body
+poses and no dynamics/connectivity. Separating head as a hypothetical independent
+six-DOF body lowers this to4.471/9.177 mm, but changes the model. No marker/model
+changes were made. Current torque errors exceed the rigidity floor, so both
+optimization and physical approximation matter. Preserve original25/35 mm gates;
+never silently omit head markers. See native_evidence/rigidity_9967_69.
 
 ## Reproducible Compute Limits
 
@@ -128,17 +160,12 @@ numerical accuracy or wall-time guarantee. Exhaustion raises without partial dat
 
 ## Ordered Next Work
 
-1. Qualify a new runtime containing the tested call-budget API, then run one
-   fixed-candidate comparison at63's failing hash using original augmented
-   tolerances1e-10/1e-12, max_step0.000125 and a100000 sensitivity-call budget.
-   This isolates smaller step from64's expensive tolerance change. Keep both
-   numerical gates. If it cannot pass cheaply, stop optimizer retries and add
-   a manufactured physical-state accuracy test with added zero sensitivity
-   columns before changing adaptive error control. Current DOP853 uses one
-   error norm over54 states plus54\*81 sensitivities; adding parameters changes
-   the norm. Qualify blockwise control or a separate variational solve along
-   an accurate continuous primal trajectory, including directional derivatives.
-   Do not infer analytic Jacobian correctness merely from primal agreement.
+1. Observe authorized fit68 on its original handle and preserve its terminal
+   result. A successful numerical check at65 or one derivative direction at66
+   does not qualify the complete optimizer Jacobian or full swing. If68 aborts,
+   diagnose the exact candidate with a bounded experiment before further fitting.
+   Keep separate error-control/manufactured padding67 as the next solver design
+   option if repeated candidate failures make the current approach impractical.
 
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives

@@ -1,0 +1,62 @@
+{
+  "qualification": "independent-body rigid relaxation conditional on fixed attachments; not forward dynamics",
+  "candidate_raw_sha256": "fabdae13158c9a8f1555e8c30b235e10eeaf0b8ce791c631157f032cf24d9181",
+  "capture_payload_sha256": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+  "source_sha256": "79fa44f9cf69505bd25d299cd0918716f4bf23bcdaeebae9c0e9a7a03145efe8",
+  "provider_sha256": "528b948e141bbee12e368fd36cbaa01fc73d92b05451bba26cebae97bc442a07",
+  "frames": 654,
+  "duration_s": 1.8138888888888889,
+  "markers": 25,
+  "full_rms_mm": 17.3930498167109,
+  "terminal_rms_mm": 24.2787663046257,
+  "prefixes": {
+    "0.6": {
+      "rms_mm": 4.065022072358301,
+      "terminal_mm": 10.84725511787975
+    },
+    "0.85": {
+      "rms_mm": 10.278616188737798,
+      "terminal_mm": 23.676956326120262
+    },
+    "1.0": {
+      "rms_mm": 13.790908464777457,
+      "terminal_mm": 27.414749371904133
+    },
+    "1.2": {
+      "rms_mm": 16.507429412404584,
+      "terminal_mm": 19.04061890741992
+    },
+    "1.4": {
+      "rms_mm": 16.13314741914049,
+      "terminal_mm": 18.717413065524447
+    },
+    "1.6": {
+      "rms_mm": 16.741538897276246,
+      "terminal_mm": 21.75654863677433
+    },
+    "1.8138888888888889": {
+      "rms_mm": 17.3930498167109,
+      "terminal_mm": 24.2787663046257
+    }
+  },
+  "body_rms_mm": {
+    "Clubhead": 2.2593978600561715,
+    "Hip": 3.8714808648368697,
+    "Hub": 34.423065763174236,
+    "LF": 0.0,
+    "LS": 8.890893521216864,
+    "LScap": 4.5033554418549215,
+    "RF": 0.0,
+    "RS": 6.483379356260044,
+    "RScap": 0.0
+  },
+  "hypothetical_head_relaxation": {
+    "full_rms_mm": 4.470968176602215,
+    "terminal_rms_mm": 9.177231484366219,
+    "status": "diagnostic only; permits independent six-DOF head pose and changes original model assumptions"
+  },
+  "limitations": [
+    "No joint connectivity, dynamics, temporal continuity or effort constraints.",
+    "Changing offsets/body assignments changes the bound; no original model changes were made."
+  ]
+}

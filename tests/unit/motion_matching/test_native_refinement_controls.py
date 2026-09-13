@@ -44,3 +44,50 @@ def test_invalid_physical_scale_rejected(scale: float) -> None:
 def test_wrong_parameter_count_rejected() -> None:
     with pytest.raises(ValueError, match="parameters"):
         control_matrix(np.ones(81), 27, 4, True, 125.0)
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "nan", "inf"])
+def test_invalid_integrator_step_rejected(value: str) -> None:
+    from docs.development.simscape_tour_matching.native_evidence.reproduction.refine_native_candidate import (
+        parse_args,
+    )
+
+    argv = [
+        "--model",
+        "model",
+        "--candidate",
+        "candidate",
+        "--target",
+        "target",
+        "--output_dir",
+        "out",
+        "--max-step",
+        value,
+    ]
+    with pytest.raises(ValueError, match="max-step"):
+        parse_args(argv)
+
+
+def test_explicit_replay_accuracy_and_sensitivity_budget() -> None:
+    from docs.development.simscape_tour_matching.native_evidence.reproduction.refine_native_candidate import (
+        parse_args,
+    )
+
+    base = [
+        "--model",
+        "model",
+        "--candidate",
+        "candidate",
+        "--target",
+        "target",
+        "--output_dir",
+        "out",
+    ]
+    old = parse_args(base)
+    assert old.max_step == 0.00025 and old.max_sensitivity_evaluations is None
+    tuned = parse_args(
+        base + ["--max-step", ".000125", "--max-sensitivity-evaluations", "100000"]
+    )
+    assert tuned.max_step == 0.000125 and tuned.max_sensitivity_evaluations == 100000
+    with pytest.raises(ValueError, match="max-sensitivity-evaluations"):
+        parse_args(base + ["--max-sensitivity-evaluations", "0"])
