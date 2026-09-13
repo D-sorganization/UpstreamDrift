@@ -365,7 +365,7 @@ def _run_prefix_stage(
         evaluations += 1
         delta = (prediction - stage_measured)[stage_observed]
         marker_residuals = (delta * stage_weights[:, None]).ravel()
-        res_list = [marker_residuals]
+        res_list: list[Array] = [marker_residuals]
 
         # Dedicated terminal-frame penalty
         if options.terminal_weight > 0 and stage_observed[-1].any():
