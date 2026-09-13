@@ -23,6 +23,10 @@ from src.shared.python.motion_matching.equality_least_squares import (
     solve_equality_least_squares,
 )
 from src.shared.python.motion_matching.marker_replay_report import observed_rms
+from src.shared.python.motion_matching.residual_regularization import (
+    regularization_derivative,
+    regularization_residual,
+)
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
     _readonly,
@@ -82,8 +86,11 @@ class MultipleShootingOptions:
     constraint_projection: Callable[[float], Array] | None = None
     variable_scales: Array | None = None
     segmented_forward_batch: SegmentedForwardBatch | None = None
+    regularization_jacobian: Callable[[Array], Array] | None = None
 
     def __post_init__(self) -> None:
+        if self.regularization_jacobian is not None and self.regularization is None:
+            raise ValueError("regularization_jacobian requires regularization")
         if self.solver not in ("least_squares", "slsqp"):
             raise ValueError("Unknown shooting solver")
         if self.segmented_forward_batch is not None and not callable(
@@ -350,8 +357,8 @@ def fit_multiple_shooting(
 
         # 4. Regularization
         if options.regularization is not None:
-            reg_res = options.regularization(theta)
-            if reg_res is not None and len(reg_res) > 0:
+            reg_res = regularization_residual(theta, options.regularization)
+            if reg_res.size > 0:
                 res_parts.append(reg_res)
 
         full_res = np.concatenate(res_parts)
@@ -438,12 +445,26 @@ def fit_multiple_shooting(
             parts.append(defect_factor * delta / np.asarray(scales)[:, None])
         if terminal_jac is not None:
             parts.append(terminal_jac)
+        if options.regularization is not None:
+            if options.regularization_jacobian is None:
+                raise ValueError("Missing regularization_jacobian")
+            local = regularization_derivative(
+                p[:theta_dim], options.regularization, options.regularization_jacobian
+            )
+            penalty = np.zeros((local.shape[0], p.size))
+            penalty[:, :theta_dim] = local
+            parts.append(penalty)
         return np.concatenate(parts)
 
     if options.window_jacobian is not None:
-        if options.regularization is not None or options.pelvis_yaw_weight > 0:
+        if options.pelvis_yaw_weight > 0:
+            raise ValueError("Analytic shooting Jacobian does not yet support yaw")
+        if (
+            options.regularization is not None
+            and options.regularization_jacobian is None
+        ):
             raise ValueError(
-                "Analytic shooting Jacobian does not yet support yaw or regularization"
+                "Analytic shooting requires regularization_jacobian for penalties"
             )
         if (
             options.state_transform is not None

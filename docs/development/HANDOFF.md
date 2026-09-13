@@ -8,8 +8,8 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Implementation through ae06e933b
-is pushed. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Prior checkpoint028f81ff1 is
+pushed; SELF adds tested effort regularization and run60/61 evidence. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -32,7 +32,7 @@ maximum routed native acceleration difference2.18034e-6 rad/s² at a reference
 539073.49 rad/s²; effort roundtrip1.25056e-12. Sampled unscaled inertia condition
 is about6.7e7 in both representations. These results support investigating
 conditioning/trajectory sensitivity, not declaring a physical-model mismatch.
-They do not prove perturbation growth or global convergence. Detailed receipt:
+They do not establish global convergence. Detailed receipt:
 simscape_tour_matching/native_evidence/manifold_acceleration_10043_19.
 Remote runtime /home/dieterolson/native-manifold-10043-18; driver
 /mnt/c/Users/diete/compare_native_manifold_replay_9967_59.py; output
@@ -40,6 +40,27 @@ Remote runtime /home/dieterolson/native-manifold-10043-18; driver
 rtol1e-12, atol1e-14, max_step1/1440, max_evaluations100000. Scalar reference
 rtol1e-12, atol1e-14, max_step0.000125. Poll the existing handle/process before
 launching another run. All root runs through59 are terminal; none should restart.
+
+## Transition Sensitivity and Regularized Fitting
+
+Run60 completes six original-state replays. Repeated baseline results are exactly
+identical. A late LSInputX B6 perturbation of1e-6 Nm changes native rates by
+0.00750466 rad/s near0.786111 s but markers by only0.5386 micrometres. The
+1e-4 Nm trials produce about0.765 rad/s and50.8 micrometres. Central derivative
+estimates retain amplitude dependence; these are measured sensitivity evidence,
+not a waiver of parity gates. Exact inputs, executed source and raw trajectories
+are archived in native_evidence/perturbation_9967_60.
+
+Shared prefix and multiple-shooting fitters now accept checked analytic penalty
+Jacobians. NativeEffortPenalty reuses the native actuator/frame provider and
+seven-point quadrature to evaluate exact mean-square total degree-six primitive
+efforts. Twelve new tests passed after RED; combined fitter/effort/control regression77 tests
+passes, as do Ruff and four-module mypy. Immutable ControlTower runtime61 passes
+96 focused/real Pinocchio tests; source archives/hashes are preserved in
+native_evidence/regularized_fit_runtime_9967_61. Existing runner behavior remains
+the default with zero penalty. Trial61 is active on ControlTower, WSL PID2779075 (agent exec25229). Its first
+analytic sensitivity gate passes with5.66e-8 m primal marker discrepancy. Inspect
+native_evidence/regularized_fit_9967_61 for its terminal receipt when available.
 
 ## Why Earlier Attempts Stalled
 
@@ -60,10 +81,11 @@ launching another run. All root runs through59 are terminal; none should restart
 
 ## Ordered Next Work
 
-1. Measure perturbation propagation on the rejected fixture using existing native
-   sensitivity/retraction providers and explicit small, constraint-consistent
-   perturbations. Record both physical and native-coordinate errors. Do not
-   continue blind tolerance sweeps, accept isolated58, or hide failed59.
+1. Inspect regularized native trial61 and its original process before launching
+   further optimization. Runtime61 is qualified with96 tests; B6 analytic fitting
+   uses max_nfev3, effort weight0.01, force/torque scales100 N/20 Nm. These are
+   numerical objective weights, not physical limits or acceptance changes.
+   Preserve any sensitivity gate failure; max_nfev is not an RHS/time budget.
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives
    before using the manifold variant in an optimizer. Preserve existing scalar API.
@@ -100,6 +122,9 @@ launching another run. All root runs through59 are terminal; none should restart
 - OpenSim epic #10003: plan/handoff branch docs/10003-opensim-matching-epic,
   documented plan commit1a68091b6. Implementation/runtime qualification is not
   accepted. Inspect its branch and requested planning check-in before proceeding.
+
+The documented development-log validator path is absent in this checkout; no
+validator pass is claimed. Normal configured commit/push hooks still apply.
 
 ## Evidence and Reproduction
 
