@@ -1,136 +1,113 @@
 # OpenSim Matching Handoff
 
-## OS-0 Execution Complete: Runtime and Evidence Baseline (2026-09-13 UTC)
+Updated 2026-09-13 (claude, lease on #10003). Epic
+[#10003](https://github.com/D-sorganization/UpstreamDrift/issues/10003), plan
+[EPIC_10003.md](EPIC_10003.md). Branch `docs/10003-opensim-matching-epic`,
+worktree `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003`,
+PR not created. Sibling full-body epic #10062
+([design](../full_body_models/EPIC_FULL_BODY_CONTACT.md)) shares the capture
+contract and the calibration algorithm from this lane.
 
-Work Package OS-0 of Epic #10003 is complete. Baseline runtime environment, packaged OpenSim model topology, and canonical C3D capture were audited and preserved.
+## State in One Paragraph
 
-### OS-0 Key Audit Results
+OS-0, OS-1 and an OS-2 runtime preflight are done; OS-3 (marker placement
+plus inverse kinematics) runs end to end on ControlTower and reaches a
+full-body marker RMS of 6.5 cm on a 33-frame subsample of the tour swing with
+an unscaled generic model. That is kinematic feasibility, not a match and not
+dynamics. OS-4 (Moco tracking) and OS-5 (global sextic efforts) have not
+started. Everything below runs without OpenSim except the two ControlTower
+drivers, which use the isolated venv described under Runtime.
 
-1. **Environment & Runtime Inventory**:
+## What Exists (All Test-First)
 
-   - Python 3.13.5 (AMD64) on Windows-11.
-   - Core numerical libraries verified: NumPy 2.4.1, SciPy 1.16.0, ezc3d 1.6.3, pytest 9.0.3, matplotlib 3.10.3.
-   - **Mandatory Red Gate Verified**: `opensim` and `casadi` modules are confirmed absent from this environment.
-   - Red qualification test suite committed: `tests/opensim/test_opensim_os0_qualification.py` fails predictably on missing `opensim` and missing `MocoStudy`/`MocoTrack`.
+- Shared capture contract `src/shared/python/motion_matching/tour_capture_contract.py`:
+  frozen identity of `data/C3D_TA_Driver.c3d` (SHA256 545405cc…, 360 Hz,
+  654 frames, metres, Y-up), 38 labels grouped by segment (head, trunk,
+  pelvis, arms, legs, club, unassigned), validated loader (invalid = negative
+  residual or nonfinite), `tracked_labels()` = 34 labels. Tests:
+  `tests/opensim/test_tour_capture_contract.py` (5).
+- OpenSim package `src/engines/physics_engines/opensim/python/tour_matching/`:
+  `marker_map.py` (34 labels → golf_humanoid bodies; head markers on `torso`
+  because the model has no head body, knees on femur, ankles on tibia, toes on
+  calcn, club markers on `Club`), `trc.py` (TRC writer/reader; missing markers
+  as explicit `NaN` cells because OpenSim trims trailing empty cells and then
+  rejects the row), `marker_set.py` (safe parse, `attach_marker_set`,
+  `unlock_coordinates`, `locked_coordinates`, `write_model`),
+  `marker_calibration.py` (alternating placement/IK with injected FK and IK,
+  Kabsch reuse). Tests: `test_tour_marker_map.py` (4), `test_trc_export.py`
+  (3), `test_marker_set_authoring.py` (3), `test_marker_calibration.py` (2).
+- Drivers under this directory: `os0_runtime_audit.py` (prior session),
+  `os1_export_trc.py` (local; writes `evidence/tour_average_tracked.trc`,
+  SHA256 eac6c880…, receipt `evidence/os1_trc_receipt.json`),
+  `os2_runtime_qualification.py` and `os3_calibrate_ik.py` (ControlTower).
 
-2. **Model Topology & Structure (`golf_humanoid.osim`)**:
+## Measured Results
 
-   - Model SHA-256: `ee651d5452e39fef8618470adb430a53658a7a5a51d91af0333e5bf7cbd305be`.
-   - 23 Bodies: pelvis, femur_r, tibia_r, patella_r, talus_r, calcn_r, toes_r, femur_l, tibia_l, patella_l, talus_l, calcn_l, toes_l, torso, head, humerus_r, ulna_r, radius_r, hand_r, humerus_l, ulna_l, radius_l, Club.
-   - 39 Coordinates, 39 CoordinateActuators.
-   - Club Attachment: `Club` is welded to `hand_r` via `WeldJoint`.
-   - Closed kinematic chain note: The current OpenSim model has no closed kinematic loop connecting `hand_l` to `Club`; constructing a second-hand coupler/loop constraint or weld constraint is a prerequisite before physical two-hand dynamics matching can proceed.
+| Run             | Evidence                            | Result                                                                                                                                                  |
+| --------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OS-1 TRC export | `evidence/os1_trc_receipt.json`     | 654 frames, 34 labels, 21,534 valid points, roundtrip 5e-7 m; `RShoulderTop` has only 128 valid samples                                                 |
+| OS-2 runtime    | `evidence/os2_runtime_receipt.json` | OpenSim 4.6 (2026-06-22) with Moco, IK, Scale; model loads with 23 bodies, 39 coordinates, 2 constraints, 0 markers; TRC read by OpenSim: 654 rows × 34 |
+| OS-3 locked     | `evidence/os3_stride20/`            | RMS 0.332 → 0.203 → 0.199 m; arm and lumbar coordinates never moved                                                                                     |
+| OS-3 unlocked   | `evidence/os3_unlocked_stride20/`   | RMS 0.198 → 0.065 → 0.087 → 0.078 m over four alternations, stride 20 (33 frames)                                                                       |
 
-3. **C3D Tour-Average Capture & Clock Audit (`data/C3D_TA_Driver.c3d`)**:
+Defects found, in priority order for the next agent:
 
-   - Capture SHA-256: `545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba` (identical to MATLAB export copy).
-   - Sample Rate: 360.0 Hz; 654 Frames (duration 1.813889 s).
-   - 38 Tracked Markers: WaistLeft, WaistRight, WaistLBack, WaistRBack, BackTop, BackLeft, BackRight, LShoulderTop, LShoulderBack, LUArmHigh, LElbowOut, LWristTop, RShoulderBack, RUArmHigh, RElbowOut, RWristTop, Marker_2:2:1..3, Marker_3:3:1..3, HeadTop, HeadFront, HeadSide, etc.
-   - Total observed marker points: 17,466 valid observations.
-   - Analog & Force Plates: Zero force plate / GRF channels exist in this optical motion capture file.
+1. The packaged `golf_humanoid.osim` locks 21 coordinates (all arm, lumbar,
+   subtalar and toe coordinates) inherited from the gait base. The OS-3 driver
+   unlocks the 17 arm and lumbar coordinates in a tracking variant written
+   beside the outputs (`base_unlocked.osim`, `golf_humanoid_tour_markers.osim`).
+   The builder `scripts/build_humanoid_osim.py` should do this permanently for
+   a golf variant, with a test, and the packaged model regenerated.
+2. Coordinate clamps bind: `arm_flex_r` spans exactly ±90°, `lumbar_rotation`
+   reaches −90°. Ranges must be widened for a golf swing and recorded.
+3. The model is unscaled: segment lengths are the Rajagopal defaults; the
+   club body has placeholder length and inertia. Scaling from first-frame
+   marker pairs (ScaleTool or the anthropometrics pipeline) is OS-3b.
+4. The alternation oscillates (0.065 then 0.087). Keep the best iteration, or
+   damp the placement update; report per-marker RMS per iteration.
+5. Only 33 frames were used; the full 654-frame IK and its per-frame RMS
+   plot are still to be produced.
 
-4. **Immutable Receipt**:
-   - Evidence preserved in `docs/development/opensim_tour_matching/evidence/os0_audit_receipt.json`.
-   - Execution script: `docs/development/opensim_tour_matching/os0_runtime_audit.py`.
+## Runtime
 
-## Current Cross-Engine Evidence
+ControlTower WSL distro `ControlTower-Runner`, venv
+`/home/dieterolson/opensim-10003` (Python 3.12.3; `pip install opensim`
+gives 4.6 with Moco; also numpy, scipy, ezc3d, defusedxml, pytest). The
+Pinocchio venv is untouched. A runtime bundle of the needed source files is
+unpacked at `/home/dieterolson/opensim-10003-runtime` (namespace layout, no
+package `__init__` beyond `tour_matching`). Launch through
+`systemd-run --user` because processes spawned from an SSH session die at
+logout; example (from the launch scripts used here):
 
-Updated 2026-09-13. The authoritative native checkpoint is commit 955c36207 on
-feat/9967-native-simscape-pinocchio; read its docs/development/HANDOFF.md before
-acting (the run 16 figures previously quoted here are 65 runs stale).
-
-Native Pinocchio returned81 (0–0.85 s, uninterrupted original-state replay):
-whole 26.366 mm, early 11.427 mm, terminal 46.305 mm, clubhead 15.96 mm, pelvis
-yaw 13.9 %; still rejected against the 25/35/12 mm gates. Derivatives are
-qualified with measured floors (audit 77). MuJoCo and Drake replay the same
-physical model to about 1e-6 to 1e-8 m through 0.8 s and act as verifiers.
-Full 1.8138888889 s capture matching remains incomplete. Overnight Simscape
-1.15 s/1.233 s extensions failed by more than an order of magnitude and are
-archived on feat/9921-simscape-tour-matching. No OpenSim equivalence follows
-from any of this.
-
-OS-0 consumes the canonical native model specification and, as its reference
-input, the returned81 candidate document
-`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81/returned-candidate.json`
-(exact degree-six coefficients, absolute clock, original q0/qd0). No OpenSim
-native installation or solver job has started. Execute OS-0 through OS-6
-sequentially with failing-then-passing tests, hashes, independent replay and an
-updated handoff at every checkpoint. Keep the Pinocchio environment isolated.
-
-## Checkout and Ownership
-
-- Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003`.
-- Branch: `docs/10003-opensim-matching-epic`; base `d03983d08`.
-- Session: `opensim-epic-20260912`, agent `codex`, issue #10003.
-- Owned path: `docs/development/opensim_tour_matching/`.
-- Pinocchio worktree: `../UpstreamDrift-pinocchio-native`; read its current
-  `docs/development/simscape_tour_matching/NATIVE_PORT_CHECKPOINT_20260911.md`.
-- Gemini worktree: `../UpstreamDrift-simscape-tour`; do not modify its runtime.
-
-## Next-Agent Prompt
-
-Start with this read-only checkpoint command in PowerShell:
-
-```powershell
-Set-Location C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003
-git status --short
-git log -1 --oneline
-Get-Content docs/development/opensim_tour_matching/EPIC_10003.md
+```bash
+RT=/home/dieterolson/opensim-10003-runtime; W=/mnt/c/Users/diete/opensim-10003
+systemd-run --user --unit=opensim-os3 --collect --quiet -p WorkingDirectory=$RT -E PYTHONPATH=$RT \
+  bash -c "/home/dieterolson/opensim-10003/bin/python docs/development/opensim_tour_matching/os3_calibrate_ik.py \
+  --osim $RT/golf_humanoid.osim --trc $RT/docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc \
+  --output $W/os3-<name> --stride 20 --iterations 4 > $W/os3-<name>.log 2>&1"
 ```
 
-Before editing, use the central coordinator from Repository_Management:
+Rebuild the bundle from the repository files listed in
+`os3_calibrate_ik.py` imports whenever those files change; record the driver
+SHA256 in the receipt (the driver does this for its inputs already).
 
-```powershell
-python3 -m scripts.check_agent_claim --repo UpstreamDrift --issue 10003
-python3 -m scripts.agent_communicate --repo UpstreamDrift --session opensim-epic-20260912 inbox
-```
+## Next Bounded Tasks (Lower-Agent Ready)
 
-These inspect the parent planning session; register a fresh session and child
-issue lease for implementation instead of impersonating this one.
+Copy-ready prompt: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
 
-Implement only OS-0 from the linked epic after the requested user check-in.
-Read AGENTS.md, CLAUDE.md, this handoff, current Pinocchio receipts and public
-OpenSim/shared interfaces. Check central claims/inbox and create a child issue
-for OS-0 before code changes. Work in an isolated topic branch. Revalidate source
-and data hashes. Do not infer installation from an old doc or copied package.
+- OS-2b: golf variant in the builder (unlock 17 coordinates, widen clamps,
+  club length from the capture's club markers), regenerated model, tests.
+- OS-3b: segment scaling from first-frame marker pairs; keep-best iteration;
+  full 654-frame IK; per-frame and per-marker RMS report; overlay animation.
+- OS-4: MocoTrack pilot on the scaled model with the calibrated MarkerSet
+  over a 0.85 s prefix, coordinate actuators only, receipts.
+- OS-5: global degree-six effort profile fit with uninterrupted replay,
+  compared on the five shared metrics (whole, early, terminal, club, yaw).
 
-First produce a native runtime inventory and a failing qualification test for
-missing/incompatible OpenSim. Discover an existing environment or use a dedicated
-supported one; preserve all active Pinocchio/MATLAB environments and jobs. Probe
-Moco support on a small constrained model before recommending a large solve.
-Run existing pure tests and report their skips separately from native evidence.
-Inventory actual packaged/runtime model coordinates, efforts, constraints,
-markers, gravity, mass properties, contact and passive effects. Audit the source
-C3D clock, masks, axes, units and any force plates. Save immutable receipts.
+## Known Limits
 
-Do not optimize the real swing yet. Finish OS-0's done gate, commit tests/docs
-normally and update this handoff with exact environment/reproduction commands.
-Then dispatch OS-1 as a separate bounded task. If scientific model/contact choice
-is unresolved, present the documented alternatives to the coordinating agent;
-continue independent evidence/contract work without inventing an answer.
-
-## Known Evidence and Limits
-
-The two driver C3D copies match SHA-256
-`545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba`.
-The existing OpenSim fitter uses 25 coordinates by default; do not map native
-27-channel coefficients by array position. Existing equivalence tests are not
-current-native continuous-replay proof. Native OpenSim has not been exercised.
-
-Local Python 3.13 and ControlTower Windows Python 3.14 returned no OpenSim module.
-ControlTower's separate Pinocchio Python 3.12 environment also returned none.
-Other installations remain unsearched. SSH `controltower` worked during this
-read-only check. No MATLAB or optimization process was launched or interrupted.
-
-## Required Checkpoint Fields
-
-For every next commit, record: issue/claim/session; commit and dirty status;
-source/model/capture hashes; host/executable/version; exact commands; red and green
-tests with skip counts; run ID/parent candidate; artifact paths and SHA-256;
-current best replay-qualified candidate; all fit/physical/coverage gates; live
-process identity or terminal exit; next single action; blocker and owner;
-push/PR/CI status; any changed assumptions or tolerances. Append dated evidence
-and keep the current status at the top accurate.
-
-Never overwrite completed runs or equate a planned command with one executed.
-Copy/restore large artifacts by manifest, not guessed latest filenames.
+Three head markers share the torso body (no head body), exactly as the
+native Hub limitation; the capture has no force plates, so ground reaction
+is inferred, never measured; the right-hand-only club weld leaves the left
+hand free, unlike the native closed loop. None of the OpenSim results implies
+Pinocchio, MuJoCo, Drake or Simscape equivalence.
