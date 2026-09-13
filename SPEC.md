@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Degree-Six Polynomial Effort Profile With Forward Simulation Replay (#10003)
+
+Implement continuous degree-six polynomial effort profiles and zero-feedback forward simulation replay for the OpenSim golf humanoid model:
+- Polynomial Profile Module (`src/engines/physics_engines/opensim/python/tour_matching/polynomial_profile.py`):
+  - `Degree6PolynomialCoefficients`: Validated parameter dataclass storing 7 descending power coefficients $c_0..c_6$ ($c_0 t^6 + \dots + c_6$) matching OpenSim `PolynomialFunction` and Simscape native conventions, providing Horner's method evaluation, analytical time derivatives, and ascending/descending conversion helpers.
+  - `PolynomialTorqueProfile`: Container for full-body degree-6 profiles across all 39 OpenSim actuators, supporting JSON serialization, time-grid matrix evaluation, and physical effort and effort-rate bounds verification.
+  - `fit_degree6_from_discrete_controls`: Least-squares polynomial fitting from discrete control trajectories, reporting $R^2$, maximum absolute fit error, and RMS error.
+  - `create_polynomial_prescribed_controller`: Configures an `opensim.PrescribedController` attaching native `opensim.PolynomialFunction` instances with descending coefficient vectors for each model actuator.
+  - `load_controls_from_sto`: Pure-Python OpenSim Storage (.sto) parser extracting time trajectories, control matrices, and actuator column labels.
+- Verification & ControlTower Execution (`docs/development/opensim_tour_matching/os5_polynomial_fit_driver.py`):
+  - Fits degree-6 polynomial profile across all 39 actuators from OS-4 dynamic controls, achieving high fidelity ($R^2 > 0.99$ on active joints, max error $< 0.011$ N*m) with zero bounds violations.
+  - Executes continuous zero-feedback forward simulation replay on ControlTower via `opensim.Manager`, integrating to $t = 0.10$ s in 7.16 ms across 5 integration steps with zero projections.
+  - Generates cryptographic evidence in `docs/development/opensim_tour_matching/evidence/os5_polynomial_profile/receipt.json`.
+
 ## OpenSim Dynamic Marker Tracking Pilot With Zero-Feedback Forward Replay (#10003)
 
 Implement constraint-aware dynamic marker tracking and zero-feedback forward simulation replay for the OpenSim golf humanoid model:
