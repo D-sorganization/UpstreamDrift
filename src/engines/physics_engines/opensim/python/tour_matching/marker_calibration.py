@@ -53,6 +53,8 @@ class CalibrationResult:
     q: Array
     rms_per_iteration_m: tuple[float, ...]
     iterations: int
+    best_iteration: int
+    per_marker_rms_m: dict[str, float]
 
 
 def _placements(
@@ -76,16 +78,31 @@ def _placements(
 def _marker_rms(
     capture: TourCapture, offsets: Offsets, poses: list[Mapping[str, Pose]]
 ) -> float:
-    errors = []
+    rms, _ = _marker_rms_and_per_marker(capture, offsets, poses)
+    return rms
+
+
+def _marker_rms_and_per_marker(
+    capture: TourCapture, offsets: Offsets, poses: list[Mapping[str, Pose]]
+) -> tuple[float, dict[str, float]]:
+    all_errors: list[float] = []
+    per_marker: dict[str, float] = {}
     for i, label in enumerate(capture.labels):
         body, offset = offsets[label]
+        marker_errors: list[float] = []
         for f in range(capture.frames):
             if capture.valid[f, i]:
                 r, t = poses[f][body]
-                errors.append(
+                err = float(
                     np.linalg.norm(r @ np.asarray(offset) + t - capture.points_m[f, i])
                 )
-    return float(np.sqrt(np.mean(np.square(errors))))
+                marker_errors.append(err)
+                all_errors.append(err)
+        per_marker[label] = (
+            float(np.sqrt(np.mean(np.square(marker_errors)))) if marker_errors else 0.0
+        )
+    total_rms = float(np.sqrt(np.mean(np.square(all_errors)))) if all_errors else 0.0
+    return total_rms, per_marker
 
 
 def calibrate_marker_offsets(
@@ -103,7 +120,8 @@ def calibrate_marker_offsets(
     maps a coordinate vector to world poses of every referenced body; ik_fn
     returns one coordinate row per capture frame. Postcondition: the RMS
     history has one entry per iteration, each measured after that iteration's
-    IK with that iteration's placements.
+    IK with that iteration's placements. The returned offsets, q and
+    per_marker_rms_m correspond to the best iteration (lowest total RMS).
     """
     if (
         isinstance(iterations, bool)
@@ -119,13 +137,34 @@ def calibrate_marker_offsets(
         raise ValueError("initial_q must be a finite vector")
     q = np.tile(q0, (capture.frames, 1))
     history: list[float] = []
-    offsets: Offsets = {}
-    for _ in range(iterations):
+
+    best_iteration = 1
+    best_rms = float("inf")
+    best_offsets: Offsets = {}
+    best_q: Array = np.empty(0)
+    best_per_marker: dict[str, float] = {}
+
+    for iter_idx in range(1, iterations + 1):
         poses = [pose_fn(q[f]) for f in range(capture.frames)]
         offsets = _placements(capture, bodies, poses)
         q = np.asarray(ik_fn(offsets, capture), float)
         if q.shape[0] != capture.frames or q.ndim != 2 or not np.isfinite(q).all():
             raise ValueError("IK must return a finite (frames, coordinates) array")
         poses = [pose_fn(q[f]) for f in range(capture.frames)]
-        history.append(_marker_rms(capture, offsets, poses))
-    return CalibrationResult(offsets, q, tuple(history), iterations)
+        rms, per_marker = _marker_rms_and_per_marker(capture, offsets, poses)
+        history.append(rms)
+        if rms < best_rms:
+            best_rms = rms
+            best_iteration = iter_idx
+            best_offsets = offsets
+            best_q = q.copy()
+            best_per_marker = per_marker
+
+    return CalibrationResult(
+        best_offsets,
+        best_q,
+        tuple(history),
+        iterations,
+        best_iteration,
+        best_per_marker,
+    )
