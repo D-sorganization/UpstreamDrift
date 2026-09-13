@@ -33,17 +33,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
-- **State:** proposed
+- **State:** in_progress
 - **Owner:** claude
 - **Issue:** #10062 (children #10063 to #10070)
-- **Branch:** docs/10003-opensim-matching-epic (design only; implementation branches per child)
+- **Branch:** docs/10003-opensim-matching-epic (FB-1/FB-2 shared contracts; implementation branches per child)
 - **PR:** not created
-- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/tour_capture_contract.py
+- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; tests/unit/motion_matching/test_full_body_spec.py; tests/unit/motion_matching/test_contact_law.py
 - **Started:** 2026-09-13
-- **Last verified:** 2026-09-13 (SELF; design document and eight child issues filed; shared capture contract tested)
-- **Summary:** MuJoCo, Drake and Pinocchio gain separate full-body model specifications with lower limbs and a shared rigid-ground contact law, matched to the 38-marker capture; upper-body qualified models and Simscape parity stay untouched.
-- **Next step:** Implement FB-1 (#10063): full-body spec schema and validator with the slice-identity test against native_geometry_spec_9967.json.
-- **Evidence:** docs/development/full_body_models/EPIC_FULL_BODY_CONTACT.md.
+- **Last verified:** 2026-09-13 (SELF; 19 unit tests pass with Ruff and mypy; full_body_spec_v1.json validates against the qualified upper-body spec, 41 coordinates, pelvis alignment residual 5.8 mm)
+- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, the shared ground-contact law with parity harness, and a committed full-body spec built from Rajagopal lower limbs are in place; per-engine builders, calibration and fitting remain.
+- **Next step:** Implement FB-3-P (#10065): Pinocchio full-body builder consuming full_body_spec_v1.json with the 1e-12 upper-body slice parity test and shared contact forces.
+- **Evidence:** docs/development/full_body_models/HANDOFF.md, build_receipt.json.
 
 ### DL-#1616 · Mermaid C4 Architecture Maps
 
