@@ -1,5 +1,26 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Run59 Does Not Confirm Robust Parity
+
+Smaller-step59 completes but native velocity error0.000587270 fails. Isolated58
+is not promoted. Root archives terminal evidence and switches from tolerance
+repetition to a full saved-state acceleration/actuator-route/history audit.
+
+## 2026-09-12 - DOP853 Run58 Passes Prefix Parity
+
+Run58 passes unchanged marker/native-state/closure gates over0.85 s in37.69 s.
+It is a representation fixture, not an accepted C3D fit. Smaller-step59 is active.
+Replaced1262-line accumulating HANDOFF with a concise current-status document;
+preserved all prior entries and incoming contexts in HANDOFF_HISTORY_20260912.md.
+Historical ACTIVE statements are explicitly nonauthoritative.
+
+## 2026-09-12 - DOP853 Pilot57 Terminal
+
+Both pilot levels complete, improving cost relative to tight RK4 but still
+failing native velocity parity. Smaller step is not monotonic convergence.
+Archived57 and launched one tighter-tolerance58 with the same explicit budget.
+Implementation push through ae06e933b passed all pre-push checks.
+
 ## 2026-09-12 - Tested Local-Chart DOP853 and Native Pilot57
 
 Added shared high-order chart integration using the same checked RHS as RK4.

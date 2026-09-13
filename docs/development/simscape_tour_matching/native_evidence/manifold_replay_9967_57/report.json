@@ -1,0 +1,44 @@
+{
+  "scope": "Same-input native representation prefix; not C3D or MATLAB acceptance",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "candidate_sha256": "b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f",
+  "runner_sha256": "82605419df4c15df56dc6051ae7ca03fb09f256a9ed225d73b01e27be0eb20d4",
+  "horizon_s": 0.85,
+  "method": "dop853",
+  "rtol": 1e-10,
+  "atol": 1e-12,
+  "adaptive_max_evaluations": 100000,
+  "scalar_rtol": 1e-12,
+  "scalar_atol": 1e-14,
+  "scalar_max_step": 0.000125,
+  "scalar_elapsed_s": 7.199196945992298,
+  "scalar_closure_pose_max_abs": 1.3132966936199189e-11,
+  "scalar_closure_velocity_max_abs": 7.37419014740226e-11,
+  "runs": [
+    {
+      "max_step": 0.001388888888888889,
+      "elapsed_s": 33.004184034012724,
+      "evaluations": 9396,
+      "steps": 717,
+      "native_q_max_abs_difference": 4.354730758215908e-7,
+      "native_v_max_abs_difference": 0.00048089917601146226,
+      "marker_max_distance_m": 8.243552340811703e-8,
+      "closure_pose_max_abs": 1.2772966018154577e-10,
+      "closure_velocity_max_abs": 2.3245294578089215e-10,
+      "prefix_parity_gates_pass": false
+    },
+    {
+      "max_step": 0.0006944444444444445,
+      "elapsed_s": 59.72797579097096,
+      "evaluations": 16596,
+      "steps": 1320,
+      "native_q_max_abs_difference": 5.944123977474902e-7,
+      "native_v_max_abs_difference": 0.0005660662544073602,
+      "marker_max_distance_m": 1.1300799958779045e-7,
+      "closure_pose_max_abs": 8.748257673798634e-11,
+      "closure_velocity_max_abs": 1.374795832731479e-10,
+      "marker_max_distance_from_previous_step_m": 3.129167516077662e-8,
+      "prefix_parity_gates_pass": false
+    }
+  ]
+}
