@@ -6,24 +6,27 @@ No OpenSim implementation or native solver job has started in this workstream.
 
 ## Current Cross-Engine Evidence
 
-Updated 2026-09-12 UTC at the requested planning check-in. The authoritative
-Pinocchio checkpoint is commit7f2310661 on feat/9967-native-simscape-pinocchio,
-NATIVE_PORT_CHECKPOINT_20260911.md in the sibling worktree listed below.
-Read its top section before acting; historical epic metrics are not current.
+Updated 2026-09-13. The authoritative native checkpoint is commit 955c36207 on
+feat/9967-native-simscape-pinocchio; read its docs/development/HANDOFF.md before
+acting (the run 16 figures previously quoted here are 65 runs stale).
 
-Run16 has completed and independently replays through0.85 s at30.956978 mm
-whole RMS and96.757316 mm terminal RMS. It fails convergence and continuity
-(max scaled defect0.002278590, required1e-4); it is not an accepted swing.
-No run17 is launched at this checkpoint. The next controlled Pinocchio trial
-changes only solver budgets, preserving the existing model and search bounds.
-Full1.8138888889 s capture matching remains incomplete. Native R2025b parity
-is qualified for the original0.8 s baseline only. No OpenSim equivalence follows.
+Native Pinocchio returned81 (0–0.85 s, uninterrupted original-state replay):
+whole 26.366 mm, early 11.427 mm, terminal 46.305 mm, clubhead 15.96 mm, pelvis
+yaw 13.9 %; still rejected against the 25/35/12 mm gates. Derivatives are
+qualified with measured floors (audit 77). MuJoCo and Drake replay the same
+physical model to about 1e-6 to 1e-8 m through 0.8 s and act as verifiers.
+Full 1.8138888889 s capture matching remains incomplete. Overnight Simscape
+1.15 s/1.233 s extensions failed by more than an order of magnitude and are
+archived on feat/9921-simscape-tour-matching. No OpenSim equivalence follows
+from any of this.
 
-The parallel OpenSim planning lane is complete. OS-0 remains the first
-implementation assignment; no OpenSim native installation or solver job has
-started. Execute the epic's stages sequentially, preserving failing-then-passing
-test evidence, source/input hashes, contracts, independent replay and an updated
-handoff at every checkpoint. Keep the existing Pinocchio environment isolated.
+OS-0 consumes the canonical native model specification and, as its reference
+input, the returned81 candidate document
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81/returned-candidate.json`
+(exact degree-six coefficients, absolute clock, original q0/qd0). No OpenSim
+native installation or solver job has started. Execute OS-0 through OS-6
+sequentially with failing-then-passing tests, hashes, independent replay and an
+updated handoff at every checkpoint. Keep the Pinocchio environment isolated.
 
 ## Checkout and Ownership
 
