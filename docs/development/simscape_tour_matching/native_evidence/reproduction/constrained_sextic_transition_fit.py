@@ -26,6 +26,7 @@ from typing import Any
 
 import numpy as np
 from scipy.optimize import least_squares
+
 repo_root = Path(__file__).resolve().parents[5]
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
@@ -79,22 +80,44 @@ def load_cubic_candidate(checkpoint_dir: Path) -> tuple[np.ndarray, list[str]]:
     if mat_path.exists():
         try:
             import h5py
+
             with h5py.File(str(mat_path), "r") as f:
                 theta = np.array(f["fit_theta"]).ravel()
                 n_joints = len(theta) // 7
                 return theta.reshape(n_joints, 7), labels
-        except (OSError, KeyError, ValueError, TypeError, ImportError, AttributeError) as e:
-            logger.warning("Could not read mat via h5py (%s); trying scipy or json fallback", e)
+        except (
+            OSError,
+            KeyError,
+            ValueError,
+            TypeError,
+            ImportError,
+            AttributeError,
+        ) as e:
+            logger.warning(
+                "Could not read mat via h5py (%s); trying scipy or json fallback", e
+            )
             try:
                 import scipy.io
+
                 mat = scipy.io.loadmat(str(mat_path))
                 theta = np.array(mat["fit_theta"]).ravel()
                 n_joints = len(theta) // 7
                 return theta.reshape(n_joints, 7), labels
-            except (OSError, KeyError, ValueError, TypeError, ImportError, AttributeError) as e2:
-                logger.warning("scipy loadmat failed (%s); falling back to json Bernstein conversion", e2)
+            except (
+                OSError,
+                KeyError,
+                ValueError,
+                TypeError,
+                ImportError,
+                AttributeError,
+            ) as e2:
+                logger.warning(
+                    "scipy loadmat failed (%s); falling back to json Bernstein conversion",
+                    e2,
+                )
 
     from src.shared.python.motion_matching.prefix_fit import bernstein_to_simscape
+
     efforts = np.array(data["evaluations"][-1]["efforts"])
     duration_s = float(data.get("duration_s", 0.60))
     n_joints = len(labels)
@@ -105,7 +128,9 @@ def load_cubic_candidate(checkpoint_dir: Path) -> tuple[np.ndarray, list[str]]:
 
 def main() -> int:
     args = parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
+    )
     root = args.run_dir
     root.mkdir(parents=True, exist_ok=True)
 
@@ -143,11 +168,18 @@ def main() -> int:
 
     # SVD basis for Vandermonde on early prefix
     W_svd, Sigma_svd, V_svd = build_prefix_svd_basis(
-        T_prefix=args.early_prefix_s, T_full=T_FULL_DEFAULT, n_samples=np.count_nonzero(early_mask)
+        T_prefix=args.early_prefix_s,
+        T_full=T_FULL_DEFAULT,
+        n_samples=np.count_nonzero(early_mask),
     )
 
     logger.info("Baseline 0.60s cubic elevated to degree 6 on s = t / 1.814")
-    logger.info("Subspace mode: %s | Joints: %d | Duration: %.2f s", args.mode, n_joints, args.duration)
+    logger.info(
+        "Subspace mode: %s | Joints: %d | Duration: %.2f s",
+        args.mode,
+        n_joints,
+        args.duration,
+    )
 
     # Define parameterization mapping
     if args.mode == "higher_order":
@@ -199,12 +231,16 @@ def main() -> int:
     }
 
     try:
-        engine_dir = args.repo / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab"
+        engine_dir = (
+            args.repo / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab"
+        )
         engine.addpath(str(engine_dir / "src/model"), nargout=0)
         engine.addpath(engine.genpath(str(engine_dir / "src/functions")), nargout=0)
         engine.addpath(str(engine_dir / "motion_matching/shared"), nargout=0)
         engine.workspace["fit_seed_path"] = str(args.initial_state)
-        engine.workspace["fit_frame_names"] = [seed["body_names"][seed["labels"].index(lbl)] for lbl in labels]
+        engine.workspace["fit_frame_names"] = [
+            seed["body_names"][seed["labels"].index(lbl)] for lbl in labels
+        ]
         engine.workspace["fit_duration"] = float(requested_times[-1])
 
         engine.eval(
@@ -232,10 +268,14 @@ fit_offsets=fit_seed.offsets_m;
 
         def forward_sim(powers_normalized: np.ndarray) -> np.ndarray:
             # Convert normalized ascending powers to Simscape native descending A..G
-            native_ag = normalized_to_simscape_powers(powers_normalized, T_full=T_FULL_DEFAULT)
+            native_ag = normalized_to_simscape_powers(
+                powers_normalized, T_full=T_FULL_DEFAULT
+            )
             theta_flat = native_ag.ravel()
             engine.workspace["fit_theta"] = matlab.double(theta_flat[:, None].tolist())
-            engine.workspace["fit_time"] = matlab.double(requested_times[:, None].tolist())
+            engine.workspace["fit_time"] = matlab.double(
+                requested_times[:, None].tolist()
+            )
             engine.eval(
                 "[fit_prediction,fit_last_replay]=simulate_golf_markers(fit_theta,fit_opts,fit_ks,fit_schema,fit_bodies,fit_offsets,fit_time);",
                 nargout=0,
@@ -279,7 +319,9 @@ fit_offsets=fit_seed.offsets_m;
             sin_yaw = u_p[:, 1] * u_t[:, 0] - u_p[:, 0] * u_t[:, 1]
             yaw_res = sin_yaw * (args.pelvis_yaw_weight * t_mult)
             res_list.append(yaw_res.ravel())
-            res_list.append(sin_yaw[-1:] * (args.pelvis_yaw_weight * args.terminal_weight))
+            res_list.append(
+                sin_yaw[-1:] * (args.pelvis_yaw_weight * args.terminal_weight)
+            )
 
             # 4. Regularization on parameter perturbation
             if args.smoothness_weight > 0:
@@ -287,7 +329,11 @@ fit_offsets=fit_seed.offsets_m;
 
             overall_rms = float(np.sqrt(np.nanmean(dist**2)))
             term_rms = float(np.sqrt(np.nanmean(dist[-1] ** 2)))
-            term_yaw_err_pct = float(abs(np.degrees(np.arcsin(np.clip(sin_yaw[-1], -1.0, 1.0)))) / 60.0 * 100.0)
+            term_yaw_err_pct = float(
+                abs(np.degrees(np.arcsin(np.clip(sin_yaw[-1], -1.0, 1.0))))
+                / 60.0
+                * 100.0
+            )
 
             report["evaluations"].append(
                 {
@@ -307,7 +353,9 @@ fit_offsets=fit_seed.offsets_m;
                     term_rms * 1000,
                     term_yaw_err_pct,
                 )
-                (root / "constrained_sextic_fit.json").write_text(json.dumps(report, indent=2))
+                (root / "constrained_sextic_fit.json").write_text(
+                    json.dumps(report, indent=2)
+                )
 
             return np.concatenate(res_list)
 
@@ -323,7 +371,10 @@ fit_offsets=fit_seed.offsets_m;
         )
 
         # Optimize
-        logger.info("Starting constrained least_squares optimization (max_nfev=%d)...", args.max_nfev)
+        logger.info(
+            "Starting constrained least_squares optimization (max_nfev=%d)...",
+            args.max_nfev,
+        )
         opt_res = least_squares(
             residual,
             x0,
@@ -354,9 +405,15 @@ fit_offsets=fit_seed.offsets_m;
         yaw_err_pct = float(abs(yaw_diff) / max(abs(yaw_target), 1.0) * 100.0)
 
         # Clubhead errors
-        club_indices = [i for i, lbl in enumerate(labels) if "club" in lbl.lower() or "marker_3:" in lbl.lower()]
+        club_indices = [
+            i
+            for i, lbl in enumerate(labels)
+            if "club" in lbl.lower() or "marker_3:" in lbl.lower()
+        ]
         club_term_rms = (
-            float(np.sqrt(np.nanmean(final_diff[-1, club_indices] ** 2))) if club_indices else 0.0
+            float(np.sqrt(np.nanmean(final_diff[-1, club_indices] ** 2)))
+            if club_indices
+            else 0.0
         )
 
         gates_passed = bool(
@@ -390,7 +447,12 @@ fit_offsets=fit_seed.offsets_m;
 
         (root / "constrained_sextic_fit.json").write_text(json.dumps(report, indent=2))
         logger.info("Optimization finished! Gates passed: %s", gates_passed)
-        logger.info("Metrics: overall=%.2f mm, terminal=%.2f mm, yaw_err=%.2f%%", overall_rms*1000, terminal_rms*1000, yaw_err_pct)
+        logger.info(
+            "Metrics: overall=%.2f mm, terminal=%.2f mm, yaw_err=%.2f%%",
+            overall_rms * 1000,
+            terminal_rms * 1000,
+            yaw_err_pct,
+        )
         return 0 if gates_passed else 1
 
     finally:

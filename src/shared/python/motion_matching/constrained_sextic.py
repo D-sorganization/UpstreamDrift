@@ -21,6 +21,15 @@ DEGREE: int = 6
 COEFFS_PER_ACTUATOR: int = DEGREE + 1  # 7 coefficients: p_0 .. p_6
 
 
+def _validate_coeffs_shape_and_duration(values: np.ndarray, T_full: float) -> None:
+    if values.shape[-1] != COEFFS_PER_ACTUATOR:
+        raise ValueError(
+            f"Expected shape (..., {COEFFS_PER_ACTUATOR}), got {values.shape}"
+        )
+    if not np.isfinite(T_full) or T_full <= 0:
+        raise ValueError("T_full must be finite and positive")
+
+
 def simscape_powers_to_normalized(
     simscape_coeffs: Array, *, T_full: float = T_FULL_DEFAULT
 ) -> Array:
@@ -32,12 +41,7 @@ def simscape_powers_to_normalized(
     p_j = simscape_coeffs[6 - j] * (T_full ** j).
     """
     values = np.asarray(simscape_coeffs, dtype=np.float64)
-    if values.shape[-1] != COEFFS_PER_ACTUATOR:
-        raise ValueError(
-            f"Expected shape (..., {COEFFS_PER_ACTUATOR}), got {values.shape}"
-        )
-    if not np.isfinite(T_full) or T_full <= 0:
-        raise ValueError("T_full must be finite and positive")
+    _validate_coeffs_shape_and_duration(values, T_full)
 
     powers = np.arange(COEFFS_PER_ACTUATOR, dtype=np.float64)
     scale = T_full**powers
@@ -54,12 +58,7 @@ def normalized_to_simscape_powers(
     Returns array in Simscape order [A, B, C, D, E, F, G].
     """
     values = np.asarray(normalized_coeffs, dtype=np.float64)
-    if values.shape[-1] != COEFFS_PER_ACTUATOR:
-        raise ValueError(
-            f"Expected shape (..., {COEFFS_PER_ACTUATOR}), got {values.shape}"
-        )
-    if not np.isfinite(T_full) or T_full <= 0:
-        raise ValueError("T_full must be finite and positive")
+    _validate_coeffs_shape_and_duration(values, T_full)
 
     powers = np.arange(COEFFS_PER_ACTUATOR, dtype=np.float64)
     scale = T_full**powers
