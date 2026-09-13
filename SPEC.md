@@ -1,11 +1,11 @@
 # SPEC.md — Repository Specification Document
 
-## Native Simscape Tour-Matching 1.15s Downswing Horizon and Impact Preparation (#9921)
+## Native Simscape Tour-Matching 1.233s Tour Impact Continuation (#9921)
 
 Advance continuous forward dynamics motion matching on the tour-average driver swing (`data/C3D_TA_Driver.c3d`, $T = 1.813889\text{ s}$, 654 frames @ 360 Hz) in Simscape Multibody R2025b (`GolfSwing3D_Kinetic.slx`):
+- 1.233s Tour Impact Candidate: Record `candidates/candidate_impact_1233s_locked_package.json` with degrees $k=0..3$ 100% frozen across all 27 native joint channels ($\max |\Delta \theta_{j, 0..3}| \le 3.6 \times 10^{-5}$), achieving 11.27mm Gate 4 early retention ($[0, 0.60\text{ s}] \le 12.0\text{ mm}$, PASS), >91% objective cost reduction ($1.7755 \times 10^5 \to 1.5170 \times 10^4$), terminal marker RMSE 657.29mm, clubhead terminal RMSE 739.27mm, and shaft delivery inclination 59.77 deg.
 - 1.15s Downswing Horizon Candidate: Record `candidates/candidate_downswing_115s_locked_package.json` with degrees $k=0..3$ 100% frozen across all 27 native joint channels, achieving 11.27mm Gate 4 early retention ($[0, 0.60\text{ s}] \le 12.0\text{ mm}$, PASS), reducing pelvis yaw error from 159.94% to 38.05% ($-24.64^\circ$), and improving terminal marker RMSE to 465.20mm.
 - 1.05s Downswing Delivery Candidate: Record `candidates/candidate_downswing_105s_locked_package.json` with degrees $k=0..3$ 100% frozen across all 27 native joint channels, achieving 11.22mm Gate 4 early retention ($[0, 0.60\text{ s}] \le 12.0\text{ mm}$, PASS) and 8.44% pelvis yaw error at 1.05s.
-- 1.233s Impact Continuation Preparation: Extract tour driver impact kinematics at $t=1.233\text{ s}$ (frame 444 @ 360 Hz), repair 1-frame optical occlusion on Marker_2:2 clubhead triad ($[1.5984, 0.3081, 1.8901]\text{ m}$), prove polynomial authority of $k=4, 5, 6$ activation scheme ($dB_6/dt = +0.481\text{ s}^{-1}$ terminal strike impulse), and pre-stage verified runner `scratch/run_impact_1233s_locked.py`.
 - Single Global Polynomial Basis & Defect Invariance: Enforce exactly one degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$ with 0.000000m defect norm across all candidate packages.
 - Turnover and Governance Sync: Document horizon continuation in `AGENT_HANDOFF.md` and maintain doc size and architecture budget compliance.
 
