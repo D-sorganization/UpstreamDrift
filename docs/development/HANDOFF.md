@@ -3,9 +3,10 @@
 ## Current Status
 
 Work RESUMED 2026-09-12 (claude, leases on #9967/#10043). The objective is
-incomplete. All numerical jobs through77 are terminal. Audit77 qualifies every
-run76 derivative block against measured floors; the next lane is the bounded
-direct-node two-window SLSQP trial (once-only shared boundary for parity). Resume instructions:
+incomplete. Jobs through78 are terminal; run79 (same formulation, primal-only
+residuals, larger budgets) is RUNNING on ControlTower, launched2026-09-13 as
+systemd unit native-fit-79, output /mnt/c/Users/diete/native-two-window-fit-9967-79.
+Poll its launch JSON/receipt before launching anything; do not restart it. Resume instructions:
 [Agent Resume Prompt](simscape_tour_matching/AGENT_RESUME_PROMPT.md).
 
 The full matching goal is OPEN. Robust trajectory equivalence of the alternate
@@ -14,9 +15,9 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpointf96766c8e is pushed with
-all normal hooks passing. SELF archives terminal audit77, its reclassification and
-the once-only shared-boundary shooting option. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpoint7786abbcc is pushed with
+all normal hooks passing. SELF archives terminal two-window trial78, its parity
+audit, its iterate audit and the run79 driver. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -292,6 +293,27 @@ only in the earlier window so marker rows, Jacobian rows, segmented RMS and
 equality offsets match an uninterrupted single-window objective at zero
 defect. Four RED/GREEN tests;46 combined shooting tests, mypy and Ruff pass.
 
+## Two-Window Direct-Node SLSQP Trial 78 (Terminal, Unchanged Candidate)
+
+Run78 is TERMINAL0 (857.6 s,10 residual evaluations,22 sensitivity solves) on
+runtime78 (runtime77 plus the once-only shooting option;135 tests). Its
+zero-displacement parity gate passed: the segmented once-only objective with
+the run73 effort penalty reproduces run73's returned score18.30016 to1.9e-12
+relative, effort cost identical, markers within1.8e-11 m of the saved replay,
+initial scaled defect4.0e-11, projected continuity rank42 (singular values
+1.00–349.8). Theta bounds are10*(0.8−x73)..10*(1.2−x73) from run73's saved
+parameters (restart roundoff3.9e-14); node box ±0.05 chart units. SLSQP took
+four accepted backtracking steps; none met the1e-7 projected equality, so the
+backend fallback returned the start. The bounded iterate audit (uninterrupted
+original-state replays of each accepted iterate) shows the terminal-weighted
+objective falling18.30→17.30 and terminal RMS65.4→62.1 mm while whole RMS
+rises28.105→28.24 mm and early RMS10.86→11.07 mm: the run73 objective trades
+whole error for terminal error, and no returned improvement exists. Evidence:
+native_evidence/two_window_fit_9967_78 (HANDOFF, raw ZIPs fda4959f…/a5516909…).
+Run79 (two_window_fit_9967_79/fit.py, SHA256 d45f9fe6…) keeps the formulation
+with primal-only residual replays, max_iterations15/max_nfev45 and explicit
+objective/linear-model reporting; it is running.
+
 The archived run73 sampled rotation-chart audit gives peak condition2.680/17.886/
 2.889 for hip/left/right shoulder. These samples do not bound between-sample
 extrema or explain the full7.45e7 trajectory-control Jacobian condition by
@@ -304,12 +326,12 @@ for the existing-provider, two-window derivative preflight now that fit73 is ter
 It specifies integrated nodes, retraction/continuity chain-rule checks and bounded
 SLSQP acceptance without recreating the solver or accepting state-reset motion.
 
-1. Run the bounded two-window direct-node SLSQP trial (Stage3): exact run73
-   coefficients with zero increments, B4/B5/B6 subset, bounds derived from run73's
-   saved parameters, integrated0.6 node with zero chart coordinates, node mode
-   Jacobians, once-only shared boundary, effort penalty parity, small iteration
-   and evaluation budgets, then original-state replay. Report projected rank,
-   active bounds and predicted versus actual reduction before any horizon change.
+1. Collect run79 when its launch JSON is terminal: archive outputs, logs and
+   the uninterrupted replay; report objective without defects, linear-model
+   prediction versus actual reduction, projected violation per iterate, active
+   bounds and original-state metrics. Only a feasible iterate with useful
+   uninterrupted improvement (whole and terminal RMS below run73) authorizes
+   chart recentering or a longer horizon; otherwise revisit weighting/conditioning.
 
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives
