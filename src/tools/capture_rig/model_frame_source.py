@@ -129,7 +129,10 @@ class ModelFrameSource:
         )
         distance = radius / sin(limiting_angle) * 1.1
         direction = np.array([0.25, 0.15, 1.0])
-        position = centre + direction / np.linalg.norm(direction) * distance
+        position = (
+            centre
+            + direction / float(np.sqrt(np.vdot(direction, direction))) * distance
+        )
         camera = PinholeCamera(
             camera_id="virtual-model-view",
             matrix=intrinsics_from_fov(*size, fov),
