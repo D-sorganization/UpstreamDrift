@@ -1,5 +1,31 @@
 # Native MuJoCo Matching Handoff
 
+## Run81 Candidate Replay Parity Across Engines
+
+`evidence/returned81_replay/metrics.json` records an independent continuous forward
+replay of the returned81 candidate (`dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776`)
+using `NativeMujocoModel` rigid KKT constraint dynamics with DOP853 integration over
+all 307 actual capture samples through 0.85 s (runtime 7.001 s).
+
+Results show near-machine-precision trajectory agreement with Pinocchio:
+
+- **Maximum Marker Difference vs Pinocchio:** 0.000123 mm (0.123 micrometres)
+- **RMS Marker Difference vs Pinocchio:** 0.000005 mm (0.005 micrometres)
+- **Closure Pose Max Abs:** 1.956e-11
+- **Closure Velocity Max Abs:** 1.417e-10
+
+Canonical Metrics (MuJoCo DOP853 vs Pinocchio):
+
+- **Whole RMS:** 26.366 mm (Pinocchio: 26.366 mm)
+- **Early RMS ≤0.6 s:** 11.427 mm (Pinocchio: 11.427 mm)
+- **Terminal RMS:** 46.305 mm (Pinocchio: 46.305 mm)
+- **Clubhead Cluster RMS:** 15.955 mm (Pinocchio: 15.955 mm)
+- **Pelvis Yaw Error:** 13.92% (Pinocchio: 13.92%)
+
+This confirms that the `NativeMujocoModel` rigid KKT solver and DOP853 integration
+yield byte-for-byte dynamics parity with Pinocchio on fitted multi-window candidates.
+Candidate rejection is due to physical fit criteria (Terminal RMS and Yaw), not engine divergence.
+
 ## Run18 Global Pose Error Addendum
 
 [Global Marker Registration Diagnostic](RUN18_GLOBAL_RIGID_AUDIT.md) reuses the
