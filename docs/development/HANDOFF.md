@@ -1,3 +1,22 @@
+# Starting-Pose Matcher Unwired Extractor Removal Handoff Checkpoint — 2026-09-12
+
+- Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8866
+- Branch: conductor/issue-8866; checkpoint SELF; PR not created.
+- Governing issue: #8866 (adversarial integration review, PR #8815). Entry DL-#8866.
+- Change: deleted `src/tools/starting_pose_matcher/skeleton_extractors/` (six
+  providers no shipped code imported) plus their eight test modules, and pruned
+  the matching rows from `scripts/config/full_src_mypy_baseline.json` (9) and
+  `scripts/config/suite_marker_baseline.json` (58), and `scripts/ci/lod_baseline.txt` (3). No GUI behaviour changed:
+  `gui_main_widget.py` still builds `JsonSkeletonExtractor` and the tool is
+  honestly single-engine, as `core.py` and the README already state.
+- Verification: `python3 -m ruff check` / `ruff format --check` on the touched
+  files; `python3 -m pytest tests/tools/starting_pose_matcher
+tests/unit/tools/starting_pose_matcher -q`; `grep -rn skeleton_extractors`
+  returns nothing outside `.git`.
+- Next: #4367 should re-add engine extractors on top of `pose_interchange`
+  (per #8867) and wire a model-source combo before any provider ships again.
+- Preserved peer handoffs below.
+
 # DRY Quarantine Tightening Handoff Checkpoint — 2026-09-12
 
 - Worktree: C:/Users/diete/Repositories/UpstreamDrift
