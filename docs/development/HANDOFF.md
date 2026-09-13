@@ -1,5 +1,20 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Current Transition Diagnosis
+
+Read [Transition Recovery](simscape_tour_matching/TRANSITION_RECOVERY_9967.md)
+for the current evidence and next experiment. Independent FK/bound audit of run33
+is archived. A pose-independent pair-distance audit finds BackLeft/HeadFront
+both on Hub cannot simultaneously match the target: transition separation
+mismatch reaches 75.2327 mm. Do not attribute all residual to torque optimization.
+Run34 (25 ms static continuation) completed; handle24560 exited0. All74 poses
+are closure-valid (maximum5.448e-11), two are iteration-limited. At0.85 s RMS
+changes36.14 to35.77 mm; at1.35 s427.20 to165.36 mm; final144.01 to61.41 mm.
+Receipt native-full-pose-sequence-9967-34.json is archived. No matching job remains
+from these experiments. Preserve baseline topology and acceptance gates.
+The previous audit-only runner change passes six existing regression checks and
+Ruff; receipts32a/32b are preserved. Tests do not establish full-swing acceptance.
+
 ## Current Recovery Action — Full-Capture Static Diagnostic
 
 This section supersedes all earlier next-action, pause, and live-job statements

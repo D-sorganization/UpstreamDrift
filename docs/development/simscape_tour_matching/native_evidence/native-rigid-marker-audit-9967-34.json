@@ -1,0 +1,269 @@
+{
+  "scope": "Target pair-distance incompatibility with fixed marker attachments on the same rigid body; independent of pose solver",
+  "bodies": [
+    {
+      "body": "Clubhead",
+      "pairs": [
+        {
+          "labels": ["Marker_2:2:2", "Marker_3:3:3"],
+          "max_distance_mismatch_mm": 12.710077729156332,
+          "time_s": 1.325,
+          "at_transition_max_mm": 1.903874727028021
+        },
+        {
+          "labels": ["Marker_2:2:2", "Marker_3:3:1"],
+          "max_distance_mismatch_mm": 12.142305872172354,
+          "time_s": 1.325,
+          "at_transition_max_mm": 1.7263423567629443
+        },
+        {
+          "labels": ["Marker_2:2:2", "Marker_3:3:2"],
+          "max_distance_mismatch_mm": 11.82974084716404,
+          "time_s": 1.325,
+          "at_transition_max_mm": 2.215816940740689
+        },
+        {
+          "labels": ["Marker_2:2:3", "Marker_3:3:2"],
+          "max_distance_mismatch_mm": 11.705690105121015,
+          "time_s": 1.3222222222222222,
+          "at_transition_max_mm": 2.5255305068253575
+        },
+        {
+          "labels": ["Marker_2:2:3", "Marker_3:3:3"],
+          "max_distance_mismatch_mm": 10.805734587012727,
+          "time_s": 1.3222222222222222,
+          "at_transition_max_mm": 2.4024331154910428
+        },
+        {
+          "labels": ["Marker_2:2:3", "Marker_3:3:1"],
+          "max_distance_mismatch_mm": 10.509248322068231,
+          "time_s": 1.325,
+          "at_transition_max_mm": 2.068860944674844
+        },
+        {
+          "labels": ["Marker_2:2:1", "Marker_3:3:2"],
+          "max_distance_mismatch_mm": 5.768861881496945,
+          "time_s": 1.1694444444444445,
+          "at_transition_max_mm": 0.8179611751282234
+        },
+        {
+          "labels": ["Marker_2:2:1", "Marker_3:3:3"],
+          "max_distance_mismatch_mm": 5.5002471769936,
+          "time_s": 1.1694444444444445,
+          "at_transition_max_mm": 1.1081083229673716
+        },
+        {
+          "labels": ["Marker_2:2:1", "Marker_3:3:1"],
+          "max_distance_mismatch_mm": 4.847456297735642,
+          "time_s": 1.1694444444444445,
+          "at_transition_max_mm": 0.830960869317221
+        },
+        {
+          "labels": ["Marker_2:2:1", "Marker_2:2:2"],
+          "max_distance_mismatch_mm": 3.795661750853996,
+          "time_s": 0.8694444444444445,
+          "at_transition_max_mm": 1.4440436773705683
+        },
+        {
+          "labels": ["Marker_3:3:2", "Marker_3:3:3"],
+          "max_distance_mismatch_mm": 3.5556460614691794,
+          "time_s": 1.5722222222222222,
+          "at_transition_max_mm": 0.9783603426765028
+        },
+        {
+          "labels": ["Marker_2:2:1", "Marker_2:2:3"],
+          "max_distance_mismatch_mm": 2.9884585570359308,
+          "time_s": 0.8694444444444445,
+          "at_transition_max_mm": 2.750215998767333
+        },
+        {
+          "labels": ["Marker_3:3:1", "Marker_3:3:2"],
+          "max_distance_mismatch_mm": 2.666158759043885,
+          "time_s": 1.586111111111111,
+          "at_transition_max_mm": 0.8947548372741088
+        },
+        {
+          "labels": ["Marker_2:2:2", "Marker_2:2:3"],
+          "max_distance_mismatch_mm": 1.5074956950761609,
+          "time_s": 1.4333333333333333,
+          "at_transition_max_mm": 1.4440426029590503
+        },
+        {
+          "labels": ["Marker_3:3:1", "Marker_3:3:3"],
+          "max_distance_mismatch_mm": 0.9388726672805298,
+          "time_s": 1.65,
+          "at_transition_max_mm": 0.6602037359289825
+        }
+      ]
+    },
+    {
+      "body": "Hip",
+      "pairs": [
+        {
+          "labels": ["WaistLeft", "WaistRight"],
+          "max_distance_mismatch_mm": 9.221427554796769,
+          "time_s": 1.525,
+          "at_transition_max_mm": 4.706738829187596
+        },
+        {
+          "labels": ["WaistLeft", "WaistRBack"],
+          "max_distance_mismatch_mm": 6.880898827164028,
+          "time_s": 1.2138888888888888,
+          "at_transition_max_mm": 1.0014063633311254
+        },
+        {
+          "labels": ["WaistRight", "WaistLBack"],
+          "max_distance_mismatch_mm": 6.596268458025967,
+          "time_s": 1.7638888888888888,
+          "at_transition_max_mm": 3.4039420091003247
+        },
+        {
+          "labels": ["WaistRight", "WaistRBack"],
+          "max_distance_mismatch_mm": 2.5244728667615233,
+          "time_s": 1.3333333333333333,
+          "at_transition_max_mm": 0.9410229381884017
+        },
+        {
+          "labels": ["WaistLeft", "WaistLBack"],
+          "max_distance_mismatch_mm": 1.2724813635703602,
+          "time_s": 1.1222222222222222,
+          "at_transition_max_mm": 0.6038445980795226
+        },
+        {
+          "labels": ["WaistLBack", "WaistRBack"],
+          "max_distance_mismatch_mm": 0.8670187531423235,
+          "time_s": 1.6388888888888888,
+          "at_transition_max_mm": 0.22421980419481957
+        }
+      ]
+    },
+    {
+      "body": "Hub",
+      "pairs": [
+        {
+          "labels": ["BackLeft", "HeadFront"],
+          "max_distance_mismatch_mm": 89.04490101528518,
+          "time_s": 1.0222222222222221,
+          "at_transition_max_mm": 75.23269463379229
+        },
+        {
+          "labels": ["BackRight", "HeadFront"],
+          "max_distance_mismatch_mm": 80.52604173123706,
+          "time_s": 1.4027777777777777,
+          "at_transition_max_mm": 11.30760642386841
+        },
+        {
+          "labels": ["BackLeft", "HeadSide"],
+          "max_distance_mismatch_mm": 72.1584192543629,
+          "time_s": 1.1388888888888888,
+          "at_transition_max_mm": 63.84861722628282
+        },
+        {
+          "labels": ["BackRight", "HeadSide"],
+          "max_distance_mismatch_mm": 68.3684883623254,
+          "time_s": 1.1416666666666666,
+          "at_transition_max_mm": 50.43777155308954
+        },
+        {
+          "labels": ["BackTop", "HeadSide"],
+          "max_distance_mismatch_mm": 67.06357022962783,
+          "time_s": 1.15,
+          "at_transition_max_mm": 57.700776356753195
+        },
+        {
+          "labels": ["BackRight", "HeadTop"],
+          "max_distance_mismatch_mm": 47.53748651874085,
+          "time_s": 1.5361111111111112,
+          "at_transition_max_mm": 11.004967486692884
+        },
+        {
+          "labels": ["BackLeft", "HeadTop"],
+          "max_distance_mismatch_mm": 45.8060282756923,
+          "time_s": 0.9944444444444445,
+          "at_transition_max_mm": 38.051120757618015
+        },
+        {
+          "labels": ["BackTop", "HeadFront"],
+          "max_distance_mismatch_mm": 31.839940732311835,
+          "time_s": 1.1333333333333333,
+          "at_transition_max_mm": 24.70356493190673
+        },
+        {
+          "labels": ["BackTop", "BackRight"],
+          "max_distance_mismatch_mm": 26.64885876254644,
+          "time_s": 1.7194444444444446,
+          "at_transition_max_mm": 3.492450585502432
+        },
+        {
+          "labels": ["BackTop", "BackLeft"],
+          "max_distance_mismatch_mm": 22.38073792632811,
+          "time_s": 1.1388888888888888,
+          "at_transition_max_mm": 15.321458003143523
+        },
+        {
+          "labels": ["BackTop", "HeadTop"],
+          "max_distance_mismatch_mm": 22.31411207811468,
+          "time_s": 1.1666666666666667,
+          "at_transition_max_mm": 16.519979350922974
+        },
+        {
+          "labels": ["BackLeft", "BackRight"],
+          "max_distance_mismatch_mm": 13.383112806663794,
+          "time_s": 1.4361111111111111,
+          "at_transition_max_mm": 4.1332858045612655
+        },
+        {
+          "labels": ["HeadFront", "HeadSide"],
+          "max_distance_mismatch_mm": 1.1713927449476802,
+          "time_s": 1.5027777777777778,
+          "at_transition_max_mm": 0.4686100739960397
+        },
+        {
+          "labels": ["HeadTop", "HeadSide"],
+          "max_distance_mismatch_mm": 1.1560728072370907,
+          "time_s": 1.8055555555555556,
+          "at_transition_max_mm": 0.11797221612630526
+        },
+        {
+          "labels": ["HeadTop", "HeadFront"],
+          "max_distance_mismatch_mm": 0.9273808202275302,
+          "time_s": 1.3694444444444445,
+          "at_transition_max_mm": 0.38034216597612747
+        }
+      ]
+    },
+    {
+      "body": "LS",
+      "pairs": [
+        {
+          "labels": ["LUArmHigh", "LElbowOut"],
+          "max_distance_mismatch_mm": 31.359815899859868,
+          "time_s": 1.1722222222222223,
+          "at_transition_max_mm": 22.533403334392382
+        }
+      ]
+    },
+    {
+      "body": "LScap",
+      "pairs": [
+        {
+          "labels": ["LShoulderTop", "LShoulderBack"],
+          "max_distance_mismatch_mm": 20.604442430141727,
+          "time_s": 1.075,
+          "at_transition_max_mm": 10.392221897296855
+        }
+      ]
+    },
+    {
+      "body": "RS",
+      "pairs": [
+        {
+          "labels": ["RUArmHigh", "RElbowOut"],
+          "max_distance_mismatch_mm": 32.953934729178954,
+          "time_s": 1.8138888888888889,
+          "at_transition_max_mm": 7.03975963885739
+        }
+      ]
+    }
+  ]
+}
