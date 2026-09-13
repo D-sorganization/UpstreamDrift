@@ -1,29 +1,29 @@
 # Native Drake Matching Handoff
 
-## Two-Window Continuation 81 & 82 Drake Replay Parity (2026-09-13 UTC)
+## Two-Window Continuation 81, 82 & 83 Drake Replay Parity (2026-09-13 UTC)
 
-Replayed Pinocchio candidates `returned81` (`dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776`) and `returned82` (`071ded569e98ea614ba499b7bb0510bfbcc4c0e791fb264fe8c07c4182fd8a33`) through `NativeDrakeModel` on ControlTower WSL using DOP853 continuous forward integration (0 to 0.85 s, 307 samples, 7,675 observations) via `reproduction/replay_candidate_parity.py`.
+Replayed Pinocchio candidates `returned81` (`dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776`), `returned82` (`071ded569e98ea614ba499b7bb0510bfbcc4c0e791fb264fe8c07c4182fd8a33`), and `returned83` (`cfaefcaebb6267e0e45ad42d88eed42d518e1cc70553f06c7008462858a8f56a`) through `NativeDrakeModel` on ControlTower WSL using DOP853 continuous forward integration (0 to 0.85 s, 307 samples, 7,675 observations) via `reproduction/replay_candidate_parity.py`.
 
 ### Parity Metrics Summary
 
-| Metric                  | returned81 (Pinocchio) | returned81 (Drake) | returned82 (Pinocchio) | returned82 (Drake) | Gate Target |
-| :---------------------- | ---------------------: | -----------------: | ---------------------: | -----------------: | :---------: |
-| Whole RMS (mm)          |                26.3661 |            26.3661 |                23.7669 |            23.7669 | <= 25.0 mm  |
-| Terminal RMS (mm)       |                46.3054 |            46.3054 |                54.0632 |            54.0632 | <= 35.0 mm  |
-| State q Max Abs         |                     -- |          4.225e-07 |                     -- |          1.768e-07 |   < 1e-06   |
-| State v Max Abs (rad/s) |                     -- |           0.000539 |                     -- |           0.000236 |  < 0.0001   |
-| Obs Marker Max Dist (m) |                     -- |          7.699e-08 |                     -- |          2.989e-08 |   < 1e-07   |
-| Obs Marker RMS Dist (m) |                     -- |          5.323e-09 |                     -- |          2.112e-09 |     N/A     |
-| Closure Pose Max Abs    |              3.493e-11 |          3.307e-12 |              3.812e-11 |          2.111e-12 |   < 1e-07   |
-| Closure Rate Max Abs    |              1.546e-10 |          1.773e-10 |              6.356e-10 |          3.592e-10 |   < 1e-07   |
-| Execution Time (s)      |                 3.62 s |            12.08 s |                 3.92 s |            12.37 s |     N/A     |
+| Metric                  | returned81 (Pino) | returned81 (Drake) | returned82 (Pino) | returned82 (Drake) | returned83 (Pino) | returned83 (Drake) | Gate Target |
+| :---------------------- | ----------------: | -----------------: | ----------------: | -----------------: | ----------------: | -----------------: | :---------: |
+| Whole RMS (mm)          |           26.3661 |            26.3661 |           23.7669 |            23.7669 |           23.3426 |            23.3426 | <= 25.0 mm  |
+| Terminal RMS (mm)       |           46.3054 |            46.3054 |           54.0632 |            54.0632 |           51.1746 |            51.1746 | <= 35.0 mm  |
+| State q Max Abs         |                -- |          4.225e-07 |                -- |          1.768e-07 |                -- |          1.160e-07 |   < 1e-06   |
+| State v Max Abs (rad/s) |                -- |           0.000539 |                -- |           0.000236 |                -- |           0.000251 |  < 0.0001   |
+| Obs Marker Max Dist (m) |                -- |          7.699e-08 |                -- |          2.989e-08 |                -- |          1.458e-08 |   < 1e-07   |
+| Obs Marker RMS Dist (m) |                -- |          5.323e-09 |                -- |          2.112e-09 |                -- |          1.028e-09 |     N/A     |
+| Closure Pose Max Abs    |         3.493e-11 |          3.307e-12 |         3.812e-11 |          2.111e-12 |         4.082e-11 |          1.483e-12 |   < 1e-07   |
+| Closure Rate Max Abs    |         1.546e-10 |          1.773e-10 |         6.356e-10 |          3.592e-10 |         7.541e-10 |          2.879e-10 |   < 1e-07   |
+| Execution Time (s)      |            3.62 s |            12.08 s |            3.92 s |            12.37 s |            3.63 s |            11.74 s |     N/A     |
 
 ### Key Observations
 
-1. **Marker Trajectory Parity**: In both candidates, Drake and Pinocchio marker positions match to within nanometer precision (2.112e-09 m RMS marker distance on returned82).
-2. **Whole & Terminal RMS Parity**: C3D Whole RMS and Terminal RMS agree down to 8 decimal places between Pinocchio and Drake.
-3. **State Rate Divergence Localization**: `state_v_max_abs` peaks at `LSInputX` near t = 0.786 s due to coordinate amplification in the left shoulder gimbal Euler representation, exactly as diagnosed in run18 (0.000236 rad/s on returned82, improved by >2x over returned81).
-4. **Evidence Paths**: Recorded in `evidence/returned81_parity/` and `evidence/returned82_parity/` (`report.json`, `trajectory.npz`).
+1. **Sub-15 Nanometer Max Parity**: In returned83, maximum marker distance between Drake and Pinocchio is reduced to **14.58 nanometers** (`1.458e-08 m`), and RMS marker distance is **1.03 nanometers** (`1.028e-09 m`).
+2. **Whole & Terminal RMS Parity**: Whole RMS (23.3426 mm) and Terminal RMS (51.1746 mm) agree to sub-micron precision between Pinocchio and Drake. Whole RMS achieves a new all-time best across both engines.
+3. **State Coordinate Divergence**: Maximum position error is 0.116 microns (`1.160e-07 m/rad`, well within `< 1e-06` gate). `state_v_max_abs` is 0.000251 rad/s at `LSInputX` around t = 0.786 s due to kinematic Euler gimbal amplification in the shoulder.
+4. **Evidence Paths**: Recorded in `evidence/returned81_parity/`, `evidence/returned82_parity/`, and `evidence/returned83_parity/` (`report.json`, `trajectory.npz`).
 
 ## Reaction-Eliminated Initializer Feasibility Study
 
