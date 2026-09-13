@@ -27,7 +27,11 @@ def main() -> None:
     parser.add_argument(
         "--replay-input", choices=("sampled", "reference-state"), default="sampled"
     )
+    parser.add_argument("--effort-regularization", type=float, default=0.0)
+    parser.add_argument("--feedback-only", action="store_true")
     args = parser.parse_args()
+    if not np.isfinite(args.effort_regularization) or args.effort_regularization < 0:
+        raise ValueError("Effort regularization must be finite and nonnegative")
     if args.effort_samples_per_frame < 1:
         raise ValueError("Effort samples per frame must be positive")
     if args.output.exists() or not np.isfinite(args.frequency) or args.frequency <= 0:
@@ -96,6 +100,7 @@ def main() -> None:
             desired,
             acceleration_scales=acceleration_scales,
             effort_scales=effort_scales,
+            effort_regularization=args.effort_regularization,
         )
         latest.update(
             primitive_effort=allocation.effort.tolist(),
@@ -173,6 +178,8 @@ def main() -> None:
     report = {
         "scope": "Feedback initializer and open-loop diagnostics, not final match acceptance",
         "frequency_rad_s": args.frequency,
+        "effort_regularization": args.effort_regularization,
+        "feedback_only": args.feedback_only,
         "model_sha256": hashlib.sha256(raw).hexdigest(),
         "path_sha256": hashlib.sha256(args.path.read_bytes()).hexdigest(),
         "candidate_sha256": candidate.sha256,
@@ -195,6 +202,9 @@ def main() -> None:
         markers=predicted,
     )
     (args.output / "feedback-report.json").write_text(json.dumps(report, indent=2))
+    if args.feedback_only:
+        (args.output / "report.json").write_text(json.dumps(report, indent=2))
+        return
     curve = CubicSpline(dense_clock, efforts, axis=0)
     reference_state = CubicHermiteSpline(
         dense_clock, feedback.state, np.asarray(derivatives), axis=0

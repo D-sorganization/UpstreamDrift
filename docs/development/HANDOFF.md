@@ -1,5 +1,38 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Run47 Regularized Initializer and Polynomial Fit Limitation
+
+Run47 is terminal: handle36715 exited0. Optional effort_regularization now
+minimizes scaled acceleration error squared plus lambda times scaled effort
+norm squared, in the same rank-truncated response subspace. Default0 preserves
+previous behavior. Five new tests failed before implementation; all10 allocation
+tests, Ruff and focused mypy pass. This is an initializer option, not an effort
+bound or a change to engine physics. --feedback-only explicitly skips replay.
+
+At lambda1 the full capture feedback RMS is45.5140 mm, terminal49.0993 mm,
+closure4.88e-10; elapsed28.319 s. Maximum sampled primitive force3291.63 N and
+torque1287.79 Nm, compared with unregularized5365.07 N and2831.82 Nm. These
+remain diagnostic unbounded efforts. Raw outputs, exact driver, allocator and
+input bytes are archived in native_evidence/feedback_9967_47/raw-run.zip.
+Runtime /home/dieterolson/native-effort-regularization-9967-47 is immutable.
+The run47 regularized trajectory has NOT been accepted or replayed open loop.
+
+The run45 sextic-compression audit is native-sextic-compression-audit-9967-47.json.
+Global degree6 least squares leaves relative effort L2 error0.9951 for
+TranslationInputX,0.9660 forHipInputX and0.9493 forSpineInputY. This particular
+arbitrary static-spline tracking profile is therefore a poor polynomial target.
+Do not keep refining its torque interpolation expecting a sextic match. Use
+motion/control co-optimization with effort and smoothness regularization, retaining
+original initial state and final uninterrupted native polynomial replay gates.
+Flexible tracking is a seed only; it does not establish sextic feasibility.
+
+Run46 strict convergence comparison remains live (handle29712, remotePID2659573).
+The baseline result is preserved; no strict result exists yet. Do not restart
+because it is slower. Verify terminal status and archive before concluding.
+Parallel agent pinocchio_manifold_builder owns the native construction hook,
+alternate spherical builder and dedicated tests under #10043. Root has not yet
+reviewed or accepted that prototype; do not claim alternative dynamics parity.
+
 ## Run46 Replay Sensitivity Audit -- In Progress
 
 Run45 first-departure audit shows model-to-model marker RMS differences crossing
