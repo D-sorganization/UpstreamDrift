@@ -23,7 +23,6 @@ from src.shared.python.motion_matching.native_candidate import NativeReplayCandi
 from src.shared.python.motion_matching.constrained_trajectory import (
     compose_chart_residual_jacobian,
     spline_chart_derivative_jacobians,
-    spline_node_derivative_maps,
 )
 
 
@@ -39,6 +38,27 @@ def validate_chart_bounds(values: np.ndarray, bound: float) -> float:
     ):
         raise ValueError("Returned state violates finite chart bounds")
     return float(np.max(abs(array)))
+
+
+def make_path_spline(
+    times: np.ndarray, coordinates: np.ndarray, initial_rate: np.ndarray | None
+) -> CubicSpline:
+    """Interpolate nodes with prescribed initial rate and natural final boundary.
+
+    For sensitivity maps pass identity node values and a zero initial rate.
+    Omitted rate retains the historical not-a-knot spline.
+    """
+    if initial_rate is None:
+        return CubicSpline(times, coordinates, axis=0)
+    velocity = np.asarray(initial_rate, dtype=float)
+    if velocity.shape != coordinates.shape[1:] or not np.isfinite(velocity).all():
+        raise ValueError("Initial rate must match finite coordinate dimensions")
+    return CubicSpline(
+        times,
+        coordinates,
+        axis=0,
+        bc_type=((1, velocity), (2, np.zeros_like(velocity))),
+    )
 
 
 def main() -> None:
@@ -162,7 +182,11 @@ def main() -> None:
             np.asarray([item.state_jacobian for item in retractions]),
         )
 
-    first, second = spline_node_derivative_maps(times)
+    initial_rate = np.asarray(candidate["qd0"], dtype=float) if tracking else None
+    derivative_spline = make_path_spline(
+        times, np.eye(args.nodes), np.zeros(args.nodes) if tracking else None
+    )
+    first, second = derivative_spline(times, 1), derivative_spline(times, 2)
 
     def state(
         flat: np.ndarray,
@@ -175,7 +199,7 @@ def main() -> None:
         np.ndarray,
     ]:
         q, node_jacobians = nodes(flat)
-        spline = CubicSpline(times, q, axis=0)
+        spline = make_path_spline(times, q, initial_rate)
         qd, qdd = spline_chart_derivative_jacobians(first, second, node_jacobians)
         return (
             q,
@@ -289,7 +313,7 @@ def main() -> None:
     values, _ = nodes(np.asarray(result.x))
     defect = residual(np.asarray(result.x))[: args.nodes * 12]
     audit_times = np.linspace(times[0], times[-1], 20 * (args.nodes - 1) + 1)
-    audit_spline = CubicSpline(times, values, axis=0)
+    audit_spline = make_path_spline(times, values, initial_rate)
     audit_values = np.asarray(
         [
             model.closure_trajectory_residuals(
@@ -306,7 +330,12 @@ def main() -> None:
                 "nodes": args.nodes,
                 "marker_tracking": tracking,
                 "first_pose_fixed": tracking,
-                "initial_velocity_enforced": False,
+                "initial_velocity_enforced": tracking,
+                "initial_velocity_max_abs_error": float(
+                    np.max(abs(audit_spline(times[0], 1) - initial_rate))
+                )
+                if tracking
+                else None,
                 "marker_scale_m": args.marker_scale_m if tracking else None,
                 "marker_rms_m": float(
                     np.sqrt(np.mean(marker_terms(result.x)[0] ** 2) * 3)
