@@ -5215,6 +5215,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 | 2026-03-29 | n/a | Performance optimization: Replaced `np.linalg.norm(..., axis=1)` with explicit element-wise arithmetic (`np.sqrt` and `np.hypot`) in physics ground reaction forces calculations for a ~5-10x speedup (spec 1.0.1) |
 | 2026-04-29 | n/a | Initial specification for UpstreamDrift v2.1.0; documented all 14 features, architecture, testing strategy, and CI/CD pipeline (spec 1.0.0) |
 | 2026-05-03 | n/a | Hardened security CI by isolating `pip-audit` in a dedicated virtualenv, keeping waiver policy in `scripts/config/pip_audit_waivers.json`, and preserving the 45% PR coverage floor. (spec 1.0.94) |
+| 2026-09-13 | n/a | Replaced `np.sum(np.sqrt(a**2 + b**2))` with `np.hypot(a, b).sum()` in `src/shared/python/signal_toolkit/signal_processing.py` to optimize element-wise Euclidean distance calculations for 1D arrays. (spec-exempt: micro-optimization) |
 <!-- prettier-ignore-end -->
 ---
 
