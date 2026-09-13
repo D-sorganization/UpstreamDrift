@@ -115,7 +115,7 @@ class NativeMujocoFullBodyModel:
         """Evaluate the shared contact law for all contact spheres at current state."""
         self.data.qpos[:] = self._vector(coordinates)
         self.data.qvel[:] = self._vector(rates)
-        self._mj.mj_kinematics(self.model, self.data)
+        self._mj.mj_fwdPosition(self.model, self.data)
 
         samples: dict[str, ContactSample] = {}
         for s_name, s_info in self._spheres.items():
