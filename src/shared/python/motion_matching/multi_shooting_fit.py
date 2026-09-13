@@ -55,6 +55,12 @@ class MultipleShootingOptions:
     Optional variable_scales apply only to slsqp, ordered as theta followed by
     each internal node's optimization coordinates in increasing time order.
     Physical node transforms, callback values and defect scales are unchanged.
+    window_jacobian_state_coordinates="physical" retains the default local
+    columns [theta, physical initial state]. With "node", columns instead are
+    [theta, current node optimization coordinates], already composed through the
+    node transform. The callback still receives the physical initial state and
+    returns physical endpoint rows. The first fixed-state window has theta
+    columns only. Physical transform derivatives remain required for defects.
     """
 
     shooting_nodes: tuple[float, ...]
@@ -87,8 +93,11 @@ class MultipleShootingOptions:
     variable_scales: Array | None = None
     segmented_forward_batch: SegmentedForwardBatch | None = None
     regularization_jacobian: Callable[[Array], Array] | None = None
+    window_jacobian_state_coordinates: Literal["physical", "node"] = "physical"
 
     def __post_init__(self) -> None:
+        if self.window_jacobian_state_coordinates not in ("physical", "node"):
+            raise ValueError("Invalid window Jacobian state coordinates")
         if self.regularization_jacobian is not None and self.regularization is None:
             raise ValueError("regularization_jacobian requires regularization")
         if self.solver not in ("least_squares", "slsqp"):
@@ -406,11 +415,21 @@ def fit_multiple_shooting(
             )
             marker, endpoint = options.window_jacobian(p[:theta_dim], clock, state)
             marker, endpoint = np.asarray(marker), np.asarray(endpoint)
-            local_size = theta_dim + (0 if state is None else state.size)
+            node_columns = options.window_jacobian_state_coordinates == "node"
+            local_state_size = 0
+            endpoint_rows = None
+            if state is not None:
+                lo, hi = state_offsets[start]
+                local_state_size = hi - lo if node_columns else state.size
+                endpoint_rows = state.size
+            elif internal_nodes:
+                endpoint_rows = node_jacobians[internal_nodes[0]].shape[0]
+            local_size = theta_dim + local_state_size
             if (
                 marker.shape != (*points.shape, local_size)
                 or endpoint.ndim != 2
                 or endpoint.shape[1] != local_size
+                or (endpoint_rows is not None and endpoint.shape[0] != endpoint_rows)
                 or not np.isfinite(marker).all()
                 or not np.isfinite(endpoint).all()
             ):
@@ -418,7 +437,11 @@ def fit_multiple_shooting(
             chain = np.zeros((local_size, p.size))
             chain[:theta_dim, :theta_dim] = np.eye(theta_dim)
             if state is not None:
-                chain[theta_dim:] = node_jacobians[start]
+                if node_columns:
+                    lo, hi = state_offsets[start]
+                    chain[theta_dim:, lo:hi] = np.eye(hi - lo)
+                else:
+                    chain[theta_dim:] = node_jacobians[start]
             global_marker = marker @ chain
             ends.append(endpoint @ chain)
             weights = np.broadcast_to(target.weights[None, :], observed.shape)

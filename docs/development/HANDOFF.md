@@ -8,8 +8,8 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpoint22c550db5 is pushed with
-all normal hooks passing. SELF archives terminal fit73 and its measured state/marker replay. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpoint9797e3e8e is pushed with
+all normal hooks passing. SELF adds direct node-chart Jacobians and passed two-window fixture75. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -209,6 +209,34 @@ numerical accuracy or wall-time guarantee. Exhaustion raises without partial dat
   scalar native dynamics available as the fitting baseline while qualifying
   alternate representations. Do not block fitting on all-engine alternate builders.
 
+## Two-Window Preflight and Direct Chart Derivatives
+
+Stage1 diagnostic75 is TERMINAL0. Window0 starts at original q0/qd0 and window1
+at the saved uninterrupted73 sample216 at0.6 s. Against uninterrupted73, maximum
+marker distance is5.369e-12 m, native q4.422e-11 and qd8.804e-9. First endpoint
+minus saved node is9.77e-14. Full pose/rate closure and the42-dimensional q/v
+node chart pass. Zero retraction shifts physical state by4.75e-12. Exact evidence:
+native_evidence/two_window_preflight_9967_75. This is fixture qualification, not
+an optimized segmented swing or a derivative pass.
+
+MultipleShootingOptions now accepts window_jacobian_state_coordinates="node"
+(default "physical"). Node mode takes theta followed by direct chart columns,
+retaining physical endpoint rows and the negative next-node transform derivative
+in continuity. No pseudoinverse extension is needed. Eleven new nonlinear tests
+went RED/GREEN; root passes44 combined shooting/node tests and source mypy/Ruff.
+
+Diagnostic76 is active, PID2923511/handle25121, on frozen runtime73. It checks
+81 control columns in window0 and81+42 in window1, then at most16 signed
+perturbation trials for control, node-position, node-velocity and mixed directions.
+Marker, q, qd and scaled endpoint/continuity checks retain1e-3 derivative gates
+with explicit weak-block reporting. No optimizer is authorized before this passes.
+Check the original handle/receipt before another launch.
+
+The archived run73 sampled rotation-chart audit gives peak condition2.680/17.886/
+2.889 for hip/left/right shoulder. These samples do not bound between-sample
+extrema or explain the full7.45e7 trajectory-control Jacobian condition by
+coordinate maps alone. See native_evidence/returned73_chart_audit.
+
 ## Ordered Next Work
 
 Use [Next Agent Execution Plan](simscape_tour_matching/NEXT_AGENT_CONVERGENCE_EXECUTION.md)
@@ -216,8 +244,8 @@ for the existing-provider, two-window derivative preflight now that fit73 is ter
 It specifies integrated nodes, retraction/continuity chain-rule checks and bounded
 SLSQP acceptance without recreating the solver or accepting state-reset motion.
 
-1. Use terminal73 as the next integrated-state fixture. Complete the two-window
-   derivative preflight before another optimizer attempt. A successful
+1. Observe derivative preflight76 on its original handle; fixture75 already
+   passes. Require qualified derivatives before another optimizer attempt. A successful
    numerical check at65 or one derivative direction at66 does not qualify the
    complete optimizer Jacobian or full swing. Preserve unchanged agreement gates.
 
