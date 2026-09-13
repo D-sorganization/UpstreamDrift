@@ -129,6 +129,10 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
   batch angle/quaternion/rate/acceleration/effort conversion. Public
   `export_native_motion` / `restore_native_motion` retain model identity,
   timestamps, fixed joint frames and per-sample angle branch references.
+  `save_native_motion` / `load_native_motion` persist those sequences as strict
+  versioned JSON with atomic replacement. `NativeMotionDocument` retains the
+  optional raw-file hash separately from canonical model identity. Initial-pose
+  file formats remain separate; reuse this provider for motion persistence.
   Reuse `SerialRotationChart` for screw-axis and conjugate effort maps and
   `FixedFrameTransport` for fixed-frame pose/twist/wrench transport. These
   conversion providers do not establish engine dynamics equivalence; see the

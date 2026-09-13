@@ -8,9 +8,8 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpoint8d84ee8bf is pushed with
-all normal hooks passing. SELF adds terminal fit68 evidence and opt-in grouped
-physical/sensitivity error control. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpointd8fbfdaff is pushed with
+all normal hooks passing. SELF adds motion-file persistence and terminal sensitivity71/72 evidence. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -124,16 +123,28 @@ Diagnostic70 is TERMINAL1 on the exact failed68 candidate, max_step0.000125,
 rtol1e-10/atol1e-12,100000 sensitivity calls, separate_error_control=True.
 Runtime70 passes49 focused tests including nine real Pinocchio cases. Agreement
 fails narrowly at1.02308673e-7 m, t0.85, WaistRBack axis1; limit remains1e-7.
-Call35.969 s, launch40.103 s. No optimizer retry. Diagnostic71 is authorized in
-the same immutable runtime with rtol3e-11/atol3e-13 and150000 calls. Inspect its
-receipt/agent handle before any further launch. Four changed source modules pass mypy.
+Call35.969 s, launch40.103 s. Diagnostic71 is TERMINAL1: tighter augmented
+rtol3e-11/atol3e-13 yields1.02308684e-7 m, effectively unchanged, in34.025 s.
+Diagnostic72 is TERMINAL0: max_step0.0000625 with original70 tolerances yields
+2.506897942e-8 m agreement,164339 calls/53.916 s sensitivity (71.554 s call/save).
+Marker samples and state/marker sensitivity Jacobians are archived; primal q/qd
+trajectories were not saved. This qualifies one candidate, not all derivatives.
+Fit73 is authorized from failed68 candidate after72 qualification, original19
+baseline, B456/max_nfev10, grouped control, max_step0.0000625,200000 calls.
+Runtime73 qualifies62 tests plus runner help. Fit73 is active: PID2891462,
+handle55242; output /mnt/c/Users/diete/native-regularized-fit-9967-73. Inspect
+its receipt/handle before any further launch. Four changed source modules pass mypy.
 Marker agreement failures now report discrepancy, time, marker and axis.
 
 The shared native motion sequence API is implemented and publicly exported.
 It converts complete batches with immutable time/model/frame/branch metadata
 and original per-sample references, reusing NativeJointStateAdapter. Root passes
-89 related tests. File I/O, UI and complete dynamic frame transport are next;
-this batch API does not qualify alternate MuJoCo/Drake dynamics. See dedicated
+101 related tests including12 new strict atomic file-I/O tests. Public
+save_native_motion/load_native_motion preserve the validated sequence plus an
+optional distinct raw-model hash. UI and complete dynamic frame transport remain;
+Five new consumer checks pass, including actual MuJoCo all16 frames at three
+samples; Drake/Pinocchio consumer tests skip locally for missing runtimes.
+These are conversion checks, not alternate MuJoCo/Drake dynamics qualification. See dedicated
 REPRESENTATION_HANDOFF for runnable usage and the remaining ordered plan.
 
 ## Fixed-Attachment Feasibility
@@ -177,7 +188,7 @@ numerical accuracy or wall-time guarantee. Exhaustion raises without partial dat
 
 ## Ordered Next Work
 
-1. Observe modest tolerance refinement71 on the exact failed68 candidate.
+1. Observe fit73 on its original handle and preserve terminal results.
    Archive terminal results before another optimizer attempt. A successful
    numerical check at65 or one derivative direction at66 does not qualify the
    complete optimizer Jacobian or full swing. Preserve unchanged agreement gates.
