@@ -42,6 +42,12 @@
       "owner": "@physics-team",
       "reason": "Falsification matrix tracking model-tier and empirical completion gates for proximal distal energy transfer; staged for decomposition.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "AGENT_HANDOFF.md",
+      "owner": "@simulation-team",
+      "reason": "Active multi-agent continuation turnover document tracking forward dynamics optimization and gate audits.",
+      "expires_on": "2026-10-15"
     }
   ]
 }
