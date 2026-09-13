@@ -10,7 +10,7 @@ Implement constraint-aware dynamic marker tracking and zero-feedback forward sim
 - Verification & Forward Simulation Replay (`docs/development/opensim_tour_matching/os4_moco_tracking_driver.py`):
   - Solves dynamic tracking in 15 IPOPT iterations to `Solve_Succeeded` (objective: `8.508366e-02`).
   - Performs zero-feedback forward simulation replay via `opensim.Manager` + `opensim.PrescribedController`, integrating to $t = 0.10$ s in 9.2 ms.
-  - Generates cryptographic receipt and solution trajectories in `evidence/os4_moco_tracking/receipt.json`.
+  - Generates cryptographic receipt and solution trajectories in `docs/development/opensim_tour_matching/evidence/os4_moco_tracking/receipt.json`.
 
 ## OpenSim Segment Scaling, Calibration Best-Iteration, and Full 654-Frame IK (#10003)
 
