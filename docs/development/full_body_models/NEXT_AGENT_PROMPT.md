@@ -6,8 +6,10 @@ docs/10003-opensim-matching-epic; main after its PR). Read AGENTS.md,
 CLAUDE.md, the epic design document, the native lane's
 docs/development/HANDOFF.md (branch feat/9967-native-simscape-pinocchio) and
 src/shared/python/motion_matching/tour_capture_contract.py with its tests.
-Lease the child issue you take (#10063 FB-1 and #10064 FB-2 first; #10065 to
-#10067 per engine; #10068 calibration; #10069 fitting; #10070 parity) and
+FB-1 (#10063) and FB-2 (#10064) are DONE on this branch (see HANDOFF.md: spec
+full_body_spec_v1.json, contact_law.py, 19 tests). Lease the child issue you
+take (#10065 to #10067 per engine first; #10068 calibration; #10069 fitting;
+#10070 parity) and
 register presence before editing. Update docs/development/HANDOFF.md and the
 DL-#10062 entry in every implementation commit.
 
@@ -32,11 +34,9 @@ Rules that every child follows (the epic body repeats them):
 
 Order of work and done gates:
 
-1. FB-1 (#10063): full-body spec schema and validator; committed full-body
-   spec JSON; slice-identity test against the upper-body spec.
-2. FB-2 (#10064): contact law contract (Hunt-Crossley normal, regularised
-   Coulomb friction), reference implementation, analytic tests, cross-engine
-   parity harness with fakes.
+1. FB-1 and FB-2: done; consume full_body_spec.load_full_body_spec and
+   contact_law.sphere_ground_contact; do not re-derive either.
+2. (reserved)
 3. FB-3 (#10065/#10066/#10067): per-engine builders and adapters; upper-body
    slice parity to 1e-12; contact parity on the harness; same-input replay
    against Pinocchio with convergence. Run real-engine tests on ControlTower

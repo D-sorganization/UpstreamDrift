@@ -1,7 +1,7 @@
 # Epic: Full-Body Models With Lower Limbs and Ground Contact (MuJoCo, Drake, Pinocchio)
 
-Status: planning complete 2026-09-13; GitHub epic and child issues filed from
-this document (numbers recorded in the tracking table at the end). Owner
+Status: FB-1 and FB-2 implemented 2026-09-13 (see HANDOFF.md beside this file;
+spec SHA256 06272a18…); GitHub epic #10062 and children #10063–#10070 filed. Owner
 lane: Claude for the shared contracts (FB-0, FB-1, FB-2); cheaper agents for
 per-engine builders and verifiers once the contracts and red tests exist.
 
