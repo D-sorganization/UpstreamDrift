@@ -1,5 +1,28 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Current Authority: Run51 Terminal and Convergence Review
+
+Run51 handle24475 exited1. Its FIRST adaptive level completed the 0.85 s replay
+in75.727 s with21624 evaluations: marker discrepancy1.26677e-6 m,
+native q6.55747e-6, native v0.00501918, closure pose2.09264e-10,
+closure rate4.20261e-9. Parity gates FAIL. The SECOND level raised step underflow
+at0.033333333333333326; it did not complete. The output-boundary regression is
+fixed with two tests; root independently passes20 generic tests. Runtime16 passes
+88 tests with one optional MuJoCo skip. Run52 is ACTIVE, local handle44055,
+using /home/dieterolson/native-manifold-10043-16 and the same arguments as51.
+Driver /mnt/c/Users/diete/compare_native_manifold_replay_9967_52.py; output
+/mnt/c/Users/diete/native-manifold-replay-9967-52. Poll it before restarting.
+Run51 archive is native_evidence/manifold_replay_9967_51/raw-run.zip, SHA256
+bafc67d1f9dc56adbe9a69389e1f92cf3a5ecaf3b3b614743f814a2c8488fe87.
+Its exact runtime/input source archives are referenced in terminal-status.json.
+
+Read simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md for the current
+assessment and ordered gates. Older live-job statements below are historical.
+The central matching gap is trajectory/control co-optimization and uninterrupted
+sextic replay, not additional static pose fitting or torque compression. Preserve
+the scalar native baseline while qualifying alternate integration; current
+quaternion replay is slower, and all-engine equivalence remains unproven.
+
 ## Branch Fix and Adaptive Replay Run51
 
 Run50 is terminal (handle80473 exited0) and archived. Preserving the native middle

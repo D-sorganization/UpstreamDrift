@@ -1,5 +1,17 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Terminal Replay Evidence and Convergence Review
+
+Verified run51 terminal exit1, archived its completed first level and failed
+second-level status. First level has good closure but fails state/marker parity;
+second level underflows at an output boundary. Assigned a focused TDD regression
+fix. Added CONVERGENCE_REVIEW_20260912.md separating initializer quality,
+open-loop polynomial feasibility, representation bugs and numerical qualification.
+The review orders bounded implementation gates and preserves R2025b acceptance.
+Boundary regression fixed without relabeling accepted states;20 generic tests
+pass independently and runtime16 passes88 with one optional skip. Run52 launched
+with identical comparison settings on immutable runtime16; result pending.
+
 ## 2026-09-12 - Branch-Preserving Adaptive Manifold Replay
 
 Added tested native branch preservation after run49 exposed wrong actuator
