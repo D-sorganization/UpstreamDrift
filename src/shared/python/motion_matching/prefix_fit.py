@@ -493,9 +493,10 @@ def _run_prefix_stage(
     # Compute terminal frame metrics
     term_obs = observed[-1]
     if term_obs.any():
-        term_dists = np.linalg.norm((prediction[-1] - measured[-1])[term_obs], axis=1)
-        terminal_rmse_m = float(np.sqrt(np.mean(term_dists**2)))
-        terminal_max_m = float(np.max(term_dists))
+        term_diff = (prediction[-1] - measured[-1])[term_obs]
+        term_sq_dists = np.einsum("ij,ij->i", term_diff, term_diff)
+        terminal_rmse_m = float(np.sqrt(np.mean(term_sq_dists)))
+        terminal_max_m = float(np.sqrt(np.max(term_sq_dists)))
     else:
         terminal_rmse_m = 0.0
         terminal_max_m = 0.0
