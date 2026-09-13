@@ -2,6 +2,15 @@
 
 ## Current Bound-Audit Correction (SELF)
 
+Latest scaled experiment SELF: retracted_tracking_9967_30.json preserves q0/qd0
+and uses numerical closure scale 1e-4 (not an acceptance tolerance). Residual
+and Jacobian share that scale; exported physical closure is unscaled. Six
+regression checks and Ruff pass. ControlTower 276 evaluations take 19.8819 s;
+marker RMS 0.814073 mm, dense pose 2.03132e-6, rate 1.47305e-4 and acceleration
+0.00878615. Chart maximum reaches 0.01. Solver success still fails physical
+closure. Next inspect active bounds and enforce intermediate-sample closure;
+do not silently widen bounds or extrapolate this four-node result to transition.
+
 Latest initial-state experiment SELF: retracted_tracking_9967_29.json uses a
 clamped initial spline derivative equal to candidate qd0, with natural final
 second derivative. Sensitivity maps use homogeneous initial-rate conditions;
