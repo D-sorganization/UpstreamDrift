@@ -1,5 +1,30 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Current Bound-Audit Correction (SELF)
+
+This section supersedes the historical solver claims below. Run20 is terminal.
+The old Jacobian comparison returned 59 chart components outside ±0.01, with
+maximum 0.07306001724; it was not a valid bounded candidate. The finite-difference
+candidate stayed within bounds (maximum 0.00483002077). Initial-point derivative
+agreement does not establish trajectory feasibility or full-engine equivalence.
+
+The runner now uses keep_feasible=True and independently rejects nonfinite or
+out-of-bound returned charts. Its regression test failed before implementation
+and passes afterward. New ControlTower evidence:
+simscape_tour_matching/native_evidence/retracted_bounds_9967_26.json.
+Forty iterations took 1.35135 seconds, returned chart maximum 0.00997851131,
+and reduced node residual from 0.4876762 to 0.03435334. It is not converged.
+A separate 61-sample spline audit found pose 4.84004e-6, rate 4.22302e-4,
+and acceleration 0.03435334 maximum absolute residuals. Thus the path is not
+qualified for torque identification. Runtime25 was reused without modification;
+runner26 is distinct from historical scripts.
+
+Next: include between-node closure and marker tracking in the path objective;
+retain actual initial-state requirements, chart bounds and full forward gates.
+Do not compare different horizons or two unfinished iterates as solver verdicts.
+Validation: test_collocation_bound_guard.py passes; native receipt above is
+physical-runtime evidence only for the four-node window. Full swing remains open.
+
 Current override SELF: run20 is TERMINAL and independently rejected; no optimizer
 is live. Exact final evidence and next action are at the top of the native
 checkpoint. The turnover's Third Task is complete: the shared batch seam,
