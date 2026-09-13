@@ -84,10 +84,19 @@ def test_explicit_replay_accuracy_and_sensitivity_budget() -> None:
         "out",
     ]
     old = parse_args(base)
+    assert old.separate_error_control is False
     assert old.max_step == 0.00025 and old.max_sensitivity_evaluations is None
     tuned = parse_args(
-        base + ["--max-step", ".000125", "--max-sensitivity-evaluations", "100000"]
+        base
+        + [
+            "--max-step",
+            ".000125",
+            "--max-sensitivity-evaluations",
+            "100000",
+            "--separate-error-control",
+        ]
     )
     assert tuned.max_step == 0.000125 and tuned.max_sensitivity_evaluations == 100000
+    assert tuned.separate_error_control is True
     with pytest.raises(ValueError, match="max-sensitivity-evaluations"):
         parse_args(base + ["--max-sensitivity-evaluations", "0"])

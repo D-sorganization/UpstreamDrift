@@ -12,6 +12,8 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import solve_ivp
 
+from src.shared.python.motion_matching.grouped_dop853 import grouped_dop853
+
 Array = NDArray[np.float64]
 
 
@@ -33,6 +35,7 @@ def integrate_forward(
     atol: float = 1e-11,
     max_step: float = 0.001,
     max_evaluations: int | None = None,
+    error_block_sizes: tuple[int, ...] | None = None,
 ) -> ContinuousForwardResult:
     """Integrate once from zero; return finite states at every requested time.
 
@@ -41,6 +44,8 @@ def integrate_forward(
     failure raises; partial trajectories are never returned as successful.
     max_evaluations optionally caps actual derivative calls, including rejected
     steps. Exhaustion raises before the next callback; it is not nonconvergence.
+    error_block_sizes optionally partitions the state and uses the maximum of
+    SciPy's DOP853 block error norms; None retains the original global norm.
     """
     initial = np.array(initial_state, dtype=float, copy=True)
     clock = np.array(time, dtype=float, copy=True)
@@ -65,6 +70,11 @@ def integrate_forward(
         or max_evaluations <= 0
     ):
         raise ValueError("max_evaluations must be a positive integer or None")
+    method = (
+        "DOP853"
+        if error_block_sizes is None
+        else grouped_dop853(error_block_sizes, initial.size)
+    )
     evaluations = 0
 
     def checked_derivative(t: float, state: Array) -> Array:
@@ -87,7 +97,7 @@ def integrate_forward(
         (0.0, float(clock[-1])),
         initial,
         t_eval=clock,
-        method="DOP853",
+        method=method,
         rtol=rtol,
         atol=atol,
         max_step=max_step,

@@ -72,6 +72,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--torque-penalty-scale", type=float, default=20.0)
     parser.add_argument("--max-step", type=float, default=0.00025)
     parser.add_argument("--max-sensitivity-evaluations", type=int)
+    parser.add_argument("--separate-error-control", action="store_true")
     args = parser.parse_args(argv)
     if not np.isfinite(args.max_step) or args.max_step <= 0:
         raise ValueError("max-step must be finite and positive")
@@ -142,6 +143,7 @@ def main() -> None:
     config = {
         "max_step": args.max_step,
         "max_sensitivity_evaluations": args.max_sensitivity_evaluations,
+        "separate_error_control": args.separate_error_control,
         "effort_penalty_weight": args.effort_penalty_weight,
         "effort_penalty_scales": {
             "force_N": args.force_penalty_scale,
@@ -287,6 +289,7 @@ def main() -> None:
                 first_control=first_control,
                 max_step=args.max_step,
                 max_sensitivity_evaluations=args.max_sensitivity_evaluations,
+                separate_error_control=args.separate_error_control,
             )
             cached_jacobian = (
                 result.marker_jacobian[:, :, :, :parameter_count] * args.amplitude_scale
