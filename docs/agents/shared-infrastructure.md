@@ -78,6 +78,10 @@ the solver or relabeling provenance.
   cost terms or visualisations.
 - `align_to_simulation_grid.py` — re-time mocap onto a sim grid.
 - `cost.py`, `final_cost.py` — cost terms and aggregators.
+- `native_effort_penalty` — exact mean-square degree-six primitive effort cost,
+  reusing `NativeEffortProfile` actuator/frame mapping and Bernstein derivatives.
+  Prefix and multiple-shooting fitters accept its checked analytic residual rows;
+  numerical objective weights do not alter physical acceptance criteria.
 - `validators.py`, `validate_theta.py` — DbC checks for inputs.
 - `metrics.py` — RMSE, peak-velocity match, etc.
 - `plot_trajectory_overlay.py`, `plot_error_timecourse.py`,
@@ -118,6 +122,14 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
   wheel is absent.
 - `pose_io` — save/load to engine-native initial-state files and to
   `BodyTarget` motion-matching JSON.
+- `NativeJointStateAdapter` and `NativeMotionSequence` — native SI state and
+  batch angle/quaternion/rate/acceleration/effort conversion. Public
+  `export_native_motion` / `restore_native_motion` retain model identity,
+  timestamps, fixed joint frames and per-sample angle branch references.
+  Reuse `SerialRotationChart` for screw-axis and conjugate effort maps and
+  `FixedFrameTransport` for fixed-frame pose/twist/wrench transport. These
+  conversion providers do not establish engine dynamics equivalence; see the
+  [Native Representation Handoff](../development/simscape_tour_matching/REPRESENTATION_HANDOFF.md).
 - User guides:
   [`docs/user_guide/pose_studio/quickstart.md`](../user_guide/pose_studio/quickstart.md),
   [`docs/user_guide/pose_studio/cross_engine_conventions.md`](../user_guide/pose_studio/cross_engine_conventions.md),

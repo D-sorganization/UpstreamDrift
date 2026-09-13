@@ -22,6 +22,35 @@ Quaternion-to-angle conversion requires explicit reference coordinates. Its gene
 
 The package public API advances from 2.0.0 to 2.1.0 for these additive exports. Canonical pose/state schema versions are unchanged. Engine-native quaternion ordering and local/world angular conventions belong at adapters; canonical ordering must never be inferred from four numerical entries.
 
+## Native Motion Sequence Milestone
+
+`NativeMotionSequence`, `export_native_motion` and `restore_native_motion` are
+now lazy public exports from `pose_interchange`. The batch provider delegates
+all numerical conversions to `NativeJointStateAdapter`. It owns immutable time,
+model fingerprint, coordinate/primitive inventory, group fixed frames, manifold
+samples and the original native q reference at every sample. Restore always
+preserves the middle-angle branch; singular failures identify sample and time.
+Efforts are SI native primitive-conjugate efforts, not raw world-force polynomial
+inputs. Group quaternions remain joint-local orientations, not world body poses.
+
+```python
+from src.shared.python.pose_interchange import (
+    NativeJointStateAdapter, export_native_motion, restore_native_motion,
+)
+
+adapter = NativeJointStateAdapter(native_specification)
+# Each matrix is [sample, coordinate] in adapter.coordinate_order.
+motion = export_native_motion(adapter, time_s, q, qd, qdd, primitive_efforts)
+q_copy, qd_copy, qdd_copy, effort_copy = restore_native_motion(adapter, motion)
+```
+
+This milestone provides in-memory conversion. File serialization, user interface,
+complete frame transport and all-engine trajectory qualification remain open.
+Eighteen new tests cover branch/winding, quaternion sign, power, deep ownership,
+metadata and malformed/singular samples; RED was observed for missing module and
+public exports. Root independently passes89 related representation tests, Ruff
+and pinned mypy. This includes the existing MuJoCo FK smoke, not full dynamics.
+
 ## Verification
 
 TDD red states were observed before implementation: absent joint_chart and frame_transport modules, and absent inverse acceleration. Fifteen joint-chart tests cover all six sequences against independent SciPy rotations, rotation-matrix finite differences for angular velocity, finite differences for angular acceleration, branch/winding and quaternion sign equivalence, power invariance, inverse acceleration, singularity errors and malformed inputs. Five frame tests verify translated origin signs, dual wrench power, inverse maps, transform ownership and invalid transforms. Seven native state tests verify real specification inventory, scalar/body/fixed-frame preservation, identity and convention rejection, singularity failure and an actual local MuJoCo native frame roundtrip (1e-12 absolute comparison tolerance). The final focused command passes 30 tests with `-m unit`, including the installed MuJoCo smoke. This checks quaternion state roundtrip through existing native MuJoCo FK, not alternate-model dynamics. Ruff and focused mypy pass. The full pose_interchange regression passed (247 tests at that checkpoint, before the final native adapter refinements). These mathematical tests are not live-engine equivalence evidence.
@@ -32,19 +61,33 @@ TDD red states were observed before implementation: absent joint_chart and frame
 
 The [Canonical Matching Handoff](../HANDOFF.md#latest-verified-result) records one 0.85-second same-input parity pass (run58), followed by a tighter-step run59 that fails native velocity parity. The isolated pass therefore does not qualify robust trajectory convergence. Pointwise acceleration and effort audits do not establish trajectory or MATLAB equivalence. The manifold implementation is currently slower than the scalar reference in those experiments; no general speed improvement is established. Keep the scalar native baseline available for matching while qualifying alternate integration. Historical test counts below describe their original checkpoints rather than current total coverage.
 
-## Next Bounded Task: Native Motion Sequence Conversion
+## Next Bounded Task: Native Motion Files and Consumers
 
-Implement versioned sequence storage and conversion under `src/shared/python/pose_interchange/`, delegating to the existing providers. This can expose reliable user-facing motion translation without changing engine physics or waiting for alternate MuJoCo/Drake builders. Coordinate #10043 ownership before edits, and check #8867 ownership before modifying motion_pipeline consumers.
+The validated in-memory envelope and batch converters above are implemented.
+Do not recreate them. Coordinate #10043 ownership before edits and #8867 before
+changing motion_pipeline consumers. Continue in these bounded TDD stages:
 
-1. **Write failing envelope tests first.** Define `native-motion-sequence-v1` with finite strictly increasing timestamps, one source specification fingerprint, a separately identified raw model artifact hash, exact coordinate inventory, native/manifold convention tag, SI units, explicit joint-base frames, fixed parent/follower transforms, and initial/per-sample native branch references. Require equal sample counts for q/qd/qdd/effort, reject duplicate or missing coordinates, mismatched model identity, unknown versions, nonfinite values and malformed quaternion norms. Preserve all 18 ungrouped scalar coordinates. Do not infer units, quaternion order, winding or frame identity from numerical values.
-2. **Implement the smallest validated record and serializer.** Suggested public functions are `load_native_motion`, `save_native_motion` and a `NativeMotionSequence` value object; names are proposed, not existing APIs. Reuse `NativeManifoldState` per sample and retain `NativeRotationGroup` metadata from the adapter. Preserve existing `CanonicalPose` and `pose_io.save_initial_state/load_initial_state` formats unchanged. Reject unsupported newer schema versions explicitly. Save through a temporary sibling followed by atomic replacement so interruption cannot corrupt a previous result; test failed writes preserve the original file.
-3. **Implement conversion with one provider.** A proposed `convert_native_motion` service delegates each sample to `NativeJointStateAdapter.export/restore`, using `preserve_middle_branch=True` for native actuator motion and retaining explicit outer-axis winding references. Do not copy Euler/quaternion formulas or infer raw engine q/v array layouts. Report singular sample index, timestamp and group, fail the conversion without silently deleting samples or inserting a pseudoinverse, and preserve the input artifact. Distinguish storage conversion from dynamical replay in output metadata.
-4. **Test mathematical and serialization acceptance.** Roundtrip an actual native-spec sequence with nonzero rates, accelerations and efforts; verify exact coordinate inventories and scalar values, numerical rotational recovery, nonzero convective acceleration, per-sample virtual-work invariance, branch and winding retention, and q versus -q orientation equivalence. Include reordered JSON keys, incompatible model hash/version, an isolated singular sample and branch-crossing inputs. Require deterministic semantic output independent of dictionary ordering. Compare orientation via rotation matrices rather than quaternion sign alone.
-5. **Expose only supported frame conversions.** Delegate explicitly requested rigid poses and angular-first twists/moment-first wrenches to `FixedFrameTransport`, retaining source/target frame names and origins. Test translated-origin signs, inverse composition and power invariance. A joint relative angular state is not a complete world body spatial state: compose retained fixed transforms and require engine FK/body motion when that context is needed. Reject moving-frame acceleration conversion until its additional transport terms are implemented and independently tested; do not relabel joint-base vectors as world vectors.
-6. **Add a user-facing entry point after the service passes.** Extend the existing Pose Studio/service routing beside `src/tools/pose_studio/pose_files.py` with a distinct motion import/export action or headless command. Initial-state files stay separate. Show source/target representation, model identity, units, frame/origin, branch policy and conversion-only status. GUI code delegates to the shared service. Provide one executable example using archived native specification and a small multi-frame fixture, with the exact command and expected output artifact in this document.
-7. **Qualify engine consumers separately.** Feed the restored named native sequence into existing Pinocchio, MuJoCo and Drake `frame_poses` and acceleration APIs. Archive runtime versions, input hashes and per-engine frame/velocity/acceleration/power comparisons; retain the existing MuJoCo FK smoke as its limited check. A successful serializer or converter does not qualify alternate model dynamics. R2025b replay and representative uninterrupted trajectory parity remain explicit later acceptance stages.
-
-Do not claim this task complete on schema tests alone: require sequence roundtrip, malformed-input rejection, public entry-point execution and a reproducible example. Keep unavailable engine runtime checks visibly outstanding instead of counting skips as parity evidence.
+1. Add `load_native_motion` and `save_native_motion` around the existing envelope,
+   with an explicit file schema and separately labeled raw model artifact hash.
+   Validate version, units, quaternion/frame conventions, coordinate inventory
+   and sample counts through the existing constructor. Do not infer conventions.
+   Keep CanonicalPose and initial-state formats unchanged. Test malformed files
+   and atomic writes that preserve the previous result on interruption.
+2. Roundtrip a real-specification multi-sample motion through disk and the public
+   export/restore API, including nonzero velocity/acceleration, both angle
+   branches/windings, quaternion sign equivalence and virtual-work preservation.
+   Preserve failure index/time; never silently skip a singular sample.
+3. Add a distinct motion import/export command or service alongside pose-only
+   routing. Record executable example and output location. The current in-memory
+   example is not a file-format or UI completion claim.
+4. Expose only supported fixed-frame pose/twist/wrench conversions by delegating
+   FixedFrameTransport. Do not apply a rotation alone to a twist at a shifted
+   origin or advertise moving-frame acceleration transport without its terms.
+5. Feed the restored named native sequence into real Pinocchio, MuJoCo and Drake
+   frame and acceleration providers. Archive runtime versions, input hashes and
+   transform/physical-velocity/acceleration/power discrepancies. A serializer or
+   FK roundtrip does not qualify alternate dynamics. Independent R2025b and
+   uninterrupted representative trajectory parity remain later acceptance gates.
 
 ## Controlled Follow-On Implementation
 
@@ -63,7 +106,7 @@ Do not claim this task complete on schema tests alone: require sequence roundtri
 Run from the UpstreamDrift worktree:
 
 ```powershell
-python -m pytest tests/unit/pose_interchange/test_joint_chart.py tests/unit/pose_interchange/test_frame_transport.py tests/unit/pose_interchange/test_public_surface.py tests/unit/pose_interchange/test_native_joint_state.py -q --no-cov -m unit
+python -m pytest tests/unit/pose_interchange/test_native_motion_sequence.py tests/unit/pose_interchange/test_joint_chart.py tests/unit/pose_interchange/test_frame_transport.py tests/unit/pose_interchange/test_public_surface.py tests/unit/pose_interchange/test_native_joint_state.py -q --no-cov -m unit
 python -m mypy src/shared/python/pose_interchange/joint_chart.py src/shared/python/pose_interchange/frame_transport.py --follow-imports=silent
 python -m ruff check src/shared/python/pose_interchange/joint_chart.py src/shared/python/pose_interchange/frame_transport.py
 ```

@@ -78,3 +78,19 @@ def test_every_public_export_remains_resolvable_and_discoverable() -> None:
         assert getattr(pose_interchange, name) is not None
     with pytest.raises(AttributeError):
         _ = pose_interchange.nonexistent_public_symbol
+
+
+def test_public_surface_exposes_native_motion_sequence() -> None:
+    from src.shared.python.pose_interchange.native_motion_sequence import (
+        NativeMotionSequence,
+        export_native_motion,
+        restore_native_motion,
+    )
+
+    for name, expected in (
+        ("NativeMotionSequence", NativeMotionSequence),
+        ("export_native_motion", export_native_motion),
+        ("restore_native_motion", restore_native_motion),
+    ):
+        assert name in pose_interchange.__all__
+        assert getattr(pose_interchange, name) is expected
