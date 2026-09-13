@@ -1,0 +1,10 @@
+{
+  "run": 57,
+  "exit_code": 0,
+  "handle": 40751,
+  "status": "complete_both_levels_fail_native_velocity_gate",
+  "runtime": "/home/dieterolson/native-manifold-10043-18",
+  "runtime_source_archive": "../manifold_dop853_10043_18/raw-source.zip",
+  "exact_input_archive": "../manifold_replay_9967_50/raw-run.zip",
+  "acceptance": "No full representation, C3D, or R2025b acceptance"
+}

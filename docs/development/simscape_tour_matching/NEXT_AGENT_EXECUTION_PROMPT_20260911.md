@@ -1,5 +1,9 @@
 # Execution Prompt: Finish Four-Engine Tour Swing Matching
 
+> Current executable turnover: [Lower-Cost Agent Turnover](LOW_COST_AGENT_TURNOVER_20260912.md).
+> Read it and the top native checkpoint first. Historical run instructions below
+> are not authorization to repeat completed work or duplicate the live optimizer.
+
 ## Current Entry Point: September 12
 
 Read the TOP of NATIVE_PORT_CHECKPOINT_20260911.md before the historical

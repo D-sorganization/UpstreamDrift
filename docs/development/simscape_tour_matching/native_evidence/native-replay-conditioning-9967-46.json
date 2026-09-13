@@ -1,0 +1,148 @@
+{
+  "scope": "Local native conditioning at feedback states; mixed coordinate units; not a stability proof",
+  "rows": [
+    {
+      "time_s": 0.0,
+      "mass_condition": 40287594.25557036,
+      "mass_min_eigenvalue": 2.259074556364882e-6,
+      "max_acceleration_q_derivative": 4274.1839112209545,
+      "max_acceleration_v_derivative": 0.4188695137891181,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.6158588028955452,
+        "LSInputY": -1.9292366356245338,
+        "RSInputY": -0.9038447417758703
+      }
+    },
+    {
+      "time_s": 0.6,
+      "mass_condition": 40022862.55562042,
+      "mass_min_eigenvalue": 2.291669268785143e-6,
+      "max_acceleration_q_derivative": 20545.300991435717,
+      "max_acceleration_v_derivative": 42.17627913728024,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.7031395040432127,
+        "LSInputY": -2.0917174179708424,
+        "RSInputY": -0.6132300932298272
+      }
+    },
+    {
+      "time_s": 0.7,
+      "mass_condition": 39768279.50398932,
+      "mass_min_eigenvalue": 2.31736157876645e-6,
+      "max_acceleration_q_derivative": 20072.828486791783,
+      "max_acceleration_v_derivative": 30.90927508145121,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.7463640362953153,
+        "LSInputY": -1.9824936363321797,
+        "RSInputY": -0.4599552048353856
+      }
+    },
+    {
+      "time_s": 0.8,
+      "mass_condition": 39347285.17742035,
+      "mass_min_eigenvalue": 2.3511571176121996e-6,
+      "max_acceleration_q_derivative": 11924.32004385129,
+      "max_acceleration_v_derivative": 37.69662368496386,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.7839463946258882,
+        "LSInputY": -1.8210081482503284,
+        "RSInputY": -0.342884643160979
+      }
+    },
+    {
+      "time_s": 0.9,
+      "mass_condition": 39256981.3572372,
+      "mass_min_eigenvalue": 2.3649511017757197e-6,
+      "max_acceleration_q_derivative": 12041.413642089901,
+      "max_acceleration_v_derivative": 285.4449480224926,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.8049508515330529,
+        "LSInputY": -1.6579957737568045,
+        "RSInputY": -0.3225315158845664
+      }
+    },
+    {
+      "time_s": 1.0,
+      "mass_condition": 38306778.5791945,
+      "mass_min_eigenvalue": 2.437798438316946e-6,
+      "max_acceleration_q_derivative": 31027.00810319954,
+      "max_acceleration_v_derivative": 220.46991947559022,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.8038307210842965,
+        "LSInputY": -1.7407525750273258,
+        "RSInputY": -0.44263250822350086
+      }
+    },
+    {
+      "time_s": 1.1,
+      "mass_condition": 37483170.436815396,
+      "mass_min_eigenvalue": 2.489824230337667e-6,
+      "max_acceleration_q_derivative": 28310.605555018592,
+      "max_acceleration_v_derivative": 32.51741035211692,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.8250612826608266,
+        "LSInputY": -1.8235301631585525,
+        "RSInputY": -0.5387277325394964
+      }
+    },
+    {
+      "time_s": 1.2,
+      "mass_condition": 37849901.671743795,
+      "mass_min_eigenvalue": 2.460654820500097e-6,
+      "max_acceleration_q_derivative": 37823.265047860616,
+      "max_acceleration_v_derivative": 336.5101865942955,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.7755715136416707,
+        "LSInputY": -1.7507004880369952,
+        "RSInputY": 0.0761642951097014
+      }
+    },
+    {
+      "time_s": 1.3,
+      "mass_condition": 39541488.36606907,
+      "mass_min_eigenvalue": 2.3030831306714896e-6,
+      "max_acceleration_q_derivative": 958600.532519334,
+      "max_acceleration_v_derivative": 682.3869644339896,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.40554498340500217,
+        "LSInputY": -1.6211303465506783,
+        "RSInputY": -0.15884943277625682
+      }
+    },
+    {
+      "time_s": 1.5,
+      "mass_condition": 39819188.66161583,
+      "mass_min_eigenvalue": 2.3204320164823255e-6,
+      "max_acceleration_q_derivative": 4061026.2562351767,
+      "max_acceleration_v_derivative": 736.9308547234667,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.4152182846501641,
+        "LSInputY": -1.6219738563737889,
+        "RSInputY": -0.9455849596162782
+      }
+    },
+    {
+      "time_s": 1.8,
+      "mass_condition": 54636507.98049304,
+      "mass_min_eigenvalue": 1.6991642152266962e-6,
+      "max_acceleration_q_derivative": 85397.79277166654,
+      "max_acceleration_v_derivative": 33.87377315041714,
+      "saved_derivative_max_error": 0.0,
+      "middle_angles": {
+        "HipInputY": -0.3762313325636989,
+        "LSInputY": -2.49577516786409,
+        "RSInputY": -1.0350743621220035
+      }
+    }
+  ]
+}

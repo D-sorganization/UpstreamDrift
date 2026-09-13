@@ -1,0 +1,10 @@
+{
+  "run": 52,
+  "exit_code": 0,
+  "local_handle": 44055,
+  "status": "complete_both_levels_fail_parity",
+  "runtime": "/home/dieterolson/native-manifold-10043-16",
+  "runtime_source_archive": "../manifold_boundary_10043_16/raw-source.zip",
+  "exact_input_archive": "../manifold_replay_9967_50/raw-run.zip",
+  "acceptance": "No C3D, complete representation, or R2025b acceptance"
+}

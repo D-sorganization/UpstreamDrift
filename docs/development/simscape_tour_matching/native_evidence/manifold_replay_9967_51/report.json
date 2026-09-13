@@ -1,0 +1,28 @@
+{
+  "scope": "Same-input native representation prefix; not C3D or MATLAB acceptance",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "candidate_sha256": "b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f",
+  "runner_sha256": "71fb0496a9304aea71f1aac9ed4207ddb77c104b8ac7a751ca181927fa127cf5",
+  "horizon_s": 0.85,
+  "method": "adaptive",
+  "rtol": 1e-10,
+  "atol": 1e-12,
+  "adaptive_max_evaluations": 100000,
+  "scalar_elapsed_s": 3.6197913219803013,
+  "scalar_closure_pose_max_abs": 7.81446019005743e-11,
+  "scalar_closure_velocity_max_abs": 1.086023715402007e-9,
+  "runs": [
+    {
+      "max_step": 0.001388888888888889,
+      "elapsed_s": 75.72700691397768,
+      "evaluations": 21624,
+      "steps": 1783,
+      "native_q_max_abs_difference": 6.55747481714819e-6,
+      "native_v_max_abs_difference": 0.005019177464760105,
+      "marker_max_distance_m": 1.2667742330735808e-6,
+      "closure_pose_max_abs": 2.0926432809662498e-10,
+      "closure_velocity_max_abs": 4.202606262992958e-9,
+      "prefix_parity_gates_pass": false
+    }
+  ]
+}

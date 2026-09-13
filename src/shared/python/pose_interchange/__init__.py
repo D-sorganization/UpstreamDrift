@@ -25,36 +25,113 @@ surface is documented in `docs/conventions/canonical-v2.md` and
 
 from __future__ import annotations
 
-from src.shared.python.pose_interchange.canonical import (
-    CONVENTION_TAG,
-    CanonicalPose,
-    canonical_from_reference_setup,
-    canonical_zero_pose,
-)
-from src.shared.python.pose_interchange.canonical_state import (
-    CONVENTION_TAG_V2,
-    CanonicalState,
-    canonical_state_zero,
-)
-from src.shared.python.pose_interchange.live_kinematics import (
-    CapabilityError,
-    LiveKinematicsService,
-    ServiceCapabilities,
-)
-from src.shared.python.pose_interchange.protocol import (
-    JointSlot,
-    PoseConventionAdapter,
-)
-from src.shared.python.pose_interchange.se3 import (
-    compose_se3,
-    euler_xyz_deg_to_quat_wxyz,
-    inverse_se3,
-    quat_exp,
-    quat_log,
-    quat_to_matrix,
-    se3_from_xyz_xyz_deg,
-    se3_to_xyz_xyz_deg,
-)
+from importlib import import_module
+from typing import TYPE_CHECKING, Any
+
+# Numeric consumers must not import application reference-pose services.
+if TYPE_CHECKING:
+    from src.shared.python.pose_interchange.canonical import (
+        CONVENTION_TAG,
+        CanonicalPose,
+        canonical_from_reference_setup,
+        canonical_zero_pose,
+    )
+    from src.shared.python.pose_interchange.canonical_state import (
+        CONVENTION_TAG_V2,
+        CanonicalState,
+        canonical_state_zero,
+    )
+    from src.shared.python.pose_interchange.live_kinematics import (
+        CapabilityError,
+        LiveKinematicsService,
+        ServiceCapabilities,
+    )
+    from src.shared.python.pose_interchange.protocol import (
+        JointSlot,
+        PoseConventionAdapter,
+    )
+    from src.shared.python.pose_interchange.se3 import (
+        compose_se3,
+        euler_xyz_deg_to_quat_wxyz,
+        inverse_se3,
+        quat_exp,
+        quat_log,
+        quat_to_matrix,
+        se3_from_xyz_xyz_deg,
+        se3_to_xyz_xyz_deg,
+    )
+
+    from .frame_transport import FixedFrameTransport
+    from .joint_chart import SerialRotationChart, SingularChartError
+    from .native_joint_state import (
+        NativeJointStateAdapter,
+        NativeManifoldState,
+        NativeRotationGroup,
+        RotationState,
+    )
+
+    from .native_motion_sequence import (
+        NativeMotionSequence,
+        export_native_motion,
+        restore_native_motion,
+    )
+
+    from .native_motion_io import (
+        NativeMotionDocument,
+        load_native_motion,
+        save_native_motion,
+    )
+
+_EXPORT_MODULES = {
+    "CONVENTION_TAG": "src.shared.python.pose_interchange.canonical",
+    "CanonicalPose": "src.shared.python.pose_interchange.canonical",
+    "canonical_from_reference_setup": "src.shared.python.pose_interchange.canonical",
+    "canonical_zero_pose": "src.shared.python.pose_interchange.canonical",
+    "CONVENTION_TAG_V2": "src.shared.python.pose_interchange.canonical_state",
+    "CanonicalState": "src.shared.python.pose_interchange.canonical_state",
+    "canonical_state_zero": "src.shared.python.pose_interchange.canonical_state",
+    "CapabilityError": "src.shared.python.pose_interchange.live_kinematics",
+    "LiveKinematicsService": "src.shared.python.pose_interchange.live_kinematics",
+    "ServiceCapabilities": "src.shared.python.pose_interchange.live_kinematics",
+    "JointSlot": "src.shared.python.pose_interchange.protocol",
+    "PoseConventionAdapter": "src.shared.python.pose_interchange.protocol",
+    "compose_se3": "src.shared.python.pose_interchange.se3",
+    "euler_xyz_deg_to_quat_wxyz": "src.shared.python.pose_interchange.se3",
+    "inverse_se3": "src.shared.python.pose_interchange.se3",
+    "quat_exp": "src.shared.python.pose_interchange.se3",
+    "quat_log": "src.shared.python.pose_interchange.se3",
+    "quat_to_matrix": "src.shared.python.pose_interchange.se3",
+    "se3_from_xyz_xyz_deg": "src.shared.python.pose_interchange.se3",
+    "se3_to_xyz_xyz_deg": "src.shared.python.pose_interchange.se3",
+    "FixedFrameTransport": ".frame_transport",
+    "SerialRotationChart": ".joint_chart",
+    "SingularChartError": ".joint_chart",
+    "NativeJointStateAdapter": ".native_joint_state",
+    "NativeManifoldState": ".native_joint_state",
+    "NativeRotationGroup": ".native_joint_state",
+    "RotationState": ".native_joint_state",
+    "NativeMotionSequence": ".native_motion_sequence",
+    "export_native_motion": ".native_motion_sequence",
+    "restore_native_motion": ".native_motion_sequence",
+    "NativeMotionDocument": ".native_motion_io",
+    "load_native_motion": ".native_motion_io",
+    "save_native_motion": ".native_motion_io",
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Load the owning provider only when its public export is requested."""
+    module = _EXPORT_MODULES.get(name)
+    if module is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(import_module(module, __name__), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__))
+
 
 # Public API version (SemVer MAJOR.MINOR.PATCH).
 #
@@ -69,7 +146,7 @@ from src.shared.python.pose_interchange.se3 import (
 # 2.0.0 (CC-2, ADR-0026): adds the ``canonical-v2`` dynamic state surface
 # (``CanonicalState`` + manifold ops). The ``canonical-v1`` pose API below is
 # unchanged and remains valid for pose-only callers.
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 # Canonical *pose* (v1) schema version. Mirrors ``CONVENTION_TAG`` for
 # downstream consumers that prefer numeric comparison; the string tag
@@ -82,6 +159,19 @@ __all__ = [
     "CONVENTION_TAG_V2",
     "CanonicalPose",
     "CanonicalState",
+    "FixedFrameTransport",
+    "SerialRotationChart",
+    "NativeJointStateAdapter",
+    "NativeManifoldState",
+    "NativeRotationGroup",
+    "RotationState",
+    "NativeMotionSequence",
+    "export_native_motion",
+    "restore_native_motion",
+    "NativeMotionDocument",
+    "load_native_motion",
+    "save_native_motion",
+    "SingularChartError",
     "CapabilityError",
     "JointSlot",
     "LiveKinematicsService",

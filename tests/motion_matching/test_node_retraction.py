@@ -2,7 +2,10 @@
 
 import numpy as np
 import pytest
-from src.shared.python.motion_matching.node_retraction import retract_node
+from src.shared.python.motion_matching.node_retraction import (
+    retract_node,
+    scaled_tangent_basis,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -47,6 +50,24 @@ def test_derivative_matches_separate_retractions() -> None:
         (run(0.2 + h).state - run(0.2 - h).state) / (2 * h),
         atol=1e-8,
     )
+
+
+def test_scaled_tangent_basis_is_orthonormal_and_annihilates_closure() -> None:
+    basis = scaled_tangent_basis(
+        np.array([[1.0, 2.0, -1.0]]), np.array([2.0, 3.0, 4.0])
+    )
+
+    np.testing.assert_allclose(basis.T @ basis, np.eye(2), atol=1e-12)
+    np.testing.assert_allclose(
+        np.array([[1.0, 2.0, -1.0]]) @ np.diag([2.0, 3.0, 4.0]) @ basis,
+        np.zeros((1, 2)),
+        atol=1e-12,
+    )
+
+
+def test_scaled_tangent_basis_rejects_rank_loss() -> None:
+    with pytest.raises(ValueError, match="rank"):
+        scaled_tangent_basis(np.zeros((1, 2)), np.ones(2))
 
 
 def test_outside_chart_rejected() -> None:

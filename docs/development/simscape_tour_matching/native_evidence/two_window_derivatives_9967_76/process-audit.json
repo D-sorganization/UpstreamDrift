@@ -1,0 +1,10 @@
+{
+  "checked_scripts": [
+    "two_window_derivatives_76.py",
+    "two_window_preflight_75.py",
+    "replay_returned_73.py",
+    "refine_native_candidate.py"
+  ],
+  "active_matching_processes": [],
+  "scope": "Only relevant native fit/preflight/evidence scripts; no claim about unrelated users jobs"
+}

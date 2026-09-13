@@ -1,0 +1,11 @@
+{
+  "command": "python render_samples.py --samples sampled-markers-state.npz --output .",
+  "matplotlib_version": "3.10.3",
+  "visually_inspected": true,
+  "hashes": {
+    "render_samples.py": "9ba39d7e5f8415b56491b784cf42e1b9fb21a432e9de004e98b64b696d4cca79",
+    "replay_returned.py": "6d9ea2820b8a53ce95b8d15b0c68a6440bf1d16e533357cc50daaa9e9f5a97d3",
+    "sampled-markers-state.npz": "754e06711ebc7c751bd01d4eb07e73cab765059e4575a1758a16b02fb25e5f49",
+    "marker-comparison.png": "e958ffd1e641a557f9d1fe646aa9b614ef7389b00300bad4c27d9994d17044ac"
+  }
+}

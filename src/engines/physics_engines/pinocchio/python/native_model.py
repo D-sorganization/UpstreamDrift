@@ -31,6 +31,37 @@ class NativeMarkerDerivatives(NamedTuple):
     dposition_dq: NDArray[np.float64]
 
 
+class NativeClosurePositionLinearization(NamedTuple):
+    """Weld pose residual and Jacobian in an explicit native coordinate order."""
+
+    names: tuple[str, ...]
+    position: NDArray[np.float64]
+    jacobian: NDArray[np.float64]
+
+
+class NativeClosureTrajectoryResiduals(NamedTuple):
+    """Pose, velocity, and acceleration weld residuals at one native state."""
+
+    position: NDArray[np.float64]
+    rate: NDArray[np.float64]
+    acceleration: NDArray[np.float64]
+
+
+class NativeClosureTrajectoryLinearization(NamedTuple):
+    """Detached partial derivatives of all weld levels at one native state.
+
+    Rows concatenate pose, rate, and acceleration residuals in that order.
+    Position and rate derivatives use explicitly configured centered differences;
+    acceleration's partial with respect to supplied acceleration is exact.
+    """
+
+    names: tuple[str, ...]
+    residual: NDArray[np.float64]
+    dq: NDArray[np.float64]
+    dv: NDArray[np.float64]
+    da: NDArray[np.float64]
+
+
 def depth_first_joints(
     joints: Sequence[Mapping[str, Any]],
 ) -> list[Mapping[str, Any]]:
@@ -74,27 +105,14 @@ class NativePinocchioModel:
         self._coordinates: dict[str, int] = {}
         self._velocity_indices: dict[str, int] = {}
         self._bodies: dict[str, tuple[int, Any]] = {"world": (0, pin.SE3.Identity())}
-        factories = {
-            "Px": pin.JointModelPX,
-            "Py": pin.JointModelPY,
-            "Pz": pin.JointModelPZ,
-            "Rx": pin.JointModelRX,
-            "Ry": pin.JointModelRY,
-            "Rz": pin.JointModelRZ,
-        }
+        coordinate_inventory: set[str] = set()
         for joint_spec in depth_first_joints(specification["joints"]):
             parent, parent_pose = self._bodies[joint_spec["parent"]]
             placement = parent_pose * self._transform(joint_spec["parent_to_base"])
-            for primitive in joint_spec["primitives"]:
-                name = primitive["coordinate"]
-                if name in self._coordinates or primitive["primitive"] not in factories:
-                    raise ValueError("Duplicate or unsupported native coordinate")
-                parent = self.model.addJoint(
-                    parent, factories[primitive["primitive"]](), placement, name
-                )
-                self._coordinates[name] = self.model.joints[parent].idx_q
-                self._velocity_indices[name] = self.model.joints[parent].idx_v
-                placement = pin.SE3.Identity()
+            parent, names = self._add_joint_primitives(parent, placement, joint_spec)
+            if coordinate_inventory.intersection(names):
+                raise ValueError("Duplicate native coordinate")
+            coordinate_inventory.update(names)
             child = joint_spec["child"]
             if child in self._bodies:
                 raise ValueError("Native body has multiple tree parents")
@@ -102,7 +120,7 @@ class NativePinocchioModel:
                 parent,
                 self._transform(joint_spec["child_to_follower"]).inverse(),
             )
-        if set(self._coordinates) != set(specification["coordinate_order"]):
+        if coordinate_inventory != set(specification["coordinate_order"]):
             raise ValueError("Native coordinate inventory was not preserved")
         for body in specification["bodies"]:
             joint, body_pose = self._bodies[body["name"]]
@@ -125,6 +143,33 @@ class NativePinocchioModel:
                 pin.Frame(frame["name"], joint, placement, pin.FrameType.OP_FRAME)
             )
         self._initialize_closure(specification["closure"])
+
+    def _add_joint_primitives(
+        self, parent: int, placement: Any, joint_spec: Mapping[str, Any]
+    ) -> tuple[int, set[str]]:
+        """Construct scalar primitives; variants reuse bodies, frames and weld."""
+        pin = self._pin
+        factories = {
+            "Px": pin.JointModelPX,
+            "Py": pin.JointModelPY,
+            "Pz": pin.JointModelPZ,
+            "Rx": pin.JointModelRX,
+            "Ry": pin.JointModelRY,
+            "Rz": pin.JointModelRZ,
+        }
+        names = set()
+        for primitive in joint_spec["primitives"]:
+            name = primitive["coordinate"]
+            if name in self._coordinates or primitive["primitive"] not in factories:
+                raise ValueError("Duplicate or unsupported native coordinate")
+            parent = self.model.addJoint(
+                parent, factories[primitive["primitive"]](), placement, name
+            )
+            self._coordinates[name] = self.model.joints[parent].idx_q
+            self._velocity_indices[name] = self.model.joints[parent].idx_v
+            placement = pin.SE3.Identity()
+            names.add(name)
+        return parent, names
 
     def _initialize_closure(self, closure: Mapping[str, Any]) -> None:
         """Attach the native weld using this model's body-frame placements."""
@@ -194,6 +239,208 @@ class NativePinocchioModel:
         ):
             raise ValueError("Invalid native closure residuals")
         return pose, velocity
+
+    def closure_residuals(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float] | None = None,
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Refresh and return weld pose/rate residuals at one native state.
+
+        The constrained-dynamics backend owns the constraint-data refresh, so
+        this intentionally invokes it with explicit zero primitive efforts.
+        It is a diagnostic/kinematic-trajectory oracle, never an inverse
+        dynamics substitute and never a state correction.  Omitted rates mean
+        an explicit zero-rate static probe; supplied rates retain their stated
+        values to support trajectory checks.
+        """
+        names = set(self._velocity_indices)
+        position = dict(coordinates)
+        velocity = {name: 0.0 for name in names} if rates is None else dict(rates)
+        if (
+            set(position) != names
+            or set(velocity) != names
+            or not np.isfinite(tuple(position.values())).all()
+            or not np.isfinite(tuple(velocity.values())).all()
+        ):
+            raise ValueError("Provide exactly native coordinate and rate inventories")
+        efforts = {name: 0.0 for name in names}
+        self.accelerations(position, velocity, efforts)
+        return self.closure_errors()
+
+    def closure_position_linearization(
+        self, coordinates: Mapping[str, float]
+    ) -> NativeClosurePositionLinearization:
+        """Refresh and return the weld pose residual and its native q Jacobian.
+
+        The constraint backend refreshes its data through the zero-rate,
+        zero-effort diagnostic probe. The returned Jacobian is kinematic only;
+        it is suitable for a local node chart, never for inverse dynamics.
+        """
+        names = tuple(coordinates)
+        position, _ = self.closure_residuals(coordinates)
+        raw = np.asarray(
+            self._pin.getConstraintsJacobian(
+                self.model, self.data, self.constraints, self.constraint_data
+            ),
+            dtype=float,
+        )
+        indices = [self._velocity_indices[name] for name in names]
+        jacobian = raw[:, indices].copy()
+        if (
+            position.shape != (6,)
+            or raw.shape != (6, self.model.nv)
+            or jacobian.shape != (6, len(names))
+            or not np.isfinite(position).all()
+            or not np.isfinite(jacobian).all()
+        ):
+            raise ValueError("Invalid native weld position linearization")
+        position.setflags(write=False)
+        jacobian.setflags(write=False)
+        return NativeClosurePositionLinearization(names, position, jacobian)
+
+    def closure_trajectory_residuals(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        accelerations: Mapping[str, float],
+    ) -> NativeClosureTrajectoryResiduals:
+        """Evaluate all weld levels without treating the loop as inverse dynamics.
+
+        The zero-effort constrained forward acceleration supplies `a0`, so the
+        acceleration residual is J*(a-a0), equivalent to J*a+gamma when
+        J*a0+gamma=0. This preserves the loop reaction rather than assuming it
+        vanishes. It is a kinematic/dynamic residual oracle, never a fitter.
+        """
+        names = tuple(coordinates)
+        if (
+            set(rates) != set(names)
+            or set(accelerations) != set(names)
+            or not np.isfinite(tuple(rates.values())).all()
+            or not np.isfinite(tuple(accelerations.values())).all()
+        ):
+            raise ValueError(
+                "Provide finite native coordinate, rate, and acceleration inventories"
+            )
+        zero_efforts = {name: 0.0 for name in names}
+        drift_values = self.accelerations(coordinates, rates, zero_efforts)
+        position, _ = self.closure_errors()
+        raw = np.asarray(
+            self._pin.getConstraintsJacobian(
+                self.model, self.data, self.constraints, self.constraint_data
+            ),
+            dtype=float,
+        )
+        indices = [self._velocity_indices[name] for name in names]
+        jacobian = raw[:, indices]
+        rate_vector = np.asarray([rates[name] for name in names], dtype=float)
+        acceleration_vector = np.asarray(
+            [accelerations[name] for name in names], dtype=float
+        )
+        drift = np.asarray([drift_values[name] for name in names], dtype=float)
+        rate = jacobian @ rate_vector
+        acceleration = jacobian @ (acceleration_vector - drift)
+        if (
+            raw.ndim != 2
+            or jacobian.shape != (position.size, len(names))
+            or not np.isfinite(position).all()
+            or not np.isfinite(rate).all()
+            or not np.isfinite(acceleration).all()
+        ):
+            raise ValueError("Invalid native weld trajectory residuals")
+        for value in (position, rate, acceleration):
+            value.setflags(write=False)
+        return NativeClosureTrajectoryResiduals(position, rate, acceleration)
+
+    def closure_trajectory_linearization(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        accelerations: Mapping[str, float],
+        *,
+        finite_difference_step: float,
+    ) -> NativeClosureTrajectoryLinearization:
+        """Differentiate the weld oracle at one state without inverse dynamics.
+
+        The finite differences are local to one 27-coordinate node, which
+        avoids treating a full spline trajectory as a black-box function. The
+        returned acceleration partial is the exact constraint Jacobian because
+        the oracle defines that residual as ``J * (a - a0)``. The final base
+        probe restores the backend data to the reported state.
+        """
+        names = tuple(coordinates)
+        if (
+            not np.isfinite(finite_difference_step)
+            or finite_difference_step <= 0.0
+            or set(rates) != set(names)
+            or set(accelerations) != set(names)
+        ):
+            raise ValueError(
+                "Expected finite positive step and matching state inventories"
+            )
+
+        def flatten(value: NativeClosureTrajectoryResiduals) -> NDArray[np.float64]:
+            return np.concatenate((value.position, value.rate, value.acceleration))
+
+        position = dict(coordinates)
+        velocity = dict(rates)
+        acceleration = dict(accelerations)
+        base = flatten(
+            self.closure_trajectory_residuals(position, velocity, acceleration)
+        )
+        derivative_shape = (base.size, len(names))
+        dq = np.empty(derivative_shape, dtype=float)
+        dv = np.empty(derivative_shape, dtype=float)
+        for index, name in enumerate(names):
+            plus_position = dict(position)
+            minus_position = dict(position)
+            plus_position[name] += finite_difference_step
+            minus_position[name] -= finite_difference_step
+            dq[:, index] = (
+                flatten(
+                    self.closure_trajectory_residuals(
+                        plus_position, velocity, acceleration
+                    )
+                )
+                - flatten(
+                    self.closure_trajectory_residuals(
+                        minus_position, velocity, acceleration
+                    )
+                )
+            ) / (2.0 * finite_difference_step)
+            plus_velocity = dict(velocity)
+            minus_velocity = dict(velocity)
+            plus_velocity[name] += finite_difference_step
+            minus_velocity[name] -= finite_difference_step
+            dv[:, index] = (
+                flatten(
+                    self.closure_trajectory_residuals(
+                        position, plus_velocity, acceleration
+                    )
+                )
+                - flatten(
+                    self.closure_trajectory_residuals(
+                        position, minus_velocity, acceleration
+                    )
+                )
+            ) / (2.0 * finite_difference_step)
+        linear = self.closure_position_linearization(position)
+        self.closure_trajectory_residuals(position, velocity, acceleration)
+        da = np.zeros(derivative_shape, dtype=float)
+        da[-linear.jacobian.shape[0] :, :] = linear.jacobian
+        if (
+            linear.names != names
+            or not np.isfinite(base).all()
+            or not np.isfinite(dq).all()
+            or not np.isfinite(dv).all()
+            or not np.isfinite(da).all()
+        ):
+            raise ValueError("Invalid native weld trajectory linearization")
+        base.setflags(write=False)
+        dq.setflags(write=False)
+        dv.setflags(write=False)
+        da.setflags(write=False)
+        return NativeClosureTrajectoryLinearization(names, base, dq, dv, da)
 
     def marker_derivatives(
         self,

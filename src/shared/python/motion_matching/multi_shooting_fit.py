@@ -23,6 +23,10 @@ from src.shared.python.motion_matching.equality_least_squares import (
     solve_equality_least_squares,
 )
 from src.shared.python.motion_matching.marker_replay_report import observed_rms
+from src.shared.python.motion_matching.residual_regularization import (
+    regularization_derivative,
+    regularization_residual,
+)
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
     _readonly,
@@ -31,6 +35,10 @@ from src.shared.python.motion_matching.prefix_fit import (
 Array: TypeAlias = NDArray[np.float64]
 SegmentedForward: TypeAlias = Callable[
     [Array, Array, Array | None], tuple[Array, Array]
+]
+SegmentedForwardBatch: TypeAlias = Callable[
+    [Sequence[tuple[Array, Array, Array | None]]],
+    Sequence[tuple[Array, Array]],
 ]
 UnsegmentedForward: TypeAlias = Callable[[Array, Array], Array]
 
@@ -44,6 +52,20 @@ class MultipleShootingOptions:
     independent equalities. defect_weight is ignored for that backend.
     Callbacks still observe the assembled residual (including unweighted
     physical defects); the constrained objective excludes those defect rows.
+    Optional variable_scales apply only to slsqp, ordered as theta followed by
+    each internal node's optimization coordinates in increasing time order.
+    Physical node transforms, callback values and defect scales are unchanged.
+    window_jacobian_state_coordinates="physical" retains the default local
+    columns [theta, physical initial state]. With "node", columns instead are
+    [theta, current node optimization coordinates], already composed through the
+    node transform. The callback still receives the physical initial state and
+    returns physical endpoint rows. The first fixed-state window has theta
+    columns only. Physical transform derivatives remain required for defects.
+    shared_boundary_policy="both" retains the legacy residual, in which the
+    capture sample shared by adjacent windows is observed in each window. "once"
+    observes it only in the earlier window, so marker rows, their Jacobian rows,
+    segmented RMS and equality offsets match an uninterrupted single-window
+    objective at zero defect. Physical defects and terminal rows are unchanged.
     """
 
     shooting_nodes: tuple[float, ...]
@@ -73,10 +95,27 @@ class MultipleShootingOptions:
     max_iterations: int = 50
     equality_tolerance: float = 1e-8
     constraint_projection: Callable[[float], Array] | None = None
+    variable_scales: Array | None = None
+    segmented_forward_batch: SegmentedForwardBatch | None = None
+    regularization_jacobian: Callable[[Array], Array] | None = None
+    window_jacobian_state_coordinates: Literal["physical", "node"] = "physical"
+    shared_boundary_policy: Literal["both", "once"] = "both"
 
     def __post_init__(self) -> None:
+        if self.window_jacobian_state_coordinates not in ("physical", "node"):
+            raise ValueError("Invalid window Jacobian state coordinates")
+        if self.shared_boundary_policy not in ("both", "once"):
+            raise ValueError("Invalid shared boundary observation policy")
+        if self.regularization_jacobian is not None and self.regularization is None:
+            raise ValueError("regularization_jacobian requires regularization")
         if self.solver not in ("least_squares", "slsqp"):
             raise ValueError("Unknown shooting solver")
+        if self.segmented_forward_batch is not None and not callable(
+            self.segmented_forward_batch
+        ):
+            raise ValueError("Segmented forward batch must be callable")
+        if self.variable_scales is not None and self.solver != "slsqp":
+            raise ValueError("Explicit variable scales require the slsqp backend")
         if (
             isinstance(self.max_iterations, bool)
             or not isinstance(self.max_iterations, int)
@@ -224,6 +263,9 @@ def fit_multiple_shooting(
         w_time = target.time[mask]
         w_points = target.points[mask]
         w_obs = np.isfinite(w_points).all(axis=2) & (target.weights > 0)
+        if i > 0 and options.shared_boundary_policy == "once" and len(w_time):
+            # The earlier window already observed this shared capture sample.
+            w_obs[0] = False
         window_data.append((t_start, t_end, w_time, w_points, w_obs))
 
     window_cache: dict[int, tuple[bytes, bytes | None, Array, Array]] = {}
@@ -240,7 +282,12 @@ def fit_multiple_shooting(
         res_parts = []
         end_states = []
 
-        # 1. Evaluate segmented forward dynamics on each window
+        # 1. Evaluate segmented forward dynamics on each window. The optional
+        # batch boundary receives only cache misses; it is responsible solely
+        # for independent window execution. Cache ownership and residual
+        # assembly stay in this coordinating process.
+        evaluated: dict[int, tuple[Array, Array]] = {}
+        misses: list[tuple[int, Array, Array, Array | None, bytes, bytes | None]] = []
         for i in range(n_windows):
             t_start, t_end, w_time, w_points, w_obs = window_data[i]
             init_s = None if i == 0 else states[t_start]
@@ -252,11 +299,45 @@ def fit_multiple_shooting(
                 and cached[0] == theta_bytes
                 and cached[1] == init_s_bytes
             ):
-                pred_markers, end_s = cached[2], cached[3]
+                evaluated[i] = (cached[2], cached[3])
             else:
-                pred_markers, end_s = segmented_forward(theta, w_time, init_s)
-                window_cache[i] = (theta_bytes, init_s_bytes, pred_markers, end_s)
+                misses.append((i, theta, w_time, init_s, theta_bytes, init_s_bytes))
 
+        if not misses:
+            fresh: list[tuple[Array, Array]] = []
+        elif options.segmented_forward_batch is None:
+            fresh = [
+                segmented_forward(theta, clock, state)
+                for _index, theta, clock, state, _theta_bytes, _state_bytes in misses
+            ]
+        else:
+            fresh = list(
+                options.segmented_forward_batch(
+                    [
+                        (theta, clock, state)
+                        for _index, theta, clock, state, *_ in misses
+                    ]
+                )
+            )
+        if len(fresh) != len(misses):
+            raise ValueError("Segmented batch result count differs from cache misses")
+        for miss, result in zip(misses, fresh, strict=True):
+            i, _theta, _clock, _state, miss_theta_bytes, miss_state_bytes = miss
+            pred_markers, end_s = (np.asarray(part, dtype=float) for part in result)
+            if not np.isfinite(pred_markers).all() or not np.isfinite(end_s).all():
+                raise ValueError("Segmented batch returned nonfinite values")
+            window_cache[i] = (
+                miss_theta_bytes,
+                miss_state_bytes,
+                pred_markers,
+                end_s,
+            )
+            evaluated[i] = (pred_markers, end_s)
+
+        # Existing marker/defect assembly intentionally stays ordered and local.
+        for i in range(n_windows):
+            t_start, t_end, w_time, w_points, w_obs = window_data[i]
+            pred_markers, end_s = evaluated[i]
             end_states.append(end_s)
 
             # Marker residuals
@@ -296,8 +377,8 @@ def fit_multiple_shooting(
 
         # 4. Regularization
         if options.regularization is not None:
-            reg_res = options.regularization(theta)
-            if reg_res is not None and len(reg_res) > 0:
+            reg_res = regularization_residual(theta, options.regularization)
+            if reg_res.size > 0:
                 res_parts.append(reg_res)
 
         full_res = np.concatenate(res_parts)
@@ -345,11 +426,21 @@ def fit_multiple_shooting(
             )
             marker, endpoint = options.window_jacobian(p[:theta_dim], clock, state)
             marker, endpoint = np.asarray(marker), np.asarray(endpoint)
-            local_size = theta_dim + (0 if state is None else state.size)
+            node_columns = options.window_jacobian_state_coordinates == "node"
+            local_state_size = 0
+            endpoint_rows = None
+            if state is not None:
+                lo, hi = state_offsets[start]
+                local_state_size = hi - lo if node_columns else state.size
+                endpoint_rows = state.size
+            elif internal_nodes:
+                endpoint_rows = node_jacobians[internal_nodes[0]].shape[0]
+            local_size = theta_dim + local_state_size
             if (
                 marker.shape != (*points.shape, local_size)
                 or endpoint.ndim != 2
                 or endpoint.shape[1] != local_size
+                or (endpoint_rows is not None and endpoint.shape[0] != endpoint_rows)
                 or not np.isfinite(marker).all()
                 or not np.isfinite(endpoint).all()
             ):
@@ -357,7 +448,11 @@ def fit_multiple_shooting(
             chain = np.zeros((local_size, p.size))
             chain[:theta_dim, :theta_dim] = np.eye(theta_dim)
             if state is not None:
-                chain[theta_dim:] = node_jacobians[start]
+                if node_columns:
+                    lo, hi = state_offsets[start]
+                    chain[theta_dim:, lo:hi] = np.eye(hi - lo)
+                else:
+                    chain[theta_dim:] = node_jacobians[start]
             global_marker = marker @ chain
             ends.append(endpoint @ chain)
             weights = np.broadcast_to(target.weights[None, :], observed.shape)
@@ -384,12 +479,26 @@ def fit_multiple_shooting(
             parts.append(defect_factor * delta / np.asarray(scales)[:, None])
         if terminal_jac is not None:
             parts.append(terminal_jac)
+        if options.regularization is not None:
+            if options.regularization_jacobian is None:
+                raise ValueError("Missing regularization_jacobian")
+            local = regularization_derivative(
+                p[:theta_dim], options.regularization, options.regularization_jacobian
+            )
+            penalty = np.zeros((local.shape[0], p.size))
+            penalty[:, :theta_dim] = local
+            parts.append(penalty)
         return np.concatenate(parts)
 
     if options.window_jacobian is not None:
-        if options.regularization is not None or options.pelvis_yaw_weight > 0:
+        if options.pelvis_yaw_weight > 0:
+            raise ValueError("Analytic shooting Jacobian does not yet support yaw")
+        if (
+            options.regularization is not None
+            and options.regularization_jacobian is None
+        ):
             raise ValueError(
-                "Analytic shooting Jacobian does not yet support yaw or regularization"
+                "Analytic shooting requires regularization_jacobian for penalties"
             )
         if (
             options.state_transform is not None
@@ -432,6 +541,7 @@ def fit_multiple_shooting(
             max_iterations=options.max_iterations,
             max_evaluations=options.max_nfev,
             constraint_tolerance=options.equality_tolerance,
+            variable_scales=options.variable_scales,
         )
     else:
         optimum = least_squares(

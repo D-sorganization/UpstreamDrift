@@ -1,0 +1,10 @@
+{
+  "run": 58,
+  "exit_code": 0,
+  "handle": 2605,
+  "status": "complete_all_existing_prefix_parity_gates_pass",
+  "runtime": "/home/dieterolson/native-manifold-10043-18",
+  "runtime_source_archive": "../manifold_dop853_10043_18/raw-source.zip",
+  "exact_input_archive": "../manifold_replay_9967_50/raw-run.zip",
+  "acceptance_scope": "Same-input 0.85 s scalar/manifold fixture only; not C3D or full R2025b acceptance"
+}

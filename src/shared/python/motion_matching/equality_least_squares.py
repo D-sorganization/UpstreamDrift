@@ -26,6 +26,7 @@ def solve_equality_least_squares(
     max_iterations: int,
     max_evaluations: int,
     constraint_tolerance: float = 1e-8,
+    variable_scales: Array | None = None,
 ) -> OptimizeResult:
     """Minimize non-equality squared residuals subject to P @ equality_rows=0.
 
@@ -36,6 +37,10 @@ def solve_equality_least_squares(
     evaluated point and NEVER reports success. Selection prefers a feasible
     lower-cost point, otherwise smaller projected violation. This is not fit
     acceptance or an independent continuous replay.
+
+    Optional positive scales use x=initial+scales*y internally. Callbacks,
+    returned x/jac and active bounds retain physical units. No residual or
+    constraint scaling is applied. None preserves the original solver variables.
     """
     x0, lo, hi, p = (
         np.array(v, dtype=float, copy=True) for v in (initial, lower, upper, projection)
@@ -70,6 +75,25 @@ def solve_equality_least_squares(
         or constraint_tolerance <= 0
     ):
         raise ValueError("Invalid equality location, budget or tolerance")
+    scale = (
+        np.ones_like(x0)
+        if variable_scales is None
+        else np.array(variable_scales, dtype=float, copy=True)
+    )
+    if scale.shape != x0.shape or not np.isfinite(scale).all() or np.any(scale <= 0):
+        raise ValueError("Invalid positive finite variable scales")
+    offset = np.zeros_like(x0) if variable_scales is None else x0.copy()
+    with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
+        scaled_initial = (x0 - offset) / scale
+        scaled_lower, scaled_upper = (lo - offset) / scale, (hi - offset) / scale
+    if not all(
+        np.isfinite(v).all() for v in (scaled_initial, scaled_lower, scaled_upper)
+    ):
+        raise ValueError("Unrepresentable bounds for variable scales")
+
+    def physical(y: Array) -> Array:
+        return offset + scale * y
+
     end = equality_start + p.shape[1]
     cache_key: bytes | None = None
     cache_r: Array = np.empty(0)
@@ -133,14 +157,21 @@ def solve_equality_least_squares(
 
     try:
         result = minimize(
-            objective,
-            x0,
-            jac=gradient,
+            lambda y: objective(physical(y)),
+            scaled_initial,
+            jac=lambda y: gradient(physical(y)) * scale,
             method="SLSQP",
-            bounds=list(zip(lo, hi, strict=True)),
-            constraints={"type": "eq", "fun": constraint, "jac": constraint_jacobian},
+            bounds=list(zip(scaled_lower, scaled_upper, strict=True)),
+            constraints={
+                "type": "eq",
+                "fun": lambda y: constraint(physical(y)),
+                "jac": lambda y: constraint_jacobian(physical(y)) * scale,
+            },
             options={"maxiter": max_iterations, "ftol": constraint_tolerance},
         )
+        result.x = physical(result.x)
+        if hasattr(result, "jac"):
+            result.jac = np.asarray(result.jac) / scale
     except _EvaluationBudgetExceeded:
         result = OptimizeResult(
             x=best_x,
