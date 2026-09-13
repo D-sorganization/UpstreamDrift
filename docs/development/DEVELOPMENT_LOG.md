@@ -40,10 +40,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10071
 - **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; tests/unit/motion_matching/test_full_body_spec.py; tests/unit/motion_matching/test_contact_law.py
 - **Started:** 2026-09-13
-- **Last verified:** 2026-09-13 (SELF; 19 unit tests pass with Ruff and mypy; full_body_spec_v1.json validates against the qualified upper-body spec, 41 coordinates, pelvis alignment residual 5.8 mm)
-- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, the shared ground-contact law with parity harness, and a committed full-body spec built from Rajagopal lower limbs are in place; per-engine builders, calibration and fitting remain.
-- **Next step:** Implement FB-3-P (#10065): Pinocchio full-body builder consuming full_body_spec_v1.json with the 1e-12 upper-body slice parity test and shared contact forces.
-- **Evidence:** docs/development/full_body_models/HANDOFF.md, build_receipt.json.
+- **Last verified:** 2026-09-13 (SELF; 24 shared unit tests pass; FB-3-M #10066 MuJoCo MJCF export and NativeMujocoFullBodyModel adapter verified with 5 passing tests, nq=41 nv=41, upper-body slice inertia/FK parity to 1e-12, contact force parity 0.0 N difference)
+- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, the shared ground-contact law with parity harness, full_body_spec_v1.json, and MuJoCo FB-3-M MJCF export and contact adapter are implemented and verified; Pinocchio and Drake builders, calibration and fitting remain.
+- **Next step:** Implement FB-3-P (#10065 Pinocchio) and FB-3-D (#10067 Drake) builders consuming full_body_spec_v1.json with the 1e-12 upper-body slice parity test and shared contact forces.
+- **Evidence:** docs/development/full_body_models/HANDOFF.md, build_receipt.json, tests/unit/motion_matching/test_full_body_mujoco.py.
 
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 
