@@ -84,40 +84,11 @@ def _segment_distance(
     return float(np.linalg.norm(p_prox - p_dist))
 
 
-def estimate_segment_scales(
-    capture: TourCapture,
-    *,
-    nominal_lengths_m: Mapping[str, float] | None = None,
-    evaluation_frames: int = 20,
-) -> SegmentScaleResult:
-    """Estimate segment lengths, scaling factors, and rigid residuals from capture markers.
-
-    Preconditions:
-    - capture must have at least evaluation_frames (default 20)
-    - nominal_lengths_m, if provided, must map positive finite values
-    - markers required for segment pairs must be present and valid at frame 0
-
-    Returns:
-    - SegmentScaleResult with scale_factors, measured_lengths_m, nominal_lengths_m,
-      rigid_residuals_m, and provenance.
-    """
-    if capture.frames < evaluation_frames:
-        raise ValueError(
-            f"Capture must have at least {evaluation_frames} frames to evaluate the rigid assumption; "
-            f"got {capture.frames} frames"
-        )
-
-    nominal = dict(
-        DEFAULT_NOMINAL_LENGTHS_M if nominal_lengths_m is None else nominal_lengths_m
-    )
-    for seg, length in nominal.items():
-        if not np.isfinite(length) or length <= 0:
-            raise ValueError(
-                f"Nominal length for {seg} must be a positive finite float; got {length}"
-            )
-
-    # Segment definitions: (proximal_labels, distal_labels, description)
-    segment_defs: dict[str, tuple[tuple[str, ...], tuple[str, ...], str]] = {
+# Segment definitions: (proximal_labels, distal_labels, description)
+SEGMENT_DEFINITIONS: MappingProxyType[
+    str, tuple[tuple[str, ...], tuple[str, ...], str]
+] = MappingProxyType(
+    {
         "femur_r": (
             ("WaistRight", "WaistRBack"),
             ("RKneeOut",),
@@ -174,13 +145,42 @@ def estimate_segment_scales(
             "waist centroid to shoulder centroid (waist-shoulder)",
         ),
     }
+)
+
+
+def _validate_scale_inputs(
+    capture: TourCapture, nominal: Mapping[str, float], evaluation_frames: int
+) -> None:
+    if capture.frames < evaluation_frames:
+        raise ValueError(
+            f"Capture must have at least {evaluation_frames} frames to evaluate the rigid assumption; "
+            f"got {capture.frames} frames"
+        )
+    for seg, length in nominal.items():
+        if not np.isfinite(length) or length <= 0:
+            raise ValueError(
+                f"Nominal length for {seg} must be a positive finite float; got {length}"
+            )
+
+
+def estimate_segment_scales(
+    capture: TourCapture,
+    *,
+    nominal_lengths_m: Mapping[str, float] | None = None,
+    evaluation_frames: int = 20,
+) -> SegmentScaleResult:
+    """Estimate segment lengths, scaling factors, and rigid residuals from capture markers."""
+    nominal = dict(
+        DEFAULT_NOMINAL_LENGTHS_M if nominal_lengths_m is None else nominal_lengths_m
+    )
+    _validate_scale_inputs(capture, nominal, evaluation_frames)
 
     measured: dict[str, float] = {}
     scales: dict[str, float] = {}
     residuals: dict[str, float] = {}
     provenance: dict[str, str] = {}
 
-    for seg, (prox_labels, dist_labels, desc) in segment_defs.items():
+    for seg, (prox_labels, dist_labels, desc) in SEGMENT_DEFINITIONS.items():
         if seg not in nominal:
             continue
         d0 = _segment_distance(capture, prox_labels, dist_labels, frame=0)
