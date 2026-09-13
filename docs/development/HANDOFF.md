@@ -2,6 +2,17 @@
 
 ## Current Bound-Audit Correction (SELF)
 
+Latest intermediate-sample experiment SELF: retracted_tracking_9967_31.json
+optimizes all three closure levels at 13 times, audits 61 times, and preserves
+q0/qd0 and marker masks. Two hundred evaluations take 33.3266 seconds; marker
+RMS 1.26002 mm, dense pose 3.10541e-8, rate 1.98868e-6, acceleration 3.89145e-4.
+A chart bound is active and the expanded initial Jacobian normalized discrepancy
+is 0.0401994 with closure residual scaling 1e-4. This derivative check is NOT
+qualified. Next split closure-level derivative errors in physical units and
+check step-size convergence before any further solve or horizon extension.
+The previous peak was between nodes at 0.1325 s (node acceleration maxima below
+9.551e-5), so intermediate enforcement addresses a measured discretization gap.
+
 Latest scaled experiment SELF: retracted_tracking_9967_30.json preserves q0/qd0
 and uses numerical closure scale 1e-4 (not an acceptance tolerance). Residual
 and Jacobian share that scale; exported physical closure is unscaled. Six
