@@ -1,8 +1,45 @@
 # Simscape Tour-Average Fit Continuation
 
-## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
+## Active Horizon Execution & Parity Turnover (2026-09-12 Live Continuation)
 
-### 0. 0.80 s Completed Audit & Candidate Eval #559 Package (`prefix-800ms-sextic-01`, DeskComputer)
+### 0. 1.05 s Downswing Delivery Certification & Audit (`candidate_downswing_105s_locked_package.json`, DeskComputer)
+
+- **Execution Status**:
+  - Run completed on DeskComputer (276 forward dynamics rollouts in Simscape Multibody R2025b `GolfSwing3D_Kinetic.slx`, 4,071.4 s compute, `xtol` termination satisfied).
+  - Continuous 100% forward dynamics rollout without resets: **Defect Norm = 0.000000 m (PASS)**.
+  - Exactly one global degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$.
+  - Degrees $k=0, 1, 2, 3$ **100% FROZEN** across all 27 joints ($\max |\Delta \theta_{j, 0..3}| = 0.000000$).
+- **Gate Audit Performance**:
+  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.22 mm (PASS $\le 12.0\text{ mm}$)**. Address ($1.40\text{ mm}$) and takeaway ($3.55\text{ mm}$) completely preserved and immune to downswing dynamics.
+  - **Downswing Cost Descent**: Cost dropped across 5 accepted trust-region steps from $5.88 \times 10^6 \to \mathbf{2.1939 \times 10^4}$ (at Eval 265).
+  - **Downswing Pelvis Yaw at 1.05 s**: Error dropped from $>378\%$ to **8.44%** at Eval 265 and **29.03%** at termination.
+  - **Whole-Window RMSE ($[0, 1.05\text{ s}]$)**: **212.02 mm**.
+  - **Terminal Marker RMSE ($1.05\text{ s}$)**: **585.30 mm**.
+  - **Terminal Clubhead RMSE ($1.05\text{ s}$)**: **695.76 mm** (best intermediate: $462.29\text{ mm}$).
+  - **0.80 s Horizon Trajectory Audit with 1.05 s Control Curve**: Whole Window RMSE = **33.43 mm**, Early Retention RMSE = **11.22 mm**, Pelvis Yaw @ 0.80s = **15.32%** ($8.96^\circ$).
+- **Candidate Package**:
+  - `candidates/candidate_downswing_105s_locked_package.json` (ID: `prefix-1050ms-downswing-locked-1789243882`).
+  - Synced to DeskComputer runtime worktree.
+
+### 0.1 0.80 s Transition Apex Certification & Audit (`candidate_transition_conditioned_080s_package.json`, DeskComputer)
+
+- **Execution Status**:
+  - Run completed on DeskComputer (1,710.3 s compute, clean exit).
+  - 100% continuous unsegmented forward dynamics: **Defect Norm = 0.000000 m (PASS)**.
+  - Single degree-6 polynomial per channel on $T_{\text{basis}} = 1.813889\text{ s}$.
+- **Gate Audit Performance**:
+  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.19 mm (PASS $\le 12.0\text{ mm}$)**.
+  - **Gate 5 Pelvis Yaw @ 0.80 s**: **2.21%** ($-1.29^\circ$) / **1.03%** ($-0.60^\circ$ in diffstep) (**PASS $< 5.0\%$**).
+  - **Whole-Window RMSE ($[0, 0.80\text{ s}]$)**: **32.16 mm** (best unsegmented rollout: **31.72 mm** in targeted package).
+  - **Terminal Marker RMSE ($0.80\text{ s}$)**: **95.84 mm**.
+  - **Clubhead Terminal RMSE ($0.80\text{ s}$)**: **69.26 mm** (matches documented 7.0 cm modeled club length gap).
+  - **Gates Passed**: **2/5 gates passed** (Early retention, Pelvis yaw).
+- **Candidate Packages**:
+  - `candidates/candidate_transition_conditioned_080s_package.json`
+  - `candidates/candidate_transition_080s_diffstep_package.json`
+  - `candidates/candidate_ms_080s_targeted_package.json`
+
+### 0.2 0.80 s Completed Audit & Candidate Eval #559 Package (`prefix-800ms-sextic-01`, DeskComputer)
 
 - **Execution Status**:
   - Run completed on DeskComputer (775 logged evaluations in `evaluations.jsonl`, `xtol` termination satisfied).
