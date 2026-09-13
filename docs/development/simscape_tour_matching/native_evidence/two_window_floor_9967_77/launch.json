@@ -1,0 +1,34 @@
+{
+  "command": [
+    "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+    "/mnt/c/Users/diete/two_window_floor_77.py",
+    "--model",
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json",
+    "--candidate",
+    "/mnt/c/Users/diete/native-regularized-fit-9967-73/returned-candidate.json",
+    "--samples",
+    "/mnt/c/Users/diete/native-regularized-fit-9967-73/evidence-replay/sampled-markers-state.npz",
+    "--audit76",
+    "/mnt/c/Users/diete/native-two-window-derivatives-9967-76",
+    "--audit76_summary",
+    "/mnt/c/Users/diete/two-window-summary-76.json",
+    "--output",
+    "/mnt/c/Users/diete/native-two-window-floor-9967-77",
+    "--runtime",
+    "/home/dieterolson/native-two-window-floor-9967-77"
+  ],
+  "environment": {
+    "PYTHONPATH": "/home/dieterolson/native-two-window-floor-9967-77",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "cwd": "/home/dieterolson/native-two-window-floor-9967-77",
+  "stdout": "/mnt/c/Users/diete/two-window-stdout-77.log",
+  "stderr": "/mnt/c/Users/diete/two-window-stderr-77.log",
+  "status": "terminal",
+  "pid": 2972754,
+  "start_time": 1789281177.482679,
+  "launcher_pid": 2972752,
+  "exit_code": 0,
+  "elapsed_s": 202.62273931503296
+}

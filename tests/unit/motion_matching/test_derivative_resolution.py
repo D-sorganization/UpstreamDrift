@@ -64,6 +64,20 @@ def test_structural_zero_requires_declaration_and_both_norms_inside_floor() -> N
     assert violated.verdict == "failed"
 
 
+def test_safety_factor_widens_only_the_floor() -> None:
+    kwargs = {"step": 1e-5, "replay_error": 1.58e-8}
+    strict = _verdict([0.4689, 0.0], [0.4689 + 1.66e-3, 0.0], **kwargs)
+    assert strict.verdict == "failed"
+    widened = _verdict(
+        [0.4689, 0.0], [0.4689 + 1.66e-3, 0.0], floor_safety_factor=2.0, **kwargs
+    )
+    assert widened.verdict == "unresolved_at_step"
+    assert widened.resolution_floor == pytest.approx(2 * 1.58e-3)
+    assert widened.gate == strict.gate == 1e-3
+    with pytest.raises(ValueError):
+        _verdict([1.0], [1.0], floor_safety_factor=0.5, **kwargs)
+
+
 def test_classification_rejects_bad_shapes_and_gates() -> None:
     with pytest.raises(ValueError):
         _verdict([1.0], [1.0, 2.0], step=1e-5, replay_error=1e-9)

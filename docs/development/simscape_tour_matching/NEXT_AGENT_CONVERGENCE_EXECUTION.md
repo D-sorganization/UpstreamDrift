@@ -18,12 +18,13 @@ This evidence is not proof of a particular nonlinear failure mechanism.
 
 ## Current Pause Checkpoint
 
-The user requested a pause and transfer to another agent. Stage1 below is already
-complete in diagnostic75; reuse its fixture. Stage2 diagnostic76 is terminal with
-failed_derivative_gates, not a blanket derivative pass. Larger control perturbations
-pass; smaller steps and near-zero cross-continuity blocks need error-floor review.
-No optimizer was launched and no numerical jobs remain active. Read
-AGENT_RESUME_PROMPT.md and the76 HANDOFF before choosing the next experiment.
+Stage1 is complete in diagnostic75; reuse its fixture. Stage2 is complete:
+diagnostic76 plus audit77 qualify every direction and block against measured
+replay/retraction floors with unchanged gates (see
+native_evidence/two_window_floor_9967_77/HANDOFF.md). Stage3 is authorized under
+the bounded settings below. No optimizer has run yet and no numerical jobs remain
+active. Use shared_boundary_policy="once" and
+window_jacobian_state_coordinates="node" for objective parity with fit73.
 The stages below remain the reusable procedure for other targets, not an instruction
 to repeat completed75 work.
 
