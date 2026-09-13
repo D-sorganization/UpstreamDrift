@@ -55,6 +55,11 @@ def test_attach_rejects_unknown_body_and_bad_offsets() -> None:
 
 def test_unlock_coordinates_flips_locked_flags_only_for_named() -> None:
     tree = ET.parse(OSIM)
+    for coord in tree.findall(".//Coordinate"):
+        if coord.get("name") in ("arm_flex_r", "lumbar_rotation", "elbow_flex_r"):
+            locked_elem = coord.find("locked")
+            if locked_elem is not None:
+                locked_elem.text = "true"
     locked_before = marker_set.locked_coordinates(tree)
     assert "arm_flex_r" in locked_before and "lumbar_rotation" in locked_before
     changed = marker_set.unlock_coordinates(tree, ("arm_flex_r", "lumbar_rotation"))
