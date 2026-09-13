@@ -1921,7 +1921,12 @@ jobs:
             --cov-config=pyproject.toml
             --cov-fail-under=75
           )
-          dependency_light_targets=()
+          dependency_light_targets=(
+            tests/unit/shared_python
+            tests/unit/sidekick
+            tests/unit/robotics
+            tests/unit/scripts/test_check_mypy_exclusion_budget.py
+          )
 
           # Route `git diff` output through a file instead of a process
           # substitution. `mapfile -t x < <(git diff ...)` discards git's exit
@@ -1962,6 +1967,14 @@ jobs:
             # Python then carries a green badge for a suite it never ran.
             echo "::notice::Push to the default branch - running the full core lane, unscoped (#8771)."
             diff_base=""
+            dependency_light_targets=(
+              tests/unit/shared_python
+              tests/unit/sidekick
+              tests/unit/robotics
+              tests/unit/scripts/test_check_mypy_exclusion_budget.py
+            )
+            coverage_args=(--no-cov)
+            coverage_report_args=()
           elif [ "${{ github.event_name }}" = "push" ] \
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
@@ -2179,6 +2192,8 @@ jobs:
             --ignore=tests/heavy_integration \
             --ignore=tests/benchmarks \
             --ignore=src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests \
+            --ignore=tests/docker \
+            --ignore=tests/examples \
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             "${coverage_args[@]}" \
             "${coverage_report_args[@]}" \
