@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Native Simscape Tour-Matching 1.05s Downswing and 0.80s Transition Advancement (#9921)
+
+Advance continuous forward dynamics motion matching on the tour-average driver swing (`data/C3D_TA_Driver.c3d`, $T = 1.813889\text{ s}$, 654 frames @ 360 Hz) in Simscape Multibody R2025b (`GolfSwing3D_Kinetic.slx`):
+- 1.05s Downswing Delivery Candidate: Record `candidates/candidate_downswing_105s_locked_package.json` with degrees $k=0..3$ 100% frozen across all 27 native joint channels, achieving 11.22mm Gate 4 early retention ($[0, 0.60\text{ s}] \le 12.0\text{ mm}$, PASS) and 8.44% pelvis yaw error at 1.05s.
+- 0.80s Transition Apex Candidate: Record `candidates/candidate_transition_conditioned_080s_package.json` and `candidates/candidate_transition_080s_diffstep_package.json`, passing Gate 4 (11.19mm $\le 12.0\text{ mm}$) and Gate 5 (1.03% to 2.21% pelvis yaw error $< 5.0\%$).
+- Single Global Polynomial Basis & Defect Invariance: Enforce exactly one degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$ with 0.000000m defect norm across all candidate packages.
+- Turnover and Governance Sync: Document horizon continuation in `AGENT_HANDOFF.md` and record budget exception in `scripts/config/doc_size_budget.json`.
+
 ## Launcher UI, Process Manager, and Library Widget Unit-Gate Debt Burndown (#8766)
 
 Burn down 67 quarantined test node IDs across launcher UI setup, process manager, library widget, and golf launcher in `scripts/config/unit_gate_quarantine.json`:
