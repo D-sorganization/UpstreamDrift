@@ -1,5 +1,12 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 -- Time-Only Replay Sensitivity Audit
+
+Measured run45 first divergence and launched fixed-input run46 tolerance pair
+on ControlTower. Baseline reproduces saved states exactly at requested sample
+times through1.1 s; tight comparison remains pending. Diagnostic uses original
+initial state and actual constrained forward dynamics without tracking feedback.
+
 ## 2026-09-12 — Gimbal-Safe Initializer and Representation Interchange
 
 Added tested gimbal-branch restrictions and archived runs42–45. Full feedback

@@ -1,5 +1,28 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Run46 Replay Sensitivity Audit -- In Progress
+
+Run45 first-departure audit shows model-to-model marker RMS differences crossing
+1 micrometre at0.761111 s,0.1 mm at0.933333 s,1 mm at0.972222 s and10 mm
+at1.019444 s. These compare open-loop with feedback, not C3D. Exact initial
+states agree. Recomputed saved accelerations agree exactly at11 sampled states.
+Gross input ordering is not supported as the explanation by this evidence.
+
+Run46 uses the SAME saved reference-state time-only input and initial state,
+with baseline rtol1e-10/atol1e-12/max_step0.00025 then tight1e-12/1e-14/0.000125.
+Horizon1.1 s; no feedback or intermediate resets in the replay. Driver is
+simscape_tour_matching/audit_feedback_replay_convergence.py. ControlTower command
+uses native-gimbal-path-9967-42 PYTHONPATH and simscape-pinocchio-9967 venv.
+Remote driver /mnt/c/Users/diete/audit_feedback_replay_convergence_9967_46.py;
+output /mnt/c/Users/diete/native-replay-convergence-9967-46. Local handle29712.
+Baseline is terminal52.998 s/115373 evaluations; tight run is still pending.
+Poll the same handle/process before launching anything. A one-entry report is
+only a checkpoint, not completion. Archive terminal outputs and update this section.
+
+This audit decides whether replay divergence is integration-sensitive. Do not
+claim open-loop instability proved from growth alone or raw mixed-unit mass
+condition numbers. No match acceptance or native-model equivalence is added.
+
 ## Authoritative Checkpoint — Representation Foundation and Replay Failure
 
 This section supersedes next-action and running-job statements below. Runs42–45

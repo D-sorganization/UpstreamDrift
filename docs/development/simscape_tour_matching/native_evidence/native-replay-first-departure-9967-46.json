@@ -1,0 +1,27 @@
+{
+  "scope": "Recorded replay versus feedback, not versus C3D; no target masks applied to model-to-model comparison",
+  "source_archive_sha256": "3e9a2485cca3f567c0e0a6628fe7a620db2ad4a5ea300fc262f3f8e6bcff79ac",
+  "dense_stride": 8,
+  "thresholds": [
+    {
+      "marker_rms_difference_threshold_m": 1e-6,
+      "first_time_s": 0.7611111111111111
+    },
+    {
+      "marker_rms_difference_threshold_m": 0.0001,
+      "first_time_s": 0.9333333333333333
+    },
+    {
+      "marker_rms_difference_threshold_m": 0.001,
+      "first_time_s": 0.9722222222222222
+    },
+    {
+      "marker_rms_difference_threshold_m": 0.01,
+      "first_time_s": 1.0194444444444444
+    },
+    {
+      "marker_rms_difference_threshold_m": 0.1,
+      "first_time_s": 1.15
+    }
+  ]
+}
