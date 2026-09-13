@@ -259,17 +259,21 @@ def render_humanoid_video(
             else:
                 frames_rgb.append(Image.fromarray(rgb))
 
-        if fmt == "mp4" and video_writer is not None:
-            video_writer.release()
-        elif fmt == "gif" and frames_rgb:
-            duration_ms = int(1000.0 / fps)
-            frames_rgb[0].save(
-                out_file,
-                save_all=True,
-                append_images=frames_rgb[1:],
-                duration=duration_ms,
-                loop=0,
-            )
+        if fmt == "gif":
+            if frames_rgb:
+                first_frame, *remaining_frames = frames_rgb
+                first_frame.save(
+                    out_file,
+                    format="GIF",
+                    save_all=bool(remaining_frames),
+                    append_images=remaining_frames,
+                    duration=int(round(1000.0 / fps)),
+                    loop=0,
+                    optimize=True,
+                )
+        elif fmt == "mp4":
+            if video_writer is not None:
+                video_writer.release()
 
         logger.info(
             f"Rendered {engine_name} humanoid animation to {out_file} ({data.frame_count} frames)"
