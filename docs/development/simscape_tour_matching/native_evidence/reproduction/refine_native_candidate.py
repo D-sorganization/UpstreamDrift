@@ -53,7 +53,8 @@ def control_matrix(
     return increment
 
 
-def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Validate reproducible solver controls before reading inputs or creating output."""
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("model", "candidate", "target", "output_dir"):
         parser.add_argument(f"--{name}", type=Path, required=True)
@@ -69,7 +70,16 @@ def main() -> None:
     parser.add_argument("--effort-penalty-weight", type=float, default=0.0)
     parser.add_argument("--force-penalty-scale", type=float, default=100.0)
     parser.add_argument("--torque-penalty-scale", type=float, default=20.0)
-    args = parser.parse_args()
+    parser.add_argument("--max-step", type=float, default=0.00025)
+    parser.add_argument("--max-sensitivity-evaluations", type=int)
+    args = parser.parse_args(argv)
+    if not np.isfinite(args.max_step) or args.max_step <= 0:
+        raise ValueError("max-step must be finite and positive")
+    if (
+        args.max_sensitivity_evaluations is not None
+        and args.max_sensitivity_evaluations <= 0
+    ):
+        raise ValueError("max-sensitivity-evaluations must be positive")
     if (
         not np.isfinite(args.effort_penalty_weight)
         or args.effort_penalty_weight < 0
@@ -81,6 +91,11 @@ def main() -> None:
         raise ValueError(
             "Require nonnegative effort penalty and positive numerical effort scales"
         )
+    return args
+
+
+def main() -> None:
+    args = parse_args()
     args.output_dir.mkdir(exist_ok=False)
     raw = args.model.read_bytes()
     spec = json.loads(raw)
@@ -125,6 +140,8 @@ def main() -> None:
             raise ValueError("Restart exceeds original correction bounds")
         restart_hash = restart.sha256
     config = {
+        "max_step": args.max_step,
+        "max_sensitivity_evaluations": args.max_sensitivity_evaluations,
         "effort_penalty_weight": args.effort_penalty_weight,
         "effort_penalty_scales": {
             "force_N": args.force_penalty_scale,
@@ -212,7 +229,7 @@ def main() -> None:
         nonlocal evaluations, best_score, last
         candidate = candidate_for(x)
         result = replay_candidate(
-            raw, candidate, time, rtol=1e-11, atol=1e-13, max_step=0.00025
+            raw, candidate, time, rtol=1e-11, atol=1e-13, max_step=args.max_step
         )
         prediction = result.markers_m
         error = np.sum((prediction - points) ** 2, axis=2)
@@ -264,7 +281,12 @@ def main() -> None:
         if key != jacobian_key:
             started = perf_counter()
             result = replay_marker_sensitivities(
-                raw, candidate, time, first_control=first_control
+                raw,
+                candidate,
+                time,
+                first_control=first_control,
+                max_step=args.max_step,
+                max_sensitivity_evaluations=args.max_sensitivity_evaluations,
             )
             cached_jacobian = (
                 result.marker_jacobian[:, :, :, :parameter_count] * args.amplitude_scale
