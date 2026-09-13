@@ -16,6 +16,17 @@ q/qd and marker samples are archived; no compute jobs remain active. Audit74's m
 3.767e7 after column normalization; penalty rows and bounds were excluded.
 This evidence is not proof of a particular nonlinear failure mechanism.
 
+## Current Pause Checkpoint
+
+The user requested a pause and transfer to another agent. Stage1 below is already
+complete in diagnostic75; reuse its fixture. Stage2 diagnostic76 is terminal with
+failed_derivative_gates, not a blanket derivative pass. Larger control perturbations
+pass; smaller steps and near-zero cross-continuity blocks need error-floor review.
+No optimizer was launched and no numerical jobs remain active. Read
+AGENT_RESUME_PROMPT.md and the76 HANDOFF before choosing the next experiment.
+The stages below remain the reusable procedure for other targets, not an instruction
+to repeat completed75 work.
+
 ## Preserve the Existing Providers
 
 Use these existing modules; do not implement another solver or convention stack:
