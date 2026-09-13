@@ -1,5 +1,26 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Local-Chart DOP853 Pilot57 Active
+
+Shared integrate_manifold_dop853 reuses the checked chart RHS, preserves
+integrated physical endpoints across output intervals, and enforces a global
+RHS budget. No quaternion coefficient derivative, normalization or physical
+projection. Root reviewed code and independently passes27 generic tests with
+one real-Pin skip locally, Ruff and mypy. Runtime18 passes96 tests/one optional
+MuJoCo skip; exact sources and API probe are manifold_dop853_10043_18.
+
+Run57 ACTIVE handle40751: /home/dieterolson/native-manifold-10043-18; driver
+/mnt/c/Users/diete/compare_native_manifold_replay_9967_57.py; output
+/mnt/c/Users/diete/native-manifold-replay-9967-57. Same.85 s candidate, method
+dop853, rtol1e-10/atol1e-12, steps[1/720,1/1440], budget100000 per level;
+scalar reference1e-12/1e-14/max_step.000125 as completed run54. No result yet.
+Poll the original handle before restarting. Driver now records independent
+scalar settings and supports this method; existing parity gates unchanged.
+
+Root additionally compared56 against tight scalar54 with the archived velocity
+script: native peak0.000659884, body angular peak2.94733e-5rad/s. Exact JSON in
+manifold_replay_9967_56/velocity-vs-tight-scalar.zip. No acceptance implied.
+
 ## Latest Status: Run56 Terminal, Higher-Order Integration in Development
 
 Run56 handle2338 exited0, all.85 s samples present. Tight adaptive RK4

@@ -346,3 +346,175 @@ def test_adaptive_genuine_tiny_requested_step_still_underflows():
             difference=lambda a, q: q - a,
             max_step=np.nextafter(0.0, 1.0),
         )
+
+
+def test_dop853_noncommuting_rotation_and_absolute_clock():
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_dop853,
+    )
+
+    clock = np.array([0.0, 0.13, 0.37, 1.0])
+    evaluations = []
+
+    def acceleration(t, q, v):
+        evaluations.append(t)
+        return np.array([-2 * t * np.sin(t * t), 2.0, 2 * t * np.cos(t * t)])
+
+    result = integrate_manifold_dop853(
+        np.array([0.0, 0.0, 0.0, 1.0]),
+        np.array([1.0, 0.0, 0.0]),
+        clock,
+        acceleration,
+        integrate=_so3_integrate,
+        difference_rate=_so3_difference_rate,
+        max_step=0.1,
+        rtol=1e-10,
+        atol=1e-12,
+    )
+    for i, t in enumerate(clock):
+        expected = Rotation.from_rotvec([t, 0, 0]) * Rotation.from_rotvec([0, t * t, 0])
+        assert (
+            np.linalg.norm(
+                (
+                    expected.inv() * Rotation.from_quat(result.configuration[i])
+                ).as_rotvec()
+            )
+            < 1e-10
+        )
+        np.testing.assert_allclose(
+            result.velocity[i], [np.cos(t * t), 2 * t, np.sin(t * t)], atol=1e-10
+        )
+    assert min(evaluations) == 0
+    assert max(evaluations) == 1
+    assert result.evaluations == len(evaluations)
+    np.testing.assert_array_equal(result.time, clock)
+
+
+def test_dop853_euclidean_continuation_preserves_physical_endpoint():
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_dop853,
+    )
+
+    clock = np.array([0.0, 0.11, 0.37, 1.0])
+    result = integrate_manifold_dop853(
+        np.array([0.3]),
+        np.array([-0.2]),
+        clock,
+        lambda t, q, v: np.array([t]),
+        integrate=lambda q, u: q + u,
+        difference_rate=lambda a, q, v: v,
+        max_step=0.1,
+    )
+    np.testing.assert_allclose(
+        result.configuration[:, 0], 0.3 - 0.2 * clock + clock**3 / 6, atol=2e-14
+    )
+    np.testing.assert_allclose(result.velocity[:, 0], -0.2 + clock**2 / 2, atol=2e-14)
+    assert result.steps >= len(clock) - 1
+    for array in (result.configuration, result.velocity, result.time):
+        assert not array.flags.writeable
+
+
+def test_dop853_evaluation_budget_is_global_across_intervals():
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_dop853,
+    )
+
+    callbacks = {
+        "integrate": lambda q, u: q + u,
+        "difference_rate": lambda a, q, v: v,
+        "max_step": 0.1,
+    }
+    first = integrate_manifold_dop853(
+        np.zeros(1),
+        np.ones(1),
+        np.array([0.0, 0.1]),
+        lambda t, q, v: np.zeros(1),
+        **callbacks,
+    )
+    calls = []
+
+    def acceleration(t, q, v):
+        calls.append(t)
+        return np.zeros(1)
+
+    with pytest.raises(RuntimeError, match="evaluation budget"):
+        integrate_manifold_dop853(
+            np.zeros(1),
+            np.ones(1),
+            np.array([0.0, 0.1, 0.2]),
+            acceleration,
+            max_evaluations=first.evaluations + 3,
+            **callbacks,
+        )
+    assert len(calls) == first.evaluations + 3
+    assert max(calls) > 0.1
+
+
+@pytest.mark.parametrize(
+    "options", [{"rtol": 0}, {"atol": np.nan}, {"max_evaluations": True}]
+)
+def test_dop853_invalid_controls(options):
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_dop853,
+    )
+
+    with pytest.raises(ValueError):
+        integrate_manifold_dop853(
+            np.zeros(1),
+            np.ones(1),
+            np.array([0.0, 0.1]),
+            lambda t, q, v: v,
+            integrate=lambda q, u: q + u,
+            difference_rate=lambda a, q, v: v,
+            **options,
+        )
+
+
+def test_dop853_malformed_callback_fails_without_partial_result():
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_dop853,
+    )
+
+    with pytest.raises(ValueError, match="acceleration"):
+        integrate_manifold_dop853(
+            np.zeros(1),
+            np.ones(1),
+            np.array([0.0, 0.1]),
+            lambda t, q, v: np.array([np.nan]),
+            integrate=lambda q, u: q + u,
+            difference_rate=lambda a, q, v: v,
+        )
+
+
+def test_dop853_actual_pinocchio_noncommuting_motion():
+    from src.shared.python.motion_matching.manifold_forward import (
+        integrate_manifold_dop853,
+    )
+
+    pin = pytest.importorskip("pinocchio")
+    if not isinstance(getattr(pin, "__version__", None), str):
+        pytest.skip("Real Pinocchio runtime required")
+    model = pin.Model()
+    model.addJoint(0, pin.JointModelSpherical(), pin.SE3.Identity(), "rotation")
+
+    def difference_rate(anchor, q, v):
+        return pin.dDifference(model, anchor, q, pin.ARG1) @ v
+
+    result = integrate_manifold_dop853(
+        pin.neutral(model),
+        np.array([1.0, 0.0, 0.0]),
+        np.array([0.0, 0.17, 0.61, 1.0]),
+        lambda t, q, v: np.array([-2 * t * np.sin(t * t), 2.0, 2 * t * np.cos(t * t)]),
+        integrate=lambda q, u: pin.integrate(model, q, u),
+        difference_rate=difference_rate,
+        max_step=0.1,
+        rtol=1e-10,
+        atol=1e-12,
+    )
+    expected = Rotation.from_rotvec([1, 0, 0]) * Rotation.from_rotvec([0, 1, 0])
+    assert (
+        np.linalg.norm(
+            (expected.inv() * Rotation.from_quat(result.configuration[-1])).as_rotvec()
+        )
+        < 1e-10
+    )
