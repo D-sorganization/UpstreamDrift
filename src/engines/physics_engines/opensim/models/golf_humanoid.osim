@@ -1736,8 +1736,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>0.32</mass>
-					<mass_center>0.0 -0.57 0.0</mass_center>
-					<inertia>0.139 0.0001 0.139 0.0 0.0 0.0</inertia>
+					<mass_center>0.0 -0.786 0.0</mass_center>
+					<inertia>0.1158 0.0001 0.1158 0.0 0.0 0.0</inertia>
 				</Body>
 			</objects>
 			<groups />
@@ -2220,7 +2220,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-0.34906585000000001 0.34906585000000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2255,7 +2255,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-0.52359878000000004 0.52359878000000004</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2633,7 +2633,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-0.34906585000000001 0.34906585000000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2668,7 +2668,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-0.52359878000000004 0.52359878000000004</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2703,7 +2703,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2712,16 +2712,16 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="lumbar_rotation">
 							<default_value>0</default_value>
 							<default_speed_value>0</default_speed_value>
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-2.094395102393195 2.094395102393195</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2813,9 +2813,9 @@
 						<Coordinate name="arm_flex_r">
 							<default_value>0</default_value>
 							<default_speed_value>0</default_speed_value>
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-2.094395102393195 3.141592653589793</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2824,7 +2824,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-2.0943950999999998 1.5707963300000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2833,7 +2833,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2927,7 +2927,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>0 2.6179999999999999</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2962,7 +2962,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>0 1.5707963300000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -2997,16 +2997,16 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-1.22173048 1.22173048</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="wrist_dev_r">
 							<default_value>0</default_value>
 							<default_speed_value>0</default_speed_value>
-							<range>-0.43633231 0.61086523999999998</range>
+							<range>-0.7853981633974483 0.7853981633974483</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -3039,9 +3039,9 @@
 						<Coordinate name="arm_flex_l">
 							<default_value>0</default_value>
 							<default_speed_value>0</default_speed_value>
-							<range>-1.5707963300000001 1.5707963300000001</range>
+							<range>-2.094395102393195 3.141592653589793</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -3050,7 +3050,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-2.0943950999999998 1.5707963300000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -3059,7 +3059,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -3153,7 +3153,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>0 2.6179999999999999</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -3188,7 +3188,7 @@
 							<default_speed_value>0</default_speed_value>
 							<range>0 1.5707963300000001</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -3223,16 +3223,16 @@
 							<default_speed_value>0</default_speed_value>
 							<range>-1.22173048 1.22173048</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="wrist_dev_l">
 							<default_value>0</default_value>
 							<default_speed_value>0</default_speed_value>
-							<range>-0.43633231 0.61086523999999998</range>
+							<range>-0.7853981633974483 0.7853981633974483</range>
 							<clamped>true</clamped>
-							<locked>true</locked>
+							<locked>false</locked>
 							<prescribed_function />
 							<prescribed>false</prescribed>
 						</Coordinate>
@@ -3286,7 +3286,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/Club</socket_parent>
-							<translation>0.0 -1.14 0.0</translation>
+							<translation>0.0 -1.042 0.0</translation>
 							<orientation>0.0 0.0 0.0</orientation>
 						</PhysicalOffsetFrame>
 					</frames>

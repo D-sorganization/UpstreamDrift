@@ -25,10 +25,13 @@ OpenSim is available; it must be exercised at least in the
 from __future__ import annotations
 
 import importlib.util
+import math
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
 import pytest
+
+pytestmark = [pytest.mark.unit, pytest.mark.smoke, pytest.mark.headless_safe]
 
 # Repo-root anchored path so the test runs from any CWD.
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -166,6 +169,104 @@ def test_known_simscape_chain_coordinates_present(model_xml: ET.Element) -> None
     }
     missing = required - coords
     assert not missing, f"Missing canonical coordinates: {sorted(missing)}"
+
+
+def _coord_elements(model: ET.Element) -> dict[str, ET.Element]:
+    elements: dict[str, ET.Element] = {}
+    for joint in model.find("JointSet").find("objects"):
+        coords = joint.find("coordinates")
+        if coords is None:
+            continue
+        for coord in coords.findall("Coordinate"):
+            cname = coord.get("name")
+            if cname:
+                elements[cname] = coord
+    return elements
+
+
+def test_arm_and_lumbar_coordinates_unlocked(model_xml: ET.Element) -> None:
+    """Arm and lumbar DOFs must be unlocked for golf swing kinematics."""
+    coords = _coord_elements(model_xml)
+    critical_coords = [
+        "lumbar_extension",
+        "lumbar_bending",
+        "lumbar_rotation",
+        "arm_flex_r",
+        "arm_add_r",
+        "arm_rot_r",
+        "elbow_flex_r",
+        "pro_sup_r",
+        "wrist_flex_r",
+        "wrist_dev_r",
+        "arm_flex_l",
+        "arm_add_l",
+        "arm_rot_l",
+        "elbow_flex_l",
+        "pro_sup_l",
+        "wrist_flex_l",
+        "wrist_dev_l",
+    ]
+    locked = [
+        name
+        for name in critical_coords
+        if (coords[name].findtext("locked") or "false").strip().lower() == "true"
+    ]
+    assert not locked, f"Golf swing coordinates locked in model: {locked}"
+
+
+def test_golf_swing_coordinate_ranges(model_xml: ET.Element) -> None:
+    """Joint clamp ranges must accommodate full golf swing excursion."""
+    coords = _coord_elements(model_xml)
+
+    def _range(name: str) -> tuple[float, float]:
+        text = coords[name].findtext("range") or ""
+        vals = [float(v) for v in text.split()]
+        return vals[0], vals[1]
+
+    # Arm flexion: [-120°, 180°]
+    for arm in ("arm_flex_r", "arm_flex_l"):
+        lo, hi = _range(arm)
+        assert lo <= math.radians(-120.0) + 1e-3, (
+            f"{arm} min range ({math.degrees(lo):.1f}°) not <= -120°"
+        )
+        assert hi >= math.radians(180.0) - 1e-3, (
+            f"{arm} max range ({math.degrees(hi):.1f}°) not >= 180°"
+        )
+
+    # Lumbar rotation: [-120°, 120°]
+    lo, hi = _range("lumbar_rotation")
+    assert lo <= math.radians(-120.0) + 1e-3, (
+        f"lumbar_rotation min range ({math.degrees(lo):.1f}°) not <= -120°"
+    )
+    assert hi >= math.radians(120.0) - 1e-3, (
+        f"lumbar_rotation max range ({math.degrees(hi):.1f}°) not >= 120°"
+    )
+
+    # Wrist deviation: [-45°, 45°]
+    for wrist in ("wrist_dev_r", "wrist_dev_l"):
+        lo, hi = _range(wrist)
+        assert lo <= math.radians(-45.0) + 1e-3, (
+            f"{wrist} min range ({math.degrees(lo):.1f}°) not <= -45°"
+        )
+        assert hi >= math.radians(45.0) - 1e-3, (
+            f"{wrist} max range ({math.degrees(hi):.1f}°) not >= 45°"
+        )
+
+
+def test_club_dimensions_match_tour_capture(model_xml: ET.Element) -> None:
+    """Club length must match tour-average capture (1.042 m grip-to-head)."""
+    weld = next(
+        j
+        for j in model_xml.find("JointSet").find("objects")
+        if j.tag == "WeldJoint" and j.get("name") == "hand_r_to_club"
+    )
+    frames = weld.find("frames").findall("PhysicalOffsetFrame")
+    head_frame = next(f for f in frames if f.get("name") == "club_head_offset")
+    trans = [float(v) for v in (head_frame.findtext("translation") or "").split()]
+    # Distal offset along -y is club length: 1.042 m
+    assert abs(trans[1] - (-1.042)) < 1e-3, (
+        f"Expected club head translation y == -1.042 m, got {trans[1]}"
+    )
 
 
 # ---------------------------------------------------------------------------
