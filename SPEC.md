@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## DefusedXML in OpenSim OS-0 Runtime Audit (#10074)
+
+Mitigate Bandit B314 / B405 XML security findings in OpenSim OS-0 runtime audit:
+- Replace `xml.etree.ElementTree` with `defusedxml.ElementTree` in `docs/development/opensim_tour_matching/os0_runtime_audit.py`.
+- Ensure secure XML parsing for model XML inspection during OS-0 audit.
+- Keep UpstreamDrift `security-scans` quality gate green.
+
 ## OpenSim Segment Scaling, Calibration Best-Iteration, and Full 654-Frame IK (#10003)
 
 Implement subject segment scaling, marker calibration best-iteration selection, and full 654-frame inverse kinematics feasibility matching the tour-average swing:

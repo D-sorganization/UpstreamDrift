@@ -12,9 +12,10 @@ import importlib.util
 import json
 import platform
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
+
+from defusedxml import ElementTree as ET
 
 import ezc3d
 import numpy as np
