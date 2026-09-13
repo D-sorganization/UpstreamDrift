@@ -1,5 +1,14 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Run52 Completed Without Boundary Failure
+
+Both adaptive levels completed after the TDD boundary fix. Finest native velocity
+discrepancy0.00465279 still fails parity despite marker discrepancy1.17068e-6 m
+and good closure. Same-tolerance max-step refinement is insufficient evidence of
+convergence. Archived terminal outputs and ordered physical-velocity/conditioning
+and independent reference-tolerance diagnostics. Implementation push through
+c1cd4de8c passed Ruff, mypy, Bandit and unit pre-push checks.
+
 ## 2026-09-12 - Terminal Replay Evidence and Convergence Review
 
 Verified run51 terminal exit1, archived its completed first level and failed
