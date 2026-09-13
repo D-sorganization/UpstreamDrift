@@ -19,11 +19,16 @@ from PyQt6.QtCore import (
     Qt,
 )
 from PyQt6.QtGui import (
+    QAction,
     QColor,
+    QContextMenuEvent,
     QDrag,
     QDragEnterEvent,
     QDropEvent,
     QEnterEvent,
+    QFocusEvent,
+    QHideEvent,
+    QKeyEvent,
     QMouseEvent,
     QPixmap,
 )
@@ -32,8 +37,10 @@ from PyQt6.QtWidgets import (
     QFrame,
     QGraphicsDropShadowEffect,
     QGraphicsOpacityEffect,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
+    QMenu,
     QPushButton,
     QVBoxLayout,
     QWidget,
@@ -57,128 +64,10 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
-# Tile image file names
-_IMG_SIMSCAPE = "simscape_multibody.png"
-_IMG_MATLAB = "matlab_logo.png"
+from .model_card_images import MODEL_IMAGES
+from .model_card_skeleton import SkeletonCard
 
-# Maps display names to tile image files in assets/
-MODEL_IMAGES = {
-    # Physics Engines - Current names from models.yaml
-    "MuJoCo": "mujoco_humanoid.png",
-    "Drake": "drake.png",
-    "Pinocchio": "pinocchio.png",
-    "OpenSim": "opensim.png",
-    "MyoSuite": "myosim.png",
-    # MATLAB/Simscape
-    "Matlab Models": _IMG_MATLAB,
-    # Tools
-    "Motion Capture": "c3d_viewer_modern.png",
-    "Model Explorer": "urdf_icon.png",
-    "Putting Green": "putting_green_modern.png",
-    "Video Analyzer": "video_analyzer_modern.png",
-    "Data Explorer": "data_explorer_modern.png",
-    "OpenPose": "openpose.png",
-    "MediaPipe": "mediapipe.png",
-    "Project Map": "project_map.png",
-    "Movement Optimizer": "movement_optimizer.png",
-    # Legacy names (backward compatibility)
-    "MuJoCo Humanoid": "mujoco_humanoid.png",
-    "MuJoCo Dashboard": "mujoco_hand.png",
-    "Drake Dashboard": "drake.png",
-    "Pinocchio Dashboard": "pinocchio.png",
-    "Drake Golf Model": "drake.png",
-    "Pinocchio Golf Model": "pinocchio.png",
-    "OpenSim Golf": "opensim.png",
-    "MyoSim Suite": "myosim.png",
-    "OpenPose Analysis": "openpose.jpg",
-    "Matlab Simscape": _IMG_MATLAB,
-    "Matlab Simscape 2D": _IMG_MATLAB,
-    "Matlab Simscape 3D": _IMG_MATLAB,
-    "Dataset Generator GUI": _IMG_MATLAB,
-    "Golf Swing Analysis GUI": _IMG_MATLAB,
-    "MATLAB Code Analyzer": _IMG_MATLAB,
-    "URDF Generator": "urdf_icon.png",
-    "C3D Motion Viewer": "c3d_viewer_modern.png",
-    "Shot Tracer": "golf_icon.png",
-    # New launcher tiles
-    "Cross Engine": "cross_engine.svg",
-    "Exercise Dashboard": "exercise_dashboard.svg",
-    "Swing Optimizer": "swing_optimizer.svg",
-    "Injury Analysis": "injury_analysis.svg",
-    "Terrain Engine": "putting_green_modern.png",
-    "BunkerShot 3D": "bunkershot3d.svg",
-    "Pendulum": "pendulum.svg",
-    "Chat Assistant": "golf_logo.png",
-    "Character Builder": "urdf_icon.png",
-    "Pose Studio": "pose_studio.svg",
-    "Dataset Generator": "data_explorer_modern.png",
-    "Golf Simulation Suite": "golf_logo.png",
-    "Motion-Match Preview": "motion_target_preview.svg",
-    "Starting-Pose Matcher (legacy)": "motion_target_preview.svg",
-    "Data Processor": "data_explorer_modern.png",
-    "Video Processor": "video_analyzer_modern.png",
-}
-
-
-class SkeletonCard(QFrame):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setObjectName("SkeletonCard")
-        self.setMinimumSize(180, 240)
-        self.setStyleSheet("""
-            #SkeletonCard {
-                background-color: rgba(255, 255, 255, 0.03);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                border-radius: 16px;
-            }
-        """)
-
-        # Qt only allows one QGraphicsEffect per widget, and a real pulse
-        # needs a QGraphicsOpacityEffect (setWindowOpacity() is a no-op on
-        # a non top-level widget -- issue #8906), so the opacity effect
-        # replaces the drop shadow as the card's active effect.
-        self.effect = QGraphicsOpacityEffect(self)
-        self.effect.setOpacity(0.35)
-        self.setGraphicsEffect(self.effect)
-
-        self._pulse_opacity: float = 0.35
-
-        pulse_up = QPropertyAnimation(self, b"pulseOpacity")
-        pulse_up.setDuration(1000)
-        pulse_up.setStartValue(0.35)
-        pulse_up.setEndValue(0.85)
-        pulse_up.setEasingCurve(QEasingCurve.Type.InOutSine)
-
-        pulse_down = QPropertyAnimation(self, b"pulseOpacity")
-        pulse_down.setDuration(1000)
-        pulse_down.setStartValue(0.85)
-        pulse_down.setEndValue(0.35)
-        pulse_down.setEasingCurve(QEasingCurve.Type.InOutSine)
-
-        self._anim = QSequentialAnimationGroup(self)
-        self._anim.addAnimation(pulse_up)
-        self._anim.addAnimation(pulse_down)
-        self._anim.setLoopCount(-1)
-        self._anim.start()
-
-    @pyqtProperty(float)
-    def pulseOpacity(self) -> float:
-        return self._pulse_opacity
-
-    @pulseOpacity.setter  # type: ignore[no-redef]
-    def pulseOpacity(self, value: float) -> None:
-        self._pulse_opacity = value
-        self.effect.setOpacity(value)
-
-    def hideEvent(self, event: QEvent | None) -> None:
-        """Stop the pulse animation once the skeleton is hidden.
-
-        Without this, `_anim`'s loop-forever animation keeps running after
-        the card is torn down (e.g. by `_rebuild_grid`'s grid-teardown
-        loop), leaking a timer for the lifetime of the process (#8906).
-        """
-        self._anim.stop()
-        super().hideEvent(event)
+__all__ = ["MODEL_IMAGES", "DraggableModelCard", "SkeletonCard"]
 
 
 class DraggableModelCard(QFrame):
@@ -304,12 +193,8 @@ class DraggableModelCard(QFrame):
                 )
                 self.lbl_img.setPixmap(scaled)
 
-    def enterEvent(self, event: QEnterEvent | None) -> None:
-        """Trigger micro-animation on hover enter."""
-        self._hover_anim.setStartValue(self._hover_offset)
-        self._hover_anim.setEndValue(4.0)
-        self._hover_anim.start()
-        # Reveal the per-tile launch button, info button, and favorite button.
+    def _show_action_buttons(self) -> None:
+        """Reveal the per-tile launch, info, and favorite buttons."""
         btn = getattr(self, "_btn_quick_launch", None)
         info_btn = getattr(self, "_btn_info", None)
         fav_btn = getattr(self, "_btn_favorite", None)
@@ -323,6 +208,46 @@ class DraggableModelCard(QFrame):
             fav_btn.show()
             fav_btn.raise_()
         self._reposition_quick_launch_button()
+
+    def _hide_action_buttons(self) -> None:
+        """Hide the per-tile launch, info, and favorite buttons if not focused."""
+        btn = getattr(self, "_btn_quick_launch", None)
+        info_btn = getattr(self, "_btn_info", None)
+        fav_btn = getattr(self, "_btn_favorite", None)
+
+        # Do not hide if the card or any action button holds keyboard focus
+        if (
+            self.hasFocus()
+            or (btn is not None and btn.hasFocus())
+            or (info_btn is not None and info_btn.hasFocus())
+            or (fav_btn is not None and fav_btn.hasFocus())
+        ):
+            return
+
+        if btn is not None:
+            btn.hide()
+        if info_btn is not None:
+            info_btn.hide()
+        if fav_btn is not None:
+            fav_btn.hide()
+        self._reposition_quick_launch_button()
+
+    def focusInEvent(self, event: QFocusEvent | None) -> None:
+        """Reveal action buttons when tile or child button receives focus."""
+        self._show_action_buttons()
+        super().focusInEvent(event)
+
+    def focusOutEvent(self, event: QFocusEvent | None) -> None:
+        """Hide action buttons when keyboard focus leaves tile and child buttons."""
+        self._hide_action_buttons()
+        super().focusOutEvent(event)
+
+    def enterEvent(self, event: QEnterEvent | None) -> None:
+        """Trigger micro-animation on hover enter."""
+        self._hover_anim.setStartValue(self._hover_offset)
+        self._hover_anim.setEndValue(4.0)
+        self._hover_anim.start()
+        self._show_action_buttons()
         super().enterEvent(event)
 
     def leaveEvent(self, event: QEvent | None) -> None:
@@ -334,16 +259,7 @@ class DraggableModelCard(QFrame):
         self._hover_anim.setStartValue(self._hover_offset)
         self._hover_anim.setEndValue(0.0)
         self._hover_anim.start()
-        btn = getattr(self, "_btn_quick_launch", None)
-        if btn is not None:
-            btn.hide()
-        info_btn = getattr(self, "_btn_info", None)
-        if info_btn is not None:
-            info_btn.hide()
-        fav_btn = getattr(self, "_btn_favorite", None)
-        if fav_btn is not None:
-            fav_btn.hide()
-        self._reposition_quick_launch_button()  # update buttons position
+        self._hide_action_buttons()
         super().leaveEvent(event)
 
     def set_selected(self, is_selected: bool) -> None:
@@ -392,8 +308,8 @@ class DraggableModelCard(QFrame):
         # Position Favorite Button at top-right corner
         fav_w = 0
         if fav_btn is not None:
-            fav_w = fav_btn.sizeHint().width()
-            fav_h = fav_btn.sizeHint().height()
+            fav_w = max(24, fav_btn.sizeHint().width())
+            fav_h = max(24, fav_btn.sizeHint().height())
             fav_btn.setFixedSize(fav_w, fav_h)
 
             if self.width() >= fav_w + margin:
@@ -412,8 +328,8 @@ class DraggableModelCard(QFrame):
 
         # Position Info Button to the left of the Favorite Button at the top
         if info_btn is not None:
-            info_w = info_btn.sizeHint().width()
-            info_h = info_btn.sizeHint().height()
+            info_w = max(24, info_btn.sizeHint().width())
+            info_h = max(24, info_btn.sizeHint().height())
             info_btn.setFixedSize(info_w, info_h)
 
             y_pos = margin
@@ -572,8 +488,13 @@ class DraggableModelCard(QFrame):
             self.lbl_img.setPixmap(pixmap)
         else:
             c = _get_theme_colors()
+            text_quaternary = (
+                c.get("text_quaternary", "#666666")
+                if isinstance(c, dict)
+                else getattr(c, "text_quaternary", "#666666")
+            )
             self.lbl_img.setText("No Image")
-            self.lbl_img.setStyleSheet(Styles.no_image_label(c.text_quaternary))
+            self.lbl_img.setStyleSheet(Styles.no_image_label(text_quaternary))
 
         if self._list_mode:
             # In list mode the icon sits to the left without centering frames.
@@ -661,25 +582,29 @@ class DraggableModelCard(QFrame):
         )
 
     def _build_info_button(self) -> QPushButton:
-        """Create a small 'i' info button."""
+        """Create a WCAG 2.5.8 compliant info button."""
         btn = QPushButton("ℹ", self)
         btn.setObjectName("CardInfoButton")
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.setToolTip(f"<b>{self.model.name}</b><br>{self.model.description}")
-        btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        btn.setFixedSize(18, 18)
+        btn.setAccessibleName(f"About {self.model.name}")
+        btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        btn.setFixedSize(24, 24)
         btn.setStyleSheet(
             "QPushButton#CardInfoButton {"
             "  background: rgba(255, 255, 255, 0.1);"
             "  color: #aaaaaa;"
             "  border: none;"
-            "  border-radius: 9px;"
-            "  font-size: 10px;"
+            "  border-radius: 12px;"
+            "  font-size: 11px;"
             "  font-weight: bold;"
             "}"
             "QPushButton#CardInfoButton:hover {"
             "  background: rgba(255, 255, 255, 0.2);"
             "  color: #ffffff;"
+            "}"
+            "QPushButton#CardInfoButton:focus {"
+            "  border: 1px solid #409cff;"
             "}"
         )
         btn.clicked.connect(self._show_info_dialog)
@@ -688,7 +613,7 @@ class DraggableModelCard(QFrame):
         return btn
 
     def _build_favorite_button(self) -> QPushButton:
-        """Create a small star favorite button."""
+        """Create a WCAG 2.5.8 compliant star favorite button."""
         favs = (
             getattr(self.parent_launcher.layout_manager, "favorites", [])
             if self.parent_launcher
@@ -700,26 +625,28 @@ class DraggableModelCard(QFrame):
         btn.setObjectName("CardFavoriteButton")
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.setToolTip("Remove from favorites" if is_fav else "Add to favorites")
-        btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        btn.setFixedSize(18, 18)
-        btn.setStyleSheet(
-            "QPushButton#CardFavoriteButton {"
-            "  background: rgba(255, 255, 255, 0.1);"
-            "  color: " + ("#ffb700" if is_fav else "#aaaaaa") + ";"
-            "  border: none;"
-            "  border-radius: 9px;"
-            "  font-size: 11px;"
-            "  font-weight: bold;"
-            "}"
-            "QPushButton#CardFavoriteButton:hover {"
-            "  background: rgba(255, 255, 255, 0.2);"
-            "  color: #ffb700;"
-            "}"
+        btn.setAccessibleName(
+            f"Remove {self.model.name} from favorites"
+            if is_fav
+            else f"Add {self.model.name} to favorites"
         )
+        btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        btn.setFixedSize(24, 24)
+        self._apply_favorite_button_style(btn, is_fav)
         btn.clicked.connect(self._toggle_favorite)
         btn.hide()
         self._btn_favorite = btn
         return btn
+
+    @staticmethod
+    def _apply_favorite_button_style(btn: QPushButton, is_fav: bool) -> None:
+        """Apply styles to favorite button based on favorited state."""
+        color = "#ffb700" if is_fav else "#aaaaaa"
+        btn.setStyleSheet(
+            f"QPushButton#CardFavoriteButton {{ background: rgba(255, 255, 255, 0.1); color: {color}; border: none; border-radius: 12px; font-size: 13px; font-weight: bold; }}"
+            f"QPushButton#CardFavoriteButton:hover {{ background: rgba(255, 255, 255, 0.2); color: #ffb700; }}"
+            f"QPushButton#CardFavoriteButton:focus {{ border: 1px solid #ffb700; }}"
+        )
 
     def _toggle_favorite(self) -> None:
         """Toggle whether this model is marked as favorite."""
@@ -730,20 +657,8 @@ class DraggableModelCard(QFrame):
             favs.remove(self.model.id)
             self._btn_favorite.setText("☆")
             self._btn_favorite.setToolTip("Add to favorites")
-            self._btn_favorite.setStyleSheet(
-                "QPushButton#CardFavoriteButton {"
-                "  background: rgba(255, 255, 255, 0.1);"
-                "  color: #aaaaaa;"
-                "  border: none;"
-                "  border-radius: 9px;"
-                "  font-size: 11px;"
-                "  font-weight: bold;"
-                "}"
-                "QPushButton#CardFavoriteButton:hover {"
-                "  background: rgba(255, 255, 255, 0.2);"
-                "  color: #ffb700;"
-                "}"
-            )
+            self._btn_favorite.setAccessibleName(f"Add {self.model.name} to favorites")
+            self._apply_favorite_button_style(self._btn_favorite, False)
             if hasattr(self.parent_launcher, "show_toast"):
                 self.parent_launcher.show_toast(
                     f"Removed {self.model.name} from favorites", "info"
@@ -752,20 +667,10 @@ class DraggableModelCard(QFrame):
             favs.append(self.model.id)
             self._btn_favorite.setText("★")
             self._btn_favorite.setToolTip("Remove from favorites")
-            self._btn_favorite.setStyleSheet(
-                "QPushButton#CardFavoriteButton {"
-                "  background: rgba(255, 255, 255, 0.1);"
-                "  color: #ffb700;"
-                "  border: none;"
-                "  border-radius: 9px;"
-                "  font-size: 11px;"
-                "  font-weight: bold;"
-                "}"
-                "QPushButton#CardFavoriteButton:hover {"
-                "  background: rgba(255, 255, 255, 0.2);"
-                "  color: #ffb700;"
-                "}"
+            self._btn_favorite.setAccessibleName(
+                f"Remove {self.model.name} from favorites"
             )
+            self._apply_favorite_button_style(self._btn_favorite, True)
             if hasattr(self.parent_launcher, "show_toast"):
                 self.parent_launcher.show_toast(
                     f"Added {self.model.name} to favorites", "success"
@@ -1063,7 +968,12 @@ class DraggableModelCard(QFrame):
         # Update description label
         desc = self.findChild(QLabel, "CardDescription")
         if desc:
-            desc.setStyleSheet(f"color: {c.text_secondary};")
+            text_secondary = (
+                c.get("text_secondary", "#aaaaaa")
+                if isinstance(c, dict)
+                else getattr(c, "text_secondary", "#aaaaaa")
+            )
+            desc.setStyleSheet(f"color: {text_secondary};")
         # Update status chip
         status_text, status_class = self._get_status_info()
         chip = self.findChild(QLabel, "StatusChip")
@@ -1087,7 +997,12 @@ class DraggableModelCard(QFrame):
         # Update no-image fallback
         img = self.findChild(QLabel, "CardImage")
         if img and not img.pixmap():
-            img.setStyleSheet(Styles.no_image_label(c.text_quaternary))
+            text_quaternary = (
+                c.get("text_quaternary", "#666666")
+                if isinstance(c, dict)
+                else getattr(c, "text_quaternary", "#666666")
+            )
+            img.setStyleSheet(Styles.no_image_label(text_quaternary))
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle left-click to select this model card."""
@@ -1116,20 +1031,120 @@ class DraggableModelCard(QFrame):
         drag.setHotSpot(self.drag_start_position)
         drag.exec(Qt.DropAction.MoveAction)
 
+    def contextMenuEvent(self, event: QContextMenuEvent | None) -> None:
+        """Expose tile actions via context menu (accessible via right-click or touch long-press)."""
+        if event is None:
+            return
+
+        menu = QMenu(self)
+        menu.setObjectName("ModelCardContextMenu")
+
+        act_launch = menu.addAction("Launch")
+        favs = (
+            getattr(self.parent_launcher.layout_manager, "favorites", [])
+            if self.parent_launcher and self.parent_launcher.layout_manager
+            else []
+        )
+        is_fav = self.model.id in favs
+        fav_label = "Remove from favorites" if is_fav else "Add to favorites"
+        act_fav = menu.addAction(fav_label)
+        act_info = menu.addAction("Model Details...")
+
+        action = menu.exec(event.globalPos())
+        if action == act_launch:
+            if self.parent_launcher:
+                self.parent_launcher.launch_model_direct(self.model.id)
+        elif action == act_fav:
+            self._toggle_favorite()
+        elif action == act_info:
+            self._show_info_dialog()
+
+    def _navigate_grid(self, key: Qt.Key) -> bool:
+        """Navigate to adjacent card in the parent launcher grid layout.
+
+        Returns True if navigation succeeded and focus was moved; False otherwise.
+        """
+        if not self.parent_launcher:
+            return False
+
+        grid = getattr(self.parent_launcher, "grid_layout", None)
+        if grid is None or not isinstance(grid, QGridLayout):
+            return False
+
+        # Locate self in grid layout
+        cur_row = -1
+        cur_col = -1
+        for i in range(grid.count()):
+            item = grid.itemAt(i)
+            if item is not None and item.widget() is self:
+                cur_row, cur_col, _, _ = grid.getItemPosition(i)
+                break
+
+        if cur_row == -1 or cur_col == -1:
+            return False
+
+        dr, dc = 0, 0
+        if key == Qt.Key.Key_Left:
+            dr, dc = 0, -1
+        elif key == Qt.Key.Key_Right:
+            dr, dc = 0, 1
+        elif key == Qt.Key.Key_Up:
+            dr, dc = -1, 0
+        elif key == Qt.Key.Key_Down:
+            dr, dc = 1, 0
+        else:
+            return False
+
+        target_row = cur_row + dr
+        target_col = cur_col + dc
+
+        # Bounds check against non-negative indices
+        if target_row < 0 or target_col < 0:
+            return False
+
+        target_item = grid.itemAtPosition(target_row, target_col)
+        if target_item is not None:
+            widget = target_item.widget()
+            if widget is not None and widget.isEnabled() and widget.isVisible():
+                widget.setFocus(Qt.FocusReason.ShortcutFocusReason)
+                if hasattr(self.parent_launcher, "select_model") and hasattr(
+                    widget, "model"
+                ):
+                    self.parent_launcher.select_model(widget.model.id)
+                return True
+
+        return False
+
     def keyPressEvent(self, event: Any) -> None:
         """Handle keyboard navigation and activation.
 
         Supports:
         - Enter/Return: Launch the model
         - Space: Select the model
-        - Arrow keys: Navigate to adjacent cards (handled by parent grid)
+        - Arrow keys: Navigate to adjacent cards in the launcher grid
         """
-        if event and event.key() in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
+        if not event:
+            return
+
+        key = event.key()
+        if key in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
             if self.parent_launcher:
                 self.parent_launcher.launch_model_direct(self.model.id)
-        elif event and event.key() == Qt.Key.Key_Space:
+            event.accept()
+        elif key == Qt.Key.Key_Space:
             if self.parent_launcher:
                 self.parent_launcher.select_model(self.model.id)
+            event.accept()
+        elif key in (
+            Qt.Key.Key_Left,
+            Qt.Key.Key_Right,
+            Qt.Key.Key_Up,
+            Qt.Key.Key_Down,
+        ):
+            if self._navigate_grid(key):
+                event.accept()
+            else:
+                super().keyPressEvent(event)
         else:
             super().keyPressEvent(event)
 

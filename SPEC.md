@@ -1,5 +1,189 @@
 # SPEC.md — Repository Specification Document
 
+## Launcher UI, Process Manager, and Library Widget Unit-Gate Debt Burndown (#8766)
+
+Burn down 67 quarantined test node IDs across launcher UI setup, process manager, library widget, and golf launcher in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine all 67 tests across `tests/launchers/test_golf_launcher.py` (25 tests), `tests/launchers/test_launcher_ui_setup.py` (21 tests), `tests/launchers/test_launcher_process_manager.py` (17 tests), and `tests/launchers/test_library_widget.py` (4 tests).
+- Theme Mock Alignment: Update test mock patch target in `test_update_launch_button_tolerates_theme_without_success_hover` to `src.shared.python.theme.get_current_colors` matching `upstream_drift_launcher.py` module imports.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 298 to 231 node IDs across 10 clusters) and execute all 127 launcher unit tests with 100% pass rate.
+
+## Security Handlers and Physics Module Docstrings Unit-Gate Debt Burndown (#8766)
+
+Burn down 32 quarantined test node IDs across exception handling and physics module docstrings in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine all 32 tests in `tests/unit/test_security_and_module_fixes.py` (4 bare-pass exception handler checks and 28 physics module docstring checks).
+- Path Isolation & Refactor Compatibility: Anchor relative file paths for AST inspection in `TestBarePassExceptionHandlers` and `TestPhysicsModuleDocstrings` to `REPO_ROOT` to survive `_prevent_repo_root_io` test runner directory isolation; handle the `src/shared/python/physics/aerodynamics` directory refactor gracefully by checking its `__init__.py`.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 330 to 298 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
+## CORS Configuration Unit-Gate Debt Burndown (#8766)
+
+Burn down 13 quarantined test node IDs across CORS middleware configuration in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine all 13 tests in `tests/unit/test_cors.py`.
+- Modern FastAPI Compatibility & Contract Alignment: Update test mock application creation to provide `FastAPI` mock spec (`MagicMock(spec=FastAPI)`) satisfying the `require(isinstance(app, FastAPI), ...)` precondition in canonical `cors.py`; align test assertions with canonical vendor defaults (`allow_credentials=False`, `allow_methods=["GET", "POST", "OPTIONS"]`, and wildcard origin validation when credentials are enabled).
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 343 to 330 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
+## Launcher Diagnostics, Artifacts, Pipeline, and Tools Model Sources Debt Burndown (#8766)
+
+Burn down 20 quarantined test node IDs across launcher diagnostics, checkpoint loading, golf state environment constants, motion pipeline orchestration, TRC adapters, and tools launcher model sources in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 20 tests across `tests/launchers/test_launcher_diagnostics.py` (1 test), `tests/unit/motion_matching/test_checkpoint_artifact_loading.py` (4 tests), `tests/unreal_integration/wave6_unreal/test_skeleton_and_golf_state.py` (1 test), `tests/unit/motion_pipeline/orchestrator/test_orchestrator.py` (2 tests), `tests/unit/motion_pipeline/sources/test_trc_adapter.py` (1 test), and `tests/launchers/test_launcher_model_sources.py` (11 tests).
+- Robust Path and Monkeypatch Hardening: Direct module object monkeypatching for `_checkpoint_artifacts`, `model_source_providers`, `trc_adapter`, and motion pipeline sources/preprocessing/scaling/ik loaders; anchor AST source file path resolution in `test_skeleton_and_golf_state.py` to repo root to survive `_prevent_repo_root_io` test runner directory isolation; update error expectation in `test_orchestrator.py` to accept domain-specific `InvalidInputError`.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 363 to 343 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
+## AI Adapters, Setup Wizard, and Launcher Tools Unit-Gate Debt Burndown (#8766)
+
+Burn down 16 quarantined test node IDs across AI adapters, setup wizard, launcher bootstrap, and tools clusters in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 16 passing tests across `tests/reinforcement_learning/wave6_rl/test_trajectory_funnel_benchmark_coverage.py` (1 test), `tests/unit/config/test_setup_wizard.py` (2 tests), `tests/unit/sidekick/lab/bio/test_c3d_io.py` (1 test), `tests/unit/test_launch_upstream_drift_bootstrap.py` (2 tests), `tests/unit/tools/model_generation/test_rest_api_fastapi.py` (1 test), `tests/unit/sidekick/test_data_io.py` (1 test), and `tests/unit/shared_python/ai/adapters/` (8 tests across Gemini and Ollama).
+- Validated System Invariants: Ensure reinforcement learning funnel exports, setup wizard embedding, launcher bootstrap repo resolution, FastAPI model generation parameter parsing, Bio C3D export path validation, sidekick CSV/JSON serialization, and Gemini/Ollama provider adapters execute deterministically and cleanly.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 379 to 363 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
+## Motion Pipeline API Source Formats and Matrix Reconciliation (#8875)
+
+Reconcile advertised source formats in the motion pipeline orchestrator API with runtime registered adapters, drop the misleading auto-generated claim from formats documentation, and record architecture budget exceptions for pre-existing create_app handlers:
+- API Source Formats: Update `PipelineRequest.source_format` and `run_pipeline` form parameter descriptions in `src/shared/python/motion_pipeline/api.py` to document registered adapters (`alphapose_json`, `bvh`, `c3d`, `csv`, `deeplabcut`, `hmr2`, `hrnet_json`, `mediapipe_json`, `opencap_session`, `openpose_json`, `opensim_sto_mot`, `trc`, `auto`, `passthrough`) and eliminate misleading mentions of rejected `mat`, `fbx`, and generic `json` formats.
+- Documentation Integrity: Reconcile `docs/motion_pipeline/formats.md` to document that format support matrix is hand-maintained for capture sources and quirks.
+- Agent Context & Architecture Budget: Record reviewed `pipeline-api` contract boundary and render views, and add architecture budget exceptions for legacy `create_app` functions in `scripts/config/architecture_budget.json`.
+- Suite Marker Ratchet: Mark `tests/unit/motion_pipeline/orchestrator/test_api.py` with `pytestmark = pytest.mark.unit`, paying down 156 unmarked test entries in `scripts/config/suite_marker_baseline.json`.
+
+## Shared Python and Physics Engines Unit-Gate Debt Burndown (#8766)
+
+Burn down 29 quarantined test node IDs across the shared Python and physics engines clusters in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 29 passing headless tests across `tests/unit/shared_python/test_ai_sample_tools.py` (12 tests), `tests/unit/shared_python/ai/adapters/test_ai_adapters_base.py` (2 tests), `tests/unit/shared_python/test_ai_tool_registry.py` (2 tests), `tests/tools/sidekick_tool/test_embed_adapter.py` (1 test), `tests/unit/launcher/test_sidekick_extension_overlay.py` (1 test), `tests/unit/shared_python/test_analysis_orchestrator.py` (1 test), `tests/unit/shared_python/test_engine_loaders_coverage.py` (1 test), `tests/unit/shared_python/test_output_manager.py` (1 test), and `tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_joint_analysis.py` (8 tests).
+- Validated System Invariants: Ensure AI sample tools, registry dispatch, engine loader coverage, output manager utilities, sidekick extension overlay isolation, and MuJoCo joint analysis execute cleanly and deterministically in headless CI environments.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 408 to 379 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
+## Bunker Shot and API Route Unit-Gate Debt Burndown (#8766)
+
+Burn down 57 quarantined test node IDs across the `bunker_shot_model_and_workbench` and `api_routes_and_security` clusters in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 18 passing solver envelope, truncation guard, workbench embedding adapter, headless non-Qt import isolation, evaluation report, and test shot unit tests across `tests/bunkershot3d/` and `tests/tools/bunker_shot_gui/`, and 39 passing API route, WebSocket, diagnostics, model, engine, and security verification unit tests across `tests/unit/api/` and `tests/unit/api_security/`.
+- Scientific Workbench, API, and Security Invariant Adherence: Verify all un-quarantined solver, workbench, and API route tests execute with real physical parameters, non-invented physics guarantees (ADR 0032), fail-closed security contracts (bcrypt key verification), and strict error sanitization.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 465 to 408 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
+## Deployment and Teleoperation Unit-Gate Debt Burndown (#8766)
+
+Burn down all 11 quarantined test node IDs under the `deployment_devices_and_configuration` cluster in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine all 11 teleoperation interface, device input, and provider adapter unit tests across `tests/deployment/`, `tests/unit/deployment/`, and `tests/config/wave5_config/`, eliminating the entire `deployment_devices_and_configuration` cluster from quarantine debt.
+- Validated Device and Teleoperation Contracts: Verify disconnected input device contracts (`HapticDeviceInput`, `SpaceMouseInput`, `VRControllerInput`), teleoperation control modes (position, velocity, impedance, wrench, and disengaged clutch torque zeroing), and provider presentation metadata mappings pass deterministically against repository code.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 476 to 465 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
+## Packaging and Governance Unit-Gate Debt Burndown (#8766)
+
+Burn down 43 quarantined test node IDs under the `packaging_ci_and_repository_governance` cluster in `scripts/config/unit_gate_quarantine.json`:
+- Retired Passing Quarantined Tests: Un-quarantine 40 previously unmasked packaging, release, workflow boundary, and build hook unit tests (including all 29 node IDs in `tests/unit/test_build_hooks.py`) verified 100% passing against current repository code.
+- Script and Workflow Test Path Isolation: Anchor relative paths in `tests/unit/scripts/test_check_gitignore_dotenv.py` and `tests/scripts/test_check_vendor_updates.py` to the repository root so subprocess executions and workflow asset lookups remain robust against test runner working-directory variations.
+- Monolith Refactor Register Synchronization: Regenerate `docs/development/monolith_refactor_register.md` via `scripts/gen_monolith_register.py --write` to synchronize tracked oversized files and allow `tests/scripts/test_monolith_register.py` to pass without quarantine.
+- Automated Verification: Run `scripts/ci/check_unit_gate_quarantine.py` ensuring contract adherence (ratchet down from 519 to 476 node IDs across 10 clusters) and execute `pytest tests/ci/test_unit_gate_quarantine_contract.py`.
+
+## Signed Release Tag Enforcement and Verification (#9747)
+
+Enforce cryptographic signing on production release tags in `.github/workflows/release.yml` and synchronize operational release procedures in `docs/operations/release-runbook.md`:
+- Automated Release Tag Verification Gate: Insert a fail-closed `Verify release tag is signed` step into the `build` job in `.github/workflows/release.yml` executing `git verify-tag "${GITHUB_REF_NAME}"`. Runs on every pushed `v*.*.*` tag before installing build tools or compiling packages. Any unsigned or lightweight tag immediately fails the release build.
+- Runbook Alignment: Update `docs/operations/release-runbook.md` release and recovery commands to prescribe `git tag -s` (signed tags). Document release operator requirements including local GPG/SSH signing key setup, `tag.gpgSign true` configuration, and the workflow's verification gate.
+- Verification & Test Coverage: Contract test in `tests/ci/test_ci_infrastructure.py` asserting that the `build` job of `.github/workflows/release.yml` contains the `Verify release tag is signed` step executing `git verify-tag "${GITHUB_REF_NAME}"`.
+
+## Accessible Model Card Actions and Grid Navigation (#8901)
+
+Harden model card touch and keyboard accessibility and implement arrow-key grid navigation in `src/launchers/model_card.py`:
+- WCAG 2.5.8 Compliant Target Size: Increase info (`_btn_info`) and favorite (`_btn_favorite`) button fixed sizes to $24 \times 24$ px with `border-radius: 12px`, satisfying the WCAG 2.5.8 minimum target size standard for touch and mouse interactions.
+- Keyboard Focus & Accessible Semantics: Remove `Qt.FocusPolicy.NoFocus` and assign `Qt.FocusPolicy.StrongFocus` to both action buttons. Set descriptive `accessibleName` attributes (`"About {self.model.name}"`, `"Add {self.model.name} to favorites"` / `"Remove {self.model.name} from favorites"`) that update dynamically upon toggling favorite state.
+- Focus-Mirrored Visibility: Implement `_show_action_buttons()`, `_hide_action_buttons()`, `focusInEvent()`, and `focusOutEvent()` on `DraggableModelCard`. Action buttons reveal automatically when the card or any of its child buttons receive keyboard focus (e.g. Tab navigation) and hide only when keyboard focus and mouse hover both leave the card subtree.
+- Context Menu & Touch Affordance: Implement `contextMenuEvent()` on `DraggableModelCard`, exposing `"Launch"`, `"Add to / Remove from favorites"`, and `"Model Details..."` actions via standard `QMenu` at the trigger position, enabling both right-click and touch long-press workflows.
+- Arrow-Key Grid Navigation: Implement directional arrow-key navigation (`Qt.Key.Key_Left`, `Qt.Key.Key_Right`, `Qt.Key.Key_Up`, `Qt.Key.Key_Down`) in `keyPressEvent()`. Query parent launcher `grid_layout` (`QGridLayout`), resolve current tile `(row, col)` coordinates, and shift focus and model selection to the adjacent tile widget.
+- Automated Verification: Unit tests in `tests/launchers/test_model_card_accessibility.py` verifying button target sizes $\ge 24 \times 24$ px, `StrongFocus` policy, dynamic accessible names, focus-driven visibility, context menu action dispatch, and arrow-key grid navigation.
+
+## Hardened Toast Notification System and Accessibility (#8900)
+
+Harden and stabilize the shared toast notification system (`src/shared/python/ui/toast.py`) against unbounded stacking, missing user controls, static geometry drift, and non-compliant accessibility encoding:
+- Visible Toast Capping: Cap visible toasts at `MAX_VISIBLE_TOASTS = 4` in `ToastManager`. When exceeded, dismiss the oldest active toast and reposition the remaining toasts so notifications never walk off the screen.
+- Early Dismissal and Hover Controls: Implement `Toast.mousePressEvent` to dismiss on click, with pointing hand cursor indicating clickability. Implement `Toast.enterEvent` to pause the auto-dismiss timer and record remaining duration, and `Toast.leaveEvent` to resume the timer with the remaining duration.
+- Visual and Semantic Type Encoding (WCAG 1.4.1): Render `_get_icon()` into a leading `QLabel` alongside the message in `Toast._setup_ui()`. Set `accessibleName` on both `Toast` and message label with semantic type prefix (`"Success:"`, `"Error:"`, `"Warning:"`, `"Info:"`) so notification type is never encoded by background color alone.
+- Window Anchoring and Deactivation Handling: Drop `Qt.WindowType.WindowStaysOnTopHint`. Install an internal event filter on `ToastManager.parent` to automatically invoke `reposition_all()` on `Move` and `Resize` events. On `WindowDeactivate` and `Hide`, conceal active toasts so they never float over other desktop applications, unhiding and repositioning them on `WindowActivate` and `Show`. Dismiss active toasts on `Close`.
+- Automated Verification: Unit tests in `tests/unit/ui/test_toast.py` verifying icon glyphs, accessible naming, window flags, click-to-dismiss, hover pause and resume, toast stack capping, window move/resize anchoring, and application deactivation hiding.
+
+
+## Embedded-Host Workspace Layout and Dock Geometry Persistence (#8899)
+
+Persist embedded-host workspace tabs, dock areas, active tab focus, and dock splitter geometries across launcher restarts (`src/launchers/embedded_host.py`, `src/launchers/launcher_layout_manager.py`, `src/launchers/launcher_layout_persistence.py`, `src/launchers/upstream_drift_launcher.py`):
+- Workspace State Snapshot & Restore: Wire `EmbeddedHostWidget.state_snapshot()` and `EmbeddedHostWidget.restore_state()` into the launcher lifecycle. `state_snapshot()` serializes ordered tabs, dock areas, active tab index, and dock layout bytes (`"dock_geometry"`). `restore_state()` idempotently re-opens tabs and docks, sets the active tab index, and reapplies dock geometry while gracefully logging and skipping tools that are no longer registered.
+- Dock Geometry & Qt State Methods: Implement `saveState() -> QByteArray` and `restoreState(state: QByteArray) -> bool` on `EmbeddedHostWidget` delegating to its internal `QMainWindow` host window, capturing and restoring dock widget positions, floating states, and splitter sizes.
+- Schema & Persistence Wiring: Extend `LayoutManager`'s save/load layout schema with `"workspace"` and `"dock_state"` keys. In `save_layout_state()`, query `embedded_host.state_snapshot()` and `dock_window.saveState()`. In `load_layout_state()`, restore the workspace and dock state after model layout loads. Ensure `bootstrap_embeddable_tools()` runs prior to `_load_layout()` in `update_startup_results()`.
+- Automated Verification: Unit tests in `tests/launchers/test_embedded_host_workspace_persistence.py` verifying state snapshot structure, tab order and active tab round-tripping, dock area and dock geometry preservation, schema serialization in `LayoutManager`, `save_layout_state`/`load_layout_state` wiring, and graceful fallback when `embedded_host` is `None`.
+
+## Consolidated Live Keyboard Shortcuts Modal and Label Introspection (#8902)
+
+Unify keyboard shortcut discovery and eliminate misleading static/unbound shortcut listings and raw `"(shortcut)"` placeholder rows in `UpstreamDriftLauncher` (`src/launchers/launcher_dialogs.py`, `src/launchers/launcher_ui_setup.py`, `src/launchers/_launcher_top_bar_ui.py`):
+- Modal Consolidation: Repoint global `Ctrl+?` and the Help menu shortcut actions directly to the live `KeyboardShortcutsDialog` modal (`show_keyboard_shortcuts_modal` in `src/launchers/help_menu.py`), retiring the disconnected static `ShortcutsOverlay` from the primary launcher path.
+- Human-Readable Shortcut Names: Set descriptive `objectName` properties on all registered `QShortcut` instances at construction (`"User Manual"`, `"Keyboard Shortcuts"`, `"Preferences"`, `"Quit Application"`, `"Search Models"`, `"Clear Search"`, `"Zoom In"`, `"Zoom Out"`, and dynamic Sidekick feature menu labels), enabling `collect_shortcut_rows` in `help_menu.py` to scrape real, meaningful action names without falling back to `"(shortcut)"`.
+- Automated Verification: Unit tests in `tests/launchers/test_help_menu.py`, `tests/launchers/test_launcher_dialogs.py`, and `tests/launchers/test_launcher_ui_setup.py` asserting modal invocation, absence of `"(shortcut)"` placeholders, and non-empty `objectName` registration across all global shortcuts.
+
+## Background Worker for Windows Dependency Verification (#8898)
+
+Eliminate synchronous native module imports on the GUI thread during Windows runtime dependency verification in `SettingsDialog` (`src/launchers/settings_dialog.py`):
+- Report Generator Extraction: Extract Windows host dependency inspection into `check_windows_dependencies_report() -> RuntimeDependencyReport` in `src/launchers/settings_runtime.py`, probing NumPy, SciPy, MuJoCo, PyQt6, Matplotlib, Pandas, and optional engines (Drake, Pinocchio, OpenSim, MyoSuite) and packaging results into `RuntimeDependencyReport`.
+- Background Worker Execution: In `SettingsDialog`, store the check button as `self.btn_check_windows_deps` and route `_check_windows_deps()` through `_start_runtime_dependency_check(worker_key="windows", button=self.btn_check_windows_deps, check_fn=_check_windows_dependencies_report)`.
+- UI State & Thread Safety: On click, disable the button and show `"Checking..."`, dispatching inspection to `RuntimeDependencyCheckWorker` off the Qt event loop. Upon completion or failure, restore the button state and present the formatted HTML report or error dialog without freezing the interface.
+- Automated Verification: Unit tests in `tests/launchers/test_settings_dialog.py` asserting non-blocking return, worker thread execution, button busy/disabled states, and report presentation.
+
+## Integrations Health Panel Feedback, Empty State, and Contrast (#8904)
+
+Resolve collection failure masking, transient clipboard feedback, empty state guidance, and dark-mode contrast deficits in `IntegrationsHealthPanel` (`src/launchers/integrations_health_panel.py`):
+- Probe Failure State: Update `refresh()` so that probe/collection exceptions do not reset records to empty or display misleading `0/0 OK` success counts. Instead, set the status label to `"Probe failed — see logs"` while retaining previously displayed integration records and re-enabling the refresh button.
+- Transient Action Feedback: Update `_copy_diagnostics()` to display `"Copy failed — see logs"` on clipboard or formatting failures, and on both success (`"Copied!"`) and failure schedule `QTimer.singleShot(2000, self._update_status_label)` to restore the live `{healthy}/{total} OK` count after 2 seconds.
+- Spanning Empty State: In `_populate_table()`, if zero integration records are returned, insert an informative placeholder row spanning all columns (`"No integrations configured yet. Add one in Settings → MCP Servers."`) with center alignment. Call `_table.clearSpans()` prior to rebuilding rows to avoid stale span layouts.
+- Text Contrast Compliance: Pair every background badge colour with an explicit, high-contrast foreground text colour (`_STATUS_TEXT_COLOURS` mapping `#11111b` for light/pastel badges like healthy, configured, warning, error, and unknown, and `#ffffff` for dark `unconfigured` badges), satisfying accessibility contrast requirements across both dark and light UI themes.
+- Automated Verification: Unit tests in `tests/unit/launcher/test_integrations_health_panel.py` verifying exception retention, status label failure states, empty table spanning placeholder, clipboard feedback and timer recovery, and high-contrast foreground color assignment.
+
+## Defer Database Session Acquisition in Auth Dependencies (#8940)
+
+Eliminate sync database session allocation, connection pool checkout, and `SELECT 1` pre-ping overhead on unauthenticated or auth-disabled API requests (~9 sessions/second under normal UI polling):
+- Session Factory Dependency: Introduce `get_db_factory(request: Request = None) -> Callable[[], ContextManager[Session]]` and context manager `db_session_scope() -> Generator[Session, None, None]` in `src/api/database.py`. Resolves DB sessions lazily on demand rather than eagerly during FastAPI dependency resolution.
+- Auth-Disabled Mode Bypass: Update `_global_auth_dependency`, `_ws_compatible_auth_dependency`, and `_request_time_quota_dependency` in `src/api/route_registry.py` as well as `require_cloud_auth` in `src/api/auth/dependencies.py` to evaluate `is_auth_disabled()` prior to acquiring any database session. In local/auth-disabled mode, dependencies return/yield `None` without touching `SessionLocal` or database connection pools.
+- Test Override Interoperability: `get_db_factory` inspects `request.app.dependency_overrides` and wraps any `app.dependency_overrides[get_db]` or `app.dependency_overrides[get_db_factory]` seamlessly, ensuring complete backward compatibility with existing tests.
+- Automated Verification: Unit tests in `tests/unit/api/test_global_auth_enforcement.py` asserting zero `SessionLocal` constructions across global auth, quota, health, and capability probe routes when auth is disabled.
+
+## Unified Engine Dashboard Export Provenance (#8820)
+
+Stamp physics engine identity, model path, model file hash, unique run ID, and timestamp into dashboard exports and physics recordings across all formats:
+- `ProvenanceInfo` Identity Metadata: Extends `ProvenanceInfo` dataclass (`src.shared.python.data_io.provenance`) with `engine_name: str | None`, `run_id: str | None`, `drake_version: str | None`, and `pinocchio_version: str | None`. Captures unique simulation run IDs and automatically formats engine name and run ID into CSV comment headers via `# Engine: <engine_name>` and `# Run ID: <run_id>`.
+- `GenericPhysicsRecorder` & Playback Integration: Assigns a persistent UUID `run_id` per recorder session, regenerated on `.reset()`. Populates `engine_name`, `run_id`, `model_file_path`, `model_file_hash`, and a structured `ProvenanceInfo` object into `get_data_dict()`.
+- Multiformat Export Serialization:
+  - CSV (`_export_csv`): Prepends `#` comment provenance headers using `add_provenance_header_file`, preserving downstream tabular parsing in pandas (`pd.read_csv`) and numpy.
+  - JSON (`_export_json`): Serializes structured provenance metadata under a top-level `"provenance"` key.
+  - MATLAB & HDF5: Accepts `provenance` in `export_to_matlab` and `export_to_hdf5` and atomic writers, associating run identity, engine, and model metadata sidecars with binary artifacts.
+- Engine Disambiguation: Ensures MuJoCo, Drake, and Pinocchio dashboard exports from identical trajectories produce distinct, byte-level distinguishable metadata headers and provenance sidecars.
+- Automated Verification: Unit tests in `tests/unit/test_dashboard_export_provenance.py` asserting engine, run ID, model path, and timestamp stamping, as well as CSV comment row parseability and cross-engine distinction.
+
+## Surfacing MethodCitation Metadata and Formula Traceability (#8847)
+
+Surface peer-reviewed methodology citations (`MethodCitation`: Putnam 1993, Cheetham et al. 2001, McHardy & Pollard 2005, Hosea et al. 1990) and mathematical derivation formulas across analysis services, visualization renderers, injury metrics, and UI provenance labels:
+- `MethodCitation` Formatting: Adds `format_citation(self) -> str` and `to_dict(self) -> dict[str, Any]` to `MethodCitation` in `src.shared.python.analysis.dataclasses`, rendering standardized academic citations with title, publication year, author list, and DOI/notes.
+- Provenance Tooltip Affordance: Extends `ProvenanceRecord` in `src.shared.python.ux.provenance` with optional `citation: str | None = None` and renders `citation: ...` in `ProvenanceValue.describe()`, allowing tooltips and whatsThis popovers to display exact peer-reviewed literature alongside formulas and calculation inputs.
+- Kinematic Sequence API Output: Surfaces methodology metadata (`methodology: dict`) and formatted citation string (`citation: str`) in the REST API response from `_populate_kinematic_sequence` (`src.api.services.analysis_service`).
+- Visual Kinematic Sequence Annotation: Annotates coordination sequence velocity plots (`plot_kinematic_sequence` in `src.shared.python.plotting.renderers._coordination_sequence`) with formatted methodology citations when `analyzer_result` carries methodology.
+- Spinal Load Citation Aggregation: Adds `get_citations(self) -> list[MethodCitation]` and `format_citations(self) -> list[str]` to `SpinalLoadResult` (`src.shared.python.injury.spinal_load_analysis`), collecting and formatting citations across composite metrics (Spinal Load, X-Factor, Crunch Factor).
+- Workbench Scientific Traceability: Surfaces explicit methodology and formula definitions (including strokes gained `SG = verified E(start) - 1 - verified E(finish)` with Broadie 2011/2014 DOI, Theil-Sen regression, and Hotelling $T^2$ dispersion) in the Launch Monitor Analytics workbench report (`src.tools.launch_monitor_analytics.gui`).
+- Automated Verification: Unit tests in `tests/unit/test_method_citations.py` and `tests/unit/ui/test_provenance_value.py` validating formatting, dictionary serialization, API serialization, plot annotation, and tooltip provenance rendering.
+
+## Restoring Model Generation Facades and First-Party Import Resolvability (#8641)
+
+Restore the `src.shared.python.model_generation.humanoid` and `src.shared.python.model_generation.mesh` facades, repairing first-party import paths and removing silent error suppressions:
+- Humanoid Model Generation Facade (`src/shared/python/model_generation/humanoid/__init__.py`): Repoints all 34 advertised public exports directly to canonical submodules in `src.shared.python.humanoid_character_builder` (`core.anthropometry`, `core.body_parameters`, `core.segment_definitions`, `generators.urdf_config`, `generators.urdf_generator`, `interfaces.api`, `mesh.inertia_calculator`, `mesh.primitive_inertia`, `presets.loader`). Removes `# mypy: ignore-errors` and eliminates the silent `try/except ImportError: pass` block.
+- Mesh Processing Facade (`src/shared/python/model_generation/mesh/__init__.py`): Repoints all 14 advertised public exports directly to canonical submodules in `src.shared.python.humanoid_character_builder.mesh` (`collision_geometry`, `inertia_calculator`, `mesh_processor`, `primitive_inertia`). Removes `# mypy: ignore-errors` and eliminates the silent `try/except ImportError: pass` block.
+- Humanoid Character Builder CLI (`src/shared/python/humanoid_character_builder/__main__.py`): Corrects `CharacterBuilder` import from non-existent `core.builder` to `interfaces.api`.
+- Automated Verification (`tests/unit/shared_python/test_model_generation_facades.py`): Adds regression suite asserting full resolvability of all symbols in `model_generation.humanoid.__all__` and `model_generation.mesh.__all__`, as well as CLI entry point imports.
+
+
+Adopt `src/launchers/help_menu.py:build_help_menu` across GUI tool windows and provide direct navigation to calculation sheets and model documentation:
+- Reusable Help Menu Extension: Enhance `build_help_menu(menubar, parent, *, show_shortcuts=None, doc_target=None)` with support for an optional `doc_target: tuple[str, str | Path] | None` parameter, creating a primary action that directly launches the tool's calculation sheet or model document in the in-app document reader (`show_document`). Add helper `open_model_doc(path, parent)`.
+- Tool Window Adoption: Adopt `build_help_menu` with dedicated calculation sheets and model docs across standalone tool windows:
+  - `BallFlightWindow` (`src/tools/ball_flight_gui/gui.py`): links to `docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md`.
+  - `BunkerShotWindow` (`src/tools/bunker_shot_gui/gui.py`): links to `docs/bunkershot3d/credibility.md`.
+  - `PuttingGreenWindow` (`src/tools/putting_green_gui/gui.py`): links to `docs/physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md`.
+  - `SwingFlightWindow` (`src/tools/swing_flight_pipeline/gui.py`): links to `docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md`.
+  - `EnvironmentWindow` (`src/tools/golf_environment/gui.py`): links to `docs/architecture/PROJECT_MAP.md`.
+  - `VideoAnalyzerWindow` (`src/tools/video_analyzer/gui.py`): links to `docs/tutorials/content/04_video_analysis.md`.
+  - `LaunchMonitorAnalyticsWindow` (`src/tools/launch_monitor_analytics/gui.py`): links to `docs/user_guide/user_manual.md`.
+  - `SimulationBackendsWindow` (`src/tools/simulation_backends_launcher/gui.py`): links to `docs/engines/pendulum.md`.
+- Regression & Hygiene Testing: Verify `doc_target` handling in `tests/launchers/test_help_menu.py`, and add `TestToolHelpAffordances` in `tests/unit/launchers/test_help_paths_and_theme_menu.py` ensuring all tool windows expose a `&Help` menu with the expected calculation sheet actions.
+
 ## Reconciling In-App Help System and Content Mappings (#8843)
 
 Reconcile the in-app help system root paths and UI component documentation mappings:
@@ -4244,6 +4428,13 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-12 | #10018 | Reconcile motion pipeline API advertised source formats and OpenAPI schemas with registered adapters, clarify format support documentation, register architecture budget exceptions, and pay down 156 unmarked test entries (#8875). |
+| 2026-09-12 | #10015 | Burn down 29 quarantined shared Python and physics engines tests in scripts/config/unit_gate_quarantine.json (#8766). |
+| 2026-09-12 | #10013 | Burn down 30 quarantined bunker shot solver, workbench GUI, and report tests in scripts/config/unit_gate_quarantine.json under the bunker_shot_model_and_workbench cluster (#8766). |
+| 2026-09-12 | #10012 | Burn down all 11 quarantined teleoperation, device, and provider tests in scripts/config/unit_gate_quarantine.json under the deployment_devices_and_configuration cluster (#8766). |
+| 2026-09-12 | #10010 | Burn down 43 quarantined packaging and governance tests in scripts/config/unit_gate_quarantine.json under the packaging_ci_and_repository_governance cluster, anchor test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and sync monolith refactor register (#8766). |
+| 2026-09-12 | #10005 | Tightened the DRY duplication quarantine ledger: deleted 72 fingerprints whose occurrence count had fallen below 2 across all supported scanner runtimes (Python 3.11, 3.12, 3.13, 3.14), reducing quarantined debt from 666 to 594. No entry was raised or added; the baseline was not regenerated (#8695). |
+| 2026-09-12 | #10008 | Enforce cryptographic signature verification on release tags in release.yml, update release runbook commands and requirements, and add automated regression tests (#9747). |
 | 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |
 | 2026-09-10 | #8360 | Bound the launcher splash: every async startup phase (registry, engines, Docker, optional Tools/Rate provider) runs under an explicit timeout with timestamped structured diagnostics; optional-provider failure degrades the shell instead of blocking it; a StartupSession watchdog plus Retry / Continue without provider / Copy diagnostics / Close dialog replaces the quit-on-error path; loading-mode construction no longer loads the registry on the GUI thread. |
 | 2026-09-09 | #9941 | Add calibrated cross-model joint convention conversion, gap-safe golf metrics including event-defined X-Factor stretch and shaft twist velocity, explicit COM/missing-data contracts, model link adapters, and configurable desktop/web plots and API surfaces (#9934). |
