@@ -1,0 +1,28 @@
+{
+  "status": "local_render_completed",
+  "remote_render_failure": "ModuleNotFoundError matplotlib after both forward replays and NPZ save; no replay repeated",
+  "metrics": {
+    "baseline_m": {
+      "whole_rms_m": 0.030791102224713467,
+      "terminal_rms_m": 0.09998865029520043
+    },
+    "returned_m": {
+      "whole_rms_m": 0.0286353025634163,
+      "terminal_rms_m": 0.06671341174223601
+    }
+  },
+  "visual_source_sha256": "7e7843306fcb15ec6b3da504cfba1a20306196df9abea91393c2918f2890cd72",
+  "render_source_sha256": "92e21f16dc777c63158420ea8a3808f3d70a2ee74687b0deeb88f8b6e96fbe8b",
+  "npz_sha256": "4c5608be0c57307570d3af288ac4507f03da3c1df19b5b5232d3e9d1f0c02126",
+  "png_sha256": "cc37cb162dce5a0890c05d114ccebb5a304d6b2957c569420b31426fc3e420cb",
+  "runtime_source_archive_sha256": "c65ce72406ab2e1b71a21d0ae82147423574fed226c000157e6da02807c4aad6",
+  "input_hashes": {
+    "/mnt/c/Users/diete/native_geometry_spec_9967.json": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "/mnt/c/Users/diete/native-ms-fit-9967-19/returned-candidate.json": "136454eaf5c14749d971d1ba6dfe5bf4a9b9903358656fa5adeb16e30138dbec",
+    "/mnt/c/Users/diete/driver_marker_payload_9967.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "/mnt/c/Users/diete/native-regularized-fit-9967-61/returned-candidate.json": "c8928970f26231ac356b431ae2ca605340bfa78bc307b7f9e07df70cae8514b5",
+    "/mnt/c/Users/diete/native-regularized-fit-9967-62/returned-candidate.json": "b24aa36d1a9493a891335a1417b5aa68d9c55266d7d78ba67d3bb68d9af37330"
+  },
+  "render_command": "python render_samples.py --samples sampled-markers.npz --output .",
+  "validity": "valid capture AND finite target XYZ; Euclidean marker RMS"
+}

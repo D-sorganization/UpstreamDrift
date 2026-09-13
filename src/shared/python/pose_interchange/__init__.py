@@ -70,6 +70,12 @@ if TYPE_CHECKING:
         RotationState,
     )
 
+    from .native_motion_sequence import (
+        NativeMotionSequence,
+        export_native_motion,
+        restore_native_motion,
+    )
+
 _EXPORT_MODULES = {
     "CONVENTION_TAG": "src.shared.python.pose_interchange.canonical",
     "CanonicalPose": "src.shared.python.pose_interchange.canonical",
@@ -98,6 +104,9 @@ _EXPORT_MODULES = {
     "NativeManifoldState": ".native_joint_state",
     "NativeRotationGroup": ".native_joint_state",
     "RotationState": ".native_joint_state",
+    "NativeMotionSequence": ".native_motion_sequence",
+    "export_native_motion": ".native_motion_sequence",
+    "restore_native_motion": ".native_motion_sequence",
 }
 
 
@@ -147,6 +156,9 @@ __all__ = [
     "NativeManifoldState",
     "NativeRotationGroup",
     "RotationState",
+    "NativeMotionSequence",
+    "export_native_motion",
+    "restore_native_motion",
     "SingularChartError",
     "CapabilityError",
     "JointSlot",

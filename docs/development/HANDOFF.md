@@ -8,9 +8,9 @@ candidate exists. MATLAB R2025b is the required reference release. Keep the
 original capture, physical model, initial state, actuator mapping and acceptance
 criteria; quaternion conversion does not change the required native torque family.
 
-Branch: feat/9967-native-simscape-pinocchio. Checkpoint35e9c4b05 contains effort regularization and run60/runtime61 evidence;
-push pending normal hooks. SELF adds trial61 and a typing-only residual-list
-annotation required by the pinned mypy environment. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
+Branch: feat/9967-native-simscape-pinocchio. Checkpointaf8460cb9 is pushed with
+all normal hooks passing. SELF adds the tested in-memory motion-sequence API
+and final run62 evidence. PR not created. Issue #9967 owns native matching; #10043 owns representation work,
 under #9921. Check/renew the lease before new issue work. Workspace:
 C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
 
@@ -66,10 +66,29 @@ acceptance or convergence is claimed. Native effort cost barely changes
 (1.55060 to1.55026), so improvement cannot be attributed to the penalty alone.
 Exact evidence and convenient candidate: native_evidence/regularized_fit_9967_61.
 
-Run62 continues original baseline19 with restart61 and unchanged bounds/weights,
-max_nfev20. Active ControlTower WSL PID2781980, agent exec89645; output
-/mnt/c/Users/diete/native-regularized-fit-9967-62. Poll before any new launch.
+Run62 is terminal0 after468.965 s: whole28.6353 mm, early10.8248 mm,
+terminal66.7134 mm, club31.0615 mm. It reaches max_nfev20 with four active
+correction bounds; accepted/converged both false. Returned canonical candidate
+7467c5d82817251858255bdf0e560a712f0d20a366ee0094c364a6c14481e1d5.
+Native evidence folder regularized_fit_9967_62 contains the terminal receipt,
+measured replay arrays and marker-comparison.png (root visually inspected).
+Run63 is terminal1 after77.672 s and three forward evaluations. The B4/B5/B6
+trial fails the unchanged sensitivity-primal marker agreement gate on its third
+candidate, hash e057a7e977cfe2a163fe4c5e7e5767c17d5025b4ef7f33166672afbf658c358d.
+There is no returned accepted candidate. First two Jacobians passed. Diagnostic64
+is authorized at this exact failing candidate using the existing sensitivity
+provider with rtol1e-12, atol1e-14 and max_step0.000125, unchanged agreement and
+closure gates. Inspect its actual process/receipt; do not restart optimization
+or weaken the gate. This diagnostic distinguishes numerical accuracy from fit
+quality at one fixed input. No further fitting is authorized by this checkpoint.
 Runtime61 remains immutable; the local list annotation changes typing only.
+
+The shared native motion sequence API is implemented and publicly exported.
+It converts complete batches with immutable time/model/frame/branch metadata
+and original per-sample references, reusing NativeJointStateAdapter. Root passes
+89 related tests. File I/O, UI and complete dynamic frame transport are next;
+this batch API does not qualify alternate MuJoCo/Drake dynamics. See dedicated
+REPRESENTATION_HANDOFF for runnable usage and the remaining ordered plan.
 
 ## Why Earlier Attempts Stalled
 
@@ -90,11 +109,10 @@ Runtime61 remains immutable; the local list annotation changes typing only.
 
 ## Ordered Next Work
 
-1. Inspect regularized native trial62 and its original process before launching
-   further optimization. Runtime61 is qualified with96 tests; B6 analytic fitting
-   uses max_nfev20 from restart61, effort weight0.01, force/torque scales100 N/20 Nm. These are
-   numerical objective weights, not physical limits or acceptance changes.
-   Preserve any sensitivity gate failure; max_nfev is not an RHS/time budget.
+1. Inspect sensitivity diagnostic64 and its original process before selecting
+   another fit. Preserve63 failure and unchanged numerical/physical gates.
+   Runtime61 is qualified with96 tests; weights/scales are numerical objective
+   choices, not physical limits. max_nfev is not an RHS/time budget.
 2. Qualify the variant over further representative trajectories and against
    MATLAB R2025b before claiming full equivalence. Qualify tangent derivatives
    before using the manifold variant in an optimizer. Preserve existing scalar API.
