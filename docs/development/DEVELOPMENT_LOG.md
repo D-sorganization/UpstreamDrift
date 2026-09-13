@@ -1,5 +1,14 @@
 # Development Log — UpstreamDrift
 
+## 2026-09-12 - Tested Local-Chart DOP853 and Native Pilot57
+
+Added shared high-order chart integration using the same checked RHS as RK4.
+TDD tests cover noncommuting rotations, absolute clock across rebases, global
+evaluation budget and malformed callbacks. Root independently passes27 local
+tests, Ruff and mypy; remote qualification96passed1optional skip. Driver now
+records scalar tolerances independently. Run57 launched with tighter scalar
+reference and unchanged parity gates; result pending at this checkpoint.
+
 ## 2026-09-12 - Tighter Manifold Replay56
 
 Run56 completed181.85 s with52116 evaluations. Native rate discrepancy improves

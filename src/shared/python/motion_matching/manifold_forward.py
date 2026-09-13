@@ -76,6 +76,19 @@ class _ChartStepper:
     integrate: Retraction
     difference_rate: DifferenceRate
 
+    def derivative(
+        self, anchor: Array, t: float, u: Array, tangent: Array
+    ) -> tuple[Array, Array]:
+        """Shared chart RHS for RK4 and high-order local-coordinate integration."""
+        displacement = _vector(u, self.nv, "local displacement")
+        rate = _vector(tangent, self.nv, "stage velocity")
+        state = _vector(self.integrate(anchor, displacement), self.nq, "integrate")
+        udot = _vector(
+            self.difference_rate(anchor, state, rate), self.nv, "difference_rate"
+        )
+        vdot = _vector(self.acceleration(t, state, rate), self.nv, "acceleration")
+        return udot, vdot
+
     def step(self, q: Array, v: Array, start: float, end: float) -> tuple[Array, Array]:
         h = end - start
         midpoint = start + h / 2
@@ -83,14 +96,7 @@ class _ChartStepper:
             raise RuntimeError(f"Manifold integration step underflow at t={start:.17g}")
 
         def derivative(t: float, u: Array, tangent: Array) -> tuple[Array, Array]:
-            displacement = _vector(u, self.nv, "local displacement")
-            rate = _vector(tangent, self.nv, "stage velocity")
-            state = _vector(self.integrate(q, displacement), self.nq, "integrate")
-            udot = _vector(
-                self.difference_rate(q, state, rate), self.nv, "difference_rate"
-            )
-            vdot = _vector(self.acceleration(t, state, rate), self.nv, "acceleration")
-            return udot, vdot
+            return self.derivative(q, t, u, tangent)
 
         k1u, k1v = derivative(start, np.zeros(self.nv), v)
         k2u, k2v = derivative(midpoint, h / 2 * k1u, v + h / 2 * k1v)
@@ -166,6 +172,17 @@ def integrate_manifold_forward(
     return _result(clock, q_samples, v_samples, 4 * steps, steps, start)
 
 
+def _validate_adaptive_controls(rtol: float, atol: float, max_evaluations: int) -> None:
+    if any(not np.isfinite(value) or value <= 0 for value in (rtol, atol)):
+        raise ValueError("rtol and atol must be finite and positive")
+    if (
+        isinstance(max_evaluations, bool)
+        or not isinstance(max_evaluations, int)
+        or max_evaluations <= 0
+    ):
+        raise ValueError("max_evaluations must be a positive integer")
+
+
 def integrate_manifold_adaptive(
     initial_configuration: Array,
     initial_velocity: Array,
@@ -205,14 +222,7 @@ def integrate_manifold_adaptive(
     independent replay convergence beyond the local error estimate.
     """
     q, v, clock = _initial_data(initial_configuration, initial_velocity, time, max_step)
-    if any(not np.isfinite(value) or value <= 0 for value in (rtol, atol)):
-        raise ValueError("rtol and atol must be finite and positive")
-    if (
-        isinstance(max_evaluations, bool)
-        or not isinstance(max_evaluations, int)
-        or max_evaluations <= 0
-    ):
-        raise ValueError("max_evaluations must be a positive integer")
+    _validate_adaptive_controls(rtol, atol, max_evaluations)
     nq, nv = q.size, v.size
     stepper = _ChartStepper(nq, nv, acceleration, integrate, difference_rate)
     q_samples, v_samples = np.empty((clock.size, nq)), np.empty((clock.size, nv))
@@ -259,5 +269,84 @@ def integrate_manifold_adaptive(
                 steps += 1
             factor = 5.0 if error == 0 else min(5.0, max(0.1, 0.9 * error ** (-0.2)))
             proposed_h = min(max_step, h * factor)
+        q_samples[sample], v_samples[sample] = q, v
+    return _result(clock, q_samples, v_samples, evaluations, steps, start)
+
+
+def integrate_manifold_dop853(
+    initial_configuration: Array,
+    initial_velocity: Array,
+    time: Array,
+    acceleration: Acceleration,
+    *,
+    integrate: Retraction,
+    difference_rate: DifferenceRate,
+    rtol: float = 1e-9,
+    atol: float = 1e-11,
+    max_step: float = 0.001,
+    max_evaluations: int = 1_000_000,
+) -> ManifoldForwardResult:
+    """DOP853 on a local tangent chart per requested output interval.
+
+    The chart anchor is the previous integrated configuration. The initial local
+    displacement u=0 is a coordinate rebase, never a physical state reset; the
+    actual tangent velocity carries forward unchanged. Every stage uses the
+    engine retraction to obtain q and the shared chart RHS. No nq=nv assumption,
+    coefficient quaternion derivative, normalization or physical projection is
+    used. The engine owns valid-chart and unit-quaternion checks.
+
+    SciPy error control applies to the local [u,v] components in their declared
+    SI units, so equal tolerance numbers are not equivalent to the Euclidean
+    scalar model's global [q,v] tolerances. Each requested sample restarts the
+    local solver and its step-size selection; dense output is not used. This
+    has interval-boundary overhead and makes no performance guarantee.
+
+    evaluations counts every RHS request globally, including rejected steps;
+    steps counts accepted internal DOP853 steps across all intervals. A finite
+    budget, failed solver or invalid callback raises with no successful partial
+    result. Chart coverage within each sample interval must be qualified for
+    the actual trajectory, in addition to tolerance/step-size convergence.
+    """
+    from scipy.integrate import solve_ivp
+
+    q, v, clock = _initial_data(initial_configuration, initial_velocity, time, max_step)
+    _validate_adaptive_controls(rtol, atol, max_evaluations)
+    nq, nv = q.size, v.size
+    chart = _ChartStepper(nq, nv, acceleration, integrate, difference_rate)
+    q_samples, v_samples = np.empty((clock.size, nq)), np.empty((clock.size, nv))
+    q_samples[0], v_samples[0] = q, v
+    q, v = _vector(q, nq, "initial_configuration"), _vector(v, nv, "initial_velocity")
+    steps = evaluations = 0
+    start = perf_counter()
+    for sample in range(1, clock.size):
+        anchor = q
+
+        def derivative(t: float, state: Array, chart_anchor: Array = anchor) -> Array:
+            nonlocal evaluations
+            if evaluations >= max_evaluations:
+                raise RuntimeError(
+                    f"Manifold evaluation budget exhausted at t={t:.17g}: {evaluations}/{max_evaluations}"
+                )
+            evaluations += 1
+            du, dv = chart.derivative(chart_anchor, t, state[:nv], state[nv:])
+            return np.concatenate((du, dv))
+
+        solution = solve_ivp(
+            derivative,
+            (float(clock[sample - 1]), float(clock[sample])),
+            np.concatenate((np.zeros(nv), v)),
+            method="DOP853",
+            rtol=rtol,
+            atol=atol,
+            max_step=max_step,
+        )
+        if not solution.success:
+            raise RuntimeError(
+                f"Manifold DOP853 integration failed: {solution.message}"
+            )
+        final = _vector(solution.y[:, -1], 2 * nv, "DOP853 state")
+        q = _vector(integrate(anchor, final[:nv]), nq, "integrate")
+        v = _vector(final[nv:], nv, "velocity")
+        steps += len(solution.t) - 1
         q_samples[sample], v_samples[sample] = q, v
     return _result(clock, q_samples, v_samples, evaluations, steps, start)

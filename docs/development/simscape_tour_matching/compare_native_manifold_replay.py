@@ -21,6 +21,7 @@ from src.engines.physics_engines.pinocchio.python.native_replay import replay_wi
 from src.shared.python.motion_matching.manifold_forward import (
     integrate_manifold_forward,
     integrate_manifold_adaptive,
+    integrate_manifold_dop853,
 )
 from src.shared.python.motion_matching.marker_projection import project_markers
 from src.shared.python.motion_matching.native_candidate import NativeReplayCandidate
@@ -35,10 +36,15 @@ def main() -> None:
     parser.add_argument(
         "--max-steps", type=float, nargs="+", default=[1 / 720, 1 / 1440, 1 / 2880]
     )
-    parser.add_argument("--method", choices=("fixed", "adaptive"), default="fixed")
+    parser.add_argument(
+        "--method", choices=("fixed", "adaptive", "dop853"), default="fixed"
+    )
     parser.add_argument("--rtol", type=float, default=1e-10)
     parser.add_argument("--atol", type=float, default=1e-12)
     parser.add_argument("--max-evaluations", type=int, default=100000)
+    parser.add_argument("--scalar-rtol", type=float, default=1e-10)
+    parser.add_argument("--scalar-atol", type=float, default=1e-12)
+    parser.add_argument("--scalar-max-step", type=float, default=0.00025)
     args = parser.parse_args()
     raw = args.model.read_bytes()
     spec = json.loads(raw)
@@ -75,9 +81,9 @@ def main() -> None:
         candidate,
         clock,
         np.r_[data["q0"], data["qd0"]],
-        rtol=1e-10,
-        atol=1e-12,
-        max_step=0.00025,
+        rtol=args.scalar_rtol,
+        atol=args.scalar_atol,
+        max_step=args.scalar_max_step,
     )
     np.savez_compressed(
         args.output / "scalar.npz",
@@ -95,6 +101,9 @@ def main() -> None:
         "rtol": args.rtol,
         "atol": args.atol,
         "adaptive_max_evaluations": args.max_evaluations,
+        "scalar_rtol": args.scalar_rtol,
+        "scalar_atol": args.scalar_atol,
+        "scalar_max_step": args.scalar_max_step,
         "scalar_elapsed_s": scalar.integration.elapsed_s,
         "scalar_closure_pose_max_abs": scalar.closure_pose_max_abs,
         "scalar_closure_velocity_max_abs": scalar.closure_velocity_max_abs,
@@ -129,6 +138,17 @@ def main() -> None:
                 acceleration,
                 **solver_options,
                 difference=model.difference,
+                rtol=args.rtol,
+                atol=args.atol,
+                max_evaluations=args.max_evaluations,
+            )
+        elif args.method == "dop853":
+            solution = integrate_manifold_dop853(
+                mq,
+                mv,
+                clock,
+                acceleration,
+                **solver_options,
                 rtol=args.rtol,
                 atol=args.atol,
                 max_evaluations=args.max_evaluations,

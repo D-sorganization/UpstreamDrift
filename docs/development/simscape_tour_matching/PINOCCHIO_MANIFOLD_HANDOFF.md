@@ -264,6 +264,53 @@ amplification, not scalar-reference accuracy or trajectory acceptance. Root owns
 scalar-reference and adaptive-tolerance convergence. No integrations were launched
 by this diagnostic and no production code changed.
 
+## Supported Local-Chart DOP853 Checkpoint
+
+Pinocchio 4.1.0 does not expose `integrateCoeffWiseJacobian` at either the
+Python facade or compiled wrapper. The actual native model's `dIntegrate`
+returns a 27-by-27 tangent Jacobian, not a 30-by-27 coefficient derivative.
+No speculative coefficient-derivative implementation was added to the model.
+The capability probe is recorded in the runtime18 qualification receipt.
+
+The supported alternative is additive `integrate_manifold_dop853` in
+`manifold_forward.py`, using the same `_ChartStepper.derivative` math as RK4:
+
+```python
+integrate_manifold_dop853(
+    initial_configuration, initial_velocity, time, acceleration,
+    integrate=model.integrate, difference_rate=model.difference_rate,
+    rtol=1e-9, atol=1e-11, max_step=0.001, max_evaluations=1_000_000,
+)
+```
+
+Each requested output interval uses the prior actual configuration as a fixed
+local chart anchor. SciPy DOP853 integrates `[u,v]` on the interval's absolute
+physical time span; every RHS evaluation obtains q through the engine retraction.
+At the endpoint, the integrated configuration and tangent velocity carry into
+the next interval. Setting the next local u to zero only rebases coordinates;
+it never resets a physical state, inserts a target, normalizes quaternion
+coefficients or projects constraints.
+
+The global RHS budget counts requests across all intervals and rejected steps.
+`steps` counts accepted internal DOP853 steps; result shapes remain explicit
+`configuration[T,nq]` and `velocity[T,nv]`. Invalid callbacks, budget exhaustion
+and unsuccessful solver termination raise without a successful partial result.
+Scalar-vs-local-chart tolerance numbers are not directly equivalent: SciPy
+scales the local displacement components, and restarting the local solver at
+every output boundary adds overhead. No speed or candidate-fidelity claim is
+made without the root-owned replay pilot and convergence measurements.
+
+Final runtime `/home/dieterolson/native-manifold-10043-18`: **96 passed, one
+optional MuJoCo test skipped**. Local generic tests: 27 passed, one actual
+Pinocchio test skipped on Windows. New tests cover independent noncommuting
+rotation, real Pinocchio spherical operations, exact Euclidean continuation,
+absolute time across intervals, global budget enforcement and invalid inputs.
+Ruff/format and focused mypy pass. Exact source/receipt:
+`native_evidence/manifold_dop853_10043_18/{qualification.json,raw-source.zip}`.
+`manifold_forward.py` SHA is
+`18570350f155c6a87666f4ce4f81ad64976c95ae405ae60c7a20424db2f4701c`.
+No replay was launched by this subtask; root owns the next pilot.
+
 ## Next Controlled Steps
 
 1. Retain the passed production lazy-initializer qualification and verify full
