@@ -1,5 +1,32 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Current Native Pose Seed and Derivative Support
+
+Run36 completed: same74 samples at25 ms, search bound0.3 instead of0.15, original
+model/attachments. RMS at1.35 s improves165.36 to63.19 mm; final61.41 to46.32 mm;
+0.85 s remains35.77 mm. Maximum closure5.448e-11. Receipt:
+native_evidence/native-full-pose-sequence-9967-36.json. This remains static,
+not a torque trajectory, and numerical search bounds are not physical limits.
+
+Shared fit_marker_pose now optionally accepts validated marker and closure
+Jacobians. Tests first failed for missing callbacks, then five tests passed,
+including masked observations and nonfinite derivative rejection; Ruff passes.
+The existing native continuation runner exposes --use-derivatives. Native
+four-pose receipt37 preserves closure and matches earlier marker residuals;
+all four solves converge, including the previously iteration-limited0.1 s pose.
+No whole-fit speedup or derivative qualification at every state is claimed.
+New isolated runtime: /home/dieterolson/native-pose-derivatives-9967-37.
+Native script: C:/Users/diete/fit_native_marker_pose_sequence_9967_37.py.
+Receipt: native_evidence/native-pose-derivatives-9967-37.json.
+All jobs launched for36/37 are terminal. Do not mutate historical runtime25.
+
+Next: use supplied derivatives for remaining static-seed refinement, audit active
+bounds at the late residual peak, then use the existing multi_shooting_fit forward
+solver. Historical run20 driver is preserved inside ms_fit_9967_20/raw-run.zip;
+it hardcodes run19 as source and replay-centered state charts. A new initializer
+must change those references explicitly rather than merely passing a new horizon.
+Keep original q0/qd0 and require uninterrupted forward replay for acceptance.
+
 ## Current Attachment Decision
 
 Run35 fixed-pose calibration is complete and NOT adopted. It uses the shared
