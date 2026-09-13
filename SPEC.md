@@ -1,5 +1,17 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Dynamic Marker Tracking Pilot With Zero-Feedback Forward Replay (#10003)
+
+Implement constraint-aware dynamic marker tracking and zero-feedback forward simulation replay for the OpenSim golf humanoid model:
+- Dynamic Tracking Module (`src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py`):
+  - `MocoTrackingConfig`: Validated parameter dataclass specifying tracking horizon, mesh intervals, objective weights, and solver tolerances.
+  - `sanitize_trc_for_horizon`: Pure-Python observation-window filter that prunes unobserved/NaN markers (such as `RShoulderTop` which is unobserved until frame 525) to ensure spline continuity for CasADi.
+  - `build_moco_study`: Configures `opensim.MocoStudy` with `MocoControlGoal` and `MocoMarkerTrackingGoal`, sets `MocoCasADiSolver` parameters, and inserts warm-start initial guess from the OS-3b full IK state trajectory (`insertStatesTrajectory`).
+- Verification & Forward Simulation Replay (`docs/development/opensim_tour_matching/os4_moco_tracking_driver.py`):
+  - Solves dynamic tracking in 15 IPOPT iterations to `Solve_Succeeded` (objective: `8.508366e-02`).
+  - Performs zero-feedback forward simulation replay via `opensim.Manager` + `opensim.PrescribedController`, integrating to $t = 0.10$ s in 9.2 ms.
+  - Generates cryptographic receipt and solution trajectories in `docs/development/opensim_tour_matching/evidence/os4_moco_tracking/receipt.json`.
+
 ## DefusedXML in OpenSim OS-0 Runtime Audit (#10074)
 
 Mitigate Bandit B314 / B405 XML security findings in OpenSim OS-0 runtime audit:
@@ -4504,7 +4516,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-09 | #9923 | My Clubs provides searchable catalog/custom entries, measured/estimated/unknown length and head mass, stable unit controls, notes, archive/restore and explicit capture assignment. Portable snapshots preserve previous revisions and editable-copy lineage; model reports retain equipment evidence without applying unsupported club constraints. Wizard integration remains tracked in #9906. |
 | 2026-09-10 | #9962 | Record merged impact-provider history, unchanged coordinated pins and explicit scientific/consumer takeover requirements. |
 | 2026-09-10 | #9931 | Guided capture outcomes share validated prerequisite metadata with the capability atlas; standard Qt navigation reuses editors and readiness, preserves capture-owned progress, checks calibration/model associations and imports safe map selections. Epic #9906; 600 integrated regressions pass. |
-| 2026-09-09 | #9875 | Industrial readiness execution index (epic #9539): src/config/industrial_readiness.json reconciles the four priority children against 10caddd219ce213a914fa295661929e4fbf1b686 rather than the audit snapshot — U1 (#9477) and U2 (#9407) merged with SHAs, tests and user-visible acceptance evidence; U3 (#8820, dashboard exports still carry no engine/model/run identity) and U4 (#9417, deploy/ empty and no artifact beyond the wheel) re-confirmed open with a dependency and an ordered narrow-PR plan. industrial_readiness_loader.py enforces the contract that keeps the record honest (no completion claim without a 40-char merge SHA, a test path and acceptance evidence; no open entry without an owner and plan; every cited path must exist; every open issue must appear in an acceptance blocker list; 
+| 2026-09-09 | #9875 | Industrial readiness execution index (epic #9539): src/config/industrial_readiness.json reconciles the four priority children against 10caddd219ce213a914fa295661929e4fbf1b686 rather than the audit snapshot — U1 (#9477) and U2 (#9407) merged with SHAs, tests and user-visible acceptance evidence; U3 (#8820, dashboard exports still carry no engine/model/run identity) and U4 (#9417, deploy/ empty and no artifact beyond the wheel) re-confirmed open with a dependency and an ordered narrow-PR plan. industrial_readiness_loader.py enforces the contract that keeps the record honest (no completion claim without a 40-char merge SHA, a test path and acceptance evidence; no open entry without an owner and plan; every cited path must exist; every open issue must appear in an acceptance blocker list; |
 elease_status cannot read 
 eady while anything is outstanding, and is locked). scripts/generate_industrial_readiness_index.py renders docs/operations/industrial-readiness-index.md under a byte-for-byte freshness gate. 25 tests in 	ests/config/industrial_readiness/. |
 | 2026-09-09 | #9874 | Chat stream cancellation now reaches the provider transport: BaseAgentAdapter gained _track_stream()/cancel_stream(), the Ollama and OpenAI adapters publish their live streams (both block in an uninterruptible socket read and never poll the cooperative stop_event), and ChatService.stream_response closes the provider stream before its bounded join and warns if the worker still outlives it. The #9495 regression test now models a non-cooperative provider that only unblocks when its stream is closed. |
