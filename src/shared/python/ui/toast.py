@@ -25,16 +25,26 @@ from enum import Enum, auto
 from typing import TYPE_CHECKING, Any
 import weakref
 
-from PyQt6.QtCore import QPropertyAnimation, Qt, QTimer
+from PyQt6.QtCore import QEvent, QObject, QPropertyAnimation, Qt, QTimer
 from PyQt6.QtGui import QColor, QFont, QPainter, QPainterPath
-from PyQt6.QtWidgets import QGraphicsOpacityEffect, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (
+    QGraphicsOpacityEffect,
+    QHBoxLayout,
+    QLabel,
+    QWidget,
+)
 
 if TYPE_CHECKING:
     from PyQt6.QtWidgets import QMainWindow
 
 # Import theme colors if available
 try:
-    from src.shared.python.theme import Colors, Sizes, Weights, get_qfont
+    from src.shared.python.theme import (  # type: ignore[attr-defined]
+        Colors,
+        Sizes,
+        Weights,
+        get_qfont,
+    )
 
     THEME_AVAILABLE = True
 except ImportError:
@@ -67,6 +77,13 @@ class Toast(QWidget):
     FADE_IN_DURATION = 200
     FADE_OUT_DURATION = 300
 
+    TYPE_NAMES: dict[ToastType, str] = {
+        ToastType.SUCCESS: "Success",
+        ToastType.ERROR: "Error",
+        ToastType.WARNING: "Warning",
+        ToastType.INFO: "Info",
+    }
+
     def __init__(
         self,
         message: str,
@@ -88,41 +105,63 @@ class Toast(QWidget):
         self.message = message
         self.toast_type = toast_type
         self.duration = duration
+        self._is_dismissing: bool = False
+        self._remaining_time: int | None = None
+        self._hidden_by_deactivate: bool = False
 
-        # Set up widget
-        self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.Tool
-            | Qt.WindowType.WindowStaysOnTopHint
-        )
+        # Set up widget - frameless tool window without WindowStaysOnTopHint
+        # so toasts do not float above other desktop applications
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+
+        # Indicate clickability
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         # Create opacity effect for fade animations
         self.opacity_effect = QGraphicsOpacityEffect(self)
         self.opacity_effect.setOpacity(0.0)
         self.setGraphicsEffect(self.opacity_effect)
 
-        # Set up layout
-        self._setup_ui()
-
         # Animations
         self._fade_in_anim: QPropertyAnimation | None = None
         self._fade_out_anim: QPropertyAnimation | None = None
         self._dismiss_timer: QTimer | None = None
 
+        # Set up layout
+        self._setup_ui()
+
     def _setup_ui(self) -> None:
-        """Set up the toast UI."""
-        layout = QVBoxLayout(self)
+        """Set up the toast UI with leading icon and accessible type label."""
+        layout = QHBoxLayout(self)
         layout.setContentsMargins(
             self.PADDING, self.PADDING, self.PADDING, self.PADDING
         )
+        layout.setSpacing(10)
+
+        # Leading icon label
+        self.icon_label = QLabel(self._get_icon(), self)
+        self.icon_label.setStyleSheet("color: #FFFFFF; background: transparent;")
+        if THEME_AVAILABLE:
+            icon_font = get_qfont(size=Sizes.MD, weight=Weights.BOLD)
+        else:
+            icon_font = QFont("Segoe UI", 11)
+            icon_font.setWeight(QFont.Weight.Bold)
+        self.icon_label.setFont(icon_font)
+        self.icon_label.setAlignment(
+            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft
+        )
+
+        type_word = self.TYPE_NAMES.get(self.toast_type, "Notification")
+        self.icon_label.setAccessibleName(f"{type_word} icon")
+        layout.addWidget(self.icon_label)
 
         # Message label
-        self.label = QLabel(self.message)
+        self.label = QLabel(self.message, self)
         self.label.setWordWrap(True)
-        self.label.setMinimumWidth(self.MIN_WIDTH - 2 * self.PADDING)
-        self.label.setMaximumWidth(self.MAX_WIDTH - 2 * self.PADDING)
+        # Account for icon width and spacing in min/max bounds
+        self.label.setMinimumWidth(self.MIN_WIDTH - 2 * self.PADDING - 34)
+        self.label.setMaximumWidth(self.MAX_WIDTH - 2 * self.PADDING - 34)
 
         # Style based on theme availability
         if THEME_AVAILABLE:
@@ -134,6 +173,11 @@ class Toast(QWidget):
         self.label.setStyleSheet("color: #FFFFFF; background: transparent;")
 
         layout.addWidget(self.label)
+
+        # Screen reader accessibility (WCAG 1.4.1 non-color encoding)
+        accessible_text = f"{type_word}: {self.message}"
+        self.setAccessibleName(accessible_text)
+        self.label.setAccessibleName(accessible_text)
 
         # Adjust size to content
         self.adjustSize()
@@ -185,6 +229,36 @@ class Toast(QWidget):
         painter.fillPath(path, self._get_background_color())
         painter.end()
 
+    def mousePressEvent(self, event: Any) -> None:
+        """Dismiss the toast when clicked."""
+        self.dismiss()
+        if hasattr(event, "accept"):
+            event.accept()
+
+    def enterEvent(self, event: Any) -> None:
+        """Pause auto-dismiss timer on mouse hover."""
+        super().enterEvent(event)
+        if self._dismiss_timer is not None and self._dismiss_timer.isActive():
+            rem = self._dismiss_timer.remainingTime()
+            if rem > 0:
+                self._remaining_time = rem
+            self._dismiss_timer.stop()
+
+    def leaveEvent(self, event: Any) -> None:
+        """Resume auto-dismiss timer on mouse leave."""
+        super().leaveEvent(event)
+        if (
+            self._remaining_time is not None
+            and self._remaining_time > 0
+            and not self._is_dismissing
+        ):
+            if self._dismiss_timer is None:
+                self._dismiss_timer = QTimer(self)
+                self._dismiss_timer.setSingleShot(True)
+                self._dismiss_timer.timeout.connect(self.dismiss)
+            self._dismiss_timer.start(max(200, self._remaining_time))
+            self._remaining_time = None
+
     def show_animated(self) -> None:
         """Show the toast with fade-in animation."""
         self.show()
@@ -205,6 +279,8 @@ class Toast(QWidget):
 
     def dismiss(self) -> None:
         """Dismiss the toast with fade-out animation."""
+        self._is_dismissing = True
+        self._remaining_time = None
         if self._dismiss_timer:
             self._dismiss_timer.stop()
             self._dismiss_timer = None
@@ -231,6 +307,17 @@ class Toast(QWidget):
         self.deleteLater()
 
 
+class _ToastEventFilter(QObject):
+    """Internal event filter installed on the parent window."""
+
+    def __init__(self, manager: "ToastManager") -> None:
+        super().__init__()
+        self._manager = manager
+
+    def eventFilter(self, watched: Any, event: Any) -> bool:
+        return self._manager.eventFilter(watched, event)
+
+
 class ToastManager:
     """Manages toast notifications for an application window.
 
@@ -241,17 +328,81 @@ class ToastManager:
     TOAST_SPACING = 10
     MARGIN_RIGHT = 20
     MARGIN_BOTTOM = 20
+    MAX_VISIBLE_TOASTS = 4
 
-    def __init__(self, parent: "QMainWindow") -> None:
+    def __init__(self, parent: Any) -> None:
         """Create a toast manager.
 
         Args:
-            parent: Main window to attach toasts to
+            parent: Window or widget to attach toasts to
         """
         if parent is None:
             raise ValueError("parent must be provided")
+
         self.parent = parent
         self.active_toasts: list[Toast] = []
+        self.max_visible_toasts: int = self.MAX_VISIBLE_TOASTS
+
+        self._event_filter = _ToastEventFilter(self)
+        if hasattr(parent, "installEventFilter") and callable(
+            parent.installEventFilter
+        ):
+            try:
+                parent.installEventFilter(self._event_filter)
+            except (AttributeError, RuntimeError, TypeError):
+                pass
+
+    def eventFilter(self, watched: Any, event: Any) -> bool:
+        """Handle parent window movement, resizing, and activation state changes."""
+        if watched is self.parent and event is not None:
+            try:
+                event_type = event.type()
+                if event_type in (QEvent.Type.Move, QEvent.Type.Resize):
+                    self.reposition_all()
+                elif event_type in (QEvent.Type.WindowDeactivate, QEvent.Type.Hide):
+                    for toast in self.active_toasts:
+                        if toast.isVisible():
+                            toast._hidden_by_deactivate = True
+                            toast.hide()
+                elif event_type in (QEvent.Type.WindowActivate, QEvent.Type.Show):
+                    if hasattr(self.parent, "isVisible") and self.parent.isVisible():
+                        self.reposition_all()
+                        for toast in self.active_toasts:
+                            if getattr(toast, "_hidden_by_deactivate", False):
+                                toast._hidden_by_deactivate = False
+                                toast.show()
+                elif event_type == QEvent.Type.Close:
+                    self.dismiss_all()
+            except (AttributeError, RuntimeError):
+                pass
+        return False
+
+    def reposition_all(self) -> None:
+        """Reposition all active toasts relative to the parent window."""
+        try:
+            if (
+                hasattr(self.parent, "isWindow")
+                and not self.parent.isWindow()
+                and hasattr(self.parent, "mapToGlobal")
+            ):
+                global_tl = self.parent.mapToGlobal(self.parent.rect().topLeft())
+                right = global_tl.x() + self.parent.width() - 1
+                bottom = global_tl.y() + self.parent.height() - 1
+            else:
+                parent_rect = self.parent.geometry()
+                right = parent_rect.right()
+                bottom = parent_rect.bottom()
+        except (AttributeError, RuntimeError):
+            return
+
+        current_y_offset = self.MARGIN_BOTTOM
+        for toast in self.active_toasts:
+            if not toast.isVisible() and getattr(toast, "_is_dismissing", False):
+                continue
+            x = right - toast.width() - self.MARGIN_RIGHT
+            y = bottom - toast.height() - current_y_offset
+            toast.move(x, y)
+            current_y_offset += toast.height() + self.TOAST_SPACING
 
     def _calculate_position(self, toast: Toast) -> tuple[int, int]:
         """Calculate position for a new toast.
@@ -272,7 +423,9 @@ class ToastManager:
 
         # Stack above existing toasts
         for existing in self.active_toasts:
-            if existing.isVisible():
+            if existing.isVisible() or getattr(
+                existing, "_hidden_by_deactivate", False
+            ):
                 y -= existing.height() + self.TOAST_SPACING
 
         return x, y
@@ -288,11 +441,14 @@ class ToastManager:
         Returns:
             The created Toast widget
         """
-        # Pass parent window to ensure proper cleanup and prevent memory leaks
-        # Note: We don't use self.parent as actual Qt parent since toasts use
-        # frameless window flags, but we keep a reference for positioning
         if message is None:
             raise ValueError("message must be provided")
+
+        # Cap visible toasts (~4); dismiss oldest when limit is reached
+        while len(self.active_toasts) >= self.max_visible_toasts:
+            oldest = self.active_toasts.pop(0)
+            oldest.dismiss()
+
         toast = Toast(message, toast_type, duration, parent=None)
 
         # Position the toast
@@ -302,6 +458,9 @@ class ToastManager:
         # Track the toast
         self.active_toasts.append(toast)
 
+        # Reposition active toasts to ensure proper spacing
+        self.reposition_all()
+
         # Clean up when dismissed
         toast_ref = weakref.ref(toast)
 
@@ -310,6 +469,7 @@ class ToastManager:
             t = toast_ref()
             if t is not None and t in self.active_toasts:
                 self.active_toasts.remove(t)
+                self.reposition_all()
 
         toast.destroyed.connect(on_destroyed)
 
@@ -370,6 +530,7 @@ class ToastManager:
         """Dismiss all active toasts."""
         for toast in self.active_toasts[:]:
             toast.dismiss()
+        self.active_toasts.clear()
 
 
 __all__ = ["Toast", "ToastManager", "ToastType"]

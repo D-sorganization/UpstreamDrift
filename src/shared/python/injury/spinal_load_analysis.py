@@ -127,6 +127,25 @@ class SpinalLoadResult:
     # Methodology citation
     methodology: MethodCitation = CITATION_SPINAL_LOAD
 
+    def get_citations(self) -> list[MethodCitation]:
+        """Return all unique methodology citations for this result and its metrics."""
+        citations: list[MethodCitation] = [self.methodology]
+        if self.x_factor is not None:
+            citations.append(self.x_factor.methodology)
+        if self.crunch_factor is not None:
+            citations.append(self.crunch_factor.methodology)
+        seen: set[str] = set()
+        deduped: list[MethodCitation] = []
+        for c in citations:
+            if c.name not in seen:
+                seen.add(c.name)
+                deduped.append(c)
+        return deduped
+
+    def format_citations(self) -> list[str]:
+        """Return formatted citation strings for all applied methodologies."""
+        return [c.format_citation() for c in self.get_citations()]
+
 
 class SpinalLoadAnalyzer:
     """

@@ -522,7 +522,9 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
 
     def _apply_theme_best_effort(self) -> None:
         try:
-            from src.shared.python.theme import apply_theme_to_window
+            from src.shared.python.theme import (  # type: ignore[attr-defined]
+                apply_theme_to_window,
+            )
         except ImportError:
             return
         if apply_theme_to_window is None:
@@ -755,13 +757,19 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             f"Retained Source Fields: {source_fields}\n"
             f"Import Warnings: {len(warnings)}\n\n"
             f"Recorded Treatment Actions: {len(self.project.audit_log)}\n\n"
-            "Scientific Interpretation\n"
-            "-------------------------\n"
+            "Scientific Interpretation & Traceability\n"
+            "-----------------------------------------\n"
             "Relationships describe association, not causation. Identity-derived "
             "metrics are marked by the metric registry. Matched shots are required "
             "for monitor bias and agreement claims; unmatched comparisons remain "
             "descriptive. Original source columns and per-file SHA-256 provenance "
-            "are retained in the project."
+            "are retained in the project.\n\n"
+            "Methodology & Formula Traceability:\n"
+            "- Longitudinal trends: Theil-Sen robust linear regression with Mann-Kendall test\n"
+            "- Dispersion: 95% bivariate normal confidence ellipse (Hotelling T^2)\n"
+            "- Multicollinearity: Variance Inflation Factor (VIF = 1 / (1 - R_i^2))\n"
+            "- Strokes Gained: SG = verified E(start state) - 1 - verified E(finish state) "
+            "(Broadie 2011/2014, DOI: 10.1287/inte.1110.0594)\n"
         )
 
     # ---- shared action-bar plumbing (#9470) -----------------------------
@@ -1601,9 +1609,7 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
         menu_bar = self.menuBar()
         assert menu_bar is not None
         file_menu = menu_bar.addMenu("&File")
-        help_menu = menu_bar.addMenu("&Help")
         assert file_menu is not None
-        assert help_menu is not None
         load_corpus_action = QtGui.QAction("Load &Private Corpus", self)
         load_corpus_action.setStatusTip(
             "Load every source in the authorized private shot corpus."
@@ -1617,9 +1623,17 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
         quit_action.setShortcut(QtGui.QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
-        about_action = QtGui.QAction("&About Launch Monitor Analytics", self)
-        about_action.triggered.connect(self._show_about)
-        help_menu.addAction(about_action)
+
+        from src.launchers.help_menu import build_help_menu
+
+        build_help_menu(
+            menu_bar,
+            self,
+            doc_target=(
+                "User Manual",
+                "docs/user_guide/user_manual.md",
+            ),
+        )
 
     def _show_about(self) -> None:
         QtWidgets.QMessageBox.about(

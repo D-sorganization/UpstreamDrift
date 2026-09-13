@@ -54,7 +54,8 @@ from PyQt6.QtWidgets import (
 
 from bunkershot3d.fields.store import load_field
 
-from src.shared.python.ui import HoverCopyTextBrowser
+from src.launchers.help_menu import build_help_menu
+from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 
 from .crosstier import CrossTierComparison
 from .crosstier_run import cross_tier_check
@@ -794,6 +795,16 @@ class BunkerShotWindow(QMainWindow):
         status.showMessage(
             "F0 dynamic RFT. Every result carries a validity verdict; "
             "out-of-envelope queries are refused, not estimated."
+        )
+        menubar = self.menuBar()
+        assert menubar is not None
+        build_help_menu(
+            menubar,
+            self,
+            doc_target=(
+                "BunkerShot3D Credibility Statement",
+                "docs/bunkershot3d/credibility.md",
+            ),
         )
 
     def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API

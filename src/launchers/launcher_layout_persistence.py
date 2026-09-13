@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from PyQt6.QtCore import QByteArray
 from PyQt6.QtWidgets import QApplication
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -34,6 +35,27 @@ def save_layout_state(launcher: Any) -> None:
             "wsl_mode": launcher.chk_wsl.isChecked(),
         },
     }
+
+    host = getattr(launcher, "embedded_host", None)
+    if host is not None and hasattr(host, "state_snapshot"):
+        try:
+            window_state["workspace"] = host.state_snapshot()
+        except (RuntimeError, TypeError, ValueError, OSError) as exc:
+            logger.warning("Failed to snapshot embedded host workspace: %s", exc)
+
+    dock_window = (
+        getattr(host, "host_window", None)
+        or host
+        or (launcher if hasattr(launcher, "saveState") else None)
+    )
+    if dock_window is not None and hasattr(dock_window, "saveState"):
+        try:
+            raw_state = dock_window.saveState()
+            if raw_state:
+                window_state["dock_state"] = bytes(raw_state).hex()
+        except (RuntimeError, TypeError, ValueError, OSError) as exc:
+            logger.warning("Failed to save dock geometry: %s", exc)
+
     launcher.layout_manager.save_layout(window_state)
 
 
@@ -88,6 +110,29 @@ def load_layout_state(launcher: Any) -> None:
     saved_selection = layout_data.get("selected_model")
     if saved_selection and saved_selection in launcher.model_cards:
         launcher.select_model(saved_selection)
+
+    # Restore embedded host workspace state (#8899)
+    workspace = layout_data.get("workspace")
+    host = getattr(launcher, "embedded_host", None)
+    if host is not None and workspace and isinstance(workspace, dict):
+        try:
+            host.restore_state(workspace)
+        except (RuntimeError, TypeError, ValueError, OSError) as exc:
+            logger.warning("Failed to restore embedded host workspace: %s", exc)
+
+    # Restore dock geometry / Qt state (#8899)
+    dock_state_hex = layout_data.get("dock_state")
+    if dock_state_hex and isinstance(dock_state_hex, str):
+        dock_target = (
+            getattr(host, "host_window", None)
+            or host
+            or (launcher if hasattr(launcher, "restoreState") else None)
+        )
+        if dock_target is not None and hasattr(dock_target, "restoreState"):
+            try:
+                dock_target.restoreState(QByteArray(bytes.fromhex(dock_state_hex)))
+            except (RuntimeError, TypeError, ValueError, OSError) as exc:
+                logger.warning("Failed to restore dock geometry: %s", exc)
 
     launcher._rebuild_grid()
     logger.info("Layout loaded successfully")

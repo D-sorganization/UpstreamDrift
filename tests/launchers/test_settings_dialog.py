@@ -404,10 +404,14 @@ def test_compare_versions(parent_launcher, qapp) -> None:
 
 @patch("PyQt6.QtWidgets.QMessageBox.information")
 @patch("src.launchers.settings_dialog.SettingsWidget._generate_dep_table_html")
-def test_check_windows_deps(mock_gen_html, mock_info, parent_launcher, qapp) -> None:
+@pytest.mark.unit
+def test_check_windows_deps(
+    mock_gen_html, mock_info, parent_launcher, qapp, qtbot
+) -> None:
     mock_gen_html.return_value = "mock_html"
     dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._check_windows_deps()
+    qtbot.waitUntil(lambda: mock_info.called, timeout=3000)
     mock_info.assert_called_once()
     args, kwargs = mock_info.call_args
     assert "mock_html" in args[2]
@@ -421,6 +425,47 @@ def test_check_windows_deps(mock_gen_html, mock_info, parent_launcher, qapp) -> 
     drake_res = next((r for r in check_results if r["name"] == "Drake"), None)
     if drake_res and drake_res["installed"] == "Missing (Use Docker/WSL)":
         assert drake_res["status"] == "warn"
+
+
+@patch("PyQt6.QtWidgets.QMessageBox.information")
+@patch("src.launchers.settings_dialog._check_windows_dependencies_report")
+@pytest.mark.unit
+def test_check_windows_deps_returns_while_worker_runs(
+    mock_report_fn, mock_info, parent_launcher, qapp, qtbot
+) -> None:
+    from src.launchers.settings_runtime import RuntimeDependencyReport
+
+    release_probe = threading.Event()
+    calling_threads: list[threading.Thread] = []
+
+    def delayed_report() -> RuntimeDependencyReport:
+        calling_threads.append(threading.current_thread())
+        release_probe.wait(timeout=2)
+        return RuntimeDependencyReport(
+            dialog_title="Windows Dependency Check",
+            table_title="Windows Environment",
+            environment_name="Native Windows",
+            check_results=[],
+        )
+
+    mock_report_fn.side_effect = delayed_report
+
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+
+    start = time.perf_counter()
+    dialog._check_windows_deps()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < 0.1
+    assert not dialog.btn_check_windows_deps.isEnabled()
+    assert dialog.btn_check_windows_deps.text() == "Checking..."
+
+    release_probe.set()
+    qtbot.waitUntil(dialog.btn_check_windows_deps.isEnabled, timeout=3000)
+    assert mock_info.called
+    assert dialog.btn_check_windows_deps.text() == "Check Deps"
+    assert len(calling_threads) == 1
+    assert calling_threads[0] != threading.main_thread()
 
 
 @patch("PyQt6.QtWidgets.QMessageBox.warning")

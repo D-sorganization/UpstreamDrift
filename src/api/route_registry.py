@@ -23,7 +23,7 @@ import contextlib
 import importlib
 import pkgutil
 from collections.abc import AsyncGenerator, Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ContextManager
 
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
@@ -35,7 +35,7 @@ from src.api.auth.dependencies import (
     check_usage_quota,
 )
 from src.api.auth.models import User
-from src.api.database import get_db
+from src.api.database import get_db_factory
 from src.shared.python.config.environment import is_auth_disabled
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -141,25 +141,26 @@ def _request_time_quota_dependency(
 
     async def dependency(
         request: Request,
-        db: Session = Depends(get_db),
+        db_factory: Callable[[], ContextManager[Session]] = Depends(get_db_factory),
     ) -> AsyncGenerator[User | None, None]:
         if is_auth_disabled():
             yield None
             return
 
-        current_user = await _current_user_from_bearer_header(request, db)
-        generator = quota_dependency(current_user, db)
-        # Drives consume_quota(); raises HTTP 429 when the quota is exhausted.
-        user = next(generator)
-        try:
-            yield user
-        except Exception as exc:  # noqa: BLE001 - hand off to the refund path
-            with contextlib.suppress(StopIteration):
-                generator.throw(exc)
-            raise
-        else:
-            with contextlib.suppress(StopIteration):
-                next(generator)
+        with db_factory() as db:
+            current_user = await _current_user_from_bearer_header(request, db)
+            generator = quota_dependency(current_user, db)
+            # Drives consume_quota(); raises HTTP 429 when the quota is exhausted.
+            user = next(generator)
+            try:
+                yield user
+            except Exception as exc:  # noqa: BLE001 - hand off to the refund path
+                with contextlib.suppress(StopIteration):
+                    generator.throw(exc)
+                raise
+            else:
+                with contextlib.suppress(StopIteration):
+                    next(generator)
 
     dependency.enforced_dependency = enforced_dependency  # type: ignore[attr-defined]
     return dependency
@@ -177,7 +178,7 @@ _VIDEO_QUOTA_DEPENDENCY = _request_time_quota_dependency(
 
 async def _global_auth_dependency(
     request: Request,
-    db: Session = Depends(get_db),
+    db_factory: Callable[[], ContextManager[Session]] = Depends(get_db_factory),
 ) -> User | None:
     """Require an authenticated bearer token for protected routers.
 
@@ -189,12 +190,13 @@ async def _global_auth_dependency(
     """
     if is_auth_disabled():
         return None
-    return await _current_user_from_bearer_header(request, db)
+    with db_factory() as db:
+        return await _current_user_from_bearer_header(request, db)
 
 
 async def _ws_compatible_auth_dependency(
     request: Request = None,  # type: ignore[assignment]
-    db: Session = Depends(get_db),
+    db_factory: Callable[[], ContextManager[Session]] = Depends(get_db_factory),
 ) -> User | None:
     """Auth dependency safe to attach to routers that mix HTTP and WS routes.
 
@@ -216,12 +218,10 @@ async def _ws_compatible_auth_dependency(
 
     In local/auth-disabled mode this is a no-op (returns ``None``).
     """
-    if request is None:
-        # WebSocket scope: the route handler self-authenticates.
+    if request is None or is_auth_disabled():
         return None
-    if is_auth_disabled():
-        return None
-    return await _current_user_from_bearer_header(request, db)
+    with db_factory() as db:
+        return await _current_user_from_bearer_header(request, db)
 
 
 # Public alias for server.py: the chat_ws and realtime routers are mounted

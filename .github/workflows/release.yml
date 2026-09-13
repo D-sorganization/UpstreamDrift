@@ -151,6 +151,11 @@ jobs:
         run: python -m pip cache purge || true
       - name: Verify version consistency
         run: python3 scripts/check_version_consistency.py
+      - name: Verify release tag is signed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git verify-tag "${GITHUB_REF_NAME}"
       - name: Verify tag matches package version
         shell: bash
         run: |
@@ -163,6 +168,7 @@ jobs:
             echo "::error::Tag ${GITHUB_REF_NAME} does not match pyproject version ${actual}"
             exit 1
           fi
+
       - name: Install build tools
         run: |
           python -m ensurepip --upgrade || true
