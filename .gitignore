@@ -42,6 +42,7 @@ slprj/
 *.slxc
 *.autosave
 *.mex*
+qualified_candidate_replay.mat
 
 # IDE
 *.cursor-chat
