@@ -1,5 +1,36 @@
 # Native Multi-Engine Matching Checkpoint
 
+## Current Forward Trial — Pose-Seeded Shooting
+
+Run38 is now the active forward trial. Local handle40297; remote output directory
+C:/Users/diete/native-ms-pose-seed-fit-9967-38. Revalidate its process/output before
+restarting. Command uses run_native_ms_pose_seed_9967_38.py, --state-seed
+C:/Users/diete/native-shooting-state-seed-9967-38.json, --max-iterations12,
+--max-nfev13, --node-bound0.02. Runtime is
+/home/dieterolson/native-ms-state-seed-9967-38 in ControlTower-Runner; use the
+existing simscape-pinocchio-9967 venv, OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1.
+
+The driver is a preserved run20 derivative with only an explicit interior-state
+seed pathway and provenance changes. It keeps original q0/qd0, all25 markers,
+geometry, sextic controls, prior control bounds and uninterrupted acceptance.
+It removes the REQUIREMENT that the INITIAL guesses already have zero shooting
+defects; final continuity and forward replay acceptance are unchanged. Initial
+scaled defect norms at0.2/0.4/0.6/0.7/0.8 s are3.85/13.90/55.20/32.78/89.43.
+They are large, so fitting success is uncertain. Derivative preflight runs before
+optimization; if it fails, archive the failure rather than dropping that gate.
+
+Positions/rates come from run36 and the existing sampled closure projection.
+Only interior states are consumed. Finite-difference accelerations in the source
+are NOT used, and no smooth dynamic-path or inverse-dynamics claim is made.
+This distinction avoids the prior dead end requiring an inverse-ready trajectory
+before using ordinary multiple-shooting guesses. Source model hash and exact
+node times are validated by new shared select_shooting_states; initial-time
+replacement is prohibited. Six TDD tests pass; Ruff passes.
+
+Next: poll40297, inspect derivative-audit.json and evaluations.jsonl, then at
+termination archive outputs and independently replay any returned candidate.
+Do not restart run20 or re-run static marker rigidity checks.
+
 ## Current Native Pose Seed and Derivative Support
 
 Run36 completed: same74 samples at25 ms, search bound0.3 instead of0.15, original
