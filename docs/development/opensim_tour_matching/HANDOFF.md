@@ -1,8 +1,37 @@
 # OpenSim Matching Handoff
 
-Updated: 2026-09-12 UTC. Epic: [#10003](https://github.com/D-sorganization/UpstreamDrift/issues/10003).
-Plan: [EPIC_10003.md](EPIC_10003.md). Status: planning complete; prepared for the requested user check-in.
-No OpenSim implementation or native solver job has started in this workstream.
+## OS-0 Execution Complete: Runtime and Evidence Baseline (2026-09-13 UTC)
+
+Work Package OS-0 of Epic #10003 is complete. Baseline runtime environment, packaged OpenSim model topology, and canonical C3D capture were audited and preserved.
+
+### OS-0 Key Audit Results
+
+1. **Environment & Runtime Inventory**:
+
+   - Python 3.13.5 (AMD64) on Windows-11.
+   - Core numerical libraries verified: NumPy 2.4.1, SciPy 1.16.0, ezc3d 1.6.3, pytest 9.0.3, matplotlib 3.10.3.
+   - **Mandatory Red Gate Verified**: `opensim` and `casadi` modules are confirmed absent from this environment.
+   - Red qualification test suite committed: `tests/opensim/test_opensim_os0_qualification.py` fails predictably on missing `opensim` and missing `MocoStudy`/`MocoTrack`.
+
+2. **Model Topology & Structure (`golf_humanoid.osim`)**:
+
+   - Model SHA-256: `ee651d5452e39fef8618470adb430a53658a7a5a51d91af0333e5bf7cbd305be`.
+   - 23 Bodies: pelvis, femur_r, tibia_r, patella_r, talus_r, calcn_r, toes_r, femur_l, tibia_l, patella_l, talus_l, calcn_l, toes_l, torso, head, humerus_r, ulna_r, radius_r, hand_r, humerus_l, ulna_l, radius_l, Club.
+   - 39 Coordinates, 39 CoordinateActuators.
+   - Club Attachment: `Club` is welded to `hand_r` via `WeldJoint`.
+   - Closed kinematic chain note: The current OpenSim model has no closed kinematic loop connecting `hand_l` to `Club`; constructing a second-hand coupler/loop constraint or weld constraint is a prerequisite before physical two-hand dynamics matching can proceed.
+
+3. **C3D Tour-Average Capture & Clock Audit (`data/C3D_TA_Driver.c3d`)**:
+
+   - Capture SHA-256: `545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba` (identical to MATLAB export copy).
+   - Sample Rate: 360.0 Hz; 654 Frames (duration 1.813889 s).
+   - 38 Tracked Markers: WaistLeft, WaistRight, WaistLBack, WaistRBack, BackTop, BackLeft, BackRight, LShoulderTop, LShoulderBack, LUArmHigh, LElbowOut, LWristTop, RShoulderBack, RUArmHigh, RElbowOut, RWristTop, Marker_2:2:1..3, Marker_3:3:1..3, HeadTop, HeadFront, HeadSide, etc.
+   - Total observed marker points: 17,466 valid observations.
+   - Analog & Force Plates: Zero force plate / GRF channels exist in this optical motion capture file.
+
+4. **Immutable Receipt**:
+   - Evidence preserved in `docs/development/opensim_tour_matching/evidence/os0_audit_receipt.json`.
+   - Execution script: `docs/development/opensim_tour_matching/os0_runtime_audit.py`.
 
 ## Current Cross-Engine Evidence
 
