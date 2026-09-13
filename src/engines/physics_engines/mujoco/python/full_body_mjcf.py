@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -27,47 +28,12 @@ from src.shared.python.motion_matching.full_body_spec import (
 )
 
 
-def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
-    """Export the full-body specification to MJCF with 41 scalar joints and contact sites."""
-    spec = json.loads(model_bytes)
-    if spec.get("schema_version") != "full-body-v1":
-        raise ValueError("Unsupported schema version: expected full-body-v1")
-    if not isinstance(spec.get("closure"), dict):
-        raise ValueError("Missing closure specification")
-    if not isinstance(spec.get("contact"), dict):
-        raise ValueError("Missing contact specification")
-
-    root = ET.Element("mujoco", model="full_body_golf")
-    ET.SubElement(
-        root, "compiler", angle="radian", autolimits="false", inertiafromgeom="false"
-    )
-    gravity = np.asarray(spec["gravity_m_s2"], dtype=float)
-    if gravity.shape != (3,) or not np.isfinite(gravity).all():
-        raise ValueError("Invalid full-body gravity")
-    option = ET.SubElement(root, "option", gravity=_numbers(gravity), jacobian="dense")
-    ET.SubElement(option, "flag", contact="disable")
-
-    default_root = ET.SubElement(root, "default")
-    default_contact = ET.SubElement(
-        default_root, "default", attrib={"class": "contact"}
-    )
-    ET.SubElement(default_contact, "geom", contype="0", conaffinity="0")
-
-    world = ET.SubElement(root, "worldbody")
-    bodies = {body["name"]: body for body in spec["bodies"]}
-    if len(bodies) != len(spec["bodies"]) or "world" not in bodies:
-        raise ValueError("Invalid full-body body inventory")
-
-    elements: dict[str, ET.Element] = {"world": world}
-    offsets: dict[str, np.ndarray] = {"world": np.eye(4)}
-    coordinates: list[str] = []
-
-    # Separate upper-body joints and lower-limb joints
+def _order_full_body_joints(spec: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Sequence joints with upper-body tree first, then lower limb chains."""
     upper_spec = upper_body_slice(spec)
     upper_joint_names = {j["name"] for j in upper_spec["joints"]}
     upper_ordered = order_directed_tree(upper_spec["joints"])
 
-    # Lower limb chains: right leg then left leg
     lower_joints_by_name = {
         j["name"]: j for j in spec["joints"] if j["name"] not in upper_joint_names
     }
@@ -86,10 +52,24 @@ def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
     lower_ordered = [
         lower_joints_by_name[name] for name in leg_chain if name in lower_joints_by_name
     ]
+    return list(upper_ordered) + lower_ordered
 
-    all_ordered_joints = upper_ordered + lower_ordered
 
-    for joint in all_ordered_joints:
+def _build_full_body_kinematics(
+    root: ET.Element,
+    spec: Mapping[str, Any],
+) -> tuple[dict[str, ET.Element], dict[str, np.ndarray]]:
+    """Construct worldbody, rigid body elements, joints, and inertias."""
+    world = ET.SubElement(root, "worldbody")
+    bodies = {body["name"]: body for body in spec["bodies"]}
+    if len(bodies) != len(spec["bodies"]) or "world" not in bodies:
+        raise ValueError("Invalid full-body body inventory")
+
+    elements: dict[str, ET.Element] = {"world": world}
+    offsets: dict[str, np.ndarray] = {"world": np.eye(4)}
+    coordinates: list[str] = []
+
+    for joint in _order_full_body_joints(spec):
         parent, child = joint["parent"], joint["child"]
         if parent not in elements:
             raise ValueError(f"Parent body {parent} not yet constructed in tree")
@@ -128,8 +108,16 @@ def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
         or set(coordinates) != set(spec["coordinate_order"])
     ):
         raise ValueError("Body or coordinate inventory was not preserved")
+    return elements, offsets
 
-    # Frame sites
+
+def _attach_full_body_sites(
+    root: ET.Element,
+    elements: Mapping[str, ET.Element],
+    offsets: Mapping[str, np.ndarray],
+    spec: Mapping[str, Any],
+) -> tuple[dict[str, str], dict[str, str]]:
+    """Attach frame sites, contact sphere geoms/sites, and closure weld sites."""
     frame_sites: dict[str, str] = {}
     for i, frame in enumerate(spec["frames"]):
         if frame["name"] in frame_sites:
@@ -147,14 +135,12 @@ def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
             },
         )
 
-    # Contact geoms and sites
     contact_sites: dict[str, str] = {}
     for sphere in spec["contact"]["spheres"]:
         s_name = sphere["name"]
         b_name = sphere["body"]
         radius = float(sphere["radius_m"])
         p_body = np.asarray(sphere["position_m"], dtype=float)
-        # Position in MuJoCo body frame
         p_mjcf = offsets[b_name][:3, :3] @ p_body + offsets[b_name][:3, 3]
 
         geom_name = f"contact_{s_name}"
@@ -178,7 +164,6 @@ def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
             size=".005",
         )
 
-    # Dual-grip weld closure sites
     for suffix in ("a", "b"):
         closure_body = spec["closure"][f"body_{suffix}"]
         ET.SubElement(
@@ -200,6 +185,37 @@ def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
         site1="native_closure_a",
         site2="native_closure_b",
     )
+    return frame_sites, contact_sites
+
+
+def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
+    """Export the full-body specification to MJCF with 41 scalar joints and contact sites."""
+    spec = json.loads(model_bytes)
+    if spec.get("schema_version") != "full-body-v1":
+        raise ValueError("Unsupported schema version: expected full-body-v1")
+    if not isinstance(spec.get("closure"), dict):
+        raise ValueError("Missing closure specification")
+    if not isinstance(spec.get("contact"), dict):
+        raise ValueError("Missing contact specification")
+
+    root = ET.Element("mujoco", model="full_body_golf")
+    ET.SubElement(
+        root, "compiler", angle="radian", autolimits="false", inertiafromgeom="false"
+    )
+    gravity = np.asarray(spec["gravity_m_s2"], dtype=float)
+    if gravity.shape != (3,) or not np.isfinite(gravity).all():
+        raise ValueError("Invalid full-body gravity")
+    option = ET.SubElement(root, "option", gravity=_numbers(gravity), jacobian="dense")
+    ET.SubElement(option, "flag", contact="disable")
+
+    default_root = ET.SubElement(root, "default")
+    default_contact = ET.SubElement(
+        default_root, "default", attrib={"class": "contact"}
+    )
+    ET.SubElement(default_contact, "geom", contype="0", conaffinity="0")
+
+    elements, offsets = _build_full_body_kinematics(root, spec)
+    frame_sites, contact_sites = _attach_full_body_sites(root, elements, offsets, spec)
 
     xml = ET.tostring(root, encoding="unicode")
     return xml, {

@@ -7,6 +7,7 @@ enforces the same six-dimensional closure with an explicit rigid solve.
 import hashlib
 import json
 import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -81,6 +82,51 @@ def _inertia(body: dict, follower: np.ndarray) -> dict[str, str]:
     }
 
 
+def _attach_native_sites_and_weld(
+    root: ET.Element,
+    elements: Mapping[str, ET.Element],
+    offsets: Mapping[str, np.ndarray],
+    spec: Mapping[str, Any],
+) -> dict[str, str]:
+    """Attach marker frame sites, closure sites, and weld constraint."""
+    sites: dict[str, str] = {}
+    for i, frame in enumerate(spec["frames"]):
+        if frame["name"] in sites:
+            raise ValueError("Duplicate native frame")
+        site = f"native_frame_{i}"
+        sites[frame["name"]] = site
+        ET.SubElement(
+            elements[frame["body"]],
+            "site",
+            {
+                "name": site,
+                "size": ".001",
+                **_pose(offsets[frame["body"]] @ transform(frame["placement"])),
+            },
+        )
+    for suffix in ("a", "b"):
+        body = spec["closure"][f"body_{suffix}"]
+        ET.SubElement(
+            elements[body],
+            "site",
+            {
+                "name": f"native_closure_{suffix}",
+                "size": ".001",
+                **_pose(
+                    offsets[body] @ transform(spec["closure"][f"placement_{suffix}"])
+                ),
+            },
+        )
+    ET.SubElement(
+        ET.SubElement(root, "equality"),
+        "weld",
+        name="native_grip",
+        site1="native_closure_a",
+        site2="native_closure_b",
+    )
+    return sites
+
+
 def export_native_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
     """Export source-bound native geometry; never add helper mass or limits."""
     spec = json.loads(model_bytes)
@@ -139,41 +185,8 @@ def export_native_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
         or set(coordinates) != set(spec["coordinate_order"])
     ):
         raise ValueError("Native body or coordinate inventory was not preserved")
-    sites = {}
-    for i, frame in enumerate(spec["frames"]):
-        if frame["name"] in sites:
-            raise ValueError("Duplicate native frame")
-        site = f"native_frame_{i}"
-        sites[frame["name"]] = site
-        ET.SubElement(
-            elements[frame["body"]],
-            "site",
-            {
-                "name": site,
-                "size": ".001",
-                **_pose(offsets[frame["body"]] @ transform(frame["placement"])),
-            },
-        )
-    for suffix in ("a", "b"):
-        body = spec["closure"][f"body_{suffix}"]
-        ET.SubElement(
-            elements[body],
-            "site",
-            {
-                "name": f"native_closure_{suffix}",
-                "size": ".001",
-                **_pose(
-                    offsets[body] @ transform(spec["closure"][f"placement_{suffix}"])
-                ),
-            },
-        )
-    ET.SubElement(
-        ET.SubElement(root, "equality"),
-        "weld",
-        name="native_grip",
-        site1="native_closure_a",
-        site2="native_closure_b",
-    )
+
+    sites = _attach_native_sites_and_weld(root, elements, offsets, spec)
     xml = ET.tostring(root, encoding="unicode")
     return xml, {
         "model_sha256": hashlib.sha256(model_bytes).hexdigest(),
