@@ -1,5 +1,22 @@
 # SPEC.md — Repository Specification Document
 
+## Cross-Engine Full-Body Parity and Visual Review (FB-6, #10070)
+
+Implement cross-engine full-body forward dynamics simulation replay, numerical step-size convergence, and visual review under Epic #10062:
+- Shared Cross-Engine Replay Module (`src/shared/python/motion_matching/cross_engine_replay.py`):
+  - `CrossEngineReplayConfig`: Immutable specification for multi-engine replay and step-size convergence analysis.
+  - `StepSizeConvergenceResult`, `compute_step_size_convergence`: Numerical convergence evaluation under integration tolerance / step-size refinement ($h$ vs. $h/2$ or $rtol$ refinement).
+  - `EngineReplayOutcome`, `CrossEngineComparisonReport`, `compare_engine_replays`: Cross-engine comparison aggregation reporting per-engine metrics, contact audits, and pairwise differences.
+  - `generate_overlay_frame`, `render_marker_overlay_animation`: Generates 3D animated GIF visual review overlays comparing C3D target capture markers (black) against simulated model markers (engine-colored) with candidate hash prefix in filenames.
+- Unified Engine Model Interfaces:
+  - `src/engines/physics_engines/mujoco/python/full_body_model.py`: Exposes canonical `.coordinate_order` and `evaluate_contact_samples`.
+  - `src/engines/physics_engines/pinocchio/python/native_model.py`: Exposes canonical `.coordinate_order` and `evaluate_contact_samples`.
+  - `src/engines/physics_engines/drake/python/full_body_model.py`: Exposes canonical `.coordinate_order` and `evaluate_contact_samples`; fixes contact sphere point offset in ground calibration.
+  - `src/shared/python/motion_matching/full_body_forward_dynamics.py`: Adaptive RK45 integration across all three engines with configurable `rtol`/`atol` and universal address ground plane height auto-calibration for `ground_plane` (Drake), `ground` (Pinocchio), and `_ground_plane` (MuJoCo).
+- Automated Evidence & Verification Suite (`docs/development/full_body_models/evidence/fb6_parity/`):
+  - Driver `verify_cross_engine_parity.py` replaying the accepted 41-DOF full-body candidate (`returned-candidate.json`) over all 654 frames across MuJoCo, Pinocchio, and Drake with step-size convergence verification.
+  - Generates machine-verifiable receipts (`receipt_mujoco.json`, `receipt_pinocchio.json`, `receipt_drake.json`), compressed trajectories (`forward_trajectory_<engine>.npz`), parity report (`parity_report.json`), and 3D marker overlay animations (`overlay_<engine>_<cand_hash>.gif`).
+
 ## Full-Body Forward-Dynamics Matching With Two-Window Shooting Fitter (FB-5, #10069)
 
 Implement full-body forward-dynamics simulation, multiple-shooting fitter extensions, and measured derivative resolution under Epic #10062:

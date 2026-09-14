@@ -161,13 +161,42 @@ def calibrate_ground_height_at_address(model: Any, address_q: Array) -> float:
     q_dict = {
         name: float(address_q[i]) for i, name in enumerate(model.coordinate_order)
     }
-    model.data.qpos[:] = model._vector(q_dict)
-    model._mj.mj_fwdPosition(model.model, model.data)
-    min_z = min(
-        model.data.site_xpos[s_info["site_id"]][2] - s_info["radius"]
-        for s_info in model._spheres.values()
-    )
-    return float(min_z)
+    if hasattr(model, "_mj"):
+        model.data.qpos[:] = model._vector(q_dict)
+        model._mj.mj_fwdPosition(model.model, model.data)
+        min_z = min(
+            model.data.site_xpos[s_info["site_id"]][2] - s_info["radius"]
+            for s_info in model._spheres.values()
+        )
+        return float(min_z)
+    if hasattr(model, "_pin"):
+        q = model.configuration(q_dict)
+        model._pin.forwardKinematics(model.model, model.data, q)
+        model._pin.updateFramePlacements(model.model, model.data)
+        min_z = min(
+            float(
+                model.data.oMf[model._contact_frames[s.name]].translation[2]
+                - s.radius_m
+            )
+            for s in model.contact_spheres
+        )
+        return float(min_z)
+    if hasattr(model, "plant"):
+        model.plant.SetPositions(model.context, model._vector(q_dict, model._q_indices))
+        min_z = min(
+            float(
+                model.plant.CalcPointsPositions(
+                    model.context,
+                    s_info["frame"],
+                    np.zeros(3),
+                    model.plant.world_frame(),
+                )[2, 0]
+                - s_info["radius_m"]
+            )
+            for s_info in model._spheres.values()
+        )
+        return float(min_z)
+    return 0.0
 
 
 @dataclass(frozen=True)
@@ -178,6 +207,8 @@ class RolloutOptions:
     unactuated_indices: frozenset[int] = DEFAULT_UNACTUATED
     integrator: str = "rk45"
     normalize_time: bool = False
+    rtol: float = 1e-5
+    atol: float = 1e-7
 
 
 def _slice_capture(capture: TourCapture, n_frames: int) -> TourCapture:
@@ -288,8 +319,8 @@ def _simulate_rk45(
         init_state,
         t_eval=times,
         method="RK45",
-        rtol=1e-5,
-        atol=1e-7,
+        rtol=options.rtol,
+        atol=options.atol,
     )
     if not sol.success:
         zero_markers = np.zeros((n_frames, len(capture.labels), 3), dtype=np.float64)
@@ -436,6 +467,14 @@ def simulate_full_body_forward(
         calib_z = calibrate_ground_height_at_address(model, q0)
         model.ground_plane = GroundPlane(
             normal=model.ground_plane.normal, height_m=calib_z
+        )
+    elif hasattr(model, "ground") and abs(model.ground.height_m) < 1e-6:
+        calib_z = calibrate_ground_height_at_address(model, q0)
+        model.ground = GroundPlane(normal=model.ground.normal, height_m=calib_z)
+    elif hasattr(model, "_ground_plane") and abs(model._ground_plane.height_m) < 1e-6:
+        calib_z = calibrate_ground_height_at_address(model, q0)
+        model._ground_plane = GroundPlane(
+            normal=model._ground_plane.normal, height_m=calib_z
         )
 
     if opts.integrator == "rk45" and len(times) > 1:
