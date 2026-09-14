@@ -180,7 +180,33 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
   scapulae at address means refitting q0 (or re-calibrating attachments)
   with those coordinates constrained, then re-qualifying.
 
+## Tour Matching Viewer Launcher Tile Completed (Step 3 of the Visuals Plan)
+
+- Implemented pure-data engine-agnostic replay and forward kinematics reader
+  `src/tools/tour_matching_viewer/core.py` (`load_replay`, `body_poses_from_state`,
+  `viewer_frame`). Supports native `returned-replay.npz` and OpenSim IK `.mot`
+  formats. Forward kinematics derived pure-Python from `full_body_spec_v1.json`
+  evaluates to $< 10^{-12}$ error against MuJoCo forward kinematics across all 24
+  bodies over 20 random states without importing `mujoco`.
+- Implemented PyQt6/matplotlib 3D viewer `TourMatchingViewerWidget` and
+  `TourMatchingViewerWindow` (`src/tools/tour_matching_viewer/gui.py`) with scrub
+  slider, playback controls, target/model markers, visual skeleton segments,
+  ground wireframe, and per-frame valid marker RMS readout.
+- Embedded launcher tile via `_TourMatchingViewerEmbedAdapter` (`_embed_adapter.py`)
+  registered into `EMBEDDABLE_TOOL_REGISTRY` and configured in `src/config/models.yaml`
+  (`tool_id: tour_matching_viewer`, category `tool`, status `beta`).
+- 10 unit tests passing in `tests/unit/tools/test_tour_matching_viewer_core.py` and
+  `tests/unit/tools/test_tour_matching_viewer_adapter.py`.
+- Rendered offscreen verification evidence archived under
+  `docs/development/full_body_models/evidence/viewer/`:
+  - `screenshot_returned81.png`
+  - `screenshot_mot.png`
+  - `receipt.json`
+  - `returned81_replay.npz`
+  - `opensim_os3b_ik.mot`
+
 ## Next
 
-- Cross-engine same-input replay and comparison across MuJoCo FB-3-M (#10066), Pinocchio FB-3-P (#10065), and Drake FB-3-D (#10067).
-- FB-4 ground height and marker calibration, and FB-5 fitting per Epic #10062.
+- Cross-engine same-input replay of Returned81 in MuJoCo, Drake, and Pinocchio with video (Step 4).
+- OpenSim on real horizon 0.85s (Step 5).
+- Independent FB-3 re-checks (Step 6).
