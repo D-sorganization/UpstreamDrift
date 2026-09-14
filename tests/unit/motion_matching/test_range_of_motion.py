@@ -38,6 +38,12 @@ def test_violations_flag_only_excursions_beyond_tolerance() -> None:
     )
     assert found["knee_angle_r"].max_excess_deg == pytest.approx(10.0)
     assert module.violations(q[:1], order) == {}
+    # A whole turn added to a coordinate is not an excursion.
+    turned = q.copy()
+    turned[:, 1] += 2 * np.pi
+    assert module.violations(turned, order)["LEInput"].max_excess_deg == pytest.approx(
+        5.0
+    )
     with pytest.raises(ValueError):
         module.violations(q[:, :2], order)
     with pytest.raises(ValueError):

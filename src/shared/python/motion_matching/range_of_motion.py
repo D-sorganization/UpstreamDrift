@@ -89,7 +89,9 @@ def violations(
         if name not in ranges_deg:
             continue
         lo, hi = ranges_deg[name]
-        deg = np.degrees(values[:, index])
+        # Continuous trajectories may carry whole turns (unwrapped Euler
+        # angles); ranges are stated within a turn, so compare modulo 360.
+        deg = (np.degrees(values[:, index]) + 180.0) % 360.0 - 180.0
         excess = np.maximum(lo - deg, deg - hi)
         bad = excess > tolerance_deg
         if bad.any():

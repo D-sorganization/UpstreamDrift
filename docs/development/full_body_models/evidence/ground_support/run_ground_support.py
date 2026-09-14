@@ -184,11 +184,18 @@ NEUTRAL_BOUNDS_DEG = {
 # way); the spin that sets it is otherwise free in the marker fit.
 ADDRESS_RESTARTS = 6  # perturbed re-solves per leg seed in the address fit
 ADDRESS_RESTART_SPREAD_RAD = 0.5
-ADDRESS_ELBOW_BOUNDS_DEG = {"LEInput": (-12.0, 5.0), "REInput": (-15.0, -3.0)}
-# Pit target = ELBOW_PIT_UP * up + ELBOW_PIT_INWARD * (toward the other arm).
-ELBOW_PIT_UP = 1.0
-ELBOW_PIT_INWARD = 0.4
+ADDRESS_ELBOW_BOUNDS_DEG = {"LEInput": (-35.0, 5.0), "REInput": (-30.0, -3.0)}
+# The elbow pits follow the capture: the direction the forearm folds toward
+# is read from the shoulder, elbow and wrist markers (posture_metrics
+# .elbow_pit_direction), averaged over the static frames for the address and
+# taken per frame through the swing, and pulls each upper arm's pit axis.
+# This pins the humeral roll that the two upper-arm markers leave free.
+ELBOW_PIT_MARKERS = {
+    "L": ("LShoulderTop", "LElbowOut", "LWristTop"),
+    "R": ("RShoulderBack", "RElbowOut", "RWristTop"),
+}
 ELBOW_PIT_WEIGHT = 0.02  # address fits with placed markers
+ELBOW_PIT_WEIGHT_SWING = 0.01  # per frame through the trajectory
 # Address balance: the body-plus-club centre of mass is pulled over the centroid
 # of the contact spheres, so the setup does not lean onto the toes.
 ADDRESS_BALANCE_WEIGHT = 3.0
@@ -346,6 +353,12 @@ def render_playback(
 # forearms are flagged only because bounding them with the current hand-club
 # attachment collapses the fit (driver 65 mm, receipted 2026-09-14; MM-2,
 # #10104 carries the roll calibration of the grip that must come first).
+# Wrists and forearms: flagged, not yet bounded. With the marker-driven pits
+# and the human ranges imposed, the fit rose to 49 mm (driver) and 42 mm
+# (7-iron) with forearm pronation pinned at 90 deg and the left cock at its
+# radial limit, so the roll of the hand on the club (copied from the native
+# document) is what limits the chain; MM-2 (#10104) calibrates it from the
+# address before the ranges are imposed. Receipted 2026-09-14.
 IK_UNBOUNDED = frozenset(
     {"LWInputX", "RWInputX", "LWInputY", "RWInputY", "LFInput", "RFInput"}
 )
@@ -508,24 +521,42 @@ class Lane:
         assert best is not None
         return best
 
+    def marker_pit(self, side: str, frames: Sequence[int]) -> np.ndarray | None:
+        """Mean marker-derived elbow pit direction of ``side`` over ``frames``
+        (None when the markers are missing or the elbow is straight)."""
+        cols = [self.labels.index(m) for m in ELBOW_PIT_MARKERS[side]]
+        pits = []
+        for f in frames:
+            if not self.valid[f, cols].all():
+                continue
+            pit = post.elbow_pit_direction(*self.points[f, cols])
+            if pit is not None:
+                pits.append(pit)
+        if not pits:
+            return None
+        mean = np.mean(pits, axis=0)
+        return mean / np.linalg.norm(mean)
+
     def elbow_pit_targets(
         self, kin: FullBodyMarkerKinematics, q: np.ndarray, weight: float
     ) -> dict[str, tuple[tuple[float, float, float], np.ndarray, float]]:
-        """Axis targets pointing each elbow pit up and toward the other arm,
-        from the shoulder positions of the pose ``q``."""
-        poses = kin.body_poses(q, ["LS", "RS"])
-        left, right = poses["LS"][1], poses["RS"][1]
-        across = right - left
-        across[2] = 0.0
-        across /= max(np.linalg.norm(across), 1e-9)
+        """Axis targets pulling each upper arm's pit axis toward the pit
+        direction the address markers show (static frames)."""
+        return self.pit_targets_for(list(range(STATIC_FRAMES)), weight)
+
+    def pit_targets_for(
+        self, frames: Sequence[int], weight: float
+    ) -> dict[str, tuple[tuple[float, float, float], np.ndarray, float]]:
         out = {}
-        for side, sign in (("L", 1.0), ("R", -1.0)):
-            target = (
-                ELBOW_PIT_UP * np.array([0.0, 0.0, 1.0])
-                + ELBOW_PIT_INWARD * sign * across
-            )
-            out[f"{side}S"] = ((1.0, 0.0, 0.0), target, weight)
+        for side in ("L", "R"):
+            pit = self.marker_pit(side, frames)
+            if pit is not None:
+                out[f"{side}S"] = ((1.0, 0.0, 0.0), pit, weight)
         return out
+
+    def pit_targets_per_frame(self, weight: float) -> list[dict | None]:
+        """One pit target set per capture frame (None where unobservable)."""
+        return [self.pit_targets_for([f], weight) or None for f in range(self.frames)]
 
     def static_trial(
         self, spec_bytes: bytes, seeds: dict, q_seed: np.ndarray
@@ -586,6 +617,11 @@ class Lane:
             bounds=self.bounds,
             marker_weights=self.marker_weights,
             prior_weights=self.prior_weights,
+            axis_targets_per_frame=(
+                self.pit_targets_per_frame(ELBOW_PIT_WEIGHT_SWING)
+                if self.anthropometric
+                else None
+            ),
             restarts=TRAJECTORY_RESTARTS,
             restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,
             restart_margin_m=TRAJECTORY_RESTART_MARGIN_M,

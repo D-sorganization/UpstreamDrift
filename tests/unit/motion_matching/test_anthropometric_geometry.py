@@ -247,3 +247,24 @@ def test_document_carries_club_torso_hints_and_shared_ranges(upper: dict) -> Non
         json.loads(NATIVE.read_text()), stature_m=STATURE, mass_kg=MASS, club=IRON_7
     )
     assert iron["club"]["name"] == "iron7" and iron["club"]["length_m"] < 1.0
+
+
+def test_grip_roll_turns_the_hands_about_the_shaft_only() -> None:
+    native = json.loads(NATIVE.read_text())
+    plain = module.build_upper_body(native, stature_m=STATURE, mass_kg=MASS)
+    rolled = module.build_upper_body(
+        native, stature_m=STATURE, mass_kg=MASS, grip_roll_deg=40.0
+    )
+    zero = dict.fromkeys(plain["coordinate_order"], 0.0)
+    a = NativeMujocoModel(json.dumps(plain).encode()).frame_poses(zero)
+    b = NativeMujocoModel(json.dumps(rolled).encode()).frame_poses(zero)
+    # The shaft direction from the wrist is unchanged; the club frame rolled.
+    shaft_a = a["Clubhead"][:3, 3] - a["LW"][:3, 3]
+    shaft_b = b["Clubhead"][:3, 3] - b["LW"][:3, 3]
+    cos = shaft_a @ shaft_b / np.linalg.norm(shaft_a) / np.linalg.norm(shaft_b)
+    assert cos > 0.999
+    rel = a["Clubhead"][:3, :3].T @ b["Clubhead"][:3, :3]
+    assert np.degrees(np.arccos((np.trace(rel) - 1) / 2)) == pytest.approx(
+        40.0, abs=0.1
+    )
+    assert rolled["subject"]["grip_roll_deg"] == 40.0

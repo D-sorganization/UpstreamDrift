@@ -86,3 +86,23 @@ def plane_normal(points: Array, toward: Array) -> Array:
     if normal @ _unit(toward, "toward") < 0:
         normal = -normal
     return normal
+
+
+def elbow_pit_direction(
+    shoulder: Array, elbow: Array, wrist: Array, min_flexion_deg: float = 5.0
+) -> Array | None:
+    """Unit direction the elbow pit faces, from three arm markers.
+
+    The forearm folds toward the pit, so the pit direction is the component
+    of the forearm direction perpendicular to the upper-arm direction. With
+    the elbow straighter than ``min_flexion_deg`` the fold is not observable
+    and ``None`` is returned. Precondition: finite 3-vectors, upper arm and
+    forearm of nonzero length.
+    """
+    upper = _unit(np.asarray(elbow, float) - np.asarray(shoulder, float), "upper arm")
+    fore = _unit(np.asarray(wrist, float) - np.asarray(elbow, float), "forearm")
+    flexion = np.degrees(np.arccos(np.clip(upper @ fore, -1.0, 1.0)))
+    if flexion < min_flexion_deg:
+        return None
+    pit = fore - (fore @ upper) * upper
+    return pit / np.linalg.norm(pit)

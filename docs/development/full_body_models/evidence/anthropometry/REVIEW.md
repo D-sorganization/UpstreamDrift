@@ -474,3 +474,43 @@ Tracked as epic #10113 (children #10103 to #10112).
 | Whole-run tracking root RMS                   | 25 mm           | 33 mm          |
 | Stance frames inside the support polygon      | 84 %            | 89 %           |
 | CoM offset from the polygon centroid          | 8 mm            | 3 mm           |
+
+## 12. Elbow Pits From the Markers, Grip Roll, Club Mesh Epic (2026-09-14)
+
+- **What the markers say.** `posture_metrics.elbow_pit_direction` reads the
+  direction the forearm folds toward from the shoulder, elbow and wrist
+  markers. Driver address: lead pit up -0.35, inward (toward the trail
+  side) +0.49, forward -0.38; trail pit up +0.11, inward +0.58; both pits
+  turn upward through the backswing (0.9 at the top). The lead arm's marker
+  chord angle at address is 48 deg (about 20 to 25 deg true flexion), the
+  trail arm 29 deg. The earlier fixed target (up plus a little inward) was
+  therefore wrong for the lead arm at address, which is why forcing it broke
+  every fit (9.2, 9.3).
+- **Data-driven pits.** The driver now pulls each upper arm's pit axis toward
+  the marker-derived direction, averaged over the static frames for the
+  address fits and per frame through the trajectory
+  (`solve_trajectory(axis_targets_per_frame=...)`), with the elbow windows
+  widened to what the markers show (left -35 to 5 deg, right -30 to -3).
+  Receipts with the wrists flagged: driver IK 26.0 mm, 7-iron
+  24.1 mm; address 12.9 / 5.2 mm; backswing root
+  5 / 4 mm; pits at address left -0.09 / +0.61,
+  right +0.08 / +1.00 (up, inward).
+- **Wrist ranges.** Imposing the human wrist and forearm ranges in the IK
+  with these pits gave driver 49 mm and 7-iron 42 mm, with forearm pronation
+  pinned at +90 deg and the lead cock at its +25 deg radial limit at address
+  (arms 63 to 74 mm, club 71 mm). The one free parameter left in the
+  hand-club chain is the roll of the hands about the shaft, copied from the
+  native hand frames; `GRIP_ROLL_DEG` (builder `--grip-roll`) makes it
+  explicit and `scan_grip_roll.py` calibrates it from the driver swing by
+  the sum of wrist and forearm excursions beyond the human ranges with the
+  wrists unbounded: roll 0 deg is best with a total excursion of 224 deg (lead cock 122 deg beyond its range), +45 deg 277, -45 deg 333, -90 deg 303, +90 deg 451, so no roll brings the wrists within human ranges and the roll is not the lever. The ranges are imposed only once the
+  calibrated roll keeps the fit; until then the driver flags the wrists and
+  forearms (`IK_UNBOUNDED`) and every receipt lists the excursions. Ranges
+  never enter the equations of motion.
+- **Club meshes.** Organised as epic #10120 (CM-1 to CM-6) after a survey of
+  the three repositories: Tools `rate_of_closure/club` already builds
+  parametric heads and writes STL, UpstreamDrift `bunkershot3d/geometry`
+  lofts wedges with mass properties, Tools_Private `glass_models` is a
+  gmsh vessel mesher for FEA, and Gasification_Model has no mesh code; the
+  epic builds one shared club mesh library, a Club Mesh Studio tool, a
+  versioned head library and mesh heads in the three engines' visuals.

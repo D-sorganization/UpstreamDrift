@@ -437,3 +437,35 @@ def test_axis_targets_turn_a_frame_axis_toward_a_direction(
             ground=GROUND,
             axis_targets={frame: ((0, 0, 0), want, 1)},
         )
+
+
+def test_axis_targets_per_frame_are_validated_and_applied(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    n = len(kinematics.coordinate_order)
+    q0 = np.zeros(n)
+    q0[2] = 1.2
+    targets = np.stack([kinematics.marker_positions(q0)] * 2)
+    valid = np.ones(targets.shape[:2], dtype=bool)
+    frame = "Hub"
+    site = kinematics.model.site(kinematics.adapter.metadata["frame_sites"][frame]).id
+    want = np.array([0.0, 0.0, 1.0])
+    per_frame = [None, {frame: ((1.0, 0.0, 0.0), want, 1e3)}]
+    q, _ = kinematics.solve_trajectory(
+        targets,
+        valid,
+        q0,
+        ground=GROUND,
+        closure_weight=0.0,
+        prior_weight=1e-6,
+        axis_targets_per_frame=per_frame,
+    )
+    kinematics._set(q[0])
+    first = kinematics.data.site_xmat[site].reshape(3, 3)[:, 0] @ want
+    kinematics._set(q[1])
+    second = kinematics.data.site_xmat[site].reshape(3, 3)[:, 0] @ want
+    assert second > 0.99 and first < 0.5
+    with pytest.raises(ValueError):
+        kinematics.solve_trajectory(
+            targets, valid, q0, ground=GROUND, axis_targets_per_frame=[None]
+        )

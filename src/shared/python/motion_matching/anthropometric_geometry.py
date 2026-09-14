@@ -88,6 +88,11 @@ WRIST_PRIMITIVES = ("Rx", "Rz")
 # position golfers call neutral. Applied as a fixed turn about the cock axis
 # between the wrist base and the hand.
 GRIP_ULNAR_OFFSET_DEG = 25.0
+# Roll of the hands about the shaft relative to the native hand frames, the
+# one free parameter of the hand-club attachment that the markers do not fix;
+# calibrated so the wrist coordinates read human ranges over the swing
+# (MM-2, #10104). Zero keeps the native roll.
+GRIP_ROLL_DEG = 0.0
 ADDRESS_SEED_DEG: dict[str, float] = {  # arms 45 deg below horizontal, elbows soft
     "LSInputY": 45.0,
     "RSInputY": 45.0,
@@ -96,16 +101,23 @@ ADDRESS_SEED_DEG: dict[str, float] = {  # arms 45 deg below horizontal, elbows s
 }
 
 
-def _grip_offset(child_to_follower: Any) -> list[list[float]]:
-    """Native hand-to-club transform with the neutral-grip ulnar turn about
-    the wrist cock axis (base x) applied on the base side."""
+def _grip_offset(
+    child_to_follower: Any, grip_roll_deg: float = GRIP_ROLL_DEG
+) -> list[list[float]]:
+    """Native hand-to-club transform with the grip roll about the shaft (base
+    y) and the neutral-grip ulnar turn about the wrist cock axis (base x)
+    applied on the base side."""
     angle = np.radians(GRIP_ULNAR_OFFSET_DEG)  # sign checked by the axis test
     c, s_ = np.cos(angle), np.sin(angle)
+    roll = np.radians(grip_roll_deg)
+    cr, sr = np.cos(roll), np.sin(roll)
     turn = np.eye(4)
     turn[:3, :3] = np.array([[1.0, 0.0, 0.0], [0.0, c, -s_], [0.0, s_, c]])
+    about_shaft = np.eye(4)  # the child frame's y is the shaft axis
+    about_shaft[:3, :3] = np.array([[cr, 0.0, sr], [0.0, 1.0, 0.0], [-sr, 0.0, cr]])
     # child_to_follower is expressed in the child (hand/club) frame, so a turn
     # in the follower (wrist base) frame composes on the right.
-    return (np.asarray(child_to_follower, dtype=float) @ turn).tolist()
+    return (about_shaft @ np.asarray(child_to_follower, dtype=float) @ turn).tolist()
 
 
 def _t(
@@ -163,6 +175,7 @@ def build_upper_body(
     arm_scale: float = 1.0,
     shoulder_scale: float = 1.0,
     club: ClubSpec = DRIVER,
+    grip_roll_deg: float = GRIP_ROLL_DEG,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
 
@@ -424,7 +437,7 @@ def build_upper_body(
                 )
             ],
             rotation=rotation,
-            c2f=_grip_offset(native_wrist["child_to_follower"]),
+            c2f=_grip_offset(native_wrist["child_to_follower"], grip_roll_deg),
         )
     for f in native["frames"]:
         if f["body"] in (names["Clubface Vector"], names["RHandStandoff"]):
@@ -445,6 +458,7 @@ def build_upper_body(
             "trunk_scale": trunk_scale,
             "arm_scale": arm_scale,
             "shoulder_scale": shoulder_scale,
+            "grip_roll_deg": grip_roll_deg,
             "source": "de Leva 1996 male table",
         },
         "coordinate_ranges_deg": {k: list(v) for k, v in COORDINATE_RANGES_DEG.items()},

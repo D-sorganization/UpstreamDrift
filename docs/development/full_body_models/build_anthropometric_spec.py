@@ -123,6 +123,9 @@ def main() -> None:
     parser.add_argument("--shoulder-scale", type=float, default=1.0)
     parser.add_argument("--club", choices=sorted(CLUBS), default="driver")
     parser.add_argument(
+        "--grip-roll", type=float, default=0.0, help="hand roll about the shaft, deg"
+    )
+    parser.add_argument(
         "--name", default=None, help="default full_body_spec_anthro_<club>"
     )
     args = parser.parse_args()
@@ -137,6 +140,7 @@ def main() -> None:
         arm_scale=args.arm_scale,
         shoulder_scale=args.shoulder_scale,
         club=CLUBS[args.club],
+        grip_roll_deg=args.grip_roll,
     )
     bodies, joints = read_osim(args.osim)
     rotation, hip_half = pelvis_alignment_for(args.stature)

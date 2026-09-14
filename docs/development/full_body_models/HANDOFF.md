@@ -366,6 +366,16 @@ Matching" launcher tile (`src/tools/motion_matching`, tests under
 `tests/tools/motion_matching`). Epic #10113 tracks MM-1 to MM-10; REVIEW.md
 section 11 carries the table.
 
+### Marker-Driven Elbow Pits, Grip Roll, Club Mesh Epic (2026-09-14)
+
+Elbow pits follow the markers per frame (`posture_metrics.elbow_pit_direction`,
+`Lane.pit_targets_per_frame`); `GRIP_ROLL_DEG` / `--grip-roll` exposes the
+hand roll about the shaft and `evidence/anthropometry/scan_grip_roll.py`
+calibrates it (roll 0 deg is best with a total excursion of 224 deg (lead cock 122 deg beyond its range), +45 deg 277, -45 deg 333, -90 deg 303, +90 deg 451, so no roll brings the wrists within human ranges and the roll is not the lever). Receipts (wrists flagged): driver IK
+26.0 mm, 7-iron 24.1 mm. Bounding the wrists still costs the
+fit until the roll is calibrated (REVIEW.md 12, MM-2 #10104). Club meshes
+are epic #10120.
+
 ## Next
 
 - Epic #10113 in order: MM-2 grip roll calibration from the address so the

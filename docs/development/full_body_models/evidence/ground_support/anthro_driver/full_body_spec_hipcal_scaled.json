@@ -429,11 +429,11 @@
       "name": "tibia_r",
       "solids": [
         {
-          "com_m": [0.0, -0.204691, 0.0],
+          "com_m": [0.0, -0.19240954, 0.0],
           "inertia_com_kg_m2": [
-            [0.0634325, 0.0, 0.0],
-            [0.0, 0.0056617, 0.0],
-            [0.0, 0.0, 0.0634325]
+            [0.056048956999999996, 0.0, 0.0],
+            [0.0, 0.00500267812, 0.0],
+            [0.0, 0.0, 0.056048956999999996]
           ],
           "mass_kg": 3.90640097495255,
           "name": "tibia_r",
@@ -534,11 +534,11 @@
       "name": "tibia_l",
       "solids": [
         {
-          "com_m": [0.0, -0.202735, 0.0],
+          "com_m": [0.0, -0.1905709, 0.0],
           "inertia_com_kg_m2": [
-            [0.0622653, 0.0, 0.0],
-            [0.0, 0.00563255, 0.0],
-            [0.0, 0.0, 0.0622653]
+            [0.055017619079999996, 0.0, 0.0],
+            [0.0, 0.00497692118, 0.0],
+            [0.0, 0.0, 0.055017619079999996]
           ],
           "mass_kg": 3.90640097495255,
           "name": "tibia_l",
@@ -1433,11 +1433,11 @@
       "parent_to_base": [
         [
           0.9942975703750765, -0.018557934606193413, -0.10501402101325395,
-          -0.0102646
+          -0.009648724
         ],
         [
           4.12693463669788e-8, 0.9847417938081873, -0.1740218363523156,
-          -0.438544
+          -0.41223136
         ],
         [0.10664118128667834, 0.17302948474345656, 0.9791263737961489, 0.0],
         [0.0, 0.0, 0.0, 1.0]
@@ -1598,10 +1598,11 @@
       "parent_to_base": [
         [
           0.9942975703750765, -0.018557934606193413, 0.10501402101325395,
-          -0.0102381
+          -0.009623814
         ],
         [
-          4.12693463669788e-8, 0.9847417938081873, 0.1740218363523156, -0.434354
+          4.12693463669788e-8, 0.9847417938081873, 0.1740218363523156,
+          -0.40829276
         ],
         [-0.10664118128667834, -0.17302948474345656, 0.9791263737961489, 0.0],
         [0.0, 0.0, 0.0, 1.0]
@@ -1828,7 +1829,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 2e+05 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 2e+05 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x0.9400, tibia_r x0.9400 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {

@@ -559,6 +559,7 @@ class FullBodyMarkerKinematics:
         restart_threshold_m: float = 0.0,
         restart_spread_rad: float = 0.5,
         restart_margin_m: float = 0.0,
+        axis_targets_per_frame: Sequence[Mapping[str, Any] | None] | None = None,
         **options: Any,
     ) -> tuple[Array, list[PoseFit]]:
         """Solve consecutive frames, each warm-started from the previous one.
@@ -576,7 +577,8 @@ class FullBodyMarkerKinematics:
         enters stance is anchored to its ground point at that frame for as
         long as it stays in stance, so planted feet do not slide.
         ``prior_trajectory`` (frames, nv) replaces the warm start: frame ``k``
-        starts from and is pulled toward its row. Precondition: targets
+        starts from and is pulled toward its row. ``axis_targets_per_frame``
+        gives every capture frame its own ``axis_targets`` (or None). Precondition: targets
         (frames, markers, 3), valid (frames, markers). Postcondition: one row
         of q and one PoseFit per requested frame.
         """
@@ -598,6 +600,11 @@ class FullBodyMarkerKinematics:
                 raise ValueError("prior_trajectory must be (frames, coordinates)")
         if min(restarts, restart_threshold_m, restart_spread_rad, restart_margin_m) < 0:
             raise ValueError("Restart settings must be nonnegative")
+        if (
+            axis_targets_per_frame is not None
+            and len(axis_targets_per_frame) != targets.shape[0]
+        ):
+            raise ValueError("axis_targets_per_frame needs one entry per capture frame")
         rng = np.random.default_rng(0)
         q = np.asarray(q_init, dtype=float)
         fits: list[PoseFit] = []
@@ -611,6 +618,9 @@ class FullBodyMarkerKinematics:
                     name: point for name, point in anchors.items() if name in stance
                 }
             start = q if prior_trajectory is None else prior[k]
+            frame_options = dict(options)
+            if axis_targets_per_frame is not None:
+                frame_options["axis_targets"] = axis_targets_per_frame[k]
             fit = self.solve_pose(
                 targets[k],
                 mask[k],
@@ -618,7 +628,7 @@ class FullBodyMarkerKinematics:
                 ground=ground,
                 flat_feet=stance if flat_feet_per_frame is not None else False,
                 anchors=anchors if plant_stance else None,
-                **options,
+                **frame_options,
             )
             for _ in range(restarts if fit.marker_rms_m > restart_threshold_m else 0):
                 jittered = np.asarray(start, dtype=float).copy()
@@ -632,7 +642,7 @@ class FullBodyMarkerKinematics:
                     ground=ground,
                     flat_feet=stance if flat_feet_per_frame is not None else False,
                     anchors=anchors if plant_stance else None,
-                    **options,
+                    **frame_options,
                 )
                 if retry.marker_rms_m < fit.marker_rms_m - restart_margin_m:
                     fit = retry
