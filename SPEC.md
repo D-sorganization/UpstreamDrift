@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Worker Handoff and Model Probe (#10142)
+
+The ST-01 experiment under `scripts/shadow_tracker/` records repeatable real
+MuJoCo short-window execution, unit-separated closure errors and a named/native
+coordinate-order mismatch. It explicitly does not qualify the model. Frozen
+image-only contracts and bounded worker packets are in
+[Ready Tasks](docs/plans/shadow_tracker/READY_TASKS.md). ST-02A/C can proceed
+independently of unresolved dynamics qualification; ST-02B follows A. Specialist
+blockers #10140/#10141 and the original scientific gates remain open.
+
 ## Shadow Tracker Planning Baseline (#10122)
 
 Shadow Tracker is a planned silhouette-driven markerless motion reconstruction
@@ -4639,6 +4649,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-14 | #10144 | Add TDD model diagnostics, measured qualification blockers and frozen image-only worker handoff for Shadow Tracker. |
 | 2026-09-14 | #10136 | Establish Shadow Tracker epic, implementation plan, source/test homes and agent handoff; no runtime implementation. |
 | 2026-09-14 | #10090 | Tour Matching Viewer launcher tile for in-app 3D playback of candidate motions against tour capture (Step 3, #10062) |
 | 2026-09-14 | #10087 | Shared visual skeleton layer with MuJoCo rendering and model-visuals handoff (#10062) |
