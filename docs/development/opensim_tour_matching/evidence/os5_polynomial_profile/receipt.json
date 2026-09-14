@@ -1,0 +1,266 @@
+{
+  "schema_version": "1.0",
+  "deliverable": "OS-5",
+  "title": "Global Degree-Six Effort Profile and Forward Simulation Replay",
+  "timestamp_utc": "2026-09-13T23:46:32.677874+00:00",
+  "git_commit": "3e2dbab3a",
+  "inputs": {
+    "model_path": "/mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim",
+    "model_sha256": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
+    "controls_path": "/home/dieterolson/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/os4_moco_tracking/tracked_controls.sto",
+    "controls_sha256": "dab10f6acdf76cf83549955fdf16df8dfac3a249aebe4452e0e715ddb8f01080",
+    "ik_states_path": "/mnt/c/Users/diete/opensim-10003/ik_states_full.sto",
+    "ik_states_sha256": "325796072973aad8b007c5f975253eaf62057b91924cada85e2dae381cd1c2cc"
+  },
+  "polynomial_fit": {
+    "num_actuators": 39,
+    "polynomial_degree": 6,
+    "duration_s": 0.1,
+    "sample_count": 21,
+    "bounds_passed": true,
+    "bounds_violations": {},
+    "actuator_metrics": {
+      "/forceset/tau_pelvis_tilt": {
+        "r_squared": 0.9995484792803522,
+        "max_abs_error": 5.304929566754676e-5,
+        "rms_error": 2.4600576488350487e-5,
+        "ss_res": 1.2708955634742837e-8
+      },
+      "/forceset/tau_pelvis_list": {
+        "r_squared": 0.9969657655692213,
+        "max_abs_error": 7.008812505306561e-5,
+        "rms_error": 2.8504677528093057e-5,
+        "ss_res": 1.706284946059204e-8
+      },
+      "/forceset/tau_pelvis_rotation": {
+        "r_squared": 0.9965261730174719,
+        "max_abs_error": 9.764689920178709e-5,
+        "rms_error": 3.240109425870105e-5,
+        "ss_res": 2.204644909238583e-8
+      },
+      "/forceset/tau_pelvis_tx": {
+        "r_squared": 0.9973831249924366,
+        "max_abs_error": 4.90560182994884e-6,
+        "rms_error": 1.644092071992822e-6,
+        "ss_res": 5.6763813564982663e-11
+      },
+      "/forceset/tau_pelvis_ty": {
+        "r_squared": 0.99973244732001,
+        "max_abs_error": 7.23207620130197e-6,
+        "rms_error": 3.654007274009688e-6,
+        "ss_res": 2.803871523288299e-10
+      },
+      "/forceset/tau_pelvis_tz": {
+        "r_squared": 0.9926974912528067,
+        "max_abs_error": 1.384653810291531e-5,
+        "rms_error": 5.1424812653600665e-6,
+        "ss_res": 5.553473848561648e-10
+      },
+      "/forceset/tau_hip_flexion_r": {
+        "r_squared": 0.9992320925534338,
+        "max_abs_error": 9.529913611589554e-5,
+        "rms_error": 3.65457561572596e-5,
+        "ss_res": 2.804743815522343e-8
+      },
+      "/forceset/tau_hip_adduction_r": {
+        "r_squared": 0.9947179396372354,
+        "max_abs_error": 0.00025228663464873385,
+        "rms_error": 8.968224654427374e-5,
+        "ss_res": 1.689010122497859e-7
+      },
+      "/forceset/tau_hip_rotation_r": {
+        "r_squared": 0.9937875882934759,
+        "max_abs_error": 0.0004890611157332856,
+        "rms_error": 0.00016228051821474024,
+        "ss_res": 5.530342984329374e-7
+      },
+      "/forceset/tau_knee_angle_r": {
+        "r_squared": 0.9556731915547619,
+        "max_abs_error": 0.00025887092287143977,
+        "rms_error": 9.600979884373524e-5,
+        "ss_res": 1.935755109543046e-7
+      },
+      "/forceset/tau_knee_angle_r_beta": {
+        "r_squared": 0.9588396580372541,
+        "max_abs_error": 0.00012433041448598291,
+        "rms_error": 4.634899957433572e-5,
+        "ss_res": 4.511282499237723e-8
+      },
+      "/forceset/tau_ankle_angle_r": {
+        "r_squared": 0.9606960549788535,
+        "max_abs_error": 0.0005725621782406111,
+        "rms_error": 0.0002213411479969893,
+        "ss_res": 1.0288299797291275e-6
+      },
+      "/forceset/tau_subtalar_angle_r": {
+        "r_squared": 0.6227933820476295,
+        "max_abs_error": 0.010531904676774522,
+        "rms_error": 0.0038353367842233798,
+        "ss_res": 0.00030890597321675566
+      },
+      "/forceset/tau_mtp_angle_r": {
+        "r_squared": 0.4996689615751726,
+        "max_abs_error": 0.0003186429492423297,
+        "rms_error": 0.0001129555918967769,
+        "ss_res": 2.6793828055577544e-7
+      },
+      "/forceset/tau_hip_flexion_l": {
+        "r_squared": 0.9994661386611756,
+        "max_abs_error": 7.86340837577843e-5,
+        "rms_error": 3.497327318226488e-5,
+        "ss_res": 2.5685726578707886e-8
+      },
+      "/forceset/tau_hip_adduction_l": {
+        "r_squared": 0.993299567217582,
+        "max_abs_error": 0.0001579578933013858,
+        "rms_error": 5.724596359774339e-5,
+        "ss_res": 6.881910731291739e-8
+      },
+      "/forceset/tau_hip_rotation_l": {
+        "r_squared": 0.9969614012833226,
+        "max_abs_error": 9.981285555543218e-5,
+        "rms_error": 4.016103065471295e-5,
+        "ss_res": 3.387107604822466e-8
+      },
+      "/forceset/tau_knee_angle_l": {
+        "r_squared": 0.998051411397927,
+        "max_abs_error": 3.1124664343736485e-5,
+        "rms_error": 1.321125455665075e-5,
+        "ss_res": 3.665282186173129e-9
+      },
+      "/forceset/tau_knee_angle_l_beta": {
+        "r_squared": 0.9977757272904231,
+        "max_abs_error": 1.677049077823518e-5,
+        "rms_error": 7.0381327673755596e-6,
+        "ss_res": 1.0402415698753167e-9
+      },
+      "/forceset/tau_ankle_angle_l": {
+        "r_squared": 0.9318304690792143,
+        "max_abs_error": 9.417700939909563e-5,
+        "rms_error": 5.9923130001561486e-5,
+        "ss_res": 7.54064116928648e-8
+      },
+      "/forceset/tau_subtalar_angle_l": {
+        "r_squared": 0.9149382547923209,
+        "max_abs_error": 0.0011458003587934877,
+        "rms_error": 0.000541084929956637,
+        "ss_res": 6.148230929949754e-6
+      },
+      "/forceset/tau_mtp_angle_l": {
+        "r_squared": 0.9551040119723637,
+        "max_abs_error": 2.5445290759411795e-5,
+        "rms_error": 1.1757429988777834e-5,
+        "ss_res": 2.9029803587612596e-9
+      },
+      "/forceset/tau_lumbar_extension": {
+        "r_squared": 0.9994455116194141,
+        "max_abs_error": 7.417615119943754e-5,
+        "rms_error": 3.627897369372933e-5,
+        "ss_res": 2.76394425776764e-8
+      },
+      "/forceset/tau_lumbar_bending": {
+        "r_squared": 0.9949823904041933,
+        "max_abs_error": 8.008253203459312e-5,
+        "rms_error": 3.006386068485946e-5,
+        "ss_res": 1.8980550104851405e-8
+      },
+      "/forceset/tau_lumbar_rotation": {
+        "r_squared": 0.9980333705547417,
+        "max_abs_error": 0.00012430536823068977,
+        "rms_error": 4.050047076016315e-5,
+        "ss_res": 3.444605076769144e-8
+      },
+      "/forceset/tau_arm_flex_r": {
+        "r_squared": 0.9977028097380278,
+        "max_abs_error": 0.000292204997443105,
+        "rms_error": 9.411559748592517e-5,
+        "ss_res": 1.860126594927864e-7
+      },
+      "/forceset/tau_arm_add_r": {
+        "r_squared": 0.9980633021427877,
+        "max_abs_error": 2.7464843561498885e-5,
+        "rms_error": 1.2832326769699424e-5,
+        "ss_res": 3.4580408168112337e-9
+      },
+      "/forceset/tau_arm_rot_r": {
+        "r_squared": 0.988291616780099,
+        "max_abs_error": 0.00013237113432594799,
+        "rms_error": 6.556139304974782e-5,
+        "ss_res": 9.026422143109397e-8
+      },
+      "/forceset/tau_elbow_flex_r": {
+        "r_squared": 0.9977169485384481,
+        "max_abs_error": 0.000727796255207711,
+        "rms_error": 0.0002397052320792769,
+        "ss_res": 1.20663056400978e-6
+      },
+      "/forceset/tau_pro_sup_r": {
+        "r_squared": 0.925623286890373,
+        "max_abs_error": 0.000781843105778037,
+        "rms_error": 0.00028408412661328695,
+        "ss_res": 1.694779610866315e-6
+      },
+      "/forceset/tau_wrist_flex_r": {
+        "r_squared": 0.99746048056051,
+        "max_abs_error": 0.00047745143403225485,
+        "rms_error": 0.00019108005862911084,
+        "ss_res": 7.66743364919793e-7
+      },
+      "/forceset/tau_wrist_dev_r": {
+        "r_squared": 0.9975316476341198,
+        "max_abs_error": 0.00038857767412859645,
+        "rms_error": 0.0001307564351191894,
+        "ss_res": 3.5904215182665443e-7
+      },
+      "/forceset/tau_arm_flex_l": {
+        "r_squared": 0.9997236180268506,
+        "max_abs_error": 6.5591044789107145e-6,
+        "rms_error": 3.41267390312423e-6,
+        "ss_res": 2.4457320655036846e-10
+      },
+      "/forceset/tau_arm_add_l": {
+        "r_squared": 0.9996326713666004,
+        "max_abs_error": 1.4510080213703323e-5,
+        "rms_error": 7.302125222617427e-6,
+        "ss_res": 1.119741688102498e-9
+      },
+      "/forceset/tau_arm_rot_l": {
+        "r_squared": 0.9994172688918198,
+        "max_abs_error": 5.1538181696786475e-5,
+        "rms_error": 2.126963203997947e-5,
+        "ss_res": 9.500342189438544e-9
+      },
+      "/forceset/tau_elbow_flex_l": {
+        "r_squared": 0.9996738927950262,
+        "max_abs_error": 1.5059388992313396e-5,
+        "rms_error": 8.409941194828626e-6,
+        "ss_res": 1.4852693289099866e-9
+      },
+      "/forceset/tau_pro_sup_l": {
+        "r_squared": 0.997913303507533,
+        "max_abs_error": 5.219424062924264e-5,
+        "rms_error": 2.3396753506549908e-5,
+        "ss_res": 1.1495569567571364e-8
+      },
+      "/forceset/tau_wrist_flex_l": {
+        "r_squared": 0.9980224434952412,
+        "max_abs_error": 8.365684881059585e-6,
+        "rms_error": 3.1591151785371275e-6,
+        "ss_res": 2.0958018293653702e-10
+      },
+      "/forceset/tau_wrist_dev_l": {
+        "r_squared": 0.9987969023723343,
+        "max_abs_error": 1.2072713684328709e-5,
+        "rms_error": 5.138201038984481e-6,
+        "ss_res": 5.544233082574452e-10
+      }
+    }
+  },
+  "forward_replay": {
+    "success": true,
+    "sim_wall_time_ms": 7.163268979638815,
+    "terminal_time_s": 0.1,
+    "num_steps": 6,
+    "states_sto": "/home/dieterolson/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/os5_polynomial_profile/forward_states.sto"
+  }
+}
