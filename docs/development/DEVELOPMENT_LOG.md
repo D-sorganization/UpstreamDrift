@@ -36,14 +36,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** claude
 - **Issue:** #10062 (children #10063 to #10070)
-- **Branch:** feat/full-body-opensim-epic
+- **Branch:** feat/pinocchio-full-body-builder
 - **PR:** #10071
-- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; tests/unit/motion_matching/test_full_body_spec.py; tests/unit/motion_matching/test_contact_law.py
+- **Paths:** docs/development/full_body_models; src/engines/physics_engines/pinocchio/python/native_model.py; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; tests/unit/motion_matching/test_pinocchio_full_body_builder.py; tests/unit/motion_matching/test_full_body_spec.py; tests/unit/motion_matching/test_contact_law.py
 - **Started:** 2026-09-13
-- **Last verified:** 2026-09-13 (SELF; 24 shared unit tests pass; FB-3-M #10066 MuJoCo MJCF export and NativeMujocoFullBodyModel adapter verified with 5 passing tests, nq=41 nv=41, upper-body slice inertia/FK parity to 1e-12, contact force parity 0.0 N difference)
-- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, the shared ground-contact law with parity harness, full_body_spec_v1.json, and MuJoCo FB-3-M MJCF export and contact adapter are implemented and verified; Pinocchio and Drake builders, calibration and fitting remain.
-- **Next step:** Implement FB-3-P (#10065 Pinocchio) and FB-3-D (#10067 Drake) builders consuming full_body_spec_v1.json with the 1e-12 upper-body slice parity test and shared contact forces.
-- **Evidence:** docs/development/full_body_models/HANDOFF.md, build_receipt.json, tests/unit/motion_matching/test_full_body_mujoco.py.
+- **Last verified:** 2026-09-14 (SELF; FB-3-M #10066 MuJoCo MJCF export and FB-3-P #10065 Pinocchio builder qualified: all Done Gates passed to < 1e-12; 6 Pinocchio unit tests pass on ControlTower and skip cleanly on Windows; 5 MuJoCo unit tests pass)
+- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, shared ground-contact law with parity harness, full_body_spec_v1.json, MuJoCo full-body MJCF export with contact adapter (FB-3-M, #10066), and Pinocchio full-body builder with spatial contact forces injected into weld-constrained dynamics (FB-3-P, #10065) are implemented and verified; Drake builder (FB-3-D, #10067), calibration, and fitting remain.
+- **Next step:** Implement FB-3-D (#10067, Drake builder) consuming full_body_spec_v1.json with the 1e-12 upper-body slice parity test and shared contact forces.
+- **Evidence:** docs/development/full_body_models/HANDOFF.md, docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json, tests/unit/motion_matching/test_full_body_mujoco.py.
 
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 
