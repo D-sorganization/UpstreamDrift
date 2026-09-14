@@ -7,6 +7,32 @@ Implement full-body MuJoCo MJCF export and dynamic simulation adapter supporting
 - Full-Body Model Adapter (`src/engines/physics_engines/mujoco/python/full_body_model.py`): Implement `NativeMujocoFullBodyModel` providing `evaluate_contact_samples`, `accelerations`, `frame_poses`, and `closure_errors`. Calculate contact forces using the shared Hunt-Crossley and regularized Coulomb law (`contact_law.sphere_ground_contact`), apply explicit spatial wrenches via `data.xfrc_applied`, and resolve the closed-loop dual-grip weld via an explicit rigid solve.
 - Comprehensive Test Suite (`tests/unit/motion_matching/test_full_body_mujoco.py`): Verify compile structure ($nq=41, nv=41$), upper-body slice inertia and forward kinematics parity to $10^{-12}$, frame poses parity against qualified native upper body, and exact 0.0 N force parity against reference contact adapter across random contact states.
 
+## OpenSim Degree-Six Polynomial Effort Profile With Forward Simulation Replay (#10003)
+
+Implement continuous degree-six polynomial effort profiles and zero-feedback forward simulation replay for the OpenSim golf humanoid model:
+- Polynomial Profile Module (`src/engines/physics_engines/opensim/python/tour_matching/polynomial_profile.py`):
+  - `Degree6PolynomialCoefficients`: Validated parameter dataclass storing 7 descending power coefficients $c_0..c_6$ ($c_0 t^6 + \dots + c_6$) matching OpenSim `PolynomialFunction` and Simscape native conventions, providing Horner's method evaluation, analytical time derivatives, and ascending/descending conversion helpers.
+  - `PolynomialTorqueProfile`: Container for full-body degree-6 profiles across all 39 OpenSim actuators, supporting JSON serialization, time-grid matrix evaluation, and physical effort and effort-rate bounds verification.
+  - `fit_degree6_from_discrete_controls`: Least-squares polynomial fitting from discrete control trajectories, reporting $R^2$, maximum absolute fit error, and RMS error.
+  - `create_polynomial_prescribed_controller`: Configures an `opensim.PrescribedController` attaching native `opensim.PolynomialFunction` instances with descending coefficient vectors for each model actuator.
+  - `load_controls_from_sto`: Pure-Python OpenSim Storage (.sto) parser extracting time trajectories, control matrices, and actuator column labels.
+- Verification & ControlTower Execution (`docs/development/opensim_tour_matching/os5_polynomial_fit_driver.py`):
+  - Fits degree-6 polynomial profile across all 39 actuators from OS-4 dynamic controls, achieving high fidelity ($R^2 > 0.99$ on active joints, max error $< 0.011$ N*m) with zero bounds violations.
+  - Executes continuous zero-feedback forward simulation replay on ControlTower via `opensim.Manager`, integrating to $t = 0.10$ s in 7.16 ms across 5 integration steps with zero projections.
+  - Generates cryptographic evidence in `docs/development/opensim_tour_matching/evidence/os5_polynomial_profile/receipt.json`.
+
+## OpenSim Dynamic Marker Tracking Pilot With Zero-Feedback Forward Replay (#10003)
+
+Implement constraint-aware dynamic marker tracking and zero-feedback forward simulation replay for the OpenSim golf humanoid model:
+- Dynamic Tracking Module (`src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py`):
+  - `MocoTrackingConfig`: Validated parameter dataclass specifying tracking horizon, mesh intervals, objective weights, and solver tolerances.
+  - `sanitize_trc_for_horizon`: Pure-Python observation-window filter that prunes unobserved/NaN markers (such as `RShoulderTop` which is unobserved until frame 525) to ensure spline continuity for CasADi.
+  - `build_moco_study`: Configures `opensim.MocoStudy` with `MocoControlGoal` and `MocoMarkerTrackingGoal`, sets `MocoCasADiSolver` parameters, and inserts warm-start initial guess from the OS-3b full IK state trajectory (`insertStatesTrajectory`).
+- Verification & Forward Simulation Replay (`docs/development/opensim_tour_matching/os4_moco_tracking_driver.py`):
+  - Solves dynamic tracking in 15 IPOPT iterations to `Solve_Succeeded` (objective: `8.508366e-02`).
+  - Performs zero-feedback forward simulation replay via `opensim.Manager` + `opensim.PrescribedController`, integrating to $t = 0.10$ s in 9.2 ms.
+  - Generates cryptographic receipt and solution trajectories in `docs/development/opensim_tour_matching/evidence/os4_moco_tracking/receipt.json`.
+
 ## DefusedXML in OpenSim OS-0 Runtime Audit (#10074)
 
 Mitigate Bandit B314 / B405 XML security findings in OpenSim OS-0 runtime audit:
@@ -4511,7 +4537,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-09 | #9923 | My Clubs provides searchable catalog/custom entries, measured/estimated/unknown length and head mass, stable unit controls, notes, archive/restore and explicit capture assignment. Portable snapshots preserve previous revisions and editable-copy lineage; model reports retain equipment evidence without applying unsupported club constraints. Wizard integration remains tracked in #9906. |
 | 2026-09-10 | #9962 | Record merged impact-provider history, unchanged coordinated pins and explicit scientific/consumer takeover requirements. |
 | 2026-09-10 | #9931 | Guided capture outcomes share validated prerequisite metadata with the capability atlas; standard Qt navigation reuses editors and readiness, preserves capture-owned progress, checks calibration/model associations and imports safe map selections. Epic #9906; 600 integrated regressions pass. |
-| 2026-09-09 | #9875 | Industrial readiness execution index (epic #9539): src/config/industrial_readiness.json reconciles the four priority children against 10caddd219ce213a914fa295661929e4fbf1b686 rather than the audit snapshot — U1 (#9477) and U2 (#9407) merged with SHAs, tests and user-visible acceptance evidence; U3 (#8820, dashboard exports still carry no engine/model/run identity) and U4 (#9417, deploy/ empty and no artifact beyond the wheel) re-confirmed open with a dependency and an ordered narrow-PR plan. industrial_readiness_loader.py enforces the contract that keeps the record honest (no completion claim without a 40-char merge SHA, a test path and acceptance evidence; no open entry without an owner and plan; every cited path must exist; every open issue must appear in an acceptance blocker list; 
+| 2026-09-09 | #9875 | Industrial readiness execution index (epic #9539): src/config/industrial_readiness.json reconciles the four priority children against 10caddd219ce213a914fa295661929e4fbf1b686 rather than the audit snapshot — U1 (#9477) and U2 (#9407) merged with SHAs, tests and user-visible acceptance evidence; U3 (#8820, dashboard exports still carry no engine/model/run identity) and U4 (#9417, deploy/ empty and no artifact beyond the wheel) re-confirmed open with a dependency and an ordered narrow-PR plan. industrial_readiness_loader.py enforces the contract that keeps the record honest (no completion claim without a 40-char merge SHA, a test path and acceptance evidence; no open entry without an owner and plan; every cited path must exist; every open issue must appear in an acceptance blocker list; |
 elease_status cannot read 
 eady while anything is outstanding, and is locked). scripts/generate_industrial_readiness_index.py renders docs/operations/industrial-readiness-index.md under a byte-for-byte freshness gate. 25 tests in 	ests/config/industrial_readiness/. |
 | 2026-09-09 | #9874 | Chat stream cancellation now reaches the provider transport: BaseAgentAdapter gained _track_stream()/cancel_stream(), the Ollama and OpenAI adapters publish their live streams (both block in an uninterruptible socket read and never poll the cooperative stop_event), and ChatService.stream_response closes the provider stream before its bounded join and warns if the worker still outlives it. The #9495 regression test now models a non-cooperative provider that only unblocks when its stream is closed. |
