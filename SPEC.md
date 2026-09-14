@@ -4639,7 +4639,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-14 | #10123 | Establish Shadow Tracker epic, implementation plan, source/test homes and agent handoff; no runtime implementation. |
+| 2026-09-14 | #10136 | Establish Shadow Tracker epic, implementation plan, source/test homes and agent handoff; no runtime implementation. |
 | 2026-09-14 | #10090 | Tour Matching Viewer launcher tile for in-app 3D playback of candidate motions against tour capture (Step 3, #10062) |
 | 2026-09-14 | #10087 | Shared visual skeleton layer with MuJoCo rendering and model-visuals handoff (#10062) |
 | 2026-09-13 | #8929 | Pendulum GUI playback: matrix panel snapshots dynamics per frame instead of per paint; trail slices a precomputed spline and draws bucketed polylines (spec-exempt: performance) |

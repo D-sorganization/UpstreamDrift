@@ -7,7 +7,8 @@
 - **Start Here:** [Shadow Tracker](docs/plans/shadow_tracker/README.md),
   [Work Packages](docs/plans/shadow_tracker/WORK_PACKAGES.md), and
   [Agent Handoff](docs/plans/shadow_tracker/AGENT_HANDOFF.md).
-- **Branch:** `docs/issue-10122-shadow-tracker`; setup child #10123.
+- **Branch:** `docs/issue-10122-shadow-tracker`; setup child #10123;
+  [Planning PR #10136](https://github.com/D-sorganization/UpstreamDrift/pull/10136).
 - **Next:** ST-01 (#10124) freezes model feasibility and benchmark profiles;
   ST-02 (#10125) then starts small-agent TDD contract implementation.
 - **Constraints:** Preserve observed vs inferred data, unknown archive timing,
