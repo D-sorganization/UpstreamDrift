@@ -1,0 +1,791 @@
+{
+  "basis": "monomial_descending_degree6",
+  "degree": 6,
+  "duration_s": 0.1,
+  "actuator_names": [
+    "/forceset/tau_pelvis_tilt",
+    "/forceset/tau_pelvis_list",
+    "/forceset/tau_pelvis_rotation",
+    "/forceset/tau_pelvis_tx",
+    "/forceset/tau_pelvis_ty",
+    "/forceset/tau_pelvis_tz",
+    "/forceset/tau_hip_flexion_r",
+    "/forceset/tau_hip_adduction_r",
+    "/forceset/tau_hip_rotation_r",
+    "/forceset/tau_knee_angle_r",
+    "/forceset/tau_knee_angle_r_beta",
+    "/forceset/tau_ankle_angle_r",
+    "/forceset/tau_subtalar_angle_r",
+    "/forceset/tau_mtp_angle_r",
+    "/forceset/tau_hip_flexion_l",
+    "/forceset/tau_hip_adduction_l",
+    "/forceset/tau_hip_rotation_l",
+    "/forceset/tau_knee_angle_l",
+    "/forceset/tau_knee_angle_l_beta",
+    "/forceset/tau_ankle_angle_l",
+    "/forceset/tau_subtalar_angle_l",
+    "/forceset/tau_mtp_angle_l",
+    "/forceset/tau_lumbar_extension",
+    "/forceset/tau_lumbar_bending",
+    "/forceset/tau_lumbar_rotation",
+    "/forceset/tau_arm_flex_r",
+    "/forceset/tau_arm_add_r",
+    "/forceset/tau_arm_rot_r",
+    "/forceset/tau_elbow_flex_r",
+    "/forceset/tau_pro_sup_r",
+    "/forceset/tau_wrist_flex_r",
+    "/forceset/tau_wrist_dev_r",
+    "/forceset/tau_arm_flex_l",
+    "/forceset/tau_arm_add_l",
+    "/forceset/tau_arm_rot_l",
+    "/forceset/tau_elbow_flex_l",
+    "/forceset/tau_pro_sup_l",
+    "/forceset/tau_wrist_flex_l",
+    "/forceset/tau_wrist_dev_l"
+  ],
+  "profiles": {
+    "/forceset/tau_pelvis_tilt": {
+      "actuator_name": "/forceset/tau_pelvis_tilt",
+      "coefficients": [
+        41796.48222341175, -11327.304508224708, 1103.5279976136126,
+        -37.86189694844255, -1.8223822313280449, 0.1686456184207391,
+        0.0005413988936267842
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_pelvis_list": {
+      "actuator_name": "/forceset/tau_pelvis_list",
+      "coefficients": [
+        10340.67905825448, -2553.1621442023984, 308.1837622841793,
+        -34.219128662003534, 3.053008736335467, -0.11912670175743469,
+        -0.00018726130011743075
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_pelvis_rotation": {
+      "actuator_name": "/forceset/tau_pelvis_rotation",
+      "coefficients": [
+        -27871.39317192206, 3361.315323685136, 175.9145040970723,
+        -44.92664276057036, 2.8274602899016723, -0.062114584082560285,
+        -7.741560725219841e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_pelvis_tx": {
+      "actuator_name": "/forceset/tau_pelvis_tx",
+      "coefficients": [
+        1555.3738354923835, -588.752315028934, 79.91260357448576,
+        -4.717401514160219, 0.07261665568162468, 0.0033093401122232594,
+        1.682897738558375e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_pelvis_ty": {
+      "actuator_name": "/forceset/tau_pelvis_ty",
+      "coefficients": [
+        5337.358325372516, -1368.477007135586, 127.73504656570096,
+        -4.1023719603825715, -0.34949853950093507, 0.031239124060347144,
+        8.745108195600024e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_pelvis_tz": {
+      "actuator_name": "/forceset/tau_pelvis_tz",
+      "coefficients": [
+        -2249.160866402955, 1180.0627570293673, -190.99808967019482,
+        14.10922846682451, -0.5453034452839493, 0.008562375414548727,
+        -1.3418945527208322e-6
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_hip_flexion_r": {
+      "actuator_name": "/forceset/tau_hip_flexion_r",
+      "coefficients": [
+        -67117.08732950156, 21209.393077332123, -2382.1513859055253,
+        101.66004082711991, 1.225657070012302, -0.204237934393238,
+        -0.0007178897432985384
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_hip_adduction_r": {
+      "actuator_name": "/forceset/tau_hip_adduction_r",
+      "coefficients": [
+        -80547.43933881569, 27704.252879146316, -3532.653781497352,
+        231.68426125959263, -10.039459050215065, 0.25018673207543596,
+        0.0002118149897247976
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_hip_rotation_r": {
+      "actuator_name": "/forceset/tau_hip_rotation_r",
+      "coefficients": [
+        394134.71316969465, -106294.53576569236, 10943.957192515705,
+        -521.6085611689631, 8.51696911871689, 0.09027247345262485,
+        0.0008779288995546089
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_knee_angle_r": {
+      "actuator_name": "/forceset/tau_knee_angle_r",
+      "coefficients": [
+        -260216.20310477557, 76194.70556363654, -8322.98350380705,
+        410.525734930628, -8.129887358299293, 0.018414941342494353,
+        -0.00046395740961192633
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_knee_angle_r_beta": {
+      "actuator_name": "/forceset/tau_knee_angle_r_beta",
+      "coefficients": [
+        -127019.63922687924, 37166.43393196705, -4055.7005269003057,
+        199.59626035455832, -3.9172694248238877, 0.007467089634469719,
+        -0.00022758734152612201
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_ankle_angle_r": {
+      "actuator_name": "/forceset/tau_ankle_angle_r",
+      "coefficients": [
+        -437580.3671016151, 117585.42750281809, -11876.722183631508,
+        578.3692708473783, -13.63481741816402, 0.08206725385449577,
+        0.00025262900480434094
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_subtalar_angle_r": {
+      "actuator_name": "/forceset/tau_subtalar_angle_r",
+      "coefficients": [
+        8953371.265516154, -2632116.8124866704, 291857.875615298,
+        -15203.998332859557, 374.9424579173241, -3.754407681718861,
+        0.009999012724351069
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_mtp_angle_r": {
+      "actuator_name": "/forceset/tau_mtp_angle_r",
+      "coefficients": [
+        -236141.31465776745, 70015.3404027243, -7824.613239789131,
+        409.60520211727305, -10.125053045736768, 0.10409521494171606,
+        -0.00030132822593600863
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_hip_flexion_l": {
+      "actuator_name": "/forceset/tau_hip_flexion_l",
+      "coefficients": [
+        -62668.100516365834, 15326.898729780487, -1246.0590677930006,
+        21.459828206495786, 3.679649998627211, -0.23694091310296284,
+        -0.0007355802983822997
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_hip_adduction_l": {
+      "actuator_name": "/forceset/tau_hip_adduction_l",
+      "coefficients": [
+        -4438.220951717825, -1867.933145402547, 690.9160747286178,
+        -87.98793797952395, 5.7079064496960426, -0.14850908186242,
+        -0.00012014131848508883
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_hip_rotation_l": {
+      "actuator_name": "/forceset/tau_hip_rotation_l",
+      "coefficients": [
+        -50166.84053974496, 8440.032356132473, -85.28328301797418,
+        -59.715522224496496, 4.253274511161805, -0.07539203904933439,
+        -0.00019445881060277148
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_knee_angle_l": {
+      "actuator_name": "/forceset/tau_knee_angle_l",
+      "coefficients": [
+        -28572.03486071507, 6489.874552209354, -372.94034445688635,
+        -3.610594215921078, 0.2272022372835414, 0.021025414392553888,
+        1.3905607760038066e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_knee_angle_l_beta": {
+      "actuator_name": "/forceset/tau_knee_angle_l_beta",
+      "coefficients": [
+        -16653.150371176733, 3951.689925227021, -266.0634935869739,
+        2.4157016024828843, 0.006530561563861327, 0.011663363904600078,
+        3.948940740216759e-6
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_ankle_angle_l": {
+      "actuator_name": "/forceset/tau_ankle_angle_l",
+      "coefficients": [
+        -240976.60109192875, 72041.95733045497, -8005.771192942529,
+        404.09163377404116, -8.763607737872627, 0.050528723978846876,
+        0.00010074090288299153
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_subtalar_angle_l": {
+      "actuator_name": "/forceset/tau_subtalar_angle_l",
+      "coefficients": [
+        372865.12713714305, -90964.45042201797, 8124.541742257003,
+        -311.4581599971091, 4.275483951424623, 0.008597300613619113,
+        -0.0012829043757207794
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_mtp_angle_l": {
+      "actuator_name": "/forceset/tau_mtp_angle_l",
+      "coefficients": [
+        5453.744040260072, -2081.2546449949236, 274.1515005875725,
+        -15.97209629564883, 0.4018127794109563, -0.0031706457475419204,
+        2.9184543466565682e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_lumbar_extension": {
+      "actuator_name": "/forceset/tau_lumbar_extension",
+      "coefficients": [
+        -67792.5249413824, 15981.053683528171, -1237.0976873074878,
+        14.546986131159429, 4.243241790580677, -0.24602415441010803,
+        -0.0007095659314900539
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_lumbar_bending": {
+      "actuator_name": "/forceset/tau_lumbar_bending",
+      "coefficients": [
+        -9830.761102219787, 2529.284561807013, -313.0432759551759,
+        34.586890276533694, -2.901866898439375, 0.10244366075999539,
+        0.00012181317223203341
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_lumbar_rotation": {
+      "actuator_name": "/forceset/tau_lumbar_rotation",
+      "coefficients": [
+        42485.20246903515, -6862.857360555139, 170.84947633924898,
+        29.72452125188279, -3.2915432424392472, 0.11567246650380711,
+        0.0002428214996828361
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_arm_flex_r": {
+      "actuator_name": "/forceset/tau_arm_flex_r",
+      "coefficients": [
+        120620.01629203225, -23001.884715514407, 1216.5058414366897,
+        29.67189668489592, -6.146537062485166, 0.17794361262703284,
+        0.0006056467873251726
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_arm_add_r": {
+      "actuator_name": "/forceset/tau_arm_add_r",
+      "coefficients": [
+        -30364.194653900784, 6328.641024023083, -230.00075053729287,
+        -20.526013118693047, 1.3426749635674733, -0.028225599905722702,
+        -4.472635343952156e-6
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_arm_rot_r": {
+      "actuator_name": "/forceset/tau_arm_rot_r",
+      "coefficients": [
+        18120.68797302935, 9349.640052061945, -3082.824411647972,
+        271.51551526739195, -7.6901611336332705, 0.019166568545243078,
+        -0.00011540930054392877
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_elbow_flex_r": {
+      "actuator_name": "/forceset/tau_elbow_flex_r",
+      "coefficients": [
+        -418186.1569465827, 93664.09131047351, -7333.91108681973,
+        171.93486795166854, 9.439074886799403, -0.46871357397101965,
+        -0.0016325663584739107
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_pro_sup_r": {
+      "actuator_name": "/forceset/tau_pro_sup_r",
+      "coefficients": [
+        -128649.78148098166, 18172.748137324495, 447.1094177812025,
+        -128.47708178365414, 2.4171831078619372, 0.06282799590637274,
+        0.00038980314147571345
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_wrist_flex_r": {
+      "actuator_name": "/forceset/tau_wrist_flex_r",
+      "coefficients": [
+        306799.21965767886, -81892.11115873243, 8313.387327534598,
+        -330.4392640362386, -2.677639935355699, 0.3489838776583064,
+        0.0012687853052069094
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_wrist_dev_r": {
+      "actuator_name": "/forceset/tau_wrist_dev_r",
+      "coefficients": [
+        -137352.0248434776, 21341.455252726788, -313.3661829856639,
+        -115.7202545480574, 10.257286816106465, -0.29221952322028394,
+        -0.0008510698198496132
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_arm_flex_l": {
+      "actuator_name": "/forceset/tau_arm_flex_l",
+      "coefficients": [
+        9324.660181924142, -2238.456116690305, 186.2579042864484,
+        -7.217035218529155, -0.029612601888394832, 0.01968298048138776,
+        6.347969893319542e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_arm_add_l": {
+      "actuator_name": "/forceset/tau_arm_add_l",
+      "coefficients": [
+        7472.001795332688, -1860.9339884559956, 129.94143317026038,
+        -4.964916854334384, 0.8814644977199282, -0.055297148662491205,
+        -0.00012022117916615914
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_arm_rot_l": {
+      "actuator_name": "/forceset/tau_arm_rot_l",
+      "coefficients": [
+        7309.317085041659, -3262.134778527603, 602.0229620896454,
+        -35.89248414472135, -0.9992993364332781, 0.1037080876303664,
+        0.00029410485380277333
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_elbow_flex_l": {
+      "actuator_name": "/forceset/tau_elbow_flex_l",
+      "coefficients": [
+        -2291.923868949722, 274.80162599230334, -91.41902967769853,
+        18.50054040194634, -0.7019494807378477, -0.027904733159102586,
+        -7.277144208278914e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_pro_sup_l": {
+      "actuator_name": "/forceset/tau_pro_sup_l",
+      "coefficients": [
+        -110295.83408034575, 31099.006205779126, -3249.6667267874664,
+        156.86514127194036, -3.5569678830360174, 0.04768338393905064,
+        -0.0008101022080125489
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_wrist_flex_l": {
+      "actuator_name": "/forceset/tau_wrist_flex_l",
+      "coefficients": [
+        2545.7691470621794, -1126.637809936479, 173.12325040764054,
+        -11.266266653363367, 0.3491864815237219, -0.006586809480307306,
+        -5.048616996396073e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    },
+    "/forceset/tau_wrist_dev_l": {
+      "actuator_name": "/forceset/tau_wrist_dev_l",
+      "coefficients": [
+        4122.517800229778, -1217.7023472770636, 163.0350133674624,
+        -8.7205421766442, -0.14760282376793007, 0.019578229696988057,
+        2.8815629301699717e-5
+      ],
+      "ordering": "descending",
+      "units": "N*m",
+      "time_origin_s": 0.0,
+      "duration_s": 0.1,
+      "degree": 6
+    }
+  },
+  "fit_metrics": {
+    "/forceset/tau_pelvis_tilt": {
+      "r_squared": 0.9995484792803522,
+      "max_abs_error": 5.304929566754676e-5,
+      "rms_error": 2.4600576488350487e-5,
+      "ss_res": 1.2708955634742837e-8
+    },
+    "/forceset/tau_pelvis_list": {
+      "r_squared": 0.9969657655692213,
+      "max_abs_error": 7.008812505306561e-5,
+      "rms_error": 2.8504677528093057e-5,
+      "ss_res": 1.706284946059204e-8
+    },
+    "/forceset/tau_pelvis_rotation": {
+      "r_squared": 0.9965261730174719,
+      "max_abs_error": 9.764689920178709e-5,
+      "rms_error": 3.240109425870105e-5,
+      "ss_res": 2.204644909238583e-8
+    },
+    "/forceset/tau_pelvis_tx": {
+      "r_squared": 0.9973831249924366,
+      "max_abs_error": 4.90560182994884e-6,
+      "rms_error": 1.644092071992822e-6,
+      "ss_res": 5.6763813564982663e-11
+    },
+    "/forceset/tau_pelvis_ty": {
+      "r_squared": 0.99973244732001,
+      "max_abs_error": 7.23207620130197e-6,
+      "rms_error": 3.654007274009688e-6,
+      "ss_res": 2.803871523288299e-10
+    },
+    "/forceset/tau_pelvis_tz": {
+      "r_squared": 0.9926974912528067,
+      "max_abs_error": 1.384653810291531e-5,
+      "rms_error": 5.1424812653600665e-6,
+      "ss_res": 5.553473848561648e-10
+    },
+    "/forceset/tau_hip_flexion_r": {
+      "r_squared": 0.9992320925534338,
+      "max_abs_error": 9.529913611589554e-5,
+      "rms_error": 3.65457561572596e-5,
+      "ss_res": 2.804743815522343e-8
+    },
+    "/forceset/tau_hip_adduction_r": {
+      "r_squared": 0.9947179396372354,
+      "max_abs_error": 0.00025228663464873385,
+      "rms_error": 8.968224654427374e-5,
+      "ss_res": 1.689010122497859e-7
+    },
+    "/forceset/tau_hip_rotation_r": {
+      "r_squared": 0.9937875882934759,
+      "max_abs_error": 0.0004890611157332856,
+      "rms_error": 0.00016228051821474024,
+      "ss_res": 5.530342984329374e-7
+    },
+    "/forceset/tau_knee_angle_r": {
+      "r_squared": 0.9556731915547619,
+      "max_abs_error": 0.00025887092287143977,
+      "rms_error": 9.600979884373524e-5,
+      "ss_res": 1.935755109543046e-7
+    },
+    "/forceset/tau_knee_angle_r_beta": {
+      "r_squared": 0.9588396580372541,
+      "max_abs_error": 0.00012433041448598291,
+      "rms_error": 4.634899957433572e-5,
+      "ss_res": 4.511282499237723e-8
+    },
+    "/forceset/tau_ankle_angle_r": {
+      "r_squared": 0.9606960549788535,
+      "max_abs_error": 0.0005725621782406111,
+      "rms_error": 0.0002213411479969893,
+      "ss_res": 1.0288299797291275e-6
+    },
+    "/forceset/tau_subtalar_angle_r": {
+      "r_squared": 0.6227933820476295,
+      "max_abs_error": 0.010531904676774522,
+      "rms_error": 0.0038353367842233798,
+      "ss_res": 0.00030890597321675566
+    },
+    "/forceset/tau_mtp_angle_r": {
+      "r_squared": 0.4996689615751726,
+      "max_abs_error": 0.0003186429492423297,
+      "rms_error": 0.0001129555918967769,
+      "ss_res": 2.6793828055577544e-7
+    },
+    "/forceset/tau_hip_flexion_l": {
+      "r_squared": 0.9994661386611756,
+      "max_abs_error": 7.86340837577843e-5,
+      "rms_error": 3.497327318226488e-5,
+      "ss_res": 2.5685726578707886e-8
+    },
+    "/forceset/tau_hip_adduction_l": {
+      "r_squared": 0.993299567217582,
+      "max_abs_error": 0.0001579578933013858,
+      "rms_error": 5.724596359774339e-5,
+      "ss_res": 6.881910731291739e-8
+    },
+    "/forceset/tau_hip_rotation_l": {
+      "r_squared": 0.9969614012833226,
+      "max_abs_error": 9.981285555543218e-5,
+      "rms_error": 4.016103065471295e-5,
+      "ss_res": 3.387107604822466e-8
+    },
+    "/forceset/tau_knee_angle_l": {
+      "r_squared": 0.998051411397927,
+      "max_abs_error": 3.1124664343736485e-5,
+      "rms_error": 1.321125455665075e-5,
+      "ss_res": 3.665282186173129e-9
+    },
+    "/forceset/tau_knee_angle_l_beta": {
+      "r_squared": 0.9977757272904231,
+      "max_abs_error": 1.677049077823518e-5,
+      "rms_error": 7.0381327673755596e-6,
+      "ss_res": 1.0402415698753167e-9
+    },
+    "/forceset/tau_ankle_angle_l": {
+      "r_squared": 0.9318304690792143,
+      "max_abs_error": 9.417700939909563e-5,
+      "rms_error": 5.9923130001561486e-5,
+      "ss_res": 7.54064116928648e-8
+    },
+    "/forceset/tau_subtalar_angle_l": {
+      "r_squared": 0.9149382547923209,
+      "max_abs_error": 0.0011458003587934877,
+      "rms_error": 0.000541084929956637,
+      "ss_res": 6.148230929949754e-6
+    },
+    "/forceset/tau_mtp_angle_l": {
+      "r_squared": 0.9551040119723637,
+      "max_abs_error": 2.5445290759411795e-5,
+      "rms_error": 1.1757429988777834e-5,
+      "ss_res": 2.9029803587612596e-9
+    },
+    "/forceset/tau_lumbar_extension": {
+      "r_squared": 0.9994455116194141,
+      "max_abs_error": 7.417615119943754e-5,
+      "rms_error": 3.627897369372933e-5,
+      "ss_res": 2.76394425776764e-8
+    },
+    "/forceset/tau_lumbar_bending": {
+      "r_squared": 0.9949823904041933,
+      "max_abs_error": 8.008253203459312e-5,
+      "rms_error": 3.006386068485946e-5,
+      "ss_res": 1.8980550104851405e-8
+    },
+    "/forceset/tau_lumbar_rotation": {
+      "r_squared": 0.9980333705547417,
+      "max_abs_error": 0.00012430536823068977,
+      "rms_error": 4.050047076016315e-5,
+      "ss_res": 3.444605076769144e-8
+    },
+    "/forceset/tau_arm_flex_r": {
+      "r_squared": 0.9977028097380278,
+      "max_abs_error": 0.000292204997443105,
+      "rms_error": 9.411559748592517e-5,
+      "ss_res": 1.860126594927864e-7
+    },
+    "/forceset/tau_arm_add_r": {
+      "r_squared": 0.9980633021427877,
+      "max_abs_error": 2.7464843561498885e-5,
+      "rms_error": 1.2832326769699424e-5,
+      "ss_res": 3.4580408168112337e-9
+    },
+    "/forceset/tau_arm_rot_r": {
+      "r_squared": 0.988291616780099,
+      "max_abs_error": 0.00013237113432594799,
+      "rms_error": 6.556139304974782e-5,
+      "ss_res": 9.026422143109397e-8
+    },
+    "/forceset/tau_elbow_flex_r": {
+      "r_squared": 0.9977169485384481,
+      "max_abs_error": 0.000727796255207711,
+      "rms_error": 0.0002397052320792769,
+      "ss_res": 1.20663056400978e-6
+    },
+    "/forceset/tau_pro_sup_r": {
+      "r_squared": 0.925623286890373,
+      "max_abs_error": 0.000781843105778037,
+      "rms_error": 0.00028408412661328695,
+      "ss_res": 1.694779610866315e-6
+    },
+    "/forceset/tau_wrist_flex_r": {
+      "r_squared": 0.99746048056051,
+      "max_abs_error": 0.00047745143403225485,
+      "rms_error": 0.00019108005862911084,
+      "ss_res": 7.66743364919793e-7
+    },
+    "/forceset/tau_wrist_dev_r": {
+      "r_squared": 0.9975316476341198,
+      "max_abs_error": 0.00038857767412859645,
+      "rms_error": 0.0001307564351191894,
+      "ss_res": 3.5904215182665443e-7
+    },
+    "/forceset/tau_arm_flex_l": {
+      "r_squared": 0.9997236180268506,
+      "max_abs_error": 6.5591044789107145e-6,
+      "rms_error": 3.41267390312423e-6,
+      "ss_res": 2.4457320655036846e-10
+    },
+    "/forceset/tau_arm_add_l": {
+      "r_squared": 0.9996326713666004,
+      "max_abs_error": 1.4510080213703323e-5,
+      "rms_error": 7.302125222617427e-6,
+      "ss_res": 1.119741688102498e-9
+    },
+    "/forceset/tau_arm_rot_l": {
+      "r_squared": 0.9994172688918198,
+      "max_abs_error": 5.1538181696786475e-5,
+      "rms_error": 2.126963203997947e-5,
+      "ss_res": 9.500342189438544e-9
+    },
+    "/forceset/tau_elbow_flex_l": {
+      "r_squared": 0.9996738927950262,
+      "max_abs_error": 1.5059388992313396e-5,
+      "rms_error": 8.409941194828626e-6,
+      "ss_res": 1.4852693289099866e-9
+    },
+    "/forceset/tau_pro_sup_l": {
+      "r_squared": 0.997913303507533,
+      "max_abs_error": 5.219424062924264e-5,
+      "rms_error": 2.3396753506549908e-5,
+      "ss_res": 1.1495569567571364e-8
+    },
+    "/forceset/tau_wrist_flex_l": {
+      "r_squared": 0.9980224434952412,
+      "max_abs_error": 8.365684881059585e-6,
+      "rms_error": 3.1591151785371275e-6,
+      "ss_res": 2.0958018293653702e-10
+    },
+    "/forceset/tau_wrist_dev_l": {
+      "r_squared": 0.9987969023723343,
+      "max_abs_error": 1.2072713684328709e-5,
+      "rms_error": 5.138201038984481e-6,
+      "ss_res": 5.544233082574452e-10
+    }
+  }
+}
