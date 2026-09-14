@@ -747,8 +747,8 @@
     "LFInput": [-90.0, 90.0],
     "LScapInputX": [-10.0, 30.0],
     "LScapInputY": [-40.0, 40.0],
-    "LWInputX": [-45.0, 35.0],
-    "LWInputY": [-80.0, 80.0],
+    "LWInputX": [-40.0, 25.0],
+    "LWInputY": [-70.0, 70.0],
     "NeckInputX": [-45.0, 45.0],
     "NeckInputY": [-60.0, 60.0],
     "NeckInputZ": [-80.0, 80.0],
@@ -756,8 +756,8 @@
     "RFInput": [-90.0, 90.0],
     "RScapInputX": [-30.0, 10.0],
     "RScapInputY": [-40.0, 40.0],
-    "RWInputX": [-45.0, 35.0],
-    "RWInputY": [-80.0, 80.0],
+    "RWInputX": [-40.0, 25.0],
+    "RWInputY": [-70.0, 70.0],
     "SpineInputX": [-35.0, 35.0],
     "SpineInputY": [-45.0, 45.0],
     "TorsoInput": [-100.0, 100.0],
@@ -1181,9 +1181,15 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
-        [0.1736481776669303, 0.0, 0.9848077530122079, -0.02501411692651008],
-        [0.0, 1.0, 0.0, -1.1239999999999999],
-        [-0.984807753012208, 0.0, 0.1736481776669303, 0.05908933628725997],
+        [
+          0.1736481776669303, 0.4161977407267834, 0.8925389352890298,
+          -0.02501411692651008
+        ],
+        [0.0, 0.9063077870366499, -0.42261826174069944, -1.1239999999999999],
+        [
+          -0.984807753012208, 0.07338689100003823, 0.15737869562426263,
+          0.05908933628725997
+        ],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
@@ -1204,7 +1210,7 @@
         },
         {
           "coordinate": "LWInputY",
-          "primitive": "Ry"
+          "primitive": "Rz"
         }
       ]
     },
@@ -1315,9 +1321,9 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
-        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.9063077870366499, -0.42261826174069944, 0.0],
         [1.0, 0.0, 0.0, 0.0],
-        [0.0, 0.0, -1.0, 0.0127],
+        [0.0, -0.42261826174069944, -0.9063077870366499, 0.0127],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
@@ -1338,7 +1344,7 @@
         },
         {
           "coordinate": "RWInputY",
-          "primitive": "Ry"
+          "primitive": "Rz"
         }
       ]
     },
@@ -1840,12 +1846,16 @@
   },
   "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
   "upper_body_schema_version": 1,
-  "upper_body_sha256": "ced60f7a74d3f654454f2bb0d9a1ff223dd4e155ecb7e1b20e0666c7842fd7dd",
+  "upper_body_sha256": "2e1e568a0b00ed351f9de8f7df8e5bdcad1029cb51218021a50d8bcdbe265355",
   "visual_hints": {
     "capsule_radius_m": {
+      "femur_l": 0.072,
+      "femur_r": 0.072,
       "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": 0.0065,
-      "solid_reference:GolfSwing3D_Kinetic/HubtoLS": 0.045,
-      "solid_reference:GolfSwing3D_Kinetic/HubtoRS": 0.045
+      "solid_reference:GolfSwing3D_Kinetic/HubtoLS": 0.04,
+      "solid_reference:GolfSwing3D_Kinetic/HubtoRS": 0.04,
+      "tibia_l": 0.055,
+      "tibia_r": 0.055
     },
     "shapes": {
       "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector/Clubhead": {
@@ -1854,18 +1864,18 @@
         "shape": "ellipsoid"
       },
       "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk": {
-        "center_m": [0.0, 0.0, 0.10565273398908671],
-        "half_size_m": [0.11115, 0.14535, 0.12565273398908672],
+        "center_m": [0.0, 0.0, 0.11410495270821366],
+        "half_size_m": [0.09405, 0.132525, 0.13100939014646754],
         "shape": "ellipsoid"
       },
       "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/upper_trunk": {
-        "center_m": [0.0, 0.0, 0.30427987388856975],
-        "half_size_m": [0.11970000000000001, 0.17955, 0.1456527339890867],
+        "center_m": [0.0, 0.0, 0.29582765516944276],
+        "half_size_m": [0.1026, 0.15817499999999998, 0.13100939014646754],
         "shape": "ellipsoid"
       },
       "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis": {
-        "center_m": [0.0, 0.0, 0.04909124368179206],
-        "half_size_m": [0.11115, 0.16245, 0.11909124368179207],
+        "center_m": [0.0, 0.0, 0.05909124368179206],
+        "half_size_m": [0.098325, 0.14535, 0.12909124368179206],
         "shape": "ellipsoid"
       }
     }

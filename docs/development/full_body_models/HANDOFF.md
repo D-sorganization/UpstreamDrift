@@ -356,13 +356,25 @@ IK 24.8 / 34.1 mm, address 7.1 / 15.5 mm, CoM
 inside the polygon in both; setup parity `evidence/setup_parity/receipt_*.json`.
 REVIEW.md section 10.
 
+### Anatomical Wrist, Visual Realism, Launcher Tool, Epic #10113 (2026-09-14)
+
+Wrist Rz flexion with a 25 deg neutral-grip offset (driver IK 24.0 mm,
+7-iron 24.1 mm; wrists flagged, not bounded: bounding collapses the fit
+because the left humerus roll is wrong, MM-2/MM-5); thicker legs, slimmer
+torso, hidden marker spheres; `club_models.from_database`; the "Motion
+Matching" launcher tile (`src/tools/motion_matching`, tests under
+`tests/tools/motion_matching`). Epic #10113 tracks MM-1 to MM-10; REVIEW.md
+section 11 carries the table.
+
 ## Next
 
-- AN-1 (#10099): left elbow pit (REVIEW.md 9.3): two-axis elbow or the
-  left hand roll in the closure, test first; verify the de Leva table
-  against the paper; Simscape update and R2025b parity for the 27 native
-  coordinates (the neck stays outside Simscape). Keep one static-trial
-  round; never `--recalibrate-upper` on this document.
+- Epic #10113 in order: MM-2 grip roll calibration from the address so the
+  wrist ranges can be imposed (#10104, with MM-5 #10107 the left pit);
+  MM-6 hip zero twist so the leg ranges apply unwidened (#10108); MM-3
+  meshes from BunkerShot3D solids and catalogue clubs (#10105); MM-7
+  downswing dynamics (#10109); MM-10 dynamics replay parity (#10112);
+  MM-8 Simscape parity (#10110); MM-9 de Leva verification (#10111).
+  Keep one static-trial round; never `--recalibrate-upper`.
 - GS-4: the downswing needs a dynamically consistent reference or the FB-5
   contact-aware shooting fit; candidates in order: stance timing from the
   reference contact forces instead of marker heights, a hip zero-twist

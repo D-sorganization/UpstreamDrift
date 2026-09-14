@@ -10,34 +10,34 @@
     "radius_m": 0.05
   },
   {
-    "body": "COMRod",
-    "length_m": 0.4226,
-    "radius_m": 0.05
-  },
-  {
-    "body": "COMRod",
-    "length_m": 0.4226,
-    "radius_m": 0.05
-  },
-  {
     "body": "tibia_r",
-    "length_m": 0.4215,
-    "radius_m": 0.0443
+    "length_m": 0.4347,
+    "radius_m": 0.055
   },
   {
     "body": "tibia_l",
-    "length_m": 0.4175,
-    "radius_m": 0.0446
+    "length_m": 0.4305,
+    "radius_m": 0.055
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.4226,
+    "radius_m": 0.05
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.4226,
+    "radius_m": 0.05
   },
   {
     "body": "femur_r",
-    "length_m": 0.3808,
-    "radius_m": 0.05
+    "length_m": 0.393,
+    "radius_m": 0.072
   },
   {
     "body": "femur_l",
-    "length_m": 0.3697,
-    "radius_m": 0.05
+    "length_m": 0.3815,
+    "radius_m": 0.072
   },
   {
     "body": "LUpperArm",
@@ -52,12 +52,12 @@
   {
     "body": "HubtoLS",
     "length_m": 0.1949,
-    "radius_m": 0.045
+    "radius_m": 0.04
   },
   {
     "body": "HubtoRS",
     "length_m": 0.1949,
-    "radius_m": 0.045
+    "radius_m": 0.04
   },
   {
     "body": "calcn_r",

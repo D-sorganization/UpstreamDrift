@@ -32,6 +32,7 @@ from build_full_body_spec import (  # noqa: E402
 )
 
 from src.shared.python.motion_matching.anthropometric_geometry import (  # noqa: E402
+    LEG_VISUAL_RADIUS_M,
     build_upper_body,
     pelvis_alignment_for,
 )
@@ -244,6 +245,13 @@ def main() -> None:
     document["address_seed_deg"] = upper["address_seed_deg"]
     document["club"] = upper["club"]
     document["visual_hints"] = upper["visual_hints"]
+    document["visual_hints"]["capsule_radius_m"].update(
+        {
+            f"{segment}_{side}": LEG_VISUAL_RADIUS_M[segment]
+            for segment in LEG_VISUAL_RADIUS_M
+            for side in ("r", "l")
+        }
+    )
     args.output.mkdir(parents=True, exist_ok=True)
     spec_path = save_full_body_spec(document, args.output / f"{args.name}.json")
     receipt = {

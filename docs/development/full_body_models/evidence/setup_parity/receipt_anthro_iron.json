@@ -10,10 +10,10 @@
     "total_mass_kg": 0.428,
     "wrist_to_head_m": 0.9079999999999999
   },
-  "timestamp_utc": "2026-09-14T16:21:11.550624+00:00",
+  "timestamp_utc": "2026-09-14T17:05:41.325514+00:00",
   "spec": "docs\\development\\full_body_models\\evidence\\ground_support\\anthro_iron\\full_body_spec_hipcal_scaled.json",
-  "spec_sha256": "94c1127f8292a8522111100a95b702db587377af801113e4ab755daa5ef78f74",
-  "trajectory_sha256": "1d499e913fe4f454cfa66f65649aedd36b2178846cfa4a95e883d88df839c77d",
+  "spec_sha256": "386ad71ac763923cb9184f2e19993b76c29600ffec1f8cb77578e042e1f287d3",
+  "trajectory_sha256": "ee848a65c79ceb202c83fb837a6b808171747f9ea70b36ef239f8d50cf0b7bbc",
   "pose": "frame 0 of the ground-support IK trajectory, by coordinate name",
   "coordinates": 44,
   "total_mass_kg": 79.4734923989728,
@@ -28,16 +28,16 @@
       "reference": true
     },
     "drake": {
-      "max_position_error_m": 4.09832724192079e-6,
-      "max_rotation_error_rad": 1.0254770835733794e-5,
+      "max_position_error_m": 5.701462495477365e-6,
+      "max_rotation_error_rad": 1.1650878611485262e-5,
       "worst_frame": "Clubhead",
       "frames": 17,
       "passed": true
     },
     "pinocchio": {
-      "max_position_error_m": 6.173763625669405e-16,
+      "max_position_error_m": 2.8322382403341864e-16,
       "max_rotation_error_rad": 4.2146848510894035e-8,
-      "worst_frame": "Clubhead",
+      "worst_frame": "LW",
       "frames": 17,
       "passed": true
     }

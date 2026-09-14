@@ -159,28 +159,43 @@ def test_joint_axes_are_anatomical_in_mujoco(upper: dict) -> None:
     np.testing.assert_allclose(poses1["Hub"], poses0["Hub"])
     assert not np.allclose(poses1["Head"][:3, :3], poses0["Head"][:3, :3])
     # Arms point forward at zero pose; elbow flexion (negative) lifts the wrist.
-    straight = model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))["LW"][
-        :3, 3
-    ]
+    wrist = m.joint("LWInputX").id
     shoulder = model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))["LS"][
         :3, 3
     ]
+    straight = d.xanchor[wrist].copy()
     assert straight[0] > shoulder[0] + 0.5 and abs(straight[2] - shoulder[2]) < 1e-9
     bent = dict.fromkeys(model.coordinate_order, 0.0)
     bent["LEInput"] = -0.5
-    moved = model.frame_poses(bent)["LW"][:3, 3]
+    model.frame_poses(bent)
+    moved = d.xanchor[wrist].copy()
     assert moved[2] > straight[2] + 0.05 and abs(moved[1] - straight[1]) < 1e-9
     # Wrist cock (Rx) turns about the elbow axis, and a positive cock lifts the
     # club toward the elbow pit (+z at zero pose) on both sides.
     model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))
     for side in "LR":
         assert abs(d.xaxis[m.joint(f"{side}WInputX").id] @ left) > 0.999
-        assert abs(d.xaxis[m.joint(f"{side}WInputY").id] @ fwd) > 0.999  # spin
+        assert abs(d.xaxis[m.joint(f"{side}WInputY").id] @ fwd) < 0.01  # not a spin
+        assert abs(d.xaxis[m.joint(f"{side}WInputY").id] @ left) < 0.01  # flexion
+    # A neutral grip holds the shaft GRIP_ULNAR_OFFSET_DEG below the forearm
+    # line, on the side away from the pit.
+    poses = model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))
+    forearm = poses["LW"][:3, 3] - poses["LE"][:3, 3]
+    shaft = poses["Clubhead"][:3, 3] - poses["LW"][:3, 3]
+    angle = np.degrees(
+        np.arccos(forearm @ shaft / np.linalg.norm(forearm) / np.linalg.norm(shaft))
+    )
+    assert angle == pytest.approx(module.GRIP_ULNAR_OFFSET_DEG, abs=1.5)
+    assert shaft[2] < 0  # toward the ulnar side (away from the pit, which is +z)
     cocked = dict.fromkeys(model.coordinate_order, 0.0)
     cocked["LWInputX"] = 0.3
     head0 = model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))["Clubhead"]
     head1 = model.frame_poses(cocked)["Clubhead"]
     assert head1[2, 3] > head0[2, 3] + 0.2 and abs(head1[1, 3] - head0[1, 3]) < 1e-9
+    flexed = dict.fromkeys(model.coordinate_order, 0.0)
+    flexed["LWInputY"] = 0.3
+    head2 = model.frame_poses(flexed)["Clubhead"]
+    assert abs(head2[1, 3] - head0[1, 3]) > 0.2  # flexion swings the club sideways
     # The address seed lowers the arms below the shoulders.
     seed = dict.fromkeys(model.coordinate_order, 0.0)
     seed.update({k: np.radians(v) for k, v in module.ADDRESS_SEED_DEG.items()})

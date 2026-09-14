@@ -96,6 +96,49 @@ IRON_7 = ClubSpec(
     head_gyration_m=(0.030, 0.020, 0.030),
 )
 CLUBS: dict[str, ClubSpec] = {DRIVER.name: DRIVER, IRON_7.name: IRON_7}
+# Shape hints per catalogue club type; masses and lengths come from the club
+# database so there is one source of club numbers in the repository.
+HEAD_SHAPES: dict[str, tuple[str, tuple[float, float, float]]] = {
+    "Driver": ("ellipsoid", (0.060, 0.032, 0.050)),
+    "Wood": ("ellipsoid", (0.050, 0.028, 0.042)),
+    "Hybrid": ("ellipsoid", (0.040, 0.026, 0.034)),
+    "Iron": ("box", (0.008, 0.040, 0.025)),
+    "Wedge": ("box", (0.008, 0.040, 0.028)),
+}
+
+
+def from_database(club_id: str) -> ClubSpec:
+    """A ``ClubSpec`` from the repository's club database entry ``club_id``
+    (``ClubDatabase`` in the MuJoCo humanoid package: lengths in inches,
+    masses in grams, head MOI in g cm^2 about the vertical axis). The head
+    shape comes from ``HEAD_SHAPES`` by club type; the vertical radius of
+    gyration from the MOI, the others scaled as in the typical constants.
+    Raises ``ValueError`` for an unknown club or club type.
+    """
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.club_configurations import (  # noqa: E501
+        ClubDatabase,
+    )
+
+    entry = ClubDatabase.get_club(club_id)
+    if entry is None:
+        raise ValueError(f"Unknown club {club_id!r} in the club database")
+    if entry.club_type not in HEAD_SHAPES:
+        raise ValueError(f"No head shape for club type {entry.club_type!r}")
+    shape, half = HEAD_SHAPES[entry.club_type]
+    head_mass = entry.head_mass_grams / 1000.0
+    k_vertical = math.sqrt(entry.moment_of_inertia * 1e-7 / head_mass)
+    return ClubSpec(
+        name=club_id,
+        length_m=entry.length_inches * 0.0254,
+        head_mass_kg=head_mass,
+        shaft_mass_kg=entry.shaft_mass_grams / 1000.0,
+        grip_mass_kg=entry.grip_mass_grams / 1000.0,
+        grip_length_m=DRIVER.grip_length_m,
+        shaft_radius_m=DRIVER.shaft_radius_m,
+        head_shape=shape,
+        head_half_size_m=half,
+        head_gyration_m=(0.85 * k_vertical, k_vertical, k_vertical),
+    )
 
 
 def _placement(translation: tuple[float, float, float]) -> list[list[float]]:

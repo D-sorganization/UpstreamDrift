@@ -35,14 +35,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** claude
-- **Issue:** #10062 (children #10063 to #10070)
+- **Issue:** #10062 (children #10063 to #10070); continued by epic #10113 (MM-1 to MM-10)
 - **Branch:** feat/drake-full-body-builder
 - **PR:** #10071
 - **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/visual_skeleton.py; src/shared/python/motion_matching/ground_support.py; src/shared/python/motion_matching/hip_calibration.py; src/shared/python/motion_matching/segment_scaling.py; src/shared/python/motion_matching/anthropometry.py; src/shared/python/motion_matching/anthropometric_geometry.py; src/shared/python/motion_matching/anthropometric_candidate.py; src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py; src/engines/physics_engines/mujoco/python/visual_layer.py; src/engines/physics_engines/mujoco/python/full_body_mjcf.py; src/engines/physics_engines/mujoco/python/full_body_markers.py; src/engines/physics_engines/mujoco/python/full_body_simulation.py; tests/unit/motion_matching
 - **Started:** 2026-09-13
-- **Last verified:** 2026-09-14 (SELF; typical driver and 7-iron clubs, 7-iron capture matched, torso and club visuals, human ranges of motion flagged, address balance; IK 24.8 / 34.1 mm; unit tests in the touched files pass)
+- **Last verified:** 2026-09-14 (SELF; anatomical wrist with neutral-grip offset, leg and torso visuals, club specs from the club database, Motion Matching launcher tile; driver IK 24.0 mm, 7-iron 24.1 mm; epic #10113 filed with MM-1 to MM-10; unit tests and launcher gates pass)
 - **Summary:** Shared full-body specification schema/validator with upper-body slice identity, shared ground-contact law with parity harness, full_body_spec_v1.json, MuJoCo full-body MJCF export with contact adapter (FB-3-M, #10066), Pinocchio full-body builder with spatial contact forces injected into weld-constrained dynamics (FB-3-P, #10065), and Drake full-body URDF export and KKT weld adapter with shared contact (FB-3-D, #10067) are implemented and verified; cross-engine comparison, calibration, and fitting remain.
-- **Next step:** Test-first a two-axis elbow (flexion plus carrying angle) or the left-hand roll in the closure so the left elbow pit faces inward at address without breaking the swing fit (REVIEW.md 9.3).
+- **Next step:** MM-2 (#10104): calibrate the grip roll about the club from the address so the wrist and forearm human ranges can be imposed in the IK without collapsing the fit.
 - **Evidence:** docs/development/full_body_models/HANDOFF.md, docs/development/full_body_models/evidence/fb3_drake/receipt.json, docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json, tests/unit/motion_matching/test_full_body_drake.py, tests/unit/motion_matching/test_full_body_mujoco.py.
 
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown

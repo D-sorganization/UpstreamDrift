@@ -78,12 +78,34 @@ ARM_FORWARD = np.array([[0.0, 0.0, -1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0]])
 # applied to the copied native wrist base: turns its cock axis from the pit
 # direction onto the elbow axis so a positive cock lifts the hand toward the pit.
 WRIST_ROLL = np.array([[0.0, 1.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+# Wrist primitives in the rolled base: Rx is radial/ulnar deviation (cock,
+# positive toward the elbow pit) and Rz flexion/extension (about the palm
+# normal). The native second primitive was a spin about the club, redundant
+# with forearm pronation; a real wrist has no such freedom.
+WRIST_PRIMITIVES = ("Rx", "Rz")
+# A neutral wrist holds the shaft this far toward the little-finger (ulnar)
+# side of the forearm line, so the wrist coordinates read zero in the grip
+# position golfers call neutral. Applied as a fixed turn about the cock axis
+# between the wrist base and the hand.
+GRIP_ULNAR_OFFSET_DEG = 25.0
 ADDRESS_SEED_DEG: dict[str, float] = {  # arms 45 deg below horizontal, elbows soft
     "LSInputY": 45.0,
     "RSInputY": 45.0,
     "LEInput": -20.0,
     "REInput": -20.0,
 }
+
+
+def _grip_offset(child_to_follower: Any) -> list[list[float]]:
+    """Native hand-to-club transform with the neutral-grip ulnar turn about
+    the wrist cock axis (base x) applied on the base side."""
+    angle = np.radians(GRIP_ULNAR_OFFSET_DEG)  # sign checked by the axis test
+    c, s_ = np.cos(angle), np.sin(angle)
+    turn = np.eye(4)
+    turn[:3, :3] = np.array([[1.0, 0.0, 0.0], [0.0, c, -s_], [0.0, s_, c]])
+    # child_to_follower is expressed in the child (hand/club) frame, so a turn
+    # in the follower (wrist base) frame composes on the right.
+    return (np.asarray(child_to_follower, dtype=float) @ turn).tolist()
 
 
 def _t(
@@ -395,9 +417,14 @@ def build_upper_body(
             hand_suffix,
             fore,
             (0, 0, -forearm / 2),
-            [(p["primitive"], p["coordinate"]) for p in native_wrist["primitives"]],
+            [
+                (primitive, p["coordinate"])
+                for primitive, p in zip(
+                    WRIST_PRIMITIVES, native_wrist["primitives"], strict=True
+                )
+            ],
             rotation=rotation,
-            c2f=_copy(native_wrist["child_to_follower"]),
+            c2f=_grip_offset(native_wrist["child_to_follower"]),
         )
     for f in native["frames"]:
         if f["body"] in (names["Clubface Vector"], names["RHandStandoff"]):
@@ -434,9 +461,12 @@ def build_upper_body(
 # Torso and shoulder visuals as fractions of stature (male means): the trunk
 # is drawn as three ellipsoids (pelvis, abdomen, thorax) and the clavicle links
 # as thick capsules, so the picture carries the trunk mass the solids carry.
-TORSO_WIDTH_FRACTION = {"pelvis": 0.19, "abdomen": 0.17, "thorax": 0.21}
-TORSO_DEPTH_FRACTION = {"pelvis": 0.13, "abdomen": 0.13, "thorax": 0.14}
-CLAVICLE_VISUAL_RADIUS_M = 0.045
+TORSO_WIDTH_FRACTION = {"pelvis": 0.17, "abdomen": 0.155, "thorax": 0.185}
+TORSO_DEPTH_FRACTION = {"pelvis": 0.115, "abdomen": 0.11, "thorax": 0.12}
+CLAVICLE_VISUAL_RADIUS_M = 0.04
+# Legs drawn at male mid-segment girths (thigh, calf) rather than the
+# density-derived capsule radius.
+LEG_VISUAL_RADIUS_M = {"femur": 0.072, "tibia": 0.055}
 
 
 def torso_visual_hints(
@@ -459,18 +489,18 @@ def torso_visual_hints(
         "shapes": {
             names["LowerTorso"] + "/pelvis": {
                 "shape": "ellipsoid",
-                "half_size_m": half("pelvis", pelvis_h + 0.10),
-                "center_m": [0.0, 0.0, pelvis_h / 2 - 0.02],
+                "half_size_m": half("pelvis", pelvis_h + 0.12),
+                "center_m": [0.0, 0.0, pelvis_h / 2 - 0.01],
             },
             names["COMRod"] + "/middle_trunk": {
                 "shape": "ellipsoid",
-                "half_size_m": half("abdomen", hub_h * 0.5 + 0.04),
-                "center_m": [0.0, 0.0, hub_h * 0.25],
+                "half_size_m": half("abdomen", hub_h * 0.62),
+                "center_m": [0.0, 0.0, hub_h * 0.27],
             },
             names["COMRod"] + "/upper_trunk": {
                 "shape": "ellipsoid",
-                "half_size_m": half("thorax", hub_h * 0.5 + 0.08),
-                "center_m": [0.0, 0.0, hub_h * 0.72],
+                "half_size_m": half("thorax", hub_h * 0.62),
+                "center_m": [0.0, 0.0, hub_h * 0.70],
             },
         },
         "capsule_radius_m": {

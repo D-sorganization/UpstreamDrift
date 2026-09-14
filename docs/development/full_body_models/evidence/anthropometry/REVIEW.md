@@ -425,3 +425,52 @@ other arm.
 
 Open: the left elbow pit still faces outward (section 9.3); the 7-iron
 downswing tracking (GS-4) is open as for the driver.
+
+## 11. Anatomical Wrist, Visual Realism, Launcher Tool, Epic #10113 (User Direction 2026-09-14)
+
+Tracked as epic #10113 (children #10103 to #10112).
+
+- **Wrist (MM-2, #10104).** The second wrist primitive is now flexion /
+  extension about the palm normal (`Rz`) instead of the native spin about
+  the club (redundant with forearm pronation); a neutral-grip ulnar offset
+  of 25 deg between the wrist base and the hand makes the coordinates read
+  zero at a neutral grip (`GRIP_ULNAR_OFFSET_DEG`, tested). With this wrist
+  and the wrists still flagged rather than bounded, both captures fit
+  better: driver full-capture IK 24.0 mm (24.8 before), 7-iron 24.1 mm
+  (34.1 before); centre of mass 8 mm and 3 mm from the polygon centroid.
+  Bounding the wrists and forearms to human ranges in the IK collapses the
+  fit (driver 65 mm, 7-iron 68 mm, address 23 mm; receipted in the session)
+  and the unbounded wrist cock reads +51 to +66 deg at address and up to
+  +159 deg in the swing, which is not a human deviation but the left
+  humerus rolled so that the elbow pit faces down and outward (section 9.3,
+  MM-5 #10107). The roll of the grip about the club (copied from the native
+  hand frame) must be calibrated from the address before the wrist ranges
+  can be imposed; until then the wrists and forearms are flagged only
+  (`IK_UNBOUNDED`) and every receipt lists the excursions.
+- **Visual realism (MM-1, #10103).** Thigh and calf capsules at 72 and 55 mm,
+  torso ellipsoids slimmer (17/15.5/18.5 % of stature wide, 11 to 12 %
+  deep) and overlapping so the trunk reads as one shape, clavicle capsules
+  40 mm, centre-of-mass and frame spheres moved to a hidden render group.
+- **Club specs from the club database (MM-3, #10105, part).**
+  `club_models.from_database(club_id)` builds a `ClubSpec` from
+  `ClubDatabase` (lengths, head, shaft and grip masses, head MOI) so the
+  repository has one source of club numbers; head meshes from the
+  BunkerShot3D solids and catalogue clubs remain in #10105.
+- **Launcher (MM-4, #10106).** `src/tools/motion_matching` (PyQt6 form:
+  capture, club, stature, mass, scale factors; runs the document builder
+  and the ground-support driver, streams the log, shows the receipt
+  summary and playback GIFs) registered as the "Motion Matching" tile
+  (category motion_matching, `models.yaml`, launcher manifest, feature
+  parity as a web gap on #10106) with unit tests for the command and
+  summary layer.
+
+| Receipt (`ground_support/<run>/receipt.json`) | Driver          | 7-iron         |
+| --------------------------------------------- | --------------- | -------------- |
+| Full-capture IK, all markers                  | 24.0 mm         | 24.1 mm        |
+| Address marker RMS                            | 8.7 mm          | 6.9 mm         |
+| Address spine bend forward / lateral          | 8.9 / 6.3 deg   | 9.9 / 6.9 deg  |
+| Elbows left / right                           | 1.6 / -13.8 deg | 3.3 / -5.3 deg |
+| Backswing tracking root error max             | 4 mm            | 5 mm           |
+| Whole-run tracking root RMS                   | 25 mm           | 33 mm          |
+| Stance frames inside the support polygon      | 84 %            | 89 %           |
+| CoM offset from the polygon centroid          | 8 mm            | 3 mm           |

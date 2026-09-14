@@ -341,9 +341,11 @@ def render_playback(
 
 
 # Coordinates whose declared human range is reported (range_of_motion_flags)
-# but not imposed on the IK: the wrist cock and the two forearm/wrist spins
-# absorb modelling slop of the hand-club chain, and the legs keep the widened
-# Rajagopal bounds until the hip zero twist is calibrated.
+# but not yet imposed on the IK: the legs keep the widened Rajagopal bounds
+# until the hip zero twist is calibrated (MM-6, #10108); the wrists and
+# forearms are flagged only because bounding them with the current hand-club
+# attachment collapses the fit (driver 65 mm, receipted 2026-09-14; MM-2,
+# #10104 carries the roll calibration of the grip that must come first).
 IK_UNBOUNDED = frozenset(
     {"LWInputX", "RWInputX", "LWInputY", "RWInputY", "LFInput", "RFInput"}
 )

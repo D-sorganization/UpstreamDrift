@@ -70,3 +70,16 @@ def test_apply_club_sets_masses_and_moves_the_hands_along_the_shaft(
         club.head_shape
     )
     assert json.loads(SPEC.read_text()) == doc  # input untouched
+
+
+def test_specs_from_the_club_database_agree_with_the_typical_constants() -> None:
+    driver = module.from_database("driver")
+    iron = module.from_database("7_iron")
+    assert driver.length_m == pytest.approx(module.DRIVER.length_m, abs=1e-3)
+    assert driver.head_mass_kg == pytest.approx(module.DRIVER.head_mass_kg, abs=0.01)
+    assert driver.head_shape == "ellipsoid" and iron.head_shape == "box"
+    assert iron.length_m == pytest.approx(module.IRON_7.length_m, abs=1e-3)
+    assert 0.03 < driver.head_gyration_m[2] < 0.06
+    assert abs(driver.total_mass_kg - module.DRIVER.total_mass_kg) < 0.02
+    with pytest.raises(ValueError):
+        module.from_database("no_such_club")

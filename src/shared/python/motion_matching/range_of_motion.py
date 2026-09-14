@@ -3,7 +3,8 @@
 Matching must never put the golfer where a human cannot go. ``HUMAN_RANGES_DEG``
 lists conservative adult ranges (Kapandji, Rajagopal 2016 for the legs) in
 the anthropometric document's sign conventions: elbow flexion negative,
-right scapula elevation negative, wrist cock positive toward the elbow pit.
+right scapula elevation negative, wrist cock positive toward the elbow pit
+(radial), wrist Y flexion/extension about the palm normal.
 Coordinates that are Euler components of a ball joint (the shoulder gimbal)
 have no anatomical range on their own and are absent. ``violations`` flags,
 per coordinate, how far a trajectory leaves its range.
@@ -43,10 +44,10 @@ UPPER_RANGES_DEG: dict[str, tuple[float, float]] = {
     "REInput": (-150.0, 5.0),
     "LFInput": (-90.0, 90.0),
     "RFInput": (-90.0, 90.0),
-    "LWInputX": (-45.0, 35.0),
-    "RWInputX": (-45.0, 35.0),
-    "LWInputY": (-80.0, 80.0),
-    "RWInputY": (-80.0, 80.0),
+    "LWInputX": (-40.0, 25.0),  # ulnar .. radial deviation from a neutral grip
+    "RWInputX": (-40.0, 25.0),
+    "LWInputY": (-70.0, 70.0),  # flexion .. extension
+    "RWInputY": (-70.0, 70.0),
 }
 HUMAN_RANGES_DEG: dict[str, tuple[float, float]] = {
     **UPPER_RANGES_DEG,

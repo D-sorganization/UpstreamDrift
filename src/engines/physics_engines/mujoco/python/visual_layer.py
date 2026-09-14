@@ -22,6 +22,9 @@ from src.shared.python.motion_matching.visual_skeleton import (
 _VISUAL_CLASS = "visual"
 _CAPSULE_RGBA = "0.75 0.78 0.85 1"
 _SHAPE_RGBA = "0.7 0.72 0.8 1"
+# Centre-of-mass and frame spheres sit in a group the renderer hides by
+# default (groups 0 to 2 are shown); enable group 3 to inspect them.
+_MARKER_SPHERE_GROUP = "3"
 _COM_RGBA = "0.9 0.35 0.2 1"
 _FRAME_RGBA = "0.2 0.6 0.95 1"
 _FLOOR_RGBA = "0.35 0.45 0.3 1"
@@ -110,6 +113,7 @@ def attach_visual_layer(
             ),
             size=_numbers([sphere.radius_m]),
             rgba=_COM_RGBA if sphere.kind == "com" else _FRAME_RGBA,
+            group=_MARKER_SPHERE_GROUP,
             attrib={"class": _VISUAL_CLASS},
         )
     world = elements["world"]

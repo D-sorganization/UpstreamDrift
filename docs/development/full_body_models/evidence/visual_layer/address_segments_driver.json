@@ -12,12 +12,12 @@
   {
     "body": "tibia_r",
     "length_m": 0.4347,
-    "radius_m": 0.0437
+    "radius_m": 0.055
   },
   {
     "body": "tibia_l",
     "length_m": 0.4305,
-    "radius_m": 0.0439
+    "radius_m": 0.055
   },
   {
     "body": "COMRod",
@@ -32,12 +32,12 @@
   {
     "body": "femur_r",
     "length_m": 0.4051,
-    "radius_m": 0.05
+    "radius_m": 0.072
   },
   {
     "body": "femur_l",
     "length_m": 0.3933,
-    "radius_m": 0.05
+    "radius_m": 0.072
   },
   {
     "body": "LUpperArm",
@@ -52,12 +52,12 @@
   {
     "body": "HubtoLS",
     "length_m": 0.1949,
-    "radius_m": 0.045
+    "radius_m": 0.04
   },
   {
     "body": "HubtoRS",
     "length_m": 0.1949,
-    "radius_m": 0.045
+    "radius_m": 0.04
   },
   {
     "body": "calcn_r",

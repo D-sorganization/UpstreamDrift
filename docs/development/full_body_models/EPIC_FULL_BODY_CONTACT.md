@@ -161,12 +161,12 @@ exempt. Gates, each with its own receipt, in order:
   accepted only by the uninterrupted replay gates of the native lane.
 - AN-1 Anthropometric geometry (#10099): neutral address by a static
   trial, de Leva masses, subject lengths from the swing. Status
-  2026-09-14: neck, wrist cock axis, setup windows, CoM overlay and
-  balance, typical driver and 7-iron clubs, both captures matched
-  (IK 24.8 / 34.1 mm), torso and club visuals, human ranges of
-  motion flagged, cross-engine setup parity for both; left elbow pit still
-  outward; unqualified until Simscape parity. Evidence
-  `evidence/anthropometry/REVIEW.md` 9 to 10, `evidence/setup_parity/`.
+  2026-09-14: neck, anatomical wrist (cock plus flexion, neutral-grip
+  offset), setup windows, CoM balance, typical clubs from the club
+  database, both captures matched (IK 24.0 / 24.1 mm), torso and club
+  visuals, human ranges flagged, setup parity for both, Motion Matching
+  launcher tile; continued as epic #10113 (MM-1 to MM-10). Evidence
+  `evidence/anthropometry/REVIEW.md` 9 to 11, `evidence/setup_parity/`.
 
 ## Rules Every Child Follows
 
