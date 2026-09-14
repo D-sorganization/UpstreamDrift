@@ -16,11 +16,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 
+from typing import TypeAlias
+
 import numpy as np
 from numpy.typing import NDArray
 
-Array = NDArray[np.float64]
-BoolArray = NDArray[np.bool_]
+Array: TypeAlias = NDArray[np.float64]
+BoolArray: TypeAlias = NDArray[np.bool_]
 
 
 @dataclass(frozen=True)
