@@ -235,52 +235,42 @@ def run_remote_engine(engine_name: str, stride: int, iterations: int) -> dict[st
     return json.loads((engine_dir / "receipt.json").read_text(encoding="utf-8"))
 
 
-def run_local_engine(engine_name: str, stride: int, iterations: int) -> dict[str, Any]:
-    from src.shared.python.motion_matching.full_body_spec import load_full_body_spec
-    from src.shared.python.motion_matching.marker_calibration import (
-        calibrate_marker_offsets,
-    )
-    from src.shared.python.motion_matching.tour_capture_contract import (
-        TourCapture,
-        load_tour_capture,
-        tracked_labels,
-    )
-
-    sys.stdout.write(f"=== Starting FB-4 Calibration: {engine_name.upper()} ===\n")
-    sys.stdout.flush()
-
-    upper_spec = json.loads(UPPER_SPEC_PATH.read_text(encoding="utf-8"))
-    fb_spec = load_full_body_spec(FULL_BODY_SPEC_PATH, upper_spec)
-    capture = load_tour_capture(C3D_PATH)
-    labels = tracked_labels()
-    if len(labels) != 34:
-        raise ValueError(f"Expected exactly 34 tracked labels, found {len(labels)}")
-
-    bodies = {lbl: fb_spec["marker_attachments"][lbl]["body"] for lbl in labels}
-
-    adapter: Any
+def _init_adapter(engine_name: str, fb_spec: dict[str, Any]) -> Any:
+    """Instantiate the engine-specific full-body IK adapter."""
     if engine_name == "mujoco":
         from src.engines.physics_engines.mujoco.python.full_body_ik import (
             MujocoFullBodyIK,
         )
 
-        adapter = MujocoFullBodyIK(fb_spec)
-    elif engine_name == "pinocchio":
+        return MujocoFullBodyIK(fb_spec)
+    if engine_name == "pinocchio":
         from src.engines.physics_engines.pinocchio.python.full_body_ik import (
             PinocchioFullBodyIK,
         )
 
-        adapter = PinocchioFullBodyIK(fb_spec)
-    elif engine_name == "drake":
+        return PinocchioFullBodyIK(fb_spec)
+    if engine_name == "drake":
         from src.engines.physics_engines.drake.python.full_body_ik import (
             DrakeFullBodyIK,
         )
 
-        adapter = DrakeFullBodyIK(fb_spec)
-    else:
-        raise ValueError(f"Unknown engine: {engine_name}")
+        return DrakeFullBodyIK(fb_spec)
+    raise ValueError(f"Unknown engine: {engine_name}")
 
-    # 1. Stride Subsample Calibration (e.g. stride 20 -> 33 frames, 3 iterations)
+
+def _subsample_calibration(
+    adapter: Any,
+    capture: Any,
+    labels: list[str],
+    bodies: dict[str, str],
+    stride: int,
+    iterations: int,
+) -> tuple[Any, Any, dict[str, Any]]:
+    from src.shared.python.motion_matching.marker_calibration import (
+        calibrate_marker_offsets,
+    )
+    from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+
     t_sub = capture.time_s[::stride] - capture.time_s[0]
     p_sub = capture.points_m[::stride]
     v_sub = capture.valid[::stride]
@@ -302,7 +292,6 @@ def run_local_engine(engine_name: str, stride: int, iterations: int) -> dict[str
         initial_q=initial_q,
         iterations=iterations,
     )
-
     sub_frame_rms, sub_marker_rms, sub_total_rms = adapter.evaluate_trajectory_rms(
         calib_res.offsets, cap_sub, calib_res.q
     )
@@ -310,44 +299,95 @@ def run_local_engine(engine_name: str, stride: int, iterations: int) -> dict[str
         f"Subsample calibration complete: best iteration {calib_res.best_iteration}, "
         f"total RMS = {sub_total_rms * 1000.0:.2f} mm\n"
     )
+    metrics = {
+        "sub_frame_rms": sub_frame_rms,
+        "sub_marker_rms": sub_marker_rms,
+        "sub_total_rms": sub_total_rms,
+    }
+    return calib_res, cap_sub, metrics
 
-    # 2. Solve Full 654-Frame IK Trajectory with calibrated offsets
-    sys.stdout.write(
-        "Solving full 654-frame IK trajectory with calibrated offsets...\n"
-    )
-    sys.stdout.flush()
-    cap_full_tracked = capture.subset(labels)
-    q_full = adapter.ik_fn(
-        calib_res.offsets,
-        cap_full_tracked,
-        initial_q=calib_res.q[0],
-        closure_weight=10.0,
-    )
 
-    full_frame_rms, full_marker_rms, full_total_rms = adapter.evaluate_trajectory_rms(
-        calib_res.offsets, cap_full_tracked, q_full
-    )
-    sys.stdout.write(
-        f"Full trajectory IK complete: total RMS = {full_total_rms * 1000.0:.2f} mm, "
-        f"mean frame RMS = {np.mean(full_frame_rms) * 1000.0:.2f} mm, "
-        f"max frame RMS = {np.max(full_frame_rms) * 1000.0:.2f} mm\n"
-    )
+def _build_receipt_dict(
+    engine_name: str,
+    calib_res: Any,
+    traj_metrics: dict[str, Any],
+    run_meta: dict[str, Any],
+    offsets_path: Path,
+    traj_path: Path,
+) -> dict[str, Any]:
+    sub_marker_rms = traj_metrics["sub_marker_rms"]
+    full_frame_rms = traj_metrics["full_frame_rms"]
+    q_full = traj_metrics["q_full"]
+    return {
+        "work_package": "FB-4",
+        "issue": "#10068",
+        "epic": "#10062",
+        "engine": engine_name,
+        "status": "PASSED",
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "environment": {
+            "python": sys.version,
+            "platform": platform.platform(),
+            "executable": sys.executable,
+            f"{engine_name}_version": get_engine_version(engine_name),
+        },
+        "inputs": {
+            "full_body_spec_v1.json": sha256_file(FULL_BODY_SPEC_PATH),
+            "native_geometry_spec_9967.json": sha256_file(UPPER_SPEC_PATH),
+            "C3D_TA_Driver.c3d": sha256_file(C3D_PATH),
+            "marker_calibration.py": sha256_file(
+                ROOT / "src/shared/python/motion_matching/marker_calibration.py"
+            ),
+            "full_body_ik.py": sha256_file(
+                ROOT / "src/shared/python/motion_matching/full_body_ik.py"
+            ),
+        },
+        "stride_subsample": {
+            "stride": run_meta["stride"],
+            "num_frames": run_meta["cap_sub_frames"],
+            "iterations": run_meta["iterations"],
+            "best_iteration": calib_res.best_iteration,
+            "total_rms_m": float(traj_metrics["sub_total_rms"]),
+            "per_marker_rms_m": {k: float(v) for k, v in sub_marker_rms.items()},
+        },
+        "full_trajectory": {
+            "stride": 1,
+            "num_frames": q_full.shape[0],
+            "total_rms_m": float(traj_metrics["full_total_rms"]),
+            "mean_frame_rms_m": float(np.mean(full_frame_rms)),
+            "max_frame_rms_m": float(np.max(full_frame_rms)),
+            "closure_max_error_m": traj_metrics["max_closure_err"],
+            "closure_mean_error_m": traj_metrics["mean_closure_err"],
+        },
+        "head_marker_limitation": HEAD_MARKER_LIMITATION_NOTE,
+        "artifacts": {
+            "calibrated_offsets_sha256": sha256_file(offsets_path),
+            "ik_trajectory_sha256": sha256_file(traj_path),
+        },
+    }
 
-    # 3. Evaluate Dual-Grip Weld Loop Closure Residuals across trajectory
-    closure_errs = [
-        float(np.linalg.norm(adapter.closure_residuals(q_full[f])))
-        for f in range(q_full.shape[0])
-    ]
-    max_closure_err = float(np.max(closure_errs))
-    mean_closure_err = float(np.mean(closure_errs))
 
-    # 4. Save Artifacts
+def _save_artifacts(
+    engine_name: str,
+    adapter: Any,
+    calib_res: Any,
+    traj_metrics: dict[str, Any],
+    run_meta: dict[str, Any],
+) -> dict[str, Any]:
     out_dir = HERE / engine_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
     offsets_path = out_dir / "calibrated_offsets.json"
     traj_path = out_dir / "ik_trajectory.npz"
     receipt_path = out_dir / "receipt.json"
+
+    labels = run_meta["labels"]
+    sub_marker_rms = traj_metrics["sub_marker_rms"]
+    full_marker_rms = traj_metrics["full_marker_rms"]
+    sub_total_rms = traj_metrics["sub_total_rms"]
+    full_frame_rms = traj_metrics["full_frame_rms"]
+    q_full = traj_metrics["q_full"]
+    capture = run_meta["capture"]
 
     offsets_data = {
         "schema_version": "v1",
@@ -378,56 +418,84 @@ def run_local_engine(engine_name: str, stride: int, iterations: int) -> dict[str
         coordinate_order=np.array(adapter.coordinate_order),
     )
 
-    receipt_data = {
-        "work_package": "FB-4",
-        "issue": "#10068",
-        "epic": "#10062",
-        "engine": engine_name,
-        "status": "PASSED",
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-        "environment": {
-            "python": sys.version,
-            "platform": platform.platform(),
-            "executable": sys.executable,
-            f"{engine_name}_version": get_engine_version(engine_name),
-        },
-        "inputs": {
-            "full_body_spec_v1.json": sha256_file(FULL_BODY_SPEC_PATH),
-            "native_geometry_spec_9967.json": sha256_file(UPPER_SPEC_PATH),
-            "C3D_TA_Driver.c3d": sha256_file(C3D_PATH),
-            "marker_calibration.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/marker_calibration.py"
-            ),
-            "full_body_ik.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/full_body_ik.py"
-            ),
-        },
-        "stride_subsample": {
-            "stride": stride,
-            "num_frames": cap_sub.frames,
-            "iterations": iterations,
-            "best_iteration": calib_res.best_iteration,
-            "total_rms_m": float(sub_total_rms),
-            "per_marker_rms_m": {k: float(v) for k, v in sub_marker_rms.items()},
-        },
-        "full_trajectory": {
-            "stride": 1,
-            "num_frames": q_full.shape[0],
-            "total_rms_m": float(full_total_rms),
-            "mean_frame_rms_m": float(np.mean(full_frame_rms)),
-            "max_frame_rms_m": float(np.max(full_frame_rms)),
-            "closure_max_error_m": max_closure_err,
-            "closure_mean_error_m": mean_closure_err,
-        },
-        "head_marker_limitation": HEAD_MARKER_LIMITATION_NOTE,
-        "artifacts": {
-            "calibrated_offsets_sha256": sha256_file(offsets_path),
-            "ik_trajectory_sha256": sha256_file(traj_path),
-        },
-    }
+    receipt_data = _build_receipt_dict(
+        engine_name, calib_res, traj_metrics, run_meta, offsets_path, traj_path
+    )
     receipt_path.write_text(json.dumps(receipt_data, indent=2), encoding="utf-8")
     sys.stdout.write(f"Saved receipt to {receipt_path}\n")
     return receipt_data
+
+
+def run_local_engine(engine_name: str, stride: int, iterations: int) -> dict[str, Any]:
+    from src.shared.python.motion_matching.full_body_spec import load_full_body_spec
+    from src.shared.python.motion_matching.tour_capture_contract import (
+        load_tour_capture,
+        tracked_labels,
+    )
+
+    sys.stdout.write(f"=== Starting FB-4 Calibration: {engine_name.upper()} ===\n")
+    sys.stdout.flush()
+
+    upper_spec = json.loads(UPPER_SPEC_PATH.read_text(encoding="utf-8"))
+    fb_spec = load_full_body_spec(FULL_BODY_SPEC_PATH, upper_spec)
+    capture = load_tour_capture(C3D_PATH)
+    labels = tracked_labels()
+    if len(labels) != 34:
+        raise ValueError(f"Expected exactly 34 tracked labels, found {len(labels)}")
+
+    bodies = {lbl: fb_spec["marker_attachments"][lbl]["body"] for lbl in labels}
+    adapter = _init_adapter(engine_name, fb_spec)
+
+    calib_res, cap_sub, sub_m = _subsample_calibration(
+        adapter, capture, labels, bodies, stride, iterations
+    )
+
+    # 2. Solve Full 654-Frame IK Trajectory with calibrated offsets
+    sys.stdout.write(
+        "Solving full 654-frame IK trajectory with calibrated offsets...\n"
+    )
+    sys.stdout.flush()
+    cap_full_tracked = capture.subset(labels)
+    q_full = adapter.ik_fn(
+        calib_res.offsets,
+        cap_full_tracked,
+        initial_q=calib_res.q[0],
+        closure_weight=10.0,
+    )
+
+    full_frame_rms, full_marker_rms, full_total_rms = adapter.evaluate_trajectory_rms(
+        calib_res.offsets, cap_full_tracked, q_full
+    )
+    sys.stdout.write(
+        f"Full trajectory IK complete: total RMS = {full_total_rms * 1000.0:.2f} mm, "
+        f"mean frame RMS = {np.mean(full_frame_rms) * 1000.0:.2f} mm, "
+        f"max frame RMS = {np.max(full_frame_rms) * 1000.0:.2f} mm\n"
+    )
+
+    # 3. Evaluate Dual-Grip Weld Loop Closure Residuals across trajectory
+    closure_errs = [
+        float(np.linalg.norm(adapter.closure_residuals(q_full[f])))
+        for f in range(q_full.shape[0])
+    ]
+
+    traj_metrics = {
+        "sub_marker_rms": sub_m["sub_marker_rms"],
+        "sub_total_rms": sub_m["sub_total_rms"],
+        "full_frame_rms": full_frame_rms,
+        "full_marker_rms": full_marker_rms,
+        "full_total_rms": full_total_rms,
+        "q_full": q_full,
+        "max_closure_err": float(np.max(closure_errs)),
+        "mean_closure_err": float(np.mean(closure_errs)),
+    }
+    run_meta = {
+        "labels": labels,
+        "stride": stride,
+        "iterations": iterations,
+        "cap_sub_frames": cap_sub.frames,
+        "capture": capture,
+    }
+    return _save_artifacts(engine_name, adapter, calib_res, traj_metrics, run_meta)
 
 
 def main() -> None:

@@ -42,6 +42,9 @@ class MujocoFullBodyIK:
 
         self.specification = spec_dict
         self.model = NativeMujocoFullBodyModel(spec_bytes)
+        self._mj_model = self.model.model
+        self._mj_data = self.model.data
+        self._metadata = self.model.metadata
         self.coordinate_order: tuple[str, ...] = tuple(self.model.coordinate_order)
         if len(self.coordinate_order) != 41:
             raise ValueError("Expected exactly 41 full-body coordinates")
@@ -53,16 +56,16 @@ class MujocoFullBodyIK:
         )
         self._site_ids: dict[str, int] = {}
         self._body_ids: dict[str, int] = {}
-        frame_sites = self.model.metadata.get("frame_sites", {})
+        frame_sites = self._metadata.get("frame_sites", {})
 
         for b in bodies:
             if b in frame_sites:
-                self._site_ids[b] = self.model.model.site(frame_sites[b]).id
+                self._site_ids[b] = self._mj_model.site(frame_sites[b]).id
             else:
-                self._body_ids[b] = self.model.model.body(b).id
+                self._body_ids[b] = self._mj_model.body(b).id
 
-        self._closure_a_id = self.model.model.site("native_closure_a").id
-        self._closure_b_id = self.model.model.site("native_closure_b").id
+        self._closure_a_id = self._mj_model.site("native_closure_a").id
+        self._closure_b_id = self._mj_model.site("native_closure_b").id
 
     def pose_fn(self, q: Array) -> dict[str, Pose]:
         """Compute world poses (R, t) for all bodies referenced by markers."""
@@ -73,25 +76,25 @@ class MujocoFullBodyIK:
             raise ValueError(f"Expected {len(self.coordinate_order)} coordinates")
 
         for i in range(len(q_arr)):
-            self.model.data.qpos[i] = q_arr[i]
-        mujoco.mj_kinematics(self.model.model, self.model.data)
+            self._mj_data.qpos[i] = q_arr[i]
+        mujoco.mj_kinematics(self._mj_model, self._mj_data)
 
         poses: dict[str, Pose] = {}
         for b, sid in self._site_ids.items():
-            r = self.model.data.site_xmat[sid].reshape((3, 3)).copy()
-            t = self.model.data.site_xpos[sid].copy()
+            r = self._mj_data.site_xmat[sid].reshape((3, 3)).copy()
+            t = self._mj_data.site_xpos[sid].copy()
             poses[b] = (r, t)
         for b, bid in self._body_ids.items():
-            r = self.model.data.xmat[bid].reshape((3, 3)).copy()
-            t = self.model.data.xpos[bid].copy()
+            r = self._mj_data.xmat[bid].reshape((3, 3)).copy()
+            t = self._mj_data.xpos[bid].copy()
             poses[b] = (r, t)
         return poses
 
     def closure_residuals(self, q: Array) -> Array:
         """Evaluate position residual between dual-grip weld sites in world."""
         # mj_kinematics was executed in pose_fn
-        pa = self.model.data.site_xpos[self._closure_a_id]
-        pb = self.model.data.site_xpos[self._closure_b_id]
+        pa = self._mj_data.site_xpos[self._closure_a_id]
+        pb = self._mj_data.site_xpos[self._closure_b_id]
         return np.asarray(pa - pb, dtype=float)
 
     def ik_fn(

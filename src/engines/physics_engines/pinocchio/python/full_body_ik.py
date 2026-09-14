@@ -39,6 +39,8 @@ class PinocchioFullBodyIK:
 
         self.specification = spec_dict
         self.model = FullBodyPinocchioModel(spec_dict)
+        self._pin_model = self.model.model
+        self._pin_data = self.model.data
         self.coordinate_order: tuple[str, ...] = tuple(
             self.specification["coordinate_order"]
         )
@@ -76,23 +78,23 @@ class PinocchioFullBodyIK:
             raise ValueError(f"Expected {len(self.coordinate_order)} coordinates")
 
         pin = self.model._pin
-        pin.forwardKinematics(self.model.model, self.model.data, q_arr)
-        pin.updateFramePlacements(self.model.model, self.model.data)
+        pin.forwardKinematics(self._pin_model, self._pin_data, q_arr)
+        pin.updateFramePlacements(self._pin_model, self._pin_data)
 
         poses: dict[str, Pose] = {}
         for b, fid in self._frame_ids.items():
-            omf = self.model.data.oMf[fid]
+            omf = self._pin_data.oMf[fid]
             poses[b] = (omf.rotation.copy(), omf.translation.copy())
         for b, (jid, b_placement) in self._body_tuples.items():
-            omi = self.model.data.oMi[jid] * b_placement
+            omi = self._pin_data.oMi[jid] * b_placement
             poses[b] = (omi.rotation.copy(), omi.translation.copy())
         return poses
 
     def closure_residuals(self, q: Array) -> Array:
         """Evaluate position residual between dual-grip weld frames in world."""
         # forwardKinematics was called in pose_fn
-        oma = self.model.data.oMi[self._closure_ja] * self._closure_pa
-        omb = self.model.data.oMi[self._closure_jb] * self._closure_pb
+        oma = self._pin_data.oMi[self._closure_ja] * self._closure_pa
+        omb = self._pin_data.oMi[self._closure_jb] * self._closure_pb
         return np.asarray(oma.translation - omb.translation, dtype=float)
 
     def ik_fn(
