@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from importlib import import_module
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -31,7 +31,7 @@ from src.shared.python.motion_matching.full_body_spec import (
     upper_body_slice,
 )
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 def solve_weld_acceleration(
