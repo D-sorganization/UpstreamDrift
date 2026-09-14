@@ -18,7 +18,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -46,7 +46,7 @@ def order_directed_tree(edges: Sequence[Mapping[str, Any]]) -> list[Mapping[str,
     return ordered
 
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 FULL_BODY_SCHEMA_VERSION = "full-body-v1"
 _UPPER_KEYS = (
     "schema_version",
