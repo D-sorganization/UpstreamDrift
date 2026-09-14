@@ -86,6 +86,8 @@ jobs:
         working-directory: .
         run: |
           if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
             if find .git/objects -type f -empty | grep -q .; then
               echo "Found empty/corrupt git objects, purging .git..."
               rm -rf .git
@@ -581,6 +583,13 @@ jobs:
       PYTHONNOUSERSITE: "1"
       PIP_CONFIG_FILE: /dev/null
     steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Initialize Pinned Research Provider
         run: git submodule update --init --depth 1 vendor/ud-tools
@@ -656,6 +665,13 @@ jobs:
       PYTHONNOUSERSITE: "1"
       PIP_CONFIG_FILE: /dev/null
     steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Initialize Pinned Research Provider
         run: git submodule update --init --depth 1 vendor/ud-tools
