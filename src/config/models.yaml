@@ -458,6 +458,21 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "tour_matching_viewer"
+    name: "Tour Matching Viewer"
+    description: "Interactive 3D replay and kinematic playback of full-body matching candidates against tour capture"
+    type: "special_app"
+    path: "src/tools/tour_matching_viewer/__main__.py"
+    capabilities:
+      - "motion_matching"
+      - "visual_skeleton"
+      - "kinematic_playback"
+    launcher:
+      category: "tool"
+      logo: "assets/urdf_icon.png"
+      status: "beta"
+      default_launch: "tab"
+
   - id: "data_explorer"
     name: "Data Explorer"
     description: "Import, filter, and visualise simulation datasets"

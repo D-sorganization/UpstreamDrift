@@ -185,3 +185,19 @@ def test_committed_full_body_spec_validates_against_the_qualified_base() -> None
     assert {b["name"] for b in doc["bodies"]} >= {"femur_l", "calcn_r", "toes_l"}
     assert doc["contact"]["ground"]["calibrated"] is False
     assert receipt["pelvis_alignment"]["rms_residual_m"] < 0.01
+
+
+def test_order_full_body_joints_orders_upper_tree_then_lower_chains() -> None:
+    path = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
+    doc = module.load_full_body_spec(path, _upper())
+    ordered = module.order_full_body_joints(doc)
+    assert len(ordered) == len(doc["joints"])
+    upper_joints = {j["name"] for j in module.upper_body_slice(doc)["joints"]}
+    # Upper joints come first
+    for j in ordered[: len(upper_joints)]:
+        assert j["name"] in upper_joints
+    # Lower limb joints follow
+    lower_names = [j["name"] for j in ordered[len(upper_joints) :]]
+    assert lower_names[0] == "hip_r"
+    assert "knee_r" in lower_names
+    assert "hip_l" in lower_names
