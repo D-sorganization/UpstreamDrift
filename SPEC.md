@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Source and Frame Identity Contracts (ST-02A, #10137)
+
+Implements frozen `SourceAsset`, `FrameIdentity`, and `validate_frame_sequence`
+records under `src/shared/python/shadow_tracker/source_records.py` with private
+shared validation helpers. Enforces immutable slots, strict types (rejecting
+booleans/strings for numerics), reduced timebase fractions, URI scheme gating,
+and sequence ordering for presentation and known physical timestamps.
+
 ## Shadow Tracker Worker Handoff and Model Probe (#10142)
 
 The ST-01 experiment under `scripts/shadow_tracker/` records repeatable real
@@ -4649,6 +4657,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-14 | #10145 | Implement frozen source and frame identity records for Shadow Tracker (ST-02A, #10137). |
 | 2026-09-14 | #10144 | Add TDD model diagnostics, measured qualification blockers and frozen image-only worker handoff for Shadow Tracker. |
 | 2026-09-14 | #10136 | Establish Shadow Tracker epic, implementation plan, source/test homes and agent handoff; no runtime implementation. |
 | 2026-09-14 | #10090 | Tour Matching Viewer launcher tile for in-app 3D playback of candidate motions against tour capture (Step 3, #10062) |
