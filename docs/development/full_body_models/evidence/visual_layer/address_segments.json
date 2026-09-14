@@ -1,0 +1,137 @@
+[
+  {
+    "body": "Clubface Vector",
+    "length_m": 1.0765,
+    "radius_m": 0.0171
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.4978,
+    "radius_m": 0.05
+  },
+  {
+    "body": "tibia_r",
+    "length_m": 0.4347,
+    "radius_m": 0.0437
+  },
+  {
+    "body": "tibia_l",
+    "length_m": 0.4305,
+    "radius_m": 0.0439
+  },
+  {
+    "body": "femur_r",
+    "length_m": 0.4051,
+    "radius_m": 0.05
+  },
+  {
+    "body": "femur_l",
+    "length_m": 0.3933,
+    "radius_m": 0.05
+  },
+  {
+    "body": "LUpperArm",
+    "length_m": 0.3683,
+    "radius_m": 0.0361
+  },
+  {
+    "body": "RUpperArm",
+    "length_m": 0.3683,
+    "radius_m": 0.0361
+  },
+  {
+    "body": "LowerTorso",
+    "length_m": 0.3048,
+    "radius_m": 0.05
+  },
+  {
+    "body": "HubtoLS",
+    "length_m": 0.254,
+    "radius_m": 0.05
+  },
+  {
+    "body": "HubtoRS",
+    "length_m": 0.254,
+    "radius_m": 0.05
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.2491,
+    "radius_m": 0.05
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.2491,
+    "radius_m": 0.05
+  },
+  {
+    "body": "calcn_r",
+    "length_m": 0.1621,
+    "radius_m": 0.0415
+  },
+  {
+    "body": "calcn_l",
+    "length_m": 0.1602,
+    "radius_m": 0.0418
+  },
+  {
+    "body": "Spherical Solid",
+    "length_m": 0.1524,
+    "radius_m": 0.0397
+  },
+  {
+    "body": "LLowerForearm",
+    "length_m": 0.1524,
+    "radius_m": 0.0397
+  },
+  {
+    "body": "Spherical Solid1",
+    "length_m": 0.1524,
+    "radius_m": 0.0397
+  },
+  {
+    "body": "RLowerForearm",
+    "length_m": 0.1524,
+    "radius_m": 0.0397
+  },
+  {
+    "body": "LowerTorso",
+    "length_m": 0.1066,
+    "radius_m": 0.05
+  },
+  {
+    "body": "LowerTorso",
+    "length_m": 0.0921,
+    "radius_m": 0.05
+  },
+  {
+    "body": "talus_r",
+    "length_m": 0.0615,
+    "radius_m": 0.0191
+  },
+  {
+    "body": "talus_l",
+    "length_m": 0.0611,
+    "radius_m": 0.0191
+  },
+  {
+    "body": "UpperTorsoBase",
+    "length_m": 0.061,
+    "radius_m": 0.05
+  },
+  {
+    "body": "toes_r",
+    "length_m": 0.0366,
+    "radius_m": 0.0364
+  },
+  {
+    "body": "toes_l",
+    "length_m": 0.0363,
+    "radius_m": 0.0365
+  },
+  {
+    "body": "RHandStandoff",
+    "length_m": 0.0127,
+    "radius_m": 0.0129
+  }
+]

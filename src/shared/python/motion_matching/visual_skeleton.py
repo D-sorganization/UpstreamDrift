@@ -20,7 +20,8 @@ import numpy as np
 from numpy.typing import NDArray
 
 Array = NDArray[np.float64]
-_MIN_RADIUS_M, _MAX_RADIUS_M, _RADIUS_PER_LENGTH = 0.015, 0.05, 0.06
+_MIN_RADIUS_M, _MAX_RADIUS_M = 0.006, 0.05
+_TISSUE_DENSITY_KG_M3 = 1500.0  # uniform-density cylinder sizing for capsules
 _SPHERE_RADIUS_M = {"com": 0.02, "frame": 0.012}
 
 
@@ -82,11 +83,19 @@ class WorldSegment:
     radius_m: float
 
 
-def capsule_radius(length_m: float) -> float:
-    """Radius policy: proportional to length, clamped to a visible band."""
-    if not math.isfinite(length_m) or length_m < 0:
-        raise ValueError("Capsule length must be finite and nonnegative")
-    return float(min(_MAX_RADIUS_M, max(_MIN_RADIUS_M, _RADIUS_PER_LENGTH * length_m)))
+def capsule_radius(mass_kg: float, length_m: float) -> float:
+    """Radius of a uniform-density cylinder with this mass and length, clamped.
+
+    Heavy short segments (pelvis, thigh) come out thick; light long ones (club
+    shaft) thin. The band keeps every segment visible without letting it
+    dominate the picture.
+    """
+    if not math.isfinite(mass_kg) or mass_kg < 0:
+        raise ValueError("Capsule mass must be finite and nonnegative")
+    if not math.isfinite(length_m) or length_m <= 0:
+        raise ValueError("Capsule length must be finite and positive")
+    radius = math.sqrt(mass_kg / (math.pi * _TISSUE_DENSITY_KG_M3 * length_m))
+    return float(min(_MAX_RADIUS_M, max(_MIN_RADIUS_M, radius)))
 
 
 def _ground(spec: Mapping[str, Any]) -> GroundVisual:
@@ -110,8 +119,9 @@ def derive_visual_skeleton(spec: Mapping[str, Any]) -> VisualSkeleton:
     """Derive capsules, spheres and ground from a native or full-body spec.
 
     Preconditions: every joint parent is ``world`` or a body, every body is the
-    child of exactly one joint, gravity is nonzero. Postcondition: exactly one
-    capsule per body with positive length.
+    child of exactly one joint, gravity is nonzero. Postcondition: at least one
+    capsule per body: one per child joint, plus one to the farthest centre of
+    mass when it lies beyond every child joint.
     """
     named = [body for body in spec["bodies"] if body["name"] != "world"]
     bodies = {body["name"]: body for body in named}
@@ -140,6 +150,7 @@ def derive_visual_skeleton(spec: Mapping[str, Any]) -> VisualSkeleton:
     for name, body in bodies.items():
         start = own_joint[name]
         com_points = []
+        mass = 0.0
         for solid in body.get("solids", []):
             placement = _transform(solid["placement"], "placement")
             com = (
@@ -147,6 +158,7 @@ def derive_visual_skeleton(spec: Mapping[str, Any]) -> VisualSkeleton:
                 + placement[:3, 3]
             )
             if float(solid.get("mass_kg", 0.0)) > 0:
+                mass += float(solid["mass_kg"])
                 com_points.append(com)
                 spheres.append(
                     Sphere(
@@ -157,24 +169,35 @@ def derive_visual_skeleton(spec: Mapping[str, Any]) -> VisualSkeleton:
                         solid["name"],
                     )
                 )
-        targets = child_joints[name] or com_points
+        targets = list(child_joints[name])
+        reach = max((float(np.linalg.norm(p - start)) for p in targets), default=0.0)
+        if com_points:
+            far_com = max(com_points, key=lambda p: float(np.linalg.norm(p - start)))
+            if float(np.linalg.norm(far_com - start)) > reach:
+                targets.append(far_com)  # leaf, or a COM beyond every child joint
         if not targets:
             raise ValueError(
                 f"Body {name} has neither child joints nor a massive solid"
             )
-        far = max(targets, key=lambda p: float(np.linalg.norm(p - start)))
-        if float(np.linalg.norm(far - start)) <= 1e-9:
-            far = start + np.array(
-                [0.0, 0.0, _MIN_RADIUS_M]
-            )  # zero-extent body: a stub
-        capsules.append(
-            Capsule(
-                name,
-                tuple(start.tolist()),
-                tuple(far.tolist()),
-                capsule_radius(float(np.linalg.norm(far - start))),
+        for end in targets:
+            length = float(np.linalg.norm(end - start))
+            if length <= 1e-9:
+                continue  # child joint colocated with this body's joint
+            capsules.append(
+                Capsule(
+                    name,
+                    tuple(start.tolist()),
+                    tuple(end.tolist()),
+                    capsule_radius(mass, length),
+                )
             )
-        )
+        if not any(c.body == name for c in capsules):
+            stub = start + np.array([0.0, 0.0, _MIN_RADIUS_M])
+            capsules.append(
+                Capsule(
+                    name, tuple(start.tolist()), tuple(stub.tolist()), _MIN_RADIUS_M
+                )
+            )
     for frame in spec.get("frames", []):
         placement = _transform(frame["placement"], "placement")
         spheres.append(

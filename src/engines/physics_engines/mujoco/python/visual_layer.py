@@ -71,14 +71,14 @@ def attach_visual_layer(
     ET.SubElement(
         visual_default, "geom", contype="0", conaffinity="0", group="1", mass="0"
     )
-    for capsule in skeleton.capsules:
+    for index, capsule in enumerate(skeleton.capsules):
         offset = offsets[capsule.body]
         start = _to_mjcf_frame(offset, np.asarray(capsule.start_m))
         end = _to_mjcf_frame(offset, np.asarray(capsule.end_m))
         ET.SubElement(
             elements[capsule.body],
             "geom",
-            name=f"visual_capsule_{capsule.body}",
+            name=f"visual_capsule_{index}_{capsule.body}",
             type="capsule",
             fromto=_numbers(np.concatenate((start, end))),
             size=_numbers([capsule.radius_m]),

@@ -23,7 +23,7 @@ def test_visual_export_adds_geoms_but_keeps_physics_identical() -> None:
     assert visual.nbody == plain.nbody
     assert visual.ngeom > plain.ngeom + 20  # one capsule per body plus floor
     assert visual.nlight >= 1
-    assert visual_meta["visual_layer"]["capsules"] == plain.nbody - 1
+    assert visual_meta["visual_layer"]["capsules"] >= plain.nbody - 1
     assert visual_meta["visual_layer"]["floor"] is True
     assert "visual_layer" not in plain_meta
     # Visual geoms never collide and never contribute inertia.

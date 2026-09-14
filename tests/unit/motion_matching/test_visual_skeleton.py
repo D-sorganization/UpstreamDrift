@@ -46,7 +46,7 @@ def _synthetic_spec() -> dict:
                 "solids": [
                     {
                         "name": "arm",
-                        "mass_kg": 2.0,
+                        "mass_kg": 0.5,
                         "com_m": [0.15, 0.0, 0.0],
                         "inertia_com_kg_m2": (0.01 * np.eye(3)).tolist(),
                         "placement": np.eye(4).tolist(),
@@ -78,19 +78,68 @@ def _synthetic_spec() -> dict:
 
 def test_capsules_follow_joint_origins_and_leaves_reach_their_com() -> None:
     skeleton = module.derive_visual_skeleton(_synthetic_spec())
-    by_body = {c.body: c for c in skeleton.capsules}
-    trunk = by_body["trunk"]
+    by_body: dict[str, list] = {}
+    for c in skeleton.capsules:
+        by_body.setdefault(c.body, []).append(c)
+    (trunk,) = by_body["trunk"]
     np.testing.assert_allclose(trunk.start_m, [0, 0, 0])
     np.testing.assert_allclose(trunk.end_m, [0, 0, 0.4])
-    arm = by_body["arm"]
+    (arm,) = by_body["arm"]
     np.testing.assert_allclose(arm.start_m, [0, 0, 0])
     np.testing.assert_allclose(arm.end_m, [0.15, 0, 0])  # leaf: joint -> COM
-    assert 0.015 <= trunk.radius_m <= 0.05 and arm.radius_m < trunk.radius_m
+    # Radii follow mass and length (uniform-density cylinder), clamped.
+    assert trunk.radius_m == pytest.approx(module.capsule_radius(10.0, 0.4))
+    assert arm.radius_m == pytest.approx(module.capsule_radius(0.5, 0.15))
+    assert 0.006 <= arm.radius_m < trunk.radius_m <= 0.05
     kinds = {s.kind for s in skeleton.spheres}
     assert kinds == {"com", "frame"}
     assert any(s.kind == "frame" and s.body == "arm" for s in skeleton.spheres)
     assert skeleton.ground.normal == pytest.approx((0.0, 0.0, 1.0))
     assert skeleton.ground.height_m == 0.0 and skeleton.ground.calibrated is False
+
+
+def test_one_capsule_per_child_joint_and_extension_to_a_far_com() -> None:
+    spec = _synthetic_spec()
+    spec["bodies"].append(
+        {
+            "name": "arm2",
+            "solids": [
+                {
+                    "name": "arm2",
+                    "mass_kg": 2.0,
+                    "com_m": [0.15, 0.0, 0.0],
+                    "inertia_com_kg_m2": (0.01 * np.eye(3)).tolist(),
+                    "placement": np.eye(4).tolist(),
+                }
+            ],
+        }
+    )
+    spec["joints"].append(
+        {
+            "name": "shoulder2",
+            "parent": "trunk",
+            "child": "arm2",
+            "parent_to_base": _t([0.1, 0, 0.4]),
+            "child_to_follower": _t([0, 0, 0]),
+            "primitives": [{"primitive": "Rz", "coordinate": "arm2_rz"}],
+        }
+    )
+    spec["coordinate_order"].append("arm2_rz")
+    spec["bodies"][0]["solids"][0]["com_m"] = [0.0, 0.0, 0.9]  # head-like far COM
+    skeleton = module.derive_visual_skeleton(spec)
+    trunk = [c for c in skeleton.capsules if c.body == "trunk"]
+    ends = sorted(tuple(np.round(c.end_m, 6)) for c in trunk)
+    assert ends == [(0.0, 0.0, 0.4), (0.0, 0.0, 0.9), (0.1, 0.0, 0.4)]
+
+
+def test_capsule_radius_policy() -> None:
+    assert module.capsule_radius(0.3, 1.08) < module.capsule_radius(1.13, 0.23)
+    assert module.capsule_radius(20.0, 0.3) == 0.05
+    assert module.capsule_radius(1e-6, 1.0) == 0.006
+    with pytest.raises(ValueError):
+        module.capsule_radius(-1.0, 0.3)
+    with pytest.raises(ValueError):
+        module.capsule_radius(1.0, 0.0)
 
 
 def test_world_segments_follow_body_poses() -> None:
@@ -113,6 +162,8 @@ def test_full_body_spec_yields_a_complete_skeleton() -> None:
     skeleton = module.derive_visual_skeleton(spec)
     bodies = {b["name"] for b in spec["bodies"]} - {"world"}
     assert {c.body for c in skeleton.capsules} == bodies
+    radius = {c.body.rsplit("/", 1)[-1]: c.radius_m for c in skeleton.capsules}
+    assert radius["Clubface Vector"] < radius["LLowerForearm"] < radius["LowerTorso"]
     assert all(
         np.isfinite(c.start_m).all() and np.isfinite(c.end_m).all()
         for c in skeleton.capsules
@@ -129,7 +180,7 @@ def test_full_body_spec_yields_a_complete_skeleton() -> None:
 def test_upper_body_spec_without_contact_block_still_works() -> None:
     spec = json.loads(UPPER.read_text())
     skeleton = module.derive_visual_skeleton(spec)
-    assert len(skeleton.capsules) == len(
+    assert len(skeleton.capsules) >= len(
         [b for b in spec["bodies"] if b["name"] != "world"]
     )
 

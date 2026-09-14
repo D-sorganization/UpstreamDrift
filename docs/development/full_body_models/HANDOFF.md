@@ -154,6 +154,31 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
   playback GIF, MJCF, receipt). Steps 3 to 6 (viewer tile, cross-engine replay
   videos, OpenSim real horizon, FB-3 re-checks) are specified for lower-level
   agents in [VISUALS_HANDOFF.md](VISUALS_HANDOFF.md).
+- Capsule radius policy (user review 2026-09-13: club and segments looked
+  uniformly thick): radius of a uniform-density cylinder,
+  `sqrt(m / (pi * 1500 kg/m^3 * L))`, clamped to 6 to 50 mm, and one capsule per
+  child joint plus one to the farthest centre of mass. Club shaft 17 mm,
+  forearms 36 to 40 mm, torso and thighs 50 mm (`address_segments.json`).
+- Address-pose evidence at the returned81 candidate's q0 (the Simscape
+  qualified start, legs at zero): `address_{front,side,top}.png` with frame-0
+  capture markers (black) and native marker predictions (blue) overlaid
+  (`render_address_views.py`, frame-0 valid marker RMS 2.9e-13 m), the
+  labelled joint-to-joint Simscape skeleton `simscape_skeleton_address.png`
+  with `address_posture.json` (`render_simscape_skeleton.py`), and
+  `render_playback.py` for the default pose and playback GIF. No MATLAB is
+  runnable on DeskComputer (`C:/Program Files/MATLAB/R2025b` has no
+  `bin/matlab.exe`), so the Simscape skeleton is drawn from the ported
+  geometry whose frame parity against R2025b is receipted at 2.1e-13 m
+  (`native_frame_parity_r2025b.json`).
+- Posture facts the user should decide on (model and start pose, not
+  rendering): Simscape geometry inputs UpperArmLength 14.5 in (0.368 m) and
+  LowerArmLength 12 in (0.305 m elbow to wrist); hub to shoulder 0.254 m;
+  the hip, torso and spine joints coincide, so the pelvis-to-rod bend of
+  -16.9 deg (SpineInputX) at q0 is what the frame-0 marker fit needed; the
+  shoulders sit 0.09 m (L) and 0.19 m (R) below the hub at q0 (scapula
+  coordinates 30/-40 deg and 35/38 deg). A straight spine or higher
+  scapulae at address means refitting q0 (or re-calibrating attachments)
+  with those coordinates constrained, then re-qualifying.
 
 ## Next
 
