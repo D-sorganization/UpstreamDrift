@@ -32,7 +32,7 @@ NATIVE = Path(
     "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
 )
 HERE = Path(__file__).resolve().parent
-SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
+SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v2.json"
 
 # Simscape joint names -> the spec body whose own joint sits at that point.
 JOINTS = {
@@ -71,6 +71,7 @@ LINKS = [
     ("knee_r", "ankle_r"),
     ("knee_l", "ankle_l"),
 ]
+FRAME_SITES: dict[str, str] = {}
 UPPER_BODY_BODIES = {
     "LowerTorso", "UpperTorsoBase", "COMRod", "HubtoLS", "HubtoRS",
     "LUpperArm", "RUpperArm", "Spherical Solid", "Spherical Solid1",
@@ -84,20 +85,9 @@ def joint_points(model: mujoco.MjModel, data: mujoco.MjData) -> dict[str, np.nda
         body = model.body(model.jnt_bodyid[j]).name.rsplit("/", 1)[-1]
         anchors.setdefault(body, data.xanchor[j].copy())
     points = {label: anchors[body] for label, body in JOINTS.items()}
-    club = [
-        i for i in range(model.nbody) if model.body(i).name.endswith("Clubface Vector")
-    ]
-    spec = json.loads(SPEC.read_text())
-    body = next(b for b in spec["bodies"] if b["name"].endswith("Clubface Vector"))
-    far = max(
-        (
-            np.array(s["placement"])[:3, :3] @ np.array(s["com_m"])
-            + np.array(s["placement"])[:3, 3]
-            for s in body["solids"]
-        ),
-        key=np.linalg.norm,
-    )  # the clubhead solid sits farthest from the wrist frame
-    points["clubhead"] = data.xpos[club[0]] + data.xmat[club[0]].reshape(3, 3) @ far
+    # The spec's "Clubhead" frame is exported as a site; use it directly.
+    site = model.site(FRAME_SITES["Clubhead"]).id
+    points["clubhead"] = data.site_xpos[site].copy()
     return points
 
 
@@ -196,7 +186,8 @@ def draw(points: dict[str, np.ndarray], markers: np.ndarray, path: Path) -> None
 
 
 def main() -> None:
-    xml, _ = exporter.export_full_body_mjcf(SPEC.read_bytes(), visual=True)
+    xml, meta = exporter.export_full_body_mjcf(SPEC.read_bytes(), visual=True)
+    FRAME_SITES.update(meta["frame_sites"])
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
     candidate = json.loads((NATIVE / "returned-candidate.json").read_text())

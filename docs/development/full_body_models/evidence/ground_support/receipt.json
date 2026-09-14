@@ -1,7 +1,21 @@
 {
   "base_spec_sha256": "4f7ba8250a152c1ce5db86abf33e66b77510bd4c7c58c02f7890a86a97dd355a",
-  "hipcal_spec_file": "full_body_spec_hipcal.json",
   "spec_file": "full_body_spec_hipcal_scaled.json",
+  "hipcal_spec_file": "full_body_spec_hipcal.json",
+  "recalibrate_upper": false,
+  "anthropometric": null,
+  "posture_top_of_backswing": {
+    "spine_bend_deg": {
+      "total_deg": 21.047337914804594,
+      "forward_deg": -18.26188137457452,
+      "lateral_deg": -10.712474912090453
+    },
+    "clavicle_link_below_horizontal_deg": {
+      "L": 67.41583444065573,
+      "R": 2.8838241407934393
+    },
+    "hips_to_shoulder_centre_m": 0.608438012551459
+  },
   "spec_sha256": "1f343f6b7a20f90c87d196c31a187b7c37e881d8728be30c48b7fdb0e55ae5ee",
   "hip_calibration": {
     "spec_sha256": "3f88952e3b9457463dfa694720987bc3379c2ca9e27b4cdebbdda430284cd24d",
@@ -140,6 +154,18 @@
         "ankle_angle_l": 9.807576393304764,
         "subtalar_angle_l": 28.203519772608328,
         "mtp_angle_l": 0.0
+      },
+      "posture": {
+        "spine_bend_deg": {
+          "total_deg": 21.535753551365218,
+          "forward_deg": -7.2927308955836985,
+          "lateral_deg": 21.267970786935017
+        },
+        "clavicle_link_below_horizontal_deg": {
+          "L": 20.911464903500455,
+          "R": 46.601427110864925
+        },
+        "hips_to_shoulder_centre_m": 0.5953637352403521
       }
     }
   },
@@ -392,6 +418,6 @@
     "lowest_sphere_height_min_m": -0.016659066809826185,
     "lowest_sphere_height_max_m": 0.03355230573459598
   },
-  "elapsed_s": 66.52238139999099,
-  "qualification": "kinematic IK and computed-torque tracking milestone on the MuJoCo full-body model; not a fit, not acceptance"
+  "elapsed_s": 67.92577600001823,
+  "qualification": "kinematic IK and computed-torque tracking milestone on the MuJoCo full-body model (qualified upper body with functional hips); not a fit, not acceptance"
 }

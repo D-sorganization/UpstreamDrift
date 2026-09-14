@@ -28,6 +28,7 @@ Every number here is a milestone of a stated candidate, not acceptance.
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import logging
@@ -53,6 +54,10 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (  # noqa:
 )
 from src.engines.physics_engines.opensim.python.tour_matching.marker_calibration import (  # noqa: E402
     calibrate_marker_offsets,
+)
+from src.shared.python.motion_matching import posture_metrics as post  # noqa: E402
+from src.shared.python.motion_matching.anthropometric_candidate import (  # noqa: E402
+    anthropometric_candidate,
 )
 from src.shared.python.motion_matching.contact_law import GroundPlane  # noqa: E402
 from src.shared.python.motion_matching.full_body_spec import (  # noqa: E402
@@ -86,8 +91,12 @@ CANDIDATE = (
     / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json"
 )
 C3D = ROOT / "data/C3D_TA_Driver.c3d"
-HIPCAL_SPEC = HERE / "full_body_spec_hipcal.json"
-SCALED_SPEC = HERE / "full_body_spec_hipcal_scaled.json"
+OUT = HERE  # overridden by --out
+UP_AXIS, FORWARD_AXIS, RIGHT_AXIS = (
+    np.array([0.0, 0.0, 1.0]),
+    np.array([-1.0, 0.0, 0.0]),
+    np.array([0.0, 1.0, 0.0]),
+)
 TOE_STANDOFF_M = 0.03  # marker centre above the sole (shoe upper plus marker radius)
 # The v2 document carries heel and metatarsal-head spheres only (15 cm of
 # support); the golfer's centre of mass at address lies 3 to 6 cm ahead of
@@ -350,12 +359,13 @@ class Lane:
     def calibrate_legs(
         self, spec_bytes: bytes, upper: dict, seeds: dict, q_start: np.ndarray
     ):
-        """Alternating leg-marker calibration on the decimated frames with stance pins."""
+        """Alternating marker calibration of ``seeds`` (others fixed) with stance pins."""
         frames = self.calibration_frames
-        cols = [self.labels.index(m) for m in LEG_LABELS]
+        calibrated = tuple(seeds)
+        cols = [self.labels.index(m) for m in calibrated]
         leg_capture = TourCapture(
             time_s=self.times[frames],
-            labels=LEG_LABELS,
+            labels=calibrated,
             points_m=self.points[np.ix_(frames, cols)],
             valid=self.valid[np.ix_(frames, cols)],
         )
@@ -399,7 +409,54 @@ class Lane:
         return float(np.sqrt(np.mean(errors[self.valid[frames]] ** 2)))
 
 
+def posture_summary(kin: FullBodyMarkerKinematics, q: np.ndarray) -> dict:
+    """Spine bend and clavicle-link angles of the model at one pose."""
+    adapter = kin.adapter
+    m, d = adapter.model, adapter.data
+    kin.marker_positions(q)
+
+    def site(frame: str) -> np.ndarray:
+        return d.site_xpos[m.site(adapter.metadata["frame_sites"][frame]).id].copy()
+
+    hips = (
+        d.xanchor[m.joint("hip_flexion_r").id] + d.xanchor[m.joint("hip_flexion_l").id]
+    ) / 2
+    spine, hub = site("Spine"), site("Hub")
+    bend = post.spine_bend(spine - hips, hub - spine, UP_AXIS, FORWARD_AXIS, RIGHT_AXIS)
+    links = {}
+    for side in ("L", "R"):
+        v = site(f"{side}S") - hub
+        links[side] = float(np.degrees(np.arcsin(-v[2] / np.linalg.norm(v))))
+    return {
+        "spine_bend_deg": bend.__dict__,
+        "clavicle_link_below_horizontal_deg": links,
+        "hips_to_shoulder_centre_m": float(
+            np.linalg.norm((site("LS") + site("RS")) / 2 - hips)
+        ),
+    }
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", type=Path, default=HERE)
+    parser.add_argument(
+        "--anthropometric",
+        nargs=2,
+        type=float,
+        metavar=("STATURE_M", "MASS_KG"),
+        help="build the de Leva candidate (unqualified) before calibration",
+    )
+    parser.add_argument(
+        "--recalibrate-upper",
+        action="store_true",
+        help="calibrate the 25 upper-body offsets too (qualified offsets as prior)",
+    )
+    args = parser.parse_args()
+    global OUT
+    OUT = args.out
+    OUT.mkdir(parents=True, exist_ok=True)
+    hipcal_path = OUT / "full_body_spec_hipcal.json"
+    scaled_path = OUT / "full_body_spec_hipcal_scaled.json"
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     log = logging.getLogger("ground_support")
     t_start = time.perf_counter()
@@ -424,9 +481,26 @@ def main() -> None:
         "hip_from_opensim_pelvis"
     ]
     hip_spec = add_toe_spheres(apply_hip_calibration(base_spec, hip_cal, alignment_old))
-    validate_full_body_spec(hip_spec, upper_base)
-    HIPCAL_SPEC.write_text(json.dumps(hip_spec, indent=2, sort_keys=True) + "\n")
-    hip_bytes = HIPCAL_SPEC.read_bytes()
+    if args.anthropometric:
+        stature_m, mass_kg = args.anthropometric
+        hip_spec = anthropometric_candidate(
+            hip_spec, stature_m=stature_m, mass_kg=mass_kg
+        )
+        qualification_note = (
+            f"anthropometric candidate ({stature_m:.3f} m, {mass_kg:.1f} kg), "
+            "unqualified: upper-body lengths, masses and inertias changed"
+        )
+    else:
+        validate_full_body_spec(hip_spec, upper_base)
+        qualification_note = "qualified upper body with functional hips"
+    hipcal_path.write_text(json.dumps(hip_spec, indent=2, sort_keys=True) + "\n")
+    hip_bytes = hipcal_path.read_bytes()
+    if args.recalibrate_upper:
+        seeds_all = {**upper, **LEG_SEEDS}
+        fixed: dict = {}
+    else:
+        seeds_all = dict(LEG_SEEDS)
+        fixed = dict(upper)
     hip_report = {
         "spec_sha256": canonical_sha256(hip_spec),
         "centre_r_hip_frame_m": hip_cal.centre_r,
@@ -463,7 +537,7 @@ def main() -> None:
     }
 
     # 3. leg calibration, segment scale search, recalibration
-    offsets, calibration = lane.calibrate_legs(hip_bytes, upper, LEG_SEEDS, address.q)
+    offsets, calibration = lane.calibrate_legs(hip_bytes, fixed, seeds_all, address.q)
     scale_table = []
     best = (float("inf"), 1.0, 1.0, hip_spec)
     for femur in SCALE_GRID:
@@ -474,7 +548,7 @@ def main() -> None:
             doc = scale_segments(hip_spec, scales)
             doc_bytes = json.dumps(doc, sort_keys=True).encode()
             rms = lane.pinned_rms(
-                doc_bytes, {**upper, **scaled_offsets(offsets, femur, tibia)}, address.q
+                doc_bytes, {**fixed, **scaled_offsets(offsets, femur, tibia)}, address.q
             )
             scale_table.append({"femur": femur, "tibia": tibia, "pinned_rms_m": rms})
             log.info(
@@ -486,13 +560,14 @@ def main() -> None:
             if rms < best[0]:
                 best = (rms, femur, tibia, doc)
     _, femur_scale, tibia_scale, scaled_spec = best
-    validate_full_body_spec(scaled_spec, upper_base)
-    SCALED_SPEC.write_text(json.dumps(scaled_spec, indent=2, sort_keys=True) + "\n")
-    spec_bytes = SCALED_SPEC.read_bytes()
+    if not args.anthropometric:
+        validate_full_body_spec(scaled_spec, upper_base)
+    scaled_path.write_text(json.dumps(scaled_spec, indent=2, sort_keys=True) + "\n")
+    spec_bytes = scaled_path.read_bytes()
     offsets, calibration2 = lane.calibrate_legs(
-        spec_bytes, upper, scaled_offsets(offsets, femur_scale, tibia_scale), address.q
+        spec_bytes, fixed, scaled_offsets(offsets, femur_scale, tibia_scale), address.q
     )
-    attachments = {**upper, **offsets}
+    attachments = {**fixed, **offsets}
     adapter, kin = lane.kinematics(spec_bytes, attachments)
     sim = fs.FullBodySimulator(adapter)
     address2 = lane.best_address(kin, address.q)
@@ -510,6 +585,7 @@ def main() -> None:
             name: float(np.degrees(address2.q[kin.coordinate_order.index(name)]))
             for name in kin.coordinate_order[adapter.upper_body_coordinates :]
         },
+        "posture": posture_summary(kin, address2.q),
     }
 
     # 4. full IK, smoothing, consistency re-solve
@@ -596,7 +672,7 @@ def main() -> None:
         },
     }
     np.savez(
-        HERE / "ik_trajectory.npz",
+        OUT / "ik_trajectory.npz",
         time_s=lane.times,
         q=q_ik,
         q_ref=q_ref,
@@ -677,7 +753,7 @@ def main() -> None:
         "lowest_sphere_height_max_m": float(record.lowest_sphere_height_m.max()),
     }
     np.savez(
-        HERE / "dynamics_record.npz",
+        OUT / "dynamics_record.npz",
         time_s=record.time_s,
         q=record.q,
         v=record.v,
@@ -691,13 +767,16 @@ def main() -> None:
     )
     lookat = np.nanmean(lane.points[0], axis=0)
     names = tuple(kin.coordinate_order)
-    render_playback(spec_bytes, names, q_ref, lookat, HERE / "ik_playback.gif")
-    render_playback(spec_bytes, names, sim_q, lookat, HERE / "tracking_playback.gif")
+    render_playback(spec_bytes, names, q_ref, lookat, OUT / "ik_playback.gif")
+    render_playback(spec_bytes, names, sim_q, lookat, OUT / "tracking_playback.gif")
 
     receipt = {
         "base_spec_sha256": canonical_sha256(base_spec),
-        "hipcal_spec_file": HIPCAL_SPEC.name,
-        "spec_file": SCALED_SPEC.name,
+        "spec_file": scaled_path.name,
+        "hipcal_spec_file": hipcal_path.name,
+        "recalibrate_upper": bool(args.recalibrate_upper),
+        "anthropometric": list(args.anthropometric) if args.anthropometric else None,
+        "posture_top_of_backswing": posture_summary(kin, q_ref[int(0.83 * RATE_HZ)]),
         "spec_sha256": hashlib.sha256(spec_bytes).hexdigest(),
         "hip_calibration": hip_report,
         "candidate_sha256": hashlib.sha256(CANDIDATE.read_bytes()).hexdigest(),
@@ -722,10 +801,10 @@ def main() -> None:
         "elapsed_s": time.perf_counter() - t_start,
         "qualification": (
             "kinematic IK and computed-torque tracking milestone on the MuJoCo "
-            "full-body model; not a fit, not acceptance"
+            f"full-body model ({qualification_note}); not a fit, not acceptance"
         ),
     }
-    (HERE / "receipt.json").write_text(
+    (OUT / "receipt.json").write_text(
         json.dumps(receipt, indent=2, default=float) + "\n"
     )
     log.info(

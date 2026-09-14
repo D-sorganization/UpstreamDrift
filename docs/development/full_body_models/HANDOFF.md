@@ -254,8 +254,32 @@ montages), spec SHA in the receipt:
   help (receipted in the session, not adopted). Joint bounds are the
   Rajagopal ranges widened 2x because the hip zero twist is not calibrated.
 
+## Anthropometry and Posture Review (User Direction 2026-09-14)
+
+The user asked why the torso looks arched at address and how the body
+dimensions were determined. Answer in
+[evidence/anthropometry/REVIEW.md](evidence/anthropometry/REVIEW.md) with
+`receipt.json` (`review_anthropometry.py`): the golfer's markers show a hip
+hinge with a modest trunk lean, no spinal arch; the model's bend is a 7 deg
+extension plus a 21 deg side bend at its only trunk joint, which sits at the
+base of the neck 0.515 m above the hips, with the hub 0.14 m above the
+shoulder centre so the clavicle links point 21 and 47 deg downward. Upper
+arms are 33 % and forearms 15 % too long, the trunk-plus-head 70 % too heavy
+(model 108 kg versus about 78 kg). Shared modules added: `anthropometry.py`
+(de Leva table, transcribed, verify against the paper before qualification),
+`posture_metrics.py`, `anthropometric_candidate.py` (de Leva lengths,
+masses and inertias on the current topology; unqualified). The candidate
+run (`ground_support/candidate_anthro/`) shows scaling alone makes the fit
+worse (48 mm), so the trunk topology must change; section 8 of the review
+is the ready-to-file child issue. The driver `run_ground_support.py` gained
+`--anthropometric`, `--recalibrate-upper`, `--out` and posture metrics in
+its receipt.
+
 ## Next
 
+- AN-1: file and execute "Anthropometric native geometry v2" (review
+  section 8): pelvis, trunk to the shoulder centre, hub at the shoulders,
+  de Leva masses; then Simscape update and R2025b parity.
 - GS-4: the downswing needs a dynamically consistent reference or the FB-5
   contact-aware shooting fit; candidates in order: stance timing from the
   reference contact forces instead of marker heights, a hip zero-twist
