@@ -1,0 +1,38 @@
+{
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "qualification": "independent_r2025b_cold_replay_returned86",
+  "candidate_sha256": "fb8fab9352ba83dbe1b862eb0804c7f7f57201c3116f473acb5fdfe668ae44d5",
+  "duration_s": 0.85,
+  "n_samples": 307,
+  "elapsed_s": 14.9570722,
+  "metrics": {
+    "whole_rms_m": 0.91005226421556773,
+    "whole_rms_mm": 910.05226421556767,
+    "early_rms_m": 0.64086636831691357,
+    "early_rms_mm": 640.86636831691362,
+    "terminal_rms_m": 1.8319556015173206,
+    "terminal_rms_mm": 1831.9556015173207,
+    "club_cluster_rms_m": 1.8404159187647693,
+    "club_cluster_rms_mm": 1840.4159187647692,
+    "pelvis_yaw_error_pct": 16.414527838816774
+  },
+  "pinocchio_metrics": {
+    "whole_rms_m": 0.022351978510836715,
+    "early_rms_m": 0.010723567451166371,
+    "terminal_rms_m": 0.040141224776338608,
+    "club_cluster_rms_m": 0.0071238589201724984,
+    "pelvis_yaw_error_pct": 15.125243900548849
+  },
+  "cross_engine_parity": {
+    "max_marker_difference_m": 2.1517878317555659,
+    "mean_marker_difference_m": 0.34205112794545217
+  },
+  "gates": {
+    "gate1_whole_rms_25mm": false,
+    "gate2_early_rms_12mm": false,
+    "gate3_terminal_rms_35mm": false,
+    "gate4_clubhead_60mm": false,
+    "gate5_pelvis_yaw_5pct": false
+  }
+}
