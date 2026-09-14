@@ -8,13 +8,13 @@ worker. Use [Handoff PR #10144](https://github.com/D-sorganization/UpstreamDrift
 or its merged contents; never infer that the complete
 ST-01 scientific qualification has passed.
 
-| Packet | Issue                                                                   | Readiness                                        | Allowed Work                                                    |
-| ------ | ----------------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------- |
-| A      | [#10137](https://github.com/D-sorganization/UpstreamDrift/issues/10137) | Implemented in Packet A Topic Branch             | SourceAsset, FrameIdentity, sequence validation                 |
-| C      | [#10139](https://github.com/D-sorganization/UpstreamDrift/issues/10139) | Ready After This Handoff Lands; Independent of A | Convert existing camera types with explicit direction           |
-| B      | [#10138](https://github.com/D-sorganization/UpstreamDrift/issues/10138) | Ready After Packet A Merges                      | Immutable binary masks, correction lineage and content identity |
-| D      | [#10140](https://github.com/D-sorganization/UpstreamDrift/issues/10140) | Specialist Review Required                       | Fix IK coordinate packing, then regenerate invalidated evidence |
-| E      | [#10141](https://github.com/D-sorganization/UpstreamDrift/issues/10141) | Specialist Review Required                       | Separate production closure units and acceptance status         |
+| Packet | Issue                                                                   | Readiness                                                                               | Allowed Work                                                    |
+| ------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| A      | [#10137](https://github.com/D-sorganization/UpstreamDrift/issues/10137) | Implemented in [PR #10145](https://github.com/D-sorganization/UpstreamDrift/pull/10145) | SourceAsset, FrameIdentity, sequence validation                 |
+| C      | [#10139](https://github.com/D-sorganization/UpstreamDrift/issues/10139) | Ready After This Handoff Lands; Independent of A                                        | Convert existing camera types with explicit direction           |
+| B      | [#10138](https://github.com/D-sorganization/UpstreamDrift/issues/10138) | Ready After Packet A Merges                                                             | Immutable binary masks, correction lineage and content identity |
+| D      | [#10140](https://github.com/D-sorganization/UpstreamDrift/issues/10140) | Specialist Review Required                                                              | Fix IK coordinate packing, then regenerate invalidated evidence |
+| E      | [#10141](https://github.com/D-sorganization/UpstreamDrift/issues/10141) | Specialist Review Required                                                              | Separate production closure units and acceptance status         |
 
 A and C can be assigned to separate agents because they have disjoint source
 files. Serialize façade changes or let the integration reviewer reconcile those
