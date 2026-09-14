@@ -28,7 +28,7 @@ from src.shared.python.motion_matching.full_body_spec import (
 )
 
 
-def _order_full_body_joints(spec: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _order_full_body_joints(spec: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     """Sequence joints with upper-body tree first, then lower limb chains."""
     upper_spec = upper_body_slice(spec)
     upper_joint_names = {j["name"] for j in upper_spec["joints"]}

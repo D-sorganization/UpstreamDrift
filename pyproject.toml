@@ -630,6 +630,13 @@ module = [
 follow_imports = "skip"
 
 [[tool.mypy.overrides]]
+module = [
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.*",
+]
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
 module = "src.shared.python.gui_pkg.draggable_tabs"
 follow_imports = "silent"
 

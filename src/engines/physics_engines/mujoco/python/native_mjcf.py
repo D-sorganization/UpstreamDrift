@@ -101,7 +101,7 @@ def _add_weld_equality(
 def _attach_joint_element(
     parent_element: ET.Element,
     child_body: dict[str, Any],
-    joint: dict[str, Any],
+    joint: Mapping[str, Any],
     parent_offset: np.ndarray,
     coordinates: list[str],
 ) -> tuple[ET.Element, np.ndarray]:
