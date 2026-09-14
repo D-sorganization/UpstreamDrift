@@ -1,5 +1,24 @@
 # SPEC.md — Repository Specification Document
 
+## Pinocchio Full-Body Model Builder With Shared Ground Contact (FB-3-P, #10065)
+
+Implement full-body Pinocchio model builder with lower limbs and shared ground contact forces under Epic #10062:
+- Full-Body Model Builder (`src/engines/physics_engines/pinocchio/python/native_model.py`):
+  - `FullBodyPinocchioModel`: Extends `NativePinocchioModel` without modifying the base qualified model or geometry specification (`native_geometry_spec_9967.json`).
+  - Consumes `full_body_spec_v1.json` (41 coordinates, 24 bodies, 23 joints, 4 foot contact spheres, weld loop closure).
+  - Registers foot contact spheres as operational frames on the Pinocchio model before data initialization.
+  - Implements `contact_forces(coordinates, rates)` evaluating the shared regularised contact law (`sphere_ground_contact` from `src.shared.python.motion_matching.contact_law`).
+  - Implements `accelerations(coordinates, rates, primitive_efforts)` projecting 3D spatial contact forces into generalized torques $\tau_{\text{contact}} = \sum J^T F_{\text{contact}}$ and injecting into `pin.constraintDynamics(...)` while retaining the weld closure constraint solver.
+  - Implements `upper_body_model()` and `mass_matrix(...)` for slice extraction and parity verification.
+  - `build_full_body_pinocchio_model`: Factory constructor consuming the full-body specification.
+- Verification & ControlTower Execution (`docs/development/full_body_models/evidence/fb3_pinocchio/`):
+  - Driver `verify_pinocchio_full_body.py` and cryptographic receipt `receipt.json`.
+  - Gate (a): Upper-body slice reproduces qualified model mass matrix and forward kinematics to $< 10^{-12}$ at random states.
+  - Gate (b): Full-body FK reproduces spec upper frames to $< 10^{-12}$ at random states.
+  - Gate (c): Contact forces at analytic neutral and penetrating states equal FB-2 reference values to $< 10^{-12}$.
+  - Gate (d): Weld loop closure residuals unchanged on the upper-body chain to $< 10^{-12}$.
+  - Forward accelerations with contact forces and weld constraints produce finite values and bounded closure errors.
+
 ## OpenSim Tour Matching Unified CLI, Visualization, and Handoff (#10003)
 
 Implement unified command-line interface, headless visualization reporting, and cryptographic reproduction package for the OpenSim tour matching program:
