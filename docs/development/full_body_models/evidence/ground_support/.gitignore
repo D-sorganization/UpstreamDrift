@@ -1,3 +1,7 @@
 *_log.txt
 anthro_driver_fit/*
 !anthro_driver_fit/receipt.json
+anthro_driver_zmp/*
+!anthro_driver_zmp/receipt.json
+anthro_iron_zmp/*
+!anthro_iron_zmp/receipt.json

@@ -76,6 +76,10 @@ from src.shared.python.motion_matching.ground_support import (  # noqa: E402
     calibrate_ground_height,
     capture_to_native_world,
 )
+from src.shared.python.motion_matching.dynamics_filter import (  # noqa: E402
+    cart_table_shift,
+    project_inside,
+)
 from src.shared.python.motion_matching.closure_fit import (  # noqa: E402
     closure_residual,
     fit_closure_placement,
@@ -154,6 +158,12 @@ ADDRESS_SEEDS_DEG = [
 STANCE_TOLERANCE_M = 0.02  # marker within this height of its address height: on ground
 REFERENCE_CUTOFF_HZ = 12.0  # zero-phase low-pass on the IK reference before tracking
 TRACKING_CUTOFF_HZ = 12.0  # second zero-phase low-pass on the re-solved reference for the dynamics (MM-7)
+# Dynamics filter (MM-7b): the tracked reference is re-solved with its
+# centre-of-mass path shifted by the cart-table correction until the
+# zero-moment point stays inside the support polygon with this margin.
+ZMP_MARGIN_M = 0.02
+ZMP_FILTER_ITERATIONS = 3
+ZMP_COM_WEIGHT = 200.0  # weight of the centre-of-mass rows in the re-solve
 CONSISTENCY_PRIOR = 0.1  # weight pulling the re-solve toward the smoothed reference
 CALIBRATION_STRIDE = 6
 STATIC_FRAMES = 24  # first 0.067 s of address treated as the static trial
@@ -721,6 +731,93 @@ def wrist_bounds() -> dict[str, tuple[float, float]]:
     }
 
 
+def zmp_summary(zmp: dict, times: np.ndarray) -> dict:
+    """Receipt lines for a ``reference_zmp`` result."""
+    window = (times >= 1.0) & (times < 1.5)
+    return {
+        "outside_fraction": float((zmp["outside_m"] > 0).mean()),
+        "outside_fraction_1s_to_1_5s": float((zmp["outside_m"][window] > 0).mean()),
+        "outside_max_m": float(zmp["outside_m"].max()),
+        "outside_mean_m": float(zmp["outside_m"].mean()),
+        "unloaded_fraction": float(zmp["unloaded"].mean()),
+    }
+
+
+def zmp_filter(
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    sim: fs.FullBodySimulator,
+    q_track: np.ndarray,
+    zmp: dict,
+    log: logging.Logger,
+) -> tuple[np.ndarray, dict, dict]:
+    """Dynamics filter on the tracked reference (MM-7b).
+
+    Each pass projects the reference zero-moment point into the per-frame
+    support polygon shrunk by ``ZMP_MARGIN_M``, finds the smallest smooth
+    centre-of-mass shift whose cart-table effect closes the gap, re-solves
+    the IK against the markers with the shifted centre-of-mass path as
+    per-frame rows (the previous reference as prior, stance planted), and
+    low-passes the result again. Postcondition: the returned reference keeps
+    the closure and stance constraints of the consistency re-solve; the
+    report carries every pass's zero-moment-point summary and marker error.
+    """
+    basis = kin._plane_basis(lane.ground)
+    passes = []
+    report = {
+        "margin_m": ZMP_MARGIN_M,
+        "com_weight": ZMP_COM_WEIGHT,
+        "before": zmp_summary(zmp, lane.times),
+    }
+    for k in range(ZMP_FILTER_ITERATIONS):
+        target = np.array(
+            [
+                project_inside(point, hull, ZMP_MARGIN_M) if not unloaded else point
+                for point, hull, unloaded in zip(
+                    zmp["zmp_xy"], zmp["hull_xy"], zmp["unloaded"], strict=True
+                )
+            ]
+        )
+        heights = zmp["com"][:, 2] - lane.ground.height_m
+        shift = cart_table_shift(zmp["zmp_xy"], target, heights, lane.times)
+        com_goal = zmp["com"][:, :2] + shift  # world xy; plane basis is xy here
+        goals = [(basis @ np.r_[g, 0.0], ZMP_COM_WEIGHT) for g in com_goal]
+        q_new, fits = kin.solve_trajectory(
+            lane.points,
+            lane.valid,
+            q_track[0],
+            ground=lane.ground,
+            prior_weight=CONSISTENCY_PRIOR,
+            iterations=30,
+            flat_feet_per_frame=lane.stance,
+            plant_stance=True,
+            prior_trajectory=q_track,
+            bounds=lane.bounds,
+            com_targets_per_frame=goals,
+        )
+        q_track = smooth_reference(q_new, RATE_HZ, TRACKING_CUTOFF_HZ)
+        zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+        errors = marker_errors(kin, q_track, lane.points)
+        passes.append(
+            {
+                "pass": k + 1,
+                "com_shift_max_m": float(np.linalg.norm(shift, axis=1).max()),
+                "marker_rms_m": float(np.sqrt(np.mean(errors[lane.valid] ** 2))),
+                "closure_error_max_m": float(max(f.closure_error_m for f in fits)),
+                **zmp_summary(zmp, lane.times),
+            }
+        )
+        log.info(
+            "zmp filter pass %d: com shift max %.1f mm, markers %.1f mm, zmp outside "
+            "%.2f (1.0-1.5 s %.2f), max %.0f mm",
+            k + 1, passes[-1]["com_shift_max_m"] * 1e3, passes[-1]["marker_rms_m"] * 1e3,
+            passes[-1]["outside_fraction"], passes[-1]["outside_fraction_1s_to_1_5s"],
+            passes[-1]["outside_max_m"] * 1e3,
+        )  # fmt: skip
+    report["passes"] = passes
+    return q_track, zmp, report
+
+
 def fit_closure_from_address(
     lane: Lane, kin: FullBodyMarkerKinematics, document: dict, q_start: np.ndarray
 ) -> tuple[dict, dict]:
@@ -874,6 +971,13 @@ def main() -> None:
         action="store_true",
         help="leave the wrists and forearms unbounded (flagged only) even for a "
         "document with a fitted grip rotation, e.g. to feed fit_grip_rotation.py",
+    )
+    parser.add_argument(
+        "--zmp-filter",
+        action="store_true",
+        help="dynamics-filter the tracked reference (MM-7b): shift its "
+        "centre-of-mass path so the zero-moment point stays inside the "
+        "support polygon, re-solving the IK with centre-of-mass rows",
     )
     parser.add_argument(
         "--static-seeds",
@@ -1181,6 +1285,9 @@ def main() -> None:
     # tracked reference is the re-solved one low-passed once more (MM-7).
     q_track = smooth_reference(q_ref, RATE_HZ, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+    zmp_filter_report: dict | None = None
+    if args.zmp_filter:
+        q_track, zmp, zmp_filter_report = zmp_filter(lane, kin, sim, q_track, zmp, log)
     q0 = fs.preload_feet(sim, q_track[0])
     v0 = np.gradient(q_track, lane.times, axis=0)[0]
     controller = fs.tracking_controller(
@@ -1212,6 +1319,7 @@ def main() -> None:
             "tracking_cutoff_hz": TRACKING_CUTOFF_HZ,
         },
         "contact_parameters": adapter.contact_parameters.as_document(),
+        "zmp_filter": zmp_filter_report,
         "reference_zmp": {
             "description": "zero-moment point the tracked reference demands "
             "of this model against the support polygon of the spheres on the "

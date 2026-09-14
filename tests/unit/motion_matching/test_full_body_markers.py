@@ -490,3 +490,55 @@ def test_closure_rotation_weight_can_release_the_grip_orientation(
     assert rows == []
     with pytest.raises(ValueError):
         kinematics._append_closure([], [], 1e2, -1.0)
+
+
+def test_com_target_rows_pull_the_centre_of_mass(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    kin = kinematics
+    spheres = list(kin._spheres)
+    ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
+    q0 = np.zeros(len(kin.coordinate_order))
+    before = kin.com_plane_position(q0, ground)
+    goal = before + np.array([0.03, -0.02])
+    fit = kin.solve_pose(
+        np.full((len(kin.labels), 3), np.nan),
+        np.zeros(len(kin.labels), dtype=bool),
+        q0,
+        ground=ground,
+        flat_feet=True,
+        prior_weight=1e-3,
+        com_target=(goal, 500.0),
+        iterations=80,
+    )
+    after = kin.com_plane_position(fit.q, ground)
+    assert np.linalg.norm(after - goal) < np.linalg.norm(before - goal) * 0.5
+    assert np.linalg.norm(after - before) > 0.01
+    with pytest.raises(ValueError):
+        kin.solve_pose(
+            np.full((len(kin.labels), 3), np.nan),
+            np.zeros(len(kin.labels), dtype=bool),
+            q0,
+            ground=ground,
+            flat_feet=True,
+            com_target=(goal, -1.0),
+        )
+    traj, _ = kin.solve_trajectory(
+        np.full((2, len(kin.labels), 3), np.nan),
+        np.zeros((2, len(kin.labels)), dtype=bool),
+        q0,
+        ground=ground,
+        flat_feet_per_frame=[spheres, spheres],
+        prior_weight=1e-3,
+        com_targets_per_frame=[None, (goal, 50.0)],
+        iterations=20,
+    )
+    assert traj.shape[0] == 2
+    with pytest.raises(ValueError):
+        kin.solve_trajectory(
+            np.full((2, len(kin.labels), 3), np.nan),
+            np.zeros((2, len(kin.labels)), dtype=bool),
+            q0,
+            ground=ground,
+            com_targets_per_frame=[None],
+        )

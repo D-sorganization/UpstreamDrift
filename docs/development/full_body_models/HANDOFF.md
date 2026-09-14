@@ -415,6 +415,17 @@ marker RMS 74.6 mm; 7-iron root 31 (to 1.5 s; 133 at 1.75 s in the follow-throug
 outside the feet on 77 % of the downswing frames: the remaining
 3 to 4 cm is the reference, not the controller. Details REVIEW.md 15.
 
+### Cart-Table Dynamics Filter Tried (MM-7B, Not Adopted, 2026-09-14)
+
+`src/shared/python/motion_matching/dynamics_filter.py`, centre-of-mass rows
+in the marker solver (`com_target`, `com_targets_per_frame`) and the driver's
+`--zmp-filter` implement the cart-table zero-moment-point correction. On the
+driver it moves the centre of mass 112 to 278 mm, raises the reference's
+marker error from 27 to 98 mm and makes the replay worse (497 mm); the
+excursions come from the arm-club angular momentum the cart table ignores.
+Kept as an experiment (`anthro_driver_zmp/receipt.json`); MM-7b now means a
+whole-body shooting fit (FB-5). Details REVIEW.md 15.
+
 ### How to Continue (Read This First)
 
 1. Run the pipeline from the launcher tile "Motion Matching" or

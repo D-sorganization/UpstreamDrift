@@ -604,7 +604,8 @@ def reference_zmp(
     spheres within ``contact_tolerance_m`` of the plane at that frame (all
     spheres when fewer than three touch). Returns arrays over frames:
     ``zmp_xy``, ``com``, ``grf_over_weight`` (3), ``outside_m`` (distance
-    outside the hull, zero inside) and ``unloaded`` (vertical reaction below
+    outside the hull, zero inside), ``hull_xy`` (an object array of the
+    per-frame support vertices) and ``unloaded`` (vertical reaction below
     ``min_load_fraction`` of the weight: the reference is near free fall and
     its zero-moment point is meaningless; ``outside_m`` is zero there). A
     loaded frame outside cannot be realised by any unilateral foot contact,
@@ -651,6 +652,7 @@ def reference_zmp(
     grf = np.empty((frames, 3))
     outside = np.empty(frames)
     unloaded = np.zeros(frames, dtype=bool)
+    hulls = np.empty(frames, dtype=object)
     sphere_names = list(adapter._spheres)
     for k in range(frames):
         c0, p0, l0 = momentum(ref[k], velocity[k])
@@ -679,10 +681,12 @@ def reference_zmp(
         grf[k] = reaction / (mass * g)
         unloaded[k] = float(reaction @ n) < min_load_fraction * mass * g
         outside[k] = 0.0 if unloaded[k] else _distance_outside(point[:2], hull)
+        hulls[k] = hull.copy()
     return {
         "zmp_xy": zmp,
         "com": com,
         "grf_over_weight": grf,
         "outside_m": outside,
         "unloaded": unloaded,
+        "hull_xy": hulls,
     }

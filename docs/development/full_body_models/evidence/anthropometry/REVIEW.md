@@ -712,15 +712,38 @@ torque 835 N m. The softer sole costs a little backswing sway
 untouched (the contact law is in the shared document): Drake 5.9e-06 m
 driver, 5.4e-06 m 7-iron.
 
+### Cart-Table Dynamics Filter (MM-7B Experiment, Not Adopted)
+
+`dynamics_filter.py` (model-free: `project_inside`, `cart_table_shift`)
+and the driver's `--zmp-filter` implement the Kagami-style correction:
+project the reference zero-moment point into the per-frame support polygon
+shrunk by 2 cm, find the smallest smooth centre-of-mass shift whose
+cart-table effect closes the gap, re-solve the IK against the markers with
+that centre-of-mass path as per-frame rows (`solve_pose(com_target=...)`,
+`solve_trajectory(com_targets_per_frame=...)`), low-pass, repeat. On the
+driver (`ground_support/anthro_driver_zmp/receipt.json`) three passes take
+the zero-moment point outside the polygon from 77 % to 62 %, 57 % and 57 %
+of the downswing frames while the centre-of-mass shift grows to 112, 160
+and 278 mm, the reference's marker error rises from 27 to 38, 55 and 98 mm,
+and the replay is worse than without the filter (root error 129 mm at
+1.4 s, 497 mm at 1.75 s; 7-iron 337 mm at 1.4 s, `anthro_iron_zmp/receipt.json`). Verdict: the single-mass cart-table relation
+cannot describe this reference. Its zero-moment-point excursions are driven
+by the angular momentum of the arms and club (the term the cart table
+ignores), so the centre of mass would have to move tens of centimetres to
+compensate, which the markers forbid. A consistent motion needs the
+upper-body swing itself to change, not the centre-of-mass path. The flag
+stays available as an experiment with its receipt.
+
 ### What Remains, Next Step MM-7B
 
 The reference is still not dynamically consistent for this model (zero-moment
-point outside on 77 % of the downswing frames), so the replay
-follows it to within 3 to 4 cm at the pelvis rather than exactly. The next
-step is a dynamics filter on the reference: shift the centre-of-mass
-trajectory by the cart-table relation (delta zmp = delta c - z_c / g
-delta c'') until the zero-moment point stays inside the support polygon
-with a margin, then re-solve the IK with per-frame centre-of-mass rows so
-the markers move as little as possible (Kagami-style preview correction).
-`reference_zmp` provides the constraint; the IK already has centre-of-mass
-rows for the address (`_append_balance`).
+point outside on 77 % of the downswing frames), so the replay follows it to
+within 3 to 4 cm at the pelvis rather than exactly. The next step is a
+whole-body formulation rather than a centre-of-mass filter: the FB-5
+contact-aware shooting fit (optimise the tracked reference of every
+coordinate under the replay's own contact dynamics so that the marker error
+of the replayed motion is minimised, with the zero-moment point as a
+penalty), or an equivalent trajectory optimisation over the angular
+momentum of the arm-club system. `reference_zmp` and the downswing
+experiment harness provide the metrics; the 38 mm root error of the
+compliant-sole replay is the baseline to beat.

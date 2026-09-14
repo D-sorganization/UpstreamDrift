@@ -231,8 +231,13 @@ class FullBodyMarkerKinematics:
         prior_weights: Mapping[str, float] | None = None,
         axis_targets: Mapping[str, tuple[Sequence[float], Sequence[float], float]]
         | None = None,
+        com_target: tuple[Sequence[float], float] | None = None,
     ) -> PoseFit:
         """Least-squares pose for one frame of marker targets.
+
+        ``com_target`` is ``(xy, weight)``: the whole-body centre of mass is
+        pulled toward that point in the ground plane (the dynamics filter's
+        shifted centre-of-mass path).
 
         ``marker_weights`` (label -> nonnegative weight, default 1) scales a
         marker's rows in the least squares; a zero weight drops the marker
@@ -277,6 +282,14 @@ class FullBodyMarkerKinematics:
             raise ValueError("Iterations must be positive and weights nonnegative")
         if balance_weight < 0:
             raise ValueError("Iterations must be positive and weights nonnegative")
+        com_goal: tuple[Array, float] | None = None
+        if com_target is not None:
+            goal = np.asarray(com_target[0], dtype=float)
+            if goal.shape != (2,) or not np.isfinite(goal).all() or com_target[1] < 0:
+                raise ValueError(
+                    "com_target needs a finite plane point and weight >= 0"
+                )
+            com_goal = (goal, float(com_target[1]))
         sqrt_marker = np.ones(len(self.labels))
         for label, weight in (marker_weights or {}).items():
             if label not in self.labels:
@@ -325,6 +338,7 @@ class FullBodyMarkerKinematics:
             self._append_ground(rows, jacs, ground, ground_weight, pinned)
             self._append_anchors(rows, jacs, planted, ground_weight)
             self._append_balance(rows, jacs, ground, balance_weight)
+            self._append_com_target(rows, jacs, ground, com_goal)
             self._append_axes(rows, jacs, axes)
             return np.concatenate(rows), np.concatenate(jacs)[:, free]
 
@@ -553,6 +567,38 @@ class FullBodyMarkerKinematics:
         rows.append(w * basis @ (com - centres))
         jacs.append(w * (basis @ (jac_com - jac_centres))[:, self._dof])
 
+    def _append_com_target(
+        self,
+        rows: list[Array],
+        jacs: list[Array],
+        ground: GroundPlane,
+        goal: tuple[Array, float] | None,
+    ) -> None:
+        if goal is None or goal[1] <= 0:
+            return
+        basis = self._plane_basis(ground)
+        nv = self.model.nv
+        self._mj.mj_comPos(self.model, self.data)
+        jac_com = np.zeros((3, nv))
+        self._mj.mj_jacSubtreeCom(self.model, self.data, jac_com, 1)
+        com = self.data.subtree_com[1].copy()
+        w = np.sqrt(goal[1])
+        rows.append(w * (basis @ com - goal[0]))
+        jacs.append(w * (basis @ jac_com)[:, self._dof])
+
+    @staticmethod
+    def _plane_basis(ground: GroundPlane) -> Array:
+        """Two orthonormal in-plane axes (rows) of the ground plane."""
+        n = np.asarray(ground.normal, dtype=float)
+        n = n / np.linalg.norm(n)
+        return np.asarray(np.linalg.svd(np.eye(3) - np.outer(n, n))[0][:, :2].T)
+
+    def com_plane_position(self, q: Array, ground: GroundPlane) -> Array:
+        """Centre of mass expressed on the plane basis of ``_plane_basis``."""
+        self._set(q)
+        self._mj.mj_comPos(self.model, self.data)
+        return np.asarray(self._plane_basis(ground) @ self.data.subtree_com[1])
+
     def support_offset(self, q: Array, ground: GroundPlane) -> float:
         """Distance in the ground plane from the CoM to the sphere centroid at ``q``."""
         self._set(q)
@@ -582,9 +628,14 @@ class FullBodyMarkerKinematics:
         restart_spread_rad: float = 0.5,
         restart_margin_m: float = 0.0,
         axis_targets_per_frame: Sequence[Mapping[str, Any] | None] | None = None,
+        com_targets_per_frame: Sequence[tuple[Sequence[float], float] | None]
+        | None = None,
         **options: Any,
     ) -> tuple[Array, list[PoseFit]]:
         """Solve consecutive frames, each warm-started from the previous one.
+
+        ``com_targets_per_frame`` gives every capture frame its own
+        ``com_target`` (or None).
 
         A frame whose fit stays above ``restart_threshold_m`` is re-solved
         ``restarts`` more times from the start pose with the non-root
@@ -627,6 +678,11 @@ class FullBodyMarkerKinematics:
             and len(axis_targets_per_frame) != targets.shape[0]
         ):
             raise ValueError("axis_targets_per_frame needs one entry per capture frame")
+        if (
+            com_targets_per_frame is not None
+            and len(com_targets_per_frame) != targets.shape[0]
+        ):
+            raise ValueError("com_targets_per_frame needs one entry per capture frame")
         rng = np.random.default_rng(0)
         q = np.asarray(q_init, dtype=float)
         fits: list[PoseFit] = []
@@ -643,6 +699,8 @@ class FullBodyMarkerKinematics:
             frame_options = dict(options)
             if axis_targets_per_frame is not None:
                 frame_options["axis_targets"] = axis_targets_per_frame[k]
+            if com_targets_per_frame is not None:
+                frame_options["com_target"] = com_targets_per_frame[k]
             fit = self.solve_pose(
                 targets[k],
                 mask[k],
