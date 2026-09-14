@@ -180,6 +180,19 @@ class RolloutOptions:
     normalize_time: bool = False
 
 
+def _slice_capture(capture: TourCapture, n_frames: int) -> TourCapture:
+    """Return capture truncated to n_frames if sub-horizon rollout."""
+    if capture.frames == n_frames:
+        return capture
+    return TourCapture(
+        time_s=capture.time_s[:n_frames] - capture.time_s[0],
+        labels=capture.labels,
+        points_m=capture.points_m[:n_frames],
+        valid=capture.valid[:n_frames],
+        source_sha256=capture.source_sha256,
+    )
+
+
 def _build_failed_rollout(
     times: Array,
     n_coords: int,
@@ -188,14 +201,15 @@ def _build_failed_rollout(
 ) -> ForwardRolloutResult:
     """Construct a fallback ForwardRolloutResult when numerical integration fails."""
     n_frames = len(times)
-    zero_markers = np.zeros((n_frames, len(capture.labels), 3), dtype=np.float64)
+    eval_cap = _slice_capture(capture, n_frames)
+    zero_markers = np.zeros((n_frames, len(eval_cap.labels), 3), dtype=np.float64)
     return ForwardRolloutResult(
         time_s=times,
         q=np.zeros((n_frames, n_coords)),
         qd=np.zeros((n_frames, n_coords)),
         predicted_markers_m=zero_markers,
         shared_metrics=compute_shared_metrics(
-            capture=capture,
+            capture=eval_cap,
             predicted_points_m=zero_markers,
             tracked_labels=list(marker_offsets.keys()),
         ),
@@ -215,13 +229,14 @@ def _assemble_rollout_result(
     q_traj, qd_traj, pred_m, samples, err, status = data
     if status != "success":
         return _build_failed_rollout(times, q_traj.shape[1], capture, marker_offsets)
+    eval_cap = _slice_capture(capture, len(times))
     return ForwardRolloutResult(
         time_s=times,
         q=q_traj,
         qd=qd_traj,
         predicted_markers_m=pred_m,
         shared_metrics=compute_shared_metrics(
-            capture=capture,
+            capture=eval_cap,
             predicted_points_m=pred_m,
             tracked_labels=list(marker_offsets.keys()),
         ),

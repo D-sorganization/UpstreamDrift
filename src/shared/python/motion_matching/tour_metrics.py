@@ -65,22 +65,20 @@ def compute_shared_metrics(
     - SharedMetrics instance with the 5 scalar metrics
     """
     pred = np.asarray(predicted_points_m, dtype=np.float64)
-    n_frames = pred.shape[0]
-    if pred.ndim != 3 or pred.shape[1:] != (len(capture.labels), 3):
-        raise ValueError(
-            f"Shape mismatch: expected (frames, {len(capture.labels)}, 3), got {pred.shape}"
-        )
+    expected_shape = (capture.frames, len(capture.labels), 3)
+    if pred.shape != expected_shape:
+        raise ValueError(f"Shape mismatch: expected {expected_shape}, got {pred.shape}")
 
-    obs = capture.points_m[:n_frames]
-    cap_time = capture.time_s[:n_frames]
+    obs = capture.points_m
+    cap_time = capture.time_s
     if tracked_labels is not None:
         tracked_set = set(tracked_labels)
         label_mask = np.array(
             [lbl in tracked_set for lbl in capture.labels], dtype=bool
         )
-        valid = capture.valid[:n_frames] & label_mask[None, :]
+        valid = capture.valid & label_mask[None, :]
     else:
-        valid = capture.valid[:n_frames] & np.isfinite(pred).all(axis=-1)
+        valid = capture.valid & np.isfinite(pred).all(axis=-1)
 
     if not np.isfinite(pred[valid]).all():
         raise ValueError("Predicted points must be finite at all valid capture points")
@@ -98,7 +96,7 @@ def compute_shared_metrics(
     early_rmse = float(np.sqrt(np.mean(early_errs))) if len(early_errs) > 0 else 0.0
 
     # 3. Terminal marker RMS (final terminal_ratio portion)
-    term_start = int(n_frames * (1.0 - terminal_ratio))
+    term_start = int(capture.frames * (1.0 - terminal_ratio))
     term_mask = np.zeros_like(valid)
     term_mask[term_start:, :] = valid[term_start:, :]
     term_errs = dist_sq[term_mask]

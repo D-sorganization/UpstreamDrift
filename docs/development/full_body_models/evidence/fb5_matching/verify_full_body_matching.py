@@ -409,7 +409,7 @@ def _archive_artifacts_and_receipt(
     }
 
     receipt_path = ctx.output_dir / f"receipt_{ctx.engine}.json"
-    receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     logger.info("Receipt written to %s", receipt_path)
     logger.info("Forward trajectory written to %s", traj_path)
     return receipt
