@@ -40,6 +40,11 @@ tests, LoD/DRY review, changed-boundary tests, provenance and handoff updates.
 
 ## ST-02: Implement Immutable Evidence Contracts
 
+Dispatch update: [ST-D7](CONTRACT_FREEZE.md) permits image-only Packets A/C/B
+(#10137/#10139/#10138) independently of scientific qualification. Full ST-02
+completion still depends on ST-01 for dynamics/provider/result contracts.
+See [Ready Tasks](READY_TASKS.md); this is not a waiver of any physics gate.
+
 - **Outcome:** Every frame, mask, camera and result has unambiguous meaning.
 - **Depends On:** ST-01. **Size:** M. **Owner:** Small Agent + API Reviewer.
 - **Scope:** `contracts.py`, serialization fixtures, typed provider interfaces;
