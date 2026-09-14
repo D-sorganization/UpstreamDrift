@@ -4,7 +4,8 @@
 
 Planning PR #10136 is merged. The image-only contract decisions and measured
 model findings in this handoff must also be present on the checkout used by the
-worker. Use the PR linked from the root handoff; never infer that the complete
+worker. Use [Handoff PR #10144](https://github.com/D-sorganization/UpstreamDrift/pull/10144)
+or its merged contents; never infer that the complete
 ST-01 scientific qualification has passed.
 
 | Packet | Issue                                                                   | Readiness                                        | Allowed Work                                                    |

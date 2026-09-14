@@ -10,6 +10,7 @@
   [Qualification Findings](docs/plans/shadow_tracker/QUALIFICATION_FINDINGS.md).
   ST-01 (#10124) is still open; no dynamics/scientific qualification is claimed.
 - **Handoff Branch:** `feat/issue-10124-shadow-tracker-handoff`, issue #10142.
+  [Handoff PR #10144](https://github.com/D-sorganization/UpstreamDrift/pull/10144).
   Diagnostic tests pass; product-record code is assigned to the worker packets.
 - **State:** Documentation, frozen image contracts and diagnostic probe only;
   no Shadow Tracker fitter or scientific qualification. Epic #10122 remains open.
