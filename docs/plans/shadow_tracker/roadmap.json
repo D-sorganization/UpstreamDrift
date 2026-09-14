@@ -12,8 +12,10 @@
       "issue": 10123,
       "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10123",
       "depends_on": [],
-      "status": "pending",
-      "spec": "WORK_PACKAGES.md"
+      "status": "complete",
+      "spec": "WORK_PACKAGES.md",
+      "merge_pr": 10136,
+      "merge_commit": "2331978f29c317249d9b12e7ef16b50868cd6deb"
     },
     {
       "id": "ST-01",
@@ -21,7 +23,7 @@
       "issue": 10124,
       "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10124",
       "depends_on": ["ST-00"],
-      "status": "pending",
+      "status": "in_progress_scientific_qualification_blocked",
       "spec": "WORK_PACKAGES.md"
     },
     {
@@ -123,5 +125,31 @@
       "status": "pending",
       "spec": "WORK_PACKAGES.md"
     }
-  ]
+  ],
+  "dispatch_contract": "CONTRACT_FREEZE.md",
+  "dispatch_queue": "READY_TASKS.md",
+  "dispatch_packets": [
+    {
+      "id": "ST-02A",
+      "spec": "CONTRACT_FREEZE.md",
+      "issue": 10137,
+      "depends_on": ["handoff-10142"],
+      "parent": 10125
+    },
+    {
+      "id": "ST-02C",
+      "spec": "CONTRACT_FREEZE.md",
+      "issue": 10139,
+      "depends_on": ["handoff-10142"],
+      "parent": 10125
+    },
+    {
+      "id": "ST-02B",
+      "spec": "CONTRACT_FREEZE.md",
+      "issue": 10138,
+      "depends_on": ["ST-02A"],
+      "parent": 10125
+    }
+  ],
+  "specialist_blockers": [10140, 10141]
 }

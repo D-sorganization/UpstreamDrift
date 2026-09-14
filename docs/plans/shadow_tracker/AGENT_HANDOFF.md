@@ -2,13 +2,22 @@
 
 ## Current State
 
-Planning baseline for epic #10122. Only documentation, a roadmap, and reserved
-source/test directories are supplied. No segmentation, fitter, runnable demo,
-engine integration, or scientific qualification is implemented by this setup.
-There is no committed footage, checkpoint or large model asset.
+Epic #10122 now has a tested real-model qualification experiment plus frozen
+image-only contracts and dispatch packets. No segmentation, fitter, runnable
+product demo or scientific qualification is implemented. There is no newly
+committed footage, checkpoint or large model asset.
 
-Setup is delivered in [PR #10136](https://github.com/D-sorganization/UpstreamDrift/pull/10136),
-closing only ST-00 (#10123) when merged. All implementation work remains open.
+The planning setup [PR #10136](https://github.com/D-sorganization/UpstreamDrift/pull/10136)
+is merged and ST-00 is closed. Image-record implementation remains open.
+
+## Immediate Dispatch
+
+Use [Ready Tasks](READY_TASKS.md): Packet A (#10137) and Packet C (#10139)
+can start from this handoff independently; Packet B (#10138) waits for A.
+[Contract Freeze](CONTRACT_FREEZE.md) supplies exact types and acceptance cases.
+[Qualification Findings](QUALIFICATION_FINDINGS.md) records the real-runtime
+probe and specialist blockers #10140/#10141. ST-01 remains open; its scientific
+gates are not passed. See ST-D7 for why image bookkeeping can proceed separately.
 
 Canonical starting point: [README](README.md). Decisions are in
 [Architecture](ARCHITECTURE.md); contracts and tolerances are proposals until
@@ -30,11 +39,11 @@ Do not copy stale `pending` roadmap state into a completion claim.
 7. Update the root handoff and this project's evidence/status pointers. Reference
    the child issue. Close a child only when all of its acceptance criteria land.
 
-The next research task is ST-01. The first lower-cost coding task is ST-02 after
-its contracts and model decisions are frozen. Do not give a small agent ST-08
-with instructions to invent the optimization architecture.
+ST-01 remains the research task. Lower-cost agents take frozen image-only
+ST-02A/C/B packets, not the entire ST-02 or ST-08 work package. The full-body
+native/canonical mapping and scientific profile are not frozen by this handoff.
 
-## Planning Validation
+## Original Planning Validation
 
 - Documentation title-case check: 17 changed Markdown documents, zero violations.
 - Local-link and roadmap audit: 25 local links resolved; 13 unique child issues;
@@ -50,8 +59,9 @@ with instructions to invent the optimization architecture.
   absent in this checkout. Existing SPEC-integrity tests provide the available
   local check; preserve this tooling limitation in the PR.
 
-CI results belong to the setup PR. No Shadow Tracker runtime tests or scientific
-benchmarks have been run because the runtime is not implemented.
+CI results belong to the setup PR. This baseline did not exercise a tracker.
+Current diagnostic TDD, live-model test and evidence details are recorded in
+[Qualification Findings](QUALIFICATION_FINDINGS.md).
 
 ## Small-Agent Task Prompt
 

@@ -2,6 +2,11 @@
 
 ## Status and Principles
 
+The source/frame, binary-mask and camera-conversion subsets are now frozen for
+implementation in [Contract Freeze](CONTRACT_FREEZE.md). That narrower document
+takes precedence for its explicit fields. The remaining records below remain
+proposals; model qualification and scientific claims stay blocked.
+
 This is the implementation contract proposal for ST-02, not an executable schema.
 Freeze schema version `shadow-tracker/1.0.0` only when its tests and compatibility
 review pass. Reuse repository validators and immutable camera/state records.
