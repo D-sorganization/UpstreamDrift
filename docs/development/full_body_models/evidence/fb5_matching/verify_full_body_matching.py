@@ -133,7 +133,7 @@ def run_full_body_matching(
         model = NativeMujocoFullBodyModel(spec_bytes)
         ik_adapter = MujocoFullBodyIK(spec_bytes.decode("utf-8"))
     else:
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #10062
             f"Engine {engine} matching runner not yet implemented"
         )
 
