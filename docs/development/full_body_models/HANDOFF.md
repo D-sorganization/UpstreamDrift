@@ -185,52 +185,82 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
 User direction: when the legs are shown, the golfer must be carried by the
 ground through modelled contact, keep dynamic balance, and the legs must
 match the c3d leg markers under full physics in MuJoCo, Drake and Pinocchio.
-Design and acceptance gates: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md)
-section "GS Ground Support". Work so far (branch feat/10062-visual-skeleton-layer):
+Gates: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md) section
+"GS Ground Support". Branch feat/10062-visual-skeleton-layer, PR #10087.
 
-- Shared contracts: `src/shared/python/motion_matching/ground_support.py`
-  (capture to native world `(x, y, z) -> (x, -z, y)`, ground height from the
-  lowest toe markers, support report with weight fraction, centre of pressure
-  and support-polygon test), `hip_calibration.py` (functional hip centres by
-  sphere fit of the knee markers in the pelvis frame, anatomical pelvis axes,
-  rewrite of the hip joints of a document), `segment_scaling.py` (length
-  scaling of named bodies with COM, inertia, sphere and marker offsets).
-- MuJoCo lane: `full_body_markers.py` (marker FK, projected
-  Levenberg-Marquardt pose IK with grip closure, one-sided ground penalty,
-  named stance spheres pinned to the plane, CoM-over-support rows, joint
-  bounds, locked coordinates, trajectory warm start, body poses for the
-  shared calibration) and `full_body_simulation.py` (RK4 over the adapter's
-  closure-constrained accelerations with an unactuated root, affine
-  dynamics `a = A tau + b` from one KKT factorisation, least-norm inverse
-  dynamics under the closure, computed-torque hold and tracking controllers,
-  feet-planted CoM balance law, feet preload, support record). The adapter
-  gained `generalized_forces` and `upper_body_coordinates`.
-- Specification defect found and fixed: v1 (`full_body_spec_v1.json`) had
-  the hip and knee permutation matrices swapped in `build_full_body_spec.py`,
-  so hip flexion turned about the femur's long axis and the knee about the
-  femur's y axis. `full_body_spec_v2.json` (`build_receipt_v2.json`) fixes
-  it; `tests/unit/motion_matching/test_lower_limb_axes.py` guards the axes.
+Shared contracts (all with unit tests under `tests/unit/motion_matching`):
+
+- `src/shared/python/motion_matching/ground_support.py`: capture to native
+  world `(x, y, z) -> (x, -z, y)` (capture frame 0 is native t=0 exactly),
+  ground height from the lowest toe markers minus a standoff, support report
+  (weight fraction, centre of pressure, convex support polygon).
+- `hip_calibration.py`: functional hip centres by sphere fit of the knee
+  markers in the pelvis frame (sd 2 mm over 649 frames), anatomical pelvis
+  axes (right = hip line, up = the Hip frame's +z, forward = up x right),
+  rewrite of a document's hip joints. `segment_scaling.py`: length scaling
+  of named bodies. `marker_calibration.calibrate_marker_offsets` gained an
+  anatomical prior (`prior_offsets`, `prior_weight`).
+
+MuJoCo lane:
+
+- `full_body_markers.py`: marker FK on spec frames and bodies (lower-limb
+  offsets mapped through `adapter.body_frames`, because MJCF bodies sit at
+  the joint follower frame), projected Levenberg-Marquardt pose IK with grip
+  closure, one-sided ground penalty, stance pins, planted-sphere anchors
+  (`plant_stance`), CoM-over-support rows, joint bounds, locks, prior
+  trajectory, body poses for the shared calibration.
+- `full_body_simulation.py`: RK4 over the adapter's closure-constrained
+  accelerations with an unactuated root; affine dynamics `a = A tau + b`
+  from one KKT solve; least-norm inverse dynamics (closure removes six
+  directions, singular values below 1e-2 dropped); computed-torque hold and
+  tracking controllers with per-joint natural frequencies, optional CoM
+  balance and root regulation; feet preload; support record. Standing hold
+  on the balanced address posture: weight fraction 1.000, CoM drift 1.5 mm
+  over 2 s.
+
+Specification defects found and fixed:
+
+- v1 had the hip and knee permutation matrices swapped in
+  `build_full_body_spec.py` (hip flexion turned about the femur's long axis,
+  the knee about the femur's y axis). `full_body_spec_v2.json`
+  (`build_receipt_v2.json`) fixes it; `test_lower_limb_axes.py` guards it.
   v1 and every FB-3 receipt built on it are superseded for lower-limb use.
-- Pelvis alignment defect: the v1/v2 pelvis alignment (from the OS-3 pelvis
-  offsets, themselves a 0.2 m RMS fit) put the hip joints mirrored and about
-  0.15 m off. The evidence driver relocates both hips to functional centres
-  (sphere sd 2 mm over 649 frames) and writes `full_body_spec_hipcal.json`.
-- Evidence `evidence/ground_support/run_ground_support.py` and `receipt.json`
-  (stages: hip calibration, ground and stance, multi-seed address IK, pinned
-  leg-marker calibration, femur/tibia scale grid, full IK, 12 Hz zero-phase
-  smoothing plus consistency re-solve, computed-torque tracking, GIFs).
-  Standing hold on the balanced address posture: weight fraction 1.000, CoM
-  drift 1.5 mm over 2 s (`test_full_body_simulation.py`).
-- Open: the tracked simulation still leaves the reference (root drift) even
-  when the joints track to 1e-3 rad; see the receipt's `dynamics` block and
-  the GS-4 gate in the epic for what must hold before any claim.
+- The v1/v2 pelvis alignment (from the OS-3 pelvis offsets, a 0.2 m RMS fit)
+  put the hips mirrored and about 0.15 m off; the driver relocates them to
+  the functional centres (`full_body_spec_hipcal.json`).
+- Heel and metatarsal spheres alone leave the address centre of mass 3 to
+  6 cm ahead of the support polygon (the model tips forward); the driver
+  adds toe spheres at calcaneus x = 0.23 m and raises the placeholder
+  contact stiffness from 5e4 to 2e5 N/m (`full_body_spec_hipcal_scaled.json`).
+
+Evidence `evidence/ground_support/` (`run_ground_support.py`, `receipt.json`,
+`ik_trajectory.npz`, `dynamics_record.npz`, playback GIFs and frame
+montages), spec SHA in the receipt:
+
+- Address (GS-2): whole 3.1 mm, legs 5.4/5.2 mm, arms 0.5/0.4 mm, pelvis
+  4.3 mm; hip flexion 44/59 deg, hip rotation -17/+7 deg; feet flat.
+- Leg calibration: 23 to 16 mm on 109 frames; femur scale 0.97 chosen from a
+  {0.94, 0.97, 1.00}^2 grid; after scaling 20 to 13 mm.
+- Reference (GS-3): full-capture IK 28.8 mm whole (legs 12/14 mm, arms 31/26,
+  pelvis 44, head 47, club 10) against an upper-body-only floor of 26 mm;
+  smoothed 12 Hz plus consistency re-solve 28.5 mm, stance spheres within
+  2.4 mm of the plane, planted-sphere drift 2.1 mm, closure 0.9 mm.
+- Dynamics (GS-4, open): computed-torque tracking, unactuated root, joints
+  to 0.0035 rad. To 1.0 s (address and backswing): root error max 14 mm,
+  marker RMS 22 mm, weight fraction 0.36 to 1.70. Downswing and impact
+  diverge: root error 21 mm at 1.1 s, 65 at 1.2, 151 at 1.3, 313 mm at
+  1.75 s; whole-run marker RMS 174 mm, inside-polygon 85 %, peak torque
+  4375 N m. Root regulation through the legs and CoM balance terms did not
+  help (receipted in the session, not adopted). Joint bounds are the
+  Rajagopal ranges widened 2x because the hip zero twist is not calibrated.
 
 ## Next
 
-- GS-4: make the computed-torque tracking of the consistent reference stay
-  on the feet (weight fraction near 1, CoP inside the support polygon, root
-  within 0.05 m of the reference) or replace it by the contact-aware
-  shooting fit (FB-5); every attempt keeps its receipt.
+- GS-4: the downswing needs a dynamically consistent reference or the FB-5
+  contact-aware shooting fit; candidates in order: stance timing from the
+  reference contact forces instead of marker heights, a hip zero-twist
+  calibration so the Rajagopal ranges apply unwidened, then the two-window
+  fit on the full body with contact. Every attempt keeps its receipt.
 - GS-5: rebuild FB-3-P and FB-3-D on v2 with the hip-calibrated, scaled
   document and rerun same-input replay parity.
 - Cross-engine same-input replay and comparison across MuJoCo FB-3-M (#10066), Pinocchio FB-3-P (#10065), and Drake FB-3-D (#10067).

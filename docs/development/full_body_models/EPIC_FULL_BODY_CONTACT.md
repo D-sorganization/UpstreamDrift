@@ -140,7 +140,7 @@ exempt. Gates, each with its own receipt, in order:
   address; both feet flat at address.
 - GS-2 Address pose: full 41-coordinate IK at frame 0 with stance spheres
   pinned, grip closed, CoM inside the support polygon; report per-segment
-  RMS. Done: 23 mm whole, arms 2 mm, legs 17/55 mm (right leg open).
+  RMS. Done: 3.1 mm whole, arms 0.5 mm, legs 5.4/5.2 mm.
 - GS-3 Reference trajectory: full-capture IK with stance pins, calibrated
   leg offsets, zero-phase smoothing and a consistency re-solve; the
   reference must keep every stance sphere within 5 mm of the plane and the
@@ -153,6 +153,8 @@ exempt. Gates, each with its own receipt, in order:
   plane by more than the static penetration times five, root within 0.05 m
   of the reference, and marker RMS of the simulated motion reported. This
   is the "legs support the body weight" claim; nothing weaker counts.
+  Status 2026-09-14: met to 1.0 s (root within 14 mm, weight fraction 0.36
+  to 1.70), not met through the downswing (root 0.15 m at 1.3 s).
 - GS-5 Cross-engine: the same controls replayed in Pinocchio and Drake with
   the shared contact law and closure (parity receipts) on the same document.
 - GS-6 Matching: the FB-5 shooting fit on the full body with contact,

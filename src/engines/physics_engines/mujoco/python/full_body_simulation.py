@@ -335,6 +335,49 @@ def joint_natural_frequencies(
     return omega
 
 
+def _planted_coupling(simulator: FullBodySimulator) -> Array:
+    """``S`` with ``v_root = S v_legs`` when every contact sphere is held still.
+
+    From ``J_feet,root v_root + J_feet,legs v_legs = 0`` at the current state
+    (the adapter's kinematics must already be evaluated).
+    """
+    adapter = simulator.adapter
+    mj, model, data = adapter._mj, adapter.model, adapter.data
+    rows = []
+    for info in adapter._spheres.values():
+        buffer = np.zeros((3, model.nv))
+        mj.mj_jacSite(model, data, buffer, None, info["site_id"])
+        rows.append(buffer[:, simulator._dof])
+    jac_feet = np.concatenate(rows)
+    legs = simulator.lower_limb
+    return -np.linalg.pinv(jac_feet[:, simulator.root]) @ jac_feet[:, legs]
+
+
+def _root_regulation_acceleration(
+    simulator: FullBodySimulator,
+    q: Array,
+    v: Array,
+    q_ref: Array,
+    v_ref: Array,
+    gains: tuple[float, float],
+) -> Array:
+    """Lower-limb acceleration steering the root (pelvis) pose to its reference.
+
+    With the feet planted the root pose is a function of the leg joints; a PD
+    law on the six root coordinates gives a desired root acceleration that the
+    least-norm inverse of the planted coupling maps onto the legs. Returns a
+    full-size vector with only lower-limb entries nonzero.
+    """
+    simulator.adapter.frame_poses(simulator._map(q))
+    simulator.adapter._mj.mj_comPos(simulator.adapter.model, simulator.adapter.data)
+    coupling = _planted_coupling(simulator)
+    root = simulator.root
+    wanted = gains[0] * (q_ref[root] - q[root]) + gains[1] * (v_ref[root] - v[root])
+    out = np.zeros(simulator.nv)
+    out[simulator.lower_limb] = np.linalg.pinv(coupling) @ wanted
+    return out
+
+
 def _planted_com_jacobian(
     simulator: FullBodySimulator, q: Array
 ) -> tuple[Array, Array]:
@@ -347,16 +390,8 @@ def _planted_com_jacobian(
     strategy of a standing body.
     """
     com, jac_com = simulator.centre_of_mass(q)
-    adapter = simulator.adapter
-    mj, model, data = adapter._mj, adapter.model, adapter.data
-    rows = []
-    for info in adapter._spheres.values():
-        buffer = np.zeros((3, model.nv))
-        mj.mj_jacSite(model, data, buffer, None, info["site_id"])
-        rows.append(buffer[:, simulator._dof])
-    jac_feet = np.concatenate(rows)
     legs = simulator.lower_limb
-    coupling = -np.linalg.pinv(jac_feet[:, simulator.root]) @ jac_feet[:, legs]
+    coupling = _planted_coupling(simulator)
     return com, jac_com[:, legs] + jac_com[:, simulator.root] @ coupling
 
 
@@ -397,6 +432,7 @@ def _computed_torque(
     zeta: float,
     balance: tuple[float, float] | None,
     com_ref: Array | None,
+    root_regulation: tuple[float, float] | None = None,
 ) -> Array:
     act = simulator.actuated
     omega = np.broadcast_to(np.asarray(omega_rad_s, dtype=float), (simulator.nv,))[act]
@@ -407,6 +443,13 @@ def _computed_torque(
     )
     if balance is not None and com_ref is not None:
         wanted = wanted + _balance_acceleration(simulator, q, v, com_ref, balance)
+    if root_regulation is not None:
+        wanted = (
+            wanted
+            + _root_regulation_acceleration(
+                simulator, q, v, q_ref, v_ref, root_regulation
+            )[act]
+        )
     return simulator.inverse_dynamics(q, v, wanted)
 
 
@@ -417,6 +460,7 @@ def hold_pose_controller(
     omega_rad_s: float | Array,
     zeta: float = 1.0,
     balance: tuple[float, float] | None = None,
+    root_regulation: tuple[float, float] | None = None,
 ) -> Controller:
     """Computed-torque hold of a posture with optional centre-of-mass balance.
 
@@ -431,12 +475,23 @@ def hold_pose_controller(
     if reference.shape != (simulator.nv,) or not np.isfinite(reference).all():
         raise ValueError("Reference posture must be finite with model size")
     _check_gains(omega_rad_s, zeta, balance)
+    _check_gains(1.0, 1.0, root_regulation)
     com_ref = simulator.centre_of_mass(reference)[0] if balance is not None else None
     zero = np.zeros(simulator.nv)
 
     def controller(t: float, q: Array, v: Array) -> Array:
         return _computed_torque(
-            simulator, q, v, reference, zero, zero, omega_rad_s, zeta, balance, com_ref
+            simulator,
+            q,
+            v,
+            reference,
+            zero,
+            zero,
+            omega_rad_s,
+            zeta,
+            balance,
+            com_ref,
+            root_regulation,
         )
 
     return controller
@@ -450,8 +505,13 @@ def tracking_controller(
     omega_rad_s: float | Array,
     zeta: float = 1.0,
     balance: tuple[float, float] | None = None,
+    root_regulation: tuple[float, float] | None = None,
 ) -> Controller:
     """Computed-torque tracking of a reference trajectory (linear interpolation).
+
+    ``root_regulation`` gives the (stiffness 1/s^2, damping 1/s) of the PD law
+    that steers the pelvis root coordinates to the reference through the
+    planted legs; combine it with compliant lower-limb frequencies.
 
     Reference velocity and acceleration come from finite differences of the
     rows. Precondition: strictly increasing times and one q row per time.
@@ -466,6 +526,7 @@ def tracking_controller(
     ):
         raise ValueError("Reference times must increase with one finite q row each")
     _check_gains(omega_rad_s, zeta, balance)
+    _check_gains(1.0, 1.0, root_regulation)
     if times.size > 1:
         velocity = np.gradient(reference, times, axis=0)
         acceleration = np.gradient(velocity, times, axis=0)
@@ -484,7 +545,17 @@ def tracking_controller(
         )
         com_ref = simulator.centre_of_mass(q_t)[0] if balance is not None else None
         return _computed_torque(
-            simulator, q, v, q_t, v_t, a_t, omega_rad_s, zeta, balance, com_ref
+            simulator,
+            q,
+            v,
+            q_t,
+            v_t,
+            a_t,
+            omega_rad_s,
+            zeta,
+            balance,
+            com_ref,
+            root_regulation,
         )
 
     return controller

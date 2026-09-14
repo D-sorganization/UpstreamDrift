@@ -137,6 +137,23 @@ def test_tracking_controller_validates_reference(
     )
     tau = controller(0.5, q, np.zeros(simulator.nv))
     assert tau.shape == (simulator.nv,) and np.all(tau[:6] == 0.0)
+    regulated = module.tracking_controller(
+        simulator,
+        [0.0, 1.0],
+        np.stack([q, q]),
+        omega_rad_s=omega,
+        root_regulation=(100.0, 20.0),
+    )
+    tau_r = regulated(0.5, q, np.zeros(simulator.nv))
+    assert tau_r.shape == (simulator.nv,) and np.all(tau_r[:6] == 0.0)
+    with pytest.raises(ValueError):
+        module.tracking_controller(
+            simulator,
+            [0.0, 1.0],
+            np.stack([q, q]),
+            omega_rad_s=omega,
+            root_regulation=(-1.0, 0.0),
+        )
     # Computed torque reproduces any achievable joint acceleration exactly.
     q0 = module.preload_feet(simulator, standing_pose(simulator))
     v0 = np.zeros(simulator.nv)

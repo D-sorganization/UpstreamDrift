@@ -89,6 +89,14 @@ C3D = ROOT / "data/C3D_TA_Driver.c3d"
 HIPCAL_SPEC = HERE / "full_body_spec_hipcal.json"
 SCALED_SPEC = HERE / "full_body_spec_hipcal_scaled.json"
 TOE_STANDOFF_M = 0.03  # marker centre above the sole (shoe upper plus marker radius)
+# The v2 document carries heel and metatarsal-head spheres only (15 cm of
+# support); the golfer's centre of mass at address lies 3 to 6 cm ahead of
+# the metatarsal heads, so a toe sphere per foot (rigid with the calcaneus,
+# bottom level with the others) extends the support polygon to the toe tips.
+TOE_SPHERES = {
+    "toe_r": ("calcn_r", (0.23, -0.010, 0.0), 0.025),
+    "toe_l": ("calcn_l", (0.23, -0.010, 0.0), 0.025),
+}
 LEG_SEEDS = {  # OpenSim body frames: x forward, y up the segment, z to the right
     "RKneeOut": ("femur_r", (0.0, -0.40, 0.06)),
     "LKneeOut": ("femur_l", (0.0, -0.39, -0.06)),
@@ -133,6 +141,7 @@ DT_S = 1e-3
 OMEGA_RAD_S = 30.0
 BALANCE = (60.0, 15.0)
 RATE_HZ = 360.0
+PLAYBACK_STRIDE = 6  # 60 Hz playback keeps the GIFs near 2 MB
 PRIOR = 1e-3
 
 
@@ -176,7 +185,34 @@ def stance_spheres(
                 pinned.append(f"heel_{side}")
             if column(f"{prefix}ToeIn")[k] and column(f"{prefix}ToeOut")[k]:
                 pinned.append(f"forefoot_{side}")
+                pinned.append(f"toe_{side}")
         out.append(tuple(pinned))
+    return out
+
+
+CONTACT_STIFFNESS_N_M = 2.0e5  # placeholder 5e4 sank 20 to 50 mm under swing loads
+
+
+def add_toe_spheres(document: dict) -> dict:
+    """Return a copy of ``document`` with toe spheres and the stiffer contact law."""
+    contact = dict(document["contact"])
+    contact["parameters"] = {
+        **contact["parameters"],
+        "stiffness_n_m": CONTACT_STIFFNESS_N_M,
+    }
+    names = {sphere["name"] for sphere in contact["spheres"]}
+    extra = [
+        {"name": name, "body": body, "position_m": list(position), "radius_m": radius}
+        for name, (body, position, radius) in TOE_SPHERES.items()
+        if name not in names
+    ]
+    contact["spheres"] = list(contact["spheres"]) + extra
+    out = dict(document)
+    out["contact"] = contact
+    out["provenance"] = str(document.get("provenance", "")) + (
+        " | toe contact spheres added on the calcanei (support polygon to the toe"
+        f" tips); contact stiffness {CONTACT_STIFFNESS_N_M:.0e} N/m"
+    )
     return out
 
 
@@ -228,12 +264,12 @@ def render_playback(
     cam.lookat[:] = lookat
     cam.distance, cam.azimuth, cam.elevation = 3.2, 135.0, -12.0
     frames_out = []
-    for k in range(0, q.shape[0], 3):
+    for k in range(0, q.shape[0], PLAYBACK_STRIDE):
         data.qpos[addresses] = q[k]
         mujoco.mj_forward(model, data)
         renderer.update_scene(data, camera=cam)
         frames_out.append(renderer.render().copy())
-    imageio.mimsave(path, frames_out, duration=1000 * 3 / RATE_HZ, loop=0)
+    imageio.mimsave(path, frames_out, duration=1000 * PLAYBACK_STRIDE / RATE_HZ, loop=0)
 
 
 class Lane:
@@ -387,7 +423,7 @@ def main() -> None:
     alignment_old = json.loads(BUILD_RECEIPT.read_text())["pelvis_alignment"][
         "hip_from_opensim_pelvis"
     ]
-    hip_spec = apply_hip_calibration(base_spec, hip_cal, alignment_old)
+    hip_spec = add_toe_spheres(apply_hip_calibration(base_spec, hip_cal, alignment_old))
     validate_full_body_spec(hip_spec, upper_base)
     HIPCAL_SPEC.write_text(json.dumps(hip_spec, indent=2, sort_keys=True) + "\n")
     hip_bytes = HIPCAL_SPEC.read_bytes()
@@ -405,7 +441,7 @@ def main() -> None:
     }
     stance_fraction = {
         name: float(np.mean([name in s for s in lane.stance]))
-        for name in ("heel_r", "forefoot_r", "heel_l", "forefoot_l")
+        for name in ("heel_r", "forefoot_r", "toe_r", "heel_l", "forefoot_l", "toe_l")
     }
 
     # 2. address pose with seed leg offsets
@@ -613,6 +649,29 @@ def main() -> None:
             "mean": float(record.weight_fraction.mean()),
         },
         "inside_support_polygon_fraction": float(record.inside_support_polygon.mean()),
+        "root_error_timeline_m": {
+            f"{t:.2f}": float(
+                np.linalg.norm(
+                    sim_q[int(round(t * RATE_HZ)), :3]
+                    - q_ref[int(round(t * RATE_HZ)), :3]
+                )
+            )
+            for t in (0.0, 0.25, 0.5, 0.75, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75)
+        },
+        "backswing_to_1s": {
+            "root_error_max_m": float(
+                np.linalg.norm(sim_q[:361, :3] - q_ref[:361, :3], axis=1).max()
+            ),
+            "marker_rms_m": float(
+                np.sqrt(np.mean(sim_errors[:361][lane.valid[:361]] ** 2))
+            ),
+            "weight_fraction_min": float(
+                record.weight_fraction[record.time_s <= 1.0].min()
+            ),
+            "weight_fraction_max": float(
+                record.weight_fraction[record.time_s <= 1.0].max()
+            ),
+        },
         "peak_joint_torque_n_m": float(np.abs(record.tau).max()),
         "lowest_sphere_height_min_m": float(record.lowest_sphere_height_m.min()),
         "lowest_sphere_height_max_m": float(record.lowest_sphere_height_m.max()),
@@ -651,6 +710,10 @@ def main() -> None:
             "policy": lane.ground_cal.policy,
             "stance_tolerance_m": STANCE_TOLERANCE_M,
             "stance_rule": "heights relative to address; both feet flat at frame 0",
+            "toe_spheres": {
+                k: {"body": b, "position_m": list(p), "radius_m": r}
+                for k, (b, p, r) in TOE_SPHERES.items()
+            },
             "stance_fraction": stance_fraction,
         },
         "address": address_report,
