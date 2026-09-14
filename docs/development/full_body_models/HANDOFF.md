@@ -398,6 +398,23 @@ IK 27.3 mm; 7-iron 4.4 / 28.6 mm; no wrist flags; parity Drake 6e-6 m,
 Pinocchio 1e-15 m. Details REVIEW.md 14; derivation
 `evidence/anthropometry/fit_grip_rotation_receipt.json`.
 
+### Downswing Dynamics: Compliant Sole, Tracked Reference, ZMP (MM-7, 2026-09-14)
+
+`evidence/ground_support/downswing_experiment.py` replays the dynamics
+stage of a finished run with one setting changed (32 receipts under
+`anthro_driver/downswing_*.json`). Reference jerk, friction creep, friction
+coefficients and root regulation were ruled out; the feet were being
+unloaded by sub-degree root tilt on a 200 kN/m sole. Adopted: anthropometric
+documents carry a 50 kN/m, 2 s/m sole (`build_anthropometric_spec.py`) and
+the driver tracks the re-solved reference through a 12 Hz low-pass
+(`TRACKING_CUTOFF_HZ`). Driver: root error 38 mm through impact
+(was 178), never airborne, peak torque 476 N m (was 2523), whole-run
+marker RMS 74.6 mm; 7-iron root 31 (to 1.5 s; 133 at 1.75 s in the follow-through) mm, marker RMS
+112.3 mm. `full_body_simulation.reference_zmp` (in every receipt as
+`dynamics.reference_zmp`) shows the composite reference's zero-moment point
+outside the feet on 77 % of the downswing frames: the remaining
+3 to 4 cm is the reference, not the controller. Details REVIEW.md 15.
+
 ### How to Continue (Read This First)
 
 1. Run the pipeline from the launcher tile "Motion Matching" or
@@ -405,8 +422,10 @@ Pinocchio 1e-15 m. Details REVIEW.md 14; derivation
    `python docs/development/full_body_models/build_anthropometric_spec.py ... --club driver|iron7`
    then `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> --skip-hip-calibration --static-seeds [--free-wrists] --capture driver|iron --out <run>` (wrists bounded by default for fitted documents; refit the hand rotation with `evidence/anthropometry/fit_grip_rotation.py --run <free-wrist run> ...`).
 2. Read the receipt (`<run>/receipt.json`): `address.calibrated`, `ik`
-   (full-capture IK, `range_of_motion_flags`), `dynamics`
-   (`backswing_to_1s`, `inside_support_polygon_fraction`); playback GIFs.
+   (full-capture IK, `range_of_motion_flags`, `attachments_m`), `dynamics`
+   (`root_error_timeline_m`, `weight_fraction`, `reference_zmp`,
+   `backswing_to_1s`); playback GIFs. Dynamics-only variants:
+   `evidence/ground_support/downswing_experiment.py --run <run> --name <n> [...]`.
 3. Cross-engine: `evidence/setup_parity/verify_setup_parity.py --run <run>`
    (Drake and Pinocchio on ControlTower over SSH; poses by coordinate name).
 4. Never rerun with `--recalibrate-upper`; keep one static-trial round;

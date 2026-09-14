@@ -184,6 +184,12 @@ MM-2 (#10104) resolved 2026-09-14: the constant hand-to-club rotation is
 fitted from the matches (`grip_fit.py`), the wrists are bounded to the human
 ranges in the matching, and both captures hold (REVIEW.md 14).
 
+MM-7 (#10109) advanced 2026-09-14: the downswing replay holds to 38 mm
+at the pelvis through impact with a compliant sole and a band-limited tracked
+reference (was 178 mm, airborne); the reference zero-moment point diagnostic
+shows the composite capture is not dynamically consistent for the model, so
+MM-7b is a dynamics filter on the reference (REVIEW.md 15).
+
 ## Rules Every Child Follows
 
 - TDD: failing test first, committed with the implementation.

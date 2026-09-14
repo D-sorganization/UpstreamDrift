@@ -649,10 +649,10 @@
     },
     "law": "hunt_crossley_coulomb",
     "parameters": {
-      "dissipation_s_m": 1.0,
+      "dissipation_s_m": 2.0,
       "dynamic_friction": 0.8,
       "static_friction": 0.9,
-      "stiffness_n_m": 200000.0,
+      "stiffness_n_m": 50000.0,
       "transition_velocity_m_s": 0.05,
       "viscous_friction": 0.0
     },

@@ -1,5 +1,5 @@
 {
-  "base_spec_sha256": "a69ec5206302a4106fcb2671aec2449710b5f690e3ecbd05b4b4cc4912b41dff",
+  "base_spec_sha256": "f0100b39d25133b91e9a8252277d09b0e5284c992589697d28ba84870804d56d",
   "base_spec_file": "full_body_spec_anthro_iron7.json",
   "spec_file": "full_body_spec_hipcal_scaled.json",
   "hipcal_spec_file": "full_body_spec_hipcal.json",
@@ -17,9 +17,9 @@
     },
     "hips_to_shoulder_centre_m": 0.5754862588669757
   },
-  "spec_sha256": "7a11bbb756d460619b58523e7970a0b320a6bf09e1b81579eff84de3de6b3042",
+  "spec_sha256": "5d037fb991e827b0846bc8e832089d8459870d7ec3e330c54a36f152413abcb6",
   "hip_calibration": {
-    "spec_sha256": "0c874ab46945bdbb765723b83004a4555b47808a7a1f732841796908292555f4",
+    "spec_sha256": "b5ac8eed59155edbca5f30dd0ad14a325bfff6ef2bafe736b7f0a1f097bb604b",
     "centre_r_hip_frame_m": [
       -0.005010614545412944, -0.10510059317219156, -0.024975960967052332
     ],
@@ -237,6 +237,208 @@
     "closure_error_max_m": 0.0019365640118957238,
     "lowest_sphere_height_min_m": -0.0013105842735424977,
     "lowest_sphere_height_max_m": 0.0012132171709828207,
+    "attachments_m": {
+      "BackLeft": {
+        "body": "Spine",
+        "offset_m": [
+          -0.17902915142989131, 0.07784759446528453, 0.33662010775564694
+        ]
+      },
+      "BackRight": {
+        "body": "Spine",
+        "offset_m": [
+          -0.18499954786798697, -0.10468281366986039, 0.3276743111943996
+        ]
+      },
+      "BackTop": {
+        "body": "Spine",
+        "offset_m": [
+          -0.12162055266126616, -0.03219620327465617, 0.5043251609052783
+        ]
+      },
+      "HeadFront": {
+        "body": "Head",
+        "offset_m": [
+          0.14785633164078027, -0.0032215577384579093, 0.2544322654430286
+        ]
+      },
+      "HeadSide": {
+        "body": "Head",
+        "offset_m": [
+          0.003571550129181878, 0.09774624174564807, 0.22835410645888432
+        ]
+      },
+      "HeadTop": {
+        "body": "Head",
+        "offset_m": [
+          0.008560642197093356, 0.0031345196457750984, 0.3233859513560823
+        ]
+      },
+      "LElbowOut": {
+        "body": "LS",
+        "offset_m": [
+          0.10685928066039264, 0.060545413540268794, -0.2758063076097181
+        ]
+      },
+      "LShoulderBack": {
+        "body": "LScap",
+        "offset_m": [
+          -0.13267776614742316, 0.1330669634832353, 0.043086487049887844
+        ]
+      },
+      "LShoulderTop": {
+        "body": "LScap",
+        "offset_m": [0.0, 0.19494, 0.05]
+      },
+      "LUArmHigh": {
+        "body": "LS",
+        "offset_m": [
+          0.06915283171080713, 0.07188252565119953, -0.11470694922980779
+        ]
+      },
+      "LWristTop": {
+        "body": "LF",
+        "offset_m": [
+          0.1111766839835265, 0.027110844977205926, -0.11376157558952338
+        ]
+      },
+      "Marker_2:2:1": {
+        "body": "Clubhead",
+        "offset_m": [
+          0.01723904911726183, -0.07159946010754144, 0.0023590869807554576
+        ]
+      },
+      "Marker_2:2:2": {
+        "body": "Clubhead",
+        "offset_m": [
+          0.066536014235787, 0.019145635057977343, -0.020932735605259933
+        ]
+      },
+      "Marker_2:2:3": {
+        "body": "Clubhead",
+        "offset_m": [
+          -0.022599445392448337, -0.06944180446520379, 0.0008496945028179085
+        ]
+      },
+      "Marker_3:3:1": {
+        "body": "Clubhead",
+        "offset_m": [
+          -0.49445821593515493, -0.05279141648407692, -0.04158574520998749
+        ]
+      },
+      "Marker_3:3:2": {
+        "body": "Clubhead",
+        "offset_m": [
+          -0.5681384923174791, -0.04734464473389036, -0.00955450364860199
+        ]
+      },
+      "Marker_3:3:3": {
+        "body": "Clubhead",
+        "offset_m": [
+          -0.6156389053626966, -0.04932860163163396, -0.04502882315974615
+        ]
+      },
+      "RElbowOut": {
+        "body": "RS",
+        "offset_m": [
+          -0.06997652538189396, 0.004363438872309154, -0.3449846739941653
+        ]
+      },
+      "RShoulderBack": {
+        "body": "RScap",
+        "offset_m": [
+          -0.11501944830271803, -0.1799114814501357, 0.03117192279011405
+        ]
+      },
+      "RShoulderTop": {
+        "body": "RScap",
+        "offset_m": [0.0, -0.19494, 0.05]
+      },
+      "RUArmHigh": {
+        "body": "RS",
+        "offset_m": [
+          -0.10077343015514773, -0.004591955124606243, -0.1767552463504384
+        ]
+      },
+      "RWristTop": {
+        "body": "RF",
+        "offset_m": [
+          -0.0078414905052831, -0.05678815415864529, -0.1336781084630888
+        ]
+      },
+      "WaistLBack": {
+        "body": "Hip",
+        "offset_m": [
+          -0.18142955184703, 0.07660726628088708, 0.08614188570023579
+        ]
+      },
+      "WaistLeft": {
+        "body": "Hip",
+        "offset_m": [
+          -0.04045681144304519, 0.15537916045378794, 0.14038726663122084
+        ]
+      },
+      "WaistRBack": {
+        "body": "Hip",
+        "offset_m": [
+          -0.19216001963148052, -0.09188897587974797, 0.06840548575756779
+        ]
+      },
+      "WaistRight": {
+        "body": "Hip",
+        "offset_m": [
+          -0.05888559244331552, -0.18763559435153435, 0.1250824858406787
+        ]
+      },
+      "RKneeOut": {
+        "body": "femur_r",
+        "offset_m": [
+          0.039683120749551846, -0.40162260004009664, 0.040166298398282695
+        ]
+      },
+      "LKneeOut": {
+        "body": "femur_l",
+        "offset_m": [
+          0.011543771333825977, -0.4074765779278827, -0.07188661811422077
+        ]
+      },
+      "RAnkleOut": {
+        "body": "tibia_r",
+        "offset_m": [
+          -0.0058844076865089915, -0.40509540911075703, 0.03871970915172364
+        ]
+      },
+      "LAnkleOut": {
+        "body": "tibia_l",
+        "offset_m": [
+          -0.025902482506989857, -0.4315733252052729, -0.0694118916959529
+        ]
+      },
+      "RToeIn": {
+        "body": "calcn_r",
+        "offset_m": [
+          0.1888132034425857, -0.007127538822323081, -0.044498723911296015
+        ]
+      },
+      "RToeOut": {
+        "body": "calcn_r",
+        "offset_m": [
+          0.1801120698446238, 0.026955225896325465, 0.06559069114395248
+        ]
+      },
+      "LToeIn": {
+        "body": "calcn_l",
+        "offset_m": [
+          0.18352834910020158, 0.016970729253419338, 0.02376844994045956
+        ]
+      },
+      "LToeOut": {
+        "body": "calcn_l",
+        "offset_m": [
+          0.17254720724873215, 0.013401269957271313, -0.08210546193777878
+        ]
+      }
+    },
     "reference": {
       "cutoff_hz": 12.0,
       "consistency_prior": 0.1,
@@ -390,7 +592,7 @@
       ],
       "femur_scale": 1.0,
       "tibia_scale": 1.0,
-      "spec_sha256": "19fbd1e49b502c54a78cffd23dbe8699de1809176d0d6bfc72724be41bb7346a"
+      "spec_sha256": "726778d29e21ecff6df90cd4aec1aa350dee832b3f6829a8cde581ed25775eb1"
     },
     "joint_ranges_deg": {
       "hip_flexion": [-30.0, 120.0],
@@ -473,97 +675,130 @@
       "type": "computed torque tracking, unactuated root",
       "omega_rad_s": 30.0,
       "zeta": 1.0,
-      "balance": [60.0, 15.0]
+      "balance": [60.0, 15.0],
+      "tracking_cutoff_hz": 12.0
     },
-    "marker_rms_m": 0.15527210365924576,
+    "contact_parameters": {
+      "stiffness_n_m": 50000.0,
+      "dissipation_s_m": 2.0,
+      "static_friction": 0.9,
+      "dynamic_friction": 0.8,
+      "viscous_friction": 0.0,
+      "transition_velocity_m_s": 0.05
+    },
+    "reference_zmp": {
+      "description": "zero-moment point the tracked reference demands of this model against the support polygon of the spheres on the plane at each frame; outside means no unilateral foot contact can realise the reference there",
+      "outside_fraction": 0.3455098934550989,
+      "outside_fraction_1s_to_1_5s": 0.7611111111111111,
+      "outside_max_m": 10.07250400611648,
+      "unloaded_fraction": 0.0,
+      "vertical_grf_over_weight": [0.13809275535905907, 2.823689553306316],
+      "horizontal_grf_over_weight_max": 1.8766584330295535
+    },
+    "marker_rms_m": 0.11225942053456099,
     "segment_rms_m": {
-      "head": 0.17392154074167943,
-      "trunk": 0.14910700278001313,
-      "pelvis": 0.09921467389467632,
-      "left_arm": 0.17120970991106788,
-      "right_arm": 0.15084478862525624,
-      "left_leg": 0.04522530006079202,
-      "right_leg": 0.11862243142442991,
-      "club": 0.2234740101544881
+      "head": 0.14258641277969078,
+      "trunk": 0.10828796020148178,
+      "pelvis": 0.06275116176982032,
+      "left_arm": 0.11904492560938874,
+      "right_arm": 0.12056433980099557,
+      "left_leg": 0.028712774282077885,
+      "right_leg": 0.0755551958420692,
+      "club": 0.1579301182378113
     },
-    "joint_tracking_rms_rad": 0.0031155847004763282,
-    "root_tracking_rms_m": 0.04090973832409652,
+    "joint_tracking_rms_rad": 0.005896143789330847,
+    "root_tracking_rms_m": 0.026446142325775676,
     "weight_fraction": {
-      "min": 0.0,
-      "max": 8.886530877146575,
-      "mean": 0.9840233176599967
+      "min": 0.2859815480028878,
+      "max": 3.6460296550589293,
+      "mean": 0.9977217496901554
     },
-    "inside_support_polygon_fraction": 0.8836065573770492,
+    "inside_support_polygon_fraction": 0.9557377049180328,
     "range_of_motion_flags": {
+      "REInput": {
+        "max_excess_deg": 0.55,
+        "frames": 2,
+        "fraction": 0.003
+      },
+      "RWInputX": {
+        "max_excess_deg": 1.76,
+        "frames": 16,
+        "fraction": 0.0244
+      },
+      "RWInputY": {
+        "max_excess_deg": 0.68,
+        "frames": 6,
+        "fraction": 0.0091
+      },
       "hip_rotation_r": {
-        "max_excess_deg": 10.66,
-        "frames": 52,
-        "fraction": 0.0791
+        "max_excess_deg": 10.47,
+        "frames": 51,
+        "fraction": 0.0776
       },
       "knee_angle_r": {
-        "max_excess_deg": 9.96,
-        "frames": 562,
-        "fraction": 0.8554
+        "max_excess_deg": 10.15,
+        "frames": 564,
+        "fraction": 0.8584
       },
       "ankle_angle_r": {
-        "max_excess_deg": 18.64,
+        "max_excess_deg": 18.45,
         "frames": 80,
         "fraction": 0.1218
       },
       "subtalar_angle_r": {
-        "max_excess_deg": 20.08,
+        "max_excess_deg": 20.11,
         "frames": 467,
         "fraction": 0.7108
       },
       "mtp_angle_r": {
-        "max_excess_deg": 13.21,
+        "max_excess_deg": 13.32,
         "frames": 179,
         "fraction": 0.2725
       },
       "hip_adduction_l": {
-        "max_excess_deg": 12.83,
-        "frames": 170,
-        "fraction": 0.2588
+        "max_excess_deg": 12.94,
+        "frames": 171,
+        "fraction": 0.2603
       },
       "hip_rotation_l": {
-        "max_excess_deg": 11.16,
-        "frames": 97,
-        "fraction": 0.1476
+        "max_excess_deg": 10.92,
+        "frames": 100,
+        "fraction": 0.1522
       },
       "subtalar_angle_l": {
-        "max_excess_deg": 11.69,
-        "frames": 209,
-        "fraction": 0.3181
+        "max_excess_deg": 11.59,
+        "frames": 208,
+        "fraction": 0.3166
       },
       "mtp_angle_l": {
-        "max_excess_deg": 24.23,
+        "max_excess_deg": 23.05,
         "frames": 210,
         "fraction": 0.3196
       }
     },
     "root_error_timeline_m": {
-      "0.00": 0.0005750187383097849,
-      "0.25": 0.0028171324333695564,
-      "0.50": 0.003079720987453341,
-      "0.75": 0.00505816070878783,
-      "1.00": 0.005967981106171865,
-      "1.10": 0.007210438483242635,
-      "1.20": 0.014193791878690003,
-      "1.30": 0.030953890080563477,
-      "1.40": 0.03567853196231872,
-      "1.50": 0.07670565119571242,
-      "1.75": 0.19953968389925944
+      "0.00": 0.001373480067838413,
+      "0.25": 0.0065247273591141864,
+      "0.50": 0.01674324899426591,
+      "0.75": 0.02088347975744092,
+      "1.00": 0.015474917236957712,
+      "1.10": 0.006352165355464236,
+      "1.20": 0.008699752922584191,
+      "1.30": 0.0282140474984029,
+      "1.40": 0.031240913673050628,
+      "1.50": 0.025173428313641423,
+      "1.75": 0.13326682966296857
     },
     "backswing_to_1s": {
-      "root_error_max_m": 0.005967981106171865,
-      "marker_rms_m": 0.021575910968416982,
-      "weight_fraction_min": 0.2879410481116984,
-      "weight_fraction_max": 1.6948023027975045
+      "root_error_max_m": 0.021041011389197235,
+      "marker_rms_m": 0.030143512596186126,
+      "weight_fraction_min": 0.7218801505880718,
+      "weight_fraction_max": 1.2076641179117893
     },
-    "peak_joint_torque_n_m": 2990.7222059297774,
-    "lowest_sphere_height_min_m": -0.011651415192939007,
-    "lowest_sphere_height_max_m": 0.011944551098290873
+    "peak_joint_torque_n_m": 834.8566769691819,
+    "lowest_sphere_height_min_m": -0.019290672575719085,
+    "lowest_sphere_height_max_m": -0.0025723837562067614
   },
-  "elapsed_s": 209.72425710002426,
+  "elapsed_s": 212.11285430000862,
   "qualification": "kinematic IK and computed-torque tracking milestone on the MuJoCo full-body model (anthropometric geometry (AN-1); unqualified until Simscape parity); not a fit, not acceptance"
 }

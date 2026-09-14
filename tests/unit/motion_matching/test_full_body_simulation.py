@@ -154,6 +154,38 @@ def test_tracking_controller_validates_reference(
             omega_rad_s=omega,
             root_regulation=(-1.0, 0.0),
         )
+    # The acceleration feedforward scales only the reference acceleration:
+    # with a curved reference the torque differs, with a straight one it does not.
+    curved = np.stack([q, q + 0.1, q])
+    full = module.tracking_controller(
+        simulator, [0.0, 0.5, 1.0], curved, omega_rad_s=omega
+    )
+    pd_only = module.tracking_controller(
+        simulator,
+        [0.0, 0.5, 1.0],
+        curved,
+        omega_rad_s=omega,
+        acceleration_feedforward=0.0,
+    )
+    assert not np.allclose(
+        full(0.5, q, np.zeros(simulator.nv)), pd_only(0.5, q, np.zeros(simulator.nv))
+    )
+    straight = module.tracking_controller(
+        simulator,
+        [0.0, 1.0],
+        np.stack([q, q]),
+        omega_rad_s=omega,
+        acceleration_feedforward=0.0,
+    )
+    np.testing.assert_allclose(straight(0.5, q, np.zeros(simulator.nv)), tau)
+    with pytest.raises(ValueError):
+        module.tracking_controller(
+            simulator,
+            [0.0, 1.0],
+            np.stack([q, q]),
+            omega_rad_s=omega,
+            acceleration_feedforward=1.5,
+        )
     # Computed torque reproduces any achievable joint acceleration exactly.
     q0 = module.preload_feet(simulator, standing_pose(simulator))
     v0 = np.zeros(simulator.nv)
@@ -166,3 +198,43 @@ def test_tracking_controller_validates_reference(
     assert np.abs(achieved - target).max() < 1e-6
     with pytest.raises(ValueError):
         simulator.inverse_dynamics(q0, v0, target[:-1])
+
+
+def test_reference_zmp_of_a_standing_pose_is_the_com_projection(
+    simulator: module.FullBodySimulator,
+) -> None:
+    from src.shared.python.motion_matching.contact_law import GroundPlane
+
+    q0 = module.preload_feet(simulator, standing_pose(simulator))
+    times = np.linspace(0.0, 0.1, 5)
+    still = np.tile(q0, (5, 1))
+    ground = GroundPlane(
+        normal=(0.0, 0.0, 1.0), height_m=simulator.adapter.ground_plane.height_m
+    )
+    out = module.reference_zmp(simulator, times, still, ground)
+    com = simulator.centre_of_mass(q0)[0]
+    # No acceleration: the reaction is the weight, the ZMP sits under the CoM.
+    np.testing.assert_allclose(out["zmp_xy"], np.tile(com[:2], (5, 1)), atol=1e-6)
+    np.testing.assert_allclose(out["grf_over_weight"][:, 2], 1.0, atol=1e-6)
+    assert np.all(out["outside_m"] == 0.0)  # standing pose balances over the feet
+    # A lurch along the first root slide moves the ZMP away from the CoM by
+    # z_c a_t / (g + a_n): the slide is not world-aligned, so use its axis.
+    lurch = still.copy()
+    lurch[:, 0] += 0.5 * 20.0 * times**2  # 20 m/s^2 along the slide
+    out2 = module.reference_zmp(simulator, times, lurch, ground)
+    axis = simulator.root_translation_axes(q0)[:, 0]
+    a = 20.0 * axis
+    moved = simulator.centre_of_mass(lurch[2])[0]  # the CoM has travelled too
+    z_c = moved[2] - ground.height_m
+    expected = moved[:2] - z_c * a[:2] / (9.81 + a[2])
+    np.testing.assert_allclose(out2["zmp_xy"][2], expected, atol=0.01)
+    assert out2["outside_m"][2] > 0.5 and not out2["unloaded"][2]
+    # Free fall: unloaded frames carry no zero-moment point.
+    drop = np.linalg.solve(simulator.root_translation_axes(q0), [0.0, 0.0, -9.81])
+    fall = still + 0.5 * np.outer(times**2, np.r_[drop, np.zeros(simulator.nv - 3)])
+    out3 = module.reference_zmp(simulator, times, fall, ground)
+    assert out3["unloaded"][2] and out3["outside_m"][2] == 0.0
+    with pytest.raises(ValueError):
+        module.reference_zmp(simulator, times[:2], still[:2], ground)
+    with pytest.raises(ValueError):
+        module.reference_zmp(simulator, times, still, ground, contact_tolerance_m=-1.0)

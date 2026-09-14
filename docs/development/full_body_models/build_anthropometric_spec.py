@@ -55,7 +55,15 @@ from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: E
     tracked_labels,
 )
 
-CONTACT_STIFFNESS_N_M = 2.0e5
+# Shoe sole plus turf compliance (MM-7, #10109): a 78 kg golfer sinks
+# mg / k = 16 mm at rest. The qualified native document keeps 2.0e5 N/m; with
+# that stiffness heel and toe load sharing turns on sub-millimetre root tilt
+# and the tracked downswing hops (root error 178 mm, airborne at 1.3 s);
+# with 5.0e4 N/m and dissipation 2 s/m the body gives the few centimetres the
+# composite reference demands (43 mm, never airborne, peak torque 476 N m;
+# evidence/ground_support/anthro_driver/downswing_*.json).
+CONTACT_STIFFNESS_N_M = 5.0e4
+CONTACT_DISSIPATION_S_M = 2.0
 SPHERES = (
     ("heel", (0.01, -0.005, 0.0), 0.035),
     ("forefoot", (0.16, -0.005, 0.0), 0.03),
@@ -204,7 +212,7 @@ def main() -> None:
         law="hunt_crossley_coulomb",
         parameters={
             "stiffness_n_m": CONTACT_STIFFNESS_N_M,
-            "dissipation_s_m": 1.0,
+            "dissipation_s_m": CONTACT_DISSIPATION_S_M,
             "static_friction": 0.9,
             "dynamic_friction": 0.8,
             "viscous_friction": 0.0,

@@ -153,6 +153,7 @@ ADDRESS_SEEDS_DEG = [
 ]
 STANCE_TOLERANCE_M = 0.02  # marker within this height of its address height: on ground
 REFERENCE_CUTOFF_HZ = 12.0  # zero-phase low-pass on the IK reference before tracking
+TRACKING_CUTOFF_HZ = 12.0  # second zero-phase low-pass on the re-solved reference for the dynamics (MM-7)
 CONSISTENCY_PRIOR = 0.1  # weight pulling the re-solve toward the smoothed reference
 CALIBRATION_STRIDE = 6
 STATIC_FRAMES = 24  # first 0.067 s of address treated as the static trial
@@ -263,16 +264,23 @@ def stance_spheres(
     return out
 
 
-CONTACT_STIFFNESS_N_M = 2.0e5  # placeholder 5e4 sank 20 to 50 mm under swing loads
+# Native v1 documents: their placeholder 5e4 N/m with dissipation 1 s/m sank
+# 20 to 50 mm under swing loads, so the driver raises it. Anthropometric
+# documents declare their own sole compliance (build_anthropometric_spec,
+# MM-7) and keep it.
+CONTACT_STIFFNESS_N_M = 2.0e5
 
 
 def add_toe_spheres(document: dict) -> dict:
-    """Return a copy of ``document`` with toe spheres and the stiffer contact law."""
+    """Return a copy of ``document`` with toe spheres; native documents also
+    get the stiffer contact law, anthropometric ones keep their own."""
     contact = dict(document["contact"])
-    contact["parameters"] = {
-        **contact["parameters"],
-        "stiffness_n_m": CONTACT_STIFFNESS_N_M,
-    }
+    stiffness = (
+        contact["parameters"]["stiffness_n_m"]
+        if "subject" in document
+        else CONTACT_STIFFNESS_N_M
+    )
+    contact["parameters"] = {**contact["parameters"], "stiffness_n_m": stiffness}
     names = {sphere["name"] for sphere in contact["spheres"]}
     extra = [
         {"name": name, "body": body, "position_m": list(position), "radius_m": radius}
@@ -284,7 +292,7 @@ def add_toe_spheres(document: dict) -> dict:
     out["contact"] = contact
     out["provenance"] = str(document.get("provenance", "")) + (
         " | toe contact spheres added on the calcanei (support polygon to the toe"
-        f" tips); contact stiffness {CONTACT_STIFFNESS_N_M:.0e} N/m"
+        f" tips); contact stiffness {stiffness:.0e} N/m"
     )
     return out
 
@@ -1098,6 +1106,10 @@ def main() -> None:
         "closure_error_max_m": float(max(f.closure_error_m for f in fits)),
         "lowest_sphere_height_min_m": float(heights.min()),
         "lowest_sphere_height_max_m": float(heights.max()),
+        "attachments_m": {
+            label: {"body": body, "offset_m": [float(v) for v in offset]}
+            for label, (body, offset) in attachments.items()
+        },
         "reference": {
             "cutoff_hz": REFERENCE_CUTOFF_HZ,
             "consistency_prior": CONSISTENCY_PRIOR,
@@ -1164,11 +1176,15 @@ def main() -> None:
         valid=lane.valid,
     )
 
-    # 5. forward dynamics tracking
-    q0 = fs.preload_feet(sim, q_ref[0])
-    v0 = np.gradient(q_ref, lane.times, axis=0)[0]
+    # 5. forward dynamics tracking. The consistency re-solve steps where
+    # markers drop out (root accelerations near 500 m/s^2 at impact), so the
+    # tracked reference is the re-solved one low-passed once more (MM-7).
+    q_track = smooth_reference(q_ref, RATE_HZ, TRACKING_CUTOFF_HZ)
+    zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+    q0 = fs.preload_feet(sim, q_track[0])
+    v0 = np.gradient(q_track, lane.times, axis=0)[0]
     controller = fs.tracking_controller(
-        sim, lane.times, q_ref, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
+        sim, lane.times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
     )
     record = sim.run(
         q0,
@@ -1193,6 +1209,27 @@ def main() -> None:
             "omega_rad_s": OMEGA_RAD_S,
             "zeta": 1.0,
             "balance": BALANCE,
+            "tracking_cutoff_hz": TRACKING_CUTOFF_HZ,
+        },
+        "contact_parameters": adapter.contact_parameters.as_document(),
+        "reference_zmp": {
+            "description": "zero-moment point the tracked reference demands "
+            "of this model against the support polygon of the spheres on the "
+            "plane at each frame; outside means no unilateral foot contact "
+            "can realise the reference there",
+            "outside_fraction": float((zmp["outside_m"] > 0).mean()),
+            "outside_fraction_1s_to_1_5s": float(
+                (zmp["outside_m"][(lane.times >= 1.0) & (lane.times < 1.5)] > 0).mean()
+            ),
+            "outside_max_m": float(zmp["outside_m"].max()),
+            "unloaded_fraction": float(zmp["unloaded"].mean()),
+            "vertical_grf_over_weight": [
+                float(zmp["grf_over_weight"][:, 2].min()),
+                float(zmp["grf_over_weight"][:, 2].max()),
+            ],
+            "horizontal_grf_over_weight_max": float(
+                np.linalg.norm(zmp["grf_over_weight"][:, :2], axis=1).max()
+            ),
         },
         "marker_rms_m": float(np.sqrt(np.mean(sim_errors[lane.valid] ** 2))),
         "segment_rms_m": segment_rms(labels, sim_errors, lane.valid),

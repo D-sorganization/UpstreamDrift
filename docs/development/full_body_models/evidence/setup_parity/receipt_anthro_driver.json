@@ -10,9 +10,9 @@
     "total_mass_kg": 0.313,
     "wrist_to_head_m": 1.1239999999999999
   },
-  "timestamp_utc": "2026-09-14T19:20:12.009636+00:00",
+  "timestamp_utc": "2026-09-14T20:22:40.975110+00:00",
   "spec": "docs\\development\\full_body_models\\evidence\\ground_support\\anthro_driver\\full_body_spec_hipcal_scaled.json",
-  "spec_sha256": "f8db4e3e6d1af04de0c54565e80c25d582f0ba45c85c6b201fdf1ac8d409f23e",
+  "spec_sha256": "69c5bf4f0df19ac76dbcf9de545165a8fd0e680d9ae2069bce7a2b2cc35dca13",
   "trajectory_sha256": "53a8f5062c3e47cd7fed57b23c9c10f3af3771b4d75e0c44b95a76cea20f7d02",
   "pose": "frame 0 of the ground-support IK trajectory, by coordinate name",
   "coordinates": 44,

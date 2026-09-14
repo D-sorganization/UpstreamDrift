@@ -649,10 +649,10 @@
     },
     "law": "hunt_crossley_coulomb",
     "parameters": {
-      "dissipation_s_m": 1.0,
+      "dissipation_s_m": 2.0,
       "dynamic_friction": 0.8,
       "static_friction": 0.9,
-      "stiffness_n_m": 200000.0,
+      "stiffness_n_m": 50000.0,
       "transition_velocity_m_s": 0.05,
       "viscous_friction": 0.0
     },
@@ -1831,7 +1831,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 2e+05 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {

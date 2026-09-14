@@ -22,8 +22,10 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 from src.engines.physics_engines.mujoco.python.native_model import (
     _evaluate_weld_closure,
 )
+from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.ground_support import (
     SupportReport,
+    convex_hull_contains,
     support_report,
 )
 
@@ -508,16 +510,22 @@ def tracking_controller(
     zeta: float = 1.0,
     balance: tuple[float, float] | None = None,
     root_regulation: tuple[float, float] | None = None,
+    acceleration_feedforward: float = 1.0,
 ) -> Controller:
     """Computed-torque tracking of a reference trajectory (linear interpolation).
 
     ``root_regulation`` gives the (stiffness 1/s^2, damping 1/s) of the PD law
     that steers the pelvis root coordinates to the reference through the
     planted legs; combine it with compliant lower-limb frequencies.
+    ``acceleration_feedforward`` scales the reference acceleration term in
+    [0, 1]: 1 is exact computed torque, 0 leaves only the PD law on position
+    and velocity, which a noisy (not dynamically consistent) reference needs.
 
     Reference velocity and acceleration come from finite differences of the
     rows. Precondition: strictly increasing times and one q row per time.
     """
+    if not 0.0 <= acceleration_feedforward <= 1.0:
+        raise ValueError("acceleration_feedforward must lie in [0, 1]")
     times = np.asarray(time_ref, dtype=float)
     reference = np.asarray(q_ref, dtype=float)
     if (
@@ -531,7 +539,7 @@ def tracking_controller(
     _check_gains(1.0, 1.0, root_regulation)
     if times.size > 1:
         velocity = np.gradient(reference, times, axis=0)
-        acceleration = np.gradient(velocity, times, axis=0)
+        acceleration = acceleration_feedforward * np.gradient(velocity, times, axis=0)
     else:
         velocity = np.zeros_like(reference)
         acceleration = np.zeros_like(reference)
@@ -561,3 +569,120 @@ def tracking_controller(
         )
 
     return controller
+
+
+def _distance_outside(point_xy: Array, hull_xy: Array) -> float:
+    """Distance from a point to a convex polygon, zero inside."""
+    if convex_hull_contains(point_xy, hull_xy):
+        return 0.0
+    best = np.inf
+    n = len(hull_xy)
+    for i in range(n):
+        a, b = hull_xy[i], hull_xy[(i + 1) % n]
+        ab = b - a
+        s = float(np.clip((point_xy - a) @ ab / max(float(ab @ ab), 1e-12), 0.0, 1.0))
+        best = min(best, float(np.linalg.norm(point_xy - (a + s * ab))))
+    return best
+
+
+def reference_zmp(
+    simulator: FullBodySimulator,
+    time_ref: Sequence[float],
+    q_ref: Array,
+    ground: GroundPlane,
+    *,
+    contact_tolerance_m: float = 0.005,
+    min_load_fraction: float = 0.1,
+) -> dict[str, Array]:
+    """Zero-moment point a reference trajectory demands of this model.
+
+    From the whole-body linear and angular momentum rates (MuJoCo subtree
+    momentum, finite differences of the reference) the total ground reaction
+    ``R = m (a_com + g)`` and the moment about the centre of mass follow; the
+    zero-moment point is where that reaction must act on the plane for the
+    moment to vanish. It is compared with the convex hull of the contact
+    spheres within ``contact_tolerance_m`` of the plane at that frame (all
+    spheres when fewer than three touch). Returns arrays over frames:
+    ``zmp_xy``, ``com``, ``grf_over_weight`` (3), ``outside_m`` (distance
+    outside the hull, zero inside) and ``unloaded`` (vertical reaction below
+    ``min_load_fraction`` of the weight: the reference is near free fall and
+    its zero-moment point is meaningless; ``outside_m`` is zero there). A
+    loaded frame outside cannot be realised by any unilateral foot contact,
+    whatever the controller. Preconditions: strictly increasing times with
+    one finite row each, at least three frames.
+    """
+    times = np.asarray(time_ref, dtype=float)
+    ref = np.asarray(q_ref, dtype=float)
+    if (
+        times.ndim != 1
+        or times.size < 3
+        or np.any(np.diff(times) <= 0)
+        or ref.shape != (times.size, simulator.nv)
+        or not np.isfinite(ref).all()
+    ):
+        raise ValueError(
+            "Reference needs at least three increasing times and finite rows"
+        )
+    if contact_tolerance_m < 0 or not 0.0 < min_load_fraction < 1.0:
+        raise ValueError(
+            "contact tolerance must be nonnegative, load fraction in (0, 1)"
+        )
+    adapter = simulator.adapter
+    mj, model, data = adapter._mj, adapter.model, adapter.data
+    n = np.asarray(ground.normal, dtype=float)
+    n = n / np.linalg.norm(n)
+    g = float(np.linalg.norm(simulator.gravity))
+    mass = simulator.mass_kg
+    velocity = np.gradient(ref, times, axis=0)
+    acceleration = np.gradient(velocity, times, axis=0)
+
+    def momentum(q: Array, v: Array) -> tuple[Array, Array, Array]:
+        adapter.frame_poses(simulator._map(q))
+        data.qvel[simulator._dof] = v
+        mj.mj_forward(model, data)
+        mj.mj_subtreeVel(model, data)
+        linear = data.subtree_linvel[1] * model.body_subtreemass[1]
+        return data.subtree_com[1].copy(), linear.copy(), data.subtree_angmom[1].copy()
+
+    dt = 1e-4
+    frames = times.size
+    zmp = np.empty((frames, 2))
+    com = np.empty((frames, 3))
+    grf = np.empty((frames, 3))
+    outside = np.empty(frames)
+    unloaded = np.zeros(frames, dtype=bool)
+    sphere_names = list(adapter._spheres)
+    for k in range(frames):
+        c0, p0, l0 = momentum(ref[k], velocity[k])
+        c1, p1, l1 = momentum(
+            ref[k] + velocity[k] * dt, velocity[k] + acceleration[k] * dt
+        )
+        reaction = (p1 - p0) / dt - simulator.gravity * mass
+        moment = (l1 - l0) / dt  # about the centre of mass
+        normal_load = max(float(reaction @ n), 1e-6)
+        height = float(c0 @ n) - ground.height_m
+        # Point on the plane where the reaction gives zero moment about the CoM:
+        # r = c - height n + (n x (moment + height n x R_t)) / R_n, worked per axis
+        r_t = reaction - n * float(reaction @ n)
+        point = c0 - n * height + (np.cross(n, moment) - height * r_t) / normal_load
+        adapter.frame_poses(simulator._map(ref[k]))  # momentum left the +dt state
+        centres = np.array(
+            [data.site_xpos[adapter._spheres[s]["site_id"]] for s in sphere_names]
+        )
+        radii = np.array([adapter._spheres[s]["radius"] for s in sphere_names])
+        sphere_height = centres @ n - radii - ground.height_m
+        touching = sphere_height <= contact_tolerance_m
+        feet = centres[touching] if touching.sum() >= 3 else centres
+        hull = feet[:, :2]
+        zmp[k] = point[:2]
+        com[k] = c0
+        grf[k] = reaction / (mass * g)
+        unloaded[k] = float(reaction @ n) < min_load_fraction * mass * g
+        outside[k] = 0.0 if unloaded[k] else _distance_outside(point[:2], hull)
+    return {
+        "zmp_xy": zmp,
+        "com": com,
+        "grf_over_weight": grf,
+        "outside_m": outside,
+        "unloaded": unloaded,
+    }
