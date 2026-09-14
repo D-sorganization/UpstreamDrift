@@ -14,6 +14,24 @@ Implement Tour Matching Viewer launcher tile as an engine-agnostic in-app playba
 - Evidence & Verification (`docs/development/full_body_models/evidence/viewer/`):
   - Generates offscreen screen captures (`screenshot_returned81.png`, `screenshot_mot.png`), sample test replays, and `receipt.json`.
 
+## Full-Body Marker Calibration and IK per Physics Engine (FB-4, #10068)
+
+Implement alternating marker calibration and least-squares inverse kinematics over full-body coordinates for MuJoCo, Pinocchio, and Drake under Epic #10062:
+- Reusable Marker Calibration (`src/shared/python/motion_matching/marker_calibration.py`):
+  - Injected forward kinematics (`pose_fn`) and inverse kinematics (`ik_fn`) alternating optimization loop.
+  - Re-exported with backward compatibility in `src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`.
+- Trajectory IK Solver (`src/shared/python/motion_matching/full_body_ik.py`):
+  - `solve_full_body_ik_trajectory`: Engine-agnostic Levenberg-Marquardt solver across capture frames with sequential warm-starting, regularisation, and dual-grip weld loop closure residual enforcement.
+  - `compute_marker_rms_trajectory`: Trajectory-wide per-frame, per-marker, and overall root-mean-square error evaluation.
+- Engine IK Adapters:
+  - MuJoCo (`src/engines/physics_engines/mujoco/python/full_body_ik.py`): `MujocoFullBodyIK` wrapping `NativeMujocoFullBodyModel`, evaluating body and site world poses via `mj_kinematics`, dual-grip weld closure residuals, and 41-coordinate IK.
+  - Pinocchio (`src/engines/physics_engines/pinocchio/python/full_body_ik.py`): `PinocchioFullBodyIK` wrapping `FullBodyPinocchioModel`, evaluating frame placements and joint body placements, dual-grip weld placement differences, and 41-coordinate IK.
+  - Drake (`src/engines/physics_engines/drake/python/full_body_ik.py`): `DrakeFullBodyIK` wrapping `FullBodyDrakeModel`, evaluating Drake frame and body link relative transforms in world, weld closure frame differences, and 41-coordinate IK.
+- Automated Evidence & Verification Suite (`docs/development/full_body_models/evidence/fb4_calibration/`):
+  - Verification runner `verify_full_body_calibration.py` supporting `--engine mujoco|pinocchio|drake|all` with automatic remote dispatch to WSL Ubuntu on `deskcomputer` when local engine runtimes are absent.
+  - Generates machine-verifiable receipts (`receipt.json`), calibrated marker offsets (`calibrated_offsets.json`), and compressed trajectories (`ik_trajectory.npz`) per engine for all 34 tracked capture labels bound to the `full_body_spec_v1.json` hash.
+  - Evaluates stride-20 calibration subsample (33 frames, 3 iterations) and complete 654-frame IK trajectory with loop closure residuals $< 0.38$ mm across all engines.
+  - Documents head-marker limitation: Three head markers (`HeadTop`, `HeadFront`, `HeadSide`) attached to rigid torso segment `Hub`.
 
 ## Drake Full-Body Model Builder Law of Demeter and Type Parity (#10067)
 

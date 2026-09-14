@@ -204,9 +204,17 @@ class NativePinocchioModel:
         self.constraints = [constraint]
         self.constraint_data = [constraint.createData()]
         self.data = self.model.createData()
-        pin.initConstraintDynamics(
-            self.model, self.data, self.constraints, self.constraint_data
-        )
+        try:
+            pin.initConstraintDynamics(
+                self.model, self.data, self.constraints, self.constraint_data
+            )
+        except (TypeError, Exception):
+            if hasattr(pin, "StdVec_RigidConstraintModel"):
+                c_vec = pin.StdVec_RigidConstraintModel()
+                c_vec.append(constraint)
+                pin.initConstraintDynamics(self.model, self.data, c_vec)
+            else:
+                pin.initConstraintDynamics(self.model, self.data, self.constraints)
 
     def _transform(self, value: Any) -> Any:
         matrix = np.asarray(value, dtype=float)
