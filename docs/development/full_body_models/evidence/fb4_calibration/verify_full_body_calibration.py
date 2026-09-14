@@ -16,7 +16,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 import numpy as np
 
@@ -261,7 +261,7 @@ def _init_adapter(engine_name: str, fb_spec: dict[str, Any]) -> Any:
 def _subsample_calibration(
     adapter: Any,
     capture: Any,
-    labels: list[str],
+    labels: Sequence[str],
     bodies: dict[str, str],
     stride: int,
     iterations: int,
