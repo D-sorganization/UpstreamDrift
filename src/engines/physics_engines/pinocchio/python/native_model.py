@@ -674,7 +674,9 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         for sphere in self.contact_spheres:
             sample = samples[sphere.name]
             if sample.penetration_m > 0.0:
-                f_world = sample.normal_force_n + sample.friction_force_n
+                f_world = np.asarray(sample.normal_force_n) + np.asarray(
+                    sample.friction_force_n
+                )
                 fid = self._contact_frames[sphere.name]
                 pin = self._pin
                 ref_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
