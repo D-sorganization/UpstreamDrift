@@ -1,5 +1,16 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Planning Baseline (#10122)
+
+Shadow Tracker is a planned silhouette-driven markerless motion reconstruction
+feature for modern single/multiview capture and historical footage. The
+[implementation plan](docs/plans/shadow_tracker/README.md) defines evidence
+contracts, existing model integration boundaries, staged control fitting,
+continuous forward replay, uncertainty, scientific gates and agent turnover.
+Runtime behavior is not implemented by this planning baseline. Work is tracked
+under epic #10122 and children #10123–#10135. Future implementation must follow
+TDD, DbC, LoD and DRY; image agreement alone does not qualify dynamics or kinetics.
+
 ## Cross-Engine Full-Body Parity and Visual Review (FB-6, #10070)
 
 Implement cross-engine full-body forward dynamics simulation replay, numerical step-size convergence, and visual review under Epic #10062:
@@ -4628,6 +4639,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-14 | #10136 | Establish Shadow Tracker epic, implementation plan, source/test homes and agent handoff; no runtime implementation. |
 | 2026-09-14 | #10090 | Tour Matching Viewer launcher tile for in-app 3D playback of candidate motions against tour capture (Step 3, #10062) |
 | 2026-09-14 | #10087 | Shared visual skeleton layer with MuJoCo rendering and model-visuals handoff (#10062) |
 | 2026-09-13 | #8929 | Pendulum GUI playback: matrix panel snapshots dynamics per frame instead of per paint; trail slices a precomputed spline and draws bucketed polylines (spec-exempt: performance) |

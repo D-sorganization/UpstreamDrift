@@ -1,5 +1,23 @@
 # Simscape Tour-Average Fit Continuation
 
+## Shadow Tracker Planning and Agent Pickup (#10122)
+
+- **State:** Documentation and project structure only; no Shadow Tracker runtime
+  or scientific qualification. Epic #10122 remains open.
+- **Start Here:** [Shadow Tracker](docs/plans/shadow_tracker/README.md),
+  [Work Packages](docs/plans/shadow_tracker/WORK_PACKAGES.md), and
+  [Agent Handoff](docs/plans/shadow_tracker/AGENT_HANDOFF.md).
+- **Branch:** `docs/issue-10122-shadow-tracker`; setup child #10123;
+  [Planning PR #10136](https://github.com/D-sorganization/UpstreamDrift/pull/10136).
+- **Next:** ST-01 (#10124) freezes model feasibility and benchmark profiles;
+  ST-02 (#10125) then starts small-agent TDD contract implementation.
+- **Constraints:** Preserve observed vs inferred data, unknown archive timing,
+  fixed subject morphology and continuous forward replay. No fake markers,
+  root-force assistance or completion inferred from silhouette overlap.
+- **Model Reuse:** Existing full-body rollout needs a reviewed adapter to remove
+  mandatory marker-scoring coupling. Canonical state mappings and actual engine
+  availability require tests. Simscape acceptance remains MATLAB R2025b.
+
 ### 0. 1.15 s Downswing Horizon Continuation & Certified Audit (`candidate_downswing_115s_locked_package.json`, DeskComputer)
 
 - **Execution Status**:
