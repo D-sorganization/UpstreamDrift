@@ -13,7 +13,7 @@
   "totals": {
     "identical": 424,
     "diverged": 278,
-    "ud-only": 1237,
+    "ud-only": 1238,
     "tools-only": 661,
     "spelling-only": 124
   },
@@ -679,7 +679,7 @@
     "shadow_tracker": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 5,
+      "ud-only": 6,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -20671,7 +20671,7 @@
       "classification": "ud-only",
       "package": "shadow_tracker",
       "subpackage": "",
-      "ud_bytes": 976,
+      "ud_bytes": 1217,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -20684,6 +20684,18 @@
       "package": "shadow_tracker",
       "subpackage": "",
       "ud_bytes": 2800,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "shadow_tracker/camera_bridge.py",
+      "classification": "ud-only",
+      "package": "shadow_tracker",
+      "subpackage": "",
+      "ud_bytes": 6506,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
