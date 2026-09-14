@@ -1,0 +1,13 @@
+{
+  "candidate_sha256": "4e9b5da6c38bfa7eaf9ca1c207d6ca3aea1f9b6cb4c7d7a4dab1ff4b7878e0b8",
+  "whole_rms_mm": 21.22574268862103,
+  "early_rms_mm": 10.120639684653375,
+  "terminal_rms_mm": 39.213352365238165,
+  "club_cluster_rms_mm": 8.629505257769694,
+  "pelvis_yaw_error_pct": 16.235179278810282,
+  "max_marker_diff_vs_pinocchio_mm": 6.868258636827385e-5,
+  "rms_marker_diff_vs_pinocchio_mm": 2.9193714429496145e-6,
+  "closure_pose_max_abs": 6.188033196770822e-12,
+  "closure_velocity_max_abs": 1.7533174911932292e-10,
+  "elapsed_s": 7.4127569000120275
+}
