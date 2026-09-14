@@ -54,6 +54,7 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (  # noqa:
 )
 from src.engines.physics_engines.opensim.python.tour_matching.marker_calibration import (  # noqa: E402
     calibrate_marker_offsets,
+    static_marker_offsets,
 )
 from src.shared.python.motion_matching import posture_metrics as post  # noqa: E402
 from src.shared.python.motion_matching.anthropometric_candidate import (  # noqa: E402
@@ -143,6 +144,15 @@ STANCE_TOLERANCE_M = 0.02  # marker within this height of its address height: on
 REFERENCE_CUTOFF_HZ = 12.0  # zero-phase low-pass on the IK reference before tracking
 CONSISTENCY_PRIOR = 0.1  # weight pulling the re-solve toward the smoothed reference
 CALIBRATION_STRIDE = 6
+STATIC_FRAMES = 24  # first 0.067 s of address treated as the static trial
+# The native chain has no neck: the head turns relative to the thorax during a
+# swing, so its six markers get a low weight in the fit (errors still reported).
+HEAD_MARKER_WEIGHT = 0.1
+TRAJECTORY_RESTARTS = 4  # perturbed re-solves for frames above the threshold
+TRAJECTORY_RESTART_THRESHOLD_M = 0.03
+# Neutral address for the static trial: scapulae undepressed, spine nearly straight.
+NEUTRAL_LOCKS = {f"{s}ScapInput{a}": 0.0 for s in "LR" for a in "XY"}
+NEUTRAL_BOUNDS_DEG = {"SpineInputX": (-5.0, 5.0), "SpineInputY": (-10.0, 10.0)}
 CALIBRATION_ITERATIONS = 3
 CALIBRATION_PRIOR_FRAMES = 40.0  # anatomical seed weight in frame-equivalents
 SCALE_GRID = (0.94, 0.97, 1.00)  # femur and tibia length scales searched
@@ -281,6 +291,28 @@ def render_playback(
     imageio.mimsave(path, frames_out, duration=1000 * PLAYBACK_STRIDE / RATE_HZ, loop=0)
 
 
+def document_bounds(document: dict) -> dict[str, tuple[float, float]]:
+    """Radian bounds declared by an anthropometric document (empty otherwise)."""
+    return {
+        name: (np.radians(lo), np.radians(hi))
+        for name, (lo, hi) in document.get("coordinate_ranges_deg", {}).items()
+    }
+
+
+def document_seed(document: dict, kin: FullBodyMarkerKinematics) -> np.ndarray:
+    """Start pose: the document's address seed (anthropometric geometry) or
+    the qualified candidate's coordinates (native geometry)."""
+    q = np.zeros(len(kin.coordinate_order))
+    candidate = json.loads(CANDIDATE.read_text())
+    seed = document.get("address_seed_deg")
+    for name, value in zip(candidate["coordinate_names"], candidate["q0"], strict=True):
+        if seed is None or name.startswith(("Translation", "HipInput")):
+            q[kin.coordinate_order.index(name)] = value
+    for name, value in (seed or {}).items():
+        q[kin.coordinate_order.index(name)] = np.radians(value)
+    return q
+
+
 class Lane:
     """Capture, ground, stance and bounds shared by every stage."""
 
@@ -307,6 +339,11 @@ class Lane:
             for side in ("r", "l")
         }
         self.calibration_frames = list(range(0, self.frames, CALIBRATION_STRIDE))
+        self.marker_weights = {
+            label: HEAD_MARKER_WEIGHT
+            for label in MARKER_SEGMENTS["head"]
+            if label in labels
+        }
 
     def kinematics(
         self, spec_bytes: bytes, attachments: dict
@@ -317,7 +354,23 @@ class Lane:
         ordered = {label: attachments[label] for label in self.labels}
         return adapter, FullBodyMarkerKinematics(adapter, ordered)
 
-    def best_address(self, kin: FullBodyMarkerKinematics, base: np.ndarray):
+    def best_address(
+        self,
+        kin: FullBodyMarkerKinematics,
+        base: np.ndarray,
+        *,
+        neutral: bool = False,
+    ):
+        """Best address fit over the leg seeds; ``neutral`` locks the scapulae
+        and bounds the spine to a straight-torso address."""
+        bounds = dict(self.bounds)
+        locked = None
+        if neutral:
+            locked = dict(NEUTRAL_LOCKS)
+            bounds |= {
+                name: (np.radians(lo), np.radians(hi))
+                for name, (lo, hi) in NEUTRAL_BOUNDS_DEG.items()
+            }
         best = None
         for seed in ADDRESS_SEEDS_DEG:
             start = base.copy()
@@ -334,12 +387,38 @@ class Lane:
                 prior_weight=PRIOR,
                 iterations=100,
                 flat_feet=self.stance[0],
-                bounds=self.bounds,
+                bounds=bounds,
+                locked=locked,
+                marker_weights=self.marker_weights,
             )
             if best is None or fit.marker_rms_m < best.marker_rms_m:
                 best = fit
         assert best is not None
         return best
+
+    def static_offsets(
+        self, kin: FullBodyMarkerKinematics, q: np.ndarray, seeds: dict
+    ) -> dict:
+        """Static-trial placement of every seed marker at pose ``q`` over the
+        first ``STATIC_FRAMES`` frames (bodies as in ``seeds``)."""
+        frames = list(range(STATIC_FRAMES))
+        seen = {
+            label
+            for label in seeds
+            if self.valid[frames, self.labels.index(label)].any()
+        }
+        cols = [self.labels.index(m) for m in seen]
+        capture = TourCapture(
+            time_s=self.times[frames],
+            labels=tuple(seen),
+            points_m=self.points[np.ix_(frames, cols)],
+            valid=self.valid[np.ix_(frames, cols)],
+        )
+        bodies = {label: seeds[label][0] for label in seen}
+        poses = kin.body_poses(q, sorted(set(bodies.values())))
+        placed = static_marker_offsets(capture, bodies, [poses] * len(frames))
+        # Markers absent from the static frames keep their anatomical seed.
+        return {label: placed.get(label, seed) for label, seed in seeds.items()}
 
     def trajectory(
         self, kin: FullBodyMarkerKinematics, q_start: np.ndarray, frames=None
@@ -354,6 +433,9 @@ class Lane:
             flat_feet_per_frame=self.stance,
             plant_stance=True,
             bounds=self.bounds,
+            marker_weights=self.marker_weights,
+            restarts=TRAJECTORY_RESTARTS,
+            restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,
         )
 
     def calibrate_legs(
@@ -440,6 +522,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=HERE)
     parser.add_argument(
+        "--spec",
+        type=Path,
+        default=SPEC,
+        help="full-body document to start from (default: the qualified v2)",
+    )
+    parser.add_argument(
+        "--skip-hip-calibration",
+        action="store_true",
+        help="keep the document's hip joints (anthropometric geometry places them)",
+    )
+    parser.add_argument(
         "--anthropometric",
         nargs=2,
         type=float,
@@ -451,6 +544,11 @@ def main() -> None:
         action="store_true",
         help="calibrate the 25 upper-body offsets too (qualified offsets as prior)",
     )
+    parser.add_argument(
+        "--static-seeds",
+        action="store_true",
+        help="replace the seed offsets by a neutral-spine static-trial placement",
+    )
     args = parser.parse_args()
     global OUT
     OUT = args.out
@@ -460,7 +558,8 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     log = logging.getLogger("ground_support")
     t_start = time.perf_counter()
-    base_spec = json.loads(SPEC.read_text())
+    base_spec = json.loads(args.spec.read_text())
+    unqualified = "unqualified" in str(base_spec.get("upper_body_qualification", ""))
     upper_base = json.loads(UPPER_SPEC.read_text())
     candidate = json.loads(CANDIDATE.read_text())
     upper = {
@@ -470,6 +569,7 @@ def main() -> None:
     }
     labels = tuple({**upper, **LEG_SEEDS})
     lane = Lane(labels)
+    lane.bounds |= document_bounds(base_spec)
 
     # 0. functional hip calibration
     waist_offsets = {
@@ -477,10 +577,15 @@ def main() -> None:
         for label in MARKER_SEGMENTS["pelvis"]
     }
     hip_cal = functional_hip_calibration(lane.points, lane.valid, labels, waist_offsets)
-    alignment_old = json.loads(BUILD_RECEIPT.read_text())["pelvis_alignment"][
-        "hip_from_opensim_pelvis"
-    ]
-    hip_spec = add_toe_spheres(apply_hip_calibration(base_spec, hip_cal, alignment_old))
+    if args.skip_hip_calibration:
+        hip_spec = add_toe_spheres(base_spec)
+    else:
+        alignment_old = json.loads(BUILD_RECEIPT.read_text())["pelvis_alignment"][
+            "hip_from_opensim_pelvis"
+        ]
+        hip_spec = add_toe_spheres(
+            apply_hip_calibration(base_spec, hip_cal, alignment_old)
+        )
     if args.anthropometric:
         stature_m, mass_kg = args.anthropometric
         hip_spec = anthropometric_candidate(
@@ -490,6 +595,8 @@ def main() -> None:
             f"anthropometric candidate ({stature_m:.3f} m, {mass_kg:.1f} kg), "
             "unqualified: upper-body lengths, masses and inertias changed"
         )
+    elif unqualified:
+        qualification_note = str(base_spec["upper_body_qualification"])
     else:
         validate_full_body_spec(hip_spec, upper_base)
         qualification_note = "qualified upper body with functional hips"
@@ -520,9 +627,7 @@ def main() -> None:
 
     # 2. address pose with seed leg offsets
     adapter, kin = lane.kinematics(hip_bytes, {**upper, **LEG_SEEDS})
-    q_seed = np.zeros(len(kin.coordinate_order))
-    for name, value in zip(candidate["coordinate_names"], candidate["q0"], strict=True):
-        q_seed[kin.coordinate_order.index(name)] = value
+    q_seed = document_seed(base_spec, kin)
     address = lane.best_address(kin, q_seed)
     address_report = {
         "seed_offsets": {
@@ -535,6 +640,23 @@ def main() -> None:
         },
         "stance_spheres": lane.stance[0],
     }
+    if args.static_seeds:
+        neutral = lane.best_address(kin, q_seed, neutral=True)
+        seeds_all = lane.static_offsets(kin, neutral.q, seeds_all)
+        adapter, kin = lane.kinematics(hip_bytes, {**fixed, **seeds_all})
+        address = lane.best_address(kin, neutral.q)
+        address_report["static_trial"] = {
+            "frames": STATIC_FRAMES,
+            "neutral_fit_rms_m": neutral.marker_rms_m,
+            "neutral_posture": posture_summary(kin, neutral.q),
+            "marker_rms_m": address.marker_rms_m,
+            "posture": posture_summary(kin, address.q),
+        }
+        log.info(
+            "static trial: neutral fit %.1f mm, address with static seeds %.1f mm",
+            neutral.marker_rms_m * 1e3,
+            address.marker_rms_m * 1e3,
+        )
 
     # 3. leg calibration, segment scale search, recalibration
     offsets, calibration = lane.calibrate_legs(hip_bytes, fixed, seeds_all, address.q)
@@ -560,7 +682,7 @@ def main() -> None:
             if rms < best[0]:
                 best = (rms, femur, tibia, doc)
     _, femur_scale, tibia_scale, scaled_spec = best
-    if not args.anthropometric:
+    if not args.anthropometric and not unqualified:
         validate_full_body_spec(scaled_spec, upper_base)
     scaled_path.write_text(json.dumps(scaled_spec, indent=2, sort_keys=True) + "\n")
     spec_bytes = scaled_path.read_bytes()
@@ -772,6 +894,7 @@ def main() -> None:
 
     receipt = {
         "base_spec_sha256": canonical_sha256(base_spec),
+        "base_spec_file": args.spec.name,
         "spec_file": scaled_path.name,
         "hipcal_spec_file": hipcal_path.name,
         "recalibrate_upper": bool(args.recalibrate_upper),

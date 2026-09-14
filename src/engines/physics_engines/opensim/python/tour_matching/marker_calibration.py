@@ -57,6 +57,29 @@ class CalibrationResult:
     per_marker_rms_m: dict[str, float]
 
 
+def static_marker_offsets(
+    capture: TourCapture,
+    bodies: Mapping[str, str],
+    poses: Sequence[Mapping[str, Pose]],
+) -> Offsets:
+    """Marker offsets from a static trial: each marker's observed position
+    expressed in its body frame, averaged over the frames where it is valid.
+
+    ``poses[f]`` maps every body named in ``bodies`` to its world pose at
+    frame ``f``; the frames are assumed to share one pose of the subject, so
+    this is the classical static-trial placement (OpenSim Scale) with the
+    subject's chosen static pose deciding the offsets. Raises ``ValueError``
+    when a marker has no valid frame or a body has no pose. Postcondition:
+    every capture label is returned, on its ``bodies`` entry.
+    """
+    if len(poses) != capture.frames:
+        raise ValueError("One pose set per capture frame is required")
+    missing = {bodies[label] for label in capture.labels} - set(poses[0])
+    if missing:
+        raise ValueError(f"No pose for bodies {sorted(missing)}")
+    return _placements(capture, bodies, list(poses))
+
+
 def _placements(
     capture: TourCapture,
     bodies: Mapping[str, str],

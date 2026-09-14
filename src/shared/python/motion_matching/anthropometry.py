@@ -124,3 +124,28 @@ def mass_check(total_kg: float, stature_m: float, mass_kg: float) -> float:
     _check_positive(mass_kg, "mass_kg")
     _check_positive(stature_m, "stature_m")
     return total_kg / mass_kg
+
+
+def inertia_about_axis(
+    mass_kg: float, length_m: float, radii: tuple[float, float, float], axis: Array
+) -> Array:
+    """Inertia tensor ``m (k L)^2`` with the longitudinal radius along ``axis``.
+
+    ``radii`` are (sagittal, transverse, longitudinal) fractions of the
+    length; the two transverse principal axes are placed orthogonal to
+    ``axis``. Precondition: positive mass and length, nonzero axis.
+    Postcondition: symmetric positive definite tensor about the centre of mass.
+    """
+    _check_positive(mass_kg, "mass_kg")
+    _check_positive(length_m, "length_m")
+    a = np.asarray(axis, dtype=float)
+    if a.shape != (3,) or not np.isfinite(a).all() or np.linalg.norm(a) < 1e-12:
+        raise ValueError("axis must be a finite nonzero 3-vector")
+    a = a / np.linalg.norm(a)
+    helper = np.array([1.0, 0.0, 0.0]) if abs(a[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
+    x = np.cross(a, helper)
+    x /= np.linalg.norm(x)
+    y = np.cross(a, x)
+    rot = np.column_stack([x, y, a])
+    principal = np.diag([mass_kg * (k * length_m) ** 2 for k in radii])
+    return np.asarray(rot @ principal @ rot.T, dtype=np.float64)

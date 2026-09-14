@@ -226,8 +226,13 @@ class FullBodyMarkerKinematics:
         damping: float = 1e-4,
         locked: Mapping[str, float] | None = None,
         tolerance_m: float = 1e-7,
+        marker_weights: Mapping[str, float] | None = None,
     ) -> PoseFit:
         """Least-squares pose for one frame of marker targets.
+
+        ``marker_weights`` (label -> nonnegative weight, default 1) scales a
+        marker's rows in the least squares; a zero weight drops the marker
+        from the fit but keeps it in the reported errors.
 
         Minimises marker error plus ``prior_weight`` times the distance from
         ``q_init``, ``closure_weight`` times the weld closure error and
@@ -261,6 +266,14 @@ class FullBodyMarkerKinematics:
             raise ValueError("Iterations must be positive and weights nonnegative")
         if balance_weight < 0:
             raise ValueError("Iterations must be positive and weights nonnegative")
+        sqrt_marker = np.ones(len(self.labels))
+        for label, weight in (marker_weights or {}).items():
+            if label not in self.labels:
+                raise ValueError(f"Unknown marker {label}")
+            if weight < 0:
+                raise ValueError("Marker weights must be nonnegative")
+            sqrt_marker[self.labels.index(label)] = np.sqrt(weight)
+        row_scale = np.repeat(sqrt_marker[mask], 3)
         q = np.asarray(q_init, dtype=float).copy()
         low, high = self._bounds(bounds)
         q = np.clip(q, low, high)
@@ -278,8 +291,8 @@ class FullBodyMarkerKinematics:
             self._set(q_k)
             positions = self._positions()
             jac = self._marker_jacobian(positions)
-            rows = [(positions[mask] - targets[mask]).reshape(-1)]
-            jacs = [jac[mask].reshape(-1, nv)]
+            rows = [row_scale * (positions[mask] - targets[mask]).reshape(-1)]
+            jacs = [row_scale[:, None] * jac[mask].reshape(-1, nv)]
             rows.append(sqrt_prior * (q_k - q_init))
             jacs.append(sqrt_prior * np.eye(nv))
             self._append_closure(rows, jacs, closure_weight)
@@ -478,9 +491,18 @@ class FullBodyMarkerKinematics:
         flat_feet_per_frame: Sequence[Sequence[str]] | None = None,
         plant_stance: bool = False,
         prior_trajectory: Array | None = None,
+        restarts: int = 0,
+        restart_threshold_m: float = 0.0,
+        restart_spread_rad: float = 0.5,
         **options: Any,
     ) -> tuple[Array, list[PoseFit]]:
         """Solve consecutive frames, each warm-started from the previous one.
+
+        A frame whose fit stays above ``restart_threshold_m`` is re-solved
+        ``restarts`` more times from the start pose with the non-root
+        coordinates perturbed uniformly by ``restart_spread_rad`` (a fixed
+        seed, so results are reproducible); the best fit is kept, so restarts
+        never make a frame worse.
 
         ``flat_feet_per_frame`` names, per capture frame, the contact spheres
         in stance (pinned to the plane). With ``plant_stance`` a sphere that
@@ -507,6 +529,9 @@ class FullBodyMarkerKinematics:
             prior = np.asarray(prior_trajectory, dtype=float)
             if prior.shape != (targets.shape[0], len(self.coordinate_order)):
                 raise ValueError("prior_trajectory must be (frames, coordinates)")
+        if restarts < 0 or restart_threshold_m < 0 or restart_spread_rad < 0:
+            raise ValueError("Restart settings must be nonnegative")
+        rng = np.random.default_rng(0)
         q = np.asarray(q_init, dtype=float)
         fits: list[PoseFit] = []
         anchors: dict[str, Array] = {}
@@ -528,6 +553,22 @@ class FullBodyMarkerKinematics:
                 anchors=anchors if plant_stance else None,
                 **options,
             )
+            for _ in range(restarts if fit.marker_rms_m > restart_threshold_m else 0):
+                jittered = np.asarray(start, dtype=float).copy()
+                jittered[6:] += rng.uniform(
+                    -restart_spread_rad, restart_spread_rad, len(jittered) - 6
+                )
+                retry = self.solve_pose(
+                    targets[k],
+                    mask[k],
+                    jittered,
+                    ground=ground,
+                    flat_feet=stance if flat_feet_per_frame is not None else False,
+                    anchors=anchors if plant_stance else None,
+                    **options,
+                )
+                if retry.marker_rms_m < fit.marker_rms_m:
+                    fit = retry
             if plant_stance:
                 points = self.sphere_ground_points(fit.q, ground)
                 for name in stance:

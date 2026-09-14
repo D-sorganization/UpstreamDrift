@@ -203,6 +203,26 @@ def test_trajectory_solver_warm_starts(
     assert abs(q[1, kinematics.coordinate_order.index("knee_angle_l")] - 0.3) < 5e-3
     with pytest.raises(ValueError):
         kinematics.solve_trajectory(targets[0], valid[0], q_a, ground=GROUND)
+    # Restarts from a poor start never make a frame worse than the plain solve
+    # (one frame, so both runs share the same start pose).
+    far = q_a.copy()
+    far[6:] += 1.0
+    plain = kinematics.solve_trajectory(
+        targets[:1], valid[:1], far, ground=GROUND, closure_weight=0.0, iterations=5
+    )[1][0]
+    restarted = kinematics.solve_trajectory(
+        targets[:1],
+        valid[:1],
+        far,
+        ground=GROUND,
+        closure_weight=0.0,
+        iterations=5,
+        restarts=3,
+        restart_threshold_m=1e-4,
+    )[1][0]
+    assert restarted.marker_rms_m <= plain.marker_rms_m + 1e-12
+    with pytest.raises(ValueError):
+        kinematics.solve_trajectory(targets, valid, q_a, ground=GROUND, restarts=-1)
 
 
 def test_planted_stance_spheres_do_not_slide(
@@ -264,4 +284,39 @@ def test_planted_stance_spheres_do_not_slide(
     with pytest.raises(ValueError):
         kinematics.solve_pose(
             targets[0], valid[0], q_a, ground=GROUND, anchors={"nope": (0, 0, 0)}
+        )
+
+
+def test_marker_weights_drop_a_marker_from_the_fit(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    rng = np.random.default_rng(5)
+    n = len(kinematics.coordinate_order)
+    q_true = np.zeros(n)
+    q_true[:3] = [0.3, -0.2, 1.2]
+    q_true[6:] = rng.uniform(-0.25, 0.25, n - 6)
+    targets = kinematics.marker_positions(q_true)
+    valid = np.ones(len(targets), dtype=bool)
+    spoiled = kinematics.labels[0]
+    targets[0] += [0.3, 0.0, 0.0]  # one marker is wrong by 30 cm
+    q_start = q_true + rng.normal(0.0, 0.05, n)
+    fit = kinematics.solve_pose(
+        targets,
+        valid,
+        q_start,
+        ground=GROUND,
+        closure_weight=0.0,
+        prior_weight=1e-6,
+        marker_weights={spoiled: 0.0},
+    )
+    assert fit.per_marker_m[spoiled] == pytest.approx(0.3, abs=1e-3)
+    others = [e for label, e in fit.per_marker_m.items() if label != spoiled]
+    assert max(others) < 1e-3
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets, valid, q_start, ground=GROUND, marker_weights={spoiled: -1.0}
+        )
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets, valid, q_start, ground=GROUND, marker_weights={"nope": 1.0}
         )

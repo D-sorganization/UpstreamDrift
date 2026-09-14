@@ -171,3 +171,82 @@ within 1 %, zero-pose lengths equal to the subject table, and on the tour
 capture with recalibrated attachments an address spine bend within 10 deg
 in both planes, clavicle links within 15 deg of horizontal, whole-swing IK
 at or below 26 mm, followed by the Simscape update and R2025b parity.
+
+## 9. AN-1 Iteration 1: Anthropometric Geometry Built and Measured (#10099)
+
+`anthropometric_geometry.build_upper_body(native, stature_m, mass_kg,
+trunk_scale, arm_scale, shoulder_scale)` writes the anatomical chain with
+the 27 native coordinate names, the native body, joint and frame names, and
+the club, hands and closure copied verbatim (`test_anthropometric_geometry.py`,
+5 tests: names and closure preserved, zero-pose lengths equal the subject
+table, masses and SPD inertias, joint axes in MuJoCo, ranges and seed).
+`build_anthropometric_spec.py` assembles `full_body_spec_anthro_v1.json`
+with the Rajagopal legs on a fixed pelvis alignment, toe spheres and the
+2e5 N/m contact. Findings, each with a receipt:
+
+1. **Static-trial marker placement is required.** Anatomical seed offsets
+   were 35 to 140 mm off the golfer's markers (waist markers sit about
+   0.14 m above the functional hip centres, not 0.08 m; head and back
+   markers 0.1 m higher than seeded), and the swing-wide calibration with a
+   40-frame prior toward wrong seeds moved offsets into anatomically
+   impossible places while the IK bent the spine to compensate (address
+   spine bend 24 deg forward, links 40 to 60 deg down). The driver now
+   fits a neutral address (scapulae locked at zero, spine within 10 deg
+   forward and 5 deg lateral) and places every marker from the first 24
+   address frames (`marker_calibration.static_marker_offsets`, driver flag
+   `--static-seeds`); the right shoulder-top marker is absent until frame
+   526 and keeps its mirrored seed. Address RMS with those offsets is
+   1 mm and the address posture is neutral by construction.
+2. **The scapula joint had a null direction.** Its second primitive turned
+   about the clavicle link's own axis (a pure spin of the shoulder,
+   duplicating the shoulder gimbal); every IK used it to depress the links.
+   It is now `Rz` (protraction about the vertical); the coordinate names
+   are unchanged.
+3. **The shoulder gimbal must not start with hanging arms.** With the upper
+   arm along -z at zero pose the middle rotation sits near its 90 deg
+   singularity through the whole swing and the trajectory IK diverged
+   (75 to 200 mm). The upper arm now points forward at zero pose
+   (`ARM_FORWARD`), the elbow range is one-sided (-150 to 5 deg, flexion
+   lifts the wrist), shoulder, forearm and wrist angles stay unbounded
+   because they wrap during a swing; a hands-forward `address_seed_deg`
+   and `coordinate_ranges_deg` travel in the document.
+4. **The chain has no neck.** The head turns about 90 deg relative to the
+   thorax during the swing; its three markers cannot be fitted by a rigid
+   head and were bending the trunk. They now carry weight 0.1 in every IK
+   (`solve_pose(marker_weights=...)`, `HEAD_MARKER_WEIGHT`) and are reported
+   separately; whole-swing numbers below are given with and without them.
+5. **Restarts.** `solve_trajectory(restarts, restart_threshold_m)` re-solves
+   a frame above 30 mm from four perturbed starts and keeps the best; the
+   downswing and finish went from 70 to 200 mm to 46 to 56 mm.
+
+Subject-specific lengths (`scan_geometry.py`, `scan_geometry_receipt.json`):
+offsets from the static trial, no further calibration, decimated-swing IK
+RMS of the 30 non-head markers ranks (trunk, arm, shoulder) scale factors on
+the de Leva lengths at 1.71 m, 78 kg.
+
+| trunk | arm | shoulder | body RMS | all RMS | address bend fwd / lat | links L / R |
+| ----- | --- | -------- | -------- | ------- | ---------------------- | ----------- |
+| 1.25  | 1.0 | 1.0      | 24.6 mm  | 39.9 mm | -5.6 / 13.0 deg        | -19 / 19    |
+| 1.05  | 1.1 | 1.0      | 24.8 mm  | 39.3 mm | 11.1 / 4.1 deg         | -7 / 7      |
+| 1.15  | 1.1 | 1.0      | 28.9 mm  | 43.8 mm | 9.3 / 6.9 deg          | -3 / 3      |
+| 1.15  | 1.0 | 1.0      | 30.7 mm  | 49.0 mm | -2.5 / 9.9 deg         | -20 / 20    |
+| 1.35  | 1.0 | 1.0      | 39.5 mm  | 54.4 mm | -2.6 / 15.4 deg        | -26 / 26    |
+
+The basin is flat (24.6 to 29 mm across trunk 1.05 to 1.25, arm 1.0 to
+1.2, shoulder 0.85 to 1.15; the IK noise is a few mm), so the capture
+identifies the trunk as 5 to 25 % longer than the de Leva mean for the
+stature and does not resolve the arms and shoulder width further. The
+canonical document uses trunk 1.15, arm 1.10, shoulder 1.00: the only
+scanned point whose address meets the posture acceptance (bend 9.3 deg
+forward, 6.9 deg lateral, links within 3 deg of horizontal).
+
+Against the acceptance in section 8 and #10099: posture met; whole-swing
+body-marker RMS 28.9 mm (24.6 at the flat-basin best) against the
+qualified geometry's 26.2 mm body-only (28.8 mm with its head at 47 mm);
+with the deweighted head included 43.8 mm, which is not a like-for-like
+number. The remaining error is not in the lengths: arms 36 to 52 mm and
+trunk 28 mm persist across the basin, so the next lever is structural
+(thoracic flexibility or a scapulothoracic model, a neck joint for the
+head), each a coordinate-set change that must be carried into Simscape.
+The de Leva masses and inertias are in the document; nothing here is
+qualified until the Simscape model carries the same numbers.

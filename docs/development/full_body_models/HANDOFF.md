@@ -275,11 +275,54 @@ is the ready-to-file child issue. The driver `run_ground_support.py` gained
 `--anthropometric`, `--recalibrate-upper`, `--out` and posture metrics in
 its receipt.
 
+## AN-1 Iteration 1: Anthropometric Native Geometry (#10099, in Progress)
+
+Findings and receipts in [evidence/anthropometry/REVIEW.md](evidence/anthropometry/REVIEW.md)
+section 9. Code (all with unit tests, 15 in the touched files):
+
+- `src/shared/python/motion_matching/anthropometric_geometry.py`:
+  `build_upper_body(native, stature_m, mass_kg, trunk_scale, arm_scale,
+shoulder_scale)`; 27 native coordinate names, native body/joint/frame
+  names, club and closure verbatim; pelvis, trunk to the shoulder centre,
+  hub at the shoulders, scapula `Rx` elevation + `Rz` protraction (the
+  native `Ry` was a pure spin), upper arms forward at zero pose so the
+  shoulder gimbal stays away from its singularity, one-sided elbows;
+  `COORDINATE_RANGES_DEG` and `ADDRESS_SEED_DEG` travel in the document.
+- `docs/development/full_body_models/build_anthropometric_spec.py` writes
+  `full_body_spec_anthro_v1.json` (+ `build_receipt_anthro_v1.json`) with
+  the Rajagopal legs on a fixed pelvis alignment, toe spheres, 2e5 N/m.
+  Canonical scales: trunk 1.15, arm 1.10, shoulder 1.00 at 1.71 m, 78 kg.
+- `marker_calibration.static_marker_offsets` (static-trial placement);
+  `full_body_markers.solve_pose(marker_weights=...)` and
+  `solve_trajectory(restarts, restart_threshold_m)`.
+- Driver `run_ground_support.py`: `--static-seeds` (neutral address with
+  locked scapulae and a bounded spine, offsets from the first 24 frames),
+  document bounds and seed for anthropometric documents, head markers at
+  weight 0.1 in every IK (`HEAD_MARKER_WEIGHT`), four restarts above 30 mm.
+  These last two change the baseline numbers of every rerun: report
+  body-only and all-marker RMS side by side.
+- `evidence/anthropometry/scan_geometry.py` ranks (trunk, arm, shoulder)
+  scales by the decimated-swing body-marker RMS with static offsets and no
+  calibration (`scan_geometry_receipt.json`).
+
+State against the #10099 acceptance: posture met on the canonical document
+(address spine bend 9.3 deg forward, 6.9 deg lateral, clavicle links within
+3 deg of horizontal); whole-swing body-marker RMS 28.9 mm (24.6 mm at the
+flat-basin best) versus 26.2 mm body-only for the qualified geometry; the
+deweighted head sits at about 110 mm because the chain has no neck. The
+residual is structural (arms 36 to 52 mm, trunk 28 mm across the basin),
+not a length. Unqualified until Simscape carries the same geometry.
+
 ## Next
 
-- AN-1: file and execute "Anthropometric native geometry v2" (review
-  section 8): pelvis, trunk to the shoulder centre, hub at the shoulders,
-  de Leva masses; then Simscape update and R2025b parity.
+- AN-1 (#10099): run the full driver on `full_body_spec_anthro_v1.json`
+  (`--spec ... --skip-hip-calibration --static-seeds --recalibrate-upper
+--out anthro_v1`) and record IK and tracking in the receipt; then decide
+  the structural lever (neck joint for the head; thoracic or
+  scapulothoracic flexibility) as a coordinate-set change with its own
+  Simscape parity plan; rerender the address views and the Simscape
+  skeleton on the anthropometric document; verify the de Leva table
+  against the paper before any qualification.
 - GS-4: the downswing needs a dynamically consistent reference or the FB-5
   contact-aware shooting fit; candidates in order: stance timing from the
   reference contact forces instead of marker heights, a hip zero-twist

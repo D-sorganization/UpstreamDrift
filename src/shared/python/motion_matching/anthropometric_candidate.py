@@ -23,6 +23,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.anthropometry import (
     DE_LEVA_MALE,
+    inertia_about_axis,
     segment_parameters,
 )
 from src.shared.python.motion_matching.segment_scaling import scale_segments
@@ -116,27 +117,6 @@ def _segment_axis_in_body(
     return axis / norm, own, norm
 
 
-def _inertia_in_body(
-    mass: float, length: float, radii: tuple[float, float, float], axis: Array
-) -> Array:
-    """de Leva inertia ``m (k L)^2`` with the longitudinal axis along ``axis``."""
-    helper = (
-        np.array([1.0, 0.0, 0.0]) if abs(axis[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
-    )
-    x = np.cross(axis, helper)
-    x /= np.linalg.norm(x)
-    y = np.cross(axis, x)
-    rot = np.column_stack([x, y, axis])
-    principal = np.diag(
-        [
-            mass * (radii[0] * length) ** 2,
-            mass * (radii[1] * length) ** 2,
-            mass * (radii[2] * length) ** 2,
-        ]
-    )
-    return rot @ principal @ rot.T
-
-
 def _set_segment_solid(
     document: dict,
     body: str,
@@ -149,7 +129,7 @@ def _set_segment_solid(
     axis, own, length = _segment_axis_in_body(document, body)
     mass = params.mass_kg if mass_override is None else mass_override
     com = own + axis * (DE_LEVA_MALE[segment].com_fraction * length)
-    inertia = _inertia_in_body(mass, length, DE_LEVA_MALE[segment].radii, axis)
+    inertia = inertia_about_axis(mass, length, DE_LEVA_MALE[segment].radii, axis)
     entry = next(b for b in document["bodies"] if b["name"] == body)
     entry["solids"] = [
         {

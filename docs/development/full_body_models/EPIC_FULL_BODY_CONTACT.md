@@ -159,6 +159,12 @@ exempt. Gates, each with its own receipt, in order:
   the shared contact law and closure (parity receipts) on the same document.
 - GS-6 Matching: the FB-5 shooting fit on the full body with contact,
   accepted only by the uninterrupted replay gates of the native lane.
+- AN-1 Anthropometric geometry (#10099): neutral address by a static
+  trial, de Leva masses, subject lengths from the swing. Status
+  2026-09-14: posture acceptance met (bend 9.3/6.9 deg, links within
+  3 deg); body-marker swing RMS 28.9 mm against 26.2 mm qualified; the
+  head (no neck) is deweighted and reported separately; unqualified until
+  Simscape parity. Evidence `evidence/anthropometry/REVIEW.md` section 9.
 
 ## Rules Every Child Follows
 
