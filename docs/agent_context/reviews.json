@@ -19,7 +19,7 @@
       "rationale": "Reviewed Camera Setup to recording-plan edge and shared setup instructions; imported-video goals remain independent of camera hardware. 563 Capture Rig, 16 atlas/workflow and 15 goal tests pass. Formatting changed registry whitespace only."
     },
     "launcher-atlas": {
-      "fingerprint": "3736003394d2c9036afef9eaf44304f8d622630a9e4ae5ce1719bc28f2ec4a6b",
+      "fingerprint": "f9109e13c13ec53eb7f913d61ef5cb0ce1ec5ce012a860f9926243b17d7f67c2",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -29,14 +29,14 @@
         "src/config/feature_parity.json": "1a7d3b9fe6fdf99376916ae4af708a13c7e7c385470eda00913c5c62737427be",
         "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
         "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
-        "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
+        "src/config/models.yaml": "789894ce2f009f5c070faeb678d2acbb40a3baef1693e60b0119016cc476b9a1",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Reviewed native camera setup metadata and optional recording route against desktop-only registry contracts. 563 Capture Rig, 16 atlas/workflow and 15 goal tests pass. Formatting normalized registry whitespace; contracts are unchanged."
+      "rationale": "Add tour_matching_viewer tool tile to launcher catalog (Step 3)"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",

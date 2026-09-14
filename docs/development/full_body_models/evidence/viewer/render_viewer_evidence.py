@@ -15,6 +15,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -43,19 +44,13 @@ ADDRESS_PATH = (
 )
 
 
-def main() -> None:
-    EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
-    app = QApplication.instance() or QApplication([])
-
-    spec = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
-    address_data = json.loads(ADDRESS_PATH.read_text(encoding="utf-8"))
-    coord_order = spec["coordinate_order"]
-
-    # 1. Synthesize returned81 30-frame replay archive
-    n_frames = 30
-    time_s = np.linspace(0.0, 0.1, n_frames)
+def _create_synthetic_npz(
+    coord_order: list[str],
+    address_data: dict[str, Any],
+    time_s: np.ndarray,
+    n_frames: int,
+) -> tuple[np.ndarray, Path]:
     q_mat = np.zeros((n_frames, len(coord_order)), dtype=float)
-    # Set coordinates matching address posture start pose
     deg_map = address_data.get("start_pose_deg", {})
     if "spine_bend_pelvis_to_rod_X" in deg_map and "SpineInputX" in coord_order:
         q_mat[:, coord_order.index("SpineInputX")] = np.radians(
@@ -70,13 +65,12 @@ def main() -> None:
             deg_map["torso_rotation_Z"]
         )
 
-    # Target points from address posture joint points
     target_pts = np.zeros((n_frames, 34, 3), dtype=float)
     model_pts = np.zeros((n_frames, 34, 3), dtype=float)
     joint_pts = list(address_data.get("joint_points_m", {}).values())
     for idx in range(min(len(joint_pts), 34)):
         target_pts[:, idx] = joint_pts[idx]
-        model_pts[:, idx] = np.array(joint_pts[idx]) + 0.005  # slight 5mm offset
+        model_pts[:, idx] = np.array(joint_pts[idx]) + 0.005
 
     npz_path = EVIDENCE_DIR / "returned81_replay.npz"
     np.savez_compressed(
@@ -87,19 +81,15 @@ def main() -> None:
         target_m=target_pts,
         valid=np.ones((n_frames, 34), dtype=bool),
     )
+    return q_mat, npz_path
 
-    # 2. Render returned81 replay
-    widget = TourMatchingViewerWidget(spec_path=SPEC_PATH)
-    widget.resize(1024, 768)
-    widget.load_file(npz_path)
-    widget.render_frame(0)
 
-    pixmap = widget.grab()
-    screenshot_returned81_path = EVIDENCE_DIR / "screenshot_returned81.png"
-    pixmap.save(str(screenshot_returned81_path))
-    logger.info("Saved %s", screenshot_returned81_path)
-
-    # 3. Create OpenSim IK .mot file and render
+def _create_synthetic_mot(
+    coord_order: list[str],
+    time_s: np.ndarray,
+    q_mat: np.ndarray,
+    n_frames: int,
+) -> Path:
     mot_lines = [
         "Coordinates",
         "version=1",
@@ -115,17 +105,10 @@ def main() -> None:
 
     mot_path = EVIDENCE_DIR / "opensim_os3b_ik.mot"
     mot_path.write_text("\n".join(mot_lines), encoding="utf-8")
+    return mot_path
 
-    widget.load_file(mot_path)
-    widget.render_frame(0)
-    pixmap_mot = widget.grab()
-    screenshot_mot_path = EVIDENCE_DIR / "screenshot_mot.png"
-    pixmap_mot.save(str(screenshot_mot_path))
-    logger.info("Saved %s", screenshot_mot_path)
 
-    widget.cleanup()
-
-    # 4. Generate receipt
+def _write_receipt() -> None:
     spec_bytes = SPEC_PATH.read_bytes()
     receipt = {
         "step": "Step 3 (Visuals Handoff)",
@@ -147,10 +130,43 @@ def main() -> None:
             "kinematics": "pure-Python rigid-body recursion with no engine requirement",
         },
     }
-
     receipt_path = EVIDENCE_DIR / "receipt.json"
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     logger.info("Saved %s", receipt_path)
+
+
+def main() -> None:
+    EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
+    _app = QApplication.instance() or QApplication([])
+
+    spec = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
+    address_data = json.loads(ADDRESS_PATH.read_text(encoding="utf-8"))
+    coord_order = spec["coordinate_order"]
+
+    n_frames = 30
+    time_s = np.linspace(0.0, 0.1, n_frames)
+    q_mat, npz_path = _create_synthetic_npz(coord_order, address_data, time_s, n_frames)
+
+    widget = TourMatchingViewerWidget(spec_path=SPEC_PATH)
+    widget.resize(1024, 768)
+    widget.load_file(npz_path)
+    widget.render_frame(0)
+
+    pixmap = widget.grab()
+    screenshot_returned81_path = EVIDENCE_DIR / "screenshot_returned81.png"
+    pixmap.save(str(screenshot_returned81_path))
+    logger.info("Saved %s", screenshot_returned81_path)
+
+    mot_path = _create_synthetic_mot(coord_order, time_s, q_mat, n_frames)
+    widget.load_file(mot_path)
+    widget.render_frame(0)
+    pixmap_mot = widget.grab()
+    screenshot_mot_path = EVIDENCE_DIR / "screenshot_mot.png"
+    pixmap_mot.save(str(screenshot_mot_path))
+    logger.info("Saved %s", screenshot_mot_path)
+
+    widget.cleanup()
+    _write_receipt()
 
 
 if __name__ == "__main__":
