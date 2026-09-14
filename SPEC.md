@@ -4556,6 +4556,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-14 | #10087 | Shared visual skeleton layer with MuJoCo rendering and model-visuals handoff (#10062) |
 | 2026-09-13 | #8929 | Pendulum GUI playback: matrix panel snapshots dynamics per frame instead of per paint; trail slices a precomputed spline and draws bucketed polylines (spec-exempt: performance) |
 | 2026-09-12 | #10020 | Optimize array magnitude calculations in joint_conventions.py and golf_trajectory.py using np.einsum (spec-exempt: micro-optimization) |
 | 2026-09-12 | #10011 | Optimize np.linalg.norm calculation in prefix_fit.py using np.einsum for RMS and Max calculations (spec-exempt: micro-optimization) |

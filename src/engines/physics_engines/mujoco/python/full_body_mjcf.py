@@ -145,8 +145,15 @@ def _attach_full_body_sites(
     return frame_sites, contact_sites
 
 
-def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
-    """Export the full-body specification to MJCF with 41 scalar joints and contact sites."""
+def export_full_body_mjcf(
+    model_bytes: bytes, *, visual: bool = False
+) -> tuple[str, dict[str, Any]]:
+    """Export the full-body specification to MJCF with 41 scalar joints and contact sites.
+
+    ``visual=True`` additionally attaches the shared visual skeleton (capsules,
+    COM/frame spheres, floor, lights, camera) as massless non-colliding geoms;
+    the physics content is identical to the plain export.
+    """
     spec = json.loads(model_bytes)
     if spec.get("schema_version") != "full-body-v1":
         raise ValueError("Unsupported schema version: expected full-body-v1")
@@ -173,9 +180,18 @@ def export_full_body_mjcf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
 
     elements, offsets = _build_full_body_kinematics(root, spec)
     frame_sites, contact_sites = _attach_full_body_sites(root, elements, offsets, spec)
+    visual_meta = None
+    if visual:
+        from src.engines.physics_engines.mujoco.python.visual_layer import (
+            attach_visual_layer,
+        )
+
+        visual_meta = attach_visual_layer(root, elements, offsets, spec)
 
     xml = ET.tostring(root, encoding="unicode")
+    extra = {} if visual_meta is None else {"visual_layer": visual_meta}
     return xml, {
+        **extra,
         "representation": "native-full-body-mjcf-v1",
         "model_sha256": hashlib.sha256(model_bytes).hexdigest(),
         "mjcf_sha256": hashlib.sha256(xml.encode("utf-8")).hexdigest(),
