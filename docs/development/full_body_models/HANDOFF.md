@@ -54,11 +54,42 @@ forward-kinematics parity tests against OpenSim decide whether that mapping
 and the Euler convention (SimTK body-fixed XYZ) are right, and must fail
 loudly if not.
 
+## Done (FB-3-P Pinocchio Full-Body Builder, #10065)
+
+FB-3-P is implemented and verified on ControlTower with Pinocchio 4.1.0:
+
+- `src/engines/physics_engines/pinocchio/python/native_model.py`: extended with
+  `FullBodyPinocchioModel` and `build_full_body_pinocchio_model` without touching
+  the qualified `NativePinocchioModel`.
+- Foot contact spheres added as operational frames to the Pinocchio model before
+  `createData()`.
+- Shared contact law evaluated via `contact_forces(...)` using
+  `sphere_ground_contact` from `src.shared.python.motion_matching.contact_law`.
+- Contact forces converted to generalized joint torques via spatial Jacobian
+  projection $\tau_{\text{contact}} = \sum J^T F_{\text{contact}}$ and combined with
+  actuator efforts into `pin.constraintDynamics(...)` retaining the weld loop
+  closure constraint solver.
+- Gate results:
+  - Gate (a): Upper-body slice reproduces qualified model mass matrix and FK to
+    $0.0$ max difference (< $10^{-12}$) across 20 random states.
+  - Gate (b): Full-body FK matches spec frames to $0.0$ max difference (< $10^{-12}$)
+    across 20 random states.
+  - Gate (c): Contact forces at analytic states match the FB-2 reference with $0.0$
+    difference in normal force, friction force, and penetration depth.
+  - Gate (d): Closure residuals unchanged on the upper-body chain to $0.0$ max
+    difference (< $10^{-12}$) across 20 random positions and velocities.
+- Evidence archived under `docs/development/full_body_models/evidence/fb3_pinocchio/`:
+  - Driver: `verify_pinocchio_full_body.py` (auto-dispatches to ControlTower if
+    local Pinocchio is absent).
+  - Receipt: `receipt.json`.
+- Tests: `tests/unit/motion_matching/test_pinocchio_full_body_builder.py` (6 passed
+  on ControlTower in 0.46s; clean skip on Windows).
+
 ## Next
 
-FB-3 per engine (#10065 Pinocchio, #10066 MuJoCo, #10067 Drake): builders
-that consume `full_body_spec_v1.json` through `load_full_body_spec`, keep the
-scalar upper-body path untouched, apply `sphere_ground_contact` as external
-forces, and prove the upper-body slice reproduces the qualified model to
-1e-12 in mass matrix and FK before anything else. Then FB-4 calibration and
-FB-5 fitting per the epic. Every run archived with hashes and a HANDOFF.
+FB-3 per engine (#10066 MuJoCo, #10067 Drake): builders that consume
+`full_body_spec_v1.json` through `load_full_body_spec`, keep the scalar
+upper-body path untouched, apply `sphere_ground_contact` as external forces,
+and prove the upper-body slice reproduces the qualified model to 1e-12 in mass
+matrix and FK before anything else. Then FB-4 calibration (#10068) and FB-5
+fitting (#10069) per the epic.
