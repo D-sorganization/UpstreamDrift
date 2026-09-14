@@ -36,14 +36,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** claude
 - **Issue:** #10062 (children #10063 to #10070)
-- **Branch:** feat/drake-full-body-builder
-- **PR:** #10071
-- **Paths:** docs/development/full_body_models; src/engines/physics_engines/drake/python/full_body_urdf.py; src/engines/physics_engines/drake/python/full_body_model.py; src/engines/physics_engines/pinocchio/python/native_model.py; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; tests/unit/motion_matching/test_full_body_drake.py; tests/unit/motion_matching/test_pinocchio_full_body_builder.py; tests/unit/motion_matching/test_full_body_spec.py; tests/unit/motion_matching/test_contact_law.py
+- **Branch:** feat/fb4-marker-calibration-ik
+- **PR:** pending (#10068)
+- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/marker_calibration.py; src/shared/python/motion_matching/full_body_ik.py; src/engines/physics_engines/mujoco/python/full_body_ik.py; src/engines/physics_engines/pinocchio/python/full_body_ik.py; src/engines/physics_engines/drake/python/full_body_ik.py; docs/development/full_body_models/evidence/fb4_calibration; tests/unit/motion_matching
 - **Started:** 2026-09-13
-- **Last verified:** 2026-09-14 (SELF; FB-3-M #10066 MuJoCo, FB-3-P #10065 Pinocchio, and FB-3-D #10067 Drake builders qualified: all Done Gates passed to < 1e-12; 6 Drake unit tests pass on ControlTower and skip cleanly on Windows; 6 Pinocchio unit tests pass; 5 MuJoCo unit tests pass)
-- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, shared ground-contact law with parity harness, full_body_spec_v1.json, MuJoCo full-body MJCF export with contact adapter (FB-3-M, #10066), Pinocchio full-body builder with spatial contact forces injected into weld-constrained dynamics (FB-3-P, #10065), and Drake full-body URDF export and KKT weld adapter with shared contact (FB-3-D, #10067) are implemented and verified; cross-engine comparison, calibration, and fitting remain.
-- **Next step:** Cross-engine same-input replay and comparison across MuJoCo FB-3-M, Pinocchio FB-3-P, and Drake FB-3-D; ground height / marker calibration (FB-4) and fitting (FB-5) per Epic #10062.
-- **Evidence:** docs/development/full_body_models/HANDOFF.md, docs/development/full_body_models/evidence/fb3_drake/receipt.json, docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json, tests/unit/motion_matching/test_full_body_drake.py, tests/unit/motion_matching/test_full_body_mujoco.py.
+- **Last verified:** 2026-09-14 (SELF; FB-4 marker calibration and full-body IK verified on MuJoCo, Pinocchio, and Drake with receipts and .npz trajectories; 8 unit tests pass with Ruff/black/mypy)
+- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, shared ground-contact law with parity harness, full_body_spec_v1.json, MuJoCo full-body MJCF export with contact adapter (FB-3-M, #10066), Pinocchio full-body builder with spatial contact forces injected into weld-constrained dynamics (FB-3-P, #10065), Drake full-body URDF export and KKT weld adapter with shared contact (FB-3-D, #10067), and alternating marker calibration and IK per engine for 34 tracked labels (FB-4, #10068) are implemented and verified; receipts and full 654-frame trajectories archived.
+- **Next step:** Execute FB-5 full-body forward-dynamics matching (#10069) initialized from the FB-4 IK trajectories.
+- **Evidence:** docs/development/full_body_models/HANDOFF.md, docs/development/full_body_models/evidence/fb4_calibration/ (mujoco, pinocchio, drake receipts and trajectories), tests/unit/motion_matching/test_full_body_marker_calibration.py, tests/unit/motion_matching/test_marker_calibration.py.
 
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 

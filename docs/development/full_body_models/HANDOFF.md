@@ -140,7 +140,54 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
 - Tests: `tests/unit/motion_matching/test_full_body_drake.py` (6 passed on ControlTower
   in 0.98s; 1 passed, 5 cleanly skipped on Windows without pydrake).
 
+## Visual Skeleton Layer Completed (Step 1 of the Visuals Plan)
+
+- `src/shared/python/motion_matching/visual_skeleton.py`: one engine-agnostic
+  visual description derived from any native or full-body spec (capsule per
+  body, COM and frame spheres, ground plane opposite gravity with a
+  `calibrated` flag, world-segment mapping for viewers); 5 unit tests.
+- `src/engines/physics_engines/mujoco/python/visual_layer.py` and
+  `export_full_body_mjcf(..., visual=True)`: massless non-colliding visual
+  geoms, floor, lights, camera; physics proven identical to the plain export
+  (masses, inertias, xpos, qacc) in `tests/unit/motion_matching/test_mujoco_visual_layer.py`.
+- Evidence `evidence/visual_layer/` (default pose PNG, returned81 kinematic
+  playback GIF, MJCF, receipt). Steps 3 to 6 (viewer tile, cross-engine replay
+  videos, OpenSim real horizon, FB-3 re-checks) are specified for lower-level
+  agents in [VISUALS_HANDOFF.md](VISUALS_HANDOFF.md).
+
+## FB-4 Marker Calibration and IK per Engine Completed (#10068)
+
+- Shared alternating marker calibration moved to `src/shared/python/motion_matching/marker_calibration.py`
+  with backward-compatible re-export in `src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`.
+- Shared trajectory IK solver and marker RMS evaluator in `src/shared/python/motion_matching/full_body_ik.py`
+  (`solve_full_body_ik_trajectory`, `compute_marker_rms_trajectory`).
+  Features warm-started Levenberg-Marquardt optimization across frames, explicit dual-grip weld loop closure residual enforcement,
+  and regularisation to guarantee $m \ge n$.
+- Engine adapters implemented:
+  - `src/engines/physics_engines/mujoco/python/full_body_ik.py` (`MujocoFullBodyIK`)
+  - `src/engines/physics_engines/pinocchio/python/full_body_ik.py` (`PinocchioFullBodyIK`)
+  - `src/engines/physics_engines/drake/python/full_body_ik.py` (`DrakeFullBodyIK`)
+- Automated verification driver: `docs/development/full_body_models/evidence/fb4_calibration/verify_full_body_calibration.py`
+  (supports `--engine mujoco|pinocchio|drake|all`, automatic dispatch to WSL Ubuntu on deskcomputer when local engine is missing).
+- Evidence generated and archived for all three engines under `docs/development/full_body_models/evidence/fb4_calibration/`:
+  - `mujoco/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 174.49 mm (best iter 3)
+    - Full trajectory RMS (654 frames): 159.47 mm (mean frame RMS 157.67 mm, max 241.57 mm)
+    - Weld closure max error: 0.37 mm
+  - `pinocchio/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 240.51 mm (best iter 2)
+    - Full trajectory RMS (654 frames): 178.52 mm (mean frame RMS 176.32 mm, max 297.48 mm)
+    - Weld closure max error: 0.00 mm
+  - `drake/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 317.16 mm (best iter 3)
+    - Full trajectory RMS (654 frames): 176.47 mm (mean frame RMS 172.21 mm, max 544.30 mm)
+    - Weld closure max error: 0.00 mm
+- Head-marker limitation documented:
+  - Three head markers (`HeadTop`, `HeadFront`, `HeadSide`) are attached to the single rigid trunk/head segment (`Hub`).
+    Because the skeletal specification does not include an articulated cervical neck joint, independent head motions relative to the thorax produce higher rigid residual on `Hub`.
+- Tests: `tests/unit/motion_matching/test_marker_calibration.py` (3 passed), `tests/unit/motion_matching/test_full_body_marker_calibration.py` (5 passed, 2 cleanly skipped on Windows).
+
 ## Next
 
-- Cross-engine same-input replay and comparison across MuJoCo FB-3-M (#10066), Pinocchio FB-3-P (#10065), and Drake FB-3-D (#10067).
-- FB-4 ground height and marker calibration, and FB-5 fitting per Epic #10062.
+- FB-5 Full-Body Forward-Dynamics Matching (#10069): Extend two-window shooting fitter to full-body coordinates with contact, initializing node trajectory from the FB-4 IK trajectories.
+- FB-6 Cross-Engine Full-Body Parity and Visual Review (#10070).
