@@ -86,16 +86,21 @@
             [0.0, 0.0, 1.0, 0.0],
             [0.0, 0.0, 0.0, 1.0]
           ]
-        },
+        }
+      ]
+    },
+    {
+      "name": "GolfSwing3D_Kinetic/Head",
+      "solids": [
         {
-          "com_m": [0.0, 0.0, 0.5819461294083859],
+          "com_m": [0.0, 0.0, 0.11933519345203904],
           "inertia_com_kg_m2": [
-            [0.030572073067708958, 0.0, 0.0],
+            [0.030572073067708965, 0.0, 0.0],
             [0.0, 0.028287139896934158, 0.0],
-            [0.0, 0.0, 0.02098866404076999]
+            [0.0, 0.0, 0.020988664040769992]
           ],
           "mass_kg": 5.413200000000001,
-          "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/head",
+          "name": "GolfSwing3D_Kinetic/Head/head",
           "placement": [
             [1.0, 0.0, 0.0, 0.0],
             [0.0, 1.0, 0.0, 0.0],
@@ -774,6 +779,9 @@
     "RSInputZ",
     "RWInputX",
     "RWInputY",
+    "NeckInputX",
+    "NeckInputY",
+    "NeckInputZ",
     "hip_flexion_r",
     "hip_adduction_r",
     "hip_rotation_r",
@@ -793,6 +801,9 @@
     "LEInput": [-150.0, 5.0],
     "LScapInputX": [-10.0, 30.0],
     "LScapInputY": [-40.0, 40.0],
+    "NeckInputX": [-45.0, 45.0],
+    "NeckInputY": [-60.0, 60.0],
+    "NeckInputZ": [-80.0, 80.0],
     "REInput": [-150.0, 5.0],
     "RScapInputX": [-30.0, 10.0],
     "RScapInputY": [-40.0, 40.0],
@@ -838,6 +849,16 @@
         [1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
         [0.0, 0.0, 1.0, 0.42261093595634686],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "GolfSwing3D_Kinetic/Head",
+      "name": "Head",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ]
     },
@@ -1054,6 +1075,37 @@
         {
           "coordinate": "SpineInputY",
           "primitive": "Ry"
+        }
+      ]
+    },
+    {
+      "child": "GolfSwing3D_Kinetic/Head",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Neck Joint",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.4626109359563469],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "NeckInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "NeckInputY",
+          "primitive": "Ry"
+        },
+        {
+          "coordinate": "NeckInputZ",
+          "primitive": "Rz"
         }
       ]
     },
@@ -1669,16 +1721,16 @@
       "offset_m": [-0.1, 0.0, 0.4426109359563469]
     },
     "HeadFront": {
-      "body": "Spine",
-      "offset_m": [0.1, 0.0, 0.6226586509477311]
+      "body": "Head",
+      "offset_m": [0.1, 0.0, 0.16]
     },
     "HeadSide": {
-      "body": "Spine",
-      "offset_m": [0.0, 0.08, 0.6226586509477311]
+      "body": "Head",
+      "offset_m": [0.0, 0.08, 0.16]
     },
     "HeadTop": {
-      "body": "Spine",
-      "offset_m": [0.0, 0.0, 0.7026586509477311]
+      "body": "Head",
+      "offset_m": [0.0, 0.0, 0.24]
     },
     "LAnkleOut": {
       "body": "tibia_l",
@@ -1817,11 +1869,11 @@
     "trunk_scale": 1.15
   },
   "upper_body_counts": {
-    "bodies": 14,
-    "coordinates": 27,
-    "joints": 13
+    "bodies": 15,
+    "coordinates": 30,
+    "joints": 14
   },
   "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
   "upper_body_schema_version": 1,
-  "upper_body_sha256": "1a2f2e873423a33a55f7b8ed831a01d25b6f731343d58b212f6c237c97a4d70c"
+  "upper_body_sha256": "9d7edf4380d44c0b53fbcb050a5b4b2f1697ac8d4c06f9f06fffe0ea9da0bbf0"
 }

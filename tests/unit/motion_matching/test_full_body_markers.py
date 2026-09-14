@@ -393,3 +393,47 @@ def test_prior_weights_hold_named_coordinates(
         kinematics.solve_pose(
             targets, valid, q_start, ground=GROUND, prior_weights={held: -1.0}
         )
+
+
+def test_axis_targets_turn_a_frame_axis_toward_a_direction(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    n = len(kinematics.coordinate_order)
+    q0 = np.zeros(n)
+    q0[2] = 1.2
+    targets = kinematics.marker_positions(q0)
+    valid = np.ones(len(targets), dtype=bool)
+    frame = "Hub"
+    site = kinematics.model.site(kinematics.adapter.metadata["frame_sites"][frame]).id
+    kinematics._set(q0)
+    before = kinematics.data.site_xmat[site].reshape(3, 3)[:, 0].copy()
+    want = np.array([0.0, 0.0, 1.0])
+    assert before @ want < 0.5
+    fit = kinematics.solve_pose(
+        targets,
+        valid,
+        q0,
+        ground=GROUND,
+        closure_weight=0.0,
+        prior_weight=1e-6,
+        axis_targets={frame: ((1.0, 0.0, 0.0), want, 1e3)},  # outweighs the markers
+    )
+    kinematics._set(fit.q)
+    after = kinematics.data.site_xmat[site].reshape(3, 3)[:, 0]
+    assert after @ want > 0.99
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets,
+            valid,
+            q0,
+            ground=GROUND,
+            axis_targets={"nope": ((1, 0, 0), want, 1)},
+        )
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets,
+            valid,
+            q0,
+            ground=GROUND,
+            axis_targets={frame: ((0, 0, 0), want, 1)},
+        )

@@ -7,7 +7,8 @@ joint names, the same club, hands and grip closure, but an anatomical chain:
 
     world -(6 dof)-> pelvis (hip centres to L5/S1)
           -(torso Rz)-> UpperTorsoBase at L5/S1
-          -(spine Rx, Ry)-> trunk to the shoulder centre, head above it
+          -(spine Rx, Ry)-> trunk to the shoulder centre
+          -(neck Rx tilt, Ry nod, Rz turn at the cervicale)-> head
           -(scapula Rx elevation, Rz protraction at the hub)-> clavicle links
                                           to the shoulder joints
           -(shoulder Rx, Ry, Rz)-> upper arm -(elbow Ry)-> elbow ball
@@ -15,7 +16,10 @@ joint names, the same club, hands and grip closure, but an anatomical chain:
 
 Zero pose: standing, x forward, y left, z up, arms straight forward. Lengths, masses,
 centres of mass and inertias come from de Leva through ``anthropometry``.
-The scapula coordinates keep their native names but the second primitive is
+The head is its own body on a three-axis neck at the cervicale (coordinates
+``NeckInputX/Y/Z``, appended after the 27 native names; the Simscape model
+has no neck, so this is a deliberate, documented departure). The scapula
+coordinates keep their native names but the second primitive is
 ``Rz`` (protraction about the vertical), because a rotation about the link's
 own axis would only spin the shoulder, duplicating the shoulder gimbal.
 ``COORDINATE_RANGES_DEG`` gives anatomical ranges in this document's sign
@@ -55,6 +59,9 @@ COORDINATES = (
     "REInput", "RFInput", "RScapInputX", "RScapInputY",
     "RSInputX", "RSInputY", "RSInputZ", "RWInputX", "RWInputY",
 )  # fmt: skip
+NECK_COORDINATES = ("NeckInputX", "NeckInputY", "NeckInputZ")
+HEAD_BODY = "GolfSwing3D_Kinetic/Head"
+NECK_JOINT = "GolfSwing3D_Kinetic/Neck Joint"
 
 
 # Ranges in this document's conventions: elbow flexion is negative (one-sided),
@@ -64,6 +71,9 @@ COORDINATE_RANGES_DEG: dict[str, tuple[float, float]] = {
     "SpineInputX": (-35.0, 35.0),
     "SpineInputY": (-45.0, 45.0),
     "TorsoInput": (-100.0, 100.0),
+    "NeckInputX": (-45.0, 45.0),
+    "NeckInputY": (-60.0, 60.0),
+    "NeckInputZ": (-80.0, 80.0),
     "LScapInputX": (-10.0, 30.0),
     "RScapInputX": (-30.0, 10.0),
     "LScapInputY": (-40.0, 40.0),
@@ -260,19 +270,34 @@ def build_upper_body(
                 (0, 0, hub_h * 0.5),
                 (0, 0, hub_h),
             ),
-            _segment_solid(
-                names["COMRod"] + "/head",
-                "head",
-                stature_m,
-                mass_kg,
-                (0, 0, cervicale_h),
-                (0, 0, cervicale_h + head_len),
-            ),
         ],
     )
     joint("COMRod", base, (0, 0, 0), [("Rx", "SpineInputX"), ("Ry", "SpineInputY")])
     frame("Spine", trunk_body, (0, 0, 0))
     frame("Hub", trunk_body, (0, 0, hub_h))
+    # Head on a three-axis neck at the cervicale (not in the Simscape model).
+    names["Head"] = HEAD_BODY
+    jname["Head"] = NECK_JOINT
+    head = body(
+        "Head",
+        [
+            _segment_solid(
+                HEAD_BODY + "/head",
+                "head",
+                stature_m,
+                mass_kg,
+                (0, 0, 0),
+                (0, 0, head_len),
+            )
+        ],
+    )
+    joint(
+        "Head",
+        trunk_body,
+        (0, 0, cervicale_h),
+        [("Rx", "NeckInputX"), ("Ry", "NeckInputY"), ("Rz", "NeckInputZ")],
+    )
+    frame("Head", head, (0, 0, 0))
     for side, sign in (("L", 1.0), ("R", -1.0)):
         link = body(
             f"Hubto{side}S",
@@ -377,7 +402,7 @@ def build_upper_body(
     for f in native["frames"]:
         if f["body"] in (names["Clubface Vector"], names["RHandStandoff"]):
             frames.append(_copy(f))
-    order = list(native["coordinate_order"])
+    order = list(native["coordinate_order"]) + list(NECK_COORDINATES)
     document = {
         "schema_version": native["schema_version"],
         "qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",

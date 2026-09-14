@@ -228,6 +228,8 @@ class FullBodyMarkerKinematics:
         tolerance_m: float = 1e-7,
         marker_weights: Mapping[str, float] | None = None,
         prior_weights: Mapping[str, float] | None = None,
+        axis_targets: Mapping[str, tuple[Sequence[float], Sequence[float], float]]
+        | None = None,
     ) -> PoseFit:
         """Least-squares pose for one frame of marker targets.
 
@@ -236,7 +238,11 @@ class FullBodyMarkerKinematics:
         from the fit but keeps it in the reported errors. ``prior_weights``
         (coordinate -> nonnegative weight) replaces ``prior_weight`` for the
         named coordinates, so nearly redundant spins can be held to the
-        previous frame more firmly than the rest.
+        previous frame more firmly than the rest. ``axis_targets`` maps a
+        spec frame name to ``(body_axis, world_direction, weight)``: the
+        frame's body axis is pulled toward the world direction (both
+        normalised), which fixes an otherwise free spin such as the
+        direction the elbow pit faces.
 
         Minimises marker error plus ``prior_weight`` times the distance from
         ``q_init``, ``closure_weight`` times the weld closure error and
@@ -297,6 +303,7 @@ class FullBodyMarkerKinematics:
                 raise ValueError("Prior weights must be nonnegative")
             prior_diag[self.coordinate_order.index(name)] = float(weight)
         sqrt_prior = np.sqrt(prior_diag)
+        axes = self._axis_rows(axis_targets)
 
         def residuals(q_k: Array) -> tuple[Array, Array]:
             self._set(q_k)
@@ -310,6 +317,7 @@ class FullBodyMarkerKinematics:
             self._append_ground(rows, jacs, ground, ground_weight, pinned)
             self._append_anchors(rows, jacs, planted, ground_weight)
             self._append_balance(rows, jacs, ground, balance_weight)
+            self._append_axes(rows, jacs, axes)
             return np.concatenate(rows), np.concatenate(jacs)[:, free]
 
         # Levenberg-Marquardt: a step is kept only when it lowers the cost.
@@ -361,6 +369,51 @@ class FullBodyMarkerKinematics:
             lowest_sphere_height_m=min(heights.values()),
             iterations=done,
         )
+
+    def _axis_rows(
+        self,
+        axis_targets: Mapping[str, tuple[Sequence[float], Sequence[float], float]]
+        | None,
+    ) -> list[tuple[int, Array, Array, float]]:
+        sites = self.adapter.metadata["frame_sites"]
+        out = []
+        for frame, (body_axis, world_dir, weight) in (axis_targets or {}).items():
+            if frame not in sites:
+                raise ValueError(f"Unknown frame {frame}")
+            if weight < 0:
+                raise ValueError("Axis weights must be nonnegative")
+            a = np.asarray(body_axis, dtype=float)
+            d = np.asarray(world_dir, dtype=float)
+            if np.linalg.norm(a) < 1e-12 or np.linalg.norm(d) < 1e-12:
+                raise ValueError("Axis targets need nonzero vectors")
+            site = self.model.site(sites[frame]).id
+            out.append((site, a / np.linalg.norm(a), d / np.linalg.norm(d), weight))
+        return out
+
+    def _append_axes(
+        self,
+        rows: list[Array],
+        jacs: list[Array],
+        axes: list[tuple[int, Array, Array, float]],
+    ) -> None:
+        nv = self.model.nv
+        for site, axis, target, weight in axes:
+            if weight <= 0:
+                continue
+            jr = np.zeros((3, nv))
+            self._mj.mj_jacSite(self.model, self.data, None, jr, site)
+            world_axis = self.data.site_xmat[site].reshape(3, 3) @ axis
+            # d(R a) = omega x (R a) = -[R a]_x omega
+            skew = np.array(
+                [
+                    [0.0, -world_axis[2], world_axis[1]],
+                    [world_axis[2], 0.0, -world_axis[0]],
+                    [-world_axis[1], world_axis[0], 0.0],
+                ]
+            )
+            w = np.sqrt(weight)
+            rows.append(w * (world_axis - target))
+            jacs.append(w * (-skew @ jr)[:, self._dof])
 
     def _append_closure(
         self, rows: list[Array], jacs: list[Array], weight: float

@@ -288,3 +288,44 @@ fit are in hand; the downswing tracking is better than on the qualified
 geometry but the weight fraction still leaves the ground (GS-4 stays open).
 Address renders: `visual_layer/address_{front,side,top}_anthro.png` and
 `simscape_skeleton_address_anthro.png` (frame 0 of the IK trajectory).
+
+### 9.2 Neck Joint and Address Arms (User Direction 2026-09-14)
+
+The user asked for a neck (tilt, nod, turn; the Simscape model has none and
+that is accepted) and for anatomically plausible arms at address: less
+flexion in the left arm and elbow pits facing up or a little toward the
+other arm.
+
+- **Neck.** `anthropometric_geometry` adds a head body on a three-axis neck
+  at the cervicale (`NeckInputX/Y/Z`, 30 upper-body coordinates, ranges
+  45/60/80 deg); head markers attach to the head. With the neck the head
+  markers carry full weight again and fit at 28 mm over the swing
+  (104 mm deweighted before).
+- **Address arms.** The neutral (static-trial) fit bounds the elbows
+  (left -25 to 5 deg, right -35 to 5 deg) and every address fit carries a
+  weak axis row (`solve_pose(axis_targets=...)`) pulling each upper arm's
+  pit axis toward up plus 0.4 times the direction to the other shoulder;
+  the address fit gained perturbed restarts (6 per leg seed) because the
+  address is a multi-minimum problem for the arms and pelvis.
+- **Result** (`ground_support/anthro_v1/receipt.json`): full-capture IK
+  30.2 mm over all 34 markers (head 28, trunk 34, pelvis 22, arms 49/39,
+  legs 13/16, club 21), address 11.4 mm with spine bend 6.7 deg forward /
+  5.8 deg lateral and links within 14 deg, left elbow -25 deg (at its
+  bound), right -2 deg, tracking to 1.0 s root error 7 mm, whole-run root
+  RMS 53 mm, 83 % of stance frames inside the support polygon. The right
+  elbow pit faces up and inward (0.29 up, 0.56 inward); the left pit still
+  faces outward and downward (-0.46 up, -0.88 inward).
+- **What did not work, all receipted in the session:** a dominant pit
+  weight (5.0), humeri seeded turned inward, a second static-trial round
+  with the placed markers, and shoulder joints 0.10 m below the cervicale
+  each turned the left pit inward at address but put both elbows at the
+  hyperextension bound and broke the swing fit (68 to 81 mm; the second
+  round is a degenerate fixed point, address 3 mm and swing 81 mm).
+  Whatever forces the left pit inward makes the left forearm want to bend
+  backwards, so the left humerus-forearm-club chain prefers the pit
+  outward: the suspect is the roll of the wrist frame copied verbatim from
+  the native document (its forearm axes are not this document's), which
+  ties the club's cock axis to the forearm in a way that only a pit-out
+  humerus can satisfy. Next: derive the wrist base rotation from this
+  document's forearm frame (cock axis perpendicular to the pit plane) with
+  a test, then rerun the pit rows at address.

@@ -74,12 +74,12 @@ def evaluate(
     seeds = {**upper, **drv.LEG_SEEDS}
     if lane is None:
         lane = drv.Lane(tuple(seeds))
-    lane.bounds |= drv.document_bounds(spec)
+    drv.configure_lane(lane, spec)
     spec_bytes = json.dumps(drv.add_toe_spheres(spec), sort_keys=True).encode()
     adapter, kin = lane.kinematics(spec_bytes, seeds)
-    neutral = lane.best_address(kin, drv.document_seed(spec, kin), neutral=True)
-    static = lane.static_offsets(kin, neutral.q, seeds)
-    adapter, kin = lane.kinematics(spec_bytes, static)
+    static, neutral, kin = lane.static_trial(
+        spec_bytes, seeds, drv.document_seed(spec, kin)
+    )
     address = lane.best_address(kin, neutral.q)
     frames = lane.calibration_frames
     q, _ = lane.trajectory(kin, address.q, frames=frames)
@@ -96,6 +96,10 @@ def evaluate(
         "swing_rms_all_m": float(np.sqrt(np.mean(errors[valid] ** 2))),
         "swing_rms_body_m": body_rms(lane.labels, errors, valid),
         "swing_segment_rms_m": drv.segment_rms(lane.labels, errors, valid),
+        "address_elbows_deg": {
+            name: float(np.degrees(address.q[kin.coordinate_order.index(name)]))
+            for name in ("LEInput", "REInput")
+        },
         "frames": len(frames),
     }
     return lane, row
@@ -131,6 +135,9 @@ def main() -> None:
             row["address_posture"]["spine_bend_deg"]["forward_deg"],
             row["address_posture"]["spine_bend_deg"]["lateral_deg"],
         )  # fmt: skip
+        log.info(
+            "   elbows %s", {k: round(v) for k, v in row["address_elbows_deg"].items()}
+        )
         receipt_path.write_text(
             json.dumps(
                 {

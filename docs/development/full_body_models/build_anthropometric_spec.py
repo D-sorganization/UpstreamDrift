@@ -58,7 +58,6 @@ SPHERES = (
 
 def marker_seeds(
     hub_height_m: float,
-    cervicale_m: float,
     clav_m: float,
     upper_arm_m: float,
     forearm_m: float,
@@ -81,9 +80,9 @@ def marker_seeds(
         "BackTop": MarkerAttachment("Spine", (-0.10, 0.0, hub_height_m + 0.02)),
         "BackLeft": MarkerAttachment("Spine", (-0.11, 0.09, hub_height_m * 0.7)),
         "BackRight": MarkerAttachment("Spine", (-0.11, -0.09, hub_height_m * 0.7)),
-        "HeadTop": MarkerAttachment("Spine", (0.0, 0.0, cervicale_m + 0.24)),
-        "HeadFront": MarkerAttachment("Spine", (0.10, 0.0, cervicale_m + 0.16)),
-        "HeadSide": MarkerAttachment("Spine", (0.0, 0.08, cervicale_m + 0.16)),
+        "HeadTop": MarkerAttachment("Head", (0.0, 0.0, 0.24)),
+        "HeadFront": MarkerAttachment("Head", (0.10, 0.0, 0.16)),
+        "HeadSide": MarkerAttachment("Head", (0.0, 0.08, 0.16)),
         "LShoulderTop": MarkerAttachment("LScap", (0.0, clav_m, 0.05)),
         "LShoulderBack": MarkerAttachment("LScap", (-0.06, clav_m - 0.01, 0.02)),
         "RShoulderTop": MarkerAttachment("RScap", (0.0, -clav_m, 0.05)),
@@ -184,14 +183,6 @@ def main() -> None:
     )
     hub_frame = next(f for f in upper["frames"] if f["name"] == "Hub")
     hub_h = float(np.asarray(hub_frame["placement"])[2, 3])
-    head_solid = next(
-        s
-        for b in upper["bodies"]
-        if b["name"].endswith("COMRod")
-        for s in b["solids"]
-        if s["name"].endswith("/head")
-    )
-    cervicale = float(head_solid["com_m"][2]) - 0.5 * 0.2429 * args.stature / 1.741
     clav = float(
         np.linalg.norm(
             np.asarray(
@@ -220,7 +211,7 @@ def main() -> None:
         )
     )
     candidate = json.loads(args.native_candidate.read_text())
-    markers = marker_seeds(hub_h, cervicale, clav, upper_arm, forearm, candidate)
+    markers = marker_seeds(hub_h, clav, upper_arm, forearm, candidate)
     document = derive_full_body_spec(
         upper,
         extension,

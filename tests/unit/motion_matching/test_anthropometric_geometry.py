@@ -40,10 +40,18 @@ def _joint(upper: dict, child_suffix: str) -> dict:
 
 def test_names_coordinates_and_closure_are_preserved(upper: dict) -> None:
     native = json.loads(NATIVE.read_text())
-    assert upper["coordinate_order"] == native["coordinate_order"]
-    assert {b["name"] for b in upper["bodies"]} == {b["name"] for b in native["bodies"]}
-    assert {j["name"] for j in upper["joints"]} == {j["name"] for j in native["joints"]}
-    assert {f["name"] for f in upper["frames"]} == {f["name"] for f in native["frames"]}
+    assert upper["coordinate_order"] == native["coordinate_order"] + list(
+        module.NECK_COORDINATES
+    )
+    assert {b["name"] for b in upper["bodies"]} == {
+        b["name"] for b in native["bodies"]
+    } | {module.HEAD_BODY}
+    assert {j["name"] for j in upper["joints"]} == {
+        j["name"] for j in native["joints"]
+    } | {module.NECK_JOINT}
+    assert {f["name"] for f in upper["frames"]} == {
+        f["name"] for f in native["frames"]
+    } | {"Head"}
     assert upper["closure"] == native["closure"]
     club_native = next(
         b for b in native["bodies"] if b["name"].endswith("Clubface Vector")
@@ -119,11 +127,22 @@ def test_joint_axes_are_anatomical_in_mujoco(upper: dict) -> None:
     model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))
     up, left = np.array([0, 0, 1.0]), np.array([0, 1.0, 0])
     assert abs(d.xaxis[m.joint("TorsoInput").id] @ up) > 0.999
+    assert abs(d.xaxis[m.joint("NeckInputX").id] @ np.array([1.0, 0, 0])) > 0.999
+    assert abs(d.xaxis[m.joint("NeckInputY").id] @ left) > 0.999  # nod
+    assert abs(d.xaxis[m.joint("NeckInputZ").id] @ up) > 0.999  # turn
     assert abs(d.xaxis[m.joint("SpineInputY").id] @ left) > 0.999  # flexion axis
     fwd = np.array([1.0, 0, 0])
     assert abs(d.xaxis[m.joint("LEInput").id] @ left) > 0.999  # elbow flexion
     assert abs(d.xaxis[m.joint("LFInput").id] @ fwd) > 0.999  # pronation along the arm
-    assert len(model.coordinate_order) == 27
+    assert len(model.coordinate_order) == 30
+    # The neck sits at the cervicale, above the hub, and turns the head only.
+    zero_pose = dict.fromkeys(model.coordinate_order, 0.0)
+    turned = dict(zero_pose)
+    turned["NeckInputZ"] = 1.0
+    poses0, poses1 = model.frame_poses(zero_pose), model.frame_poses(turned)
+    assert poses0["Head"][2, 3] > poses0["Hub"][2, 3] + 0.03
+    np.testing.assert_allclose(poses1["Hub"], poses0["Hub"])
+    assert not np.allclose(poses1["Head"][:3, :3], poses0["Head"][:3, :3])
     # Arms point forward at zero pose; elbow flexion (negative) lifts the wrist.
     straight = model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))["LW"][
         :3, 3

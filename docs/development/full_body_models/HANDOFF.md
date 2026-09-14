@@ -318,16 +318,30 @@ branch and 2 pi continuity before smoothing), per-coordinate
 Renders: `evidence/visual_layer/*_anthro.*` (scripts take `--spec
 --trajectory --suffix`). Unqualified until Simscape carries the geometry.
 
+### Neck and Address Arms (User Direction 2026-09-14)
+
+Head body on a three-axis neck (`NeckInputX/Y/Z`, 30 upper coordinates;
+Simscape has none, accepted), head markers at full weight; address elbows
+bounded in the static trial with weak elbow-pit axis rows
+(`solve_pose(axis_targets=...)`) and restarts in the address fit; lane
+settings shared by driver and scan (`configure_lane`). Receipt
+`evidence/ground_support/anthro_v1/receipt.json`: full-capture IK 30.2 mm
+over all markers (head 28 mm), address 11.4 mm neutral, left elbow -25 deg,
+right -2 deg, backswing root error 7 mm. The left elbow pit still faces
+outward: forcing it inward breaks the swing fit (REVIEW.md 9.2 lists the
+four attempts); the wrist frame copied from the native document is the
+suspect. Renders `evidence/visual_layer/*_anthro.*` refreshed.
+
 ## Next
 
-- AN-1 (#10099): decide the structural lever for the head and arms (neck
-  joint; thoracic or scapulothoracic flexibility) as a coordinate-set
-  change with its own Simscape parity plan; give the visual layer a head
-  for the anthropometric document; verify the de Leva table against the
-  paper; then the Simscape update and R2025b parity (MATLAB not on
-  DeskComputer). Never rerun with `--recalibrate-upper` on this document:
-  the swing-wide calibration drags the static placements off (55 mm
-  address, receipted in the session).
+- AN-1 (#10099): derive the wrist base rotation from this document's
+  forearm frame (cock axis perpendicular to the elbow-pit plane, test
+  first) and rerun the address pit rows so the left pit faces inward
+  without breaking the swing (REVIEW.md 9.2); verify the de Leva table
+  against the paper; then the Simscape update and R2025b parity (MATLAB
+  not on DeskComputer; the neck stays MuJoCo/Drake/Pinocchio-only). Never
+  rerun with `--recalibrate-upper` on this document (55 mm address,
+  receipted) and keep one static-trial round.
 - GS-4: the downswing needs a dynamically consistent reference or the FB-5
   contact-aware shooting fit; candidates in order: stance timing from the
   reference contact forces instead of marker heights, a hip zero-twist

@@ -6,7 +6,7 @@
   },
   {
     "body": "COMRod",
-    "length_m": 0.5819,
+    "length_m": 0.4626,
     "radius_m": 0.05
   },
   {
@@ -92,6 +92,11 @@
   {
     "body": "LowerTorso",
     "length_m": 0.1382,
+    "radius_m": 0.05
+  },
+  {
+    "body": "Head",
+    "length_m": 0.1193,
     "radius_m": 0.05
   },
   {

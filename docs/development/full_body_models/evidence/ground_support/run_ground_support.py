@@ -35,6 +35,7 @@ import logging
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 import imageio
 import mujoco
@@ -165,6 +166,19 @@ SPIN_COORDINATES = tuple(
 # Neutral address for the static trial: scapulae undepressed, spine nearly straight.
 NEUTRAL_LOCKS = {f"{s}ScapInput{a}": 0.0 for s in "LR" for a in "XY"}
 NEUTRAL_BOUNDS_DEG = {"SpineInputX": (-5.0, 5.0), "SpineInputY": (-10.0, 10.0)}
+# Address arms (anthropometric documents): lead arm nearly straight, trail arm
+# softly flexed, and each elbow pit facing up and a little toward the other
+# arm. The pit is the upper-arm frame's +x axis (flexion lifts the wrist that
+# way); the spin that sets it is otherwise free in the marker fit.
+ADDRESS_RESTARTS = 6  # perturbed re-solves per leg seed in the address fit
+ADDRESS_RESTART_SPREAD_RAD = 0.5
+ADDRESS_ELBOW_BOUNDS_DEG = {"LEInput": (-25.0, 5.0), "REInput": (-35.0, 5.0)}
+ELBOW_PIT_INWARD = 0.4  # target = up + ELBOW_PIT_INWARD * (toward the other shoulder)
+ELBOW_PIT_WEIGHT = 0.02  # address fits with placed markers
+# Static trial rounds and their pit weights. One mild round: a dominant pit
+# weight (5.0) or a second round with the placed markers both turned the left
+# pit inward at address but broke the swing (68 to 81 mm), receipted 2026-09-14.
+ELBOW_PIT_WEIGHTS_NEUTRAL = (0.02,)
 CALIBRATION_ITERATIONS = 3
 CALIBRATION_PRIOR_FRAMES = 40.0  # anatomical seed weight in frame-equivalents
 SCALE_GRID = (0.94, 0.97, 1.00)  # femur and tibia length scales searched
@@ -325,6 +339,18 @@ def document_seed(document: dict, kin: FullBodyMarkerKinematics) -> np.ndarray:
     return q
 
 
+def configure_lane(lane: Lane, document: dict) -> None:
+    """Document-dependent solver settings: declared ranges, the spin priors and
+    address constraints of anthropometric documents, full head weight when a
+    neck carries the head."""
+    lane.bounds |= document_bounds(document)
+    if "address_seed_deg" in document:
+        lane.anthropometric = True
+        lane.prior_weights = dict.fromkeys(SPIN_COORDINATES, SPIN_PRIOR)
+    if "NeckInputZ" in document["coordinate_order"]:
+        lane.marker_weights = {}
+
+
 class Lane:
     """Capture, ground, stance and bounds shared by every stage."""
 
@@ -357,6 +383,7 @@ class Lane:
             if label in labels
         }
         self.prior_weights: dict[str, float] = {}
+        self.anthropometric = False
 
     def kinematics(
         self, spec_bytes: bytes, attachments: dict
@@ -373,18 +400,31 @@ class Lane:
         base: np.ndarray,
         *,
         neutral: bool = False,
+        pit_weight: float = ELBOW_PIT_WEIGHT,
     ):
         """Best address fit over the leg seeds; ``neutral`` locks the scapulae
         and bounds the spine to a straight-torso address."""
         bounds = dict(self.bounds)
         locked = None
+        axis_targets = None
         if neutral:
             locked = dict(NEUTRAL_LOCKS)
             bounds |= {
                 name: (np.radians(lo), np.radians(hi))
                 for name, (lo, hi) in NEUTRAL_BOUNDS_DEG.items()
             }
+            if self.anthropometric:
+                bounds |= {
+                    name: (np.radians(lo), np.radians(hi))
+                    for name, (lo, hi) in ADDRESS_ELBOW_BOUNDS_DEG.items()
+                }
+        if self.anthropometric:
+            # Every address fit keeps the elbow pits up and inward; the arm
+            # markers sit close to the humeral axis and do not pin its spin,
+            # and in the static trial the seed offsets must not decide it.
+            axis_targets = self.elbow_pit_targets(kin, base, pit_weight)
         best = None
+        rng = np.random.default_rng(0)
         for seed in ADDRESS_SEEDS_DEG:
             start = base.copy()
             for joint, value in seed.items():
@@ -392,23 +432,77 @@ class Lane:
                     start[kin.coordinate_order.index(f"{joint}_{side}")] = np.radians(
                         value
                     )
-            fit = kin.solve_pose(
-                self.points[0],
-                self.valid[0],
-                start,
-                ground=self.ground,
-                prior_weight=PRIOR,
-                iterations=100,
-                flat_feet=self.stance[0],
-                bounds=bounds,
-                locked=locked,
-                marker_weights=self.marker_weights,
-                prior_weights=self.prior_weights,
-            )
-            if best is None or fit.marker_rms_m < best.marker_rms_m:
-                best = fit
+            # The leg seed plus perturbed restarts of the other coordinates:
+            # the address is a multi-minimum problem for the arms and pelvis.
+            starts = [start] + [
+                np.concatenate(
+                    [
+                        start[:6],
+                        start[6:]
+                        + rng.uniform(
+                            -ADDRESS_RESTART_SPREAD_RAD,
+                            ADDRESS_RESTART_SPREAD_RAD,
+                            len(start) - 6,
+                        ),
+                    ]
+                )
+                for _ in range(ADDRESS_RESTARTS)
+            ]
+            for q0 in starts:
+                fit = kin.solve_pose(
+                    self.points[0],
+                    self.valid[0],
+                    q0,
+                    ground=self.ground,
+                    prior_weight=PRIOR,
+                    iterations=100,
+                    flat_feet=self.stance[0],
+                    bounds=bounds,
+                    locked=locked,
+                    marker_weights=self.marker_weights,
+                    prior_weights=self.prior_weights,
+                    axis_targets=axis_targets,
+                )
+                if best is None or fit.marker_rms_m < best.marker_rms_m:
+                    best = fit
         assert best is not None
         return best
+
+    def elbow_pit_targets(
+        self, kin: FullBodyMarkerKinematics, q: np.ndarray, weight: float
+    ) -> dict[str, tuple[tuple[float, float, float], np.ndarray, float]]:
+        """Axis targets pointing each elbow pit up and toward the other arm,
+        from the shoulder positions of the pose ``q``."""
+        poses = kin.body_poses(q, ["LS", "RS"])
+        left, right = poses["LS"][1], poses["RS"][1]
+        across = right - left
+        across[2] = 0.0
+        across /= max(np.linalg.norm(across), 1e-9)
+        out = {}
+        for side, sign in (("L", 1.0), ("R", -1.0)):
+            target = np.array([0.0, 0.0, 1.0]) + ELBOW_PIT_INWARD * sign * across
+            out[f"{side}S"] = ((1.0, 0.0, 0.0), target, weight)
+        return out
+
+    def static_trial(
+        self, spec_bytes: bytes, seeds: dict, q_seed: np.ndarray
+    ) -> tuple[dict, Any, FullBodyMarkerKinematics]:
+        """Alternating static trial: neutral address fit, placement of every
+        marker at that pose, and again with the placed markers so the pose is
+        decided by well-placed markers plus the posture constraints (the
+        anatomical seeds only start it). Returns the placements, the last
+        neutral fit and the kinematics carrying the placements."""
+        placed = dict(seeds)
+        q = q_seed
+        neutral = None
+        for weight in ELBOW_PIT_WEIGHTS_NEUTRAL:
+            adapter, kin = self.kinematics(spec_bytes, placed)
+            neutral = self.best_address(kin, q, neutral=True, pit_weight=weight)
+            placed = self.static_offsets(kin, neutral.q, placed)
+            q = neutral.q
+        adapter, kin = self.kinematics(spec_bytes, placed)
+        assert neutral is not None
+        return placed, neutral, kin
 
     def static_offsets(
         self, kin: FullBodyMarkerKinematics, q: np.ndarray, seeds: dict
@@ -586,9 +680,7 @@ def main() -> None:
     }
     labels = tuple({**upper, **LEG_SEEDS})
     lane = Lane(labels)
-    lane.bounds |= document_bounds(base_spec)
-    if "address_seed_deg" in base_spec:
-        lane.prior_weights = dict.fromkeys(SPIN_COORDINATES, SPIN_PRIOR)
+    configure_lane(lane, base_spec)
 
     # 0. functional hip calibration
     waist_offsets = {
@@ -662,11 +754,12 @@ def main() -> None:
     if args.static_seeds:
         # Every marker is placed from the static trial; without
         # --recalibrate-upper the upper-body placements then stay fixed.
-        neutral = lane.best_address(kin, q_seed, neutral=True)
-        placed = lane.static_offsets(kin, neutral.q, {**fixed, **seeds_all})
+        placed, neutral, kin = lane.static_trial(
+            hip_bytes, {**fixed, **seeds_all}, q_seed
+        )
+        adapter = kin.adapter
         fixed = {label: placed[label] for label in fixed}
         seeds_all = {label: placed[label] for label in seeds_all}
-        adapter, kin = lane.kinematics(hip_bytes, {**fixed, **seeds_all})
         address = lane.best_address(kin, neutral.q)
         address_report["static_trial"] = {
             "frames": STATIC_FRAMES,
