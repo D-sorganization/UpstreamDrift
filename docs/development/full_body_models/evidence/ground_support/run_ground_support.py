@@ -164,6 +164,22 @@ TRACKING_CUTOFF_HZ = 12.0  # second zero-phase low-pass on the re-solved referen
 ZMP_MARGIN_M = 0.02
 ZMP_FILTER_ITERATIONS = 3
 ZMP_COM_WEIGHT = 200.0  # weight of the centre-of-mass rows in the re-solve
+# Shooting fit (FB-5, MM-7b), iterative learning form: the pelvis command
+# pinned in the re-solve moves against the drift the replay showed
+# (command <- command - relaxation * (replayed - reference)) on every root
+# coordinate but the vertical slide, which the planted feet set; the joints
+# are re-solved against the markers around that command, replayed again, and
+# the best replay by marker error is kept. Pinning the pelvis where the
+# replay drifted instead (a plain fixed point) is anti-corrective and
+# diverges (receipted 2026-09-14: 74.6, 73.9, 90, 199, 266 mm).
+SHOOTING_LOCKED = (
+    "TranslationInputX",
+    "TranslationInputY",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+)
+SHOOTING_RELAXATION = 0.7
 CONSISTENCY_PRIOR = 0.1  # weight pulling the re-solve toward the smoothed reference
 CALIBRATION_STRIDE = 6
 STATIC_FRAMES = 24  # first 0.067 s of address treated as the static trial
@@ -731,6 +747,129 @@ def wrist_bounds() -> dict[str, tuple[float, float]]:
     }
 
 
+def replay(
+    sim: fs.FullBodySimulator, lane: Lane, q_track: np.ndarray
+) -> tuple[fs.SimulationRecord, np.ndarray]:
+    """Track ``q_track`` with computed torque from preloaded feet; returns the
+    record and the state resampled on the capture times."""
+    q0 = fs.preload_feet(sim, q_track[0])
+    v0 = np.gradient(q_track, lane.times, axis=0)[0]
+    controller = fs.tracking_controller(
+        sim, lane.times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
+    )
+    record = sim.run(
+        q0,
+        v0,
+        controller,
+        duration_s=float(lane.times[-1]),
+        dt_s=DT_S,
+        record_every=int(round(1.0 / (RATE_HZ * DT_S))),
+    )
+    sim_q = np.array(
+        [
+            [np.interp(t, record.time_s, record.q[:, k]) for k in range(sim.nv)]
+            for t in lane.times
+        ]
+    )
+    return record, sim_q
+
+
+def shooting_fit(
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    sim: fs.FullBodySimulator,
+    q_track: np.ndarray,
+    q_ref: np.ndarray,
+    iterations: int,
+    log: logging.Logger,
+    gain: float = SHOOTING_RELAXATION,
+) -> tuple[np.ndarray, dict, dict]:
+    """Contact-aware shooting fit of the tracked reference (FB-5, MM-7b).
+
+    The simulator is the plant: each iteration replays the current reference,
+    measures how far the pelvis drifted from the reference pelvis path, moves
+    the pelvis command against that drift by ``SHOOTING_RELAXATION``
+    (iterative learning: the replay of a command displaced by minus the
+    drift lands on the reference), re-solves the joints against the markers
+    with the command pinned (``SHOOTING_LOCKED``; the vertical slide stays
+    free so the planted feet set it) and low-passes the result. The
+    objective is the marker error of the replayed motion; the best replay's
+    reference is returned with its zero-moment-point summary. Postcondition:
+    the returned reference never replays worse than the input (iteration 0).
+    """
+    root = [kin.coordinate_order.index(name) for name in SHOOTING_LOCKED]
+    target = q_track[:, root].copy()  # the reference pelvis path to land on
+    command = target.copy()
+    history = []
+    best_q, best_rms = q_track, np.inf
+    for k in range(iterations + 1):
+        record, sim_q = replay(sim, lane, q_track)
+        errors = marker_errors(kin, sim_q, lane.points)
+        rms = float(np.sqrt(np.mean(errors[lane.valid] ** 2)))
+        root_err = np.linalg.norm(sim_q[:, :3] - q_ref[:, :3], axis=1)
+        zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+        history.append(
+            {
+                "iteration": k,
+                "replay_marker_rms_m": rms,
+                "replay_segment_rms_m": segment_rms(lane.labels, errors, lane.valid),
+                "root_error_max_m": float(root_err.max()),
+                "root_error_1_4s_m": float(root_err[int(round(1.4 * RATE_HZ))]),
+                "weight_fraction_min": float(record.weight_fraction.min()),
+                "reference_marker_rms_m": float(
+                    np.sqrt(
+                        np.mean(
+                            marker_errors(kin, q_track, lane.points)[lane.valid] ** 2
+                        )
+                    )
+                ),
+                "reference_change_max_rad": float(
+                    np.abs(q_track[:, 6:] - q_ref[:, 6:]).max()
+                ),
+                "pelvis_command_offset_max_m": float(
+                    np.abs(command[:, :2] - target[:, :2]).max()
+                ),
+                **zmp_summary(zmp, lane.times),
+            }
+        )
+        log.info(
+            "shooting %d: replay markers %.1f mm, root max %.0f mm (1.4 s %.0f), wf min %.2f, zmp outside 1.0-1.5 s %.2f",
+            k, rms * 1e3, root_err.max() * 1e3, history[-1]["root_error_1_4s_m"] * 1e3,
+            history[-1]["weight_fraction_min"], history[-1]["outside_fraction_1s_to_1_5s"],
+        )  # fmt: skip
+        if rms < best_rms:
+            best_q, best_rms = q_track, rms
+        if k == iterations:
+            break
+        command = command - gain * (sim_q[:, root] - target)
+        locked = [
+            {name: float(command[j, i]) for i, name in enumerate(SHOOTING_LOCKED)}
+            for j in range(len(lane.times))
+        ]
+        q_fit, _ = kin.solve_trajectory(
+            lane.points,
+            lane.valid,
+            q_track[0],
+            ground=lane.ground,
+            prior_weight=CONSISTENCY_PRIOR,
+            iterations=30,
+            flat_feet_per_frame=lane.stance,
+            plant_stance=True,
+            prior_trajectory=q_track,
+            bounds=lane.bounds,
+            locked_per_frame=locked,
+        )
+        q_track = smooth_reference(q_fit, RATE_HZ, TRACKING_CUTOFF_HZ)
+    zmp = fs.reference_zmp(sim, lane.times, best_q, lane.ground)
+    report = {
+        "locked": list(SHOOTING_LOCKED),
+        "relaxation": gain,
+        "iterations": history,
+        "best_iteration": int(np.argmin([h["replay_marker_rms_m"] for h in history])),
+    }
+    return best_q, zmp, report
+
+
 def zmp_summary(zmp: dict, times: np.ndarray) -> dict:
     """Receipt lines for a ``reference_zmp`` result."""
     window = (times >= 1.0) & (times < 1.5)
@@ -971,6 +1110,21 @@ def main() -> None:
         action="store_true",
         help="leave the wrists and forearms unbounded (flagged only) even for a "
         "document with a fitted grip rotation, e.g. to feed fit_grip_rotation.py",
+    )
+    parser.add_argument(
+        "--shooting-fit",
+        type=int,
+        default=0,
+        metavar="N",
+        help="contact-aware shooting fit of the tracked reference (FB-5): N "
+        "replay/re-solve iterations with the replayed pelvis pinned; the best "
+        "replay is kept",
+    )
+    parser.add_argument(
+        "--shooting-gain",
+        type=float,
+        default=SHOOTING_RELAXATION,
+        help="iterative-learning gain on the pelvis command per shooting pass",
     )
     parser.add_argument(
         "--zmp-filter",
@@ -1288,25 +1442,12 @@ def main() -> None:
     zmp_filter_report: dict | None = None
     if args.zmp_filter:
         q_track, zmp, zmp_filter_report = zmp_filter(lane, kin, sim, q_track, zmp, log)
-    q0 = fs.preload_feet(sim, q_track[0])
-    v0 = np.gradient(q_track, lane.times, axis=0)[0]
-    controller = fs.tracking_controller(
-        sim, lane.times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
-    )
-    record = sim.run(
-        q0,
-        v0,
-        controller,
-        duration_s=float(lane.times[-1]),
-        dt_s=DT_S,
-        record_every=int(round(1.0 / (RATE_HZ * DT_S))),
-    )
-    sim_q = np.array(
-        [
-            [np.interp(t, record.time_s, record.q[:, k]) for k in range(sim.nv)]
-            for t in lane.times
-        ]
-    )
+    shooting_report: dict | None = None
+    if args.shooting_fit > 0:
+        q_track, zmp, shooting_report = shooting_fit(
+            lane, kin, sim, q_track, q_ref, args.shooting_fit, log, args.shooting_gain
+        )
+    record, sim_q = replay(sim, lane, q_track)
     sim_errors = marker_errors(kin, sim_q, lane.points)
     dynamics_report = {
         "duration_s": float(lane.times[-1]),
@@ -1320,6 +1461,7 @@ def main() -> None:
         },
         "contact_parameters": adapter.contact_parameters.as_document(),
         "zmp_filter": zmp_filter_report,
+        "shooting_fit": shooting_report,
         "reference_zmp": {
             "description": "zero-moment point the tracked reference demands "
             "of this model against the support polygon of the spheres on the "

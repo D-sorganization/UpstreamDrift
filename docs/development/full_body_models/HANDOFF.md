@@ -426,6 +426,14 @@ excursions come from the arm-club angular momentum the cart table ignores.
 Kept as an experiment (`anthro_driver_zmp/receipt.json`); MM-7b now means a
 whole-body shooting fit (FB-5). Details REVIEW.md 15.
 
+### Contact-Aware Shooting Fit (FB-5, MM-7B, 2026-09-14)
+
+`run_ground_support.py --shooting-fit N` replays the tracked reference,
+moves the pinned pelvis command against the replay's drift (iterative
+learning) and re-solves the joints against the markers
+(`solve_trajectory(locked_per_frame=...)`); the best replay is kept.
+On both captures every gain diverges from iteration 0 (driver 74.6 to 134.8 mm at gain 0.7, to 103.9 mm at gain 0.25; 7-iron 112.3 to 192.9 mm), so the dynamics stage keeps the unmodified reference. The replay error is pelvis yaw lag (72.7 of 74.6 mm), a ground yaw-moment limit for this composite reference; the next form is a differentiable-simulator trajectory optimisation (JaxSim #6647 or MJX). Details REVIEW.md 16.
+
 ### How to Continue (Read This First)
 
 1. Run the pipeline from the launcher tile "Motion Matching" or

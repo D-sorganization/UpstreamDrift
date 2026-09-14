@@ -5,3 +5,9 @@ anthro_driver_zmp/*
 !anthro_driver_zmp/receipt.json
 anthro_iron_zmp/*
 !anthro_iron_zmp/receipt.json
+anthro_driver_shoot/*
+!anthro_driver_shoot/receipt.json
+anthro_iron_shoot/*
+!anthro_iron_shoot/receipt.json
+anthro_driver_shoot_g025/*
+!anthro_driver_shoot_g025/receipt.json

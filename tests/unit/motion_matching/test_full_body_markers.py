@@ -542,3 +542,33 @@ def test_com_target_rows_pull_the_centre_of_mass(
             ground=ground,
             com_targets_per_frame=[None],
         )
+
+
+def test_locked_per_frame_pins_named_coordinates(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    kin = kinematics
+    spheres = list(kin._spheres)
+    ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
+    q0 = np.zeros(len(kin.coordinate_order))
+    traj, _ = kin.solve_trajectory(
+        np.full((2, len(kin.labels), 3), np.nan),
+        np.zeros((2, len(kin.labels)), dtype=bool),
+        q0,
+        ground=ground,
+        flat_feet_per_frame=[spheres, spheres],
+        prior_weight=1e-3,
+        locked_per_frame=[None, {"TranslationInputX": 0.05, "HipInputZ": 0.1}],
+        iterations=10,
+    )
+    x = kin.coordinate_order.index("TranslationInputX")
+    z = kin.coordinate_order.index("HipInputZ")
+    assert traj[1, x] == 0.05 and traj[1, z] == 0.1
+    with pytest.raises(ValueError):
+        kin.solve_trajectory(
+            np.full((2, len(kin.labels), 3), np.nan),
+            np.zeros((2, len(kin.labels)), dtype=bool),
+            q0,
+            ground=ground,
+            locked_per_frame=[None],
+        )

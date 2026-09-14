@@ -630,12 +630,14 @@ class FullBodyMarkerKinematics:
         axis_targets_per_frame: Sequence[Mapping[str, Any] | None] | None = None,
         com_targets_per_frame: Sequence[tuple[Sequence[float], float] | None]
         | None = None,
+        locked_per_frame: Sequence[Mapping[str, float] | None] | None = None,
         **options: Any,
     ) -> tuple[Array, list[PoseFit]]:
         """Solve consecutive frames, each warm-started from the previous one.
 
         ``com_targets_per_frame`` gives every capture frame its own
-        ``com_target`` (or None).
+        ``com_target`` (or None); ``locked_per_frame`` its own ``locked``
+        mapping (the shooting fit pins the root the replay produced).
 
         A frame whose fit stays above ``restart_threshold_m`` is re-solved
         ``restarts`` more times from the start pose with the non-root
@@ -683,6 +685,8 @@ class FullBodyMarkerKinematics:
             and len(com_targets_per_frame) != targets.shape[0]
         ):
             raise ValueError("com_targets_per_frame needs one entry per capture frame")
+        if locked_per_frame is not None and len(locked_per_frame) != targets.shape[0]:
+            raise ValueError("locked_per_frame needs one entry per capture frame")
         rng = np.random.default_rng(0)
         q = np.asarray(q_init, dtype=float)
         fits: list[PoseFit] = []
@@ -701,6 +705,8 @@ class FullBodyMarkerKinematics:
                 frame_options["axis_targets"] = axis_targets_per_frame[k]
             if com_targets_per_frame is not None:
                 frame_options["com_target"] = com_targets_per_frame[k]
+            if locked_per_frame is not None:
+                frame_options["locked"] = locked_per_frame[k]
             fit = self.solve_pose(
                 targets[k],
                 mask[k],

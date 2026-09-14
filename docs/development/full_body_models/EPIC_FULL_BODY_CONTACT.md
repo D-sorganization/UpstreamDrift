@@ -188,8 +188,9 @@ MM-7 (#10109) advanced 2026-09-14: the downswing replay holds to 38 mm
 at the pelvis through impact with a compliant sole and a band-limited tracked
 reference (was 178 mm, airborne); the reference zero-moment point diagnostic
 shows the composite capture is not dynamically consistent for the model, so
-the cart-table dynamics filter was tried and rejected, so MM-7b is the FB-5
-whole-body shooting fit (REVIEW.md 15).
+the cart-table dynamics filter was tried and rejected; the FB-5 shooting
+fit (iterative-learning pelvis command, replay in the loop) was implemented and diverges on both captures (pelvis yaw lag is a ground yaw-moment limit), so MM-7b is a differentiable-simulator trajectory optimisation
+(REVIEW.md 16).
 
 ## Rules Every Child Follows
 
