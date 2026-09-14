@@ -1,3 +1,21 @@
+# Full-Body Models FB-5 (Forward-Dynamics Matching) Handoff Checkpoint — 2026-09-14
+
+- Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003
+- Branch: feat/fb5-full-body-forward-dynamics
+- Governing issue: #10069 (Parent epic #10062). Entry DL-#10062.
+- Change: Derivative floor resolution utility (`derivative_resolution.py`), multi-shooting fit extension
+  with `shared_boundary_policy="once"` and node modes (`multi_shooting_fit.py`), shared 5 tour metrics extraction
+  (`tour_metrics.py`), MuJoCo KKT dynamics regularization fallback (`native_model.py`), continuous 41-coordinate
+  forward simulation with ground contact and contact audit (`full_body_forward_dynamics.py`), and automated
+  verification driver `verify_full_body_matching.py`.
+- Verification: Measured derivative resolution floor (resolved at $h=1.00\times 10^{-6}$, noise floor $10^{-12}$),
+  demonstrated two-window multiple shooting fit with `shared_boundary_policy="once"`, and executed uninterrupted
+  654-frame original-state replay ($t=0$ to $t=1.8139$ s) in MuJoCo with reported 5 shared metrics and contact audit.
+  13 unit tests pass with Ruff, Black, and Mypy.
+- Evidence: `docs/development/full_body_models/evidence/fb5_matching/receipt_mujoco.json` and `forward_trajectory_mujoco.npz`.
+- Next: FB-6 cross-engine parity and visual review (#10070).
+- Preserved peer handoffs below.
+
 # Full-Body Models FB-4 (Marker Calibration & IK) Handoff Checkpoint — 2026-09-14
 
 - Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003

@@ -1,5 +1,27 @@
 # SPEC.md — Repository Specification Document
 
+## Full-Body Forward-Dynamics Matching With Two-Window Shooting Fitter (FB-5, #10069)
+
+Implement full-body forward-dynamics simulation, multiple-shooting fitter extensions, and measured derivative resolution under Epic #10062:
+- Derivative Resolution Utilities (`src/shared/python/motion_matching/derivative_resolution.py`):
+  - `measure_derivative_floor`: Determine scale-aware finite-difference perturbation steps and measure noise floors on stiff, contact-coupled forward simulation objectives.
+  - `compute_finite_difference_step_vector`: Scale-aware finite-difference perturbation vector $h_i = \max(\text{floor}, \text{default\_step} \cdot (1.0 + |x_{0,i}|))$.
+- Constrained Multiple-Shooting Fitter Extensions (`src/shared/python/motion_matching/multi_shooting_fit.py`):
+  - Add `shared_boundary_policy="once" | "both"`: Eliminates duplicate boundary residual accumulation at internal shooting nodes.
+  - Add `node_mode="joint" | "fixed_nodes" | "nodes_only"`: Permits optimizing state defect variables at shooting nodes initialized from kinematics without state resets during replay.
+- Shared Kinematic Metrics Module (`src/shared/python/motion_matching/tour_metrics.py`):
+  - Standardized evaluation of the 5 shared tour metrics: `whole_marker_rmse_m`, `early_marker_rmse_m`, `terminal_marker_rmse_m`, `club_marker_rmse_m`, and `pelvis_yaw_rmse_rad`.
+  - Backward-compatible re-export in `src/engines/physics_engines/opensim/python/tour_matching/metrics.py`.
+- Physics Dynamics Hardening (`src/engines/physics_engines/mujoco/python/native_model.py`):
+  - Add damped regularization $W = J M^{-1} J^T + \epsilon I$ and `lstsq` fallback to `_solve_kkt_dynamics` to avoid numerical singularity failures under open-loop constraint configurations.
+- Full-Body Forward Simulation (`src/shared/python/motion_matching/full_body_forward_dynamics.py`):
+  - `simulate_full_body_forward`: Continuous `solve_ivp(method="rk45")` and semi-implicit Euler integration across 41 coordinates with compliant ground contact and loop closure.
+  - Auto-calibration of ground height at address: `calibrate_ground_height_at_address`.
+  - Comprehensive contact force and penetration audit (`ContactAuditResult`).
+- Automated Evidence & Verification Runner (`docs/development/full_body_models/evidence/fb5_matching/`):
+  - Driver `verify_full_body_matching.py` resolving derivative floor ($h=1.00\times 10^{-6}$, noise floor $1.00\times 10^{-12}$), demonstrating two-window shooting fit setup (`shared_boundary_policy="once"`, node mode `nodes_only`, FB-4 IK node initialization), and simulating an uninterrupted 654-frame replay.
+  - Archives machine-verifiable receipts (`receipt_mujoco.json`) and forward trajectory (`forward_trajectory_mujoco.npz`).
+
 ## Full-Body Marker Calibration and IK per Physics Engine (FB-4, #10068)
 
 Implement alternating marker calibration and least-squares inverse kinematics over full-body coordinates for MuJoCo, Pinocchio, and Drake under Epic #10062:
