@@ -20,19 +20,28 @@ def pytest_configure(config):
     persists through collection. Individual test classes use @patch.dict
     to clean up per-test-scope.
     """
-    # Mock Drake dependencies
-    if "pydrake" not in sys.modules:
-        sys.modules["pydrake"] = MagicMock()
-    if "pydrake.all" not in sys.modules:
-        sys.modules["pydrake.all"] = sys.modules["pydrake"]
+    # Mock Drake dependencies if not importable
+    try:
+        import pydrake.all
+    except ImportError:
+        if "pydrake" not in sys.modules:
+            sys.modules["pydrake"] = MagicMock()
+        if "pydrake.all" not in sys.modules:
+            sys.modules["pydrake.all"] = sys.modules["pydrake"]
 
-    # Mock optimization dependencies
-    if "casadi" not in sys.modules:
-        sys.modules["casadi"] = MagicMock()
-    if "pinocchio" not in sys.modules:
-        sys.modules["pinocchio"] = MagicMock()
-    if "pinocchio.casadi" not in sys.modules:
-        sys.modules["pinocchio.casadi"] = MagicMock()
+    # Mock optimization dependencies if not importable
+    try:
+        import casadi
+    except ImportError:
+        if "casadi" not in sys.modules:
+            sys.modules["casadi"] = MagicMock()
+    try:
+        import pinocchio
+    except ImportError:
+        if "pinocchio" not in sys.modules:
+            sys.modules["pinocchio"] = MagicMock()
+        if "pinocchio.casadi" not in sys.modules:
+            sys.modules["pinocchio.casadi"] = MagicMock()
 
 
 @pytest.fixture(autouse=True)
@@ -51,7 +60,7 @@ def _reset_mocks_between_tests():
     detects mocks and reports NOT_INSTALLED, but resetting the cache per test
     keeps that determination from leaking across the mock/unmock boundary.
     """
-    # Reset the mocks to MagicMock() to clear any state
+    # Reset the mocks to MagicMock() to clear any state if they were mocked
     for module_name in [
         "pydrake",
         "pydrake.all",
@@ -59,7 +68,9 @@ def _reset_mocks_between_tests():
         "pinocchio",
         "pinocchio.casadi",
     ]:
-        if module_name in sys.modules:
+        if module_name in sys.modules and isinstance(
+            sys.modules[module_name], MagicMock
+        ):
             sys.modules[module_name] = MagicMock()
 
     # Drop any memoised availability verdict so each test re-probes against the

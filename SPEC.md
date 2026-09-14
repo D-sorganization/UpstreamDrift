@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Drake Full-Body Model URDF Export, Sidecar Contract, and KKT Adapter (FB-3-D, #10067)
+
+Implement full-body Drake URDF export, bundle validation contract, and dynamic simulation adapter supporting the FB-2 shared rigid-ground contact law:
+- URDF Export (`src/engines/physics_engines/drake/python/full_body_urdf.py`): Convert `full-body-v1` specifications into a valid Drake URDF model containing all 41 scalar degrees of freedom (27 upper-body joints + 14 lower-limb joints), preserving exact upper-body kinematic, inertial, frame site, and weld equality closure structure. Add calcaneus contact sphere links and visual/collision elements (`contact_heel_r`, `contact_forefoot_r`, `contact_heel_l`, `contact_forefoot_l`). Produces sidecar metadata enforcing coordinate ordering and SHA256 identities.
+- Bundle Contract Validator (`src/engines/physics_engines/drake/python/full_body_urdf_contract.py`): Validate URDF, sidecar, and model bundle integrity, verifying cryptographic hashes, schema requirements, joint and coordinate orders, body link names, and dual-grip closure constraints.
+- Full-Body Model Adapter (`src/engines/physics_engines/drake/python/full_body_model.py`): Implement `NativeDrakeFullBodyModel` providing `evaluate_contact_samples`, `accelerations`, `frame_poses`, and `closure_errors`. Calculate contact forces using the shared Hunt-Crossley and regularized Coulomb law (`contact_law.sphere_ground_contact`), apply explicit spatial forces via contact Jacobians (`jac_pos.T @ f_contact`), and resolve the closed-loop dual-grip weld constraint via an explicit rigid KKT solve.
+- Comprehensive Test Suite (`tests/unit/motion_matching/test_full_body_drake.py`): Verify compile structure ($nq=41, nv=41$), upper-body slice inertia and forward kinematics parity to $10^{-12}$, frame poses parity against qualified native upper body, and exact 0.0 N force parity against reference contact adapter across random contact states.
+
 ## MuJoCo Full-Body Model Export and Shared Ground Contact Adapter (FB-3-M, #10066)
 
 Implement full-body MuJoCo MJCF export and dynamic simulation adapter supporting the FB-2 shared rigid-ground contact law:

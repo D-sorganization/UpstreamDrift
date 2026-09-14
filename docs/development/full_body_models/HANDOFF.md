@@ -74,8 +74,29 @@ loudly if not.
   to 1e-12, frame poses parity against the qualified native model, and exact 0.0 N
   contact force parity on the shared FB-2 harness.
 
+## FB-3-D Completed (#10067)
+
+- `src/engines/physics_engines/drake/python/full_body_urdf.py`: `export_full_body_urdf`
+  converts `full-body-v1` documents to URDF XML preserving all 41 scalar joints
+  (27 upper-body joints + 14 lower-limb joints), upper-body kinematic transforms
+  and aggregated inertias, 16 frame links/joints, 2 weld closure sites, and adds 4
+  calcaneus contact sphere links and visual/collision elements (`contact_heel_r`, `contact_forefoot_r`,
+  `contact_heel_l`, `contact_forefoot_l`). Generates mandatory sidecar metadata.
+- `src/engines/physics_engines/drake/python/full_body_urdf_contract.py`:
+  `validate_full_body_urdf_bundle` validates bundle consistency, SHA256 identities,
+  coordinate orders, and link mappings.
+- `src/engines/physics_engines/drake/python/full_body_model.py`: `NativeDrakeFullBodyModel`
+  compiles in continuous Drake `MultibodyPlant(time_step=0.0)` without stock discrete SAP.
+  Provides `evaluate_contact_samples`, `accelerations`, `frame_poses`, and `closure_errors`.
+  Applies the shared FB-2 contact law via contact Jacobians (`jac_pos.T @ f_contact`)
+  and resolves the closed-loop dual-grip weld via an explicit rigid KKT solve.
+- `tests/unit/motion_matching/test_full_body_drake.py`: 4 tests (2 structural unit tests
+  and 2 live simulation tests on ControlTower runner) verifying compilation ($nq=41, nv=41$),
+  upper-body slice inertia and FK parity to 1e-12, frame poses parity against the qualified
+  native model, and exact 0.0 N contact force parity on the shared FB-2 harness.
+
 ## Next
 
-- FB-3-P (#10065 Pinocchio) and FB-3-D (#10067 Drake) builders consuming `full_body_spec_v1.json`.
-- Cross-engine same-input replay and comparison against MuJoCo FB-3-M.
+- FB-3-P (#10065 Pinocchio) builder consuming `full_body_spec_v1.json` (PR #10083 in review).
+- Cross-engine same-input replay and comparison across MuJoCo FB-3-M, Drake FB-3-D, and Pinocchio FB-3-P.
 - FB-4 ground height and marker calibration, and FB-5 fitting per Epic #10062.
