@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## MuJoCo Full-Body Model Export and Shared Ground Contact Adapter (FB-3-M, #10066)
+
+Implement full-body MuJoCo MJCF export and dynamic simulation adapter supporting the FB-2 shared rigid-ground contact law:
+- MJCF Export (`src/engines/physics_engines/mujoco/python/full_body_mjcf.py`): Convert `full-body-v1` specifications into a valid MuJoCo XML model containing all 41 scalar degrees of freedom (27 upper-body joints + 14 lower-limb joints), preserving exact upper-body kinematic, inertial, frame site, and weld equality closure structure. Add calcaneus contact sphere geoms and sites (`contact_heel_r`, `contact_forefoot_r`, `contact_heel_l`, `contact_forefoot_l`). Disable stock solver collision to decouple contact physics.
+- Full-Body Model Adapter (`src/engines/physics_engines/mujoco/python/full_body_model.py`): Implement `NativeMujocoFullBodyModel` providing `evaluate_contact_samples`, `accelerations`, `frame_poses`, and `closure_errors`. Calculate contact forces using the shared Hunt-Crossley and regularized Coulomb law (`contact_law.sphere_ground_contact`), apply explicit spatial wrenches via `data.xfrc_applied`, and resolve the closed-loop dual-grip weld via an explicit rigid solve.
+- Comprehensive Test Suite (`tests/unit/motion_matching/test_full_body_mujoco.py`): Verify compile structure ($nq=41, nv=41$), upper-body slice inertia and forward kinematics parity to $10^{-12}$, frame poses parity against qualified native upper body, and exact 0.0 N force parity against reference contact adapter across random contact states.
+
 ## OpenSim Tour Matching Unified CLI, Visualization, and Handoff (#10003)
 
 Implement unified command-line interface, headless visualization reporting, and cryptographic reproduction package for the OpenSim tour matching program:
