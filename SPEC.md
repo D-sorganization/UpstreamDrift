@@ -7,6 +7,21 @@ Implement full-body MuJoCo MJCF export and dynamic simulation adapter supporting
 - Full-Body Model Adapter (`src/engines/physics_engines/mujoco/python/full_body_model.py`): Implement `NativeMujocoFullBodyModel` providing `evaluate_contact_samples`, `accelerations`, `frame_poses`, and `closure_errors`. Calculate contact forces using the shared Hunt-Crossley and regularized Coulomb law (`contact_law.sphere_ground_contact`), apply explicit spatial wrenches via `data.xfrc_applied`, and resolve the closed-loop dual-grip weld via an explicit rigid solve.
 - Comprehensive Test Suite (`tests/unit/motion_matching/test_full_body_mujoco.py`): Verify compile structure ($nq=41, nv=41$), upper-body slice inertia and forward kinematics parity to $10^{-12}$, frame poses parity against qualified native upper body, and exact 0.0 N force parity against reference contact adapter across random contact states.
 
+## OpenSim Tour Matching Unified CLI, Visualization, and Handoff (#10003)
+
+Implement unified command-line interface, headless visualization reporting, and cryptographic reproduction package for the OpenSim tour matching program:
+- Unified CLI Router (`src/engines/physics_engines/opensim/python/tour_matching/cli.py`):
+  - Exposes 7 subcommand operations (`prepare`, `qualify`, `calibrate`, `fit`, `replay`, `compare`, `resume`) with argument parsing and validation.
+  - Implements deterministic `RunConfig` hashing (`sha256`) to isolate execution artifacts across differing horizon, degree, or seed configurations.
+  - Manages `CheckpointManifest` state tracking with resilient corrupted-checkpoint recovery, status inspection, and multi-stage lifecycle continuation.
+- Publication-Quality Headless Visualization (`src/engines/physics_engines/opensim/python/tour_matching/visualization.py`):
+  - Pure headless matplotlib (`Agg` backend) generating 3D trajectory overlays, marker RMSE error timecourses, and effort / effort-rate profiles.
+  - Exports publication-ready PNG artifacts without display server or desktop graphical dependencies.
+- Reproducibility Receipt & Evidence Package (`docs/development/opensim_tour_matching/evidence/os6_handoff/`):
+  - Full clean-machine execution via `docs/development/opensim_tour_matching/os6_handoff_driver.py`.
+  - Cryptographic artifact manifest (`reproduction_receipt.json`) hashing model (`.osim`), input TRC (`.trc`), control history (`.sto`), forward states (`.sto`), and polynomial profile (`.json`).
+  - Records final cross-engine benchmark comparison metrics between OpenSim and Simscape.
+
 ## OpenSim Degree-Six Polynomial Effort Profile With Forward Simulation Replay (#10003)
 
 Implement continuous degree-six polynomial effort profiles and zero-feedback forward simulation replay for the OpenSim golf humanoid model:
