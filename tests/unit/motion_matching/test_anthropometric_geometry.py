@@ -16,6 +16,7 @@ from src.shared.python.motion_matching.anthropometric_candidate import (
     zero_pose_joint_positions,
 )
 from src.shared.python.motion_matching.anthropometry import segment_parameters
+from src.shared.python.motion_matching.club_models import IRON_7
 
 pytestmark = pytest.mark.unit
 
@@ -52,12 +53,26 @@ def test_names_coordinates_and_closure_are_preserved(upper: dict) -> None:
     assert {f["name"] for f in upper["frames"]} == {
         f["name"] for f in native["frames"]
     } | {"Head"}
-    assert upper["closure"] == native["closure"]
+    # The closure keeps its bodies and rotations; the club moves the hands
+    # along the shaft to the driver's length.
+    for key in ("body_a", "body_b", "name", "placement_a"):
+        assert upper["closure"][key] == native["closure"][key]
+    np.testing.assert_allclose(
+        np.array(upper["closure"]["placement_b"])[:3, :3],
+        np.array(native["closure"]["placement_b"])[:3, :3],
+    )
     club_native = next(
         b for b in native["bodies"] if b["name"].endswith("Clubface Vector")
     )
     club = next(b for b in upper["bodies"] if b["name"].endswith("Clubface Vector"))
-    assert club["solids"] == club_native["solids"]
+    # Hand solids are the native ones (shifted along the shaft); the club itself
+    # is the typical driver.
+    hands = lambda body: sorted(  # noqa: E731
+        (s["name"], s["mass_kg"])
+        for s in body["solids"]
+        if "Hand" in s["name"].rsplit("/", 1)[-1]
+    )
+    assert hands(club) == hands(club_native)
     assert "unqualified" in upper["qualification"]
 
 
@@ -201,3 +216,19 @@ def test_ranges_seed_and_scapula_axes(upper: dict) -> None:
     q = dict.fromkeys(model.coordinate_order, 0.0)
     q["LScapInputY"] = -0.3
     assert model.frame_poses(q)["LS"][0, 3] > zero[0] + 0.03
+
+
+def test_document_carries_club_torso_hints_and_shared_ranges(upper: dict) -> None:
+    assert upper["club"]["name"] == "driver"
+    assert upper["club"]["total_mass_kg"] == pytest.approx(0.313)
+    hints = upper["visual_hints"]
+    assert len(hints["shapes"]) == 4  # pelvis, abdomen, thorax, club head
+    assert all(
+        v > 0 for shape in hints["shapes"].values() for v in shape["half_size_m"]
+    )
+    assert any(k.endswith("Clubface Vector") for k in hints["capsule_radius_m"])
+    assert upper["coordinate_ranges_deg"]["LEInput"] == [-150.0, 5.0]
+    iron = module.build_upper_body(
+        json.loads(NATIVE.read_text()), stature_m=STATURE, mass_kg=MASS, club=IRON_7
+    )
+    assert iron["club"]["name"] == "iron7" and iron["club"]["length_m"] < 1.0

@@ -1,0 +1,50 @@
+{
+  "source": "frame 0 of ik_trajectory.npz on full_body_spec_hipcal_scaled.json",
+  "simscape_geometry_in_inches": {
+    "UpperArmLength": 14.5,
+    "LowerArmLength": 12.0
+  },
+  "segment_lengths_m": {
+    "hub_to_shoulder": 0.19494,
+    "shoulder_to_shoulder": 0.3807032311640866,
+    "upper_arm_L": 0.30435249856404356,
+    "upper_arm_R": 0.3043524985640438,
+    "elbow_to_wrist_L": 0.2905232050545662,
+    "elbow_to_wrist_R": 0.29052320505456647,
+    "spine_rod_hip_to_hub": 0.42261093595634697,
+    "wrist_to_clubhead": 0.9083551948439551
+  },
+  "start_pose_deg": {
+    "spine_bend_pelvis_to_rod_X": 5.775138561032764,
+    "spine_bend_pelvis_to_rod_Y": 18.075531632127504,
+    "torso_rotation_Z": -2.0716117502644398,
+    "rod_tilt_from_vertical": 36.752553143037545,
+    "LScap_X": -0.05991166702140552,
+    "LScap_Y": 25.312267417321145,
+    "RScap_X": -2.4591308415210227,
+    "RScap_Y": 0.5086168737753514
+  },
+  "shoulder_drop_below_hub_m": {
+    "L": -0.05462418631350352,
+    "R": -0.00019058731846044452
+  },
+  "joint_points_m": {
+    "hip/spine/torso": [0.618, -0.0239, 0.9927],
+    "hub (scapulae)": [0.3653, -0.0143, 1.3313],
+    "LS": [0.4322, -0.1891, 1.3859],
+    "RS": [0.359, 0.1805, 1.3315],
+    "LE": [0.3893, -0.0872, 1.1024],
+    "RE": [0.3308, 0.096, 1.0405],
+    "LF": [0.3689, -0.0385, 0.967],
+    "RF": [0.3228, 0.0531, 0.9019],
+    "LW": [0.3485, 0.0101, 0.8317],
+    "RW": [0.3149, 0.0103, 0.7633],
+    "hip_r": [0.6561, 0.0749, 0.8671],
+    "hip_l": [0.6678, -0.1023, 0.8571],
+    "knee_r": [0.6211, 0.1499, 0.4953],
+    "knee_l": [0.6374, -0.1624, 0.4937],
+    "ankle_r": [0.6329, 0.2263, 0.081],
+    "ankle_l": [0.6421, -0.2243, 0.0808],
+    "clubhead": [-0.0494, -0.013, 0.0154]
+  }
+}

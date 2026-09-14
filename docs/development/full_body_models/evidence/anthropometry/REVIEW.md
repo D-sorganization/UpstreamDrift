@@ -378,3 +378,50 @@ other arm.
   subject is short and light of that mean and the table is a subject
   estimate, not a population default; the stature and mass are explicit
   inputs of `build_anthropometric_spec.py`.
+
+## 10. Clubs, Captures, Torso Visuals, Ranges of Motion, Balance (User Direction 2026-09-14)
+
+- **Clubs.** `club_models.py` holds typical retail values: driver 45.5 in,
+  198 g head, 65 g graphite shaft, 50 g grip (313 g); 7-iron 37 in, 268 g
+  head, 110 g steel shaft, 50 g grip (428 g); head inertia from radii of
+  gyration, shaft and grip as rods. `apply_club` rewrites the club body of a
+  document and moves the hands along the shaft so the wrist sits
+  `length - 32 mm` from the head, keeping the wrist base and the closure
+  weld (tested on both clubs: hand relation unchanged to 1e-9 m). Documents:
+  `full_body_spec_anthro_driver.json`, `full_body_spec_anthro_iron7.json`
+  (builder `--club`), each carrying a `club` block and total mass
+  79.4 / 79.5 kg body plus club.
+- **Captures.** The 7-iron file `data/C3D_TA_Iron.c3d` (359 Hz, 657 frames,
+  the same 34 tracked labels plus three extras) is registered next to the
+  driver in `tour_capture_contract.TOUR_CAPTURES`; the driver takes
+  `--capture driver|iron`.
+- **Visuals.** Documents carry `visual_hints`: three torso ellipsoids
+  (pelvis, abdomen, thorax at 19/17/21 % of stature wide, 13/13/14 % deep),
+  45 mm clavicle capsules, a 6.5 mm shaft, an ellipsoid driver head and a box
+  iron blade; the visual skeleton and the MuJoCo layer render them; nothing
+  in the dynamics changes.
+- **Ranges of motion.** `range_of_motion.py` holds `HUMAN_RANGES_DEG` (hinge
+  and spine/neck/scapula coordinates in the document's conventions plus the
+  Rajagopal leg ranges) and `violations`; documents carry the full table, the
+  IK bounds the spine, neck, scapulae and elbows, and every receipt flags
+  excursions of the IK reference and of the simulation
+  (`range_of_motion_flags`). The wrist cock and the forearm/wrist spins are
+  flagged, not bounded: they absorb slop of the hand-club chain, and bounding
+  them broke the fit (receipted: driver IK 77 mm with them bounded).
+- **Balance.** Address fits pull the body-plus-club centre of mass over the
+  centroid of the contact spheres (`ADDRESS_BALANCE_WEIGHT`), moving it from
+  38 mm to 0.011 m (driver) and 0.01 m (iron) off the
+  centroid, inside the polygon in both.
+
+| Receipt (`ground_support/<run>/receipt.json`) | Driver (`anthro_driver`) | 7-iron (`anthro_iron`) |
+| --------------------------------------------- | ------------------------ | ---------------------- |
+| Full-capture IK, all markers                  | 24.8 mm                  | 34.1 mm                |
+| Address marker RMS                            | 7.1 mm                   | 15.5 mm                |
+| Address spine bend forward / lateral          | 8.9 / 5.7 deg            | 9.4 / 8.0 deg          |
+| Elbows left / right                           | 0.4 / -5.0 deg           | 0.0 / -2.4 deg         |
+| Backswing tracking root error max             | 6 mm                     | 5 mm                   |
+| CoM inside the polygon at address             | True                     | True                   |
+| Setup parity Drake / Pinocchio                | 5e-06 / 3e-16 m          | 4e-06 / 6e-16 m        |
+
+Open: the left elbow pit still faces outward (section 9.3); the 7-iron
+downswing tracking (GS-4) is open as for the driver.

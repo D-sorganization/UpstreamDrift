@@ -1,8 +1,8 @@
 [
   {
     "body": "Clubface Vector",
-    "length_m": 1.0765,
-    "radius_m": 0.0171
+    "length_m": 0.9084,
+    "radius_m": 0.0065
   },
   {
     "body": "COMRod",
@@ -31,12 +31,12 @@
   },
   {
     "body": "femur_r",
-    "length_m": 0.4051,
+    "length_m": 0.3808,
     "radius_m": 0.05
   },
   {
     "body": "femur_l",
-    "length_m": 0.3933,
+    "length_m": 0.3697,
     "radius_m": 0.05
   },
   {
@@ -52,12 +52,12 @@
   {
     "body": "HubtoLS",
     "length_m": 0.1949,
-    "radius_m": 0.0215
+    "radius_m": 0.045
   },
   {
     "body": "HubtoRS",
     "length_m": 0.1949,
-    "radius_m": 0.0215
+    "radius_m": 0.045
   },
   {
     "body": "calcn_r",

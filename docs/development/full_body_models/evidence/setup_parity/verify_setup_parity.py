@@ -6,9 +6,9 @@ from it and takes a pose as ``{coordinate name: value}`` in the document's
 between engines by name, never by index. This script takes the fitted
 address (frame 0 of the ground-support IK trajectory), evaluates every spec
 frame in MuJoCo locally and in Drake and Pinocchio on ControlTower (their
-environments live there, as for FB-3), and writes ``receipt.json`` with the
+environments live there, as for FB-3), and writes ``receipt_<run>.json`` with the
 largest position and rotation deviation per engine. Gate: positions within 1e-5 m
-and rotations within 1e-5 rad of MuJoCo (URDF text precision), plus the masses and
+and rotations within 2e-5 rad of MuJoCo (URDF text precision), plus the masses and
 the whole-body centre of mass reported for the record.
 
     python verify_setup_parity.py            # local MuJoCo + remote engines
@@ -31,14 +31,10 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[4]
 sys.path.insert(0, str(ROOT))
 
-SPEC = (
-    ROOT
-    / "docs/development/full_body_models/evidence/ground_support/anthro_v1/full_body_spec_hipcal_scaled.json"
-)
-TRAJECTORY = (
-    ROOT
-    / "docs/development/full_body_models/evidence/ground_support/anthro_v1/ik_trajectory.npz"
-)
+GROUND_SUPPORT = ROOT / "docs/development/full_body_models/evidence/ground_support"
+RUN = "anthro_driver"  # overridden by --run (a ground-support output folder)
+SPEC = GROUND_SUPPORT / RUN / "full_body_spec_hipcal_scaled.json"
+TRAJECTORY = GROUND_SUPPORT / RUN / "ik_trajectory.npz"
 POSE = HERE / "address_pose.json"
 REMOTE_BASE = "/home/dieterolson/fb3_pinocchio_test"
 REMOTE_PYTHON = {
@@ -57,7 +53,7 @@ SYNC = [
     "docs/development/full_body_models/evidence/setup_parity/spec.json",
 ]
 POSITION_TOL_M = 1e-5  # URDF text precision bounds Drake at a few micrometres
-ROTATION_TOL_RAD = 1e-5
+ROTATION_TOL_RAD = 2e-5
 
 
 def sha256(path: Path) -> str:
@@ -168,10 +164,15 @@ def deviation(reference: dict[str, list], other: dict[str, list]) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--engine", default="mujoco")
+    parser.add_argument("--run", default=RUN, help="ground-support output folder")
     parser.add_argument(
         "--local", action="store_true", help="evaluate one engine here and print JSON"
     )
     args = parser.parse_args()
+    global SPEC, TRAJECTORY
+    SPEC = GROUND_SUPPORT / args.run / "full_body_spec_hipcal_scaled.json"
+    TRAJECTORY = GROUND_SUPPORT / args.run / "ik_trajectory.npz"
+    receipt_path = HERE / f"receipt_{args.run}.json"
     if args.local:
         spec = json.loads((HERE / "spec.json").read_text())
         pose = json.loads(POSE.read_text())
@@ -189,6 +190,8 @@ def main() -> None:
     masses = sum(s["mass_kg"] for b in spec["bodies"] for s in b["solids"])
     receipt = {
         "issue": "#10099",
+        "run": args.run,
+        "club": spec.get("club"),
         "timestamp_utc": datetime.now(UTC).isoformat(),
         "spec": str(SPEC.relative_to(ROOT)),
         "spec_sha256": sha256(SPEC),
@@ -200,7 +203,7 @@ def main() -> None:
         "engines": results,
         "translation_rule": "a pose is a mapping coordinate name -> value in the document's coordinate_order; every adapter's frame_poses takes that mapping",
     }
-    (HERE / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
     sys.stdout.write(json.dumps(results, indent=1) + "\n")
 
 

@@ -7,6 +7,11 @@ capsule per body from its own joint origin to each child joint origin (or to
 its centre of mass for a leaf body), a small sphere at every centre of mass
 and marker frame, and a ground plane opposite gravity. Engines only translate
 these primitives into their own scene formats; nothing here touches dynamics.
+
+A document may carry ``visual_hints``: ``shapes`` (solid name -> ellipsoid or
+box with half sizes and a centre in the body frame, for torso segments and
+club heads) and ``capsule_radius_m`` (body name -> radius override, for a
+thin shaft or thick shoulders). Hints change pictures only.
 """
 
 from __future__ import annotations
@@ -62,6 +67,17 @@ class Sphere:
 
 
 @dataclass(frozen=True)
+class Shape:
+    """An axis-aligned ellipsoid or box in ``body``'s frame (half sizes)."""
+
+    body: str
+    center_m: tuple[float, float, float]
+    half_size_m: tuple[float, float, float]
+    kind: Literal["ellipsoid", "box"]
+    label: str
+
+
+@dataclass(frozen=True)
 class GroundVisual:
     normal: tuple[float, float, float]
     height_m: float
@@ -73,6 +89,7 @@ class VisualSkeleton:
     capsules: tuple[Capsule, ...]
     spheres: tuple[Sphere, ...]
     ground: GroundVisual
+    shapes: tuple[Shape, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -145,14 +162,39 @@ def derive_visual_skeleton(spec: Mapping[str, Any]) -> VisualSkeleton:
     missing = set(bodies) - set(own_joint)
     if missing:
         raise ValueError(f"Bodies without a parent joint: {sorted(missing)}")
+    hints = spec.get("visual_hints", {}) or {}
+    radius_hints = {
+        k: float(v) for k, v in (hints.get("capsule_radius_m", {}) or {}).items()
+    }
+    shape_hints: dict[str, Mapping[str, Any]] = dict(hints.get("shapes", {}) or {})
+    for radius in radius_hints.values():
+        if not math.isfinite(radius) or radius <= 0:
+            raise ValueError("Capsule radius hints must be positive")
     capsules: list[Capsule] = []
     spheres: list[Sphere] = []
+    shapes: list[Shape] = []
     for name, body in bodies.items():
         start = own_joint[name]
         com_points = []
         mass = 0.0
         for solid in body.get("solids", []):
             placement = _transform(solid["placement"], "placement")
+            hint = shape_hints.get(solid["name"])
+            if hint is not None:
+                if hint.get("shape") not in ("ellipsoid", "box"):
+                    raise ValueError(f"Unknown shape hint for {solid['name']}")
+                half = _finite_vector(hint["half_size_m"], 3, "half_size_m")
+                if (half <= 0).any():
+                    raise ValueError("Shape half sizes must be positive")
+                shapes.append(
+                    Shape(
+                        name,
+                        tuple(_finite_vector(hint["center_m"], 3, "center_m").tolist()),
+                        tuple(half.tolist()),
+                        hint["shape"],
+                        solid["name"],
+                    )
+                )
             com = (
                 placement[:3, :3] @ _finite_vector(solid["com_m"], 3, "com_m")
                 + placement[:3, 3]
@@ -188,7 +230,7 @@ def derive_visual_skeleton(spec: Mapping[str, Any]) -> VisualSkeleton:
                     name,
                     tuple(start.tolist()),
                     tuple(end.tolist()),
-                    capsule_radius(mass, length),
+                    radius_hints.get(name, capsule_radius(mass, length)),
                 )
             )
         if not any(c.body == name for c in capsules):
@@ -209,7 +251,7 @@ def derive_visual_skeleton(spec: Mapping[str, Any]) -> VisualSkeleton:
                 frame["name"],
             )
         )
-    return VisualSkeleton(tuple(capsules), tuple(spheres), _ground(spec))
+    return VisualSkeleton(tuple(capsules), tuple(spheres), _ground(spec), tuple(shapes))
 
 
 def skeleton_world_segments(

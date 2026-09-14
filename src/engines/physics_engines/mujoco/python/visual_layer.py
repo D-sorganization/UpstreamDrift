@@ -21,6 +21,7 @@ from src.shared.python.motion_matching.visual_skeleton import (
 
 _VISUAL_CLASS = "visual"
 _CAPSULE_RGBA = "0.75 0.78 0.85 1"
+_SHAPE_RGBA = "0.7 0.72 0.8 1"
 _COM_RGBA = "0.9 0.35 0.2 1"
 _FRAME_RGBA = "0.2 0.6 0.95 1"
 _FLOOR_RGBA = "0.35 0.45 0.3 1"
@@ -83,6 +84,19 @@ def attach_visual_layer(
             fromto=_numbers(np.concatenate((start, end))),
             size=_numbers([capsule.radius_m]),
             rgba=_CAPSULE_RGBA,
+            attrib={"class": _VISUAL_CLASS},
+        )
+    for index, shape in enumerate(skeleton.shapes):
+        ET.SubElement(
+            elements[shape.body],
+            "geom",
+            name=f"visual_{shape.kind}_{index}_{shape.body}",
+            type=shape.kind,
+            pos=_numbers(
+                _to_mjcf_frame(offsets[shape.body], np.asarray(shape.center_m))
+            ),
+            size=_numbers(shape.half_size_m),
+            rgba=_SHAPE_RGBA,
             attrib={"class": _VISUAL_CLASS},
         )
     for i, sphere in enumerate(skeleton.spheres):

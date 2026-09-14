@@ -289,7 +289,7 @@ shoulder_scale)`; 27 native coordinate names, native body/joint/frame
   shoulder gimbal stays away from its singularity, one-sided elbows;
   `COORDINATE_RANGES_DEG` and `ADDRESS_SEED_DEG` travel in the document.
 - `docs/development/full_body_models/build_anthropometric_spec.py` writes
-  `full_body_spec_anthro_v1.json` (+ `build_receipt_anthro_v1.json`) with
+  `full_body_spec_anthro_<club>.json` (+ `build_receipt_anthro_<club>.json`) with
   the Rajagopal legs on a fixed pelvis alignment, toe spheres, 2e5 N/m.
   Canonical scales: trunk 1.15, arm 1.10, shoulder 1.00 at 1.71 m, 78 kg.
 - `marker_calibration.static_marker_offsets` (static-trial placement);
@@ -306,7 +306,7 @@ shoulder_scale)`; 27 native coordinate names, native body/joint/frame
   calibration (`scan_geometry_receipt.json`).
 
 State against the #10099 acceptance (full driver run, REVIEW.md 9.1,
-`evidence/ground_support/anthro_v1/receipt.json`): address 2.1 mm with
+`evidence/ground_support/anthro_driver/receipt.json`): address 2.1 mm with
 spine bend 0.3 deg forward, 6.3 deg lateral and clavicle links within 5 deg
 of horizontal (met); full-capture IK 26.2 mm on the non-head markers, equal
 to the qualified geometry's 26.2 mm, 40.0 mm with the deweighted head (no
@@ -315,7 +315,7 @@ whole-run root RMS 49 mm (qualified 172 mm), weight fraction still reaches
 0 (GS-4 open). Solver additions for this: `continuous_branches` (Euler
 branch and 2 pi continuity before smoothing), per-coordinate
 `prior_weights` (0.1 on the three collinear spins), restart margin 3 mm.
-Renders: `evidence/visual_layer/*_anthro.*` (scripts take `--spec
+Renders: `evidence/visual_layer/*_driver.*` and `*_iron.*` (scripts take `--spec
 --trajectory --suffix`). Unqualified until Simscape carries the geometry.
 
 ### Neck and Address Arms (User Direction 2026-09-14)
@@ -325,12 +325,12 @@ Simscape has none, accepted), head markers at full weight; address elbows
 bounded in the static trial with weak elbow-pit axis rows
 (`solve_pose(axis_targets=...)`) and restarts in the address fit; lane
 settings shared by driver and scan (`configure_lane`). Receipt
-`evidence/ground_support/anthro_v1/receipt.json`: full-capture IK 30.2 mm
+`evidence/ground_support/anthro_driver/receipt.json`: full-capture IK 30.2 mm
 over all markers (head 28 mm), address 11.4 mm neutral, left elbow -25 deg,
 right -2 deg, backswing root error 7 mm. The left elbow pit still faces
 outward: forcing it inward breaks the swing fit (REVIEW.md 9.2 lists the
 four attempts); the wrist frame copied from the native document is the
-suspect. Renders `evidence/visual_layer/*_anthro.*` refreshed.
+suspect. Renders `evidence/visual_layer/*_driver.*` and `*_iron.*` refreshed.
 
 ### Wrist Axis, Setup Position, Parity, Centre of Mass (2026-09-14)
 
@@ -339,10 +339,22 @@ retraction and elbow windows in every address fit, centre-of-mass overlay
 (`visual_layer.add_com_markers`, driver playback and address views,
 `centre_of_mass` in the address receipt), cross-engine setup parity
 (`evidence/setup_parity/`: Pinocchio 9e-16 m, Drake 6.5e-06 m on the
-same document; poses translate by coordinate name). Receipt anthro_v1:
+same document; poses translate by coordinate name). Receipt (then anthro_v1, now anthro_driver):
 IK 30.4 mm all markers, address 8.3 mm, elbows -7.5/-4.7 deg,
 backswing root 5 mm, CoM inside the polygon at address: True.
 Open: the left elbow pit faces outward (REVIEW.md 9.3).
+
+### Clubs, Two Captures, Torso Visuals, Ranges of Motion (2026-09-14)
+
+`club_models.py` (driver, 7-iron; `apply_club`), documents
+`full_body_spec_anthro_driver.json` and `full_body_spec_anthro_iron7.json`
+(builder `--club`), the 7-iron capture registered in the contract
+(`--capture iron`), `visual_hints` for torso ellipsoids, clavicles, shaft and
+club heads, `range_of_motion.py` with receipt flags, address balance rows.
+Receipts `evidence/ground_support/anthro_driver/` and `anthro_iron/`:
+IK 24.8 / 34.1 mm, address 7.1 / 15.5 mm, CoM
+inside the polygon in both; setup parity `evidence/setup_parity/receipt_*.json`.
+REVIEW.md section 10.
 
 ## Next
 

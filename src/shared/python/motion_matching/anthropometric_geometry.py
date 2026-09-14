@@ -43,6 +43,8 @@ from src.shared.python.motion_matching.anthropometry import (
     inertia_about_axis,
     segment_parameters,
 )
+from src.shared.python.motion_matching.club_models import DRIVER, ClubSpec, apply_club
+from src.shared.python.motion_matching.range_of_motion import UPPER_RANGES_DEG
 
 Array = NDArray[np.float64]
 
@@ -64,23 +66,9 @@ HEAD_BODY = "GolfSwing3D_Kinetic/Head"
 NECK_JOINT = "GolfSwing3D_Kinetic/Neck Joint"
 
 
-# Ranges in this document's conventions: elbow flexion is negative (one-sided),
-# left scapula elevation positive (right negative). Shoulder, forearm and wrist
-# angles are Euler angles that wrap during a swing, so they stay unbounded.
-COORDINATE_RANGES_DEG: dict[str, tuple[float, float]] = {
-    "SpineInputX": (-35.0, 35.0),
-    "SpineInputY": (-45.0, 45.0),
-    "TorsoInput": (-100.0, 100.0),
-    "NeckInputX": (-45.0, 45.0),
-    "NeckInputY": (-60.0, 60.0),
-    "NeckInputZ": (-80.0, 80.0),
-    "LScapInputX": (-10.0, 30.0),
-    "RScapInputX": (-30.0, 10.0),
-    "LScapInputY": (-40.0, 40.0),
-    "RScapInputY": (-40.0, 40.0),
-    "LEInput": (-150.0, 5.0),
-    "REInput": (-150.0, 5.0),
-}
+# Anatomical ranges in this document's conventions come from the shared
+# range-of-motion table; ball-joint Euler components stay unbounded.
+COORDINATE_RANGES_DEG: dict[str, tuple[float, float]] = dict(UPPER_RANGES_DEG)
 # Shoulder gimbal base: the upper arm points forward at zero pose so that the
 # middle (Ry) rotation stays far from its +-90 deg singularity during a swing,
 # where the arms hang forward-down at address and rise to about 45 deg above
@@ -152,6 +140,7 @@ def build_upper_body(
     trunk_scale: float = 1.0,
     arm_scale: float = 1.0,
     shoulder_scale: float = 1.0,
+    club: ClubSpec = DRIVER,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
 
@@ -433,12 +422,62 @@ def build_upper_body(
         },
         "coordinate_ranges_deg": {k: list(v) for k, v in COORDINATE_RANGES_DEG.items()},
         "address_seed_deg": dict(ADDRESS_SEED_DEG),
+        "visual_hints": torso_visual_hints(names, stature_m, pelvis_h, hub_h, clav),
     }
     built = {b["name"] for b in bodies}
     missing = set(names.values()) - built
     if missing:
         raise ValueError(f"Bodies not built: {sorted(missing)}")
-    return document
+    return apply_club(document, club)
+
+
+# Torso and shoulder visuals as fractions of stature (male means): the trunk
+# is drawn as three ellipsoids (pelvis, abdomen, thorax) and the clavicle links
+# as thick capsules, so the picture carries the trunk mass the solids carry.
+TORSO_WIDTH_FRACTION = {"pelvis": 0.19, "abdomen": 0.17, "thorax": 0.21}
+TORSO_DEPTH_FRACTION = {"pelvis": 0.13, "abdomen": 0.13, "thorax": 0.14}
+CLAVICLE_VISUAL_RADIUS_M = 0.045
+
+
+def torso_visual_hints(
+    names: Mapping[str, str],
+    stature_m: float,
+    pelvis_h: float,
+    hub_h: float,
+    clav: float,
+) -> dict[str, Any]:
+    """Visual hints for the pelvis, abdomen, thorax and clavicle links."""
+
+    def half(kind: str, height: float) -> list[float]:
+        return [
+            TORSO_DEPTH_FRACTION[kind] * stature_m / 2,
+            TORSO_WIDTH_FRACTION[kind] * stature_m / 2,
+            height / 2,
+        ]
+
+    return {
+        "shapes": {
+            names["LowerTorso"] + "/pelvis": {
+                "shape": "ellipsoid",
+                "half_size_m": half("pelvis", pelvis_h + 0.10),
+                "center_m": [0.0, 0.0, pelvis_h / 2 - 0.02],
+            },
+            names["COMRod"] + "/middle_trunk": {
+                "shape": "ellipsoid",
+                "half_size_m": half("abdomen", hub_h * 0.5 + 0.04),
+                "center_m": [0.0, 0.0, hub_h * 0.25],
+            },
+            names["COMRod"] + "/upper_trunk": {
+                "shape": "ellipsoid",
+                "half_size_m": half("thorax", hub_h * 0.5 + 0.08),
+                "center_m": [0.0, 0.0, hub_h * 0.72],
+            },
+        },
+        "capsule_radius_m": {
+            names["HubtoLS"]: CLAVICLE_VISUAL_RADIUS_M,
+            names["HubtoRS"]: CLAVICLE_VISUAL_RADIUS_M,
+        },
+    }
 
 
 def pelvis_alignment_for(stature_m: float) -> tuple[Array, float]:

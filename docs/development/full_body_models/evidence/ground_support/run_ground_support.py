@@ -29,6 +29,7 @@ Every number here is a milestone of a stated candidate, not acceptance.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 import hashlib
 import json
 import logging
@@ -75,6 +76,11 @@ from src.shared.python.motion_matching.ground_support import (  # noqa: E402
     calibrate_ground_height,
     capture_to_native_world,
 )
+from src.shared.python.motion_matching.range_of_motion import (  # noqa: E402
+    HUMAN_RANGES_DEG,
+    LOWER_LIMB_RANGES_DEG,
+    violations,
+)
 from src.shared.python.motion_matching.hip_calibration import (  # noqa: E402
     apply_hip_calibration,
     functional_hip_calibration,
@@ -97,7 +103,11 @@ CANDIDATE = (
     ROOT
     / "docs/development/full_body_models/evidence/native_candidates/returned81_candidate.json"
 )
-C3D = ROOT / "data/C3D_TA_Driver.c3d"
+CAPTURES = {
+    "driver": ROOT / "data/C3D_TA_Driver.c3d",
+    "iron": ROOT / "data/C3D_TA_Iron.c3d",
+}
+C3D = CAPTURES["driver"]  # overridden by --capture
 OUT = HERE  # overridden by --out
 UP_AXIS, FORWARD_AXIS, RIGHT_AXIS = (
     np.array([0.0, 0.0, 1.0]),
@@ -129,15 +139,6 @@ LEG_LABELS = tuple(LEG_SEEDS)
 # widened by BOUND_WIDENING: the hip zero orientation is not anatomically
 # calibrated yet, so a constant offset would otherwise consume the range and
 # pin joints on their bounds (whole-swing RMS 54 mm at 1x, 28 mm at 2x).
-LOWER_LIMB_RANGES_DEG = {
-    "hip_flexion": (-30.0, 120.0),
-    "hip_adduction": (-50.0, 30.0),
-    "hip_rotation": (-40.0, 40.0),
-    "knee_angle": (-120.0, 10.0),
-    "ankle_angle": (-40.0, 30.0),
-    "subtalar_angle": (-20.0, 20.0),
-    "mtp_angle": (-30.0, 30.0),
-}
 BOUND_WIDENING = 2.0
 # Address IK is solved from several leg seeds (degrees) and the best marker fit
 # kept, so a local minimum with a joint pinned on its bound is not accepted.
@@ -188,6 +189,9 @@ ADDRESS_ELBOW_BOUNDS_DEG = {"LEInput": (-12.0, 5.0), "REInput": (-15.0, -3.0)}
 ELBOW_PIT_UP = 1.0
 ELBOW_PIT_INWARD = 0.4
 ELBOW_PIT_WEIGHT = 0.02  # address fits with placed markers
+# Address balance: the body-plus-club centre of mass is pulled over the centroid
+# of the contact spheres, so the setup does not lean onto the toes.
+ADDRESS_BALANCE_WEIGHT = 3.0
 # Static trial rounds and their pit weights. One mild round: a dominant pit
 # weight (5.0) or a second round with the placed markers both turned the left
 # pit inward at address but broke the swing (68 to 81 mm), receipted 2026-09-14.
@@ -336,11 +340,22 @@ def render_playback(
     imageio.mimsave(path, frames_out, duration=1000 * PLAYBACK_STRIDE / RATE_HZ, loop=0)
 
 
+# Coordinates whose declared human range is reported (range_of_motion_flags)
+# but not imposed on the IK: the wrist cock and the two forearm/wrist spins
+# absorb modelling slop of the hand-club chain, and the legs keep the widened
+# Rajagopal bounds until the hip zero twist is calibrated.
+IK_UNBOUNDED = frozenset(
+    {"LWInputX", "RWInputX", "LWInputY", "RWInputY", "LFInput", "RFInput"}
+)
+
+
 def document_bounds(document: dict) -> dict[str, tuple[float, float]]:
-    """Radian bounds declared by an anthropometric document (empty otherwise)."""
+    """Radian IK bounds declared by an anthropometric document (empty
+    otherwise): upper-body coordinates only, minus ``IK_UNBOUNDED``."""
     return {
         name: (np.radians(lo), np.radians(hi))
         for name, (lo, hi) in document.get("coordinate_ranges_deg", {}).items()
+        if name not in IK_UNBOUNDED and not name.endswith(("_r", "_l"))
     }
 
 
@@ -373,9 +388,10 @@ def configure_lane(lane: Lane, document: dict) -> None:
 class Lane:
     """Capture, ground, stance and bounds shared by every stage."""
 
-    def __init__(self, labels: tuple[str, ...]) -> None:
+    def __init__(self, labels: tuple[str, ...], c3d: Path = C3D) -> None:
         self.labels = labels
-        capture = load_tour_capture(C3D).subset(labels)
+        self.c3d = c3d
+        capture = load_tour_capture(c3d).subset(labels)
         self.points = capture_to_native_world(capture.points_m)
         self.valid = capture.valid.copy()
         self.times = np.asarray(capture.time_s, dtype=float)
@@ -432,6 +448,7 @@ class Lane:
                 name: (np.radians(lo), np.radians(hi))
                 for name, (lo, hi) in NEUTRAL_BOUNDS_DEG.items()
             }
+        balance = ADDRESS_BALANCE_WEIGHT if self.anthropometric else 0.0
         if self.anthropometric:
             # The address elbows stay in their anatomical windows in every
             # address fit (the trajectory then carries its document ranges).
@@ -482,6 +499,7 @@ class Lane:
                     marker_weights=self.marker_weights,
                     prior_weights=self.prior_weights,
                     axis_targets=axis_targets,
+                    balance_weight=balance,
                 )
                 if best is None or fit.marker_rms_m < best.marker_rms_m:
                     best = fit
@@ -624,6 +642,19 @@ class Lane:
         return float(np.sqrt(np.mean(errors[self.valid[frames]] ** 2)))
 
 
+def rom_flags(q: np.ndarray, names: Sequence[str]) -> dict:
+    """Human range-of-motion violations of a trajectory (degrees, frames)."""
+    found = violations(q, names, HUMAN_RANGES_DEG)
+    return {
+        name: {
+            "max_excess_deg": round(v.max_excess_deg, 2),
+            "frames": v.frames,
+            "fraction": round(v.fraction, 4),
+        }
+        for name, v in found.items()
+    }
+
+
 def com_report(
     sim: fs.FullBodySimulator,
     kin: FullBodyMarkerKinematics,
@@ -697,14 +728,21 @@ def main() -> None:
         help="calibrate the 25 upper-body offsets too (qualified offsets as prior)",
     )
     parser.add_argument(
+        "--capture",
+        choices=sorted(CAPTURES),
+        default="driver",
+        help="which canonical tour-average capture to match",
+    )
+    parser.add_argument(
         "--static-seeds",
         action="store_true",
         help="place every marker from a neutral-spine static trial (upper-body "
         "placements stay fixed unless --recalibrate-upper)",
     )
     args = parser.parse_args()
-    global OUT
+    global OUT, C3D
     OUT = args.out
+    C3D = CAPTURES[args.capture]
     OUT.mkdir(parents=True, exist_ok=True)
     hipcal_path = OUT / "full_body_spec_hipcal.json"
     scaled_path = OUT / "full_body_spec_hipcal_scaled.json"
@@ -721,7 +759,7 @@ def main() -> None:
         if a["offset_m"] is not None
     }
     labels = tuple({**upper, **LEG_SEEDS})
-    lane = Lane(labels)
+    lane = Lane(labels, C3D)
     configure_lane(lane, base_spec)
 
     # 0. functional hip calibration
@@ -946,6 +984,7 @@ def main() -> None:
             "spec_sha256": canonical_sha256(scaled_spec),
         },
         "joint_ranges_deg": LOWER_LIMB_RANGES_DEG,
+        "range_of_motion_flags": rom_flags(q_ref, kin.coordinate_order),
         "bound_widening": BOUND_WIDENING,
         "leg_angle_ranges_deg": {
             name: [
@@ -1009,6 +1048,7 @@ def main() -> None:
             "mean": float(record.weight_fraction.mean()),
         },
         "inside_support_polygon_fraction": float(record.inside_support_polygon.mean()),
+        "range_of_motion_flags": rom_flags(sim_q, kin.coordinate_order),
         "root_error_timeline_m": {
             f"{t:.2f}": float(
                 np.linalg.norm(
@@ -1065,7 +1105,9 @@ def main() -> None:
         "spec_sha256": hashlib.sha256(spec_bytes).hexdigest(),
         "hip_calibration": hip_report,
         "candidate_sha256": hashlib.sha256(CANDIDATE.read_bytes()).hexdigest(),
+        "capture": args.capture,
         "capture_sha256": hashlib.sha256(C3D.read_bytes()).hexdigest(),
+        "club": base_spec.get("club"),
         "labels": labels,
         "ground": {
             "height_m": lane.ground_cal.height_m,

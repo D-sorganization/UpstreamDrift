@@ -1,6 +1,6 @@
 {
-  "spec_sha256": "78865a57e61413c242ef7869a4236bb93d7384c9fb0966b07fd1b577e3008599",
-  "spec_file_sha256": "cc7ebc7f0a97dfd7d665bcded6dbc6d30368b810175277f9e7495b1bf2fa20e8",
+  "spec_sha256": "75831c4f4b2cb13a154ae77cb39da52bc01fb8d21d6cd720f1973f1a276ace9b",
+  "spec_file_sha256": "4daf75a13e7bd28b5968d0bddd6a611e0b83a28f778f579bd695f6b8bba7f5cf",
   "subject": {
     "stature_m": 1.71,
     "mass_kg": 78.0,
@@ -16,7 +16,7 @@
   },
   "hip_half_width_m": 0.08892,
   "hub_height_above_l5s1_m": 0.42261093595634686,
-  "total_mass_kg": 79.41241599897279,
+  "total_mass_kg": 79.4734923989728,
   "simplifications": [
     "patella bodies and patellofemoral coupler constraints dropped",
     "walker knee reduced to a hinge about its primary axis; coupled spline translations ignored",

@@ -35,6 +35,11 @@ from src.shared.python.motion_matching.anthropometric_geometry import (  # noqa:
     build_upper_body,
     pelvis_alignment_for,
 )
+from src.shared.python.motion_matching.club_models import CLUBS  # noqa: E402
+from src.shared.python.motion_matching.range_of_motion import (  # noqa: E402
+    HUMAN_RANGES_DEG,
+    as_document,
+)
 from src.shared.python.motion_matching.full_body_spec import (  # noqa: E402
     ContactSpec,
     ContactSphere,
@@ -115,8 +120,13 @@ def main() -> None:
     parser.add_argument("--trunk-scale", type=float, default=1.0)
     parser.add_argument("--arm-scale", type=float, default=1.0)
     parser.add_argument("--shoulder-scale", type=float, default=1.0)
-    parser.add_argument("--name", default="full_body_spec_anthro_v1")
+    parser.add_argument("--club", choices=sorted(CLUBS), default="driver")
+    parser.add_argument(
+        "--name", default=None, help="default full_body_spec_anthro_<club>"
+    )
     args = parser.parse_args()
+    if args.name is None:
+        args.name = f"full_body_spec_anthro_{args.club}"
     native = json.loads(args.native.read_text())
     upper = build_upper_body(
         native,
@@ -125,6 +135,7 @@ def main() -> None:
         trunk_scale=args.trunk_scale,
         arm_scale=args.arm_scale,
         shoulder_scale=args.shoulder_scale,
+        club=CLUBS[args.club],
     )
     bodies, joints = read_osim(args.osim)
     rotation, hip_half = pelvis_alignment_for(args.stature)
@@ -224,8 +235,15 @@ def main() -> None:
         ),
     )
     document["subject"] = upper["subject"]
-    document["coordinate_ranges_deg"] = upper["coordinate_ranges_deg"]
+    document["coordinate_ranges_deg"] = {
+        **upper["coordinate_ranges_deg"],
+        **as_document(
+            {k: v for k, v in HUMAN_RANGES_DEG.items() if k[-2:] in ("_r", "_l")}
+        ),
+    }
     document["address_seed_deg"] = upper["address_seed_deg"]
+    document["club"] = upper["club"]
+    document["visual_hints"] = upper["visual_hints"]
     args.output.mkdir(parents=True, exist_ok=True)
     spec_path = save_full_body_spec(document, args.output / f"{args.name}.json")
     receipt = {
