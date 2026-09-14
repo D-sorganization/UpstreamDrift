@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Immutable Binary Masks and Lineage (ST-02B, #10138)
+
+Implements frozen `MaskFrame` record under `src/shared/python/shadow_tracker/mask_records.py`
+with immutable binary masks (`body`, `club`, `valid` as `bytes`), strict dimension and value
+validation (0 or 1 integers only, rejecting booleans and bytearrays), pixel invariant enforcement
+(body and club must be zero wherever valid is zero), revision lineage tracking (`revision_id`,
+`parent_revision_id`, `producer_id`, `correction_note`), boolean evidence properties
+(`has_valid_pixels`, `has_observed_foreground`), deterministic SHA-256 `observation_hash` over
+canonical UTF-8 JSON, and lossless JSON dictionary serialization/deserialization.
+
 ## Restore CI Standard and Scheduled Workflow Health (#10143)
 
 Restores fleet workflow health on default branch and scheduled runs:
