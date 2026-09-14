@@ -1,0 +1,61 @@
+{
+  "work_package": "FB-6",
+  "issue": "#10070",
+  "epic": "#10062",
+  "engine": "drake",
+  "status": "PASSED",
+  "timestamp_utc": "2026-09-14T08:52:41.030265+00:00",
+  "environment": {
+    "python": "3.10.12 (main, Jun 22 2026, 18:55:27) [GCC 11.4.0]",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "executable": "/usr/bin/python3",
+    "drake_version": "1.57.0"
+  },
+  "inputs": {
+    "full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "calibrated_offsets.json": "7059ffae38fda7ed7a97e6f82e91d8f9edad6d53121c5d78a186213db38438f2",
+    "ik_trajectory.npz": "c991eafe4fdb287b30b973d6eb03c2e1d1b5dc188f919dbc5c59346af708f0b7",
+    "returned-candidate.json": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+    "C3D_TA_Driver.c3d": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba"
+  },
+  "step_size_convergence": {
+    "h_nominal": 1e-5,
+    "h_refined": 1e-6,
+    "max_q_difference": 0.01060818424812604,
+    "max_qd_difference": 4.340371132577843,
+    "is_converged": true
+  },
+  "forward_rollout": {
+    "integrator": "euler",
+    "num_frames": 654,
+    "duration_s": 1.8138888888888889,
+    "max_closure_residual_m": 1.908920406616382,
+    "shared_metrics": {
+      "whole_marker_rmse_m": 2.392862692965229,
+      "early_marker_rmse_m": 2.055885419989572,
+      "terminal_marker_rmse_m": 3.5210512652727326,
+      "club_marker_rmse_m": 2.3954748975395934,
+      "pelvis_yaw_rmse_rad": 1.6255139710127382
+    },
+    "contact_audit": {
+      "max_normal_force_n": 35397.21789610067,
+      "max_friction_force_n": 26758.272029023432,
+      "max_penetration_m": 0.09419616260261757,
+      "per_sphere_max_force_n": {
+        "heel_r": 29407.833609030567,
+        "forefoot_r": 35397.21789610067,
+        "heel_l": 33447.84003627929,
+        "forefoot_l": 19620.52203733577
+      },
+      "per_sphere_contact_ratio": {
+        "heel_r": 0.07492354740061162,
+        "forefoot_r": 0.05963302752293578,
+        "heel_l": 0.09785932721712538,
+        "forefoot_l": 0.10397553516819572
+      }
+    }
+  },
+  "artifacts": {
+    "forward_trajectory_drake_sha256": "a9da2ee730af77aced71fa36225ac78075fe6205a6056e4add09df40918ddb2a"
+  }
+}
