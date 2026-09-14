@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -23,7 +23,7 @@ from src.shared.python.motion_matching.full_body_ik import (
 from src.shared.python.motion_matching.marker_calibration import Offsets, Pose
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 class PinocchioFullBodyIK:
