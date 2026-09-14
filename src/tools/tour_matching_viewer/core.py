@@ -17,8 +17,11 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
+from src.engines.physics_engines.mujoco.python.native_mjcf import (
+    transform as _transform,
+)
 from src.shared.python.motion_matching.full_body_spec import (
-    order_directed_tree,
+    order_full_body_joints,
     upper_body_slice,
 )
 from src.shared.python.motion_matching.visual_skeleton import (
@@ -29,22 +32,6 @@ from src.shared.python.motion_matching.visual_skeleton import (
 
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
-
-
-def _transform(value: Any) -> NDArray[np.float64]:
-    """Validate and return a 4x4 homogeneous rigid transform."""
-    matrix = np.asarray(value, dtype=np.float64)
-    if (
-        matrix.shape != (4, 4)
-        or not np.isfinite(matrix).all()
-        or not np.allclose(matrix[3], [0, 0, 0, 1], atol=1e-12, rtol=0)
-        or not np.allclose(
-            matrix[:3, :3].T @ matrix[:3, :3], np.eye(3), atol=1e-12, rtol=0
-        )
-        or not np.isclose(np.linalg.det(matrix[:3, :3]), 1, atol=1e-12, rtol=0)
-    ):
-        raise ValueError("Invalid native rigid transform")
-    return matrix
 
 
 @dataclass(frozen=True)
@@ -257,28 +244,7 @@ def body_poses_from_state(
 
     Matches MuJoCo forward kinematics (xpos and xmat) to < 1e-9 across all joints.
     """
-    upper_spec = upper_body_slice(spec)
-    upper_joint_names = {j["name"] for j in upper_spec["joints"]}
-    upper_ordered = order_directed_tree(upper_spec["joints"])
-    lower_joints_by_name = {
-        j["name"]: j for j in spec["joints"] if j["name"] not in upper_joint_names
-    }
-    leg_chain = [
-        "hip_r",
-        "knee_r",
-        "ankle_r",
-        "subtalar_r",
-        "mtp_r",
-        "hip_l",
-        "knee_l",
-        "ankle_l",
-        "subtalar_l",
-        "mtp_l",
-    ]
-    lower_ordered = [
-        lower_joints_by_name[name] for name in leg_chain if name in lower_joints_by_name
-    ]
-    ordered_joints = list(upper_ordered) + lower_ordered
+    ordered_joints = order_full_body_joints(spec)
 
     if isinstance(q, Mapping):
         coord_map = dict(q)
@@ -288,7 +254,7 @@ def body_poses_from_state(
         }
     else:
         # Default joint ordering matching the depth-first kinematic tree
-        children_by_parent: dict[str, list[dict[str, Any]]] = {}
+        children_by_parent: dict[str, list[Mapping[str, Any]]] = {}
         for joint in ordered_joints:
             children_by_parent.setdefault(joint["parent"], []).append(joint)
 
