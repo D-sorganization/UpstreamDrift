@@ -70,6 +70,41 @@ def compute_finite_difference_step_vector(
     return np.maximum(scaled, floor)
 
 
+def _validate_steps(steps: Sequence[float] | None) -> tuple[float, ...]:
+    eval_steps = DEFAULT_FD_STEPS if steps is None else tuple(float(s) for s in steps)
+    if len(eval_steps) < 2:
+        raise ValueError("steps must contain at least 2 entries")
+    for i, s in enumerate(eval_steps):
+        if s <= 0.0 or not math.isfinite(s):
+            raise ValueError(f"step {s} must be strictly positive and finite")
+        if i > 0 and s >= eval_steps[i - 1]:
+            raise ValueError("steps must be strictly decreasing")
+    return eval_steps
+
+
+def _compute_perturbed_slopes(
+    f: Callable[[Array], Array],
+    arr: Array,
+    y0: Array,
+    component_idx: int,
+    eval_steps: tuple[float, ...],
+) -> list[float]:
+    n = len(arr)
+    slopes: list[float] = []
+    unit_vec = np.zeros(n, dtype=np.float64)
+    unit_vec[component_idx] = 1.0
+
+    for h in eval_steps:
+        x_perturbed = arr + h * unit_vec
+        yh = np.asarray(f(x_perturbed), dtype=np.float64)
+        if not np.isfinite(yh).all():
+            slopes.append(float("nan"))
+            continue
+        diff = (yh[0] - y0[0]) / h
+        slopes.append(float(diff))
+    return slopes
+
+
 def measure_derivative_floor(
     f: Callable[[Array], Array],
     x0: Array,
@@ -92,31 +127,13 @@ def measure_derivative_floor(
     if not (0 <= component_idx < n):
         raise ValueError(f"component_idx {component_idx} out of range [0, {n})")
 
-    eval_steps = DEFAULT_FD_STEPS if steps is None else tuple(float(s) for s in steps)
-    if len(eval_steps) < 2:
-        raise ValueError("steps must contain at least 2 entries")
-    for i, s in enumerate(eval_steps):
-        if s <= 0.0 or not math.isfinite(s):
-            raise ValueError(f"step {s} must be strictly positive and finite")
-        if i > 0 and s >= eval_steps[i - 1]:
-            raise ValueError("steps must be strictly decreasing")
+    eval_steps = _validate_steps(steps)
 
     y0 = np.asarray(f(arr), dtype=np.float64)
     if y0.size == 0 or not np.isfinite(y0).all():
         raise ValueError("f(x0) produced non-finite output")
 
-    slopes: list[float] = []
-    unit_vec = np.zeros(n, dtype=np.float64)
-    unit_vec[component_idx] = 1.0
-
-    for h in eval_steps:
-        x_perturbed = arr + h * unit_vec
-        yh = np.asarray(f(x_perturbed), dtype=np.float64)
-        if not np.isfinite(yh).all():
-            slopes.append(float("nan"))
-            continue
-        diff = (yh[0] - y0[0]) / h
-        slopes.append(float(diff))
+    slopes = _compute_perturbed_slopes(f, arr, y0, component_idx, eval_steps)
 
     valid_pairs = [
         (s, slope)

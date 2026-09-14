@@ -103,8 +103,7 @@ def test_simulate_full_body_forward_short() -> None:
         ik_adapter=ik_adapter,
         theta=theta,
         time_grid=time_grid,
-        initial_q=q0,
-        initial_qd=qd0,
+        initial_state=(q0, qd0),
         marker_offsets=marker_offsets,
         capture=capture,
     )

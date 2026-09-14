@@ -4,7 +4,7 @@
   "epic": "#10062",
   "engine": "mujoco",
   "status": "PASSED",
-  "timestamp_utc": "2026-09-14T06:48:53.467676+00:00",
+  "timestamp_utc": "2026-09-14T07:07:06.470144+00:00",
   "environment": {
     "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -17,9 +17,9 @@
     "ik_trajectory.npz": "f955a751da8bf6f6f45ee0919fdec29b2cfcc590a95b674dc42829fe61a1fa9c",
     "returned-candidate.json": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
     "C3D_TA_Driver.c3d": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
-    "derivative_resolution.py": "62b9cccbe30e65ea5f1f770264427c0dfac405de232662447203c027e4c25b37",
+    "derivative_resolution.py": "3062e7c711be21d73f7395036c7c3d20ac618e665317c3cfeb3e6b50e1ca65ec",
     "multi_shooting_fit.py": "dd161a0a8a2112562ecaab1136675f602223a994f70fd7d7283111b095d39875",
-    "full_body_forward_dynamics.py": "168ea16cf09758c3e9aa4e301e8a75e12c3704d57b9d86d0b573db567417d8ee",
+    "full_body_forward_dynamics.py": "dbf22773a1eac956b1ae0e73aac37f20507f07e5aecb8adb6ec25a1e22472c7c",
     "tour_metrics.py": "d726e75db3f19427b37e282f4b151c3140c69592e57fcd07b70858964d59af9a"
   },
   "derivative_resolution": {

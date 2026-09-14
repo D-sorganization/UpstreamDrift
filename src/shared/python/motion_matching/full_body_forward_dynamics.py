@@ -170,187 +170,255 @@ def calibrate_ground_height_at_address(model: Any, address_q: Array) -> float:
     return float(min_z)
 
 
-def simulate_full_body_forward(
+@dataclass(frozen=True)
+class RolloutOptions:
+    """Configuration options for full-body forward dynamics rollout."""
+
+    substeps: int = 2
+    unactuated_indices: frozenset[int] = DEFAULT_UNACTUATED
+    integrator: str = "rk45"
+    normalize_time: bool = False
+
+
+def _build_failed_rollout(
+    times: Array,
+    n_coords: int,
+    capture: TourCapture,
+    marker_offsets: Mapping[str, Any],
+) -> ForwardRolloutResult:
+    """Construct a fallback ForwardRolloutResult when numerical integration fails."""
+    n_frames = len(times)
+    zero_markers = np.zeros((n_frames, len(capture.labels), 3), dtype=np.float64)
+    return ForwardRolloutResult(
+        time_s=times,
+        q=np.zeros((n_frames, n_coords)),
+        qd=np.zeros((n_frames, n_coords)),
+        predicted_markers_m=zero_markers,
+        shared_metrics=compute_shared_metrics(
+            capture=capture,
+            predicted_points_m=zero_markers,
+            tracked_labels=list(marker_offsets.keys()),
+        ),
+        contact_audit=_audit_contact_samples([], n_frames),
+        max_closure_residual_m=0.0,
+        status="failed",
+    )
+
+
+def _simulate_rk45(
     model: Any,
     ik_adapter: Any,
     theta: Array,
-    time_grid: Array,
-    initial_q: Array,
-    initial_qd: Array,
+    times: Array,
+    initial_state: tuple[Array, Array],
     marker_offsets: Mapping[str, Any],
     capture: TourCapture,
-    *,
-    substeps: int = 2,
-    unactuated_indices: set[int] | frozenset[int] | None = None,
-    integrator: str = "rk45",
-    normalize_time: bool = False,
+    options: RolloutOptions,
 ) -> ForwardRolloutResult:
-    """Simulate uninterrupted forward dynamics from initial state over time_grid."""
+    """Execute forward simulation via adaptive RK45 integration."""
     from scipy.integrate import solve_ivp
 
-    times = np.asarray(time_grid, dtype=np.float64)
     n_frames = len(times)
-    n_coords = len(initial_q)
     coord_names = list(model.coordinate_order)
+    n_coords = len(coord_names)
     duration_s = float(times[-1]) if times[-1] > 0.0 else 1.0
+    init_state = np.concatenate([initial_state[0], initial_state[1]])
 
-    curr_q = np.array(initial_q, dtype=np.float64, copy=True)
-    curr_qd = np.array(initial_qd, dtype=np.float64, copy=True)
-
-    # Auto-calibrate ground height if uncalibrated (at default 0.0)
-    if hasattr(model, "ground_plane") and abs(model.ground_plane.height_m) < 1e-6:
-        calib_z = calibrate_ground_height_at_address(model, curr_q)
-        model.ground_plane = GroundPlane(
-            normal=model.ground_plane.normal, height_m=calib_z
+    def deriv(t: float, state: Array) -> Array:
+        q_dict = {name: float(state[i]) for i, name in enumerate(coord_names)}
+        qd_dict = {
+            name: float(state[n_coords + i]) for i, name in enumerate(coord_names)
+        }
+        tau_dict = evaluate_polynomial_torques(
+            theta,
+            t,
+            duration_s,
+            coord_names,
+            options.unactuated_indices,
+            normalize_time=options.normalize_time,
         )
+        acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
+        acc = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
+        return np.concatenate([state[n_coords:], acc])
 
-    if integrator == "rk45" and n_frames > 1:
-        initial_state = np.concatenate([curr_q, curr_qd])
-        t_span = (float(times[0]), float(times[-1]))
-
-        def deriv(t: float, state: Array) -> Array:
-            q_dict = {name: float(state[i]) for i, name in enumerate(coord_names)}
-            qd_dict = {
-                name: float(state[n_coords + i]) for i, name in enumerate(coord_names)
-            }
-            tau_dict = evaluate_polynomial_torques(
-                theta,
-                t,
-                duration_s,
-                coord_names,
-                unactuated_indices,
-                normalize_time=normalize_time,
-            )
-            acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
-            acc = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
-            return np.concatenate([state[n_coords:], acc])
-
-        sol = solve_ivp(
-            deriv,
-            t_span,
-            initial_state,
-            t_eval=times,
-            method="RK45",
-            rtol=1e-5,
-            atol=1e-7,
-        )
-        if not sol.success:
-            return ForwardRolloutResult(
-                time_s=times,
-                q=np.zeros((n_frames, n_coords)),
-                qd=np.zeros((n_frames, n_coords)),
-                predicted_markers_m=np.zeros((n_frames, len(capture.labels), 3)),
-                shared_metrics=compute_shared_metrics(
-                    capture=capture,
-                    predicted_points_m=np.zeros((n_frames, len(capture.labels), 3)),
-                    tracked_labels=list(marker_offsets.keys()),
-                ),
-                contact_audit=_audit_contact_samples([], n_frames),
-                max_closure_residual_m=0.0,
-                status="failed",
-            )
-
-        q_traj = sol.y[:n_coords, :].T
-        qd_traj = sol.y[n_coords:, :].T
-        pred_markers = np.full(
-            (n_frames, len(capture.labels), 3), np.nan, dtype=np.float64
-        )
-        all_contact_samples = []
-        max_closure_err = 0.0
-
-        for k in range(n_frames):
-            q_k = q_traj[k]
-            qd_k = qd_traj[k]
-            pred_markers[k] = _compute_frame_markers(
-                ik_adapter, q_k, marker_offsets, capture.labels
-            )
-            q_dict = {name: float(q_k[i]) for i, name in enumerate(coord_names)}
-            qd_dict = {name: float(qd_k[i]) for i, name in enumerate(coord_names)}
-            c_samples = model.evaluate_contact_samples(q_dict, qd_dict)
-            all_contact_samples.append(c_samples)
-            tau_dict = evaluate_polynomial_torques(
-                theta,
-                float(times[k]),
-                duration_s,
-                coord_names,
-                unactuated_indices,
-                normalize_time=normalize_time,
-            )
-            model.accelerations(q_dict, qd_dict, tau_dict)
-            err_p, _ = model.closure_errors()
-            max_closure_err = max(max_closure_err, float(np.linalg.norm(err_p)))
-
-    else:
-        # Step-by-step semi-implicit Euler integration
-        q_traj = np.zeros((n_frames, n_coords), dtype=np.float64)
-        qd_traj = np.zeros((n_frames, n_coords), dtype=np.float64)
-        pred_markers = np.full(
-            (n_frames, len(capture.labels), 3), np.nan, dtype=np.float64
-        )
-
-        q_traj[0] = curr_q.copy()
-        qd_traj[0] = curr_qd.copy()
-        pred_markers[0] = _compute_frame_markers(
-            ik_adapter, curr_q, marker_offsets, capture.labels
-        )
-
-        all_contact_samples = []
-        max_closure_err = 0.0
-
-        for step in range(n_frames - 1):
-            t_curr = float(times[step])
-            t_next = float(times[step + 1])
-            dt_frame = t_next - t_curr
-            dt_sub = dt_frame / max(1, substeps)
-
-            for sub in range(substeps):
-                t_sub = t_curr + sub * dt_sub
-                tau_dict = evaluate_polynomial_torques(
-                    theta,
-                    t_sub,
-                    duration_s,
-                    coord_names,
-                    unactuated_indices,
-                    normalize_time=normalize_time,
-                )
-                q_dict = {name: float(curr_q[i]) for i, name in enumerate(coord_names)}
-                qd_dict = {
-                    name: float(curr_qd[i]) for i, name in enumerate(coord_names)
-                }
-
-                c_samples = model.evaluate_contact_samples(q_dict, qd_dict)
-                all_contact_samples.append(c_samples)
-
-                acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
-                pos_err, _ = model.closure_errors()
-                max_closure_err = max(max_closure_err, float(np.linalg.norm(pos_err)))
-
-                acc = np.array(
-                    [acc_dict[name] for name in coord_names], dtype=np.float64
-                )
-                curr_qd += acc * dt_sub
-                curr_q += curr_qd * dt_sub
-
-            q_traj[step + 1] = curr_q.copy()
-            qd_traj[step + 1] = curr_qd.copy()
-            pred_markers[step + 1] = _compute_frame_markers(
-                ik_adapter, curr_q, marker_offsets, capture.labels
-            )
-
-    contact_audit = _audit_contact_samples(all_contact_samples, n_frames)
-    shared_metrics = compute_shared_metrics(
-        capture=capture,
-        predicted_points_m=pred_markers,
-        tracked_labels=list(marker_offsets.keys()),
+    sol = solve_ivp(
+        deriv,
+        (float(times[0]), float(times[-1])),
+        init_state,
+        t_eval=times,
+        method="RK45",
+        rtol=1e-5,
+        atol=1e-7,
     )
+    if not sol.success:
+        return _build_failed_rollout(times, n_coords, capture, marker_offsets)
+
+    q_traj = sol.y[:n_coords, :].T
+    qd_traj = sol.y[n_coords:, :].T
+    pred_markers = np.full((n_frames, len(capture.labels), 3), np.nan, dtype=np.float64)
+    all_contact_samples = []
+    max_closure_err = 0.0
+
+    for k in range(n_frames):
+        q_k = q_traj[k]
+        qd_k = qd_traj[k]
+        pred_markers[k] = _compute_frame_markers(
+            ik_adapter, q_k, marker_offsets, capture.labels
+        )
+        q_dict = {name: float(q_k[i]) for i, name in enumerate(coord_names)}
+        qd_dict = {name: float(qd_k[i]) for i, name in enumerate(coord_names)}
+        all_contact_samples.append(model.evaluate_contact_samples(q_dict, qd_dict))
+        tau_dict = evaluate_polynomial_torques(
+            theta,
+            float(times[k]),
+            duration_s,
+            coord_names,
+            options.unactuated_indices,
+            normalize_time=options.normalize_time,
+        )
+        model.accelerations(q_dict, qd_dict, tau_dict)
+        err_p, _ = model.closure_errors()
+        max_closure_err = max(max_closure_err, float(np.linalg.norm(err_p)))
 
     return ForwardRolloutResult(
         time_s=times,
         q=q_traj,
         qd=qd_traj,
         predicted_markers_m=pred_markers,
-        shared_metrics=shared_metrics,
-        contact_audit=contact_audit,
+        shared_metrics=compute_shared_metrics(
+            capture=capture,
+            predicted_points_m=pred_markers,
+            tracked_labels=list(marker_offsets.keys()),
+        ),
+        contact_audit=_audit_contact_samples(all_contact_samples, n_frames),
         max_closure_residual_m=max_closure_err,
         status="success",
+    )
+
+
+def _simulate_euler(
+    model: Any,
+    ik_adapter: Any,
+    theta: Array,
+    times: Array,
+    initial_state: tuple[Array, Array],
+    marker_offsets: Mapping[str, Any],
+    capture: TourCapture,
+    options: RolloutOptions,
+) -> ForwardRolloutResult:
+    """Execute forward simulation via semi-implicit Euler integration."""
+    n_frames = len(times)
+    coord_names = list(model.coordinate_order)
+    n_coords = len(coord_names)
+    duration_s = float(times[-1]) if times[-1] > 0.0 else 1.0
+
+    curr_q = np.array(initial_state[0], dtype=np.float64, copy=True)
+    curr_qd = np.array(initial_state[1], dtype=np.float64, copy=True)
+
+    q_traj = np.zeros((n_frames, n_coords), dtype=np.float64)
+    qd_traj = np.zeros((n_frames, n_coords), dtype=np.float64)
+    pred_markers = np.full((n_frames, len(capture.labels), 3), np.nan, dtype=np.float64)
+
+    q_traj[0] = curr_q.copy()
+    qd_traj[0] = curr_qd.copy()
+    pred_markers[0] = _compute_frame_markers(
+        ik_adapter, curr_q, marker_offsets, capture.labels
+    )
+
+    all_contact_samples = []
+    max_closure_err = 0.0
+
+    for step in range(n_frames - 1):
+        t_curr = float(times[step])
+        t_next = float(times[step + 1])
+        dt_frame = t_next - t_curr
+        dt_sub = dt_frame / max(1, options.substeps)
+
+        for sub in range(options.substeps):
+            t_sub = t_curr + sub * dt_sub
+            tau_dict = evaluate_polynomial_torques(
+                theta,
+                t_sub,
+                duration_s,
+                coord_names,
+                options.unactuated_indices,
+                normalize_time=options.normalize_time,
+            )
+            q_dict = {name: float(curr_q[i]) for i, name in enumerate(coord_names)}
+            qd_dict = {name: float(curr_qd[i]) for i, name in enumerate(coord_names)}
+
+            c_samples = model.evaluate_contact_samples(q_dict, qd_dict)
+            all_contact_samples.append(c_samples)
+
+            acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
+            pos_err, _ = model.closure_errors()
+            max_closure_err = max(max_closure_err, float(np.linalg.norm(pos_err)))
+
+            acc = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
+            curr_qd += acc * dt_sub
+            curr_q += curr_qd * dt_sub
+
+        q_traj[step + 1] = curr_q.copy()
+        qd_traj[step + 1] = curr_qd.copy()
+        pred_markers[step + 1] = _compute_frame_markers(
+            ik_adapter, curr_q, marker_offsets, capture.labels
+        )
+
+    return ForwardRolloutResult(
+        time_s=times,
+        q=q_traj,
+        qd=qd_traj,
+        predicted_markers_m=pred_markers,
+        shared_metrics=compute_shared_metrics(
+            capture=capture,
+            predicted_points_m=pred_markers,
+            tracked_labels=list(marker_offsets.keys()),
+        ),
+        contact_audit=_audit_contact_samples(all_contact_samples, n_frames),
+        max_closure_residual_m=max_closure_err,
+        status="success",
+    )
+
+
+def simulate_full_body_forward(
+    model: Any,
+    ik_adapter: Any,
+    theta: Array,
+    time_grid: Array,
+    initial_state: tuple[Array, Array],
+    marker_offsets: Mapping[str, Any],
+    capture: TourCapture,
+    options: RolloutOptions | None = None,
+) -> ForwardRolloutResult:
+    """Simulate uninterrupted forward dynamics from initial state over time_grid."""
+    opts = RolloutOptions() if options is None else options
+    times = np.asarray(time_grid, dtype=np.float64)
+    q0 = np.asarray(initial_state[0], dtype=np.float64)
+
+    if hasattr(model, "ground_plane") and abs(model.ground_plane.height_m) < 1e-6:
+        calib_z = calibrate_ground_height_at_address(model, q0)
+        model.ground_plane = GroundPlane(
+            normal=model.ground_plane.normal, height_m=calib_z
+        )
+
+    if opts.integrator == "rk45" and len(times) > 1:
+        return _simulate_rk45(
+            model,
+            ik_adapter,
+            theta,
+            times,
+            initial_state,
+            marker_offsets,
+            capture,
+            opts,
+        )
+    return _simulate_euler(
+        model,
+        ik_adapter,
+        theta,
+        times,
+        initial_state,
+        marker_offsets,
+        capture,
+        opts,
     )

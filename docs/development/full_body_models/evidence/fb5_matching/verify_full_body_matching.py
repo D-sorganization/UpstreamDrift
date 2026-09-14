@@ -14,10 +14,11 @@ import argparse
 import hashlib
 import json
 import logging
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 import platform
 import sys
-from datetime import datetime, timezone
 from typing import Any
 
 import numpy as np
@@ -46,8 +47,9 @@ from src.shared.python.motion_matching.multi_shooting_fit import (  # noqa: E402
 )
 from src.shared.python.motion_matching.prefix_fit import MarkerTarget  # noqa: E402
 from src.shared.python.motion_matching.full_body_forward_dynamics import (  # noqa: E402
-    simulate_full_body_forward,
+    RolloutOptions,
     calibrate_ground_height_at_address,
+    simulate_full_body_forward,
 )
 
 logger = logging.getLogger(__name__)
@@ -80,15 +82,34 @@ def get_engine_version(engine_name: str) -> str:
     return "unknown"
 
 
-def run_full_body_matching(
-    engine: str = "mujoco",
-    output_dir: Path | None = None,
-    num_frames: int | None = None,
-) -> dict[str, Any]:
-    """Execute FB-5 verification, shooting fit demonstration, and 654-frame rollout."""
-    if output_dir is None:
-        output_dir = HERE
-    output_dir.mkdir(parents=True, exist_ok=True)
+@dataclass(frozen=True)
+class MatchingContext:
+    """Context holding models, initial trajectory, and configuration for FB-5 matching."""
+
+    engine: str
+    output_dir: Path
+    frames_to_run: int
+    time_grid: np.ndarray
+    capture: Any
+    marker_offsets: dict[str, Any]
+    q_ik: np.ndarray
+    model: Any
+    ik_adapter: Any
+    theta: np.ndarray
+    unactuated_indices: frozenset[int]
+    ground_height_m: float
+    offsets_path: Path
+    ik_path: Path
+
+
+def _setup_matching_context(
+    engine: str,
+    output_dir: Path | None,
+    num_frames: int | None,
+) -> MatchingContext:
+    """Validate prerequisites and initialize models, trajectories, and control polynomials."""
+    target_dir = HERE if output_dir is None else output_dir
+    target_dir.mkdir(parents=True, exist_ok=True)
 
     ik_path = (
         ROOT
@@ -99,74 +120,81 @@ def run_full_body_matching(
         / f"docs/development/full_body_models/evidence/fb4_calibration/{engine}/calibrated_offsets.json"
     )
 
-    if not SPEC_PATH.is_file():
-        raise FileNotFoundError(f"Full body spec missing: {SPEC_PATH}")
-    if not ik_path.is_file():
-        raise FileNotFoundError(f"IK trajectory missing: {ik_path}")
-    if not offsets_path.is_file():
-        raise FileNotFoundError(f"Calibrated offsets missing: {offsets_path}")
-    if not CANDIDATE_PATH.is_file():
-        raise FileNotFoundError(f"Qualified candidate missing: {CANDIDATE_PATH}")
-    if not C3D_PATH.is_file():
-        raise FileNotFoundError(f"C3D capture missing: {C3D_PATH}")
+    for p, desc in (
+        (SPEC_PATH, "Full body spec"),
+        (ik_path, "IK trajectory"),
+        (offsets_path, "Calibrated offsets"),
+        (CANDIDATE_PATH, "Qualified candidate"),
+        (C3D_PATH, "C3D capture"),
+    ):
+        if not p.is_file():
+            raise FileNotFoundError(f"{desc} missing: {p}")
 
-    # 1. Load inputs and spec
     spec_bytes = SPEC_PATH.read_bytes()
-    capture = load_tour_capture(str(C3D_PATH))
+    capture = load_tour_capture(C3D_PATH)
     offsets_data = json.loads(offsets_path.read_text(encoding="utf-8"))
     marker_offsets = offsets_data["marker_offsets"]
     candidate = json.loads(CANDIDATE_PATH.read_text(encoding="utf-8"))
 
     ik_traj = np.load(ik_path)
     q_ik = ik_traj["q"]
-    n_total_frames = len(q_ik)
-    frames_to_run = (
-        n_total_frames
-        if (num_frames is None or num_frames <= 0)
-        else min(num_frames, n_total_frames)
+    n_total = len(q_ik)
+    frames = (
+        n_total if (num_frames is None or num_frames <= 0) else min(num_frames, n_total)
     )
+    time_grid = capture.time_s[:frames] - capture.time_s[0]
 
-    time_grid = capture.time_s[:frames_to_run] - capture.time_s[0]
-
-    # 2. Instantiate physics model and IK adapter
     if engine == "mujoco":
         model = NativeMujocoFullBodyModel(spec_bytes)
         ik_adapter = MujocoFullBodyIK(spec_bytes.decode("utf-8"))
     else:
-        raise NotImplementedError(  # tracked: #10062
+        raise NotImplementedError(
             f"Engine {engine} matching runner not yet implemented"
         )
 
-    coord_names = list(model.coordinate_order)
-    n_coords = len(coord_names)
+    n_coords = len(model.coordinate_order)
     q0 = q_ik[0].copy()
-    qd0 = np.zeros(n_coords, dtype=np.float64)
-
-    # 3. Ground height calibration at address
     ground_h = calibrate_ground_height_at_address(model, q0)
     model.ground_plane = model.ground_plane.__class__(
         normal=model.ground_plane.normal, height_m=ground_h
     )
 
-    # 4. Construct control polynomial theta matrix (41 x 7)
-    # Qualified native candidate is 27 upper-body joints (highest-power-first)
-    # Reversing each row yields lowest-power-first for evaluate_polynomial_torque
     upper_coeffs = np.array(candidate["coefficients"], dtype=np.float64)
     upper_names = candidate["coordinate_names"]
-
     theta = np.zeros((n_coords, 7), dtype=np.float64)
     for name, row in zip(upper_names, upper_coeffs, strict=True):
         if name in model._indices:
             idx = model.coordinate_order.index(name)
             theta[idx] = row[::-1]
 
-    unactuated_indices = frozenset({0, 1, 2, 3, 4, 5})
+    return MatchingContext(
+        engine=engine,
+        output_dir=target_dir,
+        frames_to_run=frames,
+        time_grid=time_grid,
+        capture=capture,
+        marker_offsets=marker_offsets,
+        q_ik=q_ik,
+        model=model,
+        ik_adapter=ik_adapter,
+        theta=theta,
+        unactuated_indices=frozenset({0, 1, 2, 3, 4, 5}),
+        ground_height_m=ground_h,
+        offsets_path=offsets_path,
+        ik_path=ik_path,
+    )
 
-    # 5. Measure derivative resolution floor
-    logger.info("[%s] Measuring derivative resolution floor...", engine.upper())
+
+def _run_derivative_resolution(
+    model: Any,
+    q0: np.ndarray,
+    coord_names: list[str],
+) -> tuple[Any, np.ndarray]:
+    """Measure the finite-difference derivative floor of the forward model."""
+    logger.info("Measuring derivative resolution floor...")
     q0_dict = {name: float(q0[i]) for i, name in enumerate(coord_names)}
     qd0_dict = dict.fromkeys(coord_names, 0.0)
-    tau_base = np.zeros(n_coords, dtype=np.float64)
+    tau_base = np.zeros(len(coord_names), dtype=np.float64)
 
     def f_acc(tau_vec: np.ndarray) -> np.ndarray:
         tau_d = {name: float(tau_vec[i]) for i, name in enumerate(coord_names)}
@@ -178,36 +206,40 @@ def run_full_body_matching(
     logger.info("  Derivative floor status: %s", deriv_res.status)
     logger.info("  Optimal finite difference step: %.2e", deriv_res.optimal_step)
     logger.info("  Measured noise floor: %.2e", deriv_res.noise_floor)
+    return deriv_res, step_vec
 
-    # 6. Multi-Shooting Fit Setup with shared_boundary_policy="once"
+
+def _run_multi_shooting_demo(
+    ctx: MatchingContext,
+) -> tuple[MultipleShootingOptions, Any]:
+    """Demonstrate multiple shooting fit with shared_boundary_policy='once'."""
     logger.info(
         "[%s] Demonstrating two-window multiple-shooting fit (shared_boundary_policy='once')...",
-        engine.upper(),
+        ctx.engine.upper(),
     )
-    t_mid = float(time_grid[len(time_grid) // 2])
-    t_end = float(time_grid[-1])
-    mid_idx = len(time_grid) // 2
-    q_mid = q_ik[mid_idx].copy()
-    qd_mid = (q_ik[min(mid_idx + 1, len(q_ik) - 1)] - q_ik[max(mid_idx - 1, 0)]) / (
-        float(time_grid[min(mid_idx + 1, len(time_grid) - 1)])
-        - float(time_grid[max(mid_idx - 1, 0)])
+    t_mid = float(ctx.time_grid[len(ctx.time_grid) // 2])
+    t_end = float(ctx.time_grid[-1])
+    mid_idx = len(ctx.time_grid) // 2
+    q_mid = ctx.q_ik[mid_idx].copy()
+    qd_mid = (
+        ctx.q_ik[min(mid_idx + 1, len(ctx.q_ik) - 1)] - ctx.q_ik[max(mid_idx - 1, 0)]
+    ) / (
+        float(ctx.time_grid[min(mid_idx + 1, len(ctx.time_grid) - 1)])
+        - float(ctx.time_grid[max(mid_idx - 1, 0)])
     )
     initial_mid_state = np.concatenate([q_mid, qd_mid])
 
-    # Build MarkerTarget from capture
-    pts = capture.points_m[:frames_to_run]
+    pts = ctx.capture.points_m[: ctx.frames_to_run]
     observed = np.isfinite(pts).all(axis=2)
     has_obs = np.any(observed, axis=0)
-    weights = np.where(has_obs, 1.0, 0.0)
     target = MarkerTarget(
-        time=time_grid,
+        time=ctx.time_grid,
         points=pts,
-        weights=weights,
+        weights=np.where(has_obs, 1.0, 0.0),
     )
-
     ms_options = MultipleShootingOptions(
         shooting_nodes=(t_mid, t_end),
-        state_dim=2 * n_coords,
+        state_dim=2 * len(ctx.model.coordinate_order),
         defect_weight=100.0,
         defect_tolerance=1e-3,
         max_nfev=2,
@@ -215,26 +247,25 @@ def run_full_body_matching(
         node_mode="nodes_only",
     )
 
-    def segmented_forward_stub(
-        th: np.ndarray, t_span: np.ndarray, init_state: np.ndarray | None
+    def segmented_stub(
+        th: np.ndarray, t_span: np.ndarray, init_s: np.ndarray | None
     ) -> tuple[np.ndarray, np.ndarray]:
-        # Fast evaluation stub for multiple-shooting solver integration contract
         n_pts = len(t_span)
-        n_mks = len(capture.labels)
-        pts = np.zeros((n_pts, n_mks, 3), dtype=np.float64)
-        s_out = initial_mid_state.copy() if init_state is None else init_state.copy()
-        return pts, s_out
+        n_mks = len(ctx.capture.labels)
+        pts_stub = np.zeros((n_pts, n_mks, 3), dtype=np.float64)
+        s_out = initial_mid_state.copy() if init_s is None else init_s.copy()
+        return pts_stub, s_out
 
-    def unsegmented_forward_stub(th: np.ndarray, t_span: np.ndarray) -> np.ndarray:
-        return np.zeros((len(t_span), len(capture.labels), 3), dtype=np.float64)
+    def unsegmented_stub(th: np.ndarray, t_span: np.ndarray) -> np.ndarray:
+        return np.zeros((len(t_span), len(ctx.capture.labels), 3), dtype=np.float64)
 
     ms_fit_result = fit_multiple_shooting(
         target=target,
-        segmented_forward=segmented_forward_stub,
-        unsegmented_forward=unsegmented_forward_stub,
-        initial_theta=theta.ravel(),
-        lower_theta=theta.ravel() - 50.0,
-        upper_theta=theta.ravel() + 50.0,
+        segmented_forward=segmented_stub,
+        unsegmented_forward=unsegmented_stub,
+        initial_theta=ctx.theta.ravel(),
+        lower_theta=ctx.theta.ravel() - 50.0,
+        upper_theta=ctx.theta.ravel() + 50.0,
         initial_states={t_mid: initial_mid_state},
         state_bounds={t_mid: (initial_mid_state - 1.0, initial_mid_state + 1.0)},
         options=ms_options,
@@ -245,63 +276,59 @@ def run_full_body_matching(
         ms_fit_result.message,
     )
     logger.info("  Max defect norm: %.6f", ms_fit_result.max_defect_norm)
+    return ms_options, ms_fit_result
 
-    # 7. Execute Uninterrupted Full-Horizon Original-State Forward Simulation
+
+def _execute_forward_rollout(ctx: MatchingContext) -> Any:
+    """Execute uninterrupted full-horizon forward dynamics replay."""
     logger.info(
         "[%s] Simulating uninterrupted original-state forward replay (%d frames)...",
-        engine.upper(),
-        frames_to_run,
+        ctx.engine.upper(),
+        ctx.frames_to_run,
     )
-    rollout = simulate_full_body_forward(
-        model=model,
-        ik_adapter=ik_adapter,
-        theta=theta,
-        time_grid=time_grid,
-        initial_q=q0,
-        initial_qd=qd0,
-        marker_offsets=marker_offsets,
-        capture=capture,
-        unactuated_indices=unactuated_indices,
+    n_coords = len(ctx.model.coordinate_order)
+    rollout_options = RolloutOptions(
+        unactuated_indices=ctx.unactuated_indices,
         integrator="rk45",
     )
-
+    rollout = simulate_full_body_forward(
+        model=ctx.model,
+        ik_adapter=ctx.ik_adapter,
+        theta=ctx.theta,
+        time_grid=ctx.time_grid,
+        initial_state=(ctx.q_ik[0].copy(), np.zeros(n_coords, dtype=np.float64)),
+        marker_offsets=ctx.marker_offsets,
+        capture=ctx.capture,
+        options=rollout_options,
+    )
+    m = rollout.shared_metrics
+    c = rollout.contact_audit
     logger.info("Forward Simulation Results:")
     logger.info("  Status: %s", rollout.status)
-    logger.info(
-        "  Whole marker RMSE: %.2f mm",
-        rollout.shared_metrics.whole_marker_rmse_m * 1000.0,
-    )
-    logger.info(
-        "  Early marker RMSE: %.2f mm",
-        rollout.shared_metrics.early_marker_rmse_m * 1000.0,
-    )
-    logger.info(
-        "  Terminal marker RMSE: %.2f mm",
-        rollout.shared_metrics.terminal_marker_rmse_m * 1000.0,
-    )
-    logger.info(
-        "  Club marker RMSE: %.2f mm",
-        rollout.shared_metrics.club_marker_rmse_m * 1000.0,
-    )
-    logger.info(
-        "  Pelvis yaw RMSE: %.4f rad", rollout.shared_metrics.pelvis_yaw_rmse_rad
-    )
-    logger.info(
-        "  Max normal ground force: %.2f N", rollout.contact_audit.max_normal_force_n
-    )
-    logger.info(
-        "  Max friction ground force: %.2f N",
-        rollout.contact_audit.max_friction_force_n,
-    )
-    logger.info(
-        "  Max penetration: %.2f mm", rollout.contact_audit.max_penetration_m * 1000.0
-    )
+    logger.info("  Whole marker RMSE: %.2f mm", m.whole_marker_rmse_m * 1000.0)
+    logger.info("  Early marker RMSE: %.2f mm", m.early_marker_rmse_m * 1000.0)
+    logger.info("  Terminal marker RMSE: %.2f mm", m.terminal_marker_rmse_m * 1000.0)
+    logger.info("  Club marker RMSE: %.2f mm", m.club_marker_rmse_m * 1000.0)
+    logger.info("  Pelvis yaw RMSE: %.4f rad", m.pelvis_yaw_rmse_rad)
+    logger.info("  Max normal ground force: %.2f N", c.max_normal_force_n)
+    logger.info("  Max friction ground force: %.2f N", c.max_friction_force_n)
+    logger.info("  Max penetration: %.2f mm", c.max_penetration_m * 1000.0)
     logger.info(
         "  Max closure residual: %.2f mm", rollout.max_closure_residual_m * 1000.0
     )
+    return rollout
 
-    # 8. Archive evidence
-    traj_path = output_dir / f"forward_trajectory_{engine}.npz"
+
+def _archive_artifacts_and_receipt(
+    ctx: MatchingContext,
+    deriv_res: Any,
+    step_vec: np.ndarray,
+    ms_options: MultipleShootingOptions,
+    ms_fit_result: Any,
+    rollout: Any,
+) -> dict[str, Any]:
+    """Archive forward trajectory evidence and write validation receipt."""
+    traj_path = ctx.output_dir / f"forward_trajectory_{ctx.engine}.npz"
     np.savez_compressed(
         traj_path,
         time_s=rollout.time_s,
@@ -315,19 +342,19 @@ def run_full_body_matching(
         "work_package": "FB-5",
         "issue": "#10069",
         "epic": "#10062",
-        "engine": engine,
+        "engine": ctx.engine,
         "status": "PASSED" if rollout.status == "success" else "FAILED",
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "environment": {
             "python": sys.version,
             "platform": platform.platform(),
             "executable": sys.executable,
-            f"{engine}_version": get_engine_version(engine),
+            f"{ctx.engine}_version": get_engine_version(ctx.engine),
         },
         "inputs": {
             "full_body_spec_v1.json": sha256_file(SPEC_PATH),
-            "calibrated_offsets.json": sha256_file(offsets_path),
-            "ik_trajectory.npz": sha256_file(ik_path),
+            "calibrated_offsets.json": sha256_file(ctx.offsets_path),
+            "ik_trajectory.npz": sha256_file(ctx.ik_path),
             "returned-candidate.json": sha256_file(CANDIDATE_PATH),
             "C3D_TA_Driver.c3d": sha256_file(C3D_PATH),
             "derivative_resolution.py": sha256_file(
@@ -363,9 +390,9 @@ def run_full_body_matching(
         },
         "forward_rollout": {
             "integrator": "rk45",
-            "num_frames": frames_to_run,
-            "duration_s": float(time_grid[-1]),
-            "ground_height_m": ground_h,
+            "num_frames": ctx.frames_to_run,
+            "duration_s": float(ctx.time_grid[-1]),
+            "ground_height_m": ctx.ground_height_m,
             "max_closure_residual_m": rollout.max_closure_residual_m,
             "shared_metrics": {
                 "whole_marker_rmse_m": rollout.shared_metrics.whole_marker_rmse_m,
@@ -377,16 +404,33 @@ def run_full_body_matching(
             "contact_audit": rollout.contact_audit.as_dict(),
         },
         "artifacts": {
-            f"forward_trajectory_{engine}_sha256": traj_sha256,
+            f"forward_trajectory_{ctx.engine}_sha256": traj_sha256,
         },
     }
 
-    receipt_path = output_dir / f"receipt_{engine}.json"
+    receipt_path = ctx.output_dir / f"receipt_{ctx.engine}.json"
     receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
     logger.info("Receipt written to %s", receipt_path)
     logger.info("Forward trajectory written to %s", traj_path)
-
     return receipt
+
+
+def run_full_body_matching(
+    engine: str = "mujoco",
+    output_dir: Path | None = None,
+    num_frames: int | None = None,
+) -> dict[str, Any]:
+    """Execute FB-5 verification, shooting fit demonstration, and 654-frame rollout."""
+    ctx = _setup_matching_context(engine, output_dir, num_frames)
+    coord_names = list(ctx.model.coordinate_order)
+    deriv_res, step_vec = _run_derivative_resolution(
+        ctx.model, ctx.q_ik[0], coord_names
+    )
+    ms_options, ms_fit_result = _run_multi_shooting_demo(ctx)
+    rollout = _execute_forward_rollout(ctx)
+    return _archive_artifacts_and_receipt(
+        ctx, deriv_res, step_vec, ms_options, ms_fit_result, rollout
+    )
 
 
 def main() -> None:
