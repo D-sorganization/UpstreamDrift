@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Restore CI Standard and Scheduled Workflow Health (#10143)
+
+Restores fleet workflow health on default branch and scheduled runs:
+- Synchronize full source mypy baseline with Linux quality gate.
+- Align scheduled/default branch coverage condition to run full core lane with `--no-cov`.
+- Enforce provider authority contract for native tiles in parity smoke tests (`_provider_status`).
+- Prevent cross-runner sparse-checkout contamination on self-hosted Docker runners.
+- Pin `google/osv-scanner-action` to verified stable digest.
+
 ## Shadow Tracker Camera Direction Conversion (ST-02C, #10139)
 
 Implements bidirectional conversion between `pose_estimation.observations.CameraCalibration`
@@ -8,6 +17,7 @@ Implements bidirectional conversion between `pose_estimation.observations.Camera
 Reuses `Transform6DOF` SE(3) inversion, enforces pinhole K constraints (zero skew, bottom row
 `[0, 0, 1]`, positive focal lengths), validates proper finite rotations, and canonicalizes
 distortion representations (none/empty to five zeros; four coefficients to five with k3=0).
+
 
 ## Shadow Tracker Source and Frame Identity Contracts (ST-02A, #10137)
 
