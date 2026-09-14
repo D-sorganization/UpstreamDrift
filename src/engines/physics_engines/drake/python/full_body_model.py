@@ -239,6 +239,19 @@ class FullBodyDrakeModel:
             )
         return samples
 
+    @property
+    def coordinate_order(self) -> tuple[str, ...]:
+        """Return the canonical 41-coordinate order of the full-body model."""
+        return self.names
+
+    def evaluate_contact_samples(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+    ) -> dict[str, ContactSample]:
+        """Evaluate shared contact law forces for each foot contact sphere."""
+        return self.contact_forces(coordinates, rates)
+
     def _evaluate_closure_residuals(
         self, a: Any, b: Any, jacobian: Array, velocity: Array
     ) -> tuple[Array, Array]:

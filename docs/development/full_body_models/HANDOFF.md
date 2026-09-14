@@ -263,10 +263,41 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
   - `receipt_mujoco.json` containing environment, input SHA256 hashes, derivative floor resolution, multi-shooting setup, 5 shared metrics, and contact audit.
 - Tests: `tests/unit/motion_matching/test_derivative_resolution.py` (4 passed), `tests/unit/motion_matching/test_multi_shooting_fit.py` (7 passed), `tests/unit/motion_matching/test_full_body_forward_dynamics.py` (2 passed).
 
+## FB-6 Cross-Engine Full-Body Parity and Visual Review Completed (#10070)
+
+- Shared cross-engine replay and visual review module implemented in `src/shared/python/motion_matching/cross_engine_replay.py`:
+  - `CrossEngineReplayConfig`, `StepSizeConvergenceResult`, `compute_step_size_convergence`, `EngineReplayOutcome`, `CrossEngineComparisonReport`, `compare_engine_replays`.
+  - 3D marker overlay frame generator and GIF animation renderer: `generate_overlay_frame`, `render_marker_overlay_animation` with target (green) vs. model (blue/red) marker visualization, candidate hash prefix in filenames, and configurable frame stride.
+- Unified physics engine adapters:
+  - `src/engines/physics_engines/mujoco/python/full_body_model.py`: unified `.coordinate_order` property and `evaluate_contact_samples`.
+  - `src/engines/physics_engines/pinocchio/python/native_model.py`: unified `.coordinate_order` property and `evaluate_contact_samples`.
+  - `src/engines/physics_engines/drake/python/full_body_model.py`: unified `.coordinate_order` property and `evaluate_contact_samples`; fixed sphere frame offset in address ground height calibration.
+  - `src/shared/python/motion_matching/full_body_forward_dynamics.py`: adaptive RK45 integration across all three engines with configurable `rtol`/`atol` options and universal ground height auto-calibration for `ground_plane` (Drake), `ground` (Pinocchio), and `_ground_plane` (MuJoCo).
+- Automated verification driver: `docs/development/full_body_models/evidence/fb6_parity/verify_cross_engine_parity.py`
+  - Replays the accepted candidate (`returned-candidate.json`) over all 654 frames across all three engines (MuJoCo, Pinocchio, Drake).
+  - Step-size convergence: verified on initial settling window via tolerance refinement (`rtol=1e-5, atol=1e-7` vs `rtol=1e-6, atol=1e-8`). All engines achieved `is_converged=True` (MuJoCo: 3.17e-3 rad, Pinocchio: 2.58e-5 rad, Drake: 1.06e-2 rad, all $\le 0.05$ rad tolerance).
+  - Full-body parity metrics across 654 frames:
+    - MuJoCo: whole marker RMSE 2.738 m, terminal RMSE 3.438 m, yaw RMSE 2.003 rad, max closure residual 2.675 m.
+    - Pinocchio: whole marker RMSE 2.757 m, terminal RMSE 3.411 m, yaw RMSE 1.885 rad, max closure residual 2.467 m.
+    - Drake: whole marker RMSE 2.393 m, terminal RMSE 3.521 m, yaw RMSE 1.626 rad, max closure residual 1.909 m.
+    - Pairwise whole marker RMSE diff: MuJoCo vs Pinocchio: 0.019 m (1.9 cm); MuJoCo vs Drake: 0.345 m; Pinocchio vs Drake: 0.364 m.
+- Evidence archived under `docs/development/full_body_models/evidence/fb6_parity/`:
+  - Visual review animations:
+    - `replays/overlay_mujoco_3f94aa92f28a.gif` (131 frames)
+    - `replays/overlay_pinocchio_3f94aa92f28a.gif` (131 frames)
+    - `replays/overlay_drake_3f94aa92f28a.gif` (131 frames)
+  - Cryptographic receipts and parity comparison report:
+    - `receipt_mujoco.json`
+    - `receipt_pinocchio.json`
+    - `receipt_drake.json`
+    - `parity_report.json`
+  - Compressed forward trajectories:
+    - `forward_trajectory_mujoco.npz`
+    - `forward_trajectory_pinocchio.npz`
+    - `forward_trajectory_drake.npz`
+- Tests: `tests/unit/motion_matching/test_full_body_parity.py` (4 passed), `tests/unit/motion_matching/test_full_body_forward_dynamics.py` (2 passed).
+
 ## Next
 
-- Land PR #10092 (FB-5: Full-Body Forward-Dynamics Matching, #10069).
-- Cross-engine same-input replay of Returned81 in MuJoCo, Drake, and Pinocchio with video (VISUALS_HANDOFF.md Step 4).
-- OpenSim on real horizon 0.85s (VISUALS_HANDOFF.md Step 5).
-- Independent FB-3 re-checks (VISUALS_HANDOFF.md Step 6).
-- FB-6 Cross-Engine Full-Body Parity and Visual Review (#10070).
+- Merge PR for FB-6 (#10070).
+- Close epic #10062 ("Epic: full-body models with lower limbs and ground contact (MuJoCo, Drake, Pinocchio)").
