@@ -84,6 +84,26 @@ class GroundPlane:
         )
 
 
+def contact_setup_from_spec(
+    spec: Mapping[str, Any],
+) -> tuple[ContactParameters, GroundPlane]:
+    """Extract contact parameters and ground plane from a full-body model specification."""
+    contact_cfg = spec["contact"]
+    params = ContactParameters(**contact_cfg["parameters"])
+    ground_cfg = contact_cfg["ground"]
+    g = np.asarray(spec["gravity_m_s2"], dtype=float)
+    g_norm = np.linalg.norm(g)
+    if g_norm < 1e-12:
+        raise ValueError("Nonzero gravity required for opposite_gravity policy")
+    unit_g = -g / g_norm
+    ground_normal = (float(unit_g[0]), float(unit_g[1]), float(unit_g[2]))
+    ground_height = float(
+        ground_cfg["height_m"] if ground_cfg["height_m"] is not None else 0.0
+    )
+    plane = GroundPlane(normal=ground_normal, height_m=ground_height)
+    return params, plane
+
+
 class ContactSample(NamedTuple):
     """Per-sphere contact outcome in world coordinates."""
 

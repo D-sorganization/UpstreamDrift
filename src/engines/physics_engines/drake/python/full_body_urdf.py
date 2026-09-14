@@ -28,8 +28,7 @@ from src.shared.python.model_generation.core.types import (
     Origin,
 )
 from src.shared.python.motion_matching.full_body_spec import (
-    order_directed_tree,
-    upper_body_slice,
+    order_full_body_joints,
 )
 
 
@@ -55,33 +54,6 @@ def _origin(value: Any) -> Origin:
     ):
         raise ValueError("Native transform cannot be preserved in URDF RPY")
     return Origin(xyz=tuple(matrix[:3, 3]), rpy=tuple(rpy))
-
-
-def _order_full_body_joints(spec: Mapping[str, Any]) -> list[Mapping[str, Any]]:
-    """Sequence joints with upper-body tree first, then lower limb chains."""
-    upper_spec = upper_body_slice(spec)
-    upper_joint_names = {j["name"] for j in upper_spec["joints"]}
-    upper_ordered = order_directed_tree(upper_spec["joints"])
-
-    lower_joints_by_name = {
-        j["name"]: j for j in spec["joints"] if j["name"] not in upper_joint_names
-    }
-    leg_chain = [
-        "hip_r",
-        "knee_r",
-        "ankle_r",
-        "subtalar_r",
-        "mtp_r",
-        "hip_l",
-        "knee_l",
-        "ankle_l",
-        "subtalar_l",
-        "mtp_l",
-    ]
-    lower_ordered = [
-        lower_joints_by_name[name] for name in leg_chain if name in lower_joints_by_name
-    ]
-    return list(upper_ordered) + lower_ordered
 
 
 def _build_joint_primitives(
@@ -135,7 +107,7 @@ def _build_kinematic_tree(
 ) -> None:
     """Construct tree kinematics and verify coordinate inventory."""
     coordinates: list[str] = []
-    for joint in _order_full_body_joints(spec):
+    for joint in order_full_body_joints(spec):
         parent = body_links[joint["parent"]]
         last_primitive = _build_joint_primitives(
             joint, parent, coordinates, links, joints

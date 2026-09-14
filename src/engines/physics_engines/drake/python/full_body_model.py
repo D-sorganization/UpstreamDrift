@@ -20,9 +20,8 @@ from src.engines.physics_engines.drake.python.full_body_urdf_contract import (
     validate_full_body_urdf_bundle,
 )
 from src.shared.python.motion_matching.contact_law import (
-    ContactParameters,
     ContactSample,
-    GroundPlane,
+    contact_setup_from_spec,
     sphere_ground_contact,
 )
 
@@ -43,34 +42,15 @@ def _solve_rigid_kkt_acceleration(
         or j_arr.ndim != 2
         or j_arr.shape[1] != n
         or b_arr.shape != (j_arr.shape[0],)
-        or any(not np.isfinite(val).all() for val in (m_arr, f_arr, j_arr, b_arr))
     ):
-        raise ValueError("Invalid constrained dynamics dimensions or values")
-    k = b_arr.size
+        raise ValueError("Incompatible dimensions for KKT solve")
+
+    k = j_arr.shape[0]
     kkt_matrix = np.block([[m_arr, -j_arr.T], [j_arr, np.zeros((k, k))]])
     result = np.linalg.solve(kkt_matrix, np.concatenate((f_arr, -b_arr)))[:n]
     if not np.isfinite(result).all():
         raise FloatingPointError("Nonfinite constrained acceleration")
     return result.copy()
-
-
-def _init_ground_plane(
-    spec: Mapping[str, Any],
-) -> tuple[ContactParameters, GroundPlane]:
-    contact_cfg = spec["contact"]
-    params = ContactParameters(**contact_cfg["parameters"])
-    ground_cfg = contact_cfg["ground"]
-    g = np.asarray(spec["gravity_m_s2"], dtype=float)
-    g_norm = np.linalg.norm(g)
-    if g_norm < 1e-12:
-        raise ValueError("Nonzero gravity required for opposite_gravity policy")
-    unit_g = -g / g_norm
-    ground_normal = (float(unit_g[0]), float(unit_g[1]), float(unit_g[2]))
-    ground_height = float(
-        ground_cfg["height_m"] if ground_cfg["height_m"] is not None else 0.0
-    )
-    plane = GroundPlane(normal=ground_normal, height_m=ground_height)
-    return params, plane
 
 
 class NativeDrakeFullBodyModel:
@@ -122,7 +102,7 @@ class NativeDrakeFullBodyModel:
         self._v_indices = [self._joints[name].velocity_start() for name in self.names]
         self._last_closure: tuple[Array, Array] | None = None
 
-        self.contact_parameters, self.ground_plane = _init_ground_plane(spec)
+        self.contact_parameters, self.ground_plane = contact_setup_from_spec(spec)
         self._contact_spheres = {
             s["name"]: {
                 "body_name": meta["contact_links"][s["name"]],
@@ -176,16 +156,26 @@ class NativeDrakeFullBodyModel:
             for name, frame in self._frames.items()
         }
 
+    def _translation_jacobian(self, frame: Any) -> Array:
+        world = self.plant.world_frame()
+        return self.plant.CalcJacobianTranslationalVelocity(
+            self.context,
+            self._wrt_v,
+            frame,
+            np.zeros(3),
+            world,
+            world,
+        )
+
     def evaluate_contact_samples(
-        self,
-        coordinates: Mapping[str, float],
-        rates: Mapping[str, float],
+        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
     ) -> dict[str, ContactSample]:
-        """Evaluate the shared contact law for all contact spheres at current state."""
+        """Evaluate shared Hunt-Crossley and regularized Coulomb model at state."""
         self.plant.SetPositions(
             self.context, self._vector(coordinates, self._q_indices)
         )
         self.plant.SetVelocities(self.context, self._vector(rates, self._v_indices))
+
         world = self.plant.world_frame()
         samples: dict[str, ContactSample] = {}
 
@@ -196,14 +186,7 @@ class NativeDrakeFullBodyModel:
             pos = self.plant.CalcPointsPositions(
                 self.context, frame, np.zeros((3, 1)), world
             ).ravel()
-            jac_pos = self.plant.CalcJacobianTranslationalVelocity(
-                self.context,
-                self._wrt_v,
-                frame,
-                np.zeros(3),
-                world,
-                world,
-            )
+            jac_pos = self._translation_jacobian(frame)
             v_vec = self.plant.GetVelocities(self.context)
             vel = jac_pos @ v_vec
 
@@ -229,7 +212,6 @@ class NativeDrakeFullBodyModel:
 
         samples = self.evaluate_contact_samples(coordinates, rates)
         tau_contact = np.zeros(len(self.names))
-        world = self.plant.world_frame()
 
         for s_name, sample in samples.items():
             f_contact = np.asarray(sample.normal_force_n) + np.asarray(
@@ -240,14 +222,7 @@ class NativeDrakeFullBodyModel:
             frame = self.plant.GetBodyByName(
                 self._contact_spheres[s_name]["body_name"], self.instance
             ).body_frame()
-            jac_pos = self.plant.CalcJacobianTranslationalVelocity(
-                self.context,
-                self._wrt_v,
-                frame,
-                np.zeros(3),
-                world,
-                world,
-            )
+            jac_pos = self._translation_jacobian(frame)
             tau_contact += jac_pos.T @ f_contact
 
         a, b = self._closure
