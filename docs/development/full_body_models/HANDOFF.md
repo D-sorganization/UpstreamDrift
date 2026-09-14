@@ -140,6 +140,21 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
 - Tests: `tests/unit/motion_matching/test_full_body_drake.py` (6 passed on ControlTower
   in 0.98s; 1 passed, 5 cleanly skipped on Windows without pydrake).
 
+## Visual Skeleton Layer Completed (Step 1 of the Visuals Plan)
+
+- `src/shared/python/motion_matching/visual_skeleton.py`: one engine-agnostic
+  visual description derived from any native or full-body spec (capsule per
+  body, COM and frame spheres, ground plane opposite gravity with a
+  `calibrated` flag, world-segment mapping for viewers); 5 unit tests.
+- `src/engines/physics_engines/mujoco/python/visual_layer.py` and
+  `export_full_body_mjcf(..., visual=True)`: massless non-colliding visual
+  geoms, floor, lights, camera; physics proven identical to the plain export
+  (masses, inertias, xpos, qacc) in `tests/unit/motion_matching/test_mujoco_visual_layer.py`.
+- Evidence `evidence/visual_layer/` (default pose PNG, returned81 kinematic
+  playback GIF, MJCF, receipt). Steps 3 to 6 (viewer tile, cross-engine replay
+  videos, OpenSim real horizon, FB-3 re-checks) are specified for lower-level
+  agents in [VISUALS_HANDOFF.md](VISUALS_HANDOFF.md).
+
 ## Next
 
 - Cross-engine same-input replay and comparison across MuJoCo FB-3-M (#10066), Pinocchio FB-3-P (#10065), and Drake FB-3-D (#10067).
