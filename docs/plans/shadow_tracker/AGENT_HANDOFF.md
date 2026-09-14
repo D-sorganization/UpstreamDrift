@@ -7,6 +7,9 @@ source/test directories are supplied. No segmentation, fitter, runnable demo,
 engine integration, or scientific qualification is implemented by this setup.
 There is no committed footage, checkpoint or large model asset.
 
+Setup is delivered in [PR #10136](https://github.com/D-sorganization/UpstreamDrift/pull/10136),
+closing only ST-00 (#10123) when merged. All implementation work remains open.
+
 Canonical starting point: [README](README.md). Decisions are in
 [Architecture](ARCHITECTURE.md); contracts and tolerances are proposals until
 ST-01/ST-02 freeze them. GitHub issues are authoritative for current work status.
