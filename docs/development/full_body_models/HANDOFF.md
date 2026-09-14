@@ -105,8 +105,42 @@ FB-3-P is implemented and verified on ControlTower with Pinocchio 4.1.0:
 - Tests: `tests/unit/motion_matching/test_pinocchio_full_body_builder.py` (6 passed
   on ControlTower in 0.46s; clean skip on Windows).
 
+## FB-3-D Completed (#10067)
+
+FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
+
+- `src/engines/physics_engines/drake/python/full_body_urdf.py`: exports `full-body-v1`
+  documents to URDF XML preserving all 41 scalar joints (27 upper-body joints + 14
+  lower-limb joints), physical solid inertias, 16 upper-body frames, 2 weld closure
+  frames, and 4 foot contact sphere links (`contact_heel_r`, `contact_forefoot_r`,
+  `contact_heel_l`, `contact_forefoot_l`). Sidecar metadata emitted with `schema_version: 1`,
+  `requires_sidecar: True`, and `representation: native-full-body-urdf-v1`.
+- `src/engines/physics_engines/drake/python/full_body_model.py`: `FullBodyDrakeModel`
+  provides full-body kinematics, `contact_forces`, and `accelerations`.
+  Applies the shared FB-2 Hunt-Crossley and regularized Coulomb contact law
+  (`sphere_ground_contact`) via spatial contact wrenches and generalized force
+  projection $J_{\text{trans}}^T F_{\text{contact}}$ into the rigid continuous
+  constrained KKT solve (`solve_weld_acceleration`) enforcing the 6-DOF dual-grip weld
+  closure without numerical relaxation.
+- Gate results:
+  - Gate (a): Upper-body slice reproduces qualified model mass matrix and FK to
+    $0.0$ max difference (< $10^{-12}$) across 20 random states, with exact link mass
+    and inertia parity.
+  - Gate (b): Full-body FK matches spec frames to $0.0$ max difference (< $10^{-12}$)
+    across 20 random states.
+  - Gate (c): Contact forces at analytic states match the FB-2 reference with $0.0$
+    difference in normal force, friction force, and penetration depth across all 4 spheres.
+  - Gate (d): Closure residuals unchanged on the upper-body chain to $0.0$ max position
+    difference and $2.22 \times 10^{-16}$ max velocity difference (< $10^{-12}$) across
+    20 random positions and velocities.
+  - Accelerations: 41 coordinates, all finite under combined contact forces and weld closure.
+- Evidence archived under `docs/development/full_body_models/evidence/fb3_drake/`:
+  - Driver: `verify_drake_full_body.py` (auto-dispatches to ControlTower if local Drake is absent).
+  - Receipt: `receipt.json` (`8af6d6d3b8491b8d27deaa894e209147b4a6ea4fb3dfc4d01bd7f91221d8d701`).
+- Tests: `tests/unit/motion_matching/test_full_body_drake.py` (6 passed on ControlTower
+  in 0.98s; 1 passed, 5 cleanly skipped on Windows without pydrake).
+
 ## Next
 
-- FB-3-D (#10067 Drake builder) consuming `full_body_spec_v1.json` with the 1e-12 upper-body slice parity test and shared contact forces.
-- Cross-engine same-input replay and comparison across MuJoCo FB-3-M and Pinocchio FB-3-P.
+- Cross-engine same-input replay and comparison across MuJoCo FB-3-M (#10066), Pinocchio FB-3-P (#10065), and Drake FB-3-D (#10067).
 - FB-4 ground height and marker calibration, and FB-5 fitting per Epic #10062.
