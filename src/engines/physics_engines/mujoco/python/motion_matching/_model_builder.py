@@ -229,6 +229,10 @@ def build_model(variant: Variant = "full_body") -> CompiledModel:
             f"variant {variant!r}: no club-head body found "
             f"(looked for {_HEAD_BODY_CANDIDATES})"
         )
+
+    def _make_data() -> mujoco.MjData:
+        return mujoco.MjData(model)
+
     return CompiledModel(
         variant=variant,
         model=model,
@@ -237,7 +241,7 @@ def build_model(variant: Variant = "full_body") -> CompiledModel:
         club_grip_body_id=grip_id,
         club_head_body_id=head_id,
         xml_hash=_hash_xml(_xml_for(variant)),
-        make_data=lambda m=model: mujoco.MjData(m),
+        make_data=_make_data,
     )
 
 

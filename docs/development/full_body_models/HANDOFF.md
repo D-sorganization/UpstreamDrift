@@ -54,7 +54,27 @@ forward-kinematics parity tests against OpenSim decide whether that mapping
 and the Euler convention (SimTK body-fixed XYZ) are right, and must fail
 loudly if not.
 
-## Done (FB-3-P Pinocchio Full-Body Builder, #10065)
+## FB-3-M Completed (#10066)
+
+- `src/engines/physics_engines/mujoco/python/full_body_mjcf.py`: `export_full_body_mjcf`
+  converts `full-body-v1` documents to MJCF XML preserving all 41 scalar joints
+  (27 upper-body joints + 14 lower-limb joints), upper-body kinematic transforms
+  and aggregated inertias, 16 frame sites, 2 weld closure sites, and adds 4
+  calcaneus contact sphere geoms and sites (`contact_heel_r`, `contact_forefoot_r`,
+  `contact_heel_l`, `contact_forefoot_l`). Stock MuJoCo contact solver is disabled
+  (`flag contact="disable"`).
+- `src/engines/physics_engines/mujoco/python/full_body_model.py`: `NativeMujocoFullBodyModel`
+  provides full-body kinematics, `evaluate_contact_samples`, and `accelerations`.
+  Applies the shared FB-2 Hunt-Crossley and regularized Coulomb contact law
+  (`sphere_ground_contact`) via spatial wrenches in `data.xfrc_applied` and
+  generalized force projection `jac_pos.T @ f_contact`. Resolves the dual-grip
+  closure constraint via an explicit rigid solve.
+- `tests/unit/motion_matching/test_full_body_mujoco.py`: 5 live simulation tests
+  verifying compilation ($nq=41, nv=41$), upper-body slice inertia and FK parity
+  to 1e-12, frame poses parity against the qualified native model, and exact 0.0 N
+  contact force parity on the shared FB-2 harness.
+
+## FB-3-P Completed (#10065)
 
 FB-3-P is implemented and verified on ControlTower with Pinocchio 4.1.0:
 
@@ -87,9 +107,6 @@ FB-3-P is implemented and verified on ControlTower with Pinocchio 4.1.0:
 
 ## Next
 
-FB-3 per engine (#10066 MuJoCo, #10067 Drake): builders that consume
-`full_body_spec_v1.json` through `load_full_body_spec`, keep the scalar
-upper-body path untouched, apply `sphere_ground_contact` as external forces,
-and prove the upper-body slice reproduces the qualified model to 1e-12 in mass
-matrix and FK before anything else. Then FB-4 calibration (#10068) and FB-5
-fitting (#10069) per the epic.
+- FB-3-D (#10067 Drake builder) consuming `full_body_spec_v1.json` with the 1e-12 upper-body slice parity test and shared contact forces.
+- Cross-engine same-input replay and comparison across MuJoCo FB-3-M and Pinocchio FB-3-P.
+- FB-4 ground height and marker calibration, and FB-5 fitting per Epic #10062.
