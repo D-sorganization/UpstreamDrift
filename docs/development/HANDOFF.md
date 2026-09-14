@@ -1,3 +1,19 @@
+# Full-Body Models FB-4 (Marker Calibration & IK) Handoff Checkpoint — 2026-09-14
+
+- Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003
+- Branch: feat/fb4-marker-calibration-ik
+- Governing issue: #10068 (Parent epic #10062). Entry DL-#10062.
+- Change: Reusable alternating marker calibration (`marker_calibration.py`) moved to shared package;
+  engine-agnostic trajectory IK solver (`full_body_ik.py`) with warm-started Levenberg-Marquardt optimization,
+  regularization, and dual-grip weld loop closure residual enforcement; engine adapters `MujocoFullBodyIK`,
+  `PinocchioFullBodyIK`, and `DrakeFullBodyIK`; automated verification runner `verify_full_body_calibration.py`.
+- Verification: Calibrated 34 markers on stride-20 subsample (33 frames, 3 iters) and solved full 654-frame IK
+  across MuJoCo (total RMS 159.47 mm), Pinocchio (total RMS 178.52 mm), and Drake (total RMS 176.47 mm).
+  All 8 unit tests pass with Ruff, Black, and Mypy.
+- Evidence: `docs/development/full_body_models/evidence/fb4_calibration/` (`mujoco`, `pinocchio`, `drake` receipts, offsets, and .npz trajectories).
+- Next: FB-5 forward-dynamics matching (#10069) initialized from FB-4 IK trajectories.
+- Preserved peer handoffs below.
+
 # Full-Body Models FB-3-P (Pinocchio) Handoff Checkpoint — 2026-09-14
 
 - Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003

@@ -205,8 +205,43 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
   - `returned81_replay.npz`
   - `opensim_os3b_ik.mot`
 
+## FB-4 Marker Calibration and IK per Engine Completed (#10068)
+
+- Shared alternating marker calibration moved to `src/shared/python/motion_matching/marker_calibration.py`
+  with backward-compatible re-export in `src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`.
+- Shared trajectory IK solver and marker RMS evaluator in `src/shared/python/motion_matching/full_body_ik.py`
+  (`solve_full_body_ik_trajectory`, `compute_marker_rms_trajectory`).
+  Features warm-started Levenberg-Marquardt optimization across frames, explicit dual-grip weld loop closure residual enforcement,
+  and regularisation to guarantee $m \ge n$.
+- Engine adapters implemented:
+  - `src/engines/physics_engines/mujoco/python/full_body_ik.py` (`MujocoFullBodyIK`)
+  - `src/engines/physics_engines/pinocchio/python/full_body_ik.py` (`PinocchioFullBodyIK`)
+  - `src/engines/physics_engines/drake/python/full_body_ik.py` (`DrakeFullBodyIK`)
+- Automated verification driver: `docs/development/full_body_models/evidence/fb4_calibration/verify_full_body_calibration.py`
+  (supports `--engine mujoco|pinocchio|drake|all`, automatic dispatch to WSL Ubuntu on deskcomputer when local engine is missing).
+- Evidence generated and archived for all three engines under `docs/development/full_body_models/evidence/fb4_calibration/`:
+  - `mujoco/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 174.49 mm (best iter 3)
+    - Full trajectory RMS (654 frames): 159.47 mm (mean frame RMS 157.67 mm, max 241.57 mm)
+    - Weld closure max error: 0.37 mm
+  - `pinocchio/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 240.51 mm (best iter 2)
+    - Full trajectory RMS (654 frames): 178.52 mm (mean frame RMS 176.32 mm, max 297.48 mm)
+    - Weld closure max error: 0.00 mm
+  - `drake/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 317.16 mm (best iter 3)
+    - Full trajectory RMS (654 frames): 176.47 mm (mean frame RMS 172.21 mm, max 544.30 mm)
+    - Weld closure max error: 0.00 mm
+- Head-marker limitation documented:
+  - Three head markers (`HeadTop`, `HeadFront`, `HeadSide`) are attached to the single rigid trunk/head segment (`Hub`).
+    Because the skeletal specification does not include an articulated cervical neck joint, independent head motions relative to the thorax produce higher rigid residual on `Hub`.
+- Tests: `tests/unit/motion_matching/test_marker_calibration.py` (3 passed), `tests/unit/motion_matching/test_full_body_marker_calibration.py` (5 passed, 2 cleanly skipped on Windows).
+
 ## Next
 
-- Cross-engine same-input replay of Returned81 in MuJoCo, Drake, and Pinocchio with video (Step 4).
-- OpenSim on real horizon 0.85s (Step 5).
-- Independent FB-3 re-checks (Step 6).
+- Land PR #10090 (Step 3: Tour Matching Viewer Launcher Tile).
+- Cross-engine same-input replay of Returned81 in MuJoCo, Drake, and Pinocchio with video (VISUALS_HANDOFF.md Step 4).
+- OpenSim on real horizon 0.85s (VISUALS_HANDOFF.md Step 5).
+- Independent FB-3 re-checks (VISUALS_HANDOFF.md Step 6).
+- FB-5 Full-Body Forward-Dynamics Matching (#10069): Extend two-window shooting fitter to full-body coordinates with contact, initializing node trajectory from the FB-4 IK trajectories.
+- FB-6 Cross-Engine Full-Body Parity and Visual Review (#10070).
