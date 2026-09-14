@@ -53,7 +53,9 @@ def _origin(value: Any) -> Origin:
         Rotation.from_euler("xyz", rpy).as_matrix(), matrix[:3, :3], atol=1e-12, rtol=0
     ):
         raise ValueError("Native transform cannot be preserved in URDF RPY")
-    return Origin(xyz=tuple(matrix[:3, 3]), rpy=tuple(rpy))
+    xyz = (float(matrix[0, 3]), float(matrix[1, 3]), float(matrix[2, 3]))
+    rpy_tuple = (float(rpy[0]), float(rpy[1]), float(rpy[2]))
+    return Origin(xyz=xyz, rpy=rpy_tuple)
 
 
 def _build_joint_primitives(
