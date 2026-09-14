@@ -237,11 +237,36 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
     Because the skeletal specification does not include an articulated cervical neck joint, independent head motions relative to the thorax produce higher rigid residual on `Hub`.
 - Tests: `tests/unit/motion_matching/test_marker_calibration.py` (3 passed), `tests/unit/motion_matching/test_full_body_marker_calibration.py` (5 passed, 2 cleanly skipped on Windows).
 
+## FB-5 Full-Body Forward-Dynamics Matching Completed (#10069)
+
+- Derivative floor and resolution utilities implemented in `src/shared/python/motion_matching/derivative_resolution.py`:
+  - `measure_derivative_floor`, `compute_finite_difference_step_vector`, `DerivativeResolutionResult`.
+  - Determines scale-aware perturbation steps and measures truncation vs. roundoff noise floors on stiff contact objectives.
+- Multiple-shooting fitter in `src/shared/python/motion_matching/multi_shooting_fit.py` extended:
+  - `shared_boundary_policy`: `"both" | "once"`, preventing sample duplication at shooting window interfaces.
+  - `node_mode`: `"joint" | "fixed_nodes" | "nodes_only"`.
+- Shared metrics extracted to `src/shared/python/motion_matching/tour_metrics.py`:
+  - Standardized calculation of `whole_marker_rmse_m`, `early_marker_rmse_m`, `terminal_marker_rmse_m`, `club_marker_rmse_m`, `pelvis_yaw_rmse_rad`.
+  - Backward-compatible re-export in `src/engines/physics_engines/opensim/python/tour_matching/metrics.py`.
+- Native MuJoCo KKT solver hardened in `src/engines/physics_engines/mujoco/python/native_model.py`:
+  - Damped regularization $W = J M^{-1} J^T + \epsilon I$ with `lstsq` fallback to prevent numerical constraint singularity failures.
+- Uninterrupted forward dynamics simulation in `src/shared/python/motion_matching/full_body_forward_dynamics.py`:
+  - Supports continuous `solve_ivp(method="rk45")` and semi-implicit Euler integration across all 41 coordinates.
+  - Auto-calibrates ground plane height from lowest contact sphere at address.
+  - Full ground contact force and penetration audit (`ContactAuditResult`).
+- Automated verification runner `docs/development/full_body_models/evidence/fb5_matching/verify_full_body_matching.py`:
+  - Measures derivative resolution floor: resolved at $h=1.00\times 10^{-6}$ with relative error $2.93\times 10^{-9}$ (noise floor $1.00\times 10^{-12}$).
+  - Demonstrates two-window shooting fit setup with `shared_boundary_policy="once"`, node mode `nodes_only`, and nodes initialized from FB-4 IK.
+  - Simulates uninterrupted original-state replay over all 654 frames from $(q_0, \dot{q}_0=0)$ with qualified native polynomial controls.
+- Evidence archived under `docs/development/full_body_models/evidence/fb5_matching/`:
+  - `forward_trajectory_mujoco.npz` (`time_s`, `q`, `qd`, `predicted_markers_m`).
+  - `receipt_mujoco.json` containing environment, input SHA256 hashes, derivative floor resolution, multi-shooting setup, 5 shared metrics, and contact audit.
+- Tests: `tests/unit/motion_matching/test_derivative_resolution.py` (4 passed), `tests/unit/motion_matching/test_multi_shooting_fit.py` (7 passed), `tests/unit/motion_matching/test_full_body_forward_dynamics.py` (2 passed).
+
 ## Next
 
-- Land PR #10090 (Step 3: Tour Matching Viewer Launcher Tile).
+- Land PR #10092 (FB-5: Full-Body Forward-Dynamics Matching, #10069).
 - Cross-engine same-input replay of Returned81 in MuJoCo, Drake, and Pinocchio with video (VISUALS_HANDOFF.md Step 4).
 - OpenSim on real horizon 0.85s (VISUALS_HANDOFF.md Step 5).
 - Independent FB-3 re-checks (VISUALS_HANDOFF.md Step 6).
-- FB-5 Full-Body Forward-Dynamics Matching (#10069): Extend two-window shooting fitter to full-body coordinates with contact, initializing node trajectory from the FB-4 IK trajectories.
 - FB-6 Cross-Engine Full-Body Parity and Visual Review (#10070).

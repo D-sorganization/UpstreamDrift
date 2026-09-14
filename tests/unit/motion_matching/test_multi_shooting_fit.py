@@ -242,3 +242,84 @@ def test_multiple_shooting_callback_invoked() -> None:
     assert len(callback_evals) > 0
     assert callback_evals[0][1] > 0
     assert isinstance(callback_evals[0][2], float)
+
+
+def test_multiple_shooting_options_boundary_policy_and_node_mode() -> None:
+    # Valid options
+    opts = MultipleShootingOptions(
+        shooting_nodes=(0.5, 1.0),
+        shared_boundary_policy="once",
+        node_mode="fixed_nodes",
+    )
+    assert opts.shared_boundary_policy == "once"
+    assert opts.node_mode == "fixed_nodes"
+
+    # Invalid shared_boundary_policy
+    with pytest.raises(ValueError, match="shared_boundary_policy"):
+        MultipleShootingOptions(
+            shooting_nodes=(0.5, 1.0),
+            shared_boundary_policy="invalid",
+        )
+
+    # Invalid node_mode
+    with pytest.raises(ValueError, match="node_mode"):
+        MultipleShootingOptions(
+            shooting_nodes=(0.5, 1.0),
+            node_mode="invalid",
+        )
+
+
+def test_multiple_shooting_shared_boundary_once_policy() -> None:
+    """With shared_boundary_policy='once', boundary samples are counted once, not duplicated."""
+    time = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
+    points = np.zeros((len(time), 1, 3))
+    target = MarkerTarget(time, points, np.ones(1))
+
+    residual_lens = []
+
+    def cb(theta: np.ndarray, residuals: np.ndarray, cost: float) -> None:
+        residual_lens.append(len(residuals))
+
+    opts_both = MultipleShootingOptions(
+        shooting_nodes=(0.5, 1.0),
+        state_dim=2,
+        max_nfev=1,
+        shared_boundary_policy="both",
+        callback=cb,
+    )
+    fit_multiple_shooting(
+        target=target,
+        segmented_forward=lambda th, t, s: (np.zeros((len(t), 1, 3)), np.zeros(2)),
+        unsegmented_forward=lambda th, t: np.zeros((len(t), 1, 3)),
+        initial_theta=np.array([1.0]),
+        lower_theta=np.array([0.0]),
+        upper_theta=np.array([2.0]),
+        initial_states={0.5: np.zeros(2)},
+        state_bounds={0.5: (np.full(2, -1.0), np.full(2, 1.0))},
+        options=opts_both,
+    )
+    len_both = residual_lens[-1]
+
+    residual_lens.clear()
+    opts_once = MultipleShootingOptions(
+        shooting_nodes=(0.5, 1.0),
+        state_dim=2,
+        max_nfev=1,
+        shared_boundary_policy="once",
+        callback=cb,
+    )
+    fit_multiple_shooting(
+        target=target,
+        segmented_forward=lambda th, t, s: (np.zeros((len(t), 1, 3)), np.zeros(2)),
+        unsegmented_forward=lambda th, t: np.zeros((len(t), 1, 3)),
+        initial_theta=np.array([1.0]),
+        lower_theta=np.array([0.0]),
+        upper_theta=np.array([2.0]),
+        initial_states={0.5: np.zeros(2)},
+        state_bounds={0.5: (np.full(2, -1.0), np.full(2, 1.0))},
+        options=opts_once,
+    )
+    len_once = residual_lens[-1]
+
+    # Exactly 1 marker (3 coordinates) was duplicated at t=0.5 in "both" mode
+    assert len_both - len_once == 3

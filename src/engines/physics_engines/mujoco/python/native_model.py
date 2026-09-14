@@ -77,11 +77,29 @@ def _solve_kkt_dynamics(
     rhs_force: np.ndarray,
     jac: np.ndarray,
     drift: np.ndarray,
+    regularization: float = 1e-6,
 ) -> np.ndarray:
     """Solve M a - J.T lambda = rhs_force, J a = -drift."""
-    unconstrained = np.linalg.solve(mass, np.column_stack((rhs_force, jac.T)))
+    rhs = np.column_stack((rhs_force, jac.T))
+    try:
+        unconstrained = np.linalg.solve(mass, rhs)
+    except np.linalg.LinAlgError:
+        mass_reg = mass + regularization * np.eye(mass.shape[0])
+        try:
+            unconstrained = np.linalg.solve(mass_reg, rhs)
+        except np.linalg.LinAlgError:
+            unconstrained, _, _, _ = np.linalg.lstsq(mass, rhs, rcond=None)
+
     free, response = unconstrained[:, 0], unconstrained[:, 1:]
-    multiplier = np.linalg.solve(jac @ response, -drift - jac @ free)
+    weld_matrix = jac @ response
+    if regularization > 0.0:
+        weld_matrix = weld_matrix + regularization * np.eye(weld_matrix.shape[0])
+    try:
+        multiplier = np.linalg.solve(weld_matrix, -drift - jac @ free)
+    except np.linalg.LinAlgError:
+        multiplier, _, _, _ = np.linalg.lstsq(
+            weld_matrix, -drift - jac @ free, rcond=None
+        )
     return free + response @ multiplier
 
 

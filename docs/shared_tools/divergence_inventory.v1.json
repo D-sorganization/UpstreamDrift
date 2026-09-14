@@ -13,7 +13,7 @@
   "totals": {
     "identical": 424,
     "diverged": 278,
-    "ud-only": 1228,
+    "ud-only": 1231,
     "tools-only": 661,
     "spelling-only": 124
   },
@@ -462,7 +462,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 103,
+      "ud-only": 106,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -11828,6 +11828,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/derivative_resolution.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 5570,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/diagnostics/__init__.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -11948,11 +11960,23 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/full_body_forward_dynamics.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 12562,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/full_body_ik.py",
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 8886,
+      "ud_bytes": 8883,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12348,7 +12372,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 11912,
+      "ud_bytes": 13916,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12781,6 +12805,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 7520,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/tour_metrics.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 5234,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
