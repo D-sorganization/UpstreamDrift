@@ -2,15 +2,24 @@
 
 ## Shadow Tracker Planning and Agent Pickup (#10122)
 
-- **State:** Documentation and project structure only; no Shadow Tracker runtime
-  or scientific qualification. Epic #10122 remains open.
+- **Current Pickup:** [Ready Tasks](docs/plans/shadow_tracker/READY_TASKS.md) and
+  [Contract Freeze](docs/plans/shadow_tracker/CONTRACT_FREEZE.md). A (#10137) and
+  C (#10139) are independent image-data packets; B (#10138) waits for A.
+- **Measured Blockers:** The new real-model probe finds an IK/native coordinate
+  mismatch (#10140) and legacy mixed-unit grip metrics (#10141). See
+  [Qualification Findings](docs/plans/shadow_tracker/QUALIFICATION_FINDINGS.md).
+  ST-01 (#10124) is still open; no dynamics/scientific qualification is claimed.
+- **Handoff Branch:** `feat/issue-10124-shadow-tracker-handoff`, issue #10142.
+  Diagnostic tests pass; product-record code is assigned to the worker packets.
+- **State:** Documentation, frozen image contracts and diagnostic probe only;
+  no Shadow Tracker fitter or scientific qualification. Epic #10122 remains open.
 - **Start Here:** [Shadow Tracker](docs/plans/shadow_tracker/README.md),
   [Work Packages](docs/plans/shadow_tracker/WORK_PACKAGES.md), and
   [Agent Handoff](docs/plans/shadow_tracker/AGENT_HANDOFF.md).
-- **Branch:** `docs/issue-10122-shadow-tracker`; setup child #10123;
+- **Merged Planning Baseline:** Setup child #10123;
   [Planning PR #10136](https://github.com/D-sorganization/UpstreamDrift/pull/10136).
-- **Next:** ST-01 (#10124) freezes model feasibility and benchmark profiles;
-  ST-02 (#10125) then starts small-agent TDD contract implementation.
+- **Next:** Dispatch frozen ST-02A/C while specialists continue ST-01. The
+  remaining ST-02 dynamics contracts still depend on ST-01 qualification.
 - **Constraints:** Preserve observed vs inferred data, unknown archive timing,
   fixed subject morphology and continuous forward replay. No fake markers,
   root-force assistance or completion inferred from silhouette overlap.
