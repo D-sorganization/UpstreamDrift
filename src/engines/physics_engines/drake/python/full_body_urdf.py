@@ -55,7 +55,9 @@ def _origin(value: Any) -> Origin:
         Rotation.from_euler("xyz", rpy).as_matrix(), matrix[:3, :3], atol=1e-12, rtol=0
     ):
         raise ValueError("Rigid transform cannot be preserved in URDF RPY")
-    return Origin(xyz=tuple(matrix[:3, 3]), rpy=tuple(rpy))
+    xyz = (float(matrix[0, 3]), float(matrix[1, 3]), float(matrix[2, 3]))
+    rpy_tuple = (float(rpy[0]), float(rpy[1]), float(rpy[2]))
+    return Origin(xyz=xyz, rpy=rpy_tuple)
 
 
 def _order_full_body_joints(spec: Mapping[str, Any]) -> list[Mapping[str, Any]]:
@@ -146,7 +148,11 @@ def _attach_solids_and_frames(
                     inertia=Inertia.from_matrix(
                         np.asarray(solid["inertia_com_kg_m2"], dtype=float),
                         mass=float(solid["mass_kg"]),
-                        center_of_mass=tuple(solid["com_m"]),
+                        center_of_mass=(
+                            float(solid["com_m"][0]),
+                            float(solid["com_m"][1]),
+                            float(solid["com_m"][2]),
+                        ),
                     ),
                 )
             )
@@ -198,7 +204,11 @@ def _attach_contact_spheres(
                 f"Contact sphere {s_name} references unknown body {b_name}"
             )
         radius = float(sphere["radius_m"])
-        p_body = tuple(float(x) for x in sphere["position_m"])
+        p_body = (
+            float(sphere["position_m"][0]),
+            float(sphere["position_m"][1]),
+            float(sphere["position_m"][2]),
+        )
 
         links.append(Link(name=link_name, inertia=Inertia(0.0, 0.0, 0.0, mass=0.0)))
         placement = np.eye(4)
