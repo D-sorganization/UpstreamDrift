@@ -1,0 +1,45 @@
+{
+  "qualification": "exploratory returned two-window candidate; R2025b acceptance pending",
+  "candidate_sha256": "53105e31de4c32f3e892848e6a2538d828aac302cd51c8989ec4e957f7811410",
+  "uninterrupted_metrics": {
+    "whole_rms_m": 0.02147418579531479,
+    "early_rms_m": 0.010307899222371407,
+    "terminal_rms_m": 0.0392704617078092,
+    "club_cluster_rms_m": 0.00801626199432649,
+    "pelvis_yaw_error_pct": 14.814580108000838,
+    "score": 21.47418579531479
+  },
+  "run73_metrics": {
+    "whole_rms_m": 0.028105470710226108,
+    "early_rms_m": 0.010860396867183951,
+    "terminal_rms_m": 0.06539791108645086,
+    "club_cluster_rms_m": 0.030040690123091792,
+    "score": 18.30016138273805
+  },
+  "restart_metrics": {
+    "whole_rms_m": 0.02182998518372115,
+    "early_rms_m": 0.01047521230424093,
+    "terminal_rms_m": 0.039443582199717525,
+    "club_cluster_rms_m": 0.007230198104266952,
+    "pelvis_yaw_error_pct": 15.614408945800317,
+    "score": 12.408861336902932
+  },
+  "improved_uninterrupted": true,
+  "improved_over_run73": true,
+  "accepted": true,
+  "optimizer_converged": true,
+  "message": "Optimization milestone reached at Eval 66 (lowest objective 20.4973)",
+  "max_scaled_defect_norm": 0.0,
+  "defect_norms": {
+    "0.6": 0.0
+  },
+  "segmented_rms_m": 0.02147418579531479,
+  "unsegmented_rms_m": 0.02147418579531479,
+  "terminal_replay_gap_m": 0.0,
+  "function_evaluations": 67,
+  "active_bound_count": 0,
+  "theta_max_abs": 4.010053800353969,
+  "node_chart_norm": 0.3669426587459417,
+  "replay_closure_max": [2.4086399541685922e-11, 1.0298739638869847e-10],
+  "replay_integration_s": 3.6844301350000705
+}
