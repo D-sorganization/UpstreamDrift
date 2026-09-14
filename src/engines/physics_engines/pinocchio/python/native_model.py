@@ -112,7 +112,8 @@ class NativePinocchioModel:
             raise ValueError("Unsupported native geometry schema")
         self._pin = pin
         self.model = pin.Model()
-        self.model.gravity.linear[:] = specification["gravity_m_s2"]
+        gravity = self.model.gravity
+        gravity.linear[:] = specification["gravity_m_s2"]
         self._coordinates: dict[str, int] = {}
         self._velocity_indices: dict[str, int] = {}
         self._bodies: dict[str, tuple[int, Any]] = {"world": (0, pin.SE3.Identity())}
@@ -476,12 +477,13 @@ class NativePinocchioModel:
         )
         derivatives = []
         for body, offset in zip(bodies, local, strict=True):
+            pin = self._pin
             raw = np.asarray(
-                self._pin.getFrameJacobian(
+                pin.getFrameJacobian(
                     self.model,
                     self.data,
                     self._frames[body],
-                    self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+                    pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
                 ),
                 dtype=float,
             )
@@ -578,7 +580,8 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         self.specification = specification
         self._pin = pin
         self.model = pin.Model()
-        self.model.gravity.linear[:] = specification["gravity_m_s2"]
+        gravity = self.model.gravity
+        gravity.linear[:] = specification["gravity_m_s2"]
         self._coordinates: dict[str, int] = {}
         self._velocity_indices: dict[str, int] = {}
         self._bodies: dict[str, tuple[int, Any]] = {"world": (0, pin.SE3.Identity())}
@@ -669,18 +672,21 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         """Evaluate shared contact law forces for each foot contact sphere."""
         q = self.configuration(coordinates)
         v = self._velocity_vector(rates)
-        self._pin.forwardKinematics(self.model, self.data, q, v)
-        self._pin.updateFramePlacements(self.model, self.data)
+        pin = self._pin
+        pin.forwardKinematics(self.model, self.data, q, v)
+        pin.updateFramePlacements(self.model, self.data)
+        ref_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
         samples = {}
         for sphere in self.contact_spheres:
             fid = self._contact_frames[sphere.name]
             center = self.data.oMf[fid].translation.copy()
-            velocity = self._pin.getFrameVelocity(
+            frame_vel = pin.getFrameVelocity(
                 self.model,
                 self.data,
                 fid,
-                self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
-            ).linear.copy()
+                ref_frame,
+            )
+            velocity = frame_vel.linear.copy()
             samples[sphere.name] = sphere_ground_contact(
                 center, velocity, sphere.radius_m, self.ground, self.contact_parameters
             )
@@ -704,12 +710,14 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             if sample.penetration_m > 0.0:
                 f_world = sample.normal_force_n + sample.friction_force_n
                 fid = self._contact_frames[sphere.name]
+                pin = self._pin
+                ref_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
                 j_raw = np.asarray(
-                    self._pin.getFrameJacobian(
+                    pin.getFrameJacobian(
                         self.model,
                         self.data,
                         fid,
-                        self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+                        ref_frame,
                     ),
                     dtype=float,
                 )

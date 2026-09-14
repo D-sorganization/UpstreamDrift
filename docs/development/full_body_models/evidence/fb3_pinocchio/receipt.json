@@ -2,7 +2,7 @@
   "work_package": "FB-3-P",
   "issue": "#10065",
   "epic": "#10062",
-  "timestamp_utc": "2026-09-14T00:52:10.584898+00:00",
+  "timestamp_utc": "2026-09-14T00:57:14.761527+00:00",
   "status": "PASSED",
   "environment": {
     "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
@@ -13,7 +13,7 @@
   "inputs": {
     "full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
     "native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
-    "native_model.py": "1c4c75b8955f93a374ac3ddb67d5847d6c80f1d22fb98c39ca33e2413122d14e",
+    "native_model.py": "0bcb6c8b59e174633f93af2e6598c9abbd24b5df48fad62aa56e452b0afbe4d7",
     "contact_law.py": "7c511df195ef7dc9a6fbf6fb2e6d152f1ff75ecc19794543662e1adde51ac966",
     "full_body_spec.py": "bfcf80bc2781f72ddffebc446cfc131d1bae8935f991080c031fb59821e14a8c"
   },
