@@ -514,3 +514,24 @@ Tracked as epic #10113 (children #10103 to #10112).
   gmsh vessel mesher for FEA, and Gasification_Model has no mesh code; the
   epic builds one shared club mesh library, a Club Mesh Studio tool, a
   versioned head library and mesh heads in the three engines' visuals.
+
+## 13. Closure Weld Fitted From the Address (MM-2, 2026-09-14)
+
+User direction: the MuJoCo, Drake, Pinocchio and OpenSim full-body models
+are the showpiece and may depart from the block-limited Simscape model
+where that makes them better; Simscape remains the cross-validation lane.
+
+`closure_fit.fit_closure_placement` rewrites the dual-grip weld's club-side
+placement so the weld holds exactly at a fitted address in which the
+closure is released, the trail wrist is held at anatomical values
+(ulnar -10 deg, flexion 0, pronation 30 deg; `TRAIL_WRIST_ADDRESS_DEG`)
+and the lead wrist is bounded to human ranges, with the elbow pits from
+the markers (driver flag `--fit-closure`, needs `--static-seeds`). The weld
+stays a weld, so the engines and their parity are untouched; only the
+numbers in `closure.placement_b` change and the document records them
+under `closure_fit`.
+
+Driver capture, closure fitted, wrists and forearms bounded in the IK:
+open-chain address fit 43.7 mm (hands held on the grip point, weld orientation free, trail wrist locked at ulnar -10 / flexion 0 / pronation 30 deg, lead wrist bounded), weld turned 65.6 deg and moved 1.2 mm, address with the fitted weld and bounded wrists 41.1 mm, full-capture IK 67.8 mm (`anthro_driver_fit/receipt.json`); the lead cock sits at its +25 deg radial limit at address.
+
+Verdict: fitting the weld from the address does not make the human wrist ranges reachable either; with the pits fixed by the markers the lead wrist still needs +50 to +65 deg of cock at address and 110 deg of travel through the swing (the unbounded receipts), about twice a human radial-ulnar range. The C3D carries no hand markers, so the wrist axes are observed only through the club: the remaining hypothesis is that the cock coordinate is absorbing motion that belongs to flexion/extension and pronation because the wrist base axes are still rolled relative to the golfer's hand, and the test for it is to fit the hand frame from the club orientation at three swing phases (address, top, impact) and solve the constant hand-to-club rotation that minimises the wrist excursions jointly, rather than the shaft roll alone. The driver keeps the wrists flagged (driver 26.0 mm, 7-iron 24.1 mm) and `--fit-closure` stays available as an experiment with its receipt.

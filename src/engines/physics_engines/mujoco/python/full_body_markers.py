@@ -218,6 +218,7 @@ class FullBodyMarkerKinematics:
         iterations: int = 60,
         prior_weight: float = 1e-2,
         closure_weight: float = 1e2,
+        closure_rotation_weight: float | None = None,
         ground_weight: float = 1e2,
         flat_feet: bool | Sequence[str] = False,
         balance_weight: float = 0.0,
@@ -313,7 +314,14 @@ class FullBodyMarkerKinematics:
             jacs = [row_scale[:, None] * jac[mask].reshape(-1, nv)]
             rows.append(sqrt_prior * (q_k - q_init))
             jacs.append(sqrt_prior * np.eye(nv))
-            self._append_closure(rows, jacs, closure_weight)
+            self._append_closure(
+                rows,
+                jacs,
+                closure_weight,
+                closure_weight
+                if closure_rotation_weight is None
+                else closure_rotation_weight,
+            )
             self._append_ground(rows, jacs, ground, ground_weight, pinned)
             self._append_anchors(rows, jacs, planted, ground_weight)
             self._append_balance(rows, jacs, ground, balance_weight)
@@ -416,9 +424,19 @@ class FullBodyMarkerKinematics:
             jacs.append(w * (-skew @ jr)[:, self._dof])
 
     def _append_closure(
-        self, rows: list[Array], jacs: list[Array], weight: float
+        self,
+        rows: list[Array],
+        jacs: list[Array],
+        weight: float,
+        rotation_weight: float | None = None,
     ) -> None:
-        if weight <= 0:
+        """Weld rows: positions at ``weight``, orientations at
+        ``rotation_weight`` (default the same; zero keeps the hands on the
+        grip point while leaving their relative roll free)."""
+        rotation_weight = weight if rotation_weight is None else rotation_weight
+        if rotation_weight < 0:
+            raise ValueError("Closure rotation weight must be nonnegative")
+        if weight <= 0 and rotation_weight <= 0:
             return
         a, b = self._closure
         nv = self.model.nv
@@ -426,14 +444,18 @@ class FullBodyMarkerKinematics:
         jp_b, jr_b = np.zeros((3, nv)), np.zeros((3, nv))
         self._mj.mj_jacSite(self.model, self.data, jp_a, jr_a, a)
         self._mj.mj_jacSite(self.model, self.data, jp_b, jr_b, b)
-        w = np.sqrt(weight)
-        rows.append(w * (self.data.site_xpos[a] - self.data.site_xpos[b]))
-        jacs.append(w * (jp_a - jp_b)[:, self._dof])
-        rot = _rotation_error(
-            self.data.site_xmat[a].reshape(3, 3), self.data.site_xmat[b].reshape(3, 3)
-        )
-        rows.append(w * rot)
-        jacs.append(w * (jr_a - jr_b)[:, self._dof])
+        if weight > 0:
+            w = np.sqrt(weight)
+            rows.append(w * (self.data.site_xpos[a] - self.data.site_xpos[b]))
+            jacs.append(w * (jp_a - jp_b)[:, self._dof])
+        if rotation_weight > 0:
+            wr = np.sqrt(rotation_weight)
+            rot = _rotation_error(
+                self.data.site_xmat[a].reshape(3, 3),
+                self.data.site_xmat[b].reshape(3, 3),
+            )
+            rows.append(wr * rot)
+            jacs.append(wr * (jr_a - jr_b)[:, self._dof])
 
     def _append_ground(
         self,

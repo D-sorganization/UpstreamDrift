@@ -376,6 +376,31 @@ calibrates it (roll 0 deg is best with a total excursion of 224 deg (lead cock 1
 fit until the roll is calibrated (REVIEW.md 12, MM-2 #10104). Club meshes
 are epic #10120.
 
+### Closure Fitted From the Address, Showpiece Direction (2026-09-14)
+
+User direction: MuJoCo, Drake, Pinocchio and OpenSim full-body models are
+the showpiece and may improve beyond the block-limited Simscape model;
+Simscape stays the cross-validation lane. `closure_fit.py` and the driver's
+`--fit-closure` fit the two-hand weld from the address with anatomical
+wrists. Driver result: open-chain address fit 43.7 mm (hands held on the grip point, weld orientation free, trail wrist locked at ulnar -10 / flexion 0 / pronation 30 deg, lead wrist bounded), weld turned 65.6 deg and moved 1.2 mm, address with the fitted weld and bounded wrists 41.1 mm, full-capture IK 67.8 mm (`anthro_driver_fit/receipt.json`); the lead cock sits at its +25 deg radial limit at address. Verdict: fitting the weld from the address does not make the human wrist ranges reachable either; with the pits fixed by the markers the lead wrist still needs +50 to +65 deg of cock at address and 110 deg of travel through the swing (the unbounded receipts), about twice a human radial-ulnar range. The C3D carries no hand markers, so the wrist axes are observed only through the club: the remaining hypothesis is that the cock coordinate is absorbing motion that belongs to flexion/extension and pronation because the wrist base axes are still rolled relative to the golfer's hand, and the test for it is to fit the hand frame from the club orientation at three swing phases (address, top, impact) and solve the constant hand-to-club rotation that minimises the wrist excursions jointly, rather than the shaft roll alone. The driver keeps the wrists flagged (driver 26.0 mm, 7-iron 24.1 mm) and `--fit-closure` stays available as an experiment with its receipt. Details REVIEW.md 13.
+
+### How to Continue (Read This First)
+
+1. Run the pipeline from the launcher tile "Motion Matching" or
+   `python -m src.tools.motion_matching`; headless:
+   `python docs/development/full_body_models/build_anthropometric_spec.py ... --club driver|iron7`
+   then `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> --skip-hip-calibration --static-seeds [--fit-closure] --capture driver|iron --out <run>`.
+2. Read the receipt (`<run>/receipt.json`): `address.calibrated`, `ik`
+   (full-capture IK, `range_of_motion_flags`), `dynamics`
+   (`backswing_to_1s`, `inside_support_polygon_fraction`); playback GIFs.
+3. Cross-engine: `evidence/setup_parity/verify_setup_parity.py --run <run>`
+   (Drake and Pinocchio on ControlTower over SSH; poses by coordinate name).
+4. Never rerun with `--recalibrate-upper`; keep one static-trial round;
+   ranges act on the matching only (`range_of_motion.py`).
+5. Epics: #10113 (MM-1 to MM-10) and #10120 (CM-1 to CM-6) hold every
+   open item with acceptance criteria; update DL-#10062 and this handoff
+   in every implementation commit.
+
 ## Next
 
 - Epic #10113 in order: MM-2 grip roll calibration from the address so the

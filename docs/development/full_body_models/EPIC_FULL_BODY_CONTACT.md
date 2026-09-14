@@ -168,6 +168,18 @@ exempt. Gates, each with its own receipt, in order:
   launcher tile; continued as epic #10113 (MM-1 to MM-10). Evidence
   `evidence/anthropometry/REVIEW.md` 9 to 11, `evidence/setup_parity/`.
 
+## Direction (User, 2026-09-14)
+
+The MuJoCo, Drake, Pinocchio and OpenSim full-body models are the showpiece
+and may be improved beyond the block-limited (1000-block) Simscape model
+wherever that makes them better golfers; Simscape remains the
+cross-validation lane and an additional feature. Parity between the four
+showpiece models is maintained through the shared document (one
+`coordinate_order`, poses by coordinate name, `evidence/setup_parity`) and
+the shared contact, closure and range-of-motion modules; every departure
+from Simscape is recorded in the document (`closure_fit`, `subject`,
+`visual_hints`) and in REVIEW.md.
+
 ## Rules Every Child Follows
 
 - TDD: failing test first, committed with the implementation.

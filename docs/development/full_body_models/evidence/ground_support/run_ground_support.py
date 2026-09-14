@@ -76,6 +76,10 @@ from src.shared.python.motion_matching.ground_support import (  # noqa: E402
     calibrate_ground_height,
     capture_to_native_world,
 )
+from src.shared.python.motion_matching.closure_fit import (  # noqa: E402
+    closure_residual,
+    fit_closure_placement,
+)
 from src.shared.python.motion_matching.range_of_motion import (  # noqa: E402
     HUMAN_RANGES_DEG,
     LOWER_LIMB_RANGES_DEG,
@@ -680,6 +684,74 @@ class Lane:
         return float(np.sqrt(np.mean(errors[self.valid[frames]] ** 2)))
 
 
+# Trail-hand wrist at address for the closure fit: slight ulnar deviation,
+# neutral flexion, moderate pronation (the trail hand has no marker of its own,
+# so its roll on the grip is set by anatomy and the weld absorbs the rest).
+TRAIL_WRIST_ADDRESS_DEG = {"RWInputX": -10.0, "RWInputY": 0.0, "RFInput": 30.0}
+WRIST_COORDINATES = (
+    "LWInputX",
+    "LWInputY",
+    "LFInput",
+    "RWInputX",
+    "RWInputY",
+    "RFInput",
+)
+
+
+def wrist_bounds() -> dict[str, tuple[float, float]]:
+    """Human wrist and forearm ranges as radian IK bounds."""
+    return {
+        name: (np.radians(lo), np.radians(hi))
+        for name, (lo, hi) in HUMAN_RANGES_DEG.items()
+        if name in WRIST_COORDINATES
+    }
+
+
+def fit_closure_from_address(
+    lane: Lane, kin: FullBodyMarkerKinematics, document: dict, q_start: np.ndarray
+) -> tuple[dict, dict]:
+    """Fit the dual-grip weld at the address: keep both hands on the grip
+    point but release the weld's orientation, hold the trail wrist at
+    anatomical values, bound the lead wrist to human ranges, fit the markers,
+    then rewrite the closure so the weld holds exactly there. Returns the new
+    document and a report."""
+    bounds = dict(lane.bounds) | wrist_bounds()
+    locked = {k: np.radians(v) for k, v in TRAIL_WRIST_ADDRESS_DEG.items()}
+    fit = kin.solve_pose(
+        lane.points[0],
+        lane.valid[0],
+        q_start,
+        ground=lane.ground,
+        prior_weight=PRIOR,
+        iterations=150,
+        flat_feet=lane.stance[0],
+        bounds=bounds,
+        locked=locked,
+        marker_weights=lane.marker_weights,
+        prior_weights=lane.prior_weights,
+        axis_targets=lane.elbow_pit_targets(kin, q_start, ELBOW_PIT_WEIGHT),
+        closure_rotation_weight=0.0,  # hands stay on the grip; their roll is free
+    )
+    kin._set(fit.q)
+    site_a = kin._closure[0]
+    hand_world = (
+        kin.data.site_xmat[site_a].reshape(3, 3).copy(),
+        kin.data.site_xpos[site_a].copy(),
+    )
+    club_body = document["closure"]["body_b"]
+    club_world = kin.body_poses(fit.q, [club_body])[club_body]
+    fitted = fit_closure_placement(document, hand_world, club_world)
+    residual = closure_residual(
+        hand_world, club_world, fitted["closure"]["placement_b"]
+    )
+    return fitted, {
+        **fitted["closure_fit"],
+        "open_chain_marker_rms_m": fit.marker_rms_m,
+        "trail_wrist_locked_deg": dict(TRAIL_WRIST_ADDRESS_DEG),
+        "residual_at_fit_m_rad": list(residual),
+    }
+
+
 def rom_flags(q: np.ndarray, names: Sequence[str]) -> dict:
     """Human range-of-motion violations of a trajectory (degrees, frames)."""
     found = violations(q, names, HUMAN_RANGES_DEG)
@@ -770,6 +842,12 @@ def main() -> None:
         choices=sorted(CAPTURES),
         default="driver",
         help="which canonical tour-average capture to match",
+    )
+    parser.add_argument(
+        "--fit-closure",
+        action="store_true",
+        help="fit the two-hand closure weld from the address with anatomical "
+        "wrists and bound the wrists to human ranges (needs --static-seeds)",
     )
     parser.add_argument(
         "--static-seeds",
@@ -889,6 +967,27 @@ def main() -> None:
         log.info(
             "static trial: neutral fit %.1f mm, address with static seeds %.1f mm",
             neutral.marker_rms_m * 1e3,
+            address.marker_rms_m * 1e3,
+        )
+
+    if args.fit_closure:
+        if not args.static_seeds:
+            raise ValueError("--fit-closure needs --static-seeds")
+        hip_spec, closure_report = fit_closure_from_address(
+            lane, kin, hip_spec, address.q
+        )
+        hipcal_path.write_text(json.dumps(hip_spec, indent=2, sort_keys=True) + "\n")
+        hip_bytes = hipcal_path.read_bytes()
+        lane.bounds |= wrist_bounds()
+        adapter, kin = lane.kinematics(hip_bytes, {**fixed, **seeds_all})
+        address = lane.best_address(kin, address.q)
+        closure_report["address_rms_after_m"] = address.marker_rms_m
+        address_report["closure_fit"] = closure_report
+        log.info(
+            "closure fit: weld turned %.1f deg, moved %.1f mm; address %.1f mm with "
+            "wrists bounded",
+            closure_report["rotation_change_deg"],
+            closure_report["translation_change_m"] * 1e3,
             address.marker_rms_m * 1e3,
         )
 

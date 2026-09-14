@@ -469,3 +469,24 @@ def test_axis_targets_per_frame_are_validated_and_applied(
         kinematics.solve_trajectory(
             targets, valid, q0, ground=GROUND, axis_targets_per_frame=[None]
         )
+
+
+def test_closure_rotation_weight_can_release_the_grip_orientation(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    n = len(kinematics.coordinate_order)
+    q0 = np.zeros(n)
+    q0[2] = 1.2
+    kinematics._set(q0)
+    rows: list = []
+    jacs: list = []
+    kinematics._append_closure(rows, jacs, 1e2)
+    assert [r.shape for r in rows] == [(3,), (3,)]  # positions and orientations
+    rows, jacs = [], []
+    kinematics._append_closure(rows, jacs, 1e2, 0.0)
+    assert [r.shape for r in rows] == [(3,)]  # positions only: the roll is free
+    rows, jacs = [], []
+    kinematics._append_closure(rows, jacs, 0.0, 0.0)
+    assert rows == []
+    with pytest.raises(ValueError):
+        kinematics._append_closure([], [], 1e2, -1.0)
