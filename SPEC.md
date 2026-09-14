@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Source and Frame Identity Contracts (ST-02A, #10137)
+
+Implements frozen `SourceAsset`, `FrameIdentity`, and `validate_frame_sequence`
+records under `src/shared/python/shadow_tracker/source_records.py` with private
+shared validation helpers. Enforces immutable slots, strict types (rejecting
+booleans/strings for numerics), reduced timebase fractions, URI scheme gating,
+and sequence ordering for presentation and known physical timestamps.
+
 ## Shadow Tracker Worker Handoff and Model Probe (#10142)
 
 The ST-01 experiment under `scripts/shadow_tracker/` records repeatable real
