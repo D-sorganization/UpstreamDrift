@@ -68,24 +68,7 @@ def _order_full_body_joints(spec: Mapping[str, Any]) -> list[Mapping[str, Any]]:
         upper_joint_names = {j["name"] for j in spec["joints"]}
         upper_ordered = order_directed_tree(spec["joints"])
 
-    lower_joints_by_name = {
-        j["name"]: j for j in spec["joints"] if j["name"] not in upper_joint_names
-    }
-    leg_chain = [
-        "hip_r",
-        "knee_r",
-        "ankle_r",
-        "subtalar_r",
-        "mtp_r",
-        "hip_l",
-        "knee_l",
-        "ankle_l",
-        "subtalar_l",
-        "mtp_l",
-    ]
-    lower_ordered = [
-        lower_joints_by_name[name] for name in leg_chain if name in lower_joints_by_name
-    ]
+    lower_ordered = [j for j in spec["joints"] if j["name"] not in upper_joint_names]
     return list(upper_ordered) + lower_ordered
 
 
@@ -242,12 +225,12 @@ def _attach_contact_spheres(
 def export_full_body_urdf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
     """Export the full-body specification to URDF with 41 scalar joints and contact links."""
     spec = json.loads(model_bytes)
-    if spec.get("schema_version") != "full-body-v1":
-        raise ValueError("Unsupported schema version: expected full-body-v1")
-    if not isinstance(spec.get("closure"), dict):
-        raise ValueError("Missing closure specification")
-    if not isinstance(spec.get("contact"), dict):
-        raise ValueError("Missing contact specification")
+    if (
+        spec.get("schema_version") != "full-body-v1"
+        or not isinstance(spec.get("closure"), dict)
+        or not isinstance(spec.get("contact"), dict)
+    ):
+        raise ValueError("Invalid full-body specification for Drake URDF export")
 
     body_links = {body["name"]: f"body_{i}" for i, body in enumerate(spec["bodies"])}
     if len(body_links) != len(spec["bodies"]) or "world" not in body_links:
