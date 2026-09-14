@@ -14,17 +14,19 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
+from typing import TypeAlias
+
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.body_part_viz.fitters._kabsch import kabsch_rotation
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
-Array = NDArray[np.float64]
-Pose = tuple[Array, Array]
-Offsets = dict[str, tuple[str, tuple[float, float, float]]]
-PoseFn = Callable[[Array], Mapping[str, Pose]]
-IkFn = Callable[[Offsets, TourCapture], Array]
+Array: TypeAlias = NDArray[np.float64]
+Pose: TypeAlias = tuple[Array, Array]
+Offsets: TypeAlias = dict[str, tuple[str, tuple[float, float, float]]]
+PoseFn: TypeAlias = Callable[[Array], Mapping[str, Pose]]
+IkFn: TypeAlias = Callable[[Offsets, TourCapture], Array]
 
 
 def rigid_pose_from_markers(body_points: Array, world_points: Array) -> Pose:

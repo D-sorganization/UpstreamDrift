@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Tour Matching Viewer Launcher Tile (Step 3, #10062, #10090)
+
+Implement Tour Matching Viewer launcher tile as an engine-agnostic in-app playback tool:
+- Engine-Agnostic Core (`src/tools/tour_matching_viewer/core.py`):
+  - `load_replay(path)`: Robust ingestion of native `returned-replay.npz` and OpenSim IK `.mot` tables.
+  - `body_poses_from_state(spec, q)`: Pure-Python forward kinematics recursing through the 23-joint tree defined in `full_body_spec_v1.json` (Px, Py, Pz translations then Rx, Ry, Rz intrinsic rotations). Evaluated to $< 10^{-12}$ error against MuJoCo forward kinematics across all 24 bodies over 20 random states without importing `mujoco`.
+  - `viewer_frame(spec, replay, i)`: Computes world-space visual skeleton segments (`skeleton_world_segments`), model marker positions, and target markers for frame `i`.
+- PyQt6/Matplotlib 3D GUI (`src/tools/tour_matching_viewer/gui.py`):
+  - `TourMatchingViewerWidget` & `TourMatchingViewerWindow`: Interactive 3D canvas displaying ground wireframe, target capture markers (black), model markers (engine colour), visual skeleton line segments, scrub slider, and frame/RMS labels.
+- Launcher Tile Embed Adapter (`src/tools/tour_matching_viewer/_embed_adapter.py`, `src/config/models.yaml`):
+  - Implements `EmbeddableTool` (`tool_id = "tour_matching_viewer"`, `min_size = (900, 650)`), registered in `EMBEDDABLE_TOOL_REGISTRY` and configured in `models.yaml`.
+- Evidence & Verification (`docs/development/full_body_models/evidence/viewer/`):
+  - Generates offscreen screen captures (`screenshot_returned81.png`, `screenshot_mot.png`), sample test replays, and `receipt.json`.
+
 ## Full-Body Marker Calibration and IK per Physics Engine (FB-4, #10068)
 
 Implement alternating marker calibration and least-squares inverse kinematics over full-body coordinates for MuJoCo, Pinocchio, and Drake under Epic #10062:
@@ -4575,6 +4589,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-14 | #10090 | Tour Matching Viewer launcher tile for in-app 3D playback of candidate motions against tour capture (Step 3, #10062) |
 | 2026-09-14 | #10087 | Shared visual skeleton layer with MuJoCo rendering and model-visuals handoff (#10062) |
 | 2026-09-13 | #8929 | Pendulum GUI playback: matrix panel snapshots dynamics per frame instead of per paint; trail slices a precomputed spline and draws bucketed polylines (spec-exempt: performance) |
 | 2026-09-12 | #10020 | Optimize array magnitude calculations in joint_conventions.py and golf_trajectory.py using np.einsum (spec-exempt: micro-optimization) |
