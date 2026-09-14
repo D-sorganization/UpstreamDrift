@@ -83,6 +83,10 @@ For pytest, set `TOOLS_REPO_PATH` to that provider. For the probe process,
 matching the repository's vendor search order. No provider files were modified.
 The CLI records engine/environment, model/assets and probe hashes. Time measurements
 exclude general Python process/import startup and do not imply production latency.
+The committed receipt was generated before the probe's first commit: its Git
+field identifies the base checkout, while `source_sha256` and `probe_sha256`
+identify the exact experimental source files. The handoff PR supplies those
+files; do not assume the base commit alone contains the probe.
 
 TDD: the metrics suite first failed importing missing `pilot_metrics`, then 13
 cases passed. The probe test first failed importing missing `model_probe`, then

@@ -12,6 +12,11 @@ is merged and ST-00 is closed. Image-record implementation remains open.
 
 ## Immediate Dispatch
 
+This handoff is published in
+[PR #10144](https://github.com/D-sorganization/UpstreamDrift/pull/10144), closing
+only handoff preparation #10142. Its source code and contract decisions must
+be present in the worker checkout.
+
 Use [Ready Tasks](READY_TASKS.md): Packet A (#10137) and Packet C (#10139)
 can start from this handoff independently; Packet B (#10138) waits for A.
 [Contract Freeze](CONTRACT_FREEZE.md) supplies exact types and acceptance cases.
