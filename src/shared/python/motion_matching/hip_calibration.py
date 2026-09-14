@@ -149,7 +149,11 @@ def functional_hip_calibration(
         residual_sd_r_m=fit_r.residual_sd_m,
         residual_sd_l_m=fit_l.residual_sd_m,
         frames=min(fit_r.points, fit_l.points),
-        pelvis_axes=tuple(tuple(float(v) for v in axes[:, k]) for k in range(3)),
+        pelvis_axes=(
+            (float(axes[0, 0]), float(axes[1, 0]), float(axes[2, 0])),
+            (float(axes[0, 1]), float(axes[1, 1]), float(axes[2, 1])),
+            (float(axes[0, 2]), float(axes[1, 2]), float(axes[2, 2])),
+        ),
         waist_fit_max_residual_m=residual,
     )
 

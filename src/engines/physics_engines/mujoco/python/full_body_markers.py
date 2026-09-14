@@ -222,7 +222,7 @@ class FullBodyMarkerKinematics:
         flat_feet: bool | Sequence[str] = False,
         balance_weight: float = 0.0,
         bounds: Mapping[str, tuple[float, float]] | None = None,
-        anchors: Mapping[str, Sequence[float]] | None = None,
+        anchors: Mapping[str, Sequence[float] | Array] | None = None,
         damping: float = 1e-4,
         locked: Mapping[str, float] | None = None,
         tolerance_m: float = 1e-7,
@@ -382,7 +382,7 @@ class FullBodyMarkerKinematics:
             jacs.append(w * (n @ jp)[None, self._dof])
 
     def _anchor_targets(
-        self, anchors: Mapping[str, Sequence[float]] | None, ground: GroundPlane
+        self, anchors: Mapping[str, Sequence[float] | Array] | None, ground: GroundPlane
     ) -> dict[str, Array]:
         if not anchors:
             return {}

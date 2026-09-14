@@ -200,7 +200,9 @@ class FullBodySimulator:
             height = float(centre @ n - plane.height_m)
             lowest = min(lowest, height - info["radius"])
             points[name] = centre - (height) * n
-        report = support_report(samples, points, plane, self.mass_kg, self.gravity)
+        report = support_report(
+            samples, points, plane, self.mass_kg, self.gravity.tolist()
+        )
         return report, float(lowest)
 
     def step(

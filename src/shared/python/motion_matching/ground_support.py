@@ -104,9 +104,9 @@ def _plane_basis(normal: Array) -> tuple[Array, Array]:
     helper = (
         np.array([1.0, 0.0, 0.0]) if abs(normal[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
     )
-    u = np.cross(normal, helper)
+    u = np.asarray(np.cross(normal, helper), dtype=np.float64)
     u /= np.linalg.norm(u)
-    return u, np.cross(normal, u)
+    return u, np.asarray(np.cross(normal, u), dtype=np.float64)
 
 
 def convex_hull_contains(
