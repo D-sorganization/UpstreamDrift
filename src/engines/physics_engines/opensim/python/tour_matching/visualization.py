@@ -130,7 +130,7 @@ def plot_3d_trajectory_overlay(
 
     ax.set_xlabel("X (m)")
     ax.set_ylabel("Y (m)")
-    ax.set_zlabel("Z (m)")
+    ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
     ax.set_title(title, fontsize=12, fontweight="bold")
     ax.legend(loc="upper left", fontsize=8)
 

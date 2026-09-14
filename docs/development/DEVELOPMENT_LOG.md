@@ -35,15 +35,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** claude
-- **Issue:** #10062 (children #10063 to #10070)
-- **Branch:** feat/drake-full-body-builder
-- **PR:** #10071
-- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/visual_skeleton.py; src/engines/physics_engines/mujoco/python/visual_layer.py; src/engines/physics_engines/mujoco/python/full_body_mjcf.py; tests/unit/motion_matching
+- **Branch:** feat/fb4-marker-calibration-ik
+- **PR:** #10089 (FB-4, #10068)
+- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/marker_calibration.py; src/shared/python/motion_matching/full_body_ik.py; src/shared/python/motion_matching/visual_skeleton.py; src/engines/physics_engines/mujoco/python/visual_layer.py; src/engines/physics_engines/mujoco/python/full_body_mjcf.py; src/engines/physics_engines/mujoco/python/full_body_ik.py; src/engines/physics_engines/pinocchio/python/full_body_ik.py; src/engines/physics_engines/drake/python/full_body_ik.py; docs/development/full_body_models/evidence/fb4_calibration; tests/unit/motion_matching
 - **Started:** 2026-09-13
-- **Last verified:** 2026-09-14 (SELF; mass-based capsule radii and per-child-joint capsules, address views and labelled Simscape skeleton evidence, 9 visual unit tests pass; FB-3-M/P/D landed)
-- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, shared ground-contact law with parity harness, full_body_spec_v1.json, MuJoCo full-body MJCF export with contact adapter (FB-3-M, #10066), Pinocchio full-body builder with spatial contact forces injected into weld-constrained dynamics (FB-3-P, #10065), and Drake full-body URDF export and KKT weld adapter with shared contact (FB-3-D, #10067) are implemented and verified; cross-engine comparison, calibration, and fitting remain.
-- **Next step:** Execute VISUALS_HANDOFF.md step 3 (tour matching viewer tile) and step 6 (independent FB-3-P re-check against the original NativePinocchioModel, FB-3-D receipt).
-- **Evidence:** docs/development/full_body_models/HANDOFF.md, docs/development/full_body_models/evidence/fb3_drake/receipt.json, docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json, tests/unit/motion_matching/test_full_body_drake.py, tests/unit/motion_matching/test_full_body_mujoco.py.
+- **Last verified:** 2026-09-14 (SELF; FB-4 marker calibration and full-body IK verified on MuJoCo, Pinocchio, and Drake with receipts and .npz trajectories; Visual skeleton layer #10087 merged; 13 unit tests pass with Ruff/black/mypy)
+- **Summary:** Shared full-body specification schema/validator with upper-body slice identity, shared ground-contact law with parity harness, full_body_spec_v1.json, MuJoCo full-body MJCF export with contact adapter (FB-3-M, #10066), Pinocchio full-body builder with spatial contact forces injected into weld-constrained dynamics (FB-3-P, #10065), Drake full-body URDF export and KKT weld adapter with shared contact (FB-3-D, #10067), shared visual skeleton layer with MuJoCo rendering and visuals handoff (#10087), and alternating marker calibration and IK per engine for 34 tracked labels (FB-4, #10068) are implemented and verified; receipts and full 654-frame trajectories archived.
+- **Next step:** Execute FB-5 full-body forward-dynamics matching (#10069) initialized from the FB-4 IK trajectories; execute Step 3 of VISUALS_HANDOFF.md (Tour Matching Viewer Tile).
+- **Evidence:** docs/development/full_body_models/HANDOFF.md, docs/development/full_body_models/VISUALS_HANDOFF.md, docs/development/full_body_models/evidence/fb4_calibration/ (mujoco, pinocchio, drake receipts and trajectories), docs/development/full_body_models/evidence/visual_layer/, tests/unit/motion_matching/test_full_body_marker_calibration.py, tests/unit/motion_matching/test_marker_calibration.py, tests/unit/motion_matching/test_visual_skeleton.py, tests/unit/motion_matching/test_mujoco_visual_layer.py.
 
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 
