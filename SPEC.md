@@ -8,6 +8,25 @@ Implement full-body Drake URDF export, bundle validation contract, and dynamic s
 - Full-Body Model Adapter (`src/engines/physics_engines/drake/python/full_body_model.py`): Implement `NativeDrakeFullBodyModel` providing `evaluate_contact_samples`, `accelerations`, `frame_poses`, and `closure_errors`. Calculate contact forces using the shared Hunt-Crossley and regularized Coulomb law (`contact_law.sphere_ground_contact`), apply explicit spatial forces via contact Jacobians (`jac_pos.T @ f_contact`), and resolve the closed-loop dual-grip weld constraint via an explicit rigid KKT solve.
 - Comprehensive Test Suite (`tests/unit/motion_matching/test_full_body_drake.py`): Verify compile structure ($nq=41, nv=41$), upper-body slice inertia and forward kinematics parity to $10^{-12}$, frame poses parity against qualified native upper body, and exact 0.0 N force parity against reference contact adapter across random contact states.
 
+## Pinocchio Full-Body Model Builder With Shared Ground Contact (FB-3-P, #10065)
+
+Implement full-body Pinocchio model builder with lower limbs and shared ground contact forces under Epic #10062:
+- Full-Body Model Builder (`src/engines/physics_engines/pinocchio/python/native_model.py`):
+  - `FullBodyPinocchioModel`: Extends `NativePinocchioModel` without modifying the base qualified model or geometry specification (`native_geometry_spec_9967.json`).
+  - Consumes `full_body_spec_v1.json` (41 coordinates, 24 bodies, 23 joints, 4 foot contact spheres, weld loop closure).
+  - Registers foot contact spheres as operational frames on the Pinocchio model before data initialization.
+  - Implements `contact_forces(coordinates, rates)` evaluating the shared regularised contact law (`sphere_ground_contact` from `src.shared.python.motion_matching.contact_law`).
+  - Implements `accelerations(coordinates, rates, primitive_efforts)` projecting 3D spatial contact forces into generalized torques $\tau_{\text{contact}} = \sum J^T F_{\text{contact}}$ and injecting into `pin.constraintDynamics(...)` while retaining the weld closure constraint solver.
+  - Implements `upper_body_model()` and `mass_matrix(...)` for slice extraction and parity verification.
+  - `build_full_body_pinocchio_model`: Factory constructor consuming the full-body specification.
+- Verification & ControlTower Execution (`docs/development/full_body_models/evidence/fb3_pinocchio/`):
+  - Driver `verify_pinocchio_full_body.py` and cryptographic receipt `receipt.json`.
+  - Gate (a): Upper-body slice reproduces qualified model mass matrix and forward kinematics to $< 10^{-12}$ at random states.
+  - Gate (b): Full-body FK reproduces spec upper frames to $< 10^{-12}$ at random states.
+  - Gate (c): Contact forces at analytic neutral and penetrating states equal FB-2 reference values to $< 10^{-12}$.
+  - Gate (d): Weld loop closure residuals unchanged on the upper-body chain to $< 10^{-12}$.
+  - Forward accelerations with contact forces and weld constraints produce finite values and bounded closure errors.
+
 ## MuJoCo Full-Body Model Export and Shared Ground Contact Adapter (FB-3-M, #10066)
 
 Implement full-body MuJoCo MJCF export and dynamic simulation adapter supporting the FB-2 shared rigid-ground contact law:

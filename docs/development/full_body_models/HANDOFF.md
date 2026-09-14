@@ -74,6 +74,37 @@ loudly if not.
   to 1e-12, frame poses parity against the qualified native model, and exact 0.0 N
   contact force parity on the shared FB-2 harness.
 
+## FB-3-P Completed (#10065)
+
+FB-3-P is implemented and verified on ControlTower with Pinocchio 4.1.0:
+
+- `src/engines/physics_engines/pinocchio/python/native_model.py`: extended with
+  `FullBodyPinocchioModel` and `build_full_body_pinocchio_model` without touching
+  the qualified `NativePinocchioModel`.
+- Foot contact spheres added as operational frames to the Pinocchio model before
+  `createData()`.
+- Shared contact law evaluated via `contact_forces(...)` using
+  `sphere_ground_contact` from `src.shared.python.motion_matching.contact_law`.
+- Contact forces converted to generalized joint torques via spatial Jacobian
+  projection $\tau_{\text{contact}} = \sum J^T F_{\text{contact}}$ and combined with
+  actuator efforts into `pin.constraintDynamics(...)` retaining the weld loop
+  closure constraint solver.
+- Gate results:
+  - Gate (a): Upper-body slice reproduces qualified model mass matrix and FK to
+    $0.0$ max difference (< $10^{-12}$) across 20 random states.
+  - Gate (b): Full-body FK matches spec frames to $0.0$ max difference (< $10^{-12}$)
+    across 20 random states.
+  - Gate (c): Contact forces at analytic states match the FB-2 reference with $0.0$
+    difference in normal force, friction force, and penetration depth.
+  - Gate (d): Closure residuals unchanged on the upper-body chain to $0.0$ max
+    difference (< $10^{-12}$) across 20 random positions and velocities.
+- Evidence archived under `docs/development/full_body_models/evidence/fb3_pinocchio/`:
+  - Driver: `verify_pinocchio_full_body.py` (auto-dispatches to ControlTower if
+    local Pinocchio is absent).
+  - Receipt: `receipt.json`.
+- Tests: `tests/unit/motion_matching/test_pinocchio_full_body_builder.py` (6 passed
+  on ControlTower in 0.46s; clean skip on Windows).
+
 ## FB-3-D Completed (#10067)
 
 - `src/engines/physics_engines/drake/python/full_body_urdf.py`: `export_full_body_urdf`
@@ -97,6 +128,5 @@ loudly if not.
 
 ## Next
 
-- FB-3-P (#10065 Pinocchio) builder consuming `full_body_spec_v1.json` (PR #10083 in review).
 - Cross-engine same-input replay and comparison across MuJoCo FB-3-M, Drake FB-3-D, and Pinocchio FB-3-P.
 - FB-4 ground height and marker calibration, and FB-5 fitting per Epic #10062.

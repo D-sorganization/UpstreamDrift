@@ -1,3 +1,18 @@
+# Full-Body Models FB-3-P (Pinocchio) Handoff Checkpoint — 2026-09-14
+
+- Worktree: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003
+- Branch: feat/pinocchio-full-body-builder
+- Governing issue: #10065 (Parent epic #10062). Entry DL-#10062.
+- Change: Pinocchio full-body model builder (`FullBodyPinocchioModel` and `build_full_body_pinocchio_model`)
+  consuming `full_body_spec_v1.json`, retaining `NativePinocchioModel` untouched, injecting shared contact
+  torques $\tau_{\text{contact}} = \sum J^T F_{\text{contact}}$ into constrained dynamics while preserving
+  the weld closure solver.
+- Verification: ControlTower Linux venv (`simscape-pinocchio-9967/.venv`) with Pinocchio 4.1.0; all 4 Done Gates
+  reproduced to $< 10^{-12}$; 6 unit tests pass on ControlTower and skip cleanly on Windows without Pinocchio.
+- Evidence: `docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json`, `verify_pinocchio_full_body.py`.
+- Next: Implement FB-3-M (#10066, MuJoCo builder) or FB-3-D (#10067, Drake builder).
+- Preserved peer handoffs below.
+
 # DRY Quarantine Tightening Handoff Checkpoint — 2026-09-12
 
 - Worktree: C:/Users/diete/Repositories/UpstreamDrift
