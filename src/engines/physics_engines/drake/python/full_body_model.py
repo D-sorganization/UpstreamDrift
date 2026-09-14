@@ -134,22 +134,21 @@ class FullBodyDrakeModel:
         }
 
     def _init_contact(self, spec: Mapping[str, Any]) -> None:
-        contact_cfg = spec["contact"]
-        self.contact_parameters = ContactParameters(**contact_cfg["parameters"])
-        ground_cfg = contact_cfg["ground"]
-        g = np.asarray(spec["gravity_m_s2"], dtype=float)
-        g_norm = np.linalg.norm(g)
-        if g_norm < 1e-12:
-            raise ValueError("Nonzero gravity required for opposite_gravity policy")
-        unit_g = -g / g_norm
-        ground_normal = (float(unit_g[0]), float(unit_g[1]), float(unit_g[2]))
-        ground_height = float(
-            ground_cfg["height_m"] if ground_cfg["height_m"] is not None else 0.0
+        c_spec = spec["contact"]
+        self.contact_parameters = ContactParameters(**c_spec["parameters"])
+        grav = np.asarray(spec["gravity_m_s2"], dtype=float)
+        g_mag = float(np.linalg.norm(grav))
+        if g_mag <= 0.0:
+            raise ValueError("Drake ground contact requires nonzero gravity vector")
+        up_vec = (-grav / g_mag).tolist()
+        h_m = float(c_spec["ground"].get("height_m") or 0.0)
+        self.ground_plane = GroundPlane(
+            normal=(float(up_vec[0]), float(up_vec[1]), float(up_vec[2])),
+            height_m=h_m,
         )
-        self.ground_plane = GroundPlane(normal=ground_normal, height_m=ground_height)
 
         self._spheres: dict[str, dict[str, Any]] = {}
-        for sphere in contact_cfg["spheres"]:
+        for sphere in c_spec["spheres"]:
             s_name = sphere["name"]
             meta_s = self.metadata["contact_spheres"][s_name]
             frame = self.plant.GetFrameByName(meta_s["link"], self._instance)
@@ -239,24 +238,9 @@ class FullBodyDrakeModel:
             )
         return samples
 
-    def closure_residuals(
-        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
+    def _evaluate_closure_residuals(
+        self, a: Any, b: Any, jacobian: Array, velocity: Array
     ) -> tuple[Array, Array]:
-        """Compute closure pose and rate residuals without solving acceleration."""
-        self.plant.SetPositions(
-            self.context, self._vector(coordinates, self._q_indices)
-        )
-        velocity = self._vector(rates, self._v_indices)
-        self.plant.SetVelocities(self.context, velocity)
-        a, b = self._closure
-        jacobian = self.plant.CalcJacobianSpatialVelocity(
-            self.context,
-            self._api.JacobianWrtVariable.kV,
-            b,
-            np.zeros(3),
-            a,
-            a,
-        )
         pose = self.plant.CalcRelativeTransform(self.context, a, b)
         pos_residual = np.concatenate(
             (
@@ -268,6 +252,30 @@ class FullBodyDrakeModel:
             ((jacobian @ velocity)[3:], (jacobian @ velocity)[:3])
         )
         return pos_residual, vel_residual
+
+    def _closure_jacobian(self) -> tuple[Any, Any, Array]:
+        a, b = self._closure
+        jacobian = self.plant.CalcJacobianSpatialVelocity(
+            self.context,
+            self._api.JacobianWrtVariable.kV,
+            b,
+            np.zeros(3),
+            a,
+            a,
+        )
+        return a, b, jacobian
+
+    def closure_residuals(
+        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
+    ) -> tuple[Array, Array]:
+        """Compute closure pose and rate residuals without solving acceleration."""
+        self.plant.SetPositions(
+            self.context, self._vector(coordinates, self._q_indices)
+        )
+        velocity = self._vector(rates, self._v_indices)
+        self.plant.SetVelocities(self.context, velocity)
+        a, b, jacobian = self._closure_jacobian()
+        return self._evaluate_closure_residuals(a, b, jacobian, velocity)
 
     def accelerations(
         self,
@@ -299,15 +307,7 @@ class FullBodyDrakeModel:
             )
             tau_contact += j_trans.T @ f_contact
 
-        a, b = self._closure
-        jacobian = self.plant.CalcJacobianSpatialVelocity(
-            self.context,
-            self._api.JacobianWrtVariable.kV,
-            b,
-            np.zeros(3),
-            a,
-            a,
-        )
+        a, b, jacobian = self._closure_jacobian()
         bias = self.plant.CalcBiasSpatialAcceleration(
             self.context,
             self._api.JacobianWrtVariable.kV,
@@ -330,16 +330,7 @@ class FullBodyDrakeModel:
             bias,
         )
 
-        pose = self.plant.CalcRelativeTransform(self.context, a, b)
-        self._last_closure = (
-            np.concatenate(
-                (
-                    pose.translation(),
-                    Rotation.from_matrix(pose.rotation().matrix()).as_rotvec(),
-                )
-            ),
-            np.concatenate(((jacobian @ velocity)[3:], (jacobian @ velocity)[:3])),
-        )
+        self._last_closure = self._evaluate_closure_residuals(a, b, jacobian, velocity)
         return {
             name: float(acceleration[index])
             for name, index in zip(self.names, self._v_indices, strict=True)

@@ -136,7 +136,7 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
   - Accelerations: 41 coordinates, all finite under combined contact forces and weld closure.
 - Evidence archived under `docs/development/full_body_models/evidence/fb3_drake/`:
   - Driver: `verify_drake_full_body.py` (auto-dispatches to ControlTower if local Drake is absent).
-  - Receipt: `receipt.json` (`8af6d6d3b8491b8d27deaa894e209147b4a6ea4fb3dfc4d01bd7f91221d8d701`).
+  - Receipt: `receipt.json` (`059ed50e48b65e0d84e3d7c7cfc7bfd0a99262470e28387e5f9b8a5ee0447001`).
 - Tests: `tests/unit/motion_matching/test_full_body_drake.py` (6 passed on ControlTower
   in 0.98s; 1 passed, 5 cleanly skipped on Windows without pydrake).
 

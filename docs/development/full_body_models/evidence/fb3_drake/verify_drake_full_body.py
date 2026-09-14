@@ -62,15 +62,7 @@ def has_real_drake() -> bool:
         return False
 
 
-def run_remote_controltower() -> dict[str, Any]:
-    """Execute verification remotely on ControlTower and return the receipt."""
-    sys.stdout.write(
-        "Real Drake not available locally. Dispatching to ControlTower...\n"
-    )
-    sys.stdout.flush()
-
-    remote_base = "/home/dieterolson/fb3_pinocchio_test"
-    # Ensure remote dirs exist
+def _sync_files_to_remote(remote_base: str) -> None:
     p0 = subprocess.run(
         [
             "ssh",
@@ -91,7 +83,6 @@ def run_remote_controltower() -> dict[str, Any]:
     if p0.returncode != 0:
         raise RuntimeError(f"Remote mkdir failed: {p0.stderr.decode()}")
 
-    # Sync files
     files_to_sync = [
         (
             FULL_BODY_SPEC_PATH,
@@ -146,6 +137,17 @@ def run_remote_controltower() -> dict[str, Any]:
             raise RuntimeError(
                 f"Failed to sync {local_path} to {remote_path}: {p.stderr.decode()}"
             )
+
+
+def run_remote_controltower() -> dict[str, Any]:
+    """Execute verification remotely on ControlTower and return the receipt."""
+    sys.stdout.write(
+        "Real Drake not available locally. Dispatching to ControlTower...\n"
+    )
+    sys.stdout.flush()
+
+    remote_base = "/home/dieterolson/fb3_pinocchio_test"
+    _sync_files_to_remote(remote_base)
 
     script = (
         f"cd {remote_base}\n"
@@ -364,62 +366,20 @@ def _verify_accelerations(
     return len(acc), all_finite, max_cp, max_cv
 
 
-def run_local_verification() -> dict[str, Any]:
-    from src.engines.physics_engines.drake.python.full_body_model import (
-        FullBodyDrakeModel,
-    )
-    from src.shared.python.motion_matching.full_body_spec import (
-        FULL_BODY_SCHEMA_VERSION,
-        load_full_body_spec,
-    )
-    import pydrake.all as drake_all
-
-    upper_spec = json.loads(UPPER_SPEC_PATH.read_text(encoding="utf-8"))
-    full_spec = load_full_body_spec(FULL_BODY_SPEC_PATH, upper_spec)
-
-    full_model = FullBodyDrakeModel(full_spec)
-    slice_model = full_model.upper_body_model()
-
-    qual_spec = {
-        "schema_version": FULL_BODY_SCHEMA_VERSION,
-        "gravity_m_s2": upper_spec["gravity_m_s2"],
-        "bodies": upper_spec["bodies"],
-        "joints": upper_spec["joints"],
-        "coordinate_order": upper_spec["coordinate_order"],
-        "frames": upper_spec["frames"],
-        "closure": upper_spec["closure"],
-        "contact": {
-            "ground": {"normal_policy": "opposite_gravity", "height_m": 0.0},
-            "parameters": full_spec["contact"]["parameters"],
-            "spheres": [],
-        },
-    }
-    qual_model = FullBodyDrakeModel(qual_spec)
-
-    rng = np.random.default_rng(20260914)
-    num_states = 20
-
-    gate_a_fk, gate_a_mass = _verify_gate_a(
-        slice_model, qual_model, full_model, upper_spec, rng, num_states
-    )
-    gate_b_fk = _verify_gate_b(
-        full_model, slice_model, full_spec, upper_spec, rng, num_states
-    )
-    pen_count, gate_c_fn, gate_c_ff, gate_c_p = _verify_gate_c(full_model, full_spec)
-    gate_d_pos, gate_d_vel = _verify_gate_d(
-        full_model, slice_model, full_spec, upper_spec, rng, num_states
-    )
-    num_coords, acc_finite, max_cp, max_cv = _verify_accelerations(
-        full_model, full_spec
-    )
-
-    try:
-        import importlib.metadata
-
-        drake_version = importlib.metadata.version("drake")
-    except (importlib.metadata.PackageNotFoundError, AttributeError, KeyError):
-        drake_version = getattr(drake_all, "__version__", "unknown")
-    receipt: dict[str, Any] = {
+def _assemble_receipt(
+    drake_version: str,
+    num_states: int,
+    gate_a: tuple[float, float],
+    gate_b_fk: float,
+    gate_c: tuple[int, float, float, float],
+    gate_d: tuple[float, float],
+    acc: tuple[int, bool, float, float],
+) -> dict[str, Any]:
+    gate_a_fk, gate_a_mass = gate_a
+    pen_count, gate_c_fn, gate_c_ff, gate_c_p = gate_c
+    gate_d_pos, gate_d_vel = gate_d
+    num_coords, acc_finite, max_cp, max_cv = acc
+    return {
         "work_package": "FB-3-D",
         "issue": "#10067",
         "epic": "#10062",
@@ -479,6 +439,72 @@ def run_local_verification() -> dict[str, Any]:
         },
     }
 
+
+def run_local_verification() -> dict[str, Any]:
+    from src.engines.physics_engines.drake.python.full_body_model import (
+        FullBodyDrakeModel,
+    )
+    from src.shared.python.motion_matching.full_body_spec import (
+        FULL_BODY_SCHEMA_VERSION,
+        load_full_body_spec,
+    )
+    import pydrake.all as drake_all
+
+    upper_spec = json.loads(UPPER_SPEC_PATH.read_text(encoding="utf-8"))
+    full_spec = load_full_body_spec(FULL_BODY_SPEC_PATH, upper_spec)
+
+    full_model = FullBodyDrakeModel(full_spec)
+    slice_model = full_model.upper_body_model()
+
+    qual_spec = {
+        "schema_version": FULL_BODY_SCHEMA_VERSION,
+        "gravity_m_s2": upper_spec["gravity_m_s2"],
+        "bodies": upper_spec["bodies"],
+        "joints": upper_spec["joints"],
+        "coordinate_order": upper_spec["coordinate_order"],
+        "frames": upper_spec["frames"],
+        "closure": upper_spec["closure"],
+        "contact": {
+            "ground": {"normal_policy": "opposite_gravity", "height_m": 0.0},
+            "parameters": full_spec["contact"]["parameters"],
+            "spheres": [],
+        },
+    }
+    qual_model = FullBodyDrakeModel(qual_spec)
+
+    rng = np.random.default_rng(20260914)
+    num_states = 20
+
+    gate_a_fk, gate_a_mass = _verify_gate_a(
+        slice_model, qual_model, full_model, upper_spec, rng, num_states
+    )
+    gate_b_fk = _verify_gate_b(
+        full_model, slice_model, full_spec, upper_spec, rng, num_states
+    )
+    pen_count, gate_c_fn, gate_c_ff, gate_c_p = _verify_gate_c(full_model, full_spec)
+    gate_d_pos, gate_d_vel = _verify_gate_d(
+        full_model, slice_model, full_spec, upper_spec, rng, num_states
+    )
+    num_coords, acc_finite, max_cp, max_cv = _verify_accelerations(
+        full_model, full_spec
+    )
+
+    try:
+        import importlib.metadata
+
+        drake_version = importlib.metadata.version("drake")
+    except (importlib.metadata.PackageNotFoundError, AttributeError, KeyError):
+        drake_version = getattr(drake_all, "__version__", "unknown")
+
+    receipt = _assemble_receipt(
+        drake_version,
+        num_states,
+        (gate_a_fk, gate_a_mass),
+        gate_b_fk,
+        (pen_count, gate_c_fn, gate_c_ff, gate_c_p),
+        (gate_d_pos, gate_d_vel),
+        (num_coords, acc_finite, max_cp, max_cv),
+    )
     RECEIPT_PATH.parent.mkdir(parents=True, exist_ok=True)
     RECEIPT_PATH.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     return receipt
