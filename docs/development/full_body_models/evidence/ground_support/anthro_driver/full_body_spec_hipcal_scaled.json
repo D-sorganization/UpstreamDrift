@@ -429,11 +429,11 @@
       "name": "tibia_r",
       "solids": [
         {
-          "com_m": [0.0, -0.19240954, 0.0],
+          "com_m": [0.0, -0.204691, 0.0],
           "inertia_com_kg_m2": [
-            [0.056048956999999996, 0.0, 0.0],
-            [0.0, 0.00500267812, 0.0],
-            [0.0, 0.0, 0.056048956999999996]
+            [0.0634325, 0.0, 0.0],
+            [0.0, 0.0056617, 0.0],
+            [0.0, 0.0, 0.0634325]
           ],
           "mass_kg": 3.90640097495255,
           "name": "tibia_r",
@@ -534,11 +534,11 @@
       "name": "tibia_l",
       "solids": [
         {
-          "com_m": [0.0, -0.1905709, 0.0],
+          "com_m": [0.0, -0.202735, 0.0],
           "inertia_com_kg_m2": [
-            [0.055017619079999996, 0.0, 0.0],
-            [0.0, 0.00497692118, 0.0],
-            [0.0, 0.0, 0.055017619079999996]
+            [0.0622653, 0.0, 0.0],
+            [0.0, 0.00563255, 0.0],
+            [0.0, 0.0, 0.0622653]
           ],
           "mass_kg": 3.90640097495255,
           "name": "tibia_l",
@@ -1182,12 +1182,15 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
         [
-          0.1736481776669303, 0.4161977407267834, 0.8925389352890298,
+          -0.5343338817661774, -0.7357083276751796, 0.4161977407267835,
           -0.02501411692651008
         ],
-        [0.0, 0.9063077870366499, -0.42261826174069944, -1.1239999999999999],
         [
-          -0.984807753012208, 0.07338689100003823, 0.15737869562426263,
+          0.30908343009591993, 0.28822496143962084, 0.9063077870366498,
+          -1.1239999999999999
+        ],
+        [
+          -0.7867367641319611, 0.6129107832242139, 0.07338689100003808,
           0.05908933628725997
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1321,9 +1324,9 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
-        [0.0, 0.9063077870366499, -0.42261826174069944, 0.0],
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, -0.42261826174069944, -0.9063077870366499, 0.0127],
+        [0.8598872403227148, 0.19501971017073785, 0.47176397337557163, 0.0],
+        [0.3261223507816858, -0.9208415297808589, -0.21376409743330366, 0.0],
+        [0.3927316466123055, 0.3376657958333494, -0.8554201681474538, 0.0127],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
@@ -1433,11 +1436,11 @@
       "parent_to_base": [
         [
           0.9942975703750765, -0.018557934606193413, -0.10501402101325395,
-          -0.009648724
+          -0.0102646
         ],
         [
           4.12693463669788e-8, 0.9847417938081873, -0.1740218363523156,
-          -0.41223136
+          -0.438544
         ],
         [0.10664118128667834, 0.17302948474345656, 0.9791263737961489, 0.0],
         [0.0, 0.0, 0.0, 1.0]
@@ -1598,11 +1601,10 @@
       "parent_to_base": [
         [
           0.9942975703750765, -0.018557934606193413, 0.10501402101325395,
-          -0.009623814
+          -0.0102381
         ],
         [
-          4.12693463669788e-8, 0.9847417938081873, 0.1740218363523156,
-          -0.40829276
+          4.12693463669788e-8, 0.9847417938081873, 0.1740218363523156, -0.434354
         ],
         [-0.10664118128667834, -0.17302948474345656, 0.9791263737961489, 0.0],
         [0.0, 0.0, 0.0, 1.0]
@@ -1829,11 +1831,16 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 2e+05 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x0.9400, tibia_r x0.9400 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 2e+05 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
     "arm_scale": 1.1,
+    "grip_roll_deg": 0.0,
+    "grip_rotation_deg": {
+      "L": [-90.0, 47.0, 0.0],
+      "R": [-34.0, 46.0, 62.0]
+    },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,
     "source": "de Leva 1996 male table",
@@ -1847,7 +1854,7 @@
   },
   "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
   "upper_body_schema_version": 1,
-  "upper_body_sha256": "2e1e568a0b00ed351f9de8f7df8e5bdcad1029cb51218021a50d8bcdbe265355",
+  "upper_body_sha256": "5bd6947b4fd943df456a4a28ca4c4334cc0c54530a984cdabb10d32e05756238",
   "visual_hints": {
     "capsule_radius_m": {
       "femur_l": 0.072,

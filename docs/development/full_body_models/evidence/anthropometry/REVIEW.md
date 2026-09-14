@@ -535,3 +535,66 @@ Driver capture, closure fitted, wrists and forearms bounded in the IK:
 open-chain address fit 43.7 mm (hands held on the grip point, weld orientation free, trail wrist locked at ulnar -10 / flexion 0 / pronation 30 deg, lead wrist bounded), weld turned 65.6 deg and moved 1.2 mm, address with the fitted weld and bounded wrists 41.1 mm, full-capture IK 67.8 mm (`anthro_driver_fit/receipt.json`); the lead cock sits at its +25 deg radial limit at address.
 
 Verdict: fitting the weld from the address does not make the human wrist ranges reachable either; with the pits fixed by the markers the lead wrist still needs +50 to +65 deg of cock at address and 110 deg of travel through the swing (the unbounded receipts), about twice a human radial-ulnar range. The C3D carries no hand markers, so the wrist axes are observed only through the club: the remaining hypothesis is that the cock coordinate is absorbing motion that belongs to flexion/extension and pronation because the wrist base axes are still rolled relative to the golfer's hand, and the test for it is to fit the hand frame from the club orientation at three swing phases (address, top, impact) and solve the constant hand-to-club rotation that minimises the wrist excursions jointly, rather than the shaft roll alone. The driver keeps the wrists flagged (driver 26.0 mm, 7-iron 24.1 mm) and `--fit-closure` stays available as an experiment with its receipt.
+
+## 14. Hand-to-Club Rotation Fitted From the Matches, Wrists Bounded (MM-2, 2026-09-14)
+
+The capture has no hand markers, so the golfer's hand frame is observed only
+through the club. The wrist chain of the anthropometric documents is
+`Rz(pronation) @ base @ Rx(cock) @ Rz(flexion)` from the proximal forearm to
+the hand body, and one constant in it was never observed: the rotation of the
+hand body on the wrist follower frame (the wrist joint's
+`child_to_follower`, copied from the native document with the quarter-turn
+and the neutral-grip turn applied). When that constant is wrong the cock
+coordinate absorbs motion that belongs to flexion and pronation, which is what
+sections 12 and 13 measured: 110 deg of lead cock travel and pronation pinned
+at 90 deg, with neither the grip roll (one axis) nor the closure weld able to
+fix it.
+
+`grip_fit.py` fits the constant. From an unbounded match it reconstructs the
+forearm-to-hand rotation per frame (MuJoCo forward kinematics of the run's
+document), decomposes it exactly into the three coordinates
+(`wrist_angles`; the chain is an intrinsic Y-X-Z Euler sequence) and searches
+the follower-side rotation under which the excursions beyond the human ranges
+are smallest over every frame of every run given (`fit_grip_rotation`:
+15 deg grid over extrinsic x-y-z angles, Nelder-Mead refinement, root mean
+square excess as the cost). `evidence/anthropometry/fit_grip_rotation.py`
+runs it over the driver and 7-iron matches together
+(`fit_grip_rotation_receipt.json`, inputs: identity-rotation documents
+matched with `--free-wrists`, driver IK 26.0 mm, 7-iron 24.1 mm):
+
+| Hand  | Rotation (x, y, z deg) | RMS excess before -> after | Max excess after (pronation, cock, flexion) |
+| ----- | ---------------------- | -------------------------- | ------------------------------------------- |
+| lead  | -89.7, 46.7, 0.0       | 40.6 -> 3.9 deg            | 2.7, 16.3, 0.2 deg                          |
+| trail | -34.2, 46.0, 62.0      | 17.7 -> 1.2 deg            | 0.0, 19.6, 0.0 deg                          |
+
+One rotation per hand serves both captures (driver lead 3.9 / trail 1.5 deg
+RMS, 7-iron 3.9 / 0.8 deg). The residual is the lead cock reaching 41 deg
+radial at the top against the 25 deg human limit; everything else is inside.
+The fitted values are the builder defaults (`GRIP_ROTATION_DEG`, flags
+`--lead-grip-rotation` / `--trail-grip-rotation`), recorded in
+`subject.grip_rotation_deg`, and the driver bounds the wrists and forearms
+to the human ranges by default for any document that carries a fitted
+rotation (`--free-wrists` releases them again, `--bound-wrists` forces them
+for an unfitted document). Nothing enters the equations of motion: the wrist
+joints keep their two free coordinates; only the hand's resting orientation
+on them changed.
+
+Receipts with the wrists bounded (`ground_support/anthro_driver`,
+`anthro_iron`): driver address 5.1 mm, full-capture IK 27.3 mm (was 26.0 mm
+unbounded, 67.8 mm with the closure fit); 7-iron address 4.4 mm, IK 28.6 mm
+(was 24.1 mm unbounded); no wrist or forearm flags on either; backswing
+dynamics root 6.2 / 6.0 mm, markers 18.5 / 21.6 mm; support-polygon fraction
+0.82 / 0.88. Wrist angles at address, driver: lead pronation 30, cock -31,
+flexion 16 deg; trail 9, -30, 11 deg. Refitting the rotation on the bounded
+runs returns the identity (`fit_grip_rotation_residual_receipt.json`).
+Cross-engine setup parity at the new addresses: Drake 5.9e-6 / 5.4e-6 m,
+Pinocchio 7e-16 / 8e-16 m (`setup_parity/receipt_anthro_*.json`).
+
+Caveats. An unbounded match can sit on the far Euler branch of the wrist
+chain (cock beyond 90 deg with pronation and flexion turned by 180 deg), a
+geometrically identical pose that the range flags report as a 155 deg
+excursion; the fit compares rotation matrices, not angles, and is immune,
+but unbounded receipts of fitted documents must be read with that in mind.
+The 7-iron's left arm rose from 40 to 48 mm under the bounds, the price of
+the 25 deg radial limit; MM-2 leaves the human ranges as they are rather
+than widening them to the golfer.

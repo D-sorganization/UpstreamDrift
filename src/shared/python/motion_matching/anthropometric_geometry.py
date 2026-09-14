@@ -44,6 +44,7 @@ from src.shared.python.motion_matching.anthropometry import (
     segment_parameters,
 )
 from src.shared.python.motion_matching.club_models import DRIVER, ClubSpec, apply_club
+from src.shared.python.motion_matching.grip_fit import grip_rotation
 from src.shared.python.motion_matching.range_of_motion import UPPER_RANGES_DEG
 
 Array = NDArray[np.float64]
@@ -93,6 +94,17 @@ GRIP_ULNAR_OFFSET_DEG = 25.0
 # calibrated so the wrist coordinates read human ranges over the swing
 # (MM-2, #10104). Zero keeps the native roll.
 GRIP_ROLL_DEG = 0.0
+#: Constant rotation of each hand body on its wrist follower frame (extrinsic
+#: x-y-z, degrees), fitted from the tour-average driver and 7-iron matches so
+#: that the wrist cock, flexion and forearm pronation stay within the human
+#: ranges over both swings (grip_fit.fit_grip_rotation; receipt
+#: evidence/anthropometry/fit_grip_rotation_receipt.json). The capture has no
+#: hand markers, so this is the one constant of the hand-club chain the
+#: markers cannot fix directly. Lead ``L`` (club body), trail ``R`` (standoff).
+GRIP_ROTATION_DEG: dict[str, tuple[float, float, float]] = {
+    "L": (-90.0, 47.0, 0.0),
+    "R": (-34.0, 46.0, 62.0),
+}
 ADDRESS_SEED_DEG: dict[str, float] = {  # arms 45 deg below horizontal, elbows soft
     "LSInputY": 45.0,
     "RSInputY": 45.0,
@@ -102,11 +114,15 @@ ADDRESS_SEED_DEG: dict[str, float] = {  # arms 45 deg below horizontal, elbows s
 
 
 def _grip_offset(
-    child_to_follower: Any, grip_roll_deg: float = GRIP_ROLL_DEG
+    child_to_follower: Any,
+    grip_roll_deg: float = GRIP_ROLL_DEG,
+    rotation_deg: Sequence[float] = (0.0, 0.0, 0.0),
 ) -> list[list[float]]:
     """Native hand-to-club transform with the grip roll about the shaft (base
-    y) and the neutral-grip ulnar turn about the wrist cock axis (base x)
-    applied on the base side."""
+    y), the neutral-grip ulnar turn about the wrist cock axis (base x) and the
+    fitted constant hand rotation (``grip_fit``) applied on the base side."""
+    extra = np.eye(4)
+    extra[:3, :3] = grip_rotation(rotation_deg)
     angle = np.radians(GRIP_ULNAR_OFFSET_DEG)  # sign checked by the axis test
     c, s_ = np.cos(angle), np.sin(angle)
     roll = np.radians(grip_roll_deg)
@@ -117,7 +133,8 @@ def _grip_offset(
     about_shaft[:3, :3] = np.array([[cr, 0.0, sr], [0.0, 1.0, 0.0], [-sr, 0.0, cr]])
     # child_to_follower is expressed in the child (hand/club) frame, so a turn
     # in the follower (wrist base) frame composes on the right.
-    return (about_shaft @ np.asarray(child_to_follower, dtype=float) @ turn).tolist()
+    c2f = np.asarray(child_to_follower, dtype=float)
+    return (about_shaft @ c2f @ turn @ extra).tolist()
 
 
 def _t(
@@ -176,8 +193,12 @@ def build_upper_body(
     shoulder_scale: float = 1.0,
     club: ClubSpec = DRIVER,
     grip_roll_deg: float = GRIP_ROLL_DEG,
+    grip_rotation_deg: Mapping[str, Sequence[float]] | None = None,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
+
+    ``grip_rotation_deg`` maps ``"L"`` and ``"R"`` to the constant rotation
+    of each hand on its wrist (default ``GRIP_ROTATION_DEG``).
 
     ``trunk_scale`` multiplies the de Leva trunk length (hips to shoulder
     centre), ``arm_scale`` the upper arm and forearm lengths and
@@ -197,6 +218,14 @@ def build_upper_body(
         raise ValueError("Scale factors must be positive")
     if tuple(native["coordinate_order"]) != COORDINATES:
         raise ValueError("Native document must carry the 27 native coordinates")
+    grip_rotation = {
+        side: tuple(float(v) for v in angles)
+        for side, angles in (grip_rotation_deg or GRIP_ROTATION_DEG).items()
+    }
+    if set(grip_rotation) != {"L", "R"} or any(
+        len(v) != 3 for v in grip_rotation.values()
+    ):
+        raise ValueError("grip_rotation_deg needs three angles for L and R")
     names = {b["name"].rsplit("/", 1)[-1]: b["name"] for b in native["bodies"]}
     joints = {j["child"]: j for j in native["joints"]}
     jname = {j["child"].rsplit("/", 1)[-1]: j["name"] for j in native["joints"]}
@@ -437,7 +466,9 @@ def build_upper_body(
                 )
             ],
             rotation=rotation,
-            c2f=_grip_offset(native_wrist["child_to_follower"], grip_roll_deg),
+            c2f=_grip_offset(
+                native_wrist["child_to_follower"], grip_roll_deg, grip_rotation[side]
+            ),
         )
     for f in native["frames"]:
         if f["body"] in (names["Clubface Vector"], names["RHandStandoff"]):
@@ -459,6 +490,7 @@ def build_upper_body(
             "arm_scale": arm_scale,
             "shoulder_scale": shoulder_scale,
             "grip_roll_deg": grip_roll_deg,
+            "grip_rotation_deg": {k: list(v) for k, v in grip_rotation.items()},
             "source": "de Leva 1996 male table",
         },
         "coordinate_ranges_deg": {k: list(v) for k, v in COORDINATE_RANGES_DEG.items()},

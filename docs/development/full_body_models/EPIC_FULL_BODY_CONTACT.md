@@ -180,6 +180,10 @@ the shared contact, closure and range-of-motion modules; every departure
 from Simscape is recorded in the document (`closure_fit`, `subject`,
 `visual_hints`) and in REVIEW.md.
 
+MM-2 (#10104) resolved 2026-09-14: the constant hand-to-club rotation is
+fitted from the matches (`grip_fit.py`), the wrists are bounded to the human
+ranges in the matching, and both captures hold (REVIEW.md 14).
+
 ## Rules Every Child Follows
 
 - TDD: failing test first, committed with the implementation.

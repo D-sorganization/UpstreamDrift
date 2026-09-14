@@ -1,0 +1,131 @@
+{
+  "runs": {
+    "anthro_driver": {
+      "path": "docs\\development\\full_body_models\\evidence\\ground_support\\anthro_driver",
+      "frames": 654,
+      "lead_frames_on_far_euler_branch": 0,
+      "trail_frames_on_far_euler_branch": 0
+    },
+    "anthro_iron": {
+      "path": "docs\\development\\full_body_models\\evidence\\ground_support\\anthro_iron",
+      "frames": 657,
+      "lead_frames_on_far_euler_branch": 0,
+      "trail_frames_on_far_euler_branch": 0
+    }
+  },
+  "document_grip_rotation_deg": {
+    "L": [-90.0, 47.0, 0.0],
+    "R": [-34.0, 46.0, 62.0]
+  },
+  "metric": "rms of the wrist and forearm excursions beyond coordinate_ranges_deg over all frames of all runs",
+  "sides": {
+    "lead": {
+      "coordinates": ["LFInput", "LWInputX", "LWInputY"],
+      "rotation_deg": [0.0, 0.0, 0.0],
+      "cost_before_rms_excess_deg": 0.0,
+      "cost_after_rms_excess_deg": 0.0,
+      "max_excess_before_deg": {
+        "pronation": 0.0,
+        "cock": 0.0,
+        "flexion": 0.0
+      },
+      "max_excess_after_deg": {
+        "pronation": 0.0,
+        "cock": 0.0,
+        "flexion": 0.0
+      },
+      "angle_range_before_deg": {
+        "pronation": [-90.0, 62.0],
+        "cock": [-40.0, 25.0],
+        "flexion": [-60.1, 23.6]
+      },
+      "angle_range_after_deg": {
+        "pronation": [-90.0, 62.0],
+        "cock": [-40.0, 25.0],
+        "flexion": [-60.1, 23.6]
+      },
+      "per_run_after": {
+        "anthro_driver": {
+          "rms_excess_deg": 0.0,
+          "max_excess_deg": {
+            "pronation": 0.0,
+            "cock": 0.0,
+            "flexion": 0.0
+          },
+          "angle_range_deg": {
+            "pronation": [-63.7, 62.0],
+            "cock": [-40.0, 25.0],
+            "flexion": [-45.0, 23.6]
+          }
+        },
+        "anthro_iron": {
+          "rms_excess_deg": 0.0,
+          "max_excess_deg": {
+            "pronation": 0.0,
+            "cock": 0.0,
+            "flexion": 0.0
+          },
+          "angle_range_deg": {
+            "pronation": [-90.0, 37.1],
+            "cock": [-40.0, 17.6],
+            "flexion": [-60.1, 7.5]
+          }
+        }
+      }
+    },
+    "trail": {
+      "coordinates": ["RFInput", "RWInputX", "RWInputY"],
+      "rotation_deg": [0.0, 0.0, 0.0],
+      "cost_before_rms_excess_deg": 0.0,
+      "cost_after_rms_excess_deg": 0.0,
+      "max_excess_before_deg": {
+        "pronation": 0.0,
+        "cock": 0.0,
+        "flexion": 0.0
+      },
+      "max_excess_after_deg": {
+        "pronation": 0.0,
+        "cock": 0.0,
+        "flexion": 0.0
+      },
+      "angle_range_before_deg": {
+        "pronation": [-62.1, 77.2],
+        "cock": [-40.0, 3.6],
+        "flexion": [-70.0, 43.1]
+      },
+      "angle_range_after_deg": {
+        "pronation": [-62.1, 77.2],
+        "cock": [-40.0, 3.6],
+        "flexion": [-70.0, 43.1]
+      },
+      "per_run_after": {
+        "anthro_driver": {
+          "rms_excess_deg": 0.0,
+          "max_excess_deg": {
+            "pronation": 0.0,
+            "cock": 0.0,
+            "flexion": 0.0
+          },
+          "angle_range_deg": {
+            "pronation": [-34.4, 77.2],
+            "cock": [-40.0, 3.6],
+            "flexion": [-70.0, 42.3]
+          }
+        },
+        "anthro_iron": {
+          "rms_excess_deg": 0.0,
+          "max_excess_deg": {
+            "pronation": 0.0,
+            "cock": 0.0,
+            "flexion": 0.0
+          },
+          "angle_range_deg": {
+            "pronation": [-62.1, 51.6],
+            "cock": [-40.0, -7.0],
+            "flexion": [-70.0, 43.1]
+          }
+        }
+      }
+    }
+  }
+}

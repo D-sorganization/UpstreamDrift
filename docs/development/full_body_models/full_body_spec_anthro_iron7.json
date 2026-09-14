@@ -1182,12 +1182,15 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
         [
-          0.1736481776669303, 0.4161977407267834, 0.8925389352890298,
+          -0.5343338817661774, -0.7357083276751796, 0.4161977407267835,
           -0.02501411692651008
         ],
-        [0.0, 0.9063077870366499, -0.42261826174069944, -0.9079999999999999],
         [
-          -0.984807753012208, 0.07338689100003823, 0.15737869562426263,
+          0.30908343009591993, 0.28822496143962084, 0.9063077870366498,
+          -0.9079999999999999
+        ],
+        [
+          -0.7867367641319611, 0.6129107832242139, 0.07338689100003808,
           0.05908933628725997
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1321,9 +1324,9 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
-        [0.0, 0.9063077870366499, -0.42261826174069944, 0.0],
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, -0.42261826174069944, -0.9063077870366499, 0.0127],
+        [0.8598872403227148, 0.19501971017073785, 0.47176397337557163, 0.0],
+        [0.3261223507816858, -0.9208415297808589, -0.21376409743330366, 0.0],
+        [0.3927316466123055, 0.3376657958333494, -0.8554201681474538, 0.0127],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
@@ -1833,6 +1836,11 @@
   "schema_version": "full-body-v1",
   "subject": {
     "arm_scale": 1.1,
+    "grip_roll_deg": 0.0,
+    "grip_rotation_deg": {
+      "L": [-90.0, 47.0, 0.0],
+      "R": [-34.0, 46.0, 62.0]
+    },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,
     "source": "de Leva 1996 male table",
@@ -1846,7 +1854,7 @@
   },
   "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
   "upper_body_schema_version": 1,
-  "upper_body_sha256": "76400aad8969a2aae9eb660bcff128fcceec90ed7cb262c481849ad591ea3214",
+  "upper_body_sha256": "7190ea63b6459423defc365ed76e918506b17cb6f1c5179739a78b75c5e0294d",
   "visual_hints": {
     "capsule_radius_m": {
       "femur_l": 0.072,

@@ -357,15 +357,21 @@ def render_playback(
 # forearms are flagged only because bounding them with the current hand-club
 # attachment collapses the fit (driver 65 mm, receipted 2026-09-14; MM-2,
 # #10104 carries the roll calibration of the grip that must come first).
-# Wrists and forearms: flagged, not yet bounded. With the marker-driven pits
-# and the human ranges imposed, the fit rose to 49 mm (driver) and 42 mm
-# (7-iron) with forearm pronation pinned at 90 deg and the left cock at its
-# radial limit, so the roll of the hand on the club (copied from the native
-# document) is what limits the chain; MM-2 (#10104) calibrates it from the
-# address before the ranges are imposed. Receipted 2026-09-14.
+# Wrists and forearms are bounded only for documents that carry a fitted hand
+# rotation (``subject.grip_rotation_deg``, MM-2 #10104): with the native hand
+# orientation the human ranges cost 49 mm (driver) and 42 mm (7-iron); with
+# the rotation fitted from the matches (grip_fit.py) the bounded driver match
+# holds 27 mm. Unfitted documents keep the wrists flagged only. Receipted
+# 2026-09-14. ``--free-wrists`` releases them for the fit script's input.
 IK_UNBOUNDED = frozenset(
     {"LWInputX", "RWInputX", "LWInputY", "RWInputY", "LFInput", "RFInput"}
 )
+
+
+def fitted_grip(document: dict) -> bool:
+    """True when the document's hands carry a fitted (nonzero) rotation."""
+    rotation = document.get("subject", {}).get("grip_rotation_deg") or {}
+    return any(abs(v) > 0 for angles in rotation.values() for v in angles)
 
 
 def document_bounds(document: dict) -> dict[str, tuple[float, float]]:
@@ -850,6 +856,18 @@ def main() -> None:
         "wrists and bound the wrists to human ranges (needs --static-seeds)",
     )
     parser.add_argument(
+        "--bound-wrists",
+        action="store_true",
+        help="impose the human wrist and forearm ranges in the IK even for a "
+        "document without a fitted grip rotation",
+    )
+    parser.add_argument(
+        "--free-wrists",
+        action="store_true",
+        help="leave the wrists and forearms unbounded (flagged only) even for a "
+        "document with a fitted grip rotation, e.g. to feed fit_grip_rotation.py",
+    )
+    parser.add_argument(
         "--static-seeds",
         action="store_true",
         help="place every marker from a neutral-spine static trial (upper-body "
@@ -877,6 +895,11 @@ def main() -> None:
     labels = tuple({**upper, **LEG_SEEDS})
     lane = Lane(labels, C3D)
     configure_lane(lane, base_spec)
+    if args.bound_wrists and args.free_wrists:
+        raise ValueError("--bound-wrists and --free-wrists exclude each other")
+    if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):
+        lane.bounds |= wrist_bounds()
+        log.info("wrists and forearms bounded to the human ranges in the IK")
 
     # 0. functional hip calibration
     waist_offsets = {
@@ -1245,6 +1268,8 @@ def main() -> None:
         "capture": args.capture,
         "capture_sha256": hashlib.sha256(C3D.read_bytes()).hexdigest(),
         "club": base_spec.get("club"),
+        "grip_rotation_deg": base_spec.get("subject", {}).get("grip_rotation_deg"),
+        "wrists_bounded": any(name in lane.bounds for name in IK_UNBOUNDED),
         "labels": labels,
         "ground": {
             "height_m": lane.ground_cal.height_m,

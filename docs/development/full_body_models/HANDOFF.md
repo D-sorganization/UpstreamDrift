@@ -384,12 +384,26 @@ Simscape stays the cross-validation lane. `closure_fit.py` and the driver's
 `--fit-closure` fit the two-hand weld from the address with anatomical
 wrists. Driver result: open-chain address fit 43.7 mm (hands held on the grip point, weld orientation free, trail wrist locked at ulnar -10 / flexion 0 / pronation 30 deg, lead wrist bounded), weld turned 65.6 deg and moved 1.2 mm, address with the fitted weld and bounded wrists 41.1 mm, full-capture IK 67.8 mm (`anthro_driver_fit/receipt.json`); the lead cock sits at its +25 deg radial limit at address. Verdict: fitting the weld from the address does not make the human wrist ranges reachable either; with the pits fixed by the markers the lead wrist still needs +50 to +65 deg of cock at address and 110 deg of travel through the swing (the unbounded receipts), about twice a human radial-ulnar range. The C3D carries no hand markers, so the wrist axes are observed only through the club: the remaining hypothesis is that the cock coordinate is absorbing motion that belongs to flexion/extension and pronation because the wrist base axes are still rolled relative to the golfer's hand, and the test for it is to fit the hand frame from the club orientation at three swing phases (address, top, impact) and solve the constant hand-to-club rotation that minimises the wrist excursions jointly, rather than the shaft roll alone. The driver keeps the wrists flagged (driver 26.0 mm, 7-iron 24.1 mm) and `--fit-closure` stays available as an experiment with its receipt. Details REVIEW.md 13.
 
+### Hand-to-Club Rotation Fitted, Wrists Bounded (MM-2, 2026-09-14)
+
+`src/shared/python/motion_matching/grip_fit.py` fits the constant rotation
+of each hand on its wrist from the matched swings (the one unobserved
+constant of the hand-club chain; the C3D has no hand markers). Fitted over
+the driver and 7-iron together: lead (-89.7, 46.7, 0.0) deg, trail
+(-34.2, 46.0, 62.0) deg, wrist excursions beyond the human ranges 40.6 ->
+3.9 deg RMS (lead) and 17.7 -> 1.2 deg (trail). These are the builder
+defaults (`GRIP_ROTATION_DEG`) and the driver now bounds the wrists and
+forearms by default for fitted documents. Receipts: driver address 5.1 mm,
+IK 27.3 mm; 7-iron 4.4 / 28.6 mm; no wrist flags; parity Drake 6e-6 m,
+Pinocchio 1e-15 m. Details REVIEW.md 14; derivation
+`evidence/anthropometry/fit_grip_rotation_receipt.json`.
+
 ### How to Continue (Read This First)
 
 1. Run the pipeline from the launcher tile "Motion Matching" or
    `python -m src.tools.motion_matching`; headless:
    `python docs/development/full_body_models/build_anthropometric_spec.py ... --club driver|iron7`
-   then `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> --skip-hip-calibration --static-seeds [--fit-closure] --capture driver|iron --out <run>`.
+   then `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> --skip-hip-calibration --static-seeds [--free-wrists] --capture driver|iron --out <run>` (wrists bounded by default for fitted documents; refit the hand rotation with `evidence/anthropometry/fit_grip_rotation.py --run <free-wrist run> ...`).
 2. Read the receipt (`<run>/receipt.json`): `address.calibrated`, `ik`
    (full-capture IK, `range_of_motion_flags`), `dynamics`
    (`backswing_to_1s`, `inside_support_polygon_fraction`); playback GIFs.

@@ -32,6 +32,7 @@ from build_full_body_spec import (  # noqa: E402
 )
 
 from src.shared.python.motion_matching.anthropometric_geometry import (  # noqa: E402
+    GRIP_ROTATION_DEG,
     LEG_VISUAL_RADIUS_M,
     build_upper_body,
     pelvis_alignment_for,
@@ -126,6 +127,23 @@ def main() -> None:
         "--grip-roll", type=float, default=0.0, help="hand roll about the shaft, deg"
     )
     parser.add_argument(
+        "--lead-grip-rotation",
+        nargs=3,
+        type=float,
+        metavar=("X", "Y", "Z"),
+        default=None,
+        help="lead hand rotation on the wrist, extrinsic x-y-z deg "
+        "(default GRIP_ROTATION_DEG['L'], fitted from the matches)",
+    )
+    parser.add_argument(
+        "--trail-grip-rotation",
+        nargs=3,
+        type=float,
+        metavar=("X", "Y", "Z"),
+        default=None,
+        help="trail hand rotation on the wrist (default GRIP_ROTATION_DEG['R'])",
+    )
+    parser.add_argument(
         "--name", default=None, help="default full_body_spec_anthro_<club>"
     )
     args = parser.parse_args()
@@ -141,6 +159,10 @@ def main() -> None:
         shoulder_scale=args.shoulder_scale,
         club=CLUBS[args.club],
         grip_roll_deg=args.grip_roll,
+        grip_rotation_deg={
+            "L": args.lead_grip_rotation or GRIP_ROTATION_DEG["L"],
+            "R": args.trail_grip_rotation or GRIP_ROTATION_DEG["R"],
+        },
     )
     bodies, joints = read_osim(args.osim)
     rotation, hip_half = pelvis_alignment_for(args.stature)

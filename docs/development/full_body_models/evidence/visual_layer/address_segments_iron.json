@@ -10,24 +10,24 @@
     "radius_m": 0.05
   },
   {
-    "body": "COMRod",
-    "length_m": 0.4226,
-    "radius_m": 0.05
-  },
-  {
-    "body": "COMRod",
-    "length_m": 0.4226,
-    "radius_m": 0.05
-  },
-  {
     "body": "tibia_r",
-    "length_m": 0.4215,
+    "length_m": 0.4347,
     "radius_m": 0.055
   },
   {
     "body": "tibia_l",
-    "length_m": 0.4175,
+    "length_m": 0.4305,
     "radius_m": 0.055
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.4226,
+    "radius_m": 0.05
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.4226,
+    "radius_m": 0.05
   },
   {
     "body": "femur_r",

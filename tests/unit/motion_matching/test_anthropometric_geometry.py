@@ -12,6 +12,7 @@ from src.engines.physics_engines.mujoco.python.native_model import (
     NativeMujocoModel,
 )
 from src.shared.python.motion_matching import anthropometric_geometry as module
+from src.shared.python.motion_matching.grip_fit import grip_rotation
 from src.shared.python.motion_matching.anthropometric_candidate import (
     zero_pose_joint_positions,
 )
@@ -178,7 +179,14 @@ def test_joint_axes_are_anatomical_in_mujoco(upper: dict) -> None:
         assert abs(d.xaxis[m.joint(f"{side}WInputY").id] @ fwd) < 0.01  # not a spin
         assert abs(d.xaxis[m.joint(f"{side}WInputY").id] @ left) < 0.01  # flexion
     # A neutral grip holds the shaft GRIP_ULNAR_OFFSET_DEG below the forearm
-    # line, on the side away from the pit.
+    # line, on the side away from the pit (with the fitted hand rotation off).
+    neutral = module.build_upper_body(
+        json.loads(NATIVE.read_text()),
+        stature_m=STATURE,
+        mass_kg=MASS,
+        grip_rotation_deg={"L": (0.0, 0.0, 0.0), "R": (0.0, 0.0, 0.0)},
+    )
+    model = NativeMujocoModel(json.dumps(neutral).encode())
     poses = model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))
     forearm = poses["LW"][:3, 3] - poses["LE"][:3, 3]
     shaft = poses["Clubhead"][:3, 3] - poses["LW"][:3, 3]
@@ -247,6 +255,34 @@ def test_document_carries_club_torso_hints_and_shared_ranges(upper: dict) -> Non
         json.loads(NATIVE.read_text()), stature_m=STATURE, mass_kg=MASS, club=IRON_7
     )
     assert iron["club"]["name"] == "iron7" and iron["club"]["length_m"] < 1.0
+
+
+def test_fitted_grip_rotation_turns_each_hand_on_its_wrist(upper: dict) -> None:
+    assert upper["subject"]["grip_rotation_deg"] == {
+        k: list(v) for k, v in module.GRIP_ROTATION_DEG.items()
+    }
+    native = json.loads(NATIVE.read_text())
+    neutral = module.build_upper_body(
+        native,
+        stature_m=STATURE,
+        mass_kg=MASS,
+        grip_rotation_deg={"L": (0.0, 0.0, 0.0), "R": (0.0, 0.0, 0.0)},
+    )
+    zero = dict.fromkeys(upper["coordinate_order"], 0.0)
+    a = NativeMujocoModel(json.dumps(neutral).encode()).frame_poses(zero)
+    b = NativeMujocoModel(json.dumps(upper).encode()).frame_poses(zero)
+    # The wrist stays put; the club turns on it by the fitted rotation.
+    np.testing.assert_allclose(a["LW"][:3, 3], b["LW"][:3, 3], atol=1e-12)
+    rel = a["Clubhead"][:3, :3].T @ b["Clubhead"][:3, :3]
+    expected = grip_rotation(module.GRIP_ROTATION_DEG["L"])
+    turned = np.degrees(np.arccos((np.trace(rel) - 1) / 2))
+    assert turned == pytest.approx(
+        np.degrees(np.arccos((np.trace(expected) - 1) / 2)), abs=0.1
+    )
+    with pytest.raises(ValueError):
+        module.build_upper_body(
+            native, stature_m=STATURE, mass_kg=MASS, grip_rotation_deg={"L": (0, 0, 0)}
+        )
 
 
 def test_grip_roll_turns_the_hands_about_the_shaft_only() -> None:

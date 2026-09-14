@@ -4,7 +4,7 @@
   "frame0_valid_marker_rms_m": null,
   "views": ["front", "side", "top"],
   "centre_of_mass_m": [
-    0.5420122070159906, -0.014736381897842992, 0.9030852810299301
+    0.5208180026846027, -0.019340264903187923, 0.9054049223845406
   ],
   "com_markers": "red sphere: whole body plus club; yellow: its ground projection"
 }

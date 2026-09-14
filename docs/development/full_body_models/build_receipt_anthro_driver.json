@@ -1,18 +1,23 @@
 {
-  "spec_sha256": "0afedc824d0e448ea496e40c6efba7588d9bbef823b6f6b78a16ccf06fd8972e",
-  "spec_file_sha256": "9e8e64013c0bb2f7eebbc2abf46741a237dd96aeadd65f72f2996908bae9a483",
+  "spec_sha256": "e759d28e6cdb3ebdb1cbcfd5c97649c5826fca7841c6fca906e30752b57bde4b",
+  "spec_file_sha256": "88f8ea9bd801a8655d1c77835200223d1135e366b84b5c67d4817f16fab93153",
   "subject": {
     "stature_m": 1.71,
     "mass_kg": 78.0,
     "trunk_scale": 1.15,
     "arm_scale": 1.1,
     "shoulder_scale": 1.0,
+    "grip_roll_deg": 0.0,
+    "grip_rotation_deg": {
+      "L": [-90.0, 47.0, 0.0],
+      "R": [-34.0, 46.0, 62.0]
+    },
     "source": "de Leva 1996 male table"
   },
   "inputs": {
-    "..\\simscape_tour_matching\\native_evidence\\native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
-    "..\\..\\..\\src\\engines\\physics_engines\\opensim\\models\\golf_humanoid.osim": "344e8a86bd155e90d0882db4300c963b2665fe087b950245555fc38dc33b5ad7",
-    "evidence\\native_candidates\\returned81_candidate.json": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad"
+    "docs\\development\\simscape_tour_matching\\native_evidence\\native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+    "src\\engines\\physics_engines\\opensim\\models\\golf_humanoid.osim": "344e8a86bd155e90d0882db4300c963b2665fe087b950245555fc38dc33b5ad7",
+    "docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad"
   },
   "hip_half_width_m": 0.08892,
   "hub_height_above_l5s1_m": 0.42261093595634686,
