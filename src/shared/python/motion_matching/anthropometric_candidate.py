@@ -91,7 +91,9 @@ def _children(document: Mapping[str, Any], body: str) -> list[dict]:
     return [j for j in document["joints"] if j["parent"] == body]
 
 
-def _segment_axis_in_body(document: Mapping[str, Any], body: str) -> Array:
+def _segment_axis_in_body(
+    document: Mapping[str, Any], body: str
+) -> tuple[Array, Array, float]:
     """Unit vector from the body's own joint toward its (first) child joint, body frame."""
     own = _transform(_joint_of_child(document, body)["child_to_follower"])[:3, 3]
     kids = _children(document, body)
