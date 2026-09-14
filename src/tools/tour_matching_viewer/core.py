@@ -12,7 +12,6 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, TypeAlias
-import xml.etree.ElementTree as ET
 
 import numpy as np
 from numpy.typing import NDArray
@@ -288,19 +287,20 @@ def body_poses_from_state(
             name: float(val) for name, val in zip(coordinate_names, q, strict=True)
         }
     else:
-        # Default joint ordering matching the depth-first XML tree
-        root = ET.Element("root")
-        elements = {"world": root}
+        # Default joint ordering matching the depth-first kinematic tree
+        children_by_parent: dict[str, list[dict[str, Any]]] = {}
         for joint in ordered_joints:
-            p_elem = elements[joint["parent"]]
-            c_elem = ET.SubElement(p_elem, "body", {"name": joint["child"]})
-            elements[joint["child"]] = c_elem
-            for prim in joint["primitives"]:
-                ET.SubElement(c_elem, "joint", {"name": prim["coordinate"]})
+            children_by_parent.setdefault(joint["parent"], []).append(joint)
 
-        default_names: list[str] = [
-            str(j.get("name")) for j in root.iter("joint") if j.get("name") is not None
-        ]
+        default_names: list[str] = []
+
+        def traverse(body: str) -> None:
+            for j in children_by_parent.get(body, []):
+                for prim in j["primitives"]:
+                    default_names.append(prim["coordinate"])
+                traverse(j["child"])
+
+        traverse("world")
         coord_map = {
             name: float(val) for name, val in zip(default_names, q, strict=True)
         }
