@@ -14,6 +14,7 @@ Welcome to UpstreamDrift - a professional biomechanical analysis and physics sim
 | Add a physics engine     | [Adapter Authoring Guide](adapters/authoring_guide.md)                   |
 | Choose a physics engine  | [Engine Selection Guide](engines/engine_selection_guide.md)              |
 | Track motion capture     | [Motion Pipeline](motion_pipeline/README.md)                             |
+| Implement Shadow Tracker | [Shadow Tracker Plan](plans/shadow_tracker/README.md)                    |
 | Review architecture      | [ADRs](adr/)                                                             |
 | Read the specification   | [SPEC](../SPEC.md)                                                       |
 | Find any document        | [Documentation catalog](index.md)                                        |
