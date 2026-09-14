@@ -205,6 +205,32 @@ def _build_failed_rollout(
     )
 
 
+def _assemble_rollout_result(
+    times: Array,
+    data: tuple[Array, Array, Array, list[dict[str, Any]], float, str],
+    capture: TourCapture,
+    marker_offsets: Mapping[str, Any],
+) -> ForwardRolloutResult:
+    """Construct a ForwardRolloutResult from trajectory data, contact audit, and metrics."""
+    q_traj, qd_traj, pred_m, samples, err, status = data
+    if status != "success":
+        return _build_failed_rollout(times, q_traj.shape[1], capture, marker_offsets)
+    return ForwardRolloutResult(
+        time_s=times,
+        q=q_traj,
+        qd=qd_traj,
+        predicted_markers_m=pred_m,
+        shared_metrics=compute_shared_metrics(
+            capture=capture,
+            predicted_points_m=pred_m,
+            tracked_labels=list(marker_offsets.keys()),
+        ),
+        contact_audit=_audit_contact_samples(samples, len(times)),
+        max_closure_residual_m=err,
+        status="success",
+    )
+
+
 def _simulate_rk45(
     model: Any,
     ik_adapter: Any,
@@ -214,7 +240,7 @@ def _simulate_rk45(
     marker_offsets: Mapping[str, Any],
     capture: TourCapture,
     options: RolloutOptions,
-) -> ForwardRolloutResult:
+) -> tuple[Array, Array, Array, list[dict[str, Any]], float, str]:
     """Execute forward simulation via adaptive RK45 integration."""
     from scipy.integrate import solve_ivp
 
@@ -251,7 +277,15 @@ def _simulate_rk45(
         atol=1e-7,
     )
     if not sol.success:
-        return _build_failed_rollout(times, n_coords, capture, marker_offsets)
+        zero_markers = np.zeros((n_frames, len(capture.labels), 3), dtype=np.float64)
+        return (
+            np.zeros((n_frames, n_coords)),
+            np.zeros((n_frames, n_coords)),
+            zero_markers,
+            [],
+            0.0,
+            "failed",
+        )
 
     q_traj = sol.y[:n_coords, :].T
     qd_traj = sol.y[n_coords:, :].T
@@ -280,19 +314,13 @@ def _simulate_rk45(
         err_p, _ = model.closure_errors()
         max_closure_err = max(max_closure_err, float(np.linalg.norm(err_p)))
 
-    return ForwardRolloutResult(
-        time_s=times,
-        q=q_traj,
-        qd=qd_traj,
-        predicted_markers_m=pred_markers,
-        shared_metrics=compute_shared_metrics(
-            capture=capture,
-            predicted_points_m=pred_markers,
-            tracked_labels=list(marker_offsets.keys()),
-        ),
-        contact_audit=_audit_contact_samples(all_contact_samples, n_frames),
-        max_closure_residual_m=max_closure_err,
-        status="success",
+    return (
+        q_traj,
+        qd_traj,
+        pred_markers,
+        all_contact_samples,
+        max_closure_err,
+        "success",
     )
 
 
@@ -305,7 +333,7 @@ def _simulate_euler(
     marker_offsets: Mapping[str, Any],
     capture: TourCapture,
     options: RolloutOptions,
-) -> ForwardRolloutResult:
+) -> tuple[Array, Array, Array, list[dict[str, Any]], float, str]:
     """Execute forward simulation via semi-implicit Euler integration."""
     n_frames = len(times)
     coord_names = list(model.coordinate_order)
@@ -364,19 +392,13 @@ def _simulate_euler(
             ik_adapter, curr_q, marker_offsets, capture.labels
         )
 
-    return ForwardRolloutResult(
-        time_s=times,
-        q=q_traj,
-        qd=qd_traj,
-        predicted_markers_m=pred_markers,
-        shared_metrics=compute_shared_metrics(
-            capture=capture,
-            predicted_points_m=pred_markers,
-            tracked_labels=list(marker_offsets.keys()),
-        ),
-        contact_audit=_audit_contact_samples(all_contact_samples, n_frames),
-        max_closure_residual_m=max_closure_err,
-        status="success",
+    return (
+        q_traj,
+        qd_traj,
+        pred_markers,
+        all_contact_samples,
+        max_closure_err,
+        "success",
     )
 
 
@@ -402,7 +424,7 @@ def simulate_full_body_forward(
         )
 
     if opts.integrator == "rk45" and len(times) > 1:
-        return _simulate_rk45(
+        data = _simulate_rk45(
             model,
             ik_adapter,
             theta,
@@ -412,13 +434,15 @@ def simulate_full_body_forward(
             capture,
             opts,
         )
-    return _simulate_euler(
-        model,
-        ik_adapter,
-        theta,
-        times,
-        initial_state,
-        marker_offsets,
-        capture,
-        opts,
-    )
+    else:
+        data = _simulate_euler(
+            model,
+            ik_adapter,
+            theta,
+            times,
+            initial_state,
+            marker_offsets,
+            capture,
+            opts,
+        )
+    return _assemble_rollout_result(times, data, capture, marker_offsets)
