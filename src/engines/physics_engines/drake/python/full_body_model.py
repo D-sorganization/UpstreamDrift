@@ -83,6 +83,7 @@ class NativeDrakeFullBodyModel:
         spec = json.loads(model_bytes)
         api: Any = import_module("pydrake.all")
         self._api = api
+        self._wrt_v = api.JacobianWrtVariable.kV
 
         self.plant = api.MultibodyPlant(time_step=0.0)
         self.instance = api.Parser(self.plant).AddModelsFromString(
@@ -197,7 +198,7 @@ class NativeDrakeFullBodyModel:
             ).ravel()
             jac_pos = self.plant.CalcJacobianTranslationalVelocity(
                 self.context,
-                self._api.JacobianWrtVariable.kV,
+                self._wrt_v,
                 frame,
                 np.zeros(3),
                 world,
@@ -241,7 +242,7 @@ class NativeDrakeFullBodyModel:
             ).body_frame()
             jac_pos = self.plant.CalcJacobianTranslationalVelocity(
                 self.context,
-                self._api.JacobianWrtVariable.kV,
+                self._wrt_v,
                 frame,
                 np.zeros(3),
                 world,
@@ -251,10 +252,10 @@ class NativeDrakeFullBodyModel:
 
         a, b = self._closure
         jac = self.plant.CalcJacobianSpatialVelocity(
-            self.context, self._api.JacobianWrtVariable.kV, b, np.zeros(3), a, a
+            self.context, self._wrt_v, b, np.zeros(3), a, a
         )
         drift = self.plant.CalcBiasSpatialAcceleration(
-            self.context, self._api.JacobianWrtVariable.kV, b, np.zeros(3), a, a
+            self.context, self._wrt_v, b, np.zeros(3), a, a
         ).get_coeffs()
 
         force = (
