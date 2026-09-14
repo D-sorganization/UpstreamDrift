@@ -6,6 +6,12 @@ steps (IK, Moco tracking) live in drivers under
 docs/development/opensim_tour_matching and skip without ``opensim``.
 """
 
+from src.engines.physics_engines.opensim.python.tour_matching.cli import (
+    CheckpointManifest,
+    RunConfig,
+    build_parser,
+    compute_run_hash,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.marker_calibration import (
     CalibrationResult,
     calibrate_marker_offsets,
@@ -49,23 +55,32 @@ from src.engines.physics_engines.opensim.python.tour_matching.trc import (
     read_trc,
     write_trc,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.visualization import (
+    plot_3d_trajectory_overlay,
+    plot_effort_and_rates,
+    plot_marker_error_timecourse,
+)
 
 __all__ = [
     "DEFAULT_NOMINAL_LENGTHS_M",
     "CalibrationResult",
+    "CheckpointManifest",
     "Degree6PolynomialCoefficients",
     "GOLF_HUMANOID_MARKER_BODIES",
     "MarkerPlacement",
     "MocoTrackingConfig",
     "MocoTrackingResult",
     "PolynomialTorqueProfile",
+    "RunConfig",
     "SegmentScaleResult",
     "SharedMetrics",
     "attach_marker_set",
     "body_for",
     "build_moco_study",
+    "build_parser",
     "calibrate_marker_offsets",
     "check_effort_and_rate_bounds",
+    "compute_run_hash",
     "compute_shared_metrics",
     "create_polynomial_prescribed_controller",
     "estimate_segment_scales",
@@ -73,6 +88,9 @@ __all__ = [
     "labels_per_body",
     "load_controls_from_sto",
     "locked_coordinates",
+    "plot_3d_trajectory_overlay",
+    "plot_effort_and_rates",
+    "plot_marker_error_timecourse",
     "read_trc",
     "sanitize_trc_for_horizon",
     "unlock_coordinates",

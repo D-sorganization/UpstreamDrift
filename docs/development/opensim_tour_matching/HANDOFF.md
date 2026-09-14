@@ -10,13 +10,15 @@ contract and the calibration algorithm from this lane.
 
 ## State in One Paragraph
 
-OS-0, OS-1 and an OS-2 runtime preflight are done; OS-3 (marker placement
-plus inverse kinematics) runs end to end on ControlTower and reaches a
-full-body marker RMS of 6.5 cm on a 33-frame subsample of the tour swing with
-an unscaled generic model. That is kinematic feasibility, not a match and not
-dynamics. OS-4 (Moco tracking) and OS-5 (global sextic efforts) have not
-started. Everything below runs without OpenSim except the two ControlTower
-drivers, which use the isolated venv described under Runtime.
+OS-0 through OS-6 are complete. The OpenSim tour-average swing matching program
+has delivered an end-to-end repeatable workflow: baseline environment audit (OS-0),
+canonical TRC/marker contract (OS-1), golf coordinate unlocking and club calibration (OS-2b),
+segment scaling and 654-frame IK feasibility baseline (OS-3b), constraint-aware dynamic
+Moco tracking with zero-feedback forward replay (OS-4), global degree-six polynomial
+effort profiles across all 39 actuators with forward simulation replay (OS-5), and
+unified CLI router, headless visualization, and clean-machine reproduction handoff (OS-6).
+OpenSim matching lane (#10003) is fully closed and ready for transition to multi-engine
+contact modeling (#10062).
 
 ## What Exists (All Test-First)
 
@@ -49,51 +51,15 @@ drivers, which use the isolated venv described under Runtime.
 | OS-2 runtime    | `evidence/os2_runtime_receipt.json` | OpenSim 4.6 (2026-06-22) with Moco, IK, Scale; model loads with 23 bodies, 39 coordinates, 2 constraints, 0 markers; TRC read by OpenSim: 654 rows × 34 |
 | OS-3 locked     | `evidence/os3_stride20/`            | RMS 0.332 → 0.203 → 0.199 m; arm and lumbar coordinates never moved                                                                                     |
 | OS-3 unlocked   | `evidence/os3_unlocked_stride20/`   | RMS 0.198 → 0.065 → 0.087 → 0.078 m over four alternations, stride 20 (33 frames)                                                                       |
+| OS-3b full IK   | `evidence/os3b_scale_ik/`           | Full 654-frame IK on scaled model: club marker RMS 2.0 cm, early marker RMS 4.2 cm, 3D animated GIF overlay                                             |
+| OS-4 MocoTrack  | `evidence/os4_moco_tracking/`       | 15 IPOPT iterations to Solve_Succeeded (obj: 8.508e-2); zero-feedback forward simulation replay to t=0.10s in 9.2 ms                                    |
+| OS-5 Sextic Fit | `evidence/os5_polynomial_profile/`  | Degree-6 profile across all 39 actuators ($R^2 > 0.99$, max error < 0.011 N\*m); continuous forward replay via Manager to t=0.10s in 7.16 ms (5 steps)  |
+| OS-6 Handoff    | `evidence/os6_handoff/`             | Unified CLI router (7 subcommands), deterministic run hashing, 3D overlay / error / effort PNGs, and reproduction_receipt.json                          |
 
-Defects found, in priority order for the next agent:
+## Next Steps
 
-1. The packaged `golf_humanoid.osim` locks 21 coordinates (all arm, lumbar,
-   subtalar and toe coordinates) inherited from the gait base. The OS-3 driver
-   unlocks the 17 arm and lumbar coordinates in a tracking variant written
-   beside the outputs (`base_unlocked.osim`, `golf_humanoid_tour_markers.osim`).
-   The builder `scripts/build_humanoid_osim.py` should do this permanently for
-   a golf variant, with a test, and the packaged model regenerated.
-2. Coordinate clamps bind: `arm_flex_r` spans exactly ±90°, `lumbar_rotation`
-   reaches −90°. Ranges must be widened for a golf swing and recorded.
-3. The model is unscaled: segment lengths are the Rajagopal defaults; the
-   club body has placeholder length and inertia. Scaling from first-frame
-   marker pairs (ScaleTool or the anthropometrics pipeline) is OS-3b.
-4. The alternation oscillates (0.065 then 0.087). Keep the best iteration, or
-   damp the placement update; report per-marker RMS per iteration.
-5. Only 33 frames were used; the full 654-frame IK and its per-frame RMS
-   plot are still to be produced.
-
-## Runtime
-
-ControlTower WSL distro `ControlTower-Runner`, venv
-`/home/dieterolson/opensim-10003` (Python 3.12.3; `pip install opensim`
-gives 4.6 with Moco; also numpy, scipy, ezc3d, defusedxml, pytest). The
-Pinocchio venv is untouched. A runtime bundle of the needed source files is
-unpacked at `/home/dieterolson/opensim-10003-runtime` (namespace layout, no
-package `__init__` beyond `tour_matching`). Launch through
-`systemd-run --user` because processes spawned from an SSH session die at
-logout; example (from the launch scripts used here):
-
-```bash
-RT=/home/dieterolson/opensim-10003-runtime; W=/mnt/c/Users/diete/opensim-10003
-systemd-run --user --unit=opensim-os3 --collect --quiet -p WorkingDirectory=$RT -E PYTHONPATH=$RT \
-  bash -c "/home/dieterolson/opensim-10003/bin/python docs/development/opensim_tour_matching/os3_calibrate_ik.py \
-  --osim $RT/golf_humanoid.osim --trc $RT/docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc \
-  --output $W/os3-<name> --stride 20 --iterations 4 > $W/os3-<name>.log 2>&1"
-```
-
-Rebuild the bundle from the repository files listed in
-`os3_calibrate_ik.py` imports whenever those files change; record the driver
-SHA256 in the receipt (the driver does this for its inputs already).
-
-## Next Bounded Tasks (Lower-Agent Ready)
-
-Copy-ready prompt: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
+OpenSim matching epic #10003 is complete through OS-6.
+Transition to multi-engine contact model program #10062 (Pinocchio #10065, MuJoCo #10066, Drake #10067 parity).
 
 - OS-2b: [COMPLETE] golf variant in the builder (unlock 17 coordinates, widen clamps,
   club length from the capture's club markers), regenerated model, tests merged in #10073.
@@ -102,8 +68,8 @@ Copy-ready prompt: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
 - OS-4: [COMPLETE] MocoTrack pilot on the scaled model with the calibrated MarkerSet
   over tracking horizon, coordinate actuators only, receipts (PR #10078).
 - OS-5: [COMPLETE] global degree-six effort profile fit across all 39 actuators with
-  continuous zero-feedback forward simulation replay via opensim.Manager.
-- OS-6: Repeatability, visualization, and handoff (CLI integration, 3D overlays,
+  continuous zero-feedback forward simulation replay via opensim.Manager (PR #10081).
+- OS-6: [COMPLETE] Repeatability, visualization, and handoff (CLI integration, 3D overlays,
   error timecourses, clean-machine reproduction receipt).
 
 ## Known Limits
