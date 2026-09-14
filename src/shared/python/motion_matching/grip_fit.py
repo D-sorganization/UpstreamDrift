@@ -181,17 +181,19 @@ def fit_grip_rotation(
 
     ticks = np.arange(-grid_half_deg, grid_half_deg + 1e-9, grid_step_deg)
     ticks = np.union1d(ticks, [0.0])
-    best = np.zeros(3)
+    best: Array = np.zeros(3, dtype=float)
     best_cost = cost(best)
     for candidate in product(ticks, ticks, ticks):
-        c = cost(np.asarray(candidate))
+        trial: Array = np.array(candidate, dtype=float)
+        c = cost(trial)
         if c < best_cost - 1e-12:
-            best, best_cost = np.asarray(candidate, dtype=float), c
+            best, best_cost = trial, c
     refined = minimize(
         cost, best, method="Nelder-Mead", options={"xatol": 0.01, "fatol": 1e-6}
     )
     if refined.fun < best_cost:
-        best, best_cost = np.asarray(refined.x, dtype=float), float(refined.fun)
+        best = np.array(refined.x, dtype=float)
+        best_cost = float(refined.fun)
     before = angles_for(np.zeros(3))
     after = angles_for(best)
     return GripFit(
