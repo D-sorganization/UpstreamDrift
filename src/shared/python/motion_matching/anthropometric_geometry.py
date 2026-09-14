@@ -86,6 +86,10 @@ COORDINATE_RANGES_DEG: dict[str, tuple[float, float]] = {
 # where the arms hang forward-down at address and rise to about 45 deg above
 # horizontal at the top; arms straight up or down never occur.
 ARM_FORWARD = np.array([[0.0, 0.0, -1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0]])
+# Quarter turn about the forearm axis (z of the forearm frame, distal = -z)
+# applied to the copied native wrist base: turns its cock axis from the pit
+# direction onto the elbow axis so a positive cock lifts the hand toward the pit.
+WRIST_ROLL = np.array([[0.0, 1.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
 ADDRESS_SEED_DEG: dict[str, float] = {  # arms 45 deg below horizontal, elbows soft
     "LSInputY": 45.0,
     "RSInputY": 45.0,
@@ -382,7 +386,14 @@ def build_upper_body(
         frame(f"{side}F", fore, (0, 0, 0))
         hand_suffix = "Clubface Vector" if side == "L" else "RHandStandoff"
         native_wrist = joints[names[hand_suffix]]
-        rotation = np.asarray(native_wrist["parent_to_base"], float)[:3, :3]
+        # The native wrist base is copied for its hand-to-club relation, then
+        # rolled a quarter turn about the forearm so that the cock axis (Rx,
+        # radial/ulnar deviation) is parallel to the elbow axis: with the
+        # forearm unrotated, radial deviation moves the hand toward the elbow
+        # pit, as it does anatomically. See WRIST_ROLL.
+        rotation = (
+            WRIST_ROLL @ np.asarray(native_wrist["parent_to_base"], float)[:3, :3]
+        )
         hand = body(
             hand_suffix,
             _copy(

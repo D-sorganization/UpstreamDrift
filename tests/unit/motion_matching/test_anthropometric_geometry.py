@@ -155,6 +155,17 @@ def test_joint_axes_are_anatomical_in_mujoco(upper: dict) -> None:
     bent["LEInput"] = -0.5
     moved = model.frame_poses(bent)["LW"][:3, 3]
     assert moved[2] > straight[2] + 0.05 and abs(moved[1] - straight[1]) < 1e-9
+    # Wrist cock (Rx) turns about the elbow axis, and a positive cock lifts the
+    # club toward the elbow pit (+z at zero pose) on both sides.
+    model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))
+    for side in "LR":
+        assert abs(d.xaxis[m.joint(f"{side}WInputX").id] @ left) > 0.999
+        assert abs(d.xaxis[m.joint(f"{side}WInputY").id] @ fwd) > 0.999  # spin
+    cocked = dict.fromkeys(model.coordinate_order, 0.0)
+    cocked["LWInputX"] = 0.3
+    head0 = model.frame_poses(dict.fromkeys(model.coordinate_order, 0.0))["Clubhead"]
+    head1 = model.frame_poses(cocked)["Clubhead"]
+    assert head1[2, 3] > head0[2, 3] + 0.2 and abs(head1[1, 3] - head0[1, 3]) < 1e-9
     # The address seed lowers the arms below the shoulders.
     seed = dict.fromkeys(model.coordinate_order, 0.0)
     seed.update({k: np.radians(v) for k, v in module.ADDRESS_SEED_DEG.items()})

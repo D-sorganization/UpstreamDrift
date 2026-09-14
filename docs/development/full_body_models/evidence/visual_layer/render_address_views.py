@@ -30,6 +30,9 @@ ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT))
 
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter  # noqa: E402
+from src.engines.physics_engines.mujoco.python.visual_layer import (  # noqa: E402
+    add_com_markers,
+)
 from src.shared.python.motion_matching.ground_support import (  # noqa: E402
     capture_to_native_world,
 )
@@ -100,6 +103,9 @@ def main() -> None:
         q0 = np.load(args.trajectory)["q"][0]
         pose = f"frame 0 of {args.trajectory.name} on {spec_path.name}"
     xml = add_marker_spheres(xml, target0, "0 0 0 1", "capture")
+    ground_height = float(
+        json.loads(spec_path.read_text())["contact"].get("ground_height_m") or 0.0
+    )
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
     for name, value in zip(names, q0, strict=True):
@@ -113,6 +119,7 @@ def main() -> None:
         cam.lookat[:] = centre
         cam.distance, cam.azimuth, cam.elevation = 3.0, azimuth, elevation
         renderer.update_scene(data, camera=cam)
+        com = add_com_markers(renderer.scene, model, data, ground_height)
         imageio.imwrite(HERE / f"address_{view}{suffix}.png", renderer.render().copy())
     spec = json.loads(spec_path.read_text())
     skeleton = derive_visual_skeleton(spec)
@@ -142,6 +149,8 @@ def main() -> None:
                 "pose": pose,
                 "frame0_valid_marker_rms_m": rms,
                 "views": list(views),
+                "centre_of_mass_m": [float(v) for v in com],
+                "com_markers": "red sphere: whole body plus club; yellow: its ground projection",
             },
             indent=2,
         )

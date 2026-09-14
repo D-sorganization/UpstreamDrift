@@ -332,16 +332,25 @@ outward: forcing it inward breaks the swing fit (REVIEW.md 9.2 lists the
 four attempts); the wrist frame copied from the native document is the
 suspect. Renders `evidence/visual_layer/*_anthro.*` refreshed.
 
+### Wrist Axis, Setup Position, Parity, Centre of Mass (2026-09-14)
+
+Wrist cock axis rolled onto the elbow axis (`WRIST_ROLL`), lead scapula
+retraction and elbow windows in every address fit, centre-of-mass overlay
+(`visual_layer.add_com_markers`, driver playback and address views,
+`centre_of_mass` in the address receipt), cross-engine setup parity
+(`evidence/setup_parity/`: Pinocchio 9e-16 m, Drake 6.5e-06 m on the
+same document; poses translate by coordinate name). Receipt anthro_v1:
+IK 30.4 mm all markers, address 8.3 mm, elbows -7.5/-4.7 deg,
+backswing root 5 mm, CoM inside the polygon at address: True.
+Open: the left elbow pit faces outward (REVIEW.md 9.3).
+
 ## Next
 
-- AN-1 (#10099): derive the wrist base rotation from this document's
-  forearm frame (cock axis perpendicular to the elbow-pit plane, test
-  first) and rerun the address pit rows so the left pit faces inward
-  without breaking the swing (REVIEW.md 9.2); verify the de Leva table
-  against the paper; then the Simscape update and R2025b parity (MATLAB
-  not on DeskComputer; the neck stays MuJoCo/Drake/Pinocchio-only). Never
-  rerun with `--recalibrate-upper` on this document (55 mm address,
-  receipted) and keep one static-trial round.
+- AN-1 (#10099): left elbow pit (REVIEW.md 9.3): two-axis elbow or the
+  left hand roll in the closure, test first; verify the de Leva table
+  against the paper; Simscape update and R2025b parity for the 27 native
+  coordinates (the neck stays outside Simscape). Keep one static-trial
+  round; never `--recalibrate-upper` on this document.
 - GS-4: the downswing needs a dynamically consistent reference or the FB-5
   contact-aware shooting fit; candidates in order: stance timing from the
   reference contact forces instead of marker heights, a hip zero-twist

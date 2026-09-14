@@ -1224,8 +1224,8 @@
       "name": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm",
       "parent_to_base": [
-        [1.0, -1.2246063538223773e-16, -1.2246063538223775e-16, 0.0],
         [1.2246063538223773e-16, -2.220446049250313e-16, 1.0, 0.0],
+        [-1.0, 1.2246063538223773e-16, 1.2246063538223775e-16, 0.0],
         [
           -1.2246063538223775e-16, -1.0, -2.220446049250313e-16,
           -0.14526160252728315
@@ -1358,8 +1358,8 @@
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
       "parent_to_base": [
-        [1.0, -1.2246063538223773e-16, -1.2246063538223775e-16, 0.0],
         [1.2246063538223773e-16, -2.220446049250313e-16, 1.0, 0.0],
+        [-1.0, 1.2246063538223773e-16, 1.2246063538223775e-16, 0.0],
         [
           -1.2246063538223775e-16, -1.0, -2.220446049250313e-16,
           -0.14526160252728315
@@ -1875,5 +1875,5 @@
   },
   "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
   "upper_body_schema_version": 1,
-  "upper_body_sha256": "9d7edf4380d44c0b53fbcb050a5b4b2f1697ac8d4c06f9f06fffe0ea9da0bbf0"
+  "upper_body_sha256": "478f7282a913955c53745100ab8767e24828925224ce5352184d73906b1409de"
 }

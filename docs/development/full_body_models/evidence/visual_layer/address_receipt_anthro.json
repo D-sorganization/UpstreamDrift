@@ -2,5 +2,9 @@
   "spec": "full_body_spec_hipcal_scaled.json",
   "pose": "frame 0 of ik_trajectory.npz on full_body_spec_hipcal_scaled.json",
   "frame0_valid_marker_rms_m": null,
-  "views": ["front", "side", "top"]
+  "views": ["front", "side", "top"],
+  "centre_of_mass_m": [
+    1.0045536066342526, 0.04201015933517985, 0.9121999603122103
+  ],
+  "com_markers": "red sphere: whole body plus club; yellow: its ground projection"
 }

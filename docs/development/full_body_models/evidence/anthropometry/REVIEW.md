@@ -329,3 +329,52 @@ other arm.
   humerus can satisfy. Next: derive the wrist base rotation from this
   document's forearm frame (cock axis perpendicular to the pit plane) with
   a test, then rerun the pit rows at address.
+
+### 9.3 Wrist Axis, Setup Position, Cross-Engine Parity, Centre of Mass (User Direction 2026-09-14)
+
+- **Wrist cock axis.** The wrist base copied from the native document had its
+  cock axis (`Rx`) parallel to the elbow-pit direction, so radial deviation
+  moved the hand sideways. `WRIST_ROLL` turns the copied base a quarter turn
+  about the forearm: the cock axis is now parallel to the elbow axis and a
+  positive cock lifts the hand toward the elbow pit, on both sides, with the
+  forearm unrotated (`test_joint_axes_are_anatomical_in_mujoco`). The
+  hand-to-club relation (child transform and closure weld) is unchanged.
+- **Setup constraints** (driver, anthropometric documents only): lead
+  scapula may retract up to 20 deg in the static trial (right scapula and
+  both elevations locked), left elbow -12 to 5 deg, right elbow -15 to
+  -3 deg (5 to 10 deg nominal) in every address fit, pit rows as before.
+- **Result** (`ground_support/anthro_v1/receipt.json`): full-capture IK
+  30.4 mm over all 34 markers (head 26, arms 46/44,
+  legs 16/17, club 16), address 8.3 mm, spine
+  bend -7.8 deg forward / 6.7 deg lateral, links
+  -2.7/1.6 deg, left elbow -7.5 deg, right elbow -4.7 deg,
+  lead scapula retraction 2.5 deg, backswing root error 5 mm,
+  whole-run root RMS 72 mm, 75 % of stance frames inside the
+  support polygon. Elbow pits at address: right 0.11 / 0.31 (up, inward), left
+  -0.47 up, -0.82 inward. The left pit still faces outward; with the corrected wrist,
+  dominant pit rows toward up-inward, inward-only and inward-with-lift were
+  each tried again and each turned the left pit inward at address while the
+  swing fit rose to 47 to 86 mm (traces in the session log). The left
+  humerus roll the swing demands is opposite to the pit-inward address; the
+  next lever is a two-axis elbow (flexion plus carrying angle) or a check of
+  the left forearm/hand roll in the club closure, both test-first.
+- **Centre of mass.** `visual_layer.whole_body_com` and `add_com_markers`
+  overlay the body-plus-club centre of mass (red) and its ground projection
+  (yellow) on the playback GIFs and the address views; the driver records
+  `centre_of_mass` at address: 0.912 m above the ground, inside the
+  support polygon: True, 0.038 m from the polygon centroid.
+- **Same pose in every engine.** `evidence/setup_parity/verify_setup_parity.py`
+  evaluates the fitted address (frame 0, by coordinate name) in MuJoCo here
+  and in Drake 1.57.0 and Pinocchio 4.1.0 on ControlTower from the
+  same document: Pinocchio 9e-16 m / 5e-08 rad, Drake 6.5e-06 m /
+  7.3e-06 rad (URDF text precision) over 17 frames; gate 1e-5. The
+  translation rule between models is the document's `coordinate_order`:
+  a pose is a mapping from coordinate name to value and every adapter's
+  `frame_poses` takes that mapping; nothing is indexed by position.
+- **Mass and dimensions.** The document carries 79.4 kg (de Leva
+  segments at 78 kg plus the native club and hand solids) at 1.71 m with
+  trunk 1.15, arm 1.10 and shoulder 1.00 scale factors from the swing;
+  an average male golfer is 1.75 to 1.80 m and 80 to 85 kg, so this
+  subject is short and light of that mean and the table is a subject
+  estimate, not a population default; the stature and mass are explicit
+  inputs of `build_anthropometric_spec.py`.

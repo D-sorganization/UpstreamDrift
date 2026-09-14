@@ -143,3 +143,64 @@ def attach_visual_layer(
         "ground_calibrated": skeleton.ground.calibrated,
         "lights": 2,
     }
+
+
+def whole_body_com(model: Any, data: Any) -> np.ndarray:
+    """Centre of mass of every body in the tree (the body-plus-club system) at
+    the current ``data`` state, from MuJoCo's subtree centre of mass of the
+    first body under the world. Postcondition: a finite 3-vector."""
+    import mujoco
+
+    if model.nbody < 2:
+        raise ValueError("Model has no bodies below the world")
+    mujoco.mj_comPos(model, data)
+    com = np.asarray(data.subtree_com[1], dtype=float).copy()
+    if not np.isfinite(com).all():
+        raise ValueError("Centre of mass is not finite")
+    return com
+
+
+def add_scene_marker(
+    scene: Any,
+    position: np.ndarray,
+    radius_m: float,
+    rgba: tuple[float, float, float, float],
+) -> None:
+    """Add a sphere marker to a rendered scene (an overlay, not a model geom).
+    Precondition: the scene has a free geom slot and the radius is positive."""
+    import mujoco
+
+    if radius_m <= 0:
+        raise ValueError("Marker radius must be positive")
+    if scene.ngeom >= scene.maxgeom:
+        raise ValueError("Scene has no free geom slot for a marker")
+    geom = scene.geoms[scene.ngeom]
+    mujoco.mjv_initGeom(
+        geom,
+        mujoco.mjtGeom.mjGEOM_SPHERE,
+        np.array([radius_m, 0.0, 0.0]),
+        np.asarray(position, dtype=float),
+        np.eye(3).reshape(-1),
+        np.asarray(rgba, dtype=np.float32),
+    )
+    scene.ngeom += 1
+
+
+COM_MARKER_RGBA = (0.95, 0.15, 0.15, 1.0)
+COM_GROUND_RGBA = (0.95, 0.85, 0.1, 1.0)
+
+
+def add_com_markers(
+    scene: Any, model: Any, data: Any, ground_height_m: float
+) -> np.ndarray:
+    """Overlay the whole-body centre of mass (red) and its vertical projection
+    onto the ground plane (yellow); returns the centre of mass."""
+    com = whole_body_com(model, data)
+    add_scene_marker(scene, com, 0.03, COM_MARKER_RGBA)
+    add_scene_marker(
+        scene,
+        np.array([com[0], com[1], ground_height_m + 0.005]),
+        0.025,
+        COM_GROUND_RGBA,
+    )
+    return com

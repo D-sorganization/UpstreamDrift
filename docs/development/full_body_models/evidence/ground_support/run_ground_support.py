@@ -47,6 +47,9 @@ sys.path.insert(0, str(ROOT))
 
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter  # noqa: E402
 from src.engines.physics_engines.mujoco.python import full_body_simulation as fs  # noqa: E402
+from src.engines.physics_engines.mujoco.python.visual_layer import (  # noqa: E402
+    add_com_markers,
+)
 from src.engines.physics_engines.mujoco.python.full_body_markers import (  # noqa: E402
     continuous_branches,
     FullBodyMarkerKinematics,
@@ -68,6 +71,7 @@ from src.shared.python.motion_matching.full_body_spec import (  # noqa: E402
     validate_full_body_spec,
 )
 from src.shared.python.motion_matching.ground_support import (  # noqa: E402
+    convex_hull_contains,
     calibrate_ground_height,
     capture_to_native_world,
 )
@@ -164,16 +168,25 @@ SPIN_COORDINATES = tuple(
     f"{s}{c}" for s in ("L", "R") for c in ("SInputZ", "FInput", "WInputY")
 )
 # Neutral address for the static trial: scapulae undepressed, spine nearly straight.
-NEUTRAL_LOCKS = {f"{s}ScapInput{a}": 0.0 for s in "LR" for a in "XY"}
-NEUTRAL_BOUNDS_DEG = {"SpineInputX": (-5.0, 5.0), "SpineInputY": (-10.0, 10.0)}
+# Neutral address: scapulae level and unprotracted except that the lead (left)
+# scapula may retract up to 20 deg, which lets the right hand sit lower on the
+# grip with a softly flexed right elbow.
+NEUTRAL_LOCKS = {"LScapInputX": 0.0, "RScapInputX": 0.0, "RScapInputY": 0.0}
+NEUTRAL_BOUNDS_DEG = {
+    "SpineInputX": (-5.0, 5.0),
+    "SpineInputY": (-10.0, 10.0),
+    "LScapInputY": (0.0, 20.0),  # positive = retraction (shoulder moves back)
+}
 # Address arms (anthropometric documents): lead arm nearly straight, trail arm
-# softly flexed, and each elbow pit facing up and a little toward the other
-# arm. The pit is the upper-arm frame's +x axis (flexion lifts the wrist that
+# flexed 5 to 10 deg (3 to 15 allowed), and each elbow pit facing up and a
+# little toward the other arm. The pit is the upper-arm frame's +x axis (flexion lifts the wrist that
 # way); the spin that sets it is otherwise free in the marker fit.
 ADDRESS_RESTARTS = 6  # perturbed re-solves per leg seed in the address fit
 ADDRESS_RESTART_SPREAD_RAD = 0.5
-ADDRESS_ELBOW_BOUNDS_DEG = {"LEInput": (-25.0, 5.0), "REInput": (-35.0, 5.0)}
-ELBOW_PIT_INWARD = 0.4  # target = up + ELBOW_PIT_INWARD * (toward the other shoulder)
+ADDRESS_ELBOW_BOUNDS_DEG = {"LEInput": (-12.0, 5.0), "REInput": (-15.0, -3.0)}
+# Pit target = ELBOW_PIT_UP * up + ELBOW_PIT_INWARD * (toward the other arm).
+ELBOW_PIT_UP = 1.0
+ELBOW_PIT_INWARD = 0.4
 ELBOW_PIT_WEIGHT = 0.02  # address fits with placed markers
 # Static trial rounds and their pit weights. One mild round: a dominant pit
 # weight (5.0) or a second round with the placed markers both turned the left
@@ -299,11 +312,15 @@ def render_playback(
     q: np.ndarray,
     lookat: np.ndarray,
     path: Path,
+    show_com: bool = True,
 ) -> None:
     xml, _ = exporter.export_full_body_mjcf(spec_bytes, visual=True)
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
     addresses = [model.joint(n).qposadr[0] for n in names]
+    ground_height = float(
+        json.loads(spec_bytes)["contact"].get("ground_height_m") or 0.0
+    )
     renderer = mujoco.Renderer(model, 240, 320)
     cam = mujoco.MjvCamera()
     cam.lookat[:] = lookat
@@ -313,6 +330,8 @@ def render_playback(
         data.qpos[addresses] = q[k]
         mujoco.mj_forward(model, data)
         renderer.update_scene(data, camera=cam)
+        if show_com:
+            add_com_markers(renderer.scene, model, data, ground_height)
         frames_out.append(renderer.render().copy())
     imageio.mimsave(path, frames_out, duration=1000 * PLAYBACK_STRIDE / RATE_HZ, loop=0)
 
@@ -413,12 +432,13 @@ class Lane:
                 name: (np.radians(lo), np.radians(hi))
                 for name, (lo, hi) in NEUTRAL_BOUNDS_DEG.items()
             }
-            if self.anthropometric:
-                bounds |= {
-                    name: (np.radians(lo), np.radians(hi))
-                    for name, (lo, hi) in ADDRESS_ELBOW_BOUNDS_DEG.items()
-                }
         if self.anthropometric:
+            # The address elbows stay in their anatomical windows in every
+            # address fit (the trajectory then carries its document ranges).
+            bounds |= {
+                name: (np.radians(lo), np.radians(hi))
+                for name, (lo, hi) in ADDRESS_ELBOW_BOUNDS_DEG.items()
+            }
             # Every address fit keeps the elbow pits up and inward; the arm
             # markers sit close to the humeral axis and do not pin its spin,
             # and in the static trial the seed offsets must not decide it.
@@ -480,7 +500,10 @@ class Lane:
         across /= max(np.linalg.norm(across), 1e-9)
         out = {}
         for side, sign in (("L", 1.0), ("R", -1.0)):
-            target = np.array([0.0, 0.0, 1.0]) + ELBOW_PIT_INWARD * sign * across
+            target = (
+                ELBOW_PIT_UP * np.array([0.0, 0.0, 1.0])
+                + ELBOW_PIT_INWARD * sign * across
+            )
             out[f"{side}S"] = ((1.0, 0.0, 0.0), target, weight)
         return out
 
@@ -599,6 +622,25 @@ class Lane:
         q, _ = self.trajectory(kin, q_start, frames=frames)
         errors = marker_errors(kin, q, self.points[frames])
         return float(np.sqrt(np.mean(errors[self.valid[frames]] ** 2)))
+
+
+def com_report(
+    sim: fs.FullBodySimulator,
+    kin: FullBodyMarkerKinematics,
+    q: np.ndarray,
+    ground: GroundPlane,
+) -> dict:
+    """Whole-body-plus-club centre of mass at ``q`` and whether its ground
+    projection lies inside the polygon of the contact-sphere ground points."""
+    com, _ = sim.centre_of_mass(q)
+    points = kin.sphere_ground_points(q, ground)
+    polygon = np.array([p[:2] for p in points.values()])
+    return {
+        "com_m": [float(v) for v in com],
+        "height_above_ground_m": float(com[2] - ground.height_m),
+        "inside_support_polygon": bool(convex_hull_contains(com[:2], polygon)),
+        "polygon_centroid_offset_m": float(np.linalg.norm(com[:2] - polygon.mean(0))),
+    }
 
 
 def posture_summary(kin: FullBodyMarkerKinematics, q: np.ndarray) -> dict:
@@ -819,6 +861,7 @@ def main() -> None:
         "closure_error_m": address2.closure_error_m,
         "lowest_sphere_height_m": address2.lowest_sphere_height_m,
         "support_offset_m": kin.support_offset(address2.q, lane.ground),
+        "centre_of_mass": com_report(sim, kin, address2.q, lane.ground),
         "leg_angles_deg": {
             name: float(np.degrees(address2.q[kin.coordinate_order.index(name)]))
             for name in kin.coordinate_order[adapter.upper_body_coordinates :]
