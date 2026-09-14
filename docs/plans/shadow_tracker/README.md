@@ -1,6 +1,6 @@
 # Shadow Tracker
 
-**Status: Planning Baseline; Runtime Not Implemented.**
+**Status: Image-Contract Handoff Ready; Fitter Runtime Not Implemented.**
 
 Epic: [#10122](https://github.com/D-sorganization/UpstreamDrift/issues/10122).
 Source inspection baseline: `f8daa71aa263a60c54c785b1ac2d4bc060eb2a71`,
@@ -34,8 +34,13 @@ at each timestamp, not holding the address outline constant.
 
 ## Installation
 
-This setup adds documentation and reserved source/test directories only. There
-is no installable Shadow Tracker runtime, CLI, launcher tile, or model download.
+For immediate worker pickup, use [Ready Tasks](READY_TASKS.md) and the
+[Image-Evidence Contract Freeze](CONTRACT_FREEZE.md). Read
+[Qualification Findings](QUALIFICATION_FINDINGS.md) before touching model code.
+
+The setup now includes a tested model-qualification experiment under
+`scripts/shadow_tracker/`. There is no installable Shadow Tracker fitter,
+launcher tile, segmentation pipeline, or model download.
 Use the repository's normal development environment for future implementation.
 Optional segmentation, rendering, and engine dependencies must remain lazy and
 version-pinned when selected by their respective work packages.
