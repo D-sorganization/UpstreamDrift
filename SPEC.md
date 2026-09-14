@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Camera Direction Conversion (ST-02C, #10139)
+
+Implements bidirectional conversion between `pose_estimation.observations.CameraCalibration`
+(camera-to-world) and `motion_pipeline.contracts` camera models (`CameraIntrinsics` and
+`CameraExtrinsics`, world-to-camera) under `src/shared/python/shadow_tracker/camera_bridge.py`.
+Reuses `Transform6DOF` SE(3) inversion, enforces pinhole K constraints (zero skew, bottom row
+`[0, 0, 1]`, positive focal lengths), validates proper finite rotations, and canonicalizes
+distortion representations (none/empty to five zeros; four coefficients to five with k3=0).
+
 ## Shadow Tracker Source and Frame Identity Contracts (ST-02A, #10137)
 
 Implements frozen `SourceAsset`, `FrameIdentity`, and `validate_frame_sequence`
