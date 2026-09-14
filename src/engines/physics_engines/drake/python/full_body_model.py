@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from importlib import import_module
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -31,7 +31,7 @@ from src.shared.python.motion_matching.full_body_spec import (
     upper_body_slice,
 )
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 def solve_weld_acceleration(
@@ -72,6 +72,7 @@ class FullBodyDrakeModel:
 
         api: Any = import_module("pydrake.all")
         self._api = api
+        self._wrt_v = api.JacobianWrtVariable.kV
         self.plant = api.MultibodyPlant(time_step=0.0)
         self._instance = api.Parser(self.plant).AddModelsFromString(self.xml, "urdf")[0]
         self.plant.WeldFrames(
@@ -257,7 +258,7 @@ class FullBodyDrakeModel:
         a, b = self._closure
         jacobian = self.plant.CalcJacobianSpatialVelocity(
             self.context,
-            self._api.JacobianWrtVariable.kV,
+            self._wrt_v,
             b,
             np.zeros(3),
             a,
@@ -299,7 +300,7 @@ class FullBodyDrakeModel:
             frame = self._spheres[s_name]["frame"]
             j_trans = self.plant.CalcJacobianTranslationalVelocity(
                 self.context,
-                self._api.JacobianWrtVariable.kV,
+                self._wrt_v,
                 frame,
                 np.zeros(3),
                 self.plant.world_frame(),
@@ -310,7 +311,7 @@ class FullBodyDrakeModel:
         a, b, jacobian = self._closure_jacobian()
         bias = self.plant.CalcBiasSpatialAcceleration(
             self.context,
-            self._api.JacobianWrtVariable.kV,
+            self._wrt_v,
             b,
             np.zeros(3),
             a,

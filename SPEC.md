@@ -19,6 +19,14 @@ Implement alternating marker calibration and least-squares inverse kinematics ov
   - Evaluates stride-20 calibration subsample (33 frames, 3 iterations) and complete 654-frame IK trajectory with loop closure residuals $< 0.38$ mm across all engines.
   - Documents head-marker limitation: Three head markers (`HeadTop`, `HeadFront`, `HeadSide`) attached to rigid torso segment `Hub`.
 
+## Drake Full-Body Model Builder Law of Demeter and Type Parity (#10067)
+
+Harden Drake full-body model adapter (`FullBodyDrakeModel`) and shared contact law:
+- Law of Demeter (LOD) Alignment (`src/engines/physics_engines/drake/python/full_body_model.py`):
+  - Cache `api.JacobianWrtVariable.kV` as `self._wrt_v` in `FullBodyDrakeModel.__init__` to avoid deep attribute access chains across velocity Jacobian evaluations.
+- Type Alias Standardization:
+  - Annotate `Array: TypeAlias = NDArray[np.float64]` in `full_body_model.py` and `src/shared/python/motion_matching/contact_law.py` to ensure valid type alias representation under strict mypy parsing.
+
 ## Pinocchio Full-Body Model Builder With Shared Ground Contact (FB-3-P, #10065)
 
 Implement full-body Pinocchio model builder with lower limbs and shared ground contact forces under Epic #10062:
