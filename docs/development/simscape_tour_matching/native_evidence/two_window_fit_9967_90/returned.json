@@ -1,0 +1,900 @@
+{
+  "qualification": "exploratory returned two-window candidate; R2025b acceptance pending",
+  "candidate_sha256": "682559758e4f92f0800b04a605af0fb37341ca7fe8db3636a76d8eb56d8a8cc5",
+  "uninterrupted_metrics": {
+    "whole_rms_m": 0.02130786815552411,
+    "early_rms_m": 0.010148119778789818,
+    "terminal_rms_m": 0.03920876182603454,
+    "club_cluster_rms_m": 0.008503975944104217,
+    "pelvis_yaw_error_pct": 15.929398636289523,
+    "score": 50.565283253310085
+  },
+  "run73_metrics": {
+    "whole_rms_m": 0.028105470710226108,
+    "early_rms_m": 0.010860396867183951,
+    "terminal_rms_m": 0.06539791108645086,
+    "club_cluster_rms_m": 0.030040690123091792,
+    "score": 18.30016138273805
+  },
+  "restart_metrics": {
+    "whole_rms_m": 0.021386450602903694,
+    "early_rms_m": 0.010212429080253941,
+    "terminal_rms_m": 0.03923225342754521,
+    "club_cluster_rms_m": 0.008254472477448625,
+    "pelvis_yaw_error_pct": 16.17150276984031,
+    "score": 50.64746590579258,
+    "score_with_effort": 52.19270364091958
+  },
+  "improved_uninterrupted": true,
+  "improved_over_run73": true,
+  "accepted": false,
+  "optimizer_converged": false,
+  "message": "Iteration limit reached",
+  "max_scaled_defect_norm": 0.0008318377553799244,
+  "defect_norms": {
+    "0.6": 0.0008318377553799244
+  },
+  "segmented_rms_m": 0.021303725226306934,
+  "unsegmented_rms_m": 0.02130786815552411,
+  "terminal_replay_gap_m": 0.0004637544882037858,
+  "function_evaluations": 121,
+  "active_bound_count": 34,
+  "active_theta_lower": 4,
+  "active_theta_upper": 15,
+  "active_node_bounds": 15,
+  "theta_max_abs": 3.7506786338091924,
+  "node_chart_norm": 0.3789262551908801,
+  "costs": [
+    {
+      "evaluation": 1,
+      "assembled_cost": 52.19270364092095,
+      "objective": 52.192703640920946,
+      "defect_rows_sum_squares": 5.463141002676019e-22,
+      "linear_model_objective": 52.192703640920946
+    },
+    {
+      "evaluation": 2,
+      "assembled_cost": 3237.2921789327843,
+      "objective": 3207.629277758608,
+      "defect_rows_sum_squares": 29.66290117417593,
+      "linear_model_objective": 63282.46419794189
+    },
+    {
+      "evaluation": 3,
+      "assembled_cost": 384.03512190580625,
+      "objective": 384.0338969537274,
+      "defect_rows_sum_squares": 0.0012249520788772132,
+      "linear_model_objective": 680.0253854377266
+    },
+    {
+      "evaluation": 4,
+      "assembled_cost": 58.39790471515203,
+      "objective": 58.39790460195226,
+      "defect_rows_sum_squares": 1.1319976801616467e-7,
+      "linear_model_objective": 58.02402714426859
+    },
+    {
+      "evaluation": 5,
+      "assembled_cost": 52.20489329585224,
+      "objective": 52.20489329584102,
+      "defect_rows_sum_squares": 1.1218380878044236e-11,
+      "linear_model_objective": 52.20631654449237
+    },
+    {
+      "evaluation": 6,
+      "assembled_cost": 52.18268509139247,
+      "objective": 52.18268509139219,
+      "defect_rows_sum_squares": 2.858445279182597e-13,
+      "linear_model_objective": 52.18296222865774
+    },
+    {
+      "evaluation": 7,
+      "assembled_cost": 3580.029695487887,
+      "objective": 3521.723073176605,
+      "defect_rows_sum_squares": 58.30662231128223,
+      "linear_model_objective": 80116.4170640911
+    },
+    {
+      "evaluation": 8,
+      "assembled_cost": 517.5923654840049,
+      "objective": 517.5825912785849,
+      "defect_rows_sum_squares": 0.009774205420121237,
+      "linear_model_objective": 848.4160831899618
+    },
+    {
+      "evaluation": 9,
+      "assembled_cost": 100.70374400069254,
+      "objective": 100.70374292048052,
+      "defect_rows_sum_squares": 1.080212005934157e-6,
+      "linear_model_objective": 59.70437143253876
+    },
+    {
+      "evaluation": 10,
+      "assembled_cost": 52.22209309007695,
+      "objective": 52.222093089957866,
+      "defect_rows_sum_squares": 1.19088132324119e-10,
+      "linear_model_objective": 52.21408412012337
+    },
+    {
+      "evaluation": 11,
+      "assembled_cost": 52.17643433993576,
+      "objective": 52.17643433993419,
+      "defect_rows_sum_squares": 1.568041520614724e-12,
+      "linear_model_objective": 52.17559004844984
+    },
+    {
+      "evaluation": 12,
+      "assembled_cost": 5164.83819571899,
+      "objective": 5135.342988298862,
+      "defect_rows_sum_squares": 29.495207420129166,
+      "linear_model_objective": 32140.02786777892
+    },
+    {
+      "evaluation": 13,
+      "assembled_cost": 251.4842275515061,
+      "objective": 251.4782920517764,
+      "defect_rows_sum_squares": 0.005935499729643472,
+      "linear_model_objective": 370.51905747931283
+    },
+    {
+      "evaluation": 14,
+      "assembled_cost": 54.885592599110446,
+      "objective": 54.885591941556754,
+      "defect_rows_sum_squares": 6.575537119569177e-7,
+      "linear_model_objective": 55.10551918811428
+    },
+    {
+      "evaluation": 15,
+      "assembled_cost": 52.17929134574501,
+      "objective": 52.179291345669306,
+      "defect_rows_sum_squares": 7.570035500169908e-11,
+      "linear_model_objective": 52.179538786382054
+    },
+    {
+      "evaluation": 16,
+      "assembled_cost": 52.16902361600611,
+      "objective": 52.169023616000054,
+      "defect_rows_sum_squares": 6.054828347988814e-12,
+      "linear_model_objective": 52.16942325201183
+    },
+    {
+      "evaluation": 17,
+      "assembled_cost": 1171.0771828522454,
+      "objective": 1170.8722920658904,
+      "defect_rows_sum_squares": 0.2048907863553883,
+      "linear_model_objective": 1103.1143308407452
+    },
+    {
+      "evaluation": 18,
+      "assembled_cost": 62.62070585818651,
+      "objective": 62.620687376524124,
+      "defect_rows_sum_squares": 1.848166238220842e-5,
+      "linear_model_objective": 62.5205918781482
+    },
+    {
+      "evaluation": 19,
+      "assembled_cost": 52.25704873156921,
+      "objective": 52.25704872957521,
+      "defect_rows_sum_squares": 1.994001719862854e-9,
+      "linear_model_objective": 52.25710689329811
+    },
+    {
+      "evaluation": 20,
+      "assembled_cost": 52.168317772302906,
+      "objective": 52.168317772295076,
+      "defect_rows_sum_squares": 7.833781825223292e-12,
+      "linear_model_objective": 52.1687172839272
+    },
+    {
+      "evaluation": 21,
+      "assembled_cost": 108.1247777621751,
+      "objective": 108.11906280826616,
+      "defect_rows_sum_squares": 0.005714953908948829,
+      "linear_model_objective": 112.9489794083819
+    },
+    {
+      "evaluation": 22,
+      "assembled_cost": 52.69942118494229,
+      "objective": 52.69942061394479,
+      "defect_rows_sum_squares": 5.709974960735822e-7,
+      "linear_model_objective": 52.71333311807992
+    },
+    {
+      "evaluation": 23,
+      "assembled_cost": 52.16779821357396,
+      "objective": 52.16779821349262,
+      "defect_rows_sum_squares": 8.134994106105673e-11,
+      "linear_model_objective": 52.16784476355954
+    },
+    {
+      "evaluation": 24,
+      "assembled_cost": 52.166548406852435,
+      "objective": 52.16654840683526,
+      "defect_rows_sum_squares": 1.7173974035036124e-11,
+      "linear_model_objective": 52.166721980378085
+    },
+    {
+      "evaluation": 25,
+      "assembled_cost": 216.97297562904936,
+      "objective": 216.96206016147144,
+      "defect_rows_sum_squares": 0.010915467577935751,
+      "linear_model_objective": 206.084731480813
+    },
+    {
+      "evaluation": 26,
+      "assembled_cost": 53.611553723231836,
+      "objective": 53.611552640162884,
+      "defect_rows_sum_squares": 1.083068948295725e-6,
+      "linear_model_objective": 53.620454855739766
+    },
+    {
+      "evaluation": 27,
+      "assembled_cost": 52.17247107384713,
+      "objective": 52.17247107369989,
+      "defect_rows_sum_squares": 1.4723648041633294e-10,
+      "linear_model_objective": 52.17271458716744
+    },
+    {
+      "evaluation": 28,
+      "assembled_cost": 52.1651253081989,
+      "objective": 52.165125308178766,
+      "defect_rows_sum_squares": 2.0132333806113694e-11,
+      "linear_model_objective": 52.165266992099454
+    },
+    {
+      "evaluation": 29,
+      "assembled_cost": 173.2671156766109,
+      "objective": 173.260084828116,
+      "defect_rows_sum_squares": 0.007030848494863582,
+      "linear_model_objective": 166.97997729467352
+    },
+    {
+      "evaluation": 30,
+      "assembled_cost": 53.258679715475225,
+      "objective": 53.258679120479265,
+      "defect_rows_sum_squares": 5.949959604781256e-7,
+      "linear_model_objective": 53.25683380642803
+    },
+    {
+      "evaluation": 31,
+      "assembled_cost": 52.170520285224846,
+      "objective": 52.170520285125335,
+      "defect_rows_sum_squares": 9.951831200777642e-11,
+      "linear_model_objective": 52.17052463137303
+    },
+    {
+      "evaluation": 32,
+      "assembled_cost": 52.16431648876758,
+      "objective": 52.16431648874576,
+      "defect_rows_sum_squares": 2.1816018109812553e-11,
+      "linear_model_objective": 52.16441173401793
+    },
+    {
+      "evaluation": 33,
+      "assembled_cost": 117.90157074639478,
+      "objective": 117.89898571386408,
+      "defect_rows_sum_squares": 0.002585032530703762,
+      "linear_model_objective": 119.81661291035374
+    },
+    {
+      "evaluation": 34,
+      "assembled_cost": 52.73595408019882,
+      "objective": 52.73595380928183,
+      "defect_rows_sum_squares": 2.7091697846345835e-7,
+      "linear_model_objective": 52.79048449168181
+    },
+    {
+      "evaluation": 35,
+      "assembled_cost": 52.16507225780204,
+      "objective": 52.16507225778912,
+      "defect_rows_sum_squares": 1.291325413277015e-11,
+      "linear_model_objective": 52.16562753618462
+    },
+    {
+      "evaluation": 36,
+      "assembled_cost": 52.16305316873594,
+      "objective": 52.16305316872045,
+      "defect_rows_sum_squares": 1.548203692598729e-11,
+      "linear_model_objective": 52.16326679698802
+    },
+    {
+      "evaluation": 37,
+      "assembled_cost": 73.23192689095231,
+      "objective": 73.19893561880431,
+      "defect_rows_sum_squares": 0.032991272147973566,
+      "linear_model_objective": 68.85295446074805
+    },
+    {
+      "evaluation": 38,
+      "assembled_cost": 52.28759717975224,
+      "objective": 52.28759374254966,
+      "defect_rows_sum_squares": 3.4372025845038554e-6,
+      "linear_model_objective": 52.29835932704044
+    },
+    {
+      "evaluation": 39,
+      "assembled_cost": 52.16108639947044,
+      "objective": 52.161086399030566,
+      "defect_rows_sum_squares": 4.3987719205254527e-10,
+      "linear_model_objective": 52.16143643487261
+    },
+    {
+      "evaluation": 40,
+      "assembled_cost": 55.652719716844544,
+      "objective": 55.650157904897604,
+      "defect_rows_sum_squares": 0.002561811946942228,
+      "linear_model_objective": 54.62746377602526
+    },
+    {
+      "evaluation": 41,
+      "assembled_cost": 52.17368836375215,
+      "objective": 52.173688087412586,
+      "defect_rows_sum_squares": 2.7633955693707464e-7,
+      "linear_model_objective": 52.17566655790177
+    },
+    {
+      "evaluation": 42,
+      "assembled_cost": 52.159590836425025,
+      "objective": 52.159590834245215,
+      "defect_rows_sum_squares": 2.1798071849577715e-9,
+      "linear_model_objective": 52.16013751966756
+    },
+    {
+      "evaluation": 43,
+      "assembled_cost": 54.060527388018535,
+      "objective": 54.05988130572628,
+      "defect_rows_sum_squares": 0.0006460822922638651,
+      "linear_model_objective": 54.131788830576696
+    },
+    {
+      "evaluation": 44,
+      "assembled_cost": 52.17247559561866,
+      "objective": 52.1724755112137,
+      "defect_rows_sum_squares": 8.44049516480327e-8,
+      "linear_model_objective": 52.17378550944526
+    },
+    {
+      "evaluation": 45,
+      "assembled_cost": 52.159010371561905,
+      "objective": 52.15901036882568,
+      "defect_rows_sum_squares": 2.7362284469329624e-9,
+      "linear_model_objective": 52.159580234511445
+    },
+    {
+      "evaluation": 46,
+      "assembled_cost": 53.574292475924715,
+      "objective": 53.57404577792818,
+      "defect_rows_sum_squares": 0.0002466979965309397,
+      "linear_model_objective": 53.167530908054104
+    },
+    {
+      "evaluation": 47,
+      "assembled_cost": 52.160858259181474,
+      "objective": 52.16085823012755,
+      "defect_rows_sum_squares": 2.90539240357217e-8,
+      "linear_model_objective": 52.161730137746794
+    },
+    {
+      "evaluation": 48,
+      "assembled_cost": 52.15733314577016,
+      "objective": 52.15733314214104,
+      "defect_rows_sum_squares": 3.629123552148869e-9,
+      "linear_model_objective": 52.15780972051159
+    },
+    {
+      "evaluation": 49,
+      "assembled_cost": 52.519490696737556,
+      "objective": 52.519314678612346,
+      "defect_rows_sum_squares": 0.00017601812520957416,
+      "linear_model_objective": 52.47253204051205
+    },
+    {
+      "evaluation": 50,
+      "assembled_cost": 52.153627350369135,
+      "objective": 52.153627338367734,
+      "defect_rows_sum_squares": 1.2001405511842364e-8,
+      "linear_model_objective": 52.15347324068017
+    },
+    {
+      "evaluation": 51,
+      "assembled_cost": 52.95372220451704,
+      "objective": 52.95304660162856,
+      "defect_rows_sum_squares": 0.0006756028884845422,
+      "linear_model_objective": 52.67719825960392
+    },
+    {
+      "evaluation": 52,
+      "assembled_cost": 52.15063250458605,
+      "objective": 52.150632411724466,
+      "defect_rows_sum_squares": 9.286159777655988e-8,
+      "linear_model_objective": 52.15114334276047
+    },
+    {
+      "evaluation": 53,
+      "assembled_cost": 52.72182782668627,
+      "objective": 52.72120264147301,
+      "defect_rows_sum_squares": 0.0006251852132535893,
+      "linear_model_objective": 52.68922763495474
+    },
+    {
+      "evaluation": 54,
+      "assembled_cost": 52.14696017161762,
+      "objective": 52.14695991045059,
+      "defect_rows_sum_squares": 2.611670272443725e-7,
+      "linear_model_objective": 52.14893132721306
+    },
+    {
+      "evaluation": 55,
+      "assembled_cost": 52.46454314916544,
+      "objective": 52.46433462374217,
+      "defect_rows_sum_squares": 0.00020852542327921424,
+      "linear_model_objective": 52.483522011782725
+    },
+    {
+      "evaluation": 56,
+      "assembled_cost": 52.14569711733379,
+      "objective": 52.145696824955564,
+      "defect_rows_sum_squares": 2.9237821552348014e-7,
+      "linear_model_objective": 52.1479970621253
+    },
+    {
+      "evaluation": 57,
+      "assembled_cost": 52.456211732747484,
+      "objective": 52.455323177870746,
+      "defect_rows_sum_squares": 0.0008885548767369648,
+      "linear_model_objective": 52.496176808887526
+    },
+    {
+      "evaluation": 58,
+      "assembled_cost": 52.14313890294469,
+      "objective": 52.14313832926447,
+      "defect_rows_sum_squares": 5.736802180813059e-7,
+      "linear_model_objective": 52.14489006035101
+    },
+    {
+      "evaluation": 59,
+      "assembled_cost": 52.153130617663244,
+      "objective": 52.153085208062826,
+      "defect_rows_sum_squares": 4.540960042155743e-5,
+      "linear_model_objective": 52.1594392440102
+    },
+    {
+      "evaluation": 60,
+      "assembled_cost": 52.135339612811116,
+      "objective": 52.13533843372548,
+      "defect_rows_sum_squares": 1.179085636506124e-6,
+      "linear_model_objective": 52.13780165065762
+    },
+    {
+      "evaluation": 61,
+      "assembled_cost": 52.20575050212364,
+      "objective": 52.20563524397798,
+      "defect_rows_sum_squares": 0.00011525814566062917,
+      "linear_model_objective": 52.20148277805812
+    },
+    {
+      "evaluation": 62,
+      "assembled_cost": 52.127034033586725,
+      "objective": 52.1270323345335,
+      "defect_rows_sum_squares": 1.6990532075697963e-6,
+      "linear_model_objective": 52.12837442185904
+    },
+    {
+      "evaluation": 63,
+      "assembled_cost": 52.11480283314464,
+      "objective": 52.11479718728341,
+      "defect_rows_sum_squares": 5.645861226408007e-6,
+      "linear_model_objective": 52.11549717149949
+    },
+    {
+      "evaluation": 64,
+      "assembled_cost": 52.11408339751686,
+      "objective": 52.11408241937986,
+      "defect_rows_sum_squares": 9.78136997531475e-7,
+      "linear_model_objective": 52.1152574648637
+    },
+    {
+      "evaluation": 65,
+      "assembled_cost": 52.11257627143706,
+      "objective": 52.11257617784601,
+      "defect_rows_sum_squares": 9.359105242857387e-8,
+      "linear_model_objective": 52.11534758081274
+    },
+    {
+      "evaluation": 66,
+      "assembled_cost": 52.113315804942914,
+      "objective": 52.11331571984688,
+      "defect_rows_sum_squares": 8.509604337898339e-8,
+      "linear_model_objective": 52.115436364969696
+    },
+    {
+      "evaluation": 67,
+      "assembled_cost": 52.11127833191446,
+      "objective": 52.1112782850716,
+      "defect_rows_sum_squares": 4.684286240707095e-8,
+      "linear_model_objective": 52.11354513074947
+    },
+    {
+      "evaluation": 68,
+      "assembled_cost": 52.11004450692562,
+      "objective": 52.11004450478675,
+      "defect_rows_sum_squares": 2.1388678706939283e-9,
+      "linear_model_objective": 52.11236116691165
+    },
+    {
+      "evaluation": 69,
+      "assembled_cost": 52.10916727295035,
+      "objective": 52.10916719387958,
+      "defect_rows_sum_squares": 7.907077274065421e-8,
+      "linear_model_objective": 52.11148771329885
+    },
+    {
+      "evaluation": 70,
+      "assembled_cost": 52.10862640369464,
+      "objective": 52.108626401533016,
+      "defect_rows_sum_squares": 2.1616260081920275e-9,
+      "linear_model_objective": 52.111074918047144
+    },
+    {
+      "evaluation": 71,
+      "assembled_cost": 52.107341956898686,
+      "objective": 52.10734185841834,
+      "defect_rows_sum_squares": 9.848037420110684e-8,
+      "linear_model_objective": 52.11037858543001
+    },
+    {
+      "evaluation": 72,
+      "assembled_cost": 52.10616167774136,
+      "objective": 52.106161469099,
+      "defect_rows_sum_squares": 2.0864236212660232e-7,
+      "linear_model_objective": 52.110083520789914
+    },
+    {
+      "evaluation": 73,
+      "assembled_cost": 52.10519909101798,
+      "objective": 52.10519894796911,
+      "defect_rows_sum_squares": 1.4304887411008024e-7,
+      "linear_model_objective": 52.110075247868394
+    },
+    {
+      "evaluation": 74,
+      "assembled_cost": 52.10466467208182,
+      "objective": 52.10466462333045,
+      "defect_rows_sum_squares": 4.8751363522621364e-8,
+      "linear_model_objective": 52.110489782211616
+    },
+    {
+      "evaluation": 75,
+      "assembled_cost": 52.10386613230814,
+      "objective": 52.10386491184206,
+      "defect_rows_sum_squares": 1.220466084254742e-6,
+      "linear_model_objective": 52.11151307820155
+    },
+    {
+      "evaluation": 76,
+      "assembled_cost": 52.10437289566763,
+      "objective": 52.10437282856855,
+      "defect_rows_sum_squares": 6.709908529432094e-8,
+      "linear_model_objective": 52.11076153957866
+    },
+    {
+      "evaluation": 77,
+      "assembled_cost": 52.102973425439494,
+      "objective": 52.10291066495289,
+      "defect_rows_sum_squares": 6.27604866035657e-5,
+      "linear_model_objective": 52.11277050400579
+    },
+    {
+      "evaluation": 78,
+      "assembled_cost": 52.104131305498356,
+      "objective": 52.10413120900191,
+      "defect_rows_sum_squares": 9.649644171348074e-8,
+      "linear_model_objective": 52.11087326797807
+    },
+    {
+      "evaluation": 79,
+      "assembled_cost": 52.101845937238345,
+      "objective": 52.10175623121533,
+      "defect_rows_sum_squares": 8.970602299517499e-5,
+      "linear_model_objective": 52.11174984296585
+    },
+    {
+      "evaluation": 80,
+      "assembled_cost": 52.103846797346066,
+      "objective": 52.103846658927544,
+      "defect_rows_sum_squares": 1.3841851232247624e-7,
+      "linear_model_objective": 52.11087666640195
+    },
+    {
+      "evaluation": 81,
+      "assembled_cost": 52.101716511634365,
+      "objective": 52.10162798869478,
+      "defect_rows_sum_squares": 8.852293958335565e-5,
+      "linear_model_objective": 52.111421272028345
+    },
+    {
+      "evaluation": 82,
+      "assembled_cost": 52.10357232011858,
+      "objective": 52.10357213771514,
+      "defect_rows_sum_squares": 1.8240344039637902e-7,
+      "linear_model_objective": 52.11085051804542
+    },
+    {
+      "evaluation": 83,
+      "assembled_cost": 52.101432916924665,
+      "objective": 52.101345807638026,
+      "defect_rows_sum_squares": 8.710928663374375e-5,
+      "linear_model_objective": 52.111086661299524
+    },
+    {
+      "evaluation": 84,
+      "assembled_cost": 52.1033015653053,
+      "objective": 52.10330133609433,
+      "defect_rows_sum_squares": 2.2921098276766423e-7,
+      "linear_model_objective": 52.110796214616215
+    },
+    {
+      "evaluation": 85,
+      "assembled_cost": 52.10132397069314,
+      "objective": 52.101242711576376,
+      "defect_rows_sum_squares": 8.125911676542586e-5,
+      "linear_model_objective": 52.11111585674626
+    },
+    {
+      "evaluation": 86,
+      "assembled_cost": 52.10304857171341,
+      "objective": 52.10304829830621,
+      "defect_rows_sum_squares": 2.7340720268329325e-7,
+      "linear_model_objective": 52.11075383727488
+    },
+    {
+      "evaluation": 87,
+      "assembled_cost": 52.10116554413303,
+      "objective": 52.1010873054789,
+      "defect_rows_sum_squares": 7.823865413008402e-5,
+      "linear_model_objective": 52.11116510146284
+    },
+    {
+      "evaluation": 88,
+      "assembled_cost": 52.102808766546765,
+      "objective": 52.102808451717955,
+      "defect_rows_sum_squares": 3.1482880827940174e-7,
+      "linear_model_objective": 52.110721244410804
+    },
+    {
+      "evaluation": 89,
+      "assembled_cost": 52.10105626931325,
+      "objective": 52.100984041500546,
+      "defect_rows_sum_squares": 7.222781269702441e-5,
+      "linear_model_objective": 52.11141252712776
+    },
+    {
+      "evaluation": 90,
+      "assembled_cost": 52.1025851116138,
+      "objective": 52.10258476022215,
+      "defect_rows_sum_squares": 3.5139164720205406e-7,
+      "linear_model_objective": 52.11071817006842
+    },
+    {
+      "evaluation": 91,
+      "assembled_cost": 52.10093542907516,
+      "objective": 52.10086309977597,
+      "defect_rows_sum_squares": 7.232929919205464e-5,
+      "linear_model_objective": 52.11169564842239
+    },
+    {
+      "evaluation": 92,
+      "assembled_cost": 52.10238044013428,
+      "objective": 52.10238005760706,
+      "defect_rows_sum_squares": 3.825272316102555e-7,
+      "linear_model_objective": 52.11074173186976
+    },
+    {
+      "evaluation": 93,
+      "assembled_cost": 52.10083696506839,
+      "objective": 52.10076266502806,
+      "defect_rows_sum_squares": 7.430004033065482e-5,
+      "linear_model_objective": 52.112074173417476
+    },
+    {
+      "evaluation": 94,
+      "assembled_cost": 52.10219113170994,
+      "objective": 52.10219071958679,
+      "defect_rows_sum_squares": 4.1212313812637966e-7,
+      "linear_model_objective": 52.1107989810705
+    },
+    {
+      "evaluation": 95,
+      "assembled_cost": 52.1007258615253,
+      "objective": 52.10063694015446,
+      "defect_rows_sum_squares": 8.892137083717447e-5,
+      "linear_model_objective": 52.11258677788079
+    },
+    {
+      "evaluation": 96,
+      "assembled_cost": 52.10200878808146,
+      "objective": 52.10200833757633,
+      "defect_rows_sum_squares": 4.50505132883842e-7,
+      "linear_model_objective": 52.11089251182677
+    },
+    {
+      "evaluation": 97,
+      "assembled_cost": 52.10061491390376,
+      "objective": 52.100496859372925,
+      "defect_rows_sum_squares": 0.00011805453084784069,
+      "linear_model_objective": 52.11332689965605
+    },
+    {
+      "evaluation": 98,
+      "assembled_cost": 52.10183009068419,
+      "objective": 52.101829583974514,
+      "defect_rows_sum_squares": 5.067096607836469e-7,
+      "linear_model_objective": 52.111034892543536
+    },
+    {
+      "evaluation": 99,
+      "assembled_cost": 52.100503722077924,
+      "objective": 52.10031942645804,
+      "defect_rows_sum_squares": 0.00018429561988193228,
+      "linear_model_objective": 52.11443322951979
+    },
+    {
+      "evaluation": 100,
+      "assembled_cost": 52.10164894356188,
+      "objective": 52.101648342430416,
+      "defect_rows_sum_squares": 6.011314677619212e-7,
+      "linear_model_objective": 52.11124400395332
+    },
+    {
+      "evaluation": 101,
+      "assembled_cost": 52.100429371166285,
+      "objective": 52.10011629407543,
+      "defect_rows_sum_squares": 0.0003130770908697261,
+      "linear_model_objective": 52.11603061021202
+    },
+    {
+      "evaluation": 102,
+      "assembled_cost": 52.10146182745523,
+      "objective": 52.10146106468282,
+      "defect_rows_sum_squares": 7.627724111374867e-7,
+      "linear_model_objective": 52.11154673325429
+    },
+    {
+      "evaluation": 103,
+      "assembled_cost": 52.10155104367725,
+      "objective": 52.101550431782286,
+      "defect_rows_sum_squares": 6.118949722331659e-7,
+      "linear_model_objective": 52.111395766755166
+    },
+    {
+      "evaluation": 104,
+      "assembled_cost": 52.10054997688736,
+      "objective": 52.099868947835574,
+      "defect_rows_sum_squares": 0.0006810290517790242,
+      "linear_model_objective": 52.11833697600109
+    },
+    {
+      "evaluation": 105,
+      "assembled_cost": 52.10133982229659,
+      "objective": 52.10133889540917,
+      "defect_rows_sum_squares": 9.268874212226664e-7,
+      "linear_model_objective": 52.11182319046608
+    },
+    {
+      "evaluation": 106,
+      "assembled_cost": 52.101469508425446,
+      "objective": 52.101468884641946,
+      "defect_rows_sum_squares": 6.237835006460107e-7,
+      "linear_model_objective": 52.111551152688975
+    },
+    {
+      "evaluation": 107,
+      "assembled_cost": 52.1010680154085,
+      "objective": 52.09961136754136,
+      "defect_rows_sum_squares": 0.0014566478671391955,
+      "linear_model_objective": 52.12137271305897
+    },
+    {
+      "evaluation": 108,
+      "assembled_cost": 52.10122813227217,
+      "objective": 52.10122694666841,
+      "defect_rows_sum_squares": 1.185603753207268e-6,
+      "linear_model_objective": 52.11213483722261
+    },
+    {
+      "evaluation": 109,
+      "assembled_cost": 52.101399479582405,
+      "objective": 52.101398842949585,
+      "defect_rows_sum_squares": 6.366328267416216e-7,
+      "linear_model_objective": 52.11170809216291
+    },
+    {
+      "evaluation": 110,
+      "assembled_cost": 52.1024029502914,
+      "objective": 52.099333974581704,
+      "defect_rows_sum_squares": 0.0030689757096898037,
+      "linear_model_objective": 52.12535974250738
+    },
+    {
+      "evaluation": 111,
+      "assembled_cost": 52.10112078128302,
+      "objective": 52.10111917803759,
+      "defect_rows_sum_squares": 1.6032454327271382e-6,
+      "linear_model_objective": 52.112483791916056
+    },
+    {
+      "evaluation": 112,
+      "assembled_cost": 52.10133760978416,
+      "objective": 52.101336959627076,
+      "defect_rows_sum_squares": 6.501570769996524e-7,
+      "linear_model_objective": 52.111865082968905
+    },
+    {
+      "evaluation": 113,
+      "assembled_cost": 52.1041754684209,
+      "objective": 52.09913108742267,
+      "defect_rows_sum_squares": 0.005044380998221235,
+      "linear_model_objective": 52.12903024158541
+    },
+    {
+      "evaluation": 114,
+      "assembled_cost": 52.101029374501,
+      "objective": 52.101027336044545,
+      "defect_rows_sum_squares": 2.0384564615443122e-6,
+      "linear_model_objective": 52.112814803275214
+    },
+    {
+      "evaluation": 115,
+      "assembled_cost": 52.10128016472472,
+      "objective": 52.10127950080292,
+      "defect_rows_sum_squares": 6.6392180378725e-7,
+      "linear_model_objective": 52.11202501562844
+    },
+    {
+      "evaluation": 116,
+      "assembled_cost": 52.10538773942476,
+      "objective": 52.098966989298894,
+      "defect_rows_sum_squares": 0.006420750125860596,
+      "linear_model_objective": 52.131567921351134
+    },
+    {
+      "evaluation": 117,
+      "assembled_cost": 52.10095512437257,
+      "objective": 52.100952798715525,
+      "defect_rows_sum_squares": 2.3256570447904055e-6,
+      "linear_model_objective": 52.113100592015435
+    },
+    {
+      "evaluation": 118,
+      "assembled_cost": 52.10122447891107,
+      "objective": 52.10122380106826,
+      "defect_rows_sum_squares": 6.778428365105785e-7,
+      "linear_model_objective": 52.11219134276464
+    },
+    {
+      "evaluation": 119,
+      "assembled_cost": 52.107651950570315,
+      "objective": 52.098835975028024,
+      "defect_rows_sum_squares": 0.008815975542293115,
+      "linear_model_objective": 52.13513123211542
+    },
+    {
+      "evaluation": 120,
+      "assembled_cost": 52.10087561505526,
+      "objective": 52.10087283322647,
+      "defect_rows_sum_squares": 2.7818287940485844e-6,
+      "linear_model_objective": 52.11343561736422
+    },
+    {
+      "evaluation": 121,
+      "assembled_cost": 52.10117068031,
+      "objective": 52.10116998835595,
+      "defect_rows_sum_squares": 6.919540512755109e-7,
+      "linear_model_objective": 52.11236379782623
+    }
+  ],
+  "primal_windows": 240,
+  "jacobian_windows": 102,
+  "replay_closure_max": [3.992645103403919e-11, 2.817874822369504e-10],
+  "replay_integration_s": 13.88093278300039
+}
