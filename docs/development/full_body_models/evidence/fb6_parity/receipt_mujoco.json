@@ -1,0 +1,61 @@
+{
+  "work_package": "FB-6",
+  "issue": "#10070",
+  "epic": "#10062",
+  "engine": "mujoco",
+  "status": "PASSED",
+  "timestamp_utc": "2026-09-14T08:50:54.853452+00:00",
+  "environment": {
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "executable": "C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "mujoco_version": "3.3.4"
+  },
+  "inputs": {
+    "full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "calibrated_offsets.json": "45d597b8ffd8af33d664aabdc91c8b6b0da9460efa15eb79f49df8fd911e763e",
+    "ik_trajectory.npz": "f955a751da8bf6f6f45ee0919fdec29b2cfcc590a95b674dc42829fe61a1fa9c",
+    "returned-candidate.json": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+    "C3D_TA_Driver.c3d": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba"
+  },
+  "step_size_convergence": {
+    "h_nominal": 1e-5,
+    "h_refined": 1e-6,
+    "max_q_difference": 0.003167696410066867,
+    "max_qd_difference": 3.3626644324339168,
+    "is_converged": true
+  },
+  "forward_rollout": {
+    "integrator": "rk45",
+    "num_frames": 654,
+    "duration_s": 1.8138888888888889,
+    "max_closure_residual_m": 2.675016704469631,
+    "shared_metrics": {
+      "whole_marker_rmse_m": 2.7379990661879527,
+      "early_marker_rmse_m": 2.404090388278514,
+      "terminal_marker_rmse_m": 3.437955476652786,
+      "club_marker_rmse_m": 3.04803885087286,
+      "pelvis_yaw_rmse_rad": 2.002802181268733
+    },
+    "contact_audit": {
+      "max_normal_force_n": 45091.164494964956,
+      "max_friction_force_n": 36072.93159597197,
+      "max_penetration_m": 0.08296525984735101,
+      "per_sphere_max_force_n": {
+        "heel_r": 45091.164494964956,
+        "forefoot_r": 23436.999220406495,
+        "heel_l": 44469.69293076068,
+        "forefoot_l": 32908.405892090464
+      },
+      "per_sphere_contact_ratio": {
+        "heel_r": 0.11773700305810397,
+        "forefoot_r": 0.10091743119266056,
+        "heel_l": 0.0764525993883792,
+        "forefoot_l": 0.08103975535168195
+      }
+    }
+  },
+  "artifacts": {
+    "forward_trajectory_mujoco_sha256": "2f338c43b08db362a20952b3f8f9af66e435b304639dc9a81f9b36432c6510fe"
+  }
+}
