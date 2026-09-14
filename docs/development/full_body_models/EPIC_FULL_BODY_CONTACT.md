@@ -123,6 +123,41 @@ shared boundaries, budgets, uninterrupted original-state acceptance.
 Same-input replay of the accepted candidate in all three engines with the
 shared contact law; marker overlay animations per engine; parity receipts.
 
+## GS Ground Support (User Direction 2026-09-13)
+
+The user's direction supersedes the earlier "kinematic milestone" reading of
+FB-4: whenever legs are shown, the golfer must be supported by the ground
+through the shared contact law, hold dynamic balance, and the legs must
+match the c3d leg markers under full physics; upper-body-only models are
+exempt. Gates, each with its own receipt, in order:
+
+- GS-0 Lower-limb geometry is anatomical: hip and knee axes verified by
+  `test_lower_limb_axes.py` (v2 document); hip joints at functional centres
+  from the capture (sphere sd below 5 mm); femur and tibia lengths scaled to
+  the golfer by the pinned IK objective. Done in `evidence/ground_support`.
+- GS-1 Ground and stance: ground height from the lowest toe markers with a
+  stated standoff; per-frame stance spheres from marker heights relative to
+  address; both feet flat at address.
+- GS-2 Address pose: full 41-coordinate IK at frame 0 with stance spheres
+  pinned, grip closed, CoM inside the support polygon; report per-segment
+  RMS. Done: 23 mm whole, arms 2 mm, legs 17/55 mm (right leg open).
+- GS-3 Reference trajectory: full-capture IK with stance pins, calibrated
+  leg offsets, zero-phase smoothing and a consistency re-solve; the
+  reference must keep every stance sphere within 5 mm of the plane and the
+  closure within 5 mm; whole RMS reported against the upper-body-only floor
+  (26 mm mean with the qualified attachments).
+- GS-4 Ground-supported dynamics: forward simulation with the shared contact
+  law, unactuated root, joint torques only; over the full capture the
+  weight fraction stays within [0.2, 3], the centre of pressure inside the
+  support polygon for at least 90 % of stance frames, no sphere below the
+  plane by more than the static penetration times five, root within 0.05 m
+  of the reference, and marker RMS of the simulated motion reported. This
+  is the "legs support the body weight" claim; nothing weaker counts.
+- GS-5 Cross-engine: the same controls replayed in Pinocchio and Drake with
+  the shared contact law and closure (parity receipts) on the same document.
+- GS-6 Matching: the FB-5 shooting fit on the full body with contact,
+  accepted only by the uninterrupted replay gates of the native lane.
+
 ## Rules Every Child Follows
 
 - TDD: failing test first, committed with the implementation.

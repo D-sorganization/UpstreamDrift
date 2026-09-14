@@ -1,0 +1,267 @@
+"""Tests for marker kinematics and pose IK on the MuJoCo full-body model."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from src.engines.physics_engines.mujoco.python import full_body_markers as module
+from src.engines.physics_engines.mujoco.python.full_body_model import (
+    NativeMujocoFullBodyModel,
+)
+from src.shared.python.motion_matching.contact_law import GroundPlane
+
+pytestmark = pytest.mark.unit
+
+ROOT = Path(__file__).resolve().parents[3]
+SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
+GROUND = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
+
+
+@pytest.fixture(scope="module")
+def kinematics() -> module.FullBodyMarkerKinematics:
+    spec_bytes = SPEC.read_bytes()
+    spec = json.loads(spec_bytes)
+    attachments = {
+        label: (a["body"], tuple(a["offset_m"]))
+        for label, a in spec["marker_attachments"].items()
+        if a["offset_m"] is not None
+    }
+    attachments["RKneeOut"] = ("femur_r", (0.0, -0.4, 0.06))  # synthetic leg marker
+    attachments["LToeOut"] = ("calcn_l", (0.16, 0.0, -0.04))
+    attachments["LKneeOut"] = ("tibia_l", (0.0, -0.05, 0.06))
+    attachments["LAnkleOut"] = ("talus_l", (0.0, 0.0, 0.05))
+    return module.FullBodyMarkerKinematics(
+        NativeMujocoFullBodyModel(spec_bytes), attachments
+    )
+
+
+def test_body_markers_use_the_specification_body_frame(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    """An offset at the knee joint in the spec femur frame lands on the knee."""
+    spec = json.loads(SPEC.read_text())
+    knee = next(j for j in spec["joints"] if j["name"] == "knee_r")
+    offset = tuple(np.array(knee["parent_to_base"])[:3, 3])
+    probe = module.FullBodyMarkerKinematics(
+        kinematics.adapter, {"probe": ("femur_r", offset)}
+    )
+    q = np.zeros(len(probe.coordinate_order))
+    q[2] = 1.0
+    world = probe.marker_positions(q)[0]
+    anchor = probe.data.xanchor[probe.model.joint("knee_angle_r").id]
+    np.testing.assert_allclose(world, anchor, atol=1e-9)
+    rotation, translation = probe.body_poses(q, ["femur_r"])["femur_r"]
+    np.testing.assert_allclose(
+        rotation @ np.array(offset) + translation, anchor, atol=1e-9
+    )
+    assert np.linalg.det(rotation) == pytest.approx(1.0)
+
+
+def test_marker_positions_follow_attached_bodies(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    q = np.zeros(len(kinematics.coordinate_order))
+    base = kinematics.marker_positions(q)
+    q[kinematics.coordinate_order.index("TranslationInputZ")] = 0.5
+    moved = kinematics.marker_positions(q)
+    shifts = moved - base  # one rigid translation of 0.5 m along the slide axis
+    np.testing.assert_allclose(np.linalg.norm(shifts, axis=1), 0.5, atol=1e-12)
+    np.testing.assert_allclose(shifts - shifts[0], 0.0, atol=1e-12)
+    assert set(kinematics.labels) >= {"RKneeOut", "LToeOut", "WaistLeft"}
+    with pytest.raises(ValueError):
+        kinematics.marker_positions(q[:-1])
+
+
+def test_pose_ik_recovers_markers_and_respects_ground_and_locks(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    rng = np.random.default_rng(3)
+    n = len(kinematics.coordinate_order)
+    q_true = np.zeros(n)
+    q_true[:3] = [0.3, -0.2, 1.2]
+    q_true[6:] = rng.uniform(-0.25, 0.25, n - 6)
+    targets = kinematics.marker_positions(q_true)
+    valid = np.ones(len(targets), dtype=bool)
+    valid[4] = False
+    q_start = q_true + rng.normal(0.0, 0.05, n)
+    fit = kinematics.solve_pose(
+        targets, valid, q_start, ground=GROUND, closure_weight=0.0, prior_weight=1e-6
+    )
+    assert fit.marker_rms_m < 1e-4
+    assert fit.iterations >= 1 and len(fit.per_marker_m) == int(valid.sum())
+    # Ground penalty: a pose whose feet are below the plane is lifted.
+    low = q_true.copy()
+    low[2] = -0.2
+    lifted = kinematics.solve_pose(
+        kinematics.marker_positions(low),
+        np.ones(len(targets), bool),
+        low,
+        ground=GROUND,
+        closure_weight=0.0,
+        prior_weight=1e-6,
+        ground_weight=1e4,
+    )
+    assert lifted.lowest_sphere_height_m > -5e-3
+    assert (
+        kinematics.sphere_heights(low, GROUND)["heel_l"] < lifted.lowest_sphere_height_m
+    )
+    # Locks pin coordinates exactly.
+    pinned = kinematics.solve_pose(
+        targets,
+        valid,
+        q_start,
+        ground=GROUND,
+        closure_weight=0.0,
+        locked={"knee_angle_r": 0.1},
+    )
+    assert pinned.q[kinematics.coordinate_order.index("knee_angle_r")] == 0.1
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets, np.zeros(len(targets), bool), q_start, ground=GROUND
+        )
+    # Flat feet: with no markers the legs bend until all four spheres touch.
+    standing = kinematics.solve_pose(
+        targets,
+        np.zeros(len(targets), bool),
+        q_start,
+        ground=GROUND,
+        closure_weight=0.0,
+        flat_feet=True,
+        ground_weight=1e4,
+    )
+    heights = kinematics.sphere_heights(standing.q, GROUND)
+    assert max(abs(h) for h in heights.values()) < 1e-3
+    one_foot = kinematics.solve_pose(
+        targets,
+        np.zeros(len(targets), bool),
+        q_start,
+        ground=GROUND,
+        closure_weight=0.0,
+        flat_feet=("heel_l", "forefoot_l"),
+        ground_weight=1e4,
+    )
+    heights = kinematics.sphere_heights(one_foot.q, GROUND)
+    assert abs(heights["heel_l"]) < 1e-3 and abs(heights["forefoot_l"]) < 1e-3
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets, valid, q_start, ground=GROUND, flat_feet=("nope",)
+        )
+    balanced = kinematics.solve_pose(
+        targets,
+        np.zeros(len(targets), bool),
+        standing.q,
+        ground=GROUND,
+        closure_weight=0.0,
+        flat_feet=True,
+        ground_weight=1e4,
+        balance_weight=1e4,
+    )
+    assert kinematics.support_offset(balanced.q, GROUND) < 1e-3
+    assert (
+        max(abs(h) for h in kinematics.sphere_heights(balanced.q, GROUND).values())
+        < 1e-3
+    )
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets, valid, q_start, ground=GROUND, locked={"nope": 0.0}
+        )
+    bounded = kinematics.solve_pose(
+        targets,
+        valid,
+        q_start,
+        ground=GROUND,
+        closure_weight=0.0,
+        bounds={"knee_angle_r": (-0.05, 0.05)},
+    )
+    assert abs(bounded.q[kinematics.coordinate_order.index("knee_angle_r")]) <= 0.05
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets, valid, q_start, ground=GROUND, bounds={"knee_angle_r": (1.0, 0.0)}
+        )
+
+
+def test_trajectory_solver_warm_starts(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    n = len(kinematics.coordinate_order)
+    q_a = np.zeros(n)
+    q_a[2] = 1.0
+    q_b = q_a.copy()
+    q_b[kinematics.coordinate_order.index("knee_angle_l")] = 0.3
+    targets = np.stack(
+        [kinematics.marker_positions(q_a), kinematics.marker_positions(q_b)]
+    )
+    valid = np.ones(targets.shape[:2], dtype=bool)
+    q, fits = kinematics.solve_trajectory(
+        targets, valid, q_a, ground=GROUND, closure_weight=0.0, prior_weight=1e-6
+    )
+    assert q.shape == (2, n) and all(f.marker_rms_m < 1e-4 for f in fits)
+    assert abs(q[1, kinematics.coordinate_order.index("knee_angle_l")] - 0.3) < 5e-3
+    with pytest.raises(ValueError):
+        kinematics.solve_trajectory(targets[0], valid[0], q_a, ground=GROUND)
+
+
+def test_planted_stance_spheres_do_not_slide(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    """Anchored spheres keep their ground point across frames; pins alone do not."""
+    n = len(kinematics.coordinate_order)
+    q_a = np.zeros(n)
+    q_a[2] = 1.0
+    q_b = q_a.copy()
+    q_b[0] += 0.05  # the whole body shifted 5 cm: markers say slide
+    targets = np.stack(
+        [kinematics.marker_positions(q_a), kinematics.marker_positions(q_b)]
+    )
+    valid = np.ones(targets.shape[:2], dtype=bool)
+    stance = [("heel_l", "forefoot_l"), ("heel_l", "forefoot_l")]
+    free, _ = kinematics.solve_trajectory(
+        targets,
+        valid,
+        q_a,
+        ground=GROUND,
+        closure_weight=0.0,
+        prior_weight=1e-6,
+        flat_feet_per_frame=stance,
+        ground_weight=1e4,
+    )
+    planted, fits = kinematics.solve_trajectory(
+        targets,
+        valid,
+        q_a,
+        ground=GROUND,
+        closure_weight=0.0,
+        prior_weight=1e-6,
+        flat_feet_per_frame=stance,
+        plant_stance=True,
+        ground_weight=1e4,
+    )
+    moved_free = kinematics.sphere_ground_points(free[1], GROUND)["heel_l"]
+    start = kinematics.sphere_ground_points(free[0], GROUND)["heel_l"]
+    moved_planted = kinematics.sphere_ground_points(planted[1], GROUND)["heel_l"]
+    assert np.linalg.norm(moved_free - start) > 0.03
+    assert np.linalg.norm(moved_planted - start) < 2e-3
+    # A prior trajectory replaces the warm start.
+    prior = np.stack([q_a, q_a])
+    pulled, _ = kinematics.solve_trajectory(
+        targets,
+        valid,
+        q_a,
+        ground=GROUND,
+        closure_weight=0.0,
+        prior_weight=1e3,
+        prior_trajectory=prior,
+    )
+    assert np.abs(pulled[1] - q_a).max() < 1e-2
+    with pytest.raises(ValueError):
+        kinematics.solve_trajectory(
+            targets, valid, q_a, ground=GROUND, plant_stance=True
+        )
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets[0], valid[0], q_a, ground=GROUND, anchors={"nope": (0, 0, 0)}
+        )

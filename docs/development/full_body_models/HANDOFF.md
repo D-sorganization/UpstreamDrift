@@ -180,7 +180,58 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
   scapulae at address means refitting q0 (or re-calibrating attachments)
   with those coordinates constrained, then re-qualifying.
 
+## Ground Support Program (User Direction 2026-09-13, in Progress)
+
+User direction: when the legs are shown, the golfer must be carried by the
+ground through modelled contact, keep dynamic balance, and the legs must
+match the c3d leg markers under full physics in MuJoCo, Drake and Pinocchio.
+Design and acceptance gates: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md)
+section "GS Ground Support". Work so far (branch feat/10062-visual-skeleton-layer):
+
+- Shared contracts: `src/shared/python/motion_matching/ground_support.py`
+  (capture to native world `(x, y, z) -> (x, -z, y)`, ground height from the
+  lowest toe markers, support report with weight fraction, centre of pressure
+  and support-polygon test), `hip_calibration.py` (functional hip centres by
+  sphere fit of the knee markers in the pelvis frame, anatomical pelvis axes,
+  rewrite of the hip joints of a document), `segment_scaling.py` (length
+  scaling of named bodies with COM, inertia, sphere and marker offsets).
+- MuJoCo lane: `full_body_markers.py` (marker FK, projected
+  Levenberg-Marquardt pose IK with grip closure, one-sided ground penalty,
+  named stance spheres pinned to the plane, CoM-over-support rows, joint
+  bounds, locked coordinates, trajectory warm start, body poses for the
+  shared calibration) and `full_body_simulation.py` (RK4 over the adapter's
+  closure-constrained accelerations with an unactuated root, affine
+  dynamics `a = A tau + b` from one KKT factorisation, least-norm inverse
+  dynamics under the closure, computed-torque hold and tracking controllers,
+  feet-planted CoM balance law, feet preload, support record). The adapter
+  gained `generalized_forces` and `upper_body_coordinates`.
+- Specification defect found and fixed: v1 (`full_body_spec_v1.json`) had
+  the hip and knee permutation matrices swapped in `build_full_body_spec.py`,
+  so hip flexion turned about the femur's long axis and the knee about the
+  femur's y axis. `full_body_spec_v2.json` (`build_receipt_v2.json`) fixes
+  it; `tests/unit/motion_matching/test_lower_limb_axes.py` guards the axes.
+  v1 and every FB-3 receipt built on it are superseded for lower-limb use.
+- Pelvis alignment defect: the v1/v2 pelvis alignment (from the OS-3 pelvis
+  offsets, themselves a 0.2 m RMS fit) put the hip joints mirrored and about
+  0.15 m off. The evidence driver relocates both hips to functional centres
+  (sphere sd 2 mm over 649 frames) and writes `full_body_spec_hipcal.json`.
+- Evidence `evidence/ground_support/run_ground_support.py` and `receipt.json`
+  (stages: hip calibration, ground and stance, multi-seed address IK, pinned
+  leg-marker calibration, femur/tibia scale grid, full IK, 12 Hz zero-phase
+  smoothing plus consistency re-solve, computed-torque tracking, GIFs).
+  Standing hold on the balanced address posture: weight fraction 1.000, CoM
+  drift 1.5 mm over 2 s (`test_full_body_simulation.py`).
+- Open: the tracked simulation still leaves the reference (root drift) even
+  when the joints track to 1e-3 rad; see the receipt's `dynamics` block and
+  the GS-4 gate in the epic for what must hold before any claim.
+
 ## Next
 
+- GS-4: make the computed-torque tracking of the consistent reference stay
+  on the feet (weight fraction near 1, CoP inside the support polygon, root
+  within 0.05 m of the reference) or replace it by the contact-aware
+  shooting fit (FB-5); every attempt keeps its receipt.
+- GS-5: rebuild FB-3-P and FB-3-D on v2 with the hip-calibrated, scaled
+  document and rerun same-input replay parity.
 - Cross-engine same-input replay and comparison across MuJoCo FB-3-M (#10066), Pinocchio FB-3-P (#10065), and Drake FB-3-D (#10067).
 - FB-4 ground height and marker calibration, and FB-5 fitting per Epic #10062.
