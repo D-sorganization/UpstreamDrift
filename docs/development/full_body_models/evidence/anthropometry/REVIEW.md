@@ -250,3 +250,41 @@ trunk 28 mm persist across the basin, so the next lever is structural
 head), each a coordinate-set change that must be carried into Simscape.
 The de Leva masses and inertias are in the document; nothing here is
 qualified until the Simscape model carries the same numbers.
+
+### 9.1 Full Driver Run on the Canonical Document
+
+`ground_support/anthro_v1/receipt.json` (`run_ground_support.py --spec
+full_body_spec_anthro_v1.json --skip-hip-calibration --static-seeds --out
+anthro_v1`; static placements kept fixed, legs calibrated). Two more
+solver changes were needed and are receipted in the same run: the shoulder
+gimbals are kept on the Euler branch nearest the previous frame and every
+coordinate unwrapped (`continuous_branches`; the same poses, no 2 pi or
+branch jumps into the 12 Hz smoother), and the three spins that turn about
+one line with a straight elbow (shoulder Z, forearm, wrist Y) carry a
+0.1 prior toward the previous frame (`prior_weights`). A restart replaces a
+warm start only when it is 3 mm better.
+
+| Metric                                   | Qualified geometry (receipt.json) | Anthropometric (anthro_v1)   |
+| ---------------------------------------- | --------------------------------- | ---------------------------- |
+| Address marker RMS                       | 3.1 mm                            | 2.1 mm                       |
+| Address spine bend forward / lateral     | -7 / 21 deg                       | 0.3 / 6.3 deg                |
+| Clavicle links below horizontal L / R    | 21 / 47 deg                       | -5 / 5 deg                   |
+| Full-capture IK, all markers             | 28.8 mm (head at full weight)     | 40.0 mm (head at weight 0.1) |
+| Full-capture IK, non-head markers        | 26.2 mm                           | 26.2 mm                      |
+| Head markers                             | 47 mm                             | 104 mm (deweighted, no neck) |
+| Legs / pelvis / club                     | 12, 14 / 44 / 10 mm               | 12, 15 / 19 / 19 mm          |
+| Arms L / R                               | 30 / 26 mm                        | 42 / 30 mm                   |
+| Reference closure max                    | 1.3 mm                            | 2.7 mm                       |
+| Tracking to 1.0 s, root error max        | 14 mm                             | 5 mm                         |
+| Tracking to 1.0 s, marker RMS            | 22 mm                             | 25 mm                        |
+| Whole-run tracking root RMS / marker RMS | 172 mm / 174 mm                   | 49 mm / 89 mm                |
+| Inside support polygon (stance frames)   | 85 %                              | 79 %                         |
+| Weight fraction range                    | 0.36 to 1.70 (to 1.0 s)           | 0.0 to 3.2 (to 1.0 s)        |
+| Peak joint torque                        | 4375 N m                          | 4453 N m                     |
+| Total mass                               | 108 kg                            | 78 kg                        |
+
+The neutral address, the human masses and the like-for-like body-marker
+fit are in hand; the downswing tracking is better than on the qualified
+geometry but the weight fraction still leaves the ground (GS-4 stays open).
+Address renders: `visual_layer/address_{front,side,top}_anthro.png` and
+`simscape_skeleton_address_anthro.png` (frame 0 of the IK trajectory).

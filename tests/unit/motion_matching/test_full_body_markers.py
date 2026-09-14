@@ -320,3 +320,76 @@ def test_marker_weights_drop_a_marker_from_the_fit(
         kinematics.solve_pose(
             targets, valid, q_start, ground=GROUND, marker_weights={"nope": 1.0}
         )
+
+
+def _rotation_xyz(x: float, y: float, z: float) -> np.ndarray:
+    cx, sx, cy, sy, cz, sz = (
+        np.cos(x),
+        np.sin(x),
+        np.cos(y),
+        np.sin(y),
+        np.cos(z),
+        np.sin(z),
+    )
+    rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
+    ry = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
+    rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
+    return rx @ ry @ rz
+
+
+def test_continuous_branches_keep_the_pose_and_remove_jumps() -> None:
+    order = ["r0", "r1", "r2", "r3", "r4", "r5", "ax", "ay", "az", "e"]
+    frames = np.zeros((3, len(order)))
+    frames[0, 6:9] = [0.2, 0.4, -0.3]
+    frames[1, 6:9] = [0.2 + np.pi, np.pi - 0.45, -0.3 + np.pi]  # other branch
+    frames[2, 6:9] = [0.3, 0.5, -0.2]
+    frames[:, 9] = [0.1, 0.1 + 2 * np.pi, 0.2]  # a 2 pi wrap
+    fixed = module.continuous_branches(frames, order, gimbals=[("ax", "ay", "az")])
+    for k in range(3):
+        np.testing.assert_allclose(
+            _rotation_xyz(*fixed[k, 6:9]), _rotation_xyz(*frames[k, 6:9]), atol=1e-12
+        )
+    assert np.abs(np.diff(fixed[:, 6:], axis=0)).max() < 0.5
+    np.testing.assert_allclose(fixed[:, :6], frames[:, :6])
+    with pytest.raises(ValueError):
+        module.continuous_branches(frames, order, gimbals=[("ax", "ay", "nope")])
+    with pytest.raises(ValueError):
+        module.continuous_branches(frames[:, :4], order)
+
+
+def test_prior_weights_hold_named_coordinates(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    rng = np.random.default_rng(7)
+    n = len(kinematics.coordinate_order)
+    q_true = np.zeros(n)
+    q_true[:3] = [0.3, -0.2, 1.2]
+    q_true[6:] = rng.uniform(-0.25, 0.25, n - 6)
+    targets = kinematics.marker_positions(q_true)
+    valid = np.ones(len(targets), dtype=bool)
+    q_start = q_true.copy()
+    held = "knee_angle_l"  # observable through the left ankle and toe markers
+    index = kinematics.coordinate_order.index(held)
+    q_start[index] += 0.3
+    free = kinematics.solve_pose(
+        targets, valid, q_start, ground=GROUND, closure_weight=0.0, prior_weight=1e-6
+    )
+    stiff = kinematics.solve_pose(
+        targets,
+        valid,
+        q_start,
+        ground=GROUND,
+        closure_weight=0.0,
+        prior_weight=1e-6,
+        prior_weights={held: 1e6},
+    )
+    assert abs(free.q[index] - q_true[index]) < 1e-3
+    assert abs(stiff.q[index] - q_start[index]) < 1e-3
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets, valid, q_start, ground=GROUND, prior_weights={"nope": 1.0}
+        )
+    with pytest.raises(ValueError):
+        kinematics.solve_pose(
+            targets, valid, q_start, ground=GROUND, prior_weights={held: -1.0}
+        )

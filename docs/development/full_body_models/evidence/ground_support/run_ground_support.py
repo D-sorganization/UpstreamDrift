@@ -47,6 +47,7 @@ sys.path.insert(0, str(ROOT))
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter  # noqa: E402
 from src.engines.physics_engines.mujoco.python import full_body_simulation as fs  # noqa: E402
 from src.engines.physics_engines.mujoco.python.full_body_markers import (  # noqa: E402
+    continuous_branches,
     FullBodyMarkerKinematics,
 )
 from src.engines.physics_engines.mujoco.python.full_body_model import (  # noqa: E402
@@ -150,6 +151,17 @@ STATIC_FRAMES = 24  # first 0.067 s of address treated as the static trial
 HEAD_MARKER_WEIGHT = 0.1
 TRAJECTORY_RESTARTS = 4  # perturbed re-solves for frames above the threshold
 TRAJECTORY_RESTART_THRESHOLD_M = 0.03
+TRAJECTORY_RESTART_MARGIN_M = 0.003  # a restart must beat the warm start by this
+SHOULDER_GIMBALS = tuple(
+    (f"{s}SInputX", f"{s}SInputY", f"{s}SInputZ") for s in ("L", "R")
+)
+# With a straight elbow the shoulder spin, forearm spin and wrist spin turn
+# about one line; these coordinates are held to the previous frame more firmly
+# (anthropometric documents only, where the names carry these meanings).
+SPIN_PRIOR = 0.1
+SPIN_COORDINATES = tuple(
+    f"{s}{c}" for s in ("L", "R") for c in ("SInputZ", "FInput", "WInputY")
+)
 # Neutral address for the static trial: scapulae undepressed, spine nearly straight.
 NEUTRAL_LOCKS = {f"{s}ScapInput{a}": 0.0 for s in "LR" for a in "XY"}
 NEUTRAL_BOUNDS_DEG = {"SpineInputX": (-5.0, 5.0), "SpineInputY": (-10.0, 10.0)}
@@ -344,6 +356,7 @@ class Lane:
             for label in MARKER_SEGMENTS["head"]
             if label in labels
         }
+        self.prior_weights: dict[str, float] = {}
 
     def kinematics(
         self, spec_bytes: bytes, attachments: dict
@@ -390,6 +403,7 @@ class Lane:
                 bounds=bounds,
                 locked=locked,
                 marker_weights=self.marker_weights,
+                prior_weights=self.prior_weights,
             )
             if best is None or fit.marker_rms_m < best.marker_rms_m:
                 best = fit
@@ -434,8 +448,10 @@ class Lane:
             plant_stance=True,
             bounds=self.bounds,
             marker_weights=self.marker_weights,
+            prior_weights=self.prior_weights,
             restarts=TRAJECTORY_RESTARTS,
             restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,
+            restart_margin_m=TRAJECTORY_RESTART_MARGIN_M,
         )
 
     def calibrate_legs(
@@ -547,7 +563,8 @@ def main() -> None:
     parser.add_argument(
         "--static-seeds",
         action="store_true",
-        help="replace the seed offsets by a neutral-spine static-trial placement",
+        help="place every marker from a neutral-spine static trial (upper-body "
+        "placements stay fixed unless --recalibrate-upper)",
     )
     args = parser.parse_args()
     global OUT
@@ -570,6 +587,8 @@ def main() -> None:
     labels = tuple({**upper, **LEG_SEEDS})
     lane = Lane(labels)
     lane.bounds |= document_bounds(base_spec)
+    if "address_seed_deg" in base_spec:
+        lane.prior_weights = dict.fromkeys(SPIN_COORDINATES, SPIN_PRIOR)
 
     # 0. functional hip calibration
     waist_offsets = {
@@ -641,8 +660,12 @@ def main() -> None:
         "stance_spheres": lane.stance[0],
     }
     if args.static_seeds:
+        # Every marker is placed from the static trial; without
+        # --recalibrate-upper the upper-body placements then stay fixed.
         neutral = lane.best_address(kin, q_seed, neutral=True)
-        seeds_all = lane.static_offsets(kin, neutral.q, seeds_all)
+        placed = lane.static_offsets(kin, neutral.q, {**fixed, **seeds_all})
+        fixed = {label: placed[label] for label in fixed}
+        seeds_all = {label: placed[label] for label in seeds_all}
         adapter, kin = lane.kinematics(hip_bytes, {**fixed, **seeds_all})
         address = lane.best_address(kin, neutral.q)
         address_report["static_trial"] = {
@@ -712,6 +735,9 @@ def main() -> None:
 
     # 4. full IK, smoothing, consistency re-solve
     q_ik, fits = lane.trajectory(kin, address2.q)
+    # Same poses, continuous coordinates: unwrap and keep each shoulder gimbal
+    # on the Euler branch nearest the previous frame before smoothing.
+    q_ik = continuous_branches(q_ik, kin.coordinate_order, SHOULDER_GIMBALS)
     errors = marker_errors(kin, q_ik, lane.points)
     q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
     q_ref, ref_fits = kin.solve_trajectory(

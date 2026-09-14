@@ -161,10 +161,11 @@ exempt. Gates, each with its own receipt, in order:
   accepted only by the uninterrupted replay gates of the native lane.
 - AN-1 Anthropometric geometry (#10099): neutral address by a static
   trial, de Leva masses, subject lengths from the swing. Status
-  2026-09-14: posture acceptance met (bend 9.3/6.9 deg, links within
-  3 deg); body-marker swing RMS 28.9 mm against 26.2 mm qualified; the
-  head (no neck) is deweighted and reported separately; unqualified until
-  Simscape parity. Evidence `evidence/anthropometry/REVIEW.md` section 9.
+  2026-09-14: posture acceptance met (address 2.1 mm, bend 0.3/6.3 deg,
+  links within 5 deg); non-head full-capture IK 26.2 mm, equal to the
+  qualified geometry; backswing tracking root 5 mm; the head (no neck) is
+  deweighted and reported separately; unqualified until Simscape parity.
+  Evidence `evidence/anthropometry/REVIEW.md` sections 9 and 9.1.
 
 ## Rules Every Child Follows
 

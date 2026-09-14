@@ -305,24 +305,29 @@ shoulder_scale)`; 27 native coordinate names, native body/joint/frame
   scales by the decimated-swing body-marker RMS with static offsets and no
   calibration (`scan_geometry_receipt.json`).
 
-State against the #10099 acceptance: posture met on the canonical document
-(address spine bend 9.3 deg forward, 6.9 deg lateral, clavicle links within
-3 deg of horizontal); whole-swing body-marker RMS 28.9 mm (24.6 mm at the
-flat-basin best) versus 26.2 mm body-only for the qualified geometry; the
-deweighted head sits at about 110 mm because the chain has no neck. The
-residual is structural (arms 36 to 52 mm, trunk 28 mm across the basin),
-not a length. Unqualified until Simscape carries the same geometry.
+State against the #10099 acceptance (full driver run, REVIEW.md 9.1,
+`evidence/ground_support/anthro_v1/receipt.json`): address 2.1 mm with
+spine bend 0.3 deg forward, 6.3 deg lateral and clavicle links within 5 deg
+of horizontal (met); full-capture IK 26.2 mm on the non-head markers, equal
+to the qualified geometry's 26.2 mm, 40.0 mm with the deweighted head (no
+neck; 104 mm); tracking to 1.0 s root error 5 mm (qualified 14 mm),
+whole-run root RMS 49 mm (qualified 172 mm), weight fraction still reaches
+0 (GS-4 open). Solver additions for this: `continuous_branches` (Euler
+branch and 2 pi continuity before smoothing), per-coordinate
+`prior_weights` (0.1 on the three collinear spins), restart margin 3 mm.
+Renders: `evidence/visual_layer/*_anthro.*` (scripts take `--spec
+--trajectory --suffix`). Unqualified until Simscape carries the geometry.
 
 ## Next
 
-- AN-1 (#10099): run the full driver on `full_body_spec_anthro_v1.json`
-  (`--spec ... --skip-hip-calibration --static-seeds --recalibrate-upper
---out anthro_v1`) and record IK and tracking in the receipt; then decide
-  the structural lever (neck joint for the head; thoracic or
-  scapulothoracic flexibility) as a coordinate-set change with its own
-  Simscape parity plan; rerender the address views and the Simscape
-  skeleton on the anthropometric document; verify the de Leva table
-  against the paper before any qualification.
+- AN-1 (#10099): decide the structural lever for the head and arms (neck
+  joint; thoracic or scapulothoracic flexibility) as a coordinate-set
+  change with its own Simscape parity plan; give the visual layer a head
+  for the anthropometric document; verify the de Leva table against the
+  paper; then the Simscape update and R2025b parity (MATLAB not on
+  DeskComputer). Never rerun with `--recalibrate-upper` on this document:
+  the swing-wide calibration drags the static placements off (55 mm
+  address, receipted in the session).
 - GS-4: the downswing needs a dynamically consistent reference or the FB-5
   contact-aware shooting fit; candidates in order: stance timing from the
   reference contact forces instead of marker heights, a hip zero-twist

@@ -227,12 +227,16 @@ class FullBodyMarkerKinematics:
         locked: Mapping[str, float] | None = None,
         tolerance_m: float = 1e-7,
         marker_weights: Mapping[str, float] | None = None,
+        prior_weights: Mapping[str, float] | None = None,
     ) -> PoseFit:
         """Least-squares pose for one frame of marker targets.
 
         ``marker_weights`` (label -> nonnegative weight, default 1) scales a
         marker's rows in the least squares; a zero weight drops the marker
-        from the fit but keeps it in the reported errors.
+        from the fit but keeps it in the reported errors. ``prior_weights``
+        (coordinate -> nonnegative weight) replaces ``prior_weight`` for the
+        named coordinates, so nearly redundant spins can be held to the
+        previous frame more firmly than the rest.
 
         Minimises marker error plus ``prior_weight`` times the distance from
         ``q_init``, ``closure_weight`` times the weld closure error and
@@ -285,7 +289,14 @@ class FullBodyMarkerKinematics:
             q[index] = float(value)
             free[index] = False
         nv = self.model.nv
-        sqrt_prior = np.sqrt(prior_weight)
+        prior_diag = np.full(nv, float(prior_weight))
+        for name, weight in (prior_weights or {}).items():
+            if name not in self.coordinate_order:
+                raise ValueError(f"Unknown prior coordinate {name}")
+            if weight < 0:
+                raise ValueError("Prior weights must be nonnegative")
+            prior_diag[self.coordinate_order.index(name)] = float(weight)
+        sqrt_prior = np.sqrt(prior_diag)
 
         def residuals(q_k: Array) -> tuple[Array, Array]:
             self._set(q_k)
@@ -494,6 +505,7 @@ class FullBodyMarkerKinematics:
         restarts: int = 0,
         restart_threshold_m: float = 0.0,
         restart_spread_rad: float = 0.5,
+        restart_margin_m: float = 0.0,
         **options: Any,
     ) -> tuple[Array, list[PoseFit]]:
         """Solve consecutive frames, each warm-started from the previous one.
@@ -501,8 +513,10 @@ class FullBodyMarkerKinematics:
         A frame whose fit stays above ``restart_threshold_m`` is re-solved
         ``restarts`` more times from the start pose with the non-root
         coordinates perturbed uniformly by ``restart_spread_rad`` (a fixed
-        seed, so results are reproducible); the best fit is kept, so restarts
-        never make a frame worse.
+        seed, so results are reproducible); a restart replaces the warm-started
+        fit only when it is better by more than ``restart_margin_m`` (a
+        different local minimum with the same marker error would only add a
+        jump), so restarts never make a frame worse.
 
         ``flat_feet_per_frame`` names, per capture frame, the contact spheres
         in stance (pinned to the plane). With ``plant_stance`` a sphere that
@@ -529,7 +543,7 @@ class FullBodyMarkerKinematics:
             prior = np.asarray(prior_trajectory, dtype=float)
             if prior.shape != (targets.shape[0], len(self.coordinate_order)):
                 raise ValueError("prior_trajectory must be (frames, coordinates)")
-        if restarts < 0 or restart_threshold_m < 0 or restart_spread_rad < 0:
+        if min(restarts, restart_threshold_m, restart_spread_rad, restart_margin_m) < 0:
             raise ValueError("Restart settings must be nonnegative")
         rng = np.random.default_rng(0)
         q = np.asarray(q_init, dtype=float)
@@ -567,7 +581,7 @@ class FullBodyMarkerKinematics:
                     anchors=anchors if plant_stance else None,
                     **options,
                 )
-                if retry.marker_rms_m < fit.marker_rms_m:
+                if retry.marker_rms_m < fit.marker_rms_m - restart_margin_m:
                     fit = retry
             if plant_stance:
                 points = self.sphere_ground_points(fit.q, ground)
@@ -576,3 +590,37 @@ class FullBodyMarkerKinematics:
             fits.append(fit)
             q = fit.q
         return np.array([fit.q for fit in fits]), fits
+
+
+def continuous_branches(
+    q: Array,
+    coordinate_order: Sequence[str],
+    gimbals: Sequence[tuple[str, str, str]] = (),
+) -> Array:
+    """Return ``q`` with every non-root coordinate unwrapped by 2 pi and each
+    XYZ gimbal (``Rx Ry Rz`` triple) on the Euler branch nearest the previous
+    frame: ``(x, y, z)`` and ``(x + pi, pi - y, z + pi)`` are the same
+    rotation, so a solver may switch between them without moving the body.
+    Precondition: ``q`` is (frames, coordinates) matching ``coordinate_order``
+    and every gimbal name exists. Postcondition: the pose of every frame is
+    unchanged; the result differs from ``q`` only by multiples of 2 pi and by
+    branch swaps.
+    """
+    out = np.asarray(q, dtype=float).copy()
+    if out.ndim != 2 or out.shape[1] != len(coordinate_order):
+        raise ValueError("q must be (frames, coordinates) matching the order")
+    for triple in gimbals:
+        if any(name not in coordinate_order for name in triple):
+            raise ValueError(f"Unknown gimbal coordinates {triple}")
+    out[:, 6:] = np.unwrap(out[:, 6:], axis=0)
+    for triple in gimbals:
+        ix, iy, iz = (coordinate_order.index(name) for name in triple)
+        for k in range(1, out.shape[0]):
+            prev = out[k - 1, [ix, iy, iz]]
+            here = out[k, [ix, iy, iz]]
+            alt = np.array([here[0] + np.pi, np.pi - here[1], here[2] + np.pi])
+            alt = prev + (alt - prev + np.pi) % (2 * np.pi) - np.pi
+            here = prev + (here - prev + np.pi) % (2 * np.pi) - np.pi
+            best = alt if np.abs(alt - prev).sum() < np.abs(here - prev).sum() else here
+            out[k, [ix, iy, iz]] = best
+    return out
