@@ -52,6 +52,8 @@ python3 -m pytest tests/unit/shadow_tracker/test_source_records.py -n auto --tim
 python3 -m ruff check src/shared/python/shadow_tracker tests/unit/shadow_tracker
 python3 -m ruff format --check src/shared/python/shadow_tracker tests/unit/shadow_tracker
 python3 -m mypy src/shared/python/shadow_tracker --follow-imports=silent
+python3 -m scripts.shared_tools.divergence_inventory --write
+python3 -m pytest tests/unit/scripts/test_divergence_inventory.py --no-cov -q
 ```
 
 Commands targeting future test files become runnable when the packet creates
@@ -59,6 +61,8 @@ those files; their absence now is intentional. Do not commit xfailed placeholder
 Packet C additionally runs the existing camera-observation and pipeline contract
 tests found by the discovery workflow. CI coverage and repository gates still
 apply; a passing focused test alone does not complete a packet.
+Commit both generated shared-tools inventory files whenever adding source files.
+The inventory includes source-directory Markdown files as well as Python modules.
 
 ## Review and Turnover Checklist
 

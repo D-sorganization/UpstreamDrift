@@ -13,7 +13,7 @@
   "totals": {
     "identical": 424,
     "diverged": 278,
-    "ud-only": 1232,
+    "ud-only": 1234,
     "tools-only": 661,
     "spelling-only": 124
   },
@@ -673,6 +673,13 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 22,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
+    "shadow_tracker": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 2,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -20629,6 +20636,30 @@
       "package": "sg_optimizer",
       "subpackage": "shot_model",
       "ud_bytes": 3218,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "shadow_tracker/AGENTS.md",
+      "classification": "ud-only",
+      "package": "shadow_tracker",
+      "subpackage": "",
+      "ud_bytes": 926,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "shadow_tracker/README.md",
+      "classification": "ud-only",
+      "package": "shadow_tracker",
+      "subpackage": "",
+      "ud_bytes": 732,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
