@@ -111,6 +111,11 @@ class NativePinocchioModel:
         if specification.get("schema_version") != 1:
             raise ValueError("Unsupported native geometry schema")
         self._pin = pin
+        self._build_tree(specification)
+        self._initialize_closure(specification["closure"])
+
+    def _build_tree(self, specification: Mapping[str, Any]) -> None:
+        pin = self._pin
         self.model = pin.Model()
         gravity = self.model.gravity
         gravity.linear[:] = specification["gravity_m_s2"]
@@ -154,7 +159,6 @@ class NativePinocchioModel:
             self._frames[frame["name"]] = self.model.addFrame(
                 pin.Frame(frame["name"], joint, placement, pin.FrameType.OP_FRAME)
             )
-        self._initialize_closure(specification["closure"])
 
     def _add_joint_primitives(
         self, parent: int, placement: Any, joint_spec: Mapping[str, Any]
@@ -280,6 +284,18 @@ class NativePinocchioModel:
         self.accelerations(position, velocity, efforts)
         return self.closure_errors()
 
+    def _constraints_jacobian(
+        self, names: tuple[str, ...]
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        raw = np.asarray(
+            self._pin.getConstraintsJacobian(
+                self.model, self.data, self.constraints, self.constraint_data
+            ),
+            dtype=float,
+        )
+        indices = [self._velocity_indices[name] for name in names]
+        return raw, np.asarray(raw[:, indices], dtype=float)
+
     def closure_position_linearization(
         self, coordinates: Mapping[str, float]
     ) -> NativeClosurePositionLinearization:
@@ -291,14 +307,8 @@ class NativePinocchioModel:
         """
         names = tuple(coordinates)
         position, _ = self.closure_residuals(coordinates)
-        raw = np.asarray(
-            self._pin.getConstraintsJacobian(
-                self.model, self.data, self.constraints, self.constraint_data
-            ),
-            dtype=float,
-        )
-        indices = [self._velocity_indices[name] for name in names]
-        jacobian = raw[:, indices].copy()
+        raw, jac_slice = self._constraints_jacobian(names)
+        jacobian = jac_slice.copy()
         if (
             position.shape != (6,)
             or raw.shape != (6, self.model.nv)
@@ -337,14 +347,7 @@ class NativePinocchioModel:
         zero_efforts = {name: 0.0 for name in names}
         drift_values = self.accelerations(coordinates, rates, zero_efforts)
         position, _ = self.closure_errors()
-        raw = np.asarray(
-            self._pin.getConstraintsJacobian(
-                self.model, self.data, self.constraints, self.constraint_data
-            ),
-            dtype=float,
-        )
-        indices = [self._velocity_indices[name] for name in names]
-        jacobian = raw[:, indices]
+        raw, jacobian = self._constraints_jacobian(names)
         rate_vector = np.asarray([rates[name] for name in names], dtype=float)
         acceleration_vector = np.asarray(
             [accelerations[name] for name in names], dtype=float
@@ -526,6 +529,9 @@ class NativePinocchioModel:
         acceleration = self._pin.constraintDynamics(
             self.model, self.data, q, v, tau, self.constraints, self.constraint_data
         )
+        return self._acceleration_dict(acceleration)
+
+    def _acceleration_dict(self, acceleration: Any) -> dict[str, float]:
         if not np.all(np.isfinite(acceleration)):
             raise FloatingPointError(
                 "Native constrained dynamics produced nonfinite acceleration"
@@ -579,50 +585,12 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             raise ValueError("Unsupported full-body schema")
         self.specification = specification
         self._pin = pin
-        self.model = pin.Model()
-        gravity = self.model.gravity
-        gravity.linear[:] = specification["gravity_m_s2"]
-        self._coordinates: dict[str, int] = {}
-        self._velocity_indices: dict[str, int] = {}
-        self._bodies: dict[str, tuple[int, Any]] = {"world": (0, pin.SE3.Identity())}
-        coordinate_inventory: set[str] = set()
-        for joint_spec in depth_first_joints(specification["joints"]):
-            parent, parent_pose = self._bodies[joint_spec["parent"]]
-            placement = parent_pose * self._transform(joint_spec["parent_to_base"])
-            parent, names = self._add_joint_primitives(parent, placement, joint_spec)
-            if coordinate_inventory.intersection(names):
-                raise ValueError("Duplicate native coordinate")
-            coordinate_inventory.update(names)
-            child = joint_spec["child"]
-            if child in self._bodies:
-                raise ValueError("Native body has multiple tree parents")
-            self._bodies[child] = (
-                parent,
-                self._transform(joint_spec["child_to_follower"]).inverse(),
-            )
-        if coordinate_inventory != set(specification["coordinate_order"]):
-            raise ValueError("Native coordinate inventory was not preserved")
-        for body in specification["bodies"]:
-            joint, body_pose = self._bodies[body["name"]]
-            for solid in body["solids"]:
-                inertia = pin.Inertia(
-                    solid["mass_kg"],
-                    np.asarray(solid["com_m"]),
-                    np.asarray(solid["inertia_com_kg_m2"]),
-                )
-                self.model.appendBodyToJoint(
-                    joint, inertia, body_pose * self._transform(solid["placement"])
-                )
-        self._frames: dict[str, int] = {}
-        for frame in specification["frames"]:
-            joint, body_pose = self._bodies[frame["body"]]
-            placement = body_pose * self._transform(frame["placement"])
-            if frame["name"] in self._frames:
-                raise ValueError("Duplicate native marker-reference frame")
-            self._frames[frame["name"]] = self.model.addFrame(
-                pin.Frame(frame["name"], joint, placement, pin.FrameType.OP_FRAME)
-            )
+        self._build_tree(specification)
+        self._initialize_contact(specification)
+        self._initialize_closure(specification["closure"])
 
+    def _initialize_contact(self, specification: Mapping[str, Any]) -> None:
+        pin = self._pin
         contact_spec = specification["contact"]
         self.contact_parameters = ContactParameters(**contact_spec["parameters"])
         g_vec = np.asarray(specification["gravity_m_s2"], dtype=float)
@@ -648,8 +616,6 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             self._contact_frames[sphere.name] = self.model.addFrame(
                 pin.Frame(sphere.name, joint, placement, pin.FrameType.OP_FRAME)
             )
-
-        self._initialize_closure(specification["closure"])
 
     def upper_body_model(self) -> NativePinocchioModel:
         """Construct the qualified upper-body model from this spec's upper-body slice."""
@@ -732,14 +698,7 @@ class FullBodyPinocchioModel(NativePinocchioModel):
             self.constraints,
             self.constraint_data,
         )
-        if not np.all(np.isfinite(acceleration)):
-            raise FloatingPointError(
-                "Native constrained dynamics produced nonfinite acceleration"
-            )
-        return {
-            name: float(acceleration[index])
-            for name, index in self._velocity_indices.items()
-        }
+        return self._acceleration_dict(acceleration)
 
 
 def build_full_body_pinocchio_model(
