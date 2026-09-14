@@ -8,7 +8,7 @@ untouched; the exporter's plain output remains the qualified representation.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # nosec B405 - construction only
+import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
 from collections.abc import Mapping
 from typing import Any
 
