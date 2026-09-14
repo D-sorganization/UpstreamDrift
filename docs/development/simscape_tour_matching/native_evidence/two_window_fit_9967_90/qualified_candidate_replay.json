@@ -1,0 +1,30 @@
+{
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "qualification": "independent_r2025b_cold_replay_returned90",
+  "duration_s": 0.85,
+  "n_samples": 307,
+  "elapsed_s": 19.8577373,
+  "metrics": {
+    "whole_rms_m": 0.90580689733425168,
+    "whole_rms_mm": 905.80689733425163,
+    "early_rms_m": 0.64936914740814367,
+    "early_rms_mm": 649.3691474081437,
+    "terminal_rms_m": 1.6959701304236139,
+    "terminal_rms_mm": 1695.9701304236139,
+    "club_cluster_rms_m": 1.281472478247327,
+    "club_cluster_rms_mm": 1281.472478247327,
+    "pelvis_yaw_error_pct": 269.18547310874072
+  },
+  "cross_engine_parity": {
+    "max_marker_difference_m": 2.1263544134009491,
+    "mean_marker_difference_m": 0.34516339905510618
+  },
+  "gates": {
+    "gate1_whole_rms_25mm": false,
+    "gate2_early_rms_12mm": false,
+    "gate3_terminal_rms_35mm": false,
+    "gate4_clubhead_60mm": false,
+    "gate5_pelvis_yaw_5pct": false
+  }
+}
