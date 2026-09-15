@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import math
+from types import MappingProxyType
 from typing import Any, Literal
+
 
 from ._validation import check_id, check_pos_float, check_str
 from .contracts import Handedness, RenderRequest, SubjectModelBinding
@@ -51,7 +53,7 @@ class VisualMorphology:
             if v <= 0.0 or not math.isfinite(v):
                 raise ValueError(f"segment length {k} must be positive, got {v}")
             clean_lengths[k] = float(v)
-        object.__setattr__(self, "segment_lengths", clean_lengths)
+        object.__setattr__(self, "segment_lengths", MappingProxyType(clean_lengths))
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -142,6 +144,21 @@ class InitialHypothesis:
                 f"label must be one of {sorted(_VALID_HYPOTHESIS_LABELS)}, got {self.label!r}"
             )
         check_str(self.provenance, "provenance")
+
+        if not self.pose:
+            raise ValueError(f"pose must be a non-empty sequence, got {self.pose!r}")
+        for x in self.pose:
+            if not math.isfinite(float(x)):
+                raise ValueError(f"pose coordinate must be finite, got {x}")
+
+        if not self.velocity:
+            raise ValueError(
+                f"velocity must be a non-empty sequence, got {self.velocity!r}"
+            )
+        for v in self.velocity:
+            if not math.isfinite(float(v)):
+                raise ValueError(f"velocity coordinate must be finite, got {v}")
+
         object.__setattr__(self, "pose", tuple(float(x) for x in self.pose))
         object.__setattr__(self, "velocity", tuple(float(v) for v in self.velocity))
 
