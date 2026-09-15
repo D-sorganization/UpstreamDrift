@@ -38,6 +38,18 @@ Specifies standardized replay archive serialization, forward-kinematics projecti
   - `compute_replay_five_metrics()`: Evaluates the 5 uninterrupted tracking metrics comparing predicted marker trajectories against target capture markers with valid-mask filtering and pelvis marker cluster identification.
   - Enforces DbC invariants: validates matching frame counts, strictly increasing time grids, non-empty markers, and raises `ValueError` on corrupt or unaligned data.
 
+## GSPro Durable TCP Transport and Intent Journal (#10192)
+
+Defines durable async TCP transport, bounded stream framing, and delivery intent journal for golf simulator integration:
+- `ShotJournal` (`src/shared/python/golf_simulator/journal.py`): Thread-safe delivery intent ledger recording shot submissions before physical wire writes with distinct `DeliveryStatus` (`PENDING`, `ACKNOWLEDGED`, `REJECTED`, `AMBIGUOUS`).
+  - Strict DbC invariants: Rejects duplicate shot intents; transitions in-flight drops and timeouts to `AMBIGUOUS`.
+  - Invariant: ambiguous deliveries are never automatically resubmitted without explicit caller policy to protect against physical duplicate ball launches.
+  - Durable persistence: Supports atomic file-backed storage across restarts.
+- `GSProTransport` (`src/shared/python/golf_simulator/adapters/gspro/transport.py`): Async TCP client for GSPro Open Connect v1.
+  - Bounded stream framer: Limits buffer accumulation to `max_buffer_bytes` (64 KiB), raising `FramingBufferOverflowError` and disconnecting cleanly on overflow.
+  - Reassembles fragmented frames across partial TCP chunks and validates brace-balanced JSON payloads.
+  - Integrates with `ShotJournal` to ensure pre-write intent recording and status transition on receipts or dropouts.
+
 ## GSPro Compatibility Profile and Pure Codec (#10189, #10191)
 
 Implements frozen protocol profile and deterministic serialization for GSPro Open Connect v1 under `src/shared/python/golf_simulator/adapters/gspro/`:
