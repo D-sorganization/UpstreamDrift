@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Separate Grip Displacement and Rotation Units in Rollout Acceptance (#10141)
+
+Separates physical loop-closure error units in full-body forward dynamics simulation:
+- Decomposes the 6D dual-grip weld loop-closure residual into `max_closure_translation_m` (metres) and `max_closure_rotation_rad` (radians), preventing unit mixing between Euclidean distances and rotation vectors.
+- Retains `max_closure_residual_m` and adds `legacy_mixed_unit_closure_value` for backwards compatibility with historical receipts and legacy consumers.
+- Implements `ForwardRolloutResult.is_accepted()` to physically gate rollout validity on explicit separate translation and rotation thresholds while rejecting unexecuted or failed outputs.
+- Propagates separated closure fields to `EngineReplayOutcome` and model probe diagnostics.
+
 ## Align MuJoCo Full-Body IK Coordinates With Named Dynamics Coordinates (#10140)
 
 Aligns `MujocoFullBodyIK` coordinate assignment with `NativeMujocoFullBodyModel` named coordinate order and native qpos layout:
