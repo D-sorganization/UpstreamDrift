@@ -27,6 +27,10 @@ tests/unit/repo_hygiene/test_vendored_tools_fallback.py` → 140 passed;
   `python -m scripts.shared_tools.check_tools_pins` consistent; ruff, ruff format, mypy clean
   on changed files. Pre-existing, out of scope: `development_log.py` flags DL-#10003 and
   DL-#10062 'Last verified' without a SHA.
+- CI follow-up: `seam-drift-gate` wanted a ruling for the new Tools-only `camera` cluster
+  (`docs/shared_tools/seam_rulings.v1.json`: tools-canonical, n/a); `agent-context` views
+  re-rendered because the source fingerprint covers the `vendor/ud-tools` dependency the pin
+  bump moved (no contract or review changed; no component registers the rig modules).
 - Not done here: hardware verification (three cameras at 60 fps in the preview, Record
   handoff) is an operator step — cameras may be in use.
 - Next: operator runs the rig check, then the PR merges; consider a Tools follow-up to make
