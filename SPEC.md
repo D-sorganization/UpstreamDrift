@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Fail Closed on Invalid Rollout and Missing Closure Evidence (#10166)
+
+Hardens physical rollout acceptance gating and closure error extraction:
+- Updates `ForwardRolloutResult.is_closure_accepted()` (and alias `is_accepted()`) to fail closed on non-finite state arrays (`q`, `qd`, `time_s`), non-strictly-increasing time grids, shape mismatches, negative closure metrics, infinite closure errors, and infinite/non-positive profile limit tolerances.
+- Explicitly documents that `is_closure_accepted()` verifies numerical integration and separated loop-closure tolerances only, and does not imply or grant contact qualification, cross-engine replay parity, or full physical/scientific model acceptance.
+- Updates `_extract_closure_errors()` to enforce exact declared closure shapes (3D translation-only or 6D weld) and report `rot_err=None` (rather than 0.0) when rotational closure is absent/unmeasured.
+- Protects accumulators against `max(0.0, NaN)` masking in `_simulate_rk45` and `_simulate_euler` and propagates NaNs to explicit `status="invalid"`.
+- Audits terminal Euler state for accelerations, contacts, and closure errors alongside intermediate substeps.
+- Updates `EngineReplayOutcome` to default separated unit fields (`max_closure_translation_m`, `max_closure_rotation_rad`) to `None` instead of `0.0`, distinguishing absent measurements from measured zero, and validates finite non-negative values in `__post_init__`.
+
 ## Separate Grip Displacement and Rotation Units in Rollout Acceptance (#10141)
 
 Separates physical loop-closure error units in full-body forward dynamics simulation:
