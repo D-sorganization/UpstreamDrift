@@ -138,36 +138,44 @@ class SourceCatalog:
 # ---------------------------------------------------------------------------
 
 
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ShotDefinition:
+    """Specification for defining a bounded continuous shot within an asset."""
+
+    shot_id: str
+    start_pts: int
+    end_pts: int
+    start_frame_id: str
+    end_frame_id: str
+    subject_id: str
+    swing_id: str
+    camera_id: str
+    cuts: tuple[tuple[int, int], ...] = ()
+    transforms: tuple[str, ...] = ()
+
+
 def create_shot(
     asset: SourceAsset,
-    *,
-    shot_id: str,
-    start_pts: int,
-    end_pts: int,
-    start_frame_id: str,
-    end_frame_id: str,
-    subject_id: str,
-    swing_id: str,
-    camera_id: str,
-    cuts: tuple[tuple[int, int], ...] = (),
-    transforms: tuple[str, ...] = (),
+    definition: ShotDefinition,
 ) -> Shot:
     """Create a validated continuous Shot record tied to a parent SourceAsset."""
     if not isinstance(asset, SourceAsset):
         raise TypeError(f"Expected SourceAsset, got {type(asset).__name__}")
+    if not isinstance(definition, ShotDefinition):
+        raise TypeError(f"Expected ShotDefinition, got {type(definition).__name__}")
     return Shot(
         schema_version=SHOT_SCHEMA_VERSION,
         asset_id=asset.asset_id,
-        shot_id=shot_id,
-        start_pts=start_pts,
-        end_pts=end_pts,
-        start_frame_id=start_frame_id,
-        end_frame_id=end_frame_id,
-        subject_id=subject_id,
-        swing_id=swing_id,
-        camera_id=camera_id,
-        cuts=cuts,
-        transforms=transforms,
+        shot_id=definition.shot_id,
+        start_pts=definition.start_pts,
+        end_pts=definition.end_pts,
+        start_frame_id=definition.start_frame_id,
+        end_frame_id=definition.end_frame_id,
+        subject_id=definition.subject_id,
+        swing_id=definition.swing_id,
+        camera_id=definition.camera_id,
+        cuts=definition.cuts,
+        transforms=definition.transforms,
     )
 
 

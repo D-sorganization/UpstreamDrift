@@ -34,6 +34,7 @@ from shared.python.shadow_tracker.ingestion import (
     AffineTimingMapping,
     CameraSynchronization,
     PiecewiseTimingMapping,
+    ShotDefinition,
     SourceCatalog,
     create_shot,
     detect_telecine_duplicates,
@@ -236,16 +237,18 @@ def test_shot_creation_and_cut_filtering() -> None:
 
     shot = create_shot(
         asset,
-        shot_id="shot-01",
-        start_pts=100,
-        end_pts=500,
-        start_frame_id="f-010",
-        end_frame_id="f-050",
-        subject_id="sub-01",
-        swing_id="swing-01",
-        camera_id="cam-01",
-        cuts=((200, 250),),
-        transforms=("mirror_h", "crop:0,0,1280,720"),
+        ShotDefinition(
+            shot_id="shot-01",
+            start_pts=100,
+            end_pts=500,
+            start_frame_id="f-010",
+            end_frame_id="f-050",
+            subject_id="sub-01",
+            swing_id="swing-01",
+            camera_id="cam-01",
+            cuts=((200, 250),),
+            transforms=("mirror_h", "crop:0,0,1280,720"),
+        ),
     )
 
     assert isinstance(shot, Shot)
