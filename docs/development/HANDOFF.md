@@ -1,7 +1,7 @@
 # Capture Rig Shared Camera Layer Handoff Checkpoint — 2026-09-15
 
 - Worktree: C:/Users/diete/Repositories/\_wt_claude_10204
-- Branch: claude/10204-shared-camera; checkpoint SELF; PR not created at this checkpoint.
+- Branch: claude/10204-shared-camera; checkpoint SELF; PR #10211 open with auto-merge (squash) armed.
 - Governing issue: #10204 (part of D-sorganization/Tools#5218). Entry DL-#10204.
 - Change: `vendor/ud-tools` gitlink, `requirements-tools.txt` and `Cargo.toml` pinned
   together to Tools 1ac89c18e6280752d949e520c2143d2fb584d31e (first commit carrying

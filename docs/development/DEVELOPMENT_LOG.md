@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #10204 (part of D-sorganization/Tools#5218)
 - **Branch:** claude/10204-shared-camera
-- **PR:** not created
+- **PR:** #10211 (open; auto-merge squash armed)
 - **Paths:** src/motion_capture/rig/preview_source.py; src/motion_capture/rig/recorder.py; tests/fixtures/reference_calibration/preview_source_checks.py; vendor/ud-tools; requirements-tools.txt; Cargo.toml; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-15
 - **Last verified:** 2026-09-15 (SELF; `run_checks.py` 38 passed incl. 8 adapter checks; `tests/motion_capture/rig` + shadow/fallback hygiene 140 passed; `check_tools_pins` consistent at 1ac89c18e; ruff, ruff-format, mypy clean on changed files)
