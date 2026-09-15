@@ -1,32 +1,18 @@
 # Simscape Tour-Average Fit Continuation
 
-## Shadow Tracker Planning and Agent Pickup (#10122)
+## Shadow Tracker Review and Full Development Pickup (#10122)
 
-- **Current Pickup:** [Ready Tasks](docs/plans/shadow_tracker/READY_TASKS.md) and
-  [Contract Freeze](docs/plans/shadow_tracker/CONTRACT_FREEZE.md). A (#10137) and
-  C (#10139) are independent image-data packets; B (#10138) waits for A.
-- **Measured Blockers:** The new real-model probe finds an IK/native coordinate
-  mismatch (#10140) and legacy mixed-unit grip metrics (#10141). See
-  [Qualification Findings](docs/plans/shadow_tracker/QUALIFICATION_FINDINGS.md).
-  ST-01 (#10124) is still open; no dynamics/scientific qualification is claimed.
-- **Handoff Branch:** `feat/issue-10124-shadow-tracker-handoff`, issue #10142.
-  [Handoff PR #10144](https://github.com/D-sorganization/UpstreamDrift/pull/10144).
-  Diagnostic tests pass; product-record code is assigned to the worker packets.
-- **State:** Documentation, frozen image contracts and diagnostic probe only;
-  no Shadow Tracker fitter or scientific qualification. Epic #10122 remains open.
-- **Start Here:** [Shadow Tracker](docs/plans/shadow_tracker/README.md),
-  [Work Packages](docs/plans/shadow_tracker/WORK_PACKAGES.md), and
-  [Agent Handoff](docs/plans/shadow_tracker/AGENT_HANDOFF.md).
-- **Merged Planning Baseline:** Setup child #10123;
-  [Planning PR #10136](https://github.com/D-sorganization/UpstreamDrift/pull/10136).
-- **Next:** Dispatch frozen ST-02A/C while specialists continue ST-01. The
-  remaining ST-02 dynamics contracts still depend on ST-01 qualification.
-- **Constraints:** Preserve observed vs inferred data, unknown archive timing,
-  fixed subject morphology and continuous forward replay. No fake markers,
-  root-force assistance or completion inferred from silhouette overlap.
-- **Model Reuse:** Existing full-body rollout needs a reviewed adapter to remove
-  mandatory marker-scoring coupling. Canonical state mappings and actual engine
-  availability require tests. Simscape acceptance remains MATLAB R2025b.
+- **Start Here:** [Development Review](docs/plans/shadow_tracker/DEVELOPMENT_REVIEW.md)
+  and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
+- **Baseline:** `c3395229839cfb66ded994bbef0a39fcb985e1e6`; A/B/C are merged in
+  #10145/#10147/#10148. The first corrective task is #10151, not those closed tasks.
+- **Verified:** 111 focused tests pass; scoped Ruff/mypy pass. Review reproduces
+  malformed-input exception and mask pre-conversion length-check gaps.
+- **Remaining:** Full video/mask/render/fit pipeline, launcher/UI, scientific
+  validation, performance qualification and release. #10140/#10141 remain model
+  blockers. No complete fitter or qualified Shadow Tracker product exists yet.
+- **Review Delivery:** #10150; documentation-only review and continuation plan.
+  Full epic #10122 stays open. Follow the per-stage evidence and turnover gates.
 
 ### 0. 1.15 s Downswing Horizon Continuation & Certified Audit (`candidate_downswing_115s_locked_package.json`, DeskComputer)
 
