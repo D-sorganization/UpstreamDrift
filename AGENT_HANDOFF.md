@@ -4,12 +4,13 @@
 
 - **Start Here:** [Development Review](docs/plans/shadow_tracker/DEVELOPMENT_REVIEW.md)
   and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
-- **Progress:** Stages 0–5 complete: #10151 (contract hardening), #10140/#10141 (MuJoCo coordinate & closure units),
+- **Progress:** Stages 0–6 complete: #10151 (contract hardening), #10140/#10141 (MuJoCo coordinate & closure units),
   #10124 (feasibility audit), #10125 (full contracts freeze), #10126 (video ingestion and lineage),
-  #10127 (body/club silhouettes and occlusion), and #10128 (calibrated rendering, projection, and residuals).
-- **Remaining:** Stages 6–10 (Initialization #10129, Continuous Rollout #10130, Fitting #10131/#10132,
+  #10127 (body/club silhouettes and occlusion), #10128 (calibrated rendering, projection, and residuals),
+  and #10129 (subject shape and initial-state fitting).
+- **Remaining:** Stages 7–10 (Continuous Rollout #10130, Fitting #10131/#10132,
   Validation #10133, UI/Product #10134, Release #10135).
-- **Next Stage:** Stage 6 (#10129): Fit Subject Shape and Initial-State Hypotheses.
+- **Next Stage:** Stage 7 (#10130): Continuous Physics Rollout Integration and Replay Parity.
 - **Review Delivery:** #10150; documentation-only review and continuation plan.
   Full epic #10122 stays open. Follow the per-stage evidence and turnover gates.
 
