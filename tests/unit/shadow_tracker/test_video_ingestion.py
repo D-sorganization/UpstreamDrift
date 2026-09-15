@@ -577,3 +577,203 @@ def test_ingest_capture_rig_view(tmp_path: Path) -> None:
             width_px=1920,
             height_px=1080,
         )
+
+
+# ---------------------------------------------------------------------------
+# 8. Real Local Video Decoding (ST-03A, #10168)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def test_clip_file(tmp_path: Path) -> Path:
+    """Generate a tiny 5-frame local video clip (64x64) with distinct frame contents."""
+    import cv2
+    import numpy as np
+
+    clip_path = tmp_path / "test_swing_clip.mp4"
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    writer = cv2.VideoWriter(str(clip_path), fourcc, 25.0, (64, 64))
+    assert writer.isOpened(), "Could not open VideoWriter for test clip fixture"
+    try:
+        for i in range(5):
+            # Generate deterministic frame with distinct color
+            img = np.full((64, 64, 3), (i + 1) * 40, dtype=np.uint8)
+            writer.write(img)
+    finally:
+        writer.release()
+    return clip_path
+
+
+def test_opencv_video_decoder_properties_and_iteration(test_clip_file: Path) -> None:
+    from shared.python.shadow_tracker.ingestion import OpenCvVideoDecoder
+
+    decoder = OpenCvVideoDecoder(test_clip_file)
+    assert decoder.frame_count == 5
+    assert decoder.width == 64
+    assert decoder.height == 64
+    assert decoder.timebase_numerator == 1
+    assert decoder.timebase_denominator == 25
+    assert decoder.pts_ticks(0) == 0
+    assert decoder.pts_ticks(4) == 4
+
+    hashes = [decoder.read_frame_hash(i) for i in range(5)]
+    assert len(hashes) == 5
+    # All frames have distinct contents, so hashes must be unique
+    assert len(set(hashes)) == 5
+    for h in hashes:
+        assert len(h) == 64
+
+    # Out of bounds access raises IndexError
+    with pytest.raises(IndexError):
+        decoder.pts_ticks(5)
+    with pytest.raises(IndexError):
+        decoder.read_frame_hash(5)
+    with pytest.raises(IndexError):
+        decoder.pts_ticks(-1)
+
+
+def test_opencv_video_decoder_missing_or_corrupt_file(tmp_path: Path) -> None:
+    from shared.python.shadow_tracker.ingestion import OpenCvVideoDecoder
+
+    missing = tmp_path / "missing.mp4"
+    with pytest.raises(FileNotFoundError):
+        OpenCvVideoDecoder(missing)
+
+    corrupt = tmp_path / "corrupt.mp4"
+    corrupt.write_bytes(b"NOT_A_VIDEO")
+    with pytest.raises(ValueError, match="Could not open video file"):
+        OpenCvVideoDecoder(corrupt)
+
+
+def test_decode_video_frames_produces_validated_frame_identities(
+    test_clip_file: Path,
+) -> None:
+    from shared.python.shadow_tracker.ingestion import (
+        OpenCvVideoDecoder,
+        decode_video_frames,
+    )
+    from shared.python.shadow_tracker.source_records import validate_frame_sequence
+
+    decoder = OpenCvVideoDecoder(test_clip_file)
+    asset = ingest_source_asset(
+        test_clip_file,
+        asset_id="asset-test-01",
+        width_px=decoder.width,
+        height_px=decoder.height,
+        rights_status="permitted",
+        rights_note="Test dataset",
+    )
+
+    frames = list(
+        decode_video_frames(
+            decoder,
+            asset=asset,
+            shot_id="shot-01",
+            swing_id="swing-01",
+            camera_id="cam-face-on",
+        )
+    )
+    assert len(frames) == 5
+    validate_frame_sequence(frames)
+
+    for i, frame in enumerate(frames):
+        assert frame.asset_id == "asset-test-01"
+        assert frame.shot_id == "shot-01"
+        assert frame.swing_id == "swing-01"
+        assert frame.camera_id == "cam-face-on"
+        assert frame.pts_ticks == i
+        assert frame.timebase_numerator == 1
+        assert frame.timebase_denominator == 25
+        assert frame.presentation_time == Fraction(i, 25)
+        # Default physical_time_s is computed from presentation time
+        assert frame.physical_time_s == pytest.approx(i / 25.0)
+
+
+def test_decode_video_frames_supports_unknown_physical_time(
+    test_clip_file: Path,
+) -> None:
+    from shared.python.shadow_tracker.ingestion import (
+        OpenCvVideoDecoder,
+        decode_video_frames,
+    )
+    from shared.python.shadow_tracker.source_records import validate_frame_sequence
+
+    decoder = OpenCvVideoDecoder(test_clip_file)
+    asset = ingest_source_asset(
+        test_clip_file,
+        asset_id="asset-archive-01",
+        width_px=decoder.width,
+        height_px=decoder.height,
+    )
+
+    frames = list(
+        decode_video_frames(
+            decoder,
+            asset=asset,
+            shot_id="shot-archive",
+            swing_id="swing-01",
+            camera_id="cam-01",
+            physical_time_s_fn=None,
+            physical_time_reason="archive footage with uncalibrated clock",
+        )
+    )
+    assert len(frames) == 5
+    validate_frame_sequence(frames)
+    for frame in frames:
+        assert frame.physical_time_s is None
+        assert frame.physical_time_reason == "archive footage with uncalibrated clock"
+
+
+def test_decode_video_frames_max_frames_and_cancellation(
+    test_clip_file: Path,
+) -> None:
+    from shared.python.shadow_tracker.ingestion import (
+        DecodeLimits,
+        OpenCvVideoDecoder,
+        decode_video_frames,
+    )
+
+    # Test DecodeLimits invariants
+    with pytest.raises(ValueError, match="max_frames cannot be negative"):
+        DecodeLimits(max_frames=-1)
+
+    decoder = OpenCvVideoDecoder(test_clip_file)
+    asset = ingest_source_asset(
+        test_clip_file,
+        asset_id="asset-test-01",
+        width_px=decoder.width,
+        height_px=decoder.height,
+    )
+
+    # Bounded decoding with max_frames
+    bounded_frames = list(
+        decode_video_frames(
+            decoder,
+            asset=asset,
+            shot_id="shot-01",
+            swing_id="swing-01",
+            camera_id="cam-01",
+            limits=DecodeLimits(max_frames=2),
+        )
+    )
+    assert len(bounded_frames) == 2
+
+    # Cancellation via is_cancelled callback
+    call_count = 0
+
+    def cancel_after_one() -> bool:
+        nonlocal call_count
+        call_count += 1
+        return call_count > 1
+
+    cancelled_frames = list(
+        decode_video_frames(
+            decoder,
+            asset=asset,
+            shot_id="shot-01",
+            swing_id="swing-01",
+            camera_id="cam-01",
+            limits=DecodeLimits(is_cancelled=cancel_after_one),
+        )
+    )
+    assert len(cancelled_frames) == 1
