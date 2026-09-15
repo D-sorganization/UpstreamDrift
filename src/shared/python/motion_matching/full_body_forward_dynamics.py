@@ -446,6 +446,161 @@ def _extract_closure_errors(model: Any) -> tuple[float, float | None, float]:
     return trans_err, rot_err, mixed_err
 
 
+def _evaluate_frame_dynamics(
+    model: Any,
+    theta: Array,
+    t: float,
+    duration_s: float,
+    coord_names: Sequence[str],
+    q_vec: Array,
+    qd_vec: Array,
+    options: RolloutOptions,
+) -> tuple[dict[str, Any], dict[str, float], float, float | None, float]:
+    """Evaluate contact samples, torques, accelerations, and closure errors."""
+    q_dict = {name: float(q_vec[i]) for i, name in enumerate(coord_names)}
+    qd_dict = {name: float(qd_vec[i]) for i, name in enumerate(coord_names)}
+    c_samples = model.evaluate_contact_samples(q_dict, qd_dict)
+    tau_dict = evaluate_polynomial_torques(
+        theta,
+        t,
+        duration_s,
+        coord_names,
+        options.unactuated_indices,
+        normalize_time=options.normalize_time,
+    )
+    acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
+    trans_err, rot_err, mixed_err = _extract_closure_errors(model)
+    return c_samples, acc_dict, trans_err, rot_err, mixed_err
+
+
+def _check_trajectory_finite(
+    q_traj: Array,
+    qd_traj: Array,
+    pred_markers: Array,
+    tracked_labels: Sequence[str],
+    marker_offsets: Mapping[str, Any],
+    max_trans_err: float | None,
+    max_rot_err: float | None,
+    max_mixed_err: float | None,
+) -> str:
+    """Validate that state trajectories, tracked markers, and closure errors are finite."""
+    tracked_indices = [
+        i for i, label in enumerate(tracked_labels) if label in marker_offsets
+    ]
+    has_nan = (
+        not np.all(np.isfinite(q_traj))
+        or not np.all(np.isfinite(qd_traj))
+        or (
+            len(tracked_indices) > 0
+            and not np.all(np.isfinite(pred_markers[:, tracked_indices, :]))
+        )
+        or (max_trans_err is not None and not np.isfinite(max_trans_err))
+        or (max_rot_err is not None and not np.isfinite(max_rot_err))
+        or (max_mixed_err is not None and not np.isfinite(max_mixed_err))
+    )
+    return "invalid" if has_nan else "success"
+
+
+@dataclass(frozen=True)
+class _EulerStepContext:
+    """Context for Euler substep integration."""
+
+    model: Any
+    theta: Array
+    duration_s: float
+    coord_names: Sequence[str]
+    options: RolloutOptions
+
+
+def _step_euler_substeps(
+    ctx: _EulerStepContext,
+    t_curr: float,
+    curr_q: Array,
+    curr_qd: Array,
+    dt_frame: float,
+    all_contact_samples: list[dict[str, Any]],
+    closure_errs: list[float | None],
+) -> None:
+    """Execute substeps of semi-implicit Euler integration for one frame step."""
+    dt_sub = dt_frame / max(1, ctx.options.substeps)
+    for sub in range(ctx.options.substeps):
+        t_sub = t_curr + sub * dt_sub
+        c_samples, acc_dict, trans_err, rot_err, mixed_err = _evaluate_frame_dynamics(
+            ctx.model,
+            ctx.theta,
+            t_sub,
+            ctx.duration_s,
+            ctx.coord_names,
+            curr_q,
+            curr_qd,
+            ctx.options,
+        )
+        all_contact_samples.append(c_samples)
+        closure_errs[0] = _accumulate_max(closure_errs[0], trans_err)
+        closure_errs[1] = _accumulate_max(closure_errs[1], rot_err)
+        closure_errs[2] = _accumulate_max(closure_errs[2], mixed_err)
+
+        acc = np.array([acc_dict[name] for name in ctx.coord_names], dtype=np.float64)
+        curr_qd += acc * dt_sub
+        curr_q += curr_qd * dt_sub
+
+
+def _audit_rollout_trajectory(
+    ctx: _EulerStepContext,
+    ik_adapter: Any,
+    times: Array,
+    q_traj: Array,
+    qd_traj: Array,
+    marker_offsets: Mapping[str, Any],
+    labels: Sequence[str],
+) -> tuple[Array, list[dict[str, Any]], float, float | None, float, str]:
+    """Audit kinematics, contact samples, and loop closure along a simulated trajectory."""
+    n_frames = len(times)
+    pred_markers = np.full((n_frames, len(labels), 3), np.nan, dtype=np.float64)
+    all_contact_samples: list[dict[str, Any]] = []
+    max_trans: float | None = None
+    max_rot: float | None = None
+    max_mixed: float | None = None
+
+    for k in range(n_frames):
+        pred_markers[k] = _compute_frame_markers(
+            ik_adapter, q_traj[k], marker_offsets, labels
+        )
+        c_samples, _, trans, rot, mixed = _evaluate_frame_dynamics(
+            ctx.model,
+            ctx.theta,
+            float(times[k]),
+            ctx.duration_s,
+            ctx.coord_names,
+            q_traj[k],
+            qd_traj[k],
+            ctx.options,
+        )
+        all_contact_samples.append(c_samples)
+        max_trans = _accumulate_max(max_trans, trans)
+        max_rot = _accumulate_max(max_rot, rot)
+        max_mixed = _accumulate_max(max_mixed, mixed)
+
+    status = _check_trajectory_finite(
+        q_traj,
+        qd_traj,
+        pred_markers,
+        labels,
+        marker_offsets,
+        max_trans,
+        max_rot,
+        max_mixed,
+    )
+    return (
+        pred_markers,
+        all_contact_samples,
+        max_trans if max_trans is not None else 0.0,
+        max_rot,
+        max_mixed if max_mixed is not None else 0.0,
+        status,
+    )
+
+
 def _simulate_rk45(
     model: Any,
     ik_adapter: Any,
@@ -475,11 +630,9 @@ def _simulate_rk45(
     init_state = np.concatenate([initial_state[0], initial_state[1]])
 
     def deriv(t: float, state: Array) -> Array:
-        q_dict = {name: float(state[i]) for i, name in enumerate(coord_names)}
-        qd_dict = {
-            name: float(state[n_coords + i]) for i, name in enumerate(coord_names)
-        }
-        tau_dict = evaluate_polynomial_torques(
+        q_d = {name: float(state[i]) for i, name in enumerate(coord_names)}
+        qd_d = {name: float(state[n_coords + i]) for i, name in enumerate(coord_names)}
+        tau = evaluate_polynomial_torques(
             theta,
             t,
             duration_s,
@@ -487,7 +640,7 @@ def _simulate_rk45(
             options.unactuated_indices,
             normalize_time=options.normalize_time,
         )
-        acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
+        acc_dict = model.accelerations(q_d, qd_d, tau)
         acc = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
         return np.concatenate([state[n_coords:], acc])
 
@@ -515,61 +668,11 @@ def _simulate_rk45(
 
     q_traj = sol.y[:n_coords, :].T
     qd_traj = sol.y[n_coords:, :].T
-    pred_markers = np.full((n_frames, len(capture.labels), 3), np.nan, dtype=np.float64)
-    all_contact_samples = []
-    max_trans_err: float | None = None
-    max_rot_err: float | None = None
-    max_mixed_err: float | None = None
-
-    for k in range(n_frames):
-        q_k = q_traj[k]
-        qd_k = qd_traj[k]
-        pred_markers[k] = _compute_frame_markers(
-            ik_adapter, q_k, marker_offsets, capture.labels
-        )
-        q_dict = {name: float(q_k[i]) for i, name in enumerate(coord_names)}
-        qd_dict = {name: float(qd_k[i]) for i, name in enumerate(coord_names)}
-        all_contact_samples.append(model.evaluate_contact_samples(q_dict, qd_dict))
-        tau_dict = evaluate_polynomial_torques(
-            theta,
-            float(times[k]),
-            duration_s,
-            coord_names,
-            options.unactuated_indices,
-            normalize_time=options.normalize_time,
-        )
-        model.accelerations(q_dict, qd_dict, tau_dict)
-        trans_err, rot_err, mixed_err = _extract_closure_errors(model)
-        max_trans_err = _accumulate_max(max_trans_err, trans_err)
-        max_rot_err = _accumulate_max(max_rot_err, rot_err)
-        max_mixed_err = _accumulate_max(max_mixed_err, mixed_err)
-
-    tracked_indices = [
-        i for i, label in enumerate(capture.labels) if label in marker_offsets
-    ]
-    has_nan = (
-        not np.all(np.isfinite(q_traj))
-        or not np.all(np.isfinite(qd_traj))
-        or (
-            len(tracked_indices) > 0
-            and not np.all(np.isfinite(pred_markers[:, tracked_indices, :]))
-        )
-        or (max_trans_err is not None and not np.isfinite(max_trans_err))
-        or (max_rot_err is not None and not np.isfinite(max_rot_err))
-        or (max_mixed_err is not None and not np.isfinite(max_mixed_err))
+    ctx = _EulerStepContext(model, theta, duration_s, coord_names, options)
+    pred_m, samples, max_trans, max_rot, max_mixed, status = _audit_rollout_trajectory(
+        ctx, ik_adapter, times, q_traj, qd_traj, marker_offsets, capture.labels
     )
-    status = "invalid" if has_nan else "success"
-
-    return (
-        q_traj,
-        qd_traj,
-        pred_markers,
-        all_contact_samples,
-        max_trans_err if max_trans_err is not None else 0.0,
-        max_rot_err,
-        max_mixed_err if max_mixed_err is not None else 0.0,
-        status,
-    )
+    return q_traj, qd_traj, pred_m, samples, max_trans, max_rot, max_mixed, status
 
 
 def _simulate_euler(
@@ -599,7 +702,6 @@ def _simulate_euler(
 
     curr_q = np.array(initial_state[0], dtype=np.float64, copy=True)
     curr_qd = np.array(initial_state[1], dtype=np.float64, copy=True)
-
     q_traj = np.zeros((n_frames, n_coords), dtype=np.float64)
     qd_traj = np.zeros((n_frames, n_coords), dtype=np.float64)
     pred_markers = np.full((n_frames, len(capture.labels), 3), np.nan, dtype=np.float64)
@@ -610,43 +712,21 @@ def _simulate_euler(
         ik_adapter, curr_q, marker_offsets, capture.labels
     )
 
-    all_contact_samples = []
-    max_trans_err: float | None = None
-    max_rot_err: float | None = None
-    max_mixed_err: float | None = None
+    all_contact_samples: list[dict[str, Any]] = []
+    closure_errs: list[float | None] = [None, None, None]
+    ctx = _EulerStepContext(model, theta, duration_s, coord_names, options)
 
     for step in range(n_frames - 1):
-        t_curr = float(times[step])
-        t_next = float(times[step + 1])
-        dt_frame = t_next - t_curr
-        dt_sub = dt_frame / max(1, options.substeps)
-
-        for sub in range(options.substeps):
-            t_sub = t_curr + sub * dt_sub
-            tau_dict = evaluate_polynomial_torques(
-                theta,
-                t_sub,
-                duration_s,
-                coord_names,
-                options.unactuated_indices,
-                normalize_time=options.normalize_time,
-            )
-            q_dict = {name: float(curr_q[i]) for i, name in enumerate(coord_names)}
-            qd_dict = {name: float(curr_qd[i]) for i, name in enumerate(coord_names)}
-
-            c_samples = model.evaluate_contact_samples(q_dict, qd_dict)
-            all_contact_samples.append(c_samples)
-
-            acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
-            trans_err, rot_err, mixed_err = _extract_closure_errors(model)
-            max_trans_err = _accumulate_max(max_trans_err, trans_err)
-            max_rot_err = _accumulate_max(max_rot_err, rot_err)
-            max_mixed_err = _accumulate_max(max_mixed_err, mixed_err)
-
-            acc = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
-            curr_qd += acc * dt_sub
-            curr_q += curr_qd * dt_sub
-
+        dt_frame = float(times[step + 1]) - float(times[step])
+        _step_euler_substeps(
+            ctx,
+            float(times[step]),
+            curr_q,
+            curr_qd,
+            dt_frame,
+            all_contact_samples,
+            closure_errs,
+        )
         q_traj[step + 1] = curr_q.copy()
         qd_traj[step + 1] = curr_qd.copy()
         pred_markers[step + 1] = _compute_frame_markers(
@@ -654,49 +734,39 @@ def _simulate_euler(
         )
 
     # Audit terminal Euler state (frame n_frames - 1)
-    q_term_dict = {name: float(curr_q[i]) for i, name in enumerate(coord_names)}
-    qd_term_dict = {name: float(curr_qd[i]) for i, name in enumerate(coord_names)}
-    all_contact_samples.append(
-        model.evaluate_contact_samples(q_term_dict, qd_term_dict)
-    )
-    tau_term_dict = evaluate_polynomial_torques(
+    c_samples, _, trans, rot, mixed = _evaluate_frame_dynamics(
+        model,
         theta,
         float(times[-1]),
         duration_s,
         coord_names,
-        options.unactuated_indices,
-        normalize_time=options.normalize_time,
+        curr_q,
+        curr_qd,
+        options,
     )
-    model.accelerations(q_term_dict, qd_term_dict, tau_term_dict)
-    trans_err, rot_err, mixed_err = _extract_closure_errors(model)
-    max_trans_err = _accumulate_max(max_trans_err, trans_err)
-    max_rot_err = _accumulate_max(max_rot_err, rot_err)
-    max_mixed_err = _accumulate_max(max_mixed_err, mixed_err)
+    all_contact_samples.append(c_samples)
+    closure_errs[0] = _accumulate_max(closure_errs[0], trans)
+    closure_errs[1] = _accumulate_max(closure_errs[1], rot)
+    closure_errs[2] = _accumulate_max(closure_errs[2], mixed)
 
-    tracked_indices = [
-        i for i, label in enumerate(capture.labels) if label in marker_offsets
-    ]
-    has_nan = (
-        not np.all(np.isfinite(q_traj))
-        or not np.all(np.isfinite(qd_traj))
-        or (
-            len(tracked_indices) > 0
-            and not np.all(np.isfinite(pred_markers[:, tracked_indices, :]))
-        )
-        or (max_trans_err is not None and not np.isfinite(max_trans_err))
-        or (max_rot_err is not None and not np.isfinite(max_rot_err))
-        or (max_mixed_err is not None and not np.isfinite(max_mixed_err))
+    status = _check_trajectory_finite(
+        q_traj,
+        qd_traj,
+        pred_markers,
+        capture.labels,
+        marker_offsets,
+        closure_errs[0],
+        closure_errs[1],
+        closure_errs[2],
     )
-    status = "invalid" if has_nan else "success"
-
     return (
         q_traj,
         qd_traj,
         pred_markers,
         all_contact_samples,
-        max_trans_err if max_trans_err is not None else 0.0,
-        max_rot_err,
-        max_mixed_err if max_mixed_err is not None else 0.0,
+        closure_errs[0] if closure_errs[0] is not None else 0.0,
+        closure_errs[1],
+        closure_errs[2] if closure_errs[2] is not None else 0.0,
         status,
     )
 
