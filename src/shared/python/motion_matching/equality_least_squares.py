@@ -156,7 +156,7 @@ def solve_equality_least_squares(
         return p @ derivative(x)[equality_start:end]
 
     try:
-        result = minimize(
+        result = minimize(  # type: ignore[call-overload]
             lambda y: objective(physical(y)),
             scaled_initial,
             jac=lambda y: gradient(physical(y)) * scale,
@@ -173,12 +173,14 @@ def solve_equality_least_squares(
         if hasattr(result, "jac"):
             result.jac = np.asarray(result.jac) / scale
     except _EvaluationBudgetExceeded:
-        result = OptimizeResult(
-            x=best_x,
-            fun=best_cost,
-            success=False,
-            status=9,
-            message="Physical residual evaluation budget exhausted; returned evaluated fallback",
+        result = OptimizeResult(  # type: ignore[call-arg,arg-type]
+            {
+                "x": best_x,
+                "fun": best_cost,
+                "success": False,
+                "status": 9,
+                "message": "Physical residual evaluation budget exhausted; returned evaluated fallback",
+            }
         )
     result.nfev = count
     # Comparable least_squares scaled optimality is unavailable from SLSQP.
