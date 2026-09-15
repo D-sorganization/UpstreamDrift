@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Returned81 Cross-Engine Replay Format and 5-Metric Evaluation (#10062)
+
+Specifies standardized replay archive serialization, forward-kinematics projection, and 5-metric evaluation across physics engines (MuJoCo, Pinocchio, Drake) for Visuals Handoff Step 4:
+- Implements `src/shared/python/motion_matching/replay_metrics.py`:
+  - `save_native_replay_npz()`: Serializes standardized replay archives containing `time_s` (1D monotonic float array), `native_state` (2D float array with shape $(T, 2n)$), `markers_m` (3D float array with shape $(T, M, 3)$), `target_m` (3D float array with shape $(T, M, 3)$), and `valid` (2D boolean mask with shape $(T, M)$).
+  - `load_native_replay_npz()`: Loads and validates archive contents, enforcing shape alignment, strict time monotonicity, and finite values.
+  - `ReplayFiveMetrics`: Slotted dataclass capturing the 5 uninterrupted tracking metrics: `whole_rms_m`, `early_rms_m`, `terminal_rms_m`, `club_cluster_rms_m`, and `pelvis_yaw_error_pct`.
+  - `compute_replay_five_metrics()`: Evaluates the 5 uninterrupted tracking metrics comparing predicted marker trajectories against target capture markers with valid-mask filtering and pelvis marker cluster identification.
+  - Enforces DbC invariants: validates matching frame counts, strictly increasing time grids, non-empty markers, and raises `ValueError` on corrupt or unaligned data.
+
 ## Shadow Tracker Segmentation Invariants and Model Checkpoint Hardening (#10202)
 
 Hardens segmentation provider and auxiliary DTO boundary invariants addressing review findings:
@@ -29,7 +39,6 @@ No outbound GSPro integration is implemented by this specification update.
 Native GSPro avatars and autonomous course feedback remain vendor-gated research.
 Existing contact/impact qualification gaps must be resolved independently of
 socket delivery; scientific acceptance retains the canonical manual governance.
-
 
 ## Shadow Tracker Evidence-Based Turnover Refresh (#10184)
 
