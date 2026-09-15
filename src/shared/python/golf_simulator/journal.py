@@ -219,7 +219,8 @@ class ShotJournal:
     def _persist_unlocked(self) -> None:
         if self._storage_path is None:
             return
-        self._storage_path.parent.mkdir(parents=True, exist_ok=True)
+        parent_dir = self._storage_path.parent
+        parent_dir.mkdir(parents=True, exist_ok=True)
         entries_data = [e.to_dict() for e in self._entries.values()]
         temp_file = self._storage_path.with_suffix(".tmp")
         temp_file.write_text(json.dumps(entries_data, indent=2), encoding="utf-8")
