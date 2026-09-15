@@ -527,7 +527,7 @@ export interface Body_upload_c3d_tools_motion_capture_upload_c3d_post {
 }
 
 /**
- * Metadata extracted from an uploaded C3D file. Marker positions are converted to meters server-side (mirroring the desktop C3D viewer's ``target_units="m"`` handling) so the web visualizer never has to guess mm-vs-m scaling.
+ * Metadata extracted from an uploaded C3D file. Marker positions are converted to meters server-side by the motion pipeline's ``C3DAdapter`` so the web visualizer never has to guess mm-vs-m scaling.
  */
 export interface C3DUploadResponse {
   recording_name: string;
@@ -539,6 +539,8 @@ export interface C3DUploadResponse {
   native_units: string;
   /** Units of the stored marker positions */
   converted_units: string;
+  /** Tracked-motion result when ``run_pipeline=true`` was requested; None when the upload was playback-only */
+  pipeline?: PipelineResponse | null;
 }
 
 /**
@@ -2028,6 +2030,24 @@ export interface OutcomeProxyRowV1 {
   lateral_yards: number;
   target_distance_yards: number;
   radial_error_yards: number;
+}
+
+/**
+ * Response model for motion pipeline API. Wraps MotionMatchingResult with additional metadata.
+ */
+export interface PipelineResponse {
+  /** Associated request identifier */
+  request_id: string;
+  /** Whether processing succeeded */
+  success: boolean;
+  /** Matched trajectory and metrics (if success) */
+  result?: Record<string, unknown> | null;
+  /** Error message (if failed) */
+  error?: string | null;
+  /** Per-stage audit log for provenance */
+  audit_log?: Record<string, unknown>[];
+  /** Additional metadata */
+  metadata?: Record<string, unknown>;
 }
 
 /**

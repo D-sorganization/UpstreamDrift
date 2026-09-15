@@ -18,11 +18,13 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
 from src.api.middleware.upload_limits import write_upload_file_to_path
 from src.shared.python.core.contracts import precondition
+from src.shared.python.motion_pipeline.api import PipelineResponse
+from src.shared.python.motion_pipeline.contracts import MarkerTrajectory
 from src.shared.python.pose_estimation.registry import (
     capture_source_estimators,
     estimator_availability,
@@ -116,9 +118,9 @@ class PlaybackResponse(BaseModel):
 class C3DUploadResponse(BaseModel):
     """Metadata extracted from an uploaded C3D file.
 
-    Marker positions are converted to meters server-side (mirroring the
-    desktop C3D viewer's ``target_units="m"`` handling) so the web
-    visualizer never has to guess mm-vs-m scaling.
+    Marker positions are converted to meters server-side by the motion
+    pipeline's ``C3DAdapter`` so the web visualizer never has to guess
+    mm-vs-m scaling.
     """
 
     recording_name: str
@@ -131,6 +133,13 @@ class C3DUploadResponse(BaseModel):
     )
     converted_units: str = Field(
         "m", description="Units of the stored marker positions"
+    )
+    pipeline: PipelineResponse | None = Field(
+        None,
+        description=(
+            "Tracked-motion result when ``run_pipeline=true`` was requested; "
+            "None when the upload was playback-only"
+        ),
     )
 
 
@@ -423,15 +432,39 @@ async def get_frame(recording_name: str, frame_index: int) -> SkeletonFrame:
 
 
 @router.post("/upload-c3d", response_model=C3DUploadResponse)
-async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
+async def upload_c3d(
+    file: UploadFile = File(...),
+    run_pipeline: bool = Query(
+        False,
+        description=(
+            "Also hand the parsed trajectory to the motion pipeline "
+            "(adapter → preprocessing → scaling → IK → matching) and return "
+            "the tracked-motion result in ``pipeline``"
+        ),
+    ),
+    ik_backend: str = Query("geometric", description="IK backend for run_pipeline"),
+    matching_backend: str = Query(
+        "mujoco", description="Motion matching backend for run_pipeline"
+    ),
+    matching_model_urdf: str | None = Query(
+        None, description="Production URDF path for matching backends that need one"
+    ),
+) -> C3DUploadResponse:
     """Upload a C3D file and register it as a playback-ready recording.
 
-    The file is parsed with the same ``C3DDataReader`` the desktop viewer
-    uses; marker positions are converted to meters (``target_units="m"``)
-    so mm-based files render at the correct scale. Returns marker metadata
-    and the recording id usable with the playback/frame endpoints.
+    The file is parsed once by the motion pipeline's ``C3DAdapter`` — the
+    same reader ``POST /api/v1/motion-pipeline/run`` uses — so marker
+    positions arrive in meters and format quirks are handled in one place
+    (#8865). Returns marker metadata and the recording id usable with the
+    playback/frame endpoints.
 
-    See issue #7454
+    With ``run_pipeline=true`` the parsed ``MarkerTrajectory`` is handed to
+    ``MotionPipeline`` without re-parsing and the tracked-motion result is
+    returned in ``pipeline``. A failed solve does not fail the upload: the
+    recording is still registered and ``pipeline.success`` is ``False`` with
+    the error message, so the playback half never depends on the solve.
+
+    See issues #7454, #8865
     """
     filename = file.filename or "upload.c3d"
     if not filename.lower().endswith(".c3d"):
@@ -447,25 +480,31 @@ async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
             detail=f"C3D import is unavailable: {reason}",
         )
 
-    from src.shared.python.sidekick.lab.bio.c3d_reader import C3DDataReader
+    from src.shared.python.motion_pipeline.sources.base import AdapterContractError
+    from src.shared.python.motion_pipeline.sources.c3d_adapter import C3DAdapter
 
     with tempfile.TemporaryDirectory(prefix="mocap_c3d_") as tmp_dir:
         tmp_path = Path(tmp_dir) / "upload.c3d"
         await write_upload_file_to_path(file, tmp_path)
         try:
-            reader = C3DDataReader(tmp_path)
-            metadata = reader.get_metadata()
-            df_points = reader.points_dataframe(include_time=False, target_units="m")
-        except (ValueError, KeyError, OSError, RuntimeError, IndexError) as exc:
+            trajectory = C3DAdapter().load(tmp_path)
+        except (
+            AdapterContractError,
+            ValueError,
+            KeyError,
+            OSError,
+            RuntimeError,
+            IndexError,
+        ) as exc:
             logger.exception("Failed to parse uploaded C3D file %s", filename)
             raise HTTPException(
                 status_code=422,
                 detail=f"Could not parse C3D file '{filename}': {exc}",
             ) from exc
 
-    marker_names = list(metadata.marker_labels)
-    frame_rate = float(metadata.frame_rate)
-    frames = _frames_from_points(df_points, frame_rate)
+    marker_names = [str(label) for label in trajectory.metadata["source_labels"]]
+    frame_rate = float(trajectory.metadata["fps"])
+    frames = _frames_from_trajectory(trajectory, marker_names)
 
     _session_state["counter"] += 1
     recording_name = f"c3d_{Path(filename).stem}_{_session_state['counter']}"
@@ -478,6 +517,21 @@ async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
     if len(_recordings) > _MAX_CACHE_SIZE:
         _recordings.pop(next(iter(_recordings)))
 
+    pipeline_response = None
+    if run_pipeline:
+        pipeline_response = _hand_off_to_pipeline(
+            trajectory,
+            request_id=recording_name,
+            ik_backend=ik_backend,
+            matching_backend=matching_backend,
+            matching_model_urdf=matching_model_urdf,
+        )
+
+    native_units = (
+        str(trajectory.metadata["units"])
+        if trajectory.metadata.get("units_declared")
+        else ""
+    )
     duration = len(frames) / frame_rate if frame_rate > 0 else 0.0
     return C3DUploadResponse(
         recording_name=recording_name,
@@ -485,19 +539,22 @@ async def upload_c3d(file: UploadFile = File(...)) -> C3DUploadResponse:
         frame_rate=frame_rate,
         total_frames=len(frames),
         duration_seconds=duration,
-        native_units=str(metadata.units or ""),
+        native_units=native_units,
         converted_units="m",
+        pipeline=pipeline_response,
     )
 
 
 # ── Helpers ──
 
 # Non-estimator sources keep a local probe table; estimator sources are
-# probed through the registry (C2/#8402).
+# probed through the registry (C2/#8402). C3D is served by the motion
+# pipeline's C3DAdapter, which accepts either of its backends (#8865).
 _UNAVAILABLE_REASONS = {
     "c3d": (
-        "ezc3d",
-        "ezc3d is not installed on the server (pip install ezc3d)",
+        ("upstream_mocap_io", "ezc3d"),
+        "no C3D backend is installed on the server "
+        "(pip install ezc3d or upstream-mocap-io)",
     ),
 }
 
@@ -510,13 +567,50 @@ def _source_availability(source_id: str) -> tuple[bool, str | None]:
     """
     if source_id not in _UNAVAILABLE_REASONS:
         return estimator_availability(source_id)
-    module_name, reason = _UNAVAILABLE_REASONS[source_id]
-    try:
-        if importlib.util.find_spec(module_name) is not None:
-            return True, None
-    except (ImportError, ValueError):  # broken partial installs
-        logger.warning("Probing importability of %s failed", module_name)
+    module_names, reason = _UNAVAILABLE_REASONS[source_id]
+    for module_name in module_names:
+        try:
+            if importlib.util.find_spec(module_name) is not None:
+                return True, None
+        except (ImportError, ValueError):  # broken partial installs
+            logger.warning("Probing importability of %s failed", module_name)
     return False, reason
+
+
+def _hand_off_to_pipeline(
+    trajectory: MarkerTrajectory,
+    *,
+    request_id: str,
+    ik_backend: str,
+    matching_backend: str,
+    matching_model_urdf: str | None,
+) -> PipelineResponse:
+    """Run the motion pipeline on an already-parsed trajectory.
+
+    Mirrors ``POST /api/v1/motion-pipeline/run`` but skips the adapter
+    stage: the trajectory is passed through as canonical data so the C3D
+    file is parsed exactly once. Failures are reported in the response
+    rather than raised, because the caller's upload has already succeeded.
+    """
+    from src.shared.python.motion_pipeline.orchestrator import (
+        AdapterOverride,
+        MotionPipeline,
+        PipelineConfig,
+    )
+
+    config = PipelineConfig(
+        adapter=AdapterOverride(format="c3d"),
+        ik_backend=ik_backend,
+        matching_backend=matching_backend,
+        matching_model_urdf=matching_model_urdf,
+    )
+    pipeline = MotionPipeline(config)
+    try:
+        result = pipeline.run(trajectory)
+    except (ValueError, RuntimeError) as exc:
+        logger.exception("Motion pipeline hand-off failed for %s", request_id)
+        return PipelineResponse.from_error(request_id, str(exc))
+    return PipelineResponse.from_result(result, pipeline.get_audit_log())
 
 
 def _recording_joint_names(recording: dict[str, Any]) -> list[str]:
@@ -539,37 +633,37 @@ def _skeleton_parent_for(source_type: str, joint_name: str) -> str | None:
     return None
 
 
-def _frames_from_points(df_points: Any, frame_rate: float) -> list[dict[str, Any]]:
-    """Convert a tidy C3D points DataFrame into playback frames.
+def _frames_from_trajectory(
+    trajectory: MarkerTrajectory, marker_names: list[str]
+) -> list[dict[str, Any]]:
+    """Convert a canonical ``MarkerTrajectory`` into playback frames.
 
-    Non-finite coordinates (occluded markers) are zeroed with confidence 0
-    so frames stay JSON-serializable; valid markers get confidence 1.
+    The adapter drops occluded / non-finite markers from a frame; they are
+    re-emitted here zeroed with confidence 0 so every frame lists the full
+    marker set and stays JSON-serializable. Present markers get confidence 1.
     """
-    if df_points is None or df_points.empty:
-        return []
-
     frames: list[dict[str, Any]] = []
-    frame_ids = sorted(df_points["frame"].unique())
-    grouped = dict(tuple(df_points.groupby("frame")))
-    for out_index, frame_id in enumerate(frame_ids):
-        group = grouped[frame_id]
+    for out_index, frame in enumerate(trajectory.frames):
         joints = []
-        for row in group.itertuples(index=False):
-            x, y, z = float(row.x), float(row.y), float(row.z)
-            finite = all(math.isfinite(v) for v in (x, y, z))
+        for name in marker_names:
+            marker = frame.markers.get(name)
+            position, confidence = [0.0, 0.0, 0.0], 0.0
+            if marker is not None and all(
+                math.isfinite(v) for v in (marker.x, marker.y, marker.z)
+            ):
+                position, confidence = [marker.x, marker.y, marker.z], 1.0
             joints.append(
                 {
-                    "name": str(row.marker),
-                    "position": [x, y, z] if finite else [0.0, 0.0, 0.0],
-                    "confidence": 1.0 if finite else 0.0,
+                    "name": name,
+                    "position": position,
+                    "confidence": confidence,
                     "parent": None,
                 }
             )
-        timestamp = out_index / frame_rate if frame_rate > 0 else float(out_index)
         frames.append(
             {
                 "frame_index": out_index,
-                "timestamp": timestamp,
+                "timestamp": float(frame.timestamp),
                 "joints": joints,
             }
         )
