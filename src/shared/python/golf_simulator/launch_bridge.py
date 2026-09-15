@@ -108,6 +108,42 @@ def launch_conditions_to_shot_envelope(
     )
 
 
+def shot_envelope_to_launch_conditions(
+    shot: ShotEnvelope,
+) -> LaunchConditions:
+    """Convert a canonical ShotEnvelope back into standard LaunchConditions.
+
+    Recovers speed, vertical launch angle, horizontal azimuth, spin rate (RPM),
+    and unit spin axis from Cartesian SI coordinates (+x forward, +y left, +z up).
+    """
+    from src.shared.python.physics.ball_launch_conditions import LaunchConditions
+
+    vx, vy, vz = shot.ball_velocity_m_s
+    v_horiz = math.sqrt(vx * vx + vy * vy)
+    speed = math.sqrt(vx * vx + vy * vy + vz * vz)
+    launch_angle = math.atan2(vz, v_horiz)
+    azimuth_angle = math.atan2(vy, vx)
+
+    wx, wy, wz = shot.ball_angular_velocity_rad_s
+    omega_mag = math.sqrt(wx * wx + wy * wy + wz * wz)
+    spin_rate_rpm = omega_mag * 60.0 / (2.0 * math.pi)
+
+    if omega_mag > 1e-9:
+        spin_axis = np.array(
+            [wx / omega_mag, wy / omega_mag, wz / omega_mag], dtype=float
+        )
+    else:
+        spin_axis = np.array([0.0, -1.0, 0.0], dtype=float)
+
+    return LaunchConditions(
+        velocity=float(speed),
+        launch_angle=float(launch_angle),
+        azimuth_angle=float(azimuth_angle),
+        spin_rate=float(spin_rate_rpm),
+        spin_axis=spin_axis,
+    )
+
+
 def post_impact_state_to_shot_envelope(
     post_impact: PostImpactState,
     metadata: ShotMetadata,
