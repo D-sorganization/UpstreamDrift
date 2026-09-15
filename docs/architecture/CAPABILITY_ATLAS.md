@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**59 launcher tiles · 44 feature contracts.**
+**60 launcher tiles · 45 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -227,6 +227,7 @@ flowchart LR
 | Character Builder (humanoid URDF generation) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/model_generation/cli/main.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/character_builder.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/CharacterBuilder.tsx) |
 | Data Explorer (import/filter/visualize datasets) | gap | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/data_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DataExplorer.tsx) |
 | Swing dataset generation and import | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/dataset.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DatasetGenerator.tsx) |
+| Golf Simulator capability-aware controls and replay submission | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/golf_simulator/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/golf_simulator.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/GolfSimulator.tsx) |
 | Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/launch_monitor_analytics/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launch_monitor_analytics.py) |
 | MATLAB/Simscape model suite | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/matlab_suite_dialog.py) |
 | Model Explorer (browse/select/build URDF-MJCF) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/launch_model_explorer.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/model_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/ModelExplorer.tsx) |
