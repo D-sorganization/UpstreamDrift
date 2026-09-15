@@ -4898,6 +4898,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-15 | #10204 | Capture rig adopts the shared camera layer: `vendor/ud-tools` pinned to Tools 1ac89c18e (`shared.python.camera`), `preview_source.py` becomes one `SharedSourceAdapter` (rig `open/read/close` over the Tools `FrameSource`) and `recorder.dshow_device_ref` delegates; the preview command is pinned token-for-token against the pre-port list (only delta: `-rtbufsize 256M`). Adapter tests run in the isolated provider harness. |
 | 2026-09-15 | #10201 | Propose GSPro and interchangeable simulator integration, detailed implementation children, architecture and worker turnover (#10188); no runtime implementation. |
 | 2026-09-15 | #10185 | Refresh Shadow Tracker turnover with reproduced acceptance gaps and current corrective/product sequence (#10184). |
 | 2026-09-15 | #10152 | Review Shadow Tracker contracts and publish the full implementation, launcher, performance and CI/CD continuation handoff (#10150). |
