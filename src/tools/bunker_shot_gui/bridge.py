@@ -30,6 +30,7 @@ No Qt, no arithmetic that is not either the solver's or the metric's.
 """
 
 from __future__ import annotations
+import math
 
 from dataclasses import dataclass
 from functools import lru_cache
@@ -652,7 +653,9 @@ def _state_at(
     position = result.positions_m[frame]
     velocity = np.asarray(result.velocities_m_s[frame], dtype=np.float64)
     if speed_m_s is not None:
-        recorded = float(np.linalg.norm(velocity))
+        recorded = float(
+            math.sqrt(velocity.dot(velocity))
+        )  # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
         if recorded <= 0.0:
             raise ValueError(
                 f"sample {frame} has no velocity, so there is no direction to "
