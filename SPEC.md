@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Video Ingestion, Shots, Timing, and Capture Evidence (#10126)
+
+Specifies video ingestion, shot partitioning, timing mappings, and capture evidence for Shadow Tracker ST-03:
+- Implements `src/shared/python/shadow_tracker/ingestion.py` for auditable observation ingestion:
+  - `ingest_source_asset()`: Ingests media files into immutable `SourceAsset` records with SHA-256 content verification, rights status, and dimensions; rejects missing, corrupt, or empty media files.
+  - `SourceCatalog`: In-memory catalog ensuring idempotent registration and detecting conflicting asset contents for identical asset IDs.
+  - `create_shot()` and `ShotDefinition`: Builds validated continuous shots bound to parent source assets with cut intervals and transform provenance.
+  - `validate_shot_frames()` and `filter_shot_frames()`: Strictly rejects cross-swing fusion (mismatched `swing_id`), inconsistent camera/asset IDs, out-of-bounds timestamps, and filters cut intervals.
+  - `AffineTimingMapping` and `PiecewiseTimingMapping`: Provides rational and piecewise mappings between presentation time and physical swing time without assuming constant framerates or continuous physics across edits.
+  - `CameraSynchronization`: Models multi-view camera offsets, clock drift rates, and uncertainty bounds.
+  - `detect_telecine_duplicates()`: Identifies consecutive telecine pull-down duplicate frames via content hashes while preserving audit trails.
+  - `map_frame_to_observation()`: Translates ingested frame identities into `FrameObservation` records.
+  - `SyntheticVideoDecoder` and `ingest_capture_rig_view()`: Provides deterministic offline decoding and Capture Rig view adapters.
+
 ## Shadow Tracker Immutable Evidence Contracts and Service Protocols (#10125)
 
 Freezes immutable evidence contracts, auxiliary DTOs, and runtime service protocols for Shadow Tracker ST-02:
