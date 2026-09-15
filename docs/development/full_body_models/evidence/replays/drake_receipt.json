@@ -1,0 +1,19 @@
+{
+  "candidate_sha256": "a9a0fa8eb20aa1b1a4e8a4c885cc13d2d1cfe750755357eee0de25354373ee56",
+  "engine": "drake",
+  "replay_npz": "drake_returned81_replay.npz",
+  "gif": "drake_returned81.gif",
+  "metrics": {
+    "whole_rms_m": 0.026365350715109214,
+    "early_rms_m": 0.01142617956954139,
+    "terminal_rms_m": 0.046305405150117544,
+    "club_cluster_rms_m": 0.015952762868635062,
+    "pelvis_yaw_error_pct": 13.923000255931143
+  },
+  "marker_diff_vs_pinocchio": {
+    "max_abs_m": 1.624195827958433e-5,
+    "mean_abs_m": 2.184200899169326e-6
+  },
+  "frames_evaluated": 307,
+  "kinematic_parity_passed": false
+}
