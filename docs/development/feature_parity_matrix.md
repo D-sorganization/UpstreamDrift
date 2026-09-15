@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 19 parity · 12 gap · 13 exempt (12 pending decision in #7460).
+**Summary:** 20 parity · 12 gap · 13 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -46,6 +46,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.character_builder`<br>Character Builder (humanoid URDF generation) | 🔴 gap | `src/shared/python/model_generation/cli/main.py` | `src/api/routes/character_builder.py` | `ui/src/pages/CharacterBuilder.tsx` | #7448 |
 | `tools.data_explorer`<br>Data Explorer (import/filter/visualize datasets) | 🔴 gap | — | `src/api/routes/data_explorer.py` | `ui/src/pages/DataExplorer.tsx` | #7448 |
 | `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |
+| `tools.golf_simulator`<br>Golf Simulator capability-aware controls and replay submission | ✅ parity | `src/tools/golf_simulator/gui.py` | `src/api/routes/golf_simulator.py` | `ui/src/pages/GolfSimulator.tsx` | — |
 | `tools.launch_monitor_analytics`<br>Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends | 🔴 gap | `src/tools/launch_monitor_analytics/gui.py` | `src/api/routes/launch_monitor_analytics.py` | — | #8364 |
 | `tools.matlab_suite`<br>MATLAB/Simscape model suite | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | — | — | Requires a local MATLAB installation; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | 🔴 gap | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | #7448 |
@@ -80,6 +81,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `drake_golf` | `engines.load_and_simulate` |
 | `force_overlays` | `simulation.controls_wiring` |
 | `golf_simulation_suite` | `simulation.golf_suite_batch` |
+| `golf_simulator` | `tools.golf_simulator` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
 | `matlab_suite` | `tools.matlab_suite` |
