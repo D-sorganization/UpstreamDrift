@@ -25,11 +25,12 @@ tracks.
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 GRAVITY_M_S2 = 9.81
 
 
