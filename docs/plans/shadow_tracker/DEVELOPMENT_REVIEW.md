@@ -5,6 +5,7 @@
 Reviewed commit `c3395229839cfb66ded994bbef0a39fcb985e1e6` on 2026-09-14.
 Merged implementations: source/frame records #10145, camera bridge #10147,
 and masks #10148; #10149 updates the dispatch table. Review tracking: #10150.
+Published in [PR #10152](https://github.com/D-sorganization/UpstreamDrift/pull/10152).
 This document reviews those changes and defines the remaining delivery work.
 It does not certify an implemented fitter, a working launcher feature, or a
 scientifically qualified model. The full implementation epic is still #10122.
