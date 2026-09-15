@@ -1,5 +1,45 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Subject Shape and Initial-State Hypotheses (#10129)
+
+Specifies subject shape fitting and initial-state hypothesis generation for Shadow Tracker ST-06:
+- Implements `src/shared/python/shadow_tracker/initialization.py`:
+  - `VisualMorphology`: Slotted frozen record encapsulating visual envelope dimensions (`height_m`, `chest_width_m`, `depth_m`, `segment_lengths`), strictly positive and finite.
+  - `InertialParameters`: Slotted frozen record encapsulating mass properties (`mass_kg`, `center_of_mass_body_m`, `moments_of_inertia_kg_m2`), enforcing strict separation from visual dimensions so visual envelope edits never corrupt mass/inertial properties.
+  - `SubjectMorphology`: Slotted frozen aggregate binding `subject_id`, `VisualMorphology`, `InertialParameters`, and `handedness`.
+  - `InitialHypothesis`: Slotted frozen candidate record containing initial kinematic state (`pose`, `velocity`), camera geometry (`camera_id`, `scale`, `depth_m`), `score`, `label` (`"observed" | "inferred" | "prior"`), and `provenance`.
+  - `MultiviewFitResult`: Slotted frozen container storing the evaluated initial hypotheses, `best_hypothesis`, `residuals_evaluated`, and `camera_ids`.
+  - `estimate_short_window_velocity()`: Computes initial coordinate rates via finite differences over short multi-frame windows ($\ge 2$ frames) without assuming zero initial velocity or static address posture.
+  - `generate_monocular_hypotheses()`: Generates discrete depth, scale, and handedness hypotheses under monocular ambiguity without prematurely collapsing to an arbitrary unique depth.
+  - `fit_initial_state_multiview()`: Recovers known poses and evaluates initial-state candidates across calibrated multi-view silhouettes using objective valid-pixel residual loss functions (`compute_silhouette_loss`). Fulfills Gate G2 pose recovery.
+
+## Shadow Tracker Calibrated Silhouette Rendering and Residual Losses (#10128)
+
+Specifies calibrated silhouette rendering, analytic projection, and valid-pixel residual losses for Shadow Tracker ST-05:
+- Implements `src/shared/python/shadow_tracker/projection.py`:
+  - `PinholeCameraModel`: Slotted frozen camera model encapsulating dimensions, intrinsics (`fx`, `fy`, `cx`, `cy`), Brown-Conrady distortion (`k1`, `k2`, `p1`, `p2`, `k3`), extrinsics ($R_{wc}, t_{wc}$), cropping, and mirroring.
+  - `project_point_to_pixel()`: Computes analytic pinhole projection of 3D world coordinates with lens distortion, mirroring, and cropping; strictly rejects non-positive focal lengths, non-finite parameters, and handles behind-camera and offscreen geometry. Meets Gate G1 accuracy ($\le 0.5$ px).
+  - `AnalyticSilhouetteRenderer`: Reference renderer fulfilling `SilhouetteRenderer` protocol, rendering slotted `RenderResult` masks (`body_mask`, `club_mask`, `visibility_mask`) from candidate state vectors without engine or GPU dependencies.
+  - `SilhouetteLossResult` and `compute_silhouette_loss()`: Computes valid-pixel aware silhouette residuals and combined loss comparing rendered candidates to observed `MaskFrame` records.
+  - Enforces strict DbC invariants:
+    - Points behind the camera plane ($Z_c \le 0$) or outside effective boundaries are flagged non-visible (`is_visible=False`).
+    - Evaluates IoU and Dice residuals strictly over valid pixels (`valid != 0`), ensuring occluded or unobserved regions do not penalize candidate solutions.
+    - All-invalid masks return well-defined results (`is_valid=False`, `valid_pixel_count=0`) without `ZeroDivisionError` or NaN.
+    - Monotonic contour shift: known spatial displacements strictly increase loss.
+    - Thin-club separation: club loss is evaluated independently from body loss so body overlap cannot mask clubhead or shaft tracking errors.
+
+## Shadow Tracker Body/Club Silhouettes and Segmentation (#10127)
+
+Specifies body and club silhouette segmentation, gold-mask evaluation, and occlusion tracking for Shadow Tracker ST-04:
+- Implements `src/shared/python/shadow_tracker/segmentation.py`:
+  - `ManualMaskProvider`: Deterministic segmenter fulfilling `Segmenter` protocol for reviewed gold masks and corrections; maps registered `MaskFrame` instances by `frame_id` with `has_mask` and `get_mask`.
+  - `ModelSegmentationProvider`: Adapter for automated silhouette segmentation models enforcing lazy missing-checkpoint validation (`FileNotFoundError`) and provenance tagging without unqualified automatic mask confidence.
+  - `track_occlusion_and_identity()`: Computes body visibility fraction relative to expected body area, evaluating partial occlusion and identity loss thresholds into frozen `OcclusionReport`.
+  - `compute_mask_iou()` and `compute_mask_dice()`: Computes intersection-over-union and Dice similarity coefficients strictly over valid pixels (`valid != 0`), ignoring unobserved or masked-out regions.
+  - Enforces strict DbC invariants:
+    - Empty vs unknown mask semantics: unobserved regions require `valid == 0`, and any non-zero body or club pixel on an invalid pixel strictly raises `ValueError`.
+    - Revision-aware cache invalidation: manual corrections update `revision_id`, link `parent_revision_id`, and produce a modified `observation_hash`, ensuring downstream silhouette losses and residual caches are safely invalidated.
+
 ## Fail Closed on Invalid Rollout and Missing Closure Evidence (#10166)
 
 Hardens physical rollout acceptance gating and closure error extraction:
