@@ -16,30 +16,14 @@ ST-01 scientific qualification has passed.
 | D      | [#10140](https://github.com/D-sorganization/UpstreamDrift/issues/10140) | Specialist Review Required                                                              | Fix IK coordinate packing, then regenerate invalidated evidence |
 | E      | [#10141](https://github.com/D-sorganization/UpstreamDrift/issues/10141) | Specialist Review Required                                                              | Separate production closure units and acceptance status         |
 
-A and C can be assigned to separate agents because they have disjoint source
-files. Serialize façade changes or let the integration reviewer reconcile those
-few exports. B waits for A's actual merged API. This is an assignment plan;
-no background agents have been started by the handoff.
+## Current Dispatch
 
-## Exact Worker Prompt
-
-```text
-Implement Shadow Tracker Packet <A/C/B>, issue #<10137/10139/10138>.
-Read repository AGENTS.md and CLAUDE.md, then:
-  docs/plans/shadow_tracker/CONTRACT_FREEZE.md
-  docs/plans/shadow_tracker/READY_TASKS.md
-  docs/plans/shadow_tracker/AGENT_HANDOFF.md
-Claim the child issue using Repository_Management before editing.
-Implement only the chosen packet and its unit tests. Use the frozen field names,
-types, schema tags, error policy and acceptance examples exactly. Write and run
-the failing tests before implementation. Record red and green output in the PR.
-No decoder, neural model, dynamics engine or scientific gate changes are allowed.
-Use existing camera/state/contract utilities; no third camera convention.
-Keep each PR small. Do not close #10122, #10124 or #10125 with this slice.
-Update the handoff with commit, tests, remaining dependency and exact next task.
-If the frozen API cannot be satisfied using the existing provider, report the
-specific mismatch instead of changing the contract or returning mock success.
-```
+A/B/C are implemented; their old pickup prompt is retired. Begin with
+[Development Review](DEVELOPMENT_REVIEW.md) and
+[Continuation Prompt](CONTINUATION_PROMPT.md). The first corrective task is
+#10151: malformed-input contracts and pre-conversion mask-size validation.
+Specialist blockers #10140/#10141 remain open. The review defines the complete
+remaining pipeline, launcher, performance and release acceptance.
 
 ## Commands by Packet
 

@@ -1,5 +1,11 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Development Review and Continuation (#10150)
+
+Records the reviewed image-contract baseline, reproduced validation findings and
+full delivery handoff covering TDD/DbC/LoD/DRY, model qualification, launcher/UI,
+performance and CI/CD. No fitter or scientific gate is completed by this review.
+
 ## Shadow Tracker Immutable Binary Masks and Lineage (ST-02B, #10138)
 
 Implements frozen `MaskFrame` record under `src/shared/python/shadow_tracker/mask_records.py`

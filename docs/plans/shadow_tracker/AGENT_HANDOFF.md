@@ -2,32 +2,18 @@
 
 ## Current State
 
-Epic #10122 now has a tested real-model qualification experiment plus frozen
-image-only contracts and dispatch packets. No segmentation, fitter, runnable
-product demo or scientific qualification is implemented. There is no newly
-committed footage, checkpoint or large model asset.
-
-The planning setup [PR #10136](https://github.com/D-sorganization/UpstreamDrift/pull/10136)
-is merged and ST-00 is closed. Image-record implementation remains open.
+Reviewed implementation baseline: `c3395229839cfb66ded994bbef0a39fcb985e1e6`.
+A/B/C are merged in #10145/#10147/#10148. All 111 focused tests pass, but review
+reproduced validation and allocation-order gaps. No fitter, segmentation pipeline
+or Shadow Tracker launcher workflow is implemented; scientific gates remain open.
 
 ## Immediate Dispatch
 
-This handoff is published in
-[PR #10144](https://github.com/D-sorganization/UpstreamDrift/pull/10144), closing
-only handoff preparation #10142. Its source code and contract decisions must
-be present in the worker checkout.
-
-Use [Ready Tasks](READY_TASKS.md): Packet A (#10137) and Packet C (#10139)
-can start from this handoff independently; Packet B (#10138) waits for A.
-[Contract Freeze](CONTRACT_FREEZE.md) supplies exact types and acceptance cases.
-[Qualification Findings](QUALIFICATION_FINDINGS.md) records the real-runtime
-probe and specialist blockers #10140/#10141. ST-01 remains open; its scientific
-gates are not passed. See ST-D7 for why image bookkeeping can proceed separately.
-
-Canonical starting point: [README](README.md). Decisions are in
-[Architecture](ARCHITECTURE.md); contracts and tolerances are proposals until
-ST-01/ST-02 freeze them. GitHub issues are authoritative for current work status.
-Do not copy stale `pending` roadmap state into a completion claim.
+Read [Development Review](DEVELOPMENT_REVIEW.md) for evidence and the entire
+remaining implementation path, then use [Continuation Prompt](CONTINUATION_PROMPT.md).
+Claim #10151 for contract repair first. Specialist #10140/#10141 and ST-01 remain
+open; do not interpret merged image records as physical-model qualification.
+The original planning and diagnostic receipts below are historical evidence.
 
 ## First Pickup
 
