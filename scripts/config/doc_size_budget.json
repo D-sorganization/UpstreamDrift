@@ -48,6 +48,12 @@
       "owner": "@simulation-team",
       "reason": "Active multi-agent continuation turnover document tracking forward dynamics optimization and gate audits.",
       "expires_on": "2026-10-15"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/anthropometry/REVIEW.md",
+      "owner": "@simulation-team",
+      "reason": "Comprehensive anthropometry and posture review evidence document for AN-1 and ground support program; staged for section decomposition under epic #10162.",
+      "expires_on": "2026-10-15"
     }
   ]
 }

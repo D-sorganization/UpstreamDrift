@@ -22,7 +22,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from src.engines.physics_engines.opensim.python.tour_matching.marker_calibration import (
+from src.shared.python.motion_matching.marker_calibration import (
     rigid_pose_from_markers,
 )
 
