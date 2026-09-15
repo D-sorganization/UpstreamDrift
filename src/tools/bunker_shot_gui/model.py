@@ -216,7 +216,9 @@ def _sand_delivery(
     """
     accelerated = divot.accelerated_mass
     return SandDelivery(
-        impulse_n_s=float(np.linalg.norm(result.impulse_n_s)),
+        impulse_n_s=float(
+            math.sqrt(result.impulse_n_s.dot(result.impulse_n_s))
+        ),  # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
         displaced_mass_kg=accelerated.central_kg,
         displaced_mass_bounds_kg=accelerated.bounds_kg,
         displaced_mass_reason=ACCELERATED_MASS_CONSISTENCY_REASON,
@@ -489,7 +491,9 @@ class WorkbenchModel:
             refused=False,
             delivered=delivered,
             peak_force_n=result.peak_force_n,
-            impulse_n_s=float(np.linalg.norm(result.impulse_n_s)),
+            impulse_n_s=float(
+                math.sqrt(result.impulse_n_s.dot(result.impulse_n_s))
+            ),  # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
             entry_speed_mps=result.entry_speed_m_s,
             exit_speed_mps=result.exit_speed_m_s,
             max_depth_m=result.max_sole_depth_m,
