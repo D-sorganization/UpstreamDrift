@@ -10,26 +10,50 @@
  * - Safe operator recovery for uncertain delivery
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { apiFetch } from "@/api/fetch";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
+
+export type DeliveryStatus =
+  | "DISCONNECTED"
+  | "CONNECTED"
+  | "PREPARED"
+  | "ARMED"
+  | "SENT_UNCONFIRMED"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "VISUALLY_VERIFIED";
+
+export interface CapabilityItem {
+  state: string;
+  evidence: string;
+}
+
+export interface Capabilities {
+  shot_input?: CapabilityItem;
+  club_data?: CapabilityItem;
+  local_trajectory_return?: CapabilityItem;
+}
 
 export interface DestinationItem {
   destination_id: string;
   name: string;
   description: string;
   is_connected: boolean;
-  capabilities: {
-    shot_input: { state: string; evidence: string };
-    club_data: { state: string; evidence: string };
-    local_trajectory_return: { state: string; evidence: string };
-  };
+  capabilities?: Capabilities;
+}
+
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
+  return fallback;
 }
 
 export function GolfSimulatorPage() {
   const [destinations, setDestinations] = useState<DestinationItem[]>([]);
   const [selectedDest, setSelectedDest] = useState<string>("local");
-  const [sessionState, setSessionState] = useState<string>("DISCONNECTED");
+  const [sessionState, setSessionState] = useState<DeliveryStatus>("DISCONNECTED");
   const [preparedShotId, setPreparedShotId] = useState<string | null>(null);
   const [armToken, setArmToken] = useState<string | null>(null);
   const [replayState, setReplayState] = useState<string>("stopped");
@@ -37,20 +61,28 @@ export function GolfSimulatorPage() {
   const [operatorEvidence, setOperatorEvidence] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const fetchDestinations = useCallback(async () => {
-    try {
-      const res = await apiFetch<{ destinations: DestinationItem[] }>("/tools/golf-simulator/destinations");
-      if (res && res.destinations) {
-        setDestinations(res.destinations);
-      }
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to load destinations");
-    }
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch<{ destinations: DestinationItem[] }>("/tools/golf-simulator/destinations")
+      .then((res) => {
+        if (!cancelled && res?.destinations) {
+          setDestinations(res.destinations);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setErrorMsg(getErrorMessage(err, "Failed to load destinations"));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  useEffect(() => {
-    fetchDestinations();
-  }, [fetchDestinations]);
+  const capabilities = useMemo(() => {
+    const dest = destinations.find((d) => d.destination_id === selectedDest);
+    return dest?.capabilities ?? null;
+  }, [destinations, selectedDest]);
 
   const handleConnect = async () => {
     try {
@@ -59,9 +91,9 @@ export function GolfSimulatorPage() {
         method: "POST",
         body: JSON.stringify({ destination_id: selectedDest, session_id: "web-session" }),
       });
-      setSessionState(res.state === "idle" ? "CONNECTED" : res.state.toUpperCase());
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to connect to simulator");
+      setSessionState(res.state === "idle" ? "CONNECTED" : (res.state.toUpperCase() as DeliveryStatus));
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Failed to connect to simulator"));
     }
   };
 
@@ -99,8 +131,8 @@ export function GolfSimulatorPage() {
       });
       setPreparedShotId(res.prepared_shot_id);
       setSessionState("PREPARED");
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to prepare shot");
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Failed to prepare shot"));
     }
   };
 
@@ -114,8 +146,8 @@ export function GolfSimulatorPage() {
       });
       setArmToken(res.arm_token);
       setSessionState("ARMED");
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to arm shot");
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Failed to arm shot"));
     }
   };
 
@@ -129,8 +161,8 @@ export function GolfSimulatorPage() {
       });
       setArmToken(null);
       setSessionState("PREPARED");
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to disarm shot");
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Failed to disarm shot"));
     }
   };
 
@@ -145,8 +177,8 @@ export function GolfSimulatorPage() {
       setPreparedShotId(null);
       setArmToken(null);
       setSessionState("CONNECTED");
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to cancel shot");
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Failed to cancel shot"));
     }
   };
 
@@ -167,8 +199,8 @@ export function GolfSimulatorPage() {
       } else {
         setSessionState("REJECTED");
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to submit shot");
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Failed to submit shot"));
     }
   };
 
@@ -182,8 +214,8 @@ export function GolfSimulatorPage() {
       });
       setSessionState("VISUALLY_VERIFIED");
       setOperatorEvidence("");
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to reconcile delivery");
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Failed to reconcile delivery"));
     }
   };
 
@@ -199,8 +231,8 @@ export function GolfSimulatorPage() {
       );
       setReplayState(res.playback_state);
       setReplayTimeS(res.current_time_s);
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Replay action failed");
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Replay action failed"));
     }
   };
 
@@ -231,8 +263,9 @@ export function GolfSimulatorPage() {
   };
 
   return (
-    <WorkspaceShell title="Golf Simulator Console">
+    <WorkspaceShell>
       <div className="space-y-6 max-w-4xl mx-auto p-4 text-gray-200">
+        <h1 className="text-xl font-bold">Golf Simulator Console</h1>
         {errorMsg && (
           <div role="alert" className="p-3 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
             {errorMsg}
@@ -282,6 +315,28 @@ export function GolfSimulatorPage() {
             </span>
           </div>
         </section>
+
+        {/* Capability Indicators */}
+        {capabilities && (
+          <section className="bg-gray-800/80 p-3 rounded-lg border border-gray-700 flex flex-wrap items-center gap-4 text-xs">
+            <span className="text-gray-400 font-medium">Capabilities:</span>
+            {capabilities.shot_input && (
+              <span className="px-2 py-0.5 rounded bg-gray-700 text-gray-200">
+                Shot Input: <span className="font-semibold text-emerald-400">{capabilities.shot_input.state}</span>
+              </span>
+            )}
+            {capabilities.club_data && (
+              <span className="px-2 py-0.5 rounded bg-gray-700 text-gray-200">
+                Club Data: <span className="font-semibold text-sky-400">{capabilities.club_data.state}</span>
+              </span>
+            )}
+            {capabilities.local_trajectory_return && (
+              <span className="px-2 py-0.5 rounded bg-gray-700 text-gray-200">
+                Local Trajectory: <span className="font-semibold text-purple-400">{capabilities.local_trajectory_return.state}</span>
+              </span>
+            )}
+          </section>
+        )}
 
         {/* Shot Lifecycle Controls */}
         <section className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
@@ -387,3 +442,5 @@ export function GolfSimulatorPage() {
     </WorkspaceShell>
   );
 }
+
+export default GolfSimulatorPage;
