@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Evidence-Based Turnover Refresh (#10184)
+
+Corrects prototype completion claims after the September 15 review. Records
+reproduced provider, renderer, state and ownership gaps; orders corrective work,
+real-media/UI progress and independent model qualification. No runtime behavior
+or scientific acceptance changes in this documentation update.
+
 ## Shadow Tracker Subject Shape and Initial-State Hypotheses (#10129)
 
 Specifies subject shape fitting and initial-state hypothesis generation for Shadow Tracker ST-06:
