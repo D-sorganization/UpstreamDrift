@@ -253,10 +253,24 @@ def qualify_impact_contact(
     )
 
 
+def _make_contact_event(samples: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    peak_sample = max(
+        samples,
+        key=lambda s: float(s.get("normal_force", 0.0)),
+    )
+    return {
+        "start_time_s": float(samples[0]["time_s"]),
+        "end_time_s": float(samples[-1]["time_s"]),
+        "peak_time_s": float(peak_sample["time_s"]),
+        "max_normal_force": float(peak_sample.get("normal_force", 0.0)),
+        "num_samples": len(samples),
+    }
+
+
 def extract_single_contact_event(
     contact_samples: Sequence[dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    """Extract distinct impact events from a continuous contact time series.
+    """Identify contiguous contact events and extract peak metrics from each event.
 
     Deduplicates contiguous in-contact samples into a single contact event with
     identified start, end, peak normal force, and peak timestamp.
@@ -274,36 +288,12 @@ def extract_single_contact_event(
         else:
             if in_event and current_samples:
                 # Event ended - extract peak
-                peak_sample = max(
-                    current_samples,
-                    key=lambda s: float(s.get("normal_force", 0.0)),
-                )
-                events.append(
-                    {
-                        "start_time_s": float(current_samples[0]["time_s"]),
-                        "end_time_s": float(current_samples[-1]["time_s"]),
-                        "peak_time_s": float(peak_sample["time_s"]),
-                        "max_normal_force": float(peak_sample.get("normal_force", 0.0)),
-                        "num_samples": len(current_samples),
-                    }
-                )
+                events.append(_make_contact_event(current_samples))
                 current_samples = []
                 in_event = False
 
     if in_event and current_samples:
-        peak_sample = max(
-            current_samples,
-            key=lambda s: float(s.get("normal_force", 0.0)),
-        )
-        events.append(
-            {
-                "start_time_s": float(current_samples[0]["time_s"]),
-                "end_time_s": float(current_samples[-1]["time_s"]),
-                "peak_time_s": float(peak_sample["time_s"]),
-                "max_normal_force": float(peak_sample.get("normal_force", 0.0)),
-                "num_samples": len(current_samples),
-            }
-        )
+        events.append(_make_contact_event(current_samples))
 
     return events
 
