@@ -1,5 +1,23 @@
 # SPEC.md — Repository Specification Document
 
+## Shared Golf Session Service and Local Reference Destination (#10194)
+
+Centralizes destination lifecycle, prepare/arm/cancel/submit policy, and receipt lookup across simulator ports:
+- `GolfSessionService` (`src/shared/python/golf_simulator/session.py`):
+  - Enforces explicit state machine: `IDLE` -> `PREPARED` -> `ARMED` -> `SUBMITTING` -> `IDLE` (or `UNCERTAIN`).
+  - Guards destination switching: requires idle or reconciled state; rejects in-flight switching while armed or submitting; invalidates prepared arm tokens upon destination reconfiguration.
+  - Multi-axis qualification verification: audits destination capability support (`shot_input.state == SUPPORTED`) and requires `QUALIFIED` contact status for `MODEL_CONTACT` shots before arming.
+  - Context revision checking: ensures aim and orientation revisions match preparation before granting one-time arm tokens.
+  - One-shot impact submission: consumes single-use arm tokens, records intent and acknowledgment/rejection/ambiguity in `ShotJournal`, and traps ambiguous delivery into `UNCERTAIN` state until operator reconciliation.
+- `LocalReferenceAdapter` (`src/shared/python/golf_simulator/adapters/local.py`):
+  - Satisfies `SimulatorAdapter` protocol and integrates with existing ball-flight physics via `FlightSimulatorProtocol`.
+  - Converts canonical `ShotEnvelope` to `LaunchConditions` via `shot_envelope_to_launch_conditions`.
+  - Simulates RK4 ball trajectories with aerodynamic drag/lift/Magnus forces, recording discrete trajectory points with full provenance labeling while keeping numerical trajectories cleanly decoupled from submission audit receipts.
+- Pure Bridge Conversion (`src/shared/python/golf_simulator/launch_bridge.py`):
+  - `shot_envelope_to_launch_conditions`: Reconstitutes scalar speed, vertical launch angle, horizontal azimuth angle, RPM spin rate, and unit spin axis from SI Cartesian velocity and angular velocity vectors.
+- Unified Service Contract Suite (`tests/unit/golf_simulator/test_service_contracts.py`):
+  - Parametrized contract test suite proving destination interchangeability across fake and local reference adapters without changing shot identity or delivery integrity.
+
 ## Shadow Tracker Video Decoding and Auditable Frame Identities (#10168)
 
 Establishes local video clip decoding and auditable frame records:

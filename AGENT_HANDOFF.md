@@ -1,32 +1,34 @@
 # Simscape Tour-Average Fit Continuation
 
-## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03, GS-04 Complete
+## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03, GS-04, GS-05 Complete
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
 - **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
-  GS-03 (#10192) durable transport, and GS-04 (#10193) impact state preservation & qualification complete.
-  Planning PR #10201, PR #10208, and PR #10213 merged.
+  GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
+  and GS-05 (#10194) shared session service and local reference destination complete.
+  Planning PR #10201, PR #10208, PR #10213, and PR #10215 merged.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10193-impact-qualification`.
+  branch `feat/issue-10194-session-service`.
 - **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
+  `src/shared/python/golf_simulator/session.py`,
   `src/shared/python/golf_simulator/launch_bridge.py`,
+  `src/shared/python/golf_simulator/adapters/local.py`,
+  `src/shared/python/golf_simulator/adapters/fake.py`,
   `src/shared/python/golf_simulator/adapters/gspro/profile.py`,
   `src/shared/python/golf_simulator/adapters/gspro/codec.py`,
   `src/shared/python/golf_simulator/adapters/gspro/transport.py`,
-  `src/shared/python/golf_simulator/journal.py`,
-  `src/shared/python/physics/impact_model/solver.py`,
-  `src/shared/python/physics/swing_ball_flight_pipeline.py`.
-  - Impact solver full parameter and angular velocity preservation: `ImpactSolverAPI.solve_pre_impact_state`,
-    `solve_impact`, and `solve_with_gear_effect` forward clubhead angular velocity, loft, lie, and MOI.
-  - `SwingBallFlightPipeline` delegates to `solve_pre_impact_state` without discarding swing kinematics.
-  - `qualify_impact_contact` enforces positive approach velocity, positive ball speed, physical smash factor (<=1.60),
-    deduplicates multiple contact samples, explicitly separates `MODEL_CONTACT` from `DEMO_PEAK_SPEED`,
-    and checks Simscape eligibility (requiring MATLAB R2025b).
-- **Validation:** 102 unit tests across `tests/unit/impact_model/`, `tests/unit/golf_simulator/`, and
-  `tests/unit/physics/test_swing_ball_flight_pipeline_5337.py` pass 100%.
-  Ruff check, Ruff format check, Black, Law of Demeter, divergence inventory, and mypy pass with 0 errors.
-- **Next:** Proceed to GS-05 (#10194) session service and local reference adapter.
+  `src/shared/python/golf_simulator/journal.py`.
+  - `GolfSessionService`: Central orchestrator enforcing state machine (`IDLE` -> `PREPARED` -> `ARMED` -> `SUBMITTING` -> `IDLE`/`UNCERTAIN`),
+    guarding destination switching, invalidating arm tokens on context/destination changes, validating model qualification before arming,
+    and handling ambiguous deliveries via operator reconciliation.
+  - `LocalReferenceAdapter`: Satisfies `SimulatorAdapter` protocol, wraps `FlightSimulatorProtocol` (`BallFlightSimulator` with pure-Python
+    `EnhancedBallFlightSimulator` fallback), computes RK4 ball trajectories with full provenance labeling, and maintains distinct trajectory and receipt contracts.
+  - `shot_envelope_to_launch_conditions`: Reconstitutes scalar launch parameters and 3D spin axis from canonical `ShotEnvelope`.
+  - `FakeSimulatorAdapter`: Configurable test spy for testing adapter substitution, capability auditing, and fault simulation.
+- **Validation:** 50 unit tests across `tests/unit/golf_simulator/` (including session service, local adapter, reverse bridge, and unified service contracts) pass 100%.
+  Ruff check, Ruff format check, Black, changed-file architecture budget, and mypy pass with 0 errors.
+- **Next:** Open PR for GS-05 (#10194) and proceed to GS-06 (#10195) replay and one-impact submission.
 - **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Shadow Tracker Current Turnover (#10122)
