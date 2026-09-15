@@ -13,7 +13,7 @@
   "totals": {
     "identical": 424,
     "diverged": 278,
-    "ud-only": 1252,
+    "ud-only": 1254,
     "tools-only": 708,
     "spelling-only": 124
   },
@@ -371,7 +371,7 @@
     "golf_simulator": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 7,
+      "ud-only": 9,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -8841,7 +8841,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "",
-      "ud_bytes": 1343,
+      "ud_bytes": 1516,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8865,7 +8865,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "adapters",
-      "ud_bytes": 630,
+      "ud_bytes": 908,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8897,11 +8897,35 @@
       "spelling_only": false
     },
     {
+      "path": "golf_simulator/adapters/gspro/transport.py",
+      "classification": "ud-only",
+      "package": "golf_simulator",
+      "subpackage": "adapters",
+      "ud_bytes": 9469,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "golf_simulator/contracts.py",
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "",
       "ud_bytes": 13001,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_simulator/journal.py",
+      "classification": "ud-only",
+      "package": "golf_simulator",
+      "subpackage": "",
+      "ud_bytes": 8700,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

@@ -35,15 +35,15 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** local
-- **Issue:** #10188 (child #10190 active; children #10189–#10200)
-- **Branch:** feat/issue-10190-shot-contracts
-- **PR:** #10208 (open; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
-- **Paths:** `src/shared/python/golf_simulator; tests/unit/golf_simulator; docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md`
+- **Issue:** #10188 (child #10192 active; children #10189–#10200)
+- **Branch:** feat/issue-10192-durable-transport
+- **PR:** #10213 (open; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
+- **Paths:** `src/shared/python/golf_simulator; tests/unit/golf_simulator; tests/integration/golf_simulator; docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md`
 - **Started:** 2026-09-15
-- **Last verified:** 2026-09-15 (`83e522aa0`; SELF; GS-00 protocol profile, GS-01 immutable shot contracts, and GS-02 pure codec implemented test-first; 23 unit tests pass under standard and python -O with DBC_LEVEL=off; ruff check/format, mypy, architecture budget, DRY, and LoD pass; regression tests pass)
-- **Summary:** GS-00/01/02 simulator domain, GSPro profile, and pure codec implemented under src/shared/python/golf_simulator. ShotEnvelope, AimContext (with RᵀR=I and det=+1 proper rotation), ShotQualification, SimulatorCapabilities, and launch_bridge conversion from LaunchConditions, PostImpactState, and PipelineResult with ShotMetadata parameter object. GSProProfile and pure codec encode/decode canonical SI shots to Open Connect v1 wire payloads with independent golden fixtures.
-- **Next step:** Implement GS-03 (#10192) durable transport, bounded stream framer, and delivery journal.
-- **Evidence:** tests/unit/golf_simulator/test_shot_contract.py, tests/unit/golf_simulator/test_launch_bridge.py, tests/unit/golf_simulator/test_gspro_profile.py, tests/unit/golf_simulator/test_gspro_codec.py; docs/plans/golf_simulator_integration/README.md.
+- **Last verified:** 2026-09-15 (`2bf5ec40f`; SELF; GS-00, GS-01, GS-02, and GS-03 implemented test-first; 34 unit and integration tests pass under standard and python -O with DBC_LEVEL=off; ruff check/format, mypy, architecture budget, DRY, and LoD pass; divergence inventory updated)
+- **Summary:** GS-00/01/02/03 simulator domain, GSPro profile, pure codec, durable transport, and delivery journal implemented under src/shared/python/golf_simulator. ShotJournal enforces pre-write intent logging, distinct status transitions, and marks drops as AMBIGUOUS without auto-resend. GSProTransport enforces bounded framing buffer (<=64 KiB), reassembles fragmented frames, and prevents stream overflow.
+- **Next step:** Implement GS-04 (#10193) full impact state forwarding and contact event qualification in swing physics pipeline.
+- **Evidence:** tests/unit/golf_simulator/test_shot_contract.py, tests/unit/golf_simulator/test_launch_bridge.py, tests/unit/golf_simulator/test_gspro_profile.py, tests/unit/golf_simulator/test_gspro_codec.py, tests/unit/golf_simulator/test_journal.py, tests/integration/golf_simulator/test_fake_gspro_peer.py; docs/plans/golf_simulator_integration/README.md.
 
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
 
