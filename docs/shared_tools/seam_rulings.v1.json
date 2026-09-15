@@ -271,6 +271,11 @@
       "ruling": "tools-canonical",
       "status": "cleaned",
       "rationale": "Deprecated alias shim for sidekick; spelling-only divergence. UD copy retired 2026-09-06: every tracked file differed from the pinned tree only by the `src.shared.python` import spelling, which the seam absorbs, so the fallback returns equivalent bytes."
+    },
+    "camera": {
+      "ruling": "tools-canonical",
+      "status": "n/a",
+      "rationale": "Tools-only (4 files, added in Tools 1ac89c18e for D-sorganization/Tools#5218); UD has no copy. src/motion_capture/rig/preview_source.py and recorder.dshow_device_ref consume it through one adapter (UD #10204); the rig's stream-copy recorder command has no shared counterpart and stays in UD."
     }
   }
 }
