@@ -6,80 +6,140 @@ backends do not (Media Foundation hangs on the third unit, DirectShow refuses
 the full mode by index). So the live preview decodes through the same ffmpeg
 path: one process per camera reading the compressed MJPEG at the capture
 mode and writing downscaled raw BGR frames at a modest rate to a pipe.
+
+That decode now lives in the fleet's shared camera layer, Tools
+``shared.python.camera`` (ported from this module and pinned there, #10204).
+This module keeps only the rig-facing seam: :class:`SharedSourceAdapter`
+presents a Tools :class:`~shared.python.sidekick.lab.mocap.acquisition.FrameSource`
+through the rig's own :class:`~.sources.FrameSource` protocol, and the
+plan-driven constructors bind it to cameras. The seam points one way — the
+rig consumes the shared layer; nothing in Tools knows the rig exists.
 """
 
 from __future__ import annotations
 
-import subprocess
-import time
-from collections.abc import Mapping, Sequence
-from contextlib import ExitStack
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 import numpy as np
+from shared.python.camera import CaptureMode as SharedCaptureMode
+from shared.python.camera import FfmpegDirectShowSource
+from shared.python.contracts import StateError as SharedStateError
+from shared.python.sidekick.lab.mocap.acquisition import FramePacket
+from shared.python.sidekick.lab.mocap.acquisition import (
+    FrameSource as SharedFrameSource,
+)
 
 from src.shared.python.core.contracts import StateError, require
-from src.shared.python.core.process_safety import managed_popen
 
 from .plan import CameraControls, CaptureMode
-from .recorder import dshow_device_ref
+from .recorder import require_pnp_instance_id
 from .sources import Frame
 
 PREVIEW_WIDTH = 640
 PREVIEW_FPS = 12
-STOP_TIMEOUT_S = 3.0
+_FOURCC_BY_PIXEL_FORMAT = {"bgr24": "BGR3"}
+
+SharedSourceFactory = Callable[[SharedCaptureMode], SharedFrameSource]
 
 
-def ffmpeg_preview_args(
-    ffmpeg_exe: str,
-    device_ref: str,
-    mode: CaptureMode,
-    *,
-    width: int = PREVIEW_WIDTH,
-    fps: int = PREVIEW_FPS,
-) -> list[str]:
-    """ffmpeg command: capture at ``mode``, emit ``width``-wide BGR frames at ``fps``.
+def shared_capture_mode(mode: CaptureMode) -> SharedCaptureMode:
+    """The rig's plan mode as the shared layer's mode (same four fields)."""
+    return SharedCaptureMode(
+        width=mode.width, height=mode.height, fps=mode.fps, fourcc=mode.fourcc
+    )
 
-    Precondition: positive width and fps. The output height keeps the aspect
-    ratio (``-2`` lets ffmpeg round to an even number).
+
+def _frame_from_packet(packet: FramePacket) -> Frame:
+    """A rig :class:`Frame` over a shared packet's pixels (no copy).
+
+    The rig timestamps arrival on the host clock (ADR-0041), which the packet
+    carries as ``host_monotonic_ns``; the packet's index-derived
+    ``timestamp_ns`` is not a rig clock domain and is not used.
     """
-    require(width > 0 and fps > 0, "positive preview width and fps", (width, fps))
-    codec = "mjpeg" if mode.fourcc == "MJPG" else mode.fourcc.lower()
-    return [
-        ffmpeg_exe,
-        "-hide_banner",
-        "-loglevel",
-        "error",
-        "-f",
-        "dshow",
-        "-vcodec",
-        codec,
-        "-video_size",
-        f"{mode.width}x{mode.height}",
-        "-framerate",
-        str(mode.fps),
-        "-i",
-        f"video={device_ref}",
-        "-vf",
-        f"fps={fps},scale={width}:-2",
-        "-f",
-        "rawvideo",
-        "-pix_fmt",
-        "bgr24",
-        "pipe:1",
-    ]
+    width, height = packet.resolution_px
+    image = np.frombuffer(packet.image_bytes, dtype=np.uint8).reshape(height, width, 3)
+    return Frame(image=image, seq=packet.sequence_number, t_ns=packet.host_monotonic_ns)
 
 
-def preview_frame_size(
-    mode: CaptureMode, width: int = PREVIEW_WIDTH
-) -> tuple[int, int]:
-    """``(width, height)`` of the preview frames ffmpeg will emit for ``mode``."""
-    height = int(round(mode.height * width / mode.width / 2) * 2)
-    return width, max(height, 2)
+class SharedSourceAdapter:
+    """The rig's ``open/read/close`` over a Tools ``initialize/start_capture/read_frame``.
+
+    ``factory`` builds a fresh shared source for the mode ``open`` negotiates;
+    the adapter owns it until ``close``. ``open`` proves the first frame (and
+    consumes it) so a device that refuses fails at open time, ``read`` returns
+    ``None`` once the stream ends — the rig contract is "nothing arrived",
+    never an exception — and ``close`` is idempotent.
+    """
+
+    def __init__(self, identity: str, factory: SharedSourceFactory) -> None:
+        require(bool(identity), "identity must be non-empty")
+        self._identity = identity
+        self._factory = factory
+        self._source: SharedFrameSource | None = None
+
+    @property
+    def identity(self) -> str:
+        return self._identity
+
+    def open(
+        self, mode: CaptureMode, controls: CameraControls | None = None
+    ) -> CaptureMode:
+        """Start the shared source; returns the mode it emits (size, rate, pixels).
+
+        UVC ``controls`` are not applied on the preview path (the recorder
+        applies them at capture time). Raises ``StateError`` if the source
+        ends before its first frame, quoting what ffmpeg said.
+        """
+        self.close()
+        source = self._factory(shared_capture_mode(mode))
+        source.initialize()
+        source.start_capture()
+        self._source = source
+        try:
+            source.read_frame()
+        except SharedStateError as exc:
+            self.close()
+            raise StateError(
+                f"ffmpeg preview of {self._identity} produced no frame: {exc}"
+            ) from exc
+        caps = source.capabilities
+        (width, height), fps = caps.resolutions_px[0], caps.frame_rates_hz[0]
+        pixel_format = caps.pixel_formats[0]
+        require(
+            pixel_format in _FOURCC_BY_PIXEL_FORMAT, "a rig pixel format", pixel_format
+        )
+        return CaptureMode(
+            width=width,
+            height=height,
+            fps=round(fps),
+            fourcc=_FOURCC_BY_PIXEL_FORMAT[pixel_format],
+        )
+
+    def read(self) -> Frame | None:
+        """The next decoded frame, or ``None`` when the stream has ended."""
+        source = self._source
+        if source is None:
+            raise StateError("read() before open()")
+        try:
+            packet = source.read_frame()
+        except SharedStateError:
+            return None
+        return _frame_from_packet(packet)
+
+    def close(self) -> None:
+        source, self._source = self._source, None
+        if source is not None:
+            source.close()
 
 
-class FfmpegPreviewSource:
-    """A :class:`FrameSource` backed by an ffmpeg decode of one DirectShow camera."""
+class FfmpegPreviewSource(SharedSourceAdapter):
+    """A rig :class:`~.sources.FrameSource` over the shared ffmpeg DirectShow decode.
+
+    Precondition: a non-empty identity, a PnP camera instance id and positive
+    preview ``width``/``fps``. ``popen`` is forwarded to the shared source so
+    the lifecycle is testable without a device.
+    """
 
     def __init__(
         self,
@@ -89,100 +149,23 @@ class FfmpegPreviewSource:
         ffmpeg_exe: str | None = None,
         width: int = PREVIEW_WIDTH,
         fps: int = PREVIEW_FPS,
+        popen: Any = None,
     ) -> None:
-        require(bool(identity), "identity must be non-empty")
-        self._identity = identity
+        require(width > 0 and fps > 0, "positive preview width and fps", (width, fps))
+        require_pnp_instance_id(camera_instance_id)
         self.camera_instance_id = camera_instance_id
-        self._device_ref = dshow_device_ref(camera_instance_id)
-        self._ffmpeg = ffmpeg_exe
-        self._width, self._fps = width, fps
-        self._stack: ExitStack | None = None
-        self._proc: Any = None
-        self._frame_shape: tuple[int, int] = (0, 0)
-        self._seq = 0
 
-    @property
-    def identity(self) -> str:
-        return self._identity
-
-    def _exe(self) -> str:
-        if self._ffmpeg is None:
-            import imageio_ffmpeg
-
-            self._ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
-        return self._ffmpeg
-
-    def open(
-        self, mode: CaptureMode, controls: CameraControls | None = None
-    ) -> CaptureMode:
-        """Start ffmpeg; returns the preview mode (downscaled size, preview fps).
-
-        UVC ``controls`` are not applied on the preview path (the recorder
-        applies them at capture time). Raises ``StateError`` if ffmpeg exits
-        before the first frame.
-        """
-        self.close()
-        args = ffmpeg_preview_args(
-            self._exe(), self._device_ref, mode, width=self._width, fps=self._fps
-        )
-        stack = ExitStack()
-        self._proc = stack.enter_context(
-            managed_popen(
-                args,
-                timeout=STOP_TIMEOUT_S,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+        def build(mode: SharedCaptureMode) -> SharedFrameSource:
+            return FfmpegDirectShowSource(
+                camera_instance_id,
+                mode,
+                width=width,
+                fps=fps,
+                ffmpeg_exe=ffmpeg_exe,
+                popen=popen,
             )
-        )
-        self._stack = stack
-        width, height = preview_frame_size(mode, self._width)
-        self._frame_shape = (height, width)
-        self._seq = 0
-        first = self.read()
-        if first is None:
-            err = self._stderr_tail()
-            self.close()
-            raise StateError(
-                f"ffmpeg preview of {self._identity} produced no frame: {err}"
-            )
-        return CaptureMode(width=width, height=height, fps=self._fps, fourcc="BGR3")
 
-    def read(self) -> Frame | None:
-        """The next decoded frame, or ``None`` when ffmpeg has stopped."""
-        proc = self._proc
-        if proc is None or proc.stdout is None:
-            raise StateError("read() before open()")
-        height, width = self._frame_shape
-        need = height * width * 3
-        buf = bytearray()
-        while len(buf) < need:
-            chunk = proc.stdout.read(need - len(buf))
-            if not chunk:
-                return None
-            buf.extend(chunk)
-        image = np.frombuffer(bytes(buf), dtype=np.uint8).reshape(height, width, 3)
-        frame = Frame(image=image, seq=self._seq, t_ns=time.monotonic_ns())
-        self._seq += 1
-        return frame
-
-    def _stderr_tail(self) -> str:
-        proc = self._proc
-        if proc is None or proc.stderr is None:
-            return ""
-        try:
-            _out, err = proc.communicate(timeout=STOP_TIMEOUT_S)
-        except subprocess.TimeoutExpired:
-            return "ffmpeg still running"
-        return (err or b"")[-400:].decode("utf-8", "replace").strip()
-
-    def close(self) -> None:
-        proc, stack = self._proc, self._stack
-        self._proc, self._stack = None, None
-        if proc is not None and proc.poll() is None:
-            proc.terminate()  # a raw-video pipe has no graceful quit key
-        if stack is not None:
-            stack.close()
+        super().__init__(identity, build)
 
 
 def preview_sources_from_ids(
