@@ -19,6 +19,7 @@ calls into, so behaviour is identical either way.
 """
 
 from __future__ import annotations
+import math
 
 import sys
 from typing import TYPE_CHECKING, Any, cast
@@ -720,7 +721,9 @@ class MainWidget(QtWidgets.QWidget):
             backend = make_backend(backend_name, params)
             backend.reset(initial.copy())
             trace = backend.rollout(None, horizon, dt)
-            speeds.append(float(np.linalg.norm(trace.v[-1])))
+            speeds.append(
+                float(math.sqrt(trace.v[-1].dot(trace.v[-1])))
+            )  # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
         return speeds
 
     def _plot_trajectory(self, trace: Trace) -> None:
