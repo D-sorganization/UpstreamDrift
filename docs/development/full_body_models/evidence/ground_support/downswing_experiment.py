@@ -106,6 +106,14 @@ def main() -> None:
         "between heel and toe less sensitively",
     )
     parser.add_argument("--dissipation", type=float, default=None)
+    parser.add_argument(
+        "--reference",
+        type=Path,
+        default=None,
+        help="npz with a 'q' array (frames, coordinates) to track instead of the "
+        "run's own reference (an optimised reference); errors stay against the "
+        "run's q_ref and markers",
+    )
     parser.add_argument("--dt", type=float, default=DT_S)
     parser.add_argument("--duration", type=float, default=None)
     args = parser.parse_args()
@@ -151,7 +159,12 @@ def main() -> None:
         )
     sim = fs.FullBodySimulator(adapter)
 
-    reference = condition(q_ref, times, args.cutoff_hz)
+    tracked = q_ref
+    if args.reference is not None:
+        tracked = np.load(args.reference)["q"]
+        if tracked.shape != q_ref.shape:
+            raise ValueError("--reference must match the run's (frames, coordinates)")
+    reference = condition(tracked, times, args.cutoff_hz)
     v_ref = np.gradient(reference, times, axis=0)
     a_ref = np.gradient(v_ref, times, axis=0)
     omega: float | np.ndarray = args.omega
@@ -195,6 +208,7 @@ def main() -> None:
         "name": args.name,
         "settings": {
             "cutoff_hz": args.cutoff_hz,
+            "reference": None if args.reference is None else str(args.reference),
             "omega_rad_s": args.omega,
             "legs_omega_rad_s": args.legs_omega,
             "zeta": args.zeta,
@@ -269,6 +283,11 @@ def main() -> None:
             )
         ),
     }
+    window = times[keep] <= 1.5
+    out["marker_rms_to_1_5s_m"] = float(
+        np.sqrt(np.mean(errors[window][valid[keep][window]] ** 2))
+    )
+    np.savez(run / f"downswing_{args.name}.npz", sim_q=sim_q, errors_m=errors)
     (run / f"downswing_{args.name}.json").write_text(json.dumps(out, indent=2) + "\n")
     log.info(
         "%s: root err max %.0f mm, timeline %s, wf %.2f..%.2f, torque %.0f N m, %s",

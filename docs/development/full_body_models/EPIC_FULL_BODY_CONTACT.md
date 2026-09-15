@@ -189,8 +189,7 @@ at the pelvis through impact with a compliant sole and a band-limited tracked
 reference (was 178 mm, airborne); the reference zero-moment point diagnostic
 shows the composite capture is not dynamically consistent for the model, so
 the cart-table dynamics filter was tried and rejected; the FB-5 shooting
-fit (iterative-learning pelvis command, replay in the loop) was implemented and diverges on both captures (pelvis yaw lag is a ground yaw-moment limit), so MM-7b is a differentiable-simulator trajectory optimisation
-(REVIEW.md 16).
+fit (iterative-learning pelvis command, replay in the loop) was implemented and diverges on both captures (pelvis yaw lag is a ground yaw-moment limit), so MM-7b became the MJX differentiable trajectory optimisation, which transfers within its 1.5 s cost window (shared-plant replay 56.1 to 40.2 mm, pelvis yaw lag at 1.4 s 12.3 to 2.6 deg) but not yet over the follow-through (REVIEW.md 17).
 
 ## Rules Every Child Follows
 

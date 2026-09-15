@@ -434,6 +434,18 @@ learning) and re-solves the joints against the markers
 (`solve_trajectory(locked_per_frame=...)`); the best replay is kept.
 On both captures every gain diverges from iteration 0 (driver 74.6 to 134.8 mm at gain 0.7, to 103.9 mm at gain 0.25; 7-iron 112.3 to 192.9 mm), so the dynamics stage keeps the unmodified reference. The replay error is pelvis yaw lag (72.7 of 74.6 mm), a ground yaw-moment limit for this composite reference; the next form is a differentiable-simulator trajectory optimisation (JaxSim #6647 or MJX). Details REVIEW.md 16.
 
+### Differentiable Trajectory Optimisation With MJX (FB-5, MM-7B, 2026-09-14)
+
+`evidence/ground_support/export_mjx_package.py --run <run>` then, in the
+MJX environment, `mjx_trajectory_optimisation.py --run <run> --iterations N
+--learning-rate 5e-4` (`--diagnose` replays only, `--init` warm-starts,
+`--horizon` sets the cost window). Environment recipe (Windows, CPU):
+`python -m venv ~/.venv-mjx && ~/.venv-mjx/Scripts/pip install "jax[cpu]"
+mujoco-mjx defusedxml numpy scipy` (JAX 0.11.1, MuJoCo 3.13, MJX 3.13; the
+main environment keeps MuJoCo 3.3.4). Validate any optimised reference in
+the shared-law plant with `downswing_experiment.py --run <run> --reference
+<npz>`. Driver result: to 1.5 s the shared-plant replay drops from 56.1 to 40.2 mm (pelvis yaw lag at 1.4 s 12.3 to 2.6 deg); the uncosted follow-through collapses from iteration 8, so iterations 4 to 6 are the whole-swing choice (79.6 mm against 74.6). The MJX plant's own follow-through diverges (soft grip weld), which is the next thing to fix before a full-horizon solve. Details REVIEW.md 17.
+
 ### How to Continue (Read This First)
 
 1. Run the pipeline from the launcher tile "Motion Matching" or

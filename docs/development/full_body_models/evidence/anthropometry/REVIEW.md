@@ -790,3 +790,57 @@ iterative-learning form:
 | driver (gain 0.25) | 6         | 103.9 mm       | 56 mm    | 45 mm         | 0.35                | 80 %                     |
 
 Verdict: every gain diverges monotonically from iteration 0 on both captures (gain 0.7: driver 74.6 to 134.8 mm, 7-iron 112.3 to 192.9 mm; gain 0.25: driver 74.6 to 103.9 mm over six passes), so the best reference is always the unmodified one and the dynamics stage keeps it. The attribution receipted with the soft-sole replay explains why: substituting only the replayed pelvis rotation into the reference already gives 72.7 of the 74.6 mm replay error (translation alone 35.3 mm, the joints with the reference pelvis 34.6 mm); the pelvis yaw lags the reference by 15 deg through the downswing and 34 deg in the follow-through, and that lag is what the ground can supply in yaw moment for this reference, not something a displaced pelvis command can pre-compensate (a command displaced against the drift costs marker fit in the reference immediately and the replay does not recover it). Friction on the compliant sole is not the lever either (transition velocity 10 mm/s: identical; coefficient 1.5: yaw 14.9 to 9.1 deg at 1.3 s but 78.6 mm overall). The shooting fit therefore needs the whole-body swing as the decision variable with the contact dynamics as constraints: a trajectory optimisation with a differentiable simulator (the JaxSim differentiable backend, epic #6647, or MuJoCo MJX) over the arm-club angular momentum and pelvis rotation, where the composite reference is a soft target and the ground yaw-moment capacity is respected. The iterative-learning harness, `reference_zmp` and the downswing experiment harness stay as the evaluation tools; `--shooting-fit` remains available with its receipts (`anthro_driver_shoot`, `anthro_iron_shoot`, `anthro_driver_shoot_g025`).
+
+## 17. Differentiable Trajectory Optimisation With MuJoCo MJX (FB-5, MM-7B, 2026-09-14)
+
+The whole tracked reference is now optimised through the contact dynamics
+with gradients. `export_mjx_package.py` writes a finished run as a
+self-contained package (the MJCF with its grip site weld stiffened, the
+tracked reference, the capture markers and validity, the marker attachments
+in MJCF body frames, spheres, contact law, ground, controller gains);
+`mjx_trajectory_optimisation.py` runs in an isolated environment (JAX
+0.11, MuJoCo 3.13 with MJX; recipe in HANDOFF) and is a JAX port of the
+replay: the shared Hunt-Crossley plus regularised-Coulomb sphere law applied
+as world wrenches at the calcanei, the dual-grip weld as a stiff
+spring-damper wrench (MJX's constraint solver is an iterative loop JAX
+cannot reverse-differentiate, so every equality is removed from the model),
+the root-free computed-torque controller, semi-implicit Euler at six
+substeps per capture frame, a `lax.scan` over frames with checkpointing that
+emits the replayed marker positions. Decision variables: knot values every
+40 ms of a correction added to the 38 actuated coordinates (47 knots,
+1786 parameters); cost: mean squared replayed marker error over valid
+markers up to 1.65 s (the soft-weld plant departs from the rigid-weld one in
+the last follow-through) plus a small regulariser; Adam on the gradient
+through the whole rollout (about 52 s per iteration on CPU after a
+697 s compile).
+
+Port and pitfalls (all receipted in `anthro_driver/mjx_*`): the
+near-massless hand standoff explodes on a spring weld without a 5e-3
+kg m^2 armature floor on every dof; the previous substep's applied torque
+sits in `qfrc_smooth` and must be cleared before the controller's forward
+pass; a vector norm at zero tangential speed and the NaN of invalid markers
+under a masked `where` both poison the gradient. With those fixed the MJX
+replay of the unmodified reference is 41.0 mm to 1.65 s against the
+shared simulator's 74.6 mm over the whole swing, with the same downswing
+profile. A learning rate of 2e-3 rad per knot makes the objective wander
+(41 to 107 mm between iterations; `mjx_opt_lr2e-3_log.txt`); 5e-4 descends
+monotonically.
+
+| Iteration (lr 5e-4) | MJX replay markers to 1.65 s |
+| ------------------- | ---------------------------- | --------------------- | ------------------------ | -------------------------- |
+| Iteration           | MJX replay to 1.45 s         | shared plant to 1.5 s | shared plant whole swing | pelvis yaw lag 1.3 / 1.4 s |
+| ---                 | ---                          | ---                   | ---                      | ---                        |
+| 0 (unmodified)      | 41.0 mm                      | 56.1 mm               | 74.6 mm                  | 14.9 / 12.3 deg            |
+| 2                   | 34.2 mm                      | 48.0 mm               | 78.1 mm                  | 12.2 / 8.2 deg             |
+| 4                   | 32.0 mm                      | 42.4 mm               | 79.6 mm                  | 10.6 / 5.4 deg             |
+| 6                   | 30.5 mm                      | 42.8 mm               | 83.3 mm                  | 10.3 / 4.3 deg             |
+| 8                   | 29.5 mm                      | 44.6 mm               | 195.5 mm                 | 10.4 / 4.0 deg             |
+| 10                  | 28.8 mm                      | 43.7 mm               | 192.4 mm                 | 10.6 / 3.8 deg             |
+| 12                  | 28.4 mm                      | 42.1 mm               | 190.0 mm                 | 10.3 / 3.4 deg             |
+| 14                  | 27.9 mm                      | 41.6 mm               | 184.9 mm                 | 9.9 / 3.1 deg              |
+| 16                  | 27.5 mm                      | 40.2 mm               | 182.3 mm                 | 9.4 / 2.6 deg              |
+
+Validation in the shared-law simulator (`downswing_experiment.py
+--reference`, the real plant with the rigid weld and RK4): every snapshot replayed in the shared-law simulator (`downswing_mjx_h145_iter*.json`), columns above.
+
+Verdict: the differentiable optimisation works and transfers within its cost window. The replayed marker error to 1.5 s falls from 56.1 to 40.2 mm (28 %) and the pelvis yaw lag at 1.4 s from 12.3 to 2.6 deg with corrections below half a degree at the knots, which is the first method in this lane to move the pelvis yaw. It does not yet transfer to the whole swing: the follow-through after 1.5 s is uncosted (the soft-weld MJX plant departs from the rigid-weld one there, 187 and 322 mm at 1.7 and 1.8 s even at 12 substeps) and from iteration 8 the shared plant collapses after impact (whole-swing 182 to 195 mm), while iterations 4 to 6 keep it near the baseline (79.6 and 83.3 mm against 74.6). The transferable choice today is therefore iteration 4 to 6 for a whole-swing replay or iteration 16 for the swing to 1.5 s. Next: give the MJX plant a faithful follow-through (the divergence after 1.6 s is the soft grip weld under the post-impact club loads; a rigid weld would need an implicit constraint solve with its own adjoint, or the club could be locked to the lead hand after impact), then optimise the full horizon and repeat on the 7-iron. The receipts (`mjx_optimisation_receipt.json`, `mjx_opt_*_log.txt`, the snapshot replays) and the two scripts are the harness for it.
