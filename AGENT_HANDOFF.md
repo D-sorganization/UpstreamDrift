@@ -7,16 +7,17 @@
 - **State:** GS-01 (#10190) domain contracts and conversion bridge implemented and tested.
   Planning PR #10201 is merged. Epic #10188 has 12 native children #10189–#10200.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10190-shot-contracts`; commit `SELF`.
+  branch `feat/issue-10190-shot-contracts`; commit `SELF` (`64158c629`); PR #10208 (open).
 - **Delivered in GS-01:** `src/shared/python/golf_simulator/contracts.py`,
   `src/shared/python/golf_simulator/launch_bridge.py`, `src/shared/python/golf_simulator/__init__.py`.
   Immutable `ShotEnvelope`, `AimContext` with proper rotation validation ($R^TR=I, \det R=+1$),
   multi-axis `ShotQualification`, `SimulatorCapabilities` with distinct capability states,
-  and lossless launch bridge from `LaunchConditions`, `PostImpactState`, and `PipelineResult`.
+  and lossless launch bridge from `LaunchConditions`, `PostImpactState`, and `PipelineResult`
+  using `ShotMetadata` parameter object to satisfy architecture parameter budgets.
 - **Validation:** 14 unit tests in `tests/unit/golf_simulator/` pass under normal and `python -O`
-  with `DBC_LEVEL=off`. Ruff check, Ruff format check, and mypy pass with 0 errors.
+  with `DBC_LEVEL=off`. Ruff check, Ruff format check, architecture budget check, and mypy pass with 0 errors.
   Existing physics and impact parity regression tests pass 100%.
-- **Next:** Land PR for GS-01 (#10190); proceed with GS-00 (#10189) protocol profile characterization
+- **Next:** Land PR for GS-01 (#10208); proceed with GS-00 (#10189) protocol profile characterization
   and GS-02 (#10191) pure codec.
 - **Preserve:** Original checkout's unrelated branch/untracked work.
 

@@ -23,12 +23,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10188 (child #10190 active; children #10189–#10200)
 - **Branch:** feat/issue-10190-shot-contracts
-- **PR:** #10201 (merged; planning); pending PR for #10190
+- **PR:** #10208 (open; GS-01 #10190); #10201 (merged; planning)
 - **Paths:** `src/shared/python/golf_simulator; tests/unit/golf_simulator; docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md`
 - **Started:** 2026-09-15
-- **Last verified:** 2026-09-15 (`34ab30722` baseline; SELF; GS-01 immutable shot contracts, AimContext proper rotation, capability ports, and launch bridge implemented test-first; 14 unit tests pass under standard and python -O with DBC_LEVEL=off; ruff check/format and mypy pass; regression tests pass)
+- **Last verified:** 2026-09-15 (`64158c629`; SELF; GS-01 immutable shot contracts, AimContext proper rotation, capability ports, and launch bridge implemented test-first; 14 unit tests pass under standard and python -O with DBC_LEVEL=off; ruff check/format and mypy pass; regression tests pass)
 - **Summary:** GS-01 canonical shot domain implemented under src/shared/python/golf_simulator with ShotEnvelope, AimContext (with RᵀR=I and det=+1 proper rotation), ShotQualification, SimulatorCapabilities, and launch_bridge conversion from LaunchConditions, PostImpactState, and PipelineResult. Rejects booleans, non-finite values, zero-speed strikes, and improper rotations under all DBC/optimization levels.
-- **Next step:** Land GS-01 PR (#10190) and proceed with GS-00 (#10189) protocol profile characterization and GS-02 (#10191) pure codec.
+- **Next step:** Land GS-01 PR (#10208) and proceed with GS-00 (#10189) protocol profile characterization and GS-02 (#10191) pure codec.
 - **Evidence:** tests/unit/golf_simulator/test_shot_contract.py, tests/unit/golf_simulator/test_launch_bridge.py; docs/plans/golf_simulator_integration/README.md.
 
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
