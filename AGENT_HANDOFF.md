@@ -1,24 +1,25 @@
 # Simscape Tour-Average Fit Continuation
 
-## GSPro Integration (#10188) — GS-01 Shot Contracts Complete
+## GSPro Integration (#10188) — GS-00, GS-01, GS-02 Complete
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** GS-01 (#10190) domain contracts and conversion bridge implemented and tested.
-  Planning PR #10201 is merged. Epic #10188 has 12 native children #10189–#10200.
+- **State:** GS-00 (#10189) compatibility profile, GS-01 (#10190) domain contracts and conversion bridge,
+  and GS-02 (#10191) pure codec implemented and tested. Planning PR #10201 merged; PR #10208 open.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10190-shot-contracts`; commit `SELF` (`64158c629`); PR #10208 (open).
-- **Delivered in GS-01:** `src/shared/python/golf_simulator/contracts.py`,
-  `src/shared/python/golf_simulator/launch_bridge.py`, `src/shared/python/golf_simulator/__init__.py`.
+  branch `feat/issue-10190-shot-contracts`; commit `SELF`.
+- **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
+  `src/shared/python/golf_simulator/launch_bridge.py`,
+  `src/shared/python/golf_simulator/adapters/gspro/profile.py`,
+  `src/shared/python/golf_simulator/adapters/gspro/codec.py`.
   Immutable `ShotEnvelope`, `AimContext` with proper rotation validation ($R^TR=I, \det R=+1$),
   multi-axis `ShotQualification`, `SimulatorCapabilities` with distinct capability states,
-  and lossless launch bridge from `LaunchConditions`, `PostImpactState`, and `PipelineResult`
-  using `ShotMetadata` parameter object to satisfy architecture parameter budgets.
-- **Validation:** 14 unit tests in `tests/unit/golf_simulator/` pass under normal and `python -O`
+  lossless launch bridge using `ShotMetadata`, `GSProProfile` versioned observation matrix,
+  and pure JSON codec with independent golden fixtures for straight, draw/fade, zero-spin, and club data.
+- **Validation:** 23 unit tests in `tests/unit/golf_simulator/` pass under normal and `python -O`
   with `DBC_LEVEL=off`. Ruff check, Ruff format check, architecture budget check, and mypy pass with 0 errors.
   Existing physics and impact parity regression tests pass 100%.
-- **Next:** Land PR for GS-01 (#10208); proceed with GS-00 (#10189) protocol profile characterization
-  and GS-02 (#10191) pure codec.
+- **Next:** Implement GS-03 (#10192) durable transport, stream framer, and delivery journal.
 - **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Shadow Tracker Current Turnover (#10122)

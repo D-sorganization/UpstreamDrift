@@ -10,6 +10,12 @@ Specifies standardized replay archive serialization, forward-kinematics projecti
   - `compute_replay_five_metrics()`: Evaluates the 5 uninterrupted tracking metrics comparing predicted marker trajectories against target capture markers with valid-mask filtering and pelvis marker cluster identification.
   - Enforces DbC invariants: validates matching frame counts, strictly increasing time grids, non-empty markers, and raises `ValueError` on corrupt or unaligned data.
 
+## GSPro Compatibility Profile and Pure Codec (#10189, #10191)
+
+Implements frozen protocol profile and deterministic serialization for GSPro Open Connect v1 under `src/shared/python/golf_simulator/adapters/gspro/`:
+- `profile.py`: `GSProProfile` characterizes observed vs documented vs unresolved vendor protocol semantics; port 921, speed unit `mph`, distance unit `Yards`, HLA positive `right`, 64 KiB buffer limit. Declares native avatar injection and autonomous course control as unsupported.
+- `codec.py`: Pure functions `encode_shot_payload`, `decode_simulator_response`, and `encode_heartbeat_payload`. Converts canonical SI/radian units and vectors to vendor representation without mutating stored values; preserves missing club data without zero-filling; maps status codes (200, 201, 501) to explicit `ResponseCategory` enums without treating unknown codes as success.
+
 ## Canonical Golf Simulator Contracts and Capability Ports (#10190)
 
 Defines immutable canonical shot and simulator capability ports under `src/shared/python/golf_simulator/`:
