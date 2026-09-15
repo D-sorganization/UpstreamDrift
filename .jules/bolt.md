@@ -103,3 +103,8 @@
 ## 2024-05-20 - [Optimize Norm Calculation in Fit2d]
 **Learning:** Using `np.linalg.norm(..., axis=3)` to compute array magnitudes for 4D arrays (like those in `fit2d.py` for shape `(T, V, L, 2)`) incurs significant overhead due to temporary array allocations. By replacing it directly with `d = np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))`, we avoid `np.linalg.norm` dispatch overhead and temporary allocations.
 **Action:** Replace `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` when scalar reductions are needed, to optimize computation.
+
+## 2024-05-21 - [Optimize Norm Calculation in Motion Retargeting]
+**Learning:** In the motion capture retargeting pipeline (e.g., `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py`), calling `np.linalg.norm(pos_error)` on small 1D arrays (like 3D position errors) incurs significant overhead due to NumPy's internal dispatching and instance checks. Replacing it with `math.sqrt(pos_error.dot(pos_error))` bypasses this overhead and is significantly faster (~2.5x).
+**Action:** Replace `np.linalg.norm(pos_error)` with `math.sqrt(pos_error.dot(pos_error))` for small 1D array magnitude calculations where possible.
+

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import mujoco
 import numpy as np
 
@@ -139,7 +141,9 @@ class MotionRetargeting:
                 current_pos = self.data.xpos[body_id]
 
                 pos_error = target_pos - current_pos
-                total_error += float(np.linalg.norm(pos_error))
+                total_error += math.sqrt(
+                    pos_error.dot(pos_error)
+                )  # ⚡ Bolt: ndarray.dot + math.sqrt is faster than np.linalg.norm for small 1D arrays
 
                 jacp, _ = self.ik_analyzer.compute_body_jacobian(body_id)
                 jacobian_rows.append(jacp)
@@ -194,7 +198,10 @@ class MotionRetargeting:
             if marker_name in self.marker_to_body_id:
                 body_id = self.marker_to_body_id[marker_name]
                 current_pos = self.data.xpos[body_id].copy()
-                error = float(np.linalg.norm(target_pos - current_pos))
+                pos_diff = target_pos - current_pos
+                error = math.sqrt(
+                    pos_diff.dot(pos_diff)
+                )  # ⚡ Bolt: ndarray.dot + math.sqrt is faster than np.linalg.norm for small 1D arrays
                 errors[marker_name] = error
 
         return errors
