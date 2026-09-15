@@ -1,25 +1,24 @@
 # Simscape Tour-Average Fit Continuation
 
-## GSPro Integration Planning and Turnover (#10188)
+## GSPro Integration (#10188) — GS-01 Shot Contracts Complete
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** Planning only; outbound client not implemented or live-qualified.
-  Epic #10188 has 12 native children #10189–#10200. DL-#10188 is proposed.
+- **State:** GS-01 (#10190) domain contracts and conversion bridge implemented and tested.
+  Planning PR #10201 is merged. Epic #10188 has 12 native children #10189–#10200.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `docs/issue-10188-gspro-integration`; commit `SELF`;
-  [PR #10201](https://github.com/D-sorganization/UpstreamDrift/pull/10201) open for review.
-- **Lead:** GS-00 protocol freeze, GS-03 uncertain-delivery transport, GS-04 impact
-  qualification. **Worker:** GS-01 canonical domain now, GS-02 codec after freeze.
-- **Evidence:** Local installation found; no running GSPro or listener observed.
-  Existing pipeline loses impact fields and MuJoCo example samples peak speed.
-- **Boundary:** Companion golfer view first; native avatar/autonomous course API
-  unverified. No auto-resend after uncertain delivery; retain MATLAB R2025b.
-- **Validation:** Documentation pre-commit checks, 12 local links, title case,
-  SPEC duplicate and whitespace checks pass. Full development-log check retains
-  two pre-existing missing-SHA findings; baseline comparison adds none.
-- **Preserve:** Original checkout's unrelated branch/untracked work. This handoff
-  already exceeded the 150-line policy before this change; no unrelated rewrite.
+  branch `feat/issue-10190-shot-contracts`; commit `SELF`.
+- **Delivered in GS-01:** `src/shared/python/golf_simulator/contracts.py`,
+  `src/shared/python/golf_simulator/launch_bridge.py`, `src/shared/python/golf_simulator/__init__.py`.
+  Immutable `ShotEnvelope`, `AimContext` with proper rotation validation ($R^TR=I, \det R=+1$),
+  multi-axis `ShotQualification`, `SimulatorCapabilities` with distinct capability states,
+  and lossless launch bridge from `LaunchConditions`, `PostImpactState`, and `PipelineResult`.
+- **Validation:** 14 unit tests in `tests/unit/golf_simulator/` pass under normal and `python -O`
+  with `DBC_LEVEL=off`. Ruff check, Ruff format check, and mypy pass with 0 errors.
+  Existing physics and impact parity regression tests pass 100%.
+- **Next:** Land PR for GS-01 (#10190); proceed with GS-00 (#10189) protocol profile characterization
+  and GS-02 (#10191) pure codec.
+- **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Shadow Tracker Current Turnover (#10122)
 
