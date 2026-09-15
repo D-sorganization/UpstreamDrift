@@ -446,6 +446,20 @@ main environment keeps MuJoCo 3.3.4). Validate any optimised reference in
 the shared-law plant with `downswing_experiment.py --run <run> --reference
 <npz>`. Driver result: to 1.5 s the shared-plant replay drops from 56.1 to 40.2 mm (pelvis yaw lag at 1.4 s 12.3 to 2.6 deg); the uncosted follow-through collapses from iteration 8, so iterations 4 to 6 are the whole-swing choice (79.6 mm against 74.6). The MJX plant's own follow-through diverges after 1.6 s (not the weld: a five-times stiffer one is identical), and the joint-by-joint comparison shows it is the pelvis yaw response of the contact (joints track equally; MJX lags 50.6 deg in the follow-through, the shared plant 34.4, and less than the shared plant through the downswing), so the contact integration is the next thing to reconcile before a full-horizon solve. Details REVIEW.md 17.
 
+### Completion Plan (Handoff Epic #10162, 2026-09-14)
+
+The remaining work is organised as epic #10162 with tiered, self-contained
+children (each carries files, TDD steps, DbC/LoD/DRY constraints, commands,
+acceptance criteria and receipts): expert HO-5 (#10159, MJX plant
+reconciliation, full horizon, 7-iron); moderate HO-4 (#10158, tile stages),
+HO-8 (#10108, hip zero twist), HO-10 (#10112, dynamics replay parity);
+cheap HO-1 (#10155, pipeline package under src, first), HO-2 (#10156,
+receipt schema), HO-3 (#10157, MJX environment and JAX-gated tests), HO-6
+(#10160, 7-iron receipts), HO-7 (#10161, design-decision record), HO-9
+(#10111, de Leva verification); blocked #10110 (Simscape lane). Order:
+HO-1, then HO-2 and HO-3, HO-7 and HO-9 any time, HO-4/HO-8/HO-10 after
+HO-1, HO-6 after HO-5. Definition of done is on the epic.
+
 ### How to Continue (Read This First)
 
 1. Run the pipeline from the launcher tile "Motion Matching" or
@@ -461,9 +475,10 @@ the shared-law plant with `downswing_experiment.py --run <run> --reference
    (Drake and Pinocchio on ControlTower over SSH; poses by coordinate name).
 4. Never rerun with `--recalibrate-upper`; keep one static-trial round;
    ranges act on the matching only (`range_of_motion.py`).
-5. Epics: #10113 (MM-1 to MM-10) and #10120 (CM-1 to CM-6) hold every
-   open item with acceptance criteria; update DL-#10062 and this handoff
-   in every implementation commit.
+5. Epics: #10162 (handoff, HO-1 to HO-10, tiered), #10113 (MM-1 to MM-10)
+   and #10120 (CM-1 to CM-6) hold every open item with acceptance
+   criteria; update DL-#10062 and this handoff in every implementation
+   commit.
 
 ## Next
 

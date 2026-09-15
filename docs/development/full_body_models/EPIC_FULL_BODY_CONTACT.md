@@ -191,6 +191,9 @@ shows the composite capture is not dynamically consistent for the model, so
 the cart-table dynamics filter was tried and rejected; the FB-5 shooting
 fit (iterative-learning pelvis command, replay in the loop) was implemented and diverges on both captures (pelvis yaw lag is a ground yaw-moment limit), so MM-7b became the MJX differentiable trajectory optimisation, which transfers within its 1.5 s cost window (shared-plant replay 56.1 to 40.2 mm, pelvis yaw lag at 1.4 s 12.3 to 2.6 deg) but not yet over the follow-through (REVIEW.md 17).
 
+Handoff (2026-09-14): the remaining work is epic #10162 (HO-1 to HO-10,
+tiered cheap/moderate/expert with implementation instructions per child).
+
 ## Rules Every Child Follows
 
 - TDD: failing test first, committed with the implementation.
