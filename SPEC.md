@@ -1,5 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Calibrated Silhouette Rendering and Residual Losses (#10128)
+
+Specifies calibrated silhouette rendering, analytic projection, and valid-pixel residual losses for Shadow Tracker ST-05:
+- Implements `src/shared/python/shadow_tracker/projection.py`:
+  - `PinholeCameraModel`: Slotted frozen camera model encapsulating dimensions, intrinsics (`fx`, `fy`, `cx`, `cy`), Brown-Conrady distortion (`k1`, `k2`, `p1`, `p2`, `k3`), extrinsics ($R_{wc}, t_{wc}$), cropping, and mirroring.
+  - `project_point_to_pixel()`: Computes analytic pinhole projection of 3D world coordinates with lens distortion, mirroring, and cropping; strictly rejects non-positive focal lengths, non-finite parameters, and handles behind-camera and offscreen geometry. Meets Gate G1 accuracy ($\le 0.5$ px).
+  - `AnalyticSilhouetteRenderer`: Reference renderer fulfilling `SilhouetteRenderer` protocol, rendering slotted `RenderResult` masks (`body_mask`, `club_mask`, `visibility_mask`) from candidate state vectors without engine or GPU dependencies.
+  - `SilhouetteLossResult` and `compute_silhouette_loss()`: Computes valid-pixel aware silhouette residuals and combined loss comparing rendered candidates to observed `MaskFrame` records.
+  - Enforces strict DbC invariants:
+    - Points behind the camera plane ($Z_c \le 0$) or outside effective boundaries are flagged non-visible (`is_visible=False`).
+    - Evaluates IoU and Dice residuals strictly over valid pixels (`valid != 0`), ensuring occluded or unobserved regions do not penalize candidate solutions.
+    - All-invalid masks return well-defined results (`is_valid=False`, `valid_pixel_count=0`) without `ZeroDivisionError` or NaN.
+    - Monotonic contour shift: known spatial displacements strictly increase loss.
+    - Thin-club separation: club loss is evaluated independently from body loss so body overlap cannot mask clubhead or shaft tracking errors.
+
 ## Shadow Tracker Body/Club Silhouettes and Segmentation (#10127)
 
 Specifies body and club silhouette segmentation, gold-mask evaluation, and occlusion tracking for Shadow Tracker ST-04:
