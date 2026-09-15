@@ -13,17 +13,16 @@ ST-01 scientific qualification has passed.
 | A      | [#10137](https://github.com/D-sorganization/UpstreamDrift/issues/10137) | Implemented in [PR #10145](https://github.com/D-sorganization/UpstreamDrift/pull/10145) | SourceAsset, FrameIdentity, sequence validation                 |
 | C      | [#10139](https://github.com/D-sorganization/UpstreamDrift/issues/10139) | Implemented in [PR #10147](https://github.com/D-sorganization/UpstreamDrift/pull/10147) | Convert existing camera types with explicit direction           |
 | B      | [#10138](https://github.com/D-sorganization/UpstreamDrift/issues/10138) | Implemented in [PR #10148](https://github.com/D-sorganization/UpstreamDrift/pull/10148) | Immutable binary masks, correction lineage and content identity |
-| D      | [#10140](https://github.com/D-sorganization/UpstreamDrift/issues/10140) | Specialist Review Required                                                              | Fix IK coordinate packing, then regenerate invalidated evidence |
-| E      | [#10141](https://github.com/D-sorganization/UpstreamDrift/issues/10141) | Specialist Review Required                                                              | Separate production closure units and acceptance status         |
+| D      | [#10140](https://github.com/D-sorganization/UpstreamDrift/issues/10140) | Implemented in [PR #10164](https://github.com/D-sorganization/UpstreamDrift/pull/10164) | Fix IK coordinate packing, establish forward kinematics parity  |
+| E      | [#10141](https://github.com/D-sorganization/UpstreamDrift/issues/10141) | Implemented in [PR #10165](https://github.com/D-sorganization/UpstreamDrift/pull/10165) | Separate production closure units and acceptance status         |
 
 ## Current Dispatch
 
-A/B/C are implemented; their old pickup prompt is retired. Begin with
-[Development Review](DEVELOPMENT_REVIEW.md) and
-[Continuation Prompt](CONTINUATION_PROMPT.md). The first corrective task is
-#10151: malformed-input contracts and pre-conversion mask-size validation.
-Specialist blockers #10140/#10141 remain open. The review defines the complete
-remaining pipeline, launcher, performance and release acceptance.
+A/B/C and D/E are implemented; Stage 0 contract hardening (#10151) merged in #10163.
+ST-01 (#10124) feasibility qualification confirms that while coordinate packing (#10140)
+and closure units (#10141) are resolved in software, the stored historical calibration
+trajectory and physical model geometry remain unqualified for golfer reconstruction.
+The next immediate dispatch is Stage 2 (#10125): full contracts freeze.
 
 ## Commands by Packet
 
