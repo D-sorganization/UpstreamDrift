@@ -79,10 +79,21 @@ class PinholeCameraModel:
             raise ValueError(
                 f"rotation_world_to_camera must have 9 elements, got {len(self.rotation_world_to_camera)}"
             )
+        r = self.rotation_world_to_camera
+        det = (
+            r[0] * (r[4] * r[8] - r[5] * r[7])
+            - r[1] * (r[3] * r[8] - r[5] * r[6])
+            + r[2] * (r[3] * r[7] - r[4] * r[6])
+        )
+        if abs(det) < 1e-6 or not math.isfinite(det):
+            raise ValueError(
+                f"rotation matrix must be non-singular and valid, got det={det}"
+            )
         if len(self.translation_world_to_camera) != 3:
             raise ValueError(
                 f"translation_world_to_camera must have 3 elements, got {len(self.translation_world_to_camera)}"
             )
+
         if self.crop_box is not None:
             if len(self.crop_box) != 4:
                 raise ValueError(
@@ -166,12 +177,71 @@ def project_point_to_pixel(
 
 
 class AnalyticSilhouetteRenderer:
-    """Slotted reference renderer fulfilling the `SilhouetteRenderer` protocol."""
+    """Slotted reference renderer fulfilling the `SilhouetteRenderer` protocol.
 
-    __slots__ = ("_cameras",)
+    Renders calibrated body and club silhouettes from state vectors as filled geometric
+    primitives (disks projected from spheres/capsules) or reference point landmarks.
+    """
 
-    def __init__(self, cameras: Mapping[str, PinholeCameraModel]) -> None:
+    __slots__ = ("_cameras", "_body_radius_m", "_club_radius_m")
+
+    def __init__(
+        self,
+        cameras: Mapping[str, PinholeCameraModel],
+        *,
+        body_radius_m: float = 0.0,
+        club_radius_m: float = 0.0,
+    ) -> None:
         self._cameras = dict(cameras)
+        if body_radius_m < 0.0 or not math.isfinite(body_radius_m):
+            raise ValueError(f"body_radius_m must be non-negative, got {body_radius_m}")
+        if club_radius_m < 0.0 or not math.isfinite(club_radius_m):
+            raise ValueError(f"club_radius_m must be non-negative, got {club_radius_m}")
+        self._body_radius_m = float(body_radius_m)
+        self._club_radius_m = float(club_radius_m)
+
+    @property
+    def body_radius_m(self) -> float:
+        return self._body_radius_m
+
+    @property
+    def club_radius_m(self) -> float:
+        return self._club_radius_m
+
+    def _rasterize_disk(
+        self,
+        mask: list[int],
+        center_u: float,
+        center_v: float,
+        radius_px: float,
+        width: int,
+        height: int,
+    ) -> None:
+        """Rasterize a filled 2D disk with subpixel center into a binary mask."""
+        if radius_px <= 0.5:
+            col = int(round(center_u))
+            row = int(round(center_v))
+            if 0 <= row < height and 0 <= col < width:
+                mask[row * width + col] = 1
+            return
+
+        r_int = int(math.ceil(radius_px))
+        min_row = max(0, int(math.floor(center_v - radius_px)))
+        max_row = min(height - 1, int(math.ceil(center_v + radius_px)))
+        min_col = max(0, int(math.floor(center_u - radius_px)))
+        max_col = min(width - 1, int(math.ceil(center_u + radius_px)))
+
+        r2 = radius_px * radius_px
+        for row in range(min_row, max_row + 1):
+            dv = float(row) - center_v
+            dv2 = dv * dv
+            if dv2 > r2:
+                continue
+            row_offset = row * width
+            for col in range(min_col, max_col + 1):
+                du = float(col) - center_u
+                if du * du + dv2 <= r2:
+                    mask[row_offset + col] = 1
 
     def render(self, request: RenderRequest) -> RenderResult:
         """Render calibrated body and club silhouettes from state vector."""
@@ -191,24 +261,35 @@ class AnalyticSilhouetteRenderer:
         vis_mask = [1] * total_px
 
         state = request.state
-        # State vector: first 3 elements are body landmark, next 3 are clubhead landmark
+        # State vector: first 3 elements are body center [X, Y, Z]
         if len(state) >= 3:
             bx, by, bz = state[0], state[1], state[2]
             bu, bv, b_vis = project_point_to_pixel((bx, by, bz), camera)
             if b_vis:
-                col = int(round(bu))
-                row = int(round(bv))
-                if 0 <= row < height and 0 <= col < width:
-                    body_mask[row * width + col] = 1
+                # Transform body radius to camera image plane pixel radius
+                # Z in camera frame = r[6]*bx + r[7]*by + r[8]*bz + t[2]
+                r_cam = camera.rotation_world_to_camera
+                t_cam = camera.translation_world_to_camera
+                zc = r_cam[6] * bx + r_cam[7] * by + r_cam[8] * bz + t_cam[2]
+                if zc > 1e-6 and self._body_radius_m > 0.0:
+                    r_px = camera.fx * self._body_radius_m / zc
+                else:
+                    r_px = 0.0
+                self._rasterize_disk(body_mask, bu, bv, r_px, width, height)
 
-        if len(state) >= 6:
+        # Elements 3:6: clubhead landmark if length == 6, or clubhead from full state
+        if len(state) == 6:
             cx, cy, cz = state[3], state[4], state[5]
             cu, cv, c_vis = project_point_to_pixel((cx, cy, cz), camera)
             if c_vis:
-                col = int(round(cu))
-                row = int(round(cv))
-                if 0 <= row < height and 0 <= col < width:
-                    club_mask[row * width + col] = 1
+                r_cam = camera.rotation_world_to_camera
+                t_cam = camera.translation_world_to_camera
+                zc = r_cam[6] * cx + r_cam[7] * cy + r_cam[8] * cz + t_cam[2]
+                if zc > 1e-6 and self._club_radius_m > 0.0:
+                    r_px = camera.fx * self._club_radius_m / zc
+                else:
+                    r_px = 0.0
+                self._rasterize_disk(club_mask, cu, cv, r_px, width, height)
 
         return RenderResult(
             body_mask=tuple(body_mask),
