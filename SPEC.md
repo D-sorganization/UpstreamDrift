@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Fail Closed on Invalid Rollout and Missing Closure Evidence (#10166)
+
+Hardens physical rollout acceptance gating and closure error extraction:
+- Updates `ForwardRolloutResult.is_closure_accepted()` (and alias `is_accepted()`) to fail closed on non-finite state arrays (`q`, `qd`, `time_s`), non-strictly-increasing time grids, shape mismatches, negative closure metrics, infinite closure errors, and infinite/non-positive profile limit tolerances.
+- Explicitly documents that `is_closure_accepted()` verifies numerical integration and separated loop-closure tolerances only, and does not imply or grant contact qualification, cross-engine replay parity, or full physical/scientific model acceptance.
+- Updates `_extract_closure_errors()` to enforce exact declared closure shapes (3D translation-only or 6D weld) and report `rot_err=None` (rather than 0.0) when rotational closure is absent/unmeasured.
+- Protects accumulators against `max(0.0, NaN)` masking in `_simulate_rk45` and `_simulate_euler` and propagates NaNs to explicit `status="invalid"`.
+- Audits terminal Euler state for accelerations, contacts, and closure errors alongside intermediate substeps.
+- Updates `EngineReplayOutcome` to default separated unit fields (`max_closure_translation_m`, `max_closure_rotation_rad`) to `None` instead of `0.0`, distinguishing absent measurements from measured zero, and validates finite non-negative values in `__post_init__`.
+
 ## Shadow Tracker Video Ingestion, Shots, Timing, and Capture Evidence (#10126)
 
 Specifies video ingestion, shot partitioning, timing mappings, and capture evidence for Shadow Tracker ST-03:
@@ -14,6 +24,7 @@ Specifies video ingestion, shot partitioning, timing mappings, and capture evide
   - `map_frame_to_observation()`: Translates ingested frame identities into `FrameObservation` records.
   - `SyntheticVideoDecoder` and `ingest_capture_rig_view()`: Provides deterministic offline decoding and Capture Rig view adapters.
 
+
 ## Shadow Tracker Immutable Evidence Contracts and Service Protocols (#10125)
 
 Freezes immutable evidence contracts, auxiliary DTOs, and runtime service protocols for Shadow Tracker ST-02:
@@ -27,6 +38,7 @@ Freezes immutable evidence contracts, auxiliary DTOs, and runtime service protoc
   - `FrameObservation` presentation time conversion returns an exact, reduced `fractions.Fraction`, enforcing strictly positive timebase denominators and strict `float` for known physical time.
 - Enforces defensive copying and immutability across tuples and mapping attributes to prevent external mutation of constructor inputs or exported fields.
 - Implements strict lossless dictionary serialization and deserialization (`to_dict` / `from_dict`) with schema tag validation, unknown field rejection, and container element verification.
+
 
 ## Shadow Tracker Feasibility Qualification and Benchmark Freeze (#10124)
 

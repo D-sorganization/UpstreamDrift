@@ -13,6 +13,7 @@ from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 import json
 import logging
+import math
 from pathlib import Path
 from typing import Any, TypeAlias
 
@@ -124,8 +125,33 @@ class EngineReplayOutcome:
     contact_audit: ContactAuditResult
     convergence: StepSizeConvergenceResult
     max_closure_residual_m: float
-    max_closure_translation_m: float = 0.0
-    max_closure_rotation_rad: float = 0.0
+    max_closure_translation_m: float | None = None
+    max_closure_rotation_rad: float | None = None
+
+    def __post_init__(self) -> None:
+        if (
+            not math.isfinite(self.max_closure_residual_m)
+            or self.max_closure_residual_m < 0.0
+        ):
+            raise ValueError(
+                f"max_closure_residual_m must be finite and non-negative, got {self.max_closure_residual_m}"
+            )
+        if self.max_closure_translation_m is not None:
+            if (
+                not math.isfinite(self.max_closure_translation_m)
+                or self.max_closure_translation_m < 0.0
+            ):
+                raise ValueError(
+                    f"max_closure_translation_m must be finite and non-negative, got {self.max_closure_translation_m}"
+                )
+        if self.max_closure_rotation_rad is not None:
+            if (
+                not math.isfinite(self.max_closure_rotation_rad)
+                or self.max_closure_rotation_rad < 0.0
+            ):
+                raise ValueError(
+                    f"max_closure_rotation_rad must be finite and non-negative, got {self.max_closure_rotation_rad}"
+                )
 
     def as_dict(self) -> dict[str, Any]:
         return {
