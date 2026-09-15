@@ -2,20 +2,24 @@
 
 ## Current State
 
-Reviewed baseline: `b97e159dcc1686b4fc36351124996862619d8f35`.
-Code for evidence records, timing, mask metrics, point projection and candidate
-ranking has merged. Full ST-01–ST-06 acceptance has not been demonstrated.
-The renderer is point-only; the model segmenter can report success without
-inference; real decoding, persisted mask lineage and model qualification remain.
+Reviewed baseline includes merged Stage 0 contract hardening (#10151 / PR #10163),
+MuJoCo IK coordinate alignment (#10140 / PR #10164), production closure units separation
+(#10141 / PR #10165), acceptance gating hardening (#10166 / PR #10170), feasibility qualification
+(#10124 / PR #10169), and evidence regeneration after IK correction (#10167). Historical calibration
+is preserved in `historical/`; active IK trajectory and offsets have been regenerated with aligned
+coordinates, improving grip translation closure from 1.266 m to 13.7 mm (scientific qualification
+remains open due to rotation closure and strict 5 mm tolerance). Code for evidence records (#10125),
+video ingestion (#10126), mask metrics (#10127), calibrated silhouettes (#10128), and shape
+fitting (#10129) has merged. Full ST-01–ST-06 acceptance has not been demonstrated.
 See [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md) for reproduced cases.
 
 ## Immediate Dispatch
 
-First repair false segmentation success under #10127, then the renderer/state
-contract under #10128 and DTO invariants. Continue real local-video ingestion
-(#10168) and persisted manual-mask review independently of physical qualification.
-Use [Continuation Prompt](CONTINUATION_PROMPT.md). Stage 7 is boundary work only
-until #10167 supplies regenerated, physically valid model evidence. Do not use
+Read [Development Review](DEVELOPMENT_REVIEW.md), [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md), and [Continuation Prompt](CONTINUATION_PROMPT.md).
+Evidence regeneration (#10167) is complete, reducing translation error to 13.7 mm. First repair false
+segmentation success under #10127, then the renderer/state contract under #10128 and DTO invariants.
+Continue real local-video ingestion (#10168) and persisted manual-mask review independently of physical qualification.
+Stage 7 (#10130) is boundary work only until physical qualification gates pass. Do not use
 issue closure or merged prototypes as proof that scientific gates have passed.
 
 ## First Pickup

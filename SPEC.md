@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Proposed Model-Driven Golf Simulator Integration (#10188)
+
+Planning scope only: [GSPro Integration Plan](docs/plans/golf_simulator_integration/README.md)
+defines a vendor-neutral shot-delivery port, immutable launch/provenance contract,
+durable uncertainty handling, GSPro adapter, local reference destination and
+synchronized companion golfer replay. GitHub children #10189–#10200 separate
+protocol characterization, implementation, impact qualification and licensed
+acceptance under TDD, DbC, Law of Demeter and DRY requirements.
+
+No outbound GSPro integration is implemented by this specification update.
+Native GSPro avatars and autonomous course feedback remain vendor-gated research.
+Existing contact/impact qualification gaps must be resolved independently of
+socket delivery; scientific acceptance retains the canonical manual governance.
+
 ## Shadow Tracker Evidence-Based Turnover Refresh (#10184)
 
 Corrects prototype completion claims after the September 15 review. Records
@@ -46,6 +60,20 @@ Specifies body and club silhouette segmentation, gold-mask evaluation, and occlu
   - Enforces strict DbC invariants:
     - Empty vs unknown mask semantics: unobserved regions require `valid == 0`, and any non-zero body or club pixel on an invalid pixel strictly raises `ValueError`.
     - Revision-aware cache invalidation: manual corrections update `revision_id`, link `parent_revision_id`, and produce a modified `observation_hash`, ensuring downstream silhouette losses and residual caches are safely invalidated.
+
+## Shadow Tracker Evidence Regeneration and Qualification After IK Correction (#10167)
+
+Audits stored IK provenance and regenerates MuJoCo calibration evidence following coordinate mapping alignment (#10140):
+- Audits historical FB-4 MuJoCo IK trajectory and calibrated marker offsets, documenting the legacy sequential indexing defect (`qpos[i] = q_arr[i]`) that stored coordinates in native MuJoCo qpos order rather than declared `coordinate_order`.
+- Preserves historical FB-4 evidence under `docs/development/full_body_models/evidence/fb4_calibration/mujoco/historical/` and legacy model probe receipt under `docs/plans/shadow_tracker/evidence/model_probe_10_frames_historical_scrambled.json`.
+- Regenerates active MuJoCo marker offsets (`calibrated_offsets.json`) and 654-frame IK trajectory (`ik_trajectory.npz`) using aligned `MujocoFullBodyIK` coordinate indexing:
+  - Subsample marker calibration RMS drops from 174.5 mm to 145.2 mm.
+  - Full trajectory IK RMS drops from 159.5 mm to 138.1 mm (mean frame RMS drops from 157.7 mm to 133.7 mm).
+  - Dual-grip initial weld translation closure error drops from 1.265687 m to 0.013733 m (13.7 mm, 92x improvement), matching identically across IK and forward dynamics paths.
+  - Initial grip rotation closure error improves from 2.350 rad to 1.657 rad.
+- Updates canonical model probe receipt `docs/plans/shadow_tracker/evidence/model_probe_10_frames.json` with fresh rollouts, zero nominal repeat differences, and 2.0e-10 m refined tolerance step differences.
+- Confirms that ST-01 model feasibility remains scientifically unqualified (`scientifically_qualified: false`) because initial translation error (13.7 mm) exceeds the 5 mm profile tolerance and rotation error (1.657 rad) exceeds 0.05 rad, correctly failing closed under `ForwardRolloutResult.is_closure_accepted()`.
+- Adds unit tests in `tests/unit/shadow_tracker/test_calibration_provenance.py` verifying legacy scrambled error reproduction, active initial closure tolerance (< 2 cm), spec coordinate order agreement, and receipt artifact digest integrity.
 
 ## Fail Closed on Invalid Rollout and Missing Closure Evidence (#10166)
 
@@ -4815,6 +4843,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-15 | #10201 | Propose GSPro and interchangeable simulator integration, detailed implementation children, architecture and worker turnover (#10188); no runtime implementation. |
 | 2026-09-15 | #10185 | Refresh Shadow Tracker turnover with reproduced acceptance gaps and current corrective/product sequence (#10184). |
 | 2026-09-15 | #10152 | Review Shadow Tracker contracts and publish the full implementation, launcher, performance and CI/CD continuation handoff (#10150). |
 | 2026-09-14 | #10147 | Implement camera direction conversion between observation and pipeline contracts for Shadow Tracker (ST-02C, #10139). |
