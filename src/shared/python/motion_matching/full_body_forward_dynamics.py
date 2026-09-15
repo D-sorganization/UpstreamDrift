@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import logging
+import math
 from typing import Any, TypeAlias
 
 import numpy as np
@@ -62,9 +63,90 @@ class ForwardRolloutResult:
     shared_metrics: SharedMetrics
     contact_audit: ContactAuditResult
     max_closure_translation_m: float
-    max_closure_rotation_rad: float
+    max_closure_rotation_rad: float | None
     max_closure_residual_m: float
     status: str
+
+    def is_closure_accepted(
+        self,
+        *,
+        max_translation_tol_m: float = 1e-3,
+        max_rotation_tol_rad: float = 0.05,
+    ) -> bool:
+        """Rollout numerical closure acceptance predicate.
+
+        Gating execution status, finite state validity, strictly increasing time,
+        consistent sequence shapes, and separated loop-closure tolerances.
+        Fails closed on missing or non-finite measurements, negative metrics,
+        infinite or non-positive profile limits, or unexecuted/failed runs.
+
+        Note: this predicate verifies numerical rollout closure and validity only;
+        it does NOT imply or grant full physical/scientific qualification, contact
+        audit compliance, cross-engine replay parity, or downstream model acceptance.
+        """
+        if self.status != "success":
+            return False
+        if len(self.time_s) == 0:
+            return False
+        # Profile limits (tolerances) must be finite and strictly positive
+        if not (
+            math.isfinite(max_translation_tol_m)
+            and max_translation_tol_m > 0.0
+            and math.isfinite(max_rotation_tol_rad)
+            and max_rotation_tol_rad > 0.0
+        ):
+            return False
+        # Time array must be finite and strictly increasing
+        time_arr = np.asarray(self.time_s)
+        if not np.all(np.isfinite(time_arr)):
+            return False
+        if len(time_arr) > 1 and not np.all(np.diff(time_arr) > 0.0):
+            return False
+        # Shapes and time alignment
+        q_arr = np.asarray(self.q)
+        qd_arr = np.asarray(self.qd)
+        pred_arr = np.asarray(self.predicted_markers_m)
+        n_frames = len(time_arr)
+        if (
+            q_arr.shape[0] != n_frames
+            or qd_arr.shape[0] != n_frames
+            or pred_arr.shape[0] != n_frames
+        ):
+            return False
+        # Finite state check
+        if (
+            not np.all(np.isfinite(q_arr))
+            or not np.all(np.isfinite(qd_arr))
+            or not np.all(np.isfinite(pred_arr))
+        ):
+            return False
+        # Reject zero-filled / unexecuted output
+        if not np.any(q_arr) and not np.any(qd_arr) and not np.any(pred_arr):
+            return False
+        # Measured closure metrics must be finite and non-negative
+        if (
+            self.max_closure_translation_m is None
+            or not math.isfinite(self.max_closure_translation_m)
+            or self.max_closure_translation_m < 0.0
+        ):
+            return False
+        # Rotation closure evidence must be present, finite, and non-negative
+        if (
+            self.max_closure_rotation_rad is None
+            or not math.isfinite(self.max_closure_rotation_rad)
+            or self.max_closure_rotation_rad < 0.0
+        ):
+            return False
+        if (
+            self.max_closure_residual_m is None
+            or not math.isfinite(self.max_closure_residual_m)
+            or self.max_closure_residual_m < 0.0
+        ):
+            return False
+        return bool(
+            self.max_closure_translation_m <= max_translation_tol_m
+            and self.max_closure_rotation_rad <= max_rotation_tol_rad
+        )
 
     def is_accepted(
         self,
@@ -72,22 +154,14 @@ class ForwardRolloutResult:
         max_translation_tol_m: float = 1e-3,
         max_rotation_tol_rad: float = 0.05,
     ) -> bool:
-        """Physical rollout acceptance gating execution status and separated closure tolerances.
+        """Rollout closure acceptance predicate (delegates to is_closure_accepted).
 
-        Rejects failed or zero-filled output. Both translation and rotation errors must be
-        within explicit physical limits.
+        Checks numerical integration and separated loop-closure tolerances. Does
+        not imply full physical/scientific qualification or multi-engine replay.
         """
-        if self.status != "success" or len(self.time_s) == 0:
-            return False
-        if (
-            not np.any(self.q)
-            and not np.any(self.qd)
-            and not np.any(self.predicted_markers_m)
-        ):
-            return False
-        return bool(
-            self.max_closure_translation_m <= max_translation_tol_m
-            and self.max_closure_rotation_rad <= max_rotation_tol_rad
+        return self.is_closure_accepted(
+            max_translation_tol_m=max_translation_tol_m,
+            max_rotation_tol_rad=max_rotation_tol_rad,
         )
 
     def as_dict(self) -> dict[str, Any]:
@@ -262,13 +336,29 @@ def _slice_capture(capture: TourCapture, n_frames: int) -> TourCapture:
     )
 
 
+def _accumulate_max(current: float | None, new_val: float | None) -> float | None:
+    """Accumulate maximum without hiding NaNs behind 0.0 or overwriting None."""
+    if new_val is None:
+        return current
+    if current is None:
+        return new_val
+    if np.isnan(current) or np.isnan(new_val):
+        return float("nan")
+    return max(current, new_val)
+
+
 def _build_failed_rollout(
     times: Array,
     n_coords: int,
     capture: TourCapture,
     marker_offsets: Mapping[str, Any],
+    *,
+    status: str = "failed",
+    max_closure_translation_m: float = float("nan"),
+    max_closure_rotation_rad: float | None = None,
+    max_closure_residual_m: float = float("nan"),
 ) -> ForwardRolloutResult:
-    """Construct a fallback ForwardRolloutResult when numerical integration fails."""
+    """Construct a fallback ForwardRolloutResult when numerical integration fails or is invalid."""
     n_frames = len(times)
     eval_cap = _slice_capture(capture, n_frames)
     zero_markers = np.zeros((n_frames, len(eval_cap.labels), 3), dtype=np.float64)
@@ -283,23 +373,41 @@ def _build_failed_rollout(
             tracked_labels=list(marker_offsets.keys()),
         ),
         contact_audit=_audit_contact_samples([], n_frames),
-        max_closure_translation_m=0.0,
-        max_closure_rotation_rad=0.0,
-        max_closure_residual_m=0.0,
-        status="failed",
+        max_closure_translation_m=max_closure_translation_m,
+        max_closure_rotation_rad=max_closure_rotation_rad,
+        max_closure_residual_m=max_closure_residual_m,
+        status=status,
     )
 
 
 def _assemble_rollout_result(
     times: Array,
-    data: tuple[Array, Array, Array, list[dict[str, Any]], float, float, float, str],
+    data: tuple[
+        Array,
+        Array,
+        Array,
+        list[dict[str, Any]],
+        float,
+        float | None,
+        float,
+        str,
+    ],
     capture: TourCapture,
     marker_offsets: Mapping[str, Any],
 ) -> ForwardRolloutResult:
     """Construct a ForwardRolloutResult from trajectory data, contact audit, and metrics."""
     q_traj, qd_traj, pred_m, samples, trans_err, rot_err, mixed_err, status = data
     if status != "success":
-        return _build_failed_rollout(times, q_traj.shape[1], capture, marker_offsets)
+        return _build_failed_rollout(
+            times,
+            q_traj.shape[1],
+            capture,
+            marker_offsets,
+            status=status,
+            max_closure_translation_m=trans_err,
+            max_closure_rotation_rad=rot_err,
+            max_closure_residual_m=mixed_err,
+        )
     eval_cap = _slice_capture(capture, len(times))
     return ForwardRolloutResult(
         time_s=times,
@@ -319,12 +427,21 @@ def _assemble_rollout_result(
     )
 
 
-def _extract_closure_errors(model: Any) -> tuple[float, float, float]:
-    """Extract translation, rotation, and mixed closure error norms from model."""
+def _extract_closure_errors(model: Any) -> tuple[float, float | None, float]:
+    """Extract translation, rotation, and mixed closure error norms from model.
+
+    Validates declared 1D closure residual shape (size 3 for translation-only or
+    size 6 for translation + rotation). Returns rot_err as None when rotation is
+    not measured, preserving missing evidence distinct from measured 0.0.
+    """
     err_p, _ = model.closure_errors()
     err_p_arr = np.asarray(err_p, dtype=np.float64)
+    if err_p_arr.ndim != 1 or err_p_arr.size not in (3, 6):
+        raise ValueError(
+            f"Expected 1D closure residual of size 3 or 6, got shape {err_p_arr.shape}"
+        )
     trans_err = float(np.linalg.norm(err_p_arr[:3]))
-    rot_err = float(np.linalg.norm(err_p_arr[3:])) if err_p_arr.size > 3 else 0.0
+    rot_err = float(np.linalg.norm(err_p_arr[3:6])) if err_p_arr.size == 6 else None
     mixed_err = float(np.linalg.norm(err_p_arr))
     return trans_err, rot_err, mixed_err
 
@@ -338,7 +455,16 @@ def _simulate_rk45(
     marker_offsets: Mapping[str, Any],
     capture: TourCapture,
     options: RolloutOptions,
-) -> tuple[Array, Array, Array, list[dict[str, Any]], float, float, float, str]:
+) -> tuple[
+    Array,
+    Array,
+    Array,
+    list[dict[str, Any]],
+    float,
+    float | None,
+    float,
+    str,
+]:
     """Execute forward simulation via adaptive RK45 integration."""
     from scipy.integrate import solve_ivp
 
@@ -381,9 +507,9 @@ def _simulate_rk45(
             np.zeros((n_frames, n_coords)),
             zero_markers,
             [],
-            0.0,
-            0.0,
-            0.0,
+            float("nan"),
+            None,
+            float("nan"),
             "failed",
         )
 
@@ -391,9 +517,9 @@ def _simulate_rk45(
     qd_traj = sol.y[n_coords:, :].T
     pred_markers = np.full((n_frames, len(capture.labels), 3), np.nan, dtype=np.float64)
     all_contact_samples = []
-    max_trans_err = 0.0
-    max_rot_err = 0.0
-    max_mixed_err = 0.0
+    max_trans_err: float | None = None
+    max_rot_err: float | None = None
+    max_mixed_err: float | None = None
 
     for k in range(n_frames):
         q_k = q_traj[k]
@@ -414,19 +540,35 @@ def _simulate_rk45(
         )
         model.accelerations(q_dict, qd_dict, tau_dict)
         trans_err, rot_err, mixed_err = _extract_closure_errors(model)
-        max_trans_err = max(max_trans_err, trans_err)
-        max_rot_err = max(max_rot_err, rot_err)
-        max_mixed_err = max(max_mixed_err, mixed_err)
+        max_trans_err = _accumulate_max(max_trans_err, trans_err)
+        max_rot_err = _accumulate_max(max_rot_err, rot_err)
+        max_mixed_err = _accumulate_max(max_mixed_err, mixed_err)
+
+    tracked_indices = [
+        i for i, label in enumerate(capture.labels) if label in marker_offsets
+    ]
+    has_nan = (
+        not np.all(np.isfinite(q_traj))
+        or not np.all(np.isfinite(qd_traj))
+        or (
+            len(tracked_indices) > 0
+            and not np.all(np.isfinite(pred_markers[:, tracked_indices, :]))
+        )
+        or (max_trans_err is not None and not np.isfinite(max_trans_err))
+        or (max_rot_err is not None and not np.isfinite(max_rot_err))
+        or (max_mixed_err is not None and not np.isfinite(max_mixed_err))
+    )
+    status = "invalid" if has_nan else "success"
 
     return (
         q_traj,
         qd_traj,
         pred_markers,
         all_contact_samples,
-        max_trans_err,
+        max_trans_err if max_trans_err is not None else 0.0,
         max_rot_err,
-        max_mixed_err,
-        "success",
+        max_mixed_err if max_mixed_err is not None else 0.0,
+        status,
     )
 
 
@@ -439,7 +581,16 @@ def _simulate_euler(
     marker_offsets: Mapping[str, Any],
     capture: TourCapture,
     options: RolloutOptions,
-) -> tuple[Array, Array, Array, list[dict[str, Any]], float, float, float, str]:
+) -> tuple[
+    Array,
+    Array,
+    Array,
+    list[dict[str, Any]],
+    float,
+    float | None,
+    float,
+    str,
+]:
     """Execute forward simulation via semi-implicit Euler integration."""
     n_frames = len(times)
     coord_names = list(model.coordinate_order)
@@ -460,9 +611,9 @@ def _simulate_euler(
     )
 
     all_contact_samples = []
-    max_trans_err = 0.0
-    max_rot_err = 0.0
-    max_mixed_err = 0.0
+    max_trans_err: float | None = None
+    max_rot_err: float | None = None
+    max_mixed_err: float | None = None
 
     for step in range(n_frames - 1):
         t_curr = float(times[step])
@@ -488,9 +639,9 @@ def _simulate_euler(
 
             acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
             trans_err, rot_err, mixed_err = _extract_closure_errors(model)
-            max_trans_err = max(max_trans_err, trans_err)
-            max_rot_err = max(max_rot_err, rot_err)
-            max_mixed_err = max(max_mixed_err, mixed_err)
+            max_trans_err = _accumulate_max(max_trans_err, trans_err)
+            max_rot_err = _accumulate_max(max_rot_err, rot_err)
+            max_mixed_err = _accumulate_max(max_mixed_err, mixed_err)
 
             acc = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
             curr_qd += acc * dt_sub
@@ -502,15 +653,51 @@ def _simulate_euler(
             ik_adapter, curr_q, marker_offsets, capture.labels
         )
 
+    # Audit terminal Euler state (frame n_frames - 1)
+    q_term_dict = {name: float(curr_q[i]) for i, name in enumerate(coord_names)}
+    qd_term_dict = {name: float(curr_qd[i]) for i, name in enumerate(coord_names)}
+    all_contact_samples.append(
+        model.evaluate_contact_samples(q_term_dict, qd_term_dict)
+    )
+    tau_term_dict = evaluate_polynomial_torques(
+        theta,
+        float(times[-1]),
+        duration_s,
+        coord_names,
+        options.unactuated_indices,
+        normalize_time=options.normalize_time,
+    )
+    model.accelerations(q_term_dict, qd_term_dict, tau_term_dict)
+    trans_err, rot_err, mixed_err = _extract_closure_errors(model)
+    max_trans_err = _accumulate_max(max_trans_err, trans_err)
+    max_rot_err = _accumulate_max(max_rot_err, rot_err)
+    max_mixed_err = _accumulate_max(max_mixed_err, mixed_err)
+
+    tracked_indices = [
+        i for i, label in enumerate(capture.labels) if label in marker_offsets
+    ]
+    has_nan = (
+        not np.all(np.isfinite(q_traj))
+        or not np.all(np.isfinite(qd_traj))
+        or (
+            len(tracked_indices) > 0
+            and not np.all(np.isfinite(pred_markers[:, tracked_indices, :]))
+        )
+        or (max_trans_err is not None and not np.isfinite(max_trans_err))
+        or (max_rot_err is not None and not np.isfinite(max_rot_err))
+        or (max_mixed_err is not None and not np.isfinite(max_mixed_err))
+    )
+    status = "invalid" if has_nan else "success"
+
     return (
         q_traj,
         qd_traj,
         pred_markers,
         all_contact_samples,
-        max_trans_err,
+        max_trans_err if max_trans_err is not None else 0.0,
         max_rot_err,
-        max_mixed_err,
-        "success",
+        max_mixed_err if max_mixed_err is not None else 0.0,
+        status,
     )
 
 
