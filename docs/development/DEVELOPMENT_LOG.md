@@ -23,13 +23,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10188 (child #10190 active; children #10189–#10200)
 - **Branch:** feat/issue-10190-shot-contracts
-- **PR:** #10208 (open; GS-01 #10190); #10201 (merged; planning)
+- **PR:** #10208 (open; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
 - **Paths:** `src/shared/python/golf_simulator; tests/unit/golf_simulator; docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md`
 - **Started:** 2026-09-15
-- **Last verified:** 2026-09-15 (`64158c629`; SELF; GS-01 immutable shot contracts, AimContext proper rotation, capability ports, and launch bridge implemented test-first; 14 unit tests pass under standard and python -O with DBC_LEVEL=off; ruff check/format and mypy pass; regression tests pass)
-- **Summary:** GS-01 canonical shot domain implemented under src/shared/python/golf_simulator with ShotEnvelope, AimContext (with RᵀR=I and det=+1 proper rotation), ShotQualification, SimulatorCapabilities, and launch_bridge conversion from LaunchConditions, PostImpactState, and PipelineResult. Rejects booleans, non-finite values, zero-speed strikes, and improper rotations under all DBC/optimization levels.
-- **Next step:** Land GS-01 PR (#10208) and proceed with GS-00 (#10189) protocol profile characterization and GS-02 (#10191) pure codec.
-- **Evidence:** tests/unit/golf_simulator/test_shot_contract.py, tests/unit/golf_simulator/test_launch_bridge.py; docs/plans/golf_simulator_integration/README.md.
+- **Last verified:** 2026-09-15 (`64158c629`; SELF; GS-00 protocol profile, GS-01 immutable shot contracts, and GS-02 pure codec implemented test-first; 23 unit tests pass under standard and python -O with DBC_LEVEL=off; ruff check/format, mypy, and architecture budget pass; regression tests pass)
+- **Summary:** GS-00/01/02 simulator domain, GSPro profile, and pure codec implemented under src/shared/python/golf_simulator. ShotEnvelope, AimContext (with RᵀR=I and det=+1 proper rotation), ShotQualification, SimulatorCapabilities, and launch_bridge conversion from LaunchConditions, PostImpactState, and PipelineResult with ShotMetadata parameter object. GSProProfile and pure codec encode/decode canonical SI shots to Open Connect v1 wire payloads with independent golden fixtures.
+- **Next step:** Implement GS-03 (#10192) durable transport, bounded stream framer, and delivery journal.
+- **Evidence:** tests/unit/golf_simulator/test_shot_contract.py, tests/unit/golf_simulator/test_launch_bridge.py, tests/unit/golf_simulator/test_gspro_profile.py, tests/unit/golf_simulator/test_gspro_codec.py; docs/plans/golf_simulator_integration/README.md.
 
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
 
