@@ -15,11 +15,12 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 REFERENCE_STATURE_M = 1.741
 REFERENCE_MASS_KG = 73.0

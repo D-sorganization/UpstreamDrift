@@ -17,19 +17,33 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10204 · Capture Rig Shared Camera Layer
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10204 (part of D-sorganization/Tools#5218)
+- **Branch:** claude/10204-shared-camera
+- **PR:** #10211 (open; auto-merge squash armed)
+- **Paths:** src/motion_capture/rig/preview_source.py; src/motion_capture/rig/recorder.py; tests/fixtures/reference_calibration/preview_source_checks.py; vendor/ud-tools; requirements-tools.txt; Cargo.toml; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/seam_rulings.v1.json; docs/agent_context
+- **Started:** 2026-09-15
+- **Last verified:** 2026-09-15 (SELF; seam-drift and agent-context gates pass locally; `run_checks.py` 38 passed incl. 8 adapter checks; `tests/motion_capture/rig` + shadow/fallback hygiene 140 passed; `check_tools_pins` consistent at 1ac89c18e; ruff, ruff-format, mypy clean on changed files)
+- **Summary:** Pin `vendor/ud-tools` to Tools 1ac89c18e, replace the rig's own ffmpeg preview decode with one adapter over Tools `shared.python.camera.FfmpegDirectShowSource` (seam points rig → Tools), delegate `dshow_device_ref` to the shared builder, and pin the launched command token-for-token against the pre-port list. The shared package is a `sidekick.lab.mocap` consumer, so it imports at launcher runtime and in the isolated provider harness, not in the root test process.
+- **Next step:** Operator verifies on the rig that the preview binds all three cameras at 60 fps and Record still hands off, then merges the PR.
+- **Evidence:** tests/fixtures/reference_calibration/preview_source_checks.py; scripts/shared_tools/check_tools_pins.py.
+
 ### DL-#10188 · Model-Driven Golf Simulator Integration
 
-- **State:** proposed
-- **Owner:** codex
-- **Issue:** #10188 (children #10189–#10200)
-- **Branch:** docs/issue-10188-gspro-integration
-- **PR:** #10201 (open; planning only)
-- **Paths:** docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10188 (child #10192 active; children #10189–#10200)
+- **Branch:** feat/issue-10192-durable-transport
+- **PR:** #10213 (open; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
+- **Paths:** `src/shared/python/golf_simulator; tests/unit/golf_simulator; tests/integration/golf_simulator; docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md`
 - **Started:** 2026-09-15
-- **Last verified:** 2026-09-15 (`395d3de876d8f87b7b00785ef2f430d0e9387ce7` source baseline; SELF planning changes; documentation pre-commit, 12 local links, title case, SPEC duplicate and whitespace checks pass; development-log baseline comparison adds no findings)
-- **Summary:** Proposed GSPro shot delivery and interchangeable local/commercial simulator architecture with immutable contracts, uncertainty handling, impact qualification gates, companion replay, detailed TDD/DbC/LoD/DRY children and delegated acceptance runbook; no outbound runtime implementation or live qualification.
-- **Next step:** Execute GS-00 protocol characterization (#10189) on the installed licensed GSPro host.
-- **Evidence:** docs/plans/golf_simulator_integration/README.md and FEASIBILITY.md; canonical handoff names worker domain slice #10190.
+- **Last verified:** 2026-09-15 (`2bf5ec40f`; SELF; GS-00, GS-01, GS-02, and GS-03 implemented test-first; 34 unit and integration tests pass under standard and python -O with DBC_LEVEL=off; ruff check/format, mypy, architecture budget, DRY, and LoD pass; divergence inventory updated)
+- **Summary:** GS-00/01/02/03 simulator domain, GSPro profile, pure codec, durable transport, and delivery journal implemented under src/shared/python/golf_simulator. ShotJournal enforces pre-write intent logging, distinct status transitions, and marks drops as AMBIGUOUS without auto-resend. GSProTransport enforces bounded framing buffer (<=64 KiB), reassembles fragmented frames, and prevents stream overflow.
+- **Next step:** Implement GS-04 (#10193) full impact state forwarding and contact event qualification in swing physics pipeline.
+- **Evidence:** tests/unit/golf_simulator/test_shot_contract.py, tests/unit/golf_simulator/test_launch_bridge.py, tests/unit/golf_simulator/test_gspro_profile.py, tests/unit/golf_simulator/test_gspro_codec.py, tests/unit/golf_simulator/test_journal.py, tests/integration/golf_simulator/test_fake_gspro_peer.py; docs/plans/golf_simulator_integration/README.md.
 
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
 

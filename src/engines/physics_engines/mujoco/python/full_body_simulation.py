@@ -597,7 +597,7 @@ def _distance_outside(point_xy: Array, hull_xy: Array) -> float:
 
 def reference_zmp(
     simulator: FullBodySimulator,
-    time_ref: Sequence[float],
+    time_ref: Sequence[float] | Array,
     q_ref: Array,
     ground: GroundPlane,
     *,

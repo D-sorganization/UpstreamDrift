@@ -25,14 +25,15 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from itertools import product
-from typing import Literal
+from typing import Literal, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
+
 
 #: Wrist chain after the pronation joint: ``Rz(pronation) @ base @ Rx(cock) @
 #: Rz(flexion)``. With the anthropometric wrist base (``base.T @ z == -y``) the

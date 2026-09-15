@@ -7,9 +7,12 @@ Reconciles the parallel Visuals/FB-4/FB-5/FB-6 and Ground Support lanes under HO
   - Adds `prior_offsets` and `prior_weight` parameters to `calibrate_marker_offsets()` and internal `_placements()`, allowing anatomical marker priors to regularize least-squares marker placement optimization.
   - Implements `static_marker_offsets()` computing mean marker positions in local body frames across static trial frames.
   - Preserves OpenSim re-export shim in `src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`.
-- Law of Demeter and Clean Layering Enforcement:
+- Law of Demeter, DRY, and Clean Layering Enforcement:
   - Eliminates deep member access chains in `full_body_markers.py` and `full_body_simulation.py` to satisfy LOD quality gates.
   - Enforces dependency direction constraints ensuring `src/shared/python/motion_matching` remains decoupled from engine-specific modules.
+  - Refactors `anthropometric_candidate.py` segment mass scaling loops to eliminate DRY duplication.
+  - Adds strict `Literal["YXZ"]` typing to `_EULER` in `grip_fit.py` and explicit `Array: TypeAlias` annotations to `anthropometry.py`, RK4 integration buffers, and `reference_zmp` time sequences in `full_body_simulation.py`.
+
 
 ## Shadow Tracker Filled-Area Silhouette Rendering and Invariants (#10206)
 
@@ -34,6 +37,33 @@ Specifies standardized replay archive serialization, forward-kinematics projecti
   - `ReplayFiveMetrics`: Slotted dataclass capturing the 5 uninterrupted tracking metrics: `whole_rms_m`, `early_rms_m`, `terminal_rms_m`, `club_cluster_rms_m`, and `pelvis_yaw_error_pct`.
   - `compute_replay_five_metrics()`: Evaluates the 5 uninterrupted tracking metrics comparing predicted marker trajectories against target capture markers with valid-mask filtering and pelvis marker cluster identification.
   - Enforces DbC invariants: validates matching frame counts, strictly increasing time grids, non-empty markers, and raises `ValueError` on corrupt or unaligned data.
+
+## GSPro Durable TCP Transport and Intent Journal (#10192)
+
+Defines durable async TCP transport, bounded stream framing, and delivery intent journal for golf simulator integration:
+- `ShotJournal` (`src/shared/python/golf_simulator/journal.py`): Thread-safe delivery intent ledger recording shot submissions before physical wire writes with distinct `DeliveryStatus` (`PENDING`, `ACKNOWLEDGED`, `REJECTED`, `AMBIGUOUS`).
+  - Strict DbC invariants: Rejects duplicate shot intents; transitions in-flight drops and timeouts to `AMBIGUOUS`.
+  - Invariant: ambiguous deliveries are never automatically resubmitted without explicit caller policy to protect against physical duplicate ball launches.
+  - Durable persistence: Supports atomic file-backed storage across restarts.
+- `GSProTransport` (`src/shared/python/golf_simulator/adapters/gspro/transport.py`): Async TCP client for GSPro Open Connect v1.
+  - Bounded stream framer: Limits buffer accumulation to `max_buffer_bytes` (64 KiB), raising `FramingBufferOverflowError` and disconnecting cleanly on overflow.
+  - Reassembles fragmented frames across partial TCP chunks and validates brace-balanced JSON payloads.
+  - Integrates with `ShotJournal` to ensure pre-write intent recording and status transition on receipts or dropouts.
+
+## GSPro Compatibility Profile and Pure Codec (#10189, #10191)
+
+Implements frozen protocol profile and deterministic serialization for GSPro Open Connect v1 under `src/shared/python/golf_simulator/adapters/gspro/`:
+- `profile.py`: `GSProProfile` characterizes observed vs documented vs unresolved vendor protocol semantics; port 921, speed unit `mph`, distance unit `Yards`, HLA positive `right`, 64 KiB buffer limit. Declares native avatar injection and autonomous course control as unsupported.
+- `codec.py`: Pure functions `encode_shot_payload`, `decode_simulator_response`, and `encode_heartbeat_payload`. Converts canonical SI/radian units and vectors to vendor representation without mutating stored values; preserves missing club data without zero-filling; maps status codes (200, 201, 501) to explicit `ResponseCategory` enums without treating unknown codes as success.
+
+## Canonical Golf Simulator Contracts and Capability Ports (#10190)
+
+Defines immutable canonical shot and simulator capability ports under `src/shared/python/golf_simulator/`:
+- `ShotEnvelope`: Immutable canonical SI shot contract (+x forward, +y left, +z up) with finite 3-vectors, schema versioning, explicit provenance, and multi-axis `ShotQualification` (contact, numerical, scientific). Rejects booleans, non-finite values, zero-speed strikes, and improper rotations under all DBC/optimization levels.
+- `AimContext`: Source-to-target alignment context enforcing proper rotations ($R^TR=I, \det R=+1$).
+- `SimulatorCapabilities`: Honest, distinct capability states (`SUPPORTED`, `UNSUPPORTED`, `UNVERIFIED`) for shot input, club data, local trajectory, course state, and native avatar animation.
+- `SimulatorAdapter`: Protocol defining vendor-neutral async adapter port (`capabilities`, `connect`, `submit`, `events`, `disconnect`).
+- `launch_bridge`: Curated conversion from existing `LaunchConditions`, `PostImpactState`, and `PipelineResult` preserving angular velocity vectors and impact provenance.
 
 ## Shadow Tracker Segmentation Invariants and Model Checkpoint Hardening (#10202)
 
@@ -4894,6 +4924,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-15 | #10204 | Capture rig adopts the shared camera layer: `vendor/ud-tools` pinned to Tools 1ac89c18e (`shared.python.camera`), `preview_source.py` becomes one `SharedSourceAdapter` (rig `open/read/close` over the Tools `FrameSource`) and `recorder.dshow_device_ref` delegates; the preview command is pinned token-for-token against the pre-port list (only delta: `-rtbufsize 256M`). Adapter tests run in the isolated provider harness. |
 | 2026-09-15 | #10201 | Propose GSPro and interchangeable simulator integration, detailed implementation children, architecture and worker turnover (#10188); no runtime implementation. |
 | 2026-09-15 | #10185 | Refresh Shadow Tracker turnover with reproduced acceptance gaps and current corrective/product sequence (#10184). |
 | 2026-09-15 | #10152 | Review Shadow Tracker contracts and publish the full implementation, launcher, performance and CI/CD continuation handoff (#10150). |

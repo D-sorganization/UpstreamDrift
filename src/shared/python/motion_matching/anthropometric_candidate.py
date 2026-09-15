@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -28,7 +28,8 @@ from src.shared.python.motion_matching.anthropometry import (
 )
 from src.shared.python.motion_matching.segment_scaling import scale_segments
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
+
 
 # Native body name suffixes and the de Leva segment each stands for.
 UPPER_ARM = {"LUpperArm": "upper_arm", "RUpperArm": "upper_arm"}

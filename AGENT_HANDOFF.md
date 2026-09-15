@@ -1,25 +1,27 @@
 # Simscape Tour-Average Fit Continuation
 
-## GSPro Integration Planning and Turnover (#10188)
+## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03 Complete
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** Planning only; outbound client not implemented or live-qualified.
-  Epic #10188 has 12 native children #10189–#10200. DL-#10188 is proposed.
+- **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
+  and GS-03 (#10192) durable transport and delivery journal complete. Planning PR #10201 and PR #10208 merged; PR #10213 open.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `docs/issue-10188-gspro-integration`; commit `SELF`;
-  [PR #10201](https://github.com/D-sorganization/UpstreamDrift/pull/10201) open for review.
-- **Lead:** GS-00 protocol freeze, GS-03 uncertain-delivery transport, GS-04 impact
-  qualification. **Worker:** GS-01 canonical domain now, GS-02 codec after freeze.
-- **Evidence:** Local installation found; no running GSPro or listener observed.
-  Existing pipeline loses impact fields and MuJoCo example samples peak speed.
-- **Boundary:** Companion golfer view first; native avatar/autonomous course API
-  unverified. No auto-resend after uncertain delivery; retain MATLAB R2025b.
-- **Validation:** Documentation pre-commit checks, 12 local links, title case,
-  SPEC duplicate and whitespace checks pass. Full development-log check retains
-  two pre-existing missing-SHA findings; baseline comparison adds none.
-- **Preserve:** Original checkout's unrelated branch/untracked work. This handoff
-  already exceeded the 150-line policy before this change; no unrelated rewrite.
+  branch `feat/issue-10192-durable-transport`; commit `2bf5ec40f`.
+- **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
+  `src/shared/python/golf_simulator/launch_bridge.py`,
+  `src/shared/python/golf_simulator/adapters/gspro/profile.py`,
+  `src/shared/python/golf_simulator/adapters/gspro/codec.py`,
+  `src/shared/python/golf_simulator/adapters/gspro/transport.py`,
+  `src/shared/python/golf_simulator/journal.py`.
+  Durable intent journal (`ShotJournal`) enforcing pre-write intent logging, distinct status transitions,
+  and marking network drops as AMBIGUOUS without auto-resend. Async TCP transport (`GSProTransport`)
+  with bounded framing buffer (<=64 KiB), stream reassembly across partial TCP packets, and overflow guard.
+- **Validation:** 34 unit and integration tests across `tests/unit/golf_simulator/` and
+  `tests/integration/golf_simulator/` pass 100% under normal and `python -O` with `DBC_LEVEL=off`.
+  Ruff check, Ruff format check, architecture budget check, divergence inventory check, and mypy pass with 0 errors.
+- **Next:** Implement GS-04 (#10193) full impact state forwarding and contact qualification in swing pipeline.
+- **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Shadow Tracker Current Turnover (#10122)
 
