@@ -297,7 +297,22 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
     - `forward_trajectory_drake.npz`
 - Tests: `tests/unit/motion_matching/test_full_body_parity.py` (4 passed), `tests/unit/motion_matching/test_full_body_forward_dynamics.py` (2 passed).
 
+## Visuals Handoff Step 4 Completed: Same-Input Replays in MuJoCo, Pinocchio, and Drake (#10062)
+
+- Replayed returned81 candidate trajectory (`returned-candidate.json`, SHA256 `dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776`) across all three physics engines (Pinocchio, MuJoCo, Drake).
+- Shared 5-metric evaluator and standardized NPZ reader/writer implemented in `src/shared/python/motion_matching/replay_metrics.py`.
+- Evaluated 307 frames on candidate coordinates:
+  - MuJoCo: whole_rms_m 0.026366, early_rms_m 0.011427, terminal_rms_m 0.046305, club_cluster_rms_m 0.015955, pelvis_yaw_error_pct 13.923%. Max marker error vs Pinocchio: $2.35 \times 10^{-15}$ m.
+  - Pinocchio: whole_rms_m 0.026366, early_rms_m 0.011427, terminal_rms_m 0.046305, club_cluster_rms_m 0.015955, pelvis_yaw_error_pct 13.923%.
+  - Drake: whole_rms_m 0.026365, early_rms_m 0.011426, terminal_rms_m 0.046305, club_cluster_rms_m 0.015953, pelvis_yaw_error_pct 13.923%. Max marker error vs Pinocchio: $1.62 \times 10^{-5}$ m.
+- Evidence archived under `docs/development/full_body_models/evidence/replays/`:
+  - Three animated visual GIFs: `mujoco_returned81.gif`, `pinocchio_returned81.gif`, `drake_returned81.gif`.
+  - Three standardized NPZ replays: `mujoco_returned81_replay.npz`, `pinocchio_returned81_replay.npz`, `drake_returned81_replay.npz`.
+  - Engine receipts: `mujoco_receipt.json`, `pinocchio_receipt.json`, `drake_receipt.json`.
+  - Combined cross-engine receipt: `receipt.json`.
+- Tests: `tests/unit/motion_matching/test_returned81_cross_engine_replay.py` (3 passed).
+
 ## Next
 
-- Merge PR for FB-6 (#10070).
-- Close epic #10062 ("Epic: full-body models with lower limbs and ground contact (MuJoCo, Drake, Pinocchio)").
+- Merge PR for Visuals Step 4 (#10062).
+- Execute Step 6: Independent FB-3 re-checks (Gate (a) independent reference for FB-3-P, FB-3-D ControlTower receipt, FB-3-M default pose PNG).
