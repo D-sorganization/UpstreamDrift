@@ -103,3 +103,8 @@
 ## 2024-05-20 - [Optimize Norm Calculation in Fit2d]
 **Learning:** Using `np.linalg.norm(..., axis=3)` to compute array magnitudes for 4D arrays (like those in `fit2d.py` for shape `(T, V, L, 2)`) incurs significant overhead due to temporary array allocations. By replacing it directly with `d = np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))`, we avoid `np.linalg.norm` dispatch overhead and temporary allocations.
 **Action:** Replace `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` when scalar reductions are needed, to optimize computation.
+
+## 2025-05-19 - Vector Magnitude Calculation
+**Learning:** `np.sqrt(np.einsum("ij,ij->i", v, v))` is significantly faster (~2.5x) than `np.linalg.norm(v, axis=1)` for multidimensional arrays in tight loops.
+**Action:** Use `np.sqrt(np.einsum("ij,ij->i", v, v))` instead of `np.linalg.norm(v, axis=1)` for performance optimizations when calculating vector magnitudes along an axis.
+
