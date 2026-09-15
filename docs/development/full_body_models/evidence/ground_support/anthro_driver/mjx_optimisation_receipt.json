@@ -1,0 +1,127 @@
+{
+  "run": "anthro_driver",
+  "settings": {
+    "run": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-visuals-10062\\docs\\development\\full_body_models\\evidence\\ground_support\\anthro_driver",
+    "iterations": 16,
+    "substeps": 6,
+    "knot_spacing": 0.04,
+    "learning_rate": 0.0005,
+    "regularisation": 0.001,
+    "name": "mjx_h145",
+    "weld_stiffness": 200000.0,
+    "weld_damping": 400.0,
+    "horizon": 1.45,
+    "snapshot_every": 2,
+    "init": null,
+    "diagnose": false
+  },
+  "knots": 47,
+  "actuated_coordinates": 38,
+  "port_check_replay_marker_rms_m": 0.04097243398427963,
+  "shared_simulator_replay_marker_rms_m": 0.07458191318642943,
+  "best_replay_marker_rms_m": 0.027484770701104267,
+  "history": [
+    {
+      "iteration": 0,
+      "replay_marker_rms_m": 0.04097243398427963,
+      "total_cost": 0.0016787402564659715
+    },
+    {
+      "iteration": 1,
+      "replay_marker_rms_m": 0.03690740093588829,
+      "total_cost": 0.0013621565885841846,
+      "delta_max_rad": 0.0004999998491257429
+    },
+    {
+      "iteration": 2,
+      "replay_marker_rms_m": 0.03419167920947075,
+      "total_cost": 0.001169071183539927,
+      "delta_max_rad": 0.001000668853521347
+    },
+    {
+      "iteration": 3,
+      "replay_marker_rms_m": 0.0327746756374836,
+      "total_cost": 0.001074180006980896,
+      "delta_max_rad": 0.001501196762546897
+    },
+    {
+      "iteration": 4,
+      "replay_marker_rms_m": 0.03197411820292473,
+      "total_cost": 0.0010223453864455223,
+      "delta_max_rad": 0.002001544227823615
+    },
+    {
+      "iteration": 5,
+      "replay_marker_rms_m": 0.03122422657907009,
+      "total_cost": 0.0009749538148753345,
+      "delta_max_rad": 0.0025016108993440866
+    },
+    {
+      "iteration": 6,
+      "replay_marker_rms_m": 0.030519571155309677,
+      "total_cost": 0.0009314461494795978,
+      "delta_max_rad": 0.0030059446580708027
+    },
+    {
+      "iteration": 7,
+      "replay_marker_rms_m": 0.030003804713487625,
+      "total_cost": 0.0009002307779155672,
+      "delta_max_rad": 0.003514456795528531
+    },
+    {
+      "iteration": 8,
+      "replay_marker_rms_m": 0.029470844194293022,
+      "total_cost": 0.0008685337379574776,
+      "delta_max_rad": 0.004026362206786871
+    },
+    {
+      "iteration": 9,
+      "replay_marker_rms_m": 0.029054170474410057,
+      "total_cost": 0.000844148569740355,
+      "delta_max_rad": 0.004541926551610231
+    },
+    {
+      "iteration": 10,
+      "replay_marker_rms_m": 0.028821254149079323,
+      "total_cost": 0.0008306690724566579,
+      "delta_max_rad": 0.005061169154942036
+    },
+    {
+      "iteration": 11,
+      "replay_marker_rms_m": 0.02864801697432995,
+      "total_cost": 0.0008207139326259494,
+      "delta_max_rad": 0.005584129597991705
+    },
+    {
+      "iteration": 12,
+      "replay_marker_rms_m": 0.02841181680560112,
+      "total_cost": 0.0008072369964793324,
+      "delta_max_rad": 0.006110695656388998
+    },
+    {
+      "iteration": 13,
+      "replay_marker_rms_m": 0.028124263510107994,
+      "total_cost": 0.0007909805281087756,
+      "delta_max_rad": 0.006640543695539236
+    },
+    {
+      "iteration": 14,
+      "replay_marker_rms_m": 0.027876224368810654,
+      "total_cost": 0.0007770908996462822,
+      "delta_max_rad": 0.0071731265634298325
+    },
+    {
+      "iteration": 15,
+      "replay_marker_rms_m": 0.027687476947903633,
+      "total_cost": 0.0007666040328331292,
+      "delta_max_rad": 0.007707752287387848
+    },
+    {
+      "iteration": 16,
+      "replay_marker_rms_m": 0.027484770864248276,
+      "total_cost": 0.0007554209441877902,
+      "delta_max_rad": 0.008243665099143982
+    }
+  ],
+  "elapsed_s": 1533.4
+}

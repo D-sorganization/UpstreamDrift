@@ -12,6 +12,7 @@ the picture can be discussed in numbers. Kinematic only; no dynamics.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -27,12 +28,19 @@ ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT))
 
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter  # noqa: E402
+from src.shared.python.motion_matching.ground_support import (  # noqa: E402
+    capture_to_native_world,
+)
+from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: E402
+    load_tour_capture,
+)
 
 NATIVE = Path(
     "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
 )
 HERE = Path(__file__).resolve().parent
-SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
+SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v2.json"
+C3D = ROOT / "data/C3D_TA_Driver.c3d"
 
 # Simscape joint names -> the spec body whose own joint sits at that point.
 JOINTS = {
@@ -71,6 +79,7 @@ LINKS = [
     ("knee_r", "ankle_r"),
     ("knee_l", "ankle_l"),
 ]
+FRAME_SITES: dict[str, str] = {}
 UPPER_BODY_BODIES = {
     "LowerTorso", "UpperTorsoBase", "COMRod", "HubtoLS", "HubtoRS",
     "LUpperArm", "RUpperArm", "Spherical Solid", "Spherical Solid1",
@@ -84,20 +93,9 @@ def joint_points(model: mujoco.MjModel, data: mujoco.MjData) -> dict[str, np.nda
         body = model.body(model.jnt_bodyid[j]).name.rsplit("/", 1)[-1]
         anchors.setdefault(body, data.xanchor[j].copy())
     points = {label: anchors[body] for label, body in JOINTS.items()}
-    club = [
-        i for i in range(model.nbody) if model.body(i).name.endswith("Clubface Vector")
-    ]
-    spec = json.loads(SPEC.read_text())
-    body = next(b for b in spec["bodies"] if b["name"].endswith("Clubface Vector"))
-    far = max(
-        (
-            np.array(s["placement"])[:3, :3] @ np.array(s["com_m"])
-            + np.array(s["placement"])[:3, 3]
-            for s in body["solids"]
-        ),
-        key=np.linalg.norm,
-    )  # the clubhead solid sits farthest from the wrist frame
-    points["clubhead"] = data.xpos[club[0]] + data.xmat[club[0]].reshape(3, 3) @ far
+    # The spec's "Clubhead" frame is exported as a site; use it directly.
+    site = model.site(FRAME_SITES["Clubhead"]).id
+    points["clubhead"] = data.site_xpos[site].copy()
     return points
 
 
@@ -137,7 +135,9 @@ def posture(points: dict[str, np.ndarray], q: dict[str, float]) -> dict:
     }
 
 
-def draw(points: dict[str, np.ndarray], markers: np.ndarray, path: Path) -> None:
+def draw(
+    points: dict[str, np.ndarray], markers: np.ndarray, path: Path, source: str
+) -> None:
     fig = plt.figure(figsize=(15, 5.5))
     views = {
         "front (down the line)": (0, -90),
@@ -188,30 +188,46 @@ def draw(points: dict[str, np.ndarray], markers: np.ndarray, path: Path) -> None
         ax.set_zlabel("z (m)")
         if k == 1:
             ax.legend(loc="lower left", fontsize=8)
-    fig.suptitle(
-        "Simscape-qualified skeleton at the native start pose (returned81 q0); legs at zero"
-    )
+    fig.suptitle(f"Skeleton through the exported joint frames: {source}", fontsize=9)
     fig.tight_layout()
     fig.savefig(path, dpi=130)
 
 
 def main() -> None:
-    xml, _ = exporter.export_full_body_mjcf(SPEC.read_bytes(), visual=True)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--spec", type=Path, default=SPEC)
+    parser.add_argument("--trajectory", type=Path, help="driver ik_trajectory.npz")
+    parser.add_argument("--suffix", default="")
+    args = parser.parse_args()
+    suffix = f"_{args.suffix}" if args.suffix else ""
+    xml, meta = exporter.export_full_body_mjcf(args.spec.read_bytes(), visual=True)
+    FRAME_SITES.update(meta["frame_sites"])
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
-    candidate = json.loads((NATIVE / "returned-candidate.json").read_text())
-    q = dict(zip(candidate["coordinate_names"], candidate["q0"], strict=True))
+    if args.trajectory is None:
+        candidate = json.loads((NATIVE / "returned-candidate.json").read_text())
+        q = dict(zip(candidate["coordinate_names"], candidate["q0"], strict=True))
+        markers = np.load(NATIVE / "returned-replay.npz")["target_m"][0]
+        source = "returned81 candidate q0 = Simscape qualified start; legs at zero"
+    else:
+        order = json.loads(args.spec.read_text())["coordinate_order"]
+        q = dict(zip(order, np.load(args.trajectory)["q"][0], strict=True))
+        capture = load_tour_capture(C3D)
+        markers = capture_to_native_world(capture.points_m)[0]
+        source = f"frame 0 of {args.trajectory.name} on {args.spec.name}"
     for name, value in q.items():
         data.qpos[model.joint(name).qposadr[0]] = value
     mujoco.mj_forward(model, data)
     points = joint_points(model, data)
-    replay = np.load(NATIVE / "returned-replay.npz")
-    draw(points, replay["target_m"][0], HERE / "simscape_skeleton_address.png")
+    draw(points, markers, HERE / f"simscape_skeleton_address{suffix}.png", source)
     report = posture(points, q)
+    report["source"] = source
     report["joint_points_m"] = {
         k: [round(float(v), 4) for v in p] for k, p in points.items()
     }
-    (HERE / "address_posture.json").write_text(json.dumps(report, indent=2) + "\n")
+    (HERE / f"address_posture{suffix}.json").write_text(
+        json.dumps(report, indent=2) + "\n"
+    )
 
 
 if __name__ == "__main__":
