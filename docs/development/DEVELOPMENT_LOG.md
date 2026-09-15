@@ -58,6 +58,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), 16 AI adapter / launcher tests (#10026), 20 safe launcher / pipeline / model sources tests (#10031), 13 CORS tests (#10033), and 32 security and module docstring tests (#10034). This tranche burns down 67 quarantined tests across tests/launchers/test_golf_launcher.py (25), tests/launchers/test_launcher_ui_setup.py (21), tests/launchers/test_launcher_process_manager.py (17), and tests/launchers/test_library_widget.py (4), ratcheting debt down from 298 to 231.
 - **Next step:** Open PR, monitor CI checks, and merge.
 
+### DL-#9349 · ADR-0046 G2 Workbench Re-Point Closure
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9349 (ADR-0046 Stage 2; module retirement landed under #9348)
+- **Branch:** conductor/issue-9349
+- **PR:** not created
+- **Paths:** src/config/launcher_manifest.json, src/config/models.yaml, tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py, docs/adr/0046-launch-monitor-analytics-single-model-layer.md, ui/public/capability-atlas, docs/architecture/CAPABILITY_ATLAS.md
+- **Started:** 2026-09-14
+- **Last verified:** 2026-09-14 (SELF; new manifest test 4 pass; test_canonical_layer_parity.py and tests/ui/tools/launch_monitor pass against the vendored canonical layer at pin e83bd2e4; capability atlas regenerated)
+- **Summary:** Closes the last Stage 2 deliverable this repository owns: both launch-monitor tiles (UD workbench and Rate of Closure Impact Explorer) now state the "same analytics engine" relationship in models.yaml (desktop launcher) and launcher_manifest.json (web launcher), pinned by a test; ADR-0046 follow-ups record G2 as landed. No workbench code changed — both UIs keep their identity.
+- **Next step:** Open the PR with `Closes #9349` and merge once quality-gate is green.
+- **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
+
 ## Shipped (Last 90 Days)
 
 ### DL-#8875 · Motion Pipeline Formats Documentation Reconcile

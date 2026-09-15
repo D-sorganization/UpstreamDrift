@@ -4768,6 +4768,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-14 | #9349 | ADR-0046 Stage 2 (G2) closure: both launch-monitor launcher tiles state the shared-engine relationship on the desktop and web launchers, pinned by a manifest test; ADR-0046 follow-ups record G2 as landed. |
 | 2026-09-15 | #10152 | Review Shadow Tracker contracts and publish the full implementation, launcher, performance and CI/CD continuation handoff (#10150). |
 | 2026-09-14 | #10147 | Implement camera direction conversion between observation and pipeline contracts for Shadow Tracker (ST-02C, #10139). |
 | 2026-09-14 | #10145 | Implement frozen source and frame identity records for Shadow Tracker (ST-02A, #10137). |

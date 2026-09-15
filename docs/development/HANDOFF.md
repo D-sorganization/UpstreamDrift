@@ -127,6 +127,21 @@ app-local in the ADR-0046 Stage 2 parity gate and ADR-0048. Validation:
 `test_canonical_layer_parity.py` 40 pass, ruff/mypy/pre-commit clean on changed
 files. Workbench dialog wiring for the public exports is a follow-up. See DL-#8365.
 
+Issue #9349 (claude, worktree `_issue_worktrees/UpstreamDrift-conductor-issue-9349`,
+branch `conductor/issue-9349`, PR not created, commit SELF): closed ADR-0046
+Stage 2 (G2). Module retirement had already landed under #9348; the remaining
+Stage 2 deliverable was the launcher relationship statement. Both launch-monitor
+tiles now say they are surfaces of "the same analytics engine" in
+`src/config/models.yaml` (desktop) and `src/config/launcher_manifest.json`
+(web), pinned by `tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py`;
+ADR-0046 follow-ups record G2 as landed; capability atlas regenerated. No
+workbench code changed. Validation: new test 4 pass;
+`tests/unit/launch_monitor/test_canonical_layer_parity.py` and
+`tests/ui/tools/launch_monitor` pass against the vendored canonical layer at pin
+`e83bd2e4` (this linked worktree's `vendor/ud-tools` was mirrored from the main
+checkout without `.git`, per the `tests/conftest.py` workaround). Next: open the
+PR with `Closes #9349`. See DL-#9349.
+
 Active #9899: `feat/9899-calibration-revision-status`, draft PR #9959,
 builds on #9954 (which merged to main). Camera source hashing uses shared provenance;
 command and wizard regression tests cover same-path changes, absent source,
