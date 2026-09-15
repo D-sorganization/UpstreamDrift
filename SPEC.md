@@ -1,5 +1,21 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Segmentation Invariants and Model Checkpoint Hardening (#10202)
+
+Hardens segmentation provider and auxiliary DTO boundary invariants addressing review findings:
+- `ModelSegmentationProvider.segment()`:
+  - Rejects arbitrary, unverified files presenting as checkpoints; explicitly raises actionable `RuntimeError` rather than returning mock/unrun mask counts until genuine neural inference is integrated.
+- `ManualMaskProvider`:
+  - Isolates registered masks by `(shot_id, frame_id)` to prevent collisions between identical frame IDs across different shots.
+  - Implements full revision lineage tracking with `get_revision(revision_id)` and `get_revision_history(frame_id, shot_id=...)`.
+  - Supports optional `shot_id` filtering in `get_mask()` and `has_mask()`, requiring explicit disambiguation if multiple shots share a frame ID.
+  - Validates in `segment()` that all requested frames exist within the target `shot_id` or raises `KeyError`.
+- Auxiliary DTO Boundary Validation:
+  - `SegmentationRequest`: Validates non-empty `shot_id`, non-empty tuple `frame_ids` with valid identifier strings, and dict `options`.
+  - `SegmentationResult`: Validates non-empty `shot_id`, non-negative integer `mask_count`, and valid string `provenance`.
+  - `RenderRequest`: Validates non-empty `camera_id`, finite float tuple `state`, and positive integer 2-tuple `image_size_px`.
+  - `RenderResult`: Validates tuple masks of equal lengths.
+
 ## Proposed Model-Driven Golf Simulator Integration (#10188)
 
 Planning scope only: [GSPro Integration Plan](docs/plans/golf_simulator_integration/README.md)
@@ -13,6 +29,7 @@ No outbound GSPro integration is implemented by this specification update.
 Native GSPro avatars and autonomous course feedback remain vendor-gated research.
 Existing contact/impact qualification gaps must be resolved independently of
 socket delivery; scientific acceptance retains the canonical manual governance.
+
 
 ## Shadow Tracker Evidence-Based Turnover Refresh (#10184)
 
