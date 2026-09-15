@@ -16,10 +16,10 @@ See [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md) for reproduced case
 ## Immediate Dispatch
 
 Read [Development Review](DEVELOPMENT_REVIEW.md), [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md), and [Continuation Prompt](CONTINUATION_PROMPT.md).
-Evidence regeneration (#10167) is complete, reducing translation error to 13.7 mm. Active slice #10202
-repairs false segmentation success and enforces shot-isolated mask revisions under ST-04.
-Next: resolve renderer/state contract under #10128 and DTO invariants.
-Continue real local-video ingestion (#10168) and persisted manual-mask review independently of physical qualification.
+Evidence regeneration (#10167) is complete, reducing translation error to 13.7 mm. Issue #10202
+is complete, repairing false segmentation success and enforcing shot-isolated mask revisions under ST-04.
+Active slice is #10206 (filled-area silhouette rendering and state invariants).
+Next: Continue real local-video ingestion (#10168) and persisted manual-mask review independently of physical qualification.
 Stage 7 (#10130) is boundary work only until physical qualification gates pass. Do not use
 issue closure or merged prototypes as proof that scientific gates have passed.
 
