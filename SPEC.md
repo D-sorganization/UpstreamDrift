@@ -1,5 +1,33 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Video Ingestion, Shots, Timing, and Capture Evidence (#10126)
+
+Specifies video ingestion, shot partitioning, timing mappings, and capture evidence for Shadow Tracker ST-03:
+- Implements `src/shared/python/shadow_tracker/ingestion.py` for auditable observation ingestion:
+  - `ingest_source_asset()`: Ingests media files into immutable `SourceAsset` records with SHA-256 content verification, rights status, and dimensions; rejects missing, corrupt, or empty media files.
+  - `SourceCatalog`: In-memory catalog ensuring idempotent registration and detecting conflicting asset contents for identical asset IDs.
+  - `create_shot()` and `ShotDefinition`: Builds validated continuous shots bound to parent source assets with cut intervals and transform provenance.
+  - `validate_shot_frames()` and `filter_shot_frames()`: Strictly rejects cross-swing fusion (mismatched `swing_id`), inconsistent camera/asset IDs, out-of-bounds timestamps, and filters cut intervals.
+  - `AffineTimingMapping` and `PiecewiseTimingMapping`: Provides rational and piecewise mappings between presentation time and physical swing time without assuming constant framerates or continuous physics across edits.
+  - `CameraSynchronization`: Models multi-view camera offsets, clock drift rates, and uncertainty bounds.
+  - `detect_telecine_duplicates()`: Identifies consecutive telecine pull-down duplicate frames via content hashes while preserving audit trails.
+  - `map_frame_to_observation()`: Translates ingested frame identities into `FrameObservation` records.
+  - `SyntheticVideoDecoder` and `ingest_capture_rig_view()`: Provides deterministic offline decoding and Capture Rig view adapters.
+
+## Shadow Tracker Immutable Evidence Contracts and Service Protocols (#10125)
+
+Freezes immutable evidence contracts, auxiliary DTOs, and runtime service protocols for Shadow Tracker ST-02:
+- Freezes slotted, frozen dataclasses under `src/shared/python/shadow_tracker/contracts.py`: `Shot`, `FrameObservation`, `CameraTrack`, `SubjectModelBinding`, `FitRequest`, `ReplayAudit`, `CandidateResult`, and `ResultBundle`.
+- Implements frozen service DTOs: `SegmentationRequest`, `SegmentationResult`, `RenderRequest`, `RenderResult`, `ModelCapabilities`, `RolloutRequest`, and `RolloutResult`.
+- Defines `@runtime_checkable` service protocols: `Segmenter`, `SilhouetteRenderer`, `ForwardModel`, and `ShadowTrackerService`, keeping core contracts free from external simulation or computer-vision engine dependencies.
+- Enforces strict DbC invariants:
+  - `CandidateResult.is_accepted` strictly requires an accompanying passing `ReplayAudit` with `is_physically_accepted=True`; setting acceptance without passing physical replay raises `ValueError`.
+  - `ReplayAudit.is_physically_accepted` strictly requires `reset_count == 1` (reference-free continuous execution); any non-unitary reset count raises `ValueError`.
+  - `Shot` requires `start_pts <= end_pts` and ensures all cut points fall within `[start_pts, end_pts]`.
+  - `FrameObservation` presentation time conversion returns an exact, reduced `fractions.Fraction`, enforcing strictly positive timebase denominators and strict `float` for known physical time.
+- Enforces defensive copying and immutability across tuples and mapping attributes to prevent external mutation of constructor inputs or exported fields.
+- Implements strict lossless dictionary serialization and deserialization (`to_dict` / `from_dict`) with schema tag validation, unknown field rejection, and container element verification.
+
 ## Shadow Tracker Feasibility Qualification and Benchmark Freeze (#10124)
 
 Audits and records measured model qualification evidence for Shadow Tracker ST-01:
