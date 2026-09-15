@@ -15,6 +15,7 @@ from ._validation import (
     check_int,
     check_payload_keys,
     check_pos_int,
+    check_schema_version,
     check_sha256,
     check_uri,
 )
@@ -65,19 +66,17 @@ class SourceAsset:
     rights_note: str
 
     def __post_init__(self) -> None:
-        if self.schema_version != SOURCE_SCHEMA_VERSION:
-            raise ValueError(
-                f"schema_version must be exactly {SOURCE_SCHEMA_VERSION!r}, got {self.schema_version!r}"
-            )
+        check_schema_version(self.schema_version, SOURCE_SCHEMA_VERSION)
         check_id(self.asset_id, "asset_id")
         check_uri(self.source_uri, "source_uri")
         check_sha256(self.content_sha256, "content_sha256")
         check_pos_int(self.width_px, "width_px")
         check_pos_int(self.height_px, "height_px")
-        if (
-            not isinstance(self.rights_status, str)
-            or self.rights_status not in _VALID_RIGHTS_STATUSES
-        ):
+        if not isinstance(self.rights_status, str):
+            raise TypeError(
+                f"rights_status must be a str, got {type(self.rights_status).__name__}"
+            )
+        if self.rights_status not in _VALID_RIGHTS_STATUSES:
             raise ValueError(
                 f"rights_status must be one of {sorted(_VALID_RIGHTS_STATUSES)}, got {self.rights_status!r}"
             )
@@ -134,10 +133,7 @@ class FrameIdentity:
     frame_sha256: str
 
     def __post_init__(self) -> None:
-        if self.schema_version != FRAME_SCHEMA_VERSION:
-            raise ValueError(
-                f"schema_version must be exactly {FRAME_SCHEMA_VERSION!r}, got {self.schema_version!r}"
-            )
+        check_schema_version(self.schema_version, FRAME_SCHEMA_VERSION)
         check_id(self.asset_id, "asset_id")
         check_id(self.shot_id, "shot_id")
         check_id(self.swing_id, "swing_id")
@@ -152,18 +148,15 @@ class FrameIdentity:
             )
         if self.physical_time_s is not None:
             if isinstance(self.physical_time_s, bool) or not isinstance(
-                self.physical_time_s, (int, float)
+                self.physical_time_s, float
             ):
                 raise TypeError(
                     f"physical_time_s must be float or None, got {type(self.physical_time_s).__name__}"
                 )
-            f_val = float(self.physical_time_s)
-            if not math.isfinite(f_val):
+            if not math.isfinite(self.physical_time_s):
                 raise ValueError(
                     f"physical_time_s must be finite, got {self.physical_time_s}"
                 )
-            if not isinstance(self.physical_time_s, float):
-                object.__setattr__(self, "physical_time_s", f_val)
         if not isinstance(self.physical_time_reason, str):
             raise TypeError(
                 f"physical_time_reason must be a str, got {type(self.physical_time_reason).__name__}"
@@ -219,7 +212,7 @@ def validate_frame_sequence(frames: Sequence[FrameIdentity]) -> None:
     """Validate sequence constraints on a series of frame identities.
 
     Preconditions:
-        - Sequence must be nonempty.
+        - Sequence must be nonempty and contain only FrameIdentity instances.
         - All frames must share identical asset_id, shot_id, swing_id, and camera_id.
         - Frame IDs must be unique.
         - Presentation time must strictly increase (pts_ticks order).
@@ -227,6 +220,12 @@ def validate_frame_sequence(frames: Sequence[FrameIdentity]) -> None:
     """
     if not frames:
         raise ValueError("Frame sequence cannot be empty")
+
+    for idx, item in enumerate(frames):
+        if not isinstance(item, FrameIdentity):
+            raise TypeError(
+                f"Element at index {idx} must be a FrameIdentity, got {type(item).__name__}"
+            )
 
     first = frames[0]
     expected_asset = first.asset_id
