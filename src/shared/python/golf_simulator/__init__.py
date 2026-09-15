@@ -41,6 +41,10 @@ from src.shared.python.golf_simulator.launch_bridge import (
     rpm_to_rad_s,
     shot_envelope_to_launch_conditions,
 )
+from src.shared.python.golf_simulator.replay import (
+    MonotonicReplayClock,
+    ReplaySubmissionCoordinator,
+)
 from src.shared.python.golf_simulator.session import GolfSessionService
 
 __all__ = [
@@ -55,8 +59,10 @@ __all__ = [
     "GolfSessionService",
     "JournalEntry",
     "LocalReferenceAdapter",
+    "MonotonicReplayClock",
     "NumericalStatus",
     "PreparedShot",
+    "ReplaySubmissionCoordinator",
     "ScientificStatus",
     "SessionState",
     "ShotEnvelope",
