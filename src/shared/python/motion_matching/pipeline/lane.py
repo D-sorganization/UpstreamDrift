@@ -260,7 +260,7 @@ class Lane:
         """Mean marker-derived elbow pit direction of ``side`` over ``frames``
         (None when the markers are missing or the elbow is straight)."""
         cols = [self.labels.index(m) for m in ELBOW_PIT_MARKERS[side]]
-        pits = []
+        pits: list[np.ndarray] = []
         for f in frames:
             if not self.valid[f, cols].all():
                 continue
