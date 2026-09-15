@@ -58,6 +58,14 @@ if TYPE_CHECKING:
     from .mask_records import (
         MaskFrame,
     )
+    from .segmentation import (
+        ManualMaskProvider,
+        ModelSegmentationProvider,
+        OcclusionReport,
+        compute_mask_dice,
+        compute_mask_iou,
+        track_occlusion_and_identity,
+    )
     from .source_records import (
         FrameIdentity,
         RightsStatus,
@@ -114,6 +122,12 @@ _LAZY_EXPORTS: dict[str, str] = {
     "VideoDecoderAdapter": ".ingestion",
     "SyntheticVideoDecoder": ".ingestion",
     "ingest_capture_rig_view": ".ingestion",
+    "compute_mask_iou": ".segmentation",
+    "compute_mask_dice": ".segmentation",
+    "OcclusionReport": ".segmentation",
+    "track_occlusion_and_identity": ".segmentation",
+    "ManualMaskProvider": ".segmentation",
+    "ModelSegmentationProvider": ".segmentation",
 }
 
 __all__ = [
@@ -130,7 +144,10 @@ __all__ = [
     "FrameIdentity",
     "FrameObservation",
     "MaskFrame",
+    "ManualMaskProvider",
     "ModelCapabilities",
+    "ModelSegmentationProvider",
+    "OcclusionReport",
     "PiecewiseTimingMapping",
     "RenderRequest",
     "RenderResult",
@@ -155,6 +172,8 @@ __all__ = [
     "SubjectModelBinding",
     "SyntheticVideoDecoder",
     "VideoDecoderAdapter",
+    "compute_mask_dice",
+    "compute_mask_iou",
     "create_shot",
     "detect_telecine_duplicates",
     "filter_shot_frames",
@@ -163,6 +182,7 @@ __all__ = [
     "ingest_source_asset",
     "map_frame_to_observation",
     "to_pipeline_camera",
+    "track_occlusion_and_identity",
     "validate_frame_sequence",
     "validate_shot_frames",
 ]
