@@ -68,7 +68,7 @@
       "atol": 1.0000000000000001e-7,
       "ground_height_m": -1.3343133162022776,
       "ground_unchanged": true,
-      "wall_time_s": 0.0726202999940142,
+      "wall_time_s": 0.08125549997203052,
       "contact": {
         "max_normal_force_n": 32.03255147532959,
         "max_friction_force_n": 17.095342880619825,
@@ -86,6 +86,8 @@
           "forefoot_l": 0.0
         }
       },
+      "max_closure_translation_m": 1.2656872753122124,
+      "max_closure_rotation_rad": 2.350290198363639,
       "legacy_mixed_unit_closure_value": 2.669424712444861,
       "native_qpos_order": [
         "TranslationInputX",
@@ -131,7 +133,7 @@
         "mtp_angle_l"
       ],
       "declared_order_matches_native_qpos": false,
-      "ik_initial_grip_translation_m": 0.010623096461690436,
+      "ik_initial_grip_translation_m": 1.265687275312212,
       "dynamics_initial_grip_translation_m": 1.265687275312212,
       "max_grip_translation_m": 1.2656872753122124,
       "max_grip_rotation_rad": 2.350290198363639,
@@ -148,7 +150,7 @@
       "atol": 1.0000000000000001e-7,
       "ground_height_m": -1.3343133162022776,
       "ground_unchanged": true,
-      "wall_time_s": 0.06666930002393201,
+      "wall_time_s": 0.07533139997394755,
       "contact": {
         "max_normal_force_n": 32.03255147532959,
         "max_friction_force_n": 17.095342880619825,
@@ -166,6 +168,8 @@
           "forefoot_l": 0.0
         }
       },
+      "max_closure_translation_m": 1.2656872753122124,
+      "max_closure_rotation_rad": 2.350290198363639,
       "legacy_mixed_unit_closure_value": 2.669424712444861,
       "native_qpos_order": [
         "TranslationInputX",
@@ -211,7 +215,7 @@
         "mtp_angle_l"
       ],
       "declared_order_matches_native_qpos": false,
-      "ik_initial_grip_translation_m": 0.010623096461690436,
+      "ik_initial_grip_translation_m": 1.265687275312212,
       "dynamics_initial_grip_translation_m": 1.265687275312212,
       "max_grip_translation_m": 1.2656872753122124,
       "max_grip_rotation_rad": 2.350290198363639,
@@ -228,7 +232,7 @@
       "atol": 1e-8,
       "ground_height_m": -1.3343133162022776,
       "ground_unchanged": true,
-      "wall_time_s": 0.08156790002249181,
+      "wall_time_s": 0.08549490000586957,
       "contact": {
         "max_normal_force_n": 32.03260166895625,
         "max_friction_force_n": 17.096396872904876,
@@ -246,6 +250,8 @@
           "forefoot_l": 0.0
         }
       },
+      "max_closure_translation_m": 1.2656872753122121,
+      "max_closure_rotation_rad": 2.3502901983636693,
       "legacy_mixed_unit_closure_value": 2.6694247124449038,
       "native_qpos_order": [
         "TranslationInputX",
@@ -291,7 +297,7 @@
         "mtp_angle_l"
       ],
       "declared_order_matches_native_qpos": false,
-      "ik_initial_grip_translation_m": 0.010623096461690436,
+      "ik_initial_grip_translation_m": 1.265687275312212,
       "dynamics_initial_grip_translation_m": 1.265687275312212,
       "max_grip_translation_m": 1.2656872753122121,
       "max_grip_rotation_rad": 2.3502901983636693,
@@ -323,17 +329,17 @@
     "mujoco": "3.3.4",
     "numpy": "2.4.1"
   },
-  "git_commit": "2331978f29c317249d9b12e7ef16b50868cd6deb",
-  "probe_sha256": "eae8d20698c61a704dc24bf21b7d08ad260cf817273533c432ba40acd160636a",
+  "git_commit": "9814c348796260f3b8377bd2e304f471d500584b",
+  "probe_sha256": "9bd29f6352ae268fcef0cffff84e8f3185a28b9604c8a1210e0b3c59d9155b84",
   "source_sha256": {
-    "scripts/shadow_tracker/model_probe.py": "eae8d20698c61a704dc24bf21b7d08ad260cf817273533c432ba40acd160636a",
+    "scripts/shadow_tracker/model_probe.py": "9bd29f6352ae268fcef0cffff84e8f3185a28b9604c8a1210e0b3c59d9155b84",
     "scripts/shadow_tracker/pilot_metrics.py": "bf54925eddccbb08026c59d26a469ff9ca5dd38ed3bebc36d51eb57b0b5841f3",
     "src/engines/physics_engines/mujoco/python/full_body_model.py": "9f899e18615d465b72ef06dc583489f0e21e9af5f1c6991ec1a8ba8d3f1352cb",
-    "src/engines/physics_engines/mujoco/python/full_body_ik.py": "1460ed41928d94a3fdc81bec74c1494b9eaf86492ce6698957b3e2a144f60a37",
+    "src/engines/physics_engines/mujoco/python/full_body_ik.py": "704f7b479575b285fcf7b52e19719f0734ab3081073a87e65ca70e671f75344d",
     "src/engines/physics_engines/mujoco/python/full_body_mjcf.py": "8f47f33783b335fcea2da7b9755b9cf6d4ad02ff902d48f41656816fd2a68381",
     "src/engines/physics_engines/mujoco/python/native_model.py": "1713e4f4e36c2a2ab1995606fb4336286c3b2300c8e1d455c7b7f060023da623",
-    "src/shared/python/motion_matching/full_body_forward_dynamics.py": "138e69a8c9be0db4bf71a3831b90b32d69f6113f681c0265b952a6e158b60afb",
+    "src/shared/python/motion_matching/full_body_forward_dynamics.py": "5e0cd83ab00b11e786340d2dfdaccd79119f748c9de990f733b26d9c07cb2547",
     "src/shared/python/motion_matching/contact_law.py": "6de93f7c866da72562e34555e996a6900cf6a80057ffed04de3a5098e055109c"
   },
-  "timestamp_utc": "2026-09-14T21:23:01.916954+00:00"
+  "timestamp_utc": "2026-09-15T03:24:42.612216+00:00"
 }

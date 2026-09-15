@@ -22,11 +22,18 @@ The model has 24 bodies, 23 joints and 41 scalar coordinates (`nq=nv=41`).
 - Yet the named-coordinate dynamics path reports about **1.266 m of grip
   displacement and 2.350 rad of grip rotation**. Numerical repeatability is
   therefore not evidence of a valid pose or grip.
-- A native-order mismatch exists: declared coordinate order differs from MuJoCo
-  qpos order. `MujocoFullBodyIK.pose_fn` writes q directly into qpos, whereas
-  `NativeMujocoFullBodyModel` packs by joint name. The same saved vector does not
-  mean the same pose at those two boundaries. Recompute historical IK evidence
-  after the mapping is corrected; do not merely relabel the saved vector.
+- The native-order mismatch between `MujocoFullBodyIK.pose_fn` and `NativeMujocoFullBodyModel`
+  was addressed in #10140 (PR #10164): `MujocoFullBodyIK` now aligns coordinates with
+  native qpos layout via precomputed indexing, establishing exact forward kinematics parity.
+- When evaluated with aligned coordinates, the historical stored IK pose vector
+  (`docs/development/full_body_models/evidence/fb4_calibration/mujoco/ik_trajectory.npz`)
+  reveals identical grip displacement (1.266 m) at both the IK and dynamics boundaries.
+  This confirms that the stored trajectory itself was generated under the legacy coordinate
+  scrambling and must be recomputed before model qualification.
+- Production closure units separation was implemented in #10141 (PR #10165):
+  `ForwardRolloutResult` and `EngineReplayOutcome` now record `max_closure_translation_m`
+  and `max_closure_rotation_rad` separately and enforce physical tolerance checks via
+  `is_accepted()`. Under these physical criteria, the rollout is rejected despite solver success.
 
 The probe records initial IK and dynamics closure separately to make this
 disagreement reproducible. It does not fix the existing engine or validate the
