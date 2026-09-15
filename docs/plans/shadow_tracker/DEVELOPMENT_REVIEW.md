@@ -1,5 +1,9 @@
 # Shadow Tracker Implementation Review and Delivery Handoff
 
+For newer implementation findings and pickup instructions, read
+[September 15 Progress Review](PROGRESS_REVIEW_2026_09_15.md). This document
+preserves the earlier review and full delivery requirements.
+
 ## Review Baseline and Verdict
 
 Reviewed commit `c3395229839cfb66ded994bbef0a39fcb985e1e6` on 2026-09-14.
