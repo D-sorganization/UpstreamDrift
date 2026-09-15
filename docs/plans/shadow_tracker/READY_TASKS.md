@@ -23,9 +23,10 @@ ST-01 (#10124) feasibility qualification confirms that while coordinate packing 
 and closure units (#10141) are resolved in software, the stored historical calibration
 trajectory and physical model geometry remain unqualified for golfer reconstruction.
 Stage 2 (#10125) full contracts freeze, Stage 3 (#10126) video ingestion and lineage,
-Stage 4 (#10127) body and club silhouette segmentation, and Stage 5 (#10128) calibrated
-silhouette rendering and residual losses are implemented and validated with 100% boundary tests.
-The next immediate dispatch is Stage 6 (#10129): fit subject shape and initial-state hypotheses.
+Stage 4 (#10127) body and club silhouette segmentation, Stage 5 (#10128) calibrated
+silhouette rendering and residual losses, and Stage 6 (#10129) subject shape and
+initial-state fitting are implemented and validated with 100% boundary tests.
+The next immediate dispatch is Stage 7 (#10130): continuous physics rollout integration and replay parity.
 
 ## Commands by Packet
 
