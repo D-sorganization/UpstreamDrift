@@ -311,7 +311,7 @@ class FullBodyDrakeModel:
         tau_contact = np.zeros(self.plant.num_velocities())
         for s_name, sample in samples.items():
             f_contact = sample.normal_force_n + sample.friction_force_n
-            if np.linalg.norm(f_contact) <= 0.0:
+            if math.sqrt(np.dot(f_contact, f_contact)) <= 0.0:
                 continue
             frame = self._spheres[s_name]["frame"]
             j_trans = self.plant.CalcJacobianTranslationalVelocity(

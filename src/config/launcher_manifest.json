@@ -225,7 +225,7 @@
     {
       "id": "motion_capture",
       "name": "Motion Capture",
-      "description": "C3D Viewer, OpenPose, and MediaPipe Analysis \u2014 with retargeting, inverse-dynamics solving, signal processing, and anthropometric scaling pipeline",
+      "description": "C3D Viewer, OpenPose, and MediaPipe Analysis — with retargeting, inverse-dynamics solving, signal processing, and anthropometric scaling pipeline",
       "category": "tool",
       "type": "special_app",
       "path": "src/tools/freemocap_sidecar/run_freemocap.py",
@@ -455,23 +455,6 @@
       }
     },
     {
-      "id": "motion_matching",
-      "name": "Motion Matching",
-      "description": "Match the tour-average driver or 7-iron capture with full-body forward dynamics on the anthropometric golfer (address, full-capture IK, contact tracking, receipts and playback).",
-      "category": "motion_matching",
-      "type": "special_app",
-      "path": "src/tools/motion_matching/__main__.py",
-      "logo": "motion_matching.svg",
-      "status": "beta",
-      "capabilities": ["mocap", "matching", "forward_dynamics", "receipts"],
-      "tags": ["mocap", "matching", "forward_dynamics", "driver", "iron"],
-      "order": 103,
-      "web": {
-        "mode": "unavailable",
-        "reason": "PyQt6 tool driving a local pipeline; no web page yet (#10106)"
-      }
-    },
-    {
       "id": "pose_studio",
       "name": "Pose Studio",
       "description": "Interactive pose editor for joint angle manipulation and retargeting",
@@ -629,7 +612,7 @@
     {
       "id": "pendulum_simulator",
       "name": "Pendulum Simulator",
-      "description": "Interactive proximal\u2013distal companion for double, triple, and 8-DOF golfer dynamics",
+      "description": "Interactive proximal–distal companion for double, triple, and 8-DOF golfer dynamics",
       "category": "physics_engine",
       "type": "special_app",
       "path": "tools://src/double_pendulum_golf/__main__.py",

@@ -1,49 +1,5 @@
 # Simscape Tour-Average Fit Continuation
 
-## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03, GS-04, GS-05 Complete
-
-- **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
-  [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
-  GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
-  and GS-05 (#10194) shared session service and local reference destination complete.
-  Planning PR #10201, PR #10208, PR #10213, and PR #10215 merged.
-- **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10194-session-service`.
-- **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
-  `src/shared/python/golf_simulator/session.py`,
-  `src/shared/python/golf_simulator/launch_bridge.py`,
-  `src/shared/python/golf_simulator/adapters/local.py`,
-  `src/shared/python/golf_simulator/adapters/fake.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/profile.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/codec.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/transport.py`,
-  `src/shared/python/golf_simulator/journal.py`.
-  - `GolfSessionService`: Central orchestrator enforcing state machine (`IDLE` -> `PREPARED` -> `ARMED` -> `SUBMITTING` -> `IDLE`/`UNCERTAIN`),
-    guarding destination switching, invalidating arm tokens on context/destination changes, validating model qualification before arming,
-    and handling ambiguous deliveries via operator reconciliation.
-  - `LocalReferenceAdapter`: Satisfies `SimulatorAdapter` protocol, wraps `FlightSimulatorProtocol` (`BallFlightSimulator` with pure-Python
-    `EnhancedBallFlightSimulator` fallback), computes RK4 ball trajectories with full provenance labeling, and maintains distinct trajectory and receipt contracts.
-  - `shot_envelope_to_launch_conditions`: Reconstitutes scalar launch parameters and 3D spin axis from canonical `ShotEnvelope`.
-  - `FakeSimulatorAdapter`: Configurable test spy for testing adapter substitution, capability auditing, and fault simulation.
-- **Validation:** 50 unit tests across `tests/unit/golf_simulator/` (including session service, local adapter, reverse bridge, and unified service contracts) pass 100%.
-  Ruff check, Ruff format check, Black, changed-file architecture budget, and mypy pass with 0 errors.
-- **Next:** Open PR for GS-05 (#10194) and proceed to GS-06 (#10195) replay and one-impact submission.
-- **Preserve:** Original checkout's unrelated branch/untracked work.
-
-## Shadow Tracker Current Turnover (#10122)
-
-- **Read First:** [Current Progress Review](docs/plans/shadow_tracker/PROGRESS_REVIEW_2026_09_15.md)
-  and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
-- **Baseline:** `b97e159dcc1686b4fc36351124996862619d8f35`; prototype modules through
-  ST-06 landed, but stage acceptance and scientific qualification remain incomplete.
-- **First Repairs:** False model-segmentation success, point-only rendering and
-  conflicting state semantics, then finite/shape/ownership validation.
-- **Independent Progress:** Real decoding (#10168), persisted masks and launcher
-  review; #10167 regenerated model evidence before qualified rollout/fitting.
-- **Review Tracking:** #10184. Do not advertise a ready fitter or claim all CI/CD
-  passes from merged PRs. Preserve the full scientific/product/release gates.
-
 ### 0. 1.15 s Downswing Horizon Continuation & Certified Audit (`candidate_downswing_115s_locked_package.json`, DeskComputer)
 
 - **Execution Status**:

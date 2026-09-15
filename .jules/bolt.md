@@ -100,11 +100,6 @@
 **Learning:** `np.linalg.norm()` is known to be relatively slow for small arrays (like 3D vectors) due to internal overhead and instance checks. Built-in `math.sqrt(np.vdot(arr, arr))` provides a significant speedup by bypassing `np.linalg.norm` overhead while leveraging the fast C-level `np.vdot`. For simple length threshold checks like `np.linalg.norm(diff) <= 1e-9`, squaring the threshold (`np.vdot(diff, diff) <= 1e-18`) completely skips the square root.
 **Action:** When computing vector norms for small 1D arrays, replace `np.linalg.norm(v)` with `math.sqrt(np.vdot(v, v))`. For simple threshold checks, replace `np.linalg.norm(v) < threshold` with `np.vdot(v, v) < threshold**2`.
 
-## 2024-05-20 - [Optimize Norm Calculation in Fit2d]
-**Learning:** Using `np.linalg.norm(..., axis=3)` to compute array magnitudes for 4D arrays (like those in `fit2d.py` for shape `(T, V, L, 2)`) incurs significant overhead due to temporary array allocations. By replacing it directly with `d = np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))`, we avoid `np.linalg.norm` dispatch overhead and temporary allocations.
-**Action:** Replace `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` when scalar reductions are needed, to optimize computation.
-
 ## 2025-05-19 - Vector Magnitude Calculation
 **Learning:** `np.sqrt(np.einsum("ij,ij->i", v, v))` is significantly faster (~2.5x) than `np.linalg.norm(v, axis=1)` for multidimensional arrays in tight loops.
 **Action:** Use `np.sqrt(np.einsum("ij,ij->i", v, v))` instead of `np.linalg.norm(v, axis=1)` for performance optimizations when calculating vector magnitudes along an axis.
-

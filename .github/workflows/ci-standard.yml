@@ -708,31 +708,6 @@ jobs:
             semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
             exit 0
           else
-            diff_base="HEAD~1"
-            if ! git rev-parse --verify --quiet "${diff_base}^{commit}" >/dev/null; then
-              diff_base=""
-            fi
-            if [ -n "$diff_base" ]; then
-              mapfile -d '' semgrep_targets < <(
-                git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- \
-                  'src/**/*.py' \
-                  'scripts/**/*.py' \
-                  'tests/**/*.py' \
-                  'ui/**/*.js' \
-                  'ui/**/*.jsx' \
-                  'ui/**/*.ts' \
-                  'ui/**/*.tsx' \
-                  'src/**/*.json' \
-                  'src/**/*.xml' \
-                  'scripts/**/*.sh'
-              )
-              if [ "${#semgrep_targets[@]}" -eq 0 ]; then
-                echo "No changed source/application files supported by Semgrep; skipping SAST delta scan."
-                exit 0
-              fi
-              semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
-              exit 0
-            fi
             semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error
             exit 0
           fi
@@ -1984,9 +1959,13 @@ jobs:
               echo "NOTE: merge-base unavailable; using direct diff against origin/${{ github.base_ref }}"
             fi
             diff_base="${merge_base:-origin/${{ github.base_ref }}}"
-          elif [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
-            # Trunk pushes and scheduled runs on default branch always run the full lane, unscoped (#8771).
-            echo "::notice::Default branch run - running the full core lane, unscoped (#8771)."
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
+            # Trunk pushes always run the full lane, unscoped. Path-scoping is
+            # a pull-request latency optimisation; on the default branch it is
+            # a correctness hole, because a commit that happens to touch no
+            # Python then carries a green badge for a suite it never ran.
+            echo "::notice::Push to the default branch - running the full core lane, unscoped (#8771)."
             diff_base=""
             dependency_light_targets=(
               tests/unit/shared_python

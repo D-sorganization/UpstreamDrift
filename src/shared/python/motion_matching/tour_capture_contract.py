@@ -41,7 +41,7 @@ class TourCaptureSpec:
         return (self.frames - 1) / self.rate_hz
 
 
-TOUR_CAPTURE = TourCaptureSpec(  # the driver swing, the original canonical file
+TOUR_CAPTURE = TourCaptureSpec(
     sha256="545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
     rate_hz=360.0,
     frames=654,
@@ -195,30 +195,8 @@ class TourCapture:
         )
 
 
-TOUR_CAPTURE_IRON = TourCaptureSpec(  # the 7-iron swing of the same golfer
-    sha256="395deb1f91006586819020fc85180409e716f07e1c680f9fb2ca114759f80845",
-    rate_hz=359.0,
-    frames=657,
-    units="m",
-    vertical_axis="y",
-    labels=TOUR_CAPTURE.labels[:35] + ("Uname*36", "Uname*37", "pelvis"),
-)
-TOUR_CAPTURES: dict[str, TourCaptureSpec] = {
-    "driver": TOUR_CAPTURE,
-    "iron": TOUR_CAPTURE_IRON,
-}
-
-
-def capture_kind(digest: str) -> str:
-    """Name of the canonical capture with this SHA-256, else ValueError."""
-    for name, spec in TOUR_CAPTURES.items():
-        if spec.sha256 == digest:
-            return name
-    raise ValueError("File is not a canonical tour-average capture")
-
-
 def load_tour_capture(path: Path) -> TourCapture:
-    """Read a canonical C3D (driver or 7-iron) and verify it against its spec.
+    """Read the canonical C3D and verify it against :data:`TOUR_CAPTURE`.
 
     Points with negative residuals or nonfinite coordinates are marked invalid.
     Rejects any file whose hash, rate, units, frame count or labels differ.
@@ -227,7 +205,8 @@ def load_tour_capture(path: Path) -> TourCapture:
 
     raw = Path(path).read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
-    spec = TOUR_CAPTURES[capture_kind(digest)]
+    if digest != TOUR_CAPTURE.sha256:
+        raise ValueError("File is not the canonical tour-average capture")
     c3d = ezc3d.c3d(str(path))
     parameters = c3d["parameters"]["POINT"]
     labels = tuple(parameters["LABELS"]["value"])
@@ -236,14 +215,14 @@ def load_tour_capture(path: Path) -> TourCapture:
     points = np.asarray(c3d["data"]["points"], dtype=float)  # (4, markers, frames)
     residuals = np.asarray(c3d["data"]["meta_points"]["residuals"][0], dtype=float)
     if (
-        labels != spec.labels
-        or rate != spec.rate_hz
-        or units != spec.units
-        or points.shape != (4, len(labels), spec.frames)
+        labels != TOUR_CAPTURE.labels
+        or rate != TOUR_CAPTURE.rate_hz
+        or units != TOUR_CAPTURE.units
+        or points.shape != (4, len(labels), TOUR_CAPTURE.frames)
     ):
         raise ValueError("Capture parameters differ from the frozen specification")
     xyz = np.transpose(points[:3], (2, 1, 0)).copy()
     valid = np.isfinite(xyz).all(axis=2) & (residuals.T >= 0)
     xyz[~valid] = np.nan
-    time = np.arange(spec.frames) / spec.rate_hz
+    time = np.arange(TOUR_CAPTURE.frames) / TOUR_CAPTURE.rate_hz
     return TourCapture(time, labels, xyz, valid, digest)

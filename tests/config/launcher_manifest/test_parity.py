@@ -24,7 +24,6 @@ from src.config.launcher_manifest_loader import (
     WEB_LAUNCH_MODES,
     LauncherManifest,
     WebLaunchContract,
-    _provider_status,
 )
 from src.shared.python.config.model_registry import ModelRegistry
 
@@ -209,9 +208,12 @@ class TestParity:
             native = native_by_id[tile_id]
             native_launcher = native.launcher
             assert native_launcher is not None
-            native_status, _ = _provider_status(
-                native, native_launcher.status, _REPO_ROOT, check_runtime=False
-            )
+            native_status = native_launcher.status
+            if (
+                native.provider == "tools"
+                and not (_REPO_ROOT / "vendor" / "ud-tools" / "src").is_dir()
+            ):
+                native_status = "provider_unavailable"
             native_fields = {
                 "category": native_launcher.category,
                 "status": native_status,
