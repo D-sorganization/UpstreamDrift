@@ -162,7 +162,7 @@
       "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 gave both surfaces cross-family trajectory-record import, each overlaying imported swing_sim.ball_flight_trajectory/1 records from either flight-model family and labeling them by model_family/model_name: the web BallFlight page via H3 (#9352, POST /tools/ball-flight/import), and the PyQt6 Shot Tracer via H2 (#9351, the vendored flight_interchange reader)."
     },
     "simulation.swing_objective_lab": {
-      "title": "Swing Objective Lab \u2014 mechanism-vs-outcome downswing comparison",
+      "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",
       "pyqt": "src/launchers/adapters/swing_objective_lab_embed.py",
       "api": "src/api/routes/swing_objectives.py",
       "web": "ui/src/pages/SwingObjectiveLab.tsx",
@@ -421,15 +421,6 @@
       "status": "parity",
       "tiles": [],
       "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. This entry qualifies controls only; automatic solver load production and remaining desktop host wiring are pending in docs/development/segment_force_color_epic.md."
-    },
-    "tools.motion_matching": {
-      "title": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",
-      "pyqt": "src/tools/motion_matching/gui.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 10106,
-      "tiles": ["motion_matching"]
     }
   }
 }

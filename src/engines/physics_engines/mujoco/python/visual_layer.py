@@ -21,10 +21,6 @@ from src.shared.python.motion_matching.visual_skeleton import (
 
 _VISUAL_CLASS = "visual"
 _CAPSULE_RGBA = "0.75 0.78 0.85 1"
-_SHAPE_RGBA = "0.7 0.72 0.8 1"
-# Centre-of-mass and frame spheres sit in a group the renderer hides by
-# default (groups 0 to 2 are shown); enable group 3 to inspect them.
-_MARKER_SPHERE_GROUP = "3"
 _COM_RGBA = "0.9 0.35 0.2 1"
 _FRAME_RGBA = "0.2 0.6 0.95 1"
 _FLOOR_RGBA = "0.35 0.45 0.3 1"
@@ -89,19 +85,6 @@ def attach_visual_layer(
             rgba=_CAPSULE_RGBA,
             attrib={"class": _VISUAL_CLASS},
         )
-    for index, shape in enumerate(skeleton.shapes):
-        ET.SubElement(
-            elements[shape.body],
-            "geom",
-            name=f"visual_{shape.kind}_{index}_{shape.body}",
-            type=shape.kind,
-            pos=_numbers(
-                _to_mjcf_frame(offsets[shape.body], np.asarray(shape.center_m))
-            ),
-            size=_numbers(shape.half_size_m),
-            rgba=_SHAPE_RGBA,
-            attrib={"class": _VISUAL_CLASS},
-        )
     for i, sphere in enumerate(skeleton.spheres):
         ET.SubElement(
             elements[sphere.body],
@@ -113,7 +96,6 @@ def attach_visual_layer(
             ),
             size=_numbers([sphere.radius_m]),
             rgba=_COM_RGBA if sphere.kind == "com" else _FRAME_RGBA,
-            group=_MARKER_SPHERE_GROUP,
             attrib={"class": _VISUAL_CLASS},
         )
     world = elements["world"]
@@ -161,64 +143,3 @@ def attach_visual_layer(
         "ground_calibrated": skeleton.ground.calibrated,
         "lights": 2,
     }
-
-
-def whole_body_com(model: Any, data: Any) -> np.ndarray:
-    """Centre of mass of every body in the tree (the body-plus-club system) at
-    the current ``data`` state, from MuJoCo's subtree centre of mass of the
-    first body under the world. Postcondition: a finite 3-vector."""
-    import mujoco
-
-    if model.nbody < 2:
-        raise ValueError("Model has no bodies below the world")
-    mujoco.mj_comPos(model, data)
-    com = np.asarray(data.subtree_com[1], dtype=float).copy()
-    if not np.isfinite(com).all():
-        raise ValueError("Centre of mass is not finite")
-    return com
-
-
-def add_scene_marker(
-    scene: Any,
-    position: np.ndarray,
-    radius_m: float,
-    rgba: tuple[float, float, float, float],
-) -> None:
-    """Add a sphere marker to a rendered scene (an overlay, not a model geom).
-    Precondition: the scene has a free geom slot and the radius is positive."""
-    import mujoco
-
-    if radius_m <= 0:
-        raise ValueError("Marker radius must be positive")
-    if scene.ngeom >= scene.maxgeom:
-        raise ValueError("Scene has no free geom slot for a marker")
-    geom = scene.geoms[scene.ngeom]
-    mujoco.mjv_initGeom(
-        geom,
-        mujoco.mjtGeom.mjGEOM_SPHERE,
-        np.array([radius_m, 0.0, 0.0]),
-        np.asarray(position, dtype=float),
-        np.eye(3).reshape(-1),
-        np.asarray(rgba, dtype=np.float32),
-    )
-    scene.ngeom += 1
-
-
-COM_MARKER_RGBA = (0.95, 0.15, 0.15, 1.0)
-COM_GROUND_RGBA = (0.95, 0.85, 0.1, 1.0)
-
-
-def add_com_markers(
-    scene: Any, model: Any, data: Any, ground_height_m: float
-) -> np.ndarray:
-    """Overlay the whole-body centre of mass (red) and its vertical projection
-    onto the ground plane (yellow); returns the centre of mass."""
-    com = whole_body_com(model, data)
-    add_scene_marker(scene, com, 0.03, COM_MARKER_RGBA)
-    add_scene_marker(
-        scene,
-        np.array([com[0], com[1], ground_height_m + 0.005]),
-        0.025,
-        COM_GROUND_RGBA,
-    )
-    return com

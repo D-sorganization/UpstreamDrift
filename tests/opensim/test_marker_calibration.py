@@ -163,28 +163,3 @@ def test_alternating_calibration_selects_best_iteration_on_oscillation() -> None
         assert result.per_marker_rms_m[label] == pytest.approx(
             result.rms_per_iteration_m[1], rel=1e-5
         )
-
-
-def test_static_offsets_recover_body_frame_positions_over_valid_frames() -> None:
-    rot, trans = _rotation(0.3), np.array([0.5, -1.0, 2.0])
-    offsets = {"A": (0.1, 0.0, 0.2), "B": (-0.1, 0.3, 0.0)}
-    world = np.array(
-        [[rot @ np.array(o) + trans for o in offsets.values()] for _ in range(3)]
-    )
-    world[1, 0] += 5.0  # invalid frame carries garbage
-    capture = TourCapture(
-        time_s=np.array([0.0, 0.1, 0.2]),
-        labels=("A", "B"),
-        points_m=world,
-        valid=np.array([[True, True], [False, True], [True, True]]),
-    )
-    bodies = {"A": "trunk", "B": "trunk"}
-    poses = [{"trunk": (rot, trans)}] * 3
-    result = module.static_marker_offsets(capture, bodies, poses)
-    for label, offset in offsets.items():
-        assert result[label][0] == "trunk"
-        np.testing.assert_allclose(result[label][1], offset, atol=1e-12)
-    with pytest.raises(ValueError):
-        module.static_marker_offsets(capture, bodies, poses[:2])
-    with pytest.raises(ValueError):
-        module.static_marker_offsets(capture, {"A": "arm", "B": "trunk"}, poses)

@@ -606,22 +606,6 @@
       "id": "tools.model_explorer"
     },
     {
-      "feature_id": "tools.motion_matching",
-      "title": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",
-      "status": "gap",
-      "pyqt": "src/tools/motion_matching/gui.py",
-      "api": null,
-      "web": null,
-      "issue": 10106,
-      "reason": null,
-      "pending_decision": false,
-      "tiles": [
-        "motion_matching"
-      ],
-      "notes": "",
-      "id": "tools.motion_matching"
-    },
-    {
       "feature_id": "tools.pose_editing",
       "title": "Pose Studio interactive pose editing",
       "status": "exempt",
@@ -1055,21 +1039,6 @@
         "club",
         "body",
         "preview"
-      ]
-    },
-    {
-      "id": "motion_matching",
-      "title": "Motion Matching",
-      "description": "Match the tour-average driver or 7-iron capture with full-body forward dynamics on the anthropometric golfer",
-      "path": "src/tools/motion_matching/__main__.py",
-      "launch_target": "src/tools/motion_matching/__main__.py",
-      "category": "motion_matching",
-      "status": "beta",
-      "capabilities": [
-        "mocap",
-        "matching",
-        "forward_dynamics",
-        "receipts"
       ]
     },
     {
@@ -2786,9 +2755,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "db988b0091b8e70a78c9b862a18c4f52af5fb56b2c58d4c772d95cbea096ac92",
-    "src/config/launcher_manifest.json": "89ce66ae10de8d56905be878c90b9488328b5fb0dbf679b579fe3610d20ec2b0",
-    "src/config/feature_parity.json": "36b24a242e7fc3162eec04d0bec25b56e13d02baf8089b33386679cc47b634ce",
+    "src/config/models.yaml": "789894ce2f009f5c070faeb678d2acbb40a3baef1693e60b0119016cc476b9a1",
+    "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
+    "src/config/feature_parity.json": "1a7d3b9fe6fdf99376916ae4af708a13c7e7c385470eda00913c5c62737427be",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
