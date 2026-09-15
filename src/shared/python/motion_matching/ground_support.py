@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -56,7 +57,7 @@ class GroundCalibration:
 
 def calibrate_ground_height(
     points_native: Array,
-    valid: Array,
+    valid: NDArray[Any],
     labels: Sequence[str],
     toe_labels: Sequence[str],
     *,

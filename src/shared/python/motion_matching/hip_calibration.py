@@ -74,7 +74,7 @@ class HipCalibration:
 
 def functional_hip_calibration(
     points: Array,
-    valid: Array,
+    valid: NDArray[Any],
     labels: Sequence[str],
     waist_offsets: Mapping[str, Sequence[float]],
     *,

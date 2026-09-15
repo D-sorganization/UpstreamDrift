@@ -86,7 +86,7 @@ def cart_table_shift(
     zmp_xy: Array,
     target_xy: Array,
     z_c_m: Array | float,
-    times: Sequence[float],
+    times: Sequence[float] | Array,
     *,
     acceleration_weight: float = 1e-3,
     position_weight: float = 1e-2,
