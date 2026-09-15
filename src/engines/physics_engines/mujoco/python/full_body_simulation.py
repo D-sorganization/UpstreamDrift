@@ -260,7 +260,8 @@ class FullBodySimulator:
         steps = int(round(duration_s / dt_s))
         times, qs, vs, taus = [0.0], [q.copy()], [v.copy()], []
         supports: list[tuple[SupportReport, float]] = [self.support(q, v)]
-        tau_prev = np.zeros(self.nv)
+        tau_prev: Array = np.zeros(self.nv)
+
         for k in range(1, steps + 1):
             q, v, tau_prev = self.step((k - 1) * dt_s, q, v, controller, dt_s)
             if k % record_every == 0 or k == steps:
@@ -597,7 +598,7 @@ def _distance_outside(point_xy: Array, hull_xy: Array) -> float:
 
 def reference_zmp(
     simulator: FullBodySimulator,
-    time_ref: Sequence[float],
+    time_ref: Sequence[float] | Array,
     q_ref: Array,
     ground: GroundPlane,
     *,
