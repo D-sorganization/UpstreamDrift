@@ -1,5 +1,17 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Body/Club Silhouettes and Segmentation (#10127)
+
+Specifies body and club silhouette segmentation, gold-mask evaluation, and occlusion tracking for Shadow Tracker ST-04:
+- Implements `src/shared/python/shadow_tracker/segmentation.py`:
+  - `ManualMaskProvider`: Deterministic segmenter fulfilling `Segmenter` protocol for reviewed gold masks and corrections; maps registered `MaskFrame` instances by `frame_id` with `has_mask` and `get_mask`.
+  - `ModelSegmentationProvider`: Adapter for automated silhouette segmentation models enforcing lazy missing-checkpoint validation (`FileNotFoundError`) and provenance tagging without unqualified automatic mask confidence.
+  - `track_occlusion_and_identity()`: Computes body visibility fraction relative to expected body area, evaluating partial occlusion and identity loss thresholds into frozen `OcclusionReport`.
+  - `compute_mask_iou()` and `compute_mask_dice()`: Computes intersection-over-union and Dice similarity coefficients strictly over valid pixels (`valid != 0`), ignoring unobserved or masked-out regions.
+  - Enforces strict DbC invariants:
+    - Empty vs unknown mask semantics: unobserved regions require `valid == 0`, and any non-zero body or club pixel on an invalid pixel strictly raises `ValueError`.
+    - Revision-aware cache invalidation: manual corrections update `revision_id`, link `parent_revision_id`, and produce a modified `observation_hash`, ensuring downstream silhouette losses and residual caches are safely invalidated.
+
 ## Fail Closed on Invalid Rollout and Missing Closure Evidence (#10166)
 
 Hardens physical rollout acceptance gating and closure error extraction:
