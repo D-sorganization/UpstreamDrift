@@ -1,5 +1,18 @@
 # SPEC.md — Repository Specification Document
 
+## Ground Support Pipeline Modularization and Law of Demeter Abstractions (HO-1 #10155, #10162)
+
+Modularizes the monolithic `run_ground_support.py` script into a tested, cleanly factored package under `src/shared/python/motion_matching/pipeline/`:
+- `pipeline.constants`: Centralizes pure SI physics constants (gravity, contact thresholds, damping, optimization tolerances, bounds, default weight configurations).
+- `pipeline.lane`: Encapsulates `Lane` configuration dataclass and contact geometry; manages stance and toe contact sphere allocations; exposes Demeter-compliant delegating properties for downstream kinematics queries without violating object encapsulation.
+- `pipeline.address`: Implements anatomical marker prior scaling (`scaled_offsets`), posture metrics (`posture_summary`), address pose optimization (`best_address`), static trial calibrations (`static_offsets`, `static_trial`), and functional hip calibration integration (`calibrate_legs`).
+- `pipeline.reference`: Implements reference trajectory solver orchestration (`full_capture_ik`), low-pass kinematic trajectory smoothing (`smooth_reference`), marker discrepancy auditing (`marker_errors`), and kinematic loop consistency resolution (`consistency_resolve`).
+- `pipeline.dynamics`: Implements forward dynamic tracking simulation (`replay`), shooting fit optimization (`shooting_fit`), ZMP support polygon filtering (`zmp_filter`), and center-of-mass excursion analysis (`com_report`).
+- `pipeline.receipt`: Assembles and validates the structured ground-support receipt schema (`build_ground_support_receipt`).
+- `FullBodyMarkerKinematics` (`src/engines/physics_engines/mujoco/python/full_body_markers.py`):
+  - Adds delegating properties `.nq`, `.sphere_names`, `.closure_sites`, and `.marker_bodies_and_offsets` to eliminate external structural reach-through.
+- Backwards Compatibility: `run_ground_support.py` becomes a thin CLI driver delegating all stages to `pipeline` while preserving exact CLI arguments and artifact formats.
+
 ## Replay and Single-Impact Shot Submission (#10195)
 
 Synchronizes precomputed immutable golfer model swing replay with authoritative single-impact shot submission:
