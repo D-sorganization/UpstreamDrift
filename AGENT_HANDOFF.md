@@ -1,26 +1,34 @@
 # Simscape Tour-Average Fit Continuation
 
-## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03 Complete
+## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03, GS-04, GS-05 Complete
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
 - **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
-  and GS-03 (#10192) durable transport and delivery journal complete. Planning PR #10201 and PR #10208 merged; PR #10213 open.
+  GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
+  and GS-05 (#10194) shared session service and local reference destination complete.
+  Planning PR #10201, PR #10208, PR #10213, and PR #10215 merged.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10192-durable-transport`; commit `2bf5ec40f`.
+  branch `feat/issue-10194-session-service`.
 - **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
+  `src/shared/python/golf_simulator/session.py`,
   `src/shared/python/golf_simulator/launch_bridge.py`,
+  `src/shared/python/golf_simulator/adapters/local.py`,
+  `src/shared/python/golf_simulator/adapters/fake.py`,
   `src/shared/python/golf_simulator/adapters/gspro/profile.py`,
   `src/shared/python/golf_simulator/adapters/gspro/codec.py`,
   `src/shared/python/golf_simulator/adapters/gspro/transport.py`,
   `src/shared/python/golf_simulator/journal.py`.
-  Durable intent journal (`ShotJournal`) enforcing pre-write intent logging, distinct status transitions,
-  and marking network drops as AMBIGUOUS without auto-resend. Async TCP transport (`GSProTransport`)
-  with bounded framing buffer (<=64 KiB), stream reassembly across partial TCP packets, and overflow guard.
-- **Validation:** 34 unit and integration tests across `tests/unit/golf_simulator/` and
-  `tests/integration/golf_simulator/` pass 100% under normal and `python -O` with `DBC_LEVEL=off`.
-  Ruff check, Ruff format check, architecture budget check, divergence inventory check, and mypy pass with 0 errors.
-- **Next:** Implement GS-04 (#10193) full impact state forwarding and contact qualification in swing pipeline.
+  - `GolfSessionService`: Central orchestrator enforcing state machine (`IDLE` -> `PREPARED` -> `ARMED` -> `SUBMITTING` -> `IDLE`/`UNCERTAIN`),
+    guarding destination switching, invalidating arm tokens on context/destination changes, validating model qualification before arming,
+    and handling ambiguous deliveries via operator reconciliation.
+  - `LocalReferenceAdapter`: Satisfies `SimulatorAdapter` protocol, wraps `FlightSimulatorProtocol` (`BallFlightSimulator` with pure-Python
+    `EnhancedBallFlightSimulator` fallback), computes RK4 ball trajectories with full provenance labeling, and maintains distinct trajectory and receipt contracts.
+  - `shot_envelope_to_launch_conditions`: Reconstitutes scalar launch parameters and 3D spin axis from canonical `ShotEnvelope`.
+  - `FakeSimulatorAdapter`: Configurable test spy for testing adapter substitution, capability auditing, and fault simulation.
+- **Validation:** 50 unit tests across `tests/unit/golf_simulator/` (including session service, local adapter, reverse bridge, and unified service contracts) pass 100%.
+  Ruff check, Ruff format check, Black, changed-file architecture budget, and mypy pass with 0 errors.
+- **Next:** Open PR for GS-05 (#10194) and proceed to GS-06 (#10195) replay and one-impact submission.
 - **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Shadow Tracker Current Turnover (#10122)
