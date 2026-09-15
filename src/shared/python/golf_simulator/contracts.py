@@ -259,6 +259,23 @@ class ShotEnvelope:
             _validate_finite_float(self.impact_time_s, "impact_time_s")
 
 
+@dataclass(frozen=True)
+class ShotMetadata:
+    """Metadata and provenance bundle for creating ShotEnvelope instances."""
+
+    shot_id: str
+    session_id: str
+    aim_context: AimContext
+    created_at_utc: str
+    source_kind: SourceKind = SourceKind.MANUAL
+    qualification: ShotQualification | None = None
+    club_data: ClubData | None = None
+    model_run_id: str | None = None
+    trace_digest: str | None = None
+    impact_id: str | None = None
+    impact_time_s: float | None = None
+
+
 class CapabilityState(str, Enum):
     """Honest capability state without hopeful booleans."""
 

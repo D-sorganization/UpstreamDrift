@@ -6,17 +6,17 @@ Follows TDD, DbC, Law of Demeter, and DRY.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from src.shared.python.golf_simulator.contracts import (
-    AimContext,
     ClubData,
     ContactStatus,
     NumericalStatus,
     ScientificStatus,
     ShotEnvelope,
+    ShotMetadata,
     ShotQualification,
     SourceKind,
 )
@@ -37,19 +37,25 @@ def rpm_to_rad_s(rpm: float) -> float:
     return float(rpm) * (2.0 * math.pi / 60.0)
 
 
+def _resolve_qualification(
+    metadata: ShotMetadata, default_source: SourceKind
+) -> ShotQualification:
+    if metadata.qualification is not None:
+        return metadata.qualification
+    is_manual = metadata.source_kind == SourceKind.MANUAL
+    return ShotQualification(
+        contact=ContactStatus.NOT_APPLICABLE if is_manual else ContactStatus.QUALIFIED,
+        numerical=NumericalStatus.ESTIMATED if is_manual else NumericalStatus.CONVERGED,
+        scientific=ScientificStatus.NOT_APPLICABLE
+        if is_manual
+        else ScientificStatus.BENCHMARKED,
+        evidence_refs=("bridge_conversion",),
+    )
+
+
 def launch_conditions_to_shot_envelope(
     launch_conditions: LaunchConditions,
-    shot_id: str,
-    session_id: str,
-    aim_context: AimContext,
-    created_at_utc: str,
-    source_kind: SourceKind = SourceKind.MANUAL,
-    qualification: ShotQualification | None = None,
-    club_data: ClubData | None = None,
-    model_run_id: str | None = None,
-    trace_digest: str | None = None,
-    impact_id: str | None = None,
-    impact_time_s: float | None = None,
+    metadata: ShotMetadata,
 ) -> ShotEnvelope:
     """Convert existing LaunchConditions into a canonical ShotEnvelope.
 
@@ -76,97 +82,61 @@ def launch_conditions_to_shot_envelope(
         float(unit_axis[2] * omega_mag),
     )
 
-    if qualification is None:
-        qualification = ShotQualification(
-            contact=ContactStatus.NOT_APPLICABLE
-            if source_kind == SourceKind.MANUAL
-            else ContactStatus.UNVERIFIED,
-            numerical=NumericalStatus.ESTIMATED,
-            scientific=ScientificStatus.NOT_APPLICABLE
-            if source_kind == SourceKind.MANUAL
-            else ScientificStatus.UNVERIFIED,
-            evidence_refs=("launch_conditions_conversion",),
-        )
+    qualification = _resolve_qualification(metadata, SourceKind.MANUAL)
 
     return ShotEnvelope(
         schema_version=1,
-        shot_id=shot_id,
-        session_id=session_id,
-        source_kind=source_kind,
+        shot_id=metadata.shot_id,
+        session_id=metadata.session_id,
+        source_kind=metadata.source_kind,
         qualification=qualification,
         ball_velocity_m_s=(vx, vy, vz),
         ball_angular_velocity_rad_s=angular_vel,
-        aim_context=aim_context,
-        created_at_utc=created_at_utc,
-        club_data=club_data,
-        model_run_id=model_run_id,
-        trace_digest=trace_digest,
-        impact_id=impact_id,
-        impact_time_s=impact_time_s,
+        aim_context=metadata.aim_context,
+        created_at_utc=metadata.created_at_utc,
+        club_data=metadata.club_data,
+        model_run_id=metadata.model_run_id,
+        trace_digest=metadata.trace_digest,
+        impact_id=metadata.impact_id,
+        impact_time_s=metadata.impact_time_s,
     )
 
 
 def post_impact_state_to_shot_envelope(
     post_impact: PostImpactState,
-    shot_id: str,
-    session_id: str,
-    aim_context: AimContext,
-    created_at_utc: str,
-    source_kind: SourceKind = SourceKind.MODEL_CONTACT,
-    qualification: ShotQualification | None = None,
-    club_data: ClubData | None = None,
-    model_run_id: str | None = None,
-    trace_digest: str | None = None,
-    impact_id: str | None = None,
-    impact_time_s: float | None = None,
+    metadata: ShotMetadata,
 ) -> ShotEnvelope:
     """Convert PostImpactState from impact model into a canonical ShotEnvelope."""
     vel = tuple(float(x) for x in post_impact.ball_velocity)
     spin = tuple(float(x) for x in post_impact.ball_angular_velocity)
 
-    if qualification is None:
-        qualification = ShotQualification(
-            contact=ContactStatus.QUALIFIED,
-            numerical=NumericalStatus.CONVERGED,
-            scientific=ScientificStatus.BENCHMARKED,
-            evidence_refs=("post_impact_state",),
-        )
+    qualification = _resolve_qualification(metadata, SourceKind.MODEL_CONTACT)
 
     return ShotEnvelope(
         schema_version=1,
-        shot_id=shot_id,
-        session_id=session_id,
-        source_kind=source_kind,
+        shot_id=metadata.shot_id,
+        session_id=metadata.session_id,
+        source_kind=metadata.source_kind,
         qualification=qualification,
         ball_velocity_m_s=(vel[0], vel[1], vel[2]),
         ball_angular_velocity_rad_s=(spin[0], spin[1], spin[2]),
-        aim_context=aim_context,
-        created_at_utc=created_at_utc,
-        club_data=club_data,
-        model_run_id=model_run_id,
-        trace_digest=trace_digest,
-        impact_id=impact_id,
-        impact_time_s=impact_time_s,
+        aim_context=metadata.aim_context,
+        created_at_utc=metadata.created_at_utc,
+        club_data=metadata.club_data,
+        model_run_id=metadata.model_run_id,
+        trace_digest=metadata.trace_digest,
+        impact_id=metadata.impact_id,
+        impact_time_s=metadata.impact_time_s,
     )
 
 
 def pipeline_result_to_shot_envelope(
     pipeline_result: PipelineResult,
-    shot_id: str,
-    session_id: str,
-    aim_context: AimContext,
-    created_at_utc: str,
-    source_kind: SourceKind = SourceKind.MODEL_CONTACT,
-    qualification: ShotQualification | None = None,
-    model_run_id: str | None = None,
-    trace_digest: str | None = None,
-    impact_id: str | None = None,
-    impact_time_s: float | None = None,
+    metadata: ShotMetadata,
 ) -> ShotEnvelope:
     """Convert PipelineResult into a canonical ShotEnvelope preserving impact state."""
-    # Build club data if available from swing/impact state
-    club_data: ClubData | None = None
-    if pipeline_result.swing_state is not None:
+    club_data = metadata.club_data
+    if club_data is None and pipeline_result.swing_state is not None:
         ss = pipeline_result.swing_state
         club_data = ClubData(
             club_speed_m_s=float(ss.club_speed) if hasattr(ss, "club_speed") else None,
@@ -179,17 +149,21 @@ def pipeline_result_to_shot_envelope(
             else None,
         )
 
+    updated_metadata = ShotMetadata(
+        shot_id=metadata.shot_id,
+        session_id=metadata.session_id,
+        aim_context=metadata.aim_context,
+        created_at_utc=metadata.created_at_utc,
+        source_kind=metadata.source_kind,
+        qualification=metadata.qualification,
+        club_data=club_data,
+        model_run_id=metadata.model_run_id,
+        trace_digest=metadata.trace_digest,
+        impact_id=metadata.impact_id,
+        impact_time_s=metadata.impact_time_s,
+    )
+
     return post_impact_state_to_shot_envelope(
         post_impact=pipeline_result.impact_state,
-        shot_id=shot_id,
-        session_id=session_id,
-        aim_context=aim_context,
-        created_at_utc=created_at_utc,
-        source_kind=source_kind,
-        qualification=qualification,
-        club_data=club_data,
-        model_run_id=model_run_id,
-        trace_digest=trace_digest,
-        impact_id=impact_id,
-        impact_time_s=impact_time_s,
+        metadata=updated_metadata,
     )
