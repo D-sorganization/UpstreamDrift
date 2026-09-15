@@ -1,5 +1,18 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Subject Shape and Initial-State Hypotheses (#10129)
+
+Specifies subject shape fitting and initial-state hypothesis generation for Shadow Tracker ST-06:
+- Implements `src/shared/python/shadow_tracker/initialization.py`:
+  - `VisualMorphology`: Slotted frozen record encapsulating visual envelope dimensions (`height_m`, `chest_width_m`, `depth_m`, `segment_lengths`), strictly positive and finite.
+  - `InertialParameters`: Slotted frozen record encapsulating mass properties (`mass_kg`, `center_of_mass_body_m`, `moments_of_inertia_kg_m2`), enforcing strict separation from visual dimensions so visual envelope edits never corrupt mass/inertial properties.
+  - `SubjectMorphology`: Slotted frozen aggregate binding `subject_id`, `VisualMorphology`, `InertialParameters`, and `handedness`.
+  - `InitialHypothesis`: Slotted frozen candidate record containing initial kinematic state (`pose`, `velocity`), camera geometry (`camera_id`, `scale`, `depth_m`), `score`, `label` (`"observed" | "inferred" | "prior"`), and `provenance`.
+  - `MultiviewFitResult`: Slotted frozen container storing the evaluated initial hypotheses, `best_hypothesis`, `residuals_evaluated`, and `camera_ids`.
+  - `estimate_short_window_velocity()`: Computes initial coordinate rates via finite differences over short multi-frame windows ($\ge 2$ frames) without assuming zero initial velocity or static address posture.
+  - `generate_monocular_hypotheses()`: Generates discrete depth, scale, and handedness hypotheses under monocular ambiguity without prematurely collapsing to an arbitrary unique depth.
+  - `fit_initial_state_multiview()`: Recovers known poses and evaluates initial-state candidates across calibrated multi-view silhouettes using objective valid-pixel residual loss functions (`compute_silhouette_loss`). Fulfills Gate G2 pose recovery.
+
 ## Shadow Tracker Calibrated Silhouette Rendering and Residual Losses (#10128)
 
 Specifies calibrated silhouette rendering, analytic projection, and valid-pixel residual losses for Shadow Tracker ST-05:
