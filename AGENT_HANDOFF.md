@@ -7,7 +7,7 @@
 - **State:** GS-00 (#10189) compatibility profile, GS-01 (#10190) domain contracts and conversion bridge,
   and GS-02 (#10191) pure codec implemented and tested. Planning PR #10201 merged; PR #10208 open.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10190-shot-contracts`; commit `SELF`.
+  branch `feat/issue-10190-shot-contracts`; commit `83e522aa0`.
 - **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
   `src/shared/python/golf_simulator/launch_bridge.py`,
   `src/shared/python/golf_simulator/adapters/gspro/profile.py`,
