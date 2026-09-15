@@ -58,8 +58,14 @@ if _PYQT_AVAILABLE:
 
         def _init_ui(self) -> None:
             layout = QtWidgets.QVBoxLayout(self)
+            layout.addWidget(self._init_header_ui())
+            layout.addWidget(self._init_capabilities_ui())
+            layout.addWidget(self._init_lifecycle_ui())
+            layout.addWidget(self._init_transport_ui())
+            layout.addWidget(self._init_reconciliation_ui())
+            layout.addStretch()
 
-            # 1. Header with Destination and Status Badge
+        def _init_header_ui(self) -> QtWidgets.QGroupBox:
             header_box = QtWidgets.QGroupBox("Simulator Destination & Connection", self)
             header_layout = QtWidgets.QHBoxLayout(header_box)
 
@@ -84,10 +90,9 @@ if _PYQT_AVAILABLE:
             )
             header_layout.addWidget(self._status_badge)
             header_layout.addStretch()
+            return header_box
 
-            layout.addWidget(header_box)
-
-            # 2. Capabilities Readout
+        def _init_capabilities_ui(self) -> QtWidgets.QGroupBox:
             cap_box = QtWidgets.QGroupBox("Destination Capabilities", self)
             cap_layout = QtWidgets.QVBoxLayout(cap_box)
             self._lbl_cap_shot = QtWidgets.QLabel("• Shot Input: Supported", self)
@@ -98,9 +103,9 @@ if _PYQT_AVAILABLE:
             cap_layout.addWidget(self._lbl_cap_shot)
             cap_layout.addWidget(self._lbl_cap_club)
             cap_layout.addWidget(self._lbl_cap_traj)
-            layout.addWidget(cap_box)
+            return cap_box
 
-            # 3. Shot Preparation & Execution Controls
+        def _init_lifecycle_ui(self) -> QtWidgets.QGroupBox:
             shot_box = QtWidgets.QGroupBox("Shot Lifecycle & Impact Controls", self)
             shot_layout = QtWidgets.QHBoxLayout(shot_box)
 
@@ -126,10 +131,9 @@ if _PYQT_AVAILABLE:
             )
             self._btn_submit.clicked.connect(self._on_submit_clicked)
             shot_layout.addWidget(self._btn_submit)
+            return shot_box
 
-            layout.addWidget(shot_box)
-
-            # 4. Replay Transport Controls
+        def _init_transport_ui(self) -> QtWidgets.QGroupBox:
             replay_box = QtWidgets.QGroupBox("Monotonic Replay Transport", self)
             replay_layout = QtWidgets.QHBoxLayout(replay_box)
 
@@ -154,10 +158,9 @@ if _PYQT_AVAILABLE:
             self._lbl_replay_time = QtWidgets.QLabel("Time: 0.00 s", self)
             replay_layout.addWidget(self._lbl_replay_time)
             replay_layout.addStretch()
+            return replay_box
 
-            layout.addWidget(replay_box)
-
-            # 5. Uncertainty Reconciliation & Audit
+        def _init_reconciliation_ui(self) -> QtWidgets.QGroupBox:
             recon_box = QtWidgets.QGroupBox(
                 "Delivery Reconciliation & Uncertainty Recovery", self
             )
@@ -172,9 +175,7 @@ if _PYQT_AVAILABLE:
             self._btn_reconcile = QtWidgets.QPushButton("Confirm Delivery", self)
             self._btn_reconcile.clicked.connect(self._on_reconcile_clicked)
             recon_layout.addWidget(self._btn_reconcile)
-
-            layout.addWidget(recon_box)
-            layout.addStretch()
+            return recon_box
 
         def _on_destination_changed(self) -> None:
             dest = self._destination_combo.currentData()

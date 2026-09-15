@@ -288,6 +288,18 @@ def _capabilities_to_dict(caps: SimulatorCapabilities) -> dict[str, Any]:
     }
 
 
+def _receipt_to_response(receipt: SubmissionReceipt) -> SubmissionReceiptResponse:
+    return SubmissionReceiptResponse(
+        shot_id=receipt.shot_id,
+        session_id=receipt.session_id,
+        state=receipt.state.value,
+        destination_id=receipt.destination_id,
+        attempt_id=receipt.attempt_id,
+        timestamp_utc=receipt.timestamp_utc,
+        detail=receipt.detail,
+    )
+
+
 @router.post("/session", response_model=SessionStatusResponse)
 async def create_or_update_session(
     req: CreateSessionRequest,
@@ -463,15 +475,7 @@ async def submit_shot(req: SubmitShotRequest) -> SubmissionReceiptResponse:
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
         ) from exc
 
-    return SubmissionReceiptResponse(
-        shot_id=receipt.shot_id,
-        session_id=receipt.session_id,
-        state=receipt.state.value,
-        destination_id=receipt.destination_id,
-        attempt_id=receipt.attempt_id,
-        timestamp_utc=receipt.timestamp_utc,
-        detail=receipt.detail,
-    )
+    return _receipt_to_response(receipt)
 
 
 @router.get("/shot/{shot_id}/status", response_model=SubmissionReceiptResponse)
@@ -485,15 +489,7 @@ async def get_shot_status(shot_id: str) -> SubmissionReceiptResponse:
             detail=f"Shot '{shot_id}' receipt not found",
         )
 
-    return SubmissionReceiptResponse(
-        shot_id=receipt.shot_id,
-        session_id=receipt.session_id,
-        state=receipt.state.value,
-        destination_id=receipt.destination_id,
-        attempt_id=receipt.attempt_id,
-        timestamp_utc=receipt.timestamp_utc,
-        detail=receipt.detail,
-    )
+    return _receipt_to_response(receipt)
 
 
 @router.post("/shot/{shot_id}/resolve", response_model=SubmissionReceiptResponse)
@@ -513,15 +509,7 @@ async def resolve_uncertain_delivery(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
         ) from exc
 
-    return SubmissionReceiptResponse(
-        shot_id=receipt.shot_id,
-        session_id=receipt.session_id,
-        state=receipt.state.value,
-        destination_id=receipt.destination_id,
-        attempt_id=receipt.attempt_id,
-        timestamp_utc=receipt.timestamp_utc,
-        detail=receipt.detail,
-    )
+    return _receipt_to_response(receipt)
 
 
 @router.post("/replay/action", response_model=ReplayStatusResponse)
