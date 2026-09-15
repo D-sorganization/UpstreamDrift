@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -29,8 +30,8 @@ from src.shared.python.motion_matching.ground_support import (
     support_report,
 )
 
-Array = NDArray[np.float64]
-Controller = Callable[[float, Array, Array], Array]
+Array: TypeAlias = NDArray[np.float64]
+Controller: TypeAlias = Callable[[float, Array, Array], Array]
 
 MIN_SINGULAR_VALUE = 1e-2  # 1 / (kg m^2): directions below this are closure-locked
 ROOT_COORDINATES = (

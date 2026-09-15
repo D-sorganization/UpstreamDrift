@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -24,7 +24,7 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 )
 from src.shared.python.motion_matching.contact_law import GroundPlane
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
 
 
