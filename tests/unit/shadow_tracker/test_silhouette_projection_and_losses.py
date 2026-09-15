@@ -374,3 +374,63 @@ def test_thin_club_separation_independent_loss(
     assert res_bad.body_iou == pytest.approx(1.0)  # Perfect body
     assert res_bad.club_iou == pytest.approx(0.0)  # Disjoint club
     assert res_bad.combined_loss > 0.0  # Combined loss catches club error!
+
+
+# ---------------------------------------------------------------------------
+# 8. Filled Primitive Area & Camera/Pose Invariants (Review Findings)
+# ---------------------------------------------------------------------------
+
+
+def test_renderer_renders_filled_primitive_area() -> None:
+    """ST-05 / P1 finding: projected primitive must occupy independently calculated filled area.
+
+    A sphere/ellipsoid/capsule primitive with radius > 0 at depth Z must project to a filled
+    disk of radius r_px = fx * R / Z, NOT a single pixel!
+    """
+    camera = PinholeCameraModel(
+        camera_id="cam-area",
+        width_px=100,
+        height_px=100,
+        fx=100.0,
+        fy=100.0,
+        cx=50.0,
+        cy=50.0,
+    )
+    renderer = AnalyticSilhouetteRenderer(
+        cameras={"cam-area": camera},
+        body_radius_m=0.2,  # 20 cm radius body primitive
+        club_radius_m=0.05,  # 5 cm radius clubhead primitive
+    )
+
+    # State: 7-element pose (tx, ty, tz, qw, qx, qy, qz)
+    # Placed at (0.0, 0.0, 2.0) -> center projects to (cx, cy) = (50, 50)
+    # Expected radius: r_px = 100 * 0.2 / 2.0 = 10 pixels!
+    # Expected area: pi * 10^2 ~ 314 pixels.
+    req = RenderRequest(
+        camera_id="cam-area",
+        state=(0.0, 0.0, 2.0, 1.0, 0.0, 0.0, 0.0),
+        image_size_px=(100, 100),
+    )
+    result = renderer.render(req)
+
+    foreground_count = result.body_mask.count(1)
+    # Must NOT be 1 pixel! Must be a filled area consistent with primitive geometry
+    assert foreground_count > 50
+    assert 250 <= foreground_count <= 350
+
+
+def test_pinhole_camera_model_rejects_zero_or_invalid_rotation() -> None:
+    """ST-05 / P2 finding: PinholeCameraModel must reject all-zero rotation matrices."""
+    with pytest.raises(
+        ValueError, match="rotation matrix must be non-singular|invalid rotation"
+    ):
+        PinholeCameraModel(
+            camera_id="cam-bad-rot",
+            width_px=100,
+            height_px=100,
+            fx=100.0,
+            fy=100.0,
+            cx=50.0,
+            cy=50.0,
+            rotation_world_to_camera=(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+        )
