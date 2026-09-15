@@ -156,31 +156,79 @@ def track_occlusion_and_identity(
 
 
 class ManualMaskProvider:
-    """Deterministic segmenter serving reviewed gold masks and corrections with revision tracking."""
+    """Deterministic segmenter serving reviewed gold masks and corrections with revision tracking.
 
-    __slots__ = ("_masks",)
+    Keyed by `(shot_id, frame_id)` to ensure strict shot isolation and addressable revision lineage.
+    """
+
+    __slots__ = ("_masks", "_revisions", "_history")
 
     def __init__(self) -> None:
-        self._masks: dict[str, MaskFrame] = {}
+        self._masks: dict[tuple[str, str], MaskFrame] = {}
+        self._revisions: dict[str, MaskFrame] = {}
+        self._history: dict[tuple[str, str], list[MaskFrame]] = {}
 
     def register_mask(self, mask: MaskFrame) -> None:
-        """Register or update a mask frame, tracking revision lineage."""
+        """Register or update a mask frame, tracking revision lineage and shot isolation."""
         if not isinstance(mask, MaskFrame):
             raise TypeError(f"Expected MaskFrame, got {type(mask).__name__}")
-        self._masks[mask.frame.frame_id] = mask
+        key = (mask.frame.shot_id, mask.frame.frame_id)
+        self._masks[key] = mask
+        self._revisions[mask.revision_id] = mask
+        if key not in self._history:
+            self._history[key] = []
+        self._history[key].append(mask)
 
-    def get_mask(self, frame_id: str) -> MaskFrame:
-        """Retrieve mask for frame_id or raise KeyError."""
-        if frame_id not in self._masks:
+    def get_mask(self, frame_id: str, *, shot_id: str | None = None) -> MaskFrame:
+        """Retrieve latest mask for frame_id, optionally filtered by shot_id."""
+        check_id(frame_id, "frame_id")
+        if shot_id is not None:
+            check_id(shot_id, "shot_id")
+            key = (shot_id, frame_id)
+            if key not in self._masks:
+                raise KeyError(
+                    f"No mask registered for frame_id {frame_id!r} in shot {shot_id!r}"
+                )
+            return self._masks[key]
+
+        matching = [m for (s, f), m in self._masks.items() if f == frame_id]
+        if not matching:
             raise KeyError(f"No mask registered for frame_id {frame_id!r}")
-        return self._masks[frame_id]
+        if len(matching) > 1:
+            raise ValueError(
+                f"Multiple shots contain frame_id {frame_id!r}: {[m.frame.shot_id for m in matching]}. "
+                "Specify shot_id to disambiguate."
+            )
+        return matching[0]
 
-    def has_mask(self, frame_id: str) -> bool:
-        """Return whether a mask is registered for frame_id."""
-        return frame_id in self._masks
+    def get_revision(self, revision_id: str) -> MaskFrame:
+        """Retrieve a specific mask revision by revision_id."""
+        check_id(revision_id, "revision_id")
+        if revision_id not in self._revisions:
+            raise KeyError(f"No mask found with revision_id {revision_id!r}")
+        return self._revisions[revision_id]
+
+    def get_revision_history(
+        self, frame_id: str, *, shot_id: str
+    ) -> tuple[MaskFrame, ...]:
+        """Return the complete revision history sequence for a (shot_id, frame_id)."""
+        check_id(frame_id, "frame_id")
+        check_id(shot_id, "shot_id")
+        key = (shot_id, frame_id)
+        if key not in self._history:
+            raise KeyError(
+                f"No revision history for frame_id {frame_id!r} in shot {shot_id!r}"
+            )
+        return tuple(self._history[key])
+
+    def has_mask(self, frame_id: str, *, shot_id: str | None = None) -> bool:
+        """Return whether a mask is registered for frame_id (and shot_id if given)."""
+        if shot_id is not None:
+            return (shot_id, frame_id) in self._masks
+        return any(f == frame_id for (_, f) in self._masks)
 
     def segment(self, request: SegmentationRequest) -> SegmentationResult:
-        """Fulfill a SegmentationRequest using registered reviewed masks."""
+        """Fulfill a SegmentationRequest using registered reviewed masks for request.shot_id."""
         if not isinstance(request, SegmentationRequest):
             raise TypeError(
                 f"Expected SegmentationRequest, got {type(request).__name__}"
@@ -188,7 +236,11 @@ class ManualMaskProvider:
 
         count = 0
         for fid in request.frame_ids:
-            _ = self.get_mask(fid)
+            key = (request.shot_id, fid)
+            if key not in self._masks:
+                raise KeyError(
+                    f"No mask registered for shot {request.shot_id!r} and frame_id {fid!r}"
+                )
             count += 1
 
         return SegmentationResult(
@@ -225,15 +277,27 @@ class ModelSegmentationProvider:
         return self._checkpoint_path
 
     def segment(self, request: SegmentationRequest) -> SegmentationResult:
-        """Run segmentation or raise actionable missing checkpoint error."""
+        """Run segmentation or raise actionable missing checkpoint/unsupported error.
+
+        Arbitrary or unverified model checkpoints must not report false success.
+        Until genuine neural inference execution is integrated, this method raises
+        an explicit RuntimeError rather than returning mock mask counts.
+        """
+        if not isinstance(request, SegmentationRequest):
+            raise TypeError(
+                f"Expected SegmentationRequest, got {type(request).__name__}"
+            )
+
         if not self._checkpoint_path.is_file():
             raise FileNotFoundError(
                 f"Model checkpoint not found for {self._model_name}: {self._checkpoint_path}. "
                 "Download the pinned model weights or use ManualMaskProvider."
             )
 
-        return SegmentationResult(
-            shot_id=request.shot_id,
-            mask_count=len(request.frame_ids),
-            provenance=f"model:{self._model_name}:{self._checkpoint_path.name}",
+        # Explicitly fail until genuine neural inference is wired and loaded:
+        # Never report false segmentation success on an arbitrary file.
+        raise RuntimeError(
+            f"Automated inference is not supported for checkpoint {self._checkpoint_path.name!r} "
+            f"on model {self._model_name!r}. Genuine model execution is not yet integrated; "
+            "use ManualMaskProvider for reviewed gold masks."
         )
