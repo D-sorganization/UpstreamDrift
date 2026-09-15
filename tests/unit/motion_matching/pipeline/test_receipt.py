@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching.pipeline.receipt import (
+    GroundSupportReceiptInputs,
     build_ground_support_receipt,
 )
 
@@ -43,25 +44,27 @@ def test_build_ground_support_receipt_structure(tmp_path: Path) -> None:
         return_value={"spine_bend_deg": {}},
     ):
         receipt = build_ground_support_receipt(
-            base_spec=base_spec,
-            spec_path=spec_path,
-            scaled_path=scaled_path,
-            hipcal_path=hipcal_path,
-            recalibrate_upper=False,
-            anthropometric=None,
-            qualification_note="test note",
-            spec_bytes=b"{}",
-            hip_report={"centre_r": [0, 0, 0]},
-            candidate_bytes=b"{}",
-            c3d_path=c3d_file,
-            capture_name="driver",
-            lane=lane,
-            address_report={"rms": 0.005},
-            ik_report={"rms": 0.027},
-            dynamics_report={"rms": 0.074},
-            kin=kin,
-            q_ref=q_ref,
-            elapsed_s=42.0,
+            GroundSupportReceiptInputs(
+                base_spec=base_spec,
+                spec_path=spec_path,
+                scaled_path=scaled_path,
+                hipcal_path=hipcal_path,
+                recalibrate_upper=False,
+                anthropometric=None,
+                qualification_note="test note",
+                spec_bytes=b"{}",
+                hip_report={"centre_r": [0, 0, 0]},
+                candidate_bytes=b"{}",
+                c3d_path=c3d_file,
+                capture_name="driver",
+                lane=lane,
+                address_report={"rms": 0.005},
+                ik_report={"rms": 0.027},
+                dynamics_report={"rms": 0.074},
+                kin=kin,
+                q_ref=q_ref,
+                elapsed_s=42.0,
+            )
         )
 
     assert receipt["base_spec_file"] == "spec.json"

@@ -7,10 +7,12 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python.full_body_markers import (
-    FullBodyMarkerKinematics,
-)
-from src.engines.physics_engines.opensim.python.tour_matching.marker_calibration import (
+if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        FullBodyMarkerKinematics,
+    )
+
+from src.shared.python.motion_matching.marker_calibration import (
     calibrate_marker_offsets,
     static_marker_offsets,
 )
