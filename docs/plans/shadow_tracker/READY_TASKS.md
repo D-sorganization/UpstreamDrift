@@ -20,10 +20,13 @@ ST-01 scientific qualification has passed.
 
 Use [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md) and
 [Continuation Prompt](CONTINUATION_PROMPT.md). Merged prototypes do not complete
-ST-01–ST-06. First: reject fake segmentation success (#10127). Next: real filled
-rendering and a shared state contract (#10128), boundary/ownership repairs, and
-real ingestion (#10168) with persistent manual-mask review. Continue #10167
-qualification independently. Do not reimplement A/B/C or skip directly to fitting.
+ST-01–ST-06. Evidence regeneration (#10167) confirms that coordinate packing (#10140)
+and closure units (#10141) are resolved in software and calibration evidence regenerated, reducing
+initial grip displacement to 13.7 mm (historical artifacts preserved; physical qualification remains open
+due to rotation closure and strict 5 mm tolerance). First: reject fake segmentation success (#10127).
+Next: real filled rendering and a shared state contract (#10128), boundary/ownership repairs, and
+real ingestion (#10168) with persistent manual-mask review. Stage 7 (#10130) rollout integration is
+boundary work only until physical qualification gates pass. Do not reimplement A/B/C or skip directly to fitting.
 
 ## Commands by Packet
 
