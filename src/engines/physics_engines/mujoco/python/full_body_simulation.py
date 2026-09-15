@@ -272,9 +272,11 @@ class FullBodySimulator:
         taus.insert(0, taus[0] if taus else tau_prev)
         cops = np.array(
             [
-                r.centre_of_pressure_m
-                if r.centre_of_pressure_m is not None
-                else (np.nan,) * 3
+                (
+                    r.centre_of_pressure_m
+                    if r.centre_of_pressure_m is not None
+                    else (np.nan,) * 3
+                )
                 for r, _ in supports
             ]
         )
@@ -513,7 +515,7 @@ def hold_pose_controller(
 
 def tracking_controller(
     simulator: FullBodySimulator,
-    time_ref: Sequence[float],
+    time_ref: Sequence[float] | Array,
     q_ref: Array,
     *,
     omega_rad_s: float | Array,

@@ -572,3 +572,27 @@ def test_locked_per_frame_pins_named_coordinates(
             ground=ground,
             locked_per_frame=[None],
         )
+
+
+def test_delegating_properties_satisfy_lod(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    """Delegating properties expose spheres, closure sites and marker offsets without reach-through."""
+    kin = kinematics
+    assert kin.nq == len(kin.coordinate_order)
+    assert kin.nq > 0
+
+    assert isinstance(kin.sphere_names, tuple)
+    assert len(kin.sphere_names) > 0
+    assert "heel_r" in kin.sphere_names
+
+    assert isinstance(kin.closure_sites, tuple)
+    assert len(kin.closure_sites) == 2
+
+    offsets = kin.marker_bodies_and_offsets
+    assert isinstance(offsets, dict)
+    assert set(offsets.keys()) == set(kin.labels)
+    for body, offset in offsets.values():
+        assert isinstance(body, str)
+        assert isinstance(offset, np.ndarray)
+        assert offset.shape == (3,)
