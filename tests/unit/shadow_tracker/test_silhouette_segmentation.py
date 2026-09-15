@@ -13,7 +13,9 @@ Tests verify:
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 import pytest
+
 
 from shared.python.shadow_tracker._validation import (
     FRAME_SCHEMA_VERSION,
@@ -319,3 +321,197 @@ def test_lazy_missing_model_provider_error() -> None:
     # Actionable error on execution, not hidden or mocked
     with pytest.raises(FileNotFoundError, match="Model checkpoint not found"):
         provider.segment(req)
+
+
+def test_arbitrary_existing_checkpoint_must_not_report_segmentation_success(
+    tmp_path: Path,
+) -> None:
+    """ST-04 / P1 finding: arbitrary file pretending to be checkpoint must not succeed."""
+    bogus_ckpt = tmp_path / "not_a_model.pth"
+    bogus_ckpt.write_bytes(b"not a model file")
+
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b",
+        checkpoint_path=bogus_ckpt,
+    )
+
+    req = SegmentationRequest(
+        shot_id="shot-01",
+        frame_ids=("f-01",),
+    )
+
+    # Must raise RuntimeError or explicit actionable exception indicating automated inference
+    # is unsupported/unimplemented rather than returning fake success with mask counts
+    with pytest.raises(
+        RuntimeError,
+        match="Automated inference is not supported|not a valid model checkpoint",
+    ):
+        provider.segment(req)
+
+
+def test_manual_mask_provider_shot_isolation(
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """ST-04 / P2 finding: two shots with same frame ID must not collide or exchange masks."""
+    width, height = 2, 2
+    total_px = width * height
+    valid = bytes([1] * total_px)
+    body = bytes([1, 0, 0, 0])
+    club = bytes([0, 1, 0, 0])
+
+    mask_shot1 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,  # shot_id="shot-01", frame_id="f-010"
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-shot1",
+        parent_revision_id=None,
+        producer_id="reviewer",
+        correction_note="",
+    )
+
+    frame_identity_shot2 = FrameIdentity(
+        schema_version=FRAME_SCHEMA_VERSION,
+        asset_id="asset-golf-01",
+        shot_id="shot-02",  # Different shot!
+        swing_id="swing-02",
+        camera_id="cam-face-on",
+        frame_id="f-010",  # Same local frame ID!
+        pts_ticks=200,
+        timebase_numerator=1,
+        timebase_denominator=1000,
+        physical_time_s=0.2,
+        physical_time_reason="",
+        frame_sha256="b" * 64,
+    )
+
+    mask_shot2 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=frame_identity_shot2,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-shot2",
+        parent_revision_id=None,
+        producer_id="reviewer",
+        correction_note="",
+    )
+
+    provider = ManualMaskProvider()
+    provider.register_mask(mask_shot1)
+    provider.register_mask(mask_shot2)
+
+    # Retrieval must support shot disambiguation
+    retrieved_shot1 = provider.get_mask("f-010", shot_id="shot-01")
+    retrieved_shot2 = provider.get_mask("f-010", shot_id="shot-02")
+    assert retrieved_shot1.revision_id == "rev-shot1"
+    assert retrieved_shot2.revision_id == "rev-shot2"
+    assert retrieved_shot1.frame.shot_id == "shot-01"
+    assert retrieved_shot2.frame.shot_id == "shot-02"
+
+    # Requesting segment for shot-01 only yields shot-01 masks
+    req_shot1 = SegmentationRequest(
+        shot_id="shot-01",
+        frame_ids=("f-010",),
+    )
+    res_shot1 = provider.segment(req_shot1)
+    assert res_shot1.mask_count == 1
+
+    # Requesting frame not in shot must raise KeyError
+    req_mismatch = SegmentationRequest(
+        shot_id="shot-03",
+        frame_ids=("f-010",),
+    )
+    with pytest.raises(KeyError, match="No mask registered for shot 'shot-03'"):
+        provider.segment(req_mismatch)
+
+
+def test_manual_mask_provider_revision_history_addressable(
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """ST-04 / P2 finding: past revisions remain addressable and inspectable."""
+    width, height = 2, 2
+    total_px = width * height
+    valid = bytes([1] * total_px)
+    body = bytes([1, 0, 0, 0])
+    club_v1 = bytes([0, 1, 0, 0])
+    club_v2 = bytes([0, 1, 1, 0])
+
+    m1 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club_v1,
+        valid=valid,
+        revision_id="rev-01",
+        parent_revision_id=None,
+        producer_id="annotator-1",
+        correction_note="Initial",
+    )
+    m2 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club_v2,
+        valid=valid,
+        revision_id="rev-02",
+        parent_revision_id="rev-01",
+        producer_id="reviewer-1",
+        correction_note="Correction",
+    )
+
+    provider = ManualMaskProvider()
+    provider.register_mask(m1)
+    provider.register_mask(m2)
+
+    # Current returns latest revision
+    latest = provider.get_mask("f-010", shot_id="shot-01")
+    assert latest.revision_id == "rev-02"
+
+    # Specific revision is also addressable
+    rev1 = provider.get_revision("rev-01")
+    assert rev1.revision_id == "rev-01"
+    assert rev1.club == club_v1
+
+    # Revision history list
+    history = provider.get_revision_history("f-010", shot_id="shot-01")
+    assert len(history) == 2
+    assert [h.revision_id for h in history] == ["rev-01", "rev-02"]
+
+
+def test_segmentation_dto_validation() -> None:
+    """ST-02 / ST-04 DTO boundary validation."""
+    with pytest.raises((ValueError, TypeError)):
+        SegmentationRequest(
+            shot_id="",  # invalid empty id
+            frame_ids=("f-01",),
+        )
+
+    with pytest.raises((ValueError, TypeError)):
+        SegmentationRequest(
+            shot_id="shot-01",
+            frame_ids=(),  # empty frame ids
+        )
+
+    with pytest.raises((ValueError, TypeError)):
+        SegmentationResult(
+            shot_id="",
+            mask_count=1,
+            provenance="test",
+        )
+
+    with pytest.raises((ValueError, TypeError)):
+        SegmentationResult(
+            shot_id="shot-01",
+            mask_count=-1,  # negative mask count
+            provenance="test",
+        )

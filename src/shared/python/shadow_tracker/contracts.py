@@ -28,7 +28,9 @@ from ._validation import (
     check_schema_version,
     check_sha256,
     check_str,
+    check_strict_float,
 )
+
 
 # ---------------------------------------------------------------------------
 # Type Aliases & Allowed Keys
@@ -775,12 +777,32 @@ class SegmentationRequest:
     frame_ids: tuple[str, ...]
     options: dict[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        check_id(self.shot_id, "shot_id")
+        if not isinstance(self.frame_ids, tuple) or not self.frame_ids:
+            raise ValueError(
+                f"frame_ids must be a non-empty tuple of frame IDs, got {self.frame_ids!r}"
+            )
+        for fid in self.frame_ids:
+            check_id(fid, "frame_id")
+        if not isinstance(self.options, dict):
+            raise TypeError(
+                f"options must be a dict, got {type(self.options).__name__}"
+            )
+
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class SegmentationResult:
     shot_id: str
     mask_count: int
     provenance: str
+
+    def __post_init__(self) -> None:
+        check_id(self.shot_id, "shot_id")
+        check_int(self.mask_count, "mask_count")
+        if self.mask_count < 0:
+            raise ValueError(f"mask_count must be non-negative, got {self.mask_count}")
+        check_str(self.provenance, "provenance")
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -789,12 +811,45 @@ class RenderRequest:
     state: tuple[float, ...]
     image_size_px: tuple[int, int]
 
+    def __post_init__(self) -> None:
+        check_id(self.camera_id, "camera_id")
+        if not isinstance(self.state, tuple):
+            raise TypeError(f"state must be a tuple, got {type(self.state).__name__}")
+        for s in self.state:
+            check_strict_float(s, "state element")
+        if not isinstance(self.image_size_px, tuple) or len(self.image_size_px) != 2:
+            raise ValueError(
+                f"image_size_px must be a 2-element tuple (width, height), got {self.image_size_px!r}"
+            )
+        check_pos_int(self.image_size_px[0], "width_px")
+        check_pos_int(self.image_size_px[1], "height_px")
+
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class RenderResult:
     body_mask: tuple[int, ...]
     club_mask: tuple[int, ...]
     visibility_mask: tuple[int, ...]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.body_mask, tuple):
+            raise TypeError(
+                f"body_mask must be a tuple, got {type(self.body_mask).__name__}"
+            )
+        if not isinstance(self.club_mask, tuple):
+            raise TypeError(
+                f"club_mask must be a tuple, got {type(self.club_mask).__name__}"
+            )
+        if not isinstance(self.visibility_mask, tuple):
+            raise TypeError(
+                f"visibility_mask must be a tuple, got {type(self.visibility_mask).__name__}"
+            )
+        if len(self.body_mask) != len(self.club_mask) or len(self.body_mask) != len(
+            self.visibility_mask
+        ):
+            raise ValueError(
+                f"Mask sizes must match: body={len(self.body_mask)}, club={len(self.club_mask)}, vis={len(self.visibility_mask)}"
+            )
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
