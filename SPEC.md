@@ -1,5 +1,23 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Video Decoding and Auditable Frame Identities (#10168)
+
+Establishes local video clip decoding and auditable frame records:
+- `OpenCvVideoDecoder`:
+  - Concrete `VideoDecoderAdapter` backed by OpenCV `VideoCapture` for reading local video clips (e.g. mp4, avi, mov).
+  - Validates that source video file exists and can be opened, raising `FileNotFoundError` or `ValueError` on failure.
+  - Extracts video stream metadata: `frame_count`, `width`, `height`, and fractional `pts_timebase` derived from FPS.
+  - Computes deterministic SHA-256 frame payload hashes via `read_frame_hash(frame_idx)` for content auditability.
+  - Enforces strict index bounds validation raising `IndexError` on out-of-range frame queries.
+- `DecodeLimits`:
+  - Execution bounds and cooperative cancellation controls for bounded video decoding (`max_frames`, `is_cancelled`).
+  - Preconditions: validates non-negative `max_frames`.
+- `decode_video_frames()`:
+  - Bounded frame iterator generating immutable `FrameIdentity` records from a `VideoDecoderAdapter` and `SourceAsset`.
+  - Supports `DecodeLimits` (`max_frames`, `is_cancelled`) to enforce finite memory bounds, processing limits, and architecture parameter limits.
+  - Supports physical time calculation via `physical_time_s_fn` mapping or fallback to presentation time with auditable reason tracking.
+  - Validates IDs using Design-by-Contract (`check_id`) and yields sequence records compliant with `validate_frame_sequence()`.
+
 ## Full Impact State Preservation and Contact Qualification (#10193)
 
 Preserves complete clubhead dynamics through impact solver and qualifies physical strike events:
