@@ -1,5 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## Full Impact State Preservation and Contact Qualification (#10193)
+
+Preserves complete clubhead dynamics through impact solver and qualifies physical strike events:
+- `ImpactSolverAPI.solve_pre_impact_state` (`src/shared/python/physics/impact_model/solver.py`):
+  - Solves ball launch directly from complete `PreImpactState` instances without dropping rotational or clubhead geometry state.
+  - Forward-propagates `clubhead_angular_velocity`, `clubhead_loft`, `clubhead_lie`, and `clubhead_moi` to underlying physics models (`solve_impact` and `solve_with_gear_effect`).
+  - Ensures clubhead 3D angular velocity vector is preserved into post-impact kinematic states and downstream telemetry.
+- `SwingBallFlightPipeline._solve_impact` (`src/shared/python/physics/swing_ball_flight_pipeline.py`):
+  - Delegated directly to `solve_pre_impact_state`, eliminating legacy slicing that discarded angular velocity and club face orientation.
+- Launch Bridge and Strike Qualification (`src/shared/python/golf_simulator/launch_bridge.py`):
+  - `qualify_impact_contact`: Validates physical contact bounds; rejects negative or zero approach velocity, negative launch speed, and smash factors exceeding physical limit ($1.60$).
+  - Distinguishes contact qualification modes: `MODEL_CONTACT`, `DEMO_PEAK_SPEED`, and `MANUAL`.
+  - `extract_single_contact_event`: Extracts single contact events from continuous contact time series, deduplicating multi-frame contacts and picking the peak normal force frame.
+  - `check_simscape_eligibility`: Explicitly enforces MATLAB R2025b requirement and model prerequisites for Simscape trajectory eligibility.
+
 ## Ground Support Landing and Marker Prior Calibration (#10186, #10162)
 
 Reconciles the parallel Visuals/FB-4/FB-5/FB-6 and Ground Support lanes under HO-0 (#10186):
@@ -12,7 +27,6 @@ Reconciles the parallel Visuals/FB-4/FB-5/FB-6 and Ground Support lanes under HO
   - Enforces dependency direction constraints ensuring `src/shared/python/motion_matching` remains decoupled from engine-specific modules.
   - Refactors `anthropometric_candidate.py` segment mass scaling loops to eliminate DRY duplication.
   - Adds strict `Literal["YXZ"]` typing to `_EULER` in `grip_fit.py` and explicit `Array: TypeAlias` annotations to `anthropometry.py`, RK4 integration buffers, and `reference_zmp` time sequences in `full_body_simulation.py`.
-
 
 ## Shadow Tracker Filled-Area Silhouette Rendering and Invariants (#10206)
 
