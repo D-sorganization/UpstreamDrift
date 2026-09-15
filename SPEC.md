@@ -11,6 +11,20 @@ Reconciles the parallel Visuals/FB-4/FB-5/FB-6 and Ground Support lanes under HO
   - Eliminates deep member access chains in `full_body_markers.py` and `full_body_simulation.py` to satisfy LOD quality gates.
   - Enforces dependency direction constraints ensuring `src/shared/python/motion_matching` remains decoupled from engine-specific modules.
 
+## Shadow Tracker Filled-Area Silhouette Rendering and Invariants (#10206)
+
+Hardens silhouette rendering, camera models, and hypothesis invariants:
+- `AnalyticSilhouetteRenderer`:
+  - Renders filled-area geometric silhouette projections using configurable `body_radius_m` and `club_radius_m` primitives rather than single-pixel hits.
+  - Computes subpixel disk rasterization with exact pixel-grid coverage (`_rasterize_disk`) ensuring faithful projection loss evaluation against observed binary masks.
+  - Accommodates unified 7-element coordinate representations $(t_x, t_y, t_z, q_w, q_x, q_y, q_z)$ from initial hypothesis generation alongside legacy multi-point coordinate states.
+- `PinholeCameraModel`:
+  - Enforces rotation non-singularity on construction: computes the determinant of `rotation_world_to_camera` and raises `ValueError` if $|\det(R)| < 10^{-6}$.
+- `VisualMorphology`:
+  - Shields segment length maps from external mutation by wrapping `segment_lengths` in an immutable `types.MappingProxyType`.
+- `InitialHypothesis`:
+  - Enforces non-empty, finite floating point sequence invariants for `pose` and `velocity` sequences.
+
 ## Returned81 Cross-Engine Replay Format and 5-Metric Evaluation (#10062)
 
 Specifies standardized replay archive serialization, forward-kinematics projection, and 5-metric evaluation across physics engines (MuJoCo, Pinocchio, Drake) for Visuals Handoff Step 4:
