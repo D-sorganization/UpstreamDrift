@@ -388,3 +388,38 @@ class SimulatorAdapter(Protocol):
     async def disconnect(self) -> None:
         """Cleanly terminate the simulator connection."""
         ...
+
+
+class SessionState(str, Enum):
+    """Lifecycle state of the GolfSessionService."""
+
+    IDLE = "idle"
+    PREPARED = "prepared"
+    ARMED = "armed"
+    SUBMITTING = "submitting"
+    UNCERTAIN = "uncertain"
+
+
+@dataclass(frozen=True)
+class PreparedShot:
+    """A prepared shot ready for validation, arming, and impact submission."""
+
+    prepared_shot_id: str
+    shot: ShotEnvelope
+    context_revision: int
+    created_at_utc: str
+    arm_token: str | None = None
+    is_armed: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.prepared_shot_id or not str(self.prepared_shot_id).strip():
+            raise ValueError("prepared_shot_id must be a non-empty string")
+        if not isinstance(self.shot, ShotEnvelope):
+            raise TypeError("shot must be a ShotEnvelope instance")
+        _validate_not_bool(self.context_revision, "context_revision")
+        if not isinstance(self.context_revision, int) or self.context_revision < 0:
+            raise ValueError(
+                f"context_revision must be a non-negative integer, got {self.context_revision!r}"
+            )
+        if not self.created_at_utc or not str(self.created_at_utc).strip():
+            raise ValueError("created_at_utc must be a non-empty ISO timestamp string")

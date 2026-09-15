@@ -161,15 +161,67 @@ class ImpactSolverAPI:
         self.params = params or ImpactParameters()
         self.recorder = ImpactRecorder()
 
+    def solve_pre_impact_state(
+        self,
+        timestamp: float,
+        pre_state: PreImpactState,
+        record: bool = True,
+    ) -> PostImpactState:
+        """Solve impact directly from a complete PreImpactState.
+
+        Preserves all kinematics, angles, and inertia parameters without slicing.
+        If pre_state.impact_offset is set, also applies gear effect spin.
+
+        Args:
+            timestamp: Current simulation time [s]
+            pre_state: Complete pre-impact state
+            record: Whether to record this impact
+
+        Returns:
+            Post-impact state
+        """
+        if timestamp is None:
+            raise ValueError("timestamp must be provided")
+        if pre_state is None:
+            raise ValueError("pre_state must be provided")
+
+        post_state = self.model.solve(pre_state, self.params)
+
+        if pre_state.impact_offset is not None:
+            gear_spin = compute_gear_effect_spin(
+                impact_offset=np.asarray(pre_state.impact_offset),
+                clubhead_velocity=np.asarray(pre_state.clubhead_velocity),
+                clubface_normal=np.asarray(pre_state.clubhead_orientation),
+                gear_factor=self.params.gear_effect_factor,
+                h_scale=self.params.gear_effect_h_scale,
+                v_scale=self.params.gear_effect_v_scale,
+            )
+            post_state = PostImpactState(
+                ball_velocity=post_state.ball_velocity,
+                ball_angular_velocity=post_state.ball_angular_velocity + gear_spin,
+                clubhead_velocity=post_state.clubhead_velocity,
+                clubhead_angular_velocity=post_state.clubhead_angular_velocity,
+                contact_duration=post_state.contact_duration,
+                energy_transfer=post_state.energy_transfer,
+                impact_location=np.asarray(pre_state.impact_offset),
+            )
+
+        if record:
+            self.recorder.record_impact(
+                timestamp, pre_state, post_state, self.params, self.model_type
+            )
+
+        return post_state
+
     # fmt: off
     @precondition(  # fmt: skip
-        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True, impact_offset=None: (
+        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True, impact_offset=None, clubhead_angular_velocity=None, clubhead_loft=None, clubhead_lie=None, clubhead_moi=None: (
             clubhead_mass > 0
         ),
         "Clubhead mass must be positive",
     )
     @precondition(  # fmt: skip
-        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True, impact_offset=None: (
+        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True, impact_offset=None, clubhead_angular_velocity=None, clubhead_loft=None, clubhead_lie=None, clubhead_moi=None: (
             timestamp >= 0
         ),
         "Timestamp must be non-negative",
@@ -184,11 +236,15 @@ class ImpactSolverAPI:
         clubhead_mass: float = 0.200,
         record: bool = True,
         impact_offset: np.ndarray | None = None,
+        clubhead_angular_velocity: np.ndarray | None = None,
+        clubhead_loft: float | None = None,
+        clubhead_lie: float | None = None,
+        clubhead_moi: float | None = None,
     ) -> PostImpactState:
     # fmt: on
         """Solve impact and optionally record event.
 
-        Simplified API for common use case.
+        Simplified API for common use case, preserving all pre-impact parameters.
 
         Args:
             timestamp: Current simulation time [s]
@@ -201,6 +257,10 @@ class ImpactSolverAPI:
             impact_offset: Impact offset from face center [m] (2,)
                 [horizontal, vertical]; enables the MOI effective-mass
                 reduction for off-center strikes
+            clubhead_angular_velocity: Clubhead angular velocity [rad/s] (3,)
+            clubhead_loft: Clubface loft angle [rad]
+            clubhead_lie: Clubface lie angle [rad]
+            clubhead_moi: Clubhead moment of inertia about CG [kg·m²]
 
         Returns:
             Post-impact state
@@ -211,19 +271,29 @@ class ImpactSolverAPI:
             ball_velocity = np.zeros(3)
         if ball_angular_velocity is None:
             ball_angular_velocity = np.zeros(3)
+        if clubhead_angular_velocity is None:
+            clubhead_angular_velocity = np.zeros(3)
 
-        pre_state = PreImpactState(
-            clubhead_velocity=np.asarray(clubhead_velocity),
-            clubhead_angular_velocity=np.zeros(3),
-            clubhead_orientation=np.asarray(clubhead_orientation),
-            ball_position=np.zeros(3),
-            ball_velocity=np.asarray(ball_velocity),
-            ball_angular_velocity=np.asarray(ball_angular_velocity),
-            clubhead_mass=clubhead_mass,
-            impact_offset=(
+        pre_state_kwargs: dict[str, object] = {
+            "clubhead_velocity": np.asarray(clubhead_velocity),
+            "clubhead_angular_velocity": np.asarray(clubhead_angular_velocity),
+            "clubhead_orientation": np.asarray(clubhead_orientation),
+            "ball_position": np.zeros(3),
+            "ball_velocity": np.asarray(ball_velocity),
+            "ball_angular_velocity": np.asarray(ball_angular_velocity),
+            "clubhead_mass": clubhead_mass,
+            "impact_offset": (
                 np.asarray(impact_offset) if impact_offset is not None else None
             ),
-        )
+        }
+        if clubhead_loft is not None:
+            pre_state_kwargs["clubhead_loft"] = clubhead_loft
+        if clubhead_lie is not None:
+            pre_state_kwargs["clubhead_lie"] = clubhead_lie
+        if clubhead_moi is not None:
+            pre_state_kwargs["clubhead_moi"] = clubhead_moi
+
+        pre_state = PreImpactState(**pre_state_kwargs)  # type: ignore[arg-type]
 
         post_state = self.model.solve(pre_state, self.params)
 
@@ -243,6 +313,10 @@ class ImpactSolverAPI:
         ball_velocity: np.ndarray | None = None,
         clubhead_mass: float = 0.200,
         record: bool = True,
+        clubhead_angular_velocity: np.ndarray | None = None,
+        clubhead_loft: float | None = None,
+        clubhead_lie: float | None = None,
+        clubhead_moi: float | None = None,
     ) -> PostImpactState:
         """Solve impact with gear effect spin from offset impact.
 
@@ -254,66 +328,43 @@ class ImpactSolverAPI:
             ball_velocity: Ball velocity [m/s] (3,)
             clubhead_mass: Clubhead mass [kg]
             record: Whether to record this impact
+            clubhead_angular_velocity: Clubhead angular velocity [rad/s] (3,)
+            clubhead_loft: Clubface loft angle [rad]
+            clubhead_lie: Clubface lie angle [rad]
+            clubhead_moi: Clubhead moment of inertia about CG [kg·m²]
 
         Returns:
             Post-impact state with gear effect spin added
         """
-        # Solve base impact WITH the offset so the MOI effective-mass
-        # reduction applies (previously the offset was silently dropped).
         if timestamp is None:
             raise ValueError("timestamp must be provided")
-        post_state = self.solve_impact(
-            timestamp,
-            clubhead_velocity,
-            clubhead_orientation,
-            ball_velocity,
-            None,
-            clubhead_mass,
-            record=False,  # Record after adding gear effect
-            impact_offset=np.asarray(impact_offset),
-        )
 
-        # Add gear effect spin
-        gear_spin = compute_gear_effect_spin(
-            impact_offset=np.asarray(impact_offset),
-            clubhead_velocity=np.asarray(clubhead_velocity),
-            clubface_normal=np.asarray(clubhead_orientation),
-            gear_factor=self.params.gear_effect_factor,
-            h_scale=self.params.gear_effect_h_scale,
-            v_scale=self.params.gear_effect_v_scale,
-        )
+        if clubhead_angular_velocity is None:
+            clubhead_angular_velocity = np.zeros(3)
 
-        # Create modified post-state with gear effect
-        modified_post = PostImpactState(
-            ball_velocity=post_state.ball_velocity,
-            ball_angular_velocity=post_state.ball_angular_velocity + gear_spin,
-            clubhead_velocity=post_state.clubhead_velocity,
-            clubhead_angular_velocity=post_state.clubhead_angular_velocity,
-            contact_duration=post_state.contact_duration,
-            energy_transfer=post_state.energy_transfer,
-            impact_location=np.asarray(impact_offset),
-        )
+        pre_kwargs: dict[str, object] = {
+            "clubhead_velocity": np.asarray(clubhead_velocity),
+            "clubhead_angular_velocity": np.asarray(clubhead_angular_velocity),
+            "clubhead_orientation": np.asarray(clubhead_orientation),
+            "ball_position": np.zeros(3),
+            "ball_velocity": (
+                np.asarray(ball_velocity)
+                if ball_velocity is not None
+                else np.zeros(3)
+            ),
+            "ball_angular_velocity": np.zeros(3),
+            "clubhead_mass": clubhead_mass,
+            "impact_offset": np.asarray(impact_offset),
+        }
+        if clubhead_loft is not None:
+            pre_kwargs["clubhead_loft"] = clubhead_loft
+        if clubhead_lie is not None:
+            pre_kwargs["clubhead_lie"] = clubhead_lie
+        if clubhead_moi is not None:
+            pre_kwargs["clubhead_moi"] = clubhead_moi
 
-        if record:
-            pre_state = PreImpactState(
-                clubhead_velocity=np.asarray(clubhead_velocity),
-                clubhead_angular_velocity=np.zeros(3),
-                clubhead_orientation=np.asarray(clubhead_orientation),
-                ball_position=np.zeros(3),
-                ball_velocity=(
-                    np.asarray(ball_velocity)
-                    if ball_velocity is not None
-                    else np.zeros(3)
-                ),
-                ball_angular_velocity=np.zeros(3),
-                clubhead_mass=clubhead_mass,
-                impact_offset=np.asarray(impact_offset),
-            )
-            self.recorder.record_impact(
-                timestamp, pre_state, modified_post, self.params, self.model_type
-            )
-
-        return modified_post
+        pre_state = PreImpactState(**pre_kwargs)  # type: ignore[arg-type]
+        return self.solve_pre_impact_state(timestamp=timestamp, pre_state=pre_state, record=record)
 
     def get_energy_report(self) -> dict:
         """Get energy balance report for all recorded impacts.

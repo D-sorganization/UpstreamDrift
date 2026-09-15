@@ -1,5 +1,56 @@
 # SPEC.md — Repository Specification Document
 
+## Shared Golf Session Service and Local Reference Destination (#10194)
+
+Centralizes destination lifecycle, prepare/arm/cancel/submit policy, and receipt lookup across simulator ports:
+- `GolfSessionService` (`src/shared/python/golf_simulator/session.py`):
+  - Enforces explicit state machine: `IDLE` -> `PREPARED` -> `ARMED` -> `SUBMITTING` -> `IDLE` (or `UNCERTAIN`).
+  - Guards destination switching: requires idle or reconciled state; rejects in-flight switching while armed or submitting; invalidates prepared arm tokens upon destination reconfiguration.
+  - Multi-axis qualification verification: audits destination capability support (`shot_input.state == SUPPORTED`) and requires `QUALIFIED` contact status for `MODEL_CONTACT` shots before arming.
+  - Context revision checking: ensures aim and orientation revisions match preparation before granting one-time arm tokens.
+  - One-shot impact submission: consumes single-use arm tokens, records intent and acknowledgment/rejection/ambiguity in `ShotJournal`, and traps ambiguous delivery into `UNCERTAIN` state until operator reconciliation.
+- `LocalReferenceAdapter` (`src/shared/python/golf_simulator/adapters/local.py`):
+  - Satisfies `SimulatorAdapter` protocol and integrates with existing ball-flight physics via `FlightSimulatorProtocol`.
+  - Converts canonical `ShotEnvelope` to `LaunchConditions` via `shot_envelope_to_launch_conditions`.
+  - Simulates RK4 ball trajectories with aerodynamic drag/lift/Magnus forces, recording discrete trajectory points with full provenance labeling while keeping numerical trajectories cleanly decoupled from submission audit receipts.
+- Pure Bridge Conversion (`src/shared/python/golf_simulator/launch_bridge.py`):
+  - `shot_envelope_to_launch_conditions`: Reconstitutes scalar speed, vertical launch angle, horizontal azimuth angle, RPM spin rate, and unit spin axis from SI Cartesian velocity and angular velocity vectors.
+- Unified Service Contract Suite (`tests/unit/golf_simulator/test_service_contracts.py`):
+  - Parametrized contract test suite proving destination interchangeability across fake and local reference adapters without changing shot identity or delivery integrity.
+
+## Shadow Tracker Video Decoding and Auditable Frame Identities (#10168)
+
+Establishes local video clip decoding and auditable frame records:
+- `OpenCvVideoDecoder`:
+  - Concrete `VideoDecoderAdapter` backed by OpenCV `VideoCapture` for reading local video clips (e.g. mp4, avi, mov).
+  - Validates that source video file exists and can be opened, raising `FileNotFoundError` or `ValueError` on failure.
+  - Extracts video stream metadata: `frame_count`, `width`, `height`, and fractional `pts_timebase` derived from FPS.
+  - Computes deterministic SHA-256 frame payload hashes via `read_frame_hash(frame_idx)` for content auditability.
+  - Enforces strict index bounds validation raising `IndexError` on out-of-range frame queries.
+- `DecodeLimits`:
+  - Execution bounds and cooperative cancellation controls for bounded video decoding (`max_frames`, `is_cancelled`).
+  - Preconditions: validates non-negative `max_frames`.
+- `decode_video_frames()`:
+  - Bounded frame iterator generating immutable `FrameIdentity` records from a `VideoDecoderAdapter` and `SourceAsset`.
+  - Supports `DecodeLimits` (`max_frames`, `is_cancelled`) to enforce finite memory bounds, processing limits, and architecture parameter limits.
+  - Supports physical time calculation via `physical_time_s_fn` mapping or fallback to presentation time with auditable reason tracking.
+  - Validates IDs using Design-by-Contract (`check_id`) and yields sequence records compliant with `validate_frame_sequence()`.
+
+## Full Impact State Preservation and Contact Qualification (#10193)
+
+Preserves complete clubhead dynamics through impact solver and qualifies physical strike events:
+- `ImpactSolverAPI.solve_pre_impact_state` (`src/shared/python/physics/impact_model/solver.py`):
+  - Solves ball launch directly from complete `PreImpactState` instances without dropping rotational or clubhead geometry state.
+  - Forward-propagates `clubhead_angular_velocity`, `clubhead_loft`, `clubhead_lie`, and `clubhead_moi` to underlying physics models (`solve_impact` and `solve_with_gear_effect`).
+  - Ensures clubhead 3D angular velocity vector is preserved into post-impact kinematic states and downstream telemetry.
+- `SwingBallFlightPipeline._solve_impact` (`src/shared/python/physics/swing_ball_flight_pipeline.py`):
+  - Delegated directly to `solve_pre_impact_state`, eliminating legacy slicing that discarded angular velocity and club face orientation.
+- Launch Bridge and Strike Qualification (`src/shared/python/golf_simulator/launch_bridge.py`):
+  - `qualify_impact_contact`: Validates physical contact bounds; rejects negative or zero approach velocity, negative launch speed, and smash factors exceeding physical limit ($1.60$).
+  - Distinguishes contact qualification modes: `MODEL_CONTACT`, `DEMO_PEAK_SPEED`, and `MANUAL`.
+  - `extract_single_contact_event`: Extracts single contact events from continuous contact time series, deduplicating multi-frame contacts and picking the peak normal force frame.
+  - `check_simscape_eligibility`: Explicitly enforces MATLAB R2025b requirement and model prerequisites for Simscape trajectory eligibility.
+
 ## Ground Support Landing and Marker Prior Calibration (#10186, #10162)
 
 Reconciles the parallel Visuals/FB-4/FB-5/FB-6 and Ground Support lanes under HO-0 (#10186):
@@ -12,7 +63,6 @@ Reconciles the parallel Visuals/FB-4/FB-5/FB-6 and Ground Support lanes under HO
   - Enforces dependency direction constraints ensuring `src/shared/python/motion_matching` remains decoupled from engine-specific modules.
   - Refactors `anthropometric_candidate.py` segment mass scaling loops to eliminate DRY duplication.
   - Adds strict `Literal["YXZ"]` typing to `_EULER` in `grip_fit.py` and explicit `Array: TypeAlias` annotations to `anthropometry.py`, RK4 integration buffers, and `reference_zmp` time sequences in `full_body_simulation.py`.
-
 
 ## Shadow Tracker Filled-Area Silhouette Rendering and Invariants (#10206)
 
