@@ -143,9 +143,12 @@ class GolfSessionService:
 
         # Audit qualification requirements for model-driven shots
         if shot.source_kind == SourceKind.MODEL_CONTACT:
-            if shot.qualification.contact != ContactStatus.QUALIFIED:
+            qualification = shot.qualification
+            contact_status = qualification.contact
+            if contact_status != ContactStatus.QUALIFIED:
+                status_name = contact_status.value
                 raise ValueError(
-                    f"Model shot requires qualified contact, got {shot.qualification.contact.value}"
+                    f"Model shot requires qualified contact, got {status_name}"
                 )
 
         prep_id = str(uuid.uuid4())
