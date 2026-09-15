@@ -1,18 +1,17 @@
 # Simscape Tour-Average Fit Continuation
 
-## Shadow Tracker Review and Full Development Pickup (#10122)
+## Shadow Tracker Current Turnover (#10122)
 
-- **Start Here:** [Development Review](docs/plans/shadow_tracker/DEVELOPMENT_REVIEW.md)
+- **Read First:** [Current Progress Review](docs/plans/shadow_tracker/PROGRESS_REVIEW_2026_09_15.md)
   and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
-- **Progress:** Stages 0–6 complete: #10151 (contract hardening), #10140/#10141 (MuJoCo coordinate & closure units),
-  #10124 (feasibility audit), #10125 (full contracts freeze), #10126 (video ingestion and lineage),
-  #10127 (body/club silhouettes and occlusion), #10128 (calibrated rendering, projection, and residuals),
-  and #10129 (subject shape and initial-state fitting).
-- **Remaining:** Stages 7–10 (Continuous Rollout #10130, Fitting #10131/#10132,
-  Validation #10133, UI/Product #10134, Release #10135).
-- **Next Stage:** Stage 7 (#10130): Continuous Physics Rollout Integration and Replay Parity.
-- **Review Delivery:** #10150; documentation-only review and continuation plan.
-  Full epic #10122 stays open. Follow the per-stage evidence and turnover gates.
+- **Baseline:** `b97e159dcc1686b4fc36351124996862619d8f35`; prototype modules through
+  ST-06 landed, but stage acceptance and scientific qualification remain incomplete.
+- **First Repairs:** False model-segmentation success, point-only rendering and
+  conflicting state semantics, then finite/shape/ownership validation.
+- **Independent Progress:** Real decoding (#10168), persisted masks and launcher
+  review; #10167 regenerated model evidence before qualified rollout/fitting.
+- **Review Tracking:** #10184. Do not advertise a ready fitter or claim all CI/CD
+  passes from merged PRs. Preserve the full scientific/product/release gates.
 
 ### 0. 1.15 s Downswing Horizon Continuation & Certified Audit (`candidate_downswing_115s_locked_package.json`, DeskComputer)
 

@@ -19,10 +19,10 @@ at each timestamp, not holding the address outline constant.
 
 ## Start Here
 
-For current review findings and the full implementation path, start with
-[Development Review](DEVELOPMENT_REVIEW.md) and the copy-ready
-[Continuation Prompt](CONTINUATION_PROMPT.md). A/B/C are merged; #10151 is the
-first corrective packet. The fitter and launcher workflow remain unimplemented.
+For current review findings and next tasks, read
+[Current Progress Review](PROGRESS_REVIEW_2026_09_15.md) and
+[Continuation Prompt](CONTINUATION_PROMPT.md). Several prototypes have merged;
+real segmentation/rendering/ingestion acceptance and the fitter remain incomplete.
 
 | Need                                           | Document                                        |
 | ---------------------------------------------- | ----------------------------------------------- |
