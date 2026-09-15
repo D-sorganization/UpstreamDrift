@@ -423,3 +423,73 @@ class PreparedShot:
             )
         if not self.created_at_utc or not str(self.created_at_utc).strip():
             raise ValueError("created_at_utc must be a non-empty ISO timestamp string")
+
+
+class ReplayPlaybackState(str, Enum):
+    """Playback state of the presentation replay clock."""
+
+    STOPPED = "stopped"
+    PLAYING = "playing"
+    PAUSED = "paused"
+    SCRUBBING = "scrubbing"
+
+
+@dataclass(frozen=True)
+class ReplayTimingRecord:
+    """Latency metrics and timestamps for a single-impact submission."""
+
+    shot_id: str
+    impact_clock_time_s: float
+    send_attempt_timestamp_utc: str
+    response_timestamp_utc: str
+    impact_to_send_latency_ms: float
+    send_to_response_latency_ms: float
+    observed_onset_timestamp_utc: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.shot_id or not str(self.shot_id).strip():
+            raise ValueError("shot_id must be a non-empty string")
+        _validate_finite_float(self.impact_clock_time_s, "impact_clock_time_s")
+        if self.impact_clock_time_s < 0.0:
+            raise ValueError("impact_clock_time_s must be non-negative")
+        if (
+            not self.send_attempt_timestamp_utc
+            or not str(self.send_attempt_timestamp_utc).strip()
+        ):
+            raise ValueError("send_attempt_timestamp_utc must be a non-empty string")
+        if (
+            not self.response_timestamp_utc
+            or not str(self.response_timestamp_utc).strip()
+        ):
+            raise ValueError("response_timestamp_utc must be a non-empty string")
+        _validate_finite_float(
+            self.impact_to_send_latency_ms, "impact_to_send_latency_ms"
+        )
+        if self.impact_to_send_latency_ms < 0.0:
+            raise ValueError("impact_to_send_latency_ms must be non-negative")
+        _validate_finite_float(
+            self.send_to_response_latency_ms, "send_to_response_latency_ms"
+        )
+        if self.send_to_response_latency_ms < 0.0:
+            raise ValueError("send_to_response_latency_ms must be non-negative")
+
+
+@dataclass(frozen=True)
+class ReplayFrame:
+    """Presentation frame record capturing model replay status and pose timestamp."""
+
+    timestamp_s: float
+    frame_index: int
+    model_run_id: str
+    is_impact_frame: bool = False
+    qualification: ShotQualification | None = None
+
+    def __post_init__(self) -> None:
+        _validate_finite_float(self.timestamp_s, "timestamp_s")
+        if self.timestamp_s < 0.0:
+            raise ValueError("timestamp_s must be non-negative")
+        _validate_not_bool(self.frame_index, "frame_index")
+        if not isinstance(self.frame_index, int) or self.frame_index < 0:
+            raise ValueError("frame_index must be a non-negative integer")
+        if not self.model_run_id or not str(self.model_run_id).strip():
+            raise ValueError("model_run_id must be a non-empty string")

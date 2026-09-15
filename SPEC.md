@@ -1,5 +1,27 @@
 # SPEC.md — Repository Specification Document
 
+## Replay and Single-Impact Shot Submission (#10195)
+
+Synchronizes precomputed immutable golfer model swing replay with authoritative single-impact shot submission:
+- `MonotonicReplayClock` (`src/shared/python/golf_simulator/replay.py`):
+  - Driven by an injectable monotonic time source (`time_fn`, defaulting to `time.monotonic`).
+  - Supports `play()`, `pause()`, `stop()`, `seek(target_time_s)`, and `set_playback_rate(rate)` (for slow-motion and normal playback).
+  - Evaluates monotonic playback ticks returning `(t_prev, t_curr, was_seek)` to distinguish normal forward advance from user scrubbing.
+- `ReplaySubmissionCoordinator` (`src/shared/python/golf_simulator/replay.py`):
+  - Binds an immutable `PreparedShot` and its single-use `arm_token` from `GolfSessionService`.
+  - Authoritative single-impact trigger: triggers submission via `session_service.submit_at_impact()` when playback monotonically crosses model trajectory impact time $t_{\text{impact}}$ ($t_{\text{prev}} < t_{\text{impact}} \le t_{\text{curr}}$).
+  - Scrubbing and seeking protection: seeking across $t_{\text{impact}}$ automatically disarms the active prepared shot and returns the session service to `PREPARED`, preventing accidental or duplicate submissions.
+  - Subsequent tick protection: guarantees no duplicate submissions after the impact event has triggered.
+  - Latency auditing: captures `ReplayTimingRecord` measuring `impact_to_send_latency_ms` and `send_to_response_latency_ms`, satisfying the local/fake benchmark target ($p95 \le 50\text{ ms}$).
+  - Best-effort presentation: optionally broadcasts playback telemetry over realtime IPC channels without making delivery correctness dependent on pub/sub delivery.
+- Replay Domain Contracts (`src/shared/python/golf_simulator/contracts.py`):
+  - `ReplayPlaybackState`: Enum (`STOPPED`, `PLAYING`, `PAUSED`, `SCRUBBING`).
+  - `ReplayTimingRecord`: Immutable record storing timestamps and latency metrics for each coordinated submission.
+  - `ReplayFrame`: Presentation frame record linking model run identity, timestamp, frame index, and qualification status.
+- Realtime Presentation Channels (`src/shared/python/realtime/channels.py`):
+  - Registered `golf_simulator/replay/<session_id>/state` (frequency hint `low`).
+  - Registered `golf_simulator/replay/<session_id>/frame` (frequency hint `high`).
+
 ## Shared Golf Session Service and Local Reference Destination (#10194)
 
 Centralizes destination lifecycle, prepare/arm/cancel/submit policy, and receipt lookup across simulator ports:
