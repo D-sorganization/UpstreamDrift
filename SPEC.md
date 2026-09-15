@@ -4829,7 +4829,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-15 | #10188 | Propose GSPro and interchangeable simulator integration, detailed implementation children, architecture and worker turnover; no runtime implementation. |
+| 2026-09-15 | #10201 | Propose GSPro and interchangeable simulator integration, detailed implementation children, architecture and worker turnover (#10188); no runtime implementation. |
 | 2026-09-15 | #10185 | Refresh Shadow Tracker turnover with reproduced acceptance gaps and current corrective/product sequence (#10184). |
 | 2026-09-15 | #10152 | Review Shadow Tracker contracts and publish the full implementation, launcher, performance and CI/CD continuation handoff (#10150). |
 | 2026-09-14 | #10147 | Implement camera direction conversion between observation and pipeline contracts for Shadow Tracker (ST-02C, #10139). |

@@ -7,7 +7,8 @@
 - **State:** Planning only; outbound client not implemented or live-qualified.
   Epic #10188 has 12 native children #10189–#10200. DL-#10188 is proposed.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `docs/issue-10188-gspro-integration`; commit `SELF`; PR not created yet.
+  branch `docs/issue-10188-gspro-integration`; commit `SELF`;
+  [PR #10201](https://github.com/D-sorganization/UpstreamDrift/pull/10201) open for review.
 - **Lead:** GS-00 protocol freeze, GS-03 uncertain-delivery transport, GS-04 impact
   qualification. **Worker:** GS-01 canonical domain now, GS-02 codec after freeze.
 - **Evidence:** Local installation found; no running GSPro or listener observed.

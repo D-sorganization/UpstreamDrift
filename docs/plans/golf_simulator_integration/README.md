@@ -3,6 +3,7 @@
 ## Decision and Delivery Status
 
 **Epic:** [#10188](https://github.com/D-sorganization/UpstreamDrift/issues/10188).
+**Planning PR:** [#10201](https://github.com/D-sorganization/UpstreamDrift/pull/10201).
 **Status:** proposed architecture and implementation handoff; no outbound
 GSPro client has been implemented or live-qualified by this change.
 **Reviewed:** 2026-09-15, baseline

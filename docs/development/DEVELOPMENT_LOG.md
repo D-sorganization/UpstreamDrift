@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #10188 (children #10189–#10200)
 - **Branch:** docs/issue-10188-gspro-integration
-- **PR:** not created
+- **PR:** #10201 (open; planning only)
 - **Paths:** docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-15
 - **Last verified:** 2026-09-15 (`395d3de876d8f87b7b00785ef2f430d0e9387ce7` source baseline; SELF planning changes; documentation pre-commit, 12 local links, title case, SPEC duplicate and whitespace checks pass; development-log baseline comparison adds no findings)
