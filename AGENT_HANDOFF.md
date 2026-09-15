@@ -1,5 +1,18 @@
 # Simscape Tour-Average Fit Continuation
 
+## Shadow Tracker Current Turnover (#10122)
+
+- **Read First:** [Current Progress Review](docs/plans/shadow_tracker/PROGRESS_REVIEW_2026_09_15.md)
+  and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
+- **Baseline:** `b97e159dcc1686b4fc36351124996862619d8f35`; prototype modules through
+  ST-06 landed, but stage acceptance and scientific qualification remain incomplete.
+- **First Repairs:** False model-segmentation success, point-only rendering and
+  conflicting state semantics, then finite/shape/ownership validation.
+- **Independent Progress:** Real decoding (#10168), persisted masks and launcher
+  review; #10167 regenerated model evidence before qualified rollout/fitting.
+- **Review Tracking:** #10184. Do not advertise a ready fitter or claim all CI/CD
+  passes from merged PRs. Preserve the full scientific/product/release gates.
+
 ### 0. 1.15 s Downswing Horizon Continuation & Certified Audit (`candidate_downswing_115s_locked_package.json`, DeskComputer)
 
 - **Execution Status**:

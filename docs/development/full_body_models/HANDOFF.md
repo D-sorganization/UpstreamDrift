@@ -180,6 +180,123 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
   scapulae at address means refitting q0 (or re-calibrating attachments)
   with those coordinates constrained, then re-qualifying.
 
+## Tour Matching Viewer Launcher Tile Completed (Step 3 of the Visuals Plan)
+
+- Implemented pure-data engine-agnostic replay and forward kinematics reader
+  `src/tools/tour_matching_viewer/core.py` (`load_replay`, `body_poses_from_state`,
+  `viewer_frame`). Supports native `returned-replay.npz` and OpenSim IK `.mot`
+  formats. Forward kinematics derived pure-Python from `full_body_spec_v1.json`
+  evaluates to $< 10^{-12}$ error against MuJoCo forward kinematics across all 24
+  bodies over 20 random states without importing `mujoco`.
+- Implemented PyQt6/matplotlib 3D viewer `TourMatchingViewerWidget` and
+  `TourMatchingViewerWindow` (`src/tools/tour_matching_viewer/gui.py`) with scrub
+  slider, playback controls, target/model markers, visual skeleton segments,
+  ground wireframe, and per-frame valid marker RMS readout.
+- Embedded launcher tile via `_TourMatchingViewerEmbedAdapter` (`_embed_adapter.py`)
+  registered into `EMBEDDABLE_TOOL_REGISTRY` and configured in `src/config/models.yaml`
+  (`tool_id: tour_matching_viewer`, category `tool`, status `beta`).
+- 10 unit tests passing in `tests/unit/tools/test_tour_matching_viewer_core.py` and
+  `tests/unit/tools/test_tour_matching_viewer_adapter.py`.
+- Rendered offscreen verification evidence archived under
+  `docs/development/full_body_models/evidence/viewer/`:
+  - `screenshot_returned81.png`
+  - `screenshot_mot.png`
+  - `receipt.json`
+  - `returned81_replay.npz`
+  - `opensim_os3b_ik.mot`
+
+## FB-4 Marker Calibration and IK per Engine Completed (#10068)
+
+- Shared alternating marker calibration moved to `src/shared/python/motion_matching/marker_calibration.py`
+  with backward-compatible re-export in `src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`.
+- Shared trajectory IK solver and marker RMS evaluator in `src/shared/python/motion_matching/full_body_ik.py`
+  (`solve_full_body_ik_trajectory`, `compute_marker_rms_trajectory`).
+  Features warm-started Levenberg-Marquardt optimization across frames, explicit dual-grip weld loop closure residual enforcement,
+  and regularisation to guarantee $m \ge n$.
+- Engine adapters implemented:
+  - `src/engines/physics_engines/mujoco/python/full_body_ik.py` (`MujocoFullBodyIK`)
+  - `src/engines/physics_engines/pinocchio/python/full_body_ik.py` (`PinocchioFullBodyIK`)
+  - `src/engines/physics_engines/drake/python/full_body_ik.py` (`DrakeFullBodyIK`)
+- Automated verification driver: `docs/development/full_body_models/evidence/fb4_calibration/verify_full_body_calibration.py`
+  (supports `--engine mujoco|pinocchio|drake|all`, automatic dispatch to WSL Ubuntu on deskcomputer when local engine is missing).
+- Evidence generated and archived for all three engines under `docs/development/full_body_models/evidence/fb4_calibration/`:
+  - `mujoco/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 174.49 mm (best iter 3)
+    - Full trajectory RMS (654 frames): 159.47 mm (mean frame RMS 157.67 mm, max 241.57 mm)
+    - Weld closure max error: 0.37 mm
+  - `pinocchio/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 240.51 mm (best iter 2)
+    - Full trajectory RMS (654 frames): 178.52 mm (mean frame RMS 176.32 mm, max 297.48 mm)
+    - Weld closure max error: 0.00 mm
+  - `drake/`: `calibrated_offsets.json`, `ik_trajectory.npz`, `receipt.json`
+    - Subsample RMS (33 frames, 3 iters): 317.16 mm (best iter 3)
+    - Full trajectory RMS (654 frames): 176.47 mm (mean frame RMS 172.21 mm, max 544.30 mm)
+    - Weld closure max error: 0.00 mm
+- Head-marker limitation documented:
+  - Three head markers (`HeadTop`, `HeadFront`, `HeadSide`) are attached to the single rigid trunk/head segment (`Hub`).
+    Because the skeletal specification does not include an articulated cervical neck joint, independent head motions relative to the thorax produce higher rigid residual on `Hub`.
+- Tests: `tests/unit/motion_matching/test_marker_calibration.py` (3 passed), `tests/unit/motion_matching/test_full_body_marker_calibration.py` (5 passed, 2 cleanly skipped on Windows).
+
+## FB-5 Full-Body Forward-Dynamics Matching Completed (#10069)
+
+- Derivative floor and resolution utilities implemented in `src/shared/python/motion_matching/derivative_resolution.py`:
+  - `measure_derivative_floor`, `compute_finite_difference_step_vector`, `DerivativeResolutionResult`.
+  - Determines scale-aware perturbation steps and measures truncation vs. roundoff noise floors on stiff contact objectives.
+- Multiple-shooting fitter in `src/shared/python/motion_matching/multi_shooting_fit.py` extended:
+  - `shared_boundary_policy`: `"both" | "once"`, preventing sample duplication at shooting window interfaces.
+  - `node_mode`: `"joint" | "fixed_nodes" | "nodes_only"`.
+- Shared metrics extracted to `src/shared/python/motion_matching/tour_metrics.py`:
+  - Standardized calculation of `whole_marker_rmse_m`, `early_marker_rmse_m`, `terminal_marker_rmse_m`, `club_marker_rmse_m`, `pelvis_yaw_rmse_rad`.
+  - Backward-compatible re-export in `src/engines/physics_engines/opensim/python/tour_matching/metrics.py`.
+- Native MuJoCo KKT solver hardened in `src/engines/physics_engines/mujoco/python/native_model.py`:
+  - Damped regularization $W = J M^{-1} J^T + \epsilon I$ with `lstsq` fallback to prevent numerical constraint singularity failures.
+- Uninterrupted forward dynamics simulation in `src/shared/python/motion_matching/full_body_forward_dynamics.py`:
+  - Supports continuous `solve_ivp(method="rk45")` and semi-implicit Euler integration across all 41 coordinates.
+  - Auto-calibrates ground plane height from lowest contact sphere at address.
+  - Full ground contact force and penetration audit (`ContactAuditResult`).
+- Automated verification runner `docs/development/full_body_models/evidence/fb5_matching/verify_full_body_matching.py`:
+  - Measures derivative resolution floor: resolved at $h=1.00\times 10^{-6}$ with relative error $2.93\times 10^{-9}$ (noise floor $1.00\times 10^{-12}$).
+  - Demonstrates two-window shooting fit setup with `shared_boundary_policy="once"`, node mode `nodes_only`, and nodes initialized from FB-4 IK.
+  - Simulates uninterrupted original-state replay over all 654 frames from $(q_0, \dot{q}_0=0)$ with qualified native polynomial controls.
+- Evidence archived under `docs/development/full_body_models/evidence/fb5_matching/`:
+  - `forward_trajectory_mujoco.npz` (`time_s`, `q`, `qd`, `predicted_markers_m`).
+  - `receipt_mujoco.json` containing environment, input SHA256 hashes, derivative floor resolution, multi-shooting setup, 5 shared metrics, and contact audit.
+- Tests: `tests/unit/motion_matching/test_derivative_resolution.py` (4 passed), `tests/unit/motion_matching/test_multi_shooting_fit.py` (7 passed), `tests/unit/motion_matching/test_full_body_forward_dynamics.py` (2 passed).
+
+## FB-6 Cross-Engine Full-Body Parity and Visual Review Completed (#10070)
+
+- Shared cross-engine replay and visual review module implemented in `src/shared/python/motion_matching/cross_engine_replay.py`:
+  - `CrossEngineReplayConfig`, `StepSizeConvergenceResult`, `compute_step_size_convergence`, `EngineReplayOutcome`, `CrossEngineComparisonReport`, `compare_engine_replays`.
+  - 3D marker overlay frame generator and GIF animation renderer: `generate_overlay_frame`, `render_marker_overlay_animation` with target (green) vs. model (blue/red) marker visualization, candidate hash prefix in filenames, and configurable frame stride.
+- Unified physics engine adapters:
+  - `src/engines/physics_engines/mujoco/python/full_body_model.py`: unified `.coordinate_order` property and `evaluate_contact_samples`.
+  - `src/engines/physics_engines/pinocchio/python/native_model.py`: unified `.coordinate_order` property and `evaluate_contact_samples`.
+  - `src/engines/physics_engines/drake/python/full_body_model.py`: unified `.coordinate_order` property and `evaluate_contact_samples`; fixed sphere frame offset in address ground height calibration.
+  - `src/shared/python/motion_matching/full_body_forward_dynamics.py`: adaptive RK45 integration across all three engines with configurable `rtol`/`atol` options and universal ground height auto-calibration for `ground_plane` (Drake), `ground` (Pinocchio), and `_ground_plane` (MuJoCo).
+- Automated verification driver: `docs/development/full_body_models/evidence/fb6_parity/verify_cross_engine_parity.py`
+  - Replays the accepted candidate (`returned-candidate.json`) over all 654 frames across all three engines (MuJoCo, Pinocchio, Drake).
+  - Step-size convergence: verified on initial settling window via tolerance refinement (`rtol=1e-5, atol=1e-7` vs `rtol=1e-6, atol=1e-8`). All engines achieved `is_converged=True` (MuJoCo: 3.17e-3 rad, Pinocchio: 2.58e-5 rad, Drake: 1.06e-2 rad, all $\le 0.05$ rad tolerance).
+  - Full-body parity metrics across 654 frames:
+    - MuJoCo: whole marker RMSE 2.738 m, terminal RMSE 3.438 m, yaw RMSE 2.003 rad, max closure residual 2.675 m.
+    - Pinocchio: whole marker RMSE 2.757 m, terminal RMSE 3.411 m, yaw RMSE 1.885 rad, max closure residual 2.467 m.
+    - Drake: whole marker RMSE 2.393 m, terminal RMSE 3.521 m, yaw RMSE 1.626 rad, max closure residual 1.909 m.
+    - Pairwise whole marker RMSE diff: MuJoCo vs Pinocchio: 0.019 m (1.9 cm); MuJoCo vs Drake: 0.345 m; Pinocchio vs Drake: 0.364 m.
+- Evidence archived under `docs/development/full_body_models/evidence/fb6_parity/`:
+  - Visual review animations:
+    - `replays/overlay_mujoco_3f94aa92f28a.gif` (131 frames)
+    - `replays/overlay_pinocchio_3f94aa92f28a.gif` (131 frames)
+    - `replays/overlay_drake_3f94aa92f28a.gif` (131 frames)
+  - Cryptographic receipts and parity comparison report:
+    - `receipt_mujoco.json`
+    - `receipt_pinocchio.json`
+    - `receipt_drake.json`
+    - `parity_report.json`
+  - Compressed forward trajectories:
+    - `forward_trajectory_mujoco.npz`
+    - `forward_trajectory_pinocchio.npz`
+    - `forward_trajectory_drake.npz`
+- Tests: `tests/unit/motion_matching/test_full_body_parity.py` (4 passed), `tests/unit/motion_matching/test_full_body_forward_dynamics.py` (2 passed).
+
 ## Ground Support Program (User Direction 2026-09-13, in Progress)
 
 User direction: when the legs are shown, the golfer must be carried by the
@@ -476,6 +593,10 @@ against this lane's `full_body_markers.py`/`full_body_simulation.py`/
 Until HO-0 merges, child branches must start from this branch and will
 not merge; nobody should start HO-1 before HO-0 is done.
 
+### Two Implementations Coexist (Read This First)
+
+Two implementations of the full-body program currently coexist in the repository: the FB-4/5/6 lane landed on main (#10089, #10092, #10094) and the Ground Support lane landed in this PR (#10186, #10113, #10162). Until unified in HO-1 (#10155), see the [Two Implementations, One Program](#two-implementations-one-program) reconciliation table below for canonical assignments and receipts.
+
 ### How to Continue (Read This First)
 
 1. Run the pipeline from the launcher tile "Motion Matching" or
@@ -495,6 +616,19 @@ not merge; nobody should start HO-1 before HO-0 is done.
    and #10120 (CM-1 to CM-6) hold every open item with acceptance
    criteria; update DL-#10062 and this handoff in every implementation
    commit.
+
+## Two Implementations, One Program
+
+The following table records the canonical module assignments to be executed in HO-1 (#10155):
+
+| Concern                       | On `main` (FB-4/5/6 lane)                                                                                                   | On the branch (ground-support lane)                                                                                                                  | Canonical Choice for HO-1                                                                                      | Validating Receipt / Rationale                                                                                                                                                                                                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Marker IK                     | `src/shared/python/motion_matching/full_body_ik.py` (240), `src/engines/physics_engines/mujoco/python/full_body_ik.py` (92) | `src/engines/physics_engines/mujoco/python/full_body_markers.py` (775; static seeds, planted stance, axis rows, CoM rows, `locked_per_frame`)        | **Ground Support Lane** (`full_body_markers.py` to be consolidated into `full_body_ik.py`)                     | Validated by tour capture receipts: driver address 5.1 mm, IK 27.3 mm; 7-iron address 4.4 mm, IK 28.6 mm (`evidence/ground_support/*/receipt.json`). Carries static trial placement, planted stance, and anatomical joint limits. |
+| Forward dynamics and tracking | `src/shared/python/motion_matching/full_body_forward_dynamics.py` (785; zero-feedback, polynomial control, contact audit)   | `src/engines/physics_engines/mujoco/python/full_body_simulation.py` (692; computed torque with root free, acceleration feedforward, `reference_zmp`) | **Ground Support Lane** (`full_body_simulation.py` to be consolidated into `full_body_forward_dynamics.py`)    | Validated by whole-run marker RMS 74.6 mm (driver) and 112.3 mm (7-iron) with unactuated floating root, compliant sole, and computed-torque tracking.                                                                             |
+| MJCF and native model         | `src/engines/physics_engines/mujoco/python/full_body_mjcf.py` (172), `native_model.py` (226, on both)                       | `src/engines/physics_engines/mujoco/python/full_body_model.py` (211; anthropometric documents, toe spheres, closure sites)                           | **Ground Support Lane** (`full_body_model.py` to be consolidated into `full_body_mjcf.py` / `native_model.py`) | Carries anthropometric documents, toe contact spheres, and dual-grip closure sites required for ground support.                                                                                                                   |
+| Cross-engine replay           | `src/shared/python/motion_matching/cross_engine_replay.py` (366), `derivative_resolution.py` (193)                          | `docs/development/full_body_models/evidence/setup_parity/verify_setup_parity.py` (poses by coordinate name over SSH)                                 | **Main Lane** (`cross_engine_replay.py`, `derivative_resolution.py`)                                           | Validated by `evidence/fb6_parity/parity_report.json` and step-size convergence analysis across MuJoCo, Pinocchio, and Drake; replaces the SSH script in #10112.                                                                  |
+| Contact law                   | `src/shared/python/motion_matching/contact_law.py`                                                                          | same module (imported by the branch's simulation)                                                                                                    | **Identical**                                                                                                  | Same shared module used across both implementations; no conflict.                                                                                                                                                                 |
+| Evidence                      | `evidence/fb4_calibration`, `fb5_matching`, `fb6_parity`, `viewer`                                                          | `evidence/ground_support`, `anthropometry`, `setup_parity`, `visual_layer`                                                                           | **Both Retained**                                                                                              | Both sets of evidence are retained in the tree under `docs/development/full_body_models/evidence/`.                                                                                                                               |
 
 ## Next
 

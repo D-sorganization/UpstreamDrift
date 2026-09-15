@@ -46,6 +46,8 @@ class MultipleShootingOptions:
     pelvis_yaw_max_error_pct: float = 5.0
     regularization: Callable[[Array], Array] | None = None
     callback: Callable[[Array, Array, float], None] | None = None
+    shared_boundary_policy: str = "both"
+    node_mode: str = "joint"
 
     def __post_init__(self) -> None:
         nodes = np.asarray(self.shooting_nodes, dtype=float)
@@ -63,6 +65,14 @@ class MultipleShootingOptions:
             raise ValueError("defect_weight must be non-negative")
         if self.defect_tolerance <= 0:
             raise ValueError("defect_tolerance must be positive")
+        if self.shared_boundary_policy not in ("both", "once"):
+            raise ValueError(
+                f"shared_boundary_policy must be 'both' or 'once', got {self.shared_boundary_policy!r}"
+            )
+        if self.node_mode not in ("joint", "fixed_nodes", "nodes_only"):
+            raise ValueError(
+                f"node_mode must be 'joint', 'fixed_nodes', or 'nodes_only', got {self.node_mode!r}"
+            )
 
 
 @dataclass(frozen=True)
@@ -102,25 +112,32 @@ def fit_multiple_shooting(
     # Intermediate state nodes are nodes[:-1] (exclude terminal end)
     internal_nodes = nodes[:-1]
 
-    # Pack decision variables: [theta, state_1, state_2, ...]
-    var_list = [initial_theta]
-    lower_list = [lower_theta]
-    upper_list = [upper_theta]
+    # Pack decision variables depending on node_mode
+    var_list: list[Array] = []
+    lower_list: list[Array] = []
+    upper_list: list[Array] = []
+    curr_offset = 0
+
+    if options.node_mode in ("joint", "fixed_nodes"):
+        var_list.append(initial_theta)
+        lower_list.append(lower_theta)
+        upper_list.append(upper_theta)
+        curr_offset += theta_dim
 
     state_offsets = {}
-    curr_offset = theta_dim
-    for node in internal_nodes:
-        if node not in initial_states or node not in state_bounds:
-            raise ValueError(
-                f"Missing initial state or bounds for shooting node {node}"
-            )
-        s_init = np.asarray(initial_states[node], dtype=float)
-        s_lo, s_hi = state_bounds[node]
-        var_list.append(s_init)
-        lower_list.append(s_lo)
-        upper_list.append(s_hi)
-        state_offsets[node] = (curr_offset, curr_offset + len(s_init))
-        curr_offset += len(s_init)
+    if options.node_mode in ("joint", "nodes_only"):
+        for node in internal_nodes:
+            if node not in initial_states or node not in state_bounds:
+                raise ValueError(
+                    f"Missing initial state or bounds for shooting node {node}"
+                )
+            s_init = np.asarray(initial_states[node], dtype=float)
+            s_lo, s_hi = state_bounds[node]
+            var_list.append(s_init)
+            lower_list.append(s_lo)
+            upper_list.append(s_hi)
+            state_offsets[node] = (curr_offset, curr_offset + len(s_init))
+            curr_offset += len(s_init)
 
     x0 = np.concatenate(var_list)
     x_lower = np.concatenate(lower_list)
@@ -131,7 +148,10 @@ def fit_multiple_shooting(
     for i in range(n_windows):
         t_start = window_boundaries[i]
         t_end = window_boundaries[i + 1]
-        mask = (target.time >= t_start - 1e-12) & (target.time <= t_end + 1e-12)
+        if options.shared_boundary_policy == "once" and i < n_windows - 1:
+            mask = (target.time >= t_start - 1e-12) & (target.time < t_end - 1e-12)
+        else:
+            mask = (target.time >= t_start - 1e-12) & (target.time <= t_end + 1e-12)
         w_time = target.time[mask]
         w_points = target.points[mask]
         w_obs = np.isfinite(w_points).all(axis=2) & (target.weights > 0)
@@ -140,12 +160,26 @@ def fit_multiple_shooting(
     window_cache: dict[int, tuple[bytes, bytes | None, Array, Array]] = {}
 
     def residual(p: Array) -> Array:
-        theta = p[:theta_dim]
+        if options.node_mode == "joint":
+            theta = p[:theta_dim]
+            states = {}
+            for node in internal_nodes:
+                s_lo, s_hi = state_offsets[node]
+                states[node] = p[s_lo:s_hi]
+        elif options.node_mode == "fixed_nodes":
+            theta = p[:theta_dim]
+            states = {
+                node: np.asarray(initial_states[node], dtype=float)
+                for node in internal_nodes
+            }
+        else:  # nodes_only
+            theta = initial_theta
+            states = {}
+            for node in internal_nodes:
+                s_lo, s_hi = state_offsets[node]
+                states[node] = p[s_lo:s_hi]
+
         theta_bytes = theta.tobytes()
-        states = {}
-        for node in internal_nodes:
-            s_lo, s_hi = state_offsets[node]
-            states[node] = p[s_lo:s_hi]
 
         res_parts = []
         end_states = []
@@ -233,11 +267,24 @@ def fit_multiple_shooting(
         diff_step=diff_step,
     )
 
-    opt_theta = optimum.x[:theta_dim].copy()
-    opt_states = {}
-    for node in internal_nodes:
-        idx_lo, idx_hi = state_offsets[node]
-        opt_states[node] = optimum.x[idx_lo:idx_hi].copy()
+    if options.node_mode == "nodes_only":
+        opt_theta = initial_theta.copy()
+        opt_states = {}
+        for node in internal_nodes:
+            idx_lo, idx_hi = state_offsets[node]
+            opt_states[node] = optimum.x[idx_lo:idx_hi].copy()
+    elif options.node_mode == "fixed_nodes":
+        opt_theta = optimum.x[:theta_dim].copy()
+        opt_states = {
+            node: np.asarray(initial_states[node], dtype=float).copy()
+            for node in internal_nodes
+        }
+    else:
+        opt_theta = optimum.x[:theta_dim].copy()
+        opt_states = {}
+        for node in internal_nodes:
+            idx_lo, idx_hi = state_offsets[node]
+            opt_states[node] = optimum.x[idx_lo:idx_hi].copy()
 
     # Compute final defect norm and segmented RMSE across windows
     defects = []

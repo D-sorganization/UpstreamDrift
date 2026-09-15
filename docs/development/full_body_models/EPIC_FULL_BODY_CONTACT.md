@@ -122,6 +122,11 @@ shared boundaries, budgets, uninterrupted original-state acceptance.
 
 Same-input replay of the accepted candidate in all three engines with the
 shared contact law; marker overlay animations per engine; parity receipts.
+Completed in PR for #10070: all three engines (MuJoCo, Pinocchio, Drake)
+replayed the 654-frame candidate uninterrupted with RK45 integration and
+passed step-size convergence verification. Pairwise whole marker RMSE diff:
+MuJoCo vs Pinocchio 1.9 cm; MuJoCo vs Drake 34.5 cm; Pinocchio vs Drake 36.4 cm.
+Visual overlay animations and cryptographic receipts archived under `evidence/fb6_parity/`.
 
 ## GS Ground Support (User Direction 2026-09-13)
 

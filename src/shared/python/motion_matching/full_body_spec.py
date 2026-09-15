@@ -18,7 +18,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -46,7 +46,34 @@ def order_directed_tree(edges: Sequence[Mapping[str, Any]]) -> list[Mapping[str,
     return ordered
 
 
-Array = NDArray[np.float64]
+def order_full_body_joints(spec: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+    """Sequence joints with upper-body tree first, then lower limb chains."""
+    upper_spec = upper_body_slice(spec)
+    upper_joint_names = {j["name"] for j in upper_spec["joints"]}
+    upper_ordered = order_directed_tree(upper_spec["joints"])
+
+    lower_joints_by_name = {
+        j["name"]: j for j in spec["joints"] if j["name"] not in upper_joint_names
+    }
+    leg_chain = [
+        "hip_r",
+        "knee_r",
+        "ankle_r",
+        "subtalar_r",
+        "mtp_r",
+        "hip_l",
+        "knee_l",
+        "ankle_l",
+        "subtalar_l",
+        "mtp_l",
+    ]
+    lower_ordered = [
+        lower_joints_by_name[name] for name in leg_chain if name in lower_joints_by_name
+    ]
+    return list(upper_ordered) + lower_ordered
+
+
+Array: TypeAlias = NDArray[np.float64]
 FULL_BODY_SCHEMA_VERSION = "full-body-v1"
 _UPPER_KEYS = (
     "schema_version",

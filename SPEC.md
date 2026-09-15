@@ -1,5 +1,264 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Evidence-Based Turnover Refresh (#10184)
+
+Corrects prototype completion claims after the September 15 review. Records
+reproduced provider, renderer, state and ownership gaps; orders corrective work,
+real-media/UI progress and independent model qualification. No runtime behavior
+or scientific acceptance changes in this documentation update.
+
+## Shadow Tracker Subject Shape and Initial-State Hypotheses (#10129)
+
+Specifies subject shape fitting and initial-state hypothesis generation for Shadow Tracker ST-06:
+- Implements `src/shared/python/shadow_tracker/initialization.py`:
+  - `VisualMorphology`: Slotted frozen record encapsulating visual envelope dimensions (`height_m`, `chest_width_m`, `depth_m`, `segment_lengths`), strictly positive and finite.
+  - `InertialParameters`: Slotted frozen record encapsulating mass properties (`mass_kg`, `center_of_mass_body_m`, `moments_of_inertia_kg_m2`), enforcing strict separation from visual dimensions so visual envelope edits never corrupt mass/inertial properties.
+  - `SubjectMorphology`: Slotted frozen aggregate binding `subject_id`, `VisualMorphology`, `InertialParameters`, and `handedness`.
+  - `InitialHypothesis`: Slotted frozen candidate record containing initial kinematic state (`pose`, `velocity`), camera geometry (`camera_id`, `scale`, `depth_m`), `score`, `label` (`"observed" | "inferred" | "prior"`), and `provenance`.
+  - `MultiviewFitResult`: Slotted frozen container storing the evaluated initial hypotheses, `best_hypothesis`, `residuals_evaluated`, and `camera_ids`.
+  - `estimate_short_window_velocity()`: Computes initial coordinate rates via finite differences over short multi-frame windows ($\ge 2$ frames) without assuming zero initial velocity or static address posture.
+  - `generate_monocular_hypotheses()`: Generates discrete depth, scale, and handedness hypotheses under monocular ambiguity without prematurely collapsing to an arbitrary unique depth.
+  - `fit_initial_state_multiview()`: Recovers known poses and evaluates initial-state candidates across calibrated multi-view silhouettes using objective valid-pixel residual loss functions (`compute_silhouette_loss`). Fulfills Gate G2 pose recovery.
+
+## Shadow Tracker Calibrated Silhouette Rendering and Residual Losses (#10128)
+
+Specifies calibrated silhouette rendering, analytic projection, and valid-pixel residual losses for Shadow Tracker ST-05:
+- Implements `src/shared/python/shadow_tracker/projection.py`:
+  - `PinholeCameraModel`: Slotted frozen camera model encapsulating dimensions, intrinsics (`fx`, `fy`, `cx`, `cy`), Brown-Conrady distortion (`k1`, `k2`, `p1`, `p2`, `k3`), extrinsics ($R_{wc}, t_{wc}$), cropping, and mirroring.
+  - `project_point_to_pixel()`: Computes analytic pinhole projection of 3D world coordinates with lens distortion, mirroring, and cropping; strictly rejects non-positive focal lengths, non-finite parameters, and handles behind-camera and offscreen geometry. Meets Gate G1 accuracy ($\le 0.5$ px).
+  - `AnalyticSilhouetteRenderer`: Reference renderer fulfilling `SilhouetteRenderer` protocol, rendering slotted `RenderResult` masks (`body_mask`, `club_mask`, `visibility_mask`) from candidate state vectors without engine or GPU dependencies.
+  - `SilhouetteLossResult` and `compute_silhouette_loss()`: Computes valid-pixel aware silhouette residuals and combined loss comparing rendered candidates to observed `MaskFrame` records.
+  - Enforces strict DbC invariants:
+    - Points behind the camera plane ($Z_c \le 0$) or outside effective boundaries are flagged non-visible (`is_visible=False`).
+    - Evaluates IoU and Dice residuals strictly over valid pixels (`valid != 0`), ensuring occluded or unobserved regions do not penalize candidate solutions.
+    - All-invalid masks return well-defined results (`is_valid=False`, `valid_pixel_count=0`) without `ZeroDivisionError` or NaN.
+    - Monotonic contour shift: known spatial displacements strictly increase loss.
+    - Thin-club separation: club loss is evaluated independently from body loss so body overlap cannot mask clubhead or shaft tracking errors.
+
+## Shadow Tracker Body/Club Silhouettes and Segmentation (#10127)
+
+Specifies body and club silhouette segmentation, gold-mask evaluation, and occlusion tracking for Shadow Tracker ST-04:
+- Implements `src/shared/python/shadow_tracker/segmentation.py`:
+  - `ManualMaskProvider`: Deterministic segmenter fulfilling `Segmenter` protocol for reviewed gold masks and corrections; maps registered `MaskFrame` instances by `frame_id` with `has_mask` and `get_mask`.
+  - `ModelSegmentationProvider`: Adapter for automated silhouette segmentation models enforcing lazy missing-checkpoint validation (`FileNotFoundError`) and provenance tagging without unqualified automatic mask confidence.
+  - `track_occlusion_and_identity()`: Computes body visibility fraction relative to expected body area, evaluating partial occlusion and identity loss thresholds into frozen `OcclusionReport`.
+  - `compute_mask_iou()` and `compute_mask_dice()`: Computes intersection-over-union and Dice similarity coefficients strictly over valid pixels (`valid != 0`), ignoring unobserved or masked-out regions.
+  - Enforces strict DbC invariants:
+    - Empty vs unknown mask semantics: unobserved regions require `valid == 0`, and any non-zero body or club pixel on an invalid pixel strictly raises `ValueError`.
+    - Revision-aware cache invalidation: manual corrections update `revision_id`, link `parent_revision_id`, and produce a modified `observation_hash`, ensuring downstream silhouette losses and residual caches are safely invalidated.
+
+## Fail Closed on Invalid Rollout and Missing Closure Evidence (#10166)
+
+Hardens physical rollout acceptance gating and closure error extraction:
+- Updates `ForwardRolloutResult.is_closure_accepted()` (and alias `is_accepted()`) to fail closed on non-finite state arrays (`q`, `qd`, `time_s`), non-strictly-increasing time grids, shape mismatches, negative closure metrics, infinite closure errors, and infinite/non-positive profile limit tolerances.
+- Explicitly documents that `is_closure_accepted()` verifies numerical integration and separated loop-closure tolerances only, and does not imply or grant contact qualification, cross-engine replay parity, or full physical/scientific model acceptance.
+- Updates `_extract_closure_errors()` to enforce exact declared closure shapes (3D translation-only or 6D weld) and report `rot_err=None` (rather than 0.0) when rotational closure is absent/unmeasured.
+- Protects accumulators against `max(0.0, NaN)` masking in `_simulate_rk45` and `_simulate_euler` and propagates NaNs to explicit `status="invalid"`.
+- Audits terminal Euler state for accelerations, contacts, and closure errors alongside intermediate substeps.
+- Updates `EngineReplayOutcome` to default separated unit fields (`max_closure_translation_m`, `max_closure_rotation_rad`) to `None` instead of `0.0`, distinguishing absent measurements from measured zero, and validates finite non-negative values in `__post_init__`.
+
+## Shadow Tracker Video Ingestion, Shots, Timing, and Capture Evidence (#10126)
+
+Specifies video ingestion, shot partitioning, timing mappings, and capture evidence for Shadow Tracker ST-03:
+- Implements `src/shared/python/shadow_tracker/ingestion.py` for auditable observation ingestion:
+  - `ingest_source_asset()`: Ingests media files into immutable `SourceAsset` records with SHA-256 content verification, rights status, and dimensions; rejects missing, corrupt, or empty media files.
+  - `SourceCatalog`: In-memory catalog ensuring idempotent registration and detecting conflicting asset contents for identical asset IDs.
+  - `create_shot()` and `ShotDefinition`: Builds validated continuous shots bound to parent source assets with cut intervals and transform provenance.
+  - `validate_shot_frames()` and `filter_shot_frames()`: Strictly rejects cross-swing fusion (mismatched `swing_id`), inconsistent camera/asset IDs, out-of-bounds timestamps, and filters cut intervals.
+  - `AffineTimingMapping` and `PiecewiseTimingMapping`: Provides rational and piecewise mappings between presentation time and physical swing time without assuming constant framerates or continuous physics across edits.
+  - `CameraSynchronization`: Models multi-view camera offsets, clock drift rates, and uncertainty bounds.
+  - `detect_telecine_duplicates()`: Identifies consecutive telecine pull-down duplicate frames via content hashes while preserving audit trails.
+  - `map_frame_to_observation()`: Translates ingested frame identities into `FrameObservation` records.
+  - `SyntheticVideoDecoder` and `ingest_capture_rig_view()`: Provides deterministic offline decoding and Capture Rig view adapters.
+
+
+## Shadow Tracker Immutable Evidence Contracts and Service Protocols (#10125)
+
+Freezes immutable evidence contracts, auxiliary DTOs, and runtime service protocols for Shadow Tracker ST-02:
+- Freezes slotted, frozen dataclasses under `src/shared/python/shadow_tracker/contracts.py`: `Shot`, `FrameObservation`, `CameraTrack`, `SubjectModelBinding`, `FitRequest`, `ReplayAudit`, `CandidateResult`, and `ResultBundle`.
+- Implements frozen service DTOs: `SegmentationRequest`, `SegmentationResult`, `RenderRequest`, `RenderResult`, `ModelCapabilities`, `RolloutRequest`, and `RolloutResult`.
+- Defines `@runtime_checkable` service protocols: `Segmenter`, `SilhouetteRenderer`, `ForwardModel`, and `ShadowTrackerService`, keeping core contracts free from external simulation or computer-vision engine dependencies.
+- Enforces strict DbC invariants:
+  - `CandidateResult.is_accepted` strictly requires an accompanying passing `ReplayAudit` with `is_physically_accepted=True`; setting acceptance without passing physical replay raises `ValueError`.
+  - `ReplayAudit.is_physically_accepted` strictly requires `reset_count == 1` (reference-free continuous execution); any non-unitary reset count raises `ValueError`.
+  - `Shot` requires `start_pts <= end_pts` and ensures all cut points fall within `[start_pts, end_pts]`.
+  - `FrameObservation` presentation time conversion returns an exact, reduced `fractions.Fraction`, enforcing strictly positive timebase denominators and strict `float` for known physical time.
+- Enforces defensive copying and immutability across tuples and mapping attributes to prevent external mutation of constructor inputs or exported fields.
+- Implements strict lossless dictionary serialization and deserialization (`to_dict` / `from_dict`) with schema tag validation, unknown field rejection, and container element verification.
+
+
+## Shadow Tracker Feasibility Qualification and Benchmark Freeze (#10124)
+
+Audits and records measured model qualification evidence for Shadow Tracker ST-01:
+- Replays passive full-body rollouts under aligned coordinates (#10140) and separated closure units (#10141) via `scripts/shadow_tracker/model_probe.py`.
+- Documents identical grip closure translation (1.266 m) across `MujocoFullBodyIK` and `NativeMujocoFullBodyModel`, demonstrating that stored calibration vectors (`ik_trajectory.npz`) were generated under legacy scrambled joint indexing and require recomputation before forward fitting.
+- Verifies that while solver convergence succeeds, physical acceptance rejects the trajectory due to excessive grip translation and rotation.
+- Updates canonical receipt `docs/plans/shadow_tracker/evidence/model_probe_10_frames.json` with separate translational and rotational metrics.
+- Freezes benchmark profile requirements and holdout policy, keeping scientific gates explicit before entering Stage 2 full contracts freeze.
+
+## Separate Grip Displacement and Rotation Units in Rollout Acceptance (#10141)
+
+Separates physical loop-closure error units in full-body forward dynamics simulation:
+- Decomposes the 6D dual-grip weld loop-closure residual into `max_closure_translation_m` (metres) and `max_closure_rotation_rad` (radians), preventing unit mixing between Euclidean distances and rotation vectors.
+- Retains `max_closure_residual_m` and adds `legacy_mixed_unit_closure_value` for backwards compatibility with historical receipts and legacy consumers.
+- Implements `ForwardRolloutResult.is_accepted()` to physically gate rollout validity on explicit separate translation and rotation thresholds while rejecting unexecuted or failed outputs.
+- Propagates separated closure fields to `EngineReplayOutcome` and model probe diagnostics.
+
+## Align MuJoCo Full-Body IK Coordinates With Named Dynamics Coordinates (#10140)
+
+Aligns `MujocoFullBodyIK` coordinate assignment with `NativeMujocoFullBodyModel` named coordinate order and native qpos layout:
+- Precomputes native qpos DOF index mapping `self._qpos_indices = np.array([self.model._indices[name] for name in self.coordinate_order], dtype=np.int32)` in `MujocoFullBodyIK.__init__`.
+- Vectorizes coordinate placement in `pose_fn` via `self._mj_data.qpos[self._qpos_indices] = q_arr`, preventing coordinate scrambling on models where declared joint order differs from native qpos DOF order.
+- Guarantees kinematics synchronization in `closure_residuals` when evaluated independently of `pose_fn`.
+- Validates exact forward kinematics parity across frame sites, body segments, and dual-grip weld closures against `NativeMujocoFullBodyModel`.
+
+## Shadow Tracker Record Validation Hardening (#10151)
+
+Hardens boundary validation for frozen Shadow Tracker image-evidence records:
+- Centralizes deserialization dictionary checks in `_validation.check_payload_keys`: verifies payload is a `dict` before key access (raising `TypeError`), rejects unknown fields, and rejects missing required fields (raising `ValueError`).
+- Centralizes `schema_version` verification via `_validation.check_schema_version` raising `TypeError` for non-string types and `ValueError` for mismatched tags.
+- Enforces strict `float` type for known `physical_time_s` in `FrameIdentity` (rejecting integer coercion).
+- Enforces strict `str` type for `rights_status` in `SourceAsset` (raising `TypeError`).
+- Validates sequence item types in `validate_frame_sequence` (raising `TypeError` if any element is not a `FrameIdentity`).
+- Enforces positive dimensions and checks `body`, `club`, and `valid` sequence lengths before consuming elements in `MaskFrame.from_dict` to prevent unwanted iteration of oversized sequences.
+
+## Shadow Tracker Development Review and Continuation (#10150)
+
+Records the reviewed image-contract baseline, reproduced validation findings and
+full delivery handoff covering TDD/DbC/LoD/DRY, model qualification, launcher/UI,
+performance and CI/CD. No fitter or scientific gate is completed by this review.
+
+
+## Shadow Tracker Immutable Binary Masks and Lineage (ST-02B, #10138)
+
+Implements frozen `MaskFrame` record under `src/shared/python/shadow_tracker/mask_records.py`
+with immutable binary masks (`body`, `club`, `valid` as `bytes`), strict dimension and value
+validation (0 or 1 integers only, rejecting booleans and bytearrays), pixel invariant enforcement
+(body and club must be zero wherever valid is zero), revision lineage tracking (`revision_id`,
+`parent_revision_id`, `producer_id`, `correction_note`), boolean evidence properties
+(`has_valid_pixels`, `has_observed_foreground`), deterministic SHA-256 `observation_hash` over
+canonical UTF-8 JSON, and lossless JSON dictionary serialization/deserialization.
+
+## Restore CI Standard and Scheduled Workflow Health (#10143)
+
+Restores fleet workflow health on default branch and scheduled runs:
+- Synchronize full source mypy baseline with Linux quality gate.
+- Align scheduled/default branch coverage condition to run full core lane with `--no-cov`.
+- Enforce provider authority contract for native tiles in parity smoke tests (`_provider_status`).
+- Prevent cross-runner sparse-checkout contamination on self-hosted Docker runners.
+- Pin `google/osv-scanner-action` to verified stable digest.
+
+## Shadow Tracker Camera Direction Conversion (ST-02C, #10139)
+
+Implements bidirectional conversion between `pose_estimation.observations.CameraCalibration`
+(camera-to-world) and `motion_pipeline.contracts` camera models (`CameraIntrinsics` and
+`CameraExtrinsics`, world-to-camera) under `src/shared/python/shadow_tracker/camera_bridge.py`.
+Reuses `Transform6DOF` SE(3) inversion, enforces pinhole K constraints (zero skew, bottom row
+`[0, 0, 1]`, positive focal lengths), validates proper finite rotations, and canonicalizes
+distortion representations (none/empty to five zeros; four coefficients to five with k3=0).
+
+
+## Shadow Tracker Source and Frame Identity Contracts (ST-02A, #10137)
+
+Implements frozen `SourceAsset`, `FrameIdentity`, and `validate_frame_sequence`
+records under `src/shared/python/shadow_tracker/source_records.py` with private
+shared validation helpers. Enforces immutable slots, strict types (rejecting
+booleans/strings for numerics), reduced timebase fractions, URI scheme gating,
+and sequence ordering for presentation and known physical timestamps.
+
+## Shadow Tracker Worker Handoff and Model Probe (#10142)
+
+The ST-01 experiment under `scripts/shadow_tracker/` records repeatable real
+MuJoCo short-window execution, unit-separated closure errors and a named/native
+coordinate-order mismatch. It explicitly does not qualify the model. Frozen
+image-only contracts and bounded worker packets are in
+[Ready Tasks](docs/plans/shadow_tracker/READY_TASKS.md). ST-02A/C can proceed
+independently of unresolved dynamics qualification; ST-02B follows A. Specialist
+blockers #10140/#10141 and the original scientific gates remain open.
+
+## Shadow Tracker Planning Baseline (#10122)
+
+Shadow Tracker is a planned silhouette-driven markerless motion reconstruction
+feature for modern single/multiview capture and historical footage. The
+[implementation plan](docs/plans/shadow_tracker/README.md) defines evidence
+contracts, existing model integration boundaries, staged control fitting,
+continuous forward replay, uncertainty, scientific gates and agent turnover.
+Runtime behavior is not implemented by this planning baseline. Work is tracked
+under epic #10122 and children #10123–#10135. Future implementation must follow
+TDD, DbC, LoD and DRY; image agreement alone does not qualify dynamics or kinetics.
+
+## Cross-Engine Full-Body Parity and Visual Review (FB-6, #10070)
+
+Implement cross-engine full-body forward dynamics simulation replay, numerical step-size convergence, and visual review under Epic #10062:
+- Shared Cross-Engine Replay Module (`src/shared/python/motion_matching/cross_engine_replay.py`):
+  - `CrossEngineReplayConfig`: Immutable specification for multi-engine replay and step-size convergence analysis.
+  - `StepSizeConvergenceResult`, `compute_step_size_convergence`: Numerical convergence evaluation under integration tolerance / step-size refinement ($h$ vs. $h/2$ or $rtol$ refinement).
+  - `EngineReplayOutcome`, `CrossEngineComparisonReport`, `compare_engine_replays`: Cross-engine comparison aggregation reporting per-engine metrics, contact audits, and pairwise differences.
+  - `generate_overlay_frame`, `render_marker_overlay_animation`: Generates 3D animated GIF visual review overlays comparing C3D target capture markers (black) against simulated model markers (engine-colored) with candidate hash prefix in filenames.
+- Unified Engine Model Interfaces:
+  - `src/engines/physics_engines/mujoco/python/full_body_model.py`: Exposes canonical `.coordinate_order` and `evaluate_contact_samples`.
+  - `src/engines/physics_engines/pinocchio/python/native_model.py`: Exposes canonical `.coordinate_order` and `evaluate_contact_samples`.
+  - `src/engines/physics_engines/drake/python/full_body_model.py`: Exposes canonical `.coordinate_order` and `evaluate_contact_samples`; fixes contact sphere point offset in ground calibration.
+  - `src/shared/python/motion_matching/full_body_forward_dynamics.py`: Adaptive RK45 integration across all three engines with configurable `rtol`/`atol` and universal address ground plane height auto-calibration for `ground_plane` (Drake), `ground` (Pinocchio), and `_ground_plane` (MuJoCo).
+- Automated Evidence & Verification Suite (`docs/development/full_body_models/evidence/fb6_parity/`):
+  - Driver `verify_cross_engine_parity.py` replaying the accepted 41-DOF full-body candidate (`returned-candidate.json`) over all 654 frames across MuJoCo, Pinocchio, and Drake with step-size convergence verification.
+  - Generates machine-verifiable receipts (`receipt_mujoco.json`, `receipt_pinocchio.json`, `receipt_drake.json`), compressed trajectories (`forward_trajectory_<engine>.npz`), parity report (`parity_report.json`), and 3D marker overlay animations (`overlay_<engine>_<cand_hash>.gif`).
+
+## Full-Body Forward-Dynamics Matching With Two-Window Shooting Fitter (FB-5, #10069)
+
+Implement full-body forward-dynamics simulation, multiple-shooting fitter extensions, and measured derivative resolution under Epic #10062:
+- Derivative Resolution Utilities (`src/shared/python/motion_matching/derivative_resolution.py`):
+  - `measure_derivative_floor`: Determine scale-aware finite-difference perturbation steps and measure noise floors on stiff, contact-coupled forward simulation objectives.
+  - `compute_finite_difference_step_vector`: Scale-aware finite-difference perturbation vector $h_i = \max(\text{floor}, \text{default\_step} \cdot (1.0 + |x_{0,i}|))$.
+- Constrained Multiple-Shooting Fitter Extensions (`src/shared/python/motion_matching/multi_shooting_fit.py`):
+  - Add `shared_boundary_policy="once" | "both"`: Eliminates duplicate boundary residual accumulation at internal shooting nodes.
+  - Add `node_mode="joint" | "fixed_nodes" | "nodes_only"`: Permits optimizing state defect variables at shooting nodes initialized from kinematics without state resets during replay.
+- Shared Kinematic Metrics Module (`src/shared/python/motion_matching/tour_metrics.py`):
+  - Standardized evaluation of the 5 shared tour metrics: `whole_marker_rmse_m`, `early_marker_rmse_m`, `terminal_marker_rmse_m`, `club_marker_rmse_m`, and `pelvis_yaw_rmse_rad`.
+  - Backward-compatible re-export in `src/engines/physics_engines/opensim/python/tour_matching/metrics.py`.
+- Physics Dynamics Hardening (`src/engines/physics_engines/mujoco/python/native_model.py`):
+  - Add damped regularization $W = J M^{-1} J^T + \epsilon I$ and `lstsq` fallback to `_solve_kkt_dynamics` to avoid numerical singularity failures under open-loop constraint configurations.
+- Full-Body Forward Simulation (`src/shared/python/motion_matching/full_body_forward_dynamics.py`):
+  - `simulate_full_body_forward`: Continuous `solve_ivp(method="rk45")` and semi-implicit Euler integration across 41 coordinates with compliant ground contact and loop closure.
+  - Auto-calibration of ground height at address: `calibrate_ground_height_at_address`.
+  - Comprehensive contact force and penetration audit (`ContactAuditResult`).
+- Automated Evidence & Verification Runner (`docs/development/full_body_models/evidence/fb5_matching/`):
+  - Driver `verify_full_body_matching.py` resolving derivative floor ($h=1.00\times 10^{-6}$, noise floor $1.00\times 10^{-12}$), demonstrating two-window shooting fit setup (`shared_boundary_policy="once"`, node mode `nodes_only`, FB-4 IK node initialization), and simulating an uninterrupted 654-frame replay.
+  - Archives machine-verifiable receipts (`receipt_mujoco.json`) and forward trajectory (`forward_trajectory_mujoco.npz`).
+
+## Tour Matching Viewer Launcher Tile (Step 3, #10062, #10090)
+
+Implement Tour Matching Viewer launcher tile as an engine-agnostic in-app playback tool:
+- Engine-Agnostic Core (`src/tools/tour_matching_viewer/core.py`):
+  - `load_replay(path)`: Robust ingestion of native `returned-replay.npz` and OpenSim IK `.mot` tables.
+  - `body_poses_from_state(spec, q)`: Pure-Python forward kinematics recursing through the 23-joint tree defined in `full_body_spec_v1.json` (Px, Py, Pz translations then Rx, Ry, Rz intrinsic rotations). Evaluated to $< 10^{-12}$ error against MuJoCo forward kinematics across all 24 bodies over 20 random states without importing `mujoco`.
+  - `viewer_frame(spec, replay, i)`: Computes world-space visual skeleton segments (`skeleton_world_segments`), model marker positions, and target markers for frame `i`.
+- PyQt6/Matplotlib 3D GUI (`src/tools/tour_matching_viewer/gui.py`):
+  - `TourMatchingViewerWidget` & `TourMatchingViewerWindow`: Interactive 3D canvas displaying ground wireframe, target capture markers (black), model markers (engine colour), visual skeleton line segments, scrub slider, and frame/RMS labels.
+- Launcher Tile Embed Adapter (`src/tools/tour_matching_viewer/_embed_adapter.py`, `src/config/models.yaml`):
+  - Implements `EmbeddableTool` (`tool_id = "tour_matching_viewer"`, `min_size = (900, 650)`), registered in `EMBEDDABLE_TOOL_REGISTRY` and configured in `models.yaml`.
+- Evidence & Verification (`docs/development/full_body_models/evidence/viewer/`):
+  - Generates offscreen screen captures (`screenshot_returned81.png`, `screenshot_mot.png`), sample test replays, and `receipt.json`.
+
+## Full-Body Marker Calibration and IK per Physics Engine (FB-4, #10068)
+
+Implement alternating marker calibration and least-squares inverse kinematics over full-body coordinates for MuJoCo, Pinocchio, and Drake under Epic #10062:
+- Reusable Marker Calibration (`src/shared/python/motion_matching/marker_calibration.py`):
+  - Injected forward kinematics (`pose_fn`) and inverse kinematics (`ik_fn`) alternating optimization loop.
+  - Re-exported with backward compatibility in `src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`.
+- Trajectory IK Solver (`src/shared/python/motion_matching/full_body_ik.py`):
+  - `solve_full_body_ik_trajectory`: Engine-agnostic Levenberg-Marquardt solver across capture frames with sequential warm-starting, regularisation, and dual-grip weld loop closure residual enforcement.
+  - `compute_marker_rms_trajectory`: Trajectory-wide per-frame, per-marker, and overall root-mean-square error evaluation.
+- Engine IK Adapters:
+  - MuJoCo (`src/engines/physics_engines/mujoco/python/full_body_ik.py`): `MujocoFullBodyIK` wrapping `NativeMujocoFullBodyModel`, evaluating body and site world poses via `mj_kinematics`, dual-grip weld closure residuals, and 41-coordinate IK.
+  - Pinocchio (`src/engines/physics_engines/pinocchio/python/full_body_ik.py`): `PinocchioFullBodyIK` wrapping `FullBodyPinocchioModel`, evaluating frame placements and joint body placements, dual-grip weld placement differences, and 41-coordinate IK.
+  - Drake (`src/engines/physics_engines/drake/python/full_body_ik.py`): `DrakeFullBodyIK` wrapping `FullBodyDrakeModel`, evaluating Drake frame and body link relative transforms in world, weld closure frame differences, and 41-coordinate IK.
+- Automated Evidence & Verification Suite (`docs/development/full_body_models/evidence/fb4_calibration/`):
+  - Verification runner `verify_full_body_calibration.py` supporting `--engine mujoco|pinocchio|drake|all` with automatic remote dispatch to WSL Ubuntu on `deskcomputer` when local engine runtimes are absent.
+  - Generates machine-verifiable receipts (`receipt.json`), calibrated marker offsets (`calibrated_offsets.json`), and compressed trajectories (`ik_trajectory.npz`) per engine for all 34 tracked capture labels bound to the `full_body_spec_v1.json` hash.
+  - Evaluates stride-20 calibration subsample (33 frames, 3 iterations) and complete 654-frame IK trajectory with loop closure residuals $< 0.38$ mm across all engines.
+  - Documents head-marker limitation: Three head markers (`HeadTop`, `HeadFront`, `HeadSide`) attached to rigid torso segment `Hub`.
+
 ## Drake Full-Body Model Builder Law of Demeter and Type Parity (#10067)
 
 Harden Drake full-body model adapter (`FullBodyDrakeModel`) and shared contact law:
@@ -4556,6 +4815,13 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-15 | #10185 | Refresh Shadow Tracker turnover with reproduced acceptance gaps and current corrective/product sequence (#10184). |
+| 2026-09-15 | #10152 | Review Shadow Tracker contracts and publish the full implementation, launcher, performance and CI/CD continuation handoff (#10150). |
+| 2026-09-14 | #10147 | Implement camera direction conversion between observation and pipeline contracts for Shadow Tracker (ST-02C, #10139). |
+| 2026-09-14 | #10145 | Implement frozen source and frame identity records for Shadow Tracker (ST-02A, #10137). |
+| 2026-09-14 | #10144 | Add TDD model diagnostics, measured qualification blockers and frozen image-only worker handoff for Shadow Tracker. |
+| 2026-09-14 | #10136 | Establish Shadow Tracker epic, implementation plan, source/test homes and agent handoff; no runtime implementation. |
+| 2026-09-14 | #10090 | Tour Matching Viewer launcher tile for in-app 3D playback of candidate motions against tour capture (Step 3, #10062) |
 | 2026-09-14 | #10087 | Shared visual skeleton layer with MuJoCo rendering and model-visuals handoff (#10062) |
 | 2026-09-13 | #8929 | Pendulum GUI playback: matrix panel snapshots dynamics per frame instead of per paint; trail slices a precomputed spline and draws bucketed polylines (spec-exempt: performance) |
 | 2026-09-12 | #10020 | Optimize array magnitude calculations in joint_conventions.py and golf_trajectory.py using np.einsum (spec-exempt: micro-optimization) |

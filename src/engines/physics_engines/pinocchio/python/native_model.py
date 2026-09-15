@@ -204,9 +204,17 @@ class NativePinocchioModel:
         self.constraints = [constraint]
         self.constraint_data = [constraint.createData()]
         self.data = self.model.createData()
-        pin.initConstraintDynamics(
-            self.model, self.data, self.constraints, self.constraint_data
-        )
+        try:
+            pin.initConstraintDynamics(
+                self.model, self.data, self.constraints, self.constraint_data
+            )
+        except (TypeError, Exception):
+            if hasattr(pin, "StdVec_RigidConstraintModel"):
+                c_vec = pin.StdVec_RigidConstraintModel()
+                c_vec.append(constraint)
+                pin.initConstraintDynamics(self.model, self.data, c_vec)
+            else:
+                pin.initConstraintDynamics(self.model, self.data, self.constraints)
 
     def _transform(self, value: Any) -> Any:
         matrix = np.asarray(value, dtype=float)
@@ -657,6 +665,28 @@ class FullBodyPinocchioModel(NativePinocchioModel):
                 center, velocity, sphere.radius_m, self.ground, self.contact_parameters
             )
         return samples
+
+    @property
+    def coordinate_order(self) -> tuple[str, ...]:
+        """Return the canonical 41-coordinate order of the full-body model."""
+        return tuple(self.specification["coordinate_order"])
+
+    @property
+    def ground_plane(self) -> GroundPlane:
+        """Ground plane alias for simulation interface consistency."""
+        return self.ground
+
+    @ground_plane.setter
+    def ground_plane(self, value: GroundPlane) -> None:
+        self.ground = value
+
+    def evaluate_contact_samples(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+    ) -> dict[str, ContactSample]:
+        """Evaluate shared contact law forces for each foot contact sphere."""
+        return self.contact_forces(coordinates, rates)
 
     def accelerations(
         self,
