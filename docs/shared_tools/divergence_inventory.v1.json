@@ -13,7 +13,7 @@
   "totals": {
     "identical": 424,
     "diverged": 278,
-    "ud-only": 1244,
+    "ud-only": 1245,
     "tools-only": 661,
     "spelling-only": 124
   },
@@ -462,7 +462,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 107,
+      "ud-only": 108,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12548,6 +12548,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 2066,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/replay_metrics.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 9327,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -33446,9 +33458,9 @@
     {
       "path": "config/__init__.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-13",
-        "commit": "b4ddf7b30a4fc64eb4c83781c2005c0eefb6e0fa"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -33459,9 +33471,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-26",
-        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -33550,9 +33562,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-29",
-        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -34616,9 +34628,9 @@
     {
       "path": "realtime/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-27",
-        "commit": "667b3ba078b21c5873e5991a87af0aec005397b2"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -34629,9 +34641,9 @@
     {
       "path": "realtime/transport_file.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-06-09",
-        "commit": "64bd5222b1a4dd4643a1e4da6c702b8146149cfd"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -35071,9 +35083,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-20",
-        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
