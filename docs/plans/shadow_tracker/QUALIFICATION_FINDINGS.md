@@ -3,7 +3,8 @@
 ## Verdict
 
 **The existing MuJoCo model executes, but is not qualified for Shadow Tracker.**
-ST-01 remains open. Source/mask/camera bookkeeping can proceed under
+ST-01 scientific acceptance remains incomplete regardless of issue state.
+Source/mask/camera bookkeeping can proceed under
 [Contract Freeze](CONTRACT_FREEZE.md); fitting and scientific claims stay blocked.
 
 ## Measured Evidence
