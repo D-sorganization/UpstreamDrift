@@ -27,6 +27,16 @@ class PelvisYawMetrics:
     valid: bool
 
 
+def _invalid_pelvis_yaw_metrics() -> PelvisYawMetrics:
+    return PelvisYawMetrics(
+        yaw_pred_deg=0.0,
+        yaw_target_deg=0.0,
+        yaw_diff_deg=0.0,
+        pelvis_yaw_error_pct=100.0,
+        valid=False,
+    )
+
+
 def compute_pelvis_yaw_metrics(
     pred_markers_term: Array | None,
     target_markers_term: Array | None,
@@ -62,13 +72,7 @@ def compute_pelvis_yaw_metrics(
         or pred_markers_term.shape[0] <= max(wl_i, wr_i)
         or target_markers_term.shape[0] <= max(wl_i, wr_i)
     ):
-        return PelvisYawMetrics(
-            yaw_pred_deg=0.0,
-            yaw_target_deg=0.0,
-            yaw_diff_deg=0.0,
-            pelvis_yaw_error_pct=100.0,
-            valid=False,
-        )
+        return _invalid_pelvis_yaw_metrics()
 
     v_p = pred_markers_term[wr_i, :2] - pred_markers_term[wl_i, :2]
     v_t = target_markers_term[wr_i, :2] - target_markers_term[wl_i, :2]
@@ -81,13 +85,7 @@ def compute_pelvis_yaw_metrics(
         or norm_p < tolerance
         or norm_t < tolerance
     ):
-        return PelvisYawMetrics(
-            yaw_pred_deg=0.0,
-            yaw_target_deg=0.0,
-            yaw_diff_deg=0.0,
-            pelvis_yaw_error_pct=100.0,
-            valid=False,
-        )
+        return _invalid_pelvis_yaw_metrics()
 
     yaw_pred = float(np.degrees(np.arctan2(v_p[1], v_p[0])))
     yaw_target = float(np.degrees(np.arctan2(v_t[1], v_t[0])))
