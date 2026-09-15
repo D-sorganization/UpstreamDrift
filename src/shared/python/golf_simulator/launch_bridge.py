@@ -6,7 +6,8 @@ Follows TDD, DbC, Law of Demeter, and DRY.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -23,7 +24,10 @@ from src.shared.python.golf_simulator.contracts import (
 
 if TYPE_CHECKING:
     from src.shared.python.physics.ball_launch_conditions import LaunchConditions
-    from src.shared.python.physics.impact_model.types import PostImpactState
+    from src.shared.python.physics.impact_model.types import (
+        PostImpactState,
+        PreImpactState,
+    )
     from src.shared.python.physics.swing_ball_flight_pipeline import PipelineResult
 
 
@@ -46,9 +50,11 @@ def _resolve_qualification(
     return ShotQualification(
         contact=ContactStatus.NOT_APPLICABLE if is_manual else ContactStatus.QUALIFIED,
         numerical=NumericalStatus.ESTIMATED if is_manual else NumericalStatus.CONVERGED,
-        scientific=ScientificStatus.NOT_APPLICABLE
-        if is_manual
-        else ScientificStatus.BENCHMARKED,
+        scientific=(
+            ScientificStatus.NOT_APPLICABLE
+            if is_manual
+            else ScientificStatus.BENCHMARKED
+        ),
         evidence_refs=("bridge_conversion",),
     )
 
@@ -140,13 +146,13 @@ def pipeline_result_to_shot_envelope(
         ss = pipeline_result.swing_state
         club_data = ClubData(
             club_speed_m_s=float(ss.club_speed) if hasattr(ss, "club_speed") else None,
-            attack_angle_rad=float(ss.attack_angle)
-            if hasattr(ss, "attack_angle")
-            else None,
+            attack_angle_rad=(
+                float(ss.attack_angle) if hasattr(ss, "attack_angle") else None
+            ),
             club_path_rad=float(ss.club_path) if hasattr(ss, "club_path") else None,
-            face_to_target_rad=float(ss.face_angle)
-            if hasattr(ss, "face_angle")
-            else None,
+            face_to_target_rad=(
+                float(ss.face_angle) if hasattr(ss, "face_angle") else None
+            ),
         )
 
     updated_metadata = ShotMetadata(
@@ -167,3 +173,136 @@ def pipeline_result_to_shot_envelope(
         post_impact=pipeline_result.impact_state,
         metadata=updated_metadata,
     )
+
+
+def qualify_impact_contact(
+    pre_state: PreImpactState,
+    post_state: PostImpactState,
+    source_kind: SourceKind,
+    engine_name: str,
+) -> ShotQualification:
+    """Qualify the contact and physics integrity of an impact event.
+
+    Audits:
+    1. Positive approach velocity (club moving toward ball along normal).
+    2. Post-impact ball launch speed > 0.
+    3. Physically valid smash factor (ball_speed / club_speed <= 1.60 for golf ball collision).
+    4. Distinguishes MODEL_CONTACT vs DEMO_PEAK_SPEED vs MANUAL.
+    5. Provenance linking with engine identity and smash factor evidence.
+
+    Raises:
+        ValueError: If approach velocity <= 0, ball speed <= 0, or smash factor exceeds 1.60.
+    """
+    v_club = np.asarray(pre_state.clubhead_velocity, dtype=float)
+    v_ball_pre = np.asarray(pre_state.ball_velocity, dtype=float)
+    n_face = np.asarray(pre_state.clubhead_orientation, dtype=float)
+    norm_n = float(np.linalg.norm(n_face))
+    n_unit = n_face / norm_n if norm_n > 1e-9 else np.array([1.0, 0.0, 0.0])
+
+    v_rel = v_club - v_ball_pre
+    approach_speed = float(np.dot(v_rel, n_unit))
+    if approach_speed <= 1e-6:
+        raise ValueError(
+            f"negative or zero approach velocity: approach_speed={approach_speed:.4f} m/s"
+        )
+
+    club_speed = float(np.linalg.norm(v_club))
+    v_ball_post = np.asarray(post_state.ball_velocity, dtype=float)
+    ball_speed = float(np.linalg.norm(v_ball_post))
+
+    if ball_speed <= 1e-6:
+        raise ValueError(
+            f"zero or negative post-impact ball speed: {ball_speed:.4f} m/s"
+        )
+
+    smash_factor = ball_speed / club_speed if club_speed > 1e-6 else 0.0
+    # Theoretical maximum for golf ball (COR ~0.83, mass ratio ~4.3) is ~1.50 - 1.55.
+    # We enforce an upper bound of 1.60 to reject unphysical energy injection.
+    if smash_factor > 1.60:
+        raise ValueError(
+            f"Smash factor {smash_factor:.3f} exceeds physical limit 1.60 (ball_speed={ball_speed:.1f}, club_speed={club_speed:.1f})"
+        )
+
+    evidence = (
+        f"engine:{engine_name}",
+        f"smash_factor:{smash_factor:.3f}",
+        f"approach_speed_m_s:{approach_speed:.2f}",
+    )
+
+    if source_kind == SourceKind.DEMO_PEAK_SPEED:
+        return ShotQualification(
+            contact=ContactStatus.DEMO_ONLY,
+            numerical=NumericalStatus.CONVERGED,
+            scientific=ScientificStatus.PEAK_SPEED_HEURISTIC,
+            evidence_refs=evidence,
+        )
+
+    if source_kind == SourceKind.MODEL_CONTACT:
+        return ShotQualification(
+            contact=ContactStatus.QUALIFIED,
+            numerical=NumericalStatus.CONVERGED,
+            scientific=ScientificStatus.BENCHMARKED,
+            evidence_refs=evidence,
+        )
+
+    return ShotQualification(
+        contact=ContactStatus.UNVERIFIED,
+        numerical=NumericalStatus.ESTIMATED,
+        scientific=ScientificStatus.UNVERIFIED,
+        evidence_refs=evidence,
+    )
+
+
+def _make_contact_event(samples: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    peak_sample = max(
+        samples,
+        key=lambda s: float(s.get("normal_force", 0.0)),
+    )
+    return {
+        "start_time_s": float(samples[0]["time_s"]),
+        "end_time_s": float(samples[-1]["time_s"]),
+        "peak_time_s": float(peak_sample["time_s"]),
+        "max_normal_force": float(peak_sample.get("normal_force", 0.0)),
+        "num_samples": len(samples),
+    }
+
+
+def extract_single_contact_event(
+    contact_samples: Sequence[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Identify contiguous contact events and extract peak metrics from each event.
+
+    Deduplicates contiguous in-contact samples into a single contact event with
+    identified start, end, peak normal force, and peak timestamp.
+    Ensures multiple samples across the contact duration do not produce multiple shots.
+    """
+    events: list[dict[str, Any]] = []
+    in_event = False
+    current_samples: list[dict[str, Any]] = []
+
+    for sample in contact_samples:
+        is_contact = bool(sample.get("in_contact", False))
+        if is_contact:
+            in_event = True
+            current_samples.append(sample)
+        else:
+            if in_event and current_samples:
+                # Event ended - extract peak
+                events.append(_make_contact_event(current_samples))
+                current_samples = []
+                in_event = False
+
+    if in_event and current_samples:
+        events.append(_make_contact_event(current_samples))
+
+    return events
+
+
+def check_simscape_eligibility(matlab_release: str | None) -> bool:
+    """Verify Simscape acceptance eligibility under project policy.
+
+    Requires MATLAB R2025b explicitly.
+    """
+    if not matlab_release or not isinstance(matlab_release, str):
+        return False
+    return matlab_release.strip().upper() == "R2025B"
