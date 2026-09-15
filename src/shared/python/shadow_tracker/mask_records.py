@@ -13,6 +13,7 @@ from ._validation import (
     check_id,
     check_payload_keys,
     check_pos_int,
+    check_schema_version,
 )
 from .source_records import FrameIdentity
 
@@ -66,10 +67,7 @@ class MaskFrame:
     correction_note: str
 
     def __post_init__(self) -> None:
-        if self.schema_version != MASK_SCHEMA_VERSION:
-            raise ValueError(
-                f"schema_version must be exactly {MASK_SCHEMA_VERSION!r}, got {self.schema_version!r}"
-            )
+        check_schema_version(self.schema_version, MASK_SCHEMA_VERSION)
         if not isinstance(self.frame, FrameIdentity):
             raise TypeError(
                 f"frame must be a FrameIdentity, got {type(self.frame).__name__}"
@@ -160,21 +158,36 @@ class MaskFrame:
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> MaskFrame:
-        """Deserialize from dictionary, rejecting unknown fields."""
+        """Deserialize from dictionary, rejecting unknown fields and validating dimensions/lengths before conversion."""
         check_payload_keys(payload, _MASK_FRAME_KEYS)
         raw_frame = payload["frame"]
-        frame = (
-            raw_frame
-            if isinstance(raw_frame, FrameIdentity)
-            else FrameIdentity.from_dict(raw_frame)
-        )
+        if isinstance(raw_frame, FrameIdentity):
+            frame = raw_frame
+        elif isinstance(raw_frame, dict):
+            frame = FrameIdentity.from_dict(raw_frame)
+        else:
+            raise TypeError(
+                f"frame must be a FrameIdentity or dict, got {type(raw_frame).__name__}"
+            )
 
-        def _to_bytes(val: object, field_name: str) -> bytes:
-            if isinstance(val, bytes):
-                return val
+        width_px = check_pos_int(payload["width_px"], "width_px")
+        height_px = check_pos_int(payload["height_px"], "height_px")
+        expected_len = width_px * height_px
+
+        def _check_len_and_to_bytes(val: object, field_name: str) -> bytes:
             if isinstance(val, bytearray):
                 raise TypeError(f"{field_name} must be bytes, got bytearray")
+            if isinstance(val, bytes):
+                if len(val) != expected_len:
+                    raise ValueError(
+                        f"{field_name} length must be exactly {expected_len} bytes, got {len(val)}"
+                    )
+                return val
             if isinstance(val, Sequence) and not isinstance(val, (str, bytes)):
+                if len(val) != expected_len:
+                    raise ValueError(
+                        f"{field_name} length must be exactly {expected_len} bytes, got {len(val)}"
+                    )
                 # Validate integer elements
                 byte_vals = bytearray()
                 for item in val:
@@ -192,15 +205,15 @@ class MaskFrame:
                 f"{field_name} must be bytes or Sequence[int], got {type(val).__name__}"
             )
 
-        body = _to_bytes(payload["body"], "body")
-        club = _to_bytes(payload["club"], "club")
-        valid = _to_bytes(payload["valid"], "valid")
+        body = _check_len_and_to_bytes(payload["body"], "body")
+        club = _check_len_and_to_bytes(payload["club"], "club")
+        valid = _check_len_and_to_bytes(payload["valid"], "valid")
 
         return cls(
             schema_version=payload["schema_version"],
             frame=frame,
-            width_px=payload["width_px"],
-            height_px=payload["height_px"],
+            width_px=width_px,
+            height_px=height_px,
             body=body,
             club=club,
             valid=valid,
