@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Feasibility Qualification and Benchmark Freeze (#10124)
+
+Audits and records measured model qualification evidence for Shadow Tracker ST-01:
+- Replays passive full-body rollouts under aligned coordinates (#10140) and separated closure units (#10141) via `scripts/shadow_tracker/model_probe.py`.
+- Documents identical grip closure translation (1.266 m) across `MujocoFullBodyIK` and `NativeMujocoFullBodyModel`, demonstrating that stored calibration vectors (`ik_trajectory.npz`) were generated under legacy scrambled joint indexing and require recomputation before forward fitting.
+- Verifies that while solver convergence succeeds, physical acceptance rejects the trajectory due to excessive grip translation and rotation.
+- Updates canonical receipt `docs/plans/shadow_tracker/evidence/model_probe_10_frames.json` with separate translational and rotational metrics.
+- Freezes benchmark profile requirements and holdout policy, keeping scientific gates explicit before entering Stage 2 full contracts freeze.
+
 ## Separate Grip Displacement and Rotation Units in Rollout Acceptance (#10141)
 
 Separates physical loop-closure error units in full-body forward dynamics simulation:

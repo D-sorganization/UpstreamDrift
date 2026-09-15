@@ -2,18 +2,18 @@
 
 ## Current State
 
-Reviewed implementation baseline: `c3395229839cfb66ded994bbef0a39fcb985e1e6`.
-A/B/C are merged in #10145/#10147/#10148. All 111 focused tests pass, but review
-reproduced validation and allocation-order gaps. No fitter, segmentation pipeline
-or Shadow Tracker launcher workflow is implemented; scientific gates remain open.
+Current implementation baseline includes merged Stage 0 contract hardening (#10151 / PR #10163),
+MuJoCo IK coordinate alignment (#10140 / PR #10164), and production closure units separation
+(#10141 / PR #10165). ST-01 feasibility qualification (#10124) has been executed: 10-frame
+model probe runs repeatably, but physical acceptance fails due to legacy trajectory coordinate
+scrambling and unqualified model morphology. Scientific gates remain blocked.
 
 ## Immediate Dispatch
 
-Read [Development Review](DEVELOPMENT_REVIEW.md) for evidence and the entire
-remaining implementation path, then use [Continuation Prompt](CONTINUATION_PROMPT.md).
-Claim #10151 for contract repair first. Specialist #10140/#10141 and ST-01 remain
-open; do not interpret merged image records as physical-model qualification.
-The original planning and diagnostic receipts below are historical evidence.
+Read [Development Review](DEVELOPMENT_REVIEW.md) and [Continuation Prompt](CONTINUATION_PROMPT.md).
+Prerequisites #10140, #10141, and #10124 are complete. Next task is Stage 2 (#10125):
+Full Contracts Freeze for Shadow Tracker. Do not interpret passing unit tests as physical-model
+qualification. Recompute historical IK trajectories before attempting forward fitting.
 
 ## First Pickup
 
