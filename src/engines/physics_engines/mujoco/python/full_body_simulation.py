@@ -168,8 +168,6 @@ class FullBodySimulator:
         target = np.asarray(joint_acceleration, dtype=float)
         if target.shape != (self.actuated.size,) or not np.isfinite(target).all():
             raise ValueError("Joint acceleration must be finite, one per joint")
-        affine, offset = self.affine_dynamics(q, v)
-        rows = self.actuated
         # The grip closure removes six controllable directions, so the square
         # joint block is rank deficient: invert only the singular directions a
         # real joint can move (apparent inertia below 1 / MIN_SINGULAR_VALUE)
@@ -249,26 +247,28 @@ class FullBodySimulator:
         Postcondition: the record starts at t=0 with the initial state and the
         support columns are evaluated at every sampled state.
         """
-        q: Array = np.asarray(q0, dtype=float).copy()
-        v: Array = np.asarray(v0, dtype=float).copy()
-        if q.shape != (self.nv,) or v.shape != (self.nv,):
+        q_curr: Array = np.asarray(q0, dtype=float).copy()
+        v_curr: Array = np.asarray(v0, dtype=float).copy()
+        if tuple(q_curr.shape) != (self.nv,) or tuple(v_curr.shape) != (self.nv,):
             raise ValueError("Initial state must match the coordinate count")
-        if not (np.isfinite(q).all() and np.isfinite(v).all()):
+        if not (np.isfinite(q_curr).all() and np.isfinite(v_curr).all()):
             raise ValueError("Initial state must be finite")
         if duration_s <= 0 or dt_s <= 0 or record_every < 1:
             raise ValueError("Duration, step and record interval must be positive")
         steps = int(round(duration_s / dt_s))
-        times, qs, vs, taus = [0.0], [q.copy()], [v.copy()], []
-        supports: list[tuple[SupportReport, float]] = [self.support(q, v)]
-        tau_prev = np.zeros(self.nv)
+        times, qs, vs, taus = [0.0], [q_curr.copy()], [v_curr.copy()], []
+        supports: list[tuple[SupportReport, float]] = [self.support(q_curr, v_curr)]
+        tau_prev: Array = np.zeros(self.nv)
         for k in range(1, steps + 1):
-            q, v, tau_prev = self.step((k - 1) * dt_s, q, v, controller, dt_s)
+            q_curr, v_curr, tau_prev = self.step(
+                (k - 1) * dt_s, q_curr, v_curr, controller, dt_s
+            )
             if k % record_every == 0 or k == steps:
                 times.append(k * dt_s)
-                qs.append(q.copy())
-                vs.append(v.copy())
+                qs.append(q_curr.copy())
+                vs.append(v_curr.copy())
                 taus.append(tau_prev.copy())
-                supports.append(self.support(q, v))
+                supports.append(self.support(q_curr, v_curr))
         taus.insert(0, taus[0] if taus else tau_prev)
         cops = np.array(
             [
