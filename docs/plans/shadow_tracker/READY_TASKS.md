@@ -24,10 +24,11 @@ ST-01–ST-06. Evidence regeneration (#10167) confirms that coordinate packing (
 and closure units (#10141) are resolved in software and calibration evidence regenerated, reducing
 initial grip displacement to 13.7 mm (historical artifacts preserved; physical qualification remains open
 due to rotation closure and strict 5 mm tolerance). ST-04 (#10202) is complete, rejecting unrun model
-segmentation and enforcing shot-isolated mask revisions. Active slice is ST-05 (#10206), implementing
+segmentation and enforcing shot-isolated mask revisions. ST-05 (#10206) is complete, implementing
 filled-area silhouette rendering, rotation non-singularity checks, and morphology/hypothesis invariants.
-Next: real ingestion (#10168) with persistent manual-mask review. Stage 7 (#10130) rollout integration is
-boundary work only until physical qualification gates pass. Do not reimplement A/B/C or skip directly to fitting.
+Active slice is ST-03A (#10168), implementing real local-video clip decoding, bounded iterator, and auditable frame records.
+Next: Stage 7 (#10130) forward rollout integration and replay parity, followed by release qualification.
+Do not reimplement A/B/C or skip directly to fitting.
 
 ## Commands by Packet
 
