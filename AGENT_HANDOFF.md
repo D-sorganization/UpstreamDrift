@@ -4,13 +4,12 @@
 
 - **Start Here:** [Development Review](docs/plans/shadow_tracker/DEVELOPMENT_REVIEW.md)
   and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
-- **Baseline:** `c3395229839cfb66ded994bbef0a39fcb985e1e6`; A/B/C are merged in
-  #10145/#10147/#10148. The first corrective task is #10151, not those closed tasks.
-- **Verified:** 111 focused tests pass; scoped Ruff/mypy pass. Review reproduces
-  malformed-input exception and mask pre-conversion length-check gaps.
-- **Remaining:** Full video/mask/render/fit pipeline, launcher/UI, scientific
-  validation, performance qualification and release. #10140/#10141 remain model
-  blockers. No complete fitter or qualified Shadow Tracker product exists yet.
+- **Progress:** Stages 0–4 complete: #10151 (contract hardening), #10140/#10141 (MuJoCo coordinate & closure units),
+  #10124 (feasibility audit), #10125 (full contracts freeze), #10126 (video ingestion and lineage),
+  and #10127 (body and club silhouettes, gold-mask evaluation, occlusion tracking).
+- **Remaining:** Stages 5–10 (Rendering/Losses #10128, Initialization #10129, Continuous Rollout #10130,
+  Fitting #10131/#10132, Validation #10133, UI/Product #10134, Release #10135).
+- **Next Stage:** Stage 5 (#10128): Render Calibrated Silhouettes and Compute Residuals.
 - **Review Delivery:** #10150; documentation-only review and continuation plan.
   Full epic #10122 stays open. Follow the per-stage evidence and turnover gates.
 
