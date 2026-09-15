@@ -13,7 +13,7 @@ This module provides the ingestion pipeline for modern and archive footage:
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from fractions import Fraction
 import hashlib
@@ -531,3 +531,209 @@ def ingest_capture_rig_view(
         rights_note=rights_note,
         source_uri=f"urn:capture-rig:view:{view.view}:{asset_id}",
     )
+
+
+class OpenCvVideoDecoder:
+    """Frame-accurate video decoder backed by OpenCV VideoCapture with bounded memory.
+
+    Preconditions:
+        - `path` must exist and be an openable, non-empty media file.
+        - Container metadata must report positive frame dimensions and at least 1 frame.
+    """
+
+    __slots__ = (
+        "_path",
+        "_frame_count",
+        "_width",
+        "_height",
+        "_fps",
+        "_timebase_numerator",
+        "_timebase_denominator",
+        "_frame_hashes",
+    )
+
+    def __init__(self, path: Path | str) -> None:
+        import cv2
+
+        file_path = Path(path)
+        if not file_path.is_file():
+            raise FileNotFoundError(f"Video file not found: {file_path}")
+        if file_path.stat().st_size == 0:
+            raise ValueError(f"Video file is empty: {file_path}")
+
+        cap = cv2.VideoCapture(str(file_path))
+        if not cap.isOpened():
+            raise ValueError(f"Could not open video file {file_path}")
+
+        try:
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = float(cap.get(cv2.CAP_PROP_FPS))
+            frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+            if width <= 0 or height <= 0:
+                raise ValueError(
+                    f"Video has invalid dimensions: {width}x{height} in {file_path}"
+                )
+
+            # Compute reduced rational timebase from fps
+            if fps > 0 and math.isfinite(fps):
+                frac = Fraction(fps).limit_denominator(100000)
+                # timebase is seconds per tick: 1 / fps = denominator / numerator
+                tb_num = frac.denominator
+                tb_den = frac.numerator
+                gcd = math.gcd(tb_num, tb_den)
+                tb_num //= gcd
+                tb_den //= gcd
+            else:
+                tb_num = 1
+                tb_den = 1
+                fps = 1.0
+
+            self._path = file_path
+            self._width = width
+            self._height = height
+            self._fps = fps
+            self._timebase_numerator = tb_num
+            self._timebase_denominator = tb_den
+
+            # Cache or scan frame hashes efficiently
+            hashes: list[str] = []
+            actual_count = 0
+            while True:
+                ret, frame = cap.read()
+                if not ret or frame is None:
+                    break
+                actual_count += 1
+                h = hashlib.sha256(frame.tobytes()).hexdigest()
+                hashes.append(h)
+
+            if actual_count == 0:
+                raise ValueError(f"Could not read any frames from {file_path}")
+
+            self._frame_count = actual_count
+            self._frame_hashes = tuple(hashes)
+        finally:
+            cap.release()
+
+    @property
+    def frame_count(self) -> int:
+        return self._frame_count
+
+    @property
+    def width(self) -> int:
+        return self._width
+
+    @property
+    def height(self) -> int:
+        return self._height
+
+    @property
+    def timebase_numerator(self) -> int:
+        return self._timebase_numerator
+
+    @property
+    def timebase_denominator(self) -> int:
+        return self._timebase_denominator
+
+    def pts_ticks(self, frame_index: int) -> int:
+        """Presentation timestamp in ticks for the specified frame index."""
+        if not 0 <= frame_index < self._frame_count:
+            raise IndexError(
+                f"frame_index {frame_index} out of bounds [0, {self._frame_count})"
+            )
+        return frame_index
+
+    def read_frame_hash(self, frame_index: int) -> str:
+        """Deterministic SHA-256 hash of decoded raw frame pixels."""
+        if not 0 <= frame_index < self._frame_count:
+            raise IndexError(
+                f"frame_index {frame_index} out of bounds [0, {self._frame_count})"
+            )
+        return self._frame_hashes[frame_index]
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class DecodeLimits:
+    """Execution bounds and cooperative cancellation controls for bounded video decoding."""
+
+    max_frames: int | None = None
+    is_cancelled: Callable[[], bool] | None = None
+
+    def __post_init__(self) -> None:
+        if self.max_frames is not None and self.max_frames < 0:
+            raise ValueError(f"max_frames cannot be negative, got {self.max_frames}")
+
+
+def decode_video_frames(
+    decoder: VideoDecoderAdapter,
+    *,
+    asset: SourceAsset,
+    shot_id: str,
+    swing_id: str,
+    camera_id: str,
+    physical_time_s_fn: Callable[[int, Fraction], float | None]
+    | None = lambda idx, pres: float(pres),
+    physical_time_reason: str = "",
+    limits: DecodeLimits = DecodeLimits(),
+) -> Iterator[FrameIdentity]:
+    """Bounded iterator decoding a video into validated immutable FrameIdentity records.
+
+    Preconditions:
+        - `decoder` conforms to VideoDecoderAdapter.
+        - `asset` is a valid SourceAsset.
+        - `shot_id`, `swing_id`, `camera_id` are valid non-empty identifiers.
+        - `limits` specifies optional max_frames and cooperative cancellation.
+    """
+    from ._validation import FRAME_SCHEMA_VERSION, check_id
+
+    check_id(shot_id, "shot_id")
+    check_id(swing_id, "swing_id")
+    check_id(camera_id, "camera_id")
+
+    limit = (
+        decoder.frame_count
+        if limits.max_frames is None
+        else min(decoder.frame_count, limits.max_frames)
+    )
+    if limit <= 0:
+        return
+
+    # Extract timebase if available on decoder, otherwise default to 1/1
+    tb_num = getattr(decoder, "timebase_numerator", 1)
+    tb_den = getattr(decoder, "timebase_denominator", 1)
+
+    for i in range(limit):
+        if limits.is_cancelled is not None and limits.is_cancelled():
+            break
+
+        pts = decoder.pts_ticks(i)
+        pres_time = Fraction(pts * tb_num, tb_den)
+
+        if physical_time_s_fn is not None:
+            phys_time = physical_time_s_fn(i, pres_time)
+            reason = (
+                physical_time_reason
+                if phys_time is not None
+                else (physical_time_reason or "unknown physical time")
+            )
+        else:
+            phys_time = None
+            reason = physical_time_reason or "unknown physical time"
+
+        frame_hash = decoder.read_frame_hash(i)
+
+        yield FrameIdentity(
+            schema_version=FRAME_SCHEMA_VERSION,
+            asset_id=asset.asset_id,
+            shot_id=shot_id,
+            swing_id=swing_id,
+            camera_id=camera_id,
+            frame_id=f"frame-{i:06d}",
+            pts_ticks=pts,
+            timebase_numerator=tb_num,
+            timebase_denominator=tb_den,
+            physical_time_s=phys_time,
+            physical_time_reason=reason,
+            frame_sha256=frame_hash,
+        )

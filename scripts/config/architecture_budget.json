@@ -3,6 +3,24 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/shared/python/physics/impact_model/solver.py",
+      "symbol": "ImpactSolverAPI.solve_impact",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10193,
+      "reason": "Issue #10193: solve_impact preserves complete clubhead kinematics (angular velocity, loft, lie, MOI) to avoid lossy slicing before impact solver; callers migrate to solve_pre_impact_state.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/physics/impact_model/solver.py",
+      "symbol": "ImpactSolverAPI.solve_with_gear_effect",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10193,
+      "reason": "Issue #10193: solve_with_gear_effect preserves complete clubhead kinematics (angular velocity, loft, lie, MOI) to avoid lossy slicing before impact solver; callers migrate to solve_pre_impact_state.",
+      "expires_on": "2026-11-30"
+    },
+    {
       "path": "src/launchers/launcher_layout_manager.py",
       "symbol": "LayoutManager.rebuild_grid",
       "rule": "function-lines",
