@@ -83,6 +83,56 @@ def bernstein_to_simscape(control_torques: Array, *, duration_s: float) -> Array
     return normalized_to_simscape(power, duration_s=duration_s)
 
 
+def simscape_to_bernstein(native_descending: Array, *, duration_s: float) -> Array:
+    """Convert native Simscape descending power coefficients to Bernstein controls.
+
+    Inverse of bernstein_to_simscape. Guarantees tau_bernstein(t) == tau_simscape(t)
+    on [0, duration_s] to machine precision.
+    """
+    native_desc = np.atleast_2d(np.asarray(native_descending, dtype=float))
+    if native_desc.ndim != 2 or native_desc.shape[1] != COEFFS_PER_JOINT:
+        raise ValueError(
+            f"native_descending must have shape (joints, {COEFFS_PER_JOINT})"
+        )
+    if duration_s <= 0:
+        raise ValueError("duration_s must be strictly positive")
+
+    native_ascending = native_desc[:, ::-1]
+    powers = native_ascending * (duration_s ** np.arange(COEFFS_PER_JOINT))
+    m_mat = np.zeros((COEFFS_PER_JOINT, COEFFS_PER_JOINT), dtype=float)
+    degree = COEFFS_PER_JOINT - 1
+    for k in range(degree + 1):
+        for j in range(k, degree + 1):
+            m_mat[j, k] = comb(degree, k) * comb(degree - k, j - k) * ((-1) ** (j - k))
+    inv_m = np.linalg.inv(m_mat.T)
+    c_target = powers @ inv_m
+    return np.ascontiguousarray(c_target, dtype=float)
+
+
+def reexpress_bernstein_basis(
+    control_torques: Array,
+    *,
+    source_duration_s: float,
+    target_duration_s: float,
+) -> Array:
+    """Re-express degree-6 Bernstein controls from one basis duration to another.
+
+    Guarantees that the continuous physical torque tau(t) is strictly identical
+    across [0, min(source_duration_s, target_duration_s)]:
+        tau_target(t) == tau_source(t) for all t.
+    """
+    c_src = np.asarray(control_torques, dtype=float)
+    if c_src.ndim != 2 or c_src.shape[1] != COEFFS_PER_JOINT:
+        raise ValueError(
+            f"control_torques must have shape (joints, {COEFFS_PER_JOINT})"
+        )
+    if source_duration_s <= 0 or target_duration_s <= 0:
+        raise ValueError("source and target durations must be strictly positive")
+
+    simscape_desc = bernstein_to_simscape(c_src, duration_s=source_duration_s)
+    return simscape_to_bernstein(simscape_desc, duration_s=target_duration_s)
+
+
 def bernstein_effort_range(control_torques: Array) -> Array:
     """Numerical min/max on the full basis interval, including stationary points.
 
