@@ -460,6 +460,22 @@ receipt schema), HO-3 (#10157, MJX environment and JAX-gated tests), HO-6
 HO-1, then HO-2 and HO-3, HO-7 and HO-9 any time, HO-4/HO-8/HO-10 after
 HO-1, HO-6 after HO-5. Definition of done is on the epic.
 
+**HO-0 (#10186, expert) comes before all of them (2026-09-15).** The 22
+commits after PR #10087 (`11cccded9` to `ee418af35`) are on this branch
+only, and `main` took a parallel lane on the same program (FB-4 #10089,
+FB-5 #10092, FB-6 #10094, viewer tile #10090, fixes #10164/#10165): a
+merge conflicts in 22 files (dry run 2026-09-15). HO-0 lands the branch on
+`main` with one merge commit resolved by the per-file rules in the issue
+(branch side for the 20 visual-layer files, main side for SPEC.md and the
+divergence inventory, hand-merge of this file and the development log,
+`static_marker_offsets` ported into the shared `marker_calibration`
+module), records a "Two Implementations, One Program" table (main's
+`full_body_ik.py`/`full_body_forward_dynamics.py`/`cross_engine_replay.py`
+against this lane's `full_body_markers.py`/`full_body_simulation.py`/
+`verify_setup_parity.py`), and repoints the epic and children at `main`.
+Until HO-0 merges, child branches must start from this branch and will
+not merge; nobody should start HO-1 before HO-0 is done.
+
 ### How to Continue (Read This First)
 
 1. Run the pipeline from the launcher tile "Motion Matching" or
@@ -475,26 +491,18 @@ HO-1, HO-6 after HO-5. Definition of done is on the epic.
    (Drake and Pinocchio on ControlTower over SSH; poses by coordinate name).
 4. Never rerun with `--recalibrate-upper`; keep one static-trial round;
    ranges act on the matching only (`range_of_motion.py`).
-5. Epics: #10162 (handoff, HO-1 to HO-10, tiered), #10113 (MM-1 to MM-10)
+5. Epics: #10162 (handoff, HO-0 landing #10186 first, then HO-1 to HO-10, tiered), #10113 (MM-1 to MM-10)
    and #10120 (CM-1 to CM-6) hold every open item with acceptance
    criteria; update DL-#10062 and this handoff in every implementation
    commit.
 
 ## Next
 
-- Epic #10113 in order: MM-2 grip roll calibration from the address so the
-  wrist ranges can be imposed (#10104, with MM-5 #10107 the left pit);
-  MM-6 hip zero twist so the leg ranges apply unwidened (#10108); MM-3
-  meshes from BunkerShot3D solids and catalogue clubs (#10105); MM-7
-  downswing dynamics (#10109); MM-10 dynamics replay parity (#10112);
-  MM-8 Simscape parity (#10110); MM-9 de Leva verification (#10111).
-  Keep one static-trial round; never `--recalibrate-upper`.
-- GS-4: the downswing needs a dynamically consistent reference or the FB-5
-  contact-aware shooting fit; candidates in order: stance timing from the
-  reference contact forces instead of marker heights, a hip zero-twist
-  calibration so the Rajagopal ranges apply unwidened, then the two-window
-  fit on the full body with contact. Every attempt keeps its receipt.
-- GS-5: rebuild FB-3-P and FB-3-D on v2 with the hip-calibrated, scaled
-  document and rerun same-input replay parity.
-- Cross-engine same-input replay and comparison across MuJoCo FB-3-M (#10066), Pinocchio FB-3-P (#10065), and Drake FB-3-D (#10067).
-- FB-4 ground height and marker calibration, and FB-5 fitting per Epic #10062.
+- HO-0 (#10186): land this branch on `main` and record the reconciliation
+  with the FB-4/5/6 lane; expert. Then epic #10162 in the order given in
+  "Completion Plan": HO-1 (#10155) first, HO-2/HO-3 in parallel, HO-7 and
+  HO-9 any time, HO-4/HO-8/HO-10 after HO-1, HO-5 (#10159, expert) in
+  parallel with the cheap items, HO-6 after HO-5. #10110 waits for the
+  Simscape lane. Superseded lists (MM order, GS-4/GS-5, FB-3 replay
+  parity) are folded into those issues; keep one static-trial round;
+  never `--recalibrate-upper`.
