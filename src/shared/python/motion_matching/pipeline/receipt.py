@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python.full_body_markers import (
-    FullBodyMarkerKinematics,
-)
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.pipeline.address import posture_summary
 from src.shared.python.motion_matching.pipeline.constants import (
@@ -21,57 +19,52 @@ from src.shared.python.motion_matching.pipeline.constants import (
 )
 
 if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        FullBodyMarkerKinematics,
+    )
     from src.shared.python.motion_matching.pipeline.lane import Lane
 
 
+@dataclass(frozen=True)
+class GroundSupportReceiptInputs:
+    """Inputs required to assemble a ground-support execution receipt."""
+
+    base_spec: dict[str, Any]
+    spec_path: Path
+    scaled_path: Path
+    hipcal_path: Path
+    recalibrate_upper: bool
+    anthropometric: tuple[float, float] | None
+    qualification_note: str
+    spec_bytes: bytes
+    hip_report: dict[str, Any]
+    candidate_bytes: bytes
+    c3d_path: Path
+    capture_name: str
+    lane: Lane
+    address_report: dict[str, Any]
+    ik_report: dict[str, Any]
+    dynamics_report: dict[str, Any]
+    kin: FullBodyMarkerKinematics
+    q_ref: np.ndarray
+    elapsed_s: float
+
+
 def build_ground_support_receipt(
-    *,
-    base_spec: dict[str, Any],
-    spec_path: Path,
-    scaled_path: Path,
-    hipcal_path: Path,
-    recalibrate_upper: bool,
-    anthropometric: tuple[float, float] | None,
-    qualification_note: str,
-    spec_bytes: bytes,
-    hip_report: dict[str, Any],
-    candidate_bytes: bytes,
-    c3d_path: Path,
-    capture_name: str,
-    lane: Lane,
-    address_report: dict[str, Any],
-    ik_report: dict[str, Any],
-    dynamics_report: dict[str, Any],
-    kin: FullBodyMarkerKinematics,
-    q_ref: np.ndarray,
-    elapsed_s: float,
+    inputs: GroundSupportReceiptInputs,
 ) -> dict[str, Any]:
     """Assemble the standardized receipt for ground-supported full-body pipeline.
 
     Args:
-        base_spec: Input base specification dictionary.
-        spec_path: Path to input specification file.
-        scaled_path: Path to scaled specification output file.
-        hipcal_path: Path to hip-calibrated specification output file.
-        recalibrate_upper: Whether upper body was recalibrated.
-        anthropometric: Optional (stature_m, mass_kg) tuple.
-        qualification_note: Description note for qualification milestone.
-        spec_bytes: Raw bytes of final scaled spec.
-        hip_report: Summary dictionary from hip calibration stage.
-        candidate_bytes: Raw bytes of candidate file.
-        c3d_path: Path to C3D capture file.
-        capture_name: Label of capture ("driver", "iron", etc.).
-        lane: Coordination lane providing ground, stance, labels, and bounds.
-        address_report: Summary dictionary from address stage.
-        ik_report: Summary dictionary from IK stage.
-        dynamics_report: Summary dictionary from forward dynamics stage.
-        kin: Final marker kinematics model.
-        q_ref: (N, nq) reference trajectory array.
-        elapsed_s: Total elapsed execution time in seconds.
+        inputs: Context bundle containing spec paths, reports, lane, and kinematics.
 
     Returns:
         Structured receipt dictionary matching GS milestone schema.
     """
+    lane = inputs.lane
+    kin = inputs.kin
+    q_ref = inputs.q_ref
+
     stance_fraction = {
         name: float(np.mean([name in s for s in lane.stance]))
         for name in ("heel_r", "forefoot_r", "toe_r", "heel_l", "forefoot_l", "toe_l")
@@ -82,20 +75,24 @@ def build_ground_support_receipt(
     tob_posture = posture_summary(kin, q_ref[tob_frame])
 
     return {
-        "base_spec_sha256": canonical_sha256(base_spec),
-        "base_spec_file": spec_path.name,
-        "spec_file": scaled_path.name,
-        "hipcal_spec_file": hipcal_path.name,
-        "recalibrate_upper": bool(recalibrate_upper),
-        "anthropometric": list(anthropometric) if anthropometric else None,
+        "base_spec_sha256": canonical_sha256(inputs.base_spec),
+        "base_spec_file": inputs.spec_path.name,
+        "spec_file": inputs.scaled_path.name,
+        "hipcal_spec_file": inputs.hipcal_path.name,
+        "recalibrate_upper": bool(inputs.recalibrate_upper),
+        "anthropometric": (
+            list(inputs.anthropometric) if inputs.anthropometric else None
+        ),
         "posture_top_of_backswing": tob_posture,
-        "spec_sha256": hashlib.sha256(spec_bytes).hexdigest(),
-        "hip_calibration": hip_report,
-        "candidate_sha256": hashlib.sha256(candidate_bytes).hexdigest(),
-        "capture": capture_name,
-        "capture_sha256": hashlib.sha256(c3d_path.read_bytes()).hexdigest(),
-        "club": base_spec.get("club"),
-        "grip_rotation_deg": base_spec.get("subject", {}).get("grip_rotation_deg"),
+        "spec_sha256": hashlib.sha256(inputs.spec_bytes).hexdigest(),
+        "hip_calibration": inputs.hip_report,
+        "candidate_sha256": hashlib.sha256(inputs.candidate_bytes).hexdigest(),
+        "capture": inputs.capture_name,
+        "capture_sha256": hashlib.sha256(inputs.c3d_path.read_bytes()).hexdigest(),
+        "club": inputs.base_spec.get("club"),
+        "grip_rotation_deg": inputs.base_spec.get("subject", {}).get(
+            "grip_rotation_deg"
+        ),
         "wrists_bounded": any(name in lane.bounds for name in IK_UNBOUNDED),
         "labels": list(lane.labels),
         "ground": {
@@ -111,12 +108,12 @@ def build_ground_support_receipt(
             },
             "stance_fraction": stance_fraction,
         },
-        "address": address_report,
-        "ik": ik_report,
-        "dynamics": dynamics_report,
-        "elapsed_s": elapsed_s,
+        "address": inputs.address_report,
+        "ik": inputs.ik_report,
+        "dynamics": inputs.dynamics_report,
+        "elapsed_s": inputs.elapsed_s,
         "qualification": (
             "kinematic IK and computed-torque tracking milestone on the MuJoCo "
-            f"full-body model ({qualification_note}); not a fit, not acceptance"
+            f"full-body model ({inputs.qualification_note}); not a fit, not acceptance"
         ),
     }

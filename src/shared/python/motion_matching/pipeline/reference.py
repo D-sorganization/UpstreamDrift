@@ -12,12 +12,6 @@ import mujoco
 import numpy as np
 from scipy.signal import butter, filtfilt
 
-from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
-from src.engines.physics_engines.mujoco.python.full_body_markers import (
-    FullBodyMarkerKinematics,
-    continuous_branches,
-)
-from src.engines.physics_engines.mujoco.python.visual_layer import add_com_markers
 from src.shared.python.motion_matching.pipeline.constants import (
     CONSISTENCY_PRIOR,
     PLAYBACK_STRIDE,
@@ -26,6 +20,9 @@ from src.shared.python.motion_matching.pipeline.constants import (
 )
 
 if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        FullBodyMarkerKinematics,
+    )
     from src.shared.python.motion_matching.pipeline.lane import Lane
 
 
@@ -118,6 +115,10 @@ def full_capture_ik(
         if all(name in kin.coordinate_order for name in triple)
     ]
     if active_gimbals:
+        from src.engines.physics_engines.mujoco.python.full_body_markers import (
+            continuous_branches,
+        )
+
         q_ik = continuous_branches(q_ik, kin.coordinate_order, active_gimbals)
     return q_ik, fits
 
@@ -175,6 +176,9 @@ def render_playback(
     show_com: bool = True,
 ) -> None:
     """Render animated GIF of motion from spec and joint trajectory."""
+    from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
+    from src.engines.physics_engines.mujoco.python.visual_layer import add_com_markers
+
     xml, _ = exporter.export_full_body_mjcf(spec_bytes, visual=True)
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)

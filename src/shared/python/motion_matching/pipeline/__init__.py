@@ -40,6 +40,7 @@ from src.shared.python.motion_matching.pipeline.lane import (
     wrist_bounds,
 )
 from src.shared.python.motion_matching.pipeline.receipt import (
+    GroundSupportReceiptInputs,
     build_ground_support_receipt,
 )
 from src.shared.python.motion_matching.pipeline.reference import (
@@ -52,6 +53,7 @@ from src.shared.python.motion_matching.pipeline.reference import (
 
 __all__ = [
     "Lane",
+    "GroundSupportReceiptInputs",
     "add_toe_spheres",
     "address",
     "best_address",
