@@ -22,6 +22,7 @@ from src.shared.python.golf_simulator.contracts import (
     ContactStatus,
     NumericalStatus,
     ScientificStatus,
+    ReplayPlaybackState,
     SessionState,
     ShotEnvelope,
     ShotQualification,
@@ -34,7 +35,6 @@ from src.shared.python.golf_simulator.contracts import (
 from src.shared.python.golf_simulator.journal import ShotJournal
 from src.shared.python.golf_simulator.replay import (
     MonotonicReplayClock,
-    ReplayPlaybackState,
     ReplaySubmissionCoordinator,
 )
 from src.shared.python.golf_simulator.session import GolfSessionService
