@@ -63,7 +63,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `golf_club` | 0 | 0 | 0 | 0 | 100 | 0 |
-| `golf_simulator` | 0 | 0 | 0 | 7 | 0 | 0 |
+| `golf_simulator` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
@@ -129,7 +129,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **424** | **278** | **124** | **1252** | **661** | **702** |
+| **Total** | **424** | **278** | **124** | **1254** | **661** | **702** |
 
 ## Diverged Files by Package
 
