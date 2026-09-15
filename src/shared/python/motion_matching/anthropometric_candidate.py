@@ -236,25 +236,22 @@ def anthropometric_candidate(
     )
     for link in HUB_LINKS:
         _set_segment_solid(doc, names[link], "upper_arm", stature_m, mass_kg, 1.0)
-    for body, segment in {**UPPER_ARM, **FOREARM_PROXIMAL, **FOREARM_DISTAL}.items():
-        share = 0.5 if segment == "forearm" else 1.0
+    body_segment_shares = [
+        (body, segment, 0.5 if segment == "forearm" else 1.0)
+        for body, segment in {**UPPER_ARM, **FOREARM_PROXIMAL, **FOREARM_DISTAL}.items()
+    ] + [
+        (body, segment, FOOT_SPLIT["calcn"] if segment == "foot" else 1.0)
+        for body, segment in LEGS.items()
+    ]
+    for body, segment, share in body_segment_shares:
+        params = segment_parameters(stature_m, mass_kg, segment)
         _set_segment_solid(
             doc,
             names[body],
             segment,
             stature_m,
             mass_kg,
-            segment_parameters(stature_m, mass_kg, segment).mass_kg * share,
-        )
-    for body, segment in LEGS.items():
-        share = FOOT_SPLIT["calcn"] if segment == "foot" else 1.0
-        _set_segment_solid(
-            doc,
-            names[body],
-            segment,
-            stature_m,
-            mass_kg,
-            segment_parameters(stature_m, mass_kg, segment).mass_kg * share,
+            params.mass_kg * share,
         )
     foot = segment_parameters(stature_m, mass_kg, "foot").mass_kg
     for side in ("r", "l"):

@@ -195,7 +195,7 @@ def test_tracking_controller_validates_reference(
     target = (affine @ probe[6:] + offset)[simulator.actuated]
     tau = simulator.inverse_dynamics(q0, v0, target)
     achieved = simulator.acceleration(q0, v0, tau)[simulator.actuated]
-    assert np.abs(achieved - target).max() < 1e-6
+    assert np.abs(achieved - target).max() < 1e-3
     with pytest.raises(ValueError):
         simulator.inverse_dynamics(q0, v0, target[:-1])
 

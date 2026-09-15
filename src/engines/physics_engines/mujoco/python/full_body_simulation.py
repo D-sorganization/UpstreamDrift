@@ -249,8 +249,8 @@ class FullBodySimulator:
         Postcondition: the record starts at t=0 with the initial state and the
         support columns are evaluated at every sampled state.
         """
-        q = np.asarray(q0, dtype=float).copy()
-        v = np.asarray(v0, dtype=float).copy()
+        q: Array = np.asarray(q0, dtype=float).copy()
+        v: Array = np.asarray(v0, dtype=float).copy()
         if q.shape != (self.nv,) or v.shape != (self.nv,):
             raise ValueError("Initial state must match the coordinate count")
         if not (np.isfinite(q).all() and np.isfinite(v).all()):

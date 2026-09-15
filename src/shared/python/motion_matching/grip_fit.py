@@ -25,6 +25,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from itertools import product
+from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -37,7 +38,7 @@ Array = NDArray[np.float64]
 #: Rz(flexion)``. With the anthropometric wrist base (``base.T @ z == -y``) the
 #: chain is the intrinsic ``Y X Z`` Euler sequence with the first angle negated.
 WRIST_BASE_AXIS = np.array([0.0, -1.0, 0.0])
-_EULER = "YXZ"
+_EULER: Literal["YXZ"] = "YXZ"
 ANGLE_NAMES = ("pronation", "cock", "flexion")
 
 
