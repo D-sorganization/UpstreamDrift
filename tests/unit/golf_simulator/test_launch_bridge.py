@@ -15,6 +15,7 @@ from src.shared.python.golf_simulator.contracts import (
     NumericalStatus,
     ScientificStatus,
     ShotEnvelope,
+    ShotMetadata,
     ShotQualification,
     SourceKind,
 )
@@ -66,12 +67,16 @@ def test_convert_launch_conditions_to_shot_envelope() -> None:
         spin_axis=spin_axis,
     )
 
-    envelope = launch_conditions_to_shot_envelope(
-        launch_conditions=lc,
+    metadata = ShotMetadata(
         shot_id="shot-test-01",
         session_id="session-test-01",
         aim_context=_identity_aim(),
         created_at_utc="2026-09-15T12:00:00Z",
+    )
+
+    envelope = launch_conditions_to_shot_envelope(
+        launch_conditions=lc,
+        metadata=metadata,
     )
 
     # Expected velocity decomposition:
@@ -107,8 +112,7 @@ def test_convert_post_impact_state_to_shot_envelope() -> None:
         impact_location=np.array([0.002, -0.001]),
     )
 
-    envelope = post_impact_state_to_shot_envelope(
-        post_impact=post,
+    metadata = ShotMetadata(
         shot_id="shot-model-01",
         session_id="session-model-01",
         model_run_id="run-mujoco-01",
@@ -126,6 +130,11 @@ def test_convert_post_impact_state_to_shot_envelope() -> None:
         created_at_utc="2026-09-15T12:00:00Z",
     )
 
+    envelope = post_impact_state_to_shot_envelope(
+        post_impact=post,
+        metadata=metadata,
+    )
+
     assert envelope.ball_velocity_m_s == (65.0, -1.5, 12.0)
     assert envelope.ball_angular_velocity_rad_s == (5.0, -280.0, 15.0)
     assert envelope.impact_time_s == 0.235
@@ -141,11 +150,14 @@ def test_bridge_rejects_zero_speed_launch_conditions() -> None:
         spin_rate=0.0,
         spin_axis=np.array([0.0, -1.0, 0.0]),
     )
+    metadata = ShotMetadata(
+        shot_id="shot-zero",
+        session_id="session-zero",
+        aim_context=_identity_aim(),
+        created_at_utc="2026-09-15T12:00:00Z",
+    )
     with pytest.raises(ValueError, match="zero-speed"):
         launch_conditions_to_shot_envelope(
             launch_conditions=lc,
-            shot_id="shot-zero",
-            session_id="session-zero",
-            aim_context=_identity_aim(),
-            created_at_utc="2026-09-15T12:00:00Z",
+            metadata=metadata,
         )
