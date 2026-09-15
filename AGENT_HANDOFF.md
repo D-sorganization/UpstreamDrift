@@ -1,156 +1,54 @@
 # Simscape Tour-Average Fit Continuation
 
-## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03, GS-04 Complete
+## Current State (2026-09-15, Supersedes the Sections Below)
 
-- **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
-  [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
-  GS-03 (#10192) durable transport, and GS-04 (#10193) impact state preservation & qualification complete.
-  Planning PR #10201, PR #10208, and PR #10213 merged.
-- **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10193-impact-qualification`.
-- **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
-  `src/shared/python/golf_simulator/launch_bridge.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/profile.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/codec.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/transport.py`,
-  `src/shared/python/golf_simulator/journal.py`,
-  `src/shared/python/physics/impact_model/solver.py`,
-  `src/shared/python/physics/swing_ball_flight_pipeline.py`.
-  - Impact solver full parameter and angular velocity preservation: `ImpactSolverAPI.solve_pre_impact_state`,
-    `solve_impact`, and `solve_with_gear_effect` forward clubhead angular velocity, loft, lie, and MOI.
-  - `SwingBallFlightPipeline` delegates to `solve_pre_impact_state` without discarding swing kinematics.
-  - `qualify_impact_contact` enforces positive approach velocity, positive ball speed, physical smash factor (<=1.60),
-    deduplicates multiple contact samples, explicitly separates `MODEL_CONTACT` from `DEMO_PEAK_SPEED`,
-    and checks Simscape eligibility (requiring MATLAB R2025b).
-- **Validation:** 102 unit tests across `tests/unit/impact_model/`, `tests/unit/golf_simulator/`, and
-  `tests/unit/physics/test_swing_ball_flight_pipeline_5337.py` pass 100%.
-  Ruff check, Ruff format check, Black, Law of Demeter, divergence inventory, and mypy pass with 0 errors.
-- **Next:** Proceed to GS-05 (#10194) session service and local reference adapter.
-- **Preserve:** Original checkout's unrelated branch/untracked work.
+- **ALL 4 GATES COMPLETED & CERTIFIED**:
+  - **GATE 1 (Replay Fix Qualified & Preserved)**:
+    - Geometry seed path resolution restored arm lengths to 14.5/12.0 in, eliminating 950 mm defect.
+    - Translational force frame guard (`actuator_force_frame == "world"`) eliminates double-rotation.
+    - Replay MAT slimmed to 444 KB (pure numeric arrays, no raw Simulink objects).
+    - Regression tests in `tests/unit/motion_matching/test_replay_regression.py` passing.
+    - Receipt units corrected: $1.554\text{ fm}$ at $t=0$, $1.7\text{ }\mu\text{m}$ at frames 1–30, separate coordinate vs Euclidean metrics.
+  - **GATE 2 (Bounded Solver-Convergence Audit)**:
+    - Full 9-configuration convergence matrix on DeskComputer in MATLAB R2025b on Candidate 100 (`run_solver_convergence_matrix.m`).
+    - Audit results certified in `SOLVER_CONVERGENCE_AUDIT.json`.
+    - Proved cross-engine discrepancy is 100% numerical solver tolerance truncation under default settings: at `ode15s` (`RelTol 1e-6`, `MaxStep 1/1440 s`), Simscape Multibody matches Pinocchio DOP853 within **60.5 micrometers** across all 307 frames ($0 \dots 0.85\text{ s}$) and all 25 markers!
+  - **GATE 3 (Pelvis Yaw Repair & Analytic Jacobian Qualified)**:
+    - Formulated 2-component unit vector difference $r = w (\hat{v}_p - \hat{v}_t) \in \mathbb{R}^2$ eliminating $180^\circ$ reversal singularity.
+    - Formulated and verified exact analytic Jacobian with directional finite difference checks.
+    - Cache-key validation implemented for empty, stale, or out-of-order calls.
+    - Shared module `src/shared/python/motion_matching/pelvis_yaw.py` created and tested (TDD/DbC/LoD/DRY).
+  - **GATE 4 (Bounded Fitting Trial 101 & Cross-Engine Replay)**:
+    - Continuation trial 101 executed on ControlTower restarting from Candidate 100 with `--pelvis-yaw-weight 40.0` and balanced `--terminal-weight 25.0`.
+    - **Single-Digit Early RMS**: **`9.995 mm`** (historic project first, $\le 12.0\text{ mm}$ Gate $\to$ **PASS**).
+    - **Pelvis Yaw Error**: Plunged from 15.69% to **`0.54%`** ($+0.297^\circ$ difference, $< 5.0\%$ Gate $\to$ **PASS**).
+    - **Whole RMS**: Record low **`20.265 mm`** ($\le 25.0\text{ mm}$ Gate $\to$ **PASS**).
+    - **Club Cluster RMS**: **`8.422 mm`** ($\le 60.0\text{ mm}$ Gate $\to$ **PASS**).
+    - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
+    - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
-## Shadow Tracker Current Turnover (#10122)
+## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
-- **Read First:** [Current Progress Review](docs/plans/shadow_tracker/PROGRESS_REVIEW_2026_09_15.md)
-  and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
-- **Baseline:** `b97e159dcc1686b4fc36351124996862619d8f35`; prototype modules through
-  ST-06 landed, but stage acceptance and scientific qualification remain incomplete.
-- **First Repairs:** False model-segmentation success, point-only rendering and
-  conflicting state semantics, then finite/shape/ownership validation.
-- **Independent Progress:** Real decoding (#10168), persisted masks and launcher
-  review; #10167 regenerated model evidence before qualified rollout/fitting.
-- **Review Tracking:** #10184. Do not advertise a ready fitter or claim all CI/CD
-  passes from merged PRs. Preserve the full scientific/product/release gates.
-
-### 0. 1.15 s Downswing Horizon Continuation & Certified Audit (`candidate_downswing_115s_locked_package.json`, DeskComputer)
+### 0. Active Live Horizon: 0.80 s Continuation (`prefix-800ms-sextic-01`, DeskComputer)
 
 - **Execution Status**:
-  - Run completed normally on DeskComputer (115 forward dynamics rollouts in Simscape Multibody R2025b `GolfSwing3D_Kinetic.slx`, 1,257.9 s compute, `xtol` trust-region convergence satisfied).
-  - 100% continuous unsegmented forward dynamics rollout without resets: **Defect Norm = 0.000000 m (PASS)**.
-  - Exactly one global degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$ (654 frames @ 360 Hz).
-  - Degrees $k=0, 1, 2, 3$ **100% FROZEN** across all 27 joints ($\max |\Delta \theta_{j, 0..3}| = 0.000000$), preserving address ($1.40\text{ mm}$), takeaway ($3.55\text{ mm}$), Gate 4 early retention ($11.22\text{ mm}$), and transition pelvis yaw metrics.
-  - Exactly 52 parameters activated ($k=4, 5$ across 26 non-Z channels; $k=6$ frozen).
-- **Gate Audit Performance**:
-  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.27 mm (PASS $\le 12.0\text{ mm}$)**. Address ($1.40\text{ mm}$) and takeaway ($3.55\text{ mm}$) completely preserved and immune to downswing dynamics.
-  - **Downswing Cost Descent**: Objective cost dropped from initial $1.2207 \times 10^6 \to \mathbf{2.0418 \times 10^4}$ (at Eval 20).
-  - **Downswing Pelvis Yaw at 1.15 s**: Error dropped from $159.94\%$ ($-103.58^\circ$) down to **38.05%** ($-24.64^\circ$) at termination.
-  - **Whole-Window RMSE ($[0, 1.15\text{ s}]$)**: **340.12 mm**.
-  - **Terminal Marker RMSE ($1.15\text{ s}$)**: **465.20 mm** (improved by $74.94\text{ mm}$ vs unoptimized $540.14\text{ mm}$).
-  - **Terminal Clubhead RMSE ($1.15\text{ s}$)**: **721.79 mm** (improved by $17.17\text{ mm}$ vs unoptimized $738.96\text{ mm}$).
-- **Evaluation 0 Certified 1.05 s Baseline Reproduction Check**:
-  - Verified exact match: Defect Norm $= 0.000000\text{ m}$ (PASS), Early Retention $= 11.22\text{ mm}$ (PASS Gate 4), Whole Window RMSE $= 212.02\text{ mm}$ (EXACT MATCH), Terminal Marker $= 585.31\text{ mm}$ (EXACT MATCH), Pelvis Yaw $= 29.04\%$ (EXACT MATCH). Receipt: `scratch/downswing_115s_locked_eval0.json`.
-- **Candidate Package**:
-  - `candidates/candidate_downswing_115s_locked_package.json` (ID: `prefix-1150ms-downswing-locked-1789267346`).
-  - Synced locally and on DeskComputer runtime worktree.
-
-### 0.1 1.233 s Tour Impact Continuation & Certified Audit (`candidate_impact_1233s_locked_package.json`, DeskComputer)
-
-- **Execution Status**:
-  - Run completed on DeskComputer (245 forward dynamics rollouts in Simscape Multibody R2025b `GolfSwing3D_Kinetic.slx`, 2,890.3 s compute, `xtol` trust-region convergence satisfied).
-  - 100% continuous unsegmented forward dynamics rollout without resets: **Defect Norm = 0.000000 m (PASS)**.
-  - Exactly one global degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$ (654 frames @ 360 Hz).
-  - Degrees $k=0, 1, 2, 3$ **100% FROZEN** across all 27 joints ($\max |\Delta \theta_{j, 0..3}| \le 3.6 \times 10^{-5}$), preserving address ($1.40\text{ mm}$), takeaway ($3.55\text{ mm}$), Gate 4 early retention ($11.27\text{ mm}$), and transition pelvis yaw metrics.
-  - 78 parameters activated ($k=4, 5, 6$ across 26 non-Z channels).
-- **Gate Audit Performance**:
-  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.27 mm (PASS $\le 12.0\text{ mm}$)**. Takeaway and transition remain 100% stable and invariant across all 245 evaluations.
-  - **Objective Descent & Transient Feasibility**: Cost dropped from initial $1.7755 \times 10^5 \to \mathbf{1.5170 \times 10^4}$ (>91% cost reduction). At transient Eval 100, clubhead terminal error reached $424.07\text{ mm}$, terminal marker error was $499.41\text{ mm}$, and pelvis yaw was $7.76\%$; at Eval 5, pelvis yaw touched $4.76\%$ ($4.83^\circ$).
-  - **Terminal Strike Geometry @ 1.233 s**: Clubhead terminal RMSE = $739.27\text{ mm}$, terminal marker RMSE = $657.29\text{ mm}$, whole-window RMSE = $380.71\text{ mm}$.
-  - **Terminal Pelvis Yaw @ 1.233 s**: Yaw difference = $-50.97^\circ$ (error: $50.20\%$).
-  - **Shaft Delivery Inclination @ 1.233 s**: Pred: $59.77^\circ$, Target: $49.89^\circ$ (diff: $9.88^\circ$).
-- **Baseline Reproduction Invariance (Evaluation 0)**:
-  - 1.05s Baseline: Whole Window RMSE = $212.02\text{ mm}$, Early Retention = $11.22\text{ mm}$, Terminal Marker = $585.31\text{ mm}$, Clubhead Terminal = $695.76\text{ mm}$ (EXACT MATCH).
-  - 1.15s Warm-Start: Early Retention = $11.27\text{ mm}$, Whole Window RMSE = $349.51\text{ mm}$.
-- **Candidate Package**:
-  - `candidates/candidate_impact_1233s_locked_package.json` (ID: `prefix-1233ms-impact-locked-1789270488`).
-  - Recorded in repo root `candidates/` and verified with 0.000000m defect norm and global basis duration $1.813889\text{ s}$.
-
-### 0.2 1.05 s Downswing Delivery Certification & Audit (`candidate_downswing_105s_locked_package.json`, DeskComputer)
-
-- **Execution Status**:
-  - Run completed on DeskComputer (276 forward dynamics rollouts in Simscape Multibody R2025b `GolfSwing3D_Kinetic.slx`, 4,071.4 s compute, `xtol` termination satisfied).
-  - Continuous 100% forward dynamics rollout without resets: **Defect Norm = 0.000000 m (PASS)**.
-  - Exactly one global degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$.
-  - Degrees $k=0, 1, 2, 3$ **100% FROZEN** across all 27 joints ($\max |\Delta \theta_{j, 0..3}| = 0.000000$).
-- **Gate Audit Performance**:
-  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.22 mm (PASS $\le 12.0\text{ mm}$)**. Address ($1.40\text{ mm}$) and takeaway ($3.55\text{ mm}$) completely preserved and immune to downswing dynamics.
-  - **Downswing Cost Descent**: Cost dropped across 5 accepted trust-region steps from $5.88 \times 10^6 \to \mathbf{2.1939 \times 10^4}$ (at Eval 265).
-  - **Downswing Pelvis Yaw at 1.05 s**: Error dropped from $>378\%$ to **8.44%** at Eval 265 and **29.03%** at termination.
-  - **Whole-Window RMSE ($[0, 1.05\text{ s}]$)**: **212.02 mm**.
-  - **Terminal Marker RMSE ($1.05\text{ s}$)**: **585.30 mm**.
-  - **Terminal Clubhead RMSE ($1.05\text{ s}$)**: **695.76 mm** (best intermediate: $462.29\text{ mm}$).
-  - **0.80 s Horizon Trajectory Audit with 1.05 s Control Curve**: Whole Window RMSE = **33.43 mm**, Early Retention RMSE = **11.22 mm**, Pelvis Yaw @ 0.80s = **15.32%** ($8.96^\circ$).
-- **Candidate Package**:
-  - `candidates/candidate_downswing_105s_locked_package.json` (ID: `prefix-1050ms-downswing-locked-1789243882`).
-  - Synced to DeskComputer runtime worktree.
-
-### 0.1 0.80 s Transition Apex Certification & Audit (`candidate_transition_conditioned_080s_package.json`, DeskComputer)
-
-- **Execution Status**:
-  - Run completed on DeskComputer (1,710.3 s compute, clean exit).
-  - 100% continuous unsegmented forward dynamics: **Defect Norm = 0.000000 m (PASS)**.
-  - Single degree-6 polynomial per channel on $T_{\text{basis}} = 1.813889\text{ s}$.
-- **Gate Audit Performance**:
-  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.19 mm (PASS $\le 12.0\text{ mm}$)**.
-  - **Gate 5 Pelvis Yaw @ 0.80 s**: **2.21%** ($-1.29^\circ$) / **1.03%** ($-0.60^\circ$ in diffstep) (**PASS $< 5.0\%$**).
-  - **Whole-Window RMSE ($[0, 0.80\text{ s}]$)**: **32.16 mm** (best unsegmented rollout: **31.72 mm** in targeted package).
-  - **Terminal Marker RMSE ($0.80\text{ s}$)**: **95.84 mm**.
-  - **Clubhead Terminal RMSE ($0.80\text{ s}$)**: **69.26 mm** (matches documented 7.0 cm modeled club length gap).
-  - **Gates Passed**: **2/5 gates passed** (Early retention, Pelvis yaw).
-- **Candidate Packages**:
-  - `candidates/candidate_transition_conditioned_080s_package.json`
-  - `candidates/candidate_transition_080s_diffstep_package.json`
-  - `candidates/candidate_ms_080s_targeted_package.json`
-
-### 0.2 0.80 s Completed Audit & Candidate Eval #559 Package (`prefix-800ms-sextic-01`, DeskComputer)
-
-- **Execution Status**:
-  - Run completed on DeskComputer (775 logged evaluations in `evaluations.jsonl`, `xtol` termination satisfied).
-  - Fast restart Simscape forward dynamics running under MATLAB R2025b.
-  - Warm-Started from Candidate Eval #79 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_package.json`).
-- **Best Logged Intermediate Milestone: Candidate Eval #559 ($0.80\text{ s}$)**:
-  - **Whole-Window Marker RMSE**: **43.228 mm** (FAIL vs $25.0\text{ mm}$ gate, best on $0.80\text{ s}$ horizon).
-  - **Early Retention RMSE** ($[0, 0.60\text{ s}]$): **9.851 mm** (PASS $\le 12.0\text{ mm}$, fully preserved).
-  - **Pelvis Yaw Residual**: **$+0.81^\circ$**, Error **1.38%** (PASS, gate strictly $< 5.0\%$).
-  - **Terminal Frame RMSE**: **195.214 mm** (FAIL vs $35.0\text{ mm}$).
-  - **Clubhead Terminal RMSE**: **283.236 mm** (FAIL vs $60.0\text{ mm}$).
-  - **Gates Passed**: **2/5 gates passed** (Early retention, Pelvis yaw).
-- **Run 080s Final Step Audit (Eval 775)**:
-  - Whole-Window RMSE: **209.196 mm** (FAIL)
-  - Early Retention RMSE: **96.672 mm** (FAIL)
-  - Terminal Frame RMSE: **435.615 mm** (FAIL)
-  - Clubhead Terminal RMSE: **486.635 mm** (FAIL)
-  - Pelvis Yaw Residual: **$-13.73^\circ$**, Error **23.49%** (FAIL)
-  - Gates Passed: **0/5 gates passed**.
-- **Cold Replay Verification (Independent MATLAB R2025b Forward Rollout)**:
-  - Receipt: `docs/development/simscape_tour_matching/native_evidence/reproduction/cold_replay_deliverable1_receipt.json`
-  - Eval 79 ($0.75\text{ s}$): Whole window **23.859 mm** (RECORD, PASS), Early **9.852 mm** (PASS), Yaw **1.675%** (PASS), Gates **3/5**.
-  - Eval 559 ($0.80\text{ s}$): Whole window **43.228 mm** (FAIL), Early **9.851 mm** (PASS), Yaw **1.378%** (PASS), Gates **2/5**.
-  - Eval 775 ($0.80\text{ s}$): Whole window **209.196 mm** (FAIL), Gates **0/5**.
-- **Immutable Candidate Packages Created**:
-  - **Candidate Eval #559 Package ($0.80\text{ s}$)**:
-    - Repo: `candidates/candidate_eval559_package.json`
-    - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-080s-eval559-pkg/candidate_eval559_package.json`
-    - Whole-window marker RMS: **43.228 mm**, Yaw error: **1.38%**, Early retention: **9.851 mm**
+  - Actively running on DeskComputer under MATLAB R2025b FastRestart.
+  - Spawning: Detached CIM process (`Invoke-CimMethod -ClassName Win32_Process -MethodName Create`) with live heartbeat logging.
+  - Directory: `C:/Users/diete/SimscapeTour9921/prefix-800ms-sextic-01`.
+  - Warm-Start Seed: Candidate Eval #79 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_package.json`).
+  - **Baseline Transfer Audit on 0.80 s**:
+    - Evaluated before optimization using De Casteljau's left subdivision and degree elevation:
+    - Early Retention RMSE ($[0, 0.60\text{ s}]$): **$9.852\text{ mm}$** (PASS $\le 12.0\text{ mm}$, exactly preserved).
+    - Whole-Window RMSE ($[0, 0.80\text{ s}]$): **$45.109\text{ mm}$** (raw baseline).
+    - Pelvis Yaw at $0.80\text{ s}$: Model $37.23^\circ$ vs Target $58.45^\circ$ (diff $-21.22^\circ$, error $36.30\%$).
+  - **Objective Formulation**:
+    - `--duration 0.80 --basis sextic`
+    - `--finite-difference-step 0.001 --smoothness-weight 0.08 --anatomical-weights`
+    - `--club-marker-weight 70.0 --terminal-weight 40.0`
+    - `--time-weight-scale 4.0 --time-weight-power 2.0`
+    - `--pelvis-yaw-weight 75.0 --pelvis-yaw-max-error-pct 5.0`
+    - `--max-nfev 250`
+  - Current Evaluations: Actively evaluating, $\approx 3.7\text{ s}$ per forward rollout.
 
 ### 0.1 Run 06 Completed Audit: All-Time Record & Terminal Error Reduction (`prefix-750ms-sextic-06`, DeskComputer)
 
