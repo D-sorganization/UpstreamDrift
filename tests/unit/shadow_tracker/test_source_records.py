@@ -431,3 +431,66 @@ def test_validate_frame_sequence_rejects_non_increasing_known_physical_time() ->
     )
     with pytest.raises(ValueError, match="physical_time_s"):
         validate_frame_sequence([f1, f4])
+
+
+# --------------------------------------------------------------------------- #
+#  Issue #10151 Malformed-Input and Type Boundary Tests                      #
+# --------------------------------------------------------------------------- #
+
+
+def test_source_asset_from_dict_wrong_container_type_raises_type_error() -> None:
+    """SourceAsset.from_dict([]) must raise TypeError naming payload/container."""
+    with pytest.raises(TypeError, match="dict|mapping|payload"):
+        SourceAsset.from_dict([])  # type: ignore[arg-type]
+
+
+def test_source_asset_from_dict_missing_required_keys_raises_value_error() -> None:
+    """SourceAsset.from_dict({}) must raise ValueError naming missing fields."""
+    with pytest.raises(ValueError, match="Missing required field|schema_version"):
+        SourceAsset.from_dict({})
+
+
+def test_frame_identity_from_dict_wrong_container_type_raises_type_error() -> None:
+    """FrameIdentity.from_dict([]) must raise TypeError naming payload/container."""
+    with pytest.raises(TypeError, match="dict|mapping|payload"):
+        FrameIdentity.from_dict([])  # type: ignore[arg-type]
+
+
+def test_frame_identity_from_dict_missing_required_keys_raises_value_error() -> None:
+    """FrameIdentity.from_dict({}) must raise ValueError naming missing fields."""
+    with pytest.raises(ValueError, match="Missing required field|schema_version"):
+        FrameIdentity.from_dict({})
+
+
+def test_validate_frame_sequence_wrong_element_type_raises_type_error() -> None:
+    """validate_frame_sequence([None]) must raise TypeError naming FrameIdentity."""
+    with pytest.raises(TypeError, match="FrameIdentity"):
+        validate_frame_sequence([None])  # type: ignore[list-item]
+
+    f1 = _make_frame_identity(frame_id="f1", pts_ticks=0)
+    with pytest.raises(TypeError, match="FrameIdentity"):
+        validate_frame_sequence([f1, "not-a-frame"])  # type: ignore[list-item]
+
+
+def test_source_asset_schema_version_wrong_type_raises_type_error() -> None:
+    """Wrong-type schema_version must raise TypeError, not ValueError."""
+    with pytest.raises(TypeError, match="schema_version"):
+        _make_source_asset(schema_version=123)  # type: ignore[arg-type]
+
+
+def test_frame_identity_schema_version_wrong_type_raises_type_error() -> None:
+    """Wrong-type schema_version must raise TypeError, not ValueError."""
+    with pytest.raises(TypeError, match="schema_version"):
+        _make_frame_identity(schema_version=123)  # type: ignore[arg-type]
+
+
+def test_source_asset_rights_status_wrong_type_raises_type_error() -> None:
+    """Integer or wrong-type rights_status must raise TypeError, not ValueError."""
+    with pytest.raises(TypeError, match="rights_status"):
+        _make_source_asset(rights_status=123)  # type: ignore[arg-type]
+
+
+def test_frame_identity_rejects_integer_physical_time_s() -> None:
+    """physical_time_s must strictly be float or None; int must raise TypeError."""
+    with pytest.raises(TypeError, match="physical_time_s"):
+        _make_frame_identity(physical_time_s=1)  # type: ignore[arg-type]
