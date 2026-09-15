@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from shared.python.shadow_tracker.mask_records import MaskFrame
@@ -407,7 +409,7 @@ def test_mask_frame_from_dict_rejects_oversized_sequence_before_consumption() ->
         def __len__(self) -> int:
             return 5
 
-        def __getitem__(self, index: int) -> int:
+        def __getitem__(self, index: Any) -> Any:
             raise RuntimeError("pixels consumed before length rejection")
 
     mask = _make_mask_frame(width_px=2, height_px=2)
