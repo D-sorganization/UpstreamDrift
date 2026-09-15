@@ -134,22 +134,35 @@
       "spec": "CONTRACT_FREEZE.md",
       "issue": 10137,
       "depends_on": ["handoff-10142"],
-      "parent": 10125
+      "parent": 10125,
+      "status": "implemented_reviewed_followup_required",
+      "merge_pr": 10145
     },
     {
       "id": "ST-02C",
       "spec": "CONTRACT_FREEZE.md",
       "issue": 10139,
       "depends_on": ["handoff-10142"],
-      "parent": 10125
+      "parent": 10125,
+      "status": "implemented_reviewed_followup_required",
+      "merge_pr": 10147
     },
     {
       "id": "ST-02B",
       "spec": "CONTRACT_FREEZE.md",
       "issue": 10138,
       "depends_on": ["ST-02A"],
-      "parent": 10125
+      "parent": 10125,
+      "status": "implemented_reviewed_followup_required",
+      "merge_pr": 10148
     }
   ],
-  "specialist_blockers": [10140, 10141]
+  "specialist_blockers": [10140, 10141],
+  "review": {
+    "baseline": "c3395229839cfb66ded994bbef0a39fcb985e1e6",
+    "document": "DEVELOPMENT_REVIEW.md",
+    "continuation_prompt": "CONTINUATION_PROMPT.md",
+    "first_corrective_issue": 10151,
+    "full_product_implemented": false
+  }
 }
