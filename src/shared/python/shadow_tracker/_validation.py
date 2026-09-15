@@ -70,10 +70,30 @@ def check_uri(val: object, field_name: str = "source_uri") -> str:
     return uri
 
 
+def check_schema_version(val: object, expected: str) -> str:
+    """Validate that schema_version is a string matching expected exactly."""
+    if not isinstance(val, str):
+        raise TypeError(f"schema_version must be a str, got {type(val).__name__}")
+    if val != expected:
+        raise ValueError(f"schema_version must be exactly {expected!r}, got {val!r}")
+    return val
+
+
 def check_payload_keys(
-    payload: dict[str, Any], allowed_keys: set[str] | frozenset[str]
-) -> None:
-    """Reject unexpected keys during deserialization."""
+    payload: object, allowed_keys: set[str] | frozenset[str]
+) -> dict[str, Any]:
+    """Validate payload container type, missing keys, and unexpected keys during deserialization."""
+    if not isinstance(payload, dict):
+        raise TypeError(f"Payload must be a dict, got {type(payload).__name__}")
+
+    # Check for unknown keys
     extra = set(payload.keys()) - set(allowed_keys)
     if extra:
         raise ValueError(f"Unknown fields rejected: {sorted(extra)}")
+
+    # Check for missing required keys
+    missing = set(allowed_keys) - set(payload.keys())
+    if missing:
+        raise ValueError(f"Missing required fields: {sorted(missing)}")
+
+    return payload

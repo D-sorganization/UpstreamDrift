@@ -376,3 +376,52 @@ def test_mask_frame_observation_hash_format_and_determinism() -> None:
     assert h1 == h2
     assert len(h1) == 64
     assert all(c in "0123456789abcdef" for c in h1)
+
+
+# --------------------------------------------------------------------------- #
+#  Issue #10151 Malformed-Input and Pre-Conversion Tests                      #
+# --------------------------------------------------------------------------- #
+
+
+def test_mask_frame_from_dict_wrong_container_type_raises_type_error() -> None:
+    """MaskFrame.from_dict([]) must raise TypeError naming payload/container."""
+    with pytest.raises(TypeError, match="dict|mapping|payload"):
+        MaskFrame.from_dict([])  # type: ignore[arg-type]
+
+
+def test_mask_frame_from_dict_missing_required_keys_raises_value_error() -> None:
+    """MaskFrame.from_dict({}) must raise ValueError naming missing fields, not leak KeyError."""
+    with pytest.raises(ValueError, match="Missing required field|frame"):
+        MaskFrame.from_dict({})
+
+
+def test_mask_frame_from_dict_rejects_oversized_sequence_before_consumption() -> None:
+    """Validate positive dimensions and all three payload lengths before reading pixels.
+
+    A custom Sequence whose __getitem__ raises should NEVER have __getitem__ called
+    if its length does not match width_px * height_px.
+    """
+    from collections.abc import Sequence
+
+    class OversizeSequence(Sequence):
+        def __len__(self) -> int:
+            return 5
+
+        def __getitem__(self, index: int) -> int:
+            raise RuntimeError("pixels consumed before length rejection")
+
+    mask = _make_mask_frame(width_px=2, height_px=2)
+    payload = mask.to_dict()
+    payload["body"] = OversizeSequence()
+
+    with pytest.raises(ValueError, match="body.*length"):
+        MaskFrame.from_dict(payload)
+
+
+def test_mask_frame_from_dict_rejects_non_dict_frame_with_type_error() -> None:
+    """Non-dict / non-FrameIdentity frame field must raise TypeError."""
+    mask = _make_mask_frame()
+    payload = mask.to_dict()
+    payload["frame"] = 123
+    with pytest.raises(TypeError, match="frame"):
+        MaskFrame.from_dict(payload)
