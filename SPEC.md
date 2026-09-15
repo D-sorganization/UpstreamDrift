@@ -1,10 +1,21 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Record Validation Hardening (#10151)
+
+Hardens boundary validation for frozen Shadow Tracker image-evidence records:
+- Centralizes deserialization dictionary checks in `_validation.check_payload_keys`: verifies payload is a `dict` before key access (raising `TypeError`), rejects unknown fields, and rejects missing required fields (raising `ValueError`).
+- Centralizes `schema_version` verification via `_validation.check_schema_version` raising `TypeError` for non-string types and `ValueError` for mismatched tags.
+- Enforces strict `float` type for known `physical_time_s` in `FrameIdentity` (rejecting integer coercion).
+- Enforces strict `str` type for `rights_status` in `SourceAsset` (raising `TypeError`).
+- Validates sequence item types in `validate_frame_sequence` (raising `TypeError` if any element is not a `FrameIdentity`).
+- Enforces positive dimensions and checks `body`, `club`, and `valid` sequence lengths before consuming elements in `MaskFrame.from_dict` to prevent unwanted iteration of oversized sequences.
+
 ## Shadow Tracker Development Review and Continuation (#10150)
 
 Records the reviewed image-contract baseline, reproduced validation findings and
 full delivery handoff covering TDD/DbC/LoD/DRY, model qualification, launcher/UI,
 performance and CI/CD. No fitter or scientific gate is completed by this review.
+
 
 ## Shadow Tracker Immutable Binary Masks and Lineage (ST-02B, #10138)
 
