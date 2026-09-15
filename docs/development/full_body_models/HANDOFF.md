@@ -444,7 +444,7 @@ MJX environment, `mjx_trajectory_optimisation.py --run <run> --iterations N
 mujoco-mjx defusedxml numpy scipy` (JAX 0.11.1, MuJoCo 3.13, MJX 3.13; the
 main environment keeps MuJoCo 3.3.4). Validate any optimised reference in
 the shared-law plant with `downswing_experiment.py --run <run> --reference
-<npz>`. Driver result: to 1.5 s the shared-plant replay drops from 56.1 to 40.2 mm (pelvis yaw lag at 1.4 s 12.3 to 2.6 deg); the uncosted follow-through collapses from iteration 8, so iterations 4 to 6 are the whole-swing choice (79.6 mm against 74.6). The MJX plant's own follow-through diverges (soft grip weld), which is the next thing to fix before a full-horizon solve. Details REVIEW.md 17.
+<npz>`. Driver result: to 1.5 s the shared-plant replay drops from 56.1 to 40.2 mm (pelvis yaw lag at 1.4 s 12.3 to 2.6 deg); the uncosted follow-through collapses from iteration 8, so iterations 4 to 6 are the whole-swing choice (79.6 mm against 74.6). The MJX plant's own follow-through diverges after 1.6 s (not the weld: a five-times stiffer one is identical), which is the next thing to locate joint by joint before a full-horizon solve. Details REVIEW.md 17.
 
 ### How to Continue (Read This First)
 
