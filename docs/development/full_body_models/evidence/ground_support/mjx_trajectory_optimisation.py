@@ -390,6 +390,7 @@ def main() -> None:
         ok = np.asarray(valid) & finite[:, None]
         rms = float(np.sqrt(np.mean(err[ok] ** 2))) if ok.any() else float("nan")
         root_err = np.linalg.norm(q_sim[:, :3] - q_track[:, :3], axis=1)
+        np.savez(run / "mjx_diagnose.npz", markers_m=m, q_sim=q_sim, peak_qvel=speed)
         LOG.info(
             "diagnose: rollout %.0f s; first non-finite frame %d (t=%.3f s); replay markers over finite frames %.1f mm",
             time.perf_counter() - t0,
