@@ -2,23 +2,21 @@
 
 ## Current State
 
-Current implementation baseline includes merged Stage 0 contract hardening (#10151 / PR #10163),
-MuJoCo IK coordinate alignment (#10140 / PR #10164), production closure units separation
-(#10141 / PR #10165), and feasibility qualification (#10124 / PR #10169). Stage 2 (#10125)
-full contracts freeze, Stage 3 (#10126) video ingestion, shot partitioning, timing mappings,
-and capture evidence, Stage 4 (#10127) body and club silhouette segmentation and occlusion tracking,
-Stage 5 (#10128) calibrated silhouette rendering, analytic projection, and residual losses,
-and Stage 6 (#10129) subject shape and initial-state hypothesis fitting
-have been implemented and tested with 100% boundary and DbC enforcement.
-Scientific gates remain blocked.
+Reviewed baseline: `b97e159dcc1686b4fc36351124996862619d8f35`.
+Code for evidence records, timing, mask metrics, point projection and candidate
+ranking has merged. Full ST-01–ST-06 acceptance has not been demonstrated.
+The renderer is point-only; the model segmenter can report success without
+inference; real decoding, persisted mask lineage and model qualification remain.
+See [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md) for reproduced cases.
 
 ## Immediate Dispatch
 
-Read [Development Review](DEVELOPMENT_REVIEW.md) and [Continuation Prompt](CONTINUATION_PROMPT.md).
-Prerequisites #10140, #10141, #10124, #10125, #10126, #10127, #10128, and #10129 are complete. Next task is Stage 7 (#10130):
-Continuous Physics Rollout Integration and Replay Parity.
-Do not interpret passing unit tests as physical-model qualification. Recompute historical IK trajectories
-before attempting forward fitting.
+First repair false segmentation success under #10127, then the renderer/state
+contract under #10128 and DTO invariants. Continue real local-video ingestion
+(#10168) and persisted manual-mask review independently of physical qualification.
+Use [Continuation Prompt](CONTINUATION_PROMPT.md). Stage 7 is boundary work only
+until #10167 supplies regenerated, physically valid model evidence. Do not use
+issue closure or merged prototypes as proof that scientific gates have passed.
 
 ## First Pickup
 
@@ -35,9 +33,9 @@ before attempting forward fitting.
 7. Update the root handoff and this project's evidence/status pointers. Reference
    the child issue. Close a child only when all of its acceptance criteria land.
 
-ST-01 remains the research task. Lower-cost agents take frozen image-only
-ST-02A/C/B packets, not the entire ST-02 or ST-08 work package. The full-body
-native/canonical mapping and scientific profile are not frozen by this handoff.
+Lower-cost agents take one corrective or real-ingestion slice from the current
+progress review. A/B/C are already implemented. Scientific model qualification
+and full-body native/canonical mapping still require independent evidence.
 
 ## Original Planning Validation
 
