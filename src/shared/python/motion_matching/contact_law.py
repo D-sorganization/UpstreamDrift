@@ -206,3 +206,46 @@ def contact_parity_report(
         "max_normal_force_difference_n": normal_diff,
         "max_friction_force_difference_n": friction_diff,
     }
+
+
+def calibrate_ground_height_at_address(model: Any, address_q: Array) -> float:
+    """Calibrate ground plane height to the lowest contact sphere surface at address."""
+    q_dict = {
+        name: float(address_q[i]) for i, name in enumerate(model.coordinate_order)
+    }
+    if hasattr(model, "_mj"):
+        model.data.qpos[:] = model._vector(q_dict)
+        model._mj.mj_fwdPosition(model.model, model.data)
+        min_z = min(
+            model.data.site_xpos[s_info["site_id"]][2] - s_info["radius"]
+            for s_info in model._spheres.values()
+        )
+        return float(min_z)
+    if hasattr(model, "_pin"):
+        q = model.configuration(q_dict)
+        model._pin.forwardKinematics(model.model, model.data, q)
+        model._pin.updateFramePlacements(model.model, model.data)
+        min_z = min(
+            float(
+                model.data.oMf[model._contact_frames[s.name]].translation[2]
+                - s.radius_m
+            )
+            for s in model.contact_spheres
+        )
+        return float(min_z)
+    if hasattr(model, "plant"):
+        model.plant.SetPositions(model.context, model._vector(q_dict, model._q_indices))
+        min_z = min(
+            float(
+                model.plant.CalcPointsPositions(
+                    model.context,
+                    s_info["frame"],
+                    np.zeros(3),
+                    model.plant.world_frame(),
+                )[2, 0]
+                - s_info["radius_m"]
+            )
+            for s_info in model._spheres.values()
+        )
+        return float(min_z)
+    return 0.0
