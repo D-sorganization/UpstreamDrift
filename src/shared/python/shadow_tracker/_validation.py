@@ -9,6 +9,14 @@ import urllib.parse
 SOURCE_SCHEMA_VERSION = "shadow-tracker/source/1.0.0"
 FRAME_SCHEMA_VERSION = "shadow-tracker/frame/1.0.0"
 MASK_SCHEMA_VERSION = "shadow-tracker/mask/1.0.0"
+SHOT_SCHEMA_VERSION = "shadow-tracker/shot/1.0.0"
+FRAME_OBSERVATION_SCHEMA_VERSION = "shadow-tracker/frame-observation/1.0.0"
+CAMERA_TRACK_SCHEMA_VERSION = "shadow-tracker/camera-track/1.0.0"
+SUBJECT_BINDING_SCHEMA_VERSION = "shadow-tracker/subject-binding/1.0.0"
+FIT_REQUEST_SCHEMA_VERSION = "shadow-tracker/fit-request/1.0.0"
+REPLAY_AUDIT_SCHEMA_VERSION = "shadow-tracker/replay-audit/1.0.0"
+CANDIDATE_RESULT_SCHEMA_VERSION = "shadow-tracker/candidate-result/1.0.0"
+RESULT_BUNDLE_SCHEMA_VERSION = "shadow-tracker/result-bundle/1.0.0"
 
 _HEX_DIGITS = frozenset("0123456789abcdef")
 _ALLOWED_URI_SCHEMES = frozenset(("https", "http", "urn"))
@@ -53,6 +61,55 @@ def check_pos_int(val: object, field_name: str) -> int:
     if i <= 0:
         raise ValueError(f"{field_name} must be positive, got {i}")
     return i
+
+
+def check_float(val: object, field_name: str) -> float:
+    """Validate finite float, rejecting booleans, ints, and numeric strings."""
+    if isinstance(val, bool) or not isinstance(val, (int, float)):
+        raise TypeError(f"{field_name} must be a float, got {type(val).__name__}")
+    f = float(val)
+    if not math.isfinite(f):
+        raise ValueError(f"{field_name} must be finite, got {f}")
+    return f
+
+
+def check_strict_float(val: object, field_name: str) -> float:
+    """Validate finite float strictly (rejecting int coercion, booleans, and strings)."""
+    if isinstance(val, bool) or not isinstance(val, float):
+        raise TypeError(f"{field_name} must be a float, got {type(val).__name__}")
+    if not math.isfinite(val):
+        raise ValueError(f"{field_name} must be finite, got {val}")
+    return val
+
+
+def check_pos_float(val: object, field_name: str) -> float:
+    """Validate positive finite float."""
+    f = check_float(val, field_name)
+    if f <= 0.0:
+        raise ValueError(f"{field_name} must be positive, got {f}")
+    return f
+
+
+def check_nonneg_float(val: object, field_name: str) -> float:
+    """Validate non-negative finite float."""
+    f = check_float(val, field_name)
+    if f < 0.0:
+        raise ValueError(f"{field_name} must be non-negative, got {f}")
+    return f
+
+
+def check_optional_float(val: object, field_name: str) -> float | None:
+    """Validate optional finite float."""
+    if val is None:
+        return None
+    return check_strict_float(val, field_name)
+
+
+def check_bool(val: object, field_name: str) -> bool:
+    """Validate boolean."""
+    if not isinstance(val, bool):
+        raise TypeError(f"{field_name} must be a bool, got {type(val).__name__}")
+    return val
 
 
 def check_uri(val: object, field_name: str = "source_uri") -> str:
