@@ -85,6 +85,8 @@ def _execute(
         "ground_unchanged": model.ground_plane == initial_ground,
         "wall_time_s": time.perf_counter() - started,
         "contact": result.contact_audit.as_dict(),
+        "max_closure_translation_m": result.max_closure_translation_m,
+        "max_closure_rotation_rad": result.max_closure_rotation_rad,
         "legacy_mixed_unit_closure_value": result.max_closure_residual_m,
         "native_qpos_order": native_order,
         "declared_order_matches_native_qpos": names == native_order,
