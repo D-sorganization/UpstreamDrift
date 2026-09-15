@@ -332,7 +332,7 @@ export function GolfSimulatorPage() {
             )}
             {capabilities.local_trajectory_return && (
               <span className="px-2 py-0.5 rounded bg-gray-700 text-gray-200">
-                Local Trajectory: <span className="font-semibold text-purple-400">{capabilities.local_trajectory_return.state}</span>
+                Local Trajectory: <span className="font-semibold text-blue-300">{capabilities.local_trajectory_return.state}</span>
               </span>
             )}
           </section>
