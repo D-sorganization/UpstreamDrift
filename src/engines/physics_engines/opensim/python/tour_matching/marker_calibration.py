@@ -18,6 +18,7 @@ from src.shared.python.motion_matching.marker_calibration import (
     calibrate_marker_offsets,
     express_in_body,
     rigid_pose_from_markers,
+    static_marker_offsets,
 )
 
 __all__ = [
@@ -33,4 +34,5 @@ __all__ = [
     "calibrate_marker_offsets",
     "express_in_body",
     "rigid_pose_from_markers",
+    "static_marker_offsets",
 ]

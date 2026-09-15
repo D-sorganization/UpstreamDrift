@@ -25,7 +25,7 @@ NATIVE = Path(
     "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native/docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_81"
 )
 HERE = Path(__file__).resolve().parent
-SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
+SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v2.json"
 SIZE = (240, 320)
 STRIDE = 3
 

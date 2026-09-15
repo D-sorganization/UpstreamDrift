@@ -326,6 +326,18 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "motion_matching"
+    name: "Motion Matching"
+    description: "Match the tour-average driver or 7-iron capture with full-body forward dynamics on the anthropometric golfer"
+    type: "special_app"
+    path: "src/tools/motion_matching/__main__.py"
+    tags: ["mocap", "matching", "forward_dynamics", "driver", "iron"]
+    launcher:
+      category: "motion_matching"
+      logo: "motion_matching.svg"
+      status: "beta"
+      default_launch: "tab"
+
   - id: "pose_studio"
     name: "Pose Studio"
     description: "Cross-engine interactive pose editor"
