@@ -35,15 +35,15 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** local
-- **Issue:** #10188 (child #10194 active; children #10189–#10200)
-- **Branch:** feat/issue-10194-session-service
-- **PR:** #10215 (merged; GS-04 #10193); #10213 (merged; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
+- **Issue:** #10188 (child #10195 active; children #10189–#10200)
+- **Branch:** feat/issue-10195-replay-submission
+- **PR:** #10217 (merged; GS-05 #10194); #10215 (merged; GS-04 #10193); #10213 (merged; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
 - **Paths:** `src/shared/python/golf_simulator; tests/unit/golf_simulator; docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md`
 - **Started:** 2026-09-15
-- **Last verified:** 2026-09-15 (SELF; GS-00, GS-01, GS-02, GS-03, GS-04, and GS-05 implemented test-first; 50 unit tests pass across golf_simulator; ruff check/format, black, mypy, architecture budget, and spec paths clean with 0 errors)
-- **Summary:** GS-05 (#10194) shared golf session service and local reference destination implemented. GolfSessionService coordinates destination lifecycle, prepare/arm/cancel/submit policy, single-use arm tokens, context revision checking, and reconciliation of uncertain submissions. LocalReferenceAdapter wraps FlightSimulatorProtocol (BallFlightSimulator with EnhancedBallFlightSimulator fallback), computes RK4 ball trajectories with full provenance labeling, and maintains distinct trajectory and receipt contracts. shot_envelope_to_launch_conditions delivers bidirectional conversion parity. FakeSimulatorAdapter provides configurable test spy and fault injection. Service contract test suite validates adapter substitution and shot identity preservation.
-- **Next step:** Open PR for GS-05 (#10194); proceed to GS-06 (#10195) replay and one-impact submission.
-- **Evidence:** tests/unit/golf_simulator/test_session_service.py, tests/unit/golf_simulator/test_local_adapter.py, tests/unit/golf_simulator/test_service_contracts.py, tests/unit/golf_simulator/test_launch_bridge_reverse.py; docs/plans/golf_simulator_integration/README.md.
+- **Last verified:** 2026-09-15 (SELF; GS-00 through GS-06 implemented test-first; 56 unit tests pass across golf_simulator; ruff check/format, black, mypy, architecture budget, and spec paths clean with 0 errors)
+- **Summary:** GS-06 (#10195) replay and single-impact submission implemented. MonotonicReplayClock provides deterministic, monotonic playback with play, pause, seek, stop, and rate adjustments. ReplaySubmissionCoordinator binds immutable PreparedShot and single-use arm tokens, executing one-shot submission exactly once as playback monotonically crosses impact time. Seeking across impact disarms the submission, preventing accidental duplicate shots. MonotonicReplayClock and ReplaySubmissionCoordinator maintain p95 impact-to-send latency under 50 ms across 100 benchmarked samples. ReplayTimingRecord captures detailed send/response/onset telemetry. Realtime channels registered for replay state and frame presentation.
+- **Next step:** Open PR for GS-06 (#10195); proceed to GS-07 (#10196) API, desktop, and web controls.
+- **Evidence:** tests/unit/golf_simulator/test_replay_submission.py, tests/unit/golf_simulator/test_session_service.py, tests/unit/golf_simulator/test_local_adapter.py, tests/unit/golf_simulator/test_service_contracts.py; docs/plans/golf_simulator_integration/README.md.
 
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
 

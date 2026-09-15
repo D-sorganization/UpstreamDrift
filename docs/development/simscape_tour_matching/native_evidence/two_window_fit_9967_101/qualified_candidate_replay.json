@@ -1,0 +1,43 @@
+{
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "qualification": "qualified_r2025b_cold_replay_returned101",
+  "duration_s": 0.85,
+  "n_samples": 307,
+  "elapsed_s": 23.2527202,
+  "solver_configuration": {
+    "solver": "ode15s",
+    "reltol": "1e-6",
+    "abstol": "1e-9",
+    "maxstep": "1/1440"
+  },
+  "metrics": {
+    "whole_rms_m": 0.020264936937422665,
+    "whole_rms_mm": 20.264936937422664,
+    "early_rms_m": 0.009995167207112356,
+    "early_rms_mm": 9.9951672071123561,
+    "terminal_rms_m": 0.040311525909035,
+    "terminal_rms_mm": 40.311525909035,
+    "club_cluster_rms_m": 0.0084224812542508087,
+    "club_cluster_rms_mm": 8.4224812542508083,
+    "pelvis_yaw_diff_deg": 0.29677686911065848,
+    "pelvis_yaw_error_pct": 0.54345061828369468
+  },
+  "cross_engine_parity": {
+    "max_marker_coord_discrepancy_m": 5.4961880052599443e-5,
+    "max_marker_coord_discrepancy_mm": 0.054961880052599443,
+    "mean_marker_coord_discrepancy_m": 5.5449376013671108e-7,
+    "mean_marker_coord_discrepancy_mm": 0.000554493760136711,
+    "max_marker_euclidean_discrepancy_m": 6.0493493627824182e-5,
+    "max_marker_euclidean_discrepancy_mm": 0.060493493627824184,
+    "mean_marker_euclidean_discrepancy_m": 1.1216988051420313e-6,
+    "mean_marker_euclidean_discrepancy_mm": 0.0011216988051420314
+  },
+  "gates": {
+    "gate1_whole_rms_25mm": true,
+    "gate2_early_rms_12mm": true,
+    "gate3_terminal_rms_35mm": false,
+    "gate4_clubhead_60mm": true,
+    "gate5_pelvis_yaw_5pct": true
+  }
+}

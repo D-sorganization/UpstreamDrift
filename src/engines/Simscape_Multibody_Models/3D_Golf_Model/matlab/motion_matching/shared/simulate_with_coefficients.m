@@ -148,6 +148,14 @@ function sim_out = simulate_with_coefficients(theta, opts)
         end
     end
 
+    % Allow caller to pass Simulink model parameter overrides (e.g. RelTol, MaxStep, Solver)
+    if isfield(opts, "model_parameters") && isstruct(opts.model_parameters)
+        mp_names = fieldnames(opts.model_parameters);
+        for i = 1:numel(mp_names)
+            simIn = simIn.setModelParameter(mp_names{i}, opts.model_parameters.(mp_names{i}));
+        end
+    end
+
     % ---- 5. Run sim --------------------------------------------------------
     simOut = [];
     err = [];

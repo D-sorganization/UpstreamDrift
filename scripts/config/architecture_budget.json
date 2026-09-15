@@ -3,6 +3,69 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_100/two_window_fit_100.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: execution script for candidate 100 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_101/two_window_fit_101.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: execution script for continuation 101 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/audit_solver_convergence_9967.py",
+      "symbol": "run_convergence_audit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: run_convergence_audit executes and certifies the 9-configuration Pinocchio vs Simscape solver convergence matrix.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/equality_least_squares.py",
+      "symbol": "solve_equality_least_squares",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: solve_equality_least_squares implements generalized bounded equality-constrained least-squares solver with QR nullspace projection.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/equality_least_squares.py",
+      "symbol": "solve_equality_least_squares",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: solve_equality_least_squares accepts problem matrices (A, b, C, d), bounds, regularization, and solver options without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/multi_shooting_fit.py",
+      "symbol": "fit_multiple_shooting.residual",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: inner residual evaluation in multiple shooting fit coordinates marker errors, terminal states, defect constraints, and pelvis yaw penalties.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/multi_shooting_fit.py",
+      "symbol": "fit_multiple_shooting.analytic_jacobian",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: inner analytic Jacobian in multiple shooting fit evaluates exact block derivatives for markers, continuity defects, and 2-component pelvis yaw penalty.",
+      "expires_on": "2026-11-30"
+    },
+    {
       "path": "src/shared/python/physics/impact_model/solver.py",
       "symbol": "ImpactSolverAPI.solve_impact",
       "rule": "parameters",
