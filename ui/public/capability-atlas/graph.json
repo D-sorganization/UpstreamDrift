@@ -558,6 +558,22 @@
       "id": "tools.dataset_generator"
     },
     {
+      "feature_id": "tools.golf_simulator",
+      "title": "Golf Simulator capability-aware controls and replay submission",
+      "status": "parity",
+      "pyqt": "src/tools/golf_simulator/gui.py",
+      "api": "src/api/routes/golf_simulator.py",
+      "web": "ui/src/pages/GolfSimulator.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "golf_simulator"
+      ],
+      "notes": "Parity controls across PyQt6 desktop widget and React web console backed by shared API routes.",
+      "id": "tools.golf_simulator"
+    },
+    {
       "feature_id": "tools.launch_monitor_analytics",
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
       "status": "gap",
@@ -852,6 +868,22 @@
         "full_simulation",
         "parameter_sweep",
         "batch_runs"
+      ]
+    },
+    {
+      "id": "golf_simulator",
+      "title": "Golf Simulator Console",
+      "description": "Capability-aware destination controls and replay submission for simulator integration",
+      "path": "src/tools/golf_simulator/gui.py",
+      "launch_target": "src/tools/golf_simulator/gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "shot_input",
+        "destination_selection",
+        "session_lifecycle",
+        "replay_transport",
+        "uncertainty_recovery"
       ]
     },
     {
@@ -2786,9 +2818,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "db988b0091b8e70a78c9b862a18c4f52af5fb56b2c58d4c772d95cbea096ac92",
-    "src/config/launcher_manifest.json": "89ce66ae10de8d56905be878c90b9488328b5fb0dbf679b579fe3610d20ec2b0",
-    "src/config/feature_parity.json": "36b24a242e7fc3162eec04d0bec25b56e13d02baf8089b33386679cc47b634ce",
+    "src/config/models.yaml": "ab98f71789d64d4ae19c2923e310b3fcc9d568216b0169e17f0da05915901c16",
+    "src/config/launcher_manifest.json": "e24f5c8bf10665d37a028cd084e89b062607cb4d26391993a66bc903eb38aa67",
+    "src/config/feature_parity.json": "0b38d2c770205253f27d20cea850803fa35d70b157416ab14ac5090c7a5ac477",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

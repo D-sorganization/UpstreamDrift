@@ -30,7 +30,9 @@ describe("GolfSimulatorPage", () => {
           name: "Local Reference Simulator",
           description: "Local physics",
           is_connected: true,
-          capabilities: {},
+          capabilities: {
+            shot_input: { state: "supported", evidence: "in-process" },
+          },
         },
       ],
     });
@@ -41,6 +43,7 @@ describe("GolfSimulatorPage", () => {
       expect(apiFetchMock).toHaveBeenCalledWith("/tools/golf-simulator/destinations");
     });
     expect(screen.getByText("Local Reference Simulator")).toBeInTheDocument();
+    expect(screen.getByText("Shot Input:")).toBeInTheDocument();
   });
 
   it("handles connect, prepare, arm, and submit workflow", async () => {
