@@ -1,16 +1,16 @@
-# Simscape Tour-Average Fit Continuation
-
-## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03, GS-04, GS-05 Complete
+## GSPro Integration (#10188) — GS-00 Through GS-06 Complete
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
 - **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
   GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
-  and GS-05 (#10194) shared session service and local reference destination complete.
-  Planning PR #10201, PR #10208, PR #10213, and PR #10215 merged.
+  GS-05 (#10194) shared session service and local reference destination, and
+  GS-06 (#10195) replay and single-impact submission complete.
+  Planning PR #10201, PR #10208, PR #10213, PR #10215, and PR #10217 merged.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10194-session-service`.
-- **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
+  branch `feat/issue-10195-replay-submission`.
+- **Delivered:** `src/shared/python/golf_simulator/replay.py`,
+  `src/shared/python/golf_simulator/contracts.py`,
   `src/shared/python/golf_simulator/session.py`,
   `src/shared/python/golf_simulator/launch_bridge.py`,
   `src/shared/python/golf_simulator/adapters/local.py`,
@@ -19,16 +19,16 @@
   `src/shared/python/golf_simulator/adapters/gspro/codec.py`,
   `src/shared/python/golf_simulator/adapters/gspro/transport.py`,
   `src/shared/python/golf_simulator/journal.py`.
-  - `GolfSessionService`: Central orchestrator enforcing state machine (`IDLE` -> `PREPARED` -> `ARMED` -> `SUBMITTING` -> `IDLE`/`UNCERTAIN`),
-    guarding destination switching, invalidating arm tokens on context/destination changes, validating model qualification before arming,
-    and handling ambiguous deliveries via operator reconciliation.
-  - `LocalReferenceAdapter`: Satisfies `SimulatorAdapter` protocol, wraps `FlightSimulatorProtocol` (`BallFlightSimulator` with pure-Python
-    `EnhancedBallFlightSimulator` fallback), computes RK4 ball trajectories with full provenance labeling, and maintains distinct trajectory and receipt contracts.
-  - `shot_envelope_to_launch_conditions`: Reconstitutes scalar launch parameters and 3D spin axis from canonical `ShotEnvelope`.
-  - `FakeSimulatorAdapter`: Configurable test spy for testing adapter substitution, capability auditing, and fault simulation.
-- **Validation:** 50 unit tests across `tests/unit/golf_simulator/` (including session service, local adapter, reverse bridge, and unified service contracts) pass 100%.
-  Ruff check, Ruff format check, Black, changed-file architecture budget, and mypy pass with 0 errors.
-- **Next:** Open PR for GS-05 (#10194) and proceed to GS-06 (#10195) replay and one-impact submission.
+  - `MonotonicReplayClock`: Presentation clock driven by monotonic time, providing play, pause, seek, stop,
+    and playback rate adjustment with seek-flag detection.
+  - `ReplaySubmissionCoordinator`: Coordinates presentation replay with single-impact shot submission.
+    Submits exactly once when playback monotonically crosses impact time; disarms on seeks across impact;
+    guards against duplicate submissions on subsequent ticks or dropped frames; records detailed latency metrics.
+  - `ReplayTimingRecord`: Captures `impact_to_send_latency_ms` and `send_to_response_latency_ms` ($p95 \le 50\text{ ms}$).
+  - `ReplayPlaybackState` & `ReplayFrame`: Presentation states and frame metadata linking model run ID and qualification.
+- **Validation:** 56 unit tests across `tests/unit/golf_simulator/` (including replay submission, session service, local adapter, reverse bridge, and unified service contracts) pass 100%.
+  Ruff check, Ruff format check, Black, changed-file architecture budget, divergence inventory, and mypy pass with 0 errors.
+- **Next:** Open PR for GS-06 (#10195) and proceed to GS-07 (#10196) API, desktop, and web controls.
 - **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Shadow Tracker Current Turnover (#10122)
