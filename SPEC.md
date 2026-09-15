@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Align MuJoCo Full-Body IK Coordinates With Named Dynamics Coordinates (#10140)
+
+Aligns `MujocoFullBodyIK` coordinate assignment with `NativeMujocoFullBodyModel` named coordinate order and native qpos layout:
+- Precomputes native qpos DOF index mapping `self._qpos_indices = np.array([self.model._indices[name] for name in self.coordinate_order], dtype=np.int32)` in `MujocoFullBodyIK.__init__`.
+- Vectorizes coordinate placement in `pose_fn` via `self._mj_data.qpos[self._qpos_indices] = q_arr`, preventing coordinate scrambling on models where declared joint order differs from native qpos DOF order.
+- Guarantees kinematics synchronization in `closure_residuals` when evaluated independently of `pose_fn`.
+- Validates exact forward kinematics parity across frame sites, body segments, and dual-grip weld closures against `NativeMujocoFullBodyModel`.
+
 ## Shadow Tracker Record Validation Hardening (#10151)
 
 Hardens boundary validation for frozen Shadow Tracker image-evidence records:
