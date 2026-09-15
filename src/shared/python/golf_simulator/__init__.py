@@ -23,6 +23,11 @@ from src.shared.python.golf_simulator.contracts import (
     SubmissionReceipt,
     SubmissionState,
 )
+from src.shared.python.golf_simulator.journal import (
+    DeliveryStatus,
+    JournalEntry,
+    ShotJournal,
+)
 from src.shared.python.golf_simulator.launch_bridge import (
     launch_conditions_to_shot_envelope,
     pipeline_result_to_shot_envelope,
@@ -38,9 +43,12 @@ __all__ = [
     "ConnectionState",
     "ConnectionStatus",
     "ContactStatus",
+    "DeliveryStatus",
+    "JournalEntry",
     "NumericalStatus",
     "ScientificStatus",
     "ShotEnvelope",
+    "ShotJournal",
     "ShotMetadata",
     "ShotQualification",
     "SimulatorAdapter",
