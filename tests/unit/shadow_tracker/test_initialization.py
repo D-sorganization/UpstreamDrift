@@ -354,3 +354,73 @@ def test_initial_hypothesis_invariants() -> None:
             label="guessed",  # type: ignore[arg-type]
             provenance="grid_search",
         )
+
+    # ST-06 / P2 finding: NaN or inf in pose must be rejected
+    with pytest.raises(ValueError, match="pose coordinate must be finite"):
+        InitialHypothesis(
+            hypothesis_id="hyp_001",
+            subject_id="sub_001",
+            camera_id="cam_001",
+            scale=1.0,
+            depth_m=3.0,
+            handedness="right",
+            pose=(float("nan"), 0.0, 0.0, 1.0, 0.0, 0.0, 0.0),
+            velocity=(0.0, 0.0, 0.0),
+            score=0.92,
+            label="inferred",
+            provenance="grid_search",
+        )
+
+    # Empty pose or velocity must be rejected
+    with pytest.raises(ValueError, match="pose must be a non-empty sequence"):
+        InitialHypothesis(
+            hypothesis_id="hyp_001",
+            subject_id="sub_001",
+            camera_id="cam_001",
+            scale=1.0,
+            depth_m=3.0,
+            handedness="right",
+            pose=(),
+            velocity=(0.0, 0.0, 0.0),
+            score=0.92,
+            label="inferred",
+            provenance="grid_search",
+        )
+
+    with pytest.raises(ValueError, match="velocity must be a non-empty sequence"):
+        InitialHypothesis(
+            hypothesis_id="hyp_001",
+            subject_id="sub_001",
+            camera_id="cam_001",
+            scale=1.0,
+            depth_m=3.0,
+            handedness="right",
+            pose=(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0),
+            velocity=(),
+            score=0.92,
+            label="inferred",
+            provenance="grid_search",
+        )
+
+
+@pytest.mark.unit
+def test_visual_morphology_segment_lengths_ownership_immutability() -> None:
+    """ST-06 / P2 finding: mutating input dict or returned mapping must not corrupt VisualMorphology."""
+    lengths = {"torso": 0.60, "leg": 0.85}
+    morph = VisualMorphology(
+        height_m=1.80,
+        chest_width_m=0.45,
+        depth_m=0.28,
+        segment_lengths=lengths,
+    )
+
+    # Mutate input dict
+    lengths["torso"] = 999.0
+    assert morph.segment_lengths["torso"] == 0.60
+
+    # Mutate returned dictionary
+    try:
+        morph.segment_lengths["torso"] = 888.0
+    except (TypeError, ValueError):
+        pass
+    assert morph.segment_lengths["torso"] == 0.60
