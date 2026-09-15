@@ -58,6 +58,13 @@ if TYPE_CHECKING:
     from .mask_records import (
         MaskFrame,
     )
+    from .projection import (
+        AnalyticSilhouetteRenderer,
+        PinholeCameraModel,
+        SilhouetteLossResult,
+        compute_silhouette_loss,
+        project_point_to_pixel,
+    )
     from .segmentation import (
         ManualMaskProvider,
         ModelSegmentationProvider,
@@ -128,10 +135,16 @@ _LAZY_EXPORTS: dict[str, str] = {
     "track_occlusion_and_identity": ".segmentation",
     "ManualMaskProvider": ".segmentation",
     "ModelSegmentationProvider": ".segmentation",
+    "PinholeCameraModel": ".projection",
+    "project_point_to_pixel": ".projection",
+    "AnalyticSilhouetteRenderer": ".projection",
+    "SilhouetteLossResult": ".projection",
+    "compute_silhouette_loss": ".projection",
 }
 
 __all__ = [
     "AffineTimingMapping",
+    "AnalyticSilhouetteRenderer",
     "CANDIDATE_RESULT_SCHEMA_VERSION",
     "CAMERA_TRACK_SCHEMA_VERSION",
     "CameraSynchronization",
@@ -149,6 +162,7 @@ __all__ = [
     "ModelSegmentationProvider",
     "OcclusionReport",
     "PiecewiseTimingMapping",
+    "PinholeCameraModel",
     "RenderRequest",
     "RenderResult",
     "ReplayAudit",
@@ -166,6 +180,7 @@ __all__ = [
     "ShadowTrackerService",
     "Shot",
     "ShotDefinition",
+    "SilhouetteLossResult",
     "SilhouetteRenderer",
     "SourceAsset",
     "SourceCatalog",
@@ -174,6 +189,7 @@ __all__ = [
     "VideoDecoderAdapter",
     "compute_mask_dice",
     "compute_mask_iou",
+    "compute_silhouette_loss",
     "create_shot",
     "detect_telecine_duplicates",
     "filter_shot_frames",
@@ -181,6 +197,7 @@ __all__ = [
     "ingest_capture_rig_view",
     "ingest_source_asset",
     "map_frame_to_observation",
+    "project_point_to_pixel",
     "to_pipeline_camera",
     "track_occlusion_and_identity",
     "validate_frame_sequence",
