@@ -206,3 +206,8 @@ jobs:
             --inputs tests/fixtures/wgs.json \
             --output /tmp/wgs_result.json
           cat /tmp/wgs_result.json
+
+      - name: Disable sparse-checkout
+        if: always()
+        shell: bash
+        run: git sparse-checkout disable 2>/dev/null || true

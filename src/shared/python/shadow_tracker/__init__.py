@@ -6,6 +6,13 @@ import importlib
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from .camera_bridge import (
+        from_pipeline_camera,
+        to_pipeline_camera,
+    )
+    from .mask_records import (
+        MaskFrame,
+    )
     from .source_records import (
         FrameIdentity,
         RightsStatus,
@@ -18,12 +25,18 @@ _LAZY_EXPORTS: dict[str, str] = {
     "FrameIdentity": ".source_records",
     "RightsStatus": ".source_records",
     "validate_frame_sequence": ".source_records",
+    "MaskFrame": ".mask_records",
+    "to_pipeline_camera": ".camera_bridge",
+    "from_pipeline_camera": ".camera_bridge",
 }
 
 __all__ = [
     "FrameIdentity",
+    "MaskFrame",
     "RightsStatus",
     "SourceAsset",
+    "from_pipeline_camera",
+    "to_pipeline_camera",
     "validate_frame_sequence",
 ]
 

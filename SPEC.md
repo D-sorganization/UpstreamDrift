@@ -1,5 +1,34 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Immutable Binary Masks and Lineage (ST-02B, #10138)
+
+Implements frozen `MaskFrame` record under `src/shared/python/shadow_tracker/mask_records.py`
+with immutable binary masks (`body`, `club`, `valid` as `bytes`), strict dimension and value
+validation (0 or 1 integers only, rejecting booleans and bytearrays), pixel invariant enforcement
+(body and club must be zero wherever valid is zero), revision lineage tracking (`revision_id`,
+`parent_revision_id`, `producer_id`, `correction_note`), boolean evidence properties
+(`has_valid_pixels`, `has_observed_foreground`), deterministic SHA-256 `observation_hash` over
+canonical UTF-8 JSON, and lossless JSON dictionary serialization/deserialization.
+
+## Restore CI Standard and Scheduled Workflow Health (#10143)
+
+Restores fleet workflow health on default branch and scheduled runs:
+- Synchronize full source mypy baseline with Linux quality gate.
+- Align scheduled/default branch coverage condition to run full core lane with `--no-cov`.
+- Enforce provider authority contract for native tiles in parity smoke tests (`_provider_status`).
+- Prevent cross-runner sparse-checkout contamination on self-hosted Docker runners.
+- Pin `google/osv-scanner-action` to verified stable digest.
+
+## Shadow Tracker Camera Direction Conversion (ST-02C, #10139)
+
+Implements bidirectional conversion between `pose_estimation.observations.CameraCalibration`
+(camera-to-world) and `motion_pipeline.contracts` camera models (`CameraIntrinsics` and
+`CameraExtrinsics`, world-to-camera) under `src/shared/python/shadow_tracker/camera_bridge.py`.
+Reuses `Transform6DOF` SE(3) inversion, enforces pinhole K constraints (zero skew, bottom row
+`[0, 0, 1]`, positive focal lengths), validates proper finite rotations, and canonicalizes
+distortion representations (none/empty to five zeros; four coefficients to five with k3=0).
+
+
 ## Shadow Tracker Source and Frame Identity Contracts (ST-02A, #10137)
 
 Implements frozen `SourceAsset`, `FrameIdentity`, and `validate_frame_sequence`
@@ -4657,6 +4686,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-14 | #10147 | Implement camera direction conversion between observation and pipeline contracts for Shadow Tracker (ST-02C, #10139). |
 | 2026-09-14 | #10145 | Implement frozen source and frame identity records for Shadow Tracker (ST-02A, #10137). |
 | 2026-09-14 | #10144 | Add TDD model diagnostics, measured qualification blockers and frozen image-only worker handoff for Shadow Tracker. |
 | 2026-09-14 | #10136 | Establish Shadow Tracker epic, implementation plan, source/test homes and agent handoff; no runtime implementation. |
