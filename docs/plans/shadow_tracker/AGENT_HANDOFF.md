@@ -6,15 +6,16 @@ Current implementation baseline includes merged Stage 0 contract hardening (#101
 MuJoCo IK coordinate alignment (#10140 / PR #10164), production closure units separation
 (#10141 / PR #10165), and feasibility qualification (#10124 / PR #10169). Stage 2 (#10125)
 full contracts freeze, Stage 3 (#10126) video ingestion, shot partitioning, timing mappings,
-and capture evidence, and Stage 4 (#10127) body and club silhouette segmentation and occlusion
-tracking have been implemented and tested with 100% boundary and DbC enforcement.
+and capture evidence, Stage 4 (#10127) body and club silhouette segmentation and occlusion tracking,
+and Stage 5 (#10128) calibrated silhouette rendering, analytic projection, and residual losses
+have been implemented and tested with 100% boundary and DbC enforcement.
 Scientific gates remain blocked.
 
 ## Immediate Dispatch
 
 Read [Development Review](DEVELOPMENT_REVIEW.md) and [Continuation Prompt](CONTINUATION_PROMPT.md).
-Prerequisites #10140, #10141, #10124, #10125, #10126, and #10127 are complete. Next task is Stage 5 (#10128):
-Render Calibrated Silhouettes and Compute Residuals (projection, silhouette losses, differentiable renderer adapters).
+Prerequisites #10140, #10141, #10124, #10125, #10126, #10127, and #10128 are complete. Next task is Stage 6 (#10129):
+Fit Subject Shape and Initial-State Hypotheses (morphology, camera/scale/handedness hypotheses, velocity).
 Do not interpret passing unit tests as physical-model qualification. Recompute historical IK trajectories
 before attempting forward fitting.
 
