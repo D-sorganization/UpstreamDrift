@@ -61,8 +61,46 @@ class ForwardRolloutResult:
     predicted_markers_m: Array
     shared_metrics: SharedMetrics
     contact_audit: ContactAuditResult
+    max_closure_translation_m: float
+    max_closure_rotation_rad: float
     max_closure_residual_m: float
     status: str
+
+    def is_accepted(
+        self,
+        *,
+        max_translation_tol_m: float = 1e-3,
+        max_rotation_tol_rad: float = 0.05,
+    ) -> bool:
+        """Physical rollout acceptance gating execution status and separated closure tolerances.
+
+        Rejects failed or zero-filled output. Both translation and rotation errors must be
+        within explicit physical limits.
+        """
+        if self.status != "success" or len(self.time_s) == 0:
+            return False
+        if (
+            not np.any(self.q)
+            and not np.any(self.qd)
+            and not np.any(self.predicted_markers_m)
+        ):
+            return False
+        return bool(
+            self.max_closure_translation_m <= max_translation_tol_m
+            and self.max_closure_rotation_rad <= max_rotation_tol_rad
+        )
+
+    def as_dict(self) -> dict[str, Any]:
+        """Serialize rollout result summary with separated units and legacy labels."""
+        return {
+            "status": self.status,
+            "max_closure_translation_m": self.max_closure_translation_m,
+            "max_closure_rotation_rad": self.max_closure_rotation_rad,
+            "legacy_mixed_unit_closure_value": self.max_closure_residual_m,
+            "max_closure_residual_m": self.max_closure_residual_m,
+            "contact_audit": self.contact_audit.as_dict(),
+            "shared_metrics": self.shared_metrics.as_dict(),
+        }
 
 
 def evaluate_polynomial_torques(
@@ -245,6 +283,8 @@ def _build_failed_rollout(
             tracked_labels=list(marker_offsets.keys()),
         ),
         contact_audit=_audit_contact_samples([], n_frames),
+        max_closure_translation_m=0.0,
+        max_closure_rotation_rad=0.0,
         max_closure_residual_m=0.0,
         status="failed",
     )
@@ -252,12 +292,12 @@ def _build_failed_rollout(
 
 def _assemble_rollout_result(
     times: Array,
-    data: tuple[Array, Array, Array, list[dict[str, Any]], float, str],
+    data: tuple[Array, Array, Array, list[dict[str, Any]], float, float, float, str],
     capture: TourCapture,
     marker_offsets: Mapping[str, Any],
 ) -> ForwardRolloutResult:
     """Construct a ForwardRolloutResult from trajectory data, contact audit, and metrics."""
-    q_traj, qd_traj, pred_m, samples, err, status = data
+    q_traj, qd_traj, pred_m, samples, trans_err, rot_err, mixed_err, status = data
     if status != "success":
         return _build_failed_rollout(times, q_traj.shape[1], capture, marker_offsets)
     eval_cap = _slice_capture(capture, len(times))
@@ -272,9 +312,21 @@ def _assemble_rollout_result(
             tracked_labels=list(marker_offsets.keys()),
         ),
         contact_audit=_audit_contact_samples(samples, len(times)),
-        max_closure_residual_m=err,
+        max_closure_translation_m=trans_err,
+        max_closure_rotation_rad=rot_err,
+        max_closure_residual_m=mixed_err,
         status="success",
     )
+
+
+def _extract_closure_errors(model: Any) -> tuple[float, float, float]:
+    """Extract translation, rotation, and mixed closure error norms from model."""
+    err_p, _ = model.closure_errors()
+    err_p_arr = np.asarray(err_p, dtype=np.float64)
+    trans_err = float(np.linalg.norm(err_p_arr[:3]))
+    rot_err = float(np.linalg.norm(err_p_arr[3:])) if err_p_arr.size > 3 else 0.0
+    mixed_err = float(np.linalg.norm(err_p_arr))
+    return trans_err, rot_err, mixed_err
 
 
 def _simulate_rk45(
@@ -286,7 +338,7 @@ def _simulate_rk45(
     marker_offsets: Mapping[str, Any],
     capture: TourCapture,
     options: RolloutOptions,
-) -> tuple[Array, Array, Array, list[dict[str, Any]], float, str]:
+) -> tuple[Array, Array, Array, list[dict[str, Any]], float, float, float, str]:
     """Execute forward simulation via adaptive RK45 integration."""
     from scipy.integrate import solve_ivp
 
@@ -330,6 +382,8 @@ def _simulate_rk45(
             zero_markers,
             [],
             0.0,
+            0.0,
+            0.0,
             "failed",
         )
 
@@ -337,7 +391,9 @@ def _simulate_rk45(
     qd_traj = sol.y[n_coords:, :].T
     pred_markers = np.full((n_frames, len(capture.labels), 3), np.nan, dtype=np.float64)
     all_contact_samples = []
-    max_closure_err = 0.0
+    max_trans_err = 0.0
+    max_rot_err = 0.0
+    max_mixed_err = 0.0
 
     for k in range(n_frames):
         q_k = q_traj[k]
@@ -357,15 +413,19 @@ def _simulate_rk45(
             normalize_time=options.normalize_time,
         )
         model.accelerations(q_dict, qd_dict, tau_dict)
-        err_p, _ = model.closure_errors()
-        max_closure_err = max(max_closure_err, float(np.linalg.norm(err_p)))
+        trans_err, rot_err, mixed_err = _extract_closure_errors(model)
+        max_trans_err = max(max_trans_err, trans_err)
+        max_rot_err = max(max_rot_err, rot_err)
+        max_mixed_err = max(max_mixed_err, mixed_err)
 
     return (
         q_traj,
         qd_traj,
         pred_markers,
         all_contact_samples,
-        max_closure_err,
+        max_trans_err,
+        max_rot_err,
+        max_mixed_err,
         "success",
     )
 
@@ -379,7 +439,7 @@ def _simulate_euler(
     marker_offsets: Mapping[str, Any],
     capture: TourCapture,
     options: RolloutOptions,
-) -> tuple[Array, Array, Array, list[dict[str, Any]], float, str]:
+) -> tuple[Array, Array, Array, list[dict[str, Any]], float, float, float, str]:
     """Execute forward simulation via semi-implicit Euler integration."""
     n_frames = len(times)
     coord_names = list(model.coordinate_order)
@@ -400,7 +460,9 @@ def _simulate_euler(
     )
 
     all_contact_samples = []
-    max_closure_err = 0.0
+    max_trans_err = 0.0
+    max_rot_err = 0.0
+    max_mixed_err = 0.0
 
     for step in range(n_frames - 1):
         t_curr = float(times[step])
@@ -425,8 +487,10 @@ def _simulate_euler(
             all_contact_samples.append(c_samples)
 
             acc_dict = model.accelerations(q_dict, qd_dict, tau_dict)
-            pos_err, _ = model.closure_errors()
-            max_closure_err = max(max_closure_err, float(np.linalg.norm(pos_err)))
+            trans_err, rot_err, mixed_err = _extract_closure_errors(model)
+            max_trans_err = max(max_trans_err, trans_err)
+            max_rot_err = max(max_rot_err, rot_err)
+            max_mixed_err = max(max_mixed_err, mixed_err)
 
             acc = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
             curr_qd += acc * dt_sub
@@ -443,7 +507,9 @@ def _simulate_euler(
         qd_traj,
         pred_markers,
         all_contact_samples,
-        max_closure_err,
+        max_trans_err,
+        max_rot_err,
+        max_mixed_err,
         "success",
     )
 

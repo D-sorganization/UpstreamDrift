@@ -124,6 +124,8 @@ class EngineReplayOutcome:
     contact_audit: ContactAuditResult
     convergence: StepSizeConvergenceResult
     max_closure_residual_m: float
+    max_closure_translation_m: float = 0.0
+    max_closure_rotation_rad: float = 0.0
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -133,6 +135,9 @@ class EngineReplayOutcome:
             "contact_audit": self.contact_audit.as_dict(),
             "convergence": self.convergence.as_dict(),
             "max_closure_residual_m": self.max_closure_residual_m,
+            "max_closure_translation_m": self.max_closure_translation_m,
+            "max_closure_rotation_rad": self.max_closure_rotation_rad,
+            "legacy_mixed_closure_residual": self.max_closure_residual_m,
         }
 
 
