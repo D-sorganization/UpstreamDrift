@@ -62,6 +62,7 @@ from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: E
     MARKER_SEGMENTS,
 )
 from src.shared.python.motion_matching.pipeline import (  # noqa: E402
+    GroundSupportReceiptInputs,
     Lane,
     add_toe_spheres,
     best_address,
@@ -720,25 +721,27 @@ def main() -> None:
     render_playback(spec_bytes, names, sim_q, lookat, OUT / "tracking_playback.gif")
 
     receipt = build_ground_support_receipt(
-        base_spec=base_spec,
-        spec_path=args.spec,
-        scaled_path=scaled_path,
-        hipcal_path=hipcal_path,
-        recalibrate_upper=args.recalibrate_upper,
-        anthropometric=args.anthropometric,
-        qualification_note=qualification_note,
-        spec_bytes=spec_bytes,
-        hip_report=hip_report,
-        candidate_bytes=candidate_bytes,
-        c3d_path=C3D,
-        capture_name=args.capture,
-        lane=lane,
-        address_report=address_report,
-        ik_report=ik_report,
-        dynamics_report=dynamics_report,
-        kin=kin,
-        q_ref=q_ref,
-        elapsed_s=time.perf_counter() - t_start,
+        GroundSupportReceiptInputs(
+            base_spec=base_spec,
+            spec_path=args.spec,
+            scaled_path=scaled_path,
+            hipcal_path=hipcal_path,
+            recalibrate_upper=args.recalibrate_upper,
+            anthropometric=args.anthropometric,
+            qualification_note=qualification_note,
+            spec_bytes=spec_bytes,
+            hip_report=hip_report,
+            candidate_bytes=candidate_bytes,
+            c3d_path=C3D,
+            capture_name=args.capture,
+            lane=lane,
+            address_report=address_report,
+            ik_report=ik_report,
+            dynamics_report=dynamics_report,
+            kin=kin,
+            q_ref=q_ref,
+            elapsed_s=time.perf_counter() - t_start,
+        )
     )
     (OUT / "receipt.json").write_text(
         json.dumps(receipt, indent=2, default=float) + "\n"
