@@ -85,6 +85,11 @@ const SwingObjectiveLabPage = lazy(() =>
     default: m.SwingObjectiveLabPage,
   })),
 );
+const GolfSimulatorPage = lazy(() =>
+  import("./pages/GolfSimulator").then((m) => ({
+    default: m.GolfSimulatorPage,
+  })),
+);
 /** Themed full-viewport fallback shown while a route chunk loads (#7433). */
 function PageLoadingFallback() {
   return (
@@ -147,6 +152,11 @@ function RoutedContent() {
           <Route
             path="/tools/swing-objective-lab"
             element={<SwingObjectiveLabPage />}
+          />
+          {/* Golf Simulator Console (#10196) */}
+          <Route
+            path="/tools/golf-simulator"
+            element={<GolfSimulatorPage />}
           />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
