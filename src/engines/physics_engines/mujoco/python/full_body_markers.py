@@ -147,12 +147,13 @@ class FullBodyMarkerKinematics:
                 rotation = self.data.site_xmat[site].reshape(3, 3).copy()
                 translation = self.data.site_xpos[site].copy()
             else:
-                body_id = self._mj.mj_name2id(
-                    self.model, self._mj.mjtObj.mjOBJ_BODY, body
-                )
+                mj = self._mj
+                mjt_obj = mj.mjtObj
+                body_id = mj.mj_name2id(self.model, mjt_obj.mjOBJ_BODY, body)
                 if body_id < 0:
                     raise ValueError(f"Unknown body {body}")
-                frame = self.adapter.body_frames.get(body)
+                body_frames = self.adapter.body_frames
+                frame = body_frames.get(body)
                 if frame is None:
                     raise ValueError(f"Body {body} has no joint frame")
                 r_mj = self.data.xmat[body_id].reshape(3, 3)

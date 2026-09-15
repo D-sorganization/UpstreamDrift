@@ -71,10 +71,12 @@ class FullBodySimulator:
         self.root = np.arange(6)
         self.actuated = np.arange(6, self.nv)
         self.lower_limb = np.arange(adapter.upper_body_coordinates, self.nv)
-        self.mass_kg = float(np.sum(adapter.model.body_mass))
-        self.gravity = np.array(adapter.model.opt.gravity, dtype=float)
+        model = adapter.model
+        opt = model.opt
+        self.mass_kg = float(np.sum(model.body_mass))
+        self.gravity = np.array(opt.gravity, dtype=float)
         # Adapter force vectors follow MuJoCo DOF order; states follow spec order.
-        self._dof = np.array([adapter.model.joint(name).dofadr[0] for name in names])
+        self._dof = np.array([model.joint(name).dofadr[0] for name in names])
 
     def _map(self, values: Array) -> dict[str, float]:
         return dict(zip(self.names, values.tolist(), strict=True))
@@ -121,11 +123,13 @@ class FullBodySimulator:
 
     def static_penetration_m(self) -> float:
         """Penetration at which equally loaded spheres carry the weight at rest."""
-        stiffness = float(self.adapter.contact_parameters.stiffness_n_m)
+        contact_params = self.adapter.contact_parameters
+        stiffness = float(contact_params.stiffness_n_m)
+        spheres = self.adapter._spheres
         return (
             self.mass_kg
             * float(np.linalg.norm(self.gravity))
-            / (stiffness * len(self.adapter._spheres))
+            / (stiffness * len(spheres))
         )
 
     def affine_dynamics(self, q: Array, v: Array) -> tuple[Array, Array]:
@@ -197,8 +201,11 @@ class FullBodySimulator:
         n = n / np.linalg.norm(n)
         points: dict[str, Array] = {}
         lowest = np.inf
-        for name, info in self.adapter._spheres.items():
-            centre = self.adapter.data.site_xpos[info["site_id"]].copy()
+        adapter_spheres = self.adapter._spheres
+        adapter_data = self.adapter.data
+        for name, info in adapter_spheres.items():
+            site_id = info["site_id"]
+            centre = adapter_data.site_xpos[site_id].copy()
             height = float(centre @ n - plane.height_m)
             lowest = min(lowest, height - info["radius"])
             points[name] = centre - (height) * n
@@ -372,8 +379,10 @@ def _root_regulation_acceleration(
     least-norm inverse of the planted coupling maps onto the legs. Returns a
     full-size vector with only lower-limb entries nonzero.
     """
-    simulator.adapter.frame_poses(simulator._map(q))
-    simulator.adapter._mj.mj_comPos(simulator.adapter.model, simulator.adapter.data)
+    adapter = simulator.adapter
+    adapter.frame_poses(simulator._map(q))
+    mj = adapter._mj
+    mj.mj_comPos(adapter.model, adapter.data)
     coupling = _planted_coupling(simulator)
     root = simulator.root
     wanted = gains[0] * (q_ref[root] - q[root]) + gains[1] * (v_ref[root] - v[root])
@@ -413,7 +422,8 @@ def _balance_acceleration(
     inverse of the feet-planted CoM Jacobian.
     """
     com, jac = _planted_com_jacobian(simulator, q)
-    n = np.asarray(simulator.adapter.ground_plane.normal, dtype=float)
+    ground_plane = simulator.adapter.ground_plane
+    n = np.asarray(ground_plane.normal, dtype=float)
     n = n / np.linalg.norm(n)
     error = com_ref - com
     error -= (error @ n) * n

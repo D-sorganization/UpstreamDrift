@@ -1,5 +1,16 @@
 # SPEC.md — Repository Specification Document
 
+## Ground Support Landing and Marker Prior Calibration (#10186, #10162)
+
+Reconciles the parallel Visuals/FB-4/FB-5/FB-6 and Ground Support lanes under HO-0 (#10186):
+- `src/shared/python/motion_matching/marker_calibration.py`:
+  - Adds `prior_offsets` and `prior_weight` parameters to `calibrate_marker_offsets()` and internal `_placements()`, allowing anatomical marker priors to regularize least-squares marker placement optimization.
+  - Implements `static_marker_offsets()` computing mean marker positions in local body frames across static trial frames.
+  - Preserves OpenSim re-export shim in `src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`.
+- Law of Demeter and Clean Layering Enforcement:
+  - Eliminates deep member access chains in `full_body_markers.py` and `full_body_simulation.py` to satisfy LOD quality gates.
+  - Enforces dependency direction constraints ensuring `src/shared/python/motion_matching` remains decoupled from engine-specific modules.
+
 ## Returned81 Cross-Engine Replay Format and 5-Metric Evaluation (#10062)
 
 Specifies standardized replay archive serialization, forward-kinematics projection, and 5-metric evaluation across physics engines (MuJoCo, Pinocchio, Drake) for Visuals Handoff Step 4:
