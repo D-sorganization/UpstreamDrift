@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10188 · Model-Driven Golf Simulator Integration
+
+- **State:** proposed
+- **Owner:** codex
+- **Issue:** #10188 (children #10189–#10200)
+- **Branch:** docs/issue-10188-gspro-integration
+- **PR:** #10201 (open; planning only)
+- **Paths:** docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md
+- **Started:** 2026-09-15
+- **Last verified:** 2026-09-15 (`395d3de876d8f87b7b00785ef2f430d0e9387ce7` source baseline; SELF planning changes; documentation pre-commit, 12 local links, title case, SPEC duplicate and whitespace checks pass; development-log baseline comparison adds no findings)
+- **Summary:** Proposed GSPro shot delivery and interchangeable local/commercial simulator architecture with immutable contracts, uncertainty handling, impact qualification gates, companion replay, detailed TDD/DbC/LoD/DRY children and delegated acceptance runbook; no outbound runtime implementation or live qualification.
+- **Next step:** Execute GS-00 protocol characterization (#10189) on the installed licensed GSPro host.
+- **Evidence:** docs/plans/golf_simulator_integration/README.md and FEASIBILITY.md; canonical handoff names worker domain slice #10190.
+
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
 
 - **State:** in_progress

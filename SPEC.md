@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Proposed Model-Driven Golf Simulator Integration (#10188)
+
+Planning scope only: [GSPro Integration Plan](docs/plans/golf_simulator_integration/README.md)
+defines a vendor-neutral shot-delivery port, immutable launch/provenance contract,
+durable uncertainty handling, GSPro adapter, local reference destination and
+synchronized companion golfer replay. GitHub children #10189–#10200 separate
+protocol characterization, implementation, impact qualification and licensed
+acceptance under TDD, DbC, Law of Demeter and DRY requirements.
+
+No outbound GSPro integration is implemented by this specification update.
+Native GSPro avatars and autonomous course feedback remain vendor-gated research.
+Existing contact/impact qualification gaps must be resolved independently of
+socket delivery; scientific acceptance retains the canonical manual governance.
+
 ## Shadow Tracker Evidence-Based Turnover Refresh (#10184)
 
 Corrects prototype completion claims after the September 15 review. Records
@@ -4829,6 +4843,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-15 | #10201 | Propose GSPro and interchangeable simulator integration, detailed implementation children, architecture and worker turnover (#10188); no runtime implementation. |
 | 2026-09-15 | #10185 | Refresh Shadow Tracker turnover with reproduced acceptance gaps and current corrective/product sequence (#10184). |
 | 2026-09-15 | #10152 | Review Shadow Tracker contracts and publish the full implementation, launcher, performance and CI/CD continuation handoff (#10150). |
 | 2026-09-14 | #10147 | Implement camera direction conversion between observation and pipeline contracts for Shadow Tracker (ST-02C, #10139). |
