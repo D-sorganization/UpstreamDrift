@@ -1,0 +1,109 @@
+{
+  "title": "Cross-Engine Parity Diagnosis & Verification Receipt (Candidate 100)",
+  "timestamp": "2026-09-15T16:50:00Z",
+  "reference_environment": {
+    "node": "DeskComputer",
+    "os": "Windows",
+    "matlab_release": "R2025b Update 5",
+    "matlab_version": "25.2.0.3177638 (R2025b) Update 5"
+  },
+  "artifact_hashes": {
+    "model_slx_sha256": "daca9a90ad0ab819c7d61641ed594b8f230f8658f2a5f4ce34026db44b52ddc9",
+    "candidate_json_sha256": "2b0e8fe98b373c9d74e39612ba9329685c0eb53ec659efc8d84c4708e270b962",
+    "seed_json_sha256": "dea77a4d19c879b88671f5336735080b054deb6131dedb065b9810ec0ae708cc",
+    "replay_script_m_sha256": "e266a2f6e04a6d77e3f8032c74a67706c669b802afa8a039c43119a42ab77219",
+    "corrected_replay_mat_sha256": "bd77dcbd890ce48116d6a38c71b247ad9d91fc38e28f0549a22731ea9fed3850",
+    "corrected_replay_json_sha256": "29e067457171d92c90b1a27c9ac315da11cc346aba8d30dcc4063a3b71ca4015"
+  },
+  "pipeline_verification": {
+    "polynomial_coefficient_order": "highest-power-first",
+    "time_basis": "absolute-seconds",
+    "actuator_coordinates_count": 27,
+    "force_frame_commanded": "world",
+    "internal_model_transform": "ConvertGlobalXtoHipBaseLocal (Product SID 7061) multiplies by RotationMatrixGlobaltoHipJointBase"
+  },
+  "diagnosed_defects": [
+    {
+      "defect_id": 1,
+      "name": "Missing Geometry Seed Resolution at Assembly",
+      "root_cause": "Replay script looked in non-existent reproduction/ subfolder, defaulting arm lengths to 12.0/14.0 in instead of 14.5/12.0 in. Closed arm-club kinematic loop could not close.",
+      "initial_impact": "46.177 mm marker discrepancy at t=0 before any motion.",
+      "repaired_metric": "1.554e-12 mm (1.554 femtometers) marker agreement at t=0, KinematicsSolver status=1 (27/27 targets satisfied)."
+    },
+    {
+      "defect_id": 2,
+      "name": "Translational Force Double-Rotation",
+      "root_cause": "Candidate world-frame forces were pre-multiplied by rot_wb in replay script, while Simulink model already contained ConvertGlobalXtoHipBaseLocal block performing the rotation internally.",
+      "initial_impact": "Swapped Fy and Fz forces, injected ~383 N false lateral force, caused initial hip angular acceleration of 160 rad/s^2 vs -1.1 rad/s^2.",
+      "repaired_metric": "Simscape commanded force exactly matches Pinocchio joint base force to 15 decimal places (-2.375 N, 385.675 N, 661.323 N). Initial hip angular acceleration matches (-1.139 rad/s^2 vs -1.140 rad/s^2)."
+    }
+  ],
+  "parity_audit_time_series": {
+    "frames_1_to_30_0_080s": {
+      "max_marker_coord_discrepancy_mm": 0.0017,
+      "mean_marker_coord_discrepancy_mm": 0.0001,
+      "max_marker_euclidean_discrepancy_mm": 0.0017,
+      "mean_marker_euclidean_discrepancy_mm": 0.0002,
+      "status": "1.7 micrometer agreement (matches Gate 2 early threshold of 12.0 mm)"
+    },
+    "frames_1_to_150_0_414s": {
+      "max_marker_coord_discrepancy_mm": 0.0096,
+      "mean_marker_coord_discrepancy_mm": 0.0006,
+      "max_marker_euclidean_discrepancy_mm": 0.0126,
+      "mean_marker_euclidean_discrepancy_mm": 0.0011,
+      "status": "12.6 micrometer agreement"
+    },
+    "frames_1_to_200_0_553s": {
+      "max_marker_coord_discrepancy_mm": 0.2549,
+      "mean_marker_coord_discrepancy_mm": 0.0033,
+      "max_marker_euclidean_discrepancy_mm": 0.3026,
+      "mean_marker_euclidean_discrepancy_mm": 0.0066,
+      "status": "Sub-millimeter agreement (0.30 mm)"
+    },
+    "full_horizon_307_frames_0_850s": {
+      "max_marker_coord_discrepancy_mm": 283.2432,
+      "mean_marker_coord_discrepancy_mm": 2.1893,
+      "max_marker_euclidean_discrepancy_mm": 346.7511,
+      "mean_marker_euclidean_discrepancy_mm": 4.4983,
+      "note": "Divergence accumulates on floating base hip coordinate under ode23t (RelTol 1e-3). Tightening to RelTol 1e-6 reduces max coord discrepancy to 96.38 mm, showing solver sensitivity under initial qualification. Subject to bounded solver-convergence audit."
+    }
+  },
+  "repaired_simscape_metrics": {
+    "whole_rms_m": 0.031117389015071172,
+    "whole_rms_mm": 31.117389015071172,
+    "early_rms_m": 0.01001790725678273,
+    "early_rms_mm": 10.01790725678273,
+    "terminal_rms_m": 0.13982146423637087,
+    "terminal_rms_mm": 139.82146423637087,
+    "club_cluster_rms_m": 0.008899812188511545,
+    "club_cluster_rms_mm": 8.899812188511545,
+    "pelvis_yaw_error_pct": 143.1244577796126
+  },
+  "comparison_summary": {
+    "whole_rms_mm": {
+      "pinocchio": 20.342,
+      "original_simscape": 950.463,
+      "corrected_simscape": 31.117
+    },
+    "early_rms_mm": {
+      "pinocchio": 10.015,
+      "original_simscape": 680.608,
+      "corrected_simscape": 10.018
+    },
+    "terminal_rms_mm": {
+      "pinocchio": 39.202,
+      "original_simscape": 1788.283,
+      "corrected_simscape": 139.821
+    },
+    "club_cluster_rms_mm": {
+      "pinocchio": 8.728,
+      "original_simscape": 1887.162,
+      "corrected_simscape": 8.9
+    },
+    "pelvis_yaw_error_pct": {
+      "pinocchio": 15.691,
+      "original_simscape": 282.367,
+      "corrected_simscape": 143.124
+    }
+  }
+}
