@@ -19,24 +19,24 @@
       "rationale": "Reviewed Camera Setup to recording-plan edge and shared setup instructions; imported-video goals remain independent of camera hardware. 563 Capture Rig, 16 atlas/workflow and 15 goal tests pass. Formatting changed registry whitespace only."
     },
     "launcher-atlas": {
-      "fingerprint": "e696ad02c374a58c0a5f867020817d016eb2a5011b120884775b711ad28fe6a3",
+      "fingerprint": "2eae22366e509114efff2082f634c1fe12d8355ad7dd22cdfa9f5c15a02c8944",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "50329f3dea4d265c205d090c037452ac1d1bad80ce3f35109e71729edc344976",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "36b24a242e7fc3162eec04d0bec25b56e13d02baf8089b33386679cc47b634ce",
-        "src/config/launcher_manifest.json": "89ce66ae10de8d56905be878c90b9488328b5fb0dbf679b579fe3610d20ec2b0",
+        "src/config/feature_parity.json": "0b38d2c770205253f27d20cea850803fa35d70b157416ab14ac5090c7a5ac477",
+        "src/config/launcher_manifest.json": "e24f5c8bf10665d37a028cd084e89b062607cb4d26391993a66bc903eb38aa67",
         "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
-        "src/config/models.yaml": "db988b0091b8e70a78c9b862a18c4f52af5fb56b2c58d4c772d95cbea096ac92",
+        "src/config/models.yaml": "ab98f71789d64d4ae19c2923e310b3fcc9d568216b0169e17f0da05915901c16",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "\\ Reconcile launcher-atlas inputs after landing ground support and viewer tile\\"
+      "rationale": "Add golf_simulator desktop and web tile"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
