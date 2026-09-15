@@ -123,7 +123,7 @@ def write() -> int:
     rows = oversized_files()
     table = _render_table(rows)
     intro = (
-        "# Monolith refactor register\n\n"
+        "# Monolith Refactor Register\n\n"
         "Tracking register for the A-O monolith findings (issue #7131). It "
         "lists every tracked `.py`/`.m` source file under `src/` currently over "
         f"**{THRESHOLD} LOC** — the surfaces that block the no-monolith "
