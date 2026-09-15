@@ -6,6 +6,7 @@ Reviewed `b97e159dcc1686b4fc36351124996862619d8f35`, including PRs #10169–#101
 #10179 and #10180. This review supersedes older pickup/status paragraphs; the
 original full scope and G0–G7 in [Validation](VALIDATION.md) remain mandatory.
 Tracking issue: #10184. Commit/PR presence proves code landed, not stage acceptance.
+Turnover publication: [PR #10185](https://github.com/D-sorganization/UpstreamDrift/pull/10185).
 
 Useful progress includes hardened rollout acceptance (#10170), additional
 evidence DTOs/protocols (#10171), shot/timing helpers (#10172), mask metrics and
