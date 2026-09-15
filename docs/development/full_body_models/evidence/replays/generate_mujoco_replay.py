@@ -15,6 +15,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
 import mujoco
 import numpy as np
@@ -55,6 +56,59 @@ def camera(lookat: np.ndarray) -> mujoco.MjvCamera:
     return cam
 
 
+def evaluate_forward_kinematics(
+    model: NativeMujocoModel,
+    q_pin: np.ndarray,
+    names: list[str],
+    candidate_doc: dict[str, Any],
+) -> np.ndarray:
+    """Evaluate forward kinematics across all candidate frames."""
+    mj_markers = []
+    for k in range(len(q_pin)):
+        qk_dict = {name: float(q_pin[k, i]) for i, name in enumerate(names)}
+        poses_k = model.frame_poses(qk_dict)
+        m_k = project_markers(
+            poses_k,
+            candidate_doc["marker_bodies"],
+            candidate_doc["marker_offsets_m"],
+        )
+        mj_markers.append(m_k)
+    return np.asarray(mj_markers, dtype=np.float64)
+
+
+def render_replay_gif(
+    q_pin: np.ndarray,
+    names: list[str],
+    lookat: np.ndarray,
+) -> int:
+    """Render animated GIF using MuJoCo visual layer."""
+    spec_bytes = FULL_BODY_SPEC_PATH.read_bytes()
+    xml, _ = exporter.export_full_body_mjcf(spec_bytes, visual=True)
+    visual_model = mujoco.MjModel.from_xml_string(xml)
+    visual_data = mujoco.MjData(visual_model)
+
+    addresses = [visual_model.joint(n).qposadr[0] for n in names]
+    renderer = mujoco.Renderer(visual_model, *SIZE)
+
+    pil_frames: list[Image.Image] = []
+    for k in range(0, q_pin.shape[0], STRIDE):
+        visual_data.qpos[addresses] = q_pin[k]
+        mujoco.mj_forward(visual_model, visual_data)
+        renderer.update_scene(visual_data, camera=camera(lookat))
+        arr = renderer.render().copy()
+        pil_frames.append(Image.fromarray(arr))
+
+    frame_duration_ms = int(round(1000.0 * STRIDE / 360.0))
+    pil_frames[0].save(
+        OUTPUT_GIF,
+        save_all=True,
+        append_images=pil_frames[1:],
+        duration=frame_duration_ms,
+        loop=0,
+    )
+    return len(pil_frames)
+
+
 def main() -> None:
     logger.info("Loading candidate and reference replays...")
     candidate_doc = json.loads(CANDIDATE_JSON.read_text(encoding="utf-8"))
@@ -73,27 +127,13 @@ def main() -> None:
     names = candidate_doc["coordinate_names"]
 
     logger.info("Computing MuJoCo forward kinematics on candidate coordinates...")
-    mj_markers = []
-    for k in range(len(q_pin)):
-        qk_dict = {name: float(q_pin[k, i]) for i, name in enumerate(names)}
-        poses_k = model.frame_poses(qk_dict)
-        m_k = project_markers(
-            poses_k,
-            candidate_doc["marker_bodies"],
-            candidate_doc["marker_offsets_m"],
-        )
-        mj_markers.append(m_k)
-    mj_markers = np.asarray(mj_markers, dtype=np.float64)
+    mj_markers = evaluate_forward_kinematics(model, q_pin, names, candidate_doc)
 
-    # Marker difference vs Pinocchio
     marker_diff = np.abs(mj_markers - pin_replay["markers_m"])
     max_marker_diff = float(np.max(marker_diff))
     mean_marker_diff = float(np.mean(marker_diff))
     logger.info("Max marker diff vs Pinocchio: %.6e m", max_marker_diff)
-    logger.info("Mean marker diff vs Pinocchio: %.6e m", mean_marker_diff)
 
-    # Save replay NPZ
-    logger.info("Saving MuJoCo replay NPZ to %s...", OUTPUT_NPZ)
     save_native_replay_npz(
         OUTPUT_NPZ,
         time_s=time_s,
@@ -103,8 +143,6 @@ def main() -> None:
         valid=valid,
     )
 
-    # Compute 5 metrics
-    logger.info("Evaluating 5 uninterrupted metrics...")
     metrics = compute_replay_five_metrics(
         time_s=time_s,
         pred_markers_m=mj_markers,
@@ -112,36 +150,9 @@ def main() -> None:
         valid=valid,
         marker_labels=candidate_doc["marker_labels"],
     )
-    logger.info("MuJoCo Metrics: %s", json.dumps(metrics.as_dict(), indent=2))
 
-    # Render animated GIF with visual layer
-    logger.info("Rendering animated GIF using MuJoCo visual layer...")
-    spec_bytes = FULL_BODY_SPEC_PATH.read_bytes()
-    xml, meta = exporter.export_full_body_mjcf(spec_bytes, visual=True)
-    visual_model = mujoco.MjModel.from_xml_string(xml)
-    visual_data = mujoco.MjData(visual_model)
-
-    addresses = [visual_model.joint(n).qposadr[0] for n in names]
     lookat = np.nanmean(target_m[0], axis=0)
-    renderer = mujoco.Renderer(visual_model, *SIZE)
-
-    pil_frames: list[Image.Image] = []
-    for k in range(0, q_pin.shape[0], STRIDE):
-        visual_data.qpos[addresses] = q_pin[k]
-        mujoco.mj_forward(visual_model, visual_data)
-        renderer.update_scene(visual_data, camera=camera(lookat))
-        arr = renderer.render().copy()
-        pil_frames.append(Image.fromarray(arr))
-
-    logger.info("Saving animated GIF (%d frames) to %s...", len(pil_frames), OUTPUT_GIF)
-    frame_duration_ms = int(round(1000.0 * STRIDE / 360.0))
-    pil_frames[0].save(
-        OUTPUT_GIF,
-        save_all=True,
-        append_images=pil_frames[1:],
-        duration=frame_duration_ms,
-        loop=0,
-    )
+    n_frames = render_replay_gif(q_pin, names, lookat)
 
     receipt = {
         "candidate_sha256": candidate_doc.get("source_sha256")
@@ -157,7 +168,7 @@ def main() -> None:
         "render_config": {
             "resolution": list(SIZE),
             "stride": STRIDE,
-            "frames": len(pil_frames),
+            "frames": n_frames,
             "camera": {
                 "distance": 3.2,
                 "azimuth": 135.0,
