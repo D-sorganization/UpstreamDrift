@@ -11,6 +11,7 @@ single/multiview captures and historical footage with explicit ambiguity and
 unknown timing. Do not stop at data classes, a mock UI, or a synthetic-only demo.
 
 Read current AGENTS.md, CLAUDE.md, SPEC.md and root AGENT_HANDOFF.md. Then read:
+  docs/plans/shadow_tracker/PROGRESS_REVIEW_2026_09_15.md
   docs/plans/shadow_tracker/DEVELOPMENT_REVIEW.md
   docs/plans/shadow_tracker/CONTRACT_FREEZE.md
   docs/plans/shadow_tracker/QUALIFICATION_FINDINGS.md
@@ -18,25 +19,25 @@ Read current AGENTS.md, CLAUDE.md, SPEC.md and root AGENT_HANDOFF.md. Then read:
   docs/plans/shadow_tracker/INTEGRATION.md
   docs/plans/shadow_tracker/VALIDATION.md
   docs/plans/shadow_tracker/CAPTURE_AND_ARCHIVES.md
-Inspect current code and GitHub state; the review baseline is c3395229, not an
-assumption about your checkout. A/B/C (#10137/#10139/#10138) are already merged.
+Inspect current code and GitHub state. Reviewed baseline is b97e159dc. Record
+hardening and prototype stages through ST-06 have merged, but their full
+acceptance is incomplete. The current progress review supersedes old pickup
+instructions and unsupported claims of 100% boundary coverage.
 
-FIRST ACTION: check the claim for #10151 in Repository_Management and lease it
-if free. In an isolated topic worktree reproduce the review's malformed-input
-and pre-conversion mask-length findings as failing behavioral tests. Repair only
-that packet, preserving schemas/hash compatibility and immutable ownership.
-Resolve the physical_time_s coercion discrepancy explicitly against the frozen
-contract. Run all Shadow Tracker and affected-consumer tests, lint, format,
-types, inventory checks and repository CI; publish a focused PR referencing
-#10151. Do not reimplement A/B/C from the old pickup prompt.
+FIRST ACTION: inspect/claim a bounded follow-up under #10127. Write a red test
+showing that an arbitrary existing checkpoint must not report segmentation
+success; the current provider returns a mask count without running inference.
+Make it fail explicitly until real masks are produced. Do not add fake inference.
 
-AFTER THAT: follow the complete delivery sequence in DEVELOPMENT_REVIEW.md.
-Before each stage, inspect issue dependencies and create/claim a bounded child
-slice with one concrete outcome, allowed files and red/green acceptance tests.
-Specialist work #10140/#10141 and #10124 remains prerequisite to qualified
-dynamics. Never compensate for incorrect model coordinates with optimizer
-freedom or loosen physics tolerances. Image-only work can advance only with an
-explicit bounded dependency decision, without closing the blocked parent.
+NEXT: resolve the point-only renderer and conflicting state conventions under
+#10128, add independent filled-area/articulation oracles, and repair DTO finite,
+shape and ownership invariants. Do not fit a golfer against two landmark pixels.
+In a separate bounded image-only slice, finish real decoding under #10168 and
+persisted mask revisions under #10127, then expose the real review journey in
+the launcher. Scientific #10167 must regenerate valid calibration/IK evidence;
+Stage 7 boundary work cannot qualify physics on the historical invalid pose.
+Follow all remaining stages and acceptance gates in the current progress review
+and DEVELOPMENT_REVIEW.md. Do not redefine partial prototypes as completed stages.
 
 Apply TDD, DbC, LoD and DRY throughout production code, adapters and UI. Preserve
 behavioral red/green evidence. Reuse existing public camera/canonical-state,
