@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0",
+  "tools_pin": "1ac89c18e6280752d949e520c2143d2fb584d31e",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -11774,7 +11774,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 6384,
+      "ud_bytes": 6424,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

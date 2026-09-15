@@ -20,6 +20,7 @@ raise SystemExit(
             str(fixture / "session_checks.py"),
             str(fixture / "solver_checks.py"),
             str(fixture / "reuse_checks.py"),
+            str(fixture / "preview_source_checks.py"),
             "--confcutdir",
             str(fixture),
             "-c",
