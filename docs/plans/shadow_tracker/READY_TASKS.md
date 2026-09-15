@@ -22,7 +22,8 @@ A/B/C and D/E are implemented; Stage 0 contract hardening (#10151) merged in #10
 ST-01 (#10124) feasibility qualification confirms that while coordinate packing (#10140)
 and closure units (#10141) are resolved in software, the stored historical calibration
 trajectory and physical model geometry remain unqualified for golfer reconstruction.
-The next immediate dispatch is Stage 2 (#10125): full contracts freeze.
+Stage 2 (#10125) full contracts freeze is implemented in `feat/st02-immutable-evidence-contracts-10125`.
+The next immediate dispatch is Stage 3 (#10126): video ingestion and lineage.
 
 ## Commands by Packet
 
