@@ -1,5 +1,11 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Development Review and Continuation (#10150)
+
+Records the reviewed image-contract baseline, reproduced validation findings and
+full delivery handoff covering TDD/DbC/LoD/DRY, model qualification, launcher/UI,
+performance and CI/CD. No fitter or scientific gate is completed by this review.
+
 ## Shadow Tracker Immutable Binary Masks and Lineage (ST-02B, #10138)
 
 Implements frozen `MaskFrame` record under `src/shared/python/shadow_tracker/mask_records.py`
@@ -4686,6 +4692,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-15 | #10152 | Review Shadow Tracker contracts and publish the full implementation, launcher, performance and CI/CD continuation handoff (#10150). |
 | 2026-09-14 | #10147 | Implement camera direction conversion between observation and pipeline contracts for Shadow Tracker (ST-02C, #10139). |
 | 2026-09-14 | #10145 | Implement frozen source and frame identity records for Shadow Tracker (ST-02A, #10137). |
 | 2026-09-14 | #10144 | Add TDD model diagnostics, measured qualification blockers and frozen image-only worker handoff for Shadow Tracker. |
