@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10188 (child #10192 active; children #10189–#10200)
 - **Branch:** feat/issue-10192-durable-transport
-- **PR:** #10208 (open; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
+- **PR:** #10213 (open; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
 - **Paths:** `src/shared/python/golf_simulator; tests/unit/golf_simulator; tests/integration/golf_simulator; docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md`
 - **Started:** 2026-09-15
 - **Last verified:** 2026-09-15 (`2bf5ec40f`; SELF; GS-00, GS-01, GS-02, and GS-03 implemented test-first; 34 unit and integration tests pass under standard and python -O with DBC_LEVEL=off; ruff check/format, mypy, architecture budget, DRY, and LoD pass; divergence inventory updated)

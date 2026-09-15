@@ -5,7 +5,7 @@
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
 - **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
-  and GS-03 (#10192) durable transport and delivery journal complete. Planning PR #10201 merged; PR #10208 passing CI.
+  and GS-03 (#10192) durable transport and delivery journal complete. Planning PR #10201 and PR #10208 merged; PR #10213 open.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
   branch `feat/issue-10192-durable-transport`; commit `2bf5ec40f`.
 - **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
