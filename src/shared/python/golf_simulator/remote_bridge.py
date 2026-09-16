@@ -76,6 +76,7 @@ class LocalBridgeServer:
         vendor_host: str = "127.0.0.1",
         vendor_port: int = 921,
         queue_capacity: int = 32,
+        adapter: SimulatorAdapter | None = None,
     ) -> None:
         # Preconditions
         if not auth_token or not str(auth_token).strip():
@@ -96,6 +97,7 @@ class LocalBridgeServer:
         self._auth_token = auth_token
         self.vendor_host = vendor_host
         self.vendor_port = vendor_port
+        self._adapter = adapter
         self._queue: asyncio.Queue[ShotEnvelope] = asyncio.Queue(maxsize=queue_capacity)
 
     def _verify_auth(self, token: str) -> None:
@@ -142,6 +144,9 @@ class LocalBridgeServer:
     ) -> SubmissionReceipt:
         if cancellation_token and cancellation_token.is_cancelled:
             raise asyncio.CancelledError("Operation cancelled by caller")
+
+        if self._adapter is not None:
+            return await self._adapter.submit(shot)
 
         now = _utc_now_iso()
         return SubmissionReceipt(
@@ -200,17 +205,45 @@ class RemoteBridgeClient(SimulatorAdapter):
         return self._capabilities
 
     async def connect(self, config: dict[str, Any] | None = None) -> ConnectionStatus:
-        self._connected = True
-        return ConnectionStatus(
-            state=ConnectionState.CONNECTED,
-            endpoint=self.server_endpoint,
-            message="Remote bridge connected",
-        )
+        if self._bridge_server is not None:
+            self._connected = True
+            return ConnectionStatus(
+                state=ConnectionState.CONNECTED,
+                endpoint=self.server_endpoint,
+                message="Remote bridge connected",
+            )
+
+        # Verify network reachability of remote server endpoint
+        try:
+            parts = self.server_endpoint.split(":")
+            host = parts[0]
+            port = int(parts[1]) if len(parts) > 1 else 9220
+            reader, writer = await asyncio.wait_for(
+                asyncio.open_connection(host, port),
+                timeout=0.5,
+            )
+            writer.close()
+            await writer.wait_closed()
+            self._connected = True
+            return ConnectionStatus(
+                state=ConnectionState.CONNECTED,
+                endpoint=self.server_endpoint,
+                message="Remote bridge connected",
+            )
+        except Exception as exc:
+            self._connected = False
+            return ConnectionStatus(
+                state=ConnectionState.FAILED,
+                endpoint=self.server_endpoint,
+                message=f"Could not connect to remote bridge: {exc}",
+            )
 
     async def disconnect(self) -> None:
         self._connected = False
 
     async def submit(self, shot: ShotEnvelope) -> SubmissionReceipt:
+        if not self._connected:
+            raise ConnectionError("Remote bridge connection not established")
         if self._bridge_server is not None:
             return await self._bridge_server.handle_submit_request(
                 auth_token=self._auth_token,

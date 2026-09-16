@@ -96,3 +96,24 @@ def test_retention_pruning_preserves_unresolved(tmp_path: Path) -> None:
     assert "recent-acked" in remaining_ids
     # Crucial acceptance criterion: uncertain/unresolved records MUST be preserved!
     assert "old-ambiguous" in remaining_ids
+
+
+def test_automatic_recovery_on_startup_when_storage_loaded(tmp_path: Path) -> None:
+    journal_path = tmp_path / "auto_recover_journal.json"
+    journal1 = ShotJournal(storage_path=journal_path)
+    journal1.record_intent("shot-pending-auto", b"test_payload")
+    assert journal1.get_entry("shot-pending-auto").status == DeliveryStatus.PENDING
+
+    # Instantiating a new journal with storage and auto_recover=True automatically transitions pending to AMBIGUOUS
+    journal2 = ShotJournal(storage_path=journal_path, auto_recover=True)
+    entry = journal2.get_entry("shot-pending-auto")
+    assert entry.status == DeliveryStatus.AMBIGUOUS
+    assert "Crash recovery" in (entry.error or "")
+
+    # With auto_recover=False, pending is preserved
+    journal_path3 = tmp_path / "manual_recover_journal.json"
+    journal3 = ShotJournal(storage_path=journal_path3)
+    journal3.record_intent("shot-pending-manual", b"test_payload")
+
+    journal4 = ShotJournal(storage_path=journal_path3, auto_recover=False)
+    assert journal4.get_entry("shot-pending-manual").status == DeliveryStatus.PENDING

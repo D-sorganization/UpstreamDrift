@@ -13,7 +13,7 @@
   "totals": {
     "identical": 424,
     "diverged": 278,
-    "ud-only": 1281,
+    "ud-only": 1286,
     "tools-only": 708,
     "spelling-only": 124
   },
@@ -371,7 +371,7 @@
     "golf_simulator": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 13,
+      "ud-only": 18,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -8841,7 +8841,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "",
-      "ud_bytes": 2116,
+      "ud_bytes": 3499,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8945,11 +8945,23 @@
       "spelling_only": false
     },
     {
+      "path": "golf_simulator/discovery.py",
+      "classification": "ud-only",
+      "package": "golf_simulator",
+      "subpackage": "",
+      "ud_bytes": 5775,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "golf_simulator/journal.py",
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "",
-      "ud_bytes": 8700,
+      "ud_bytes": 11687,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8962,6 +8974,54 @@
       "package": "golf_simulator",
       "subpackage": "",
       "ud_bytes": 11981,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_simulator/logging_redaction.py",
+      "classification": "ud-only",
+      "package": "golf_simulator",
+      "subpackage": "",
+      "ud_bytes": 2141,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_simulator/packaging.py",
+      "classification": "ud-only",
+      "package": "golf_simulator",
+      "subpackage": "",
+      "ud_bytes": 3161,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_simulator/producer_lock.py",
+      "classification": "ud-only",
+      "package": "golf_simulator",
+      "subpackage": "",
+      "ud_bytes": 5908,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_simulator/remote_bridge.py",
+      "classification": "ud-only",
+      "package": "golf_simulator",
+      "subpackage": "",
+      "ud_bytes": 9172,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

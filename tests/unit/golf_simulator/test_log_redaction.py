@@ -76,3 +76,24 @@ def test_logging_filter_scrubs_records() -> None:
         assert "api_key=[REDACTED]" in log_content
     finally:
         logger.removeHandler(handler)
+
+
+def test_logging_filter_scrubs_interpolated_args() -> None:
+    logger = logging.getLogger("test.redaction.interpolated")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    stream = io.StringIO()
+    handler = logging.StreamHandler(stream)
+    handler.addFilter(SecretRedactionFilter())
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    logger.addHandler(handler)
+
+    try:
+        # Pass sensitive token as positional formatting argument
+        logger.info("Connecting using %s credential", "token=sensitive123")
+        content = stream.getvalue()
+        assert "sensitive123" not in content
+        assert "token=[REDACTED]" in content
+    finally:
+        logger.removeHandler(handler)

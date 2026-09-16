@@ -159,4 +159,6 @@ class ProducerLockManager:
                 return
             if self._current_lock.producer_id != lock.producer_id:
                 raise ValueError("Cannot release lock held by another producer")
+            if self._current_lock.expires_at_utc != lock.expires_at_utc:
+                raise ValueError("Cannot release stale lock token")
             self._current_lock = None

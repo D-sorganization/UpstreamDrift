@@ -81,12 +81,18 @@ class JournalEntry:
 class ShotJournal:
     """Thread-safe and durable delivery intent journal."""
 
-    def __init__(self, storage_path: Path | None = None) -> None:
+    def __init__(
+        self,
+        storage_path: Path | None = None,
+        auto_recover: bool = True,
+    ) -> None:
         self._lock = threading.Lock()
         self._storage_path = Path(storage_path) if storage_path is not None else None
         self._entries: dict[str, JournalEntry] = {}
         if self._storage_path is not None and self._storage_path.is_file():
             self._load_from_storage()
+            if auto_recover:
+                self.recover_on_startup()
 
     def record_intent(self, shot_id: str, payload_bytes: bytes) -> JournalEntry:
         """Record intent to deliver shot before wire transmission.
