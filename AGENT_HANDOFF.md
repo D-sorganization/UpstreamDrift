@@ -27,7 +27,7 @@
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
-## GSPro Integration (#10188) — GS-00 Through GS-08 Complete
+## GSPro Integration (#10188) — GS-00 Through GS-10 Delivered
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
@@ -35,36 +35,26 @@
   GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
   GS-05 (#10194) shared session service and local reference destination,
   GS-06 (#10195) replay and single-impact submission,
-  GS-07 (#10196) capability-aware desktop and web controls, and
-  GS-08 (#10197) Windows deployment and authenticated remote topology complete.
-  Planning PR #10201, PR #10208, PR #10213, PR #10215, PR #10217, PR #10220, and PR #10222 merged.
+  GS-07 (#10196) capability-aware desktop and web controls,
+  GS-08 (#10197) Windows deployment and authenticated remote topology, and
+  GS-09 (#10198) licensed acceptance and support matrix complete.
+  GS-10 (#10199) second commercial simulator evaluation and Flight Relay adapter implemented.
+  PRs #10201, #10208, #10213, #10215, #10217, #10220, #10222, #10225, and #10226 merged into `main`.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10197-windows-remote`.
-- **Delivered:**
-  - Configurable Discovery & Support Diagnostics (`src/shared/python/golf_simulator/discovery.py`):
-    `SimulatorEndpoint` enforcing strict local loopback (`127.0.0.1`, `localhost`), valid ports (1-65535);
-    `SupportReceipt` producing non-secret audit metadata without leaking API keys or bearer tokens;
-    `discover_simulator_installation` resolving environment variables without registry scraping or hardcoded paths.
-  - Single-Producer Session Ownership & Conflict Detection (`src/shared/python/golf_simulator/producer_lock.py`):
-    `ProducerLockManager` and `ProducerLock` leases preventing collision with real launch monitors;
-    raises `ProducerConflictError` with conflict metadata without terminating or killing unrelated processes.
-  - Authenticated Remote Bridge Facade (`src/shared/python/golf_simulator/remote_bridge.py`):
-    `LocalBridgeServer` and `RemoteBridgeClient` (fulfilling `SimulatorAdapter`);
-    enforces token authentication (`AuthenticationError`), blocks non-loopback vendor bindings (`BridgeSecurityError`),
-    bounds queues with explicit backpressure (`QueueCapacityExceededError`), and supports cooperative cancellation tokens.
-  - Logging Redaction (`src/shared/python/golf_simulator/logging_redaction.py`):
-    `SecretRedactionFilter`, `redact_text`, `redact_mapping` scrubbing bearer tokens, passwords, and API keys.
-  - Durable Journal Recovery & Retention (`src/shared/python/golf_simulator/journal.py`):
-    `recover_on_startup()` recovering in-flight `PENDING` records to `AMBIGUOUS`;
-    `prune_retention()` removing expired terminal records while strictly preserving unresolved evidence.
-  - Windows Packaging & Licensing Enforcement (`src/shared/python/golf_simulator/packaging.py`):
-    `check_environment_readiness()` detecting optional dependencies without runtime crashes;
-    `assert_licensing_policy()` blocking automated EULA acceptance and vendor binary modification (`LicensingPolicyViolationError`).
+  branch `feat/issue-10199-second-simulator`.
+- **Delivered in GS-10:**
+  - Technical & Licensing Evaluation (`docs/plans/golf_simulator_integration/COMMERCIAL_SIMULATOR_EVALUATION.md`):
+    Comprehensive assessment of E6 CONNECT, Creative Golf 3D, TrackMan Virtual Golf, and Flight Relay Protocol;
+    direct adapter vs relay architectural trade-offs; turnkey vendor inquiry templates for user outreach;
+    honest capability declaration declaring unverified closed APIs as `UNSUPPORTED`.
+  - Flight Relay Protocol Adapter (`src/shared/python/golf_simulator/adapters/relay.py`):
+    `FlightRelayAdapter` and `FlightRelayConfig` conforming to `SimulatorAdapter` protocol;
+    shot normalization and journal integration; strict rejection of unsupported proprietary simulator targets (`UnsupportedDestinationError`).
 - **Validation:**
-  - 84 unit tests in `tests/unit/golf_simulator/` pass 100%.
+  - 95 unit tests in `tests/unit/golf_simulator/` pass 100%.
   - Verified under `python -O` (Design-by-Contract assertions active regardless of optimization flag).
-  - All architecture budget and lint checks pass cleanly.
-- **Next:** Open PR for GS-08 (#10197) and proceed to GS-09 (#10198) licensed acceptance and support matrix.
+  - All architecture budget, divergence inventory, and lint checks pass cleanly.
+- **Next:** Open PR for GS-10 (#10199), merge via auto-squash, and proceed to final child GS-11 (#10200).
 - **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
