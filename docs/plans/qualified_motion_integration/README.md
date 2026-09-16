@@ -165,3 +165,28 @@ The epic is complete only when each work package's actual current-state
 evidence meets its requirement, or the user explicitly changes that scope.
 Reasoned library-feature deferrals are recorded; missing required integration
 is not silently converted into a deferral.
+
+## Global Coefficient Lift and Discrete Integration (#10265)
+
+The selected Crocoddyl formulation augments physical state `[q, v]` with one
+constant vector of global Bernstein coefficients. A zero-time initial action
+sets that vector with `nu = 7 * n_actuated`; subsequent physical actions have
+`nu = 0` and copy the same coefficient state. The initial physical state is
+fixed. This preserves the historical control family and allows FDDP defects
+without silently introducing independent effort controls at each time node.
+A real Crocoddyl 3.2.1 toy probe exercised varying action control dimensions,
+FDDP descent, and bounded BoxFDDP. Full-body action qualification is still open.
+
+Each physical action must use `NativeFullBodyStep` and its exact discrete
+linearization. In particular, multiplying a continuous acceleration Jacobian
+by the time step is not the derivative of RK4. Every stage and substep carries
+state and coefficient sensitivities. Reject or explicitly diagnose contact
+kinks when requesting smooth optimization; do not present a branch derivative
+as global smoothness. Pure closed-form dynamics and independent native finite
+differences establish this boundary before action assembly.
+
+Dense coefficient augmentation increases memory and factorization cost. Measure
+native derivative cost and solver memory before choosing a full-capture node
+grid. Any temporal coarsening must retain the declared objective, physical
+horizon, event coverage and independent full-resolution replay; a shorter or
+sparsely audited fit is not equivalent acceptance.

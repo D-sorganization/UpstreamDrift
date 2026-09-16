@@ -1,5 +1,14 @@
 # Simscape Tour-Average Fit Continuation
 
+## Polynomial Full-Body Dynamics Boundary (#10265)
+
+The integration retains global degree-six Bernstein efforts for every non-root
+coordinate. World-root names are derived and checked; their efforts remain
+zero. The RK4 boundary differentiates all stages and substeps of the corrected
+native plant. Outputs are owned/read-only and expose contact branch validity.
+This is a dynamics prerequisite, not a completed Crocoddyl optimizer. Next:
+coefficient-lift action assembly, objective contracts and independent replay.
+
 ## Qualified Motion Integration (#10254)
 
 - **Read First:** [Integration Boundaries and Delegation Plan](docs/plans/qualified_motion_integration/README.md).

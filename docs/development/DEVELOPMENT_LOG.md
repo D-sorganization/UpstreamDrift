@@ -73,6 +73,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+Slice #10265 preserves global degree-six controls with a checked unactuated
+root mapping and exact RK4 state/coefficient sensitivities. It is a prerequisite
+to coefficient-lift Crocoddyl actions; optimizer and physical acceptance remain
+open. Preserve explicit ground configuration in independent replay.
+
 - **Weld Linearization (#10260; 2026-09-16):** Corrected the finite weld pose
   Jacobian and preserved the distinct acceleration-constraint partial. Real
   Pinocchio directional checks fail before correction for displaced wrists;
