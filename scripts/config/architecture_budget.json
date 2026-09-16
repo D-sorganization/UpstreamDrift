@@ -3,6 +3,33 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/shared/python/motion_matching/hip_calibration.py",
+      "symbol": "hip_rotation_zero",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10108,
+      "reason": "Issue #10108: hip_rotation_zero calculates zero-twist rotation angle offsets with dual-leg knee-in/ankle fallback across frame subsets.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/hip_calibration.py",
+      "symbol": "hip_rotation_zero",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10108,
+      "reason": "Issue #10108: hip_rotation_zero accepts marker kinematics, waist offsets, knee/ankle label pairs, and calibration options without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/hip_calibration.py",
+      "symbol": "apply_hip_calibration",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10108,
+      "reason": "Issue #10108: apply_hip_calibration transforms joint frames and incorporates zero-twist offsets into parent-to-base transforms.",
+      "expires_on": "2026-11-30"
+    },
+    {
       "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_100/two_window_fit_100.py",
       "symbol": "main",
       "rule": "function-lines",
