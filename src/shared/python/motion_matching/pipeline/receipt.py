@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-import hashlib
+from collections.abc import Mapping
 from dataclasses import dataclass
+import hashlib
+import json
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -128,3 +131,48 @@ def build_ground_support_receipt(
         validate_receipt(receipt_dict)
 
     return receipt_dict
+
+
+def log_pipeline_summary(
+    log: logging.Logger,
+    receipt: Mapping[str, Any],
+    ik_report: Mapping[str, Any],
+    calibration: Any,
+    calibration2: Any,
+) -> None:
+    """Log formatted summaries of address, dynamics, IK, and calibration.
+
+    Args:
+        log: Logger instance.
+        receipt: Complete ground support receipt dictionary.
+        ik_report: Full IK stage report dictionary.
+        calibration: Initial leg calibration result object.
+        calibration2: Recalibration result object after segment scaling.
+    """
+    log.info(
+        json.dumps(
+            {k: receipt[k] for k in ("address", "dynamics")}, indent=1, default=float
+        )
+    )
+    log.info(
+        "ik %s",
+        json.dumps(
+            {
+                k: ik_report[k]
+                for k in (
+                    "marker_rms_m",
+                    "segment_rms_m",
+                    "reference",
+                    "segment_scaling",
+                    "leg_angle_ranges_deg",
+                )
+            },
+            indent=1,
+            default=float,
+        ),
+    )
+    log.info(
+        "calibration rms %s -> scaled %s",
+        calibration.rms_per_iteration_m,
+        calibration2.rms_per_iteration_m,
+    )
