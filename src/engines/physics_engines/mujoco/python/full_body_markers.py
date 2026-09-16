@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -24,7 +24,7 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 )
 from src.shared.python.motion_matching.contact_law import GroundPlane
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
 
 
@@ -99,6 +99,34 @@ class FullBodyMarkerKinematics:
             name: (int(info["site_id"]), float(info["radius"]))
             for name, info in adapter._spheres.items()
         }
+
+    @property
+    def nq(self) -> int:
+        """Number of generalized coordinates in the model."""
+        return len(self.coordinate_order)
+
+    @property
+    def sphere_names(self) -> tuple[str, ...]:
+        """Names of the contact spheres carried by the model."""
+        return tuple(self._spheres.keys())
+
+    @property
+    def closure_sites(self) -> tuple[str, str]:
+        """Pair of site names (site_a, site_b) forming the loop closure."""
+        return (self._closure[0], self._closure[1])
+
+    @property
+    def marker_bodies_and_offsets(self) -> dict[str, tuple[str, Array]]:
+        """Map of marker label to (body_name, local_offset_in_mjcf_body)."""
+        mj = self._mj
+        model = self.model
+        out: dict[str, tuple[str, Array]] = {}
+        for label, body_id, local in zip(
+            self.labels, self._body_ids, self._local, strict=True
+        ):
+            body_name = mj.mj_id2name(model, mj.mjtObj.mjOBJ_BODY, body_id)
+            out[label] = (body_name, local.copy())
+        return out
 
     # -- forward kinematics -------------------------------------------------
     def _set(self, q: Array) -> None:
@@ -212,7 +240,7 @@ class FullBodyMarkerKinematics:
     def solve_pose(
         self,
         targets: Array,
-        valid: Array,
+        valid: NDArray[Any],
         q_init: Array,
         *,
         ground: GroundPlane,
@@ -230,8 +258,9 @@ class FullBodyMarkerKinematics:
         tolerance_m: float = 1e-7,
         marker_weights: Mapping[str, float] | None = None,
         prior_weights: Mapping[str, float] | None = None,
-        axis_targets: Mapping[str, tuple[Sequence[float], Sequence[float], float]]
-        | None = None,
+        axis_targets: (
+            Mapping[str, tuple[Sequence[float], Sequence[float], float]] | None
+        ) = None,
         com_target: tuple[Sequence[float], float] | None = None,
     ) -> PoseFit:
         """Least-squares pose for one frame of marker targets.
@@ -332,9 +361,11 @@ class FullBodyMarkerKinematics:
                 rows,
                 jacs,
                 closure_weight,
-                closure_weight
-                if closure_rotation_weight is None
-                else closure_rotation_weight,
+                (
+                    closure_weight
+                    if closure_rotation_weight is None
+                    else closure_rotation_weight
+                ),
             )
             self._append_ground(rows, jacs, ground, ground_weight, pinned)
             self._append_anchors(rows, jacs, planted, ground_weight)
@@ -395,8 +426,9 @@ class FullBodyMarkerKinematics:
 
     def _axis_rows(
         self,
-        axis_targets: Mapping[str, tuple[Sequence[float], Sequence[float], float]]
-        | None,
+        axis_targets: (
+            Mapping[str, tuple[Sequence[float], Sequence[float], float]] | None
+        ),
     ) -> list[tuple[int, Array, Array, float]]:
         sites = self.adapter.metadata["frame_sites"]
         out = []
@@ -616,7 +648,7 @@ class FullBodyMarkerKinematics:
     def solve_trajectory(
         self,
         targets: Array,
-        valid: Array,
+        valid: NDArray[Any],
         q_init: Array,
         *,
         ground: GroundPlane,
@@ -629,8 +661,9 @@ class FullBodyMarkerKinematics:
         restart_spread_rad: float = 0.5,
         restart_margin_m: float = 0.0,
         axis_targets_per_frame: Sequence[Mapping[str, Any] | None] | None = None,
-        com_targets_per_frame: Sequence[tuple[Sequence[float], float] | None]
-        | None = None,
+        com_targets_per_frame: (
+            Sequence[tuple[Sequence[float], float] | None] | None
+        ) = None,
         locked_per_frame: Sequence[Mapping[str, float] | None] | None = None,
         **options: Any,
     ) -> tuple[Array, list[PoseFit]]:

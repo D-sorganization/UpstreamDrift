@@ -93,6 +93,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  920 | `src/tools/bunker_shot_gui/report.py`                                                                                                                                         |
 |  919 | `src/bunkershot3d/vandv/ledger.py`                                                                                                                                            |
 |  916 | `src/engines/physics_engines/opensim/python/muscle_analysis.py`                                                                                                               |
+|  911 | `src/shared/python/shadow_tracker/contracts.py`                                                                                                                               |
 |  907 | `src/unreal_integration/mesh_loader.py`                                                                                                                                       |
 |  902 | `src/tools/capture_rig/reference_comparison.py`                                                                                                                               |
 |  899 | `src/shared/python/estimation/map_estimator.py`                                                                                                                               |
@@ -111,7 +112,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  865 | `src/shared/python/signal_toolkit/fitting.py`                                                                                                                                 |
 |  864 | `src/tools/bunker_shot_gui/widgets.py`                                                                                                                                        |
 |  859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m`                                                       |
-|  856 | `src/shared/python/shadow_tracker/contracts.py`                                                                                                                               |
 |  853 | `src/shared/python/ai/gui/assistant_panel.py`                                                                                                                                 |
 |  853 | `src/shared/python/sidekick/process_calculators/constants.py`                                                                                                                 |
 |  849 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py`                                                                                |
@@ -144,6 +144,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  811 | `src/engines/physics_engines/drake/python/src/pose_editor_tab.py`                                                                                                             |
 |  811 | `src/tools/model_explorer/joint_manipulator.py`                                                                                                                               |
 |  810 | `src/shared/python/humanoid_character_builder/mesh/mesh_processor.py`                                                                                                         |
+|  809 | `src/engines/physics_engines/mujoco/python/full_body_markers.py`                                                                                                              |
 |  809 | `src/shared/python/model_generation/converters/urdf_parser.py`                                                                                                                |
 |  809 | `src/shared/python/pose_editor/widgets.py`                                                                                                                                    |
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py`                                                                           |
