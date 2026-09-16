@@ -5,6 +5,7 @@ from __future__ import annotations
 from src.shared.python.motion_matching.pipeline import (
     address,
     constants,
+    design_decisions,
     dynamics,
     lane,
     receipt,
@@ -63,6 +64,7 @@ __all__ = [
     "configure_lane",
     "consistency_resolve",
     "constants",
+    "design_decisions",
     "document_bounds",
     "document_seed",
     "dynamics",

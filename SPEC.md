@@ -22,12 +22,67 @@ Establishes cross-platform environment automation and JAX/MJX-gated unit tests f
   - Validates analytic static equilibrium preload on lowest contact sphere ($-mg / (k n_{\text{spheres}})$).
   - Validates gradient finiteness ($\nabla \text{cost} \in \mathbb{R}$) on 12-frame truncated optimization with rest posture norms and NaN target filtering.
 
+## De Leva Male Anthropometry Table Verification (HO-9 #10111, #10162)
+
+Verifies the male body segment parameters in `src/shared/python/motion_matching/anthropometry.py` (`DE_LEVA_MALE`) against Table 4 of de Leva, P. (1996), "Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters", *Journal of Biomechanics*, 29(9), 1223-1230:
+- Segment Parameters Asserted: Pinning unit test in `tests/unit/motion_matching/test_de_leva_table.py` asserts segment length, mass percentage, center-of-mass percentage from proximal joint center, and sagittal, transverse, and longitudinal principal radii of gyration percentages against published literature values for all 11 male segments (`head`, `trunk`, `upper_trunk`, `middle_trunk`, `lower_trunk`, `upper_arm`, `forearm`, `hand`, `thigh`, `shank`, `foot`).
+- Shank Joint-Center Discrepancy Remediated: Corrects the male shank parameters in `anthropometry.py` to match de Leva (1996) joint-center definitions (knee joint center to ankle joint center):
+  - `com_fraction`: updated from `0.4459` (unadjusted Zatsiorsky-Seluyanov 1985 bony-landmark value) to `0.4395` (de Leva 1996 joint-center adjustment).
+  - `radii`: updated from `(0.255, 0.249, 0.103)` to `(0.251, 0.246, 0.102)`.
+- Verification Evidence: Structured receipt committed to `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json` recording line-by-line verification, reference subject constants (height 1.741 m, mass 73.0 kg), and joint-center endpoint boundaries.
+
+## Motion Matching Launcher Tile Pipeline Stages and Multi-Tab Execution (HO-4 #10158, #10162)
+
+Exposes every stage of the full-body motion matching pipeline through the desktop launcher tile with multi-tab configuration, process lifecycle management, and strict Law of Demeter separation:
+- `src/tools/motion_matching/pipeline.py`:
+  - `MatchRequest`: Extended with validated configuration fields `free_wrists` (bool), `bound_wrists` (bool), `fit_closure` (bool), `zmp_filter` (bool), `shooting_fit` (int >= 0), `shooting_gain` (float > 0), and `cutoff_hz` (float > 0). DbC postconditions reject concurrent `free_wrists` and `bound_wrists`.
+  - `match_command()`: Formulates command argument sequences for headless and CLI matching execution without exposing internal model or path structure to UI components.
+  - `ExperimentRequest`: Slotted dataclass specifying downswing experiment configuration (`run_dir`, `experiment_name`, `reference_path`, `downswing_torque_scale`, `downswing_kp_scale`, `downswing_kd_scale`, `max_seconds`).
+  - `experiment_command()`: Constructs CLI arguments for `downswing_experiment.py`.
+  - `export_mjx_command()`: Constructs CLI arguments for `evidence/ground_support/export_mjx_package.py`.
+  - `validate_reference_command()`: Constructs CLI arguments for evaluating and validating trajectory references against the shared contact-law plant.
+  - `read_experiment_summary()`: Safely reads, parses, and validates downswing experiment summaries from disk.
+- `src/tools/motion_matching/gui.py`:
+  - `MotionMatchingWidget`: Multi-tab interface (`Matching`, `Downswing experiment`, `MJX`).
+  - Matching Tab: Captures input document selection, capture selection, skip hip calibration, static seeds, and an explicit Stages group exposing free/bound wrists, fit closure, ZMP filter, shooting fit iterations and gain, and low-pass cutoff frequency.
+  - Downswing Experiment Tab: Controls run directory, experiment variant name, reference selection, downswing torque/gain scales, and timeout controls.
+  - MJX Tab: Provides one-click action triggers for MJX package export and trajectory reference validation with stdout/stderr telemetry streams.
+  - `RunWorker`: Background QThread process runner executing pipeline commands asynchronously with real-time log streaming and graceful termination.
+  - Law of Demeter Compliance: UI classes interact strictly through high-level domain requests (`MatchRequest`, `ExperimentRequest`) and factory functions; UI never constructs raw command-line argument lists.
+- Launcher and Governance Registry:
+  - Feature parity entry `tools.motion_matching` tracked as a registered gap with issue #10106 in `src/config/feature_parity.json`.
+  - Generated `docs/development/feature_parity_matrix.md` updated with Title Casing compliance.
+- Unit Testing:
+  - `tests/tools/motion_matching/test_pipeline.py`: 8 tests covering request validation contracts, command generation, and experiment summary parsing.
+  - `tests/tools/motion_matching/test_motion_matching_gui.py`: 5 headless PyQt6 tests verifying tab instantiation, stage checkboxes, mutual exclusion, downswing experiment request construction, and MJX command dispatch.
+
 ## Shadow Tracker Time and Geometry Turnover Review (#10230)
 
 Updates current agent pickup after real decoder, disk-renderer and calibration
 changes. Records source/physical-time, geometry/clipping and revision-integrity
 findings with corrective issues and full product completion gates. Documentation
 only; no runtime behavior or scientific qualification changes.
+
+## Full-Body Showpiece Design Decisions Record (HO-7 #10161, #10162)
+
+Consolidates all seventeen sections of findings in `docs/development/full_body_models/evidence/anthropometry/REVIEW.md` into the authoritative design-decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`:
+- `pipeline.design_decisions`: Implements structured `DesignDecision` records, parser `parse_design_decisions()`, and Design-by-Contract validator `validate_design_decisions()` ensuring all 14 architectural and biomechanical decisions exist in exact order with what, why, evidence receipts, rejected alternatives, and verified disk-existing receipt and review links.
+- 14 Consolidated Decisions:
+  1. Anthropometric Geometry From de Leva (subject-specific parameters, 78 kg total mass, positive-definite inertias)
+  2. Arms Forward at Zero Pose (`ARM_FORWARD` convention eliminating shoulder gimbal singularity during swing)
+  3. Scapula Rz (independent protraction/retraction avoiding clavicle link roll null-space)
+  4. One Static-Trial Round (calibrating static offsets over first 24 frames, freezing offsets)
+  5. Marker-Driven Elbow Pits (vector directions derived directly from markers rather than arbitrary heuristics)
+  6. Anatomical Wrist Axes and Neutral-Grip Turn (radial cocking along elbow axis, palm-normal flexion, $25^\circ$ ulnar offset)
+  7. Fitted Hand-to-Club Rotation (`GRIP_ROTATION_DEG` calibrated 3D rotation tensor eliminating unphysical wrist excursions)
+  8. Human Ranges in the Matching Only, Wrists Bounded by Default (kinematic constraints without dynamic hard-stops)
+  9. Clubs From `club_models` (centralized club mass and inertia parameters linked to `ClubDatabase`)
+  10. Compliant 50 kN/m Sole (realistic shoe/turf compliance preventing foot lift-off and airborne divergence)
+  11. 12 Hz Tracked Reference (zero-phase low-pass filtering removing high-frequency jerk and torque spikes)
+  12. Reference Zero-Moment-Point Diagnostic (physics-based dynamic consistency and momentum-rate auditing)
+  13. Rejected Alternatives Record (1D grip-roll scans, address closure fit, cart-table filter, fixed-point and iterative-learning shooting fits)
+  14. MJX Differentiable Optimisation (windowed end-to-end contact dynamics trajectory optimization)
+- Testing & Governance: `tests/unit/motion_matching/pipeline/test_design_decisions.py` validates all 14 decisions, correct ordering, link integrity, and negative validation behavior. Document passes title capitalization and prettier formatting.
 
 ## Ground Support Execution Receipt Schema, Validator, and Reference Documentation (HO-2 #10156, #10162)
 
@@ -5152,6 +5207,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
 | 2026-09-15 | #10204 | Capture rig adopts the shared camera layer: `vendor/ud-tools` pinned to Tools 1ac89c18e (`shared.python.camera`), `preview_source.py` becomes one `SharedSourceAdapter` (rig `open/read/close` over the Tools `FrameSource`) and `recorder.dshow_device_ref` delegates; the preview command is pinned token-for-token against the pre-port list (only delta: `-rtbufsize 256M`). Adapter tests run in the isolated provider harness. |

@@ -1,9 +1,8 @@
 # Full-Body Models Handoff (Epic #10062)
 
-Updated 2026-09-13 (claude; leases on #10063 and #10064). Branch
-`docs/10003-opensim-matching-epic`, worktree
-`C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003`, PR not
-created. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
+Updated 2026-09-16 (claude; HO-9 #10111). Branch
+`feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
+Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
 Copy-ready prompt for the next agent: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
 
 ## Done (Test-First, No Engine Required)
@@ -614,10 +613,12 @@ Two implementations of the full-body program currently coexist in the repository
 
 ### How to Continue (Read This First)
 
-1. Run the pipeline from the launcher tile "Motion Matching" or
-   `python -m src.tools.motion_matching`; headless:
-   `python docs/development/full_body_models/build_anthropometric_spec.py ... --club driver|iron7`
-   then `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> --skip-hip-calibration --static-seeds [--free-wrists] --capture driver|iron --out <run>` (wrists bounded by default for fitted documents; refit the hand rotation with `evidence/anthropometry/fit_grip_rotation.py --run <free-wrist run> ...`).
+1. Run the pipeline from the launcher tile "Motion Matching" (`python -m src.tools.motion_matching`) or headlessly via `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> ...`. The launcher tile provides a tabbed interface:
+   - **Matching Tab**: Full pipeline execution with granular stage controls (free/bound wrists, fit closure, cart-table ZMP filter, whole-body shooting fit iterations and gain, cutoff frequency).
+   - **Downswing Experiment Tab**: Run parameter sweep and variant comparison experiments against reference fits with custom torque/gain overrides.
+   - **MJX Tab**: Export MJX optimization packages and validate optimized trajectory references against the shared contact-law plant.
+     Headless pipeline runs: `python docs/development/full_body_models/build_anthropometric_spec.py ... --club driver|iron7`
+     then `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> --skip-hip-calibration --static-seeds [--free-wrists] --capture driver|iron --out <run>` (wrists bounded by default for fitted documents; refit the hand rotation with `evidence/anthropometry/fit_grip_rotation.py --run <free-wrist run> ...`).
 2. Read the receipt (`<run>/receipt.json`): `address.calibrated`, `ik`
    (full-capture IK, `range_of_motion_flags`, `attachments_m`), `dynamics`
    (`root_error_timeline_m`, `weight_fraction`, `reference_zmp`,
@@ -649,6 +650,9 @@ The following table records the canonical module assignments to be executed in H
 
 - **HO-0 (#10186)**: Landed on `main` reconciling ground-support and FB-4/5/6 lanes.
 - **HO-1 (#10155)**: Landed on `main` in PR #10218 (`afea5e0a8`). Ground-support pipeline package established under `src/shared/python/motion_matching/pipeline/` with CLI wrapper in `docs/development/full_body_models/evidence/ground_support/run_ground_support.py`.
-- **HO-2 (#10156)**: Landed on `main` in PR #10224 (`c708d0627`). Established Pydantic V2 receipt schema and validator (`src/shared/python/motion_matching/pipeline/receipt_schema.py`), unit tests validating all committed receipts and rejection paths (`test_receipt_schema.py`), generated markdown documentation (`docs/development/full_body_models/RECEIPTS.md`), and freshness test (`test_receipts_markdown_freshness.py`).
-- **HO-3 (#10157)**: MJX environment setup automation (`scripts/setup_mjx_env.ps1`, `scripts/setup_mjx_env.sh`, `scripts/config/mjx_env_pins.json`), JAX marker in `pyproject.toml`, pure contact & weld wrench functions with double-precision parity (< 1e-6 N against shared contact law), and 6 JAX-gated unit tests (`tests/unit/motion_matching/test_mjx_optimisation.py`).
-- **Next**: Land HO-3 PR, then proceed to HO-4 (#10158, visual marker playback GIF in pipeline) and subsequent handoff issues in epic #10162.
+- **HO-2 (#10156)**: Implemented Pydantic V2 receipt schema and validator (`src/shared/python/motion_matching/pipeline/receipt_schema.py`), unit tests validating all committed receipts and rejection paths (`test_receipt_schema.py`), generated markdown documentation (`docs/development/full_body_models/RECEIPTS.md`), and freshness test (`test_receipts_markdown_freshness.py`).
+- **HO-7 (#10161)**: Consolidated seventeen sections of findings from `evidence/anthropometry/REVIEW.md` into authoritative design decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`. Established structured parser, validator with DbC contracts, and full test suite `tests/unit/motion_matching/pipeline/test_design_decisions.py`. Merged to `main` in PR #10235 (`27b271fe2`).
+- **HO-4 (#10158)**: Exposed all pipeline stages in the Motion Matching launcher tile (`src/tools/motion_matching/gui.py`, `pipeline.py`). Tabbed interface across Matching (with granular Stages options for free/bound wrists, fit closure, ZMP filter, shooting fit, cutoff frequency), Downswing experiment, and MJX tabs, with asynchronous `RunWorker` and strict LoD. Headless PyQt6 and pipeline test suites in `tests/tools/motion_matching/`. Added `tools.motion_matching` to `src/config/feature_parity.json` (tracking gap #10106) and regenerated `docs/development/feature_parity_matrix.md`. Merged to `main` in PR #10236 (`db4fe88c4`).
+- **HO-9 (#10111, MM-9)**: Verified de Leva (1996) male segment table line-by-line against Table 4 of the published paper. Pinning unit test in `tests/unit/motion_matching/test_de_leva_table.py` asserts each segment against literal paper values (mass %, CoM %, and principal radii %). Corrected shank `com_fraction` from 0.4459 to 0.4395 and radii from (0.255, 0.249, 0.103) to (0.251, 0.246, 0.102) in `src/shared/python/motion_matching/anthropometry.py`, eliminating bony-landmark carryover from Zatsiorsky-Seluyanov 1985. Committed verification receipt `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json`.
+- **HO-3 (#10157)**: Delivered cross-platform MJX virtualenv setup scripts (`scripts/setup_mjx_env.ps1`, `scripts/setup_mjx_env.sh`) reading pinned versions from `scripts/config/mjx_env_pins.json`, refactored differentiable trajectory optimization into pure testable functions with `SiteState` and `WeldGains` parameter tuples complying with architecture parameter budgets, added `requires_jax` marker to `pyproject.toml`, and implemented 6 unit tests in `tests/unit/motion_matching/test_mjx_optimisation.py` covering knot basis, tail freezing mask, contact force parity (< 1e-6 N), weld wrench equilibrium, initial preload, and finite gradients on truncated 12-frame horizon.
+- **Next**: Land HO-3 (#10157), then proceed to HO-11 (#10250, anthropometric document rebuild and freshness gate) before any new receipts, followed by HO-8 (#10108), HO-12 (#10251), HO-10 (#10160), HO-5 (#10159), and HO-6 (#10121) in epic #10162.
