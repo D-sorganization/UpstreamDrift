@@ -204,14 +204,17 @@ class RemoteBridgeClient(SimulatorAdapter):
     def capabilities(self) -> SimulatorCapabilities:
         return self._capabilities
 
+    def _success_status(self) -> ConnectionStatus:
+        self._connected = True
+        return ConnectionStatus(
+            state=ConnectionState.CONNECTED,
+            endpoint=self.server_endpoint,
+            message="Remote bridge connected",
+        )
+
     async def connect(self, config: dict[str, Any] | None = None) -> ConnectionStatus:
         if self._bridge_server is not None:
-            self._connected = True
-            return ConnectionStatus(
-                state=ConnectionState.CONNECTED,
-                endpoint=self.server_endpoint,
-                message="Remote bridge connected",
-            )
+            return self._success_status()
 
         # Verify network reachability of remote server endpoint
         try:
@@ -224,12 +227,7 @@ class RemoteBridgeClient(SimulatorAdapter):
             )
             writer.close()
             await writer.wait_closed()
-            self._connected = True
-            return ConnectionStatus(
-                state=ConnectionState.CONNECTED,
-                endpoint=self.server_endpoint,
-                message="Remote bridge connected",
-            )
+            return self._success_status()
         except Exception as exc:
             self._connected = False
             return ConnectionStatus(
