@@ -149,7 +149,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  809 | `src/engines/physics_engines/mujoco/python/full_body_markers.py`                                                                                                              |
 |  809 | `src/shared/python/model_generation/converters/urdf_parser.py`                                                                                                                |
 |  809 | `src/shared/python/pose_editor/widgets.py`                                                                                                                                    |
-|  808 | `src/engines/physics_engines/pinocchio/python/native_model.py`                                                                                                                |
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py`                                                                           |
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py`           |
 |  803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py`                                                                                                          |
