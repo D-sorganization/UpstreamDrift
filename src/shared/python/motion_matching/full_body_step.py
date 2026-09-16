@@ -145,8 +145,12 @@ class NativeFullBodyStep:
     def _maps(self, state: Array) -> tuple[dict[str, float], dict[str, float]]:
         names = self.control.coordinate_names
         n = len(names)
-        coordinates = dict(zip(names, state[:n], strict=True))
-        rates = dict(zip(names, state[n:], strict=True))
+        coordinates = {
+            name: float(value) for name, value in zip(names, state[:n], strict=True)
+        }
+        rates = {
+            name: float(value) for name, value in zip(names, state[n:], strict=True)
+        }
         return coordinates, rates
 
     def _dynamics(
@@ -247,7 +251,7 @@ class NativeFullBodyStep:
             state, parameters, time_s, dt_s
         )
         dimension = current.size
-        total_x = np.eye(dimension)
+        total_x: Array = np.eye(dimension)
         total_p = np.zeros((dimension, self.control.n_parameters))
         differentiable = True
         step_s = duration / self.options.substeps
