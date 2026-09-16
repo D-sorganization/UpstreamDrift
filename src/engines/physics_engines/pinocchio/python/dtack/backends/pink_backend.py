@@ -70,8 +70,8 @@ class PINKBackend:
     ) -> npt.NDArray[np.float64]:
         """Solve one step, preserving hard constraints and Pink limit defaults.
 
-        The configuration cache reflects the last attempted ``q_init`` when a
-        solve fails, and the integrated result after a successful solve.
+        After input validation, the configuration cache is refreshed to ``q_init``
+        before the QP solve and to the integrated result after success.
         """
         if not PINK_AVAILABLE:
             raise ImportError(f"PINK is required but not installed. {_INSTALL_HINT}")
