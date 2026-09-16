@@ -1,5 +1,15 @@
 # SPEC.md — Repository Specification Document
 
+## Ground Support Execution Receipt Schema, Validator, and Reference Documentation (HO-2 #10156, #10162)
+
+Establishes formal Pydantic V2 schemas, validation contracts, and generated reference documentation for ground-support execution receipts under `src/shared/python/motion_matching/pipeline/`:
+- `pipeline.receipt_schema`: Top-level `Receipt` model, legacy run discriminator (`_is_legacy_without_zmp`), and Design-by-Contract validator `validate_receipt(document: dict) -> Receipt` providing explicit dot-separated failing field paths (e.g. `dynamics.reference_zmp`, `ik.marker_rms_m`). Re-exports all component models for caller convenience.
+- `pipeline.receipt_components`: Factorization of sub-models for ground contact plane and toe spheres (`GroundReceipt`), anatomical seed offsets and address pose calibration (`AddressReceipt`), full-capture inverse kinematics trajectory tracking, marker calibration, and segment scaling (`IkReceipt`).
+- `pipeline.receipt_dynamics`: Factorization of sub-models for computed-torque tracking simulation, regularized Hunt-Crossley / Coulomb contact parameters, ZMP support polygon excursions, floating base timeline error, and shooting fit optimization (`DynamicsReceipt`).
+- `pipeline.receipt_docs`: Table-based Markdown documentation generator (`render_receipts_markdown()`) producing `docs/development/full_body_models/RECEIPTS.md` documenting field names, pure SI units, semantic meanings, and pipeline source stages.
+- Freshness Testing: `tests/unit/motion_matching/pipeline/test_receipts_markdown_freshness.py` guarantees byte-level synchronization between Pydantic schema field annotations and committed documentation.
+- Pipeline Validation: `pipeline.receipt.build_ground_support_receipt` enforces schema validation before returning or writing execution receipts.
+
 ## Capability-Aware Desktop and Web Controls Through the Existing API (#10196)
 
 Exposes `GolfSessionService` and `ReplaySubmissionCoordinator` through existing FastAPI endpoints, PyQt6 desktop UI, and React web console:
@@ -27,6 +37,7 @@ Exposes `GolfSessionService` and `ReplaySubmissionCoordinator` through existing 
   - Canonical tile `golf_simulator` registered in `src/config/models.yaml` and `src/config/launcher_manifest.json`.
   - Feature parity entry `tools.golf_simulator` registered with status `parity` in `src/config/feature_parity.json` and matrix regenerated in `docs/development/feature_parity_matrix.md`.
   - Embed module registered in `FALLBACK_ADAPTER_MODULES` in `src/launchers/embedded_tool_bootstrap.py`.
+
 
 ## Ground Support Pipeline Modularization and Law of Demeter Abstractions (HO-1 #10155, #10162)
 
