@@ -1,9 +1,8 @@
 # Full-Body Models Handoff (Epic #10062)
 
-Updated 2026-09-13 (claude; leases on #10063 and #10064). Branch
-`docs/10003-opensim-matching-epic`, worktree
-`C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003`, PR not
-created. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
+Updated 2026-09-15 (claude; HO-7 #10161). Branch
+`feat/10161-design-decisions`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
+Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
 Copy-ready prompt for the next agent: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
 
 ## Done (Test-First, No Engine Required)
@@ -650,4 +649,5 @@ The following table records the canonical module assignments to be executed in H
 - **HO-0 (#10186)**: Landed on `main` reconciling ground-support and FB-4/5/6 lanes.
 - **HO-1 (#10155)**: Landed on `main` in PR #10218 (`afea5e0a8`). Ground-support pipeline package established under `src/shared/python/motion_matching/pipeline/` with CLI wrapper in `docs/development/full_body_models/evidence/ground_support/run_ground_support.py`.
 - **HO-2 (#10156)**: Implemented Pydantic V2 receipt schema and validator (`src/shared/python/motion_matching/pipeline/receipt_schema.py`), unit tests validating all committed receipts and rejection paths (`test_receipt_schema.py`), generated markdown documentation (`docs/development/full_body_models/RECEIPTS.md`), and freshness test (`test_receipts_markdown_freshness.py`).
-- **Next**: Land HO-2 PR, then proceed to HO-3 (#10157, MJX environment and JAX-gated tests) and subsequent handoff issues in epic #10162.
+- **HO-7 (#10161)**: Consolidated seventeen sections of findings from `evidence/anthropometry/REVIEW.md` into authoritative design decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`. Established structured parser, validator with DbC contracts, and full test suite `tests/unit/motion_matching/pipeline/test_design_decisions.py`.
+- **Next**: Land HO-7 PR, then proceed to HO-3 (#10157, MJX environment and JAX-gated tests) and subsequent handoff issues in epic #10162.
