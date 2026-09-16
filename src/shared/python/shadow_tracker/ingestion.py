@@ -472,6 +472,14 @@ class VideoDecoderAdapter(Protocol):
     def read_frame_hash(self, frame_index: int) -> str: ...
 
 
+def _reduce_timebase(timebase: tuple[int, int]) -> tuple[int, int]:
+    num, den = timebase
+    check_pos_int(num, "timebase_numerator")
+    check_pos_int(den, "timebase_denominator")
+    gcd = math.gcd(num, den)
+    return num // gcd, den // gcd
+
+
 class SyntheticVideoDecoder:
     """Deterministic synthetic video decoder for testing and offline ingestion."""
 
@@ -512,12 +520,10 @@ class SyntheticVideoDecoder:
         else:
             self._pts_ticks = tuple(range(frame_count))
 
-        num, den = timebase
-        check_pos_int(num, "timebase_numerator")
-        check_pos_int(den, "timebase_denominator")
-        gcd = math.gcd(num, den)
-        self._timebase_numerator = num // gcd
-        self._timebase_denominator = den // gcd
+        (
+            self._timebase_numerator,
+            self._timebase_denominator,
+        ) = _reduce_timebase(timebase)
         self._is_timing_exact = True
         self._timing_mode = "authoritative"
         self._decoder_name = "synthetic"
@@ -724,19 +730,16 @@ class OpenCvVideoDecoder:
                 self._timing_mode = "estimated_cfr"
 
         if timebase is not None:
-            num, den = timebase
-            check_pos_int(num, "timebase_numerator")
-            check_pos_int(den, "timebase_denominator")
-            gcd = math.gcd(num, den)
-            self._timebase_numerator = num // gcd
-            self._timebase_denominator = den // gcd
+            (
+                self._timebase_numerator,
+                self._timebase_denominator,
+            ) = _reduce_timebase(timebase)
         elif fps > 0 and math.isfinite(fps):
             frac = Fraction(fps).limit_denominator(100000)
-            tb_num = frac.denominator
-            tb_den = frac.numerator
-            gcd = math.gcd(tb_num, tb_den)
-            self._timebase_numerator = tb_num // gcd
-            self._timebase_denominator = tb_den // gcd
+            (
+                self._timebase_numerator,
+                self._timebase_denominator,
+            ) = _reduce_timebase((frac.denominator, frac.numerator))
         else:
             self._timebase_numerator = 1
             self._timebase_denominator = 1
