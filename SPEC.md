@@ -7,6 +7,27 @@ changes. Records source/physical-time, geometry/clipping and revision-integrity
 findings with corrective issues and full product completion gates. Documentation
 only; no runtime behavior or scientific qualification changes.
 
+## Full-Body Showpiece Design Decisions Record (HO-7 #10161, #10162)
+
+Consolidates all seventeen sections of findings in `docs/development/full_body_models/evidence/anthropometry/REVIEW.md` into the authoritative design-decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`:
+- `pipeline.design_decisions`: Implements structured `DesignDecision` records, parser `parse_design_decisions()`, and Design-by-Contract validator `validate_design_decisions()` ensuring all 14 architectural and biomechanical decisions exist in exact order with what, why, evidence receipts, rejected alternatives, and verified disk-existing receipt and review links.
+- 14 Consolidated Decisions:
+  1. Anthropometric Geometry From de Leva (subject-specific parameters, 78 kg total mass, positive-definite inertias)
+  2. Arms Forward at Zero Pose (`ARM_FORWARD` convention eliminating shoulder gimbal singularity during swing)
+  3. Scapula Rz (independent protraction/retraction avoiding clavicle link roll null-space)
+  4. One Static-Trial Round (calibrating static offsets over first 24 frames, freezing offsets)
+  5. Marker-Driven Elbow Pits (vector directions derived directly from markers rather than arbitrary heuristics)
+  6. Anatomical Wrist Axes and Neutral-Grip Turn (radial cocking along elbow axis, palm-normal flexion, $25^\circ$ ulnar offset)
+  7. Fitted Hand-to-Club Rotation (`GRIP_ROTATION_DEG` calibrated 3D rotation tensor eliminating unphysical wrist excursions)
+  8. Human Ranges in the Matching Only, Wrists Bounded by Default (kinematic constraints without dynamic hard-stops)
+  9. Clubs From `club_models` (centralized club mass and inertia parameters linked to `ClubDatabase`)
+  10. Compliant 50 kN/m Sole (realistic shoe/turf compliance preventing foot lift-off and airborne divergence)
+  11. 12 Hz Tracked Reference (zero-phase low-pass filtering removing high-frequency jerk and torque spikes)
+  12. Reference Zero-Moment-Point Diagnostic (physics-based dynamic consistency and momentum-rate auditing)
+  13. Rejected Alternatives Record (1D grip-roll scans, address closure fit, cart-table filter, fixed-point and iterative-learning shooting fits)
+  14. MJX Differentiable Optimisation (windowed end-to-end contact dynamics trajectory optimization)
+- Testing & Governance: `tests/unit/motion_matching/pipeline/test_design_decisions.py` validates all 14 decisions, correct ordering, link integrity, and negative validation behavior. Document passes title capitalization and prettier formatting.
+
 ## Ground Support Execution Receipt Schema, Validator, and Reference Documentation (HO-2 #10156, #10162)
 
 Establishes formal Pydantic V2 schemas, validation contracts, and generated reference documentation for ground-support execution receipts under `src/shared/python/motion_matching/pipeline/`:
@@ -5130,6 +5151,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
 | 2026-09-15 | #10204 | Capture rig adopts the shared camera layer: `vendor/ud-tools` pinned to Tools 1ac89c18e (`shared.python.camera`), `preview_source.py` becomes one `SharedSourceAdapter` (rig `open/read/close` over the Tools `FrameSource`) and `recorder.dshow_device_ref` delegates; the preview command is pinned token-for-token against the pre-port list (only delta: `-rtbufsize 256M`). Adapter tests run in the isolated provider harness. |
