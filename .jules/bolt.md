@@ -108,3 +108,7 @@
 **Learning:** For small 1D NumPy arrays (e.g., 3D vectors), `math.sqrt(array.dot(array))` is significantly faster (~2.5x) than `np.linalg.norm(array)` because it bypasses NumPy's internal dispatching and instance checks. This is safe to use where array inputs are known to be small 1D vectors.
 **Action:** Replace `float(np.linalg.norm(array))` with `float(math.sqrt(array.dot(array)))` in tight loops or where small 1D vector magnitudes are calculated frequently.
 
+
+## 2026-09-16 - Safe SPEC.md Modification Pattern Update
+**Learning:** Even using a pattern like `line.startswith('| YYYY-MM-DD |')` may fail the `repo-structure-gates` tests because older rows, like `| Date | PR | Summary |`, might not be found. We must explicitly search for the header format in the specific `## 12. Change Log` section and insert below the actual table header separator (e.g. `| --- | --- | --- |`).
+**Action:** When updating `SPEC.md` programmatically, use a script that correctly finds the header separator in the proper section and inserts the new row. Additionally, the unit tests inside `repo_hygiene` like `test_spec_changelog_integrity.py` are a great way to verify the file was updated without breaking the parser rules.

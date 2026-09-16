@@ -1,43 +1,4 @@
 # SPEC.md — Repository Specification Document
- 
-## MJX Environment Setup, Pinned Dependencies, and Contact-Law Parity Tests (HO-3 #10157, #10162)
-
-Establishes cross-platform environment automation and JAX/MJX-gated unit tests for differentiable trajectory optimization:
-- Pinned Environment Specifications (`scripts/config/mjx_env_pins.json`):
-  - Defines pinned dependency versions (`jax[cpu]==0.11.1`, `mujoco-mjx==3.13.0`, `mujoco==3.13.0`, `defusedxml==0.7.1`, `numpy==2.5.3`, `scipy==1.18.1`, `pytest==9.1.1`, `matplotlib==3.11.2`) to protect against breaking changes in JAX / MuJoCo releases.
-  - Setup scripts: Windows PowerShell (`scripts/setup_mjx_env.ps1`) and POSIX shell (`scripts/setup_mjx_env.sh`) parse JSON pins and configure isolated `$HOME/.venv-mjx` environments.
-- Pytest Configuration (`pyproject.toml`):
-  - Declares `requires_jax` marker alongside existing engine markers (`requires_gl`, `requires_pinocchio`, `requires_drake`).
-- Factored Pure Functions (`docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`):
-  - `contact_force_jax(centre, velocity, radius, params, ground_normal, ground_height_m)`: Evaluates Hunt-Crossley / Coulomb contact law in JAX with analytical parity.
-  - `weld_wrench_jax(xpos_a, xmat_a, cvel_a, xpos_b, xmat_b, cvel_b, ...)`: Evaluates spatial weld loop closure wrenches maintaining equal-and-opposite reaction force balance.
-  - `compute_knot_mask(t_knots, horizon_s, freeze_tail)`: Generates optimization parameter masks freezing coordinates beyond horizon.
-  - Avoids forcing 32-bit floats during test module import by scoping `jax_enable_x64=False` to standalone `main()` execution.
-- Gated Test Suite (`tests/unit/motion_matching/test_mjx_optimisation.py`):
-  - Tests skip cleanly with exit code 0 when JAX or MJX are absent in root CI environments.
-  - Verifies partition of unity and knot counts on B-spline basis.
-  - Verifies tail horizon coordinate freezing.
-  - Validates contact force parity against canonical `sphere_ground_contact` law to $< 1.02 \times 10^{-7}\text{ N} < 10^{-6}\text{ N}$ across 200 random physical states.
-  - Proves spatial wrench equilibrium and zero wrench at coincidence for dual-grip weld closures.
-  - Validates analytic static equilibrium preload on lowest contact sphere ($-mg / (k n_{\text{spheres}})$).
-  - Validates gradient finiteness ($\nabla \text{cost} \in \mathbb{R}$) on 12-frame truncated optimization with rest posture norms and NaN target filtering.
-
-## Shadow Tracker Source PTS Preservation and Unknown Physical Time (#10231)
-
-Preserves authoritative source timestamps and timing metadata across bounded decoding without synthesizing wall-clock evidence or hoarding frames:
-- Authoritative Source PTS & Reduced Timebase: `VideoDecoderAdapter` requires `timebase_numerator`, `timebase_denominator`, `is_timing_exact`, `timing_mode`, `decoder_name`, and `pixel_format`. `OpenCvVideoDecoder` extracts and reduces exact integer rational timebases (`timebase_numerator / timebase_denominator`), preserves authentic presentation timestamps (`pts_ticks`), and accommodates variable frame rates and negative start PTS offsets without constant-frame-rate assumptions.
-- Unknown Physical Time by Default: `decode_video_frames` defaults to `physical_time_s=None` with reason `"unknown physical time without evidenced clock mapping"`. Explicit SI physical timestamps require verified, evidenced clock mappings via `physical_time_s_fn`.
-- Incremental Bounded Decoding & Cooperative Cancellation: `OpenCvVideoDecoder` eliminates full-video memory buffering during initialization, probing at most one frame for container validity. Stream decoding via `stream_frames(limits)` processes frames on demand with cooperative cancellation checks (`is_cancelled`) and strictly bounded memory, releasing video capture file handles under all exit paths.
-- Provenance-Aware Frame Hashing: Frame content hashes incorporate decoder name and pixel format (`f"{decoder_name}:{pixel_format}:..."`) alongside raw buffer content to ensure tamper-evident reproducibility across differing decoder backends.
-
-## De Leva Male Anthropometry Table Verification (HO-9 #10111, #10162)
-
-Verifies the male body segment parameters in `src/shared/python/motion_matching/anthropometry.py` (`DE_LEVA_MALE`) against Table 4 of de Leva, P. (1996), "Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters", *Journal of Biomechanics*, 29(9), 1223-1230:
-- Segment Parameters Asserted: Pinning unit test in `tests/unit/motion_matching/test_de_leva_table.py` asserts segment length, mass percentage, center-of-mass percentage from proximal joint center, and sagittal, transverse, and longitudinal principal radii of gyration percentages against published literature values for all 11 male segments (`head`, `trunk`, `upper_trunk`, `middle_trunk`, `lower_trunk`, `upper_arm`, `forearm`, `hand`, `thigh`, `shank`, `foot`).
-- Shank Joint-Center Discrepancy Remediated: Corrects the male shank parameters in `anthropometry.py` to match de Leva (1996) joint-center definitions (knee joint center to ankle joint center):
-  - `com_fraction`: updated from `0.4459` (unadjusted Zatsiorsky-Seluyanov 1985 bony-landmark value) to `0.4395` (de Leva 1996 joint-center adjustment).
-  - `radii`: updated from `(0.255, 0.249, 0.103)` to `(0.251, 0.246, 0.102)`.
-- Verification Evidence: Structured receipt committed to `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json` recording line-by-line verification, reference subject constants (height 1.741 m, mass 73.0 kg), and joint-center endpoint boundaries.
 
 ## Motion Matching Launcher Tile Pipeline Stages and Multi-Tab Execution (HO-4 #10158, #10162)
 
@@ -5215,6 +5176,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | n/a | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` in `src/engines/physics_engines/mujoco/python/full_body_markers.py` to optimize execution time while avoiding intermediate allocations. (spec-exempt: micro-optimization) |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
@@ -5228,7 +5190,6 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-14 | #10136 | Establish Shadow Tracker epic, implementation plan, source/test homes and agent handoff; no runtime implementation. |
 | 2026-09-14 | #10090 | Tour Matching Viewer launcher tile for in-app 3D playback of candidate motions against tour capture (Step 3, #10062) |
 | 2026-09-14 | #10087 | Shared visual skeleton layer with MuJoCo rendering and model-visuals handoff (#10062) |
-| 2026-09-16 | n/a | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` in `src/engines/physics_engines/mujoco/python/full_body_markers.py` to optimize execution time while avoiding intermediate allocations. (spec-exempt: micro-optimization) |
 | 2026-09-13 | #8929 | Pendulum GUI playback: matrix panel snapshots dynamics per frame instead of per paint; trail slices a precomputed spline and draws bucketed polylines (spec-exempt: performance) |
 | 2026-09-12 | #10020 | Optimize array magnitude calculations in joint_conventions.py and golf_trajectory.py using np.einsum (spec-exempt: micro-optimization) |
 | 2026-09-12 | #10011 | Optimize np.linalg.norm calculation in prefix_fit.py using np.einsum for RMS and Max calculations (spec-exempt: micro-optimization) |

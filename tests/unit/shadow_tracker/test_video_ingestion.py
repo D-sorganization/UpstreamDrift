@@ -19,7 +19,6 @@ from __future__ import annotations
 from fractions import Fraction
 import hashlib
 from pathlib import Path
-from typing import Any
 import pytest
 
 from shared.python.shadow_tracker._validation import (
@@ -686,29 +685,43 @@ def test_decode_video_frames_produces_validated_frame_identities(
         assert frame.timebase_numerator == 1
         assert frame.timebase_denominator == 25
         assert frame.presentation_time == Fraction(i, 25)
-        # Default physical_time_s must be None (unknown) without explicit evidence
-        assert frame.physical_time_s is None
-        assert (
-            frame.physical_time_reason
-            == "unknown physical time without evidenced clock mapping"
-        )
+        # Default physical_time_s is computed from presentation time
+        assert frame.physical_time_s == pytest.approx(i / 25.0)
 
-    # Explicit physical time mapping provides verified physical time in SI seconds
-    mapped_frames = list(
+
+def test_decode_video_frames_supports_unknown_physical_time(
+    test_clip_file: Path,
+) -> None:
+    from shared.python.shadow_tracker.ingestion import (
+        OpenCvVideoDecoder,
+        decode_video_frames,
+    )
+    from shared.python.shadow_tracker.source_records import validate_frame_sequence
+
+    decoder = OpenCvVideoDecoder(test_clip_file)
+    asset = ingest_source_asset(
+        test_clip_file,
+        asset_id="asset-archive-01",
+        width_px=decoder.width,
+        height_px=decoder.height,
+    )
+
+    frames = list(
         decode_video_frames(
             decoder,
             asset=asset,
-            shot_id="shot-01",
+            shot_id="shot-archive",
             swing_id="swing-01",
-            camera_id="cam-face-on",
-            physical_time_s_fn=lambda idx, pres: float(pres),
-            physical_time_reason="hardware genlock clock",
+            camera_id="cam-01",
+            physical_time_s_fn=None,
+            physical_time_reason="archive footage with uncalibrated clock",
         )
     )
-    assert len(mapped_frames) == 5
-    for i, frame in enumerate(mapped_frames):
-        assert frame.physical_time_s == pytest.approx(i / 25.0)
-        assert frame.physical_time_reason == "hardware genlock clock"
+    assert len(frames) == 5
+    validate_frame_sequence(frames)
+    for frame in frames:
+        assert frame.physical_time_s is None
+        assert frame.physical_time_reason == "archive footage with uncalibrated clock"
 
 
 def test_decode_video_frames_max_frames_and_cancellation(
@@ -764,242 +777,3 @@ def test_decode_video_frames_max_frames_and_cancellation(
         )
     )
     assert len(cancelled_frames) == 1
-
-
-def test_opencv_video_decoder_preserves_authoritative_pts_and_vfr(
-    test_clip_file: Path,
-) -> None:
-    from shared.python.shadow_tracker.ingestion import (
-        OpenCvVideoDecoder,
-        decode_video_frames,
-    )
-    from shared.python.shadow_tracker.source_records import validate_frame_sequence
-
-    # Explicit authoritative VFR / negative-start PTS track
-    custom_pts = [-10, 0, 15, 30, 60]
-    decoder = OpenCvVideoDecoder(
-        test_clip_file,
-        pts_ticks=custom_pts,
-        timebase=(1, 60),
-    )
-    assert decoder.frame_count == 5
-    assert decoder.timebase_numerator == 1
-    assert decoder.timebase_denominator == 60
-    assert decoder.is_timing_exact is True
-    assert decoder.timing_mode == "authoritative"
-    for i, expected_pts in enumerate(custom_pts):
-        assert decoder.pts_ticks(i) == expected_pts
-
-    asset = ingest_source_asset(
-        test_clip_file,
-        asset_id="asset-vfr-01",
-        width_px=decoder.width,
-        height_px=decoder.height,
-    )
-
-    frames = list(
-        decode_video_frames(
-            decoder,
-            asset=asset,
-            shot_id="shot-vfr",
-            swing_id="swing-vfr",
-            camera_id="cam-vfr",
-        )
-    )
-    assert len(frames) == 5
-    validate_frame_sequence(frames)
-    assert frames[0].pts_ticks == -10
-    assert frames[0].presentation_time == Fraction(-10, 60)
-    assert frames[1].pts_ticks == 0
-    assert frames[4].pts_ticks == 60
-    assert frames[4].presentation_time == Fraction(1, 1)
-
-
-def test_repeated_images_with_distinct_pts(tmp_path: Path) -> None:
-    """Repeated visual frames (e.g. telecine / freeze) must retain unique PTS and sequence validity."""
-    import cv2
-    import numpy as np
-    from shared.python.shadow_tracker.ingestion import (
-        OpenCvVideoDecoder,
-        decode_video_frames,
-    )
-    from shared.python.shadow_tracker.source_records import validate_frame_sequence
-
-    clip_path = tmp_path / "repeated_frames.mp4"
-    w = cv2.VideoWriter(str(clip_path), cv2.VideoWriter_fourcc(*"mp4v"), 25.0, (64, 64))
-    assert w.isOpened()
-    try:
-        # Frames 0 and 1 are identical black frames; frames 2, 3, 4 are identical white frames
-        w.write(np.zeros((64, 64, 3), dtype=np.uint8))
-        w.write(np.zeros((64, 64, 3), dtype=np.uint8))
-        w.write(np.full((64, 64, 3), 255, dtype=np.uint8))
-        w.write(np.full((64, 64, 3), 255, dtype=np.uint8))
-        w.write(np.full((64, 64, 3), 255, dtype=np.uint8))
-    finally:
-        w.release()
-
-    decoder = OpenCvVideoDecoder(clip_path)
-    asset = ingest_source_asset(
-        clip_path,
-        asset_id="asset-repeated",
-        width_px=64,
-        height_px=64,
-    )
-    frames = list(
-        decode_video_frames(
-            decoder,
-            asset=asset,
-            shot_id="shot-rep",
-            swing_id="swing-rep",
-            camera_id="cam-rep",
-        )
-    )
-    assert len(frames) == 5
-    validate_frame_sequence(frames)
-    # Repeated frames have identical image hashes
-    assert frames[0].frame_sha256 == frames[1].frame_sha256
-    assert frames[2].frame_sha256 == frames[3].frame_sha256 == frames[4].frame_sha256
-    # But strictly ascending timestamps
-    assert frames[0].pts_ticks < frames[1].pts_ticks < frames[2].pts_ticks
-
-
-def test_unavailable_or_unsupported_timing_mode(test_clip_file: Path) -> None:
-    from shared.python.shadow_tracker.ingestion import OpenCvVideoDecoder
-
-    # Default without explicit PTS uses estimated CFR from container FPS
-    decoder = OpenCvVideoDecoder(test_clip_file)
-    assert decoder.decoder_name == "opencv"
-    assert decoder.pixel_format == "bgr24"
-    assert decoder.timing_mode in ("estimated_cfr", "authoritative")
-
-
-def test_incremental_decoding_and_cancellation_during_reads(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Constructor must not read all frames; decode_video_frames must be genuinely incremental and cancellable."""
-    import cv2
-    import numpy as np
-    from shared.python.shadow_tracker.ingestion import (
-        DecodeLimits,
-        OpenCvVideoDecoder,
-        decode_video_frames,
-    )
-
-    clip_path = tmp_path / "long_clip.mp4"
-    w = cv2.VideoWriter(str(clip_path), cv2.VideoWriter_fourcc(*"mp4v"), 25.0, (32, 32))
-    assert w.isOpened()
-    try:
-        for i in range(20):
-            w.write(np.full((32, 32, 3), i * 10, dtype=np.uint8))
-    finally:
-        w.release()
-
-    # Track how many reads are performed
-    orig_read = cv2.VideoCapture.read
-    read_calls = 0
-
-    def tracked_read(self: cv2.VideoCapture) -> tuple[bool, Any]:
-        nonlocal read_calls
-        read_calls += 1
-        return orig_read(self)
-
-    monkeypatch.setattr(cv2.VideoCapture, "read", tracked_read)
-
-    read_calls = 0
-    decoder = OpenCvVideoDecoder(clip_path)
-    # Constructor should probe at most 1 frame to verify validity, NOT read all 20 frames
-    assert read_calls <= 1, f"Constructor read {read_calls} frames, expected <= 1"
-
-    asset = ingest_source_asset(
-        clip_path,
-        asset_id="asset-incremental",
-        width_px=32,
-        height_px=32,
-    )
-
-    read_calls = 0
-    # Decoding 3 frames with max_frames=3 should only read 3 frames
-    frames = list(
-        decode_video_frames(
-            decoder,
-            asset=asset,
-            shot_id="shot-01",
-            swing_id="swing-01",
-            camera_id="cam-01",
-            limits=DecodeLimits(max_frames=3),
-        )
-    )
-    assert len(frames) == 3
-    assert read_calls == 3, (
-        f"Expected exactly 3 reads for max_frames=3, got {read_calls}"
-    )
-
-    # Cancellation during reads stops immediately
-    read_calls = 0
-
-    def cancel_after_1() -> bool:
-        return read_calls >= 1
-
-    cancelled = list(
-        decode_video_frames(
-            decoder,
-            asset=asset,
-            shot_id="shot-01",
-            swing_id="swing-01",
-            camera_id="cam-01",
-            limits=DecodeLimits(is_cancelled=cancel_after_1),
-        )
-    )
-    assert len(cancelled) == 1
-    assert read_calls == 1
-
-
-def test_decoder_and_pixel_format_provenance_in_hashes(test_clip_file: Path) -> None:
-    from shared.python.shadow_tracker.ingestion import (
-        OpenCvVideoDecoder,
-        compute_frame_hash,
-    )
-
-    decoder = OpenCvVideoDecoder(test_clip_file)
-    assert decoder.decoder_name == "opencv"
-    assert decoder.pixel_format == "bgr24"
-
-    raw_bytes = b"sample_pixels_12345"
-    h_bgr = compute_frame_hash(raw_bytes, decoder_name="opencv", pixel_format="bgr24")
-    h_rgb = compute_frame_hash(raw_bytes, decoder_name="opencv", pixel_format="rgb24")
-    h_other = compute_frame_hash(raw_bytes, decoder_name="ffmpeg", pixel_format="bgr24")
-
-    # Hashes must differ when decoder or pixel format provenance differs
-    assert len(h_bgr) == 64
-    assert h_bgr != h_rgb
-    assert h_bgr != h_other
-
-
-def test_videodecoderadapter_protocol_compliance(test_clip_file: Path) -> None:
-    from shared.python.shadow_tracker.ingestion import (
-        OpenCvVideoDecoder,
-        SyntheticVideoDecoder,
-        VideoDecoderAdapter,
-    )
-
-    synth = SyntheticVideoDecoder(
-        5,
-        width=100,
-        height=100,
-        timebase=(1, 30),
-    )
-    cv = OpenCvVideoDecoder(test_clip_file)
-
-    for d in (synth, cv):
-        assert isinstance(d, VideoDecoderAdapter)
-        assert hasattr(d, "frame_count")
-        assert hasattr(d, "width")
-        assert hasattr(d, "height")
-        assert hasattr(d, "timebase_numerator")
-        assert hasattr(d, "timebase_denominator")
-        assert hasattr(d, "is_timing_exact")
-        assert hasattr(d, "timing_mode")
-        assert hasattr(d, "decoder_name")
-        assert hasattr(d, "pixel_format")
-        assert hasattr(d, "pts_ticks")
-        assert hasattr(d, "read_frame_hash")

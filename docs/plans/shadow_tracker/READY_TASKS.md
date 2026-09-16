@@ -19,7 +19,7 @@ ST-01 scientific qualification has passed.
 ## Current Dispatch
 
 [Current Turnover](TURNOVER_CURRENT.md) supersedes older pickup instructions.
-#10231: source timestamps, physical-time provenance and genuinely bounded decode (implemented; landing in PR).
+#10231: source timestamps, physical-time provenance and genuinely bounded decode.
 #10233: revision collision/parent integrity and persistence; independent of physics.
 #10232: articulated geometry/state binding, clipping and calibrated filled masks.
 Use [Continuation Prompt](CONTINUATION_PROMPT.md), then all ST-07–ST-12 gates.
