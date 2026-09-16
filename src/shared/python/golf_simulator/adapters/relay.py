@@ -116,7 +116,9 @@ class FlightRelayAdapter:
         return self._capabilities
 
     async def connect(self, config: dict[str, Any] | None = None) -> ConnectionStatus:
-        norm_name = self._config.destination_name.lower().replace("-", "_").strip()
+        target_name = self._config.destination_name
+        target_lower = target_name.lower()
+        norm_name = target_lower.replace("-", "_").strip()
         if norm_name in UNSUPPORTED_COMMERCIAL_TARGETS:
             self._connected = False
             raise UnsupportedDestinationError(
