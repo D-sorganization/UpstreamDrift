@@ -184,6 +184,8 @@ Reuse existing validated camera/FK/geometry providers. Keep disks and points as
 explicitly limited reference utilities; do not claim a sphere's exact perspective
 silhouette from an unqualified fx\*r/z circle approximation.
 
+**Implementation status (#10232):** Addressed via `ArticulatedSilhouetteRenderer` evaluating forward kinematics from canonical 27-DOF articulated state, generating separated body and club capsule masks responsive to limb/wrist kinematics, rasterizing bounding boxes intersecting sensor margins when ellipse centers are offscreen, handling anamorphic focal lengths, and strictly validating camera-crop dimensions and state conventions.
+
 ### 3. Protect and Persist Mask Revision Identity — #10233
 
 Shot-aware lookup is repaired, but `_revisions[revision_id]` is overwritten on

@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from fractions import Fraction
 import math
-from typing import Any, Literal, Protocol, runtime_checkable
+from typing import Any, Final, Literal, Protocol, runtime_checkable
 
 from ._validation import (
     CANDIDATE_RESULT_SCHEMA_VERSION,
@@ -805,11 +805,19 @@ class SegmentationResult:
         check_str(self.provenance, "provenance")
 
 
+POINT_LANDMARKS_CONVENTION: Final[str] = "point_landmarks"
+CANONICAL_ARTICULATED_CONVENTION: Final[str] = "canonical_articulated_v1"
+_VALID_RENDER_STATE_CONVENTIONS: frozenset[str] = frozenset(
+    (POINT_LANDMARKS_CONVENTION, CANONICAL_ARTICULATED_CONVENTION)
+)
+
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class RenderRequest:
     camera_id: str
     state: tuple[float, ...]
     image_size_px: tuple[int, int]
+    state_convention: str = POINT_LANDMARKS_CONVENTION
 
     def __post_init__(self) -> None:
         check_id(self.camera_id, "camera_id")
@@ -823,11 +831,17 @@ class RenderRequest:
             )
         check_pos_int(self.image_size_px[0], "width_px")
         check_pos_int(self.image_size_px[1], "height_px")
+        check_str(self.state_convention, "state_convention")
+        if self.state_convention not in _VALID_RENDER_STATE_CONVENTIONS:
+            raise ValueError(
+                f"state_convention must be one of {sorted(_VALID_RENDER_STATE_CONVENTIONS)}, got {self.state_convention!r}"
+            )
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class RenderResult:
     body_mask: tuple[int, ...]
+
     club_mask: tuple[int, ...]
     visibility_mask: tuple[int, ...]
 
