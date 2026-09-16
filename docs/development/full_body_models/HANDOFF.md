@@ -1,5 +1,14 @@
 # Full-Body Models Handoff (Epic #10062)
 
+## Optional Viewer Adapter Status (#10256, #10254)
+
+MeshCat and Gepetto adapters now own persistent native visualizers, validate
+configuration dimensions and preserve separate visual/collision models. Scene
+cleanup is scoped to each adapter. Real MeshCat dispatch is exercised in the
+opt-in heavy integration test; live Gepetto qualification remains pending.
+These wrappers are prerequisites for replay integration, not evidence that the
+full-body product already routes through them or that any model fit is valid.
+
 Updated 2026-09-16 (claude; HO-9 #10111). Branch
 `feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).

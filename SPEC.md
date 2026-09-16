@@ -1,4 +1,15 @@
 # SPEC.md — Repository Specification Document
+
+## Optional Viewer Replay and Lifecycle (#10256)
+
+Gepetto and MeshCat adapters persist native Pinocchio visualizers, pass distinct
+visual/collision models, and forward finite `(model.nq,)` configurations to
+actual display calls. `None` means Pinocchio neutral pose. Unloaded/closed
+instances fail explicitly. Reload, failed load and idempotent close clean
+only adapter-owned scene nodes; external servers remain running. MeshCat
+supports a self-managed server with explicit browser suppression. Live
+Gepetto qualification and product-level replay selection are still separate
+requirements under #10254.
  
 ## MJX Environment Setup, Pinned Dependencies, and Contact-Law Parity Tests (HO-3 #10157, #10162)
 
@@ -5207,6 +5218,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10256 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
@@ -6865,4 +6877,3 @@ The general optimal-control extra retains its separate version range (#9842).
 - Replaced `np.linalg.norm()` with `math.sqrt(np.vdot())` for small 3D vectors in `src/tools/capture_rig/model_frame_source.py` and `src/tools/capture_rig/reference_volumes.py` to bypass linear algebra overhead. (spec-exempt: micro-optimization)
 | 2024-05-20 | #<pr> | Replaced `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` in `src/motion_capture/reconstruct/model/fit2d.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
 - Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for small 1D arrays in `bunker_shot_gui` and `simulation_backends_launcher` for performance improvement. (spec-exempt: micro-optimization)
-
