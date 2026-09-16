@@ -11,7 +11,7 @@ single/multiview captures and historical footage with explicit ambiguity and
 unknown timing. Do not stop at data classes, a mock UI, or a synthetic-only demo.
 
 Read current AGENTS.md, CLAUDE.md, SPEC.md and root AGENT_HANDOFF.md. Then read:
-  docs/plans/shadow_tracker/PROGRESS_REVIEW_2026_09_15.md
+  docs/plans/shadow_tracker/TURNOVER_CURRENT.md
   docs/plans/shadow_tracker/DEVELOPMENT_REVIEW.md
   docs/plans/shadow_tracker/CONTRACT_FREEZE.md
   docs/plans/shadow_tracker/QUALIFICATION_FINDINGS.md
@@ -19,25 +19,30 @@ Read current AGENTS.md, CLAUDE.md, SPEC.md and root AGENT_HANDOFF.md. Then read:
   docs/plans/shadow_tracker/INTEGRATION.md
   docs/plans/shadow_tracker/VALIDATION.md
   docs/plans/shadow_tracker/CAPTURE_AND_ARCHIVES.md
-Inspect current code and GitHub state. Reviewed baseline is b97e159dc. Record
-hardening and prototype stages through ST-06 have merged, but their full
-acceptance is incomplete. The current progress review supersedes old pickup
-instructions and unsupported claims of 100% boundary coverage.
+Inspect current source and GitHub state. Reviewed baseline is 33ffde23f. The
+false inference success, NaN hypothesis and mutable morphology findings were
+repaired. Real OpenCV decoding and reference disk rendering exist but are not
+archive-timing or articulated-model acceptance. Read TURNOVER_CURRENT.md first.
 
-FIRST ACTION: inspect/claim a bounded follow-up under #10127. Write a red test
-showing that an arbitrary existing checkpoint must not report segmentation
-success; the current provider returns a mask count without running inference.
-Make it fail explicitly until real masks are produced. Do not add fake inference.
+FIRST ACTION: inspect/claim #10231 and write behavioral red tests for preserved
+real VFR/negative PTS, unknown physical time by default, and cancellation during
+actual decode. Do not derive authoritative PTS from average FPS or frame index.
+Do not turn presentation time into physical time without explicit evidence.
 
-NEXT: resolve the point-only renderer and conflicting state conventions under
-#10128, add independent filled-area/articulation oracles, and repair DTO finite,
-shape and ownership invariants. Do not fit a golfer against two landmark pixels.
-In a separate bounded image-only slice, finish real decoding under #10168 and
-persisted mask revisions under #10127, then expose the real review journey in
-the launcher. Scientific #10167 must regenerate valid calibration/IK evidence;
-Stage 7 boundary work cannot qualify physics on the historical invalid pose.
-Follow all remaining stages and acceptance gates in the current progress review
-and DEVELOPMENT_REVIEW.md. Do not redefine partial prototypes as completed stages.
+NEXT: #10233 fixes duplicate revision IDs, parent ownership and persistent mask
+lineage. #10232 binds real articulated state/geometry to rendering and tests
+clipped visible shapes, nonsquare focal lengths and body/club pose changes.
+Keep reference disk helpers honestly labeled. A seven-value state with ignored
+rotation and no club is not a full-body render. Reuse camera/FK/state providers.
+
+Then fix initialization no-evidence/club-scoring/velocity acceptance and deliver
+a real import -> review -> manual edit -> save/reopen launcher slice using one
+service, manifest/entry point/lazy adapter and real UI tests. Fitting remains
+unavailable until real continuous rollout and scientific qualification pass.
+Regenerated grip evidence is improved but still outside the physical profile;
+retain that limitation and complete all ST-07–ST-12 stages, including uncertainty,
+modern/archive validation, full UI/API/React/export parity and packaged release.
+Do not jump from a Stage 7 prototype directly to release.
 
 Apply TDD, DbC, LoD and DRY throughout production code, adapters and UI. Preserve
 behavioral red/green evidence. Reuse existing public camera/canonical-state,

@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Time and Geometry Turnover Review (#10230)
+
+Updates current agent pickup after real decoder, disk-renderer and calibration
+changes. Records source/physical-time, geometry/clipping and revision-integrity
+findings with corrective issues and full product completion gates. Documentation
+only; no runtime behavior or scientific qualification changes.
+
 ## Ground Support Execution Receipt Schema, Validator, and Reference Documentation (HO-2 #10156, #10162)
 
 Establishes formal Pydantic V2 schemas, validation contracts, and generated reference documentation for ground-support execution receipts under `src/shared/python/motion_matching/pipeline/`:
