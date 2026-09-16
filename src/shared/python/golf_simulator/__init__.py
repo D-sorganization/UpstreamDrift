@@ -7,6 +7,11 @@ from src.shared.python.golf_simulator.adapters.local import (
     LocalReferenceAdapter,
     TrajectoryRecord,
 )
+from src.shared.python.golf_simulator.adapters.relay import (
+    FlightRelayAdapter,
+    FlightRelayConfig,
+    UnsupportedDestinationError,
+)
 from src.shared.python.golf_simulator.contracts import (
     AimContext,
     CapabilityDescriptor,
@@ -90,6 +95,8 @@ __all__ = [
     "ContactStatus",
     "DeliveryStatus",
     "EnvironmentReadinessReport",
+    "FlightRelayAdapter",
+    "FlightRelayConfig",
     "GolfSessionService",
     "JournalEntry",
     "LicensingPolicyViolationError",
@@ -121,6 +128,7 @@ __all__ = [
     "SubmissionState",
     "SupportReceipt",
     "TrajectoryRecord",
+    "UnsupportedDestinationError",
     "assert_licensing_policy",
     "check_environment_readiness",
     "discover_simulator_installation",

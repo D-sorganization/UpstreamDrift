@@ -205,6 +205,25 @@ Hardens segmentation provider and auxiliary DTO boundary invariants addressing r
   - `RenderRequest`: Validates non-empty `camera_id`, finite float tuple `state`, and positive integer 2-tuple `image_size_px`.
   - `RenderResult`: Validates tuple masks of equal lengths.
 
+## Second Commercial Simulator and Flight Relay Adapter Evaluation (#10199)
+
+Specifies the commercial simulator evaluation and Flight Relay Protocol adapter for golf simulator integration (GS-10):
+- Implements `docs/plans/golf_simulator_integration/COMMERCIAL_SIMULATOR_EVALUATION.md`:
+  - Evaluates commercial simulator integration candidates: E6 CONNECT (TruGolf), Creative Golf 3D (Creative Simulators), TrackMan Virtual Golf (TrackMan TPS), and Flight Relay Protocol.
+  - Documents protocol/SDK access, licensing and entitlement models, supported operations, coordinate systems/units, provenance, and testing availability.
+  - Compares direct proprietary adapters versus relay architectures across maintainability, version stability, delivery semantics, and license compatibility.
+  - Provides turnkey vendor inquiry templates for user authorization.
+  - Maintains strict honest capability declaration: unverified or closed vendor SDKs remain declared `UNSUPPORTED`.
+- Implements `src/shared/python/golf_simulator/adapters/relay.py`:
+  - `FlightRelayConfig`: Configuration for relay destination (`destination_id`, host, port, token, timeout, strict qualification).
+  - `UnsupportedDestinationError`: Exception raised when attempting to target proprietary simulators without validated SDK entitlement.
+  - `FlightRelayAdapter`: Conforms to `SimulatorAdapter` protocol. Normalizes model-qualified shots into open relay envelopes (`FlightRelayPayload`), records intent and acknowledgment in `ShotJournal`, and rejects unsupported destinations.
+- Unit Test Suite (`tests/unit/golf_simulator/test_relay_adapter.py`):
+  - Validates adapter lifecycle (`connect`, `disconnect`, `capabilities`).
+  - Verifies successful shot formatting, submission, and journal acknowledgment for supported destinations.
+  - Verifies rejection of unsupported destinations (`UnsupportedDestinationError`).
+  - Verifies event stream iteration and clean termination.
+
 ## Golf Simulator Integration Support and Operational Acceptance Matrix (#10198)
 
 Specifies the authoritative hardware, topology, capability boundary, and operational acceptance qualification matrix for golf simulator integration (GS-09):
