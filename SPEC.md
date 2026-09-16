@@ -194,6 +194,29 @@ Hardens segmentation provider and auxiliary DTO boundary invariants addressing r
   - `RenderRequest`: Validates non-empty `camera_id`, finite float tuple `state`, and positive integer 2-tuple `image_size_px`.
   - `RenderResult`: Validates tuple masks of equal lengths.
 
+## Windows Deployment and Authenticated Remote Topology (#10197)
+
+Specifies Windows integration and authenticated remote topology for golf simulator execution (GS-08):
+- Implements `src/shared/python/golf_simulator/discovery.py`:
+  - `SimulatorEndpoint`: Restricts raw simulator sockets strictly to loopback (`127.0.0.1`, `localhost`, `::1`); enforces valid port bounds (1-65535).
+  - `SupportReceipt`: Non-secret environment diagnostics receipt containing app, connector, and profile versions, endpoint details, and optional package indicators without credential leakage.
+  - `discover_simulator_installation()`: Resolves environment (`GSPRO_INSTALL_DIR`, `GSPRO_API_PORT`, `GSPRO_HOST`, `GSPRO_PROFILE_PATH`) and optional config files with fallback defaults; zero Windows registry scraping or hardcoded user paths.
+- Implements `src/shared/python/golf_simulator/producer_lock.py`:
+  - `ProducerLockManager` and `ProducerLock`: Single-producer session ownership lease with TTL, renewal, and release semantics.
+  - `ProducerConflictError`: Reports competing producer ID, session ID, and lease expiration without terminating or killing unrelated processes.
+- Implements `src/shared/python/golf_simulator/remote_bridge.py`:
+  - `LocalBridgeServer`: Local bridge on the Windows host binding raw vendor socket to `127.0.0.1`; validates bearer tokens (`AuthenticationError`); enforces bounded queue backpressure (`QueueCapacityExceededError`); supports cooperative cancellation tokens.
+  - `RemoteBridgeClient`: Remote adapter facade implementing `SimulatorAdapter` protocol for remote model execution.
+  - `BridgeSecurityError`: Raised if non-loopback bindings are requested for vendor sockets.
+- Implements `src/shared/python/golf_simulator/logging_redaction.py`:
+  - `SecretRedactionFilter`, `redact_text`, `redact_mapping`: Scrubs bearer tokens, passwords, and API keys from structured logs and diagnostics.
+- Implements `src/shared/python/golf_simulator/packaging.py`:
+  - `check_environment_readiness()`: Assesses platform and optional packages (`pywin32`, `psutil`) without import crashes.
+  - `assert_licensing_policy()`: Precondition checks blocking automated EULA acceptance or vendor binary modification (`LicensingPolicyViolationError`).
+- Updates `src/shared/python/golf_simulator/journal.py`:
+  - `recover_on_startup()`: Scans storage on restart and marks unconfirmed in-flight `PENDING` shots as `AMBIGUOUS`.
+  - `prune_retention()`: Prunes expired terminal shots while preserving ambiguous and unresolved delivery records.
+
 ## Proposed Model-Driven Golf Simulator Integration (#10188)
 
 Planning scope only: [GSPro Integration Plan](docs/plans/golf_simulator_integration/README.md)
@@ -207,6 +230,7 @@ No outbound GSPro integration is implemented by this specification update.
 Native GSPro avatars and autonomous course feedback remain vendor-gated research.
 Existing contact/impact qualification gaps must be resolved independently of
 socket delivery; scientific acceptance retains the canonical manual governance.
+
 
 ## Shadow Tracker Evidence-Based Turnover Refresh (#10184)
 
@@ -5037,6 +5061,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
 | 2026-09-15 | #10204 | Capture rig adopts the shared camera layer: `vendor/ud-tools` pinned to Tools 1ac89c18e (`shared.python.camera`), `preview_source.py` becomes one `SharedSourceAdapter` (rig `open/read/close` over the Tools `FrameSource`) and `recorder.dshow_device_ref` delegates; the preview command is pinned token-for-token against the pre-port list (only delta: `-rtbufsize 256M`). Adapter tests run in the isolated provider harness. |
 | 2026-09-15 | #10201 | Propose GSPro and interchangeable simulator integration, detailed implementation children, architecture and worker turnover (#10188); no runtime implementation. |
 | 2026-09-15 | #10185 | Refresh Shadow Tracker turnover with reproduced acceptance gaps and current corrective/product sequence (#10184). |
