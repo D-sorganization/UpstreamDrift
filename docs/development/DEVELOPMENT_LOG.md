@@ -83,7 +83,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-16 (SELF; HO-4 #10158 Motion Matching tile stages implemented test-first; all 13 pipeline and GUI tests pass; feature parity matrix regenerated; ruff, mypy clean)
 - **Summary:** Full-body pipeline handoff (epic #10162). HO-4 (#10158) expanded `src/tools/motion_matching/` (`pipeline.py`, `gui.py`) to expose all pipeline stages (free/bound wrists, fit-closure, ZMP filter, contact-aware shooting fit), downswing experiments (`downswing_experiment.py`), and MJX package export / reference validation (`export_mjx_package.py`). Implemented `ExperimentRequest`, `MatchRequest` extensions with DbC validations, and tabbed `MotionMatchingWidget` with `RunWorker` adhering strictly to LoD.
 - **Next step:** Land HO-4 PR, then proceed to HO-3 (#10157 MJX environment and JAX-gated tests) or next available child in epic #10162.
-- **Evidence:** tests/tools/motion_matching/test_pipeline.py, tests/tools/motion_matching/test_gui.py, src/tools/motion_matching/gui.py, src/tools/motion_matching/pipeline.py.
+- **Evidence:** tests/tools/motion_matching/test_motion_matching_tile_pipeline.py, tests/tools/motion_matching/test_motion_matching_tile_gui.py, src/tools/motion_matching/gui.py, src/tools/motion_matching/pipeline.py.
 
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 

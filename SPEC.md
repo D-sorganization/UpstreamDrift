@@ -22,8 +22,8 @@ Exposes every stage of the full-body motion matching pipeline through the deskto
   - Feature parity entry `tools.motion_matching` tracked as a registered gap with issue #10106 in `src/config/feature_parity.json`.
   - Generated `docs/development/feature_parity_matrix.md` updated with Title Casing compliance.
 - Unit Testing:
-  - `tests/tools/motion_matching/test_pipeline.py`: 8 tests covering request validation contracts, command generation, and experiment summary parsing.
-  - `tests/tools/motion_matching/test_gui.py`: 5 headless PyQt6 tests verifying tab instantiation, stage checkboxes, mutual exclusion, downswing experiment request construction, and MJX command dispatch.
+  - `tests/tools/motion_matching/test_motion_matching_tile_pipeline.py`: 8 tests covering request validation contracts, command generation, and experiment summary parsing.
+  - `tests/tools/motion_matching/test_motion_matching_tile_gui.py`: 5 headless PyQt6 tests verifying tab instantiation, stage checkboxes, mutual exclusion, downswing experiment request construction, and MJX command dispatch.
 
 ## Shadow Tracker Time and Geometry Turnover Review (#10230)
 
