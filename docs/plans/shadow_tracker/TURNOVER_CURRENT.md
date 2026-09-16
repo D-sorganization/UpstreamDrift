@@ -5,6 +5,7 @@
 Reviewed main `33ffde23f` after #10205, #10212, #10214 and calibration regeneration
 #10177. Review delivery is tracked by #10230. This is the current pickup document;
 earlier reviews remain historical. Read [Continuation Prompt](CONTINUATION_PROMPT.md)
+Publication: [PR #10234](https://github.com/D-sorganization/UpstreamDrift/pull/10234).
 and preserve the full [Work Packages](WORK_PACKAGES.md) and G0–G7 in
 [Validation](VALIDATION.md). Merged implementation is not stage qualification.
 
