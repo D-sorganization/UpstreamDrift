@@ -1,4 +1,16 @@
 # SPEC.md — Repository Specification Document
+
+## Pink Adapter State and Constraint Contract (#10257)
+
+`PinkSolver.solve` and `PINKBackend.solve_ik` use one validated implementation
+with explicit configuration (`nq`) and tangent velocity (`nv`) dimensions.
+They preserve positional arguments and add keyword-only hard task constraints
+and limits. Omitted options preserve Pink defaults; unsupported requested
+capabilities fail explicitly. Each solve refreshes kinematics from its input,
+performs one `pin.integrate(q, velocity * dt)`, and updates the cache afterward.
+Collision geometry remains available to Pink. Invalid inputs, nonfinite
+outputs and solver infeasibility propagate as errors. Optional native loading
+handles missing/broken imports without pretending the capability exists.
  
 ## MJX Environment Setup, Pinned Dependencies, and Contact-Law Parity Tests (HO-3 #10157, #10162)
 
@@ -5207,6 +5219,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10257 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
@@ -6865,4 +6878,3 @@ The general optimal-control extra retains its separate version range (#9842).
 - Replaced `np.linalg.norm()` with `math.sqrt(np.vdot())` for small 3D vectors in `src/tools/capture_rig/model_frame_source.py` and `src/tools/capture_rig/reference_volumes.py` to bypass linear algebra overhead. (spec-exempt: micro-optimization)
 | 2024-05-20 | #<pr> | Replaced `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` in `src/motion_capture/reconstruct/model/fit2d.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
 - Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for small 1D arrays in `bunker_shot_gui` and `simulation_backends_launcher` for performance improvement. (spec-exempt: micro-optimization)
-
