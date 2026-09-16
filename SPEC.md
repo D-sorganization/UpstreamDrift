@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Finite Weld Pose Linearization (#10260)
+
+The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
+`Jlog6(c1Mc2.inverse()) @ J_constraint`, in caller coordinate order.
+The velocity and acceleration constraints continue using `J_constraint`;
+their trajectory acceleration partial must not substitute the finite pose
+Jacobian. Real-engine tests verify off-closure directions and storage ownership.
+
 ## Contact-Aware Full-Body Derivatives (#10255, #10254)
 
 The shared sphere-contact law exposes world-force derivatives with respect to
@@ -5220,6 +5228,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10260 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
 | 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
