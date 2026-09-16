@@ -194,6 +194,19 @@ Hardens segmentation provider and auxiliary DTO boundary invariants addressing r
   - `RenderRequest`: Validates non-empty `camera_id`, finite float tuple `state`, and positive integer 2-tuple `image_size_px`.
   - `RenderResult`: Validates tuple masks of equal lengths.
 
+## Golf Simulator Integration Support and Operational Acceptance Matrix (#10198)
+
+Specifies the authoritative hardware, topology, capability boundary, and operational acceptance qualification matrix for golf simulator integration (GS-09):
+- Implements `docs/plans/golf_simulator_integration/SUPPORT_MATRIX.md`:
+  - Documents Single Host (`127.0.0.1:921`) and Authenticated Remote Bridge topologies.
+  - Formalizes operational prerequisites: Python versions, display resolutions, optional package handling (`pywin32`, `psutil`), and nonsecret diagnostic receipts.
+  - Declares honest capability boundaries: Native ball flight and club data are supported; putting carries minimum velocity constraints ($\ge 1.5\text{ m/s}$); native avatar animation, course feedback telemetry, local trajectory streaming, and remote aim control are declared `UNSUPPORTED`.
+  - Details disconnect classification, ambiguous delivery retention, and operator verification playbooks preventing duplicate shot injection.
+- Implements `tests/integration/golf_simulator/test_live_acceptance.py`:
+  - Opt-in live acceptance qualification suite governed by `GSPRO_LIVE_TEST=1` (cleanly skips by default in 0.25s during standard CI).
+  - Demonstrates nonsecret audit receipts, deterministic shot qualification across standard flight regimes (straight drive, left hook, right slice, chip, and putt), explicit capability verification, disconnect injection with `AMBIGUOUS` journal retention, and single-producer lease conflict rejection.
+- Updates `docs/plans/golf_simulator_integration/ACCEPTANCE_RUNBOOK.md` and `README.md` to index the canonical support matrix and acceptance procedures.
+
 ## Windows Deployment and Authenticated Remote Topology (#10197)
 
 Specifies Windows integration and authenticated remote topology for golf simulator execution (GS-08):
