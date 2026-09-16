@@ -1,7 +1,7 @@
 # Full-Body Models Handoff (Epic #10062)
 
-Updated 2026-09-15 (claude; HO-7 #10161). Branch
-`feat/10161-design-decisions`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
+Updated 2026-09-15 (claude; HO-4 #10158). Branch
+`feat/10158-motion-matching-tile`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
 Copy-ready prompt for the next agent: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
 
@@ -613,10 +613,12 @@ Two implementations of the full-body program currently coexist in the repository
 
 ### How to Continue (Read This First)
 
-1. Run the pipeline from the launcher tile "Motion Matching" or
-   `python -m src.tools.motion_matching`; headless:
-   `python docs/development/full_body_models/build_anthropometric_spec.py ... --club driver|iron7`
-   then `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> --skip-hip-calibration --static-seeds [--free-wrists] --capture driver|iron --out <run>` (wrists bounded by default for fitted documents; refit the hand rotation with `evidence/anthropometry/fit_grip_rotation.py --run <free-wrist run> ...`).
+1. Run the pipeline from the launcher tile "Motion Matching" (`python -m src.tools.motion_matching`) or headlessly via `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> ...`. The launcher tile provides a tabbed interface:
+   - **Matching Tab**: Full pipeline execution with granular stage controls (free/bound wrists, fit closure, cart-table ZMP filter, whole-body shooting fit iterations and gain, cutoff frequency).
+   - **Downswing Experiment Tab**: Run parameter sweep and variant comparison experiments against reference fits with custom torque/gain overrides.
+   - **MJX Tab**: Export MJX optimization packages and validate optimized trajectory references against the shared contact-law plant.
+     Headless pipeline runs: `python docs/development/full_body_models/build_anthropometric_spec.py ... --club driver|iron7`
+     then `python docs/development/full_body_models/evidence/ground_support/run_ground_support.py --spec <doc> --skip-hip-calibration --static-seeds [--free-wrists] --capture driver|iron --out <run>` (wrists bounded by default for fitted documents; refit the hand rotation with `evidence/anthropometry/fit_grip_rotation.py --run <free-wrist run> ...`).
 2. Read the receipt (`<run>/receipt.json`): `address.calibrated`, `ik`
    (full-capture IK, `range_of_motion_flags`, `attachments_m`), `dynamics`
    (`root_error_timeline_m`, `weight_fraction`, `reference_zmp`,
@@ -649,5 +651,6 @@ The following table records the canonical module assignments to be executed in H
 - **HO-0 (#10186)**: Landed on `main` reconciling ground-support and FB-4/5/6 lanes.
 - **HO-1 (#10155)**: Landed on `main` in PR #10218 (`afea5e0a8`). Ground-support pipeline package established under `src/shared/python/motion_matching/pipeline/` with CLI wrapper in `docs/development/full_body_models/evidence/ground_support/run_ground_support.py`.
 - **HO-2 (#10156)**: Implemented Pydantic V2 receipt schema and validator (`src/shared/python/motion_matching/pipeline/receipt_schema.py`), unit tests validating all committed receipts and rejection paths (`test_receipt_schema.py`), generated markdown documentation (`docs/development/full_body_models/RECEIPTS.md`), and freshness test (`test_receipts_markdown_freshness.py`).
-- **HO-7 (#10161)**: Consolidated seventeen sections of findings from `evidence/anthropometry/REVIEW.md` into authoritative design decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`. Established structured parser, validator with DbC contracts, and full test suite `tests/unit/motion_matching/pipeline/test_design_decisions.py`.
-- **Next**: Land HO-7 PR, then proceed to HO-3 (#10157, MJX environment and JAX-gated tests) and subsequent handoff issues in epic #10162.
+- **HO-7 (#10161)**: Consolidated seventeen sections of findings from `evidence/anthropometry/REVIEW.md` into authoritative design decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`. Established structured parser, validator with DbC contracts, and full test suite `tests/unit/motion_matching/pipeline/test_design_decisions.py`. Merged to `main` in PR #10235 (`27b271fe2`).
+- **HO-4 (#10158)**: Exposed all pipeline stages in the Motion Matching launcher tile (`src/tools/motion_matching/gui.py`, `pipeline.py`). Tabbed interface across Matching (with granular Stages options for free/bound wrists, fit closure, ZMP filter, shooting fit, cutoff frequency), Downswing experiment, and MJX tabs, with asynchronous `RunWorker` and strict LoD. Headless PyQt6 and pipeline test suites in `tests/tools/motion_matching/`. Added `tools.motion_matching` to `src/config/feature_parity.json` (tracking gap #10106) and regenerated `docs/development/feature_parity_matrix.md`.
+- **Next**: Proceed to HO-3 (#10157, MJX environment and JAX-gated tests) and subsequent handoff issues in epic #10162.

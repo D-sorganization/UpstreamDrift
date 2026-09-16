@@ -22,6 +22,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 FULL_BODY = REPO_ROOT / "docs/development/full_body_models"
 BUILDER = FULL_BODY / "build_anthropometric_spec.py"
 DRIVER_SCRIPT = FULL_BODY / "evidence/ground_support/run_ground_support.py"
+DOWNSWING_SCRIPT = FULL_BODY / "evidence/ground_support/downswing_experiment.py"
+EXPORT_MJX_SCRIPT = FULL_BODY / "evidence/ground_support/export_mjx_package.py"
 NATIVE = (
     REPO_ROOT
     / "docs/development/simscape_tour_matching/native_evidence/native_geometry_spec_9967.json"
@@ -45,6 +47,13 @@ class MatchRequest:
     arm_scale: float = 1.10
     shoulder_scale: float = 1.0
     output_name: str | None = None
+    free_wrists: bool = False
+    bound_wrists: bool = False
+    fit_closure: bool = False
+    zmp_filter: bool = False
+    shooting_fit: int = 0
+    shooting_gain: float = 0.7
+    cutoff_hz: float | None = None
 
     def __post_init__(self) -> None:
         if self.capture not in CAPTURES:
@@ -60,6 +69,14 @@ class MatchRequest:
         ):
             if not value > 0:
                 raise ValueError("Subject values and scale factors must be positive")
+        if self.free_wrists and self.bound_wrists:
+            raise ValueError("Cannot specify both free_wrists and bound_wrists")
+        if not isinstance(self.shooting_fit, int) or self.shooting_fit < 0:
+            raise ValueError("shooting_fit iterations must be a non-negative integer")
+        if not (0.0 <= self.shooting_gain <= 1.0):
+            raise ValueError("shooting_gain must be in [0, 1]")
+        if self.cutoff_hz is not None and not (0.0 < self.cutoff_hz < 180.0):
+            raise ValueError("cutoff_hz must be positive and below Nyquist (180 Hz)")
 
     @property
     def document_name(self) -> str:
@@ -76,6 +93,54 @@ class MatchRequest:
     @property
     def output_dir(self) -> Path:
         return FULL_BODY / "evidence/ground_support" / self.run_name
+
+
+@dataclass(frozen=True)
+class ExperimentRequest:
+    """Settings for a downswing dynamics experiment."""
+
+    run: Path | str
+    name: str
+    cutoff_hz: float | None = None
+    omega: float = 120.0
+    zeta: float = 1.0
+    feedforward: float = 1.0
+    legs_omega: float | None = None
+    balance: bool = True
+    root_regulation: tuple[float, float] | None = None
+    transition_velocity: float | None = None
+    friction: tuple[float, float] | None = None
+    stiffness: float | None = None
+    dissipation: float | None = None
+    reference: Path | str | None = None
+    dt: float | None = None
+    duration: float | None = None
+
+    def __post_init__(self) -> None:
+        if not self.name or not isinstance(self.name, str):
+            raise ValueError("Experiment name must be a non-empty string")
+        if self.cutoff_hz is not None and not (0.0 < self.cutoff_hz < 180.0):
+            raise ValueError(
+                "Cutoff frequency must be positive and below Nyquist (180 Hz)"
+            )
+        if not (0.0 <= self.feedforward <= 1.0):
+            raise ValueError("Feedforward gain must be in [0, 1]")
+        if self.omega <= 0:
+            raise ValueError("Omega must be positive")
+        if self.zeta < 0:
+            raise ValueError("Zeta must be non-negative")
+        if self.legs_omega is not None and self.legs_omega <= 0:
+            raise ValueError("Legs omega must be positive")
+        if self.transition_velocity is not None and self.transition_velocity <= 0:
+            raise ValueError("Transition velocity must be positive")
+        if self.stiffness is not None and self.stiffness <= 0:
+            raise ValueError("Stiffness must be positive")
+        if self.dissipation is not None and self.dissipation < 0:
+            raise ValueError("Dissipation must be non-negative")
+        if self.dt is not None and self.dt <= 0:
+            raise ValueError("Time step dt must be positive")
+        if self.duration is not None and self.duration <= 0:
+            raise ValueError("Duration must be positive")
 
 
 def build_command(request: MatchRequest) -> list[str]:
@@ -108,7 +173,7 @@ def build_command(request: MatchRequest) -> list[str]:
 
 def match_command(request: MatchRequest) -> list[str]:
     """Command line that matches the capture on the built document."""
-    return [
+    cmd = [
         sys.executable,
         str(DRIVER_SCRIPT),
         "--spec",
@@ -120,6 +185,115 @@ def match_command(request: MatchRequest) -> list[str]:
         "--out",
         str(request.output_dir),
     ]
+    if request.free_wrists:
+        cmd.append("--free-wrists")
+    if request.bound_wrists:
+        cmd.append("--bound-wrists")
+    if request.fit_closure:
+        cmd.append("--fit-closure")
+    if request.zmp_filter:
+        cmd.append("--zmp-filter")
+    if request.shooting_fit > 0:
+        cmd.extend(["--shooting-fit", str(request.shooting_fit)])
+        cmd.extend(["--shooting-gain", str(request.shooting_gain)])
+    elif request.shooting_gain != 0.7:
+        cmd.extend(["--shooting-gain", str(request.shooting_gain)])
+    return cmd
+
+
+def experiment_command(request: ExperimentRequest) -> list[str]:
+    """Command line for running a downswing experiment."""
+    cmd = [
+        sys.executable,
+        str(DOWNSWING_SCRIPT),
+        "--run",
+        str(request.run),
+        "--name",
+        request.name,
+        "--omega",
+        str(request.omega),
+        "--zeta",
+        str(request.zeta),
+        "--feedforward",
+        str(request.feedforward),
+    ]
+    if request.cutoff_hz is not None:
+        cmd.extend(["--cutoff-hz", str(request.cutoff_hz)])
+    if request.legs_omega is not None:
+        cmd.extend(["--legs-omega", str(request.legs_omega)])
+    if not request.balance:
+        cmd.append("--no-balance")
+    if request.root_regulation is not None:
+        cmd.extend(
+            [
+                "--root-regulation",
+                str(request.root_regulation[0]),
+                str(request.root_regulation[1]),
+            ]
+        )
+    if request.transition_velocity is not None:
+        cmd.extend(["--transition-velocity", str(request.transition_velocity)])
+    if request.friction is not None:
+        cmd.extend(["--friction", str(request.friction[0]), str(request.friction[1])])
+    if request.stiffness is not None:
+        cmd.extend(["--stiffness", str(request.stiffness)])
+    if request.dissipation is not None:
+        cmd.extend(["--dissipation", str(request.dissipation)])
+    if request.reference is not None:
+        cmd.extend(["--reference", str(request.reference)])
+    if request.dt is not None:
+        cmd.extend(["--dt", str(request.dt)])
+    if request.duration is not None:
+        cmd.extend(["--duration", str(request.duration)])
+    return cmd
+
+
+def export_mjx_command(run: Path | str) -> list[str]:
+    """Command line that exports the MJX package for ``run``."""
+    return [
+        sys.executable,
+        str(EXPORT_MJX_SCRIPT),
+        "--run",
+        str(run),
+    ]
+
+
+def validate_reference_command(
+    run: Path | str, reference: Path | str, name: str = "mjx_validation"
+) -> list[str]:
+    """Command line that validates an optimised reference in the shared plant."""
+    return [
+        sys.executable,
+        str(DOWNSWING_SCRIPT),
+        "--run",
+        str(run),
+        "--name",
+        name,
+        "--reference",
+        str(reference),
+    ]
+
+
+def read_experiment_summary(run_dir: Path | str, name: str) -> dict[str, Any]:
+    """Read the downswing experiment receipt summary.
+
+    Precondition: ``run_dir`` contains ``downswing_{name}.json``.
+    Postcondition: Returns a dictionary containing headline metrics.
+    """
+    path = Path(run_dir) / f"downswing_{name}.json"
+    if not path.exists():
+        raise ValueError(f"No experiment receipt found at {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        "name": name,
+        "root_error_max_mm": _mm(data.get("root_error_max_m")),
+        "root_error_timeline_m": data.get("root_error_timeline_m", {}),
+        "marker_rms_to_1_5s_m": data.get("marker_rms_to_1_5s_m"),
+        "marker_rms_to_1_5s_mm": _mm(data.get("marker_rms_to_1_5s_m")),
+        "marker_rms_mm": _mm(data.get("marker_rms_m")),
+        "inside_support_polygon_fraction": data.get("inside_support_polygon_fraction"),
+        "peak_joint_torque_n_m": data.get("peak_joint_torque_n_m"),
+    }
 
 
 def summarise_receipt(receipt: dict[str, Any]) -> dict[str, Any]:

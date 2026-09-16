@@ -57,7 +57,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
 | `visualization.force_color_controls`<br>Shared Segment Force Color Controls | ✅ parity | `src/shared/python/body_part_viz/force_color_controls.py` | — | `ui/src/components/visualization/ForceColorControls.tsx` | — |
 
-## Launcher tile coverage
+## Launcher Tile Coverage
 
 Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 
