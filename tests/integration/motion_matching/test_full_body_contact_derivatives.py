@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -15,27 +13,6 @@ from src.engines.physics_engines.pinocchio.python.native_model import (
 from src.shared.python.motion_matching.contact_law import GroundPlane
 
 pytestmark = [pytest.mark.integration, pytest.mark.requires_pinocchio]
-ROOT = Path(__file__).resolve().parents[3]
-
-
-@pytest.fixture
-def plant_state() -> tuple[FullBodyPinocchioModel, dict[str, float]]:
-    """Use an archived closed-grip pose, without claiming fit qualification."""
-    pin = pytest.importorskip("pinocchio")
-    if not isinstance(getattr(pin, "__version__", None), str):
-        pytest.skip("A real Pinocchio runtime is required")
-    folder = ROOT / "docs/development/full_body_models"
-    spec = json.loads((folder / "full_body_spec_v1.json").read_text())
-    candidate = json.loads(
-        (folder / "evidence/native_candidates/returned81_candidate.json").read_text()
-    )
-    plant = FullBodyPinocchioModel(spec)
-    pose = dict.fromkeys(spec["coordinate_order"], 0.0)
-    pose.update(zip(candidate["coordinate_names"], candidate["q0"], strict=True))
-    # Tilt legs away from straight-leg singular configurations.
-    pose["knee_angle_r"] = 0.15
-    pose["knee_angle_l"] = 0.18
-    return plant, pose
 
 
 def _contact_plane(plant: FullBodyPinocchioModel, pose: dict[str, float]) -> None:
