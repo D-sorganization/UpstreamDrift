@@ -1,0 +1,30 @@
+{
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "qualification": "tight_half_step_refinement_audit_returned101",
+  "duration_s": 0.85,
+  "n_samples": 307,
+  "elapsed_s": 29.1489565,
+  "solver_configuration": {
+    "Solver": "ode15s",
+    "RelTol": "1e-7",
+    "AbsTol": "1e-10",
+    "MaxStep": "0.00034722"
+  },
+  "metrics": {
+    "whole_rms_mm": 20.26485130860522,
+    "early_rms_mm": 9.99514324924091,
+    "terminal_rms_mm": 40.313723660502149
+  },
+  "refinement_vs_baseline_simscape": {
+    "max_marker_diff_m": 5.6165393965225408e-5,
+    "max_marker_diff_mm": 0.056165393965225408,
+    "mean_marker_diff_mm": 0.00051611249519309171,
+    "max_q_diff": 0.00032630238275888068,
+    "max_qd_diff": 0.20223836742155754
+  },
+  "tight_simscape_vs_pinocchio": {
+    "max_marker_coord_discrepancy_mm": 0.0031454820283993712,
+    "max_marker_euclidean_discrepancy_mm": 0.0045230086714305338
+  }
+}
