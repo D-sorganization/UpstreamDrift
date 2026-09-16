@@ -1,5 +1,18 @@
 # Simscape Tour-Average Fit Continuation
 
+## Shadow Tracker Current Turnover (#10122)
+
+- **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)
+  and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
+- **Baseline:** `33ffde23f`; earlier provider/immutability defects are repaired.
+  Real decoding, reference disks and regenerated evidence are partial progress.
+- **Next:** #10231 source/physical-time integrity and incremental decode; #10233
+  revision integrity/persistence; #10232 articulated geometry and clipped rendering.
+- **Product:** No Shadow Tracker launcher application or complete fitter yet.
+  Ship an honest evidence-review journey while physical qualification proceeds.
+- **Completion:** Keep all ST-07–ST-12 fitting, uncertainty, real/archive, UI/export
+  and release gates. Review delivery #10230 does not qualify the product.
+
 ## Current State (2026-09-15, Supersedes the Sections Below)
 
 - **ALL 4 GATES COMPLETED & CERTIFIED**:
