@@ -727,6 +727,7 @@ markers = [
     "gate: production validation gate",
     "core_only: tests that must pass in a default install with no optional engine extras",
     "requires_gl: Tests needing OpenGL/moderngl or a display",
+    "requires_jax: tests requiring JAX and MuJoCo MJX (skip when missing)",
     "headless_safe: marks tests verified to work in headless mode",
     "slow_numba: Tests that require numba JIT or are heavy",
     "asyncio: marks tests as async tests",
