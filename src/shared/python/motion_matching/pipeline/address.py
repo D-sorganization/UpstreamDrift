@@ -312,6 +312,10 @@ def calibrate_legs(
             )
             for label in lane.labels
         }
+        from src.engines.physics_engines.mujoco.python.full_body_markers import (
+            FullBodyMarkerKinematics,
+        )
+
         state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
         return lane.trajectory(state["kin"], q_start, frames=frames)[0]
 
