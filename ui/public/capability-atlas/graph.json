@@ -2820,7 +2820,7 @@
   "inputs": {
     "src/config/models.yaml": "ab98f71789d64d4ae19c2923e310b3fcc9d568216b0169e17f0da05915901c16",
     "src/config/launcher_manifest.json": "e24f5c8bf10665d37a028cd084e89b062607cb4d26391993a66bc903eb38aa67",
-    "src/config/feature_parity.json": "0b38d2c770205253f27d20cea850803fa35d70b157416ab14ac5090c7a5ac477",
+    "src/config/feature_parity.json": "8969ea35030e75ba719a68c49463f5a0e0eba39639d82b74baa4a55e25041b58",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
