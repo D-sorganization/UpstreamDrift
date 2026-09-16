@@ -16,7 +16,7 @@ import enum
 import json
 import logging
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import threading
 from typing import Any
@@ -81,12 +81,18 @@ class JournalEntry:
 class ShotJournal:
     """Thread-safe and durable delivery intent journal."""
 
-    def __init__(self, storage_path: Path | None = None) -> None:
+    def __init__(
+        self,
+        storage_path: Path | None = None,
+        auto_recover: bool = True,
+    ) -> None:
         self._lock = threading.Lock()
         self._storage_path = Path(storage_path) if storage_path is not None else None
         self._entries: dict[str, JournalEntry] = {}
         if self._storage_path is not None and self._storage_path.is_file():
             self._load_from_storage()
+            if auto_recover:
+                self.recover_on_startup()
 
     def record_intent(self, shot_id: str, payload_bytes: bytes) -> JournalEntry:
         """Record intent to deliver shot before wire transmission.
@@ -187,6 +193,80 @@ class ShotJournal:
         """Retrieve audit entry by shot ID."""
         with self._lock:
             return self._get_entry_unlocked(shot_id)
+
+    def recover_on_startup(self) -> int:
+        """Scan journal on startup and transition unacknowledged PENDING shots to AMBIGUOUS.
+
+        Prevents silent duplicate shot executions following process crashes or restarts.
+        """
+        now = _utc_now_iso()
+        recovered_count = 0
+        with self._lock:
+            for shot_id, entry in list(self._entries.items()):
+                if entry.status == DeliveryStatus.PENDING:
+                    updated = JournalEntry(
+                        shot_id=entry.shot_id,
+                        status=DeliveryStatus.AMBIGUOUS,
+                        payload_bytes=entry.payload_bytes,
+                        created_at_utc=entry.created_at_utc,
+                        updated_at_utc=now,
+                        response_code=entry.response_code,
+                        response_message=entry.response_message,
+                        error="Crash recovery: unconfirmed pending delivery marked ambiguous on startup",
+                    )
+                    self._entries[shot_id] = updated
+                    recovered_count += 1
+            if recovered_count > 0:
+                self._persist_unlocked()
+                logger.warning(
+                    "Crash recovery transitioned %d pending shot(s) to AMBIGUOUS",
+                    recovered_count,
+                )
+        return recovered_count
+
+    def prune_retention(
+        self,
+        max_age_seconds: float,
+        keep_unresolved: bool = True,
+    ) -> int:
+        """Prune historical journal entries older than max_age_seconds.
+
+        DbC Invariant:
+        If keep_unresolved is True, PENDING and AMBIGUOUS records are strictly
+        preserved regardless of age to protect unconfirmed delivery evidence.
+        """
+        if max_age_seconds < 0:
+            raise ValueError("max_age_seconds must be non-negative")
+
+        now = datetime.now(timezone.utc)
+        cutoff = now - timedelta(seconds=max_age_seconds)
+        pruned_count = 0
+
+        with self._lock:
+            for shot_id, entry in list(self._entries.items()):
+                if keep_unresolved and entry.status in (
+                    DeliveryStatus.PENDING,
+                    DeliveryStatus.AMBIGUOUS,
+                ):
+                    continue
+
+                try:
+                    entry_dt = datetime.fromisoformat(entry.updated_at_utc)
+                except Exception:
+                    continue
+
+                if entry_dt < cutoff:
+                    del self._entries[shot_id]
+                    pruned_count += 1
+
+            if pruned_count > 0:
+                self._persist_unlocked()
+                logger.info(
+                    "Pruned %d journal entries older than %gs",
+                    pruned_count,
+                    max_age_seconds,
+                )
+        return pruned_count
 
     def list_entries(self, status: DeliveryStatus | None = None) -> list[JournalEntry]:
         """List audit entries optionally filtered by delivery status."""
