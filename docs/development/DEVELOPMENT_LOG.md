@@ -73,6 +73,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Pink Adapters (#10257; 2026-09-16):** Shared solve path validates state,
+  time and outputs; forwards hard constraints/limits; retains collision
+  geometry; refreshes cached FK and propagates solver failures. Real native
+  contracts include free-flyer dimensions and infeasible equality/limit
+  combinations. Full-body task assembly and runtime packaging (#10262) remain
+  separate; no fitted trajectories were regenerated.
+
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #10062 (children #10063 to #10070); continued by epic #10162 (MM-1 to MM-10, HO-1 to HO-10)

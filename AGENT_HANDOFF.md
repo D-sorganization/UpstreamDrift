@@ -1,5 +1,15 @@
 # Simscape Tour-Average Fit Continuation
 
+## Pink Adapter Contract (#10257, #10254)
+
+Both Pink entry points share one validated solve step. They preserve geometry,
+forward explicit hard constraints/limits, refresh cached kinematics and
+integrate tangent velocity exactly once. Solver failures propagate with
+context; unchanged poses are no longer returned as a success fallback.
+The adapter has real equality, infeasibility, cache and free-flyer tests.
+Full-body marker/stance/weld task assembly and production selection remain
+outstanding. The reproducible combined runtime is tracked by #10262.
+
 ## Shadow Tracker Current Turnover (#10122)
 
 - **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)
