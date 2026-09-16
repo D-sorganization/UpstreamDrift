@@ -31,7 +31,8 @@ composition is not a golfer inserted into GSPro's 3D scene.
 4. [Acceptance Runbook](ACCEPTANCE_RUNBOOK.md): offline and licensed checks.
 5. [Support Matrix](SUPPORT_MATRIX.md): supported topologies, boundaries, and runbooks.
 6. [Commercial Simulator Evaluation](COMMERCIAL_SIMULATOR_EVALUATION.md): E6, Creative Golf, TrackMan, and Flight Relay evaluation.
-7. [Next Agent Instructions](NEXT_AGENT.md): bounded worker tasks and turnover.
+7. [Native Avatar and Course Feedback Research](NATIVE_AVATAR_COURSE_FEEDBACK_RESEARCH.md): native mesh/rigging, course telemetry, aim control, and companion presentation.
+8. [Next Agent Instructions](NEXT_AGENT.md): bounded worker tasks and turnover.
 
 Current execution state lives in [the canonical handoff](../../../AGENT_HANDOFF.md)
 and [development log](../../development/DEVELOPMENT_LOG.md), entry DL-#10188.

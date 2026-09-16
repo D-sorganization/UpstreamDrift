@@ -27,34 +27,39 @@
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
-## GSPro Integration (#10188) — GS-00 Through GS-10 Delivered
+## GSPro Integration (#10188) — GS-00 Through GS-11 Complete (Epic Ready for Closure)
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
+- **State:** All 12 child milestones (GS-00 through GS-11) complete:
+  GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
   GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
   GS-05 (#10194) shared session service and local reference destination,
   GS-06 (#10195) replay and single-impact submission,
   GS-07 (#10196) capability-aware desktop and web controls,
-  GS-08 (#10197) Windows deployment and authenticated remote topology, and
-  GS-09 (#10198) licensed acceptance and support matrix complete.
-  GS-10 (#10199) second commercial simulator evaluation and Flight Relay adapter implemented.
-  PRs #10201, #10208, #10213, #10215, #10217, #10220, #10222, #10225, and #10226 merged into `main`.
+  GS-08 (#10197) Windows deployment and authenticated remote topology,
+  GS-09 (#10198) licensed acceptance and support matrix,
+  GS-10 (#10199) second commercial simulator evaluation and Flight Relay adapter, and
+  GS-11 (#10200) native avatar animation and autonomous course feedback research.
+  PRs #10201, #10208, #10213, #10215, #10217, #10220, #10222, #10225, #10226, and #10227 merged into `main`.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10199-second-simulator`.
-- **Delivered in GS-10:**
-  - Technical & Licensing Evaluation (`docs/plans/golf_simulator_integration/COMMERCIAL_SIMULATOR_EVALUATION.md`):
-    Comprehensive assessment of E6 CONNECT, Creative Golf 3D, TrackMan Virtual Golf, and Flight Relay Protocol;
-    direct adapter vs relay architectural trade-offs; turnkey vendor inquiry templates for user outreach;
-    honest capability declaration declaring unverified closed APIs as `UNSUPPORTED`.
-  - Flight Relay Protocol Adapter (`src/shared/python/golf_simulator/adapters/relay.py`):
-    `FlightRelayAdapter` and `FlightRelayConfig` conforming to `SimulatorAdapter` protocol;
-    shot normalization and journal integration; strict rejection of unsupported proprietary simulator targets (`UnsupportedDestinationError`).
+  branch `feat/issue-10200-native-avatar-course-feedback`.
+- **Delivered in GS-11:**
+  - Technical Research Document (`docs/plans/golf_simulator_integration/NATIVE_AVATAR_COURSE_FEEDBACK_RESEARCH.md`):
+    Exhaustive investigation into Unity runtime and Course Designer AssetBundle constraints;
+    confirms zero runtime skeletal rigging APIs;
+    characterizes Open Connect v1 unidirectional limits (absent ball landing, lie, surface, wind, elevation, and hazard feedback);
+    prohibits reverse-engineering / memory scraping / DLL injection;
+    provides turnkey vendor inquiry templates;
+    formalizes Synchronized Companion Presentation Architecture using `MonotonicReplayClock`.
+  - Capability Assertion Boundary (`src/shared/python/golf_simulator/contracts.py`):
+    `UnsupportedCapabilityError` and `assert_capability_supported()` raising explicit exceptions on unsupported capabilities.
+  - Honest Declarations: All adapters declare `native_avatar_animation`, `course_state_feedback`, and `aim_control` as `UNSUPPORTED`.
 - **Validation:**
-  - 95 unit tests in `tests/unit/golf_simulator/` pass 100%.
+  - 100 unit tests in `tests/unit/golf_simulator/` pass 100%.
   - Verified under `python -O` (Design-by-Contract assertions active regardless of optimization flag).
   - All architecture budget, divergence inventory, and lint checks pass cleanly.
-- **Next:** Open PR for GS-10 (#10199), merge via auto-squash, and proceed to final child GS-11 (#10200).
+- **Next:** Open PR for GS-11 (#10200), merge via auto-squash, close parent Epic #10188.
 - **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)

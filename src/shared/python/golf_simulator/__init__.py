@@ -33,6 +33,8 @@ from src.shared.python.golf_simulator.contracts import (
     SourceKind,
     SubmissionReceipt,
     SubmissionState,
+    UnsupportedCapabilityError,
+    assert_capability_supported,
 )
 from src.shared.python.golf_simulator.journal import (
     DeliveryStatus,
@@ -128,7 +130,9 @@ __all__ = [
     "SubmissionState",
     "SupportReceipt",
     "TrajectoryRecord",
+    "UnsupportedCapabilityError",
     "UnsupportedDestinationError",
+    "assert_capability_supported",
     "assert_licensing_policy",
     "check_environment_readiness",
     "discover_simulator_installation",
