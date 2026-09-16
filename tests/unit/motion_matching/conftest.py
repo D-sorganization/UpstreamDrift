@@ -18,8 +18,12 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from src.shared.python.pose_interchange.canonical import CanonicalPose
-from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+try:
+    from src.shared.python.pose_interchange.canonical import CanonicalPose
+    from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+except ImportError:
+    CanonicalPose = Any  # type: ignore[assignment,misc]
+    MockKinematicsService = Any  # type: ignore[assignment,misc]
 
 # =============================================================================
 # Session-scoped C3D data fixtures (Issue #5104 - State & Data Management)
