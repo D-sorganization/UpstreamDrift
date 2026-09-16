@@ -47,15 +47,15 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** local
-- **Issue:** #10188 (child #10195 active; children #10189–#10200)
-- **Branch:** feat/issue-10195-replay-submission
-- **PR:** #10217 (merged; GS-05 #10194); #10215 (merged; GS-04 #10193); #10213 (merged; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
-- **Paths:** `src/shared/python/golf_simulator; tests/unit/golf_simulator; docs/plans/golf_simulator_integration; AGENT_HANDOFF.md; SPEC.md`
+- **Issue:** #10188 (child #10196 active; children #10189–#10200)
+- **Branch:** feat/issue-10196-controls
+- **PR:** #10220 (merged; GS-06 #10195); #10217 (merged; GS-05 #10194); #10215 (merged; GS-04 #10193); #10213 (merged; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
+- **Paths:** `src/api/routes/golf_simulator.py; src/tools/golf_simulator; ui/src/pages/GolfSimulator.tsx; src/config/models.yaml; src/config/launcher_manifest.json; src/config/feature_parity.json; docs/development/feature_parity_matrix.md; tests/unit/api/test_golf_simulator_routes.py; tests/unit/tools/golf_simulator; ui/src/pages/GolfSimulator.test.tsx`
 - **Started:** 2026-09-15
-- **Last verified:** 2026-09-15 (SELF; GS-00 through GS-06 implemented test-first; 56 unit tests pass across golf_simulator; ruff check/format, black, mypy, architecture budget, and spec paths clean with 0 errors)
-- **Summary:** GS-06 (#10195) replay and single-impact submission implemented. MonotonicReplayClock provides deterministic, monotonic playback with play, pause, seek, stop, and rate adjustments. ReplaySubmissionCoordinator binds immutable PreparedShot and single-use arm tokens, executing one-shot submission exactly once as playback monotonically crosses impact time. Seeking across impact disarms the submission, preventing accidental duplicate shots. MonotonicReplayClock and ReplaySubmissionCoordinator maintain p95 impact-to-send latency under 50 ms across 100 benchmarked samples. ReplayTimingRecord captures detailed send/response/onset telemetry. Realtime channels registered for replay state and frame presentation.
-- **Next step:** Open PR for GS-06 (#10195); proceed to GS-07 (#10196) API, desktop, and web controls.
-- **Evidence:** tests/unit/golf_simulator/test_replay_submission.py, tests/unit/golf_simulator/test_session_service.py, tests/unit/golf_simulator/test_local_adapter.py, tests/unit/golf_simulator/test_service_contracts.py; docs/plans/golf_simulator_integration/README.md.
+- **Last verified:** 2026-09-15 (SELF; GS-00 through GS-07 implemented test-first; all unit and parity tests pass locally; ruff, black, mypy, and lod checks clean)
+- **Summary:** GS-07 (#10196) capability-aware desktop and web controls exposed through the existing API (`/tools/golf-simulator/...`). Features destination selection, session lifecycle (IDLE, PREPARED, ARMED, SUBMITTING, UNCERTAIN), single-impact submit at impact trigger, replay transport, delivery status badges (DISCONNECTED, CONNECTED, ARMED, SENT_UNCONFIRMED, ACCEPTED, REJECTED, VISUALLY_VERIFIED), and operator reconciliation for uncertain delivery. Registered as parity tile in models.yaml, launcher_manifest.json, feature_parity.json, and regenerated feature_parity_matrix.md.
+- **Next step:** Commit, open PR for GS-07 (#10196), and merge via auto-squash.
+- **Evidence:** tests/unit/api/test_golf_simulator_routes.py; tests/unit/tools/golf_simulator/test_desktop_controls.py; ui/src/pages/GolfSimulator.test.tsx; tests/config/test_launcher_registry_parity.py; tests/config/feature_parity/test_registry.py.
 
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
 

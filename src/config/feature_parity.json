@@ -59,6 +59,15 @@
       "status": "parity",
       "tiles": ["putting_green"]
     },
+    "tools.golf_simulator": {
+      "title": "Golf Simulator capability-aware controls and replay submission",
+      "pyqt": "src/tools/golf_simulator/gui.py",
+      "api": "src/api/routes/golf_simulator.py",
+      "web": "ui/src/pages/GolfSimulator.tsx",
+      "status": "parity",
+      "tiles": ["golf_simulator"],
+      "notes": "Parity controls across PyQt6 desktop widget and React web console backed by shared API routes."
+    },
     "tools.terrain_engine": {
       "title": "Terrain and topography configuration",
       "pyqt": null,
