@@ -6,12 +6,10 @@ disconnect handling, and clear rejection of unsupported proprietary targets.
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 from typing import Any
 import pytest
 
-from src.shared.python.golf_simulator.adapters.gspro.codec import ResponseCategory
 from src.shared.python.golf_simulator.adapters.relay import (
     FlightRelayAdapter,
     FlightRelayConfig,
@@ -29,8 +27,11 @@ from src.shared.python.golf_simulator.contracts import (
     ShotQualification,
     SimulatorAdapter,
     SourceKind,
+    SubmissionState,
 )
 from src.shared.python.golf_simulator.journal import DeliveryStatus, ShotJournal
+
+pytestmark = [pytest.mark.unit]
 
 
 def _make_sample_shot(shot_id: str = "shot-relay-1") -> ShotEnvelope:
@@ -47,10 +48,10 @@ def _make_sample_shot(shot_id: str = "shot-relay-1") -> ShotEnvelope:
         evidence_refs=("relay_test",),
     )
     club = ClubData(
-        speed_m_s=45.0,
-        path_angle_rad=0.02,
+        club_speed_m_s=45.0,
+        club_path_rad=0.02,
         attack_angle_rad=-0.03,
-        face_to_target_angle_rad=0.01,
+        face_to_target_rad=0.01,
     )
     return ShotEnvelope(
         schema_version=1,
@@ -117,8 +118,8 @@ async def test_flight_relay_submit_shot(tmp_path: Path) -> None:
     shot = _make_sample_shot("shot-test-submit-1")
 
     receipt = await adapter.submit(shot)
-    assert receipt.category == ResponseCategory.CONFIRMED_ACCEPTED
-    assert receipt.code == 200
+    assert receipt.state == SubmissionState.CONFIRMED_ACCEPTED
+    assert receipt.destination_id == "flight_relay"
 
     entry = journal.get_entry("shot-test-submit-1")
     assert entry.status == DeliveryStatus.ACKNOWLEDGED
