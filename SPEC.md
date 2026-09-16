@@ -1,4 +1,26 @@
 # SPEC.md — Repository Specification Document
+ 
+## MJX Environment Setup, Pinned Dependencies, and Contact-Law Parity Tests (HO-3 #10157, #10162)
+
+Establishes cross-platform environment automation and JAX/MJX-gated unit tests for differentiable trajectory optimization:
+- Pinned Environment Specifications (`scripts/config/mjx_env_pins.json`):
+  - Defines pinned dependency versions (`jax[cpu]==0.11.1`, `mujoco-mjx==3.13.0`, `mujoco==3.13.0`, `defusedxml==0.7.1`, `numpy==2.5.3`, `scipy==1.18.1`, `pytest==9.1.1`, `matplotlib==3.11.2`) to protect against breaking changes in JAX / MuJoCo releases.
+  - Setup scripts: Windows PowerShell (`scripts/setup_mjx_env.ps1`) and POSIX shell (`scripts/setup_mjx_env.sh`) parse JSON pins and configure isolated `$HOME/.venv-mjx` environments.
+- Pytest Configuration (`pyproject.toml`):
+  - Declares `requires_jax` marker alongside existing engine markers (`requires_gl`, `requires_pinocchio`, `requires_drake`).
+- Factored Pure Functions (`docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`):
+  - `contact_force_jax(centre, velocity, radius, params, ground_normal, ground_height_m)`: Evaluates Hunt-Crossley / Coulomb contact law in JAX with analytical parity.
+  - `weld_wrench_jax(xpos_a, xmat_a, cvel_a, xpos_b, xmat_b, cvel_b, ...)`: Evaluates spatial weld loop closure wrenches maintaining equal-and-opposite reaction force balance.
+  - `compute_knot_mask(t_knots, horizon_s, freeze_tail)`: Generates optimization parameter masks freezing coordinates beyond horizon.
+  - Avoids forcing 32-bit floats during test module import by scoping `jax_enable_x64=False` to standalone `main()` execution.
+- Gated Test Suite (`tests/unit/motion_matching/test_mjx_optimisation.py`):
+  - Tests skip cleanly with exit code 0 when JAX or MJX are absent in root CI environments.
+  - Verifies partition of unity and knot counts on B-spline basis.
+  - Verifies tail horizon coordinate freezing.
+  - Validates contact force parity against canonical `sphere_ground_contact` law to $< 1.02 \times 10^{-7}\text{ N} < 10^{-6}\text{ N}$ across 200 random physical states.
+  - Proves spatial wrench equilibrium and zero wrench at coincidence for dual-grip weld closures.
+  - Validates analytic static equilibrium preload on lowest contact sphere ($-mg / (k n_{\text{spheres}})$).
+  - Validates gradient finiteness ($\nabla \text{cost} \in \mathbb{R}$) on 12-frame truncated optimization with rest posture norms and NaN target filtering.
 
 ## De Leva Male Anthropometry Table Verification (HO-9 #10111, #10162)
 
