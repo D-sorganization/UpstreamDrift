@@ -8,10 +8,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python import full_body_simulation as fs
-from src.engines.physics_engines.mujoco.python.full_body_markers import (
-    FullBodyMarkerKinematics,
-)
+if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python import full_body_simulation as fs
+    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        FullBodyMarkerKinematics,
+    )
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.dynamics_filter import (
     cart_table_shift,

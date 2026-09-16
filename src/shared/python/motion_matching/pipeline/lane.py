@@ -9,12 +9,13 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python.full_body_markers import (
-    FullBodyMarkerKinematics,
-)
-from src.engines.physics_engines.mujoco.python.full_body_model import (
-    NativeMujocoFullBodyModel,
-)
+if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
 
 from src.shared.python.motion_matching import posture_metrics as post
 from src.shared.python.motion_matching.contact_law import GroundPlane
