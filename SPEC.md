@@ -1,4 +1,17 @@
 # SPEC.md — Repository Specification Document
+
+## Contact-Aware Full-Body Derivatives (#10255, #10254)
+
+The shared sphere-contact law exposes world-force derivatives with respect to
+center and velocity, including the zero-slip limit and explicit nonsmooth
+activation/clipping status. `FullBodyPinocchioModel.acceleration_derivatives`
+composes these through constrained dynamics and the changing contact Jacobian.
+`contact_effort_derivatives` returns detached read-only matrices in the caller's
+declared coordinate order without mutating the constrained-dynamics cache.
+The force law, geometry, controls and historical evidence remain unchanged.
+Real-engine directional tests cover active/no contact, moving joints, reordered
+coordinates and cache isolation. This boundary is a prerequisite for full-body
+Crocoddyl; it does not qualify a fitted swing or change solver defaults.
  
 ## MJX Environment Setup, Pinned Dependencies, and Contact-Law Parity Tests (HO-3 #10157, #10162)
 
@@ -5207,6 +5220,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10255 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
@@ -6865,4 +6879,3 @@ The general optimal-control extra retains its separate version range (#9842).
 - Replaced `np.linalg.norm()` with `math.sqrt(np.vdot())` for small 3D vectors in `src/tools/capture_rig/model_frame_source.py` and `src/tools/capture_rig/reference_volumes.py` to bypass linear algebra overhead. (spec-exempt: micro-optimization)
 | 2024-05-20 | #<pr> | Replaced `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` in `src/motion_capture/reconstruct/model/fit2d.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
 - Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for small 1D arrays in `bunker_shot_gui` and `simulation_backends_launcher` for performance improvement. (spec-exempt: micro-optimization)
-
