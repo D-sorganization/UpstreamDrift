@@ -15,7 +15,7 @@ Finite weld correction #10260 differentiates the six-component pose error away
 from closure with the correct SE(3) log Jacobian. Trajectory acceleration
 linearization retains the separate constraint velocity Jacobian. Eleven real
 closure regression tests and the 11 contact derivative tests pass on Pinocchio
-3.8; no motion-fit evidence or acceptance thresholds changed.
+3.8 and 4.1; no motion-fit evidence or acceptance thresholds changed.
 The principal-log branch at rotation pi is rejected for derivative evaluation;
 trajectory finite differences also reject steps that could cross that cut.
 
