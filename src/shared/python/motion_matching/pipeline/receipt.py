@@ -85,6 +85,10 @@ def build_ground_support_receipt(
         "anthropometric": (
             list(inputs.anthropometric) if inputs.anthropometric else None
         ),
+        "de_leva_table_sha256": (
+            inputs.base_spec.get("de_leva_table_sha256")
+            or inputs.base_spec.get("subject", {}).get("de_leva_table_sha256")
+        ),
         "posture_top_of_backswing": tob_posture,
         "spec_sha256": hashlib.sha256(inputs.spec_bytes).hexdigest(),
         "hip_calibration": inputs.hip_report,
