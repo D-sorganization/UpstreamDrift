@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+import json
 import os
 from pathlib import Path
 import sys
@@ -121,17 +122,30 @@ def discover_simulator_installation(
     """
     source_env = env if env is not None else os.environ
 
-    install_dir_str = source_env.get("GSPRO_INSTALL_DIR")
+    cfg_dict: dict[str, Any] = {}
+    if config_path is not None:
+        cfg_p = Path(config_path)
+        if cfg_p.is_file():
+            try:
+                cfg_dict = json.loads(cfg_p.read_text(encoding="utf-8"))
+            except Exception as exc:
+                raise ValueError(
+                    f"Failed to parse simulator config file: {exc}"
+                ) from exc
+
+    install_dir_str = source_env.get("GSPRO_INSTALL_DIR") or cfg_dict.get("install_dir")
     install_dir = Path(install_dir_str) if install_dir_str else None
 
-    host = source_env.get("GSPRO_HOST", "127.0.0.1")
-    port_str = source_env.get("GSPRO_API_PORT", "921")
+    host = str(source_env.get("GSPRO_HOST") or cfg_dict.get("host") or "127.0.0.1")
+    port_val = source_env.get("GSPRO_API_PORT") or cfg_dict.get("port") or 921
     try:
-        port = int(port_str)
-    except ValueError as exc:
-        raise ValueError(f"Invalid GSPRO_API_PORT: {port_str}") from exc
+        port = int(port_val)
+    except (ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid GSPRO_API_PORT: {port_val}") from exc
 
-    profile_version = source_env.get("GSPRO_PROFILE_PATH", "v1")
+    profile_version = str(
+        source_env.get("GSPRO_PROFILE_PATH") or cfg_dict.get("profile_version") or "v1"
+    )
 
     # Determine discovery method
     is_custom_env = any(
@@ -143,7 +157,12 @@ def discover_simulator_installation(
             "GSPRO_PROFILE_PATH",
         )
     )
-    discovery_method = "environment" if is_custom_env else "defaults"
+    if is_custom_env:
+        discovery_method = "environment"
+    elif cfg_dict:
+        discovery_method = "config_file"
+    else:
+        discovery_method = "defaults"
 
     endpoint = SimulatorEndpoint(host=host, port=port)
     return SimulatorConfig(

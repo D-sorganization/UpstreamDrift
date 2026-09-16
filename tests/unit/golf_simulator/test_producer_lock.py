@@ -112,3 +112,22 @@ def test_cannot_release_with_mismatched_producer() -> None:
         ValueError, match="Cannot release lock held by another producer"
     ):
         manager.release(fake_lock)
+
+
+def test_cannot_release_with_stale_lock_after_renewal() -> None:
+    manager = ProducerLockManager()
+    lock1 = manager.acquire(
+        producer_id="producer-1", session_id="session-42", ttl_seconds=10.0
+    )
+    lock2 = manager.renew(lock1, extension_seconds=30.0)
+
+    # Releasing the stale lock1 token must raise ValueError and keep lock2 active
+    with pytest.raises(ValueError, match="Cannot release stale lock token"):
+        manager.release(lock1)
+
+    assert manager.is_locked()
+    assert manager.current_producer() == "producer-1"
+
+    # Releasing active lock2 succeeds
+    manager.release(lock2)
+    assert not manager.is_locked()

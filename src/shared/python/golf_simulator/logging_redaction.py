@@ -61,13 +61,10 @@ class SecretRedactionFilter(logging.Filter):
     """Logging filter that scrubs secrets from LogRecord messages and arguments."""
 
     def filter(self, record: logging.LogRecord) -> bool:
-        if isinstance(record.msg, str):
-            record.msg = redact_text(record.msg)
-        if record.args:
-            if isinstance(record.args, tuple):
-                record.args = tuple(
-                    redact_text(a) if isinstance(a, str) else a for a in record.args
-                )
-            elif isinstance(record.args, dict):
-                record.args = redact_mapping(record.args)
+        try:
+            msg_str = record.getMessage()
+        except Exception:
+            msg_str = str(record.msg)
+        record.msg = redact_text(msg_str)
+        record.args = ()
         return True

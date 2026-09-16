@@ -154,3 +154,53 @@ async def test_remote_bridge_client_facade() -> None:
     assert receipt.shot_id == shot.shot_id
     assert receipt.state == SubmissionState.CONFIRMED_ACCEPTED
     assert client.capabilities().shot_input.state.value == "supported"
+
+
+@pytest.mark.asyncio
+async def test_bridge_server_delegates_to_vendor_adapter() -> None:
+    from unittest.mock import AsyncMock
+    from src.shared.python.golf_simulator.contracts import SimulatorAdapter
+
+    mock_adapter = AsyncMock(spec=SimulatorAdapter)
+    now = "2026-09-15T12:00:01Z"
+    expected_receipt = SubmissionReceipt(
+        shot_id="shot-adapter-1",
+        session_id="session-adapter-1",
+        state=SubmissionState.CONFIRMED_ACCEPTED,
+        destination_id="gspro_v1",
+        attempt_id="att-1",
+        timestamp_utc=now,
+        detail="Vendor acknowledged",
+    )
+    mock_adapter.submit.return_value = expected_receipt
+
+    server = LocalBridgeServer(
+        bridge_host="127.0.0.1",
+        bridge_port=9220,
+        auth_token="token123",
+        adapter=mock_adapter,
+    )
+    shot = _make_dummy_shot()
+    receipt = await server.handle_submit_request(auth_token="token123", shot=shot)
+
+    assert receipt == expected_receipt
+    mock_adapter.submit.assert_awaited_once_with(shot)
+
+
+@pytest.mark.asyncio
+async def test_remote_bridge_client_unreachable_endpoint() -> None:
+    from src.shared.python.golf_simulator.contracts import ConnectionState
+
+    # Port 65432 is not listening on localhost
+    client = RemoteBridgeClient(
+        server_endpoint="127.0.0.1:65432",
+        auth_token="tok",
+        bridge_server=None,
+    )
+    status = await client.connect()
+    assert status.state == ConnectionState.FAILED
+
+    with pytest.raises(
+        ConnectionError, match="Remote bridge connection not established"
+    ):
+        await client.submit(_make_dummy_shot())

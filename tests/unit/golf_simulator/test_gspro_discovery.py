@@ -103,3 +103,28 @@ def test_support_receipt_contains_no_secrets() -> None:
     secret_terms = ["token", "secret", "password", "key", "credential", "auth"]
     for term in secret_terms:
         assert term not in as_dict
+
+
+def test_discover_from_config_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # Clear env vars
+    for key in (
+        "GSPRO_INSTALL_DIR",
+        "GSPRO_API_PORT",
+        "GSPRO_HOST",
+        "GSPRO_PROFILE_PATH",
+    ):
+        monkeypatch.delenv(key, raising=False)
+
+    cfg_file = tmp_path / "gspro_config.json"
+    cfg_file.write_text(
+        '{"host": "localhost", "port": 925, "profile_version": "v2", "install_dir": "/opt/gspro"}'
+    )
+
+    config = discover_simulator_installation(config_path=cfg_file)
+    assert config.endpoint.host == "localhost"
+    assert config.endpoint.port == 925
+    assert config.profile_version == "v2"
+    assert config.discovery_method == "config_file"
+    assert config.install_dir == Path("/opt/gspro")
