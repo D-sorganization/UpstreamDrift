@@ -17,6 +17,22 @@ Calibrates the hip coordinate zero-twist angle from optical motion capture data 
   - Verified 0 lower-limb `range_of_motion_flags` on the IK reference for both captures (`driver` and `iron`).
   - Cross-engine setup parity (`verify_setup_parity.py`) re-verified across MuJoCo, Drake, and Pinocchio.
 
+## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
+
+Completes the modularization of the ground support execution pipeline by moving remaining orchestration stages and CLI utilities from `run_ground_support.py` into the reusable `src.shared.python.motion_matching.pipeline` package, reducing `run_ground_support.py` from 779 lines to 374 lines (satisfying the <400 line architecture budget):
+- Reusable Pipeline Stage Additions (`src/shared/python/motion_matching/pipeline/`):
+  - `address.py`: Exposes `AddressStageInputs`, `AddressStageResult`, `solve_address_stage`, `calibrated_address_summary`, `prepare_hip_spec`, `search_segment_scales`, and `HipCalibrationOptions`.
+  - `reference.py`: Exposes `IKReportInputs` (with support for custom offsets) and `build_ik_report`.
+  - `dynamics.py`: Exposes `DynamicsReportInputs` and `build_dynamics_report`.
+  - `receipt.py`: Exposes `log_pipeline_summary` for structured console reporting.
+  - `__init__.py`: Re-exports all newly packaged stage inputs, results, builders, and options.
+- CLI & Evidence Decoupling:
+  - `run_ground_support.py` refactored into a thin CLI driver (374 lines) delegating completely to the pipeline package.
+  - Evidence scripts (`scan_geometry.py`, `downswing_experiment.py`, `export_mjx_package.py`) migrated to import directly from `src.shared.python.motion_matching.pipeline`.
+  - Zero imports from `run_ground_support` remain in the codebase (`grep -rn "from run_ground_support import" docs src` is 0).
+- Bitwise Receipt & Simulation Parity:
+  - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
+
 ## Anthropometric Document Rebuild and Freshness Gate (HO-11 #10250, #10162)
 
 Rebuilds full-body anthropometric model specifications and ground-support receipts after the HO-9 (#10249) de Leva 1996 shank parameter corrections, enforcing document freshness via continuous integration:
