@@ -57,10 +57,10 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py`                                                                                                                           |
 | 1037 | `src/tools/bunker_shot_gui/shot3d.py`                                                                                                                                         |
 | 1035 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py`                                                                                                   |
-| 1027 | `src/tools/bunker_shot_gui/model.py`                                                                                                                                          |
+| 1023 | `src/tools/bunker_shot_gui/model.py`                                                                                                                                          |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py`                                                                                                                                       |
-| 1021 | `src/tools/bunker_shot_gui/slices.py`                                                                                                                                         |
 | 1019 | `src/shared/python/optimization/casadi_backend.py`                                                                                                                            |
+| 1019 | `src/tools/bunker_shot_gui/slices.py`                                                                                                                                         |
 | 1018 | `src/tools/bunker_shot_gui/render3d_vtk.py`                                                                                                                                   |
 | 1012 | `src/shared/python/config/model_source_providers.py`                                                                                                                          |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
@@ -83,7 +83,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  948 | `src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py`                                                                                              |
 |  947 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/visualization/SkeletonPlotter.m`                                                                        |
 |  943 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py`                                                                                            |
-|  943 | `src/shared/python/shadow_tracker/ingestion.py`                                                                                                                               |
 |  940 | `src/shared/python/sidekick/lab/bio/c3d_reader.py`                                                                                                                            |
 |  934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py`                                                                                                                  |
 |  932 | `src/shared/python/model_generation/library/model_library.py`                                                                                                                 |
@@ -104,12 +103,12 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  890 | `src/shared/python/sidekick/process_calculators/scrubber_calculator.py`                                                                                                       |
 |  888 | `src/engines/pendulum_models/python/double_pendulum_model/ui/double_pendulum_gui.py`                                                                                          |
 |  887 | `src/shared/python/sidekick/process_calculators/syngas_compression_calculator.py`                                                                                             |
-|  887 | `src/tools/bunker_shot_gui/bridge.py`                                                                                                                                         |
+|  884 | `src/tools/bunker_shot_gui/bridge.py`                                                                                                                                         |
 |  879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m`                                                         |
 |  877 | `src/bunkershot3d/io/schema.py`                                                                                                                                               |
 |  875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py`                                                                          |
 |  870 | `src/shared/python/model_generation/cli/main.py`                                                                                                                              |
-|  869 | `src/tools/simulation_backends_launcher/gui.py`                                                                                                                               |
+|  866 | `src/tools/simulation_backends_launcher/gui.py`                                                                                                                               |
 |  865 | `src/shared/python/signal_toolkit/fitting.py`                                                                                                                                 |
 |  864 | `src/tools/bunker_shot_gui/widgets.py`                                                                                                                                        |
 |  859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m`                                                       |
