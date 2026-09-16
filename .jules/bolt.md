@@ -108,3 +108,6 @@
 **Learning:** For small 1D NumPy arrays (e.g., 3D vectors), `math.sqrt(array.dot(array))` is significantly faster (~2.5x) than `np.linalg.norm(array)` because it bypasses NumPy's internal dispatching and instance checks. This is safe to use where array inputs are known to be small 1D vectors.
 **Action:** Replace `float(np.linalg.norm(array))` with `float(math.sqrt(array.dot(array)))` in tight loops or where small 1D vector magnitudes are calculated frequently.
 
+## 2026-09-16 - Safe SPEC.md Modification Pattern
+**Learning:** Programmatically inserting changelog entries into `SPEC.md` by relying on exact multi-line string matches for the Markdown table header (e.g., `## 7. Change Log\n\n| Date...`) is brittle and prone to failure due to subtle whitespace or formatting variations.
+**Action:** When updating `SPEC.md` programmatically, use a more robust line-by-line parsing approach. Locate the injection point by searching for the first existing table row (e.g., matching `line.startswith('| 20')` or `line.startswith('| YYYY')`) and insert the new row before it.
