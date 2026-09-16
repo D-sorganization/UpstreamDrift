@@ -252,7 +252,7 @@ class NativeFullBodyStep:
         )
         dimension = current.size
         total_x: Array = np.eye(dimension)
-        total_p = np.zeros((dimension, self.control.n_parameters))
+        total_p: Array = np.zeros((dimension, self.control.n_parameters))
         differentiable = True
         step_s = duration / self.options.substeps
         for index in range(self.options.substeps):
