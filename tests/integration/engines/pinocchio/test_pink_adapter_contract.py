@@ -5,12 +5,12 @@ from __future__ import annotations
 import importlib
 import subprocess
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import Mock
 
 import numpy as np
 import pytest
+from defusedxml import ElementTree as ET
 
 _COLLECTED_WITH_PINOCCHIO_MOCK = isinstance(sys.modules.get("pinocchio"), Mock)
 
@@ -80,7 +80,7 @@ def native_import_isolation(tmp_path_factory: pytest.TempPathFactory) -> None:
     except subprocess.CalledProcessError as exc:
         pytest.fail(f"isolated native Pink tests failed:\n{exc.stdout}\n{exc.stderr}")
     # This XML is produced exclusively by the just-completed local subprocess.
-    cases = ET.parse(report).findall(".//testcase")  # noqa: S314
+    cases = ET.parse(report).findall(".//testcase")
     assert len(cases) == 4, "All four native adapter contracts must execute"
     assert all(
         case.find("skipped") is None
