@@ -1435,9 +1435,18 @@
       "name": "hip_r",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
-        [0.0, 1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0, -0.08892],
-        [0.0, 0.0, 1.0, 0.0],
+        [
+          0.2977480752612648, 0.8224896917007939, -0.48462025414147036,
+          -0.0050106145454129405
+        ],
+        [
+          -0.9502761284954551, 0.20684767566143322, -0.23278599331821995,
+          -0.10510059317219156
+        ],
+        [
+          -0.09122150672894973, 0.529834640354322, 0.8431808172573104,
+          -0.024975960967052332
+        ],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1600,9 +1609,18 @@
       "name": "hip_l",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
-        [0.0, 1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0, 0.08892],
-        [0.0, 0.0, 1.0, 0.0],
+        [
+          0.8744365453255577, 0.022448551734102897, -0.48462025414147036,
+          -0.004559604579806642
+        ],
+        [
+          -0.153665128574095, 0.9603112566117067, -0.23278599331821995,
+          0.10533385137723617
+        ],
+        [
+          0.46016057682010175, 0.2780258134596225, 0.8431808172573104,
+          -0.08163949804960423
+        ],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1904,7 +1922,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | hip joints relocated to functional centres from the capture (radii 0.4278/0.3952 m, sphere sd 2.1/1.9 mm over 649 frames) with zero twist calibrated (R: -21.94 deg, L: 46.69 deg) | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -1914,6 +1932,10 @@
     "grip_rotation_deg": {
       "L": [-90.0, 47.0, 0.0],
       "R": [-34.0, 46.0, 62.0]
+    },
+    "hip_zero_twist_deg": {
+      "l": 46.69,
+      "r": -21.94
     },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,
