@@ -34,6 +34,7 @@ from .projection import (
     PinholeCameraModel,
     _rasterize_ellipse,
     project_point_to_pixel,
+    resolve_camera_and_dimensions,
 )
 
 # 27 canonical articulated state fields: 3 translation + 24 joint angles (degrees)
@@ -210,27 +211,7 @@ class ArticulatedSilhouetteRenderer:
     def _validate_request(
         self, request: RenderRequest
     ) -> tuple[PinholeCameraModel, int, int]:
-        if not isinstance(request, RenderRequest):
-            raise TypeError(f"Expected RenderRequest, got {type(request).__name__}")
-        if request.camera_id not in self._cameras:
-            raise KeyError(
-                f"Camera ID {request.camera_id!r} not configured in renderer"
-            )
-
-        camera = self._cameras[request.camera_id]
-        if camera.crop_box is not None:
-            min_x, min_y, max_x, max_y = camera.crop_box
-            eff_width = max_x - min_x
-            eff_height = max_y - min_y
-        else:
-            eff_width = camera.width_px
-            eff_height = camera.height_px
-
-        width, height = request.image_size_px
-        if (width, height) != (eff_width, eff_height):
-            raise ValueError(
-                f"RenderRequest image_size_px {(width, height)} does not match camera effective dimensions {(eff_width, eff_height)}"
-            )
+        camera, width, height = resolve_camera_and_dimensions(self._cameras, request)
 
         if request.state_convention != CANONICAL_ARTICULATED_CONVENTION:
             raise ValueError(

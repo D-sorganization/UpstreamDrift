@@ -217,6 +217,32 @@ def _rasterize_ellipse(
                 mask[row_offset + col] = 1
 
 
+def resolve_camera_and_dimensions(
+    cameras: Mapping[str, PinholeCameraModel], request: RenderRequest
+) -> tuple[PinholeCameraModel, int, int]:
+    """Validate request and resolve configured camera with matching effective dimensions."""
+    if not isinstance(request, RenderRequest):
+        raise TypeError(f"Expected RenderRequest, got {type(request).__name__}")
+    if request.camera_id not in cameras:
+        raise KeyError(f"Camera ID {request.camera_id!r} not configured in renderer")
+
+    camera = cameras[request.camera_id]
+    if camera.crop_box is not None:
+        min_x, min_y, max_x, max_y = camera.crop_box
+        eff_width = max_x - min_x
+        eff_height = max_y - min_y
+    else:
+        eff_width = camera.width_px
+        eff_height = camera.height_px
+
+    width, height = request.image_size_px
+    if (width, height) != (eff_width, eff_height):
+        raise ValueError(
+            f"RenderRequest image_size_px {(width, height)} does not match camera effective dimensions {(eff_width, eff_height)}"
+        )
+    return camera, width, height
+
+
 # ---------------------------------------------------------------------------
 # 2. Analytic Silhouette Renderer Adapter
 # ---------------------------------------------------------------------------
@@ -258,27 +284,7 @@ class AnalyticSilhouetteRenderer:
 
     def render(self, request: RenderRequest) -> RenderResult:
         """Render calibrated body and club silhouettes from state vector."""
-        if not isinstance(request, RenderRequest):
-            raise TypeError(f"Expected RenderRequest, got {type(request).__name__}")
-        if request.camera_id not in self._cameras:
-            raise KeyError(
-                f"Camera ID {request.camera_id!r} not configured in renderer"
-            )
-
-        camera = self._cameras[request.camera_id]
-        if camera.crop_box is not None:
-            min_x, min_y, max_x, max_y = camera.crop_box
-            eff_width = max_x - min_x
-            eff_height = max_y - min_y
-        else:
-            eff_width = camera.width_px
-            eff_height = camera.height_px
-
-        width, height = request.image_size_px
-        if (width, height) != (eff_width, eff_height):
-            raise ValueError(
-                f"RenderRequest image_size_px {(width, height)} does not match camera effective dimensions {(eff_width, eff_height)}"
-            )
+        camera, width, height = resolve_camera_and_dimensions(self._cameras, request)
 
         if request.state_convention != POINT_LANDMARKS_CONVENTION:
             raise ValueError(
