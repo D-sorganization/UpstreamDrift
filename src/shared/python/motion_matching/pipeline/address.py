@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python.full_body_markers import (
-    FullBodyMarkerKinematics,
-)
+if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        FullBodyMarkerKinematics,
+    )
 
 from src.shared.python.motion_matching.marker_calibration import (
     calibrate_marker_offsets,
