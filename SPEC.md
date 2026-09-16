@@ -11,6 +11,21 @@ supports a self-managed server with explicit browser suppression. Live
 Gepetto qualification and product-level replay selection are still separate
 requirements under #10254.
  
+## Anthropometric Document Rebuild and Freshness Gate (HO-11 #10250, #10162)
+
+Rebuilds full-body anthropometric model specifications and ground-support receipts after the HO-9 (#10249) de Leva 1996 shank parameter corrections, enforcing document freshness via continuous integration:
+- Document Freshness Gate (`tests/unit/motion_matching/test_document_freshness.py`):
+  - Contract and unit tests verify that committed anthropometric documents (`full_body_spec_anthro_driver.json`, `full_body_spec_anthro_iron7.json`) include an authoritative `anthropometry` block with all male segments from `DE_LEVA_MALE`.
+  - Enforces matching SHA-256 table hash against `anthropometry.de_leva_table_sha256()` (`7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1`).
+  - Rejects missing table hash, stale table hash, missing segments, stale shank CoM fraction (e.g. pre-HO-9 `0.4459`), and stale shank radii with strict design-by-contract exceptions (`TypeError`, `ValueError`).
+- Schema & Receipt Validation (`src/shared/python/motion_matching/pipeline/`):
+  - `anthropometry.py`: Exposes `de_leva_table_dict()` and `de_leva_table_sha256()`.
+  - `receipt_schema.py`: Models optional `de_leva_table_sha256: str | None` and validates ground-support receipts; regenerated `RECEIPTS.md`.
+  - `build_anthropometric_spec.py`: Embeds top-level and subject-level `de_leva_table_sha256` and segment parameter dictionary into generated specifications.
+- Ground-Support Execution and Parity:
+  - Re-executed ground-support captures (`anthro_driver`, `anthro_iron`) under identical pipeline flags (`--skip-hip-calibration --static-seeds`).
+  - Controlled experiment confirms 0.000 mm shift between unedited `HEAD` spec and rebuilt spec across both driver and iron kinematics and forward dynamics.
+
 ## MJX Environment Setup, Pinned Dependencies, and Contact-Law Parity Tests (HO-3 #10157, #10162)
 
 Establishes cross-platform environment automation and JAX/MJX-gated unit tests for differentiable trajectory optimization:
@@ -32,6 +47,14 @@ Establishes cross-platform environment automation and JAX/MJX-gated unit tests f
   - Proves spatial wrench equilibrium and zero wrench at coincidence for dual-grip weld closures.
   - Validates analytic static equilibrium preload on lowest contact sphere ($-mg / (k n_{\text{spheres}})$).
   - Validates gradient finiteness ($\nabla \text{cost} \in \mathbb{R}$) on 12-frame truncated optimization with rest posture norms and NaN target filtering.
+
+## Shadow Tracker Source PTS Preservation and Unknown Physical Time (#10231)
+
+Preserves authoritative source timestamps and timing metadata across bounded decoding without synthesizing wall-clock evidence or hoarding frames:
+- Authoritative Source PTS & Reduced Timebase: `VideoDecoderAdapter` requires `timebase_numerator`, `timebase_denominator`, `is_timing_exact`, `timing_mode`, `decoder_name`, and `pixel_format`. `OpenCvVideoDecoder` extracts and reduces exact integer rational timebases (`timebase_numerator / timebase_denominator`), preserves authentic presentation timestamps (`pts_ticks`), and accommodates variable frame rates and negative start PTS offsets without constant-frame-rate assumptions.
+- Unknown Physical Time by Default: `decode_video_frames` defaults to `physical_time_s=None` with reason `"unknown physical time without evidenced clock mapping"`. Explicit SI physical timestamps require verified, evidenced clock mappings via `physical_time_s_fn`.
+- Incremental Bounded Decoding & Cooperative Cancellation: `OpenCvVideoDecoder` eliminates full-video memory buffering during initialization, probing at most one frame for container validity. Stream decoding via `stream_frames(limits)` processes frames on demand with cooperative cancellation checks (`is_cancelled`) and strictly bounded memory, releasing video capture file handles under all exit paths.
+- Provenance-Aware Frame Hashing: Frame content hashes incorporate decoder name and pixel format (`f"{decoder_name}:{pixel_format}:..."`) alongside raw buffer content to ensure tamper-evident reproducibility across differing decoder backends.
 
 ## De Leva Male Anthropometry Table Verification (HO-9 #10111, #10162)
 

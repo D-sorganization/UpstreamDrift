@@ -31,6 +31,10 @@ from build_full_body_spec import (  # noqa: E402
     transform,
 )
 
+from src.shared.python.motion_matching.anthropometry import (  # noqa: E402
+    de_leva_table_dict,
+    de_leva_table_sha256,
+)
 from src.shared.python.motion_matching.anthropometric_geometry import (  # noqa: E402
     GRIP_ROTATION_DEG,
     LEG_VISUAL_RADIUS_M,
@@ -270,6 +274,12 @@ def main() -> None:
         ),
     )
     document["subject"] = upper["subject"]
+    document["de_leva_table_sha256"] = de_leva_table_sha256()
+    document["anthropometry"] = {
+        "table": "de_leva_1996_male",
+        "de_leva_table_sha256": de_leva_table_sha256(),
+        "segments": de_leva_table_dict(),
+    }
     document["coordinate_ranges_deg"] = {
         **upper["coordinate_ranges_deg"],
         **as_document(
@@ -291,6 +301,7 @@ def main() -> None:
     receipt = {
         "spec_sha256": canonical_sha256(document),
         "spec_file_sha256": hashlib.sha256(spec_path.read_bytes()).hexdigest(),
+        "de_leva_table_sha256": de_leva_table_sha256(),
         "subject": upper["subject"],
         "inputs": {
             str(p): hashlib.sha256(p.read_bytes()).hexdigest()
