@@ -1,0 +1,335 @@
+"""Address setup fitting, static trial marker placement, and closure fitting."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        FullBodyMarkerKinematics,
+    )
+
+from src.shared.python.motion_matching.marker_calibration import (
+    calibrate_marker_offsets,
+    static_marker_offsets,
+)
+from src.shared.python.motion_matching import posture_metrics as post
+from src.shared.python.motion_matching.closure_fit import (
+    closure_residual,
+    fit_closure_placement,
+)
+from src.shared.python.motion_matching.pipeline.constants import (
+    ADDRESS_BALANCE_WEIGHT,
+    ADDRESS_ELBOW_BOUNDS_DEG,
+    ADDRESS_RESTART_SPREAD_RAD,
+    ADDRESS_RESTARTS,
+    ADDRESS_SEEDS_DEG,
+    CALIBRATION_ITERATIONS,
+    CALIBRATION_PRIOR_FRAMES,
+    ELBOW_PIT_WEIGHT,
+    ELBOW_PIT_WEIGHTS_NEUTRAL,
+    FORWARD_AXIS,
+    NEUTRAL_BOUNDS_DEG,
+    NEUTRAL_LOCKS,
+    PRIOR,
+    RIGHT_AXIS,
+    STATIC_FRAMES,
+    TRAIL_WRIST_ADDRESS_DEG,
+    UP_AXIS,
+)
+from src.shared.python.motion_matching.pipeline.lane import wrist_bounds
+from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.pipeline.lane import Lane
+
+
+def scaled_offsets(
+    offsets: Mapping[str, tuple[str, Sequence[float]]], femur: float, tibia: float
+) -> dict[str, tuple[str, tuple[float, float, float]]]:
+    """Leg marker offsets carried onto scaled femur and tibia bodies.
+
+    Precondition: ``femur`` and ``tibia`` must be strictly positive.
+    Postcondition: returned offsets preserve body names with scaled coordinate offsets.
+    """
+    if femur <= 0 or tibia <= 0:
+        raise ValueError("femur and tibia must have positive scale factors")
+    out: dict[str, tuple[str, tuple[float, float, float]]] = {}
+    for label, (body, offset) in offsets.items():
+        if body.startswith("femur"):
+            factor = femur
+        elif body.startswith("tibia"):
+            factor = tibia
+        else:
+            factor = 1.0
+        scaled = factor * np.asarray(offset, dtype=float)
+        out[label] = (body, (float(scaled[0]), float(scaled[1]), float(scaled[2])))
+    return out
+
+
+def posture_summary(kin: FullBodyMarkerKinematics, q: np.ndarray) -> dict[str, Any]:
+    """Spine bend and clavicle-link angles of the model at one pose."""
+    adapter = kin.adapter
+    m, d = adapter.model, adapter.data
+    kin.marker_positions(q)
+
+    def site(frame: str) -> np.ndarray:
+        return d.site_xpos[m.site(adapter.metadata["frame_sites"][frame]).id].copy()
+
+    hips = (
+        d.xanchor[m.joint("hip_flexion_r").id] + d.xanchor[m.joint("hip_flexion_l").id]
+    ) / 2
+    spine, hub = site("Spine"), site("Hub")
+    bend = post.spine_bend(spine - hips, hub - spine, UP_AXIS, FORWARD_AXIS, RIGHT_AXIS)
+    links = {}
+    for side in ("L", "R"):
+        v = site(f"{side}S") - hub
+        links[side] = float(np.degrees(np.arcsin(-v[2] / np.linalg.norm(v))))
+    return {
+        "spine_bend_deg": bend.__dict__,
+        "clavicle_link_below_horizontal_deg": links,
+        "hips_to_shoulder_centre_m": float(
+            np.linalg.norm((site("LS") + site("RS")) / 2 - hips)
+        ),
+    }
+
+
+def best_address(
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    base: np.ndarray,
+    *,
+    neutral: bool = False,
+    pit_weight: float = ELBOW_PIT_WEIGHT,
+) -> Any:
+    """Best address fit over the leg seeds; ``neutral`` locks the scapulae
+    and bounds the spine to a straight-torso address.
+    """
+    bounds = dict(lane.bounds)
+    locked = None
+    axis_targets = None
+    if neutral:
+        locked = dict(NEUTRAL_LOCKS)
+        bounds |= {
+            name: (float(np.radians(lo)), float(np.radians(hi)))
+            for name, (lo, hi) in NEUTRAL_BOUNDS_DEG.items()
+        }
+    balance = ADDRESS_BALANCE_WEIGHT if lane.anthropometric else 0.0
+    if lane.anthropometric:
+        bounds |= {
+            name: (float(np.radians(lo)), float(np.radians(hi)))
+            for name, (lo, hi) in ADDRESS_ELBOW_BOUNDS_DEG.items()
+        }
+        axis_targets = lane.pit_targets_for(list(range(STATIC_FRAMES)), pit_weight)
+
+    best = None
+    rng = np.random.default_rng(0)
+    for seed in ADDRESS_SEEDS_DEG:
+        start = base.copy()
+        for joint, value in seed.items():
+            for side in ("r", "l"):
+                coord = f"{joint}_{side}"
+                if coord in kin.coordinate_order:
+                    start[kin.coordinate_order.index(coord)] = float(np.radians(value))
+        starts = [start] + [
+            np.concatenate(
+                [
+                    start[:6],
+                    start[6:]
+                    + rng.uniform(
+                        -ADDRESS_RESTART_SPREAD_RAD,
+                        ADDRESS_RESTART_SPREAD_RAD,
+                        len(start) - 6,
+                    ),
+                ]
+            )
+            for _ in range(ADDRESS_RESTARTS)
+        ]
+        for q0 in starts:
+            fit = kin.solve_pose(
+                lane.points[0],
+                lane.valid[0],
+                q0,
+                ground=lane.ground,
+                prior_weight=PRIOR,
+                iterations=100,
+                flat_feet=lane.stance[0],
+                bounds=bounds,
+                locked=locked,
+                marker_weights=lane.marker_weights,
+                prior_weights=lane.prior_weights,
+                axis_targets=axis_targets,
+                balance_weight=balance,
+            )
+            if best is None or fit.marker_rms_m < best.marker_rms_m:
+                best = fit
+    if best is None:
+        raise RuntimeError("No viable address fit found across multi-start seeds")
+    return best
+
+
+def static_offsets(
+    lane: Lane, kin: FullBodyMarkerKinematics, q: np.ndarray, seeds: dict
+) -> dict:
+    """Static-trial placement of every seed marker at pose ``q`` over the
+    first ``STATIC_FRAMES`` frames (bodies as in ``seeds``)."""
+    frames = list(range(STATIC_FRAMES))
+    seen = {
+        label for label in seeds if lane.valid[frames, lane.labels.index(label)].any()
+    }
+    cols = [lane.labels.index(m) for m in seen]
+    capture = TourCapture(
+        time_s=lane.times[frames],
+        labels=tuple(seen),
+        points_m=lane.points[np.ix_(frames, cols)],
+        valid=lane.valid[np.ix_(frames, cols)],
+    )
+    bodies = {label: seeds[label][0] for label in seen}
+    poses = kin.body_poses(q, sorted(set(bodies.values())))
+    placed = static_marker_offsets(capture, bodies, [poses] * len(frames))
+    return {label: placed.get(label, seed) for label, seed in seeds.items()}
+
+
+def static_trial(
+    lane: Lane, spec_bytes: bytes, seeds: dict, q_seed: np.ndarray
+) -> tuple[dict, Any, FullBodyMarkerKinematics]:
+    """Alternating static trial: neutral address fit, placement of every
+    marker at that pose, and again with the placed markers."""
+    placed = dict(seeds)
+    q = q_seed
+    neutral = None
+    kin = None
+    for weight in ELBOW_PIT_WEIGHTS_NEUTRAL:
+        adapter, kin = lane.kinematics(spec_bytes, placed)
+        neutral = best_address(lane, kin, q, neutral=True, pit_weight=weight)
+        placed = static_offsets(lane, kin, neutral.q, placed)
+        q = neutral.q
+    adapter, kin = lane.kinematics(spec_bytes, placed)
+    if neutral is None or kin is None:
+        raise RuntimeError("Static trial failed to converge")
+    return placed, neutral, kin
+
+
+def fit_closure_from_address(
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    document: dict[str, Any],
+    q_start: np.ndarray,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Fit the dual-grip weld at the address: keep both hands on the grip
+    point but release the weld's orientation, hold the trail wrist at
+    anatomical values, bound the lead wrist to human ranges, fit the markers,
+    then rewrite the closure so the weld holds exactly there.
+    """
+    bounds = dict(lane.bounds) | wrist_bounds()
+    locked = {k: float(np.radians(v)) for k, v in TRAIL_WRIST_ADDRESS_DEG.items()}
+    fit = kin.solve_pose(
+        lane.points[0],
+        lane.valid[0],
+        q_start,
+        ground=lane.ground,
+        prior_weight=PRIOR,
+        iterations=150,
+        flat_feet=lane.stance[0],
+        bounds=bounds,
+        locked=locked,
+        marker_weights=lane.marker_weights,
+        prior_weights=lane.prior_weights,
+        axis_targets=lane.pit_targets_for(list(range(STATIC_FRAMES)), ELBOW_PIT_WEIGHT),
+        closure_rotation_weight=0.0,
+    )
+    kin._set(fit.q)
+    # LoD: Use delegating property closure_sites
+    site_a = kin.closure_sites[0]
+    hand_world = (
+        kin.data.site_xmat[site_a].reshape(3, 3).copy(),
+        kin.data.site_xpos[site_a].copy(),
+    )
+    club_body = document["closure"]["body_b"]
+    club_world = kin.body_poses(fit.q, [club_body])[club_body]
+    fitted = fit_closure_placement(document, hand_world, club_world)
+    residual = closure_residual(
+        hand_world, club_world, fitted["closure"]["placement_b"]
+    )
+    return fitted, {
+        **fitted["closure_fit"],
+        "open_chain_marker_rms_m": fit.marker_rms_m,
+        "trail_wrist_locked_deg": dict(TRAIL_WRIST_ADDRESS_DEG),
+        "residual_at_fit_m_rad": list(residual),
+    }
+
+
+def elbow_pit_targets(
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    q: np.ndarray,
+    weight: float,
+) -> dict[str, tuple[Sequence[float], Sequence[float], float]]:
+    """Axis targets pulling upper arms toward address marker pit directions."""
+    return lane.pit_targets_for(list(range(STATIC_FRAMES)), weight)
+
+
+def calibrate_legs(
+    lane: Lane,
+    spec_bytes: bytes,
+    upper: Mapping[str, tuple[str, Sequence[float]]],
+    seeds: Mapping[str, tuple[str, Sequence[float]]],
+    q_start: np.ndarray,
+) -> tuple[dict[str, tuple[str, tuple[float, float, float]]], Any]:
+    """Alternating marker calibration of ``seeds`` (others fixed) with stance pins."""
+    frames = lane.calibration_frames
+    calibrated = tuple(seeds)
+    cols = [lane.labels.index(m) for m in calibrated]
+    leg_capture = TourCapture(
+        time_s=lane.times[frames],
+        labels=calibrated,
+        points_m=lane.points[np.ix_(frames, cols)],
+        valid=lane.valid[np.ix_(frames, cols)],
+    )
+    leg_bodies = {label: body for label, (body, _) in seeds.items()}
+    adapter, kin0 = lane.kinematics(spec_bytes, {**upper, **seeds})
+    state = {"kin": kin0}
+
+    def pose_fn(q: np.ndarray) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+        return state["kin"].body_poses(q, sorted(set(leg_bodies.values())))
+
+    def ik_fn(
+        offsets: dict[str, tuple[str, tuple[float, float, float]]],
+        cap: TourCapture,
+    ) -> np.ndarray:
+        merged = {**upper, **offsets}
+        attachments = {
+            label: (
+                merged[label][0],
+                (
+                    float(merged[label][1][0]),
+                    float(merged[label][1][1]),
+                    float(merged[label][1][2]),
+                ),
+            )
+            for label in lane.labels
+        }
+        state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
+        return lane.trajectory(state["kin"], q_start, frames=frames)[0]
+
+    result = calibrate_marker_offsets(
+        leg_capture,
+        leg_bodies,
+        pose_fn,
+        ik_fn,
+        initial_q=q_start,
+        iterations=CALIBRATION_ITERATIONS,
+        prior_offsets={label: offset for label, (_, offset) in seeds.items()},
+        prior_weight=CALIBRATION_PRIOR_FRAMES,
+    )
+    offsets = {
+        label: (
+            body,
+            (float(offset[0]), float(offset[1]), float(offset[2])),
+        )
+        for label, (body, offset) in result.offsets.items()
+    }
+    return offsets, result
