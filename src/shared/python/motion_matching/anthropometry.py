@@ -52,7 +52,7 @@ DE_LEVA_MALE: Mapping[str, SegmentTable] = {
     "forearm": SegmentTable(0.2689, 0.0162, 0.4574, (0.276, 0.265, 0.121)),
     "hand": SegmentTable(0.0862, 0.0061, 0.7900, (0.628, 0.513, 0.401)),
     "thigh": SegmentTable(0.4222, 0.1416, 0.4095, (0.329, 0.329, 0.149)),
-    "shank": SegmentTable(0.4340, 0.0433, 0.4459, (0.255, 0.249, 0.103)),
+    "shank": SegmentTable(0.4340, 0.0433, 0.4395, (0.251, 0.246, 0.102)),
     "foot": SegmentTable(0.2581, 0.0137, 0.4415, (0.257, 0.245, 0.124)),
 }
 
