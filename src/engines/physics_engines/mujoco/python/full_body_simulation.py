@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -29,8 +30,8 @@ from src.shared.python.motion_matching.ground_support import (
     support_report,
 )
 
-Array = NDArray[np.float64]
-Controller = Callable[[float, Array, Array], Array]
+Array: TypeAlias = NDArray[np.float64]
+Controller: TypeAlias = Callable[[float, Array, Array], Array]
 
 MIN_SINGULAR_VALUE = 1e-2  # 1 / (kg m^2): directions below this are closure-locked
 ROOT_COORDINATES = (
@@ -272,9 +273,11 @@ class FullBodySimulator:
         taus.insert(0, taus[0] if taus else tau_prev)
         cops = np.array(
             [
-                r.centre_of_pressure_m
-                if r.centre_of_pressure_m is not None
-                else (np.nan,) * 3
+                (
+                    r.centre_of_pressure_m
+                    if r.centre_of_pressure_m is not None
+                    else (np.nan,) * 3
+                )
                 for r, _ in supports
             ]
         )
@@ -513,7 +516,7 @@ def hold_pose_controller(
 
 def tracking_controller(
     simulator: FullBodySimulator,
-    time_ref: Sequence[float],
+    time_ref: Sequence[float] | Array,
     q_ref: Array,
     *,
     omega_rad_s: float | Array,

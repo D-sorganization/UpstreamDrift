@@ -25,11 +25,12 @@ tracks.
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 GRAVITY_M_S2 = 9.81
 
 
@@ -86,7 +87,7 @@ def cart_table_shift(
     zmp_xy: Array,
     target_xy: Array,
     z_c_m: Array | float,
-    times: Sequence[float],
+    times: Sequence[float] | Array,
     *,
     acceleration_weight: float = 1e-3,
     position_weight: float = 1e-2,

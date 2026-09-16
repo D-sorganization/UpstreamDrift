@@ -135,7 +135,7 @@
       "owner": "@dieterolson @D-sorganization/physics-team",
       "issue": 9153,
       "reason": "Issue #9153: the 102-line deterministic figure writer is hash-frozen in the completed two-replay CRBA requalification. Splitting two lines after observing the replay would invalidate the prospective figure-source authority and require two new native executions; defer the behavior-preserving helper extraction until the protected evidence lands.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
