@@ -121,6 +121,11 @@ class Receipt(BaseModel):
         description="Subject stature (m) and mass (kg) if anthropometric geometry",
         json_schema_extra={"unit": "m, kg", "stage": "metadata"},
     )
+    de_leva_table_sha256: str | None = Field(
+        None,
+        description="SHA256 hash of the de Leva anthropometric table if anthropometric geometry",
+        json_schema_extra={"unit": "hash", "stage": "metadata"},
+    )
     posture_top_of_backswing: PostureSummary | None = Field(
         None,
         description="Upper body posture metrics at top of backswing (~0.83 s)",
@@ -262,7 +267,7 @@ def validate_receipt(document: dict[str, Any]) -> Receipt:
 
 
 def main() -> None:
-    """CLI entry point for receipt schema inspection and documentation rendering."""
+    """CLI entry point for receipt schema inspection, validation, and documentation rendering."""
     parser = argparse.ArgumentParser(
         description="Ground-support receipt schema and documentation."
     )
@@ -270,6 +275,12 @@ def main() -> None:
         "--markdown",
         action="store_true",
         help="Generate Markdown documentation for docs/development/full_body_models/RECEIPTS.md",
+    )
+    parser.add_argument(
+        "receipts",
+        nargs="*",
+        type=Path,
+        help="Receipt JSON file paths to validate",
     )
     args = parser.parse_args()
 
@@ -279,6 +290,11 @@ def main() -> None:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(content, encoding="utf-8")
         sys.stdout.write(f"Wrote {len(content)} bytes to {out_path}\n")
+    elif args.receipts:
+        for receipt_path in args.receipts:
+            doc = json.loads(receipt_path.read_text(encoding="utf-8"))
+            validate_receipt(doc)
+            sys.stdout.write(f"Valid: {receipt_path}\n")
     else:
         parser.print_help()
 
