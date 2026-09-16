@@ -645,13 +645,9 @@ The following table records the canonical module assignments to be executed in H
 | Contact law                   | `src/shared/python/motion_matching/contact_law.py`                                                                          | same module (imported by the branch's simulation)                                                                                                    | **Identical**                                                                                                  | Same shared module used across both implementations; no conflict.                                                                                                                                                                 |
 | Evidence                      | `evidence/fb4_calibration`, `fb5_matching`, `fb6_parity`, `viewer`                                                          | `evidence/ground_support`, `anthropometry`, `setup_parity`, `visual_layer`                                                                           | **Both Retained**                                                                                              | Both sets of evidence are retained in the tree under `docs/development/full_body_models/evidence/`.                                                                                                                               |
 
-## Next
+## Status and Next Steps
 
-- HO-0 (#10186): land this branch on `main` and record the reconciliation
-  with the FB-4/5/6 lane; expert. Then epic #10162 in the order given in
-  "Completion Plan": HO-1 (#10155) first, HO-2/HO-3 in parallel, HO-7 and
-  HO-9 any time, HO-4/HO-8/HO-10 after HO-1, HO-5 (#10159, expert) in
-  parallel with the cheap items, HO-6 after HO-5. #10110 waits for the
-  Simscape lane. Superseded lists (MM order, GS-4/GS-5, FB-3 replay
-  parity) are folded into those issues; keep one static-trial round;
-  never `--recalibrate-upper`.
+- **HO-0 (#10186)**: Landed on `main` reconciling ground-support and FB-4/5/6 lanes.
+- **HO-1 (#10155)**: Landed on `main` in PR #10218 (`afea5e0a8`). Ground-support pipeline package established under `src/shared/python/motion_matching/pipeline/` with CLI wrapper in `docs/development/full_body_models/evidence/ground_support/run_ground_support.py`.
+- **HO-2 (#10156)**: Implemented Pydantic V2 receipt schema and validator (`src/shared/python/motion_matching/pipeline/receipt_schema.py`), unit tests validating all committed receipts and rejection paths (`test_receipt_schema.py`), generated markdown documentation (`docs/development/full_body_models/RECEIPTS.md`), and freshness test (`test_receipts_markdown_freshness.py`).
+- **Next**: Land HO-2 PR, then proceed to HO-3 (#10157, MJX environment and JAX-gated tests) and subsequent handoff issues in epic #10162.

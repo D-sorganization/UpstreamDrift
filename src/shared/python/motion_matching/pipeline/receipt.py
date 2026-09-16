@@ -17,6 +17,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     STANCE_TOLERANCE_M,
     TOE_SPHERES,
 )
+from src.shared.python.motion_matching.pipeline.receipt_schema import validate_receipt
 
 if TYPE_CHECKING:
     from src.engines.physics_engines.mujoco.python.full_body_markers import (
@@ -48,6 +49,7 @@ class GroundSupportReceiptInputs:
     kin: FullBodyMarkerKinematics
     q_ref: np.ndarray
     elapsed_s: float
+    validate: bool = True
 
 
 def build_ground_support_receipt(
@@ -74,7 +76,7 @@ def build_ground_support_receipt(
     tob_frame = min(int(round(0.83 * RATE_HZ)), len(q_ref) - 1)
     tob_posture = posture_summary(kin, q_ref[tob_frame])
 
-    return {
+    receipt_dict = {
         "base_spec_sha256": canonical_sha256(inputs.base_spec),
         "base_spec_file": inputs.spec_path.name,
         "spec_file": inputs.scaled_path.name,
@@ -117,3 +119,8 @@ def build_ground_support_receipt(
             f"full-body model ({inputs.qualification_note}); not a fit, not acceptance"
         ),
     }
+
+    if inputs.validate:
+        validate_receipt(receipt_dict)
+
+    return receipt_dict
