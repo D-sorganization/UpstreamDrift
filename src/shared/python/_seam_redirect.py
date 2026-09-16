@@ -57,10 +57,14 @@ SUBMODULE_HINT = "git submodule update --init vendor/ud-tools"
 # None when the UD copy is gone entirely (tools-canonical rulings). Keep this
 # in sync with docs/shared_tools/seam_rulings.v1.json ``status: cleaned`` rows.
 REDIRECTED_ROOTS: dict[str, Path | None] = {
+    "chat": None,
     "chat_contracts": None,
     "codemap": None,
     "compatibility": None,
+    "contracts": None,
     "cors": None,
+    "data_processing": None,
+    "data_processor_io": None,
     "deprecation": None,
     "file_watcher": None,
     "logging_pkg": None,
