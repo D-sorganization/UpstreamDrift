@@ -154,7 +154,10 @@ class FullBodySimulator:
         rhs[: model.nv, 0] = contact - bias
         rhs[model.nv :, 0] = -drift
         rhs[self._dof[self.actuated], 1:] = np.eye(self.actuated.size)
-        solution = np.linalg.solve(kkt, rhs)[: model.nv]
+        try:
+            solution = np.linalg.solve(kkt, rhs)[: model.nv]
+        except np.linalg.LinAlgError:
+            solution = np.linalg.lstsq(kkt, rhs, rcond=1e-7)[0][: model.nv]
         ordered = solution[self._dof]  # spec coordinate order
         return ordered[:, 1:], ordered[:, 0]
 

@@ -24,10 +24,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(
-    0, str(ROOT / "docs/development/full_body_models/evidence/ground_support")
-)
-import run_ground_support as drv  # noqa: E402
+import src.shared.python.motion_matching.pipeline as drv  # noqa: E402
 
 from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: E402
     MARKER_SEGMENTS,
