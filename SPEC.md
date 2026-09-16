@@ -1,5 +1,16 @@
 # SPEC.md — Repository Specification Document
 
+## Global Polynomial Full-Body Step (#10265)
+
+Full-body control parameters are one row-major seven-coefficient Bernstein
+curve per non-root coordinate over a declared physical horizon. Root effort
+is identically zero; export produces canonical ascending physical-second
+power coefficients. Native RK4 stepping validates state/control inventories
+and differentiates every internal stage and substep. Discrete state and
+coefficient Jacobians include shared contact derivatives, with nonsmooth
+contact branches reported explicitly. No state resets or pose projection are
+part of this open-loop boundary.
+
 ## Finite Weld Pose Linearization (#10260)
 
 The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
@@ -5236,6 +5247,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10265 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |
 | 2026-09-16 | #10263 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
 | 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |

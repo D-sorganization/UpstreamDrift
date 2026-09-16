@@ -1,5 +1,14 @@
 # Full-Body Models Handoff (Epic #10062)
 
+## Global Polynomial Step Prerequisite (#10265)
+
+The name-safe effort mapping and native RK4 step preserve the global degree-six
+control contract and all six unactuated root coordinates. Derivatives apply
+the chain rule through every RK4 stage and substep. Qualification here concerns
+local numerical derivatives; it does not establish a fitted physical swing.
+Independent acceptance replay must explicitly retain the optimization ground:
+the historical forward runner currently auto-calibrates a near-zero plane.
+
 ## Qualified Solver Integration (#10254)
 
 The [integration plan](../../plans/qualified_motion_integration/README.md)

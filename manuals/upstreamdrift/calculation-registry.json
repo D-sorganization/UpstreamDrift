@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-polynomial-full-body-step-inventory",
+      "owner": "UpstreamDrift issue #10265",
+      "resolution": "Inventory global Bernstein effort mapping, physical-second polynomial export, unactuated root convention and exact discrete RK4 state/coefficient sensitivities. Contact branch flags are local differentiability evidence, not proof of a physically accepted fit."
+    },
+    {
       "id": "UP-D1-weld-linearization-inventory",
       "owner": "UpstreamDrift issue #10254",
       "resolution": "Inventory the finite SE(3) weld pose derivative and distinct velocity/acceleration constraint Jacobian corrected by #10260. Independent local directional checks establish derivative agreement away from closure; they do not qualify fitted kinematics, root actuation, or full-horizon physical replay."
