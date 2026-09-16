@@ -42,7 +42,7 @@ LEG_SEEDS: dict[str, tuple[str, tuple[float, float, float]]] = {
 }
 LEG_LABELS: tuple[str, ...] = tuple(LEG_SEEDS)
 
-BOUND_WIDENING: float = 2.0
+BOUND_WIDENING: float = 1.0
 
 ADDRESS_SEEDS_DEG: list[dict[str, float]] = [
     {"hip_flexion": flexion, "knee_angle": knee, "hip_rotation": rotation}

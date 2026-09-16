@@ -1,4 +1,21 @@
 # SPEC.md — Repository Specification Document
+## Hip Zero-Twist Calibration and Unwidened Leg Bounds (HO-8 #10108, MM-6, #10162)
+
+Calibrates the hip coordinate zero-twist angle from optical motion capture data and unwidens lower-limb joint range-of-motion bounds:
+- **Hip Zero-Twist Angle Calibration (`src/shared/python/motion_matching/hip_calibration.py`)**:
+  - `HipRotationZero`: Slotted immutable dataclass (`offset_r_deg`, `offset_l_deg`, properties `r`, `l`, sequence/dict interfaces, and `to_dict()`).
+  - `hip_rotation_zero(points, valid, labels, waist_offsets, calibration)`: Functional hip rotation zero-twist calibration. Determines the functional flexion plane normal from capture markers (using medial knee markers `RKneeIn`/`LKneeIn` when available, or shank-thigh cross products fallback using ankle markers `RAnkleOut`/`LAnkleOut` and knee markers `RKneeOut`/`LKneeOut`).
+  - Mathematical zero-twist orientation: In pelvis anatomical frame ($+X$ forward, $+Y$ up, $+Z$ right), for right leg with anatomical axis pointing rightward ($+Z$), $\theta_r = \operatorname{arctan2}(v_{\text{anat}}[0], v_{\text{anat}}[2])$. For left leg pointing leftward ($-Z$), $\theta_l = \operatorname{arctan2}(-v_{\text{anat}}[0], -v_{\text{anat}}[2])$.
+  - `apply_hip_calibration`: Accepts `zero_twist_deg: HipRotationZero | Mapping[str, float] | None = None`. Post-multiplies `parent_to_base` by $R_z(\theta)$ to rotate the hip joint zero without altering joint center position. Records provenance and `document["subject"]["hip_zero_twist_deg"]`.
+- **Pipeline Integration and Receipt Schema**:
+  - `src/shared/python/motion_matching/pipeline/constants.py`: Sets `BOUND_WIDENING: float = 1.0` (unwidened, 1.0x human physiological range).
+  - `src/shared/python/motion_matching/pipeline/receipt_components.py`: Adds `hip_zero_twist_deg: dict[str, float] | None` to `HipCalibrationReceipt`.
+  - `docs/development/full_body_models/evidence/ground_support/run_ground_support.py`: Computes zero-twist offsets via `hip_rotation_zero` and passes them to `apply_hip_calibration` and the hip calibration report.
+  - `src/engines/physics_engines/mujoco/python/full_body_simulation.py`: Fallback to least-squares solver (`np.linalg.lstsq`) in `affine_dynamics` when KKT matrix is singular under boundary conditions.
+- **Evidence Verification**:
+  - Regenerated ground-support receipts with `BOUND_WIDENING = 1.0`: `anthro_driver`, `anthro_driver_shoot`, `anthro_iron`, and `anthro_iron_shoot`.
+  - Verified 0 lower-limb `range_of_motion_flags` on the IK reference for both captures (`driver` and `iron`).
+  - Cross-engine setup parity (`verify_setup_parity.py`) re-verified across MuJoCo, Drake, and Pinocchio.
 
 ## Pink Adapter State and Constraint Contract (#10257)
 
