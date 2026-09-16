@@ -27,39 +27,44 @@
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
-## GSPro Integration (#10188) — GS-00 Through GS-07 Complete
+## GSPro Integration (#10188) — GS-00 Through GS-08 Complete
 
 - **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
   [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
 - **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
   GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
   GS-05 (#10194) shared session service and local reference destination,
-  GS-06 (#10195) replay and single-impact submission, and
-  GS-07 (#10196) capability-aware desktop and web controls complete.
-  Planning PR #10201, PR #10208, PR #10213, PR #10215, PR #10217, and PR #10220 merged.
+  GS-06 (#10195) replay and single-impact submission,
+  GS-07 (#10196) capability-aware desktop and web controls, and
+  GS-08 (#10197) Windows deployment and authenticated remote topology complete.
+  Planning PR #10201, PR #10208, PR #10213, PR #10215, PR #10217, PR #10220, and PR #10222 merged.
 - **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10196-controls`.
+  branch `feat/issue-10197-windows-remote`.
 - **Delivered:**
-  - FastAPI Route Layer (`src/api/routes/golf_simulator.py`):
-    Exposes destination listing, session lifecycle (`IDLE`, `PREPARED`, `ARMED`, `SUBMITTING`, `UNCERTAIN`),
-    prepare/arm/disarm/cancel/submit endpoints, delivery status query, operator uncertainty reconciliation,
-    and monotonic replay playback control (`play`, `pause`, `stop`, `seek`, `rate`).
-  - Desktop Tool & Embed Adapter (`src/tools/golf_simulator/`):
-    `MainWidget` and `FallbackWidget` (`gui.py`), `GolfSimulatorEmbedAdapter` (`_embed_adapter.py`).
-    Integrated with launcher via `FALLBACK_ADAPTER_MODULES` in `src/launchers/embedded_tool_bootstrap.py`.
-  - Web Parity Console (`ui/src/pages/GolfSimulator.tsx`):
-    Full parity React console with destination selector, session lifecycle, status badges, replay controls,
-    and uncertainty recovery, wired to `/tools/golf-simulator` in `ui/src/App.tsx`.
-  - Registries & Parity:
-    `golf_simulator` tile registered in `src/config/models.yaml` and `src/config/launcher_manifest.json`;
-    feature parity entry in `src/config/feature_parity.json`; matrix regenerated in `docs/development/feature_parity_matrix.md`.
+  - Configurable Discovery & Support Diagnostics (`src/shared/python/golf_simulator/discovery.py`):
+    `SimulatorEndpoint` enforcing strict local loopback (`127.0.0.1`, `localhost`), valid ports (1-65535);
+    `SupportReceipt` producing non-secret audit metadata without leaking API keys or bearer tokens;
+    `discover_simulator_installation` resolving environment variables without registry scraping or hardcoded paths.
+  - Single-Producer Session Ownership & Conflict Detection (`src/shared/python/golf_simulator/producer_lock.py`):
+    `ProducerLockManager` and `ProducerLock` leases preventing collision with real launch monitors;
+    raises `ProducerConflictError` with conflict metadata without terminating or killing unrelated processes.
+  - Authenticated Remote Bridge Facade (`src/shared/python/golf_simulator/remote_bridge.py`):
+    `LocalBridgeServer` and `RemoteBridgeClient` (fulfilling `SimulatorAdapter`);
+    enforces token authentication (`AuthenticationError`), blocks non-loopback vendor bindings (`BridgeSecurityError`),
+    bounds queues with explicit backpressure (`QueueCapacityExceededError`), and supports cooperative cancellation tokens.
+  - Logging Redaction (`src/shared/python/golf_simulator/logging_redaction.py`):
+    `SecretRedactionFilter`, `redact_text`, `redact_mapping` scrubbing bearer tokens, passwords, and API keys.
+  - Durable Journal Recovery & Retention (`src/shared/python/golf_simulator/journal.py`):
+    `recover_on_startup()` recovering in-flight `PENDING` records to `AMBIGUOUS`;
+    `prune_retention()` removing expired terminal records while strictly preserving unresolved evidence.
+  - Windows Packaging & Licensing Enforcement (`src/shared/python/golf_simulator/packaging.py`):
+    `check_environment_readiness()` detecting optional dependencies without runtime crashes;
+    `assert_licensing_policy()` blocking automated EULA acceptance and vendor binary modification (`LicensingPolicyViolationError`).
 - **Validation:**
-  - 9 API route unit tests (`tests/unit/api/test_golf_simulator_routes.py`) pass 100%.
-  - 2 desktop control unit tests (`tests/unit/tools/golf_simulator/test_desktop_controls.py`) pass 100%.
-  - 3 web vitest tests (`ui/src/pages/GolfSimulator.test.tsx`) pass 100%.
-  - Feature parity tests (`tests/config/feature_parity/`) and launcher registry parity (`tests/config/test_launcher_registry_parity.py`) pass 100%.
-  - Local server route parity tests (`tests/unit/api/test_local_server_route_parity.py`) pass 100%.
-- **Next:** Open PR for GS-07 (#10196) and proceed to GS-08 (#10197) end-to-end integration and smoke tests.
+  - 84 unit tests in `tests/unit/golf_simulator/` pass 100%.
+  - Verified under `python -O` (Design-by-Contract assertions active regardless of optimization flag).
+  - All architecture budget and lint checks pass cleanly.
+- **Next:** Open PR for GS-08 (#10197) and proceed to GS-09 (#10198) licensed acceptance and support matrix.
 - **Preserve:** Original checkout's unrelated branch/untracked work.
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
