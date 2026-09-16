@@ -654,4 +654,23 @@ The following table records the canonical module assignments to be executed in H
 - **HO-7 (#10161)**: Consolidated seventeen sections of findings from `evidence/anthropometry/REVIEW.md` into authoritative design decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`. Established structured parser, validator with DbC contracts, and full test suite `tests/unit/motion_matching/pipeline/test_design_decisions.py`. Merged to `main` in PR #10235 (`27b271fe2`).
 - **HO-4 (#10158)**: Exposed all pipeline stages in the Motion Matching launcher tile (`src/tools/motion_matching/gui.py`, `pipeline.py`). Tabbed interface across Matching (with granular Stages options for free/bound wrists, fit closure, ZMP filter, shooting fit, cutoff frequency), Downswing experiment, and MJX tabs, with asynchronous `RunWorker` and strict LoD. Headless PyQt6 and pipeline test suites in `tests/tools/motion_matching/`. Added `tools.motion_matching` to `src/config/feature_parity.json` (tracking gap #10106) and regenerated `docs/development/feature_parity_matrix.md`. Merged to `main` in PR #10236 (`db4fe88c4`).
 - **HO-9 (#10111, MM-9)**: Verified de Leva (1996) male segment table line-by-line against Table 4 of the published paper. Pinning unit test in `tests/unit/motion_matching/test_de_leva_table.py` asserts each segment against literal paper values (mass %, CoM %, and principal radii %). Corrected shank `com_fraction` from 0.4459 to 0.4395 and radii from (0.255, 0.249, 0.103) to (0.251, 0.246, 0.102) in `src/shared/python/motion_matching/anthropometry.py`, eliminating bony-landmark carryover from Zatsiorsky-Seluyanov 1985. Committed verification receipt `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json`.
-- **Next**: Proceed to HO-3 (#10157, MJX environment and JAX-gated tests) and subsequent handoff issues in epic #10162.
+- **Review 2026-09-16 (expert agent)**: receipts on `main` unchanged through
+  the landing (driver address 5.1 / IK 27.0 / dynamics 74.6 mm). HO-3
+  (#10157) is open as PR #10228 and stalled on three fixable items
+  (architecture budget: `weld_wrench_jax` has 14 parameters against a
+  budget of 8, group them into `SiteState`/`WeldGains` named tuples; `feat`
+  title with no `src/` change fails phantom-guard, retitle `test:`; doc
+  conflicts, resolve once as the last step). HO-8 (#10108) claimed
+  2026-09-16. Two gaps found and filed: **HO-11 (#10250)** the anthropometric
+  documents and every receipt are stale since HO-9 changed the de Leva
+  shank row (documents last rebuilt in the HO-0 merge; receipts still hash
+  the old document) and CI did not catch it, so HO-11 rebuilds both
+  documents, reruns both captures through the HO-2 validator and adds a
+  document-freshness test; **HO-12 (#10251)** `run_ground_support.py` is
+  779 lines on `main` against HO-1's acceptance of under 400.
+- **Order from here**: HO-3 finish; HO-11 before any new receipt; HO-8 in
+  progress; HO-12 and HO-10 (#10112, now unblocked; use main's
+  `cross_engine_replay.py` per the table above) after HO-11; HO-5 (#10159,
+  expert) from HO-11's rebuilt receipts; HO-6 (#10160) after HO-5; #10110
+  waits for the Simscape lane.
+- **Doc hotspot rule**: `DEVELOPMENT_LOG.md` (`DL-#10062`) and `HANDOFF.md` "Status and Next Steps" are edited by every child, so they conflict whenever another child merges first. Resolve once, as the last step before merge: `git merge origin/main`, take `main`'s copy of both files (`git checkout --theirs`), re-apply only your own lines (your DL "Last verified"/"Next step", your one status bullet), commit, push. Never push repeated "Merge branch 'main'" commits with unresolved hunks. PR title prefix must match the diff (`test:`/`docs:`/`refactor:` when nothing under `src/` changes) or phantom-guard fails. `equivalence (3.11)` and `Trivy Container Scan` are not required and fail on `main` already; name them as pre-existing in the PR body, do not fix them in a child PR. Run `python scripts/ci/check_architecture_budget.py` before pushing (8-parameter and function-size budgets on changed files).
