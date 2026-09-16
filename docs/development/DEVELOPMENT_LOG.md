@@ -73,6 +73,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Viewer Adapters (#10256; 2026-09-16):** Replaced no-op display paths with
+  persistent Pinocchio visualizers, explicit validation and scoped cleanup.
+  Real MeshCat probing exposed and corrected shared-root deletion and owned
+  process cleanup defects. Live Gepetto qualification and production replay
+  integration remain outstanding under #10254.
+
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #10062 (children #10063 to #10070); continued by epic #10162 (MM-1 to MM-10, HO-1 to HO-10)

@@ -1,5 +1,15 @@
 # Simscape Tour-Average Fit Continuation
 
+## Optional Viewer Adapters (#10256, #10254)
+
+Gepetto and MeshCat wrappers retain their native visualizers and dispatch
+validated configurations, including neutral pose. They distinguish visual and
+collision geometry, own unique scene roots, and preserve shared servers/scenes
+during cleanup. MeshCat's owned server is explicitly managed. Adapter tests
+and a real MeshCat runtime smoke check exist; a live Gepetto CORBA/server
+qualification and production replay selection remain outstanding. This change
+does not certify any motion-fit result or replace the native viewer.
+
 ## Shadow Tracker Current Turnover (#10122)
 
 - **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)
