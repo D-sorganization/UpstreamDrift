@@ -73,6 +73,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+Runtime slice #10262 adds a consistent conda-forge numerical manifest and exact
+Linux lock plus isolated capability probes. Receipt success is scoped to
+runtime behavior; model, full-body fitting and renderer acceptance stay open.
+
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #10062 (children #10063 to #10070); continued by epic #10162 (MM-1 to MM-10, HO-1 to HO-10)

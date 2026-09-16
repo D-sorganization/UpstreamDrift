@@ -1,4 +1,15 @@
 # SPEC.md — Repository Specification Document
+
+## Optional Motion Runtime Qualification (#10262)
+
+The optional numerical environment is defined by a portable version manifest
+and exact Linux conda-forge package lock. Native import and solver probes run
+in isolated interpreters. Qualification fails for missing required components,
+failed processes, timeouts, malformed results, nonfinite equality outputs or
+unmet hard-constraint behavior. Receipts identify runtime versions, source
+hashes, interpreter, numerical tolerances and source-freshness status. This
+capability check does not confer full-body model or physical acceptance.
+
  
 ## MJX Environment Setup, Pinned Dependencies, and Contact-Law Parity Tests (HO-3 #10157, #10162)
 
@@ -5215,6 +5226,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10262 | Add reproducible optional motion runtime and isolated fail-closed capability receipts. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |

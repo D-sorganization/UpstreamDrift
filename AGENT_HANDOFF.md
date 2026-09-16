@@ -1,5 +1,15 @@
 # Simscape Tour-Average Fit Continuation
 
+## Optional Motion Runtime (#10262)
+
+The numerical runtime has a conda-forge version manifest and Linux x86-64-v3
+explicit package lock. `scripts/ci/check_motion_runtime.py` isolates native
+imports and solver probes and emits a fail-closed capability receipt with
+versions, hashes, bounded process diagnostics and source-freshness status.
+The qualified sample stack is Pinocchio 4.1, Pink 4.4 and Crocoddyl 3.2.1.
+This does not qualify full-body fitting, physics, or Gepetto rendering.
+Continue model and product integration under #10254.
+
 ## Shadow Tracker Current Turnover (#10122)
 
 - **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)
