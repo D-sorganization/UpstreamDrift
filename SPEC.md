@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## De Leva Male Anthropometry Table Verification (HO-9 #10111, #10162)
+
+Verifies the male body segment parameters in `src/shared/python/motion_matching/anthropometry.py` (`DE_LEVA_MALE`) against Table 4 of de Leva, P. (1996), "Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters", *Journal of Biomechanics*, 29(9), 1223-1230:
+- Segment Parameters Asserted: Pinning unit test in `tests/unit/motion_matching/test_de_leva_table.py` asserts segment length, mass percentage, center-of-mass percentage from proximal joint center, and sagittal, transverse, and longitudinal principal radii of gyration percentages against published literature values for all 11 male segments (`head`, `trunk`, `upper_trunk`, `middle_trunk`, `lower_trunk`, `upper_arm`, `forearm`, `hand`, `thigh`, `shank`, `foot`).
+- Shank Joint-Center Discrepancy Remediated: Corrects the male shank parameters in `anthropometry.py` to match de Leva (1996) joint-center definitions (knee joint center to ankle joint center):
+  - `com_fraction`: updated from `0.4459` (unadjusted Zatsiorsky-Seluyanov 1985 bony-landmark value) to `0.4395` (de Leva 1996 joint-center adjustment).
+  - `radii`: updated from `(0.255, 0.249, 0.103)` to `(0.251, 0.246, 0.102)`.
+- Verification Evidence: Structured receipt committed to `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json` recording line-by-line verification, reference subject constants (height 1.741 m, mass 73.0 kg), and joint-center endpoint boundaries.
+
 ## Motion Matching Launcher Tile Pipeline Stages and Multi-Tab Execution (HO-4 #10158, #10162)
 
 Exposes every stage of the full-body motion matching pipeline through the desktop launcher tile with multi-tab configuration, process lifecycle management, and strict Law of Demeter separation:
