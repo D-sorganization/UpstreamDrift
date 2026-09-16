@@ -1,5 +1,30 @@
 # SPEC.md — Repository Specification Document
 
+## Motion Matching Launcher Tile Pipeline Stages and Multi-Tab Execution (HO-4 #10158, #10162)
+
+Exposes every stage of the full-body motion matching pipeline through the desktop launcher tile with multi-tab configuration, process lifecycle management, and strict Law of Demeter separation:
+- `src/tools/motion_matching/pipeline.py`:
+  - `MatchRequest`: Extended with validated configuration fields `free_wrists` (bool), `bound_wrists` (bool), `fit_closure` (bool), `zmp_filter` (bool), `shooting_fit` (int >= 0), `shooting_gain` (float > 0), and `cutoff_hz` (float > 0). DbC postconditions reject concurrent `free_wrists` and `bound_wrists`.
+  - `match_command()`: Formulates command argument sequences for headless and CLI matching execution without exposing internal model or path structure to UI components.
+  - `ExperimentRequest`: Slotted dataclass specifying downswing experiment configuration (`run_dir`, `experiment_name`, `reference_path`, `downswing_torque_scale`, `downswing_kp_scale`, `downswing_kd_scale`, `max_seconds`).
+  - `experiment_command()`: Constructs CLI arguments for `downswing_experiment.py`.
+  - `export_mjx_command()`: Constructs CLI arguments for `evidence/ground_support/export_mjx_package.py`.
+  - `validate_reference_command()`: Constructs CLI arguments for evaluating and validating trajectory references against the shared contact-law plant.
+  - `read_experiment_summary()`: Safely reads, parses, and validates downswing experiment summaries from disk.
+- `src/tools/motion_matching/gui.py`:
+  - `MotionMatchingWidget`: Multi-tab interface (`Matching`, `Downswing experiment`, `MJX`).
+  - Matching Tab: Captures input document selection, capture selection, skip hip calibration, static seeds, and an explicit Stages group exposing free/bound wrists, fit closure, ZMP filter, shooting fit iterations and gain, and low-pass cutoff frequency.
+  - Downswing Experiment Tab: Controls run directory, experiment variant name, reference selection, downswing torque/gain scales, and timeout controls.
+  - MJX Tab: Provides one-click action triggers for MJX package export and trajectory reference validation with stdout/stderr telemetry streams.
+  - `RunWorker`: Background QThread process runner executing pipeline commands asynchronously with real-time log streaming and graceful termination.
+  - Law of Demeter Compliance: UI classes interact strictly through high-level domain requests (`MatchRequest`, `ExperimentRequest`) and factory functions; UI never constructs raw command-line argument lists.
+- Launcher and Governance Registry:
+  - Feature parity entry `tools.motion_matching` tracked as a registered gap with issue #10106 in `src/config/feature_parity.json`.
+  - Generated `docs/development/feature_parity_matrix.md` updated with Title Casing compliance.
+- Unit Testing:
+  - `tests/tools/motion_matching/test_pipeline.py`: 8 tests covering request validation contracts, command generation, and experiment summary parsing.
+  - `tests/tools/motion_matching/test_gui.py`: 5 headless PyQt6 tests verifying tab instantiation, stage checkboxes, mutual exclusion, downswing experiment request construction, and MJX command dispatch.
+
 ## Shadow Tracker Time and Geometry Turnover Review (#10230)
 
 Updates current agent pickup after real decoder, disk-renderer and calibration

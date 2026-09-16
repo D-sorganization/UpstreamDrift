@@ -86,6 +86,16 @@
       "tiles": ["dataset_generator"],
       "notes": "Web-first tool; the desktop launcher opens the web route."
     },
+    "tools.motion_matching": {
+      "title": "Motion Matching tour-average capture matching",
+      "pyqt": "src/tools/motion_matching/gui.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 10106,
+      "tiles": [],
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation."
+    },
     "canonical_core.workspaces": {
       "title": "Canonical-core estimation/comparison workspaces",
       "pyqt": "src/tools/canonical_core/estimation.py",
