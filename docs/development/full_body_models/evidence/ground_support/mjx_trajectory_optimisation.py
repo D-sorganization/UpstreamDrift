@@ -29,6 +29,7 @@ import json
 import logging
 import time
 from pathlib import Path
+from typing import Any, NamedTuple
 
 import xml.etree.ElementTree as ET  # serialisation only; parsing is defused
 
@@ -39,7 +40,6 @@ import mujoco
 import numpy as np
 from mujoco import mjx
 
-jax.config.update("jax_enable_x64", False)
 LOG = logging.getLogger("mjx_opt")
 
 
@@ -77,6 +77,153 @@ WELD_STIFFNESS_N_M = 2.0e5
 WELD_DAMPING_N_S_M = 400.0
 WELD_ROT_STIFFNESS_N_M_RAD = 2.0e3
 WELD_ROT_DAMPING_N_M_S = 4.0
+
+
+def contact_force_jax(
+    centre: jnp.ndarray,
+    velocity: jnp.ndarray,
+    radius: float | jnp.ndarray,
+    params: Any,
+    ground_normal: jnp.ndarray | None = None,
+    ground_height_m: float = 0.0,
+) -> jnp.ndarray:
+    """Evaluate the shared ground contact force (normal + friction) in JAX.
+
+    Pure JAX formulation of Hunt-Crossley compliant normal contact and
+    regularised Coulomb friction, matching
+    ``src.shared.python.motion_matching.contact_law.sphere_ground_contact``.
+
+    Parameters:
+        centre: 3-vector sphere center in world coordinates (m).
+        velocity: 3-vector sphere linear velocity in world coordinates (m/s).
+        radius: Sphere radius (m).
+        params: Contact parameters providing stiffness_n_m, dissipation_s_m,
+            static_friction, dynamic_friction, viscous_friction, and
+            transition_velocity_m_s (either ContactParameters instance, dict,
+            or object with these attributes).
+        ground_normal: Optional 3-vector unit normal (defaults to z-up [0, 0, 1]).
+        ground_height_m: Optional ground plane height (defaults to 0.0).
+
+    Returns:
+        3-vector total contact force (normal + friction) in world frame (N).
+    """
+    c = jnp.asarray(centre)
+    v = jnp.asarray(velocity)
+    r = float(radius)
+    if c.shape != (3,) or v.shape != (3,):
+        raise ValueError("centre and velocity must be 3-vectors")
+    if not (r > 0.0):
+        raise ValueError("Sphere radius must be positive")
+
+    if isinstance(params, dict):
+        k_n = float(params["stiffness_n_m"])
+        d_n = float(params["dissipation_s_m"])
+        mu_s = float(params["static_friction"])
+        mu_d = float(params["dynamic_friction"])
+        mu_v = float(params["viscous_friction"])
+        v_t = float(params["transition_velocity_m_s"])
+    else:
+        k_n = float(params.stiffness_n_m)
+        d_n = float(params.dissipation_s_m)
+        mu_s = float(params.static_friction)
+        mu_d = float(params.dynamic_friction)
+        mu_v = float(params.viscous_friction)
+        v_t = float(params.transition_velocity_m_s)
+
+    if k_n <= 0.0 or v_t <= 0.0:
+        raise ValueError("Stiffness and transition velocity must be positive")
+    if d_n < 0.0 or mu_d < 0.0 or mu_v < 0.0:
+        raise ValueError("Dissipation and friction coefficients must be nonnegative")
+    if mu_s < mu_d:
+        raise ValueError("Static friction must not be below dynamic friction")
+
+    if ground_normal is None:
+        n_ground = jnp.array([0.0, 0.0, 1.0], dtype=c.dtype)
+    else:
+        n_ground = jnp.asarray(ground_normal, dtype=c.dtype)
+        n_ground = n_ground / jnp.linalg.norm(n_ground)
+
+    signed = c @ n_ground - ground_height_m - r
+    pen = jnp.maximum(0.0, -signed)
+    rate_in = -(n_ground @ v)
+    magnitude = jnp.maximum(0.0, k_n * pen * (1.0 + d_n * rate_in))
+    magnitude = jnp.where(pen > 0.0, magnitude, 0.0)
+    tangential = v - n_ground * (n_ground @ v)
+    speed = jnp.sqrt(jnp.sum(tangential**2) + 1e-12)
+    ratio = speed / v_t
+    mu = mu_d + (mu_s - mu_d) * jnp.exp(-(ratio**2)) + mu_v * speed
+    friction = -tangential / speed * mu * magnitude * jnp.tanh(ratio)
+    return n_ground * magnitude + friction
+
+
+class SiteState(NamedTuple):
+    """World-frame state of one weld site: position, velocity, body rotation, angular velocity, body centre of mass."""
+
+    p: jnp.ndarray
+    v: jnp.ndarray
+    r: jnp.ndarray
+    w: jnp.ndarray
+    com: jnp.ndarray
+
+
+class WeldGains(NamedTuple):
+    """Gains for the weld spring-damper reaction."""
+
+    k: float = WELD_STIFFNESS_N_M
+    c: float = WELD_DAMPING_N_S_M
+    rot_k: float = WELD_ROT_STIFFNESS_N_M_RAD
+    rot_c: float = WELD_ROT_DAMPING_N_M_S
+
+
+def weld_wrench_jax(
+    a: SiteState,
+    b: SiteState,
+    gains: WeldGains = WeldGains(),
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Equal and opposite spatial wrenches on body a and body b.
+
+    Computes the spring-damper reaction holding closure site b on site a.
+    Returns (wrench_a, wrench_b) where each is a 6-vector (force, torque at CoM).
+    """
+    rel = a.r @ b.r.T  # rotation taking b's axes onto a's
+    rotvec = 0.5 * jnp.array(
+        [rel[2, 1] - rel[1, 2], rel[0, 2] - rel[2, 0], rel[1, 0] - rel[0, 1]]
+    )
+    force_on_b = gains.k * (a.p - b.p) + gains.c * (a.v - b.v)
+    torque_on_b = gains.rot_k * rotvec + gains.rot_c * (a.w - b.w)
+    wrench_b = jnp.concatenate(
+        [force_on_b, torque_on_b + jnp.cross(b.p - b.com, force_on_b)]
+    )
+    wrench_a = jnp.concatenate(
+        [-force_on_b, -torque_on_b + jnp.cross(a.p - a.com, -force_on_b)]
+    )
+    return wrench_a, wrench_b
+
+
+def compute_knot_mask(
+    knot_times: np.ndarray | jnp.ndarray,
+    horizon: float,
+) -> jnp.ndarray:
+    """Mask of active knots within the cost horizon (knots > horizon are 0)."""
+    if horizon <= 0.0:
+        raise ValueError("Horizon must be positive")
+    kt = jnp.asarray(knot_times)
+    return jnp.asarray((kt <= horizon).astype(jnp.float32))
+
+
+def build_reference(
+    q_track: jnp.ndarray | np.ndarray,
+    act_indices: jnp.ndarray | np.ndarray,
+    basis: jnp.ndarray | np.ndarray,
+    delta: jnp.ndarray,
+    knot_mask: jnp.ndarray | None = None,
+) -> jnp.ndarray:
+    """Tracked reference plus the knot correction; masked knots are frozen."""
+    q = jnp.asarray(q_track)
+    act = jnp.asarray(act_indices)
+    b = jnp.asarray(basis)
+    d = delta if knot_mask is None else delta * knot_mask[:, None]
+    return q.at[:, act].add(b @ d)
 
 
 def build(
@@ -121,6 +268,13 @@ def build(
     body_a = int(model.site_bodyid[site_a])
     body_b = int(model.site_bodyid[site_b])
 
+    weld_gains = WeldGains(
+        k=weld_k,
+        c=weld_c,
+        rot_k=WELD_ROT_STIFFNESS_N_M_RAD,
+        rot_c=WELD_ROT_DAMPING_N_M_S,
+    )
+
     def weld_wrenches(d: mjx.Data, xfrc: jnp.ndarray) -> jnp.ndarray:
         """Stiff spring-damper holding closure site b on site a (the dual-grip
         weld the shared simulator solves rigidly)."""
@@ -130,21 +284,12 @@ def build(
         jp_b, jr_b = mjx.jac(mm, d, p_b, body_b)
         v_a, v_b = jp_a.T @ d.qvel, jp_b.T @ d.qvel
         w_a, w_b = jr_a.T @ d.qvel, jr_b.T @ d.qvel
-        rel = r_a @ r_b.T  # rotation taking b's axes onto a's
-        rotvec = 0.5 * jnp.array(
-            [rel[2, 1] - rel[1, 2], rel[0, 2] - rel[2, 0], rel[1, 0] - rel[0, 1]]
+        wa, wb = weld_wrench_jax(
+            SiteState(p=p_a, v=v_a, r=r_a, w=w_a, com=d.xipos[body_a]),
+            SiteState(p=p_b, v=v_b, r=r_b, w=w_b, com=d.xipos[body_b]),
+            gains=weld_gains,
         )
-        force_on_b = weld_k * (p_a - p_b) + weld_c * (v_a - v_b)
-        torque_on_b = WELD_ROT_STIFFNESS_N_M_RAD * rotvec + WELD_ROT_DAMPING_N_M_S * (
-            w_a - w_b
-        )
-        wrench_b = jnp.concatenate(
-            [force_on_b, torque_on_b + jnp.cross(p_b - d.xipos[body_b], force_on_b)]
-        )
-        wrench_a = jnp.concatenate(
-            [-force_on_b, -torque_on_b + jnp.cross(p_a - d.xipos[body_a], -force_on_b)]
-        )
-        return xfrc.at[body_b].add(wrench_b).at[body_a].add(wrench_a)
+        return xfrc.at[body_b].add(wb).at[body_a].add(wa)
 
     def sphere_wrenches(d: mjx.Data) -> jnp.ndarray:
         """World wrenches (nbody, 6) of the shared contact law at state ``d``."""
@@ -162,19 +307,9 @@ def build(
             centre = d.site_xpos[site]
             jacp, _ = mjx.jac(mm, d, centre, body)
             velocity = jacp.T @ d.qvel
-            signed = centre @ n_ground - ground_h - radius
-            pen = jnp.maximum(0.0, -signed)
-            rate_in = -(n_ground @ velocity)
-            magnitude = jnp.maximum(0.0, k_n * pen * (1.0 + d_n * rate_in))
-            magnitude = jnp.where(pen > 0.0, magnitude, 0.0)
-            tangential = velocity - n_ground * (n_ground @ velocity)
-            speed = jnp.sqrt(
-                jnp.sum(tangential**2) + 1e-12
-            )  # norm with a finite gradient at rest
-            ratio = speed / v_t
-            mu = mu_d + (mu_s - mu_d) * jnp.exp(-(ratio**2)) + mu_v * speed
-            friction = -tangential / speed * mu * magnitude * jnp.tanh(ratio)
-            force = n_ground * magnitude + friction
+            force = contact_force_jax(
+                centre, velocity, radius, contact, n_ground, ground_h
+            )
             point = centre - n_ground * radius
             torque = jnp.cross(point - d.xipos[body], force)
             return acc.at[body].add(jnp.concatenate([force, torque]))
@@ -281,6 +416,7 @@ def initial_state(
 
 
 def main() -> None:
+    jax.config.update("jax_enable_x64", False)
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", type=Path, required=True)
@@ -339,13 +475,12 @@ def main() -> None:
     mass = float(meta["mass_kg"])
 
     knot_times = np.arange(times[0], times[-1] + args.knot_spacing, args.knot_spacing)
-    knot_mask = jnp.asarray((knot_times[:n_knots] <= args.horizon).astype(np.float32))
+    knot_mask = compute_knot_mask(knot_times[:n_knots], args.horizon)
 
     def reference(delta: jnp.ndarray) -> jnp.ndarray:
         """Tracked reference plus the knot correction; knots beyond the cost
         horizon are frozen so the uncosted tail keeps the original reference."""
-        q = jnp.asarray(q_track)
-        return q.at[:, act].add(basis @ (delta * knot_mask[:, None]))
+        return build_reference(q_track, act, basis, delta, knot_mask)
 
     def replay(delta: jnp.ndarray) -> jnp.ndarray:
         q_np = reference(delta)
