@@ -1,0 +1,23 @@
+{
+  "qualification": "refined_pinocchio_half_step_replay_returned101",
+  "settings": {
+    "rtol": 1e-12,
+    "atol": 1e-14,
+    "max_step": 3.125e-5
+  },
+  "elapsed_s": 27.273098249999748,
+  "metrics": {
+    "whole_rms_mm": 20.264853204955266,
+    "early_rms_mm": 9.995135614727488,
+    "terminal_rms_mm": 40.313675779207315
+  },
+  "refinement_vs_baseline_pinocchio": {
+    "max_marker_coord_diff_mm": 4.27302166775001e-5,
+    "max_marker_euc_diff_mm": 4.6931808939993396e-5,
+    "mean_marker_euc_diff_mm": 5.739327024792244e-7,
+    "max_q_diff": 2.4823182792621523e-7,
+    "max_qd_diff": 0.00015034727897500488,
+    "closure_pose_max_abs": 7.0225492088147324e-12,
+    "closure_velocity_max_abs": 1.3366641127277035e-11
+  }
+}

@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9967 · Native Simscape Tour Matching
+
+- **State:** in_progress
+- **Owner:** codex (turnover review; execution ownership by next lease)
+- **Issue:** #9967 (parent #9921)
+- **Branch:** feat/9967-native-simscape-pinocchio
+- **Paths:** src/shared/python/motion_matching; docs/development/simscape_tour_matching
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-15 (SELF; raw run101 MAT/NPZ metrics independently recomputed; seven focused yaw/replay tests passed)
+- **Summary:** Run101 improves yaw and has measured R2025b–Pinocchio prefix agreement of 0.0605 mm maximum. Terminal RMS 40.31 mm fails the 35 mm gate; full 1.814 s capture is incomplete. No optimizer launched by this review.
+- **Next step:** Follow RUN101_REVIEW_AND_TURNOVER.md: bounded refinement check, head/left-arm terminal feasibility, justified bounded fitting trial and horizon extension.
+
 ### DL-#10204 · Capture Rig Shared Camera Layer
 
 - **State:** in_review
