@@ -205,6 +205,25 @@ Hardens segmentation provider and auxiliary DTO boundary invariants addressing r
   - `RenderRequest`: Validates non-empty `camera_id`, finite float tuple `state`, and positive integer 2-tuple `image_size_px`.
   - `RenderResult`: Validates tuple masks of equal lengths.
 
+## Native GSPro Model Animation and Autonomous Course Feedback Research (#10200)
+
+Specifies the native animation and autonomous course feedback research investigation for golf simulator integration (GS-11):
+- Implements `docs/plans/golf_simulator_integration/NATIVE_AVATAR_COURSE_FEEDBACK_RESEARCH.md`:
+  - Evaluates engine architecture of GSPro (Unity runtime) and Course Designer tooling (Unity terrain / OPCD static AssetBundles); establishes that Course Designer produces static environments and provides zero runtime skeletal rigging or dynamic mesh injection APIs.
+  - Characterizes Open Connect v1 protocol limits: establishes that socket communication is unidirectional shot input and lacks real-time course feedback (landing coordinates, lie condition, terrain surface, slope, wind vector, elevation, hazard states, or hole completion).
+  - Documents lack of programmatic aim control, camera angle switching, or target selection RPCs in public simulator interfaces.
+  - Establishes explicit security and licensing boundaries: prohibits memory scraping (Cheat Engine / ReadProcessMemory), DLL injection (Harmony / BepInEx), packet sniffing, and binary modification as violations of EULA, anti-cheat, and scientific reproducibility.
+  - Delivers turnkey vendor inquiry templates for structured outreach if commercial SDK access becomes available.
+  - Formalizes the **Synchronized Companion Presentation Architecture**: dual-screen / split-screen presentation synchronizing UpstreamDrift's high-fidelity biomechanical skeletal viewer with GSPro's ball flight simulator using `MonotonicReplayClock`.
+- Implements capability contracts and assertions in `src/shared/python/golf_simulator/contracts.py`:
+  - `UnsupportedCapabilityError`: Structured exception raised when attempting operations requiring unsupported or unverified capabilities.
+  - `assert_capability_supported()`: Boundary assertion verifying capability descriptors against `CapabilityState.SUPPORTED`.
+  - Honest capability declarations across all adapters: `native_avatar_animation`, `course_state_feedback`, and `aim_control` are declared `CapabilityState.UNSUPPORTED`.
+- Qualification Suite (`tests/unit/golf_simulator/test_avatar_course_feedback_research.py`):
+  - Asserts honest `UNSUPPORTED` state across all production, relay, and reference adapters.
+  - Verifies rejection of autonomous closed-loop play when telemetry is unavailable.
+  - Verifies clean fallback to companion presentation mode without undefined guessing.
+
 ## Second Commercial Simulator and Flight Relay Adapter Evaluation (#10199)
 
 Specifies the commercial simulator evaluation and Flight Relay Protocol adapter for golf simulator integration (GS-10):

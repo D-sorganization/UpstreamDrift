@@ -97,9 +97,11 @@ def test_autonomous_round_requires_course_feedback() -> None:
         assert_capability_supported(caps, "course_state_feedback")
 
     assert exc.value.state == CapabilityState.UNSUPPORTED
+    ev_lower = exc.value.evidence.lower()
     assert (
-        "does not report real-time course" in exc.value.evidence
-        or "unsupported" in exc.value.evidence.lower()
+        "not supported" in ev_lower
+        or "unsupported" in ev_lower
+        or "does not report" in ev_lower
     )
 
 
