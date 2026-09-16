@@ -54,6 +54,7 @@ from src.shared.python.motion_matching.full_body_spec import (  # noqa: E402
 from src.shared.python.motion_matching.hip_calibration import (  # noqa: E402
     apply_hip_calibration,
     functional_hip_calibration,
+    hip_rotation_zero,
 )
 from src.shared.python.motion_matching.segment_scaling import (
     scale_segments,
@@ -366,6 +367,9 @@ def main() -> None:
         for label in MARKER_SEGMENTS["pelvis"]
     }
     hip_cal = functional_hip_calibration(lane.points, lane.valid, labels, waist_offsets)
+    zero_twist = hip_rotation_zero(
+        lane.points, lane.valid, labels, waist_offsets, calibration=hip_cal
+    )
     if args.skip_hip_calibration:
         hip_spec = add_toe_spheres(base_spec)
     else:
@@ -373,7 +377,9 @@ def main() -> None:
             "hip_from_opensim_pelvis"
         ]
         hip_spec = add_toe_spheres(
-            apply_hip_calibration(base_spec, hip_cal, alignment_old)
+            apply_hip_calibration(
+                base_spec, hip_cal, alignment_old, zero_twist_deg=zero_twist
+            )
         )
     if args.anthropometric:
         stature_m, mass_kg = args.anthropometric
@@ -410,6 +416,7 @@ def main() -> None:
         "frames": hip_cal.frames,
         "pelvis_axes_in_hip_frame": hip_cal.pelvis_axes,
         "waist_fit_max_residual_m": hip_cal.waist_fit_max_residual_m,
+        "hip_zero_twist_deg": zero_twist.to_dict(),
     }
 
     # 2. address pose with seed leg offsets
