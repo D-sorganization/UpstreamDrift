@@ -35,6 +35,14 @@ Establishes cross-platform environment automation and JAX/MJX-gated unit tests f
   - Validates analytic static equilibrium preload on lowest contact sphere ($-mg / (k n_{\text{spheres}})$).
   - Validates gradient finiteness ($\nabla \text{cost} \in \mathbb{R}$) on 12-frame truncated optimization with rest posture norms and NaN target filtering.
 
+## Shadow Tracker Source PTS Preservation and Unknown Physical Time (#10231)
+
+Preserves authoritative source timestamps and timing metadata across bounded decoding without synthesizing wall-clock evidence or hoarding frames:
+- Authoritative Source PTS & Reduced Timebase: `VideoDecoderAdapter` requires `timebase_numerator`, `timebase_denominator`, `is_timing_exact`, `timing_mode`, `decoder_name`, and `pixel_format`. `OpenCvVideoDecoder` extracts and reduces exact integer rational timebases (`timebase_numerator / timebase_denominator`), preserves authentic presentation timestamps (`pts_ticks`), and accommodates variable frame rates and negative start PTS offsets without constant-frame-rate assumptions.
+- Unknown Physical Time by Default: `decode_video_frames` defaults to `physical_time_s=None` with reason `"unknown physical time without evidenced clock mapping"`. Explicit SI physical timestamps require verified, evidenced clock mappings via `physical_time_s_fn`.
+- Incremental Bounded Decoding & Cooperative Cancellation: `OpenCvVideoDecoder` eliminates full-video memory buffering during initialization, probing at most one frame for container validity. Stream decoding via `stream_frames(limits)` processes frames on demand with cooperative cancellation checks (`is_cancelled`) and strictly bounded memory, releasing video capture file handles under all exit paths.
+- Provenance-Aware Frame Hashing: Frame content hashes incorporate decoder name and pixel format (`f"{decoder_name}:{pixel_format}:..."`) alongside raw buffer content to ensure tamper-evident reproducibility across differing decoder backends.
+
 ## De Leva Male Anthropometry Table Verification (HO-9 #10111, #10162)
 
 Verifies the male body segment parameters in `src/shared/python/motion_matching/anthropometry.py` (`DE_LEVA_MALE`) against Table 4 of de Leva, P. (1996), "Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters", *Journal of Biomechanics*, 29(9), 1223-1230:
