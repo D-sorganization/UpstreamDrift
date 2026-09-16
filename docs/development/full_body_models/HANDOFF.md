@@ -1,5 +1,14 @@
 # Full-Body Models Handoff (Epic #10062)
 
+## Reproducible Numerical Runtime (#10262)
+
+Use the optional runtime manifest/lock and checker documented in
+`docs/engines/pinocchio.md`. Real Crocoddyl descent and Pink hard-equality /
+infeasible-QP probes pass in the consistent conda-forge stack. Preserve the
+receipt's explicit source-freshness status; a runtime pass is not model or
+physical acceptance. Linux lock requires x86-64-v3. Viewer qualification
+remains separate.
+
 Updated 2026-09-16 (claude; HO-9 #10111). Branch
 `feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
