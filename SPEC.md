@@ -39,6 +39,20 @@ Completes the modularization of the ground support execution pipeline by moving 
 - Bitwise Receipt & Simulation Parity:
   - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
 
+## Shadow Tracker Articulated Golfer Silhouette Rendering and Clipping (#10232)
+
+Binds silhouette projection to articulated kinematic model state and correctly clips boundary geometry:
+- `ArticulatedSilhouetteRenderer`:
+  - Concrete `SilhouetteRenderer` protocol implementation that evaluates forward kinematics from standard 27-element canonical articulated state vectors (`TranslationStartPositionX/Y/Z` + 24 `REFERENCE_GOLFER_FIELDS`).
+  - Renders 3D capsule-swept segments between connected joints for golfer body segments (trunk, head, shoulders, arms, forearms, hips, thighs, shanks) and club assembly (shaft, clubhead) into distinct, decoupled binary silhouette masks (`body_mask` and `club_mask`).
+  - Responds directly to kinematic variation: body mask area and distribution change under joint angle articulation (e.g. torso flexion, lead knee extension), and club mask separates and pivots under wrist radial/flexion rotations.
+- Off-Screen & Boundary Clipping:
+  - Robustly rasterizes projection ellipses whose 3D joint centers project outside camera sensor bounds ($u < 0, u \ge W, v < 0, v \ge H$) without discarding visible portions inside image margins $[0, W) \times [0, H)$.
+  - Supports anamorphic projection ($f_x \neq f_y$) by computing semi-major and semi-minor radii along respective pixel axes.
+- Strict State and Dimension Parity:
+  - Enforces matching dimensions between `RenderRequest.image_size_px` and `PinholeCameraModel.effective_image_size` (including `crop_box` dimensions).
+  - Explicitly rejects incompatible or unbound state conventions with descriptive `ValueError`.
+
 ## Anthropometric Document Rebuild and Freshness Gate (HO-11 #10250, #10162)
 
 Rebuilds full-body anthropometric model specifications and ground-support receipts after the HO-9 (#10249) de Leva 1996 shank parameter corrections, enforcing document freshness via continuous integration:
@@ -5269,6 +5283,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10232 | Bind silhouette rendering to articulated model state and clip visible geometry across camera boundaries. |
 | 2026-09-16 | #10274 | Correct Shadow Tracker estimated-timing capability and refresh restart guidance for renderer, mask persistence and native timestamp evidence. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
