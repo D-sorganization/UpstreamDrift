@@ -240,6 +240,13 @@ class Lane:
 
         Precondition: spec ground plane matches the toe calibration height.
         """
+        from src.engines.physics_engines.mujoco.python.full_body_markers import (
+            FullBodyMarkerKinematics,
+        )
+        from src.engines.physics_engines.mujoco.python.full_body_model import (
+            NativeMujocoFullBodyModel,
+        )
+
         adapter = NativeMujocoFullBodyModel(spec_bytes)
         if abs(adapter.ground_plane.height_m - self.ground.height_m) > 1e-3:
             raise ValueError("Spec ground height disagrees with the toe calibration")
