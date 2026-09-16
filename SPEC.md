@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Time and Geometry Turnover Review (#10230)
+
+Updates current agent pickup after real decoder, disk-renderer and calibration
+changes. Records source/physical-time, geometry/clipping and revision-integrity
+findings with corrective issues and full product completion gates. Documentation
+only; no runtime behavior or scientific qualification changes.
+
 ## Ground Support Execution Receipt Schema, Validator, and Reference Documentation (HO-2 #10156, #10162)
 
 Establishes formal Pydantic V2 schemas, validation contracts, and generated reference documentation for ground-support execution receipts under `src/shared/python/motion_matching/pipeline/`:
@@ -5123,6 +5130,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
 | 2026-09-15 | #10204 | Capture rig adopts the shared camera layer: `vendor/ud-tools` pinned to Tools 1ac89c18e (`shared.python.camera`), `preview_source.py` becomes one `SharedSourceAdapter` (rig `open/read/close` over the Tools `FrameSource`) and `recorder.dshow_device_ref` delegates; the preview command is pinned token-for-token against the pre-port list (only delta: `-rtbufsize 256M`). Adapter tests run in the isolated provider harness. |
 | 2026-09-15 | #10201 | Propose GSPro and interchangeable simulator integration, detailed implementation children, architecture and worker turnover (#10188); no runtime implementation. |

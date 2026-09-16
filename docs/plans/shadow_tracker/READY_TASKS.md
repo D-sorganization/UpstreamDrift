@@ -18,17 +18,12 @@ ST-01 scientific qualification has passed.
 
 ## Current Dispatch
 
-Use [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md) and
-[Continuation Prompt](CONTINUATION_PROMPT.md). Merged prototypes do not complete
-ST-01–ST-06. Evidence regeneration (#10167) confirms that coordinate packing (#10140)
-and closure units (#10141) are resolved in software and calibration evidence regenerated, reducing
-initial grip displacement to 13.7 mm (historical artifacts preserved; physical qualification remains open
-due to rotation closure and strict 5 mm tolerance). ST-04 (#10202) is complete, rejecting unrun model
-segmentation and enforcing shot-isolated mask revisions. ST-05 (#10206) is complete, implementing
-filled-area silhouette rendering, rotation non-singularity checks, and morphology/hypothesis invariants.
-Active slice is ST-03A (#10168), implementing real local-video clip decoding, bounded iterator, and auditable frame records.
-Next: Stage 7 (#10130) forward rollout integration and replay parity, followed by release qualification.
-Do not reimplement A/B/C or skip directly to fitting.
+[Current Turnover](TURNOVER_CURRENT.md) supersedes older pickup instructions.
+#10231: source timestamps, physical-time provenance and genuinely bounded decode.
+#10233: revision collision/parent integrity and persistence; independent of physics.
+#10232: articulated geometry/state binding, clipping and calibrated filled masks.
+Use [Continuation Prompt](CONTINUATION_PROMPT.md), then all ST-07–ST-12 gates.
+Merged #10205/#10212/#10214 establish partial progress, not whole-stage acceptance.
 
 ## Commands by Packet
 
@@ -36,8 +31,8 @@ From the target UpstreamDrift checkout, after installing normal development
 dependencies and initializing the exact pinned Tools provider:
 
 ```bash
-# Replace source_records with camera_bridge or mask_records for C or B.
-python3 -m pytest tests/unit/shadow_tracker/test_source_records.py -n auto --timeout=60
+# Add focused red/green tests for the selected corrective task.
+python3 -m pytest tests/unit/shadow_tracker tests/integration/shadow_tracker --timeout=60
 python3 -m ruff check src/shared/python/shadow_tracker tests/unit/shadow_tracker
 python3 -m ruff format --check src/shared/python/shadow_tracker tests/unit/shadow_tracker
 python3 -m mypy src/shared/python/shadow_tracker --follow-imports=silent
