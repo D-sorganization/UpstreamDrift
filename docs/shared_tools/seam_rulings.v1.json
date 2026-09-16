@@ -70,8 +70,8 @@
     },
     "chat": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Tools rewrote _chat_dock_widget_qt.py and friends on 2026-09-02; UD's 17 diverged files are the older #8322 snapshot (10 spelling-only). chat/_qt/runtime.py is a UD extraction listed as Unresolved in shared_python_ownership_exceptions.yaml (#8687) and belongs upstream."
+      "status": "cleaned",
+      "rationale": "Tools rewrote _chat_dock_widget_qt.py and friends on 2026-09-02; UD's 17 diverged files were the older #8322 snapshot (10 spelling-only). UD copy retired 2026-09-16: canonical's ChatDockWidget takes ChatConnectionConfig/ChatPresentationConfig/ChatIntegrationHooks (#9357), so sidekick/ui/tools_sidebar/chat_tab.py was converged byte-for-byte with canonical and dashboard/launcher.py migrated to the config objects. chat/_qt/runtime.py (the #8553 extraction, #8687) had no consumer outside UD's own _chat_dock_widget_qt.py and was retired with it; recover it from git history if Tools wants that decomposition upstream."
     },
     "chat_contracts": {
       "ruling": "tools-canonical",
@@ -96,8 +96,8 @@
     },
     "contracts.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Tools' contracts.py is newer (2026-08-20) and the finder already aliases src.shared.python.contracts to it; UD-only _contracts_*.py helpers are unrelated and stay."
+      "status": "cleaned",
+      "rationale": "Tools' contracts.py is newer (2026-08-20); UD-only _contracts_*.py helpers are unrelated and stay. UD copy retired 2026-09-16: the only content diffs were canonical's by-name-first precondition binding and a flattened invariant wrapper, and both spellings now resolve to one module object from the pinned tree (previously src.shared.python.contracts and shared.python.contracts were two module objects with distinct exception classes)."
     },
     "cors.py": {
       "ruling": "tools-canonical",
@@ -106,13 +106,13 @@
     },
     "data_processing": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "processor.py Tools newer (2026-08-20); the UD-only file is a drift test that becomes moot."
+      "status": "cleaned",
+      "rationale": "processor.py Tools newer (2026-08-20); the UD-only file was a drift test that became moot. UD copy retired 2026-09-16: processor.py differed only by the src.shared.python import prefix."
     },
     "data_processor_io": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "rust_engine.py Tools newer (2026-08-20); added to UD by #8322."
+      "status": "cleaned",
+      "rationale": "rust_engine.py Tools newer (2026-08-20); added to UD by #8322. UD copy retired 2026-09-16: canonical's rust_engine.py differs only by the import prefix, str()-coerced column names and a single header-read pass."
     },
     "deprecation.py": {
       "ruling": "tools-canonical",

@@ -98,6 +98,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), 16 AI adapter / launcher tests (#10026), 20 safe launcher / pipeline / model sources tests (#10031), 13 CORS tests (#10033), and 32 security and module docstring tests (#10034). This tranche burns down 67 quarantined tests across tests/launchers/test_golf_launcher.py (25), tests/launchers/test_launcher_ui_setup.py (21), tests/launchers/test_launcher_process_manager.py (17), and tests/launchers/test_library_widget.py (4), ratcheting debt down from 298 to 231.
 - **Next step:** Open PR, monitor CI checks, and merge.
 
+### DL-#9406 · Retire the src/shared/python Shadow Tree
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #9406 (RM #1505 Phase 1)
+- **Branch:** conductor/issue-9406
+- **PR:** not created
+- **Paths:** src/shared/python/\_seam_redirect.py; src/shared/python/dashboard/launcher.py; src/shared/python/sidekick/ui/tools_sidebar/chat_tab.py; docs/shared_tools/seam_rulings.v1.json; docs/shared_tools/divergence_inventory.v1.json; scripts/config/shadow_modules.yaml; docs/development/readiness_seam_handoff.md
+- **Started:** 2026-09-02
+- **Last verified:** 2026-09-16 (SELF; `check_seam_drift.py` passes with 10 notes, down from 14; `check_tools_pins` consistent at 1ac89c18e; seam-redirect, vendored-fallback, child-copy-contract, contracts, chat and dashboard suites pass locally)
+- **Summary:** Every `tools-canonical` cluster that the ledger allowed to be deleted from UpstreamDrift's side alone is now retired: `chat`, `contracts.py`, `data_processing`, `data_processor_io` join the 16 earlier retirements, so 20 of 36 actionable rulings are `cleaned`. `chat` required converging `sidekick/ui/tools_sidebar/chat_tab.py` with canonical and migrating `dashboard/launcher.py` to Tools' `ChatConnectionConfig` constructor. The remaining overlap (~510 files) is `split`, `deferred` or `ud-canonical` and needs either the Tools-side upstreaming or a namespace ruling before it can move.
+- **Next step:** Retire `ai` (split; 118 overlapping, subpackage rulings recorded) so `import_aliases.py` can follow, which is the last `tools-canonical` cluster.
+
 ## Shipped (Last 90 Days)
 
 ### DL-#8875 · Motion Pipeline Formats Documentation Reconcile

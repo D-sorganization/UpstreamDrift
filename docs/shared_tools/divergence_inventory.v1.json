@@ -11,11 +11,11 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 424,
-    "diverged": 278,
-    "ud-only": 1292,
-    "tools-only": 708,
-    "spelling-only": 124
+    "identical": 380,
+    "diverged": 257,
+    "ud-only": 1290,
+    "tools-only": 773,
+    "spelling-only": 114
   },
   "packages": {
     "README.md": {
@@ -173,11 +173,11 @@
       "spelling-only": 0
     },
     "chat": {
-      "identical": 40,
-      "diverged": 17,
-      "ud-only": 1,
-      "tools-only": 0,
-      "spelling-only": 10
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 0,
+      "tools-only": 57,
+      "spelling-only": 0
     },
     "chat_contracts": {
       "identical": 0,
@@ -223,9 +223,9 @@
     },
     "contracts.py": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "control_features_registry.py": {
@@ -271,10 +271,10 @@
       "spelling-only": 0
     },
     "data_processing": {
-      "identical": 3,
-      "diverged": 1,
-      "ud-only": 1,
-      "tools-only": 0,
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 0,
+      "tools-only": 4,
       "spelling-only": 0
     },
     "data_processor": {
@@ -285,10 +285,10 @@
       "spelling-only": 0
     },
     "data_processor_io": {
-      "identical": 2,
-      "diverged": 1,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 3,
       "spelling-only": 0
     },
     "dataset_tools": {
@@ -698,8 +698,8 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 234,
-      "diverged": 75,
+      "identical": 235,
+      "diverged": 74,
       "ud-only": 36,
       "tools-only": 45,
       "spelling-only": 24
@@ -4902,119 +4902,107 @@
     },
     {
       "path": "chat/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 4634,
+      "ud_bytes": null,
       "tools_bytes": 4716,
-      "byte_delta": -82,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_chat_dock_widget_qt.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 45741,
+      "ud_bytes": null,
       "tools_bytes": 62406,
-      "byte_delta": -16665,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 402,
+      "ud_bytes": null,
       "tools_bytes": 402,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/ai_dropdowns.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 8942,
+      "ud_bytes": null,
       "tools_bytes": 8942,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/bubbles.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 6771,
+      "ud_bytes": null,
       "tools_bytes": 6771,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/exports.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 5781,
+      "ud_bytes": null,
       "tools_bytes": 5781,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/history_sidebar.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 14984,
+      "ud_bytes": null,
       "tools_bytes": 14984,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/input.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 1988,
+      "ud_bytes": null,
       "tools_bytes": 1988,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/queue_panel.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 7360,
+      "ud_bytes": null,
       "tools_bytes": 7360,
-      "byte_delta": 0,
-      "byte_identical": true,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "chat/_qt/runtime.py",
-      "classification": "ud-only",
-      "package": "chat",
-      "subpackage": "_qt",
-      "ud_bytes": 16077,
-      "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -5022,577 +5010,577 @@
     },
     {
       "path": "chat/_qt/sessions.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 2731,
+      "ud_bytes": null,
       "tools_bytes": 2731,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/styling.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 1057,
+      "ud_bytes": null,
       "tools_bytes": 1057,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/ui_builder.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 18854,
+      "ud_bytes": null,
       "tools_bytes": 18854,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_qt/workspace.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "_qt",
-      "ud_bytes": 1955,
+      "ud_bytes": null,
       "tools_bytes": 1955,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_quick_bar_theme.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 4073,
+      "ud_bytes": null,
       "tools_bytes": 4073,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_router_protocol_adapters.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 1194,
+      "ud_bytes": null,
       "tools_bytes": 1194,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_theme_protocol.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 1961,
+      "ud_bytes": null,
       "tools_bytes": 1961,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_thinking_indicator.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 6736,
+      "ud_bytes": null,
       "tools_bytes": 6736,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/_workspace_protocol.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 2855,
+      "ud_bytes": null,
       "tools_bytes": 2855,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/ai_settings_controller.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 5361,
+      "ud_bytes": null,
       "tools_bytes": 5361,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/chat_dock_widget.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 9066,
+      "ud_bytes": null,
       "tools_bytes": 9260,
-      "byte_delta": -194,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/chat_popout_window.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 5852,
+      "ud_bytes": null,
       "tools_bytes": 5852,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/cli_provider_availability.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 4484,
+      "ud_bytes": null,
       "tools_bytes": 4484,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/condensation/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "condensation",
-      "ud_bytes": 1048,
+      "ud_bytes": null,
       "tools_bytes": 1048,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/condensation/condenser.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "condensation",
-      "ud_bytes": 3974,
+      "ud_bytes": null,
       "tools_bytes": 3970,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/condensation/contracts.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "condensation",
-      "ud_bytes": 3063,
+      "ud_bytes": null,
       "tools_bytes": 3063,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/condensation/strategy.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "condensation",
-      "ud_bytes": 5137,
+      "ud_bytes": null,
       "tools_bytes": 5133,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/condensation/tokens.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "condensation",
-      "ud_bytes": 1431,
+      "ud_bytes": null,
       "tools_bytes": 1431,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/credentials.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 702,
+      "ud_bytes": null,
       "tools_bytes": 698,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/export/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "export",
-      "ud_bytes": 990,
+      "ud_bytes": null,
       "tools_bytes": 990,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/export/contracts.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "export",
-      "ud_bytes": 2370,
+      "ud_bytes": null,
       "tools_bytes": 2370,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/export/copy_clipboard.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "export",
-      "ud_bytes": 3848,
+      "ud_bytes": null,
       "tools_bytes": 3844,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/export/html_exporter.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "export",
-      "ud_bytes": 4612,
+      "ud_bytes": null,
       "tools_bytes": 4608,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/export/markdown_exporter.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "export",
-      "ud_bytes": 3138,
+      "ud_bytes": null,
       "tools_bytes": 3134,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/export/secret_redactor.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "export",
-      "ud_bytes": 2782,
+      "ud_bytes": null,
       "tools_bytes": 2778,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/export/text_exporter.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "export",
-      "ud_bytes": 2944,
+      "ud_bytes": null,
       "tools_bytes": 2940,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/memory_panel.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 13739,
+      "ud_bytes": null,
       "tools_bytes": 13739,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/models.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 5677,
+      "ud_bytes": null,
       "tools_bytes": 5673,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/qt_diagnostics.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 2092,
+      "ud_bytes": null,
       "tools_bytes": 2092,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/quick_bar.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 14879,
+      "ud_bytes": null,
       "tools_bytes": 15010,
-      "byte_delta": -131,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/router_factory.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 13957,
+      "ud_bytes": null,
       "tools_bytes": 13957,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/service_base.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 17692,
+      "ud_bytes": null,
       "tools_bytes": 17688,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "chat/skills_manager.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 4604,
+      "ud_bytes": null,
       "tools_bytes": 4663,
-      "byte_delta": -59,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/terminal_contracts.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 7134,
+      "ud_bytes": null,
       "tools_bytes": 7134,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/terminal_providers.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 6426,
+      "ud_bytes": null,
       "tools_bytes": 6426,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/terminal_runtime.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 9423,
+      "ud_bytes": null,
       "tools_bytes": 9423,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 28,
+      "ud_bytes": null,
       "tools_bytes": 28,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/test_chat.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 17551,
+      "ud_bytes": null,
       "tools_bytes": 17551,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/test_chat_drift.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 3015,
+      "ud_bytes": null,
       "tools_bytes": 3015,
-      "byte_delta": 0,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/test_chat_routing_lifecycle.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 13283,
+      "ud_bytes": null,
       "tools_bytes": 13283,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/test_chat_ws_error_handling.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 3252,
+      "ud_bytes": null,
       "tools_bytes": 3252,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/test_credentials.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 7134,
+      "ud_bytes": null,
       "tools_bytes": 7134,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/test_service_base.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 10751,
+      "ud_bytes": null,
       "tools_bytes": 10751,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/test_voice_input.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 4447,
+      "ud_bytes": null,
       "tools_bytes": 4447,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/tests/test_workspace_bridge.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "tests",
-      "ud_bytes": 12646,
+      "ud_bytes": null,
       "tools_bytes": 12936,
-      "byte_delta": -290,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/voice_input_manager.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 6326,
+      "ud_bytes": null,
       "tools_bytes": 6326,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/websocket_protocol.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 7050,
+      "ud_bytes": null,
       "tools_bytes": 7050,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat/workspace_command_handler.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat",
       "subpackage": "",
-      "ud_bytes": 7145,
+      "ud_bytes": null,
       "tools_bytes": 7145,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -6162,12 +6150,12 @@
     },
     {
       "path": "contracts.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "contracts.py",
       "subpackage": "",
-      "ud_bytes": 24271,
+      "ud_bytes": null,
       "tools_bytes": 24980,
-      "byte_delta": -709,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -6549,7 +6537,7 @@
       "classification": "ud-only",
       "package": "dashboard",
       "subpackage": "",
-      "ud_bytes": 4018,
+      "ud_bytes": 4162,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6906,61 +6894,49 @@
     },
     {
       "path": "data_processing/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "data_processing",
       "subpackage": "",
-      "ud_bytes": 747,
+      "ud_bytes": null,
       "tools_bytes": 747,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "data_processing/processor.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "data_processing",
       "subpackage": "",
-      "ud_bytes": 22196,
+      "ud_bytes": null,
       "tools_bytes": 22175,
-      "byte_delta": 21,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "data_processing/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "data_processing",
       "subpackage": "tests",
-      "ud_bytes": 35,
+      "ud_bytes": null,
       "tools_bytes": 35,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
-      "path": "data_processing/tests/test_data_processing_drift.py",
-      "classification": "ud-only",
+      "path": "data_processing/tests/test_processor.py",
+      "classification": "tools-only",
       "package": "data_processing",
       "subpackage": "tests",
-      "ud_bytes": 2056,
-      "tools_bytes": null,
+      "ud_bytes": null,
+      "tools_bytes": 25239,
       "byte_delta": null,
       "byte_identical": false,
-      "ud_has_child_copy_header": true,
-      "spelling_only": false
-    },
-    {
-      "path": "data_processing/tests/test_processor.py",
-      "classification": "identical",
-      "package": "data_processing",
-      "subpackage": "tests",
-      "ud_bytes": 25239,
-      "tools_bytes": 25239,
-      "byte_delta": 0,
-      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -6990,36 +6966,36 @@
     },
     {
       "path": "data_processor_io/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "data_processor_io",
       "subpackage": "",
-      "ud_bytes": 901,
+      "ud_bytes": null,
       "tools_bytes": 901,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "data_processor_io/bulk_facade.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "data_processor_io",
       "subpackage": "",
-      "ud_bytes": 4955,
+      "ud_bytes": null,
       "tools_bytes": 4955,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "data_processor_io/rust_engine.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "data_processor_io",
       "subpackage": "",
-      "ud_bytes": 17769,
+      "ud_bytes": null,
       "tools_bytes": 17849,
-      "byte_delta": -80,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -25410,13 +25386,13 @@
     },
     {
       "path": "sidekick/ui/tools_sidebar/chat_tab.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "ui",
-      "ud_bytes": 17447,
+      "ud_bytes": 17751,
       "tools_bytes": 17751,
-      "byte_delta": -304,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -34377,232 +34353,11 @@
       }
     },
     {
-      "path": "chat/__init__.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
-      }
-    },
-    {
-      "path": "chat/_chat_dock_widget_qt.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-12",
-        "commit": "e3ea36a8bb2115081d1f7caa8f8aa7544afa74c4"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
-      }
-    },
-    {
-      "path": "chat/chat_dock_widget.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
-      }
-    },
-    {
-      "path": "chat/condensation/condenser.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/condensation/strategy.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/credentials.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/export/copy_clipboard.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/export/html_exporter.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/export/markdown_exporter.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/export/secret_redactor.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/export/text_exporter.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/models.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/quick_bar.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
-      }
-    },
-    {
-      "path": "chat/service_base.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgcodexagent[bot]",
-        "date": "2026-06-16",
-        "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "chat/skills_manager.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-25",
-        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
-      }
-    },
-    {
-      "path": "chat/tests/test_chat_drift.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
-      }
-    },
-    {
-      "path": "chat/tests/test_workspace_bridge.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
-      }
-    },
-    {
       "path": "config/__init__.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-13",
-        "commit": "b4ddf7b30a4fc64eb4c83781c2005c0eefb6e0fa"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -34613,53 +34368,14 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-26",
-        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
         "date": "2026-05-20",
         "commit": "54d47b4dc98072e54c381e445e8669b4e65db96c"
-      }
-    },
-    {
-      "path": "contracts.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
-      }
-    },
-    {
-      "path": "data_processing/processor.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
-      }
-    },
-    {
-      "path": "data_processor_io/rust_engine.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-07",
-        "commit": "0782853295e005af68818617e4725eb980890f43"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
       }
     },
     {
@@ -34704,9 +34420,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-29",
-        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -35770,9 +35486,9 @@
     {
       "path": "realtime/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-27",
-        "commit": "667b3ba078b21c5873e5991a87af0aec005397b2"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -35783,9 +35499,9 @@
     {
       "path": "realtime/transport_file.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-06-09",
-        "commit": "64bd5222b1a4dd4643a1e4da6c702b8146149cfd"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -36225,9 +35941,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-20",
-        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36584,19 +36300,6 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "sidekick/ui/tools_sidebar/chat_tab.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "de6ec7bdeee5883065b3ff5decb5461946bd1f88"
       }
     },
     {

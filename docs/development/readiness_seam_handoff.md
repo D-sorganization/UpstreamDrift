@@ -1,6 +1,6 @@
 # Readiness Program: Seam Retirement and Failure Triage
 
-Updated: 2026-09-07. Program is
+Updated: 2026-09-16. Program is
 [Repository_Management#1505](https://github.com/D-sorganization/Repository_Management/issues/1505).
 This document covers UpstreamDrift #9406 (retire the `src/shared/python` shadow
 tree) and #9474 (triage the `main` failure list). Live work is PR #9569.
@@ -9,10 +9,10 @@ Current state only. History is in git and on the issues.
 
 ## Seam State
 
-Source of truth is `docs/shared_tools/seam_rulings.v1.json`. **16 of 36**
-actionable rulings are `cleaned`, 20 `pending-cleanup`. Inventory totals:
-identical 476, diverged 262, ud-only 1183, tools-only 518. `check_seam_drift.py`
-passes with 17 notes, down from 32.
+Source of truth is `docs/shared_tools/seam_rulings.v1.json`. **20 of 36**
+actionable rulings are `cleaned`, 16 `pending-cleanup`. Inventory totals:
+identical 380, diverged 257, ud-only 1290, tools-only 773. `check_seam_drift.py`
+passes with 10 notes, down from 32.
 
 Retirement works because `src/__init__.py` registers the pinned Tools tree as an
 import **fallback** — a meta-path finder appended to `sys.meta_path`, so a child
@@ -24,7 +24,31 @@ could extend the finished module's path.
 Retired: `deprecation.py`, `README.md`, `chat_contracts`, `file_watcher`,
 `logging_pkg`, `safe_eval.py`, `safe_pandas_eval.py`, `scripting`, `tests`,
 `cors.py`, `rotation_transforms`, `upstream_drift_tools`, `compatibility.py`,
-`codemap`, `programmatic_pid`, `plot_engine`.
+`codemap`, `programmatic_pid`, `plot_engine`, and on 2026-09-16 `chat`,
+`contracts.py`, `data_processing`, `data_processor_io`.
+
+Every `tools-canonical` cluster that could be deleted from this side alone is
+now gone. What remains is `import_aliases.py` (blocked on `ai`, trap 3), the
+`split` clusters (`ai`, `calc_backend`, `sidekick`, `signal_toolkit`,
+`realtime`), the `deferred` ones (`__init__.py`, `config`, `gui_launcher`,
+`reporting`) and the three `ud-canonical` packages that must be upstreamed to
+Tools first. Note that the fallback finder in `src/__init__.py` serves whole
+clusters only (`_cluster_is_still_owned`), so a `split` cluster cannot be
+retired file-by-file: its UD-only modules need a home outside the shared
+namespace, or the redirect in `_seam_redirect.py` needs a UD-only directory
+entry as `theme` and `ui` have, before the overlapping files can go.
+
+Retiring `chat` needed two consumer changes because canonical's
+`ChatDockWidget` takes `ChatConnectionConfig` / `ChatPresentationConfig` /
+`ChatIntegrationHooks` (Tools #4896, UD #9357) instead of 16 keyword
+arguments: `sidekick/ui/tools_sidebar/chat_tab.py` was converged byte-for-byte
+with canonical (the guard permits convergence) and `dashboard/launcher.py` was
+migrated by hand. `chat/_qt/runtime.py` (#8553, #8687) had no consumer outside
+UD's own `_chat_dock_widget_qt.py` and went with it; recover it from history if
+Tools wants that decomposition. `tests/conftest.py` no longer eagerly imports
+`chat` to splice the UD directory onto its `__path__`: with no UD copy left,
+that eager import resolved the top-level `chat` shim before `shared.python`
+existed and left the shim, not the canonical package, in `sys.modules`.
 
 ## Four Traps This Work Has Already Hit
 
@@ -136,6 +160,10 @@ python -m pytest tests/unit/repo_hygiene/test_tools_child_copy_contract.py -q
 
 Retiring a cluster: confirm every tracked file is byte-identical to the pinned
 tree (`git ls-files` — a bare `cmp` sweep counts `__pycache__` and lies), delete,
-set the ruling to `cleaned`, regenerate the inventory, and confirm the drift gate
-still passes. Never mark `cleaned` without deleting: that switches the gate from
-reporting the path to enforcing it.
+set the ruling to `cleaned`, add the root to `REDIRECTED_ROOTS` in
+`src/shared/python/_seam_redirect.py`, drop it from
+`scripts/config/shadow_modules.yaml` and from
+`tests/unit/repo_hygiene/tools_child_copy_missing_counterparts.txt` (both are
+shrink-only ledgers whose tests fail on stale rows), regenerate the inventory,
+and confirm the drift gate still passes. Never mark `cleaned` without deleting:
+that switches the gate from reporting the path to enforcing it.

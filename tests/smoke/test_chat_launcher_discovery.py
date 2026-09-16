@@ -16,6 +16,9 @@ import pytest
 
 REPO_ROOT = Path(__file__).parents[2]
 SRC_ROOT = REPO_ROOT / "src" / "shared" / "python"
+# The chat package is tools-canonical (UD #9406): the UpstreamDrift copy is
+# retired and ``src.shared.python.chat`` resolves to the pinned Tools tree.
+PINNED_TOOLS_SHARED = REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
 
 pytestmark = pytest.mark.smoke
 
@@ -24,11 +27,11 @@ class TestSharedChatImport:
     """Verify shared chat component can be imported and has public API."""
 
     def test_shared_chat_module_exists(self) -> None:
-        """Shared chat module should exist in src/shared/python."""
+        """Shared chat module should exist in the pinned Tools tree."""
         chat_paths = [
+            PINNED_TOOLS_SHARED / "chat" / "__init__.py",
             SRC_ROOT / "chat" / "__init__.py",
             SRC_ROOT / "chat.py",
-            REPO_ROOT / "vendor" / "Tools" / "src" / "chat" / "__init__.py",
         ]
         found = any(p.exists() for p in chat_paths)
         assert found, (
@@ -39,12 +42,14 @@ class TestSharedChatImport:
     def test_shared_chat_public_api(self) -> None:
         """Shared chat should expose public API for consumption."""
         # The shared chat module exports ChatDockWidget and ChatMessageBubble
-        # as its primary public API (see src/shared/python/chat/__init__.py)
+        # as its primary public API (see chat/__init__.py in the pinned tree)
         expected_exports = {
             "ChatDockWidget",
             "ChatMessageBubble",
         }
-        chat_init = SRC_ROOT / "chat" / "__init__.py"
+        chat_init = PINNED_TOOLS_SHARED / "chat" / "__init__.py"
+        if not chat_init.exists():
+            chat_init = SRC_ROOT / "chat" / "__init__.py"
         if chat_init.exists():
             source = chat_init.read_text(encoding="utf-8")
             exported_names = {

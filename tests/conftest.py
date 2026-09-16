@@ -90,7 +90,7 @@ if _updrift_shared_python in _sys.path:
 _sys.path.insert(1, _updrift_shared_python)
 
 
-for _pkg in ("chat", "sidekick", "ai", "shared.python", "src.shared.python"):
+for _pkg in ("sidekick", "ai", "shared.python", "src.shared.python"):
     with contextlib.suppress(ImportError):
         if _pkg == "shared.python" or _pkg == "src.shared.python":
             __import__("shared.python")
