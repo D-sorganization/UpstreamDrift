@@ -176,10 +176,11 @@ def test_weld_wrench_equal_and_opposite_and_zero_at_coincidence() -> None:
     com_a = jnp.array([0.05, 0.1, 0.15], dtype=jnp.float64)
     com_b = jnp.array([0.15, 0.25, 0.35], dtype=jnp.float64)
 
+    site_a = mjx_opt.SiteState(p=p_a, v=v_a, r=r_a, w=w_a, com=com_a)
+    site_b_coincident = mjx_opt.SiteState(p=p_a, v=v_a, r=r_a, w=w_a, com=com_b)
+
     # 1. Coincident sites with zero relative velocity and identity orientation
-    wa_zero, wb_zero = mjx_opt.weld_wrench_jax(
-        p_a, p_a, v_a, v_a, r_a, r_a, w_a, w_a, com_a, com_b
-    )
+    wa_zero, wb_zero = mjx_opt.weld_wrench_jax(site_a, site_b_coincident)
     np.testing.assert_allclose(np.asarray(wa_zero), 0.0, atol=1e-12)
     np.testing.assert_allclose(np.asarray(wb_zero), 0.0, atol=1e-12)
 
@@ -188,9 +189,9 @@ def test_weld_wrench_equal_and_opposite_and_zero_at_coincidence() -> None:
     v_b = v_a + jnp.array([-0.01, 0.02, 0.0], dtype=jnp.float64)
     r_b = r_a
     w_b = w_a
-    wa, wb = mjx_opt.weld_wrench_jax(
-        p_a, p_b, v_a, v_b, r_a, r_b, w_a, w_b, com_a, com_b
-    )
+    site_b = mjx_opt.SiteState(p=p_b, v=v_b, r=r_b, w=w_b, com=com_b)
+
+    wa, wb = mjx_opt.weld_wrench_jax(site_a, site_b)
     wa_np, wb_np = np.asarray(wa), np.asarray(wb)
 
     # Linear forces on body a and b are strictly equal and opposite

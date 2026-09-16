@@ -29,7 +29,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import xml.etree.ElementTree as ET  # serialisation only; parsing is defused
 
@@ -156,38 +156,46 @@ def contact_force_jax(
     return n_ground * magnitude + friction
 
 
+class SiteState(NamedTuple):
+    """World-frame state of one weld site: position, velocity, body rotation, angular velocity, body centre of mass."""
+
+    p: jnp.ndarray
+    v: jnp.ndarray
+    r: jnp.ndarray
+    w: jnp.ndarray
+    com: jnp.ndarray
+
+
+class WeldGains(NamedTuple):
+    """Gains for the weld spring-damper reaction."""
+
+    k: float = WELD_STIFFNESS_N_M
+    c: float = WELD_DAMPING_N_S_M
+    rot_k: float = WELD_ROT_STIFFNESS_N_M_RAD
+    rot_c: float = WELD_ROT_DAMPING_N_M_S
+
+
 def weld_wrench_jax(
-    p_a: jnp.ndarray,
-    p_b: jnp.ndarray,
-    v_a: jnp.ndarray,
-    v_b: jnp.ndarray,
-    r_a: jnp.ndarray,
-    r_b: jnp.ndarray,
-    w_a: jnp.ndarray,
-    w_b: jnp.ndarray,
-    com_a: jnp.ndarray,
-    com_b: jnp.ndarray,
-    weld_k: float = WELD_STIFFNESS_N_M,
-    weld_c: float = WELD_DAMPING_N_S_M,
-    weld_rot_k: float = WELD_ROT_STIFFNESS_N_M_RAD,
-    weld_rot_c: float = WELD_ROT_DAMPING_N_M_S,
+    a: SiteState,
+    b: SiteState,
+    gains: WeldGains = WeldGains(),
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
     """Equal and opposite spatial wrenches on body a and body b.
 
     Computes the spring-damper reaction holding closure site b on site a.
     Returns (wrench_a, wrench_b) where each is a 6-vector (force, torque at CoM).
     """
-    rel = r_a @ r_b.T  # rotation taking b's axes onto a's
+    rel = a.r @ b.r.T  # rotation taking b's axes onto a's
     rotvec = 0.5 * jnp.array(
         [rel[2, 1] - rel[1, 2], rel[0, 2] - rel[2, 0], rel[1, 0] - rel[0, 1]]
     )
-    force_on_b = weld_k * (p_a - p_b) + weld_c * (v_a - v_b)
-    torque_on_b = weld_rot_k * rotvec + weld_rot_c * (w_a - w_b)
+    force_on_b = gains.k * (a.p - b.p) + gains.c * (a.v - b.v)
+    torque_on_b = gains.rot_k * rotvec + gains.rot_c * (a.w - b.w)
     wrench_b = jnp.concatenate(
-        [force_on_b, torque_on_b + jnp.cross(p_b - com_b, force_on_b)]
+        [force_on_b, torque_on_b + jnp.cross(b.p - b.com, force_on_b)]
     )
     wrench_a = jnp.concatenate(
-        [-force_on_b, -torque_on_b + jnp.cross(p_a - com_a, -force_on_b)]
+        [-force_on_b, -torque_on_b + jnp.cross(a.p - a.com, -force_on_b)]
     )
     return wrench_a, wrench_b
 
@@ -260,6 +268,13 @@ def build(
     body_a = int(model.site_bodyid[site_a])
     body_b = int(model.site_bodyid[site_b])
 
+    weld_gains = WeldGains(
+        k=weld_k,
+        c=weld_c,
+        rot_k=WELD_ROT_STIFFNESS_N_M_RAD,
+        rot_c=WELD_ROT_DAMPING_N_M_S,
+    )
+
     def weld_wrenches(d: mjx.Data, xfrc: jnp.ndarray) -> jnp.ndarray:
         """Stiff spring-damper holding closure site b on site a (the dual-grip
         weld the shared simulator solves rigidly)."""
@@ -270,20 +285,9 @@ def build(
         v_a, v_b = jp_a.T @ d.qvel, jp_b.T @ d.qvel
         w_a, w_b = jr_a.T @ d.qvel, jr_b.T @ d.qvel
         wa, wb = weld_wrench_jax(
-            p_a,
-            p_b,
-            v_a,
-            v_b,
-            r_a,
-            r_b,
-            w_a,
-            w_b,
-            d.xipos[body_a],
-            d.xipos[body_b],
-            weld_k,
-            weld_c,
-            WELD_ROT_STIFFNESS_N_M_RAD,
-            WELD_ROT_DAMPING_N_M_S,
+            SiteState(p=p_a, v=v_a, r=r_a, w=w_a, com=d.xipos[body_a]),
+            SiteState(p=p_b, v=v_b, r=r_b, w=w_b, com=d.xipos[body_b]),
+            gains=weld_gains,
         )
         return xfrc.at[body_b].add(wb).at[body_a].add(wa)
 
