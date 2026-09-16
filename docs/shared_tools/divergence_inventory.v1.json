@@ -13,7 +13,7 @@
   "totals": {
     "identical": 424,
     "diverged": 278,
-    "ud-only": 1290,
+    "ud-only": 1291,
     "tools-only": 708,
     "spelling-only": 124
   },
@@ -371,7 +371,7 @@
     "golf_simulator": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 18,
+      "ud-only": 19,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -8841,7 +8841,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "",
-      "ud_bytes": 3499,
+      "ud_bytes": 3729,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8853,7 +8853,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "adapters",
-      "ud_bytes": 34,
+      "ud_bytes": 376,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8926,6 +8926,18 @@
       "package": "golf_simulator",
       "subpackage": "adapters",
       "ud_bytes": 7062,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_simulator/adapters/relay.py",
+      "classification": "ud-only",
+      "package": "golf_simulator",
+      "subpackage": "adapters",
+      "ud_bytes": 8331,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
