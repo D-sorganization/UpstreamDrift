@@ -1090,6 +1090,28 @@
       "web": {
         "mode": "native-window"
       }
+    },
+    {
+      "id": "golf_simulator",
+      "name": "Golf Simulator Console",
+      "description": "Capability-aware destination controls and replay submission for simulator integration",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/tools/golf_simulator/gui.py",
+      "logo": "golf_logo.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "shot_input",
+        "destination_selection",
+        "session_lifecycle",
+        "replay_transport",
+        "uncertainty_recovery"
+      ],
+      "order": 47,
+      "web": {
+        "mode": "route",
+        "route": "/tools/golf-simulator"
+      }
     }
   ]
 }

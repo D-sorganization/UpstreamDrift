@@ -94,6 +94,20 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "golf_simulator"
+    name: "Golf Simulator Console"
+    description: "Capability-aware destination controls and replay submission for simulator integration"
+    type: "special_app"
+    path: "src/tools/golf_simulator/gui.py"
+    launcher:
+      category: "simulation"
+      categories:
+        - "simulation"
+        - "tool"
+      logo: "assets/golf_logo.png"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "putting_green"
     name: "Putting Green"
     description: "Realistic putting green with ball-rolling physics"

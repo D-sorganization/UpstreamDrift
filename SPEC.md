@@ -1,5 +1,33 @@
 # SPEC.md — Repository Specification Document
 
+## Capability-Aware Desktop and Web Controls Through the Existing API (#10196)
+
+Exposes `GolfSessionService` and `ReplaySubmissionCoordinator` through existing FastAPI endpoints, PyQt6 desktop UI, and React web console:
+- API Routes (`src/api/routes/golf_simulator.py`):
+  - `GET /tools/golf-simulator/destinations`: Enumerate available simulator destinations and their capability descriptors.
+  - `POST /tools/golf-simulator/session`: Initialize or switch destination with in-flight conflict rejection (409 Conflict if armed or submitting).
+  - `GET /tools/golf-simulator/session`: Query active session state and destination capabilities.
+  - `DELETE /tools/golf-simulator/session`: Terminate active session and reset service to idle.
+  - `POST /tools/golf-simulator/shot/prepare`: Prepare shot envelope for arming, auditing destination capabilities and contact qualification.
+  - `POST /tools/golf-simulator/shot/arm`: Arm prepared shot with context revision verification and single-use arm token generation.
+  - `POST /tools/golf-simulator/shot/disarm`: Disarm armed shot, returning session to `PREPARED`.
+  - `POST /tools/golf-simulator/shot/cancel`: Cancel prepared/armed shot, resetting session to `IDLE`.
+  - `POST /tools/golf-simulator/shot/submit`: Single-impact submission with pre-send/post-send journal auditing.
+  - `GET /tools/golf-simulator/shot/{id}/status`: Query delivery receipt and acknowledgment status.
+  - `POST /tools/golf-simulator/shot/{id}/resolve`: Operator uncertainty reconciliation without editing raw wire JSON.
+  - `POST /tools/golf-simulator/replay/action`: Monotonic replay transport controls (`play`, `pause`, `stop`, `seek`, `rate`).
+- Desktop GUI & Launcher Embedding (`src/tools/golf_simulator/`):
+  - `MainWidget` (`src/tools/golf_simulator/gui.py`): PyQt6 interface with destination selector, status badge (`DISCONNECTED`, `CONNECTED`, `ARMED`, `SENT_UNCONFIRMED`, `ACCEPTED`, `REJECTED`, `VISUALLY_VERIFIED`), capability-aware disables, replay transport, and operator recovery input.
+  - `FallbackWidget`: Actionable fallback when PyQt6 or GUI dependencies are absent.
+  - `GolfSimulatorEmbedAdapter` (`src/tools/golf_simulator/_embed_adapter.py`): Implements `EmbeddableTool` protocol for seamless integration into the desktop launcher.
+- Web Parity Console (`ui/src/pages/GolfSimulator.tsx`):
+  - Full feature parity web interface providing destination selection, session lifecycle controls, delivery status badges, replay transport, and uncertainty reconciliation.
+  - Registered route `/tools/golf-simulator` in `ui/src/App.tsx`.
+- Launcher and Parity Registries:
+  - Canonical tile `golf_simulator` registered in `src/config/models.yaml` and `src/config/launcher_manifest.json`.
+  - Feature parity entry `tools.golf_simulator` registered with status `parity` in `src/config/feature_parity.json` and matrix regenerated in `docs/development/feature_parity_matrix.md`.
+  - Embed module registered in `FALLBACK_ADAPTER_MODULES` in `src/launchers/embedded_tool_bootstrap.py`.
+
 ## Ground Support Pipeline Modularization and Law of Demeter Abstractions (HO-1 #10155, #10162)
 
 Modularizes the monolithic `run_ground_support.py` script into a tested, cleanly factored package under `src/shared/python/motion_matching/pipeline/`:
