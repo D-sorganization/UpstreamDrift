@@ -159,11 +159,11 @@
   ],
   "specialist_blockers": [10140, 10141],
   "review": {
-    "baseline": "b97e159dcc1686b4fc36351124996862619d8f35",
-    "document": "PROGRESS_REVIEW_2026_09_15.md",
+    "baseline": "33ffde23f",
+    "document": "TURNOVER_CURRENT.md",
     "continuation_prompt": "CONTINUATION_PROMPT.md",
-    "tracking_issue": 10184,
-    "full_product_implemented": false,
-    "first_corrective_parent": 10127
+    "tracking_issue": 10230,
+    "corrective_issues": [10231, 10232, 10233],
+    "full_product_implemented": false
   }
 }
