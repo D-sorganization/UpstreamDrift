@@ -47,15 +47,15 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** local
-- **Issue:** #10188 (child #10199 active; children #10189–#10200)
-- **Branch:** feat/issue-10199-second-simulator
-- **PR:** #10226 (merged; GS-09 #10198); #10225 (merged; GS-08 #10197); #10222 (merged; GS-07 #10196); #10220 (merged; GS-06 #10195); #10217 (merged; GS-05 #10194); #10215 (merged; GS-04 #10193); #10213 (merged; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
-- **Paths:** `docs/plans/golf_simulator_integration/COMMERCIAL_SIMULATOR_EVALUATION.md; src/shared/python/golf_simulator/adapters/relay.py; src/shared/python/golf_simulator/adapters/__init__.py; src/shared/python/golf_simulator/__init__.py; tests/unit/golf_simulator/test_relay_adapter.py`
+- **Issue:** #10188 (child #10200 active; children #10189–#10200)
+- **Branch:** feat/issue-10200-native-avatar-course-feedback
+- **PR:** #10227 (merged; GS-10 #10199); #10226 (merged; GS-09 #10198); #10225 (merged; GS-08 #10197); #10222 (merged; GS-07 #10196); #10220 (merged; GS-06 #10195); #10217 (merged; GS-05 #10194); #10215 (merged; GS-04 #10193); #10213 (merged; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
+- **Paths:** `docs/plans/golf_simulator_integration/NATIVE_AVATAR_COURSE_FEEDBACK_RESEARCH.md; src/shared/python/golf_simulator/contracts.py; src/shared/python/golf_simulator/__init__.py; tests/unit/golf_simulator/test_avatar_course_feedback_research.py`
 - **Started:** 2026-09-15
-- **Last verified:** 2026-09-16 (SELF; GS-00 through GS-10 implemented test-first; all 95 golf_simulator unit tests pass locally, verified under python -O; ruff, black, mypy, and architecture budgets clean)
-- **Summary:** GS-10 (#10199) Second commercial simulator evaluation and Flight Relay Protocol adapter delivered. Documents technical and licensing evaluation across E6 CONNECT, Creative Golf 3D, TrackMan Virtual Golf, and Flight Relay Protocol with user-facing inquiry templates. Implements `FlightRelayAdapter` and `FlightRelayConfig` conforming to `SimulatorAdapter` protocol, handling shot normalization, journal integration, and honest rejection of unsupported proprietary simulator targets (`UnsupportedDestinationError`).
-- **Next step:** Commit, open PR referencing Closes #10199, merge via auto-squash, and proceed to GS-11 (#10200).
-- **Evidence:** tests/unit/golf_simulator/test_relay_adapter.py; docs/plans/golf_simulator_integration/COMMERCIAL_SIMULATOR_EVALUATION.md.
+- **Last verified:** 2026-09-16 (SELF; GS-00 through GS-11 implemented test-first; all 100 golf_simulator unit tests pass locally, verified under python -O; ruff, black, mypy, and architecture budgets clean)
+- **Summary:** GS-11 (#10200) Native GSPro model animation and autonomous course feedback research delivered. Documents Unity runtime constraints and confirms Course Designer produces static AssetBundles with zero dynamic skeletal mesh hooks; confirms Open Connect v1 is strictly unidirectional shot input lacking ball landing, lie, surface, wind, elevation, hazard, or aim feedback; prohibits memory scraping / DLL injection / packet sniffing; establishes turnkey vendor inquiry templates; formalizes Synchronized Companion Presentation Architecture; implements `UnsupportedCapabilityError` and `assert_capability_supported()` in `contracts.py`.
+- **Next step:** Commit, open PR referencing Closes #10200, merge via auto-squash, and close parent Epic #10188.
+- **Evidence:** tests/unit/golf_simulator/test_avatar_course_feedback_research.py; docs/plans/golf_simulator_integration/NATIVE_AVATAR_COURSE_FEEDBACK_RESEARCH.md.
 
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
 
