@@ -37,9 +37,12 @@
 # guard therefore never blocked anything. This file restores the ledger and
 # records the four regressions explicitly rather than laundering them.
 #
-# This coarse top-level ledger has 18 named overlaps after the explicit
+# This coarse top-level ledger has 14 named overlaps after the explicit
 # realtime exception below. Cleaned split roots can still contain UD-only
-# files. The ledger moved 33 -> 17 on 2026-09-03 (UD #9406 PR-3:
+# files. The ledger moved 18 -> 14 on 2026-09-16 (UD #9406: chat,
+# contracts.py, data_processing, data_processor_io deleted; they resolve to
+# the pinned Tools tree through the fallback finder in src/__init__.py).
+# Before that it moved 33 -> 17 on 2026-09-03 (UD #9406 PR-3:
 # logging_pkg, notes, plot_theme, chat_contracts, file_watcher, scripting,
 # safe_eval.py, safe_pandas_eval.py, deprecation.py, cors.py deleted; their
 # src.shared.python.* spellings resolve to the pinned Tools tree through
@@ -57,16 +60,7 @@ shadows:
   calc_backend:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  chat:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   config:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  contracts.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  data_processing:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   gui_launcher:
@@ -95,13 +89,11 @@ shadows:
     sunset_date: "2026-12-31"
 
   # ── Regressions introduced by #8322 while the guard was disabled ───────────
-  # These four UD-side copies were added by commit 0575fb4b8 on 2026-08-01,
-  # the same commit that emptied this ledger. They are recorded here so the
+  # Four UD-side copies were added by commit 0575fb4b8 on 2026-08-01, the
+  # same commit that emptied this ledger. They are recorded here so the
   # ratchet has a truthful starting point, NOT because they are approved.
-  # They are the first entries that should be paid down.
-  data_processor_io:
-    tracking_issue: 8322
-    sunset_date: "2026-12-31"
+  # They are the first entries that should be paid down; data_processor_io
+  # was retired 2026-09-16.
   import_aliases.py:
     tracking_issue: 8322
     sunset_date: "2026-12-31"
