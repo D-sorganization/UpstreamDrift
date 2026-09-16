@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -21,7 +22,7 @@ from src.shared.python.motion_matching.loaders._marker_clusters import (
     y_up_to_z_up_rotation,
 )
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 def capture_to_native_world(points_y_up: Array) -> Array:
@@ -56,7 +57,7 @@ class GroundCalibration:
 
 def calibrate_ground_height(
     points_native: Array,
-    valid: Array,
+    valid: NDArray[Any],
     labels: Sequence[str],
     toe_labels: Sequence[str],
     *,
