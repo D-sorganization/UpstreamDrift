@@ -207,8 +207,9 @@ class ArticulatedSilhouetteRenderer:
     def club_radius_m(self) -> float:
         return self._club_radius_m
 
-    def render(self, request: RenderRequest) -> RenderResult:
-        """Render articulated body and club silhouettes from canonical state vector."""
+    def _validate_request(
+        self, request: RenderRequest
+    ) -> tuple[PinholeCameraModel, int, int]:
         if not isinstance(request, RenderRequest):
             raise TypeError(f"Expected RenderRequest, got {type(request).__name__}")
         if request.camera_id not in self._cameras:
@@ -237,33 +238,28 @@ class ArticulatedSilhouetteRenderer:
                 f"got {request.state_convention!r}"
             )
 
-        state = request.state
-        if len(state) != _CANONICAL_FIELD_COUNT:
+        if len(request.state) != _CANONICAL_FIELD_COUNT:
             raise ValueError(
                 f"ArticulatedSilhouetteRenderer requires {_CANONICAL_FIELD_COUNT} state elements for "
-                f"{CANONICAL_ARTICULATED_CONVENTION!r}, got {len(state)}"
+                f"{CANONICAL_ARTICULATED_CONVENTION!r}, got {len(request.state)}"
             )
 
-        # Map state vector to angle dictionary
-        angles = state_vector_to_joint_dict(state)
+        return camera, width, height
 
-        # Forward kinematics
-        pose = forward_kinematics(angles, lengths=self._segment_lengths)
-        pts = pose.points
-
-        total_px = width * height
-        body_mask = [0] * total_px
-        club_mask = [0] * total_px
-        vis_mask = [1] * total_px
-
-        # 1. Rasterize body segments
+    def _rasterize_body(
+        self,
+        body_mask: list[int],
+        pts: Mapping[str, np.ndarray],
+        camera: PinholeCameraModel,
+        width: int,
+        height: int,
+    ) -> None:
         for p1_name, p2_name, base_r in _BODY_SEGMENTS:
             r = base_r * self._body_scale
             p1 = pts[p1_name]
             p2 = pts[p2_name]
             _rasterize_3d_segment(body_mask, p1, p2, r, camera, width, height)
 
-        # Head sphere above torso_top
         torso_top = pts["torso_top"]
         spine_top = pts["spine_top"]
         head_vec = torso_top - spine_top
@@ -283,12 +279,18 @@ class ArticulatedSilhouetteRenderer:
             height,
         )
 
-        # 2. Rasterize club (shaft from butt to clubhead, plus clubhead)
+    def _rasterize_club(
+        self,
+        club_mask: list[int],
+        pts: Mapping[str, np.ndarray],
+        camera: PinholeCameraModel,
+        width: int,
+        height: int,
+    ) -> None:
         butt = pts["butt"]
         clubhead = pts["clubhead"]
         _rasterize_3d_segment(club_mask, butt, clubhead, 0.015, camera, width, height)
 
-        # Clubhead mass/disk
         r_cam = camera.rotation_world_to_camera
         t_cam = camera.translation_world_to_camera
         zc_head = float(
@@ -305,6 +307,22 @@ class ArticulatedSilhouetteRenderer:
             rx_head = camera.fx * self._club_radius_m / zc_head
             ry_head = camera.fy * self._club_radius_m / zc_head
             _rasterize_ellipse(club_mask, cu, cv, rx_head, ry_head, width, height)
+
+    def render(self, request: RenderRequest) -> RenderResult:
+        """Render articulated body and club silhouettes from canonical state vector."""
+        camera, width, height = self._validate_request(request)
+
+        angles = state_vector_to_joint_dict(request.state)
+        pose = forward_kinematics(angles, lengths=self._segment_lengths)
+        pts = pose.points
+
+        total_px = width * height
+        body_mask = [0] * total_px
+        club_mask = [0] * total_px
+        vis_mask = [1] * total_px
+
+        self._rasterize_body(body_mask, pts, camera, width, height)
+        self._rasterize_club(club_mask, pts, camera, width, height)
 
         return RenderResult(
             body_mask=tuple(body_mask),
