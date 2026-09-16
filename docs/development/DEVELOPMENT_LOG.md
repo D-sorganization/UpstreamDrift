@@ -47,15 +47,15 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** local
-- **Issue:** #10188 (child #10196 active; children #10189–#10200)
-- **Branch:** feat/issue-10196-controls
-- **PR:** #10220 (merged; GS-06 #10195); #10217 (merged; GS-05 #10194); #10215 (merged; GS-04 #10193); #10213 (merged; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
-- **Paths:** `src/api/routes/golf_simulator.py; src/tools/golf_simulator; ui/src/pages/GolfSimulator.tsx; src/config/models.yaml; src/config/launcher_manifest.json; src/config/feature_parity.json; docs/development/feature_parity_matrix.md; tests/unit/api/test_golf_simulator_routes.py; tests/unit/tools/golf_simulator; ui/src/pages/GolfSimulator.test.tsx`
+- **Issue:** #10188 (child #10197 active; children #10189–#10200)
+- **Branch:** feat/issue-10197-windows-remote
+- **PR:** #10222 (merged; GS-07 #10196); #10220 (merged; GS-06 #10195); #10217 (merged; GS-05 #10194); #10215 (merged; GS-04 #10193); #10213 (merged; GS-03 #10192); #10208 (merged; GS-00 #10189, GS-01 #10190, GS-02 #10191); #10201 (merged; planning)
+- **Paths:** `src/shared/python/golf_simulator/discovery.py; src/shared/python/golf_simulator/producer_lock.py; src/shared/python/golf_simulator/remote_bridge.py; src/shared/python/golf_simulator/logging_redaction.py; src/shared/python/golf_simulator/packaging.py; src/shared/python/golf_simulator/journal.py; src/shared/python/golf_simulator/__init__.py; tests/unit/golf_simulator/test_gspro_discovery.py; tests/unit/golf_simulator/test_producer_lock.py; tests/unit/golf_simulator/test_remote_bridge.py; tests/unit/golf_simulator/test_log_redaction.py; tests/unit/golf_simulator/test_journal_retention_recovery.py; tests/unit/golf_simulator/test_windows_packaging.py`
 - **Started:** 2026-09-15
-- **Last verified:** 2026-09-15 (SELF; GS-00 through GS-07 implemented test-first; all unit and parity tests pass locally; ruff, black, mypy, and lod checks clean)
-- **Summary:** GS-07 (#10196) capability-aware desktop and web controls exposed through the existing API (`/tools/golf-simulator/...`). Features destination selection, session lifecycle (IDLE, PREPARED, ARMED, SUBMITTING, UNCERTAIN), single-impact submit at impact trigger, replay transport, delivery status badges (DISCONNECTED, CONNECTED, ARMED, SENT_UNCONFIRMED, ACCEPTED, REJECTED, VISUALLY_VERIFIED), and operator reconciliation for uncertain delivery. Registered as parity tile in models.yaml, launcher_manifest.json, feature_parity.json, and regenerated feature_parity_matrix.md.
-- **Next step:** Commit, open PR for GS-07 (#10196), and merge via auto-squash.
-- **Evidence:** tests/unit/api/test_golf_simulator_routes.py; tests/unit/tools/golf_simulator/test_desktop_controls.py; ui/src/pages/GolfSimulator.test.tsx; tests/config/test_launcher_registry_parity.py; tests/config/feature_parity/test_registry.py.
+- **Last verified:** 2026-09-16 (SELF; GS-00 through GS-08 implemented test-first; all 84 golf_simulator unit tests pass locally, verified under python -O; ruff, black, mypy, and architecture budgets clean)
+- **Summary:** GS-08 (#10197) Windows deployment and authenticated remote-topology layer delivered. Implements configurable installation and endpoint discovery (`SimulatorEndpoint`, `SupportReceipt`, `discover_simulator_installation`) strictly restricting raw vendor socket to loopback (`127.0.0.1`); single-producer session ownership lease (`ProducerLockManager`, `ProducerConflictError`) reporting conflicts without process termination; authenticated remote bridge facade (`LocalBridgeServer`, `RemoteBridgeClient`) with token authentication, bounded queue backpressure, timeouts, and cancellation tokens; structured logging secret redaction (`SecretRedactionFilter`); durable journal crash recovery scanning on startup and retention pruning preserving unresolved records; and Windows packaging readiness diagnostics with strict enforcement against automatic EULA acceptance or binary modification.
+- **Next step:** Commit, open PR referencing Closes #10197, update SPEC.md with PR number, and merge via auto-squash.
+- **Evidence:** tests/unit/golf_simulator/test_gspro_discovery.py; tests/unit/golf_simulator/test_producer_lock.py; tests/unit/golf_simulator/test_remote_bridge.py; tests/unit/golf_simulator/test_log_redaction.py; tests/unit/golf_simulator/test_journal_retention_recovery.py; tests/unit/golf_simulator/test_windows_packaging.py.
 
 ### DL-#10003 · OpenSim Tour-Average Full-Body Matching
 

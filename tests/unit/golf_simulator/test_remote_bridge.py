@@ -149,7 +149,8 @@ async def test_remote_bridge_client_facade() -> None:
     )
     shot = _make_dummy_shot()
 
-    receipt = await client.submit_shot(shot)
+    receipt = await client.submit(shot)
     assert isinstance(receipt, SubmissionReceipt)
     assert receipt.shot_id == shot.shot_id
     assert receipt.state == SubmissionState.CONFIRMED_ACCEPTED
+    assert client.capabilities().shot_input.state.value == "supported"
