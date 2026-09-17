@@ -2,6 +2,8 @@
 
 ## Restart Review — 2026-09-16
 
+Restart delivery: [PR #10274](https://github.com/D-sorganization/UpstreamDrift/pull/10274).
+
 Reviewed main `0ec64e45f`, including timing PR #10253 (`bd2e86b7d`).
 **The immediate delivery blocker is renderer PR #10264**, not a missing plan.
 The project remains partial infrastructure: no usable Shadow Tracker launcher
