@@ -27,6 +27,22 @@ supports a self-managed server with explicit browser suppression. Live
 Gepetto qualification and product-level replay selection are still separate
 requirements under #10254.
 
+## Shadow Tracker Control Fitting and Silhouette Optimization (#10131)
+
+Optimizes skeletal control parameters against calibrated multi-view silhouette sequences with strict physical gate enforcement:
+- **Optimization Configuration & Loss Decomposition (`src/shared/python/shadow_tracker/fitting.py`)**:
+  - `OptimizationConfig`: Validates execution time budgets, iteration limits, relative tolerances, body/club silhouette weights, Frobenius-norm torque regularization weights, and physical penalty scaling.
+  - `ObjectiveBreakdown`: Slotted frozen structure detailing silhouette IoU loss, body IoU, club IoU, torque regularization penalty, physics constraint penalty, and Gate G4 physical acceptance flag.
+- **Physical Priority Over Silhouette Fidelity (Gate G4)**:
+  - Enforces physical feasibility priority: physically non-viable candidates receive substantial penalty terms (`physics_penalty = weight * (1.0 + grip_error)`), guaranteeing that unconstrained kinematic silhouettes cannot override physics violations.
+  - Verification with `compare_equal_budget_baselines`: Kinematic optimization produces lower silhouette loss but fails Gate G4 replay verification, whereas forward dynamics optimization produces valid physical trajectories.
+- **Continuous Budget Management & Cancellation**:
+  - Monitors wall-clock execution time and iteration counts; returns `status="budget_exhausted"` upon budget depletion.
+  - Periodically invokes caller cancellation callbacks; returns `status="cancelled"` cleanly on user interrupt without corrupting state.
+- **Fresh Replay Audit & Checkpoints**:
+  - `_score_fresh_replay`: Performs an independent forward rollout replay audit from the best parameter set, preventing optimizer cache contamination.
+  - `OptimizationCheckpoint`: Records search snapshots at configured checkpoint intervals for optimization auditing and convergence visualization.
+
 ## Shadow Tracker Full-Body Forward Rollout and Auditable Replay (#10130)
 
 Connects real continuous full-body physics forward simulation to Shadow Tracker observation fitting with deterministic replay verification:
