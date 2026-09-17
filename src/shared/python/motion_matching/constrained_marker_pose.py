@@ -132,7 +132,7 @@ def fit_marker_pose(
     if forward_jacobian is not None:
         cost_jacobian(start)
     cost(start)
-    optimum = minimize(
+    optimum = minimize(  # type: ignore[call-overload]
         cost,
         start,
         method="SLSQP",

@@ -248,14 +248,24 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         layout.setContentsMargins(6, 6, 6, 6)
         layout.setSpacing(6)
 
-        # Row 1: Title, Effort Badge, RMS, and Inspection Actions
+        layout.addLayout(self._create_header_row())
+        layout.addLayout(self._create_selector_row())
+
+        self._figure = Figure(figsize=(6, 5), dpi=100)
+        self._canvas = FigureCanvasQTAgg(self._figure)
+        self._ax = cast(Axes3D, self._figure.add_subplot(111, projection="3d"))
+        self._setup_3d_axes()
+        layout.addWidget(self._canvas, stretch=1)
+
+        layout.addLayout(self._create_controls_row())
+
+    def _create_header_row(self) -> QtWidgets.QHBoxLayout:
         row1 = QtWidgets.QHBoxLayout()
         self._title_label = QtWidgets.QLabel("Tour Matching Viewer — No replay loaded")
         font = self._title_label.font()
         font.setBold(True)
         self._title_label.setFont(font)
         row1.addWidget(self._title_label)
-
         row1.addStretch()
 
         self._effort_badge = QtWidgets.QLabel("Torque (τ): —")
@@ -277,10 +287,9 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._open_btn = QtWidgets.QPushButton("Open Replay…")
         self._open_btn.clicked.connect(self._on_open_clicked)
         row1.addWidget(self._open_btn)
+        return row1
 
-        layout.addLayout(row1)
-
-        # Row 2: Catalog Selector and View Configuration
+    def _create_selector_row(self) -> QtWidgets.QHBoxLayout:
         row2 = QtWidgets.QHBoxLayout()
         row2.addWidget(QtWidgets.QLabel("Catalog:"))
         self._catalog_combo = QtWidgets.QComboBox()
@@ -317,16 +326,9 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         row2.addWidget(self._camera_combo)
 
         row2.addStretch()
-        layout.addLayout(row2)
+        return row2
 
-        # 3D Viewport
-        self._figure = Figure(figsize=(6, 5), dpi=100)
-        self._canvas = FigureCanvasQTAgg(self._figure)
-        self._ax = cast(Axes3D, self._figure.add_subplot(111, projection="3d"))
-        self._setup_3d_axes()
-        layout.addWidget(self._canvas, stretch=1)
-
-        # Controls bar: Restart, Play/Pause, Slider, Frame Label, Speed
+    def _create_controls_row(self) -> QtWidgets.QHBoxLayout:
         controls_layout = QtWidgets.QHBoxLayout()
         self._restart_btn = QtWidgets.QPushButton("⏮ Restart")
         self._restart_btn.setFixedWidth(80)
@@ -354,8 +356,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._speed_combo.setCurrentIndex(2)  # Default 1.0x
         self._speed_combo.currentIndexChanged.connect(self._on_speed_changed)
         controls_layout.addWidget(self._speed_combo)
-
-        layout.addLayout(controls_layout)
+        return controls_layout
 
     def _setup_3d_axes(self) -> None:
         self._ax.clear()
@@ -529,34 +530,9 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
             replay, candidate_hash=candidate_hash, engine_name=engine_name
         )
 
-    def render_frame(self, frame_idx: int) -> None:
-        """Evaluate kinematics and render 3D elements for a given frame index."""
-        if self._replay is None or self._spec is None:
-            return
-
-        n_frames = self._replay.frame_count
-        if frame_idx < 0 or frame_idx >= n_frames:
-            return
-
-        self._current_frame = frame_idx
-        t = float(self._replay.time_s[frame_idx])
-        self._frame_label.setText(f"Frame: {frame_idx + 1} / {n_frames} ({t:.3f} s)")
-
-        vframe: ViewerFrame = viewer_frame(self._spec, self._replay, frame_idx)
-        self._rms_label.setText(f"Valid Marker RMS: {vframe.rms_error * 1000.0:.2f} mm")
-
-        camera = (self._ax.elev, self._ax.azim, self._ax.roll)
-        limits = (self._ax.get_xlim(), self._ax.get_ylim(), self._ax.get_zlim())
-        self._setup_3d_axes()
-        self._ax.view_init(elev=camera[0], azim=camera[1], roll=camera[2])
-        self._ax.set_xlim(limits[0])
-        self._ax.set_ylim(limits[1])
-        self._ax.set_zlim(limits[2])
-
-        # 1. Render segments: Cylinders or Line Skeleton
-        render_mode = self._render_mode_combo.currentText()
-        eng_color = ENGINE_COLORS.get(self._engine_name, ENGINE_COLORS["default"])
-
+    def _render_segments(
+        self, vframe: ViewerFrame, eng_color: str, render_mode: str
+    ) -> None:
         if render_mode == "Cylinders":
             polygons = []
             colors = []
@@ -581,7 +557,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                 )
                 self._ax.add_collection3d(line_coll)
 
-        # 2. Render target markers (black)
+    def _render_markers(self, vframe: ViewerFrame, eng_color: str) -> None:
         if vframe.target_markers is not None:
             valid = (
                 vframe.valid_mask
@@ -599,8 +575,6 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                     label="Target Markers",
                     alpha=0.7,
                 )
-
-        # 3. Render model markers (engine colour)
         if vframe.model_markers is not None:
             mm = vframe.model_markers
             self._ax.scatter(
@@ -613,7 +587,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                 alpha=0.9,
             )
 
-        # 4. Render marker error vectors (if enabled)
+    def _render_marker_errors(self, vframe: ViewerFrame) -> None:
         if (
             self._error_overlay_check.isChecked()
             and vframe.target_markers is not None
@@ -634,6 +608,35 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                 )
                 self._ax.add_collection3d(err_coll)
 
+    def render_frame(self, frame_idx: int) -> None:
+        """Evaluate kinematics and render 3D elements for a given frame index."""
+        if self._replay is None or self._spec is None:
+            return
+
+        n_frames = self._replay.frame_count
+        if frame_idx < 0 or frame_idx >= n_frames:
+            return
+
+        self._current_frame = frame_idx
+        t = float(self._replay.time_s[frame_idx])
+        self._frame_label.setText(f"Frame: {frame_idx + 1} / {n_frames} ({t:.3f} s)")
+
+        vframe: ViewerFrame = viewer_frame(self._spec, self._replay, frame_idx)
+        self._rms_label.setText(f"Valid Marker RMS: {vframe.rms_error * 1000.0:.2f} mm")
+
+        camera = (self._ax.elev, self._ax.azim, self._ax.roll)
+        limits = (self._ax.get_xlim(), self._ax.get_ylim(), self._ax.get_zlim())
+        self._setup_3d_axes()
+        self._ax.view_init(elev=camera[0], azim=camera[1], roll=camera[2])
+        self._ax.set_xlim(limits[0])
+        self._ax.set_ylim(limits[1])
+        self._ax.set_zlim(limits[2])
+
+        render_mode = self._render_mode_combo.currentText()
+        eng_color = ENGINE_COLORS.get(self._engine_name, ENGINE_COLORS["default"])
+        self._render_segments(vframe, eng_color, render_mode)
+        self._render_markers(vframe, eng_color)
+        self._render_marker_errors(vframe)
         self._canvas.draw_idle()
 
     def restart_playback(self) -> None:

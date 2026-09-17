@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any
@@ -43,25 +43,22 @@ def _artifact(root: Path, entry: Any) -> Path:
     if not isinstance(entry, dict) or set(entry) != {"path", "sha256"}:
         raise ValueError("Artifact requires path and sha256")
     name = entry["path"]
-    if not isinstance(name, str) or not name or "\\" in name or ":" in name:
-        raise ValueError("Artifact path must be relative POSIX path")
-    relative = PurePosixPath(name)
-    if relative.is_absolute() or ".." in relative.parts:
-        raise ValueError("Artifact path must be relative without escape")
-    path = (root / name).resolve()
-    if not path.is_relative_to(root):
-        raise ValueError("Artifact path escapes bundle root")
-    digest = entry["sha256"]
-    if (
-        not isinstance(digest, str)
-        or hashlib.sha256(path.read_bytes()).hexdigest() != digest
-    ):
+    posix = PurePosixPath(name)
+    if posix.is_absolute() or ".." in posix.parts:
+        raise ValueError("Artifact path must be a relative subdirectory entry")
+    resolved = (root / Path(posix)).resolve()
+    if not resolved.is_relative_to(root.resolve()) or not resolved.is_file():
+        raise ValueError("Artifact path escapes manifest directory")
+    digest = hashlib.sha256(resolved.read_bytes()).hexdigest()
+    if digest != entry["sha256"]:
         raise ValueError(f"Artifact hash mismatch: {name}")
-    return path
+    return resolved
 
 
-def _array(value: Any, shape: tuple[int, ...], name: str) -> NDArray[np.float64]:
-    result = np.array(value, dtype=float, copy=True)
+def _array(source: Any, shape: tuple[int, ...], name: str) -> NDArray[Any]:
+    if source is None:
+        raise ValueError(f"Missing array: {name}")
+    result = np.array(source, dtype=float, copy=True)
     if result.shape != shape or not np.isfinite(result).all():
         raise ValueError(f"{name} requires finite shape {shape}")
     result.flags.writeable = False
@@ -80,7 +77,56 @@ class SavedSimscapeReplay:
     coordinate_names: tuple[str, ...]
     arrays: Mapping[str, NDArray[Any]]
     manifest_path: Path
-    artifact_paths: Mapping[str, Path] = MappingProxyType({})
+    artifact_paths: Mapping[str, Path] = field(default_factory=dict)
+
+
+def _load_trajectory_arrays(
+    traj_path: Path, names: list[str], duration: float, n_expected: Any, k_markers: int
+) -> tuple[dict[str, NDArray[Any]], NDArray[Any], int]:
+    raw = loadmat(traj_path)
+    time = np.asarray(raw.get("time_s"), dtype=float).reshape(-1)
+    if time.size < 2 or not np.isfinite(time).all() or np.any(np.diff(time) <= 0):
+        raise ValueError("Replay clock requires finite increasing samples")
+    if not np.isclose(time[0], 0, atol=1e-12, rtol=0) or not np.isclose(
+        time[-1], duration, atol=1e-9, rtol=0
+    ):
+        raise ValueError("Manifest horizon differs from original replay clock")
+    n, d = len(time), len(names)
+    if k_markers == 0 or n_expected != n:
+        raise ValueError("Missing markers or inconsistent sample count")
+    arrays: dict[str, NDArray[Any]] = {"time_s": _array(time, (n,), "time_s")}
+    for key in ("q", "qd", "qdd", "omega"):
+        arrays[key] = _array(raw.get(key), (n, d), key)
+    tau = np.array(raw.get("tau"), dtype=float, copy=True)
+    if tau.shape != (n, d):
+        raise ValueError("tau requires the recorded coordinate shape")
+    tau_valid = np.isfinite(tau)
+    tau.flags.writeable = False
+    tau_valid.flags.writeable = False
+    arrays.update(tau=tau, tau_valid=tau_valid)
+    arrays["markers_m"] = _array(raw.get("prediction"), (n, k_markers, 3), "prediction")
+    return arrays, time, n
+
+
+def _load_target_arrays(
+    target_path: Path, time: NDArray[Any], n: int, k_markers: int
+) -> dict[str, NDArray[Any]]:
+    with np.load(target_path, allow_pickle=False) as target:
+        if not np.array_equal(target["time_s"], time):
+            raise ValueError("Target clock differs from retained replay")
+        valid = np.array(target["valid"], copy=True)
+        points = np.array(target["target_m"], dtype=float, copy=True)
+    if (
+        valid.dtype != np.bool_
+        or valid.shape != (n, k_markers)
+        or points.shape != (n, k_markers, 3)
+    ):
+        raise ValueError("Invalid target/mask shape or type")
+    if not valid.any() or not np.isfinite(points[valid]).all():
+        raise ValueError("Observed target markers must be finite")
+    valid.flags.writeable = False
+    points.flags.writeable = False
+    return {"target_m": points, "valid": valid}
 
 
 def load_simscape_bundle(path: Path | str) -> SavedSimscapeReplay:
@@ -131,10 +177,6 @@ def load_simscape_bundle(path: Path | str) -> SavedSimscapeReplay:
         model.get("coordinate_order", [])
     ):
         raise ValueError("Model/candidate coordinate inventory mismatch")
-    raw = loadmat(files["trajectory"])
-    time = np.asarray(raw.get("time_s"), dtype=float).reshape(-1)
-    if time.size < 2 or not np.isfinite(time).all() or np.any(np.diff(time) <= 0):
-        raise ValueError("Replay clock requires finite increasing samples")
     duration = doc.get("duration_s")
     if (
         isinstance(duration, bool)
@@ -142,42 +184,15 @@ def load_simscape_bundle(path: Path | str) -> SavedSimscapeReplay:
         or not np.isfinite(duration)
     ):
         raise ValueError("Invalid replay duration")
-    if not np.isclose(time[0], 0, atol=1e-12, rtol=0) or not np.isclose(
-        time[-1], duration, atol=1e-9, rtol=0
-    ):
-        raise ValueError("Manifest horizon differs from original replay clock")
     if not np.isclose(
         report.get("duration_s", -1), duration, atol=1e-9, rtol=0
     ) or not np.isclose(candidate.get("duration_s", -1), duration, atol=1e-9, rtol=0):
         raise ValueError("Report/candidate horizon mismatch")
-    n, d = len(time), len(names)
     k = len(candidate.get("marker_labels", []))
-    if k == 0 or report.get("n_samples") != n:
-        raise ValueError("Missing markers or inconsistent sample count")
-    arrays: dict[str, NDArray[Any]] = {"time_s": _array(time, (n,), "time_s")}
-    for key in ("q", "qd", "qdd", "omega"):
-        arrays[key] = _array(raw.get(key), (n, d), key)
-    # Missing effort samples remain missing; never manufacture zero torque.
-    tau = np.array(raw.get("tau"), dtype=float, copy=True)
-    if tau.shape != (n, d):
-        raise ValueError("tau requires the recorded coordinate shape")
-    tau_valid = np.isfinite(tau)
-    tau.flags.writeable = False
-    tau_valid.flags.writeable = False
-    arrays.update(tau=tau, tau_valid=tau_valid)
-    arrays["markers_m"] = _array(raw.get("prediction"), (n, k, 3), "prediction")
-    with np.load(files["target"], allow_pickle=False) as target:
-        if not np.array_equal(target["time_s"], time):
-            raise ValueError("Target clock differs from retained replay")
-        valid = np.array(target["valid"], copy=True)
-        points = np.array(target["target_m"], dtype=float, copy=True)
-    if valid.dtype != np.bool_ or valid.shape != (n, k) or points.shape != (n, k, 3):
-        raise ValueError("Invalid target/mask shape or type")
-    if not valid.any() or not np.isfinite(points[valid]).all():
-        raise ValueError("Observed target markers must be finite")
-    valid.flags.writeable = False
-    points.flags.writeable = False
-    arrays.update(target_m=points, valid=valid)
+    arrays, time, n = _load_trajectory_arrays(
+        files["trajectory"], names, float(duration), report.get("n_samples"), k
+    )
+    arrays.update(_load_target_arrays(files["target"], time, n, k))
     return SavedSimscapeReplay(
         run_id,
         status,

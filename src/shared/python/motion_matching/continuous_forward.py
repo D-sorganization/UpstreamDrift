@@ -97,7 +97,7 @@ def integrate_forward(
         (0.0, float(clock[-1])),
         initial,
         t_eval=clock,
-        method=method,
+        method=method,  # type: ignore[arg-type]
         rtol=rtol,
         atol=atol,
         max_step=max_step,
