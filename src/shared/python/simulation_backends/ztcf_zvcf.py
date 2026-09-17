@@ -21,9 +21,9 @@ as ZVCF because it answers a different intervention question.
 For the planar double pendulum the bias force is ``C(q, v) v + g(q) + d(v)``.
 At ``v = 0`` the Coriolis term (quadratic in velocity) and the viscous damping
 term (linear in velocity) both vanish, so ``bias(q, 0) == g(q)``. The ZVCF
-expression therefore reduces to ``solve(M, tau - g(q))``, matching the
-analytical ground truth in
-:meth:`PendulumPhysicsEngine.compute_zvcf`.
+expression therefore reduces to ``solve(M, -g(q))`` with control zeroed ($u = 0$).
+By contrast, the control-preserved zero-velocity diagnostic evaluates
+``solve(M, tau - g(q))``.
 
 # AGENT-NOTE: These are POINTWISE / INSTANTANEOUS decompositions evaluated at
 # each measured state along a trajectory -- they are NOT forward-integrated

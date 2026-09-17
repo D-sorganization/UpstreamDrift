@@ -264,6 +264,56 @@ class NativePinocchioModel:
             raise ValueError("Invalid native closure residuals")
         return pose, velocity
 
+    def closure_reaction_wrench(
+        self, frame: str = "world"
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+        """Return (force_N, torque_Nm, point_m) for the active weld constraint.
+
+        Extracts the 6D spatial contact wrench from constraint_data[0].contact_force.
+        If frame == "world", transports the contact force from the local weld constraint
+        frame to the world frame using the weld's world placement.
+        """
+        if len(self.constraint_data) != 1:
+            raise ValueError("Expected exactly one native weld closure")
+        contact = self.constraint_data[0]
+        contact_force = getattr(contact, "contact_force", None)
+        if contact_force is None:
+            raise ValueError("Constraint data does not contain contact_force")
+        constraint = self.constraints[0]
+        joint_id = getattr(
+            constraint, "joint1_id", getattr(constraint, "joint1Id", None)
+        )
+        joint_placement = getattr(
+            constraint, "joint1_placement", getattr(constraint, "joint1Placement", None)
+        )
+
+        if frame == "world" and joint_id is not None and joint_placement is not None:
+            weld_world_pose = self.data.oMi[joint_id] * joint_placement
+            if hasattr(contact_force, "linear") and hasattr(contact_force, "angular"):
+                world_force = weld_world_pose.act(contact_force)
+                f = np.asarray(world_force.linear, dtype=float).copy()
+                tau = np.asarray(world_force.angular, dtype=float).copy()
+            else:
+                raw_vec = np.asarray(contact_force, dtype=float).reshape(-1)
+                rot = weld_world_pose.rotation
+                f = (rot @ raw_vec[:3]).copy()
+                tau = (rot @ raw_vec[3:]).copy()
+            point = np.asarray(weld_world_pose.translation, dtype=float).copy()
+        else:
+            if hasattr(contact_force, "linear") and hasattr(contact_force, "angular"):
+                f = np.asarray(contact_force.linear, dtype=float).copy()
+                tau = np.asarray(contact_force.angular, dtype=float).copy()
+            else:
+                raw_vec = np.asarray(contact_force, dtype=float).reshape(-1)
+                f = raw_vec[:3].copy()
+                tau = raw_vec[3:].copy()
+            point = np.zeros(3)
+
+        f.flags.writeable = False
+        tau.flags.writeable = False
+        point.flags.writeable = False
+        return f, tau, point
+
     def closure_residuals(
         self,
         coordinates: Mapping[str, float],

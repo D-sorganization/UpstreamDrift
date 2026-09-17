@@ -29,6 +29,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Package B product polish delivered test-first: SimulationDataStore extended with replay cataloging, manifest discovery, and hash/path verification. TourMatchingViewerWidget upgraded with shared catalog selection for run102 (and all registered runs), source-time clock speed controls (0.25x, 0.5x, 1.0x, 2.0x via MonotonicReplayClock), restart control, persistent camera across scrubbing/playback, multi-angle camera presets, true 3D cylinder rendering (Poly3DCollection and cylinder_faces), toggleable marker error vectors, explicit unavailable torque badge, and interactive inspection dialogs for the verified R2025b qualification report and cylinder animation GIF. Zero claims that playback reruns physics.
 - **Next step:** Package B product polish is complete on feat/10285-native-saved-replay. Proceed to Package C (Native Counterfactual Qualification) under epic #10286 in a separate worktree following SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md.
 
+### DL-#10286 · Native Swing ZTCF/ZVCF and Reaction-Wrench Analysis
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10286 (sibling #10285)
+- **Branch:** feat/10285-native-saved-replay
+- **Paths:** src/shared/python/motion_matching/counterfactual.py; src/engines/physics_engines/pinocchio/python/native_model.py; tests/unit/motion_matching/test_native_counterfactual.py; docs/development/simscape_tour_matching
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 (SELF; 8 unit tests pass in test_native_counterfactual.py; ruff check and format clean; mypy clean with 0 errors; architecture budget and divergence inventory pass)
+- **Summary:** Delivered CF-1, CF-2, and CF-3 test-first for epic #10286: explicit versioned counterfactual intervention contracts (actual, ZTCF, ZVCF, control increments), immutable SpatialWrench with Varignon moment transport and action-reaction negation, NativeConstrainedCounterfactualProvider ensuring zero caller mutation and evaluating closed-loop constrained accelerations and reaction wrenches, 3D spatial power (P = F . v + M . omega), mechanical work, linear and angular impulse integrals, and export to engine-neutral SpatialWrenchTrajectory. Qualified closure_reaction_wrench extraction on NativePinocchioModel. Fixed stale shared ZVCF docstring claiming tau - g.
+- **Next step:** Port forward/branched ZTCF and real-engine capability matrix across remaining engines (CF-4, CF-5) and wire to tour matching viewer counterfactual inspection (CF-7).
+
 ### DL-#9967 · Native Simscape Tour Matching
 
 - **State:** in_progress
