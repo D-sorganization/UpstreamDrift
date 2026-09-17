@@ -97,7 +97,6 @@ open. Preserve explicit ground configuration in independent replay.
   all 11 closure and 11 contact integration tests pass afterward, including
   explicit rejection of undefined derivatives at the rotation-pi log branch. Next:
   merge numerical prerequisites before constrained Pink task assembly.
-
 - **Solver Integration (#10254, #10255; 2026-09-16):** Reproduced missing
   ground-contact state terms in inherited Pinocchio acceleration derivatives;
   added exact local contact-force partials and constrained chain-rule composition.

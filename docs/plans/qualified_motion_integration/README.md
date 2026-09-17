@@ -122,22 +122,6 @@ Manual publication remains blocked by its existing inventory requirement.
 
 ## Delegation Contract
 
-### Finite Weld Boundary (#10260)
-
-Pinocchio 3.8 defines the six-component pose residual as `-log6(c1Mc2)`.
-Its constraint velocity is expressed in contact frame 1, so the finite pose
-derivative is `Jlog6(c1Mc2.inverse()) @ J_constraint`. The old raw Jacobian
-agreed only at closure. Independent displaced-wrist checks reproduced errors
-of 0.0193 and 0.0726 before correction, then passed with `rtol=2e-6`,
-`atol=2e-7` and centered step `1e-6`. Acceleration residuals retain the raw
-constraint Jacobian. Derivative evaluation rejects rotations within `1e-7`
-rad of the principal-log branch at pi; finite differences also require a
-margin of twice their scalar-coordinate step. Both sides of the cut are
-tested independently. The 11 real-engine regression tests are in
-`tests/integration/motion_matching/test_native_weld_derivatives.py`.
-
-### Worker Requirements
-
 Every worker receives one issue, owned files, exact public signatures,
 preconditions/postconditions, a failing-first test list, a real validation
 command and explicit exclusions. No worker chooses a new plant, denominator,
