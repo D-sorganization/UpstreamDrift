@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-crocoddyl-polynomial-action-inventory",
+      "owner": "UpstreamDrift issue #10269",
+      "resolution": "Inventory polynomial Crocoddyl action models, exact discrete RK4 chain-rule derivatives, BoxFDDP coefficient bounds, and independent replay diagnostics before manual coverage. Local action derivatives and box convergence provide numerical feasibility evidence, not full-horizon physical acceptance."
+    },
+    {
       "id": "UP-D1-pink-adapter-inventory",
       "owner": "UpstreamDrift issue #10257",
       "resolution": "Inventory the shared Pink adapter step, hard equality and limit forwarding, configuration geometry cache, nq/nv manifold integration and explicit solver failure contracts before manual coverage. Native adapter tests do not qualify full-body fitting or physical acceptance."
