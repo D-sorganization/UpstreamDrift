@@ -50,6 +50,15 @@ Completes the modularization of the ground support execution pipeline by moving 
 - Bitwise Receipt & Simulation Parity:
   - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
 
+## Crocoddyl Polynomial Action Model (#10269)
+
+Integrates global degree-six polynomial actuation into a Crocoddyl `ActionModelAbstract`
+for full-body motion matching. The action represents continuous RK4 steps over fixed
+substep intervals, computing analytical derivatives `Fx` and `Fu` through the exact
+chain rule on discrete full-body sensitivity tensors. Supports box-constrained optimization
+over coefficient increments, unactuated root mapping, active and bilateral contact states,
+and independent replay diagnostics.
+
 ## Global Polynomial Full-Body Step (#10265)
 
 Full-body control parameters are one row-major seven-coefficient Bernstein
