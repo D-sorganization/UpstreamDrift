@@ -507,12 +507,17 @@ class PolynomialShootingProblem:
             state[: self._physical] - expected
             for state, expected in zip(states[1:], replay, strict=True)
         ]
-        zeros = np.zeros(self._parameters)
-        lower_violation, upper_violation = zeros, zeros.copy()
+        zeros: Array = np.zeros(self._parameters, dtype=float)
+        lower_violation: Array = zeros
+        upper_violation: Array = zeros.copy()
         if self.coefficient_bounds is not None:
             lower, upper = self.coefficient_bounds
-            lower_violation = np.maximum(lower - coefficients, 0.0)
-            upper_violation = np.maximum(coefficients - upper, 0.0)
+            lower_violation = np.asarray(
+                np.maximum(lower - coefficients, 0.0), dtype=float
+            )
+            upper_violation = np.asarray(
+                np.maximum(coefficients - upper, 0.0), dtype=float
+            )
         return _diagnostics(
             _DiagnosticParts(
                 coefficients,
