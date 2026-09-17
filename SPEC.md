@@ -1,5 +1,25 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Modern and Historical Footage Qualification Workflows (#10133)
+
+Qualifies reference modern footage and historical pilot archive workflows with lineage deduplication, rights auditing, and multi-camera synchronization validation:
+- **Lineage Deduplication and Split Isolation (`src/shared/python/shadow_tracker/footage_workflows.py`)**:
+  - `FilmLineage`: Encapsulates canonical film metadata, recording source, recording year, golfer identity, and associated re-encoded `known_asset_ids`.
+  - `validate_split_isolation`: Detects film and asset leakage across dataset splits, raising `ValueError` if any film or re-encoded asset spans both train and holdout splits.
+  - `DeduplicationSplitter`: Deterministically partitions collections of film lineages into train and holdout sets while guaranteeing split isolation.
+- **Rights, Lineage, and Attribution Auditing**:
+  - `RightsAuditReport`: Slotted frozen structure detailing asset rights clearance, golfer attribution confirmation, and flagged reasons.
+  - `audit_asset_rights`: Audits `SourceAsset` records. Enforces that unreviewed, unknown, or restricted rights (`is_cleared_for_release=False`) and unconfirmed golfer attribution block clearance for public model training or release.
+- **Multi-Camera Physical Synchronization Validation**:
+  - `SyncValidationResult`: Slotted frozen structure recording synchronization validity, maximum drift, overlap duration, and refusal reason.
+  - `validate_multiview_synchronization`: Verifies temporal overlap and clock alignment between multi-camera observation sequences. Returns `is_synchronous=False` with `refusal_reason="non_overlapping_temporal_windows"` if temporal ranges do not intersect, or `refusal_reason="excessive_clock_drift"` if maximum frame drift exceeds the $10$ ms allowable tolerance.
+- **Reference Degradation Harness**:
+  - `DegradationConfig` & `DegradationHarness`: Simulates archive-like visual degradation (spatial downscaling, blur, additive noise, and telecine frame dropping cadence) on high-resolution modern ground truth to test model degradation curves and abstention boundaries.
+- **Historical Pilot Catalog & Accounting**:
+  - `PilotEntry` & `HistoricalPilotCatalog`: Resumable catalog tracking historical pilot runs with clip metadata, suitability grades (`unusable`, `qualitative_only`, `kinematic_candidate`, `qualified`), annotation minutes, and compute seconds.
+  - `compute_pilot_yield`: Computes discovery-to-acceptance yield and aggregate labor and compute costs.
+  - `get_failed_cases_inventory`: Returns all non-qualifying pilot clips to avoid survivorship bias in archival evaluation.
+
 ## Optional Viewer Replay and Lifecycle (#10256)
 
 Gepetto and MeshCat adapters persist native Pinocchio visualizers, pass distinct
@@ -225,7 +245,6 @@ Binds silhouette projection to articulated kinematic model state and correctly c
   - Enforces matching dimensions between `RenderRequest.image_size_px` and `PinholeCameraModel.effective_image_size` (including `crop_box` dimensions).
   - Explicitly rejects incompatible or unbound state conventions with descriptive `ValueError`.
 
->>>>>>> SPEC.md (theirs)
 ## Anthropometric Document Rebuild and Freshness Gate (HO-11 #10250, #10162)
 
 Rebuilds full-body anthropometric model specifications and ground-support receipts after the HO-9 (#10249) de Leva 1996 shank parameter corrections, enforcing document freshness via continuous integration:
