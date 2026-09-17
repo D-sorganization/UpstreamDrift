@@ -35,7 +35,7 @@ def grouped_dop853(block_sizes: tuple[int, ...], state_size: int) -> type[DOP853
         def _estimate_error_norm(
             self, stages: NDArray[np.float64], step: float, scale: NDArray[np.float64]
         ) -> float:
-            existing_norm = super()._estimate_error_norm
+            existing_norm = super()._estimate_error_norm  # type: ignore[misc]
             return max(
                 float(existing_norm(stages[:, block], step, scale[block]))
                 for block in blocks
