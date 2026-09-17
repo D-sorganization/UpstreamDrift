@@ -1112,6 +1112,27 @@
         "mode": "route",
         "route": "/tools/golf-simulator"
       }
+    },
+    {
+      "id": "shadow_tracker",
+      "name": "Shadow Tracker",
+      "description": "Articulated silhouette tracking, manual mask correction, and forward rollout verification",
+      "category": "motion_capture",
+      "type": "special_app",
+      "path": "src/tools/shadow_tracker/__main__.py",
+      "logo": "shadow_tracker.svg",
+      "status": "utility",
+      "capabilities": [
+        "video_import",
+        "manual_mask_editing",
+        "bundle_persistence",
+        "worst_frame_navigation",
+        "canonical_export"
+      ],
+      "order": 49,
+      "web": {
+        "mode": "native-window"
+      }
     }
   ]
 }
