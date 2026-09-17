@@ -1,5 +1,20 @@
 # Simscape Tour-Average Fit Continuation
 
+## Qualified Motion Integration (#10254)
+
+- **Read First:** [Integration Boundaries and Delegation Plan](docs/plans/qualified_motion_integration/README.md).
+- **First Numerical Boundary (#10255):** Full-body Pinocchio derivatives now
+  include the state dependence of shared ground forces and contact Jacobians.
+  Real Pinocchio 3.8 tests reproduce the previous active-contact failure and
+  pass after the chain-rule correction. This is derivative qualification,
+  not a full-swing fitting or contact-model acceptance claim.
+- **Bounded Work:** #10256 viewer lifecycle and #10257 Pink state/constraint
+  adapters are separate implementation slices; review actual tests and CI
+  before treating either as delivered.
+- **Preserve:** #10250 owns anthropometric evidence regeneration; #10108 and
+  #10159 retain their model-calibration and MJX reconciliation scope. Keep the
+  full #10162 physical gates and MATLAB R2025b requirement.
+
 ## Shadow Tracker Current Turnover (#10122)
 
 - **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)

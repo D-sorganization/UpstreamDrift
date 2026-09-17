@@ -34,6 +34,19 @@ Calibrates the hip coordinate zero-twist angle from optical motion capture data 
   - Verified 0 lower-limb `range_of_motion_flags` on the IK reference for both captures (`driver` and `iron`).
   - Cross-engine setup parity (`verify_setup_parity.py`) re-verified across MuJoCo, Drake, and Pinocchio.
 
+## Contact-Aware Full-Body Derivatives (#10255, #10254)
+
+The shared sphere-contact law exposes world-force derivatives with respect to
+center and velocity, including the zero-slip limit and explicit nonsmooth
+activation/clipping status. `FullBodyPinocchioModel.acceleration_derivatives`
+composes these through constrained dynamics and the changing contact Jacobian.
+`contact_effort_derivatives` returns detached read-only matrices in the caller's
+declared coordinate order without mutating the constrained-dynamics cache.
+The force law, geometry, controls and historical evidence remain unchanged.
+Real-engine directional tests cover active/no contact, moving joints, reordered
+coordinates and cache isolation. This boundary is a prerequisite for full-body
+Crocoddyl; it does not qualify a fitted swing or change solver defaults.
+ 
 ## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
 
 Completes the modularization of the ground support execution pipeline by moving remaining orchestration stages and CLI utilities from `run_ground_support.py` into the reusable `src.shared.python.motion_matching.pipeline` package, reducing `run_ground_support.py` from 779 lines to 374 lines (satisfying the <400 line architecture budget):
@@ -64,6 +77,7 @@ Binds silhouette projection to articulated kinematic model state and correctly c
   - Enforces matching dimensions between `RenderRequest.image_size_px` and `PinholeCameraModel.effective_image_size` (including `crop_box` dimensions).
   - Explicitly rejects incompatible or unbound state conventions with descriptive `ValueError`.
 
+>>>>>>> SPEC.md (theirs)
 ## Anthropometric Document Rebuild and Freshness Gate (HO-11 #10250, #10162)
 
 Rebuilds full-body anthropometric model specifications and ground-support receipts after the HO-9 (#10249) de Leva 1996 shank parameter corrections, enforcing document freshness via continuous integration:
@@ -5294,6 +5308,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
 | 2026-09-16 | #10274 | Correct Shadow Tracker estimated-timing capability and refresh restart guidance for renderer, mask persistence and native timestamp evidence. |
 | 2026-09-16 | #10232 | Bind silhouette rendering to articulated model state and clip visible geometry across camera boundaries. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
@@ -6954,4 +6969,3 @@ The general optimal-control extra retains its separate version range (#9842).
 - Replaced `np.linalg.norm()` with `math.sqrt(np.vdot())` for small 3D vectors in `src/tools/capture_rig/model_frame_source.py` and `src/tools/capture_rig/reference_volumes.py` to bypass linear algebra overhead. (spec-exempt: micro-optimization)
 | 2024-05-20 | #<pr> | Replaced `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` in `src/motion_capture/reconstruct/model/fit2d.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
 - Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for small 1D arrays in `bunker_shot_gui` and `simulation_backends_launcher` for performance improvement. (spec-exempt: micro-optimization)
-

@@ -73,6 +73,15 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Solver Integration (#10254, #10255; 2026-09-16):** Reproduced missing
+  ground-contact state terms in inherited Pinocchio acceleration derivatives;
+  added exact local contact-force partials and constrained chain-rule composition.
+  Real Pinocchio 3.8 integration tests cover active/no contact, moving joints,
+  reversed coordinate order, nonfinite input, contact kinks and cache isolation.
+  Plan: `docs/plans/qualified_motion_integration/README.md`. Next: review/merge
+  derivative boundary, then integrate #10257 Pink and #10256 viewer adapters;
+  preserve #10250 evidence refresh and all full-horizon qualification gates.
+
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #10062 (children #10063 to #10070); continued by epic #10162 (MM-1 to MM-10, HO-1 to HO-10)
