@@ -19,6 +19,8 @@ if TYPE_CHECKING:
         RESULT_BUNDLE_SCHEMA_VERSION,
         SHOT_SCHEMA_VERSION,
         SUBJECT_BINDING_SCHEMA_VERSION,
+        CANONICAL_ARTICULATED_CONVENTION,
+        POINT_LANDMARKS_CONVENTION,
         CameraTrack,
         CandidateResult,
         FitRequest,
@@ -38,6 +40,12 @@ if TYPE_CHECKING:
         Shot,
         SilhouetteRenderer,
         SubjectModelBinding,
+    )
+    from .articulated_renderer import (
+        CANONICAL_ARTICULATED_STATE_FIELDS,
+        ArticulatedSilhouetteRenderer,
+        state_vector_from_joint_dict,
+        state_vector_to_joint_dict,
     )
     from .ingestion import (
         AffineTimingMapping,
@@ -166,13 +174,22 @@ _LAZY_EXPORTS: dict[str, str] = {
     "estimate_short_window_velocity": ".initialization",
     "generate_monocular_hypotheses": ".initialization",
     "fit_initial_state_multiview": ".initialization",
+    "CANONICAL_ARTICULATED_CONVENTION": ".contracts",
+    "POINT_LANDMARKS_CONVENTION": ".contracts",
+    "ArticulatedSilhouetteRenderer": ".articulated_renderer",
+    "CANONICAL_ARTICULATED_STATE_FIELDS": ".articulated_renderer",
+    "state_vector_from_joint_dict": ".articulated_renderer",
+    "state_vector_to_joint_dict": ".articulated_renderer",
 }
 
 __all__ = [
     "AffineTimingMapping",
     "AnalyticSilhouetteRenderer",
+    "ArticulatedSilhouetteRenderer",
     "CANDIDATE_RESULT_SCHEMA_VERSION",
     "CAMERA_TRACK_SCHEMA_VERSION",
+    "CANONICAL_ARTICULATED_CONVENTION",
+    "CANONICAL_ARTICULATED_STATE_FIELDS",
     "CameraSynchronization",
     "CameraTrack",
     "CandidateResult",
@@ -192,6 +209,7 @@ __all__ = [
     "MultiviewFitResult",
     "OcclusionReport",
     "OpenCvVideoDecoder",
+    "POINT_LANDMARKS_CONVENTION",
     "PiecewiseTimingMapping",
     "PinholeCameraModel",
     "RenderRequest",
@@ -236,6 +254,8 @@ __all__ = [
     "ingest_source_asset",
     "map_frame_to_observation",
     "project_point_to_pixel",
+    "state_vector_from_joint_dict",
+    "state_vector_to_joint_dict",
     "to_pipeline_camera",
     "track_occlusion_and_identity",
     "validate_frame_sequence",
