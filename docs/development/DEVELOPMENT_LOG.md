@@ -78,6 +78,25 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   Real MeshCat probing exposed and corrected shared-root deletion and owned
   process cleanup defects. Live Gepetto qualification and production replay
   integration remain outstanding under #10254.
+
+- **LoD Regression (#10254; 2026-09-16):** Reproduced the main-derived
+  `inputs.calibration2.offsets.items()` architecture failure before the change.
+  Resolve the owned offset mapping once before formatting the report; preserve
+  explicit/calibrated/attachment precedence. Seven reference-stage tests and
+  the full 3,221-file LoD no-growth scan pass; the baseline was not changed.
+
+- **Integration Turnover (#10254; 2026-09-16):** Post-compaction Crocoddyl ABI
+  and Pink feasible/infeasible QP probes pass on the preserved WSL environment.
+  Added bounded TDD/DbC/LoD/DRY worker contracts and three Pink pipeline packets.
+  Main authority is 0ec64e45; #10250/#10251 are closed. Native action assembly,
+  production Pink integration, CI and full physical qualification remain open.
+  See `docs/plans/qualified_motion_integration/TURNOVER.md`.
+
+Slice #10265 preserves global degree-six controls with a checked unactuated
+root mapping and exact RK4 state/coefficient sensitivities. It is a prerequisite
+to coefficient-lift Crocoddyl actions; optimizer and physical acceptance remain
+open. Preserve explicit ground configuration in independent replay.
+
 - **Weld Linearization (#10260; 2026-09-16):** Corrected the finite weld pose
   Jacobian and preserved the distinct acceleration-constraint partial. Real
   Pinocchio directional checks fail before correction for displaced wrists;
