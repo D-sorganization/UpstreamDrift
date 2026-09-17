@@ -281,6 +281,18 @@ def _evaluate_candidate_controls(
     return breakdown, rollout_res
 
 
+def _apply_parameter_vector(base: np.ndarray, p: np.ndarray, stage: str) -> np.ndarray:
+    """Project low-dimensional parameter vector onto 2D control array."""
+    cand = base.copy()
+    if stage == "scalar":
+        cand[6:, :] += p[0]
+    elif cand.shape[0] > 6:
+        cand[6:, 0] = p
+    else:
+        cand[:, 0] = p[0]
+    return cand
+
+
 # ---------------------------------------------------------------------------
 # 3. Control Fitter Engine
 # ---------------------------------------------------------------------------
@@ -310,17 +322,21 @@ class ControlFitter:
         self.config = config if config is not None else OptimizationConfig()
         self.cancel_callback = cancel_callback
 
-    def fit(
+    def _execute_optimization(
         self,
-        initial_controls: np.ndarray | Sequence[Sequence[float]] | None = None,
-        *,
-        stage: Literal["scalar", "full"] = "scalar",
-    ) -> FittingOutcome:
-        """Run bounded control optimization and produce validated CandidateResult."""
-        start_time = time.perf_counter()
-        base_controls = self._init_control_array(initial_controls)
+        base_controls: np.ndarray,
+        stage: Literal["scalar", "full"],
+        start_time: float,
+    ) -> tuple[
+        ExecutionStatus,
+        np.ndarray,
+        ObjectiveBreakdown | None,
+        RolloutResult | None,
+        list[OptimizationCheckpoint],
+        int,
+    ]:
+        """Execute Scipy optimization loop with budget and cancellation guards."""
         checkpoints: list[OptimizationCheckpoint] = []
-
         best_loss = float("inf")
         best_breakdown: ObjectiveBreakdown | None = None
         best_controls = base_controls.copy()
@@ -353,14 +369,7 @@ class ControlFitter:
                 status = "cancelled"
                 raise StopIteration("Cancelled by user")
 
-            cand_controls = base_controls.copy()
-            if stage == "scalar":
-                cand_controls[6:, :] += p[0]
-            elif cand_controls.shape[0] > 6:
-                cand_controls[6:, 0] = p
-            else:
-                cand_controls[:, 0] = p[0]
-
+            cand_controls = _apply_parameter_vector(base_controls, p, stage)
             breakdown, rollout_res = _evaluate_candidate_controls(
                 self.forward_model,
                 self.renderer,
@@ -405,6 +414,33 @@ class ControlFitter:
             logger.debug("Optimization stopped early: %s", status)
         except Exception as exc:  # noqa: BLE001
             logger.debug("Optimizer raised exception: %s", exc)
+
+        return (
+            status,
+            best_controls,
+            best_breakdown,
+            best_rollout,
+            checkpoints,
+            eval_count,
+        )
+
+    def fit(
+        self,
+        initial_controls: np.ndarray | Sequence[Sequence[float]] | None = None,
+        *,
+        stage: Literal["scalar", "full"] = "scalar",
+    ) -> FittingOutcome:
+        """Run bounded control optimization and produce validated CandidateResult."""
+        start_time = time.perf_counter()
+        base_controls = self._init_control_array(initial_controls)
+        (
+            status,
+            best_controls,
+            best_breakdown,
+            best_rollout,
+            checkpoints,
+            eval_count,
+        ) = self._execute_optimization(base_controls, stage, start_time)
 
         elapsed_total = time.perf_counter() - start_time
         if best_breakdown is None or best_rollout is None:
