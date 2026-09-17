@@ -26,7 +26,7 @@ The integration owner resolves dependency order and shared-file conflicts.
 | Pink Adapter            | #10257 / #10267        | Implemented; CI Triage Pending               | Configuration, constraints, limits, geometry       |
 | Runtime                 | #10262 / #10268        | Native Probes Pass; CI Pending               | Isolated ABI and actual QP execution               |
 | Polynomial Step         | #10265 / #10270        | Implemented; CI Pending                      | Exact RK4 state/coefficient sensitivities          |
-| Crocoddyl Actions       | #10269                 | Active Bounded Worker                        | Lift, flow, terminal and replay diagnostics        |
+| Crocoddyl Actions       | #10269                 | Local Checkpoint; Integration Review Pending | Lift, flow, terminal and replay diagnostics        |
 | Pink Pipeline           | #10276, #10277, #10278 | Contract Review Before Dispatch              | See the Pink packet; adapter alone is insufficient |
 | Evidence Integrity      | #10271                 | Bounded Work After Producer Review           | Input-to-output provenance chain                   |
 | Plant Parity            | #10112                 | Integration Owner Design Required            | Matched model, ground, controls and weld           |
@@ -130,6 +130,24 @@ review workflow is required before adoption; otherwise record deferral and
 retain native/MeshCat review.
 
 ## Crocoddyl Action Packet (#10269)
+
+Local implementation checkpoint: `7caf4bc6f` on
+`feat/10269-crocoddyl-polynomial-actions`, in
+`C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10269-crocoddyl-actions`.
+It is committed but not pushed. Its base remains `722540e707`; the next worker
+must integrate current #10270 (at least `f489853f5`) before publication.
+Nineteen unit tests and six fresh-process native cases pass, including FDDP,
+BoxFDDP and active/offground full-body derivatives with reordered coordinates.
+The harness enforces six native executions with zero failures/errors/skips.
+Parent review added initial-boundary defects and shooting-node/replay cost gaps;
+regressions fail before those additions and pass afterward. Focused typing,
+Ruff, pre-commit and function/file budgets pass. Broad regression, governance,
+remote CI and full-horizon performance/physical qualification remain pending.
+
+Resume from the recorded commit; do not reimplement these actions. Preserve
+untracked `vendor/ud-tools.partial-10269-diskfull/` recovery material. The next
+bounded assignment is integration/review and publication of this checkpoint,
+not another action-model implementation.
 
 Owned implementation: new `motion_matching/crocoddyl_polynomial.py`, optionally
 a focused diagnostics module, and corresponding unit/integration tests.
