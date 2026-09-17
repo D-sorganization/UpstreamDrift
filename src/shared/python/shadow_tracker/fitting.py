@@ -293,6 +293,29 @@ def _apply_parameter_vector(base: np.ndarray, p: np.ndarray, stage: str) -> np.n
     return cand
 
 
+class _OptimizationContext:
+    """Mutable optimization state tracking best evaluations and status."""
+
+    __slots__ = (
+        "eval_count",
+        "best_loss",
+        "best_breakdown",
+        "best_controls",
+        "best_rollout",
+        "status",
+        "checkpoints",
+    )
+
+    def __init__(self, base_controls: np.ndarray) -> None:
+        self.eval_count = 0
+        self.best_loss = float("inf")
+        self.best_breakdown: ObjectiveBreakdown | None = None
+        self.best_controls = base_controls.copy()
+        self.best_rollout: RolloutResult | None = None
+        self.status: ExecutionStatus = "completed"
+        self.checkpoints: list[OptimizationCheckpoint] = []
+
+
 # ---------------------------------------------------------------------------
 # 3. Control Fitter Engine
 # ---------------------------------------------------------------------------
@@ -322,6 +345,56 @@ class ControlFitter:
         self.config = config if config is not None else OptimizationConfig()
         self.cancel_callback = cancel_callback
 
+    def _step_objective(
+        self,
+        p: np.ndarray,
+        ctx: _OptimizationContext,
+        base_controls: np.ndarray,
+        stage: Literal["scalar", "full"],
+        start_time: float,
+    ) -> float:
+        """Evaluate a single parameter search step with budget and safety guards."""
+        ctx.eval_count += 1
+        elapsed = time.perf_counter() - start_time
+
+        if elapsed >= self.config.budget_seconds:
+            ctx.status = "budget_exhausted"
+            raise StopIteration("Budget exhausted")
+
+        if self.cancel_callback and self.cancel_callback():
+            ctx.status = "cancelled"
+            raise StopIteration("Cancelled by user")
+
+        cand_controls = _apply_parameter_vector(base_controls, p, stage)
+        breakdown, rollout_res = _evaluate_candidate_controls(
+            self.forward_model,
+            self.renderer,
+            self.camera,
+            self.observed_masks,
+            self.time_points_s,
+            self.initial_state,
+            cand_controls,
+            self.config,
+        )
+
+        if breakdown.total_loss < ctx.best_loss:
+            ctx.best_loss = breakdown.total_loss
+            ctx.best_breakdown = breakdown
+            ctx.best_controls = cand_controls.copy()
+            ctx.best_rollout = rollout_res
+
+        if ctx.eval_count % self.config.checkpoint_interval == 0:
+            self._record_checkpoint(
+                ctx.checkpoints,
+                ctx.eval_count,
+                elapsed,
+                breakdown,
+                ctx.best_loss,
+                cand_controls,
+            )
+
+        return breakdown.total_loss
+
     def _execute_optimization(
         self,
         base_controls: np.ndarray,
@@ -336,14 +409,7 @@ class ControlFitter:
         int,
     ]:
         """Execute Scipy optimization loop with budget and cancellation guards."""
-        checkpoints: list[OptimizationCheckpoint] = []
-        best_loss = float("inf")
-        best_breakdown: ObjectiveBreakdown | None = None
-        best_controls = base_controls.copy()
-        best_rollout: RolloutResult | None = None
-        eval_count = 0
-        status: ExecutionStatus = "completed"
-
+        ctx = _OptimizationContext(base_controls)
         p0 = (
             np.array([0.0], dtype=np.float64)
             if stage == "scalar"
@@ -351,53 +417,7 @@ class ControlFitter:
         )
 
         def objective_fn(p: np.ndarray) -> float:
-            nonlocal \
-                eval_count, \
-                best_loss, \
-                best_breakdown, \
-                best_controls, \
-                best_rollout, \
-                status
-            eval_count += 1
-            elapsed = time.perf_counter() - start_time
-
-            if elapsed >= self.config.budget_seconds:
-                status = "budget_exhausted"
-                raise StopIteration("Budget exhausted")
-
-            if self.cancel_callback and self.cancel_callback():
-                status = "cancelled"
-                raise StopIteration("Cancelled by user")
-
-            cand_controls = _apply_parameter_vector(base_controls, p, stage)
-            breakdown, rollout_res = _evaluate_candidate_controls(
-                self.forward_model,
-                self.renderer,
-                self.camera,
-                self.observed_masks,
-                self.time_points_s,
-                self.initial_state,
-                cand_controls,
-                self.config,
-            )
-
-            if breakdown.total_loss < best_loss:
-                best_loss = breakdown.total_loss
-                best_breakdown = breakdown
-                best_controls = cand_controls.copy()
-                best_rollout = rollout_res
-
-            if eval_count % self.config.checkpoint_interval == 0:
-                self._record_checkpoint(
-                    checkpoints,
-                    eval_count,
-                    elapsed,
-                    breakdown,
-                    best_loss,
-                    cand_controls,
-                )
-
-            return breakdown.total_loss
+            return self._step_objective(p, ctx, base_controls, stage, start_time)
 
         try:
             objective_fn(p0)
@@ -411,17 +431,17 @@ class ControlFitter:
                 },
             )
         except StopIteration:
-            logger.debug("Optimization stopped early: %s", status)
+            logger.debug("Optimization stopped early: %s", ctx.status)
         except Exception as exc:  # noqa: BLE001
             logger.debug("Optimizer raised exception: %s", exc)
 
         return (
-            status,
-            best_controls,
-            best_breakdown,
-            best_rollout,
-            checkpoints,
-            eval_count,
+            ctx.status,
+            ctx.best_controls,
+            ctx.best_breakdown,
+            ctx.best_rollout,
+            ctx.checkpoints,
+            ctx.eval_count,
         )
 
     def fit(
