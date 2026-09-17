@@ -1,5 +1,16 @@
 # Native Multi-Engine Matching Handoff
 
+## Saved Replay and Counterfactual Product Work
+
+Epics #10285 (Simulation Library/Replay) and #10286 (Native ZTCF/ZVCF Wrenches)
+now define the integration work. Read
+[Saved Runs and Counterfactuals Handoff](simscape_tour_matching/SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md).
+Actual R2025b run102 cylindrical animation and dual-view still are generated in
+simscape_tour_matching/visuals_returned102 from saved MATLAB states, with hashes
+and a visual reconstruction check. This is a rejected0.85 s prefix, not new physics.
+The viewer's native-spec ordering fix passes seven core tests including a real
+MuJoCo FK test. Full GUI/model selection and catalog integration remain open.
+
 ## Current Status
 
 Run102 is the latest committed native fit found in the 2026-09-16 review.
