@@ -146,6 +146,11 @@ class MotionMatchingWidget(QWidget):
         self.club.addItems(list(pipeline.CLUBS))
         self.capture.currentTextChanged.connect(self._default_club)
 
+        self.backend = QComboBox()
+        self.backend.addItems(list(pipeline.BACKENDS))
+        self.step_mode = QComboBox()
+        self.step_mode.addItems(list(pipeline.STEP_MODES))
+
         self.stature = self._double_spin(1.71, 1.4, 2.2, 0.01)
         self.mass = self._double_spin(78.0, 40.0, 150.0, 0.5)
         self.trunk = self._double_spin(1.15, 0.8, 1.4, 0.01)
@@ -153,6 +158,8 @@ class MotionMatchingWidget(QWidget):
         self.shoulder = self._double_spin(1.0, 0.8, 1.3, 0.01)
 
         form = QFormLayout()
+        form.addRow("Backend", self.backend)
+        form.addRow("Pink Step Mode", self.step_mode)
         form.addRow("Capture", self.capture)
         form.addRow("Club", self.club)
         form.addRow("Stature (m)", self.stature)
@@ -379,6 +386,8 @@ class MotionMatchingWidget(QWidget):
             zmp_filter=self.zmp_filter.isChecked(),
             shooting_fit=self.shooting_fit.value(),
             shooting_gain=self.shooting_gain.value(),
+            backend=self.backend.currentText(),
+            step_mode=self.step_mode.currentText(),
         )
 
     def experiment_request(self) -> pipeline.ExperimentRequest:
