@@ -79,7 +79,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 27 | 52 | 16 | 16 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 136 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 137 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
