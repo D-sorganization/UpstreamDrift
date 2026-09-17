@@ -30,6 +30,13 @@ coefficient-lift action assembly, objective contracts and independent replay.
   and a real MeshCat runtime smoke check exist; a live Gepetto CORBA/server
   qualification and production replay selection remain outstanding. This change
   does not certify any motion-fit result or replace the native viewer.
+- **Pink Adapter Contract (#10257, #10254):** Both Pink entry points share one validated solve step. They preserve geometry,
+  forward explicit hard constraints/limits, refresh cached kinematics and
+  integrate tangent velocity exactly once. Solver failures propagate with
+  context; unchanged poses are no longer returned as a success fallback.
+  The adapter has real equality, infeasibility, cache and free-flyer tests.
+  Full-body marker/stance/weld task assembly and production selection remain
+  outstanding. The reproducible combined runtime is tracked by #10262.
 - **Bounded Work:** #10256 viewer lifecycle and #10257 Pink state/constraint
   adapters are separate implementation slices; review actual tests and CI
   before treating either as delivered.
