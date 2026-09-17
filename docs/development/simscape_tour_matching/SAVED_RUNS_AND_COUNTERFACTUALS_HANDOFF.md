@@ -144,3 +144,12 @@ pointers, add source-time playback and shared cylinder/multi-angle rendering,
 then explicit MATLAB inspect/rerun actions with immutable new run outputs. Keep
 #10285 separate from the native optimization critical path and #10286 wrench
 qualification. Do not treat manifest hashes as proof of scientific correctness.
+
+Standalone Qt-first loading was exercised after removing the unnecessary MuJoCo
+runtime import from viewer FK. The unchanged rigid-transform validator now lives
+in shared motion_matching with a compatible MuJoCo re-export. Mypy passes on the
+four changed viewer/importer/shared-validator modules. The captured offscreen
+GUI image verifies terminal geometry but shows missing-font squares in Qt labels
+even with an explicit Arial request; it is diagnostic evidence, not polished UI
+acceptance. Verify fonts in a normal desktop session before promotion. The
+existing cylinder GIF remains the readable visual preview.
