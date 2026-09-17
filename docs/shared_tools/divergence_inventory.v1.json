@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "1ac89c18e6280752d949e520c2143d2fb584d31e",
+  "tools_pin": "62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -4822,7 +4822,7 @@
       "package": "camera",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 1338,
+      "tools_bytes": 1830,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
