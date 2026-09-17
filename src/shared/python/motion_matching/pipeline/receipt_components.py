@@ -855,3 +855,72 @@ class IkReceipt(BaseModel):
         description="Optional constrained IK execution diagnostics and provenance",
         json_schema_extra={"unit": "compound", "stage": "ik"},
     )
+
+
+class AcceptanceGateReport(BaseModel):
+    """Outcome and measurement for an individual acceptance gate."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    name: str = Field(
+        ...,
+        description="Standardized name of the acceptance gate",
+        json_schema_extra={"unit": "text", "stage": "acceptance"},
+    )
+    status: str = Field(
+        ...,
+        description="Pass/fail status of the gate (passed, failed, missing)",
+        json_schema_extra={"unit": "text", "stage": "acceptance"},
+    )
+    threshold: float = Field(
+        ...,
+        description="Acceptance limit or tolerance threshold",
+        json_schema_extra={"unit": "threshold", "stage": "acceptance"},
+    )
+    measured: float | None = Field(
+        None,
+        description="Observed value extracted from execution receipt",
+        json_schema_extra={"unit": "measured", "stage": "acceptance"},
+    )
+    unit: str = Field(
+        "m",
+        description="Physical or statistical unit of measurement",
+        json_schema_extra={"unit": "text", "stage": "acceptance"},
+    )
+    reason: str = Field(
+        "",
+        description="Diagnostic explanation for gate failure or omission",
+        json_schema_extra={"unit": "text", "stage": "acceptance"},
+    )
+
+
+class AcceptanceReceipt(BaseModel):
+    """Authoritative evaluation verdict under the matched-swing program (MS-01)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    horizon: str = Field(
+        ...,
+        description="Evaluation horizon milestone (G1, G2, or G3)",
+        json_schema_extra={"unit": "text", "stage": "acceptance"},
+    )
+    is_physically_accepted: bool = Field(
+        ...,
+        description="Whether all physical and kinematic gates were satisfied",
+        json_schema_extra={"unit": "bool", "stage": "acceptance"},
+    )
+    status: str = Field(
+        ...,
+        description="Verdict status string (PASSED or REJECTED)",
+        json_schema_extra={"unit": "text", "stage": "acceptance"},
+    )
+    gates: list[AcceptanceGateReport] = Field(
+        default_factory=list,
+        description="Detailed list of evaluated physical and kinematic gates",
+        json_schema_extra={"unit": "compound", "stage": "acceptance"},
+    )
+    qualification_note: str = Field(
+        "",
+        description="Summary note describing acceptance decision rationale",
+        json_schema_extra={"unit": "text", "stage": "acceptance"},
+    )
