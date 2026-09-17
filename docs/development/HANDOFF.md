@@ -1,5 +1,10 @@
 # Native Multi-Engine Matching Handoff
 
+Both restoration audits are terminal and pass: fitter startup parity and native
+finite-weld pose derivatives using PR #10263 head 0db3c295a. Read the latest section
+of simscape_tour_matching/PROGRESS_REVIEW_20260917.md before historical notes.
+No new fit was performed; next is downstream chart qualification and feasibility.
+
 Historical run102 fitter imports now resolve; 22 affected tests and the pinned
 mypy hook pass. Six hash-matched inputs are archived. A separate ControlTower
 audit-only run is active; see the latest progress review before restarting work.
