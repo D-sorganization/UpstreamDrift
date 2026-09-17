@@ -16,12 +16,14 @@ import math
 
 import numpy as np
 
-from motion_matching.diagnostics.forward_kinematics import (
+from src.shared.python.motion_matching.diagnostics.forward_kinematics import (
     SegmentLengths,
     SkeletonPose,
     forward_kinematics,
 )
-from motion_matching.diagnostics.reference_pose import REFERENCE_GOLFER_FIELDS
+from src.shared.python.motion_matching.diagnostics.reference_pose import (
+    REFERENCE_GOLFER_FIELDS,
+)
 
 from .contracts import (
     CANONICAL_ARTICULATED_CONVENTION,
