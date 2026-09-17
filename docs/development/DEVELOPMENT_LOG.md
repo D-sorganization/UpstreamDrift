@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10323 · Matched-Swing Run Ledger
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10323 (epic #10363 MS-02)
+- **Branch:** feat/ms02-matched-swing-run-ledger-10323
+- **PR:** open
+- **Paths:** src/shared/python/motion_matching/ledger.py; src/shared/python/motion_matching/ledger_schema.py; src/shared/python/motion_matching/**main**.py; src/shared/python/motion_matching/leaderboard.py; src/tools/motion_matching/pipeline.py; reports/matched_swing_ledger.json; tests/unit/motion_matching/test_ledger.py
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 at HEAD (SELF; scan discovers and classifies all 85 committed receipts across evidence roots; tests/unit/motion_matching/test_ledger.py 7 passed; architecture budget OK, ruff and ruff format clean)
+- **Summary:** Added matched-swing run ledger discovering, classifying, and indexing execution receipts across ground-support, native Simscape, OpenSim, calibration, and parity evidence trees. Deterministic serialization into reports/matched_swing_ledger.json, CLI subcommand `ledger --write`, and `list_runs()` API for tools.
+- **Next step:** Open PR referencing Closes #10323, enable auto-merge.
+- **Evidence:** reports/matched_swing_ledger.json; tests/unit/motion_matching/test_ledger.py
+
 ### DL-#10362 · Tools Dependency Gate for Matched Swing Program
 
 - **State:** in_progress
