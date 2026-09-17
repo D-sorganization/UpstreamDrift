@@ -485,7 +485,6 @@ models:
       logo: "shadow_tracker.svg"
       status: "utility"
       default_launch: "tab"
-    embed_adapter: "src/tools/shadow_tracker/_embed_adapter.py::ShadowTrackerAdapter"
 
   # =============================================================================
   # TOOLS & DATA — model exploration, datasets, utilities
