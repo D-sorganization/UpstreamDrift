@@ -1120,7 +1120,7 @@
       "category": "motion_capture",
       "type": "special_app",
       "path": "src/tools/shadow_tracker/__main__.py",
-      "logo": "capture_rig.svg",
+      "logo": "shadow_tracker.svg",
       "status": "utility",
       "capabilities": [
         "video_import",
@@ -1129,7 +1129,7 @@
         "worst_frame_navigation",
         "canonical_export"
       ],
-      "order": 48,
+      "order": 49,
       "web": {
         "mode": "native-window"
       }
