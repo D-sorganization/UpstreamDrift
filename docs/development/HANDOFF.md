@@ -1,5 +1,8 @@
 # Native Multi-Engine Matching Handoff
 
+Playback now follows source timestamps and preserves camera orientation; six
+affected GUI tests pass. See the source-time checkpoint in the saved-runs handoff.
+
 Verified Simscape manifest playback now passes 21 focused tests; see the latest
 checkpoint and launch command in [Saved Runs Handoff](simscape_tour_matching/SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md).
 

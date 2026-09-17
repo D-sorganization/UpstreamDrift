@@ -19,6 +19,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from src.shared.python.golf_simulator import MonotonicReplayClock
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.simulation_store.replay_bundle import load_simscape_bundle
 from src.tools.tour_matching_viewer.core import (
@@ -61,6 +62,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(self._on_timer_tick)
         self._is_playing: bool = False
+        self._clock = MonotonicReplayClock()
 
         self._init_ui()
         self._load_spec()
@@ -148,6 +150,9 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         engine_name: str = "unknown",
     ) -> None:
         """Populate viewer with pre-loaded replay data."""
+        if self._is_playing:
+            self.toggle_playback()
+        self._clock.stop()
         self._replay = replay
         self._candidate_hash = candidate_hash
         self._engine_name = engine_name.lower()
@@ -230,7 +235,13 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         vframe: ViewerFrame = viewer_frame(self._spec, self._replay, frame_idx)
         self._rms_label.setText(f"Valid Marker RMS: {vframe.rms_error * 1000.0:.2f} mm")
 
+        camera = (self._ax.elev, self._ax.azim, self._ax.roll)
+        limits = (self._ax.get_xlim(), self._ax.get_ylim(), self._ax.get_zlim())
         self._setup_3d_axes()
+        self._ax.view_init(elev=camera[0], azim=camera[1], roll=camera[2])
+        self._ax.set_xlim(limits[0])
+        self._ax.set_ylim(limits[1])
+        self._ax.set_zlim(limits[2])
 
         # 1. Render visual skeleton segments as 3D lines
         lines = []
@@ -280,27 +291,47 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
     def toggle_playback(self) -> None:
         """Toggle animation timer."""
         if self._is_playing:
+            self._clock.pause()
             self._timer.stop()
             self._play_btn.setText("▶ Play")
             self._is_playing = False
         else:
             if self._replay is not None and self._replay.frame_count > 1:
-                # Target ~30 fps playback
+                if self._current_frame == self._replay.frame_count - 1:
+                    self._slider.setValue(0)
+                    self.render_frame(0)
+                self._clock.seek(
+                    float(
+                        self._replay.time_s[self._current_frame]
+                        - self._replay.time_s[0]
+                    )
+                )
+                self._clock.play()
+                # Display ticks sample the source clock; frames may be skipped.
                 self._timer.start(33)
                 self._play_btn.setText("⏸ Pause")
                 self._is_playing = True
 
     def _on_timer_tick(self) -> None:
-        if self._replay is None:
+        if self._replay is None or not self._is_playing:
             return
-        n_frames = self._replay.frame_count
-        next_frame = (self._current_frame + 1) % n_frames
+        _, elapsed_s, _ = self._clock.tick()
+        times = self._replay.time_s
+        source_s = float(times[0]) + elapsed_s
+        next_frame = min(
+            len(times) - 1,
+            max(0, int(np.searchsorted(times, source_s, side="right")) - 1),
+        )
         self._slider.blockSignals(True)
         self._slider.setValue(next_frame)
         self._slider.blockSignals(False)
         self.render_frame(next_frame)
+        if source_s >= times[-1]:
+            self.toggle_playback()
 
     def _on_slider_changed(self, value: int) -> None:
+        if self._replay is not None:
+            self._clock.seek(float(self._replay.time_s[value] - self._replay.time_s[0]))
         self.render_frame(value)
 
     def _on_open_clicked(self) -> None:
@@ -320,6 +351,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
 
     def cleanup(self) -> None:
         """Halt playback and release resources."""
+        self._clock.stop()
         self._timer.stop()
         self._is_playing = False
         self._figure.clf()
