@@ -17,3 +17,6 @@ requirements*.lock text eol=lf
 # Exclude archived legacy code from language statistics
 engines/pendulum_models/archive/** linguist-vendored
 engines/pendulum_models/archive/** linguist-documentation
+
+# Preserve historical model bytes used by candidate provenance hashes.
+docs/development/simscape_tour_matching/native_evidence/runtime78_original_model.bin -text

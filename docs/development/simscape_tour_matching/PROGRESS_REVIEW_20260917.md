@@ -1,5 +1,41 @@
 # Simscape Matching Progress Review and Execution Turnover
 
+**Verified numerical restoration:** the new source snapshot plus pinned Tools
+commit 1ac89c18e reproduces all run102 marker samples exactly (maximum difference
+0 m) in 13.38 s on Pinocchio 4.1.0/Python 3.12.3. Position/rate closure maxima
+are 3.16e-12 / 1.78e-11. Receipt: native_evidence/runtime78_restoration.json.
+This resolves the replay reproduction blocker, not the full fitter, off-closure
+derivatives, full horizon, torque logging or MATLAB acceptance. The old
+source-recovery paragraphs below are historical checkpoints, not pending work.
+
+To repeat: initialize the pinned Tools submodule in a checkout with these restored
+modules. In a new output directory copy runtime78_original_model.bin as model.bin,
+two_window_fit_9967_102/returned-candidate.json as candidate.json and
+two_window_fit_9967_102/returned-replay.npz as reference.npz. Set PYTHONPATH to
+the checkout, OPENBLAS_NUM_THREADS=1 and OMP_NUM_THREADS=1; use the recorded
+Pinocchio Python environment to execute native_evidence/reproduction/
+run102_restored_baseline.py by its absolute path. Always use a new directory.
+The script writes receipt_restored_verified.json. The exact tested remote folder
+is /home/dieterolson/native-clean-replay-20260917-01; do not replace its results.
+
+Next restore/reconcile the fitter's native_effort_penalty and shooting_schedule
+dependencies with their tests, check any further transitive imports, then qualify
+#10263 before finite-weld feasibility work. Do not expand restoration to unrelated
+manifold/full-body providers merely because they are present in the archive.
+
+Restoration checkpoint: the complete missing-file audit identified 50 historical
+source/test paths, all recovered with hashes matching run102. Nine source modules
+and four regression files needed by replay/node-chart/sensitivity imports are now
+restored; 28 local tests, lint, formatting and nine-module mypy checks pass. The
+remaining recovered files are archived, not silently installed. See
+native_evidence/runtime78_restoration.json and runtime78_missing_sources.tar.gz.
+The exact original model bytes are preserved as runtime78_original_model.bin;
+the tracked JSON is semantically identical but has a different formatting hash.
+A fresh source snapshot was uploaded to ControlTower at
+/home/dieterolson/native-clean-replay-20260917-01 for independent baseline replay.
+Do not call the restored fitter fully reproducible until that numerical result
+and the remaining driver dependencies have been checked.
+
 Follow-on recovery: the three missing fitting modules have been retrieved read-only
 from ControlTower runtime78 and their bytes match run102's recorded hashes. See
 native_evidence/runtime78_recovered_sources.zip and its JSON receipt. They are
