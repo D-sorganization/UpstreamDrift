@@ -115,3 +115,7 @@
 ## 2026-09-17 - [Optimization: Replace Np.Linalg.Norm With Math.Sqrt(Dot)]
 **Learning:** For small 1D NumPy arrays (e.g. 3D vectors) in tight physics calculation loops, `np.linalg.norm` adds substantial Python dispatch and internal instance checking overhead. Built-in `math.sqrt(np.vdot(arr, arr))` or `math.sqrt(arr.dot(arr))` avoids this overhead entirely, yielding significant performance gains (~2.5x speedup) while being safe, domain-correct, and functionally equivalent.
 **Action:** Always replace `float(np.linalg.norm(array))` with `float(math.sqrt(array.dot(array)))` where array sizes are small and statically known.
+
+## 2026-09-16 - Safe SPEC.md Modification Pattern Update
+**Learning:** Even using a pattern like `line.startswith('| YYYY-MM-DD |')` may fail the `repo-structure-gates` tests because older rows, like `| Date | PR | Summary |`, might not be found. We must explicitly search for the header format in the specific `## 12. Change Log` section and insert below the actual table header separator (e.g. `| --- | --- | --- |`).
+**Action:** When updating `SPEC.md` programmatically, use a script that correctly finds the header separator in the proper section and inserts the new row. Additionally, the unit tests inside `repo_hygiene` like `test_spec_changelog_integrity.py` are a great way to verify the file was updated without breaking the parser rules.
