@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 from dataclasses import dataclass, fields
@@ -61,15 +62,30 @@ __all__ = [
     "maybe_append_row",
     "JSON_LEADERBOARD_COLUMNS",
     "default_json_path",
+    "valid_engines",
 ]
 
 # --- Schema ------------------------------------------------------------------
 
 _VALID_ENGINES: frozenset[str] = frozenset(
-    {"simscape", "mujoco", "drake", "pinocchio", "opensim"}
+    {
+        "simscape",
+        "mujoco",
+        "drake",
+        "pinocchio",
+        "opensim",
+        "myosuite",
+        "pendulum",
+    }
 )
 _COMMIT_RE = re.compile(r"^[0-9a-f]{7,40}$")
 _ISO8601_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$")
+
+
+def valid_engines() -> frozenset[str]:
+    """Return the set of recognized engine identifiers for the leaderboard."""
+    return _VALID_ENGINES
+
 
 # Canonical column order for the Markdown table (matches issue #4097 spec).
 _COLUMNS: tuple[str, ...] = (
@@ -116,9 +132,13 @@ def _validate_strings(record: LeaderboardRow) -> None:
 
 
 def _validate_numbers(record: LeaderboardRow) -> None:
-    """Numeric fields must be finite and non-negative."""
+    """Numeric fields must be finite and non-negative (or None if unavailable)."""
+    if record.solver.startswith("unavailable"):
+        return
     for name in _NONNEG_FIELDS:
         value = getattr(record, name)
+        if value is None:
+            continue
         if not isinstance(value, (int, float)) or isinstance(value, bool):
             raise LeaderboardError(f"{name} must be a number, got {value!r}")
         if value < 0:
@@ -161,11 +181,11 @@ class LeaderboardRow:
     trial: str
     engine: str
     solver: str
-    grip_rmse_mm: float
-    clubhead_rmse_mm: float
-    body_marker_rmse_mm: float
-    total_work_J: float
-    wall_clock_s: float
+    grip_rmse_mm: float | None
+    clubhead_rmse_mm: float | None
+    body_marker_rmse_mm: float | None
+    total_work_J: float | None
+    wall_clock_s: float | None
     commit: str
     run_at: str
 
@@ -192,7 +212,14 @@ class LeaderboardRow:
             )
         kwargs = {name: data.get(name) for name in _REQUIRED_FIELDS}
         kwargs["trial"] = trial
-        missing = [name for name, v in kwargs.items() if v is None]
+        is_unavail = str(data.get("solver", "")).startswith("unavailable") or str(
+            data.get("status", "")
+        ).startswith("unavailable")
+        missing = [
+            name
+            for name, v in kwargs.items()
+            if v is None and (not is_unavail or name not in _NONNEG_FIELDS)
+        ]
         if missing:
             raise LeaderboardError(
                 f"missing required field(s) {sorted(missing)} in leaderboard JSON"
@@ -204,7 +231,9 @@ class LeaderboardRow:
         out: dict[str, str] = {}
         for name in _COLUMNS:
             value = getattr(self, name)
-            if isinstance(value, float):
+            if value is None:
+                out[name] = "-"
+            elif isinstance(value, float):
                 out[name] = f"{value:.3f}"
             else:
                 out[name] = str(value)
@@ -306,7 +335,15 @@ def render_markdown(results: dict[str, list[FitResult]]) -> str:
     lines.append("")
 
     for trial in sorted(results.keys()):
-        rows = sorted(results[trial], key=lambda r: r.grip_rmse_mm)
+        rows = sorted(
+            results[trial],
+            key=lambda r: (
+                float("inf")
+                if r.grip_rmse_mm is None
+                or (isinstance(r.grip_rmse_mm, float) and math.isnan(r.grip_rmse_mm))
+                else r.grip_rmse_mm
+            ),
+        )
         lines.append(f"## {trial}")
         lines.append("")
         lines.extend(_format_table([r.as_row() for r in rows], _COLUMNS))
@@ -449,6 +486,9 @@ def _row_from_fit_result(
         "run_at",
         default=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
+    run_at_str = str(run_at)
+    if run_at_str.endswith("+00:00"):
+        run_at_str = run_at_str[:-6] + "Z"
     solver = _attr("method", "solver", default="unknown")
     iterations = _attr("iterations", "n_iterations", default=0)
 
@@ -463,7 +503,7 @@ def _row_from_fit_result(
         ),
         "wallclock": wallclock,
         "commit_sha": _short_commit(commit),
-        "run_at": str(run_at),
+        "run_at": run_at_str,
         "solver": str(solver),
         "iterations": int(iterations) if iterations is not None else 0,
     }
