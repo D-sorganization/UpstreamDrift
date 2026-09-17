@@ -1,34 +1,17 @@
 # Native Multi-Engine Matching Handoff
 
-Both restoration audits are terminal and pass: fitter startup parity and native
-finite-weld pose derivatives using PR #10263 head 0db3c295a. Read the latest section
-of simscape_tour_matching/PROGRESS_REVIEW_20260917.md before historical notes.
-No new fit was performed; next is downstream chart qualification and feasibility.
+## Current Entry Point
 
-Historical run102 fitter imports now resolve; 22 affected tests and the pinned
-mypy hook pass. Six hash-matched inputs are archived. A separate ControlTower
-audit-only run is active; see the latest progress review before restarting work.
-
-Fresh-source Pinocchio replay now reproduces run102 markers exactly in 13.38 s;
-see runtime78_restoration.json. Restore remaining fitter dependencies and qualify
-finite-weld derivatives next. The original fit remains rejected at 0.85 s.
-
-Replay/node-chart/sensitivity source restoration passes 28 local regression tests.
-Read the new restoration checkpoint in PROGRESS_REVIEW_20260917.md and the
-runtime78_restoration.json receipt before resuming remote numerical validation.
-
-The three missing native fit modules are now hash-matched archival recoveries
-in simscape_tour_matching/native_evidence/runtime78_recovered_sources.zip.
-Restore qualified source/tests next; clean-runtime execution remains unverified.
-
-Playback now follows source timestamps and preserves camera orientation; six
-affected GUI tests pass. See the source-time checkpoint in the saved-runs handoff.
-
-Verified Simscape manifest playback now passes 21 focused tests; see the latest
-checkpoint and launch command in [Saved Runs Handoff](simscape_tour_matching/SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md).
-
-Latest review: [Progress Review and Execution Turnover](simscape_tour_matching/PROGRESS_REVIEW_20260917.md).
-Read it first for current prerequisites, missing effort evidence and unfinished replay tests.
+Read [Latest Progress Review](simscape_tour_matching/PROGRESS_REVIEW_20260917.md)
+and [Next-Agent Prompt](simscape_tour_matching/AGENT_RESUME_PROMPT.md) first.
+All review audits are finished. Source replay/fitter restoration and sampled
+native chart/retraction checks pass. New 24-solve terminal static evidence finds
+39.76310 mm best tested within the yaw allowance, versus 40.30135 mm saved dynamic
+error and the unchanged 35 mm gate. This is local evidence, not global infeasibility.
+Prioritize fixed geometry/marker diagnosis before a large torque-only search.
+The full swing, qualified effort export, replay product and counterfactuals remain
+incomplete. Exact scripts/receipts and comparison plot are preserved under
+simscape_tour_matching/native_evidence/terminal_feasibility_20260917.
 
 ## Saved Replay and Counterfactual Product Work
 

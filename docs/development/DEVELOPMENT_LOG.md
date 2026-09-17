@@ -37,9 +37,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/9967-native-simscape-pinocchio
 - **Paths:** src/shared/python/motion_matching; docs/development/simscape_tour_matching
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-15 (SELF; raw run101 MAT/NPZ metrics independently recomputed; seven focused yaw/replay tests passed)
-- **Summary:** Run101 improves yaw and has measured R2025b–Pinocchio prefix agreement of 0.0605 mm maximum. Terminal RMS 40.31 mm fails the 35 mm gate; full 1.814 s capture is incomplete. No optimizer launched by this review.
-- **Next step:** Follow PROGRESS_REVIEW_20260917.md, then COMPLETION_HANDOFF_20260916.md: replay restoration is verified (28 tests and exact run102 marker reproduction in 13.38 s); fitter effort/schedule dependencies now restored (22 focused tests and pinned mypy pass); remote audit-only parity passes (90.73 s), and the #10263 pose derivative passes native directional checks; qualify the downstream chart before feasibility, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
+- **Last verified:** 2026-09-17 (SELF; five constrained-pose tests, Ruff and pinned mypy pass; 24 native local static solves and sampled chart/retraction derivative audit completed)
+- **Summary:** Run102 R2025b terminal RMS 40.30135 mm fails 35 mm at 0.85 s. Best tested yaw-valid static pose is 39.76310 mm with unchanged geometry and attachments; local evidence only. Native replay and fitter startup parity restored; sampled corrected-provider chart/retraction checks pass. No new dynamic fit.
+- **Next step:** Follow AGENT_RESUME_PROMPT.md and the latest PROGRESS_REVIEW_20260917.md: fixed-model residual curve and capture-wide geometry/attachment diagnosis, then a separately named coherent model variant if justified; qualify projected control directions before bounded 0.90 s global-sextic continuation and independent R2025b validation. Preserve baseline and acceptance gates.
 
 ### DL-#10204 · Capture Rig Shared Camera Layer
 

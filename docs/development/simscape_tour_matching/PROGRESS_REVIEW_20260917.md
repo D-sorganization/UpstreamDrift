@@ -1,6 +1,43 @@
 # Simscape Matching Progress Review and Execution Turnover
 
-## Latest Verified State: Restoration and Derivative Audit Complete
+## Latest Verified State: Local Terminal Feasibility Is the Priority
+
+This section supersedes the next-step orders and running-job statements below.
+All audits launched by this review have finished. No new dynamic candidate was
+produced. Run102 remains a rejected 0–0.85 s prefix of 654 frames / 1.813888889 s.
+
+| Evidence                              | Terminal Marker RMS | Qualification                      |
+| ------------------------------------- | ------------------: | ---------------------------------- |
+| Saved R2025b run102                   |         40.30135 mm | Actual forward replay; fails 35 mm |
+| Static pose, exact target yaw         |         40.37778 mm | Fixed geometry and attachments     |
+| Best tested static pose within 5% yaw |         39.76310 mm | Fixed geometry; fails 35 mm        |
+| Static pose with unrestricted yaw     |         39.20167 mm | Also fails yaw (15.70349%)         |
+
+Twenty-four local constrained solves converged with tight weld closure. No local
+bound is active at the best allowed pose. Multiple starts and two search radii
+support a repeatable local result, **not a global error lower bound**. The best
+allowed pose remains only about 0.54 mm below the saved dynamic terminal error.
+Largest residuals are HeadSide (80.40 mm), LUArmHigh (78.99 mm), HeadFront
+(76.16 mm), HeadTop (51.87 mm), and WaistLeft (51.43 mm). This supports checking
+fixed geometry and attachment calibration before a large additional torque budget.
+No markers, acceptance gates, geometry, or baseline candidates were changed.
+
+The restored shared constrained_marker_pose solver has five passing unit tests
+(RED missing import before restoration, GREEN afterward), Ruff and pinned mypy.
+A separate native chart audit passes closure directional derivatives at 0, 0.6,
+and 0.85 s, both closed and with a 0.1 rad wrist perturbation, at three step sizes.
+Maximum error is 1.68e-8; nonzero retraction derivative error is below 4.68e-10.
+These sampled checks do not qualify full trajectory sensitivities or reactions.
+All native audits consume the isolated finite-weld provider from #10263 commit
+0db3c295a7f668789afbb4666f60912294f81cce; the checkout provider is not overwritten.
+
+Evidence, exact executed scripts, receipts, local search definitions, and an
+all-marker comparison plot are in native_evidence/terminal_feasibility_20260917.
+Read its README.md and the rewritten AGENT_RESUME_PROMPT.md for the executable
+handoff order. Search boxes are numerical bounds, not certified anatomical limits.
+The fixed-model terminal study must not be relabeled a successful swing match.
+
+## Previous Checkpoint: Restoration and Derivative Audit Complete
 
 Both remote audits are terminal. No optimization is running from this review.
 The fitter startup audit passes in 90.73 s: relative segmented/uninterrupted
