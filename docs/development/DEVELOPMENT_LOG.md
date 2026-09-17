@@ -73,6 +73,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Viewer Adapters (#10256; 2026-09-16):** Replaced no-op display paths with
+  persistent Pinocchio visualizers, explicit validation and scoped cleanup.
+  Real MeshCat probing exposed and corrected shared-root deletion and owned
+  process cleanup defects. Live Gepetto qualification and production replay
+  integration remain outstanding under #10254.
+
+- **Runtime Qualification (#10262; 2026-09-16):** Runtime slice #10262 adds a consistent conda-forge numerical manifest and exact
+  Linux lock plus isolated capability probes. Receipt success is scoped to
+  runtime behavior; model, full-body fitting and renderer acceptance stay open.
+
 - **Pink Adapters (#10257; 2026-09-16):** Shared solve path validates state,
   time and outputs; forwards hard constraints/limits; retains collision
   geometry; refreshes cached FK and propagates solver failures. Real native
@@ -98,12 +108,19 @@ root mapping and exact RK4 state/coefficient sensitivities. It is a prerequisite
 to coefficient-lift Crocoddyl actions; optimizer and physical acceptance remain
 open. Preserve explicit ground configuration in independent replay.
 
+- **Crocoddyl Actions (#10269; 2026-09-16):** Implemented the lift/flow/terminal
+  models, exact RK4 chain-rule derivatives, cost scaling, coefficient bounds, warm starts
+  and independent replay diagnostics. Cases tested in isolation include real FDDP, BoxFDDP
+  bounded polynomial effort and full-body active/offground contact with canonical/reversed
+  coordinates.
+
 - **Weld Linearization (#10260; 2026-09-16):** Corrected the finite weld pose
   Jacobian and preserved the distinct acceleration-constraint partial. Real
   Pinocchio directional checks fail before correction for displaced wrists;
   all 11 closure and 11 contact integration tests pass afterward, including
   explicit rejection of undefined derivatives at the rotation-pi log branch. Next:
   merge numerical prerequisites before constrained Pink task assembly.
+
 - **Solver Integration (#10254, #10255; 2026-09-16):** Reproduced missing
   ground-contact state terms in inherited Pinocchio acceleration derivatives;
   added exact local contact-force partials and constrained chain-rule composition.
