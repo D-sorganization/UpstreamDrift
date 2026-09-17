@@ -216,6 +216,88 @@ def canonical_to_native_full_body(
     return q_native, qd_native
 
 
+def _parse_rollout_request(
+    request: RolloutRequest,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, bool]:
+    """Validate and parse a RolloutRequest into numeric arrays."""
+    if not isinstance(request, RolloutRequest):
+        raise TypeError(f"request must be RolloutRequest, got {type(request).__name__}")
+
+    times = np.asarray(request.time_points_s, dtype=np.float64)
+    if len(times) < 2:
+        raise ValueError(f"time_points_s requires at least 2 points, got {len(times)}")
+    if not np.all(np.isfinite(times)):
+        raise ValueError("time_points_s must contain only finite numbers")
+    if not np.all(np.diff(times) > 0.0):
+        raise ValueError("time_points_s must be strictly increasing")
+
+    init_arr = np.asarray(request.initial_state, dtype=np.float64).reshape(-1)
+    if not np.all(np.isfinite(init_arr)):
+        raise ValueError("initial_state must contain only finite numbers")
+
+    if len(init_arr) == _CANONICAL_COORDS:
+        q0, qd0 = canonical_to_native_full_body(
+            init_arr, np.zeros(_CANONICAL_TANGENT, dtype=np.float64)
+        )
+    elif len(init_arr) == _NATIVE_COORDS:
+        q0 = init_arr.copy()
+        qd0 = np.zeros(_NATIVE_COORDS, dtype=np.float64)
+    else:
+        raise ValueError(
+            f"initial_state must have length {_NATIVE_COORDS} (native) or "
+            f"{_CANONICAL_COORDS} (canonical), got {len(init_arr)}"
+        )
+
+    controls_arr = np.asarray(request.controls, dtype=np.float64)
+    if controls_arr.ndim != 2:
+        raise ValueError(f"controls must be 2D array, got shape {controls_arr.shape}")
+    if controls_arr.shape[0] != _NATIVE_COORDS:
+        raise ValueError(
+            f"controls rows must match coordinate count {_NATIVE_COORDS}, "
+            f"got {controls_arr.shape[0]}"
+        )
+
+    root_forces = controls_arr[:_ROOT_UNACTUATED_COUNT, :]
+    has_undeclared_root_forces = bool(np.any(np.abs(root_forces) > 1e-9))
+    return times, q0, qd0, controls_arr, has_undeclared_root_forces
+
+
+def _build_replay_audit(
+    sim_res: Any,
+    times: np.ndarray,
+    integrator: str,
+    has_undeclared_root_forces: bool,
+    max_trans_tol_m: float,
+    max_rot_tol_rad: float,
+) -> ReplayAudit:
+    """Construct ReplayAudit evaluating physical acceptance criteria."""
+    is_physically_accepted = (
+        sim_res.status == "success"
+        and not has_undeclared_root_forces
+        and sim_res.max_closure_translation_m <= max_trans_tol_m
+        and (
+            sim_res.max_closure_rotation_rad is not None
+            and sim_res.max_closure_rotation_rad <= max_rot_tol_rad
+        )
+    )
+    return ReplayAudit(
+        schema_version=REPLAY_AUDIT_SCHEMA_VERSION,
+        candidate_id="full_body_candidate",
+        reset_count=1,
+        integrator_name=integrator,
+        integrator_version="1.0.0",
+        coverage_start_s=float(times[0]),
+        coverage_end_s=float(times[-1]),
+        max_grip_translation_error_m=float(sim_res.max_closure_translation_m),
+        max_grip_rotation_error_rad=float(
+            sim_res.max_closure_rotation_rad
+            if sim_res.max_closure_rotation_rad is not None
+            else 0.0
+        ),
+        is_physically_accepted=is_physically_accepted,
+    )
+
+
 class FullBodyForwardModel:
     """Shadow Tracker forward dynamics model adapter implementing the ForwardModel protocol.
 
@@ -258,55 +340,9 @@ class FullBodyForwardModel:
                 "No physical engine or full-body model available for forward simulation."
             )
 
-        if not isinstance(request, RolloutRequest):
-            raise TypeError(
-                f"request must be RolloutRequest, got {type(request).__name__}"
-            )
-
-        times = np.asarray(request.time_points_s, dtype=np.float64)
-        if len(times) < 2:
-            raise ValueError(
-                f"time_points_s requires at least 2 points, got {len(times)}"
-            )
-        if not np.all(np.isfinite(times)):
-            raise ValueError("time_points_s must contain only finite numbers")
-        if not np.all(np.diff(times) > 0.0):
-            raise ValueError("time_points_s must be strictly increasing")
-
-        # Parse initial state
-        init_arr = np.asarray(request.initial_state, dtype=np.float64).reshape(-1)
-        if not np.all(np.isfinite(init_arr)):
-            raise ValueError("initial_state must contain only finite numbers")
-
-        if len(init_arr) == _CANONICAL_COORDS:
-            # Canonical state -> convert to native
-            q0, qd0 = canonical_to_native_full_body(
-                init_arr, np.zeros(_CANONICAL_TANGENT, dtype=np.float64)
-            )
-        elif len(init_arr) == _NATIVE_COORDS:
-            q0 = init_arr.copy()
-            qd0 = np.zeros(_NATIVE_COORDS, dtype=np.float64)
-        else:
-            raise ValueError(
-                f"initial_state must have length {_NATIVE_COORDS} (native) or "
-                f"{_CANONICAL_COORDS} (canonical), got {len(init_arr)}"
-            )
-
-        # Parse and audit controls
-        controls_arr = np.asarray(request.controls, dtype=np.float64)
-        if controls_arr.ndim != 2:
-            raise ValueError(
-                f"controls must be 2D array, got shape {controls_arr.shape}"
-            )
-        if controls_arr.shape[0] != _NATIVE_COORDS:
-            raise ValueError(
-                f"controls rows must match coordinate count {_NATIVE_COORDS}, "
-                f"got {controls_arr.shape[0]}"
-            )
-
-        # Gate G4: detect undeclared root forces (torques on unactuated root DOFs 0..5)
-        root_forces = controls_arr[:_ROOT_UNACTUATED_COUNT, :]
-        has_undeclared_root_forces = bool(np.any(np.abs(root_forces) > 1e-9))
+        times, q0, qd0, controls_arr, has_undeclared_root_forces = (
+            _parse_rollout_request(request)
+        )
 
         options = RolloutOptions(
             substeps=2,
@@ -326,35 +362,15 @@ class FullBodyForwardModel:
             options=options,
         )
 
-        # Evaluate physical acceptance criteria
-        is_physically_accepted = (
-            sim_res.status == "success"
-            and not has_undeclared_root_forces
-            and sim_res.max_closure_translation_m <= self.max_translation_tol_m
-            and (
-                sim_res.max_closure_rotation_rad is not None
-                and sim_res.max_closure_rotation_rad <= self.max_rotation_tol_rad
-            )
+        audit = _build_replay_audit(
+            sim_res=sim_res,
+            times=times,
+            integrator=options.integrator,
+            has_undeclared_root_forces=has_undeclared_root_forces,
+            max_trans_tol_m=self.max_translation_tol_m,
+            max_rot_tol_rad=self.max_rotation_tol_rad,
         )
 
-        audit = ReplayAudit(
-            schema_version=REPLAY_AUDIT_SCHEMA_VERSION,
-            candidate_id="full_body_candidate",
-            reset_count=1,
-            integrator_name=options.integrator,
-            integrator_version="1.0.0",
-            coverage_start_s=float(times[0]),
-            coverage_end_s=float(times[-1]),
-            max_grip_translation_error_m=float(sim_res.max_closure_translation_m),
-            max_grip_rotation_error_rad=float(
-                sim_res.max_closure_rotation_rad
-                if sim_res.max_closure_rotation_rad is not None
-                else 0.0
-            ),
-            is_physically_accepted=is_physically_accepted,
-        )
-
-        # Map trajectory frames to canonical coordinates
         canonical_trajectory: list[tuple[float, ...]] = []
         for k in range(len(times)):
             q_k_canon, _ = native_to_canonical_full_body(sim_res.q[k], sim_res.qd[k])

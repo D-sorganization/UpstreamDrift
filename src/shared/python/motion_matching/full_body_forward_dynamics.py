@@ -661,6 +661,31 @@ def _simulate_rk45(
     return q_traj, qd_traj, pred_m, samples, max_trans, max_rot, max_mixed, status
 
 
+def _audit_terminal_euler(
+    ctx: _EulerStepContext,
+    t_end: float,
+    curr_q: Array,
+    curr_qd: Array,
+    closure_errs: list[float | None],
+    all_contact_samples: list[dict[str, Any]],
+) -> None:
+    """Audit terminal Euler state and accumulate closure errors."""
+    c_samples, _, trans, rot, mixed = _evaluate_frame_dynamics(
+        ctx.model,
+        ctx.theta,
+        t_end,
+        ctx.duration_s,
+        ctx.coord_names,
+        curr_q,
+        curr_qd,
+        ctx.options,
+    )
+    all_contact_samples.append(c_samples)
+    closure_errs[0] = _accumulate_max(closure_errs[0], trans)
+    closure_errs[1] = _accumulate_max(closure_errs[1], rot)
+    closure_errs[2] = _accumulate_max(closure_errs[2], mixed)
+
+
 def _simulate_euler(
     model: Any,
     ik_adapter: Any | None,
@@ -726,21 +751,14 @@ def _simulate_euler(
                 ik_adapter, curr_q, mo, labels
             )
 
-    # Audit terminal Euler state (frame n_frames - 1)
-    c_samples, _, trans, rot, mixed = _evaluate_frame_dynamics(
-        model,
-        theta,
+    _audit_terminal_euler(
+        ctx,
         float(times[-1]),
-        duration_s,
-        coord_names,
         curr_q,
         curr_qd,
-        options,
+        closure_errs,
+        all_contact_samples,
     )
-    all_contact_samples.append(c_samples)
-    closure_errs[0] = _accumulate_max(closure_errs[0], trans)
-    closure_errs[1] = _accumulate_max(closure_errs[1], rot)
-    closure_errs[2] = _accumulate_max(closure_errs[2], mixed)
 
     status = _check_trajectory_finite(
         q_traj,
