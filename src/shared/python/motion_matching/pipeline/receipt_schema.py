@@ -11,6 +11,8 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .receipt_components import (
+    AcceptanceGateReport,
+    AcceptanceReceipt,
     AddressReceipt,
     AttachmentOffset,
     CalibratedAddressReport,
@@ -212,6 +214,11 @@ class Receipt(BaseModel):
         ...,
         description="Qualification note and status claim for the run",
         json_schema_extra={"unit": "text", "stage": "metadata"},
+    )
+    acceptance: AcceptanceReceipt | None = Field(
+        None,
+        description="Physical and kinematic acceptance evaluation verdict (MS-01)",
+        json_schema_extra={"unit": "compound", "stage": "metadata"},
     )
 
 
