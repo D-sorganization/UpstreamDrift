@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Register shadow_tracker tool in launcher_manifest.json for issue #10134"
+      "rationale": "Register Shadow Tracker review and workbench launcher tile (#10134)"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
