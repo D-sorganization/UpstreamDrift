@@ -20,6 +20,7 @@ from src.engines.physics_engines.pinocchio.python.crocoddyl_problem import (
     coordinate_bounds,
     finite_difference_rates,
     least_squares_controls,
+    per_coordinate_effort_bounds,
     range_barrier,
 )
 
@@ -130,3 +131,21 @@ def test_range_barrier_is_zero_inside_and_quadratic_outside() -> None:
     assert cost == pytest.approx(0.5 * 10.0 * 0.25)
     assert grad[0] == pytest.approx(10.0 * 0.5) and grad[1] == 0.0
     assert hess[0] == pytest.approx(10.0) and hess[1] == 0.0
+
+
+def test_per_coordinate_effort_bounds_follow_patterns() -> None:
+    order = ("TranslationInputX", "mtp_angle_l", "knee_angle_r", "LSInputZ", "custom")
+    actuated = np.array([False, True, True, True, True])
+    bounds = per_coordinate_effort_bounds(order, actuated, 600.0)
+    assert bounds.tolist() == [10.0, 250.0, 120.0, 600.0]
+
+
+def test_ridge_damps_near_singular_sensitivity() -> None:
+    deffort = np.diag([1.0, 1e-6])
+    actuated = np.array([True, True])
+    a_ref = np.array([1.0, 1.0])
+    plain = least_squares_controls(a_ref, np.zeros(2), deffort, actuated)
+    damped = least_squares_controls(a_ref, np.zeros(2), deffort, actuated, ridge=1e-3)
+    assert plain[1] > 1e5
+    assert abs(damped[1]) < 1.0
+    assert abs(damped[0] - a_ref[0]) < 1e-2

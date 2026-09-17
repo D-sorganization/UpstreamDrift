@@ -35,11 +35,11 @@ class FitWeights:
     per coordinate outside its human range (rad).
     """
 
-    marker: float = 1.0
-    terminal_marker: float = 10.0
+    marker: float = 1e3
+    terminal_marker: float = 1e4
     effort: float = 1e-5
-    velocity: float = 1e-4
-    range_barrier: float = 1e2
+    velocity: float = 1e-3
+    range_barrier: float = 1e3
 
     def __post_init__(self) -> None:
         for name in (
@@ -204,11 +204,58 @@ def actuated_mask(coordinate_order: Sequence[str]) -> NDArray[np.bool_]:
     )
 
 
+EFFORT_BOUND_PATTERNS_N_M: tuple[tuple[str, float], ...] = (
+    ("mtp_angle", 10.0),
+    ("subtalar_angle", 40.0),
+    ("ankle_angle", 150.0),
+    ("knee_angle", 250.0),
+    ("hip_", 300.0),
+    ("SpineInput", 300.0),
+    ("TorsoInput", 300.0),
+    ("ScapInput", 80.0),
+    ("LSInput", 120.0),
+    ("RSInput", 120.0),
+    ("LEInput", 80.0),
+    ("REInput", 80.0),
+    ("LFInput", 40.0),
+    ("RFInput", 40.0),
+    ("LWInput", 30.0),
+    ("RWInput", 30.0),
+    ("NeckInput", 30.0),
+)
+"""Peak-effort bounds by coordinate-name pattern (first match wins), in N m.
+
+Values are generous human joint-torque envelopes; they bound the solver, they
+are not identified quantities. Unmatched actuated coordinates fall back to the
+caller's default.
+"""
+
+
+def per_coordinate_effort_bounds(
+    coordinate_order: Sequence[str], actuated: NDArray[np.bool_], default_n_m: float
+) -> Array:
+    """Effort bound for each actuated coordinate, in the actuated-column order."""
+    require(default_n_m > 0.0, "default effort bound must be positive", default_n_m)
+    bounds: list[float] = []
+    for name, is_actuated in zip(coordinate_order, actuated, strict=True):
+        if not is_actuated:
+            continue
+        bound = default_n_m
+        for pattern, value in EFFORT_BOUND_PATTERNS_N_M:
+            if pattern in name:
+                bound = value
+                break
+        bounds.append(bound)
+    return np.asarray(bounds, dtype=float)
+
+
 def least_squares_controls(
     a_reference: Array,
     a_zero_effort: Array,
     deffort: Array,
     actuated: NDArray[np.bool_],
+    *,
+    ridge: float = 0.0,
 ) -> Array:
     """Efforts that best reproduce a reference acceleration through the plant's effort sensitivity.
 
@@ -222,7 +269,13 @@ def least_squares_controls(
         a_ref.shape == a_zero.shape == (sensitivity.shape[0],),
         "acceleration shapes must agree",
     )
-    solution, *_ = np.linalg.lstsq(sensitivity, a_ref - a_zero, rcond=None)
+    require(ridge >= 0.0, "ridge must be nonnegative", ridge)
+    if ridge > 0.0:
+        # Tikhonov-regularised normal equations damp near-massless directions.
+        normal = sensitivity.T @ sensitivity + ridge * np.eye(sensitivity.shape[1])
+        solution = np.linalg.solve(normal, sensitivity.T @ (a_ref - a_zero))
+    else:
+        solution, *_ = np.linalg.lstsq(sensitivity, a_ref - a_zero, rcond=None)
     ensure(bool(np.isfinite(solution).all()), "least-squares controls must be finite")
     return solution
 
