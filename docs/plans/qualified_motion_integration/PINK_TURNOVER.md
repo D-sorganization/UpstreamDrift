@@ -152,11 +152,12 @@ Run unit tests separately from native tests. Example adapter regression commands
 after the prerequisite PR is present, from the selected repository root:
 
 ```bash
-python3 -m pytest -q tests/unit/engines/pinocchio/dtack --timeout=60
+python3 -m pytest -q tests/unit/engines/pinocchio/test_pink_tasks.py tests/unit/engines/pinocchio/dtack --timeout=60
 /home/dieterolson/.local/bin/micromamba run \
   -p /home/dieterolson/.venvs/upstream-crocoddyl-conda-10254 \
-  python3 -m pytest -q tests/integration/engines/pinocchio/test_pink_adapter_contract.py \
-  --timeout=60 --junitxml=/tmp/pink-adapter.xml
+  python3 -m pytest -q tests/integration/engines/pinocchio/test_pink_tasks.py \
+  tests/integration/engines/pinocchio/test_pink_adapter_contract.py \
+  --timeout=60 --junitxml=/tmp/pink-tasks.xml
 ```
 
 Check that the named integration file exists on the recorded prerequisite head

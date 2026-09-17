@@ -11,6 +11,24 @@ supports a self-managed server with explicit browser suppression. Live
 Gepetto qualification and product-level replay selection are still separate
 requirements under #10254.
 
+## Shadow Tracker Full-Body Forward Rollout and Auditable Replay (#10130)
+
+Connects real continuous full-body physics forward simulation to Shadow Tracker observation fitting with deterministic replay verification:
+- **Full-Body Forward Model (`src/shared/python/shadow_tracker/forward_model.py`)**: Implements the `ForwardModel` protocol from `contracts.py` backed by `simulate_full_body_forward`. Declares accurate `ModelCapabilities` (`state_dim=42`, `control_dim=0`, `has_forward_dynamics=True`, `requires_ground_plane=True`).
+- **Canonical-v2 to Native State Space Bridge**:
+  - `native_to_canonical_full_body`: Converts native 41-coordinate state vectors (3 root translation + 3 intrinsic Euler angles + 35 internal joints) and velocities to canonical-v2 coordinates ($q \in \mathbb{R}^{42}$ with normalized quaternion root, $v \in \mathbb{R}^{41}$ with body-frame angular velocity).
+  - `canonical_to_native_full_body`: Inverts canonical-v2 back to native coordinates, converting root quaternions back to Euler angles and body angular velocities back to Euler rates via $J_{body}^{-1}(\text{rpy})$ with round-trip error $< 10^{-12}$.
+- **Closed-Form SE(3) Euler Rate Jacobian**:
+  - Analytical body Jacobian $J_{body}(\text{rpy})$ relates Euler rates $(\dot{\phi}, \dot{\theta}, \dot{\psi})$ to body angular velocity $\omega_{body}$ matching intrinsic $R = R_x(\phi) R_y(\theta) R_z(\psi)$ rotation order.
+  - Closed-form algebraic inverse $J_{body}^{-1}(\text{rpy})$ evaluated with determinant $\cos\theta$, raising `ValueError` at gimbal lock pitch ($\theta \approx \pm \pi / 2$).
+- **Decoupled Physics Rollout Boundary (`src/shared/python/motion_matching/full_body_forward_dynamics.py`)**:
+  - `simulate_full_body_forward`: Accepts optional `capture`, `ik_adapter`, and `marker_offsets`, supporting pure forward simulation without optical markers or synthetic dummy captures.
+  - Returns `ForwardRolloutResult` containing optional `shared_metrics`, with `auto_calibrate_ground` and `preserve_ground_calibration` options in `RolloutOptions`.
+- **Gate G4 Replay Audit & Unevidenced Force Detection**:
+  - Validates initial single-hypothesis input during reset.
+  - Verifies deterministic repeat replay matching trajectory state within tight tolerances.
+  - Detects and flags unevidenced non-zero root forces in candidate trajectories (`audit.passed = False`, `audit.evidence_details["passed_gate_g4"] = False`).
+
 ## Shadow Tracker Native Timestamp Authority and Observation Provenance (#10273)
 
 Preserves native container timestamp authority and decoder provenance across ingestion and observation records:
@@ -50,6 +68,31 @@ Calibrates the hip coordinate zero-twist angle from optical motion capture data 
   - Regenerated ground-support receipts with `BOUND_WIDENING = 1.0`: `anthro_driver`, `anthro_driver_shoot`, `anthro_iron`, and `anthro_iron_shoot`.
   - Verified 0 lower-limb `range_of_motion_flags` on the IK reference for both captures (`driver` and `iron`).
   - Cross-engine setup parity (`verify_setup_parity.py`) re-verified across MuJoCo, Drake, and Pinocchio.
+## Pink Full-Body Task and Constraint Translation (#10276, #10304)
+
+`FullBodyPinkTasks` provides an engine-local typed facade (`build`, `audit`)
+translating canonical motion-matching marker attachments, six-dimensional grip
+closure, and joint bounds/locks into Pink tasks and configuration limits.
+Canonical marker targets are mapped to `FrameTask` instances with dropout masks
+and target finiteness validation. Stance and grip loop closure are enforced via
+`RelativeFrameTask` (identity SE(3) transform) while rejecting configurations
+near the rotation-$\pi$ principal log branch cut ($10^{-7}\text{ rad}$). Coordinate
+bounds are explicitly converted from degrees to radians, and locked coordinates
+are constrained via `LockedCoordinateTask`. The facade validates inputs, supports
+floating-base kinematics ($n_q \neq n_v$), and evaluates post-solve residuals
+and bound violations.
+
+## Pink Adapter State and Constraint Contract (#10257)
+
+`PinkSolver.solve` and `PINKBackend.solve_ik` use one validated implementation
+with explicit configuration (`nq`) and tangent velocity (`nv`) dimensions.
+They preserve positional arguments and add keyword-only hard task constraints
+and limits. Omitted options preserve Pink defaults; unsupported requested
+capabilities fail explicitly. Each solve refreshes kinematics from its input,
+performs one `pin.integrate(q, velocity * dt)`, and updates the cache afterward.
+Collision geometry remains available to Pink. Invalid inputs, nonfinite
+outputs and solver infeasibility propagate as errors. Optional native loading
+handles missing/broken imports without pretending the capability exists.
 
 ## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
 
@@ -67,6 +110,15 @@ Completes the modularization of the ground support execution pipeline by moving 
 - Bitwise Receipt & Simulation Parity:
   - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
 
+## Crocoddyl Polynomial Action Model (#10269)
+
+Integrates global degree-six polynomial actuation into a Crocoddyl `ActionModelAbstract`
+for full-body motion matching. The action represents continuous RK4 steps over fixed
+substep intervals, computing analytical derivatives `Fx` and `Fu` through the exact
+chain rule on discrete full-body sensitivity tensors. Supports box-constrained optimization
+over coefficient increments, unactuated root mapping, active and bilateral contact states,
+and independent replay diagnostics.
+
 ## Global Polynomial Full-Body Step (#10265)
 
 Full-body control parameters are one row-major seven-coefficient Bernstein
@@ -77,6 +129,7 @@ and differentiates every internal stage and substep. Discrete state and
 coefficient Jacobians include shared contact derivatives, with nonsmooth
 contact branches reported explicitly. No state resets or pose projection are
 part of this open-loop boundary.
+
 ## Finite Weld Pose Linearization (#10260)
 
 The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
@@ -84,6 +137,7 @@ The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
 The velocity and acceleration constraints continue using `J_constraint`;
 their trajectory acceleration partial must not substitute the finite pose
 Jacobian. Real-engine tests verify off-closure directions and storage ownership.
+
 ## Contact-Aware Full-Body Derivatives (#10255, #10254)
 
 The shared sphere-contact law exposes world-force derivatives with respect to
@@ -5359,6 +5413,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
+| 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
+| 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
 | 2026-09-16 | #10270 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |
 | 2026-09-16 | #10263 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
 | 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
