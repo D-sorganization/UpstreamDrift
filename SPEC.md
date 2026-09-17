@@ -94,6 +94,16 @@ Collision geometry remains available to Pink. Invalid inputs, nonfinite
 outputs and solver infeasibility propagate as errors. Optional native loading
 handles missing/broken imports without pretending the capability exists.
 
+## Optional Motion Runtime Qualification (#10262)
+
+The optional numerical environment is defined by a portable version manifest
+and exact Linux conda-forge package lock. Native import and solver probes run
+in isolated interpreters. Qualification fails for missing required components,
+failed processes, timeouts, malformed results, nonfinite equality outputs or
+unmet hard-constraint behavior. Receipts identify runtime versions, source
+hashes, interpreter, numerical tolerances and source-freshness status. This
+capability check does not confer full-body model or physical acceptance.
+
 ## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
 
 Completes the modularization of the ground support execution pipeline by moving remaining orchestration stages and CLI utilities from `run_ground_support.py` into the reusable `src.shared.python.motion_matching.pipeline` package, reducing `run_ground_support.py` from 779 lines to 374 lines (satisfying the <400 line architecture budget):
@@ -5413,6 +5423,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
+| 2026-09-16 | #10268 | Add reproducible optional motion runtime and isolated fail-closed capability receipts. |
 | 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
 | 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
 | 2026-09-16 | #10270 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |

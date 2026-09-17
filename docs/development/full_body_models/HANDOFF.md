@@ -36,6 +36,15 @@ opt-in heavy integration test; live Gepetto qualification remains pending.
 These wrappers are prerequisites for replay integration, not evidence that the
 full-body product already routes through them or that any model fit is valid.
 
+## Reproducible Numerical Runtime (#10262)
+
+Use the optional runtime manifest/lock and checker documented in
+`docs/engines/pinocchio.md`. Real Crocoddyl descent and Pink hard-equality /
+infeasible-QP probes pass in the consistent conda-forge stack. Preserve the
+receipt's explicit source-freshness status; a runtime pass is not model or
+physical acceptance. Linux lock requires x86-64-v3. Viewer qualification
+remains separate.
+
 ## Pink Adapter Status (#10257, #10254)
 
 The low-level Pink adapters now share validated state/time handling, retain
