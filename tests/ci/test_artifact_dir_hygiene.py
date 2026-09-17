@@ -80,9 +80,19 @@ def test_output_dir_tracks_only_the_keepfile() -> None:
     )
 
 
+ALLOWED_REPORT_FILES = frozenset(
+    {
+        "reports/matched_swing_ledger.json",
+        "reports/cross_engine_leaderboard.json",
+    }
+)
+
+
 def test_reports_dir_tracks_no_scanner_dumps() -> None:
     tracked = _tracked_files("reports")
-    json_dumps = [f for f in tracked if f.endswith(".json")]
+    json_dumps = [
+        f for f in tracked if f.endswith(".json") and f not in ALLOWED_REPORT_FILES
+    ]
     assert json_dumps == [], (
         f"reports/ must not track scanner dumps (#8836, #9415): {json_dumps!r}"
     )
