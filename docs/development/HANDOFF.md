@@ -1,5 +1,13 @@
 # Native Multi-Engine Matching Handoff
 
+Fresh-source Pinocchio replay now reproduces run102 markers exactly in 13.38 s;
+see runtime78_restoration.json. Restore remaining fitter dependencies and qualify
+finite-weld derivatives next. The original fit remains rejected at 0.85 s.
+
+Replay/node-chart/sensitivity source restoration passes 28 local regression tests.
+Read the new restoration checkpoint in PROGRESS_REVIEW_20260917.md and the
+runtime78_restoration.json receipt before resuming remote numerical validation.
+
 The three missing native fit modules are now hash-matched archival recoveries
 in simscape_tour_matching/native_evidence/runtime78_recovered_sources.zip.
 Restore qualified source/tests next; clean-runtime execution remains unverified.
