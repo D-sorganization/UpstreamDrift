@@ -11,7 +11,11 @@ import mujoco
 import numpy as np
 from scipy.signal import butter, filtfilt
 
+from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
+from src.shared.python.motion_matching.tour_capture_contract import (
+    MARKER_VALIDITY_POLICY,
+)
 from src.shared.python.motion_matching.pipeline.constants import (
     BOUND_WIDENING,
     CALIBRATION_PRIOR_FRAMES,
@@ -93,6 +97,13 @@ def marker_errors(
             for row, target in zip(q, points, strict=True)
         ]
     )
+
+
+@precondition(lambda label, is_valid=True: isinstance(label, str), "label must be str")
+@postcondition(lambda r: r >= 0.0, "weight must be non-negative")
+def marker_weight(label: str, is_valid: bool = True) -> float:
+    """Return marker tracking weight according to the canonical validity policy."""
+    return MARKER_VALIDITY_POLICY.weight_for(label, is_valid=is_valid)
 
 
 def full_capture_ik(
