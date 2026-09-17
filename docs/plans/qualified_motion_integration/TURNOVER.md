@@ -72,6 +72,11 @@ lint/format, typing, file/module-size, LoD and design-manual governance checks,
 then repository-required CI. A known main failure is a documented blocker,
 not permission to remove a gate or declare the branch green.
 
+The main-derived reference-report LoD violation was reproduced and corrected
+without changing the baseline: resolve the offset mapping before serialization.
+Seven reference-stage tests and the 3,221-file no-growth scan pass locally.
+Remote CI remains authoritative for merge readiness.
+
 ## Runtime and Resource Procedure
 
 On OGLAPTOP use the existing Ubuntu-24.04 environments. Do not reinstall or

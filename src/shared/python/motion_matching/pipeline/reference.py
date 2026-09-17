@@ -280,6 +280,14 @@ def _build_calibration_stage_report(
     inputs: IKReportInputs,
     lane: Lane,
 ) -> dict[str, Any]:
+    offsets = inputs.offsets
+    if offsets is None:
+        calibration = inputs.calibration2
+        offsets = (
+            calibration.offsets
+            if hasattr(calibration, "offsets")
+            else inputs.attachments
+        )
     return {
         "stride": CALIBRATION_STRIDE,
         "frames": len(lane.calibration_frames),
@@ -291,16 +299,7 @@ def _build_calibration_stage_report(
         ),
         "per_marker_rms_m": inputs.calibration2.per_marker_rms_m,
         "offsets_m": {
-            k: {"body": b, "offset_m": list(o)}
-            for k, (b, o) in (
-                inputs.offsets.items()
-                if inputs.offsets is not None
-                else (
-                    inputs.calibration2.offsets.items()
-                    if hasattr(inputs.calibration2, "offsets")
-                    else inputs.attachments.items()
-                )
-            )
+            k: {"body": b, "offset_m": list(o)} for k, (b, o) in offsets.items()
         },
     }
 
