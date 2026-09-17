@@ -110,21 +110,9 @@ ROADMAP_ISSUES = [
 ]
 
 
-@precondition(
-    lambda ledger_data: isinstance(ledger_data, dict) and "rows" in ledger_data
-)
-@postcondition(lambda result: isinstance(result, str) and len(result) > 0)
-def render_matched_swing_status(ledger_data: dict[str, Any]) -> str:
-    """Render the status matrices and roadmap tables from ledger data.
-
-    DbC:
-    - Precondition: `ledger_data` is a valid dict containing 'rows'.
-    - Postcondition: Returns non-empty markdown string.
-    """
-    rows: list[dict[str, Any]] = ledger_data.get("rows", [])
+def _render_progress_matrix(rows: list[dict[str, Any]]) -> list[str]:
+    """Render the cross-engine progress matrix table."""
     total_receipts = len(rows)
-
-    # Engine summary
     engines = ("mujoco", "pinocchio", "drake", "opensim", "simscape", "myosuite")
     engine_stats: dict[str, dict[str, Any]] = {
         eng: {
@@ -161,30 +149,24 @@ def render_matched_swing_status(ledger_data: dict[str, Any]) -> str:
             stats["min_dyn_rms_mm"] = min(stats["min_dyn_rms_mm"], dyn_rms * 1000.0)
 
     # Assign qualification labels based on actual verified receipts
-    # MuJoCo: G1 engineering milestone (calibrated tour capture: 27.3 mm IK, 74.6 mm dyn)
     engine_stats["mujoco"]["status"] = (
         "⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity)"
     )
-    # Pinocchio: Crocoddyl & Pink PRs active; kinematics in progress
     engine_stats["pinocchio"]["status"] = (
         "⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)"
     )
-    # Drake: Parity receipts committed; native forward fit pending
     engine_stats["drake"]["status"] = (
         "⚙️ Parity Replay (6e-6 m Drake-MuJoCo setup parity)"
     )
-    # OpenSim: Greenfield / Moco bridge planned
     engine_stats["opensim"]["status"] = "⚠️ Staged (Moco track problem under MS-102)"
-    # Simscape: Tour baseline authority
     engine_stats["simscape"]["status"] = (
         "🏛️ Historical Tour Authority (Simscape lane baseline)"
     )
-    # MyoSuite: Fail-closed experimental
     engine_stats["myosuite"]["status"] = (
         "🔬 Experimental (Fail-closed; MS-50 corrective landed)"
     )
 
-    lines: list[str] = [
+    lines = [
         "### 1. Cross-Engine Engineering Progress Matrix",
         "",
         f"Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, {total_receipts} committed receipts scanned).",
@@ -210,34 +192,59 @@ def render_matched_swing_status(ledger_data: dict[str, Any]) -> str:
         lines.append(
             f"| **{eng.capitalize()}** | {lanes} | {caps} | {ik_str} | {dyn_str} | {st['count']} | {st['status']} |"
         )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)",
-            "",
-            "Per Owner-Authorized Contract Revision (MS-100 #10374 / MS-104 #10378 / MS-106 #10380):",
-            "Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release. All six engines remain required.",
-            "",
-            "| Gate | Criterion | MuJoCo | Pinocchio | Drake | OpenSim | Simscape | MyoSuite | Gate Status |",
-            "|---|---|---|---|---|---|---|---|---|",
-            "| **G1: Kinematic Fit** | Whole-swing marker RMS $\\le 30$ mm, 0 RoM violations | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active** |",
-            "| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |",
-            "| **G3: Professional Release** | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ❌ Blocked | **Open (Blocks Release)** |",
-            "",
-            "### 3. Matched Swing Release Issues Roadmap",
-            "",
-            "| Issue | Title | Tier | Accountable Role | Blocker / Dependency | Next Executable Action |",
-            "|---|---|---|---|---|---|",
-        ]
-    )
 
+def _render_qualification_ladder() -> list[str]:
+    """Render the full-swing qualification ladder table."""
+    return [
+        "",
+        "### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)",
+        "",
+        "Per Owner-Authorized Contract Revision (MS-100 #10374 / MS-104 #10378 / MS-106 #10380):",
+        "Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release. All six engines remain required.",
+        "",
+        "| Gate | Criterion | MuJoCo | Pinocchio | Drake | OpenSim | Simscape | MyoSuite | Gate Status |",
+        "|---|---|---|---|---|---|---|---|---|",
+        "| **G1: Kinematic Fit** | Whole-swing marker RMS $\\le 30$ mm, 0 RoM violations | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active** |",
+        "| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |",
+        "| **G3: Professional Release** | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ❌ Blocked | **Open (Blocks Release)** |",
+        "",
+    ]
+
+
+def _render_roadmap_table() -> list[str]:
+    """Render the matched swing release roadmap table."""
+    lines = [
+        "### 3. Matched Swing Release Issues Roadmap",
+        "",
+        "| Issue | Title | Tier | Accountable Role | Blocker / Dependency | Next Executable Action |",
+        "|---|---|---|---|---|---|",
+    ]
     for item in ROADMAP_ISSUES:
         lines.append(
             f"| [**{item['key']}**](https://github.com/D-sorganization/UpstreamDrift/issues/{item['issue']}) "
             f"(#{item['issue']}) | {item['title']} | {item['tier']} | `{item['role']}` | {item['blocker']} | {item['action']} |"
         )
+    return lines
 
+
+@precondition(
+    lambda ledger_data: isinstance(ledger_data, dict) and "rows" in ledger_data
+)
+@postcondition(lambda result: isinstance(result, str) and len(result) > 0)
+def render_matched_swing_status(ledger_data: dict[str, Any]) -> str:
+    """Render the status matrices and roadmap tables from ledger data.
+
+    DbC:
+    - Precondition: `ledger_data` is a valid dict containing 'rows'.
+    - Postcondition: Returns non-empty markdown string.
+    """
+    rows: list[dict[str, Any]] = ledger_data.get("rows", [])
+    lines: list[str] = []
+    lines.extend(_render_progress_matrix(rows))
+    lines.extend(_render_qualification_ladder())
+    lines.extend(_render_roadmap_table())
     return "\n".join(lines)
 
 
