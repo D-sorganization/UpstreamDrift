@@ -190,3 +190,39 @@ def test_viewer_frame_computes_world_segments_and_markers(tmp_path: Path) -> Non
     assert frame_data.model_markers.shape == (n_markers, 3)
     assert frame_data.valid_mask.shape == (n_markers,)
     assert frame_data.rms_error >= 0.0
+
+
+def test_native_simscape_replay_fk_matches_archived_markers() -> None:
+    """Native model playback must preserve all saved MATLAB marker locations."""
+    from scipy.io import loadmat
+    from src.engines.physics_engines.mujoco.python.native_mjcf import transform
+
+    evidence = ROOT / "docs/development/simscape_tour_matching/native_evidence"
+    spec = json.loads((evidence / "native_geometry_spec_9967.json").read_text())
+    run = evidence / "two_window_fit_9967_102"
+    candidate = json.loads((run / "returned-candidate.json").read_text())
+    replay = loadmat(run / "qualified_candidate_replay.mat")
+    offsets = np.asarray(candidate["marker_offsets_m"])
+    body_offsets = {
+        j["child"]: np.linalg.inv(transform(j["child_to_follower"]))
+        for j in spec["joints"]
+    }
+    frames = {f["name"]: f for f in spec["frames"]}
+    for frame in (0, 150, 250, 306):
+        poses = body_poses_from_state(
+            spec, replay["q"][frame], candidate["coordinate_names"]
+        )
+        calculated = []
+        for body, offset in zip(candidate["marker_bodies"], offsets, strict=True):
+            attached = frames[body]
+            owner = attached["body"]
+            physical = (
+                poses[owner] @ body_offsets[owner] @ transform(attached["placement"])
+            )
+            calculated.append(physical[:3, :3] @ offset + physical[:3, 3])
+        # Saved coordinates and markers are separate sampled MATLAB outputs.
+        # Qualify visual reconstruction at 0.1 mm, not machine-precision FK parity.
+        errors = np.linalg.norm(
+            np.asarray(calculated) - replay["prediction"][frame], axis=1
+        )
+        assert np.max(errors) < 1e-4

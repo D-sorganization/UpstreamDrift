@@ -1,0 +1,21 @@
+{
+  "source": "actual MATLAB R2025b retained q; no new simulation",
+  "run": "returned102",
+  "status": "rejected prefix",
+  "horizon_s": 0.85,
+  "playback": "approximately one-third real speed; last frame retained",
+  "sample_indices": [
+    0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 102, 108,
+    114, 120, 126, 132, 138, 144, 150, 156, 162, 168, 174, 180, 186, 192, 198,
+    204, 210, 216, 222, 228, 234, 240, 246, 252, 258, 264, 270, 276, 282, 288,
+    294, 300, 306
+  ],
+  "max_rendered_marker_reconstruction_m": 1.4715330641067369e-5,
+  "visual_geometry": "shared capsules rendered as cylinders, no added legs/head joints",
+  "hashes": {
+    "native_evidence\\native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+    "native_evidence\\two_window_fit_9967_102\\returned-candidate.json": "936ebf0e2d7dc7f888737a3ba8739d874dd87963999c916a5abd66b8d1070bdd",
+    "native_evidence\\two_window_fit_9967_102\\qualified_candidate_replay.mat": "b521de0348a9cca5facbf5cb0a3ea175030b369d75d2ef9795a2d0d3e5eb6291",
+    "render_saved_simscape.py": "456ec32fc17f7ac7fb2c451144d4b5ec4a446b6ce23742df3092e47f95d627c3"
+  }
+}

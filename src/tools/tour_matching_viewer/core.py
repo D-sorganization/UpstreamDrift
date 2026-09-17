@@ -21,6 +21,7 @@ from src.engines.physics_engines.mujoco.python.native_mjcf import (
     transform as _transform,
 )
 from src.shared.python.motion_matching.full_body_spec import (
+    order_directed_tree,
     order_full_body_joints,
     upper_body_slice,
 )
@@ -244,7 +245,11 @@ def body_poses_from_state(
 
     Matches MuJoCo forward kinematics (xpos and xmat) to < 1e-9 across all joints.
     """
-    ordered_joints = order_full_body_joints(spec)
+    ordered_joints = (
+        order_full_body_joints(spec)
+        if "upper_body_counts" in spec
+        else order_directed_tree(spec["joints"])
+    )
 
     if isinstance(q, Mapping):
         coord_map = dict(q)

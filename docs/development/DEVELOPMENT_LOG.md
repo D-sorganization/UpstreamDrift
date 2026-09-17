@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10285 � Saved Simulation Library and Native Replay
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #10285 (counterfactual sibling #10286)
+- **Branch:** feat/10285-native-saved-replay
+- **Paths:** src/tools/tour_matching_viewer; docs/development/simscape_tour_matching
+- **Started:** 2026-09-16
+- **Last verified:** 2026-09-16 (SELF; seven viewer core tests passed including native archived MATLAB reconstruction and real MuJoCo FK; cylinder still visually inspected)
+- **Summary:** Native-spec FK ordering fixed test-first; actual saved R2025b run102 cylindrical preview and provenance generated. Counterfactual definitions/provider gaps audited against AffineDrift/WSCG. Two product epics and detailed turnover created; no new simulation launched.
+- **Next step:** Follow SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md and epic SL-1/SL-2: canonical model/run manifest and real retained-state import; do not present synthetic or mismatched-model GUI evidence as qualification.
+
 ### DL-#9967 · Native Simscape Tour Matching
 
 - **State:** in_progress
