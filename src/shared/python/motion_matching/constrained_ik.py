@@ -142,6 +142,9 @@ class IKOptions:
     tolerance: float = 1e-4
     limit_policy: str = "enforce"
     dt_numerical: float = 1.0 / 360.0
+    weld_translation_tolerance_m: float = 0.005
+    weld_rotation_tolerance_rad: float = 0.05
+    marker_tolerance_m: float = 0.03
 
     def __post_init__(self) -> None:
         if self.step_mode not in ("physical", "projection"):
@@ -162,6 +165,18 @@ class IKOptions:
             )
         if self.dt_numerical <= 0.0:
             raise ValueError(f"dt_numerical must be > 0, got {self.dt_numerical}")
+        if self.weld_translation_tolerance_m <= 0.0:
+            raise ValueError(
+                f"weld_translation_tolerance_m must be > 0, got {self.weld_translation_tolerance_m}"
+            )
+        if self.weld_rotation_tolerance_rad <= 0.0:
+            raise ValueError(
+                f"weld_rotation_tolerance_rad must be > 0, got {self.weld_rotation_tolerance_rad}"
+            )
+        if self.marker_tolerance_m <= 0.0:
+            raise ValueError(
+                f"marker_tolerance_m must be > 0, got {self.marker_tolerance_m}"
+            )
 
 
 @dataclass(frozen=True)
