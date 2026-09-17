@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Review Workbench Viewport and Action Wiring Corrective (#10357)
+
+Repairs Shadow Tracker GUI workbench interaction and rendering surfaces in accordance with launcher embed standards (MS-84):
+- **Action Signal Wiring (`src/tools/shadow_tracker/gui.py`)**:
+  - Connects toolbar action buttons (`btn_open`, `btn_save`, `btn_export`) to concrete review model handlers.
+  - Implements file dialog workflows for opening bundle directories, saving sessions, and exporting canonical JSON packages with explicit status reporting and error boundaries.
+  - Enforces connected signal receivers across all toolbar and navigation buttons (`btn_open`, `btn_save`, `btn_export`, `btn_worst`, `btn_prev`, `btn_next`).
+- **Custom Review Viewport (`src/tools/shadow_tracker/gui.py`)**:
+  - Replaces plain placeholder `QLabel` with dedicated `ShadowTrackerViewportWidget` subclassing `QtWidgets.QWidget`.
+  - Exposes typed `observation` property and `set_observation(obs: FrameObservation | None)` mutation interface.
+  - Implements custom `paintEvent` rendering:
+    - Empty state: clean status prompt guiding user to open bundles.
+    - Active state: background fill, bounding frame, shot/camera identifiers, authoritative frame PTS and clock authority, mask references, and kinematics overlay placeholder.
+
 ## Pink Constrained IK Interface Repair and Fail-Closed Qualification (#10318)
 
 Repairs native driver interface wiring, eliminates silent fallback, and enforces honest constraint evaluation across the Pink constrained IK pipeline:
