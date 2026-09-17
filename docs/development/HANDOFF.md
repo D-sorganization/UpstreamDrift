@@ -1,5 +1,11 @@
 # Native Multi-Engine Matching Handoff
 
+## Matched Swing Program: Pinocchio + Crocoddyl Lane (MS-31, #10338)
+
+Updated 2026-09-17 (claude). Current turnover for the native Crocoddyl full-body
+fit (first G1 candidate) is `docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md`;
+the parallel OpenSim/Moco lane is MS-42 (#10341). Program epic #10363.
+
 ## Current Status
 
 Run101 is a **rejected 0–0.85 s prefix**, not a completed full-swing match.
