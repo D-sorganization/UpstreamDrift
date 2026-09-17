@@ -280,26 +280,26 @@ def _build_calibration_stage_report(
     inputs: IKReportInputs,
     lane: Lane,
 ) -> dict[str, Any]:
-    offsets = inputs.offsets
-    if offsets is None:
-        calibration = inputs.calibration2
-        offsets = (
-            calibration.offsets
-            if hasattr(calibration, "offsets")
-            else inputs.attachments
-        )
+    custom_offsets = inputs.offsets
+    cal2 = inputs.calibration2
+    cal2_offsets = getattr(cal2, "offsets", None)
+    if custom_offsets is not None:
+        source_offsets = custom_offsets
+    elif cal2_offsets is not None:
+        source_offsets = cal2_offsets
+    else:
+        source_offsets = inputs.attachments
+
     return {
         "stride": CALIBRATION_STRIDE,
         "frames": len(lane.calibration_frames),
         "prior_frames": CALIBRATION_PRIOR_FRAMES,
         "prior_offsets_m": {k: list(v[1]) for k, v in LEG_SEEDS.items()},
         "rms_per_iteration_m": list(inputs.calibration.rms_per_iteration_m),
-        "rms_per_iteration_after_scaling_m": list(
-            inputs.calibration2.rms_per_iteration_m
-        ),
-        "per_marker_rms_m": inputs.calibration2.per_marker_rms_m,
+        "rms_per_iteration_after_scaling_m": list(cal2.rms_per_iteration_m),
+        "per_marker_rms_m": cal2.per_marker_rms_m,
         "offsets_m": {
-            k: {"body": b, "offset_m": list(o)} for k, (b, o) in offsets.items()
+            k: {"body": b, "offset_m": list(o)} for k, (b, o) in source_offsets.items()
         },
     }
 
