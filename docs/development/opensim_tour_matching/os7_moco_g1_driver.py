@@ -111,6 +111,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--replay-timeout-s", type=float, default=1800.0)
     parser.add_argument("--rungs", type=float, nargs="*", default=None)
     parser.add_argument("--warm-start", type=Path, default=None)
+    parser.add_argument(
+        "--continue-on-failure",
+        action="store_true",
+        help="warm-start the next rung from a capped (unconverged) trajectory",
+    )
     return parser.parse_args()
 
 
@@ -268,6 +273,7 @@ def _run_rung(
     previous: tuple | None,
 ) -> tuple[dict[str, Any], tuple | None]:
     args: argparse.Namespace = context["args"]
+    warm_unconverged = bool(context.get("warm_unconverged", False))
     rung_dir = args.outdir / "rungs" / f"{int(round(horizon_s * 1000)):04d}ms"
     rung_dir.mkdir(parents=True, exist_ok=True)
     scored, labels, reference = _prepare_reference(capture, horizon_s, args, rung_dir)
@@ -337,7 +343,11 @@ def _run_rung(
         json.dumps(receipt, indent=2, default=str) + "\n"
     )
     states_t, states = read_sto(rung_dir / "states.sto")
-    next_previous = (states_t, states, controls) if solve["success"] else None
+    usable = solve["success"] or args.continue_on_failure
+    receipt["warm_start_from_unconverged"] = bool(
+        previous is not None and warm_unconverged
+    )
+    next_previous = (states_t, states, controls) if usable else None
     return receipt, next_previous
 
 
@@ -443,6 +453,7 @@ def main() -> int:
         receipt, previous = _run_rung(capture, horizon_s, context, previous)
         receipts.append(receipt)
         _write_top_level(receipts, context)
+        context["warm_unconverged"] = not receipt["solver_success"]
         if previous is None:
             logger.warning("Rung %.3f s did not converge; ladder stops here", horizon_s)
             break
