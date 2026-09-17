@@ -26,6 +26,17 @@ application or qualified silhouette-driven forward fitter exists on this baselin
   `test_silhouette_projection_and_losses.py:18`. CI run `35153532669`, job
   `104988849182`, reported 16,572 passed, 399 skipped and one collection error.
   Passing smaller test jobs do not override this failure.
+- Static review of that renderer head also finds no thigh/shin/foot segments in
+  `_BODY_SEGMENTS`; knee motion changing the upper body is not evidence of a
+  full-body silhouette. Add lower-limb geometry and independent region tests.
+  `_rasterize_3d_segment` chooses sample count from unbounded projected endpoint
+  distance after clipping depth to 1e-6 m. Near-plane crossings can therefore
+  request extremely large loops even for a tiny image. Add adversarial near-plane
+  work-budget tests and viewport-aware bounded rasterization before enabling
+  interactive fitting. Height currently scales radii while FK lengths are supplied
+  independently; test and document consistent subject geometry rather than
+  treating radius scaling as fitted body shape. These are code-review findings,
+  not measured performance or geometry qualification receipts.
 - The original checkout already has uncommitted qualified-import corrections
   in `articulated_renderer.py` and its projection test. Preserve and inspect
   those changes with the owning agent; do not overwrite or duplicate its PR.
