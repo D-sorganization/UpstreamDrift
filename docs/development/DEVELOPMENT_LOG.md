@@ -73,6 +73,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Pink Integration Defect Repair & Fail-Closed Qualification (#10318; 2026-09-17):**
+  Repaired three blocking defects in the Pink constrained IK pipeline:
+
+  1. Driver interface: Replaced nonexistent module reference in `run_ground_support.py`
+     with `PinkTrajectoryService`, `IKTrajectoryRequest`, and `IKOptions`, generating
+     conforming `ConstrainedIkReceipt` records.
+  2. Fail-closed native execution: Eliminated silent no-op fallback in
+     `PinkTrajectoryService._execute_qp_step`; missing native stack or model fails closed
+     with explicit failure reasons.
+  3. Honest constraint evaluation: Enforced `NaN` residuals for unevaluated marker and
+     weld constraints, and gated qualification on rate limit violations and named
+     physical tolerances (`weld_translation_tolerance_m`, `weld_rotation_tolerance_rad`,
+     `marker_tolerance_m`).
+
 - **Pink Pipeline & Receipt Exposure (#10278; 2026-09-17):** Exposed Pink
   constrained inverse kinematics backend through `MatchRequest` (`backend="pink"`,
   `step_mode`, `solver`), CLI `--backend pink`, and GUI dropdown. Structured
