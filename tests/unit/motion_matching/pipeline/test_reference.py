@@ -135,3 +135,66 @@ def test_consistency_resolve_calls_kin_solve_trajectory() -> None:
     assert kwargs["plant_stance"] is True
     assert np.array_equal(kwargs["prior_trajectory"], q_smooth)
     assert kwargs["bounds"] == lane.bounds
+
+
+@pytest.mark.unit
+def test_build_ik_report_structure() -> None:
+    from src.shared.python.motion_matching.pipeline.reference import (
+        IKReportInputs,
+        build_ik_report,
+    )
+
+    lane = MagicMock()
+    lane.frames = 10
+    lane.times = np.linspace(0.0, 1.0, 10)
+    lane.points = np.zeros((10, 2, 3))
+    lane.valid = np.ones((10, 2), dtype=bool)
+    lane.stance = [("heel_r",)] * 10
+    lane.ground = MagicMock()
+    lane.calibration_frames = list(range(5))
+
+    kin = MagicMock()
+    kin.coordinate_order = ["tx", "ty", "tz", "rx", "ry", "rz", "hip_flexion_r"]
+    kin.sphere_heights.return_value = {"s1": 0.05}
+    kin.sphere_ground_points.return_value = {"heel_r": np.array([0.0, 0.0, 0.0])}
+    kin.marker_positions.return_value = np.zeros((2, 3))
+
+    adapter = MagicMock()
+    adapter.upper_body_coordinates = 6
+
+    fit = MagicMock()
+    fit.closure_error_m = 0.001
+    fits = [fit] * 10
+
+    cal = MagicMock()
+    cal.rms_per_iteration_m = [0.02, 0.01]
+    cal2 = MagicMock()
+    cal2.rms_per_iteration_m = [0.015, 0.008]
+    cal2.per_marker_rms_m = {"m1": 0.008}
+
+    inputs = IKReportInputs(
+        lane=lane,
+        kin=kin,
+        adapter=adapter,
+        q_ik=np.zeros((10, 7)),
+        fits=fits,
+        q_smooth=np.zeros((10, 7)),
+        q_ref=np.zeros((10, 7)),
+        ref_fits=fits,
+        labels=("m1", "m2"),
+        attachments={"m1": ("b1", (0.0, 0.0, 0.0))},
+        calibration=cal,
+        calibration2=cal2,
+        femur_scale=1.0,
+        tibia_scale=1.0,
+        scale_table=[],
+        scaled_spec={"bodies": {}},
+    )
+
+    report = build_ik_report(inputs)
+    assert report["frames"] == 10
+    assert "marker_rms_m" in report
+    assert "reference" in report
+    assert "calibration" in report
+    assert "segment_scaling" in report
+    assert "leg_angle_ranges_deg" in report

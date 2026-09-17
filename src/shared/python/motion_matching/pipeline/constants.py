@@ -8,12 +8,29 @@ Preconditions / Invariants:
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
     LOWER_LIMB_RANGES_DEG,
 )
+
+REPO_ROOT: Path = Path(__file__).resolve().parents[5]
+DATA_DIR: Path = REPO_ROOT / "data"
+CAPTURES: dict[str, Path] = {
+    "driver": DATA_DIR / "C3D_TA_Driver.c3d",
+    "iron": DATA_DIR / "C3D_TA_Iron.c3d",
+}
+FULL_BODY_DIR: Path = REPO_ROOT / "docs/development/full_body_models"
+SPEC: Path = FULL_BODY_DIR / "full_body_spec_v2.json"
+BUILD_RECEIPT: Path = FULL_BODY_DIR / "build_receipt_v2.json"
+UPPER_SPEC: Path = (
+    REPO_ROOT
+    / "docs/development/simscape_tour_matching/native_evidence/native_geometry_spec_9967.json"
+)
+CANDIDATE: Path = FULL_BODY_DIR / "evidence/native_candidates/returned81_candidate.json"
 
 UP_AXIS = np.array([0.0, 0.0, 1.0])
 FORWARD_AXIS = np.array([-1.0, 0.0, 0.0])
