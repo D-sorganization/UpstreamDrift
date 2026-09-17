@@ -73,9 +73,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
-Runtime slice #10262 adds a consistent conda-forge numerical manifest and exact
-Linux lock plus isolated capability probes. Receipt success is scoped to
-runtime behavior; model, full-body fitting and renderer acceptance stay open.
+- **Runtime Qualification (#10262; 2026-09-16):** Runtime slice #10262 adds a consistent conda-forge numerical manifest and exact
+  Linux lock plus isolated capability probes. Receipt success is scoped to
+  runtime behavior; model, full-body fitting and renderer acceptance stay open.
+- **Solver Integration (#10254, #10255; 2026-09-16):** Reproduced missing
+  ground-contact state terms in inherited Pinocchio acceleration derivatives;
+  added exact local contact-force partials and constrained chain-rule composition.
+  Real Pinocchio 3.8 integration tests cover active/no contact, moving joints,
+  reversed coordinate order, nonfinite input, contact kinks and cache isolation.
+  Plan: `docs/plans/qualified_motion_integration/README.md`. Next: review/merge
+  derivative boundary, then integrate #10257 Pink and #10256 viewer adapters;
+  preserve #10250 evidence refresh and all full-horizon qualification gates.
 
 - **State:** in_progress
 - **Owner:** local
