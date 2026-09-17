@@ -73,6 +73,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Integration Turnover (#10254; 2026-09-16):** Post-compaction Crocoddyl ABI
+  and Pink feasible/infeasible QP probes pass on the preserved WSL environment.
+  Added bounded TDD/DbC/LoD/DRY worker contracts and three Pink pipeline packets.
+  Main authority is 0ec64e45; #10250/#10251 are closed. Native action assembly,
+  production Pink integration, CI and full physical qualification remain open.
+  See `docs/plans/qualified_motion_integration/TURNOVER.md`.
+
 Slice #10265 preserves global degree-six controls with a checked unactuated
 root mapping and exact RK4 state/coefficient sensitivities. It is a prerequisite
 to coefficient-lift Crocoddyl actions; optimizer and physical acceptance remain

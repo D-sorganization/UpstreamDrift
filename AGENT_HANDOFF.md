@@ -11,6 +11,12 @@ coefficient-lift action assembly, objective contracts and independent replay.
 
 ## Qualified Motion Integration (#10254)
 
+- **Dispatch:** [Worker Turnover](docs/plans/qualified_motion_integration/TURNOVER.md)
+  and [Pink Packets](docs/plans/qualified_motion_integration/PINK_TURNOVER.md).
+  Post-storage runtime probes pass; full-body actions are in progress. Pink
+  production wiring still requires task translation, trajectory timing and
+  product integration. #10250/#10251 are closed; #10271 tracks receipt integrity.
+
 - **Read First:** [Integration Boundaries and Delegation Plan](docs/plans/qualified_motion_integration/README.md).
 - **First Numerical Boundary (#10255):** Full-body Pinocchio derivatives now
   include the state dependence of shared ground forces and contact Jacobians.
