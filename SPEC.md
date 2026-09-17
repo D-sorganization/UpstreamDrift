@@ -1,5 +1,41 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Modern and Historical Footage Qualification Workflows (#10133)
+
+Qualifies reference modern footage and historical pilot archive workflows with lineage deduplication, rights auditing, and multi-camera synchronization validation:
+- **Lineage Deduplication and Split Isolation (`src/shared/python/shadow_tracker/footage_workflows.py`)**:
+  - `FilmLineage`: Encapsulates canonical film metadata, recording source, recording year, golfer identity, and associated re-encoded `known_asset_ids`.
+  - `validate_split_isolation`: Detects film and asset leakage across dataset splits, raising `ValueError` if any film or re-encoded asset spans both train and holdout splits.
+  - `DeduplicationSplitter`: Deterministically partitions collections of film lineages into train and holdout sets while guaranteeing split isolation.
+- **Rights, Lineage, and Attribution Auditing**:
+  - `RightsAuditReport`: Slotted frozen structure detailing asset rights clearance, golfer attribution confirmation, and flagged reasons.
+  - `audit_asset_rights`: Audits `SourceAsset` records. Enforces that unreviewed, unknown, or restricted rights (`is_cleared_for_release=False`) and unconfirmed golfer attribution block clearance for public model training or release.
+- **Multi-Camera Physical Synchronization Validation**:
+  - `SyncValidationResult`: Slotted frozen structure recording synchronization validity, maximum drift, overlap duration, and refusal reason.
+  - `validate_multiview_synchronization`: Verifies temporal overlap and clock alignment between multi-camera observation sequences. Returns `is_synchronous=False` with `refusal_reason="non_overlapping_temporal_windows"` if temporal ranges do not intersect, or `refusal_reason="excessive_clock_drift"` if maximum frame drift exceeds the $10$ ms allowable tolerance.
+- **Reference Degradation Harness**:
+  - `DegradationConfig` & `DegradationHarness`: Simulates archive-like visual degradation (spatial downscaling, blur, additive noise, and telecine frame dropping cadence) on high-resolution modern ground truth to test model degradation curves and abstention boundaries.
+- **Historical Pilot Catalog & Accounting**:
+  - `PilotEntry` & `HistoricalPilotCatalog`: Resumable catalog tracking historical pilot runs with clip metadata, suitability grades (`unusable`, `qualitative_only`, `kinematic_candidate`, `qualified`), annotation minutes, and compute seconds.
+  - `compute_pilot_yield`: Computes discovery-to-acceptance yield and aggregate labor and compute costs.
+  - `get_failed_cases_inventory`: Returns all non-qualifying pilot clips to avoid survivorship bias in archival evaluation.
+
+## Constrained IK Trajectory Service and Physical-Time Audits (#10277)
+
+Provides an engine-neutral trajectory inverse kinematics service protocol and engine-local Pink implementation with strict timing invariants and failure semantics:
+- **Shared Protocol and Data Contracts (`src/shared/python/motion_matching/constrained_ik.py`)**:
+  - `ConstrainedIKBackend(Protocol)`: Declares typed multi-frame trajectory solving (`solve_trajectory(request, options) -> IKTrajectoryResult`) and post-smoothing audit (`audit_trajectory(trajectory, request) -> IKTrajectoryResult`).
+  - `IKTrajectoryRequest`: Frozen, immutable specification owning initial state, strictly increasing capture times starting at zero, named 3D marker targets and validity mask arrays, marker labels, canonical model identifier, and optional posture target, stance closure policy, and frame-boundary cancellation token. Immutability guaranteed via read-only array flags.
+  - `IKOptions`: Options controlling step mode (`"physical"` vs `"projection"`), QP solver, iteration budget, damping, residual tolerance, and limit policy.
+  - `FrameRateAudit`: Audits physical joint velocities $\dot{q} = \Delta q / \Delta t$ per frame against velocity limits; verified to scale inversely with physical capture interval $\Delta t = t_f - t_{f-1}$.
+  - `IKTrajectoryResult`: Full trajectory result recording coordinates, per-frame success flags, post-step residuals, rate audits, execution timings, backend identity, and structured failure reasons.
+- **Pink Trajectory Service (`src/engines/physics_engines/pinocchio/python/pink_trajectory.py`)**:
+  - `PinkTrajectoryService`: Implements `ConstrainedIKBackend` backed by `FullBodyPinkTasks`.
+  - Decoupled physical vs projection timing: In physical step mode, executes exactly one integration step per physical frame with $dt_{\text{phys}} = t_f - t_{f-1}$, avoiding compounding or multiplying physical elapsed time or velocity limits by inner iteration counts.
+  - State refresh & clean cache management: Refreshes Pinocchio forward kinematics and frame placements per solve, matching fresh solver instances from arbitrary initial states.
+  - Deterministic dropout handling: When all markers in a frame drop out, reports structured insufficient-data failure without corrupting downstream solver state or claiming false posture-only success; recovers deterministically upon marker reappearance.
+  - Failure & cancellation semantics: Failed or infeasible QP steps are explicitly marked with `frame_success[f] = False` and structured failure reasons. Cancellation at frame boundaries preserves the complete time grid with subsequent frames marked unattempted and `passed = False`.
+
 ## Optional Viewer Replay and Lifecycle (#10256)
 
 Gepetto and MeshCat adapters persist native Pinocchio visualizers, pass distinct
@@ -27,6 +63,24 @@ Integrates review workbench, durable bundle persistence, and embedded/standalone
   - `ShadowTrackerAdapter`: Implements `LauncherAdapterProtocol` and `EmbeddedToolAdapter` for seamless embedding inside `upstream_drift_launcher`.
   - `ShadowTrackerWidget` and `ShadowTrackerReviewModel`: Provides scrubbing, observation inspection, mask correction, and export capabilities.
   - Launcher manifest registration: Adds `shadow_tracker` tile to `src/config/launcher_manifest.json` under `motion_capture` category with order 48.
+
+## Shadow Tracker Ambiguity Quantification and Evidence Gates (#10132)
+
+Provides scientific evaluation, visual ambiguity quantification, and deterministic evidence gates for reconstructed motion sequences:
+- **Visual Ambiguity Quantification (`src/shared/python/shadow_tracker/evaluation.py`)**:
+  - `detect_silhouette_ambiguity`: Evaluates whether distinct 3D poses/trajectories produce indistinguishable 2D silhouettes from available camera views, reporting maximum 3D pose divergence alongside negligible silhouette IoU difference to flag multi-hypothesis ambiguity.
+  - `AmbiguityReport`: Slotted frozen structure recording ambiguity status, pose divergence, silhouette difference, and candidate IDs.
+- **Deterministic Evidence Gating & Abstention**:
+  - `classify_evidence_quality`: Evaluates candidate results under strict Gate G0-G5 rules. Uncalibrated/inexact timing (`is_timing_exact=False` or `timing_mode="nominal_video"`) strictly blocks SI kinetics qualification, capping quality at `kinematic_only` or `insufficient_evidence`.
+  - Failed physical replay audits (Gate G4) strictly reject `validated_profile` and prevent `CandidateResult` acceptance.
+  - `evaluate_candidate_evidence`: Detects unobserved/missing club evidence; missing club masks yield positive uncertainty/penalty rather than misleading zero error.
+  - Returns structured abstention reasons when evidence thresholds are violated.
+- **Calibrated Uncertainty vs Sensitivity Separation**:
+  - `QuantityConfidence`: Explicitly separates empirical posterior bounds (from held-out Bayesian coverage) from parameter sensitivity ranges (from camera, timing, mass, contact ablations).
+  - Enforces the scientific constraint: optimizer curvature (Hessian) or multistart scatter is never labeled as calibrated confidence (`is_calibrated=False`).
+  - `compute_empirical_coverage`: Evaluates empirical coverage against nominal confidence levels and tracks average interval width.
+- **Atomic Evaluated Bundle Assembly**:
+  - `create_evaluated_result_bundle`: Packages candidate trajectories, audits, quality ratings, and evidence hashes into an immutable, versioned `ResultBundle`.
 
 ## Shadow Tracker Control Fitting and Silhouette Optimization (#10131)
 
@@ -224,7 +278,6 @@ Binds silhouette projection to articulated kinematic model state and correctly c
   - Enforces matching dimensions between `RenderRequest.image_size_px` and `PinholeCameraModel.effective_image_size` (including `crop_box` dimensions).
   - Explicitly rejects incompatible or unbound state conventions with descriptive `ValueError`.
 
->>>>>>> SPEC.md (theirs)
 ## Anthropometric Document Rebuild and Freshness Gate (HO-11 #10250, #10162)
 
 Rebuilds full-body anthropometric model specifications and ground-support receipts after the HO-9 (#10249) de Leva 1996 shank parameter corrections, enforcing document freshness via continuous integration:
@@ -5455,6 +5508,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-17 | #10310 | Implement ConstrainedIKBackend protocol, physical-time rate audits, and PinkTrajectoryService with decoupled timing and structured failure semantics (#10277). |
 | 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
 | 2026-09-16 | #10268 | Add reproducible optional motion runtime and isolated fail-closed capability receipts. |
 | 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
