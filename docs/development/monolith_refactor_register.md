@@ -88,13 +88,13 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py`                                                                                                                  |
 |  932 | `src/shared/python/model_generation/library/model_library.py`                                                                                                                 |
 |  926 | `src/shared/python/engine_core/cross_engine_validator.py`                                                                                                                     |
+|  925 | `src/shared/python/shadow_tracker/contracts.py`                                                                                                                               |
 |  922 | `src/research/differentiable/engine.py`                                                                                                                                       |
 |  921 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py`                                                                                                        |
 |  921 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py`                                                                                                                 |
 |  920 | `src/tools/bunker_shot_gui/report.py`                                                                                                                                         |
 |  919 | `src/bunkershot3d/vandv/ledger.py`                                                                                                                                            |
 |  916 | `src/engines/physics_engines/opensim/python/muscle_analysis.py`                                                                                                               |
-|  911 | `src/shared/python/shadow_tracker/contracts.py`                                                                                                                               |
 |  907 | `src/unreal_integration/mesh_loader.py`                                                                                                                                       |
 |  902 | `src/tools/capture_rig/reference_comparison.py`                                                                                                                               |
 |  899 | `src/shared/python/estimation/map_estimator.py`                                                                                                                               |
