@@ -407,7 +407,10 @@ class FullBodyMarkerKinematics:
                     break
         self._set(q)
         positions = self._positions()
-        errors = np.linalg.norm(positions - targets, axis=1)
+        diff = positions - targets
+        errors = np.sqrt(
+            np.einsum("ij,ij->i", diff, diff)
+        )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
         rms = float(np.sqrt(np.mean(errors[mask] ** 2))) if mask.any() else 0.0
         per_marker = {
             label: float(errors[k]) for k, label in enumerate(self.labels) if mask[k]
