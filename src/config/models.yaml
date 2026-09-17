@@ -64,7 +64,7 @@ models:
     launcher:
       category: "physics_engine"
       logo: "assets/myosim.png"
-      status: "ready"
+      status: "experimental"
       default_launch: "tab"
 
   - id: "matlab_suite"
