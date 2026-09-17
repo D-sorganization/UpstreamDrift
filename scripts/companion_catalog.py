@@ -22,7 +22,7 @@ from typing import Any
 
 import yaml
 
-from scripts import companion_workflows
+from scripts import companion_evidence, companion_workflows
 
 # This module must stay importable with only ``jsonschema`` and ``pyyaml``
 # installed: the release workflow's companion job pip-installs exactly those
@@ -31,7 +31,7 @@ from scripts import companion_workflows
 
 SCHEMA_ID = "https://upstreamdrift.dev/schemas/upstreamdrift-companion-v1.schema.json"
 SCHEMA_VERSION = "1.0.0"
-GENERATOR_VERSION = "1.1.0"
+GENERATOR_VERSION = "1.2.0"
 CAPABILITIES_SCHEMA_ID = (
     "https://upstreamdrift.dev/schemas/"
     "upstreamdrift-companion-capabilities-v1.schema.json"
@@ -46,6 +46,8 @@ SCREENSHOT_PENDING_REASON = "No governed capture exists at this commit (#9191)."
 DEFAULT_OUTPUT = Path("dist/companion/upstreamdrift-companion.v1.json")
 INPUT_PATHS = (
     Path("pyproject.toml"),
+    companion_evidence.CAPABILITY_REGISTRY_PATH,
+    companion_evidence.DOCUMENTATION_REGISTRY_PATH,
     companion_workflows.REGISTRY_PATH,
     Path("src/config/feature_parity.json"),
     Path("src/config/launcher_manifest.json"),
@@ -66,6 +68,16 @@ _ENGINE_DISPLAY_NAMES = {
     "opensim": "OpenSim",
     "myosuite": "MyoSuite",
 }
+
+
+def engine_facts() -> dict[str, dict[str, str]]:
+    """Expose the catalog-owned engine name and support tier per engine id."""
+    return {
+        engine_id: {"name": _ENGINE_DISPLAY_NAMES[engine_id], "support_tier": tier}
+        for engine_id, tier in sorted(_ENGINE_TIERS.items())
+    }
+
+
 _STABLE_LEGACY_STATUSES = frozenset(
     {
         "engine_ready",
@@ -511,6 +523,7 @@ def _merge_programs(
     models: Sequence[LocalModelRecord],
     feature_ids_by_program: Mapping[str, list[str]],
 ) -> list[dict[str, Any]]:
+    """Merge both registries; the evidence registry fills ``documentation_ids``."""
     records: dict[str, dict[str, Any]] = {}
     for raw in launcher_tiles:
         payload = _launcher_payload(raw)
@@ -565,6 +578,7 @@ def _merge_programs(
                     "Program listing and launch metadata only"
                 ),
                 "feature_ids": sorted(feature_ids_by_program.get(program_id, [])),
+                "documentation_ids": [],
                 "legacy_statuses": statuses,
                 "source_records": source_records,
             }
@@ -640,6 +654,7 @@ def _catalog_payload(
     source: Mapping[str, Any],
     tools_commit: str,
     inventories: Mapping[str, Sequence[Mapping[str, Any]]],
+    blockers: Sequence[str],
     summary: Mapping[str, int],
 ) -> dict[str, Any]:
     """Assemble the strict schema shape from already validated facts."""
@@ -665,6 +680,18 @@ def _catalog_payload(
     ]
     registries = [
         {
+            "id": "capability_evidence",
+            "path": companion_evidence.CAPABILITY_REGISTRY_PATH.as_posix(),
+            "version": companion_evidence.REGISTRY_VERSION,
+            "discovery_mode": "local-only",
+        },
+        {
+            "id": "documentation",
+            "path": companion_evidence.DOCUMENTATION_REGISTRY_PATH.as_posix(),
+            "version": companion_evidence.REGISTRY_VERSION,
+            "discovery_mode": "local-only",
+        },
+        {
             "id": "feature_parity",
             "path": "src/config/feature_parity.json",
             "version": str(parity["version"]),
@@ -689,28 +716,11 @@ def _catalog_payload(
             "discovery_mode": "local-only",
         },
     ]
-    engines = [
-        {
-            "id": engine_id,
-            "name": _ENGINE_DISPLAY_NAMES[engine_id],
-            "support_tier": _ENGINE_TIERS[engine_id],
-            "scientific_qualification": _qualification(
-                "Installation/support tier only; no numerical capability claim"
-            ),
-        }
-        for engine_id in sorted(_ENGINE_TIERS)
-    ]
     return {
         "$schema": SCHEMA_ID,
         "schema_version": SCHEMA_VERSION,
         "manifest_id": "upstreamdrift-companion",
-        "publication": {
-            "state": "draft",
-            "blockers": [
-                "Engine capability claims require qualification evidence.",
-                "Documentation and screenshot inventories require their governed provider slices.",
-            ],
-        },
+        "publication": {"state": "draft", "blockers": list(blockers)},
         "source": dict(source),
         "providers": providers,
         "registries": registries,
@@ -722,12 +732,13 @@ def _catalog_payload(
                 "arguments": ["scripts/ci/verify_installation.py"],
             },
         },
-        "engines": engines,
+        "engines": list(inventories["engines"]),
         "programs": list(inventories["programs"]),
         "features": list(inventories["features"]),
-        "documentation": [],
+        "documentation": list(inventories["documentation"]),
         "workflows": list(inventories["workflows"]),
         "screenshots": [],
+        "known_gaps": list(inventories["known_gaps"]),
         "summary": dict(summary),
     }
 
@@ -917,6 +928,37 @@ def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, A
     return _build(repo_root, require_clean=require_clean)[0]
 
 
+def _engine_stubs() -> list[dict[str, Any]]:
+    """Catalog-owned engine facts; the evidence registry cannot restate them."""
+    return [
+        {
+            "id": engine_id,
+            "name": facts["name"],
+            "support_tier": facts["support_tier"],
+            "scientific_qualification": _qualification(
+                "Installation/support tier only; no numerical capability claim"
+            ),
+        }
+        for engine_id, facts in engine_facts().items()
+    ]
+
+
+def _evidence_context(
+    root: Path, *, source_commit: str, require_clean: bool
+) -> companion_evidence.SourceContext:
+    def read_input(path: str) -> bytes | None:
+        try:
+            return _read_input(root, Path(path), require_committed=require_clean)
+        except CatalogAuthorityError:
+            return None
+
+    return companion_evidence.SourceContext(
+        commit=source_commit,
+        commit_date=_run_git(root, "show", "-s", "--format=%cs", source_commit),
+        read_input=read_input,
+    )
+
+
 def _build(
     repo_root: Path, *, require_clean: bool
 ) -> tuple[dict[str, Any], dict[str, list[str]]]:
@@ -964,7 +1006,22 @@ def _build(
         "executable_workflow_records": sum(
             workflow["availability"]["state"] == "available" for workflow in workflows
         ),
+        "single_source_program_records": sum(
+            len(program["source_records"]) == 1 for program in programs
+        ),
     }
+    evidence = companion_evidence.build_governed_records(
+        documentation_payload=payloads[companion_evidence.DOCUMENTATION_REGISTRY_PATH],
+        capability_payload=payloads[companion_evidence.CAPABILITY_REGISTRY_PATH],
+        context=_evidence_context(
+            root, source_commit=source_commit, require_clean=require_clean
+        ),
+        engines=_engine_stubs(),
+        programs=programs,
+        workflows=workflows,
+        summary=summary,
+    )
+    summary.update(evidence["summary"])
     catalog = _catalog_payload(
         launcher=launcher,
         parity=parity,
@@ -972,10 +1029,14 @@ def _build(
         source=source,
         tools_commit=tools_commit,
         inventories={
+            "engines": evidence["engines"],
             "programs": programs,
             "features": features,
+            "documentation": evidence["documentation"],
             "workflows": workflows,
+            "known_gaps": evidence["known_gaps"],
         },
+        blockers=evidence["blockers"],
         summary=summary,
     )
     return catalog, _capability_ids_by_program(launcher["tiles"], models)

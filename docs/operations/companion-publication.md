@@ -55,7 +55,9 @@ with a detached `.sha256` sidecar; `PAYLOAD_ASSET_NAMES` in
   from the same committed inputs;
 - `screenshots.json` — screenshot _metadata_ only: one `pending` record per
   visible program with null asset fields and an explicit reason until the
-  governed capture workflow (#9191) exists; nothing is fabricated;
+  governed capture workflow (#9191) exists; nothing is fabricated; the
+  manifest itself carries the governed `documentation`, `engines`, and
+  `known_gaps` records described below;
 - `upstreamdrift-companion-v1.schema.json`,
   `upstreamdrift-companion-capabilities-v1.schema.json`, and
   `upstreamdrift-companion-screenshots-v1.schema.json` — the strict schemas
@@ -76,6 +78,38 @@ with a standalone `yaml.safe_load` reader and imports nothing from `src.*`, so
 the publication job needs only `jsonschema` and `pyyaml` (#9416). Registry
 keys the catalog does not export are ignored so registry additions cannot
 break publication.
+
+## Documentation and Capability Evidence (#9193)
+
+The manifest's `documentation`, `engines`, `known_gaps`, and
+`publication.blockers` fields come from two more hashed inputs,
+`scripts/config/companion_documentation.v1.json` and
+`scripts/config/companion_capability_evidence.v1.json`, parsed by
+`scripts/companion_evidence.py`. Each documentation record is bound to the
+exact source commit, the committed blob hash, and an immutable
+`https://github.com/D-sorganization/UpstreamDrift/blob/<commit>/<path>` link;
+its `freshness` is derived from the recorded review, the reviewed hash, and the
+source commit date only. Every workflow `documentation_paths` entry must have a
+governed record, and every program exports `documentation_ids` (an empty list
+is an explicit "no documentation route" state). An engine capability is
+`qualified` only when it names an exact test node or committed artifact, its
+hash, and the CI workflow that executes it; otherwise it is `unqualified` with
+a reason. The registry cannot restate engine names, support tiers, or
+scientific qualification, and `known_gaps` need an owning issue.
+
+To record a review, set `last_reviewed`, `review_due`, and `reviewed_sha256`
+(the SHA-256 of the committed file bytes). Editing a governed document without
+updating its record demotes it to `review_required`; a passed due date demotes
+it to `stale`; neither breaks the build, but both stay visible as blockers.
+Regenerate and check the derived provider page with:
+
+```text
+python3 -m scripts.companion_evidence --repo-root . render-docs
+python3 -m scripts.companion_evidence --repo-root . render-docs --check
+```
+
+`docs/engines/engine_capability_evidence.md` is rendered from the registries
+alone (no commit, hash, or freshness) so it never references its own commit.
 
 ### Consumer Entry Point (AffineDrift)
 
