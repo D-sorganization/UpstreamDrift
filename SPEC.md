@@ -45,6 +45,14 @@ performs one `pin.integrate(q, velocity * dt)`, and updates the cache afterward.
 Collision geometry remains available to Pink. Invalid inputs, nonfinite
 outputs and solver infeasibility propagate as errors. Optional native loading
 handles missing/broken imports without pretending the capability exists.
+
+## Finite Weld Pose Linearization (#10260)
+
+The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
+`Jlog6(c1Mc2.inverse()) @ J_constraint`, in caller coordinate order.
+The velocity and acceleration constraints continue using `J_constraint`;
+their trajectory acceleration partial must not substitute the finite pose
+Jacobian. Real-engine tests verify off-closure directions and storage ownership.
 ## Contact-Aware Full-Body Derivatives (#10255, #10254)
 
 The shared sphere-contact law exposes world-force derivatives with respect to
@@ -5320,6 +5328,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
+| 2026-09-16 | #10263 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
 | 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
 | 2026-09-16 | #10274 | Correct Shadow Tracker estimated-timing capability and refresh restart guidance for renderer, mask persistence and native timestamp evidence. |
 | 2026-09-16 | #10232 | Bind silhouette rendering to articulated model state and clip visible geometry across camera boundaries. |
