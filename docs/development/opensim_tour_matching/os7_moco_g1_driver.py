@@ -46,6 +46,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.moco_g1 import (  
     mesh_intervals_for,
     read_sto,
     retain_markers,
+    smooth_columns,
     trim_trailing_invalid,
     validate_os7_receipt,
     window_capture,
@@ -111,6 +112,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--replay-timeout-s", type=float, default=1800.0)
     parser.add_argument("--rungs", type=float, nargs="*", default=None)
     parser.add_argument("--warm-start", type=Path, default=None)
+    parser.add_argument(
+        "--ik-smooth-frames",
+        type=int,
+        default=1,
+        help="odd Hann window (frames) applied to the IK before it seeds the guess "
+        "speeds and the state-tracking reference; 1 = raw IK",
+    )
     parser.add_argument(
         "--continue-on-failure",
         action="store_true",
@@ -291,7 +299,7 @@ def _run_rung(
     study = build_rung_study(
         context["moco_model"],
         rung_dir / "reference.trc",
-        args.ik_states,
+        context["ik_reference"],
         config,
         weights,
     )
@@ -325,6 +333,7 @@ def _run_rung(
         "mesh_intervals": config.mesh_intervals,
         "config": config.__dict__,
         "warm_start": warm,
+        "ik_smooth_frames": args.ik_smooth_frames,
         "guess_metrics": _safe_metrics(scored, guess_markers),
         "reference": reference,
         "marker_weights": weights,
@@ -437,11 +446,17 @@ def main() -> int:
         ladder = tuple(h for h in ladder if any(abs(h - r) < 1e-6 for r in args.rungs))
     moco_model = args.outdir / "golf_humanoid_scaled_tour_markers_moco.osim"
     forces = normalise_actuators(args.model, moco_model, LadderRungConfig(1.0, 1))
+    ik_t, ik_raw = read_sto(args.ik_states)
+    ik_smooth = smooth_columns(ik_raw, args.ik_smooth_frames)
+    ik_reference = write_sto(
+        args.outdir / "ik_reference.sto", ik_t, ik_smooth, in_degrees=False
+    )
     context = {
         "args": args,
         "moco_model": moco_model,
         "forces": forces,
-        "ik": read_sto(args.ik_states),
+        "ik": (ik_t, ik_smooth),
+        "ik_reference": ik_reference,
     }
     previous = None
     if args.warm_start is not None:
