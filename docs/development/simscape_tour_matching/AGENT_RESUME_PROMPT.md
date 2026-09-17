@@ -1,5 +1,8 @@
 # Simscape Matching Agent Resume Prompt
 
+Latest review: [Progress Review and Execution Turnover](PROGRESS_REVIEW_20260917.md).
+Read it first for current prerequisites, missing effort evidence and unfinished replay tests.
+
 Read AGENTS.md, CLAUDE.md, docs/development/HANDOFF.md and
 [the current completion handoff](COMPLETION_HANDOFF_20260916.md).
 This replaces historical run73/run76 resume instructions.

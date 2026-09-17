@@ -27,7 +27,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-16
 - **Last verified:** 2026-09-16 (SELF; seven viewer core tests passed including native archived MATLAB reconstruction and real MuJoCo FK; cylinder still visually inspected)
 - **Summary:** Native-spec FK ordering fixed test-first; actual saved R2025b run102 cylindrical preview and provenance generated. Counterfactual definitions/provider gaps audited against AffineDrift/WSCG. Two product epics and detailed turnover created; no new simulation launched.
-- **Next step:** Follow SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md and epic SL-1/SL-2: canonical model/run manifest and real retained-state import; do not present synthetic or mismatched-model GUI evidence as qualification.
+- **Next step:** Read PROGRESS_REVIEW_20260917.md for the 13-pass/3-failure WIP checkpoint and all-nonfinite saved tau channel; then follow SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md and epic SL-1/SL-2: canonical model/run manifest and real retained-state import; do not present synthetic or mismatched-model GUI evidence as qualification.
 
 ### DL-#9967 · Native Simscape Tour Matching
 
@@ -39,7 +39,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-15 (SELF; raw run101 MAT/NPZ metrics independently recomputed; seven focused yaw/replay tests passed)
 - **Summary:** Run101 improves yaw and has measured R2025b–Pinocchio prefix agreement of 0.0605 mm maximum. Terminal RMS 40.31 mm fails the 35 mm gate; full 1.814 s capture is incomplete. No optimizer launched by this review.
-- **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
+- **Next step:** Follow PROGRESS_REVIEW_20260917.md, then COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ### DL-#10204 · Capture Rig Shared Camera Layer
 

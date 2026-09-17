@@ -1,5 +1,8 @@
 # Native Multi-Engine Matching Handoff
 
+Latest review: [Progress Review and Execution Turnover](simscape_tour_matching/PROGRESS_REVIEW_20260917.md).
+Read it first for current prerequisites, missing effort evidence and unfinished replay tests.
+
 ## Saved Replay and Counterfactual Product Work
 
 Epics #10285 (Simulation Library/Replay) and #10286 (Native ZTCF/ZVCF Wrenches)
