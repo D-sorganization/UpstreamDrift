@@ -27,7 +27,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-16
 - **Last verified:** 2026-09-16 (SELF; seven viewer core tests passed including native archived MATLAB reconstruction and real MuJoCo FK; cylinder still visually inspected)
 - **Summary:** Native-spec FK ordering fixed test-first; actual saved R2025b run102 cylindrical preview and provenance generated. Counterfactual definitions/provider gaps audited against AffineDrift/WSCG. Two product epics and detailed turnover created; no new simulation launched.
-- **Next step:** Read PROGRESS_REVIEW_20260917.md for the 13-pass/3-failure WIP checkpoint and all-nonfinite saved tau channel; then follow SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md and epic SL-1/SL-2: canonical model/run manifest and real retained-state import; do not present synthetic or mismatched-model GUI evidence as qualification.
+- **Next step:** The prior three WIP failures are resolved (21 focused tests pass): verified manifest playback, explicit missing-torque mask and physical capsule frames. Follow the latest SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md checkpoint for catalog integration and source-time playback: canonical model/run manifest and real retained-state import; do not present synthetic or mismatched-model GUI evidence as qualification.
 
 ### DL-#9967 · Native Simscape Tour Matching
 

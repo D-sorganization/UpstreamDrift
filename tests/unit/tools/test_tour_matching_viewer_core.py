@@ -226,3 +226,17 @@ def test_native_simscape_replay_fk_matches_archived_markers() -> None:
             np.asarray(calculated) - replay["prediction"][frame], axis=1
         )
         assert np.max(errors) < 1e-4
+
+
+def test_visual_capsules_start_at_joint_follower_origins() -> None:
+    """Physical-body visual endpoints must not be applied in joint frames twice."""
+    spec = json.loads(SPEC_PATH.read_text())
+    names = tuple(spec["coordinate_order"])
+    q = np.linspace(-0.1, 0.1, len(names))
+    replay = ReplayData(np.array([0.0]), q[None, :], coordinate_names=names)
+    followers = body_poses_from_state(spec, q, names)
+    frame = viewer_frame(spec, replay, 0)
+    for segment in frame.segments:
+        np.testing.assert_allclose(
+            segment.start_m, followers[segment.body][:3, 3], atol=1e-12
+        )

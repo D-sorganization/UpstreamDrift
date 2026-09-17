@@ -81,3 +81,35 @@ def test_import_registers_adapter_in_registry() -> None:
     tool = get_embeddable_tool("tour_matching_viewer")
     assert tool is not None
     assert tool.tool_id == "tour_matching_viewer"
+
+
+def test_verified_simscape_bundle_uses_retained_model_and_status(
+    qapp, tmp_path
+) -> None:  # noqa: ANN001
+    from pathlib import Path
+    from src.tools.tour_matching_viewer.gui import TourMatchingViewerWidget
+
+    root = Path(__file__).resolve().parents[3]
+    manifest = (
+        root
+        / "docs/development/simscape_tour_matching/native_evidence/simscape_returned102.replay.json"
+    )
+    widget = TourMatchingViewerWidget()
+    try:
+        widget.load_file(manifest)
+        assert widget._engine_name == "simscape"
+        assert len(widget._spec["coordinate_order"]) == 27
+        assert widget._replay.frame_count == 307
+        assert "rejected" in widget._title_label.text().lower()
+        assert "unavailable" in widget._title_label.text().lower()
+        widget._slider.setValue(306)
+        assert "0.850 s" in widget._frame_label.text()
+        before = widget._replay
+        invalid = tmp_path / "invalid.json"
+        invalid.write_text('{"schema_version": "bad"}')
+        with pytest.raises(ValueError):
+            widget.load_file(invalid)
+        assert widget._replay is before
+    finally:
+        widget.cleanup()
+        widget.close()

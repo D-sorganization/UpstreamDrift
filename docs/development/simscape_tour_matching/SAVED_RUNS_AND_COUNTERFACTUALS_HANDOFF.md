@@ -113,3 +113,34 @@ this offline renderer. The generated receipt records source hashes and frame ind
 The completed renderer is a concrete reference for SL-2/SL-6, not a second viewer
 architecture. The cheaper agent should reuse its data path and the shared providers
 when adding manifest import, camera controls and force panels to the existing UI.
+
+## Verified Manifest Playback Checkpoint
+
+The follow-on implementation resolves the three local WIP failures recorded in
+PROGRESS_REVIEW_20260917.md. The focused importer/core/GUI suite passes 21 tests.
+The saved Simscape manifest verifies artifact hashes, clock, coordinate inventory,
+R2025b report gates and required finite state arrays. Recorded torque retains its
+missing samples and exposes a read-only validity mask; no zero torque is invented.
+The GUI selects the manifest model, reports rejected status and unavailable torque,
+and preserves the existing replay if a new manifest fails validation. Capsule
+rendering now converts follower poses to physical body poses. This does not change
+simulation dynamics or the returned candidate.
+
+From the repository root, with GUI dependencies installed:
+
+```powershell
+python -m src.tools.tour_matching_viewer docs/development/simscape_tour_matching/native_evidence/simscape_returned102.replay.json
+```
+
+Alternatively use Open Replay in the existing Tour Matching Viewer and select
+that manifest. The GUI currently renders segments as lines; the previously
+qualified cylinder GIF remains under visuals_returned102. This checkpoint is
+retained-state playback, not MATLAB execution, a run catalog, real-time playback
+qualification, torque reconstruction or all-engine acceptance. The GUI timer still
+advances one saved frame per tick; correct source-time playback is a next task.
+
+Next: reuse the existing SimulationDataStore for a catalog of verified manifest
+pointers, add source-time playback and shared cylinder/multi-angle rendering,
+then explicit MATLAB inspect/rerun actions with immutable new run outputs. Keep
+#10285 separate from the native optimization critical path and #10286 wrench
+qualification. Do not treat manifest hashes as proof of scientific correctness.

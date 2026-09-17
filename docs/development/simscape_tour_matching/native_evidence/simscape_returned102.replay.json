@@ -1,0 +1,29 @@
+{
+  "schema_version": "upstreamdrift/saved-simscape-replay/1",
+  "run_id": "simscape-returned102",
+  "engine": "simscape",
+  "status": "rejected",
+  "duration_s": 0.85,
+  "artifacts": {
+    "model": {
+      "path": "native_geometry_spec_9967.json",
+      "sha256": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d"
+    },
+    "candidate": {
+      "path": "two_window_fit_9967_102/returned-candidate.json",
+      "sha256": "936ebf0e2d7dc7f888737a3ba8739d874dd87963999c916a5abd66b8d1070bdd"
+    },
+    "trajectory": {
+      "path": "two_window_fit_9967_102/qualified_candidate_replay.mat",
+      "sha256": "b521de0348a9cca5facbf5cb0a3ea175030b369d75d2ef9795a2d0d3e5eb6291"
+    },
+    "target": {
+      "path": "two_window_fit_9967_102/returned-replay.npz",
+      "sha256": "efec8a6ecf9479c1bf0f5604d21add5224373423f1441c6250c1c3cd484e25b5"
+    },
+    "report": {
+      "path": "two_window_fit_9967_102/qualified_candidate_replay.json",
+      "sha256": "b1bf388c76b799dc0bd45a9db9089d34658c8d567cb4bc14d77423d632028097"
+    }
+  }
+}

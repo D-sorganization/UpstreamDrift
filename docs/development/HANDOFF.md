@@ -1,5 +1,8 @@
 # Native Multi-Engine Matching Handoff
 
+Verified Simscape manifest playback now passes 21 focused tests; see the latest
+checkpoint and launch command in [Saved Runs Handoff](simscape_tour_matching/SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md).
+
 Latest review: [Progress Review and Execution Turnover](simscape_tour_matching/PROGRESS_REVIEW_20260917.md).
 Read it first for current prerequisites, missing effort evidence and unfinished replay tests.
 
