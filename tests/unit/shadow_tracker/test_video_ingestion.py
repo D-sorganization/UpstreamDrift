@@ -870,7 +870,8 @@ def test_unavailable_or_unsupported_timing_mode(test_clip_file: Path) -> None:
     decoder = OpenCvVideoDecoder(test_clip_file)
     assert decoder.decoder_name == "opencv"
     assert decoder.pixel_format == "bgr24"
-    assert decoder.timing_mode in ("estimated_cfr", "authoritative")
+    assert decoder.timing_mode == "estimated_cfr"
+    assert decoder.is_timing_exact is False
 
 
 def test_incremental_decoding_and_cancellation_during_reads(
