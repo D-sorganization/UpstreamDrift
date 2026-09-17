@@ -11,13 +11,20 @@ the historical forward runner currently auto-calibrates a near-zero plane.
 
 ## Qualified Solver Integration (#10254)
 
+Resume with [Worker Turnover](../../plans/qualified_motion_integration/TURNOVER.md)
+and [Pink Pipeline Packets](../../plans/qualified_motion_integration/PINK_TURNOVER.md).
+Storage recovery is complete and native runtime probes pass. Adapter/derivative
+PRs remain under review; production Pink selection and full-body Crocoddyl
+qualification are not complete. The turnover records separate implementation,
+CI and scientific gates.
+
 The [integration plan](../../plans/qualified_motion_integration/README.md)
 defines coordinate, closure, underactuation, timing and evidence boundaries.
 First slice #10255 corrects the missing contact-force chain rule in full-body
 Pinocchio derivatives. Independent real-engine differences reproduce failure
 before the change and pass afterward; contact kinks remain explicitly nonsmooth.
-No fit receipts were regenerated. Keep #10250's evidence refresh and #10162's
-physical acceptance work as prerequisites. #10256 and #10257 are separately
+No fit receipts were regenerated. The #10250 refresh is merged; #10271 receipt integrity and #10162's
+physical acceptance remain prerequisites. #10256 and #10257 are separately
 owned viewer and Pink adapter slices, not completed product integration.
 
 Finite weld correction #10260 differentiates the six-component pose error away
