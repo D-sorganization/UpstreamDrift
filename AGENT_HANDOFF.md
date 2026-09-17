@@ -30,6 +30,13 @@ coefficient-lift action assembly, objective contracts and independent replay.
   The qualified sample stack is Pinocchio 4.1, Pink 4.4 and Crocoddyl 3.2.1.
   This does not qualify full-body fitting, physics, or Gepetto rendering.
   Continue model and product integration under #10254.
+- **Pink Adapter Contract (#10257, #10254):** Both Pink entry points share one validated solve step. They preserve geometry,
+  forward explicit hard constraints/limits, refresh cached kinematics and
+  integrate tangent velocity exactly once. Solver failures propagate with
+  context; unchanged poses are no longer returned as a success fallback.
+  The adapter has real equality, infeasibility, cache and free-flyer tests.
+  Full-body marker/stance/weld task assembly and production selection remain
+  outstanding. The reproducible combined runtime is tracked by #10262.
 - **Bounded Work:** #10256 viewer lifecycle and #10257 Pink state/constraint
   adapters are separate implementation slices; review actual tests and CI
   before treating either as delivered.
