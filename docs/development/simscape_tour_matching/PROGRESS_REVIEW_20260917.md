@@ -1,5 +1,26 @@
 # Simscape Matching Progress Review and Execution Turnover
 
+## Turnover Checkpoint: Static Curve Completed, Work Paused
+
+The user requested handoff to cheaper agents. No more experiments are being
+launched. Read CHEAPER_AGENT_WORK_PACKAGES.md for three bounded packages: numerical
+calibration diagnosis, saved-run product polish, and native counterfactuals.
+
+The new diagnostic completed 304 local solves at 38 times in 143.43 s (exit 0).
+Best yaw-valid static RMS rises to 41.911 mm at 0.90 s and 46.294 mm at 1.05 s,
+with no active local bounds. Later 1.25�1.55 s results include active bounds and
+changed marker masks; investigate those before interpreting their spikes.
+All samples are static diagnostic poses, not an extended dynamic fit. The full
+receipt/scripts/hash/summary are in native_evidence/static_curve_20260917.
+
+A shared-provider rigidity diagnostic over all 654 frames confirms that Hub's
+BackLeft�HeadSide distance varies by about 110 mm in the target despite a fixed
+model attachment pair. This motivates checking target processing, rigid body
+assignments and capture-wide calibration. It does not prove the aggregate 35 mm
+acceptance gate impossible, or authorize silently adding a neck. Seven existing
+rigidity tests pass. Full motion, effort exports, polished saved-run UI and native
+counterfactual qualification remain incomplete.
+
 ## Latest Verified State: Local Terminal Feasibility Is the Priority
 
 This section supersedes the next-step orders and running-job statements below.
