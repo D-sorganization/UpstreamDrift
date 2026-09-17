@@ -20,6 +20,22 @@ Qualifies reference modern footage and historical pilot archive workflows with l
   - `compute_pilot_yield`: Computes discovery-to-acceptance yield and aggregate labor and compute costs.
   - `get_failed_cases_inventory`: Returns all non-qualifying pilot clips to avoid survivorship bias in archival evaluation.
 
+## Constrained IK Trajectory Service and Physical-Time Audits (#10277)
+
+Provides an engine-neutral trajectory inverse kinematics service protocol and engine-local Pink implementation with strict timing invariants and failure semantics:
+- **Shared Protocol and Data Contracts (`src/shared/python/motion_matching/constrained_ik.py`)**:
+  - `ConstrainedIKBackend(Protocol)`: Declares typed multi-frame trajectory solving (`solve_trajectory(request, options) -> IKTrajectoryResult`) and post-smoothing audit (`audit_trajectory(trajectory, request) -> IKTrajectoryResult`).
+  - `IKTrajectoryRequest`: Frozen, immutable specification owning initial state, strictly increasing capture times starting at zero, named 3D marker targets and validity mask arrays, marker labels, canonical model identifier, and optional posture target, stance closure policy, and frame-boundary cancellation token. Immutability guaranteed via read-only array flags.
+  - `IKOptions`: Options controlling step mode (`"physical"` vs `"projection"`), QP solver, iteration budget, damping, residual tolerance, and limit policy.
+  - `FrameRateAudit`: Audits physical joint velocities $\dot{q} = \Delta q / \Delta t$ per frame against velocity limits; verified to scale inversely with physical capture interval $\Delta t = t_f - t_{f-1}$.
+  - `IKTrajectoryResult`: Full trajectory result recording coordinates, per-frame success flags, post-step residuals, rate audits, execution timings, backend identity, and structured failure reasons.
+- **Pink Trajectory Service (`src/engines/physics_engines/pinocchio/python/pink_trajectory.py`)**:
+  - `PinkTrajectoryService`: Implements `ConstrainedIKBackend` backed by `FullBodyPinkTasks`.
+  - Decoupled physical vs projection timing: In physical step mode, executes exactly one integration step per physical frame with $dt_{\text{phys}} = t_f - t_{f-1}$, avoiding compounding or multiplying physical elapsed time or velocity limits by inner iteration counts.
+  - State refresh & clean cache management: Refreshes Pinocchio forward kinematics and frame placements per solve, matching fresh solver instances from arbitrary initial states.
+  - Deterministic dropout handling: When all markers in a frame drop out, reports structured insufficient-data failure without corrupting downstream solver state or claiming false posture-only success; recovers deterministically upon marker reappearance.
+  - Failure & cancellation semantics: Failed or infeasible QP steps are explicitly marked with `frame_success[f] = False` and structured failure reasons. Cancellation at frame boundaries preserves the complete time grid with subsequent frames marked unattempted and `passed = False`.
+
 ## Optional Viewer Replay and Lifecycle (#10256)
 
 Gepetto and MeshCat adapters persist native Pinocchio visualizers, pass distinct
@@ -5475,6 +5491,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-17 | #10310 | Implement ConstrainedIKBackend protocol, physical-time rate audits, and PinkTrajectoryService with decoupled timing and structured failure semantics (#10277). |
 | 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
 | 2026-09-16 | #10268 | Add reproducible optional motion runtime and isolated fail-closed capability receipts. |
 | 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
