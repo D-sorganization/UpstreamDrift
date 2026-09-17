@@ -31,7 +31,9 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.engines.physics_engines.pinocchio.python.crocoddyl_action import (
+    implicit_euler_rollout,
     make_action_models,
+    tracking_rollout,
 )
 from src.engines.physics_engines.pinocchio.python.crocoddyl_problem import (
     FitHorizon,
@@ -41,7 +43,6 @@ from src.engines.physics_engines.pinocchio.python.crocoddyl_problem import (
     build_marker_targets,
     coordinate_bounds,
     finite_difference_rates,
-    least_squares_controls,
     per_coordinate_effort_bounds,
     range_barrier,
 )
@@ -84,6 +85,11 @@ class SolverSettings:
     verbose: bool = True
     armature_kg_m2: float = 5e-3
     warm_start_ridge: float = 1e-2
+    node_integrator: str = "rk45"  # "rk45" | "implicit_euler"
+    tracking_kp: float = 400.0
+    tracking_kd: float = 40.0
+    continuation_s: tuple[float, ...] = ()
+    stage_iterations: int = 40
 
 
 @dataclass(frozen=True)
@@ -425,28 +431,34 @@ def run_fit(
     q_smooth = _smooth(q_ik, dt, 12.0)
     v_ik = finite_difference_rates(q_smooth, dt)
     a_ik = finite_difference_rates(v_ik, dt)
-    us0 = np.empty((n_nodes - 1, int(ctx.actuated.sum())))
-    for k in range(n_nodes - 1):
-        der = ctx.derivatives(q_smooth[k], v_ik[k], np.zeros(ctx.n))
-        a_zero = ctx.acceleration(q_smooth[k], v_ik[k], np.zeros(ctx.n))
-        us0[k] = np.clip(
-            least_squares_controls(
-                a_ik[k],
-                a_zero,
-                np.asarray(der.deffort),
-                ctx.actuated,
-                ridge=settings.warm_start_ridge,
-            ),
-            -effort_bounds,
-            effort_bounds,
-        )
-    xs0 = [np.concatenate([q_smooth[k], v_ik[k]]) for k in range(n_nodes)]
+    q_track, v_track, us0 = tracking_rollout(
+        ctx,
+        q_smooth,
+        v_ik,
+        a_ik,
+        dt,
+        kp=settings.tracking_kp,
+        kd=settings.tracking_kd,
+        effort_bounds=effort_bounds,
+        ridge=settings.warm_start_ridge,
+    )
+    xs0 = [np.concatenate([q_track[k], v_track[k]]) for k in range(n_nodes)]
     ik_summary = {
         "marker_rms_m": float(np.sqrt(np.mean(ik_rms**2))),
         "marker_rms_first_frame_m": float(ik_rms[0]),
         "closure_position_error_max_m": float(np.max(ik_closure)),
         "wall_clock_s": ik_wall,
         "iterations_per_frame": (ik_options or MarkerIkOptions()).iterations,
+        "tracking_rollout_marker_rms_m": float(
+            np.sqrt(
+                np.mean(
+                    np.sum(
+                        (_predicted_markers(ctx, q_track) - targets.targets) ** 2,
+                        axis=2,
+                    )[targets.valid]
+                )
+            )
+        ),
     }
     np.savez_compressed(
         out_dir / "warm_start.npz",
@@ -454,42 +466,100 @@ def run_fit(
         q=q_ik,
         q_smooth=q_smooth,
         v=v_ik,
+        q_track=q_track,
+        v_track=v_track,
         us=us0,
         ik_rms_m=ik_rms,
     )
 
-    # --- Crocoddyl problem (linearly implicit Euler action models) ---------------------
-    running, terminal = make_action_models(
-        crocoddyl, ctx, targets, inputs.weights, effort_bounds, dt
-    )
-    problem = crocoddyl.ShootingProblem(xs0[0], running, terminal)
-    fddp = crocoddyl.SolverBoxFDDP(problem)
-    fddp.th_stop = settings.stop_tolerance
-    if settings.verbose:
-        fddp.setCallbacks([crocoddyl.CallbackVerbose()])
+    # --- Crocoddyl problem: horizon continuation, linearly implicit Euler nodes -------
+    stage_ends = [
+        float(t) for t in settings.continuation_s if t < inputs.horizon.t_end_s
+    ]
+    stage_ends.append(inputs.horizon.t_end_s)
+    stages: list[dict[str, Any]] = []
+    xs_prev = [x.copy() for x in xs0]
+    us_prev = [u.copy() for u in us0]
     t_solve = time.perf_counter()
-    converged = bool(
-        fddp.solve(
-            xs0,
-            [u.copy() for u in us0],
-            settings.max_iterations,
-            False,
-            settings.initial_regularisation,
+    fddp = None
+    for stage_index, t_end in enumerate(stage_ends):
+        n_stage = int(round((t_end - inputs.horizon.t_start_s) / dt)) + 1
+        stage_targets = MarkerTargets(
+            targets.labels,
+            targets.node_times[:n_stage],
+            targets.targets[:n_stage],
+            targets.valid[:n_stage],
+            targets.weights,
         )
-    )
+        running, terminal = make_action_models(
+            crocoddyl,
+            ctx,
+            stage_targets,
+            inputs.weights,
+            effort_bounds,
+            dt,
+            node_integrator=settings.node_integrator,
+        )
+        problem = crocoddyl.ShootingProblem(xs_prev[0], running, terminal)
+        fddp = crocoddyl.SolverBoxFDDP(problem)
+        fddp.th_stop = settings.stop_tolerance
+        if settings.verbose:
+            fddp.setCallbacks([crocoddyl.CallbackVerbose()])
+        last_stage = stage_index == len(stage_ends) - 1
+        iterations = (
+            settings.max_iterations if last_stage else settings.stage_iterations
+        )
+        t_stage = time.perf_counter()
+        converged = bool(
+            fddp.solve(
+                xs_prev[:n_stage],
+                us_prev[: n_stage - 1],
+                iterations,
+                False,
+                settings.initial_regularisation,
+            )
+        )
+        xs_stage = [np.array(x) for x in fddp.xs]
+        us_stage = [np.array(u) for u in fddp.us]
+        stage_q = np.array(xs_stage)[:, : ctx.n]
+        stage_err = np.sum(
+            (_predicted_markers(ctx, stage_q) - stage_targets.targets) ** 2, axis=2
+        )
+        stages.append(
+            {
+                "t_end_s": t_end,
+                "nodes": n_stage,
+                "iterations": int(fddp.iter),
+                "converged": converged,
+                "cost": float(fddp.cost),
+                "stopping_criterion": float(fddp.stoppingCriteria()),
+                "wall_clock_s": time.perf_counter() - t_stage,
+                "marker_rms_m": float(np.sqrt(np.mean(stage_err[stage_targets.valid]))),
+            }
+        )
+        if not last_stage:
+            # Extend the accepted stage with the tracking warm start for the new nodes.
+            xs_prev = xs_stage + xs_prev[n_stage:]
+            us_prev = us_stage + us_prev[n_stage - 1 :]
+    assert fddp is not None
     solve_wall = time.perf_counter() - t_solve
     xs = np.array(fddp.xs)
     us = np.array(fddp.us)
+    converged = bool(stages[-1]["converged"])
     q_fddp, v_fddp = xs[:, : ctx.n], xs[:, ctx.n :]
     solver_summary = {
         "solver": "crocoddyl.SolverBoxFDDP",
         "integrator": settings.integrator,
+        "node_integrator": settings.node_integrator,
         "replay_integrator": settings.replay_integrator,
         "converged": converged,
         "iterations": int(fddp.iter),
         "cost": float(fddp.cost),
         "stopping_criterion": float(fddp.stoppingCriteria()),
         "wall_clock_s": solve_wall,
+        "stages": stages,
+        "continuation_s": list(stage_ends),
+        "tracking_gains": {"kp": settings.tracking_kp, "kd": settings.tracking_kd},
         "max_iterations": settings.max_iterations,
         "effort_bound_default_n_m": settings.effort_bound_n_m,
         "warm_start_ridge": settings.warm_start_ridge,
@@ -507,7 +577,9 @@ def run_fit(
     except FloatingPointError as exc:
         replay_note = str(exc)
         q_rep, v_rep = q_fddp, v_fddp
+    q_imp, _ = implicit_euler_rollout(ctx, q_fddp[0], v_fddp[0], us, dt)
     pred_fddp = _predicted_markers(ctx, q_fddp)
+    pred_imp = _predicted_markers(ctx, q_imp)
     pred_rep = _predicted_markers(ctx, q_rep)
     pred_ik = _predicted_markers(ctx, q_ik)
     metrics_ik = _metrics(inputs, pred_ik, targets.valid)
@@ -565,6 +637,7 @@ def run_fit(
         },
         "metrics": {
             "warm_start_ik": metrics_ik,
+            "implicit_euler_rollout": _metrics(inputs, pred_imp, targets.valid),
             "fddp_rollout": metrics_fddp,
             "replay": metrics_rep,
         },
@@ -651,6 +724,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--replay-integrator", choices=("rk45", "rk4"), default="rk45")
     parser.add_argument("--replay-substeps", type=int, default=12)
     parser.add_argument("--armature", type=float, default=5e-3)
+    parser.add_argument(
+        "--node-integrator", choices=("rk45", "implicit_euler"), default="rk45"
+    )
+    parser.add_argument("--tracking-kp", type=float, default=400.0)
+    parser.add_argument("--tracking-kd", type=float, default=40.0)
+    parser.add_argument(
+        "--continuation",
+        type=str,
+        default="",
+        help="comma-separated stage end times in seconds, e.g. 0.05,0.10,0.20",
+    )
+    parser.add_argument("--stage-iterations", type=int, default=40)
     parser.add_argument("--warm-start-ridge", type=float, default=1e-2)
     parser.add_argument("--marker-weight", type=float, default=FitWeights().marker)
     parser.add_argument(
@@ -684,6 +769,11 @@ def main(argv: list[str] | None = None) -> int:
         replay_substeps=args.replay_substeps,
         verbose=not args.quiet,
         armature_kg_m2=args.armature,
+        node_integrator=args.node_integrator,
+        tracking_kp=args.tracking_kp,
+        tracking_kd=args.tracking_kd,
+        continuation_s=tuple(float(t) for t in args.continuation.split(",") if t),
+        stage_iterations=args.stage_iterations,
         warm_start_ridge=args.warm_start_ridge,
     )
     receipt = run_fit(
