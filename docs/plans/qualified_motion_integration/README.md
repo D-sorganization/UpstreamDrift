@@ -7,18 +7,24 @@ This plan freezes the difficult boundaries before delegating implementation.
 
 ## Current Authority
 
-- Start from `origin/main`, initially `09346c9dd`, in a separate checkout.
+- Review `origin/main` at dispatch; the current audited main revision is
+  `0ec64e45f1f259c11e26e36315ee370a5c51c7d9`. Use a separate checkout.
+- Start execution with [Worker Turnover](TURNOVER.md) and the
+  [Pink Pipeline Packet](PINK_TURNOVER.md), which define dependency order,
+  owned files, TDD cases, contracts and native qualification commands.
 - Full-body anatomy, contact and capture authority: `full_body_spec`,
   `contact_law`, `tour_capture_contract`, and the existing ground-support
   `motion_matching.pipeline` package.
-- Preserve the ongoing #10162 program. #10250 owns anthropometric evidence
-  regeneration; #10108 owns hip calibration; #10159 owns MJX plant reconciliation.
+- Preserve the ongoing #10162 program. Anthropometry refresh #10250 and
+  pipeline consolidation #10251 are closed. #10108 provides hip calibration;
+  #10159 owns MJX plant reconciliation. #10271 tracks remaining receipt-chain
+  integrity; regenerated artifacts are not automatically physically qualified.
 - Historical returned81 is a 307-sample, 25-marker, 0.85 s reference. It does
   not certify the complete full-body capture. Ground-support receipts have
   34 modeled labels. The capture contract has 38; coverage must be explicit.
-- Do not regenerate numerical baseline receipts before #10250 completes.
-  Local derivative probes on immutable old fixtures are algebra tests, not
-  regenerated scientific qualification.
+- Regenerate evidence through the consolidated pipeline after validating
+  the current input chain. Local derivative probes on immutable old fixtures
+  are algebra tests, not regenerated scientific qualification.
 
 ## Integration Decisions
 
