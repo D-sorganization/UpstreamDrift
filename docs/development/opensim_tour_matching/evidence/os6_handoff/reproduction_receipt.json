@@ -4,7 +4,7 @@
   "title": "OpenSim Tour Matching Repeatability, Visualization, and Handoff Receipt",
   "timestamp_utc": "2026-09-14T00:04:05.704185+00:00",
   "git_commit": "653c97fe97b01b53ed3455f1b145d0a9f85daa45",
-  "status": "ACCEPTED",
+  "status": "ACCEPTED (superseded: shared metrics unverified, see shared_cross_engine_metrics_status)",
   "summary": "Complete delivery of OpenSim tour matching pipeline (OS-0 through OS-6). Includes C3D validation, TRC export, model calibration, Moco dynamic tracking pilot, degree-6 polynomial effort fitting, continuous zero-feedback forward simulation, and clean-machine reproduction evidence.",
   "asset_manifest": {
     "c3d_capture": {
@@ -44,6 +44,8 @@
       "size_bytes": 9864
     }
   },
+  "shared_cross_engine_metrics_status": "unverified",
+  "shared_cross_engine_metrics_note": "Annotated 2026-09-17 (#10341, MS-42 phase A): these round numbers were not computed from any replay; OS-3b measured 0.0785 / 0.0426 / 0.1712 m (IK, not dynamics) and the OS-4 pilot only replayed 0.10 s. The measured dynamic numbers live in evidence/os7_moco_g1/receipt.json (replay_metrics).",
   "shared_cross_engine_metrics": {
     "whole_swing_marker_rms_m": 0.065,
     "early_prefix_marker_rms_m": 0.015,

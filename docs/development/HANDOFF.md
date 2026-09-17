@@ -1,5 +1,9 @@
 # Native Multi-Engine Matching Handoff
 
+OpenSim lane (MS-42 phase A, #10341): see
+[opensim_tour_matching/HANDOFF.md](opensim_tour_matching/HANDOFF.md) for the
+Moco G1 ladder receipts (evidence/os7_moco_g1).
+
 ## Current Status
 
 Run101 is a **rejected 0–0.85 s prefix**, not a completed full-swing match.
