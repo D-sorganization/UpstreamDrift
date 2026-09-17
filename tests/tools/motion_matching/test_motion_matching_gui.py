@@ -74,6 +74,21 @@ def test_stages_group_and_mutual_exclusion(widget: MotionMatchingWidget) -> None
     assert req.shooting_gain == 0.65
 
 
+def test_matching_tab_backend_selection(widget: MotionMatchingWidget) -> None:
+    # Default is mujoco and physical
+    req = widget.request()
+    assert req.backend == "mujoco"
+    assert req.step_mode == "physical"
+
+    # Select pink and projection
+    widget.backend.setCurrentText("pink")
+    widget.step_mode.setCurrentText("projection")
+
+    req2 = widget.request()
+    assert req2.backend == "pink"
+    assert req2.step_mode == "projection"
+
+
 def test_downswing_experiment_request_binding(
     widget: MotionMatchingWidget, tmp_path: Path
 ) -> None:
