@@ -60,6 +60,7 @@ __all__ = [
     "generate_report",
     "append_row",
     "maybe_append_row",
+    "sync_leaderboard_from_ledger",
     "JSON_LEADERBOARD_COLUMNS",
     "default_json_path",
     "valid_engines",
@@ -394,7 +395,11 @@ def default_json_path() -> Path:
         return Path(env)
     here = Path(__file__).resolve()
     for parent in here.parents:
-        if (parent / "pyproject.toml").is_file():
+        if (parent / ".git").exists() or (
+            (parent / "docs").is_dir()
+            and (parent / "src").is_dir()
+            and (parent / "pyproject.toml").is_file()
+        ):
             return parent / "reports" / "cross_engine_leaderboard.json"
     return Path("reports") / "cross_engine_leaderboard.json"
 
@@ -589,6 +594,45 @@ def maybe_append_row(
             "leaderboard.append_row failed (engine=%s): %s", engine, exc
         )
         return None
+
+
+def sync_leaderboard_from_ledger(
+    ledger_rows: Any,
+    *,
+    json_path: Path | None = None,
+) -> Path:
+    """Populate cross_engine_leaderboard.json from ledger rows unconditionally."""
+    path = json_path if json_path is not None else default_json_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows_out: list[dict[str, Any]] = []
+    for row in ledger_rows:
+        eng = getattr(row, "engine", None)
+        if eng not in _VALID_ENGINES:
+            continue
+        metrics = getattr(row, "metrics", None)
+        whole_rmse = getattr(metrics, "whole_marker_rmse_m", None) if metrics else None
+        if whole_rmse is None:
+            continue
+        cand_sha = getattr(row, "candidate_sha", None) or "unknown"
+        capture = getattr(row, "capture", None) or "unknown"
+        run_dict = {
+            "engine": eng,
+            "engine_version": "unknown",
+            "target_id": capture,
+            "theta": [],
+            "residual_rms": float(whole_rmse),
+            "body_marker_rms": float(whole_rmse),
+            "wallclock": float(getattr(row, "horizon_s", None) or 0.0),
+            "commit_sha": _short_commit(cand_sha),
+            "run_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "solver": "unknown",
+            "iterations": 0,
+        }
+        rows_out.append(run_dict)
+    path.write_text(
+        json.dumps(rows_out, indent=2, sort_keys=False) + "\n", encoding="utf-8"
+    )
+    return path.resolve()
 
 
 # --- Module-level metadata ---------------------------------------------------

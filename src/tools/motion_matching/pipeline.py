@@ -382,3 +382,18 @@ def artefacts(output_dir: Path) -> Sequence[Path]:
         for p in (output_dir / "ik_playback.gif", output_dir / "tracking_playback.gif")
         if p.exists()
     )
+
+
+def list_runs(ledger_path: Path | None = None) -> Sequence[Any]:
+    """Return all classified runs from the matched-swing run ledger."""
+    from src.shared.python.motion_matching.ledger import default_ledger_path, scan
+    from src.shared.python.motion_matching.ledger_schema import Ledger
+
+    path = ledger_path or default_ledger_path()
+    if path.is_file():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return Ledger.model_validate(data).rows
+        except (json.JSONDecodeError, OSError, ValueError):
+            pass
+    return scan().rows
