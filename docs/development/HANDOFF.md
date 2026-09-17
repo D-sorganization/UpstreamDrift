@@ -1,5 +1,30 @@
 # Native Multi-Engine Matching Handoff
 
+## Package C Progress: Native Counterfactual Qualification (CF-1, CF-2, CF-3 Complete)
+
+Package C of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
+(epic #10286) has delivered its foundational milestones test-first:
+
+1. **Explicit Versioned Counterfactual Contracts (CF-1)**:
+   - Defined `SpatialWrench` in `src/shared/python/motion_matching/counterfactual.py` with force, torque,
+     application point, frame, action direction (`proximal_on_distal` / `distal_on_proximal`), and SI units.
+   - Implemented Varignon moment transport ($M_P = M_O + r_{P/O} \times F$) and Newton's third law action-reaction negation.
+   - Defined `PointwiseCounterfactualSample` providing immutable views of actual, ZTCF, ZVCF, and control
+     increment accelerations and reaction wrenches without caller mutation.
+   - Corrected stale ZVCF docstring in `src/shared/python/simulation_backends/ztcf_zvcf.py` claiming `solve(M, tau - g(q))`.
+2. **Native Constrained Counterfactual Provider (CF-2)**:
+   - Implemented `NativeConstrainedCounterfactualProvider` supporting models solving $M a + h = B u + J^T \lambda$
+     and $J a + \dot{J} v = 0$.
+   - Recomputes acceleration AND reaction wrench for every intervention: actual $(q, v, u)$, ZTCF $(q, v, 0)$,
+     and instantaneous ZVCF $(q, 0, 0)$.
+   - Added `closure_reaction_wrench(frame="world")` on `NativePinocchioModel` to extract the spatial contact force
+     from `constraint_data[0].contact_force` and transport it to the world reference frame.
+3. **3D Spatial Wrench Power, Work & Impulse Accounting (CF-3)**:
+   - Implemented `CounterfactualTrajectory` with 3D spatial power $P(t) = F(t) \cdot v(t) + M(t) \cdot \omega(t)$,
+     cumulative work $W(t) = \int_0^t P(\tau) d\tau$, linear impulse $\int F dt$, and angular impulse $\int M dt$.
+   - Implemented export to engine-neutral `SpatialWrenchTrajectory`.
+   - Verified on retained Simscape `simscape-returned102` evidence with 8 unit tests in `test_native_counterfactual.py`.
+
 ## Package B Completed: Saved-Run Product Polish Delivered
 
 Package B of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
