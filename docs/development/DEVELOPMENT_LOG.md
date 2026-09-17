@@ -73,6 +73,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Viewer Adapters (#10256; 2026-09-16):** Replaced no-op display paths with
+  persistent Pinocchio visualizers, explicit validation and scoped cleanup.
+  Real MeshCat probing exposed and corrected shared-root deletion and owned
+  process cleanup defects. Live Gepetto qualification and production replay
+  integration remain outstanding under #10254.
+
+- **Runtime Qualification (#10262; 2026-09-16):** Runtime slice #10262 adds a consistent conda-forge numerical manifest and exact
+  Linux lock plus isolated capability probes. Receipt success is scoped to
+  runtime behavior; model, full-body fitting and renderer acceptance stay open.
+
 - **Pink Adapters (#10257; 2026-09-16):** Shared solve path validates state,
   time and outputs; forwards hard constraints/limits; retains collision
   geometry; refreshes cached FK and propagates solver failures. Real native
