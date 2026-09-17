@@ -20,6 +20,7 @@ from typing import Any, TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.acceptance import Horizon, evaluate
 from src.shared.python.motion_matching.full_body_forward_dynamics import (
     ContactAuditResult,
 )
@@ -176,8 +177,23 @@ class CrossEngineComparisonReport:
     pairwise_metric_diffs: dict[str, dict[str, float]]
     max_marker_rmse_diff_m: float
 
+    @property
+    def is_physically_accepted(self) -> bool:
+        """True only if every engine outcome passes the physical acceptance contract."""
+        return all(
+            evaluate(outcome.as_dict(), horizon=Horizon.G3).is_physically_accepted
+            for outcome in self.outcomes.values()
+        )
+
+    @property
+    def status(self) -> str:
+        """Authoritative status string ('PASSED' or 'REJECTED') derived from physical gates."""
+        return "PASSED" if self.is_physically_accepted else "REJECTED"
+
     def as_dict(self) -> dict[str, Any]:
         return {
+            "status": self.status,
+            "is_physically_accepted": self.is_physically_accepted,
             "engines": list(self.engines),
             "outcomes": {k: v.as_dict() for k, v in self.outcomes.items()},
             "pairwise_metric_diffs": self.pairwise_metric_diffs,
