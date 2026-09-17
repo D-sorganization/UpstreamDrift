@@ -1,11 +1,23 @@
 # Native Multi-Engine Matching Handoff
 
-## Paused for Cheaper-Agent Turnover
+## Package A Completed: Calibration Decision Report Filed
 
-Start with [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md).
-The 38-frame/304-solve static diagnostic is complete and archived. No matching
-job launched by this review remains live. Investigate calibration and flagged
-late-frame search bounds before another large control search; see the latest review.
+Package A of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
+is complete. Read the full decision report:
+[Package A Calibration Decision](simscape_tour_matching/PACKAGE_A_CALIBRATION_DECISION.md).
+Key conclusions:
+
+1. Fixed-offset parameter recalibration on the baseline single-Hub topology drops
+   training error (-2.62 mm) but fails to generalize on held-out validation (+0.18 mm).
+2. The fundamental error floor stems from a 109.6 mm non-rigid deformation between
+   head and back markers in the capture (`BackLeft`–`HeadSide` target distance varies
+   from 349.7 to 459.3 mm). Splitting head and back into independent rigid clusters
+   drops the aggregate rigid floor from 14.59 mm to 3.72 mm (head: 0.16 mm, back: 5.05 mm).
+3. The 1.25 s static solve spike (84.03 mm) is resolved to a `WaistRight` occlusion
+   interacting with an artificial yaw penalty; relieved unconstrained yaw achieves
+   31.08 mm with 0 active bounds.
+4. Next action: Review with team whether to introduce an explicit 3-DOF cervical (neck)
+   articulation or re-scope Hub tracking markers before running bounded 0.90 s continuation.
 
 ## Current Entry Point
 
