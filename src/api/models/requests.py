@@ -242,6 +242,13 @@ class CounterfactualRequest(BaseModel):
             "recorded frames through the engine (expensive)"
         ),
     )
+    baseline_run_id: str | None = Field(
+        None,
+        description=(
+            "Optional archived catalog baseline run ID (e.g. 'simscape-returned102') "
+            "to analyze offline from simulation library without live engine"
+        ),
+    )
 
     @field_validator("kind")
     @classmethod

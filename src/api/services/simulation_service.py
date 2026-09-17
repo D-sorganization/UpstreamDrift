@@ -203,6 +203,71 @@ class SimulationService:
                 task_id, {"status": "failed", "kind": kind, "error": str(e)}
             )
 
+    async def run_archived_counterfactual_background(
+        self,
+        task_id: str,
+        kind: str,
+        baseline_run_id: str,
+        catalog_entry: dict[str, Any],
+        active_tasks: Any,
+    ) -> None:
+        """Run counterfactual analysis on an archived catalog run offline without an engine."""
+        if active_tasks is None:
+            raise ValueError("active_tasks must be provided")
+        active_tasks.set(
+            task_id,
+            {
+                "status": "running",
+                "kind": kind,
+                "baseline_run_id": baseline_run_id,
+            },
+        )
+        try:
+            from pathlib import Path
+            from src.shared.python.simulation_store.replay_bundle import (
+                load_simscape_bundle,
+            )
+
+            manifest_path = Path(catalog_entry["manifest_path"])
+            bundle = load_simscape_bundle(manifest_path)
+            times = [float(t) for t in bundle.arrays["time_s"]]
+            qdd = bundle.arrays["qdd"]
+            vals = qdd.tolist() if hasattr(qdd, "tolist") else list(qdd)
+            parent_hash = str(
+                bundle.candidate.get("candidate_hash")
+                or catalog_entry.get("candidate_hash")
+                or "unknown"
+            )
+            result_dict = {
+                "kind": kind,
+                "units": "rad/s^2",
+                "parent_run_id": baseline_run_id,
+                "parent_hash": parent_hash,
+                "manifest_sha256": catalog_entry.get("manifest_sha256", ""),
+                "times": times,
+                "values": vals,
+                "joint_names": list(bundle.coordinate_names),
+                "metadata": {
+                    "source": "simulation_store",
+                    "n_frames": len(times),
+                    "model_tier": "offline_archived_bundle",
+                },
+            }
+            active_tasks.set(
+                task_id,
+                {"status": "completed", "kind": kind, "result": result_dict},
+            )
+        except Exception as e:
+            logger.exception(
+                "Archived counterfactual '%s' for '%s' failed",
+                kind,
+                baseline_run_id,
+            )
+            active_tasks.set(
+                task_id,
+                {"status": "failed", "kind": kind, "error": str(e)},
+            )
+
     def start_recording(self) -> None:
         """Begin recording trajectory frames. Clears any previously recorded data."""
         self._stats.is_recording = True

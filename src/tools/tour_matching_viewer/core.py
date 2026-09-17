@@ -45,6 +45,8 @@ class ReplayData:
     target_markers_m: NDArray[np.float64] | None = None
     valid_mask: NDArray[np.bool_] | None = None
     coordinate_names: tuple[str, ...] | None = None
+    reaction_wrenches_N_Nm: NDArray[np.float64] | None = None
+    wrench_points_m: NDArray[np.float64] | None = None
 
     @property
     def frame_count(self) -> int:
@@ -61,6 +63,8 @@ class ViewerFrame:
     valid_mask: NDArray[np.bool_] | None
     rms_error: float
     marker_errors_mm: NDArray[np.float64] | None = None
+    force_arrow: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None
+    moment_arrow: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None
 
 
 def load_replay(
@@ -302,7 +306,7 @@ def body_poses_from_state(
 
         for prim in joint["primitives"]:
             kind = prim["primitive"]
-            val = coord_map[prim["coordinate"]]
+            val = coord_map.get(prim["coordinate"], 0.0)
             axis = np.eye(3)["xyz".index(kind[1])]
             if kind[0] == "P":
                 curr_pos = curr_pos + curr_r @ (axis * val)
@@ -361,6 +365,19 @@ def viewer_frame(
         if len(valid_diff) > 0:
             rms_error = float(np.sqrt(np.mean(valid_diff**2)))
 
+    force_arrow: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None
+    moment_arrow: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None
+    if (
+        replay.reaction_wrenches_N_Nm is not None
+        and replay.wrench_points_m is not None
+        and frame_idx < len(replay.reaction_wrenches_N_Nm)
+    ):
+        w = replay.reaction_wrenches_N_Nm[frame_idx]
+        pt = replay.wrench_points_m[frame_idx]
+        if np.all(np.isfinite(w)) and np.all(np.isfinite(pt)):
+            force_arrow = wrench_arrow_vectors(pt, w[:3], scale=0.005)
+            moment_arrow = wrench_arrow_vectors(pt, w[3:], scale=0.01)
+
     return ViewerFrame(
         segments=segments,
         target_markers=target_markers,
@@ -368,6 +385,8 @@ def viewer_frame(
         valid_mask=valid_mask,
         rms_error=rms_error,
         marker_errors_mm=marker_errors_mm,
+        force_arrow=force_arrow,
+        moment_arrow=moment_arrow,
     )
 
 
@@ -438,3 +457,78 @@ def marker_error_vectors(
         if mask[i]:
             lines.append((target_markers[i], model_markers[i]))
     return lines
+
+
+def wrench_arrow_vectors(
+    point: Sequence[float] | NDArray[np.float64],
+    vector: Sequence[float] | NDArray[np.float64],
+    scale: float = 0.005,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Return start and end 3D points for visualizing a spatial force or moment vector.
+
+    Args:
+        point: 3D point of application [x, y, z] in metres.
+        vector: 3D force or moment vector in SI units (N or N*m).
+        scale: Visual scaling factor (metres per Newton or N*m).
+
+    Returns:
+        (start_point, end_point) as float64 arrays of shape (3,).
+    """
+    p = np.asarray(point, dtype=np.float64).reshape(3)
+    v = np.asarray(vector, dtype=np.float64).reshape(3)
+    return p, p + scale * v
+
+
+def export_provenance_table(
+    replay: ReplayData,
+    output_path: Path | str,
+    *,
+    candidate_hash: str = "unknown",
+    engine_name: str = "unknown",
+) -> Path:
+    """Export provenance-bearing numerical table for analysis or publication."""
+    out = Path(output_path).resolve()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    n_frames = replay.frame_count
+    rows = []
+    has_wrench = replay.reaction_wrenches_N_Nm is not None
+    for i in range(n_frames):
+        t = float(replay.time_s[i])
+        row: dict[str, Any] = {
+            "frame": i + 1,
+            "time_s": t,
+            "candidate_hash": candidate_hash,
+            "engine": engine_name,
+        }
+        if replay.coordinate_names is not None and replay.coordinates is not None:
+            for j, name in enumerate(replay.coordinate_names):
+                row[f"q_{name}"] = float(replay.coordinates[i, j])
+        if has_wrench:
+            assert replay.reaction_wrenches_N_Nm is not None
+            w = replay.reaction_wrenches_N_Nm[i]
+            row["Fx_N"] = float(w[0])
+            row["Fy_N"] = float(w[1])
+            row["Fz_N"] = float(w[2])
+            row["Mx_Nm"] = float(w[3])
+            row["My_Nm"] = float(w[4])
+            row["Mz_Nm"] = float(w[5])
+        rows.append(row)
+    if out.suffix.lower() == ".json":
+        import json
+
+        payload = {
+            "candidate_hash": candidate_hash,
+            "engine": engine_name,
+            "n_frames": n_frames,
+            "rows": rows,
+        }
+        out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    else:  # CSV
+        import csv
+
+        if rows:
+            with open(out, "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+                writer.writeheader()
+                writer.writerows(rows)
+    return out
