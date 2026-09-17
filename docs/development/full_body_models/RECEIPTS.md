@@ -40,6 +40,7 @@ Summary provenance, hashes, file references, and execution duration written by `
 | `dynamics`                 | compound | Forward dynamics tracking, computed torque, and ZMP diagnostics            | dynamics |
 | `elapsed_s`                | s        | Total wall-clock runtime of ground-support execution                       | metadata |
 | `qualification`            | text     | Qualification note and status claim for the run                            | metadata |
+| `acceptance`               | compound | Physical and kinematic acceptance evaluation verdict (MS-01)               | metadata |
 
 ## Ground Stage (`ground`)
 

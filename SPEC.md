@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Physical Acceptance Contract and Gates (#10322)
+
+Defines and enforces pure physical acceptance contracts, multi-horizon gates, and receipts across motion matching and cross-engine replay:
+- **Acceptance Contract & Multi-Horizon Gates (`src/shared/python/motion_matching/acceptance.py`)**:
+  - `evaluate`: Evaluates trajectory receipts against strict kinematic and dynamic tolerance gates across three evaluation horizons: Kinematic Marker Tracking (G1), Contact & Ground Force Feasibility (G2), and Energy & Dynamic Consistency (G3).
+  - Decomposed into modular gate evaluators (`_evaluate_marker_rmse`, `_evaluate_pelvis_yaw`, `_evaluate_normal_contact_force`, `_evaluate_ground_and_closure`, `_evaluate_weight_fraction`) respecting architecture line budgets and precondition/postcondition contracts.
+- **Versioned Receipt Integration (`src/shared/python/motion_matching/pipeline/receipt_components.py`, `receipt_schema.py`, `receipt.py`)**:
+  - Adds `AcceptanceReceipt` and `AcceptanceGateReport` recording horizon verdicts, evaluated tolerances, violation details, and aggregate pass/fail disposition.
+  - Plugs acceptance auditing directly into `ReceiptBuilder` and `Receipt` structures.
+- **Cross-Engine Replay Validation (`src/shared/python/motion_matching/cross_engine_replay.py`, `docs/development/full_body_models/`)**:
+  - Asserts physical acceptance across engine replay pipelines; documents verdicts in `verdicts_2026-09.json` and FB-6 parity report.
+- **Unit Testing (`tests/unit/motion_matching/test_acceptance.py`)**:
+  - Tests covering gate evaluation, edge-case kinematics, contact force bounds, and fail-closed receipt emission.
+
 ## Target Capture Hash-Lock and Marker Validity Policy (#10325)
 
 Enforces byte-level hash integrity on tournament capture files and codifies the canonical marker validity policy across engines:

@@ -13,7 +13,7 @@
   "totals": {
     "identical": 424,
     "diverged": 278,
-    "ud-only": 1305,
+    "ud-only": 1306,
     "tools-only": 708,
     "spelling-only": 124
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 141,
+      "ud-only": 142,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -11969,6 +11969,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/acceptance.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 18855,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/align_to_simulation_grid.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -12129,7 +12141,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 10232,
+      "ud_bytes": 10924,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12213,7 +12225,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 12032,
+      "ud_bytes": 12733,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13041,7 +13053,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 5939,
+      "ud_bytes": 6215,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13053,7 +13065,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 30312,
+      "ud_bytes": 32741,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13089,7 +13101,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 10547,
+      "ud_bytes": 10819,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13101,7 +13113,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 13146,
+      "ud_bytes": 13688,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13557,7 +13569,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 8213,
+      "ud_bytes": 11302,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21477,7 +21489,7 @@
       "classification": "ud-only",
       "package": "shadow_tracker",
       "subpackage": "",
-      "ud_bytes": 25940,
+      "ud_bytes": 23936,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -34756,9 +34768,9 @@
     {
       "path": "config/__init__.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-13",
-        "commit": "b4ddf7b30a4fc64eb4c83781c2005c0eefb6e0fa"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -34769,9 +34781,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-26",
-        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -34860,9 +34872,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-29",
-        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -35926,9 +35938,9 @@
     {
       "path": "realtime/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-27",
-        "commit": "667b3ba078b21c5873e5991a87af0aec005397b2"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -35939,9 +35951,9 @@
     {
       "path": "realtime/transport_file.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-06-09",
-        "commit": "64bd5222b1a4dd4643a1e4da6c702b8146149cfd"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -36381,9 +36393,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-20",
-        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
