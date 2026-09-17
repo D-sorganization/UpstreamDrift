@@ -16,8 +16,10 @@ from types import MappingProxyType
 
 from defusedxml import ElementTree as SafeET
 
+from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.tour_capture_contract import (
     MARKER_SEGMENTS,
+    MARKER_VALIDITY_POLICY,
     tracked_labels,
 )
 
@@ -95,3 +97,15 @@ def model_body_names(osim_path: Path) -> set[str]:
 def bodies_missing_from(model_bodies: set[str]) -> tuple[str, ...]:
     """Return mapped bodies absent from the model, sorted."""
     return tuple(sorted(set(GOLF_HUMANOID_MARKER_BODIES.values()) - set(model_bodies)))
+
+
+@precondition(lambda label, is_valid=True: isinstance(label, str), "label must be str")
+@postcondition(lambda r: r >= 0.0, "weight must be non-negative")
+def marker_weight(label: str, is_valid: bool = True) -> float:
+    """Return OpenSim tracking weight for the marker label."""
+    return MARKER_VALIDITY_POLICY.weight_for(label, is_valid=is_valid)
+
+
+def marker_weights(is_valid: bool = True) -> dict[str, float]:
+    """Return dictionary of marker weights for all tracked labels."""
+    return {label: marker_weight(label, is_valid) for label in tracked_labels()}
