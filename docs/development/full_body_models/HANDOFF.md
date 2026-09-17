@@ -1,5 +1,16 @@
 # Full-Body Models Handoff (Epic #10062)
 
+## Qualified Solver Integration (#10254)
+
+The [integration plan](../../plans/qualified_motion_integration/README.md)
+defines coordinate, closure, underactuation, timing and evidence boundaries.
+First slice #10255 corrects the missing contact-force chain rule in full-body
+Pinocchio derivatives. Independent real-engine differences reproduce failure
+before the change and pass afterward; contact kinks remain explicitly nonsmooth.
+No fit receipts were regenerated. Keep #10250's evidence refresh and #10162's
+physical acceptance work as prerequisites. #10256 and #10257 are separately
+owned viewer and Pink adapter slices, not completed product integration.
+
 ## Pink Adapter Status (#10257, #10254)
 
 The low-level Pink adapters now share validated state/time handling, retain
