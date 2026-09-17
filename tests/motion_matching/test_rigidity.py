@@ -64,3 +64,30 @@ def test_partial_point_and_invalid_body_contracts_are_rejected() -> None:
         rigid_attachment_residuals(np.zeros((1, 3)), np.zeros((1, 1, 3)), [])
     with pytest.raises(ValueError):
         rigid_attachment_residuals(np.zeros((1, 3)), np.zeros((1, 1, 3)), [""])
+
+
+def test_cluster_separation_preserves_internal_rigidity() -> None:
+    """Verifies that separating coupled clusters diagnoses relative deformation."""
+    # Cluster A: 3 rigid points
+    cluster_a = np.array([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.0, 0.1, 0.0]])
+    # Cluster B: 3 rigid points
+    cluster_b = np.array([[0.0, 0.0, 0.5], [0.1, 0.0, 0.5], [0.0, 0.1, 0.5]])
+    combined = np.vstack([cluster_a, cluster_b])
+
+    # Frame 0: unperturbed
+    # Frame 1: cluster B translates by [0.05, 0.0, 0.0] relative to cluster A
+    observed = np.zeros((2, 6, 3))
+    observed[0] = combined
+    observed[1, :3] = cluster_a
+    observed[1, 3:] = cluster_b + [0.05, 0.0, 0.0]
+
+    # When treated as a single rigid body, deformation forces nonzero residual
+    err_combined = rigid_attachment_residuals(combined, observed, ["Hub"] * 6)
+    np.testing.assert_allclose(err_combined[0], 0.0, atol=1e-12)
+    assert np.mean(err_combined[1]) > 0.001
+
+    # When split into independent clusters, each cluster has zero residual floor
+    err_split = rigid_attachment_residuals(
+        combined, observed, ["ClusterA"] * 3 + ["ClusterB"] * 3
+    )
+    np.testing.assert_allclose(err_split, 0.0, atol=1e-12)

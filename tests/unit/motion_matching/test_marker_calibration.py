@@ -150,3 +150,64 @@ def test_alternating_calibration_selects_best_iteration_on_oscillation() -> None
         assert result.per_marker_rms_m[label] == pytest.approx(
             result.rms_per_iteration_m[1], rel=1e-5
         )
+
+
+def test_alternating_calibration_held_out_validation() -> None:
+    labels = ("M1", "M2", "M3")
+    bodies = {"M1": "B", "M2": "B", "M3": "B"}
+    train_frames = 5
+    val_frames = 5
+    total_frames = train_frames + val_frames
+
+    true_offsets = {"M1": (0.1, 0.0, 0.0), "M2": (0.0, 0.1, 0.0), "M3": (0.0, 0.0, 0.1)}
+
+    def poses(q: np.ndarray) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+        return {"B": (np.eye(3), np.array([q[0], 0.0, 0.0]))}
+
+    points = np.zeros((total_frames, len(labels), 3))
+    for f in range(total_frames):
+        for i, label in enumerate(labels):
+            points[f, i] = np.array(true_offsets[label]) + np.array(
+                [float(f), 0.0, 0.0]
+            )
+
+    train_capture = TourCapture(
+        np.arange(train_frames) / 360.0,
+        labels,
+        points[:train_frames],
+        np.ones((train_frames, len(labels)), bool),
+    )
+    val_capture = TourCapture(
+        np.arange(val_frames) / 360.0,
+        labels,
+        points[train_frames:],
+        np.ones((val_frames, len(labels)), bool),
+    )
+
+    def ik(offsets: module.Offsets, cap: TourCapture) -> np.ndarray:
+        out = np.zeros((cap.frames, 1))
+        for f in range(cap.frames):
+            diffs = [
+                cap.points_m[f, i, 0] - offsets[lb][1][0]
+                for i, lb in enumerate(cap.labels)
+            ]
+            out[f, 0] = float(np.mean(diffs))
+        return out
+
+    # Calibrate on train_capture
+    result = module.calibrate_marker_offsets(
+        train_capture, bodies, poses, ik, initial_q=np.zeros(1), iterations=3
+    )
+    assert result.rms_per_iteration_m[-1] < 1e-9
+
+    # Evaluate held-out validation frames with calibrated offsets
+    val_q = ik(result.offsets, val_capture)
+    val_poses: list[module.Mapping[str, module.Pose]] = [
+        poses(val_q[f]) for f in range(val_capture.frames)
+    ]
+    val_rms, val_per_marker = module._marker_rms_and_per_marker(
+        val_capture, result.offsets, val_poses
+    )
+    assert val_rms < 1e-9
+    for lb in labels:
+        assert val_per_marker[lb] < 1e-9
