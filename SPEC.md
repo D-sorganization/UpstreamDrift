@@ -103,6 +103,15 @@ Completes the modularization of the ground support execution pipeline by moving 
 - Bitwise Receipt & Simulation Parity:
   - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
 
+## Crocoddyl Polynomial Action Model (#10269)
+
+Integrates global degree-six polynomial actuation into a Crocoddyl `ActionModelAbstract`
+for full-body motion matching. The action represents continuous RK4 steps over fixed
+substep intervals, computing analytical derivatives `Fx` and `Fu` through the exact
+chain rule on discrete full-body sensitivity tensors. Supports box-constrained optimization
+over coefficient increments, unactuated root mapping, active and bilateral contact states,
+and independent replay diagnostics.
+
 ## Global Polynomial Full-Body Step (#10265)
 
 Full-body control parameters are one row-major seven-coefficient Bernstein
@@ -113,6 +122,7 @@ and differentiates every internal stage and substep. Discrete state and
 coefficient Jacobians include shared contact derivatives, with nonsmooth
 contact branches reported explicitly. No state resets or pose projection are
 part of this open-loop boundary.
+
 ## Finite Weld Pose Linearization (#10260)
 
 The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
@@ -120,6 +130,7 @@ The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
 The velocity and acceleration constraints continue using `J_constraint`;
 their trajectory acceleration partial must not substitute the finite pose
 Jacobian. Real-engine tests verify off-closure directions and storage ownership.
+
 ## Contact-Aware Full-Body Derivatives (#10255, #10254)
 
 The shared sphere-contact law exposes world-force derivatives with respect to
