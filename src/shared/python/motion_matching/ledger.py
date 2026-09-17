@@ -378,8 +378,8 @@ def scan(
     for s_root in search_roots:
         resolved_s = Path(s_root).resolve()
         if resolved_s.is_dir():
-            for f in resolved_s.rglob("*receipt*.json"):
-                if f.is_file():
+            for f in resolved_s.rglob("*.json"):
+                if f.is_file() and "receipt" in f.name.lower():
                     discovered_files.add(f.resolve())
 
     rows: list[LedgerRow] = []
