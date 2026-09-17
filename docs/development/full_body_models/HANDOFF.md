@@ -11,6 +11,13 @@ No fit receipts were regenerated. Keep #10250's evidence refresh and #10162's
 physical acceptance work as prerequisites. #10256 and #10257 are separately
 owned viewer and Pink adapter slices, not completed product integration.
 
+Finite weld correction #10260 differentiates the six-component pose error away
+from closure with the correct SE(3) log Jacobian. Trajectory acceleration
+linearization retains the separate constraint velocity Jacobian. Eleven real
+closure regression tests and the 11 contact derivative tests pass on Pinocchio
+3.8 and 4.1; no motion-fit evidence or acceptance thresholds changed.
+The principal-log branch at rotation pi is rejected for derivative evaluation;
+trajectory finite differences also reject steps that could cross that cut.
 Updated 2026-09-16 (claude; HO-9 #10111). Branch
 `feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
