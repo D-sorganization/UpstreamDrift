@@ -78,6 +78,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   Real MeshCat probing exposed and corrected shared-root deletion and owned
   process cleanup defects. Live Gepetto qualification and production replay
   integration remain outstanding under #10254.
+- **Solver Integration (#10254, #10255; 2026-09-16):** Reproduced missing
+  ground-contact state terms in inherited Pinocchio acceleration derivatives;
+  added exact local contact-force partials and constrained chain-rule composition.
+  Real Pinocchio 3.8 integration tests cover active/no contact, moving joints,
+  reversed coordinate order, nonfinite input, contact kinks and cache isolation.
+  Plan: `docs/plans/qualified_motion_integration/README.md`. Next: review/merge
+  derivative boundary, then integrate #10257 Pink and #10256 viewer adapters;
+  preserve #10250 evidence refresh and all full-horizon qualification gates.
 
 - **State:** in_progress
 - **Owner:** local
