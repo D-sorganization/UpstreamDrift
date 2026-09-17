@@ -73,6 +73,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **LoD Regression (#10254; 2026-09-16):** Reproduced the main-derived
+  `inputs.calibration2.offsets.items()` architecture failure before the change.
+  Resolve the owned offset mapping once before formatting the report; preserve
+  explicit/calibrated/attachment precedence. Seven reference-stage tests and
+  the full 3,221-file LoD no-growth scan pass; the baseline was not changed.
+
 - **Integration Turnover (#10254; 2026-09-16):** Post-compaction Crocoddyl ABI
   and Pink feasible/infeasible QP probes pass on the preserved WSL environment.
   Added bounded TDD/DbC/LoD/DRY worker contracts and three Pink pipeline packets.
