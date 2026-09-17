@@ -76,6 +76,8 @@ def _euler_xyz(x: float, y: float, z: float) -> np.ndarray:
 def forward_kinematics(
     angles: Mapping[str, float],
     lengths: SegmentLengths | None = None,
+    *,
+    include_lower_body: bool = False,
 ) -> SkeletonPose:
     """Compute landmark positions for a coarse golfer skeleton.
 
@@ -89,6 +91,9 @@ def forward_kinematics(
         Missing fields default to 0.
     lengths
         Segment lengths, default :class:`SegmentLengths`.
+    include_lower_body
+        Whether to compute lower-body landmarks (hips, knees, ankles, feet).
+        Defaults to False to preserve 13-landmark upper-body kinematics compatibility.
 
     Returns
     -------
@@ -120,7 +125,8 @@ def forward_kinematics(
         a("HipStartPositionX"), a("HipStartPositionY"), a("HipStartPositionZ")
     )
     points = _compute_upper_body(pelvis, R_hip, a, lengths)
-    points.update(_compute_lower_body(pelvis, R_hip, a, lengths))
+    if include_lower_body:
+        points.update(_compute_lower_body(pelvis, R_hip, a, lengths))
     return SkeletonPose(points=points)
 
 
