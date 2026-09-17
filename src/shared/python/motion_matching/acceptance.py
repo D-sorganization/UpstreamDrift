@@ -137,6 +137,387 @@ def _extract_metric(data: Mapping[str, Any], *keys: str) -> float | None:
     return None
 
 
+def _check_rmse_gate(
+    name: str,
+    measured: float | None,
+    threshold: float,
+    label: str,
+) -> GateResult | None:
+    if measured is None:
+        return None
+    if measured <= threshold:
+        return GateResult(
+            name=name,
+            status=GateStatus.PASSED,
+            threshold=threshold,
+            measured=measured,
+        )
+    return GateResult(
+        name=name,
+        status=GateStatus.FAILED,
+        threshold=threshold,
+        measured=measured,
+        reason=f"{label} RMSE {measured * 1e3:.2f} mm > {threshold * 1e3:.2f} mm",
+    )
+
+
+def _evaluate_marker_rmse(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    results: list[GateResult] = []
+    capture = str(receipt.get("capture", "driver")).lower()
+    if horizon == Horizon.G1:
+        thresh_whole = gates.g1_whole_rmse_m
+    elif horizon == Horizon.G2:
+        thresh_whole = gates.g2_whole_rmse_m
+    else:
+        thresh_whole = (
+            gates.g3_whole_iron_rmse_m
+            if "iron" in capture
+            else gates.g3_whole_driver_rmse_m
+        )
+
+    val_whole = _extract_metric(
+        receipt, "whole_marker_rmse_m", "whole_rms_m", "marker_rms_m"
+    )
+    if val_whole is None:
+        results.append(
+            GateResult(
+                name="whole_marker_rmse_m",
+                status=GateStatus.MISSING,
+                threshold=thresh_whole,
+                reason="missing whole marker RMSE",
+            )
+        )
+    else:
+        r_whole = _check_rmse_gate(
+            "whole_marker_rmse_m", val_whole, thresh_whole, "whole"
+        )
+        if r_whole is not None:
+            results.append(r_whole)
+
+    thresh_early = (
+        gates.g1_early_rmse_m
+        if horizon == Horizon.G1
+        else (gates.g2_early_rmse_m if horizon == Horizon.G2 else gates.g3_early_rmse_m)
+    )
+    val_early = _extract_metric(receipt, "early_marker_rmse_m", "early_rms_m")
+    r_early = _check_rmse_gate("early_marker_rmse_m", val_early, thresh_early, "early")
+    if r_early is not None:
+        results.append(r_early)
+
+    thresh_terminal = (
+        gates.g1_terminal_rmse_m
+        if horizon == Horizon.G1
+        else (
+            gates.g2_terminal_rmse_m
+            if horizon == Horizon.G2
+            else gates.g3_terminal_rmse_m
+        )
+    )
+    val_terminal = _extract_metric(receipt, "terminal_marker_rmse_m", "terminal_rms_m")
+    r_terminal = _check_rmse_gate(
+        "terminal_marker_rmse_m", val_terminal, thresh_terminal, "terminal"
+    )
+    if r_terminal is not None:
+        results.append(r_terminal)
+
+    thresh_club = (
+        gates.g1_club_rmse_m
+        if horizon == Horizon.G1
+        else (gates.g2_club_rmse_m if horizon == Horizon.G2 else gates.g3_club_rmse_m)
+    )
+    val_club = _extract_metric(receipt, "club_marker_rmse_m", "club_cluster_rms_m")
+    r_club = _check_rmse_gate("club_marker_rmse_m", val_club, thresh_club, "club")
+    if r_club is not None:
+        results.append(r_club)
+
+    return results
+
+
+def _evaluate_pelvis_yaw(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    results: list[GateResult] = []
+    thresh_yaw_rad = (
+        gates.g1_pelvis_yaw_rmse_rad
+        if horizon == Horizon.G1
+        else (
+            gates.g2_pelvis_yaw_rmse_rad
+            if horizon == Horizon.G2
+            else gates.g3_pelvis_yaw_rmse_rad
+        )
+    )
+    val_yaw_rad = _extract_metric(receipt, "pelvis_yaw_rmse_rad")
+    val_yaw_pct = _extract_metric(receipt, "pelvis_yaw_error_pct")
+    val_yaw_deg = _extract_metric(receipt, "pelvis_yaw_diff_deg")
+    if val_yaw_rad is not None:
+        if val_yaw_rad <= thresh_yaw_rad:
+            results.append(
+                GateResult(
+                    name="pelvis_yaw_rmse_rad",
+                    status=GateStatus.PASSED,
+                    threshold=thresh_yaw_rad,
+                    measured=val_yaw_rad,
+                    unit="rad",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="pelvis_yaw_rmse_rad",
+                    status=GateStatus.FAILED,
+                    threshold=thresh_yaw_rad,
+                    measured=val_yaw_rad,
+                    unit="rad",
+                    reason=f"pelvis yaw RMSE {val_yaw_rad:.4f} rad > {thresh_yaw_rad:.4f} rad",
+                )
+            )
+    elif val_yaw_pct is not None:
+        thresh_pct = gates.g1_pelvis_yaw_error_pct
+        if val_yaw_pct <= thresh_pct:
+            results.append(
+                GateResult(
+                    name="pelvis_yaw_error_pct",
+                    status=GateStatus.PASSED,
+                    threshold=thresh_pct,
+                    measured=val_yaw_pct,
+                    unit="%",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="pelvis_yaw_error_pct",
+                    status=GateStatus.FAILED,
+                    threshold=thresh_pct,
+                    measured=val_yaw_pct,
+                    unit="%",
+                    reason=f"pelvis yaw error {val_yaw_pct:.2f}% > {thresh_pct:.2f}%",
+                )
+            )
+    elif val_yaw_deg is not None:
+        thresh_deg = math.degrees(thresh_yaw_rad)
+        if abs(val_yaw_deg) <= thresh_deg:
+            results.append(
+                GateResult(
+                    name="pelvis_yaw_diff_deg",
+                    status=GateStatus.PASSED,
+                    threshold=thresh_deg,
+                    measured=val_yaw_deg,
+                    unit="deg",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="pelvis_yaw_diff_deg",
+                    status=GateStatus.FAILED,
+                    threshold=thresh_deg,
+                    measured=val_yaw_deg,
+                    unit="deg",
+                    reason=f"pelvis yaw diff {val_yaw_deg:.2f} deg > {thresh_deg:.2f} deg",
+                )
+            )
+    return results
+
+
+def _evaluate_normal_contact_force(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+    contact_audit: Any,
+) -> list[GateResult]:
+    results: list[GateResult] = []
+    mass_kg = gates.nominal_body_mass_kg
+    if (
+        isinstance(receipt.get("anthropometric"), (list, tuple))
+        and len(receipt["anthropometric"]) >= 2
+    ):
+        mass_kg = float(receipt["anthropometric"][1])
+    thresh_max_force = (
+        mass_kg * gates.gravity_m_s2 * gates.max_normal_force_bw_multiplier
+    )
+
+    val_force = None
+    if isinstance(contact_audit, Mapping):
+        val_force = _extract_metric(contact_audit, "max_normal_force_n")
+    if val_force is None:
+        val_force = _extract_metric(receipt, "max_normal_force_n")
+
+    is_native_crossval = "native" in str(
+        receipt.get("lane", "")
+    ) or "two_window_fit" in str(receipt)
+    if val_force is None:
+        if not is_native_crossval and "contact_audit" in receipt:
+            results.append(
+                GateResult(
+                    name="max_normal_force_n",
+                    status=GateStatus.FAILED,
+                    threshold=thresh_max_force,
+                    unit="N",
+                    reason="missing max normal force in contact audit",
+                )
+            )
+        elif not is_native_crossval:
+            dyn = receipt.get("dynamics")
+            if isinstance(dyn, Mapping) and "controller" in dyn:
+                results.append(
+                    GateResult(
+                        name="max_normal_force_n",
+                        status=GateStatus.FAILED,
+                        threshold=thresh_max_force,
+                        unit="N",
+                        reason="missing contact forces in dynamics receipt",
+                    )
+                )
+            else:
+                results.append(
+                    GateResult(
+                        name="max_normal_force_n",
+                        status=GateStatus.MISSING,
+                        threshold=thresh_max_force,
+                        unit="N",
+                        reason="missing dynamics.max_normal_force_n",
+                    )
+                )
+    else:
+        if val_force <= thresh_max_force:
+            results.append(
+                GateResult(
+                    name="max_normal_force_n",
+                    status=GateStatus.PASSED,
+                    threshold=thresh_max_force,
+                    measured=val_force,
+                    unit="N",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="max_normal_force_n",
+                    status=GateStatus.FAILED,
+                    threshold=thresh_max_force,
+                    measured=val_force,
+                    unit="N",
+                    reason=f"max normal force {val_force:.1f} N exceeds {thresh_max_force:.1f} N (3x BW)",
+                )
+            )
+    return results
+
+
+def _evaluate_ground_and_closure(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+    contact_audit: Any,
+) -> list[GateResult]:
+    results: list[GateResult] = []
+    thresh_penetration = gates.max_penetration_m
+    val_penetration = None
+    if isinstance(contact_audit, Mapping):
+        val_penetration = _extract_metric(contact_audit, "max_penetration_m")
+    if val_penetration is None:
+        val_penetration = _extract_metric(receipt, "max_penetration_m")
+    if val_penetration is not None:
+        if val_penetration <= thresh_penetration:
+            results.append(
+                GateResult(
+                    name="max_penetration_m",
+                    status=GateStatus.PASSED,
+                    threshold=thresh_penetration,
+                    measured=val_penetration,
+                    unit="m",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="max_penetration_m",
+                    status=GateStatus.FAILED,
+                    threshold=thresh_penetration,
+                    measured=val_penetration,
+                    unit="m",
+                    reason=f"penetration {val_penetration * 1e3:.1f} mm > {thresh_penetration * 1e3:.1f} mm",
+                )
+            )
+
+    thresh_closure_m = gates.max_closure_residual_m
+    val_closure_m = _extract_metric(
+        receipt,
+        "max_closure_residual_m",
+        "closure_error_max_m",
+        "max_closure_translation_m",
+        "reference_closure_max_abs",
+    )
+    if val_closure_m is not None:
+        if val_closure_m <= thresh_closure_m:
+            results.append(
+                GateResult(
+                    name="max_closure_residual_m",
+                    status=GateStatus.PASSED,
+                    threshold=thresh_closure_m,
+                    measured=val_closure_m,
+                    unit="m",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="max_closure_residual_m",
+                    status=GateStatus.FAILED,
+                    threshold=thresh_closure_m,
+                    measured=val_closure_m,
+                    unit="m",
+                    reason=f"closure residual {val_closure_m * 1e3:.2f} mm > {thresh_closure_m * 1e3:.2f} mm",
+                )
+            )
+    return results
+
+
+def _evaluate_weight_fraction(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    results: list[GateResult] = []
+    weight_frac = (
+        receipt.get("dynamics", {}).get("weight_fraction")
+        if isinstance(receipt.get("dynamics"), Mapping)
+        else None
+    )
+    if isinstance(weight_frac, Mapping):
+        w_min = weight_frac.get("min")
+        w_max = weight_frac.get("max")
+        if w_min is not None and w_max is not None:
+            if (
+                float(w_min) >= gates.weight_fraction_min
+                and float(w_max) <= gates.weight_fraction_max
+            ):
+                results.append(
+                    GateResult(
+                        name="weight_fraction",
+                        status=GateStatus.PASSED,
+                        threshold=gates.weight_fraction_min,
+                        measured=float(w_min),
+                        unit="BW",
+                    )
+                )
+            else:
+                results.append(
+                    GateResult(
+                        name="weight_fraction",
+                        status=GateStatus.FAILED,
+                        threshold=gates.weight_fraction_min,
+                        measured=float(w_min),
+                        unit="BW",
+                        reason=f"weight fraction range [{w_min:.2f}, {w_max:.2f}] outside [{gates.weight_fraction_min}, {gates.weight_fraction_max}]",
+                    )
+                )
+    return results
+
+
 @precondition(
     lambda receipt, horizon=Horizon.G1, gates=None: isinstance(horizon, Horizon),
     "horizon must be Horizon enum",
@@ -155,400 +536,13 @@ def evaluate(
     if gates is None:
         gates = AcceptanceGates()
 
-    gate_results: list[GateResult] = []
-
-    # 1. Whole-marker RMSE
-    capture = str(receipt.get("capture", "driver")).lower()
-    if horizon == Horizon.G1:
-        thresh_whole = gates.g1_whole_rmse_m
-    elif horizon == Horizon.G2:
-        thresh_whole = gates.g2_whole_rmse_m
-    else:
-        thresh_whole = (
-            gates.g3_whole_iron_rmse_m
-            if "iron" in capture
-            else gates.g3_whole_driver_rmse_m
-        )
-
-    val_whole = _extract_metric(
-        receipt, "whole_marker_rmse_m", "whole_rms_m", "marker_rms_m"
-    )
-    if val_whole is None:
-        gate_results.append(
-            GateResult(
-                name="whole_marker_rmse_m",
-                status=GateStatus.MISSING,
-                threshold=thresh_whole,
-                reason="missing whole marker RMSE",
-            )
-        )
-    elif val_whole <= thresh_whole:
-        gate_results.append(
-            GateResult(
-                name="whole_marker_rmse_m",
-                status=GateStatus.PASSED,
-                threshold=thresh_whole,
-                measured=val_whole,
-            )
-        )
-    else:
-        gate_results.append(
-            GateResult(
-                name="whole_marker_rmse_m",
-                status=GateStatus.FAILED,
-                threshold=thresh_whole,
-                measured=val_whole,
-                reason=f"whole RMSE {val_whole * 1e3:.2f} mm > {thresh_whole * 1e3:.2f} mm",
-            )
-        )
-
-    # 2. Early marker RMSE
-    thresh_early = (
-        gates.g1_early_rmse_m
-        if horizon == Horizon.G1
-        else (gates.g2_early_rmse_m if horizon == Horizon.G2 else gates.g3_early_rmse_m)
-    )
-    val_early = _extract_metric(receipt, "early_marker_rmse_m", "early_rms_m")
-    if val_early is not None:
-        if val_early <= thresh_early:
-            gate_results.append(
-                GateResult(
-                    name="early_marker_rmse_m",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_early,
-                    measured=val_early,
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="early_marker_rmse_m",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_early,
-                    measured=val_early,
-                    reason=f"early RMSE {val_early * 1e3:.2f} mm > {thresh_early * 1e3:.2f} mm",
-                )
-            )
-
-    # 3. Terminal marker RMSE
-    thresh_terminal = (
-        gates.g1_terminal_rmse_m
-        if horizon == Horizon.G1
-        else (
-            gates.g2_terminal_rmse_m
-            if horizon == Horizon.G2
-            else gates.g3_terminal_rmse_m
-        )
-    )
-    val_terminal = _extract_metric(receipt, "terminal_marker_rmse_m", "terminal_rms_m")
-    if val_terminal is not None:
-        if val_terminal <= thresh_terminal:
-            gate_results.append(
-                GateResult(
-                    name="terminal_marker_rmse_m",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_terminal,
-                    measured=val_terminal,
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="terminal_marker_rmse_m",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_terminal,
-                    measured=val_terminal,
-                    reason=f"terminal RMSE {val_terminal * 1e3:.2f} mm > {thresh_terminal * 1e3:.2f} mm",
-                )
-            )
-
-    # 4. Club marker RMSE
-    thresh_club = (
-        gates.g1_club_rmse_m
-        if horizon == Horizon.G1
-        else (gates.g2_club_rmse_m if horizon == Horizon.G2 else gates.g3_club_rmse_m)
-    )
-    val_club = _extract_metric(receipt, "club_marker_rmse_m", "club_cluster_rms_m")
-    if val_club is not None:
-        if val_club <= thresh_club:
-            gate_results.append(
-                GateResult(
-                    name="club_marker_rmse_m",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_club,
-                    measured=val_club,
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="club_marker_rmse_m",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_club,
-                    measured=val_club,
-                    reason=f"club RMSE {val_club * 1e3:.2f} mm > {thresh_club * 1e3:.2f} mm",
-                )
-            )
-
-    # 5. Pelvis yaw
-    thresh_yaw_rad = (
-        gates.g1_pelvis_yaw_rmse_rad
-        if horizon == Horizon.G1
-        else (
-            gates.g2_pelvis_yaw_rmse_rad
-            if horizon == Horizon.G2
-            else gates.g3_pelvis_yaw_rmse_rad
-        )
-    )
-    val_yaw_rad = _extract_metric(receipt, "pelvis_yaw_rmse_rad")
-    val_yaw_pct = _extract_metric(receipt, "pelvis_yaw_error_pct")
-    val_yaw_deg = _extract_metric(receipt, "pelvis_yaw_diff_deg")
-    if val_yaw_rad is not None:
-        if val_yaw_rad <= thresh_yaw_rad:
-            gate_results.append(
-                GateResult(
-                    name="pelvis_yaw_rmse_rad",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_yaw_rad,
-                    measured=val_yaw_rad,
-                    unit="rad",
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="pelvis_yaw_rmse_rad",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_yaw_rad,
-                    measured=val_yaw_rad,
-                    unit="rad",
-                    reason=f"pelvis yaw RMSE {val_yaw_rad:.4f} rad > {thresh_yaw_rad:.4f} rad",
-                )
-            )
-    elif val_yaw_pct is not None:
-        thresh_pct = gates.g1_pelvis_yaw_error_pct
-        if val_yaw_pct <= thresh_pct:
-            gate_results.append(
-                GateResult(
-                    name="pelvis_yaw_error_pct",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_pct,
-                    measured=val_yaw_pct,
-                    unit="%",
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="pelvis_yaw_error_pct",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_pct,
-                    measured=val_yaw_pct,
-                    unit="%",
-                    reason=f"pelvis yaw error {val_yaw_pct:.2f}% > {thresh_pct:.2f}%",
-                )
-            )
-    elif val_yaw_deg is not None:
-        thresh_deg = math.degrees(thresh_yaw_rad)
-        if abs(val_yaw_deg) <= thresh_deg:
-            gate_results.append(
-                GateResult(
-                    name="pelvis_yaw_diff_deg",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_deg,
-                    measured=val_yaw_deg,
-                    unit="deg",
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="pelvis_yaw_diff_deg",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_deg,
-                    measured=val_yaw_deg,
-                    unit="deg",
-                    reason=f"pelvis yaw diff {val_yaw_deg:.2f} deg > {thresh_deg:.2f} deg",
-                )
-            )
-
-    # 6. Physical limit: Max normal contact force <= 3x body weight (~2354 N for 80kg)
-    # Extract subject mass if present
-    mass_kg = gates.nominal_body_mass_kg
-    if (
-        isinstance(receipt.get("anthropometric"), (list, tuple))
-        and len(receipt["anthropometric"]) >= 2
-    ):
-        mass_kg = float(receipt["anthropometric"][1])
-    thresh_max_force = (
-        mass_kg * gates.gravity_m_s2 * gates.max_normal_force_bw_multiplier
-    )
-
-    # Normal contact force lookup (contact_audit, dynamics, or direct)
-    val_force = None
     contact_audit = receipt.get("contact_audit")
-    if isinstance(contact_audit, Mapping):
-        val_force = _extract_metric(contact_audit, "max_normal_force_n")
-    if val_force is None:
-        val_force = _extract_metric(receipt, "max_normal_force_n")
-
-    # Native fits without explicit feet contact forces (e.g. Simscape native model)
-    is_native_crossval = "native" in str(
-        receipt.get("lane", "")
-    ) or "two_window_fit" in str(receipt)
-    if val_force is None:
-        if not is_native_crossval and "contact_audit" in receipt:
-            gate_results.append(
-                GateResult(
-                    name="max_normal_force_n",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_max_force,
-                    unit="N",
-                    reason="missing max normal force in contact audit",
-                )
-            )
-        elif not is_native_crossval:
-            # Check dynamics controller
-            dyn = receipt.get("dynamics")
-            if isinstance(dyn, Mapping) and "controller" in dyn:
-                gate_results.append(
-                    GateResult(
-                        name="max_normal_force_n",
-                        status=GateStatus.FAILED,
-                        threshold=thresh_max_force,
-                        unit="N",
-                        reason="missing contact forces in dynamics receipt",
-                    )
-                )
-            else:
-                gate_results.append(
-                    GateResult(
-                        name="max_normal_force_n",
-                        status=GateStatus.MISSING,
-                        threshold=thresh_max_force,
-                        unit="N",
-                        reason="missing dynamics.max_normal_force_n",
-                    )
-                )
-    else:
-        if val_force <= thresh_max_force:
-            gate_results.append(
-                GateResult(
-                    name="max_normal_force_n",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_max_force,
-                    measured=val_force,
-                    unit="N",
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="max_normal_force_n",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_max_force,
-                    measured=val_force,
-                    unit="N",
-                    reason=f"max normal force {val_force:.1f} N exceeds {thresh_max_force:.1f} N (3x BW)",
-                )
-            )
-
-    # 7. Physical limit: Ground penetration <= 10 mm
-    thresh_penetration = gates.max_penetration_m
-    val_penetration = None
-    if isinstance(contact_audit, Mapping):
-        val_penetration = _extract_metric(contact_audit, "max_penetration_m")
-    if val_penetration is None:
-        val_penetration = _extract_metric(receipt, "max_penetration_m")
-    if val_penetration is not None:
-        if val_penetration <= thresh_penetration:
-            gate_results.append(
-                GateResult(
-                    name="max_penetration_m",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_penetration,
-                    measured=val_penetration,
-                    unit="m",
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="max_penetration_m",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_penetration,
-                    measured=val_penetration,
-                    unit="m",
-                    reason=f"penetration {val_penetration * 1e3:.1f} mm > {thresh_penetration * 1e3:.1f} mm",
-                )
-            )
-
-    # 8. Physical limit: Loop closure residual <= 5 mm / 0.05 rad
-    thresh_closure_m = gates.max_closure_residual_m
-    val_closure_m = _extract_metric(
-        receipt,
-        "max_closure_residual_m",
-        "closure_error_max_m",
-        "max_closure_translation_m",
-        "reference_closure_max_abs",
-    )
-    if val_closure_m is not None:
-        if val_closure_m <= thresh_closure_m:
-            gate_results.append(
-                GateResult(
-                    name="max_closure_residual_m",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_closure_m,
-                    measured=val_closure_m,
-                    unit="m",
-                )
-            )
-        else:
-            gate_results.append(
-                GateResult(
-                    name="max_closure_residual_m",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_closure_m,
-                    measured=val_closure_m,
-                    unit="m",
-                    reason=f"closure residual {val_closure_m * 1e3:.2f} mm > {thresh_closure_m * 1e3:.2f} mm",
-                )
-            )
-
-    # 9. Weight fraction within [0.2, 3.0]
-    weight_frac = (
-        receipt.get("dynamics", {}).get("weight_fraction")
-        if isinstance(receipt.get("dynamics"), Mapping)
-        else None
-    )
-    if isinstance(weight_frac, Mapping):
-        w_min = weight_frac.get("min")
-        w_max = weight_frac.get("max")
-        if w_min is not None and w_max is not None:
-            if (
-                float(w_min) >= gates.weight_fraction_min
-                and float(w_max) <= gates.weight_fraction_max
-            ):
-                gate_results.append(
-                    GateResult(
-                        name="weight_fraction",
-                        status=GateStatus.PASSED,
-                        threshold=gates.weight_fraction_min,
-                        measured=float(w_min),
-                        unit="BW",
-                    )
-                )
-            else:
-                gate_results.append(
-                    GateResult(
-                        name="weight_fraction",
-                        status=GateStatus.FAILED,
-                        threshold=gates.weight_fraction_min,
-                        measured=float(w_min),
-                        unit="BW",
-                        reason=f"weight fraction range [{w_min:.2f}, {w_max:.2f}] outside [{gates.weight_fraction_min}, {gates.weight_fraction_max}]",
-                    )
-                )
+    gate_results: list[GateResult] = []
+    gate_results.extend(_evaluate_marker_rmse(receipt, horizon, gates))
+    gate_results.extend(_evaluate_pelvis_yaw(receipt, horizon, gates))
+    gate_results.extend(_evaluate_normal_contact_force(receipt, gates, contact_audit))
+    gate_results.extend(_evaluate_ground_and_closure(receipt, gates, contact_audit))
+    gate_results.extend(_evaluate_weight_fraction(receipt, gates))
 
     # Overall verdict
     is_accepted = len(gate_results) > 0 and all(
