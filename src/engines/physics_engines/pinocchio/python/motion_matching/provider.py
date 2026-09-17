@@ -98,7 +98,14 @@ class PinocchioFitSwingProvider:
             ImportError: If the ``pinocchio`` bindings are unavailable.
         """
         club = resolve_club_target(target)
-        result = fit_swing_pinocchio(club, opts)
+        native_opts: FitOptions | None = None
+        if opts is not None:
+            engine_opts = getattr(opts, "engine_options", None)
+            if isinstance(engine_opts, FitOptions):
+                native_opts = engine_opts
+            elif isinstance(opts, FitOptions):
+                native_opts = opts
+        result = fit_swing_pinocchio(club, native_opts)
         # Issue #4713 / #6935: opt-in CI publication via the shared helper.
         publish_leaderboard_row(
             ENGINE_NAME,
