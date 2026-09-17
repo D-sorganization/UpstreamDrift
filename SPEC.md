@@ -14,6 +14,20 @@ Defines and enforces pure physical acceptance contracts, multi-horizon gates, an
 - **Unit Testing (`tests/unit/motion_matching/test_acceptance.py`)**:
   - Tests covering gate evaluation, edge-case kinematics, contact force bounds, and fail-closed receipt emission.
 
+## Shadow Tracker Review Workbench Viewport and Action Wiring Corrective (#10357)
+
+Repairs Shadow Tracker GUI workbench interaction and rendering surfaces in accordance with launcher embed standards (MS-84):
+- **Action Signal Wiring (`src/tools/shadow_tracker/gui.py`)**:
+  - Connects toolbar action buttons (`btn_open`, `btn_save`, `btn_export`) to concrete review model handlers.
+  - Implements file dialog workflows for opening bundle directories, saving sessions, and exporting canonical JSON packages with explicit status reporting and error boundaries.
+  - Enforces connected signal receivers across all toolbar and navigation buttons (`btn_open`, `btn_save`, `btn_export`, `btn_worst`, `btn_prev`, `btn_next`).
+- **Custom Review Viewport (`src/tools/shadow_tracker/gui.py`)**:
+  - Replaces plain placeholder `QLabel` with dedicated `ShadowTrackerViewportWidget` subclassing `QtWidgets.QWidget`.
+  - Exposes typed `observation` property and `set_observation(obs: FrameObservation | None)` mutation interface.
+  - Implements custom `paintEvent` rendering:
+    - Empty state: clean status prompt guiding user to open bundles.
+    - Active state: background fill, bounding frame, shot/camera identifiers, authoritative frame PTS and clock authority, mask references, and kinematics overlay placeholder.
+
 ## Pink Displaced-Target and Both-Club Motion Matching Proofs (#10254)
 
 Proves native Pink displaced-target motion reduction, hard constraint qualification failure handling, and dual-club smoke journeys:
@@ -24,6 +38,7 @@ Proves native Pink displaced-target motion reduction, hard constraint qualificat
 - **Both-Club (Driver & 7-Iron) Pipeline Smoke Journeys (`tests/unit/motion_matching/test_pink_pipeline_receipts.py`)**:
   - Exercises full pipeline matching runs across both driver and 7-iron clubs via `MatchRequest` and CLI `--backend pink`.
   - Verifies generation of conforming `ConstrainedIkReceipt` records across both clubs.
+
 
 ## Pink Constrained IK Interface Repair and Fail-Closed Qualification (#10318)
 
