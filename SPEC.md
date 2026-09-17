@@ -1,5 +1,18 @@
 # SPEC.md — Repository Specification Document
 
+## Tools Dependency Repin and Seam Integrity (MS-95, #10362)
+
+Enforces immutable Tools source resolution and couples the 4-way dependency repin to Tools `main` commit `62e8cdbf9`:
+- **Submodule and Manifest Pinning (`vendor/ud-tools`, `requirements-tools.txt`, `Cargo.toml`)**:
+  - `vendor/ud-tools`: Pinned to commit `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` on Tools `main`.
+  - `requirements-tools.txt`: Points to `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`.
+  - `Cargo.toml`: Updates `tools-core` git dependency revision to `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`.
+- **Divergence Inventory Sync (`docs/shared_tools/divergence_inventory.v1.json`, `.md`)**:
+  - Re-generates divergence inventory reflecting canonical package classifications and parity across UpstreamDrift and Tools.
+- **Ownership and Seam Guarantees (Tools #4494, #4262, #5227)**:
+  - Preserves UpstreamDrift canonical ownership of `humanoid_character_builder` and `model_generation` under `scripts/config/shadow_modules.yaml`.
+  - Consumes lazy `FrameSource` import from Tools, removing mocap import cascades on pure builder workflows.
+
 ## Pinocchio Native Fit With Crocoddyl Full-Body Optimal Control (MS-31, #10338)
 
 Delivers native Crocoddyl full-body optimal control problem formulation, FDDP trajectory solver, and two-window fit modularization under #10338 and #10254 (W4/W5):
