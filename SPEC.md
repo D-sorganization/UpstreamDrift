@@ -1,5 +1,16 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Manual Mask Revision Persistence and Lineage Protection (#10233)
+
+Protects manual mask revision identity and establishes durable, atomic mask history and lineage:
+- **Immutable Revision Identity & Idempotent Re-Registration (`src/shared/python/shadow_tracker/segmentation.py`)**:
+  - `ManualMaskProvider.register_mask`: Enforces conflict rejection (`ValueError`) when attempting to register a differing `MaskFrame` under an existing `revision_id`. Permits strictly identical re-registration idempotently without duplicating history entries.
+  - Lineage and Parent Ownership: Validates that `parent_revision_id` exists in the provider and belongs to the exact same namespaced frame scope before any internal mutations occur.
+  - Transactional Atomicity: All validations precede internal dictionary mutations; failed registration leaves all indices and histories unmodified.
+  - Namespaced Multi-Camera Identity: Indexes and queries masks and revision histories across full `(asset_id, shot_id, swing_id, camera_id, frame_id)` scope tuples, preventing camera-id collisions across multi-camera captures while disambiguating queries by `camera_id`.
+  - Atomic Persistence: `save(path)` and `ManualMaskProvider.load(path)` provide atomic JSON serialization and deserialization with full lineage preservation and validation upon reload.
+  - Downstream Cache Invalidation: `get_cache_key(...)` returns deterministic `f"{mask.revision_id}:{mask.observation_hash}"` tokens for invalidating downstream optimization and rasterization caches upon manual correction.
+
 ## Pipeline Report Calibration Offsets Boundary Protection (#10275)
 
 Repairs Law of Demeter boundary in motion matching reference report generation:
@@ -5283,8 +5294,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-16 | #10232 | Bind silhouette rendering to articulated model state and clip visible geometry across camera boundaries. |
 | 2026-09-16 | #10274 | Correct Shadow Tracker estimated-timing capability and refresh restart guidance for renderer, mask persistence and native timestamp evidence. |
+| 2026-09-16 | #10232 | Bind silhouette rendering to articulated model state and clip visible geometry across camera boundaries. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
