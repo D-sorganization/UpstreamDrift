@@ -671,7 +671,7 @@ def test_articulated_renderer_binds_subject_and_renders_separate_masks() -> None
 
     angles = reference_golfer_setup()
     state_vec = state_vector_from_joint_dict(angles)
-    assert len(state_vec) == 27
+    assert len(state_vec) == 37
     assert len(state_vec) == len(CANONICAL_ARTICULATED_STATE_FIELDS)
 
     req = RenderRequest(
@@ -884,7 +884,8 @@ def test_articulated_renderer_rejects_unsupported_convention_and_lengths() -> No
         )
     # Wrong length (e.g. 7 elements):
     with pytest.raises(
-        ValueError, match="requires 27 state elements for 'canonical_articulated_v1'"
+        ValueError,
+        match="requires 37 \\(or 27\\) state elements for 'canonical_articulated_v1'",
     ):
         renderer.render(
             RenderRequest(
@@ -894,3 +895,179 @@ def test_articulated_renderer_rejects_unsupported_convention_and_lengths() -> No
                 state_convention=CANONICAL_ARTICULATED_CONVENTION,
             )
         )
+
+
+def test_articulated_renderer_lower_limb_region_isolation() -> None:
+    """ST-05 / #10232: Knee flexion rotates lower-limb segments while upper body is strictly isolated."""
+    from shared.python.shadow_tracker.articulated_renderer import _BODY_SEGMENTS
+
+    # Verify segments explicitly contain thighs, shins, and feet
+    segment_pairs = {(p1, p2) for p1, p2, _ in _BODY_SEGMENTS}
+    assert ("l_hip", "l_knee") in segment_pairs
+    assert ("r_hip", "r_knee") in segment_pairs
+    assert ("l_knee", "l_ankle") in segment_pairs
+    assert ("r_knee", "r_ankle") in segment_pairs
+    assert ("l_ankle", "l_foot") in segment_pairs
+    assert ("r_ankle", "r_foot") in segment_pairs
+
+    # Frontal camera framing whole golfer (height 200, width 200)
+    camera = PinholeCameraModel(
+        camera_id="cam-full",
+        width_px=200,
+        height_px=200,
+        fx=130.0,
+        fy=130.0,
+        cx=100.0,
+        cy=90.0,
+        translation_world_to_camera=(0.0, 0.0, 3.0),
+    )
+    binding = _make_test_subject_binding()
+    renderer = ArticulatedSilhouetteRenderer(
+        cameras={"cam-full": camera},
+        subject_binding=binding,
+    )
+
+    angles_base = reference_golfer_setup()
+    state_base = state_vector_from_joint_dict(angles_base)
+
+    angles_knee = dict(angles_base)
+    # Flex left knee by 60 degrees
+    angles_knee["LKneeStartPosition"] = 60.0
+    state_knee = state_vector_from_joint_dict(angles_knee)
+
+    res_base = renderer.render(
+        RenderRequest(
+            camera_id="cam-full",
+            state=state_base,
+            image_size_px=(200, 200),
+            state_convention=CANONICAL_ARTICULATED_CONVENTION,
+        )
+    )
+    res_knee = renderer.render(
+        RenderRequest(
+            camera_id="cam-full",
+            state=state_knee,
+            image_size_px=(200, 200),
+            state_convention=CANONICAL_ARTICULATED_CONVENTION,
+        )
+    )
+
+    # Pelvis is positioned at y=0, projects near cy=90 in this camera setup.
+    # In rows 0..70 (upper torso, head, shoulders, arms), pixels must be IDENTICAL.
+    upper_diffs = 0
+    lower_diffs = 0
+    for r in range(200):
+        for c in range(200):
+            idx = r * 200 + c
+            b1 = res_base.body_mask[idx]
+            b2 = res_knee.body_mask[idx]
+            if b1 != b2:
+                if r < 75:
+                    upper_diffs += 1
+                else:
+                    lower_diffs += 1
+
+    assert upper_diffs == 0, (
+        f"Upper body pixels must not move when knee rotates: got {upper_diffs} diffs"
+    )
+    assert lower_diffs > 20, (
+        f"Lower body pixels must change when knee rotates: got {lower_diffs} diffs"
+    )
+
+
+def test_articulated_renderer_near_plane_adversarial_bounded_work() -> None:
+    """ST-05 / #10232: Segments crossing or extremely near the camera plane do not produce unbounded work."""
+    import time
+    from shared.python.shadow_tracker.articulated_renderer import _rasterize_3d_segment
+    import numpy as np
+
+    camera = PinholeCameraModel(
+        camera_id="cam-near",
+        width_px=100,
+        height_px=100,
+        fx=200.0,
+        fy=200.0,
+        cx=50.0,
+        cy=50.0,
+    )
+    mask = [0] * (100 * 100)
+
+    # Adversarial segment: starts at z = 0.0001 (0.1 mm in front of optical center) and ends at z = 2.0 m
+    # Without bounded viewport work, projected distance is > 2,000,000 pixels.
+    p1 = np.array([0.5, 0.5, 0.0001])
+    p2 = np.array([0.0, 0.0, 2.0])
+
+    t0 = time.perf_counter()
+    _rasterize_3d_segment(mask, p1, p2, 0.05, camera, 100, 100)
+    elapsed = time.perf_counter() - t0
+
+    # Must complete in well under 100 milliseconds
+    assert elapsed < 0.1, f"Near-plane rasterization took too long: {elapsed:.4f}s"
+    assert sum(mask) > 0, "Visible portion of segment must be rasterized"
+
+
+def test_articulated_renderer_coherent_subject_morphology_scaling() -> None:
+    """ST-05 / #10232: Subject height scales both envelope radii and segment lengths coherently."""
+    camera = PinholeCameraModel(
+        camera_id="cam-scale",
+        width_px=200,
+        height_px=200,
+        fx=100.0,
+        fy=100.0,
+        cx=100.0,
+        cy=100.0,
+        translation_world_to_camera=(0.0, 0.0, 3.5),
+    )
+
+    binding_short = SubjectModelBinding(
+        schema_version=SUBJECT_BINDING_SCHEMA_VERSION,
+        subject_id="subj-short",
+        model_hash="0" * 64,
+        joint_ids=("root", "spine", "shoulder_left", "shoulder_right"),
+        body_ids=("torso", "head", "arm_left", "arm_right"),
+        visual_envelope={"height_m": 1.50, "chest_width_m": 0.40, "depth_m": 0.25},
+        mass_kg=55.0,
+        scale_evidence="measured_anthropometry",
+        handedness="right",
+    )
+    binding_tall = SubjectModelBinding(
+        schema_version=SUBJECT_BINDING_SCHEMA_VERSION,
+        subject_id="subj-tall",
+        model_hash="0" * 64,
+        joint_ids=("root", "spine", "shoulder_left", "shoulder_right"),
+        body_ids=("torso", "head", "arm_left", "arm_right"),
+        visual_envelope={"height_m": 2.05, "chest_width_m": 0.50, "depth_m": 0.32},
+        mass_kg=95.0,
+        scale_evidence="measured_anthropometry",
+        handedness="right",
+    )
+
+    renderer_short = ArticulatedSilhouetteRenderer(
+        cameras={"cam-scale": camera},
+        subject_binding=binding_short,
+    )
+    renderer_tall = ArticulatedSilhouetteRenderer(
+        cameras={"cam-scale": camera},
+        subject_binding=binding_tall,
+    )
+
+    angles = reference_golfer_setup()
+    state = state_vector_from_joint_dict(angles)
+    req = RenderRequest(
+        camera_id="cam-scale",
+        state=state,
+        image_size_px=(200, 200),
+        state_convention=CANONICAL_ARTICULATED_CONVENTION,
+    )
+
+    res_short = renderer_short.render(req)
+    res_tall = renderer_tall.render(req)
+
+    area_short = res_short.body_mask.count(1)
+    area_tall = res_tall.body_mask.count(1)
+
+    assert area_short > 0
+    assert area_tall > area_short * 1.3, (
+        f"Tall subject must produce significantly larger silhouette than short subject: "
+        f"tall={area_tall}, short={area_short}"
+    )
