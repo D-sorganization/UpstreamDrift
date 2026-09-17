@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10338 · Pinocchio Native Fit With Crocoddyl Full-Body Optimal Control
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10338 (epic #10363, #10254 W4/W5)
+- **Branch:** feat/10338-crocoddyl-full-body-fit
+- **PR:** open
+- **Paths:** src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; src/shared/python/motion_matching/two_window_fit.py; tests/unit/motion_matching/test_pinocchio_full_body_fit.py; tests/unit/motion_matching/test_two_window_fit.py; evidence/matched/driver_g1_pinocchio
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 at b490980 (SELF; two-window fit modularization verified against run-102 target reproducing zero-displacement parity to < 1e-12; Crocoddyl problem assembly and FDDP driver verified with mock isolation and strict fail-closed CrocoddylNotAvailableError; all 28 tests pass; ruff, black, mypy, architecture budget clean)
+- **Summary:** Native Crocoddyl optimal control problem builder and FDDP driver implemented on the full-body plant. Pure problem assembly from full-body spec with per-node controls, marker target costs, 6D loop closure, and effort regularisation. Two-window SLSQP fitter extracted into shared motion matching module with analytical metrics, honest acceptance gates, and backward-compatible documentation shim. Evidence generated under evidence/matched/driver_g1_pinocchio/.
+- **Next step:** Open PR referencing Closes #10338 and #10254 W4/W5, merge via auto-squash, release lease.
+- **Evidence:** evidence/matched/driver_g1_pinocchio/receipt.json; evidence/matched/driver_g1_pinocchio/parity_vs_mujoco.json; tests/unit/motion_matching/test_two_window_fit.py; tests/unit/motion_matching/test_pinocchio_full_body_fit.py.
+
 ### DL-#9967 · Native Simscape Tour Matching
 
 - **State:** in_progress
