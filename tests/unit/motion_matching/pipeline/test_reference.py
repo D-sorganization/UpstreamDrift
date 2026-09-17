@@ -198,3 +198,92 @@ def test_build_ik_report_structure() -> None:
     assert "calibration" in report
     assert "segment_scaling" in report
     assert "leg_angle_ranges_deg" in report
+
+
+@pytest.mark.unit
+def test_build_calibration_stage_report_prefers_explicit_offsets_and_calibration2() -> (
+    None
+):
+    from src.shared.python.motion_matching.pipeline.reference import (
+        IKReportInputs,
+        _build_calibration_stage_report,
+    )
+
+    lane = MagicMock()
+    lane.calibration_frames = [0, 1]
+    cal = MagicMock()
+    cal.rms_per_iteration_m = [0.01]
+    cal2 = MagicMock()
+    cal2.rms_per_iteration_m = [0.005]
+    cal2.per_marker_rms_m = {"m1": 0.005}
+    cal2.offsets = {"m1": ("b_cal2", (0.1, 0.2, 0.3))}
+
+    # Case 1: cal2.offsets used when inputs.offsets is None
+    inputs1 = IKReportInputs(
+        lane=lane,
+        kin=MagicMock(),
+        adapter=MagicMock(),
+        q_ik=np.zeros((2, 7)),
+        fits=[],
+        q_smooth=np.zeros((2, 7)),
+        q_ref=np.zeros((2, 7)),
+        ref_fits=[],
+        labels=("m1",),
+        attachments={"m1": ("b_att", (0.0, 0.0, 0.0))},
+        calibration=cal,
+        calibration2=cal2,
+        femur_scale=1.0,
+        tibia_scale=1.0,
+        scale_table=[],
+        scaled_spec={},
+        offsets=None,
+    )
+    rep1 = _build_calibration_stage_report(inputs1, lane)
+    assert rep1["offsets_m"]["m1"]["body"] == "b_cal2"
+
+    # Case 2: explicit inputs.offsets takes highest priority
+    inputs2 = IKReportInputs(
+        lane=lane,
+        kin=MagicMock(),
+        adapter=MagicMock(),
+        q_ik=np.zeros((2, 7)),
+        fits=[],
+        q_smooth=np.zeros((2, 7)),
+        q_ref=np.zeros((2, 7)),
+        ref_fits=[],
+        labels=("m1",),
+        attachments={"m1": ("b_att", (0.0, 0.0, 0.0))},
+        calibration=cal,
+        calibration2=cal2,
+        femur_scale=1.0,
+        tibia_scale=1.0,
+        scale_table=[],
+        scaled_spec={},
+        offsets={"m1": ("b_explicit", (0.4, 0.5, 0.6))},
+    )
+    rep2 = _build_calibration_stage_report(inputs2, lane)
+    assert rep2["offsets_m"]["m1"]["body"] == "b_explicit"
+
+    # Case 3: attachments fallback when offsets is None and calibration2 has no offsets
+    del cal2.offsets
+    inputs3 = IKReportInputs(
+        lane=lane,
+        kin=MagicMock(),
+        adapter=MagicMock(),
+        q_ik=np.zeros((2, 7)),
+        fits=[],
+        q_smooth=np.zeros((2, 7)),
+        q_ref=np.zeros((2, 7)),
+        ref_fits=[],
+        labels=("m1",),
+        attachments={"m1": ("b_att", (0.0, 0.0, 0.0))},
+        calibration=cal,
+        calibration2=cal2,
+        femur_scale=1.0,
+        tibia_scale=1.0,
+        scale_table=[],
+        scaled_spec={},
+        offsets=None,
+    )
+    rep3 = _build_calibration_stage_report(inputs3, lane)
+    assert rep3["offsets_m"]["m1"]["body"] == "b_att"

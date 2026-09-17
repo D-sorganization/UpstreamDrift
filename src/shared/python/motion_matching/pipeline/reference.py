@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 import json
 from pathlib import Path
@@ -276,6 +276,20 @@ def _build_reference_stage_report(
     }
 
 
+def _resolve_offsets_items(
+    inputs: IKReportInputs,
+) -> Iterable[tuple[Any, Any]]:
+    offsets = inputs.offsets
+    if offsets is not None:
+        return offsets.items()
+    cal2 = inputs.calibration2
+    if hasattr(cal2, "offsets"):
+        cal_offsets = cal2.offsets
+        return cal_offsets.items()
+    attachments = inputs.attachments
+    return attachments.items()
+
+
 def _build_calibration_stage_report(
     inputs: IKReportInputs,
     lane: Lane,
@@ -292,15 +306,7 @@ def _build_calibration_stage_report(
         "per_marker_rms_m": inputs.calibration2.per_marker_rms_m,
         "offsets_m": {
             k: {"body": b, "offset_m": list(o)}
-            for k, (b, o) in (
-                inputs.offsets.items()
-                if inputs.offsets is not None
-                else (
-                    inputs.calibration2.offsets.items()
-                    if hasattr(inputs.calibration2, "offsets")
-                    else inputs.attachments.items()
-                )
-            )
+            for k, (b, o) in _resolve_offsets_items(inputs)
         },
     }
 
