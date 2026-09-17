@@ -27,12 +27,15 @@ class PelvisYawMetrics:
     valid: bool
 
 
-def _invalid_pelvis_yaw_metrics() -> PelvisYawMetrics:
+def _invalid_pelvis_yaw_metrics(
+    yaw_pred: float = np.nan,
+    yaw_target: float = np.nan,
+) -> PelvisYawMetrics:
     return PelvisYawMetrics(
-        yaw_pred_deg=0.0,
-        yaw_target_deg=0.0,
-        yaw_diff_deg=0.0,
-        pelvis_yaw_error_pct=100.0,
+        yaw_pred_deg=yaw_pred,
+        yaw_target_deg=yaw_target,
+        yaw_diff_deg=np.nan,
+        pelvis_yaw_error_pct=np.nan,
         valid=False,
     )
 
@@ -43,6 +46,8 @@ def compute_pelvis_yaw_metrics(
     wl_i: int,
     wr_i: int,
     tolerance: float = 1e-6,
+    target_valid: npt.NDArray[np.bool_] | None = None,
+    pred_valid: npt.NDArray[np.bool_] | None = None,
 ) -> PelvisYawMetrics:
     """Compute pelvis yaw angles in degrees and percentage error.
 
@@ -58,6 +63,10 @@ def compute_pelvis_yaw_metrics(
         WaistRight marker index.
     tolerance : float
         Minimum norm for planar separation vector.
+    target_valid : npt.NDArray[np.bool_] or None
+        Optional (K,) boolean validity mask for target markers.
+    pred_valid : npt.NDArray[np.bool_] or None
+        Optional (K,) boolean validity mask for predicted markers.
 
     Returns
     -------
@@ -71,24 +80,59 @@ def compute_pelvis_yaw_metrics(
         or target_markers_term.ndim < 2
         or pred_markers_term.shape[0] <= max(wl_i, wr_i)
         or target_markers_term.shape[0] <= max(wl_i, wr_i)
+        or wl_i < 0
+        or wr_i < 0
+        or wl_i == wr_i
     ):
         return _invalid_pelvis_yaw_metrics()
 
-    v_p = pred_markers_term[wr_i, :2] - pred_markers_term[wl_i, :2]
-    v_t = target_markers_term[wr_i, :2] - target_markers_term[wl_i, :2]
-    norm_p = float(np.linalg.norm(v_p))
-    norm_t = float(np.linalg.norm(v_t))
+    # Check predicted marker validity
+    yaw_pred: float = np.nan
+    yaw_pred_valid = False
+    if pred_valid is not None:
+        if (
+            pred_valid.ndim >= 1
+            and pred_valid.shape[0] > max(wl_i, wr_i)
+            and bool(pred_valid[wl_i])
+            and bool(pred_valid[wr_i])
+        ):
+            yaw_pred_valid = True
+    else:
+        yaw_pred_valid = True
 
-    if (
-        not np.isfinite(norm_p)
-        or not np.isfinite(norm_t)
-        or norm_p < tolerance
-        or norm_t < tolerance
-    ):
-        return _invalid_pelvis_yaw_metrics()
+    if yaw_pred_valid:
+        v_p = pred_markers_term[wr_i, :2] - pred_markers_term[wl_i, :2]
+        norm_p = float(np.linalg.norm(v_p))
+        if np.isfinite(norm_p) and norm_p >= tolerance:
+            yaw_pred = float(np.degrees(np.arctan2(v_p[1], v_p[0])))
+        else:
+            yaw_pred_valid = False
 
-    yaw_pred = float(np.degrees(np.arctan2(v_p[1], v_p[0])))
-    yaw_target = float(np.degrees(np.arctan2(v_t[1], v_t[0])))
+    # Check target marker validity
+    yaw_target: float = np.nan
+    yaw_target_valid = False
+    if target_valid is not None:
+        if (
+            target_valid.ndim >= 1
+            and target_valid.shape[0] > max(wl_i, wr_i)
+            and bool(target_valid[wl_i])
+            and bool(target_valid[wr_i])
+        ):
+            yaw_target_valid = True
+    else:
+        yaw_target_valid = True
+
+    if yaw_target_valid:
+        v_t = target_markers_term[wr_i, :2] - target_markers_term[wl_i, :2]
+        norm_t = float(np.linalg.norm(v_t))
+        if np.isfinite(norm_t) and norm_t >= tolerance:
+            yaw_target = float(np.degrees(np.arctan2(v_t[1], v_t[0])))
+        else:
+            yaw_target_valid = False
+
+    if not yaw_pred_valid or not yaw_target_valid:
+        return _invalid_pelvis_yaw_metrics(yaw_pred, yaw_target)
+
     diff_deg = float((yaw_pred - yaw_target + 180.0) % 360.0 - 180.0)
     error_pct = float(abs(diff_deg) / max(abs(yaw_target), 1.0) * 100.0)
 
@@ -109,6 +153,8 @@ def compute_pelvis_yaw_residual_and_derivative(
     yaw_weight: float,
     marker_jac_term: Array | None = None,
     tolerance: float = 1e-6,
+    target_valid: npt.NDArray[np.bool_] | None = None,
+    pred_valid: npt.NDArray[np.bool_] | None = None,
 ) -> tuple[Array, Array | None, PelvisYawMetrics]:
     """Compute 2-component unit vector difference residual and analytic Jacobian.
 
@@ -139,6 +185,10 @@ def compute_pelvis_yaw_residual_and_derivative(
         (K, 3, N_p) marker Jacobian at terminal frame.
     tolerance : float
         Minimum vector norm before declaring degeneracy.
+    target_valid : npt.NDArray[np.bool_] or None
+        Optional (K,) boolean validity mask for target markers.
+    pred_valid : npt.NDArray[np.bool_] or None
+        Optional (K,) boolean validity mask for predicted markers.
 
     Returns
     -------
@@ -155,7 +205,13 @@ def compute_pelvis_yaw_residual_and_derivative(
     )
 
     metrics = compute_pelvis_yaw_metrics(
-        pred_markers_term, target_markers_term, wl_i, wr_i, tolerance=tolerance
+        pred_markers_term,
+        target_markers_term,
+        wl_i,
+        wr_i,
+        tolerance=tolerance,
+        target_valid=target_valid,
+        pred_valid=pred_valid,
     )
 
     if not metrics.valid or pred_markers_term is None or target_markers_term is None:
