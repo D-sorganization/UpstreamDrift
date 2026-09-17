@@ -42,6 +42,9 @@ from src.engines.physics_engines.opensim.python.tour_matching.marker_set import 
     locked_coordinates,
     parse_model,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.visualization import (  # noqa: E402
+    animate_marker_overlay as generate_overlay_gif,
+)
 from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: E402
     MARKER_SEGMENTS,
     TourCapture,
@@ -90,71 +93,6 @@ def apply_segment_scaling(
                     trans_elem.text = " ".join(f"{v:.8g}" for v in scaled_coords)
 
     return write_model(tree, out_path)
-
-
-def generate_overlay_gif(
-    observed_m: np.ndarray,
-    predicted_m: np.ndarray,
-    valid_mask: np.ndarray,
-    time_s: np.ndarray,
-    out_path: Path,
-    stride: int = 6,
-) -> None:
-    """Generate 3D animated GIF comparing observed vs model markers."""
-    try:
-        import matplotlib
-
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
-        from matplotlib.animation import FuncAnimation
-    except ImportError:
-        return
-
-    frames_to_plot = np.arange(0, len(time_s), stride)
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(111, projection="3d")
-
-    def update(frame_idx):
-        ax.clear()
-        f = frames_to_plot[frame_idx]
-        v = valid_mask[f]
-        obs = observed_m[f, v]
-        pred = predicted_m[f, v]
-
-        ax.scatter(
-            obs[:, 0],
-            obs[:, 2],
-            obs[:, 1],
-            c="blue",
-            label="Observed Mocap",
-            s=20,
-            alpha=0.7,
-        )
-        ax.scatter(
-            pred[:, 0],
-            pred[:, 2],
-            pred[:, 1],
-            c="red",
-            label="OpenSim Model",
-            s=20,
-            alpha=0.7,
-        )
-
-        ax.set_xlim(-1.0, 1.0)
-        ax.set_ylim(-1.0, 1.0)
-        ax.set_zlim(0.0, 2.0)
-        ax.set_xlabel("X (forward/target) [m]")
-        ax.set_ylabel("Z (lateral) [m]")
-        ax.set_zlabel("Y (up) [m]")
-        ax.set_title(
-            f"Tour Driver Matching - Frame {f}/{len(time_s)} (t = {time_s[f]:.3f}s)"
-        )
-        ax.legend(loc="upper right")
-        return []
-
-    anim = FuncAnimation(fig, update, frames=len(frames_to_plot), blit=False)
-    anim.save(str(out_path), writer="pillow", fps=15)
-    plt.close(fig)
 
 
 def _solve_ik_and_evaluate(

@@ -139,3 +139,52 @@ def plot_3d_trajectory_overlay(
     plt.close(fig)
     logger.info("Saved 3D trajectory plot to %s", target)
     return target
+
+
+def animate_marker_overlay(
+    observed_m: NDArray[Any],
+    predicted_m: NDArray[Any],
+    valid_mask: NDArray[Any],
+    time_s: NDArray[Any],
+    output_path: Path | str,
+    stride: int = 6,
+    title: str = "Tour Driver Matching",
+) -> Path:
+    """Animated GIF of observed (blue) against model (red) markers, Y up.
+
+    Shared by the OS-3b IK overlay and the OS-7 Moco replay playback so both
+    lanes draw the same picture. Invalid observed samples are skipped.
+    """
+    from matplotlib.animation import FuncAnimation
+
+    if stride < 1:
+        raise ValueError("stride must be >= 1")
+    target = Path(output_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    frames_to_plot = np.arange(0, len(time_s), stride)
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111, projection="3d")
+
+    def update(frame_idx: int) -> list[Any]:
+        ax.clear()
+        f = frames_to_plot[frame_idx]
+        v = valid_mask[f]
+        obs = observed_m[f, v]
+        pred = predicted_m[f, v]
+        ax.scatter(obs[:, 0], obs[:, 2], obs[:, 1], c="blue", label="Observed", s=20)
+        ax.scatter(pred[:, 0], pred[:, 2], pred[:, 1], c="red", label="Model", s=20)
+        ax.set_xlim(-1.0, 1.0)
+        ax.set_ylim(-1.0, 1.0)
+        ax.set_zlim(0.0, 2.0)  # type: ignore[attr-defined]
+        ax.set_xlabel("X (forward/target) [m]")
+        ax.set_ylabel("Z (lateral) [m]")
+        ax.set_zlabel("Y (up) [m]")  # type: ignore[attr-defined]
+        ax.set_title(f"{title} - frame {f}/{len(time_s)} (t = {time_s[f]:.3f} s)")
+        ax.legend(loc="upper right")
+        return []
+
+    anim = FuncAnimation(fig, update, frames=len(frames_to_plot), blit=False)
+    anim.save(str(target), writer="pillow", fps=15)
+    plt.close(fig)
+    logger.info("Saved marker overlay animation to %s", target)
+    return target

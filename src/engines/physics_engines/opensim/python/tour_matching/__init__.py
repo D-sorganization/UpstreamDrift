@@ -56,6 +56,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.trc import (
     write_trc,
 )
 from src.engines.physics_engines.opensim.python.tour_matching.visualization import (
+    animate_marker_overlay,
     plot_3d_trajectory_overlay,
     plot_effort_and_rates,
     plot_marker_error_timecourse,
@@ -74,6 +75,7 @@ __all__ = [
     "RunConfig",
     "SegmentScaleResult",
     "SharedMetrics",
+    "animate_marker_overlay",
     "attach_marker_set",
     "body_for",
     "build_moco_study",
