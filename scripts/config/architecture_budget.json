@@ -48,6 +48,15 @@
       "expires_on": "2026-11-30"
     },
     {
+      "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/two_window_fit_102.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: execution script for candidate 102 fit preserves CLI options and delegates to modular motion_matching.two_window_fit.",
+      "expires_on": "2026-11-30"
+    },
+    {
       "path": "scripts/audit_solver_convergence_9967.py",
       "symbol": "run_convergence_audit",
       "rule": "function-lines",
