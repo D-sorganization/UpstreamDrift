@@ -27,16 +27,6 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from run_ground_support import (  # noqa: E402
-    BALANCE,
-    CAPTURES,
-    OMEGA_RAD_S,
-    RATE_HZ,
-    TRACKING_CUTOFF_HZ,
-    Lane,
-    smooth_reference,
-)
 from src.engines.physics_engines.mujoco.python.full_body_markers import (  # noqa: E402
     FullBodyMarkerKinematics,
 )
@@ -45,6 +35,15 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (  # noqa:
 )
 from src.engines.physics_engines.mujoco.python.full_body_simulation import (  # noqa: E402
     ROOT_COORDINATES,
+)
+from src.shared.python.motion_matching.pipeline import (  # noqa: E402
+    BALANCE,
+    CAPTURES,
+    OMEGA_RAD_S,
+    RATE_HZ,
+    TRACKING_CUTOFF_HZ,
+    Lane,
+    smooth_reference,
 )
 
 HERE = Path(__file__).resolve().parent

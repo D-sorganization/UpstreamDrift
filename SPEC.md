@@ -11,6 +11,71 @@ supports a self-managed server with explicit browser suppression. Live
 Gepetto qualification and product-level replay selection are still separate
 requirements under #10254.
  
+## Shadow Tracker Manual Mask Revision Persistence and Lineage Protection (#10233)
+
+Protects manual mask revision identity and establishes durable, atomic mask history and lineage:
+- **Immutable Revision Identity & Idempotent Re-Registration (`src/shared/python/shadow_tracker/segmentation.py`)**:
+  - `ManualMaskProvider.register_mask`: Enforces conflict rejection (`ValueError`) when attempting to register a differing `MaskFrame` under an existing `revision_id`. Permits strictly identical re-registration idempotently without duplicating history entries.
+  - Lineage and Parent Ownership: Validates that `parent_revision_id` exists in the provider and belongs to the exact same namespaced frame scope before any internal mutations occur.
+  - Transactional Atomicity: All validations precede internal dictionary mutations; failed registration leaves all indices and histories unmodified.
+  - Namespaced Multi-Camera Identity: Indexes and queries masks and revision histories across full `(asset_id, shot_id, swing_id, camera_id, frame_id)` scope tuples, preventing camera-id collisions across multi-camera captures while disambiguating queries by `camera_id`.
+  - Atomic Persistence: `save(path)` and `ManualMaskProvider.load(path)` provide atomic JSON serialization and deserialization with full lineage preservation and validation upon reload.
+  - Downstream Cache Invalidation: `get_cache_key(...)` returns deterministic `f"{mask.revision_id}:{mask.observation_hash}"` tokens for invalidating downstream optimization and rasterization caches upon manual correction.
+
+## Pipeline Report Calibration Offsets Boundary Protection (#10275)
+
+Repairs Law of Demeter boundary in motion matching reference report generation:
+- `src/shared/python/motion_matching/pipeline/reference.py`: In `_build_calibration_stage_report`, accesses `calibration2` offsets through a local boundary variable `source_offsets` rather than deep dot-chained expressions (`inputs.calibration2.offsets.items`), preserving fallback precedence (`inputs.offsets` -> `cal2.offsets` -> `inputs.attachments`) with zero new LoD violations (`scripts/ci/check_lod.py`).
+
+## Hip Zero-Twist Calibration and Unwidened Leg Bounds (HO-8 #10108, MM-6, #10162)
+
+Calibrates the hip coordinate zero-twist angle from optical motion capture data and unwidens lower-limb joint range-of-motion bounds:
+- **Hip Zero-Twist Angle Calibration (`src/shared/python/motion_matching/hip_calibration.py`)**:
+  - `HipRotationZero`: Slotted immutable dataclass (`offset_r_deg`, `offset_l_deg`, properties `r`, `l`, sequence/dict interfaces, and `to_dict()`).
+  - `hip_rotation_zero(points, valid, labels, waist_offsets, calibration)`: Functional hip rotation zero-twist calibration. Determines the functional flexion plane normal from capture markers (using medial knee markers `RKneeIn`/`LKneeIn` when available, or shank-thigh cross products fallback using ankle markers `RAnkleOut`/`LAnkleOut` and knee markers `RKneeOut`/`LKneeOut`).
+  - Mathematical zero-twist orientation: In pelvis anatomical frame ($+X$ forward, $+Y$ up, $+Z$ right), for right leg with anatomical axis pointing rightward ($+Z$), $\theta_r = \operatorname{arctan2}(v_{\text{anat}}[0], v_{\text{anat}}[2])$. For left leg pointing leftward ($-Z$), $\theta_l = \operatorname{arctan2}(-v_{\text{anat}}[0], -v_{\text{anat}}[2])$.
+  - `apply_hip_calibration`: Accepts `zero_twist_deg: HipRotationZero | Mapping[str, float] | None = None`. Post-multiplies `parent_to_base` by $R_z(\theta)$ to rotate the hip joint zero without altering joint center position. Records provenance and `document["subject"]["hip_zero_twist_deg"]`.
+- **Pipeline Integration and Receipt Schema**:
+  - `src/shared/python/motion_matching/pipeline/constants.py`: Sets `BOUND_WIDENING: float = 1.0` (unwidened, 1.0x human physiological range).
+  - `src/shared/python/motion_matching/pipeline/receipt_components.py`: Adds `hip_zero_twist_deg: dict[str, float] | None` to `HipCalibrationReceipt`.
+  - `docs/development/full_body_models/evidence/ground_support/run_ground_support.py`: Computes zero-twist offsets via `hip_rotation_zero` and passes them to `apply_hip_calibration` and the hip calibration report.
+  - `src/engines/physics_engines/mujoco/python/full_body_simulation.py`: Fallback to least-squares solver (`np.linalg.lstsq`) in `affine_dynamics` when KKT matrix is singular under boundary conditions.
+- **Evidence Verification**:
+  - Regenerated ground-support receipts with `BOUND_WIDENING = 1.0`: `anthro_driver`, `anthro_driver_shoot`, `anthro_iron`, and `anthro_iron_shoot`.
+  - Verified 0 lower-limb `range_of_motion_flags` on the IK reference for both captures (`driver` and `iron`).
+  - Cross-engine setup parity (`verify_setup_parity.py`) re-verified across MuJoCo, Drake, and Pinocchio.
+
+## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
+
+Completes the modularization of the ground support execution pipeline by moving remaining orchestration stages and CLI utilities from `run_ground_support.py` into the reusable `src.shared.python.motion_matching.pipeline` package, reducing `run_ground_support.py` from 779 lines to 374 lines (satisfying the <400 line architecture budget):
+- Reusable Pipeline Stage Additions (`src/shared/python/motion_matching/pipeline/`):
+  - `address.py`: Exposes `AddressStageInputs`, `AddressStageResult`, `solve_address_stage`, `calibrated_address_summary`, `prepare_hip_spec`, `search_segment_scales`, and `HipCalibrationOptions`.
+  - `reference.py`: Exposes `IKReportInputs` (with support for custom offsets) and `build_ik_report`.
+  - `dynamics.py`: Exposes `DynamicsReportInputs` and `build_dynamics_report`.
+  - `receipt.py`: Exposes `log_pipeline_summary` for structured console reporting.
+  - `__init__.py`: Re-exports all newly packaged stage inputs, results, builders, and options.
+- CLI & Evidence Decoupling:
+  - `run_ground_support.py` refactored into a thin CLI driver (374 lines) delegating completely to the pipeline package.
+  - Evidence scripts (`scan_geometry.py`, `downswing_experiment.py`, `export_mjx_package.py`) migrated to import directly from `src.shared.python.motion_matching.pipeline`.
+  - Zero imports from `run_ground_support` remain in the codebase (`grep -rn "from run_ground_support import" docs src` is 0).
+- Bitwise Receipt & Simulation Parity:
+  - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
+
+## Shadow Tracker Articulated Golfer Silhouette Rendering and Clipping (#10232)
+
+Binds silhouette projection to articulated kinematic model state and correctly clips boundary geometry:
+- `ArticulatedSilhouetteRenderer`:
+  - Concrete `SilhouetteRenderer` protocol implementation that evaluates forward kinematics from standard 27-element canonical articulated state vectors (`TranslationStartPositionX/Y/Z` + 24 `REFERENCE_GOLFER_FIELDS`).
+  - Renders 3D capsule-swept segments between connected joints for golfer body segments (trunk, head, shoulders, arms, forearms, hips, thighs, shanks) and club assembly (shaft, clubhead) into distinct, decoupled binary silhouette masks (`body_mask` and `club_mask`).
+  - Responds directly to kinematic variation: body mask area and distribution change under joint angle articulation (e.g. torso flexion, lead knee extension), and club mask separates and pivots under wrist radial/flexion rotations.
+- Off-Screen & Boundary Clipping:
+  - Robustly rasterizes projection ellipses whose 3D joint centers project outside camera sensor bounds ($u < 0, u \ge W, v < 0, v \ge H$) without discarding visible portions inside image margins $[0, W) \times [0, H)$.
+  - Supports anamorphic projection ($f_x \neq f_y$) by computing semi-major and semi-minor radii along respective pixel axes.
+- Strict State and Dimension Parity:
+  - Enforces matching dimensions between `RenderRequest.image_size_px` and `PinholeCameraModel.effective_image_size` (including `crop_box` dimensions).
+  - Explicitly rejects incompatible or unbound state conventions with descriptive `ValueError`.
+
+>>>>>>> SPEC.md (theirs)
 ## Anthropometric Document Rebuild and Freshness Gate (HO-11 #10250, #10162)
 
 Rebuilds full-body anthropometric model specifications and ground-support receipts after the HO-9 (#10249) de Leva 1996 shank parameter corrections, enforcing document freshness via continuous integration:
@@ -5242,6 +5307,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
+| 2026-09-16 | #10274 | Correct Shadow Tracker estimated-timing capability and refresh restart guidance for renderer, mask persistence and native timestamp evidence. |
+| 2026-09-16 | #10232 | Bind silhouette rendering to articulated model state and clip visible geometry across camera boundaries. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |

@@ -515,3 +515,343 @@ def test_segmentation_dto_validation() -> None:
             mask_count=-1,  # negative mask count
             provenance="test",
         )
+
+
+# ---------------------------------------------------------------------------
+# 10. Issue #10233: Revision Identity Protection & Lineage Persistence
+# ---------------------------------------------------------------------------
+
+
+def test_register_mask_rejects_conflicting_duplicate_revision_id(
+    base_frame_identity: FrameIdentity,
+) -> None:
+    width, height = 2, 2
+    total_px = width * height
+    valid = bytes([1] * total_px)
+    body = bytes([1, 0, 0, 0])
+    club = bytes([0, 1, 0, 0])
+
+    mask1 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-unique-01",
+        parent_revision_id=None,
+        producer_id="annotator-1",
+        correction_note="First registration",
+    )
+
+    provider = ManualMaskProvider()
+    provider.register_mask(mask1)
+
+    diff_shot_frame = FrameIdentity(
+        schema_version=FRAME_SCHEMA_VERSION,
+        asset_id=base_frame_identity.asset_id,
+        shot_id="shot-02",  # Different shot!
+        swing_id=base_frame_identity.swing_id,
+        camera_id=base_frame_identity.camera_id,
+        frame_id=base_frame_identity.frame_id,
+        pts_ticks=base_frame_identity.pts_ticks,
+        timebase_numerator=base_frame_identity.timebase_numerator,
+        timebase_denominator=base_frame_identity.timebase_denominator,
+        physical_time_s=base_frame_identity.physical_time_s,
+        physical_time_reason=base_frame_identity.physical_time_reason,
+        frame_sha256="b" * 64,
+    )
+    conflicting_mask_diff_shot = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=diff_shot_frame,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-unique-01",  # Duplicate revision ID with differing shot!
+        parent_revision_id=None,
+        producer_id="annotator-2",
+        correction_note="Conflicting revision in shot-02",
+    )
+
+    with pytest.raises(ValueError, match="already exists|Conflicting duplicate"):
+        provider.register_mask(conflicting_mask_diff_shot)
+
+    assert provider.get_revision("rev-unique-01").frame.shot_id == "shot-01"
+
+
+def test_register_mask_permits_idempotent_identical_re_registration(
+    base_frame_identity: FrameIdentity,
+) -> None:
+    width, height = 2, 2
+    total_px = width * height
+    valid = bytes([1] * total_px)
+    body = bytes([1, 0, 0, 0])
+    club = bytes([0, 1, 0, 0])
+
+    mask = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-idempotent",
+        parent_revision_id=None,
+        producer_id="annotator-1",
+        correction_note="Initial note",
+    )
+
+    provider = ManualMaskProvider()
+    provider.register_mask(mask)
+    assert len(provider.get_revision_history("f-010", shot_id="shot-01")) == 1
+
+    provider.register_mask(mask)
+    history = provider.get_revision_history("f-010", shot_id="shot-01")
+    assert len(history) == 1
+    assert history[0] == mask
+
+
+def test_register_mask_validates_parent_ownership_and_missing_parent(
+    base_frame_identity: FrameIdentity,
+) -> None:
+    width, height = 2, 2
+    total_px = width * height
+    valid = bytes([1] * total_px)
+    body = bytes([1, 0, 0, 0])
+    club = bytes([0, 1, 0, 0])
+
+    provider = ManualMaskProvider()
+
+    orphan_mask = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-child-orphan",
+        parent_revision_id="rev-nonexistent-parent",
+        producer_id="annotator-1",
+        correction_note="Orphan child",
+    )
+    with pytest.raises(ValueError, match="not found|does not exist"):
+        provider.register_mask(orphan_mask)
+
+    parent_mask = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-parent-f010",
+        parent_revision_id=None,
+        producer_id="annotator-1",
+        correction_note="Base f-010 mask",
+    )
+    provider.register_mask(parent_mask)
+
+    diff_frame_identity = FrameIdentity(
+        schema_version=FRAME_SCHEMA_VERSION,
+        asset_id=base_frame_identity.asset_id,
+        shot_id=base_frame_identity.shot_id,
+        swing_id=base_frame_identity.swing_id,
+        camera_id=base_frame_identity.camera_id,
+        frame_id="f-020",
+        pts_ticks=200,
+        timebase_numerator=1,
+        timebase_denominator=1000,
+        physical_time_s=0.2,
+        physical_time_reason="",
+        frame_sha256="c" * 64,
+    )
+    cross_frame_child = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=diff_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-child-f020",
+        parent_revision_id="rev-parent-f010",
+        producer_id="annotator-1",
+        correction_note="Cross frame child",
+    )
+    with pytest.raises(
+        ValueError, match="belongs to different frame scope|scope mismatch|not found"
+    ):
+        provider.register_mask(cross_frame_child)
+
+
+def test_failed_registration_leaves_every_index_unchanged(
+    base_frame_identity: FrameIdentity,
+) -> None:
+    width, height = 2, 2
+    total_px = width * height
+    valid = bytes([1] * total_px)
+    body = bytes([1, 0, 0, 0])
+    club = bytes([0, 1, 0, 0])
+
+    m1 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-good-01",
+        parent_revision_id=None,
+        producer_id="ann",
+        correction_note="Initial",
+    )
+    provider = ManualMaskProvider()
+    provider.register_mask(m1)
+
+    snapshot_rev_count = len(provider.all_revisions())
+    snapshot_history = provider.get_revision_history("f-010", shot_id="shot-01")
+
+    m_invalid = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-bad-child",
+        parent_revision_id="rev-missing-parent",
+        producer_id="ann",
+        correction_note="Invalid child",
+    )
+    with pytest.raises(ValueError):
+        provider.register_mask(m_invalid)
+
+    assert len(provider.all_revisions()) == snapshot_rev_count
+    assert provider.get_revision_history("f-010", shot_id="shot-01") == snapshot_history
+    assert not provider.has_revision("rev-bad-child")
+
+
+def test_namespaced_full_asset_swing_camera_frame_identity(
+    base_frame_identity: FrameIdentity,
+) -> None:
+    width, height = 2, 2
+    total_px = width * height
+    valid = bytes([1] * total_px)
+    body = bytes([1, 0, 0, 0])
+    club = bytes([0, 1, 0, 0])
+
+    cam_dtl_frame = FrameIdentity(
+        schema_version=FRAME_SCHEMA_VERSION,
+        asset_id=base_frame_identity.asset_id,
+        shot_id=base_frame_identity.shot_id,
+        swing_id=base_frame_identity.swing_id,
+        camera_id="cam-down-the-line",
+        frame_id="f-010",
+        pts_ticks=100,
+        timebase_numerator=1,
+        timebase_denominator=1000,
+        physical_time_s=0.1,
+        physical_time_reason="",
+        frame_sha256="d" * 64,
+    )
+
+    mask_face_on = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-fo-01",
+        parent_revision_id=None,
+        producer_id="ann",
+        correction_note="Face-on",
+    )
+    mask_dtl = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=cam_dtl_frame,
+        width_px=width,
+        height_px=height,
+        body=body,
+        club=club,
+        valid=valid,
+        revision_id="rev-dtl-01",
+        parent_revision_id=None,
+        producer_id="ann",
+        correction_note="DTL",
+    )
+
+    provider = ManualMaskProvider()
+    provider.register_mask(mask_face_on)
+    provider.register_mask(mask_dtl)
+
+    with pytest.raises(ValueError, match="Multiple"):
+        provider.get_mask("f-010")
+
+    res_fo = provider.get_mask("f-010", camera_id="cam-face-on")
+    assert res_fo.revision_id == "rev-fo-01"
+
+    res_dtl = provider.get_mask("f-010", camera_id="cam-down-the-line")
+    assert res_dtl.revision_id == "rev-dtl-01"
+
+
+def test_atomic_save_and_reopen_all_revisions(
+    base_frame_identity: FrameIdentity,
+    tmp_path: Path,
+) -> None:
+    width, height = 2, 2
+    total_px = width * height
+    valid = bytes([1] * total_px)
+    body_v1 = bytes([1, 0, 0, 0])
+    club_v1 = bytes([0, 1, 0, 0])
+    club_v2 = bytes([0, 1, 1, 0])
+
+    m1 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body_v1,
+        club=club_v1,
+        valid=valid,
+        revision_id="rev-save-01",
+        parent_revision_id=None,
+        producer_id="ann",
+        correction_note="Initial",
+    )
+    m2 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=base_frame_identity,
+        width_px=width,
+        height_px=height,
+        body=body_v1,
+        club=club_v2,
+        valid=valid,
+        revision_id="rev-save-02",
+        parent_revision_id="rev-save-01",
+        producer_id="reviewer",
+        correction_note="Corrected shaft",
+    )
+
+    provider = ManualMaskProvider()
+    provider.register_mask(m1)
+    provider.register_mask(m2)
+
+    save_path = tmp_path / "masks" / "revisions.json"
+    provider.save(save_path)
+    assert save_path.is_file()
+
+    restored = ManualMaskProvider.load(save_path)
+    assert len(restored.all_revisions()) == 2
+    assert restored.get_mask("f-010", shot_id="shot-01").revision_id == "rev-save-02"
+    history = restored.get_revision_history("f-010", shot_id="shot-01")
+    assert [h.revision_id for h in history] == ["rev-save-01", "rev-save-02"]

@@ -91,3 +91,63 @@ def test_com_report_structure() -> None:
     assert report["height_above_ground_m"] == pytest.approx(0.8)
     assert report["inside_support_polygon"] is True
     assert "polygon_centroid_offset_m" in report
+
+
+@pytest.mark.unit
+def test_build_dynamics_report_structure() -> None:
+    from src.shared.python.motion_matching.pipeline.dynamics import (
+        DynamicsReportInputs,
+        build_dynamics_report,
+    )
+
+    lane = MagicMock()
+    lane.frames = 720
+    lane.times = np.linspace(0.0, 2.0, 720)
+    lane.points = np.zeros((720, 2, 3))
+    lane.valid = np.ones((720, 2), dtype=bool)
+
+    kin = MagicMock()
+    kin.coordinate_order = ["tx", "ty", "tz", "rx", "ry", "rz"]
+    kin.marker_positions.return_value = np.zeros((2, 3))
+
+    adapter = MagicMock()
+    adapter.contact_parameters.as_document.return_value = {"stiffness": 1000}
+
+    record = MagicMock()
+    record.time_s = lane.times
+    record.q = np.zeros((720, 6))
+    record.v = np.zeros((720, 6))
+    record.tau = np.zeros((720, 6))
+    record.normal_force_n = np.ones(720) * 800.0
+    record.weight_fraction = np.ones(720)
+    record.centre_of_pressure_m = np.zeros((720, 3))
+    record.inside_support_polygon = np.ones(720, dtype=bool)
+    record.lowest_sphere_height_m = np.zeros(720)
+
+    zmp = {
+        "outside_m": np.zeros(720),
+        "unloaded": np.zeros(720, dtype=bool),
+        "grf_over_weight": np.ones((720, 3)),
+    }
+
+    inputs = DynamicsReportInputs(
+        record=record,
+        sim_q=np.zeros((720, 6)),
+        q_ref=np.zeros((720, 6)),
+        lane=lane,
+        kin=kin,
+        adapter=adapter,
+        zmp=zmp,
+        labels=("m1", "m2"),
+    )
+
+    report, errors = build_dynamics_report(inputs)
+    assert report["duration_s"] == pytest.approx(2.0)
+    assert "controller" in report
+    assert "reference_zmp" in report
+    assert "marker_rms_m" in report
+    assert "root_error_timeline_m" in report
+    assert "backswing_to_1s" in report
+    assert report["lowest_sphere_height_min_m"] == 0.0
+    assert report["lowest_sphere_height_max_m"] == 0.0
+    assert errors.shape == (720, 2)
