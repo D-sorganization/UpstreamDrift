@@ -250,6 +250,31 @@ def write_sto(
     return path
 
 
+@precondition(
+    lambda columns, frames: frames >= 1 and frames % 2 == 1,
+    "frames must be an odd positive window length",
+)
+def smooth_columns(columns: Mapping[str, Array], frames: int) -> dict[str, Array]:
+    """Centred Hann moving average of each column (edge-padded, length kept).
+
+    ``frames == 1`` returns copies. Used to take the 360 Hz IK jitter out of
+    the warm-start speeds and the IK-state reference: the OS-3b IK shows
+    per-frame jumps of 0.045 rad (finite-difference accelerations above
+    1500 rad/s^2) that a dynamic solve cannot reconcile.
+    """
+    if frames == 1:
+        return {name: np.array(values, dtype=float) for name, values in columns.items()}
+    window = np.hanning(frames + 2)[1:-1]
+    window /= window.sum()
+    half = frames // 2
+    out: dict[str, Array] = {}
+    for name, values in columns.items():
+        q = np.asarray(values, dtype=float)
+        padded = np.pad(q, half, mode="edge")
+        out[name] = np.convolve(padded, window, mode="valid")
+    return out
+
+
 def _interp(t: Array, src_t: Array, src: Array) -> Array:
     return np.interp(t, src_t, src)
 
@@ -357,6 +382,7 @@ __all__ = [
     "mesh_intervals_for",
     "read_sto",
     "retain_markers",
+    "smooth_columns",
     "trim_trailing_invalid",
     "validate_os7_receipt",
     "window_capture",

@@ -20,6 +20,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.moco_g1 import (
     mesh_intervals_for,
     read_sto,
     retain_markers,
+    smooth_columns,
     trim_trailing_invalid,
     validate_os7_receipt,
     window_capture,
@@ -252,6 +253,32 @@ def test_validate_receipt_names_missing_keys() -> None:
         (KeyError, ValueError, ContractViolationError), match="replay_metrics"
     ):
         validate_os7_receipt(doc)
+
+
+# ---------------------------------------------------------------- smoothing
+
+
+def test_smooth_columns_removes_jitter_and_keeps_trend() -> None:
+    t = np.linspace(0.0, 1.0, 361)
+    rng = np.random.default_rng(1)
+    clean = np.sin(2.0 * np.pi * t)
+    noisy = clean + 0.02 * rng.standard_normal(t.size)
+    smoothed = smooth_columns({"/j/q/value": noisy}, frames=15)["/j/q/value"]
+    assert smoothed.shape == t.shape
+    assert np.abs(smoothed - clean)[20:-20].max() < 0.012
+    assert np.abs(noisy - clean).max() > 0.04
+    # edge padding keeps the endpoints near the signal (no shrink to zero)
+    assert abs(smoothed[0] - clean[0]) < 0.03
+    assert abs(smoothed[-1] - clean[-1]) < 0.03
+
+
+def test_smooth_columns_identity_and_validation() -> None:
+    q = np.arange(10.0)
+    assert smooth_columns({"a": q}, frames=1)["a"].tolist() == q.tolist()
+    with pytest.raises((ValueError, ContractViolationError)):
+        smooth_columns({"a": q}, frames=0)
+    with pytest.raises((ValueError, ContractViolationError)):
+        smooth_columns({"a": q}, frames=4)  # must be odd
 
 
 # ---------------------------------------------------------------- sto
