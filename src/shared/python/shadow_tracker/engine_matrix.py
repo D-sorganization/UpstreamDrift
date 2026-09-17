@@ -391,12 +391,12 @@ def profile_shadow_tracker_performance(
 # ---------------------------------------------------------------------------
 
 
-def _audit_individual_gates(
+def _audit_synthetic_gates(
     candidate: CandidateResult,
     observations: Sequence[FrameObservation],
     profile: GateProfile,
 ) -> list[GateStatus]:
-    """Audit individual gate criteria G0 through G7."""
+    """Audit synthetic and reference gates G0 through G3."""
     statuses: list[GateStatus] = []
 
     # G0: Input Integrity
@@ -464,6 +464,16 @@ def _audit_individual_gates(
             ),
         )
     )
+    return statuses
+
+
+def _audit_operational_gates(
+    candidate: CandidateResult,
+    observations: Sequence[FrameObservation],
+    profile: GateProfile,
+) -> list[GateStatus]:
+    """Audit operational, dynamics, and reproduction gates G4 through G7."""
+    statuses: list[GateStatus] = []
 
     # G4: Dynamics Replay
     audit = candidate.replay_audit
@@ -545,8 +555,18 @@ def _audit_individual_gates(
             ),
         )
     )
-
     return statuses
+
+
+def _audit_individual_gates(
+    candidate: CandidateResult,
+    observations: Sequence[FrameObservation],
+    profile: GateProfile,
+) -> list[GateStatus]:
+    """Audit individual gate criteria G0 through G7."""
+    return _audit_synthetic_gates(
+        candidate, observations, profile
+    ) + _audit_operational_gates(candidate, observations, profile)
 
 
 def audit_full_release_gates(
