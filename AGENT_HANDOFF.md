@@ -1,17 +1,71 @@
 # Simscape Tour-Average Fit Continuation
 
+## Polynomial Full-Body Dynamics Boundary (#10265)
+
+The integration retains global degree-six Bernstein efforts for every non-root
+coordinate. World-root names are derived and checked; their efforts remain
+zero. The RK4 boundary differentiates all stages and substeps of the corrected
+native plant. Outputs are owned/read-only and expose contact branch validity.
+This is a dynamics prerequisite, not a completed Crocoddyl optimizer. Next:
+coefficient-lift action assembly, objective contracts and independent replay.
+
+## Qualified Motion Integration (#10254)
+
+- **Dispatch:** [Worker Turnover](docs/plans/qualified_motion_integration/TURNOVER.md)
+  and [Pink Packets](docs/plans/qualified_motion_integration/PINK_TURNOVER.md).
+  Post-storage runtime probes pass; full-body actions are in progress. Pink
+  production wiring still requires task translation, trajectory timing and
+  product integration. #10250/#10251 are closed; #10271 tracks receipt integrity.
+
+- **Read First:** [Integration Boundaries and Delegation Plan](docs/plans/qualified_motion_integration/README.md).
+- **First Numerical Boundary (#10255):** Full-body Pinocchio derivatives now
+  include the state dependence of shared ground forces and contact Jacobians.
+  Real Pinocchio 3.8 tests reproduce the previous active-contact failure and
+  pass after the chain-rule correction. This is derivative qualification,
+  not a full-swing fitting or contact-model acceptance claim.
+- **Optional Viewer Adapters (#10256, #10254):** Gepetto and MeshCat wrappers retain their native visualizers and dispatch
+  validated configurations, including neutral pose. They distinguish visual and
+  collision geometry, own unique scene roots, and preserve shared servers/scenes
+  during cleanup. MeshCat's owned server is explicitly managed. Adapter tests
+  and a real MeshCat runtime smoke check exist; a live Gepetto CORBA/server
+  qualification and production replay selection remain outstanding. This change
+  does not certify any motion-fit result or replace the native viewer.
+- **Optional Motion Runtime (#10262):** The numerical runtime has a conda-forge version manifest and Linux x86-64-v3
+  explicit package lock. `scripts/ci/check_motion_runtime.py` isolates native
+  imports and solver probes and emits a fail-closed capability receipt with
+  versions, hashes, bounded process diagnostics and source-freshness status.
+  The qualified sample stack is Pinocchio 4.1, Pink 4.4 and Crocoddyl 3.2.1.
+  This does not qualify full-body fitting, physics, or Gepetto rendering.
+  Continue model and product integration under #10254.
+- **Pink Adapter Contract (#10257, #10254):** Both Pink entry points share one validated solve step. They preserve geometry,
+  forward explicit hard constraints/limits, refresh cached kinematics and
+  integrate tangent velocity exactly once. Solver failures propagate with
+  context; unchanged poses are no longer returned as a success fallback.
+  The adapter has real equality, infeasibility, cache and free-flyer tests.
+  Full-body marker/stance/weld task assembly and production selection remain
+  outstanding. The reproducible combined runtime is tracked by #10262.
+- **Bounded Work:** #10256 viewer lifecycle and #10257 Pink state/constraint
+  adapters are separate implementation slices; review actual tests and CI
+  before treating either as delivered.
+- **Finite Weld Error (#10260):** The pose linearization now applies the SE(3)
+  log Jacobian away from closure. The trajectory acceleration partial retains
+  the raw constraint velocity Jacobian. Real directional checks cover closed
+  and displaced grips; these do not qualify a fitted full-body trajectory.
+- **Preserve:** #10250 owns anthropometric evidence regeneration; #10108 and
+  #10159 retain their model-calibration and MJX reconciliation scope. Keep the
+  full #10162 physical gates and MATLAB R2025b requirement.
+
 ## Shadow Tracker Current Turnover (#10122)
 
 - **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)
   and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
-- **Baseline:** `33ffde23f`; earlier provider/immutability defects are repaired.
-  Real decoding, reference disks and regenerated evidence are partial progress.
-- **Next:** #10231 source/physical-time integrity and incremental decode; #10233
-  revision integrity/persistence; #10232 articulated geometry and clipped rendering.
-- **Product:** No Shadow Tracker launcher application or complete fitter yet.
-  Ship an honest evidence-review journey while physical qualification proceeds.
-- **Completion:** Keep all ST-07–ST-12 fitting, uncertainty, real/archive, UI/export
-  and release gates. Review delivery #10230 does not qualify the product.
+- **Baseline:** `0ec64e45f`; timing #10253 merged. Restart repair marks estimated
+  timestamps inexact; 195 focused/model-probe tests pass.
+- **Next:** Renderer owner finishes #10264 import failure and merge conflicts;
+  independent agents claim #10233 revision persistence. #10273 tracks remaining
+  native PTS and stored clock-authority gaps. Preserve existing renderer edits.
+- **Product Milestone:** Import, manual mask review, save/reopen in the launcher
+  under #10134; no claim of qualified fitting or completed ST-07–ST-12.
 
 ## Current State (2026-09-15, Supersedes the Sections Below)
 

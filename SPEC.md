@@ -1,5 +1,320 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Modern and Historical Footage Qualification Workflows (#10133)
+
+Qualifies reference modern footage and historical pilot archive workflows with lineage deduplication, rights auditing, and multi-camera synchronization validation:
+- **Lineage Deduplication and Split Isolation (`src/shared/python/shadow_tracker/footage_workflows.py`)**:
+  - `FilmLineage`: Encapsulates canonical film metadata, recording source, recording year, golfer identity, and associated re-encoded `known_asset_ids`.
+  - `validate_split_isolation`: Detects film and asset leakage across dataset splits, raising `ValueError` if any film or re-encoded asset spans both train and holdout splits.
+  - `DeduplicationSplitter`: Deterministically partitions collections of film lineages into train and holdout sets while guaranteeing split isolation.
+- **Rights, Lineage, and Attribution Auditing**:
+  - `RightsAuditReport`: Slotted frozen structure detailing asset rights clearance, golfer attribution confirmation, and flagged reasons.
+  - `audit_asset_rights`: Audits `SourceAsset` records. Enforces that unreviewed, unknown, or restricted rights (`is_cleared_for_release=False`) and unconfirmed golfer attribution block clearance for public model training or release.
+- **Multi-Camera Physical Synchronization Validation**:
+  - `SyncValidationResult`: Slotted frozen structure recording synchronization validity, maximum drift, overlap duration, and refusal reason.
+  - `validate_multiview_synchronization`: Verifies temporal overlap and clock alignment between multi-camera observation sequences. Returns `is_synchronous=False` with `refusal_reason="non_overlapping_temporal_windows"` if temporal ranges do not intersect, or `refusal_reason="excessive_clock_drift"` if maximum frame drift exceeds the $10$ ms allowable tolerance.
+- **Reference Degradation Harness**:
+  - `DegradationConfig` & `DegradationHarness`: Simulates archive-like visual degradation (spatial downscaling, blur, additive noise, and telecine frame dropping cadence) on high-resolution modern ground truth to test model degradation curves and abstention boundaries.
+- **Historical Pilot Catalog & Accounting**:
+  - `PilotEntry` & `HistoricalPilotCatalog`: Resumable catalog tracking historical pilot runs with clip metadata, suitability grades (`unusable`, `qualitative_only`, `kinematic_candidate`, `qualified`), annotation minutes, and compute seconds.
+  - `compute_pilot_yield`: Computes discovery-to-acceptance yield and aggregate labor and compute costs.
+  - `get_failed_cases_inventory`: Returns all non-qualifying pilot clips to avoid survivorship bias in archival evaluation.
+
+## Constrained IK Trajectory Service and Physical-Time Audits (#10277)
+
+Provides an engine-neutral trajectory inverse kinematics service protocol and engine-local Pink implementation with strict timing invariants and failure semantics:
+- **Shared Protocol and Data Contracts (`src/shared/python/motion_matching/constrained_ik.py`)**:
+  - `ConstrainedIKBackend(Protocol)`: Declares typed multi-frame trajectory solving (`solve_trajectory(request, options) -> IKTrajectoryResult`) and post-smoothing audit (`audit_trajectory(trajectory, request) -> IKTrajectoryResult`).
+  - `IKTrajectoryRequest`: Frozen, immutable specification owning initial state, strictly increasing capture times starting at zero, named 3D marker targets and validity mask arrays, marker labels, canonical model identifier, and optional posture target, stance closure policy, and frame-boundary cancellation token. Immutability guaranteed via read-only array flags.
+  - `IKOptions`: Options controlling step mode (`"physical"` vs `"projection"`), QP solver, iteration budget, damping, residual tolerance, and limit policy.
+  - `FrameRateAudit`: Audits physical joint velocities $\dot{q} = \Delta q / \Delta t$ per frame against velocity limits; verified to scale inversely with physical capture interval $\Delta t = t_f - t_{f-1}$.
+  - `IKTrajectoryResult`: Full trajectory result recording coordinates, per-frame success flags, post-step residuals, rate audits, execution timings, backend identity, and structured failure reasons.
+- **Pink Trajectory Service (`src/engines/physics_engines/pinocchio/python/pink_trajectory.py`)**:
+  - `PinkTrajectoryService`: Implements `ConstrainedIKBackend` backed by `FullBodyPinkTasks`.
+  - Decoupled physical vs projection timing: In physical step mode, executes exactly one integration step per physical frame with $dt_{\text{phys}} = t_f - t_{f-1}$, avoiding compounding or multiplying physical elapsed time or velocity limits by inner iteration counts.
+  - State refresh & clean cache management: Refreshes Pinocchio forward kinematics and frame placements per solve, matching fresh solver instances from arbitrary initial states.
+  - Deterministic dropout handling: When all markers in a frame drop out, reports structured insufficient-data failure without corrupting downstream solver state or claiming false posture-only success; recovers deterministically upon marker reappearance.
+  - Failure & cancellation semantics: Failed or infeasible QP steps are explicitly marked with `frame_success[f] = False` and structured failure reasons. Cancellation at frame boundaries preserves the complete time grid with subsequent frames marked unattempted and `passed = False`.
+
+## Optional Viewer Replay and Lifecycle (#10256)
+
+Gepetto and MeshCat adapters persist native Pinocchio visualizers, pass distinct
+visual/collision models, and forward finite `(model.nq,)` configurations to
+actual display calls. `None` means Pinocchio neutral pose. Unloaded/closed
+instances fail explicitly. Reload, failed load and idempotent close clean
+only adapter-owned scene nodes; external servers remain running. MeshCat
+supports a self-managed server with explicit browser suppression. Live
+Gepetto qualification and product-level replay selection are still separate
+requirements under #10254.
+
+## Shadow Tracker Ambiguity Quantification and Evidence Gates (#10132)
+
+Provides scientific evaluation, visual ambiguity quantification, and deterministic evidence gates for reconstructed motion sequences:
+- **Visual Ambiguity Quantification (`src/shared/python/shadow_tracker/evaluation.py`)**:
+  - `detect_silhouette_ambiguity`: Evaluates whether distinct 3D poses/trajectories produce indistinguishable 2D silhouettes from available camera views, reporting maximum 3D pose divergence alongside negligible silhouette IoU difference to flag multi-hypothesis ambiguity.
+  - `AmbiguityReport`: Slotted frozen structure recording ambiguity status, pose divergence, silhouette difference, and candidate IDs.
+- **Deterministic Evidence Gating & Abstention**:
+  - `classify_evidence_quality`: Evaluates candidate results under strict Gate G0-G5 rules. Uncalibrated/inexact timing (`is_timing_exact=False` or `timing_mode="nominal_video"`) strictly blocks SI kinetics qualification, capping quality at `kinematic_only` or `insufficient_evidence`.
+  - Failed physical replay audits (Gate G4) strictly reject `validated_profile` and prevent `CandidateResult` acceptance.
+  - `evaluate_candidate_evidence`: Detects unobserved/missing club evidence; missing club masks yield positive uncertainty/penalty rather than misleading zero error.
+  - Returns structured abstention reasons when evidence thresholds are violated.
+- **Calibrated Uncertainty vs Sensitivity Separation**:
+  - `QuantityConfidence`: Explicitly separates empirical posterior bounds (from held-out Bayesian coverage) from parameter sensitivity ranges (from camera, timing, mass, contact ablations).
+  - Enforces the scientific constraint: optimizer curvature (Hessian) or multistart scatter is never labeled as calibrated confidence (`is_calibrated=False`).
+  - `compute_empirical_coverage`: Evaluates empirical coverage against nominal confidence levels and tracks average interval width.
+- **Atomic Evaluated Bundle Assembly**:
+  - `create_evaluated_result_bundle`: Packages candidate trajectories, audits, quality ratings, and evidence hashes into an immutable, versioned `ResultBundle`.
+
+## Shadow Tracker Control Fitting and Silhouette Optimization (#10131)
+
+Optimizes skeletal control parameters against calibrated multi-view silhouette sequences with strict physical gate enforcement:
+- **Optimization Configuration & Loss Decomposition (`src/shared/python/shadow_tracker/fitting.py`)**:
+  - `OptimizationConfig`: Validates execution time budgets, iteration limits, relative tolerances, body/club silhouette weights, Frobenius-norm torque regularization weights, and physical penalty scaling.
+  - `ObjectiveBreakdown`: Slotted frozen structure detailing silhouette IoU loss, body IoU, club IoU, torque regularization penalty, physics constraint penalty, and Gate G4 physical acceptance flag.
+- **Physical Priority Over Silhouette Fidelity (Gate G4)**:
+  - Enforces physical feasibility priority: physically non-viable candidates receive substantial penalty terms (`physics_penalty = weight * (1.0 + grip_error)`), guaranteeing that unconstrained kinematic silhouettes cannot override physics violations.
+  - Verification with `compare_equal_budget_baselines`: Kinematic optimization produces lower silhouette loss but fails Gate G4 replay verification, whereas forward dynamics optimization produces valid physical trajectories.
+- **Continuous Budget Management & Cancellation**:
+  - Monitors wall-clock execution time and iteration counts; returns `status="budget_exhausted"` upon budget depletion.
+  - Periodically invokes caller cancellation callbacks; returns `status="cancelled"` cleanly on user interrupt without corrupting state.
+- **Fresh Replay Audit & Checkpoints**:
+  - `_score_fresh_replay`: Performs an independent forward rollout replay audit from the best parameter set, preventing optimizer cache contamination.
+  - `OptimizationCheckpoint`: Records search snapshots at configured checkpoint intervals for optimization auditing and convergence visualization.
+
+## Shadow Tracker Full-Body Forward Rollout and Auditable Replay (#10130)
+
+Connects real continuous full-body physics forward simulation to Shadow Tracker observation fitting with deterministic replay verification:
+- **Full-Body Forward Model (`src/shared/python/shadow_tracker/forward_model.py`)**: Implements the `ForwardModel` protocol from `contracts.py` backed by `simulate_full_body_forward`. Declares accurate `ModelCapabilities` (`state_dim=42`, `control_dim=0`, `has_forward_dynamics=True`, `requires_ground_plane=True`).
+- **Canonical-v2 to Native State Space Bridge**:
+  - `native_to_canonical_full_body`: Converts native 41-coordinate state vectors (3 root translation + 3 intrinsic Euler angles + 35 internal joints) and velocities to canonical-v2 coordinates ($q \in \mathbb{R}^{42}$ with normalized quaternion root, $v \in \mathbb{R}^{41}$ with body-frame angular velocity).
+  - `canonical_to_native_full_body`: Inverts canonical-v2 back to native coordinates, converting root quaternions back to Euler angles and body angular velocities back to Euler rates via $J_{body}^{-1}(\text{rpy})$ with round-trip error $< 10^{-12}$.
+- **Closed-Form SE(3) Euler Rate Jacobian**:
+  - Analytical body Jacobian $J_{body}(\text{rpy})$ relates Euler rates $(\dot{\phi}, \dot{\theta}, \dot{\psi})$ to body angular velocity $\omega_{body}$ matching intrinsic $R = R_x(\phi) R_y(\theta) R_z(\psi)$ rotation order.
+  - Closed-form algebraic inverse $J_{body}^{-1}(\text{rpy})$ evaluated with determinant $\cos\theta$, raising `ValueError` at gimbal lock pitch ($\theta \approx \pm \pi / 2$).
+- **Decoupled Physics Rollout Boundary (`src/shared/python/motion_matching/full_body_forward_dynamics.py`)**:
+  - `simulate_full_body_forward`: Accepts optional `capture`, `ik_adapter`, and `marker_offsets`, supporting pure forward simulation without optical markers or synthetic dummy captures.
+  - Returns `ForwardRolloutResult` containing optional `shared_metrics`, with `auto_calibrate_ground` and `preserve_ground_calibration` options in `RolloutOptions`.
+- **Gate G4 Replay Audit & Unevidenced Force Detection**:
+  - Validates initial single-hypothesis input during reset.
+  - Verifies deterministic repeat replay matching trajectory state within tight tolerances.
+  - Detects and flags unevidenced non-zero root forces in candidate trajectories (`audit.passed = False`, `audit.evidence_details["passed_gate_g4"] = False`).
+
+## Shadow Tracker Native Timestamp Authority and Observation Provenance (#10273)
+
+Preserves native container timestamp authority and decoder provenance across ingestion and observation records:
+- **Container PTS Extraction (`extract_iso_bmff_pts`)**: Standard library ISO-BMFF box parser reading timescale from `mdhd` and exact presentation timestamps from `stts` and optional composition offsets `ctts`. Detects genuine variable frame rate (VFR) containers without external dependencies.
+- **OpenCvVideoDecoder Timing Authority**: Automatically discovers container presentation timestamps for variable frame rate media, configuring `timing_mode="container_pts"`, `is_timing_exact=True`, and `clock_evidence="container_pts_metadata"`. Explicit caller `pts_ticks` require an explicit `timebase` and establish `timing_mode="authoritative"`, `is_timing_exact=True`, and `clock_evidence="caller_authoritative_pts"`. Missing, corrupt, or uniform CFR containers without authoritative per-sample tables safely default to `timing_mode="estimated_cfr"`, `is_timing_exact=False`, and `clock_evidence="estimated_nominal_fps"`.
+- **Contract Provenance & Migration**: `FrameIdentity` and `FrameObservation` contracts preserve `timing_mode`, `is_timing_exact`, `clock_evidence`, `decoder_name`, `decoder_version`, and `pixel_format` across serialization and deserialization, safely migrating legacy 1.0.0 payloads without data loss.
+## Shadow Tracker Manual Mask Revision Persistence and Lineage Protection (#10233)
+
+Protects manual mask revision identity and establishes durable, atomic mask history and lineage:
+- **Immutable Revision Identity & Idempotent Re-Registration (`src/shared/python/shadow_tracker/segmentation.py`)**:
+  - `ManualMaskProvider.register_mask`: Enforces conflict rejection (`ValueError`) when attempting to register a differing `MaskFrame` under an existing `revision_id`. Permits strictly identical re-registration idempotently without duplicating history entries.
+  - Lineage and Parent Ownership: Validates that `parent_revision_id` exists in the provider and belongs to the exact same namespaced frame scope before any internal mutations occur.
+  - Transactional Atomicity: All validations precede internal dictionary mutations; failed registration leaves all indices and histories unmodified.
+  - Namespaced Multi-Camera Identity: Indexes and queries masks and revision histories across full `(asset_id, shot_id, swing_id, camera_id, frame_id)` scope tuples, preventing camera-id collisions across multi-camera captures while disambiguating queries by `camera_id`.
+  - Atomic Persistence: `save(path)` and `ManualMaskProvider.load(path)` provide atomic JSON serialization and deserialization with full lineage preservation and validation upon reload.
+  - Downstream Cache Invalidation: `get_cache_key(...)` returns deterministic `f"{mask.revision_id}:{mask.observation_hash}"` tokens for invalidating downstream optimization and rasterization caches upon manual correction.
+
+## Pipeline Report Calibration Offsets Boundary Protection (#10275)
+
+Repairs Law of Demeter boundary in motion matching reference report generation:
+- `src/shared/python/motion_matching/pipeline/reference.py`: In `_build_calibration_stage_report`, accesses `calibration2` offsets through a local boundary variable `source_offsets` rather than deep dot-chained expressions (`inputs.calibration2.offsets.items`), preserving fallback precedence (`inputs.offsets` -> `cal2.offsets` -> `inputs.attachments`) with zero new LoD violations (`scripts/ci/check_lod.py`).
+
+## Hip Zero-Twist Calibration and Unwidened Leg Bounds (HO-8 #10108, MM-6, #10162)
+
+Calibrates the hip coordinate zero-twist angle from optical motion capture data and unwidens lower-limb joint range-of-motion bounds:
+- **Hip Zero-Twist Angle Calibration (`src/shared/python/motion_matching/hip_calibration.py`)**:
+  - `HipRotationZero`: Slotted immutable dataclass (`offset_r_deg`, `offset_l_deg`, properties `r`, `l`, sequence/dict interfaces, and `to_dict()`).
+  - `hip_rotation_zero(points, valid, labels, waist_offsets, calibration)`: Functional hip rotation zero-twist calibration. Determines the functional flexion plane normal from capture markers (using medial knee markers `RKneeIn`/`LKneeIn` when available, or shank-thigh cross products fallback using ankle markers `RAnkleOut`/`LAnkleOut` and knee markers `RKneeOut`/`LKneeOut`).
+  - Mathematical zero-twist orientation: In pelvis anatomical frame ($+X$ forward, $+Y$ up, $+Z$ right), for right leg with anatomical axis pointing rightward ($+Z$), $\theta_r = \operatorname{arctan2}(v_{\text{anat}}[0], v_{\text{anat}}[2])$. For left leg pointing leftward ($-Z$), $\theta_l = \operatorname{arctan2}(-v_{\text{anat}}[0], -v_{\text{anat}}[2])$.
+  - `apply_hip_calibration`: Accepts `zero_twist_deg: HipRotationZero | Mapping[str, float] | None = None`. Post-multiplies `parent_to_base` by $R_z(\theta)$ to rotate the hip joint zero without altering joint center position. Records provenance and `document["subject"]["hip_zero_twist_deg"]`.
+- **Pipeline Integration and Receipt Schema**:
+  - `src/shared/python/motion_matching/pipeline/constants.py`: Sets `BOUND_WIDENING: float = 1.0` (unwidened, 1.0x human physiological range).
+  - `src/shared/python/motion_matching/pipeline/receipt_components.py`: Adds `hip_zero_twist_deg: dict[str, float] | None` to `HipCalibrationReceipt`.
+  - `docs/development/full_body_models/evidence/ground_support/run_ground_support.py`: Computes zero-twist offsets via `hip_rotation_zero` and passes them to `apply_hip_calibration` and the hip calibration report.
+  - `src/engines/physics_engines/mujoco/python/full_body_simulation.py`: Fallback to least-squares solver (`np.linalg.lstsq`) in `affine_dynamics` when KKT matrix is singular under boundary conditions.
+- **Evidence Verification**:
+  - Regenerated ground-support receipts with `BOUND_WIDENING = 1.0`: `anthro_driver`, `anthro_driver_shoot`, `anthro_iron`, and `anthro_iron_shoot`.
+  - Verified 0 lower-limb `range_of_motion_flags` on the IK reference for both captures (`driver` and `iron`).
+  - Cross-engine setup parity (`verify_setup_parity.py`) re-verified across MuJoCo, Drake, and Pinocchio.
+## Pink Full-Body Task and Constraint Translation (#10276, #10304)
+
+`FullBodyPinkTasks` provides an engine-local typed facade (`build`, `audit`)
+translating canonical motion-matching marker attachments, six-dimensional grip
+closure, and joint bounds/locks into Pink tasks and configuration limits.
+Canonical marker targets are mapped to `FrameTask` instances with dropout masks
+and target finiteness validation. Stance and grip loop closure are enforced via
+`RelativeFrameTask` (identity SE(3) transform) while rejecting configurations
+near the rotation-$\pi$ principal log branch cut ($10^{-7}\text{ rad}$). Coordinate
+bounds are explicitly converted from degrees to radians, and locked coordinates
+are constrained via `LockedCoordinateTask`. The facade validates inputs, supports
+floating-base kinematics ($n_q \neq n_v$), and evaluates post-solve residuals
+and bound violations.
+
+## Pink Adapter State and Constraint Contract (#10257)
+
+`PinkSolver.solve` and `PINKBackend.solve_ik` use one validated implementation
+with explicit configuration (`nq`) and tangent velocity (`nv`) dimensions.
+They preserve positional arguments and add keyword-only hard task constraints
+and limits. Omitted options preserve Pink defaults; unsupported requested
+capabilities fail explicitly. Each solve refreshes kinematics from its input,
+performs one `pin.integrate(q, velocity * dt)`, and updates the cache afterward.
+Collision geometry remains available to Pink. Invalid inputs, nonfinite
+outputs and solver infeasibility propagate as errors. Optional native loading
+handles missing/broken imports without pretending the capability exists.
+
+## Optional Motion Runtime Qualification (#10262)
+
+The optional numerical environment is defined by a portable version manifest
+and exact Linux conda-forge package lock. Native import and solver probes run
+in isolated interpreters. Qualification fails for missing required components,
+failed processes, timeouts, malformed results, nonfinite equality outputs or
+unmet hard-constraint behavior. Receipts identify runtime versions, source
+hashes, interpreter, numerical tolerances and source-freshness status. This
+capability check does not confer full-body model or physical acceptance.
+
+## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
+
+Completes the modularization of the ground support execution pipeline by moving remaining orchestration stages and CLI utilities from `run_ground_support.py` into the reusable `src.shared.python.motion_matching.pipeline` package, reducing `run_ground_support.py` from 779 lines to 374 lines (satisfying the <400 line architecture budget):
+- Reusable Pipeline Stage Additions (`src/shared/python/motion_matching/pipeline/`):
+  - `address.py`: Exposes `AddressStageInputs`, `AddressStageResult`, `solve_address_stage`, `calibrated_address_summary`, `prepare_hip_spec`, `search_segment_scales`, and `HipCalibrationOptions`.
+  - `reference.py`: Exposes `IKReportInputs` (with support for custom offsets) and `build_ik_report`.
+  - `dynamics.py`: Exposes `DynamicsReportInputs` and `build_dynamics_report`.
+  - `receipt.py`: Exposes `log_pipeline_summary` for structured console reporting.
+  - `__init__.py`: Re-exports all newly packaged stage inputs, results, builders, and options.
+- CLI & Evidence Decoupling:
+  - `run_ground_support.py` refactored into a thin CLI driver (374 lines) delegating completely to the pipeline package.
+  - Evidence scripts (`scan_geometry.py`, `downswing_experiment.py`, `export_mjx_package.py`) migrated to import directly from `src.shared.python.motion_matching.pipeline`.
+  - Zero imports from `run_ground_support` remain in the codebase (`grep -rn "from run_ground_support import" docs src` is 0).
+- Bitwise Receipt & Simulation Parity:
+  - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
+
+## Crocoddyl Polynomial Action Model (#10269)
+
+Integrates global degree-six polynomial actuation into a Crocoddyl `ActionModelAbstract`
+for full-body motion matching. The action represents continuous RK4 steps over fixed
+substep intervals, computing analytical derivatives `Fx` and `Fu` through the exact
+chain rule on discrete full-body sensitivity tensors. Supports box-constrained optimization
+over coefficient increments, unactuated root mapping, active and bilateral contact states,
+and independent replay diagnostics.
+
+## Global Polynomial Full-Body Step (#10265)
+
+Full-body control parameters are one row-major seven-coefficient Bernstein
+curve per non-root coordinate over a declared physical horizon. Root effort
+is identically zero; export produces canonical ascending physical-second
+power coefficients. Native RK4 stepping validates state/control inventories
+and differentiates every internal stage and substep. Discrete state and
+coefficient Jacobians include shared contact derivatives, with nonsmooth
+contact branches reported explicitly. No state resets or pose projection are
+part of this open-loop boundary.
+
+## Finite Weld Pose Linearization (#10260)
+
+The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
+`Jlog6(c1Mc2.inverse()) @ J_constraint`, in caller coordinate order.
+The velocity and acceleration constraints continue using `J_constraint`;
+their trajectory acceleration partial must not substitute the finite pose
+Jacobian. Real-engine tests verify off-closure directions and storage ownership.
+
+## Contact-Aware Full-Body Derivatives (#10255, #10254)
+
+The shared sphere-contact law exposes world-force derivatives with respect to
+center and velocity, including the zero-slip limit and explicit nonsmooth
+activation/clipping status. `FullBodyPinocchioModel.acceleration_derivatives`
+composes these through constrained dynamics and the changing contact Jacobian.
+`contact_effort_derivatives` returns detached read-only matrices in the caller's
+declared coordinate order without mutating the constrained-dynamics cache.
+The force law, geometry, controls and historical evidence remain unchanged.
+Real-engine directional tests cover active/no contact, moving joints, reordered
+coordinates and cache isolation. This boundary is a prerequisite for full-body
+Crocoddyl; it does not qualify a fitted swing or change solver defaults.
+ 
+## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
+
+Completes the modularization of the ground support execution pipeline by moving remaining orchestration stages and CLI utilities from `run_ground_support.py` into the reusable `src.shared.python.motion_matching.pipeline` package, reducing `run_ground_support.py` from 779 lines to 374 lines (satisfying the <400 line architecture budget):
+- Reusable Pipeline Stage Additions (`src/shared/python/motion_matching/pipeline/`):
+  - `address.py`: Exposes `AddressStageInputs`, `AddressStageResult`, `solve_address_stage`, `calibrated_address_summary`, `prepare_hip_spec`, `search_segment_scales`, and `HipCalibrationOptions`.
+  - `reference.py`: Exposes `IKReportInputs` (with support for custom offsets) and `build_ik_report`.
+  - `dynamics.py`: Exposes `DynamicsReportInputs` and `build_dynamics_report`.
+  - `receipt.py`: Exposes `log_pipeline_summary` for structured console reporting.
+  - `__init__.py`: Re-exports all newly packaged stage inputs, results, builders, and options.
+- CLI & Evidence Decoupling:
+  - `run_ground_support.py` refactored into a thin CLI driver (374 lines) delegating completely to the pipeline package.
+  - Evidence scripts (`scan_geometry.py`, `downswing_experiment.py`, `export_mjx_package.py`) migrated to import directly from `src.shared.python.motion_matching.pipeline`.
+  - Zero imports from `run_ground_support` remain in the codebase (`grep -rn "from run_ground_support import" docs src` is 0).
+- Bitwise Receipt & Simulation Parity:
+  - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
+
+## Shadow Tracker Articulated Golfer Silhouette Rendering and Clipping (#10232)
+
+Binds silhouette projection to articulated kinematic model state and correctly clips boundary geometry:
+- `ArticulatedSilhouetteRenderer`:
+  - Concrete `SilhouetteRenderer` protocol implementation that evaluates forward kinematics from standard 27-element canonical articulated state vectors (`TranslationStartPositionX/Y/Z` + 24 `REFERENCE_GOLFER_FIELDS`).
+  - Renders 3D capsule-swept segments between connected joints for golfer body segments (trunk, head, shoulders, arms, forearms, hips, thighs, shanks) and club assembly (shaft, clubhead) into distinct, decoupled binary silhouette masks (`body_mask` and `club_mask`).
+  - Responds directly to kinematic variation: body mask area and distribution change under joint angle articulation (e.g. torso flexion, lead knee extension), and club mask separates and pivots under wrist radial/flexion rotations.
+- Off-Screen & Boundary Clipping:
+  - Robustly rasterizes projection ellipses whose 3D joint centers project outside camera sensor bounds ($u < 0, u \ge W, v < 0, v \ge H$) without discarding visible portions inside image margins $[0, W) \times [0, H)$.
+  - Supports anamorphic projection ($f_x \neq f_y$) by computing semi-major and semi-minor radii along respective pixel axes.
+- Strict State and Dimension Parity:
+  - Enforces matching dimensions between `RenderRequest.image_size_px` and `PinholeCameraModel.effective_image_size` (including `crop_box` dimensions).
+  - Explicitly rejects incompatible or unbound state conventions with descriptive `ValueError`.
+
+## Anthropometric Document Rebuild and Freshness Gate (HO-11 #10250, #10162)
+
+Rebuilds full-body anthropometric model specifications and ground-support receipts after the HO-9 (#10249) de Leva 1996 shank parameter corrections, enforcing document freshness via continuous integration:
+- Document Freshness Gate (`tests/unit/motion_matching/test_document_freshness.py`):
+  - Contract and unit tests verify that committed anthropometric documents (`full_body_spec_anthro_driver.json`, `full_body_spec_anthro_iron7.json`) include an authoritative `anthropometry` block with all male segments from `DE_LEVA_MALE`.
+  - Enforces matching SHA-256 table hash against `anthropometry.de_leva_table_sha256()` (`7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1`).
+  - Rejects missing table hash, stale table hash, missing segments, stale shank CoM fraction (e.g. pre-HO-9 `0.4459`), and stale shank radii with strict design-by-contract exceptions (`TypeError`, `ValueError`).
+- Schema & Receipt Validation (`src/shared/python/motion_matching/pipeline/`):
+  - `anthropometry.py`: Exposes `de_leva_table_dict()` and `de_leva_table_sha256()`.
+  - `receipt_schema.py`: Models optional `de_leva_table_sha256: str | None` and validates ground-support receipts; regenerated `RECEIPTS.md`.
+  - `build_anthropometric_spec.py`: Embeds top-level and subject-level `de_leva_table_sha256` and segment parameter dictionary into generated specifications.
+- Ground-Support Execution and Parity:
+  - Re-executed ground-support captures (`anthro_driver`, `anthro_iron`) under identical pipeline flags (`--skip-hip-calibration --static-seeds`).
+  - Controlled experiment confirms 0.000 mm shift between unedited `HEAD` spec and rebuilt spec across both driver and iron kinematics and forward dynamics.
+
+## MJX Environment Setup, Pinned Dependencies, and Contact-Law Parity Tests (HO-3 #10157, #10162)
+
+Establishes cross-platform environment automation and JAX/MJX-gated unit tests for differentiable trajectory optimization:
+- Pinned Environment Specifications (`scripts/config/mjx_env_pins.json`):
+  - Defines pinned dependency versions (`jax[cpu]==0.11.1`, `mujoco-mjx==3.13.0`, `mujoco==3.13.0`, `defusedxml==0.7.1`, `numpy==2.5.3`, `scipy==1.18.1`, `pytest==9.1.1`, `matplotlib==3.11.2`) to protect against breaking changes in JAX / MuJoCo releases.
+  - Setup scripts: Windows PowerShell (`scripts/setup_mjx_env.ps1`) and POSIX shell (`scripts/setup_mjx_env.sh`) parse JSON pins and configure isolated `$HOME/.venv-mjx` environments.
+- Pytest Configuration (`pyproject.toml`):
+  - Declares `requires_jax` marker alongside existing engine markers (`requires_gl`, `requires_pinocchio`, `requires_drake`).
+- Factored Pure Functions (`docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`):
+  - `contact_force_jax(centre, velocity, radius, params, ground_normal, ground_height_m)`: Evaluates Hunt-Crossley / Coulomb contact law in JAX with analytical parity.
+  - `weld_wrench_jax(xpos_a, xmat_a, cvel_a, xpos_b, xmat_b, cvel_b, ...)`: Evaluates spatial weld loop closure wrenches maintaining equal-and-opposite reaction force balance.
+  - `compute_knot_mask(t_knots, horizon_s, freeze_tail)`: Generates optimization parameter masks freezing coordinates beyond horizon.
+  - Avoids forcing 32-bit floats during test module import by scoping `jax_enable_x64=False` to standalone `main()` execution.
+- Gated Test Suite (`tests/unit/motion_matching/test_mjx_optimisation.py`):
+  - Tests skip cleanly with exit code 0 when JAX or MJX are absent in root CI environments.
+  - Verifies partition of unity and knot counts on B-spline basis.
+  - Verifies tail horizon coordinate freezing.
+  - Validates contact force parity against canonical `sphere_ground_contact` law to $< 1.02 \times 10^{-7}\text{ N} < 10^{-6}\text{ N}$ across 200 random physical states.
+  - Proves spatial wrench equilibrium and zero wrench at coincidence for dual-grip weld closures.
+  - Validates analytic static equilibrium preload on lowest contact sphere ($-mg / (k n_{\text{spheres}})$).
+  - Validates gradient finiteness ($\nabla \text{cost} \in \mathbb{R}$) on 12-frame truncated optimization with rest posture norms and NaN target filtering.
+
+## Shadow Tracker Source PTS Preservation and Unknown Physical Time (#10231)
+
+Preserves authoritative source timestamps and timing metadata across bounded decoding without synthesizing wall-clock evidence or hoarding frames:
+- Authoritative Source PTS & Reduced Timebase: `VideoDecoderAdapter` requires `timebase_numerator`, `timebase_denominator`, `is_timing_exact`, `timing_mode`, `decoder_name`, and `pixel_format`. `OpenCvVideoDecoder` extracts and reduces exact integer rational timebases (`timebase_numerator / timebase_denominator`), preserves authentic presentation timestamps (`pts_ticks`), and accommodates variable frame rates and negative start PTS offsets without constant-frame-rate assumptions.
+- Unknown Physical Time by Default: `decode_video_frames` defaults to `physical_time_s=None` with reason `"unknown physical time without evidenced clock mapping"`. Explicit SI physical timestamps require verified, evidenced clock mappings via `physical_time_s_fn`.
+- Incremental Bounded Decoding & Cooperative Cancellation: `OpenCvVideoDecoder` eliminates full-video memory buffering during initialization, probing at most one frame for container validity. Stream decoding via `stream_frames(limits)` processes frames on demand with cooperative cancellation checks (`is_cancelled`) and strictly bounded memory, releasing video capture file handles under all exit paths.
+- Provenance-Aware Frame Hashing: Frame content hashes incorporate decoder name and pixel format (`f"{decoder_name}:{pixel_format}:..."`) alongside raw buffer content to ensure tamper-evident reproducibility across differing decoder backends.
+
+## De Leva Male Anthropometry Table Verification (HO-9 #10111, #10162)
+
+Verifies the male body segment parameters in `src/shared/python/motion_matching/anthropometry.py` (`DE_LEVA_MALE`) against Table 4 of de Leva, P. (1996), "Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters", *Journal of Biomechanics*, 29(9), 1223-1230:
+- Segment Parameters Asserted: Pinning unit test in `tests/unit/motion_matching/test_de_leva_table.py` asserts segment length, mass percentage, center-of-mass percentage from proximal joint center, and sagittal, transverse, and longitudinal principal radii of gyration percentages against published literature values for all 11 male segments (`head`, `trunk`, `upper_trunk`, `middle_trunk`, `lower_trunk`, `upper_arm`, `forearm`, `hand`, `thigh`, `shank`, `foot`).
+- Shank Joint-Center Discrepancy Remediated: Corrects the male shank parameters in `anthropometry.py` to match de Leva (1996) joint-center definitions (knee joint center to ankle joint center):
+  - `com_fraction`: updated from `0.4459` (unadjusted Zatsiorsky-Seluyanov 1985 bony-landmark value) to `0.4395` (de Leva 1996 joint-center adjustment).
+  - `radii`: updated from `(0.255, 0.249, 0.103)` to `(0.251, 0.246, 0.102)`.
+- Verification Evidence: Structured receipt committed to `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json` recording line-by-line verification, reference subject constants (height 1.741 m, mass 73.0 kg), and joint-center endpoint boundaries.
+
 ## Motion Matching Launcher Tile Pipeline Stages and Multi-Tab Execution (HO-4 #10158, #10162)
 
 Exposes every stage of the full-body motion matching pipeline through the desktop launcher tile with multi-tab configuration, process lifecycle management, and strict Law of Demeter separation:
@@ -5176,7 +5491,17 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-16 | n/a | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` in `src/engines/physics_engines/mujoco/python/full_body_markers.py` to optimize execution time while avoiding intermediate allocations. (spec-exempt: micro-optimization) |
+| 2026-09-16 | #10244 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` in `src/engines/physics_engines/mujoco/python/full_body_markers.py` to optimize execution time while avoiding intermediate allocations. (spec-exempt: micro-optimization) |
+| 2026-09-17 | #10310 | Implement ConstrainedIKBackend protocol, physical-time rate audits, and PinkTrajectoryService with decoupled timing and structured failure semantics (#10277). |
+| 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
+| 2026-09-16 | #10268 | Add reproducible optional motion runtime and isolated fail-closed capability receipts. |
+| 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
+| 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
+| 2026-09-16 | #10270 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |
+| 2026-09-16 | #10263 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
+| 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
+| 2026-09-16 | #10274 | Correct Shadow Tracker estimated-timing capability and refresh restart guidance for renderer, mask persistence and native timestamp evidence. |
+| 2026-09-16 | #10232 | Bind silhouette rendering to articulated model state and clip visible geometry across camera boundaries. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
@@ -6835,4 +7160,3 @@ The general optimal-control extra retains its separate version range (#9842).
 - Replaced `np.linalg.norm()` with `math.sqrt(np.vdot())` for small 3D vectors in `src/tools/capture_rig/model_frame_source.py` and `src/tools/capture_rig/reference_volumes.py` to bypass linear algebra overhead. (spec-exempt: micro-optimization)
 | 2024-05-20 | #<pr> | Replaced `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` in `src/motion_capture/reconstruct/model/fit2d.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
 - Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for small 1D arrays in `bunker_shot_gui` and `simulation_backends_launcher` for performance improvement. (spec-exempt: micro-optimization)
-
