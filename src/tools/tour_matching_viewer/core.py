@@ -17,7 +17,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
-from src.engines.physics_engines.mujoco.python.native_mjcf import (
+from src.shared.python.motion_matching.rigid_transform import (
     transform as _transform,
 )
 from src.shared.python.motion_matching.full_body_spec import (
@@ -331,7 +331,13 @@ def viewer_frame(
     q_frame = replay.coordinates[frame_idx]
     coord_names = replay.coordinate_names or tuple(spec["coordinate_order"])
     poses = body_poses_from_state(spec, q_frame, coordinate_names=coord_names)
-    segments = skeleton_world_segments(skeleton, poses)
+    # FK exposes follower frames; capsule geometry is expressed in body frames.
+    physical_poses = {"world": poses["world"]}
+    for joint in spec["joints"]:
+        physical_poses[joint["child"]] = poses[joint["child"]] @ np.linalg.inv(
+            _transform(joint["child_to_follower"])
+        )
+    segments = skeleton_world_segments(skeleton, physical_poses)
 
     target_markers = (
         replay.target_markers_m[frame_idx]

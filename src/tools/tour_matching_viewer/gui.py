@@ -7,7 +7,7 @@ against optical mocap target markers.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import matplotlib
 
@@ -15,10 +15,12 @@ matplotlib.use("Agg")  # Default to Agg unless canvas installs backend
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.simulation_store.replay_bundle import load_simscape_bundle
 from src.tools.tour_matching_viewer.core import (
     ReplayData,
     ViewerFrame,
@@ -90,7 +92,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         # 3D Viewport
         self._figure = Figure(figsize=(6, 5), dpi=100)
         self._canvas = FigureCanvasQTAgg(self._figure)
-        self._ax = self._figure.add_subplot(111, projection="3d")
+        self._ax = cast(Axes3D, self._figure.add_subplot(111, projection="3d"))
         self._setup_3d_axes()
         layout.addWidget(self._canvas, stretch=1)
 
@@ -142,8 +144,8 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self,
         replay: ReplayData,
         *,
-        candidate_hash: str = "returned81",
-        engine_name: str = "mujoco",
+        candidate_hash: str = "unknown",
+        engine_name: str = "unknown",
     ) -> None:
         """Populate viewer with pre-loaded replay data."""
         self._replay = replay
@@ -163,8 +165,39 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self.render_frame(0)
 
     def load_file(self, path: Path | str) -> None:
-        """Load a replay file (.npz or .mot)."""
+        """Load a verified Simscape manifest or a legacy replay archive."""
         p = Path(path)
+        if p.suffix.lower() == ".json":
+            bundle = load_simscape_bundle(p)
+            arrays = bundle.arrays
+            replay = ReplayData(
+                time_s=arrays["time_s"],
+                coordinates=arrays["q"],
+                model_markers_m=arrays["markers_m"],
+                target_markers_m=arrays["target_m"],
+                valid_mask=arrays["valid"],
+                coordinate_names=bundle.coordinate_names,
+            )
+            spec = dict(bundle.model)
+            viewer_frame(spec, replay, 0)
+            self._spec = spec
+            if self._is_playing:
+                self.toggle_playback()
+            self.load_replay_data(
+                replay, candidate_hash=bundle.run_id, engine_name="simscape"
+            )
+            effort = "Recorded Torque Available"
+            if not arrays["tau_valid"].all():
+                effort = (
+                    "Recorded Torque Partly Unavailable"
+                    if arrays["tau_valid"].any()
+                    else "Recorded Torque Unavailable"
+                )
+            self._title_label.setText(
+                f"{bundle.run_id} | Simscape | {bundle.status} | "
+                f"{replay.time_s[-1]:.3f} s | {effort}"
+            )
+            return
         if self._spec is None:
             self._load_spec()
         replay = load_replay(p, self._spec)
@@ -275,7 +308,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
             self,
             "Open Tour Matching Replay",
             "",
-            "Replay Files (*.npz *.mot *.sto);;All Files (*)",
+            "Replay Files (*.json *.npz *.mot *.sto);;All Files (*)",
         )
         if path:
             try:
