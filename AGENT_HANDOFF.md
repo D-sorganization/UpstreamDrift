@@ -1,14 +1,26 @@
 # Simscape Tour-Average Fit Continuation
 
-## Optional Viewer Adapters (#10256, #10254)
+## Qualified Motion Integration (#10254)
 
-Gepetto and MeshCat wrappers retain their native visualizers and dispatch
-validated configurations, including neutral pose. They distinguish visual and
-collision geometry, own unique scene roots, and preserve shared servers/scenes
-during cleanup. MeshCat's owned server is explicitly managed. Adapter tests
-and a real MeshCat runtime smoke check exist; a live Gepetto CORBA/server
-qualification and production replay selection remain outstanding. This change
-does not certify any motion-fit result or replace the native viewer.
+- **Read First:** [Integration Boundaries and Delegation Plan](docs/plans/qualified_motion_integration/README.md).
+- **First Numerical Boundary (#10255):** Full-body Pinocchio derivatives now
+  include the state dependence of shared ground forces and contact Jacobians.
+  Real Pinocchio 3.8 tests reproduce the previous active-contact failure and
+  pass after the chain-rule correction. This is derivative qualification,
+  not a full-swing fitting or contact-model acceptance claim.
+- **Optional Viewer Adapters (#10256, #10254):** Gepetto and MeshCat wrappers retain their native visualizers and dispatch
+  validated configurations, including neutral pose. They distinguish visual and
+  collision geometry, own unique scene roots, and preserve shared servers/scenes
+  during cleanup. MeshCat's owned server is explicitly managed. Adapter tests
+  and a real MeshCat runtime smoke check exist; a live Gepetto CORBA/server
+  qualification and production replay selection remain outstanding. This change
+  does not certify any motion-fit result or replace the native viewer.
+- **Bounded Work:** #10256 viewer lifecycle and #10257 Pink state/constraint
+  adapters are separate implementation slices; review actual tests and CI
+  before treating either as delivered.
+- **Preserve:** #10250 owns anthropometric evidence regeneration; #10108 and
+  #10159 retain their model-calibration and MJX reconciliation scope. Keep the
+  full #10162 physical gates and MATLAB R2025b requirement.
 
 ## Shadow Tracker Current Turnover (#10122)
 
