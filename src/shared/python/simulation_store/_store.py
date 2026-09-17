@@ -25,12 +25,15 @@ from __future__ import annotations
 import json
 import logging
 import re
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import platformdirs
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.simulation_store.replay_bundle import load_simscape_bundle
+
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +105,9 @@ class SimulationDataStore:
         store = SimulationDataStore()
         store.save_run("run_001", {"engine": "drake", "score": 0.95})
         data = store.load_run("run_001")
-        print(store.list_runs())  # ["run_001"]
+        runs = store.list_runs()  # ["run_001"]
         store.delete_run("run_001")
+
     """
 
     def __init__(self, base_dir: Path | None = None) -> None:
@@ -215,3 +219,125 @@ class SimulationDataStore:
         """
         _validate_run_id(run_id)
         return _RunFile(self._base_dir, run_id).exists()
+
+    # ------------------------------------------------------------------
+    # Replay Bundle Catalog
+    # ------------------------------------------------------------------
+
+    def register_replay_bundle(self, manifest_path: Path | str) -> dict[str, Any]:
+        """Verify and register a saved simulation replay manifest in the store.
+
+        Preconditions:
+            - ``manifest_path`` must exist and point to a readable replay manifest.
+
+        Postconditions:
+            - Returns a catalog entry dict with provenance and status.
+            - Backing entry is saved in the store under ``bundle.run_id``.
+        """
+        p = Path(manifest_path).resolve()
+        if not p.is_file():
+            raise FileNotFoundError(f"Replay manifest not found: {p}")
+
+        bundle = load_simscape_bundle(p)
+        time_s = bundle.arrays["time_s"]
+        tau_valid = bundle.arrays["tau_valid"]
+        has_torque = bool(tau_valid.any())
+        if tau_valid.all():
+            tau_status = "available"
+        elif tau_valid.any():
+            tau_status = "partly_available"
+        else:
+            tau_status = "unavailable"
+
+        report_path_str = ""
+        if "report" in bundle.artifact_paths:
+            report_path_str = str(bundle.artifact_paths["report"])
+
+        # Check for cylinder animation GIF nearby
+        animation_path_str = ""
+        possible_anims = [
+            p.parent.parent
+            / "visuals_returned102"
+            / f"{bundle.run_id.replace('-', '_')}_cylinders.gif",
+            p.parent.parent
+            / "visuals_returned102"
+            / "simscape_returned102_cylinders.gif",
+            p.parent / f"{bundle.run_id}_cylinders.gif",
+        ]
+        for anim in possible_anims:
+            if anim.is_file():
+                animation_path_str = str(anim.resolve())
+                break
+
+        entry: dict[str, Any] = {
+            "run_id": bundle.run_id,
+            "engine": "simscape",
+            "status": bundle.status,
+            "duration_s": float(time_s[-1]),
+            "n_samples": int(len(time_s)),
+            "manifest_path": str(p),
+            "report_path": report_path_str,
+            "animation_path": animation_path_str,
+            "tau_status": tau_status,
+            "has_torque": has_torque,
+            "gates": dict(bundle.report.get("gates", {})),
+            "metrics": dict(bundle.report.get("metrics", {})),
+            "is_replay_catalog": True,
+        }
+
+        self.save_run(bundle.run_id, entry)
+        logger.info(
+            "replay_bundle_registered run_id=%s status=%s tau_status=%s",
+            bundle.run_id,
+            bundle.status,
+            tau_status,
+        )
+        return entry
+
+    def list_catalog_entries(self) -> list[dict[str, Any]]:
+        """Return all catalog entries stored in the database.
+
+        Postcondition:
+            Returns a list of dicts for registered replay bundles.
+        """
+        entries: list[dict[str, Any]] = []
+        for run_id in self.list_runs():
+            try:
+                run_data = self.load_run(run_id)
+                if (
+                    isinstance(run_data, dict)
+                    and run_data.get("is_replay_catalog") is True
+                ):
+                    entries.append(run_data)
+            except Exception:
+                logger.debug("Skipping unreadable or invalid run file: %s", run_id)
+        return entries
+
+    def get_catalog_entry(self, run_id: str) -> dict[str, Any]:
+        """Return the catalog entry for *run_id*.
+
+        Raises:
+            KeyError: If run_id is not found or is not a catalog entry.
+        """
+        run_data = self.load_run(run_id)
+        if not (
+            isinstance(run_data, dict) and run_data.get("is_replay_catalog") is True
+        ):
+            raise KeyError(f"Run {run_id!r} is not a registered replay catalog entry")
+        return run_data
+
+    @staticmethod
+    def discover_known_manifests(
+        search_dirs: Sequence[Path] | None = None,
+    ) -> list[Path]:
+        """Find verified replay manifests in repository evidence directories."""
+        if search_dirs is None:
+            repo_root = Path(__file__).resolve().parents[4]
+            search_dirs = [
+                repo_root / "docs/development/simscape_tour_matching/native_evidence",
+            ]
+        discovered: list[Path] = []
+        for d in search_dirs:
+            if d.is_dir():
+                discovered.extend(sorted(d.glob("*.replay.json")))
+        return discovered

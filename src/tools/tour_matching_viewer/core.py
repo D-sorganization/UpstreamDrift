@@ -60,6 +60,7 @@ class ViewerFrame:
     model_markers: NDArray[np.float64] | None
     valid_mask: NDArray[np.bool_] | None
     rms_error: float
+    marker_errors_mm: NDArray[np.float64] | None = None
 
 
 def load_replay(
@@ -352,13 +353,13 @@ def viewer_frame(
     valid_mask = replay.valid_mask[frame_idx] if replay.valid_mask is not None else None
 
     rms_error = 0.0
+    marker_errors_mm: NDArray[np.float64] | None = None
     if target_markers is not None and model_markers is not None:
-        if valid_mask is not None:
-            diff = model_markers[valid_mask] - target_markers[valid_mask]
-        else:
-            diff = model_markers - target_markers
-        if len(diff) > 0:
-            rms_error = float(np.sqrt(np.mean(diff**2)))
+        diff = model_markers - target_markers
+        marker_errors_mm = np.linalg.norm(diff, axis=-1) * 1000.0
+        valid_diff = diff[valid_mask] if valid_mask is not None else diff
+        if len(valid_diff) > 0:
+            rms_error = float(np.sqrt(np.mean(valid_diff**2)))
 
     return ViewerFrame(
         segments=segments,
@@ -366,4 +367,74 @@ def viewer_frame(
         model_markers=model_markers,
         valid_mask=valid_mask,
         rms_error=rms_error,
+        marker_errors_mm=marker_errors_mm,
     )
+
+
+def cylinder_faces(
+    start: Sequence[float] | NDArray[np.float64],
+    end: Sequence[float] | NDArray[np.float64],
+    radius: float,
+    n_theta: int = 12,
+) -> list[NDArray[np.float64]]:
+    """Build drawing-only cylinder faces; physical geometry is unchanged.
+
+    Constructs quadrilateral facets connecting circular cross-sections at
+    *start* and *end*.
+
+    Args:
+        start: 3D coordinates of cylinder start point.
+        end: 3D coordinates of cylinder end point.
+        radius: Radius in metres (> 0).
+        n_theta: Number of facets around circumference (>= 3).
+
+    Returns:
+        List of (4, 3) arrays representing polygon face vertices.
+    """
+    p_start = np.asarray(start, dtype=np.float64)
+    p_end = np.asarray(end, dtype=np.float64)
+    direction = p_end - p_start
+    length = float(np.linalg.norm(direction))
+    if length < 1e-10 or radius <= 0 or n_theta < 3:
+        return []
+    axis = direction / length
+    helper = np.eye(3)[int(np.argmin(np.abs(axis)))]
+    u = np.cross(axis, helper)
+    u_norm = float(np.linalg.norm(u))
+    if u_norm < 1e-10:
+        return []
+    u /= u_norm
+    v = np.cross(axis, u)
+    theta = np.linspace(0, 2 * np.pi, n_theta + 1)
+    ring = radius * (np.cos(theta)[:, None] * u + np.sin(theta)[:, None] * v)
+    a, b = p_start + ring, p_end + ring
+    return [np.array([a[k], a[k + 1], b[k + 1], b[k]]) for k in range(n_theta)]
+
+
+def marker_error_vectors(
+    target_markers: NDArray[np.float64],
+    model_markers: NDArray[np.float64],
+    valid_mask: NDArray[np.bool_] | None = None,
+) -> list[tuple[NDArray[np.float64], NDArray[np.float64]]]:
+    """Return line segment endpoints (target -> model) for all valid markers.
+
+    Args:
+        target_markers: (K, 3) target marker coordinates.
+        model_markers: (K, 3) model marker coordinates.
+        valid_mask: Optional (K,) boolean mask of valid markers.
+
+    Returns:
+        List of (start, end) coordinate pairs for 3D line drawing.
+    """
+    if len(target_markers) != len(model_markers):
+        raise ValueError("Marker count mismatch between target and model")
+    mask = (
+        valid_mask
+        if valid_mask is not None
+        else np.ones(len(target_markers), dtype=bool)
+    )
+    lines: list[tuple[NDArray[np.float64], NDArray[np.float64]]] = []
+    for i in range(len(target_markers)):
+        if mask[i]:
+            lines.append((target_markers[i], model_markers[i]))
+    return lines

@@ -80,6 +80,7 @@ class SavedSimscapeReplay:
     coordinate_names: tuple[str, ...]
     arrays: Mapping[str, NDArray[Any]]
     manifest_path: Path
+    artifact_paths: Mapping[str, Path] = MappingProxyType({})
 
 
 def load_simscape_bundle(path: Path | str) -> SavedSimscapeReplay:
@@ -186,4 +187,5 @@ def load_simscape_bundle(path: Path | str) -> SavedSimscapeReplay:
         tuple(names),
         MappingProxyType(arrays),
         manifest_path,
+        MappingProxyType(files),
     )

@@ -17,17 +17,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10285 � Saved Simulation Library and Native Replay
+### DL-#10285 · Saved Simulation Library and Native Replay
 
 - **State:** in_progress
-- **Owner:** codex
+- **Owner:** claude
 - **Issue:** #10285 (counterfactual sibling #10286)
 - **Branch:** feat/10285-native-saved-replay
-- **Paths:** src/tools/tour_matching_viewer; docs/development/simscape_tour_matching
+- **Paths:** src/tools/tour_matching_viewer; src/shared/python/simulation_store; docs/development/simscape_tour_matching
 - **Started:** 2026-09-16
-- **Last verified:** 2026-09-16 (SELF; seven viewer core tests passed including native archived MATLAB reconstruction and real MuJoCo FK; cylinder still visually inspected)
-- **Summary:** Native-spec FK ordering fixed test-first; actual saved R2025b run102 cylindrical preview and provenance generated. Counterfactual definitions/provider gaps audited against AffineDrift/WSCG. Two product epics and detailed turnover created; no new simulation launched.
-- **Next step:** The prior three WIP failures are resolved (21 focused tests pass): verified manifest playback, explicit missing-torque mask and physical capsule frames. Follow the latest SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md checkpoint for catalog integration and cylinder/multi-angle rendering; source-time playback and persistent camera orientation now pass six affected GUI tests: canonical model/run manifest and real retained-state import; do not present synthetic or mismatched-model GUI evidence as qualification.
+- **Last verified:** 2026-09-17 (SELF; 78 tests pass across test_simulation_data_store, test_tour_matching_viewer_adapter, and test_tour_matching_viewer_core; ruff check clean, ruff format clean, mypy clean with 0 errors)
+- **Summary:** Package B product polish delivered test-first: SimulationDataStore extended with replay cataloging, manifest discovery, and hash/path verification. TourMatchingViewerWidget upgraded with shared catalog selection for run102 (and all registered runs), source-time clock speed controls (0.25x, 0.5x, 1.0x, 2.0x via MonotonicReplayClock), restart control, persistent camera across scrubbing/playback, multi-angle camera presets, true 3D cylinder rendering (Poly3DCollection and cylinder_faces), toggleable marker error vectors, explicit unavailable torque badge, and interactive inspection dialogs for the verified R2025b qualification report and cylinder animation GIF. Zero claims that playback reruns physics.
+- **Next step:** Package B product polish is complete on feat/10285-native-saved-replay. Proceed to Package C (Native Counterfactual Qualification) under epic #10286 in a separate worktree following SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md.
 
 ### DL-#9967 · Native Simscape Tour Matching
 
