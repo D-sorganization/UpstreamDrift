@@ -27,6 +27,24 @@ supports a self-managed server with explicit browser suppression. Live
 Gepetto qualification and product-level replay selection are still separate
 requirements under #10254.
 
+## Shadow Tracker Ambiguity Quantification and Evidence Gates (#10132)
+
+Provides scientific evaluation, visual ambiguity quantification, and deterministic evidence gates for reconstructed motion sequences:
+- **Visual Ambiguity Quantification (`src/shared/python/shadow_tracker/evaluation.py`)**:
+  - `detect_silhouette_ambiguity`: Evaluates whether distinct 3D poses/trajectories produce indistinguishable 2D silhouettes from available camera views, reporting maximum 3D pose divergence alongside negligible silhouette IoU difference to flag multi-hypothesis ambiguity.
+  - `AmbiguityReport`: Slotted frozen structure recording ambiguity status, pose divergence, silhouette difference, and candidate IDs.
+- **Deterministic Evidence Gating & Abstention**:
+  - `classify_evidence_quality`: Evaluates candidate results under strict Gate G0-G5 rules. Uncalibrated/inexact timing (`is_timing_exact=False` or `timing_mode="nominal_video"`) strictly blocks SI kinetics qualification, capping quality at `kinematic_only` or `insufficient_evidence`.
+  - Failed physical replay audits (Gate G4) strictly reject `validated_profile` and prevent `CandidateResult` acceptance.
+  - `evaluate_candidate_evidence`: Detects unobserved/missing club evidence; missing club masks yield positive uncertainty/penalty rather than misleading zero error.
+  - Returns structured abstention reasons when evidence thresholds are violated.
+- **Calibrated Uncertainty vs Sensitivity Separation**:
+  - `QuantityConfidence`: Explicitly separates empirical posterior bounds (from held-out Bayesian coverage) from parameter sensitivity ranges (from camera, timing, mass, contact ablations).
+  - Enforces the scientific constraint: optimizer curvature (Hessian) or multistart scatter is never labeled as calibrated confidence (`is_calibrated=False`).
+  - `compute_empirical_coverage`: Evaluates empirical coverage against nominal confidence levels and tracks average interval width.
+- **Atomic Evaluated Bundle Assembly**:
+  - `create_evaluated_result_bundle`: Packages candidate trajectories, audits, quality ratings, and evidence hashes into an immutable, versioned `ResultBundle`.
+
 ## Shadow Tracker Control Fitting and Silhouette Optimization (#10131)
 
 Optimizes skeletal control parameters against calibrated multi-view silhouette sequences with strict physical gate enforcement:
