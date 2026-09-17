@@ -46,6 +46,32 @@ Collision geometry remains available to Pink. Invalid inputs, nonfinite
 outputs and solver infeasibility propagate as errors. Optional native loading
 handles missing/broken imports without pretending the capability exists.
 
+## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
+
+Completes the modularization of the ground support execution pipeline by moving remaining orchestration stages and CLI utilities from `run_ground_support.py` into the reusable `src.shared.python.motion_matching.pipeline` package, reducing `run_ground_support.py` from 779 lines to 374 lines (satisfying the <400 line architecture budget):
+- Reusable Pipeline Stage Additions (`src/shared/python/motion_matching/pipeline/`):
+  - `address.py`: Exposes `AddressStageInputs`, `AddressStageResult`, `solve_address_stage`, `calibrated_address_summary`, `prepare_hip_spec`, `search_segment_scales`, and `HipCalibrationOptions`.
+  - `reference.py`: Exposes `IKReportInputs` (with support for custom offsets) and `build_ik_report`.
+  - `dynamics.py`: Exposes `DynamicsReportInputs` and `build_dynamics_report`.
+  - `receipt.py`: Exposes `log_pipeline_summary` for structured console reporting.
+  - `__init__.py`: Re-exports all newly packaged stage inputs, results, builders, and options.
+- CLI & Evidence Decoupling:
+  - `run_ground_support.py` refactored into a thin CLI driver (374 lines) delegating completely to the pipeline package.
+  - Evidence scripts (`scan_geometry.py`, `downswing_experiment.py`, `export_mjx_package.py`) migrated to import directly from `src.shared.python.motion_matching.pipeline`.
+  - Zero imports from `run_ground_support` remain in the codebase (`grep -rn "from run_ground_support import" docs src` is 0).
+- Bitwise Receipt & Simulation Parity:
+  - Headless ground support execution on both `anthro_driver` and `anthro_iron` captures confirms bitwise identical physics and receipt results up to non-deterministic execution wall clock `elapsed_s`.
+
+## Global Polynomial Full-Body Step (#10265)
+
+Full-body control parameters are one row-major seven-coefficient Bernstein
+curve per non-root coordinate over a declared physical horizon. Root effort
+is identically zero; export produces canonical ascending physical-second
+power coefficients. Native RK4 stepping validates state/control inventories
+and differentiates every internal stage and substep. Discrete state and
+coefficient Jacobians include shared contact derivatives, with nonsmooth
+contact branches reported explicitly. No state resets or pose projection are
+part of this open-loop boundary.
 ## Finite Weld Pose Linearization (#10260)
 
 The native weld pose Jacobian differentiates `-log6(c1Mc2)` using
@@ -5328,6 +5354,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
+| 2026-09-16 | #10270 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |
 | 2026-09-16 | #10263 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
 | 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
 | 2026-09-16 | #10274 | Correct Shadow Tracker estimated-timing capability and refresh restart guidance for renderer, mask persistence and native timestamp evidence. |
