@@ -1,5 +1,12 @@
 # Native Multi-Engine Matching Handoff
 
+## Paused for Cheaper-Agent Turnover
+
+Start with [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md).
+The 38-frame/304-solve static diagnostic is complete and archived. No matching
+job launched by this review remains live. Investigate calibration and flagged
+late-frame search bounds before another large control search; see the latest review.
+
 ## Current Entry Point
 
 Read [Latest Progress Review](simscape_tour_matching/PROGRESS_REVIEW_20260917.md)

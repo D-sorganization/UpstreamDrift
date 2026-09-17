@@ -21,6 +21,15 @@ All fail 35 mm. These are local results, not proof of global infeasibility.
 Head and left upper-arm residuals dominate. Sampled native chart/retraction checks
 pass with the corrected finite-weld provider. No new dynamic fit was produced.
 
+## Handoff Update: Sampled Static Curve Completed
+
+The across-swing diagnostic is now complete: 304 solves at 38 times through the
+capture end, saved under native_evidence/static_curve_20260917. Do not rerun the
+entire study in step 2. Inspect its masks and active-bound flags, resolve the
+flagged late-frame cases, then proceed to calibration diagnosis. Read
+CHEAPER_AGENT_WORK_PACKAGES.md for bounded assignments and the copyable prompt.
+No review-launched job remains live; the full forward swing is still incomplete.
+
 ## Sequential Execution and Decision Gates
 
 1. **Reproduce the checkpoint.** Verify evidence archive hashes and exact inputs

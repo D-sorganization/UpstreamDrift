@@ -37,9 +37,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/9967-native-simscape-pinocchio
 - **Paths:** src/shared/python/motion_matching; docs/development/simscape_tour_matching
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-17 (SELF; five constrained-pose tests, Ruff and pinned mypy pass; 24 native local static solves and sampled chart/retraction derivative audit completed)
+- **Last verified:** 2026-09-17 (SELF; five constrained-pose tests, Ruff and pinned mypy pass; terminal and 38-frame/304-solve native static diagnostics plus sampled chart/retraction derivative audit completed; seven rigidity tests pass)
 - **Summary:** Run102 R2025b terminal RMS 40.30135 mm fails 35 mm at 0.85 s. Best tested yaw-valid static pose is 39.76310 mm with unchanged geometry and attachments; local evidence only. Native replay and fitter startup parity restored; sampled corrected-provider chart/retraction checks pass. No new dynamic fit.
-- **Next step:** Follow AGENT_RESUME_PROMPT.md and the latest PROGRESS_REVIEW_20260917.md: fixed-model residual curve and capture-wide geometry/attachment diagnosis, then a separately named coherent model variant if justified; qualify projected control directions before bounded 0.90 s global-sextic continuation and independent R2025b validation. Preserve baseline and acceptance gates.
+- **Next step:** Follow AGENT_RESUME_PROMPT.md and the latest PROGRESS_REVIEW_20260917.md: inspect the completed static curve and its late active-bound/missing-marker cases, then capture-wide geometry/attachment diagnosis, then a separately named coherent model variant if justified; qualify projected control directions before bounded 0.90 s global-sextic continuation and independent R2025b validation. Preserve baseline and acceptance gates.
 
 ### DL-#10204 · Capture Rig Shared Camera Layer
 
