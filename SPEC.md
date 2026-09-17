@@ -14,6 +14,18 @@ Repairs Shadow Tracker GUI workbench interaction and rendering surfaces in accor
     - Empty state: clean status prompt guiding user to open bundles.
     - Active state: background fill, bounding frame, shot/camera identifiers, authoritative frame PTS and clock authority, mask references, and kinematics overlay placeholder.
 
+## Pink Displaced-Target and Both-Club Motion Matching Proofs (#10254)
+
+Proves native Pink displaced-target motion reduction, hard constraint qualification failure handling, and dual-club smoke journeys:
+- **Displaced-Target Motion & Residual Reduction (`tests/unit/engines/pinocchio/test_pink_trajectory.py`)**:
+  - Validates that applying displaced reachable marker targets drives non-zero generalized coordinate displacement ($\|q_1 - q_0\| > 0$) while reducing marker position residual errors to zero under native QP trajectory execution.
+- **Infeasible Hard Constraint Qualification Refusal**:
+  - Proves that infeasible QP / hard constraint conditions fail frame convergence (`frame_success[0] = False`, `passed = False`) with deterministic failure reasons, ensuring fail-closed safety.
+- **Both-Club (Driver & 7-Iron) Pipeline Smoke Journeys (`tests/unit/motion_matching/test_pink_pipeline_receipts.py`)**:
+  - Exercises full pipeline matching runs across both driver and 7-iron clubs via `MatchRequest` and CLI `--backend pink`.
+  - Verifies generation of conforming `ConstrainedIkReceipt` records across both clubs.
+
+
 ## Pink Constrained IK Interface Repair and Fail-Closed Qualification (#10318)
 
 Repairs native driver interface wiring, eliminates silent fallback, and enforces honest constraint evaluation across the Pink constrained IK pipeline:
