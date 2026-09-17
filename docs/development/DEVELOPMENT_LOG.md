@@ -35,11 +35,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #10286 (sibling #10285)
 - **Branch:** feat/10285-native-saved-replay
-- **Paths:** src/shared/python/motion_matching/counterfactual.py; src/engines/physics_engines/pinocchio/python/native_model.py; tests/unit/motion_matching/test_native_counterfactual.py; docs/development/simscape_tour_matching
+- **Paths:** src/shared/python/motion_matching/counterfactual.py; src/shared/python/motion_matching/counterfactual_matrix.py; src/engines/physics_engines; tests/unit/motion_matching; docs/development/simscape_tour_matching
 - **Started:** 2026-09-17
-- **Last verified:** 2026-09-17 (SELF; 8 unit tests pass in test_native_counterfactual.py; ruff check and format clean; mypy clean with 0 errors; architecture budget and divergence inventory pass)
-- **Summary:** Delivered CF-1, CF-2, and CF-3 test-first for epic #10286: explicit versioned counterfactual intervention contracts (actual, ZTCF, ZVCF, control increments), immutable SpatialWrench with Varignon moment transport and action-reaction negation, NativeConstrainedCounterfactualProvider ensuring zero caller mutation and evaluating closed-loop constrained accelerations and reaction wrenches, 3D spatial power (P = F . v + M . omega), mechanical work, linear and angular impulse integrals, and export to engine-neutral SpatialWrenchTrajectory. Qualified closure_reaction_wrench extraction on NativePinocchioModel. Fixed stale shared ZVCF docstring claiming tau - g.
-- **Next step:** Port forward/branched ZTCF and real-engine capability matrix across remaining engines (CF-4, CF-5) and wire to tour matching viewer counterfactual inspection (CF-7).
+- **Last verified:** 2026-09-17 (SELF; 16 unit tests pass in tests/unit/motion_matching; ruff check and format clean; mypy clean with 0 errors; architecture budget and divergence inventory pass)
+- **Summary:** Delivered CF-1 through CF-4 test-first for epic #10286: explicit versioned counterfactual contracts (SpatialWrench with Varignon moment transport and action-reaction negation, PointwiseCounterfactualSample), NativeConstrainedCounterfactualProvider with Pinocchio closure_reaction_wrench, 3D spatial power/work/impulse integrals, and authoritative 5-engine capability matrix (`counterfactual_matrix.py`). Implemented state restoration guarantees (`try ... finally` in OpenSim realizing dynamics upon restoration; Pinocchio working-data forward kinematics restoration in `finally`) and eliminated silent empty-success fallbacks across Pinocchio, Drake, and OpenSim. Handled Drake underactuation via `MakeActuationMatrix() @ tau`.
+- **Next step:** Execute CF-5 (forward/branched ZTCF rollouts) and wire counterfactual trajectories into Tour Matching Viewer (CF-6, CF-7).
 
 ### DL-#9967 · Native Simscape Tour Matching
 

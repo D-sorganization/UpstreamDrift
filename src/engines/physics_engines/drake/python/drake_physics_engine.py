@@ -546,13 +546,27 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         if tau is None:
             raise ValueError("tau must be provided")
         if not self.plant_context:
-            return np.array([])
+            raise RuntimeError("Drake plant context is not initialized")
 
         # Get mass matrix
         M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
 
-        # Control component: M^-1 * tau
-        a_control = np.linalg.solve(M, tau)
+        nv = self.plant.num_velocities()
+        nu = self.plant.num_actuators()
+        tau_arr = np.asarray(tau, dtype=float)
+
+        if tau_arr.shape == (nu,) and nu != nv:
+            b_matrix = np.asarray(self.plant.MakeActuationMatrix(), dtype=float)
+            tau_gen = b_matrix @ tau_arr
+        elif tau_arr.shape == (nv,):
+            tau_gen = tau_arr
+        else:
+            raise ValueError(
+                f"tau dimension mismatch: expected ({nu},) actuators or ({nv},) generalized coordinates, got {tau_arr.shape}"
+            )
+
+        # Control component: M^-1 * tau_gen
+        a_control = np.linalg.solve(M, tau_gen)
 
         return cast(np.ndarray, a_control)
 
@@ -577,7 +591,7 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         if q is None:
             raise ValueError("q must be provided")
         if not self.plant_context:
-            return np.array([])
+            raise RuntimeError("Drake plant context is not initialized")
 
         # Save current state
         saved_q = self.plant.GetPositions(self.plant_context)
@@ -670,7 +684,7 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         if q is None:
             raise ValueError("q must be provided")
         if not self.plant_context:
-            return np.array([])
+            raise RuntimeError("Drake plant context is not initialized")
 
         # Save current state
         saved_q = self.plant.GetPositions(self.plant_context)

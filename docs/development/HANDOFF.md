@@ -1,6 +1,6 @@
 # Native Multi-Engine Matching Handoff
 
-## Package C Progress: Native Counterfactual Qualification (CF-1, CF-2, CF-3 Complete)
+## Package C Progress: Native Counterfactual Qualification (CF-1, CF-2, CF-3, CF-4 Complete)
 
 Package C of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
 (epic #10286) has delivered its foundational milestones test-first:
@@ -24,6 +24,16 @@ Package C of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACK
      cumulative work $W(t) = \int_0^t P(\tau) d\tau$, linear impulse $\int F dt$, and angular impulse $\int M dt$.
    - Implemented export to engine-neutral `SpatialWrenchTrajectory`.
    - Verified on retained Simscape `simscape-returned102` evidence with 8 unit tests in `test_native_counterfactual.py`.
+4. **Multi-Engine Qualification & Capability Matrix (CF-4)**:
+   - Authored authoritative 5-engine matrix in `src/shared/python/motion_matching/counterfactual_matrix.py`
+     covering Pinocchio, MuJoCo, Drake, OpenSim, and Simscape R2025b, with programmatic query and CLI formatting.
+   - Guaranteed state restoration across engines: OpenSim `try ... finally` restores coordinates, speeds,
+     and controls, re-realizing dynamics upon exit. Pinocchio restores working kinematic data via
+     `pin.forwardKinematics` in `finally`.
+   - Eliminated silent empty-success fallbacks (`return np.array([])`) across OpenSim, Pinocchio, and Drake,
+     raising explicit `RuntimeError` on uninitialized states or realization failures.
+   - Handled Drake underactuation via `MakeActuationMatrix() @ tau`.
+   - Verified with 8 unit tests in `tests/unit/motion_matching/test_counterfactual_matrix.py` (16 total in suite).
 
 ## Package B Completed: Saved-Run Product Polish Delivered
 
