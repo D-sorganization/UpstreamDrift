@@ -114,10 +114,8 @@ def load_inputs(
     else:
         attachments = document["marker_attachments"]
         source = f"document:{document_path.name}"
-    require(
-        ground_height_m is not None,
-        "ground height must come from a receipt or --ground-height",
-    )
+    if ground_height_m is None:
+        raise ValueError("ground height must come from a receipt or --ground-height")
     labels = tuple(
         label
         for label in tracked_labels()
