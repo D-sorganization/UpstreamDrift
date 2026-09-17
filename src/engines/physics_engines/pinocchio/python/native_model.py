@@ -24,6 +24,17 @@ from src.shared.python.motion_matching.full_body_spec import (
 )
 from src.shared.python.motion_matching.marker_projection import project_markers
 
+# The principal SE(3) logarithm changes branch at a rotation of pi. Keep
+# derivative claims outside a small explicit numerical margin of that cut.
+_WELD_LOG_BRANCH_MARGIN_RAD = 1e-7
+
+
+def _require_weld_log_chart(
+    pose_error: NDArray[np.float64], margin_rad: float = _WELD_LOG_BRANCH_MARGIN_RAD
+) -> None:
+    if np.linalg.norm(pose_error[3:]) >= np.pi - margin_rad:
+        raise ValueError("Weld log derivative is undefined near the rotation-pi branch")
+
 
 class NativeAccelerationDerivatives(NamedTuple):
     """Detached derivatives in the stated native scalar-coordinate order."""
@@ -321,11 +332,18 @@ class NativePinocchioModel:
         The constraint backend refreshes its data through the zero-rate,
         zero-effort diagnostic probe. The returned Jacobian is kinematic only;
         it is suitable for a local node chart, never for inverse dynamics.
+        Differentiate the finite residual ``-log6(c1Mc2)`` with the left
+        log Jacobian; the constraint velocity Jacobian alone is valid only
+        at zero pose error. The result owns finite, read-only storage.
+        Rotations within 1e-7 rad of the principal-log branch cut are rejected.
         """
         names = tuple(coordinates)
         position, _ = self.closure_residuals(coordinates)
+        _require_weld_log_chart(position)
         raw, jac_slice = self._constraints_jacobian(names)
-        jacobian = jac_slice.copy()
+        contact = self.constraint_data[0]
+        inverse_placement = contact.c1Mc2.inverse()
+        jacobian = np.asarray(self._pin.Jlog6(inverse_placement) @ jac_slice)
         if (
             position.shape != (6,)
             or raw.shape != (6, self.model.nv)
@@ -399,6 +417,8 @@ class NativePinocchioModel:
         returned acceleration partial is the exact constraint Jacobian because
         the oracle defines that residual as ``J * (a - a0)``. The final base
         probe restores the backend data to the reported state.
+        The pose must stay away from the log branch by at least twice the
+        scalar-coordinate difference step (and the fixed numerical margin).
         """
         names = tuple(coordinates)
         if (
@@ -419,6 +439,9 @@ class NativePinocchioModel:
         acceleration = dict(accelerations)
         base = flatten(
             self.closure_trajectory_residuals(position, velocity, acceleration)
+        )
+        _require_weld_log_chart(
+            base[:6], max(_WELD_LOG_BRANCH_MARGIN_RAD, 2.0 * finite_difference_step)
         )
         derivative_shape = (base.size, len(names))
         dq = np.empty(derivative_shape, dtype=float)
@@ -456,12 +479,13 @@ class NativePinocchioModel:
                     )
                 )
             ) / (2.0 * finite_difference_step)
-        linear = self.closure_position_linearization(position)
         self.closure_trajectory_residuals(position, velocity, acceleration)
+        raw, velocity_jacobian = self._constraints_jacobian(names)
         da = np.zeros(derivative_shape, dtype=float)
-        da[-linear.jacobian.shape[0] :, :] = linear.jacobian
+        da[-velocity_jacobian.shape[0] :, :] = velocity_jacobian
         if (
-            linear.names != names
+            raw.shape != (6, self.model.nv)
+            or velocity_jacobian.shape != (6, len(names))
             or not np.isfinite(base).all()
             or not np.isfinite(dq).all()
             or not np.isfinite(dv).all()
