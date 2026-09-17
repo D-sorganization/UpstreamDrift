@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10341 · OpenSim Moco G1 Dynamic Tracking (MS-42 Phase A)
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10341 (epic #10363 Matched Swing Program)
+- **Branch:** feat/10341-moco-g1
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/moco_g1.py; src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py; src/engines/physics_engines/opensim/python/tour_matching/visualization.py; docs/development/opensim_tour_matching/os7_moco_g1_driver.py; docs/development/opensim_tour_matching/evidence/os7_moco_g1; tests/opensim/test_moco_g1_ladder.py
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 (SELF; 23 unit tests in tests/opensim/test_moco_g1_ladder.py pass; ladder run on ControlTower opensim-10003 venv, receipts under evidence/os7_moco_g1)
+- **Summary:** Horizon ladder 0.1 -> 0.3 -> 0.6 -> 0.85 -> full for MocoTrack on the OS-3b scaled tour-marker model (7dd1da17, now committed), warm-started rung to rung, with the five shared metrics computed from one uninterrupted open-loop replay of the fitted controls. The OS-4 pilot's 1e-2 tolerances let collocation defects absorb gravity (peak control 0.018 N m); OS-7 normalises actuators and tightens tolerances. Numbers are in the receipt, whatever they are; the model has no contact law, so ground reaction is inferred through pelvis residual actuators.
+- **Next step:** Phase B (after MS-40): rerun os7_moco_g1_driver.py on the exported document model with the shared Hunt-Crossley contact law and pass the receipt through acceptance.py.
+- **Evidence:** docs/development/opensim_tour_matching/evidence/os7_moco_g1/receipt.json (per-horizon table), rungs/<ms>ms/receipt.json, playback.gif.
+
 ### DL-#9967 · Native Simscape Tour Matching
 
 - **State:** in_progress
