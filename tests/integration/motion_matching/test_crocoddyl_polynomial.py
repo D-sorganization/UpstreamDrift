@@ -18,21 +18,27 @@ _NATIVE_MODULES_MOCKED = any(
 _CACHED_PLANT_STATE = None
 
 if not _NATIVE_MODULES_MOCKED:
-    import crocoddyl
+    try:
+        import crocoddyl  # noqa: F401
 
-    from src.shared.python.motion_matching.contact_law import GroundPlane
-    from src.shared.python.motion_matching.crocoddyl_polynomial import (
-        PolynomialCostQuadratic,
-        build_polynomial_shooting_problem,
-    )
-    from src.shared.python.motion_matching.full_body_step import (
-        FullBodyStepOptions,
-        NativeFullBodyStep,
-    )
-    from src.shared.python.motion_matching.polynomial_actuation import (
-        ROOT_COORDINATES,
-        FullBodyPolynomialControl,
-    )
+        from src.shared.python.motion_matching.contact_law import GroundPlane
+        from src.shared.python.motion_matching.crocoddyl_polynomial import (
+            PolynomialCostQuadratic,
+            build_polynomial_shooting_problem,
+        )
+        from src.shared.python.motion_matching.full_body_step import (
+            FullBodyStepOptions,
+            NativeFullBodyStep,
+        )
+        from src.shared.python.motion_matching.polynomial_actuation import (
+            ROOT_COORDINATES,
+            FullBodyPolynomialControl,
+        )
+    except (ImportError, OSError) as exc:
+        pytest.skip(
+            f"native Crocoddyl/Pinocchio stack unavailable: {exc}",
+            allow_module_level=True,
+        )
 
 pytestmark = [
     pytest.mark.integration,
