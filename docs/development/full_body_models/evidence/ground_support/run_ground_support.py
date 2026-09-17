@@ -20,6 +20,7 @@ import logging
 from pathlib import Path
 import sys
 import time
+from typing import Any
 
 import numpy as np
 
@@ -159,7 +160,40 @@ def main() -> None:
         action="store_true",
         help="place every marker from a neutral-spine static trial",
     )
+    parser.add_argument(
+        "--backend",
+        choices=["mujoco", "pink"],
+        default="mujoco",
+        help="kinematic tracking backend engine (mujoco or pink)",
+    )
+    parser.add_argument(
+        "--pink-step-mode",
+        choices=["physical", "projection"],
+        default="physical",
+        help="integration step mode for Pink solver",
+    )
+    parser.add_argument(
+        "--pink-solver",
+        default="quadprog",
+        help="QP solver backend for Pink",
+    )
+    parser.add_argument(
+        "--pink-limit-policy",
+        choices=["enforce", "ignore"],
+        default="enforce",
+        help="joint limit policy for Pink solver",
+    )
     args = parser.parse_args()
+    if args.backend == "pink":
+        from src.shared.python.motion_matching.pipeline.lane import (
+            probe_pink_capability,
+        )
+
+        available, diag = probe_pink_capability()
+        if not available:
+            raise RuntimeError(
+                f"Pink backend requested but not available: {diag['reason']}"
+            )
     global OUT, C3D
     OUT = args.out
     C3D = CAPTURES[args.capture]
@@ -257,13 +291,46 @@ def main() -> None:
     )
 
     # 4. full IK, smoothing, consistency re-solve
-    q_ik, fits = full_capture_ik(lane, kin, address2.q)
-    errors = marker_errors(kin, q_ik, lane.points)
-    q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
-    q_ref, ref_fits = consistency_resolve(
-        lane, kin, q_smooth, prior_weight=CONSISTENCY_PRIOR, iterations=30
-    )
-    ref_errors = marker_errors(kin, q_ref, lane.points)
+    constrained_ik_dict: dict[str, Any] | None = None
+    if args.backend == "pink":
+        from src.engines.physics_engines.pink.trajectory import (
+            PinkTrajectoryBackend,
+            TrajectorySolveRequest,
+        )
+
+        pink_backend = PinkTrajectoryBackend()
+        solve_req = TrajectorySolveRequest(
+            points=lane.points,
+            valid=lane.valid,
+            q_start=address2.q,
+            labels=labels,
+            model_name="golf_humanoid",
+            capture_name=args.capture,
+            step_mode=args.pink_step_mode,
+            solver=args.pink_solver,
+            limit_policy=args.pink_limit_policy,
+        )
+        pink_result = pink_backend.solve_trajectory(solve_req)
+        q_ik = pink_result.q_trajectory
+        fits = pink_result.fits
+        q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
+        audit_result = pink_backend.audit_trajectory(q_smooth)
+        constrained_ik_dict = dict(pink_result.diagnostics)
+        constrained_ik_dict["is_qualified"] = audit_result.is_qualified
+        constrained_ik_dict["qualification_state"] = audit_result.qualification_state
+        q_ref = q_smooth
+        ref_fits = fits
+        errors = marker_errors(kin, q_ik, lane.points)
+        ref_errors = marker_errors(kin, q_ref, lane.points)
+    else:
+        q_ik, fits = full_capture_ik(lane, kin, address2.q)
+        errors = marker_errors(kin, q_ik, lane.points)
+        q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
+        q_ref, ref_fits = consistency_resolve(
+            lane, kin, q_smooth, prior_weight=CONSISTENCY_PRIOR, iterations=30
+        )
+        ref_errors = marker_errors(kin, q_ref, lane.points)
+
     ik_report = build_ik_report(
         IKReportInputs(
             lane=lane,
@@ -285,6 +352,7 @@ def main() -> None:
             q_ref=q_ref,
             ref_fits=ref_fits,
             ref_errors=ref_errors,
+            constrained_ik=constrained_ik_dict,
         )
     )
     np.savez(
@@ -343,6 +411,7 @@ def main() -> None:
 
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
+            backend=args.backend,
             base_spec=base_spec,
             spec_path=args.spec,
             scaled_path=scaled_path,

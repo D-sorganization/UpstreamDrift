@@ -73,6 +73,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Pink Pipeline & Receipt Exposure (#10278; 2026-09-17):** Exposed Pink
+  constrained inverse kinematics backend through `MatchRequest` (`backend="pink"`,
+  `step_mode`, `solver`), CLI `--backend pink`, and GUI dropdown. Structured
+  diagnostics and provenance recorded via `ConstrainedIkReceipt` in receipt schema.
+  Fail-closed capability probe `probe_pink_capability()` prevents silent fallback.
+  Regenerated `RECEIPTS.md`.
+
 - **Viewer Adapters (#10256; 2026-09-16):** Replaced no-op display paths with
   persistent Pinocchio visualizers, explicit validation and scoped cleanup.
   Real MeshCat probing exposed and corrected shared-root deletion and owned
