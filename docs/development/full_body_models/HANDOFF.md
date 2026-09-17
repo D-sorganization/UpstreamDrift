@@ -36,6 +36,17 @@ receipt's explicit source-freshness status; a runtime pass is not model or
 physical acceptance. Linux lock requires x86-64-v3. Viewer qualification
 remains separate.
 
+## Pink Adapter Status (#10257, #10254)
+
+The low-level Pink adapters now share validated state/time handling, retain
+collision geometry, forward hard constraints and limits, refresh cached
+kinematics and propagate infeasibility. Four real-native tests cover equality,
+infeasibility, sequential state refresh and free-flyer `nq != nv` behavior.
+Mixed unit/native collection isolates the real tests from unit mocks and
+checks their executed results. This does not implement the full-body marker,
+stance or weld tasks; those must use the qualified #10260 closure derivative
+and explicit physical-time contract before production selection.
+
 Finite weld correction #10260 differentiates the six-component pose error away
 from closure with the correct SE(3) log Jacobian. Trajectory acceleration
 linearization retains the separate constraint velocity Jacobian. Eleven real
@@ -43,6 +54,7 @@ closure regression tests and the 11 contact derivative tests pass on Pinocchio
 3.8 and 4.1; no motion-fit evidence or acceptance thresholds changed.
 The principal-log branch at rotation pi is rejected for derivative evaluation;
 trajectory finite differences also reject steps that could cross that cut.
+
 Updated 2026-09-16 (claude; HO-9 #10111). Branch
 `feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).

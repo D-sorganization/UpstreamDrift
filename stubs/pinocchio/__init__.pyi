@@ -50,6 +50,8 @@ class CollisionModel(GeometryModel): ...
 class RobotWrapper:
     model: Model
     data: Data
+    collision_model: GeometryModel
+    visual_model: GeometryModel
     q0: np.ndarray
     @staticmethod
     def BuildFromURDF(filename: str) -> RobotWrapper: ...
