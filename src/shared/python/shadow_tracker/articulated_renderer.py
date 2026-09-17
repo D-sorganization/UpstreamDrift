@@ -364,7 +364,11 @@ class ArticulatedSilhouetteRenderer:
         camera, width, height = self._validate_request(request)
 
         angles = state_vector_to_joint_dict(request.state)
-        pose = forward_kinematics(angles, lengths=self._segment_lengths)
+        pose = forward_kinematics(
+            angles,
+            lengths=self._segment_lengths,
+            include_lower_body=True,
+        )
         pts = pose.points
 
         total_px = width * height
