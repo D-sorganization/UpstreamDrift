@@ -61,6 +61,24 @@ supports a self-managed server with explicit browser suppression. Live
 Gepetto qualification and product-level replay selection are still separate
 requirements under #10254.
 
+## Shadow Tracker Engine Conformance Matrix, Independent Replay, and Release Qualification (#10135)
+
+Delivers multi-engine physics conformance verification, independent forward dynamics replay, and full G0–G7 scientific release qualification for Shadow Tracker:
+- **Engine Conformance & Receipt Auditing (`src/shared/python/shadow_tracker/engine_matrix.py`)**:
+  - `EngineReceipt`: Slotted frozen structure recording engine version, asset/model SHA-256 digest, coordinate state convention (`canonical_v2_quaternion` vs `scalar_rpy`), contact model type, MATLAB release version (`R2025b` for Simscape), physical closure tolerances, and solver acceptance.
+  - `audit_engine_conformance`: Evaluates candidate engines against conformance criteria. Fails closed with explicit reasons if model hash mismatches, if Simscape lacks explicit MATLAB R2025b receipts, or if coordinate conventions deviate from canonical quaternion manifold standards.
+  - `validate_cross_engine_contact_claims`: Forbids and rejects equivalence assertions for contact results across materially different physical contact laws.
+  - `EngineCapabilityMatrix`: Aggregates engine profiles and tracks advertised vs unsupported vs experimental engines, ensuring unadvertised engines do not block a first-engine release.
+- **Independent Forward Dynamics Replay & Performance Profiling**:
+  - `verify_independent_replay`: Re-simulates candidate control solutions independently without optimizer internal caches, verifying trajectory agreement within tight tolerance ($\le 1\times 10^{-6}$).
+  - `profile_shadow_tracker_performance`: Measures FPS throughput, peak memory allocation, phase latencies, and flags compute budget exceedances.
+- **Comprehensive G0–G7 Release Profile Gate Suite**:
+  - `audit_full_release_gates`: Audits candidates against all development gates G0 through G7 (Input Integrity, Synthetic Projection, Synthetic Recovery, Modern Reference, Dynamics Replay, Robustness/Uncertainty, Historical Pilot, and Product/Reproduction).
+  - Enforces complete swing phase coverage (`address`, `takeaway`, `transition`, `downswing`, `impact`, `follow_through`) before certifying release readiness.
+- **Scientific Manual Registry & Evidence Inventory**:
+  - `get_shadow_tracker_scientific_registry`: Authoritative mathematical models, equations, physical invariants (energy conservation, non-negative dissipation, friction cone limits), and validation statuses.
+  - `generate_release_evidence_inventory`: Assembles serializable JSON release receipts with SHA-256 digests, documenting verified capabilities and exposing any remaining gaps explicitly.
+
 ## Shadow Tracker Review Workbench, Bundle Persistence, and Launcher Integration (#10134)
 
 Integrates review workbench, durable bundle persistence, and embedded/standalone launcher workflows for Shadow Tracker:

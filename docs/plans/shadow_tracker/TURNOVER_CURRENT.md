@@ -1,5 +1,16 @@
 # Shadow Tracker Current Review and Turnover
 
+## Release Qualification and Delivery Review — 2026-09-17
+
+Delivery: [Issue #10135](https://github.com/D-sorganization/UpstreamDrift/issues/10135) (ST-12: Qualify Advertised Engines and Release).
+
+- **Advertised Engine Qualification & Conformance Matrix:** `EngineCapabilityMatrix`, `EngineReceipt`, `audit_engine_conformance` validating model hashes, canonical quaternion conventions, closure tolerances, and Simscape MATLAB R2025b prerequisites.
+- **Independent Replay Verification:** `IndependentReplayAudit` and `verify_independent_replay` ensuring forward dynamics replay passes without optimizer cache leakage.
+- **Performance Profiling:** `PerformanceProfile` and `profile_shadow_tracker_performance` benchmarking throughput, memory, frame rates, and per-phase latency against computational budgets.
+- **Scientific Calculation Registry:** `ScientificRegistryEntry` and `get_shadow_tracker_scientific_registry` publishing immutable formulas, physical invariants, and assumptions.
+- **Full Release Gates Audit & Evidence Inventory:** `audit_full_release_gates` verifying G0–G7, complete swing phase coverage (address through follow-through), and generating deterministic SHA-256 evidence digests via `generate_release_evidence_inventory`.
+- **Validation Receipt:** 274 unit tests passing across `tests/unit/shadow_tracker`.
+
 ## Restart Review — 2026-09-16
 
 Restart delivery: [PR #10274](https://github.com/D-sorganization/UpstreamDrift/pull/10274).
