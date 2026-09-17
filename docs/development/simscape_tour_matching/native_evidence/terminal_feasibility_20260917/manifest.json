@@ -1,0 +1,13 @@
+{
+  "qualification": "exploratory static feasibility and sampled derivative evidence only",
+  "dependency_commit": "0db3c295a7f668789afbb4666f60912294f81cce",
+  "archive_hashes": {
+    "chart.tar.gz": "8847be33ee454875e7480db36de77b02ecc982c09bafc039753c3eb0c4d1c10f",
+    "exact_yaw.tar.gz": "ebe4709d76eb532379c1b8d638a3619adc6f7c06a22eed0fd43750777c0be334",
+    "yaw_range.tar.gz": "547a4e26f46fdcab65e20fbc259c93e17b7a893287d7dea3750210a965ce54e9"
+  },
+  "source_inputs": "native-clean-replay-20260917-01 model.bin/candidate.json/reference.npz; original model and run102 fixtures tracked in parent evidence directory",
+  "geometry": "unchanged original model; local search boxes, not anatomical joint-limit certification",
+  "yaw_gate_roundoff_allowance_pct": 1e-8,
+  "no_new_dynamic_fit": true
+}

@@ -1,0 +1,69 @@
+{
+  "qualification": "sampled native chart/retraction directional tests; not full optimizer qualification",
+  "dependency_commit": "0db3c295a7f668789afbb4666f60912294f81cce",
+  "records": [
+    {
+      "kind": "closure_jacobian",
+      "frame": 0,
+      "wrist_offset_rad": 0.0,
+      "max_error": 2.829195662468198e-10,
+      "passed": true
+    },
+    {
+      "kind": "closure_jacobian",
+      "frame": 0,
+      "wrist_offset_rad": 0.1,
+      "max_error": 7.014238322111677e-11,
+      "passed": true
+    },
+    {
+      "kind": "nonzero_retraction",
+      "frame": 0,
+      "closure_max_abs": 7.975387424069204e-17,
+      "max_derivative_error": 1.907546863522125e-11,
+      "passed": true
+    },
+    {
+      "kind": "closure_jacobian",
+      "frame": 216,
+      "wrist_offset_rad": 0.0,
+      "max_error": 2.1921893848808605e-9,
+      "passed": true
+    },
+    {
+      "kind": "closure_jacobian",
+      "frame": 216,
+      "wrist_offset_rad": 0.1,
+      "max_error": 1.2302545353976013e-9,
+      "passed": true
+    },
+    {
+      "kind": "nonzero_retraction",
+      "frame": 216,
+      "closure_max_abs": 1.5543122344752192e-15,
+      "max_derivative_error": 3.779571100537282e-11,
+      "passed": true
+    },
+    {
+      "kind": "closure_jacobian",
+      "frame": 306,
+      "wrist_offset_rad": 0.0,
+      "max_error": 1.1951897027628888e-8,
+      "passed": true
+    },
+    {
+      "kind": "closure_jacobian",
+      "frame": 306,
+      "wrist_offset_rad": 0.1,
+      "max_error": 1.6787509382609755e-8,
+      "passed": true
+    },
+    {
+      "kind": "nonzero_retraction",
+      "frame": 306,
+      "closure_max_abs": 7.105427357601002e-15,
+      "max_derivative_error": 4.679728410339479e-10,
+      "passed": true
+    }
+  ]
+}
