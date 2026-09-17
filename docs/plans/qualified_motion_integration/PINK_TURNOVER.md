@@ -54,7 +54,7 @@ Jacobian against the repository's finite-weld contract before reuse.
   constraints afterward through the same backend. Smoothing cannot confer
   feasibility or repair an infeasible result without a new solver result.
 
-## Packet P1: Task and Kinematics Translation
+## Packet P1: Task and Kinematics Translation (#10276)
 
 **Ready for bounded dispatch after #10257 and #10260 are available at recorded
 dependency SHAs.** Own a focused engine-local Pink full-body task module beside
@@ -91,7 +91,7 @@ whose closure/limits are checked after manifold integration. Freeze exact
 test tolerances in the tests based on derivative scale and #10260's contract;
 do not treat those numerical tolerances as physical fit thresholds.
 
-## Packet P2: Trajectory Service and Timing
+## Packet P2: Trajectory Service and Timing (#10277)
 
 Dispatch after P1 review. Own one shared trajectory protocol/options/results
 module, its engine-local Pink implementation and tests. Coordinate any change
@@ -126,7 +126,7 @@ temporal continuity, failures and wall time. Full physical qualification stays
 separate. Dynamics replay remains the selected canonical dynamics backend;
 Pink is an IK library, not a new forward-dynamics engine.
 
-## Packet P3: Existing Product Surface
+## Packet P3: Existing Product Surface (#10278)
 
 Dispatch after P2 signature freeze. Own the existing `MatchRequest` in
 `src/tools/motion_matching/pipeline.py`, its CLI/GUI consumers and the current

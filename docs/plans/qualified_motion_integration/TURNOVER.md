@@ -18,20 +18,20 @@ PR heads. A different worker's open claim is a stop condition for that slice.
 Do not cherry-pick entire stacks independently into multiple downstream PRs.
 The integration owner resolves dependency order and shared-file conflicts.
 
-| Slice                   | Existing Issue / PR | Dispatch State                               | Required Boundary                                  |
-| ----------------------- | ------------------- | -------------------------------------------- | -------------------------------------------------- |
-| Contact Derivatives     | #10255 / #10259     | Implemented; Review and CI Pending           | Real constrained-plant derivatives                 |
-| Finite Weld Derivatives | #10260 / #10263     | Implemented; Review and CI Pending           | Six-dimensional finite-pose derivative             |
-| Viewer Lifecycle        | #10256 / #10266     | Adapter Implemented; Gepetto Runtime Corrupt | Persistent owned scene and cleanup                 |
-| Pink Adapter            | #10257 / #10267     | Implemented; CI Triage Pending               | Configuration, constraints, limits, geometry       |
-| Runtime                 | #10262 / #10268     | Native Probes Pass; CI Pending               | Isolated ABI and actual QP execution               |
-| Polynomial Step         | #10265 / #10270     | Implemented; CI Pending                      | Exact RK4 state/coefficient sensitivities          |
-| Crocoddyl Actions       | #10269              | Active Bounded Worker                        | Lift, flow, terminal and replay diagnostics        |
-| Pink Pipeline           | Epic W3             | Contract Review Before Dispatch              | See the Pink packet; adapter alone is insufficient |
-| Evidence Integrity      | #10271              | Bounded Work After Producer Review           | Input-to-output provenance chain                   |
-| Plant Parity            | #10112              | Integration Owner Design Required            | Matched model, ground, controls and weld           |
-| Objective and Benchmark | Epic W5             | Blocked on Actions and Objective Review      | Same full horizon and independent replay           |
-| Product Wiring          | Epic W8             | Blocked on Stable Backend Results            | One service for CLI and UI                         |
+| Slice                   | Existing Issue / PR    | Dispatch State                               | Required Boundary                                  |
+| ----------------------- | ---------------------- | -------------------------------------------- | -------------------------------------------------- |
+| Contact Derivatives     | #10255 / #10259        | Implemented; Review and CI Pending           | Real constrained-plant derivatives                 |
+| Finite Weld Derivatives | #10260 / #10263        | Implemented; Review and CI Pending           | Six-dimensional finite-pose derivative             |
+| Viewer Lifecycle        | #10256 / #10266        | Adapter Implemented; Gepetto Runtime Corrupt | Persistent owned scene and cleanup                 |
+| Pink Adapter            | #10257 / #10267        | Implemented; CI Triage Pending               | Configuration, constraints, limits, geometry       |
+| Runtime                 | #10262 / #10268        | Native Probes Pass; CI Pending               | Isolated ABI and actual QP execution               |
+| Polynomial Step         | #10265 / #10270        | Implemented; CI Pending                      | Exact RK4 state/coefficient sensitivities          |
+| Crocoddyl Actions       | #10269                 | Active Bounded Worker                        | Lift, flow, terminal and replay diagnostics        |
+| Pink Pipeline           | #10276, #10277, #10278 | Contract Review Before Dispatch              | See the Pink packet; adapter alone is insufficient |
+| Evidence Integrity      | #10271                 | Bounded Work After Producer Review           | Input-to-output provenance chain                   |
+| Plant Parity            | #10112                 | Integration Owner Design Required            | Matched model, ground, controls and weld           |
+| Objective and Benchmark | Epic W5                | Blocked on Actions and Objective Review      | Same full horizon and independent replay           |
+| Product Wiring          | Epic W8                | Blocked on Stable Backend Results            | One service for CLI and UI                         |
 
 Do not create duplicate issues for these scopes. For an epic-only row, first
 search existing children; reuse one or create one scoped implementation issue,
