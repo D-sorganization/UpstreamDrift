@@ -14,11 +14,12 @@ full_body_models/evidence/viewer/render_viewer_evidence.py as real fit evidence.
 
 ## Existing User Entry Points and Integration Gaps
 
-`python -m src.tools.tour_matching_viewer [replay.npz]` opens the Tour Matching
-Viewer. Its constructor accepts a spec path but the current CLI does not; its
-default full-body model is unsafe for the original27-coordinate native replay.
-It loads NPZ or MOT/STO, not the archived MATLAB MAT directly. Fix explicit
-model selection and coordinate/hash checks before advertising one-click replay.
+`python -m src.tools.tour_matching_viewer <manifest.json>` opens the Tour Matching
+Viewer with verified native Simscape model selection and retained MAT states.
+Use the run102 manifest command in the checkpoint below. Legacy NPZ/MOT/STO
+loading still depends on the supplied/default specification and is not the
+recommended native Simscape entry point. Playback follows source timestamps,
+stops at the endpoint and preserves the camera orientation while redrawing.
 Engine tiles launch their own environments; they are not evidence of a unified
 saved-run browser. The shared simulation_store persists JSON records under the
 platform user-data directory; reuse/extend it with artifact manifests and adapters.
@@ -74,11 +75,10 @@ reference-point and biological interpretation limits.
 ## Next-Agent Prompt
 
 Implement epics10285 and10286 sequentially using their explicit work packages and
-this handoff. Read local AGENTS/CLAUDE and coordinate leases before editing. First
-make the real R2025b saved run loadable with its exact native spec and validated
-coordinates; provide multi-angle cylindrical playback and time-linked data without
-requiring MATLAB for playback. Then integrate the shared catalog and explicit
-R2025b rerun action. Never label synthetic motion or a failed prefix as accepted.
+this handoff. Read local AGENTS/CLAUDE and coordinate leases before editing. Preserve the now-tested R2025b manifest importer, physical-frame rendering and
+source-time playback. Next integrate the existing shared catalog, then add
+multi-angle cylindrical playback, time-linked data and explicit R2025b rerun
+actions. Offline playback must not require MATLAB or a MuJoCo runtime. Never label synthetic motion or a failed prefix as accepted.
 
 Before counterfactual UI work, freeze the intervention/result contract and qualify
 the constrained provider plus3D wrench accounting. Reuse existing APIs and WSCG
@@ -106,9 +106,8 @@ including real MuJoCo FK for the existing full-body path. The all307-frame audit
 measured maximum reconstructed-vs-archived MATLAB marker difference0.075842 mm;
 the preview gate is0.1 mm, a visualization tolerance, not a new dynamics gate.
 Follower-frame poses are explicitly transformed back to physical body frames
-before rendering the cylinders. Production GUI skeleton placement and native
-model selection still require their own end-to-end tests; do not infer them from
-this offline renderer. The generated receipt records source hashes and frame indices.
+before rendering the cylinders. Production GUI skeleton placement and manifest model selection are now separately
+covered by the verified-manifest tests described below. The generated receipt records source hashes and frame indices.
 
 The completed renderer is a concrete reference for SL-2/SL-6, not a second viewer
 architecture. The cheaper agent should reuse its data path and the shared providers
@@ -171,3 +170,18 @@ modifying the shared simulator clock or simulation physics.
 Next product task is the verified manifest catalog, followed by reusable cylinder
 rendering, selectable camera views and explicit slow-motion control. Keep the
 known offscreen-font limitation visible until a normal desktop visual check passes.
+
+## Native Counterfactual Implementation Entry Point
+
+Use `src/engines/physics_engines/pinocchio/python/native_model.py`:
+`accelerations(coordinates, rates, primitive_efforts)` already calls native
+`constraintDynamics` with the rigid weld. Its efforts are joint-conjugate,
+not raw polynomial inputs; preserve the existing actuator routing. Its
+`closure_trajectory_residuals` already evaluates a zero-effort constrained
+acceleration and the acceleration-level constraint residual. Reuse this provider
+for native pointwise ZTCF/ZVCF instead of adapting the unconstrained pendulum
+mass-matrix solve. The provider mutates engine working data; a counterfactual
+adapter needs a dedicated analysis instance or guaranteed restoration before
+returning to the source run. Reaction extraction, frame/sign qualification and
+full internal-state preservation remain unimplemented acceptance work, not
+inferred capabilities of this acceleration-only return value.
