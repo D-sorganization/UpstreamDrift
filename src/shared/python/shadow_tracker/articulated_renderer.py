@@ -3,8 +3,8 @@
 This module implements:
 - `ArticulatedSilhouetteRenderer`: Fulfills `SilhouetteRenderer` protocol by binding
   subject model visual envelope, camera geometry, and canonical articulated state vectors
-  evaluated via forward kinematics.
-- `CANONICAL_ARTICULATED_STATE_FIELDS`: 27-element ordered fields for the canonical state layout.
+  evaluated via forward kinematics across full body (spine, torso, arms, hands, thighs, shins, feet).
+- `CANONICAL_ARTICULATED_STATE_FIELDS`: 37-element ordered fields for full canonical state layout.
 - `state_vector_from_joint_dict`: Helper mapping joint angle dictionary to state tuple.
 - `state_vector_to_joint_dict`: Helper mapping state tuple to joint angle dictionary.
 """
@@ -39,12 +39,27 @@ from .projection import (
     resolve_camera_and_dimensions,
 )
 
-# 27 canonical articulated state fields: 3 translation + 24 joint angles (degrees)
+# 37 canonical articulated state fields: 3 translation + 24 reference golfer fields + 10 lower-body fields
 CANONICAL_ARTICULATED_STATE_FIELDS: tuple[str, ...] = (
-    "TranslationStartPositionX",
-    "TranslationStartPositionY",
-    "TranslationStartPositionZ",
-) + REFERENCE_GOLFER_FIELDS
+    (
+        "TranslationStartPositionX",
+        "TranslationStartPositionY",
+        "TranslationStartPositionZ",
+    )
+    + REFERENCE_GOLFER_FIELDS
+    + (
+        "LHipStartPositionX",
+        "LHipStartPositionY",
+        "LHipStartPositionZ",
+        "RHipStartPositionX",
+        "RHipStartPositionY",
+        "RHipStartPositionZ",
+        "LKneeStartPosition",
+        "RKneeStartPosition",
+        "LAnkleStartPosition",
+        "RAnkleStartPosition",
+    )
+)
 
 _CANONICAL_FIELD_COUNT = len(CANONICAL_ARTICULATED_STATE_FIELDS)
 
@@ -60,6 +75,15 @@ _BODY_SEGMENTS: tuple[tuple[str, str, float], ...] = (
     ("r_elbow", "r_wrist", 0.05),
     ("l_wrist", "l_hand", 0.04),
     ("r_wrist", "r_hand", 0.04),
+    # Lower limb segments: thighs, shins, feet
+    ("pelvis", "l_hip", 0.09),
+    ("pelvis", "r_hip", 0.09),
+    ("l_hip", "l_knee", 0.08),
+    ("r_hip", "r_knee", 0.08),
+    ("l_knee", "l_ankle", 0.06),
+    ("r_knee", "r_ankle", 0.06),
+    ("l_ankle", "l_foot", 0.05),
+    ("r_ankle", "r_foot", 0.05),
 )
 
 
@@ -68,27 +92,39 @@ def state_vector_from_joint_dict(
     *,
     translation: tuple[float, float, float] = (0.0, 0.0, 0.0),
 ) -> tuple[float, ...]:
-    """Construct a canonical 27-element state tuple from a joint angle mapping."""
+    """Construct a canonical state tuple from a joint angle mapping."""
     vals = [
         float(angles.get("TranslationStartPositionX", translation[0])),
         float(angles.get("TranslationStartPositionY", translation[1])),
         float(angles.get("TranslationStartPositionZ", translation[2])),
     ]
-    for field in REFERENCE_GOLFER_FIELDS:
+    for field in CANONICAL_ARTICULATED_STATE_FIELDS[3:]:
         vals.append(float(angles.get(field, 0.0)))
     return tuple(vals)
 
 
 def state_vector_to_joint_dict(state: tuple[float, ...]) -> dict[str, float]:
-    """Extract joint angles and translation mapping from a 27-element canonical state tuple."""
-    if len(state) != _CANONICAL_FIELD_COUNT:
-        raise ValueError(
-            f"Expected {_CANONICAL_FIELD_COUNT} elements for canonical articulated state, got {len(state)}"
-        )
-    return {
-        field: float(val)
-        for field, val in zip(CANONICAL_ARTICULATED_STATE_FIELDS, state, strict=True)
-    }
+    """Extract joint angles and translation mapping from a canonical state tuple."""
+    if len(state) == _CANONICAL_FIELD_COUNT:
+        return {
+            field: float(val)
+            for field, val in zip(
+                CANONICAL_ARTICULATED_STATE_FIELDS, state, strict=True
+            )
+        }
+    if len(state) == 27:
+        res = {
+            field: float(val)
+            for field, val in zip(
+                CANONICAL_ARTICULATED_STATE_FIELDS[:27], state, strict=True
+            )
+        }
+        for field in CANONICAL_ARTICULATED_STATE_FIELDS[27:]:
+            res[field] = 0.0
+        return res
+    raise ValueError(
+        f"Expected {_CANONICAL_FIELD_COUNT} (or 27) elements for canonical articulated state, got {len(state)}"
+    )
 
 
 def _rasterize_3d_segment(
@@ -99,9 +135,9 @@ def _rasterize_3d_segment(
     camera: PinholeCameraModel,
     width: int,
     height: int,
-    depth_epsilon: float = 1e-6,
+    depth_epsilon: float = 1e-3,
 ) -> None:
-    """Rasterize a 3D swept sphere (capsule) segment into a 2D binary mask."""
+    """Rasterize a 3D swept sphere segment into a 2D mask with bounded viewport work."""
     r_cam = camera.rotation_world_to_camera
     t_cam = camera.translation_world_to_camera
 
@@ -109,7 +145,6 @@ def _rasterize_3d_segment(
     z1 = float(r_cam[6] * p1[0] + r_cam[7] * p1[1] + r_cam[8] * p1[2] + t_cam[2])
     z2 = float(r_cam[6] * p2[0] + r_cam[7] * p2[1] + r_cam[8] * p2[2] + t_cam[2])
 
-    # Both behind camera
     if z1 <= depth_epsilon and z2 <= depth_epsilon:
         return
 
@@ -139,9 +174,24 @@ def _rasterize_3d_segment(
     rx2 = camera.fx * radius_m / z2
     ry2 = camera.fy * radius_m / z2
 
+    max_r = max(rx1, ry1, rx2, ry2)
+    min_u = min(u1, u2) - max_r
+    max_u = max(u1, u2) + max_r
+    min_v = min(v1, v2) - max_r
+    max_v = max(v1, v2) + max_r
+    if max_u < 0 or min_u >= width or max_v < 0 or min_v >= height:
+        return
+
     dist_px = math.hypot(u2 - u1, v2 - v1)
     min_r = max(0.5, min(rx1, ry1, rx2, ry2))
-    num_steps = max(1, int(math.ceil(dist_px / max(1.0, min_r * 0.75))))
+    # Bounded sampling work prevents infinite/excessive loops on near-plane crossings
+    max_screen_extent = math.hypot(width, height) + 2.0 * max_r
+    effective_dist_px = min(dist_px, max_screen_extent * 2.0)
+    max_allowed_steps = max(64, int(4 * max(width, height)))
+    num_steps = min(
+        max(1, int(math.ceil(effective_dist_px / max(1.0, min_r * 0.75)))),
+        max_allowed_steps,
+    )
 
     for step in range(num_steps + 1):
         alpha = float(step) / float(num_steps)
@@ -154,6 +204,8 @@ def _rasterize_3d_segment(
         )
         rx = camera.fx * radius_m / zc
         ry = camera.fy * radius_m / zc
+        if uc + rx < 0 or uc - rx >= width or vc + ry < 0 or vc - ry >= height:
+            continue
         _rasterize_ellipse(mask, uc, vc, rx, ry, width, height)
 
 
@@ -193,14 +245,30 @@ class ArticulatedSilhouetteRenderer:
                 f"Expected SubjectModelBinding, got {type(subject_binding).__name__}"
             )
         self._subject_binding = subject_binding
-        self._segment_lengths = (
-            segment_lengths if segment_lengths is not None else SegmentLengths()
-        )
+        env = subject_binding.visual_envelope
+        # Reference golfer height is 1.78 m (SI units)
+        nominal_height_m = float(env.get("height_m", 1.78))
+        self._body_scale = nominal_height_m / 1.78
+        if segment_lengths is not None:
+            self._segment_lengths = segment_lengths
+        else:
+            scale = self._body_scale
+            self._segment_lengths = SegmentLengths(
+                pelvis_to_spine=0.20 * scale,
+                spine_to_torso=0.20 * scale,
+                torso_to_shoulder=0.18 * scale,
+                upper_arm=0.30 * scale,
+                forearm=0.27 * scale,
+                hand=0.10 * scale,
+                club_shaft=1.10,
+                pelvis_to_hip=0.10 * scale,
+                thigh=0.44 * scale,
+                shin=0.42 * scale,
+                foot=0.18 * scale,
+            )
         if club_radius_m <= 0.0 or not math.isfinite(club_radius_m):
             raise ValueError(f"club_radius_m must be positive, got {club_radius_m}")
         self._club_radius_m = float(club_radius_m)
-        env = subject_binding.visual_envelope
-        self._body_scale = float(env.get("height_m", 1.80) / 1.80)
 
     @property
     def subject_binding(self) -> SubjectModelBinding:
@@ -221,9 +289,9 @@ class ArticulatedSilhouetteRenderer:
                 f"got {request.state_convention!r}"
             )
 
-        if len(request.state) != _CANONICAL_FIELD_COUNT:
+        if len(request.state) not in (_CANONICAL_FIELD_COUNT, 27):
             raise ValueError(
-                f"ArticulatedSilhouetteRenderer requires {_CANONICAL_FIELD_COUNT} state elements for "
+                f"ArticulatedSilhouetteRenderer requires {_CANONICAL_FIELD_COUNT} (or 27) state elements for "
                 f"{CANONICAL_ARTICULATED_CONVENTION!r}, got {len(request.state)}"
             )
 
