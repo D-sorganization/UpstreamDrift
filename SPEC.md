@@ -5526,17 +5526,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10316 | Optimized np.linalg.norm with math.sqrt(dot) in mujoco_swing_source.py. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10315 | Expose Pink constrained IK solver across motion pipeline, CLI/GUI controls, and versioned receipts (#10278). |
+| 2026-09-16 | #10248 | Replaced `np.linalg.norm(span_mm)` with `math.sqrt(np.vdot(span_mm, span_mm))` for small 3D vectors in `src/tools/bunker_shot_gui/render3d_vtk.py` avoiding np.linalg.norm overhead. (spec-exempt: micro-optimization) |
 | 2026-09-16 | #10244 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` in `src/engines/physics_engines/mujoco/python/full_body_markers.py` to optimize execution time while avoiding intermediate allocations. (spec-exempt: micro-optimization) |
-| 2026-09-17 | #10310 | Implement ConstrainedIKBackend protocol, physical-time rate audits, and PinkTrajectoryService with decoupled timing and structured failure semantics (#10277). |
-| 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
-| 2026-09-16 | #10268 | Add reproducible optional motion runtime and isolated fail-closed capability receipts. |
-| 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
-| 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
-| 2026-09-16 | #10270 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |
-| 2026-09-16 | #10263 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
-| 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
-| 2026-09-16 | #10274 | Correct Shadow Tracker estimated-timing capability and refresh restart guidance for renderer, mask persistence and native timestamp evidence. |
-| 2026-09-16 | #10232 | Bind silhouette rendering to articulated model state and clip visible geometry across camera boundaries. |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
