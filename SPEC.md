@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Native Timestamp Authority and Observation Provenance (#10273)
+
+Preserves native container timestamp authority and decoder provenance across ingestion and observation records:
+- **Container PTS Extraction (`extract_iso_bmff_pts`)**: Standard library ISO-BMFF box parser reading timescale from `mdhd` and exact presentation timestamps from `stts` and optional composition offsets `ctts`. Detects genuine variable frame rate (VFR) containers without external dependencies.
+- **OpenCvVideoDecoder Timing Authority**: Automatically discovers container presentation timestamps for variable frame rate media, configuring `timing_mode="container_pts"`, `is_timing_exact=True`, and `clock_evidence="container_pts_metadata"`. Explicit caller `pts_ticks` require an explicit `timebase` and establish `timing_mode="authoritative"`, `is_timing_exact=True`, and `clock_evidence="caller_authoritative_pts"`. Missing, corrupt, or uniform CFR containers without authoritative per-sample tables safely default to `timing_mode="estimated_cfr"`, `is_timing_exact=False`, and `clock_evidence="estimated_nominal_fps"`.
+- **Contract Provenance & Migration**: `FrameIdentity` and `FrameObservation` contracts preserve `timing_mode`, `is_timing_exact`, `clock_evidence`, `decoder_name`, `decoder_version`, and `pixel_format` across serialization and deserialization, safely migrating legacy 1.0.0 payloads without data loss.
+
 ## Shadow Tracker Manual Mask Revision Persistence and Lineage Protection (#10233)
 
 Protects manual mask revision identity and establishes durable, atomic mask history and lineage:
