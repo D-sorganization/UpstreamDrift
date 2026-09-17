@@ -1,10 +1,43 @@
 # Native Multi-Engine Matching Handoff
 
+## Package B Completed: Saved-Run Product Polish Delivered
+
+Package B of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
+(epic #10285) is complete. Key deliverables implemented test-first and verified:
+
+1. **SimulationDataStore Replay Catalog**: Extended `SimulationDataStore` with `register_replay_bundle`,
+   `list_catalog_entries`, `get_catalog_entry`, and automatic `discover_known_manifests`. Verified
+   provenance, duration, sample count, qualification status (`rejected`), and artifact hash validation.
+2. **Catalog Discovery & Run Selection**: `TourMatchingViewerWidget` auto-discovers and populates
+   the saved run catalog in its toolbar. Selecting `simscape-returned102` immediately loads the verified
+   retained run without requiring the user to navigate or locate arbitrary NPZ archives.
+3. **Speed & Restart Controls**: Added playback rate controls (`0.25x`, `0.5x`, `1.0x`, `2.0x`) through
+   the existing source-time presentation clock (`MonotonicReplayClock.set_playback_rate`), preserving
+   monotonicity without drifting or re-running physics. Added dedicated restart control (`⏮ Restart`)
+   resetting clock and frame to 0.0 s.
+4. **Cylinder Rendering & Persistent Cameras**: Implemented drawing-only 3D cylinder surface rendering
+   via `Poly3DCollection` and `cylinder_faces`, with toggleable line skeleton mode. Maintained persistent
+   camera orientation across scrubs, frames, and playback, alongside multi-angle camera presets
+   (Perspective, Face-On, Down-the-Line, Top-Down).
+5. **Marker Error Vectors & Effort Display**: Added visual marker error overlay vectors (`marker_error_vectors`)
+   connecting corresponding target and model markers. Prominently displayed explicit effort status badge
+   identifying missing generalized force samples (`Torque (τ): Recorded Torque Unavailable`) without
+   manufacturing zero torques.
+6. **Report & Animation Inspection Actions**: Added one-click inspection dialogs:
+   - `ReportInspectorDialog`: Displays certified R2025b gates (showing gate3 fail vs gate1/2/4/5 pass),
+     metrics, and solver config with explicit notice of offline retained evidence.
+   - `AnimationInspectorDialog`: Plays and presents the actual R2025b cylinder animation GIF with external
+     viewer launch capabilities.
+7. **Verification**: 78 unit tests passing across `tests/unit/simulation_store/` and `tests/unit/tools/`
+   (`test_simulation_data_store.py`, `test_tour_matching_viewer_adapter.py`, `test_tour_matching_viewer_core.py`),
+   with 0 ruff errors, 0 format discrepancies, and 0 mypy issues.
+
 ## Package A Completed: Calibration Decision Report Filed
 
 Package A of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
 is complete. Read the full decision report:
 [Package A Calibration Decision](simscape_tour_matching/PACKAGE_A_CALIBRATION_DECISION.md).
+
 Key conclusions:
 
 1. Fixed-offset parameter recalibration on the baseline single-Hub topology drops

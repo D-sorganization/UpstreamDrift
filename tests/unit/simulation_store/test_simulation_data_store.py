@@ -328,3 +328,98 @@ class TestJsonFileFormat:
         store.save_run("r2", {"b": 2})
         files = {p.stem for p in tmp_path.glob("*.json")}
         assert files == {"r1", "r2"}
+
+
+# ---------------------------------------------------------------------------
+# Replay Bundle Catalog
+# ---------------------------------------------------------------------------
+
+
+class TestReplayBundleCatalog:
+    @pytest.fixture()
+    def manifest_path(self) -> Path:
+        root = Path(__file__).resolve().parents[3]
+        manifest = (
+            root
+            / "docs/development/simscape_tour_matching/native_evidence/simscape_returned102.replay.json"
+        )
+        assert manifest.exists(), f"Manifest fixture missing: {manifest}"
+        return manifest
+
+    def test_register_replay_bundle_valid_manifest(
+        self, store: SimulationDataStore, manifest_path: Path
+    ) -> None:
+        entry = store.register_replay_bundle(manifest_path)
+        assert entry["run_id"] == "simscape-returned102"
+        assert entry["engine"] == "simscape"
+        assert entry["status"] == "rejected"
+        assert entry["tau_status"] == "unavailable"
+        assert entry["has_torque"] is False
+        assert entry["duration_s"] == 0.85
+        assert entry["n_samples"] == 307
+        assert entry["is_replay_catalog"] is True
+        assert Path(entry["manifest_path"]).resolve() == manifest_path.resolve()
+        assert Path(entry["report_path"]).exists()
+        assert "gate1_whole_rms_25mm" in entry["gates"]
+        assert entry["gates"]["gate1_whole_rms_25mm"] is True
+        assert entry["gates"]["gate3_terminal_rms_35mm"] is False
+
+        # Verify entry is retrievable via load_run and get_catalog_entry
+        loaded = store.load_run("simscape-returned102")
+        assert loaded["run_id"] == "simscape-returned102"
+        assert store.get_catalog_entry("simscape-returned102") == entry
+
+    def test_register_replay_bundle_missing_file_raises(
+        self, store: SimulationDataStore, tmp_path: Path
+    ) -> None:
+        missing = tmp_path / "nonexistent.replay.json"
+        with pytest.raises(FileNotFoundError):
+            store.register_replay_bundle(missing)
+
+    def test_register_replay_bundle_corrupted_hash_raises(
+        self, store: SimulationDataStore, manifest_path: Path, tmp_path: Path
+    ) -> None:
+        # Create a manifest pointing to a corrupted file
+        doc = json.loads(manifest_path.read_text(encoding="utf-8"))
+        # Change model sha256 to a bogus hash
+        doc["artifacts"]["model"]["sha256"] = "0" * 64
+        corrupted_manifest = tmp_path / "corrupted.replay.json"
+        corrupted_manifest.write_text(json.dumps(doc), encoding="utf-8")
+        # Also copy over artifacts or symlink
+        for art_val in doc["artifacts"].values():
+            src_file = manifest_path.parent / art_val["path"]
+            dst_file = tmp_path / art_val["path"]
+
+            dst_file.parent.mkdir(parents=True, exist_ok=True)
+            dst_file.write_bytes(src_file.read_bytes())
+
+        with pytest.raises(ValueError, match="Artifact hash mismatch"):
+            store.register_replay_bundle(corrupted_manifest)
+
+    def test_list_catalog_entries(
+        self, store: SimulationDataStore, manifest_path: Path
+    ) -> None:
+        # Initially empty catalog
+        assert store.list_catalog_entries() == []
+
+        # Save an ordinary non-catalog run
+        store.save_run("plain_run", {"some": "data"})
+        assert store.list_catalog_entries() == []
+
+        # Register replay manifest
+        store.register_replay_bundle(manifest_path)
+        catalog = store.list_catalog_entries()
+        assert len(catalog) == 1
+        assert catalog[0]["run_id"] == "simscape-returned102"
+
+    def test_get_catalog_entry_unknown_raises_key_error(
+        self, store: SimulationDataStore
+    ) -> None:
+        with pytest.raises(KeyError):
+            store.get_catalog_entry("unknown_run")
+
+    def test_discover_known_manifests(self, store: SimulationDataStore) -> None:
+        discovered = store.discover_known_manifests()
+        assert len(discovered) >= 1
+        names = [p.name for p in discovered]
+        assert "simscape_returned102.replay.json" in names

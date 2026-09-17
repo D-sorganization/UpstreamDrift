@@ -60,8 +60,11 @@ def test_load_replay_npz_happy_path(tmp_path: Path) -> None:
     assert replay.frame_count == n_frames
     assert np.allclose(replay.time_s, time_s)
     assert replay.coordinates.shape == (n_frames, n_coords)
+    assert replay.model_markers_m is not None
     assert replay.model_markers_m.shape == (n_frames, n_markers, 3)
+    assert replay.target_markers_m is not None
     assert replay.target_markers_m.shape == (n_frames, n_markers, 3)
+    assert replay.valid_mask is not None
     assert replay.valid_mask.shape == (n_frames, n_markers)
 
 
@@ -186,8 +189,11 @@ def test_viewer_frame_computes_world_segments_and_markers(tmp_path: Path) -> Non
 
     frame_data = viewer_frame(spec, replay, 0)
     assert len(frame_data.segments) > 20
+    assert frame_data.target_markers is not None
     assert frame_data.target_markers.shape == (n_markers, 3)
+    assert frame_data.model_markers is not None
     assert frame_data.model_markers.shape == (n_markers, 3)
+    assert frame_data.valid_mask is not None
     assert frame_data.valid_mask.shape == (n_markers,)
     assert frame_data.rms_error >= 0.0
 
@@ -240,3 +246,60 @@ def test_visual_capsules_start_at_joint_follower_origins() -> None:
         np.testing.assert_allclose(
             segment.start_m, followers[segment.body][:3, 3], atol=1e-12
         )
+
+
+def test_cylinder_faces_geometry() -> None:
+    from src.tools.tour_matching_viewer.core import cylinder_faces
+
+    # Zero length segment returns empty faces
+    assert cylinder_faces([0, 0, 0], [0, 0, 0], 0.05) == []
+    # Zero or negative radius returns empty faces
+    assert cylinder_faces([0, 0, 0], [0, 0, 1], 0.0) == []
+    assert cylinder_faces([0, 0, 0], [0, 0, 1], -0.05) == []
+
+    # Valid cylinder produces n_theta quads
+    faces = cylinder_faces([0, 0, 0], [0, 0, 1], 0.05, n_theta=12)
+    assert len(faces) == 12
+    for quad in faces:
+        assert quad.shape == (4, 3)
+        # Check Z coordinates: 2 vertices at z=0, 2 vertices at z=1
+        z_vals = sorted(quad[:, 2])
+        np.testing.assert_allclose(z_vals[:2], [0.0, 0.0], atol=1e-9)
+        np.testing.assert_allclose(z_vals[2:], [1.0, 1.0], atol=1e-9)
+        # Check radial distance in xy is ~0.05
+        radii = np.linalg.norm(quad[:, :2], axis=1)
+        np.testing.assert_allclose(radii, 0.05, atol=1e-9)
+
+
+def test_marker_error_vectors_and_magnitudes() -> None:
+    from src.tools.tour_matching_viewer.core import marker_error_vectors
+
+    targets = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
+    models = np.array([[0.0, 0.0, 0.01], [1.0, 0.02, 0.0], [2.0, 0.0, 0.0]])
+    valid = np.array([True, True, False])
+
+    lines = marker_error_vectors(targets, models, valid)
+    assert len(lines) == 2
+    np.testing.assert_allclose(lines[0][0], targets[0])
+    np.testing.assert_allclose(lines[0][1], models[0])
+    np.testing.assert_allclose(lines[1][0], targets[1])
+    np.testing.assert_allclose(lines[1][1], models[1])
+
+    # Viewer frame computes per-marker errors in mm
+    spec = json.loads(SPEC_PATH.read_text())
+    names = tuple(spec["coordinate_order"])
+    q = np.zeros(len(names))
+    replay = ReplayData(
+        time_s=np.array([0.0]),
+        coordinates=q[None, :],
+        model_markers_m=models[None, :],
+        target_markers_m=targets[None, :],
+        valid_mask=valid[None, :],
+        coordinate_names=names,
+    )
+    vframe = viewer_frame(spec, replay, 0)
+    assert vframe.marker_errors_mm is not None
+    assert len(vframe.marker_errors_mm) == 3
+    np.testing.assert_allclose(vframe.marker_errors_mm[0], 10.0, atol=1e-6)  # 10 mm
+    np.testing.assert_allclose(vframe.marker_errors_mm[1], 20.0, atol=1e-6)  # 20 mm
+    np.testing.assert_allclose(vframe.marker_errors_mm[2], 0.0, atol=1e-6)
