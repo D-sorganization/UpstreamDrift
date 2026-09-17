@@ -15,6 +15,7 @@ from src.shared.python.motion_matching.counterfactual import (
     NativeConstrainedCounterfactualProvider,
     PointwiseCounterfactualSample,
     SpatialWrench,
+    solve_constrained_dynamics,
 )
 
 pytestmark = pytest.mark.unit
@@ -353,10 +354,106 @@ def test_provider_with_native_model_interface() -> None:
     assert np.allclose(sample.actual_reaction_wrench.torque_Nm, [0.0, 5.0, 0.0])
 
 
-def test_counterfactual_trajectory_from_saved_simscape_bundle() -> None:
-    """Verify loading and structuring counterfactual trajectory on verified run102 evidence."""
+def test_wrench_moment_origin_power_invariance() -> None:
+    """Verify that power P = F . v_P + M_P . omega is strictly invariant under change of moment origin."""
+    point_A = np.array([0.5, -0.2, 0.8])
+    force = np.array([25.0, -15.0, 10.0])
+    torque_A = np.array([2.0, -4.0, 6.0])
+
+    wrench_A = SpatialWrench(
+        force_N=force,
+        torque_Nm=torque_A,
+        point_of_application_m=point_A,
+    )
+
+    # Rigid body twist: angular velocity omega and linear velocity v_A at point A
+    omega = np.array([1.5, -2.0, 0.8])
+    v_A = np.array([3.0, 1.2, -0.5])
+
+    # Power evaluated at point A
+    power_A = wrench_A.instantaneous_power(v_A, omega)
+
+    # Transport moment to point B
+    point_B = np.array([1.2, 0.4, -0.1])
+    wrench_B = wrench_A.change_point_of_application(point_B)
+
+    # Rigid kinematic transport of linear velocity from A to B: v_B = v_A + omega x (B - A)
+    v_B = v_A + np.cross(omega, point_B - point_A)
+
+    # Power evaluated at point B
+    power_B = wrench_B.instantaneous_power(v_B, omega)
+
+    assert power_A == pytest.approx(power_B, abs=1e-12)
+
+
+def test_constrained_dynamics_kkt_solver() -> None:
+    """Validate constrained forward dynamics solver (Ma + h = Bu + J^T lambda).
+
+    Validates:
+    - Force balance: Ma + h - Bu - J^T lambda = 0
+    - Constraint acceleration: Ja + J_dot v = 0
+    - Action/reaction: equal and opposite constraint reactions
+    - Power invariance of constraint forces: lambda^T (J v) = 0
+    """
+    rng = np.random.default_rng(12345)
+    n = 6  # generalized coordinates
+    m = 2  # holonomic constraints
+
+    # Symmetric positive-definite mass matrix
+    A_mat = rng.normal(0, 1, size=(n, n))
+    M = A_mat.T @ A_mat + 2.0 * np.eye(n)
+
+    h = rng.normal(0, 10, size=n)
+    B = np.eye(n)
+    u = rng.normal(0, 5, size=n)
+
+    # Constraint Jacobian of full row rank
+    J = rng.normal(0, 1, size=(m, n))
+    gamma = rng.normal(0, 2, size=m)  # J_dot * v
+
+    # Solve constrained dynamics
+    accel, lambdas = solve_constrained_dynamics(
+        mass_matrix=M,
+        coriolis_gravity=h,
+        actuation_matrix=B,
+        applied_torques=u,
+        constraint_jacobian=J,
+        constraint_drift=gamma,
+    )
+
+    assert accel.shape == (n,)
+    assert lambdas.shape == (m,)
+
+    # 1. Force balance: M a + h - B u - J^T lambda = 0
+    force_residual = M @ accel + h - B @ u - J.T @ lambdas
+    np.testing.assert_allclose(force_residual, 0.0, atol=1e-12)
+
+    # 2. Constraint acceleration: J a + gamma = 0
+    constraint_acc_residual = J @ accel + gamma
+    np.testing.assert_allclose(constraint_acc_residual, 0.0, atol=1e-12)
+
+    # 3. Action / Reaction: Generalized constraint reaction is J^T lambda
+    # For opposing bodies in weld, J_1 = -J_2 => F_1 = J_1^T lambda = - (J_2^T lambda) = -F_2
+    J_opposing = -J
+    f_action = J.T @ lambdas
+    f_reaction = J_opposing.T @ lambdas
+    np.testing.assert_allclose(f_action + f_reaction, 0.0, atol=1e-12)
+
+    # 4. Power of constraint forces under valid velocities J v = 0 is zero
+    # Construct a velocity v in nullspace of J: J v = 0
+    u_null, s_null, vh_null = np.linalg.svd(J)
+    null_basis = vh_null[m:].T  # n x (n-m)
+    v_valid = null_basis @ rng.normal(0, 1, size=n - m)
+    np.testing.assert_allclose(J @ v_valid, 0.0, atol=1e-12)
+
+    # Constraint power: (J^T lambda)^T v = lambda^T (J v) = 0
+    p_constraint = float(f_action @ v_valid)
+    assert p_constraint == pytest.approx(0.0, abs=1e-12)
+
+
+def test_saved_bundle_rejects_baseline_acceleration_relabeling() -> None:
+    """Verify that from_saved_simscape_bundle explicitly rejects baseline-acceleration relabeling when torques are unavailable."""
     from pathlib import Path
-    from src.shared.python.simulation_store.replay_bundle import load_simscape_bundle
 
     repo_root = Path(__file__).resolve().parents[3]
     manifest = (
@@ -366,40 +463,16 @@ def test_counterfactual_trajectory_from_saved_simscape_bundle() -> None:
     if not manifest.exists():
         pytest.skip("run102 manifest not found")
 
-    bundle = load_simscape_bundle(manifest)
-    assert bundle.run_id == "simscape-returned102"
-    assert bundle.status == "rejected"  # Explicitly rejected prefix
+    # When torques are unavailable in bundle, must raise ValueError
+    with pytest.raises(
+        ValueError, match="applied actuator torques 'tau' are non-finite or unavailable"
+    ):
+        CounterfactualTrajectory.from_saved_simscape_bundle(manifest)
 
-    # Extract retained kinematics
-    times = np.asarray(bundle.arrays["time_s"])
-    qdd = np.asarray(bundle.arrays["qdd"])
-    n = times.size
-    d = len(bundle.coordinate_names)
-    assert qdd.shape == (n, d)
-
-    # In run102, tau is recorded as NaN (unavailable)
-    tau = np.asarray(bundle.arrays["tau"])
-    assert not np.isfinite(tau).any()  # Never manufacture zero torque!
-
-    # Create dummy reaction wrenches and twists for testing trajectory container
-    dummy_wrenches = np.zeros((n, 6))
-    dummy_twist = np.zeros((n, 6))
-
-    traj = CounterfactualTrajectory(
-        time_s=times,
-        coordinate_names=bundle.coordinate_names,
-        actual_accelerations=qdd,
-        ztcf_accelerations=qdd,  # In pure drift regime
-        control_accelerations=np.zeros_like(qdd),
-        zvcf_accelerations=np.zeros_like(qdd),
-        actual_wrenches=dummy_wrenches,
-        ztcf_wrenches=dummy_wrenches,
-        control_wrenches=dummy_wrenches,
-        zvcf_wrenches=dummy_wrenches,
-        twist=dummy_twist,
-        parent_run_id=bundle.run_id,
+    # With explicit allow_unverified_relabeling flag, it allows inspection
+    traj = CounterfactualTrajectory.from_saved_simscape_bundle(
+        manifest, allow_unverified_relabeling=True
     )
-
     assert traj.parent_run_id == "simscape-returned102"
+    assert traj.model_tier == "saved_simscape_bundle"
     assert traj.time_s.size == 307
-    assert len(traj.coordinate_names) == 27

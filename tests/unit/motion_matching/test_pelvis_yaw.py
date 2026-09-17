@@ -177,6 +177,92 @@ def test_pelvis_yaw_degenerate_and_missing_markers() -> None:
         marker_jac_term=np.zeros((2, 3, 3)),
     )
     assert not m.valid
+    assert np.isnan(m.yaw_target_deg)
+    assert np.isnan(m.yaw_diff_deg)
+    assert np.isnan(m.pelvis_yaw_error_pct)
     assert res.shape == (2,)
     assert jac is not None
     assert jac.shape == (2, 3)
+
+
+def test_pelvis_yaw_target_valid_flag_unobserved_waist_marker() -> None:
+    """Missing or unobserved waist markers in target_valid must produce unavailable measurements, never synthetic targets."""
+    wl_i, wr_i = 0, 1
+    target = np.zeros((2, 3))
+    target[0] = [0.1, 0.2, 0.0]  # WaistLeft
+    target[1] = [0.0, 0.0, 0.0]  # WaistRight unobserved, defaulted to origin
+
+    pred = np.zeros((2, 3))
+    pred[0] = [0.1, 0.2, 0.0]
+    pred[1] = [0.4, 0.2, 0.0]
+
+    # Without target_valid, the distance between target[1] and target[0] is > 0.1 m,
+    # which would spuriously compute an artificial angle pointing across the room (~116 deg)
+    # With target_valid specifying wr is invalid:
+    target_valid = np.array([True, False], dtype=bool)
+
+    m = compute_pelvis_yaw_metrics(
+        pred, target, wl_i=wl_i, wr_i=wr_i, target_valid=target_valid
+    )
+    assert not m.valid
+    assert np.isnan(m.yaw_target_deg)
+    assert np.isnan(m.yaw_diff_deg)
+    assert np.isnan(m.pelvis_yaw_error_pct)
+
+    # Residual and derivative must be zero with no penalty
+    res, jac, m_deriv = compute_pelvis_yaw_residual_and_derivative(
+        pred,
+        target,
+        wl_i=wl_i,
+        wr_i=wr_i,
+        yaw_weight=50.0,
+        marker_jac_term=np.ones((2, 3, 4)),
+        target_valid=target_valid,
+    )
+    assert not m_deriv.valid
+    np.testing.assert_allclose(res, [0.0, 0.0])
+    assert jac is not None
+    np.testing.assert_allclose(jac, 0.0)
+
+    # Same if wl is invalid
+    target_valid_wl = np.array([False, True], dtype=bool)
+    m_wl = compute_pelvis_yaw_metrics(
+        pred, target, wl_i=wl_i, wr_i=wr_i, target_valid=target_valid_wl
+    )
+    assert not m_wl.valid
+    assert np.isnan(m_wl.yaw_target_deg)
+
+
+def test_pelvis_yaw_pred_valid_flag() -> None:
+    """Invalid prediction markers must produce unavailable yaw metrics and zero residual/derivative."""
+    wl_i, wr_i = 0, 1
+    target = np.zeros((2, 3))
+    target[0] = [0.0, 0.0, 0.0]
+    target[1] = [1.0, 0.0, 0.0]
+
+    pred = np.zeros((2, 3))
+    pred[0] = [0.0, 0.0, 0.0]
+    pred[1] = [1.0, 0.0, 0.0]
+
+    pred_valid = np.array([True, False], dtype=bool)
+    m = compute_pelvis_yaw_metrics(
+        pred, target, wl_i=wl_i, wr_i=wr_i, pred_valid=pred_valid
+    )
+    assert not m.valid
+    assert np.isnan(m.yaw_pred_deg)
+    assert np.isnan(m.yaw_diff_deg)
+    assert np.isnan(m.pelvis_yaw_error_pct)
+
+    res, jac, m_deriv = compute_pelvis_yaw_residual_and_derivative(
+        pred,
+        target,
+        wl_i=wl_i,
+        wr_i=wr_i,
+        yaw_weight=30.0,
+        marker_jac_term=np.ones((2, 3, 2)),
+        pred_valid=pred_valid,
+    )
+    assert not m_deriv.valid
+    np.testing.assert_allclose(res, [0.0, 0.0])
+    assert jac is not None
+    np.testing.assert_allclose(jac, 0.0)

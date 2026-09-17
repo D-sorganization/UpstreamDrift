@@ -23,9 +23,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #10285 (counterfactual sibling #10286)
 - **Branch:** feat/10285-native-saved-replay
+- **PR:** #10287
 - **Paths:** src/tools/tour_matching_viewer; src/shared/python/simulation_store; docs/development/simscape_tour_matching
 - **Started:** 2026-09-16
-- **Last verified:** 2026-09-17 (SELF; 78 tests pass across test_simulation_data_store, test_tour_matching_viewer_adapter, and test_tour_matching_viewer_core; ruff check clean, ruff format clean, mypy clean with 0 errors)
+- **Last verified:** 2026-09-17 (`88da1c572`; SELF; 78 tests pass across test_simulation_data_store, test_tour_matching_viewer_adapter, and test_tour_matching_viewer_core; ruff check clean, ruff format clean, mypy clean with 0 errors)
 - **Summary:** Package B product polish delivered test-first: SimulationDataStore extended with replay cataloging, manifest discovery, and hash/path verification. TourMatchingViewerWidget upgraded with shared catalog selection for run102 (and all registered runs), source-time clock speed controls (0.25x, 0.5x, 1.0x, 2.0x via MonotonicReplayClock), restart control, persistent camera across scrubbing/playback, multi-angle camera presets, true 3D cylinder rendering (Poly3DCollection and cylinder_faces), toggleable marker error vectors, explicit unavailable torque badge, and interactive inspection dialogs for the verified R2025b qualification report and cylinder animation GIF. Zero claims that playback reruns physics.
 - **Next step:** Package B product polish is complete on feat/10285-native-saved-replay. Proceed to Package C (Native Counterfactual Qualification) under epic #10286 in a separate worktree following SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md.
 
@@ -35,9 +36,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #10286 (sibling #10285)
 - **Branch:** feat/10285-native-saved-replay
+- **PR:** #10287
 - **Paths:** src/shared/python/motion_matching/counterfactual.py; src/shared/python/motion_matching/counterfactual_matrix.py; src/engines/physics_engines; src/tools/tour_matching_viewer; src/api; tests/unit/motion_matching; tests/unit/tools; tests/unit/api; docs/development/simscape_tour_matching
 - **Started:** 2026-09-17
-- **Last verified:** 2026-09-17 (SELF; 70 tests pass across test_native_counterfactual, test_counterfactual_matrix, test_forward_ztcf, test_routes_counterfactual, test_tour_matching_viewer_core, test_tour_matching_viewer_adapter, and test_two_hand_wscg_analysis; ruff check and format clean; mypy clean with 0 issues on target files; architecture budget and divergence inventory pass)
+- **Last verified:** 2026-09-17 (`88da1c572`; SELF; 70 tests pass across test_native_counterfactual, test_counterfactual_matrix, test_forward_ztcf, test_routes_counterfactual, test_tour_matching_viewer_core, test_tour_matching_viewer_adapter, and test_two_hand_wscg_analysis; ruff check and format clean; mypy clean with 0 issues on target files; architecture budget and divergence inventory pass)
 - **Summary:** Delivered complete Package C milestones CF-1 through CF-8 test-first for epic #10286. Implemented versioned spatial wrench contracts (SpatialWrench with Varignon moment transport and action-reaction negation, PointwiseCounterfactualSample), NativeConstrainedCounterfactualProvider with Pinocchio closure_reaction_wrench, 3D spatial power/work/impulse integrals, and authoritative 5-engine capability matrix (counterfactual_matrix.py) with state restoration guarantees and zero silent fallbacks. Implemented forward branched ZTCF dynamics rollouts (ForwardZTCFBranch, CutState, RK4 integration, explicit rejection of forward ZVCF rollouts). Added /analysis/counterfactual API route with offline catalog baseline execution. Integrated reaction wrenches into Tour Matching Viewer (TourMatchingViewerWidget with CF badge, 'Reaction Wrenches (CF)' 3D overlay, load_counterfactual_trajectory, and provenance table export). Verified WSCG 2024 two-hand model audit reproduction and byte-deterministic evidence generation.
 - **Next step:** Merge PR on feat/10285-native-saved-replay closing epic #10286. Proceed to next active work package or maintenance issue.
 
@@ -47,11 +49,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex (turnover review; execution ownership by next lease)
 - **Issue:** #9967 (parent #9921)
 - **Branch:** feat/9967-native-simscape-pinocchio
+- **PR:** #10219; #10287
 - **Paths:** src/shared/python/motion_matching; docs/development/simscape_tour_matching
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-17 (SELF; Package A diagnosis completed; 17 unit tests pass across test_rigidity, test_marker_calibration, and test_constrained_marker_pose; ruff check and format clean; calibration decision report completed)
-- **Summary:** Package A calibration audit completed. Parameter recalibration of fixed marker attachments under the single-Hub baseline topology fails to generalize (+0.18 mm error increase on held-out validation frames). Rigidity analysis confirms 109.6 mm non-rigid deformation between head and back markers across the capture; split-cluster rigid floor drops from 14.59 mm to 3.72 mm (head cluster 0.16 mm, back cluster 5.05 mm). Active bounds and 1.25s spike (84.03 mm) resolved to WaistRight marker occlusion and artificial yaw penalty; relieved solve achieves 31.08 mm with 0 active bounds. Decision report filed in docs/development/simscape_tour_matching/PACKAGE_A_CALIBRATION_DECISION.md.
-- **Next step:** Review Package A decision report with team to decide whether to introduce an explicit 3-DOF cervical articulation (neck) between UpperTorsoBase and Head or re-scope Hub tracking markers before launching bounded 0.90 s dynamic control continuation. Preserved baseline Simscape model and acceptance gates without unauthorized mutation.
+- **Last verified:** 2026-09-17 (`88da1c572`; SELF; Checkpoints 1-6 complete: sensitivities suite 222 passed; bounded 0-0.90s SLSQP Candidate 103 converged on ControlTower with Whole RMS 23.25 mm, Early RMS 10.15 mm, Club RMS 26.42 mm; qualified cold replay on DeskComputer in MATLAB R2025b Update 5 achieves 2.77 um mean Euclidean cross-engine parity with zero state resets; 16 unit tests pass in test_pelvis_yaw and test_native_counterfactual; ruff and black clean)
+- **Summary:** Checkpoints 1–6 complete across epics #9921, #9967, and #10286. Package A calibration decision report completed with mathematical rigor distinguishing cluster vs articulated solves. Fixed yaw target validity using TDD; missing/degenerate waist markers generate unavailable yaw, eliminating synthetic targets. Evaluated segment lengths and marker offsets under held-out validation on unchanged topology. Evaluated 3-DOF spherical neck joint proposal on versioned spec (full_body_spec_v2_neck_proposal.json). Verified full trajectory sensitivity suite (222 passed). Executed bounded 0–0.90s two-window direct-node SLSQP continuation (Candidate 103), achieving an 84.9% loss reduction ($354.53 \to 53.67$), Whole RMS 23.25 mm (Gate <= 25 mm PASS), Early RMS 10.15 mm (Gate <= 12 mm PASS), Clubhead cluster 26.41 mm (Gate <= 60 mm PASS), and Terminal RMS 50.91 mm (down from 127.97 mm). Validated cold on DeskComputer via uninterrupted MATLAB R2025b Update 5 simulation (36.27 s, zero state resets, 2.77 um mean Euclidean parity vs Pinocchio).
+- **Next step:** Advance continuation ladder from 0.90s toward tour impact window (t = 1.233s) using bounded multiple shooting with qualified neck joint and segment length calibration. Preserved Simscape model baseline and acceptance gates without unauthorized in-place mutation.
 
 ### DL-#10204 · Capture Rig Shared Camera Layer
 

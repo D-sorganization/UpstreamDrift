@@ -1,0 +1,30 @@
+{
+  "qualification": "biomechanical joint-fit test: evaluates whether relative Head/Back motion across all 654 frames is explained by a 3-DOF spherical joint (cervical spine)",
+  "frame_count": 654,
+  "head_on_back_3d_rotation": {
+    "min_deg": 0.0,
+    "max_deg": 74.38084298505161,
+    "range_deg": 74.38084298505161,
+    "mean_deg": 38.69739352019319
+  },
+  "calibrated_joint_center": {
+    "joint_center_in_back_frame_m": [
+      -0.07886160432925582, 0.0961449118910701, 0.08700965596805307
+    ],
+    "joint_center_in_head_frame_m": [
+      0.2251386063536169, -0.13228164144880203, -0.04873575834756426
+    ]
+  },
+  "spherical_joint_residual_mm": {
+    "mean_mm": 15.087216372722269,
+    "rms_mm": 15.98953772052385,
+    "p95_mm": 21.852224944933425,
+    "max_mm": 27.617666970302064
+  },
+  "rigid_0dof_baseline_deformation_mm": {
+    "max_pair_deformation_mm": 109.6,
+    "hub_cluster_rms_at_085s_mm": 47.66,
+    "peak_hub_cluster_rms_mm": 55.83
+  },
+  "conclusion": "A fixed cervical joint center with 3 rotational freedoms reduces the Head/Back relative tracking error from 55.83 mm peak (109.6 mm pair deformation) down to 15.09 mm mean / 15.99 mm RMS across a large 74.4 degree range of relative head tilt/rotation. The proposal is formulated as a separately versioned model while preserving the baseline Simscape model."
+}

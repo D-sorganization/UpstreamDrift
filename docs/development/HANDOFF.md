@@ -1,5 +1,26 @@
 # Native Multi-Engine Matching Handoff
 
+## Checkpoints 1–6 Complete: Bounded 0–0.90s SLSQP Optimization & R2025b Validation
+
+### Completion Levels by Verification Tier
+
+1. **Implementation Level**: Complete.
+   - Replaced baseline-acceleration relabeling with exact constrained dynamics evaluation ($M a + h = B u + J^T \lambda$).
+   - Corrected yaw target validity using TDD: unobserved waist markers produce unavailable yaw measurements rather than synthetic targets.
+   - Built reproducible calibration and decomposition scripts with held-out validation.
+   - Formulated 0–0.90s two-window direct-node SLSQP continuation (`two_window_fit_103.py`) with zero target-state resets.
+2. **Synthetic Testing Level**: Complete.
+   - 16/16 unit tests passing across `test_pelvis_yaw.py` and `test_native_counterfactual.py`.
+   - Full trajectory sensitivity test suite verified on ControlTower (222 passed, 1 skipped in 3.80s).
+   - Zero-displacement preflight parity confirmed to machine precision ($1.62 \times 10^{-11}$ defect, score agreement $1.01 \times 10^{-12}$).
+3. **Native-Engine Validation Level**: Complete.
+   - **Pinocchio 4.1.0 on ControlTower**: Candidate 103 converged with Whole RMS $23.25\text{ mm}$ ($\le 25.0\text{ mm}$ Gate PASS), Early RMS $10.15\text{ mm}$ ($\le 12.0\text{ mm}$ Gate PASS), Clubhead cluster RMS $26.42\text{ mm}$ ($\le 60.0\text{ mm}$ Gate PASS), Terminal RMS $50.94\text{ mm}$ (down $60.2\%$ from $127.97\text{ mm}$ baseline), and assembled cost reduced by $84.9\%$ ($354.53 \to 53.67$).
+   - **MATLAB R2025b Update 5 on DeskComputer**: Uninterrupted forward dynamics simulation (`replay_returned103_r2025b.m`, 325 frames @ 360 Hz, `ode15s`, `RelTol 1e-6`, `MaxStep 1/1440 s`) executed in 36.27 s with zero state resets. Demonstrated **$2.77\text{ }\mu\text{m}$** mean Euclidean cross-engine parity and **$0.194\text{ mm}$** maximum Euclidean discrepancy across all 325 frames and all 25 markers.
+4. **User-Interface Validation Level**: Complete.
+   - Tour Matching Viewer cataloging, replay speed controls, multi-angle camera presets, true 3D cylinder rendering, marker error vectors, and CF wrench overlays verified in #10285.
+
+---
+
 ## Package C Complete: Native Counterfactual Qualification (CF-1 Through CF-8 Complete)
 
 Package C of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
@@ -91,25 +112,30 @@ Package B of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACK
    (`test_simulation_data_store.py`, `test_tour_matching_viewer_adapter.py`, `test_tour_matching_viewer_core.py`),
    with 0 ruff errors, 0 format discrepancies, and 0 mypy issues.
 
-## Package A Completed: Calibration Decision Report Filed
+## Package A Diagnosis: Calibration Decision Report Filed
 
 Package A of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
-is complete. Read the full decision report:
+diagnosis is documented in:
 [Package A Calibration Decision](simscape_tour_matching/PACKAGE_A_CALIBRATION_DECISION.md).
 
-Key conclusions:
+Key diagnostic distinctions and conclusions:
 
-1. Fixed-offset parameter recalibration on the baseline single-Hub topology drops
-   training error (-2.62 mm) but fails to generalize on held-out validation (+0.18 mm).
-2. The fundamental error floor stems from a 109.6 mm non-rigid deformation between
-   head and back markers in the capture (`BackLeft`–`HeadSide` target distance varies
-   from 349.7 to 459.3 mm). Splitting head and back into independent rigid clusters
-   drops the aggregate rigid floor from 14.59 mm to 3.72 mm (head: 0.16 mm, back: 5.05 mm).
-3. The 1.25 s static solve spike (84.03 mm) is resolved to a `WaistRight` occlusion
-   interacting with an artificial yaw penalty; relieved unconstrained yaw achieves
-   31.08 mm with 0 active bounds.
-4. Next action: Review with team whether to introduce an explicit 3-DOF cervical (neck)
-   articulation or re-scope Hub tracking markers before running bounded 0.90 s continuation.
+1. **Offset-Only Calibration on Unchanged Topology:** Fixed-offset parameter recalibration
+   on the baseline single-Hub topology drops training aggregate RMS (-2.62 mm) but does not
+   generalize on held-out validation (+0.18 mm). Hub cluster error alone remains at 43.65 mm.
+   This offset-only test did not evaluate segment-length calibration or articulated alternatives.
+2. **Deformation vs. Independent Lower Bounds:** Relative deformation between head and back
+   markers reaches 109.6 mm in the capture (`BackLeft`–`HeadSide` target distance varies
+   from 349.7 to 459.3 mm). Splitting head and back into separate unconstrained 6D rigid bodies
+   drops the theoretical unconstrained lower bound from 14.59 mm to 3.72 mm (head cluster: 0.16 mm,
+   back cluster: 5.05 mm). These bounds represent complete physical disconnection, not connected poses.
+3. **Local Articulated Solutions & Yaw Artifacts:** The 1.25 s local articulated solve spike
+   (84.03 mm) was resolved to a `WaistRight` occlusion interacting with a corrupted target yaw vector;
+   relieved unconstrained yaw achieves 31.08 mm aggregate RMS with 0 active bounds.
+4. **Next Actions:** Evaluate permitted segment-length calibration alongside marker placements under
+   held-out validation; quantify whether a fixed-joint-center cervical rotation explains Head/Back motion
+   before considering topology proposals; preserve the baseline Simscape model and proceed toward a
+   reproducible, validated 0.90 s candidate.
 
 ## Current Entry Point
 

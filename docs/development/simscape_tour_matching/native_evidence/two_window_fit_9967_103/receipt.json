@@ -1,0 +1,48 @@
+{
+  "status": "terminal",
+  "residual_evaluations": 32,
+  "jacobians": 26,
+  "primal_windows": 62,
+  "restart_roundoff": {
+    "max_abs_increment_outside_box": 0.0,
+    "note": "Control bounds recentered on candidate 102 with symmetric box headroom +/- control_box"
+  },
+  "reference_closure_max_abs": 5.127454016928823e-12,
+  "zero_retraction_shift": 2.0123902544355587e-12,
+  "effort_cost_zero": 1.5531517741358203,
+  "config_sha256": "40f1923358a6526ec2a6d4de362e902981bb4b3f31ebc7e73641b05d1203b8a1",
+  "elapsed_s": 1777.829684975004,
+  "restart_uninterrupted_metrics": {
+    "whole_rms_m": 0.0276249792473915,
+    "early_rms_m": 0.009995357264954529,
+    "terminal_rms_m": 0.12797396459182075,
+    "club_cluster_rms_m": 0.15661866631245466,
+    "pelvis_yaw_error_pct": 26.707228609780977,
+    "pelvis_yaw_diff_deg": -13.68775235037728,
+    "score": 352.97725801634056,
+    "score_with_effort": 354.53040979047637
+  },
+  "zero_displacement_parity": {
+    "whole_rms_m": 0.027624979247410433,
+    "early_rms_m": 0.009995357264954529,
+    "terminal_rms_m": 0.12797396459185195,
+    "club_cluster_rms_m": 0.15661866631287036,
+    "pelvis_yaw_error_pct": 26.70722860981408,
+    "pelvis_yaw_diff_deg": -13.687752350394248,
+    "score": 352.9772580166982,
+    "effort_penalty_cost": 1.5531517741358203,
+    "score_with_effort": 354.530409790834,
+    "restart_score_with_effort": 354.53040979047637,
+    "relative_score_difference": 1.0088240150783581e-12,
+    "marker_max_abs_difference_vs_saved_m": 1.7688073228327994e-12,
+    "initial_scaled_defect_norm": 1.6155504812303713e-11,
+    "projected_constraint_rank": 42,
+    "projected_constraint_singular_values": [
+      280.0029365765425, 1.000000003436964
+    ],
+    "linear_model_objective_at_zero": 354.5304097908341
+  },
+  "parity_passed": true,
+  "returned_sha256": "6f8afe4f6105b251d4bea96f9c2a021fcb69fb7060f1b566d7acde916564a408",
+  "improved_uninterrupted": true
+}

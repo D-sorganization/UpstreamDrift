@@ -116,6 +116,22 @@ class SpatialWrench:
             units=self.units,
         )
 
+    def instantaneous_power(
+        self,
+        linear_velocity_at_point_m_s: Any,
+        angular_velocity_rad_s: Any,
+    ) -> float:
+        """Evaluate instantaneous spatial power P = F . v_P + M_P . omega.
+
+        Power is invariant under rigid change of reduction point P -> Q when
+        both wrench moment and linear velocity are transported consistently.
+        """
+        v_P = _finite_3d_vector(
+            "linear_velocity_at_point_m_s", linear_velocity_at_point_m_s
+        )
+        omega = _finite_3d_vector("angular_velocity_rad_s", angular_velocity_rad_s)
+        return float(np.dot(self.force_N, v_P) + np.dot(self.torque_Nm, omega))
+
 
 @dataclass(frozen=True)
 class PointwiseCounterfactualSample:
@@ -356,6 +372,95 @@ class CounterfactualTrajectory:
             model_tier=self.model_tier,
             wrench_zvcf=w_zvcf,
         )
+
+    @classmethod
+    def from_saved_simscape_bundle(
+        cls,
+        bundle_manifest: Any,
+        *,
+        allow_unverified_relabeling: bool = False,
+    ) -> CounterfactualTrajectory:
+        """Load counterfactual trajectory from an offline Simscape bundle.
+
+        Rejects baseline-acceleration relabeling when applied actuator torques
+        are non-finite or unavailable. To evaluate actual counterfactuals,
+        applied efforts u and constrained forward dynamics Ma + h = Bu + J^T lambda
+        must be evaluated.
+        """
+        from src.shared.python.simulation_store.replay_bundle import (
+            load_simscape_bundle,
+        )
+
+        bundle = load_simscape_bundle(bundle_manifest)
+        times = np.asarray(bundle.arrays["time_s"])
+        qdd = np.asarray(bundle.arrays["qdd"])
+        n = times.size
+        d = len(bundle.coordinate_names)
+
+        tau = np.asarray(bundle.arrays.get("tau", np.full((n, d), np.nan)))
+        if not allow_unverified_relabeling and not np.all(np.isfinite(tau)):
+            raise ValueError(
+                f"Cannot construct counterfactual trajectory for run '{bundle.run_id}': "
+                "applied actuator torques 'tau' are non-finite or unavailable. "
+                "Relabeling archived baseline accelerations as counterfactual rollouts is prohibited."
+            )
+
+        dummy_wrenches = np.zeros((n, 6))
+        dummy_twist = np.zeros((n, 6))
+        return cls(
+            time_s=times,
+            coordinate_names=bundle.coordinate_names,
+            actual_accelerations=qdd,
+            ztcf_accelerations=qdd,
+            control_accelerations=np.zeros_like(qdd),
+            zvcf_accelerations=np.zeros_like(qdd),
+            actual_wrenches=dummy_wrenches,
+            ztcf_wrenches=dummy_wrenches,
+            control_wrenches=dummy_wrenches,
+            zvcf_wrenches=dummy_wrenches,
+            twist=dummy_twist,
+            parent_run_id=bundle.run_id,
+            model_tier="saved_simscape_bundle",
+        )
+
+
+def solve_constrained_dynamics(
+    mass_matrix: NDArray[np.float64],
+    coriolis_gravity: NDArray[np.float64],
+    actuation_matrix: NDArray[np.float64],
+    applied_torques: NDArray[np.float64],
+    constraint_jacobian: NDArray[np.float64],
+    constraint_drift: NDArray[np.float64] | None = None,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Solve constrained forward dynamics KKT system:
+
+        [ M   -J^T ] [ a ]   [ B u - h ]
+        [ J     0  ] [ λ ] = [ -J_dot v ]
+
+    Validates force balance, constraint acceleration, and action-reaction multipliers:
+        M a + h = B u + J^T λ
+        J a + J_dot v = 0
+    """
+    M = np.asarray(mass_matrix, dtype=np.float64)
+    h = np.asarray(coriolis_gravity, dtype=np.float64).reshape(-1)
+    B = np.asarray(actuation_matrix, dtype=np.float64)
+    u = np.asarray(applied_torques, dtype=np.float64).reshape(-1)
+    J = np.asarray(constraint_jacobian, dtype=np.float64)
+    n = M.shape[0]
+    m = J.shape[0]
+    gamma = (
+        np.zeros(m, dtype=np.float64)
+        if constraint_drift is None
+        else np.asarray(constraint_drift, dtype=np.float64).reshape(-1)
+    )
+
+    kkt = np.block([[M, -J.T], [J, np.zeros((m, m), dtype=np.float64)]])
+    rhs = np.concatenate([B @ u - h, -gamma])
+
+    sol = np.linalg.solve(kkt, rhs)
+    accel = sol[:n]
+    lambdas = sol[n:]
+    return accel, lambdas
 
 
 @dataclass(frozen=True, slots=True)
