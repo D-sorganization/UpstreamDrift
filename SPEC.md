@@ -1,5 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## Pink Constrained IK Interface Repair and Fail-Closed Qualification (#10318)
+
+Repairs native driver interface wiring, eliminates silent fallback, and enforces honest constraint evaluation across the Pink constrained IK pipeline:
+- **Driver and Pipeline Wiring (`run_ground_support.py`, `src/tools/motion_matching/pipeline.py`)**:
+  - Direct integration with `PinkTrajectoryService`, `IKTrajectoryRequest`, and `IKOptions`.
+  - Adapter `_PinkFrameFit` normalizes frame fits and maps weld translation errors to closure residuals for diagnostic reporting.
+  - Constructs conforming `ConstrainedIkReceipt` records capturing backend provenance, convergence status, physical step mode, and rate audit ratios.
+- **Fail-Closed Native Execution (`src/engines/physics_engines/pinocchio/python/pink_trajectory.py`)**:
+  - `PinkTrajectoryService._execute_qp_step` fails closed immediately if Pinocchio or Pink libraries are absent or if the plant model is uninitialized, returning `(q, False, reason)`.
+  - `solve_trajectory` requires overall qualification to pass `rates_ok` (all joints within velocity limits) in addition to individual frame convergence.
+- **Honest Constraint Evaluation & Physical Tolerances (`pink_tasks.py`, `constrained_ik.py`)**:
+  - `FullBodyPinkTasks.audit`: Returns `NaN` for marker errors when marker positions are uncomputed, and `NaN` for weld translation/rotation residuals when weld constraints are unevaluated.
+  - `IKOptions` defines physical named tolerances: `weld_translation_tolerance_m` (default 5 mm), `weld_rotation_tolerance_rad` (default 0.05 rad), and `marker_tolerance_m` (default 3 cm).
+  - Trajectory audit and frame solving reject `NaN` residuals and bound violations, preventing unevaluated or unexecuted states from passing qualification.
+
 ## Constrained IK Pipeline Integration, CLI/GUI, and Receipts (#10278)
 
 Exposes the Pink constrained inverse kinematics solver across the motion matching pipeline, CLI driver, PyQt6 GUI, and versioned receipts:
