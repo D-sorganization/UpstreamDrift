@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10338 · Native Crocoddyl Full-Body Fit (Matched Swing Program MS-31)
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10338 (epic #10363)
+- **Branch:** feat/10338-crocoddyl-native-fit
+- **Paths:** src/engines/physics*engines/pinocchio/python/{crocoddyl_problem,crocoddyl_action,marker_kinematics,full_body_fit}.py; tests/unit/motion_matching/test_crocoddyl*{problem,action}.py; tests/integration/motion_matching/test_full_body_fit_native.py; docs/development/full_body_models/evidence/matched
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 (SELF; unit tests green on Windows; native smoke and 0.30 s continuation fit run on ControlTower `upstream-motion-runtime`)
+- **Summary:** Per-node-effort FDDP on the qualified FullBodyPinocchioModel (shared contact law, weld closure) with a Gauss-Newton marker IK warm start, computed-torque tracking rollout, horizon continuation and linearly implicit derivatives; nodes integrate with adaptive RK45 so the solver rollout is the acceptance replay. 0.30 s window: 15.9 mm whole marker RMS in-solver; G1 (0.85 s) receipt pending.
+- **Next step:** Run the G1 window with continuation on ControlTower and commit the receipt, candidate and playback under docs/development/full_body_models/evidence/matched/driver_g1_pinocchio/.
+
 ### DL-#9967 · Native Simscape Tour Matching
 
 - **State:** in_progress
