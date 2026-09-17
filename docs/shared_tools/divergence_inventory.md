@@ -79,7 +79,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 27 | 52 | 16 | 16 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 136 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 141 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
@@ -110,7 +110,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `scripting` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
-| `shadow_tracker` | 0 | 0 | 0 | 12 | 0 | 0 |
+| `shadow_tracker` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `sidekick` | 234 | 75 | 24 | 36 | 45 | 309 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
@@ -130,7 +130,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **424** | **278** | **124** | **1292** | **708** | **702** |
+| **Total** | **424** | **278** | **124** | **1302** | **708** | **702** |
 
 ## Diverged Files by Package
 

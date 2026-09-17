@@ -1,5 +1,69 @@
 # Full-Body Models Handoff (Epic #10062)
 
+## Global Polynomial Step Prerequisite (#10265)
+
+The name-safe effort mapping and native RK4 step preserve the global degree-six
+control contract and all six unactuated root coordinates. Derivatives apply
+the chain rule through every RK4 stage and substep. Qualification here concerns
+local numerical derivatives; it does not establish a fitted physical swing.
+Independent acceptance replay must explicitly retain the optimization ground:
+the historical forward runner currently auto-calibrates a near-zero plane.
+
+## Qualified Solver Integration (#10254)
+
+Resume with [Worker Turnover](../../plans/qualified_motion_integration/TURNOVER.md)
+and [Pink Pipeline Packets](../../plans/qualified_motion_integration/PINK_TURNOVER.md).
+Storage recovery is complete and native runtime probes pass. Adapter/derivative
+PRs remain under review; production Pink selection and full-body Crocoddyl
+qualification are not complete. The turnover records separate implementation,
+CI and scientific gates.
+
+The [integration plan](../../plans/qualified_motion_integration/README.md)
+defines coordinate, closure, underactuation, timing and evidence boundaries.
+First slice #10255 corrects the missing contact-force chain rule in full-body
+Pinocchio derivatives. Independent real-engine differences reproduce failure
+before the change and pass afterward; contact kinks remain explicitly nonsmooth.
+No fit receipts were regenerated. The #10250 refresh is merged; #10271 receipt integrity and #10162's
+physical acceptance remain prerequisites. #10256 and #10257 are separately
+owned viewer and Pink adapter slices, not completed product integration.
+
+## Optional Viewer Adapter Status (#10256, #10254)
+
+MeshCat and Gepetto adapters now own persistent native visualizers, validate
+configuration dimensions and preserve separate visual/collision models. Scene
+cleanup is scoped to each adapter. Real MeshCat dispatch is exercised in the
+opt-in heavy integration test; live Gepetto qualification remains pending.
+These wrappers are prerequisites for replay integration, not evidence that the
+full-body product already routes through them or that any model fit is valid.
+
+## Reproducible Numerical Runtime (#10262)
+
+Use the optional runtime manifest/lock and checker documented in
+`docs/engines/pinocchio.md`. Real Crocoddyl descent and Pink hard-equality /
+infeasible-QP probes pass in the consistent conda-forge stack. Preserve the
+receipt's explicit source-freshness status; a runtime pass is not model or
+physical acceptance. Linux lock requires x86-64-v3. Viewer qualification
+remains separate.
+
+## Pink Adapter Status (#10257, #10254)
+
+The low-level Pink adapters now share validated state/time handling, retain
+collision geometry, forward hard constraints and limits, refresh cached
+kinematics and propagate infeasibility. Four real-native tests cover equality,
+infeasibility, sequential state refresh and free-flyer `nq != nv` behavior.
+Mixed unit/native collection isolates the real tests from unit mocks and
+checks their executed results. This does not implement the full-body marker,
+stance or weld tasks; those must use the qualified #10260 closure derivative
+and explicit physical-time contract before production selection.
+
+Finite weld correction #10260 differentiates the six-component pose error away
+from closure with the correct SE(3) log Jacobian. Trajectory acceleration
+linearization retains the separate constraint velocity Jacobian. Eleven real
+closure regression tests and the 11 contact derivative tests pass on Pinocchio
+3.8 and 4.1; no motion-fit evidence or acceptance thresholds changed.
+The principal-log branch at rotation pi is rejected for derivative evaluation;
+trajectory finite differences also reject steps that could cross that cut.
+
 Updated 2026-09-16 (claude; HO-9 #10111). Branch
 `feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
@@ -654,23 +718,13 @@ The following table records the canonical module assignments to be executed in H
 - **HO-7 (#10161)**: Consolidated seventeen sections of findings from `evidence/anthropometry/REVIEW.md` into authoritative design decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`. Established structured parser, validator with DbC contracts, and full test suite `tests/unit/motion_matching/pipeline/test_design_decisions.py`. Merged to `main` in PR #10235 (`27b271fe2`).
 - **HO-4 (#10158)**: Exposed all pipeline stages in the Motion Matching launcher tile (`src/tools/motion_matching/gui.py`, `pipeline.py`). Tabbed interface across Matching (with granular Stages options for free/bound wrists, fit closure, ZMP filter, shooting fit, cutoff frequency), Downswing experiment, and MJX tabs, with asynchronous `RunWorker` and strict LoD. Headless PyQt6 and pipeline test suites in `tests/tools/motion_matching/`. Added `tools.motion_matching` to `src/config/feature_parity.json` (tracking gap #10106) and regenerated `docs/development/feature_parity_matrix.md`. Merged to `main` in PR #10236 (`db4fe88c4`).
 - **HO-9 (#10111, MM-9)**: Verified de Leva (1996) male segment table line-by-line against Table 4 of the published paper. Pinning unit test in `tests/unit/motion_matching/test_de_leva_table.py` asserts each segment against literal paper values (mass %, CoM %, and principal radii %). Corrected shank `com_fraction` from 0.4459 to 0.4395 and radii from (0.255, 0.249, 0.103) to (0.251, 0.246, 0.102) in `src/shared/python/motion_matching/anthropometry.py`, eliminating bony-landmark carryover from Zatsiorsky-Seluyanov 1985. Committed verification receipt `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json`.
+- **HO-3 (#10157)**: Delivered cross-platform MJX virtualenv setup scripts (`scripts/setup_mjx_env.ps1`, `scripts/setup_mjx_env.sh`) reading pinned versions from `scripts/config/mjx_env_pins.json`, refactored differentiable trajectory optimization into pure testable functions with `SiteState` and `WeldGains` parameter tuples complying with architecture parameter budgets, added `requires_jax` marker to `pyproject.toml`, and implemented 6 unit tests in `tests/unit/motion_matching/test_mjx_optimisation.py` covering knot basis, tail freezing mask, contact force parity (< 1e-6 N), weld wrench equilibrium, initial preload, and finite gradients on truncated 12-frame horizon. Merged to `main` in PR #10228 (`09346c9dd`).
+- **HO-11 (#10250)**: Rebuilt anthropometric documents (`full_body_spec_anthro_driver.json`, `..._iron7.json`) and ground-support receipts with canonical `de_leva_table_sha256` and `anthropometry` blocks after HO-9 de Leva shank fix. Added document freshness test suite `tests/unit/motion_matching/test_document_freshness.py` with 9 unit/contract tests enforcing byte-level agreement against `DE_LEVA_MALE`. Updated Pydantic receipt schema (`receipt_schema.py`), pipeline receipt builder (`receipt.py`), and regenerated `RECEIPTS.md`. Fixed local engine imports in `pipeline/lane.py` and `pipeline/address.py`. Re-executed driver and 7-iron captures, validating 0.000 mm shift between unedited and rebuilt models. Merged to `main` in PR #10261 (`81ea27bfb`).
+- **HO-8 (#10108, MM-6)**: Delivered hip coordinate zero-twist functional calibration (`src/shared/python/motion_matching/hip_calibration.py`) using knee medial markers or shank-thigh ankle plane normal fallback, post-multiplying `parent_to_base` by $R_z(\theta)$ to rotate coordinate zero without translating hip centers. Set `BOUND_WIDENING: float = 1.0` in `src/shared/python/motion_matching/pipeline/constants.py`. Regenerated receipts for `anthro_driver`, `anthro_driver_shoot`, `anthro_iron`, and `anthro_iron_shoot`, verifying 0 lower-limb `range_of_motion_flags` on the IK reference for both captures. Re-verified cross-engine setup parity across MuJoCo, Drake, and Pinocchio.
 - **Review 2026-09-16 (expert agent)**: receipts on `main` unchanged through
-  the landing (driver address 5.1 / IK 27.0 / dynamics 74.6 mm). HO-3
-  (#10157) is open as PR #10228 and stalled on three fixable items
-  (architecture budget: `weld_wrench_jax` has 14 parameters against a
-  budget of 8, group them into `SiteState`/`WeldGains` named tuples; `feat`
-  title with no `src/` change fails phantom-guard, retitle `test:`; doc
-  conflicts, resolve once as the last step). HO-8 (#10108) claimed
-  2026-09-16. Two gaps found and filed: **HO-11 (#10250)** the anthropometric
-  documents and every receipt are stale since HO-9 changed the de Leva
-  shank row (documents last rebuilt in the HO-0 merge; receipts still hash
-  the old document) and CI did not catch it, so HO-11 rebuilds both
-  documents, reruns both captures through the HO-2 validator and adds a
-  document-freshness test; **HO-12 (#10251)** `run_ground_support.py` is
+  the landing (driver address 5.1 / IK 27.0 / dynamics 74.6 mm). Two gaps found and filed: **HO-11 (#10250)** the anthropometric
+  documents and every receipt were stale since HO-9 changed the de Leva
+  shank row; **HO-12 (#10251)** `run_ground_support.py` was
   779 lines on `main` against HO-1's acceptance of under 400.
-- **Order from here**: HO-3 finish; HO-11 before any new receipt; HO-8 in
-  progress; HO-12 and HO-10 (#10112, now unblocked; use main's
-  `cross_engine_replay.py` per the table above) after HO-11; HO-5 (#10159,
-  expert) from HO-11's rebuilt receipts; HO-6 (#10160) after HO-5; #10110
-  waits for the Simscape lane.
 - **Doc hotspot rule**: `DEVELOPMENT_LOG.md` (`DL-#10062`) and `HANDOFF.md` "Status and Next Steps" are edited by every child, so they conflict whenever another child merges first. Resolve once, as the last step before merge: `git merge origin/main`, take `main`'s copy of both files (`git checkout --theirs`), re-apply only your own lines (your DL "Last verified"/"Next step", your one status bullet), commit, push. Never push repeated "Merge branch 'main'" commits with unresolved hunks. PR title prefix must match the diff (`test:`/`docs:`/`refactor:` when nothing under `src/` changes) or phantom-guard fails. `equivalence (3.11)` and `Trivy Container Scan` are not required and fail on `main` already; name them as pre-existing in the PR body, do not fix them in a child PR. Run `python scripts/ci/check_architecture_budget.py` before pushing (8-parameter and function-size budgets on changed files).
+- **Next**: Land HO-12 PR (#10251), then proceed to HO-10 (#10160), HO-5 (#10159), and HO-6 (#10121) in epic #10162.
