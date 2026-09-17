@@ -19,6 +19,9 @@ preview tool.
 
 ### Specifications
 
+- [Matched Swing Program Tracker](../development/matched_swing_program/README.md)
+  Single source of truth for the six-engine matched swing program (epic #10363),
+  physical acceptance gates (G1/G2/G3), run ledger, and wave plan.
 - [CLUB_IK_SPEC](../../src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/CLUB_IK_SPEC.md)
   Inverse-kinematics specification for the club chain shared between
   the MATLAB and Python loaders.

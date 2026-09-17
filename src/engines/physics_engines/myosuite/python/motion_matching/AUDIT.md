@@ -1,5 +1,7 @@
 # MyoSuite Motion-Matching Plumbing Audit
 
+> [!WARNING] > **SUPERSEDED (2026-09-17)**: The claims in this audit document are superseded by the Matched Swing Program single source of truth. See [`docs/development/matched_swing_program/README.md`](../../../../../../docs/development/matched_swing_program/README.md) for authoritative physical gates, engine qualification status, and run evidence.
+
 ## Current State
 
 - MyoSuite provides high-fidelity, 290-muscle simulation via MuJoCo.
