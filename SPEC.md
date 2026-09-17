@@ -1,5 +1,16 @@
 # SPEC.md — Repository Specification Document
 
+## Optional Viewer Replay and Lifecycle (#10256)
+
+Gepetto and MeshCat adapters persist native Pinocchio visualizers, pass distinct
+visual/collision models, and forward finite `(model.nq,)` configurations to
+actual display calls. `None` means Pinocchio neutral pose. Unloaded/closed
+instances fail explicitly. Reload, failed load and idempotent close clean
+only adapter-owned scene nodes; external servers remain running. MeshCat
+supports a self-managed server with explicit browser suppression. Live
+Gepetto qualification and product-level replay selection are still separate
+requirements under #10254.
+
 ## Shadow Tracker Control Fitting and Silhouette Optimization (#10131)
 
 Optimizes skeletal control parameters against calibrated multi-view silhouette sequences with strict physical gate enforcement:
@@ -40,7 +51,6 @@ Preserves native container timestamp authority and decoder provenance across ing
 - **Container PTS Extraction (`extract_iso_bmff_pts`)**: Standard library ISO-BMFF box parser reading timescale from `mdhd` and exact presentation timestamps from `stts` and optional composition offsets `ctts`. Detects genuine variable frame rate (VFR) containers without external dependencies.
 - **OpenCvVideoDecoder Timing Authority**: Automatically discovers container presentation timestamps for variable frame rate media, configuring `timing_mode="container_pts"`, `is_timing_exact=True`, and `clock_evidence="container_pts_metadata"`. Explicit caller `pts_ticks` require an explicit `timebase` and establish `timing_mode="authoritative"`, `is_timing_exact=True`, and `clock_evidence="caller_authoritative_pts"`. Missing, corrupt, or uniform CFR containers without authoritative per-sample tables safely default to `timing_mode="estimated_cfr"`, `is_timing_exact=False`, and `clock_evidence="estimated_nominal_fps"`.
 - **Contract Provenance & Migration**: `FrameIdentity` and `FrameObservation` contracts preserve `timing_mode`, `is_timing_exact`, `clock_evidence`, `decoder_name`, `decoder_version`, and `pixel_format` across serialization and deserialization, safely migrating legacy 1.0.0 payloads without data loss.
-
 ## Shadow Tracker Manual Mask Revision Persistence and Lineage Protection (#10233)
 
 Protects manual mask revision identity and establishes durable, atomic mask history and lineage:
@@ -5428,6 +5438,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
 | 2026-09-16 | #10268 | Add reproducible optional motion runtime and isolated fail-closed capability receipts. |
 | 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
 | 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
