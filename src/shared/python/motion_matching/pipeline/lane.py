@@ -17,6 +17,7 @@ if TYPE_CHECKING:
         NativeMujocoFullBodyModel,
     )
 
+from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.motion_matching import posture_metrics as post
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.ground_support import (
@@ -391,3 +392,24 @@ class Lane:
         from src.shared.python.motion_matching.pipeline.address import calibrate_legs
 
         return calibrate_legs(self, spec_bytes, upper, seeds, q_start)
+
+
+def probe_pink_capability() -> tuple[bool, dict[str, Any]]:
+    """Probe if Pink constrained IK solver and dependencies are available.
+
+    Returns:
+        tuple of (is_available, diagnostics_dict)
+    """
+    missing: list[str] = []
+    if not is_engine_available("pink"):
+        missing.append("pink")
+    if not is_engine_available("pinocchio"):
+        missing.append("pinocchio")
+
+    if missing:
+        return False, {
+            "available": False,
+            "missing": missing,
+            "reason": f"Required packages unavailable: {', '.join(missing)}",
+        }
+    return True, {"available": True, "missing": [], "reason": "ok"}
