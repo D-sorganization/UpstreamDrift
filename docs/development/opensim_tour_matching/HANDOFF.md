@@ -100,11 +100,14 @@ Replay of the fitted controls; targets whole <= 25, early <= 12, terminal <= 35,
 | 0.30                            | 30   | Solve_Succeeded             | 215  | 850            | 41.2                | 41.0               | 41.0              | 41.0       | 41.0          | 12.9      | 5.74             | 648                            | fail     |
 | 0.60 (run 1, 300-iteration cap) | 60   | Maximum_Iterations_Exceeded | 300  | 2222           | 42.4                | 41.6               | 257.7             | 257.7      | 524.9         | 543.7     | 13.95            | 758                            | fail     |
 
+| 0.60 (run 2, warm-started from run 1, 600-iteration cap) | 60 | Solve_Succeeded | 428 | 3379 | 41.6 | 41.5 | 81.4 | 81.4 | 204.1 | 97.2 | 33.56 | 758 | fail |
 OS7_ROWS_PENDING
 
 `replay_departure.json` (helper `os7_replay_departure.py`, 60 mm band):
 0.10 s and 0.30 s never leave the band; the run-1 0.60 s replay departs at
-t = 0.372 s and ends at 732 mm. The collocation solution at 0.60 s was still
+t = 0.372 s and ends at 732 mm; the converged run-2 0.60 s replay departs at
+t = 0.417 s and ends at 295 mm (convergence halves the divergence, the rest
+is intrinsic to open-loop replay of a residual-supported body). The collocation solution at 0.60 s was still
 41.6 mm, so the departure is open-loop divergence of a residual-supported
 body without feedback (constraint violation 2.3e-5 at the iteration cap,
 10 ms Hermite-Simpson mesh), not a fitting failure.
