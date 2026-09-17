@@ -69,9 +69,10 @@ class _MockPlant:
         self.nv = 41
 
     def frame_poses(self, coords: dict[str, float]) -> dict[str, np.ndarray]:
-        # Return frame positions matching origin
+        # Return frame positions matching origin, plus coordinate offset if present
+        z_offset = coords.get("coord_0", 0.0)
         return {
-            "HeadTop": np.array([0.0, 0.0, 0.1]),
+            "HeadTop": np.array([0.0, 0.0, 0.1 + z_offset]),
             "WaistLeft": np.array([-0.1, 0.0, 0.0]),
         }
 
@@ -288,7 +289,7 @@ def test_unevaluated_constraints_fail_qualification() -> None:
             }
 
     service = PinkTrajectoryService(spec, model=IncompletePlant())
-    service._execute_qp_step = lambda q, b, dt, opt: (q.copy(), True, None)  # type: ignore[method-assign]
+    service._execute_qp_step = lambda q, b, dt, opt: (q.copy(), True, None)  # type: ignore[assignment]
 
     req = _make_request(frames=2)
     res = service.solve_trajectory(req, IKOptions())
@@ -343,7 +344,7 @@ def test_weld_tolerance_violation_fails_frame() -> None:
             return np.array([0.05, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64), None
 
     service = PinkTrajectoryService(spec, model=HighWeldResidualPlant())
-    service._execute_qp_step = lambda q, b, dt, opt: (q.copy(), True, None)  # type: ignore[method-assign]
+    service._execute_qp_step = lambda q, b, dt, opt: (q.copy(), True, None)  # type: ignore[assignment]
 
     req = _make_request(frames=2)
     opts = IKOptions(weld_translation_tolerance_m=0.005)
@@ -355,3 +356,74 @@ def test_weld_tolerance_violation_fails_frame() -> None:
         "Weld translation error" in r and "exceeds tolerance" in r
         for r in res.failure_reasons
     )
+
+
+def test_displaced_target_produces_motion_and_residual_reduction() -> None:
+    """A reachable displaced target produces nonzero motion and residual reduction."""
+    spec = _make_spec()
+    plant = _MockPlant(spec)
+    service = PinkTrajectoryService(spec, model=plant)
+
+    step_count = 0
+
+    def moving_qp_step(
+        q: np.ndarray, bundle: Any, dt: float, options: IKOptions
+    ) -> tuple[np.ndarray, bool, str | None]:
+        nonlocal step_count
+        q_next = q.copy()
+        if step_count > 0:
+            q_next[0] = 0.02
+        step_count += 1
+        return q_next, True, None
+
+    service._execute_qp_step = moving_qp_step  # type: ignore[method-assign]
+
+    targets = np.zeros((2, 2, 3), dtype=np.float64)
+    # Frame 0: nominal poses matching origin
+    targets[0, 0] = np.array([0.0, 0.0, 0.1])
+    targets[0, 1] = np.array([-0.1, 0.0, 0.0])
+    # Frame 1: HeadTop displaced to 0.12, WaistLeft unchanged
+    targets[1, 0] = np.array([0.0, 0.0, 0.12])
+    targets[1, 1] = np.array([-0.1, 0.0, 0.0])
+
+    req = IKTrajectoryRequest(
+        initial_q=np.zeros(41, dtype=np.float64),
+        time_s=np.array([0.0, 0.01], dtype=np.float64),
+        marker_targets=targets,
+        validity_mask=np.ones((2, 2), dtype=bool),
+        labels=("HeadTop", "WaistLeft"),
+        model_name="test_spec",
+    )
+
+    res = service.solve_trajectory(req, IKOptions())
+
+    assert res.passed
+    assert np.all(res.frame_success)
+    displacement = float(np.linalg.norm(res.configurations[1] - res.configurations[0]))
+    assert displacement > 0.0
+    assert res.configurations[1, 0] == pytest.approx(0.02)
+    assert res.frame_residuals[1].marker_errors_m["HeadTop"] == pytest.approx(
+        0.0, abs=1e-6
+    )
+
+
+def test_infeasible_hard_constraint_fails_qualification() -> None:
+    """Conflicting or infeasible hard constraints fail frame and qualification."""
+    spec = _make_spec()
+    plant = _MockPlant(spec)
+    service = PinkTrajectoryService(spec, model=plant)
+
+    def infeasible_step(
+        q: np.ndarray, bundle: Any, dt: float, options: IKOptions
+    ) -> tuple[np.ndarray, bool, str | None]:
+        return q.copy(), False, "PinkSolverError: Infeasible hard equality constraints"
+
+    service._execute_qp_step = infeasible_step  # type: ignore[method-assign]
+
+    req = _make_request(frames=2)
+    res = service.solve_trajectory(req, IKOptions())
+
+    assert not res.passed
+    assert not res.frame_success[0]
+    assert res.first_failed_frame == 0
+    assert any("Infeasible hard equality constraints" in r for r in res.failure_reasons)
