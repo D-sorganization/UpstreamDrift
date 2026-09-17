@@ -27,6 +27,15 @@ No fit receipts were regenerated. The #10250 refresh is merged; #10271 receipt i
 physical acceptance remain prerequisites. #10256 and #10257 are separately
 owned viewer and Pink adapter slices, not completed product integration.
 
+## Optional Viewer Adapter Status (#10256, #10254)
+
+MeshCat and Gepetto adapters now own persistent native visualizers, validate
+configuration dimensions and preserve separate visual/collision models. Scene
+cleanup is scoped to each adapter. Real MeshCat dispatch is exercised in the
+opt-in heavy integration test; live Gepetto qualification remains pending.
+These wrappers are prerequisites for replay integration, not evidence that the
+full-body product already routes through them or that any model fit is valid.
+
 ## Reproducible Numerical Runtime (#10262)
 
 Use the optional runtime manifest/lock and checker documented in
