@@ -51,6 +51,7 @@ FALLBACK_ADAPTER_MODULES = (
     "src.tools.launch_monitor_analytics._embed_adapter",
     "src.tools.golf_simulator._embed_adapter",
     "src.tools.swing_flight_pipeline._embed_adapter",
+    "src.tools.shadow_tracker._embed_adapter",
     # Physics-engine adapters (issue #8857): these self-register the
     # mujoco_unified / drake_golf / pinocchio_golf / opensim_golf /
     # myosim_suite tool ids used by the launcher tiles.

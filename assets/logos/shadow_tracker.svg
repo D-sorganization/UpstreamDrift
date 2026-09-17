@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>Shadow Tracker</title>
+  <rect x="4" y="4" width="56" height="56" rx="10" fill="#1e1e2e"/>
+  <g fill="none" stroke="#f38ba8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="12" y="16" width="22" height="16" rx="3"/>
+    <path d="M34 21l10-5v18l-10-5z"/>
+  </g>
+  <g fill="#cba6f7" opacity="0.85">
+    <circle cx="28" cy="40" r="4"/>
+    <path d="M22 54c0-4 2.5-7 6-7s6 3 6 7z"/>
+  </g>
+</svg>
