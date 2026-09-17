@@ -19,21 +19,22 @@ Read current AGENTS.md, CLAUDE.md, SPEC.md and root AGENT_HANDOFF.md. Then read:
   docs/plans/shadow_tracker/INTEGRATION.md
   docs/plans/shadow_tracker/VALIDATION.md
   docs/plans/shadow_tracker/CAPTURE_AND_ARCHIVES.md
-Inspect current source and GitHub state. Reviewed baseline is 33ffde23f. The
-false inference success, NaN hypothesis and mutable morphology findings were
-repaired. Real OpenCV decoding and reference disk rendering exist but are not
-archive-timing or articulated-model acceptance. Read TURNOVER_CURRENT.md first.
+Inspect current source and GitHub state. Reviewed main is 0ec64e45f. Timing
+PR #10253 merged; unknown physical time and incremental decode exist. The restart
+review corrects estimated-CFR is_timing_exact. Native PTS and persisted clock
+authority remain #10273. Read TURNOVER_CURRENT.md before older review sections.
 
-FIRST ACTION: inspect/claim #10231 and write behavioral red tests for preserved
-real VFR/negative PTS, unknown physical time by default, and cancellation during
-actual decode. Do not derive authoritative PTS from average FPS or frame index.
-Do not turn presentation time into physical time without explicit evidence.
+FIRST ACTION: check ownership and status of renderer PR #10264 / #10232. Its
+unit-test-gate failed importing motion_matching.diagnostics, and it has merge
+conflicts. Existing uncommitted import corrections are present in the original
+checkout; preserve them. The owning agent should verify them, integrate current
+main and obtain passing full-unit collection plus focused tests at the new SHA.
+Do not create a competing renderer PR or claim this unmerged feature is ready.
 
-NEXT: #10233 fixes duplicate revision IDs, parent ownership and persistent mask
-lineage. #10232 binds real articulated state/geometry to rendering and tests
-clipped visible shapes, nonsquare focal lengths and body/club pose changes.
-Keep reference disk helpers honestly labeled. A seven-value state with ignored
-rotation and no club is not a full-body render. Reuse camera/FK/state providers.
+NEXT INDEPENDENT TASK: claim #10233 for revision identity and atomic persistence.
+Start with failing duplicate-ID/idempotence/parent-ownership tests, then implement
+save/reopen and invalidation. Keep changes small for reliable cheaper-agent
+execution. Follow with #10273 native timestamp authority, not another FPS proxy.
 
 Then fix initialization no-evidence/club-scoring/velocity acceptance and deliver
 a real import -> review -> manual edit -> save/reopen launcher slice using one
