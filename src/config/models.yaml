@@ -469,6 +469,24 @@ models:
       logo: "assets/mediapipe.png"
       status: "ready"
 
+  - id: "shadow_tracker"
+    name: "Shadow Tracker"
+    description: "Articulated silhouette tracking, manual mask correction, and forward rollout verification"
+    type: "special_app"
+    path: "src/tools/shadow_tracker/__main__.py"
+    capabilities:
+      - "video_import"
+      - "manual_mask_editing"
+      - "bundle_persistence"
+      - "worst_frame_navigation"
+      - "canonical_export"
+    launcher:
+      category: "motion_capture"
+      logo: "shadow_tracker.svg"
+      status: "utility"
+      default_launch: "tab"
+    embed_adapter: "src/tools/shadow_tracker/_embed_adapter.py::ShadowTrackerAdapter"
+
   # =============================================================================
   # TOOLS & DATA — model exploration, datasets, utilities
   # =============================================================================
