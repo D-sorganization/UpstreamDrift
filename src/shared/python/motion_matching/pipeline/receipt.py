@@ -52,6 +52,7 @@ class GroundSupportReceiptInputs:
     kin: FullBodyMarkerKinematics
     q_ref: np.ndarray
     elapsed_s: float
+    backend: str = "mujoco"
     validate: bool = True
 
 
@@ -80,6 +81,7 @@ def build_ground_support_receipt(
     tob_posture = posture_summary(kin, q_ref[tob_frame])
 
     receipt_dict = {
+        "backend": inputs.backend,
         "base_spec_sha256": canonical_sha256(inputs.base_spec),
         "base_spec_file": inputs.spec_path.name,
         "spec_file": inputs.scaled_path.name,

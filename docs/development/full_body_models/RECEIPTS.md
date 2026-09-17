@@ -16,6 +16,7 @@ Summary provenance, hashes, file references, and execution duration written by `
 
 | Field                      | Unit     | Meaning                                                                    | Stage    |
 | :------------------------- | :------- | :------------------------------------------------------------------------- | :------- |
+| `backend`                  | string   | Kinematic backend engine used for tracking (mujoco or pink)                | metadata |
 | `base_spec_sha256`         | hash     | SHA256 hash of the initial input model specification document              | metadata |
 | `base_spec_file`           | filename | Filename of the input model specification document                         | metadata |
 | `spec_file`                | filename | Filename of the final scaled and calibrated spec document                  | metadata |
@@ -87,6 +88,7 @@ Full-trajectory marker matching, alternating calibration, limb scaling, and rang
 | `range_of_motion_flags`      | compound   | Excursions exceeding anatomical limits across reference      | ik    |
 | `bound_widening`             | multiplier | Safety factor applied to widen joint range limits            | ik    |
 | `leg_angle_ranges_deg`       | deg        | Min and max angles observed per lower limb joint coordinate  | ik    |
+| `constrained_ik`             | compound   | Optional constrained IK execution diagnostics and provenance | ik    |
 
 ## Dynamics Stage (`dynamics`)
 
