@@ -1,7 +1,9 @@
 # OpenSim Parity Specification
 
-> **Status:** greenfield. OpenSim is **the most-stubbed of the five engines**
-> in this repository. Today the engine has _no_ humanoid model, _no_ forward
+> [!WARNING] > **SUPERSEDED (2026-09-17)**: The claims and greenfield status in this document are superseded by the Matched Swing Program single source of truth. See [`docs/development/matched_swing_program/README.md`](../../../../docs/development/matched_swing_program/README.md) for authoritative physical gates, engine qualification status, and run evidence.
+
+> **Status:** greenfield (SUPERSEDED by matched*swing_program). OpenSim is **the most-stubbed of the five engines**
+> in this repository. Today the engine has \_no* humanoid model, _no_ forward
 > simulator wrapper, _no_ fit driver, _no_ visualisation, and _no_ tests.
 > This document is the implementation plan to bring it to feature parity
 > with the Simscape Multibody motion-matching pipeline (the "primary path"
