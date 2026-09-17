@@ -73,6 +73,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Pink Displaced Targets & Both-Club Smoke Qualification (2026-09-17):**
+  Added tests verifying that reachable displaced marker targets produce nonzero motion
+  and measurable residual reduction, infeasible hard constraints fail qualification closed
+  with structured failure reasons, and both driver and 7-iron smoke journeys produce valid
+  conforming receipts through `MatchRequest` and `ConstrainedIkReceipt`.
+
 - **Pink Integration Defect Repair & Fail-Closed Qualification (#10318; 2026-09-17):**
   Repaired three blocking defects in the Pink constrained IK pipeline:
 
