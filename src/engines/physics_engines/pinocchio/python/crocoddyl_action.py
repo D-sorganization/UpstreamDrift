@@ -149,6 +149,7 @@ def make_action_models(
     node_integrator: str = "rk45",
     rtol: float = 1e-6,
     atol: float = 1e-8,
+    substeps: int = 1,
 ) -> tuple[list[Any], Any]:
     """Running models for every node but the last, plus the terminal model."""
     require(dt > 0.0, "dt must be positive", dt)
@@ -157,6 +158,7 @@ def make_action_models(
         "unknown node integrator",
         node_integrator,
     )
+    require(substeps >= 1, "substeps must be at least 1", substeps)
     n_nodes = targets.targets.shape[0]
     require(n_nodes >= 2, "at least two nodes are required", n_nodes)
     nu = int(ctx.actuated.sum())
@@ -191,10 +193,12 @@ def make_action_models(
                 q_next, v_next = rk45_node_step(
                     ctx, q, v, tau, dt, rtol=rtol, atol=atol
                 )
-            else:
+            elif substeps == 1:
                 accel = ctx.acceleration(q, v, tau)
                 v_next = v + dt * solve @ accel
                 q_next = q + dt * v_next
+            else:
+                q_next, v_next = implicit_euler_substeps(ctx, q, v, tau, dt, substeps)
             return np.concatenate([q_next, v_next]), solve, der
 
         def calc(self, data: Any, x: Array, u: Array | None = None) -> None:
@@ -292,6 +296,23 @@ def make_action_models(
 
     running = [ImplicitEulerAction(node) for node in range(n_nodes - 1)]
     return running, TerminalAction()
+
+
+def implicit_euler_substeps(
+    ctx: PlantContext, q: Array, v: Array, tau: Array, dt: float, substeps: int
+) -> tuple[Array, Array]:
+    """Linearly implicit Euler over ``substeps`` sub-intervals, fresh velocity Jacobian each."""
+    h = dt / substeps
+    qk, vk = np.asarray(q, dtype=float), np.asarray(v, dtype=float)
+    eye = np.eye(ctx.n)
+    for _ in range(substeps):
+        der = ctx.derivatives(qk, vk, tau)
+        accel = ctx.acceleration(qk, vk, tau)
+        vk = vk + h * np.linalg.solve(eye - h * np.asarray(der.dv), accel)
+        qk = qk + h * vk
+    if not np.isfinite(qk).all():
+        raise FloatingPointError("implicit substeps diverged")
+    return qk, vk
 
 
 def implicit_euler_rollout(
