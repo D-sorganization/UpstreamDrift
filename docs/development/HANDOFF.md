@@ -1,5 +1,9 @@
 # Native Multi-Engine Matching Handoff
 
+The three missing native fit modules are now hash-matched archival recoveries
+in simscape_tour_matching/native_evidence/runtime78_recovered_sources.zip.
+Restore qualified source/tests next; clean-runtime execution remains unverified.
+
 Playback now follows source timestamps and preserves camera orientation; six
 affected GUI tests pass. See the source-time checkpoint in the saved-runs handoff.
 

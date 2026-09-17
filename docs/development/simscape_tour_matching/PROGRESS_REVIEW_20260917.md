@@ -1,5 +1,13 @@
 # Simscape Matching Progress Review and Execution Turnover
 
+Follow-on recovery: the three missing fitting modules have been retrieved read-only
+from ControlTower runtime78 and their bytes match run102's recorded hashes. See
+native_evidence/runtime78_recovered_sources.zip and its JSON receipt. They are
+archival recovery, not yet installed providers or a clean-runtime replay. Restore
+with tests and dependency reconciliation; do not rerun the blind source search.
+Remote WSL login shell startup fails on a stale cargo environment path; direct
+`wsl -d ControlTower-Runner -- <command>` or non-login `sh -c` worked.
+
 ## Review Scope and Verdict
 
 Reviewed on 2026-09-17 UTC (2026-09-16 local). Working HEAD b15ba9474;
