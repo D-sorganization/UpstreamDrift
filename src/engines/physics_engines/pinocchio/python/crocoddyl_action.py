@@ -347,8 +347,13 @@ def tracking_rollout(
     kd: float,
     effort_bounds: Array,
     ridge: float,
+    q0: Array | None = None,
+    v0: Array | None = None,
 ) -> tuple[Array, Array, Array]:
     """Dynamically consistent warm start: computed-torque tracking of the IK reference.
+
+    ``q0``/``v0`` override the initial state (used to continue from a previous
+    candidate's final node).
 
     At every node the desired acceleration ``a_ref + kp (q_ref - q) + kd (v_ref - v)``
     is mapped to bounded efforts through the plant's effort sensitivity (ridge
@@ -362,7 +367,8 @@ def tracking_rollout(
     q = np.empty_like(q_ref)
     v = np.empty_like(v_ref)
     us = np.empty((n_nodes - 1, int(ctx.actuated.sum())))
-    q[0], v[0] = q_ref[0], v_ref[0]
+    q[0] = q_ref[0] if q0 is None else np.asarray(q0, dtype=float)
+    v[0] = v_ref[0] if v0 is None else np.asarray(v0, dtype=float)
     for k in range(n_nodes - 1):
         zero = np.zeros(ctx.n)
         der = ctx.derivatives(q[k], v[k], zero)
