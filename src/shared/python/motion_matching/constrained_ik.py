@@ -8,16 +8,18 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Protocol, TypeAlias, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, TypeAlias, runtime_checkable
 
 import numpy as np
 from numpy.typing import NDArray
 
-from src.engines.physics_engines.pinocchio.python.pink_tasks import (
-    FrameResiduals,
-    StanceClosurePolicy,
-)
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.pinocchio.python.pink_tasks import (
+        FrameResiduals,
+        StanceClosurePolicy,
+    )
 
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
