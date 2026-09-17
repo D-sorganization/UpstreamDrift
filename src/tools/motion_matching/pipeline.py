@@ -33,6 +33,9 @@ CANDIDATE = FULL_BODY / "evidence/native_candidates/returned81_candidate.json"
 CAPTURES = ("driver", "iron")
 CLUBS = ("driver", "iron7")
 CLUB_FOR_CAPTURE = {"driver": "driver", "iron": "iron7"}
+BACKENDS = ("mujoco", "pink")
+STEP_MODES = ("physical", "projection")
+SOLVERS = ("quadprog",)
 
 
 @dataclass(frozen=True)
@@ -54,12 +57,21 @@ class MatchRequest:
     shooting_fit: int = 0
     shooting_gain: float = 0.7
     cutoff_hz: float | None = None
+    backend: str = "mujoco"
+    step_mode: str = "physical"
+    solver: str = "quadprog"
 
     def __post_init__(self) -> None:
         if self.capture not in CAPTURES:
             raise ValueError(f"Capture must be one of {CAPTURES}")
         if self.club not in CLUBS:
             raise ValueError(f"Club must be one of {CLUBS}")
+        if self.backend not in BACKENDS:
+            raise ValueError(f"backend must be one of {BACKENDS}")
+        if self.step_mode not in STEP_MODES:
+            raise ValueError(f"step_mode must be one of {STEP_MODES}")
+        if self.solver not in SOLVERS:
+            raise ValueError(f"solver must be one of {SOLVERS}")
         for value in (
             self.stature_m,
             self.mass_kg,
@@ -185,6 +197,12 @@ def match_command(request: MatchRequest) -> list[str]:
         "--out",
         str(request.output_dir),
     ]
+    if request.backend != "mujoco":
+        cmd.extend(["--backend", request.backend])
+    if request.step_mode != "physical":
+        cmd.extend(["--pink-step-mode", request.step_mode])
+    if request.solver != "quadprog":
+        cmd.extend(["--pink-solver", request.solver])
     if request.free_wrists:
         cmd.append("--free-wrists")
     if request.bound_wrists:
@@ -306,11 +324,18 @@ def summarise_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
     for key in ("address", "ik", "dynamics"):
         if key not in receipt:
             raise ValueError(f"Receipt lacks the {key} block")
+    backend = receipt.get("backend", "mujoco")
+    constrained = receipt["ik"].get("constrained_ik") or {}
+    all_frames_converged = constrained.get("all_frames_converged", True)
+    is_qualified = constrained.get("is_qualified", True)
     address = receipt["address"].get("calibrated", {})
     com = address.get("centre_of_mass", {})
     dynamics = receipt["dynamics"]
     backswing = dynamics.get("backswing_to_1s", {})
-    return {
+    summary: dict[str, Any] = {
+        "backend": backend,
+        "is_qualified": is_qualified,
+        "all_frames_converged": all_frames_converged,
         "capture": receipt.get("capture"),
         "club": (receipt.get("club") or {}).get("name"),
         "address_marker_rms_mm": _mm(address.get("marker_rms_m")),
@@ -328,6 +353,14 @@ def summarise_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
             (dynamics.get("range_of_motion_flags") or {}).keys()
         ),
     }
+    if "step_mode" in constrained:
+        summary["step_mode"] = constrained["step_mode"]
+    if (
+        "first_failed_frame" in constrained
+        and constrained["first_failed_frame"] is not None
+    ):
+        summary["first_failed_frame"] = constrained["first_failed_frame"]
+    return summary
 
 
 def _mm(value: Any) -> float | None:
