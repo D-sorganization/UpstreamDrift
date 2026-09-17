@@ -397,12 +397,59 @@ def _smooth(q: Array, dt: float, cutoff_hz: float) -> Array:
         return q
 
 
+def _resume_from_candidate(
+    ctx: _PlantContext,
+    candidate_path: Path,
+    q_track: Array,
+    v_track: Array,
+    us0: Array,
+    q_ref: Array,
+    v_ref: Array,
+    a_ref: Array,
+    dt: float,
+    settings: SolverSettings,
+    effort_bounds: Array,
+) -> tuple[Array, Array, Array]:
+    """Overlay a previous candidate on the warm start and continue tracking past its end."""
+    require(
+        candidate_path.exists(), "warm-start candidate must exist", str(candidate_path)
+    )
+    data = np.load(candidate_path)
+    names = tuple(str(n) for n in data["coordinate_order"])
+    require(
+        names == ctx.map.names, "candidate coordinate order must match the document"
+    )
+    m = min(int(data["q"].shape[0]), q_track.shape[0])
+    q_track[:m] = data["q"][:m]
+    v_track[:m] = data["v"][:m]
+    us0[: m - 1] = data["u"][: m - 1]
+    if m < q_track.shape[0]:
+        q_tail, v_tail, u_tail = tracking_rollout(
+            ctx,
+            q_ref[m - 1 :],
+            v_ref[m - 1 :],
+            a_ref[m - 1 :],
+            dt,
+            kp=settings.tracking_kp,
+            kd=settings.tracking_kd,
+            effort_bounds=effort_bounds,
+            ridge=settings.warm_start_ridge,
+            q0=q_track[m - 1],
+            v0=v_track[m - 1],
+        )
+        q_track[m - 1 :] = q_tail
+        v_track[m - 1 :] = v_tail
+        us0[m - 1 :] = u_tail
+    return q_track, v_track, us0
+
+
 def run_fit(
     inputs: FitInputs,
     settings: SolverSettings,
     out_dir: Path,
     *,
     ik_options: MarkerIkOptions | None = None,
+    warm_start_candidate: Path | None = None,
 ) -> dict[str, Any]:
     import crocoddyl
 
@@ -444,6 +491,22 @@ def run_fit(
         effort_bounds=effort_bounds,
         ridge=settings.warm_start_ridge,
     )
+    warm_start_source = "tracking_rollout"
+    if warm_start_candidate is not None:
+        q_track, v_track, us0 = _resume_from_candidate(
+            ctx,
+            warm_start_candidate,
+            q_track,
+            v_track,
+            us0,
+            q_smooth,
+            v_ik,
+            a_ik,
+            dt,
+            settings,
+            effort_bounds,
+        )
+        warm_start_source = f"candidate:{warm_start_candidate}"
     xs0 = [np.concatenate([q_track[k], v_track[k]]) for k in range(n_nodes)]
     ik_summary = {
         "marker_rms_m": float(np.sqrt(np.mean(ik_rms**2))),
@@ -618,6 +681,7 @@ def run_fit(
         "document_sha256": inputs.document_sha256,
         "capture_sha256": inputs.capture.source_sha256,
         "attachments_source": inputs.attachments_source,
+        "warm_start_source": warm_start_source,
         "ground_height_m": inputs.ground_height_m,
         "armature_kg_m2": ctx.armature_kg_m2,
         "effort_bounds_n_m": dict(
@@ -721,6 +785,12 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="ground-support receipt supplying ik.attachments_m and ground.height_m",
     )
+    parser.add_argument(
+        "--warm-start-candidate",
+        type=Path,
+        default=None,
+        help="candidate.npz of a previous fit to resume from (its nodes overlay the warm start)",
+    )
     parser.add_argument("--ground-height", type=float, default=None)
     parser.add_argument("--t-start", type=float, default=0.0)
     parser.add_argument("--t-end", type=float, default=0.85)
@@ -791,6 +861,7 @@ def main(argv: list[str] | None = None) -> int:
         settings,
         args.out,
         ik_options=MarkerIkOptions(iterations=args.ik_iterations),
+        warm_start_candidate=args.warm_start_candidate,
     )
     ensure("metrics" in receipt, "receipt must carry metrics")
     logging.basicConfig(level=logging.INFO, format="%(message)s")
