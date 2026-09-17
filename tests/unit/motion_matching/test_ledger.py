@@ -39,8 +39,8 @@ def test_scan_finds_every_committed_receipt():
     disk_receipts = [
         p.resolve()
         for root in roots
-        for p in root.rglob("*receipt*.json")
-        if p.is_file()
+        for p in root.rglob("*.json")
+        if p.is_file() and "receipt" in p.name.lower()
     ]
     assert len(disk_receipts) >= 40, (
         f"Expected at least 40 receipts on disk, found {len(disk_receipts)}"
