@@ -27,6 +27,24 @@ No fit receipts were regenerated. The #10250 refresh is merged; #10271 receipt i
 physical acceptance remain prerequisites. #10256 and #10257 are separately
 owned viewer and Pink adapter slices, not completed product integration.
 
+## Optional Viewer Adapter Status (#10256, #10254)
+
+MeshCat and Gepetto adapters now own persistent native visualizers, validate
+configuration dimensions and preserve separate visual/collision models. Scene
+cleanup is scoped to each adapter. Real MeshCat dispatch is exercised in the
+opt-in heavy integration test; live Gepetto qualification remains pending.
+These wrappers are prerequisites for replay integration, not evidence that the
+full-body product already routes through them or that any model fit is valid.
+
+## Reproducible Numerical Runtime (#10262)
+
+Use the optional runtime manifest/lock and checker documented in
+`docs/engines/pinocchio.md`. Real Crocoddyl descent and Pink hard-equality /
+infeasible-QP probes pass in the consistent conda-forge stack. Preserve the
+receipt's explicit source-freshness status; a runtime pass is not model or
+physical acceptance. Linux lock requires x86-64-v3. Viewer qualification
+remains separate.
+
 ## Pink Adapter Status (#10257, #10254)
 
 The low-level Pink adapters now share validated state/time handling, retain
@@ -45,6 +63,7 @@ closure regression tests and the 11 contact derivative tests pass on Pinocchio
 3.8 and 4.1; no motion-fit evidence or acceptance thresholds changed.
 The principal-log branch at rotation pi is rejected for derivative evaluation;
 trajectory finite differences also reject steps that could cross that cut.
+
 Updated 2026-09-16 (claude; HO-9 #10111). Branch
 `feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
