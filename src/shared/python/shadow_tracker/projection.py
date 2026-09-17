@@ -20,6 +20,7 @@ from ._validation import (
     check_strict_float,
 )
 from .contracts import (
+    POINT_LANDMARKS_CONVENTION,
     RenderRequest,
     RenderResult,
     SilhouetteRenderer,
@@ -171,6 +172,77 @@ def project_point_to_pixel(
     return u, v, is_in_bounds
 
 
+def _rasterize_ellipse(
+    mask: list[int],
+    center_u: float,
+    center_v: float,
+    rx_px: float,
+    ry_px: float,
+    width: int,
+    height: int,
+) -> None:
+    """Rasterize a filled 2D ellipse with subpixel center into a binary mask.
+
+    Correctly clips against image boundaries [0, width) x [0, height) even when
+    the ellipse center (center_u, center_v) lies outside image bounds.
+    """
+    if rx_px <= 0.5 and ry_px <= 0.5:
+        col = int(round(center_u))
+        row = int(round(center_v))
+        if 0 <= row < height and 0 <= col < width:
+            mask[row * width + col] = 1
+        return
+
+    rx = max(rx_px, 0.5)
+    ry = max(ry_px, 0.5)
+    min_row = max(0, int(math.floor(center_v - ry)))
+    max_row = min(height - 1, int(math.ceil(center_v + ry)))
+    min_col = max(0, int(math.floor(center_u - rx)))
+    max_col = min(width - 1, int(math.ceil(center_u + rx)))
+
+    if min_row > max_row or min_col > max_col:
+        return
+
+    rx2 = rx * rx
+    ry2 = ry * ry
+    for row in range(min_row, max_row + 1):
+        dv = float(row) - center_v
+        norm_v2 = (dv * dv) / ry2
+        if norm_v2 > 1.0:
+            continue
+        row_offset = row * width
+        for col in range(min_col, max_col + 1):
+            du = float(col) - center_u
+            if ((du * du) / rx2) + norm_v2 <= 1.0:
+                mask[row_offset + col] = 1
+
+
+def resolve_camera_and_dimensions(
+    cameras: Mapping[str, PinholeCameraModel], request: RenderRequest
+) -> tuple[PinholeCameraModel, int, int]:
+    """Validate request and resolve configured camera with matching effective dimensions."""
+    if not isinstance(request, RenderRequest):
+        raise TypeError(f"Expected RenderRequest, got {type(request).__name__}")
+    if request.camera_id not in cameras:
+        raise KeyError(f"Camera ID {request.camera_id!r} not configured in renderer")
+
+    camera = cameras[request.camera_id]
+    if camera.crop_box is not None:
+        min_x, min_y, max_x, max_y = camera.crop_box
+        eff_width = max_x - min_x
+        eff_height = max_y - min_y
+    else:
+        eff_width = camera.width_px
+        eff_height = camera.height_px
+
+    width, height = request.image_size_px
+    if (width, height) != (eff_width, eff_height):
+        raise ValueError(
+            f"RenderRequest image_size_px {(width, height)} does not match camera effective dimensions {(eff_width, eff_height)}"
+        )
+    return camera, width, height
+
+
 # ---------------------------------------------------------------------------
 # 2. Analytic Silhouette Renderer Adapter
 # ---------------------------------------------------------------------------
@@ -208,88 +280,56 @@ class AnalyticSilhouetteRenderer:
     def club_radius_m(self) -> float:
         return self._club_radius_m
 
-    def _rasterize_disk(
-        self,
-        mask: list[int],
-        center_u: float,
-        center_v: float,
-        radius_px: float,
-        width: int,
-        height: int,
-    ) -> None:
-        """Rasterize a filled 2D disk with subpixel center into a binary mask."""
-        if radius_px <= 0.5:
-            col = int(round(center_u))
-            row = int(round(center_v))
-            if 0 <= row < height and 0 <= col < width:
-                mask[row * width + col] = 1
-            return
-
-        r_int = int(math.ceil(radius_px))
-        min_row = max(0, int(math.floor(center_v - radius_px)))
-        max_row = min(height - 1, int(math.ceil(center_v + radius_px)))
-        min_col = max(0, int(math.floor(center_u - radius_px)))
-        max_col = min(width - 1, int(math.ceil(center_u + radius_px)))
-
-        r2 = radius_px * radius_px
-        for row in range(min_row, max_row + 1):
-            dv = float(row) - center_v
-            dv2 = dv * dv
-            if dv2 > r2:
-                continue
-            row_offset = row * width
-            for col in range(min_col, max_col + 1):
-                du = float(col) - center_u
-                if du * du + dv2 <= r2:
-                    mask[row_offset + col] = 1
+    _rasterize_ellipse = staticmethod(_rasterize_ellipse)
 
     def render(self, request: RenderRequest) -> RenderResult:
         """Render calibrated body and club silhouettes from state vector."""
-        if not isinstance(request, RenderRequest):
-            raise TypeError(f"Expected RenderRequest, got {type(request).__name__}")
-        if request.camera_id not in self._cameras:
-            raise KeyError(
-                f"Camera ID {request.camera_id!r} not configured in renderer"
+        camera, width, height = resolve_camera_and_dimensions(self._cameras, request)
+
+        if request.state_convention != POINT_LANDMARKS_CONVENTION:
+            raise ValueError(
+                f"AnalyticSilhouetteRenderer only supports state_convention={POINT_LANDMARKS_CONVENTION!r}, got {request.state_convention!r}"
+            )
+        state = request.state
+        if len(state) not in (3, 6):
+            raise ValueError(
+                f"Unsupported state for AnalyticSilhouetteRenderer: expected 3 (body) or 6 (body+club) elements, got {len(state)} elements. For articulated golfer models, use ArticulatedSilhouetteRenderer."
             )
 
-        camera = self._cameras[request.camera_id]
-        width, height = request.image_size_px
         total_px = width * height
-
         body_mask = [0] * total_px
         club_mask = [0] * total_px
         vis_mask = [1] * total_px
 
-        state = request.state
-        # State vector: first 3 elements are body center [X, Y, Z]
-        if len(state) >= 3:
-            bx, by, bz = state[0], state[1], state[2]
-            bu, bv, b_vis = project_point_to_pixel((bx, by, bz), camera)
-            if b_vis:
-                # Transform body radius to camera image plane pixel radius
-                # Z in camera frame = r[6]*bx + r[7]*by + r[8]*bz + t[2]
-                r_cam = camera.rotation_world_to_camera
-                t_cam = camera.translation_world_to_camera
-                zc = r_cam[6] * bx + r_cam[7] * by + r_cam[8] * bz + t_cam[2]
-                if zc > 1e-6 and self._body_radius_m > 0.0:
-                    r_px = camera.fx * self._body_radius_m / zc
-                else:
-                    r_px = 0.0
-                self._rasterize_disk(body_mask, bu, bv, r_px, width, height)
+        r_cam = camera.rotation_world_to_camera
+        t_cam = camera.translation_world_to_camera
 
-        # Elements 3:6: clubhead landmark if length == 6, or clubhead from full state
+        # Elements 0:3: body center [X, Y, Z]
+        bx, by, bz = state[0], state[1], state[2]
+        zc_b = r_cam[6] * bx + r_cam[7] * by + r_cam[8] * bz + t_cam[2]
+        if zc_b > 1e-9:
+            bu, bv, _ = project_point_to_pixel((bx, by, bz), camera)
+            if self._body_radius_m > 0.0:
+                rx_b = camera.fx * self._body_radius_m / zc_b
+                ry_b = camera.fy * self._body_radius_m / zc_b
+            else:
+                rx_b = 0.0
+                ry_b = 0.0
+            self._rasterize_ellipse(body_mask, bu, bv, rx_b, ry_b, width, height)
+
+        # Elements 3:6: clubhead landmark
         if len(state) == 6:
             cx, cy, cz = state[3], state[4], state[5]
-            cu, cv, c_vis = project_point_to_pixel((cx, cy, cz), camera)
-            if c_vis:
-                r_cam = camera.rotation_world_to_camera
-                t_cam = camera.translation_world_to_camera
-                zc = r_cam[6] * cx + r_cam[7] * cy + r_cam[8] * cz + t_cam[2]
-                if zc > 1e-6 and self._club_radius_m > 0.0:
-                    r_px = camera.fx * self._club_radius_m / zc
+            zc_c = r_cam[6] * cx + r_cam[7] * cy + r_cam[8] * cz + t_cam[2]
+            if zc_c > 1e-9:
+                cu, cv, _ = project_point_to_pixel((cx, cy, cz), camera)
+                if self._club_radius_m > 0.0:
+                    rx_c = camera.fx * self._club_radius_m / zc_c
+                    ry_c = camera.fy * self._club_radius_m / zc_c
                 else:
-                    r_px = 0.0
-                self._rasterize_disk(club_mask, cu, cv, r_px, width, height)
+                    rx_c = 0.0
+                    ry_c = 0.0
+                self._rasterize_ellipse(club_mask, cu, cv, rx_c, ry_c, width, height)
 
         return RenderResult(
             body_mask=tuple(body_mask),
