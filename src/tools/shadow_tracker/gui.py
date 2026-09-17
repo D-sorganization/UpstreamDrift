@@ -177,6 +177,88 @@ class ShadowTrackerReviewModel:
             raise
 
 
+class ShadowTrackerViewportWidget(QWidget):
+    """Custom viewport rendering for Shadow Tracker review frames (MS-84)."""
+
+    def __init__(self, parent: Any = None) -> None:
+        super().__init__(parent)
+        self._observation: FrameObservation | None = None
+        self.setMinimumSize(640, 360)
+        self.setStyleSheet("background-color: #1a1a1a; color: #e0e0e0;")
+
+    @property
+    def observation(self) -> FrameObservation | None:
+        """Return the currently displayed frame observation."""
+        return self._observation
+
+    def set_observation(self, obs: FrameObservation | None) -> None:
+        """Set active observation and trigger redraw."""
+        self._observation = obs
+        self.update()
+
+    def paintEvent(self, event: QtGui.QPaintEvent | None) -> None:  # noqa: N802
+        """Render review frame, authority metadata, and silhouette outlines."""
+        painter = QtGui.QPainter(self)
+        try:
+            rect = self.rect()
+            painter.fillRect(rect, QtGui.QColor("#1a1a1a"))
+
+            if self._observation is None:
+                painter.setPen(QtGui.QColor("#888888"))
+                painter.drawText(
+                    rect,
+                    QtCore.Qt.AlignmentFlag.AlignCenter,
+                    "No Bundle Loaded\nUse Open Bundle... to load footage, masks, and forward kinematic tracking.",
+                )
+                return
+
+            obs = self._observation
+            painter.setPen(QtGui.QColor("#4CAF50"))
+            painter.drawRect(rect.adjusted(10, 10, -10, -10))
+
+            painter.setPen(QtGui.QColor("#e0e0e0"))
+            font = painter.font()
+            font.setPointSize(11)
+            font.setBold(True)
+            painter.setFont(font)
+            painter.drawText(
+                20,
+                35,
+                f"Frame: {obs.frame_id} (Shot: {obs.shot_id}, Cam: {obs.camera_id})",
+            )
+
+            font.setBold(False)
+            font.setPointSize(9)
+            painter.setFont(font)
+            timing_info = (
+                f"PTS: {obs.pts_ticks} ({obs.physical_time_s:.4f}s) | "
+                f"Clock Authority: {obs.timing_mode} ({obs.clock_evidence}) | "
+                f"Exact: {obs.is_timing_exact}"
+            )
+            painter.drawText(20, 60, timing_info)
+
+            mask_info = f"Masks: Body: {obs.body_mask_ref} | Club: {obs.club_mask_ref} | Valid: {obs.valid_mask_ref}"
+            painter.drawText(20, 80, mask_info)
+
+            center_rect = QtCore.QRect(
+                40, 100, max(50, rect.width() - 80), max(50, rect.height() - 140)
+            )
+            painter.setPen(
+                QtGui.QPen(QtGui.QColor("#555555"), 1, QtCore.Qt.PenStyle.DashLine)
+            )
+            painter.drawRect(center_rect)
+
+            painter.setPen(QtGui.QColor("#aaaaaa"))
+            painter.drawText(
+                center_rect,
+                QtCore.Qt.AlignmentFlag.AlignCenter,
+                f"Viewport Active Review\nBody Silhouette & Kinematics Overlay\n"
+                f"Decoder: {obs.decoder_name} | Provenance: {obs.confidence_provenance}",
+            )
+        finally:
+            painter.end()
+
+
 class ShadowTrackerWidget(QWidget):
     """Review and editing workbench widget for Shadow Tracker."""
 
@@ -215,22 +297,73 @@ class ShadowTrackerWidget(QWidget):
         nav_layout.addWidget(self.lbl_frame_info)
         layout.addLayout(nav_layout)
 
-        # Main viewport / display placeholder
-        self.lbl_viewport = QtWidgets.QLabel("No Bundle Loaded", self)
-        self.lbl_viewport.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.lbl_viewport.setMinimumSize(640, 360)
-        self.lbl_viewport.setStyleSheet("background-color: #1a1a1a; color: #888888;")
-        layout.addWidget(self.lbl_viewport, stretch=1)
+        # Main viewport / display
+        self.viewport = ShadowTrackerViewportWidget(self)
+        layout.addWidget(self.viewport, stretch=1)
 
         # Status / Error panel
         self.lbl_status = QtWidgets.QLabel("Status: Ready (Review Mode)", self)
         layout.addWidget(self.lbl_status)
 
         # Connect signals
+        self.btn_open.clicked.connect(self._on_open_bundle)
+        self.btn_save.clicked.connect(self._on_save_bundle)
+        self.btn_export.clicked.connect(self._on_export_canonical)
         self.btn_prev.clicked.connect(self._on_prev)
         self.btn_next.clicked.connect(self._on_next)
         self.slider_frame.valueChanged.connect(self._on_slider_changed)
         self.btn_worst.clicked.connect(self._on_worst)
+
+    def _on_open_bundle(self) -> None:
+        bundle_dir = QtWidgets.QFileDialog.getExistingDirectory(
+            self, "Select Shadow Tracker Bundle Directory"
+        )
+        if not bundle_dir:
+            return
+        try:
+            self.load_bundle(bundle_dir)
+            self.lbl_status.setText(f"Loaded bundle from {Path(bundle_dir).name}")
+        except (OSError, ValueError, RuntimeError, KeyError) as exc:
+            logger.warning("Failed to open bundle: %s", exc)
+            self.lbl_status.setText(f"Error opening bundle: {exc}")
+
+    def _on_save_bundle(self) -> None:
+        try:
+            saved_path = self.save_bundle()
+            self.lbl_status.setText(f"Saved bundle to {saved_path.name}")
+        except ValueError:
+            target_dir = QtWidgets.QFileDialog.getExistingDirectory(
+                self, "Select Destination Bundle Directory"
+            )
+            if not target_dir:
+                return
+            try:
+                saved_path = self.save_bundle(target_dir)
+                self.lbl_status.setText(f"Saved bundle to {saved_path.name}")
+            except (OSError, ValueError, RuntimeError, KeyError) as exc:
+                logger.warning("Failed to save bundle: %s", exc)
+                self.lbl_status.setText(f"Error saving bundle: {exc}")
+        except (OSError, RuntimeError, KeyError) as exc:
+            logger.warning("Failed to save bundle: %s", exc)
+            self.lbl_status.setText(f"Error saving bundle: {exc}")
+
+    def _on_export_canonical(self) -> None:
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "Export Canonical Dataset Package",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not filename:
+            return
+        try:
+            self.export_canonical(filename)
+            self.lbl_status.setText(
+                f"Exported canonical package to {Path(filename).name}"
+            )
+        except (OSError, ValueError, RuntimeError, KeyError) as exc:
+            logger.warning("Failed to export canonical package: %s", exc)
+            self.lbl_status.setText(f"Error exporting canonical package: {exc}")
 
     def _on_prev(self) -> None:
         self.model.step_frame(-1)
@@ -262,13 +395,7 @@ class ShadowTrackerWidget(QWidget):
         self.slider_frame.blockSignals(False)
 
         obs = self.model.get_current_observation()
-        if obs:
-            self.lbl_viewport.setText(
-                f"Frame: {obs.frame_id}\n"
-                f"PTS: {obs.pts_ticks} ({obs.physical_time_s:.4f}s)\n"
-                f"Clock Authority: {obs.timing_mode} ({obs.clock_evidence})\n"
-                f"Masks: {obs.body_mask_ref} | {obs.club_mask_ref}"
-            )
+        self.viewport.set_observation(obs)
 
     # Public review API methods
     def load_bundle(self, bundle_dir: str | Path) -> None:
