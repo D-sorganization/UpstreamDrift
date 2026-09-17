@@ -1,4 +1,10 @@
 # SPEC.md — Repository Specification Document
+
+## Pipeline Report Calibration Offsets Boundary Protection (#10275)
+
+Repairs Law of Demeter boundary in motion matching reference report generation:
+- `src/shared/python/motion_matching/pipeline/reference.py`: In `_build_calibration_stage_report`, accesses `calibration2` offsets through a local boundary variable `source_offsets` rather than deep dot-chained expressions (`inputs.calibration2.offsets.items`), preserving fallback precedence (`inputs.offsets` -> `cal2.offsets` -> `inputs.attachments`) with zero new LoD violations (`scripts/ci/check_lod.py`).
+
 ## Hip Zero-Twist Calibration and Unwidened Leg Bounds (HO-8 #10108, MM-6, #10162)
 
 Calibrates the hip coordinate zero-twist angle from optical motion capture data and unwidens lower-limb joint range-of-motion bounds:
