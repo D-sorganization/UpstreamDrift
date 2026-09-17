@@ -27,6 +27,17 @@ No fit receipts were regenerated. The #10250 refresh is merged; #10271 receipt i
 physical acceptance remain prerequisites. #10256 and #10257 are separately
 owned viewer and Pink adapter slices, not completed product integration.
 
+## Pink Adapter Status (#10257, #10254)
+
+The low-level Pink adapters now share validated state/time handling, retain
+collision geometry, forward hard constraints and limits, refresh cached
+kinematics and propagate infeasibility. Four real-native tests cover equality,
+infeasibility, sequential state refresh and free-flyer `nq != nv` behavior.
+Mixed unit/native collection isolates the real tests from unit mocks and
+checks their executed results. This does not implement the full-body marker,
+stance or weld tasks; those must use the qualified #10260 closure derivative
+and explicit physical-time contract before production selection.
+
 Finite weld correction #10260 differentiates the six-component pose error away
 from closure with the correct SE(3) log Jacobian. Trajectory acceleration
 linearization retains the separate constraint velocity Jacobian. Eleven real

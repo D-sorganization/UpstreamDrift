@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-pink-adapter-inventory",
+      "owner": "UpstreamDrift issue #10257",
+      "resolution": "Inventory the shared Pink adapter step, hard equality and limit forwarding, configuration geometry cache, nq/nv manifold integration and explicit solver failure contracts before manual coverage. Native adapter tests do not qualify full-body fitting or physical acceptance."
+    },
+    {
       "id": "UP-D1-polynomial-full-body-step-inventory",
       "owner": "UpstreamDrift issue #10265",
       "resolution": "Inventory global Bernstein effort mapping, physical-second polynomial export, unactuated root convention and exact discrete RK4 state/coefficient sensitivities. Contact branch flags are local differentiability evidence, not proof of a physically accepted fit."
