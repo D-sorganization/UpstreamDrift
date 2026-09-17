@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Constrained IK Pipeline Integration, CLI/GUI, and Receipts (#10278)
+
+Exposes the Pink constrained inverse kinematics solver across the motion matching pipeline, CLI driver, PyQt6 GUI, and versioned receipts:
+- **Versioned Receipt Extensions (`src/shared/python/motion_matching/pipeline/receipt_components.py`, `receipt_schema.py`)**:
+  - `ConstrainedIkReceipt`: Records backend identity (`"pink"`), convergence metrics (`all_frames_converged`, `unconverged_frames`), iteration budget, residual error stats, rate audit status (`rate_limits_respected`, `max_joint_velocity_ratio`), solver choice, and step mode (`"physical"` vs `"projection"`).
+  - Enforces fail-closed validation: `is_qualified` cannot be true if `not all_frames_converged`.
+  - Top-level `Receipt` includes `backend: str = "mujoco"` and `IkReceipt` includes optional `constrained_ik: ConstrainedIkReceipt | None`.
+- **Pipeline & Driver Surface (`src/tools/motion_matching/pipeline.py`, `run_ground_support.py`)**:
+  - `MatchRequest` accepts `backend` (`"mujoco"` | `"pink"`), `step_mode` (`"physical"` | `"projection"`), and `solver` (`"quadprog"` | `"osqp"` | `"proxsuite"`).
+  - CLI and driver support `--backend`, `--pink-step-mode`, `--pink-solver`, and `--pink-limit-policy`.
+  - Fail-closed capability checking: `probe_pink_capability()` verifies Pink dependencies before invocation, raising `RuntimeError` rather than silently falling back.
+- **PyQt6 GUI Controls (`src/tools/motion_matching/gui.py`)**:
+  - Matching tab exposes `Backend` and `Pink Step Mode` combo boxes, with `Pink Step Mode` dynamically enabled only when Pink is selected.
+
 ## Shadow Tracker Modern and Historical Footage Qualification Workflows (#10133)
 
 Qualifies reference modern footage and historical pilot archive workflows with lineage deduplication, rights auditing, and multi-camera synchronization validation:
@@ -5491,6 +5505,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-17 | #10315 | Expose Pink constrained IK solver across motion pipeline, CLI/GUI controls, and versioned receipts (#10278). |
 | 2026-09-16 | #10244 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` in `src/engines/physics_engines/mujoco/python/full_body_markers.py` to optimize execution time while avoiding intermediate allocations. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10310 | Implement ConstrainedIKBackend protocol, physical-time rate audits, and PinkTrajectoryService with decoupled timing and structured failure semantics (#10277). |
 | 2026-09-16 | #10266 | Restore optional viewer display dispatch, configuration validation, distinct geometry and scoped scene/server lifecycle. |
