@@ -1,5 +1,37 @@
 # Simscape Matching Progress Review and Execution Turnover
 
+## Latest Verified State: Restoration and Derivative Audit Complete
+
+Both remote audits are terminal. No optimization is running from this review.
+The fitter startup audit passes in 90.73 s: relative segmented/uninterrupted
+objective discrepancy 5.06e-14, marker difference 9.50e-12 m, scaled defect
+3.36e-11, projected rank 42. It uses the original run102 configuration and run101
+restart, not a new candidate. Evidence: native_evidence/restoration_audit_20260917.
+
+PR #10263 now has head 0db3c295a7f668789afbb4666f60912294f81cce, is open and
+reported mergeable=true at this check. Earlier conflict status below is historical.
+A separate real Pinocchio 4.1.0 native-model audit compares the current and PR
+providers at run102 initial/terminal states, wrist offsets 0/+0.1/-0.4 rad,
+three finite-difference steps (1e-5/1e-6/1e-7) and three directions per step.
+The old provider passes closed states but fails off-closure cases, with maximum
+absolute directional error 0.0507–0.2724. The PR provider passes every tested
+case with maximum error below 8e-9 (rtol 2e-6, atol 2e-7). The archived audit
+contains its exact executed script, corrected provider and receipt.
+
+This qualifies the finite **pose** derivative on these native states. It is not
+an acceleration/reaction qualification or proof that this error caused the
+optimizer plateau. NativeNodeChart uses trajectory finite differences; check
+that downstream path separately. The source checkout still has the original
+provider; consume the qualified owner's change rather than duplicating it.
+Coordination evidence: GitHub issue #10260 comment 5708242678.
+
+Next sequence: pin/consume #10263; qualify native chart/retraction and preserve
+the velocity Jacobian for acceleration constraints; restore only the required
+articulated-pose helpers/tests from the verified source archive; obtain a feasible
+terminal witness and test projected control directions; then run a bounded 0.90 s
+fit. Baseline/source recovery is now done and should not be repeated blindly.
+The rejected 0.85 s candidate and all original acceptance gates remain unchanged.
+
 Fitter-dependency checkpoint: native_effort_penalty and shooting_schedule are
 restored with exact integral/boundary tests. All historical run102 driver imports
 resolve locally; 22 focused tests and the repository-pinned mypy hook pass.
