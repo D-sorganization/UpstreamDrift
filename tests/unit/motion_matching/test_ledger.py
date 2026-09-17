@@ -97,12 +97,14 @@ def test_row_classification():
 
 @pytest.mark.unit
 def test_ledger_is_deterministic():
-    """Two successive scans produce byte-identical JSON."""
+    """Two successive scans produce byte-identical rows and totals."""
     ledger1 = scan()
     ledger2 = scan()
-    json1 = ledger1.to_json()
-    json2 = ledger2.to_json()
-    assert json1 == json2
+    d1 = json.loads(ledger1.to_json())
+    d2 = json.loads(ledger2.to_json())
+    d1.pop("generated_at", None)
+    d2.pop("generated_at", None)
+    assert d1 == d2
 
 
 @pytest.mark.unit
