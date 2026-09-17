@@ -63,7 +63,7 @@ class ForwardRolloutResult:
     q: Array
     qd: Array
     predicted_markers_m: Array
-    shared_metrics: SharedMetrics
+    shared_metrics: SharedMetrics | None
     contact_audit: ContactAuditResult
     max_closure_translation_m: float
     max_closure_rotation_rad: float | None
@@ -120,11 +120,15 @@ class ForwardRolloutResult:
         if (
             not np.all(np.isfinite(q_arr))
             or not np.all(np.isfinite(qd_arr))
-            or not np.all(np.isfinite(pred_arr))
+            or (pred_arr.size > 0 and not np.all(np.isfinite(pred_arr)))
         ):
             return False
         # Reject zero-filled / unexecuted output
-        if not np.any(q_arr) and not np.any(qd_arr) and not np.any(pred_arr):
+        if (
+            not np.any(q_arr)
+            and not np.any(qd_arr)
+            and (pred_arr.size == 0 or not np.any(pred_arr))
+        ):
             return False
         # Measured closure metrics must be finite and non-negative
         if (
@@ -176,7 +180,11 @@ class ForwardRolloutResult:
             "legacy_mixed_unit_closure_value": self.max_closure_residual_m,
             "max_closure_residual_m": self.max_closure_residual_m,
             "contact_audit": self.contact_audit.as_dict(),
-            "shared_metrics": self.shared_metrics.as_dict(),
+            "shared_metrics": (
+                self.shared_metrics.as_dict()
+                if self.shared_metrics is not None
+                else None
+            ),
         }
 
 
@@ -281,6 +289,8 @@ class RolloutOptions:
     normalize_time: bool = False
     rtol: float = 1e-5
     atol: float = 1e-7
+    auto_calibrate_ground: bool = True
+    preserve_ground_calibration: bool = True
 
 
 def _slice_capture(capture: TourCapture, n_frames: int) -> TourCapture:
@@ -310,8 +320,8 @@ def _accumulate_max(current: float | None, new_val: float | None) -> float | Non
 def _build_failed_rollout(
     times: Array,
     n_coords: int,
-    capture: TourCapture,
-    marker_offsets: Mapping[str, Any],
+    capture: TourCapture | None,
+    marker_offsets: Mapping[str, Any] | None,
     *,
     status: str = "failed",
     max_closure_translation_m: float = float("nan"),
@@ -320,18 +330,23 @@ def _build_failed_rollout(
 ) -> ForwardRolloutResult:
     """Construct a fallback ForwardRolloutResult when numerical integration fails or is invalid."""
     n_frames = len(times)
-    eval_cap = _slice_capture(capture, n_frames)
-    zero_markers = np.zeros((n_frames, len(eval_cap.labels), 3), dtype=np.float64)
+    if capture is not None and marker_offsets is not None:
+        eval_cap = _slice_capture(capture, n_frames)
+        zero_markers = np.zeros((n_frames, len(eval_cap.labels), 3), dtype=np.float64)
+        shared_metrics = compute_shared_metrics(
+            capture=eval_cap,
+            predicted_points_m=zero_markers,
+            tracked_labels=list(marker_offsets.keys()),
+        )
+    else:
+        zero_markers = np.empty((n_frames, 0, 3), dtype=np.float64)
+        shared_metrics = None
     return ForwardRolloutResult(
         time_s=times,
         q=np.zeros((n_frames, n_coords)),
         qd=np.zeros((n_frames, n_coords)),
         predicted_markers_m=zero_markers,
-        shared_metrics=compute_shared_metrics(
-            capture=eval_cap,
-            predicted_points_m=zero_markers,
-            tracked_labels=list(marker_offsets.keys()),
-        ),
+        shared_metrics=shared_metrics,
         contact_audit=_audit_contact_samples([], n_frames),
         max_closure_translation_m=max_closure_translation_m,
         max_closure_rotation_rad=max_closure_rotation_rad,
@@ -352,8 +367,8 @@ def _assemble_rollout_result(
         float,
         str,
     ],
-    capture: TourCapture,
-    marker_offsets: Mapping[str, Any],
+    capture: TourCapture | None,
+    marker_offsets: Mapping[str, Any] | None,
 ) -> ForwardRolloutResult:
     """Construct a ForwardRolloutResult from trajectory data, contact audit, and metrics."""
     q_traj, qd_traj, pred_m, samples, trans_err, rot_err, mixed_err, status = data
@@ -368,17 +383,21 @@ def _assemble_rollout_result(
             max_closure_rotation_rad=rot_err,
             max_closure_residual_m=mixed_err,
         )
-    eval_cap = _slice_capture(capture, len(times))
+    if capture is not None and marker_offsets is not None:
+        eval_cap = _slice_capture(capture, len(times))
+        shared_metrics = compute_shared_metrics(
+            capture=eval_cap,
+            predicted_points_m=pred_m,
+            tracked_labels=list(marker_offsets.keys()),
+        )
+    else:
+        shared_metrics = None
     return ForwardRolloutResult(
         time_s=times,
         q=q_traj,
         qd=qd_traj,
         predicted_markers_m=pred_m,
-        shared_metrics=compute_shared_metrics(
-            capture=eval_cap,
-            predicted_points_m=pred_m,
-            tracked_labels=list(marker_offsets.keys()),
-        ),
+        shared_metrics=shared_metrics,
         contact_audit=_audit_contact_samples(samples, len(times)),
         max_closure_translation_m=trans_err,
         max_closure_rotation_rad=rot_err,
@@ -507,25 +526,31 @@ def _step_euler_substeps(
 
 def _audit_rollout_trajectory(
     ctx: _EulerStepContext,
-    ik_adapter: Any,
+    ik_adapter: Any | None,
     times: Array,
     q_traj: Array,
     qd_traj: Array,
-    marker_offsets: Mapping[str, Any],
+    marker_offsets: Mapping[str, Any] | None,
     labels: Sequence[str],
 ) -> tuple[Array, list[dict[str, Any]], float, float | None, float, str]:
     """Audit kinematics, contact samples, and loop closure along a simulated trajectory."""
     n_frames = len(times)
-    pred_markers = np.full((n_frames, len(labels), 3), np.nan, dtype=np.float64)
+    has_markers = (
+        ik_adapter is not None and marker_offsets is not None and len(labels) > 0
+    )
+    mo = marker_offsets if marker_offsets is not None else {}
+    if has_markers:
+        pred_markers = np.full((n_frames, len(labels), 3), np.nan, dtype=np.float64)
+    else:
+        pred_markers = np.empty((n_frames, 0, 3), dtype=np.float64)
     all_contact_samples: list[dict[str, Any]] = []
     max_trans: float | None = None
     max_rot: float | None = None
     max_mixed: float | None = None
 
     for k in range(n_frames):
-        pred_markers[k] = _compute_frame_markers(
-            ik_adapter, q_traj[k], marker_offsets, labels
-        )
+        if has_markers and ik_adapter is not None:
+            pred_markers[k] = _compute_frame_markers(ik_adapter, q_traj[k], mo, labels)
         c_samples, _, trans, rot, mixed = _evaluate_frame_dynamics(
             ctx.model,
             ctx.theta,
@@ -545,8 +570,8 @@ def _audit_rollout_trajectory(
         q_traj,
         qd_traj,
         pred_markers,
-        labels,
-        marker_offsets,
+        labels if has_markers else (),
+        mo if has_markers else {},
         max_trans,
         max_rot,
         max_mixed,
@@ -563,12 +588,12 @@ def _audit_rollout_trajectory(
 
 def _simulate_rk45(
     model: Any,
-    ik_adapter: Any,
+    ik_adapter: Any | None,
     theta: Array,
     times: Array,
     initial_state: tuple[Array, Array],
-    marker_offsets: Mapping[str, Any],
-    capture: TourCapture,
+    marker_offsets: Mapping[str, Any] | None,
+    capture: TourCapture | None,
     options: RolloutOptions,
 ) -> tuple[
     Array,
@@ -588,6 +613,7 @@ def _simulate_rk45(
     n_coords = len(coord_names)
     duration_s = float(times[-1]) if times[-1] > 0.0 else 1.0
     init_state = np.concatenate([initial_state[0], initial_state[1]])
+    labels = capture.labels if capture is not None else ()
 
     def deriv(t: float, state: Array) -> Array:
         q_d = {name: float(state[i]) for i, name in enumerate(coord_names)}
@@ -614,7 +640,7 @@ def _simulate_rk45(
         atol=options.atol,
     )
     if not sol.success:
-        zero_markers = np.zeros((n_frames, len(capture.labels), 3), dtype=np.float64)
+        zero_markers = np.zeros((n_frames, len(labels), 3), dtype=np.float64)
         return (
             np.zeros((n_frames, n_coords)),
             np.zeros((n_frames, n_coords)),
@@ -630,19 +656,44 @@ def _simulate_rk45(
     qd_traj = sol.y[n_coords:, :].T
     ctx = _EulerStepContext(model, theta, duration_s, coord_names, options)
     pred_m, samples, max_trans, max_rot, max_mixed, status = _audit_rollout_trajectory(
-        ctx, ik_adapter, times, q_traj, qd_traj, marker_offsets, capture.labels
+        ctx, ik_adapter, times, q_traj, qd_traj, marker_offsets, labels
     )
     return q_traj, qd_traj, pred_m, samples, max_trans, max_rot, max_mixed, status
 
 
+def _audit_terminal_euler(
+    ctx: _EulerStepContext,
+    t_end: float,
+    curr_q: Array,
+    curr_qd: Array,
+    closure_errs: list[float | None],
+    all_contact_samples: list[dict[str, Any]],
+) -> None:
+    """Audit terminal Euler state and accumulate closure errors."""
+    c_samples, _, trans, rot, mixed = _evaluate_frame_dynamics(
+        ctx.model,
+        ctx.theta,
+        t_end,
+        ctx.duration_s,
+        ctx.coord_names,
+        curr_q,
+        curr_qd,
+        ctx.options,
+    )
+    all_contact_samples.append(c_samples)
+    closure_errs[0] = _accumulate_max(closure_errs[0], trans)
+    closure_errs[1] = _accumulate_max(closure_errs[1], rot)
+    closure_errs[2] = _accumulate_max(closure_errs[2], mixed)
+
+
 def _simulate_euler(
     model: Any,
-    ik_adapter: Any,
+    ik_adapter: Any | None,
     theta: Array,
     times: Array,
     initial_state: tuple[Array, Array],
-    marker_offsets: Mapping[str, Any],
-    capture: TourCapture,
+    marker_offsets: Mapping[str, Any] | None,
+    capture: TourCapture | None,
     options: RolloutOptions,
 ) -> tuple[
     Array,
@@ -659,18 +710,24 @@ def _simulate_euler(
     coord_names = list(model.coordinate_order)
     n_coords = len(coord_names)
     duration_s = float(times[-1]) if times[-1] > 0.0 else 1.0
+    labels = capture.labels if capture is not None else ()
+    has_markers = (
+        ik_adapter is not None and marker_offsets is not None and len(labels) > 0
+    )
+    mo = marker_offsets if marker_offsets is not None else {}
 
     curr_q = np.array(initial_state[0], dtype=np.float64, copy=True)
     curr_qd = np.array(initial_state[1], dtype=np.float64, copy=True)
     q_traj = np.zeros((n_frames, n_coords), dtype=np.float64)
     qd_traj = np.zeros((n_frames, n_coords), dtype=np.float64)
-    pred_markers = np.full((n_frames, len(capture.labels), 3), np.nan, dtype=np.float64)
+    if has_markers and ik_adapter is not None:
+        pred_markers = np.full((n_frames, len(labels), 3), np.nan, dtype=np.float64)
+        pred_markers[0] = _compute_frame_markers(ik_adapter, curr_q, mo, labels)
+    else:
+        pred_markers = np.empty((n_frames, 0, 3), dtype=np.float64)
 
     q_traj[0] = curr_q.copy()
     qd_traj[0] = curr_qd.copy()
-    pred_markers[0] = _compute_frame_markers(
-        ik_adapter, curr_q, marker_offsets, capture.labels
-    )
 
     all_contact_samples: list[dict[str, Any]] = []
     closure_errs: list[float | None] = [None, None, None]
@@ -689,32 +746,26 @@ def _simulate_euler(
         )
         q_traj[step + 1] = curr_q.copy()
         qd_traj[step + 1] = curr_qd.copy()
-        pred_markers[step + 1] = _compute_frame_markers(
-            ik_adapter, curr_q, marker_offsets, capture.labels
-        )
+        if has_markers and ik_adapter is not None:
+            pred_markers[step + 1] = _compute_frame_markers(
+                ik_adapter, curr_q, mo, labels
+            )
 
-    # Audit terminal Euler state (frame n_frames - 1)
-    c_samples, _, trans, rot, mixed = _evaluate_frame_dynamics(
-        model,
-        theta,
+    _audit_terminal_euler(
+        ctx,
         float(times[-1]),
-        duration_s,
-        coord_names,
         curr_q,
         curr_qd,
-        options,
+        closure_errs,
+        all_contact_samples,
     )
-    all_contact_samples.append(c_samples)
-    closure_errs[0] = _accumulate_max(closure_errs[0], trans)
-    closure_errs[1] = _accumulate_max(closure_errs[1], rot)
-    closure_errs[2] = _accumulate_max(closure_errs[2], mixed)
 
     status = _check_trajectory_finite(
         q_traj,
         qd_traj,
         pred_markers,
-        capture.labels,
-        marker_offsets,
+        labels if has_markers else (),
+        mo if has_markers else {},
         closure_errs[0],
         closure_errs[1],
         closure_errs[2],
@@ -733,38 +784,45 @@ def _simulate_euler(
 
 def simulate_full_body_forward(
     model: Any,
-    ik_adapter: Any,
-    theta: Array,
-    time_grid: Array,
-    initial_state: tuple[Array, Array],
-    marker_offsets: Mapping[str, Any],
-    capture: TourCapture,
+    ik_adapter: Any | None = None,
+    theta: Array | None = None,
+    time_grid: Array | Sequence[float] | None = None,
+    initial_state: tuple[Array, Array] | None = None,
+    marker_offsets: Mapping[str, Any] | None = None,
+    capture: TourCapture | None = None,
     options: RolloutOptions | None = None,
 ) -> ForwardRolloutResult:
     """Simulate uninterrupted forward dynamics from initial state over time_grid."""
     opts = RolloutOptions() if options is None else options
+    if time_grid is None:
+        raise ValueError("time_grid must be provided")
     times = np.asarray(time_grid, dtype=np.float64)
+    if initial_state is None:
+        raise ValueError("initial_state must be provided")
     q0 = np.asarray(initial_state[0], dtype=np.float64)
+    coord_count = len(getattr(model, "coordinate_order", [])) or len(q0)
+    th = (
+        np.zeros((coord_count, 7), dtype=np.float64)
+        if theta is None
+        else np.asarray(theta, dtype=np.float64)
+    )
 
-    if hasattr(model, "ground_plane") and abs(model.ground_plane.height_m) < 1e-6:
-        calib_z = calibrate_ground_height_at_address(model, q0)
-        model.ground_plane = GroundPlane(
-            normal=model.ground_plane.normal, height_m=calib_z
-        )
-    elif hasattr(model, "ground") and abs(model.ground.height_m) < 1e-6:
-        calib_z = calibrate_ground_height_at_address(model, q0)
-        model.ground = GroundPlane(normal=model.ground.normal, height_m=calib_z)
-    elif hasattr(model, "_ground_plane") and abs(model._ground_plane.height_m) < 1e-6:
-        calib_z = calibrate_ground_height_at_address(model, q0)
-        model._ground_plane = GroundPlane(
-            normal=model._ground_plane.normal, height_m=calib_z
-        )
+    if opts.auto_calibrate_ground:
+        for attr in ("ground_plane", "ground", "_ground_plane"):
+            if hasattr(model, attr):
+                gp = getattr(model, attr)
+                if abs(gp.height_m) < 1e-6:
+                    calib_z = calibrate_ground_height_at_address(model, q0)
+                    setattr(
+                        model, attr, GroundPlane(normal=gp.normal, height_m=calib_z)
+                    )
+                break
 
     if opts.integrator == "rk45" and len(times) > 1:
         data = _simulate_rk45(
             model,
             ik_adapter,
-            theta,
+            th,
             times,
             initial_state,
             marker_offsets,
@@ -775,7 +833,7 @@ def simulate_full_body_forward(
         data = _simulate_euler(
             model,
             ik_adapter,
-            theta,
+            th,
             times,
             initial_state,
             marker_offsets,

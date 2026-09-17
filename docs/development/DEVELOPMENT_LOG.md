@@ -73,17 +73,74 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Viewer Adapters (#10256; 2026-09-16):** Replaced no-op display paths with
+  persistent Pinocchio visualizers, explicit validation and scoped cleanup.
+  Real MeshCat probing exposed and corrected shared-root deletion and owned
+  process cleanup defects. Live Gepetto qualification and production replay
+  integration remain outstanding under #10254.
+
+- **Runtime Qualification (#10262; 2026-09-16):** Runtime slice #10262 adds a consistent conda-forge numerical manifest and exact
+  Linux lock plus isolated capability probes. Receipt success is scoped to
+  runtime behavior; model, full-body fitting and renderer acceptance stay open.
+
+- **Pink Adapters (#10257; 2026-09-16):** Shared solve path validates state,
+  time and outputs; forwards hard constraints/limits; retains collision
+  geometry; refreshes cached FK and propagates solver failures. Real native
+  contracts include free-flyer dimensions and infeasible equality/limit
+  combinations. Full-body task assembly and runtime packaging (#10262) remain
+  separate; no fitted trajectories were regenerated.
+
+- **LoD Regression (#10254; 2026-09-16):** Reproduced the main-derived
+  `inputs.calibration2.offsets.items()` architecture failure before the change.
+  Resolve the owned offset mapping once before formatting the report; preserve
+  explicit/calibrated/attachment precedence. Seven reference-stage tests and
+  the full 3,221-file LoD no-growth scan pass; the baseline was not changed.
+
+- **Integration Turnover (#10254; 2026-09-16):** Post-compaction Crocoddyl ABI
+  and Pink feasible/infeasible QP probes pass on the preserved WSL environment.
+  Added bounded TDD/DbC/LoD/DRY worker contracts and three Pink pipeline packets.
+  Main authority is 0ec64e45; #10250/#10251 are closed. Native action assembly,
+  production Pink integration, CI and full physical qualification remain open.
+  See `docs/plans/qualified_motion_integration/TURNOVER.md`.
+
+Slice #10265 preserves global degree-six controls with a checked unactuated
+root mapping and exact RK4 state/coefficient sensitivities. It is a prerequisite
+to coefficient-lift Crocoddyl actions; optimizer and physical acceptance remain
+open. Preserve explicit ground configuration in independent replay.
+
+- **Crocoddyl Actions (#10269; 2026-09-16):** Implemented the lift/flow/terminal
+  models, exact RK4 chain-rule derivatives, cost scaling, coefficient bounds, warm starts
+  and independent replay diagnostics. Cases tested in isolation include real FDDP, BoxFDDP
+  bounded polynomial effort and full-body active/offground contact with canonical/reversed
+  coordinates.
+
+- **Weld Linearization (#10260; 2026-09-16):** Corrected the finite weld pose
+  Jacobian and preserved the distinct acceleration-constraint partial. Real
+  Pinocchio directional checks fail before correction for displaced wrists;
+  all 11 closure and 11 contact integration tests pass afterward, including
+  explicit rejection of undefined derivatives at the rotation-pi log branch. Next:
+  merge numerical prerequisites before constrained Pink task assembly.
+
+- **Solver Integration (#10254, #10255; 2026-09-16):** Reproduced missing
+  ground-contact state terms in inherited Pinocchio acceleration derivatives;
+  added exact local contact-force partials and constrained chain-rule composition.
+  Real Pinocchio 3.8 integration tests cover active/no contact, moving joints,
+  reversed coordinate order, nonfinite input, contact kinks and cache isolation.
+  Plan: `docs/plans/qualified_motion_integration/README.md`. Next: review/merge
+  derivative boundary, then integrate #10257 Pink and #10256 viewer adapters;
+  preserve #10250 evidence refresh and all full-horizon qualification gates.
+
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #10062 (children #10063 to #10070); continued by epic #10162 (MM-1 to MM-10, HO-1 to HO-10)
-- **Branch:** feat/10111-de-leva-table
-- **PR:** #10092 (FB-5, #10069); #10090 (Step 3 merged); #10089 (FB-4, #10068 merged); #10203 (Step 4 cross-engine replays merged); #10218 (HO-1 #10155 merged); #10224 (HO-2 #10156 merged); #10235 (HO-7 #10161 merged); #10236 (HO-4 #10158 merged)
-- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/marker_calibration.py; src/shared/python/motion_matching/full_body_ik.py; src/shared/python/motion_matching/visual_skeleton.py; src/shared/python/motion_matching/derivative_resolution.py; src/shared/python/motion_matching/full_body_forward_dynamics.py; src/shared/python/motion_matching/anthropometry.py; src/shared/python/motion_matching/pipeline; src/tools/motion_matching; tests/unit/motion_matching/pipeline; tests/unit/motion_matching; tests/unit/tools; tests/tools/motion_matching
+- **Branch:** refactor/10251-pipeline-stages-run-ground-support
+- **PR:** #10092 (FB-5, #10069); #10090 (Step 3 merged); #10089 (FB-4, #10068 merged); #10203 (Step 4 cross-engine replays merged); #10218 (HO-1 #10155 merged); #10224 (HO-2 #10156 merged); #10235 (HO-7 #10161 merged); #10236 (HO-4 #10158 merged); #10249 (HO-9 #10111 merged); #10228 (HO-3 #10157 merged); #10261 (HO-11 #10250 merged); #10258 (HO-8 #10108 merged)
+- **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/marker_calibration.py; src/shared/python/motion_matching/full_body_ik.py; src/shared/python/motion_matching/visual_skeleton.py; src/shared/python/motion_matching/derivative_resolution.py; src/shared/python/motion_matching/full_body_forward_dynamics.py; src/shared/python/motion_matching/anthropometry.py; src/shared/python/motion_matching/hip_calibration.py; src/shared/python/motion_matching/pipeline; src/tools/motion_matching; tests/unit/motion_matching/pipeline; tests/unit/motion_matching; tests/unit/tools; tests/tools/motion_matching; scripts/config/mjx_env_pins.json; scripts/setup_mjx_env.ps1; scripts/setup_mjx_env.sh; tests/unit/motion_matching/test_document_freshness.py
 - **Started:** 2026-09-13
-- **Last verified:** 2026-09-16 (SELF; HO-9 #10111 de Leva 1996 table verified line-by-line against Table 4; shank joint-center discrepancy corrected; pinning test asserts all 11 male segments; all 16 anthropometry unit tests pass)
-- **Summary:** Full-body pipeline handoff (epic #10162). HO-9 (#10111, MM-9) verified the male body segment parameter table (`DE_LEVA_MALE`) in `src/shared/python/motion_matching/anthropometry.py` against Table 4 of de Leva (1996). Added comprehensive pinning unit test `tests/unit/motion_matching/test_de_leva_table.py` asserting length, mass percentage, CoM fraction, and principal radii of gyration percentages against published literature values. Corrected shank parameters from unadjusted Zatsiorsky-Seluyanov 1985 bony landmarks (com_fraction 0.4459 -> 0.4395, radii (0.255, 0.249, 0.103) -> (0.251, 0.246, 0.102)). Committed verification receipt `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json`.
-- **Next step:** Epic #10162 (status refreshed 2026-09-16 in HANDOFF.md "Status and Next Steps"): finish HO-3 (#10157, PR #10228 unblock recipe on the PR); HO-11 (#10250) rebuilds the documents and receipts made stale by HO-9's de Leva shank fix; HO-8 (#10108) in progress; then HO-12 (#10251), HO-10 (#10112); HO-5 (#10159, expert) from the rebuilt receipts; HO-6 (#10160) last.
-- **Evidence:** tests/unit/motion_matching/test_de_leva_table.py, docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json, src/shared/python/motion_matching/anthropometry.py.
+- **Last verified:** 2026-09-16 (SELF; HO-12 #10251 moved remaining run_ground_support stages into pipeline package; run_ground_support.py down to 374 lines; 0 imports from run_ground_support remain across codebase; driver and iron headless pipeline executions verify bitwise receipt parity up to elapsed_s; all unit tests, mypy, and architecture budgets pass)
+- **Summary:** Full-body pipeline handoff (epic #10162). HO-12 (#10251) completed moving `run_ground_support.py` stages into `src.shared.python.motion_matching.pipeline`, packaging `solve_address_stage`, `calibrated_address_summary`, `prepare_hip_spec`, `search_segment_scales`, `build_ik_report`, `build_dynamics_report`, and `log_pipeline_summary`. `run_ground_support.py` is now a thin CLI driver under 400 lines (374 lines). Migrated all evidence scripts to import from `src.shared.python.motion_matching.pipeline`. Integrated HO-8 hip zero-twist calibration. Verified bitwise identical driver and iron receipt parity against main up to execution elapsed_s.
+- **Next step:** Land HO-12 PR, then proceed to HO-10 (#10160), HO-5 (#10159), and HO-6 (#10121) in epic #10162.
+- **Evidence:** docs/development/full_body_models/evidence/ground_support/run_ground_support.py, src/shared/python/motion_matching/pipeline/address.py, src/shared/python/motion_matching/pipeline/reference.py, src/shared/python/motion_matching/pipeline/dynamics.py, src/shared/python/motion_matching/pipeline/receipt.py, tests/unit/motion_matching/pipeline/.
 
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 
