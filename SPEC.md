@@ -74,6 +74,19 @@ Calibrates the hip coordinate zero-twist angle from optical motion capture data 
   - Regenerated ground-support receipts with `BOUND_WIDENING = 1.0`: `anthro_driver`, `anthro_driver_shoot`, `anthro_iron`, and `anthro_iron_shoot`.
   - Verified 0 lower-limb `range_of_motion_flags` on the IK reference for both captures (`driver` and `iron`).
   - Cross-engine setup parity (`verify_setup_parity.py`) re-verified across MuJoCo, Drake, and Pinocchio.
+## Pink Full-Body Task and Constraint Translation (#10276, #10304)
+
+`FullBodyPinkTasks` provides an engine-local typed facade (`build`, `audit`)
+translating canonical motion-matching marker attachments, six-dimensional grip
+closure, and joint bounds/locks into Pink tasks and configuration limits.
+Canonical marker targets are mapped to `FrameTask` instances with dropout masks
+and target finiteness validation. Stance and grip loop closure are enforced via
+`RelativeFrameTask` (identity SE(3) transform) while rejecting configurations
+near the rotation-$\pi$ principal log branch cut ($10^{-7}\text{ rad}$). Coordinate
+bounds are explicitly converted from degrees to radians, and locked coordinates
+are constrained via `LockedCoordinateTask`. The facade validates inputs, supports
+floating-base kinematics ($n_q \neq n_v$), and evaluates post-solve residuals
+and bound violations.
 
 ## Pink Adapter State and Constraint Contract (#10257)
 
@@ -5405,6 +5418,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
 | 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
 | 2026-09-16 | #10270 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |
 | 2026-09-16 | #10263 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
