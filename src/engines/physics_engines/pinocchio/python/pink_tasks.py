@@ -638,7 +638,7 @@ class FullBodyPinkTasks:
         q: np.ndarray,
         configuration: ConfigurationState,
         request: FrameTaskRequest | None,
-    ) -> dict[str, np.ndarray] | None:
+    ) -> Mapping[str, np.ndarray] | None:
         marker_positions = configuration.marker_positions
         if (
             marker_positions is None
