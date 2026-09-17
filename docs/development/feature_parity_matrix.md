@@ -105,6 +105,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `rate_of_closure` | `tools.rate_of_closure` |
 | `realtime_ws` | `simulation.realtime_ws_stream` |
 | `robotics_module` | `launcher.tile_web_reachability` |
+| `shadow_tracker` | `mocap.breadth` |
 | `shot_tracer` | `simulation.shot_tracer` |
 | `simulation_backends` | `analysis.counterfactuals` |
 | `starting_pose_matcher` | `mocap.breadth` |

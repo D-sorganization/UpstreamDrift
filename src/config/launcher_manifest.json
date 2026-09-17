@@ -160,7 +160,7 @@
       "path": "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py",
       "engine_type": "myosuite",
       "logo": "myosim.svg",
-      "status": "engine_ready",
+      "status": "experimental",
       "capabilities": [
         "musculoskeletal",
         "muscle_control",
