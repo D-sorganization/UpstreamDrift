@@ -23,6 +23,20 @@ coefficient-lift action assembly, objective contracts and independent replay.
   Real Pinocchio 3.8 tests reproduce the previous active-contact failure and
   pass after the chain-rule correction. This is derivative qualification,
   not a full-swing fitting or contact-model acceptance claim.
+- **Optional Viewer Adapters (#10256, #10254):** Gepetto and MeshCat wrappers retain their native visualizers and dispatch
+  validated configurations, including neutral pose. They distinguish visual and
+  collision geometry, own unique scene roots, and preserve shared servers/scenes
+  during cleanup. MeshCat's owned server is explicitly managed. Adapter tests
+  and a real MeshCat runtime smoke check exist; a live Gepetto CORBA/server
+  qualification and production replay selection remain outstanding. This change
+  does not certify any motion-fit result or replace the native viewer.
+- **Optional Motion Runtime (#10262):** The numerical runtime has a conda-forge version manifest and Linux x86-64-v3
+  explicit package lock. `scripts/ci/check_motion_runtime.py` isolates native
+  imports and solver probes and emits a fail-closed capability receipt with
+  versions, hashes, bounded process diagnostics and source-freshness status.
+  The qualified sample stack is Pinocchio 4.1, Pink 4.4 and Crocoddyl 3.2.1.
+  This does not qualify full-body fitting, physics, or Gepetto rendering.
+  Continue model and product integration under #10254.
 - **Pink Adapter Contract (#10257, #10254):** Both Pink entry points share one validated solve step. They preserve geometry,
   forward explicit hard constraints/limits, refresh cached kinematics and
   integrate tangent velocity exactly once. Solver failures propagate with
