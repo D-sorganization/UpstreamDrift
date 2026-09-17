@@ -45,6 +45,7 @@ closure regression tests and the 11 contact derivative tests pass on Pinocchio
 3.8 and 4.1; no motion-fit evidence or acceptance thresholds changed.
 The principal-log branch at rotation pi is rejected for derivative evaluation;
 trajectory finite differences also reject steps that could cross that cut.
+
 Updated 2026-09-16 (claude; HO-9 #10111). Branch
 `feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
