@@ -34,3 +34,15 @@ def test_pipeline_constants_present_and_valid() -> None:
         )
         == constants.IK_UNBOUNDED
     )
+
+
+def test_pipeline_default_paths_and_captures() -> None:
+    from src.shared.python.motion_matching.pipeline import constants
+
+    assert "driver" in constants.CAPTURES
+    assert "iron" in constants.CAPTURES
+    assert constants.CAPTURES["driver"].name == "C3D_TA_Driver.c3d"
+    assert constants.CAPTURES["iron"].name == "C3D_TA_Iron.c3d"
+    assert constants.SPEC.name == "full_body_spec_v2.json"
+    assert constants.BUILD_RECEIPT.name == "build_receipt_v2.json"
+    assert constants.CANDIDATE.name == "returned81_candidate.json"
