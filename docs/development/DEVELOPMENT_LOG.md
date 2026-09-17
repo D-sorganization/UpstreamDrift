@@ -91,6 +91,12 @@ root mapping and exact RK4 state/coefficient sensitivities. It is a prerequisite
 to coefficient-lift Crocoddyl actions; optimizer and physical acceptance remain
 open. Preserve explicit ground configuration in independent replay.
 
+- **Crocoddyl Actions (#10269; 2026-09-16):** Implemented the lift/flow/terminal
+  models, exact RK4 chain-rule derivatives, cost scaling, coefficient bounds, warm starts
+  and independent replay diagnostics. Cases tested in isolation include real FDDP, BoxFDDP
+  bounded polynomial effort and full-body active/offground contact with canonical/reversed
+  coordinates.
+
 - **Weld Linearization (#10260; 2026-09-16):** Corrected the finite weld pose
   Jacobian and preserved the distinct acceleration-constraint partial. Real
   Pinocchio directional checks fail before correction for displaced wrists;
