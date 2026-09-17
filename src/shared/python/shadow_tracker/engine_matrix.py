@@ -21,7 +21,7 @@ from .contracts import (
     CandidateResult,
     FrameObservation,
 )
-from .evaluation import GateProfile, GateStatus
+from .evaluation import GateProfile, GateStatus, audit_gate_profile
 
 logger = logging.getLogger(__name__)
 
@@ -391,64 +391,23 @@ def profile_shadow_tracker_performance(
 # ---------------------------------------------------------------------------
 
 
-def _audit_synthetic_gates(
+def _audit_individual_gates(
     candidate: CandidateResult,
     observations: Sequence[FrameObservation],
     profile: GateProfile,
 ) -> list[GateStatus]:
-    """Audit synthetic and reference gates G0 through G3."""
+    """Audit all individual gates G0 through G7, reusing evaluation gate profile."""
+    _, base_statuses = audit_gate_profile(candidate, observations, profile)
+    base_map = {g.gate_id: g for g in base_statuses}
+
     statuses: list[GateStatus] = []
-
-    # G0: Input Integrity
-    g0_pass = bool(
-        observations
-        and all(
-            isinstance(obs.frame_id, str)
-            and len(obs.frame_id.strip()) > 0
-            and obs.pts_ticks >= 0
-            and bool(obs.shot_id)
-            for obs in observations
-        )
-    )
-    statuses.append(
-        GateStatus(
-            gate_id="G0",
-            passed=g0_pass,
-            score=1.0 if g0_pass else 0.0,
-            threshold=1.0,
-            reason="Input references valid" if g0_pass else "Input integrity failure",
-        )
-    )
-
-    # G1: Synthetic Projection
-    statuses.append(
-        GateStatus(
-            gate_id="G1",
-            passed=True,
-            score=0.1,
-            threshold=0.5,
-            reason="Landmark projection within 0.5 px",
-        )
-    )
-
-    # G2: Synthetic Recovery
-    mean_iou = float(candidate.diagnostics.get("mean_iou", 0.0))
-    g2_pass = bool(mean_iou >= profile.min_body_iou)
-    statuses.append(
-        GateStatus(
-            gate_id="G2",
-            passed=g2_pass,
-            score=mean_iou,
-            threshold=profile.min_body_iou,
-            reason=(
-                "Synthetic body recovery within tolerance"
-                if g2_pass
-                else "Body IoU below threshold"
-            ),
-        )
-    )
+    # G0, G1, G2 from base evaluation profile
+    for gid in ("G0", "G1", "G2"):
+        if gid in base_map:
+            statuses.append(base_map[gid])
 
     # G3: Modern Reference
+    mean_iou = float(candidate.diagnostics.get("mean_iou", 0.0))
     joint_rmse = float(candidate.diagnostics.get("joint_rmse_m", 0.04))
     g3_pass = bool(mean_iou >= 0.90 and joint_rmse <= 0.05)
     statuses.append(
@@ -464,57 +423,11 @@ def _audit_synthetic_gates(
             ),
         )
     )
-    return statuses
 
-
-def _audit_operational_gates(
-    candidate: CandidateResult,
-    observations: Sequence[FrameObservation],
-    profile: GateProfile,
-) -> list[GateStatus]:
-    """Audit operational, dynamics, and reproduction gates G4 through G7."""
-    statuses: list[GateStatus] = []
-
-    # G4: Dynamics Replay
-    audit = candidate.replay_audit
-    g4_pass = bool(
-        audit is not None
-        and audit.is_physically_accepted
-        and audit.reset_count == 1
-        and audit.max_grip_translation_error_m <= profile.max_grip_translation_error_m
-        and audit.max_grip_rotation_error_rad <= profile.max_grip_rotation_error_rad
-    )
-    statuses.append(
-        GateStatus(
-            gate_id="G4",
-            passed=g4_pass,
-            score=audit.max_grip_translation_error_m if audit else 1.0,
-            threshold=profile.max_grip_translation_error_m,
-            reason=(
-                "Continuous dynamics replay verified"
-                if g4_pass
-                else "Dynamics replay violation"
-            ),
-        )
-    )
-
-    # G5: Robustness and Uncertainty
-    g5_pass = bool(
-        candidate.uncertainty_method in ("empirical_holdout", "calibrated_posterior")
-    )
-    statuses.append(
-        GateStatus(
-            gate_id="G5",
-            passed=g5_pass,
-            score=1.0 if g5_pass else 0.0,
-            threshold=1.0,
-            reason=(
-                "Nominal 90% confidence calibrated"
-                if g5_pass
-                else "Uncalibrated uncertainty"
-            ),
-        )
-    )
+    # G4, G5 from base evaluation profile
+    for gid in ("G4", "G5"):
+        if gid in base_map:
+            statuses.append(base_map[gid])
 
     # G6: Historical Pilot
     g6_pass = bool(
@@ -555,18 +468,8 @@ def _audit_operational_gates(
             ),
         )
     )
+
     return statuses
-
-
-def _audit_individual_gates(
-    candidate: CandidateResult,
-    observations: Sequence[FrameObservation],
-    profile: GateProfile,
-) -> list[GateStatus]:
-    """Audit individual gate criteria G0 through G7."""
-    return _audit_synthetic_gates(
-        candidate, observations, profile
-    ) + _audit_operational_gates(candidate, observations, profile)
 
 
 def audit_full_release_gates(
