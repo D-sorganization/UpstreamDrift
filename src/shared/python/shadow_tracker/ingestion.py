@@ -722,12 +722,10 @@ class OpenCvVideoDecoder:
         else:
             self._explicit_pts = None
             self._frame_count = max(raw_count, 1)
-            if fps > 0 and math.isfinite(fps):
-                self._is_timing_exact = True
-                self._timing_mode = "estimated_cfr"
-            else:
-                self._is_timing_exact = False
-                self._timing_mode = "estimated_cfr"
+            # Average FPS cannot establish source presentation timestamps,
+            # even when it is finite and positive.
+            self._is_timing_exact = False
+            self._timing_mode = "estimated_cfr"
 
         if timebase is not None:
             (
