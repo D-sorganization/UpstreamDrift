@@ -39,6 +39,7 @@ from .source_records import (
     RightsStatus,
     SourceAsset,
 )
+import struct
 
 _CHUNK_SIZE = 64 * 1024
 
@@ -414,6 +415,12 @@ def map_frame_to_observation(
         club_mask_ref=club_mask_ref,
         valid_mask_ref=valid_mask_ref,
         confidence_provenance=confidence_provenance,
+        timing_mode=frame.timing_mode,
+        is_timing_exact=frame.is_timing_exact,
+        clock_evidence=frame.clock_evidence,
+        decoder_name=frame.decoder_name,
+        decoder_version=frame.decoder_version,
+        pixel_format=frame.pixel_format,
     )
 
 
@@ -462,7 +469,13 @@ class VideoDecoderAdapter(Protocol):
     def timing_mode(self) -> str: ...
 
     @property
+    def clock_evidence(self) -> str: ...
+
+    @property
     def decoder_name(self) -> str: ...
+
+    @property
+    def decoder_version(self) -> str: ...
 
     @property
     def pixel_format(self) -> str: ...
@@ -492,7 +505,9 @@ class SyntheticVideoDecoder:
         "_timebase_denominator",
         "_is_timing_exact",
         "_timing_mode",
+        "_clock_evidence",
         "_decoder_name",
+        "_decoder_version",
         "_pixel_format",
     )
 
@@ -526,7 +541,9 @@ class SyntheticVideoDecoder:
         ) = _reduce_timebase(timebase)
         self._is_timing_exact = True
         self._timing_mode = "authoritative"
+        self._clock_evidence = "synthetic_authoritative_ticks"
         self._decoder_name = "synthetic"
+        self._decoder_version = "synthetic-1.0.0"
         self._pixel_format = "synthetic"
 
     @property
@@ -558,8 +575,16 @@ class SyntheticVideoDecoder:
         return self._timing_mode
 
     @property
+    def clock_evidence(self) -> str:
+        return self._clock_evidence
+
+    @property
     def decoder_name(self) -> str:
         return self._decoder_name
+
+    @property
+    def decoder_version(self) -> str:
+        return self._decoder_version
 
     @property
     def pixel_format(self) -> str:
@@ -639,6 +664,185 @@ class DecodeLimits:
             raise ValueError(f"max_frames cannot be negative, got {self.max_frames}")
 
 
+def _probe_opencv_capture(file_path: Path) -> tuple[int, int, float, int, bytes]:
+    import cv2
+
+    cap = cv2.VideoCapture(str(file_path))
+    if not cap.isOpened():
+        raise ValueError(f"Could not open video file {file_path}")
+    try:
+        w, h = (
+            int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        )
+        fps, raw_count = (
+            float(cap.get(cv2.CAP_PROP_FPS)),
+            int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
+        )
+        if w <= 0 or h <= 0:
+            raise ValueError(f"Video has invalid dimensions: {w}x{h} in {file_path}")
+        ret, frame0 = cap.read()
+        if not ret or frame0 is None:
+            raise ValueError(f"Could not decode initial frame from {file_path}")
+        return w, h, fps, raw_count, frame0.tobytes()
+    finally:
+        cap.release()
+
+
+def _read_box_header(stream: Any, pos: int, limit: int) -> tuple[str, int, int] | None:
+    if pos + 8 > limit:
+        return None
+    stream.seek(pos)
+    hdr = stream.read(8)
+    if len(hdr) < 8:
+        return None
+    size, btype_bytes = struct.unpack(">I4s", hdr)
+    try:
+        btype = btype_bytes.decode("ascii")
+    except UnicodeDecodeError:
+        return None
+    if size == 1:
+        if pos + 16 > limit:
+            return None
+        size, hdr_len = struct.unpack(">Q", stream.read(8))[0], 16
+    elif size == 0:
+        size, hdr_len = limit - pos, 8
+    else:
+        hdr_len = 8
+    if size < hdr_len or pos + size > limit:
+        return None
+    return btype, pos + hdr_len, size - hdr_len
+
+
+def _find_subbox(
+    stream: Any, btype: str, start: int, length: int
+) -> tuple[int, int] | None:
+    curr, limit = start, start + length
+    while curr < limit:
+        info = _read_box_header(stream, curr, limit)
+        if info is None:
+            break
+        if info[0] == btype:
+            return info[1], info[2]
+        curr = info[1] + info[2]
+    return None
+
+
+def _find_all_subboxes(
+    stream: Any, btype: str, start: int, length: int
+) -> list[tuple[int, int]]:
+    boxes, curr, limit = [], start, start + length
+    while curr < limit:
+        info = _read_box_header(stream, curr, limit)
+        if info is None:
+            break
+        if info[0] == btype:
+            boxes.append((info[1], info[2]))
+        curr = info[1] + info[2]
+    return boxes
+
+
+def _parse_stts_and_ctts(
+    stream: Any, stbl_start: int, stbl_len: int
+) -> tuple[tuple[int, ...], list[int], bool] | None:
+    stts = _find_subbox(stream, "stts", stbl_start, stbl_len)
+    if stts is None or stts[1] < 8:
+        return None
+    stream.seek(stts[0])
+    entry_count = struct.unpack_from(">I", stream.read(8), 4)[0]
+    if entry_count <= 0 or stts[1] < 8 + entry_count * 8:
+        return None
+    raw_entries = stream.read(entry_count * 8)
+    dts_list: list[int] = []
+    deltas: list[int] = []
+    curr_dts = 0
+    for i in range(entry_count):
+        scount, sdelta = struct.unpack_from(">II", raw_entries, i * 8)
+        deltas.append(sdelta)
+        dts_list.extend(curr_dts + j * sdelta for j in range(scount))
+        curr_dts += scount * sdelta
+    if not dts_list:
+        return None
+    has_ctts = False
+    ctts = _find_subbox(stream, "ctts", stbl_start, stbl_len)
+    if ctts is not None and ctts[1] >= 8:
+        stream.seek(ctts[0])
+        ctts_hdr = stream.read(8)
+        c_ver, c_count = ctts_hdr[0], struct.unpack_from(">I", ctts_hdr, 4)[0]
+        if ctts[1] >= 8 + c_count * 8:
+            raw_ctts = stream.read(c_count * 8)
+            offsets: list[int] = []
+            fmt = ">Ii" if c_ver == 1 else ">II"
+            for i in range(c_count):
+                sc, so = struct.unpack_from(fmt, raw_ctts, i * 8)
+                offsets.extend([so] * sc)
+            if len(offsets) == len(dts_list):
+                has_ctts = any(o != 0 for o in offsets)
+                return (
+                    tuple(d + o for d, o in zip(dts_list, offsets, strict=True)),
+                    deltas,
+                    has_ctts,
+                )
+    return tuple(dts_list), deltas, has_ctts
+
+
+def _extract_track_timing(
+    stream: Any, trak_start: int, trak_len: int
+) -> tuple[tuple[int, ...], tuple[int, int]] | None:
+    mdia = _find_subbox(stream, "mdia", trak_start, trak_len)
+    if mdia is None:
+        return None
+    hdlr = _find_subbox(stream, "hdlr", mdia[0], mdia[1])
+    if hdlr is not None and hdlr[1] >= 12:
+        stream.seek(hdlr[0] + 8)
+        if stream.read(4) != b"vide":
+            return None
+    mdhd = _find_subbox(stream, "mdhd", mdia[0], mdia[1])
+    if mdhd is None or mdhd[1] < 24:
+        return None
+    stream.seek(mdhd[0])
+    mdhd_data = stream.read(min(mdhd[1], 36))
+    version = mdhd_data[0]
+    if version == 0 and len(mdhd_data) >= 20:
+        timescale = struct.unpack_from(">I", mdhd_data, 12)[0]
+    elif version == 1 and len(mdhd_data) >= 28:
+        timescale = struct.unpack_from(">I", mdhd_data, 20)[0]
+    else:
+        return None
+    if timescale <= 0:
+        return None
+    minf = _find_subbox(stream, "minf", mdia[0], mdia[1])
+    stbl = _find_subbox(stream, "stbl", minf[0], minf[1]) if minf else None
+    if stbl is None:
+        return None
+    parsed = _parse_stts_and_ctts(stream, stbl[0], stbl[1])
+    if parsed is None:
+        return None
+    pts_list, deltas, has_ctts = parsed
+    if not (len(set(deltas)) > 1 or has_ctts or pts_list[0] != 0):
+        return None
+    gcd = math.gcd(1, timescale)
+    return pts_list, (1 // gcd, timescale // gcd)
+
+
+def extract_iso_bmff_pts(
+    path: Path | str,
+) -> tuple[tuple[int, ...], tuple[int, int]] | None:
+    """Extract authoritative container presentation timestamps and timescale from ISO-BMFF files."""
+    file_path = Path(path)
+    if not file_path.is_file() or file_path.stat().st_size < 16:
+        return None
+    with file_path.open("rb") as stream:
+        moov = _find_subbox(stream, "moov", 0, file_path.stat().st_size)
+        if moov is None:
+            return None
+        for t_start, t_len in _find_all_subboxes(stream, "trak", moov[0], moov[1]):
+            res = _extract_track_timing(stream, t_start, t_len)
+            if res is not None:
+                return res
+    return None
+
+
 class OpenCvVideoDecoder:
     """Frame-accurate video decoder backed by OpenCV VideoCapture with bounded memory.
 
@@ -657,7 +861,9 @@ class OpenCvVideoDecoder:
         "_timebase_denominator",
         "_is_timing_exact",
         "_timing_mode",
+        "_clock_evidence",
         "_decoder_name",
+        "_decoder_version",
         "_pixel_format",
         "_explicit_pts",
         "_cache",
@@ -672,75 +878,82 @@ class OpenCvVideoDecoder:
     ) -> None:
         import cv2
 
+        if pts_ticks is not None and timebase is None:
+            raise ValueError(
+                "timebase must be explicitly provided when supplying pts_ticks"
+            )
+
         file_path = Path(path)
         if not file_path.is_file():
             raise FileNotFoundError(f"Video file not found: {file_path}")
         if file_path.stat().st_size == 0:
             raise ValueError(f"Video file is empty: {file_path}")
 
-        cap = cv2.VideoCapture(str(file_path))
-        if not cap.isOpened():
-            raise ValueError(f"Could not open video file {file_path}")
-
-        try:
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = float(cap.get(cv2.CAP_PROP_FPS))
-            raw_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-            if width <= 0 or height <= 0:
-                raise ValueError(
-                    f"Video has invalid dimensions: {width}x{height} in {file_path}"
-                )
-
-            # Probe exactly one frame to verify media is decodable and non-corrupt
-            ret, frame0 = cap.read()
-            if not ret or frame0 is None:
-                raise ValueError(f"Could not decode initial frame from {file_path}")
-        finally:
-            cap.release()
+        (
+            self._width,
+            self._height,
+            self._fps,
+            raw_count,
+            frame0_bytes,
+        ) = _probe_opencv_capture(file_path)
 
         self._path = file_path
-        self._width = width
-        self._height = height
-        self._fps = fps
         self._decoder_name = "opencv"
+        self._decoder_version = getattr(cv2, "__version__", "unknown")
         self._pixel_format = "bgr24"
         self._cache: dict[int, str] = {
             0: compute_frame_hash(
-                frame0.tobytes(), decoder_name="opencv", pixel_format="bgr24"
+                frame0_bytes, decoder_name="opencv", pixel_format="bgr24"
             )
         }
 
         if pts_ticks is not None:
+            assert timebase is not None
             if len(pts_ticks) == 0:
                 raise ValueError("pts_ticks must not be empty")
             self._explicit_pts: tuple[int, ...] | None = tuple(pts_ticks)
             self._frame_count = len(pts_ticks)
             self._is_timing_exact = True
             self._timing_mode = "authoritative"
-        else:
-            self._explicit_pts = None
-            self._frame_count = max(raw_count, 1)
-            # Average FPS cannot establish source presentation timestamps,
-            # even when it is finite and positive.
-            self._is_timing_exact = False
-            self._timing_mode = "estimated_cfr"
-
-        if timebase is not None:
+            self._clock_evidence = "caller_authoritative_pts"
             (
                 self._timebase_numerator,
                 self._timebase_denominator,
             ) = _reduce_timebase(timebase)
-        elif fps > 0 and math.isfinite(fps):
-            frac = Fraction(fps).limit_denominator(100000)
-            (
-                self._timebase_numerator,
-                self._timebase_denominator,
-            ) = _reduce_timebase((frac.denominator, frac.numerator))
         else:
-            self._timebase_numerator = 1
-            self._timebase_denominator = 1
+            self._frame_count = max(raw_count, 1)
+            container_timing = extract_iso_bmff_pts(file_path)
+            if (
+                container_timing is not None
+                and len(container_timing[0]) == self._frame_count
+            ):
+                self._explicit_pts = container_timing[0]
+                (
+                    self._timebase_numerator,
+                    self._timebase_denominator,
+                ) = container_timing[1]
+                self._is_timing_exact = True
+                self._timing_mode = "container_pts"
+                self._clock_evidence = "container_pts_metadata"
+            else:
+                self._explicit_pts = None
+                self._is_timing_exact = False
+                self._timing_mode = "estimated_cfr"
+                self._clock_evidence = "estimated_nominal_fps"
+                if timebase is not None:
+                    (
+                        self._timebase_numerator,
+                        self._timebase_denominator,
+                    ) = _reduce_timebase(timebase)
+                elif self._fps > 0 and math.isfinite(self._fps):
+                    frac = Fraction(self._fps).limit_denominator(100000)
+                    (
+                        self._timebase_numerator,
+                        self._timebase_denominator,
+                    ) = _reduce_timebase((frac.denominator, frac.numerator))
+                else:
+                    self._timebase_numerator = 1
+                    self._timebase_denominator = 1
 
     @property
     def frame_count(self) -> int:
@@ -771,8 +984,16 @@ class OpenCvVideoDecoder:
         return self._timing_mode
 
     @property
+    def clock_evidence(self) -> str:
+        return self._clock_evidence
+
+    @property
     def decoder_name(self) -> str:
         return self._decoder_name
+
+    @property
+    def decoder_version(self) -> str:
+        return self._decoder_version
 
     @property
     def pixel_format(self) -> str:
@@ -938,4 +1159,10 @@ def decode_video_frames(
             physical_time_s=phys_time,
             physical_time_reason=reason,
             frame_sha256=frame_hash,
+            timing_mode=decoder.timing_mode,
+            is_timing_exact=decoder.is_timing_exact,
+            clock_evidence=getattr(decoder, "clock_evidence", "estimated_nominal_fps"),
+            decoder_name=decoder.decoder_name,
+            decoder_version=getattr(decoder, "decoder_version", "legacy"),
+            pixel_format=decoder.pixel_format,
         )
