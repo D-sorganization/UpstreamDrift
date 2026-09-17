@@ -293,34 +293,113 @@ def main() -> None:
     # 4. full IK, smoothing, consistency re-solve
     constrained_ik_dict: dict[str, Any] | None = None
     if args.backend == "pink":
-        from src.engines.physics_engines.pink.trajectory import (
-            PinkTrajectoryBackend,
-            TrajectorySolveRequest,
+        from src.engines.physics_engines.pinocchio.python.pink_trajectory import (
+            PinkTrajectoryService,
+        )
+        from src.shared.python.motion_matching.constrained_ik import (
+            IKOptions,
+            IKTrajectoryRequest,
         )
 
-        pink_backend = PinkTrajectoryBackend()
-        solve_req = TrajectorySolveRequest(
-            points=lane.points,
-            valid=lane.valid,
-            q_start=address2.q,
-            labels=labels,
-            model_name="golf_humanoid",
-            capture_name=args.capture,
+        pink_service = PinkTrajectoryService(scaled_spec)
+        time_s = np.asarray(lane.times, dtype=np.float64)
+        points = np.asarray(lane.points, dtype=np.float64)
+        valid = np.asarray(lane.valid, dtype=bool)
+
+        solve_req = IKTrajectoryRequest(
+            initial_q=address2.q,
+            time_s=time_s,
+            marker_targets=points,
+            validity_mask=valid,
+            labels=tuple(labels),
+            model_name=str(scaled_spec.get("name", "golf_humanoid")),
+            posture_target=address2.q,
+        )
+        ik_opts = IKOptions(
             step_mode=args.pink_step_mode,
             solver=args.pink_solver,
             limit_policy=args.pink_limit_policy,
         )
-        pink_result = pink_backend.solve_trajectory(solve_req)
-        q_ik = pink_result.q_trajectory
-        fits = pink_result.fits
-        q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
-        audit_result = pink_backend.audit_trajectory(q_smooth)
-        constrained_ik_dict = dict(pink_result.diagnostics)
-        constrained_ik_dict["is_qualified"] = audit_result.is_qualified
-        constrained_ik_dict["qualification_state"] = audit_result.qualification_state
-        q_ref = q_smooth
-        ref_fits = fits
+        pink_result = pink_service.solve_trajectory(solve_req, ik_opts)
+        q_ik = pink_result.configurations
         errors = marker_errors(kin, q_ik, lane.points)
+
+        class _PinkFrameFit:
+            def __init__(self, closure_error_m: float, marker_rms_m: float) -> None:
+                self.closure_error_m = float(closure_error_m)
+                self.marker_rms_m = float(marker_rms_m)
+
+        fits = [
+            _PinkFrameFit(
+                closure_error_m=(
+                    float(r.weld_translation_error_m)
+                    if np.isfinite(r.weld_translation_error_m)
+                    else 0.0
+                ),
+                marker_rms_m=(
+                    float(np.mean(list(r.marker_errors_m.values())))
+                    if r.marker_errors_m
+                    and all(np.isfinite(list(r.marker_errors_m.values())))
+                    else 0.0
+                ),
+            )
+            for r in pink_result.frame_residuals
+        ]
+        q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
+        audit_result = pink_service.audit_trajectory(q_smooth, solve_req, ik_opts)
+
+        all_converged = bool(pink_result.passed)
+        unconverged = int(np.sum(~pink_result.frame_success))
+        rate_limits_respected = bool(
+            all(len(a.exceeded_joints) == 0 for a in audit_result.rate_audits)
+        )
+        max_ratio = float(
+            max((a.max_velocity_ratio for a in audit_result.rate_audits), default=0.0)
+        )
+
+        is_qualified = bool(
+            all_converged and audit_result.passed and rate_limits_respected
+        )
+
+        constrained_ik_dict = {
+            "backend_name": "pink",
+            "solver": args.pink_solver,
+            "model_name": str(scaled_spec.get("name", "golf_humanoid")),
+            "capture_name": args.capture,
+            "step_mode": args.pink_step_mode,
+            "limit_policy": args.pink_limit_policy,
+            "task_policy": "dual_grip_hard_equality",
+            "time_semantics": (
+                "strict_physical_elapsed_dt"
+                if args.pink_step_mode == "physical"
+                else "uniform_fixed_dt"
+            ),
+            "frame_count": int(lane.frames),
+            "frame_success_count": int(np.sum(pink_result.frame_success)),
+            "all_frames_converged": all_converged,
+            "first_failed_frame": pink_result.first_failed_frame,
+            "per_frame_status": [bool(x) for x in pink_result.frame_success],
+            "max_velocity_ratio": max_ratio,
+            "is_qualified": is_qualified,
+            "qualification_state": "qualified" if is_qualified else "disqualified",
+        }
+        q_ref = q_smooth
+        ref_fits = [
+            _PinkFrameFit(
+                closure_error_m=(
+                    float(r.weld_translation_error_m)
+                    if np.isfinite(r.weld_translation_error_m)
+                    else 0.0
+                ),
+                marker_rms_m=(
+                    float(np.mean(list(r.marker_errors_m.values())))
+                    if r.marker_errors_m
+                    and all(np.isfinite(list(r.marker_errors_m.values())))
+                    else 0.0
+                ),
+            )
+            for r in audit_result.frame_residuals
+        ]
         ref_errors = marker_errors(kin, q_ref, lane.points)
     else:
         q_ik, fits = full_capture_ik(lane, kin, address2.q)
