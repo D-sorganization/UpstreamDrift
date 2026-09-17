@@ -1,5 +1,9 @@
 # Native Multi-Engine Matching Handoff
 
+Historical run102 fitter imports now resolve; 22 affected tests and the pinned
+mypy hook pass. Six hash-matched inputs are archived. A separate ControlTower
+audit-only run is active; see the latest progress review before restarting work.
+
 Fresh-source Pinocchio replay now reproduces run102 markers exactly in 13.38 s;
 see runtime78_restoration.json. Restore remaining fitter dependencies and qualify
 finite-weld derivatives next. The original fit remains rejected at 0.85 s.

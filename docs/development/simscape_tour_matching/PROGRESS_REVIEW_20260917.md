@@ -1,5 +1,20 @@
 # Simscape Matching Progress Review and Execution Turnover
 
+Fitter-dependency checkpoint: native_effort_penalty and shooting_schedule are
+restored with exact integral/boundary tests. All historical run102 driver imports
+resolve locally; 22 focused tests and the repository-pinned mypy hook pass.
+All six original driver inputs were recovered with matching recorded hashes in
+native_evidence/run102_original_inputs.tar.gz. Their directory layout is retained.
+The first push was rejected by the pinned typing hook; the row-array typing
+compatibility correction is now tested. Local mypy alone was insufficient.
+
+A fresh audit-only run is executing at /home/dieterolson/native-fit-audit-20260917-01
+on ControlTower / ControlTower-Runner. Source snapshot and qualified baseline
+folder are separate. Read audit_output/receipt.json and verify its process before
+resuming; do not start a duplicate from an old status file. This is the original
+run102 restart/configuration (run101 seed), not a new swing fit. The current
+receipt manifest is native_evidence/run102_fitter_restoration.json.
+
 **Verified numerical restoration:** the new source snapshot plus pinned Tools
 commit 1ac89c18e reproduces all run102 marker samples exactly (maximum difference
 0 m) in 13.38 s on Pinocchio 4.1.0/Python 3.12.3. Position/rate closure maxima

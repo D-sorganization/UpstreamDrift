@@ -197,12 +197,14 @@ def replay_marker_sensitivities(
         max_step=max_step,
     )
     positions, derivatives = [], []
-    for t, state, sensitivity in zip(
+    for t, state_row, sensitivity_row in zip(
         time_s,
         integrated.integration.state,
         integrated.state_parameter_jacobian,
         strict=True,
     ):
+        state = np.asarray(state_row, dtype=float)
+        sensitivity = np.asarray(sensitivity_row, dtype=float)
         q, v = mapping(state[:n]), mapping(state[n:])
         marker = engine.marker_derivatives(
             q, doc["marker_bodies"], doc["marker_offsets_m"]

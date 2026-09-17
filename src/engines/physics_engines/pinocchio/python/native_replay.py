@@ -205,7 +205,8 @@ def _replay_native(
     absolute_clock.setflags(write=False)
     integration = integration._replace(time=absolute_clock)
     markers, errors = [], []
-    for t, state in zip(integration.time, integration.state, strict=True):
+    for t, state_row in zip(integration.time, integration.state, strict=True):
+        state = np.asarray(state_row, dtype=float)
         derivative(float(t), state)
         errors.append(closure())
         markers.append(
