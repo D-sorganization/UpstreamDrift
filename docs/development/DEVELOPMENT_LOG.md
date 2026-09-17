@@ -79,6 +79,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   contracts include free-flyer dimensions and infeasible equality/limit
   combinations. Full-body task assembly and runtime packaging (#10262) remain
   separate; no fitted trajectories were regenerated.
+- **Weld Linearization (#10260; 2026-09-16):** Corrected the finite weld pose
+  Jacobian and preserved the distinct acceleration-constraint partial. Real
+  Pinocchio directional checks fail before correction for displaced wrists;
+  all 11 closure and 11 contact integration tests pass afterward, including
+  explicit rejection of undefined derivatives at the rotation-pi log branch. Next:
+  merge numerical prerequisites before constrained Pink task assembly.
 - **Solver Integration (#10254, #10255; 2026-09-16):** Reproduced missing
   ground-contact state terms in inherited Pinocchio acceleration derivatives;
   added exact local contact-force partials and constrained chain-rule composition.
