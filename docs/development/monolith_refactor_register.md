@@ -127,6 +127,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  836 | `src/shared/python/perturbation/cross_engine_runner.py`                                                                                                                       |
 |  834 | `src/shared/python/engine_core/engine_probes.py`                                                                                                                              |
 |  833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py`                                                                                                                  |
+|  832 | `src/engines/physics_engines/pinocchio/python/native_model.py`                                                                                                                |
 |  831 | `src/bunkershot3d/solvers/mpm/constitutive.py`                                                                                                                                |
 |  831 | `src/shared/python/signal_toolkit/widget_processing.py`                                                                                                                       |
 |  831 | `src/tools/bunker_shot_gui/gui.py`                                                                                                                                            |

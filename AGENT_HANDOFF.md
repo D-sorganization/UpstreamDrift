@@ -11,6 +11,10 @@
 - **Bounded Work:** #10256 viewer lifecycle and #10257 Pink state/constraint
   adapters are separate implementation slices; review actual tests and CI
   before treating either as delivered.
+- **Finite Weld Error (#10260):** The pose linearization now applies the SE(3)
+  log Jacobian away from closure. The trajectory acceleration partial retains
+  the raw constraint velocity Jacobian. Real directional checks cover closed
+  and displaced grips; these do not qualify a fitted full-body trajectory.
 - **Preserve:** #10250 owns anthropometric evidence regeneration; #10108 and
   #10159 retain their model-calibration and MJX reconciliation scope. Keep the
   full #10162 physical gates and MATLAB R2025b requirement.
