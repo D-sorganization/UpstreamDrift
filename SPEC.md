@@ -1,5 +1,24 @@
 # SPEC.md — Repository Specification Document
 
+## Pinocchio Native Fit With Crocoddyl Full-Body Optimal Control (MS-31, #10338)
+
+Delivers native Crocoddyl full-body optimal control problem formulation, FDDP trajectory solver, and two-window fit modularization under #10338 and #10254 (W4/W5):
+- **Two-Window Fit Modularization (`src/shared/python/motion_matching/two_window_fit.py`)**:
+  - `compute_marker_metrics`: Evaluates whole-trajectory, early, terminal, and clubhead marker RMSE along with pelvis yaw angular errors and composite fit score.
+  - `check_acceptance`: Enforces physical gate thresholds: whole RMS $\le 0.025$ m, early RMS $\le 0.012$ m, terminal RMS $\le 0.035$ m, club cluster RMS $\le 0.060$ m, and pelvis yaw error $\le 5\%$.
+  - `TwoWindowParityInputs` and `evaluate_zero_displacement_parity`: Compares segmented zero-displacement evaluation against uninterrupted full-horizon replay, verifying metric and marker reproduction to $< 10^{-12}$.
+  - Modularized `docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/two_window_fit_102.py` as a lightweight delegating shim preserving execution options and reproducibility.
+- **Native Crocoddyl Problem Assembly (`src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py`)**:
+  - `CrocoddylProblemConfig` & `CrocoddylProblemBundle`: Defines problem inputs, state representation, and time grids.
+  - `build_native_crocoddyl_problem`: Pure assembly constructing per-node actuation controls, marker target residual costs from capture, 6D loop closure constraints for the dual-arm grip weld, and effort / joint-limit regularisation.
+  - Fail-closed error handling: Raises `CrocoddylNotAvailableError` when native C++ Crocoddyl is uninstalled or unavailable.
+- **Crocoddyl FDDP Driver & Receipt Generation (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - `FullBodyFitOptions` & `FullBodyFitReceipt`: Encapsulates solver configuration, convergence criteria, and solution diagnostics.
+  - `solve_full_body_fddp`: Solves the native optimal control problem using `SolverFDDP`, computes marker residual metrics, verifies physical gate acceptance, and outputs structured receipts.
+  - CLI driver supporting `--warm-start`, `--spec`, `--out`, and `--max-iterations`.
+- **Evidence & Artifacts (`evidence/matched/driver_g1_pinocchio/`)**:
+  - Contains candidate trajectory arrays (`candidate.npz`), execution receipt (`receipt.json`), cross-engine parity report (`parity_vs_mujoco.json`), and overlay visualization replay (`playback.gif`).
+
 ## Target Capture Hash-Lock and Marker Validity Policy (#10325)
 
 Enforces byte-level hash integrity on tournament capture files and codifies the canonical marker validity policy across engines:
