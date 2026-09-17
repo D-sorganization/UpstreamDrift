@@ -31,6 +31,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR referencing Closes #10323, enable auto-merge.
 - **Evidence:** reports/matched_swing_ledger.json; tests/unit/motion_matching/test_ledger.py
 
+### DL-#10362 · Tools Dependency Gate for Matched Swing Program
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10362 (epic #10363)
+- **Branch:** feat/ms95-tools-dependency-gate-10362
+- **PR:** open
+- **Paths:** vendor/ud-tools; Cargo.toml; requirements-tools.txt; docs/shared_tools/divergence_inventory.md; docs/shared_tools/divergence_inventory.v1.json; docs/agent_context/README.md; docs/agent_context/index.html
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 at 62e8cdbf9 (SELF; Tools main green, Tools #4494 and #4262 closed, Tools #5227 landed; four-way pin bumped to 62e8cdbf9; divergence inventory regenerated; agent context verified; test_no_shadow_of_tools_shared and run_checks pass)
+- **Summary:** UpstreamDrift ownership of humanoid_character_builder and model_generation ruled per Tools #4494; Tools #4262 and #4494 closed; vendor/ud-tools, requirements-tools.txt, Cargo.toml, and divergence inventory repinned to Tools main 62e8cdbf9.
+- **Next step:** Open PR referencing Closes #10362, enable auto-merge, release lease.
+- **Evidence:** docs/shared_tools/divergence_inventory.v1.json; tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py; tests/fixtures/reference_calibration/run_checks.py.
+
 ### DL-#10338 · Pinocchio Native Fit With Crocoddyl Full-Body Optimal Control
 
 - **State:** in_progress
