@@ -1,9 +1,11 @@
 {
+  "status": "REJECTED",
+  "is_physically_accepted": false,
   "engines": ["mujoco", "pinocchio", "drake"],
   "outcomes": {
     "mujoco": {
       "engine": "mujoco",
-      "status": "success",
+      "status": "REJECTED",
       "shared_metrics": {
         "whole_marker_rmse_m": 2.7379990661879527,
         "early_marker_rmse_m": 2.404090388278514,
@@ -39,7 +41,7 @@
     },
     "pinocchio": {
       "engine": "pinocchio",
-      "status": "PASSED",
+      "status": "REJECTED",
       "shared_metrics": {
         "whole_marker_rmse_m": 2.7573124637458317,
         "early_marker_rmse_m": 2.0826599265537746,
@@ -75,7 +77,7 @@
     },
     "drake": {
       "engine": "drake",
-      "status": "PASSED",
+      "status": "REJECTED",
       "shared_metrics": {
         "whole_marker_rmse_m": 2.392862692965229,
         "early_marker_rmse_m": 2.055885419989572,
