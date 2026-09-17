@@ -1,5 +1,7 @@
 # Cross-Engine Parity Specification
 
+> [!WARNING] > **SUPERSEDED (2026-09-17)**: The claims and engine readiness statuses in this document are superseded by the Matched Swing Program single source of truth. See [`docs/development/matched_swing_program/README.md`](../../docs/development/matched_swing_program/README.md) for authoritative physical gates, engine qualification status, and run evidence.
+
 The 3D Golf Model project simulates and motion-matches a golf swing on five
 physics engines. Today only the **Simscape Multibody** implementation is at
 production grade (see [Simscape_Multibody_Models/3D_Golf_Model/PROJECT_SPEC.md](Simscape_Multibody_Models/3D_Golf_Model/PROJECT_SPEC.md)).
@@ -12,7 +14,7 @@ a single `fit_swing(target, engine, options)` call.
 > a physics-engine wrapper under `src/engines/physics_engines/`.
 >
 > **Status:** spec landed; per-engine implementations tracked in the issues
-> linked at the bottom of each section.
+> linked at the bottom of each section (SUPERSEDED by matched_swing_program).
 
 ---
 

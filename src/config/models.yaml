@@ -1,3 +1,9 @@
+# =============================================================================
+# SUPERSEDED (2026-09-17): Physics engine readiness statuses below (e.g. status: ready)
+# are superseded by the Matched Swing Program single source of truth.
+# See docs/development/matched_swing_program/README.md for authoritative physical
+# gates, engine qualification status, and run evidence.
+# =============================================================================
 models:
   # =============================================================================
   # PHYSICS ENGINES — biomechanical golf-swing analysis backends

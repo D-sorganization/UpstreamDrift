@@ -19,7 +19,7 @@
       "rationale": "Reviewed Camera Setup to recording-plan edge and shared setup instructions; imported-video goals remain independent of camera hardware. 563 Capture Rig, 16 atlas/workflow and 15 goal tests pass. Formatting changed registry whitespace only."
     },
     "launcher-atlas": {
-      "fingerprint": "77d62f7a2a62fe32b43e9972d9d7c031a5984158e31739370b0495491763206c",
+      "fingerprint": "e7de7a2c0ac477abb5450fe63f6f571781a3a0e82b5906b387e9615ef01ffbb0",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -29,14 +29,14 @@
         "src/config/feature_parity.json": "d6667fb93d20e1240791d601252e2ca6ffd85bb7a2eba4deec26edc4075f8eba",
         "src/config/launcher_manifest.json": "8ed95d534d6ba9e35d528837da43346bac32588f9766018d8c99c89a17099aa2",
         "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
-        "src/config/models.yaml": "aa46785899f49bb7303f5265df7cd6329fdcadde1b33db1e1c10b437b2231c55",
+        "src/config/models.yaml": "5b6e64d27399807b6f2daf738fd2583c07f9ed05e0777a887624c260a3cd8b79",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Correct MyoSuite tile status to experimental and add shadow_tracker to mocap.breadth"
+      "rationale": "Add SUPERSEDED banner to models.yaml pointing to matched_swing_program single source of truth (#10327)"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
