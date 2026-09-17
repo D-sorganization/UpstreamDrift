@@ -1,5 +1,23 @@
 # SPEC.md — Repository Specification Document
 
+## Shadow Tracker Full-Body Forward Rollout and Auditable Replay (#10130)
+
+Connects real continuous full-body physics forward simulation to Shadow Tracker observation fitting with deterministic replay verification:
+- **Full-Body Forward Model (`src/shared/python/shadow_tracker/forward_model.py`)**: Implements the `ForwardModel` protocol from `contracts.py` backed by `simulate_full_body_forward`. Declares accurate `ModelCapabilities` (`state_dim=42`, `control_dim=0`, `has_forward_dynamics=True`, `requires_ground_plane=True`).
+- **Canonical-v2 to Native State Space Bridge**:
+  - `native_to_canonical_full_body`: Converts native 41-coordinate state vectors (3 root translation + 3 intrinsic Euler angles + 35 internal joints) and velocities to canonical-v2 coordinates ($q \in \mathbb{R}^{42}$ with normalized quaternion root, $v \in \mathbb{R}^{41}$ with body-frame angular velocity).
+  - `canonical_to_native_full_body`: Inverts canonical-v2 back to native coordinates, converting root quaternions back to Euler angles and body angular velocities back to Euler rates via $J_{body}^{-1}(\text{rpy})$ with round-trip error $< 10^{-12}$.
+- **Closed-Form SE(3) Euler Rate Jacobian**:
+  - Analytical body Jacobian $J_{body}(\text{rpy})$ relates Euler rates $(\dot{\phi}, \dot{\theta}, \dot{\psi})$ to body angular velocity $\omega_{body}$ matching intrinsic $R = R_x(\phi) R_y(\theta) R_z(\psi)$ rotation order.
+  - Closed-form algebraic inverse $J_{body}^{-1}(\text{rpy})$ evaluated with determinant $\cos\theta$, raising `ValueError` at gimbal lock pitch ($\theta \approx \pm \pi / 2$).
+- **Decoupled Physics Rollout Boundary (`src/shared/python/motion_matching/full_body_forward_dynamics.py`)**:
+  - `simulate_full_body_forward`: Accepts optional `capture`, `ik_adapter`, and `marker_offsets`, supporting pure forward simulation without optical markers or synthetic dummy captures.
+  - Returns `ForwardRolloutResult` containing optional `shared_metrics`, with `auto_calibrate_ground` and `preserve_ground_calibration` options in `RolloutOptions`.
+- **Gate G4 Replay Audit & Unevidenced Force Detection**:
+  - Validates initial single-hypothesis input during reset.
+  - Verifies deterministic repeat replay matching trajectory state within tight tolerances.
+  - Detects and flags unevidenced non-zero root forces in candidate trajectories (`audit.passed = False`, `audit.evidence_details["passed_gate_g4"] = False`).
+
 ## Shadow Tracker Native Timestamp Authority and Observation Provenance (#10273)
 
 Preserves native container timestamp authority and decoder provenance across ingestion and observation records:
