@@ -19,7 +19,7 @@
       "rationale": "Reviewed Camera Setup to recording-plan edge and shared setup instructions; imported-video goals remain independent of camera hardware. 563 Capture Rig, 16 atlas/workflow and 15 goal tests pass. Formatting changed registry whitespace only."
     },
     "launcher-atlas": {
-      "fingerprint": "16c2aa2d4a804e58db4154509adb2bc5b76808da357ebb406065e50cf18667da",
+      "fingerprint": "8f2e4b23f1cce3e69a2ce481212c51e3cda172397e82d4098cca8c91e9889ca8",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -29,14 +29,14 @@
         "src/config/feature_parity.json": "8969ea35030e75ba719a68c49463f5a0e0eba39639d82b74baa4a55e25041b58",
         "src/config/launcher_manifest.json": "66b6483f70546d47e8f391a0ba349c02f6708fb6b2f1913effebfd79d54d6c28",
         "src/config/launcher_manifest_loader.py": "e137f0b04a1731f87ac386d5082b1a87db1bef3c09544c01a22118d2bb7edfe1",
-        "src/config/models.yaml": "6ab0a54eb6c4d4bb6006d963367229fa0bceafde8107c6f0e76495cd343f70d0",
+        "src/config/models.yaml": "f156170d1e509fd6c757e5ba12949b7b3ab92c01c817aab5414dfba624851cce",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Register shadow_tracker in models.yaml and launcher_manifest.json with dedicated logo and unique order (#10134)"
+      "rationale": "Migrate shadow_tracker off legacy embed_adapter string to ADR-0013 registry bootstrap (#10134)"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
