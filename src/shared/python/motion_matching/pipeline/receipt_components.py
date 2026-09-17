@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # -----------------------------------------------------------------------------
 # Common / Sub-models
@@ -659,6 +659,121 @@ class RomFlag(BaseModel):
     )
 
 
+class ConstrainedIkReceipt(BaseModel):
+    """Constrained inverse kinematics diagnostics and provenance (Issue #10278)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    backend_name: str = Field(
+        "pink",
+        description="Name of the constrained inverse kinematics backend",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    solver: str = Field(
+        "quadprog",
+        description="QP solver name used by the backend",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    solver_version: str | None = Field(
+        None,
+        description="Version string of the QP solver engine",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    runtime_version: str | None = Field(
+        None,
+        description="Version string of the constrained IK runtime wrapper",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    pinocchio_version: str | None = Field(
+        None,
+        description="Version string of Pinocchio backend",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    source_sha256: str | None = Field(
+        None,
+        description="SHA256 digest of the underlying backend or model sources",
+        json_schema_extra={"unit": "hash", "stage": "ik"},
+    )
+    model_name: str = Field(
+        ...,
+        description="Name of the kinematic model",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    capture_name: str = Field(
+        ...,
+        description="Name of the processed motion capture sequence",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    step_mode: str = Field(
+        "physical",
+        description="Integration mode (physical or projection)",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    limit_policy: str = Field(
+        "enforce",
+        description="Joint limit policy enforced during solve",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    task_policy: str = Field(
+        "dual_grip_hard_equality",
+        description="Task hierarchy and equality constraint policy",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    time_semantics: str = Field(
+        "strict_physical_elapsed_dt",
+        description="Time integration semantics applied to velocities",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+    frame_count: int = Field(
+        ...,
+        ge=0,
+        description="Total number of trajectory frames evaluated",
+        json_schema_extra={"unit": "count", "stage": "ik"},
+    )
+    frame_success_count: int = Field(
+        ...,
+        ge=0,
+        description="Total number of successfully solved frames",
+        json_schema_extra={"unit": "count", "stage": "ik"},
+    )
+    all_frames_converged: bool = Field(
+        ...,
+        description="Whether all frames converged without solver failure",
+        json_schema_extra={"unit": "bool", "stage": "ik"},
+    )
+    first_failed_frame: int | None = Field(
+        None,
+        description="Index of first frame that failed to converge, if any",
+        json_schema_extra={"unit": "index", "stage": "ik"},
+    )
+    per_frame_status: list[bool] | None = Field(
+        None,
+        description="Convergence boolean per frame",
+        json_schema_extra={"unit": "compound", "stage": "ik"},
+    )
+    max_velocity_ratio: float | None = Field(
+        None,
+        description="Maximum observed joint velocity to limit ratio",
+        json_schema_extra={"unit": "ratio", "stage": "ik"},
+    )
+    is_qualified: bool = Field(
+        ...,
+        description="Whether the solved trajectory meets all qualification criteria",
+        json_schema_extra={"unit": "bool", "stage": "ik"},
+    )
+    qualification_state: str = Field(
+        "qualified",
+        description="Qualification state label (qualified, disqualified, etc.)",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
+
+    @model_validator(mode="after")
+    def _validate_qualification(self) -> ConstrainedIkReceipt:
+        if self.is_qualified and not self.all_frames_converged:
+            raise ValueError("is_qualified cannot be True if not all frames converged")
+        return self
+
+
 class IkReceipt(BaseModel):
     """Full-capture inverse kinematics trajectory and calibration results."""
 
@@ -734,4 +849,9 @@ class IkReceipt(BaseModel):
         None,
         description="Min and max angles observed per lower limb joint coordinate",
         json_schema_extra={"unit": "deg", "stage": "ik"},
+    )
+    constrained_ik: ConstrainedIkReceipt | None = Field(
+        None,
+        description="Optional constrained IK execution diagnostics and provenance",
+        json_schema_extra={"unit": "compound", "stage": "ik"},
     )
