@@ -152,6 +152,11 @@ class HipCalibrationReceipt(BaseModel):
         description="Maximum residual distance from waist marker rigid fit",
         json_schema_extra={"unit": "m", "stage": "address"},
     )
+    hip_zero_twist_deg: dict[str, float] | None = Field(
+        None,
+        description="Calibrated hip coordinate zero-twist offset angles for right and left hips",
+        json_schema_extra={"unit": "deg", "stage": "address"},
+    )
 
 
 class ClubReceipt(BaseModel):

@@ -6,6 +6,26 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-crocoddyl-polynomial-action-inventory",
+      "owner": "UpstreamDrift issue #10269",
+      "resolution": "Inventory polynomial Crocoddyl action models, exact discrete RK4 chain-rule derivatives, BoxFDDP coefficient bounds, and independent replay diagnostics before manual coverage. Local action derivatives and box convergence provide numerical feasibility evidence, not full-horizon physical acceptance."
+    },
+    {
+      "id": "UP-D1-pink-adapter-inventory",
+      "owner": "UpstreamDrift issue #10257",
+      "resolution": "Inventory the shared Pink adapter step, hard equality and limit forwarding, configuration geometry cache, nq/nv manifold integration and explicit solver failure contracts before manual coverage. Native adapter tests do not qualify full-body fitting or physical acceptance."
+    },
+    {
+      "id": "UP-D1-polynomial-full-body-step-inventory",
+      "owner": "UpstreamDrift issue #10265",
+      "resolution": "Inventory global Bernstein effort mapping, physical-second polynomial export, unactuated root convention and exact discrete RK4 state/coefficient sensitivities. Contact branch flags are local differentiability evidence, not proof of a physically accepted fit."
+    },
+    {
+      "id": "UP-D1-weld-linearization-inventory",
+      "owner": "UpstreamDrift issue #10254",
+      "resolution": "Inventory the finite SE(3) weld pose derivative and distinct velocity/acceleration constraint Jacobian corrected by #10260. Independent local directional checks establish derivative agreement away from closure; they do not qualify fitted kinematics, root actuation, or full-horizon physical replay."
+    },
+    {
       "id": "UP-D1-simscape-prefix-fit-inventory",
       "owner": "UpstreamDrift issue #9921",
       "resolution": "Inventory prefix_fit.py normalized/Bernstein polynomial conversion, weighted growing-prefix least squares, resample_logged_signal.m physical-clock interpolation, extract_golf_joint_kinematics.m direct-sensor unit conversion build_golf_kinematics.m native-frame snapshot, capture_fit_sim_options.m complete-horizon torque gating and repaired referenced-joint initialization pathways before a manual coverage claim. Native workspace, timestamp, joint mapping and initialization tests and a 20 ms live baseline are recorded; geometric calibration and qualified full-swing replay remain outstanding."
@@ -34,6 +54,11 @@
       "id": "UP-D1-scalar-parameter-bounds-inventory",
       "owner": "UpstreamDrift issue #9953",
       "resolution": "Classify shared scalar parameter bounds in src/shared/python/optimization/ocp/parameter_ocp.py before a manual coverage claim. Explicit constant interpolation preserves one bound per shared parameter; numerical recovery tests do not qualify anatomical accuracy or global optimality."
+    },
+    {
+      "id": "UP-D1-contact-derivatives-inventory",
+      "owner": "UpstreamDrift issue #10254",
+      "resolution": "Inventory the shared contact-force derivatives and full-body Pinocchio chain rule delivered in #10255 before manual coverage or physical qualification. Local directional derivative checks establish algebraic agreement with the implemented piecewise contact plant; they do not establish physiological force identification, valid contact parameters, full-swing fitting, or differentiability at activation and clipping boundaries."
     }
   ],
   "calculations": []

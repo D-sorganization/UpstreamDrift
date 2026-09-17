@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -372,3 +373,143 @@ def com_report(
         "inside_support_polygon": bool(convex_hull_contains(com[:2], polygon)),
         "polygon_centroid_offset_m": float(np.linalg.norm(com[:2] - polygon.mean(0))),
     }
+
+
+@dataclass(frozen=True)
+class DynamicsReportInputs:
+    """Inputs required to construct the full forward dynamics tracking report."""
+
+    record: Any
+    sim_q: np.ndarray
+    q_ref: np.ndarray
+    lane: Lane
+    kin: FullBodyMarkerKinematics
+    adapter: Any
+    zmp: dict[str, Any]
+    labels: tuple[str, ...] | Sequence[str]
+    zmp_filter_report: dict[str, Any] | None = None
+    shooting_report: dict[str, Any] | None = None
+    sim_errors: np.ndarray | None = None
+
+
+def _build_reference_zmp_report(
+    zmp: Mapping[str, Any],
+    times: np.ndarray,
+) -> dict[str, Any]:
+    return {
+        "description": (
+            "zero-moment point the tracked reference demands of this model "
+            "against the support polygon of the spheres on the plane at each frame; "
+            "outside means no unilateral foot contact can realise the reference there"
+        ),
+        "outside_fraction": float((zmp["outside_m"] > 0).mean()),
+        "outside_fraction_1s_to_1_5s": float(
+            (zmp["outside_m"][(times >= 1.0) & (times < 1.5)] > 0).mean()
+        ),
+        "outside_max_m": float(zmp["outside_m"].max()),
+        "unloaded_fraction": float(zmp["unloaded"].mean()),
+        "vertical_grf_over_weight": [
+            float(zmp["grf_over_weight"][:, 2].min()),
+            float(zmp["grf_over_weight"][:, 2].max()),
+        ],
+        "horizontal_grf_over_weight_max": float(
+            np.linalg.norm(zmp["grf_over_weight"][:, :2], axis=1).max()
+        ),
+    }
+
+
+def _build_backswing_metrics(
+    sim_q: np.ndarray,
+    q_ref: np.ndarray,
+    sim_errors: np.ndarray,
+    valid: np.ndarray,
+    frames: int,
+    record: Any,
+) -> dict[str, Any]:
+    limit = min(361, frames)
+    return {
+        "root_error_max_m": float(
+            np.linalg.norm(sim_q[:limit, :3] - q_ref[:limit, :3], axis=1).max()
+        ),
+        "marker_rms_m": float(np.sqrt(np.mean(sim_errors[:limit][valid[:limit]] ** 2))),
+        "weight_fraction_min": float(
+            record.weight_fraction[record.time_s <= 1.0].min()
+        ),
+        "weight_fraction_max": float(
+            record.weight_fraction[record.time_s <= 1.0].max()
+        ),
+    }
+
+
+def build_dynamics_report(
+    inputs: DynamicsReportInputs,
+) -> tuple[dict[str, Any], np.ndarray]:
+    """Build the structured dynamics tracking report and compute tracking errors.
+
+    Preconditions:
+    - ``inputs.sim_q`` and ``inputs.q_ref`` must have identical shapes.
+    - ``inputs.lane.times`` must match length of ``inputs.sim_q``.
+
+    Returns:
+    - ``(dynamics_report, sim_errors)``
+    """
+    lane = inputs.lane
+    kin = inputs.kin
+    adapter = inputs.adapter
+    record = inputs.record
+    sim_q = inputs.sim_q
+    q_ref = inputs.q_ref
+
+    sim_errors = (
+        inputs.sim_errors
+        if inputs.sim_errors is not None
+        else marker_errors(kin, sim_q, lane.points)
+    )
+
+    report = {
+        "duration_s": float(lane.times[-1]),
+        "dt_s": DT_S,
+        "controller": {
+            "type": "computed torque tracking, unactuated root",
+            "omega_rad_s": OMEGA_RAD_S,
+            "zeta": 1.0,
+            "balance": BALANCE,
+            "tracking_cutoff_hz": TRACKING_CUTOFF_HZ,
+        },
+        "contact_parameters": adapter.contact_parameters.as_document(),
+        "zmp_filter": inputs.zmp_filter_report,
+        "shooting_fit": inputs.shooting_report,
+        "reference_zmp": _build_reference_zmp_report(inputs.zmp, lane.times),
+        "marker_rms_m": float(np.sqrt(np.mean(sim_errors[lane.valid] ** 2))),
+        "segment_rms_m": segment_rms(inputs.labels, sim_errors, lane.valid),
+        "joint_tracking_rms_rad": float(
+            np.sqrt(np.mean((sim_q[:, 6:] - q_ref[:, 6:]) ** 2))
+        ),
+        "root_tracking_rms_m": float(
+            np.sqrt(np.mean((sim_q[:, :3] - q_ref[:, :3]) ** 2))
+        ),
+        "weight_fraction": {
+            "min": float(record.weight_fraction.min()),
+            "max": float(record.weight_fraction.max()),
+            "mean": float(record.weight_fraction.mean()),
+        },
+        "inside_support_polygon_fraction": float(record.inside_support_polygon.mean()),
+        "range_of_motion_flags": rom_flags(sim_q, kin.coordinate_order),
+        "root_error_timeline_m": {
+            f"{t:.2f}": float(
+                np.linalg.norm(
+                    sim_q[int(round(t * RATE_HZ)), :3]
+                    - q_ref[int(round(t * RATE_HZ)), :3]
+                )
+            )
+            for t in (0.0, 0.25, 0.5, 0.75, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75)
+            if int(round(t * RATE_HZ)) < lane.frames
+        },
+        "backswing_to_1s": _build_backswing_metrics(
+            sim_q, q_ref, sim_errors, lane.valid, lane.frames, record
+        ),
+        "peak_joint_torque_n_m": float(np.abs(record.tau).max()),
+        "lowest_sphere_height_min_m": float(record.lowest_sphere_height_m.min()),
+        "lowest_sphere_height_max_m": float(record.lowest_sphere_height_m.max()),
+    }
+    return report, sim_errors

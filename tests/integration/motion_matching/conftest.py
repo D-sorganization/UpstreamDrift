@@ -9,9 +9,40 @@ finishes in seconds on CPU.
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.pinocchio.python.native_model import (
+        FullBodyPinocchioModel,
+    )
+
+
+@pytest.fixture
+def plant_state() -> tuple[FullBodyPinocchioModel, dict[str, float]]:
+    """Use an archived closed-grip pose for real-engine algebra checks only."""
+    pin = pytest.importorskip("pinocchio")
+    if not isinstance(getattr(pin, "__version__", None), str):
+        pytest.skip("A real Pinocchio runtime is required")
+    from src.engines.physics_engines.pinocchio.python.native_model import (
+        FullBodyPinocchioModel,
+    )
+
+    folder = Path(__file__).resolve().parents[3] / "docs/development/full_body_models"
+    spec = json.loads((folder / "full_body_spec_v1.json").read_text())
+    candidate = json.loads(
+        (folder / "evidence/native_candidates/returned81_candidate.json").read_text()
+    )
+    plant = FullBodyPinocchioModel(spec)
+    pose = dict.fromkeys(spec["coordinate_order"], 0.0)
+    pose.update(zip(candidate["coordinate_names"], candidate["q0"], strict=True))
+    pose["knee_angle_r"] = 0.15
+    pose["knee_angle_l"] = 0.18
+    return plant, pose
+
 
 # Default location of the optional real C3D file. Resolved against the repo
 # root via ``pytest.rootpath`` to keep the fixture usable from any CWD.

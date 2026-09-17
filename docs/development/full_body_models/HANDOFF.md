@@ -1,7 +1,71 @@
 # Full-Body Models Handoff (Epic #10062)
 
-Updated 2026-09-15 (claude; HO-4 #10158). Branch
-`feat/10158-motion-matching-tile`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
+## Global Polynomial Step Prerequisite (#10265)
+
+The name-safe effort mapping and native RK4 step preserve the global degree-six
+control contract and all six unactuated root coordinates. Derivatives apply
+the chain rule through every RK4 stage and substep. Qualification here concerns
+local numerical derivatives; it does not establish a fitted physical swing.
+Independent acceptance replay must explicitly retain the optimization ground:
+the historical forward runner currently auto-calibrates a near-zero plane.
+
+## Qualified Solver Integration (#10254)
+
+Resume with [Worker Turnover](../../plans/qualified_motion_integration/TURNOVER.md)
+and [Pink Pipeline Packets](../../plans/qualified_motion_integration/PINK_TURNOVER.md).
+Storage recovery is complete and native runtime probes pass. Adapter/derivative
+PRs remain under review; production Pink selection and full-body Crocoddyl
+qualification are not complete. The turnover records separate implementation,
+CI and scientific gates.
+
+The [integration plan](../../plans/qualified_motion_integration/README.md)
+defines coordinate, closure, underactuation, timing and evidence boundaries.
+First slice #10255 corrects the missing contact-force chain rule in full-body
+Pinocchio derivatives. Independent real-engine differences reproduce failure
+before the change and pass afterward; contact kinks remain explicitly nonsmooth.
+No fit receipts were regenerated. The #10250 refresh is merged; #10271 receipt integrity and #10162's
+physical acceptance remain prerequisites. #10256 and #10257 are separately
+owned viewer and Pink adapter slices, not completed product integration.
+
+## Optional Viewer Adapter Status (#10256, #10254)
+
+MeshCat and Gepetto adapters now own persistent native visualizers, validate
+configuration dimensions and preserve separate visual/collision models. Scene
+cleanup is scoped to each adapter. Real MeshCat dispatch is exercised in the
+opt-in heavy integration test; live Gepetto qualification remains pending.
+These wrappers are prerequisites for replay integration, not evidence that the
+full-body product already routes through them or that any model fit is valid.
+
+## Reproducible Numerical Runtime (#10262)
+
+Use the optional runtime manifest/lock and checker documented in
+`docs/engines/pinocchio.md`. Real Crocoddyl descent and Pink hard-equality /
+infeasible-QP probes pass in the consistent conda-forge stack. Preserve the
+receipt's explicit source-freshness status; a runtime pass is not model or
+physical acceptance. Linux lock requires x86-64-v3. Viewer qualification
+remains separate.
+
+## Pink Adapter Status (#10257, #10254)
+
+The low-level Pink adapters now share validated state/time handling, retain
+collision geometry, forward hard constraints and limits, refresh cached
+kinematics and propagate infeasibility. Four real-native tests cover equality,
+infeasibility, sequential state refresh and free-flyer `nq != nv` behavior.
+Mixed unit/native collection isolates the real tests from unit mocks and
+checks their executed results. This does not implement the full-body marker,
+stance or weld tasks; those must use the qualified #10260 closure derivative
+and explicit physical-time contract before production selection.
+
+Finite weld correction #10260 differentiates the six-component pose error away
+from closure with the correct SE(3) log Jacobian. Trajectory acceleration
+linearization retains the separate constraint velocity Jacobian. Eleven real
+closure regression tests and the 11 contact derivative tests pass on Pinocchio
+3.8 and 4.1; no motion-fit evidence or acceptance thresholds changed.
+The principal-log branch at rotation pi is rejected for derivative evaluation;
+trajectory finite differences also reject steps that could cross that cut.
+
+Updated 2026-09-16 (claude; HO-9 #10111). Branch
+`feat/10111-de-leva-table`. Design: [EPIC_FULL_BODY_CONTACT.md](EPIC_FULL_BODY_CONTACT.md).
 Design Decisions: [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
 Copy-ready prompt for the next agent: [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md).
 
@@ -652,5 +716,9 @@ The following table records the canonical module assignments to be executed in H
 - **HO-1 (#10155)**: Landed on `main` in PR #10218 (`afea5e0a8`). Ground-support pipeline package established under `src/shared/python/motion_matching/pipeline/` with CLI wrapper in `docs/development/full_body_models/evidence/ground_support/run_ground_support.py`.
 - **HO-2 (#10156)**: Implemented Pydantic V2 receipt schema and validator (`src/shared/python/motion_matching/pipeline/receipt_schema.py`), unit tests validating all committed receipts and rejection paths (`test_receipt_schema.py`), generated markdown documentation (`docs/development/full_body_models/RECEIPTS.md`), and freshness test (`test_receipts_markdown_freshness.py`).
 - **HO-7 (#10161)**: Consolidated seventeen sections of findings from `evidence/anthropometry/REVIEW.md` into authoritative design decision record `docs/development/full_body_models/DESIGN_DECISIONS.md`. Established structured parser, validator with DbC contracts, and full test suite `tests/unit/motion_matching/pipeline/test_design_decisions.py`. Merged to `main` in PR #10235 (`27b271fe2`).
-- **HO-4 (#10158)**: Exposed all pipeline stages in the Motion Matching launcher tile (`src/tools/motion_matching/gui.py`, `pipeline.py`). Tabbed interface across Matching (with granular Stages options for free/bound wrists, fit closure, ZMP filter, shooting fit, cutoff frequency), Downswing experiment, and MJX tabs, with asynchronous `RunWorker` and strict LoD. Headless PyQt6 and pipeline test suites in `tests/tools/motion_matching/`. Added `tools.motion_matching` to `src/config/feature_parity.json` (tracking gap #10106) and regenerated `docs/development/feature_parity_matrix.md`.
-- **Next**: Proceed to HO-3 (#10157, MJX environment and JAX-gated tests) and subsequent handoff issues in epic #10162.
+- **HO-4 (#10158)**: Exposed all pipeline stages in the Motion Matching launcher tile (`src/tools/motion_matching/gui.py`, `pipeline.py`). Tabbed interface across Matching (with granular Stages options for free/bound wrists, fit closure, ZMP filter, shooting fit, cutoff frequency), Downswing experiment, and MJX tabs, with asynchronous `RunWorker` and strict LoD. Headless PyQt6 and pipeline test suites in `tests/tools/motion_matching/`. Added `tools.motion_matching` to `src/config/feature_parity.json` (tracking gap #10106) and regenerated `docs/development/feature_parity_matrix.md`. Merged to `main` in PR #10236 (`db4fe88c4`).
+- **HO-9 (#10111, MM-9)**: Verified de Leva (1996) male segment table line-by-line against Table 4 of the published paper. Pinning unit test in `tests/unit/motion_matching/test_de_leva_table.py` asserts each segment against literal paper values (mass %, CoM %, and principal radii %). Corrected shank `com_fraction` from 0.4459 to 0.4395 and radii from (0.255, 0.249, 0.103) to (0.251, 0.246, 0.102) in `src/shared/python/motion_matching/anthropometry.py`, eliminating bony-landmark carryover from Zatsiorsky-Seluyanov 1985. Committed verification receipt `docs/development/full_body_models/evidence/anthropometry/de_leva_verification.json`.
+- **HO-3 (#10157)**: Delivered cross-platform MJX virtualenv setup scripts (`scripts/setup_mjx_env.ps1`, `scripts/setup_mjx_env.sh`) reading pinned versions from `scripts/config/mjx_env_pins.json`, refactored differentiable trajectory optimization into pure testable functions with `SiteState` and `WeldGains` parameter tuples complying with architecture parameter budgets, added `requires_jax` marker to `pyproject.toml`, and implemented 6 unit tests in `tests/unit/motion_matching/test_mjx_optimisation.py` covering knot basis, tail freezing mask, contact force parity (< 1e-6 N), weld wrench equilibrium, initial preload, and finite gradients on truncated 12-frame horizon. Merged to `main` in PR #10228 (`09346c9dd`).
+- **HO-11 (#10250)**: Rebuilt anthropometric documents (`full_body_spec_anthro_driver.json`, `..._iron7.json`) and ground-support receipts with canonical `de_leva_table_sha256` and `anthropometry` blocks after HO-9 de Leva shank fix. Added document freshness test suite `tests/unit/motion_matching/test_document_freshness.py` with 9 unit/contract tests enforcing byte-level agreement against `DE_LEVA_MALE`. Updated Pydantic receipt schema (`receipt_schema.py`), pipeline receipt builder (`receipt.py`), and regenerated `RECEIPTS.md`. Fixed local engine imports in `pipeline/lane.py` and `pipeline/address.py`. Re-executed driver and 7-iron captures, validating 0.000 mm shift between unedited and rebuilt models. Merged to `main` in PR #10261 (`81ea27bfb`).
+- **HO-8 (#10108, MM-6)**: Delivered hip coordinate zero-twist functional calibration (`src/shared/python/motion_matching/hip_calibration.py`) using knee medial markers or shank-thigh ankle plane normal fallback, post-multiplying `parent_to_base` by $R_z(\theta)$ to rotate coordinate zero without translating hip centers. Set `BOUND_WIDENING: float = 1.0` in `src/shared/python/motion_matching/pipeline/constants.py`. Regenerated receipts for `anthro_driver`, `anthro_driver_shoot`, `anthro_iron`, and `anthro_iron_shoot`, verifying 0 lower-limb `range_of_motion_flags` on the IK reference for both captures. Re-verified cross-engine setup parity across MuJoCo, Drake, and Pinocchio.
+- **Next**: Land HO-8 (#10108), release lease, then proceed to HO-12 (#10251), HO-10 (#10160), HO-5 (#10159), and HO-6 (#10121) in epic #10162.
