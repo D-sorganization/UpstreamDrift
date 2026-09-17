@@ -283,8 +283,6 @@ class FullBodyPinkTasks:
             self.specification["coordinate_order"]
         )
         self._model = model
-
-        # Plant and native Pinocchio model inspection
         self._plant: Any | None = None
         self.pin_model: Any | None = None
         if model is not None and hasattr(model, "model") and hasattr(model, "_pin"):
@@ -293,7 +291,13 @@ class FullBodyPinkTasks:
         elif _is_pin_model(model):
             self.pin_model = model
 
-        # Derive dimensions
+        self._init_dimensions_and_coordinates(model)
+        self._init_bounds(model)
+        self._init_spec_structures()
+        self._init_closure_and_marker_frames()
+
+    def _init_dimensions_and_coordinates(self, model: Any | None) -> None:
+        """Initialize configuration/tangent dimensions and coordinate index mappings."""
         if self.pin_model is not None:
             self.nq: int = int(
                 getattr(self.pin_model, "nq", len(self.coordinate_order))
@@ -308,7 +312,6 @@ class FullBodyPinkTasks:
             self.nq = len(self.coordinate_order)
             self.nv = len(self.coordinate_order)
 
-        # Coordinate mappings
         self._coordinates: dict[str, int] = {}
         self._velocity_indices: dict[str, int] = {}
         if model is not None and hasattr(model, "_coordinates"):
@@ -319,7 +322,8 @@ class FullBodyPinkTasks:
                 self._coordinates[name] = i
                 self._velocity_indices[name] = i
 
-        # Coordinate bounds converted to radians
+    def _init_bounds(self, model: Any | None) -> None:
+        """Initialize coordinate position limits in radians."""
         self.lower_limit = np.full(self.nq, -math.pi, dtype=np.float64)
         self.upper_limit = np.full(self.nq, math.pi, dtype=np.float64)
         if model is not None and hasattr(model, "lowerPositionLimit"):
@@ -340,7 +344,6 @@ class FullBodyPinkTasks:
                 self.lower_limit[idx] = math.radians(float(deg_min))
                 self.upper_limit[idx] = math.radians(float(deg_max))
 
-        # Push bounds into Pinocchio model so Pink limit checks see them
         if self.pin_model is not None:
             if hasattr(self.pin_model, "lowerPositionLimit"):
                 self.pin_model.lowerPositionLimit[: len(self.lower_limit)] = (
@@ -351,7 +354,8 @@ class FullBodyPinkTasks:
                     self.upper_limit
                 )
 
-        # Known marker attachments and frames
+    def _init_spec_structures(self) -> None:
+        """Initialize specification frame, marker, and closure metadata."""
         self.marker_attachments: dict[str, Any] = self.specification.get(
             "marker_attachments", {}
         )
@@ -359,27 +363,27 @@ class FullBodyPinkTasks:
         for f in self.specification.get("frames", []):
             self._frames[f["name"]] = len(self._frames) + 1
 
-        # Weld closure frame names
         closure = self.specification.get("closure", {})
         self._closure_body_a: str = closure.get("body_a", "")
         self._closure_body_b: str = closure.get("body_b", "")
         self._closure_frame_a_name: str = closure.get("frame_a_name", "closure_frame_a")
         self._closure_frame_b_name: str = closure.get("frame_b_name", "closure_frame_b")
 
-        # Stance contact spheres
         contact_spec = self.specification.get("contact", {})
         self.contact_spheres: tuple[str, ...] = tuple(
             s["name"] for s in contact_spec.get("spheres", [])
         )
 
-        # Ensure closure frames exist in pin_model if applicable
-        if (
+    def _init_closure_and_marker_frames(self) -> None:
+        """Add closure and marker attachment operational frames to native pin_model."""
+        if not (
             PINOCCHIO_AVAILABLE
             and self._plant is not None
             and self.pin_model is not None
-            and hasattr(self._plant, "constraints")
-            and len(self._plant.constraints) > 0
         ):
+            return
+
+        if hasattr(self._plant, "constraints") and len(self._plant.constraints) > 0:
             c_model = self._plant.constraints[0]
             if not _has_frame(self.pin_model, self._closure_frame_a_name):
                 self.pin_model.addFrame(
@@ -400,42 +404,36 @@ class FullBodyPinkTasks:
                     )
                 )
 
-        # Ensure marker attachment frames exist in pin_model if applicable
-        if (
-            PINOCCHIO_AVAILABLE
-            and self._plant is not None
-            and self.pin_model is not None
-        ):
-            frames_added = False
-            for m_name, m_att in self.marker_attachments.items():
-                if not _has_frame(self.pin_model, m_name):
-                    body = m_att.get("body")
-                    joint = None
-                    body_pose = None
-                    if body in self._plant._bodies:
-                        joint, body_pose = self._plant._bodies[body]
-                    elif body in self._plant._frames:
-                        fid = self._plant._frames[body]
-                        parent_f = self.pin_model.frames[fid]
-                        joint = parent_f.parentJoint
-                        body_pose = parent_f.placement
+        frames_added = False
+        for m_name, m_att in self.marker_attachments.items():
+            if not _has_frame(self.pin_model, m_name):
+                body = m_att.get("body")
+                joint = None
+                body_pose = None
+                if body in self._plant._bodies:
+                    joint, body_pose = self._plant._bodies[body]
+                elif body in self._plant._frames:
+                    fid = self._plant._frames[body]
+                    parent_f = self.pin_model.frames[fid]
+                    joint = parent_f.parentJoint
+                    body_pose = parent_f.placement
 
-                    if joint is not None and body_pose is not None:
-                        offset = m_att.get("offset_m")
-                        if offset is not None:
-                            offset_placement = pin.SE3(
-                                np.eye(3), np.asarray(offset, dtype=float)
-                            )
-                        else:
-                            offset_placement = pin.SE3.Identity()
-                        placement = body_pose * offset_placement
-                        self.pin_model.addFrame(
-                            pin.Frame(m_name, joint, placement, pin.FrameType.OP_FRAME)
+                if joint is not None and body_pose is not None:
+                    offset = m_att.get("offset_m")
+                    if offset is not None:
+                        offset_placement = pin.SE3(
+                            np.eye(3), np.asarray(offset, dtype=float)
                         )
-                        frames_added = True
+                    else:
+                        offset_placement = pin.SE3.Identity()
+                    placement = body_pose * offset_placement
+                    self.pin_model.addFrame(
+                        pin.Frame(m_name, joint, placement, pin.FrameType.OP_FRAME)
+                    )
+                    frames_added = True
 
-            if frames_added:
-                self._plant.data = self.pin_model.createData()
+        if frames_added:
+            self._plant.data = self.pin_model.createData()
 
     def _get_model_frame_name(self, marker_name: str) -> str:
         """Resolve marker name to an operational frame name."""
@@ -449,28 +447,15 @@ class FullBodyPinkTasks:
             return marker_name
         raise ValueError(f"Unknown marker label: {marker_name}")
 
-    def build(self, request: FrameTaskRequest) -> FrameTaskBundle:
-        """Translate a frame task request into soft tasks, equalities, and limits."""
-        policy = request.policy or StanceClosurePolicy()
-        options = request.options or FrameTaskOptions()
-
-        # Validate marker names before any native calls
-        for marker_name in request.marker_targets:
-            self._get_model_frame_name(marker_name)
-
-        # Validate that at least one observed marker is present
-        observed_markers = [
-            name
-            for name, valid in request.validity_mask.items()
-            if valid and name in request.marker_targets
-        ]
-        if not observed_markers:
-            raise ValueError("Insufficient data: zero observed marker targets")
-
-        # Soft tasks
-        soft_tasks: list[Any] = []
-
-        # Marker tracking tasks
+    def _build_marker_tasks(
+        self,
+        observed_markers: list[str],
+        request: FrameTaskRequest,
+        policy: StanceClosurePolicy,
+        options: FrameTaskOptions,
+    ) -> list[Any]:
+        """Construct soft frame tracking tasks for observed markers."""
+        tasks: list[Any] = []
         for name in observed_markers:
             target_pos = np.asarray(request.marker_targets[name], dtype=np.float64)
             if target_pos.shape != (3,) or not np.all(np.isfinite(target_pos)):
@@ -489,50 +474,54 @@ class FullBodyPinkTasks:
                 )
                 target_se3 = pin.SE3(np.eye(3), target_pos)
                 task.set_target(target_se3)
-                soft_tasks.append(task)
+                tasks.append(task)
             else:
-                soft_tasks.append(
+                tasks.append(
                     MockFrameTask(frame_name, target_pos, cost=policy.marker_cost)
                 )
+        return tasks
 
-        # Posture task
-        posture_task_obj: Any | None = None
-        if request.posture_target is not None:
-            target_q: NDArray[np.float64]
-            if isinstance(request.posture_target, Mapping):
-                target_q = np.zeros(len(self.coordinate_order), dtype=np.float64)
-                for name, val in request.posture_target.items():
-                    if name in self._coordinates:
-                        target_q[self._coordinates[name]] = float(val)
-            else:
-                target_q = np.asarray(request.posture_target, dtype=np.float64)
+    def _build_posture_task(
+        self,
+        request: FrameTaskRequest,
+        policy: StanceClosurePolicy,
+        options: FrameTaskOptions,
+    ) -> Any | None:
+        """Construct posture regularization task if requested."""
+        if request.posture_target is None:
+            return None
 
-            if (
-                PINK_AVAILABLE
-                and PostureTask is not None
-                and _is_pin_model(self.pin_model)
-            ):
-                posture_task = PostureTask(cost=policy.posture_cost, gain=options.gain)
-                posture_task.set_target(target_q)
-                posture_task.target_q = target_q
-                posture_task.frame = None
-                posture_task_obj = posture_task
-                soft_tasks.append(posture_task)
-            else:
-                posture_task_obj = MockPostureTask(target_q, cost=policy.posture_cost)
-                soft_tasks.append(posture_task_obj)
+        target_q: NDArray[np.float64]
+        if isinstance(request.posture_target, Mapping):
+            target_q = np.zeros(len(self.coordinate_order), dtype=np.float64)
+            for name, val in request.posture_target.items():
+                if name in self._coordinates:
+                    target_q[self._coordinates[name]] = float(val)
+        else:
+            target_q = np.asarray(request.posture_target, dtype=np.float64)
 
-        # Hard equality constraints
+        if PINK_AVAILABLE and PostureTask is not None and _is_pin_model(self.pin_model):
+            posture_task = PostureTask(cost=policy.posture_cost, gain=options.gain)
+            posture_task.set_target(target_q)
+            posture_task.target_q = target_q
+            posture_task.frame = None
+            return posture_task
+
+        return MockPostureTask(target_q, cost=policy.posture_cost)
+
+    def _build_constraints(
+        self,
+        policy: StanceClosurePolicy,
+        options: FrameTaskOptions,
+    ) -> list[Any]:
+        """Construct hard loop closure and locked coordinate constraints."""
         constraints: list[Any] = []
-
-        # Weld closure constraint
         if policy.enforce_weld:
             if (
                 PINK_AVAILABLE
                 and RelativeFrameTask is not None
                 and _is_pin_model(self.pin_model)
             ):
-                # frame=a, root=b matches native model closure orientation
                 weld_task = RelativeFrameTask(
                     frame=self._closure_frame_a_name,
                     root=self._closure_frame_b_name,
@@ -552,7 +541,6 @@ class FullBodyPinkTasks:
                     )
                 )
 
-        # Locked coordinates
         if policy.locked_coordinates:
             for coord_name, target_val in policy.locked_coordinates.items():
                 if coord_name in self._coordinates:
@@ -568,8 +556,34 @@ class FullBodyPinkTasks:
                             gain=options.gain,
                         )
                     )
+        return constraints
 
-        # Configuration limits
+    def build(self, request: FrameTaskRequest) -> FrameTaskBundle:
+        """Translate a frame task request into soft tasks, equalities, and limits."""
+        policy = request.policy or StanceClosurePolicy()
+        options = request.options or FrameTaskOptions()
+
+        # Validate marker names before any native calls
+        for marker_name in request.marker_targets:
+            self._get_model_frame_name(marker_name)
+
+        observed_markers = [
+            name
+            for name, valid in request.validity_mask.items()
+            if valid and name in request.marker_targets
+        ]
+        if not observed_markers:
+            raise ValueError("Insufficient data: zero observed marker targets")
+
+        soft_tasks = self._build_marker_tasks(
+            observed_markers, request, policy, options
+        )
+        posture_task_obj = self._build_posture_task(request, policy, options)
+        if posture_task_obj is not None:
+            soft_tasks.append(posture_task_obj)
+
+        constraints = self._build_constraints(policy, options)
+
         target_limit_model = (
             self.pin_model if self.pin_model is not None else self._model
         )
