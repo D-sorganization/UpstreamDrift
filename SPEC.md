@@ -1,5 +1,31 @@
 # SPEC.md — Repository Specification Document
 
+## Target Capture Hash-Lock and Marker Validity Policy (#10325)
+
+Enforces byte-level hash integrity on tournament capture files and codifies the canonical marker validity policy across engines:
+- **Marker Validity Policy & Tour Capture Contracts (`src/shared/python/motion_matching/tour_capture_contract.py`)**:
+  - `MARKER_VALIDITY_POLICY`: Canonical mapping of marker labels to sample counts, nominal weights, and exclusion of unassigned labels, strictly matching `driver_capture_audit.json`.
+  - Exposes `marker_weight` and `marker_weights` helpers with DbC preconditions and postconditions.
+- **Engine Consuming Integration (`src/engines/physics_engines/opensim/python/tour_matching/marker_map.py`, `src/shared/python/motion_matching/pipeline/reference.py`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/load_club_target_c3d.m`)**:
+  - Direct consumption of the canonical validity policy across OpenSim marker mappings and reference trajectories, replacing hardcoded weighting schemas.
+  - Documents canonical file paths and SHA-256 integrity hashes in MATLAB C3D loader docstrings.
+- **Hash-Lock Integrity Verification (`tests/unit/motion_matching/test_capture_copies_are_identical.py`)**:
+  - Unit tests asserting all identical copies of driver and iron C3D target capture files match canonical SHA-256 hashes and sample counts match audit ground truth.
+
+## Shadow Tracker Review Workbench Viewport and Action Wiring Corrective (#10357)
+
+Repairs Shadow Tracker GUI workbench interaction and rendering surfaces in accordance with launcher embed standards (MS-84):
+- **Action Signal Wiring (`src/tools/shadow_tracker/gui.py`)**:
+  - Connects toolbar action buttons (`btn_open`, `btn_save`, `btn_export`) to concrete review model handlers.
+  - Implements file dialog workflows for opening bundle directories, saving sessions, and exporting canonical JSON packages with explicit status reporting and error boundaries.
+  - Enforces connected signal receivers across all toolbar and navigation buttons (`btn_open`, `btn_save`, `btn_export`, `btn_worst`, `btn_prev`, `btn_next`).
+- **Custom Review Viewport (`src/tools/shadow_tracker/gui.py`)**:
+  - Replaces plain placeholder `QLabel` with dedicated `ShadowTrackerViewportWidget` subclassing `QtWidgets.QWidget`.
+  - Exposes typed `observation` property and `set_observation(obs: FrameObservation | None)` mutation interface.
+  - Implements custom `paintEvent` rendering:
+    - Empty state: clean status prompt guiding user to open bundles.
+    - Active state: background fill, bounding frame, shot/camera identifiers, authoritative frame PTS and clock authority, mask references, and kinematics overlay placeholder.
+
 ## Pink Displaced-Target and Both-Club Motion Matching Proofs (#10254)
 
 Proves native Pink displaced-target motion reduction, hard constraint qualification failure handling, and dual-club smoke journeys:
@@ -10,6 +36,7 @@ Proves native Pink displaced-target motion reduction, hard constraint qualificat
 - **Both-Club (Driver & 7-Iron) Pipeline Smoke Journeys (`tests/unit/motion_matching/test_pink_pipeline_receipts.py`)**:
   - Exercises full pipeline matching runs across both driver and 7-iron clubs via `MatchRequest` and CLI `--backend pink`.
   - Verifies generation of conforming `ConstrainedIkReceipt` records across both clubs.
+
 
 ## Pink Constrained IK Interface Repair and Fail-Closed Qualification (#10318)
 
