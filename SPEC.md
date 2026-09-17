@@ -5402,6 +5402,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-17 | #10304 | Translate canonical marker tasks, 6D weld loop closures, and coordinate bounds/locks into Pink tasks with post-integration residual audits. |
 | 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
 | 2026-09-16 | #10270 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |
