@@ -65,6 +65,7 @@ from types import ModuleType
 from typing import TYPE_CHECKING
 
 import numpy as np
+import math
 from numpy.typing import NDArray
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -315,7 +316,8 @@ def _camera_geometry(
         ]
     )
     radius = max(
-        float(np.linalg.norm(span_mm)) * _CAMERA_RADIUS_FACTOR, _MIN_CAMERA_RADIUS_MM
+        float(math.sqrt(np.vdot(span_mm, span_mm))) * _CAMERA_RADIUS_FACTOR,
+        _MIN_CAMERA_RADIUS_MM,  # ⚡ Bolt: math.sqrt(np.vdot) avoids np.linalg.norm overhead for small 1D arrays
     )
     direction = np.asarray(camera.eye_direction, dtype=np.float64)
     eye = (

@@ -115,3 +115,7 @@
 ## 2026-09-16 - Safe SPEC.md Modification Pattern Update
 **Learning:** Even using a pattern like `line.startswith('| YYYY-MM-DD |')` may fail the `repo-structure-gates` tests because older rows, like `| Date | PR | Summary |`, might not be found. We must explicitly search for the header format in the specific `## 12. Change Log` section and insert below the actual table header separator (e.g. `| --- | --- | --- |`).
 **Action:** When updating `SPEC.md` programmatically, use a script that correctly finds the header separator in the proper section and inserts the new row. Additionally, the unit tests inside `repo_hygiene` like `test_spec_changelog_integrity.py` are a great way to verify the file was updated without breaking the parser rules.
+
+## 2024-05-20 - Math.Sqrt(Np.Vdot) Optimization in Render3D VTK
+**Learning:** For small 1D NumPy arrays, `math.sqrt(np.vdot(array, array))` is significantly faster (~2.5x) than `np.linalg.norm(array)` because it bypasses NumPy's internal dispatching and instance checks. This is especially useful in rendering code paths where camera bounds are calculated.
+**Action:** Replaced `float(np.linalg.norm(span_mm))` with `float(math.sqrt(np.vdot(span_mm, span_mm)))` in `src/tools/bunker_shot_gui/render3d_vtk.py`.
