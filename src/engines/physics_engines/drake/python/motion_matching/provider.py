@@ -73,7 +73,14 @@ class DrakeFitSwingProvider:
                 :class:`ClubTarget` shape.
         """
         club_target = resolve_club_target(target)
-        result = fit_swing_drake(club_target, opts)
+        native_opts = None
+        if opts is not None:
+            engine_opts = getattr(opts, "engine_options", None)
+            if engine_opts is not None:
+                native_opts = engine_opts
+            elif hasattr(opts, "n_joints"):
+                native_opts = opts
+        result = fit_swing_drake(club_target, native_opts)
         # Issue #4713 / #6935: opt-in CI publication via the shared helper.
         publish_leaderboard_row(self.engine_name, result, self.engine_version())
         return result
