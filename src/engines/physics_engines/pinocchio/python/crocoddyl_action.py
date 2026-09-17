@@ -14,7 +14,12 @@ the acceleration implicitly:
     q_next = q + dt * v_next
 
 The state map derivatives hold df/dv fixed inside ``S`` (a Gauss-Newton style
-approximation of the second-order term), which DDP tolerates. Crocoddyl and
+approximation of the second-order term), which DDP tolerates. By default the
+*rollout* of a node is integrated exactly with adaptive RK45 (the shared
+lane's integrator) and only the derivatives use the implicit-Euler
+linearisation, so the solver's trajectory is the acceptance replay by
+construction; ``node_integrator="implicit_euler"`` keeps the cheaper
+first-order step for both. Crocoddyl and
 the plant are reached only through the ``ctx`` object handed in by the fit
 driver, so this module stays free of engine imports.
 """
@@ -29,6 +34,7 @@ from numpy.typing import NDArray
 from src.engines.physics_engines.pinocchio.python.crocoddyl_problem import (
     FitWeights,
     MarkerTargets,
+    least_squares_controls,
     range_barrier,
 )
 from src.shared.python.contracts import require
@@ -104,6 +110,34 @@ class _NodeCost:
         return grad, hess + np.diag(barrier_hess)
 
 
+def rk45_node_step(
+    ctx: PlantContext,
+    q: Array,
+    v: Array,
+    tau: Array,
+    dt: float,
+    *,
+    rtol: float,
+    atol: float,
+) -> tuple[Array, Array]:
+    """Exact (adaptive RK45) integration of one node with zero-order-hold effort."""
+    from scipy.integrate import solve_ivp
+
+    n = ctx.n
+
+    def rhs(_t: float, y: Array) -> Array:
+        return np.concatenate([y[n:], ctx.acceleration(y[:n], y[n:], tau)])
+
+    sol = solve_ivp(
+        rhs, (0.0, dt), np.concatenate([q, v]), method="RK45", rtol=rtol, atol=atol
+    )
+    if not sol.success or not np.isfinite(sol.y[:, -1]).all():
+        raise FloatingPointError(f"RK45 node step failed: {sol.message}")
+    return np.asarray(sol.y[:n, -1], dtype=float), np.asarray(
+        sol.y[n:, -1], dtype=float
+    )
+
+
 def make_action_models(
     crocoddyl: Any,
     ctx: PlantContext,
@@ -111,9 +145,18 @@ def make_action_models(
     weights: FitWeights,
     effort_bounds: Array,
     dt: float,
+    *,
+    node_integrator: str = "rk45",
+    rtol: float = 1e-6,
+    atol: float = 1e-8,
 ) -> tuple[list[Any], Any]:
     """Running models for every node but the last, plus the terminal model."""
     require(dt > 0.0, "dt must be positive", dt)
+    require(
+        node_integrator in ("rk45", "implicit_euler"),
+        "unknown node integrator",
+        node_integrator,
+    )
     n_nodes = targets.targets.shape[0]
     require(n_nodes >= 2, "at least two nodes are required", n_nodes)
     nu = int(ctx.actuated.sum())
@@ -140,12 +183,18 @@ def make_action_models(
             q, v = x[: ctx.n], x[ctx.n :]
             tau = ctx.effort_vector(u)
             der = ctx.derivatives(q, v, tau)
-            accel = ctx.acceleration(q, v, tau)
-            solve = np.linalg.solve(
-                np.eye(ctx.n) - dt * np.asarray(der.dv), np.eye(ctx.n)
+            solve = np.asarray(
+                np.linalg.solve(np.eye(ctx.n) - dt * np.asarray(der.dv), np.eye(ctx.n)),
+                dtype=float,
             )
-            v_next = v + dt * solve @ accel
-            q_next = q + dt * v_next
+            if node_integrator == "rk45":
+                q_next, v_next = rk45_node_step(
+                    ctx, q, v, tau, dt, rtol=rtol, atol=atol
+                )
+            else:
+                accel = ctx.acceleration(q, v, tau)
+                v_next = v + dt * solve @ accel
+                q_next = q + dt * v_next
             return np.concatenate([q_next, v_next]), solve, der
 
         def calc(self, data: Any, x: Array, u: Array | None = None) -> None:
@@ -264,3 +313,53 @@ def implicit_euler_rollout(
         if not np.isfinite(q[k + 1]).all():
             raise FloatingPointError(f"implicit rollout diverged at node {k + 1}")
     return q, v
+
+
+def tracking_rollout(
+    ctx: PlantContext,
+    q_ref: Array,
+    v_ref: Array,
+    a_ref: Array,
+    dt: float,
+    *,
+    kp: float,
+    kd: float,
+    effort_bounds: Array,
+    ridge: float,
+) -> tuple[Array, Array, Array]:
+    """Dynamically consistent warm start: computed-torque tracking of the IK reference.
+
+    At every node the desired acceleration ``a_ref + kp (q_ref - q) + kd (v_ref - v)``
+    is mapped to bounded efforts through the plant's effort sensitivity (ridge
+    least squares), then the state is advanced with the same linearly implicit
+    Euler step the action models use. The result is a gap-free (xs, us) pair,
+    which FDDP handles far better than a kinematic guess with a finite-difference
+    velocity. Returns (q, v, us).
+    """
+    require(kp >= 0.0 and kd >= 0.0, "tracking gains must be nonnegative", (kp, kd))
+    n_nodes = q_ref.shape[0]
+    q = np.empty_like(q_ref)
+    v = np.empty_like(v_ref)
+    us = np.empty((n_nodes - 1, int(ctx.actuated.sum())))
+    q[0], v[0] = q_ref[0], v_ref[0]
+    for k in range(n_nodes - 1):
+        zero = np.zeros(ctx.n)
+        der = ctx.derivatives(q[k], v[k], zero)
+        a_zero = ctx.acceleration(q[k], v[k], zero)
+        a_des = a_ref[k] + kp * (q_ref[k] - q[k]) + kd * (v_ref[k] - v[k])
+        us[k] = np.clip(
+            least_squares_controls(
+                a_des, a_zero, np.asarray(der.deffort), ctx.actuated, ridge=ridge
+            ),
+            -effort_bounds,
+            effort_bounds,
+        )
+        tau = ctx.effort_vector(us[k])
+        accel = ctx.acceleration(q[k], v[k], tau)
+        v[k + 1] = v[k] + dt * np.linalg.solve(
+            np.eye(ctx.n) - dt * np.asarray(der.dv), accel
+        )
+        q[k + 1] = q[k] + dt * v[k + 1]
+        if not np.isfinite(q[k + 1]).all():
+            raise FloatingPointError(f"tracking rollout diverged at node {k + 1}")
+    return q, v, us
