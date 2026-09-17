@@ -1,5 +1,8 @@
 # Simscape Matching Completion Handoff
 
+Latest review: [Progress Review and Execution Turnover](PROGRESS_REVIEW_20260917.md).
+Read it first for current prerequisites, missing effort evidence and unfinished replay tests.
+
 ## Status and Evidence Authority
 
 Reviewed 2026-09-16. Native fit source checkpoint: 2f0460d25; fetched main
