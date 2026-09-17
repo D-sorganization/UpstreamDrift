@@ -159,11 +159,14 @@
   ],
   "specialist_blockers": [10140, 10141],
   "review": {
-    "baseline": "33ffde23f",
+    "baseline": "0ec64e45f",
     "document": "TURNOVER_CURRENT.md",
     "continuation_prompt": "CONTINUATION_PROMPT.md",
-    "tracking_issue": 10230,
-    "corrective_issues": [10231, 10232, 10233],
-    "full_product_implemented": false
+    "tracking_issue": 10122,
+    "corrective_issues": [10232, 10233, 10273],
+    "full_product_implemented": false,
+    "next_independent_issue": 10233,
+    "renderer_pr": 10264,
+    "timing_merge_pr": 10253
   }
 }
