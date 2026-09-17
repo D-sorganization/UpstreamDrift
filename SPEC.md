@@ -61,6 +61,23 @@ supports a self-managed server with explicit browser suppression. Live
 Gepetto qualification and product-level replay selection are still separate
 requirements under #10254.
 
+## Shadow Tracker Review Workbench, Bundle Persistence, and Launcher Integration (#10134)
+
+Integrates review workbench, durable bundle persistence, and embedded/standalone launcher workflows for Shadow Tracker:
+- **Bundle Persistence & Tamper Verification (`src/shared/python/shadow_tracker/artifacts.py`)**:
+  - `ShadowTrackerBundle`: Manages serialization and deserialization of session bundles containing source assets, shot metadata, observation streams (`observations.jsonl`), and binary masks.
+  - Generates manifest SHA-256 digests over constituent files using atomic temporary file creation (`manifest.json.tmp` -> `manifest.json`), preventing incomplete writes.
+  - Enforces digest validation on bundle load, raising `ValueError` on hash mismatch or corrupted payload contents.
+- **Service Session & Downstream Invalidation (`src/shared/python/shadow_tracker/service.py`)**:
+  - `DefaultShadowTrackerService`: Coordinates session state conforming to `ShadowTrackerServiceProtocol`.
+  - Invalidate downstream fits upon mask correction or observation edits while preserving mask lineage audit records.
+  - Implements worst-frame ranking using composite tracking loss, residuals, and confidence metrics.
+  - Provides canonical package export (`export_canonical_package`) and raises actionable `UnavailableBackendError` when fitting backends are unconfigured.
+- **Review Workbench & Launcher Integration (`src/tools/shadow_tracker/`, `src/config/launcher_manifest.json`, `src/launchers/embedded_tool_bootstrap.py`)**:
+  - `ShadowTrackerAdapter`: Implements `LauncherAdapterProtocol` and `EmbeddedToolAdapter` for seamless embedding inside `upstream_drift_launcher`.
+  - `ShadowTrackerWidget` and `ShadowTrackerReviewModel`: Provides scrubbing, observation inspection, mask correction, and export capabilities.
+  - Launcher manifest registration: Adds `shadow_tracker` tile to `src/config/launcher_manifest.json` under `motion_capture` category with order 48.
+
 ## Shadow Tracker Ambiguity Quantification and Evidence Gates (#10132)
 
 Provides scientific evaluation, visual ambiguity quantification, and deterministic evidence gates for reconstructed motion sequences:
