@@ -73,6 +73,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
 
+- **Pink Adapters (#10257; 2026-09-16):** Shared solve path validates state,
+  time and outputs; forwards hard constraints/limits; retains collision
+  geometry; refreshes cached FK and propagates solver failures. Real native
+  contracts include free-flyer dimensions and infeasible equality/limit
+  combinations. Full-body task assembly and runtime packaging (#10262) remain
+  separate; no fitted trajectories were regenerated.
+
 - **LoD Regression (#10254; 2026-09-16):** Reproduced the main-derived
   `inputs.calibration2.offsets.items()` architecture failure before the change.
   Resolve the owned offset mapping once before formatting the report; preserve

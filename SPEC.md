@@ -59,6 +59,18 @@ Calibrates the hip coordinate zero-twist angle from optical motion capture data 
   - Verified 0 lower-limb `range_of_motion_flags` on the IK reference for both captures (`driver` and `iron`).
   - Cross-engine setup parity (`verify_setup_parity.py`) re-verified across MuJoCo, Drake, and Pinocchio.
 
+## Pink Adapter State and Constraint Contract (#10257)
+
+`PinkSolver.solve` and `PINKBackend.solve_ik` use one validated implementation
+with explicit configuration (`nq`) and tangent velocity (`nv`) dimensions.
+They preserve positional arguments and add keyword-only hard task constraints
+and limits. Omitted options preserve Pink defaults; unsupported requested
+capabilities fail explicitly. Each solve refreshes kinematics from its input,
+performs one `pin.integrate(q, velocity * dt)`, and updates the cache afterward.
+Collision geometry remains available to Pink. Invalid inputs, nonfinite
+outputs and solver infeasibility propagate as errors. Optional native loading
+handles missing/broken imports without pretending the capability exists.
+
 ## Ground Support Pipeline Stage Packaging and Line Budget Compliance (HO-12 #10251, #10162)
 
 Completes the modularization of the ground support execution pipeline by moving remaining orchestration stages and CLI utilities from `run_ground_support.py` into the reusable `src.shared.python.motion_matching.pipeline` package, reducing `run_ground_support.py` from 779 lines to 374 lines (satisfying the <400 line architecture budget):
@@ -5366,6 +5378,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-16 | #10267 | Unify Pink adapter validation, cached kinematics, geometry, hard constraints/limits, exact-once integration and explicit solver failure semantics. |
 | 2026-09-16 | #10270 | Add name-safe global polynomial actuation and exact discrete RK4 sensitivities for the full-body plant. |
 | 2026-09-16 | #10263 | Differentiate finite SE(3) weld pose error while preserving the distinct velocity/acceleration constraint Jacobian. |
 | 2026-09-16 | #10259 | Differentiate state-dependent shared contact efforts in full-body Pinocchio constrained dynamics; add real-engine directional checks and the #10254 integration handoff. |
