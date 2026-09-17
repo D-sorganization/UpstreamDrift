@@ -303,3 +303,88 @@ def test_marker_error_vectors_and_magnitudes() -> None:
     np.testing.assert_allclose(vframe.marker_errors_mm[0], 10.0, atol=1e-6)  # 10 mm
     np.testing.assert_allclose(vframe.marker_errors_mm[1], 20.0, atol=1e-6)  # 20 mm
     np.testing.assert_allclose(vframe.marker_errors_mm[2], 0.0, atol=1e-6)
+
+
+def test_wrench_arrow_vectors_and_viewer_frame_arrows() -> None:
+    from src.tools.tour_matching_viewer.core import (
+        viewer_frame,
+        wrench_arrow_vectors,
+    )
+
+    pt = np.array([0.1, 0.2, 0.3])
+    vec = np.array([10.0, -20.0, 30.0])
+    start, end = wrench_arrow_vectors(pt, vec, scale=0.01)
+    np.testing.assert_allclose(start, pt)
+    np.testing.assert_allclose(end, pt + 0.01 * vec)
+
+    spec = json.loads(SPEC_PATH.read_text())
+    names = tuple(spec["coordinate_order"])
+    q = np.zeros(len(names))
+    wrench = np.array([100.0, 200.0, 300.0, 10.0, 20.0, 30.0])
+    replay = ReplayData(
+        time_s=np.array([0.0]),
+        coordinates=q[None, :],
+        coordinate_names=names,
+        reaction_wrenches_N_Nm=wrench[None, :],
+        wrench_points_m=pt[None, :],
+    )
+    vframe = viewer_frame(spec, replay, 0)
+    assert vframe.force_arrow is not None
+    assert vframe.moment_arrow is not None
+    np.testing.assert_allclose(vframe.force_arrow[0], pt)
+    np.testing.assert_allclose(vframe.force_arrow[1], pt + 0.005 * wrench[:3])
+    np.testing.assert_allclose(vframe.moment_arrow[0], pt)
+    np.testing.assert_allclose(vframe.moment_arrow[1], pt + 0.01 * wrench[3:])
+
+
+def test_export_provenance_table_csv_and_json(tmp_path: Path) -> None:
+    from src.tools.tour_matching_viewer.core import export_provenance_table
+
+    time_s = np.array([0.0, 0.05, 0.10])
+    coords = np.array([[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])
+    names = ("joint_a", "joint_b")
+    wrenches = np.array(
+        [
+            [10.0, 20.0, 30.0, 1.0, 2.0, 3.0],
+            [15.0, 25.0, 35.0, 1.5, 2.5, 3.5],
+            [20.0, 30.0, 40.0, 2.0, 3.0, 4.0],
+        ]
+    )
+    replay = ReplayData(
+        time_s=time_s,
+        coordinates=coords,
+        coordinate_names=names,
+        reaction_wrenches_N_Nm=wrenches,
+    )
+
+    # Export CSV
+    csv_out = tmp_path / "provenance.csv"
+    res_csv = export_provenance_table(
+        replay, csv_out, candidate_hash="cand123", engine_name="pinocchio"
+    )
+    assert res_csv.exists()
+    csv_lines = csv_out.read_text(encoding="utf-8").splitlines()
+    header = csv_lines[0].split(",")
+    assert "frame" in header
+    assert "time_s" in header
+    assert "candidate_hash" in header
+    assert "engine" in header
+    assert "q_joint_a" in header
+    assert "q_joint_b" in header
+    assert "Fx_N" in header
+    assert "Mz_Nm" in header
+    assert len(csv_lines) == 4  # header + 3 rows
+
+    # Export JSON
+    json_out = tmp_path / "provenance.json"
+    res_json = export_provenance_table(
+        replay, json_out, candidate_hash="cand123", engine_name="pinocchio"
+    )
+    assert res_json.exists()
+    payload = json.loads(json_out.read_text(encoding="utf-8"))
+    assert payload["candidate_hash"] == "cand123"
+    assert payload["engine"] == "pinocchio"
+    assert payload["n_frames"] == 3
+    assert len(payload["rows"]) == 3
+    assert payload["rows"][0]["Fx_N"] == 10.0
+    assert payload["rows"][0]["q_joint_a"] == 0.1

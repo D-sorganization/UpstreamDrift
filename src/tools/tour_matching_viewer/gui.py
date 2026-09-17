@@ -22,12 +22,17 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.golf_simulator import MonotonicReplayClock
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.motion_matching.counterfactual import (
+    CounterfactualTrajectory,
+    ForwardZTCFBranch,
+)
 from src.shared.python.simulation_store import SimulationDataStore
 from src.shared.python.simulation_store.replay_bundle import load_simscape_bundle
 from src.tools.tour_matching_viewer.core import (
     ReplayData,
     ViewerFrame,
     cylinder_faces,
+    export_provenance_table,
     load_replay,
     marker_error_vectors,
     viewer_frame,
@@ -271,8 +276,16 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._effort_badge = QtWidgets.QLabel("Torque (τ): —")
         row1.addWidget(self._effort_badge)
 
+        self._cf_badge = QtWidgets.QLabel("CF Wrench: —")
+        row1.addWidget(self._cf_badge)
+
         self._rms_label = QtWidgets.QLabel("Valid Marker RMS: — mm")
         row1.addWidget(self._rms_label)
+
+        self._export_btn = QtWidgets.QPushButton("Export Table…")
+        self._export_btn.setEnabled(False)
+        self._export_btn.clicked.connect(self._on_export_table_clicked)
+        row1.addWidget(self._export_btn)
 
         self._report_btn = QtWidgets.QPushButton("Inspect Report")
         self._report_btn.setEnabled(False)
@@ -310,6 +323,11 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._error_overlay_check.setChecked(True)
         self._error_overlay_check.toggled.connect(self._on_error_overlay_toggled)
         row2.addWidget(self._error_overlay_check)
+
+        self._counterfactual_check = QtWidgets.QCheckBox("Reaction Wrenches (CF)")
+        self._counterfactual_check.setChecked(False)
+        self._counterfactual_check.toggled.connect(self._on_counterfactual_toggled)
+        row2.addWidget(self._counterfactual_check)
 
         row2.addSpacing(10)
         row2.addWidget(QtWidgets.QLabel("Camera:"))
@@ -433,8 +451,61 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
 
         title = f"Candidate: {self._candidate_hash} | Engine: {self._engine_name.capitalize()}"
         self._title_label.setText(title)
+        self._export_btn.setEnabled(True)
 
         self.render_frame(0)
+
+    def load_counterfactual_trajectory(
+        self, traj: CounterfactualTrajectory | ForwardZTCFBranch
+    ) -> None:
+        """Load or overlay counterfactual trajectory data."""
+        if isinstance(traj, ForwardZTCFBranch):
+            replay = ReplayData(
+                time_s=traj.time_s,
+                coordinates=traj.coordinates,
+                coordinate_names=traj.coordinate_names,
+                reaction_wrenches_N_Nm=traj.reaction_wrenches,
+                wrench_points_m=np.zeros((traj.time_s.size, 3)),
+            )
+            self.load_replay_data(
+                replay,
+                candidate_hash=traj.branch_id,
+                engine_name="ztcf_branch",
+            )
+        elif hasattr(traj, "actual_wrenches"):
+            if self._replay is not None and self._replay.frame_count == len(
+                traj.time_s
+            ):
+                self._replay = ReplayData(
+                    time_s=self._replay.time_s,
+                    coordinates=self._replay.coordinates,
+                    model_markers_m=self._replay.model_markers_m,
+                    target_markers_m=self._replay.target_markers_m,
+                    valid_mask=self._replay.valid_mask,
+                    coordinate_names=self._replay.coordinate_names,
+                    reaction_wrenches_N_Nm=traj.actual_wrenches,
+                    wrench_points_m=(
+                        self._replay.wrench_points_m
+                        if self._replay.wrench_points_m is not None
+                        else np.zeros((self._replay.frame_count, 3))
+                    ),
+                )
+            else:
+                n_coords = len(traj.coordinate_names)
+                zeros_coords = np.zeros((len(traj.time_s), n_coords))
+                replay = ReplayData(
+                    time_s=traj.time_s,
+                    coordinates=zeros_coords,
+                    coordinate_names=traj.coordinate_names,
+                    reaction_wrenches_N_Nm=traj.actual_wrenches,
+                    wrench_points_m=np.zeros((len(traj.time_s), 3)),
+                )
+                self.load_replay_data(
+                    replay,
+                    candidate_hash=traj.parent_run_id or "counterfactual",
+                    engine_name="counterfactual",
+                )
+        self.render_frame(self._current_frame)
 
     def load_file(self, path: Path | str) -> None:
         """Load a verified Simscape manifest or a legacy replay archive."""
@@ -608,6 +679,26 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                 )
                 self._ax.add_collection3d(err_coll)
 
+    def _render_counterfactual_wrenches(self, vframe: ViewerFrame) -> None:
+        if not self._counterfactual_check.isChecked():
+            return
+        lines = []
+        colors = []
+        if vframe.force_arrow is not None:
+            lines.append([vframe.force_arrow[0], vframe.force_arrow[1]])
+            colors.append("#2ecc71")  # Green for force
+        if vframe.moment_arrow is not None:
+            lines.append([vframe.moment_arrow[0], vframe.moment_arrow[1]])
+            colors.append("#9b59b6")  # Purple/Magenta for moment
+        if lines:
+            wrench_coll = Line3DCollection(
+                lines,
+                colors=colors,
+                linewidths=2.5,
+                alpha=0.9,
+            )
+            self._ax.add_collection3d(wrench_coll)
+
     def render_frame(self, frame_idx: int) -> None:
         """Evaluate kinematics and render 3D elements for a given frame index."""
         if self._replay is None or self._spec is None:
@@ -624,6 +715,25 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         vframe: ViewerFrame = viewer_frame(self._spec, self._replay, frame_idx)
         self._rms_label.setText(f"Valid Marker RMS: {vframe.rms_error * 1000.0:.2f} mm")
 
+        # CF badge status: unavailable unless explicitly finite and present
+        has_wrench = (
+            self._replay.reaction_wrenches_N_Nm is not None
+            and frame_idx < len(self._replay.reaction_wrenches_N_Nm)
+            and np.all(np.isfinite(self._replay.reaction_wrenches_N_Nm[frame_idx]))
+        )
+        if has_wrench:
+            assert self._replay.reaction_wrenches_N_Nm is not None
+            w = self._replay.reaction_wrenches_N_Nm[frame_idx]
+            norm_f = float(np.linalg.norm(w[:3]))
+            norm_m = float(np.linalg.norm(w[3:]))
+            self._cf_badge.setText(
+                f"CF Wrench: |F|={norm_f:.1f} N, |M|={norm_m:.1f} Nm"
+            )
+            self._cf_badge.setStyleSheet("color: #27ae60; font-weight: bold;")
+        else:
+            self._cf_badge.setText("CF Wrench: Unavailable")
+            self._cf_badge.setStyleSheet("color: #7f8c8d;")
+
         camera = (self._ax.elev, self._ax.azim, self._ax.roll)
         limits = (self._ax.get_xlim(), self._ax.get_ylim(), self._ax.get_zlim())
         self._setup_3d_axes()
@@ -637,6 +747,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._render_segments(vframe, eng_color, render_mode)
         self._render_markers(vframe, eng_color)
         self._render_marker_errors(vframe)
+        self._render_counterfactual_wrenches(vframe)
         self._canvas.draw_idle()
 
     def restart_playback(self) -> None:
@@ -762,12 +873,49 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                     self, "Error Loading Replay", f"Failed to load replay:\n{e}"
                 )
 
+    def _on_counterfactual_toggled(self, checked: bool) -> None:  # noqa: ARG002
+        self.render_frame(self._current_frame)
+
+    def _on_export_table_clicked(self) -> None:
+        if self._replay is None:
+            return
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "Export Provenance Table",
+            f"provenance_{self._candidate_hash}.csv",
+            "CSV Files (*.csv);;JSON Files (*.json);;All Files (*)",
+        )
+        if path:
+            try:
+                export_provenance_table(
+                    self._replay,
+                    path,
+                    candidate_hash=self._candidate_hash,
+                    engine_name=self._engine_name,
+                )
+                QtWidgets.QMessageBox.information(
+                    self,
+                    "Export Complete",
+                    f"Provenance table successfully exported to:\n{path}",
+                )
+            except (OSError, ValueError, RuntimeError, KeyError) as e:
+                QtWidgets.QMessageBox.critical(
+                    self,
+                    "Export Failed",
+                    f"Failed to export provenance table:\n{e}",
+                )
+
     def cleanup(self) -> None:
         """Halt playback and release resources."""
         self._clock.stop()
         self._timer.stop()
         self._is_playing = False
         self._figure.clf()
+        if hasattr(self, "_export_btn"):
+            self._export_btn.setEnabled(False)
+        if hasattr(self, "_cf_badge"):
+            self._cf_badge.setText("CF Wrench: —")
+            self._cf_badge.setStyleSheet("")
 
 
 class TourMatchingViewerWindow(QtWidgets.QMainWindow):

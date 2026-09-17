@@ -112,16 +112,57 @@ async def run_counterfactual(
         Task ID and initial status.
 
     Raises:
-        HTTPException: 409 when no completed simulation session exists or
-            the session engine does not support the requested kind.
+        HTTPException: 404 when baseline_run_id is not found in catalog, or
+            409 when no completed simulation session exists or the session
+            engine does not support the requested kind.
     """
+    if payload.baseline_run_id is not None:
+        from src.shared.python.simulation_store import SimulationDataStore
+
+        store = SimulationDataStore()
+        for m in store.discover_known_manifests():
+            try:
+                store.register_replay_bundle(m)
+            except (OSError, ValueError, KeyError, RuntimeError):
+                pass
+
+        try:
+            entry = store.get_catalog_entry(payload.baseline_run_id)
+        except (KeyError, ValueError):
+            entry = None
+
+        if entry is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Baseline run '{payload.baseline_run_id}' not found in simulation library",
+            )
+        task_id = str(uuid.uuid4())
+        task_manager.set(
+            task_id,
+            {
+                "status": "started",
+                "kind": payload.kind,
+                "baseline_run_id": payload.baseline_run_id,
+                "created_at": datetime.now(UTC),
+            },
+        )
+        background_tasks.add_task(
+            service.run_archived_counterfactual_background,
+            task_id,
+            payload.kind,
+            payload.baseline_run_id,
+            entry,
+            task_manager,
+        )
+        return {"task_id": task_id, "status": "started", "kind": payload.kind}
+
     support = service.describe_counterfactual_support()
     if not support["session_available"]:
         raise HTTPException(
             status_code=409,
             detail=(
-                "No completed simulation session; run a simulation before "
-                "requesting a counterfactual analysis"
+                "No completed simulation session; run a simulation or specify "
+                "baseline_run_id before requesting a counterfactual analysis"
             ),
         )
     if payload.kind not in support["kinds"]:

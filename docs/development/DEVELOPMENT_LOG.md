@@ -31,15 +31,15 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10286 · Native Swing ZTCF/ZVCF and Reaction-Wrench Analysis
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** claude
 - **Issue:** #10286 (sibling #10285)
 - **Branch:** feat/10285-native-saved-replay
-- **Paths:** src/shared/python/motion_matching/counterfactual.py; src/shared/python/motion_matching/counterfactual_matrix.py; src/engines/physics_engines; tests/unit/motion_matching; docs/development/simscape_tour_matching
+- **Paths:** src/shared/python/motion_matching/counterfactual.py; src/shared/python/motion_matching/counterfactual_matrix.py; src/engines/physics_engines; src/tools/tour_matching_viewer; src/api; tests/unit/motion_matching; tests/unit/tools; tests/unit/api; docs/development/simscape_tour_matching
 - **Started:** 2026-09-17
-- **Last verified:** 2026-09-17 (SELF; 16 unit tests pass in tests/unit/motion_matching; ruff check and format clean; mypy clean with 0 errors; architecture budget and divergence inventory pass)
-- **Summary:** Delivered CF-1 through CF-4 test-first for epic #10286: explicit versioned counterfactual contracts (SpatialWrench with Varignon moment transport and action-reaction negation, PointwiseCounterfactualSample), NativeConstrainedCounterfactualProvider with Pinocchio closure_reaction_wrench, 3D spatial power/work/impulse integrals, and authoritative 5-engine capability matrix (`counterfactual_matrix.py`). Implemented state restoration guarantees (`try ... finally` in OpenSim realizing dynamics upon restoration; Pinocchio working-data forward kinematics restoration in `finally`) and eliminated silent empty-success fallbacks across Pinocchio, Drake, and OpenSim. Handled Drake underactuation via `MakeActuationMatrix() @ tau`.
-- **Next step:** Execute CF-5 (forward/branched ZTCF rollouts) and wire counterfactual trajectories into Tour Matching Viewer (CF-6, CF-7).
+- **Last verified:** 2026-09-17 (SELF; 70 tests pass across test_native_counterfactual, test_counterfactual_matrix, test_forward_ztcf, test_routes_counterfactual, test_tour_matching_viewer_core, test_tour_matching_viewer_adapter, and test_two_hand_wscg_analysis; ruff check and format clean; mypy clean with 0 issues on target files; architecture budget and divergence inventory pass)
+- **Summary:** Delivered complete Package C milestones CF-1 through CF-8 test-first for epic #10286. Implemented versioned spatial wrench contracts (SpatialWrench with Varignon moment transport and action-reaction negation, PointwiseCounterfactualSample), NativeConstrainedCounterfactualProvider with Pinocchio closure_reaction_wrench, 3D spatial power/work/impulse integrals, and authoritative 5-engine capability matrix (counterfactual_matrix.py) with state restoration guarantees and zero silent fallbacks. Implemented forward branched ZTCF dynamics rollouts (ForwardZTCFBranch, CutState, RK4 integration, explicit rejection of forward ZVCF rollouts). Added /analysis/counterfactual API route with offline catalog baseline execution. Integrated reaction wrenches into Tour Matching Viewer (TourMatchingViewerWidget with CF badge, 'Reaction Wrenches (CF)' 3D overlay, load_counterfactual_trajectory, and provenance table export). Verified WSCG 2024 two-hand model audit reproduction and byte-deterministic evidence generation.
+- **Next step:** Merge PR on feat/10285-native-saved-replay closing epic #10286. Proceed to next active work package or maintenance issue.
 
 ### DL-#9967 · Native Simscape Tour Matching
 

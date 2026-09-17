@@ -1,9 +1,9 @@
 # Native Multi-Engine Matching Handoff
 
-## Package C Progress: Native Counterfactual Qualification (CF-1, CF-2, CF-3, CF-4 Complete)
+## Package C Complete: Native Counterfactual Qualification (CF-1 Through CF-8 Complete)
 
 Package C of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
-(epic #10286) has delivered its foundational milestones test-first:
+(epic #10286) has delivered all milestones test-first and verified:
 
 1. **Explicit Versioned Counterfactual Contracts (CF-1)**:
    - Defined `SpatialWrench` in `src/shared/python/motion_matching/counterfactual.py` with force, torque,
@@ -33,7 +33,31 @@ Package C of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACK
    - Eliminated silent empty-success fallbacks (`return np.array([])`) across OpenSim, Pinocchio, and Drake,
      raising explicit `RuntimeError` on uninitialized states or realization failures.
    - Handled Drake underactuation via `MakeActuationMatrix() @ tau`.
-   - Verified with 8 unit tests in `tests/unit/motion_matching/test_counterfactual_matrix.py` (16 total in suite).
+   - Verified with 8 unit tests in `tests/unit/motion_matching/test_counterfactual_matrix.py`.
+5. **Forward/Branched ZTCF Rollouts (CF-5)**:
+   - Implemented `CutState` capturing immutable cut instant state snapshot with strict consistency validations.
+   - Explicitly rejected integration of forward ZVCF rollouts via `simulate_forward_zvcf` (`ValueError`).
+   - Implemented `simulate_forward_ztcf` with RK4 forward numerical integration, cut-instant acceleration consistency checks,
+     constraint violation tracking, and energy tracking ($E_k$, $E_p$, $E_{mech}$).
+   - Implemented `ForwardZTCFBranch` with power, work, delta energy, linear/angular impulse, and conversion to `CounterfactualTrajectory`.
+   - Verified with 9 unit tests in `tests/unit/motion_matching/test_forward_ztcf.py`.
+6. **API Route for Offline Baseline Selection (CF-6)**:
+   - Extended `CounterfactualRequest` with optional `baseline_run_id`.
+   - Updated `/analysis/counterfactual` endpoint in `src/api/routes/analysis.py` to support archived baseline lookup
+     via `SimulationDataStore`, routing to background execution with 404 on unknown baselines.
+   - Implemented `run_archived_counterfactual_background` generating immutable child results linked to parent run hash and manifest.
+   - Verified with 11 unit tests in `tests/unit/api/test_routes_counterfactual.py`.
+7. **Tour Matching Viewer Counterfactual Overlays (CF-7)**:
+   - Added reaction wrench and application point data structures to `ReplayData` and `ViewerFrame`.
+   - Added `load_counterfactual_trajectory` supporting both `ForwardZTCFBranch` and `CounterfactualTrajectory`.
+   - Added `Reaction Wrenches (CF)` 3D vector overlay via `Line3DCollection` and `wrench_arrow_vectors`.
+   - Added explicit `CF Wrench` status badge displaying exact magnitudes or `Unavailable` (never zero).
+   - Added `export_provenance_table` action generating provenance-bearing CSV or JSON files.
+   - Verified with unit tests in `tests/unit/tools/test_tour_matching_viewer_core.py` and `test_tour_matching_viewer_adapter.py`.
+8. **WSCG Legacy Plot Reproduction & Native Evidence Export (CF-8)**:
+   - Verified registered sources in `docs/research/proximal_distal_energy_transfer/sources/wscg_2024/SOURCE_REGISTER.md`.
+   - Executed WSCG analysis and figure reproduction pipelines (`run_two_hand_wscg_analysis`, `make_two_hand_wscg_figures`).
+   - Verified byte-deterministic outputs and exact couple decomposition closure across all 9 tests in `test_two_hand_wscg_analysis.py`.
 
 ## Package B Completed: Saved-Run Product Polish Delivered
 

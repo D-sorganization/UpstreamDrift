@@ -326,3 +326,84 @@ def test_inspection_dialogs_instantiate_cleanly(qapp) -> None:  # noqa: ANN001
     finally:
         widget.cleanup()
         widget.close()
+
+
+def test_counterfactual_wrench_overlay_and_export_provenance(
+    qapp,
+    tmp_path,
+    monkeypatch,  # noqa: ANN001
+) -> None:
+    import numpy as np
+    from PyQt6 import QtWidgets
+    from mpl_toolkits.mplot3d.art3d import Line3DCollection
+    from src.shared.python.motion_matching.counterfactual import (
+        CutState,
+        ForwardZTCFBranch,
+    )
+    from src.tools.tour_matching_viewer.gui import TourMatchingViewerWidget
+
+    widget = TourMatchingViewerWidget()
+    try:
+        assert widget._cf_badge.text() == "CF Wrench: —"
+        assert widget._export_btn.isEnabled() is False
+
+        # Build mock ForwardZTCFBranch
+        cut = CutState(
+            cut_time_s=0.5,
+            coordinates={"j1": 0.1},
+            rates={"j1": 0.0},
+            parent_run_id="run_baseline",
+        )
+        t = np.array([0.5, 0.51, 0.52])
+        branch = ForwardZTCFBranch(
+            cut_state=cut,
+            time_s=t,
+            coordinate_names=("j1",),
+            coordinates=np.array([[0.1], [0.12], [0.15]]),
+            rates=np.array([[0.0], [2.0], [3.0]]),
+            accelerations=np.array([[0.0], [20.0], [10.0]]),
+            reaction_wrenches=np.array(
+                [
+                    [10.0, 0.0, 0.0, 0.0, 0.0, 5.0],
+                    [15.0, 0.0, 0.0, 0.0, 0.0, 7.0],
+                    [20.0, 0.0, 0.0, 0.0, 0.0, 9.0],
+                ]
+            ),
+            twist=np.zeros((3, 6)),
+            branch_id="branch_ztcf_001",
+        )
+
+        widget.load_counterfactual_trajectory(branch)
+        assert widget._export_btn.isEnabled() is True
+        assert "CF Wrench: |F|=10.0 N, |M|=5.0 Nm" in widget._cf_badge.text()
+
+        # By default counterfactual check is unchecked
+        assert widget._counterfactual_check.isChecked() is False
+        coll_count_before = len(widget._ax.collections)
+
+        # Check counterfactual overlay
+        widget._counterfactual_check.setChecked(True)
+        coll_count_after = len(widget._ax.collections)
+        assert coll_count_after > coll_count_before
+        assert any(isinstance(c, Line3DCollection) for c in widget._ax.collections)
+
+        # Test export table with monkeypatched QFileDialog
+        export_target = tmp_path / "exported_provenance.csv"
+        monkeypatch.setattr(
+            QtWidgets.QFileDialog,
+            "getSaveFileName",
+            lambda *args, **kwargs: (str(export_target), "CSV Files (*.csv)"),
+        )
+        monkeypatch.setattr(
+            QtWidgets.QMessageBox,
+            "information",
+            lambda *args, **kwargs: None,
+        )
+        widget._on_export_table_clicked()
+        assert export_target.exists()
+        content = export_target.read_text(encoding="utf-8")
+        assert "Fx_N" in content
+        assert "branch_ztcf_001" in content
+    finally:
+        widget.cleanup()
+        widget.close()

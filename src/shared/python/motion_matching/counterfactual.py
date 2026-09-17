@@ -1,10 +1,11 @@
 """Versioned native counterfactual intervention and spatial wrench contracts.
 
-Implements CF-1, CF-2, and CF-3 for epic #10286:
+Implements CF-1, CF-2, CF-3, and CF-5 for epic #10286:
 - Explicit intervention contracts (actual, ZTCF, ZVCF)
 - 3D spatial wrench accounting and moment transport
 - Native constrained counterfactual provider with acceleration & reaction closures
 - 3D spatial power, work, and impulse integration
+- Explicit forward/branched ZTCF rollouts, saved cut states, and ZVCF rollout rejection
 """
 
 from __future__ import annotations
@@ -355,3 +356,367 @@ class CounterfactualTrajectory:
             model_tier=self.model_tier,
             wrench_zvcf=w_zvcf,
         )
+
+
+@dataclass(frozen=True, slots=True)
+class CutState:
+    """Immutable snapshot of multibody state at the branch cut time t_cut."""
+
+    cut_time_s: float
+    coordinates: Mapping[str, float]
+    rates: Mapping[str, float]
+    parent_run_id: str | None = None
+    parent_sample_index: int | None = None
+
+    def __post_init__(self) -> None:
+        if not np.isfinite(self.cut_time_s):
+            raise ValueError("cut_time_s must be a finite number")
+        if not self.coordinates:
+            raise ValueError("coordinates mapping must not be empty")
+        if set(self.coordinates) != set(self.rates):
+            raise ValueError("coordinates and rates keys must match exactly")
+        for k, v in self.coordinates.items():
+            if not np.isfinite(v):
+                raise ValueError(f"Coordinate {k} has nonfinite value {v}")
+        for k, v in self.rates.items():
+            if not np.isfinite(v):
+                raise ValueError(f"Rate {k} has nonfinite value {v}")
+        object.__setattr__(
+            self, "coordinates", MappingProxyType(dict(self.coordinates))
+        )
+        object.__setattr__(self, "rates", MappingProxyType(dict(self.rates)))
+
+
+def simulate_forward_zvcf(*args: Any, **kwargs: Any) -> None:
+    """Explicitly reject attempts to integrate ZVCF as a forward rollout.
+
+    ZVCF is strictly an instantaneous diagnostic at fixed state (q, v=0, u=0)
+    and cannot be integrated as a forward rollout. For evolving unforced dynamics,
+    use simulate_forward_ztcf.
+    """
+    raise ValueError(
+        "ZVCF is strictly an instantaneous diagnostic at fixed state (q, v=0, u=0) "
+        "and cannot be integrated as a forward rollout. For evolving unforced dynamics, "
+        "use simulate_forward_ztcf."
+    )
+
+
+@dataclass(frozen=True)
+class ForwardZTCFBranch:
+    """Immutable forward ZTCF branch integrated from a saved cut state."""
+
+    cut_state: CutState
+    time_s: NDArray[np.float64]
+    coordinate_names: tuple[str, ...]
+    coordinates: NDArray[np.float64]
+    rates: NDArray[np.float64]
+    accelerations: NDArray[np.float64]
+    reaction_wrenches: NDArray[np.float64]
+    twist: NDArray[np.float64]
+    kinetic_energy_J: NDArray[np.float64] | None = None
+    potential_energy_J: NDArray[np.float64] | None = None
+    mechanical_energy_J: NDArray[np.float64] | None = None
+    branch_id: str = "ztcf_branch"
+    is_cut_consistent: bool = True
+    max_constraint_violation: float = 0.0
+    solver_converged: bool = True
+    schema_version: str = SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        t = np.asarray(self.time_s, dtype=np.float64).reshape(-1)
+        if t.size < 2 or not np.all(np.isfinite(t)):
+            raise ValueError("time_s must contain at least two finite samples")
+        if np.any(np.diff(t) <= 0.0):
+            raise ValueError("time_s must be strictly increasing")
+        n = t.size
+        d = len(self.coordinate_names)
+        for name, arr, expected in (
+            ("coordinates", self.coordinates, (n, d)),
+            ("rates", self.rates, (n, d)),
+            ("accelerations", self.accelerations, (n, d)),
+            ("reaction_wrenches", self.reaction_wrenches, (n, 6)),
+            ("twist", self.twist, (n, 6)),
+        ):
+            a = np.asarray(arr, dtype=np.float64)
+            if a.shape != expected or not np.all(np.isfinite(a)):
+                raise ValueError(f"{name} must have finite shape {expected}")
+            a.flags.writeable = False
+
+        t.flags.writeable = False
+        object.__setattr__(self, "time_s", t)
+
+        for e_name in (
+            "kinetic_energy_J",
+            "potential_energy_J",
+            "mechanical_energy_J",
+        ):
+            e_arr = getattr(self, e_name)
+            if e_arr is not None:
+                ea = np.asarray(e_arr, dtype=np.float64).reshape(-1)
+                if ea.shape != (n,) or not np.all(np.isfinite(ea)):
+                    raise ValueError(f"{e_name} must have shape ({n},) and be finite")
+                ea.flags.writeable = False
+                object.__setattr__(self, e_name, ea)
+
+    def power(self) -> NDArray[np.float64]:
+        """Compute 3D instantaneous spatial power P = F . v + M . omega along the branch."""
+        p = np.sum(self.reaction_wrenches * self.twist, axis=1)
+        p.flags.writeable = False
+        return p
+
+    def work(self) -> NDArray[np.float64]:
+        """Compute cumulative mechanical work W(t) = integral_tcut^t P(tau) dtau."""
+        p = self.power()
+        w = np.zeros_like(p)
+        dt = np.diff(self.time_s)
+        avg_p = 0.5 * (p[:-1] + p[1:])
+        w[1:] = np.cumsum(avg_p * dt)
+        w.flags.writeable = False
+        return w
+
+    def energy_change(self) -> NDArray[np.float64] | None:
+        """Compute delta E(t) = E(t) - E(t_cut) if mechanical energy is tracked."""
+        if self.mechanical_energy_J is None:
+            return None
+        de = self.mechanical_energy_J - self.mechanical_energy_J[0]
+        de.flags.writeable = False
+        return de
+
+    def linear_impulse(self) -> NDArray[np.float64]:
+        """Compute cumulative linear impulse I(t) = integral_tcut^t F(tau) dtau."""
+        force = self.reaction_wrenches[:, :3]
+        imp = np.zeros_like(force)
+        dt = np.diff(self.time_s)[:, None]
+        avg_f = 0.5 * (force[:-1] + force[1:])
+        imp[1:] = np.cumsum(avg_f * dt, axis=0)
+        imp.flags.writeable = False
+        return imp
+
+    def angular_impulse(self) -> NDArray[np.float64]:
+        """Compute cumulative angular impulse L(t) = integral_tcut^t M(tau) dtau."""
+        moment = self.reaction_wrenches[:, 3:]
+        imp = np.zeros_like(moment)
+        dt = np.diff(self.time_s)[:, None]
+        avg_m = 0.5 * (moment[:-1] + moment[1:])
+        imp[1:] = np.cumsum(avg_m * dt, axis=0)
+        imp.flags.writeable = False
+        return imp
+
+    def to_counterfactual_trajectory(self) -> CounterfactualTrajectory:
+        """Export forward branch as a CounterfactualTrajectory."""
+        n = self.time_s.size
+        d = len(self.coordinate_names)
+        zeros_qd = np.zeros((n, d), dtype=np.float64)
+        zeros_6 = np.zeros((n, 6), dtype=np.float64)
+        return CounterfactualTrajectory(
+            time_s=self.time_s,
+            coordinate_names=self.coordinate_names,
+            actual_accelerations=self.accelerations,
+            ztcf_accelerations=self.accelerations,
+            control_accelerations=zeros_qd,
+            zvcf_accelerations=zeros_qd,
+            actual_wrenches=self.reaction_wrenches,
+            ztcf_wrenches=self.reaction_wrenches,
+            control_wrenches=zeros_6,
+            zvcf_wrenches=zeros_6,
+            twist=self.twist,
+            parent_run_id=self.cut_state.parent_run_id,
+            model_tier="forward_ztcf_branch",
+        )
+
+
+def _eval_model_forward_step(
+    model: Any,
+    coord_names: tuple[str, ...],
+    q_vec: NDArray[np.float64],
+    v_vec: NDArray[np.float64],
+    zero_u: dict[str, float],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    q_dict = {name: float(q_vec[i]) for i, name in enumerate(coord_names)}
+    v_dict = {name: float(v_vec[i]) for i, name in enumerate(coord_names)}
+    if hasattr(model, "evaluate_dynamics"):
+        acc_dict, wrench = model.evaluate_dynamics(q_dict, v_dict, zero_u)
+        a_vec = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
+        w_vec = wrench.vector
+    elif hasattr(model, "accelerations") and hasattr(model, "closure_reaction_wrench"):
+        acc_dict = model.accelerations(q_dict, v_dict, zero_u)
+        a_vec = np.array([acc_dict[name] for name in coord_names], dtype=np.float64)
+        force, torque, _ = model.closure_reaction_wrench("world")
+        w_vec = np.concatenate([force, torque])
+    else:
+        raise NotImplementedError("Model does not implement dynamics evaluation")
+    return a_vec, w_vec
+
+
+def _step_rk4(
+    model: Any,
+    coord_names: tuple[str, ...],
+    q_curr: NDArray[np.float64],
+    v_curr: NDArray[np.float64],
+    a_curr: NDArray[np.float64],
+    zero_u: dict[str, float],
+    dt_s: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    k1_v = a_curr
+    k1_q = v_curr
+    q_k2 = q_curr + 0.5 * dt_s * k1_q
+    v_k2 = v_curr + 0.5 * dt_s * k1_v
+    k2_v, _ = _eval_model_forward_step(model, coord_names, q_k2, v_k2, zero_u)
+    k2_q = v_k2
+    q_k3 = q_curr + 0.5 * dt_s * k2_q
+    v_k3 = v_curr + 0.5 * dt_s * k2_v
+    k3_v, _ = _eval_model_forward_step(model, coord_names, q_k3, v_k3, zero_u)
+    k3_q = v_k3
+    q_k4 = q_curr + dt_s * k3_q
+    v_k4 = v_curr + dt_s * k3_v
+    k4_v, _ = _eval_model_forward_step(model, coord_names, q_k4, v_k4, zero_u)
+    k4_q = v_k4
+
+    q_next = q_curr + (dt_s / 6.0) * (k1_q + 2.0 * k2_q + 2.0 * k3_q + k4_q)
+    v_next = v_curr + (dt_s / 6.0) * (k1_v + 2.0 * k2_v + 2.0 * k3_v + k4_v)
+    return q_next, v_next
+
+
+def _validate_rollout_parameters(
+    intervention: str, duration_s: float, dt_s: float
+) -> None:
+    if intervention != "ztcf":
+        raise ValueError(
+            f"Only intervention='ztcf' can be integrated as a forward rollout; got '{intervention}'. "
+            "ZVCF is strictly an instantaneous diagnostic at fixed state (q, v=0, u=0) "
+            "and cannot be integrated as a forward rollout."
+        )
+    if duration_s <= 0.0 or not np.isfinite(duration_s):
+        raise ValueError("duration_s must be positive and finite")
+    if dt_s <= 0.0 or not np.isfinite(dt_s):
+        raise ValueError("dt_s must be positive and finite")
+
+
+def _check_cut_consistency(
+    q_arr: NDArray[np.float64],
+    v_arr: NDArray[np.float64],
+    a_arr: NDArray[np.float64],
+    cut_state: CutState,
+    coord_names: tuple[str, ...],
+) -> bool:
+    q0_dict = {name: float(q_arr[0, j]) for j, name in enumerate(coord_names)}
+    v0_dict = {name: float(v_arr[0, j]) for j, name in enumerate(coord_names)}
+    return (
+        all(np.isclose(q0_dict[k], cut_state.coordinates[k]) for k in coord_names)
+        and all(np.isclose(v0_dict[k], cut_state.rates[k]) for k in coord_names)
+        and bool(np.all(np.isfinite(q_arr)))
+        and bool(np.all(np.isfinite(v_arr)))
+        and bool(np.all(np.isfinite(a_arr)))
+    )
+
+
+def _record_energies_and_violation(
+    model: Any,
+    q_dict: dict[str, float],
+    v_dict: dict[str, float],
+    i: int,
+    ke_arr: NDArray[np.float64] | None,
+    pe_arr: NDArray[np.float64] | None,
+    me_arr: NDArray[np.float64] | None,
+    max_violation: float,
+) -> float:
+    if ke_arr is not None and pe_arr is not None and me_arr is not None:
+        ke, pe, me = model.compute_energy(q_dict, v_dict)
+        ke_arr[i], pe_arr[i], me_arr[i] = ke, pe, me
+    if hasattr(model, "constraint_violation"):
+        viol = float(model.constraint_violation(q_dict, v_dict))
+        if viol > max_violation:
+            return viol
+    return max_violation
+
+
+def simulate_forward_ztcf(
+    model: Any,
+    cut_state: CutState,
+    duration_s: float,
+    dt_s: float = 1.0 / 360.0,
+    *,
+    integrator: Literal["rk4", "euler"] = "rk4",
+    branch_id: str = "ztcf_branch",
+    intervention: str = "ztcf",
+) -> ForwardZTCFBranch:
+    """Integrate evolving unforced forward dynamics from a saved cut state.
+
+    Uses zero applied control (u=0) starting at t_cut.
+    """
+    _validate_rollout_parameters(intervention, duration_s, dt_s)
+
+    coord_names = tuple(sorted(cut_state.coordinates.keys()))
+    n_steps = int(round(duration_s / dt_s)) + 1
+    t_arr = cut_state.cut_time_s + np.arange(n_steps, dtype=np.float64) * dt_s
+
+    d = len(coord_names)
+    q_arr = np.zeros((n_steps, d), dtype=np.float64)
+    v_arr = np.zeros((n_steps, d), dtype=np.float64)
+    a_arr = np.zeros((n_steps, d), dtype=np.float64)
+    w_arr = np.zeros((n_steps, 6), dtype=np.float64)
+    twist_arr = np.zeros((n_steps, 6), dtype=np.float64)
+
+    has_energy = hasattr(model, "compute_energy")
+    ke_arr = np.zeros(n_steps, dtype=np.float64) if has_energy else None
+    pe_arr = np.zeros(n_steps, dtype=np.float64) if has_energy else None
+    me_arr = np.zeros(n_steps, dtype=np.float64) if has_energy else None
+
+    q_curr = np.array(
+        [cut_state.coordinates[name] for name in coord_names], dtype=np.float64
+    )
+    v_curr = np.array([cut_state.rates[name] for name in coord_names], dtype=np.float64)
+    zero_u = dict.fromkeys(coord_names, 0.0)
+    max_violation = 0.0
+
+    for i in range(n_steps):
+        q_arr[i] = q_curr
+        v_arr[i] = v_curr
+
+        a_curr, w_curr = _eval_model_forward_step(
+            model, coord_names, q_curr, v_curr, zero_u
+        )
+        a_arr[i] = a_curr
+        w_arr[i] = w_curr
+
+        if d >= 2:
+            twist_arr[i, :2] = v_curr[:2]
+        elif d == 1:
+            twist_arr[i, 0] = v_curr[0]
+
+        q_dict = {name: float(q_curr[j]) for j, name in enumerate(coord_names)}
+        v_dict = {name: float(v_curr[j]) for j, name in enumerate(coord_names)}
+        max_violation = _record_energies_and_violation(
+            model, q_dict, v_dict, i, ke_arr, pe_arr, me_arr, max_violation
+        )
+
+        if i < n_steps - 1:
+            if integrator == "rk4":
+                q_curr, v_curr = _step_rk4(
+                    model, coord_names, q_curr, v_curr, a_curr, zero_u, dt_s
+                )
+            else:
+                q_curr = q_curr + dt_s * v_curr
+                v_curr = v_curr + dt_s * a_curr
+
+    is_cut_consistent = _check_cut_consistency(
+        q_arr, v_arr, a_arr, cut_state, coord_names
+    )
+
+    return ForwardZTCFBranch(
+        cut_state=cut_state,
+        time_s=t_arr,
+        coordinate_names=coord_names,
+        coordinates=q_arr,
+        rates=v_arr,
+        accelerations=a_arr,
+        reaction_wrenches=w_arr,
+        twist=twist_arr,
+        kinetic_energy_J=ke_arr,
+        potential_energy_J=pe_arr,
+        mechanical_energy_J=me_arr,
+        branch_id=branch_id,
+        is_cut_consistent=is_cut_consistent,
+        max_constraint_violation=max_violation,
+        solver_converged=bool(np.all(np.isfinite(q_arr))),
+    )

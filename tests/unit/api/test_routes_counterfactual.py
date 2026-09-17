@@ -251,3 +251,43 @@ def test_failed_compute_marks_task_failed(task_manager: MockTaskManager) -> None
     data = client.get(f"/simulate/status/{task_id}").json()
     assert data["status"] == "failed"
     assert "engine exploded" in data["error"]
+
+
+def test_counterfactual_archived_baseline_catalog_run(
+    task_manager: MockTaskManager,
+) -> None:
+    """Archived baseline runs can be analyzed offline without an engine or active session."""
+    client = _make_client(_make_service(None), task_manager)
+    response = client.post(
+        "/analysis/counterfactual",
+        json={"kind": "ztcf", "baseline_run_id": "simscape-returned102"},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["status"] == "started"
+    assert body["kind"] == "ztcf"
+    task_id = body["task_id"]
+
+    status = client.get(f"/simulate/status/{task_id}")
+    assert status.status_code == 200
+    data = status.json()
+    assert data["status"] == "completed"
+    result = data["result"]
+    assert result["kind"] == "ztcf"
+    assert result["parent_run_id"] == "simscape-returned102"
+    assert result["metadata"]["source"] == "simulation_store"
+    assert len(result["times"]) == 307
+    assert len(result["values"]) == 307
+
+
+def test_counterfactual_archived_baseline_not_found_is_404(
+    task_manager: MockTaskManager,
+) -> None:
+    """Requesting an unknown baseline_run_id yields 404."""
+    client = _make_client(_make_service(None), task_manager)
+    response = client.post(
+        "/analysis/counterfactual",
+        json={"kind": "ztcf", "baseline_run_id": "nonexistent-run-123"},
+    )
+    assert response.status_code == 404
+    assert "not found in simulation library" in response.json()["detail"]
