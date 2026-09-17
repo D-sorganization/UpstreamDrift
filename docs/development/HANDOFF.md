@@ -1,32 +1,109 @@
 # Native Multi-Engine Matching Handoff
 
+## Package B Completed: Saved-Run Product Polish Delivered
+
+Package B of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
+(epic #10285) is complete. Key deliverables implemented test-first and verified:
+
+1. **SimulationDataStore Replay Catalog**: Extended `SimulationDataStore` with `register_replay_bundle`,
+   `list_catalog_entries`, `get_catalog_entry`, and automatic `discover_known_manifests`. Verified
+   provenance, duration, sample count, qualification status (`rejected`), and artifact hash validation.
+2. **Catalog Discovery & Run Selection**: `TourMatchingViewerWidget` auto-discovers and populates
+   the saved run catalog in its toolbar. Selecting `simscape-returned102` immediately loads the verified
+   retained run without requiring the user to navigate or locate arbitrary NPZ archives.
+3. **Speed & Restart Controls**: Added playback rate controls (`0.25x`, `0.5x`, `1.0x`, `2.0x`) through
+   the existing source-time presentation clock (`MonotonicReplayClock.set_playback_rate`), preserving
+   monotonicity without drifting or re-running physics. Added dedicated restart control (`⏮ Restart`)
+   resetting clock and frame to 0.0 s.
+4. **Cylinder Rendering & Persistent Cameras**: Implemented drawing-only 3D cylinder surface rendering
+   via `Poly3DCollection` and `cylinder_faces`, with toggleable line skeleton mode. Maintained persistent
+   camera orientation across scrubs, frames, and playback, alongside multi-angle camera presets
+   (Perspective, Face-On, Down-the-Line, Top-Down).
+5. **Marker Error Vectors & Effort Display**: Added visual marker error overlay vectors (`marker_error_vectors`)
+   connecting corresponding target and model markers. Prominently displayed explicit effort status badge
+   identifying missing generalized force samples (`Torque (τ): Recorded Torque Unavailable`) without
+   manufacturing zero torques.
+6. **Report & Animation Inspection Actions**: Added one-click inspection dialogs:
+   - `ReportInspectorDialog`: Displays certified R2025b gates (showing gate3 fail vs gate1/2/4/5 pass),
+     metrics, and solver config with explicit notice of offline retained evidence.
+   - `AnimationInspectorDialog`: Plays and presents the actual R2025b cylinder animation GIF with external
+     viewer launch capabilities.
+7. **Verification**: 78 unit tests passing across `tests/unit/simulation_store/` and `tests/unit/tools/`
+   (`test_simulation_data_store.py`, `test_tour_matching_viewer_adapter.py`, `test_tour_matching_viewer_core.py`),
+   with 0 ruff errors, 0 format discrepancies, and 0 mypy issues.
+
+## Package A Completed: Calibration Decision Report Filed
+
+Package A of [Execution Packages](simscape_tour_matching/CHEAPER_AGENT_WORK_PACKAGES.md)
+is complete. Read the full decision report:
+[Package A Calibration Decision](simscape_tour_matching/PACKAGE_A_CALIBRATION_DECISION.md).
+
+Key conclusions:
+
+1. Fixed-offset parameter recalibration on the baseline single-Hub topology drops
+   training error (-2.62 mm) but fails to generalize on held-out validation (+0.18 mm).
+2. The fundamental error floor stems from a 109.6 mm non-rigid deformation between
+   head and back markers in the capture (`BackLeft`–`HeadSide` target distance varies
+   from 349.7 to 459.3 mm). Splitting head and back into independent rigid clusters
+   drops the aggregate rigid floor from 14.59 mm to 3.72 mm (head: 0.16 mm, back: 5.05 mm).
+3. The 1.25 s static solve spike (84.03 mm) is resolved to a `WaistRight` occlusion
+   interacting with an artificial yaw penalty; relieved unconstrained yaw achieves
+   31.08 mm with 0 active bounds.
+4. Next action: Review with team whether to introduce an explicit 3-DOF cervical (neck)
+   articulation or re-scope Hub tracking markers before running bounded 0.90 s continuation.
+
+## Current Entry Point
+
+Read [Latest Progress Review](simscape_tour_matching/PROGRESS_REVIEW_20260917.md)
+and [Next-Agent Prompt](simscape_tour_matching/AGENT_RESUME_PROMPT.md) first.
+All review audits are finished. Source replay/fitter restoration and sampled
+native chart/retraction checks pass. New 24-solve terminal static evidence finds
+39.76310 mm best tested within the yaw allowance, versus 40.30135 mm saved dynamic
+error and the unchanged 35 mm gate. This is local evidence, not global infeasibility.
+Prioritize fixed geometry/marker diagnosis before a large torque-only search.
+The full swing, qualified effort export, replay product and counterfactuals remain
+incomplete. Exact scripts/receipts and comparison plot are preserved under
+simscape_tour_matching/native_evidence/terminal_feasibility_20260917.
+
+## Saved Replay and Counterfactual Product Work
+
+Epics #10285 (Simulation Library/Replay) and #10286 (Native ZTCF/ZVCF Wrenches)
+now define the integration work. Read
+[Saved Runs and Counterfactuals Handoff](simscape_tour_matching/SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md).
+Actual R2025b run102 cylindrical animation and dual-view still are generated in
+simscape_tour_matching/visuals_returned102 from saved MATLAB states, with hashes
+and a visual reconstruction check. This is a rejected0.85 s prefix, not new physics.
+The viewer's native-spec ordering fix passes seven core tests including a real
+MuJoCo FK test. Full GUI/model selection and catalog integration remain open.
+
 ## Current Status
 
-Run101 is a **rejected 0–0.85 s prefix**, not a completed full-swing match.
-The independent R2025b replay passes four of five marker/yaw gates; terminal
-RMS is **40.3115 mm**, above the 35 mm limit. The optimizer hit its iteration
-limit and returned accepted=false / optimizer_converged=false.
+Run102 is the latest committed native fit found in the 2026-09-16 review.
+It is a rejected0–0.85 s prefix: MATLAB terminal RMS40.301 mm exceeds35 mm.
+Overall20.267 mm, early9.995 mm, club8.389 mm and yaw0.610% pass their gates.
+The optimizer exhausted its physical evaluation budget and returned a fallback;
+accepted=false and optimizer_converged=false. No full-swing acceptance exists.
 
-The 2026-09-15 review recomputed raw NPZ/MAT results: maximum Euclidean
-Simscape–Pinocchio marker discrepancy is 0.0604935 mm; overall RMS 20.26494 mm,
-early RMS 9.99517 mm, club RMS 8.42248 mm and yaw error 0.54345%.
-Required MATLAB settings: R2025b Update 5, ode15s, RelTol 1e-6, AbsTol 1e-9,
-MaxStep 1/1440 s. Preserve the corrected seed geometry and world-force convention.
-This is measured prefix agreement, not proof of universal numerical convergence.
+[Current Completion Handoff and Agent Prompt](simscape_tour_matching/COMPLETION_HANDOFF_20260916.md)
+is the authoritative next-work plan. It supersedes RUN101_REVIEW_AND_TURNOVER.md
+for task ordering. Source reviewed:2f0460d25; fetched main:d2aafa43c.
 
-Read [Run101 Review and Completion Turnover](simscape_tour_matching/RUN101_REVIEW_AND_TURNOVER.md)
-for the current evidence, ordered work packages and copy-ready agent prompt.
-It supersedes earlier claims that all fitting gates are certified. Three head
-markers account for 38.61% of terminal squared error and LUArmHigh for 15.40%.
-Next: bounded refinement verification, terminal body/attachment feasibility,
-one justified fitting trial, then progressive full-capture extension.
+Priorities: recover clean-checkout native fitting providers currently available
+only through historical/frozen runtime sources; coordinate finite-weld derivative
+fix issue10260 / PR10263; establish articulated terminal feasibility; run the first
+bounded0.90 s fit; produce reproducible manifests and synchronized motion reports.
+PR10263 is not yet a qualified merged dependency. Do not duplicate its owner.
 
-Branch: feat/9967-native-simscape-pinocchio. Issues: #9967 / #9921.
-Review source checkpoint: ca750f7d7; SELF adds the current turnover review.
-Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
-Remote hosts: DeskComputer (R2025b) and ControlTower (Pinocchio WSL).
-No new numerical jobs were launched during this review; check live processes
-before resuming. Full capture and other-engine qualification remain incomplete.
+Run101 refinement supports4.52 micrometer marker agreement with refined R2025b
+and46.9 nanometer Pinocchio self-refinement change. Run102 marker agreement at
+baseline settings is0.0605 mm maximum. These are prefix-specific measurements,
+not full-horizon rate/effort qualification. Keep geometry seed and force-frame fixes.
+
+Historical evidence lives under simscape_tour_matching/native_evidence. Remote
+hosts are DeskComputer (explicit R2025b) and ControlTower (Pinocchio WSL).
+Remote live jobs were not inspected in this review; check before launching.
+Epic9921 / issue9967 are closed despite the incomplete full goal; reconcile tracking.
+This review launches no simulation or fitting job.
 
 ## Representation Qualification
 

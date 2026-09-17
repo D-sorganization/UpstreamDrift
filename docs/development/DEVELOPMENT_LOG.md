@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10285 · Saved Simulation Library and Native Replay
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10285 (counterfactual sibling #10286)
+- **Branch:** feat/10285-native-saved-replay
+- **Paths:** src/tools/tour_matching_viewer; src/shared/python/simulation_store; docs/development/simscape_tour_matching
+- **Started:** 2026-09-16
+- **Last verified:** 2026-09-17 (SELF; 78 tests pass across test_simulation_data_store, test_tour_matching_viewer_adapter, and test_tour_matching_viewer_core; ruff check clean, ruff format clean, mypy clean with 0 errors)
+- **Summary:** Package B product polish delivered test-first: SimulationDataStore extended with replay cataloging, manifest discovery, and hash/path verification. TourMatchingViewerWidget upgraded with shared catalog selection for run102 (and all registered runs), source-time clock speed controls (0.25x, 0.5x, 1.0x, 2.0x via MonotonicReplayClock), restart control, persistent camera across scrubbing/playback, multi-angle camera presets, true 3D cylinder rendering (Poly3DCollection and cylinder_faces), toggleable marker error vectors, explicit unavailable torque badge, and interactive inspection dialogs for the verified R2025b qualification report and cylinder animation GIF. Zero claims that playback reruns physics.
+- **Next step:** Package B product polish is complete on feat/10285-native-saved-replay. Proceed to Package C (Native Counterfactual Qualification) under epic #10286 in a separate worktree following SAVED_RUNS_AND_COUNTERFACTUALS_HANDOFF.md.
+
 ### DL-#9967 · Native Simscape Tour Matching
 
 - **State:** in_progress
@@ -25,9 +37,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/9967-native-simscape-pinocchio
 - **Paths:** src/shared/python/motion_matching; docs/development/simscape_tour_matching
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-15 (SELF; raw run101 MAT/NPZ metrics independently recomputed; seven focused yaw/replay tests passed)
-- **Summary:** Run101 improves yaw and has measured R2025b–Pinocchio prefix agreement of 0.0605 mm maximum. Terminal RMS 40.31 mm fails the 35 mm gate; full 1.814 s capture is incomplete. No optimizer launched by this review.
-- **Next step:** Follow RUN101_REVIEW_AND_TURNOVER.md: bounded refinement check, head/left-arm terminal feasibility, justified bounded fitting trial and horizon extension.
+- **Last verified:** 2026-09-17 (SELF; Package A diagnosis completed; 17 unit tests pass across test_rigidity, test_marker_calibration, and test_constrained_marker_pose; ruff check and format clean; calibration decision report completed)
+- **Summary:** Package A calibration audit completed. Parameter recalibration of fixed marker attachments under the single-Hub baseline topology fails to generalize (+0.18 mm error increase on held-out validation frames). Rigidity analysis confirms 109.6 mm non-rigid deformation between head and back markers across the capture; split-cluster rigid floor drops from 14.59 mm to 3.72 mm (head cluster 0.16 mm, back cluster 5.05 mm). Active bounds and 1.25s spike (84.03 mm) resolved to WaistRight marker occlusion and artificial yaw penalty; relieved solve achieves 31.08 mm with 0 active bounds. Decision report filed in docs/development/simscape_tour_matching/PACKAGE_A_CALIBRATION_DECISION.md.
+- **Next step:** Review Package A decision report with team to decide whether to introduce an explicit 3-DOF cervical articulation (neck) between UpperTorsoBase and Head or re-scope Hub tracking markers before launching bounded 0.90 s dynamic control continuation. Preserved baseline Simscape model and acceptance gates without unauthorized mutation.
 
 ### DL-#10204 · Capture Rig Shared Camera Layer
 

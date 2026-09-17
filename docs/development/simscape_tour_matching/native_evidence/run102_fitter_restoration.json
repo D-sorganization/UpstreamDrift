@@ -1,0 +1,19 @@
+{
+  "qualification": "terminal audit-only startup parity passed; no optimization performed",
+  "remote_runtime": "/home/dieterolson/native-fit-audit-20260917-01",
+  "remote_output": "audit_output",
+  "command_source": "two_window_fit_9967_102/run_full_102.sh arguments with --audit-only and new paths; never execute its rm -rf line",
+  "input_archive_sha256": "f47a91865ecda3f956cbb3d2dda859df3f37a949bcdbfd7534e883010f389172",
+  "input_hash_reference": "two_window_fit_9967_102/config.json:input_hashes",
+  "all_six_input_hashes_verified": true,
+  "source_sha256": {
+    "src/shared/python/motion_matching/native_effort_penalty.py": "72f001dd51ccf6f43409441e982553abd2fb45c995c6dffebba59e617484d4d7",
+    "src/shared/python/motion_matching/shooting_schedule.py": "7eda3df0420755967e6fe0bdc2999a208b2891d9010485b1bc52f99c56a5e972",
+    "src/engines/physics_engines/pinocchio/python/native_replay.py": "7fe3e6cbde59847c71ae19bdfe99247ac8a60c50160b7d5c3d4cb602a34b0386",
+    "src/engines/physics_engines/pinocchio/python/native_sensitivity.py": "cc44d76762f325dd9a5fae0f5dc71185f81bd58e0e2b1b13ea3a3bf6c390b87a"
+  },
+  "typing_adjustment": "np.asarray on sampled state/sensitivity rows; pinned hook inferred scalar iteration types before correction",
+  "result": "restoration_audit_20260917/fitter_receipt.json",
+  "audit_archive_sha256": "31aca25919b7a6f38ae6137e1d558c5b4cb7036efcda3ac9ad1226fc2fdc84df",
+  "weld_audit_archive_sha256": "2e6474bf3019bc225d7eae07d98894e784fd7ac94e2464a8c25538a9540d5254"
+}

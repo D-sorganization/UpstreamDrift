@@ -1,0 +1,90 @@
+{
+  "qualification": "native finite weld position derivative only; not optimizer or acceleration/reaction qualification",
+  "dependency_commit": "0db3c295a7f668789afbb4666f60912294f81cce",
+  "records": [
+    {
+      "provider": "current",
+      "state": "initial",
+      "wrist_offset_rad": 0.0,
+      "max_absolute_directional_error": 2.879478988582207e-9,
+      "passed": true
+    },
+    {
+      "provider": "current",
+      "state": "initial",
+      "wrist_offset_rad": 0.1,
+      "max_absolute_directional_error": 0.06760804146175481,
+      "passed": false
+    },
+    {
+      "provider": "current",
+      "state": "initial",
+      "wrist_offset_rad": -0.4,
+      "max_absolute_directional_error": 0.2724438497911684,
+      "passed": false
+    },
+    {
+      "provider": "current",
+      "state": "terminal",
+      "wrist_offset_rad": 0.0,
+      "max_absolute_directional_error": 7.534787099805484e-9,
+      "passed": true
+    },
+    {
+      "provider": "current",
+      "state": "terminal",
+      "wrist_offset_rad": 0.1,
+      "max_absolute_directional_error": 0.05071867015882747,
+      "passed": false
+    },
+    {
+      "provider": "current",
+      "state": "terminal",
+      "wrist_offset_rad": -0.4,
+      "max_absolute_directional_error": 0.20773672347868205,
+      "passed": false
+    },
+    {
+      "provider": "pr10263",
+      "state": "initial",
+      "wrist_offset_rad": 0.0,
+      "max_absolute_directional_error": 2.8794627793260474e-9,
+      "passed": true
+    },
+    {
+      "provider": "pr10263",
+      "state": "initial",
+      "wrist_offset_rad": 0.1,
+      "max_absolute_directional_error": 2.5351893917502366e-9,
+      "passed": true
+    },
+    {
+      "provider": "pr10263",
+      "state": "initial",
+      "wrist_offset_rad": -0.4,
+      "max_absolute_directional_error": 2.522393627302222e-9,
+      "passed": true
+    },
+    {
+      "provider": "pr10263",
+      "state": "terminal",
+      "wrist_offset_rad": 0.0,
+      "max_absolute_directional_error": 7.53567486189155e-9,
+      "passed": true
+    },
+    {
+      "provider": "pr10263",
+      "state": "terminal",
+      "wrist_offset_rad": 0.1,
+      "max_absolute_directional_error": 7.21658549585058e-9,
+      "passed": true
+    },
+    {
+      "provider": "pr10263",
+      "state": "terminal",
+      "wrist_offset_rad": -0.4,
+      "max_absolute_directional_error": 6.552680287263968e-9,
+      "passed": true
+    }
+  ]
+}

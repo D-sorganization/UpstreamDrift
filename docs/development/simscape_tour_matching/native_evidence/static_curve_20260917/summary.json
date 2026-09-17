@@ -1,0 +1,314 @@
+{
+  "qualification": "sampled local static pose searches; not dynamics or global lower bound",
+  "archive_sha256": "5894ef991d9faeb95796b36de5278185c4b05f31c9a9c0a940464e3b6afd80ab",
+  "elapsed_s": 143.43400487399776,
+  "completed_frames": 38,
+  "planned_frames": 38,
+  "solve_count": 304,
+  "rows": [
+    {
+      "frame": 0,
+      "time_s": 0.0,
+      "best_yaw_valid_rms_mm": 2.898078904737307e-10,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 18,
+      "time_s": 0.05,
+      "best_yaw_valid_rms_mm": 0.20613415913820773,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 36,
+      "time_s": 0.1,
+      "best_yaw_valid_rms_mm": 0.5238735166519267,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 54,
+      "time_s": 0.15,
+      "best_yaw_valid_rms_mm": 1.0101879413156098,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 72,
+      "time_s": 0.2,
+      "best_yaw_valid_rms_mm": 1.630606051512287,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 90,
+      "time_s": 0.25,
+      "best_yaw_valid_rms_mm": 2.450206329829265,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 108,
+      "time_s": 0.3,
+      "best_yaw_valid_rms_mm": 3.5561282189939005,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 126,
+      "time_s": 0.35,
+      "best_yaw_valid_rms_mm": 5.15254435113735,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 144,
+      "time_s": 0.4,
+      "best_yaw_valid_rms_mm": 7.2774167427859675,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 162,
+      "time_s": 0.45,
+      "best_yaw_valid_rms_mm": 10.04046916291776,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 180,
+      "time_s": 0.5,
+      "best_yaw_valid_rms_mm": 13.254561701219293,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 198,
+      "time_s": 0.55,
+      "best_yaw_valid_rms_mm": 16.86633228422297,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 216,
+      "time_s": 0.6,
+      "best_yaw_valid_rms_mm": 20.626900768536014,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 234,
+      "time_s": 0.65,
+      "best_yaw_valid_rms_mm": 24.268953735596266,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 252,
+      "time_s": 0.7,
+      "best_yaw_valid_rms_mm": 27.764898308597875,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 270,
+      "time_s": 0.75,
+      "best_yaw_valid_rms_mm": 30.902190081034092,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 288,
+      "time_s": 0.8,
+      "best_yaw_valid_rms_mm": 33.81915701820493,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 306,
+      "time_s": 0.85,
+      "best_yaw_valid_rms_mm": 39.763099717849734,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 324,
+      "time_s": 0.9,
+      "best_yaw_valid_rms_mm": 41.91133575728179,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 342,
+      "time_s": 0.95,
+      "best_yaw_valid_rms_mm": 43.554182775770435,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 360,
+      "time_s": 1.0,
+      "best_yaw_valid_rms_mm": 45.14341737165526,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 378,
+      "time_s": 1.05,
+      "best_yaw_valid_rms_mm": 46.29408282830596,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 396,
+      "time_s": 1.1,
+      "best_yaw_valid_rms_mm": 46.08310786429004,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 414,
+      "time_s": 1.15,
+      "best_yaw_valid_rms_mm": 43.97713930271946,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 432,
+      "time_s": 1.2,
+      "best_yaw_valid_rms_mm": 40.07859419098337,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 450,
+      "time_s": 1.25,
+      "best_yaw_valid_rms_mm": 84.03488058945116,
+      "active_bounds": 2,
+      "valid_markers": 24,
+      "converged": 8
+    },
+    {
+      "frame": 468,
+      "time_s": 1.3,
+      "best_yaw_valid_rms_mm": 32.09034396796495,
+      "active_bounds": 1,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 486,
+      "time_s": 1.35,
+      "best_yaw_valid_rms_mm": 40.24787990842417,
+      "active_bounds": 3,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 504,
+      "time_s": 1.4,
+      "best_yaw_valid_rms_mm": 35.4988487186446,
+      "active_bounds": 2,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 522,
+      "time_s": 1.45,
+      "best_yaw_valid_rms_mm": 38.39942455324113,
+      "active_bounds": 1,
+      "valid_markers": 22,
+      "converged": 7
+    },
+    {
+      "frame": 540,
+      "time_s": 1.5,
+      "best_yaw_valid_rms_mm": 39.72229759680638,
+      "active_bounds": 0,
+      "valid_markers": 22,
+      "converged": 8
+    },
+    {
+      "frame": 558,
+      "time_s": 1.55,
+      "best_yaw_valid_rms_mm": 40.06374332651227,
+      "active_bounds": 1,
+      "valid_markers": 22,
+      "converged": 8
+    },
+    {
+      "frame": 576,
+      "time_s": 1.6,
+      "best_yaw_valid_rms_mm": 37.467016686168606,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 594,
+      "time_s": 1.65,
+      "best_yaw_valid_rms_mm": 38.430275711154636,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 612,
+      "time_s": 1.7,
+      "best_yaw_valid_rms_mm": 39.469826084686915,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 630,
+      "time_s": 1.75,
+      "best_yaw_valid_rms_mm": 39.01467776173091,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 648,
+      "time_s": 1.8,
+      "best_yaw_valid_rms_mm": 39.336890979102456,
+      "active_bounds": 0,
+      "valid_markers": 25,
+      "converged": 8
+    },
+    {
+      "frame": 653,
+      "time_s": 1.8138888888888889,
+      "best_yaw_valid_rms_mm": 44.21349945795481,
+      "active_bounds": 0,
+      "valid_markers": 19,
+      "converged": 8
+    }
+  ]
+}
