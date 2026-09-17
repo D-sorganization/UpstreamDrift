@@ -71,13 +71,12 @@ class IKTrajectoryRequest:
         """Validate shapes, monotonicity, uniqueness, and finite bounds."""
         if init_q.ndim != 1 or not np.isfinite(init_q).all():
             raise ValueError("initial_q must be a finite 1D array")
-        if (
-            time.ndim != 1
-            or time.size < 1
-            or not np.isfinite(time).all()
-            or time[0] != 0.0
-            or np.any(np.diff(time) <= 0)
-        ):
+        if time.ndim != 1 or time.size == 0 or time[0] != 0.0:
+            raise ValueError("Capture time must start at zero and increase strictly")
+        if not np.all(np.isfinite(time)):
+            raise ValueError("Capture time must start at zero and increase strictly")
+        dt = np.diff(time)
+        if dt.size > 0 and not np.all(dt > 0.0):
             raise ValueError("Capture time must start at zero and increase strictly")
         if not labels or len(set(labels)) != len(labels):
             raise ValueError("labels must be unique and non-empty")
