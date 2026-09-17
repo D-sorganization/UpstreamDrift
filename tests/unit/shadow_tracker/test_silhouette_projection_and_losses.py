@@ -15,7 +15,9 @@ from __future__ import annotations
 import math
 import pytest
 
-from motion_matching.diagnostics.reference_pose import reference_golfer_setup
+from src.shared.python.motion_matching.diagnostics.reference_pose import (
+    reference_golfer_setup,
+)
 from shared.python.shadow_tracker._validation import (
     FRAME_SCHEMA_VERSION,
     MASK_SCHEMA_VERSION,
