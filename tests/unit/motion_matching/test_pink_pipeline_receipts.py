@@ -213,14 +213,15 @@ def test_summarise_receipt_pink_failed_frame() -> None:
 
 
 def test_pink_capability_missing_fails_clearly(monkeypatch: pytest.MonkeyPatch) -> None:
-    from src.shared.python.motion_matching.pipeline.lane import probe_pink_capability
+    from src.shared.python.motion_matching.pipeline import lane
 
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.lane.is_engine_available",
+        lane,
+        "is_engine_available",
         lambda name: False,
     )
 
-    available, diagnostics = probe_pink_capability()
+    available, diagnostics = lane.probe_pink_capability()
     assert available is False
     assert (
         "pink" in diagnostics["missing"]
