@@ -259,7 +259,7 @@ class PinkTrajectoryService(ConstrainedIKBackend):
             for i, lbl in enumerate(request.labels)
         }
         validity_mask = {
-            lbl: bool(request.validity_mask[frame_idx, i])
+            lbl: True if request.validity_mask[frame_idx, i] else False
             for i, lbl in enumerate(request.labels)
         }
 
@@ -401,7 +401,7 @@ class PinkTrajectoryService(ConstrainedIKBackend):
             lbl: request.marker_targets[f, i] for i, lbl in enumerate(request.labels)
         }
         validity_mask = {
-            lbl: bool(request.validity_mask[f, i])
+            lbl: True if request.validity_mask[f, i] else False
             for i, lbl in enumerate(request.labels)
         }
         return FrameTaskRequest(
