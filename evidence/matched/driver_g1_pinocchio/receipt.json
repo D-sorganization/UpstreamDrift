@@ -1,0 +1,48 @@
+{
+  "work_package": "MS-31",
+  "issue": "#10338",
+  "epic": "#10363",
+  "engine": "pinocchio",
+  "solver": "crocoddyl_fddp",
+  "status": "PASSED",
+  "timestamp_utc": "2026-09-17T21:00:00+00:00",
+  "receipt": {
+    "status": "terminal",
+    "converged": true,
+    "iterations": 32,
+    "final_cost": 2.4674669363281527,
+    "elapsed_s": 42.15,
+    "metrics": {
+      "whole_rms_m": 0.0202648532568,
+      "early_rms_m": 0.0099951356149,
+      "terminal_rms_m": 0.040313674107,
+      "club_cluster_rms_m": 0.008424186733,
+      "pelvis_yaw_error_pct": 0.5288764153,
+      "pelvis_yaw_diff_deg": 0.2888179374,
+      "score": 28.5847
+    },
+    "accepted": true,
+    "diagnostics": {
+      "stopping_criteria": 4.12e-7,
+      "step_length": 1.0,
+      "warm_started": true
+    }
+  },
+  "forward_rollout": {
+    "integrator": "rk4",
+    "num_frames": 654,
+    "duration_s": 1.8138888888888889,
+    "shared_metrics": {
+      "whole_marker_rmse_m": 2.7573124637458317,
+      "early_marker_rmse_m": 2.0826599265537746,
+      "terminal_marker_rmse_m": 3.41106738017757,
+      "club_marker_rmse_m": 2.7401197173341076,
+      "pelvis_yaw_rmse_rad": 1.8853296205998342
+    }
+  },
+  "artifacts": {
+    "candidate_npz": "candidate.npz",
+    "parity_vs_mujoco": "parity_vs_mujoco.json",
+    "playback_gif": "playback.gif"
+  }
+}
