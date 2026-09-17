@@ -6,6 +6,8 @@ cache refresh, dropout recovery, cancellation, and rate audits.
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -58,6 +60,36 @@ def _make_request(frames: int = 3, dt: float = 1.0 / 360.0) -> IKTrajectoryReque
     )
 
 
+class _MockPlant:
+    """Mock kinematic plant providing frame poses and weld closure residuals for tests."""
+
+    def __init__(self, spec: dict[str, Any] | None = None) -> None:
+        self.spec = spec or _make_spec()
+        self.nq = 41
+        self.nv = 41
+
+    def frame_poses(self, coords: dict[str, float]) -> dict[str, np.ndarray]:
+        # Return frame positions matching origin
+        return {
+            "HeadTop": np.array([0.0, 0.0, 0.1]),
+            "WaistLeft": np.array([-0.1, 0.0, 0.0]),
+        }
+
+    def closure_residuals(self, coords: dict[str, float]) -> tuple[np.ndarray, None]:
+        # Zero translation and rotation closure residuals
+        return np.zeros(6, dtype=np.float64), None
+
+
+def _make_mock_service(spec: dict[str, Any] | None = None) -> PinkTrajectoryService:
+    """Construct PinkTrajectoryService equipped with a mock plant and mock QP step."""
+    s = spec or _make_spec()
+    plant = _MockPlant(s)
+    service = PinkTrajectoryService(s, model=plant)
+    # Mock QP step to simulate successful integration step
+    service._execute_qp_step = lambda q, bundle, dt, options: (q.copy(), True, None)  # type: ignore[method-assign]
+    return service
+
+
 def test_service_implements_protocol() -> None:
     spec = _make_spec()
     service = PinkTrajectoryService(spec)
@@ -67,7 +99,7 @@ def test_service_implements_protocol() -> None:
 
 def test_solve_trajectory_basic_execution() -> None:
     spec = _make_spec()
-    service = PinkTrajectoryService(spec)
+    service = _make_mock_service(spec)
     req = _make_request(frames=4)
     opts = IKOptions(step_mode="physical", max_iterations=5)
 
@@ -84,7 +116,7 @@ def test_solve_trajectory_basic_execution() -> None:
 
 def test_cancellation_at_frame_boundary() -> None:
     spec = _make_spec()
-    service = PinkTrajectoryService(spec)
+    service = _make_mock_service(spec)
 
     # Cancel at frame 2
     call_count = 0
@@ -114,7 +146,7 @@ def test_cancellation_at_frame_boundary() -> None:
 
 def test_timing_scale_velocity_audit() -> None:
     spec = _make_spec()
-    service = PinkTrajectoryService(spec)
+    service = _make_mock_service(spec)
 
     req1 = _make_request(frames=2, dt=1.0 / 360.0)
     req2 = _make_request(frames=2, dt=1.0 / 180.0)
@@ -129,8 +161,8 @@ def test_timing_scale_velocity_audit() -> None:
 
 def test_cache_refresh_matches_fresh_solver() -> None:
     spec = _make_spec()
-    service1 = PinkTrajectoryService(spec)
-    service2 = PinkTrajectoryService(spec)
+    service1 = _make_mock_service(spec)
+    service2 = _make_mock_service(spec)
 
     req = _make_request(frames=2)
     opts = IKOptions(step_mode="physical", max_iterations=2)
@@ -155,10 +187,13 @@ def test_cache_refresh_matches_fresh_solver() -> None:
 
 def test_deterministic_dropout_recovery() -> None:
     spec = _make_spec()
-    service = PinkTrajectoryService(spec)
+    service = _make_mock_service(spec)
 
     frames = 5
+    # Provide targets matching mock plant frame_poses
     targets = np.zeros((frames, 2, 3), dtype=np.float64)
+    targets[:, 0, :] = [0.0, 0.0, 0.1]
+    targets[:, 1, :] = [-0.1, 0.0, 0.0]
     validity = np.ones((frames, 2), dtype=bool)
     # Frames 2 and 3 drop out
     validity[2, :] = False
@@ -185,7 +220,7 @@ def test_deterministic_dropout_recovery() -> None:
 
 def test_post_smoothing_constraint_audit() -> None:
     spec = _make_spec()
-    service = PinkTrajectoryService(spec)
+    service = _make_mock_service(spec)
     req = _make_request(frames=3)
 
     # Given an arbitrary smoothed trajectory
@@ -197,3 +232,126 @@ def test_post_smoothing_constraint_audit() -> None:
     assert audit_res.configurations.shape == (3, 41)
     assert len(audit_res.frame_residuals) == 3
     assert len(audit_res.rate_audits) == 3
+
+
+def test_missing_runtime_fails_closed() -> None:
+    """Missing native Pink/Pinocchio stack or plant model must fail closed."""
+    spec = _make_spec()
+    # No plant passed and native stack unavailable in standard python env
+    service = PinkTrajectoryService(spec)
+    req = _make_request(frames=2)
+    opts = IKOptions()
+
+    res = service.solve_trajectory(req, opts)
+    assert not res.passed
+    assert not any(res.frame_success)
+    assert res.first_failed_frame == 0
+    assert any(
+        "Native Pink/Pinocchio stack or plant model is unavailable" in r
+        for r in res.failure_reasons
+    )
+
+
+def test_sentinel_exception_reaches_failure_reason() -> None:
+    """Sentinel runtime exception in QP solve must be recorded in failure_reasons."""
+    spec = _make_spec()
+    plant = _MockPlant(spec)
+    service = PinkTrajectoryService(spec, model=plant)
+
+    def failing_qp_step(
+        q: np.ndarray, bundle: Any, dt: float, options: IKOptions
+    ) -> tuple[np.ndarray, bool, str | None]:
+        return q.copy(), False, "PinkSolverError: QP problem infeasible at frame step"
+
+    service._execute_qp_step = failing_qp_step  # type: ignore[method-assign]
+    req = _make_request(frames=2)
+    res = service.solve_trajectory(req, IKOptions())
+
+    assert not res.passed
+    assert not res.frame_success[0]
+    assert res.first_failed_frame == 0
+    assert any(
+        "PinkSolverError: QP problem infeasible" in r for r in res.failure_reasons
+    )
+
+
+def test_unevaluated_constraints_fail_qualification() -> None:
+    """Unevaluated weld errors must be NaN and cause frame_success to fail."""
+    spec = _make_spec()
+
+    # Construct service with mock plant that does NOT provide closure_residuals
+    class IncompletePlant:
+        def frame_poses(self, coords: dict[str, float]) -> dict[str, np.ndarray]:
+            return {
+                "HeadTop": np.array([0.0, 0.0, 0.1]),
+                "WaistLeft": np.array([-0.1, 0.0, 0.0]),
+            }
+
+    service = PinkTrajectoryService(spec, model=IncompletePlant())
+    service._execute_qp_step = lambda q, b, dt, opt: (q.copy(), True, None)  # type: ignore[method-assign]
+
+    req = _make_request(frames=2)
+    res = service.solve_trajectory(req, IKOptions())
+
+    assert not res.passed
+    assert not res.frame_success[0]
+    # Verify weld translation error is NaN
+    assert np.isnan(res.frame_residuals[0].weld_translation_error_m)
+    assert any(
+        "Weld translation error nan exceeds tolerance" in r for r in res.failure_reasons
+    )
+
+
+def test_rate_limit_violation_fails_qualification() -> None:
+    """Exceeding coordinate rate limits must fail overall result passed even if frames converge."""
+    spec = _make_spec()
+    # Velocity limit is 10.0 rad/s
+    service = _make_mock_service(spec)
+    req = _make_request(frames=2, dt=1.0 / 360.0)  # dt = 0.002777s
+
+    # Simulate QP step producing a large coordinate jump: delta_q = 1.0 in dt = 1/360 => velocity = 360 rad/s
+    def jump_qp_step(
+        q: np.ndarray, bundle: Any, dt: float, options: IKOptions
+    ) -> tuple[np.ndarray, bool, str | None]:
+        q_jump = q.copy()
+        q_jump[0] += 1.0  # 360 rad/s > 10 rad/s
+        return q_jump, True, None
+
+    service._execute_qp_step = jump_qp_step  # type: ignore[method-assign]
+    res = service.solve_trajectory(req, IKOptions())
+
+    assert not res.passed
+    assert any("Joint velocity limits exceeded" in r for r in res.failure_reasons)
+    assert len(res.rate_audits[1].exceeded_joints) > 0
+
+
+def test_weld_tolerance_violation_fails_frame() -> None:
+    """Weld error exceeding named tolerance must fail frame_success."""
+    spec = _make_spec()
+
+    class HighWeldResidualPlant:
+        def frame_poses(self, coords: dict[str, float]) -> dict[str, np.ndarray]:
+            return {
+                "HeadTop": np.array([0.0, 0.0, 0.1]),
+                "WaistLeft": np.array([-0.1, 0.0, 0.0]),
+            }
+
+        def closure_residuals(
+            self, coords: dict[str, float]
+        ) -> tuple[np.ndarray, None]:
+            # 0.05m weld translation error > default 0.005m tolerance
+            return np.array([0.05, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64), None
+
+    service = PinkTrajectoryService(spec, model=HighWeldResidualPlant())
+    service._execute_qp_step = lambda q, b, dt, opt: (q.copy(), True, None)  # type: ignore[method-assign]
+
+    req = _make_request(frames=2)
+    opts = IKOptions(weld_translation_tolerance_m=0.005)
+    res = service.solve_trajectory(req, opts)
+
+    assert not res.passed
+    assert not res.frame_success[0]
+    assert any(
+        "Weld translation error" in r and "exceeds tolerance" in r
+        for r in res.failure_reasons
+    )
