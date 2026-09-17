@@ -169,7 +169,11 @@ def to_post_impact_state(
 
     ball_ke = 0.5 * state.ball.mass_kg * result.ball_speed_m_s**2
     ball_rot_ke = (
-        0.5 * state.ball.moi_kg_m2 * float(np.linalg.norm(ball_angular_velocity)) ** 2
+        0.5
+        * state.ball.moi_kg_m2
+        * float(
+            np.vdot(ball_angular_velocity, ball_angular_velocity)
+        )  # ⚡ Bolt: np.vdot avoids np.linalg.norm overhead
     )
 
     return PostImpactState(
