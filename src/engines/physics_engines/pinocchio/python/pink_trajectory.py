@@ -393,6 +393,51 @@ class PinkTrajectoryService(ConstrainedIKBackend):
         config_state = ConfigurationState(q=q)
         return self.tasks_builder.audit(config_state, request=task_req)
 
+    @staticmethod
+    def _build_frame_task_request(
+        request: IKTrajectoryRequest, f: int
+    ) -> FrameTaskRequest:
+        marker_targets = {
+            lbl: request.marker_targets[f, i] for i, lbl in enumerate(request.labels)
+        }
+        validity_mask = {
+            lbl: bool(request.validity_mask[f, i])
+            for i, lbl in enumerate(request.labels)
+        }
+        return FrameTaskRequest(
+            marker_targets=marker_targets,
+            validity_mask=validity_mask,
+            posture_target=request.posture_target,
+            policy=request.policy,
+        )
+
+    @staticmethod
+    def _is_frame_audit_successful(
+        residuals: FrameResiduals, audit: FrameRateAudit, opts: IKOptions
+    ) -> bool:
+        has_nan_marker = any(
+            not np.isfinite(err) or err > opts.marker_tolerance_m
+            for err in residuals.marker_errors_m.values()
+        )
+        weld_trans_fail = (
+            not np.isfinite(residuals.weld_translation_error_m)
+            or residuals.weld_translation_error_m > opts.weld_translation_tolerance_m
+        )
+        weld_rot_fail = (
+            not np.isfinite(residuals.weld_rotation_error_rad)
+            or residuals.weld_rotation_error_rad > opts.weld_rotation_tolerance_rad
+        )
+        bounds_fail = len(residuals.bound_violations) > 0
+        rates_fail = len(audit.exceeded_joints) > 0
+
+        return not (
+            has_nan_marker
+            or weld_trans_fail
+            or weld_rot_fail
+            or bounds_fail
+            or rates_fail
+        )
+
     def audit_trajectory(
         self,
         trajectory: Array,
@@ -417,21 +462,7 @@ class PinkTrajectoryService(ConstrainedIKBackend):
         for f in range(num_frames):
             t0 = time.perf_counter()
             dt_phys = self._get_physical_dt(request, f, 1.0 / 360.0)
-
-            marker_targets = {
-                lbl: request.marker_targets[f, i]
-                for i, lbl in enumerate(request.labels)
-            }
-            validity_mask = {
-                lbl: bool(request.validity_mask[f, i])
-                for i, lbl in enumerate(request.labels)
-            }
-            task_req = FrameTaskRequest(
-                marker_targets=marker_targets,
-                validity_mask=validity_mask,
-                posture_target=request.posture_target,
-                policy=request.policy,
-            )
+            task_req = self._build_frame_task_request(request, f)
 
             residuals = self._audit_configuration(traj[f], task_req)
             residuals_list.append(residuals)
@@ -446,32 +477,7 @@ class PinkTrajectoryService(ConstrainedIKBackend):
             )
             rate_audits_list.append(audit)
 
-            # Check all conditions for frame success
-            has_nan_marker = any(
-                not np.isfinite(err) or err > opts.marker_tolerance_m
-                for err in residuals.marker_errors_m.values()
-            )
-            weld_trans_fail = (
-                not np.isfinite(residuals.weld_translation_error_m)
-                or residuals.weld_translation_error_m
-                > opts.weld_translation_tolerance_m
-            )
-            weld_rot_fail = (
-                not np.isfinite(residuals.weld_rotation_error_rad)
-                or residuals.weld_rotation_error_rad > opts.weld_rotation_tolerance_rad
-            )
-            bounds_fail = len(residuals.bound_violations) > 0
-            rates_fail = len(audit.exceeded_joints) > 0
-
-            if (
-                has_nan_marker
-                or weld_trans_fail
-                or weld_rot_fail
-                or bounds_fail
-                or rates_fail
-            ):
-                frame_success[f] = False
-
+            frame_success[f] = self._is_frame_audit_successful(residuals, audit, opts)
             timing_list[f] = (time.perf_counter() - t0) * 1000.0
 
         passed = bool(np.all(frame_success))

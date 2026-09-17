@@ -633,15 +633,12 @@ class FullBodyPinkTasks:
             posture_task=posture_task_obj,
         )
 
-    def audit(
+    def _resolve_marker_positions(
         self,
+        q: np.ndarray,
         configuration: ConfigurationState,
-        request: FrameTaskRequest | None = None,
-    ) -> FrameResiduals:
-        """Audit post-solve residuals, bound violations, and weld closure errors."""
-        q = np.asarray(configuration.q, dtype=np.float64)
-
-        # If marker positions were not supplied but we have Pinocchio model
+        request: FrameTaskRequest | None,
+    ) -> dict[str, np.ndarray] | None:
         marker_positions = configuration.marker_positions
         if (
             marker_positions is None
@@ -680,6 +677,49 @@ class FullBodyPinkTasks:
                     }
                 except Exception:
                     marker_positions = None
+        return marker_positions
+
+    def _compute_weld_residuals(
+        self,
+        q: np.ndarray,
+        configuration: ConfigurationState,
+        request: FrameTaskRequest | None,
+    ) -> tuple[float, float]:
+        enforce_weld = True
+        if request is not None and request.policy is not None:
+            enforce_weld = request.policy.enforce_weld
+
+        if not enforce_weld:
+            return 0.0, 0.0
+
+        weld_error = configuration.weld_pose_error
+        if weld_error is None and enforce_weld:
+            model_target = self._plant if self._plant is not None else self._model
+            if model_target is not None and hasattr(model_target, "closure_residuals"):
+                try:
+                    coords = {
+                        name: float(q[self._coordinates[name]])
+                        for name in self.coordinate_order
+                    }
+                    weld_error, _ = model_target.closure_residuals(coords)
+                except Exception:
+                    weld_error = None
+
+        if weld_error is not None:
+            _require_weld_log_chart(weld_error)
+            return float(np.linalg.norm(weld_error[:3])), float(
+                np.linalg.norm(weld_error[3:])
+            )
+        return float("nan"), float("nan")
+
+    def audit(
+        self,
+        configuration: ConfigurationState,
+        request: FrameTaskRequest | None = None,
+    ) -> FrameResiduals:
+        """Audit post-solve residuals, bound violations, and weld closure errors."""
+        q = np.asarray(configuration.q, dtype=np.float64)
+        marker_positions = self._resolve_marker_positions(q, configuration, request)
 
         # Marker residuals: unevaluated or missing frame must yield NaN, never zero
         marker_errors: dict[str, float] = {}
@@ -701,34 +741,9 @@ class FullBodyPinkTasks:
                         marker_errors[name] = float("nan")
 
         # Weld closure residuals: unevaluated must yield NaN, never zero
-        enforce_weld = True
-        if request is not None and request.policy is not None:
-            enforce_weld = request.policy.enforce_weld
-
-        if not enforce_weld:
-            weld_translation_error = 0.0
-            weld_rotation_error = 0.0
-        else:
-            weld_translation_error = float("nan")
-            weld_rotation_error = float("nan")
-
-        weld_error = configuration.weld_pose_error
-        if weld_error is None and enforce_weld:
-            model_target = self._plant if self._plant is not None else self._model
-            if model_target is not None and hasattr(model_target, "closure_residuals"):
-                try:
-                    coords = {
-                        name: float(q[self._coordinates[name]])
-                        for name in self.coordinate_order
-                    }
-                    weld_error, _ = model_target.closure_residuals(coords)
-                except Exception:
-                    weld_error = None
-
-        if weld_error is not None:
-            _require_weld_log_chart(weld_error)
-            weld_translation_error = float(np.linalg.norm(weld_error[:3]))
-            weld_rotation_error = float(np.linalg.norm(weld_error[3:]))
+        weld_translation_error, weld_rotation_error = self._compute_weld_residuals(
+            q, configuration, request
+        )
 
         # Bound violations
         bound_violations: dict[str, float] = {}
