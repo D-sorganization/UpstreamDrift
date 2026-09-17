@@ -86,6 +86,8 @@ class SolverSettings:
     armature_kg_m2: float = 5e-3
     warm_start_ridge: float = 1e-2
     node_integrator: str = "rk45"  # "rk45" | "implicit_euler"
+    node_substeps: int = 1
+    rk45_rtol: float = 1e-6
     tracking_kp: float = 400.0
     tracking_kd: float = 40.0
     continuation_s: tuple[float, ...] = ()
@@ -499,6 +501,8 @@ def run_fit(
             effort_bounds,
             dt,
             node_integrator=settings.node_integrator,
+            substeps=settings.node_substeps,
+            rtol=settings.rk45_rtol,
         )
         problem = crocoddyl.ShootingProblem(xs_prev[0], running, terminal)
         fddp = crocoddyl.SolverBoxFDDP(problem)
@@ -551,6 +555,8 @@ def run_fit(
         "solver": "crocoddyl.SolverBoxFDDP",
         "integrator": settings.integrator,
         "node_integrator": settings.node_integrator,
+        "node_substeps": settings.node_substeps,
+        "rk45_rtol": settings.rk45_rtol,
         "replay_integrator": settings.replay_integrator,
         "converged": converged,
         "iterations": int(fddp.iter),
@@ -727,6 +733,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--node-integrator", choices=("rk45", "implicit_euler"), default="rk45"
     )
+    parser.add_argument("--node-substeps", type=int, default=1)
+    parser.add_argument("--rk45-rtol", type=float, default=1e-6)
     parser.add_argument("--tracking-kp", type=float, default=400.0)
     parser.add_argument("--tracking-kd", type=float, default=40.0)
     parser.add_argument(
@@ -770,6 +778,8 @@ def main(argv: list[str] | None = None) -> int:
         verbose=not args.quiet,
         armature_kg_m2=args.armature,
         node_integrator=args.node_integrator,
+        node_substeps=args.node_substeps,
+        rk45_rtol=args.rk45_rtol,
         tracking_kp=args.tracking_kp,
         tracking_kd=args.tracking_kd,
         continuation_s=tuple(float(t) for t in args.continuation.split(",") if t),
