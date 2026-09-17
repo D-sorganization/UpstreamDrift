@@ -231,6 +231,7 @@ class IKReportInputs:
     offsets: Mapping[str, tuple[str, Sequence[float]]] | None = None
     errors: np.ndarray | None = None
     ref_errors: np.ndarray | None = None
+    constrained_ik: dict[str, Any] | None = None
 
 
 def _build_reference_stage_report(
@@ -338,7 +339,7 @@ def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
         [min(kin.sphere_heights(q, lane.ground).values()) for q in inputs.q_ref]
     )
 
-    return {
+    report = {
         "frames": lane.frames,
         "marker_rms_m": float(np.sqrt(np.mean(errors[lane.valid] ** 2))),
         "segment_rms_m": segment_rms(inputs.labels, errors, lane.valid),
@@ -375,3 +376,6 @@ def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
             for name in kin.coordinate_order[adapter.upper_body_coordinates :]
         },
     }
+    if inputs.constrained_ik is not None:
+        report["constrained_ik"] = inputs.constrained_ik
+    return report

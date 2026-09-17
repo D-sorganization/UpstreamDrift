@@ -19,6 +19,7 @@ from .receipt_components import (
     ClavicleLinkDeg,
     ClosureFitReport,
     ClubReceipt,
+    ConstrainedIkReceipt,
     GroundReceipt,
     HipCalibrationReceipt,
     IkReceipt,
@@ -55,6 +56,7 @@ __all__ = [
     "ClavicleLinkDeg",
     "ClosureFitReport",
     "ClubReceipt",
+    "ConstrainedIkReceipt",
     "ContactParametersReceipt",
     "ControllerReceipt",
     "DynamicsReceipt",
@@ -91,6 +93,11 @@ class Receipt(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
+    backend: str = Field(
+        "mujoco",
+        description="Kinematic backend engine used for tracking (mujoco or pink)",
+        json_schema_extra={"unit": "string", "stage": "metadata"},
+    )
     base_spec_sha256: str = Field(
         ...,
         description="SHA256 hash of the initial input model specification document",
