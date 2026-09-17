@@ -4,14 +4,13 @@
 
 - **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)
   and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
-- **Baseline:** `33ffde23f`; earlier provider/immutability defects are repaired.
-  Real decoding, reference disks and regenerated evidence are partial progress.
-- **Next:** #10231 source/physical-time integrity and incremental decode; #10233
-  revision integrity/persistence; #10232 articulated geometry and clipped rendering.
-- **Product:** No Shadow Tracker launcher application or complete fitter yet.
-  Ship an honest evidence-review journey while physical qualification proceeds.
-- **Completion:** Keep all ST-07–ST-12 fitting, uncertainty, real/archive, UI/export
-  and release gates. Review delivery #10230 does not qualify the product.
+- **Baseline:** `0ec64e45f`; timing #10253 merged. Restart repair marks estimated
+  timestamps inexact; 195 focused/model-probe tests pass.
+- **Next:** Renderer owner finishes #10264 import failure and merge conflicts;
+  independent agents claim #10233 revision persistence. #10273 tracks remaining
+  native PTS and stored clock-authority gaps. Preserve existing renderer edits.
+- **Product Milestone:** Import, manual mask review, save/reopen in the launcher
+  under #10134; no claim of qualified fitting or completed ST-07–ST-12.
 
 ## Current State (2026-09-15, Supersedes the Sections Below)
 

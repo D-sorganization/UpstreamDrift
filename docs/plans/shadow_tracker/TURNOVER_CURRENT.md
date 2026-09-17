@@ -1,6 +1,82 @@
 # Shadow Tracker Current Review and Turnover
 
-## Reviewed Baseline and Evidence
+## Restart Review — 2026-09-16
+
+Reviewed main `0ec64e45f`, including timing PR #10253 (`bd2e86b7d`).
+**The immediate delivery blocker is renderer PR #10264**, not a missing plan.
+The project remains partial infrastructure: no usable Shadow Tracker launcher
+application or qualified silhouette-driven forward fitter exists on this baseline.
+
+### Verified Progress and Remaining Gaps
+
+- #10253 defaults physical time to unknown, exposes timing capability metadata,
+  hashes decoder/pixel-format provenance, and decodes incrementally. Do not redo
+  those repairs or claim the old eager whole-file constructor still exists.
+- A remaining defect labeled estimated-CFR timestamps exact whenever average FPS
+  was positive. This restart patch fixes that flag, with a real-video regression
+  observed failing before the fix and passing afterward.
+- Native container PTS are still not extracted. Existing VFR tests inject ticks
+  into a CFR clip. Timestamp authority is also lost in stored FrameIdentity
+  records. New follow-up **#10273** defines real VFR and persistence acceptance.
+- #10264 is open, has merge conflicts, and failed `unit-test-gate` at
+  `3bc57b84baff9e865c215b8f83aec203e17cbb36`. The concrete collection failure is
+  `ModuleNotFoundError: motion_matching.diagnostics` in
+  `test_silhouette_projection_and_losses.py:18`. CI run `35153532669`, job
+  `104988849182`, reported 16,572 passed, 399 skipped and one collection error.
+  Passing smaller test jobs do not override this failure.
+- The original checkout already has uncommitted qualified-import corrections
+  in `articulated_renderer.py` and its projection test. Preserve and inspect
+  those changes with the owning agent; do not overwrite or duplicate its PR.
+- #10233 remains open: revision collisions, parent ownership and durable mask
+  history still need implementation. Initialization still needs no-evidence
+  rejection, club-aware ranking and explicit velocity assumptions.
+
+### Next Agent Actions and Exit Criteria
+
+1. **Renderer owner:** resume #10264, incorporate/verify the existing import
+   corrections, merge current main without losing either SPEC row or handoff,
+   and regenerate inventories. Run both the focused renderer suite and the
+   complete unit collection environment that failed. Require green required
+   checks at the exact new SHA before merging. Recheck state units, camera crop,
+   near-plane/offscreen clipping and body/club motion; passing mask-change tests
+   alone does not qualify geometry or dynamics.
+2. **Next independent implementation: #10233.** Claim it before editing. Deliver
+   collision-safe and idempotent revision registration first, with red/green
+   tests proving failed operations leave every index unchanged. Then persist
+   full observation identity, parent lineage, masks and current selection with
+   atomic save/reopen and corruption tests. Keep these as bounded reviewable
+   changes, reuse repository storage and avoid touching renderer files.
+3. **Archive evidence: #10273.** Implement a genuine source-PTS provider and
+   versioned persisted clock authority. Do not infer authoritative timestamps
+   from FPS or accept injected ticks as proof of native VFR extraction. Unknown
+   physical time/scale continues to block qualified SI kinetics.
+4. **Visible product milestone: #10134.** After revision persistence, deliver
+   import -> inspect frames -> edit body/club masks -> save -> reopen through
+   one service and a real launcher adapter/entry point/manifest. Automated
+   inference and fitting must report unavailable until their gates pass. Do
+   not postpone this useful evidence-review workflow until neural inference.
+5. Then finish initialization, real continuous forward rollout (#10130), control
+   optimization (#10131), ambiguity (#10132), modern/archive validation (#10133)
+   and release (#10135). Reuse current motion-matching providers after checking
+   their exact capability/qualification receipts. Another subsystem's passing
+   tour-average fit does not qualify Shadow Tracker's video observations.
+
+### Restart Validation Receipt
+
+Python 3.13.5 on Windows, Tools pin
+`1ac89c18e6280752d949e520c2143d2fb584d31e`. Selected Shadow Tracker unit tests plus
+`tests/integration/shadow_tracker/test_model_probe.py`: **195 tests, zero
+failures/errors/skips**, JUnit `shadow-restart-review.xml` in the local temporary
+directory. This receipt covers main plus the estimated-time flag repair, not
+unmerged renderer #10264. Red test:
+`test_unavailable_or_unsupported_timing_mode` failed on `True is False` before
+implementation. No real archive or full-product qualification is claimed.
+
+## Historical Review Before the Restart
+
+The following baseline is retained for provenance; the restart review above supersedes its next-task ordering.
+
+### Reviewed Baseline and Evidence
 
 Reviewed main `33ffde23f` after #10205, #10212, #10214 and calibration regeneration
 #10177. Review delivery is tracked by #10230. This is the current pickup document;

@@ -1,5 +1,15 @@
 # Lower-Cost Agent Dispatch Queue
 
+## Restart Queue — 2026-09-16
+
+Read [Current Turnover](TURNOVER_CURRENT.md) first. #10231 is merged through
+#10253; do not repeat its completed work. Renderer #10232 has an existing,
+conflicted PR #10264 with a known import collection failure; its owner resumes
+that PR. The next independent small-agent task is #10233 revision integrity and
+persistence. #10273 tracks native PTS and stored timing authority. Then deliver
+#10134's real manual-evidence launcher journey. Older queues below are historical
+where their ordering conflicts with this section.
+
 ## Ready to Assign
 
 Planning PR #10136 is merged. The image-only contract decisions and measured
