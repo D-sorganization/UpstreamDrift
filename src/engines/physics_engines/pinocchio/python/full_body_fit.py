@@ -30,6 +30,9 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.pinocchio.python.crocoddyl_action import (
+    make_action_models,
+)
 from src.engines.physics_engines.pinocchio.python.crocoddyl_problem import (
     FitHorizon,
     FitWeights,
@@ -39,6 +42,7 @@ from src.engines.physics_engines.pinocchio.python.crocoddyl_problem import (
     coordinate_bounds,
     finite_difference_rates,
     least_squares_controls,
+    per_coordinate_effort_bounds,
     range_barrier,
 )
 from src.engines.physics_engines.pinocchio.python.marker_kinematics import (
@@ -73,9 +77,13 @@ class SolverSettings:
     max_iterations: int = 200
     stop_tolerance: float = 1e-6
     effort_bound_n_m: float = 600.0
-    integrator: str = "euler"  # "euler" | "rk4"
+    integrator: str = "linear_implicit_euler"
+    replay_integrator: str = "rk45"  # "rk45" | "rk4"
+    replay_substeps: int = 12
     initial_regularisation: float = 1e-2
     verbose: bool = True
+    armature_kg_m2: float = 5e-3
+    warm_start_ridge: float = 1e-2
 
 
 @dataclass(frozen=True)
@@ -168,6 +176,19 @@ class _PlantContext:
         self.lower, self.upper = coordinate_bounds(inputs.document, self.map.names)
         self.actuated = actuated_mask(self.map.names)
         self.n = self.map.n
+        self.armature_kg_m2 = 0.0
+
+    def apply_armature(self, armature_kg_m2: float) -> None:
+        """Add rotor inertia to every non-root dof (near-massless toe and gimbal dofs).
+
+        Recorded in the receipt: a parity replay in another engine must apply
+        the same armature or the candidate is not the same plant.
+        """
+        require(armature_kg_m2 >= 0.0, "armature must be nonnegative", armature_kg_m2)
+        armature = np.zeros(self.plant.model.nv)
+        armature[self.map.v_index[self.actuated]] = armature_kg_m2
+        self.plant.model.armature = armature
+        self.armature_kg_m2 = float(armature_kg_m2)
 
     def acceleration(self, q: Array, v: Array, tau: Array) -> Array:
         result = self.plant.accelerations(
@@ -205,107 +226,6 @@ class _PlantContext:
         return tau
 
 
-def _make_dam_class(crocoddyl: Any) -> type:
-    class MarkerTrackingDAM(crocoddyl.DifferentialActionModelAbstract):  # type: ignore[misc]
-        """Differential action model: plant dynamics + Gauss-Newton marker cost."""
-
-        def __init__(
-            self,
-            ctx: _PlantContext,
-            target: Array,
-            valid: NDArray[np.bool_],
-            marker_weights: Array,
-            weights: FitWeights,
-            *,
-            terminal: bool,
-            effort_bound: float,
-        ) -> None:
-            self.ctx = ctx
-            self.n = ctx.n
-            nu = 0 if terminal else int(ctx.actuated.sum())
-            crocoddyl.DifferentialActionModelAbstract.__init__(
-                self, crocoddyl.StateVector(2 * ctx.n), nu, 1
-            )
-            self.terminal = terminal
-            self.target = target
-            self.rows = np.flatnonzero(valid)
-            self.marker_w = (
-                weights.terminal_marker if terminal else weights.marker
-            ) * marker_weights[self.rows]
-            self.weights = weights
-            if nu:
-                self.u_lb = -effort_bound * np.ones(nu)
-                self.u_ub = effort_bound * np.ones(nu)
-
-        def _cost_terms(
-            self, q: Array, v: Array, u: Array | None, with_derivatives: bool
-        ) -> tuple[float, dict[str, Array]]:
-            ctx = self.ctx
-            if with_derivatives:
-                positions, jac = ctx.markers_and_jacobians(q)
-            else:
-                positions, jac = ctx.markers(q), None
-            error = positions[self.rows] - self.target[self.rows]
-            cost = 0.5 * float(np.sum(self.marker_w[:, None] * error**2))
-            barrier_cost, barrier_grad, barrier_hess = range_barrier(
-                q, ctx.lower, ctx.upper, self.weights.range_barrier
-            )
-            cost += barrier_cost + 0.5 * self.weights.velocity * float(v @ v)
-            if u is not None and u.size:
-                cost += 0.5 * self.weights.effort * float(u @ u)
-            terms: dict[str, Array] = {}
-            if with_derivatives and jac is not None:
-                weighted = self.marker_w[:, None] * error  # (m, 3)
-                jac_rows = jac[self.rows]  # (m, 3, n)
-                terms["Lq"] = np.einsum("mij,mi->j", jac_rows, weighted) + barrier_grad
-                terms["Lqq"] = np.einsum(
-                    "mij,mik->jk", jac_rows * self.marker_w[:, None, None], jac_rows
-                ) + np.diag(barrier_hess)
-            return cost, terms
-
-        def calc(self, data: Any, x: Array, u: Array | None = None) -> None:
-            q, v = x[: self.n], x[self.n :]
-            u_arr = None if (u is None or self.terminal) else np.asarray(u, dtype=float)
-            tau = (
-                self.ctx.effort_vector(u_arr) if u_arr is not None else np.zeros(self.n)
-            )
-            data.xout[:] = self.ctx.acceleration(q, v, tau)
-            data.cost, _ = self._cost_terms(q, v, u_arr, with_derivatives=False)
-
-        def calcDiff(self, data: Any, x: Array, u: Array | None = None) -> None:
-            q, v = x[: self.n], x[self.n :]
-            u_arr = None if (u is None or self.terminal) else np.asarray(u, dtype=float)
-            tau = (
-                self.ctx.effort_vector(u_arr) if u_arr is not None else np.zeros(self.n)
-            )
-            der = self.ctx.derivatives(q, v, tau)
-            data.Fx[:, : self.n] = der.dq
-            data.Fx[:, self.n :] = der.dv
-            if u_arr is not None:
-                data.Fu[:, :] = der.deffort[:, self.ctx.actuated]
-            _, terms = self._cost_terms(q, v, u_arr, with_derivatives=True)
-            data.Lx[: self.n] = terms["Lq"]
-            data.Lx[self.n :] = self.weights.velocity * v
-            data.Lxx[:, :] = 0.0
-            data.Lxx[: self.n, : self.n] = terms["Lqq"]
-            data.Lxx[self.n :, self.n :] = self.weights.velocity * np.eye(self.n)
-            if u_arr is not None:
-                data.Lu[:] = self.weights.effort * u_arr
-                data.Luu[:, :] = self.weights.effort * np.eye(u_arr.size)
-                data.Lxu[:, :] = 0.0
-
-        def createData(self) -> Any:
-            return crocoddyl.DifferentialActionDataAbstract(self)
-
-    return MarkerTrackingDAM
-
-
-def _integrate(crocoddyl: Any, dam: Any, dt: float, integrator: str) -> Any:
-    if integrator == "rk4":
-        return crocoddyl.IntegratedActionModelRK(dam, crocoddyl.RKType.four, dt)
-    return crocoddyl.IntegratedActionModelEuler(dam, dt)
-
-
 def rk4_replay(
     ctx: _PlantContext, q0: Array, v0: Array, us: Array, dt: float, *, substeps: int = 1
 ) -> tuple[Array, Array]:
@@ -332,6 +252,51 @@ def rk4_replay(
         q[k + 1], v[k + 1] = qk, vk
         if not np.isfinite(qk).all():
             raise FloatingPointError(f"replay diverged at node {k + 1}")
+    return q, v
+
+
+def rk45_replay(
+    ctx: _PlantContext,
+    q0: Array,
+    v0: Array,
+    us: Array,
+    dt: float,
+    *,
+    rtol: float = 1e-6,
+    atol: float = 1e-8,
+) -> tuple[Array, Array]:
+    """Zero-order-hold adaptive RK45 replay (the shared lane's integrator) at the nodes.
+
+    The shared contact law is stiff in velocity, so a fixed-step explicit
+    integrator at the capture rate diverges; adaptive RK45 takes the small
+    steps it needs and reports the state exactly at each node.
+    """
+    from scipy.integrate import solve_ivp
+
+    n_nodes = us.shape[0] + 1
+    q = np.empty((n_nodes, ctx.n))
+    v = np.empty((n_nodes, ctx.n))
+    q[0], v[0] = q0, v0
+    n = ctx.n
+    for k in range(us.shape[0]):
+        tau = ctx.effort_vector(us[k])
+
+        def rhs(_t: float, y: Array, tau: Array = tau) -> Array:
+            return np.concatenate([y[n:], ctx.acceleration(y[:n], y[n:], tau)])
+
+        sol = solve_ivp(
+            rhs,
+            (0.0, dt),
+            np.concatenate([q[k], v[k]]),
+            method="RK45",
+            rtol=rtol,
+            atol=atol,
+        )
+        if not sol.success or not np.isfinite(sol.y[:, -1]).all():
+            raise FloatingPointError(
+                f"RK45 replay diverged at node {k + 1}: {sol.message}"
+            )
+        q[k + 1], v[k + 1] = sol.y[:n, -1], sol.y[n:, -1]
     return q, v
 
 
@@ -436,6 +401,10 @@ def run_fit(
     out_dir.mkdir(parents=True, exist_ok=True)
     t_wall = time.perf_counter()
     ctx = _PlantContext(inputs)
+    ctx.apply_armature(settings.armature_kg_m2)
+    effort_bounds = per_coordinate_effort_bounds(
+        ctx.map.names, ctx.actuated, settings.effort_bound_n_m
+    )
     targets = _native_targets(inputs)
     dt = inputs.horizon.dt_s
     n_nodes = targets.targets.shape[0]
@@ -462,10 +431,14 @@ def run_fit(
         a_zero = ctx.acceleration(q_smooth[k], v_ik[k], np.zeros(ctx.n))
         us0[k] = np.clip(
             least_squares_controls(
-                a_ik[k], a_zero, np.asarray(der.deffort), ctx.actuated
+                a_ik[k],
+                a_zero,
+                np.asarray(der.deffort),
+                ctx.actuated,
+                ridge=settings.warm_start_ridge,
             ),
-            -settings.effort_bound_n_m,
-            settings.effort_bound_n_m,
+            -effort_bounds,
+            effort_bounds,
         )
     xs0 = [np.concatenate([q_smooth[k], v_ik[k]]) for k in range(n_nodes)]
     ik_summary = {
@@ -485,30 +458,10 @@ def run_fit(
         ik_rms_m=ik_rms,
     )
 
-    # --- Crocoddyl problem --------------------------------------------------------------
-    DAM = _make_dam_class(crocoddyl)
-    running = []
-    for k in range(n_nodes - 1):
-        dam = DAM(
-            ctx,
-            targets.targets[k],
-            targets.valid[k],
-            targets.weights,
-            inputs.weights,
-            terminal=False,
-            effort_bound=settings.effort_bound_n_m,
-        )
-        running.append(_integrate(crocoddyl, dam, dt, settings.integrator))
-    terminal_dam = DAM(
-        ctx,
-        targets.targets[-1],
-        targets.valid[-1],
-        targets.weights,
-        inputs.weights,
-        terminal=True,
-        effort_bound=settings.effort_bound_n_m,
+    # --- Crocoddyl problem (linearly implicit Euler action models) ---------------------
+    running, terminal = make_action_models(
+        crocoddyl, ctx, targets, inputs.weights, effort_bounds, dt
     )
-    terminal = _integrate(crocoddyl, terminal_dam, 0.0, settings.integrator)
     problem = crocoddyl.ShootingProblem(xs0[0], running, terminal)
     fddp = crocoddyl.SolverBoxFDDP(problem)
     fddp.th_stop = settings.stop_tolerance
@@ -531,19 +484,26 @@ def run_fit(
     solver_summary = {
         "solver": "crocoddyl.SolverBoxFDDP",
         "integrator": settings.integrator,
+        "replay_integrator": settings.replay_integrator,
         "converged": converged,
         "iterations": int(fddp.iter),
         "cost": float(fddp.cost),
         "stopping_criterion": float(fddp.stoppingCriteria()),
         "wall_clock_s": solve_wall,
         "max_iterations": settings.max_iterations,
-        "effort_bound_n_m": settings.effort_bound_n_m,
+        "effort_bound_default_n_m": settings.effort_bound_n_m,
+        "warm_start_ridge": settings.warm_start_ridge,
     }
 
-    # --- uninterrupted RK4 replay of the fitted efforts ---------------------------------
+    # --- uninterrupted replay of the fitted efforts (adaptive RK45, shared-lane style) --
     replay_note = None
     try:
-        q_rep, v_rep = rk4_replay(ctx, q_fddp[0], v_fddp[0], us, dt, substeps=2)
+        if settings.replay_integrator == "rk4":
+            q_rep, v_rep = rk4_replay(
+                ctx, q_fddp[0], v_fddp[0], us, dt, substeps=settings.replay_substeps
+            )
+        else:
+            q_rep, v_rep = rk45_replay(ctx, q_fddp[0], v_fddp[0], us, dt)
     except FloatingPointError as exc:
         replay_note = str(exc)
         q_rep, v_rep = q_fddp, v_fddp
@@ -581,16 +541,32 @@ def run_fit(
         "capture_sha256": inputs.capture.source_sha256,
         "attachments_source": inputs.attachments_source,
         "ground_height_m": inputs.ground_height_m,
+        "armature_kg_m2": ctx.armature_kg_m2,
+        "effort_bounds_n_m": dict(
+            zip(
+                np.asarray(ctx.map.names)[ctx.actuated].tolist(),
+                effort_bounds.tolist(),
+                strict=True,
+            )
+        ),
         "labels": list(inputs.labels),
         "horizon": asdict(inputs.horizon),
         "nodes": n_nodes,
         "weights": asdict(inputs.weights),
         "warm_start_ik": ik_summary,
         "solver": solver_summary,
+        "cost_breakdown": {
+            "warm_start": cost_breakdown(
+                ctx, targets, inputs.weights, q_smooth, v_ik, us0, dt
+            ),
+            "fddp": cost_breakdown(
+                ctx, targets, inputs.weights, q_fddp, v_fddp, us, dt
+            ),
+        },
         "metrics": {
             "warm_start_ik": metrics_ik,
             "fddp_rollout": metrics_fddp,
-            "rk4_replay": metrics_rep,
+            "replay": metrics_rep,
         },
         "replay_note": replay_note,
         "physical_audit": audit,
@@ -603,6 +579,46 @@ def run_fit(
         json.dumps(receipt, indent=2), encoding="utf-8"
     )
     return receipt
+
+
+def cost_breakdown(
+    ctx: _PlantContext,
+    targets: MarkerTargets,
+    weights: FitWeights,
+    q: Array,
+    v: Array,
+    us: Array,
+    dt: float,
+) -> dict[str, float]:
+    """Per-term cost of a trajectory, weighted like the Crocoddyl problem (dt on running nodes)."""
+    n_nodes = q.shape[0]
+    marker = effort = velocity = barrier = 0.0
+    for k in range(n_nodes):
+        positions = ctx.markers(q[k])
+        rows = np.flatnonzero(targets.valid[k])
+        error = positions[rows] - targets.targets[k][rows]
+        scale = dt if k < n_nodes - 1 else 1.0
+        marker_weight = weights.marker if k < n_nodes - 1 else weights.terminal_marker
+        marker += (
+            scale
+            * 0.5
+            * marker_weight
+            * float(np.sum(targets.weights[rows][:, None] * error**2))
+        )
+        barrier_cost, _, _ = range_barrier(
+            q[k], ctx.lower, ctx.upper, weights.range_barrier
+        )
+        barrier += scale * barrier_cost
+        velocity += scale * 0.5 * weights.velocity * float(v[k] @ v[k])
+        if k < n_nodes - 1:
+            effort += dt * 0.5 * weights.effort * float(us[k] @ us[k])
+    return {
+        "marker": marker,
+        "effort": effort,
+        "velocity": velocity,
+        "range_barrier": barrier,
+        "total": marker + effort + velocity + barrier,
+    }
 
 
 def _runtime_versions() -> dict[str, str]:
@@ -632,7 +648,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--rate-hz", type=float, default=360.0)
     parser.add_argument("--max-iterations", type=int, default=200)
     parser.add_argument("--effort-bound", type=float, default=600.0)
-    parser.add_argument("--integrator", choices=("euler", "rk4"), default="euler")
+    parser.add_argument("--replay-integrator", choices=("rk45", "rk4"), default="rk45")
+    parser.add_argument("--replay-substeps", type=int, default=12)
+    parser.add_argument("--armature", type=float, default=5e-3)
+    parser.add_argument("--warm-start-ridge", type=float, default=1e-2)
     parser.add_argument("--marker-weight", type=float, default=FitWeights().marker)
     parser.add_argument(
         "--terminal-marker-weight", type=float, default=FitWeights().terminal_marker
@@ -661,8 +680,11 @@ def main(argv: list[str] | None = None) -> int:
     settings = SolverSettings(
         max_iterations=args.max_iterations,
         effort_bound_n_m=args.effort_bound,
-        integrator=args.integrator,
+        replay_integrator=args.replay_integrator,
+        replay_substeps=args.replay_substeps,
         verbose=not args.quiet,
+        armature_kg_m2=args.armature,
+        warm_start_ridge=args.warm_start_ridge,
     )
     receipt = run_fit(
         inputs,

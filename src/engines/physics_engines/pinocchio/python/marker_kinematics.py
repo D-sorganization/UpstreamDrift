@@ -211,6 +211,7 @@ class MarkerIkSolver:
         valid: NDArray[np.bool_],
         weights: Array,
         q_prev: Array,
+        closure_weight: float | None = None,
     ) -> tuple[Array, Array]:
         opts = self._options
         positions, jac_pin = marker_positions_and_jacobians(
@@ -226,7 +227,9 @@ class MarkerIkSolver:
         marker_res = (scale * (positions[rows] - target[rows])).reshape(-1)
         marker_jac = (scale[:, :, None] * jac[rows]).reshape(-1, self._map.n)
         closure = self._plant.closure_position_linearization(self._map.as_dict(q))
-        closure_scale = np.sqrt(opts.closure_weight)
+        closure_scale = np.sqrt(
+            opts.closure_weight if closure_weight is None else closure_weight
+        )
         reg_scale = np.sqrt(opts.regularisation)
         residual = np.concatenate(
             [
@@ -252,6 +255,7 @@ class MarkerIkSolver:
         q_init: Array,
         *,
         iterations: int | None = None,
+        closure_weight: float | None = None,
     ) -> tuple[Array, float, float]:
         """Return (q, marker RMS over valid markers, closure position error norm)."""
         opts = self._options
@@ -259,7 +263,7 @@ class MarkerIkSolver:
         q_prev = q.copy()
         damping = opts.damping
         residual, jacobian = self._residual_and_jacobian(
-            q, target, valid, weights, q_prev
+            q, target, valid, weights, q_prev, closure_weight
         )
         cost = float(residual @ residual)
         for _ in range(iterations or opts.iterations):
@@ -272,7 +276,7 @@ class MarkerIkSolver:
                 step *= opts.step_limit_rad / norm
             q_trial = np.clip(q + step, self._lower, self._upper)
             residual_trial, jacobian_trial = self._residual_and_jacobian(
-                q_trial, target, valid, weights, q_prev
+                q_trial, target, valid, weights, q_prev, closure_weight
             )
             cost_trial = float(residual_trial @ residual_trial)
             if cost_trial < cost:
@@ -299,6 +303,28 @@ class MarkerIkSolver:
         closure = self._plant.closure_position_linearization(self._map.as_dict(q))
         return q, rms, float(np.linalg.norm(closure.position))
 
+    def solve_address(
+        self,
+        target: Array,
+        valid: NDArray[np.bool_],
+        weights: Array,
+        q_init: Array,
+        *,
+        iterations: int = 60,
+    ) -> Array:
+        """Marker-first address solve: ramp the closure weight so the weld cannot trap the pose."""
+        q = np.asarray(q_init, dtype=float)
+        for closure_weight in (0.0, 1.0, 1e2, self._options.closure_weight):
+            q, _, _ = self.solve_frame(
+                target,
+                valid,
+                weights,
+                q,
+                iterations=iterations,
+                closure_weight=closure_weight,
+            )
+        return q
+
     def solve_trajectory(
         self,
         targets: Array,
@@ -315,9 +341,16 @@ class MarkerIkSolver:
         closure = np.empty(n_nodes)
         q_prev = np.asarray(q_init, dtype=float)
         for node in range(n_nodes):
-            iterations = first_frame_iterations if node == 0 else None
+            if node == 0:
+                q_prev = self.solve_address(
+                    targets[0],
+                    valid[0],
+                    weights,
+                    q_prev,
+                    iterations=first_frame_iterations,
+                )
             q_prev, rms[node], closure[node] = self.solve_frame(
-                targets[node], valid[node], weights, q_prev, iterations=iterations
+                targets[node], valid[node], weights, q_prev
             )
             q_out[node] = q_prev
         ensure(bool(np.isfinite(q_out).all()), "IK trajectory must be finite")
