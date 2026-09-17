@@ -74,6 +74,16 @@ application or qualified silhouette-driven forward fitter exists on this baselin
    their exact capability/qualification receipts. Another subsystem's passing
    tour-average fit does not qualify Shadow Tracker's video observations.
 
+### Publication Blocker
+
+PR #10274 is not merge-ready at review head `d6ae73c67`: repo-wide LoD CI
+(run `35167108374`, job `105030549858`) fails on the pre-existing main chain
+`inputs.calibration2.offsets.items` in `motion_matching/pipeline/reference.py:299`.
+This is tracked by **#10275**. Integrate its focused repair and re-run checks;
+do not waive the gate or confuse local Shadow Tracker success with green CI.
+Other CI jobs were still running when this blocker was recorded. The review
+provides implementation guidance and a tested patch, not a merged delivery claim.
+
 ### Restart Validation Receipt
 
 Python 3.13.5 on Windows, Tools pin
