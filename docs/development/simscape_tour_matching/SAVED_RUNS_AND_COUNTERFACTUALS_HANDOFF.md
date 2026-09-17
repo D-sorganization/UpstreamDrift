@@ -136,11 +136,10 @@ Alternatively use Open Replay in the existing Tour Matching Viewer and select
 that manifest. The GUI currently renders segments as lines; the previously
 qualified cylinder GIF remains under visuals_returned102. This checkpoint is
 retained-state playback, not MATLAB execution, a run catalog, real-time playback
-qualification, torque reconstruction or all-engine acceptance. The GUI timer still
-advances one saved frame per tick; correct source-time playback is a next task.
+qualification, torque reconstruction or all-engine acceptance. The subsequent timing checkpoint below replaces the old one-frame-per-tick behavior.
 
 Next: reuse the existing SimulationDataStore for a catalog of verified manifest
-pointers, add source-time playback and shared cylinder/multi-angle rendering,
+pointers, add shared cylinder/multi-angle rendering,
 then explicit MATLAB inspect/rerun actions with immutable new run outputs. Keep
 #10285 separate from the native optimization critical path and #10286 wrench
 qualification. Do not treat manifest hashes as proof of scientific correctness.
@@ -153,3 +152,22 @@ GUI image verifies terminal geometry but shows missing-font squares in Qt labels
 even with an explicit Arial request; it is diagnostic evidence, not polished UI
 acceptance. Verify fonts in a normal desktop session before promotion. The
 existing cylinder GIF remains the readable visual preview.
+
+## Source-Time Playback Checkpoint
+
+The viewer now uses the shared MonotonicReplayClock. A delayed display tick
+selects the latest sample at or before the source timestamp rather than slowing
+motion by counting display ticks. Pause, scrub, resume, replay from the endpoint
+and automatic stop at the final sample are covered by a deterministic fake-clock
+GUI test using the actual 360 Hz Simscape archive. Camera orientation and axis
+limits survive frame redraws. No intermediate state interpolation is claimed.
+
+Validation: six adapter/GUI tests pass, including the new RED-to-GREEN regression
+that previously displayed frame 1 instead of frame 180 at 0.5 seconds. Existing
+21-test importer/FK/GUI qualification remains the prior checkpoint; this change
+reruns the six affected GUI tests. The source-time clock is reused without
+modifying the shared simulator clock or simulation physics.
+
+Next product task is the verified manifest catalog, followed by reusable cylinder
+rendering, selectable camera views and explicit slow-motion control. Keep the
+known offscreen-font limitation visible until a normal desktop visual check passes.

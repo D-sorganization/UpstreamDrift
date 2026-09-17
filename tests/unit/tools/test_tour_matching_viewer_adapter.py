@@ -113,3 +113,45 @@ def test_verified_simscape_bundle_uses_retained_model_and_status(
     finally:
         widget.cleanup()
         widget.close()
+
+
+def test_playback_follows_source_time_and_preserves_camera(qapp) -> None:  # noqa: ANN001
+    from pathlib import Path
+    from src.shared.python.golf_simulator import MonotonicReplayClock
+    from src.tools.tour_matching_viewer.gui import TourMatchingViewerWidget
+
+    now = [0.0]
+    widget = TourMatchingViewerWidget()
+    widget._clock = MonotonicReplayClock(time_fn=lambda: now[0])
+    manifest = (
+        Path(__file__).resolve().parents[3]
+        / "docs/development/simscape_tour_matching/native_evidence/simscape_returned102.replay.json"
+    )
+    try:
+        widget.load_file(manifest)
+        widget._ax.view_init(elev=32, azim=121)
+        widget.toggle_playback()
+        now[0] = 0.5
+        widget._on_timer_tick()
+        assert widget._current_frame == 180
+        assert widget._ax.elev == 32
+        assert widget._ax.azim == 121
+        widget.toggle_playback()
+        now[0] = 4.0
+        widget._on_timer_tick()
+        assert widget._current_frame == 180
+        widget._slider.setValue(72)
+        widget.toggle_playback()
+        now[0] = 4.1
+        widget._on_timer_tick()
+        assert 107 <= widget._current_frame <= 108
+        now[0] = 5.0
+        widget._on_timer_tick()
+        assert widget._current_frame == 306
+        assert not widget._is_playing
+        assert not widget._timer.isActive()
+        widget.toggle_playback()
+        assert widget._current_frame == 0
+    finally:
+        widget.cleanup()
+        widget.close()
