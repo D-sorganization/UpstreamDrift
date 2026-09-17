@@ -674,8 +674,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         if tau is None:
             raise ValueError("tau must be provided")
         if not self._model or not self._state:
-            logger.warning("Model or state not initialized")
-            return np.array([])
+            raise RuntimeError("OpenSim model or state not initialized")
 
         # Get mass matrix
         M = self.compute_mass_matrix()
@@ -840,13 +839,16 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         if q is None:
             raise ValueError("q must be provided")
         if not self._model or not self._state:
-            return np.array([])
+            raise RuntimeError("OpenSim model or state not initialized")
+
+        # Save current state and controls
+        q_saved, v_saved = self.get_state()
+        if opensim is not None and hasattr(opensim, "Vector"):
+            controls_saved = opensim.Vector(self._model.updControls(self._state))
+        else:
+            controls_saved = self._model.updControls(self._state)
 
         try:
-            # Save current state and controls
-            q_saved, v_saved = self.get_state()
-            controls_saved = opensim.Vector(self._model.updControls(self._state))
-
             # Set desired state
             self.set_state(q, v)
 
@@ -862,18 +864,15 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
             # Extract accelerations
             n_u = self._model.getNumSpeeds()
             udot = self._state.getUDot()
-            a_ztcf = np.array([udot.get(i) for i in range(n_u)])
-
-            # Restore state and controls
+            return np.array([udot.get(i) for i in range(n_u)])
+        finally:
+            # Restore state and controls even on exception (#10286)
             self._model.updControls(self._state).update(controls_saved)
-
             self.set_state(q_saved, v_saved)
-
-            return a_ztcf
-
-        except (ValueError, TypeError, RuntimeError) as e:
-            logger.error(f"Failed to compute ZTCF: {e}")
-            return np.array([])
+            try:
+                self._model.realizeDynamics(self._state)
+            except (RuntimeError, ValueError, TypeError):
+                pass
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
@@ -890,13 +889,16 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         if q is None:
             raise ValueError("q must be provided")
         if not self._model or not self._state:
-            return np.array([])
+            raise RuntimeError("OpenSim model or state not initialized")
+
+        # Save current state and controls
+        q_saved, v_saved = self.get_state()
+        if opensim is not None and hasattr(opensim, "Vector"):
+            controls_saved = opensim.Vector(self._model.updControls(self._state))
+        else:
+            controls_saved = self._model.updControls(self._state)
 
         try:
-            # Save current state and controls
-            q_saved, v_saved = self.get_state()
-            controls_saved = opensim.Vector(self._model.updControls(self._state))
-
             # Set state with zero velocity
             n_u = self._model.getNumSpeeds()
             self.set_state(q, np.zeros(n_u))
@@ -908,14 +910,12 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
 
             # Extract accelerations
             udot = self._state.getUDot()
-            a_zvcf = np.array([udot.get(i) for i in range(n_u)])
-
-            # Restore state and controls
+            return np.array([udot.get(i) for i in range(n_u)])
+        finally:
+            # Restore state and controls even on exception (#10286)
             self._model.updControls(self._state).update(controls_saved)
             self.set_state(q_saved, v_saved)
-
-            return a_zvcf
-
-        except (ValueError, TypeError, RuntimeError) as e:
-            logger.error(f"Failed to compute ZVCF: {e}")
-            return np.array([])
+            try:
+                self._model.realizeDynamics(self._state)
+            except (RuntimeError, ValueError, TypeError):
+                pass

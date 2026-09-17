@@ -748,7 +748,14 @@ class SimscapeAdapter:
         "q and v must be 1-D numpy arrays",
     )
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:  # noqa: ARG002
-        """Zero-Torque Counterfactual — deferred to #4006."""
+        """Zero-Torque Counterfactual (ZTCF).
+
+        In Simscape Multibody, live counterfactual evaluations require an active
+        MATLAB R2025b session running ``run_ztcf_simulation.m`` with pointwise
+        killswitch cutoff, or loading verified offline replay bundles via
+        :meth:`CounterfactualTrajectory.from_saved_simscape_bundle` (#10286).
+        Interactive live evaluation in this standalone adapter is deferred to #4006.
+        """
         self._lifecycle.require(
             AdapterState.LOADED,
             AdapterState.RUNNING,
@@ -761,7 +768,14 @@ class SimscapeAdapter:
         "q must be a 1-D numpy array",
     )
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:  # noqa: ARG002
-        """Zero-Velocity Counterfactual — deferred to #4006."""
+        """Zero-Velocity Counterfactual (ZVCF).
+
+        In Simscape Multibody, live counterfactual evaluations require an active
+        MATLAB R2025b session running ``run_ztcf_simulation.m`` with pointwise
+        killswitch cutoff, or loading verified offline replay bundles via
+        :meth:`CounterfactualTrajectory.from_saved_simscape_bundle` (#10286).
+        Interactive live evaluation in this standalone adapter is deferred to #4006.
+        """
         self._lifecycle.require(
             AdapterState.LOADED,
             AdapterState.RUNNING,

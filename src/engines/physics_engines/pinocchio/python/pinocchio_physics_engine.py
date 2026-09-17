@@ -9,7 +9,7 @@ initialization patterns.
 
 from __future__ import annotations
 
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 import numpy as np
 
@@ -74,6 +74,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         self.tau: np.ndarray = np.array([])
         self.time: float = 0.0
         self.integrator: PinocchioIntegrator = "rk4"
+        self.constraint_models: list[Any] = []
+        self.constraint_datas: list[Any] = []
 
     @property
     def is_initialized(self) -> bool:
@@ -442,16 +444,41 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if not (tau is not None):
             raise ValueError("tau must be provided")
         if self.model is None or self.data is None:
-            return np.array([])
+            raise RuntimeError("Pinocchio model is not initialized")
 
         q_arr = self._require_vector("q", self.q, self.model.nq)
         v_arr = self._require_vector("v", self.v, self.model.nv)
 
         tau_zero = np.zeros(self.model.nv)
-        a_drift = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
-        a_full = pin.aba(self.model, self.data, q_arr, v_arr, tau)
+        dyn_fn = getattr(pin, "constraintDynamics", None)
+        try:
+            if self.constraint_models and dyn_fn is not None:
+                a_drift = dyn_fn(
+                    self.model,
+                    self.data,
+                    q_arr,
+                    v_arr,
+                    tau_zero,
+                    self.constraint_models,
+                    self.constraint_datas,
+                )
+                a_full = dyn_fn(
+                    self.model,
+                    self.data,
+                    q_arr,
+                    v_arr,
+                    tau,
+                    self.constraint_models,
+                    self.constraint_datas,
+                )
+            else:
+                a_drift = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
+                a_full = pin.aba(self.model, self.data, q_arr, v_arr, tau)
 
-        return cast(np.ndarray, a_full - a_drift)
+            return cast(np.ndarray, a_full - a_drift)
+        finally:
+            if self.q is not None and self.v is not None:
+                pin.forwardKinematics(self.model, self.data, self.q, self.v)
 
     @precondition(lambda self, q: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "ZVCF acceleration must contain finite values")
@@ -471,7 +498,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if not (q is not None):
             raise ValueError("q must be provided")
         if self.model is None or self.data is None:
-            return np.array([])
+            raise RuntimeError("Pinocchio model is not initialized")
 
         q_arr = self._require_vector("q", q, self.model.nq)
 
@@ -479,10 +506,26 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
         # Canonical ZVCF zeros the declared applied-control channel.
         tau = np.zeros(self.model.nv)
+        dyn_fn = getattr(pin, "constraintDynamics", None)
 
-        a_zvcf = pin.aba(self.model, self.data, q_arr, v_zero, tau)
+        try:
+            if self.constraint_models and dyn_fn is not None:
+                a_zvcf = dyn_fn(
+                    self.model,
+                    self.data,
+                    q_arr,
+                    v_zero,
+                    tau,
+                    self.constraint_models,
+                    self.constraint_datas,
+                )
+            else:
+                a_zvcf = pin.aba(self.model, self.data, q_arr, v_zero, tau)
 
-        return cast(np.ndarray, a_zvcf)
+            return cast(np.ndarray, a_zvcf)
+        finally:
+            if self.q is not None and self.v is not None:
+                pin.forwardKinematics(self.model, self.data, self.q, self.v)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Affine drift must contain finite values")
@@ -551,9 +594,25 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if not (v is not None):
             raise ValueError("v must be provided")
         if self.model is None or self.data is None:
-            return np.array([])
+            raise RuntimeError("Pinocchio model is not initialized")
         q_arr = self._require_vector("q", q, self.model.nq)
         v_arr = self._require_vector("v", v, self.model.nv)
         tau_zero = np.zeros(self.model.nv)
-        a_ztcf = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
-        return cast(np.ndarray, np.asarray(a_ztcf).copy())
+        dyn_fn = getattr(pin, "constraintDynamics", None)
+        try:
+            if self.constraint_models and dyn_fn is not None:
+                a_ztcf = dyn_fn(
+                    self.model,
+                    self.data,
+                    q_arr,
+                    v_arr,
+                    tau_zero,
+                    self.constraint_models,
+                    self.constraint_datas,
+                )
+            else:
+                a_ztcf = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
+            return cast(np.ndarray, np.asarray(a_ztcf).copy())
+        finally:
+            if self.q is not None and self.v is not None:
+                pin.forwardKinematics(self.model, self.data, self.q, self.v)
