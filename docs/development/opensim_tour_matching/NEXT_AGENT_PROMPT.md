@@ -20,3 +20,11 @@ not wait for MuJoCo; Phase B depends on shared-model/contact work.
 Preserve the prior agent's dirty development log and untracked one-iteration
 receipt. Work in your own checkout, hold your own lease, update handoff/log
 in place, and publish one concrete next action with links to raw evidence.
+
+## Golf Model Improvement Turnover
+
+For the owner-requested anatomy, visible club and address corrections, follow
+[EPIC_GOLF_MODEL.md](EPIC_GOLF_MODEL.md) (epic #10394, children #10395–#10403)
+and [GOLF_MODEL_AGENT_PROMPT.md](GOLF_MODEL_AGENT_PROMPT.md). Start #10395,
+then #10397. This is separate from resuming the prior Moco job. Preserve
+that job and its evidence; corrected physical models invalidate old receipts.

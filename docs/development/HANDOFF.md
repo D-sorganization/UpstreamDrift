@@ -5,6 +5,11 @@ Updated 2026-09-18. Governing epic #10363; documentation review branch
 Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matching-handoff`.
 Development-log entry: `DL-#10363`.
 
+OpenSim golf-model improvement epic #10394 now has nine children (#10395–#10403).
+Start with [the golf-model assignment](opensim_tour_matching/GOLF_MODEL_AGENT_PROMPT.md)
+and [detailed epic](opensim_tour_matching/EPIC_GOLF_MODEL.md) for the missing club,
+arm scaling, address alignment and muscle/tendon extension work.
+
 The current Pinocchio/OpenSim native jobs were running at the 01:45 UTC
 snapshot. No solver was launched, stopped or accepted by this review. Read
 [the bounded agent prompt](matched_swing_program/AGENT_CONTINUATION_PROMPT.md),
