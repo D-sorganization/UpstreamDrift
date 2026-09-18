@@ -21,6 +21,9 @@ Missing root history and independent source dynamics also block qualification.
 
 Validation: 40 focused replay/acceptance/schema/full-body/contact tests pass;
 scoped Ruff and mypy pass; agent-context and architecture/file-size budgets pass.
+PR CI found CVE-2026-63374 and CVE-2026-64847 in the inherited AnyIO 4.12.1
+pins. SELF updates both runtime/development locks to the reported fixed 4.14.2;
+the audit remains enforced. Continue PR CI after this minimal dependency fix.
 Commit/push hooks pass, including security and bounded unit checks. All 21
 replay tests also pass with CI-pinned MuJoCo 3.8.0 in an isolated environment.
 The central development-log validator flags inherited missing verifying SHAs,
