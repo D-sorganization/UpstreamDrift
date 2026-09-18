@@ -4,6 +4,17 @@ Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og09-golf-nativ
 PR: open (targeting main).
 Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og09-10403`.
 
+### #9549 Impact Contact-Interval Provider Adoption (DL-#9549)
+
+- Repository/worktree: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9549`; branch `conductor/issue-9549`; commit SELF; PR not created.
+- Governing issue: #9549 (epic #9546). Objective: integrate the Tools contact-interval solver into live runs, playback and export without duplicating shared runtime in UD.
+- Audit revisions recorded: UD `5347cba0f4378cd72a6e8afea9fb27c8bfe5db75`; pinned Tools `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (`vendor/ud-tools` gitlink).
+- Completed: `tests/shared_contracts/test_impact_interval_provider.py` exercises the public `shared.python.swing_sim.impact_interval` façade through the pinned provider (time-resolved channels + audit; boundary selection changes the solver and mismatches are refused; separated terminal state feeds `derive_launch_conditions`/`simulate` once, time-limit and no-contact raise `IncompleteContactError`) and holds the not-yet-shipped workbench record integration as a strict xfail pin gate. `src/config/feature_parity.json` (`tools.rate_of_closure.notes`) records the routing; matrix doc unchanged (notes are not rendered).
+- Key decision: the interval phase in `rate_of_closure/simulation/records.py`, `ImpactModelType` member, boundary configuration, session/export threading and timeline UI are Tools-owned (#4130/#4946); UD adopts via a reviewed pin bump. No `vendor/ud-tools` edits.
+- Validation: `python3 -m pytest tests/shared_contracts/test_impact_interval_provider.py --tools-mode vendored` → 3 passed, 1 xfail (strict); `tests/config/feature_parity` → 39 passed; `python3 -m scripts.generate_feature_parity_matrix --check` OK; ruff check/format clean. Issue worktree required materializing the empty `vendor/ud-tools` from the main checkout's submodule objects (read-only `git archive`); `git status` stays clean because the path is a gitlink.
+- Blockers/risks: the issue's UI acceptance (timeline, jump to contact/separation, save/reload of the interval record, rendered evidence) cannot be met at this pin; it stays open until the Tools slice lands. The xfail is `raises=AssertionError`, so a broken provider import errors instead of masquerading as the expected gap.
+- Next: open the Tools PR (record the choice in the Tools #4946 decision thread), bump the pin here, replace the strict xfail with the shipped-record consumer contract, then add rendered desktop/web evidence per the acceptance list.
+
 ### OG-09 Status: Completed (Ready for PR)
 
 - Packaged native viewer artifacts and release evidence in `src/engines/physics_engines/opensim/python/tour_matching/view_package.py`:

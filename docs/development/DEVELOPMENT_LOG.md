@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9549 · Impact Contact-Interval Provider Adoption
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #9549 (epic #9546; Tools #4130 / #4946 / #4103; UD #9349)
+- **Branch:** conductor/issue-9549
+- **PR:** not created
+- **Paths:** tests/shared_contracts/test_impact_interval_provider.py; src/config/feature_parity.json; docs/development/HANDOFF.md; SPEC.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; UD audit revision 5347cba0f4378cd72a6e8afea9fb27c8bfe5db75, pinned Tools 62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1; `python3 -m pytest tests/shared_contracts/test_impact_interval_provider.py --tools-mode vendored` → 3 passed, 1 strict xfail (pin gate); `tests/config/feature_parity` 39 passed; ruff check/format clean)
+- **Summary:** Tools owns the six-DOF contact-interval runtime and UD consumes an immutable pin, so UD's slice is a consumer contract against `shared.python.swing_sim.impact_interval`: one façade call yields every time-resolved inspection channel plus the numerical audit; boundary selection (free/pinned/torsional grip) changes the actual solver configuration and mismatched combinations are refused with a reason; a separated terminal state feeds the canonical flight handoff exactly once while time-limit and no-contact solves raise `IncompleteContactError`. The workbench record integration (interval phase in the canonical `rate_of_closure` run record, model selection, session/export) is not at the pin and is held as a strict xfail that flips to a failure when a pin bump ships it. The `tools.rate_of_closure` parity entry records the routing.
+- **Next step:** Open the Tools PR (record the choice in the #4946 decision thread) that adds the interval phase to `rate_of_closure/simulation/records.py`; once pinned here, replace the strict xfail with the shipped-record contract.
+- **Evidence:** tests/shared_contracts/test_impact_interval_provider.py.
+
 ### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
 
 - **State:** in_progress

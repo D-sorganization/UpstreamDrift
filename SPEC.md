@@ -5751,6 +5751,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-18 | #9549 | Consumer contract for the pinned Tools contact-interval façade (time-resolved record, boundary selection, single flight handoff, incomplete-contact refusal) with a strict-xfail pin gate for the unshipped rate_of_closure interval phase; parity note routes the workbench to the provider. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
