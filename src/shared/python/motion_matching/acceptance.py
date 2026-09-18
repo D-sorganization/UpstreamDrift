@@ -93,10 +93,17 @@ class AcceptanceGates:
     min_inside_support_polygon_fraction: float = 0.85  # 85 % of frames
 
     # Dynamic well-posedness artifacts (MS-100 / MS-107)
-    max_open_loop_drift_m: float = 0.500  # maximum open-loop rollout drift (m)
+    max_open_loop_drift_m: float | None = (
+        None  # None => tied to horizon's whole_marker_rmse_m (e.g. 25 mm for G1)
+    )
     max_integrator_rtol: float = 1e-5  # required declared integrator relative tolerance
     max_collocation_defect_m: float = 0.005  # 5 mm dynamical consistency defect
     max_stabilized_marker_rmse_m: float = 0.040  # 40 mm low-gain PD tracking error
+
+    @property
+    def g3_whole_rmse_m(self) -> float:
+        """Alias for g3_whole_driver_rmse_m for uniform horizon whole-RMSE access."""
+        return self.g3_whole_driver_rmse_m
 
 
 @dataclass(frozen=True)
@@ -524,6 +531,120 @@ def _evaluate_weight_fraction(
     return results
 
 
+def _extract_solver_and_integrators(
+    receipt: Mapping[str, Any],
+    replay_data: Mapping[str, Any],
+) -> tuple[str | None, str | None, Mapping[str, Any]]:
+    raw_solver = receipt.get("solver")
+    solver_block: Mapping[str, Any] = (
+        raw_solver if isinstance(raw_solver, Mapping) else {}
+    )
+    node_integ = solver_block.get("node_integrator") or receipt.get("node_integrator")
+    replay_integ = (
+        solver_block.get("replay_integrator")
+        or replay_data.get("integrator")
+        or receipt.get("replay_integrator")
+    )
+    return (
+        str(node_integ) if node_integ is not None else None,
+        str(replay_integ) if replay_integ is not None else None,
+        solver_block,
+    )
+
+
+def _evaluate_integrator_consistency(
+    receipt: Mapping[str, Any],
+    replay_data: Mapping[str, Any],
+) -> list[GateResult]:
+    """Verify solver node_integrator and replay_integrator are identical."""
+    results: list[GateResult] = []
+    node_integ, replay_integ, _ = _extract_solver_and_integrators(receipt, replay_data)
+
+    if node_integ and replay_integ and node_integ.lower() != replay_integ.lower():
+        results.append(
+            GateResult(
+                name="integrator_consistency",
+                status=GateStatus.FAILED,
+                threshold=1.0,
+                measured=0.0,
+                unit="match",
+                reason=f"solver node_integrator '{node_integ}' != replay_integrator '{replay_integ}'",
+            )
+        )
+    elif node_integ and replay_integ:
+        results.append(
+            GateResult(
+                name="integrator_consistency",
+                status=GateStatus.PASSED,
+                threshold=1.0,
+                measured=1.0,
+                unit="match",
+            )
+        )
+    return results
+
+
+def _evaluate_integrator_tolerance(
+    receipt: Mapping[str, Any],
+    replay_data: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify declared integrator relative tolerance satisfies strictness threshold."""
+    results: list[GateResult] = []
+    node_integ, replay_integ, solver_block = _extract_solver_and_integrators(
+        receipt, replay_data
+    )
+
+    rtol_val = _extract_metric(replay_data, "rtol", "rk45_rtol", "tolerance")
+    if rtol_val is None:
+        solver_rtol = solver_block.get("rk45_rtol")
+        if isinstance(solver_rtol, (int, float)):
+            rtol_val = float(solver_rtol)
+        else:
+            receipt_rtol = receipt.get("rk45_rtol")
+            if isinstance(receipt_rtol, (int, float)):
+                rtol_val = float(receipt_rtol)
+
+    if rtol_val is not None:
+        if float(rtol_val) > gates.max_integrator_rtol:
+            results.append(
+                GateResult(
+                    name="integrator_tolerance",
+                    status=GateStatus.FAILED,
+                    threshold=gates.max_integrator_rtol,
+                    measured=float(rtol_val),
+                    reason=f"declared integrator rtol {float(rtol_val):e} exceeds maximum allowable {gates.max_integrator_rtol:e}",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="integrator_tolerance",
+                    status=GateStatus.PASSED,
+                    threshold=gates.max_integrator_rtol,
+                    measured=float(rtol_val),
+                )
+            )
+    elif node_integ in ("rk45", "runge_kutta_45") or replay_integ in (
+        "rk45",
+        "runge_kutta_45",
+    ):
+        results.append(
+            GateResult(
+                name="integrator_tolerance",
+                status=(
+                    GateStatus.FAILED
+                    if horizon in (Horizon.G2, Horizon.G3)
+                    else GateStatus.MISSING
+                ),
+                threshold=gates.max_integrator_rtol,
+                reason="missing declared rk45_rtol for adaptive RK45 integrator",
+            )
+        )
+    return results
+
+
 def _evaluate_open_loop_replay(
     receipt: Mapping[str, Any],
     horizon: Horizon,
@@ -531,6 +652,19 @@ def _evaluate_open_loop_replay(
 ) -> list[GateResult]:
     """Evaluate open-loop forward rollout drift and integrator tolerance."""
     results: list[GateResult] = []
+
+    # Drift threshold is tied to the horizon's whole-RMSE scale (e.g. 25 mm for G1)
+    if gates.max_open_loop_drift_m is not None:
+        thresh_drift = gates.max_open_loop_drift_m
+    elif horizon == Horizon.G1:
+        thresh_drift = gates.g1_whole_rmse_m
+    elif horizon == Horizon.G2:
+        thresh_drift = gates.g2_whole_rmse_m
+    elif horizon == Horizon.G3:
+        thresh_drift = gates.g3_whole_rmse_m
+    else:
+        thresh_drift = gates.g1_whole_rmse_m
+
     replay_data = receipt.get("open_loop_replay")
     if not isinstance(replay_data, Mapping):
         replay_data = receipt.get("forward_rollout")
@@ -541,46 +675,39 @@ def _evaluate_open_loop_replay(
                 GateResult(
                     name="open_loop_replay",
                     status=GateStatus.MISSING,
-                    threshold=gates.max_open_loop_drift_m,
+                    threshold=thresh_drift,
                     reason="missing open-loop replay artifact",
                 )
             )
         return results
 
+    # 1. Integrator consistency and tolerance checks
+    results.extend(_evaluate_integrator_consistency(receipt, replay_data))
+    results.extend(_evaluate_integrator_tolerance(receipt, replay_data, horizon, gates))
+
+    # 2. Replay drift check against horizon whole-RMSE threshold
     drift_val = _extract_metric(
         replay_data, "drift_m", "max_drift_m", "whole_marker_rmse_m", "max_error_m"
     )
-    rtol_val = _extract_metric(replay_data, "rtol", "tolerance", "rk45_rtol")
 
     if drift_val is None:
         results.append(
             GateResult(
                 name="open_loop_replay",
                 status=GateStatus.FAILED,
-                threshold=gates.max_open_loop_drift_m,
+                threshold=thresh_drift,
                 reason="missing drift metric in open-loop replay",
             )
         )
-    elif drift_val > gates.max_open_loop_drift_m:
+    elif drift_val > thresh_drift:
         results.append(
             GateResult(
                 name="open_loop_replay",
                 status=GateStatus.FAILED,
-                threshold=gates.max_open_loop_drift_m,
+                threshold=thresh_drift,
                 measured=drift_val,
                 unit="m",
-                reason=f"open-loop drift {drift_val * 1e3:.1f} mm exceeds {gates.max_open_loop_drift_m * 1e3:.1f} mm threshold",
-            )
-        )
-    elif rtol_val is not None and rtol_val > gates.max_integrator_rtol:
-        results.append(
-            GateResult(
-                name="open_loop_replay",
-                status=GateStatus.FAILED,
-                threshold=gates.max_open_loop_drift_m,
-                measured=drift_val,
-                unit="m",
-                reason=f"integrator rtol {rtol_val:e} exceeds maximum allowable {gates.max_integrator_rtol:e}",
+                reason=f"open-loop drift {drift_val * 1e3:.1f} mm exceeds {thresh_drift * 1e3:.1f} mm threshold",
             )
         )
     else:
@@ -588,7 +715,7 @@ def _evaluate_open_loop_replay(
             GateResult(
                 name="open_loop_replay",
                 status=GateStatus.PASSED,
-                threshold=gates.max_open_loop_drift_m,
+                threshold=thresh_drift,
                 measured=drift_val,
                 unit="m",
             )
@@ -714,8 +841,77 @@ def _evaluate_stabilized_replay(
     return results
 
 
+def _evaluate_calibration_provenance(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+    declared_capture: str | None = None,
+) -> list[GateResult]:
+    """Verify that capture and calibration/attachment provenance agree."""
+    results: list[GateResult] = []
+    capture = (
+        declared_capture
+        or receipt.get("capture")
+        or receipt.get("receipt_path")
+        or receipt.get("path")
+        or receipt.get("source_receipt")
+        or receipt.get("name")
+        or ""
+    )
+    capture = str(capture).lower()
+    attachments_source = str(receipt.get("attachments_source", "")).lower()
+
+    if not capture or not attachments_source:
+        return results
+
+    is_iron_capture = "iron" in capture
+    is_driver_capture = "driver" in capture
+    is_iron_calib = "iron" in attachments_source
+    is_driver_calib = "driver" in attachments_source
+
+    if is_iron_capture and is_driver_calib and not is_iron_calib:
+        results.append(
+            GateResult(
+                name="calibration_provenance",
+                status=GateStatus.FAILED,
+                threshold=1.0,
+                measured=0.0,
+                unit="match",
+                reason=(
+                    f"capture and calibration provenance disagree: iron capture reused driver calibration '{receipt.get('attachments_source')}'"
+                ),
+            )
+        )
+    elif is_driver_capture and is_iron_calib and not is_driver_calib:
+        results.append(
+            GateResult(
+                name="calibration_provenance",
+                status=GateStatus.FAILED,
+                threshold=1.0,
+                measured=0.0,
+                unit="match",
+                reason=(
+                    f"capture and calibration provenance disagree: driver capture reused iron calibration '{receipt.get('attachments_source')}'"
+                ),
+            )
+        )
+    elif (is_iron_capture and is_iron_calib) or (is_driver_capture and is_driver_calib):
+        results.append(
+            GateResult(
+                name="calibration_provenance",
+                status=GateStatus.PASSED,
+                threshold=1.0,
+                measured=1.0,
+                unit="match",
+                reason="capture and calibration provenance match",
+            )
+        )
+    return results
+
+
 @precondition(
-    lambda receipt, horizon=Horizon.G1, gates=None: isinstance(horizon, Horizon),
+    lambda receipt, horizon=Horizon.G1, gates=None, capture=None: isinstance(
+        horizon, Horizon
+    ),
     "horizon must be Horizon enum",
 )
 @postcondition(
@@ -727,6 +923,7 @@ def evaluate(
     *,
     horizon: Horizon = Horizon.G1,
     gates: AcceptanceGates | None = None,
+    capture: str | None = None,
 ) -> AcceptanceVerdict:
     """Pure evaluation function that returns physical & kinematic acceptance verdict."""
     if gates is None:
@@ -739,6 +936,7 @@ def evaluate(
     gate_results.extend(_evaluate_normal_contact_force(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_ground_and_closure(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_weight_fraction(receipt, gates))
+    gate_results.extend(_evaluate_calibration_provenance(receipt, gates, capture))
     gate_results.extend(_evaluate_open_loop_replay(receipt, horizon, gates))
     gate_results.extend(_evaluate_collocation_defect(receipt, horizon, gates))
     gate_results.extend(_evaluate_stabilized_replay(receipt, horizon, gates))
