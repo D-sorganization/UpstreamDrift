@@ -1,10 +1,32 @@
 # Current Matching Continuation Handoff
 
-Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og06-rebuild-full-swing-tracking-10400`; commit SELF.
+Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og07-versioned-model-variants-10401`; commit SELF.
 PR: open (targeting main).
-Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og06-10400`.
+Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og07-10401`.
 
-### OG-06 Status: Completed (Ready for PR)
+### OG-07 Status: Completed (Ready for PR)
+
+- Implemented versioned OpenSim model variants and explicit actuation capabilities in `src/engines/physics_engines/opensim/python/tour_matching/model_variants.py`:
+  - `ActuationProfile`: Encapsulates explicit actuation modalities (`ActuationType.TORQUE` vs `ActuationType.MUSCLE_TENDON`), control units (`N*m` vs `normalized`), ranges, internal states, and capabilities.
+  - `GolfEquipmentSpec`: Parameterized club specification with deterministic `hash_club_spec` SHA-256 digest, grip frame ID (`"grip_frame"`), length, mass, and mesh asset paths.
+  - `AnatomicalSkeletonSpec`: Stable anatomical frame IDs, coordinates, and visual mesh assets linked to base model digest.
+  - `GolfModelVariant`: Composed container (`AnatomicalSkeletonSpec` + `GolfEquipmentSpec` + calibration hash + `ActuationProfile`) with deterministic `variant_hash`.
+  - `GolfModelAdapter`: Facade adapter exposing variant introspection, forward kinematics, and control replay verification without leaking OpenSim C++ SDK object chains into shared/UI layers.
+  - Typed exceptions guarding fail-closed boundaries:
+    - `IncompatibleActuationError`: Rejects loading torque controls into muscle variant or vice versa.
+    - `UnknownStateError`: Rejects unmapped or missing state variables.
+    - `MissingGeometryAssetError`: Fails closed when required visual mesh files are missing on disk.
+    - `StaleModelHashError`: Rejects stale or mismatched model/component hashes.
+    - `UnsupportedCapabilityError`: Rejects unsupported capability requests rather than silent fallback.
+- Unit tests in `tests/opensim/test_golf_model_variants.py` (8 passed):
+  - RED fixtures: incompatible actuation, unknown state, missing mesh asset, stale hash, unsupported capability fail-closed.
+  - Identity/no-op variant forward kinematics invariance.
+  - Torque and muscle/tendon variants traverse identical adapter API with truthful capability reporting.
+  - SDK objects isolation (no leaked C++ pointers/handles to callers).
+- All 114 opensim unit tests pass. Ruff lint, format, Mypy, LoD, and File Size Budget clean.
+- Next child: **OG-08 (#10402)** — Qualify muscle and tendon extensions without replacing the baseline.
+
+### OG-06 Status: Completed (PR #10410)
 
 - Implemented full-swing dynamic tracking qualification and ladder progression in `src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py`:
   - `reinitialize_tracking_from_address`: Reinitializes full-swing tracking state $q_0$ from qualified address pose (`AddressFitResult`) with frozen marker calibration.

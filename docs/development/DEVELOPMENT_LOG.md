@@ -17,18 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10400 · OpenSim Rebuild Full-Swing Tracking From Qualified Address
+### DL-#10401 · OpenSim Introduce Versioned Model Variants and Actuation Capabilities
 
 - **State:** in_progress
 - **Owner:** local
+- **Issue:** #10401 (epic #10394 / #10363, OG-07)
+- **Branch:** feat/og07-versioned-model-variants-10401
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/model_variants.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_model_variants.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; loading torque controls into muscle variant raises IncompatibleActuationError; querying unknown state raises UnknownStateError; missing geometry mesh raises MissingGeometryAssetError; stale/mismatched model hash raises StaleModelHashError; unsupported capability raises UnsupportedCapabilityError; identity variant preserves forward kinematics; torque and muscle variants share identical GolfModelAdapter API; adapter shields callers from OpenSim C++ SDK objects; 8 variant tests pass; all 114 opensim unit tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Implemented versioned OpenSim model variants and explicit actuation capabilities (`model_variants.py`) via composition: AnatomicalSkeletonSpec + GolfEquipmentSpec + Calibration + ActuationProfile (torque vs. muscle/tendon). Provides typed error boundaries and a clean adapter API without SDK leakage.
+- **Next step:** Commit, push, open PR referencing Closes #10401, release lease, proceed to OG-08 (#10402).
+- **Evidence:** tests/opensim/test_golf_model_variants.py; src/engines/physics_engines/opensim/python/tour_matching/model_variants.py.
+
+### DL-#10400 · OpenSim Rebuild Full-Swing Tracking From Qualified Address
+
+- **State:** in_review
+- **Owner:** local
 - **Issue:** #10400 (epic #10394 / #10363, OG-06)
 - **Branch:** feat/og06-rebuild-full-swing-tracking-10400
-- **PR:** not created
+- **PR:** #10410
 - **Paths:** src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_moco_g1_ladder.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; model checkpoint verification raises ModelCheckpointMismatchError; truncated capture claim raises TruncatedCaptureClaimError; control/state naming mismatch raises ControlStateNamingMismatchError; dynamic bilateral grip violation raises DynamicGripViolationError; continuity violation raises ContinuityViolationError; ladder stages from static address through G1, G2, G3 full capture; distinct statuses for IK playback, solver convergence, and replay acceptance; separate tracking and forward replay receipts; 9 ladder tests pass; all 106 opensim unit tests pass; ruff, mypy, lod, file-budget clean)
 - **Summary:** Rebuilt OpenSim full-swing tracking qualification module (`full_swing_tracking.py`) reinitialized from qualified address pose $q_0$ and model hash with frozen marker calibration. Implements ladder progression, continuity, full-swing coordinate limits, dynamic bilateral grip closure, ground contact mechanics, and separate receipts under MS-100 / MS-104.
-- **Next step:** Commit, push, open PR referencing Closes #10400, release lease, proceed to OG-07 (#10401).
+- **Next step:** Land PR #10410 referencing Closes #10400.
 - **Evidence:** tests/opensim/test_moco_g1_ladder.py; src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py.
 
 ### DL-#10399 · OpenSim Calibrate and Match Two-Handed Address Pose
