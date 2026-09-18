@@ -728,6 +728,60 @@
       "issue": 10186,
       "reason": "Issue #10186: visual skeleton derivation landing in HO-0; scheduled for decomposition under epic #10162.",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/address.py",
+      "symbol": "fit_address_pose",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10399,
+      "reason": "Issue #10399: fit_address_pose performs multi-objective optimization with bilateral grip closure, ground plane clearance, and holdout validation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py",
+      "symbol": "qualify_full_swing_tracking",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10400,
+      "reason": "Issue #10400: qualify_full_swing_tracking validates ladder stages, continuity, dynamic grip closure, and compiles dual receipts under MS-100 / MS-104.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/registration.py",
+      "symbol": "align_tour_capture_to_golf_world",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10398,
+      "reason": "Issue #10398: align_tour_capture_to_golf_world computes stance support ground plane translation and target-line yaw rotation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py",
+      "symbol": "apply_segment_scaling",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10396,
+      "reason": "Issue #10396: apply_segment_scaling scales joint frames, attached meshes, COM positions, and inertia matrices under fixed_mass or density_preserving policies.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/view_package.py",
+      "symbol": "build_golf_view_package",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10403,
+      "reason": "Issue #10403: build_golf_view_package packages model variants, verifies hashes, renders keyframe milestone stills, and exports reproducible video.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/view_package.py",
+      "symbol": "build_golf_view_package",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10403,
+      "reason": "Issue #10403: build_golf_view_package accepts trajectory, variant, presets, paths, digest hashes, and event milestones.",
+      "expires_on": "2026-11-30"
     }
   ]
 }

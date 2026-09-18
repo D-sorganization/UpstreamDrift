@@ -16,9 +16,11 @@ import math
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
-import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: construction only
+
+import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 
 from defusedxml import ElementTree as SafeET
+
 
 from src.shared.python.contracts import ensure, require
 from src.shared.python.motion_matching.club_models import (
