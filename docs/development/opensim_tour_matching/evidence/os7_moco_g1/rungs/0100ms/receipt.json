@@ -1,0 +1,236 @@
+{
+  "deliverable": "OS-7",
+  "issue": "#10341 (MS-42 phase A)",
+  "horizon_s": 0.1,
+  "requested_horizon_s": 0.1,
+  "mesh_intervals": 10,
+  "config": {
+    "horizon_s": 0.1,
+    "mesh_intervals": 10,
+    "marker_weight": 10.0,
+    "club_marker_weight": 5.0,
+    "state_tracking_weight": 0.1,
+    "effort_weight": 0.001,
+    "max_iterations": 300,
+    "convergence_tolerance": 0.001,
+    "constraint_tolerance": 0.0001,
+    "rotational_optimal_force": 300.0,
+    "translational_optimal_force": 2000.0
+  },
+  "warm_start": "IK, zero controls",
+  "guess_metrics": {
+    "metrics": {
+      "whole_marker_rmse_m": 0.04192776282235426,
+      "early_marker_rmse_m": 0.04192776282235426,
+      "terminal_marker_rmse_m": 0.04182160402256413,
+      "club_marker_rmse_m": 0.008422027140789715,
+      "pelvis_yaw_rmse_rad": 0.11119349943779139
+    },
+    "gates": {
+      "gates": {
+        "whole_marker_rmse_m": {
+          "value": 0.04192776282235426,
+          "target": 0.025,
+          "passed": false
+        },
+        "early_marker_rmse_m": {
+          "value": 0.04192776282235426,
+          "target": 0.012,
+          "passed": false
+        },
+        "terminal_marker_rmse_m": {
+          "value": 0.04182160402256413,
+          "target": 0.035,
+          "passed": false
+        },
+        "club_marker_rmse_m": {
+          "value": 0.008422027140789715,
+          "target": 0.06,
+          "passed": true
+        },
+        "pelvis_yaw_rmse_deg": {
+          "value": 6.370918227075738,
+          "target": 3.0,
+          "passed": false
+        }
+      },
+      "all_passed": false
+    }
+  },
+  "reference": {
+    "frames": 37,
+    "trailing_frames_dropped": 0,
+    "sparse_markers_dropped": {
+      "RShoulderTop": 0.0
+    },
+    "gap_filled_frames": {},
+    "markers_with_unfilled_holes_dropped": {},
+    "tracked_markers": [
+      "WaistLeft",
+      "WaistRight",
+      "WaistLBack",
+      "WaistRBack",
+      "BackTop",
+      "BackLeft",
+      "BackRight",
+      "HeadTop",
+      "HeadFront",
+      "HeadSide",
+      "LShoulderTop",
+      "LShoulderBack",
+      "LElbowOut",
+      "LUArmHigh",
+      "LWristTop",
+      "RShoulderBack",
+      "RElbowOut",
+      "RUArmHigh",
+      "RWristTop",
+      "LKneeOut",
+      "LToeIn",
+      "LToeOut",
+      "LAnkleOut",
+      "RKneeOut",
+      "RToeIn",
+      "RToeOut",
+      "RAnkleOut",
+      "Marker_2:2:1",
+      "Marker_2:2:2",
+      "Marker_2:2:3",
+      "Marker_3:3:1",
+      "Marker_3:3:2",
+      "Marker_3:3:3"
+    ]
+  },
+  "marker_weights": {
+    "WaistLeft": 1.0,
+    "WaistRight": 1.0,
+    "WaistLBack": 1.0,
+    "WaistRBack": 1.0,
+    "BackTop": 1.0,
+    "BackLeft": 1.0,
+    "BackRight": 1.0,
+    "HeadTop": 1.0,
+    "HeadFront": 1.0,
+    "HeadSide": 1.0,
+    "LShoulderTop": 1.0,
+    "LShoulderBack": 1.0,
+    "LElbowOut": 1.0,
+    "LUArmHigh": 1.0,
+    "LWristTop": 1.0,
+    "RShoulderBack": 1.0,
+    "RElbowOut": 1.0,
+    "RUArmHigh": 1.0,
+    "RWristTop": 1.0,
+    "LKneeOut": 1.0,
+    "LToeIn": 1.0,
+    "LToeOut": 1.0,
+    "LAnkleOut": 1.0,
+    "RKneeOut": 1.0,
+    "RToeIn": 1.0,
+    "RToeOut": 1.0,
+    "RAnkleOut": 1.0,
+    "Marker_2:2:1": 5.0,
+    "Marker_2:2:2": 5.0,
+    "Marker_2:2:3": 5.0,
+    "Marker_3:3:1": 5.0,
+    "Marker_3:3:2": 5.0,
+    "Marker_3:3:3": 5.0
+  },
+  "solver_status": "Solve_Succeeded",
+  "solver_success": true,
+  "iterations": 209,
+  "wall_clock_s": 360.5821187320107,
+  "objective": 0.059625403339699415,
+  "effort": {
+    "pelvis_residual_rms": {
+      "tau_pelvis_tilt": 21.186118643182407,
+      "tau_pelvis_list": 2.201926950118979,
+      "tau_pelvis_rotation": 3.191791467150485,
+      "tau_pelvis_tx": 37.163179617274594,
+      "tau_pelvis_ty": 197.48308400570707,
+      "tau_pelvis_tz": 35.471641355641104
+    },
+    "pelvis_residual_rms_max": 197.48308400570707,
+    "joint_rms_max": 12.550128245975484
+  },
+  "solution_metrics": {
+    "metrics": {
+      "whole_marker_rmse_m": 0.04100645731438057,
+      "early_marker_rmse_m": 0.04100645731438057,
+      "terminal_marker_rmse_m": 0.04148802687807344,
+      "club_marker_rmse_m": 0.012896345450877165,
+      "pelvis_yaw_rmse_rad": 0.11958432566413432
+    },
+    "gates": {
+      "gates": {
+        "whole_marker_rmse_m": {
+          "value": 0.04100645731438057,
+          "target": 0.025,
+          "passed": false
+        },
+        "early_marker_rmse_m": {
+          "value": 0.04100645731438057,
+          "target": 0.012,
+          "passed": false
+        },
+        "terminal_marker_rmse_m": {
+          "value": 0.04148802687807344,
+          "target": 0.035,
+          "passed": false
+        },
+        "club_marker_rmse_m": {
+          "value": 0.012896345450877165,
+          "target": 0.06,
+          "passed": true
+        },
+        "pelvis_yaw_rmse_deg": {
+          "value": 6.851677156472872,
+          "target": 3.0,
+          "passed": false
+        }
+      },
+      "all_passed": false
+    }
+  },
+  "replay_status": "ok",
+  "replay_metrics": {
+    "metrics": {
+      "whole_marker_rmse_m": 0.04100190533534964,
+      "early_marker_rmse_m": 0.04100190533534964,
+      "terminal_marker_rmse_m": 0.041476968996865815,
+      "club_marker_rmse_m": 0.01290098500967658,
+      "pelvis_yaw_rmse_rad": 0.11958282982529517
+    },
+    "gates": {
+      "gates": {
+        "whole_marker_rmse_m": {
+          "value": 0.04100190533534964,
+          "target": 0.025,
+          "passed": false
+        },
+        "early_marker_rmse_m": {
+          "value": 0.04100190533534964,
+          "target": 0.012,
+          "passed": false
+        },
+        "terminal_marker_rmse_m": {
+          "value": 0.041476968996865815,
+          "target": 0.035,
+          "passed": false
+        },
+        "club_marker_rmse_m": {
+          "value": 0.01290098500967658,
+          "target": 0.06,
+          "passed": true
+        },
+        "pelvis_yaw_rmse_deg": {
+          "value": 6.851591451220557,
+          "target": 3.0,
+          "passed": false
+        }
+      },
+      "all_passed": false
+    }
+  },
+  "replay_wall_clock_s": 0.13659050900605507
+}
