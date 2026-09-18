@@ -95,6 +95,24 @@ class ContactForceAllocator:
         for i in range(6):
             self._s_root_transpose[i, i] = 1.0
 
+    def _compute_applied(
+        self,
+        tau_sol: Array,
+        j_ground: Array,
+        f_sol: Array,
+        j_grip: Array,
+        lambda_sol: Array,
+        root_sol: Array,
+    ) -> Array:
+        tau_full = np.zeros(self.nv)
+        tau_full[self.actuated_indices] = tau_sol
+        return (
+            tau_full
+            + j_ground.T @ f_sol
+            + j_grip.T @ lambda_sol
+            + self._s_root_transpose @ root_sol
+        )
+
     def allocate(
         self,
         tau_rnea: Array,
@@ -185,13 +203,8 @@ class ContactForceAllocator:
         root_sol = x_sol[idx_root:]
 
         # Verify equilibrium
-        tau_full = np.zeros(self.nv)
-        tau_full[self.actuated_indices] = tau_sol
-        applied = (
-            tau_full
-            + j_ground.T @ f_sol
-            + j_grip.T @ lambda_sol
-            + self._s_root_transpose @ root_sol
+        applied = self._compute_applied(
+            tau_sol, j_ground, f_sol, j_grip, lambda_sol, root_sol
         )
         eq_res = float(np.max(np.abs(applied - tau_rnea)))
 
@@ -200,12 +213,8 @@ class ContactForceAllocator:
         # Exact projection refinement: project any minute numerical residual onto actuated coordinates
         residual_err = tau_rnea - applied
         tau_sol = tau_sol + residual_err[self.actuated_indices]
-        tau_full[self.actuated_indices] = tau_sol
-        applied = (
-            tau_full
-            + j_ground.T @ f_sol
-            + j_grip.T @ lambda_sol
-            + self._s_root_transpose @ root_sol
+        applied = self._compute_applied(
+            tau_sol, j_ground, f_sol, j_grip, lambda_sol, root_sol
         )
         eq_res = float(np.max(np.abs(applied - tau_rnea)))
 
