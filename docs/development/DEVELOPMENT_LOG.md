@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10450 (https://github.com/D-sorganization/UpstreamDrift/pull/10450)
 - **Paths:** src/shared/python/shadow_tracker/segmentation.py; tests/unit/shadow_tracker/test_revision_persistence.py; docs/plans/shadow_tracker/
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 on c76d6f02c (remote-main base); 306 tests pass; scoped Ruff, file-size and context checks pass.
+- **Last verified:** 2026-09-18 on c76d6f02c (remote-main base); 306 tests pass; CI run 35376242857 identifies AnyIO 4.12.1 vulnerabilities; SELF upgrades both locks to 4.14.2; scoped Ruff, file-size and context checks pass.
 - **Summary:** Complete-record idempotence, same-observation parents, current selection and strict atomic provider snapshots with legacy reading. Renderer preserved.
 - **Next step:** Validate PR #10450 CI and merge through branch protection.
 - **Evidence:** docs/plans/shadow_tracker/TURNOVER_CURRENT.md; tests/unit/shadow_tracker/test_revision_persistence.py.

@@ -5,6 +5,8 @@
 - Workspace: `C:/Users/diete/Repositories/UpstreamDrift-10233-pr`.
 - Branch: `fix/shadow-tracker-10233-pr`; HEAD/base:
   `5347cba0f` (origin/main); implementation `c76d6f02c`; handoff update SELF; PR #10450 open.
+- CI repair SELF: upgrade AnyIO locks 4.12.1 -> 4.14.2 for
+  CVE-2026-63374 and CVE-2026-64847; no audit waiver or gate weakening.
 - Entry DL-#10233: provider implementation and tests complete; renderer and
   unrelated original-checkout work preserved.
 - Contracts, RED/GREEN commands, compatibility and limitations:

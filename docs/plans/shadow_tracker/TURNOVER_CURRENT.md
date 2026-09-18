@@ -48,6 +48,14 @@ PR field for DL-#9967, plus the existing portfolio WIP breach (now 20/8).
 DL-#10233 has no reported errors; unrelated entries were preserved. These
 repository-wide documentation failures remain a publication limitation.
 
+### CI Dependency Repair
+
+PR run `35376242857` failed code-quality and dependency-consistency solely on
+AnyIO 4.12.1: CVE-2026-63374 and CVE-2026-64847. Both runtime and development
+lockfiles now select 4.14.2, the audit-reported fixed version. PyPI metadata
+confirms Python >=3.10 compatibility and unchanged satisfied dependency bounds.
+No audit waiver or CI gate is weakened. Repair commit: SELF.
+
 ### Review Limits and Next Action
 
 Validate PR #10450 CI and merge through normal protection. The PR references
