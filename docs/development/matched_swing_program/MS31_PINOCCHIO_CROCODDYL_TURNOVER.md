@@ -2,7 +2,7 @@
 
 Governing issue: #10338 (epic #10363, Matched Swing Program). Branch
 `feat/10338-crocoddyl-native-fit`. Development-log entry `DL-#10338`.
-Last updated 2026-09-17 15:55 PT by claude. Read this file first; it is kept current
+Last updated 2026-09-17 18:10 PT by claude. Read this file first; it is kept current
 at every checkpoint so another agent can continue without the chat history.
 
 ## Objective
@@ -71,14 +71,14 @@ pipe through `tr -d '\r'`. Long runs: launch detached with
 
 ## Results so Far (ControlTower, Driver Document `anthro_driver/full_body_spec_hipcal_scaled.json`)
 
-| Run       | Window | Nodes | Solver rollout whole / terminal / club (mm) | RK45 replay whole (mm) | Note                                                                                                                                  |
-| --------- | ------ | ----- | ------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| smoke     | 0.05 s | 19    | 24.5 / 14.7 / 9.8                           | 26.9                   | implicit-Euler nodes, 8 iterations                                                                                                    |
-| w030      | 0.30 s | 109   | 467 (fallen)                                | 442                    | no continuation, kinematic warm start                                                                                                 |
-| w030c     | 0.30 s | 109   | 15.9 / 13.8 / 4.8                           | 192                    | continuation; implicit-Euler nodes exploit integrator damping                                                                         |
-| w030r     | 0.30 s | 109   | **19.7 / 14.2 / 9.8**, yaw 1.35 deg         | **19.7 (identical)**   | continuation + exact RK45 nodes; 66 min; audit: 1.4 BW peak contact, penetration 17 mm, weight fraction min 0.21, peak effort 165 N m |
-| w030s     | 0.30 s | 109   | pending                                     | pending                | continuation + 4-substep implicit-Euler nodes (speed candidate)                                                                       |
-| driver_g1 | 0.85 s | 307   | pending                                     | pending                | RK45 nodes, rtol 1e-4, warm start from w030r candidate, continuation 0.30/0.45/0.60, launched 2026-09-17 15:55 PT                     |
+| Run       | Window | Nodes | Solver rollout whole / terminal / club (mm) | RK45 replay whole (mm) | Note                                                                                                                                                                 |
+| --------- | ------ | ----- | ------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| smoke     | 0.05 s | 19    | 24.5 / 14.7 / 9.8                           | 26.9                   | implicit-Euler nodes, 8 iterations                                                                                                                                   |
+| w030      | 0.30 s | 109   | 467 (fallen)                                | 442                    | no continuation, kinematic warm start                                                                                                                                |
+| w030c     | 0.30 s | 109   | 15.9 / 13.8 / 4.8                           | 192                    | continuation; implicit-Euler nodes exploit integrator damping                                                                                                        |
+| w030r     | 0.30 s | 109   | **19.7 / 14.2 / 9.8**, yaw 1.35 deg         | **19.7 (identical)**   | continuation + exact RK45 nodes; 66 min; audit: 1.4 BW peak contact, penetration 17 mm, weight fraction min 0.21, peak effort 165 N m                                |
+| w030s     | 0.30 s | 109   | 34.0 / 25.6 / 52.8                          | 79.2                   | 4-substep implicit-Euler nodes: worse and not converged; abandoned                                                                                                   |
+| driver_g1 | 0.85 s | 307   | (first attempt lost, see below)             |                        | relaunched 2026-09-17 18:05 PT with stage checkpoints; RK45 nodes, rtol 1e-4, warm start from w030r, continuation 0.30/0.45/0.60, 30 iterations per stage, 120 final |
 
 Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
 
@@ -101,6 +101,14 @@ Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
    `FIT_ATTACHMENTS_RECEIPT=.../anthro_iron_zmp/receipt.json`, `FIT_CAPTURE=data/C3D_TA_Iron.c3d`).
 
 ## Known Gaps / Risks
+
+- 2026-09-17 18:00: the first G1 run solved for 2 h 10 min and then crashed in a
+  post-solve diagnostic (single-step implicit-Euler replay) before writing the
+  receipt, losing the solution. Fixed: the driver now writes
+  `stage_<t>s.npz` after every continuation stage and `solution.npz` +
+  `solver_stages.json` right after the solve, before any metrics; the
+  diagnostic was removed; the physical audit is guarded. Any of those files
+  can be passed to `--warm-start-candidate` to resume.
 
 - The RK45 replay of an implicit-Euler-node solution diverged (192 mm); only
   RK45-node solutions count. MS-01 `acceptance.py` does not exist yet, so the
