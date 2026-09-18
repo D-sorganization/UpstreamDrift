@@ -1,0 +1,77 @@
+{
+  "status": "REJECTED_DIAGNOSTIC",
+  "scope": "Full driver C3D kinematic fit and force-allocation diagnostic, not uninterrupted native replay",
+  "pinocchio_version": "4.1.0",
+  "ezc3d_version": "1.7.0",
+  "base_commit": "085a71b2e994b2087871ba37929a433b456b2573",
+  "source_sha256": {
+    "scripts/match_pinocchio_c3d.py": "0959673a6d38f5b3f2ee628b57613a0188d1cf9753eb44e21b0f6f60a49acf61",
+    "src/engines/physics_engines/pinocchio/python/native_model.py": "06f930c723bd4db76856a8c7411480d8e66a24a82741aaf658a64cdf9ec431c0"
+  },
+  "document_sha256": "5d1e5eac6813aecabee69752704510860597a64cf45b28798b011e6109d3bdd5",
+  "capture_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+  "horizon": {
+    "t_start_s": 0.0,
+    "t_end_s": 1.8138888888888889,
+    "dt_s": 0.002777777777777778
+  },
+  "nodes": 654,
+  "marker_rmse_mm": 133.53077592246166,
+  "segments": {
+    "club": {
+      "name": "club",
+      "marker_count": 6,
+      "rmse_mm": 50.20370481288384,
+      "max_error_mm": 367.9823660476744,
+      "coverage_fraction": 0.9564220183486238
+    },
+    "feet": {
+      "name": "feet",
+      "marker_count": 6,
+      "rmse_mm": 37.88683338447766,
+      "max_error_mm": 163.9502790805243,
+      "coverage_fraction": 1.0
+    },
+    "wrists_hands": {
+      "name": "wrists_hands",
+      "marker_count": 2,
+      "rmse_mm": 60.77191644905068,
+      "max_error_mm": 199.87489496922277,
+      "coverage_fraction": 1.0
+    },
+    "arms": {
+      "name": "arms",
+      "marker_count": 8,
+      "rmse_mm": 191.6357793967105,
+      "max_error_mm": 599.9755087913895,
+      "coverage_fraction": 0.8994648318042814
+    },
+    "pelvis": {
+      "name": "pelvis",
+      "marker_count": 4,
+      "rmse_mm": 161.59779402786438,
+      "max_error_mm": 350.61339546027807,
+      "coverage_fraction": 0.9980886850152905
+    },
+    "torso_head": {
+      "name": "torso_head",
+      "marker_count": 10,
+      "rmse_mm": 180.73119083011457,
+      "max_error_mm": 599.9755087913895,
+      "coverage_fraction": 1.0
+    }
+  },
+  "reasons": [
+    "Whole-marker RMS exceeds the existing 60 mm driver G3 gate.",
+    "Unphysical peak efforts remain near 9.2 kN m.",
+    "Acceleration parity remains about 0.0021; this diagnostic does not establish forward replay.",
+    "Inherited allocator does not yet enforce the required complete physical contact constraints."
+  ],
+  "command": "python scripts/match_pinocchio_c3d.py --mode optimum --quiet --out <new-diagnostic-directory>",
+  "artifacts_sha256": {
+    "candidate.npz": "a30912763fe816b5bc0b0fe4670030b07d0929af305a9567c98eacc36a4dc6b4",
+    "match_comparison_results.json": "01121bddbd8cb08f8537821a86f1994f0d4f602ba2c776c67393a60bc57ebeb6",
+    "receipt.json": "b709ce7d617ab769326b26dd1433b19e10826fc9b565544616e6ad6096572509",
+    "swing_evaluation_report.json": "7f157e8561e6fb24d07e401ef3feb640ae6303059ded5344417cbefdaa73baea"
+  }
+}

@@ -294,7 +294,7 @@ def match_pinocchio_c3d(
             j_ground_pin[s_idx * 3 : s_idx * 3 + 3, :] = j_raw[:3, :]
 
         # Grip Jacobian (6, nv)
-        closure = plant.closure_position_linearization(ctx.map.as_dict(q_smooth[k]))
+        closure = plant.closure_force_jacobian(ctx.map.as_dict(q_smooth[k]))
         j_grip_pin = np.zeros((6, model.nv))
         j_grip_pin[:, ctx.map.v_index] = closure.jacobian
 

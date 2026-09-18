@@ -24,9 +24,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10439 (epic #10430; program #10363)
 - **Branch:** fix/pf09-native-force-equations
 - **PR:** #10451
-- **Paths:** src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py
+- **Paths:** src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py; src/engines/physics_engines/pinocchio/python/native_model.py; scripts/match_pinocchio_c3d.py; tests/integration/engines/pinocchio/test_force_mapping.py
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at 91784d8c7; five native MuJoCo 3.3.4 RED/GREEN tests and six existing allocator regressions pass; scoped isolated mypy, Ruff, LoD and manual governance pass.
+- **Last verified:** 2026-09-18 at 085a71b2e plus SELF; four force-map tests pass natively on Pinocchio 3.8 and 4.1; five native MuJoCo 3.3.4 RED/GREEN tests and six existing allocator regressions pass; scoped isolated mypy, Ruff, LoD and manual governance pass.
 - **Summary:** Repair stale native mass/Jacobians and raw inverse-dynamics equation; validate finite inputs and dimensions before native state changes. Native multi-engine completion remains open.
 - **Next step:** Replace synthetic factory branches with native MatchingPlant force interfaces and model-conformity checks.
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py

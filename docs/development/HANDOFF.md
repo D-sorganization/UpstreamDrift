@@ -4,6 +4,35 @@ Updated 2026-09-18; branch `fix/pf09-native-force-equations`; commit SELF.
 Development entry DL-#10439. PR #10451; implementation 91784d8c7. This work is independent of the
 PF-01–04 stack and preserves the PF-05 and viewer owners' scope.
 
+## Pinocchio Grip Force Mapping
+
+SELF adds `NativePinocchioModel.closure_force_jacobian` and routes the C3D
+matching allocator through it. The old call used the derivative of the finite
+SE(3) pose-error logarithm, whose API explicitly excludes inverse dynamics.
+The new mapping is the native velocity constraint: its transpose maps a grip
+wrench in the Pinocchio constraint LOCAL frame to generalized effort. Position
+IK and closure-error diagnostics retain the log-pose derivative.
+
+Four native RED/GREEN tests pass on both Pinocchio 3.8 and 4.1: constraint
+velocity agreement, distinction from the pose derivative away from closure,
+state/order refresh without a dynamics solve, and nonfinite rejection.
+The map avoids an unnecessary constrained dynamics solve per allocation frame.
+
+Run from WSL Ubuntu-24.04 in this worktree:
+`/home/dieterolson/.venvs/upstream-crocoddyl-conda-10254/bin/python -m pytest tests/integration/engines/pinocchio/test_force_mapping.py --confcutdir=tests/integration/engines/pinocchio -o addopts= -q`
+The Pinocchio 3.8 runtime is `/home/dieterolson/.venvs/upstream-motion-10254`.
+Mocked Pinocchio collection is explicitly skipped, never counted as native proof.
+
+A complete 654-node / 1.813889 s driver diagnostic ran on Pinocchio 4.1 with
+this mapping. Marker RMS remains 133.5308 mm, arms 191.6358 mm, pelvis
+161.5978 mm and club 50.2037 mm. Peak efforts remain about 9.2 kN m and
+acceleration parity about 0.0021: REJECTED, not accepted replay. Source and
+artifact hashes and the repeat command are in `pf09_force_mapping_diagnostic.json`.
+The observed geometric mismatch is already substantial at address. Investigate
+registration, anatomical/marker calibration and IK convergence separately;
+this run does not establish an irreducible error floor. Null-space effort
+optimization alone cannot change a fixed kinematic trajectory.
+
 ## Verified Native Defects and Repair
 
 Five real MuJoCo tests failed before the repair and pass afterward. A fresh
