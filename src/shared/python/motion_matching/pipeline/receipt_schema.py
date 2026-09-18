@@ -100,6 +100,11 @@ class Receipt(BaseModel):
         description="Kinematic backend engine used for tracking (mujoco or pink)",
         json_schema_extra={"unit": "string", "stage": "metadata"},
     )
+    engine: str = Field(
+        "mujoco",
+        description="Full-body dynamics and plant engine (mujoco, drake, pinocchio)",
+        json_schema_extra={"unit": "string", "stage": "metadata"},
+    )
     base_spec_sha256: str = Field(
         ...,
         description="SHA256 hash of the initial input model specification document",
