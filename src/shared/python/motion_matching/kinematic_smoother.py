@@ -217,46 +217,9 @@ class KinematicSmoother:
         else:
             t_grid = np.arange(n_frames, dtype=float) * step_dt
 
-        # Filter design: zero-phase Butterworth
+        # Filter and spline
         fs = 1.0 / step_dt
-        nyquist = 0.5 * fs
-        norm_cutoff = min(opts.cutoff_hz / nyquist, 0.95)
-        require(norm_cutoff > 0.0, "Cutoff frequency must be positive")
-
-        if n_frames < 6:
-            # Fallback for ultra-short sequences
-            q_filtered = q_arr.copy()
-            v_smooth = np.gradient(q_filtered, step_dt, axis=0)
-            a_smooth = np.gradient(v_smooth, step_dt, axis=0)
-        else:
-            b, a_filter = sp_signal.butter(
-                opts.filter_order, norm_cutoff, btype="low", analog=False
-            )
-
-            # Reflection padding to eliminate boundary acceleration and jerk spikes
-            pad_len = min(opts.boundary_padding_frames, n_frames - 1)
-            q_pad_left = 2.0 * q_arr[0] - q_arr[1 : pad_len + 1][::-1]
-            q_pad_right = 2.0 * q_arr[-1] - q_arr[-pad_len - 1 : -1][::-1]
-            q_padded = np.vstack([q_pad_left, q_arr, q_pad_right])
-
-            # Zero-phase bidirectional filtering
-            q_filt_padded = sp_signal.filtfilt(b, a_filter, q_padded, axis=0)
-            q_filtered = q_filt_padded[pad_len : pad_len + n_frames]
-
-            # Quintic B-spline fit on padded points to ensure C4 smoothness and eliminate boundary derivative spikes
-            t_pad_left = t_grid[0] - np.arange(pad_len, 0, -1, dtype=float) * step_dt
-            t_pad_right = t_grid[-1] + np.arange(1, pad_len + 1, dtype=float) * step_dt
-            t_padded = np.concatenate([t_pad_left, t_grid, t_pad_right])
-
-            v_smooth = np.zeros((n_frames, n_coords), dtype=float)
-            a_smooth = np.zeros((n_frames, n_coords), dtype=float)
-            k_spline = min(5, t_padded.size - 1)
-
-            for col in range(n_coords):
-                spl = sp_interp.splrep(t_padded, q_filt_padded[:, col], k=k_spline, s=0)
-                q_filtered[:, col] = sp_interp.splev(t_grid, spl, der=0)
-                v_smooth[:, col] = sp_interp.splev(t_grid, spl, der=1)
-                a_smooth[:, col] = sp_interp.splev(t_grid, spl, der=2)
+        q_filtered, v_smooth, a_smooth = self._filter_and_spline(q_arr, t_grid, step_dt)
 
         # Enforce bounds and weld loop-closure
         q_proj, v_proj, closure_errs, closure_rates = self._project_closure_and_bounds(
@@ -271,44 +234,15 @@ class KinematicSmoother:
         else:
             a_final = a_smooth
 
-        # Audit smoothing metrics
-        delta_a = np.linalg.norm(np.diff(a_final, axis=0), axis=1)
-        max_acc_step = float(np.max(delta_a)) if delta_a.size else 0.0
-        median_acc_step = float(np.median(delta_a)) if delta_a.size else 1e-9
-        start_ratio = (
-            float(delta_a[0] / (delta_a[1] + 1e-9)) if delta_a.size > 1 else 1.0
-        )
-        end_ratio = (
-            float(delta_a[-1] / (delta_a[-2] + 1e-9)) if delta_a.size > 1 else 1.0
-        )
-        jerk = delta_a / step_dt if delta_a.size else np.zeros(0)
-        max_jerk = float(np.max(jerk)) if jerk.size else 0.0
-        rms_diff = float(np.sqrt(np.mean((q_proj - q_arr) ** 2)))
-
-        bounds_violations = 0
-        if self.lower is not None and self.upper is not None:
-            below = q_proj < (self.lower - 1e-6)
-            above = q_proj > (self.upper + 1e-6)
-            bounds_violations = int(np.sum(below | above))
-
-        audit = SmoothingAudit(
-            frame_count=n_frames,
-            duration_s=float(t_grid[-1] - t_grid[0]),
-            sample_rate_hz=fs,
-            cutoff_hz=opts.cutoff_hz,
-            max_acceleration_step=max_acc_step,
-            boundary_spike_start_ratio=start_ratio,
-            boundary_spike_end_ratio=end_ratio,
-            max_jerk=max_jerk,
-            position_rms_diff=rms_diff,
-            max_closure_error_m=(
-                float(np.max(closure_errs)) if closure_errs.size else 0.0
-            ),
-            max_closure_rate_m_s=(
-                float(np.max(closure_rates)) if closure_rates.size else 0.0
-            ),
-            bounds_violation_count=bounds_violations,
-            no_dropped_frames=(len(q_proj) == n_frames),
+        audit = self._build_audit(
+            q_proj,
+            q_arr,
+            a_final,
+            t_grid,
+            step_dt,
+            fs,
+            closure_errs,
+            closure_rates,
         )
 
         ensure(len(q_proj) == n_frames, "Smoothed trajectory must not drop frames")
@@ -329,4 +263,98 @@ class KinematicSmoother:
             closure_error_m=closure_errs,
             closure_rate_m_s=closure_rates,
             audit=audit,
+        )
+
+    def _filter_and_spline(
+        self, q_arr: Array, t_grid: Array, step_dt: float
+    ) -> tuple[Array, Array, Array]:
+        n_frames, n_coords = q_arr.shape
+        opts = self.options
+        fs = 1.0 / step_dt
+        nyquist = 0.5 * fs
+        norm_cutoff = min(opts.cutoff_hz / nyquist, 0.95)
+        require(norm_cutoff > 0.0, "Cutoff frequency must be positive")
+
+        if n_frames < 6:
+            q_filtered = q_arr.copy()
+            v_smooth = np.gradient(q_filtered, step_dt, axis=0)
+            a_smooth = np.gradient(v_smooth, step_dt, axis=0)
+            return q_filtered, v_smooth, a_smooth
+
+        b, a_filter = sp_signal.butter(
+            opts.filter_order, norm_cutoff, btype="low", analog=False
+        )
+        pad_len = min(opts.boundary_padding_frames, n_frames - 1)
+        q_pad_left = 2.0 * q_arr[0] - q_arr[1 : pad_len + 1][::-1]
+        q_pad_right = 2.0 * q_arr[-1] - q_arr[-pad_len - 1 : -1][::-1]
+        q_padded = np.vstack([q_pad_left, q_arr, q_pad_right])
+
+        q_filt_padded = sp_signal.filtfilt(b, a_filter, q_padded, axis=0)
+        q_filtered = q_filt_padded[pad_len : pad_len + n_frames]
+
+        t_pad_left = t_grid[0] - np.arange(pad_len, 0, -1, dtype=float) * step_dt
+        t_pad_right = t_grid[-1] + np.arange(1, pad_len + 1, dtype=float) * step_dt
+        t_padded = np.concatenate([t_pad_left, t_grid, t_pad_right])
+
+        v_smooth = np.zeros((n_frames, n_coords), dtype=float)
+        a_smooth = np.zeros((n_frames, n_coords), dtype=float)
+        k_spline = min(5, t_padded.size - 1)
+
+        for col in range(n_coords):
+            spl = sp_interp.splrep(t_padded, q_filt_padded[:, col], k=k_spline, s=0)
+            q_filtered[:, col] = sp_interp.splev(t_grid, spl, der=0)
+            v_smooth[:, col] = sp_interp.splev(t_grid, spl, der=1)
+            a_smooth[:, col] = sp_interp.splev(t_grid, spl, der=2)
+
+        return q_filtered, v_smooth, a_smooth
+
+    def _build_audit(
+        self,
+        q_proj: Array,
+        q_arr: Array,
+        a_final: Array,
+        t_grid: Array,
+        step_dt: float,
+        fs: float,
+        closure_errs: Array,
+        closure_rates: Array,
+    ) -> SmoothingAudit:
+        opts = self.options
+        n_frames = len(q_proj)
+        delta_a = np.linalg.norm(np.diff(a_final, axis=0), axis=1)
+        max_acc_step = float(np.max(delta_a)) if delta_a.size else 0.0
+        start_ratio = (
+            float(delta_a[0] / (delta_a[1] + 1e-9)) if delta_a.size > 1 else 1.0
+        )
+        end_ratio = (
+            float(delta_a[-1] / (delta_a[-2] + 1e-9)) if delta_a.size > 1 else 1.0
+        )
+        jerk = delta_a / step_dt if delta_a.size else np.zeros(0)
+        max_jerk = float(np.max(jerk)) if jerk.size else 0.0
+        rms_diff = float(np.sqrt(np.mean((q_proj - q_arr) ** 2)))
+
+        bounds_violations = 0
+        if self.lower is not None and self.upper is not None:
+            below = q_proj < (self.lower - 1e-6)
+            above = q_proj > (self.upper + 1e-6)
+            bounds_violations = int(np.sum(below | above))
+
+        return SmoothingAudit(
+            frame_count=n_frames,
+            duration_s=float(t_grid[-1] - t_grid[0]),
+            sample_rate_hz=fs,
+            cutoff_hz=opts.cutoff_hz,
+            max_acceleration_step=max_acc_step,
+            boundary_spike_start_ratio=start_ratio,
+            boundary_spike_end_ratio=end_ratio,
+            max_jerk=max_jerk,
+            position_rms_diff=rms_diff,
+            max_closure_error_m=(
+                float(np.max(closure_errs)) if closure_errs.size else 0.0
+            ),
+            max_closure_rate_m_s=(
+                float(np.max(closure_rates)) if closure_rates.size else 0.0
+            ),
+            bounds_violation_count=bounds_violations,
+            no_dropped_frames=(len(q_proj) == n_frames),
         )

@@ -1,5 +1,24 @@
 # SPEC.md — Repository Specification Document
 
+## Qualify Contact Modes and Native Pinocchio Force Feasibility (PF-04, #10434)
+
+Qualifies contact support modes with hysteresis, resolves contact geometry/support polygons, and audits Pinocchio floating-base force feasibility with physiological capacity bounds:
+- **Contact Mode Inference with Hysteresis (`src/shared/python/motion_matching/contact_modes.py`)**:
+  - `ContactState`: Discrete contact sphere state (`OPEN`, `STICKING`, `SLIPPING`).
+  - `FootSupportMode`: Single-foot support mode (`FLIGHT`, `HEEL_ONLY`, `TOE_ONLY` / pivot, `FULL_FOOT`, `SLIPPING`).
+  - `GlobalSupportMode`: Bipedal support mode (`DOUBLE_SUPPORT`, `LEFT_SUPPORT`, `RIGHT_SUPPORT`, `LEFT_HEEL_PIVOT`, `RIGHT_HEEL_PIVOT`, `FLIGHT`, `AMBIGUOUS`).
+  - `ContactHysteresisSettings`: Decoupled engage height ($h_{\text{engage}} = 0.005$ m) and release height ($h_{\text{release}} = 0.015$ m), with velocity gates ($v_{\text{engage}} = -0.05$ m/s, $v_{\text{release}} = 0.05$ m/s) and slip velocity hysteresis ($v_{\text{slip}} = 0.02$ m/s). Prevents high-frequency mode chattering during foot lift-off, landing, and heel pivots.
+  - `infer_contact_modes()`: Maps sphere trajectories over time to support modes, flags ambiguous frames, and produces `ContactModeSequence` with primary and alternative candidate schedules.
+  - `evaluate_support_geometry()`: Computes instantaneous Center of Pressure (COP), validates containment within the convex support polygon formed by active contact points, measures COP boundary margin, and verifies Coulomb friction cone compliance ($|f_{i, t}| \le \mu f_{i, n}$).
+- **Pinocchio Force Feasibility & Constitutive Gating (`src/shared/python/motion_matching/contact_force_feasibility.py`)**:
+  - Independent Residual Budgets: Enforces separate floating-base force residual ($\le 5.0$ N) and torque residual ($\le 1.0$ N·m) budgets, preventing small torque values from masking force balance violations.
+  - Physiological Capacity Limits: Enforces human biomechanical bounds ($F_{\text{GRF}} \le 3.5 \times BW$, $\tau_{\text{ankle}} \le 350$ N·m, maximum joint torque $\le 800$ N·m, documented from Rajagopal 2016 / Ball & Best 2007 / Winter 2009). Strictly rejects unphysical meganewton (MN) loads and kilonewton-metre (kN·m) ankle torque spikes.
+  - Compliant Physics Constitutive Comparison: Verifies that inferred contact forces from inverse dynamics / force allocation match constitutive Hunt-Crossley / regularized Coulomb models at $(q, v)$, strictly rejecting arbitrary supported forces when feet are in flight.
+  - Parameter Sensitivity Reporting: `compute_contact_sensitivity()` evaluates parameter sensitivity of ground forces with respect to body mass ($\pm 5\%$), marker offsets ($\pm 5$ mm), ground height ($\pm 5$ mm), and friction coefficient $\mu$ ($\pm 0.1$).
+- **Integration**:
+  - Extended `ContactForceAllocation` in `contact_force_allocator.py` with `.audit_feasibility()` method connecting directly to the feasibility qualification engine.
+  - Unit and acceptance test suite in `tests/unit/motion_matching/test_contact_modes_and_pinocchio_feasibility.py` covering static weight balance, lift-off/landing, heel pivot, slipping foot, double support, flight rejection, independent residual budgets, capacity limits, constitutive comparison, and sensitivity reporting.
+
 ## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
 
 Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility, bounded overlapping-window refinement, joint $q/v/a$ derivative consistency, and separate driver/iron calibration validation:
