@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from src.shared.python.motion_matching.pipeline import (
     address,
+    cli,
     constants,
     design_decisions,
     dynamics,
     lane,
+    plant,
     receipt,
     reference,
 )
@@ -112,6 +114,7 @@ __all__ = [
     "build_ik_report",
     "calibrate_legs",
     "calibrated_address_summary",
+    "cli",
     "com_report",
     "configure_lane",
     "consistency_resolve",
@@ -127,6 +130,7 @@ __all__ = [
     "lane",
     "log_pipeline_summary",
     "marker_errors",
+    "plant",
     "posture_summary",
     "prepare_hip_spec",
     "receipt",
