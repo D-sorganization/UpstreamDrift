@@ -218,6 +218,117 @@ def _classify_global_mode(
     return GlobalSupportMode.FLIGHT
 
 
+def _update_sphere_contact_state(
+    prev_state: ContactState,
+    bottom_h: float,
+    v_normal: float,
+    v_tangent: float,
+    opts: ContactHysteresisSettings,
+) -> tuple[ContactState, bool]:
+    """Evaluate contact engagement/release hysteresis and ambiguity for one sphere."""
+    is_ambig = False
+    if prev_state == ContactState.OPEN:
+        if bottom_h <= opts.engage_height_m or (
+            bottom_h <= opts.release_height_m and v_normal <= opts.engage_velocity_m_s
+        ):
+            new_state = (
+                ContactState.SLIPPING
+                if v_tangent > opts.slip_velocity_m_s
+                else ContactState.STICKING
+            )
+        else:
+            new_state = ContactState.OPEN
+            if (
+                opts.engage_height_m < bottom_h <= opts.release_height_m
+                and abs(v_normal) < 0.1
+            ):
+                is_ambig = True
+    else:
+        if bottom_h > opts.release_height_m or (
+            bottom_h > opts.engage_height_m and v_normal >= opts.release_velocity_m_s
+        ):
+            new_state = ContactState.OPEN
+        else:
+            slip_thresh = (
+                opts.slip_velocity_m_s * opts.slip_hysteresis_ratio
+                if prev_state == ContactState.STICKING
+                else opts.slip_velocity_m_s
+            )
+            new_state = (
+                ContactState.SLIPPING
+                if v_tangent > slip_thresh
+                else ContactState.STICKING
+            )
+            if (
+                opts.engage_height_m < bottom_h <= opts.release_height_m
+                and abs(v_normal) < 0.1
+            ):
+                is_ambig = True
+    return new_state, is_ambig
+
+
+def _build_alternative_schedules(
+    frames: list[FrameSupportMode], ambiguous_indices: list[int]
+) -> list[tuple[GlobalSupportMode, ...]]:
+    """Generate alternative candidate schedules for ambiguous intervals."""
+    if not ambiguous_indices:
+        return []
+    ambig_set = set(ambiguous_indices)
+    cand1 = [
+        GlobalSupportMode.FLIGHT if idx in ambig_set else f.global_mode
+        for idx, f in enumerate(frames)
+    ]
+    cand2 = [
+        GlobalSupportMode.DOUBLE_SUPPORT if idx in ambig_set else f.global_mode
+        for idx, f in enumerate(frames)
+    ]
+    return [tuple(cand1), tuple(cand2)]
+
+
+def _classify_frame_support_mode(
+    time_s: float,
+    sphere_states: dict[str, ContactPointState],
+    frame_has_ambiguity: bool,
+) -> FrameSupportMode:
+    l_heel = sphere_states.get(
+        "heel_l",
+        ContactPointState("heel_l", 1.0, 0.0, 0.0, ContactState.OPEN, False),
+    )
+    l_toe = sphere_states.get(
+        "forefoot_l",
+        sphere_states.get(
+            "toe_l",
+            ContactPointState("forefoot_l", 1.0, 0.0, 0.0, ContactState.OPEN, False),
+        ),
+    )
+    r_heel = sphere_states.get(
+        "heel_r",
+        ContactPointState("heel_r", 1.0, 0.0, 0.0, ContactState.OPEN, False),
+    )
+    r_toe = sphere_states.get(
+        "forefoot_r",
+        sphere_states.get(
+            "toe_r",
+            ContactPointState("forefoot_r", 1.0, 0.0, 0.0, ContactState.OPEN, False),
+        ),
+    )
+
+    l_ambig = l_heel.is_ambiguous or l_toe.is_ambiguous
+    r_ambig = r_heel.is_ambiguous or r_toe.is_ambiguous
+    l_foot = _classify_foot_mode(l_heel.state, l_toe.state, l_ambig)
+    r_foot = _classify_foot_mode(r_heel.state, r_toe.state, r_ambig)
+    global_mode = _classify_global_mode(l_foot, r_foot)
+
+    return FrameSupportMode(
+        time_s=time_s,
+        global_mode=global_mode,
+        left_foot=l_foot,
+        right_foot=r_foot,
+        is_ambiguous=frame_has_ambiguity,
+        sphere_states=sphere_states,
+    )
+
+
 def infer_contact_modes(
     sphere_positions_m: Mapping[str, Array],
     sphere_velocities_m_s: Mapping[str, Array],
@@ -226,44 +337,22 @@ def infer_contact_modes(
     sphere_radii_m: Mapping[str, float],
     settings: ContactHysteresisSettings | None = None,
 ) -> ContactModeSequence:
-    """Infer contact modes across time using height and velocity hysteresis.
-
-    Args:
-        sphere_positions_m: Dict of sphere_name -> (N_frames, 3) positions.
-        sphere_velocities_m_s: Dict of sphere_name -> (N_frames, 3) velocities.
-        ground: Ground plane definition.
-        times_s: Sequence of length N_frames timestamps.
-        sphere_radii_m: Dict of sphere_name -> radius in meters.
-        settings: Hysteresis configuration thresholds.
-
-    Returns:
-        ContactModeSequence with primary schedule and alternative ambiguous candidates.
-    """
+    """Infer contact modes across time using height and velocity hysteresis."""
     opts = settings or ContactHysteresisSettings()
     n_frames = len(times_s)
     require(n_frames > 0, "times_s must not be empty")
 
     for name, pos in sphere_positions_m.items():
-        require(
-            pos.shape == (n_frames, 3),
-            f"Position shape mismatch for {name}",
-            (pos.shape, (n_frames, 3)),
-        )
+        require(pos.shape == (n_frames, 3), f"Position shape mismatch for {name}")
     for name, vel in sphere_velocities_m_s.items():
-        require(
-            vel.shape == (n_frames, 3),
-            f"Velocity shape mismatch for {name}",
-            (vel.shape, (n_frames, 3)),
-        )
+        require(vel.shape == (n_frames, 3), f"Velocity shape mismatch for {name}")
 
     normal = np.asarray(ground.normal, dtype=float)
     normal_unit = normal / np.linalg.norm(normal)
 
-    # State machine memory across frames
     sphere_prev_state: dict[str, ContactState] = dict.fromkeys(
         sphere_positions_m, ContactState.OPEN
     )
-
     frames: list[FrameSupportMode] = []
     ambiguous_indices: list[int] = []
 
@@ -277,65 +366,17 @@ def infer_contact_modes(
             vel = sphere_velocities_m_s[name][k]
             radius = sphere_radii_m.get(name, 0.03)
 
-            # Distance from sphere bottom to ground along ground normal
             center_h = float(normal_unit @ pos) - ground.height_m
             bottom_h = center_h - radius
-
-            # Velocity components
-            v_normal = float(normal_unit @ vel)  # positive moving up
+            v_normal = float(normal_unit @ vel)
             v_tangent_vec = vel - normal_unit * v_normal
             v_tangent = float(np.linalg.norm(v_tangent_vec))
 
-            prev_state = sphere_prev_state[name]
-            is_ambig = False
-
-            # Hysteresis update logic
-            if prev_state == ContactState.OPEN:
-                # Engagement condition
-                if bottom_h <= opts.engage_height_m or (
-                    bottom_h <= opts.release_height_m
-                    and v_normal <= opts.engage_velocity_m_s
-                ):
-                    new_state = (
-                        ContactState.SLIPPING
-                        if v_tangent > opts.slip_velocity_m_s
-                        else ContactState.STICKING
-                    )
-                else:
-                    new_state = ContactState.OPEN
-                    # Ambiguity check: in the hysteresis gap with near-zero normal velocity
-                    if (
-                        opts.engage_height_m < bottom_h <= opts.release_height_m
-                        and abs(v_normal) < 0.1
-                    ):
-                        is_ambig = True
-                        frame_has_ambiguity = True
-            else:
-                # Release condition
-                if bottom_h > opts.release_height_m or (
-                    bottom_h > opts.engage_height_m
-                    and v_normal >= opts.release_velocity_m_s
-                ):
-                    new_state = ContactState.OPEN
-                else:
-                    # Stays engaged; update sticking vs slipping with slip hysteresis
-                    slip_thresh = (
-                        opts.slip_velocity_m_s * opts.slip_hysteresis_ratio
-                        if prev_state == ContactState.STICKING
-                        else opts.slip_velocity_m_s
-                    )
-                    new_state = (
-                        ContactState.SLIPPING
-                        if v_tangent > slip_thresh
-                        else ContactState.STICKING
-                    )
-
-                    if (
-                        opts.engage_height_m < bottom_h <= opts.release_height_m
-                        and abs(v_normal) < 0.1
-                    ):
-                        is_ambig = True
-                        frame_has_ambiguity = True
+            new_state, is_ambig = _update_sphere_contact_state(
+                sphere_prev_state[name], bottom_h, v_normal, v_tangent, opts
+            )
+            if is_ambig:
+                frame_has_ambiguity = True
 
             sphere_prev_state[name] = new_state
             sphere_states[name] = ContactPointState(
@@ -350,79 +391,43 @@ def infer_contact_modes(
         if frame_has_ambiguity:
             ambiguous_indices.append(k)
 
-        # Map to left and right foot states
-        l_heel = sphere_states.get(
-            "heel_l",
-            ContactPointState("heel_l", 1.0, 0.0, 0.0, ContactState.OPEN, False),
-        )
-        l_toe = sphere_states.get(
-            "forefoot_l",
-            sphere_states.get(
-                "toe_l",
-                ContactPointState(
-                    "forefoot_l", 1.0, 0.0, 0.0, ContactState.OPEN, False
-                ),
-            ),
-        )
-        r_heel = sphere_states.get(
-            "heel_r",
-            ContactPointState("heel_r", 1.0, 0.0, 0.0, ContactState.OPEN, False),
-        )
-        r_toe = sphere_states.get(
-            "forefoot_r",
-            sphere_states.get(
-                "toe_r",
-                ContactPointState(
-                    "forefoot_r", 1.0, 0.0, 0.0, ContactState.OPEN, False
-                ),
-            ),
-        )
-
-        l_ambig = l_heel.is_ambiguous or l_toe.is_ambiguous
-        r_ambig = r_heel.is_ambiguous or r_toe.is_ambiguous
-
-        l_foot = _classify_foot_mode(l_heel.state, l_toe.state, l_ambig)
-        r_foot = _classify_foot_mode(r_heel.state, r_toe.state, r_ambig)
-
-        global_mode = _classify_global_mode(l_foot, r_foot)
-
         frames.append(
-            FrameSupportMode(
-                time_s=t,
-                global_mode=global_mode,
-                left_foot=l_foot,
-                right_foot=r_foot,
-                is_ambiguous=frame_has_ambiguity,
-                sphere_states=sphere_states,
-            )
+            _classify_frame_support_mode(t, sphere_states, frame_has_ambiguity)
         )
 
-    # Generate plausible alternative candidate schedules for ambiguous intervals
-    alt_schedules: list[tuple[GlobalSupportMode, ...]] = []
-    if ambiguous_indices:
-        # Candidate 1: conservative (treat ambiguous frames as OPEN / single-support or flight)
-        cand1: list[GlobalSupportMode] = []
-        for idx, f in enumerate(frames):
-            if idx in ambiguous_indices:
-                cand1.append(GlobalSupportMode.FLIGHT)
-            else:
-                cand1.append(f.global_mode)
-        alt_schedules.append(tuple(cand1))
-
-        # Candidate 2: aggressive (treat ambiguous frames as engaged / double support)
-        cand2: list[GlobalSupportMode] = []
-        for idx, f in enumerate(frames):
-            if idx in ambiguous_indices:
-                cand2.append(GlobalSupportMode.DOUBLE_SUPPORT)
-            else:
-                cand2.append(f.global_mode)
-        alt_schedules.append(tuple(cand2))
-
+    alt_schedules = _build_alternative_schedules(frames, ambiguous_indices)
     return ContactModeSequence(
         frames=tuple(frames),
         ambiguous_frame_indices=tuple(ambiguous_indices),
         alternative_schedules=tuple(alt_schedules),
     )
+
+
+def _check_point_in_polygon(
+    cop_2d: Array, polygon_2d: Array, tolerance_cop_m: float
+) -> tuple[bool, float]:
+    """Determine whether COP is inside the 2D contact polygon or segment."""
+    n_pts = len(polygon_2d)
+    if n_pts == 1:
+        dist = float(np.linalg.norm(cop_2d - polygon_2d[0]))
+        return dist <= tolerance_cop_m, tolerance_cop_m - dist
+    if n_pts == 2:
+        p1, p2 = polygon_2d[0], polygon_2d[1]
+        seg = p2 - p1
+        seg_len_sq = float(np.dot(seg, seg))
+        t_proj = (
+            max(0.0, min(1.0, float(np.dot(cop_2d - p1, seg) / seg_len_sq)))
+            if seg_len_sq > 1e-12
+            else 0.0
+        )
+        closest = p1 + t_proj * seg
+        dist = float(np.linalg.norm(cop_2d - closest))
+        return dist <= tolerance_cop_m, tolerance_cop_m - dist
+
+    inside = convex_hull_contains(cop_2d, polygon_2d, tolerance_m=tolerance_cop_m)
+    dists = np.linalg.norm(polygon_2d - cop_2d, axis=1)
+    margin = float(tolerance_cop_m if inside else -np.min(dists))
+    return inside, margin
 
 
 def evaluate_support_geometry(
@@ -432,18 +437,7 @@ def evaluate_support_geometry(
     mu_friction: float = 0.8,
     tolerance_cop_m: float = 0.01,
 ) -> SupportGeometryReport:
-    """Evaluate Center of Pressure, support polygon containment, and friction cone.
-
-    Args:
-        contact_positions_m: Dict of contact sphere name -> 3D position vector.
-        contact_forces_n: Dict of contact sphere name -> 3D force vector applied to body.
-        ground: Ground plane definition.
-        mu_friction: Friction coefficient for Coulomb cone test.
-        tolerance_cop_m: Tolerance margin for COP polygon containment.
-
-    Returns:
-        SupportGeometryReport with COP location, containment boolean, margin, and violations.
-    """
+    """Evaluate Center of Pressure, support polygon containment, and friction cone."""
     normal = np.asarray(ground.normal, dtype=float)
     normal_unit = normal / np.linalg.norm(normal)
 
@@ -453,7 +447,6 @@ def evaluate_support_geometry(
     active_positions_2d: list[list[float]] = []
     friction_violations: dict[str, float] = {}
 
-    # Coordinate basis in ground plane for 2D polygon projection
     helper = (
         np.array([1.0, 0.0, 0.0])
         if abs(normal_unit[0]) < 0.9
@@ -466,7 +459,6 @@ def evaluate_support_geometry(
     for name, pos_3d in contact_positions_m.items():
         pos = np.asarray(pos_3d, dtype=float)
         force = np.asarray(contact_forces_n.get(name, np.zeros(3)), dtype=float)
-
         fn = float(normal_unit @ force)
         f_tangent_vec = force - normal_unit * fn
         ft = float(np.linalg.norm(f_tangent_vec))
@@ -475,10 +467,8 @@ def evaluate_support_geometry(
             total_f_n += fn
             weighted_cop += fn * pos
             active_points.append(name)
-            # Project 3D position onto 2D plane basis
             active_positions_2d.append([float(u_axis @ pos), float(v_axis @ pos)])
 
-            # Check Coulomb friction cone: |f_t| <= mu * f_n
             f_limit = mu_friction * fn
             if ft > f_limit + 1e-4:
                 friction_violations[name] = float(ft - f_limit)
@@ -496,30 +486,7 @@ def evaluate_support_geometry(
     cop_3d = weighted_cop / total_f_n
     cop_2d = np.array([float(u_axis @ cop_3d), float(v_axis @ cop_3d)])
     polygon_2d = np.array(active_positions_2d)
-
-    # If only 1 or 2 points, check distance directly
-    if len(active_positions_2d) < 3:
-        if len(active_positions_2d) == 1:
-            dist = float(np.linalg.norm(cop_2d - polygon_2d[0]))
-            inside = dist <= tolerance_cop_m
-            margin = tolerance_cop_m - dist
-        else:
-            p1, p2 = polygon_2d[0], polygon_2d[1]
-            seg = p2 - p1
-            seg_len_sq = float(np.dot(seg, seg))
-            t_proj = (
-                max(0.0, min(1.0, float(np.dot(cop_2d - p1, seg) / seg_len_sq)))
-                if seg_len_sq > 1e-12
-                else 0.0
-            )
-            closest = p1 + t_proj * seg
-            dist = float(np.linalg.norm(cop_2d - closest))
-            inside = dist <= tolerance_cop_m
-            margin = tolerance_cop_m - dist
-    else:
-        inside = convex_hull_contains(cop_2d, polygon_2d, tolerance_m=tolerance_cop_m)
-        dists = np.linalg.norm(polygon_2d - cop_2d, axis=1)
-        margin = float(tolerance_cop_m if inside else -np.min(dists))
+    inside, margin = _check_point_in_polygon(cop_2d, polygon_2d, tolerance_cop_m)
 
     return SupportGeometryReport(
         centre_of_pressure_m=(float(cop_3d[0]), float(cop_3d[1]), float(cop_3d[2])),
