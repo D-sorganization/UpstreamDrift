@@ -1,10 +1,31 @@
 # Current Matching Continuation Handoff
 
-Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og05-match-two-handed-address-10399`; commit SELF.
+Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og06-rebuild-full-swing-tracking-10400`; commit SELF.
 PR: open (targeting main).
-Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og05-10399`.
+Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og06-10400`.
 
-### OG-05 Status: Completed (Ready for PR)
+### OG-06 Status: Completed (Ready for PR)
+
+- Implemented full-swing dynamic tracking qualification and ladder progression in `src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py`:
+  - `reinitialize_tracking_from_address`: Reinitializes full-swing tracking state $q_0$ from qualified address pose (`AddressFitResult`) with frozen marker calibration.
+  - `validate_model_checkpoint`: Enforces model checkpoint SHA-256 verification against qualified baseline, raising `ModelCheckpointMismatchError` on hash mismatch.
+  - `validate_capture_claim`: Validates full-swing G3 capture claims against canonical frame count (654 frames for driver, 657 frames for iron), raising `TruncatedCaptureClaimError` on truncated captures.
+  - `validate_controls_state_naming`: Audits coordinate actuators and state variables against model coordinate names, raising `ControlStateNamingMismatchError` on discrepancies.
+  - `validate_dynamic_grip_closure`: Audits dynamic bilateral lead-hand to club grip closure distance across all frames, raising `DynamicGripViolationError` when separation exceeds $5\text{ mm}$ ($0.005\text{ m}$).
+  - `validate_swing_continuity`: Asserts position and velocity continuity between successive frames, raising `ContinuityViolationError` on physiological velocity limit violations.
+  - `validate_swing_coordinate_limits`: Audits coordinates across all swing frames against model XML `<Coordinate><range>` limits.
+  - `detect_swing_events`: Detects address, takeaway, top of backswing (TBS ~0.85s, G1), impact (~1.20s, G2), and finish (~1.814s / 1.827s, G3).
+  - Multi-stage ladder progression (`LadderStage`: `STATIC_ADDRESS`, `SHORT_PILOT`, `G1_BACKSWING`, `G2_IMPACT`, `G3_FULL_SWING`).
+  - Separate receipts: `DynamicTrackingReceipt` (optimized trajectory solution) and `ForwardReplayReceipt` (independent forward integration replay).
+  - Distinct statuses: `ik_playback_status`, `solver_convergence_status`, and `replay_acceptance_status` under MS-100 / MS-104.
+- Unit tests in `tests/opensim/test_moco_g1_ladder.py` (9 passed):
+  - RED fixtures: mismatched model checkpoint, truncated full-capture claim, controls/state naming mismatch, dynamic grip violation, continuity violation.
+  - Multi-stage ladder progression and distinct receipt statuses.
+  - Real tour capture swing event detection and contract validation on `data/C3D_TA_Driver.c3d`.
+- All 106 opensim unit tests pass. Ruff lint, format, Mypy, LoD, and File Size Budget clean.
+- Next child: **OG-07 (#10401)** — Introduce versioned model variants and actuation capabilities.
+
+### OG-05 Status: Completed (PR #10409)
 
 - Implemented two-handed address pose calibration and qualification in `src/engines/physics_engines/opensim/python/tour_matching/address.py`:
   - `detect_address_window`: Detects quasi-static address window across tour capture using marker speed thresholding ($v_{\text{max}} \le 0.05\text{ m/s}$), avoiding assumed arbitrary frame 0.
