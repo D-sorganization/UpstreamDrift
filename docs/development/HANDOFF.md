@@ -1,5 +1,31 @@
 # Current Matching Continuation Handoff
 
+Updated 2026-09-18. Governing epic #10430 / #10363; active numerical branch
+`feat/pf06-nullspace-kernel`; commit SELF; development entry DL-#10436.
+
+## Current Numerical Work
+
+PF-06 has a scaled SVD force-null-space kernel and independent constrained
+redistribution audit. Nineteen unit tests pass, including full-space comparison,
+exact friction cones, rotated normals, rank deficiency, infeasible hard-zero
+trail effort and nonfinite derived metrics. Native pipeline integration and
+native replay remain outstanding. No accepted new driver/iron candidate exists.
+
+Read [Completion Packets](../plans/pinocchio_matching_completion.md) for the
+numerical interface, motion interpretation gates and lower-cost-agent work.
+Run `python3 -m pytest tests/unit/motion_matching/test_force_nullspace.py -q --no-cov`.
+PF-05 #10435 is held by another agent. Preserve the viewer owner's scope.
+The baseline is f15dc23c0 (PF-01/02/04); PF-03 PR #10443 is separate.
+PRs #10442/#10445/#10447 remain implementation evidence, not native acceptance.
+
+The older completion statements below are historical component reports, not
+proof of accepted matching. In particular OpenSim requires native evidence
+review, and PF-01 strategy serialization still needs paired-load correction.
+
+## Prior Component Reports
+
+# Current Matching Continuation Handoff
+
 Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og09-golf-native-viewer-package-10403`; commit SELF.
 PR: open (targeting main).
 Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og09-10403`.
