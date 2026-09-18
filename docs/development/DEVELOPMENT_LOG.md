@@ -17,18 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10399 · OpenSim Calibrate and Match Two-Handed Address Pose
+### DL-#10400 · OpenSim Rebuild Full-Swing Tracking From Qualified Address
 
 - **State:** in_progress
 - **Owner:** local
+- **Issue:** #10400 (epic #10394 / #10363, OG-06)
+- **Branch:** feat/og06-rebuild-full-swing-tracking-10400
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_moco_g1_ladder.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; model checkpoint verification raises ModelCheckpointMismatchError; truncated capture claim raises TruncatedCaptureClaimError; control/state naming mismatch raises ControlStateNamingMismatchError; dynamic bilateral grip violation raises DynamicGripViolationError; continuity violation raises ContinuityViolationError; ladder stages from static address through G1, G2, G3 full capture; distinct statuses for IK playback, solver convergence, and replay acceptance; separate tracking and forward replay receipts; 9 ladder tests pass; all 106 opensim unit tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Rebuilt OpenSim full-swing tracking qualification module (`full_swing_tracking.py`) reinitialized from qualified address pose $q_0$ and model hash with frozen marker calibration. Implements ladder progression, continuity, full-swing coordinate limits, dynamic bilateral grip closure, ground contact mechanics, and separate receipts under MS-100 / MS-104.
+- **Next step:** Commit, push, open PR referencing Closes #10400, release lease, proceed to OG-07 (#10401).
+- **Evidence:** tests/opensim/test_moco_g1_ladder.py; src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py.
+
+### DL-#10399 · OpenSim Calibrate and Match Two-Handed Address Pose
+
+- **State:** in_review
+- **Owner:** local
 - **Issue:** #10399 (epic #10394 / #10363, OG-05)
 - **Branch:** feat/og05-match-two-handed-address-10399
-- **PR:** not created
+- **PR:** #10409
 - **Paths:** src/engines/physics_engines/opensim/python/tour_matching/address.py; src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_address.py; tests/opensim/test_marker_calibration.py; SPEC.md
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; frozen acceptance profile hash verified; quasi-static address window detection; dual-arm grip closure <= 5 mm; ground support clearance <= 15 mm; coordinate range limits audited; holdout validation; all 15 address and calibration tests pass; ruff, mypy, lod, file-budget clean)
 - **Summary:** Calibrated and qualified two-handed golf address pose (`address.py`) on OpenSim humanoid model against canonical tour capture. Validates bilateral grip closure between lead hand and club shaft, foot ground support, posture metrics, and coordinate limits against model XML ranges.
-- **Next step:** Commit, push, open PR referencing Closes #10399, release lease, proceed to OG-06 (#10400).
+- **Next step:** Land PR #10409 referencing Closes #10399.
 - **Evidence:** tests/opensim/test_golf_address.py; tests/opensim/test_marker_calibration.py.
 
 ### DL-#10398 · OpenSim Capture Registration and Golf Camera Views
