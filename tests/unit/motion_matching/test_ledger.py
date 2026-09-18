@@ -160,3 +160,29 @@ def test_pipeline_list_runs():
     runs = list_runs()
     assert len(runs) >= 40
     assert isinstance(runs[0], LedgerRow)
+
+
+def test_self_reported_acceptance_is_never_passed() -> None:
+    """MS-100: a receipt's own ``accepted`` flag cannot mark a ledger row accepted."""
+    from src.shared.python.motion_matching.ledger import extract_acceptance
+
+    self_reported = {"receipt": {"accepted": True, "status": "terminal"}}
+    block = extract_acceptance("x/receipt.json", self_reported, None)
+    assert block is not None
+    assert block["is_physically_accepted"] is False
+    assert block["status"] == "UNVERIFIED"
+
+    gateless = {"acceptance": {"is_physically_accepted": True, "status": "PASSED"}}
+    block = extract_acceptance("y/receipt.json", gateless, None)
+    assert block is not None and block["status"] == "UNVERIFIED"
+
+    evaluated = {
+        "acceptance": {
+            "horizon": "G1",
+            "is_physically_accepted": True,
+            "status": "PASSED",
+            "gates": [{"name": "whole", "status": "PASSED"}],
+        }
+    }
+    block = extract_acceptance("z/receipt.json", evaluated, None)
+    assert block is not None and block["status"] == "PASSED"
