@@ -782,6 +782,96 @@
       "issue": 10403,
       "reason": "Issue #10403: build_golf_view_package accepts trajectory, variant, presets, paths, digest hashes, and event milestones.",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/match_pinocchio_c3d.py",
+      "symbol": "match_pinocchio_c3d",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: match_pinocchio_c3d orchestrates full-swing kinematics, C3D extraction, contact detection, and state estimation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/match_pinocchio_c3d.py",
+      "symbol": "match_pinocchio_c3d",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: match_pinocchio_c3d accepts model paths, trajectory configurations, contact parameters, and tolerances without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "make_action_models",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: make_action_models builds Crocoddyl ActionModelAbstract sequences configuring marker tracking and contact residual models.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "make_action_models",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: make_action_models accepts pinocchio model, contact sequences, weights, and time steps without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "tracking_rollout",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: tracking_rollout simulates forward dynamics along Crocoddyl shooting nodes with state/control constraints.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "_resume_from_candidate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: _resume_from_candidate restores optimization warm-start states, multipliers, and trajectory knots from prior checkpoint.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "run_fit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: run_fit coordinates multi-stage full body dynamic motion matching fitting against C3D point cloud.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: CLI entrypoint for full body fitting with argument parsing and execution logging.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/contact_force_allocator.py",
+      "symbol": "ContactForceAllocator.allocate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: ContactForceAllocator.allocate solves quadratic program for trail-side ground reaction force distribution under friction cone constraints.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/swing_evaluator.py",
+      "symbol": "SwingEvaluator.evaluate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: SwingEvaluator.evaluate computes kinetic energy, momentum transfer, and clubhead delivery metrics across motion phases.",
+      "expires_on": "2026-11-30"
     }
   ]
 }
