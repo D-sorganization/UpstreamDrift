@@ -4,6 +4,29 @@ Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og09-golf-nativ
 PR: open (targeting main).
 Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og09-10403`.
 
+## Impact Zone Epic #9546: Readiness Index (2026-09-18)
+
+Branch `conductor/issue-9546`, commit SELF, PR not created. Worktree
+`_issue_worktrees/UpstreamDrift-conductor-issue-9546`; `vendor/ud-tools`
+materialised read-only from the main checkout at pin `62e8cdbf9`.
+
+- `src/config/impact_zone_readiness.json` + `docs/operations/impact-zone-readiness-index.md`
+  reconcile I1-I4, #9484 and #9349 against `5347cba0f` under the existing
+  loader contract (`I<n>`/`R<n>` keys admitted; generator renders one index
+  per ledger). `release_status: blocked`.
+- `tests/shared_contracts/test_impact_interval_provider.py` consumes Tools
+  #5088/#5079 (I1/I2) through the vendored solver on the audit probe. RED at
+  the audit pin `3d93bb2c` (names absent, `ceil` budget and
+  `unilateral_release = max(0, residual)` present); GREEN at `62e8cdbf9`.
+- Validation: `pytest tests/config/industrial_readiness tests/scripts/test_declared_route_producers.py`
+  45 passed; `pytest tests/shared_contracts/test_impact_interval_provider.py --tools-mode=vendored`
+  3 passed (Windows, Python 3.13); `generate_industrial_readiness_index --check` OK;
+  `check_spec_changelog_duplicates` OK; development-log validator OK.
+- Open: I3 (#9549) needs the Tools #4946 run-record seam before anything
+  else moves; I4 (#9550) waits on I3; Tools half of #9349 (Impact Explorer
+  tab) is not re-pointed. Next: bump the pin when #4946 lands and mark
+  I1/I2/I3 in the ledger with merge SHAs, tests and acceptance evidence.
+
 ### OG-09 Status: Completed (Ready for PR)
 
 - Packaged native viewer artifacts and release evidence in `src/engines/physics_engines/opensim/python/tour_matching/view_package.py`:
