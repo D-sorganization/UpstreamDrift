@@ -33,6 +33,9 @@ from src.engines.physics_engines.mujoco.python.full_body_ik import (  # noqa: E4
 from src.engines.physics_engines.mujoco.python.full_body_model import (  # noqa: E402
     NativeMujocoFullBodyModel,
 )
+from src.shared.python.motion_matching import (  # noqa: E402
+    full_body_forward_dynamics as fs,
+)
 from src.shared.python.motion_matching.pipeline import (  # noqa: E402
     BALANCE,
     CAPTURES,
@@ -177,9 +180,11 @@ def main() -> None:
         omega_rad_s=omega,
         zeta=args.zeta,
         balance=None if args.no_balance else BALANCE,
-        root_regulation=None
-        if args.root_regulation is None
-        else (args.root_regulation[0], args.root_regulation[1]),
+        root_regulation=(
+            None
+            if args.root_regulation is None
+            else (args.root_regulation[0], args.root_regulation[1])
+        ),
         acceleration_feedforward=args.feedforward,
     )
     duration = float(args.duration or times[-1])
@@ -222,9 +227,9 @@ def main() -> None:
         },
         "reference": {
             "root_acceleration_max_m_s2": float(np.abs(a_ref[:, :3]).max()),
-            "root_acceleration_downswing_max_m_s2": float(np.abs(a_ref[m][:, :3]).max())
-            if m.any()
-            else None,
+            "root_acceleration_downswing_max_m_s2": (
+                float(np.abs(a_ref[m][:, :3]).max()) if m.any() else None
+            ),
             "joint_acceleration_max_deg_s2": float(
                 np.degrees(np.abs(a_ref[:, 6:]).max())
             ),
