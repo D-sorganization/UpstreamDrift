@@ -120,52 +120,28 @@ class ContactSensitivityReport:
     friction_diff_n: float
 
 
+@dataclass(frozen=True)
+class ContactKinematicsContext:
+    """Optional geometric and contact kinematics context for force feasibility auditing."""
+
+    ankle_indices: Sequence[int] | None = None
+    contact_positions_m: Mapping[str, Array] | None = None
+    ground: GroundPlane | None = None
+    mu_friction: float = 0.8
+    constitutive_forces: Mapping[str, ContactSample] | None = None
+
+
 class ForceFeasibilityError(ValueError):
     """Raised when contact forces or actuator torques violate physical capacity gates."""
 
 
-def audit_contact_force_feasibility(
-    tau_actuated: Array,
-    f_ground: Array,
+def _check_root_residuals(
     delta_tau_root: Array,
-    *,
-    body_mass_kg: float,
-    ankle_indices: Sequence[int] | None = None,
-    contact_positions_m: Mapping[str, Array] | None = None,
-    ground: GroundPlane | None = None,
-    mu_friction: float = 0.8,
-    constitutive_forces: Mapping[str, ContactSample] | None = None,
-    config: ContactFeasibilityConfig | None = None,
-    raise_on_failure: bool = False,
-) -> FeasibilityAuditResult:
-    """Audit contact forces and joint torques against physical and physiological feasibility.
-
-    Args:
-        tau_actuated: Generalized actuated coordinate torques (N·m).
-        f_ground: Ground reaction forces (flat array of 3-vectors per contact sphere).
-        delta_tau_root: Floating base residual wrench (6 elements: [fx, fy, fz, tx, ty, tz]).
-        body_mass_kg: Subject total body mass in kilograms.
-        ankle_indices: Coordinate indices for ankle flexion/extension joints.
-        contact_positions_m: Optional dict of sphere name -> 3D position vector.
-        ground: Optional ground plane definition for COP evaluation.
-        mu_friction: Friction coefficient for Coulomb cone test.
-        constitutive_forces: Optional constitutive contact samples computed from (q, v).
-        config: Feasibility configuration and limits.
-        raise_on_failure: If True, raises ForceFeasibilityError when infeasible.
-
-    Returns:
-        FeasibilityAuditResult detailing compliance, residuals, and reasons for failure.
-    """
-    cfg = config or ContactFeasibilityConfig()
-    require(body_mass_kg > 0.0, "body_mass_kg must be positive", body_mass_kg)
-    require(len(delta_tau_root) == 6, "delta_tau_root must have length 6")
-
-    failures: list[str] = []
-
-    # 1. Independent N and Nm residual budgets on floating-base slack
+    cfg: ContactFeasibilityConfig,
+    failures: list[str],
+) -> tuple[float, float]:
     root_force_res = float(np.linalg.norm(delta_tau_root[:3]))
     root_torque_res = float(np.linalg.norm(delta_tau_root[3:]))
-
     if root_force_res > cfg.force_residual_budget_n:
         failures.append(
             f"Root force residual {root_force_res:.2f} N exceeds budget {cfg.force_residual_budget_n:.2f} N"
@@ -174,28 +150,43 @@ def audit_contact_force_feasibility(
         failures.append(
             f"Root torque residual {root_torque_res:.2f} Nm exceeds budget {cfg.torque_residual_budget_nm:.2f} Nm"
         )
+    return root_force_res, root_torque_res
 
-    # 2. Physiological ground reaction force limits (prevent MN loads)
+
+def _check_grf_limits(
+    f_ground: Array,
+    body_mass_kg: float,
+    cfg: ContactFeasibilityConfig,
+    failures: list[str],
+) -> tuple[float, float, list[Array]]:
     n_spheres = len(f_ground) // 3
     grf_vectors = [f_ground[s * 3 : (s + 1) * 3] for s in range(n_spheres)]
     grf_norms = (
         [float(np.linalg.norm(v)) for v in grf_vectors] if grf_vectors else [0.0]
     )
     max_grf = float(np.max(grf_norms)) if grf_norms else 0.0
-
-    # Total normal force (assuming vertical Z or opposite gravity)
-    g_acc = 9.81
-    bw_n = body_mass_kg * g_acc
+    bw_n = body_mass_kg * 9.81
     grf_bw_ratio = max_grf / bw_n
-
     if max_grf >= 1e6:
         failures.append(f"Unphysical meganewton load detected: {max_grf:.1e} N")
     elif grf_bw_ratio > cfg.max_normal_force_bw_ratio:
         failures.append(
             f"Ground reaction force {max_grf:.1f} N ({grf_bw_ratio:.2f} BW) exceeds capacity {cfg.max_normal_force_bw_ratio:.1f} BW"
         )
+    return max_grf, grf_bw_ratio, grf_vectors
 
-    # 3. Ankle torque limits (prevent kNm loads)
+
+def _check_joint_and_ankle_limits(
+    tau_actuated: Array,
+    ankle_indices: Sequence[int] | None,
+    cfg: ContactFeasibilityConfig,
+    failures: list[str],
+) -> tuple[float, float]:
+    max_joint = float(np.max(np.abs(tau_actuated))) if len(tau_actuated) > 0 else 0.0
+    if max_joint > cfg.max_joint_torque_nm:
+        failures.append(
+            f"Joint torque {max_joint:.1f} Nm exceeds maximum human capacity {cfg.max_joint_torque_nm:.1f} Nm"
+        )
     max_ankle = 0.0
     if ankle_indices is not None and len(ankle_indices) > 0:
         ankle_torques = [
@@ -213,23 +204,25 @@ def audit_contact_force_feasibility(
                 failures.append(
                     f"Ankle torque {max_ankle:.1f} Nm exceeds physiological limit {cfg.max_ankle_torque_nm:.1f} Nm"
                 )
+    return max_joint, max_ankle
 
-    # 4. Maximum joint torque limits
-    max_joint = float(np.max(np.abs(tau_actuated))) if len(tau_actuated) > 0 else 0.0
-    if max_joint > cfg.max_joint_torque_nm:
-        failures.append(
-            f"Joint torque {max_joint:.1f} Nm exceeds maximum human capacity {cfg.max_joint_torque_nm:.1f} Nm"
-        )
 
-    # 5. Center of pressure and friction cone evaluation
+def _check_cop_and_friction(
+    contact_positions_m: Mapping[str, Array] | None,
+    ground: GroundPlane | None,
+    grf_vectors: list[Array],
+    mu_friction: float,
+    cfg: ContactFeasibilityConfig,
+    failures: list[str],
+) -> tuple[bool, bool]:
     cop_contained = True
     friction_cone_ok = True
     if contact_positions_m is not None and ground is not None:
         sphere_names = list(contact_positions_m.keys())
-        contact_forces_dict: dict[str, Array] = {}
-        for s_idx, name in enumerate(sphere_names[:n_spheres]):
-            contact_forces_dict[name] = grf_vectors[s_idx]
-
+        contact_forces_dict = {
+            name: grf_vectors[idx]
+            for idx, name in enumerate(sphere_names[: len(grf_vectors)])
+        }
         geo_report = evaluate_support_geometry(
             contact_positions_m,
             contact_forces_dict,
@@ -242,7 +235,6 @@ def audit_contact_force_feasibility(
             failures.append(
                 f"Center of pressure lies outside foot support polygon (margin {geo_report.cop_margin_m:.3f} m)"
             )
-
         if geo_report.friction_cone_violations:
             friction_cone_ok = False
             viol_str = ", ".join(
@@ -250,36 +242,104 @@ def audit_contact_force_feasibility(
                 for k, v in geo_report.friction_cone_violations.items()
             )
             failures.append(f"Friction cone violations detected: {viol_str}")
+    return cop_contained, friction_cone_ok
 
-    # 6. Constitutive compliant contact comparison (Hunt-Crossley regularized Coulomb)
+
+def _check_constitutive_compliance(
+    constitutive_forces: Mapping[str, ContactSample] | None,
+    contact_positions_m: Mapping[str, Array] | None,
+    grf_vectors: list[Array],
+    cfg: ContactFeasibilityConfig,
+    failures: list[str],
+) -> float:
     constitutive_res = 0.0
     if constitutive_forces is not None and contact_positions_m is not None:
         sphere_names = list(contact_positions_m.keys())
         discrepancies: list[float] = []
-        for s_idx, name in enumerate(sphere_names[:n_spheres]):
+        for s_idx, name in enumerate(sphere_names[: len(grf_vectors)]):
             allocated_f = grf_vectors[s_idx]
             if name in constitutive_forces:
                 sample = constitutive_forces[name]
                 sample_f = sample.normal_force_n + sample.friction_force_n
-                diff = float(np.linalg.norm(allocated_f - sample_f))
-                discrepancies.append(diff)
-
-                # If foot is in the air (penetration == 0 and sample force == 0),
-                # allocated force cannot arbitrarily assume ground support!
+                discrepancies.append(float(np.linalg.norm(allocated_f - sample_f)))
                 if sample.penetration_m <= 0.0 and np.linalg.norm(allocated_f) > 5.0:
                     failures.append(
                         f"Unsupported contact force ({np.linalg.norm(allocated_f):.1f} N) assumed on {name} while in flight"
                     )
-
         if discrepancies:
             constitutive_res = float(np.max(discrepancies))
             if constitutive_res > cfg.constitutive_discrepancy_tolerance_n:
                 failures.append(
                     f"Allocated forces diverge from constitutive contact law by {constitutive_res:.1f} N (tolerance {cfg.constitutive_discrepancy_tolerance_n:.1f} N)"
                 )
+    return constitutive_res
+
+
+def audit_contact_force_feasibility(
+    tau_actuated: Array,
+    f_ground: Array,
+    delta_tau_root: Array,
+    *,
+    body_mass_kg: float,
+    context: ContactKinematicsContext | None = None,
+    config: ContactFeasibilityConfig | None = None,
+    raise_on_failure: bool = False,
+    **kwargs: Any,
+) -> FeasibilityAuditResult:
+    """Audit contact forces and joint torques against physical and physiological feasibility.
+
+    Args:
+        tau_actuated: Generalized actuated coordinate torques (N·m).
+        f_ground: Ground reaction forces (flat array of 3-vectors per contact sphere).
+        delta_tau_root: Floating base residual wrench (6 elements: [fx, fy, fz, tx, ty, tz]).
+        body_mass_kg: Subject total body mass in kilograms.
+        context: Optional ContactKinematicsContext bundling geometric and constitutive context.
+        config: Feasibility configuration and limits.
+        raise_on_failure: If True, raises ForceFeasibilityError when infeasible.
+        **kwargs: Optional fallback keyword arguments (ankle_indices, contact_positions_m,
+            ground, mu_friction, constitutive_forces).
+
+    Returns:
+        FeasibilityAuditResult detailing compliance, residuals, and reasons for failure.
+    """
+    cfg = config or ContactFeasibilityConfig()
+    require(body_mass_kg > 0.0, "body_mass_kg must be positive", body_mass_kg)
+    require(len(delta_tau_root) == 6, "delta_tau_root must have length 6")
+
+    ankle_indices: Sequence[int] | None = kwargs.get(
+        "ankle_indices", context.ankle_indices if context else None
+    )
+    contact_positions_m: Mapping[str, Array] | None = kwargs.get(
+        "contact_positions_m", context.contact_positions_m if context else None
+    )
+    ground: GroundPlane | None = kwargs.get(
+        "ground", context.ground if context else None
+    )
+    mu_friction: float = float(
+        kwargs.get("mu_friction", context.mu_friction if context else 0.8)
+    )
+    constitutive_forces: Mapping[str, ContactSample] | None = kwargs.get(
+        "constitutive_forces", context.constitutive_forces if context else None
+    )
+
+    failures: list[str] = []
+    root_force_res, root_torque_res = _check_root_residuals(
+        delta_tau_root, cfg, failures
+    )
+    max_grf, grf_bw_ratio, grf_vectors = _check_grf_limits(
+        f_ground, body_mass_kg, cfg, failures
+    )
+    max_joint, max_ankle = _check_joint_and_ankle_limits(
+        tau_actuated, ankle_indices, cfg, failures
+    )
+    cop_contained, friction_cone_ok = _check_cop_and_friction(
+        contact_positions_m, ground, grf_vectors, mu_friction, cfg, failures
+    )
+    constitutive_res = _check_constitutive_compliance(
+        constitutive_forces, contact_positions_m, grf_vectors, cfg, failures
+    )
 
     is_feasible = len(failures) == 0
-
     if not is_feasible and raise_on_failure:
         raise ForceFeasibilityError("; ".join(failures))
 
