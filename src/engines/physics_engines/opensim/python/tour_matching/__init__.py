@@ -55,6 +55,13 @@ from src.engines.physics_engines.opensim.python.tour_matching.trc import (
     read_trc,
     write_trc,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.model_audit import (
+    BASELINE_MODEL_SHA256,
+    BASELINE_OS3B_INPUT_SHA256,
+    ModelGeometryAuditResult,
+    audit_model_geometry,
+    verify_model_qualification,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.visualization import (
     plot_3d_trajectory_overlay,
     plot_effort_and_rates,
@@ -62,6 +69,8 @@ from src.engines.physics_engines.opensim.python.tour_matching.visualization impo
 )
 
 __all__ = [
+    "BASELINE_MODEL_SHA256",
+    "BASELINE_OS3B_INPUT_SHA256",
     "DEFAULT_NOMINAL_LENGTHS_M",
     "CalibrationResult",
     "CheckpointManifest",
@@ -70,11 +79,13 @@ __all__ = [
     "MarkerPlacement",
     "MocoTrackingConfig",
     "MocoTrackingResult",
+    "ModelGeometryAuditResult",
     "PolynomialTorqueProfile",
     "RunConfig",
     "SegmentScaleResult",
     "SharedMetrics",
     "attach_marker_set",
+    "audit_model_geometry",
     "body_for",
     "build_moco_study",
     "build_parser",
@@ -94,6 +105,7 @@ __all__ = [
     "read_trc",
     "sanitize_trc_for_horizon",
     "unlock_coordinates",
+    "verify_model_qualification",
     "write_model",
     "write_trc",
 ]

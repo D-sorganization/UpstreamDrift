@@ -161,6 +161,27 @@ def cmd_prepare(args: argparse.Namespace) -> int:
 def cmd_qualify(args: argparse.Namespace) -> int:
     """Execute qualify operation."""
     logger.info("Qualifying model %s -> %s", args.model, args.output)
+    from src.engines.physics_engines.opensim.python.tour_matching.model_audit import (
+        audit_model_geometry,
+    )
+
+    audit = audit_model_geometry(args.model)
+    receipt = {
+        "model_path": audit.model_path,
+        "sha256": audit.sha256,
+        "num_bodies": audit.num_bodies,
+        "num_coordinates": audit.num_coordinates,
+        "num_actuators": audit.num_actuators,
+        "num_muscles": audit.num_muscles,
+        "club_attached_geometry_count": audit.club_attached_geometry_count,
+        "has_visible_club": audit.has_visible_club,
+        "has_unscaled_arm_mesh_defect": audit.has_unscaled_arm_mesh_defect,
+    }
+    out_path = Path(args.output)
+    out_dir = out_path.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(receipt, f, indent=2)
     return 0
 
 
