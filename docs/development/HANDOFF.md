@@ -1,7 +1,7 @@
 # Native Force-Equation Correction (#10439)
 
 Updated 2026-09-18; branch `fix/pf09-native-force-equations`; commit SELF.
-Development entry DL-#10439. PR pending. This work is independent of the
+Development entry DL-#10439. PR #10451; implementation 91784d8c7. This work is independent of the
 PF-01–04 stack and preserves the PF-05 and viewer owners' scope.
 
 ## Verified Native Defects and Repair
