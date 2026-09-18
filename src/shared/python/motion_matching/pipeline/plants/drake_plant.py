@@ -10,6 +10,10 @@ import numpy as np
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+from src.shared.python.motion_matching.pipeline.plant import (
+    compute_attachment_marker_positions,
+    integrate_euler_step,
+)
 
 if TYPE_CHECKING:
     from src.engines.physics_engines.drake.python.full_body_ik import DrakeFullBodyIK
@@ -75,14 +79,7 @@ class DrakeMatchingPlant:
         self, q: np.ndarray, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> np.ndarray:
         ik = self.create_ik(attachments)
-        poses = ik.pose_fn(q)
-        positions = []
-        for label in attachments:
-            body, offset = attachments[label]
-            rot, trans = poses[body]
-            pos = rot @ np.asarray(offset, dtype=float) + trans
-            positions.append(pos)
-        return np.asarray(positions, dtype=float)
+        return compute_attachment_marker_positions(ik.pose_fn(q), attachments)
 
     def accelerations(
         self,
@@ -120,12 +117,6 @@ class DrakeMatchingPlant:
     def step(
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float
     ) -> tuple[np.ndarray, np.ndarray]:
-        coords = self.coordinate_order
-        q_dict = {c: float(q[i]) for i, c in enumerate(coords)}
-        v_dict = {c: float(v[i]) for i, c in enumerate(coords)}
-        tau_dict = {c: float(tau[i]) for i, c in enumerate(coords)}
-        acc = self.accelerations(q_dict, v_dict, tau_dict)
-        a = np.array([acc[c] for c in coords], dtype=float)
-        next_v = v + a * dt
-        next_q = q + next_v * dt
-        return next_q, next_v
+        return integrate_euler_step(
+            self.accelerations, self.coordinate_order, q, v, tau, dt
+        )
