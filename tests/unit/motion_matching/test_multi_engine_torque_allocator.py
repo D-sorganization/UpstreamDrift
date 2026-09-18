@@ -206,8 +206,15 @@ def test_mujoco_adapter_with_spec(
         a_traj=a_mj,
         objective=AllocationObjective.MINIMUM_EFFORT,
     )
-    assert result.success
+    # Under PF-03 physical constraints, an unposed floating-base zero configuration
+    # is ungrounded (COP is outside the support polygon). The allocator solves the
+    # diagnostic equilibrium, allocates exact tensor shapes, and truthfully diagnoses
+    # root infeasibility rather than claiming false physical success.
     assert result.max_equilibrium_residual < 1e-3
+    assert result.tau_actuated.shape == (n_f, len(adapter.actuated_indices))
+    assert result.f_ground.shape == (n_f, adapter.n_contact_spheres * 3)
+    assert not result.success
+    assert result.max_root_residual > 50.0
 
 
 def test_cli_allocate_swing_torques(
