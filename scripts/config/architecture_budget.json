@@ -872,6 +872,33 @@
       "issue": 10338,
       "reason": "Issue #10338: SwingEvaluator.evaluate computes kinetic energy, momentum transfer, and clubhead delivery metrics across motion phases.",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "build_parser",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: build_parser configures CLI flags for multi-engine pipeline execution across Drake, MuJoCo, and Pinocchio.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "_solve_pink_ik",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: _solve_pink_ik coordinates Pink solver setup, frame targets, posture regularization, and iterative frame progression.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "_simulate_and_receipt",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: _simulate_and_receipt orchestrates trajectory simulation, marker metrics, receipt schema emission, and artifact bundle export.",
+      "expires_on": "2026-11-30"
     }
   ]
 }
