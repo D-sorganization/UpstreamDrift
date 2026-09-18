@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Well-Posed Acceptance Contract and Dynamic Validation Gates (MS-100, #10374)
+
+Formalizes dynamic validation gates for open-loop replay drift, collocation defects, and stabilized replay under declared tolerances:
+- **Dynamic Acceptance Gates (`src/shared/python/motion_matching/acceptance.py`)**:
+  - `max_open_loop_drift_m`: Maximum allowed trajectory drift in uninterrupted forward rollout ($0.500\text{ m}$).
+  - `max_integrator_rtol`: Maximum allowable relative tolerance for open-loop numerical integration ($\le 10^{-5}$).
+  - `max_collocation_defect_m`: Maximum allowable collocation defect norm across all nodes ($\le 0.005\text{ m}$).
+  - `max_stabilized_marker_rmse_m`: Maximum marker RMSE under low-gain PD stabilized replay ($\le 0.040\text{ m}$).
+- **Fail-Closed Artifact Enforcement**:
+  - Tiers G2 and G3 require all dynamic artifacts (`open_loop_replay`, `collocation_defect`, `stabilized_replay`), failing closed with `GateStatus.MISSING` if absent.
+  - Backward-compatible G1 kinematic evaluation preserving historical receipt evaluation without requiring dynamic rollout artifacts.
+- **Pinocchio MatchingPlant Adapter (`src/engines/physics_engines/pinocchio/python/matching_plant.py`)**:
+  - Exports `PinocchioMatchingPlant` conforming to the unified `MatchingPlant` protocol.
+
 ## Saved Pinocchio Controls in MuJoCo (#10336)
 
 `scripts/replay_pinocchio_in_mujoco.py` replays saved joint efforts from the
