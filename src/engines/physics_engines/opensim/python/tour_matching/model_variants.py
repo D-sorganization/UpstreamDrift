@@ -373,11 +373,11 @@ class GolfModelAdapter:
         }
 
 
-def create_torque_model_variant(
+def _validate_and_extract_base(
     model_path: Path | str,
     expected_base_sha256: str | None = None,
-) -> GolfModelVariant:
-    """Construct standard torque-actuated golf humanoid model variant."""
+) -> tuple[Path, str, list[str]]:
+    """Validate model path and hash, returning path, actual sha, and coordinates."""
     path = Path(model_path)
     if not path.is_file():
         raise FileNotFoundError(f"Model file not found: {path}")
@@ -391,7 +391,6 @@ def create_torque_model_variant(
             f"Stale or mismatched model hash: expected {expected_base_sha256}, got {actual_sha}"
         )
 
-    # Parse coordinates from model
     tree = SafeET.parse(str(path))
     root = tree.getroot()
     coords: list[str] = []
@@ -399,12 +398,14 @@ def create_torque_model_variant(
         name = c.get("name")
         if name and name not in coords:
             coords.append(name)
+    return path, actual_sha, coords
 
-    # Standard 39 coordinate actuators
-    actuator_names = tuple(f"{c}_actuator" for c in coords)
-    ranges = dict.fromkeys(actuator_names, (-500.0, 500.0))
 
-    skeleton = AnatomicalSkeletonSpec(
+def _build_default_skeleton(
+    coords: Sequence[str], base_sha: str
+) -> AnatomicalSkeletonSpec:
+    """Build standard golf humanoid anatomical skeleton spec."""
+    return AnatomicalSkeletonSpec(
         skeleton_id="golf_humanoid_scaled",
         frame_ids=(
             "pelvis",
@@ -418,10 +419,13 @@ def create_torque_model_variant(
         ),
         coordinate_names=tuple(coords),
         geometry_assets={},
-        base_model_sha256=actual_sha,
+        base_model_sha256=base_sha,
     )
 
-    equipment = GolfEquipmentSpec(
+
+def _build_default_driver_equipment() -> GolfEquipmentSpec:
+    """Build canonical Driver equipment specification."""
+    return GolfEquipmentSpec(
         club_name="Driver",
         club_spec_sha256=hash_club_spec(DRIVER),
         grip_frame_id="grip_frame",
@@ -429,6 +433,23 @@ def create_torque_model_variant(
         head_mass_kg=DRIVER.head_mass_kg,
         geometry_asset_path="",
     )
+
+
+def create_torque_model_variant(
+    model_path: Path | str,
+    expected_base_sha256: str | None = None,
+) -> GolfModelVariant:
+    """Construct standard torque-actuated golf humanoid model variant."""
+    path, actual_sha, coords = _validate_and_extract_base(
+        model_path, expected_base_sha256
+    )
+
+    # Standard 39 coordinate actuators
+    actuator_names = tuple(f"{c}_actuator" for c in coords)
+    ranges = dict.fromkeys(actuator_names, (-500.0, 500.0))
+
+    skeleton = _build_default_skeleton(coords, actual_sha)
+    equipment = _build_default_driver_equipment()
 
     actuation = ActuationProfile(
         actuation_type=ActuationType.TORQUE,
@@ -453,18 +474,9 @@ def create_muscle_model_variant(
     expected_base_sha256: str | None = None,
 ) -> GolfModelVariant:
     """Construct muscle/tendon actuated golf model variant."""
-    path = Path(model_path)
-    if not path.is_file():
-        raise FileNotFoundError(f"Model file not found: {path}")
-
-    actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
-    if (
-        expected_base_sha256 is not None
-        and actual_sha.lower() != expected_base_sha256.lower()
-    ):
-        raise StaleModelHashError(
-            f"Stale or mismatched model hash: expected {expected_base_sha256}, got {actual_sha}"
-        )
+    path, actual_sha, coords = _validate_and_extract_base(
+        model_path, expected_base_sha256
+    )
 
     # Standard muscles (e.g. deltoid, latissimus, gluteus, etc.)
     muscles = (
@@ -482,36 +494,8 @@ def create_muscle_model_variant(
     )
     ranges = dict.fromkeys(muscles, (0.0, 1.0))
 
-    # Parse coordinates
-    tree = SafeET.parse(str(path))
-    root = tree.getroot()
-    coords = [c.get("name") for c in root.iter("Coordinate") if c.get("name")]
-
-    skeleton = AnatomicalSkeletonSpec(
-        skeleton_id="golf_humanoid_scaled",
-        frame_ids=(
-            "pelvis",
-            "torso",
-            "humerus_r",
-            "radius_r",
-            "hand_r",
-            "femur_r",
-            "tibia_r",
-            "calcn_r",
-        ),
-        coordinate_names=tuple(coords),
-        geometry_assets={},
-        base_model_sha256=actual_sha,
-    )
-
-    equipment = GolfEquipmentSpec(
-        club_name="Driver",
-        club_spec_sha256=hash_club_spec(DRIVER),
-        grip_frame_id="grip_frame",
-        shaft_length_m=DRIVER.length_m,
-        head_mass_kg=DRIVER.head_mass_kg,
-        geometry_asset_path="",
-    )
+    skeleton = _build_default_skeleton(coords, actual_sha)
+    equipment = _build_default_driver_equipment()
 
     actuation = ActuationProfile(
         actuation_type=ActuationType.MUSCLE_TENDON,
