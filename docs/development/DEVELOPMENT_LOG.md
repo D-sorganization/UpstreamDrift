@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10451
 - **Paths:** src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py; src/engines/physics_engines/pinocchio/python/native_model.py; scripts/match_pinocchio_c3d.py; tests/integration/engines/pinocchio/test_force_mapping.py
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at cbd72595d plus SELF; full 654-frame 15/60/180-iteration native driver diagnostics remain rejected; four force-map tests pass natively on Pinocchio 3.8 and 4.1; five native MuJoCo 3.3.4 RED/GREEN tests and six existing allocator regressions pass; scoped isolated mypy, Ruff, LoD and manual governance pass.
+- **Last verified:** 2026-09-18 at 614a3643a plus SELF; unfinished native factory adapter: five tests pass, fresh-instance grip J\*v test FAILS; earlier Pinocchio qualification is insufficient; full 654-frame 15/60/180-iteration native driver diagnostics remain rejected; four force-map tests pass natively on Pinocchio 3.8 and 4.1; five native MuJoCo 3.3.4 RED/GREEN tests and six existing allocator regressions pass; scoped isolated mypy, Ruff, LoD and manual governance pass.
 - **Summary:** Repair stale native mass/Jacobians and raw inverse-dynamics equation; validate finite inputs and dimensions before native state changes. Native multi-engine completion remains open.
-- **Next step:** Replace synthetic factory branches with native MatchingPlant force interfaces and model-conformity checks.
+- **Next step:** Resolve test_force_adapter.py::test_grip_jacobian_uses_native_velocity_order without fixture priming or weakened tolerance.
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py
 
 ### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
