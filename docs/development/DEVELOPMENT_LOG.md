@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** pending
 - **Paths:** src/shared/python/motion_matching/force_nullspace.py; tests/unit/motion_matching/test_force_nullspace.py; docs/plans/pinocchio_matching_completion.md
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at 30e4142e8 (reviewed stack); 19 unit tests pass after RED/GREEN; scoped Ruff and mypy pass; native integration not executed.
+- **Last verified:** 2026-09-18 at 611a8633e; explicit TypeAlias fixes isolated pre-push mypy in SELF; 19 unit tests pass after RED/GREEN; scoped Ruff and mypy pass; native integration not executed.
 - **Summary:** Scaled rank-revealing force redistribution with exact Coulomb cones, declared surface frames, finite contracts and independent feasibility audits; completion packets preserve native qualification requirements.
 - **Next step:** Integrate the verified native allocation A/b and contact bounds through the interface documented in docs/plans/pinocchio_matching_completion.md.
 - **Evidence:** tests/unit/motion_matching/test_force_nullspace.py
