@@ -162,6 +162,7 @@ def test_pipeline_list_runs():
     assert isinstance(runs[0], LedgerRow)
 
 
+@pytest.mark.unit
 def test_self_reported_acceptance_is_never_passed() -> None:
     """MS-100: a receipt's own ``accepted`` flag cannot mark a ledger row accepted."""
     from src.shared.python.motion_matching.ledger import extract_acceptance
