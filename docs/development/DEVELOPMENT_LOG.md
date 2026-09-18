@@ -23,11 +23,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #10338 (epic #10363)
 - **Branch:** feat/10338-crocoddyl-native-fit
+- **PR:** none
 - **Paths:** src/engines/physics*engines/pinocchio/python/{crocoddyl_problem,crocoddyl_action,marker_kinematics,full_body_fit}.py; tests/unit/motion_matching/test_crocoddyl*{problem,action}.py; tests/integration/motion_matching/test_full_body_fit_native.py; docs/development/full_body_models/evidence/matched
 - **Started:** 2026-09-17
-- **Last verified:** 2026-09-17 (SELF; unit tests green on Windows; native smoke and 0.30 s continuation fit run on ControlTower `upstream-motion-runtime`)
-- **Summary:** Per-node-effort FDDP on the qualified FullBodyPinocchioModel (shared contact law, weld closure) with a Gauss-Newton marker IK warm start, computed-torque tracking rollout, horizon continuation and linearly implicit derivatives; nodes integrate with adaptive RK45 so the solver rollout is the acceptance replay. 0.30 s window: 15.9 mm whole marker RMS in-solver; G1 (0.85 s) receipt pending.
-- **Next step:** Run the G1 window with continuation on ControlTower and commit the receipt, candidate and playback under docs/development/full_body_models/evidence/matched/driver_g1_pinocchio/.
+- **Last verified:** 2026-09-18 at 43da8dfa2 (SELF; full 654-frame driver swing matched in 8.47 s on ControlTower `upstream-motion-runtime`; optimum vs trail-zero torque allocation benchmarked; forward dynamic acceleration parity verified; `match_pinocchio_c3d.py` CLI delivered with evidence, playback animation, and comprehensive guide)
+- **Summary:** Solved full-swing (654 frames, 1.814 s) decoupled kinematic tracking via `MarkerIkSolver` (29.6 mm address RMS, 74.0 mm early swing RMS, 5.48 mm max weld closure error) and analytic RNEA inverse dynamics. Compared Optimum (minimum 2-norm, 3.91 ms solve) against Trail-Side Zero (tau_trail == 0, 215 ms solve, 616.0 N grip force transfer, 38.2 N\*m grip moment) with exact forward acceleration parity. Artifacts committed under `evidence/matched/driver_full_pinocchio/` with full developer guide `docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md`.
+- **Next step:** Feed full-body candidate trajectory into cross-engine validation lanes (Drake MS-13/17, MuJoCo MS-10/16, OpenSim MS-40/41 under epic #10363 / MS-104).
 
 ### DL-#9967 · Native Simscape Tour Matching
 

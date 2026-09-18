@@ -1,0 +1,45 @@
+{
+  "num_frames": 654,
+  "duration_s": 1.8138888888888889,
+  "kinematics": {
+    "marker_rms_m": 0.2231905974797014,
+    "marker_rms_first_frame_m": 0.029615898578733243,
+    "closure_position_error_max_m": 0.005480417882078693,
+    "wall_clock_s": 8.474397737998515,
+    "per_frame_ms": 12.95779470641975
+  },
+  "shared_metrics": {
+    "whole_marker_rmse_m": 0.22384596209667768,
+    "early_marker_rmse_m": 0.07399462369339573,
+    "terminal_marker_rmse_m": 0.3503135294653112,
+    "club_marker_rmse_m": 0.425321118343415,
+    "pelvis_yaw_rmse_rad": 0.2700780258847491
+  },
+  "replay_five": {
+    "whole_rms_m": 0.22384596209667768,
+    "early_rms_m": 0.07399462369339573,
+    "terminal_rms_m": 0.11890455711607349,
+    "club_cluster_rms_m": 0.0,
+    "pelvis_yaw_error_pct": 10.111403755489556
+  },
+  "optimum": {
+    "solve_time_ms": 3.910088009433821,
+    "per_frame_ms": 0.00597872784317098,
+    "peak_lead_arm_n_m": 544.979492744096,
+    "mean_lead_arm_n_m": 26.847178770055795,
+    "peak_trail_arm_n_m": 148.3310094349231,
+    "mean_trail_arm_n_m": 5.894448470887192,
+    "peak_total_effort_n_m": 1974.1170394248302
+  },
+  "trail_zero": {
+    "solve_time_ms": 215.55531199555844,
+    "per_frame_ms": 0.32959527828067037,
+    "peak_lead_arm_n_m": 619.1720745502085,
+    "mean_lead_arm_n_m": 36.06092885712955,
+    "peak_trail_arm_n_m": 0.0,
+    "mean_trail_arm_n_m": 0.0,
+    "peak_grip_force_n": 616.0066345856982,
+    "peak_grip_moment_n_m": 38.23954497409939,
+    "max_accel_parity_residual": 7563453.12840726
+  }
+}
