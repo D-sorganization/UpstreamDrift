@@ -12,7 +12,7 @@ from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import minimize
+from scipy.optimize import NonlinearConstraint, minimize
 
 Array: TypeAlias = NDArray[np.float64]
 
@@ -248,10 +248,11 @@ def redistribute_forces(
             initial,
             jac=gradient,
             method="SLSQP",
-            constraints={
-                "type": "ineq",
-                "fun": lambda z: constraints.margins(space.particular + basis @ z),
-            },
+            constraints=NonlinearConstraint(
+                lambda z: constraints.margins(space.particular + basis @ z),
+                0.0,
+                np.inf,
+            ),
             options={"ftol": tolerance**2, "maxiter": max_iterations},
         )
         z = solve.x

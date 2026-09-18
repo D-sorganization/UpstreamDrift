@@ -5,8 +5,10 @@ Updated 2026-09-18. Governing epic #10430 / #10363; active numerical branch
 
 ## Current Numerical Work
 
-The pre-push isolated mypy environment required an explicit `TypeAlias`;
-SELF adds that annotation after its failing hook, without runtime changes.
+PR #10449 is open. SELF replaces the optimizer constraint dictionary with
+SciPy NonlinearConstraint after the CI stub checker rejected the untyped
+dictionary. Nineteen regression tests still pass. The dependency audit also
+flags existing AnyIO vulnerabilities; this matching change does not waive it.
 
 PF-06 has a scaled SVD force-null-space kernel and independent constrained
 redistribution audit. Nineteen unit tests pass on main-based commit 611a8633e, including full-space comparison,
