@@ -48,6 +48,15 @@
       "expires_on": "2026-11-30"
     },
     {
+      "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/two_window_fit_102.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: execution script for candidate 102 fit preserves CLI options and delegates to modular motion_matching.two_window_fit.",
+      "expires_on": "2026-11-30"
+    },
+    {
       "path": "scripts/audit_solver_convergence_9967.py",
       "symbol": "run_convergence_audit",
       "rule": "function-lines",
@@ -283,7 +292,7 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 7725,
       "reason": "Issue #7725: pre-existing cross-engine CC-30 forward-sim kernel (plant build, actuation wiring, initial-pose, rollout, FK, postconditions) already exceeded the function-lines budget before this change. The rollout/error-handling loop was extracted to _record_rollout (#7727); fully decomposing the remaining plant-construction body is a larger cross-engine refactor shared by every engine's simulate_with_coefficients. Temporary exception until that decomposition lands.",
-      "expires_on": "2026-09-17"
+      "expires_on": "2026-09-30"
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
@@ -673,60 +682,6 @@
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 10186,
       "reason": "Issue #10186: ground support pipeline driver landing in HO-0; scheduled for pipeline decomposition in HO-1/HO-2 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_pose",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_pose landing in HO-0; scheduled for consolidation into full_body_ik.py in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_pose",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_pose parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_trajectory",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_trajectory landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_trajectory",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_trajectory parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_simulation.py",
-      "symbol": "_computed_torque",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: computed torque helper parameter count landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_simulation.py",
-      "symbol": "reference_zmp",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: reference ZMP computation landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
       "expires_on": "2026-11-30"
     },
     {

@@ -303,7 +303,8 @@
         "motion_capture",
         "motion_target_preview",
         "starting_pose_matcher",
-        "motion_pipeline"
+        "motion_pipeline",
+        "shadow_tracker"
       ],
       "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406).",
       "id": "mocap.breadth"
@@ -833,7 +834,7 @@
       "path": "src/engines/physics_engines/myosuite/python/gui.py",
       "launch_target": "src/engines/physics_engines/myosuite/python/gui.py",
       "category": "physics_engine",
-      "status": "ready",
+      "status": "experimental",
       "capabilities": [
         "musculoskeletal",
         "muscle_control",
@@ -2834,9 +2835,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "f156170d1e509fd6c757e5ba12949b7b3ab92c01c817aab5414dfba624851cce",
-    "src/config/launcher_manifest.json": "66b6483f70546d47e8f391a0ba349c02f6708fb6b2f1913effebfd79d54d6c28",
-    "src/config/feature_parity.json": "8969ea35030e75ba719a68c49463f5a0e0eba39639d82b74baa4a55e25041b58",
+    "src/config/models.yaml": "5b6e64d27399807b6f2daf738fd2583c07f9ed05e0777a887624c260a3cd8b79",
+    "src/config/launcher_manifest.json": "8ed95d534d6ba9e35d528837da43346bac32588f9766018d8c99c89a17099aa2",
+    "src/config/feature_parity.json": "d6667fb93d20e1240791d601252e2ca6ffd85bb7a2eba4deec26edc4075f8eba",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

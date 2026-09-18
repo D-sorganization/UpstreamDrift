@@ -20,10 +20,11 @@ from src.shared.python.motion_matching.pipeline.constants import (
     STANCE_TOLERANCE_M,
     TOE_SPHERES,
 )
+from src.shared.python.motion_matching.acceptance import Horizon, evaluate
 from src.shared.python.motion_matching.pipeline.receipt_schema import validate_receipt
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
     from src.shared.python.motion_matching.pipeline.lane import Lane
@@ -128,6 +129,10 @@ def build_ground_support_receipt(
             f"full-body model ({inputs.qualification_note}); not a fit, not acceptance"
         ),
     }
+
+    # Evaluate physical & kinematic acceptance under Matched Swing Program contract (MS-01)
+    verdict = evaluate(receipt_dict, horizon=Horizon.G3)
+    receipt_dict["acceptance"] = verdict.as_dict()
 
     if inputs.validate:
         validate_receipt(receipt_dict)

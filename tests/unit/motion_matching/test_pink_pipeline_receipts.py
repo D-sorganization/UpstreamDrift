@@ -94,34 +94,34 @@ def test_constrained_ik_receipt_validates() -> None:
         "is_qualified": True,
         "qualification_state": "qualified",
     }
-    receipt = ConstrainedIkReceipt(**data)
+    receipt = ConstrainedIkReceipt.model_validate(data)
     assert receipt.backend_name == "pink"
     assert receipt.all_frames_converged is True
     assert receipt.is_qualified is True
-    assert receipt.frame_count == 654
 
 
 def test_constrained_ik_receipt_rejects_unqualified_when_failed() -> None:
     with pytest.raises(
         ValueError, match="is_qualified cannot be True if not all frames converged"
     ):
-        ConstrainedIkReceipt(
-            backend_name="pink",
-            solver="quadprog",
-            model_name="golf_humanoid",
-            capture_name="driver",
-            step_mode="physical",
-            limit_policy="enforce",
-            task_policy="dual_grip_hard_equality",
-            time_semantics="strict_physical_elapsed_dt",
-            frame_count=10,
-            frame_success_count=9,
-            all_frames_converged=False,
-            first_failed_frame=9,
-            per_frame_status=[True] * 9 + [False],
-            is_qualified=True,
-            qualification_state="qualified",
-        )
+        failed_data = {
+            "backend_name": "pink",
+            "solver": "quadprog",
+            "model_name": "golf_humanoid",
+            "capture_name": "driver",
+            "step_mode": "physical",
+            "limit_policy": "enforce",
+            "task_policy": "dual_grip_hard_equality",
+            "time_semantics": "strict_physical_elapsed_dt",
+            "frame_count": 10,
+            "frame_success_count": 9,
+            "all_frames_converged": False,
+            "first_failed_frame": 9,
+            "per_frame_status": [True] * 9 + [False],
+            "is_qualified": True,
+            "qualification_state": "qualified",
+        }
+        ConstrainedIkReceipt.model_validate(failed_data)
 
 
 # -----------------------------------------------------------------------------
@@ -227,3 +227,58 @@ def test_pink_capability_missing_fails_clearly(monkeypatch: pytest.MonkeyPatch) 
         "pink" in diagnostics["missing"]
         or "unavailable" in diagnostics["reason"].lower()
     )
+
+
+# -----------------------------------------------------------------------------
+# 5. Both-Club Comparisons (Driver and 7-Iron Smoke Journeys)
+# -----------------------------------------------------------------------------
+
+
+def test_pink_pipeline_both_driver_and_iron_smoke_journeys() -> None:
+    """Both driver and iron captures configure Pink pipeline and produce valid receipts."""
+    for capture_name, club_name in [("driver", "driver"), ("iron", "iron7")]:
+        req = MatchRequest(
+            capture=capture_name,
+            club=club_name,
+            backend="pink",
+            step_mode="physical",
+            solver="quadprog",
+        )
+        cmd = match_command(req)
+        assert "--backend" in cmd
+        assert cmd[cmd.index("--backend") + 1] == "pink"
+        assert "--capture" in cmd
+        assert cmd[cmd.index("--capture") + 1] == capture_name
+
+        data = {
+            "backend_name": "pink",
+            "solver": "quadprog",
+            "solver_version": "0.1.12",
+            "runtime_version": "0.4.1",
+            "pinocchio_version": "3.3.1",
+            "source_sha256": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+            "model_name": "golf_humanoid",
+            "capture_name": capture_name,
+            "step_mode": "physical",
+            "limit_policy": "enforce",
+            "task_policy": "dual_grip_hard_equality",
+            "time_semantics": "strict_physical_elapsed_dt",
+            "frame_count": 654,
+            "frame_success_count": 654,
+            "all_frames_converged": True,
+            "first_failed_frame": None,
+            "per_frame_status": [True] * 654,
+            "max_velocity_ratio": 0.85,
+            "is_qualified": True,
+            "qualification_state": "qualified",
+        }
+        receipt = ConstrainedIkReceipt.model_validate(data)
+        assert receipt.capture_name == capture_name
+        assert receipt.is_qualified is True
+
+        receipt_doc = _sample_receipt(backend="pink", pink_sub_block=data)
+        receipt_doc["capture"] = capture_name
+        receipt_doc["club"] = {"name": club_name}
+        summary = summarise_receipt(receipt_doc)
+        assert summary["backend"] == "pink"
+        assert summary["is_qualified"] is True

@@ -9,6 +9,10 @@ function target = load_club_target_c3d(c3d_path, opts)
 %   CLUB_IK_SPEC.md §"Implementation notes".  This avoids duplicating the
 %   C3D parser in MATLAB.
 %
+%   Canonical target capture: data/C3D_TA_Driver.c3d (SHA-256
+%   545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba)
+%   per src/shared/python/motion_matching/tour_capture_contract.py.
+%
 %   Marker mapping: the cluster-marker C3D files in
 %   src/engines/.../matlab/Data/Mocap C3D Files/ have not previously been
 %   parsed.  This loader uses a heuristic to identify butt and clubhead:

@@ -11,6 +11,7 @@ requiring high-risk mass moves.
 - Sphinx source and generated artifacts: `docs/sphinx/`
 - Repository documentation inventory: `docs/index.md`
 - Markdown and Quarto size budget: `scripts/config/doc_size_budget.json`
+- Matched Swing Program single source of truth: `docs/development/matched_swing_program/` (MS-06 #10327)
 
 ## Local Checks
 
