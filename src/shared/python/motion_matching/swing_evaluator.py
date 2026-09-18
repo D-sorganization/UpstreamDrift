@@ -151,9 +151,8 @@ class SwingEvaluator:
         valid: NDArray[np.bool_],
         sphere_bottom_z: Array,
         ground_height_m: float,
-        closure_errors_m: Array,
+        closure_errors_m: Array | tuple[Array, Array | None],
         t_events: dict[str, float] | None = None,
-        closure_rotation_rad: Array | None = None,
     ) -> SwingEvaluationReport:
         """Run comprehensive audit on tracking and contact feasibility."""
         n_nodes, n_markers = valid.shape
@@ -299,16 +298,21 @@ class SwingEvaluator:
         )
 
         # Weld closure audit: separate translation and rotation
-        closure_arr = np.asarray(closure_errors_m, dtype=np.float64)
-        if closure_arr.ndim == 2 and closure_arr.shape[1] == 6:
-            trans_errors_m = np.linalg.norm(closure_arr[:, :3], axis=1)
-            rot_errors_rad = np.linalg.norm(closure_arr[:, 3:6], axis=1)
-        elif closure_rotation_rad is not None:
-            trans_errors_m = np.asarray(closure_errors_m, dtype=np.float64)
-            rot_errors_rad = np.asarray(closure_rotation_rad, dtype=np.float64)
+        if isinstance(closure_errors_m, tuple):
+            trans_errors_m = np.asarray(closure_errors_m[0], dtype=np.float64)
+            rot_errors_rad = (
+                np.asarray(closure_errors_m[1], dtype=np.float64)
+                if closure_errors_m[1] is not None
+                else None
+            )
         else:
-            trans_errors_m = np.asarray(closure_errors_m, dtype=np.float64)
-            rot_errors_rad = None
+            closure_arr = np.asarray(closure_errors_m, dtype=np.float64)
+            if closure_arr.ndim == 2 and closure_arr.shape[1] == 6:
+                trans_errors_m = np.linalg.norm(closure_arr[:, :3], axis=1)
+                rot_errors_rad = np.linalg.norm(closure_arr[:, 3:6], axis=1)
+            else:
+                trans_errors_m = closure_arr
+                rot_errors_rad = None
 
         max_c_trans = float(np.max(trans_errors_m)) * 1000.0
         mean_c_trans = float(np.mean(trans_errors_m)) * 1000.0

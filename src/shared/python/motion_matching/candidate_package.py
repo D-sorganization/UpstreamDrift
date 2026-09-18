@@ -149,109 +149,87 @@ class CandidatePackage:
         np.savez_compressed(p, **save_dict)
         logger.info("Saved candidate package to %s", p)
 
+    @staticmethod
+    def _unpack_npz_data(raw: Any) -> dict[str, Any]:
+        time_s = np.asarray(raw["time_s"], dtype=np.float64)
+        n_nodes = len(time_s)
+        q = np.asarray(raw["q"], dtype=np.float64)
+        v = np.asarray(raw["v"], dtype=np.float64)
+        a = np.asarray(raw["a"], dtype=np.float64)
+        u = np.asarray(raw["u"], dtype=np.float64)
+
+        u_min_trail: FloatArray | None = None
+        if "u_min_trail" in raw:
+            u_min_trail = np.asarray(raw["u_min_trail"], dtype=np.float64)
+        elif "u_trail_zero" in raw:
+            u_min_trail = np.asarray(raw["u_trail_zero"], dtype=np.float64)
+
+        u_hard_zero_trail: FloatArray | None = None
+        if "u_hard_zero_trail" in raw:
+            u_hard_zero_trail = np.asarray(raw["u_hard_zero_trail"], dtype=np.float64)
+
+        delta_tau_root = (
+            np.asarray(raw["delta_tau_root"], dtype=np.float64)
+            if "delta_tau_root" in raw
+            else np.zeros((n_nodes, 6), dtype=np.float64)
+        )
+        coord_order = tuple(str(x) for x in raw["coordinate_order"])
+        actuated = (
+            np.asarray(raw["actuated"], dtype=np.int64)
+            if "actuated" in raw
+            else np.arange(6, len(coord_order))
+        )
+        labels_key = "labels" if "labels" in raw else "marker_labels"
+        pred_key = "markers_m" if "markers_m" in raw else "predicted_markers_m"
+        targ_key = "target_m" if "target_m" in raw else "target_markers_m"
+
+        return {
+            "time_s": time_s,
+            "q": q,
+            "v": v,
+            "a": a,
+            "u": u,
+            "u_min_trail": u_min_trail,
+            "u_hard_zero_trail": u_hard_zero_trail,
+            "delta_tau_root": delta_tau_root,
+            "ground_forces": np.asarray(raw["ground_forces"], dtype=np.float64),
+            "grip_wrenches": np.asarray(raw["grip_wrenches"], dtype=np.float64),
+            "contact_modes": np.asarray(raw["contact_modes"])
+            if "contact_modes" in raw
+            else np.ones((n_nodes, 6), dtype=bool),
+            "solver_status": np.asarray(raw["solver_status"], dtype=bool)
+            if "solver_status" in raw
+            else np.ones(n_nodes, dtype=bool),
+            "equilibrium_residuals": np.asarray(
+                raw["equilibrium_residuals"], dtype=np.float64
+            )
+            if "equilibrium_residuals" in raw
+            else np.zeros(n_nodes, dtype=np.float64),
+            "coordinate_order": coord_order,
+            "actuated_indices": actuated,
+            "handedness": str(raw["handedness"])
+            if "handedness" in raw
+            else "right_handed",
+            "marker_labels": tuple(str(x) for x in raw[labels_key]),
+            "predicted_markers_m": np.asarray(raw[pred_key], dtype=np.float64),
+            "target_markers_m": np.asarray(raw[targ_key], dtype=np.float64),
+            "marker_valid": np.asarray(raw["valid"], dtype=bool),
+            "interpolation_method": str(raw["interpolation_method"])
+            if "interpolation_method" in raw
+            else "pchip",
+            "model_sha256": str(raw["model_sha256"]) if "model_sha256" in raw else "",
+            "capture_sha256": str(raw["capture_sha256"])
+            if "capture_sha256" in raw
+            else "",
+            "schema_version": str(raw["schema_version"])
+            if "schema_version" in raw
+            else "v2.0",
+        }
+
     @classmethod
     def load(cls, path: Path | str) -> CandidatePackage:
         """Load candidate package from NPZ with legacy compatibility."""
         p = Path(path)
         with np.load(p, allow_pickle=False) as raw:
-            time_s = np.asarray(raw["time_s"], dtype=np.float64)
-            n_nodes = len(time_s)
-            q = np.asarray(raw["q"], dtype=np.float64)
-            v = np.asarray(raw["v"], dtype=np.float64)
-            a = np.asarray(raw["a"], dtype=np.float64)
-            u = np.asarray(raw["u"], dtype=np.float64)
-
-            # Compatibility: u_min_trail from u_min_trail or u_trail_zero
-            u_min_trail: FloatArray | None = None
-            if "u_min_trail" in raw:
-                u_min_trail = np.asarray(raw["u_min_trail"], dtype=np.float64)
-            elif "u_trail_zero" in raw:
-                u_min_trail = np.asarray(raw["u_trail_zero"], dtype=np.float64)
-
-            u_hard_zero_trail: FloatArray | None = None
-            if "u_hard_zero_trail" in raw:
-                u_hard_zero_trail = np.asarray(
-                    raw["u_hard_zero_trail"], dtype=np.float64
-                )
-
-            # Compatibility: delta_tau_root
-            if "delta_tau_root" in raw:
-                delta_tau_root = np.asarray(raw["delta_tau_root"], dtype=np.float64)
-            else:
-                delta_tau_root = np.zeros((n_nodes, 6), dtype=np.float64)
-
-            ground_forces = np.asarray(raw["ground_forces"], dtype=np.float64)
-            grip_wrenches = np.asarray(raw["grip_wrenches"], dtype=np.float64)
-
-            if "contact_modes" in raw:
-                contact_modes = np.asarray(raw["contact_modes"])
-            else:
-                contact_modes = np.ones((n_nodes, 6), dtype=bool)
-
-            if "solver_status" in raw:
-                solver_status = np.asarray(raw["solver_status"], dtype=bool)
-            else:
-                solver_status = np.ones(n_nodes, dtype=bool)
-
-            if "equilibrium_residuals" in raw:
-                eq_res = np.asarray(raw["equilibrium_residuals"], dtype=np.float64)
-            else:
-                eq_res = np.zeros(n_nodes, dtype=np.float64)
-
-            coord_order = tuple(str(x) for x in raw["coordinate_order"])
-            actuated = (
-                np.asarray(raw["actuated"], dtype=np.int64)
-                if "actuated" in raw
-                else np.arange(6, len(coord_order))
-            )
-
-            handedness = (
-                str(raw["handedness"]) if "handedness" in raw else "right_handed"
-            )
-
-            labels_key = "labels" if "labels" in raw else "marker_labels"
-            labels = tuple(str(x) for x in raw[labels_key])
-
-            pred_key = "markers_m" if "markers_m" in raw else "predicted_markers_m"
-            pred_markers = np.asarray(raw[pred_key], dtype=np.float64)
-
-            targ_key = "target_m" if "target_m" in raw else "target_markers_m"
-            targ_markers = np.asarray(raw[targ_key], dtype=np.float64)
-
-            valid = np.asarray(raw["valid"], dtype=bool)
-
-            interp = (
-                str(raw["interpolation_method"])
-                if "interpolation_method" in raw
-                else "pchip"
-            )
-            model_hash = str(raw["model_sha256"]) if "model_sha256" in raw else ""
-            capture_hash = str(raw["capture_sha256"]) if "capture_sha256" in raw else ""
-            version = str(raw["schema_version"]) if "schema_version" in raw else "v2.0"
-
-        return cls(
-            time_s=time_s,
-            q=q,
-            v=v,
-            a=a,
-            u=u,
-            u_min_trail=u_min_trail,
-            u_hard_zero_trail=u_hard_zero_trail,
-            delta_tau_root=delta_tau_root,
-            ground_forces=ground_forces,
-            grip_wrenches=grip_wrenches,
-            contact_modes=contact_modes,
-            solver_status=solver_status,
-            equilibrium_residuals=eq_res,
-            coordinate_order=coord_order,
-            actuated_indices=actuated,
-            handedness=handedness,
-            marker_labels=labels,
-            predicted_markers_m=pred_markers,
-            target_markers_m=targ_markers,
-            marker_valid=valid,
-            interpolation_method=interp,
-            model_sha256=model_hash,
-            capture_sha256=capture_hash,
-            schema_version=version,
-        )
+            data = cls._unpack_npz_data(raw)
+        return cls(**data)
