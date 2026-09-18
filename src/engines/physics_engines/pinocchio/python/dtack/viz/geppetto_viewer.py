@@ -5,6 +5,8 @@ from __future__ import annotations
 import typing
 import uuid
 
+import numpy as np
+
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ._validation import validated_configuration
@@ -115,6 +117,52 @@ class GeppettoViewer:
             raise ImportError("Pinocchio is required to resolve neutral configuration")
         configuration = validated_configuration(self._model, q, pin.neutral)
         self._visualizer.display(configuration)
+
+    @staticmethod
+    def is_server_reachable() -> bool:
+        """Check whether Gepetto CORBA server is currently reachable."""
+        if not GEPETTO_AVAILABLE or _corbaserver is None:
+            return False
+        try:
+            client = _corbaserver.Client()
+            return client is not None
+        except Exception:
+            return False
+
+    def play_trajectory(
+        self,
+        q_trajectory: typing.Any,
+        dt: float = 1.0 / 60.0,
+        *,
+        loop: bool = False,
+        stride: int = 1,
+    ) -> None:
+        """Play back a trajectory in the Geppetto viewer.
+
+        Args:
+            q_trajectory: Array of configurations of shape (N, nq).
+            dt: Time step between frames in seconds.
+            loop: Whether to loop playback continuously.
+            stride: Stride step between frames (default 1).
+        """
+        import time
+
+        self._require_loaded()
+        q_arr = np.asarray(q_trajectory, dtype=float)
+        n_frames = len(q_arr)
+        if n_frames == 0:
+            return
+
+        while True:
+            for k in range(0, n_frames, max(1, stride)):
+                t_start = time.perf_counter()
+                self.display(q_arr[k].tolist())
+                elapsed = time.perf_counter() - t_start
+                sleep_time = (dt * max(1, stride)) - elapsed
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+            if not loop:
+                break
 
     def close(self) -> None:
         """Clean the scene without shutting down the shared Geppetto server."""
