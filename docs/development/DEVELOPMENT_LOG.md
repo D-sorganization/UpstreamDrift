@@ -32,6 +32,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Finish PR CI and merge; regenerate a source candidate with recorded armature/contact/control provenance, root history and an independent uninterrupted native replay before advancing G1.
 - **Evidence:** evidence/matched/driver_full_mujoco_replay/receipt.json; evidence/matched/driver_full_mujoco_replay/README.md.
 
+### DL-#10233 · Shadow Tracker Revision Integrity and Persistence
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #10233 (ST-04 / epic #10122)
+- **Branch:** fix/shadow-tracker-10233-pr
+- **PR:** #10450 (https://github.com/D-sorganization/UpstreamDrift/pull/10450)
+- **Paths:** src/shared/python/shadow_tracker/segmentation.py; tests/unit/shadow_tracker/test_revision_persistence.py; docs/plans/shadow_tracker/
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 on c76d6f02c (remote-main base); 306 tests pass; CI run 35376242857 identifies AnyIO 4.12.1 vulnerabilities; SELF upgrades both locks to 4.14.2; scoped Ruff, file-size and context checks pass.
+- **Summary:** Complete-record idempotence, same-observation parents, current selection and strict atomic provider snapshots with legacy reading. Renderer preserved.
+- **Next step:** Validate PR #10450 CI and merge through branch protection.
+- **Evidence:** docs/plans/shadow_tracker/TURNOVER_CURRENT.md; tests/unit/shadow_tracker/test_revision_persistence.py.
+
 ### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
 
 - **State:** in_progress

@@ -11,6 +11,14 @@ is unverified. Merge delivers the replay path, not physical qualification;
 keep #10336 open. Commit/push hooks pass, as do 21 replay tests on pinned
 MuJoCo 3.8.0. The next step is PR CI and review, then protected merge.
 
+## Shadow Tracker Revision Integrity (#10233)
+
+Provider registration and persistence repair is locally validated on
+`fix/shadow-tracker-10233-pr`; [PR #10450](https://github.com/D-sorganization/UpstreamDrift/pull/10450) is in CI. See
+[turnover evidence](docs/plans/shadow_tracker/TURNOVER_CURRENT.md) for contracts,
+13-failure RED receipt, 306-test GREEN receipt and separate ST-11 bundle risks.
+Renderer work and the original checkout are preserved. Review the focused diff.
+
 ## Polynomial Full-Body Dynamics Boundary (#10265)
 
 The integration retains global degree-six Bernstein efforts for every non-root
