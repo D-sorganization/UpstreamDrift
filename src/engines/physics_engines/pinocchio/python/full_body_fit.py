@@ -20,7 +20,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from time import perf_counter
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -392,10 +392,15 @@ def _predicted_markers(ctx: _PlantContext, q: Array) -> Array:
 
 def _smooth(q: Array, dt: float, cutoff_hz: float) -> Array:
     try:
-        from scipy.signal import butter, filtfilt
+        from src.shared.python.motion_matching.kinematic_smoother import (
+            KinematicSmoother,
+            KinematicSmootherOptions,
+        )
 
-        b, a = butter(2, cutoff_hz / (0.5 / dt))
-        return filtfilt(b, a, q, axis=0)
+        smoother = KinematicSmoother(
+            KinematicSmootherOptions(cutoff_hz=cutoff_hz, dt=dt)
+        )
+        return smoother.smooth(q, dt=dt).q
     except Exception:  # pragma: no cover - scipy absent
         return q
 
@@ -480,6 +485,8 @@ def run_fit(
     q_ik, ik_rms, ik_closure = solver.solve_trajectory(
         targets.targets, targets.valid, targets.weights, q_seed
     )
+    ik_rms = np.asarray(ik_rms)
+    ik_closure = np.asarray(ik_closure)
     ik_wall = time.perf_counter() - t_ik
     q_smooth = _smooth(q_ik, dt, 12.0)
     v_ik = finite_difference_rates(q_smooth, dt)
@@ -511,10 +518,16 @@ def run_fit(
             effort_bounds,
         )
         warm_start_source = f"candidate:{warm_start_candidate}"
-    xs0 = [np.concatenate([q_track[k], v_track[k]]) for k in range(n_nodes)]
+    q_track = np.asarray(q_track)
+    v_track = np.asarray(v_track)
+    us0 = np.asarray(us0)
+    xs0 = [
+        np.concatenate([cast(Any, q_track)[k], cast(Any, v_track)[k]])
+        for k in range(n_nodes)
+    ]
     ik_summary = {
         "marker_rms_m": float(np.sqrt(np.mean(ik_rms**2))),
-        "marker_rms_first_frame_m": float(ik_rms[0]),
+        "marker_rms_first_frame_m": float(cast(Any, ik_rms)[0]),
         "closure_position_error_max_m": float(np.max(ik_closure)),
         "wall_clock_s": ik_wall,
         "iterations_per_frame": (ik_options or MarkerIkOptions()).iterations,
@@ -548,7 +561,7 @@ def run_fit(
     stage_ends.append(inputs.horizon.t_end_s)
     stages: list[dict[str, Any]] = []
     xs_prev = [x.copy() for x in xs0]
-    us_prev = [u.copy() for u in us0]
+    us_prev = [u.copy() for u in cast(Any, us0)]
     t_solve = time.perf_counter()
     fddp = None
     for stage_index, t_end in enumerate(stage_ends):
