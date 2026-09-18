@@ -19,17 +19,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10439 · Native Force-Equation and Model Bridges
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #10439 (epic #10430; program #10363)
 - **Branch:** fix/pf09-native-force-equations
 - **PR:** #10451
-- **Paths:** src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py; src/engines/physics_engines/pinocchio/python/native_model.py; scripts/match_pinocchio_c3d.py; tests/integration/engines/pinocchio/test_force_mapping.py
+- **Paths:** src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py; src/engines/physics_engines/pinocchio/python/native_model.py; src/engines/physics_engines/pinocchio/python/force_adapter.py; tests/integration/engines/pinocchio/test_force_adapter.py; scripts/match_pinocchio_c3d.py; tests/integration/engines/pinocchio/test_force_mapping.py
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at 614a3643a plus SELF; unfinished native factory adapter: five tests pass, fresh-instance grip J\*v test FAILS; earlier Pinocchio qualification is insufficient; full 654-frame 15/60/180-iteration native driver diagnostics remain rejected; four force-map tests pass natively on Pinocchio 3.8 and 4.1; five native MuJoCo 3.3.4 RED/GREEN tests and six existing allocator regressions pass; scoped isolated mypy, Ruff, LoD and manual governance pass.
-- **Summary:** Repair stale native mass/Jacobians and raw inverse-dynamics equation; validate finite inputs and dimensions before native state changes. Native multi-engine completion remains open.
-- **Next step:** Resolve test_force_adapter.py::test_grip_jacobian_uses_native_velocity_order without fixture priming or weakened tolerance.
-- **Evidence:** tests/unit/motion_matching/test_native_force_equations.py
+- **Last verified:** 2026-09-18 at 486a422d3; fresh-instance constraint-data refresh implemented via \_refresh_constraint_data (cross-version Pinocchio 3.8 and 4.1); all 11 native Pinocchio force tests pass; five native MuJoCo 3.3.4 RED/GREEN tests and six allocator regressions pass; mypy, ruff, black clean.
+- **Summary:** Repair stale native mass/Jacobians and raw inverse-dynamics equation; refresh constraint placements in closure_force_jacobian for fresh-instance and caller-order independence. Pinocchio and MuJoCo force adapters wired to shared factory.
+- **Next step:** Land PR #10451 and continue with sequential tasks under Epic #10430 (sparse trajectory optimization PF-05, null-space kernel PF-06 integration, uninterrupted native replay PF-07).
+- **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/integration/engines/pinocchio/test_force_adapter.py; tests/integration/engines/pinocchio/test_force_mapping.py
 
 ### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
 
