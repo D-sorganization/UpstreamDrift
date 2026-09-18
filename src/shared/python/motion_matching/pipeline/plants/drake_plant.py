@@ -4,27 +4,33 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.drake.python.full_body_ik import DrakeFullBodyIK
-from src.engines.physics_engines.drake.python.full_body_model import (
-    FullBodyDrakeModel,
-)
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.drake.python.full_body_ik import DrakeFullBodyIK
+    from src.engines.physics_engines.drake.python.full_body_model import (
+        FullBodyDrakeModel,
+    )
 
 
 class DrakeMatchingPlant:
     """Drake implementation of MatchingPlant."""
 
     def __init__(self, spec: bytes | Mapping[str, Any]) -> None:
+        from src.engines.physics_engines.drake.python.full_body_model import (
+            FullBodyDrakeModel,
+        )
+
         if isinstance(spec, bytes):
             self.spec_dict: dict[str, Any] = json.loads(spec.decode("utf-8"))
         else:
             self.spec_dict = dict(spec)
-        self.model = FullBodyDrakeModel(self.spec_dict)
+        self.model: FullBodyDrakeModel = FullBodyDrakeModel(self.spec_dict)
 
     @property
     def engine_name(self) -> str:
@@ -45,6 +51,10 @@ class DrakeMatchingPlant:
     def create_ik(
         self, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> BaseFullBodyIK:
+        from src.engines.physics_engines.drake.python.full_body_ik import (
+            DrakeFullBodyIK,
+        )
+
         spec_copy = dict(self.spec_dict)
         spec_copy["marker_attachments"] = {
             label: {"body": body, "offset": list(offset)}

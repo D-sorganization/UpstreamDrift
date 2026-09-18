@@ -4,30 +4,36 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.pinocchio.python.full_body_ik import (
-    PinocchioFullBodyIK,
-)
-from src.engines.physics_engines.pinocchio.python.native_model import (
-    FullBodyPinocchioModel,
-)
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.pinocchio.python.full_body_ik import (
+        PinocchioFullBodyIK,
+    )
+    from src.engines.physics_engines.pinocchio.python.native_model import (
+        FullBodyPinocchioModel,
+    )
 
 
 class PinocchioMatchingPlant:
     """Pinocchio implementation of MatchingPlant."""
 
     def __init__(self, spec: bytes | Mapping[str, Any]) -> None:
+        from src.engines.physics_engines.pinocchio.python.native_model import (
+            FullBodyPinocchioModel,
+        )
+
         if isinstance(spec, bytes):
             self.spec_dict: dict[str, Any] = json.loads(spec.decode("utf-8"))
         else:
             self.spec_dict = dict(spec)
-        self.model = FullBodyPinocchioModel(self.spec_dict)
+        self.model: FullBodyPinocchioModel = FullBodyPinocchioModel(self.spec_dict)
         self._sha = canonical_sha256(self.spec_dict)
 
     @property
@@ -49,6 +55,10 @@ class PinocchioMatchingPlant:
     def create_ik(
         self, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> BaseFullBodyIK:
+        from src.engines.physics_engines.pinocchio.python.full_body_ik import (
+            PinocchioFullBodyIK,
+        )
+
         spec_copy = dict(self.spec_dict)
         spec_copy["marker_attachments"] = {
             label: {"body": body, "offset": list(offset)}
