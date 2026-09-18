@@ -159,3 +159,39 @@ def get_plant(engine: str, spec: bytes | Mapping[str, Any]) -> MatchingPlant:
         raise EngineUnavailableError(
             f"Failed to instantiate MatchingPlant for engine '{engine}': {exc}"
         ) from exc
+
+
+def compute_attachment_marker_positions(
+    poses: Mapping[str, tuple[np.ndarray, np.ndarray]],
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+) -> np.ndarray:
+    """Compute 3D marker positions given body poses and body-local offsets."""
+    positions = []
+    for label in attachments:
+        body, offset = attachments[label]
+        rot, trans = poses[body]
+        pos = rot @ np.asarray(offset, dtype=float) + trans
+        positions.append(pos)
+    return np.asarray(positions, dtype=float)
+
+
+def integrate_euler_step(
+    accelerations_fn: Callable[
+        [Mapping[str, float], Mapping[str, float], Mapping[str, float]],
+        Mapping[str, float],
+    ],
+    coordinate_order: Sequence[str],
+    q: np.ndarray,
+    v: np.ndarray,
+    tau: np.ndarray,
+    dt: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Single semi-implicit Euler integration step for coordinate-mapped plants."""
+    q_dict = {c: float(q[i]) for i, c in enumerate(coordinate_order)}
+    v_dict = {c: float(v[i]) for i, c in enumerate(coordinate_order)}
+    tau_dict = {c: float(tau[i]) for i, c in enumerate(coordinate_order)}
+    acc = accelerations_fn(q_dict, v_dict, tau_dict)
+    a = np.array([acc[c] for c in coordinate_order], dtype=float)
+    next_v = v + a * dt
+    next_q = q + next_v * dt
+    return next_q, next_v
