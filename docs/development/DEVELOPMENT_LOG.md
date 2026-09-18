@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10439 · Native Force-Equation and Model Bridges
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #10439 (epic #10430; program #10363)
+- **Branch:** fix/pf09-native-force-equations
+- **PR:** pending
+- **Paths:** src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 on base 5347cba0f plus SELF; five native MuJoCo 3.3.4 RED/GREEN tests and six existing allocator regressions pass; scoped isolated mypy, Ruff, LoD and manual governance pass.
+- **Summary:** Repair stale native mass/Jacobians and raw inverse-dynamics equation; validate finite inputs and dimensions before native state changes. Native multi-engine completion remains open.
+- **Next step:** Replace synthetic factory branches with native MatchingPlant force interfaces and model-conformity checks.
+- **Evidence:** tests/unit/motion_matching/test_native_force_equations.py
+
 ### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
 
 - **State:** in_progress

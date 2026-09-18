@@ -1,3 +1,43 @@
+# Native Force-Equation Correction (#10439)
+
+Updated 2026-09-18; branch `fix/pf09-native-force-equations`; commit SELF.
+Development entry DL-#10439. PR pending. This work is independent of the
+PF-01–04 stack and preserves the PF-05 and viewer owners' scope.
+
+## Verified Native Defects and Repair
+
+Five real MuJoCo tests failed before the repair and pass afterward. A fresh
+adapter returned zero contact Jacobians and used an uninitialized mass matrix
+in its parity check. `mj_inverse` also returned a different force equation:
+its output subtracts internal passive/constraint forces, while our allocator
+expects raw `M a + bias` and allocates reactions separately. A representative
+pre-fix state produced 22,360,482.97 acceleration parity error. On native
+MuJoCo 3.3.4 the repaired same-state probe has maximum error 2.06e-14;
+the five native tests plus six existing allocator tests all pass.
+
+The adapter now validates dimensions/finiteness before mutating state, refreshes
+native position and velocity stages for each request, computes the raw balance
+with native mass and bias, and refreshes contact/grip Jacobians independently
+of prior call order. Wrong 44/41 input shapes fail explicitly.
+
+Run:
+`python3 -m pytest tests/unit/motion_matching/test_native_force_equations.py -q --no-cov -m live_simulation`
+
+This verifies native algebra and contact-position directional derivatives;
+it does not qualify full-swing fitting, contact feasibility or forward replay.
+Next: replace synthetic engine factories with native MatchingPlant bridges and
+named-coordinate/model-conformity tests, then connect the audited allocation
+and run the full driver/iron acceptance pathway. No other-engine parity claimed.
+
+## Related Numerical Delivery
+
+PF-06 kernel and detailed lower-cost-agent packets: PR #10449, branch
+`feat/pf06-nullspace-kernel`, `docs/plans/pinocchio_matching_completion.md`.
+The program and matching epic were updated with the outstanding gates.
+Do not close #10439 until native bridges and qualification satisfy its scope.
+
+## Prior Component Reports
+
 # Current Matching Continuation Handoff
 
 Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og09-golf-native-viewer-package-10403`; commit SELF.
