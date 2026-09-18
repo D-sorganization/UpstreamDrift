@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10363 · Matched Swing Continuation Review
+
+- **State:** in_review
+- **Owner:** codex (handoff review only; execution by next lease holder)
+- **Issue:** #10363
+- **Branch:** docs/matching-agent-continuation
+- **PR:** not created (documentation review publication follows)
+- **Paths:** docs/development/HANDOFF.md; docs/development/matched_swing_program; docs/development/opensim_tour_matching/HANDOFF.md; docs/development/opensim_tour_matching/NEXT_AGENT_PROMPT.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at 94d593cf1 (review base; SELF contains handoff; ControlTower process/artifact/source snapshot; 14 Pinocchio and 27 OpenSim focused tests passed)
+- **Summary:** Reviewed Claude native branches and deployed code; preserved checkpoint/source recovery evidence; documented active jobs, physical failures, source integration gaps and bounded cheaper-agent continuation. No new native solve or physical acceptance claimed.
+- **Next step:** Inspect the existing ControlTower jobs and retrieve newly completed receipts through the lane handoffs.
+- **Evidence:** docs/development/matched_swing_program/evidence/continuation_20260918/matching-handoff-snapshot.json; docs/development/matched_swing_program/AGENT_CONTINUATION_PROMPT.md.
+
 ### DL-#10323 · Matched-Swing Run Ledger
 
 - **State:** in_progress
