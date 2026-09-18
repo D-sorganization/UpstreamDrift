@@ -4,29 +4,37 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python.full_body_ik import (
-    FullBodyMarkerKinematics,
-)
-from src.engines.physics_engines.mujoco.python.full_body_model import (
-    NativeMujocoFullBodyModel,
-)
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
 
 
 class MujocoMatchingPlant:
     """MuJoCo implementation of MatchingPlant."""
 
     def __init__(self, spec: bytes | Mapping[str, Any]) -> None:
+        from src.engines.physics_engines.mujoco.python.full_body_model import (
+            NativeMujocoFullBodyModel,
+        )
+
         if isinstance(spec, bytes):
             self._spec_bytes = spec
         else:
             self._spec_bytes = json.dumps(spec).encode("utf-8")
-        self.adapter = NativeMujocoFullBodyModel(self._spec_bytes)
+        self.adapter: NativeMujocoFullBodyModel = NativeMujocoFullBodyModel(
+            self._spec_bytes
+        )
 
     @property
     def engine_name(self) -> str:
@@ -47,6 +55,10 @@ class MujocoMatchingPlant:
     def create_ik(
         self, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> BaseFullBodyIK:
+        from src.engines.physics_engines.mujoco.python.full_body_ik import (
+            FullBodyMarkerKinematics,
+        )
+
         ordered = {
             label: (
                 attachments[label][0],

@@ -93,21 +93,21 @@ def _init_builtins() -> None:
     _BUILTIN_INITIALIZED = True
 
     def _load_mujoco(spec: bytes | Mapping[str, Any]) -> MatchingPlant:
-        from src.shared.python.motion_matching.pipeline.plants.mujoco import (
+        from src.shared.python.motion_matching.pipeline.plants.mujoco_plant import (
             MujocoMatchingPlant,
         )
 
         return MujocoMatchingPlant(spec)
 
     def _load_drake(spec: bytes | Mapping[str, Any]) -> MatchingPlant:
-        from src.shared.python.motion_matching.pipeline.plants.drake import (
+        from src.shared.python.motion_matching.pipeline.plants.drake_plant import (
             DrakeMatchingPlant,
         )
 
         return DrakeMatchingPlant(spec)
 
     def _load_pinocchio(spec: bytes | Mapping[str, Any]) -> MatchingPlant:
-        from src.shared.python.motion_matching.pipeline.plants.pinocchio import (
+        from src.shared.python.motion_matching.pipeline.plants.pinocchio_plant import (
             PinocchioMatchingPlant,
         )
 
