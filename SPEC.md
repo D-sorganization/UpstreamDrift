@@ -1,5 +1,25 @@
 # SPEC.md — Repository Specification Document
 
+## Bunker Sand-to-Ball Transfer Calibration and Held-Out Qualification (#9543)
+
+`bunkershot3d.ball.qualification` and `qualification_fit` are the software half
+of the measurement-to-prediction program for the splash-shot momentum transfer:
+a `MeasuredStroke` intake contract (instrument records only, ISO date, SHA-256
+raw-data digest, missing quantities kept missing), a registered intended-use
+matrix and measurement protocol, a `QualificationDataset` split by session with
+digest-level leakage refusal and #9286 sand-batch admission, a bounded
+least-squares `fit_transfer` with identifiability and sensitivity checks that
+preserves failed fits, a held-out `validate_holdout` under ASME V&V 20 judged
+against `PRACTICAL_TOLERANCES` fixed with rationale before analysis, and a
+versioned `TransferQualification`. `launch_verdict` lifts the `BEYOND_VALIDATION`
+floor to `WITHIN` only for a strike inside a qualified regime and preserves it
+elsewhere; fitted parameters carry the new `ProvenanceBasis.CALIBRATED`, ranked
+below `MEASURED`. `ValidationComparison` admits a launch-side quantity only with
+an on-file instrument `measured_record`. `objective_disposition` gives #9239 its
+disposition: ranking unavailable until calibrated, then degenerate or supported
+per target. The shipped stroke register is empty; no physical qualification is
+claimed and the report states what the three-camera rig cannot measure.
+
 ## Saved Pinocchio Controls in MuJoCo (#10336)
 
 `scripts/replay_pinocchio_in_mujoco.py` replays saved joint efforts from the
@@ -5762,6 +5782,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-18 | #9543 | Bunker sand-to-ball transfer: stroke intake contract, session-split calibration fit with identifiability checks, held-out V&V 20 qualification against predeclared tolerances, versioned evidence that lifts the launch verdict floor per regime only; shipped register stays empty. |
 | 2026-09-18 | #10448 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
 | 2026-09-18 | #10381 | Matched-swing ledger fail-closed (self-declared acceptance is UNVERIFIED); G1 Crocoddyl continuation committed as rejected evidence; matched receipts re-evaluated; program docs truth reset |
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
