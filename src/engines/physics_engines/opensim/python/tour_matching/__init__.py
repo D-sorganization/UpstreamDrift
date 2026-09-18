@@ -67,6 +67,11 @@ from src.engines.physics_engines.opensim.python.tour_matching.club_geometry impo
     get_club_frame_offsets,
     has_visual_club,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.segment_scaling import (
+    ScalingPolicy,
+    SegmentScalingReport,
+    apply_segment_scaling,
+)
 
 from src.engines.physics_engines.opensim.python.tour_matching.visualization import (
     plot_3d_trajectory_overlay,
@@ -88,8 +93,11 @@ __all__ = [
     "ModelGeometryAuditResult",
     "PolynomialTorqueProfile",
     "RunConfig",
+    "ScalingPolicy",
     "SegmentScaleResult",
+    "SegmentScalingReport",
     "SharedMetrics",
+    "apply_segment_scaling",
     "attach_marker_set",
     "attach_visual_club",
     "audit_model_geometry",
