@@ -1,10 +1,29 @@
 # Current Matching Continuation Handoff
 
-Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og02-consistent-segment-scaling-10396`; commit SELF.
+Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og04-qualify-registration-camera-10398`; commit SELF.
 PR: open (targeting main).
-Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og02-10396`.
+Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og04-10398`.
 
-### OG-02 Status: Completed
+### OG-04 Status: Completed (Ready for PR)
+
+- Implemented pure 3D rigid capture registration in `src/engines/physics_engines/opensim/python/tour_matching/registration.py`:
+  - `CaptureRegistration`: 3D rigid transform with proper rotation matrix ($\det(R)=+1.0$, reflections strictly rejected) and translation $t$.
+  - Invertible with exact round-trip identity error $\le 10^{-8}\text{ m}$.
+  - `compute_capture_registration`: Kabsch-based optimal rigid landmark registration with collinearity/degeneracy validation.
+  - `align_tour_capture_to_golf_world`: Stance ground support plane alignment (translating minimum foot marker to $Y=0$) and target line yaw alignment (rotating around $Y$ so address stance target line points along $+X$ and chest faces $-Z$).
+  - Qualified golf camera view presets (`FRONT_VIEW`, `SIDE_VIEW`, `DOWN_THE_LINE`, `OVERHEAD`) and `get_golf_camera_view`.
+- Updated `src/engines/physics_engines/opensim/python/tour_matching/visualization.py`:
+  - `plot_3d_trajectory_overlay` accepts `camera_preset` parameter, configuring camera azimuth/elevation view angles without mutating model states, kinematic trajectories, or benchmark metrics.
+- Comprehensive unit tests in `tests/opensim/test_golf_registration.py`:
+  - Exact synthetic rigid transform recovery ($\le 10^{-8}\text{ m}$).
+  - Exact round-trip inversion identity ($\le 10^{-8}\text{ m}$).
+  - Reflection and collinear degeneracy rejection.
+  - Real tour capture ground support and target line alignment.
+  - Camera presets and model state invariance verification.
+- All unit tests pass. Ruff lint, format, Mypy, LoD, and File Size Budget clean.
+- Next child: **OG-05 (#10399)** — Calibrate and match two-handed address pose.
+
+### OG-02 Status: Completed (PR #10407)
 
 - Consistent OpenSim segment scaling module implemented in `src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py`.
 - Resolves the unscaled bone mesh defect by scaling visual `<Mesh>` components on `<attached_geometry>` in lockstep with `PhysicalOffsetFrame` translations.
@@ -16,7 +35,7 @@ Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og02-10396`.
 - Rebuilt `golf_humanoid_scaled.osim` with consistent scaling and visual club geometry (SHA-256: `fd90def148665d49fd9df8cc339c8b7713189800b5ffe9662a1649036d23e830`).
 - Model passes full qualification audit `verify_model_qualification(require_visible_club=True, require_consistent_arm_scaling=True)`.
 - All pure unit tests pass (80 tests). Ruff lint, format, Mypy, LoD, and File Size Budget clean.
-- Next child: **OG-04 (#10398)** — Qualify capture registration and golf camera views.
+- PR opened: **PR #10407**.
 
 ### OG-03 Status: Completed (PR #10405)
 

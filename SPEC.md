@@ -1,5 +1,17 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Qualified Capture Registration and Golf Camera Views (OG-04, #10398)
+
+Delivers capture-to-world rigid registration and canonical golf camera view presets:
+- **Rigid 3D Registration Module (`src/engines/physics_engines/opensim/python/tour_matching/registration.py`)**:
+  - `CaptureRegistration`: Proper 3D rigid transform with rotation $R$ ($\det(R) = +1.0$) and translation $t$; implements exact round-trip inversion satisfying identity to $\le 10^{-8}\text{ m}$.
+  - `compute_capture_registration`: Computes optimal proper rigid alignment via Kabsch algorithm, rejecting degenerate or collinear landmark correspondences.
+  - `align_tour_capture_to_golf_world`: Aligns capture coordinates into canonical golf world frame ($+X$ forward along target line, $+Y$ vertical up, ground support markers at $Y = 0$).
+- **Golf Camera Presets & Invariance Verification (`registration.py`, `visualization.py`, `tests/opensim/test_golf_registration.py`)**:
+  - `GolfCameraView` and `get_golf_camera_view`: Supports canonical view presets (`FRONT_VIEW`, `SIDE_VIEW`, `DOWN_THE_LINE`, `OVERHEAD`).
+  - Decouples viewing projection from model states and metrics, verified by invariance tests.
+  - Integrates camera presets into `plot_3d_trajectory_overlay`.
+
 ## OpenSim Anatomically and Physically Consistent Segment Scaling (OG-02, #10396)
 
 Delivers consistent anatomical and physical segment scaling for the OpenSim `golf_humanoid` model and resolves bilateral upper-limb marker asymmetry defects:

@@ -17,18 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10396 · OpenSim Anatomically and Physically Consistent Segment Scaling
+### DL-#10398 · OpenSim Capture Registration and Golf Camera Views
 
 - **State:** in_progress
 - **Owner:** local
+- **Issue:** #10398 (epic #10394 / #10363, OG-04)
+- **Branch:** feat/og04-qualify-registration-camera-10398
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/registration.py; src/engines/physics_engines/opensim/python/tour_matching/visualization.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_registration.py; SPEC.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; 3D rigid transform with Kabsch SVD and proper rotation constraint det(R)==+1.0; round-trip identity error <= 1e-8 m; stance ground support registration to Y=0 and target line yaw alignment to +X; golf camera view presets FRONT_VIEW, SIDE_VIEW, DOWN_THE_LINE, OVERHEAD; camera viewpoint adjustments proven invariant over model states and kinematic metrics; 30 unit tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Implemented capture registration and qualified golf camera viewpoints (`registration.py`). Provides rigid landmark alignment without scaling or shearing, ground support plane alignment, and down-the-line / front / side / overhead camera views in `visualization.py`. Validated invariant over model states and simulation outputs.
+- **Next step:** Commit, push, open PR referencing Closes #10398, release lease, proceed to OG-05 (#10399).
+- **Evidence:** tests/opensim/test_golf_registration.py.
+
+### DL-#10396 · OpenSim Anatomically and Physically Consistent Segment Scaling
+
+- **State:** in_review
+- **Owner:** local
 - **Issue:** #10396 (epic #10394 / #10363, OG-02)
 - **Branch:** feat/og02-consistent-segment-scaling-10396
-- **PR:** not created
+- **PR:** #10407
 - **Paths:** src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py; src/engines/physics_engines/opensim/python/tour_matching/scale.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim; docs/development/opensim_tour_matching/os3b_scale_and_full_ik.py; tests/opensim/test_segment_scale.py; tests/opensim/test_opensim_os0_qualification.py; SPEC.md
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; acromion proxy reconstruction removes artificial humerus inflation bringing bilateral ratio to 1.0807; apply_segment_scaling scales joint frames, bone meshes, COM, and inertia under fixed_mass and density_preserving policies; repeat scaling protection verified; 80 unit tests passed; ruff, mypy, lod, file-budget clean)
 - **Summary:** Implemented consistent segment scaling module (`segment_scaling.py`) and acromion proxy reconstruction for unilateral marker occlusions (`scale.py`). Joint frames, visual meshes, COM, and inertia are scaled in lockstep. Regenerated qualified `golf_humanoid_scaled.osim` with attached visual club and consistent scaling, passing qualification gates without unscaled arm mesh defects.
-- **Next step:** Commit, push, and open PR referencing Closes #10396; release lease.
+- **Next step:** Land PR #10407 referencing Closes #10396.
 - **Evidence:** tests/opensim/test_segment_scale.py; tests/opensim/test_opensim_os0_qualification.py; src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim.
 
 ### DL-#10397 · OpenSim Visible Parameterized Golf Club and Grip Frames
