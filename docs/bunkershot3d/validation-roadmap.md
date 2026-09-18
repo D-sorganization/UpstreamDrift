@@ -226,3 +226,7 @@ What it does is make the gap addressable: seven named measurements, each with th
 it buys, the conditions it must be made under, the instrument class it needs and the bar
 it must clear — and a path by which making one actually changes the number this package
 publishes about itself.
+
+The launch-side counterpart — how measured strokes calibrate the sand-to-ball transfer
+and, on held-out sessions, may lift the launch verdict floor per regime — is the
+[transfer qualification program](transfer-qualification.md) (#9543).
