@@ -63,7 +63,7 @@
     {
       "id": "UP-D1-native-force-bridge-inventory",
       "owner": "UpstreamDrift issue #10439",
-      "resolution": "Inventory native MuJoCo raw M a + bias allocation balance, contact Jacobian state refresh and algebraic acceleration audit in multi_engine_torque_allocator.py. Native directional and equation tests do not qualify contact forces, full-swing replay or other engine bridges."
+      "resolution": "Inventory native MuJoCo raw M a + bias allocation balance, contact Jacobian state refresh and algebraic acceleration audit in multi_engine_torque_allocator.py. Native directional and equation tests do not qualify contact forces, full-swing replay or other engine bridges. Include the Pinocchio closure_force_jacobian velocity-constraint/wrench dual and corrected C3D allocation call; do not substitute the finite log-pose derivative for a physical force mapping."
     }
   ],
   "calculations": []
