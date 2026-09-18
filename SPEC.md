@@ -1,5 +1,21 @@
 # SPEC.md — Repository Specification Document
 
+## Constrained Contact Force Allocation and Root Equilibrium Enforcement (PF-03, #10433)
+
+Delivers strictly constrained Quadratic Program (QP) force allocation, exact unilateral Coulomb friction cone inequalities, and physical root equilibrium verification across the motion matching stack:
+- **Constrained Quadratic Program Solve (`src/shared/python/motion_matching/contact_force_allocator.py`)**:
+  - Replaces penalty-augmented bounded least squares (`lsq_linear`) and unconstrained post-projection with a constrained QP solve (`scipy.optimize.minimize(..., method='SLSQP')`).
+  - Strict Coulomb friction cone inequalities in the surface contact frame ($|t_1^T f| \le \mu n^T f$, $|t_2^T f| \le \mu n^T f$).
+  - Unilateral non-negative normal contact forces ($n^T f \ge 0$).
+  - Exact zero forces for separated contacts ($f_i \equiv 0$ when contact is inactive).
+  - Strict actuator torque limits ($\tau_{\min} \le \tau \le \tau_{\max}$) without unconstrained pseudoinverse projection that could violate actuator limits.
+  - Explicit dual-grip reaction wrench bounds ($|\lambda_{\text{grip}}| \le \lambda_{\max}$).
+- **Truthful Floating-Base Root Equilibrium & Isolation**:
+  - Diagnostic root slack ($\delta\tau_{\text{root}}$) decoupled from physical success: physical success is strictly `False` if root assistance exceeds $0.1$ N (`max_root_force_n`).
+  - Two-pass allocation: Pass 1 enforces physical equilibrium ($\|\delta\tau_{\text{root}}\|_\infty \le 0.1$ N); Pass 2 provides diagnostic relaxation when infeasible to isolate exact deficits.
+  - Detailed diagnostic categorization: `OPTIMAL`, `INFEASIBLE_ACTUATOR_BOUNDS`, `INFEASIBLE_FRICTION_CONE`, `INFEASIBLE_NORMAL_FORCE`, or `INFEASIBLE_ROOT_EQUILIBRIUM`.
+  - Supports rotated surface contact frames (`SurfaceContactFrame`), rank-deficient contact geometry, and truthful floating-base balance rejection.
+
 ## Multi-Engine Torque Allocation and Cross-Platform 3D Simulation Viewers (#10415)
 
 Delivers universal cross-engine torque determination, contact-aware QP force allocation, and multi-viewer 3D trajectory playback across MuJoCo ("Monaco"), Drake, OpenSim, and Simscape/MATLAB:
