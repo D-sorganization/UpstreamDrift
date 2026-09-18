@@ -62,6 +62,12 @@ from src.engines.physics_engines.opensim.python.tour_matching.model_audit import
     audit_model_geometry,
     verify_model_qualification,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.club_geometry import (
+    attach_visual_club,
+    get_club_frame_offsets,
+    has_visual_club,
+)
+
 from src.engines.physics_engines.opensim.python.tour_matching.visualization import (
     plot_3d_trajectory_overlay,
     plot_effort_and_rates,
@@ -85,6 +91,7 @@ __all__ = [
     "SegmentScaleResult",
     "SharedMetrics",
     "attach_marker_set",
+    "attach_visual_club",
     "audit_model_geometry",
     "body_for",
     "build_moco_study",
@@ -96,6 +103,8 @@ __all__ = [
     "create_polynomial_prescribed_controller",
     "estimate_segment_scales",
     "fit_degree6_from_discrete_controls",
+    "get_club_frame_offsets",
+    "has_visual_club",
     "labels_per_body",
     "load_controls_from_sto",
     "locked_coordinates",

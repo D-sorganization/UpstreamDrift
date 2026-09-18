@@ -1,6 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Parameterized Visual Golf Club and Grip Frames (OG-03, #10397)
+
+Attaches visible parameterized golf club geometry and canonical grip offset frames to the OpenSim `golf_humanoid` model without altering physical body dynamics:
+- **Parameterized Club Visual Geometry (`src/engines/physics_engines/opensim/python/tour_matching/club_geometry.py`)**:
+  - `has_visual_club`: Checks whether an OpenSim model or parsed XML ElementTree possesses visual geometry components on its `Club` body.
+  - `attach_visual_club`: Parameterizes shaft and clubhead visual meshes from shared `ClubSpec` (e.g. `DRIVER`, `IRON_7`) and attaches them to `Body[@name='Club']/attached_geometry` while preserving physical mass ($0.32\text{ kg}$), center of mass, and inertia tensors.
+  - Fails closed with typed `ValueError` when input documents lack a `Club` body.
+- **Canonical OpenSim Grip & Clubhead Offset Frames**:
+  - `get_club_frame_offsets`: Computes frame translations matching OpenSim coordinate conventions (grip origin at $(0, 0, 0)$, shaft pointing along $-Y$ toward $-L$, clubhead at $(0, -L, 0)$, trail hand grip at $(0, -0.06, 0)$, lead hand grip at $(0, -0.025, 0)$).
+  - Compatible with `opensim_golf.fk` canonical landmarks (`GRIP_FRAME_PATH`, `CLUBHEAD_FRAME_PATH`).
+- **Qualification Gate Verification (`src/engines/physics_engines/opensim/python/tour_matching/model_audit.py`, `tests/opensim/test_golf_club_geometry.py`)**:
+  - Confirms baseline models fail `verify_model_qualification(require_visible_club=True)` prior to attachment and pass qualification once visual geometry is attached.
+
 ## Tools Dependency Repin and Seam Integrity (MS-95, #10362)
+
 
 Enforces immutable Tools source resolution and couples the 4-way dependency repin to Tools `main` commit `62e8cdbf9`:
 - **Submodule and Manifest Pinning (`vendor/ud-tools`, `requirements-tools.txt`, `Cargo.toml`)**:
