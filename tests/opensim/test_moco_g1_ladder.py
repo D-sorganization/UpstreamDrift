@@ -17,6 +17,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.moco_g1 import (
     fill_marker_gaps,
     gate_table,
     horizon_ladder,
+    merge_ladder_receipts,
     mesh_intervals_for,
     read_sto,
     retain_markers,
@@ -279,6 +280,27 @@ def test_smooth_columns_identity_and_validation() -> None:
         smooth_columns({"a": q}, frames=0)
     with pytest.raises((ValueError, ContractViolationError)):
         smooth_columns({"a": q}, frames=4)  # must be odd
+
+
+# ---------------------------------------------------------------- receipt merge
+
+
+def test_merge_ladder_receipts_keeps_headline_and_concatenates_rows() -> None:
+    run1 = dict(
+        _receipt(), horizon_s=0.3, per_horizon=[{"horizon_s": 0.1}, {"horizon_s": 0.3}]
+    )
+    run2 = dict(_receipt(), horizon_s=0.6, per_horizon=[{"horizon_s": 0.6}])
+    merged = merge_ladder_receipts([("run1", run1), ("run2", run2)], headline="run2")
+    assert merged["horizon_s"] == 0.6
+    assert [r["horizon_s"] for r in merged["per_horizon"]] == [0.1, 0.3, 0.6]
+    assert [r["run"] for r in merged["per_horizon"]] == ["run1", "run1", "run2"]
+    assert merged["ladder_runs"] == ["run1", "run2"]
+    validate_os7_receipt(merged)
+
+
+def test_merge_ladder_receipts_rejects_unknown_headline() -> None:
+    with pytest.raises((KeyError, ValueError)):
+        merge_ladder_receipts([("run1", _receipt())], headline="nope")
 
 
 # ---------------------------------------------------------------- sto

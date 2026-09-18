@@ -57,6 +57,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.moco_tracking impo
     apply_guess,
     build_rung_study,
     guess_grid,
+    inverse_warm_start,
     normalise_actuators,
     replay_uninterrupted,
     solution_markers,
@@ -118,6 +119,12 @@ def parse_args() -> argparse.Namespace:
         default=1,
         help="odd Hann window (frames) applied to the IK before it seeds the guess "
         "speeds and the state-tracking reference; 1 = raw IK",
+    )
+    parser.add_argument(
+        "--inverse-warm-start",
+        action="store_true",
+        help="seed every rung from a MocoInverse solve on the (smoothed) IK "
+        "instead of the previous rung's trajectory",
     )
     parser.add_argument(
         "--continue-on-failure",
@@ -303,7 +310,13 @@ def _run_rung(
         config,
         weights,
     )
+    if args.inverse_warm_start:
+        previous = inverse_warm_start(
+            context["moco_model"], context["ik_reference"], config.horizon_s, rung_dir
+        )
     warm, grid, guess_states = _warm_start(study, previous, context["ik"])
+    if args.inverse_warm_start:
+        warm = "MocoInverse on smoothed IK (states + controls)"
     guess_markers = solution_markers(
         context["moco_model"], grid, guess_states, scored.time_s, capture.labels
     )
