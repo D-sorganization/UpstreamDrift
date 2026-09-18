@@ -82,12 +82,18 @@ class AcceptanceGates:
     g3_pelvis_yaw_rmse_rad: float = 0.10472  # < 6 deg
 
     # Physical limits (shared across horizons unless specified)
+    version: str = "v1.1"
     max_normal_force_bw_multiplier: float = 3.0
     nominal_body_mass_kg: float = 80.0
     gravity_m_s2: float = 9.81
     max_penetration_m: float = 0.010  # 10 mm
     max_closure_residual_m: float = 0.005  # 5 mm
     max_closure_residual_rad: float = 0.05  # 0.05 rad
+    max_friction_coefficient: float = 0.8
+    max_root_force_n: float = 0.1  # 0.1 N maximum allowed ungrounded root assistance
+    min_duration_g1_s: float = 0.80
+    min_duration_g2_s: float = 1.15
+    min_duration_g3_s: float = 1.75
     weight_fraction_min: float = 0.20
     weight_fraction_max: float = 3.00
     min_inside_support_polygon_fraction: float = 0.85  # 85 % of frames
@@ -189,6 +195,16 @@ def _evaluate_marker_rmse(
                 status=GateStatus.MISSING,
                 threshold=thresh_whole,
                 reason="missing whole marker RMSE",
+            )
+        )
+    elif not math.isfinite(val_whole):
+        results.append(
+            GateResult(
+                name="whole_marker_rmse_m",
+                status=GateStatus.FAILED,
+                threshold=thresh_whole,
+                measured=None,
+                reason="invalid predictions or empty valid marker population (non-finite RMSE)",
             )
         )
     else:
@@ -474,6 +490,41 @@ def _evaluate_ground_and_closure(
                     reason=f"closure residual {val_closure_m * 1e3:.2f} mm > {thresh_closure_m * 1e3:.2f} mm",
                 )
             )
+
+    thresh_rot = gates.max_closure_residual_rad
+    val_rot = None
+    closure_dict = receipt.get("closure")
+    if isinstance(closure_dict, Mapping):
+        val_rot = _extract_metric(
+            closure_dict, "max_closure_rotation_rad", "closure_rotation_max_rad"
+        )
+    if val_rot is None:
+        val_rot = _extract_metric(
+            receipt, "max_closure_rotation_rad", "closure_rotation_max_rad"
+        )
+
+    if val_rot is not None:
+        if val_rot <= thresh_rot:
+            results.append(
+                GateResult(
+                    name="closure_rotation_rad",
+                    status=GateStatus.PASSED,
+                    threshold=thresh_rot,
+                    measured=val_rot,
+                    unit="rad",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="closure_rotation_rad",
+                    status=GateStatus.FAILED,
+                    threshold=thresh_rot,
+                    measured=val_rot,
+                    unit="rad",
+                    reason=f"closure rotation {val_rot:.4f} rad > {thresh_rot:.4f} rad",
+                )
+            )
     return results
 
 
@@ -518,6 +569,140 @@ def _evaluate_weight_fraction(
     return results
 
 
+def _evaluate_friction_cone(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+    contact_audit: Any,
+) -> list[GateResult]:
+    results: list[GateResult] = []
+    val_ratio = None
+    if isinstance(contact_audit, Mapping):
+        val_ratio = _extract_metric(contact_audit, "max_friction_ratio")
+    if val_ratio is None:
+        val_ratio = _extract_metric(receipt, "max_friction_ratio")
+
+    if val_ratio is not None:
+        if val_ratio <= gates.max_friction_coefficient:
+            results.append(
+                GateResult(
+                    name="friction_cone",
+                    status=GateStatus.PASSED,
+                    threshold=gates.max_friction_coefficient,
+                    measured=val_ratio,
+                    unit="ratio",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="friction_cone",
+                    status=GateStatus.FAILED,
+                    threshold=gates.max_friction_coefficient,
+                    measured=val_ratio,
+                    unit="ratio",
+                    reason=f"friction ratio {val_ratio:.2f} exceeds mu={gates.max_friction_coefficient:.2f}",
+                )
+            )
+    return results
+
+
+def _evaluate_root_assistance(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    results: list[GateResult] = []
+    dyn = receipt.get("dynamics")
+    has_dynamics = isinstance(dyn, Mapping)
+    val_root = None
+    if isinstance(dyn, Mapping):
+        val_root = _extract_metric(dyn, "max_root_force_n", "delta_tau_root_max_n")
+    if val_root is None:
+        val_root = _extract_metric(receipt, "max_root_force_n", "delta_tau_root_max_n")
+
+    if has_dynamics:
+        if val_root is None:
+            results.append(
+                GateResult(
+                    name="root_assistance",
+                    status=GateStatus.MISSING,
+                    threshold=gates.max_root_force_n,
+                    unit="N",
+                    reason="missing root assistance history (delta_tau_root / max_root_force_n)",
+                )
+            )
+        elif val_root <= gates.max_root_force_n:
+            results.append(
+                GateResult(
+                    name="root_assistance",
+                    status=GateStatus.PASSED,
+                    threshold=gates.max_root_force_n,
+                    measured=val_root,
+                    unit="N",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="root_assistance",
+                    status=GateStatus.FAILED,
+                    threshold=gates.max_root_force_n,
+                    measured=val_root,
+                    unit="N",
+                    reason=f"phantom root assistance {val_root:.2f} N > {gates.max_root_force_n:.2f} N",
+                )
+            )
+    return results
+
+
+def _evaluate_horizon_duration(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    results: list[GateResult] = []
+    dur = _extract_metric(receipt, "duration_s")
+    if dur is None:
+        hor_dict = receipt.get("horizon")
+        if isinstance(hor_dict, Mapping):
+            t_end = hor_dict.get("t_end_s")
+            t_start = hor_dict.get("t_start_s", 0.0)
+            if isinstance(t_end, (int, float)) and isinstance(t_start, (int, float)):
+                dur = float(t_end - t_start)
+
+    if dur is not None:
+        thresh = (
+            gates.min_duration_g3_s
+            if horizon == Horizon.G3
+            else (
+                gates.min_duration_g2_s
+                if horizon == Horizon.G2
+                else gates.min_duration_g1_s
+            )
+        )
+        if dur >= thresh:
+            results.append(
+                GateResult(
+                    name="horizon_duration_s",
+                    status=GateStatus.PASSED,
+                    threshold=thresh,
+                    measured=dur,
+                    unit="s",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="horizon_duration_s",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=dur,
+                    unit="s",
+                    reason=f"duration {dur:.3f} s is truncated for horizon {horizon.value} (minimum required: {thresh:.3f} s)",
+                )
+            )
+    return results
+
+
 @precondition(
     lambda receipt, horizon=Horizon.G1, gates=None: isinstance(horizon, Horizon),
     "horizon must be Horizon enum",
@@ -543,6 +728,9 @@ def evaluate(
     gate_results.extend(_evaluate_normal_contact_force(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_ground_and_closure(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_weight_fraction(receipt, gates))
+    gate_results.extend(_evaluate_friction_cone(receipt, gates, contact_audit))
+    gate_results.extend(_evaluate_root_assistance(receipt, gates))
+    gate_results.extend(_evaluate_horizon_duration(receipt, horizon, gates))
 
     # Overall verdict
     is_accepted = len(gate_results) > 0 and all(
@@ -555,7 +743,9 @@ def evaluate(
         is_physically_accepted=is_accepted,
         status=status_str,
         gates=tuple(gate_results),
-        qualification_note="Physical acceptance criteria passed"
-        if is_accepted
-        else "Physical or kinematic thresholds violated",
+        qualification_note=(
+            "Physical acceptance criteria passed"
+            if is_accepted
+            else "Physical or kinematic thresholds violated"
+        ),
     )

@@ -1,8 +1,28 @@
 # Current Matching Continuation Handoff
 
-Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og09-golf-native-viewer-package-10403`; commit SELF.
-PR: open (targeting main).
-Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og09-10403`.
+Updated 2026-09-18. Governing epic #10430 / #10363; branch `feat/pf-01-freeze-fast-matching-evidence`; commit 5347cba0f.
+PR: not created (ready to submit).
+
+### PF-01 Status: Completed (Ready for PR)
+
+- Implemented PF-01 (#10431) to freeze fast-matching evidence, schemas, and negative acceptance fixtures.
+- Preserved existing driver and iron receipts immutably in `evidence/matched/driver_full_pinocchio/` and `evidence/matched/iron_full_pinocchio/`.
+- Recomputed truthful metrics from raw `candidate.npz` archives and recorded explicit rejection audits (`rejection_audit.json`):
+  - Driver G3: REJECTED (whole marker RMSE 133.53 mm > 60 mm; pelvis yaw RMSE 0.479 rad > 0.105 rad; max normal force 3285.2 N > 2354.4 N; friction cone ratio 249,001 > 0.8; missing root assistance history).
+  - Iron G3: REJECTED (whole marker RMSE 336.92 mm > 95 mm; club RMSE 225.72 mm > 100 mm; pelvis yaw RMSE 2.57 rad > 0.105 rad; max normal force 10,068.7 N > 2354.4 N; friction cone ratio 202,371 > 0.8; missing root assistance history).
+- Extended `AcceptanceGates` and `evaluate()` in `acceptance.py`:
+  - Enforces friction cone ($\mu \le 0.8$).
+  - Enforces ungrounded root assistance ($\delta\tau_{\text{root}} \le 0.1$ N, missing history fails closed).
+  - Enforces horizon duration minimums (G1: 0.80 s, G2: 1.15 s, G3: 1.75 s).
+  - Audits weld closure rotation residual ($\le 0.05$ rad) separately from translation.
+- Extended `SwingEvaluator`:
+  - Eliminates empty-population zero-success (returns NaN when valid marker count is zero).
+  - Supports explicit `t_events` phase timestamp partitioning.
+  - Distinguishes translation (m) from rotation (rad) in `ClosureAudit` with full backward compatibility.
+- Implemented `CandidatePackage` contract (`candidate_package.py`) saving complete controls, root histories, contact modes, solver status, and metadata with legacy archive compatibility.
+- Renamed soft trail-zero behavior truthfully as `AllocationObjective.MINIMUM_TRAIL_ARM` and introduced strict `AllocationObjective.HARD_ZERO_TRAIL_ARM` with backward compatibility aliases.
+- Created negative acceptance regression suite `tests/unit/motion_matching/test_negative_acceptance_fixtures.py` (9/9 passed).
+- Next eligible child: **PF-03 (#10433)** — Enforce Contact, Actuator and Root Constraints in Force Allocation.
 
 ### OG-09 Status: Completed (Ready for PR)
 

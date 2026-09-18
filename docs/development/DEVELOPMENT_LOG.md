@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10431 · PF-01: Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10431 (epic #10430 / #10363, PF-01)
+- **Branch:** feat/pf-01-freeze-fast-matching-evidence
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/candidate_package.py; src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/swing_evaluator.py; src/shared/python/motion_matching/contact_force_allocator.py; scripts/recompute_fast_matching_evidence.py; tests/unit/motion_matching/test_negative_acceptance_fixtures.py; evidence/matched/driver_full_pinocchio/rejection_audit.json; evidence/matched/iron_full_pinocchio/rejection_audit.json; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at 5347cba0f (SELF; TDD RED fixtures established; friction violation > 0.8 fails; missing root assistance history delta_tau_root fails closed; phantom root assistance > 0.1 N fails; empty valid marker population yields NaN rather than 0.0 mm success; weld closure audits separate translation and rotation; supplied t_events dictate phase windows rather than arbitrary 72% fraction; truncated duration under G3 rejected; 44/41 coordinate mismatch raises dimension mismatch; CandidatePackage contract serializes and deserializes complete controls, root histories, external loads and metadata with truthful trail-arm minimization and legacy compatibility; recomputed driver and iron G3 rejection audits saved to rejection_audit.json while keeping receipt.json immutable; all 9 negative acceptance tests pass; all 6 existing acceptance/evaluator tests pass; all 9 allocator tests pass; ruff, black, lod clean)
+- **Summary:** Implemented PF-01 to freeze fast-matching evidence, schemas, and negative acceptance fixtures. Preserved driver and iron rejected artifacts immutably and generated canonical G3 rejection audits from raw NPZ. Extended AcceptanceGates and evaluate() with friction cone, root assistance, and horizon duration gates. Extended SwingEvaluator to eliminate empty-population zero-success, support explicit t_events, and separate closure translation from rotation. Added CandidatePackage schema preserving complete controls, root histories, contact modes, and hashes. Renamed soft trail-zero truthfully with backward compatibility.
+- **Next step:** Commit, push, open PR referencing Closes #10431 and Fixes #10431, and proceed to PF-03 (#10433).
+- **Evidence:** tests/unit/motion_matching/test_negative_acceptance_fixtures.py; scripts/recompute_fast_matching_evidence.py; evidence/matched/driver_full_pinocchio/rejection_audit.json; evidence/matched/iron_full_pinocchio/rejection_audit.json.
+
 ### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
 
 - **State:** in_progress
