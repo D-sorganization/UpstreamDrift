@@ -1,5 +1,15 @@
 # Simscape Tour-Average Fit Continuation
 
+## MuJoCo Saved-Control Replay (#10336)
+
+Branch `feat/10336-mujoco-candidate-replay`; implementation commit SELF;
+PR pending creation. See DL-#10336 in `docs/development/DEVELOPMENT_LOG.md`
+and `evidence/matched/driver_full_mujoco_replay/README.md` for reproduction.
+Forty focused tests and scoped Ruff/mypy checks pass. The diagnostic replay
+and playback are preserved, but G1 is rejected and source configuration parity
+is unverified. Merge delivers the replay path, not physical qualification;
+keep #10336 open. The next step is PR CI and review, then protected merge.
+
 ## Polynomial Full-Body Dynamics Boundary (#10265)
 
 The integration retains global degree-six Bernstein efforts for every non-root

@@ -1,5 +1,36 @@
 # Current Matching Continuation Handoff
 
+## MS-21 MuJoCo Replay Continuation (#10336)
+
+Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-codex-10336`.
+Branch: `feat/10336-mujoco-candidate-replay`. Base HEAD:
+`5347cba0f4378cd72a6e8afea9fb27c8bfe5db75`. Implementation commit SELF;
+PR pending creation. User authorized commit, push, PR, CI repair and merge.
+Development-log entry: DL-#10336. Ownership was checked free and leased as
+`codex-mujoco-replay-10336-20260918` before editing. The original checkout's
+Pinocchio changes and untracked evidence were preserved.
+
+Implemented name-mapped armature and saved-control replay through the existing
+MuJoCo rigid-grip/shared-contact plant, exact G1 slicing and fail-closed checks.
+See [Reproduction and Results](../../evidence/matched/driver_full_mujoco_replay/README.md)
+for commands, candidate identity and receipt. Historical source evidence is
+unchanged. Diagnostic armature 0.005 kg·m² follows turnover guidance but cannot
+be certified as source-identical: the merged analytic producer never applies
+armature and its receipt omits it, contact configuration and interpolation.
+Missing root history and independent source dynamics also block qualification.
+
+Validation: 40 focused replay/acceptance/schema/full-body/contact tests pass;
+scoped Ruff and mypy pass; agent-context and architecture/file-size budgets pass.
+The central development-log validator flags inherited missing verifying SHAs,
+a missing PR field in DL-#9967, and the existing portfolio WIP excess. These
+unrelated entries are not repaired in this diff. The repo-local validator
+script is absent, so the central Repository_Management copy was used.
+Next: review this focused diff, then obtain a provenance-complete source
+candidate and independent native replay. Do not close #10336 or promote G2/G3
+from these diagnostic artifacts. Earlier lane handoffs follow unchanged.
+
+---
+
 Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og09-golf-native-viewer-package-10403`; commit SELF.
 PR: open (targeting main).
 Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og09-10403`.

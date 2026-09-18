@@ -50,6 +50,16 @@ For detailed factor attribution on the 27.3 mm vs 52.3 mm IK baseline shift, see
 
 ## 3. Automated Program Status & Ledger Matrix
 
+### MS-21 Native Replay Continuation (#10336)
+
+| Scope                             | State                                                                              | Evidence                                                                                                                                                   |
+| --------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Merged Driver Candidate in MuJoCo | Replay path implemented; configuration and source dynamics unverified; G1 rejected | [Receipt](../../../evidence/matched/driver_full_mujoco_replay/receipt.json), [Reproduction](../../../evidence/matched/driver_full_mujoco_replay/README.md) |
+
+The source analytic-fit receipt omits armature, interpolation, candidate hash
+and root-assistance history. Same-state marker agreement is a kinematic check;
+it does not establish native dynamics parity or a qualified full swing.
+
 The section below is generated directly from `reports/matched_swing_ledger.json` by running:
 
 ```bash

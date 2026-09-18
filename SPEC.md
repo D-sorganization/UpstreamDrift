@@ -1,5 +1,16 @@
 # SPEC.md — Repository Specification Document
 
+## Saved Pinocchio Controls in MuJoCo (#10336)
+
+`scripts/replay_pinocchio_in_mujoco.py` replays saved joint efforts from the
+original state through the native MuJoCo rigid-grip adapter and shared contact
+law. Armature is assigned by coordinate name, excluding all six root coordinates.
+Source hashes, contact configuration, interpolation and armature must match;
+legacy omissions require explicit diagnostic mode and cannot certify parity.
+The receipt separates same-state marker agreement, uninterrupted dynamics,
+G1 convergence and physical acceptance. Rejected replay and full-source IK
+playback are separately labelled artifacts; neither closes the G1/G2/G3 ladder.
+
 ## Multi-Engine Torque Allocation and Cross-Platform 3D Simulation Viewers (#10415)
 
 Delivers universal cross-engine torque determination, contact-aware QP force allocation, and multi-viewer 3D trajectory playback across MuJoCo ("Monaco"), Drake, OpenSim, and Simscape/MATLAB:
@@ -5751,6 +5762,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-18 | #10336 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
