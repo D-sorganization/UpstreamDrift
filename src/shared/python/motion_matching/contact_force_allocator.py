@@ -36,7 +36,9 @@ class AllocationObjective(str, Enum):
 
     MINIMUM_EFFORT = "minimum_effort"
     MINIMUM_TRAIL_ARM = "minimum_trail_arm"
+    HARD_ZERO_TRAIL_ARM = "hard_zero_trail_arm"
     BALANCED_LOAD = "balanced_load"
+    TRAIL_ZERO = "trail_zero"  # Backward-compatibility alias for MINIMUM_TRAIL_ARM
 
 
 @dataclass(frozen=True)
@@ -145,11 +147,17 @@ class ContactForceAllocator:
             [self._s_transpose, j_ground.T, j_grip.T, self._s_root_transpose]
         )
 
+        effective_objective = (
+            AllocationObjective.MINIMUM_TRAIL_ARM
+            if objective == AllocationObjective.TRAIL_ZERO
+            else objective
+        )
+
         # Objective diagonal weights W
         w_diag = np.ones(self.n_vars, dtype=float)
         # Actuator weights
         if (
-            objective == AllocationObjective.MINIMUM_TRAIL_ARM
+            effective_objective == AllocationObjective.MINIMUM_TRAIL_ARM
             and trail_arm_indices is not None
             and len(trail_arm_indices) > 0
         ):
@@ -179,6 +187,18 @@ class ContactForceAllocator:
         if tau_bounds is not None:
             lb[: self.n_actuated] = tau_bounds[0]
             ub[: self.n_actuated] = tau_bounds[1]
+
+        # Enforce hard zero on trail arm if requested
+        if (
+            effective_objective == AllocationObjective.HARD_ZERO_TRAIL_ARM
+            and trail_arm_indices is not None
+            and len(trail_arm_indices) > 0
+        ):
+            trail_set = set(trail_arm_indices)
+            for i, idx in enumerate(self.actuated_indices):
+                if idx in trail_set:
+                    lb[i] = 0.0
+                    ub[i] = 0.0
 
         # Unilateral ground contact: f_{i, z} >= 0
         for s in range(self.n_contact_spheres):
@@ -212,16 +232,33 @@ class ContactForceAllocator:
 
         # Exact projection refinement: project any minute numerical residual onto actuated coordinates
         residual_err = tau_rnea - applied
-        tau_sol = tau_sol + residual_err[self.actuated_indices]
+        tau_refined = tau_sol + residual_err[self.actuated_indices]
         applied = self._compute_applied(
-            tau_sol, j_ground, f_sol, j_grip, lambda_sol, root_sol
+            tau_refined, j_ground, f_sol, j_grip, lambda_sol, root_sol
         )
         eq_res = float(np.max(np.abs(applied - tau_rnea)))
 
-        success = bool(res.success and eq_res < 1e-4)
+        # Verify whether bounds were respected
+        bounds_ok = True
+        if tau_bounds is not None:
+            if np.any(tau_refined < tau_bounds[0] - 1e-4) or np.any(
+                tau_refined > tau_bounds[1] + 1e-4
+            ):
+                bounds_ok = False
+
+        if (
+            effective_objective == AllocationObjective.HARD_ZERO_TRAIL_ARM
+            and trail_arm_indices
+        ):
+            trail_set = set(trail_arm_indices)
+            for i, idx in enumerate(self.actuated_indices):
+                if idx in trail_set and abs(tau_refined[i]) > 1e-4:
+                    bounds_ok = False
+
+        success = bool(res.success and eq_res < 1e-4 and bounds_ok)
 
         return ContactForceAllocation(
-            tau_actuated=tau_sol,
+            tau_actuated=tau_refined,
             f_ground=f_sol,
             lambda_grip=lambda_sol,
             delta_tau_root=root_sol,
