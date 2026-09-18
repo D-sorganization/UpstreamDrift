@@ -17,18 +17,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10398 · OpenSim Capture Registration and Golf Camera Views
+### DL-#10399 · OpenSim Calibrate and Match Two-Handed Address Pose
 
 - **State:** in_progress
 - **Owner:** local
+- **Issue:** #10399 (epic #10394 / #10363, OG-05)
+- **Branch:** feat/og05-match-two-handed-address-10399
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/address.py; src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_address.py; tests/opensim/test_marker_calibration.py; SPEC.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; frozen acceptance profile hash verified; quasi-static address window detection; dual-arm grip closure <= 5 mm; ground support clearance <= 15 mm; coordinate range limits audited; holdout validation; all 15 address and calibration tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Calibrated and qualified two-handed golf address pose (`address.py`) on OpenSim humanoid model against canonical tour capture. Validates bilateral grip closure between lead hand and club shaft, foot ground support, posture metrics, and coordinate limits against model XML ranges.
+- **Next step:** Commit, push, open PR referencing Closes #10399, release lease, proceed to OG-06 (#10400).
+- **Evidence:** tests/opensim/test_golf_address.py; tests/opensim/test_marker_calibration.py.
+
+### DL-#10398 · OpenSim Capture Registration and Golf Camera Views
+
+- **State:** in_review
+- **Owner:** local
 - **Issue:** #10398 (epic #10394 / #10363, OG-04)
 - **Branch:** feat/og04-qualify-registration-camera-10398
-- **PR:** not created
+- **PR:** #10408
 - **Paths:** src/engines/physics_engines/opensim/python/tour_matching/registration.py; src/engines/physics_engines/opensim/python/tour_matching/visualization.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_registration.py; SPEC.md
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at HEAD (SELF; 3D rigid transform with Kabsch SVD and proper rotation constraint det(R)==+1.0; round-trip identity error <= 1e-8 m; stance ground support registration to Y=0 and target line yaw alignment to +X; golf camera view presets FRONT_VIEW, SIDE_VIEW, DOWN_THE_LINE, OVERHEAD; camera viewpoint adjustments proven invariant over model states and kinematic metrics; 30 unit tests pass; ruff, mypy, lod, file-budget clean)
 - **Summary:** Implemented capture registration and qualified golf camera viewpoints (`registration.py`). Provides rigid landmark alignment without scaling or shearing, ground support plane alignment, and down-the-line / front / side / overhead camera views in `visualization.py`. Validated invariant over model states and simulation outputs.
-- **Next step:** Commit, push, open PR referencing Closes #10398, release lease, proceed to OG-05 (#10399).
+- **Next step:** Land PR #10408 referencing Closes #10398.
 - **Evidence:** tests/opensim/test_golf_registration.py.
 
 ### DL-#10396 · OpenSim Anatomically and Physically Consistent Segment Scaling
