@@ -175,7 +175,10 @@ def shooting_fit(
         record, sim_q = replay(sim, lane, q_track)
         errors = marker_errors(kin, sim_q, lane.points)
         rms = float(np.sqrt(np.mean(errors[lane.valid] ** 2)))
-        root_err = np.linalg.norm(sim_q[:, :3] - q_ref[:, :3], axis=1)
+        root_diff = sim_q[:, :3] - q_ref[:, :3]
+        root_err = np.sqrt(
+            np.einsum("ij,ij->i", root_diff, root_diff)
+        )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is faster than np.linalg.norm(..., axis=1)
         zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
         history.append(
             {
@@ -306,7 +309,9 @@ def zmp_filter(
         passes.append(
             {
                 "pass": k + 1,
-                "com_shift_max_m": float(np.linalg.norm(shift, axis=1).max()),
+                "com_shift_max_m": float(
+                    np.sqrt(np.max(np.einsum("ij,ij->i", shift, shift)))
+                ),  # ⚡ Bolt: np.sqrt(np.max(np.einsum(...))) is faster than np.max(np.linalg.norm(..., axis=1))
                 "marker_rms_m": float(np.sqrt(np.mean(errors[lane.valid] ** 2))),
                 "closure_error_max_m": float(max(f.closure_error_m for f in fits)),
                 **zmp_summary(zmp, lane.times),
@@ -413,7 +418,15 @@ def _build_reference_zmp_report(
             float(zmp["grf_over_weight"][:, 2].max()),
         ],
         "horizontal_grf_over_weight_max": float(
-            np.linalg.norm(zmp["grf_over_weight"][:, :2], axis=1).max()
+            np.sqrt(
+                np.max(
+                    np.einsum(
+                        "ij,ij->i",
+                        zmp["grf_over_weight"][:, :2],
+                        zmp["grf_over_weight"][:, :2],
+                    )
+                )
+            )  # ⚡ Bolt: np.sqrt(np.max(np.einsum(...))) is faster than np.max(np.linalg.norm(..., axis=1))
         ),
     }
 
@@ -427,9 +440,12 @@ def _build_backswing_metrics(
     record: Any,
 ) -> dict[str, Any]:
     limit = min(361, frames)
+    limit_diff = sim_q[:limit, :3] - q_ref[:limit, :3]
     return {
         "root_error_max_m": float(
-            np.linalg.norm(sim_q[:limit, :3] - q_ref[:limit, :3], axis=1).max()
+            np.sqrt(
+                np.max(np.einsum("ij,ij->i", limit_diff, limit_diff))
+            )  # ⚡ Bolt: np.sqrt(np.max(np.einsum(...))) is faster than np.max(np.linalg.norm(..., axis=1))
         ),
         "marker_rms_m": float(np.sqrt(np.mean(sim_errors[:limit][valid[:limit]] ** 2))),
         "weight_fraction_min": float(
