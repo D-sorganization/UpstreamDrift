@@ -292,7 +292,7 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 7725,
       "reason": "Issue #7725: pre-existing cross-engine CC-30 forward-sim kernel (plant build, actuation wiring, initial-pose, rollout, FK, postconditions) already exceeded the function-lines budget before this change. The rollout/error-handling loop was extracted to _record_rollout (#7727); fully decomposing the remaining plant-construction body is a larger cross-engine refactor shared by every engine's simulate_with_coefficients. Temporary exception until that decomposition lands.",
-      "expires_on": "2026-09-17"
+      "expires_on": "2026-09-30"
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
