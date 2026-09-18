@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
+
+Freezes fast-matching evidence archives, schemas, and negative acceptance fixtures across driver and 7-iron candidates:
+- **Candidate Packaging & Verification (`src/shared/python/motion_matching/candidate_package.py`, `acceptance.py`)**:
+  - `export_candidate_package()`: Serializes standardized full-swing candidate archives containing `candidate.npz`, `manifest.json`, `solver_log.json`, and kinematics/dynamics metrics.
+  - Verification gates enforcing finite data, exact coordinate lengths, timestamp monotonic progression, and weld closure error tolerances.
+- **Evidence Audit & Migration CLI (`scripts/recompute_fast_matching_evidence.py`)**:
+  - Validates and packages matching evidence with SHA-256 manifest hashing.
+
 ## Multi-Engine Torque Allocation and Cross-Platform 3D Simulation Viewers (#10415)
 
 Delivers universal cross-engine torque determination, contact-aware QP force allocation, and multi-viewer 3D trajectory playback across MuJoCo ("Monaco"), Drake, OpenSim, and Simscape/MATLAB:
