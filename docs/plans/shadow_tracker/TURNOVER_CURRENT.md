@@ -3,8 +3,8 @@
 ## Revision Integrity and Persistence — 2026-09-18
 
 Issue #10233, ST-04 / epic #10122. Branch `fix/shadow-tracker-10233-pr`;
-publication base `5347cba0f` (remote main); implementation commit SELF.
-PR not created. The original aa01972aa-based diff was transplanted without
+publication base `5347cba0f` (remote main); implementation commit `c76d6f02c`.
+[PR #10450](https://github.com/D-sorganization/UpstreamDrift/pull/10450) is open; CI is running. The original aa01972aa-based diff was transplanted without
 its three unrelated PF-01 commits.
 This section supersedes the historical #10233 dispatch below.
 
@@ -33,7 +33,8 @@ record fields and attempted cycles without index mutation.
 
 `python3 -m pytest tests/unit/shadow_tracker
  tests/integration/shadow_tracker/test_model_probe.py --no-cov -q --timeout=60`
-passed **306 tests, zero failures/errors/skips**, on Windows / Python 3.13.5,
+passed **306 tests, zero failures/errors/skips**, including a repeat on the
+remote-main publication base, on Windows / Python 3.13.5,
 Tools pin `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`. Scoped Ruff lint/format,
 tracked file-size budget and `python3 -m agent_context --root . check` passed.
 The context catalog has no registered Shadow Tracker boundary; source and
@@ -49,7 +50,8 @@ repository-wide documentation failures remain a publication limitation.
 
 ### Review Limits and Next Action
 
-Review and publish the focused diff with `Fixes #10233` and `Refs #10122`.
+Validate PR #10450 CI and merge through normal protection. The PR references
+`Fixes #10233` and `Refs #10122`.
 Renderer source/tests and unrelated original-checkout work are preserved.
 These guarantees apply to `ManualMaskProvider.save/load`. Separately,
 `artifacts.save_bundle` overwrites existing directory files individually, and
