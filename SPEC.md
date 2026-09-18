@@ -1,5 +1,23 @@
 # SPEC.md — Repository Specification Document
 
+## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
+
+Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility, bounded overlapping-window refinement, joint $q/v/a$ derivative consistency, and separate driver/iron calibration validation:
+- **Strict Club Calibration Separation & Validation (`src/shared/python/motion_matching/club_calibration.py`)**:
+  - `ClubCalibrationSpec`: Rigid club calibration specification encapsulating physical parameters (`ClubSpec`), marker attachment geometry, shaft length bounds, lie angle, and loft angle.
+  - `validate_club_compatibility()`: Enforces strict compatibility guards against cross-contamination (e.g. applying driver calibration to 7-iron geometry, or vice versa, or mismatched shaft lengths), raising typed `ClubCompatibilityError`.
+  - `diagnose_club_marker_residuals()`: Performs rigid frame registration auditing and returns marker-by-marker residuals, RMS error, and geometric compatibility status.
+- **Kinematic Smoothing & Derivative Consistency (`src/shared/python/motion_matching/kinematic_smoother.py`)**:
+  - `KinematicSmoother`: Jointly smooths coordinate trajectories $q(t)$ and evaluates mathematically exact derivatives $v(t) = \dot{q}(t)$ and $a(t) = \ddot{q}(t)$ using Quintic B-splines over boundary-padded horizons.
+  - Boundary Reflection Padding: Reflects coordinates antisymmetrically across $t=0$ and $t=T$ prior to filtering and spline fitting, eliminating boundary acceleration and jerk spikes ($|a_0 - a_1|$ and $|a_{T} - a_{T-1}|$).
+  - Weld Closure Manifold Projection: Damped least-squares projection pass ($J_{\text{closure}} \Delta q = -e_{\text{closure}}$) restoring dual-grip loop closure ($e_{\text{closure}} \le 10^{-3}\text{ m}$) while projecting velocity into the constraint nullspace ($\dot{e}_{\text{closure}} \le 10^{-2}\text{ m/s}$).
+  - Coordinate Box Bounds: Projects coordinates onto configured joint limits ($\text{lower} \le q(t) \le \text{upper}$).
+  - `audit_smoothing_quality()`: Evaluates maximum acceleration step, boundary spike ratios, maximum jerk, RMS position difference, and verifies no dropped frames ($N_{\text{out}} = N_{\text{in}}$).
+- **Bounded Overlapping-Window IK Refinement (`src/shared/python/motion_matching/windowed_ik_refinement.py`)**:
+  - `WindowedIkRefiner`: Overlapping-window temporal optimizer initialized from per-frame `MarkerIkSolver` warm starts. Minimizes marker tracking residuals, closure violations, temporal acceleration penalty, and unilateral foot contact ground non-penetration barrier ($z_{\text{foot}} \ge h_{\text{ground}}$).
+  - Robust to marker dropout (up to 30% dropout) and target noise without numerical instability.
+  - `diagnose_difficult_frames()`: Compares multi-start fits on worst frames with closure enabled vs disabled to determine geometric floors and quantify calibration misfit vs loop closure tradeoff.
+
 ## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
 
 Freezes fast-matching evidence archives, schemas, and negative acceptance fixtures across driver and 7-iron candidates:
