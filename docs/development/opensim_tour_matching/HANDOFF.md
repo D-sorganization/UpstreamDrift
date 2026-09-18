@@ -123,3 +123,36 @@ agent can inventory, validate, package and run a single bounded diagnostic;
 it should not independently waive gates or redesign the physical model.
 
 Read [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md) for the copy-ready assignment.
+
+## Anatomical Playback and Muscle Scope
+
+Owner clarification on 2026-09-18: the product must show an anatomical golfer
+performing the complete swing, with explicit joint and muscle coverage. A
+marker-only animation does not satisfy this user-facing deliverable.
+
+Direct XML inspection of the preserved `os7_moco_g1/golf_humanoid_scaled_tour_markers_moco.osim`
+found 23 bodies (including Club), 23 joints, 39 coordinates and 39 coordinate
+actuators, with **zero muscle actuators**. Bone meshes include skull, ribcage,
+spine, pelvis, arms, hands, legs and feet. Skull geometry belongs to the torso;
+finger bones are visual meshes rather than independently articulated fingers.
+Anatomical appearance does not establish anatomical completeness or muscle forces.
+
+Local OpenSim 4.5 successfully loaded that model, its `rungs/0600ms/replay.mot`
+and `inputs/ik_states_full.sto`; playback was exercised on both. The 0.60 s file
+is a rejected dynamic replay. The 1.813888889 s IK file is the full kinematic
+fit, not a validated muscle-driven forward simulation. Its unnamed storage
+header causes a blank motion label in the GUI: package a clearly named copy
+without altering raw evidence. Inspect apparent shoulder/arm mesh gaps and
+club visibility in the GUI before shipping; do not infer the cause from a
+screenshot or silently change physical geometry.
+
+Required follow-up: qualify a distributable anatomical viewing package with
+all referenced meshes, labeled IK versus dynamic motions, capture overlay,
+full-duration playback and a reproducible video. Inventory modeled versus
+omitted joints/muscles. Qualify a separate muscle-actuated OpenSim variant
+with muscle paths, scaling, force capacity, activation/tendon dynamics and
+native replay validation before advertising muscle-driven motion or muscle
+loads. Coordinate torques are not muscle activations. Preserve the current
+residual-actuated model as a diagnostic baseline. This modeling/validation
+work requires expert review; a cheaper agent can first inventory, package,
+verify rendering and collect evidence.
