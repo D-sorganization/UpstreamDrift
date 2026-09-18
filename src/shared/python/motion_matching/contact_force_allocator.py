@@ -16,10 +16,10 @@ Subject to:
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -27,8 +27,8 @@ from scipy.optimize import lsq_linear
 
 from src.shared.python.contracts import require
 
-Array = NDArray[np.float64]
-IntArray = NDArray[np.integer[Any]]
+Array: TypeAlias = NDArray[np.float64]
+IntArray: TypeAlias = NDArray[np.integer[Any]]
 
 
 class AllocationObjective(str, Enum):
@@ -53,6 +53,34 @@ class ContactForceAllocation:
     root_balance_residual: float
     success: bool
     objective: AllocationObjective
+
+    def audit_feasibility(
+        self,
+        body_mass_kg: float,
+        ankle_indices: Sequence[int] | None = None,
+        contact_positions_m: Mapping[str, Array] | None = None,
+        ground: Any = None,
+        mu_friction: float = 0.8,
+        constitutive_forces: Mapping[str, Any] | None = None,
+        config: Any = None,
+    ) -> Any:
+        """Audit this allocation against physical feasibility and capacity limits."""
+        from src.shared.python.motion_matching.contact_force_feasibility import (
+            audit_contact_force_feasibility,
+        )
+
+        return audit_contact_force_feasibility(
+            tau_actuated=self.tau_actuated,
+            f_ground=self.f_ground,
+            delta_tau_root=self.delta_tau_root,
+            body_mass_kg=body_mass_kg,
+            ankle_indices=ankle_indices,
+            contact_positions_m=contact_positions_m,
+            ground=ground,
+            mu_friction=mu_friction,
+            constitutive_forces=constitutive_forces,
+            config=config,
+        )
 
 
 class ContactForceAllocator:
