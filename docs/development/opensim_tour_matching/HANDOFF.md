@@ -156,3 +156,6 @@ loads. Coordinate torques are not muscle activations. Preserve the current
 residual-actuated model as a diagnostic baseline. This modeling/validation
 work requires expert review; a cheaper agent can first inventory, package,
 verify rendering and collect evidence.
+
+Implementation follow-up: #10394 (anatomical playback and muscle-actuated
+model qualification), retained under epic #10363. Handoff PR: #10393.

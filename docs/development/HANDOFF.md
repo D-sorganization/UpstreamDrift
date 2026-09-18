@@ -1,7 +1,7 @@
 # Current Matching Continuation Handoff
 
 Updated 2026-09-18. Governing epic #10363; documentation review branch
-`docs/matching-agent-continuation`; commit SELF; PR not created (documentation review publication follows).
+`docs/matching-agent-continuation`; commit SELF; PR https://github.com/D-sorganization/UpstreamDrift/pull/10393.
 Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matching-handoff`.
 Development-log entry: `DL-#10363`.
 

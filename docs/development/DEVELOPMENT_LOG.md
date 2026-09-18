@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex (handoff review only; execution by next lease holder)
 - **Issue:** #10363
 - **Branch:** docs/matching-agent-continuation
-- **PR:** not created (documentation review publication follows)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10393
 - **Paths:** docs/development/HANDOFF.md; docs/development/matched_swing_program; docs/development/opensim_tour_matching/HANDOFF.md; docs/development/opensim_tour_matching/NEXT_AGENT_PROMPT.md
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at 94d593cf1 (review base; SELF contains handoff; ControlTower process/artifact/source snapshot; 14 Pinocchio and 27 OpenSim focused tests passed)
