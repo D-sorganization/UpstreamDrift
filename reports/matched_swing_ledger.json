@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T07:10:24Z",
+  "generated_at": "2026-09-18T19:29:01Z",
   "rows": [
     {
       "acceptance": null,
@@ -2270,7 +2270,63 @@
       "sha256": "9a2186ab5e7cb981697b3b6a2e7f5071a6b69f84f17fab6ec9ab5674873a118a"
     },
     {
-      "acceptance": null,
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.1335307759224617,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 133.53 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.1176887290548092,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 117.69 mm > 20.00 mm",
+            "status": "failed",
+            "threshold": 0.02,
+            "unit": "m"
+          },
+          {
+            "measured": 0.16718295544070955,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 167.18 mm > 80.00 mm",
+            "status": "failed",
+            "threshold": 0.08,
+            "unit": "m"
+          },
+          {
+            "measured": 0.05020370481288372,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.1,
+            "unit": "m"
+          },
+          {
+            "measured": 0.4793598892399277,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.4794 rad > 0.1047 rad",
+            "status": "failed",
+            "threshold": 0.10472,
+            "unit": "rad"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing dynamics.max_normal_force_n",
+            "status": "missing",
+            "threshold": 2354.4,
+            "unit": "N"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Decoupled IK + inverse-dynamics allocation (scripts/match_pinocchio_c3d.py). Kinematic fit only; no forward-replay metrics in the receipt. Evaluated on the kinematic metrics against G3 for the record.",
+        "source": "evidence/matched/driver_full_pinocchio/reevaluation.json",
+        "status": "REJECTED"
+      },
       "artefacts": {
         "gif": "evidence/matched/driver_full_pinocchio/playback.gif",
         "mot": null,
@@ -2294,10 +2350,148 @@
     },
     {
       "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3397950645586104,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 339.80 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.08919853196845129,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 89.20 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.7818067788889571,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 781.81 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.2526322109612285,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 252.63 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.7624699756771898,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.7625 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 9272.830823015664,
+            "name": "max_normal_force_n",
+            "reason": "max normal force 9272.8 N exceeds 2354.4 N (3x BW)",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.02089842056861036,
+            "name": "max_penetration_m",
+            "reason": "penetration 20.9 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          }
+        ],
         "horizon": "G1",
-        "is_physically_accepted": true,
-        "qualification_note": "terminal",
-        "status": "PASSED"
+        "is_physically_accepted": false,
+        "qualification_note": "FDDP G1 continuation (RK45 nodes, rtol 1e-4): in-solver rollout 46.4 mm whole, but the rtol 1e-6 replay diverges to 340 mm. Rejected; kept as diagnostic evidence for MS-107.",
+        "source": "evidence/matched/driver_g1_crocoddyl_rk45/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45/candidate.npz"
+      },
+      "candidate_sha": "652379c3a9ef4a90e540117078bbe4828b699e42352697268a52fccad78a8d59",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45/receipt.json",
+      "sha256": "2e4a9cb8ff594ad759e2d4f988d6a35c0de2e22143b7ed30f91d05a88fb9621e"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 2.7573124637458317,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 2757.31 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 2.0826599265537746,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 2082.66 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 3.41106738017757,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 3411.07 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 2.7401197173341076,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 2740.12 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 1.8853296205998342,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 1.8853 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing dynamics.max_normal_force_n",
+            "status": "missing",
+            "threshold": 2354.4,
+            "unit": "N"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "The receipt's own metrics block is the solver-internal fit of the 27-coordinate native run-102 candidate; the forward_rollout block is the physical replay (2.76 m). Only the replay counts. The self-reported accepted=true is void (MS-100).",
+        "source": "evidence/matched/driver_g1_pinocchio/reevaluation.json",
+        "status": "REJECTED"
       },
       "artefacts": {
         "gif": "evidence/matched/driver_g1_pinocchio/playback.gif",
@@ -2321,7 +2515,63 @@
       "sha256": "9bbca5abbd0eb97bd0a063994934bc69a1708d2d0ee07266c50ed6775a5fa317"
     },
     {
-      "acceptance": null,
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3369243511857251,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 336.92 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.21532722263879503,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 215.33 mm > 20.00 mm",
+            "status": "failed",
+            "threshold": 0.02,
+            "unit": "m"
+          },
+          {
+            "measured": 0.3891311136322293,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 389.13 mm > 80.00 mm",
+            "status": "failed",
+            "threshold": 0.08,
+            "unit": "m"
+          },
+          {
+            "measured": 0.22572158864018038,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 225.72 mm > 100.00 mm",
+            "status": "failed",
+            "threshold": 0.1,
+            "unit": "m"
+          },
+          {
+            "measured": 2.574501828432221,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 2.5745 rad > 0.1047 rad",
+            "status": "failed",
+            "threshold": 0.10472,
+            "unit": "rad"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing dynamics.max_normal_force_n",
+            "status": "missing",
+            "threshold": 2354.4,
+            "unit": "N"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Decoupled IK + inverse-dynamics allocation (scripts/match_pinocchio_c3d.py). Kinematic fit only; no forward-replay metrics in the receipt. Evaluated on the kinematic metrics against G3 for the record.",
+        "source": "evidence/matched/iron_full_pinocchio/reevaluation.json",
+        "status": "REJECTED"
+      },
       "artefacts": {
         "gif": "evidence/matched/iron_full_pinocchio/playback.gif",
         "mot": null,
@@ -2345,5 +2595,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 88
+  "total_receipts": 89
 }
