@@ -50,6 +50,16 @@ For detailed factor attribution on the 27.3 mm vs 52.3 mm IK baseline shift, see
 
 ## 3. Automated Program Status & Ledger Matrix
 
+### MS-21 Native Replay Continuation (#10336)
+
+| Scope                             | State                                                                              | Evidence                                                                                                                                                   |
+| --------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Merged Driver Candidate in MuJoCo | Replay path implemented; configuration and source dynamics unverified; G1 rejected | [Receipt](../../../evidence/matched/driver_full_mujoco_replay/receipt.json), [Reproduction](../../../evidence/matched/driver_full_mujoco_replay/README.md) |
+
+The source analytic-fit receipt omits armature, interpolation, candidate hash
+and root-assistance history. Same-state marker agreement is a kinematic check;
+it does not establish native dynamics parity or a qualified full swing.
+
 The section below is generated directly from `reports/matched_swing_ledger.json` by running:
 
 ```bash
@@ -73,16 +83,16 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 89 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 90 committed receipts scanned).
 
-| Engine        | Candidate Lanes                                                                                                       | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
-| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 29       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
-| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                         | driver, iron       | —           | —            | 8        | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
-| **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, replays                                                                  | driver             | —           | —            | 4        | ⚙️ Parity Replay (6e-6 m Drake-MuJoCo setup parity)                      |
-| **Opensim**   | tour_matching                                                                                                         | driver             | —           | —            | 9        | ⚠️ Staged (Moco track problem under MS-102)                              |
-| **Simscape**  | native                                                                                                                | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
-| **Myosuite**  | —                                                                                                                     | —                  | —           | —            | 0        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
+| Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
+| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 30       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
+| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                                  | driver, iron       | —           | —            | 8        | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
+| **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, replays                                                                           | driver             | —           | —            | 4        | ⚙️ Parity Replay (6e-6 m Drake-MuJoCo setup parity)                      |
+| **Opensim**   | tour_matching                                                                                                                  | driver             | —           | —            | 9        | ⚠️ Staged (Moco track problem under MS-102)                              |
+| **Simscape**  | native                                                                                                                         | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
+| **Myosuite**  | —                                                                                                                              | —                  | —           | —            | 0        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
 

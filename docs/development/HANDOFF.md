@@ -1,5 +1,49 @@
 # Current Matching Continuation Handoff
 
+## MS-21 MuJoCo Replay Continuation (#10336)
+
+Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-codex-10336`.
+Branch: `feat/10336-mujoco-candidate-replay`. Base HEAD:
+`5347cba0f4378cd72a6e8afea9fb27c8bfe5db75`. Implementation `94ccb1825`;
+PR #10448 open. User authorized commit, push, PR, CI repair and merge.
+Development-log entry: DL-#10336. Ownership was checked free and leased as
+`codex-mujoco-replay-10336-20260918` before editing. The original checkout's
+Pinocchio changes and untracked evidence were preserved.
+
+Implemented name-mapped armature and saved-control replay through the existing
+MuJoCo rigid-grip/shared-contact plant, exact G1 slicing and fail-closed checks.
+See [Reproduction and Results](../../evidence/matched/driver_full_mujoco_replay/README.md)
+for commands, candidate identity and receipt. Historical source evidence is
+unchanged. Diagnostic armature 0.005 kg·m² follows turnover guidance but cannot
+be certified as source-identical: the merged analytic producer never applies
+armature and its receipt omits it, contact configuration and interpolation.
+Missing root history and independent source dynamics also block qualification.
+
+Validation: 40 focused replay/acceptance/schema/full-body/contact tests pass;
+scoped Ruff and mypy pass; agent-context and architecture/file-size budgets pass.
+PR CI found CVE-2026-63374 and CVE-2026-64847 in the inherited AnyIO 4.12.1
+pins. SELF updates both runtime/development locks to the reported fixed 4.14.2;
+the audit remains enforced. SELF refreshes the matched-swing ledger for the new
+receipt and repairs the existing cross-engine gravity fixture (#4249): MuJoCo
+and Drake now consume the same collision-free canonical URDF and right-hand
+anchor rather than unlike demo plants. The unchanged 5 mm gate passes with
+real MuJoCo 3.8.0 / Drake 1.51.1 on Linux (15 passed, 2 unavailable-engine skips),
+including new analytic free-fall checks. This fixture does not qualify contact
+or bilateral grip closure. Replay plus ledger tests: 28 passed. The fixture uses
+defusedxml for both reading and serialization to satisfy the XML security gate.
+Continue PR CI on the branch updated with main's shadow-tracker merge.
+Commit/push hooks pass, including security and bounded unit checks. All 21
+replay tests also pass with CI-pinned MuJoCo 3.8.0 in an isolated environment.
+The central development-log validator flags inherited missing verifying SHAs,
+a missing PR field in DL-#9967, and the existing portfolio WIP excess. These
+unrelated entries are not repaired in this diff. The repo-local validator
+script is absent, so the central Repository_Management copy was used.
+Next: review this focused diff, then obtain a provenance-complete source
+candidate and independent native replay. Do not close #10336 or promote G2/G3
+from these diagnostic artifacts. Earlier lane handoffs follow unchanged.
+
+---
+
 ## Shadow Tracker #10233 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/UpstreamDrift-10233-pr`.
