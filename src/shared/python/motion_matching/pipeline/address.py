@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
 
@@ -335,7 +335,7 @@ def calibrate_legs(
             )
             for label in lane.labels
         }
-        from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        from src.engines.physics_engines.mujoco.python.full_body_ik import (
             FullBodyMarkerKinematics,
         )
 
