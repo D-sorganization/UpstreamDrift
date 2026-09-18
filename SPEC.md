@@ -1,5 +1,21 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Anatomically and Physically Consistent Segment Scaling (OG-02, #10396)
+
+Delivers consistent anatomical and physical segment scaling for the OpenSim `golf_humanoid` model and resolves bilateral upper-limb marker asymmetry defects:
+- **Consistent OpenSim Segment Scaling Module (`src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py`)**:
+  - `apply_segment_scaling`: Scales joint frame translations (`PhysicalOffsetFrame/translation`), attached bone visual meshes (`attached_geometry/Mesh/scale_factors`), centers of mass (`mass_center`), and inertia tensors (`inertia`).
+  - Supported scaling policies via `ScalingPolicy`: `FIXED_MASS` (default: $m' = m, \text{COM}' = s \cdot \text{COM}, I' = s^2 I$) and `DENSITY_PRESERVING` ($m' = s^3 m, \text{COM}' = s \cdot \text{COM}, I' = s^5 I$).
+  - Strict repeat-scaling protection: Tags the model document with `<ScalingMetadata>` to prevent corrupt double scaling.
+  - DbC preconditions: Validates positive finite scale factors and valid document roots.
+- **Bilateral Acromion Proxy Reconstruction (`src/engines/physics_engines/opensim/python/tour_matching/scale.py`)**:
+  - Reconstructs missing/occluded shoulder markers (such as `RShoulderTop` at frame 0 in `C3D_TA_Driver.c3d`) by applying contralateral centroid-to-back ratios.
+  - Eliminates artificial humerus length inflation: humerus scale ratio $R/L$ drops from defective $1.1713$ ($1.4567 / 1.2436$) to $1.0807$ ($1.3440 / 1.2436$), well within the $1.10$ anatomical asymmetry tolerance.
+- **Model Pipeline Integration & Qualification Tests (`tests/opensim/test_segment_scale.py`, `test_opensim_os0_qualification.py`)**:
+  - TDD tests verifying joint frame, mesh, COM, and inertia transformations under both scaling policies.
+  - Qualification test asserting that scaled models have no unscaled arm mesh defects.
+  - Updates `os3b_scale_and_full_ik.py` to reuse unified `apply_segment_scaling`.
+
 ## OpenSim Parameterized Visual Golf Club and Grip Frames (OG-03, #10397)
 
 Attaches visible parameterized golf club geometry and canonical grip offset frames to the OpenSim `golf_humanoid` model without altering physical body dynamics:
