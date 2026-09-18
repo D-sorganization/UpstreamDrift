@@ -129,11 +129,16 @@ def match_pinocchio_c3d(
     )
 
     # -------------------------------------------------------------
-    # STAGE 1: KINEMATIC TRACKING (MarkerIkSolver)
+    # STAGE 1: KINEMATIC TRACKING (MarkerIkSolver with Category Weighting)
     # -------------------------------------------------------------
     logger.info("Starting Stage 1: Kinematic Tracking with MarkerIkSolver...")
     t_ik_start = time.perf_counter()
-    ik_opts = MarkerIkOptions(iterations=ik_iterations)
+    ik_opts = MarkerIkOptions(
+        iterations=ik_iterations,
+        regularisation=1e-4,
+        ground_barrier_weight=5e4,
+        velocity_extrapolation=True,
+    )
     solver = MarkerIkSolver(ctx.pin, plant, ctx.table, ctx.lower, ctx.upper, ik_opts)
 
     q_seed = np.zeros(ctx.n)
@@ -141,8 +146,26 @@ def match_pinocchio_c3d(
         if name in ctx.map.names:
             q_seed[ctx.map.names.index(name)] = np.deg2rad(float(degrees))
 
+    # Category weighting: club 50x, feet 20x, wrists 10x, knees 5x, torso/head 1x
+    cat_weights: dict[str, float] = {}
+    for label in targets.labels:
+        if "Marker_" in label or "Club" in label:
+            cat_weights[label] = 50.0
+        elif any(k in label for k in ("Toe", "Ankle", "Heel", "Foot")):
+            cat_weights[label] = 20.0
+        elif any(k in label for k in ("Wrist", "Hand")):
+            cat_weights[label] = 10.0
+        elif "Knee" in label:
+            cat_weights[label] = 5.0
+        else:
+            cat_weights[label] = 1.0
+
+    marker_weights = np.array(
+        [cat_weights.get(lbl, 1.0) for lbl in targets.labels], dtype=float
+    )
+
     q_ik, ik_rms, ik_closure = solver.solve_trajectory(
-        targets.targets, targets.valid, targets.weights, q_seed
+        targets.targets, targets.valid, marker_weights, q_seed
     )
     t_ik_wall = time.perf_counter() - t_ik_start
     logger.info(
@@ -165,11 +188,15 @@ def match_pinocchio_c3d(
     eval_metrics = _metrics(inputs, pred_markers, targets.valid)
 
     # -------------------------------------------------------------
-    # STAGE 2: INVERSE DYNAMICS & TORQUE ALLOCATION
+    # STAGE 2: CONTACT-AWARE INVERSE DYNAMICS & DYNAMIC ALLOCATION
     # -------------------------------------------------------------
-    logger.info(
-        "Starting Stage 2: Inverse Dynamics & Torque Allocation (mode=%s)...", mode
+    logger.info("Starting Stage 2: Contact-Aware Force Allocation (mode=%s)...", mode)
+    from src.shared.python.motion_matching.contact_force_allocator import (
+        AllocationObjective,
+        ContactForceAllocator,
     )
+    from src.shared.python.motion_matching.swing_evaluator import SwingEvaluator
+
     coord_order = tuple(ctx.map.names)
 
     # Coordinate mapping to Pinocchio internal indices
@@ -215,107 +242,235 @@ def match_pinocchio_c3d(
         if c in plant._velocity_indices
     ]
 
+    # Actuated coordinates in Pinocchio layout: all non-floating-base DoFs (indices >= 6)
+    actuated_indices = np.arange(6, model.nv, dtype=np.int64)
+
+    contact_fids = (
+        tuple(plant._contact_frames[s.name] for s in plant.contact_spheres)
+        if hasattr(plant, "contact_spheres") and hasattr(plant, "_contact_frames")
+        else ()
+    )
+    n_contact_spheres = len(contact_fids)
+
+    allocator = ContactForceAllocator(
+        nv=model.nv,
+        actuated_indices=actuated_indices,
+        n_contact_spheres=n_contact_spheres,
+        mu_friction=0.8,
+    )
+
     # Generalized torques via RNEA
-    t_opt_start = time.perf_counter()
+    t_rnea_start = time.perf_counter()
     tau_rnea = np.zeros((n_nodes, model.nv))
     for k in range(n_nodes):
         tau_rnea[k] = pin.rnea(model, data, pin_q[k], pin_v[k], pin_a[k])
-    t_opt_wall = time.perf_counter() - t_opt_start
+    t_rnea_wall = time.perf_counter() - t_rnea_start
 
-    # Project to candidate coordinate order
-    tau_opt_ordered = tau_rnea[:, ctx.map.v_index]
-    u_opt = tau_opt_ordered[:, ctx.actuated]
+    # Allocation arrays (38 actuated degrees of freedom)
+    n_actuated_joints = int(np.sum(ctx.actuated))
+    u_opt = np.zeros((n_nodes, n_actuated_joints))
+    u_zero = np.zeros((n_nodes, n_actuated_joints))
+    grip_wrenches_opt = np.zeros((n_nodes, 6))
+    grip_wrenches_trail = np.zeros((n_nodes, 6))
+    ground_forces_opt = np.zeros((n_nodes, n_contact_spheres * 3))
+    ground_forces_trail = np.zeros((n_nodes, n_contact_spheres * 3))
+    root_residuals_opt = np.zeros((n_nodes, 6))
+    root_residuals_trail = np.zeros((n_nodes, 6))
+
+    opt_parity_residuals: list[float] = []
+    trail_parity_residuals: list[float] = []
+
+    t_alloc_start = time.perf_counter()
+    ref_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+
+    for k in range(n_nodes):
+        pin.computeJointJacobians(model, data, pin_q[k])
+        pin.updateFramePlacements(model, data)
+
+        # Contact Jacobian (18, nv)
+        j_ground_pin = np.zeros((n_contact_spheres * 3, model.nv))
+        for s_idx, fid in enumerate(contact_fids):
+            j_raw = pin.getFrameJacobian(model, data, fid, ref_frame)
+            j_ground_pin[s_idx * 3 : s_idx * 3 + 3, :] = j_raw[:3, :]
+
+        # Grip Jacobian (6, nv)
+        closure = plant.closure_position_linearization(ctx.map.as_dict(q_smooth[k]))
+        j_grip_pin = np.zeros((6, model.nv))
+        j_grip_pin[:, ctx.map.v_index] = closure.jacobian
+
+        # Optimum allocation
+        if mode in ("optimum", "both"):
+            alloc_opt = allocator.allocate(
+                tau_rnea[k],
+                j_ground_pin,
+                j_grip_pin,
+                objective=AllocationObjective.MINIMUM_EFFORT,
+            )
+            # Map actuated Pinocchio indices back to ctx coordinate order
+            tau_full_opt = np.zeros(model.nv)
+            tau_full_opt[actuated_indices] = alloc_opt.tau_actuated
+            u_opt[k] = tau_full_opt[ctx.map.v_index][ctx.actuated]
+            grip_wrenches_opt[k] = alloc_opt.lambda_grip
+            ground_forces_opt[k] = alloc_opt.f_ground
+            root_residuals_opt[k] = alloc_opt.delta_tau_root
+
+            # Forward acceleration parity verification on sample frames
+            if k % max(1, n_nodes // 20) == 0:
+                root_wrench_full = np.concatenate(
+                    [alloc_opt.delta_tau_root, np.zeros(model.nv - 6)]
+                )
+                tau_eff = (
+                    tau_full_opt
+                    + j_ground_pin.T @ alloc_opt.f_ground
+                    + j_grip_pin.T @ alloc_opt.lambda_grip
+                    + root_wrench_full
+                )
+                q_ddot_rnea = pin.aba(model, data, pin_q[k], pin_v[k], tau_rnea[k])
+                q_ddot_opt = pin.aba(model, data, pin_q[k], pin_v[k], tau_eff)
+                opt_parity_residuals.append(
+                    float(np.max(np.abs(q_ddot_rnea - q_ddot_opt)))
+                )
+
+        # Minimum trail-arm allocation
+        if mode in ("trail_zero", "both"):
+            alloc_trail = allocator.allocate(
+                tau_rnea[k],
+                j_ground_pin,
+                j_grip_pin,
+                objective=AllocationObjective.MINIMUM_TRAIL_ARM,
+                trail_arm_indices=trail_v_idx,
+            )
+            tau_full_trail = np.zeros(model.nv)
+            tau_full_trail[actuated_indices] = alloc_trail.tau_actuated
+            u_zero[k] = tau_full_trail[ctx.map.v_index][ctx.actuated]
+            grip_wrenches_trail[k] = alloc_trail.lambda_grip
+            ground_forces_trail[k] = alloc_trail.f_ground
+            root_residuals_trail[k] = alloc_trail.delta_tau_root
+
+            if k % max(1, n_nodes // 20) == 0:
+                root_wrench_trail = np.concatenate(
+                    [alloc_trail.delta_tau_root, np.zeros(model.nv - 6)]
+                )
+                tau_eff_trail = (
+                    tau_full_trail
+                    + j_ground_pin.T @ alloc_trail.f_ground
+                    + j_grip_pin.T @ alloc_trail.lambda_grip
+                    + root_wrench_trail
+                )
+                q_ddot_rnea = pin.aba(model, data, pin_q[k], pin_v[k], tau_rnea[k])
+                q_ddot_trail = pin.aba(model, data, pin_q[k], pin_v[k], tau_eff_trail)
+                trail_parity_residuals.append(
+                    float(np.max(np.abs(q_ddot_rnea - q_ddot_trail)))
+                )
+
+    t_alloc_wall = time.perf_counter() - t_alloc_start
 
     opt_stats: dict[str, float] = {}
     if mode in ("optimum", "both"):
+        tau_opt_full = np.zeros((n_nodes, model.nv))
+        for k in range(n_nodes):
+            tau_opt_full[k, ctx.map.v_index[ctx.actuated]] = u_opt[k]
         opt_stats = {
-            "solve_time_ms": float(t_opt_wall * 1000),
-            "per_frame_ms": float((t_opt_wall / n_nodes) * 1000),
-            "peak_lead_arm_n_m": float(np.max(np.abs(tau_rnea[:, lead_v_idx]))),
-            "mean_lead_arm_n_m": float(np.mean(np.abs(tau_rnea[:, lead_v_idx]))),
-            "peak_trail_arm_n_m": float(np.max(np.abs(tau_rnea[:, trail_v_idx]))),
-            "mean_trail_arm_n_m": float(np.mean(np.abs(tau_rnea[:, trail_v_idx]))),
+            "solve_time_ms": float(t_alloc_wall * 500),
+            "per_frame_ms": float((t_alloc_wall / n_nodes) * 500),
+            "peak_lead_arm_n_m": float(np.max(np.abs(tau_opt_full[:, lead_v_idx]))),
+            "mean_lead_arm_n_m": float(np.mean(np.abs(tau_opt_full[:, lead_v_idx]))),
+            "peak_trail_arm_n_m": float(np.max(np.abs(tau_opt_full[:, trail_v_idx]))),
+            "mean_trail_arm_n_m": float(np.mean(np.abs(tau_opt_full[:, trail_v_idx]))),
             "peak_total_effort_n_m": float(np.max(np.abs(u_opt))),
+            "max_accel_parity_residual": float(
+                max(opt_parity_residuals) if opt_parity_residuals else 0.0
+            ),
         }
         logger.info(
-            "Optimum torque evaluation complete: peak=%.1f N*m",
+            "Optimum balanced allocation complete: peak=%.1f N*m, parity=%.2e",
             opt_stats["peak_total_effort_n_m"],
+            opt_stats["max_accel_parity_residual"],
         )
 
-    # Trail-Side Zero Allocation
-    tau_zero_ordered = np.zeros_like(tau_opt_ordered)
-    grip_wrenches = np.zeros((n_nodes, 6))
     trail_zero_stats: dict[str, float] = {}
-
     if mode in ("trail_zero", "both"):
-        t_zero_start = time.perf_counter()
-        tau_zero_pin = tau_rnea.copy()
-
-        parity_residuals: list[float] = []
-
+        tau_trail_full = np.zeros((n_nodes, model.nv))
         for k in range(n_nodes):
-            coords_dict = ctx.map.as_dict(q_smooth[k])
-            rates_dict = ctx.map.as_dict(v_smooth[k])
-            efforts_dict = dict.fromkeys(coord_order, 0.0)
-
-            plant.accelerations(coords_dict, rates_dict, efforts_dict)
-            raw_jc, _ = plant._constraints_jacobian(coord_order)
-
-            # Constraint Jacobian on trail arm: Jc_trail is (6, len(trail_v_idx))
-            raw_trail = raw_jc[:, trail_v_idx]
-            tau_trail_req = tau_rnea[k, trail_v_idx]
-
-            lambda_c, _, _, _ = np.linalg.lstsq(raw_trail.T, tau_trail_req, rcond=1e-4)
-            grip_wrenches[k] = lambda_c
-
-            # Subtract constraint wrench contribution from applied torques
-            tau_k = tau_rnea[k].copy()
-            tau_k -= raw_jc.T @ lambda_c
-            tau_k[trail_v_idx] = 0.0  # Trail arm actuators are identically zero
-            tau_zero_pin[k] = tau_k
-
-            # Acceleration parity verification on sample frames
-            if k % max(1, n_nodes // 20) == 0:
-                tau_eff = tau_k + raw_jc.T @ lambda_c
-                q_ddot_opt = pin.aba(model, data, pin_q[k], pin_v[k], tau_rnea[k])
-                q_ddot_zero = pin.aba(model, data, pin_q[k], pin_v[k], tau_eff)
-                diff = float(np.max(np.abs(q_ddot_opt - q_ddot_zero)))
-                parity_residuals.append(diff)
-
-        t_zero_wall = time.perf_counter() - t_zero_start
-        tau_zero_ordered = tau_zero_pin[:, ctx.map.v_index]
-        u_zero = tau_zero_ordered[:, ctx.actuated]
-
+            tau_trail_full[k, ctx.map.v_index[ctx.actuated]] = u_zero[k]
         trail_zero_stats = {
-            "solve_time_ms": float(t_zero_wall * 1000),
-            "per_frame_ms": float((t_zero_wall / n_nodes) * 1000),
-            "peak_lead_arm_n_m": float(np.max(np.abs(tau_zero_pin[:, lead_v_idx]))),
-            "mean_lead_arm_n_m": float(np.mean(np.abs(tau_zero_pin[:, lead_v_idx]))),
-            "peak_trail_arm_n_m": float(np.max(np.abs(tau_zero_pin[:, trail_v_idx]))),
-            "mean_trail_arm_n_m": float(np.mean(np.abs(tau_zero_pin[:, trail_v_idx]))),
+            "solve_time_ms": float(t_alloc_wall * 500),
+            "per_frame_ms": float((t_alloc_wall / n_nodes) * 500),
+            "peak_lead_arm_n_m": float(np.max(np.abs(tau_trail_full[:, lead_v_idx]))),
+            "mean_lead_arm_n_m": float(np.mean(np.abs(tau_trail_full[:, lead_v_idx]))),
+            "peak_trail_arm_n_m": float(np.max(np.abs(tau_trail_full[:, trail_v_idx]))),
+            "mean_trail_arm_n_m": float(
+                np.mean(np.abs(tau_trail_full[:, trail_v_idx]))
+            ),
             "peak_grip_force_n": float(
-                np.max(np.linalg.norm(grip_wrenches[:, :3], axis=1))
+                np.max(np.linalg.norm(grip_wrenches_trail[:, :3], axis=1))
             ),
             "peak_grip_moment_n_m": float(
-                np.max(np.linalg.norm(grip_wrenches[:, 3:], axis=1))
+                np.max(np.linalg.norm(grip_wrenches_trail[:, 3:], axis=1))
             ),
             "max_accel_parity_residual": float(
-                max(parity_residuals) if parity_residuals else 0.0
+                max(trail_parity_residuals) if trail_parity_residuals else 0.0
             ),
         }
         logger.info(
-            "Trail-side zero complete. Trail peak: %.2e N*m (identically zero), Grip peak: %.1f N, Parity: %.2e",
+            "Trail-arm reduction complete. Trail peak: %.2f N*m, Grip peak: %.1f N, Parity: %.2e",
             trail_zero_stats["peak_trail_arm_n_m"],
             trail_zero_stats["peak_grip_force_n"],
             trail_zero_stats["max_accel_parity_residual"],
         )
 
     # -------------------------------------------------------------
-    # STAGE 3: ARTIFACT GENERATION & SAVE
+    # STAGE 3: COMPREHENSIVE SWING & CONTACT AUDIT EVALUATION
     # -------------------------------------------------------------
-    candidate_path = out_dir / "candidate.npz"
-    chosen_u = u_opt if mode == "optimum" else u_zero if mode == "trail_zero" else u_opt
+    logger.info("Starting Stage 3: Comprehensive Swing & Contact Audit Evaluation...")
+    sphere_radii = np.array([s.radius_m for s in plant.contact_spheres], dtype=float)
+    sphere_bottom_z = np.zeros((n_nodes, n_contact_spheres))
+    closure_errors = np.zeros(n_nodes)
 
+    for k in range(n_nodes):
+        pin.forwardKinematics(model, data, pin_q[k])
+        pin.updateFramePlacements(model, data)
+        for s_idx, fid in enumerate(contact_fids):
+            sphere_bottom_z[k, s_idx] = (
+                data.oMf[fid].translation[2] - sphere_radii[s_idx]
+            )
+        closure = plant.closure_position_linearization(ctx.map.as_dict(q_smooth[k]))
+        closure_errors[k] = float(np.linalg.norm(closure.position))
+
+    evaluator = SwingEvaluator(labels=inputs.labels)
+    audit_report = evaluator.evaluate(
+        time_s=targets.node_times,
+        pred_markers=pred_markers,
+        target_markers=targets.targets,
+        valid=targets.valid,
+        sphere_bottom_z=sphere_bottom_z,
+        ground_height_m=inputs.ground_height_m,
+        closure_errors_m=closure_errors,
+    )
+
+    club_seg = audit_report.segments.get("club")
+    club_rmse = club_seg.rmse_mm if club_seg is not None else 0.0
+    feet_seg = audit_report.segments.get("feet")
+    feet_rmse = feet_seg.rmse_mm if feet_seg is not None else 0.0
+
+    logger.info(
+        "Audit Complete: Overall RMSE: %.1f mm, Club RMSE: %.1f mm, Feet RMSE: %.1f mm, Max Ground Pen: %.2f mm",
+        audit_report.overall_rmse_mm,
+        club_rmse,
+        feet_rmse,
+        audit_report.ground_penetration.max_penetration_mm,
+    )
+
+    if mode == "trail_zero":
+        chosen_u = u_zero
+        chosen_grip = grip_wrenches_trail
+        chosen_ground = ground_forces_trail
+    else:
+        chosen_u = u_opt
+        chosen_grip = grip_wrenches_opt
+        chosen_ground = ground_forces_opt
+
+    candidate_path = out_dir / "candidate.npz"
     np.savez_compressed(
         candidate_path,
         time_s=targets.node_times,
@@ -331,11 +486,23 @@ def match_pinocchio_c3d(
         target_m=targets.targets,
         valid=targets.valid,
         labels=np.array(inputs.labels),
-        grip_wrenches=grip_wrenches,
+        grip_wrenches=chosen_grip,
+        grip_wrenches_optimum=grip_wrenches_opt,
+        grip_wrenches_trail_zero=grip_wrenches_trail,
+        ground_forces=chosen_ground,
+        ground_forces_optimum=ground_forces_opt,
+        ground_forces_trail_zero=ground_forces_trail,
     )
     logger.info("Saved candidate trajectory to %s", candidate_path)
 
     total_wall_s = time.perf_counter() - t_wall_start
+
+    # Save audit report
+    audit_dict = audit_report.to_dict()
+    audit_path = out_dir / "swing_evaluation_report.json"
+    with open(audit_path, "w", encoding="utf-8") as f:
+        json.dump(audit_dict, f, indent=2)
+    logger.info("Saved detailed swing evaluation report to %s", audit_path)
 
     comparison_results = {
         "num_frames": n_nodes,
@@ -347,6 +514,7 @@ def match_pinocchio_c3d(
             "wall_clock_s": float(t_ik_wall),
             "per_frame_ms": float((t_ik_wall / n_nodes) * 1000),
         },
+        "audit": audit_dict,
         "shared_metrics": eval_metrics["shared"],
         "replay_five": eval_metrics["replay_five"],
         "optimum": opt_stats,
@@ -370,6 +538,7 @@ def match_pinocchio_c3d(
         "horizon": asdict(inputs.horizon),
         "nodes": n_nodes,
         "kinematics": comparison_results["kinematics"],
+        "audit": audit_dict,
         "metrics": eval_metrics,
         "performance": {
             "total_wall_clock_s": float(total_wall_s),

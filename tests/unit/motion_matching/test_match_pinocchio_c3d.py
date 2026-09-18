@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from scripts.match_pinocchio_c3d import setup_logging
 
 
+@pytest.mark.unit
 def test_setup_logging() -> None:
     """Verify setup_logging executes without error."""
     setup_logging(verbose=False)
 
 
+@pytest.mark.unit
 def test_trail_zero_torque_allocation_math() -> None:
     """Verify the linear algebra of the trail-zero wrench projection."""
     rng = np.random.default_rng(42)

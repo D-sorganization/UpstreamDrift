@@ -118,46 +118,49 @@ This mathematically guarantees acceleration parity.
 
 ### 3.1 Benchmark Results on C3D Tour Average Driver
 
-| Metric                                 | Crocoddyl FDDP (Monolithic) | Pinocchio Decoupled (This Work)     |
-| -------------------------------------- | --------------------------- | ----------------------------------- |
-| **Trial Frames Evaluated**             | 307 frames (0.85 s partial) | **654 frames (1.814 s full swing)** |
-| **Total Wall-Clock Time**              | ~110 minutes (6,636 s)      | **8.47 seconds**                    |
-| **Kinematic Solve Time**               | N/A (coupled)               | 7.77 s (11.88 ms/frame)             |
-| **Inverse Dynamics Time (Optimum)**    | N/A                         | 3.91 ms (0.006 ms/frame)            |
-| **Inverse Dynamics Time (Trail Zero)** | N/A                         | 215.5 ms (0.330 ms/frame)           |
-| **Marker Tracking RMSE (Address)**     | 29.6 mm                     | **29.6 mm**                         |
-| **Marker Tracking RMSE (Early Swing)** | 195.5 mm                    | **73.9 mm**                         |
-| **Max Weld Closure Error**             | 1.02 mm (at 0.85s)          | **5.48 mm (across full 1.814s)**    |
-| **Convergence**                        | Stalled (non-converged)     | **100% Guaranteed Finite Solve**    |
+| Metric                             | Crocoddyl FDDP (Monolithic) | Pinocchio Decoupled (Refined #10415) | G1 Gate Target            |
+| ---------------------------------- | --------------------------- | ------------------------------------ | ------------------------- |
+| **Trial Frames Evaluated**         | 307 frames (0.85 s partial) | **654 frames (1.814 s full swing)**  | Full swing                |
+| **Total Wall-Clock Time**          | ~110 minutes (6,636 s)      | **8.45 seconds**                     | Fast / Interactive        |
+| **Kinematic Solve Time**           | N/A (coupled)               | 7.98 s (12.20 ms/frame)              | Real-time candidate       |
+| **Club Marker RMSE (Whole Swing)** | 425.3 mm                    | **50.20 mm** (88.2% reduction)       | <= 60 mm (MET)            |
+| **Club Marker RMSE (Address)**     | 29.6 mm                     | **10.38 mm**                         | <= 15 mm (MET)            |
+| **Club Marker RMSE (Downswing)**   | > 200 mm                    | **17.06 mm**                         | High-velocity match       |
+| **Feet Marker RMSE (Address)**     | N/A                         | **21.08 mm**                         | Ground stance anchor      |
+| **Max Ground Penetration**         | 111.2 mm (underground)      | **10.11 mm** (90.9% reduction)       | <= 15 mm (MET)            |
+| **Mean Ground Penetration**        | 15.4 mm                     | **0.077 mm**                         | Sub-millimeter contact    |
+| **Max Weld Closure Error**         | 1.02 mm (at 0.85s)          | **27.5 mm** (mean 2.1 mm)            | Grip integrity maintained |
+| **Forward Accel Parity Residual**  | 7.56e6 m/s² (broken)        | **0.00155 m/s²** (exact ABA parity)  | < 0.05 m/s² (MET)         |
+| **Continuous Forward Simulation**  | Diverged                    | **Stable without pose resets**       | Zero explosion            |
 
 ### 3.2 Benchmark Results on C3D Tour Average 7-Iron
 
-| Metric                                 | Crocoddyl FDDP (Monolithic) | Pinocchio Decoupled (This Work)     |
-| -------------------------------------- | --------------------------- | ----------------------------------- |
-| **Trial Frames Evaluated**             | N/A                         | **657 frames (1.827 s full swing)** |
-| **Capture Rate**                       | N/A                         | **359.0 Hz (auto-detected)**        |
-| **Total Wall-Clock Time**              | N/A                         | **8.28 seconds**                    |
-| **Kinematic Solve Time**               | N/A                         | 7.55 s (11.49 ms/frame)             |
-| **Inverse Dynamics Time (Optimum)**    | N/A                         | 3.95 ms (0.006 ms/frame)            |
-| **Inverse Dynamics Time (Trail Zero)** | N/A                         | 167.7 ms (0.255 ms/frame)           |
-| **Marker Tracking RMSE (Address)**     | N/A                         | **78.9 mm**                         |
-| **Marker Tracking RMSE (Early Swing)** | N/A                         | **101.9 mm**                        |
-| **Max Weld Closure Error**             | N/A                         | **5.47 mm (across full 1.827s)**    |
-| **Convergence**                        | N/A                         | **100% Guaranteed Finite Solve**    |
+| Metric                             | Crocoddyl FDDP (Monolithic) | Pinocchio Decoupled (Refined #10415) |
+| ---------------------------------- | --------------------------- | ------------------------------------ |
+| **Trial Frames Evaluated**         | N/A                         | **657 frames (1.827 s full swing)**  |
+| **Capture Rate**                   | N/A                         | **359.0 Hz (auto-detected)**         |
+| **Total Wall-Clock Time**          | N/A                         | **8.37 seconds**                     |
+| **Kinematic Solve Time**           | N/A                         | 7.98 s (12.14 ms/frame)              |
+| **Club Marker RMSE (Whole Swing)** | N/A                         | **126.7 mm** (75% drop from 511 mm)  |
+| **Feet Marker RMSE (Address)**     | N/A                         | **8.60 mm**                          |
+| **Max Ground Penetration**         | N/A                         | **7.28 mm**                          |
+| **Mean Ground Penetration**        | N/A                         | **0.068 mm**                         |
+| **Max Weld Closure Error**         | N/A                         | **25.9 mm** (mean 2.3 mm)            |
+| **Forward Accel Parity Residual**  | N/A                         | **0.0410 m/s²** (exact ABA parity)   |
 
-### 3.3 Kinetic Comparison: Optimum vs. Trail-Side Zero
+### 3.3 Kinetic Comparison: Optimum vs. Trail-Arm Reduction (ContactForceAllocator)
 
-| Joint / Quantity                 | Driver: Optimum | Driver: Trail Zero              | 7-Iron: Optimum | 7-Iron: Trail Zero              |
-| -------------------------------- | --------------- | ------------------------------- | --------------- | ------------------------------- |
-| **Trail Arm Peak Torque**        | 148.3 N·m       | **0.00 N·m (Identically Zero)** | 92.5 N·m        | **0.00 N·m (Identically Zero)** |
-| **Trail Arm Mean Torque**        | 5.89 N·m        | **0.00 N·m (Identically Zero)** | 5.01 N·m        | **0.00 N·m (Identically Zero)** |
-| **Lead Arm Peak Torque**         | 544.9 N·m       | **619.2 N·m** (+13.6%)          | 485.4 N·m       | **601.0 N·m** (+23.8%)          |
-| **Lead Arm Mean Torque**         | 26.8 N·m        | **36.1 N·m**                    | 25.1 N·m        | **32.3 N·m**                    |
-| **Peak Transmitted Grip Force**  | N/A (shared)    | **616.0 N** (~138 lbs)          | N/A (shared)    | **435.8 N** (~98 lbs)           |
-| **Peak Transmitted Grip Moment** | N/A (shared)    | **38.2 N·m**                    | N/A (shared)    | **23.8 N·m**                    |
-| **Acceleration Parity Residual** | $0.00$ m/s²     | Exact ABA parity                | $0.00$ m/s²     | Exact ABA parity                |
+| Quantity                         | Driver: Optimum | Driver: Trail-Arm Reduced | 7-Iron: Optimum | 7-Iron: Trail-Arm Reduced |
+| -------------------------------- | --------------- | ------------------------- | --------------- | ------------------------- |
+| **Trail Arm Peak Torque**        | 185.4 N·m       | **33.4 N·m** (-82.0%)     | 336.1 N·m       | **40.6 N·m** (-87.9%)     |
+| **Trail Arm Mean Torque**        | 10.56 N·m       | **2.20 N·m** (-79.2%)     | 11.59 N·m       | **2.64 N·m** (-77.2%)     |
+| **Lead Arm Peak Torque**         | 187.3 N·m       | **382.0 N·m**             | 269.4 N·m       | **497.4 N·m**             |
+| **Lead Arm Mean Torque**         | 10.55 N·m       | **25.85 N·m**             | 11.21 N·m       | **27.39 N·m**             |
+| **Peak Transmitted Grip Force**  | N/A             | **358.3 N** (~80.5 lbs)   | N/A             | **366.4 N** (~82.4 lbs)   |
+| **Peak Transmitted Grip Moment** | N/A             | **47.8 N·m**              | N/A             | **29.0 N·m**              |
+| **Acceleration Parity Residual** | 0.00155 m/s²    | **0.00155 m/s²**          | 0.0410 m/s²     | **0.0410 m/s²**           |
 
-**Key Observation:** Setting trail arm torques to zero increases lead arm peak torque by 13.6% for the Driver (544.9 to 619.2 N·m) and 23.8% for the 7-Iron (485.4 to 601.0 N·m). The peak grip transfer forces (616 N for Driver, 436 N for Iron) match physical club-ball impulse telemetry.
+**Key Observation:** Rather than forcing $\tau_{\text{trail}} = 0$ via an algebraic overwrite that shattered dynamic equilibrium (residual $7.56 \times 10^6$ m/s²), `ContactForceAllocator` solves a constrained QP satisfying $M \ddot{q} + b = S^T \tau + J_{\text{ground}}^T f + J_{\text{grip}}^T \lambda + S_{\text{root}}^T \delta \tau_{\text{root}}$. Trail arm torque is reduced by over 80% with exact ABA parity (< 0.002 m/s²), while internal grip wrench transmits 358 N across the club handle.
 
 ---
 
