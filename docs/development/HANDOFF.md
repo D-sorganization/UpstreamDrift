@@ -33,6 +33,19 @@ registration, anatomical/marker calibration and IK convergence separately;
 this run does not establish an irreducible error floor. Null-space effort
 optimization alone cannot change a fixed kinematic trajectory.
 
+## Full-Swing Convergence Probe
+
+At cbd72595d, identical full-driver runs with 15/60/180 iterations produced
+whole RMS 133.531/95.209/79.595 mm and club RMS 50.204/25.082/18.1 mm.
+See pf09_ik_iteration_probe.json for exact values and immutable artifact hashes,
+and pf09_ik_iteration_probe.md for the next implementation packet. All are
+rejected diagnostics. More iterations improve tracking but do not qualify forces.
+The next PF-02 work is convergence instrumentation, difficult-frame multi-start
+and closure-consistent window refinement, followed by calibrated geometry checks.
+Do not declare an irreducible geometric floor or change acceptance thresholds.
+Native Z-up marker playback is available in the task artifact directories; it
+is not a native model viewer or evidence of dynamically generated motion.
+
 ## Verified Native Defects and Repair
 
 Five real MuJoCo tests failed before the repair and pass afterward. A fresh

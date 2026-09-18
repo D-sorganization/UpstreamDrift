@@ -1,0 +1,230 @@
+[
+  {
+    "iterations": 15,
+    "status": "REJECTED_DIAGNOSTIC",
+    "source_commit": "cbd72595d",
+    "nodes": 654,
+    "document_sha256": "5d1e5eac6813aecabee69752704510860597a64cf45b28798b011e6109d3bdd5",
+    "capture_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+    "kinematics": {
+      "marker_rms_m": 0.13389900212411762,
+      "marker_rms_first_frame_m": 0.13154226108062714,
+      "closure_position_error_max_m": 0.01150583971794649,
+      "wall_clock_s": 14.2070866029826,
+      "per_frame_ms": 21.723374010676757
+    },
+    "overall_rmse_mm": 133.53077592246166,
+    "segments": {
+      "club": {
+        "name": "club",
+        "marker_count": 6,
+        "rmse_mm": 50.20370481288384,
+        "max_error_mm": 367.9823660476744,
+        "coverage_fraction": 0.9564220183486238
+      },
+      "feet": {
+        "name": "feet",
+        "marker_count": 6,
+        "rmse_mm": 37.88683338447766,
+        "max_error_mm": 163.9502790805243,
+        "coverage_fraction": 1.0
+      },
+      "wrists_hands": {
+        "name": "wrists_hands",
+        "marker_count": 2,
+        "rmse_mm": 60.77191644905068,
+        "max_error_mm": 199.87489496922277,
+        "coverage_fraction": 1.0
+      },
+      "arms": {
+        "name": "arms",
+        "marker_count": 8,
+        "rmse_mm": 191.6357793967105,
+        "max_error_mm": 599.9755087913895,
+        "coverage_fraction": 0.8994648318042814
+      },
+      "pelvis": {
+        "name": "pelvis",
+        "marker_count": 4,
+        "rmse_mm": 161.59779402786438,
+        "max_error_mm": 350.61339546027807,
+        "coverage_fraction": 0.9980886850152905
+      },
+      "torso_head": {
+        "name": "torso_head",
+        "marker_count": 10,
+        "rmse_mm": 180.73119083011457,
+        "max_error_mm": 599.9755087913895,
+        "coverage_fraction": 1.0
+      }
+    },
+    "optimum": {
+      "solve_time_ms": 7497.726598492591,
+      "per_frame_ms": 11.464413759162982,
+      "peak_lead_arm_n_m": 187.3506115829293,
+      "mean_lead_arm_n_m": 10.548080589830784,
+      "peak_trail_arm_n_m": 185.44748546289446,
+      "mean_trail_arm_n_m": 10.563151932004105,
+      "peak_total_effort_n_m": 9196.228014332071,
+      "max_accel_parity_residual": 0.0020978249103791313
+    },
+    "artifact_sha256": {
+      "candidate.npz": "a30912763fe816b5bc0b0fe4670030b07d0929af305a9567c98eacc36a4dc6b4",
+      "match_comparison_results.json": "01121bddbd8cb08f8537821a86f1994f0d4f602ba2c776c67393a60bc57ebeb6",
+      "receipt.json": "b709ce7d617ab769326b26dd1433b19e10826fc9b565544616e6ad6096572509",
+      "swing_evaluation_report.json": "7f157e8561e6fb24d07e401ef3feb640ae6303059ded5344417cbefdaa73baea"
+    }
+  },
+  {
+    "iterations": 60,
+    "status": "REJECTED_DIAGNOSTIC",
+    "source_commit": "cbd72595d",
+    "nodes": 654,
+    "document_sha256": "5d1e5eac6813aecabee69752704510860597a64cf45b28798b011e6109d3bdd5",
+    "capture_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+    "kinematics": {
+      "marker_rms_m": 0.09510139860783104,
+      "marker_rms_first_frame_m": 0.13456484904042282,
+      "closure_position_error_max_m": 0.004139079002704526,
+      "wall_clock_s": 28.938494294008706,
+      "per_frame_ms": 44.248462223254904
+    },
+    "overall_rmse_mm": 95.20916812852371,
+    "segments": {
+      "club": {
+        "name": "club",
+        "marker_count": 6,
+        "rmse_mm": 25.08183664613619,
+        "max_error_mm": 170.13349897769567,
+        "coverage_fraction": 0.9564220183486238
+      },
+      "feet": {
+        "name": "feet",
+        "marker_count": 6,
+        "rmse_mm": 24.800255005952902,
+        "max_error_mm": 93.1435594345908,
+        "coverage_fraction": 1.0
+      },
+      "wrists_hands": {
+        "name": "wrists_hands",
+        "marker_count": 2,
+        "rmse_mm": 45.459591172196255,
+        "max_error_mm": 106.71223369190987,
+        "coverage_fraction": 1.0
+      },
+      "arms": {
+        "name": "arms",
+        "marker_count": 8,
+        "rmse_mm": 134.71421634545524,
+        "max_error_mm": 385.88909761947457,
+        "coverage_fraction": 0.8994648318042814
+      },
+      "pelvis": {
+        "name": "pelvis",
+        "marker_count": 4,
+        "rmse_mm": 137.87133066719187,
+        "max_error_mm": 365.7485860657959,
+        "coverage_fraction": 0.9980886850152905
+      },
+      "torso_head": {
+        "name": "torso_head",
+        "marker_count": 10,
+        "rmse_mm": 122.2069727654716,
+        "max_error_mm": 365.7485860657959,
+        "coverage_fraction": 1.0
+      }
+    },
+    "optimum": {
+      "solve_time_ms": 4229.158332498628,
+      "per_frame_ms": 6.466602954890868,
+      "peak_lead_arm_n_m": 120.979218489253,
+      "mean_lead_arm_n_m": 7.948421473614748,
+      "peak_trail_arm_n_m": 111.84808063067172,
+      "mean_trail_arm_n_m": 8.726784532196051,
+      "peak_total_effort_n_m": 4433.355349970101,
+      "max_accel_parity_residual": 0.013184507038516813
+    },
+    "artifact_sha256": {
+      "candidate.npz": "aab4033d4a8ffb04b90fad45635945f50639e79b6c6db1c67932c2b1956c4209",
+      "match_comparison_results.json": "89607b091df4877727867e21a0aa4a7ca0d673c92ce526d386b15be86b2bc601",
+      "receipt.json": "4f9851998a57fef90a8c40611fe049072a2bd16c69b851719941c4bc720acc2e",
+      "swing_evaluation_report.json": "09159444ae8e6c7f8780a0662f27e014e9c93f577a7f4ba111516fb600ffc6a2"
+    }
+  },
+  {
+    "iterations": 180,
+    "status": "REJECTED_DIAGNOSTIC",
+    "source_commit": "cbd72595d",
+    "nodes": 654,
+    "document_sha256": "5d1e5eac6813aecabee69752704510860597a64cf45b28798b011e6109d3bdd5",
+    "capture_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+    "kinematics": {
+      "marker_rms_m": 0.07947811782627391,
+      "marker_rms_first_frame_m": 0.13505285965302444,
+      "closure_position_error_max_m": 0.0007080390143165573,
+      "wall_clock_s": 97.32357695099199,
+      "per_frame_ms": 148.81280879356572
+    },
+    "overall_rmse_mm": 79.59502479503824,
+    "segments": {
+      "club": {
+        "name": "club",
+        "marker_count": 6,
+        "rmse_mm": 18.122027146443298,
+        "max_error_mm": 126.37009861087422,
+        "coverage_fraction": 0.9564220183486238
+      },
+      "feet": {
+        "name": "feet",
+        "marker_count": 6,
+        "rmse_mm": 18.601104717535282,
+        "max_error_mm": 46.03432323490816,
+        "coverage_fraction": 1.0
+      },
+      "wrists_hands": {
+        "name": "wrists_hands",
+        "marker_count": 2,
+        "rmse_mm": 45.123249982136,
+        "max_error_mm": 105.44690342726122,
+        "coverage_fraction": 1.0
+      },
+      "arms": {
+        "name": "arms",
+        "marker_count": 8,
+        "rmse_mm": 113.90397048430496,
+        "max_error_mm": 357.83628012215496,
+        "coverage_fraction": 0.8994648318042814
+      },
+      "pelvis": {
+        "name": "pelvis",
+        "marker_count": 4,
+        "rmse_mm": 119.7246639968516,
+        "max_error_mm": 277.3405266573156,
+        "coverage_fraction": 0.9980886850152905
+      },
+      "torso_head": {
+        "name": "torso_head",
+        "marker_count": 10,
+        "rmse_mm": 98.49156804644369,
+        "max_error_mm": 306.4478993723058,
+        "coverage_fraction": 1.0
+      }
+    },
+    "optimum": {
+      "solve_time_ms": 4680.975345501793,
+      "per_frame_ms": 7.15745465673057,
+      "peak_lead_arm_n_m": 118.9630027509076,
+      "mean_lead_arm_n_m": 7.130418417048575,
+      "peak_trail_arm_n_m": 107.584823191564,
+      "mean_trail_arm_n_m": 8.0268894442131,
+      "peak_total_effort_n_m": 5229.96218995008,
+      "max_accel_parity_residual": 0.0011235100829889433
+    },
+    "artifact_sha256": {
+      "candidate.npz": "9ac45c13a2370888d479bfbc4ba82e1c7da05095503bcd8513467e378b6612aa",
+      "match_comparison_results.json": "496bb9952701ca7ce76b3c9162fb190ddd15af1f216e5fa1124269952b561b3e",
+      "receipt.json": "fb43918a5dd9dc6db8c0441352ba0083160399b6391cfd94267ee18980d4f49e",
+      "swing_evaluation_report.json": "541c1f1a51ee341b92e5c7d9b7122fb6b16af242dd8deeb7b83ae218ff5c3bec"
+    }
+  }
+]
