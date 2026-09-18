@@ -1,3 +1,39 @@
+# Current Matching Continuation Handoff
+
+Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og02-consistent-segment-scaling-10396`; commit SELF.
+PR: open (targeting main).
+Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og02-10396`.
+
+### OG-02 Status: Completed
+
+- Consistent OpenSim segment scaling module implemented in `src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py`.
+- Resolves the unscaled bone mesh defect by scaling visual `<Mesh>` components on `<attached_geometry>` in lockstep with `PhysicalOffsetFrame` translations.
+- Scales body center of mass (`mass_center`) and rotational inertia (`inertia`) under explicit physical policies: `fixed_mass` (default: $m' = m, \text{COM}' = s \cdot \text{COM}, I' = s^2 I$) and `density_preserving` ($m' = s^3 m, \text{COM}' = s \cdot \text{COM}, I' = s^5 I$).
+- Repeat-scaling protection: Tags model with `<ScalingMetadata>` and raises typed `ValueError` if repeated scaling is attempted.
+- Bilateral acromion proxy reconstruction in `src/engines/physics_engines/opensim/python/tour_matching/scale.py`:
+  - Reconstructs missing/occluded `RShoulderTop` marker at frame 0 using contralateral centroid-to-back ratio ($0.9226$).
+  - Corrects right humerus scale from $1.4567$ to $1.3440$, bringing right/left humerus ratio to $1.0807$ (well within 10% tolerance and resolving artificial arm distortion).
+- Rebuilt `golf_humanoid_scaled.osim` with consistent scaling and visual club geometry (SHA-256: `fd90def148665d49fd9df8cc339c8b7713189800b5ffe9662a1649036d23e830`).
+- Model passes full qualification audit `verify_model_qualification(require_visible_club=True, require_consistent_arm_scaling=True)`.
+- All pure unit tests pass (80 tests). Ruff lint, format, Mypy, LoD, and File Size Budget clean.
+- Next child: **OG-04 (#10398)** — Qualify capture registration and golf camera views.
+
+### OG-03 Status: Completed (PR #10405)
+
+- Parameterized visual club geometry and grip offset frames delivered in `src/engines/physics_engines/opensim/python/tour_matching/club_geometry.py`.
+- Solves the missing golf club visual defect by attaching parameterized shaft and clubhead visual meshes from shared `ClubSpec` (`DRIVER`, `IRON_7`) to `Body[@name='Club']/attached_geometry`.
+- Physical mass ($0.320\text{ kg}$), center of mass, and inertia tensors are strictly preserved.
+- Canonical grip offset frames (`club_grip_offset`, `club_head_offset`, `hand_r_grip_offset`, `hand_l_grip_offset`) match OpenSim coordinate conventions and `opensim_golf.fk` boundaries.
+- PR opened: **PR #10405**.
+
+### OG-01 Status: Completed (PR #10404)
+
+- Baseline model geometry and structural qualification audit delivered in `src/engines/physics_engines/opensim/python/tour_matching/model_audit.py`.
+- Pinned baseline SHA-256 hashes and reproduced defects with RED failure fixtures.
+- PR opened: **PR #10404**.
+
+---
+
 # Native Multi-Engine Matching Handoff
 
 ## Current Status

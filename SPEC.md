@@ -1,6 +1,36 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Anatomically and Physically Consistent Segment Scaling (OG-02, #10396)
+
+Delivers consistent anatomical and physical segment scaling for the OpenSim `golf_humanoid` model and resolves bilateral upper-limb marker asymmetry defects:
+- **Consistent OpenSim Segment Scaling Module (`src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py`)**:
+  - `apply_segment_scaling`: Scales joint frame translations (`PhysicalOffsetFrame/translation`), attached bone visual meshes (`attached_geometry/Mesh/scale_factors`), centers of mass (`mass_center`), and inertia tensors (`inertia`).
+  - Supported scaling policies via `ScalingPolicy`: `FIXED_MASS` (default: $m' = m, \text{COM}' = s \cdot \text{COM}, I' = s^2 I$) and `DENSITY_PRESERVING` ($m' = s^3 m, \text{COM}' = s \cdot \text{COM}, I' = s^5 I$).
+  - Strict repeat-scaling protection: Tags the model document with `<ScalingMetadata>` to prevent corrupt double scaling.
+  - DbC preconditions: Validates positive finite scale factors and valid document roots.
+- **Bilateral Acromion Proxy Reconstruction (`src/engines/physics_engines/opensim/python/tour_matching/scale.py`)**:
+  - Reconstructs missing/occluded shoulder markers (such as `RShoulderTop` at frame 0 in `C3D_TA_Driver.c3d`) by applying contralateral centroid-to-back ratios.
+  - Eliminates artificial humerus length inflation: humerus scale ratio $R/L$ drops from defective $1.1713$ ($1.4567 / 1.2436$) to $1.0807$ ($1.3440 / 1.2436$), well within the $1.10$ anatomical asymmetry tolerance.
+- **Model Pipeline Integration & Qualification Tests (`tests/opensim/test_segment_scale.py`, `test_opensim_os0_qualification.py`)**:
+  - TDD tests verifying joint frame, mesh, COM, and inertia transformations under both scaling policies.
+  - Qualification test asserting that scaled models have no unscaled arm mesh defects.
+  - Updates `os3b_scale_and_full_ik.py` to reuse unified `apply_segment_scaling`.
+
+## OpenSim Parameterized Visual Golf Club and Grip Frames (OG-03, #10397)
+
+Attaches visible parameterized golf club geometry and canonical grip offset frames to the OpenSim `golf_humanoid` model without altering physical body dynamics:
+- **Parameterized Club Visual Geometry (`src/engines/physics_engines/opensim/python/tour_matching/club_geometry.py`)**:
+  - `has_visual_club`: Checks whether an OpenSim model or parsed XML ElementTree possesses visual geometry components on its `Club` body.
+  - `attach_visual_club`: Parameterizes shaft and clubhead visual meshes from shared `ClubSpec` (e.g. `DRIVER`, `IRON_7`) and attaches them to `Body[@name='Club']/attached_geometry` while preserving physical mass ($0.32\text{ kg}$), center of mass, and inertia tensors.
+  - Fails closed with typed `ValueError` when input documents lack a `Club` body.
+- **Canonical OpenSim Grip & Clubhead Offset Frames**:
+  - `get_club_frame_offsets`: Computes frame translations matching OpenSim coordinate conventions (grip origin at $(0, 0, 0)$, shaft pointing along $-Y$ toward $-L$, clubhead at $(0, -L, 0)$, trail hand grip at $(0, -0.06, 0)$, lead hand grip at $(0, -0.025, 0)$).
+  - Compatible with `opensim_golf.fk` canonical landmarks (`GRIP_FRAME_PATH`, `CLUBHEAD_FRAME_PATH`).
+- **Qualification Gate Verification (`src/engines/physics_engines/opensim/python/tour_matching/model_audit.py`, `tests/opensim/test_golf_club_geometry.py`)**:
+  - Confirms baseline models fail `verify_model_qualification(require_visible_club=True)` prior to attachment and pass qualification once visual geometry is attached.
+
 ## Tools Dependency Repin and Seam Integrity (MS-95, #10362)
+
 
 Enforces immutable Tools source resolution and couples the 4-way dependency repin to Tools `main` commit `62e8cdbf9`:
 - **Submodule and Manifest Pinning (`vendor/ud-tools`, `requirements-tools.txt`, `Cargo.toml`)**:
@@ -5782,6 +5812,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
+| 2026-09-18 | #10395 | Freeze the OpenSim anatomical baseline and failure fixtures (OG-01): pure-XML model audit verifying SHA-256 hashes (051d61ea/7dd1da17), body/coord/actuator counts (23/39/39/0), detecting empty Club attached geometry and unscaled arm meshes, with fail-closed qualification verification. |
 | 2026-09-10 | #1616 | Adopt maintainable Mermaid C4 architecture-map contract (C4Context, C4Container, Feature Map, Change Log, validator and workflow) (#1616). |
 | 2026-09-10 | #8365 | Import the public Launch-Monitor-Data canonical exports into the launch-monitor statistics core (#8365). `src/tools/launch_monitor_model/launch_monitor_data.py` detects the two published shapes by exact header membership and refuses everything else: shot-level `load_shots()` frames map SI columns with the registry unit and native `_mph`/`_deg`/`_yd` columns with the corpus unit, never a profile default, reject a metric declared in both unit systems or any column whose unit would have to be assumed, carry `observation_kind`, and derive the private-corpus `shot_id`/`session_id` identity; the long-format `upstreamdrift_aggregate_metrics.csv` is pivoted to one `observation_kind="aggregate"` row per source/monitor/model/software/environment/cohort/club group with every published cell retained verbatim under `source::<metric>::<column>`, refusing non-`group_mean` rows, rows claiming to be shots, unknown metrics, registry-incompatible `canonical_unit`, non-numeric means and repeated metrics. Seventeen focused tests pin detection, unit fidelity, lineage, deterministic pivoting, every refusal, `.lmproject` round-trip and that imported aggregates are refused by shot-level regression alone or pooled with shots. The module is registered app-local in the ADR-0046 Stage 2 parity gate and ADR-0048; no Tools module changes. |
 | 2026-09-10 | #9959 | Bind capture reconstruction to selected calibration bytes, verify source stability during processing, and require reconstruction again after calibration changes or missing legacy lineage. Preserve earlier results, verify triangulated-model reconstruction lineage, and use existing wizard prerequisite links. Extract measurement/lens helpers within unchanged budgets; record successor turnover. |
