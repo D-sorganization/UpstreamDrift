@@ -9,7 +9,8 @@ untouched; the exporter's plain output remains the qualified representation.
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -222,3 +223,43 @@ def add_com_markers(
         COM_GROUND_RGBA,
     )
     return com
+
+
+def render_playback(
+    spec_bytes: bytes,
+    names: Sequence[str],
+    q: np.ndarray,
+    lookat: np.ndarray,
+    path: Path,
+    show_com: bool = True,
+    playback_stride: int = 4,
+    rate_hz: float = 120.0,
+) -> None:
+    """Render animated GIF of motion from spec and joint trajectory."""
+    import json
+
+    import imageio
+    import mujoco
+
+    from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
+
+    xml, _ = exporter.export_full_body_mjcf(spec_bytes, visual=True)
+    model = mujoco.MjModel.from_xml_string(xml)
+    data = mujoco.MjData(model)
+    addresses = [model.joint(n).qposadr[0] for n in names]
+    ground_height = float(
+        json.loads(spec_bytes)["contact"].get("ground_height_m") or 0.0
+    )
+    renderer = mujoco.Renderer(model, 240, 320)
+    cam = mujoco.MjvCamera()
+    cam.lookat[:] = lookat
+    cam.distance, cam.azimuth, cam.elevation = 3.2, 135.0, -12.0
+    frames_out = []
+    for k in range(0, q.shape[0], playback_stride):
+        data.qpos[addresses] = q[k]
+        mujoco.mj_forward(model, data)
+        renderer.update_scene(data, camera=cam)
+        if show_com:
+            add_com_markers(renderer.scene, model, data, ground_height)
+        frames_out.append(renderer.render().copy())
+    imageio.mimsave(path, frames_out, duration=1000 * playback_stride / rate_hz, loop=0)
