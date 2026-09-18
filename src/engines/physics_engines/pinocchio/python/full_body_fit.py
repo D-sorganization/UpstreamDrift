@@ -31,7 +31,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.engines.physics_engines.pinocchio.python.crocoddyl_action import (
-    implicit_euler_rollout,
     make_action_models,
     tracking_rollout,
 )
@@ -588,6 +587,14 @@ def run_fit(
         )
         xs_stage = [np.array(x) for x in fddp.xs]
         us_stage = [np.array(u) for u in fddp.us]
+        np.savez_compressed(
+            out_dir / f"stage_{t_end:.2f}s.npz",
+            coordinate_order=np.array(ctx.map.names),
+            q=np.array(xs_stage)[:, : ctx.n],
+            v=np.array(xs_stage)[:, ctx.n :],
+            u=np.array(us_stage),
+            time_s=targets.node_times[:n_stage],
+        )
         stage_q = np.array(xs_stage)[:, : ctx.n]
         stage_err = np.sum(
             (_predicted_markers(ctx, stage_q) - stage_targets.targets) ** 2, axis=2
@@ -613,6 +620,17 @@ def run_fit(
     xs = np.array(fddp.xs)
     us = np.array(fddp.us)
     converged = bool(stages[-1]["converged"])
+    np.savez_compressed(
+        out_dir / "solution.npz",
+        coordinate_order=np.array(ctx.map.names),
+        q=xs[:, : ctx.n],
+        v=xs[:, ctx.n :],
+        u=us,
+        time_s=targets.node_times,
+    )
+    (out_dir / "solver_stages.json").write_text(
+        json.dumps(stages, indent=2), encoding="utf-8"
+    )
     q_fddp, v_fddp = xs[:, : ctx.n], xs[:, ctx.n :]
     solver_summary = {
         "solver": "crocoddyl.SolverBoxFDDP",
@@ -646,17 +664,18 @@ def run_fit(
     except FloatingPointError as exc:
         replay_note = str(exc)
         q_rep, v_rep = q_fddp, v_fddp
-    q_imp, _ = implicit_euler_rollout(ctx, q_fddp[0], v_fddp[0], us, dt)
     pred_fddp = _predicted_markers(ctx, q_fddp)
-    pred_imp = _predicted_markers(ctx, q_imp)
     pred_rep = _predicted_markers(ctx, q_rep)
     pred_ik = _predicted_markers(ctx, q_ik)
     metrics_ik = _metrics(inputs, pred_ik, targets.valid)
     metrics_fddp = _metrics(inputs, pred_fddp, targets.valid)
     metrics_rep = _metrics(inputs, pred_rep, targets.valid)
-    audit = _physical_audit(
-        ctx, q_rep, v_rep, us, float(inputs.document["subject"]["mass_kg"])
-    )
+    try:
+        audit: dict[str, Any] = _physical_audit(
+            ctx, q_rep, v_rep, us, float(inputs.document["subject"]["mass_kg"])
+        )
+    except FloatingPointError as exc:
+        audit = {"error": str(exc)}
 
     candidate_path = out_dir / "candidate.npz"
     np.savez_compressed(
@@ -707,7 +726,6 @@ def run_fit(
         },
         "metrics": {
             "warm_start_ik": metrics_ik,
-            "implicit_euler_rollout": _metrics(inputs, pred_imp, targets.valid),
             "fddp_rollout": metrics_fddp,
             "replay": metrics_rep,
         },
