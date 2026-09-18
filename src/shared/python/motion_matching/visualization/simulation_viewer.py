@@ -153,7 +153,6 @@ class SimulationViewer:
         data: SimulationData,
         *,
         model: Any | None = None,
-        visual_model: Any | None = None,
         zmq_url: str | None = None,
         open_browser: bool = True,
         loop: bool = False,
@@ -162,6 +161,7 @@ class SimulationViewer:
         **kwargs: Any,
     ) -> None:
         """Launch playback in MeshCat WebGL viewer."""
+        visual_model: Any | None = kwargs.get("visual_model")
         from src.engines.physics_engines.pinocchio.python.dtack.viz.meshcat_viewer import (
             MESHCAT_AVAILABLE,
             MeshCatViewer,

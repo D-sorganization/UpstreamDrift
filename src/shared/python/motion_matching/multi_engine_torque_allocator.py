@@ -207,7 +207,96 @@ class MujocoForceAdapter:
         return float(np.max(np.abs(a_forward - a_target)))
 
 
-class DrakeForceAdapter:
+class _AnalyticalMultibodyBase:
+    """Base class providing shared analytical kinematics, Jacobians, and parity checks."""
+
+    def __init__(
+        self,
+        nv: int = 44,
+        n_spheres: int = 6,
+        mass_scale: float = 75.0,
+        leg_coupling: float = 0.08,
+    ) -> None:
+        self._nv = nv
+        self._n_spheres = n_spheres
+        self._actuated_indices = list(range(6, nv))
+        self._mass_scale = mass_scale
+        self._leg_coupling = leg_coupling
+
+    @property
+    def nv(self) -> int:
+        return self._nv
+
+    @property
+    def actuated_indices(self) -> Sequence[int]:
+        return self._actuated_indices
+
+    @property
+    def n_contact_spheres(self) -> int:
+        return self._n_spheres
+
+    def _get_mass_diag(self) -> Array:
+        """Return analytical mass diagonal for dynamics and parity evaluation."""
+        m_diag = np.ones(self._nv, dtype=np.float64) * 2.5
+        m_diag[:3] = self._mass_scale
+        m_diag[3:6] = 5.0
+        m_diag[6:18] = 8.0
+        m_diag[18:36] = 3.0
+        m_diag[36:] = 0.5
+        return m_diag
+
+    def compute_contact_jacobian(self, q: Array) -> Array:
+        """Spatial translational Jacobian matching 6 foot contact sites (heel, midfoot, toe)."""
+        sphere_positions = [
+            np.array([-0.05, -0.15, -0.85]),
+            np.array([0.10, -0.15, -0.85]),
+            np.array([0.20, -0.15, -0.85]),
+            np.array([-0.05, 0.15, -0.85]),
+            np.array([0.10, 0.15, -0.85]),
+            np.array([0.20, 0.15, -0.85]),
+        ]
+        j_ground = np.zeros((self._n_spheres * 3, self._nv), dtype=np.float64)
+        for s, pos in enumerate(sphere_positions):
+            row = s * 3
+            j_ground[row : row + 3, :3] = np.eye(3)
+            j_ground[row : row + 3, 3:6] = np.array(
+                [
+                    [0.0, -pos[2], pos[1]],
+                    [pos[2], 0.0, -pos[0]],
+                    [-pos[1], pos[0], 0.0],
+                ]
+            )
+            leg_start = 6 + (0 if s < 3 else 6)
+            j_ground[row : row + 3, leg_start : leg_start + 6] = (
+                self._leg_coupling * np.eye(3, 6)
+            )
+        return j_ground
+
+    def compute_grip_jacobian(self, q: Array) -> Array:
+        """6-DoF rigid weld loop closure constraint between lead and trail hands."""
+        j_grip = np.zeros((6, self._nv), dtype=np.float64)
+        trail_arm_idx = np.arange(18, 27)
+        lead_arm_idx = np.arange(27, 36)
+        for r in range(6):
+            j_grip[r, trail_arm_idx[r % 9]] = 1.0
+            j_grip[r, lead_arm_idx[r % 9]] = -1.0
+        return j_grip
+
+    def verify_acceleration_parity(
+        self, q: Array, v: Array, tau_effective: Array, a_target: Array
+    ) -> float:
+        """Verify that allocated generalized forces reproduce target joint accelerations."""
+        tau_rnea = self.compute_inverse_dynamics(q, v, a_target)
+        m_diag = self._get_mass_diag()
+        a_forward = a_target + (tau_effective - tau_rnea) / m_diag
+        return float(np.max(np.abs(a_forward - a_target)))
+
+    def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
+        """Compute inverse dynamics generalized forces."""
+        raise NotImplementedError
+
+
+class DrakeForceAdapter(_AnalyticalMultibodyBase):
     """Drake multibody adapter with exact spatial inverse dynamics and Jacobians.
 
     If Drake (pydrake) is installed, evaluates live MultibodyPlant.
@@ -221,12 +310,9 @@ class DrakeForceAdapter:
         n_spheres: int = 6,
         mass_scale: float = 75.0,
     ) -> None:
-        self._nv = nv
-        self._n_spheres = n_spheres
-        self._actuated_indices = list(range(6, nv))
-        self._mass_scale = mass_scale
-
-        # Diagnostic check for pydrake
+        super().__init__(
+            nv=nv, n_spheres=n_spheres, mass_scale=mass_scale, leg_coupling=0.08
+        )
         self._has_pydrake = False
         try:
             import pydrake  # type: ignore[import-untyped]  # noqa: F401
@@ -242,90 +328,15 @@ class DrakeForceAdapter:
     def engine_type(self) -> EngineType:
         return EngineType.DRAKE
 
-    @property
-    def nv(self) -> int:
-        return self._nv
-
-    @property
-    def actuated_indices(self) -> Sequence[int]:
-        return self._actuated_indices
-
-    @property
-    def n_contact_spheres(self) -> int:
-        return self._n_spheres
-
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
-        # Analytical generalized inertia and bias compliant with Drake MultibodyPlant
-        m_diag = np.ones(self._nv, dtype=np.float64) * 2.5
-        m_diag[:3] = self._mass_scale  # floating base translation mass
-        m_diag[3:6] = 5.0  # floating base rotational inertia
-        m_diag[6:18] = 8.0  # legs
-        m_diag[18:36] = 3.0  # arms
-        m_diag[36:] = 0.5  # club and wrists
-        m_mat = np.diag(m_diag)
-
-        # Centrifugal/Coriolis and gravitational bias forces
+        m_mat = np.diag(self._get_mass_diag())
         b_vec = np.zeros(self._nv, dtype=np.float64)
-        b_vec[2] = self._mass_scale * 9.81  # gravity load along vertical z
+        b_vec[2] = self._mass_scale * 9.81
         b_vec += 0.05 * (v**2) * np.sign(v)
-
         return m_mat @ a + b_vec
 
-    def compute_contact_jacobian(self, q: Array) -> Array:
-        # Spatial translational Jacobian matching 6 foot contact sites (heel, midfoot, toe)
-        # Position offsets relative to pelvis base frame (x: forward/back, y: lateral, z: vertical)
-        sphere_positions = [
-            np.array([-0.05, -0.15, -0.85]),
-            np.array([0.10, -0.15, -0.85]),
-            np.array([0.20, -0.15, -0.85]),
-            np.array([-0.05, 0.15, -0.85]),
-            np.array([0.10, 0.15, -0.85]),
-            np.array([0.20, 0.15, -0.85]),
-        ]
-        j_ground = np.zeros((self._n_spheres * 3, self._nv), dtype=np.float64)
-        for s, pos in enumerate(sphere_positions):
-            row = s * 3
-            # Translational velocity coupling d(v_contact)/d(v_root) = I
-            j_ground[row : row + 3, :3] = np.eye(3)
-            # Angular velocity coupling d(v_contact)/d(omega_root) = - [pos]_x
-            j_ground[row : row + 3, 3:6] = np.array(
-                [
-                    [0.0, -pos[2], pos[1]],
-                    [pos[2], 0.0, -pos[0]],
-                    [-pos[1], pos[0], 0.0],
-                ]
-            )
-            # Leg joint coupling
-            leg_start = 6 + (0 if s < 3 else 6)
-            j_ground[row : row + 3, leg_start : leg_start + 6] = 0.08 * np.eye(3, 6)
-        return j_ground
 
-    def compute_grip_jacobian(self, q: Array) -> Array:
-        # 6-DoF rigid weld loop closure constraint between lead and trail hands
-        j_grip = np.zeros((6, self._nv), dtype=np.float64)
-        trail_arm_idx = np.arange(18, 27)  # 9 trail arm coordinates
-        lead_arm_idx = np.arange(27, 36)  # 9 lead arm coordinates
-        for r in range(6):
-            j_grip[r, trail_arm_idx[r % 9]] = 1.0
-            j_grip[r, lead_arm_idx[r % 9]] = -1.0
-        return j_grip
-
-    def verify_acceleration_parity(
-        self, q: Array, v: Array, tau_effective: Array, a_target: Array
-    ) -> float:
-        tau_rnea = self.compute_inverse_dynamics(q, v, a_target)
-        # Acceleration error in mass-weighted norm
-        m_diag = np.ones(self._nv, dtype=np.float64) * 2.5
-        m_diag[:3] = self._mass_scale
-        m_diag[3:6] = 5.0
-        m_diag[6:18] = 8.0
-        m_diag[18:36] = 3.0
-        m_diag[36:] = 0.5
-        a_forward = a_target + (tau_effective - tau_rnea) / m_diag
-        return float(np.max(np.abs(a_forward - a_target)))
-
-
-class OpenSimForceAdapter:
+class OpenSimForceAdapter(_AnalyticalMultibodyBase):
     """OpenSim Simbody adapter for generalized inverse dynamics and station Jacobians.
 
     Provides a 1000x faster, strictly convex alternative to classical OpenSim RRA/CMC.
@@ -337,88 +348,30 @@ class OpenSimForceAdapter:
         n_spheres: int = 6,
         mass_scale: float = 75.0,
     ) -> None:
-        self._nv = nv
-        self._n_spheres = n_spheres
-        self._actuated_indices = list(range(6, nv))
-        self._mass_scale = mass_scale
+        super().__init__(
+            nv=nv, n_spheres=n_spheres, mass_scale=mass_scale, leg_coupling=0.07
+        )
 
     @property
     def engine_type(self) -> EngineType:
         return EngineType.OPENSIM
 
-    @property
-    def nv(self) -> int:
-        return self._nv
-
-    @property
-    def actuated_indices(self) -> Sequence[int]:
-        return self._actuated_indices
-
-    @property
-    def n_contact_spheres(self) -> int:
-        return self._n_spheres
-
-    def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
-        # Simbody MatterSubsystem residual forces
+    def _get_mass_diag(self) -> Array:
         m_diag = np.full(self._nv, 3.0, dtype=np.float64)
         m_diag[:3] = self._mass_scale
         m_diag[3:6] = 4.8
         m_diag[6:18] = 7.5
-        m_mat = np.diag(m_diag)
+        return m_diag
 
+    def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
+        m_mat = np.diag(self._get_mass_diag())
         g_vec = np.zeros(self._nv, dtype=np.float64)
         g_vec[2] = self._mass_scale * 9.81
         c_vec = 0.04 * v * np.abs(v)
         return m_mat @ a + c_vec + g_vec
 
-    def compute_contact_jacobian(self, q: Array) -> Array:
-        # Simbody calcStationJacobian at calcaneus, midfoot, and toe contact points
-        sphere_positions = [
-            np.array([-0.05, -0.15, -0.85]),
-            np.array([0.10, -0.15, -0.85]),
-            np.array([0.20, -0.15, -0.85]),
-            np.array([-0.05, 0.15, -0.85]),
-            np.array([0.10, 0.15, -0.85]),
-            np.array([0.20, 0.15, -0.85]),
-        ]
-        j_ground = np.zeros((self._n_spheres * 3, self._nv), dtype=np.float64)
-        for s, pos in enumerate(sphere_positions):
-            row = s * 3
-            j_ground[row : row + 3, :3] = np.eye(3)
-            j_ground[row : row + 3, 3:6] = np.array(
-                [
-                    [0.0, -pos[2], pos[1]],
-                    [pos[2], 0.0, -pos[0]],
-                    [-pos[1], pos[0], 0.0],
-                ]
-            )
-            leg_idx = 6 + (0 if s < 3 else 6)
-            j_ground[row : row + 3, leg_idx : leg_idx + 6] = 0.07 * np.eye(3, 6)
-        return j_ground
 
-    def compute_grip_jacobian(self, q: Array) -> Array:
-        # Weld loop station difference Jacobian
-        j_grip = np.zeros((6, self._nv), dtype=np.float64)
-        trail_arm_idx = np.arange(18, 27)
-        lead_arm_idx = np.arange(27, 36)
-        for r in range(6):
-            j_grip[r, trail_arm_idx[r % 9]] = 1.0
-            j_grip[r, lead_arm_idx[r % 9]] = -1.0
-        return j_grip
-
-    def verify_acceleration_parity(
-        self, q: Array, v: Array, tau_effective: Array, a_target: Array
-    ) -> float:
-        tau_rnea = self.compute_inverse_dynamics(q, v, a_target)
-        m_diag = np.full(self._nv, 3.0, dtype=np.float64)
-        m_diag[:3] = self._mass_scale
-        m_diag[3:6] = 4.8
-        m_diag[6:18] = 7.5
-        a_forward = a_target + (tau_effective - tau_rnea) / m_diag
-        return float(np.max(np.abs(a_forward - a_target)))
-
-
-class SimscapeForceAdapter:
+class SimscapeForceAdapter(_AnalyticalMultibodyBase):
     """Simscape / MATLAB adapter for multibody torque determination & Simulink export.
 
     Prepares dynamic torque sequences and ground reaction timeseries formatted for
@@ -431,85 +384,27 @@ class SimscapeForceAdapter:
         n_spheres: int = 6,
         mass_scale: float = 75.0,
     ) -> None:
-        self._nv = nv
-        self._n_spheres = n_spheres
-        self._actuated_indices = list(range(6, nv))
-        self._mass_scale = mass_scale
+        super().__init__(
+            nv=nv, n_spheres=n_spheres, mass_scale=mass_scale, leg_coupling=0.06
+        )
 
     @property
     def engine_type(self) -> EngineType:
         return EngineType.SIMSCAPE
 
-    @property
-    def nv(self) -> int:
-        return self._nv
-
-    @property
-    def actuated_indices(self) -> Sequence[int]:
-        return self._actuated_indices
-
-    @property
-    def n_contact_spheres(self) -> int:
-        return self._n_spheres
-
-    def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
-        # MATLAB rigidBodyTree inverse dynamics formulation
+    def _get_mass_diag(self) -> Array:
         m_diag = np.full(self._nv, 2.8, dtype=np.float64)
         m_diag[:3] = self._mass_scale
         m_diag[3:6] = 5.2
         m_diag[6:18] = 8.2
-        m_mat = np.diag(m_diag)
+        return m_diag
 
+    def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
+        m_mat = np.diag(self._get_mass_diag())
         g_load = np.zeros(self._nv, dtype=np.float64)
         g_load[2] = self._mass_scale * 9.81
         c_coriolis = 0.03 * v * np.abs(v)
         return m_mat @ a + c_coriolis + g_load
-
-    def compute_contact_jacobian(self, q: Array) -> Array:
-        # Geometric Jacobian at ground foot stations
-        sphere_positions = [
-            np.array([-0.05, -0.15, -0.85]),
-            np.array([0.10, -0.15, -0.85]),
-            np.array([0.20, -0.15, -0.85]),
-            np.array([-0.05, 0.15, -0.85]),
-            np.array([0.10, 0.15, -0.85]),
-            np.array([0.20, 0.15, -0.85]),
-        ]
-        j_ground = np.zeros((self._n_spheres * 3, self._nv), dtype=np.float64)
-        for s, pos in enumerate(sphere_positions):
-            row = s * 3
-            j_ground[row : row + 3, :3] = np.eye(3)
-            j_ground[row : row + 3, 3:6] = np.array(
-                [
-                    [0.0, -pos[2], pos[1]],
-                    [pos[2], 0.0, -pos[0]],
-                    [-pos[1], pos[0], 0.0],
-                ]
-            )
-            leg_idx = 6 + (0 if s < 3 else 6)
-            j_ground[row : row + 3, leg_idx : leg_idx + 6] = 0.06 * np.eye(3, 6)
-        return j_ground
-
-    def compute_grip_jacobian(self, q: Array) -> Array:
-        # Relative hand frame Jacobian
-        j_grip = np.zeros((6, self._nv), dtype=np.float64)
-        trail_arm_idx = np.arange(18, 27)
-        lead_arm_idx = np.arange(27, 36)
-        for r in range(6):
-            j_grip[r, trail_arm_idx[r % 9]] = 1.0
-            j_grip[r, lead_arm_idx[r % 9]] = -1.0
-        return j_grip
-
-    def verify_acceleration_parity(
-        self, q: Array, v: Array, tau_effective: Array, a_target: Array
-    ) -> float:
-        tau_rnea = self.compute_inverse_dynamics(q, v, a_target)
-        m_diag = np.full(self._nv, 2.8, dtype=np.float64)
-        m_diag[:3] = self._mass_scale
-        m_diag[3:6] = 5.2
-        m_diag[6:18] = 8.2
-        a_forward = a_target + (tau_effective - tau_rnea) / m_diag
-        return float(np.max(np.abs(a_forward - a_target)))
 
     def export_simulink_timeseries(
         self, result: TrajectoryAllocationResult, output_path: Path
