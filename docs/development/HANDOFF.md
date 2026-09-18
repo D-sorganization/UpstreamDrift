@@ -29,7 +29,9 @@ and Drake now consume the same collision-free canonical URDF and right-hand
 anchor rather than unlike demo plants. The unchanged 5 mm gate passes with
 real MuJoCo 3.8.0 / Drake 1.51.1 on Linux (15 passed, 2 unavailable-engine skips),
 including new analytic free-fall checks. This fixture does not qualify contact
-or bilateral grip closure. Replay plus ledger tests: 28 passed. Continue PR CI.
+or bilateral grip closure. Replay plus ledger tests: 28 passed. The fixture uses
+defusedxml for both reading and serialization to satisfy the XML security gate.
+Continue PR CI on the branch updated with main's shadow-tracker merge.
 Commit/push hooks pass, including security and bounded unit checks. All 21
 replay tests also pass with CI-pinned MuJoCo 3.8.0 in an isolated environment.
 The central development-log validator flags inherited missing verifying SHAs,

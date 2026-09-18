@@ -7,9 +7,7 @@ Both engines consume the canonical URDF's inertias, joints and right-hand anchor
 from __future__ import annotations
 
 from pathlib import Path
-from xml.etree.ElementTree import tostring
-
-from defusedxml.ElementTree import parse
+from defusedxml.ElementTree import parse, tostring
 
 from src.engines.physics_engines.drake.python.motion_matching.humanoid_urdf import (
     CANONICAL_URDF,
