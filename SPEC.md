@@ -1,6 +1,65 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Calibrated Two-Handed Address Pose and Qualification (OG-05, #10399)
+
+Calibrates and qualifies a verified quasi-static golf address window for OpenSim `golf_humanoid_scaled.osim`:
+- **Address Pose Fitting and Window Detection (`src/engines/physics_engines/opensim/python/tour_matching/address.py`)**:
+  - `detect_address_window`: Detects quasi-static address window from tour capture based on marker speed thresholds ($v_{\text{max}} \le 0.05\text{ m/s}$) rather than assuming an arbitrary single frame.
+  - `AddressToleranceProfile`: Frozen acceptance profile (valid-marker RMS $\le 12\text{ mm}$, max error $\le 30\text{ mm}$, grip closure $\le 5\text{ mm}$, foot clearance $\le 15\text{ mm}$, yaw error $\le 5\text{ deg}$, segment stretch $\le 15\%$) verified with deterministic SHA-256 digest (`FROZEN_ADDRESS_TOLERANCE_SHA256`).
+  - `fit_address_pose`: Fits two-handed address pose with dual-arm grip closure, foot ground support, and holdout validation.
+- **Bilateral Grip Closure & Ground Support**:
+  - `compute_grip_closure`: Measures spatial mismatch between lead hand and club shaft grip frame.
+  - Foot clearance evaluated against ground support plane ($Y = 0$).
+- **Posture Reporting & Range Auditing**:
+  - `compute_address_posture`: Reports torso/pelvis yaw, pitch, roll, elbow flexion, wrist positions, stance width, club lie angle, and shaft vector.
+  - `audit_coordinate_limits`: Audits joint angles against model `<Coordinate><range>` limits, raising typed `CoordinateLimitViolationError` on violation.
+- **Marker Offset Bounding & Holdout Validation (`marker_calibration.py`)**:
+  - `bound_marker_offsets`: Clamps marker offsets within anatomical radius and deviation bounds.
+  - `calibrate_marker_offsets_with_holdout`: Evaluates holdout RMS to guard against overfitting.
+
+## OpenSim Qualified Capture Registration and Golf Camera Views (OG-04, #10398)
+
+Delivers capture-to-world rigid registration and canonical golf camera view presets:
+- **Rigid 3D Registration Module (`src/engines/physics_engines/opensim/python/tour_matching/registration.py`)**:
+  - `CaptureRegistration`: Proper 3D rigid transform with rotation $R$ ($\det(R) = +1.0$) and translation $t$; implements exact round-trip inversion satisfying identity to $\le 10^{-8}\text{ m}$.
+  - `compute_capture_registration`: Computes optimal proper rigid alignment via Kabsch algorithm, rejecting degenerate or collinear landmark correspondences.
+  - `align_tour_capture_to_golf_world`: Aligns capture coordinates into canonical golf world frame ($+X$ forward along target line, $+Y$ vertical up, ground support markers at $Y = 0$).
+- **Golf Camera Presets & Invariance Verification (`registration.py`, `visualization.py`, `tests/opensim/test_golf_registration.py`)**:
+  - `GolfCameraView` and `get_golf_camera_view`: Supports canonical view presets (`FRONT_VIEW`, `SIDE_VIEW`, `DOWN_THE_LINE`, `OVERHEAD`).
+  - Decouples viewing projection from model states and metrics, verified by invariance tests.
+  - Integrates camera presets into `plot_3d_trajectory_overlay`.
+
+## OpenSim Anatomically and Physically Consistent Segment Scaling (OG-02, #10396)
+
+Delivers consistent anatomical and physical segment scaling for the OpenSim `golf_humanoid` model and resolves bilateral upper-limb marker asymmetry defects:
+- **Consistent OpenSim Segment Scaling Module (`src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py`)**:
+  - `apply_segment_scaling`: Scales joint frame translations (`PhysicalOffsetFrame/translation`), attached bone visual meshes (`attached_geometry/Mesh/scale_factors`), centers of mass (`mass_center`), and inertia tensors (`inertia`).
+  - Supported scaling policies via `ScalingPolicy`: `FIXED_MASS` (default: $m' = m, \text{COM}' = s \cdot \text{COM}, I' = s^2 I$) and `DENSITY_PRESERVING` ($m' = s^3 m, \text{COM}' = s \cdot \text{COM}, I' = s^5 I$).
+  - Strict repeat-scaling protection: Tags the model document with `<ScalingMetadata>` to prevent corrupt double scaling.
+  - DbC preconditions: Validates positive finite scale factors and valid document roots.
+- **Bilateral Acromion Proxy Reconstruction (`src/engines/physics_engines/opensim/python/tour_matching/scale.py`)**:
+  - Reconstructs missing/occluded shoulder markers (such as `RShoulderTop` at frame 0 in `C3D_TA_Driver.c3d`) by applying contralateral centroid-to-back ratios.
+  - Eliminates artificial humerus length inflation: humerus scale ratio $R/L$ drops from defective $1.1713$ ($1.4567 / 1.2436$) to $1.0807$ ($1.3440 / 1.2436$), well within the $1.10$ anatomical asymmetry tolerance.
+- **Model Pipeline Integration & Qualification Tests (`tests/opensim/test_segment_scale.py`, `test_opensim_os0_qualification.py`)**:
+  - TDD tests verifying joint frame, mesh, COM, and inertia transformations under both scaling policies.
+  - Qualification test asserting that scaled models have no unscaled arm mesh defects.
+  - Updates `os3b_scale_and_full_ik.py` to reuse unified `apply_segment_scaling`.
+
+## OpenSim Parameterized Visual Golf Club and Grip Frames (OG-03, #10397)
+
+Attaches visible parameterized golf club geometry and canonical grip offset frames to the OpenSim `golf_humanoid` model without altering physical body dynamics:
+- **Parameterized Club Visual Geometry (`src/engines/physics_engines/opensim/python/tour_matching/club_geometry.py`)**:
+  - `has_visual_club`: Checks whether an OpenSim model or parsed XML ElementTree possesses visual geometry components on its `Club` body.
+  - `attach_visual_club`: Parameterizes shaft and clubhead visual meshes from shared `ClubSpec` (e.g. `DRIVER`, `IRON_7`) and attaches them to `Body[@name='Club']/attached_geometry` while preserving physical mass ($0.32\text{ kg}$), center of mass, and inertia tensors.
+  - Fails closed with typed `ValueError` when input documents lack a `Club` body.
+- **Canonical OpenSim Grip & Clubhead Offset Frames**:
+  - `get_club_frame_offsets`: Computes frame translations matching OpenSim coordinate conventions (grip origin at $(0, 0, 0)$, shaft pointing along $-Y$ toward $-L$, clubhead at $(0, -L, 0)$, trail hand grip at $(0, -0.06, 0)$, lead hand grip at $(0, -0.025, 0)$).
+  - Compatible with `opensim_golf.fk` canonical landmarks (`GRIP_FRAME_PATH`, `CLUBHEAD_FRAME_PATH`).
+- **Qualification Gate Verification (`src/engines/physics_engines/opensim/python/tour_matching/model_audit.py`, `tests/opensim/test_golf_club_geometry.py`)**:
+  - Confirms baseline models fail `verify_model_qualification(require_visible_club=True)` prior to attachment and pass qualification once visual geometry is attached.
+
 ## Tools Dependency Repin and Seam Integrity (MS-95, #10362)
+
 
 Enforces immutable Tools source resolution and couples the 4-way dependency repin to Tools `main` commit `62e8cdbf9`:
 - **Submodule and Manifest Pinning (`vendor/ud-tools`, `requirements-tools.txt`, `Cargo.toml`)**:
