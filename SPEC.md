@@ -1,5 +1,22 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Calibrated Two-Handed Address Pose and Qualification (OG-05, #10399)
+
+Calibrates and qualifies a verified quasi-static golf address window for OpenSim `golf_humanoid_scaled.osim`:
+- **Address Pose Fitting and Window Detection (`src/engines/physics_engines/opensim/python/tour_matching/address.py`)**:
+  - `detect_address_window`: Detects quasi-static address window from tour capture based on marker speed thresholds ($v_{\text{max}} \le 0.05\text{ m/s}$) rather than assuming an arbitrary single frame.
+  - `AddressToleranceProfile`: Frozen acceptance profile (valid-marker RMS $\le 12\text{ mm}$, max error $\le 30\text{ mm}$, grip closure $\le 5\text{ mm}$, foot clearance $\le 15\text{ mm}$, yaw error $\le 5\text{ deg}$, segment stretch $\le 15\%$) verified with deterministic SHA-256 digest (`FROZEN_ADDRESS_TOLERANCE_SHA256`).
+  - `fit_address_pose`: Fits two-handed address pose with dual-arm grip closure, foot ground support, and holdout validation.
+- **Bilateral Grip Closure & Ground Support**:
+  - `compute_grip_closure`: Measures spatial mismatch between lead hand and club shaft grip frame.
+  - Foot clearance evaluated against ground support plane ($Y = 0$).
+- **Posture Reporting & Range Auditing**:
+  - `compute_address_posture`: Reports torso/pelvis yaw, pitch, roll, elbow flexion, wrist positions, stance width, club lie angle, and shaft vector.
+  - `audit_coordinate_limits`: Audits joint angles against model `<Coordinate><range>` limits, raising typed `CoordinateLimitViolationError` on violation.
+- **Marker Offset Bounding & Holdout Validation (`marker_calibration.py`)**:
+  - `bound_marker_offsets`: Clamps marker offsets within anatomical radius and deviation bounds.
+  - `calibrate_marker_offsets_with_holdout`: Evaluates holdout RMS to guard against overfitting.
+
 ## OpenSim Qualified Capture Registration and Golf Camera Views (OG-04, #10398)
 
 Delivers capture-to-world rigid registration and canonical golf camera view presets:

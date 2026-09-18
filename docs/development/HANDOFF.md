@@ -1,10 +1,29 @@
 # Current Matching Continuation Handoff
 
-Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og04-qualify-registration-camera-10398`; commit SELF.
+Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og05-match-two-handed-address-10399`; commit SELF.
 PR: open (targeting main).
-Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og04-10398`.
+Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og05-10399`.
 
-### OG-04 Status: Completed (Ready for PR)
+### OG-05 Status: Completed (Ready for PR)
+
+- Implemented two-handed address pose calibration and qualification in `src/engines/physics_engines/opensim/python/tour_matching/address.py`:
+  - `detect_address_window`: Detects quasi-static address window across tour capture using marker speed thresholding ($v_{\text{max}} \le 0.05\text{ m/s}$), avoiding assumed arbitrary frame 0.
+  - `AddressToleranceProfile`: Frozen acceptance profile (valid-marker RMS $\le 12\text{ mm}$, max marker error $\le 30\text{ mm}$, grip closure $\le 5\text{ mm}$, foot clearance $\le 15\text{ mm}$, yaw error $\le 5\text{ deg}$, segment stretch $\le 15\%$) verified with deterministic SHA-256 hash digest.
+  - `compute_grip_closure`: Measures bilateral grip closure between lead hand and club shaft grip frame.
+  - `compute_address_posture`: Measures and reports torso/pelvis yaw, pitch, roll, elbow flexion, wrist positions, stance width, club lie angle, and shaft vector.
+  - `audit_coordinate_limits`: Audits joint coordinates against model XML `<Coordinate><range>` bounds, raising typed `CoordinateLimitViolationError` on range violations.
+  - `fit_address_pose`: Fits two-handed address pose with bilateral grip closure, ground support plane alignment, and holdout validation.
+- Extended `src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py`:
+  - `bound_marker_offsets`: Clamps marker offsets within anatomical radius and deviation bounds.
+  - `calibrate_marker_offsets_with_holdout`: Evaluates holdout RMS to guard against overfitting.
+- Unit tests in `tests/opensim/test_golf_address.py` and `tests/opensim/test_marker_calibration.py`:
+  - RED fixtures: left hand disconnected ($> 5\text{ mm}$), yaw error ($> 5\text{ deg}$), stretched segment ($> 15\%$), invalid marker, out-of-range coordinate.
+  - Synthetic known-pose address recovery ($\le 10^{-6}\text{ m}$).
+  - Real tour capture address window detection and qualification on `data/C3D_TA_Driver.c3d`.
+- All 15 tests pass. Ruff lint, format, Mypy, LoD, and File Size Budget clean.
+- Next child: **OG-06 (#10400)** — Rebuild full-swing tracking from qualified address.
+
+### OG-04 Status: Completed (PR #10408)
 
 - Implemented pure 3D rigid capture registration in `src/engines/physics_engines/opensim/python/tour_matching/registration.py`:
   - `CaptureRegistration`: 3D rigid transform with proper rotation matrix ($\det(R)=+1.0$, reflections strictly rejected) and translation $t$.
@@ -21,7 +40,7 @@ Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og04-10398`.
   - Real tour capture ground support and target line alignment.
   - Camera presets and model state invariance verification.
 - All unit tests pass. Ruff lint, format, Mypy, LoD, and File Size Budget clean.
-- Next child: **OG-05 (#10399)** — Calibrate and match two-handed address pose.
+- PR opened: **PR #10408**.
 
 ### OG-02 Status: Completed (PR #10407)
 
