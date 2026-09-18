@@ -282,7 +282,8 @@
       "web": "ui/src/pages/ImpactExplorer.tsx",
       "status": "parity",
       "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
-      "tiles": ["rate_of_closure"]
+      "tiles": ["rate_of_closure"],
+      "notes": "Through-contact interval inspection (UD #9549 / epic #9546; Tools #4130, #4946) is provider work: the pinned Tools tree exposes the swing_sim.impact_interval facade, but its rate_of_closure run record carries no interval phase yet. UD adopts it through a reviewed pin bump; tests/shared_contracts/test_impact_interval_provider.py gates the pin and flips to a failure when the phase ships."
     },
     "tools.launch_monitor_analytics": {
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
