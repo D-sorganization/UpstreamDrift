@@ -159,3 +159,11 @@ verify rendering and collect evidence.
 
 Implementation follow-up: #10394 (anatomical playback and muscle-actuated
 model qualification), retained under epic #10363. Handoff PR: #10393.
+
+## Golf Model Improvement Turnover
+
+For the owner-requested anatomy, visible club and address corrections, follow
+[EPIC_GOLF_MODEL.md](EPIC_GOLF_MODEL.md) (epic #10394, children #10395–#10403)
+and [GOLF_MODEL_AGENT_PROMPT.md](GOLF_MODEL_AGENT_PROMPT.md). Start #10395,
+then #10397. This is separate from resuming the prior Moco job. Preserve
+that job and its evidence; corrected physical models invalidate old receipts.
