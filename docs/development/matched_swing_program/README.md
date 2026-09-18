@@ -60,12 +60,12 @@ python scripts/generate_matched_swing_status.py --write
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 86 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 88 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                       | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
 | ------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
 | **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 29       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
-| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                         | driver             | —           | —            | 5        | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
+| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                         | driver, iron       | —           | —            | 7        | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
 | **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, replays                                                                  | driver             | —           | —            | 4        | ⚙️ Parity Replay (6e-6 m Drake-MuJoCo setup parity)                      |
 | **Opensim**   | tour_matching                                                                                                         | driver             | —           | —            | 9        | ⚠️ Staged (Moco track problem under MS-102)                              |
 | **Simscape**  | native                                                                                                                | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
