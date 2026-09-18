@@ -34,6 +34,18 @@ reader to eyeball two overlapping bars.
 
 When ``|E| > u_val`` the model-form error is bounded by
 ``E +/- u_val`` -- an interval, never a point estimate.
+
+A measurement on file lifts the literature refusal (issue #9543)
+-----------------------------------------------------------------
+
+:func:`~.reference_data.require_measurable` refuses the launch-side
+quantities because **no published** measurement of them exists.  A
+:class:`~.measurement.MeasurementRecord` made on the named instrument, on
+a named date, with a stated uncertainty, is a measurement that exists --
+it is just not published -- so a comparison that names one as
+``measured_record`` is admitted.  The record has to be an instrument
+record (a synthetic fixture is refused), in the comparison's unit, and
+carry the value ``D`` was read from.  Nothing else lifts the refusal.
 """
 
 from __future__ import annotations
@@ -43,6 +55,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from .exceptions import VandVError
+from .measurement import MeasurementRecord
 from .reference_data import require_measurable
 
 __all__ = [
@@ -136,6 +149,9 @@ class ValidationComparison:
         reference: Citation for ``D``.
         coverage_factor: ``k``.
         notes: Anything a reader of the verdict needs.
+        measured_record: The on-file instrument record ``D`` was read
+            from, when the quantity has no published measurement (issue
+            #9543). ``None`` keeps the literature refusal in force.
     """
 
     quantity: str
@@ -148,16 +164,22 @@ class ValidationComparison:
     reference: str
     coverage_factor: float = COVERAGE_FACTOR
     notes: tuple[str, ...] = ()
+    measured_record: MeasurementRecord | None = None
 
     def __post_init__(self) -> None:
         """Validate the comparison and refuse unmeasured quantities.
 
         Raises:
             NoReferenceDataError: If the quantity has no published
-                measurement at all.
-            VandVError: If a value or uncertainty is unusable.
+                measurement at all and no on-file record is named.
+            VandVError: If a value or uncertainty is unusable, or the
+                on-file record is synthetic, in another unit, or does not
+                carry ``D``.
         """
-        require_measurable(self.quantity)
+        if self.measured_record is None:
+            require_measurable(self.quantity)
+        else:
+            self._require_record_carries_d()
         for name in ("simulation_value", "experiment_value"):
             if not math.isfinite(float(getattr(self, name))):
                 raise VandVError(f"{name} must be finite, got {getattr(self, name)!r}")
@@ -172,6 +194,39 @@ class ValidationComparison:
             raise VandVError(
                 f"comparison of {self.quantity!r} carries no reference for the "
                 "experimental value; an unsourced D is not a measurement"
+            )
+
+    def _require_record_carries_d(self) -> None:
+        """Refuse an on-file record that cannot stand in for ``D``.
+
+        Raises:
+            VandVError: If the record is a synthetic fixture, is in another
+                unit, or does not carry the experimental value.
+        """
+        record = self.measured_record
+        if not isinstance(record, MeasurementRecord):
+            raise VandVError(
+                "measured_record must be a MeasurementRecord, got "
+                f"{type(record).__name__}"
+            )
+        if record.is_synthetic:
+            raise VandVError(
+                f"comparison of {self.quantity!r} names a synthetic fixture as "
+                "its measurement; a fixture exercises the intake path and "
+                "validates nothing (issue #9543)"
+            )
+        if record.unit != self.unit:
+            raise VandVError(
+                f"comparison of {self.quantity!r} is in {self.unit!r} but its "
+                f"on-file record is in {record.unit!r}"
+            )
+        if record.value is None or not math.isclose(
+            float(record.value), float(self.experiment_value)
+        ):
+            raise VandVError(
+                f"comparison of {self.quantity!r} states D = "
+                f"{self.experiment_value!r} but its on-file record carries "
+                f"{record.value!r}; D must be the value that was measured"
             )
 
 

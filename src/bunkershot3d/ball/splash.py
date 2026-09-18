@@ -107,6 +107,17 @@ calibrated by reading harder. Every result therefore carries a
 ``BEYOND_VALIDATION`` and a
 :class:`~bunkershot3d.sand.provenance.SandProvenance` record naming the basis
 of every parameter, in the same shapes the rest of the package uses.
+
+The floor is lifted only by versioned evidence (issue #9543)
+-----------------------------------------------------------
+
+A :class:`~bunkershot3d.ball.qualification.TransferQualification` -- fitted on
+a designated calibration subset of measured strokes and judged on held-out
+sessions against predeclared tolerances -- may be passed to
+:func:`compute_ball_launch_from_splash`. The launch then uses its frozen
+parameters, and :func:`launch_verdict` reads ``WITHIN`` for a strike inside a
+regime the evidence qualified and keeps the floor everywhere else. No
+qualification exists today; the shipped register of strokes is empty.
 """
 
 from __future__ import annotations
@@ -114,6 +125,7 @@ from __future__ import annotations
 import enum
 import math
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -122,6 +134,9 @@ from src.shared.python.core.contracts import require
 from ..sand.provenance import PropertyProvenance, ProvenanceBasis, SandProvenance
 from ..solvers.envelope import EnvelopeStatus, ValidityVerdict, worst_of
 from .lie import BallLie, BallProperties, compute_exposed_cap_fraction
+
+if TYPE_CHECKING:
+    from .qualification import TransferQualification
 
 __all__ = [
     "BALL_LAUNCH_MEASUREMENT_GAP",
@@ -362,11 +377,53 @@ DEFAULT_MOMENTUM_TRANSFER = MomentumTransfer()
 """The shipped placeholder values. Nothing here is a calibration."""
 
 
-def momentum_transfer_provenance(transfer: MomentumTransfer) -> SandProvenance:
+def _calibrated_entries(
+    transfer: MomentumTransfer, qualification: TransferQualification
+) -> dict[str, PropertyProvenance]:
+    """Provenance for the parameters a qualification fitted (issue #9543).
+
+    Only the parameters the fit actually declared move to ``CALIBRATED``;
+    every other entry keeps its placeholder record. The note names the
+    qualified regimes, because a fitted value is evidence inside them and a
+    number outside them.
+    """
+    fit = qualification.fit
+    if not fit.succeeded or fit.transfer != transfer:
+        return {}
+    regimes = ", ".join(r.key for r in qualification.qualified_regimes) or "none"
+    entries: dict[str, PropertyProvenance] = {}
+    for name, key in (
+        ("efficiency", "transfer_efficiency"),
+        ("packing_sensitivity", "bed_packing_dependence"),
+        ("sand_ball_friction", "sand_ball_friction"),
+    ):
+        if name in fit.parameters:
+            entries[key] = PropertyProvenance(
+                basis=ProvenanceBasis.CALIBRATED,
+                source=(
+                    f"{qualification.version}: {name} = "
+                    f"{getattr(transfer, name):.4g} +/- "
+                    f"{fit.standard_errors[name]:.2g} fitted on "
+                    f"{len(fit.calibration_stroke_ids)} calibration stroke(s)"
+                ),
+                note=(
+                    f"qualified on held-out sessions for regime(s) {regimes}; "
+                    "constrained by measurement, not measured, and applicable "
+                    "only inside those regimes"
+                ),
+            )
+    return entries
+
+
+def momentum_transfer_provenance(
+    transfer: MomentumTransfer, qualification: TransferQualification | None = None
+) -> SandProvenance:
     """Return the provenance record for one set of partition parameters.
 
     Args:
         transfer: The parameters the launch was computed with.
+        qualification: The versioned evidence the parameters were frozen
+            by, if any (issue #9543).
 
     Returns:
         A record naming the basis of every parameter, in the shape the sand
@@ -376,65 +433,67 @@ def momentum_transfer_provenance(transfer: MomentumTransfer) -> SandProvenance:
         f"chosen placeholder, {transfer.efficiency:.3g} in a fully dense bed; "
         "not a calibration"
     )
-    return SandProvenance(
-        entries={
-            "transfer_efficiency": PropertyProvenance(
-                basis=ProvenanceBasis.ESTIMATED,
-                source=placeholder,
-                note="uncalibrated. " + BALL_LAUNCH_MEASUREMENT_GAP,
-            ),
-            "bed_packing_dependence": PropertyProvenance(
-                basis=ProvenanceBasis.ESTIMATED,
-                source=(
-                    f"a fully loose bed costs "
-                    f"{transfer.packing_sensitivity:.3g} of the dense-bed "
-                    "transfer efficiency, linear in relative density"
-                ),
-                note=(
-                    "the direction is physically motivated -- a loose bed "
-                    "contracts under shear and spends momentum rearranging "
-                    "grains, which is why a plugged lie plays dead -- but the "
-                    "magnitude is assumed, not measured. " + BALL_LAUNCH_MEASUREMENT_GAP
-                ),
-            ),
-            "sand_ball_friction": PropertyProvenance(
-                basis=ProvenanceBasis.ESTIMATED,
-                source=f"chosen placeholder, {transfer.sand_ball_friction:.3g}",
-                note="uncalibrated. " + BALL_LAUNCH_MEASUREMENT_GAP,
-            ),
-            "spin_lever_arm": PropertyProvenance(
-                basis=ProvenanceBasis.CONVENTION,
-                source=(
-                    f"{transfer.spin_lever_arm_fraction:.3g} of the ball radius "
-                    "below its centre"
-                ),
-                note=(
-                    "a modelling convention for where the sand stream acts; no "
-                    "measurement of the contact patch exists."
-                ),
-            ),
-            "intercepted_fraction": PropertyProvenance(
-                basis=ProvenanceBasis.CONVENTION,
-                source="linear exposed-cap taper, bunkershot3d.ball.lie",
-                note=(
-                    "the share of the moving sand taken to meet the ball is the "
-                    "share of its upper hemisphere a splash can still reach. The "
-                    "taper is continuous at both ends and strictly decreasing "
-                    "between them, and it is a convention, not cap geometry."
-                ),
-            ),
-            "launch_direction": PropertyProvenance(
-                basis=ProvenanceBasis.CONVENTION,
-                source="effective loft of the delivered face",
-                note=(
-                    "the momentum the head puts into the bed points forward and "
-                    "down; the free surface that turns the ejecta up is not "
-                    "modelled, so the launch direction is taken from the loft. "
-                    + BALL_LAUNCH_MEASUREMENT_GAP
-                ),
-            ),
-        }
+    calibrated = (
+        {} if qualification is None else _calibrated_entries(transfer, qualification)
     )
+    placeholders = {
+        "transfer_efficiency": PropertyProvenance(
+            basis=ProvenanceBasis.ESTIMATED,
+            source=placeholder,
+            note="uncalibrated. " + BALL_LAUNCH_MEASUREMENT_GAP,
+        ),
+        "bed_packing_dependence": PropertyProvenance(
+            basis=ProvenanceBasis.ESTIMATED,
+            source=(
+                f"a fully loose bed costs "
+                f"{transfer.packing_sensitivity:.3g} of the dense-bed "
+                "transfer efficiency, linear in relative density"
+            ),
+            note=(
+                "the direction is physically motivated -- a loose bed "
+                "contracts under shear and spends momentum rearranging "
+                "grains, which is why a plugged lie plays dead -- but the "
+                "magnitude is assumed, not measured. " + BALL_LAUNCH_MEASUREMENT_GAP
+            ),
+        ),
+        "sand_ball_friction": PropertyProvenance(
+            basis=ProvenanceBasis.ESTIMATED,
+            source=f"chosen placeholder, {transfer.sand_ball_friction:.3g}",
+            note="uncalibrated. " + BALL_LAUNCH_MEASUREMENT_GAP,
+        ),
+        "spin_lever_arm": PropertyProvenance(
+            basis=ProvenanceBasis.CONVENTION,
+            source=(
+                f"{transfer.spin_lever_arm_fraction:.3g} of the ball radius "
+                "below its centre"
+            ),
+            note=(
+                "a modelling convention for where the sand stream acts; no "
+                "measurement of the contact patch exists."
+            ),
+        ),
+        "intercepted_fraction": PropertyProvenance(
+            basis=ProvenanceBasis.CONVENTION,
+            source="linear exposed-cap taper, bunkershot3d.ball.lie",
+            note=(
+                "the share of the moving sand taken to meet the ball is the "
+                "share of its upper hemisphere a splash can still reach. The "
+                "taper is continuous at both ends and strictly decreasing "
+                "between them, and it is a convention, not cap geometry."
+            ),
+        ),
+        "launch_direction": PropertyProvenance(
+            basis=ProvenanceBasis.CONVENTION,
+            source="effective loft of the delivered face",
+            note=(
+                "the momentum the head puts into the bed points forward and "
+                "down; the free surface that turns the ejecta up is not "
+                "modelled, so the launch direction is taken from the loft. "
+                + BALL_LAUNCH_MEASUREMENT_GAP
+            ),
+        ),
+    }
+    return SandProvenance(entries=placeholders | calibrated)
 
 
 @dataclass(frozen=True, slots=True)
@@ -881,8 +940,13 @@ def compute_splash_impulse(
     )
 
 
-def _launch_reasons(delivery: SandDelivery) -> tuple[str, ...]:
-    """Return the findings the launch model raises about one strike.
+def _launch_reasons(
+    delivery: SandDelivery,
+    *,
+    lie: BallLie | None = None,
+    qualification: TransferQualification | None = None,
+) -> tuple[EnvelopeStatus, tuple[str, ...]]:
+    """Return the launch model's own status and findings for one strike.
 
     The supersonic-ejecta diagnostic issue #8657 added is gone from here,
     because the condition it reported is now refused outright in
@@ -893,13 +957,33 @@ def _launch_reasons(delivery: SandDelivery) -> tuple[str, ...]:
 
     Args:
         delivery: The measured strike.
+        lie: The ball's lie, needed to place the strike in a regime.
+        qualification: Versioned evidence that may lift the floor (#9543).
 
     Returns:
-        The uncalibrated-transfer statements, whatever the supplier of the
-        mass said about it, and the interval-floor diagnostic when the mass
-        band's lower edge is inadmissible.
+        The status -- ``BEYOND_VALIDATION`` unless the strike is inside a
+        qualified regime -- and the statements behind it: the qualification's
+        own, the uncalibrated-transfer statements whenever the floor stands,
+        whatever the supplier of the mass said about it, and the
+        interval-floor diagnostic when the mass band's lower edge is
+        inadmissible.
+
+    Raises:
+        ValueError: If a qualification is given without the lie it is
+            judged on.
     """
-    reasons = [BALL_LAUNCH_UNCALIBRATED_REASON, BED_PACKING_DEPENDENCE_REASON]
+    status = EnvelopeStatus.BEYOND_VALIDATION
+    reasons: list[str] = []
+    if qualification is not None:
+        if lie is None:
+            raise ValueError(
+                "a transfer qualification is judged per lie regime; pass the lie "
+                "the strike was made at (issue #9543)"
+            )
+        status, statements = qualification.statement_for(delivery, lie)
+        reasons.extend(statements)
+    if status is EnvelopeStatus.BEYOND_VALIDATION:
+        reasons.extend((BALL_LAUNCH_UNCALIBRATED_REASON, BED_PACKING_DEPENDENCE_REASON))
     if delivery.displaced_mass_reason:
         reasons.append(delivery.displaced_mass_reason)
     bounds = delivery.displaced_mass_bounds_kg
@@ -915,20 +999,28 @@ def _launch_reasons(delivery: SandDelivery) -> tuple[str, ...]:
                 floor=floor,
             )
         )
-    return tuple(reasons)
+    return status, tuple(reasons)
 
 
-def launch_verdict(delivery: SandDelivery) -> ValidityVerdict:
+def launch_verdict(
+    delivery: SandDelivery,
+    *,
+    lie: BallLie | None = None,
+    qualification: TransferQualification | None = None,
+) -> ValidityVerdict:
     """Combine the solver's verdict with the launch model's own.
 
-    The launch model's own verdict is ``BEYOND_VALIDATION`` unconditionally,
-    because per issue #8616 there is no published ball speed, launch angle or
-    spin to compare against; combining it with the solver's means a carry
-    number can never read better than the shot it came from, and never reads
-    as though it were measured.
+    The launch model's own verdict is ``BEYOND_VALIDATION`` unless versioned
+    evidence says otherwise for this strike's regime (issue #9543), because
+    per issue #8616 there is no published ball speed, launch angle or spin to
+    compare against; combining it with the solver's means a carry number can
+    never read better than the shot it came from, and never reads as though
+    it were measured.
 
     Args:
         delivery: The measured strike, carrying the solver's verdict.
+        lie: The ball's lie, required when a qualification is given.
+        qualification: The evidence that may lift the floor, or ``None``.
 
     Returns:
         The combined verdict, on the solver's feature scales, with the mean
@@ -936,6 +1028,7 @@ def launch_verdict(delivery: SandDelivery) -> ValidityVerdict:
         two measured quantities implied.
     """
     solver = delivery.verdict
+    status, reasons = _launch_reasons(delivery, lie=lie, qualification=qualification)
     details = dict(solver.details)
     details["mean_ejecta_speed_m_s"] = delivery.mean_ejecta_speed_m_s
     details["accelerated_mass_kg"] = delivery.displaced_mass_kg
@@ -954,10 +1047,10 @@ def launch_verdict(delivery: SandDelivery) -> ValidityVerdict:
     return worst_of(
         (
             ValidityVerdict(
-                status=EnvelopeStatus.BEYOND_VALIDATION,
+                status=status,
                 groups=solver.groups,
                 governing_index=solver.governing_index,
-                reasons=_launch_reasons(delivery),
+                reasons=reasons,
                 details=details,
             ),
             solver,
@@ -993,6 +1086,7 @@ def compute_ball_launch_from_splash(
     club_loft_rad: float,
     club_mass_kg: float = 0.30,
     transfer: MomentumTransfer = DEFAULT_MOMENTUM_TRANSFER,
+    qualification: TransferQualification | None = None,
 ) -> BallLaunchResult:
     """Compute ball launch conditions from a measured strike.
 
@@ -1003,15 +1097,31 @@ def compute_ball_launch_from_splash(
             metrics layer's divot mass.
         club_loft_rad: Effective loft at delivery [rad].
         club_mass_kg: Head mass [kg], for the energy share only.
-        transfer: The uncalibrated partition parameters.
+        transfer: The uncalibrated partition parameters. Replaced by the
+            frozen parameters when ``qualification`` carries them.
+        qualification: Versioned evidence (issue #9543). Its frozen
+            parameters are used, and its regimes decide whether the verdict
+            floor is lifted for this strike.
 
     Returns:
         The launch, its validity verdict and the provenance of every parameter
         the partition used.
 
     Raises:
-        ValueError: If the momentum budget does not close.
+        ValueError: If the momentum budget does not close, or if parameters
+            other than the shipped defaults are passed beside a qualification
+            that froze different ones -- a qualified verdict on unqualified
+            parameters is the overclaim this evidence exists to prevent.
     """
+    if qualification is not None and qualification.transfer is not None:
+        frozen = qualification.transfer
+        if transfer != DEFAULT_MOMENTUM_TRANSFER and transfer != frozen:
+            raise ValueError(
+                f"transfer {transfer} differs from the parameters "
+                f"{qualification.version} froze; a qualification applies only "
+                "to the parameters it qualified (issue #9543)"
+            )
+        transfer = frozen
     splash = compute_splash_impulse(
         lie=lie,
         ball=ball,
@@ -1061,6 +1171,6 @@ def compute_ball_launch_from_splash(
         transfer_efficiency=splash.transfer_efficiency,
         delivered_impulse_n_s=splash.delivered_impulse_n_s,
         ball_impulse_n_s=splash.ball_impulse_n_s,
-        verdict=launch_verdict(delivery),
-        provenance=momentum_transfer_provenance(transfer),
+        verdict=launch_verdict(delivery, lie=lie, qualification=qualification),
+        provenance=momentum_transfer_provenance(transfer, qualification),
     )
