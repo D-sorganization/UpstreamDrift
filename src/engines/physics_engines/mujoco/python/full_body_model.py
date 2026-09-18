@@ -209,3 +209,7 @@ class NativeMujocoFullBodyModel:
         if self._errors is None:
             raise ValueError("Evaluate acceleration before closure errors")
         return self._errors[0].copy(), self._errors[1].copy()
+
+    def evaluate_weld_closure(self) -> tuple[np.ndarray, np.ndarray]:
+        """Evaluate weld closure Jacobian and drift for dual-grip constraint."""
+        return _evaluate_weld_closure(self._mj, self.model, self.data, self._closure)

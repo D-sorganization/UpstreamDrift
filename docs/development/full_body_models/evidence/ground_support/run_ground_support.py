@@ -27,8 +27,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT))
 
-from src.engines.physics_engines.mujoco.python import (  # noqa: E402
-    full_body_simulation as fs,
+from src.shared.python.motion_matching import (  # noqa: E402
+    full_body_forward_dynamics as fs,
 )
 from src.shared.python.motion_matching.full_body_spec import (  # noqa: E402
     validate_full_body_spec,

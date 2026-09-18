@@ -10,10 +10,10 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python import full_body_simulation as fs
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.dynamics_filter import (
     cart_table_shift,
@@ -99,7 +99,7 @@ def replay(
     Returns:
         (record, sim_q): simulation record and state resampled on the capture times.
     """
-    from src.engines.physics_engines.mujoco.python import full_body_simulation as fs
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 
     q0 = fs.preload_feet(sim, q_track[0])
     v0 = np.gradient(q_track, lane.times, axis=0)[0]
@@ -265,7 +265,7 @@ def zmp_filter(
     Returns:
         (q_track, zmp, report): filtered reference trajectory, final ZMP, and report.
     """
-    from src.engines.physics_engines.mujoco.python import full_body_simulation as fs
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 
     basis = kin._plane_basis(lane.ground)
     passes = []
