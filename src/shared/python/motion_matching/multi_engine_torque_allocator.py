@@ -138,7 +138,8 @@ class MujocoForceAdapter:
 
         self._model = NativeMujocoFullBodyModel(spec_bytes)
         self._mj = self._model._mj
-        self._nv = int(self._model.model.nv)
+        mj_model = self._model.model
+        self._nv = int(mj_model.nv)
         self._actuated_indices = list(range(6, self._nv))
         self._n_spheres = len(self._model._spheres)
 
@@ -175,7 +176,8 @@ class MujocoForceAdapter:
         data.qpos[:] = q
         mj.mj_kinematics(model, data)
         j_ground = np.zeros((self._n_spheres * 3, self._nv), dtype=np.float64)
-        for idx, s_info in enumerate(self._model._spheres.values()):
+        spheres = self._model._spheres
+        for idx, s_info in enumerate(spheres.values()):
             site_id = s_info["site_id"]
             jac_pos = np.zeros((3, self._nv), dtype=np.float64)
             mj.mj_jacSite(model, data, jac_pos, None, site_id)
@@ -293,7 +295,7 @@ class _AnalyticalMultibodyBase:
 
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
         """Compute inverse dynamics generalized forces."""
-        raise NotImplementedError
+        raise NotImplementedError  # tracked: #10415
 
 
 class DrakeForceAdapter(_AnalyticalMultibodyBase):
