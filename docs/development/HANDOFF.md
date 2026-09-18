@@ -1,3 +1,50 @@
+# Immediate Turnover — Matching Remains Incomplete
+
+Repository/worktree: C:/Users/diete/Repositories/.worktrees/upstream-pf09-native-force
+Branch: fix/pf09-native-force-equations
+Published PR: https://github.com/D-sorganization/UpstreamDrift/pull/10451
+Last published implementation/evidence HEAD before this turnover: 614a3643a6127020b1285f6b53d36f4474c422fd
+Governing issue: #10439; epic #10430; program #10363; development entry DL-#10439.
+
+## First Task: Resolve the Fresh-Instance Grip Jacobian Failure
+
+The user's usage limit requires turnover now. Do not merge #10451 or qualify its Pinocchio force mapping until this new native failure is resolved. Earlier four native force-map tests pass on Pinocchio 3.8 and 4.1, but initialized native constraint state before comparison. They do not prove fresh-instance correctness.
+
+New uncommitted work in this worktree:
+
+- src/engines/physics_engines/pinocchio/python/force_adapter.py
+- tests/integration/engines/pinocchio/test_force_adapter.py
+- factory branch in src/shared/python/motion_matching/multi_engine_torque_allocator.py
+
+TDD: all six new native tests initially errored because the Pinocchio factory branch was absent. After implementation, five pass and one FAILS: test_grip_jacobian_uses_native_velocity_order. Expected native constraint velocity differs from adapter J\*v by up to 0.43749742. This is NOT numerical tolerance noise. Preserve this failing regression. Do not weaken it or prime the adapter in the fixture to make it pass. Investigate native constraint-placement/data refresh versus named q/v mapping. The root cause is not established. The new adapter is not yet committed, pushed, or qualified. Earlier published closure_force_jacobian may share this defect; treat its fresh-state behavior as unverified.
+
+Exact test command from this worktree:
+
+wsl -d Ubuntu-24.04 --cd /mnt/c/Users/diete/Repositories/.worktrees/upstream-pf09-native-force -- /home/dieterolson/.venvs/upstream-crocoddyl-conda-10254/bin/python -m pytest tests/integration/engines/pinocchio/test_force_adapter.py --confcutdir=tests/integration/engines/pinocchio -o addopts= -q
+
+Runtime: Pinocchio 4.1.0. Also recheck with /home/dieterolson/.venvs/upstream-motion-10254/bin/python (Pinocchio 3.8). Do not add a newer-Pinocchio-only refresh API without version coverage. Never count mocked native imports as proof. New files passed scoped Ruff lint/format; no mypy, full regression, file-size or shared-divergence refresh has yet been run for this unfinished adapter.
+
+## Verified Deliveries and Limits
+
+- PR #10449, branch feat/pf06-nullspace-kernel, worktree C:/Users/diete/Repositories/.worktrees/upstream-pf06-nullspace, HEAD 0d5d0c37c77736e4c438f458f6f6892c428f24d8: 19 tests for scaled feasible null-space allocation; detailed simpler completion packets in docs/plans/pinocchio_matching_completion.md. Not integrated trajectory optimization or replay.
+- PR #10451: MuJoCo raw force/state correction has five native RED/GREEN tests plus six existing regressions. Pinocchio force mapping needs the new fresh-state check above before approval.
+- Full driver 654-frame diagnostics at 15/60/180 IK iterations: whole RMS 133.531/95.209/79.595 mm, club 50.204/25.082/18.122 mm, IK time 14.21/28.94/97.32 s. All REJECTED. Peak efforts 9196/4433/5230 N m. See pf09_ik_iteration_probe.json and .md. Do not present the old 15-iteration residual as an irreducible geometric floor.
+- Peer #10448 reports near-exact same-pose MuJoCo geometry but rejected forward replay: 571/654 frames and G1 RMS 0.940137 m. It contains the AnyIO lockfile repair responsible for existing audit failures on our earlier CI. Do not duplicate that owner's changes.
+- Task artifacts, exact candidates and native-Z-up marker GIFs: C:/Users/diete/.codex/visualizations/2026/09/18/01a0b2f1-0f08-7062-8753-9ced39f0a3ff. Best marker preview is pinocchio-ik180-driver-diagnostic/ik-marker-playback.gif. This is kinematic markers, not a native model viewer or accepted dynamics.
+
+## Ownership and Ordered Continuation
+
+1. Recheck #10439 lease; our codex session 01a0b2f1-native-bridge lease was renewed until 2026-09-18T20:27:22Z. Resolve the fresh native force-map test first; validate both Pinocchio versions, finite input/output, caller ordering and stale-state independence. Update numerical evidence if force mapping changes.
+2. PF-02 #10432 is HELD by open PR #10445 (head 55560316d6b67be80f32560c03ee3abc25e77e50 at checkpoint). Coordinate rather than overwrite. It needs convergence instrumentation, hard-frame multi-start/window refinement, and final q/v/a/closure consistency. Contact/temporal PF-03/04/05 ownership must also be checked.
+3. Integrate audited force/contact constraints, temporal smoothing of physical forces/torques and PF-06 feasible alternatives. Hard-zero trail torque is a feasibility condition, not guaranteed feasible.
+4. Require full driver AND iron uninterrupted native forward replay, physical contact/actuator limits and frozen marker gates. Separate translation and rotation closure units.
+5. Native viewer owner must load the exact model/candidate hashes with capture/IK/replay layers and truthful status. Generic marker overlay currently swaps Y/Z; honor actual native coordinate metadata.
+6. Replace synthetic Drake/OpenSim/Simscape force adapter claims with native bridges and named-coordinate/FK/dynamic qualification. Do not infer six-engine parity from wrapper tests. MATLAB R2025b remains required.
+
+The matching goal is incomplete. No accepted full-swing kinetic candidate or all-engine parity has been proven. Preserve the user-owned changes elsewhere in the fleet and do not reset this worktree. Continue from the dirty adapter work explicitly listed above.
+
+## Prior Evidence and Context
+
 # Native Force-Equation Correction (#10439)
 
 Updated 2026-09-18; branch `fix/pf09-native-force-equations`; commit SELF.
