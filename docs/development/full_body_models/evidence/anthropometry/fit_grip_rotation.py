@@ -29,7 +29,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT))
-from src.engines.physics_engines.mujoco.python.full_body_markers import (  # noqa: E402
+from src.engines.physics_engines.mujoco.python.full_body_ik import (  # noqa: E402
     FullBodyMarkerKinematics,
 )
 from src.engines.physics_engines.mujoco.python.full_body_model import (  # noqa: E402
