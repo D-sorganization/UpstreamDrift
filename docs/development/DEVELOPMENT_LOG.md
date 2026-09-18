@@ -17,6 +17,48 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10395 · OpenSim Anatomical Baseline Freeze and Qualification Fixtures
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10395 (epic #10394 / #10363, OG-01)
+- **Branch:** feat/og01-freeze-anatomical-baseline-10395
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/model_audit.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; src/engines/physics_engines/opensim/python/tour_matching/cli.py; tests/opensim/test_anatomical_baseline_fixtures.py; tests/opensim/test_opensim_os0_qualification.py
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at 94d593cf1 (SELF; pure model audit implemented test-first; baseline SHA-256 digests and structural counts verified; missing club and unscaled mesh defects reproduced with RED fixtures; fail-closed qualification gates verified; 22 pure tests passed; ruff, mypy, lod, file-budget clean)
+- **Summary:** Delivered pure-Python OpenSim model geometry and structural qualification audit under OG-01. Verifies SHA-256 digests against pinned baseline models, audits body/coordinate/actuator counts (23/39/39/0), detects empty attached_geometry on equipment bodies (Club body) and unscaled arm meshes (scale factors 1 1 1 on humerus). Implements fail-closed `verify_model_qualification` gate with DbC assertions and structured receipts via `cli.py qualify`.
+- **Next step:** Land PR referencing Closes #10395, then start OG-03 (#10397).
+- **Evidence:** tests/opensim/test_anatomical_baseline_fixtures.py; tests/opensim/test_opensim_os0_qualification.py; docs/development/opensim_tour_matching/evidence/anatomical_review_20260918/inspection.json.
+
+### DL-#10323 · Matched-Swing Run Ledger
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10323 (epic #10363 MS-02)
+- **Branch:** feat/ms02-matched-swing-run-ledger-10323
+- **PR:** open
+- **Paths:** src/shared/python/motion_matching/ledger.py; src/shared/python/motion_matching/ledger_schema.py; src/shared/python/motion_matching/**main**.py; src/shared/python/motion_matching/leaderboard.py; src/tools/motion_matching/pipeline.py; reports/matched_swing_ledger.json; tests/unit/motion_matching/test_ledger.py
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 at HEAD (SELF; scan discovers and classifies all 85 committed receipts across evidence roots; tests/unit/motion_matching/test_ledger.py 7 passed; architecture budget OK, ruff and ruff format clean)
+- **Summary:** Added matched-swing run ledger discovering, classifying, and indexing execution receipts across ground-support, native Simscape, OpenSim, calibration, and parity evidence trees. Deterministic serialization into reports/matched_swing_ledger.json, CLI subcommand `ledger --write`, and `list_runs()` API for tools.
+- **Next step:** Open PR referencing Closes #10323, enable auto-merge.
+- **Evidence:** reports/matched_swing_ledger.json; tests/unit/motion_matching/test_ledger.py
+
+### DL-#10362 · Tools Dependency Gate for Matched Swing Program
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10362 (epic #10363)
+- **Branch:** feat/ms95-tools-dependency-gate-10362
+- **PR:** open
+- **Paths:** vendor/ud-tools; Cargo.toml; requirements-tools.txt; docs/shared_tools/divergence_inventory.md; docs/shared_tools/divergence_inventory.v1.json; docs/agent_context/README.md; docs/agent_context/index.html
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 at 62e8cdbf9 (SELF; Tools main green, Tools #4494 and #4262 closed, Tools #5227 landed; four-way pin bumped to 62e8cdbf9; divergence inventory regenerated; agent context verified; test_no_shadow_of_tools_shared and run_checks pass)
+- **Summary:** UpstreamDrift ownership of humanoid_character_builder and model_generation ruled per Tools #4494; Tools #4262 and #4494 closed; vendor/ud-tools, requirements-tools.txt, Cargo.toml, and divergence inventory repinned to Tools main 62e8cdbf9.
+- **Next step:** Open PR referencing Closes #10362, enable auto-merge, release lease.
+- **Evidence:** docs/shared_tools/divergence_inventory.v1.json; tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py; tests/fixtures/reference_calibration/run_checks.py.
+
 ### DL-#10338 · Native Crocoddyl Full-Body Fit & Balanced Contact Kinetics (Matched Swing Program MS-31 / #10415)
 
 - **State:** in_progress
@@ -85,6 +127,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Evidence:** docs/development/opensim_tour_matching/HANDOFF.md and evidence/os1_trc_receipt.json, os2_runtime_receipt.json, os3_stride20/, os3_unlocked_stride20/.
 
 ### DL-#10062 · Full-Body Models With Lower Limbs and Ground Contact
+
+- **IK & Forward Dynamics Consolidation (MS-11 #10330; 2026-09-17):**
+  Consolidated ground-support marker IK and forward dynamics into shared modules, retiring
+  `src/engines/physics_engines/mujoco/python/full_body_markers.py` (813 -> 44 lines) and
+  `full_body_simulation.py` (709 -> 55 lines) into backward-compatible deprecation shims
+  and eliminating 1,423 duplicate lines across engine files. Shared solver and dataclasses live
+  in `src/shared/python/motion_matching/full_body_ik.py` (`BaseFullBodyIK`) and
+  `src/shared/python/motion_matching/full_body_forward_dynamics.py` with zero MuJoCo imports in
+  shared motion matching. MuJoCo adapter preserved as subclass in
+  `src/engines/physics_engines/mujoco/python/full_body_ik.py`. Added comprehensive consolidation
+  test suite `tests/unit/motion_matching/test_full_body_consolidation.py`.
+
+- **Pink Displaced Targets & Both-Club Smoke Qualification (2026-09-17):**
+  Added tests verifying that reachable displaced marker targets produce nonzero motion
+  and measurable residual reduction, infeasible hard constraints fail qualification closed
+  with structured failure reasons, and both driver and 7-iron smoke journeys produce valid
+  conforming receipts through `MatchRequest` and `ConstrainedIkReceipt`.
 
 - **Pink Integration Defect Repair & Fail-Closed Qualification (#10318; 2026-09-17):**
   Repaired three blocking defects in the Pink constrained IK pipeline:
@@ -171,10 +230,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **PR:** #10092 (FB-5, #10069); #10090 (Step 3 merged); #10089 (FB-4, #10068 merged); #10203 (Step 4 cross-engine replays merged); #10218 (HO-1 #10155 merged); #10224 (HO-2 #10156 merged); #10235 (HO-7 #10161 merged); #10236 (HO-4 #10158 merged); #10249 (HO-9 #10111 merged); #10228 (HO-3 #10157 merged); #10261 (HO-11 #10250 merged); #10258 (HO-8 #10108 merged)
 - **Paths:** docs/development/full_body_models; src/shared/python/motion_matching/full_body_spec.py; src/shared/python/motion_matching/contact_law.py; src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/marker_calibration.py; src/shared/python/motion_matching/full_body_ik.py; src/shared/python/motion_matching/visual_skeleton.py; src/shared/python/motion_matching/derivative_resolution.py; src/shared/python/motion_matching/full_body_forward_dynamics.py; src/shared/python/motion_matching/anthropometry.py; src/shared/python/motion_matching/hip_calibration.py; src/shared/python/motion_matching/pipeline; src/tools/motion_matching; tests/unit/motion_matching/pipeline; tests/unit/motion_matching; tests/unit/tools; tests/tools/motion_matching; scripts/config/mjx_env_pins.json; scripts/setup_mjx_env.ps1; scripts/setup_mjx_env.sh; tests/unit/motion_matching/test_document_freshness.py
 - **Started:** 2026-09-13
-- **Last verified:** 2026-09-16 (SELF; HO-12 #10251 moved remaining run_ground_support stages into pipeline package; run_ground_support.py down to 374 lines; 0 imports from run_ground_support remain across codebase; driver and iron headless pipeline executions verify bitwise receipt parity up to elapsed_s; all unit tests, mypy, and architecture budgets pass)
-- **Summary:** Full-body pipeline handoff (epic #10162). HO-12 (#10251) completed moving `run_ground_support.py` stages into `src.shared.python.motion_matching.pipeline`, packaging `solve_address_stage`, `calibrated_address_summary`, `prepare_hip_spec`, `search_segment_scales`, `build_ik_report`, `build_dynamics_report`, and `log_pipeline_summary`. `run_ground_support.py` is now a thin CLI driver under 400 lines (374 lines). Migrated all evidence scripts to import from `src.shared.python.motion_matching.pipeline`. Integrated HO-8 hip zero-twist calibration. Verified bitwise identical driver and iron receipt parity against main up to execution elapsed_s.
-- **Next step:** Land HO-12 PR, then proceed to HO-10 (#10160), HO-5 (#10159), and HO-6 (#10121) in epic #10162.
-- **Evidence:** docs/development/full_body_models/evidence/ground_support/run_ground_support.py, src/shared/python/motion_matching/pipeline/address.py, src/shared/python/motion_matching/pipeline/reference.py, src/shared/python/motion_matching/pipeline/dynamics.py, src/shared/python/motion_matching/pipeline/receipt.py, tests/unit/motion_matching/pipeline/.
+- **Last verified:** 2026-09-17 (SELF; MS-03 #10324 reconciled headline tour numbers with primary receipts on main, established canonical calibrated reference runs vs baselines, added CANONICAL_RUN.md and bisect_receipt.json; MS-06 #10327 delivered matched swing program tracker docs, physical acceptance ladder, waves plan, status generator script, freshness tests, and retired stale claims; MS-11 #10330 finished HO-1 consolidation into shared modules, retiring shims with -1,423 lines; tests/unit/motion_matching/test_full_body_consolidation.py passed)
+- **Summary:** Full-body pipeline handoff (epic #10162, matched-swing program epic #10363). MS-03 (#10324) reconciled headline tour numbers with primary receipts on main with bisect attribution in `CANONICAL_RUN.md` and `bisect_receipt.json`. MS-06 (#10327) created `docs/development/matched_swing_program/README.md`, `GATES.md`, and `WAVES.md`, delivered `scripts/generate_matched_swing_status.py` rendering the cross-engine status matrix from `reports/matched_swing_ledger.json`, marked legacy stale parity documents with dated `SUPERSEDED` banners, and added `tests/docs/test_matched_swing_status_freshness.py`. MS-11 (#10330) consolidated ground-support marker IK and forward dynamics into shared modules, retiring duplicate implementations to backward-compatible deprecation shims.
+- **Next step:** Commit MS-11 (#10330), open PR, auto-merge, and proceed to next Wave 1 task (MS-10 #10329).
+- **Evidence:** docs/development/full_body_models/evidence/ground_support/CANONICAL_RUN.md, docs/development/full_body_models/evidence/ground_support/bisect_receipt.json, tests/unit/motion_matching/test_handoff_numbers_match_receipts.py, tests/unit/motion_matching/test_full_body_consolidation.py, docs/development/matched_swing_program/README.md, docs/development/matched_swing_program/GATES.md, docs/development/matched_swing_program/WAVES.md, scripts/generate_matched_swing_status.py, tests/docs/test_matched_swing_status_freshness.py.
 
 ### DL-#8766 · Unit-Test-Gate Debt Ledger Burndown
 

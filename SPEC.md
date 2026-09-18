@@ -1,5 +1,89 @@
 # SPEC.md — Repository Specification Document
 
+## Tools Dependency Repin and Seam Integrity (MS-95, #10362)
+
+Enforces immutable Tools source resolution and couples the 4-way dependency repin to Tools `main` commit `62e8cdbf9`:
+- **Submodule and Manifest Pinning (`vendor/ud-tools`, `requirements-tools.txt`, `Cargo.toml`)**:
+  - `vendor/ud-tools`: Pinned to commit `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` on Tools `main`.
+  - `requirements-tools.txt`: Points to `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`.
+  - `Cargo.toml`: Updates `tools-core` git dependency revision to `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`.
+- **Divergence Inventory Sync (`docs/shared_tools/divergence_inventory.v1.json`, `.md`)**:
+  - Re-generates divergence inventory reflecting canonical package classifications and parity across UpstreamDrift and Tools.
+- **Ownership and Seam Guarantees (Tools #4494, #4262, #5227)**:
+  - Preserves UpstreamDrift canonical ownership of `humanoid_character_builder` and `model_generation` under `scripts/config/shadow_modules.yaml`.
+  - Consumes lazy `FrameSource` import from Tools, removing mocap import cascades on pure builder workflows.
+
+## Pinocchio Native Fit With Crocoddyl Full-Body Optimal Control (MS-31, #10338)
+
+Delivers native Crocoddyl full-body optimal control problem formulation, FDDP trajectory solver, and two-window fit modularization under #10338 and #10254 (W4/W5):
+- **Two-Window Fit Modularization (`src/shared/python/motion_matching/two_window_fit.py`)**:
+  - `compute_marker_metrics`: Evaluates whole-trajectory, early, terminal, and clubhead marker RMSE along with pelvis yaw angular errors and composite fit score.
+  - `check_acceptance`: Enforces physical gate thresholds: whole RMS $\le 0.025$ m, early RMS $\le 0.012$ m, terminal RMS $\le 0.035$ m, club cluster RMS $\le 0.060$ m, and pelvis yaw error $\le 5\%$.
+  - `TwoWindowParityInputs` and `evaluate_zero_displacement_parity`: Compares segmented zero-displacement evaluation against uninterrupted full-horizon replay, verifying metric and marker reproduction to $< 10^{-12}$.
+  - Modularized `docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/two_window_fit_102.py` as a lightweight delegating shim preserving execution options and reproducibility.
+- **Native Crocoddyl Problem Assembly (`src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py`)**:
+  - `CrocoddylProblemConfig` & `CrocoddylProblemBundle`: Defines problem inputs, state representation, and time grids.
+  - `build_native_crocoddyl_problem`: Pure assembly constructing per-node actuation controls, marker target residual costs from capture, 6D loop closure constraints for the dual-arm grip weld, and effort / joint-limit regularisation.
+  - Fail-closed error handling: Raises `CrocoddylNotAvailableError` when native C++ Crocoddyl is uninstalled or unavailable.
+- **Crocoddyl FDDP Driver & Receipt Generation (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - `FullBodyFitOptions` & `FullBodyFitReceipt`: Encapsulates solver configuration, convergence criteria, and solution diagnostics.
+  - `solve_full_body_fddp`: Solves the native optimal control problem using `SolverFDDP`, computes marker residual metrics, verifies physical gate acceptance, and outputs structured receipts.
+  - CLI driver supporting `--warm-start`, `--spec`, `--out`, and `--max-iterations`.
+- **Evidence & Artifacts (`evidence/matched/driver_g1_pinocchio/`)**:
+  - Contains candidate trajectory arrays (`candidate.npz`), execution receipt (`receipt.json`), cross-engine parity report (`parity_vs_mujoco.json`), and overlay visualization replay (`playback.gif`).
+
+## Physical Acceptance Contract and Gates (#10322)
+
+Defines and enforces pure physical acceptance contracts, multi-horizon gates, and receipts across motion matching and cross-engine replay:
+- **Acceptance Contract & Multi-Horizon Gates (`src/shared/python/motion_matching/acceptance.py`)**:
+  - `evaluate`: Evaluates trajectory receipts against strict kinematic and dynamic tolerance gates across three evaluation horizons: Kinematic Marker Tracking (G1), Contact & Ground Force Feasibility (G2), and Energy & Dynamic Consistency (G3).
+  - Decomposed into modular gate evaluators (`_evaluate_marker_rmse`, `_evaluate_pelvis_yaw`, `_evaluate_normal_contact_force`, `_evaluate_ground_and_closure`, `_evaluate_weight_fraction`) respecting architecture line budgets and precondition/postcondition contracts.
+- **Versioned Receipt Integration (`src/shared/python/motion_matching/pipeline/receipt_components.py`, `receipt_schema.py`, `receipt.py`)**:
+  - Adds `AcceptanceReceipt` and `AcceptanceGateReport` recording horizon verdicts, evaluated tolerances, violation details, and aggregate pass/fail disposition.
+  - Plugs acceptance auditing directly into `ReceiptBuilder` and `Receipt` structures.
+- **Cross-Engine Replay Validation (`src/shared/python/motion_matching/cross_engine_replay.py`, `docs/development/full_body_models/`)**:
+  - Asserts physical acceptance across engine replay pipelines; documents verdicts in `verdicts_2026-09.json` and FB-6 parity report.
+- **Unit Testing (`tests/unit/motion_matching/test_acceptance.py`)**:
+  - Tests covering gate evaluation, edge-case kinematics, contact force bounds, and fail-closed receipt emission.
+
+## Target Capture Hash-Lock and Marker Validity Policy (#10325)
+
+Enforces byte-level hash integrity on tournament capture files and codifies the canonical marker validity policy across engines:
+- **Marker Validity Policy & Tour Capture Contracts (`src/shared/python/motion_matching/tour_capture_contract.py`)**:
+  - `MARKER_VALIDITY_POLICY`: Canonical mapping of marker labels to sample counts, nominal weights, and exclusion of unassigned labels, strictly matching `driver_capture_audit.json`.
+  - Exposes `marker_weight` and `marker_weights` helpers with DbC preconditions and postconditions.
+- **Engine Consuming Integration (`src/engines/physics_engines/opensim/python/tour_matching/marker_map.py`, `src/shared/python/motion_matching/pipeline/reference.py`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/load_club_target_c3d.m`)**:
+  - Direct consumption of the canonical validity policy across OpenSim marker mappings and reference trajectories, replacing hardcoded weighting schemas.
+  - Documents canonical file paths and SHA-256 integrity hashes in MATLAB C3D loader docstrings.
+- **Hash-Lock Integrity Verification (`tests/unit/motion_matching/test_capture_copies_are_identical.py`)**:
+  - Unit tests asserting all identical copies of driver and iron C3D target capture files match canonical SHA-256 hashes and sample counts match audit ground truth.
+
+## Shadow Tracker Review Workbench Viewport and Action Wiring Corrective (#10357)
+
+Repairs Shadow Tracker GUI workbench interaction and rendering surfaces in accordance with launcher embed standards (MS-84):
+- **Action Signal Wiring (`src/tools/shadow_tracker/gui.py`)**:
+  - Connects toolbar action buttons (`btn_open`, `btn_save`, `btn_export`) to concrete review model handlers.
+  - Implements file dialog workflows for opening bundle directories, saving sessions, and exporting canonical JSON packages with explicit status reporting and error boundaries.
+  - Enforces connected signal receivers across all toolbar and navigation buttons (`btn_open`, `btn_save`, `btn_export`, `btn_worst`, `btn_prev`, `btn_next`).
+- **Custom Review Viewport (`src/tools/shadow_tracker/gui.py`)**:
+  - Replaces plain placeholder `QLabel` with dedicated `ShadowTrackerViewportWidget` subclassing `QtWidgets.QWidget`.
+  - Exposes typed `observation` property and `set_observation(obs: FrameObservation | None)` mutation interface.
+  - Implements custom `paintEvent` rendering:
+    - Empty state: clean status prompt guiding user to open bundles.
+    - Active state: background fill, bounding frame, shot/camera identifiers, authoritative frame PTS and clock authority, mask references, and kinematics overlay placeholder.
+
+## Pink Displaced-Target and Both-Club Motion Matching Proofs (#10254)
+
+Proves native Pink displaced-target motion reduction, hard constraint qualification failure handling, and dual-club smoke journeys:
+- **Displaced-Target Motion & Residual Reduction (`tests/unit/engines/pinocchio/test_pink_trajectory.py`)**:
+  - Validates that applying displaced reachable marker targets drives non-zero generalized coordinate displacement ($\|q_1 - q_0\| > 0$) while reducing marker position residual errors to zero under native QP trajectory execution.
+- **Infeasible Hard Constraint Qualification Refusal**:
+  - Proves that infeasible QP / hard constraint conditions fail frame convergence (`frame_success[0] = False`, `passed = False`) with deterministic failure reasons, ensuring fail-closed safety.
+- **Both-Club (Driver & 7-Iron) Pipeline Smoke Journeys (`tests/unit/motion_matching/test_pink_pipeline_receipts.py`)**:
+  - Exercises full pipeline matching runs across both driver and 7-iron clubs via `MatchRequest` and CLI `--backend pink`.
+  - Verifies generation of conforming `ConstrainedIkReceipt` records across both clubs.
+
+
 ## Pink Constrained IK Interface Repair and Fail-Closed Qualification (#10318)
 
 Repairs native driver interface wiring, eliminates silent fallback, and enforces honest constraint evaluation across the Pink constrained IK pipeline:
@@ -5555,6 +5639,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10316 | Optimized np.linalg.norm with math.sqrt(dot) in mujoco_swing_source.py. (spec-exempt: micro-optimization) |
@@ -5697,6 +5782,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
+| 2026-09-18 | #10395 | Freeze the OpenSim anatomical baseline and failure fixtures (OG-01): pure-XML model audit verifying SHA-256 hashes (051d61ea/7dd1da17), body/coord/actuator counts (23/39/39/0), detecting empty Club attached geometry and unscaled arm meshes, with fail-closed qualification verification. |
 | 2026-09-10 | #1616 | Adopt maintainable Mermaid C4 architecture-map contract (C4Context, C4Container, Feature Map, Change Log, validator and workflow) (#1616). |
 | 2026-09-10 | #8365 | Import the public Launch-Monitor-Data canonical exports into the launch-monitor statistics core (#8365). `src/tools/launch_monitor_model/launch_monitor_data.py` detects the two published shapes by exact header membership and refuses everything else: shot-level `load_shots()` frames map SI columns with the registry unit and native `_mph`/`_deg`/`_yd` columns with the corpus unit, never a profile default, reject a metric declared in both unit systems or any column whose unit would have to be assumed, carry `observation_kind`, and derive the private-corpus `shot_id`/`session_id` identity; the long-format `upstreamdrift_aggregate_metrics.csv` is pivoted to one `observation_kind="aggregate"` row per source/monitor/model/software/environment/cohort/club group with every published cell retained verbatim under `source::<metric>::<column>`, refusing non-`group_mean` rows, rows claiming to be shots, unknown metrics, registry-incompatible `canonical_unit`, non-numeric means and repeated metrics. Seventeen focused tests pin detection, unit fidelity, lineage, deterministic pivoting, every refusal, `.lmproject` round-trip and that imported aggregates are refused by shot-level regression alone or pooled with shots. The module is registered app-local in the ADR-0046 Stage 2 parity gate and ADR-0048; no Tools module changes. |
 | 2026-09-10 | #9959 | Bind capture reconstruction to selected calibration bytes, verify source stability during processing, and require reconstruction again after calibration changes or missing legacy lineage. Preserve earlier results, verify triangulated-model reconstruction lineage, and use existing wizard prerequisite links. Extract measurement/lens helpers within unchanged budgets; record successor turnover. |

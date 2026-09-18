@@ -159,7 +159,8 @@
         "motion_capture",
         "motion_target_preview",
         "starting_pose_matcher",
-        "motion_pipeline"
+        "motion_pipeline",
+        "shadow_tracker"
       ],
       "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406)."
     },
