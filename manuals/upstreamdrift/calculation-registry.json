@@ -59,6 +59,11 @@
       "id": "UP-D1-contact-derivatives-inventory",
       "owner": "UpstreamDrift issue #10254",
       "resolution": "Inventory the shared contact-force derivatives and full-body Pinocchio chain rule delivered in #10255 before manual coverage or physical qualification. Local directional derivative checks establish algebraic agreement with the implemented piecewise contact plant; they do not establish physiological force identification, valid contact parameters, full-swing fitting, or differentiability at activation and clipping boundaries."
+    },
+    {
+      "id": "UP-D1-native-force-bridge-inventory",
+      "owner": "UpstreamDrift issue #10439",
+      "resolution": "Inventory native MuJoCo raw M a + bias allocation balance, contact Jacobian state refresh and algebraic acceleration audit in multi_engine_torque_allocator.py. Native directional and equation tests do not qualify contact forces, full-swing replay or other engine bridges."
     }
   ],
   "calculations": []

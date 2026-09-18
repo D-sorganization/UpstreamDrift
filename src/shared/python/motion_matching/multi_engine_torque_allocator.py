@@ -21,7 +21,7 @@ from enum import Enum
 import json
 import logging
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, TypeAlias, runtime_checkable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -35,7 +35,7 @@ from src.shared.python.motion_matching.contact_force_allocator import (
 
 logger = logging.getLogger(__name__)
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 class EngineType(str, Enum):
@@ -159,22 +159,49 @@ class MujocoForceAdapter:
     def n_contact_spheres(self) -> int:
         return self._n_spheres
 
+    def _checked_vector(self, value: Array, size: int, name: str) -> Array:
+        vector = np.asarray(value, dtype=np.float64)
+        if vector.shape != (size,):
+            raise ValueError(f"{name} shape must be ({size},), got {vector.shape}")
+        if not np.isfinite(vector).all():
+            raise ValueError(f"{name} must be finite")
+        return vector
+
+    def _prepare_state(self, q: Array, v: Array | None = None) -> None:
+        """Refresh all position-dependent fields, including mass and Jacobians."""
+        model, data = self._model.model, self._model.data
+        configuration = self._checked_vector(q, model.nq, "configuration")
+        velocity = self._checked_vector(
+            np.zeros(self._nv) if v is None else v, self._nv, "velocity"
+        )
+        # Validate both arrays before mutating native state.
+        data.qpos[:] = configuration
+        data.qvel[:] = velocity
+        self._mj.mj_fwdPosition(model, data)
+        self._mj.mj_fwdVelocity(model, data)
+
+    def _mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
+        self._prepare_state(q, v)
+        model, data = self._model.model, self._model.data
+        mass = np.zeros((self._nv, self._nv), dtype=np.float64)
+        self._mj.mj_fullM(model, mass, data.qM)
+        return mass, data.qfrc_bias.copy()
+
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
-        mj = self._mj
-        model = self._model.model
-        data = self._model.data
-        data.qpos[:] = q
-        data.qvel[:] = v
-        data.qacc[:] = a
-        mj.mj_inverse(model, data)
-        return np.asarray(data.qfrc_inverse.copy(), dtype=np.float64)
+        """Return raw M a + bias, before allocating ground and grip reactions.
+
+        MuJoCo qfrc_inverse subtracts passive/constraint forces and therefore
+        cannot be used as the raw right-hand side of this allocation equation.
+        """
+        acceleration = self._checked_vector(a, self._nv, "acceleration")
+        mass, bias = self._mass_and_bias(q, v)
+        return mass @ acceleration + bias
 
     def compute_contact_jacobian(self, q: Array) -> Array:
         mj = self._mj
         model = self._model.model
         data = self._model.data
-        data.qpos[:] = q
-        mj.mj_kinematics(model, data)
+        self._prepare_state(q)
         j_ground = np.zeros((self._n_spheres * 3, self._nv), dtype=np.float64)
         spheres = self._model._spheres
         for idx, s_info in enumerate(spheres.values()):
@@ -185,28 +212,23 @@ class MujocoForceAdapter:
         return j_ground
 
     def compute_grip_jacobian(self, q: Array) -> Array:
-        mj = self._mj
-        model = self._model.model
-        data = self._model.data
-        data.qpos[:] = q
-        mj.mj_kinematics(model, data)
+        self._prepare_state(q)
         jac_weld, _ = self._model.evaluate_weld_closure()
         return np.asarray(jac_weld, dtype=np.float64)
 
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
     ) -> float:
-        mj = self._mj
-        model = self._model.model
-        data = self._model.data
-        data.qpos[:] = q
-        data.qvel[:] = v
-        mass = np.zeros((self._nv, self._nv), dtype=np.float64)
-        mj.mj_fullM(model, mass, data.qM)
-        mj.mj_fwdVelocity(model, data)
-        bias = data.qfrc_bias.copy()
-        a_forward = np.linalg.solve(mass, tau_effective - bias)
-        return float(np.max(np.abs(a_forward - a_target)))
+        """Audit the raw equation at this exact state, independent of call order.
+
+        tau_effective includes every externally supplied force and reaction.
+        This algebraic audit is not constrained/contact forward replay.
+        """
+        effort = self._checked_vector(tau_effective, self._nv, "effective effort")
+        target = self._checked_vector(a_target, self._nv, "target acceleration")
+        mass, bias = self._mass_and_bias(q, v)
+        a_forward = np.linalg.solve(mass, effort - bias)
+        return float(np.max(np.abs(a_forward - target)))
 
 
 class _AnalyticalMultibodyBase:

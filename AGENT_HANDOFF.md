@@ -1,5 +1,12 @@
 # Simscape Tour-Average Fit Continuation
 
+## Native Matching Correction (#10439)
+
+Read [Current Handoff](docs/development/HANDOFF.md), entry DL-#10439.
+Five native MuJoCo RED/GREEN tests qualify refreshed force equations and
+Jacobians; full-swing and other-engine qualification remain open.
+PF-06 numerical kernel and completion packets are in PR #10449.
+
 ## Polynomial Full-Body Dynamics Boundary (#10265)
 
 The integration retains global degree-six Bernstein efforts for every non-root
