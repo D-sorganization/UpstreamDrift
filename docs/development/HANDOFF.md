@@ -1,20 +1,24 @@
 # Current Matching Continuation Handoff
 
-Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og01-freeze-anatomical-baseline-10395`; commit SELF.
+Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og03-visible-golf-club-10397`; commit SELF.
 PR: open (targeting main).
-Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og01-10395`.
+Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og03-10397`.
 
-### OG-01 Status: Completed
+### OG-03 Status: Completed
+
+- Parameterized visual club geometry and grip offset frames delivered in `src/engines/physics_engines/opensim/python/tour_matching/club_geometry.py`.
+- Solves the missing golf club visual defect by attaching parameterized shaft and clubhead visual meshes from shared `ClubSpec` (`DRIVER`, `IRON_7`) to `Body[@name='Club']/attached_geometry`.
+- Physical mass ($0.320\text{ kg}$), center of mass, and inertia tensors are strictly preserved.
+- Canonical grip offset frames (`club_grip_offset`, `club_head_offset`, `hand_r_grip_offset`, `hand_l_grip_offset`) match OpenSim coordinate conventions and `opensim_golf.fk` boundaries.
+- Full suite of TDD tests and RED fixtures passing in `tests/opensim/test_golf_club_geometry.py` and `tests/opensim/test_anatomical_baseline_fixtures.py` (13 tests passed).
+- Ruff lint, Ruff format, Mypy, Law of Demeter, and File Size Budget all clean.
+- Next child: **OG-02 (#10396)** — Segment scaling anatomically and physically consistent.
+
+### OG-01 Status: Completed (PR #10404)
 
 - Baseline model geometry and structural qualification audit delivered in `src/engines/physics_engines/opensim/python/tour_matching/model_audit.py`.
-- Verified SHA-256 hashes for baseline model (`051d61eab9b72912105a308145392dd5c6c30faeaf7979b460c2ea485e9b0a8d`) and input model (`7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381`).
-- Reproduced structural defects with RED test fixtures in `tests/opensim/test_anatomical_baseline_fixtures.py` and `tests/opensim/test_opensim_os0_qualification.py`:
-  - Empty `/bodyset/Club/attached_geometry` (0 visual geometry).
-  - Unscaled arm bone meshes (scale factors remain unit `1 1 1` for `humerus_r` despite joint-frame translation scaling).
-  - 23 bodies, 39 coordinates, 39 torque coordinate actuators, 0 muscles.
-- Qualification gate `verify_model_qualification` fails closed on historical baseline with typed rationale, and passes on valid model fixtures.
-- 22 pure unit tests passing; Ruff lint, Ruff format, Mypy, Law of Demeter, and File Size Budget all clean.
-- Next child: **OG-03 (#10397)** — Add visible parameterized golf club and grip frames without modifying physical mass properties.
+- Pinned baseline SHA-256 hashes and reproduced defects with RED failure fixtures.
+- PR opened: **PR #10404**.
 
 ---
 
