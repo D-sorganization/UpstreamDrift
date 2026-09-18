@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
     from src.engines.physics_engines.mujoco.python.full_body_model import (
@@ -241,7 +241,7 @@ class Lane:
 
         Precondition: spec ground plane matches the toe calibration height.
         """
-        from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        from src.engines.physics_engines.mujoco.python.full_body_ik import (
             FullBodyMarkerKinematics,
         )
         from src.engines.physics_engines.mujoco.python.full_body_model import (

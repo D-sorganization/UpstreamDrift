@@ -685,60 +685,6 @@
       "expires_on": "2026-11-30"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_pose",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_pose landing in HO-0; scheduled for consolidation into full_body_ik.py in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_pose",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_pose parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_trajectory",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_trajectory landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_trajectory",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_trajectory parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_simulation.py",
-      "symbol": "_computed_torque",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: computed torque helper parameter count landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_simulation.py",
-      "symbol": "reference_zmp",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: reference ZMP computation landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/visual_layer.py",
       "symbol": "attach_visual_layer",
       "rule": "function-lines",
