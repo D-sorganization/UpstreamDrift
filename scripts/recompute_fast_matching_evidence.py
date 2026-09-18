@@ -36,6 +36,34 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _compute_contact_metrics(
+    ground_forces: np.ndarray, n_nodes: int
+) -> tuple[float, float, int]:
+    gf_reshaped = ground_forces.reshape(n_nodes, 6, 3)
+    f_tangential = np.linalg.norm(gf_reshaped[:, :, :2], axis=2)
+    f_normal = gf_reshaped[:, :, 2]
+    active_mask = f_normal > 1.0
+    friction_ratios = np.where(
+        active_mask, f_tangential / np.maximum(f_normal, 1e-6), 0.0
+    )
+    max_friction_ratio = float(np.max(friction_ratios)) if np.any(active_mask) else 0.0
+    friction_violations = int(np.sum(friction_ratios > 0.8))
+    max_normal_force_n = float(np.max(f_normal))
+    return max_normal_force_n, max_friction_ratio, friction_violations
+
+
+def _read_receipt_metrics(receipt_path: Path) -> tuple[float, float]:
+    yaw_rmse_rad = 0.0
+    max_closure_residual_m = 0.0
+    if receipt_path.exists():
+        receipt_data = json.loads(receipt_path.read_text(encoding="utf-8"))
+        shared_sec = receipt_data.get("metrics", {}).get("shared", {})
+        yaw_rmse_rad = float(shared_sec.get("pelvis_yaw_rmse_rad", 0.0))
+        closure_sec = receipt_data.get("closure", {})
+        max_closure_residual_m = float(closure_sec.get("max_closure_mm", 0.0)) / 1000.0
+    return yaw_rmse_rad, max_closure_residual_m
+
+
 def audit_candidate_archive(archive_dir: Path, capture_name: str) -> dict[str, Any]:
     """Audit raw candidate.npz archive and evaluate against physical gates."""
     npz_path = archive_dir / "candidate.npz"
@@ -50,15 +78,10 @@ def audit_candidate_archive(archive_dir: Path, capture_name: str) -> dict[str, A
         valid = np.asarray(raw["valid"], dtype=bool)
         labels = [str(x) for x in raw["labels"]]
         ground_forces = np.asarray(raw["ground_forces"], dtype=np.float64)
-        q = np.asarray(raw["q"], dtype=np.float64)
-        v = np.asarray(raw["v"], dtype=np.float64)
-        a = np.asarray(raw["a"], dtype=np.float64)
-        u = np.asarray(raw["u"], dtype=np.float64)
 
     n_nodes = len(time_s)
     duration_s = float(time_s[-1] - time_s[0])
 
-    # 1. Run SwingEvaluator for kinematics, segment and phase metrics
     evaluator = SwingEvaluator(labels=labels)
     eval_report = evaluator.evaluate(
         time_s=time_s,
@@ -70,29 +93,15 @@ def audit_candidate_archive(archive_dir: Path, capture_name: str) -> dict[str, A
         closure_errors_m=np.zeros(n_nodes),
     )
 
-    # 2. Friction cone audit: ground_forces shape (N, 18) -> (N, 6, 3)
-    gf_reshaped = ground_forces.reshape(n_nodes, 6, 3)
-    f_tangential = np.linalg.norm(gf_reshaped[:, :, :2], axis=2)
-    f_normal = gf_reshaped[:, :, 2]
-    active_mask = f_normal > 1.0  # active normal contact > 1 N
-    friction_ratios = np.where(
-        active_mask, f_tangential / np.maximum(f_normal, 1e-6), 0.0
-    )
-    max_friction_ratio = float(np.max(friction_ratios)) if np.any(active_mask) else 0.0
-    friction_violations = int(np.sum(friction_ratios > 0.8))
-    max_normal_force_n = float(np.max(f_normal))
+    max_norm_n, max_fric, fric_viols = _compute_contact_metrics(ground_forces, n_nodes)
+    yaw_rmse, max_clos_m = _read_receipt_metrics(archive_dir / "receipt.json")
 
-    # 3. Check existing receipt for pelvis yaw and closure
-    receipt_path = archive_dir / "receipt.json"
-    yaw_rmse_rad = 0.0
-    max_closure_residual_m = 0.0
-    if receipt_path.exists():
-        receipt_data = json.loads(receipt_path.read_text(encoding="utf-8"))
-        metrics_sec = receipt_data.get("metrics", {})
-        shared_sec = metrics_sec.get("shared", {})
-        yaw_rmse_rad = float(shared_sec.get("pelvis_yaw_rmse_rad", 0.0))
-        closure_sec = receipt_data.get("closure", {})
-        max_closure_residual_m = float(closure_sec.get("max_closure_mm", 0.0)) / 1000.0
+    club_rmse_m = (
+        eval_report.segments["club"].rmse_mm / 1000.0
+        if "club" in eval_report.segments
+        else 0.0
+    )
+    max_pen_m = eval_report.ground_penetration.max_penetration_mm / 1000.0
 
     audit_payload: dict[str, Any] = {
         "schema": "matched-swing-fit/pinocchio-analytic-inverse-dynamics-v1",
@@ -103,23 +112,16 @@ def audit_candidate_archive(archive_dir: Path, capture_name: str) -> dict[str, A
         "duration_s": duration_s,
         "shared_metrics": {
             "whole_marker_rmse_m": eval_report.overall_rmse_mm / 1000.0,
-            "club_marker_rmse_m": (
-                eval_report.segments["club"].rmse_mm / 1000.0
-                if "club" in eval_report.segments
-                else 0.0
-            ),
-            "pelvis_yaw_rmse_rad": yaw_rmse_rad,
+            "club_marker_rmse_m": club_rmse_m,
+            "pelvis_yaw_rmse_rad": yaw_rmse,
         },
         "contact_audit": {
-            "max_normal_force_n": max_normal_force_n,
-            "max_friction_ratio": max_friction_ratio,
-            "friction_violation_count": friction_violations,
-            "max_penetration_m": eval_report.ground_penetration.max_penetration_mm
-            / 1000.0,
+            "max_normal_force_n": max_norm_n,
+            "max_friction_ratio": max_fric,
+            "friction_violation_count": fric_viols,
+            "max_penetration_m": max_pen_m,
         },
-        "closure": {
-            "max_closure_residual_m": max_closure_residual_m,
-        },
+        "closure": {"max_closure_residual_m": max_clos_m},
         "dynamics": {
             "has_delta_tau_root": False,
             "note": "delta_tau_root unrecorded in raw NPZ; ungrounded phantom assistance unverified",
@@ -127,7 +129,6 @@ def audit_candidate_archive(archive_dir: Path, capture_name: str) -> dict[str, A
         "evaluation_report": eval_report.to_dict(),
     }
 
-    # 4. Evaluate against official acceptance gates
     verdict: AcceptanceVerdict = evaluate(audit_payload, horizon=Horizon.G3)
     audit_payload["verdict"] = verdict.as_dict()
 
@@ -152,7 +153,6 @@ def audit_candidate_archive(archive_dir: Path, capture_name: str) -> dict[str, A
     out_path = archive_dir / "rejection_audit.json"
     out_path.write_text(json.dumps(audit_payload, indent=2), encoding="utf-8")
     logger.info("Saved explicit rejection audit to %s", out_path)
-
     return audit_payload
 
 

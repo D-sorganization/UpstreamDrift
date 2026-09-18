@@ -425,7 +425,7 @@ def _evaluate_normal_contact_force(
     return results
 
 
-def _evaluate_ground_and_closure(
+def _evaluate_penetration(
     receipt: Mapping[str, Any],
     gates: AcceptanceGates,
     contact_audit: Any,
@@ -459,7 +459,15 @@ def _evaluate_ground_and_closure(
                     reason=f"penetration {val_penetration * 1e3:.1f} mm > {thresh_penetration * 1e3:.1f} mm",
                 )
             )
+    return results
 
+
+def _evaluate_ground_and_closure(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+    contact_audit: Any,
+) -> list[GateResult]:
+    results = _evaluate_penetration(receipt, gates, contact_audit)
     thresh_closure_m = gates.max_closure_residual_m
     val_closure_m = _extract_metric(
         receipt,
