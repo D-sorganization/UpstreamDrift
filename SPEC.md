@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Multi-Engine Torque Allocation and Cross-Platform 3D Simulation Viewers (#10415)
+
+Delivers universal cross-engine torque determination, contact-aware QP force allocation, and multi-viewer 3D trajectory playback across MuJoCo ("Monaco"), Drake, OpenSim, and Simscape/MATLAB:
+- **Cross-Platform 3D Simulation Viewer Dispatcher (`src/shared/python/motion_matching/visualization/simulation_viewer.py`, `scripts/launch_simulation_viewer.py`)**:
+  - `SimulationViewer` and `launch_viewer()`: Unified interface supporting Gepetto Viewer (`gepetto-gui` / omniORB CORBA), MuJoCo (`NativeMujocoFullBodyModel` / `mujoco.Renderer`), MeshCat (WebGL / Three.js), PyVista (interactive 3D VTK with ground plane and slider), and Matplotlib (3D scatter animation).
+  - CLI launcher `scripts/launch_simulation_viewer.py` with options `--viewer`, `--candidate`, `--stride`, `--fps`, `--loop`, `--spec`, and `--check-only`.
+- **Multi-Engine Torque Allocation Architecture (`src/shared/python/motion_matching/multi_engine_torque_allocator.py`, `scripts/allocate_swing_torques.py`)**:
+  - `BaseEngineForceAdapter`: Common protocol for multi-engine inverse dynamics, spatial contact Jacobians, and dual-arm weld loop closures.
+  - Concrete engine adapters: `MujocoForceAdapter` interfacing live MuJoCo C bindings, `DrakeForceAdapter` with spatial generalized forces and MultibodyPlant kinematics, `OpenSimForceAdapter` interfacing Simbody coordinates and station Jacobians, and `SimscapeForceAdapter` with MATLAB/Simulink timeseries dataset export (`export_simulink_timeseries`).
+  - `MultiEngineTorqueAllocator`: Convex Quadratic Program (QP) solving minimum-effort and trail-arm suppressed torque allocations across floating-base plants.
+  - CLI script `scripts/allocate_swing_torques.py` with multi-engine selection, tolerance validation, and forward acceleration parity checks.
+- **Architectural Reference Document (`docs/development/MULTI_ENGINE_TORQUE_ALLOCATION_ANALYSIS.md`)**:
+  - Mathematical formulation of decoupled geometric-first tracking and contact-balanced QP force allocation ($M \ddot{q} + b = S^T \tau + J_{\text{ground}}^T f + J_{\text{grip}}^T \lambda + S_{\text{root}}^T \delta\tau_{\text{root}}$) across MuJoCo, Drake, OpenSim, and Simscape/MATLAB.
+
 ## Pinocchio Decoupled Full-Swing C3D Matching and Trail-Side Zero Torque Allocation (MS-31, #10411, #10415)
 
 Delivers a high-speed, decoupled kinematic fitting and contact-balanced inverse dynamics torque allocation pipeline for the Pinocchio 44-DoF full-body humanoid matching canonical tour-average driver and 7-iron swings:
