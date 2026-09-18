@@ -4,8 +4,8 @@
 
 Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-codex-10336`.
 Branch: `feat/10336-mujoco-candidate-replay`. Base HEAD:
-`5347cba0f4378cd72a6e8afea9fb27c8bfe5db75`. Implementation commit SELF;
-PR pending creation. User authorized commit, push, PR, CI repair and merge.
+`5347cba0f4378cd72a6e8afea9fb27c8bfe5db75`. Implementation `94ccb1825`;
+PR #10448 open. User authorized commit, push, PR, CI repair and merge.
 Development-log entry: DL-#10336. Ownership was checked free and leased as
 `codex-mujoco-replay-10336-20260918` before editing. The original checkout's
 Pinocchio changes and untracked evidence were preserved.
@@ -21,6 +21,8 @@ Missing root history and independent source dynamics also block qualification.
 
 Validation: 40 focused replay/acceptance/schema/full-body/contact tests pass;
 scoped Ruff and mypy pass; agent-context and architecture/file-size budgets pass.
+Commit/push hooks pass, including security and bounded unit checks. All 21
+replay tests also pass with CI-pinned MuJoCo 3.8.0 in an isolated environment.
 The central development-log validator flags inherited missing verifying SHAs,
 a missing PR field in DL-#9967, and the existing portfolio WIP excess. These
 unrelated entries are not repaired in this diff. The repo-local validator
