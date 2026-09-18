@@ -23,10 +23,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #10436 (epic #10430; program #10363)
 - **Branch:** feat/pf06-nullspace-kernel
-- **PR:** pending
+- **PR:** #10449
 - **Paths:** src/shared/python/motion_matching/force_nullspace.py; tests/unit/motion_matching/test_force_nullspace.py; docs/plans/pinocchio_matching_completion.md
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at 611a8633e; explicit TypeAlias fixes isolated pre-push mypy in SELF; 19 unit tests pass after RED/GREEN; scoped Ruff and mypy pass; native integration not executed.
+- **Last verified:** 2026-09-18 at a85932aaf plus SELF; typed SciPy constraint corrects CI stub checking; 19 unit tests pass after RED/GREEN; scoped Ruff and mypy pass; native integration not executed.
 - **Summary:** Scaled rank-revealing force redistribution with exact Coulomb cones, declared surface frames, finite contracts and independent feasibility audits; completion packets preserve native qualification requirements.
 - **Next step:** Integrate the verified native allocation A/b and contact bounds through the interface documented in docs/plans/pinocchio_matching_completion.md.
 - **Evidence:** tests/unit/motion_matching/test_force_nullspace.py
