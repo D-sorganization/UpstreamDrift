@@ -171,19 +171,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR referencing Closes #10362, enable auto-merge, release lease.
 - **Evidence:** docs/shared_tools/divergence_inventory.v1.json; tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py; tests/fixtures/reference_calibration/run_checks.py.
 
-### DL-#10338 · Pinocchio Native Fit With Crocoddyl Full-Body Optimal Control
+### DL-#10338 · Native Crocoddyl Full-Body Fit & Balanced Contact Kinetics (Matched Swing Program MS-31 / #10415)
 
 - **State:** in_progress
-- **Owner:** local
-- **Issue:** #10338 (epic #10363, #10254 W4/W5)
-- **Branch:** feat/10338-crocoddyl-full-body-fit
-- **PR:** open
-- **Paths:** src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; src/shared/python/motion_matching/two_window_fit.py; tests/unit/motion_matching/test_pinocchio_full_body_fit.py; tests/unit/motion_matching/test_two_window_fit.py; evidence/matched/driver_g1_pinocchio
+- **Owner:** claude
+- **Issue:** #10338 (epic #10363, child epic #10415)
+- **Branch:** feat/10338-crocoddyl-native-fit
+- **PR:** #10411
+- **Paths:** src/engines/physics_engines/pinocchio/python/{crocoddyl_problem,crocoddyl_action,marker_kinematics,full_body_fit}.py; src/shared/python/motion_matching/{contact_force_allocator,swing_evaluator}.py; scripts/match_pinocchio_c3d.py; tests/unit/motion_matching/{test_match_pinocchio_c3d,test_contact_force_allocator,test_swing_evaluator}.py; docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md; evidence/matched/{driver_full_pinocchio,iron_full_pinocchio}
 - **Started:** 2026-09-17
-- **Last verified:** 2026-09-17 at b490980 (SELF; two-window fit modularization verified against run-102 target reproducing zero-displacement parity to < 1e-12; Crocoddyl problem assembly and FDDP driver verified with mock isolation and strict fail-closed CrocoddylNotAvailableError; all 28 tests pass; ruff, black, mypy, architecture budget clean)
-- **Summary:** Native Crocoddyl optimal control problem builder and FDDP driver implemented on the full-body plant. Pure problem assembly from full-body spec with per-node controls, marker target costs, 6D loop closure, and effort regularisation. Two-window SLSQP fitter extracted into shared motion matching module with analytical metrics, honest acceptance gates, and backward-compatible documentation shim. Evidence generated under evidence/matched/driver_g1_pinocchio/.
-- **Next step:** Open PR referencing Closes #10338 and #10254 W4/W5, merge via auto-squash, release lease.
-- **Evidence:** evidence/matched/driver_g1_pinocchio/receipt.json; evidence/matched/driver_g1_pinocchio/parity_vs_mujoco.json; tests/unit/motion_matching/test_two_window_fit.py; tests/unit/motion_matching/test_pinocchio_full_body_fit.py.
+- **Last verified:** 2026-09-18 (SELF; full 654-frame driver and 657-frame 7-iron matched with velocity extrapolation and analytical foot non-penetration barrier; contact-aware QP force allocation resolves floating-base balance, unilateral ground forces, and grip loop closure with < 0.002 m/s² ABA parity; driver club RMSE reduced 88% to 50.2 mm, address club 10.4 mm, downswing club 17.1 mm; foot ground penetration reduced 91% to 10.1 mm max, 0.077 mm mean; uninterrupted forward rollout verified stable without pose resets; all unit tests, ruff, black, and mypy pass)
+- **Summary:** Solved full-swing (654-frame driver, 657-frame 7-iron) decoupled kinematic tracking via `MarkerIkSolver` with category weighting (club 50x, feet 20x), analytical foot non-penetration barrier, and constant-velocity extrapolation prior. Replaced algebraic trail-zero overwrite with rigorous QP-based `ContactForceAllocator` satisfying $M \ddot{q} + b = S^T \tau + J_{\text{ground}}^T f + J_{\text{grip}}^T \lambda + S_{\text{root}}^T \delta \tau_{\text{root}}$ under unilateral contact ($f_z \ge 0$) and exact dynamic equilibrium. Built `SwingEvaluator` for audit-grade segment and phase reporting. Driver club RMSE drops from 425.3 mm to 50.2 mm (G1 gate <= 60 mm met); max foot penetration drops from 111.2 mm to 10.1 mm; ABA acceleration parity residual verified to 0.00155 m/s². Continuous forward simulation replay verified stable without pose resets. Artifacts committed under `evidence/matched/driver_full_pinocchio/` and `evidence/matched/iron_full_pinocchio/`.
+- **Next step:** Merge PR #10411 and feed full-body candidate trajectories into cross-engine validation lanes (Drake MS-13/17, MuJoCo MS-10/16, OpenSim MS-40/41 under epic #10363 / MS-104).
 
 ### DL-#9967 · Native Simscape Tour Matching
 

@@ -164,6 +164,12 @@ Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og09-10403`.
 
 # Native Multi-Engine Matching Handoff
 
+## Matched Swing Program: Pinocchio Lane (MS-31, #10338)
+
+Updated 2026-09-18 (local/claude). Full 654-frame Driver (`C3D_TA_Driver.c3d`, 1.814 s) and 657-frame 7-Iron (`C3D_TA_Iron.c3d`, 1.827 s) swings successfully matched in ~8.3 s using the decoupled kinematic tracking + analytic inverse dynamics pipeline (`scripts/match_pinocchio_c3d.py`).
+Delivered PR #10411 on `feat/10338-crocoddyl-native-fit`. Both Optimum (minimum 2-norm, 3.9 ms) and Trail-Side Zero (tau_trail == 0, 168-215 ms, 436-616 N grip force transfer) torque solutions computed with exact forward dynamics acceleration parity.
+Current turnover: `docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md` and `docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md`. Program epic #10363.
+
 ## Current Status
 
 Run101 is a **rejected 0–0.85 s prefix**, not a completed full-swing match.

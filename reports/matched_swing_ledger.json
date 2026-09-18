@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-17T23:11:10Z",
+  "generated_at": "2026-09-18T07:10:24Z",
   "rows": [
     {
       "acceptance": null,
@@ -2270,6 +2270,29 @@
       "sha256": "9a2186ab5e7cb981697b3b6a2e7f5071a6b69f84f17fab6ec9ab5674873a118a"
     },
     {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "evidence/matched/driver_full_pinocchio/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_full_pinocchio/candidate.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_full_pinocchio/receipt.json",
+      "sha256": "b064a0efd2c267ee217e818de4845dd5395b61d68a9676b827e78b3767fb20f5"
+    },
+    {
       "acceptance": {
         "horizon": "G1",
         "is_physically_accepted": true,
@@ -2296,8 +2319,31 @@
       "reason": null,
       "receipt_path": "evidence/matched/driver_g1_pinocchio/receipt.json",
       "sha256": "9bbca5abbd0eb97bd0a063994934bc69a1708d2d0ee07266c50ed6775a5fa317"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "evidence/matched/iron_full_pinocchio/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/iron_full_pinocchio/candidate.npz"
+      },
+      "candidate_sha": null,
+      "capture": "iron",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/iron_full_pinocchio/receipt.json",
+      "sha256": "246719a47fd4a593fe62b7c52fc1ac45d0a52e0e49b3bf2fc2402cc608204f5f"
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 86
+  "total_receipts": 88
 }
