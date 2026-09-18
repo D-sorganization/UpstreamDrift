@@ -333,23 +333,23 @@ class BaseFullBodyIK:
 
     def pose_fn(self, q: Array) -> dict[str, Pose]:
         """Compute world poses (R, t) for all bodies referenced by markers."""
-        raise NotImplementedError
+        raise NotImplementedError  # tracked: #10330
 
     def closure_residuals(self, q: Array) -> Array:
         """Evaluate position residual between dual-grip weld frames/sites in world."""
-        raise NotImplementedError
+        raise NotImplementedError  # tracked: #10330
 
     def _set(self, q: Array) -> None:
         """Set generalized coordinates on underlying physics model."""
-        raise NotImplementedError
+        raise NotImplementedError  # tracked: #10330
 
     def _positions(self) -> Array:
         """Forward kinematics returning marker positions as (M, 3) array."""
-        raise NotImplementedError
+        raise NotImplementedError  # tracked: #10330
 
     def _marker_jacobian(self, positions: Array) -> Array:
         """Jacobian of marker positions with respect to generalized coordinates."""
-        raise NotImplementedError
+        raise NotImplementedError  # tracked: #10330
 
     def _axis_rows(self, targets: Any) -> list[Any]:
         """Convert axis targets into residual rows and Jacobians."""

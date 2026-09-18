@@ -224,7 +224,8 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
                 body_id = mj.mj_name2id(self.model, mjt_obj.mjOBJ_BODY, body)
                 if body_id < 0:
                     raise ValueError(f"Unknown body {body}")
-                frame = self.adapter.body_frames.get(body)
+                frames = self.adapter.body_frames
+                frame = frames.get(body)
                 if frame is None:
                     raise ValueError(f"Body {body} has no joint frame")
                 r_mj = self.data.xmat[body_id].reshape(3, 3)
