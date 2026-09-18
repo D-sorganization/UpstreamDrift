@@ -1,5 +1,21 @@
 # SPEC.md — Repository Specification Document
 
+## Pinocchio Decoupled Full-Swing C3D Matching and Trail-Side Zero Torque Allocation (MS-31, #10411, #10415)
+
+Delivers a high-speed, decoupled kinematic fitting and contact-balanced inverse dynamics torque allocation pipeline for the Pinocchio 44-DoF full-body humanoid matching canonical tour-average driver and 7-iron swings:
+- **Kinematic Manifold Tracking & Barrier Enforcement (`src/engines/physics_engines/pinocchio/python/marker_kinematics.py`)**:
+  - `MarkerIkSolver`: Solves per-frame Levenberg-Marquardt marker IK with dynamic weld closure penalty ramping ($w_c \in \{0, 1, 100, 10000\}$).
+  - Category-specific weighting: club 50×, feet 20×, wrists 10×, knees 5×, torso/head 1×.
+  - Foot contact sphere unilateral ground barrier: Analytical vertical Jacobian non-penetration penalty preventing subterranean foot drift across all 6 contact spheres (`heel_r`, `forefoot_r`, `toe_r`, `heel_l`, `forefoot_l`, `toe_l`).
+  - Velocity-extrapolated regularisation ($2 q_{k-1} - q_{k-2}$) with adaptive damping to eliminate downswing lag.
+- **Contact-Aware Dynamic Force Allocation (`src/shared/python/motion_matching/contact_force_allocator.py`)**:
+  - `ContactForceAllocator`: Constrained quadratic program resolving dynamic equilibrium $M(q)\ddot{q} + b(q, v) = S^T \tau + J_{\text{ground}}^T f + J_{\text{grip}}^T \lambda$ under unilateral ground reactions ($f_z \ge 0$) and friction cone limits.
+  - Minimum achievable trail-arm torque allocation preserving dynamic equilibrium and reducing parity acceleration residual to $< 0.002\text{ m/s}^2$.
+- **Unified Swing Evaluation (`src/shared/python/motion_matching/swing_evaluator.py`)**:
+  - `SwingEvaluator`: Evaluates marker tracking across canonical phases (Address, Backswing, Downswing, Impact, Follow-through, Finish) and anatomical segments (Club, Feet, Wrists, Arms, Torso, Pelvis, Head), auditing ground penetration and grip closure error.
+- **Continuous Forward Simulation Replay**:
+  - Uninterrupted forward rollout through the Pinocchio plant without per-frame state resetting, verifying forward dynamics consistency.
+
 ## OpenSim Calibrated Two-Handed Address Pose and Qualification (OG-05, #10399)
 
 Calibrates and qualifies a verified quasi-static golf address window for OpenSim `golf_humanoid_scaled.osim`:
@@ -5721,6 +5737,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
