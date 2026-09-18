@@ -152,20 +152,26 @@ def marker_positions_and_jacobians(
 
 @dataclass(frozen=True)
 class MarkerIkOptions:
-    iterations: int = 15
+    iterations: int = 40
     damping: float = 1e-3
     closure_weight: float = 1e4
-    regularisation: float = 1e-2
+    regularisation: float = 1e-4
     marker_weight: float = 1.0
+    ground_barrier_weight: float = 5e4
     step_limit_rad: float = 0.5
+    convergence_tol: float = 1e-5
+    velocity_extrapolation: bool = True
 
 
 class MarkerIkSolver:
-    """Damped Gauss-Newton marker IK with weld closure and box bounds.
+    """Damped Gauss-Newton marker IK with weld closure, ground barrier, and box bounds.
 
-    Residuals: weighted marker errors (valid markers only), the six-component
-    weld closure error from the plant, and a small regularisation toward the
-    previous frame's configuration. Bounds are enforced by clipping.
+    Residuals:
+    1. Weighted marker errors (valid markers only) with category weighting.
+    2. Six-component weld closure error from the plant.
+    3. Unilateral ground barrier: foot contact spheres cannot penetrate below ground.
+    4. Velocity-extrapolated regularisation toward prior trajectory motion.
+    Bounds are enforced by clipping.
     """
 
     def __init__(
@@ -191,6 +197,23 @@ class MarkerIkSolver:
             "lower bounds must match coordinate count",
         )
 
+        # Cache contact spheres and ground height for non-penetration barrier
+        self._ground_height_m = (
+            float(plant.ground.height_m)
+            if hasattr(plant, "ground") and plant.ground is not None
+            else 0.0
+        )
+        self._contact_fids = (
+            tuple(plant._contact_frames[s.name] for s in plant.contact_spheres)
+            if hasattr(plant, "contact_spheres") and hasattr(plant, "_contact_frames")
+            else ()
+        )
+        self._contact_radii = (
+            np.array([s.radius_m for s in plant.contact_spheres], dtype=float)
+            if hasattr(plant, "contact_spheres")
+            else np.zeros(0)
+        )
+
     @property
     def coordinate_map(self) -> CoordinateMap:
         return self._map
@@ -210,7 +233,7 @@ class MarkerIkSolver:
         target: Array,
         valid: NDArray[np.bool_],
         weights: Array,
-        q_prev: Array,
+        q_prior: Array,
         closure_weight: float | None = None,
     ) -> tuple[Array, Array]:
         opts = self._options
@@ -226,25 +249,51 @@ class MarkerIkSolver:
         scale = np.sqrt(opts.marker_weight * weights[rows])[:, None]
         marker_res = (scale * (positions[rows] - target[rows])).reshape(-1)
         marker_jac = (scale[:, :, None] * jac[rows]).reshape(-1, self._map.n)
+
+        # Closure
         closure = self._plant.closure_position_linearization(self._map.as_dict(q))
         closure_scale = np.sqrt(
             opts.closure_weight if closure_weight is None else closure_weight
         )
+        closure_res = closure_scale * np.asarray(closure.position)
+        closure_jac = closure_scale * np.asarray(closure.jacobian)
+
+        # Ground barrier: foot contact spheres cannot penetrate underground
+        g_res_list: list[float] = []
+        g_jac_list: list[Array] = []
+        if self._contact_fids and opts.ground_barrier_weight > 0.0:
+            self._pin.updateFramePlacements(self._model, self._data)
+            ref_frame = self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+            g_scale = np.sqrt(opts.ground_barrier_weight)
+            for fid, radius in zip(
+                self._contact_fids, self._contact_radii, strict=True
+            ):
+                sphere_pos = self._data.oMf[fid].translation
+                bottom_z = float(sphere_pos[2]) - radius
+                penetration = self._ground_height_m - bottom_z
+                if penetration > 0.0:
+                    g_res_list.append(g_scale * penetration)
+                    j_raw = self._pin.getFrameJacobian(
+                        self._model, self._data, fid, ref_frame
+                    )
+                    j_lin_z = j_raw[2:3, :]
+                    j_coord = self._map.columns_from_pin(j_lin_z)
+                    g_jac_list.append(-g_scale * j_coord[0])
+
+        if g_res_list:
+            g_res = np.array(g_res_list)
+            g_jac = np.vstack(g_jac_list)
+        else:
+            g_res = np.zeros(0)
+            g_jac = np.zeros((0, self._map.n))
+
+        # Regularisation toward velocity prior
         reg_scale = np.sqrt(opts.regularisation)
-        residual = np.concatenate(
-            [
-                marker_res,
-                closure_scale * np.asarray(closure.position),
-                reg_scale * (q - q_prev),
-            ]
-        )
-        jacobian = np.vstack(
-            [
-                marker_jac,
-                closure_scale * np.asarray(closure.jacobian),
-                reg_scale * np.eye(self._map.n),
-            ]
-        )
+        reg_res = reg_scale * (q - q_prior)
+        reg_jac = reg_scale * np.eye(self._map.n)
+
+        residual = np.concatenate([marker_res, closure_res, g_res, reg_res])
+        jacobian = np.vstack([marker_jac, closure_jac, g_jac, reg_jac])
         return residual, jacobian
 
     def solve_frame(
@@ -254,16 +303,17 @@ class MarkerIkSolver:
         weights: Array,
         q_init: Array,
         *,
+        q_prior: Array | None = None,
         iterations: int | None = None,
         closure_weight: float | None = None,
     ) -> tuple[Array, float, float]:
         """Return (q, marker RMS over valid markers, closure position error norm)."""
         opts = self._options
         q = np.clip(np.asarray(q_init, dtype=float), self._lower, self._upper)
-        q_prev = q.copy()
+        prior = q.copy() if q_prior is None else np.asarray(q_prior, dtype=float)
         damping = opts.damping
         residual, jacobian = self._residual_and_jacobian(
-            q, target, valid, weights, q_prev, closure_weight
+            q, target, valid, weights, prior, closure_weight
         )
         cost = float(residual @ residual)
         for _ in range(iterations or opts.iterations):
@@ -276,7 +326,7 @@ class MarkerIkSolver:
                 step *= opts.step_limit_rad / norm
             q_trial = np.clip(q + step, self._lower, self._upper)
             residual_trial, jacobian_trial = self._residual_and_jacobian(
-                q_trial, target, valid, weights, q_prev, closure_weight
+                q_trial, target, valid, weights, prior, closure_weight
             )
             cost_trial = float(residual_trial @ residual_trial)
             if cost_trial < cost:
@@ -289,7 +339,7 @@ class MarkerIkSolver:
                 damping = max(damping / 3.0, 1e-9)
             else:
                 damping *= 10.0
-            if norm < 1e-8:
+            if norm < opts.convergence_tol:
                 break
         positions = self.markers(q)
         rows = np.flatnonzero(valid)
@@ -320,6 +370,7 @@ class MarkerIkSolver:
                 valid,
                 weights,
                 q,
+                q_prior=q,
                 iterations=iterations,
                 closure_weight=closure_weight,
             )
@@ -339,19 +390,36 @@ class MarkerIkSolver:
         q_out = np.empty((n_nodes, self._map.n))
         rms = np.empty(n_nodes)
         closure = np.empty(n_nodes)
-        q_prev = np.asarray(q_init, dtype=float)
+        q_history: list[Array] = []
+        q_curr = np.asarray(q_init, dtype=float)
+
         for node in range(n_nodes):
             if node == 0:
-                q_prev = self.solve_address(
+                q_curr = self.solve_address(
                     targets[0],
                     valid[0],
                     weights,
-                    q_prev,
+                    q_curr,
                     iterations=first_frame_iterations,
                 )
-            q_prev, rms[node], closure[node] = self.solve_frame(
-                targets[node], valid[node], weights, q_prev
+                q_prior = q_curr.copy()
+            elif node == 1:
+                q_prior = q_history[-1].copy()
+            else:
+                if self._options.velocity_extrapolation:
+                    q_prior = 2.0 * q_history[-1] - q_history[-2]
+                else:
+                    q_prior = q_history[-1].copy()
+
+            q_curr, rms[node], closure[node] = self.solve_frame(
+                targets[node],
+                valid[node],
+                weights,
+                q_curr,
+                q_prior=q_prior,
             )
-            q_out[node] = q_prev
+            q_history.append(q_curr.copy())
+            q_out[node] = q_curr
+
         ensure(bool(np.isfinite(q_out).all()), "IK trajectory must be finite")
         return q_out, rms, closure

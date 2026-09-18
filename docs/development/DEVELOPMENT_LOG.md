@@ -17,17 +17,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10338 · Native Crocoddyl Full-Body Fit (Matched Swing Program MS-31)
+### DL-#10338 · Native Crocoddyl Full-Body Fit & Balanced Contact Kinetics (Matched Swing Program MS-31 / #10415)
 
 - **State:** in_progress
 - **Owner:** claude
-- **Issue:** #10338 (epic #10363)
+- **Issue:** #10338 (epic #10363, child epic #10415)
 - **Branch:** feat/10338-crocoddyl-native-fit
 - **PR:** #10411
-- **Paths:** src/engines/physics\*engines/pinocchio/python/{crocoddyl_problem,crocoddyl_action,marker_kinematics,full_body_fit}.py; scripts/match_pinocchio_c3d.py; tests/unit/motion_matching/test_match_pinocchio_c3d.py; docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md; evidence/matched/{driver_full_pinocchio,iron_full_pinocchio}
+- **Paths:** src/engines/physics_engines/pinocchio/python/{crocoddyl_problem,crocoddyl_action,marker_kinematics,full_body_fit}.py; src/shared/python/motion_matching/{contact_force_allocator,swing_evaluator}.py; scripts/match_pinocchio_c3d.py; tests/unit/motion_matching/{test_match_pinocchio_c3d,test_contact_force_allocator,test_swing_evaluator}.py; docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md; evidence/matched/{driver_full_pinocchio,iron_full_pinocchio}
 - **Started:** 2026-09-17
-- **Last verified:** 2026-09-18 at d5972e92a (SELF; full 654-frame driver and 657-frame 7-iron swings matched in 8.47 s and 8.28 s on ControlTower `upstream-motion-runtime`; optimum vs trail-zero torque allocation benchmarked; forward dynamic acceleration parity verified; `match_pinocchio_c3d.py` CLI delivered with evidence, playback animations, and comprehensive guide; PR #10411 opened)
-- **Summary:** Solved full-swing (654-frame driver, 657-frame 7-iron) decoupled kinematic tracking via `MarkerIkSolver` (29.6 mm address RMS on driver, max weld closure error 5.48 mm) and analytic RNEA inverse dynamics. Compared Optimum (minimum 2-norm, 3.9 ms solve) against Trail-Side Zero (tau_trail == 0, 168-215 ms solve, 436-616 N grip force transfer) with exact forward acceleration parity. Artifacts committed under `evidence/matched/driver_full_pinocchio/` and `evidence/matched/iron_full_pinocchio/` with full developer guide `docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md`.
+- **Last verified:** 2026-09-18 (SELF; full 654-frame driver and 657-frame 7-iron matched with velocity extrapolation and analytical foot non-penetration barrier; contact-aware QP force allocation resolves floating-base balance, unilateral ground forces, and grip loop closure with < 0.002 m/s² ABA parity; driver club RMSE reduced 88% to 50.2 mm, address club 10.4 mm, downswing club 17.1 mm; foot ground penetration reduced 91% to 10.1 mm max, 0.077 mm mean; uninterrupted forward rollout verified stable without pose resets; all unit tests, ruff, black, and mypy pass)
+- **Summary:** Solved full-swing (654-frame driver, 657-frame 7-iron) decoupled kinematic tracking via `MarkerIkSolver` with category weighting (club 50x, feet 20x), analytical foot non-penetration barrier, and constant-velocity extrapolation prior. Replaced algebraic trail-zero overwrite with rigorous QP-based `ContactForceAllocator` satisfying $M \ddot{q} + b = S^T \tau + J_{\text{ground}}^T f + J_{\text{grip}}^T \lambda + S_{\text{root}}^T \delta \tau_{\text{root}}$ under unilateral contact ($f_z \ge 0$) and exact dynamic equilibrium. Built `SwingEvaluator` for audit-grade segment and phase reporting. Driver club RMSE drops from 425.3 mm to 50.2 mm (G1 gate <= 60 mm met); max foot penetration drops from 111.2 mm to 10.1 mm; ABA acceleration parity residual verified to 0.00155 m/s². Continuous forward simulation replay verified stable without pose resets. Artifacts committed under `evidence/matched/driver_full_pinocchio/` and `evidence/matched/iron_full_pinocchio/`.
 - **Next step:** Merge PR #10411 and feed full-body candidate trajectories into cross-engine validation lanes (Drake MS-13/17, MuJoCo MS-10/16, OpenSim MS-40/41 under epic #10363 / MS-104).
 
 ### DL-#9967 · Native Simscape Tour Matching

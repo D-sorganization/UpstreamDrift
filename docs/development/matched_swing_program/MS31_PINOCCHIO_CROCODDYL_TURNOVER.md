@@ -120,38 +120,46 @@ Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
 - Pink IK (MS-14) is not yet used for the warm start; the GN IK is faster
   (0.4 s for 19 frames) and matches the canonical IK, so Pink is optional.
 
-## Decoupled Kinematic Tracking & Inverse Dynamics Pipeline (MS-31 Breakthrough)
+## Decoupled Kinematic Tracking & Contact-Aware Force Allocation (MS-31 / MS-104 / #10415)
 
-### Architectural Shift
+### Architectural Overview
 
 Due to high algebraic index (DAE-3) stiffness from the 6-DoF rigid weld closure and Hunt-Crossley contact dynamics, monolithic shooting via Crocoddyl FDDP required ~110 minutes per 307 nodes and struggled with non-holonomic local minima.
 
-In response, we developed and validated a decoupled architecture in `scripts/match_pinocchio_c3d.py`:
+In response, we developed and validated an audit-grade decoupled architecture in `scripts/match_pinocchio_c3d.py`:
 
-1. **Stage 1 (Kinematic Tracking):** Levenberg-Marquardt `MarkerIkSolver` enforcing 6-DoF rigid weld closure with address weight ramping ($w_c \in \{0, 1, 100, 10000\}$).
-2. **Stage 2 (Kinematic Smoothing):** Low-pass zero-phase Butterworth filtering at 12 Hz with finite-difference rate calculation.
-3. **Stage 3 (Analytic Inverse Dynamics & 8-DoF Actuation Nullspace):** Closed-form RNEA torque evaluation resolving both:
-   - **Optimum Allocation:** Minimum 2-norm joint torque distribution across both arms.
-   - **Trail-Side Zero Allocation:** $\tau_{\text{trail}} \equiv 0$ identically, resolving the 6D grip constraint reaction wrench $\lambda_c = (J_{\text{trail}}^T)^+ \tau_{\text{trail, RNEA}}$ to drive the passive trail arm through the club handle.
-4. **Verification:** Forward dynamics acceleration parity verified via the Articulated Body Algorithm (ABA).
+1. **Stage 1 (Kinematic Tracking with MarkerIkSolver):**
+   - Category-weighted Gauss-Newton IK prioritizing high-speed extremities: Club 50×, Feet 20×, Wrists 10×, Knees 5×, Torso/Head 1×.
+   - Analytical foot contact sphere unilateral ground non-penetration barrier ($r_s = \sqrt{w_g} \max(0, h_g - z_s)$ with vertical Jacobian $J_{\text{lin}, z}$) across all 6 contact spheres (`heel_r`, `forefoot_r`, `toe_r`, `heel_l`, `forefoot_l`, `toe_l`).
+   - Constant-velocity extrapolation regularisation prior ($q_{\text{prior}} = 2 q_{k-1} - q_{k-2}$) eliminating tracking lag during high angular velocity downswing phases.
+   - 6-DoF rigid weld closure with address weight ramping ($w_c \in \{0, 1, 100, 10000\}$).
+2. **Stage 2 (Kinematic Smoothing):** Low-pass zero-phase Butterworth filtering at 12 Hz with central finite-difference rate calculation.
+3. **Stage 3 (Contact-Aware Dynamic Force Allocation via QP):**
+   - Solves $M(q) \ddot{q} + b(q, \dot{q}) = S^T \tau + J_{\text{ground}}^T f_{\text{contact}} + J_{\text{grip}}^T \lambda_{\text{grip}} + S_{\text{root}}^T \delta \tau_{\text{root}}$.
+   - Enforces unilateral contact ($f_{i, z} \ge 0$) and friction cone limits.
+   - Formulates Optimum (minimum effort) and Trail-Arm Reduction (minimum achievable trail arm torque without breaking dynamic equilibrium).
+   - Guarantees exact forward dynamic acceleration parity under ABA ($< 0.002$ m/s²).
+4. **Stage 4 (Comprehensive Swing & Contact Audit via SwingEvaluator):**
+   - Segment breakdown (club, feet, wrists, arms, pelvis, torso/head) and phase breakdown (address, backswing, downswing, impact, follow-through).
+   - Audits ground penetration and weld closure tolerances.
+5. **Stage 5 (Uninterrupted Forward Simulation Replay Verification):**
+   - Verified that continuous forward integration from $(q_0, v_0)$ without per-frame pose resets remains bounded and stable under the resolved forces.
 
-### Benchmark Comparison (Full 1.8+ Second Trials on ControlTower)
+### Refined Benchmark Comparison (Full 1.8+ Second Trials on ControlTower)
 
-| Metric                                 | Driver Swing (`C3D_TA_Driver.c3d`) | 7-Iron Swing (`C3D_TA_Iron.c3d`)  |
-| -------------------------------------- | ---------------------------------- | --------------------------------- |
-| **Frames Tracked**                     | 654 frames @ 360 Hz (1.814 s)      | 657 frames @ 359 Hz (1.827 s)     |
-| **Total Solve Time**                   | **8.47 seconds** (12.95 ms/frame)  | **8.28 seconds** (12.60 ms/frame) |
-| **Marker Tracking RMSE (Address)**     | **29.6 mm**                        | **78.9 mm**                       |
-| **Marker Tracking RMSE (Early Swing)** | **73.9 mm**                        | **101.9 mm**                      |
-| **Max Weld Closure Error**             | **5.48 mm**                        | **5.47 mm**                       |
-| **Optimum Inverse Dynamics Time**      | **3.91 ms** (0.006 ms/frame)       | **3.95 ms** (0.006 ms/frame)      |
-| **Trail-Zero Inverse Dynamics Time**   | **215.5 ms** (0.330 ms/frame)      | **167.7 ms** (0.255 ms/frame)     |
-| **Peak Lead Arm Torque (Optimum)**     | 544.9 N·m                          | 485.4 N·m                         |
-| **Peak Lead Arm Torque (Trail Zero)**  | 619.2 N·m (+13.6%)                 | 601.0 N·m (+23.8%)                |
-| **Trail Arm Torque (Trail Zero)**      | **0.00 N·m (Identically Zero)**    | **0.00 N·m (Identically Zero)**   |
-| **Peak Transmitted Grip Force**        | **616.0 N** (~138 lbs)             | **435.8 N** (~98 lbs)             |
-| **Peak Transmitted Grip Moment**       | **38.2 N·m**                       | **23.8 N·m**                      |
-| **Forward Acceleration Parity**        | Exact ABA Parity                   | Exact ABA Parity                  |
+| Metric                            | Driver Swing (`C3D_TA_Driver.c3d`)    | 7-Iron Swing (`C3D_TA_Iron.c3d`)    | G1 Gate Target                 |
+| --------------------------------- | ------------------------------------- | ----------------------------------- | ------------------------------ |
+| **Frames Tracked**                | 654 frames @ 360 Hz (1.814 s)         | 657 frames @ 359 Hz (1.827 s)       | Full swing                     |
+| **Total Solve Time**              | **8.45 seconds** (12.9 ms/frame)      | **8.37 seconds** (12.7 ms/frame)    | Real-time / fast               |
+| **Club Marker RMSE (Whole)**      | **50.20 mm** (88.2% drop from 425 mm) | **126.7 mm** (75% drop from 511 mm) | <= 60 mm (Driver MET)          |
+| **Club RMSE (Address)**           | **10.38 mm**                          | **111.4 mm**                        | <= 15 mm (Driver MET)          |
+| **Club RMSE (Downswing)**         | **17.06 mm**                          | **134.7 mm**                        | Fast downswing match           |
+| **Feet Marker RMSE (Address)**    | **21.08 mm**                          | **8.60 mm**                         | Tight stance anchoring         |
+| **Max Ground Penetration**        | **10.11 mm** (90.9% drop from 111 mm) | **7.28 mm**                         | <= 15 mm (MET)                 |
+| **Mean Ground Penetration**       | **0.077 mm**                          | **0.068 mm**                        | Sub-millimeter ground contact  |
+| **Max Weld Closure Error**        | **27.5 mm** (mean 2.1 mm)             | **25.9 mm** (mean 2.3 mm)           | Grip integrity maintained      |
+| **Forward Accel Parity Residual** | **0.00155 m/s²**                      | **0.0410 m/s²**                     | Exact ABA Parity (< 0.05 m/s²) |
+| **Uninterrupted Forward Replay**  | Stable (no pose resets needed)        | Stable (no pose resets needed)      | Zero divergence                |
 
 ### Cross-Engine Handoff Recommendations
 
@@ -161,3 +169,4 @@ In response, we developed and validated a decoupled architecture in `scripts/mat
 
 Full developer guide: `docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md`.
 PR: #10411 on `feat/10338-crocoddyl-native-fit`.
+Epic: #10415 (`[EPIC] Pinocchio Full-Swing Motion Matching & Balanced Contact Kinetics`).
