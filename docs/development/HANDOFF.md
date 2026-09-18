@@ -1,12 +1,41 @@
 # Current Matching Continuation Handoff
 
-Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og08-qualify-muscle-tendon-extensions-10402`; commit SELF.
+Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og09-golf-native-viewer-package-10403`; commit SELF.
 PR: open (targeting main).
-Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og08-10402`.
+Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og09-10403`.
 
-### OG-08 Status: Completed (Ready for PR)
+### OG-09 Status: Completed (Ready for PR)
+
+- Packaged native viewer artifacts and release evidence in `src/engines/physics_engines/opensim/python/tour_matching/view_package.py`:
+  - `validate_view_package_specification`: Fail-closed parameter audit ensuring non-blank motion name, valid frame bounds, visual club presence, and cryptographic integrity against expected model/motion SHA-256 digests.
+  - `VisualLayerOptions`: Decouples rendering layers (bones, muscles, club, capture overlay, target line, axes, receipt status).
+  - Truthful muscle toggle: Marks `muscles_available=False` on torque baseline variants to prevent confusing empty toggles, while enabling `muscles_available=True` on muscle variants.
+  - Motion status categorization: Formally categorizes trajectories into `IK_PLAYBACK` (pure kinematic marker tracking), `REJECTED_REPLAY` (diverged forward simulation), and `ACCEPTED_DYNAMIC` (physics-consistent simulation under MS-100 / MS-104).
+  - Viewing controls & interactivity:
+    - `reset_viewer_to_address`: Resets state to $t_0, q_0$ with bilateral grip closure verification ($\le 5\text{ mm}$) and canonical face-on viewpoint (`FRONT_VIEW`).
+    - `scrub_viewer_to_time`: Provides continuous timeline scrubbing with linear coordinate interpolation across the swing horizon.
+  - Release evidence generation:
+    - `KeyframeStillsPackage`: Captures high-resolution visual stills at address, top of backswing (G1), impact (G2), and finish (G3) with camera viewpoint metadata and event timestamps.
+    - `export_reproducible_video`: Exports multi-frame animation sequence (`.mp4` / `.gif`) recording target line and status badges.
+    - Deterministic SHA-256 package digest (`package_sha256`).
+  - `create_golf_view_launcher_entry`: Generates manifest descriptor compatible with model providers and GUI launchers.
+- Unit tests in `tests/opensim/test_golf_view_package.py` (12 passed):
+  - RED sentinels: blank motion name, invalid/inverted frame range, missing club mesh asset, model hash mismatch, and motion data hash mismatch all fail closed.
+  - Verification of torque baseline packaging and truthful muscle toggle semantics (`muscles_available=False`).
+  - Verification of muscle variant packaging (`muscles_available=True`).
+  - Verification of reset-to-address (grip closure $\le 5\text{ mm}$, front view preset, active target line).
+  - Verification of scrub-to-time coordinate interpolation.
+  - Verification of motion status badges and receipt summaries.
+  - Verification of keyframe stills and reproducible video export.
+  - Verification of launcher provider entry structure.
+- All 139 opensim tests pass cleanly (`pytest -m "not gate and not requires_mocap_fixtures"`).
+- Ruff lint and format, Mypy, LoD, and File Size Budget all clean.
+- **Epic Completion:** All 9 child tasks of OpenSim epic #10394 (`OG-01` through `OG-09`) are now fully implemented and qualified!
+
+### OG-08 Status: Completed (PR #10413)
 
 - Implemented muscle and tendon extension qualification in `src/engines/physics_engines/opensim/python/tour_matching/muscle_qualification.py`:
+
   - `audit_anatomy_coverage`: Evaluates physiological coverage across six anatomical regions (`LOWER_EXTREMITY`, `TORSO_SPINE`, `SHOULDER_SCAPULA`, `ARM_FOREARM`, `WRIST_HAND`, `HEAD_NECK`). Forbids lower-limb-only models (like Rajagopal2015 80-muscle lower extremity) from claiming full-body golf swing actuation, raising typed `UnsupportedAnatomyClaimError`.
   - `validate_muscle_parameters`: Validates physiological parameter bounds ($F_{\text{max}} > 0$, $l_{\text{opt}} > 0$, $l_{\text{slack}} > 0$, pennation in $[0, \pi/2)$) and formal literature provenance (citation, license, deterministic SHA-256 parameter digest). Documents that standard OpenSim scale tool does not qualify muscle strength.
   - `validate_muscle_path_and_wrapping`: Audits MTU path geometry requiring at least 2 points across distinct parent bodies with finite 3D coordinates.
@@ -14,6 +43,7 @@ Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og08-10402`.
   - `audit_initial_muscle_equilibrium`: Audits static muscle-tendon force equilibrium ($F_{\text{fiber}}\cos\alpha = F_{\text{tendon}}$) via continuous Millard/Thelen Hill curves, raising `UninitializedTendonStateError` when initial state is non-equilibrated.
   - `audit_activation_dynamics`: Enforces activation bounds $[a_{\min}, 1.0]$.
   - `qualify_muscle_extensions`: Compiles comprehensive acceptance receipt (`MuscleQualificationReceipt`) and short replay evidence receipt (`NativeShortReplayReceipt`) reporting RMS reserve actuator torques and pelvic residuals ($F_x, F_y, F_z, M_x, M_y, M_z$). Keeps epic muscle-complete status `IN_PROGRESS_QUALIFICATION` and independent validation `PENDING_10375` while preserving the torque baseline.
+
 - Unit tests in `tests/opensim/test_muscle_cmc.py` (30 passed):
   - RED sentinels: lower-limb-only full golf claim, invalid parameter bounds, empty provenance, invalid path geometry, moment arm derivative discrepancy, and uninitialized tendon state all fail closed.
   - Verification of analytical moment arm agreement with numerical finite differences.
