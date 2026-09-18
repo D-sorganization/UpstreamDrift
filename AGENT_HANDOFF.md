@@ -1,5 +1,13 @@
 # Simscape Tour-Average Fit Continuation
 
+## Fast Matching Continuation (#10430)
+
+PF-06 numerical work is on `feat/pf06-nullspace-kernel` at SELF. Read
+[Matching Completion Packets](docs/plans/pinocchio_matching_completion.md)
+and [Current Matching Handoff](docs/development/HANDOFF.md). DL-#10436 records
+the implementation. Full-swing native acceptance remains unproved; preserve
+rejected driver/iron evidence and the other agent's PF-05/viewer ownership.
+
 ## Polynomial Full-Body Dynamics Boundary (#10265)
 
 The integration retains global degree-six Bernstein efforts for every non-root

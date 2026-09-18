@@ -59,6 +59,11 @@
       "id": "UP-D1-contact-derivatives-inventory",
       "owner": "UpstreamDrift issue #10254",
       "resolution": "Inventory the shared contact-force derivatives and full-body Pinocchio chain rule delivered in #10255 before manual coverage or physical qualification. Local directional derivative checks establish algebraic agreement with the implemented piecewise contact plant; they do not establish physiological force identification, valid contact parameters, full-swing fitting, or differentiability at activation and clipping boundaries."
+    },
+    {
+      "id": "UP-D1-force-nullspace-inventory",
+      "owner": "UpstreamDrift issue #10436",
+      "resolution": "Inventory scaled SVD dynamics null spaces and constrained physical-force redistribution in force_nullspace.py. Analytical and independent full-space tests establish numerical behavior only; native force assembly, constitutive compatibility, trajectory smoothing and full-swing replay remain unqualified."
     }
   ],
   "calculations": []
