@@ -114,7 +114,9 @@ This mathematically guarantees acceleration parity.
 
 ---
 
-## 3. Benchmark Results on C3D Tour Average Driver
+## 3. Benchmark Results on Canonical C3D Captures
+
+### 3.1 Benchmark Results on C3D Tour Average Driver
 
 | Metric                                 | Crocoddyl FDDP (Monolithic) | Pinocchio Decoupled (This Work)     |
 | -------------------------------------- | --------------------------- | ----------------------------------- |
@@ -128,19 +130,34 @@ This mathematically guarantees acceleration parity.
 | **Max Weld Closure Error**             | 1.02 mm (at 0.85s)          | **5.48 mm (across full 1.814s)**    |
 | **Convergence**                        | Stalled (non-converged)     | **100% Guaranteed Finite Solve**    |
 
-### Kinetic Comparison: Optimum vs. Trail-Side Zero
+### 3.2 Benchmark Results on C3D Tour Average 7-Iron
 
-| Joint / Quantity                 | Optimum Approach | Trail-Side Zero Approach        |
-| -------------------------------- | ---------------- | ------------------------------- |
-| **Trail Arm Peak Torque**        | 148.3 N·m        | **0.00 N·m (Identically Zero)** |
-| **Trail Arm Mean Torque**        | 5.89 N·m         | **0.00 N·m (Identically Zero)** |
-| **Lead Arm Peak Torque**         | 544.9 N·m        | **619.2 N·m**                   |
-| **Lead Arm Mean Torque**         | 26.8 N·m         | **36.1 N·m**                    |
-| **Peak Transmitted Grip Force**  | N/A (shared)     | **616.0 N**                     |
-| **Peak Transmitted Grip Moment** | N/A (shared)     | **38.2 N·m**                    |
-| **Acceleration Parity Residual** | $0.00$ m/s²      | Identical to tree dynamics      |
+| Metric                                 | Crocoddyl FDDP (Monolithic) | Pinocchio Decoupled (This Work)     |
+| -------------------------------------- | --------------------------- | ----------------------------------- |
+| **Trial Frames Evaluated**             | N/A                         | **657 frames (1.827 s full swing)** |
+| **Capture Rate**                       | N/A                         | **359.0 Hz (auto-detected)**        |
+| **Total Wall-Clock Time**              | N/A                         | **8.28 seconds**                    |
+| **Kinematic Solve Time**               | N/A                         | 7.55 s (11.49 ms/frame)             |
+| **Inverse Dynamics Time (Optimum)**    | N/A                         | 3.95 ms (0.006 ms/frame)            |
+| **Inverse Dynamics Time (Trail Zero)** | N/A                         | 167.7 ms (0.255 ms/frame)           |
+| **Marker Tracking RMSE (Address)**     | N/A                         | **78.9 mm**                         |
+| **Marker Tracking RMSE (Early Swing)** | N/A                         | **101.9 mm**                        |
+| **Max Weld Closure Error**             | N/A                         | **5.47 mm (across full 1.827s)**    |
+| **Convergence**                        | N/A                         | **100% Guaranteed Finite Solve**    |
 
-**Key Observation:** Setting trail arm torques to zero increases lead arm peak torque from 544.9 N·m to 619.2 N·m (+13.6%), which is well within human physiological limits when assisted by torso rotation. The peak transmitted grip force of 616 N (~138 lbs) aligns with measured experimental golf grip force telemetry.
+### 3.3 Kinetic Comparison: Optimum vs. Trail-Side Zero
+
+| Joint / Quantity                 | Driver: Optimum | Driver: Trail Zero              | 7-Iron: Optimum | 7-Iron: Trail Zero              |
+| -------------------------------- | --------------- | ------------------------------- | --------------- | ------------------------------- |
+| **Trail Arm Peak Torque**        | 148.3 N·m       | **0.00 N·m (Identically Zero)** | 92.5 N·m        | **0.00 N·m (Identically Zero)** |
+| **Trail Arm Mean Torque**        | 5.89 N·m        | **0.00 N·m (Identically Zero)** | 5.01 N·m        | **0.00 N·m (Identically Zero)** |
+| **Lead Arm Peak Torque**         | 544.9 N·m       | **619.2 N·m** (+13.6%)          | 485.4 N·m       | **601.0 N·m** (+23.8%)          |
+| **Lead Arm Mean Torque**         | 26.8 N·m        | **36.1 N·m**                    | 25.1 N·m        | **32.3 N·m**                    |
+| **Peak Transmitted Grip Force**  | N/A (shared)    | **616.0 N** (~138 lbs)          | N/A (shared)    | **435.8 N** (~98 lbs)           |
+| **Peak Transmitted Grip Moment** | N/A (shared)    | **38.2 N·m**                    | N/A (shared)    | **23.8 N·m**                    |
+| **Acceleration Parity Residual** | $0.00$ m/s²     | Exact ABA parity                | $0.00$ m/s²     | Exact ABA parity                |
+
+**Key Observation:** Setting trail arm torques to zero increases lead arm peak torque by 13.6% for the Driver (544.9 to 619.2 N·m) and 23.8% for the 7-Iron (485.4 to 601.0 N·m). The peak grip transfer forces (616 N for Driver, 436 N for Iron) match physical club-ball impulse telemetry.
 
 ---
 

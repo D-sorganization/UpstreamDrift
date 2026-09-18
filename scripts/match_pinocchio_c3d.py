@@ -88,20 +88,22 @@ def match_pinocchio_c3d(
     t_wall_start = time.perf_counter()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Determine horizon
+    # Determine horizon and capture time step
     from src.shared.python.motion_matching.tour_capture_contract import (
         load_tour_capture,
     )
 
     capture_probe = load_tour_capture(capture_path)
-    capture_duration = (capture_probe.frames - 1) / rate_hz
+    dt = float(capture_probe.time_s[1] - capture_probe.time_s[0])
+    detected_rate_hz = 1.0 / dt
+    capture_duration = float(capture_probe.time_s[-1] - capture_probe.time_s[0])
     final_t_end = (
         capture_duration if t_end_s is None else min(t_end_s, capture_duration)
     )
 
-    dt = 1.0 / rate_hz
     horizon = FitHorizon(t_start_s=t_start_s, t_end_s=final_t_end, dt_s=dt)
     weights = FitWeights()
+    logger.info("Using capture rate: %.2f Hz (dt=%.4f ms)", detected_rate_hz, dt * 1000)
 
     logger.info("Loading inputs and building plant context...")
     inputs = load_inputs(
