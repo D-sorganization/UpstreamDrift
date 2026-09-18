@@ -259,7 +259,7 @@ def _render_scene_still(
     """Render a single high-resolution milestone still using matplotlib 3D projection."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig = plt.figure(figsize=(8, 8), dpi=150)
-    ax = fig.add_subplot(111, projection="3d")
+    ax: Any = fig.add_subplot(111, projection="3d")
 
     # Dark biomechanics aesthetic
     fig.patch.set_facecolor("#1e2227")
@@ -316,9 +316,9 @@ def _render_scene_still(
     ax.tick_params(colors="gray")
 
     # Set consistent limits
-    ax.set_xlim([-1.5, 2.0])
-    ax.set_ylim([-1.5, 1.5])
-    ax.set_zlim([0.0, 2.2])
+    ax.set_xlim((-1.5, 2.0))
+    ax.set_ylim((-1.5, 1.5))
+    ax.set_zlim((0.0, 2.2))
 
     fig.savefig(
         output_path,
@@ -589,7 +589,7 @@ def export_reproducible_video(
     out.parent.mkdir(parents=True, exist_ok=True)
 
     fig = plt.figure(figsize=(6, 6), dpi=100)
-    ax = fig.add_subplot(111, projection="3d")
+    ax: Any = fig.add_subplot(111, projection="3d")
     fig.patch.set_facecolor("#1a2421")
     ax.set_facecolor("#1a2421")
 
@@ -625,9 +625,9 @@ def export_reproducible_video(
             color="#3fb950",
         )
 
-        ax.set_xlim([-1.5, 2.0])
-        ax.set_ylim([0.0, 2.2])
-        ax.set_zlim([-1.5, 1.5])
+        ax.set_xlim((-1.5, 2.0))
+        ax.set_ylim((0.0, 2.2))
+        ax.set_zlim((-1.5, 1.5))
         ax.set_axis_off()
         return []
 

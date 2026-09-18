@@ -303,7 +303,7 @@ def test_apply_segment_scaling_policies_and_analytical_invariants(
     tmp_path: Path,
 ) -> None:
     """Assert fixed_mass and density_preserving policies follow analytical scaling laws."""
-    import xml.etree.ElementTree as ET
+    from defusedxml import ElementTree as ET
     from src.engines.physics_engines.opensim.python.tour_matching.segment_scaling import (
         ScalingPolicy,
         apply_segment_scaling,

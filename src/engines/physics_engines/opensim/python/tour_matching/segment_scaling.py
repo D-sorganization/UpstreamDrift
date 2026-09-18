@@ -17,13 +17,17 @@ model XML document:
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 import math
 from pathlib import Path
-from typing import Sequence
-import xml.etree.ElementTree as ET  # nosec B405
+
+
+import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
+
+from defusedxml import ElementTree as SafeET
+
 
 from src.engines.physics_engines.opensim.python.tour_matching.marker_set import (
     parse_model,

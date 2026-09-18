@@ -14,10 +14,11 @@ from __future__ import annotations
 import copy
 import math
 from pathlib import Path
-from xml.etree import ElementTree as ET
 
 import pytest
+import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from defusedxml import ElementTree as SafeET
+
 
 from src.engines.physics_engines.opensim.python.tour_matching.club_geometry import (
     attach_visual_club,
