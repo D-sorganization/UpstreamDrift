@@ -182,7 +182,8 @@ class _PlantContext:
         self.table: MarkerTable = build_marker_table(
             self.plant, inputs.attachments, inputs.labels
         )
-        self.kin_data = self.plant.model.createData()
+        self.model = self.plant.model
+        self.kin_data = self.model.createData()
         self.lower, self.upper = coordinate_bounds(inputs.document, self.map.names)
         self.actuated = actuated_mask(self.map.names)
         self.n = self.map.n
@@ -195,9 +196,9 @@ class _PlantContext:
         the same armature or the candidate is not the same plant.
         """
         require(armature_kg_m2 >= 0.0, "armature must be nonnegative", armature_kg_m2)
-        armature = np.zeros(self.plant.model.nv)
+        armature = np.zeros(self.model.nv)
         armature[self.map.v_index[self.actuated]] = armature_kg_m2
-        self.plant.model.armature = armature
+        self.model.armature = armature
         self.armature_kg_m2 = float(armature_kg_m2)
 
     def acceleration(self, q: Array, v: Array, tau: Array) -> Array:
@@ -214,18 +215,18 @@ class _PlantContext:
     def markers(self, q: Array) -> Array:
         return marker_positions(
             self.pin,
-            self.plant.model,
+            self.model,
             self.kin_data,
-            self.map.to_pin_q(q, self.plant.model.nq),
+            self.map.to_pin_q(q, self.model.nq),
             self.table,
         )
 
     def markers_and_jacobians(self, q: Array) -> tuple[Array, Array]:
         positions, jac_pin = marker_positions_and_jacobians(
             self.pin,
-            self.plant.model,
+            self.model,
             self.kin_data,
-            self.map.to_pin_q(q, self.plant.model.nq),
+            self.map.to_pin_q(q, self.model.nq),
             self.table,
         )
         return positions, self.map.columns_from_pin(jac_pin)
@@ -468,9 +469,10 @@ def run_fit(
 
     # --- warm start: marker IK on the plant -------------------------------------------
     q_seed = np.zeros(ctx.n)
+    coord_names = ctx.map.names
     for name, degrees in (inputs.document.get("address_seed_deg") or {}).items():
-        if name in ctx.map.names:
-            q_seed[ctx.map.names.index(name)] = np.deg2rad(float(degrees))
+        if name in coord_names:
+            q_seed[coord_names.index(name)] = np.deg2rad(float(degrees))
     t_ik = time.perf_counter()
     solver = MarkerIkSolver(
         ctx.pin, ctx.plant, ctx.table, ctx.lower, ctx.upper, ik_options
