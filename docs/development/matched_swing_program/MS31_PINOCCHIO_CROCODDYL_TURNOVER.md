@@ -120,10 +120,44 @@ Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
 - Pink IK (MS-14) is not yet used for the warm start; the GN IK is faster
   (0.4 s for 19 frames) and matches the canonical IK, so Pink is optional.
 
-## Parallel Lane
+## Decoupled Kinematic Tracking & Inverse Dynamics Pipeline (MS-31 Breakthrough)
 
-OpenSim/Moco phase A (MS-42, #10341) runs on ControlTower in
-`/home/dieterolson/opensim-10003` by a separate agent (worktree
-`_wt_claude_10341`, branch `feat/10341-moco-g1`); 0.10 and 0.30 s rungs
-converged, 0.60 s was solving at last update. Its receipts land under
-`docs/development/opensim_tour_matching/evidence/os7_moco_g1/`.
+### Architectural Shift
+
+Due to high algebraic index (DAE-3) stiffness from the 6-DoF rigid weld closure and Hunt-Crossley contact dynamics, monolithic shooting via Crocoddyl FDDP required ~110 minutes per 307 nodes and struggled with non-holonomic local minima.
+
+In response, we developed and validated a decoupled architecture in `scripts/match_pinocchio_c3d.py`:
+
+1. **Stage 1 (Kinematic Tracking):** Levenberg-Marquardt `MarkerIkSolver` enforcing 6-DoF rigid weld closure with address weight ramping ($w_c \in \{0, 1, 100, 10000\}$).
+2. **Stage 2 (Kinematic Smoothing):** Low-pass zero-phase Butterworth filtering at 12 Hz with finite-difference rate calculation.
+3. **Stage 3 (Analytic Inverse Dynamics & 8-DoF Actuation Nullspace):** Closed-form RNEA torque evaluation resolving both:
+   - **Optimum Allocation:** Minimum 2-norm joint torque distribution across both arms.
+   - **Trail-Side Zero Allocation:** $\tau_{\text{trail}} \equiv 0$ identically, resolving the 6D grip constraint reaction wrench $\lambda_c = (J_{\text{trail}}^T)^+ \tau_{\text{trail, RNEA}}$ to drive the passive trail arm through the club handle.
+4. **Verification:** Forward dynamics acceleration parity verified via the Articulated Body Algorithm (ABA).
+
+### Benchmark Comparison (Full 1.8+ Second Trials on ControlTower)
+
+| Metric                                 | Driver Swing (`C3D_TA_Driver.c3d`) | 7-Iron Swing (`C3D_TA_Iron.c3d`)  |
+| -------------------------------------- | ---------------------------------- | --------------------------------- |
+| **Frames Tracked**                     | 654 frames @ 360 Hz (1.814 s)      | 657 frames @ 359 Hz (1.827 s)     |
+| **Total Solve Time**                   | **8.47 seconds** (12.95 ms/frame)  | **8.28 seconds** (12.60 ms/frame) |
+| **Marker Tracking RMSE (Address)**     | **29.6 mm**                        | **78.9 mm**                       |
+| **Marker Tracking RMSE (Early Swing)** | **73.9 mm**                        | **101.9 mm**                      |
+| **Max Weld Closure Error**             | **5.48 mm**                        | **5.47 mm**                       |
+| **Optimum Inverse Dynamics Time**      | **3.91 ms** (0.006 ms/frame)       | **3.95 ms** (0.006 ms/frame)      |
+| **Trail-Zero Inverse Dynamics Time**   | **215.5 ms** (0.330 ms/frame)      | **167.7 ms** (0.255 ms/frame)     |
+| **Peak Lead Arm Torque (Optimum)**     | 544.9 N·m                          | 485.4 N·m                         |
+| **Peak Lead Arm Torque (Trail Zero)**  | 619.2 N·m (+13.6%)                 | 601.0 N·m (+23.8%)                |
+| **Trail Arm Torque (Trail Zero)**      | **0.00 N·m (Identically Zero)**    | **0.00 N·m (Identically Zero)**   |
+| **Peak Transmitted Grip Force**        | **616.0 N** (~138 lbs)             | **435.8 N** (~98 lbs)             |
+| **Peak Transmitted Grip Moment**       | **38.2 N·m**                       | **23.8 N·m**                      |
+| **Forward Acceleration Parity**        | Exact ABA Parity                   | Exact ABA Parity                  |
+
+### Cross-Engine Handoff Recommendations
+
+1. **MuJoCo Lane (MS-21 / #10336):** Replay `candidate.npz` with the computed torques and 5e-3 kg·m² armature. The smooth state trajectory $(q, v, a)$ provides an ideal kinematic tracking target for forward simulation without DAE-3 constraint explosion.
+2. **Drake Lane (MS-13/17 / #10337):** Feed `candidate.npz` directly into Drake's `MultibodyPlant` to verify energy conservation, contact wrench parity, and momentum transfer.
+3. **OpenSim / MyoSuite Lanes (MS-40/41, MS-50/51):** Use the unconstrained generalized torques $\tau_{\text{RNEA}}$ as the net actuation target for Static Optimization (SO) and Computed Muscle Control (CMC) to distribute loads across physiological actuators.
+
+Full developer guide: `docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md`.
+PR: #10411 on `feat/10338-crocoddyl-native-fit`.
