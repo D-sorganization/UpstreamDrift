@@ -23,7 +23,13 @@ Validation: 40 focused replay/acceptance/schema/full-body/contact tests pass;
 scoped Ruff and mypy pass; agent-context and architecture/file-size budgets pass.
 PR CI found CVE-2026-63374 and CVE-2026-64847 in the inherited AnyIO 4.12.1
 pins. SELF updates both runtime/development locks to the reported fixed 4.14.2;
-the audit remains enforced. Continue PR CI after this minimal dependency fix.
+the audit remains enforced. SELF refreshes the matched-swing ledger for the new
+receipt and repairs the existing cross-engine gravity fixture (#4249): MuJoCo
+and Drake now consume the same collision-free canonical URDF and right-hand
+anchor rather than unlike demo plants. The unchanged 5 mm gate passes with
+real MuJoCo 3.8.0 / Drake 1.51.1 on Linux (15 passed, 2 unavailable-engine skips),
+including new analytic free-fall checks. This fixture does not qualify contact
+or bilateral grip closure. Replay plus ledger tests: 28 passed. Continue PR CI.
 Commit/push hooks pass, including security and bounded unit checks. All 21
 replay tests also pass with CI-pinned MuJoCo 3.8.0 in an isolated environment.
 The central development-log validator flags inherited missing verifying SHAs,
