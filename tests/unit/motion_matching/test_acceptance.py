@@ -112,3 +112,121 @@ def test_thresholds_are_frozen() -> None:
     gates = AcceptanceGates()
     with pytest.raises((dataclasses.FrozenInstanceError, TypeError)):
         gates.g1_whole_rmse_m = 0.05  # type: ignore[misc]
+
+
+def test_open_loop_replay_gate_passes_when_bounded() -> None:
+    """Open-loop replay with declared tolerance and bounded drift passes gate."""
+    receipt = {
+        "shared_metrics": {
+            "whole_marker_rmse_m": 0.020,
+            "early_marker_rmse_m": 0.010,
+            "terminal_marker_rmse_m": 0.020,
+            "club_marker_rmse_m": 0.030,
+            "pelvis_yaw_rmse_rad": 0.02,
+        },
+        "contact_audit": {
+            "max_normal_force_n": 1500.0,
+            "max_penetration_m": 0.004,
+        },
+        "open_loop_replay": {
+            "integrator": "rk45",
+            "rtol": 1e-6,
+            "drift_m": 0.120,
+        },
+    }
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    gate_names = {g.name: g for g in verdict.gates}
+    assert "open_loop_replay" in gate_names
+    assert gate_names["open_loop_replay"].status == GateStatus.PASSED
+
+
+def test_open_loop_replay_fails_on_excessive_drift() -> None:
+    """Open-loop replay fails closed when forward drift exceeds allowable threshold."""
+    receipt = {
+        "shared_metrics": {
+            "whole_marker_rmse_m": 0.020,
+            "early_marker_rmse_m": 0.010,
+            "terminal_marker_rmse_m": 0.020,
+            "club_marker_rmse_m": 0.030,
+            "pelvis_yaw_rmse_rad": 0.02,
+        },
+        "open_loop_replay": {
+            "integrator": "rk45",
+            "rtol": 1e-6,
+            "drift_m": 0.940,  # 940 mm > 500 mm threshold
+        },
+    }
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    gate_names = {g.name: g for g in verdict.gates}
+    assert "open_loop_replay" in gate_names
+    assert gate_names["open_loop_replay"].status == GateStatus.FAILED
+    assert (
+        "0.940" in gate_names["open_loop_replay"].reason
+        or "940" in gate_names["open_loop_replay"].reason
+    )
+
+
+def test_collocation_defect_gate_evaluates_correctly() -> None:
+    """Collocation defect gate passes when <= 5mm and fails when exceeding threshold."""
+    receipt_pass = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "collocation_defect": {
+            "max_defect_m": 0.002,  # 2 mm <= 5 mm
+            "mean_defect_m": 0.0005,
+        },
+    }
+    verdict_pass = evaluate(receipt_pass, horizon=Horizon.G1)
+    gate_names = {g.name: g for g in verdict_pass.gates}
+    assert "collocation_defect" in gate_names
+    assert gate_names["collocation_defect"].status == GateStatus.PASSED
+
+    receipt_fail = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "collocation_defect": {
+            "max_defect_m": 0.015,  # 15 mm > 5 mm
+        },
+    }
+    verdict_fail = evaluate(receipt_fail, horizon=Horizon.G1)
+    gate_names_fail = {g.name: g for g in verdict_fail.gates}
+    assert "collocation_defect" in gate_names_fail
+    assert gate_names_fail["collocation_defect"].status == GateStatus.FAILED
+
+
+def test_stabilized_replay_gate_evaluates_correctly() -> None:
+    """Stabilized replay gate validates low-gain PD tracking marker RMSE."""
+    receipt = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "stabilized_replay": {
+            "tracking_kp": 400.0,
+            "tracking_kd": 40.0,
+            "whole_marker_rmse_m": 0.025,  # 25 mm <= 40 mm
+        },
+    }
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    gate_names = {g.name: g for g in verdict.gates}
+    assert "stabilized_replay" in gate_names
+    assert gate_names["stabilized_replay"].status == GateStatus.PASSED
+
+
+def test_g2_and_g3_fail_closed_if_well_posed_artifacts_missing() -> None:
+    """Horizon G2 and G3 require all three well-posed artifacts to pass."""
+    receipt = {
+        "shared_metrics": {
+            "whole_marker_rmse_m": 0.020,
+            "early_marker_rmse_m": 0.010,
+            "terminal_marker_rmse_m": 0.020,
+            "club_marker_rmse_m": 0.030,
+            "pelvis_yaw_rmse_rad": 0.02,
+        },
+        "contact_audit": {
+            "max_normal_force_n": 1500.0,
+            "max_penetration_m": 0.004,
+            "max_closure_residual_m": 0.002,
+        },
+    }
+    verdict_g2 = evaluate(receipt, horizon=Horizon.G2)
+    assert verdict_g2.is_physically_accepted is False
+    missing_names = {g.name for g in verdict_g2.gates if g.status == GateStatus.MISSING}
+    assert "open_loop_replay" in missing_names
+    assert "collocation_defect" in missing_names
+    assert "stabilized_replay" in missing_names

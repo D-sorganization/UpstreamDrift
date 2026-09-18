@@ -92,6 +92,12 @@ class AcceptanceGates:
     weight_fraction_max: float = 3.00
     min_inside_support_polygon_fraction: float = 0.85  # 85 % of frames
 
+    # Dynamic well-posedness artifacts (MS-100 / MS-107)
+    max_open_loop_drift_m: float = 0.500  # maximum open-loop rollout drift (m)
+    max_integrator_rtol: float = 1e-5  # required declared integrator relative tolerance
+    max_collocation_defect_m: float = 0.005  # 5 mm dynamical consistency defect
+    max_stabilized_marker_rmse_m: float = 0.040  # 40 mm low-gain PD tracking error
+
 
 @dataclass(frozen=True)
 class AcceptanceVerdict:
@@ -518,6 +524,196 @@ def _evaluate_weight_fraction(
     return results
 
 
+def _evaluate_open_loop_replay(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Evaluate open-loop forward rollout drift and integrator tolerance."""
+    results: list[GateResult] = []
+    replay_data = receipt.get("open_loop_replay")
+    if not isinstance(replay_data, Mapping):
+        replay_data = receipt.get("forward_rollout")
+
+    if not isinstance(replay_data, Mapping):
+        if horizon in (Horizon.G2, Horizon.G3):
+            results.append(
+                GateResult(
+                    name="open_loop_replay",
+                    status=GateStatus.MISSING,
+                    threshold=gates.max_open_loop_drift_m,
+                    reason="missing open-loop replay artifact",
+                )
+            )
+        return results
+
+    drift_val = _extract_metric(
+        replay_data, "drift_m", "max_drift_m", "whole_marker_rmse_m", "max_error_m"
+    )
+    rtol_val = _extract_metric(replay_data, "rtol", "tolerance", "rk45_rtol")
+
+    if drift_val is None:
+        results.append(
+            GateResult(
+                name="open_loop_replay",
+                status=GateStatus.FAILED,
+                threshold=gates.max_open_loop_drift_m,
+                reason="missing drift metric in open-loop replay",
+            )
+        )
+    elif drift_val > gates.max_open_loop_drift_m:
+        results.append(
+            GateResult(
+                name="open_loop_replay",
+                status=GateStatus.FAILED,
+                threshold=gates.max_open_loop_drift_m,
+                measured=drift_val,
+                unit="m",
+                reason=f"open-loop drift {drift_val * 1e3:.1f} mm exceeds {gates.max_open_loop_drift_m * 1e3:.1f} mm threshold",
+            )
+        )
+    elif rtol_val is not None and rtol_val > gates.max_integrator_rtol:
+        results.append(
+            GateResult(
+                name="open_loop_replay",
+                status=GateStatus.FAILED,
+                threshold=gates.max_open_loop_drift_m,
+                measured=drift_val,
+                unit="m",
+                reason=f"integrator rtol {rtol_val:e} exceeds maximum allowable {gates.max_integrator_rtol:e}",
+            )
+        )
+    else:
+        results.append(
+            GateResult(
+                name="open_loop_replay",
+                status=GateStatus.PASSED,
+                threshold=gates.max_open_loop_drift_m,
+                measured=drift_val,
+                unit="m",
+            )
+        )
+    return results
+
+
+def _evaluate_collocation_defect(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Evaluate per-node dynamical consistency collocation defect."""
+    results: list[GateResult] = []
+    defect_data = receipt.get("collocation_defect")
+    if not isinstance(defect_data, Mapping):
+        defect_data = receipt.get("defects")
+
+    if not isinstance(defect_data, Mapping):
+        if horizon in (Horizon.G2, Horizon.G3):
+            results.append(
+                GateResult(
+                    name="collocation_defect",
+                    status=GateStatus.MISSING,
+                    threshold=gates.max_collocation_defect_m,
+                    reason="missing per-node collocation defect artifact",
+                )
+            )
+        return results
+
+    defect_val = _extract_metric(
+        defect_data, "max_defect_m", "collocation_defect_m", "defect_max_m"
+    )
+    if defect_val is None:
+        results.append(
+            GateResult(
+                name="collocation_defect",
+                status=GateStatus.FAILED,
+                threshold=gates.max_collocation_defect_m,
+                reason="missing max defect measurement in collocation defect artifact",
+            )
+        )
+    elif defect_val > gates.max_collocation_defect_m:
+        results.append(
+            GateResult(
+                name="collocation_defect",
+                status=GateStatus.FAILED,
+                threshold=gates.max_collocation_defect_m,
+                measured=defect_val,
+                unit="m",
+                reason=f"max collocation defect {defect_val * 1e3:.2f} mm > {gates.max_collocation_defect_m * 1e3:.2f} mm",
+            )
+        )
+    else:
+        results.append(
+            GateResult(
+                name="collocation_defect",
+                status=GateStatus.PASSED,
+                threshold=gates.max_collocation_defect_m,
+                measured=defect_val,
+                unit="m",
+            )
+        )
+    return results
+
+
+def _evaluate_stabilized_replay(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Evaluate cross-engine stabilized replay under low-gain PD tracking."""
+    results: list[GateResult] = []
+    stab_data = receipt.get("stabilized_replay")
+    if not isinstance(stab_data, Mapping):
+        stab_data = receipt.get("stabilized_tracking")
+
+    if not isinstance(stab_data, Mapping):
+        if horizon in (Horizon.G2, Horizon.G3):
+            results.append(
+                GateResult(
+                    name="stabilized_replay",
+                    status=GateStatus.MISSING,
+                    threshold=gates.max_stabilized_marker_rmse_m,
+                    reason="missing stabilized replay artifact",
+                )
+            )
+        return results
+
+    rmse_val = _extract_metric(
+        stab_data, "whole_marker_rmse_m", "marker_rms_m", "rmse_m"
+    )
+    if rmse_val is None:
+        results.append(
+            GateResult(
+                name="stabilized_replay",
+                status=GateStatus.FAILED,
+                threshold=gates.max_stabilized_marker_rmse_m,
+                reason="missing tracking RMSE in stabilized replay artifact",
+            )
+        )
+    elif rmse_val > gates.max_stabilized_marker_rmse_m:
+        results.append(
+            GateResult(
+                name="stabilized_replay",
+                status=GateStatus.FAILED,
+                threshold=gates.max_stabilized_marker_rmse_m,
+                measured=rmse_val,
+                unit="m",
+                reason=f"stabilized tracking RMSE {rmse_val * 1e3:.2f} mm > {gates.max_stabilized_marker_rmse_m * 1e3:.2f} mm",
+            )
+        )
+    else:
+        results.append(
+            GateResult(
+                name="stabilized_replay",
+                status=GateStatus.PASSED,
+                threshold=gates.max_stabilized_marker_rmse_m,
+                measured=rmse_val,
+                unit="m",
+            )
+        )
+    return results
+
+
 @precondition(
     lambda receipt, horizon=Horizon.G1, gates=None: isinstance(horizon, Horizon),
     "horizon must be Horizon enum",
@@ -543,6 +739,9 @@ def evaluate(
     gate_results.extend(_evaluate_normal_contact_force(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_ground_and_closure(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_weight_fraction(receipt, gates))
+    gate_results.extend(_evaluate_open_loop_replay(receipt, horizon, gates))
+    gate_results.extend(_evaluate_collocation_defect(receipt, horizon, gates))
+    gate_results.extend(_evaluate_stabilized_replay(receipt, horizon, gates))
 
     # Overall verdict
     is_accepted = len(gate_results) > 0 and all(
@@ -555,7 +754,9 @@ def evaluate(
         is_physically_accepted=is_accepted,
         status=status_str,
         gates=tuple(gate_results),
-        qualification_note="Physical acceptance criteria passed"
-        if is_accepted
-        else "Physical or kinematic thresholds violated",
+        qualification_note=(
+            "Physical acceptance criteria passed"
+            if is_accepted
+            else "Physical or kinematic thresholds violated"
+        ),
     )
