@@ -1,0 +1,85 @@
+{
+  "schema": "matched-swing-reevaluation/v1",
+  "source_receipt": "evidence/matched/driver_g1_crocoddyl_rk45/receipt.json",
+  "evaluated_by": "src/shared/python/motion_matching/acceptance.py",
+  "horizon": "G1",
+  "note": "FDDP G1 continuation (RK45 nodes, rtol 1e-4): in-solver rollout 46.4 mm whole, but the rtol 1e-6 replay diverges to 340 mm. Rejected; kept as diagnostic evidence for MS-107.",
+  "inputs": {
+    "whole_marker_rmse_m": 0.3397950645586104,
+    "early_marker_rmse_m": 0.08919853196845129,
+    "terminal_marker_rmse_m": 0.7818067788889571,
+    "club_marker_rmse_m": 0.2526322109612285,
+    "pelvis_yaw_rmse_rad": 0.7624699756771898,
+    "max_normal_force_n": 9272.830823015664,
+    "max_penetration_m": 0.02089842056861036,
+    "weight_fraction": {
+      "min": 0.0,
+      "max": 15.064093645215726,
+      "mean": 0.7874068028831578
+    }
+  },
+  "verdict": {
+    "horizon": "G1",
+    "is_physically_accepted": false,
+    "status": "REJECTED",
+    "gates": [
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.025,
+        "measured": 0.3397950645586104,
+        "unit": "m",
+        "reason": "whole RMSE 339.80 mm > 25.00 mm"
+      },
+      {
+        "name": "early_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.012,
+        "measured": 0.08919853196845129,
+        "unit": "m",
+        "reason": "early RMSE 89.20 mm > 12.00 mm"
+      },
+      {
+        "name": "terminal_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.035,
+        "measured": 0.7818067788889571,
+        "unit": "m",
+        "reason": "terminal RMSE 781.81 mm > 35.00 mm"
+      },
+      {
+        "name": "club_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.06,
+        "measured": 0.2526322109612285,
+        "unit": "m",
+        "reason": "club RMSE 252.63 mm > 60.00 mm"
+      },
+      {
+        "name": "pelvis_yaw_rmse_rad",
+        "status": "failed",
+        "threshold": 0.05236,
+        "measured": 0.7624699756771898,
+        "unit": "rad",
+        "reason": "pelvis yaw RMSE 0.7625 rad > 0.0524 rad"
+      },
+      {
+        "name": "max_normal_force_n",
+        "status": "failed",
+        "threshold": 2354.4,
+        "measured": 9272.830823015664,
+        "unit": "N",
+        "reason": "max normal force 9272.8 N exceeds 2354.4 N (3x BW)"
+      },
+      {
+        "name": "max_penetration_m",
+        "status": "failed",
+        "threshold": 0.01,
+        "measured": 0.02089842056861036,
+        "unit": "m",
+        "reason": "penetration 20.9 mm > 10.0 mm"
+      }
+    ],
+    "qualification_note": "Physical or kinematic thresholds violated"
+  }
+}
