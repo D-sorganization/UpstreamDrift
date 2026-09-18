@@ -141,6 +141,29 @@ from src.engines.physics_engines.opensim.python.tour_matching.model_variants imp
     create_muscle_model_variant,
     create_torque_model_variant,
 )
+from src.engines.physics_engines.opensim.python.tour_matching.muscle_qualification import (
+    AnatomicalRegion,
+    AnatomyCoverageScope,
+    IncompleteAnatomyCoverageError,
+    InvalidMuscleParameterError,
+    InvalidMusclePathError,
+    MomentArmDerivativeMismatchError,
+    MuscleEquilibriumState,
+    MuscleParameterProvenance,
+    MusclePathGeometry,
+    MuscleQualificationReceipt,
+    NativeShortReplayReceipt,
+    UninitializedTendonStateError,
+    UnsupportedAnatomyClaimError,
+    audit_activation_dynamics,
+    audit_anatomy_coverage,
+    audit_initial_muscle_equilibrium,
+    compute_path_length_finite_difference_moment_arm,
+    qualify_muscle_extensions,
+    validate_moment_arm_consistency,
+    validate_muscle_parameters,
+    validate_muscle_path_and_wrapping,
+)
 
 __all__ = [
     "BASELINE_MODEL_SHA256",

@@ -1,10 +1,28 @@
 # Current Matching Continuation Handoff
 
-Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og07-versioned-model-variants-10401`; commit SELF.
+Updated 2026-09-18. Governing epic #10394 / #10363; branch `feat/og08-qualify-muscle-tendon-extensions-10402`; commit SELF.
 PR: open (targeting main).
-Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og07-10401`.
+Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og08-10402`.
 
-### OG-07 Status: Completed (Ready for PR)
+### OG-08 Status: Completed (Ready for PR)
+
+- Implemented muscle and tendon extension qualification in `src/engines/physics_engines/opensim/python/tour_matching/muscle_qualification.py`:
+  - `audit_anatomy_coverage`: Evaluates physiological coverage across six anatomical regions (`LOWER_EXTREMITY`, `TORSO_SPINE`, `SHOULDER_SCAPULA`, `ARM_FOREARM`, `WRIST_HAND`, `HEAD_NECK`). Forbids lower-limb-only models (like Rajagopal2015 80-muscle lower extremity) from claiming full-body golf swing actuation, raising typed `UnsupportedAnatomyClaimError`.
+  - `validate_muscle_parameters`: Validates physiological parameter bounds ($F_{\text{max}} > 0$, $l_{\text{opt}} > 0$, $l_{\text{slack}} > 0$, pennation in $[0, \pi/2)$) and formal literature provenance (citation, license, deterministic SHA-256 parameter digest). Documents that standard OpenSim scale tool does not qualify muscle strength.
+  - `validate_muscle_path_and_wrapping`: Audits MTU path geometry requiring at least 2 points across distinct parent bodies with finite 3D coordinates.
+  - `validate_moment_arm_consistency`: Compares generalized moment arms against virtual work finite-difference path-length derivatives ($r_{\text{FD}} = -\frac{l_{MT}(q + \Delta q) - l_{MT}(q - \Delta q)}{2 \Delta q}$), raising `MomentArmDerivativeMismatchError` if deviation exceeds numerical tolerance.
+  - `audit_initial_muscle_equilibrium`: Audits static muscle-tendon force equilibrium ($F_{\text{fiber}}\cos\alpha = F_{\text{tendon}}$) via continuous Millard/Thelen Hill curves, raising `UninitializedTendonStateError` when initial state is non-equilibrated.
+  - `audit_activation_dynamics`: Enforces activation bounds $[a_{\min}, 1.0]$.
+  - `qualify_muscle_extensions`: Compiles comprehensive acceptance receipt (`MuscleQualificationReceipt`) and short replay evidence receipt (`NativeShortReplayReceipt`) reporting RMS reserve actuator torques and pelvic residuals ($F_x, F_y, F_z, M_x, M_y, M_z$). Keeps epic muscle-complete status `IN_PROGRESS_QUALIFICATION` and independent validation `PENDING_10375` while preserving the torque baseline.
+- Unit tests in `tests/opensim/test_muscle_cmc.py` (30 passed):
+  - RED sentinels: lower-limb-only full golf claim, invalid parameter bounds, empty provenance, invalid path geometry, moment arm derivative discrepancy, and uninitialized tendon state all fail closed.
+  - Verification of analytical moment arm agreement with numerical finite differences.
+  - Verification of static tendon equilibrium convergence and activation bounds.
+  - Generation of qualification receipt with reserve and residual reporting.
+- All 127 opensim tests pass cleanly (`pytest -m "not gate and not requires_mocap_fixtures"`). Ruff lint and format, Mypy, LoD, and File Size Budget clean.
+- Next child: **OG-09 (#10403)** — Package native viewer and release evidence.
+
+### OG-07 Status: Completed (PR #10412)
 
 - Implemented versioned OpenSim model variants and explicit actuation capabilities in `src/engines/physics_engines/opensim/python/tour_matching/model_variants.py`:
   - `ActuationProfile`: Encapsulates explicit actuation modalities (`ActuationType.TORQUE` vs `ActuationType.MUSCLE_TENDON`), control units (`N*m` vs `normalized`), ranges, internal states, and capabilities.
@@ -24,7 +42,6 @@ Worktree: `C:/Users/diete/Repositories/UpstreamDrift-og07-10401`.
   - Torque and muscle/tendon variants traverse identical adapter API with truthful capability reporting.
   - SDK objects isolation (no leaked C++ pointers/handles to callers).
 - All 114 opensim unit tests pass. Ruff lint, format, Mypy, LoD, and File Size Budget clean.
-- Next child: **OG-08 (#10402)** — Qualify muscle and tendon extensions without replacing the baseline.
 
 ### OG-06 Status: Completed (PR #10410)
 
