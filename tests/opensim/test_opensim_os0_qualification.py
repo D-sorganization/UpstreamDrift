@@ -66,3 +66,10 @@ def test_baseline_historical_model_rejected_by_qualification_gate() -> None:
             ValueError, match="Club body has no attached visual geometry"
         ):
             verify_model_qualification(baseline_path, require_visible_club=True)
+
+        with pytest.raises(ValueError, match="Arm meshes remain at unit scale"):
+            verify_model_qualification(
+                baseline_path,
+                require_visible_club=False,
+                require_consistent_arm_scaling=True,
+            )

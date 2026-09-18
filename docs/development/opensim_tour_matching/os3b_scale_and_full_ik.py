@@ -29,6 +29,7 @@ from src.engines.physics_engines.opensim.python.tour_matching import (  # noqa: 
     MarkerPlacement,
     SegmentScaleResult,
     SharedMetrics,
+    apply_segment_scaling,
     attach_marker_set,
     calibrate_marker_offsets,
     compute_shared_metrics,
@@ -65,31 +66,6 @@ def tracking_variant(osim: Path, offsets: dict, unlock: list[str]) -> object:
     unlock_coordinates(tree, unlock)
     attach_marker_set(tree, {k: MarkerPlacement(b, o) for k, (b, o) in offsets.items()})
     return tree
-
-
-def apply_segment_scaling(
-    osim_path: Path, scales: dict[str, float], out_path: Path
-) -> Path:
-    """Scale model segment joint offsets in XML according to estimated scale factors."""
-    tree = parse_model(osim_path)
-    root = tree.getroot()
-
-    # Scale joint translation offsets for affected segments
-    # Map segment to child joint offset frames
-    for joint in root.findall(".//JointSet/objects/*"):
-        for frame in joint.findall("frames/PhysicalOffsetFrame"):
-            parent_elem = frame.find("socket_parent")
-            trans_elem = frame.find("translation")
-            if parent_elem is not None and trans_elem is not None and trans_elem.text:
-                parent_path = parent_elem.text.strip()
-                body_name = parent_path.split("/")[-1]
-                if body_name in scales:
-                    s = scales[body_name]
-                    coords = [float(v) for v in trans_elem.text.split()]
-                    scaled_coords = [c * s for c in coords]
-                    trans_elem.text = " ".join(f"{v:.8g}" for v in scaled_coords)
-
-    return write_model(tree, out_path)
 
 
 def generate_overlay_gif(

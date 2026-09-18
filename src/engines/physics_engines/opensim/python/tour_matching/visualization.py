@@ -97,8 +97,9 @@ def plot_3d_trajectory_overlay(
     model_trajectories: Mapping[str, NDArray[Any]],
     output_path: Path | str,
     title: str = "Synchronized 3D Marker Trajectories: Target vs Model",
+    camera_preset: Any = None,
 ) -> Path:
-    """Plot synchronized 3D marker trajectory overlays."""
+    """Plot synchronized 3D marker trajectory overlays with optional golf camera preset."""
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
 
@@ -107,7 +108,7 @@ def plot_3d_trajectory_overlay(
 
     for name, traj in target_trajectories.items():
         t_data = np.asarray(traj, dtype=np.float64)
-        if t_data.shape[1] == 3:
+        if t_data.ndim == 2 and t_data.shape[1] == 3:
             ax.plot(
                 t_data[:, 0],
                 t_data[:, 1],
@@ -119,7 +120,7 @@ def plot_3d_trajectory_overlay(
 
     for name, traj in model_trajectories.items():
         m_data = np.asarray(traj, dtype=np.float64)
-        if m_data.shape[1] == 3:
+        if m_data.ndim == 2 and m_data.shape[1] == 3:
             ax.plot(
                 m_data[:, 0],
                 m_data[:, 1],
@@ -128,10 +129,23 @@ def plot_3d_trajectory_overlay(
                 lw=2.0,
             )
 
-    ax.set_xlabel("X (m)")
-    ax.set_ylabel("Y (m)")
-    ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
+    ax.set_xlabel("X (forward/target) [m]")
+    ax.set_ylabel("Y (up) [m]")
+    ax.set_zlabel("Z (lateral) [m]")  # type: ignore[attr-defined]
     ax.set_title(title, fontsize=12, fontweight="bold")
+
+    # Set camera elevation and azimuth if preset is supplied
+    if camera_preset is not None and hasattr(ax, "view_init"):
+        preset_val = getattr(camera_preset, "value", str(camera_preset)).lower()
+        if "front" in preset_val:
+            ax.view_init(elev=5, azim=-90)  # type: ignore[attr-defined]
+        elif "side" in preset_val:
+            ax.view_init(elev=5, azim=0)  # type: ignore[attr-defined]
+        elif "down_the_line" in preset_val or "dtl" in preset_val:
+            ax.view_init(elev=10, azim=180)  # type: ignore[attr-defined]
+        elif "overhead" in preset_val:
+            ax.view_init(elev=90, azim=-90)  # type: ignore[attr-defined]
+
     ax.legend(loc="upper left", fontsize=8)
 
     fig.tight_layout()
