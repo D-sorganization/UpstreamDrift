@@ -213,6 +213,8 @@ class MarkerIkSolver:
             if hasattr(plant, "contact_spheres")
             else np.zeros(0)
         )
+        rf_type = pin.ReferenceFrame
+        self._ref_frame = rf_type.LOCAL_WORLD_ALIGNED
 
     @property
     def coordinate_map(self) -> CoordinateMap:
@@ -263,7 +265,7 @@ class MarkerIkSolver:
         g_jac_list: list[Array] = []
         if self._contact_fids and opts.ground_barrier_weight > 0.0:
             self._pin.updateFramePlacements(self._model, self._data)
-            ref_frame = self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+            ref_frame = self._ref_frame
             g_scale = np.sqrt(opts.ground_barrier_weight)
             for fid, radius in zip(
                 self._contact_fids, self._contact_radii, strict=True
