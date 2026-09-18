@@ -597,6 +597,16 @@ def create_engine_force_adapter(
 ) -> BaseEngineForceAdapter:
     """Factory creating an engine force adapter for the requested target."""
     e = EngineType(engine)
+    if e == EngineType.PINOCCHIO:
+        from src.engines.physics_engines.pinocchio.python.force_adapter import (
+            PinocchioForceAdapter,
+        )
+
+        p = Path(
+            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
+        )
+        require(p.is_file(), f"Pinocchio specification not found: {p}")
+        return PinocchioForceAdapter(p.read_bytes())
     if e == EngineType.MUJOCO:
         if spec_path is None:
             spec_path = Path("docs/development/full_body_models/full_body_spec_v1.json")
