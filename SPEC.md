@@ -74,6 +74,29 @@ Attaches visible parameterized golf club geometry and canonical grip offset fram
 - **Qualification Gate Verification (`src/engines/physics_engines/opensim/python/tour_matching/model_audit.py`, `tests/opensim/test_golf_club_geometry.py`)**:
   - Confirms baseline models fail `verify_model_qualification(require_visible_club=True)` prior to attachment and pass qualification once visual geometry is attached.
 
+## Engine-Independent Pipeline Plant Interface (MS-10, #10329)
+
+Delivers engine-independent pipeline plant interface, protocol adapters, registry, and CLI runner across physics engines:
+- **`MatchingPlant` Protocol & Registry (`src/shared/python/motion_matching/pipeline/plant.py`)**:
+  - `@runtime_checkable class MatchingPlant(FullBodyPlant, Protocol)`: Defines the engine-independent plant contract combining multi-body dynamics, coordinate order, forward kinematics, ground plane geometry, and IK solver instantiation (`create_ik`).
+  - `EngineUnavailableError`: Fail-closed exception for missing or uninstalled engine adapters.
+  - Pluggable registry: `register_plant`, `available_engines`, `get_plant(engine, spec)`.
+- **Engine Plant Adapters (`src/shared/python/motion_matching/pipeline/plants/`)**:
+  - `plants/mujoco.py`: `MujocoMatchingPlant` wrapping `NativeMujocoFullBodyModel` and `FullBodyMarkerKinematics`.
+  - `plants/drake.py`: `DrakeMatchingPlant` wrapping `FullBodyDrakeModel` and `DrakeFullBodyIK`.
+  - `plants/pinocchio.py`: `PinocchioMatchingPlant` wrapping `FullBodyPinocchioModel` and `PinocchioFullBodyIK`.
+  - Lazy importing to prevent cascading dependencies when an engine is unavailable.
+- **Engine-Agnostic Lane & Pipeline Stages (`src/shared/python/motion_matching/pipeline/lane.py`)**:
+  - Decoupled `Lane` from hardcoded MuJoCo imports; uses `MatchingPlant` to create IK solvers.
+  - Engine-agnostic initialization with synthetic captures and mock plants for isolated test execution.
+- **Pipeline CLI Runner & Legacy Shim (`src/shared/python/motion_matching/pipeline/cli.py`)**:
+  - Added CLI runner accepting `--engine {mujoco,drake,pinocchio}`, `--backend {mujoco,pink}`, `--spec`, `--capture`, etc.
+  - Converted `docs/development/full_body_models/evidence/ground_support/run_ground_support.py` into a thin delegating shim preserving existing defaults.
+  - Updated `receipt_schema.py` and regenerated `RECEIPTS.md` to record the active physics engine in pipeline receipts.
+- **Verification & Unit Tests (`tests/unit/motion_matching/pipeline/`)**:
+  - `test_plant_protocol.py`: Protocol conformance, registry operations, and MuJoCo plant instantiation.
+  - `test_lane_engine_agnostic.py`: Synthetic engine-agnostic Lane execution, CLI argument parsing, and legacy shim preservation.
+
 ## Tools Dependency Repin and Seam Integrity (MS-95, #10362)
 
 
@@ -5715,6 +5738,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
+| 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
