@@ -50,8 +50,12 @@ from numpy.typing import NDArray
 from bunkershot3d.ball import (
     BallLaunchResult,
     BallLie,
+    BallProperties,
     BunkerShotState,
+    ContactType,
     SandDelivery,
+    StrikeOutcome,
+    classify_contact_regime,
     compute_bunker_launch,
 )
 from bunkershot3d.geometry import (
@@ -237,6 +241,30 @@ def _sand_delivery(
             tuple(float(x) for x in row) for row in result.exit_orientation
         ),
     )
+
+
+def _contact_regime(
+    result: ShotResult, divot: DivotMetrics | None, swing: SwingSetup
+) -> ContactType:
+    """Decide which regime the strike fell into before any carry is derived.
+
+    Classified here, on the shot and the divot the workbench already has,
+    so that a bladed strike or a head that never came out is reported as
+    that rather than routed through the splash partition (issue #9544).
+
+    Args:
+        result: The F0 shot.
+        divot: The divot measured on it, or ``None`` when there was none.
+        swing: The delivery, supplying the ball's burial.
+
+    Returns:
+        The regime.
+    """
+    return classify_contact_regime(
+        StrikeOutcome.from_shot(result, divot),
+        lie=BallLie(depth_m=float(swing.ball_depth_m)),
+        ball=BallProperties(),
+    ).regime
 
 
 def _measured_divot(divot: DivotMetrics | None) -> DivotMetrics:
@@ -480,7 +508,10 @@ class WorkbenchModel:
         views = self._views(build, solver, result, kinematics, missing)
         carry = _try(
             lambda: self.carry_estimate(
-                geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
+                geometry,
+                swing,
+                _sand_delivery(result, _measured_divot(divot), sand),
+                contact_regime=_contact_regime(result, divot, swing),
             ),
             "carry",
             missing,
@@ -638,7 +669,12 @@ class WorkbenchModel:
     # ------------------------------------------------------------ ball flight
 
     def carry_estimate(
-        self, geometry: WedgeGeometry, swing: SwingSetup, delivery: SandDelivery
+        self,
+        geometry: WedgeGeometry,
+        swing: SwingSetup,
+        delivery: SandDelivery,
+        *,
+        contact_regime: ContactType = ContactType.SPLASH,
     ) -> CarryEstimate:
         """Carry the splash and flight models predict, with its verdict.
 
@@ -652,6 +688,9 @@ class WorkbenchModel:
             swing: The delivery.
             delivery: What the solver and metrics layer measured about the
                 strike.
+            contact_regime: The regime :func:`_contact_regime` decided the
+                strike fell into. Only a splash has a carry; every other
+                regime is refused by the launch model (issue #9544).
 
         Returns:
             The carry and the verdict it may be quoted under.
@@ -659,6 +698,8 @@ class WorkbenchModel:
         Raises:
             RuntimeError: If the ball-flight kernel is unavailable. Reported
                 as a missing metric rather than replaced by an estimate.
+            UnsupportedContactRegimeError: If the strike was not a splash.
+                A ``ValueError``, reported as a missing carry.
         """
         delivered = deliver_wedge(geometry, swing.delivery())
         state = BunkerShotState(
@@ -666,6 +707,7 @@ class WorkbenchModel:
             ball_lie=BallLie(depth_m=float(swing.ball_depth_m)),
             delivery=delivery,
             club_mass_kg=geometry.head_mass_kg,
+            contact_regime=contact_regime,
         )
         launch = compute_bunker_launch(state)
         central = self._flight_carry_m(launch)
@@ -836,7 +878,10 @@ class WorkbenchModel:
                 sand,
             )
             estimate = self.carry_estimate(
-                geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
+                geometry,
+                swing,
+                _sand_delivery(result, _measured_divot(divot), sand),
+                contact_regime=_contact_regime(result, divot, swing),
             )
             return estimate, False
         except (RuntimeError, ImportError, ValueError) as error:

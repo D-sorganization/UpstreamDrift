@@ -37,6 +37,12 @@ from .pipeline import (
     compute_bunker_launch,
     to_post_impact_state,
 )
+from .regimes import (
+    RegimeClassification,
+    StrikeOutcome,
+    UnsupportedContactRegimeError,
+    classify_contact_regime,
+)
 
 __all__ = [
     "BALL_LAUNCH_MEASUREMENT_GAP",
@@ -50,8 +56,12 @@ __all__ = [
     "BunkerShotState",
     "ContactType",
     "MomentumTransfer",
+    "RegimeClassification",
     "SandDelivery",
     "SplashTransferResult",
+    "StrikeOutcome",
+    "UnsupportedContactRegimeError",
+    "classify_contact_regime",
     "compute_ball_launch_from_splash",
     "compute_bunker_launch",
     "compute_exposed_cap_area",

@@ -5751,6 +5751,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-18 | #9544 | BunkerShot3D qualifies contact regimes and coupled club rotation: `classify_contact_regime` distinguishes no-hit, direct (thin) strike, splash and buried no-release from the F0 sole path, `compute_bunker_launch` refuses every regime but splash (no forced carry), `ShotSettings.rotation_mode` names prescribed rotation and an optional `RotationCoupling` club/shaft/grip boundary with stated wrench reference-point conventions, and the V&V ledger records the support angular impulse and prescribed-driver work; F1 still refuses ball launch and out-of-plane metrics. Doc: `docs/bunkershot3d/contact-regimes.md`. |
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
