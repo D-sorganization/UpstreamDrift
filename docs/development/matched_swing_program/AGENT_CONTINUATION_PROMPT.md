@@ -53,3 +53,9 @@ branch/PR, and ONE next action. Update the canonical handoff, lane handoff and
 existing governing-issue development-log entry in the same implementation
 commit. Send the durable mailbox notice and link the evidence on the lane issue.
 Do not claim full-swing completion without all required native receipts.
+
+OpenSim product clarification: read the Anatomical Playback and Muscle Scope
+section of the lane handoff. Deliver a visible anatomical skeleton and clearly
+labeled motions; the current model has zero muscles. Inventory and escalate
+muscle-actuated model qualification rather than labeling joint torques as
+muscle activity. Preserve the current diagnostic baseline.
