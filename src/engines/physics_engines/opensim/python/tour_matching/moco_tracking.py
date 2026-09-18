@@ -398,6 +398,62 @@ def build_rung_study(
     return study
 
 
+def inverse_warm_start(
+    model_path: Path | str,
+    ik_reference_path: Path | str,
+    horizon_s: float,
+    out_dir: Path,
+    mesh_interval_s: float = 0.01,
+) -> tuple[np.ndarray, dict[str, np.ndarray], dict[str, np.ndarray]]:
+    """MocoInverse on the IK kinematics: dynamically consistent states + controls.
+
+    Solves the inverse problem (kinematics prescribed, CoordinateActuators
+    free) over ``[0, horizon_s]`` and writes ``inverse_solution.sto`` in
+    ``out_dir``. Returns (time, states, controls) in the shape the
+    warm-start assembler expects for its ``previous`` argument, so the whole
+    tracking window starts from controls that already satisfy the dynamics
+    instead of held constants.
+    """
+    import opensim
+
+    if horizon_s <= 0.0 or mesh_interval_s <= 0.0:
+        raise ValueError("horizon_s and mesh_interval_s must be > 0")
+    inverse = opensim.MocoInverse()
+    inverse.setModel(opensim.ModelProcessor(str(model_path)))
+    inverse.setKinematics(opensim.TableProcessor(str(ik_reference_path)))
+    inverse.set_kinematics_allow_extra_columns(True)
+    inverse.set_initial_time(0.0)
+    inverse.set_final_time(float(horizon_s))
+    inverse.set_mesh_interval(mesh_interval_s)
+    inverse.set_convergence_tolerance(1e-3)
+    inverse.set_constraint_tolerance(1e-4)
+    # Keep the MocoInverseSolution alive: the MocoSolution it hands out is a
+    # reference into it, and the SWIG temporary would otherwise be destroyed.
+    inverse_solution = inverse.solve()
+    solution = inverse_solution.getMocoSolution()
+    if solution.isSealed():
+        solution.unseal()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    solution.write(str(out_dir / "inverse_solution.sto"))
+    time_vec = np.array(solution.getTime().to_numpy(), dtype=float)
+    states = {
+        name: np.array(solution.getState(name).to_numpy(), dtype=float)
+        for name in solution.getStateNames()
+    }
+    controls = {
+        name: np.array(solution.getControl(name).to_numpy(), dtype=float)
+        for name in solution.getControlNames()
+    }
+    logger.info(
+        "MocoInverse %s: %d iterations, %d states, %d controls",
+        solution.getStatus(),
+        solution.getNumIterations(),
+        len(states),
+        len(controls),
+    )
+    return time_vec, states, controls
+
+
 def guess_grid(study: Any) -> tuple[Any, np.ndarray, list[str], list[str]]:
     """Create the solver's bounds guess; returns (guess, time, states, controls)."""
     import opensim

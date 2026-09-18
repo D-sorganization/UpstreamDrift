@@ -363,6 +363,29 @@ def gate_table(
     return {"gates": gates, "all_passed": all(g["passed"] for g in gates.values())}
 
 
+def merge_ladder_receipts(
+    runs: Sequence[tuple[str, Mapping[str, object]]], headline: str
+) -> dict:
+    """One receipt from several driver runs of the same ladder.
+
+    The headline run's document is copied verbatim; ``per_horizon`` becomes
+    the concatenation of every run's rows (in the given order, each tagged
+    with its ``run`` name) and ``ladder_runs`` lists the run names. Nothing
+    else is edited, so every number still comes from a driver receipt.
+    """
+    names = [name for name, _ in runs]
+    if headline not in names:
+        raise KeyError(f"headline run {headline!r} not among {names}")
+    merged = dict(dict(runs)[headline])
+    rows: list[dict] = []
+    for name, document in runs:
+        for row in document.get("per_horizon", []):  # type: ignore[union-attr]
+            rows.append({"run": name, **row})
+    merged["per_horizon"] = rows
+    merged["ladder_runs"] = names
+    return merged
+
+
 def validate_os7_receipt(document: Mapping[str, object]) -> bool:
     """Fail closed when a required OS-7 receipt key is missing."""
     missing = [key for key in REQUIRED_RECEIPT_KEYS if key not in document]
@@ -379,6 +402,7 @@ __all__ = [
     "fill_marker_gaps",
     "gate_table",
     "horizon_ladder",
+    "merge_ladder_receipts",
     "mesh_intervals_for",
     "read_sto",
     "retain_markers",
