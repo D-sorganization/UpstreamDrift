@@ -203,7 +203,9 @@ class SimulationViewer:
         **kwargs: Any,
     ) -> None:
         """Launch playback in native MuJoCo viewer."""
-        import mujoco
+        import importlib
+
+        mujoco: Any = importlib.import_module("mujoco")
         from src.engines.physics_engines.mujoco.python.full_body_model import (
             NativeMujocoFullBodyModel,
         )
@@ -229,7 +231,7 @@ class SimulationViewer:
         # Check if GUI viewer is available or use headless / renderer
         has_viewer_gui = hasattr(mujoco, "viewer")
         if has_viewer_gui:
-            import mujoco.viewer as mj_gui
+            mj_gui: Any = importlib.import_module("mujoco.viewer")
 
             with mj_gui.launch_passive(model, mj_data) as viewer:
                 while viewer.is_running():
