@@ -293,6 +293,22 @@ def get_marker_bodies(specification: Mapping[str, Any]) -> list[str]:
     return sorted({v["body"] for v in marker_attachments.values() if "body" in v})
 
 
+@dataclass(frozen=True)
+class _PosePrep:
+    mask: NDArray[np.bool_]
+    pinned: frozenset[str]
+    planted: dict[str, Array]
+    com_goal: tuple[Array, float] | None
+    row_scale: Array
+    q: Array
+    low: Array
+    high: Array
+    free: NDArray[np.bool_]
+    nv: int
+    sqrt_prior: Array
+    axes: list[Any]
+
+
 class BaseFullBodyIK:
     """Base class for engine-specific full-body IK adapters."""
 
@@ -501,23 +517,21 @@ class BaseFullBodyIK:
             targets[name] = p - (p @ n - ground.height_m) * n + radius * n
         return targets
 
-    def solve_pose(
+    def _prepare_pose_fit(
         self,
         targets: Array,
         valid: NDArray[Any],
         q_init: Array,
-        *,
         ground: GroundPlane,
-        options: SolvePoseOptions | None = None,
-        **kwargs: Any,
-    ) -> PoseFit:
-        """Least-squares pose for one frame of marker targets."""
-        opts = SolvePoseOptions(**kwargs) if options is None else options
-        targets = np.asarray(targets, dtype=float)
+        opts: SolvePoseOptions,
+    ) -> _PosePrep:
+        targets_arr = np.asarray(targets, dtype=float)
         mask = np.asarray(valid, dtype=bool)
-        if targets.shape != (len(self.labels), 3) or mask.shape != (len(self.labels),):
+        if targets_arr.shape != (len(self.labels), 3) or mask.shape != (
+            len(self.labels),
+        ):
             raise ValueError("Targets must be (markers, 3) with a validity vector")
-        mask = mask & np.isfinite(targets).all(axis=1)
+        mask = mask & np.isfinite(targets_arr).all(axis=1)
         pinned = self._pinned_spheres(opts.flat_feet)
         planted = self._anchor_targets(opts.anchors, ground)
         pinned = pinned - frozenset(planted)
@@ -573,40 +587,65 @@ class BaseFullBodyIK:
             if weight < 0:
                 raise ValueError("Prior weights must be nonnegative")
             prior_diag[self.coordinate_order.index(name)] = float(weight)
-        sqrt_prior = np.sqrt(prior_diag)
-        axes = self._axis_rows(opts.axis_targets)
+        return _PosePrep(
+            mask=mask,
+            pinned=pinned,
+            planted=planted,
+            com_goal=com_goal,
+            row_scale=row_scale,
+            q=q,
+            low=low,
+            high=high,
+            free=free,
+            nv=nv,
+            sqrt_prior=np.sqrt(prior_diag),
+            axes=self._axis_rows(opts.axis_targets),
+        )
+
+    def solve_pose(
+        self,
+        targets: Array,
+        valid: NDArray[Any],
+        q_init: Array,
+        *,
+        ground: GroundPlane,
+        options: SolvePoseOptions | None = None,
+        **kwargs: Any,
+    ) -> PoseFit:
+        """Least-squares pose for one frame of marker targets."""
+        opts = SolvePoseOptions(**kwargs) if options is None else options
+        targets = np.asarray(targets, dtype=float)
+        prep = self._prepare_pose_fit(targets, valid, q_init, ground, opts)
 
         def residuals(q_k: Array) -> tuple[Array, Array]:
             self._set(q_k)
             positions = self._positions()
             jac = self._marker_jacobian(positions)
-            rows = [row_scale * (positions[mask] - targets[mask]).reshape(-1)]
-            jacs = [row_scale[:, None] * jac[mask].reshape(-1, nv)]
-            rows.append(sqrt_prior * (q_k - q_init))
-            jacs.append(sqrt_prior * np.eye(nv))
-            self._append_closure(
-                rows,
-                jacs,
-                opts.closure_weight,
-                (
-                    opts.closure_weight
-                    if opts.closure_rotation_weight is None
-                    else opts.closure_rotation_weight
-                ),
+            rows = [
+                prep.row_scale * (positions[prep.mask] - targets[prep.mask]).reshape(-1)
+            ]
+            jacs = [prep.row_scale[:, None] * jac[prep.mask].reshape(-1, prep.nv)]
+            rows.append(prep.sqrt_prior * (q_k - q_init))
+            jacs.append(prep.sqrt_prior * np.eye(prep.nv))
+            rot_w = (
+                opts.closure_weight
+                if opts.closure_rotation_weight is None
+                else opts.closure_rotation_weight
             )
-            self._append_ground(rows, jacs, ground, opts.ground_weight, pinned)
-            self._append_anchors(rows, jacs, planted, opts.ground_weight)
+            self._append_closure(rows, jacs, opts.closure_weight, rot_w)
+            self._append_ground(rows, jacs, ground, opts.ground_weight, prep.pinned)
+            self._append_anchors(rows, jacs, prep.planted, opts.ground_weight)
             self._append_balance(rows, jacs, ground, opts.balance_weight)
-            self._append_com_target(rows, jacs, ground, com_goal)
-            self._append_axes(rows, jacs, axes)
-            return np.concatenate(rows), np.concatenate(jacs)[:, free]
+            self._append_com_target(rows, jacs, ground, prep.com_goal)
+            self._append_axes(rows, jacs, prep.axes)
+            return np.concatenate(rows), np.concatenate(jacs)[:, prep.free]
 
         q, done = _run_lm_loop(
             residuals,
-            q,
-            free,
-            low,
-            high,
+            prep.q,
+            prep.free,
+            prep.low,
+            prep.high,
             iterations=opts.iterations,
             damping=opts.damping,
             tolerance_m=opts.tolerance_m,
@@ -615,9 +654,13 @@ class BaseFullBodyIK:
         positions = self._positions()
         diff = positions - targets
         errors = np.sqrt(np.einsum("ij,ij->i", diff, diff))
-        rms = float(np.sqrt(np.mean(errors[mask] ** 2))) if mask.any() else 0.0
+        rms = (
+            float(np.sqrt(np.mean(errors[prep.mask] ** 2))) if prep.mask.any() else 0.0
+        )
         per_marker = {
-            label: float(errors[k]) for k, label in enumerate(self.labels) if mask[k]
+            label: float(errors[k])
+            for k, label in enumerate(self.labels)
+            if prep.mask[k]
         }
         heights = self._sphere_heights(ground)
         pos_err, rot_err = self.closure_error(q)
@@ -630,6 +673,60 @@ class BaseFullBodyIK:
             lowest_sphere_height_m=min(heights.values()),
             iterations=done,
         )
+
+    def _validate_trajectory_options(
+        self,
+        targets: Array,
+        valid: NDArray[Any],
+        opts: SolveTrajectoryOptions,
+    ) -> tuple[Array, NDArray[np.bool_], list[int], Array | None]:
+        targets_arr = np.asarray(targets, dtype=float)
+        mask = np.asarray(valid, dtype=bool)
+        if targets_arr.ndim != 3 or mask.shape != targets_arr.shape[:2]:
+            raise ValueError("Trajectory targets must be (frames, markers, 3)")
+        indices = (
+            list(range(targets_arr.shape[0]))
+            if opts.frames is None
+            else list(opts.frames)
+        )
+        if (
+            opts.flat_feet_per_frame is not None
+            and len(opts.flat_feet_per_frame) != targets_arr.shape[0]
+        ):
+            raise ValueError("flat_feet_per_frame needs one entry per capture frame")
+        if opts.plant_stance and opts.flat_feet_per_frame is None:
+            raise ValueError("plant_stance needs flat_feet_per_frame")
+        prior: Array | None = None
+        if opts.prior_trajectory is not None:
+            prior = np.asarray(opts.prior_trajectory, dtype=float)
+            if prior.shape != (targets_arr.shape[0], len(self.coordinate_order)):
+                raise ValueError("prior_trajectory must be (frames, coordinates)")
+        if (
+            min(
+                opts.restarts,
+                opts.restart_threshold_m,
+                opts.restart_spread_rad,
+                opts.restart_margin_m,
+            )
+            < 0
+        ):
+            raise ValueError("Restart settings must be nonnegative")
+        if (
+            opts.axis_targets_per_frame is not None
+            and len(opts.axis_targets_per_frame) != targets_arr.shape[0]
+        ):
+            raise ValueError("axis_targets_per_frame needs one entry per capture frame")
+        if (
+            opts.com_targets_per_frame is not None
+            and len(opts.com_targets_per_frame) != targets_arr.shape[0]
+        ):
+            raise ValueError("com_targets_per_frame needs one entry per capture frame")
+        if (
+            opts.locked_per_frame is not None
+            and len(opts.locked_per_frame) != targets_arr.shape[0]
+        ):
+            raise ValueError("locked_per_frame needs one entry per capture frame")
+        return targets_arr, mask, indices, prior
 
     def solve_trajectory(
         self,
@@ -646,50 +743,9 @@ class BaseFullBodyIK:
         traj_kwargs = {k: v for k, v in kwargs.items() if k in traj_field_names}
         frame_kwargs = {k: v for k, v in kwargs.items() if k not in traj_field_names}
         opts = SolveTrajectoryOptions(**traj_kwargs) if options is None else options
-
-        targets = np.asarray(targets, dtype=float)
-        mask = np.asarray(valid, dtype=bool)
-        if targets.ndim != 3 or mask.shape != targets.shape[:2]:
-            raise ValueError("Trajectory targets must be (frames, markers, 3)")
-        indices = (
-            list(range(targets.shape[0])) if opts.frames is None else list(opts.frames)
+        targets, mask, indices, prior = self._validate_trajectory_options(
+            targets, valid, opts
         )
-        if (
-            opts.flat_feet_per_frame is not None
-            and len(opts.flat_feet_per_frame) != targets.shape[0]
-        ):
-            raise ValueError("flat_feet_per_frame needs one entry per capture frame")
-        if opts.plant_stance and opts.flat_feet_per_frame is None:
-            raise ValueError("plant_stance needs flat_feet_per_frame")
-        if opts.prior_trajectory is not None:
-            prior = np.asarray(opts.prior_trajectory, dtype=float)
-            if prior.shape != (targets.shape[0], len(self.coordinate_order)):
-                raise ValueError("prior_trajectory must be (frames, coordinates)")
-        if (
-            min(
-                opts.restarts,
-                opts.restart_threshold_m,
-                opts.restart_spread_rad,
-                opts.restart_margin_m,
-            )
-            < 0
-        ):
-            raise ValueError("Restart settings must be nonnegative")
-        if (
-            opts.axis_targets_per_frame is not None
-            and len(opts.axis_targets_per_frame) != targets.shape[0]
-        ):
-            raise ValueError("axis_targets_per_frame needs one entry per capture frame")
-        if (
-            opts.com_targets_per_frame is not None
-            and len(opts.com_targets_per_frame) != targets.shape[0]
-        ):
-            raise ValueError("com_targets_per_frame needs one entry per capture frame")
-        if (
-            opts.locked_per_frame is not None
-            and len(opts.locked_per_frame) != targets.shape[0]
-        ):
-            raise ValueError("locked_per_frame needs one entry per capture frame")
 
         rng = np.random.default_rng(0)
         q = np.asarray(q_init, dtype=float)
@@ -704,7 +760,7 @@ class BaseFullBodyIK:
             )
             if opts.plant_stance:
                 anchors = {name: pt for name, pt in anchors.items() if name in stance}
-            start = q if opts.prior_trajectory is None else prior[k]
+            start = q if prior is None else prior[k]
             f_opts = dict(frame_kwargs)
             if opts.axis_targets_per_frame is not None:
                 f_opts["axis_targets"] = opts.axis_targets_per_frame[k]
