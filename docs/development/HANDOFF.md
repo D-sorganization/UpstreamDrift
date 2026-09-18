@@ -1,3 +1,30 @@
+# Current Matching Continuation Handoff
+
+Updated 2026-09-18. Governing epic #10363; documentation review branch
+`docs/matching-agent-continuation`; commit SELF; PR not created (documentation review publication follows).
+Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matching-handoff`.
+Development-log entry: `DL-#10363`.
+
+The current Pinocchio/OpenSim native jobs were running at the 01:45 UTC
+snapshot. No solver was launched, stopped or accepted by this review. Read
+[the bounded agent prompt](matched_swing_program/AGENT_CONTINUATION_PROMPT.md),
+[Pinocchio turnover](matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md)
+and [OpenSim handoff](opensim_tour_matching/HANDOFF.md). They contain exact
+source identities, live job/output paths, saved checkpoints, recovery evidence,
+failed gates, test results and escalation rules. Pinocchio native source is
+not the merged main scaffold; OpenSim local work contains owner changes.
+Preserve them. Review validation: 14 Pinocchio pure tests and 27 OpenSim ladder
+tests passed; native acceptance was not rerun. Source hashes match deployed
+files after line-ending normalization. Recovery archive is a selected subset.
+
+Next action: inspect the existing native jobs and retrieve newly completed
+receipts using the lane handoff before considering another fit.
+
+The historical Simscape continuation below remains useful for that lane;
+it is not the latest Pinocchio/OpenSim state.
+
+---
+
 # Native Multi-Engine Matching Handoff
 
 ## Current Status
