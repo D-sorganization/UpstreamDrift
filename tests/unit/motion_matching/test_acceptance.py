@@ -38,6 +38,12 @@ RUN102_RECEIPT = (
     / "two_window_fit_9967_102"
     / "receipt.json"
 )
+IRON_RECEIPT = (
+    REPO_ROOT / "evidence" / "matched" / "iron_full_pinocchio" / "receipt.json"
+)
+DRIVER_G1_RECEIPT = (
+    REPO_ROOT / "evidence" / "matched" / "driver_g1_pinocchio" / "receipt.json"
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -131,7 +137,7 @@ def test_open_loop_replay_gate_passes_when_bounded() -> None:
         "open_loop_replay": {
             "integrator": "rk45",
             "rtol": 1e-6,
-            "drift_m": 0.120,
+            "drift_m": 0.018,
         },
     }
     verdict = evaluate(receipt, horizon=Horizon.G1)
@@ -230,3 +236,109 @@ def test_g2_and_g3_fail_closed_if_well_posed_artifacts_missing() -> None:
     assert "open_loop_replay" in missing_names
     assert "collocation_defect" in missing_names
     assert "stabilized_replay" in missing_names
+
+
+def test_iron_reusing_driver_calibration_is_rejected() -> None:
+    """Fixture 1: receipt with mismatched capture/calibration provenance must be rejected."""
+    assert IRON_RECEIPT.is_file(), f"Expected iron receipt at {IRON_RECEIPT}"
+    receipt = _load_json(IRON_RECEIPT)
+
+    # Attachments source explicitly points to driver calibration
+    assert "anthro_driver_shoot_g025" in receipt["attachments_source"]
+
+    # When evaluated for an iron swing, the calibration provenance gate must reject it
+    verdict = evaluate(receipt, horizon=Horizon.G3, capture="iron")
+    assert verdict.is_physically_accepted is False
+    assert verdict.status == "REJECTED"
+
+    gate_map = {g.name: g for g in verdict.gates}
+    assert "calibration_provenance" in gate_map
+    prov_gate = gate_map["calibration_provenance"]
+    assert prov_gate.status == GateStatus.FAILED
+    assert "disagree" in prov_gate.reason
+    assert "iron capture reused driver calibration" in prov_gate.reason
+
+
+def test_driver_g1_pinocchio_is_rejected() -> None:
+    """Fixture 2: driver_g1_pinocchio with self-declared accepted=true must remain rejected."""
+    assert DRIVER_G1_RECEIPT.is_file(), (
+        f"Expected driver G1 receipt at {DRIVER_G1_RECEIPT}"
+    )
+    receipt = _load_json(DRIVER_G1_RECEIPT)
+
+    # Confirm the receipt self-declares accepted=true and status=PASSED in legacy blocks
+    assert receipt.get("status") == "PASSED"
+    assert receipt.get("receipt", {}).get("accepted") is True
+
+    # Evaluator must fail closed based on physical forward rollout metrics (2.76 m drift)
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    assert verdict.is_physically_accepted is False
+    assert verdict.status == "REJECTED"
+
+    gate_map = {g.name: g for g in verdict.gates}
+    assert "whole_marker_rmse_m" in gate_map
+    assert gate_map["whole_marker_rmse_m"].status == GateStatus.FAILED
+    assert gate_map["whole_marker_rmse_m"].measured is not None
+    assert gate_map["whole_marker_rmse_m"].measured > 2.0  # ~2.757 m
+
+
+def test_integrator_consistency_gate() -> None:
+    """Mismatched node_integrator and replay_integrator must fail consistency gate."""
+    receipt_mismatch = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "solver": {
+            "node_integrator": "linear_implicit_euler",
+            "replay_integrator": "rk45",
+        },
+        "open_loop_replay": {
+            "drift_m": 0.015,
+            "rtol": 1e-6,
+        },
+    }
+    verdict_bad = evaluate(receipt_mismatch, horizon=Horizon.G1)
+    gates_bad = {g.name: g for g in verdict_bad.gates}
+    assert "integrator_consistency" in gates_bad
+    assert gates_bad["integrator_consistency"].status == GateStatus.FAILED
+
+    receipt_match = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "solver": {
+            "node_integrator": "rk45",
+            "replay_integrator": "rk45",
+            "rk45_rtol": 1e-6,
+        },
+        "open_loop_replay": {
+            "drift_m": 0.015,
+        },
+    }
+    verdict_good = evaluate(receipt_match, horizon=Horizon.G1)
+    gates_good = {g.name: g for g in verdict_good.gates}
+    assert "integrator_consistency" in gates_good
+    assert gates_good["integrator_consistency"].status == GateStatus.PASSED
+
+
+def test_integrator_tolerance_gate() -> None:
+    """Integrator tolerance gate enforces rtol <= max_integrator_rtol (1e-5)."""
+    receipt_loose = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "open_loop_replay": {
+            "drift_m": 0.015,
+            "rtol": 1e-4,  # 1e-4 > 1e-5 max allowed
+        },
+    }
+    verdict_loose = evaluate(receipt_loose, horizon=Horizon.G1)
+    gates_loose = {g.name: g for g in verdict_loose.gates}
+    assert "integrator_tolerance" in gates_loose
+    assert gates_loose["integrator_tolerance"].status == GateStatus.FAILED
+
+    receipt_tight = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "open_loop_replay": {
+            "drift_m": 0.015,
+            "rtol": 1e-6,  # 1e-6 <= 1e-5
+        },
+    }
+    verdict_tight = evaluate(receipt_tight, horizon=Horizon.G1)
+    gates_tight = {g.name: g for g in verdict_tight.gates}
+    assert "integrator_tolerance" in gates_tight
+    assert gates_tight["integrator_tolerance"].status == GateStatus.PASSED
