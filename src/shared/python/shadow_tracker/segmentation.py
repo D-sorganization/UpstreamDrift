@@ -245,19 +245,7 @@ class ManualMaskProvider:
 
         if mask.revision_id in self._revisions:
             existing = self._revisions[mask.revision_id]
-            if (
-                mask.observation_hash == existing.observation_hash
-                and mask.revision_id == existing.revision_id
-                and mask.parent_revision_id == existing.parent_revision_id
-                and frame_scope_key(mask.frame) == frame_scope_key(existing.frame)
-                and mask.producer_id == existing.producer_id
-                and mask.correction_note == existing.correction_note
-                and mask.width_px == existing.width_px
-                and mask.height_px == existing.height_px
-                and mask.body == existing.body
-                and mask.club == existing.club
-                and mask.valid == existing.valid
-            ):
+            if mask == existing:
                 return True
             raise ValueError(
                 f"Conflicting duplicate revision_id {mask.revision_id!r}: already registered "
@@ -276,6 +264,14 @@ class ManualMaskProvider:
                 raise ValueError(
                     f"Parent revision {mask.parent_revision_id!r} belongs to different frame scope "
                     f"{parent_scope} than child mask {mask_scope}"
+                )
+
+            if parent.frame != mask.frame or (parent.width_px, parent.height_px) != (
+                mask.width_px,
+                mask.height_px,
+            ):
+                raise ValueError(
+                    "Parent and child must describe the same observation and pixel grid"
                 )
 
             curr_id: str | None = mask.parent_revision_id
@@ -318,7 +314,7 @@ class ManualMaskProvider:
         swing_id: str | None = None,
         camera_id: str | None = None,
     ) -> MaskFrame:
-        """Retrieve latest mask for frame_id, optionally filtered by scope."""
+        """Retrieve the selected mask for frame_id, optionally filtered by scope."""
         check_id(frame_id, "frame_id")
         _validate_scope_filters(shot_id, asset_id, swing_id, camera_id)
 
@@ -340,6 +336,19 @@ class ManualMaskProvider:
                 "Specify shot_id/asset_id/swing_id/camera_id to disambiguate."
             )
         return matching[0]
+
+    def select_revision(self, revision_id: str) -> None:
+        """Select an existing revision without changing history; its cache key becomes current.
+
+        Re-registering an identical record never changes this selection.
+        """
+        mask = self.get_revision(revision_id)
+        scope = frame_scope_key(mask.frame)
+        if self._masks[scope] == mask:
+            return
+        self._masks[scope] = mask
+        for cb in self._callbacks:
+            cb(scope, mask)
 
     def get_revision(self, revision_id: str) -> MaskFrame:
         """Retrieve a specific mask revision by revision_id."""
@@ -428,8 +437,9 @@ class ManualMaskProvider:
         """Persist all revisions atomically to a JSON file."""
         target = Path(path)
         payload = {
-            "schema_version": "1.0.0",
+            "schema_version": "1.1.0",
             "revisions": [m.to_dict() for m in self.all_revisions()],
+            "current_revision_ids": [m.revision_id for m in self._masks.values()],
         }
         _atomic_write_json(target, payload)
 
@@ -447,6 +457,14 @@ class ManualMaskProvider:
             raise TypeError(
                 f"Expected dict root in {source}, got {type(payload).__name__}"
             )
+        version = payload.get("schema_version")
+        if version not in ("1.0.0", "1.1.0"):
+            raise ValueError(f"Unsupported revision store schema_version: {version!r}")
+        expected_keys = {"schema_version", "revisions"}
+        if version == "1.1.0":
+            expected_keys.add("current_revision_ids")
+        if set(payload) != expected_keys:
+            raise ValueError("Revision store contains missing or unknown fields")
         raw_revisions = payload.get("revisions")
         if not isinstance(raw_revisions, list):
             raise TypeError(
@@ -460,7 +478,25 @@ class ManualMaskProvider:
                     f"Expected revision dict in 'revisions', got {type(item).__name__}"
                 )
             mask = MaskFrame.from_dict(item)
+            if provider.has_revision(mask.revision_id):
+                raise ValueError(f"Duplicate stored revision_id: {mask.revision_id!r}")
             provider.register_mask(mask)
+        if version == "1.1.0":
+            selected = payload["current_revision_ids"]
+            if not isinstance(selected, list):
+                raise TypeError("current_revision_ids must be a list")
+            current: dict[FrameScopeKey, MaskFrame] = {}
+            for revision_id in selected:
+                mask = provider.get_revision(revision_id)
+                scope = frame_scope_key(mask.frame)
+                if scope in current:
+                    raise ValueError(
+                        "Multiple current revisions for the same observation"
+                    )
+                current[scope] = mask
+            if current.keys() != provider._masks.keys():
+                raise ValueError("Current selection must cover every observation")
+            provider._masks = current
         return provider
 
     @classmethod

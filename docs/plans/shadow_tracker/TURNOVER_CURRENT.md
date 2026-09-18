@@ -1,5 +1,73 @@
 # Shadow Tracker Current Review and Turnover
 
+## Revision Integrity and Persistence — 2026-09-18
+
+Issue #10233, ST-04 / epic #10122. Branch `fix/shadow-tracker-10233-pr`;
+publication base `5347cba0f` (remote main); implementation commit `c76d6f02c`.
+[PR #10450](https://github.com/D-sorganization/UpstreamDrift/pull/10450) is open; CI is running. The original aa01972aa-based diff was transplanted without
+its three unrelated PF-01 commits.
+This section supersedes the historical #10233 dispatch below.
+
+Complete immutable record equality defines idempotence: conflicting global
+revision IDs fail before mutation, and identical registration does not reset
+selection or append history. Parents require identical complete FrameIdentity
+(source hash, timestamps, clock/decoder provenance) and pixel dimensions.
+Existing missing-parent, namespace and ancestry-cycle checks remain enforced.
+
+`select_revision` selects a registered revision without rewriting history;
+`get_cache_key` follows corrections and selection. The existing atomic JSON
+writer saves complete MaskFrames plus one selected revision per five-part scope.
+Schema 1.1.0 validates all fields and selections; legacy 1.0.0 retains its
+last-registered selection. Parents precede children in stored registration
+order. Unsupported versions, unknown fields, duplicate revisions, incomplete
+or duplicate selections, invalid pixels, orphan parents and cycles fail closed.
+
+### Red and Green Evidence
+
+Before production edits, `python3 -m pytest
+ tests/unit/shadow_tracker/test_revision_persistence.py --no-cov -q --timeout=60`
+produced **13 failures and 11 passes**: five changed-observation cases and a
+changed pixel grid did not raise; selection was absent; six invalid store
+metadata cases were accepted. Seven additional regressions cover conflicting
+record fields and attempted cycles without index mutation.
+
+`python3 -m pytest tests/unit/shadow_tracker
+ tests/integration/shadow_tracker/test_model_probe.py --no-cov -q --timeout=60`
+passed **306 tests, zero failures/errors/skips**, including a repeat on the
+remote-main publication base, on Windows / Python 3.13.5,
+Tools pin `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`. Scoped Ruff lint/format,
+tracked file-size budget and `python3 -m agent_context --root . check` passed.
+The context catalog has no registered Shadow Tracker boundary; source and
+consumers were inspected directly. Existing deprecation warnings remain. The final expanded contract file passed
+31 tests after adding namespaced reopen assertions; scoped mypy also passed.
+Four SPEC-integrity tests and staged title-case checks (seven documents) pass.
+The repo-local development-log checker is absent. Running
+`python3 ../Repository_Management/shared_scripts/development_log.py --repo-root .`
+reports pre-existing missing verification SHAs in other entries and a missing
+PR field for DL-#9967, plus the existing portfolio WIP breach (now 20/8).
+DL-#10233 has no reported errors; unrelated entries were preserved. These
+repository-wide documentation failures remain a publication limitation.
+
+### CI Dependency Repair
+
+PR run `35376242857` failed code-quality and dependency-consistency solely on
+AnyIO 4.12.1: CVE-2026-63374 and CVE-2026-64847. Both runtime and development
+lockfiles now select 4.14.2, the audit-reported fixed version. PyPI metadata
+confirms Python >=3.10 compatibility and unchanged satisfied dependency bounds.
+No audit waiver or CI gate is weakened. Repair commit: SELF.
+
+### Review Limits and Next Action
+
+Validate PR #10450 CI and merge through normal protection. The PR references
+`Fixes #10233` and `Refs #10122`.
+Renderer source/tests and unrelated original-checkout work are preserved.
+These guarantees apply to `ManualMaskProvider.save/load`. Separately,
+`artifacts.save_bundle` overwrites existing directory files individually, and
+service initialization changes live state before validating all masks. Those
+pre-existing ST-11 transactions need a separate focused repair; this provider
+change does not certify them as atomic. No power-loss durability, concurrent
+writer coordination, neural inference or scientific qualification is claimed.
+
 ## Release Qualification and Delivery Review — 2026-09-17
 
 Delivery: [Issue #10135](https://github.com/D-sorganization/UpstreamDrift/issues/10135) (ST-12: Qualify Advertised Engines and Release).
