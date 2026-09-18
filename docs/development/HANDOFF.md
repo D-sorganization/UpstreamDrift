@@ -3,26 +3,29 @@
 Repository/worktree: C:/Users/diete/Repositories/.worktrees/upstream-pf09-native-force
 Branch: fix/pf09-native-force-equations
 Published PR: https://github.com/D-sorganization/UpstreamDrift/pull/10451
-Last published implementation/evidence HEAD before this turnover: 614a3643a6127020b1285f6b53d36f4474c422fd
+Last published implementation/evidence HEAD before this turnover: 486a422d39cc129f8cd78e484b9e9e7337a85d21
 Governing issue: #10439; epic #10430; program #10363; development entry DL-#10439.
 
-## First Task: Resolve the Fresh-Instance Grip Jacobian Failure
+## Fresh-Instance Grip Jacobian Failure: RESOLVED
 
-The user's usage limit requires turnover now. Do not merge #10451 or qualify its Pinocchio force mapping until this new native failure is resolved. Earlier four native force-map tests pass on Pinocchio 3.8 and 4.1, but initialized native constraint state before comparison. They do not prove fresh-instance correctness.
+The fresh-instance Pinocchio grip-Jacobian failure in `tests/integration/engines/pinocchio/test_force_adapter.py::test_grip_jacobian_uses_native_velocity_order` has been fully diagnosed and resolved.
 
-New uncommitted work in this worktree:
+**Root Cause:**
+`FullBodyPinocchioModel.closure_force_jacobian` previously called `pin.computeJointJacobians(model, data, q)` and then evaluated `pin.getConstraintsJacobian(model, data, constraints, constraint_data)`. While `computeJointJacobians` updates `data.J` and joint placements, it does NOT refresh `constraint_data[0].c1Mc2` or `oMc1`/`oMc2` from the current joint placements. In earlier tests, `closure_trajectory_residuals` or `accelerations` (which calls `constraintDynamics`) was called first, priming `constraint_data`. On a truly fresh instance, `constraint_data` retained default uninitialized identity placements, resulting in up to 0.43749742 error against the velocity constraint.
 
-- src/engines/physics_engines/pinocchio/python/force_adapter.py
-- tests/integration/engines/pinocchio/test_force_adapter.py
-- factory branch in src/shared/python/motion_matching/multi_engine_torque_allocator.py
+**Fix:**
+Implemented `_refresh_constraint_data` on `NativePinocchioModel`:
 
-TDD: all six new native tests initially errored because the Pinocchio factory branch was absent. After implementation, five pass and one FAILS: test_grip_jacobian_uses_native_velocity_order. Expected native constraint velocity differs from adapter J\*v by up to 0.43749742. This is NOT numerical tolerance noise. Preserve this failing regression. Do not weaken it or prime the adapter in the fixture to make it pass. Investigate native constraint-placement/data refresh versus named q/v mapping. The root cause is not established. The new adapter is not yet committed, pushed, or qualified. Earlier published closure_force_jacobian may share this defect; treat its fresh-state behavior as unverified.
+- On Pinocchio 4.1+: calls `cm.calc(model, data, cd)`.
+- On Pinocchio 3.8: computes `oMc1 = data.oMi[cm.joint1_id] * cm.joint1_placement`, `oMc2 = data.oMi[cm.joint2_id] * cm.joint2_placement`, and assigns `cd.c1Mc2 = oMc1.inverse() * oMc2`, `cd.oMc1 = oMc1`, and `cd.oMc2 = oMc2`.
+- Called inside `closure_force_jacobian` prior to `getConstraintsJacobian`.
 
-Exact test command from this worktree:
+**Verification:**
 
-wsl -d Ubuntu-24.04 --cd /mnt/c/Users/diete/Repositories/.worktrees/upstream-pf09-native-force -- /home/dieterolson/.venvs/upstream-crocoddyl-conda-10254/bin/python -m pytest tests/integration/engines/pinocchio/test_force_adapter.py --confcutdir=tests/integration/engines/pinocchio -o addopts= -q
-
-Runtime: Pinocchio 4.1.0. Also recheck with /home/dieterolson/.venvs/upstream-motion-10254/bin/python (Pinocchio 3.8). Do not add a newer-Pinocchio-only refresh API without version coverage. Never count mocked native imports as proof. New files passed scoped Ruff lint/format; no mypy, full regression, file-size or shared-divergence refresh has yet been run for this unfinished adapter.
+- All 11 integration tests pass across both Pinocchio 4.1.0 (`upstream-crocoddyl-conda-10254`) and Pinocchio 3.8.0 (`upstream-motion-10254`).
+- Added `test_grip_jacobian_is_independent_of_prior_call_state` verifying order and state independence.
+- Five native MuJoCo 3.3.4 RED/GREEN tests and six allocator regressions pass.
+- Ruff, black, and mypy clean with zero errors. PR #10451 is unblocked.
 
 ## Verified Deliveries and Limits
 
