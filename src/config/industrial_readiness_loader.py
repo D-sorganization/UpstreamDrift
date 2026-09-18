@@ -1,14 +1,17 @@
-"""Industrial-readiness ledger loader — the execution index for epic #9539.
+"""Readiness ledger loader — the execution index for epics #9539 and #9546.
 
 Epic #9539 is a repository-level execution index for the 2026-09-04 industrial
 readiness review. Its own acceptance is reconciliation, not implementation: the
 priority children hold the code changes, and the epic must record, truthfully
 and against current ``main``, which of them landed, what proves it, and which
-remain open with an owner or a dependency.
+remain open with an owner or a dependency. Epic #9546 (the Impact Zone and
+Impact Explorer product from the same review) keeps its own ledger under the
+identical contract at :data:`IMPACT_ZONE_LEDGER_PATH`.
 
-This module loads ``industrial_readiness.json``, the machine-readable form of
-that record, and enforces the contract that keeps it honest. The rules exist so
-the ledger cannot drift into a green summary that the tree does not support.
+This module loads ``industrial_readiness.json`` (and its sibling), the
+machine-readable form of that record, and enforces the contract that keeps it
+honest. The rules exist so a ledger cannot drift into a green summary that the
+tree does not support.
 
 Design by Contract:
     Preconditions:
@@ -43,6 +46,7 @@ logger = get_logger(__name__)
 
 CONFIG_DIR = Path(__file__).parent
 LEDGER_PATH = CONFIG_DIR / "industrial_readiness.json"
+IMPACT_ZONE_LEDGER_PATH = CONFIG_DIR / "impact_zone_readiness.json"
 REPO_ROOT = CONFIG_DIR.parent.parent
 
 #: A queue entry is either landed on protected ``main`` or still outstanding.
@@ -60,7 +64,9 @@ VALID_RELEASE_STATUSES = frozenset({"blocked", "ready"})
 #: demands a dependency for entries carrying this value.
 UNASSIGNED_OWNER = "unassigned"
 
-_KEY_PATTERN: re.Pattern[str] = re.compile(r"^U[1-9][0-9]*$")
+#: Queue labels follow the epic body: ``U<n>`` for #9539, ``I<n>`` (children)
+#: and ``R<n>`` (existing issues reused) for #9546.
+_KEY_PATTERN: re.Pattern[str] = re.compile(r"^[A-Z][1-9][0-9]*$")
 _SHA_PATTERN: re.Pattern[str] = re.compile(r"^[0-9a-f]{40}$")
 
 
@@ -104,7 +110,7 @@ class ReadinessItem:
     """One entry in the epic's priority implementation queue.
 
     Attributes:
-        key: Queue label from the epic body (``U1`` … ``U4``)
+        key: Queue label from the epic body (``U1`` … ``U4``, ``I1`` … ``R2``)
         issue: GitHub issue number of the child
         priority: Review priority band (``P0``, ``P1``, ``P3``)
         title: Human-readable summary of the defect or program
@@ -157,7 +163,7 @@ class ReadinessItem:
         context = f"queue entry {key}"
         if not _KEY_PATTERN.match(key):
             raise ReadinessLedgerError(
-                f"{context}: key must match U<n> (e.g. 'U1'), got {key!r}"
+                f"{context}: key must match <letter><n> (e.g. 'U1'), got {key!r}"
             )
 
         status = _require_str(data.get("status"), "status", context)
@@ -298,11 +304,11 @@ class AcceptanceCriterion:
 
 @dataclass(frozen=True)
 class IndustrialReadinessLedger:
-    """The full reconciliation record for epic #9539.
+    """The full reconciliation record for one readiness epic.
 
     Attributes:
         version: Ledger schema version
-        epic: Epic issue number (9539)
+        epic: Epic issue number (9539 or 9546)
         audit_snapshot: SHA the original review was written against
         reconciled_against: SHA this record was reconciled against
         reconciled_on: ISO date of the reconciliation
@@ -449,6 +455,7 @@ class IndustrialReadinessLedger:
 
 
 __all__ = [
+    "IMPACT_ZONE_LEDGER_PATH",
     "LEDGER_PATH",
     "REPO_ROOT",
     "UNASSIGNED_OWNER",
