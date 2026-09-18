@@ -325,6 +325,19 @@ class NativePinocchioModel:
         self.accelerations(position, velocity, efforts)
         return self.closure_errors()
 
+    def _refresh_constraint_data(self) -> None:
+        """Refresh constraint placement data from current joint placements."""
+        for cm, cd in zip(self.constraints, self.constraint_data, strict=True):
+            if hasattr(cm, "calc"):
+                cm.calc(self.model, self.data, cd)
+            else:
+                oMc1 = self.data.oMi[cm.joint1_id] * cm.joint1_placement
+                oMc2 = self.data.oMi[cm.joint2_id] * cm.joint2_placement
+                cd.c1Mc2 = oMc1.inverse() * oMc2
+                cd.oMc1 = oMc1
+                if hasattr(cd, "oMc2"):
+                    cd.oMc2 = oMc2
+
     def _constraints_jacobian(
         self, names: tuple[str, ...]
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
@@ -382,6 +395,7 @@ class NativePinocchioModel:
         q = self.configuration(coordinates)
         names = tuple(coordinates)
         self._pin.computeJointJacobians(self.model, self.data, q)
+        self._refresh_constraint_data()
         _, jacobian = self._constraints_jacobian(names)
         jacobian = np.array(jacobian, dtype=float, copy=True)
         if jacobian.shape != (6, len(names)) or not np.isfinite(jacobian).all():
