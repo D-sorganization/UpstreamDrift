@@ -17,18 +17,130 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10395 · OpenSim Anatomical Baseline Freeze and Qualification Fixtures
+### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
 
 - **State:** in_progress
 - **Owner:** local
+- **Issue:** #10403 (epic #10394 / #10363, OG-09)
+- **Branch:** feat/og09-golf-native-viewer-package-10403
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/view_package.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_view_package.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; blank motion name raises InvalidMotionSpecificationError; invalid/inverted frame range raises InvalidMotionSpecificationError; missing club asset raises MissingClubAssetError; model/motion hash mismatch raises ModelMotionHashMismatchError; torque baseline truthfully sets muscles_available=False; muscle variant sets muscles_available=True; reset to address verifies bilateral grip closure <= 5 mm and canonical face-on viewpoint; scrub to time linearly interpolates coordinates across swing horizon; motion status explicitly distinguishes IK_PLAYBACK, REJECTED_REPLAY, and ACCEPTED_DYNAMIC; 4 canonical milestone stills generated [address, top, impact, finish]; reproducible video exported; deterministic SHA-256 package digest; all 12 view package tests pass; all 139 opensim unit tests pass; ruff, mypy, lod clean)
+- **Summary:** Packaged native viewer artifacts and release evidence (`view_package.py`) for the OpenSim golf humanoid. Provides visual layer options, truth-in-advertising muscle toggles, swing milestone stills, reproducible video animation export, reset-to-address with grip closure verification, continuous scrubbing, launcher entry generation, and deterministic package hashing. Completes all 9 child issues of OpenSim epic #10394.
+- **Next step:** Commit, push, open PR referencing Closes #10403, release lease, conclude OpenSim epic #10394.
+- **Evidence:** tests/opensim/test_golf_view_package.py; src/engines/physics_engines/opensim/python/tour_matching/view_package.py.
+
+### DL-#10402 · OpenSim Qualify Muscle and Tendon Extensions Without Replacing Baseline
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10402 (epic #10394 / #10363, OG-08)
+- **Branch:** feat/og08-qualify-muscle-tendon-extensions-10402
+- **PR:** #10413
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/muscle_qualification.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_muscle_cmc.py; src/engines/physics_engines/opensim/python/POST_MVP_MUSCLES.md; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; lower-limb-only claiming full-body golf swing raises UnsupportedAnatomyClaimError; invalid parameters raise InvalidMuscleParameterError; invalid MTU path raises InvalidMusclePathError; uninitialized tendon state raises UninitializedTendonStateError; moment arm discrepancy with finite-difference path-length derivative raises MomentArmDerivativeMismatchError; continuous Hill tendon model equilibrates; receipt reports reserve actuator torques and pelvic residuals; torque baseline preserved; all 30 muscle tests pass; all 127 opensim tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Qualified muscle and tendon extensions (`muscle_qualification.py`) without replacing the torque baseline. Provides explicit anatomy coverage audit (disallowing lower-extremity-only models from claiming full golf capability), parameter provenance and licensing audits, MTU path and wrapping verification, moment arm vs. finite-difference path-length derivative validation, activation dynamics, initial tendon equilibrium, and short replay receipts reporting reserve torques and pelvic residuals. Keeps epic muscle-complete status open pending independent #10375 validation.
+- **Next step:** Land PR #10413 referencing Closes #10402.
+- **Evidence:** tests/opensim/test_muscle_cmc.py; src/engines/physics_engines/opensim/python/tour_matching/muscle_qualification.py.
+
+### DL-#10401 · OpenSim Introduce Versioned Model Variants and Actuation Capabilities
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10401 (epic #10394 / #10363, OG-07)
+- **Branch:** feat/og07-versioned-model-variants-10401
+- **PR:** #10412
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/model_variants.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_model_variants.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; loading torque controls into muscle variant raises IncompatibleActuationError; querying unknown state raises UnknownStateError; missing geometry mesh raises MissingGeometryAssetError; stale/mismatched model hash raises StaleModelHashError; unsupported capability raises UnsupportedCapabilityError; identity variant preserves forward kinematics; torque and muscle variants share identical GolfModelAdapter API; adapter shields callers from OpenSim C++ SDK objects; 8 variant tests pass; all 114 opensim unit tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Implemented versioned OpenSim model variants and explicit actuation capabilities (`model_variants.py`) via composition: AnatomicalSkeletonSpec + GolfEquipmentSpec + Calibration + ActuationProfile (torque vs. muscle/tendon). Provides typed error boundaries and a clean adapter API without SDK leakage.
+- **Next step:** Land PR #10412 referencing Closes #10401.
+- **Evidence:** tests/opensim/test_golf_model_variants.py; src/engines/physics_engines/opensim/python/tour_matching/model_variants.py.
+
+### DL-#10400 · OpenSim Rebuild Full-Swing Tracking From Qualified Address
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10400 (epic #10394 / #10363, OG-06)
+- **Branch:** feat/og06-rebuild-full-swing-tracking-10400
+- **PR:** #10410
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_moco_g1_ladder.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; model checkpoint verification raises ModelCheckpointMismatchError; truncated capture claim raises TruncatedCaptureClaimError; control/state naming mismatch raises ControlStateNamingMismatchError; dynamic bilateral grip violation raises DynamicGripViolationError; continuity violation raises ContinuityViolationError; ladder stages from static address through G1, G2, G3 full capture; distinct statuses for IK playback, solver convergence, and replay acceptance; separate tracking and forward replay receipts; 9 ladder tests pass; all 106 opensim unit tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Rebuilt OpenSim full-swing tracking qualification module (`full_swing_tracking.py`) reinitialized from qualified address pose $q_0$ and model hash with frozen marker calibration. Implements ladder progression, continuity, full-swing coordinate limits, dynamic bilateral grip closure, ground contact mechanics, and separate receipts under MS-100 / MS-104.
+- **Next step:** Land PR #10410 referencing Closes #10400.
+- **Evidence:** tests/opensim/test_moco_g1_ladder.py; src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py.
+
+### DL-#10399 · OpenSim Calibrate and Match Two-Handed Address Pose
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10399 (epic #10394 / #10363, OG-05)
+- **Branch:** feat/og05-match-two-handed-address-10399
+- **PR:** #10409
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/address.py; src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_address.py; tests/opensim/test_marker_calibration.py; SPEC.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; frozen acceptance profile hash verified; quasi-static address window detection; dual-arm grip closure <= 5 mm; ground support clearance <= 15 mm; coordinate range limits audited; holdout validation; all 15 address and calibration tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Calibrated and qualified two-handed golf address pose (`address.py`) on OpenSim humanoid model against canonical tour capture. Validates bilateral grip closure between lead hand and club shaft, foot ground support, posture metrics, and coordinate limits against model XML ranges.
+- **Next step:** Land PR #10409 referencing Closes #10399.
+- **Evidence:** tests/opensim/test_golf_address.py; tests/opensim/test_marker_calibration.py.
+
+### DL-#10398 · OpenSim Capture Registration and Golf Camera Views
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10398 (epic #10394 / #10363, OG-04)
+- **Branch:** feat/og04-qualify-registration-camera-10398
+- **PR:** #10408
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/registration.py; src/engines/physics_engines/opensim/python/tour_matching/visualization.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_registration.py; SPEC.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; 3D rigid transform with Kabsch SVD and proper rotation constraint det(R)==+1.0; round-trip identity error <= 1e-8 m; stance ground support registration to Y=0 and target line yaw alignment to +X; golf camera view presets FRONT_VIEW, SIDE_VIEW, DOWN_THE_LINE, OVERHEAD; camera viewpoint adjustments proven invariant over model states and kinematic metrics; 30 unit tests pass; ruff, mypy, lod, file-budget clean)
+- **Summary:** Implemented capture registration and qualified golf camera viewpoints (`registration.py`). Provides rigid landmark alignment without scaling or shearing, ground support plane alignment, and down-the-line / front / side / overhead camera views in `visualization.py`. Validated invariant over model states and simulation outputs.
+- **Next step:** Land PR #10408 referencing Closes #10398.
+- **Evidence:** tests/opensim/test_golf_registration.py.
+
+### DL-#10396 · OpenSim Anatomically and Physically Consistent Segment Scaling
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10396 (epic #10394 / #10363, OG-02)
+- **Branch:** feat/og02-consistent-segment-scaling-10396
+- **PR:** #10407
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py; src/engines/physics_engines/opensim/python/tour_matching/scale.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim; docs/development/opensim_tour_matching/os3b_scale_and_full_ik.py; tests/opensim/test_segment_scale.py; tests/opensim/test_opensim_os0_qualification.py; SPEC.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; acromion proxy reconstruction removes artificial humerus inflation bringing bilateral ratio to 1.0807; apply_segment_scaling scales joint frames, bone meshes, COM, and inertia under fixed_mass and density_preserving policies; repeat scaling protection verified; 80 unit tests passed; ruff, mypy, lod, file-budget clean)
+- **Summary:** Implemented consistent segment scaling module (`segment_scaling.py`) and acromion proxy reconstruction for unilateral marker occlusions (`scale.py`). Joint frames, visual meshes, COM, and inertia are scaled in lockstep. Regenerated qualified `golf_humanoid_scaled.osim` with attached visual club and consistent scaling, passing qualification gates without unscaled arm mesh defects.
+- **Next step:** Land PR #10407 referencing Closes #10396.
+- **Evidence:** tests/opensim/test_segment_scale.py; tests/opensim/test_opensim_os0_qualification.py; src/engines/physics_engines/opensim/models/golf_humanoid_scaled.osim.
+
+### DL-#10397 · OpenSim Visible Parameterized Golf Club and Grip Frames
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10397 (epic #10394 / #10363, OG-03)
+- **Branch:** feat/og03-visible-golf-club-10397
+- **PR:** #10405
+- **Paths:** src/engines/physics_engines/opensim/python/tour_matching/club_geometry.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_club_geometry.py; SPEC.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; parameterized club visual geometry generator implemented; shaft and head mesh elements attached with ClubSpec scaling; mass, com, and inertia preserved; grip and clubhead offset frames aligned with OpenSim conventions; 13 pure unit tests passed; ruff, mypy, lod, file-budget clean)
+- **Summary:** Added parameterized visual geometry attachment (`attach_visual_club`) and frame calculation (`get_club_frame_offsets`) for the OpenSim Club body according to shared ClubSpec (Driver and 7-iron). Solves the missing visual club defect while strictly preserving physical mass properties (0.320 kg, COM, inertia). Fully verified against anatomical baseline fixtures and qualification gates.
+- **Next step:** Land PR #10405 referencing Closes #10397.
+- **Evidence:** tests/opensim/test_golf_club_geometry.py; tests/opensim/test_anatomical_baseline_fixtures.py.
+
+### DL-#10395 · OpenSim Anatomical Baseline Freeze and Qualification Fixtures
+
+- **State:** in_review
+- **Owner:** local
 - **Issue:** #10395 (epic #10394 / #10363, OG-01)
 - **Branch:** feat/og01-freeze-anatomical-baseline-10395
-- **PR:** not created
+- **PR:** #10404
 - **Paths:** src/engines/physics_engines/opensim/python/tour_matching/model_audit.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; src/engines/physics_engines/opensim/python/tour_matching/cli.py; tests/opensim/test_anatomical_baseline_fixtures.py; tests/opensim/test_opensim_os0_qualification.py
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at 94d593cf1 (SELF; pure model audit implemented test-first; baseline SHA-256 digests and structural counts verified; missing club and unscaled mesh defects reproduced with RED fixtures; fail-closed qualification gates verified; 22 pure tests passed; ruff, mypy, lod, file-budget clean)
 - **Summary:** Delivered pure-Python OpenSim model geometry and structural qualification audit under OG-01. Verifies SHA-256 digests against pinned baseline models, audits body/coordinate/actuator counts (23/39/39/0), detects empty attached_geometry on equipment bodies (Club body) and unscaled arm meshes (scale factors 1 1 1 on humerus). Implements fail-closed `verify_model_qualification` gate with DbC assertions and structured receipts via `cli.py qualify`.
-- **Next step:** Land PR referencing Closes #10395, then start OG-03 (#10397).
+- **Next step:** Land PR #10404 referencing Closes #10395.
 - **Evidence:** tests/opensim/test_anatomical_baseline_fixtures.py; tests/opensim/test_opensim_os0_qualification.py; docs/development/opensim_tour_matching/evidence/anatomical_review_20260918/inspection.json.
 
 ### DL-#10323 · Matched-Swing Run Ledger
