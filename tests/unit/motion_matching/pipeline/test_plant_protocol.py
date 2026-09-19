@@ -150,6 +150,7 @@ def test_plant_registry_custom_registration() -> None:
 
 
 def test_mujoco_plant_instantiation() -> None:
+    pytest.importorskip("mujoco")
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[4]
@@ -166,3 +167,32 @@ def test_pinocchio_matching_plant_module_export() -> None:
     )
 
     assert PinocchioMatchingPlant is not None
+
+
+def test_drake_matching_plant_module_export() -> None:
+    from src.engines.physics_engines.drake.python.matching_plant import (
+        DrakeMatchingPlant,
+    )
+
+    assert DrakeMatchingPlant is not None
+
+
+def test_drake_plant_instantiation() -> None:
+    try:
+        import pydrake.all as drake_all
+    except ImportError as exc:
+        pytest.skip(f"pydrake not importable: {exc}")
+    if type(drake_all).__module__ == "unittest.mock" or not hasattr(
+        drake_all, "MultibodyPlant"
+    ):
+        pytest.skip("pydrake is mocked, not a real Drake installation")
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[4]
+    spec_path = (
+        root / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+    )
+    plant = get_plant("drake", spec_path.read_bytes())
+    assert isinstance(plant, MatchingPlant)
+    assert plant.engine_name == "drake"
+    assert len(plant.coordinate_order) in (41, 44)

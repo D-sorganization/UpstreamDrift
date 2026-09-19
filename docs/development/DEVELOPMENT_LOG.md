@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10460 · Consume Shared GSPro Open Connect V1 Codec From Tools
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10460
+- **Branch:** feat/10460-consume-tools-gspro-codec
+- **PR:** not created
+- **Paths:** src/shared/python/golf_simulator/adapters/gspro/codec.py; tests/unit/golf_simulator/test_gspro_codec.py; vendor/ud-tools; Cargo.toml; requirements-tools.txt; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED captured then green verified; 106 golf simulator unit and integration tests pass; ruff, black, mypy clean with 0 errors).
+- **Summary:** Upgraded vendor/ud-tools pin to Tools commit a9ed0e7c5c6905b1164082659051d6381068052d carrying shared GSPro Open Connect v1 codec (Tools#5228). Refactored UpstreamDrift's gspro adapter codec to retain ShotEnvelope canonical SI/radian unit conversion and profile handling, but delegate wire payload encoding and response decoding to shared.python.launch_monitor.gspro_connect.
+- **Next step:** Commit, push, open PR referencing Closes #10460, and arm auto-merge.
+- **Evidence:** tests/unit/golf_simulator/test_gspro_codec.py.
+
 ### DL-#10336 · MuJoCo Replay of the Merged Pinocchio Driver Candidate
 
 - **State:** in_review
@@ -200,6 +214,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR referencing Closes #10362, enable auto-merge, release lease.
 - **Evidence:** docs/shared_tools/divergence_inventory.v1.json; tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py; tests/fixtures/reference_calibration/run_checks.py.
 
+### DL-#10352 · Shared Contact Law and Grip Closure Conformance (MS-72)
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10352 (MS-72, epic #10363)
+- **Branch:** feat/10352-contact-closure-conformance
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/contact_law.py; docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md; tests/integration/cross_engine/test_contact_closure_conformance.py; tests/integration/cross_engine/divergence_registry.yaml
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at 01c5ef0c6 (SELF; 10 contact closure conformance tests pass; frontmatter tolerance loading verified; ruff and mypy clean)
+- **Summary:** Formalized shared contact law (Hunt-Crossley compliant normal force with non-tensile clipping and regularized friction) and 6-DOF dual-grip spatial weld closure contracts across engines. Versioned via CONFORMANCE_VERSION 1.0.0 and registered divergences in divergence_registry.yaml.
+- **Next step:** Complete pre-commit checks, push branch, open PR referencing Closes #10352, release lease.
+- **Evidence:** tests/integration/cross_engine/test_contact_closure_conformance.py; docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md.
+
 ### DL-#10381 · Pinocchio G1 Qualification and Program Truth Reset (MS-107)
 
 - **State:** in_progress
@@ -208,9 +236,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** docs/10381-program-truth-reset
 - **Paths:** src/shared/python/motion_matching/ledger.py; evidence/matched; docs/development/full_body_models/evidence/acceptance/verdicts_2026-09.json; docs/development/matched_swing_program
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 (SELF; ledger fail-closed test green; ledger and status regenerated; four matched receipts re-evaluated REJECTED)
+- **Last verified:** 2026-09-18 (SELF; rtol 1e-6 rerun committed as rejected evidence; ledger regenerated)
 - **Summary:** Ledger no longer promotes self-declared acceptance; the G1 FDDP continuation (46 mm in-solver, 340 mm replay) is committed as rejected evidence; docs corrected (7-iron cross-contamination, trail-arm torque not zero, acceptance.py path). Next candidate comes from a same-integrator continuation.
-- **Next step:** Run the 0.85 s continuation from `evidence/matched/driver_g1_crocoddyl_rk45/stage_0.60s.npz` with `--rk45-rtol 1e-6` on ControlTower and commit its receipt.
+- **Next step:** Inspect the IK reference 0.60-0.85 s for coordinate-range violations and rerun the 0.85 s stage with the range-barrier weight reduced tenfold (receipt).
 
 ### DL-#10338 · Native Crocoddyl Full-Body Fit & Balanced Contact Kinetics (Matched Swing Program MS-31 / #10415)
 

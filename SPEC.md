@@ -1,5 +1,32 @@
 # SPEC.md — Repository Specification Document
 
+## Shared Contact Law and Dual-Grip Kinematic Closure Conformance (MS-72, #10352)
+
+Formalizes the versioned cross-engine contact law and dual-grip kinematic closure contracts across all six physics engines:
+- **Shared Contact Law Conformance (`src/shared/python/motion_matching/contact_law.py`)**:
+  - Defines `CONFORMANCE_VERSION = "1.0.0"` recorded in module metadata and parity reports (`contact_parity_report`).
+  - Implements compliant Hunt-Crossley normal force with explicit non-tensile clipping (`max(0, .)`) and regularized Coulomb-viscous friction.
+- **Conformance Specification Document (`docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md`)**:
+  - Full mathematical formulation of normal contact, regularized friction, thermodynamic dissipation (`P <= 0`), and dual-grip 6-DOF spatial weld closure.
+  - Declares verified tolerances in YAML frontmatter loaded directly by test harnesses, preserving Dependency Inversion and Law of Demeter.
+- **Cross-Engine Divergence Registry (`tests/integration/cross_engine/divergence_registry.yaml`)**:
+  - Registers divergences (`contact-solver-evaluation-timing`, `dual-grip-closure-formulation`, `hunt-crossley-dissipation-clipping`) across MuJoCo, Drake, Pinocchio, and OpenSim.
+- **Integration Test Suite (`tests/integration/cross_engine/test_contact_closure_conformance.py`)**:
+  - 10 integration tests exercising normal forces, zero-penetration conditions, rebound non-tensile clipping, friction regularization, spatial weld rank condition (`rank = 6`), and divergence registry compliance.
+
+## Drake MatchingPlant and Inverse Kinematics Pipeline Lane (MS-13, #10332)
+
+Implements the Drake `MatchingPlant` adapter and full inverse kinematics motion matching lane conforming to the unified engine protocol:
+- **Drake MatchingPlant Adapter (`src/engines/physics_engines/drake/python/matching_plant.py`, `src/shared/python/motion_matching/pipeline/plants/drake_plant.py`)**:
+  - Implements `DrakeMatchingPlant` conforming to the `MatchingPlant` protocol (`initialize`, `solve_address`, `solve_ik`, `simulate_tracking`).
+  - Supports analytical KKT affine dynamics, mass matrix computation, and spatial momentum tracking in `FullBodyDrakeModel`.
+- **Drake Full-Body Inverse Kinematics (`src/engines/physics_engines/drake/python/full_body_ik.py`)**:
+  - Implements `DrakeFullBodyIK` wrapping Drake's `InverseKinematics` formulation with mathematical programming solvers (`SnoptSolver` / `IpoptSolver`).
+  - Supports bilateral kinematic contact constraints (`PositionCost` and bounding boxes on foot spheres), dual-arm grip closure welds, axis alignment constraints, and center-of-mass balance constraints.
+- **Pipeline Integration and Calibration Passing (`src/shared/python/motion_matching/pipeline/cli.py`, `src/shared/python/motion_matching/full_body_forward_dynamics.py`)**:
+  - Implements `_CalibrateAndScaleResult` to propagate `hip_report` and qualification notes to receipt generation and tracking simulation across all supported physics engines.
+  - Generates full evidence receipt, trajectory kinematics, dynamics records, and playback animations (`anthro_driver_drake`).
+
 ## Well-Posed Acceptance Contract and Dynamic Validation Gates (MS-100, #10374)
 
 Formalizes dynamic validation gates for open-loop replay drift, collocation defects, and stabilized replay under declared tolerances:
@@ -831,7 +858,7 @@ Defines durable async TCP transport, bounded stream framing, and delivery intent
 
 Implements frozen protocol profile and deterministic serialization for GSPro Open Connect v1 under `src/shared/python/golf_simulator/adapters/gspro/`:
 - `profile.py`: `GSProProfile` characterizes observed vs documented vs unresolved vendor protocol semantics; port 921, speed unit `mph`, distance unit `Yards`, HLA positive `right`, 64 KiB buffer limit. Declares native avatar injection and autonomous course control as unsupported.
-- `codec.py`: Pure functions `encode_shot_payload`, `decode_simulator_response`, and `encode_heartbeat_payload`. Converts canonical SI/radian units and vectors to vendor representation without mutating stored values; preserves missing club data without zero-filling; maps status codes (200, 201, 501) to explicit `ResponseCategory` enums without treating unknown codes as success.
+- `codec.py`: Pure functions `encode_shot_payload`, `decode_simulator_response`, and `encode_heartbeat_payload`. Converts canonical SI/radian units and vectors to vendor representation without mutating stored values; preserves missing club data without zero-filling; delegates protocol wire encoding and response parsing directly to `shared.python.launch_monitor.gspro_connect` (#10460, Tools#5228); maps status codes (200, 201, 501) to explicit `ResponseCategory` enums without treating unknown codes as success.
 
 ## Canonical Golf Simulator Contracts and Capability Ports (#10190)
 
@@ -5776,6 +5803,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-18 | #10458 | Same-integrator G1 continuation (rtol 1e-6) committed as rejected evidence; rollout equals replay at 123.5 mm; ledger and turnover updated |
 | 2026-09-18 | #10428 | Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum)` in `swing_evaluator.py` (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10448 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
 | 2026-09-18 | #10381 | Matched-swing ledger fail-closed (self-declared acceptance is UNVERIFIED); G1 Crocoddyl continuation committed as rejected evidence; matched receipts re-evaluated; program docs truth reset |

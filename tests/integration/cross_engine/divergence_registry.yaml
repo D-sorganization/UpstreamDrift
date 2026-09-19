@@ -8,3 +8,33 @@ divergences:
     rationale: >
       Stub fixture for the CC-7 registry contract. Real entries must name the
       contact model or solver difference and the tolerance accepted by review.
+
+  - id: contact-solver-evaluation-timing
+    check: contact_law_conformance
+    metric: force_n
+    engines: [mujoco, pinocchio]
+    tolerance: 0.0001
+    rationale: >
+      MuJoCo applies external contact force via qfrc_applied before passive forces,
+      Drake evaluates external forces within CalcOutput before continuous state derivatives,
+      and Pinocchio evaluates constraint dynamics via Delassus matrix. Substep and mid-step
+      evaluation differences cause small force discrepancies under high velocity transients.
+
+  - id: dual-grip-closure-formulation
+    check: grip_closure_conformance
+    metric: closure_rank
+    engines: [pinocchio, mujoco]
+    tolerance: 0.000001
+    rationale: >
+      Pinocchio and Drake enforce spatial 6-DOF weld constraints (rank 6), while MuJoCo uses
+      weld equality constraints with finite solref/solimp compliance and MJX approximates via
+      spring-damper elements.
+
+  - id: hunt-crossley-dissipation-clipping
+    check: contact_dissipation_conformance
+    metric: normal_force_n
+    engines: [shared_law, hunt_crossley]
+    tolerance: 0.000001
+    rationale: >
+      Hunt-Crossley normal force magnitude is explicitly clipped at zero (f_n = max(0, f_n))
+      to prevent tensile contact forces during high rebound velocities.
