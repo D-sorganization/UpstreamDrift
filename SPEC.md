@@ -6013,6 +6013,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
+| 2026-09-19 | #10480 | Reuse shared physical-time playback across Qt React and native viewers (MV-04): PhysicalTimePlayback driving evaluation by continuous physical time using Tools playback_transport, quaternion SLERP with antipodal continuity, dropped-draw handling without timescale drift, discrete knot stepping, and PlaybackAdapter matrix (Qt, React web payload, MeshCat, Gepetto, MediaVideo with offset and documented mute reason). |
 | 2026-09-19 | #10479 | Bind saved candidates to viewer and analysis sessions (MV-03): CandidateSession ingestion with SHA-256 integrity, WSL host boundary probe, multi-candidate replay overlay with ENGINE_COLORS, conspicuous rejected fit banner, and GIF export. |
 | 2026-09-18 | #10395 | Freeze the OpenSim anatomical baseline and failure fixtures (OG-01): pure-XML model audit verifying SHA-256 hashes (051d61ea/7dd1da17), body/coord/actuator counts (23/39/39/0), detecting empty Club attached geometry and unscaled arm meshes, with fail-closed qualification verification. |
 | 2026-09-10 | #1616 | Adopt maintainable Mermaid C4 architecture-map contract (C4Context, C4Container, Feature Map, Change Log, validator and workflow) (#1616). |

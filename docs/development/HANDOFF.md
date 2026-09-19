@@ -1,16 +1,18 @@
 # Current Matching Continuation Handoff
 
+## MV-04 Reuse Shared Physical-Time Playback Across Viewers (#10480)
+
+- Worktree: `UpstreamDrift-10480-playback`, branch `feat/10480-physical-time-playback`, lease `antigravity-10480-mv04`, DL-#10480.
+- Changes:
+  - `playback.py`: `PhysicalTimePlayback` drives evaluation by continuous physical time using Tools `rate_of_closure.simulation.playback_transport`. Quaternion SLERP with antipodal continuity, Euclidean marker/force LERP, dropped-draw handling without timescale drift, non-uniform timestamps, discrete knot stepping.
+  - `playback_adapters.py`: Capabilities matrix across Qt, React (web JSON payload), MeshCat, Gepetto, and MediaVideo (with media-time offset and documented mute reason).
+  - `gui.py`: Integrated `PlaybackTransportControls` in `TourMatchingViewerWidget`, preserved camera orbit while paused.
+- Reproduction: `pytest tests/unit/motion_matching/test_physical_playback.py tests/unit/motion_matching/test_playback_adapters.py tests/unit/tools/test_tour_matching_viewer_playback.py tests/unit/tools/test_tour_matching_viewer_combo.py`.
+- Next: PR auto-merge, then proceed to MV-05 (#10481).
+
 ## MV-03 Bind Saved Candidates to Viewer & Analysis Sessions (#10479)
 
-- Worktree: `UpstreamDrift-10479-sessions`, branch `feat/10479-viewer-analysis-sessions`, lease `antigravity-10479-mv03`, DL-#10479.
-- Changes:
-  - `candidate_session.py`: `CandidateSession` ingestion with SHA-256 verification and coordinate order remapping. Missing force channels remain None without fabrication.
-  - `wsl_probe.py`: WSL physics engine probe reporting Linux-native SDK availability.
-  - `core.py`: `MultiCandidateReplay`, `export_animation_gif`, `ENGINE_COLORS`.
-  - `gui.py`: Runs combo from ledger, conspicuous rejected fit banner, capabilities label, multi-candidate replay overlay, and GIF export.
-  - `simulation_service.py` & `capabilities.py`: Ingestion service and `GET /capabilities/candidate_session` route.
-- Reproduction: `pytest tests/unit/motion_matching/test_candidate_session.py tests/unit/engine_core/test_wsl_probe.py tests/unit/tools/test_tour_matching_viewer_combo.py tests/unit/api/test_candidate_session_routes.py`.
-- Next: PR auto-merge, then proceed to MV-04 (#10480).
+- Completed in PR #10492 (merged). CandidateSession ingestion, WSL host probe, multi-candidate replay overlay with ENGINE_COLORS, rejected fit banner, GIF export.
 
 ## MV-02 Anatomical Visual Assets and Skin Toggling (#10478)
 
@@ -543,46 +545,9 @@ only in the earlier window so marker rows, Jacobian rows, segmented RMS and
 equality offsets match an uninterrupted single-window objective at zero
 defect. Four RED/GREEN tests;46 combined shooting tests, mypy and Ruff pass.
 
-## Two-Window Direct-Node SLSQP Trial 78 (Terminal, Unchanged Candidate)
+## Two-Window Direct-Node SLSQP Trials 78–81 (Terminal, Historical)
 
-Run78 is TERMINAL0 (857.6 s,10 residual evaluations,22 sensitivity solves) on
-runtime78 (runtime77 plus the once-only shooting option;135 tests). Its
-zero-displacement parity gate passed: the segmented once-only objective with
-the run73 effort penalty reproduces run73's returned score18.30016 to1.9e-12
-relative, effort cost identical, markers within1.8e-11 m of the saved replay,
-initial scaled defect4.0e-11, projected continuity rank42 (singular values
-1.00–349.8). Theta bounds are10*(0.8−x73)..10*(1.2−x73) from run73's saved
-parameters (restart roundoff3.9e-14); node box ±0.05 chart units. SLSQP took
-four accepted backtracking steps; none met the1e-7 projected equality, so the
-backend fallback returned the start. The bounded iterate audit (uninterrupted
-original-state replays of each accepted iterate) shows the terminal-weighted
-objective falling18.30→17.30 and terminal RMS65.4→62.1 mm while whole RMS
-rises28.105→28.24 mm and early RMS10.86→11.07 mm: the run73 objective trades
-whole error for terminal error, and no returned improvement exists. Evidence:
-native_evidence/two_window_fit_9967_78 (HANDOFF, raw ZIPs fda4959f…/a5516909…).
-Run79 (two_window_fit_9967_79, driver SHA256 d45f9fe6…) keeps the formulation
-with primal-only residual replays and max_iterations15/max_nfev45. It is
-TERMINAL0 (30 evaluations,32 sensitivity solves,15 iterations, iteration limit).
-Returned candidate5313c283… uninterrupted from the original state: whole
-27.563 mm (run73 28.105), terminal55.470 mm (65.398), club23.27 mm (30.04),
-but early11.359 mm (10.860) and pelvis yaw11.3 % (6.2 %) worsen; score with
-effort15.070 versus18.300. Scaled continuity defect3.99e-4 exceeds the1e-4
-tolerance;63 of123 variables at bounds (39 controls in the inherited ±2 N/Nm
-run73 box,24 node chart coordinates at ±0.05). First-Jacobian linear model
-tracks accepted steps within2 %. Still REJECTED against25/35 mm gates; the
-error growth from0.4 s is unchanged (marker-comparison.png). Run80 (two_window_fit_9967_80, driver7bc33a45…) restarts from exact returned79
-with the node recentered on its integrated0.6 s state (parity7.1e-12) and is
-TERMINAL0: returned96c786ec… uninterrupted whole26.797 mm, terminal55.208 mm,
-early11.208 mm, club23.54 mm, yaw11.3 %, score with effort14.678; defect
-1.13e-3;41 of81 controls on the inherited ±2 N/Nm box,18 node coordinates at
-±0.05. Still REJECTED. Run81 (two_window_fit_9967_81, driver da0edf86…)
-continues from returned80 with the box widened to ±4 N/Nm as its single change
-and is TERMINAL0 (1738 s,31 evaluations): returned dfafdff1… uninterrupted
-whole26.366 mm, terminal46.305 mm, club15.96 mm, early11.427 mm, yaw13.9 %,
-score with effort12.238 (linear model12.421); defect1.61e-3;29 controls on
-the widened box,21 node coordinates at ±0.05. All continuations only reshape
-the last0.1 s; error growth0.4–0.75 s is unchanged from run73 (see
-two_window_fit_9967_81/marker-comparison.png). Still REJECTED.
+Runs 78–81 explored direct-node SLSQP optimizations restarting from run 73/79/80 (see `native_evidence/two_window_fit_9967_78` through `81`). All terminated at bounds or iteration limits with continuity defects remaining between 3.99e-4 and 1.61e-3, leaving candidates rejected against the 25/35 mm gates. Continuations only reshaped the last 0.1 s; error growth 0.4–0.75 s remained unchanged from run 73. Archived rotation-chart audits confirm Jacobian conditioning issues. See native evidence for archived raw ZIPs.
 
 The archived run73 sampled rotation-chart audit gives peak condition2.680/17.886/
 2.889 for hip/left/right shoulder. These samples do not bound between-sample
