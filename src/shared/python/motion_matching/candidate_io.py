@@ -16,6 +16,8 @@ import numpy as np
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.candidate import (
     CANDIDATE_SCHEMA_VERSION,
+    CandidateAuxiliary,
+    CandidateMarkers,
     CandidateMetadata,
     MatchedSwingCandidate,
 )
@@ -72,9 +74,10 @@ def save_candidate(candidate: MatchedSwingCandidate, path: Path | str) -> None:
         )
 
     np.savez(target_path, **arrays_to_save)  # type: ignore[arg-type]
+    meta = candidate.metadata
     logger.debug(
         "Saved candidate package (%s) -> %s",
-        candidate.metadata.profile.value,
+        meta.profile.value,
         target_path,
     )
 
@@ -119,17 +122,24 @@ def load_candidate(
         marker_validity = data.get("marker_validity", None)
         external_forces = data.get("external_forces", None)
 
+        markers = CandidateMarkers(
+            model_markers_m=data.get("model_markers_m", None),
+            target_markers_m=data.get("target_markers_m", None),
+            marker_validity=data.get("marker_validity", None),
+        )
+        auxiliary = CandidateAuxiliary(
+            actuator_states=data.get("actuator_states", None),
+            external_forces=data.get("external_forces", None),
+        )
+
         candidate = MatchedSwingCandidate(
             metadata=metadata,
             time_s=time_s,
             q=q,
             v=v,
             tau=tau,
-            actuator_states=actuator_states,
-            model_markers_m=model_markers_m,
-            target_markers_m=target_markers_m,
-            marker_validity=marker_validity,
-            external_forces=external_forces,
+            markers=markers,
+            auxiliary=auxiliary,
             compute_checksums=False,
         )
 

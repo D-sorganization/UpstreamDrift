@@ -21,6 +21,7 @@ import numpy as np
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.candidate import (
     CANDIDATE_SCHEMA_VERSION,
+    CandidateMarkers,
     CandidateMetadata,
     CandidateProfile,
     MatchedSwingCandidate,
@@ -102,9 +103,11 @@ def convert_returned81_replay(
         q=q,
         v=v,
         tau=None,
-        model_markers_m=markers_m,
-        target_markers_m=target_m,
-        marker_validity=valid,
+        markers=CandidateMarkers(
+            model_markers_m=markers_m,
+            target_markers_m=target_m,
+            marker_validity=valid,
+        ),
     )
 
 
@@ -227,8 +230,7 @@ def convert_ground_support_ik(
         time_s=time_s,
         q=q,
         v=None,
-        tau=None,
-        marker_validity=valid,
+        markers=CandidateMarkers(marker_validity=valid),
     )
 
 
