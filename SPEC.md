@@ -1,5 +1,19 @@
 # SPEC.md — Repository Specification Document
 
+## Shared Contact Law and Dual-Grip Kinematic Closure Conformance (MS-72, #10352)
+
+Formalizes the versioned cross-engine contact law and dual-grip kinematic closure contracts across all six physics engines:
+- **Shared Contact Law Conformance (`src/shared/python/motion_matching/contact_law.py`)**:
+  - Defines `CONFORMANCE_VERSION = "1.0.0"` recorded in module metadata and parity reports (`contact_parity_report`).
+  - Implements compliant Hunt-Crossley normal force with explicit non-tensile clipping (`max(0, .)`) and regularized Coulomb-viscous friction.
+- **Conformance Specification Document (`docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md`)**:
+  - Full mathematical formulation of normal contact, regularized friction, thermodynamic dissipation (`P <= 0`), and dual-grip 6-DOF spatial weld closure.
+  - Declares verified tolerances in YAML frontmatter loaded directly by test harnesses, preserving Dependency Inversion and Law of Demeter.
+- **Cross-Engine Divergence Registry (`tests/integration/cross_engine/divergence_registry.yaml`)**:
+  - Registers divergences (`contact-solver-evaluation-timing`, `dual-grip-closure-formulation`, `hunt-crossley-dissipation-clipping`) across MuJoCo, Drake, Pinocchio, and OpenSim.
+- **Integration Test Suite (`tests/integration/cross_engine/test_contact_closure_conformance.py`)**:
+  - 10 integration tests exercising normal forces, zero-penetration conditions, rebound non-tensile clipping, friction regularization, spatial weld rank condition (`rank = 6`), and divergence registry compliance.
+
 ## Drake MatchingPlant and Inverse Kinematics Pipeline Lane (MS-13, #10332)
 
 Implements the Drake `MatchingPlant` adapter and full inverse kinematics motion matching lane conforming to the unified engine protocol:
