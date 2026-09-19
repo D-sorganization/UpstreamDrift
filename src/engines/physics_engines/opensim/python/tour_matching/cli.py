@@ -79,16 +79,8 @@ def compute_run_hash(config: RunConfig) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build the unified CLI parser for OpenSim tour matching operations."""
-    parser = argparse.ArgumentParser(
-        prog="python -m src.engines.physics_engines.opensim.python.tour_matching.cli",
-        description="Unified CLI for OpenSim tour matching workflow (OS-6)",
-    )
-    subparsers = parser.add_subparsers(
-        dest="command", required=True, help="Operation to perform"
-    )
-
+def _add_pipeline_subparsers(subparsers: Any) -> None:
+    """Register prepare, qualify, calibrate, and fit subparsers."""
     # prepare
     p_prep = subparsers.add_parser("prepare", help="Validate capture and export TRC")
     p_prep.add_argument(
@@ -157,6 +149,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_fit.add_argument("--stride", type=int, default=1, help="Frame subsampling stride")
 
+
+def _add_maintenance_subparsers(subparsers: Any) -> None:
+    """Register replay, compare, and resume subparsers."""
     # replay
     p_rep = subparsers.add_parser("replay", help="Replay polynomial profile forward")
     p_rep.add_argument("--model", type=Path, required=True, help="Model .osim")
@@ -183,6 +178,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--manifest", type=Path, required=True, help="Checkpoint manifest JSON"
     )
 
+
+def build_parser() -> argparse.ArgumentParser:
+    """Build the unified CLI parser for OpenSim tour matching operations."""
+    parser = argparse.ArgumentParser(
+        prog="python -m src.engines.physics_engines.opensim.python.tour_matching.cli",
+        description="Unified CLI for OpenSim tour matching workflow (OS-6)",
+    )
+    subparsers = parser.add_subparsers(
+        dest="command", required=True, help="Operation to perform"
+    )
+    _add_pipeline_subparsers(subparsers)
+    _add_maintenance_subparsers(subparsers)
     return parser
 
 

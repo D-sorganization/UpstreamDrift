@@ -161,7 +161,7 @@ def write_ik_tasks_xml(
     weights: Mapping[str, float] | None = None,
 ) -> Path:
     """Serialize OpenSim 4.0 IKTaskSet XML with marker validity policy weights."""
-    import xml.etree.ElementTree as ET
+    import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml - construction only; parsing is defused
 
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)

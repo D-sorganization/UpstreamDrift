@@ -9,7 +9,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import tempfile
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 import pytest
 
