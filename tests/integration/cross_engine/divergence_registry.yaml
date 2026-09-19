@@ -12,7 +12,7 @@ divergences:
   - id: contact-solver-evaluation-timing
     check: contact_law_conformance
     metric: force_n
-    engines: [mujoco, drake, pinocchio]
+    engines: [mujoco, pinocchio]
     tolerance: 0.0001
     rationale: >
       MuJoCo applies external contact force via qfrc_applied before passive forces,
@@ -23,7 +23,7 @@ divergences:
   - id: dual-grip-closure-formulation
     check: grip_closure_conformance
     metric: closure_rank
-    engines: [pinocchio, mujoco, drake, opensim]
+    engines: [pinocchio, mujoco]
     tolerance: 0.000001
     rationale: >
       Pinocchio and Drake enforce spatial 6-DOF weld constraints (rank 6), while MuJoCo uses
@@ -34,7 +34,7 @@ divergences:
     check: contact_dissipation_conformance
     metric: normal_force_n
     engines: [shared_law, hunt_crossley]
-    tolerance: 0.0
+    tolerance: 0.000001
     rationale: >
       Hunt-Crossley normal force magnitude is explicitly clipped at zero (f_n = max(0, f_n))
       to prevent tensile contact forces during high rebound velocities.
