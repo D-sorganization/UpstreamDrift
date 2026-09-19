@@ -133,7 +133,7 @@ def _load_npz_replay(path: Path, spec: Mapping[str, Any] | None) -> ReplayData:
             break
 
     valid_mask: NDArray[np.bool_] | None = None
-    for key in ("valid", "valid_mask"):
+    for key in ("valid", "valid_mask", "marker_validity"):
         if key in data:
             valid_mask = np.asarray(data[key], dtype=np.bool_)
             if valid_mask.shape[0] != n_frames:
@@ -145,6 +145,15 @@ def _load_npz_replay(path: Path, spec: Mapping[str, Any] | None) -> ReplayData:
     coord_names: tuple[str, ...] | None = None
     if "coordinate_order" in data:
         coord_names = tuple(str(x) for x in data["coordinate_order"])
+    elif "manifest_json" in data:
+        import json
+
+        try:
+            manifest = json.loads(str(data["manifest_json"]))
+            if manifest.get("coordinate_names"):
+                coord_names = tuple(manifest["coordinate_names"])
+        except (json.JSONDecodeError, KeyError, TypeError):
+            pass
     elif spec is not None and "coordinate_order" in spec:
         coord_names = tuple(spec["coordinate_order"])
 

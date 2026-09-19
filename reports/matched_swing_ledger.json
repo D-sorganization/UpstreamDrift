@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T02:11:59Z",
+  "generated_at": "2026-09-19T16:49:35Z",
   "rows": [
     {
       "acceptance": null,
@@ -839,7 +839,7 @@
       "artefacts": {
         "gif": "docs/development/full_body_models/evidence/ground_support/ik_playback.gif",
         "mot": null,
-        "npz": "docs/development/full_body_models/evidence/ground_support/dynamics_record.npz"
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_dynamics_candidate.npz"
       },
       "candidate_sha": null,
       "capture": null,
@@ -885,7 +885,7 @@
       "artefacts": {
         "gif": "docs/development/full_body_models/evidence/ground_support/ik_playback.gif",
         "mot": null,
-        "npz": "docs/development/full_body_models/evidence/ground_support/dynamics_record.npz"
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_dynamics_candidate.npz"
       },
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": null,
@@ -1046,7 +1046,7 @@
       "artefacts": {
         "gif": null,
         "mot": "docs/development/full_body_models/evidence/viewer/opensim_os3b_ik.mot",
-        "npz": "docs/development/full_body_models/evidence/viewer/returned81_replay.npz"
+        "npz": "docs/development/full_body_models/evidence/viewer/opensim_os3b_candidate.npz"
       },
       "candidate_sha": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
       "capture": "driver",
