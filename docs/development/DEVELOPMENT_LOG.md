@@ -17,6 +17,35 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10336 · MuJoCo Replay of the Merged Pinocchio Driver Candidate
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #10336 (MS-21, epic #10363)
+- **Branch:** feat/10336-mujoco-candidate-replay
+- **PR:** #10448 (open)
+- **Paths:** src/engines/physics_engines/mujoco/python/candidate_replay.py; src/engines/physics_engines/mujoco/python/replay_contract.py; src/engines/physics_engines/mujoco/python/replay_evidence.py; scripts/replay_pinocchio_in_mujoco.py; src/shared/python/motion_matching/pipeline/receipt_schema.py; tests/unit/motion_matching/test_mujoco_candidate_replay.py; evidence/matched/driver_full_mujoco_replay/
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at 94ccb1825; 40 focused tests pass and 21 replay tests pass on MuJoCo 3.8.0; commit/push hooks, scoped Ruff/mypy, architecture/file-size budgets and agent-context checks pass. SELF fixes PR CI's inherited AnyIO vulnerabilities with 4.14.2 in both locks; dependency audit remains enforced.
+- **Summary:** Hash-checked saved-control replay with name-mapped non-root armature, shared contact law, rigid KKT grip, no feedback or pose resets, exact G1 windows, fail-closed source/parity/physical evidence checks, and separate rejected dynamics versus IK playback. Original candidate and receipts remain unchanged. The source omits plant/control provenance and root history, so identical-plant parity and physical acceptance remain unverified/rejected.
+- **CI continuation:** SELF refreshes the receipt ledger and fixes #4249's gravity fixture to use the same collision-free URDF/right-hand anchor in MuJoCo and Drake. The 5 mm gate is unchanged; analytic free-fall assertions prevent shared wrong/stationary outputs. Real Linux engines: 15 passed, 2 unavailable-engine skips. Ledger plus replay: 28 passed.
+- **Next step:** Finish PR CI and merge; regenerate a source candidate with recorded armature/contact/control provenance, root history and an independent uninterrupted native replay before advancing G1.
+- **Evidence:** evidence/matched/driver_full_mujoco_replay/receipt.json; evidence/matched/driver_full_mujoco_replay/README.md.
+
+### DL-#10233 · Shadow Tracker Revision Integrity and Persistence
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #10233 (ST-04 / epic #10122)
+- **Branch:** fix/shadow-tracker-10233-pr
+- **PR:** #10450 (https://github.com/D-sorganization/UpstreamDrift/pull/10450)
+- **Paths:** src/shared/python/shadow_tracker/segmentation.py; tests/unit/shadow_tracker/test_revision_persistence.py; docs/plans/shadow_tracker/
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 on c76d6f02c (remote-main base); 306 tests pass; CI run 35376242857 identifies AnyIO 4.12.1 vulnerabilities; SELF upgrades both locks to 4.14.2; scoped Ruff, file-size and context checks pass.
+- **Summary:** Complete-record idempotence, same-observation parents, current selection and strict atomic provider snapshots with legacy reading. Renderer preserved.
+- **Next step:** Validate PR #10450 CI and merge through branch protection.
+- **Evidence:** docs/plans/shadow_tracker/TURNOVER_CURRENT.md; tests/unit/shadow_tracker/test_revision_persistence.py.
+
 ### DL-#10403 · OpenSim Package a Golf-Like Native Viewer and Release Evidence
 
 - **State:** in_progress
@@ -171,18 +200,30 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR referencing Closes #10362, enable auto-merge, release lease.
 - **Evidence:** docs/shared_tools/divergence_inventory.v1.json; tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py; tests/fixtures/reference_calibration/run_checks.py.
 
-### DL-#10338 · Native Crocoddyl Full-Body Fit & Balanced Contact Kinetics (Matched Swing Program MS-31 / #10415)
+### DL-#10381 · Pinocchio G1 Qualification and Program Truth Reset (MS-107)
 
 - **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10381 (epic #10363)
+- **Branch:** docs/10381-program-truth-reset
+- **Paths:** src/shared/python/motion_matching/ledger.py; evidence/matched; docs/development/full_body_models/evidence/acceptance/verdicts_2026-09.json; docs/development/matched_swing_program
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 (SELF; ledger fail-closed test green; ledger and status regenerated; four matched receipts re-evaluated REJECTED)
+- **Summary:** Ledger no longer promotes self-declared acceptance; the G1 FDDP continuation (46 mm in-solver, 340 mm replay) is committed as rejected evidence; docs corrected (7-iron cross-contamination, trail-arm torque not zero, acceptance.py path). Next candidate comes from a same-integrator continuation.
+- **Next step:** Run the 0.85 s continuation from `evidence/matched/driver_g1_crocoddyl_rk45/stage_0.60s.npz` with `--rk45-rtol 1e-6` on ControlTower and commit its receipt.
+
+### DL-#10338 · Native Crocoddyl Full-Body Fit & Balanced Contact Kinetics (Matched Swing Program MS-31 / #10415)
+
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #10338 (epic #10363, child epic #10415)
 - **Branch:** feat/10338-crocoddyl-native-fit
 - **PR:** #10411
 - **Paths:** src/engines/physics_engines/pinocchio/python/{crocoddyl_problem,crocoddyl_action,marker_kinematics,full_body_fit}.py; src/shared/python/motion_matching/{contact_force_allocator,swing_evaluator}.py; scripts/match_pinocchio_c3d.py; tests/unit/motion_matching/{test_match_pinocchio_c3d,test_contact_force_allocator,test_swing_evaluator}.py; docs/development/PINOCCHIO_C3D_MOTION_MATCHING_GUIDE.md; evidence/matched/{driver_full_pinocchio,iron_full_pinocchio}
 - **Started:** 2026-09-17
-- **Last verified:** 2026-09-18 (SELF; full 654-frame driver and 657-frame 7-iron matched with velocity extrapolation and analytical foot non-penetration barrier; contact-aware QP force allocation resolves floating-base balance, unilateral ground forces, and grip loop closure with < 0.002 m/s² ABA parity; driver club RMSE reduced 88% to 50.2 mm, address club 10.4 mm, downswing club 17.1 mm; foot ground penetration reduced 91% to 10.1 mm max, 0.077 mm mean; uninterrupted forward rollout verified stable without pose resets; all unit tests, ruff, black, and mypy pass)
+- **Last verified:** 2026-09-18 (SELF; MS-31 closed on implementation scope via #10371/#10411; qualification continues under DL-#10381)
 - **Summary:** Solved full-swing (654-frame driver, 657-frame 7-iron) decoupled kinematic tracking via `MarkerIkSolver` with category weighting (club 50x, feet 20x), analytical foot non-penetration barrier, and constant-velocity extrapolation prior. Replaced algebraic trail-zero overwrite with rigorous QP-based `ContactForceAllocator` satisfying $M \ddot{q} + b = S^T \tau + J_{\text{ground}}^T f + J_{\text{grip}}^T \lambda + S_{\text{root}}^T \delta \tau_{\text{root}}$ under unilateral contact ($f_z \ge 0$) and exact dynamic equilibrium. Built `SwingEvaluator` for audit-grade segment and phase reporting. Driver club RMSE drops from 425.3 mm to 50.2 mm (G1 gate <= 60 mm met); max foot penetration drops from 111.2 mm to 10.1 mm; ABA acceleration parity residual verified to 0.00155 m/s². Continuous forward simulation replay verified stable without pose resets. Artifacts committed under `evidence/matched/driver_full_pinocchio/` and `evidence/matched/iron_full_pinocchio/`.
-- **Next step:** Merge PR #10411 and feed full-body candidate trajectories into cross-engine validation lanes (Drake MS-13/17, MuJoCo MS-10/16, OpenSim MS-40/41 under epic #10363 / MS-104).
+- **Next step:** None here; continue in DL-#10381.
 
 ### DL-#9967 · Native Simscape Tour Matching
 
