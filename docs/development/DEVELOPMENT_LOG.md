@@ -214,18 +214,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR referencing Closes #10362, enable auto-merge, release lease.
 - **Evidence:** docs/shared_tools/divergence_inventory.v1.json; tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py; tests/fixtures/reference_calibration/run_checks.py.
 
-### DL-#10352 · Shared Contact Law and Grip Closure Conformance (MS-72)
+### DL-#10339 · Pure-XML OpenSim Full-Body Exporter (MS-40)
 
 - **State:** in_progress
 - **Owner:** claude
+- **Issue:** #10339 (MS-40, epic #10363)
+- **Branch:** feat/10339-full-body-osim
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/opensim/python/full_body_osim.py; src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.osim; src/engines/physics_engines/opensim/models/generated/full_body_anthro_iron7.osim; src/engines/physics_engines/opensim/models/generated/export_receipt.json; src/engines/physics_engines/opensim/models/README.md; tests/unit/motion_matching/test_full_body_osim.py; tests/opensim/test_full_body_osim_native.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (SELF; pure XML exporter generates 44-coordinate full-body .osim models from anthro specs with dual-grip weld closure, foot contact spheres, and 34 tour markers; unit tests pass without OpenSim SDK; native test tests/opensim/test_full_body_osim_native.py skips cleanly when opensim is not installed; architecture budget, ruff, mypy clean)
+- **Summary:** Implemented pure-XML ElementTree OpenSim exporter producing 44-coordinate full-body models (full_body_anthro_driver.osim and full_body_anthro_iron7.osim) from anthropometric specs without OpenSim runtime dependencies. Enforces 6-DOF dual-grip weld closure, Hunt-Crossley compliant foot contact spheres, 38 internal coordinate actuators, and 34 tour marker attachments with hash-verified provenance receipt.
+- **Next step:** Run CI checks, commit, push, open PR referencing Fixes #10339, enable auto-merge, release lease.
+- **Evidence:** src/engines/physics_engines/opensim/models/generated/export_receipt.json; tests/unit/motion_matching/test_full_body_osim.py; tests/opensim/test_full_body_osim_native.py.
+
+### DL-#10352 · Shared Contact Law and Grip Closure Conformance (MS-72)
+
+- **State:** shipped
+- **Owner:** claude
 - **Issue:** #10352 (MS-72, epic #10363)
 - **Branch:** feat/10352-contact-closure-conformance
-- **PR:** not created
+- **PR:** #10465 (merged)
 - **Paths:** src/shared/python/motion_matching/contact_law.py; docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md; tests/integration/cross_engine/test_contact_closure_conformance.py; tests/integration/cross_engine/divergence_registry.yaml
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at 01c5ef0c6 (SELF; 10 contact closure conformance tests pass; frontmatter tolerance loading verified; ruff and mypy clean)
 - **Summary:** Formalized shared contact law (Hunt-Crossley compliant normal force with non-tensile clipping and regularized friction) and 6-DOF dual-grip spatial weld closure contracts across engines. Versioned via CONFORMANCE_VERSION 1.0.0 and registered divergences in divergence_registry.yaml.
-- **Next step:** Complete pre-commit checks, push branch, open PR referencing Closes #10352, release lease.
+- **Next step:** Completed; PR #10465 merged into main.
 - **Evidence:** tests/integration/cross_engine/test_contact_closure_conformance.py; docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md.
 
 ### DL-#10381 · Pinocchio G1 Qualification and Program Truth Reset (MS-107)
