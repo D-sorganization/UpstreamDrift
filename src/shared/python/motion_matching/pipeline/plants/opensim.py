@@ -111,7 +111,7 @@ class OpensimMatchingPlant:
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
     ) -> Mapping[str, float]:
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #10376
             "OpenSim forward dynamics not supported; use Moco (MS-102)"
         )
 
