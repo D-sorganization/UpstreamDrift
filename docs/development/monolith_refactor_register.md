@@ -76,6 +76,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  973 | `src/tools/bunker_shot_gui/viewport_widgets.py`                                                                                                                               |
 |  965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py`                                                                             |
 |  964 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py`                                                                                                        |
+|  960 | `src/shared/python/motion_matching/acceptance.py`                                                                                                                             |
 |  960 | `src/shared/python/signal_toolkit/widget_ui.py`                                                                                                                               |
 |  957 | `src/bunkershot3d/solvers/mpm/solver.py`                                                                                                                                      |
 |  957 | `src/launchers/embedded_host.py`                                                                                                                                              |
