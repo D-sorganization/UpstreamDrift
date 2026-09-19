@@ -153,6 +153,34 @@ def _build_ground(model: ET.Element) -> None:
     ET.SubElement(wrap, "groups")
 
 
+OPENSIM_BODY_MAP: dict[str, str] = {
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": "Hip",
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase": "Torso",
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": "Spine",
+    "GolfSwing3D_Kinetic/Head": "Head",
+    "solid_reference:GolfSwing3D_Kinetic/HubtoLS": "LScap",
+    "solid_reference:GolfSwing3D_Kinetic/LUpperArm": "LS",
+    "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": "LE",
+    "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": "LF",
+    "solid_reference:GolfSwing3D_Kinetic/HubtoRS": "RScap",
+    "solid_reference:GolfSwing3D_Kinetic/RUpperArm": "RS",
+    "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": "RE",
+    "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": "RF",
+    "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": "Clubhead",
+    "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff": "Grip",
+}
+
+
+def clean_osim_body_name(name: str) -> str:
+    """Map Simscape solid reference path to clean OpenSim body name."""
+    return OPENSIM_BODY_MAP.get(name, name)
+
+
+def clean_osim_joint_name(jname: str, child_name: str) -> str:
+    """Construct clean OpenSim joint component name."""
+    return f"joint_{clean_osim_body_name(child_name)}"
+
+
 def _build_bodyset(model: ET.Element, spec: Mapping[str, Any]) -> dict[str, str]:
     """Construct BodySet from specification and return body name mappings."""
     bodyset = ET.SubElement(model, "BodySet", attrib={"name": "bodyset"})
@@ -160,10 +188,11 @@ def _build_bodyset(model: ET.Element, spec: Mapping[str, Any]) -> dict[str, str]
     body_map: dict[str, str] = {}
 
     for body_spec in spec["bodies"]:
-        bname = body_spec["name"]
-        if bname == "world":
+        raw_bname = body_spec["name"]
+        if raw_bname == "world":
             continue
 
+        bname = clean_osim_body_name(raw_bname)
         total_mass, total_com, total_inertia = _aggregate_body_inertia(body_spec)
         body_elem = ET.SubElement(objects, "Body", attrib={"name": bname})
 
@@ -202,21 +231,19 @@ def _build_transform_axis(
     st: ET.Element,
     prefix: str,
     idx: int,
-    coord_info: tuple[str, str] | None,
+    axis_vec: str,
+    coord_name: str | None,
 ) -> None:
     """Attach a single rotation or translation TransformAxis to SpatialTransform."""
-    axes = {"x": "1 0 0", "y": "0 1 0", "z": "0 0 1"}
-    fallback_axes = {1: "1 0 0", 2: "0 1 0", 3: "0 0 1"}
     axis_elem = ET.SubElement(st, "TransformAxis", attrib={"name": f"{prefix}{idx}"})
-    if coord_info is not None:
-        ax_char, cname = coord_info
-        ET.SubElement(axis_elem, "coordinates").text = cname
-        ET.SubElement(axis_elem, "axis").text = axes[ax_char]
+    if coord_name is not None:
+        ET.SubElement(axis_elem, "coordinates").text = coord_name
+        ET.SubElement(axis_elem, "axis").text = axis_vec
         fn = ET.SubElement(axis_elem, "LinearFunction", attrib={"name": "function"})
         ET.SubElement(fn, "coefficients").text = " 1 0"
     else:
         ET.SubElement(axis_elem, "coordinates")
-        ET.SubElement(axis_elem, "axis").text = fallback_axes[idx]
+        ET.SubElement(axis_elem, "axis").text = axis_vec
         fn = ET.SubElement(axis_elem, "Constant", attrib={"name": "function"})
         ET.SubElement(fn, "value").text = "0"
 
@@ -228,24 +255,24 @@ def _attach_spatial_transform(
     """Construct 6-axis SpatialTransform matching primitive translations and rotations."""
     st = ET.SubElement(joint_elem, "SpatialTransform")
 
-    rot_coords: list[tuple[str, str]] = []  # (axis_char, coord_name)
-    trans_coords: list[tuple[str, str]] = []
-
+    rot_by_axis: dict[str, str] = {}
+    trans_by_axis: dict[str, str] = {}
     for prim in primitives:
         kind = prim["primitive"]
         cname = prim["coordinate"]
         if kind.startswith("R"):
-            rot_coords.append((kind[1].lower(), cname))
+            rot_by_axis[kind[1].lower()] = cname
         elif kind.startswith("P"):
-            trans_coords.append((kind[1].lower(), cname))
+            trans_by_axis[kind[1].lower()] = cname
 
-    for idx in range(1, 4):
-        coord_info = rot_coords[idx - 1] if idx - 1 < len(rot_coords) else None
-        _build_transform_axis(st, "rotation", idx, coord_info)
+    axes = [(1, "x", "1 0 0"), (2, "y", "0 1 0"), (3, "z", "0 0 1")]
+    for idx, ax_char, ax_vec in axes:
+        _build_transform_axis(st, "rotation", idx, ax_vec, rot_by_axis.get(ax_char))
 
-    for idx in range(1, 4):
-        coord_info = trans_coords[idx - 1] if idx - 1 < len(trans_coords) else None
-        _build_transform_axis(st, "translation", idx, coord_info)
+    for idx, ax_char, ax_vec in axes:
+        _build_transform_axis(
+            st, "translation", idx, ax_vec, trans_by_axis.get(ax_char)
+        )
 
 
 def _build_jointset(model: ET.Element, spec: Mapping[str, Any]) -> list[str]:
@@ -261,9 +288,10 @@ def _build_jointset(model: ET.Element, spec: Mapping[str, Any]) -> list[str]:
     ranges_deg = spec.get("coordinate_ranges_deg", {})
 
     for joint in ordered_joints:
-        jname = joint["name"]
+        raw_jname = joint["name"]
         parent = joint["parent"]
         child = joint["child"]
+        jname = clean_osim_joint_name(raw_jname, child)
 
         joint_elem = ET.SubElement(objects, "CustomJoint", attrib={"name": jname})
         parent_frame_name = f"{jname}_parent_offset"
@@ -301,8 +329,10 @@ def _build_jointset(model: ET.Element, spec: Mapping[str, Any]) -> list[str]:
         t_parent = _validate_rigid_transform(joint["parent_to_base"])
         t_child = _validate_rigid_transform(joint["child_to_follower"])
 
-        parent_socket = "/ground" if parent == "world" else f"/bodyset/{parent}"
-        child_socket = f"/bodyset/{child}"
+        clean_parent = clean_osim_body_name(parent)
+        clean_child = clean_osim_body_name(child)
+        parent_socket = "/ground" if parent == "world" else f"/bodyset/{clean_parent}"
+        child_socket = f"/bodyset/{clean_child}"
 
         euler_p = _rotation_matrix_to_xyz_euler(t_parent[:3, :3])
         euler_c = _rotation_matrix_to_xyz_euler(t_child[:3, :3])
@@ -336,8 +366,8 @@ def _build_constraintset(
     ET.SubElement(constraintset, "groups")
 
     closure = spec["closure"]
-    body_a = closure["body_a"]
-    body_b = closure["body_b"]
+    body_a = clean_osim_body_name(closure["body_a"])
+    body_b = clean_osim_body_name(closure["body_b"])
     t_a = _validate_rigid_transform(closure["placement_a"])
     t_b = _validate_rigid_transform(closure["placement_b"])
 
@@ -399,7 +429,7 @@ def _build_contact_geometries(model: ET.Element, spec: Mapping[str, Any]) -> Non
 
     for sphere in spec["contact"]["spheres"]:
         sname = sphere["name"]
-        bname = sphere["body"]
+        bname = clean_osim_body_name(sphere["body"])
         pos = sphere["position_m"]
         radius = float(sphere["radius_m"])
 
@@ -439,7 +469,11 @@ def _build_forceset(
         )
         ET.SubElement(hc, "appliesForce").text = "true"
 
-        param_set = ET.SubElement(hc, "contact_parameters")
+        param_set = ET.SubElement(
+            hc,
+            "HuntCrossleyForce::ContactParametersSet",
+            attrib={"name": "contact_parameters"},
+        )
         param_objects = ET.SubElement(param_set, "objects")
         ET.SubElement(param_set, "groups")
 
@@ -474,11 +508,12 @@ def _build_markerset(model: ET.Element, spec: Mapping[str, Any]) -> None:
 
     marker_attachments = spec.get("marker_attachments", {})
     for mname, mdata in marker_attachments.items():
-        bname = mdata["body"]
+        raw_bname = mdata["body"]
+        clean_b = clean_osim_body_name(raw_bname)
         raw_offset = mdata.get("offset_m")
         offset = [0.0, 0.0, 0.0] if raw_offset is None else raw_offset
         marker_elem = ET.SubElement(objects, "Marker", attrib={"name": mname})
-        ET.SubElement(marker_elem, "socket_parent_frame").text = f"/bodyset/{bname}"
+        ET.SubElement(marker_elem, "socket_parent_frame").text = f"/bodyset/{clean_b}"
         ET.SubElement(marker_elem, "location").text = _format_numbers(offset)
         ET.SubElement(marker_elem, "fixed").text = "false"
 

@@ -105,10 +105,15 @@ def test_export_full_body_osim_driver_structure(driver_spec: dict) -> None:
     assert bodyset is not None
     body_objects = bodyset.find("objects")
     assert body_objects is not None
+    from src.engines.physics_engines.opensim.python.full_body_osim import (
+        clean_osim_body_name,
+    )
+
     body_names = [b.get("name") for b in body_objects.findall("Body")]
+    assert len(body_names) == 24
     for b in driver_spec["bodies"]:
         if b["name"] != "world":
-            assert b["name"] in body_names
+            assert clean_osim_body_name(b["name"]) in body_names
 
     # Closure constraints in ConstraintSet
     constraintset = model.find("ConstraintSet")

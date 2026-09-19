@@ -107,21 +107,55 @@ def build_parser() -> argparse.ArgumentParser:
     p_calib = subparsers.add_parser(
         "calibrate", help="Calibrate scaling and marker set"
     )
-    p_calib.add_argument("--model", type=Path, required=True, help="Input .osim model")
-    p_calib.add_argument("--trc", type=Path, required=True, help="Input TRC file")
     p_calib.add_argument(
-        "--output-dir", type=Path, required=True, help="Output directory"
+        "--document", type=Path, default=None, help="Input spec JSON path"
+    )
+    p_calib.add_argument(
+        "--model", type=Path, required=False, default=None, help="Input .osim model"
+    )
+    p_calib.add_argument(
+        "--trc", type=Path, required=False, default=None, help="Input TRC file"
+    )
+    p_calib.add_argument(
+        "--output-dir", type=Path, required=False, default=None, help="Output directory"
     )
 
     # fit
-    p_fit = subparsers.add_parser("fit", help="Fit polynomial controls")
+    p_fit = subparsers.add_parser("fit", help="Fit polynomial controls or document IK")
     p_fit.add_argument(
-        "--controls", type=Path, required=True, help="Input controls STO"
+        "--document", type=Path, default=None, help="Input spec JSON path"
+    )
+    p_fit.add_argument(
+        "--controls", type=Path, required=False, default=None, help="Input controls STO"
     )
     p_fit.add_argument(
         "--duration", type=float, default=0.10, help="Fitting horizon (s)"
     )
-    p_fit.add_argument("--output", type=Path, required=True, help="Output profile JSON")
+    p_fit.add_argument(
+        "--output",
+        "--out",
+        dest="output",
+        type=Path,
+        required=False,
+        default=None,
+        help="Output profile or receipt JSON path",
+    )
+    p_fit.add_argument(
+        "--output-dir",
+        "--out-dir",
+        dest="output_dir",
+        type=Path,
+        required=False,
+        default=None,
+        help="Output evidence directory",
+    )
+    p_fit.add_argument(
+        "--model", type=Path, required=False, default=None, help="Input .osim model"
+    )
+    p_fit.add_argument(
+        "--trc", type=Path, required=False, default=None, help="Input TRC file"
+    )
+    p_fit.add_argument("--stride", type=int, default=1, help="Frame subsampling stride")
 
     # replay
     p_rep = subparsers.add_parser("replay", help="Replay polynomial profile forward")
@@ -193,6 +227,38 @@ def cmd_calibrate(args: argparse.Namespace) -> int:
 
 def cmd_fit(args: argparse.Namespace) -> int:
     """Execute fit operation."""
+    if args.document is not None:
+        from src.engines.physics_engines.opensim.python.tour_matching.document_ik import (
+            DEFAULT_OSIM_PATH,
+            DEFAULT_OUT_DIR,
+            DEFAULT_TRC_PATH,
+            run_document_ik,
+        )
+
+        model_path = args.model or DEFAULT_OSIM_PATH
+        trc_path = args.trc or DEFAULT_TRC_PATH
+        out_dir = args.output_dir or (
+            args.output.parent if args.output else DEFAULT_OUT_DIR
+        )
+
+        res = run_document_ik(
+            model_path=model_path,
+            trc_path=trc_path,
+            out_dir=out_dir,
+            spec_path=args.document,
+            stride=args.stride,
+        )
+        logger.info(
+            "Document IK fit completed: whole RMSE = %.4f m -> %s",
+            res["whole_marker_rmse_m"],
+            res["receipt_path"],
+        )
+        return 0
+
+    if args.controls is None or args.output is None:
+        logger.error("Non-document fit requires --controls and --output")
+        return 1
+
     from src.engines.physics_engines.opensim.python.tour_matching.polynomial_profile import (
         fit_degree6_from_discrete_controls,
         load_controls_from_sto,
