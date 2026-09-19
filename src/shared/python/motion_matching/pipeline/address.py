@@ -93,8 +93,10 @@ def scaled_offsets(
     return out
 
 
-def posture_summary(kin: FullBodyMarkerKinematics, q: np.ndarray) -> dict[str, Any]:
+def posture_summary(kin: Any, q: np.ndarray) -> dict[str, Any]:
     """Spine bend and clavicle-link angles of the model at one pose."""
+    if hasattr(kin, "posture_summary"):
+        return kin.posture_summary(q)
     adapter = kin.adapter
     m, d = adapter.model, adapter.data
     kin.marker_positions(q)
@@ -335,11 +337,14 @@ def calibrate_legs(
             )
             for label in lane.labels
         }
-        from src.engines.physics_engines.mujoco.python.full_body_ik import (
-            FullBodyMarkerKinematics,
-        )
+        if lane.plant is not None:
+            state["kin"] = lane.plant.create_ik(attachments)
+        else:
+            from src.engines.physics_engines.mujoco.python.full_body_ik import (
+                FullBodyMarkerKinematics,
+            )
 
-        state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
+            state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
         return lane.trajectory(state["kin"], q_start, frames=frames)[0]
 
     result = calibrate_marker_offsets(

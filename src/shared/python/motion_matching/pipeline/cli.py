@@ -216,6 +216,23 @@ def _init_pipeline(args: argparse.Namespace) -> PipelineContext:
     )
 
 
+@dataclass(frozen=True)
+class _CalibrateAndScaleResult:
+    scaled_spec: dict[str, Any]
+    spec_bytes: bytes
+    address_report: dict[str, Any]
+    adapter: Any
+    kin: Any
+    sim: Any
+    address2: Any
+    attachments: Any
+    offsets: Any
+    calibration: Any
+    calibration2: Any
+    hip_report: dict[str, Any]
+    qualification_note: str
+
+
 def _calibrate_and_scale(
     ctx: PipelineContext,
     lane: Lane,
@@ -223,9 +240,7 @@ def _calibrate_and_scale(
     upper_base: dict[str, Any],
     upper: dict[str, tuple[str, tuple[float, float, float]]],
     labels: tuple[str, ...],
-) -> tuple[
-    dict[str, Any], bytes, dict[str, Any], Any, Any, Any, Any, Any, Any, Any, Any
-]:
+) -> _CalibrateAndScaleResult:
     """Execute hip calibration, address solve, segment scale search, and leg calibration."""
     args = ctx.args
     log = ctx.log
@@ -302,18 +317,20 @@ def _calibrate_and_scale(
     address_report["calibrated"] = calibrated_address_summary(
         sim, kin, address2, lane, labels, adapter
     )
-    return (
-        scaled_spec,
-        spec_bytes,
-        address_report,
-        adapter,
-        kin,
-        sim,
-        address2,
-        attachments,
-        offsets,
-        calibration,
-        calibration2,
+    return _CalibrateAndScaleResult(
+        scaled_spec=scaled_spec,
+        spec_bytes=spec_bytes,
+        address_report=address_report,
+        adapter=adapter,
+        kin=kin,
+        sim=sim,
+        address2=address2,
+        attachments=attachments,
+        offsets=offsets,
+        calibration=calibration,
+        calibration2=calibration2,
+        hip_report=hip_report,
+        qualification_note=qualification_note,
     )
 
 
@@ -473,13 +490,9 @@ def _simulate_and_receipt(
     adapter: Any,
     labels: tuple[str, ...],
     q_ref: np.ndarray,
-    spec_bytes: bytes,
+    cal_res: _CalibrateAndScaleResult,
     base_spec: dict[str, Any],
-    scaled_spec: dict[str, Any],
     ik_report: dict[str, Any],
-    address_report: dict[str, Any],
-    calibration: Any,
-    calibration2: Any,
 ) -> dict[str, Any]:
     """Execute forward dynamics tracking replay, renders, and receipt generation."""
     args = ctx.args
@@ -525,8 +538,12 @@ def _simulate_and_receipt(
     )
     lookat = np.nanmean(lane.points[0], axis=0)
     names = tuple(kin.coordinate_order)
-    render_playback(spec_bytes, names, q_ref, lookat, out_dir / "ik_playback.gif")
-    render_playback(spec_bytes, names, sim_q, lookat, out_dir / "tracking_playback.gif")
+    render_playback(
+        cal_res.spec_bytes, names, q_ref, lookat, out_dir / "ik_playback.gif"
+    )
+    render_playback(
+        cal_res.spec_bytes, names, sim_q, lookat, out_dir / "tracking_playback.gif"
+    )
 
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
@@ -537,14 +554,14 @@ def _simulate_and_receipt(
             hipcal_path=out_dir / "full_body_spec_hipcal.json",
             recalibrate_upper=args.recalibrate_upper,
             anthropometric=args.anthropometric,
-            qualification_note="engine pipeline milestone",
-            spec_bytes=spec_bytes,
-            hip_report={},
+            qualification_note=cal_res.qualification_note,
+            spec_bytes=cal_res.spec_bytes,
+            hip_report=cal_res.hip_report,
             candidate_bytes=CANDIDATE.read_bytes(),
             c3d_path=ctx.c3d_path,
             capture_name=args.capture,
             lane=lane,
-            address_report=address_report,
+            address_report=cal_res.address_report,
             ik_report=ik_report,
             dynamics_report=dynamics_report,
             kin=kin,
@@ -556,7 +573,9 @@ def _simulate_and_receipt(
     (out_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
     )
-    log_pipeline_summary(log, receipt, ik_report, calibration, calibration2)
+    log_pipeline_summary(
+        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+    )
     return receipt
 
 
@@ -582,19 +601,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         lane.bounds |= wrist_bounds()
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
 
-    (
-        scaled_spec,
-        spec_bytes,
-        address_report,
-        adapter,
-        kin,
-        sim,
-        address2,
-        attachments,
-        offsets,
-        calibration,
-        calibration2,
-    ) = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
+    cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
 
     (
         q_ik,
@@ -604,19 +611,21 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         errors,
         ref_errors,
         constrained_ik_dict,
-    ) = _solve_trajectory_ik(ctx, lane, kin, scaled_spec, labels, address2.q)
+    ) = _solve_trajectory_ik(
+        ctx, lane, cal_res.kin, cal_res.scaled_spec, labels, cal_res.address2.q
+    )
 
     ik_report = build_ik_report(
         IKReportInputs(
             lane=lane,
-            kin=kin,
-            adapter=adapter,
+            kin=cal_res.kin,
+            adapter=cal_res.adapter,
             labels=labels,
-            attachments=attachments,
-            offsets=offsets,
-            calibration=calibration,
-            calibration2=calibration2,
-            scaled_spec=scaled_spec,
+            attachments=cal_res.attachments,
+            offsets=cal_res.offsets,
+            calibration=cal_res.calibration,
+            calibration2=cal_res.calibration2,
+            scaled_spec=cal_res.scaled_spec,
             scale_table=[],
             femur_scale=1.0,
             tibia_scale=1.0,
@@ -643,18 +652,14 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     return _simulate_and_receipt(
         ctx,
         lane,
-        kin,
-        sim,
-        adapter,
+        cal_res.kin,
+        cal_res.sim,
+        cal_res.adapter,
         labels,
         q_ref,
-        spec_bytes,
+        cal_res,
         base_spec,
-        scaled_spec,
         ik_report,
-        address_report,
-        calibration,
-        calibration2,
     )
 
 
