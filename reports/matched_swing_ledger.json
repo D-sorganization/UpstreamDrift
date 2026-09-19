@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T16:49:35Z",
+  "generated_at": "2026-09-19T18:02:56Z",
   "rows": [
     {
       "acceptance": null,
@@ -539,6 +539,52 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_fit/receipt.json",
       "sha256": "05dd52ffa1516e222e31e478a15170d57757e55b286636bcf3ba00b48a1cbaf5"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.26215802208491734,
+            "name": "whole_marker_rmse_m",
+            "reason": "OpenSim IK whole RMSE 262.16 mm vs MuJoCo canonical 52.27 mm (delta 209.89 mm > 5.00 mm)",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "dynamics_stage",
+            "reason": "not_run: use moco",
+            "status": "not_run",
+            "threshold": 0.0,
+            "unit": "stage"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik_playback.gif",
+        "mot": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik.mot",
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/candidate.npz"
+      },
+      "candidate_sha": "f81216e8eb6a847081215eb5323b1b4e72a129a31d992ac7175f31628a1bf1d4",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": 71.83356401103083,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08913317524057322
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json",
+      "sha256": "66c50d2ec6ee0825be83e57bb1565ede9ef78ca1d5e3cd3527b3049a40138f8a"
     },
     {
       "acceptance": null,
@@ -2982,5 +3028,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 92
+  "total_receipts": 93
 }
