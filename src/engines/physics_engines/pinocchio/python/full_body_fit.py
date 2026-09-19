@@ -511,6 +511,12 @@ def run_fit(
             effort_bounds,
         )
         warm_start_source = f"candidate:{warm_start_candidate}"
+    assert (
+        q_track is not None
+        and v_track is not None
+        and us0 is not None
+        and ik_rms is not None
+    )
     xs0 = [np.concatenate([q_track[k], v_track[k]]) for k in range(n_nodes)]
     ik_summary = {
         "marker_rms_m": float(np.sqrt(np.mean(ik_rms**2))),
