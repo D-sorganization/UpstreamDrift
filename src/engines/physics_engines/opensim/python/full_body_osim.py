@@ -16,7 +16,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 import sys
 from typing import Any
-import xml.etree.ElementTree as ET  # nosec B405 # construction only; defusedxml used for parsing
+import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # build-only; parse via DefusedET
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -198,6 +198,29 @@ def _build_bodyset(model: ET.Element, spec: Mapping[str, Any]) -> dict[str, str]
     return body_map
 
 
+def _build_transform_axis(
+    st: ET.Element,
+    prefix: str,
+    idx: int,
+    coord_info: tuple[str, str] | None,
+) -> None:
+    """Attach a single rotation or translation TransformAxis to SpatialTransform."""
+    axes = {"x": "1 0 0", "y": "0 1 0", "z": "0 0 1"}
+    fallback_axes = {1: "1 0 0", 2: "0 1 0", 3: "0 0 1"}
+    axis_elem = ET.SubElement(st, "TransformAxis", attrib={"name": f"{prefix}{idx}"})
+    if coord_info is not None:
+        ax_char, cname = coord_info
+        ET.SubElement(axis_elem, "coordinates").text = cname
+        ET.SubElement(axis_elem, "axis").text = axes[ax_char]
+        fn = ET.SubElement(axis_elem, "LinearFunction", attrib={"name": "function"})
+        ET.SubElement(fn, "coefficients").text = " 1 0"
+    else:
+        ET.SubElement(axis_elem, "coordinates")
+        ET.SubElement(axis_elem, "axis").text = fallback_axes[idx]
+        fn = ET.SubElement(axis_elem, "Constant", attrib={"name": "function"})
+        ET.SubElement(fn, "value").text = "0"
+
+
 def _attach_spatial_transform(
     joint_elem: ET.Element,
     primitives: Sequence[Mapping[str, Any]],
@@ -216,44 +239,13 @@ def _attach_spatial_transform(
         elif kind.startswith("P"):
             trans_coords.append((kind[1].lower(), cname))
 
-    # Standard axis vectors
-    axes = {"x": "1 0 0", "y": "0 1 0", "z": "0 0 1"}
+    for idx in range(1, 4):
+        coord_info = rot_coords[idx - 1] if idx - 1 < len(rot_coords) else None
+        _build_transform_axis(st, "rotation", idx, coord_info)
 
     for idx in range(1, 4):
-        axis_elem = ET.SubElement(
-            st, "TransformAxis", attrib={"name": f"rotation{idx}"}
-        )
-        if idx - 1 < len(rot_coords):
-            ax_char, cname = rot_coords[idx - 1]
-            ET.SubElement(axis_elem, "coordinates").text = cname
-            ET.SubElement(axis_elem, "axis").text = axes[ax_char]
-            fn = ET.SubElement(axis_elem, "LinearFunction", attrib={"name": "function"})
-            ET.SubElement(fn, "coefficients").text = " 1 0"
-        else:
-            ET.SubElement(axis_elem, "coordinates")
-            ET.SubElement(axis_elem, "axis").text = (
-                "1 0 0" if idx == 1 else ("0 1 0" if idx == 2 else "0 0 1")
-            )
-            fn = ET.SubElement(axis_elem, "Constant", attrib={"name": "function"})
-            ET.SubElement(fn, "value").text = "0"
-
-    for idx in range(1, 4):
-        axis_elem = ET.SubElement(
-            st, "TransformAxis", attrib={"name": f"translation{idx}"}
-        )
-        if idx - 1 < len(trans_coords):
-            ax_char, cname = trans_coords[idx - 1]
-            ET.SubElement(axis_elem, "coordinates").text = cname
-            ET.SubElement(axis_elem, "axis").text = axes[ax_char]
-            fn = ET.SubElement(axis_elem, "LinearFunction", attrib={"name": "function"})
-            ET.SubElement(fn, "coefficients").text = " 1 0"
-        else:
-            ET.SubElement(axis_elem, "coordinates")
-            ET.SubElement(axis_elem, "axis").text = (
-                "1 0 0" if idx == 1 else ("0 1 0" if idx == 2 else "0 0 1")
-            )
-            fn = ET.SubElement(axis_elem, "Constant", attrib={"name": "function"})
-            ET.SubElement(fn, "value").text = "0"
+        coord_info = trans_coords[idx - 1] if idx - 1 < len(trans_coords) else None
+        _build_transform_axis(st, "translation", idx, coord_info)
 
 
 def _build_jointset(model: ET.Element, spec: Mapping[str, Any]) -> list[str]:
