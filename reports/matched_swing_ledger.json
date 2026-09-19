@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T20:15:37Z",
+  "generated_at": "2026-09-19T00:59:03Z",
   "rows": [
     {
       "acceptance": null,
@@ -2653,6 +2653,93 @@
       "acceptance": {
         "gates": [
           {
+            "measured": 0.1235360188278201,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 123.54 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.04850729028310768,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 48.51 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.2331304673300411,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 233.13 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.22530596222439722,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 225.31 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.06353867025331546,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.0635 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1267.8446438406743,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.01719458026964854,
+            "name": "max_penetration_m",
+            "reason": "penetration 17.2 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Same-integrator G1 continuation (RK45 rtol 1e-6 on both solve and replay) from stage_0.60s.npz: rollout == replay at 123.5 mm whole; 0.85 s stage not converged, cost dominated by the human-range barrier. Rejected; diagnostic evidence for MS-107.",
+        "source": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/candidate.npz"
+      },
+      "candidate_sha": "a7372b787824d902a616d2a77cf5dfaed2b68accf2cc112593bc8419a80e8509",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/receipt.json",
+      "sha256": "166eb43ba7a2a0243720bf838d0b509dfabe9e6a51beccc6431d7b27d47a0826"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
             "measured": 2.7573124637458317,
             "name": "whole_marker_rmse_m",
             "reason": "whole RMSE 2757.31 mm > 25.00 mm",
@@ -2809,5 +2896,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 90
+  "total_receipts": 91
 }
