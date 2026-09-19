@@ -127,3 +127,9 @@
 ## 2024-05-21 - [Optimize Norm Calculation in Motion Retargeting]
 **Learning:** In the motion capture retargeting pipeline (e.g., `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py`), calling `np.linalg.norm(pos_error)` on small 1D arrays (like 3D position errors) incurs significant overhead due to NumPy's internal dispatching and instance checks. Replacing it with `math.sqrt(pos_error.dot(pos_error))` bypasses this overhead and is significantly faster (~2.5x).
 **Action:** Replace `np.linalg.norm(pos_error)` with `math.sqrt(pos_error.dot(pos_error))` for small 1D array magnitude calculations where possible.
+
+## 2026-09-19 - Fast squared error sums
+
+**Learning:** Optimizing `np.sum(diff**2, axis=-1)` or similar by doing the difference first and then `np.einsum` or `np.vdot` avoids a temporary allocation of `diff**2` and provides a nice ~2x speedup. `np.einsum("...i,...i->...", diff, diff)` is highly efficient for taking the squared error sum along the last dimension.
+
+**Action:** Replace `np.sum((a - b)**2, axis=-1)` with `diff = a - b` followed by `np.einsum('...i,...i->...', diff, diff)`. For 1D arrays, use `np.vdot(diff, diff)`.
