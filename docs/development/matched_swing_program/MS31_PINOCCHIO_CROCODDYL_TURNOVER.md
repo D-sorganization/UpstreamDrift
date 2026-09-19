@@ -115,11 +115,13 @@ pipe through `tr -d '\r'`. Long runs: launch detached with
 | w030s     | 0.30 s | 109   | 34.0 / 25.6 / 52.8                          | 79.2                   | 4-substep implicit-Euler nodes: worse and not converged; abandoned                                                                       |
 | driver_g1 | 0.85 s | 307   | 46.4 / 53.7 / 38.3 (rtol 1e-4 nodes)        | 340 (rtol 1e-6)        | REJECTED, kept at `evidence/matched/driver_g1_crocoddyl_rk45/`; 6,636 s; stages 0.30 (19.7) / 0.45 (21.3) / 0.60 (22.4) / 0.85 (46.4) mm |
 
+| driver_g1_rtol6 | 0.85 s | 307 | 123.5 / 233 / 225 (rtol 1e-6 nodes) | 123.5 (identical) | REJECTED, `evidence/matched/driver_g1_crocoddyl_rk45_rtol6/`; 0.60 s stage 22.4 mm healthy; 0.85 s stage not converged, cost = marker 3,077 + range barrier 3,788; tolerance sensitivity closed |
+
 Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
 
 ## Next Steps (In Order)
 
-1. **MS-107 (#10381), same-integrator G1.** Rerun the 0.85 s continuation from
+1. **(done 2026-09-18, rejected) MS-107 same-integrator G1**: rollout == replay at 123.5 mm; the downswing stage is barrier-dominated. Next: inspect the IK reference 0.60-0.85 s for range violations, rerun with barrier weight /10 and raised trail-side effort bounds, then MS-20 contact identification. Original instruction was: rerun the 0.85 s continuation from
    `evidence/matched/driver_g1_crocoddyl_rk45/` stage checkpoints with
    `--rk45-rtol 1e-6` (solve == replay) and 60 iterations per stage; commit the
    receipt whatever the verdict. Then a tolerance study (rtol 1e-4/1e-5/1e-6)
