@@ -55,7 +55,7 @@ dependencies = [
     # path; it previously existed only as a hand-edit in the generated
     # environment.yml, where it constrained conda users alone and was
     # scheduled for deletion by the next `make sync-deps` (#8689).
-    "tornado>=6.5.7",
+    "tornado>=6.5.8",
     # Transitive via flask/uvicorn/pip-tools rather than imported directly.
     # Declared here for the same reason as tornado above: the floor must bind
     # on every install path, not depend on whichever dependent resolves first.
