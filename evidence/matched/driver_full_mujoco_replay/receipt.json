@@ -1,0 +1,328 @@
+{
+  "schema_version": "matched-swing-replay/1",
+  "engine": "mujoco",
+  "engine_version": "3.3.4",
+  "candidate_sha256": "7b55ffa8b05edb8c843fdc6c30b7ed57056b0f9e4b90dd672f9d03b0bf4310ad",
+  "document_sha256": "5d1e5eac6813aecabee69752704510860597a64cf45b28798b011e6109d3bdd5",
+  "capture_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+  "source_receipt_sha256": "b064a0efd2c267ee217e818de4845dd5395b61d68a9676b827e78b3767fb20f5",
+  "attachments_sha256": "e7ae60b483ba3436e97a496de5501bf7da6d7129e1ead0ab4a2e683ff52ce3f6",
+  "configuration": {
+    "settings": {
+      "armature_kg_m2": 0.005,
+      "rtol": 1e-7,
+      "atol": 1e-9,
+      "max_step_s": 0.0006944444444444445,
+      "max_evaluations": 200000
+    },
+    "contact": {
+      "ground": {
+        "calibrated": false,
+        "height_m": null,
+        "normal_policy": "opposite_gravity"
+      },
+      "law": "hunt_crossley_coulomb",
+      "parameters": {
+        "dissipation_s_m": 2.0,
+        "dynamic_friction": 0.8,
+        "static_friction": 0.9,
+        "stiffness_n_m": 50000.0,
+        "transition_velocity_m_s": 0.05,
+        "viscous_friction": 0.0
+      },
+      "provenance": "ground-support driver parameters: toe spheres, 2e5 N/m; still placeholders",
+      "spheres": [
+        {
+          "body": "calcn_r",
+          "name": "heel_r",
+          "position_m": [0.01, -0.005, 0.0],
+          "radius_m": 0.035
+        },
+        {
+          "body": "calcn_r",
+          "name": "forefoot_r",
+          "position_m": [0.16, -0.005, 0.0],
+          "radius_m": 0.03
+        },
+        {
+          "body": "calcn_r",
+          "name": "toe_r",
+          "position_m": [0.23, -0.01, 0.0],
+          "radius_m": 0.025
+        },
+        {
+          "body": "calcn_l",
+          "name": "heel_l",
+          "position_m": [0.01, -0.005, 0.0],
+          "radius_m": 0.035
+        },
+        {
+          "body": "calcn_l",
+          "name": "forefoot_l",
+          "position_m": [0.16, -0.005, 0.0],
+          "radius_m": 0.03
+        },
+        {
+          "body": "calcn_l",
+          "name": "toe_l",
+          "position_m": [0.23, -0.01, 0.0],
+          "radius_m": 0.025
+        }
+      ]
+    },
+    "ground_height_m": 0.0002577801048755657,
+    "control_interpolation": "zero_order_hold",
+    "root_efforts": "zero",
+    "controller": "none",
+    "grip": "rigid KKT",
+    "integrator": "DOP853"
+  },
+  "parity": {
+    "status": "UNVERIFIED",
+    "failures": [
+      "source armature missing or different",
+      "source contact configuration missing or different",
+      "source candidate_sha256 missing or invalid",
+      "source control interpolation missing or different"
+    ],
+    "same_state_marker_max_m": 2.3145970116419776e-15,
+    "dynamics_parity": "UNVERIFIED: no independent source forward replay"
+  },
+  "integration": {
+    "requested_frames": 654,
+    "completed_frames": 571,
+    "requested_end_s": 1.8138888888888889,
+    "completed_end_s": 1.5833333333333335,
+    "failure": "Replay evaluation budget exhausted",
+    "pose_resets": 0,
+    "g1_convergence_max_marker_m": 3.087162443043268,
+    "g1_convergence_tolerance_m": 1e-5,
+    "acceptance_audit_sha256": "15887ae660b01325fd2562422ccb3a7defb7608c29781bc8a81bbb938f480c2f"
+  },
+  "shared_metrics": {
+    "whole_marker_rmse_m": 1.4446584952684365,
+    "early_marker_rmse_m": 0.859119255495535,
+    "terminal_marker_rmse_m": 2.4292363856539376,
+    "club_marker_rmse_m": 1.5473104591894296,
+    "pelvis_yaw_rmse_rad": 1.8451309708448902
+  },
+  "g1_metrics": {
+    "whole_marker_rmse_m": 0.9401372318864682,
+    "early_marker_rmse_m": 0.859119255495535,
+    "terminal_marker_rmse_m": 0.9929206741908517,
+    "club_marker_rmse_m": 0.7416455660268633,
+    "pelvis_yaw_rmse_rad": 1.7601404429152856,
+    "max_normal_force_n": 117566.3423473042,
+    "max_penetration_m": 0.05776917182144573,
+    "max_closure_residual_m": 0.31233266828500783,
+    "max_closure_residual_rad": 0.05132401568968702
+  },
+  "acceptance": {
+    "horizon": "G1",
+    "is_physically_accepted": false,
+    "status": "REJECTED",
+    "gates": [
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.025,
+        "measured": 0.9401372318864682,
+        "unit": "m",
+        "reason": "whole RMSE 940.14 mm > 25.00 mm"
+      },
+      {
+        "name": "early_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.012,
+        "measured": 0.859119255495535,
+        "unit": "m",
+        "reason": "early RMSE 859.12 mm > 12.00 mm"
+      },
+      {
+        "name": "terminal_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.035,
+        "measured": 0.9929206741908517,
+        "unit": "m",
+        "reason": "terminal RMSE 992.92 mm > 35.00 mm"
+      },
+      {
+        "name": "club_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.06,
+        "measured": 0.7416455660268633,
+        "unit": "m",
+        "reason": "club RMSE 741.65 mm > 60.00 mm"
+      },
+      {
+        "name": "pelvis_yaw_rmse_rad",
+        "status": "failed",
+        "threshold": 0.05236,
+        "measured": 1.7601404429152856,
+        "unit": "rad",
+        "reason": "pelvis yaw RMSE 1.7601 rad > 0.0524 rad"
+      },
+      {
+        "name": "max_normal_force_n",
+        "status": "failed",
+        "threshold": 2354.4,
+        "measured": 117566.3423473042,
+        "unit": "N",
+        "reason": "max normal force 117566.3 N exceeds 2354.4 N (3x BW)"
+      },
+      {
+        "name": "max_penetration_m",
+        "status": "failed",
+        "threshold": 0.01,
+        "measured": 0.05776917182144573,
+        "unit": "m",
+        "reason": "penetration 57.8 mm > 10.0 mm"
+      },
+      {
+        "name": "max_closure_residual_m",
+        "status": "failed",
+        "threshold": 0.005,
+        "measured": 0.31233266828500783,
+        "unit": "m",
+        "reason": "closure residual 312.33 mm > 5.00 mm"
+      },
+      {
+        "name": "required_whole_marker_rmse_m",
+        "threshold": 0.025,
+        "measured": 0.9401372318864682,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "required_early_marker_rmse_m",
+        "threshold": 0.012,
+        "measured": 0.859119255495535,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "required_terminal_marker_rmse_m",
+        "threshold": 0.035,
+        "measured": 0.9929206741908517,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "required_club_marker_rmse_m",
+        "threshold": 0.06,
+        "measured": 0.7416455660268633,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "required_pelvis_yaw_rmse_rad",
+        "threshold": 0.05236,
+        "measured": 1.7601404429152856,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "required_max_normal_force_n",
+        "threshold": 2354.4,
+        "measured": 117566.3423473042,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "required_max_penetration_m",
+        "threshold": 0.01,
+        "measured": 0.05776917182144573,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "required_max_closure_residual_m",
+        "threshold": 0.005,
+        "measured": 0.31233266828500783,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "required_max_closure_residual_rad",
+        "threshold": 0.05,
+        "measured": 0.05132401568968702,
+        "status": "failed",
+        "reason": "Required finite G1 measurement",
+        "unit": ""
+      },
+      {
+        "name": "parity",
+        "status": "missing",
+        "threshold": 1.0,
+        "measured": 0.0,
+        "unit": "bool",
+        "reason": "Required replay evidence"
+      },
+      {
+        "name": "complete",
+        "status": "passed",
+        "threshold": 1.0,
+        "measured": 1.0,
+        "unit": "bool",
+        "reason": "Required replay evidence"
+      },
+      {
+        "name": "converged",
+        "status": "missing",
+        "threshold": 1.0,
+        "measured": 0.0,
+        "unit": "bool",
+        "reason": "Required replay evidence"
+      },
+      {
+        "name": "root_history",
+        "status": "missing",
+        "threshold": 1.0,
+        "measured": 0.0,
+        "unit": "bool",
+        "reason": "Required replay evidence"
+      },
+      {
+        "name": "coverage",
+        "status": "passed",
+        "threshold": 1.0,
+        "measured": 1.0,
+        "unit": "bool",
+        "reason": "Required replay evidence"
+      },
+      {
+        "name": "source_dynamics",
+        "status": "missing",
+        "threshold": 1.0,
+        "measured": 0.0,
+        "unit": "bool",
+        "reason": "Required replay evidence"
+      }
+    ],
+    "qualification_note": "Independent uninterrupted replay; missing evidence fails closed"
+  },
+  "artifacts": {
+    "replay": {
+      "path": "returned-replay.npz",
+      "sha256": "b92814ba88dc13d29ca7f795be7474b4eb893e1f24ec209a5f7c6c59eba2b753"
+    },
+    "playback": {
+      "path": "playback.gif",
+      "sha256": "d236950abb1ad64302c9b14ece6730886b1515b3e436c5193099622b55c3cc38"
+    },
+    "kinematic-playback": {
+      "path": "kinematic-playback.gif",
+      "sha256": "0ba27dd561a666c821ce3c9934392183e679adf0f5b1147158ea30055f7c0695"
+    }
+  },
+  "elapsed_s": 349.3019893000019,
+  "qualification": "Diagnostic replay only. Legacy source lacks plant/control provenance and root history; IK playback is not dynamics acceptance."
+}
