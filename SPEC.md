@@ -5823,6 +5823,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |
 | 2026-09-18 | #10428 | Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum)` in `swing_evaluator.py` (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10427 | Optimized wind speed norm calculation by replacing `np.linalg.norm` with `math.sqrt(np.dot)` for small 3D vectors in `src/shared/python/physics/aerodynamics/_config.py`. (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10458 | Same-integrator G1 continuation (rtol 1e-6) committed as rejected evidence; rollout equals replay at 123.5 mm; ledger and turnover updated |

@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10477 · Qualify Shared URDF Bundles and Preserve Numeric Precision
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10477 (MV-01, epic #10476)
+- **Branch:** feat/10477-urdf-bundle-precision
+- **PR:** not created
+- **Paths:** src/engines/physics_engines/drake/python/full_body_urdf.py; src/shared/python/model_generation/\_lazy_map.py; src/shared/python/model_generation/builders/urdf_writer.py; src/shared/python/model_generation/export/**init**.py; src/shared/python/model_generation/export/bundle_manifest.py; src/shared/python/model_generation/export/model_bundle.py; tests/integration/test_pinocchio_urdf_bundle_parity.py; tests/unit/model_generation/test_urdf_precision_bundle.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (7 unit tests pass; Pinocchio 4.1.0 parity verified in WSL native Ubuntu environment with < 1e-12 m transform and < 1e-11 mass matrix error; ruff clean).
+- **Summary:** Upgraded URDF numeric serialization from lossy 6g/4g to deterministic 17g representation. Implemented ModelBundle and ModelBundleManifest with SHA-256 integrity verification, canonical coordinate ordering, and zip archive export/import. Integrated with Drake full_body_urdf export. Verified numeric round-trip parity with native Pinocchio.
+- **Next step:** Commit, push, create PR referencing Fixes #10477, and enable auto-merge.
+- **Evidence:** tests/unit/model_generation/test_urdf_precision_bundle.py; tests/integration/test_pinocchio_urdf_bundle_parity.py.
+
 ### DL-#10460 · Consume Shared GSPro Open Connect V1 Codec From Tools
 
 - **State:** in_progress
