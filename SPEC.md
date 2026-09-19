@@ -844,7 +844,7 @@ Defines durable async TCP transport, bounded stream framing, and delivery intent
 
 Implements frozen protocol profile and deterministic serialization for GSPro Open Connect v1 under `src/shared/python/golf_simulator/adapters/gspro/`:
 - `profile.py`: `GSProProfile` characterizes observed vs documented vs unresolved vendor protocol semantics; port 921, speed unit `mph`, distance unit `Yards`, HLA positive `right`, 64 KiB buffer limit. Declares native avatar injection and autonomous course control as unsupported.
-- `codec.py`: Pure functions `encode_shot_payload`, `decode_simulator_response`, and `encode_heartbeat_payload`. Converts canonical SI/radian units and vectors to vendor representation without mutating stored values; preserves missing club data without zero-filling; maps status codes (200, 201, 501) to explicit `ResponseCategory` enums without treating unknown codes as success.
+- `codec.py`: Pure functions `encode_shot_payload`, `decode_simulator_response`, and `encode_heartbeat_payload`. Converts canonical SI/radian units and vectors to vendor representation without mutating stored values; preserves missing club data without zero-filling; delegates protocol wire encoding and response parsing directly to `shared.python.launch_monitor.gspro_connect` (#10460, Tools#5228); maps status codes (200, 201, 501) to explicit `ResponseCategory` enums without treating unknown codes as success.
 
 ## Canonical Golf Simulator Contracts and Capability Ports (#10190)
 
