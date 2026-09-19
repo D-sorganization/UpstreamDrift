@@ -189,7 +189,10 @@ class NativeMujocoFullBodyModel:
         bias, tau_contact, _ = self.generalized_forces(coordinates, rates)
 
         mass = np.zeros((model.nv, model.nv))
-        mj.mj_fullM(model, mass, data.qM)
+        if hasattr(data, "qM"):
+            mj.mj_fullM(model, mass, data.qM)
+        else:
+            mj.mj_fullM(model, data, mass)
 
         jac, drift = _evaluate_weld_closure(mj, model, data, self._closure)
         total_effort = effort + tau_contact - bias
