@@ -114,6 +114,173 @@ class CandidateMetadata:
         return cls(**d)
 
 
+@dataclass(frozen=True)
+class CandidateMarkers:
+    """Marker trajectory container for a MatchedSwingCandidate."""
+
+    model_markers_m: np.ndarray | None = None
+    target_markers_m: np.ndarray | None = None
+    marker_validity: np.ndarray | None = None
+
+
+@dataclass(frozen=True)
+class CandidateAuxiliary:
+    """Auxiliary state container (actuator states, contact/external forces)."""
+
+    actuator_states: np.ndarray | None = None
+    external_forces: np.ndarray | None = None
+
+
+def _validate_time(time_s: np.ndarray | Sequence[float]) -> np.ndarray:
+    t_arr = np.asarray(time_s, dtype=np.float64)
+    if t_arr.ndim != 1:
+        raise ValueError(f"time_s must be 1D array, got ndim={t_arr.ndim}")
+    n_frames = len(t_arr)
+    if n_frames < 2:
+        raise ValueError(f"Candidate requires at least 2 frames, got {n_frames}")
+    if not np.all(np.isfinite(t_arr)):
+        raise ValueError("time_s contains non-finite (NaN or Inf) values")
+    if t_arr[0] < 0.0:
+        raise ValueError(f"Initial time must be non-negative, got {t_arr[0]}")
+    if np.any(np.diff(t_arr) <= 0.0):
+        raise ValueError("time_s must be strictly monotonically increasing")
+    t_arr.flags.writeable = False
+    return t_arr
+
+
+def _validate_q(
+    q: np.ndarray, n_frames: int, coordinate_names: tuple[str, ...]
+) -> np.ndarray:
+    q_arr = np.asarray(q, dtype=np.float64)
+    if q_arr.ndim != 2:
+        raise ValueError(
+            f"q must be 2D array of shape (N, nq), got shape {q_arr.shape}"
+        )
+    if q_arr.shape[0] != n_frames:
+        raise ValueError(
+            f"length mismatch: q frames {q_arr.shape[0]} != time_s frames {n_frames}"
+        )
+    if coordinate_names and q_arr.shape[1] != len(coordinate_names):
+        raise ValueError(
+            f"q column count {q_arr.shape[1]} != coordinate_names count {len(coordinate_names)}"
+        )
+    q_arr.flags.writeable = False
+    return q_arr
+
+
+def _validate_v(
+    v: np.ndarray | None, n_frames: int, velocity_names: tuple[str, ...]
+) -> np.ndarray | None:
+    if v is None:
+        return None
+    v_arr = np.asarray(v, dtype=np.float64)
+    if v_arr.ndim != 2 or v_arr.shape[0] != n_frames:
+        raise ValueError(
+            f"v must be 2D array with {n_frames} frames, got shape {v_arr.shape}"
+        )
+    if velocity_names and v_arr.shape[1] != len(velocity_names):
+        raise ValueError(
+            f"v column count {v_arr.shape[1]} != velocity_names count {len(velocity_names)}"
+        )
+    v_arr.flags.writeable = False
+    return v_arr
+
+
+def _validate_tau(
+    tau: np.ndarray | None, n_frames: int, actuator_names: tuple[str, ...]
+) -> np.ndarray | None:
+    if tau is None:
+        return None
+    tau_arr = np.asarray(tau, dtype=np.float64)
+    if tau_arr.ndim != 2 or tau_arr.shape[0] != n_frames:
+        raise ValueError(
+            f"tau must be 2D array with {n_frames} frames, got shape {tau_arr.shape}"
+        )
+    if actuator_names and tau_arr.shape[1] != len(actuator_names):
+        raise ValueError(
+            f"tau column count {tau_arr.shape[1]} != actuator_names count {len(actuator_names)}"
+        )
+    tau_arr.flags.writeable = False
+    return tau_arr
+
+
+def _validate_profile(
+    profile: CandidateProfile, v: np.ndarray | None, tau: np.ndarray | None
+) -> None:
+    if profile == CandidateProfile.DYNAMIC:
+        if v is None:
+            raise ValueError("Dynamic candidate profile requires velocity array v")
+        if tau is None:
+            raise ValueError(
+                "Dynamic candidate profile requires actuator effort array tau"
+            )
+    elif profile == CandidateProfile.KINEMATIC:
+        if tau is not None:
+            raise ValueError(
+                "Kinematic candidate profile must not carry actuator effort tau"
+            )
+
+
+def _validate_markers(
+    markers: CandidateMarkers | None, n_frames: int
+) -> CandidateMarkers:
+    if markers is None:
+        return CandidateMarkers()
+
+    m_arr: np.ndarray | None = None
+    if markers.model_markers_m is not None:
+        m_arr = np.asarray(markers.model_markers_m, dtype=np.float64)
+        if m_arr.ndim != 3 or m_arr.shape[0] != n_frames or m_arr.shape[2] != 3:
+            raise ValueError(f"model_markers_m must be (N, M, 3), got {m_arr.shape}")
+        m_arr.flags.writeable = False
+
+    tgt_arr: np.ndarray | None = None
+    if markers.target_markers_m is not None:
+        tgt_arr = np.asarray(markers.target_markers_m, dtype=np.float64)
+        if tgt_arr.ndim != 3 or tgt_arr.shape[0] != n_frames or tgt_arr.shape[2] != 3:
+            raise ValueError(f"target_markers_m must be (N, M, 3), got {tgt_arr.shape}")
+        tgt_arr.flags.writeable = False
+
+    val_arr: np.ndarray | None = None
+    if markers.marker_validity is not None:
+        val_arr = np.asarray(markers.marker_validity, dtype=bool)
+        if val_arr.ndim != 2 or val_arr.shape[0] != n_frames:
+            raise ValueError(f"marker_validity must be (N, M), got {val_arr.shape}")
+        val_arr.flags.writeable = False
+
+    return CandidateMarkers(
+        model_markers_m=m_arr,
+        target_markers_m=tgt_arr,
+        marker_validity=val_arr,
+    )
+
+
+def _validate_auxiliary(
+    aux: CandidateAuxiliary | None, n_frames: int
+) -> CandidateAuxiliary:
+    if aux is None:
+        return CandidateAuxiliary()
+
+    act_arr: np.ndarray | None = None
+    if aux.actuator_states is not None:
+        act_arr = np.asarray(aux.actuator_states, dtype=np.float64)
+        if act_arr.ndim != 2 or act_arr.shape[0] != n_frames:
+            raise ValueError(f"actuator_states must be (N, K), got {act_arr.shape}")
+        act_arr.flags.writeable = False
+
+    forces_arr: np.ndarray | None = None
+    if aux.external_forces is not None:
+        forces_arr = np.asarray(aux.external_forces, dtype=np.float64)
+        if forces_arr.ndim != 2 or forces_arr.shape[0] != n_frames:
+            raise ValueError(f"external_forces must be (N, F), got {forces_arr.shape}")
+        forces_arr.flags.writeable = False
+
+    return CandidateAuxiliary(
+        actuator_states=act_arr,
+        external_forces=forces_arr,
+    )
+
+
 class MatchedSwingCandidate:
     """Unified, immutable, and checksum-verified matched swing candidate."""
 
@@ -124,12 +291,9 @@ class MatchedSwingCandidate:
         q: np.ndarray,
         v: np.ndarray | None = None,
         tau: np.ndarray | None = None,
-        actuator_states: np.ndarray | None = None,
-        model_markers_m: np.ndarray | None = None,
-        target_markers_m: np.ndarray | None = None,
-        marker_validity: np.ndarray | None = None,
-        external_forces: np.ndarray | None = None,
         *,
+        markers: CandidateMarkers | None = None,
+        auxiliary: CandidateAuxiliary | None = None,
         compute_checksums: bool = True,
     ) -> None:
         if metadata.schema_version != CANDIDATE_SCHEMA_VERSION:
@@ -138,147 +302,15 @@ class MatchedSwingCandidate:
                 f"(expected {CANDIDATE_SCHEMA_VERSION!r})"
             )
 
-        t_arr = np.asarray(time_s, dtype=np.float64)
-        if t_arr.ndim != 1:
-            raise ValueError(f"time_s must be 1D array, got ndim={t_arr.ndim}")
-        n_frames = len(t_arr)
-        if n_frames < 2:
-            raise ValueError(f"Candidate requires at least 2 frames, got {n_frames}")
-        if not np.all(np.isfinite(t_arr)):
-            raise ValueError("time_s contains non-finite (NaN or Inf) values")
-        if t_arr[0] < 0.0:
-            raise ValueError(f"Initial time must be non-negative, got {t_arr[0]}")
-        if np.any(np.diff(t_arr) <= 0.0):
-            raise ValueError("time_s must be strictly monotonically increasing")
+        self._time_s = _validate_time(time_s)
+        n_frames = len(self._time_s)
+        self._q = _validate_q(q, n_frames, metadata.coordinate_names)
+        self._v = _validate_v(v, n_frames, metadata.velocity_names)
+        self._tau = _validate_tau(tau, n_frames, metadata.actuator_names)
+        _validate_profile(metadata.profile, self._v, self._tau)
 
-        q_arr = np.asarray(q, dtype=np.float64)
-        if q_arr.ndim != 2:
-            raise ValueError(
-                f"q must be 2D array of shape (N, nq), got shape {q_arr.shape}"
-            )
-        if q_arr.shape[0] != n_frames:
-            raise ValueError(
-                f"length mismatch: q frames {q_arr.shape[0]} != time_s frames {n_frames}"
-            )
-        if metadata.coordinate_names and q_arr.shape[1] != len(
-            metadata.coordinate_names
-        ):
-            raise ValueError(
-                f"q column count {q_arr.shape[1]} != coordinate_names count {len(metadata.coordinate_names)}"
-            )
-
-        v_arr: np.ndarray | None = None
-        if v is not None:
-            v_arr = np.asarray(v, dtype=np.float64)
-            if v_arr.ndim != 2 or v_arr.shape[0] != n_frames:
-                raise ValueError(
-                    f"v must be 2D array with {n_frames} frames, got shape {v_arr.shape}"
-                )
-            if metadata.velocity_names and v_arr.shape[1] != len(
-                metadata.velocity_names
-            ):
-                raise ValueError(
-                    f"v column count {v_arr.shape[1]} != velocity_names count {len(metadata.velocity_names)}"
-                )
-
-        tau_arr: np.ndarray | None = None
-        if tau is not None:
-            tau_arr = np.asarray(tau, dtype=np.float64)
-            if tau_arr.ndim != 2 or tau_arr.shape[0] != n_frames:
-                raise ValueError(
-                    f"tau must be 2D array with {n_frames} frames, got shape {tau_arr.shape}"
-                )
-            if metadata.actuator_names and tau_arr.shape[1] != len(
-                metadata.actuator_names
-            ):
-                raise ValueError(
-                    f"tau column count {tau_arr.shape[1]} != actuator_names count {len(metadata.actuator_names)}"
-                )
-
-        # Profile checks
-        if metadata.profile == CandidateProfile.DYNAMIC:
-            if v_arr is None:
-                raise ValueError("Dynamic candidate profile requires velocity array v")
-            if tau_arr is None:
-                raise ValueError(
-                    "Dynamic candidate profile requires actuator effort array tau"
-                )
-        elif metadata.profile == CandidateProfile.KINEMATIC:
-            if tau_arr is not None:
-                raise ValueError(
-                    "Kinematic candidate profile must not carry actuator effort tau"
-                )
-
-        # Marker checks
-        m_arr: np.ndarray | None = None
-        if model_markers_m is not None:
-            m_arr = np.asarray(model_markers_m, dtype=np.float64)
-            if m_arr.ndim != 3 or m_arr.shape[0] != n_frames or m_arr.shape[2] != 3:
-                raise ValueError(
-                    f"model_markers_m must be (N, M, 3), got {m_arr.shape}"
-                )
-
-        tgt_arr: np.ndarray | None = None
-        if target_markers_m is not None:
-            tgt_arr = np.asarray(target_markers_m, dtype=np.float64)
-            if (
-                tgt_arr.ndim != 3
-                or tgt_arr.shape[0] != n_frames
-                or tgt_arr.shape[2] != 3
-            ):
-                raise ValueError(
-                    f"target_markers_m must be (N, M, 3), got {tgt_arr.shape}"
-                )
-
-        val_arr: np.ndarray | None = None
-        if marker_validity is not None:
-            val_arr = np.asarray(marker_validity, dtype=bool)
-            if val_arr.ndim != 2 or val_arr.shape[0] != n_frames:
-                raise ValueError(f"marker_validity must be (N, M), got {val_arr.shape}")
-
-        act_states_arr: np.ndarray | None = None
-        if actuator_states is not None:
-            act_states_arr = np.asarray(actuator_states, dtype=np.float64)
-            if act_states_arr.ndim != 2 or act_states_arr.shape[0] != n_frames:
-                raise ValueError(
-                    f"actuator_states must be (N, K), got {act_states_arr.shape}"
-                )
-
-        forces_arr: np.ndarray | None = None
-        if external_forces is not None:
-            forces_arr = np.asarray(external_forces, dtype=np.float64)
-            if forces_arr.ndim != 2 or forces_arr.shape[0] != n_frames:
-                raise ValueError(
-                    f"external_forces must be (N, F), got {forces_arr.shape}"
-                )
-
-        # Set read-only flags to guarantee immutability
-        t_arr.flags.writeable = False
-        q_arr.flags.writeable = False
-        if v_arr is not None:
-            v_arr.flags.writeable = False
-        if tau_arr is not None:
-            tau_arr.flags.writeable = False
-        if m_arr is not None:
-            m_arr.flags.writeable = False
-        if tgt_arr is not None:
-            tgt_arr.flags.writeable = False
-        if val_arr is not None:
-            val_arr.flags.writeable = False
-        if act_states_arr is not None:
-            act_states_arr.flags.writeable = False
-        if forces_arr is not None:
-            forces_arr.flags.writeable = False
-
-        self._time_s = t_arr
-        self._q = q_arr
-        self._v = v_arr
-        self._tau = tau_arr
-        self._actuator_states = act_states_arr
-        self._model_markers_m = m_arr
-        self._target_markers_m = tgt_arr
-        self._marker_validity = val_arr
-        self._external_forces = forces_arr
+        self._markers = _validate_markers(markers, n_frames)
+        self._auxiliary = _validate_auxiliary(auxiliary, n_frames)
 
         # Checksums
         if compute_checksums or not metadata.checksums:
@@ -310,24 +342,32 @@ class MatchedSwingCandidate:
         return self._tau
 
     @property
+    def markers(self) -> CandidateMarkers:
+        return self._markers
+
+    @property
+    def auxiliary(self) -> CandidateAuxiliary:
+        return self._auxiliary
+
+    @property
     def actuator_states(self) -> np.ndarray | None:
-        return self._actuator_states
+        return self._auxiliary.actuator_states
 
     @property
     def model_markers_m(self) -> np.ndarray | None:
-        return self._model_markers_m
+        return self._markers.model_markers_m
 
     @property
     def target_markers_m(self) -> np.ndarray | None:
-        return self._target_markers_m
+        return self._markers.target_markers_m
 
     @property
     def marker_validity(self) -> np.ndarray | None:
-        return self._marker_validity
+        return self._markers.marker_validity
 
     @property
     def external_forces(self) -> np.ndarray | None:
-        return self._external_forces
+        return self._auxiliary.external_forces
 
     @property
     def n_frames(self) -> int:
@@ -355,16 +395,16 @@ class MatchedSwingCandidate:
             res["v"] = _array_sha256(self._v)
         if self._tau is not None:
             res["tau"] = _array_sha256(self._tau)
-        if self._actuator_states is not None:
-            res["actuator_states"] = _array_sha256(self._actuator_states)
-        if self._model_markers_m is not None:
-            res["model_markers_m"] = _array_sha256(self._model_markers_m)
-        if self._target_markers_m is not None:
-            res["target_markers_m"] = _array_sha256(self._target_markers_m)
-        if self._marker_validity is not None:
-            res["marker_validity"] = _array_sha256(self._marker_validity)
-        if self._external_forces is not None:
-            res["external_forces"] = _array_sha256(self._external_forces)
+        if self._auxiliary.actuator_states is not None:
+            res["actuator_states"] = _array_sha256(self._auxiliary.actuator_states)
+        if self._markers.model_markers_m is not None:
+            res["model_markers_m"] = _array_sha256(self._markers.model_markers_m)
+        if self._markers.target_markers_m is not None:
+            res["target_markers_m"] = _array_sha256(self._markers.target_markers_m)
+        if self._markers.marker_validity is not None:
+            res["marker_validity"] = _array_sha256(self._markers.marker_validity)
+        if self._auxiliary.external_forces is not None:
+            res["external_forces"] = _array_sha256(self._auxiliary.external_forces)
         return res
 
     def verify_checksums(self) -> None:

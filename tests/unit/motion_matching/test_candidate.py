@@ -27,6 +27,8 @@ import pytest
 
 from src.shared.python.motion_matching.candidate import (
     CANDIDATE_SCHEMA_VERSION,
+    CandidateAuxiliary,
+    CandidateMarkers,
     CandidateMetadata,
     CandidateProfile,
     MatchedSwingCandidate,
@@ -87,9 +89,11 @@ def _make_dummy_dynamic_candidate(
         q=q,
         v=v,
         tau=tau,
-        model_markers_m=model_markers,
-        target_markers_m=target_markers,
-        marker_validity=validity,
+        markers=CandidateMarkers(
+            model_markers_m=model_markers,
+            target_markers_m=target_markers,
+            marker_validity=validity,
+        ),
     )
 
 
@@ -111,15 +115,17 @@ def test_candidate_roundtrip(tmp_path: Path) -> None:
 
     np.testing.assert_allclose(loaded.time_s, candidate.time_s)
     np.testing.assert_allclose(loaded.q, candidate.q)
-    assert loaded.v is not None
+    assert loaded.v is not None and candidate.v is not None
     np.testing.assert_allclose(loaded.v, candidate.v)
-    assert loaded.tau is not None
+    assert loaded.tau is not None and candidate.tau is not None
     np.testing.assert_allclose(loaded.tau, candidate.tau)
-    assert loaded.model_markers_m is not None
+    assert loaded.model_markers_m is not None and candidate.model_markers_m is not None
     np.testing.assert_allclose(loaded.model_markers_m, candidate.model_markers_m)
-    assert loaded.target_markers_m is not None
+    assert (
+        loaded.target_markers_m is not None and candidate.target_markers_m is not None
+    )
     np.testing.assert_allclose(loaded.target_markers_m, candidate.target_markers_m)
-    assert loaded.marker_validity is not None
+    assert loaded.marker_validity is not None and candidate.marker_validity is not None
     np.testing.assert_array_equal(loaded.marker_validity, candidate.marker_validity)
 
     # Immutability check
@@ -411,3 +417,42 @@ def test_candidate_schema_freshness() -> None:
     assert "MatchedSwingCandidate" in content
     assert "kinematic" in content
     assert "dynamic" in content
+
+
+def test_candidate_containers_and_immutability() -> None:
+    """Verify CandidateMarkers, CandidateAuxiliary containers, properties, and writeable=False."""
+    meta = CandidateMetadata(
+        schema_version=CANDIDATE_SCHEMA_VERSION,
+        profile=CandidateProfile.KINEMATIC,
+        engine="mujoco",
+        model_name="test",
+        coordinate_names=("q0",),
+    )
+    markers = CandidateMarkers(
+        model_markers_m=np.zeros((2, 1, 3)),
+        target_markers_m=np.ones((2, 1, 3)),
+        marker_validity=np.ones((2, 1), dtype=bool),
+    )
+    aux = CandidateAuxiliary(
+        actuator_states=np.ones((2, 2)),
+        external_forces=np.ones((2, 6)),
+    )
+    cand = MatchedSwingCandidate(
+        metadata=meta,
+        time_s=np.array([0.0, 0.1]),
+        q=np.zeros((2, 1)),
+        markers=markers,
+        auxiliary=aux,
+    )
+    assert cand.markers.model_markers_m is not None
+    assert cand.auxiliary.actuator_states is not None
+    assert cand.model_markers_m is not None
+    assert cand.target_markers_m is not None
+    assert cand.marker_validity is not None
+    assert cand.actuator_states is not None
+    assert cand.external_forces is not None
+    # Array immutability
+    assert not cand.time_s.flags.writeable
+    assert not cand.q.flags.writeable
+    assert not cand.markers.model_markers_m.flags.writeable
+    assert not cand.auxiliary.actuator_states.flags.writeable

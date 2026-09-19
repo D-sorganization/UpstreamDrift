@@ -128,6 +128,7 @@ Provided by `src.shared.python.motion_matching.candidate_convert`:
 
 ```python
 from src.shared.python.motion_matching.candidate import (
+    CandidateMarkers,
     CandidateMetadata,
     CandidateProfile,
     MatchedSwingCandidate,
@@ -147,6 +148,7 @@ candidate = MatchedSwingCandidate(
     q=q,
     v=v,
     tau=tau,
+    markers=CandidateMarkers(model_markers_m=model_markers),
 )
 save_candidate(candidate, "candidate.npz")
 ```
