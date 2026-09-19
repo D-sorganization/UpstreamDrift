@@ -208,9 +208,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** docs/10381-program-truth-reset
 - **Paths:** src/shared/python/motion_matching/ledger.py; evidence/matched; docs/development/full_body_models/evidence/acceptance/verdicts_2026-09.json; docs/development/matched_swing_program
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 (SELF; ledger fail-closed test green; ledger and status regenerated; four matched receipts re-evaluated REJECTED)
+- **Last verified:** 2026-09-18 (SELF; rtol 1e-6 rerun committed as rejected evidence; ledger regenerated)
 - **Summary:** Ledger no longer promotes self-declared acceptance; the G1 FDDP continuation (46 mm in-solver, 340 mm replay) is committed as rejected evidence; docs corrected (7-iron cross-contamination, trail-arm torque not zero, acceptance.py path). Next candidate comes from a same-integrator continuation.
-- **Next step:** Run the 0.85 s continuation from `evidence/matched/driver_g1_crocoddyl_rk45/stage_0.60s.npz` with `--rk45-rtol 1e-6` on ControlTower and commit its receipt.
+- **Next step:** Inspect the IK reference 0.60-0.85 s for coordinate-range violations and rerun the 0.85 s stage with the range-barrier weight reduced tenfold (receipt).
 
 ### DL-#10338 · Native Crocoddyl Full-Body Fit & Balanced Contact Kinetics (Matched Swing Program MS-31 / #10415)
 
