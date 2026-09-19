@@ -1,5 +1,18 @@
 # Current Matching Continuation Handoff
 
+## MV-01 Qualify Shared URDF Bundles and Numeric Precision (#10477)
+
+- Worktree: `UpstreamDrift-10477-urdf`, branch `feat/10477-urdf-bundle-precision`, lease `antigravity-10477-mv01`, DL-#10477.
+- Changes:
+  - `urdf_writer.py`: Deterministic 17g float serialization (`_format_float`), eliminating lossy `6g`/`4g` round-trip drift.
+  - `bundle_manifest.py`: `ModelBundleManifest` with SHA-256 integrity checksums and coordinate validation.
+  - `model_bundle.py`: `ModelBundle` container, export/import with path traversal defense.
+  - `full_body_urdf.py`: Updated `export_full_body_urdf` to write bundle manifest and zip archive.
+  - `test_urdf_precision_bundle.py`: 7 tests covering precision, tamper resistance, zip extraction, and coordinate ordering.
+  - `test_pinocchio_urdf_bundle_parity.py`: Pinocchio 4.1.0 in WSL verified (< 1e-12 m transform, < 1e-11 mass matrix error).
+- Reproduction: `pytest tests/unit/model_generation/test_urdf_precision_bundle.py` and WSL `pytest tests/integration/test_pinocchio_urdf_bundle_parity.py`.
+- Next: PR #10485 auto-merge, then proceed to MV-02 (#10478).
+
 ## MS-21 MuJoCo Replay Continuation (#10336)
 
 Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-codex-10336`.
