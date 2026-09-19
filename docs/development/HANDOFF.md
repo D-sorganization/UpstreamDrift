@@ -1,16 +1,20 @@
 # Current Matching Continuation Handoff
 
+## MV-06 Expose Real Forces, Torques, and Explicit Counterfactual Semantics (#10482)
+
+- Worktree: `UpstreamDrift-10482-forces`, branch `feat/10482-forces-torques-counterfactual`, lease `antigravity-10482-mv06`, DL-#10482.
+- Changes:
+  - `force_torque.py`: `SpatialWrench`, `transform_wrench` with moment arm calculation, `compute_center_of_pressure` with strict threshold semantics (Fz <= 5.0 N returns None), and `ContactReaction`.
+  - `counterfactual.py`: `AccelerationDecomposition` (gravity, drift, control, ZTCF, ZVCF), `CounterfactualStrategy`, `CounterfactualFork`, and `create_counterfactual_rollout` with cryptographic baseline immutability check.
+  - `candidate_session.py`: Added `get_wrench_at`, `get_center_of_pressure`, `get_joint_torques_at`, `get_closure_residual_at`, and `create_counterfactual_fork`.
+  - `requests.py`, `analysis.py`, `simulation_service.py`: `GET /analysis/candidate/forces` and `POST /analysis/candidate/counterfactual` endpoints (failing closed with 409 when no session is loaded).
+  - `force_inspection.py`, `gui.py`: `ForceInspectionWidget` synchronized with physical playback time embedded in Tour Matching Viewer.
+- Reproduction: `pytest tests/unit/motion_matching/test_force_torque.py tests/unit/motion_matching/test_counterfactual.py tests/unit/motion_matching/test_candidate_session_forces.py tests/unit/api/test_candidate_session_analysis_routes.py tests/unit/tools/test_tour_matching_viewer_forces.py`.
+- Next: PR auto-merge; epic #10476 completion!
+
 ## MV-05 Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading (#10481)
 
-- Worktree: `UpstreamDrift-10481-viewers`, branch `feat/10481-meshcat-gepetto-lifecycle`, lease `antigravity-10481-mv05`, DL-#10481.
-- Changes:
-  - `viewer_lifecycle.py`: Managed subprocess lifecycle in `ViewerProcessManager`, active port readiness polling with timeout (`wait_for_port`), existing listener detection without collision (`reuse_existing`), process ownership tracking (never terminates unowned processes), CORBA port 12321 protection, dynamic MeshCat URL parsing, and startup crash diagnostics.
-  - `native_viewers.py`: Registered native viewer backends (`open_in_native_viewer` for MuJoCo, MeshCat, Gepetto, OpenSim, and MATLAB) with fail-closed missing dependency handlers and explicit install hints.
-  - `model_bundle.py`: Enhanced `ModelBundle` with `extract_to` and direct directory bundle loading with mesh asset inventory parsing.
-  - `launch_simulation_viewer.py`: Extended CLI to support `--model-bundle`, `--urdf`, `--view-mode` (static, fitted, native), `--speed`, `--stride`, `--loop`, and `--output-html`.
-  - `gui.py`: Added `_open_native_btn` in Tour Matching Viewer GUI invoking `open_in_native_viewer`.
-- Reproduction: `pytest tests/unit/motion_matching/test_viewer_lifecycle.py tests/unit/motion_matching/test_native_viewers_registry.py tests/unit/motion_matching/test_launch_simulation_viewer_cli.py tests/unit/tools/test_tour_matching_viewer_native_button.py tests/unit/model_generation/test_urdf_precision_bundle.py`.
-- Next: PR auto-merge, then proceed to MV-06 (#10482).
+- Completed in PR #10501 (merged). Managed subprocess lifecycle in `ViewerProcessManager`, active port polling, existing listener detection, native viewer backends (`open_in_native_viewer`), `ModelBundle.extract_to`, CLI and GUI integration.
 
 ## MV-04 Reuse Shared Physical-Time Playback Across Viewers (#10480)
 

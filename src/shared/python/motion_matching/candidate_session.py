@@ -140,6 +140,96 @@ class CandidateSession:
         """Accessor returning viewer-compatible ReplayData."""
         return self.to_replay()
 
+    def get_wrench_at(self, frame_idx: int, contact_name: str = "ground") -> Any:
+        """Return the spatial wrench at specified frame or None if forces channel absent."""
+        if frame_idx < 0 or frame_idx >= self.frame_count:
+            raise IndexError(
+                f"frame_idx {frame_idx} out of range [0, {self.frame_count})"
+            )
+        if self.external_forces is None:
+            return None
+
+        from src.shared.python.motion_matching.force_torque import SpatialWrench
+
+        row = self.external_forces[frame_idx]
+        fx = float(row[0]) if len(row) > 0 else 0.0
+        fy = float(row[1]) if len(row) > 1 else 0.0
+        fz = float(row[2]) if len(row) > 2 else 0.0
+        tx = float(row[3]) if len(row) > 3 else 0.0
+        ty = float(row[4]) if len(row) > 4 else 0.0
+        tz = float(row[5]) if len(row) > 5 else 0.0
+
+        return SpatialWrench(
+            application_frame=contact_name,
+            point_m=(0.0, 0.0, 0.0),
+            force_n=(fx, fy, fz),
+            torque_nm=(tx, ty, tz),
+            direction_convention="applied_to_body",
+            sign_convention="standard_cartesian",
+        )
+
+    def get_center_of_pressure(
+        self, frame_idx: int, foot: str = "net", fz_threshold: float = 5.0
+    ) -> tuple[float, float] | None:
+        """Compute Center of Pressure (CoP_x, CoP_y) or None if absent or Fz <= threshold."""
+        wrench = self.get_wrench_at(frame_idx, contact_name=foot)
+        if wrench is None:
+            return None
+        from src.shared.python.motion_matching.force_torque import (
+            compute_center_of_pressure,
+        )
+
+        return compute_center_of_pressure(wrench, f_threshold_n=fz_threshold)
+
+    def get_joint_torques_at(self, frame_idx: int) -> dict[str, float] | None:
+        """Return joint torque mapping at frame_idx or None if tau channel absent."""
+        if frame_idx < 0 or frame_idx >= self.frame_count:
+            raise IndexError(
+                f"frame_idx {frame_idx} out of range [0, {self.frame_count})"
+            )
+        if self.tau is None:
+            return None
+        row = self.tau[frame_idx]
+        return {
+            name: float(row[i])
+            for i, name in enumerate(self.coordinate_names[: len(row)])
+        }
+
+    def get_closure_residual_at(self, frame_idx: int) -> float | None:
+        """Return kinematic closure residual at frame_idx or None if not computed."""
+        if frame_idx < 0 or frame_idx >= self.frame_count:
+            raise IndexError(
+                f"frame_idx {frame_idx} out of range [0, {self.frame_count})"
+            )
+        res = self.diagnostics.get("closure_residuals")
+        if res is not None and frame_idx < len(res):
+            return float(res[frame_idx])
+        return None
+
+    def create_counterfactual_fork(
+        self,
+        fork_frame_idx: int,
+        strategy: Any = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Generate an immutable counterfactual rollout fork diverging from this session."""
+        from src.shared.python.motion_matching.counterfactual import (
+            CounterfactualStrategy,
+            create_counterfactual_rollout,
+        )
+
+        chosen_strategy = (
+            strategy
+            if strategy is not None
+            else CounterfactualStrategy.ZERO_TRAIL_ARM_TORQUE
+        )
+        return create_counterfactual_rollout(
+            session=self,
+            fork_frame_idx=fork_frame_idx,
+            strategy=chosen_strategy,
+            **kwargs,
+        )
+
 
 def _resolve_model_path(
     candidate_path: Path,
@@ -201,6 +291,8 @@ def _load_npz_arrays(
     tuple[str, ...],
     NDArray[np.float64] | None,
     NDArray[np.float64] | None,
+    NDArray[np.float64] | None,
+    NDArray[np.float64] | None,
     CandidateMetadata,
 ]:
     """Extract array channels and metadata from candidate NPZ."""
@@ -213,9 +305,19 @@ def _load_npz_arrays(
             if "v" in data and data["v"] is not None
             else None
         )
+        a = (
+            np.asarray(data["a"], dtype=np.float64)
+            if "a" in data and data["a"] is not None
+            else None
+        )
         tau = (
             np.asarray(data["tau"], dtype=np.float64)
             if "tau" in data and data["tau"] is not None
+            else None
+        )
+        external_forces = (
+            np.asarray(data["external_forces"], dtype=np.float64)
+            if "external_forces" in data and data["external_forces"] is not None
             else None
         )
 
@@ -231,7 +333,7 @@ def _load_npz_arrays(
                 coordinate_names=coord_order,
             )
 
-    return time_s, q, coord_order, v, tau, metadata
+    return time_s, q, coord_order, v, a, tau, external_forces, metadata
 
 
 def _reorder_coordinates(
@@ -251,6 +353,17 @@ def _reorder_coordinates(
     ordered_q = q[:, col_indices]
     ordered_q.flags.writeable = False
     return ordered_q
+
+
+def _parse_acceptance(
+    receipt_data: Mapping[str, Any] | None,
+) -> tuple[bool, str, str, dict[str, Any]]:
+    """Extract acceptance decision and metadata from receipt sidecar."""
+    acc = receipt_data.get("acceptance", {}) if receipt_data else {}
+    is_accepted = bool(acc.get("is_accepted", True))
+    status = str(acc.get("status", "verified" if is_accepted else "rejected"))
+    reason = str(acc.get("reason", ""))
+    return is_accepted, status, reason, acc
 
 
 @precondition(lambda candidate_path, **_: Path(candidate_path).is_file())
@@ -283,7 +396,16 @@ def ingest_candidate_session(
     if receipt_data is not None:
         _validate_receipt_hashes(receipt_data, cand_sha256, model_sha256)
 
-    time_s, q, source_coords, v, tau, meta = _load_npz_arrays(cand_p)
+    (
+        time_s,
+        q,
+        source_coords,
+        v,
+        a,
+        tau,
+        external_forces,
+        meta,
+    ) = _load_npz_arrays(cand_p)
 
     if (
         time_s.ndim != 1
@@ -297,12 +419,9 @@ def ingest_candidate_session(
 
     target_coords = tuple(spec.get("coordinate_order", source_coords))
     ordered_q = _reorder_coordinates(q, source_coords, target_coords)
+    is_accepted, status, reason, acc = _parse_acceptance(receipt_data)
 
-    acc = receipt_data.get("acceptance", {}) if receipt_data else {}
-    is_accepted = bool(acc.get("is_accepted", True))
-    status = str(acc.get("status", "verified" if is_accepted else "rejected"))
-    reason = str(acc.get("reason", ""))
-
+    diag = receipt_data.get("diagnostics", {}) if receipt_data else {}
     candidate_obj = MatchedSwingCandidate(
         metadata=meta,
         time_s=time_s,
@@ -310,7 +429,7 @@ def ingest_candidate_session(
         v=v,
         tau=tau,
         markers=CandidateMarkers(),
-        auxiliary=CandidateAuxiliary(),
+        auxiliary=CandidateAuxiliary(external_forces=external_forces),
     )
 
     return CandidateSession(
@@ -322,10 +441,13 @@ def ingest_candidate_session(
         time_s=time_s,
         q=ordered_q,
         v=v,
+        a=a,
         tau=tau,
+        external_forces=external_forces,
         receipt=receipt_data,
         is_accepted=is_accepted,
         status=status,
         rejection_reason=reason,
         acceptance_criteria=acc,
+        diagnostics=diag,
     )
