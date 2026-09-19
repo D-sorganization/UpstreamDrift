@@ -86,6 +86,38 @@ def _rotation_error(r_a: Array, r_b: Array) -> Array:
     return 0.5 * np.array([r[2, 1] - r[1, 2], r[0, 2] - r[2, 0], r[1, 0] - r[0, 1]])
 
 
+def _skew3(v: Array) -> Array:
+    """Skew-symmetric matrix [v]_x such that [v]_x @ w = v x w."""
+    return np.array(
+        [[0.0, -v[2], v[1]], [v[2], 0.0, -v[0]], [-v[1], v[0], 0.0]],
+        dtype=float,
+    )
+
+
+def _validate_axis_spec(
+    body_axis: Sequence[float], world_dir: Sequence[float], weight: float
+) -> tuple[Array, Array]:
+    """Validate and normalize axis target vectors."""
+    if weight < 0:
+        raise ValueError("Axis weights must be nonnegative")
+    a = np.asarray(body_axis, dtype=float)
+    d = np.asarray(world_dir, dtype=float)
+    if np.linalg.norm(a) < 1e-12 or np.linalg.norm(d) < 1e-12:
+        raise ValueError("Axis targets need nonzero vectors")
+    return a / np.linalg.norm(a), d / np.linalg.norm(d)
+
+
+def _resolve_closure_weights(
+    pos_weight: float, rot_weight: float | None
+) -> tuple[float, float, bool]:
+    """Validate closure weights and return (pos_w, rot_w, should_skip)."""
+    resolved_rot = pos_weight if rot_weight is None else rot_weight
+    if resolved_rot < 0:
+        raise ValueError("Closure rotation weight must be nonnegative")
+    skip = pos_weight <= 0 and resolved_rot <= 0
+    return pos_weight, resolved_rot, skip
+
+
 def continuous_branches(
     q: Array,
     coordinate_order: Sequence[str],
