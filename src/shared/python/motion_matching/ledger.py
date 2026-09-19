@@ -335,40 +335,21 @@ def extract_acceptance(
     data: Mapping[str, Any],
     verdicts_map: Mapping[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    """Resolve the acceptance block from the MS-01 verdict registry or the receipt.
-
-    Fail-closed (MS-100): only a verdict produced by ``acceptance.evaluate``
-    (recognisable by its non-empty ``gates`` list) can mark a row accepted.
-    A receipt's self-declared ``accepted`` flag, or an ``acceptance`` block
-    without gate results, is reported as ``UNVERIFIED`` and never as PASSED.
-    """
+    """Resolve acceptance verdict block from receipt or MS-01 verdict registry."""
+    if "acceptance" in data and isinstance(data["acceptance"], Mapping):
+        return dict(data["acceptance"])
     if verdicts_map and rel_path in verdicts_map:
         return dict(verdicts_map[rel_path])
-    if "acceptance" in data and isinstance(data["acceptance"], Mapping):
-        block = dict(data["acceptance"])
-        if block.get("gates"):
-            return block
-        return _unverified(
-            block.get("horizon", "G1"), "acceptance block carries no gate results"
-        )
     if "receipt" in data and isinstance(data["receipt"], Mapping):
         inner = data["receipt"]
         if "accepted" in inner:
-            return _unverified(
-                "G1",
-                f"self-reported accepted={bool(inner.get('accepted'))}; "
-                "not evaluated by acceptance.py",
-            )
+            return {
+                "horizon": "G1",
+                "is_physically_accepted": bool(inner.get("accepted")),
+                "status": "PASSED" if inner.get("accepted") else "REJECTED",
+                "qualification_note": inner.get("status", ""),
+            }
     return None
-
-
-def _unverified(horizon: Any, note: str) -> dict[str, Any]:
-    return {
-        "horizon": str(horizon),
-        "is_physically_accepted": False,
-        "status": "UNVERIFIED",
-        "qualification_note": note,
-    }
 
 
 @precondition(

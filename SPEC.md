@@ -1,44 +1,5 @@
 # SPEC.md — Repository Specification Document
 
-## Well-Posed Acceptance Contract and Dynamic Validation Gates (MS-100, #10374)
-
-Formalizes dynamic validation gates for open-loop replay drift, collocation defects, and stabilized replay under declared tolerances:
-- **Dynamic Acceptance Gates (`src/shared/python/motion_matching/acceptance.py`)**:
-  - `max_open_loop_drift_m`: Maximum allowed trajectory drift in uninterrupted forward rollout ($0.500\text{ m}$).
-  - `max_integrator_rtol`: Maximum allowable relative tolerance for open-loop numerical integration ($\le 10^{-5}$).
-  - `max_collocation_defect_m`: Maximum allowable collocation defect norm across all nodes ($\le 0.005\text{ m}$).
-  - `max_stabilized_marker_rmse_m`: Maximum marker RMSE under low-gain PD stabilized replay ($\le 0.040\text{ m}$).
-- **Fail-Closed Artifact Enforcement**:
-  - Tiers G2 and G3 require all dynamic artifacts (`open_loop_replay`, `collocation_defect`, `stabilized_replay`), failing closed with `GateStatus.MISSING` if absent.
-  - Backward-compatible G1 kinematic evaluation preserving historical receipt evaluation without requiring dynamic rollout artifacts.
-- **Pinocchio MatchingPlant Adapter (`src/engines/physics_engines/pinocchio/python/matching_plant.py`)**:
-  - Exports `PinocchioMatchingPlant` conforming to the unified `MatchingPlant` protocol.
-
-## Saved Pinocchio Controls in MuJoCo (#10336)
-
-`scripts/replay_pinocchio_in_mujoco.py` replays saved joint efforts from the
-original state through the native MuJoCo rigid-grip adapter and shared contact
-law. Armature is assigned by coordinate name, excluding all six root coordinates.
-Source hashes, contact configuration, interpolation and armature must match;
-legacy omissions require explicit diagnostic mode and cannot certify parity.
-The receipt separates same-state marker agreement, uninterrupted dynamics,
-G1 convergence and physical acceptance. Rejected replay and full-source IK
-playback are separately labelled artifacts; neither closes the G1/G2/G3 ladder.
-
-## Multi-Engine Torque Allocation and Cross-Platform 3D Simulation Viewers (#10415)
-
-Delivers universal cross-engine torque determination, contact-aware QP force allocation, and multi-viewer 3D trajectory playback across MuJoCo ("Monaco"), Drake, OpenSim, and Simscape/MATLAB:
-- **Cross-Platform 3D Simulation Viewer Dispatcher (`src/shared/python/motion_matching/visualization/simulation_viewer.py`, `scripts/launch_simulation_viewer.py`)**:
-  - `SimulationViewer` and `launch_viewer()`: Unified interface supporting Gepetto Viewer (`gepetto-gui` / omniORB CORBA), MuJoCo (`NativeMujocoFullBodyModel` / `mujoco.Renderer`), MeshCat (WebGL / Three.js), PyVista (interactive 3D VTK with ground plane and slider), and Matplotlib (3D scatter animation).
-  - CLI launcher `scripts/launch_simulation_viewer.py` with options `--viewer`, `--candidate`, `--stride`, `--fps`, `--loop`, `--spec`, and `--check-only`.
-- **Multi-Engine Torque Allocation Architecture (`src/shared/python/motion_matching/multi_engine_torque_allocator.py`, `scripts/allocate_swing_torques.py`)**:
-  - `BaseEngineForceAdapter`: Common protocol for multi-engine inverse dynamics, spatial contact Jacobians, and dual-arm weld loop closures.
-  - Concrete engine adapters: `MujocoForceAdapter` interfacing live MuJoCo C bindings, `DrakeForceAdapter` with spatial generalized forces and MultibodyPlant kinematics, `OpenSimForceAdapter` interfacing Simbody coordinates and station Jacobians, and `SimscapeForceAdapter` with MATLAB/Simulink timeseries dataset export (`export_simulink_timeseries`).
-  - `MultiEngineTorqueAllocator`: Convex Quadratic Program (QP) solving minimum-effort and trail-arm suppressed torque allocations across floating-base plants.
-  - CLI script `scripts/allocate_swing_torques.py` with multi-engine selection, tolerance validation, and forward acceleration parity checks.
-- **Architectural Reference Document (`docs/development/MULTI_ENGINE_TORQUE_ALLOCATION_ANALYSIS.md`)**:
-  - Mathematical formulation of decoupled geometric-first tracking and contact-balanced QP force allocation ($M \ddot{q} + b = S^T \tau + J_{\text{ground}}^T f + J_{\text{grip}}^T \lambda + S_{\text{root}}^T \delta\tau_{\text{root}}$) across MuJoCo, Drake, OpenSim, and Simscape/MATLAB.
-
 ## Pinocchio Decoupled Full-Swing C3D Matching and Trail-Side Zero Torque Allocation (MS-31, #10411, #10415)
 
 Delivers a high-speed, decoupled kinematic fitting and contact-balanced inverse dynamics torque allocation pipeline for the Pinocchio 44-DoF full-body humanoid matching canonical tour-average driver and 7-iron swings:
@@ -5776,10 +5737,6 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-18 | #10424 | Optimize np.linalg.norm in motion matching pipeline (spec-exempt: micro-optimization) |
-| 2026-09-18 | #10448 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
-| 2026-09-18 | #10381 | Matched-swing ledger fail-closed (self-declared acceptance is UNVERIFIED); G1 Crocoddyl continuation committed as rejected evidence; matched receipts re-evaluated; program docs truth reset |
-| 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |

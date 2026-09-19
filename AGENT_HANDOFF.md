@@ -1,24 +1,5 @@
 # Simscape Tour-Average Fit Continuation
 
-## MuJoCo Saved-Control Replay (#10336)
-
-Branch `feat/10336-mujoco-candidate-replay`; implementation `94ccb1825`;
-PR #10448 open. See DL-#10336 in `docs/development/DEVELOPMENT_LOG.md`
-and `evidence/matched/driver_full_mujoco_replay/README.md` for reproduction.
-Forty focused tests and scoped Ruff/mypy checks pass. The diagnostic replay
-and playback are preserved, but G1 is rejected and source configuration parity
-is unverified. Merge delivers the replay path, not physical qualification;
-keep #10336 open. Commit/push hooks pass, as do 21 replay tests on pinned
-MuJoCo 3.8.0. The next step is PR CI and review, then protected merge.
-
-## Shadow Tracker Revision Integrity (#10233)
-
-Provider registration and persistence repair is locally validated on
-`fix/shadow-tracker-10233-pr`; [PR #10450](https://github.com/D-sorganization/UpstreamDrift/pull/10450) is in CI. See
-[turnover evidence](docs/plans/shadow_tracker/TURNOVER_CURRENT.md) for contracts,
-13-failure RED receipt, 306-test GREEN receipt and separate ST-11 bundle risks.
-Renderer work and the original checkout are preserved. Review the focused diff.
-
 ## Polynomial Full-Body Dynamics Boundary (#10265)
 
 The integration retains global degree-six Bernstein efforts for every non-root
