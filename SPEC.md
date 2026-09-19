@@ -1,5 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Document IK With Validity Policy and Shared Receipt (MS-41, #10340)
+
+Implements the official OpenSim inverse kinematics pipeline processing tour capture C3D files against the generated full-body anthropometric model with fail-closed validation and standardized candidate/receipt emission:
+- **Marker Mapping & TRC Exporter (`src/engines/physics_engines/opensim/python/tour_matching/` `marker_map.py`, `trc.py`)**:
+  - Translates capture C3D marker trajectories to OpenSim convention using anatomical calibration specs.
+  - Generates valid `.trc` time-series marker position files with validated headers and coordinate systems.
+- **IK Setup Generation & Execution (`setup_gen.py`, `document_ik.py`)**:
+  - Automatically synthesizes OpenSim `InverseKinematicsTool` XML setup configuration targeting the generated 44-DOF `.osim` model.
+  - Runs headless OpenSim IK solver or records structured diagnostics if OpenSim native binaries are unavailable.
+  - Implements fail-closed validation policy checking kinematic tracking RMSE, range of motion constraints, and coordinate bounds.
+  - Generates `MatchedSwingCandidate` `.npz` archive and comprehensive provenance `receipt.json`.
+- **CLI & Integration (`cli.py`, `src/shared/python/motion_matching/pipeline/plants/opensim.py`)**:
+  - Exposes `python -m src.engines.physics_engines.opensim.python.tour_matching ik` CLI with full parameterization.
+  - Registers `OpenSimPlant` in the shared motion-matching plant abstraction.
+
 ## Matched Swing Ledger Horizon Extraction and Drake Ground Support Classification (#10363)
 
 Updates matched swing ledger indexing and ground support metadata:
