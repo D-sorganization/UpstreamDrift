@@ -1,5 +1,17 @@
 # SPEC.md — Repository Specification Document
 
+## MuJoCo Candidate Replay Compatibility and Crocoddyl B100 Evidence (MS-21, #10336)
+
+Extends MuJoCo candidate replay pipeline for modern engine runtime compatibility and optimal control horizon standards:
+- **MuJoCo 3.x Compatibility (`src/engines/physics_engines/mujoco/python/candidate_replay.py`, `full_body_model.py`)**:
+  - Dynamically adapts to `mujoco.mj_fullM(model, data, mass)` when `data.qM` is absent while preserving backward compatibility with MuJoCo 2.x `(model, mass, data.qM)`.
+- **Optimal Control Horizon Support (`src/engines/physics_engines/mujoco/python/replay_contract.py`, `replay_evidence.py`)**:
+  - Permissive validation supporting control action arrays of shape `(len(times) - 1, n_act)` matching standard optimal control formulations where controls are defined across time intervals.
+  - Zero-order hold effort mapping properly populates interval dynamics without dimension mismatch.
+- **Crocoddyl b100 G1 Replay Evidence (`evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/`)**:
+  - Full 307-frame (0–0.85 s) forward replay of barrier-reduced Crocoddyl candidate in MuJoCo.
+  - Same-state FK agreement of $2.51 \times 10^{-15}$ m; records fail-closed rejected G1 verdict under open-loop dynamics.
+
 ## Matched Swing Ledger Horizon Extraction and Drake Ground Support Classification (#10363)
 
 Updates matched swing ledger indexing and ground support metadata:
