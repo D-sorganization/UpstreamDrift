@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10460 · Consume Shared GSPro Open Connect V1 Codec From Tools
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10460
+- **Branch:** feat/10460-consume-tools-gspro-codec
+- **PR:** not created
+- **Paths:** src/shared/python/golf_simulator/adapters/gspro/codec.py; tests/unit/golf_simulator/test_gspro_codec.py; vendor/ud-tools; Cargo.toml; requirements-tools.txt; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED captured then green verified; 106 golf simulator unit and integration tests pass; ruff, black, mypy clean with 0 errors).
+- **Summary:** Upgraded vendor/ud-tools pin to Tools commit a9ed0e7c5c6905b1164082659051d6381068052d carrying shared GSPro Open Connect v1 codec (Tools#5228). Refactored UpstreamDrift's gspro adapter codec to retain ShotEnvelope canonical SI/radian unit conversion and profile handling, but delegate wire payload encoding and response decoding to shared.python.launch_monitor.gspro_connect.
+- **Next step:** Commit, push, open PR referencing Closes #10460, and arm auto-merge.
+- **Evidence:** tests/unit/golf_simulator/test_gspro_codec.py.
+
 ### DL-#10336 · MuJoCo Replay of the Merged Pinocchio Driver Candidate
 
 - **State:** in_review
