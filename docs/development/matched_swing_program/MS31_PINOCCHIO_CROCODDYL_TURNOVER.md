@@ -116,12 +116,24 @@ pipe through `tr -d '\r'`. Long runs: launch detached with
 | driver_g1 | 0.85 s | 307   | 46.4 / 53.7 / 38.3 (rtol 1e-4 nodes)        | 340 (rtol 1e-6)        | REJECTED, kept at `evidence/matched/driver_g1_crocoddyl_rk45/`; 6,636 s; stages 0.30 (19.7) / 0.45 (21.3) / 0.60 (22.4) / 0.85 (46.4) mm |
 
 | driver_g1_rtol6 | 0.85 s | 307 | 123.5 / 233 / 225 (rtol 1e-6 nodes) | 123.5 (identical) | REJECTED, `evidence/matched/driver_g1_crocoddyl_rk45_rtol6/`; 0.60 s stage 22.4 mm healthy; 0.85 s stage not converged, cost = marker 3,077 + range barrier 3,788; tolerance sensitivity closed |
+| driver_g1_rtol6_trail_b100 | 0.85 s | 307 | In progress on ControlTower (PID 3348192) | | Continuation from `stage_0.60s.npz` with `--rk45-rtol 1e-6`, barrier weight ÷10 (`--range-barrier-weight 100.0`), raised trail-side effort bounds (`RSInput` 250, `REInput` 180, `RFInput` 80, `RWInput` 60, `RScapInput` 160 N m), 150 stage iterations. |
 
 Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
 
+## Diagnostic Findings: IK Reference & Range Barrier (0.60 - 0.85 s, 91 Nodes)
+
+Evaluated `range_barrier` ($w = 1000$) across 44 coordinates against `coordinate_ranges_deg` on ControlTower:
+
+- **Raw IK Reference (`q_ik`)**: **0.00 barrier cost, 0 violations**. All 44 coordinates across the entire capture window ($0.00$ to $0.85$ s) strictly respect anatomical limits ($[lower, upper]$).
+- **Smoothed IK Reference (`q_smooth`)**: $0.06$ barrier cost (essentially zero).
+- **Warm-Start Tracking Rollout (`q_track`)**: $38,263.16$ barrier cost (`SpineInputX` +77.8°, `RWInputX` -22.7° below bound).
+- **Unconverged 0.85 s Solution (`driver_g1_rtol6/stage_0.85s.npz`)**: **$235,545.20$ total barrier cost across 24 coordinates**.
+  Worst violators: `RWInputX` (-166.05° below, cost 102k), `RScapInputY` (-167.11° below, cost 65k), `NeckInputZ` (+88.27° above, cost 27k), `RWInputY` (-88.92° below, cost 13k).
+- **Physical Diagnosis**: Reference geometry is valid. Torque saturation on trail-arm joints (30–80 N·m) against downswing inertia caused the solver to diverge into extreme joint compensations.
+
 ## Next Steps (In Order)
 
-1. **(done 2026-09-18, rejected) MS-107 same-integrator G1**: rollout == replay at 123.5 mm; the downswing stage is barrier-dominated. Next: inspect the IK reference 0.60-0.85 s for range violations, rerun with barrier weight /10 and raised trail-side effort bounds, then MS-20 contact identification. Original instruction was: rerun the 0.85 s continuation from
+1. **(in progress) MS-107 downswing continuation**: run `driver_g1_rtol6_trail_b100` from `stage_0.60s.npz` with rtol 1e-6, barrier weight ÷10, raised trail-side effort bounds, and 150 iterations. Commit receipt, candidate, GIF, and `reevaluation.json` under `evidence/matched/driver_g1_crocoddyl_rk45_trail_b100/`.
    `evidence/matched/driver_g1_crocoddyl_rk45/` stage checkpoints with
    `--rk45-rtol 1e-6` (solve == replay) and 60 iterations per stage; commit the
    receipt whatever the verdict. Then a tolerance study (rtol 1e-4/1e-5/1e-6)

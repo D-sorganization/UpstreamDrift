@@ -149,3 +149,26 @@ def test_ridge_damps_near_singular_sensitivity() -> None:
     assert plain[1] > 1e5
     assert abs(damped[1]) < 1.0
     assert abs(damped[0] - a_ref[0]) < 1e-2
+
+
+def test_per_coordinate_effort_bounds_trail_side_raised() -> None:
+    order = (
+        "LScapInputX",
+        "RScapInputX",
+        "LSInputX",
+        "RSInputX",
+        "LEInput",
+        "REInput",
+        "LFInput",
+        "RFInput",
+        "LWInputX",
+        "RWInputX",
+    )
+    actuated = np.ones(len(order), dtype=bool)
+    bounds = per_coordinate_effort_bounds(order, actuated, 600.0)
+    # Verify trail-side joints have raised bounds relative to lead-side joints
+    assert bounds[1] > bounds[0]  # RScap (160) > LScap (80)
+    assert bounds[3] > bounds[2]  # RS (250) > LS (120)
+    assert bounds[5] > bounds[4]  # RE (180) > LE (80)
+    assert bounds[7] > bounds[6]  # RF (80) > LF (40)
+    assert bounds[9] > bounds[8]  # RW (60) > LW (30)
