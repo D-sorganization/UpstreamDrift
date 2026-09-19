@@ -20,12 +20,14 @@ from scipy.spatial.transform import Rotation
 
 from src.shared.python.model_generation.builders.urdf_writer import URDFWriter
 from src.shared.python.model_generation.core.types import (
+    Geometry,
     Inertia,
     Joint,
     JointDynamics,
     JointLimits,
     JointType,
     Link,
+    Material,
     Origin,
 )
 from src.shared.python.model_generation.export.bundle_manifest import (
@@ -230,11 +232,39 @@ def _build_body_and_joint_primitives(
     return links, joints, coordinates
 
 
+def _build_solid_visual(
+    body_name: str,
+    solid_name: str,
+    asset_root: Path | None,
+    mesh_assets: dict[str, bytes] | None,
+) -> tuple[Geometry | None, Material | None]:
+    from src.shared.python.body_part_viz.anatomical_visuals import (
+        resolve_anatomical_visual,
+    )
+
+    binding = resolve_anatomical_visual(body_name, solid_name)
+    if binding is None or binding.is_fallback:
+        return None, None
+    mesh_name = Path(binding.mesh_relative_path).name
+    visual_geom = Geometry.mesh(f"meshes/{mesh_name}", scale=binding.scale)
+    visual_mat = Material(name=f"mat_{binding.semantic_body}", color=binding.color)
+    if mesh_assets is not None:
+        cand = (
+            (asset_root / mesh_name) if asset_root else Path(binding.mesh_relative_path)
+        )
+        if cand.is_file():
+            mesh_assets[mesh_name] = cand.read_bytes()
+    return visual_geom, visual_mat
+
+
 def _build_solid_links(
     spec: dict[str, Any],
     body_links: dict[str, str],
     links: list[Link],
     joints: list[Joint],
+    include_visuals: bool = False,
+    mesh_assets: dict[str, bytes] | None = None,
+    asset_root: Path | None = None,
 ) -> dict[str, str]:
     solid_links: dict[str, str] = {}
     for body in spec.get("bodies", []):
@@ -242,6 +272,11 @@ def _build_solid_links(
             name = f"solid_{len(solid_links)}"
             solid_links[solid["name"]] = name
             com = solid.get("com_m", [0.0, 0.0, 0.0])
+            visual_geom, visual_mat = None, None
+            if include_visuals:
+                visual_geom, visual_mat = _build_solid_visual(
+                    body["name"], solid["name"], asset_root, mesh_assets
+                )
             links.append(
                 Link(
                     name=name,
@@ -250,6 +285,8 @@ def _build_solid_links(
                         mass=float(solid["mass_kg"]),
                         center_of_mass=(float(com[0]), float(com[1]), float(com[2])),
                     ),
+                    visual_geometry=visual_geom,
+                    visual_material=visual_mat,
                 )
             )
             joints.append(
@@ -372,6 +409,8 @@ def _create_sidecar_and_manifest(
 def export_model_bundle(
     spec_bytes: bytes,
     incomplete_physics_reason: str | None = None,
+    include_visuals: bool = False,
+    asset_root: Path | None = None,
 ) -> ModelBundle:
     """Generate an engine-neutral ModelBundle from specification bytes.
 
@@ -389,8 +428,11 @@ def export_model_bundle(
     if len(body_links) != len(spec["bodies"]) or "world" not in body_links:
         raise ValueError("Invalid specification body inventory")
 
+    mesh_assets: dict[str, bytes] = {}
     links, joints, _ = _build_body_and_joint_primitives(spec, body_links)
-    solid_links = _build_solid_links(spec, body_links, links, joints)
+    solid_links = _build_solid_links(
+        spec, body_links, links, joints, include_visuals, mesh_assets, asset_root
+    )
     frame_links, contact_spheres = _build_frame_and_contact_links(
         spec, body_links, links, joints
     )
@@ -414,6 +456,7 @@ def export_model_bundle(
         urdf_xml=xml,
         sidecar=sidecar,
         raw_spec=spec_bytes,
+        mesh_assets=mesh_assets,
     )
     bundle.validate()
     return bundle

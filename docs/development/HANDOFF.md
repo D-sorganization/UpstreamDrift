@@ -1,17 +1,19 @@
 # Current Matching Continuation Handoff
 
+## MV-02 Anatomical Visual Assets and Skin Toggling (#10478)
+
+- Worktree: `UpstreamDrift-10478-visuals`, branch `feat/10478-anatomical-visuals`, lease `antigravity-10478-mv02`, DL-#10478.
+- Changes:
+  - `anatomical_visuals.py`: `VisualSkinMode`, `VisualAssetBinding`, visible diagnostic fallback `[1.0, 0.0, 1.0, 1.0]`.
+  - `viewer_presentation.py`: `presentation_frames` cadence pacing and cross-platform playback lock.
+  - `native_candidate_viewer.py`: `load_candidate`, `build_visuals`, visual skin toggling without physics mutation.
+  - `model_bundle.py`: Support `include_visuals=True` with relative URDF `<mesh>` paths in bundle zips.
+- Reproduction: `pytest tests/unit/body_part_viz/test_anatomical_visuals.py tests/unit/motion_matching/test_native_viewer_presentation.py` and WSL `pytest tests/unit/motion_matching/test_native_candidate_viewer.py`.
+- Next: PR auto-merge, then proceed to MV-03 (#10479).
+
 ## MV-01 Qualify Shared URDF Bundles and Numeric Precision (#10477)
 
-- Worktree: `UpstreamDrift-10477-urdf`, branch `feat/10477-urdf-bundle-precision`, lease `antigravity-10477-mv01`, DL-#10477.
-- Changes:
-  - `urdf_writer.py`: Deterministic 17g float serialization (`_format_float`), eliminating lossy `6g`/`4g` round-trip drift.
-  - `bundle_manifest.py`: `ModelBundleManifest` with SHA-256 integrity checksums and coordinate validation.
-  - `model_bundle.py`: `ModelBundle` container, export/import with path traversal defense.
-  - `full_body_urdf.py`: Updated `export_full_body_urdf` to write bundle manifest and zip archive.
-  - `test_urdf_precision_bundle.py`: 7 tests covering precision, tamper resistance, zip extraction, and coordinate ordering.
-  - `test_pinocchio_urdf_bundle_parity.py`: Pinocchio 4.1.0 in WSL verified (< 1e-12 m transform, < 1e-11 mass matrix error).
-- Reproduction: `pytest tests/unit/model_generation/test_urdf_precision_bundle.py` and WSL `pytest tests/integration/test_pinocchio_urdf_bundle_parity.py`.
-- Next: PR #10485 auto-merge, then proceed to MV-02 (#10478).
+- Completed in PR #10485 (merged). 17g float serialization, `ModelBundleManifest`, `ModelBundle` zip export/import, Drake export integration, Pinocchio parity verified.
 
 ## MS-21 MuJoCo Replay Continuation (#10336)
 

@@ -5838,6 +5838,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
 | 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |
 | 2026-09-19 | #10475 | Define one versioned candidate package with distinct kinematic and dynamic profiles, checksumming, and converters (MS-15 #10334). |
 | 2026-09-18 | #10428 | Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum)` in `swing_evaluator.py` (spec-exempt: micro-optimization) |
