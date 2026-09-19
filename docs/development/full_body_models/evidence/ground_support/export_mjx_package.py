@@ -73,8 +73,29 @@ def main() -> None:
     run = args.run if args.run.is_absolute() else HERE / args.run
     receipt = json.loads((run / "receipt.json").read_text())
     spec_bytes = (run / "full_body_spec_hipcal_scaled.json").read_bytes()
-    ik = np.load(run / "ik_trajectory.npz")
-    times, q_ref, valid = ik["time_s"], ik["q_ref"], ik["valid"]
+    cand_file = run / "candidate.npz"
+    if cand_file.is_file():
+        from src.shared.python.motion_matching.candidate_io import load_candidate
+
+        cand = load_candidate(cand_file)
+        times, q_ref = cand.time_s, cand.q
+        ik = (
+            np.load(run / "ik_trajectory.npz")
+            if (run / "ik_trajectory.npz").is_file()
+            else None
+        )
+        valid = (
+            cand.marker_validity
+            if cand.marker_validity is not None
+            else (
+                ik["valid"]
+                if ik is not None
+                else np.ones((len(times), len(receipt["labels"])), dtype=bool)
+            )
+        )
+    else:
+        ik = np.load(run / "ik_trajectory.npz")
+        times, q_ref, valid = ik["time_s"], ik["q_ref"], ik["valid"]
     labels = tuple(receipt["labels"])
     lane = Lane(labels, CAPTURES[receipt["capture"]])
     adapter = NativeMujocoFullBodyModel(spec_bytes)
