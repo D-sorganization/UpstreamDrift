@@ -3,7 +3,7 @@
 ## Drake MatchingPlant and Inverse Kinematics Pipeline Lane (MS-13, #10332)
 
 Implements the Drake `MatchingPlant` adapter and full inverse kinematics motion matching lane conforming to the unified engine protocol:
-- **Drake MatchingPlant Adapter (`src/engines/physics_engines/drake/python/matching_plant.py`, `src/shared/python/motion_matching/pipeline/plants/drake.py`)**:
+- **Drake MatchingPlant Adapter (`src/engines/physics_engines/drake/python/matching_plant.py`, `src/shared/python/motion_matching/pipeline/plants/drake_plant.py`)**:
   - Implements `DrakeMatchingPlant` conforming to the `MatchingPlant` protocol (`initialize`, `solve_address`, `solve_ik`, `simulate_tracking`).
   - Supports analytical KKT affine dynamics, mass matrix computation, and spatial momentum tracking in `FullBodyDrakeModel`.
 - **Drake Full-Body Inverse Kinematics (`src/engines/physics_engines/drake/python/full_body_ik.py`)**:
