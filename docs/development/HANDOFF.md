@@ -1,5 +1,18 @@
 # Current Matching Continuation Handoff
 
+## PF-02 Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (#10432)
+
+- Branch: `feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration`, lease `antigravity-ud-10432`, DL-#10432.
+- Changes:
+  - `marker_kinematics.py`: Added `SolveDiagnostics` with projected gradient norm, cost decrease, active bounds count, and convergence metrics. Added `solve_frame_multi_start` with unconstrained geometric floor estimation. Added `refine_overlapping_window` with triangular window blending and temporal continuity.
+  - `kinematic_smoothing.py`: Implemented zero-phase Butterworth smoothing with analytical/numerical derivative compatibility ($\dot{q} \approx v$ and $\dot{v} \approx a$), `BoundarySpikeAudit` for boundary jerk and acceleration jump detection, and `audit_cutoff_sensitivity`.
+  - Addressed backlog items:
+    - MM-2 (#10104): Physiological wrist range of motion compliance producing 0 violations.
+    - MM-5 (#10107): Left elbow pit up-and-inward address verification (`dot(pit, up) > 0.3` and `dot(pit, inward) > 0.3`).
+    - Separate calibration provenance for driver and 7-iron enforced fail-closed.
+- Reproduction: `pytest tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py`.
+- Next: Land PR #10432 with auto-merge enabled, proceed to PF-03.
+
 ## MV-03 Bind Saved Candidates to Viewer & Analysis Sessions (#10479)
 
 - Worktree: `UpstreamDrift-10479-sessions`, branch `feat/10479-viewer-analysis-sessions`, lease `antigravity-10479-mv03`, DL-#10479.
