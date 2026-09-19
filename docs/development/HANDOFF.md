@@ -6,7 +6,23 @@
 - Changes:
   - `contact_mode_qualifier.py`: Infer heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis; support mode ambiguity metric; COP and 2D convex hull support polygon containment under arbitrary surface normal $\hat{n}$; slip speed thresholding and friction cone saturation ratio; constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation; separate linear force ($N$) and moment ($N\cdot m$) residual budgets; unphysical load rejection ($> 5000$ N, $> 300$ Nm); and mass/geometry/friction sensitivity reporting.
 - Reproduction: `pytest tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`.
-- Next: Commit, push, create PR referencing Closes #10434, enable auto-merge, and notify parent agent.
+- Next: PR #10499 open with auto-merge armed.
+
+## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
+
+- Branch: `feat/issue-10433-pf03-contact-actuator-root-constraints`, lease `antigravity-ud-10433`, DL-#10433.
+- Changes:
+  - `src/shared/python/motion_matching/contact_force_allocator.py`:
+    - Replaced penalty-augmented least squares and unconstrained post-projection with constrained QP inverse dynamics.
+    - Added `FeasibilityStatus` enum and `AllocationObjective.HARD_ZERO_TRAIL`.
+    - Enforced 8-faceted polyhedral friction pyramid and non-negative normal force ($f_n \ge 0$) along arbitrary surface normals ($\hat{n}$).
+    - Enforced contact separation mask ($f_s \equiv 0$ for separated contacts).
+    - Enforced strict actuator bounds without post-projection, using isolated actuator slack to detect and report violations without bounds breaching.
+    - Isolated diagnostic root slack $\delta\tau_{\text{root}}$ so phantom root forces never produce false physical success.
+    - Added `verify_torque_and_rate_bounds` for discrete trajectory limits and rate verification.
+  - `tests/unit/motion_matching/test_contact_force_allocator_pf03.py`: Comprehensive test suite for all 10 acceptance scenarios.
+- Validation: 12 unit tests pass 100% across PF-03 and legacy suites; ruff clean; black clean; mypy strict clean; bandit clean.
+- Next: PR #10498 open with auto-merge armed.
 
 ## MV-03 Bind Saved Candidates to Viewer & Analysis Sessions (#10479)
 
