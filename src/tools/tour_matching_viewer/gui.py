@@ -29,6 +29,30 @@ from src.tools.tour_matching_viewer.core import (
     viewer_frame,
 )
 
+
+def _ensure_tools_path() -> None:
+    try:
+        import rate_of_closure.simulation.playback_transport  # noqa: F401
+    except ImportError:
+        import sys
+
+        root = Path(__file__).resolve().parents[3]
+        for p in (root / "vendor" / "ud-tools" / "src", root.parent / "Tools" / "src"):
+            if p.exists() and str(p) not in sys.path:
+                sys.path.insert(0, str(p))
+                break
+
+
+_ensure_tools_path()
+
+from rate_of_closure.ui.pyqt6.playback_transport_controls import (  # noqa: E402
+    PlaybackTransportControls,
+)
+from src.shared.python.motion_matching.playback import (  # noqa: E402
+    InterpolatedPlaybackState,
+    PhysicalTimePlayback,
+)
+
 logger = get_logger(__name__)
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -56,8 +80,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._rejection_reason: str = ""
         self._supports_forces: bool = False
         self._supports_counterfactuals: bool = False
-        self._timer = QtCore.QTimer(self)
-        self._timer.timeout.connect(self._on_timer_tick)
+        self._playback: PhysicalTimePlayback | None = None
         self._is_playing: bool = False
 
         self._init_ui()
@@ -121,27 +144,27 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         # 3D Viewport
         self._figure = Figure(figsize=(6, 5), dpi=100)
         self._canvas = FigureCanvasQTAgg(self._figure)
-        self._ax = self._figure.add_subplot(111, projection="3d")
+        self._ax: Any = self._figure.add_subplot(111, projection="3d")
         self._setup_3d_axes()
         layout.addWidget(self._canvas, stretch=1)
 
-        # Controls bar: Play/Pause, Slider, Frame Label
-        controls_layout = QtWidgets.QHBoxLayout()
-        self._play_btn = QtWidgets.QPushButton("▶ Play")
-        self._play_btn.setFixedWidth(80)
-        self._play_btn.clicked.connect(self.toggle_playback)
-        controls_layout.addWidget(self._play_btn)
+        # Playback Transport Controls from Tools (MV-04 #10480)
+        self._transport = PlaybackTransportControls(
+            subject_label="Swing",
+            subject_phrase="swing",
+            event_labels=("Address", "Top", "Impact", "Finish"),
+            scrub_tooltip="Scrub physical swing time [s] from address to finish.",
+            help_text="Physical time authority (1x source in 1.814s) with quaternion SLERP. Drag to orbit; wheel to zoom.",
+            help_tooltip="Physical seconds along the swing timeline.",
+            parent=self,
+        )
+        self._transport.timeChanged.connect(self._on_transport_time_changed)
+        layout.addWidget(self._transport)
 
-        self._slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        self._slider.setRange(0, 0)
-        self._slider.valueChanged.connect(self._on_slider_changed)
-        controls_layout.addWidget(self._slider, stretch=1)
-
-        self._frame_label = QtWidgets.QLabel("Frame: 0 / 0 (0.000 s)")
-        self._frame_label.setFixedWidth(160)
-        controls_layout.addWidget(self._frame_label)
-
-        layout.addLayout(controls_layout)
+        # Backwards-compatible aliases for legacy properties and tests
+        self._play_btn = self._transport.play_button
+        self._slider = self._transport.scrubber
+        self._frame_label = self._transport.time_label
 
     def _setup_3d_axes(self) -> None:
         self._ax.clear()
@@ -267,6 +290,39 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         eng = getattr(session, "engine", "default")
         self.load_replay_data(replay, candidate_hash=cand_hash, engine_name=eng)
 
+    def _setup_playback_transport(self, replay: ReplayData) -> None:
+        """Initialize physical playback engine and configure transport controls."""
+        time_s = np.asarray(replay.time_s, dtype=np.float64)
+        n_frames = len(time_s)
+        event_indices = {
+            "Address": 0,
+            "Top": max(0, min(int(0.35 * (n_frames - 1)), n_frames - 1)),
+            "Impact": max(0, min(int(0.60 * (n_frames - 1)), n_frames - 1)),
+            "Finish": max(0, n_frames - 1),
+        }
+        raw_coords = getattr(replay, "coordinates", getattr(replay, "q", None))
+        coords = (
+            np.asarray(raw_coords, dtype=np.float64)
+            if raw_coords is not None
+            else np.zeros((n_frames, 0), dtype=np.float64)
+        )
+        self._playback = PhysicalTimePlayback(
+            times_s=time_s,
+            q=coords,
+            model_markers=replay.model_markers_m,
+            target_markers=replay.target_markers_m,
+            event_indices=event_indices,
+        )
+        duration_s = self._playback.duration_s
+        events = self._playback.event_times
+        event_times_s = (
+            events["Address"],
+            events["Top"],
+            events["Impact"],
+            events["Finish"],
+        )
+        self._transport.set_transport_timeline(duration_s, event_times_s)
+
     def load_multi_candidates(
         self,
         candidates: list[tuple[str, ReplayData]] | tuple[tuple[str, ReplayData], ...],
@@ -277,17 +333,13 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._engine_name = "multi"
         self._current_frame = 0
 
-        n_frames = self._multi_replay.frame_count
-        self._slider.blockSignals(True)
-        self._slider.setRange(0, max(0, n_frames - 1))
-        self._slider.setValue(0)
-        self._slider.blockSignals(False)
+        self._setup_playback_transport(self._replay)
 
         names = ", ".join(eng.capitalize() for eng, _ in self._multi_replay.candidates)
         self._title_label.setText(
             f"Multi-Candidate Replay ({len(self._multi_replay.candidates)}) | Engines: {names}"
         )
-        self.render_frame(0)
+        self.render_at_time(0.0)
 
     def load_replay_data(
         self,
@@ -303,16 +355,12 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._engine_name = engine_name.lower()
         self._current_frame = 0
 
-        n_frames = replay.frame_count
-        self._slider.blockSignals(True)
-        self._slider.setRange(0, max(0, n_frames - 1))
-        self._slider.setValue(0)
-        self._slider.blockSignals(False)
+        self._setup_playback_transport(replay)
 
         title = f"Candidate: {self._candidate_hash} | Engine: {self._engine_name.capitalize()}"
         self._title_label.setText(title)
 
-        self.render_frame(0)
+        self.render_at_time(0.0)
 
     def load_file(self, path: Path | str) -> None:
         """Load a replay file (.npz or .mot)."""
@@ -499,32 +547,32 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                 )
 
     def toggle_playback(self) -> None:
-        """Toggle animation timer."""
-        if self._is_playing:
-            self._timer.stop()
-            self._play_btn.setText("▶ Play")
+        """Toggle animation playback using physical transport timer."""
+        timer = self._transport.timer()
+        if timer.isActive():
+            self._transport.pause()
             self._is_playing = False
         else:
-            active_rep = self._multi_replay or self._replay
-            if active_rep is not None and active_rep.frame_count > 1:
-                # Target ~30 fps playback
-                self._timer.start(33)
-                self._play_btn.setText("⏸ Pause")
-                self._is_playing = True
+            self._transport.play()
+            self._is_playing = True
 
-    def _on_timer_tick(self) -> None:
-        active_rep = self._multi_replay or self._replay
-        if active_rep is None:
+    def _on_transport_time_changed(self, time_s: float) -> None:
+        self.render_at_time(time_s)
+
+    def render_at_time(self, time_s: float) -> None:
+        """Evaluate continuous trajectory and render at physical time ``time_s``."""
+        if self._playback is None:
             return
-        n_frames = active_rep.frame_count
-        next_frame = (self._current_frame + 1) % n_frames
-        self._slider.blockSignals(True)
-        self._slider.setValue(next_frame)
-        self._slider.blockSignals(False)
-        self.render_frame(next_frame)
+        state = self._playback.interpolate(time_s)
+        self._current_frame = state.lower_index
+        self.render_frame(state.lower_index)
 
     def _on_slider_changed(self, value: int) -> None:
-        self.render_frame(value)
+        if self._playback is not None:
+            t = self._playback.time_at_scrub(value)
+            self.render_at_time(t)
+        else:
+            self.render_frame(value)
 
     def _on_open_clicked(self) -> None:
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
@@ -543,7 +591,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
 
     def cleanup(self) -> None:
         """Halt playback and release resources."""
-        self._timer.stop()
+        self._transport.pause()
         self._is_playing = False
         self._figure.clf()
 
