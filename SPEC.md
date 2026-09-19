@@ -1,5 +1,18 @@
 # SPEC.md — Repository Specification Document
 
+## Drake MatchingPlant and Inverse Kinematics Pipeline Lane (MS-13, #10332)
+
+Implements the Drake `MatchingPlant` adapter and full inverse kinematics motion matching lane conforming to the unified engine protocol:
+- **Drake MatchingPlant Adapter (`src/engines/physics_engines/drake/python/matching_plant.py`, `src/shared/python/motion_matching/pipeline/plants/drake.py`)**:
+  - Implements `DrakeMatchingPlant` conforming to the `MatchingPlant` protocol (`initialize`, `solve_address`, `solve_ik`, `simulate_tracking`).
+  - Supports analytical KKT affine dynamics, mass matrix computation, and spatial momentum tracking in `FullBodyDrakeModel`.
+- **Drake Full-Body Inverse Kinematics (`src/engines/physics_engines/drake/python/full_body_ik.py`)**:
+  - Implements `DrakeFullBodyIK` wrapping Drake's `InverseKinematics` formulation with mathematical programming solvers (`SnoptSolver` / `IpoptSolver`).
+  - Supports bilateral kinematic contact constraints (`PositionCost` and bounding boxes on foot spheres), dual-arm grip closure welds, axis alignment constraints, and center-of-mass balance constraints.
+- **Pipeline Integration and Calibration Passing (`src/shared/python/motion_matching/pipeline/cli.py`, `src/shared/python/motion_matching/full_body_forward_dynamics.py`)**:
+  - Implements `_CalibrateAndScaleResult` to propagate `hip_report` and qualification notes to receipt generation and tracking simulation across all supported physics engines.
+  - Generates full evidence receipt, trajectory kinematics, dynamics records, and playback animations (`anthro_driver_drake`).
+
 ## Well-Posed Acceptance Contract and Dynamic Validation Gates (MS-100, #10374)
 
 Formalizes dynamic validation gates for open-loop replay drift, collocation defects, and stabilized replay under declared tolerances:

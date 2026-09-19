@@ -61,9 +61,11 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         )
         self.model.upper_body_coordinates = self.upper_body_coordinates
 
+        model = self.model
+        spheres_dict = model._spheres
         self._spheres: dict[str, tuple[Any, float]] = {
             s_name: (info["frame"], float(info["radius_m"]))
-            for s_name, info in self.model._spheres.items()
+            for s_name, info in spheres_dict.items()
         }
 
         self._init_attachments(attachments)
