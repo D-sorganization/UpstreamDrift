@@ -178,6 +178,7 @@ def test_model_bundle_sidecar_tampering_detection(
     bundle = export_model_bundle(calibrated_spec_bytes)
 
     # Tamper with coordinate order in sidecar
+    assert bundle.sidecar is not None
     tampered_sidecar = dict(bundle.sidecar)
     tampered_sidecar["coordinate_order"] = list(
         reversed(tampered_sidecar["coordinate_order"])
@@ -250,3 +251,25 @@ def test_bundle_archive_rejects_path_traversal(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="traversal"):
         load_model_bundle(malicious_zip)
+
+
+def test_bundle_extract_to_and_directory_loading(
+    calibrated_spec_bytes: bytes, tmp_path: Path
+) -> None:
+    """Verify that extract_to unbundles model.urdf and that load_model_bundle supports directories."""
+    bundle = export_model_bundle(calibrated_spec_bytes)
+    bundle.mesh_assets["test_mesh.obj"] = b"v 0 0 0\n"
+
+    target_dir = tmp_path / "extracted_bundle"
+    urdf_path = bundle.extract_to(target_dir)
+
+    assert urdf_path.exists()
+    assert urdf_path.name == "model.urdf"
+    assert (target_dir / "manifest.json").exists()
+    assert (target_dir / "meshes" / "test_mesh.obj").read_bytes() == b"v 0 0 0\n"
+
+    # Reload from directory
+    reloaded_dir = load_model_bundle(target_dir)
+    assert reloaded_dir.manifest.model_sha256 == bundle.manifest.model_sha256
+    assert reloaded_dir.urdf_xml == bundle.urdf_xml
+    assert "test_mesh.obj" in reloaded_dir.mesh_assets

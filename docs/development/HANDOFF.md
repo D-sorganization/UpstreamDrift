@@ -1,14 +1,20 @@
 # Current Matching Continuation Handoff
 
+## MV-05 Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading (#10481)
+
+- Worktree: `UpstreamDrift-10481-viewers`, branch `feat/10481-meshcat-gepetto-lifecycle`, lease `antigravity-10481-mv05`, DL-#10481.
+- Changes:
+  - `viewer_lifecycle.py`: Managed subprocess lifecycle in `ViewerProcessManager`, active port readiness polling with timeout (`wait_for_port`), existing listener detection without collision (`reuse_existing`), process ownership tracking (never terminates unowned processes), CORBA port 12321 protection, dynamic MeshCat URL parsing, and startup crash diagnostics.
+  - `native_viewers.py`: Registered native viewer backends (`open_in_native_viewer` for MuJoCo, MeshCat, Gepetto, OpenSim, and MATLAB) with fail-closed missing dependency handlers and explicit install hints.
+  - `model_bundle.py`: Enhanced `ModelBundle` with `extract_to` and direct directory bundle loading with mesh asset inventory parsing.
+  - `launch_simulation_viewer.py`: Extended CLI to support `--model-bundle`, `--urdf`, `--view-mode` (static, fitted, native), `--speed`, `--stride`, `--loop`, and `--output-html`.
+  - `gui.py`: Added `_open_native_btn` in Tour Matching Viewer GUI invoking `open_in_native_viewer`.
+- Reproduction: `pytest tests/unit/motion_matching/test_viewer_lifecycle.py tests/unit/motion_matching/test_native_viewers_registry.py tests/unit/motion_matching/test_launch_simulation_viewer_cli.py tests/unit/tools/test_tour_matching_viewer_native_button.py tests/unit/model_generation/test_urdf_precision_bundle.py`.
+- Next: PR auto-merge, then proceed to MV-06 (#10482).
+
 ## MV-04 Reuse Shared Physical-Time Playback Across Viewers (#10480)
 
-- Worktree: `UpstreamDrift-10480-playback`, branch `feat/10480-physical-time-playback`, lease `antigravity-10480-mv04`, DL-#10480.
-- Changes:
-  - `playback.py`: `PhysicalTimePlayback` drives evaluation by continuous physical time using Tools `rate_of_closure.simulation.playback_transport`. Quaternion SLERP with antipodal continuity, Euclidean marker/force LERP, dropped-draw handling without timescale drift, non-uniform timestamps, discrete knot stepping.
-  - `playback_adapters.py`: Capabilities matrix across Qt, React (web JSON payload), MeshCat, Gepetto, and MediaVideo (with media-time offset and documented mute reason).
-  - `gui.py`: Integrated `PlaybackTransportControls` in `TourMatchingViewerWidget`, preserved camera orbit while paused.
-- Reproduction: `pytest tests/unit/motion_matching/test_physical_playback.py tests/unit/motion_matching/test_playback_adapters.py tests/unit/tools/test_tour_matching_viewer_playback.py tests/unit/tools/test_tour_matching_viewer_combo.py`.
-- Next: PR auto-merge, then proceed to MV-05 (#10481).
+- Completed in PR #10496 (merged). PhysicalTimePlayback, quaternion SLERP, Euclidean LERP, playback adapters matrix, Tour Matching Viewer transport controls.
 
 ## MV-03 Bind Saved Candidates to Viewer & Analysis Sessions (#10479)
 

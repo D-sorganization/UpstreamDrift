@@ -119,6 +119,13 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._open_btn.clicked.connect(self._on_open_clicked)
         header_layout.addWidget(self._open_btn)
 
+        self._open_native_btn = QtWidgets.QPushButton("Open Native…")
+        self._open_native_btn.setToolTip(
+            "Launch current candidate in native 3D engine (MeshCat, Gepetto, MuJoCo, etc.)"
+        )
+        self._open_native_btn.clicked.connect(self._on_open_native_clicked)
+        header_layout.addWidget(self._open_native_btn)
+
         layout.addLayout(header_layout)
 
         # Header bar 2: capabilities status label
@@ -588,6 +595,70 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                 QtWidgets.QMessageBox.critical(
                     self, "Error Loading Replay", f"Failed to load replay:\n{e}"
                 )
+
+    def _on_open_native_clicked(self) -> None:
+        """Launch the current candidate in a registered native viewer backend."""
+        active = (
+            self._multi_replay.candidates[0][1]
+            if self._multi_replay is not None
+            else self._replay
+        )
+        if active is None:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Open Native Viewer",
+                "No candidate trajectory is currently loaded.",
+            )
+            return
+
+        from src.shared.python.motion_matching.native_viewers import (
+            ViewerLaunchConfig,
+            ViewerUnavailableError,
+            get_supported_backends,
+            open_in_native_viewer,
+        )
+        from src.shared.python.motion_matching.visualization.simulation_viewer import (
+            SimulationData,
+        )
+
+        backends = get_supported_backends()
+        engine, ok = QtWidgets.QInputDialog.getItem(
+            self,
+            "Select Native Viewer",
+            "Choose 3D visualizer backend:",
+            backends,
+            0,
+            False,
+        )
+        if not ok or not engine:
+            return
+
+        try:
+            times = active.time_s
+            q_matrix = active.coordinates
+            sim_data = SimulationData(
+                time_s=times,
+                q=q_matrix,
+                markers_m=active.model_markers_m,
+                target_m=active.target_markers_m,
+                valid=active.valid_mask,
+                coordinate_order=list(active.coordinate_names)
+                if active.coordinate_names
+                else None,
+            )
+            cfg = ViewerLaunchConfig(speed=1.0, view_mode="fitted")
+            res = open_in_native_viewer(sim_data, engine, config=cfg)
+            if res.url:
+                QtWidgets.QMessageBox.information(
+                    self, "Native Viewer Launched", f"Viewer URL:\n{res.url}"
+                )
+        except ViewerUnavailableError as exc:
+            QtWidgets.QMessageBox.warning(self, "Native Viewer Unavailable", str(exc))
+        except (RuntimeError, ValueError, OSError) as exc:
+            logger.exception("Failed to launch native viewer '%s': %s", engine, exc)
+            QtWidgets.QMessageBox.critical(
+                self, "Error Launching Viewer", f"Could not launch {engine}:\n{exc}"
+            )
 
     def cleanup(self) -> None:
         """Halt playback and release resources."""
