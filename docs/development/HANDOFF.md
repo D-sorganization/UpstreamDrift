@@ -1,5 +1,20 @@
 # Current Matching Continuation Handoff
 
+## MV-02 Anatomical Visual Assets and Skin Toggling (#10478)
+
+- Worktree: `UpstreamDrift-10478-visuals`, branch `feat/10478-anatomical-visuals`, lease `antigravity-10478-mv02`, DL-#10478.
+- Changes:
+  - `anatomical_visuals.py`: `VisualSkinMode`, `VisualAssetBinding`, visible diagnostic fallback `[1.0, 0.0, 1.0, 1.0]`.
+  - `viewer_presentation.py`: `presentation_frames` cadence pacing and cross-platform playback lock.
+  - `native_candidate_viewer.py`: `load_candidate`, `build_visuals`, visual skin toggling without physics mutation.
+  - `model_bundle.py`: Support `include_visuals=True` with relative URDF `<mesh>` paths in bundle zips.
+- Reproduction: `pytest tests/unit/body_part_viz/test_anatomical_visuals.py tests/unit/motion_matching/test_native_viewer_presentation.py` and WSL `pytest tests/unit/motion_matching/test_native_candidate_viewer.py`.
+- Next: PR auto-merge, then proceed to MV-03 (#10479).
+
+## MV-01 Qualify Shared URDF Bundles and Numeric Precision (#10477)
+
+- Completed in PR #10485 (merged). 17g float serialization, `ModelBundleManifest`, `ModelBundle` zip export/import, Drake export integration, Pinocchio parity verified.
+
 ## MS-21 MuJoCo Replay Continuation (#10336)
 
 Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-codex-10336`.
