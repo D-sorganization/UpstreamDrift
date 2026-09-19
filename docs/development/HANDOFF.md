@@ -1,5 +1,21 @@
 # Current Matching Continuation Handoff
 
+## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
+
+- Branch: `feat/issue-10433-pf03-contact-actuator-root-constraints`, lease `antigravity-ud-10433`, DL-#10433.
+- Changes:
+  - `src/shared/python/motion_matching/contact_force_allocator.py`:
+    - Replaced penalty-augmented least squares and unconstrained post-projection with constrained QP inverse dynamics.
+    - Added `FeasibilityStatus` enum and `AllocationObjective.HARD_ZERO_TRAIL`.
+    - Enforced 8-faceted polyhedral friction pyramid and non-negative normal force ($f_n \ge 0$) along arbitrary surface normals ($\hat{n}$).
+    - Enforced contact separation mask ($f_s \equiv 0$ for separated contacts).
+    - Enforced strict actuator bounds without post-projection, using isolated actuator slack to detect and report violations without bounds breaching.
+    - Isolated diagnostic root slack $\delta\tau_{\text{root}}$ so phantom root forces never produce false physical success.
+    - Added `verify_torque_and_rate_bounds` for discrete trajectory limits and rate verification.
+  - `tests/unit/motion_matching/test_contact_force_allocator_pf03.py`: Comprehensive test suite for all 10 acceptance scenarios.
+- Validation: 12 unit tests pass 100% across PF-03 and legacy suites; ruff clean; black clean; mypy strict clean; bandit clean.
+- Next: PR creation, auto-merge, and proceed to next issue in sequence.
+
 ## MV-03 Bind Saved Candidates to Viewer & Analysis Sessions (#10479)
 
 - Worktree: `UpstreamDrift-10479-sessions`, branch `feat/10479-viewer-analysis-sessions`, lease `antigravity-10479-mv03`, DL-#10479.
