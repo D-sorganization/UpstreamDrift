@@ -5805,7 +5805,6 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-09-19 | #9001 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10458 | Same-integrator G1 continuation (rtol 1e-6) committed as rejected evidence; rollout equals replay at 123.5 mm; ledger and turnover updated |
-| 2026-09-18 | #10428 | Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum)` in `swing_evaluator.py` (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10448 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
 | 2026-09-18 | #10381 | Matched-swing ledger fail-closed (self-declared acceptance is UNVERIFIED); G1 Crocoddyl continuation committed as rejected evidence; matched receipts re-evaluated; program docs truth reset |
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
