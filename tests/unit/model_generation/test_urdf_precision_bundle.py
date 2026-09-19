@@ -94,7 +94,7 @@ def test_urdf_writer_float_precision_preservation() -> None:
     assert f"{exact_inertia:.17g}" in xml
 
     # Verify parsed float matches within 1e-15
-    import xml.etree.ElementTree as ET
+    import defusedxml.ElementTree as ET
 
     root = ET.fromstring(xml)
     inertial = root.find(".//inertial")
