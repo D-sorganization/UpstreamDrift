@@ -1,18 +1,22 @@
 """Pure JSON codec and field transformations for GSPro Open Connect v1 (GS-02 #10191).
 
+Consumes shared protocol codec from Tools launch_monitor (Tools#5228).
 Follows TDD, DbC, Law of Demeter, and DRY.
 All functions are pure and have zero network or GUI side-effects.
 """
 
 from __future__ import annotations
 
-import json
 import math
 from dataclasses import dataclass
 from typing import Any
 
-import numpy as np
-
+from shared.python.launch_monitor import gspro_connect
+from shared.python.launch_monitor.gspro_connect import (
+    GSProBallData,
+    GSProClubData,
+    GSProShot,
+)
 from src.shared.python.golf_simulator.adapters.gspro.profile import (
     GSProProfile,
     ResponseCategory,
@@ -36,25 +40,15 @@ class ResponseReceipt:
 
 
 def encode_heartbeat_payload(device_id: str = "UpstreamDrift") -> dict[str, Any]:
-    """Create a minimal heartbeat message payload."""
-    return {
-        "DeviceID": device_id,
-        "ShotNumber": 0,
-        "ShotDataOptions": {
-            "ContainsBallData": False,
-            "ContainsClubData": False,
-            "LaunchMonitorIsReady": True,
-            "LaunchMonitorBallDetected": False,
-            "IsHeartBeat": True,
-        },
-    }
+    """Create a minimal heartbeat message payload via shared Tools codec."""
+    return gspro_connect.encode_heartbeat_payload(device_id=device_id)
 
 
 def _compute_spin_axis_tilt(angular_vel: tuple[float, float, float]) -> float:
     """Compute spin axis tilt angle in degrees.
 
     Pure backspin vector is along -y (tilt = 0 deg).
-    Lateral tilt angle is atan2(omega_x, -omega_y).
+    Lateral tilt angle is atan2(ox, -oy).
     """
     ox, oy, _ = angular_vel
     denom = -oy
@@ -71,7 +65,8 @@ def encode_shot_payload(
 ) -> dict[str, Any]:
     """Encode a canonical ShotEnvelope into a GSPro Open Connect JSON dictionary.
 
-    Converts SI units to profile units (m/s -> mph, radians -> degrees, rad/s -> RPM).
+    Converts SI units to profile units (m/s -> mph, radians -> degrees, rad/s -> RPM)
+    and constructs wire payloads via shared.python.launch_monitor.gspro_connect.
     """
     vx, vy, vz = shot.ball_velocity_m_s
     speed_mps = math.sqrt(vx**2 + vy**2 + vz**2)
@@ -95,94 +90,88 @@ def encode_shot_payload(
 
     speed_val = speed_mps * _MPS_TO_MPH if profile.speed_unit == "mph" else speed_mps
 
-    ball_data: dict[str, Any] = {
-        "Speed": round(speed_val, 4),
-        "TotalSpin": round(total_spin_rpm, 2),
-        "VLA": round(vla_deg, 4),
-        "HLA": round(hla_deg, 4),
-        "SpinAxis": round(spin_axis_deg, 4),
-    }
+    ball_data = GSProBallData(
+        speed_mph=speed_val,
+        spin_axis_deg=spin_axis_deg,
+        total_spin_rpm=total_spin_rpm,
+        hla_deg=hla_deg,
+        vla_deg=vla_deg,
+    )
 
-    # Optional club data
-    club_dict: dict[str, Any] = {}
-    contains_club = False
+    club_data: GSProClubData | None = None
     if shot.club_data is not None:
         cd = shot.club_data
-        if cd.club_speed_m_s is not None:
-            c_spd = (
-                cd.club_speed_m_s * _MPS_TO_MPH
-                if profile.speed_unit == "mph"
-                else cd.club_speed_m_s
+        club_speed = (
+            cd.club_speed_m_s * _MPS_TO_MPH
+            if cd.club_speed_m_s is not None and profile.speed_unit == "mph"
+            else cd.club_speed_m_s
+        )
+        aoa = (
+            math.degrees(cd.attack_angle_rad)
+            if cd.attack_angle_rad is not None
+            else None
+        )
+        path = (
+            (
+                -math.degrees(cd.club_path_rad)
+                if profile.hla_sign_positive == "right"
+                else math.degrees(cd.club_path_rad)
             )
-            club_dict["Speed"] = round(c_spd, 3)
-        if cd.attack_angle_rad is not None:
-            club_dict["AngleOfAttack"] = round(math.degrees(cd.attack_angle_rad), 2)
-        if cd.club_path_rad is not None:
-            # Invert path if HLA positive right
-            path_deg = math.degrees(cd.club_path_rad)
-            club_dict["Path"] = round(
-                -path_deg if profile.hla_sign_positive == "right" else path_deg, 2
+            if cd.club_path_rad is not None
+            else None
+        )
+        ftt = (
+            (
+                -math.degrees(cd.face_to_target_rad)
+                if profile.hla_sign_positive == "right"
+                else math.degrees(cd.face_to_target_rad)
             )
-        if cd.face_to_target_rad is not None:
-            ftt_deg = math.degrees(cd.face_to_target_rad)
-            club_dict["FaceToTarget"] = round(
-                -ftt_deg if profile.hla_sign_positive == "right" else ftt_deg, 2
-            )
-        if cd.face_to_path_rad is not None:
-            ftp_deg = math.degrees(cd.face_to_path_rad)
-            club_dict["FaceToPath"] = round(
-                -ftp_deg if profile.hla_sign_positive == "right" else ftp_deg, 2
-            )
-        if club_dict:
-            contains_club = True
+            if cd.face_to_target_rad is not None
+            else None
+        )
+        club_data = GSProClubData(
+            speed_mph=club_speed,
+            angle_of_attack_deg=aoa,
+            path_deg=path,
+            face_to_target_deg=ftt,
+        )
 
-    payload: dict[str, Any] = {
-        "DeviceID": device_id,
-        "Units": profile.distance_unit,
-        "ShotNumber": shot_number,
-        "BallData": ball_data,
-        "ShotDataOptions": {
-            "ContainsBallData": True,
-            "ContainsClubData": contains_club,
-            "LaunchMonitorIsReady": True,
-            "LaunchMonitorBallDetected": True,
-            "IsHeartBeat": False,
-        },
-    }
-    if contains_club:
-        payload["ClubData"] = club_dict
-
-    return payload
+    gspro_shot = GSProShot(ball_data=ball_data, club_data=club_data)
+    return gspro_connect.encode_shot_payload(
+        gspro_shot,
+        device_id=device_id,
+        shot_number=shot_number,
+        units=profile.distance_unit,
+    )
 
 
 def decode_simulator_response(
-    raw: str | dict[str, Any], profile: GSProProfile
+    raw: str | dict[str, Any] | bytes, profile: GSProProfile
 ) -> ResponseReceipt:
     """Decode a raw simulator JSON response into a typed ResponseReceipt."""
-    if isinstance(raw, str):
-        try:
-            data = json.loads(raw)
-        except Exception as exc:
-            return ResponseReceipt(
-                code=500,
-                category=ResponseCategory.ERROR_REJECTED,
-                message=f"Invalid JSON response: {exc}",
-                raw_payload={"raw_string": raw},
-            )
-    elif isinstance(raw, dict):
-        data = raw
-    else:
-        raise TypeError(f"Expected str or dict, got {type(raw)}")
+    try:
+        reply = gspro_connect.parse_reply(raw)
+    except Exception as exc:
+        raw_payload = (
+            {"raw_string": raw}
+            if isinstance(raw, str)
+            else (raw if isinstance(raw, dict) else None)
+        )
+        return ResponseReceipt(
+            code=500,
+            category=ResponseCategory.ERROR_REJECTED,
+            message=f"Invalid JSON response: {exc}",
+            raw_payload=raw_payload,
+        )
 
-    code = int(data.get("Code", 0))
-    category = profile.categorize_code(code)
-    message = str(data.get("Message", ""))
-    player = data.get("Player")
+    category = profile.categorize_code(reply.code)
+    player_dict = reply.raw.get("Player")
+    player_data = player_dict if isinstance(player_dict, dict) else None
 
     return ResponseReceipt(
-        code=code,
+        code=reply.code,
         category=category,
-        message=message,
-        player_data=player if isinstance(player, dict) else None,
-        raw_payload=data,
+        message=reply.message,
+        player_data=player_data,
+        raw_payload=reply.raw,
     )
