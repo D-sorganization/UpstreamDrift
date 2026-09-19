@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T19:27:40Z",
+  "generated_at": "2026-09-19T20:01:26Z",
   "rows": [
     {
       "acceptance": null,
@@ -418,7 +418,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 410.9141537999967,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -504,7 +504,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "drake",
-      "horizon_s": 326.22837022697786,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -515,7 +515,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json",
-      "sha256": "37d329cbfe296a5118626cf9176160f604346e08f57d43f6de69f6ebb87c2587"
+      "sha256": "8808e5d9ab5a2b482f1a4465cbf36ae2ee5ea62a71e295c1c891cc8e2e7a694c"
     },
     {
       "acceptance": null,
@@ -527,7 +527,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 372.7757910999935,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -550,7 +550,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 413.54473549997783,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -612,7 +612,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 1611.8685769999865,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -674,7 +674,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 207.65851470001508,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -736,7 +736,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "iron",
       "engine": "mujoco",
-      "horizon_s": 479.22056350001367,
+      "horizon_s": 1.8272980501392757,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -798,7 +798,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "iron",
       "engine": "mujoco",
-      "horizon_s": 828.5756654999859,
+      "horizon_s": 1.8272980501392757,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -821,7 +821,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "iron",
       "engine": "mujoco",
-      "horizon_s": 261.8544557999703,
+      "horizon_s": 1.8272980501392757,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -867,7 +867,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": null,
       "engine": "mujoco",
-      "horizon_s": 70.0847889999859,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -890,7 +890,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": null,
       "engine": "mujoco",
-      "horizon_s": 67.92577600001823,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
