@@ -1,5 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## Versioned Matched Swing Candidate Specification (MS-15, #10334)
+
+Defines and implements `MatchedSwingCandidate`: the versioned, engine-independent trajectory artifact emitted and consumed across all physics engines, viewers, and parity tools:
+- **Core Candidate Architecture (`src/shared/python/motion_matching/candidate.py`)**:
+  - `CandidateProfile`: Explicit `kinematic` (poses, coordinates, markers) vs. `dynamic` (full state, velocity, torques, solver/contact configuration) profiles.
+  - `CandidateMetadata`: Schema version `matched-swing-candidate-v1`, provenance hashes (model, document, source C3D), physical units, frame conventions, and SHA-256 array checksums.
+  - `MatchedSwingCandidate`: Immutable arrays (`writeable = False`), strict time monotonicity and finite checks, fail-closed rejection of missing dynamic states, and virtual-work consistency verification ($\tau_q^T v = \tau_{act}^T \dot{q}_{act}$).
+- **Packaging & Tamper Detection (`src/shared/python/motion_matching/candidate_io.py`)**:
+  - `save_candidate` / `load_candidate` using pure-NumPy `.npz` containers with canonical JSON metadata without pickle dependencies (`allow_pickle=False`).
+  - Automatic SHA-256 validation detecting array byte modification or metadata tampering.
+- **Legacy Format Converters (`src/shared/python/motion_matching/candidate_convert.py`)**:
+  - Lossless conversion from historical `*_returned81_replay.npz`, OpenSim `.mot` / `.sto`, and ground-support IK/dynamics archives without synthesizing missing dynamics.
+- **Schema Documentation (`docs/development/full_body_models/CANDIDATES.md`)**:
+  - Authoritative reference for candidate structure, profiles, array layouts, and metadata fields.
+
 ## Pure-XML OpenSim Full-Body Anthropometric Model Exporter (MS-40, #10339)
 
 Implements the pure-XML ElementTree exporter producing 44-coordinate `.osim` models and hash-verified provenance receipts:
@@ -5824,6 +5839,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |
+| 2026-09-19 | #10475 | Define one versioned candidate package with distinct kinematic and dynamic profiles, checksumming, and converters (MS-15 #10334). |
 | 2026-09-18 | #10428 | Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum)` in `swing_evaluator.py` (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10427 | Optimized wind speed norm calculation by replacing `np.linalg.norm` with `math.sqrt(np.dot)` for small 3D vectors in `src/shared/python/physics/aerodynamics/_config.py`. (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10458 | Same-integrator G1 continuation (rtol 1e-6) committed as rejected evidence; rollout equals replay at 123.5 mm; ledger and turnover updated |
