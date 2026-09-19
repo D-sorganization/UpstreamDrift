@@ -187,3 +187,19 @@ def test_self_reported_acceptance_is_never_passed() -> None:
     }
     block = extract_acceptance("z/receipt.json", evaluated, None)
     assert block is not None and block["status"] == "PASSED"
+
+
+@pytest.mark.unit
+def test_extract_horizon_s_prefers_dynamics_duration_over_elapsed_s() -> None:
+    """extract_horizon_s extracts physical simulation duration instead of solver wall-clock time."""
+    from src.shared.python.motion_matching.ledger import extract_horizon_s
+
+    data = {
+        "elapsed_s": 326.228,
+        "dynamics": {
+            "duration_s": 1.81389,
+            "dt_s": 0.001,
+        },
+    }
+    horizon = extract_horizon_s(data)
+    assert horizon == pytest.approx(1.81389)
