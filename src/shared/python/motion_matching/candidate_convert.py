@@ -21,6 +21,7 @@ import numpy as np
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.candidate import (
     CANDIDATE_SCHEMA_VERSION,
+    CandidateAuxiliary,
     CandidateMarkers,
     CandidateMetadata,
     CandidateProfile,
@@ -285,4 +286,105 @@ def convert_ground_support_dynamics(
         q=q,
         v=v,
         tau=tau,
+    )
+
+
+@precondition(
+    lambda npz_path, spec=None, engine="pinocchio": Path(npz_path).is_file(),
+    "analytic matched NPZ file must exist",
+)
+@postcondition(
+    lambda r: isinstance(r, MatchedSwingCandidate), "must return MatchedSwingCandidate"
+)
+def convert_analytic_matched_npz(
+    npz_path: Path | str,
+    spec: Mapping[str, Any] | None = None,
+    engine: str = "pinocchio",
+) -> MatchedSwingCandidate:
+    """Convert an analytic matched swing NPZ archive to a versioned MatchedSwingCandidate."""
+    p = Path(npz_path)
+    with np.load(p, allow_pickle=False) as data:
+        time_s = np.asarray(data["time_s"], dtype=np.float64)
+        q = np.asarray(data["q"], dtype=np.float64)
+        v = np.asarray(data["v"], dtype=np.float64) if "v" in data else None
+        tau: np.ndarray | None = None
+        if "u" in data:
+            tau = np.asarray(data["u"], dtype=np.float64)
+        elif "u_optimum" in data:
+            tau = np.asarray(data["u_optimum"], dtype=np.float64)
+
+        markers_m = (
+            np.asarray(data["markers_m"], dtype=np.float64)
+            if "markers_m" in data
+            else None
+        )
+        target_m = (
+            np.asarray(data["target_m"], dtype=np.float64)
+            if "target_m" in data
+            else None
+        )
+        valid = np.asarray(data["valid"], dtype=bool) if "valid" in data else None
+        grip_w = (
+            np.asarray(data["grip_wrenches"], dtype=np.float64)
+            if "grip_wrenches" in data
+            else None
+        )
+        ext_f = (
+            np.asarray(data["ground_forces"], dtype=np.float64)
+            if "ground_forces" in data
+            else None
+        )
+
+        coord_order: tuple[str, ...] = ()
+        if "coordinate_order" in data:
+            coord_order = tuple(str(x) for x in data["coordinate_order"])
+        elif spec and "coordinate_order" in spec:
+            coord_order = tuple(spec["coordinate_order"])
+        else:
+            coord_order = tuple(f"q_{i}" for i in range(q.shape[1]))
+
+        marker_names: tuple[str, ...] = ()
+        if "labels" in data:
+            marker_names = tuple(str(x) for x in data["labels"])
+
+    nv = v.shape[1] if v is not None else q.shape[1]
+    nu = tau.shape[1] if tau is not None else 0
+    vel_names = tuple(f"v_{i}" for i in range(nv))
+    act_names = tuple(f"tau_{i}" for i in range(nu))
+
+    metadata = CandidateMetadata(
+        schema_version=CANDIDATE_SCHEMA_VERSION,
+        profile=(
+            CandidateProfile.DYNAMIC if tau is not None else CandidateProfile.KINEMATIC
+        ),
+        engine=engine,
+        model_name=str(
+            spec.get("name", "full_body_pinocchio") if spec else "full_body_pinocchio"
+        ),
+        coordinate_names=coord_order,
+        velocity_names=vel_names,
+        actuator_names=act_names,
+        marker_names=marker_names,
+        missing_fields=["root_forces", "contact_modes"],
+        extra={"source_file": p.name, "legacy_format": "analytic_matched_npz"},
+    )
+
+    markers = CandidateMarkers(
+        model_markers_m=markers_m,
+        target_markers_m=target_m,
+        marker_validity=valid,
+    )
+    auxiliary = CandidateAuxiliary(
+        external_forces=ext_f,
+        grip_wrench=grip_w,
+    )
+
+    return MatchedSwingCandidate(
+        metadata=metadata,
+        time_s=time_s,
+        q=q,
+        v=v,
+        tau=tau,
+        markers=markers,
+        auxiliary=auxiliary,
     )
