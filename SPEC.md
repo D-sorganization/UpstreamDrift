@@ -1,5 +1,25 @@
 # SPEC.md — Repository Specification Document
 
+## Pure-XML OpenSim Full-Body Anthropometric Model Exporter (MS-40, #10339)
+
+Implements the pure-XML ElementTree exporter producing 44-coordinate `.osim` models and hash-verified provenance receipts:
+- **Full-Body OSIM Exporter (`src/engines/physics_engines/opensim/python/full_body_osim.py`)**:
+  - Pure-XML generation with zero OpenSim SDK runtime dependency at build time.
+  - Validates specification schema (`full-body-v1`) and generates 44 coordinates in exact document order with unbounded speed/value defaults and unlocked flags.
+  - Composite multi-solid body inertia aggregation via parallel-axis theorem for all 24 articulated bodies.
+  - Generates 6-DOF dual-grip spatial weld closure (`WeldConstraint`) or point pair (`PointConstraint`) between left and right hands.
+  - Constructs Hunt-Crossley foot contact spheres and rigid ground plane (`ContactHalfSpace`) with static/dynamic/viscous friction and non-tensile restitution.
+  - Adds 38 internal joint-torque `CoordinateActuator` components (`tau_<coordinate>`).
+  - Serializes 34 tour capture marker attachments with accurate body offset frames.
+  - Deterministic SHA-256 provenance receipt (`export_receipt.json`) linking source spec hash to generated `.osim` hash.
+- **Generated Models (`src/engines/physics_engines/opensim/models/generated/`)**:
+  - `full_body_anthro_driver.osim`: Driver club model (44 coordinates, 24 bodies, 6 contact spheres, 34 markers).
+  - `full_body_anthro_iron7.osim`: 7-iron club model (44 coordinates, 24 bodies, 6 contact spheres, 34 markers).
+  - `export_receipt.json`: Provenance metadata receipt.
+- **Verification Suites (`tests/unit/motion_matching/test_full_body_osim.py`, `tests/opensim/test_full_body_osim_native.py`)**:
+  - 4 unit tests verifying full XML topology, 44-coordinate order, dual-grip closure formulations, and CLI export.
+  - Native OpenSim runtime test suite skipped gracefully when OpenSim bindings are not present.
+
 ## Shared Contact Law and Dual-Grip Kinematic Closure Conformance (MS-72, #10352)
 
 Formalizes the versioned cross-engine contact law and dual-grip kinematic closure contracts across all six physics engines:
@@ -5803,9 +5823,9 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-18 | #10458 | Same-integrator G1 continuation (rtol 1e-6) committed as rejected evidence; rollout equals replay at 123.5 mm; ledger and turnover updated |
 | 2026-09-18 | #10428 | Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum)` in `swing_evaluator.py` (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10427 | Optimized wind speed norm calculation by replacing `np.linalg.norm` with `math.sqrt(np.dot)` for small 3D vectors in `src/shared/python/physics/aerodynamics/_config.py`. (spec-exempt: micro-optimization) |
+| 2026-09-18 | #10458 | Same-integrator G1 continuation (rtol 1e-6) committed as rejected evidence; rollout equals replay at 123.5 mm; ledger and turnover updated |
 | 2026-09-18 | #10448 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
 | 2026-09-18 | #10381 | Matched-swing ledger fail-closed (self-declared acceptance is UNVERIFIED); G1 Crocoddyl continuation committed as rejected evidence; matched receipts re-evaluated; program docs truth reset |
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
