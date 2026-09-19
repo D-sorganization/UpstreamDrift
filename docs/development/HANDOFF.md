@@ -1,5 +1,13 @@
 # Current Matching Continuation Handoff
 
+## Docker Audit Repair (#10472)
+
+The Docker image now pins Tornado 6.5.8, matching the generated runtime and
+development locks and the declared runtime floor. This resolves the in-image
+pip-audit findings GHSA-wwv5-g3v4-889x and GHSA-8423-8fgw-73vq (plus the third
+Tornado 6.5.7 advisory) without an audit waiver. CI must confirm the complete
+Docker build and dependency-artifact regeneration before merge.
+
 ## MS-21 MuJoCo Replay Continuation (#10336)
 
 Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-codex-10336`.
