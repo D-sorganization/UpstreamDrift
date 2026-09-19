@@ -1,5 +1,13 @@
 # Current Matching Continuation Handoff
 
+## PF-04 Qualify Contact Modes and Native Pinocchio Force Feasibility (#10434)
+
+- Branch: `feat/issue-10434-pf04-qualify-contact-modes-pinocchio-forces`, lease `antigravity-ud-10434`, DL-#10434.
+- Changes:
+  - `contact_mode_qualifier.py`: Infer heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis; support mode ambiguity metric; COP and 2D convex hull support polygon containment under arbitrary surface normal $\hat{n}$; slip speed thresholding and friction cone saturation ratio; constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation; separate linear force ($N$) and moment ($N\cdot m$) residual budgets; unphysical load rejection ($> 5000$ N, $> 300$ Nm); and mass/geometry/friction sensitivity reporting.
+- Reproduction: `pytest tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`.
+- Next: Commit, push, create PR referencing Closes #10434, enable auto-merge, and notify parent agent.
+
 ## MV-03 Bind Saved Candidates to Viewer & Analysis Sessions (#10479)
 
 - Worktree: `UpstreamDrift-10479-sessions`, branch `feat/10479-viewer-analysis-sessions`, lease `antigravity-10479-mv03`, DL-#10479.
