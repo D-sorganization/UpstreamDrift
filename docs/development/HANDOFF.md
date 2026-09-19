@@ -1,19 +1,24 @@
 # Current Matching Continuation Handoff
 
+## MV-03 Bind Saved Candidates to Viewer & Analysis Sessions (#10479)
+
+- Worktree: `UpstreamDrift-10479-sessions`, branch `feat/10479-viewer-analysis-sessions`, lease `antigravity-10479-mv03`, DL-#10479.
+- Changes:
+  - `candidate_session.py`: `CandidateSession` ingestion with SHA-256 verification and coordinate order remapping. Missing force channels remain None without fabrication.
+  - `wsl_probe.py`: WSL physics engine probe reporting Linux-native SDK availability.
+  - `core.py`: `MultiCandidateReplay`, `export_animation_gif`, `ENGINE_COLORS`.
+  - `gui.py`: Runs combo from ledger, conspicuous rejected fit banner, capabilities label, multi-candidate replay overlay, and GIF export.
+  - `simulation_service.py` & `capabilities.py`: Ingestion service and `GET /capabilities/candidate_session` route.
+- Reproduction: `pytest tests/unit/motion_matching/test_candidate_session.py tests/unit/engine_core/test_wsl_probe.py tests/unit/tools/test_tour_matching_viewer_combo.py tests/unit/api/test_candidate_session_routes.py`.
+- Next: PR auto-merge, then proceed to MV-04 (#10480).
+
 ## MV-02 Anatomical Visual Assets and Skin Toggling (#10478)
 
-- Worktree: `UpstreamDrift-10478-visuals`, branch `feat/10478-anatomical-visuals`, lease `antigravity-10478-mv02`, DL-#10478.
-- Changes:
-  - `anatomical_visuals.py`: `VisualSkinMode`, `VisualAssetBinding`, visible diagnostic fallback `[1.0, 0.0, 1.0, 1.0]`.
-  - `viewer_presentation.py`: `presentation_frames` cadence pacing and cross-platform playback lock.
-  - `native_candidate_viewer.py`: `load_candidate`, `build_visuals`, visual skin toggling without physics mutation.
-  - `model_bundle.py`: Support `include_visuals=True` with relative URDF `<mesh>` paths in bundle zips.
-- Reproduction: `pytest tests/unit/body_part_viz/test_anatomical_visuals.py tests/unit/motion_matching/test_native_viewer_presentation.py` and WSL `pytest tests/unit/motion_matching/test_native_candidate_viewer.py`.
-- Next: PR auto-merge, then proceed to MV-03 (#10479).
+- Completed in PR #10488 (merged). Added visual skin modes, visible diagnostic fallback (magenta), cadence pacing, and verified physics immutability under visual skin toggles.
 
 ## MV-01 Qualify Shared URDF Bundles and Numeric Precision (#10477)
 
-- Completed in PR #10485 (merged). 17g float serialization, `ModelBundleManifest`, `ModelBundle` zip export/import, Drake export integration, Pinocchio parity verified.
+- Completed in PR #10485 (merged). 17g float serialization, ModelBundleManifest, ModelBundle zip export/import, Drake export integration, Pinocchio parity verified.
 
 ## MS-21 MuJoCo Replay Continuation (#10336)
 
@@ -640,22 +645,8 @@ validator pass is claimed. Normal configured commit/push hooks still apply.
 
 ## Evidence and Reproduction
 
-Evidence root: simscape_tour_matching/native_evidence. Preserve raw ZIP archives;
-formatted JSON raw hashes can differ without changing parsed physics. Original
-native model SHA256 b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248.
-Run19 fixture canonical candidate SHA256
-b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f.
-It is a rejected0.85 s C3D fit (whole30.79 mm, terminal99.99 mm), not the best full swing.
+Evidence root: simscape_tour_matching/native_evidence. Preserve raw ZIP archives. Original native model SHA256 `b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248`. Run19 canonical candidate SHA256 `b5b1c3823c86a21df323dc4e430366dc093495b069b3d25c361b0d007b8ff24f` (rejected 0.85 s fit).
 
-ControlTower: ssh alias controltower; WSL ControlTower-Runner; Python
-/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python; runtime18 PYTHONPATH
-/home/dieterolson/native-manifold-10043-18; use one BLAS/OpenMP thread for comparable
-runs. Driver compare_native_manifold_replay.py records independent scalar settings.
-Raw run receipts identify exact archived source and inputs. Never overwrite runs.
+ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts identify exact archived source and inputs. Never overwrite runs.
 
-[Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives
-strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md)
-preserves previous matching and unrelated incoming project context. Its ACTIVE
-statements are historical, not current process evidence. Update this concise
-handoff and DEVELOPMENT_LOG with each implementation commit; append history only
-when needed. Do not reintroduce competing current-status sections.
+[Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md) preserves earlier matching history. Update this concise handoff and DEVELOPMENT_LOG with each commit.

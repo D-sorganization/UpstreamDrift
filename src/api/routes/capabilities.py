@@ -107,6 +107,58 @@ def list_capabilities() -> list[FeatureReportModel]:
     return [_report_to_model(r) for r in snapshot]
 
 
+@router.get("/capabilities/candidate_session")
+def get_candidate_session_capability(
+    candidate_path: str,
+    model_path: str | None = None,
+    receipt_path: str | None = None,
+) -> dict[str, Any]:
+    """Ingest candidate session metadata, verify integrity, and report capabilities."""
+    from src.shared.python.engine_core.wsl_probe import get_wsl_engine_status
+    from src.shared.python.motion_matching.candidate_session import (
+        ingest_candidate_session,
+    )
+
+    try:
+        session = ingest_candidate_session(
+            candidate_path=candidate_path,
+            model_path=model_path,
+            receipt_path=receipt_path,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    wsl_status = get_wsl_engine_status(session.engine).to_dict()
+
+    return {
+        "status": session.status,
+        "is_accepted": session.is_accepted,
+        "engine": session.engine,
+        "candidate_sha256": session.candidate_sha256,
+        "model_sha256": session.model_sha256,
+        "capabilities": {
+            "supports_forces": session.supports_forces,
+            "supports_counterfactuals": session.supports_counterfactuals,
+            "has_tau": session.tau is not None,
+            "has_external_forces": session.external_forces is not None,
+        },
+        "wsl_runtime": wsl_status,
+        "frame_count": session.replay.frame_count,
+        "time_range_s": [
+            float(session.replay.time_s[0]),
+            float(session.replay.time_s[-1]),
+        ],
+    }
+
+
 @router.get("/capabilities/{name}", response_model=FeatureReportModel)
 def get_capability(name: str) -> FeatureReportModel:
     """Return the report for a single feature."""

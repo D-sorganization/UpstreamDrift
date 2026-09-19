@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
+from pathlib import Path
+import time
 from typing import TYPE_CHECKING, Any
 
 import anyio.to_thread
@@ -656,3 +657,27 @@ class SimulationService:
             logger.warning("Error performing analysis: %s", e)
 
         return results
+
+    def get_candidate_session(
+        self,
+        candidate_path: str | Path,
+        model_path: str | Path | None = None,
+        receipt_path: str | Path | None = None,
+    ) -> Any:
+        """Ingest a saved candidate trajectory into a replayable CandidateSession.
+
+        Preconditions:
+            candidate_path points to an existing candidate file.
+        DbC / Invariants:
+            Preserves simulation boundary; never fabricates a GenericPhysicsRecorder
+            or simulates live physics.
+        """
+        from src.shared.python.motion_matching.candidate_session import (
+            ingest_candidate_session,
+        )
+
+        return ingest_candidate_session(
+            candidate_path=candidate_path,
+            model_path=model_path,
+            receipt_path=receipt_path,
+        )
