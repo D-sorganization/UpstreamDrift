@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Matched Swing Ledger Horizon Extraction and Drake Ground Support Classification (#10363)
+
+Updates matched swing ledger indexing and ground support metadata:
+- **Horizon Extraction (`src/shared/python/motion_matching/ledger.py`)**:
+  - `extract_horizon_s` prioritizes simulation duration from `dynamics` and `forward_rollout` receipts over wall-clock benchmark `elapsed_s`, ensuring accurate physical trajectory duration reporting.
+- **Drake Backend Classification (`docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json`)**:
+  - Corrects backend label to `drake` and updates status table reporting to reflect IK and tracking qualification state.
+
 ## Versioned Matched Swing Candidate Specification (MS-15, #10334)
 
 Defines and implements `MatchedSwingCandidate`: the versioned, engine-independent trajectory artifact emitted and consumed across all physics engines, viewers, and parity tools:
