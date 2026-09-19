@@ -82,8 +82,9 @@ def probe_wsl_engine(
         proc = subprocess.run(
             cmd,
             capture_output=True,
-            text=True,
-            timeout=timeout_s,
+            encoding="utf-8",
+            errors="replace",
+            timeout=float(timeout_s),
             check=False,
         )
     except (OSError, subprocess.TimeoutExpired) as err:
