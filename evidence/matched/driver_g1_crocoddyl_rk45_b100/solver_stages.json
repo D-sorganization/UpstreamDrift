@@ -1,0 +1,22 @@
+[
+  {
+    "t_end_s": 0.6,
+    "nodes": 217,
+    "iterations": 150,
+    "converged": false,
+    "cost": 52.94810113705844,
+    "stopping_criterion": 6.000568875409666e-5,
+    "wall_clock_s": 5166.413853328966,
+    "marker_rms_m": 0.022613078824686723
+  },
+  {
+    "t_end_s": 0.85,
+    "nodes": 307,
+    "iterations": 99,
+    "converged": true,
+    "cost": 145.33029854123328,
+    "stopping_criterion": 8.21710613276742e-7,
+    "wall_clock_s": 4697.944797976001,
+    "marker_rms_m": 0.046837589364288994
+  }
+]
