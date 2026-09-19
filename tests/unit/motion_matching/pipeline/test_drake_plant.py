@@ -106,7 +106,7 @@ def test_drake_ik_frame0_matches_setup_parity() -> None:
 
 
 def test_drake_matching_plant_alias_module() -> None:
-    from src.shared.python.motion_matching.pipeline.plants.drake import (
+    from src.engines.physics_engines.drake.python.matching_plant import (
         DrakeMatchingPlant as DrakeAlias,
     )
     from src.shared.python.motion_matching.pipeline.plants.drake_plant import (

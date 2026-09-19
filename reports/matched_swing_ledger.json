@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T00:59:03Z",
+  "generated_at": "2026-09-19T02:11:59Z",
   "rows": [
     {
       "acceptance": null,
@@ -430,6 +430,92 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
       "sha256": "3f0a0809ba61c2dfa5a17c1c67f905b157c71f7c9a5fa8c880c117d6f2890d1d"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3819772131450465,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 381.98 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.007764955644425228,
+            "name": "max_closure_residual_m",
+            "reason": "closure residual 7.76 mm > 5.00 mm",
+            "status": "failed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 4.24] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": null,
+            "name": "open_loop_replay",
+            "reason": "missing open-loop replay artifact",
+            "status": "missing",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "collocation_defect",
+            "reason": "missing per-node collocation defect artifact",
+            "status": "missing",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "stabilized_replay",
+            "reason": "missing stabilized replay artifact",
+            "status": "missing",
+            "threshold": 0.04,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/ik_playback.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/dynamics_record.npz"
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": 326.22837022697786,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.3819772131450465
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json",
+      "sha256": "37d329cbfe296a5118626cf9176160f604346e08f57d43f6de69f6ebb87c2587"
     },
     {
       "acceptance": null,
@@ -2896,5 +2982,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 91
+  "total_receipts": 92
 }
