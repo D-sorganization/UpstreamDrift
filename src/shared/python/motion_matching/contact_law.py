@@ -22,6 +22,9 @@ from numpy.typing import NDArray
 
 Array: TypeAlias = NDArray[np.float64]
 
+CONFORMANCE_VERSION: str = "1.0.0"
+"""Version of the shared contact law and grip closure conformance specification (MS-72)."""
+
 
 @dataclass(frozen=True)
 class ContactParameters:
@@ -200,6 +203,7 @@ def contact_parity_report(
                 float(np.linalg.norm(other.friction_force_n - base.friction_force_n)),
             )
     return {
+        "conformance_version": CONFORMANCE_VERSION,
         "reference": reference,
         "states": len(states),
         "penetrating_states": penetrating,
