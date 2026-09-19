@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T16:49:35Z",
+  "generated_at": "2026-09-19T18:47:50Z",
   "rows": [
     {
       "acceptance": null,
@@ -2739,6 +2739,101 @@
       "acceptance": {
         "gates": [
           {
+            "measured": 0.046837589364288994,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 46.84 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.025663229287031245,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 25.66 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0643072363103632,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 64.31 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.05259998859597353,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.1615901020914645,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.1616 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1139.6409577730308,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.01719458026964854,
+            "name": "max_penetration_m",
+            "reason": "penetration 17.2 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 2.16] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Barrier-reduced same-integrator G1 continuation (RK45 rtol 1e-6 solve and replay, range-barrier weight 100, trail-side effort bounds raised) from driver_g1_rtol6/stage_0.60s.npz: 0.85 s stage CONVERGED (99 iterations, cost 145.3) and rollout == replay at 46.8 mm whole. Still rejected at G1 (whole 46.8 > 25 mm, early 25.7 > 12, terminal 64.3 > 35, yaw 9.3 deg > 3, penetration 17.2 > 10 mm, weight fraction min 0). Best full-G1-horizon dynamic candidate to date; diagnostic evidence for MS-107.",
+        "source": "evidence/matched/driver_g1_crocoddyl_rk45_b100/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45_b100/candidate.npz"
+      },
+      "candidate_sha": "77376d5fc4b2c7f9694749b3da5bc14366cb78bdd086b5ec1cafbc42e910cfc7",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_b100/receipt.json",
+      "sha256": "864c23c7a921be842d92ee46b354c1b1e5393586d853c98317c6ebf5f2e614d4"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
             "measured": 0.1235360188278201,
             "name": "whole_marker_rmse_m",
             "reason": "whole RMSE 123.54 mm > 25.00 mm",
@@ -2982,5 +3077,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 92
+  "total_receipts": 93
 }
