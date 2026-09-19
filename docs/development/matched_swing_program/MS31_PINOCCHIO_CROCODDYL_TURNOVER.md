@@ -136,7 +136,8 @@ Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
 
 1. **(done 2026-09-19, rejected at 46.8 mm) MS-107 barrier-reduced G1**: the
    0.85 s stage now converges with `--range-barrier-weight 100` and the raised
-   trail-side bounds (both are now the repo defaults / CLI flag). Remaining
+   trail-side bounds (the bounds are now the repo defaults; the barrier weight
+   is the `--range-barrier-weight` flag, default still 1e3). Remaining
    G1 gap is 46.8 -> 25 mm whole, 25.7 -> 12 early, 64.3 -> 35 terminal,
    yaw 9.3 -> 3 deg, penetration 17.2 -> 10 mm, weight-fraction floor. Next
    receipts, one lever each, all from `driver_g1_rtol6_trail_b100/stage_0.85s.npz`
