@@ -654,3 +654,46 @@ across four repositories. A pull request number cannot collide.
 3. **Lease before edit**: Every agent must check for active claims or leases on an issue before starting implementation and post its own claim/lease to prevent concurrent duplicate work.
 
 <!-- END FLEET-MANAGED: agent-lanes -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: headless-execution -->
+
+## 🖥️ Headless Execution: Never Launch GUI Processes
+
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/AGENTS.md.
+
+Agents run unattended on shared workstations and runners. A window opened by an
+agent has no one to close it, blocks the process that spawned it, and — on
+Windows — can bind against a mismatched OpenSSL that the launching app placed on
+`PATH` (Codex's runtime bundles poppler with OpenSSL 3.6; Python ships 3.5; the
+result is a `CRYPTO_calloc` "Entry Point Not Found" dialog that hangs the
+session). These rules apply to every agent and every automation.
+
+- **Never launch `pythonw.exe`, `*.pyw`, `Start-Process` on a GUI script, a
+  `.lnk` shortcut, or a bare GUI entry point.** Always use `python.exe` /
+  `python3` with the module or script invoked explicitly.
+- **Qt is always offscreen.** Set `QT_QPA_PLATFORM=offscreen` (and
+  `PYTEST_QT_API=pyqt6` where the repo uses pytest-qt) before importing PyQt6
+  or PySide6, whether under pytest or a direct script.
+- **Matplotlib is always `Agg`.** Set `MPLBACKEND=Agg` and a writable
+  `MPLCONFIGDIR` for any run that imports matplotlib.
+- **Exercise GUI code through tests and probes, not by launching the app.** A
+  launcher's `main()` with a real `QApplication` is not a valid smoke test; use
+  the repo's offscreen test lane, or the `core.py`/`gui.py` split the repo
+  convention mandates, and skip cleanly when PyQt6 cannot load.
+- **Never modify the DLL search path or the launching app's runtime** to work
+  around a GUI failure. Report the failure with the exact dialog text and stop.
+- **Native/CUDA/OpenGL windows count as GUI.** MuJoCo viewers, `mjviewer`,
+  pygame windows and OpenGL contexts must be driven with their headless
+  backends (`MUJOCO_GL=egl`/`osmesa`, `SDL_VIDEODRIVER=dummy`) or not at all.
+
+Canonical headless prefix (PowerShell):
+
+```powershell
+$env:QT_QPA_PLATFORM='offscreen'; $env:MPLBACKEND='Agg'; $env:PYTEST_QT_API='pyqt6'
+python -m pytest -q <tests>
+```
+
+<!-- END FLEET-MANAGED: headless-execution -->
