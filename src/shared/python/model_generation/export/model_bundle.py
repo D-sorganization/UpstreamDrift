@@ -203,26 +203,9 @@ class ModelBundle:
                 zf.writestr(f"meshes/{mesh_rel_path}", mesh_bytes)
 
 
-def export_model_bundle(
-    spec_bytes: bytes,
-    incomplete_physics_reason: str | None = None,
-) -> ModelBundle:
-    """Generate an engine-neutral ModelBundle from specification bytes.
-
-    Preconditions:
-        spec_bytes must be valid JSON matching full-body specification.
-    """
-    if not isinstance(spec_bytes, (bytes, bytearray)):
-        raise TypeError("spec_bytes must be bytes")
-
-    spec = json.loads(spec_bytes)
-    if not isinstance(spec, dict) or "coordinate_order" not in spec:
-        raise ValueError("Invalid full-body specification")
-
-    body_links = {body["name"]: f"body_{i}" for i, body in enumerate(spec["bodies"])}
-    if len(body_links) != len(spec["bodies"]) or "world" not in body_links:
-        raise ValueError("Invalid specification body inventory")
-
+def _build_body_and_joint_primitives(
+    spec: dict[str, Any], body_links: dict[str, str]
+) -> tuple[list[Link], list[Joint], list[str]]:
     links: list[Link] = [
         Link(name=link_name, inertia=Inertia(0.0, 0.0, 0.0, mass=0.0))
         for link_name in body_links.values()
@@ -244,7 +227,15 @@ def export_model_bundle(
         spec["coordinate_order"]
     ):
         raise ValueError("Coordinate inventory order mismatch with specification")
+    return links, joints, coordinates
 
+
+def _build_solid_links(
+    spec: dict[str, Any],
+    body_links: dict[str, str],
+    links: list[Link],
+    joints: list[Joint],
+) -> dict[str, str]:
     solid_links: dict[str, str] = {}
     for body in spec.get("bodies", []):
         for solid in body.get("solids", []):
@@ -271,7 +262,15 @@ def export_model_bundle(
                     dynamics=JointDynamics(0.0, 0.0),
                 )
             )
+    return solid_links
 
+
+def _build_frame_and_contact_links(
+    spec: dict[str, Any],
+    body_links: dict[str, str],
+    links: list[Link],
+    joints: list[Joint],
+) -> tuple[dict[str, str], dict[str, dict[str, Any]]]:
     frame_links: dict[str, str] = {}
     for frame in spec.get("frames", []):
         name = f"frame_{len(frame_links)}"
@@ -315,13 +314,22 @@ def export_model_bundle(
                 "radius_m": radius,
                 "position_m": pos,
             }
+    return frame_links, contact_spheres
 
+
+def _create_sidecar_and_manifest(
+    spec: dict[str, Any],
+    spec_bytes: bytes,
+    urdf_xml: str,
+    body_links: dict[str, str],
+    solid_links: dict[str, str],
+    frame_links: dict[str, str],
+    contact_spheres: dict[str, dict[str, Any]],
+    incomplete_physics_reason: str | None,
+) -> tuple[dict[str, Any], ModelBundleManifest]:
     closure = spec.get("closure", {})
-    xml = URDFWriter(expand_composite_joints=False).write(
-        "full_body_golf", links, joints
-    )
     model_sha = hashlib.sha256(spec_bytes).hexdigest()
-    urdf_sha = hashlib.sha256(xml.encode("utf-8")).hexdigest()
+    urdf_sha = hashlib.sha256(urdf_xml.encode("utf-8")).hexdigest()
 
     sidecar = {
         "schema_version": 1,
@@ -357,6 +365,48 @@ def export_model_bundle(
         requires_sidecar=True,
         incomplete_physics_status=incomplete_physics_reason,
         capability_losses=["bare_urdf_lacks_closure_contacts_muscles"],
+    )
+    return sidecar, manifest
+
+
+def export_model_bundle(
+    spec_bytes: bytes,
+    incomplete_physics_reason: str | None = None,
+) -> ModelBundle:
+    """Generate an engine-neutral ModelBundle from specification bytes.
+
+    Preconditions:
+        spec_bytes must be valid JSON matching full-body specification.
+    """
+    if not isinstance(spec_bytes, (bytes, bytearray)):
+        raise TypeError("spec_bytes must be bytes")
+
+    spec = json.loads(spec_bytes)
+    if not isinstance(spec, dict) or "coordinate_order" not in spec:
+        raise ValueError("Invalid full-body specification")
+
+    body_links = {body["name"]: f"body_{i}" for i, body in enumerate(spec["bodies"])}
+    if len(body_links) != len(spec["bodies"]) or "world" not in body_links:
+        raise ValueError("Invalid specification body inventory")
+
+    links, joints, _ = _build_body_and_joint_primitives(spec, body_links)
+    solid_links = _build_solid_links(spec, body_links, links, joints)
+    frame_links, contact_spheres = _build_frame_and_contact_links(
+        spec, body_links, links, joints
+    )
+
+    xml = URDFWriter(expand_composite_joints=False).write(
+        "full_body_golf", links, joints
+    )
+    sidecar, manifest = _create_sidecar_and_manifest(
+        spec,
+        spec_bytes,
+        xml,
+        body_links,
+        solid_links,
+        frame_links,
+        contact_spheres,
+        incomplete_physics_reason,
     )
 
     bundle = ModelBundle(
