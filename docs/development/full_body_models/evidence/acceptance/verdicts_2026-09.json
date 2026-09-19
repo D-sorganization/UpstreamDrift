@@ -554,5 +554,70 @@
     ],
     "qualification_note": "Decoupled IK + inverse-dynamics allocation (scripts/match_pinocchio_c3d.py). Kinematic fit only; no forward-replay metrics in the receipt. Evaluated on the kinematic metrics against G3 for the record.",
     "source": "evidence/matched/iron_full_pinocchio/reevaluation.json"
+  },
+  "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/receipt.json": {
+    "horizon": "G1",
+    "is_physically_accepted": false,
+    "status": "REJECTED",
+    "gates": [
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.025,
+        "measured": 0.1235360188278201,
+        "unit": "m",
+        "reason": "whole RMSE 123.54 mm > 25.00 mm"
+      },
+      {
+        "name": "early_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.012,
+        "measured": 0.04850729028310768,
+        "unit": "m",
+        "reason": "early RMSE 48.51 mm > 12.00 mm"
+      },
+      {
+        "name": "terminal_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.035,
+        "measured": 0.2331304673300411,
+        "unit": "m",
+        "reason": "terminal RMSE 233.13 mm > 35.00 mm"
+      },
+      {
+        "name": "club_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.06,
+        "measured": 0.22530596222439722,
+        "unit": "m",
+        "reason": "club RMSE 225.31 mm > 60.00 mm"
+      },
+      {
+        "name": "pelvis_yaw_rmse_rad",
+        "status": "failed",
+        "threshold": 0.05236,
+        "measured": 0.06353867025331546,
+        "unit": "rad",
+        "reason": "pelvis yaw RMSE 0.0635 rad > 0.0524 rad"
+      },
+      {
+        "name": "max_normal_force_n",
+        "status": "passed",
+        "threshold": 2354.4,
+        "measured": 1267.8446438406743,
+        "unit": "N",
+        "reason": ""
+      },
+      {
+        "name": "max_penetration_m",
+        "status": "failed",
+        "threshold": 0.01,
+        "measured": 0.01719458026964854,
+        "unit": "m",
+        "reason": "penetration 17.2 mm > 10.0 mm"
+      }
+    ],
+    "qualification_note": "Same-integrator G1 continuation (RK45 rtol 1e-6 on both solve and replay) from stage_0.60s.npz: rollout == replay at 123.5 mm whole; 0.85 s stage not converged, cost dominated by the human-range barrier. Rejected; diagnostic evidence for MS-107.",
+    "source": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/reevaluation.json"
   }
 }
