@@ -214,6 +214,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR referencing Closes #10362, enable auto-merge, release lease.
 - **Evidence:** docs/shared_tools/divergence_inventory.v1.json; tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py; tests/fixtures/reference_calibration/run_checks.py.
 
+### DL-#10352 · Shared Contact Law and Grip Closure Conformance (MS-72)
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10352 (MS-72, epic #10363)
+- **Branch:** feat/10352-contact-closure-conformance
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/contact_law.py; docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md; tests/integration/cross_engine/test_contact_closure_conformance.py; tests/integration/cross_engine/divergence_registry.yaml
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at 01c5ef0c6 (SELF; 10 contact closure conformance tests pass; frontmatter tolerance loading verified; ruff and mypy clean)
+- **Summary:** Formalized shared contact law (Hunt-Crossley compliant normal force with non-tensile clipping and regularized friction) and 6-DOF dual-grip spatial weld closure contracts across engines. Versioned via CONFORMANCE_VERSION 1.0.0 and registered divergences in divergence_registry.yaml.
+- **Next step:** Complete pre-commit checks, push branch, open PR referencing Closes #10352, release lease.
+- **Evidence:** tests/integration/cross_engine/test_contact_closure_conformance.py; docs/development/matched_swing_program/CONTACT_CLOSURE_CONFORMANCE.md.
+
 ### DL-#10381 · Pinocchio G1 Qualification and Program Truth Reset (MS-107)
 
 - **State:** in_progress
