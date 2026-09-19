@@ -1,5 +1,22 @@
 # SPEC.md — Repository Specification Document
 
+## Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading (MV-05, #10481)
+
+Establishes managed subprocess lifecycle and socket discovery for interactive 3D viewers alongside an extensible native viewer registry:
+- **Viewer Process Lifecycle (`src/shared/python/motion_matching/viewer_lifecycle.py`)**:
+  - `ViewerProcessManager`: Managed background process supervision, port readiness polling with timeout (`wait_for_port`), existing listener detection without collision (`reuse_existing`), process ownership tracking (strictly refuses to terminate unowned processes started externally), CORBA port 12321 protection, dynamic MeshCat URL parsing (`resolve_meshcat_url`), and premature exit crash diagnostics.
+- **Native Viewers Registry (`src/shared/python/motion_matching/native_viewers.py`)**:
+  - Centralized registry `open_in_native_viewer(candidate, engine, config)` supporting `mujoco`, `meshcat`, `gepetto`, `opensim`, and `matlab`.
+  - Fail-closed error contract (`ViewerUnavailableError`) providing clear, actionable package installation hints when underlying SDKs are missing.
+  - `ViewerLaunchConfig` validating playback speed, loop flags, frame stride, and view modes (`static`, `fitted`, `native`).
+- **Model Bundle Extraction & Directory Ingestion (`src/shared/python/model_generation/export/model_bundle.py`)**:
+  - `ModelBundle.extract_to(target_dir)` unbundles canonical URDF, sidecar, specification, and visual/collision mesh assets into target directories.
+  - `load_model_bundle` supports direct directory loading and extracts embedded mesh asset dictionaries from zip archives.
+- **Simulation Viewer CLI (`scripts/launch_simulation_viewer.py`)**:
+  - Supports `--model-bundle`, `--urdf`, `--view-mode`, `--speed`, `--stride`, `--loop`, `--output-html`, and backend availability verification (`--check-only`).
+- **Tour Matching Viewer GUI (`src/tools/tour_matching_viewer/gui.py`)**:
+  - Adds `_open_native_btn` invoking `open_in_native_viewer` with graphical notification dialogs and graceful missing dependency warnings.
+
 ## MuJoCo Candidate Replay Compatibility and Crocoddyl B100 Evidence (MS-21, #10336)
 
 Extends MuJoCo candidate replay pipeline for modern engine runtime compatibility and optimal control horizon standards:
@@ -26,6 +43,7 @@ Implements the official OpenSim inverse kinematics pipeline processing tour capt
 - **CLI & Integration (`cli.py`, `src/shared/python/motion_matching/pipeline/plants/opensim.py`)**:
   - Exposes `python -m src.engines.physics_engines.opensim.python.tour_matching ik` CLI with full parameterization.
   - Registers `OpenSimPlant` in the shared motion-matching plant abstraction.
+
 
 ## Matched Swing Ledger Horizon Extraction and Drake Ground Support Classification (#10363)
 
