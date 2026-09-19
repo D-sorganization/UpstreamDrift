@@ -23,12 +23,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10435 (PF-05, epic #10430)
 - **Branch:** feat/issue-10435-pf05-smooth-torque-trajectory-optimization
-- **PR:** not created
+- **PR:** #10503
 - **Paths:** src/shared/python/motion_matching/smooth_torque_optimizer.py; tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-19 at HEAD (SELF; 10 unit tests pass in tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py covering known convex analytic optimum, frame-independent baseline comparison with strictly reduced derivative, non-uniform dt and unit-scaling invariance, hard physical constraint enforcement with 8-faceted friction cone and unilateral ground forces, actuator torque rate and power limits, epigraph peak utilization minimization, overlapping sliding windows with zero seam jump, initial/terminal torque continuity clamping, cubic Hermite interpolation validation, and detailed objective breakdown; ruff check clean, ruff format clean, black clean, mypy clean).
 - **Summary:** Implemented SmoothTorqueOptimizer formulating a full-horizon sparse quadratic trajectory optimization over collocation nodes. Couples adjacent nodes via second-order central difference and backward difference rate penalties, enforces 8-faceted friction cone pyramids, unilateral ground reaction forces, contact separation zeroing, actuator torque, torque-rate, and power bounds. Includes epigraph formulation minimizing peak normalized actuator utilization. Supports sliding window optimization with initial torque continuity clamps ensuring zero seam jumps. Provides Hermite spline interpolation for intermediate sample validation and frame-independent baseline comparison.
-- **Next step:** Commit, push branch, create PR with gh CLI, and enable auto-merge.
+- **Next step:** PR #10503 open with auto-merge armed.
 - **Evidence:** src/shared/python/motion_matching/smooth_torque_optimizer.py; tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py.
 
 ### DL-#10434 · Qualify Contact Modes and Native Pinocchio Force Feasibility

@@ -8,7 +8,7 @@
   - `tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py`: 10 comprehensive unit tests covering all 10 acceptance scenarios.
 - Reproduction: `pytest tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py`.
 - Validation: 10 unit tests pass (100%); ruff check clean; ruff format clean; black clean; mypy clean.
-- Next: PR created via GitHub CLI and auto-merge armed.
+- Next: PR #10503 open with auto-merge armed.
 
 ## PF-04 Qualify Contact Modes and Native Pinocchio Force Feasibility (#10434)
 
