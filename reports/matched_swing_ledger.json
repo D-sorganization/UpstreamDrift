@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T20:45:49Z",
+  "generated_at": "2026-09-19T21:43:08Z",
   "rows": [
     {
       "acceptance": null,
@@ -539,6 +539,52 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_fit/receipt.json",
       "sha256": "05dd52ffa1516e222e31e478a15170d57757e55b286636bcf3ba00b48a1cbaf5"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.26215802208491734,
+            "name": "whole_marker_rmse_m",
+            "reason": "OpenSim IK whole RMSE 262.16 mm vs MuJoCo canonical 52.27 mm (delta 209.89 mm > 5.00 mm)",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "dynamics_stage",
+            "reason": "not_run: use moco",
+            "status": "not_run",
+            "threshold": 0.0,
+            "unit": "stage"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik_playback.gif",
+        "mot": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik.mot",
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/candidate.npz"
+      },
+      "candidate_sha": "f81216e8eb6a847081215eb5323b1b4e72a129a31d992ac7175f31628a1bf1d4",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08913317524057322
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json",
+      "sha256": "3f1bb4e335b40ebfa2b90ae59db518b9d28a927fc5076e7e2127926a2d313fc5"
     },
     {
       "acceptance": null,
@@ -3042,7 +3088,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/receipt.json",
-      "sha256": "c694be090307e3485b2ffc6c9b0232ef129230cb4972638e18cc6f1f6b965db2"
+      "sha256": "39b33b37b30ac5bfe72594951d97d60805585c5260ef2b14367a3fa6ed485778"
     },
     {
       "acceptance": {
@@ -3291,5 +3337,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 94
+  "total_receipts": 95
 }
