@@ -31,18 +31,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** PR #10500 created; auto-merge enabled.
 - **Evidence:** tests/unit/motion_matching/test_mujoco_candidate_replay.py; evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/receipt.json.
 
+### DL-#10340 · OpenSim IK on Shared Document With Validity Policy and Shared Receipt
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #10340 (MS-41, epic #10363)
+- **Branch:** feat/10340-opensim-document-ik
+- **PR:** #10489 (merged)
+- **Paths:** src/engines/physics_engines/opensim/python/full_body_osim.py; src/engines/physics_engines/opensim/python/tour_matching/marker_map.py; src/engines/physics_engines/opensim/python/tour_matching/document_ik.py; src/engines/physics_engines/opensim/python/tour_matching/cli.py; src/shared/python/motion_matching/pipeline/plants/opensim.py; src/shared/python/motion_matching/pipeline/plant.py; src/shared/python/motion_matching/pipeline/plants/**init**.py; docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/; reports/matched_swing_ledger.json; tests/opensim/test_document_ik.py; tests/unit/motion_matching/test_full_body_osim.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (Full 654-frame OpenSim IK executed in 50s on ControlTower; receipt.json validated; 6/6 native tests pass; 7 unit tests pass; architecture budget clean; ruff/black clean).
+- **Summary:** Executed OpenSim InverseKinematicsTool on the exported anthropometric document model (full_body_spec_anthro_driver.json / full_body_anthro_driver.osim) with marker weights from MARKER_VALIDITY_POLICY (MS-04). Implemented OpensimMatchingPlant (reporting dynamics not_run: use moco) and registered in plant registry. Generated evidence package {receipt.json, ik.mot, candidate.npz, ik_playback.gif} under docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ and indexed in reports/matched_swing_ledger.json.
+- **Next step:** PR #10489 merged.
+- **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json; reports/matched_swing_ledger.json.
+
 ### DL-#10480 · Reuse Shared Physical-Time Playback Across Qt React and Native Viewers
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10480 (MV-04, epic #10476)
 - **Branch:** feat/10480-physical-time-playback
-- **PR:** not created
+- **PR:** #10496 (merged)
 - **Paths:** src/shared/python/motion_matching/playback.py; src/shared/python/motion_matching/playback_adapters.py; src/tools/tour_matching_viewer/gui.py; tests/unit/motion_matching/test_physical_playback.py; tests/unit/motion_matching/test_playback_adapters.py; tests/unit/tools/test_tour_matching_viewer_playback.py
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-19 at HEAD (22 unit tests pass across physical_playback, playback_adapters, tour_matching_viewer_playback, and combo; ruff clean; Law of Demeter zero new violations; DRY gate clean; divergence inventory updated; architecture budget OK).
 - **Summary:** Reuses shared Tools playback transport (`rate_of_closure.simulation.playback_transport`) in `PhysicalTimePlayback` so continuous physical time is the evaluation authority instead of naive tick timers. Implemented quaternion SLERP with antipodal sign continuity, Euclidean coordinate LERP for markers and forces, non-uniform timestamp support, dropped-draw handling without timescale drift, and discrete knot stepping. Implemented PlaybackAdapter capabilities matrix across Qt, React (web JSON payload), MeshCat, Gepetto, and MediaVideo (with media-time offset and documented mute reason). Integrated `PlaybackTransportControls` in `TourMatchingViewerWidget` while preserving paused camera manipulation.
-- **Next step:** Commit, push, create PR referencing Closes #10480, and enable auto-merge.
+- **Next step:** PR #10496 merged.
 - **Evidence:** tests/unit/motion_matching/test_physical_playback.py; tests/unit/motion_matching/test_playback_adapters.py; tests/unit/tools/test_tour_matching_viewer_playback.py.
 
 ### DL-#10479 · Bind Saved Candidates to Viewer and Analysis Sessions
