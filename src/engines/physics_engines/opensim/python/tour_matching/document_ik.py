@@ -23,11 +23,11 @@ from src.engines.physics_engines.opensim.python.tour_matching.marker_map import 
     marker_weights,
 )
 from src.engines.physics_engines.opensim.python.tour_matching.trc import (
-    TRCData,
     read_trc,
     write_trc,
 )
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 from src.shared.python.motion_matching.candidate import (
     CANDIDATE_SCHEMA_VERSION,
     CandidateMarkers,
@@ -283,7 +283,7 @@ def _build_receipt_dict(
 def _run_opensim_ik_tool(
     model: Any,
     trc_path: Path,
-    cap: TRCData,
+    cap: TourCapture,
     mot_path: Path,
     out_dir: Path,
     max_frames: int | None = None,
@@ -323,7 +323,7 @@ def _build_and_save_candidate(
     model_path: Path,
     spec_file: Path,
     coord_names: tuple[str, ...],
-    cap: TRCData,
+    cap: TourCapture,
     sol: tuple[np.ndarray, np.ndarray, np.ndarray],
 ) -> Path:
     """Assemble and serialize MatchedSwingCandidate artifact."""
