@@ -5776,6 +5776,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-18 | #10424 | Optimize np.linalg.norm in motion matching pipeline (spec-exempt: micro-optimization) |
 | 2026-09-18 | #10448 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
 | 2026-09-18 | #10381 | Matched-swing ledger fail-closed (self-declared acceptance is UNVERIFIED); G1 Crocoddyl continuation committed as rejected evidence; matched receipts re-evaluated; program docs truth reset |
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
