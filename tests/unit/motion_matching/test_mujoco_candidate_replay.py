@@ -78,6 +78,16 @@ def test_candidate_hash_and_coordinate_validation(tmp_path):
         load_candidate(invalid, hashlib.sha256(invalid.read_bytes()).hexdigest())
 
 
+def test_candidate_loading_supports_n_minus_1_controls(tmp_path):
+    path = SOURCE / "candidate.npz"
+    arrays = load_candidate(path, hashlib.sha256(path.read_bytes()).hexdigest())
+    arrays["u"] = arrays["u"][:-1]
+    shorter = tmp_path / "shorter_u.npz"
+    np.savez(shorter, **arrays)
+    loaded = load_candidate(shorter, hashlib.sha256(shorter.read_bytes()).hexdigest())
+    assert loaded["u"].shape == (len(arrays["time_s"]) - 1, arrays["u"].shape[1])
+
+
 def test_missing_club_population_cannot_be_zero_error_success():
     path = SOURCE / "candidate.npz"
     arrays = load_candidate(path, hashlib.sha256(path.read_bytes()).hexdigest())
@@ -192,7 +202,7 @@ def test_budget_exhaustion_returns_only_completed_frames():
         ReplaySettings(max_evaluations=1),
     )
     assert q.shape == v.shape == (1, 1)
-    assert "budget" in failure
+    assert failure is not None and "budget" in failure
 
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), -1.0, 0.026])
