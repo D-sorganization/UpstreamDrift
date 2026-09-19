@@ -8,8 +8,6 @@ and generates sidecar metadata preserving closure, coordinate order, and frames.
 
 from __future__ import annotations
 
-import hashlib
-import json
 import sys
 import warnings
 from collections.abc import Mapping
@@ -18,7 +16,6 @@ from typing import Any
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from src.shared.python.model_generation.builders.urdf_writer import URDFWriter
 from src.shared.python.model_generation.core.types import (
     Inertia,
     Joint,
@@ -233,70 +230,15 @@ def _attach_contact_spheres(
 
 
 def export_full_body_urdf(model_bytes: bytes) -> tuple[str, dict[str, Any]]:
-    """Export the full-body specification to URDF with 41 scalar joints and contact links."""
-    spec = json.loads(model_bytes)
-    if (
-        spec.get("schema_version") != "full-body-v1"
-        or not isinstance(spec.get("closure"), dict)
-        or not isinstance(spec.get("contact"), dict)
-    ):
-        raise ValueError("Invalid full-body specification for Drake URDF export")
+    """Export the full-body specification to URDF with scalar joints and contact links.
 
-    body_links = {body["name"]: f"body_{i}" for i, body in enumerate(spec["bodies"])}
-    if len(body_links) != len(spec["bodies"]) or "world" not in body_links:
-        raise ValueError("Invalid full-body body inventory")
-
-    links: list[Link] = []
-    joints: list[Joint] = []
-
-    for link_name in body_links.values():
-        links.append(Link(name=link_name, inertia=Inertia(0.0, 0.0, 0.0, mass=0.0)))
-
-    coordinates: list[str] = []
-    for joint in _order_full_body_joints(spec):
-        _build_joint_primitives(
-            joint,
-            body_links[joint["parent"]],
-            body_links[joint["child"]],
-            coordinates,
-            links,
-            joints,
-        )
-
-    if len(coordinates) != len(spec["coordinate_order"]) or set(coordinates) != set(
-        spec["coordinate_order"]
-    ):
-        raise ValueError("Full-body coordinate inventory was not preserved")
-
-    solid_links, frame_links = _attach_solids_and_frames(
-        spec, body_links, links, joints
-    )
-    contact_spheres = _attach_contact_spheres(spec, body_links, links, joints)
-
-    closure = spec["closure"]
-    for suffix in ("a", "b"):
-        if closure[f"body_{suffix}"] not in body_links:
-            raise ValueError(f"Unknown closure body_{suffix}")
-        _origin(closure[f"placement_{suffix}"])
-
-    xml = URDFWriter(expand_composite_joints=False).write(
-        "full_body_golf", links, joints
+    Note:
+        Moved behind the shared model_generation public API in MV-01.
+        Callers should prefer `src.shared.python.model_generation.export.model_bundle.export_model_bundle`.
+    """
+    from src.shared.python.model_generation.export.model_bundle import (
+        export_model_bundle,
     )
 
-    sidecar = {
-        "schema_version": 1,
-        "requires_sidecar": True,
-        "representation": "native-full-body-urdf-v1",
-        "qualification": "full-body URDF export; dynamics via explicit continuous KKT adapter",
-        "model_sha256": hashlib.sha256(model_bytes).hexdigest(),
-        "urdf_sha256": hashlib.sha256(xml.encode("utf-8")).hexdigest(),
-        "coordinate_order": spec["coordinate_order"],
-        "body_links": body_links,
-        "solid_links": solid_links,
-        "frame_links": frame_links,
-        "contact_spheres": contact_spheres,
-        "closure": closure,
-        "gravity_m_s2": spec["gravity_m_s2"],
-        "limit_semantics": "restore-unbounded-before-dynamics",
-    }
-    return xml, sidecar
+    bundle = export_model_bundle(model_bytes)
+    return bundle.urdf_xml, bundle.sidecar or {}

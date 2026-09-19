@@ -1,5 +1,23 @@
 # Current Matching Continuation Handoff
 
+## MV-01 Qualify Shared URDF Bundles and Numeric Precision (#10477)
+
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10477-urdf`.
+- Branch: `feat/10477-urdf-bundle-precision`. Base HEAD: `origin/main` (`5347cba0f4378cd72a6e8afea9fb27c8bfe5db75`).
+- Lease: acquired `antigravity-10477-mv01` on issue #10477.
+- Development-log entry: `DL-#10477`.
+- Changes:
+  - `src/shared/python/model_generation/builders/urdf_writer.py`: Deterministic 17g float serialization (`_format_float`), eliminating lossy `6g`/`4g` round-trip drift.
+  - `src/shared/python/model_generation/export/bundle_manifest.py`: `ModelBundleManifest` with SHA-256 integrity checksums and coordinate validation.
+  - `src/shared/python/model_generation/export/model_bundle.py`: `ModelBundle` container and export/import helpers with path traversal defense.
+  - `src/engines/physics_engines/drake/python/full_body_urdf.py`: Updated `export_full_body_urdf` to write bundle manifest and zip archive.
+  - `tests/unit/model_generation/test_urdf_precision_bundle.py`: 7 tests covering precision, tamper resistance, zip extraction, and coordinate ordering.
+  - `tests/integration/test_pinocchio_urdf_bundle_parity.py`: Integration parity test verified against native Pinocchio 4.1.0 in WSL Ubuntu-24.04 (< 1e-12 m transform and < 1e-11 mass matrix parity).
+- Reproduction commands:
+  - Unit tests: `python -m pytest tests/unit/model_generation/test_urdf_precision_bundle.py -v`
+  - Native Pinocchio parity (WSL): `wsl -d Ubuntu-24.04 /home/dieterolson/.venvs/upstream-viewers-10440/bin/python -m pytest tests/integration/test_pinocchio_urdf_bundle_parity.py -v`
+- Next steps: PR #10477, auto-merge, proceed to MV-02 (#10478).
+
 ## MS-21 MuJoCo Replay Continuation (#10336)
 
 Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-codex-10336`.
