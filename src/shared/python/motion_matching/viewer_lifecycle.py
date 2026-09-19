@@ -143,33 +143,7 @@ class ViewerProcessManager:
             self._owned_processes[proc.pid] = proc
 
         if not wait_for_port(host, port, timeout_s=timeout_s, interval_s=interval_s):
-            poll_code = proc.poll()
-            if poll_code is not None:
-                out, err = "", ""
-                try:
-                    out, err = proc.communicate(timeout=0.5)
-                except Exception:
-                    pass
-                if proc.pid in self._owned_processes:
-                    del self._owned_processes[proc.pid]
-                err_detail = err.strip() or out.strip() or f"exit code {poll_code}"
-                raise RuntimeError(
-                    f"Server {name} exited unexpectedly (code {poll_code}): {err_detail}"
-                )
-
-            # Port failed to open in time; terminate spawned process
-            self.stop_server(
-                ViewerEndpoint(
-                    name=name,
-                    host=host,
-                    port=port,
-                    pid=proc.pid,
-                    is_owned=True,
-                )
-            )
-            raise TimeoutError(
-                f"Timed out waiting for {name} server to open port {port} on {host} after {timeout_s}s"
-            )
+            self._handle_startup_timeout(name, host, port, proc, timeout_s)
 
         logger.info(
             "Server %s is ready on %s:%d (PID %s)",
@@ -184,6 +158,42 @@ class ViewerProcessManager:
             port=port,
             pid=proc.pid,
             is_owned=True,
+        )
+
+    def _handle_startup_timeout(
+        self,
+        name: str,
+        host: str,
+        port: int,
+        proc: subprocess.Popen[str],
+        timeout_s: float,
+    ) -> None:
+        """Handle process exit or timeout when waiting for a server port."""
+        poll_code = proc.poll()
+        if poll_code is not None:
+            out, err = "", ""
+            try:
+                out, err = proc.communicate(timeout=0.5)
+            except Exception:
+                pass
+            if proc.pid in self._owned_processes:
+                del self._owned_processes[proc.pid]
+            err_detail = err.strip() or out.strip() or f"exit code {poll_code}"
+            raise RuntimeError(
+                f"Server {name} exited unexpectedly (code {poll_code}): {err_detail}"
+            )
+
+        self.stop_server(
+            ViewerEndpoint(
+                name=name,
+                host=host,
+                port=port,
+                pid=proc.pid,
+                is_owned=True,
+            )
+        )
+        raise TimeoutError(
+            f"Timed out waiting for {name} server to open port {port} on {host} after {timeout_s}s"
         )
 
     def stop_server(
