@@ -1,5 +1,15 @@
 # Current Matching Continuation Handoff
 
+## PF-05 Solve Smooth Low-Effort Torque Histories With Sparse Trajectory Optimization (#10435)
+
+- Branch: `feat/issue-10435-pf05-smooth-torque-trajectory-optimization`, lease `antigravity-ud-10435`, DL-#10435.
+- Changes:
+  - `src/shared/python/motion_matching/smooth_torque_optimizer.py`: Sparse quadratic trajectory optimizer generating smooth low-effort torques over collocation nodes. Enforces physical feasibility (8-faceted friction cone, non-negative normal forces, contact separation zeroing, actuator torque/rate/power limits), epigraph formulation for peak normalized actuator utilization, initial/terminal torque continuity clamps, and overlapping sliding window execution with zero seam jumps. Provides cubic Hermite spline interpolation for intermediate trajectory validation.
+  - `tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py`: 10 comprehensive unit tests covering all 10 acceptance scenarios.
+- Reproduction: `pytest tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py`.
+- Validation: 10 unit tests pass (100%); ruff check clean; ruff format clean; black clean; mypy clean.
+- Next: PR created via GitHub CLI and auto-merge armed.
+
 ## PF-04 Qualify Contact Modes and Native Pinocchio Force Feasibility (#10434)
 
 - Branch: `feat/issue-10434-pf04-qualify-contact-modes-pinocchio-forces`, lease `antigravity-ud-10434`, DL-#10434.
