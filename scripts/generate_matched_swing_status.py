@@ -155,9 +155,7 @@ def _render_progress_matrix(rows: list[dict[str, Any]]) -> list[str]:
     engine_stats["pinocchio"]["status"] = (
         "⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)"
     )
-    engine_stats["drake"]["status"] = (
-        "⚙️ Parity Replay (6e-6 m Drake-MuJoCo setup parity)"
-    )
+    engine_stats["drake"]["status"] = "⚙️ IK 47 mm / tracking 382 mm REJECTED"
     engine_stats["opensim"]["status"] = "⚠️ Staged (Moco track problem under MS-102)"
     engine_stats["simscape"]["status"] = (
         "🏛️ Historical Tour Authority (Simscape lane baseline)"

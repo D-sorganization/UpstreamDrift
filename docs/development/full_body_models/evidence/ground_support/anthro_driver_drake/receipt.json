@@ -1,5 +1,5 @@
 {
-  "backend": "mujoco",
+  "backend": "drake",
   "base_spec_sha256": "174a6cb8dfd7f9347606789c7e6b77f602643e3139590126ac3af94e1f588b42",
   "base_spec_file": "full_body_spec_anthro_driver.json",
   "spec_file": "full_body_spec_hipcal_scaled.json",
@@ -723,7 +723,7 @@
     "lowest_sphere_height_max_m": 0.02856732421932611
   },
   "elapsed_s": 326.22837022697786,
-  "qualification": "kinematic IK and computed-torque tracking milestone on the MuJoCo full-body model (anthropometric geometry (AN-1); unqualified until Simscape parity); not a fit, not acceptance",
+  "qualification": "kinematic IK and computed-torque tracking milestone on the Drake full-body model (anthropometric geometry (AN-1); unqualified until Simscape parity); not a fit, not acceptance",
   "acceptance": {
     "horizon": "G3",
     "is_physically_accepted": false,
