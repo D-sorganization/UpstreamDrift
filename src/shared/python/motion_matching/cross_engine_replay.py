@@ -63,6 +63,19 @@ class CrossEngineReplayConfig:
         if self.tolerance_rad <= 0.0:
             raise ValueError("tolerance_rad must be strictly positive")
 
+    def load_candidate(self) -> Any:
+        """Load candidate as MatchedSwingCandidate, falling back to legacy converter."""
+        from src.shared.python.motion_matching.candidate_convert import (
+            convert_returned81_replay,
+        )
+        from src.shared.python.motion_matching.candidate_io import load_candidate
+
+        p = Path(self.candidate_path)
+        try:
+            return load_candidate(p)
+        except Exception:
+            return convert_returned81_replay(p)
+
 
 @dataclass(frozen=True)
 class StepSizeConvergenceResult:
