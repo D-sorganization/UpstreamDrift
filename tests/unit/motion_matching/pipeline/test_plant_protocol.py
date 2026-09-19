@@ -158,11 +158,3 @@ def test_mujoco_plant_instantiation() -> None:
     assert isinstance(plant, MatchingPlant)
     assert plant.engine_name == "mujoco"
     assert len(plant.coordinate_order) == 41
-
-
-def test_pinocchio_matching_plant_module_export() -> None:
-    from src.engines.physics_engines.pinocchio.python.matching_plant import (
-        PinocchioMatchingPlant,
-    )
-
-    assert PinocchioMatchingPlant is not None

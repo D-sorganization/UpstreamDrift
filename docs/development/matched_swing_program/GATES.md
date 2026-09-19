@@ -3,11 +3,9 @@
 **Author:** Dieter Olson (`agent:local`)  
 **Date:** 2026-09-17  
 **Issue:** MS-01 (#10322), MS-06 (#10327), Epic #10363  
-**Implementation:** `src/shared/python/motion_matching/acceptance.py`
+**Implementation:** `src/shared/python/motion_matching/acceptance_contract.py`
 
 ---
-
-> **Single authority (2026-09-18):** the numerical thresholds in force are the ones coded in `src/shared/python/motion_matching/acceptance.py` (`AcceptanceGates`). Where this document differs, the code wins until MS-100 versions the gates; this document is being aligned.
 
 ## 1. Principles of Acceptance
 
@@ -68,7 +66,7 @@ Evaluates complete cross-engine parity and dual-club coverage across the entire 
 
 ## 3. Evaluation Schema & Validation Commands
 
-Validation is executed programmatically via `src/shared/python/motion_matching/acceptance.py`:
+Validation is executed programmatically via `src/shared/python/motion_matching/acceptance_contract.py`:
 
 ```python
 from src.shared.python.motion_matching.acceptance_contract import (
@@ -83,5 +81,5 @@ if not verdict.passed:
 Run test suite:
 
 ```bash
-pytest tests/unit/motion_matching/test_acceptance.py -v
+pytest tests/unit/motion_matching/test_acceptance_contract.py -v
 ```
