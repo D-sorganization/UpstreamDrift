@@ -23,6 +23,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.marker_map import 
     marker_weights,
 )
 from src.engines.physics_engines.opensim.python.tour_matching.trc import (
+    TRCData,
     read_trc,
     write_trc,
 )
@@ -279,9 +280,87 @@ def _build_receipt_dict(
     return receipt
 
 
+def _run_opensim_ik_tool(
+    model: Any,
+    trc_path: Path,
+    cap: TRCData,
+    mot_path: Path,
+    out_dir: Path,
+    max_frames: int | None = None,
+) -> None:
+    """Configure and execute OpenSim InverseKinematicsTool."""
+    import opensim  # type: ignore[import-not-found]
+
+    end_idx = len(cap.time_s) - 1
+    if max_frames is not None and 0 < max_frames < len(cap.time_s):
+        end_idx = max_frames - 1
+
+    tool = opensim.InverseKinematicsTool()
+    tool.setModel(model)
+    tool.setMarkerDataFileName(str(trc_path))
+    tool.setStartTime(float(cap.time_s[0]))
+    tool.setEndTime(float(cap.time_s[end_idx]))
+    tool.setResultsDir(str(out_dir))
+    tool.setOutputMotionFileName(str(mot_path))
+
+    tasks = tool.getIKTaskSet()
+    weights = marker_weights(is_valid=True)
+    for label in cap.labels:
+        task = opensim.IKMarkerTask()
+        task.setName(label)
+        task.setWeight(float(weights.get(label, 1.0)))
+        task.setApply(True)
+        tasks.cloneAndAppend(task)
+
+    logger.info(
+        "Executing OpenSim InverseKinematicsTool across %d frames...", end_idx + 1
+    )
+    tool.run()
+
+
+def _build_and_save_candidate(
+    out_dir: Path,
+    model_path: Path,
+    spec_file: Path,
+    coord_names: tuple[str, ...],
+    cap: TRCData,
+    sol: tuple[np.ndarray, np.ndarray, np.ndarray],
+) -> Path:
+    """Assemble and serialize MatchedSwingCandidate artifact."""
+    times, q, pred_markers = sol
+    n_calc = len(times)
+    meta = CandidateMetadata(
+        schema_version=CANDIDATE_SCHEMA_VERSION,
+        profile=CandidateProfile.KINEMATIC,
+        engine="opensim",
+        model_name="full_body_anthro_driver",
+        model_sha256=_compute_sha256(model_path),
+        document_sha256=_compute_sha256(spec_file),
+        coordinate_names=coord_names,
+        marker_names=cap.labels,
+    )
+    markers_payload = CandidateMarkers(
+        model_markers_m=pred_markers,
+        target_markers_m=cap.points_m[:n_calc],
+        marker_validity=cap.valid[:n_calc],
+    )
+    candidate = MatchedSwingCandidate(
+        metadata=meta,
+        time_s=times,
+        q=q,
+        markers=markers_payload,
+    )
+    candidate_path = out_dir / "candidate.npz"
+    save_candidate(candidate, candidate_path)
+    return candidate_path
+
+
 @precondition(
-    lambda model_path, trc_path, out_dir, spec_path=None, stride=1, max_frames=None: (
-        bool(model_path and trc_path and out_dir)
+    lambda model_path, trc_path, out_dir, **kwargs: (
+        isinstance(model_path, Path)
+        and model_path.is_file()
+        and isinstance(trc_path, Path)
+        and trc_path.is_file()
     ),
     "Paths required",
 )
@@ -308,88 +387,33 @@ def run_document_ik(
     model = opensim.Model(str(model_path))
     model.initSystem()
 
-    # Identify rotational coordinates
     coord_set = model.getCoordinateSet()
     rotational_mask = [
         coord_set.get(name).getMotionType() == opensim.Coordinate.Rotational
         for name in coord_names
     ]
 
-    end_idx = len(cap.time_s) - 1
-    if max_frames is not None and 0 < max_frames < len(cap.time_s):
-        end_idx = max_frames - 1
-
     mot_path = out_dir / "ik.mot"
-    tool = opensim.InverseKinematicsTool()
-    tool.setModel(model)
-    tool.setMarkerDataFileName(str(trc_path))
-    tool.setStartTime(float(cap.time_s[0]))
-    tool.setEndTime(float(cap.time_s[end_idx]))
-    tool.setResultsDir(str(out_dir))
-    tool.setOutputMotionFileName(str(mot_path))
+    _run_opensim_ik_tool(model, trc_path, cap, mot_path, out_dir, max_frames)
 
-    tasks = tool.getIKTaskSet()
-    weights = marker_weights(is_valid=True)
-    for label in cap.labels:
-        task = opensim.IKMarkerTask()
-        task.setName(label)
-        task.setWeight(float(weights.get(label, 1.0)))
-        task.setApply(True)
-        tasks.cloneAndAppend(task)
-
-    logger.info(
-        "Executing OpenSim InverseKinematicsTool across %d frames...", end_idx + 1
-    )
-    tool.run()
-
-    # Read back ik.mot
     times, q = _load_mot_table(mot_path, coord_names, rotational_mask)
-
-    # Forward marker kinematics
     pred_markers = _forward_marker_positions(model, coord_names, cap.labels, q)
     n_calc = len(times)
-    obs_m = cap.points_m[:n_calc]
-    valid_m = cap.valid[:n_calc]
+    obs_m, valid_m = cap.points_m[:n_calc], cap.valid[:n_calc]
 
-    # Errors & Metrics
     errors = np.linalg.norm(pred_markers - obs_m, axis=-1)
     whole_rmse = float(np.sqrt(np.mean(errors[valid_m] ** 2)))
     seg_rms_dict = segment_rms(cap.labels, errors, valid_m)
 
-    # Save Candidate NPZ
-    meta = CandidateMetadata(
-        schema_version=CANDIDATE_SCHEMA_VERSION,
-        profile=CandidateProfile.KINEMATIC,
-        engine="opensim",
-        model_name="full_body_anthro_driver",
-        model_sha256=_compute_sha256(model_path),
-        document_sha256=_compute_sha256(spec_file),
-        coordinate_names=coord_names,
-        marker_names=cap.labels,
+    candidate_path = _build_and_save_candidate(
+        out_dir, model_path, spec_file, coord_names, cap, (times, q, pred_markers)
     )
-    markers_payload = CandidateMarkers(
-        model_markers_m=pred_markers,
-        target_markers_m=obs_m,
-        marker_validity=valid_m,
-    )
-    candidate = MatchedSwingCandidate(
-        metadata=meta,
-        time_s=times,
-        q=q,
-        markers=markers_payload,
-    )
-    candidate_path = out_dir / "candidate.npz"
-    save_candidate(candidate, candidate_path)
 
-    # Generate playback GIF
     gif_path = out_dir / "ik_playback.gif"
     generate_ik_overlay_gif(
         obs_m, pred_markers, valid_m, times, gif_path, stride=stride
     )
 
-    t_elapsed = time.monotonic() - t_start
-
-    # Assemble and validate receipt
     receipt_dict = _build_receipt_dict(
         spec_file,
         model_path,
@@ -398,9 +422,9 @@ def run_document_ik(
         cap.labels,
         whole_rmse,
         seg_rms_dict,
-        t_elapsed,
+        time.monotonic() - t_start,
     )
-    validated = validate_receipt(receipt_dict)
+    validate_receipt(receipt_dict)
 
     receipt_path = out_dir / "receipt.json"
     with open(receipt_path, "w", encoding="utf-8") as f:
