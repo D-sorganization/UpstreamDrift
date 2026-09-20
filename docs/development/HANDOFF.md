@@ -1,5 +1,17 @@
 # Current Matching Continuation Handoff
 
+## ORG-17 Replace Canonical Estimation Shell With Bounded Estimator Coordinator (#10526)
+
+- Branch: `feat/issue-10526-org17-estimation-workflow`, lease `antigravity-org17`, DL-#10526.
+- Changes:
+  - `src/shared/python/workspace/estimation_workspace.py`: Implemented `EstimationWorkspaceCoordinator`, `EstimationRunConfig`, `EstimationRunResult`, `ParameterPriorConfig`, and `IdentifiabilityGateConfig`.
+  - Wires `solve_single_trial_map`, `IdentifiabilityGateOptions`, parameter priors and bounds, and spline trajectory evaluation into an application service.
+  - Provides fail-closed validation for non-finite cost/trajectories and ill-conditioned systems, with complete provenance persistence round-trips.
+  - `src/shared/python/workspace/__init__.py`: Exported coordinator and dataclasses.
+  - `tests/integration/test_estimation_workspace.py`: 8 integration tests validating capability availability, synthetic parameter recovery, prior regularization, identifiability gating, non-finite cost gating, parameter bounds enforcement, and run provenance serialization roundtrips.
+- Reproduction: `pytest tests/integration/test_estimation_workspace.py --timeout=60`.
+- Next: PR auto-merge and release lease.
+
 ## ORG-01 Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity (#10510)
 
 - Worktree: main checkout, branch `feat/issue-10510-org01-capability-baseline`, lease `antigravity-ud-10510`, DL-#10510.
