@@ -31,9 +31,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** CI auto-merge into main.
 - **Evidence:** tests/integration/test_estimation_workspace.py.
 
-### DL-#10511 · Separate Capability Identity, Maturity, Availability, and Qualification (ORG-02)
+### DL-#10512 · Replace Misleading Launches With Real Tasks or Explicit Nonlaunchable States
 
 - **State:** in_progress
+- **Owner:** local
+- **Issue:** #10512 (ORG-03, epic #10508)
+- **Branch:** feat/issue-10512-org03-launch-truthfulness
+- **PR:** #10536
+- **Paths:** src/config/launcher_manifest.json; src/config/models.yaml; src/launchers/external_tools_adapter.py; src/launchers/launcher_model_handlers.py; src/launchers/launcher_process_manager.py; src/launchers/task_launch_truthfulness.py; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py; ui/public/capability-atlas/graph.json; ui/public/capability-atlas/index.html
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-20 at HEAD (84 launcher unit tests pass; architecture budget clean; file size budget clean; DRY duplication gate clean; agent_context clean; SPEC.md updated).
+- **Summary:** Audited capability launches and replaced misleading launch actions. Simulator prototype marked inspection/demo-only and distinct from qualified solvers; FreeMoCap parametric CLI guarded against zero-argument headless launch with parameter validation and cancellation safety; Video Analyzer placeholder fallback replaced with explicit unavailable provider diagnostic window (\_UnavailableToolWindow); library-only components (swing_optimizer, injury_analysis, pinn_pure_rigid, pinn_hybrid) and dual-shell service previews (canonical_core_estimation, canonical_core_comparison) audited with truthful dispositions, status messages, and next actions; fixed process assignment to Windows job objects for mock/invalid pids; regenerated capability atlas with verified freshness.
+- **Next step:** Pass CI, auto-merge into main, release lease on #10512.
+- **Evidence:** tests/launchers/test_task_launch_truthfulness.py; tests/launchers/test_simulation_guis.py; tests/launchers/test_launcher_process_manager.py; tests/scripts/test_capability_atlas.py.
+
+### DL-#10511 · Separate Capability Identity, Maturity, Availability, and Qualification (ORG-02)
+
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10511 (ORG-02, epic #10508)
 - **Branch:** feat/issue-10511-org02-capability-state-contract
