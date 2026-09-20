@@ -23,13 +23,27 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #10381 (MS-107, epic #10363)
 - **Branch:** feat/10381-crocoddyl-pelvis-yaw-g1
-- **PR:**
+- **PR:** #10599
 - **Paths:** src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py; src/engines/physics_engines/pinocchio/python/crocoddyl_action.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py; SPEC.md; docs/development/DEVELOPMENT_LOG.md
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 at HEAD (19 unit tests pass in tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py, test_crocoddyl_action.py, and test_crocoddyl_problem.py; ruff check clean; black clean; ruff format clean; check_lod clean with 0 violations).
 - **Summary:** Integrated analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver (`_NodeCost`, `ImplicitEulerAction`, `TerminalAction`). Augmented `FitWeights` with validated non-negative `pelvis_yaw: float = 0.0` and `MarkerTargets` with `waist_indices`. Wired exact Gauss-Newton Jacobian ($J_{yaw}^T J_{yaw}$) and configuration gradient ($J_{yaw}^T r_{yaw}$) into node dynamics. Added `--pelvis-yaw-weight` CLI argument to `full_body_fit.py` and updated `cost_breakdown` to include the `pelvis_yaw` term in trajectory receipts. Verified that aligned targets evaluate to zero cost and gradient, analytic gradients match central finite differences, and missing waist markers gracefully no-op.
-- **Next step:** Push branch, open PR with auto-merge, verify CI and auto-merge.
+- **Next step:** Land PR #10599 with auto-merge enabled.
 - **Evidence:** tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py.
+
+### DL-#10431 · Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10431 (PF-01)
+- **Branch:** feat/issue-10431-pf01-fast-matching-evidence-schemas-fixtures
+- **PR:** #10495
+- **Paths:** src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/candidate.py; src/shared/python/motion_matching/candidate_convert.py; src/shared/python/motion_matching/candidate_io.py; src/shared/python/motion_matching/contact_force_allocator.py; src/shared/python/motion_matching/swing_evaluator.py; tests/unit/motion_matching/test_acceptance.py; tests/unit/motion_matching/test_candidate.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_swing_evaluator.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (46 unit tests pass across test_candidate, test_contact_force_allocator, test_swing_evaluator, test_acceptance; ruff clean, black clean).
+- **Summary:** Preserved existing rejected driver/iron fast-matching receipts and candidate artifacts. Extended MatchedSwingCandidate schema, auxiliary blocks (root_forces, contact_modes, grip_wrench), metadata (solver_status, handedness, name_maps), and NPZ converter. Truthfully renamed AllocationObjective.MINIMUM_TRAIL_ARM with backwards-compatible 'trail_zero' parsing, added HARD_ZERO_TRAIL mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios. Updated SwingEvaluator to avoid fabricating impact phases without declared t_events, audit closure translation and rotation separately, and return NaN RMSE for empty marker populations. Added 7 negative acceptance fixtures in test_acceptance covering friction cone violation, torque bound overwrite, missing root histories, coordinate mismatch (44 vs 41), missing club coverage, truncated horizon, and synthetic engine false qualification.
+- **Next step:** Landed in main via PR #10495.
+- **Evidence:** tests/unit/motion_matching/test_candidate.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_swing_evaluator.py; tests/unit/motion_matching/test_acceptance.py.
 
 ### DL-#10350 · Unified Cross-Engine Parity Report
 
@@ -45,9 +59,37 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Shipped in PR #10582.
 - **Evidence:** evidence/matched/driver_g1/parity_report.json; evidence/matched/driver_g1/parity_report.md; tests/unit/motion_matching/test_parity_report.py.
 
-### DL-#10530 · Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows
+### DL-#10533 · Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries
 
 - **State:** in_progress
+- **Owner:** local
+- **Issue:** #10533 (ORG-24, epic #10508)
+- **Branch:** feat/issue-10533-org24-feature-preservation-audit
+- **PR:**
+- **Paths:** src/shared/python/workspace/feature_preservation_audit.py; src/shared/python/workspace/**init**.py; tests/integration/test_feature_preservation_audit.py; docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (11 integration tests pass in tests/integration/test_feature_preservation_audit.py covering all RED and GREEN criteria: missing baseline entries fail closed, corrupted fixture hashes fail closed, alias cycles fail closed, unknown workspace domains fail closed, all 159 baseline capabilities reconciled, 13 golden fixtures verified byte-for-byte, acyclic alias resolution, 5 core workspaces verified, external dependencies/engine qualification verified, saved layouts compatible, full audit report generated and published; ruff check, ruff format, mypy, check_file_size_budget all pass cleanly).
+- **Summary:** Implemented `FeaturePreservationAuditor` providing comprehensive reconciliation, integrity auditing, and disposition freezing for Epic #10508 closeout per issue #10533. Validated that all 159 capabilities from the ORG-01 baseline are preserved without silent removals. Verified byte-exact SHA-256 and file size integrity across all supported preservation fixtures. Confirmed acyclic transitive resolution of legacy aliases (`starting_pose_matcher` -> `motion_target_preview`, `putting_green_gui` -> `putting_green`). Audited 5 core workspaces and confirmed honest physics engine qualifications (#10351, #10353). Generated and published frozen audit disposition report at `docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md`.
+- **Next step:** Push branch, open PR with auto-merge, release lease on #10533.
+- **Evidence:** tests/integration/test_feature_preservation_audit.py; src/shared/python/workspace/feature_preservation_audit.py; docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md.
+
+### DL-#10532 · Validate and Accept Every Enabled Recommended Task Journey Across Shipped Surfaces
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10532 (ORG-23, epic #10508)
+- **Branch:** feat/issue-10532-org23-installed-workspace-journeys
+- **PR:** #10580
+- **Paths:** src/shared/python/workspace/installed_journeys.py; src/shared/python/workspace/**init**.py; tests/integration/test_installed_workspace_journeys.py; src/tools/capture_rig/gui.py
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (9 integration tests pass in tests/integration/test_installed_workspace_journeys.py covering all 6 recommended task journeys across shipped surfaces plus cancellation recovery, dependency failure, and schema corruption rejection; ruff check, ruff format, mypy, bandit, unit tests pass cleanly).
+- **Summary:** Implemented `InstalledWorkspaceJourneysCoordinator` validating and accepting all enabled recommended task journeys across shipped surfaces per ADR-0047 and issue #10532. Covered optical/video import to inspection, model/pose to supported fit, shot to named flight comparison, optimization/training to result, bounded estimation to cross-engine comparison, and global utilities navigation. Enforced failure recovery preserving source media, actionable dependency diagnostics, and rejection of corrupted artifact schemas. Decoupled `CaptureRigWidget.open_in_inspect_targets()` from StepRail action set to preserve contract and fix test suites.
+- **Next step:** Auto-merge PR #10580, release lease on #10532.
+- **Evidence:** tests/integration/test_installed_workspace_journeys.py; src/shared/python/workspace/installed_journeys.py.
+
+### DL-#10530 · Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows
+
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10530 (ORG-22, epic #10508)
 - **Branch:** feat/issue-10530-org22-research-lifecycle
