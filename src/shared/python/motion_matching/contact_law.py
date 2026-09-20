@@ -22,6 +22,9 @@ from numpy.typing import NDArray
 
 Array: TypeAlias = NDArray[np.float64]
 
+CONFORMANCE_VERSION: str = "1.0.0"
+"""Version of the shared contact law and grip closure conformance specification (MS-72)."""
+
 
 @dataclass(frozen=True)
 class ContactParameters:
@@ -74,11 +77,15 @@ class GroundPlane:
 
     def __post_init__(self) -> None:
         n = np.asarray(self.normal, dtype=float)
-        if n.shape != (3,) or not np.isfinite(n).all() or np.linalg.norm(n) < 1e-12:
+        if (
+            n.shape != (3,) or not np.isfinite(n).all() or math.sqrt(n.dot(n)) < 1e-12
+        ):  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
             raise ValueError("Ground normal must be a finite nonzero 3-vector")
         if not math.isfinite(self.height_m):
             raise ValueError("Ground height must be finite")
-        unit = n / np.linalg.norm(n)
+        unit = n / math.sqrt(
+            n.dot(n)
+        )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
         object.__setattr__(
             self, "normal", (float(unit[0]), float(unit[1]), float(unit[2]))
         )
@@ -134,7 +141,9 @@ def sphere_ground_contact(
     magnitude = max(0.0, magnitude)
     normal_force = normal * magnitude
     tangential = velocity - normal * float(normal @ velocity)
-    speed = float(np.linalg.norm(tangential))
+    speed = float(
+        math.sqrt(tangential.dot(tangential))
+    )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
     if speed <= 0.0 or magnitude <= 0.0:
         return ContactSample(penetration, rate, point, normal_force, zero)
     ratio = speed / parameters.transition_velocity_m_s
@@ -193,13 +202,26 @@ def contact_parity_report(
             other = adapters[name](center, velocity, radius)
             normal_diff[name] = max(
                 normal_diff[name],
-                float(np.linalg.norm(other.normal_force_n - base.normal_force_n)),
+                float(
+                    math.sqrt(
+                        (other.normal_force_n - base.normal_force_n).dot(
+                            other.normal_force_n - base.normal_force_n
+                        )
+                    )
+                ),  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
             )
             friction_diff[name] = max(
                 friction_diff[name],
-                float(np.linalg.norm(other.friction_force_n - base.friction_force_n)),
+                float(
+                    math.sqrt(
+                        (other.friction_force_n - base.friction_force_n).dot(
+                            other.friction_force_n - base.friction_force_n
+                        )
+                    )
+                ),  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
             )
     return {
+        "conformance_version": CONFORMANCE_VERSION,
         "reference": reference,
         "states": len(states),
         "penetrating_states": penetrating,

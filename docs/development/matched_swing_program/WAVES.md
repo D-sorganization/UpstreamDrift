@@ -109,3 +109,7 @@ _Objective:_ Continuous automated qualification and final professional release a
 - **MS-106 (#10380):** Professional release gate and verified matched badge.
 - **MS-107 (#10381):** Native automated engine benchmark regression suite.
 - **MS-108 (#10382):** Matched swing program end-to-end release audit.
+
+## Status Refresh 2026-09-18
+
+Merged on `main`: MS-01/02/03/04/05/06/10/11/31/50/84/95 (see PRs above); OG-01..09 (#10404, #10414). Open with PRs: MS-21 (#10448, rejected replay), PF-01..04/06/09 (#10442/#10443/#10445/#10447/#10449/#10451, all conflicting and red). Untouched: MS-12..MS-17, MS-20, MS-30, MS-40..43, MS-51..53, MS-60..62, MS-70..72, MS-80..83, MS-85..87, MS-90, MS-100..112. Wave 1 now leads with MS-107 (Pinocchio G1) and MS-100 (fail-closed gates); see the epic #10363 status section of 2026-09-18.

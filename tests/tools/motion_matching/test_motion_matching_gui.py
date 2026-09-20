@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -128,3 +129,119 @@ def test_get_dockable_ui() -> None:
     window = get_dockable_ui()
     assert window.windowTitle() == WINDOW_TITLE
     assert isinstance(window.centralWidget(), MotionMatchingWidget)
+
+
+def test_engine_selection_from_plant_registry(widget: MotionMatchingWidget) -> None:
+    """MS-82: Engine selection combo lists engines from plant registry."""
+    items = [widget.backend.itemText(i) for i in range(widget.backend.count())]
+    # mujoco must be in the list, along with other registered plant backends
+    assert "mujoco" in items
+    assert len(items) >= 2
+
+
+def test_results_pane_shows_movies_and_metrics(
+    widget: MotionMatchingWidget, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """MS-82: Results pane shows QMovie playback, 5 metrics, badge, and buttons."""
+    # Create fake receipt and playback GIFs
+    receipt = {
+        "capture": "driver",
+        "club": {"name": "driver"},
+        "backend": "mujoco",
+        "address": {
+            "calibrated": {
+                "marker_rms_m": 0.008,
+                "centre_of_mass": {"inside_support_polygon": True},
+            }
+        },
+        "ik": {
+            "marker_rms_m": 0.022,
+            "constrained_ik": {"is_qualified": True, "all_frames_converged": True},
+        },
+        "dynamics": {
+            "root_tracking_rms_m": 0.028,
+            "inside_support_polygon_fraction": 0.92,
+            "backswing_to_1s": {"root_error_max_m": 0.005},
+        },
+    }
+    (tmp_path / "receipt.json").write_text(json.dumps(receipt), encoding="utf-8")
+    (tmp_path / "ik_playback.gif").write_bytes(b"GIF89a")
+    (tmp_path / "tracking_playback.gif").write_bytes(b"GIF89a")
+
+    # Point request to tmp_path using monkeypatch so it is cleanly reverted
+    monkeypatch.setattr(
+        pipeline.MatchRequest, "output_dir", property(lambda self: tmp_path)
+    )
+    req = pipeline.MatchRequest(capture="driver", club="driver")
+    widget._request = req
+
+    widget.tabs.setCurrentIndex(0)
+    widget._on_finished(0)
+
+    # Check metrics
+    metrics = widget.metrics_values()
+    assert metrics["full_capture_ik_rms_mm"] == 22.0
+    assert metrics["address_marker_rms_mm"] == 8.0
+    assert metrics["backswing_root_error_max_mm"] == 5.0
+    assert metrics["whole_run_root_rms_mm"] == 28.0
+    assert metrics["inside_support_polygon_fraction"] == 0.92
+
+    # Check acceptance badge
+    assert widget.acceptance_badge.text() in ("PASSED", "QUALIFIED")
+
+    # Check QMovie playback loaded
+    assert widget.ik_movie is not None
+    assert widget.tracking_movie is not None
+
+    # Check navigation action buttons exist
+    assert widget.open_browser_btn is not None
+    assert widget.open_viewer_btn is not None
+    assert widget.open_browser_btn.text() == "Open in Results Browser"
+    assert widget.open_viewer_btn.text() == "Open in Viewer"
+
+    # Navigation button triggers
+    widget.open_browser_btn.click()
+    assert widget._browser_window is not None
+    widget._browser_window.close()
+
+    widget.open_viewer_btn.click()
+    assert widget._viewer_window is not None
+    widget._viewer_window.close()
+
+    # Cleanup
+    widget.cleanup()
+    assert widget.ik_movie is None
+    assert widget.tracking_movie is None
+
+
+def test_step_failure_updates_ui(widget: MotionMatchingWidget) -> None:
+    """Non-zero exit code updates results label with failure message."""
+    widget.tabs.setCurrentIndex(0)
+    widget._on_finished(2)
+    assert "Step failed with exit code 2" in widget.results.text()
+
+
+def test_extract_five_metrics_and_acceptance_logic() -> None:
+    """Verify verdict transitions for rejected and unclassified receipts."""
+    # Qualified but unconverged -> REJECTED
+    summary_unconverged = {
+        "is_qualified": True,
+        "all_frames_converged": False,
+        "full_capture_ik_rms_mm": 12.0,
+    }
+    metrics, verdict = pipeline.extract_five_metrics_and_acceptance(summary_unconverged)
+    assert verdict == "REJECTED"
+    assert metrics["full_capture_ik_rms_mm"] == 12.0
+
+    # Unqualified -> REJECTED
+    summary_rejected = {
+        "is_qualified": False,
+        "all_frames_converged": True,
+    }
+    _, verdict2 = pipeline.extract_five_metrics_and_acceptance(summary_rejected)
+    assert verdict2 == "REJECTED"
+
+    # None -> UNCLASSIFIED
+    summary_empty = {}
+    _, verdict3 = pipeline.extract_five_metrics_and_acceptance(summary_empty)
+    assert verdict3 == "UNCLASSIFIED"

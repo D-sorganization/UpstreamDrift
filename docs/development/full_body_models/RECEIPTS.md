@@ -17,6 +17,7 @@ Summary provenance, hashes, file references, and execution duration written by `
 | Field                      | Unit     | Meaning                                                                    | Stage    |
 | :------------------------- | :------- | :------------------------------------------------------------------------- | :------- |
 | `backend`                  | string   | Kinematic backend engine used for tracking (mujoco or pink)                | metadata |
+| `engine`                   | string   | Full-body dynamics and plant engine (mujoco, drake, pinocchio)             | metadata |
 | `base_spec_sha256`         | hash     | SHA256 hash of the initial input model specification document              | metadata |
 | `base_spec_file`           | filename | Filename of the input model specification document                         | metadata |
 | `spec_file`                | filename | Filename of the final scaled and calibrated spec document                  | metadata |
