@@ -509,13 +509,12 @@
     {
       "id": "golf_simulation_suite",
       "name": "Golf Simulation Suite",
-      "description": "Prototype visualization and demo inspection suite; not a production physics solver",
+      "description": "Comprehensive golf simulation suite with parameter sweeps and batch runs",
       "category": "simulation",
       "type": "golf_simulation",
       "path": "src/tools/golf_simulation_suite/__main__.py",
       "logo": "golf_logo.svg",
-      "status": "prototype",
-      "maturity": "prototype",
+      "status": "gui_ready",
       "capabilities": ["full_simulation", "parameter_sweep", "batch_runs"],
       "order": 21,
       "web": {
@@ -525,13 +524,12 @@
     {
       "id": "swing_optimizer",
       "name": "Swing Optimizer",
-      "description": "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16",
+      "description": "Trajectory optimization with constraint solving and cost functions",
       "category": "simulation",
       "type": "special_app",
       "path": "src/shared/python/optimization/swing_optimizer.py",
       "logo": "swing_optimizer.svg",
-      "status": "experimental",
-      "maturity": "experimental",
+      "status": "gui_ready",
       "capabilities": [
         "trajectory_optimization",
         "constraint_solving",
@@ -545,13 +543,12 @@
     {
       "id": "injury_analysis",
       "name": "Injury Risk Analysis",
-      "description": "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17",
+      "description": "Joint stress, spinal load, and swing modification analysis for injury prevention",
       "category": "biomechanics",
       "type": "special_app",
       "path": "src/shared/python/injury/injury_risk.py",
       "logo": "injury_analysis.svg",
-      "status": "experimental",
-      "maturity": "experimental",
+      "status": "gui_ready",
       "capabilities": [
         "injury_risk",
         "joint_stress",

@@ -17,93 +17,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10517 · Unified Artifact and Project Context Handoff Between Workspaces
-
-- **State:** in_progress
-- **Owner:** local
-- **Issue:** #10517 (ORG-08, epic #10508)
-- **Branch:** feat/issue-10517-org08-workspace-handoff
-- **PR:** #10542
-- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/artifact_handoff.py; src/shared/python/workspace/project_store.py; tests/unit/workspace/test_artifact_handoff.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (18 unit tests pass across test_artifact_handoff.py, test_project_store.py, test_results_browser.py; ruff check and format clean; check_file_size_budget clean).
-- **Summary:** Extended SessionProjectStore and ProjectMetadata with typed, versioned artifact handoffs (WorkspaceHandoff, ArtifactReference, ArtifactKind, RunMetadata). Enforced Design-by-Contract boundary preconditions (cross-session subject mismatch rejection, frame and schema validation, artifact existence and cryptographic sha256 hash checks before disk write, canceled/failed job qualification invariant). Added migration handling preserving unknown supported fields in older project.json files, atomic durability under interrupted writes, active context selection, and non-destructive run cloning without falsified output evidence. Implemented registered named artifact adapter conversion preserving provenance.
-- **Next step:** Push branch, open PR, enable auto-merge, release lease on #10517, and notify parent orchestrator.
-- **Evidence:** tests/unit/workspace/test_artifact_handoff.py; tests/unit/workspace/test_project_store.py; tests/unit/workspace/test_results_browser.py.
-
-### DL-#10527 · Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces
-
-- **State:** in_progress
-- **Owner:** local
-- **Issue:** #10527 (ORG-18, epic #10508)
-- **Branch:** feat/issue-10527-org18-comparison-indicator-workspace
-- **PR:** #10568
-- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/comparison_indicator_workspace.py; tests/integration/test_comparison_indicator_workspace.py
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (10 integration tests pass in test_comparison_indicator_workspace.py; 23 total workspace integration tests pass; ruff check & format clean; mypy 0 issues; LoD clean; file line budget 447 <= 500 LOC).
-- **Summary:** Implemented `ComparisonIndicatorWorkspaceCoordinator` surfacing `canonical_core_comparison` and `injury_analysis` capabilities across `results_and_compare` and `exercise_analysis` workspace shells. Provides fail-closed validation on physical units, coordinate frame identifiers, timebase sample interval alignment, channel names, and model fidelity invariance (`ModelFidelityLevel` enum rejecting cross-tier comparisons with `IncompatibleArtifactError`). Integrates `CrossEngineComparisonAdapter` delegating trace alignment to `compare_traces` with SHA-256 provenance hashes, and `InjuryIndicatorAdapter` requiring physical load channels (`peak_compression_bw`, `peak_lateral_shear_bw`, `x_factor_stretch`) normalized by body weight without mock fallbacks, stamping every output with non-clinical disclaimers.
-- **Next step:** Push branch, open PR with auto-merge, update issue.
-- **Evidence:** tests/integration/test_comparison_indicator_workspace.py.
-
-### DL-#10515 · Build Task-Oriented Desktop Navigation Over Existing Embedded Tools
-
-- **State:** completed
-- **Owner:** local
-- **Issue:** #10515 (ORG-05, epic #10508)
-- **Branch:** feat/issue-10515-org05-desktop-navigation
-- **PR:** #10539
-- **Paths:** src/launchers/workspace_navigation.py; src/launchers/launcher_layout_manager.py; src/launchers/\_launcher_navigation_ui.py; src/launchers/launcher_ui_setup.py; tests/launchers/test_workspace_navigation.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-20 at HEAD (SELF; 22 unit tests pass in test_workspace_navigation.py; all 42 tests in test_launcher_ui_setup.py pass; all 35 tests in test_launcher_layout_manager.py pass; all 19 tests in test_workspace_tabs.py pass; ruff check, ruff format --check, mypy, check_file_size_budget clean)
-- **Summary:** Built task-oriented desktop navigation over embedded tools (ORG-05). Added 5 primary task workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `ALIAS_MAP` layout migration into `LayoutManager.load_layout` preserving user custom tile scaling, view mode, and dock state. Enforced single-instance tool reuse in `dock_widget_as_tab` and `focus_or_open_tool_tab`. Provided accessible names, keyboard navigation, narrow-window scrolling via `QScrollArea`, return-to-workspace breadcrumbs (`WorkspaceBreadcrumbBar`), and actionable status explanations for missing/unconfigured capabilities (`explain_tool_status`).
-- **Next step:** Pass CI, auto-merge into main, release lease on #10515.
-- **Evidence:** tests/launchers/test_workspace_navigation.py; src/launchers/workspace_navigation.py.
-
-### DL-#10355 · Motion Matching Tile Visual Playback, Standardized Metrics, and Navigation Handoff (MS-82)
-
-- **State:** in_progress
-- **Owner:** local
-- **Issue:** #10355 (MS-82, closes #10106 gap)
-- **Branch:** feat/10355-motion-matching-tile-playback
-- **PR:** pending
-- **Paths:** src/tools/motion_matching/gui.py; src/tools/motion_matching/pipeline.py; src/config/feature_parity.json; docs/development/feature_parity_matrix.md; tests/tools/motion_matching/test_motion_matching_gui.py
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (18 unit tests pass in tests/tools/motion_matching/; 39 parity tests pass in tests/config/feature_parity/; ruff check & format clean).
-- **Summary:** Enhanced the Motion Matching PyQt6 tile to display asynchronous animation playback (`ik_playback.gif` and `tracking_playback.gif`) via `QMovie`, populated five standardized headline metrics (`full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, `inside_support_polygon_fraction`), acceptance verdict badge, and navigation handoffs to the Matched Swing Results Browser and Tour Matching Viewer. Upgraded `tools.motion_matching` in `feature_parity.json` from `gap` to `parity`.
-- **Next step:** Create PR, enable auto-merge, verify merge, and release lease.
-- **Evidence:** tests/tools/motion_matching/test_motion_matching_gui.py, tests/config/feature_parity/test_matrix_freshness.py.
-
-### DL-#10526 · Replace Canonical Estimation Shell With Bounded Estimator Coordinator
-
-- **State:** shipped
-- **Owner:** local
-- **Issue:** #10526 (ORG-17, epic #10508)
-- **Branch:** feat/issue-10526-org17-estimation-workflow
-- **PR:** #10565 (merged)
-- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/estimation_workspace.py; tests/integration/test_estimation_workspace.py
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (8 integration tests pass in test_estimation_workspace.py; ruff check & format clean; file line budget 447 <= 500 LOC; merged to main at 760a8470e).
-- **Summary:** Implemented `EstimationWorkspaceCoordinator` replacing placeholder canonical estimation shells with a bounded application service coordinator. Integrates `solve_single_trial_map`, `IdentifiabilityGateOptions`, parameter priors and bounds, and spline trajectory evaluation. Provides fail-closed validation for non-finite cost/trajectories and ill-conditioned systems, with complete provenance persistence round-trips.
-- **Next step:** Shipped.
-- **Evidence:** tests/integration/test_estimation_workspace.py.
-
-### DL-#10512 · Replace Misleading Launches With Real Tasks or Explicit Nonlaunchable States
-
-- **State:** completed
-- **Owner:** local
-- **Issue:** #10512 (ORG-03, epic #10508)
-- **Branch:** feat/issue-10512-org03-launch-truthfulness
-- **PR:** #10536
-- **Paths:** src/config/launcher_manifest.json; src/config/models.yaml; src/launchers/external_tools_adapter.py; src/launchers/launcher_model_handlers.py; src/launchers/launcher_process_manager.py; src/launchers/task_launch_truthfulness.py; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py; ui/public/capability-atlas/graph.json; ui/public/capability-atlas/index.html
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-20 at HEAD (84 launcher unit tests pass; architecture budget clean; file size budget clean; DRY duplication gate clean; agent_context clean; SPEC.md updated).
-- **Summary:** Audited capability launches and replaced misleading launch actions. Simulator prototype marked inspection/demo-only and distinct from qualified solvers; FreeMoCap parametric CLI guarded against zero-argument headless launch with parameter validation and cancellation safety; Video Analyzer placeholder fallback replaced with explicit unavailable provider diagnostic window (\_UnavailableToolWindow); library-only components (swing_optimizer, injury_analysis, pinn_pure_rigid, pinn_hybrid) and dual-shell service previews (canonical_core_estimation, canonical_core_comparison) audited with truthful dispositions, status messages, and next actions; fixed process assignment to Windows job objects for mock/invalid pids; regenerated capability atlas with verified freshness.
-- **Next step:** Pass CI, auto-merge into main, release lease on #10512.
-- **Evidence:** tests/launchers/test_task_launch_truthfulness.py; tests/launchers/test_simulation_guis.py; tests/launchers/test_launcher_process_manager.py; tests/scripts/test_capability_atlas.py.
-
 ### DL-#10511 · Separate Capability Identity, Maturity, Availability, and Qualification (ORG-02)
 
-- **State:** completed
+- **State:** in_progress
 - **Owner:** local
 - **Issue:** #10511 (ORG-02, epic #10508)
 - **Branch:** feat/issue-10511-org02-capability-state-contract
@@ -117,7 +33,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10510 · Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity
 
-- **State:** completed
+- **State:** in_progress
 - **Owner:** local
 - **Issue:** #10510 (ORG-01, epic #10508)
 - **Branch:** feat/issue-10510-org01-capability-baseline
@@ -131,7 +47,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10521 · Integrate Existing Results Browser Work With Replay, Data, and Export
 
-- **State:** completed
+- **State:** in_progress
 - **Owner:** local
 - **Issue:** #10521 (ORG-13, epic #10508)
 - **Branch:** feat/issue-10521-org13-results-workspace-handoff
@@ -145,7 +61,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10513 · Validate Every Browser, Tauri, and Native Launch Destination
 
-- **State:** completed
+- **State:** in_progress
 - **Owner:** local
 - **Issue:** #10513 (ORG-04, epic #10508)
 - **Branch:** feat/issue-10513-org04-launch-destinations
@@ -156,34 +72,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Established canonical route table `KNOWN_APP_ROUTES` and `isKnownAppRoute` in React UI; implemented browser and Tauri reachability evaluation and matrix generator (`evaluateTileReachability`, `generateReachabilityMatrix`); hardened `resolveTileLaunchAction` to reject unmapped routes with honest blocked/unavailable states; removed invalid web_route from Movement Optimizer model packs and sanitized in `LauncherManifestLoader` so Movement Optimizer resolves cleanly to `native-window`; expanded `test_route_mode_routes_exist_in_react_router` to inspect all loaded tiles from `LauncherManifest.load()` and added `test_every_tile_destination_resolves_authoritatively`.
 - **Next step:** Commit, push, enable auto-merge, and release lease.
 - **Evidence:** ui/src/api/launcherReachability.test.tsx; tests/config/launcher_manifest/test_parity.py.
-
-### DL-#10516 · Apply the Same Workspace Navigation to React and Tauri
-
-- **State:** completed
-- **Owner:** local
-- **Issue:** #10516 (ORG-06, epic #10508)
-- **Branch:** feat/issue-10516-org06-react-workspace-navigation
-- **PR:** #10540
-- **Paths:** ui/src/types/workspaceNavigation.ts; ui/src/api/capabilityAdapter.ts; ui/src/components/layout/WorkspaceNavigation.tsx; ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/pages/WorkspacePage.tsx; ui/src/components/simulation/LauncherDashboard.tsx; ui/src/App.tsx; ui/src/utils/routeTitles.ts; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (SELF; 13 unit tests pass in WorkspaceNavigation.test.tsx; full 94-file 878-test Vitest suite passes; tsc type-check, eslint, vite build pass; WCAG contrast guard passes; file budget clean)
-- **Summary:** Applied task-oriented workspace navigation across React and Tauri (ORG-06). Reused shared catalog metadata for the five primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `WorkspaceSidebar` and `WorkspaceBreadcrumb` within `WorkspaceShell` preserving browser history, bookmarkable task URLs (`/workspaces/:slug`), centralized route titles, and keyboard focus recovery. Created shared `resolveWorkspaceToolAction` capability adapter opening native tools under Tauri/desktop while providing actionable explanations and web alternatives for browser-only users.
-- **Next step:** Commit, push, open PR referencing Fixes #10516, enable auto-merge, and release lease.
-- **Evidence:** ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/components/layout/WorkspaceNavigation.tsx.
-
-### DL-#10514 · Group Engine Dashboards, Exercise Variants, and Repository Shortcuts
-
-- **State:** in_progress
-- **Owner:** local
-- **Issue:** #10514 (ORG-07, epic #10508)
-- **Branch:** feat/issue-10514-org07-model-variant-grouping
-- **PR:** #10541
-- **Paths:** src/config/models.yaml; src/launchers/exercise_dashboard.py; src/launchers/launcher_model_handlers.py; src/shared/python/config/**init**.py; src/shared/python/config/model_pack_manifest.py; src/shared/python/config/model_registry.py; src/shared/python/config/model_variant_grouping.py; tests/config/test_model_variant_grouping.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (6 unit tests pass in test_model_variant_grouping.py, 183 tests pass across adjacent suites; ruff check clean; ruff format clean; line budget check clean).
-- **Summary:** Implemented `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection` in `src/shared/python/config/model_variant_grouping.py` to project 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices without dropping any provider assets underneath. Preserved strict DbC on engine selection (never silently substitutes another engine). Added name collision protection across distinct canonical identities. Implemented `resolve_shortcut` mapping `biomech_sit_to_stand` (never falls back to gait) and `biomech_gait` to `biomech_exercise`, engine dashboards (`drake_dashboard`, `mujoco_dashboard`, `pinocchio_dashboard`) to engine advanced modes, and `movement_optimizer` / `tools_movement_optimizer` to unified task with #9406 authority resolution. Updated `SharedRepoHandler` with `get_missing_checkout_diagnostic` to emit actionable diagnostics when sibling repos are missing. Dynamicized exercise names in `exercise_dashboard.py`.
-- **Next step:** Commit with conventional commit, push branch, open PR, and arm auto-merge.
-- **Evidence:** tests/config/test_model_variant_grouping.py; tests/config/test_tile_paths_resolve.py; tests/unit/config/test_model_pack_manifest.py; tests/launchers/test_launcher_model_handlers.py.
 
 ### DL-#10482 · Expose Real Forces, Torques, and Explicit Counterfactual Semantics
 

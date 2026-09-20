@@ -127,3 +127,15 @@
 ## 2024-05-21 - [Optimize Norm Calculation in Motion Retargeting]
 **Learning:** In the motion capture retargeting pipeline (e.g., `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py`), calling `np.linalg.norm(pos_error)` on small 1D arrays (like 3D position errors) incurs significant overhead due to NumPy's internal dispatching and instance checks. Replacing it with `math.sqrt(pos_error.dot(pos_error))` bypasses this overhead and is significantly faster (~2.5x).
 **Action:** Replace `np.linalg.norm(pos_error)` with `math.sqrt(pos_error.dot(pos_error))` for small 1D array magnitude calculations where possible.
+
+## 2026-09-20 - Inline operations in mathematical substitutions
+**Learning:** Using Python walrus operators `:=` inline as arguments to mathematical functions (like `np.einsum('...', diff := (a-b), diff)`) violates formatting and stylistic standards and creates syntax errors. Even if technically valid in modern Python, it fails strict linters, drops code readability (which is explicitly against the boundaries), and leads to unexpected CI failures.
+**Action:** When refactoring calculations to avoid intermediate arrays by reusing terms, always assign the term on a separate line (e.g., `diff = a - b`) before invoking the substitution function like `np.einsum('...', diff, diff)`.
+
+## 2026-09-20 - SPEC.md row constraints
+**Learning:** `SPEC.md` requires that changelog insertions use either an actual GitHub PR number (e.g., `#1234`) or `n/a` for the second column. Using a placeholder like `#<pr>` will cause `scripts/ci/check_spec_changelog_duplicates.py` to raise a `row contract violated` error.
+**Action:** Always use `n/a` in the second column of the `SPEC.md` changelog when modifying it during offline testing or before a pull request number is assigned.
+
+## 2026-09-20 - Committing temporary files
+**Learning:** Generating utility scripts (like `patch_all.py` or `run_tests_opensim.sh`) and then tracking them into the branch breaks the `repo-structure-gates` check.
+**Action:** Always delete shell scripts and Python utility files used to modify the repo before checking `git status` and invoking `git commit`. Use `git ls-files --others --exclude-standard` to verify the working tree is clean.
