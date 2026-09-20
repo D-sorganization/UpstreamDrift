@@ -1,5 +1,21 @@
 # Current Matching Continuation Handoff
 
+## ORG-22 Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows (#10530)
+
+- Branch: `feat/issue-10530-org22-research-lifecycle`, lease `antigravity-ud-10530`, DL-#10530.
+- Changes:
+  - `src/config/research_capability_lifecycle.py`: Implemented `ResearchCapabilityLifecycleManager`, `IncompleteCapabilityRecord`, `CLINotInteractiveGUIError`, and `audit_research_and_excluded_capabilities`.
+  - Audited all packages in `src/tools/` against launcher tiles and `src/config/registry_exclusions.yaml`.
+  - Enforced fail-closed rule preventing CLI-only or headless capabilities from being claimed as GUI tiles (`CLINotInteractiveGUIError`).
+  - Standardized CLI entry points for retained headless research tools (`python -m src.tools.model_converter`, `contraction`, `drift_control`, `sg_optimizer`).
+  - Added structured incomplete capability tracking linking owners, issues, useful access, inputs/outputs, missing acceptance, and next actionable steps.
+  - Honestly documented SG optimizer Phase 3 PyQt6 UI follow-up tied to #6272 without fake GUIs or claims of abandonment.
+  - `src/config/__init__.py`: Exported lifecycle management symbols.
+  - `src/config/capability_migration.py`: Added `load()` classmethod.
+  - `tests/config/test_research_capability_lifecycle.py`: 8 comprehensive acceptance tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/config/test_research_capability_lifecycle.py --timeout=60`.
+- Next: Open PR with auto-merge, release lease, proceed to ORG-23 (#10532).
+
 ## ORG-19 Unify Sidekick, Setup, Help, and Library as Global Utilities (#10528)
 
 - Branch: `feat/issue-10528-org19-global-utilities`, lease `antigravity-ud-10528`, DL-#10528.
