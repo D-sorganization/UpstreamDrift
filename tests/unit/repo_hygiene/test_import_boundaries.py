@@ -17,6 +17,15 @@ _ALLOWED_SHARED_UPWARD_IMPORTS = {
         _SHARED_ROOT / "realtime" / "ws_pubsub.py",
         "src.api.routes.realtime",
     ),
+    # Trajectory handoff viewer dispatch per ADR-0047 / ORG-14 (#10523).
+    (
+        _SHARED_ROOT / "workspace" / "trajectory_handoff.py",
+        "src.api.routes._ball_flight_trajectory_import",
+    ),
+    (
+        _SHARED_ROOT / "workspace" / "trajectory_handoff.py",
+        "src.launchers._shot_tracer_trajectory_import",
+    ),
 }
 
 
