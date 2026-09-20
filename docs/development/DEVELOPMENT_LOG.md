@@ -45,6 +45,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Pass CI, auto-merge into main, release lease on #10515.
 - **Evidence:** tests/launchers/test_workspace_navigation.py; src/launchers/workspace_navigation.py.
 
+### DL-#10355 · Motion Matching Tile Visual Playback, Standardized Metrics, and Navigation Handoff (MS-82)
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10355 (MS-82, closes #10106 gap)
+- **Branch:** feat/10355-motion-matching-tile-playback
+- **PR:** pending
+- **Paths:** src/tools/motion_matching/gui.py; src/tools/motion_matching/pipeline.py; src/config/feature_parity.json; docs/development/feature_parity_matrix.md; tests/tools/motion_matching/test_motion_matching_gui.py
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (18 unit tests pass in tests/tools/motion_matching/; 39 parity tests pass in tests/config/feature_parity/; ruff check & format clean).
+- **Summary:** Enhanced the Motion Matching PyQt6 tile to display asynchronous animation playback (`ik_playback.gif` and `tracking_playback.gif`) via `QMovie`, populated five standardized headline metrics (`full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, `inside_support_polygon_fraction`), acceptance verdict badge, and navigation handoffs to the Matched Swing Results Browser and Tour Matching Viewer. Upgraded `tools.motion_matching` in `feature_parity.json` from `gap` to `parity`.
+- **Next step:** Create PR, enable auto-merge, verify merge, and release lease.
+- **Evidence:** tests/tools/motion_matching/test_motion_matching_gui.py, tests/config/feature_parity/test_matrix_freshness.py.
+
 ### DL-#10526 · Replace Canonical Estimation Shell With Bounded Estimator Coordinator
 
 - **State:** shipped

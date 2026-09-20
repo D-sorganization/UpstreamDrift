@@ -30,6 +30,23 @@ Applies consistent, task-oriented workspace navigation across React and Tauri we
   - Dedicated `/workspaces/:slug` routes supporting direct linking, browser forward/back navigation, and centralized route titles.
   - Integrated launcher dashboard quick-links into workspace destinations.
 
+## Motion Matching Tile: Visual Playback, Standardized Metrics, and Navigation Handoff (MS-82, #10355)
+
+Enhances the Motion Matching PyQt6 tile (`src/tools/motion_matching/gui.py` and `src/tools/motion_matching/pipeline.py`) to deliver full visual playback, standardized metrics, acceptance gating, and tool handoffs:
+- **Kinematics & Dynamics Animation Playback**:
+  - Automatically discovers and plays `ik_playback.gif` and `tracking_playback.gif` upon matching completion using `QMovie` instances mounted on dedicated display labels.
+  - Safe lifecycle management (`cleanup()`, `_stop_movies()`, and `closeEvent`) preventing memory leaks and background movie resource retention.
+- **Five Standardized Headline Metrics & Acceptance Verification**:
+  - `extract_five_metrics_and_acceptance(summary)`: Extracts `full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, and `inside_support_polygon_fraction`.
+  - Color-coded acceptance badge (`PASSED`, `REJECTED`, `UNCLASSIFIED`) reflecting qualification criteria and frame convergence.
+- **Plant Engine Registry Integration**:
+  - Backend selector dynamically queries registered physics engines via `available_engines()` querying the shared plant registry, exposing MuJoCo, Drake, Pinocchio, and Pink.
+- **Workflow Navigation Handoffs**:
+  - "Open in Results Browser": Launches the Matched Swing Results Browser dialog backed by `MatchedSwingBrowserModel`.
+  - "Open in Viewer": Launches the interactive 3D `TourMatchingViewerWindow`.
+- **Feature Parity Registration**:
+  - Upgraded `tools.motion_matching` in `src/config/feature_parity.json` from `gap` to `parity`, closing the #10106 capability gap.
+
 ## Replace Canonical Estimation Shell With Bounded Estimator Coordinator (ORG-17, #10526)
 
 Replaces placeholder canonical estimation shells with a bounded application service coordinator integrating parameter estimation, identifiability analysis, and trajectory evaluation:
