@@ -613,6 +613,10 @@ async def _process_pending_client_commands(
     Returns:
         Tuple of (updated_recv_task, action) where action is "continue", "stop", or "pause".
     """
+    if not hasattr(websocket, "receive_json"):
+        cmd = await _handle_client_commands(websocket, config)
+        return None, (cmd if cmd in ("stop", "pause") else "continue")
+
     if recv_task is None:
         recv_task = asyncio.create_task(websocket.receive_json())
 
@@ -688,7 +692,8 @@ async def _run_simulation_loop(
 
     recv_task: asyncio.Task[Any] | None = None
     try:
-        recv_task = asyncio.create_task(websocket.receive_json())
+        if hasattr(websocket, "receive_json"):
+            recv_task = asyncio.create_task(websocket.receive_json())
         while frame < total_steps:
             batch_started_at = loop.time()
             recv_task, command = await _process_pending_client_commands(
