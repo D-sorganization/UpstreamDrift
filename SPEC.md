@@ -1,5 +1,26 @@
 # SPEC.md — Repository Specification Document
 
+## Results Workspace Handoff and Action Integration (ORG-13, #10521)
+
+Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with Replay, Data Explorer, Plot, Compare, and Export actions within a unified workspace:
+- **Results Workspace Coordinator (`src/shared/python/workspace/results_workspace.py`)**:
+  - `ResultsWorkspaceCoordinator`: Coordinates result categorization, selected run isolation, action capability determination, comparison validation, and provenance-preserving export/reimport workflows.
+  - Consumes public contracts of `ResultsBrowser` and `MatchedSwingBrowserModel` directly, indexing canonical HDF5 and ledger receipts without spinning up duplicate background scans or competing index tables.
+- **Taxonomy and Artifact Categorization (`ResultCategory`, `ResultArtifactItem`)**:
+  - Distinguishes 7 canonical result classes across the workspace lifecycle: `SOURCE_DATA`, `PROCESSED_RECIPE`, `KINEMATIC_REPLAY`, `DYNAMIC_RUN`, `MEASUREMENTS`, `FLIGHT_TRAJECTORY`, and `QUALIFICATION_VERDICT`.
+- **Selected Run Context Isolation & Dispatch (`HandoffDispatchPayload`)**:
+  - `prepare_tool_handoff` and `dispatch_to_tool`: Binds the explicitly selected run ID, project context, and artifact reference directly into target tool dispatch payloads, preventing state leakage or fallback to global/most recent active session.
+- **Artifact-Type-Aware Action Dispatch (`WorkspaceActionType`, `ActionAvailability`)**:
+  - `get_action_availability`: Disables incompatible actions with clear, human-actionable diagnostic reasons (e.g. Replay requires kinematic replay or dynamic run; Data Explorer requires tabular/dataset artifacts).
+- **Run Comparison & Diagnostic Validation (`compare_runs`, `ComparisonResult`)**:
+  - Isolated multi-run comparison ensuring neither run's assets or in-memory arrays are overwritten even when filenames match identically across run directories.
+  - `MissingAssetDiagnosticError`: Diagnostic rejection when referenced artifacts are missing or moved on disk; strictly forbids guessing or substituting similarly named files.
+  - `UnitMismatchDiagnosticError`: Diagnostic rejection when compared runs possess mismatched physical units (e.g. metres vs millimetres, radians vs degrees), preventing silent erroneous numerical differences.
+- **Provenance Retention & Round-Trip Reimport (`export_result_with_provenance`, `reimport_result_artifact`)**:
+  - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
+  - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
+
+
 ## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
 
 Extends OpenSim dynamic marker tracking via MocoTrack from the initial 0.10s pilot window to the full G1 horizon (0.85s) on the tour driver swing, packaging the result into the standardized Matched Swing Program evidence and candidate architecture:
