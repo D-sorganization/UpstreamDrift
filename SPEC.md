@@ -1,4 +1,45 @@
-## Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (ORG-07, #10514)
+## Generate Accurate Atlas, Help, Parity, and Completion Records (ORG-21, #10531)
+
+Generates accurate, evidence-backed capability atlas graphs, feature parity matrices, industrial readiness records, and workspace documentation without shell-only or stale placeholders:
+- **Workspace Documentation & Freshness Acceptance (`tests/scripts/test_workspace_documentation_freshness.py`)**:
+  - `test_workspace_membership_drift`: Verifies workspace domains match canonical set (`simulation`, `analysis`, `capture`, `putting`, `training`, `governance`) across `capability_migration.json`, `models.yaml`, `launcher_manifest.json`, and `capability_connections.json`, rejecting unregistered domains.
+  - `test_undocumented_alias`: Enforces that all deprecated and configured aliases resolve transitively to active canonical destinations without cycles.
+  - `test_broken_source_and_help_links`: Enforces that all evidenced routes, node targets, and edge references in `capability_connections.json` resolve to existing files on disk.
+  - `test_stale_generated_views`: Validates that generated capability atlas artifacts, feature parity matrix, and industrial readiness index match committed files byte-for-byte.
+  - `test_shell_only_parity_cannot_be_interpreted_as_compute_complete`: Ensures that surface presence (PyQt/API/web) does not conflate with compute engine execution or qualification completeness.
+  - `test_generators_deterministic`: Asserts deterministic, repeatable outputs across repeated generator executions.
+  - `test_training_controller_readme_accurately_reflects_shipped_surface`: Asserts that `src/tools/training_controller/README.md` documents current PyQt6 GUI implementation (`MainWindow`, `gui.py`, `_embed_adapter.py`) without obsolete draft or deferred notes.
+  - `test_industrial_readiness_issue_8820_reconciled`: Validates that entry U3 (#8820, PR #9995) is recorded as merged with verified 40-char SHA and valid implementation/test paths.
+- **Catalog & Documentation Reconciliation**:
+  - `src/config/industrial_readiness.json`: Reconciled item U3 (#8820) status to `"merged"` with merge commit `8ef1bec803de292e44724cdf1f96d3ebf52bf2f2` and test evidence.
+  - `docs/operations/industrial-readiness-index.md`: Synchronized through `generate_industrial_readiness_index`.
+  - `src/tools/training_controller/README.md`: Updated to truthfully describe the shipped PyQt6 GUI surface and canonical embedded adapter.
+
+## Results Browser Tile for Matched Swing Program (MS-80, #10353)
+
+Implements a dual-pane PyQt6 embeddable tool and lineage model (`src/tools/matched_swing_browser/`) indexing and browsing the matched-swing execution ledger (`reports/matched_swing_ledger.json`):
+- **Data Model & Lineage Spine (`src/tools/matched_swing_browser/model.py`)**:
+  - `MatchedSwingFilter`: Filter criteria across engine, capture (`driver`, `iron`), lane, verdict (`PASSED`, `REJECTED`, `UNCLASSIFIED`), and full-text search. Adapts to `ResultFilter` from `src.shared.python.workspace.results_browser` for backend/text lineage, resolving issue #8824 and providing the contract consumed by #10521 (ORG-13).
+  - `MatchedSwingBrowserModel`: Loads and validates `Ledger` data from disk. Formats quantitative metrics with explicit SI/angular units (mm, degrees). Resolves associated file artifacts (GIF animations, NPZ trajectory arrays, receipt JSONs, and parity reports) with fail-closed existence checks. Decorated with `@precondition` and `@postcondition` contracts.
+- **Dual-Pane Desktop GUI (`src/tools/matched_swing_browser/gui.py`)**:
+  - `MatchedSwingBrowserWidget`:
+    - Left pane: Interactive filter group (engine, capture, lane, verdict, search text, and filter reset) coupled to a 7-column `QTableWidget` sorting and listing all 98 committed receipts.
+    - Right pane: Run summary card with acceptance pill badge (green `PASSED`, red `REJECTED`, gray `UNCLASSIFIED`), five standardized comparison metrics (Whole, Early, Terminal, Club, and Pelvis Yaw RMSE), physical gates breakdown, and asynchronous `QMovie` playback for runs with visual GIF animations.
+    - Action launchers: *Open in Tour Matching Viewer* (loads candidate NPZ into 3D viewer), *Open in Native Viewer* (dispatches to MS-83 `open_in_native_viewer`), *Open Parity Report* (displays `parity_vs_mujoco.json`), and *View Receipt JSON*.
+    - Non-blocking resource lifecycle via `cleanup()` stopping active movies.
+  - `MatchedSwingBrowserWindow`: Top-level window wrapper hosting the browser widget with closeEvent cleanup.
+- **Launcher Embedding & Registry Parity**:
+  - `_MatchedSwingBrowserEmbedAdapter` (`src/tools/matched_swing_browser/_embed_adapter.py`): Implements `EmbeddableTool` protocol for tab and dock hosting in the launcher.
+  - Package entry point in `pyproject.toml` under `upstream_drift.embeddable_tools`.
+  - Fallback adapter registration in `src/launchers/embedded_tool_bootstrap.py` (`FALLBACK_ADAPTER_MODULES`).
+  - Desktop tile catalog in `src/config/models.yaml` and web/desktop manifest in `src/config/launcher_manifest.json` with matching ID `matched_swing_browser`.
+  - Feature parity entry in `src/config/feature_parity.json` with regenerated `docs/development/feature_parity_matrix.md`.
+  - Tile icon assets: `assets/logos/matched_swing_browser.svg` and `src/launchers/assets/matched_swing_browser.png`.
+- **Evidence & Verification**:
+  - Automated tests: `tests/tools/matched_swing_browser/test_model.py` and `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py` (21 tests including headless journey test).
+  - Headless screenshot evidence: `docs/development/matched_swing_program/evidence/browser/screenshot.png`.
+
+## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
 
 Projects 28 multi-provider exercise variants into 7 cohesive logical model choices while preserving underlying provider assets and enforcing strict authority resolution:
 - **Logical Model Grouping & Projections (`src/shared/python/config/model_variant_grouping.py`)**:
@@ -12,6 +53,20 @@ Projects 28 multi-provider exercise variants into 7 cohesive logical model choic
 - **Sibling Checkout Diagnostics & Handler Hardening (`src/launchers/launcher_model_handlers.py`, `src/launchers/exercise_dashboard.py`)**:
   - `SharedRepoHandler.get_missing_checkout_diagnostic`: Emits actionable remediation diagnostics when sibling repository clones are missing.
   - `ExerciseDashboard`: Dynamicizes exercise title and configuration in UI widgets and error messages.
+
+## Unified Artifact and Project Context Handoff Between Workspaces (ORG-08, #10517)
+
+Defines typed, schema-validated artifact and project context handoffs across workspaces with cryptographic integrity and adapter conversion:
+- **Typed Artifact & Workspace Handoff Models (`src/shared/python/workspace/artifact_handoff.py`)**:
+  - `ArtifactKind`: Defines canonical artifact kinds (`time_series_trajectory`, `mesh_geometry`, `kinematic_tree`, `optimization_result`, `sensor_stream`, `calibration_data`).
+  - `ArtifactReference`: Immutable artifact reference with URI/path, kind, schema version, cryptographic SHA-256 integrity hash, coordinate frame convention, and provenance metadata.
+  - `WorkspaceHandoff`: Package containing project metadata, run context, active artifact references, and handoff provenance.
+  - Precondition and schema validation (`compute_file_sha256`, `SUPPORTED_HANDOFF_SCHEMA_VERSIONS`, `SUPPORTED_KINDS`, `SUPPORTED_FRAMES`): Validates file existence and bitwise integrity before transfer or write.
+- **Named Artifact Adapter Registry (`register_artifact_adapter`, `convert_artifact`)**:
+  - Pluggable adapter registry allowing verified artifact transformation across coordinate frames and schema formats with complete provenance recording.
+- **Session Project Store Handoff API (`src/shared/python/workspace/project_store.py`)**:
+  - `SessionProjectStore`: Extends project store with `register_run`, `load_run`, `list_runs`, `set_active_run`, `get_active_run`, `clone_run`, `check_run_artifacts`, `export_handoff`, and `import_handoff`.
+  - Enforces Design-by-Contract boundary checks: cross-session subject mismatch rejection, atomic durability under interrupted writes, and non-destructive run cloning without falsified output evidence.
 
 ## Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (ORG-18, #10527)
 
@@ -194,6 +249,20 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
 - **Provenance Retention & Round-Trip Reimport (`export_result_with_provenance`, `reimport_result_artifact`)**:
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
+
+## Guided Workflow Transitions Across Unified Workspaces (ORG-09, #10518)
+
+Coordinates multi-stage end-to-end biomechanical workflows across workspaces with disk-backed verification, cryptographic artifact hashing, and client UI projection parity:
+- **Guided Workflow Pipeline Coordinator (`src/shared/python/workspace/workflow_coordinator.py`)**:
+  - `WorkflowStepId`: Defines the 7 canonical stages (`capture_import`, `inspect_targets`, `configure_model`, `fit`, `dynamics`, `compare`, `export`).
+  - `WorkflowMode`: Tailors required stages by execution mode (`full_body_3d`, `single_view_coaching`, `ball_flight_analysis`). In `single_view_coaching`, 3D physics steps are skipped automatically without blocking downstream steps.
+  - `WorkflowCoordinator`: Manages workflow state transitions with strict preconditions:
+    - Step readiness evaluated dynamically against on-disk artifact files and cryptographic SHA-256 hashes rather than transient UI button state.
+    - Contractual isolation: `DYNAMICS` stage cannot inherit a purely kinematic pass without physics validation.
+    - Pre-existing imported artifacts support entry at downstream stages (`entry_from_artifacts`) without re-running prior stages.
+    - Cancellation diagnostic recording and automatic attempt counter increments on retry.
+- **Client UI State Projections (`WorkflowProjection`, `StepProjection`)**:
+  - Pure data projections serialized via `to_dict()` consumed identically across Qt desktop widgets (`WorkflowStripWidget`) and React/Tauri interfaces (`WorkflowStrip.tsx`).
 
 ## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
 
@@ -6136,8 +6205,6 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-08-25 | n/a | Formatted full_swing_tracking.py to pass ruff formatting check. (spec-exempt: micro-optimization) |
-| 2026-08-25 | n/a | Optimized np.linalg.norm(..., axis=-1) with np.sqrt(np.einsum) in full_swing_tracking.py for ~2.3x faster distance calculation on the speed bottleneck path. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10491 | Barrier-reduced same-integrator G1 continuation converged at 46.8 mm (rollout == replay) and is committed as rejected evidence; `--range-barrier-weight` CLI flag and raised trail-side effort bounds; ledger, README, turnover updated |
 | 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
 | 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |
