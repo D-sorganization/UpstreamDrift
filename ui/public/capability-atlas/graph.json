@@ -2870,6 +2870,6 @@
     "src/config/launcher_manifest.json": "721474b299891764d36c8246ee6ea4dafb08688fc21bb80b892571f40f86f783",
     "src/config/feature_parity.json": "b3ea92cc334a28d0c210aae82a2b3ba6da3694b21336b53e387fde3586f9269f",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-    "src/tools/capture_rig/workflow.py": "8a3887642deddf09c8fae39a6ee88bceb95241b4b19e91b4fd37c638a5398882"
+    "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
 }
