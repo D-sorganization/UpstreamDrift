@@ -264,6 +264,18 @@ Coordinates multi-stage end-to-end biomechanical workflows across workspaces wit
 - **Client UI State Projections (`WorkflowProjection`, `StepProjection`)**:
   - Pure data projections serialized via `to_dict()` consumed identically across Qt desktop widgets (`WorkflowStripWidget`) and React/Tauri interfaces (`WorkflowStrip.tsx`).
 
+## Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces (ORG-10, #10519)
+
+Connects Capture Rig as the primary capture and coaching surface to downstream Inspect Targets and Model Calibration workspaces over typed artifact references:
+- **Capture Rig Inspection Handoff (`src/shared/python/workspace/capture_inspection_handoff.py`)**:
+  - `CaptureRigInspectionCoordinator`: Coordinates imported media and video capture passing `ArtifactReference` instances to pose inspection and model calibration workspaces.
+  - Multi-Estimator Isolation: Preserves MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, original video clocks, and source pixels.
+  - FreeMoCap Pre-Spawn Validation: Validates working directories and dependencies before process launch; cancellation preserves source files intact; maintains license isolation.
+  - Optical & C3D Data Integrity: Masks missing marker samples as `NaN`; rejects incompatible spatial frames and unit conversions; prevents 2D coordinates from pretending to be metric 3D.
+  - Session Store Registration: Automatically registers target observations and calibration models into `SessionProjectStore` preserving annotations and club parameters.
+- **Capture Rig UI Action Binding (`src/tools/capture_rig/journey_actions.py`, `src/tools/capture_rig/gui.py`)**:
+  - Adds `Open in Inspect Targets` action to Capture Rig GUI and journey actions.
+
 ## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
 
 Extends OpenSim dynamic marker tracking via MocoTrack from the initial 0.10s pilot window to the full G1 horizon (0.85s) on the tour driver swing, packaging the result into the standardized Matched Swing Program evidence and candidate architecture:
