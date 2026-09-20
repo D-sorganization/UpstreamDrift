@@ -215,6 +215,45 @@ class EstimationJobResult:
         return cls.from_dict(payload)
 
 
+def _make_default_residual(
+    times: np.ndarray,
+    y_obs: np.ndarray,
+    primary_param: str,
+    custom_fn: Callable[[SplineTrajectoryEvaluation, Mapping[str, float]], np.ndarray]
+    | None,
+) -> Callable[[SplineTrajectoryEvaluation, Mapping[str, float]], np.ndarray]:
+    def residual(
+        evaluation: SplineTrajectoryEvaluation, parameters: Mapping[str, float]
+    ) -> np.ndarray:
+        if custom_fn is not None:
+            return custom_fn(evaluation, parameters)
+        scaled_pos = parameters[primary_param] * evaluation.q[:, 0]
+        traj_error = evaluation.q[:, 0] - (times**2)
+        return np.concatenate([scaled_pos - y_obs, traj_error])
+
+    return residual
+
+
+def _make_default_jacobian(
+    times: np.ndarray,
+    primary_param: str,
+) -> Callable[[SplineTrajectoryEvaluation, Mapping[str, float], Any], np.ndarray]:
+    def jacobian(
+        evaluation: SplineTrajectoryEvaluation,
+        parameters: Mapping[str, float],
+        layout: Any,
+    ) -> np.ndarray:
+        jac = np.zeros((2 * times.size, layout.size), dtype=float)
+        jac[: times.size, : layout.trajectory_size] = (
+            parameters[primary_param] * evaluation.q_basis[:, 0, :]
+        )
+        jac[: times.size, layout.parameter_column(primary_param)] = evaluation.q[:, 0]
+        jac[times.size :, : layout.trajectory_size] = evaluation.q_basis[:, 0, :]
+        return jac
+
+    return jacobian
+
+
 class EstimationWorkspaceCoordinator:
     """Application coordinator for bounded estimation workflows."""
 
@@ -358,23 +397,11 @@ class EstimationWorkspaceCoordinator:
         param_block = SharedParameterBlock.from_specs(shared_specs)
 
         # 2. Define residual and analytical Jacobian
-        def default_residual(
-            evaluation: SplineTrajectoryEvaluation,
-            parameters: Mapping[str, float],
-        ) -> np.ndarray:
-            if custom_residual_fn is not None:
-                return custom_residual_fn(evaluation, parameters)
-
-            # Sum of scaling fit on primary parameter
-            primary_param = shared_specs[0].name
-            scale = parameters[primary_param]
-            scaled_pos = scale * evaluation.q[:, 0]
-            traj_error = evaluation.q[:, 0] - (times**2)
-            resids = [scaled_pos - y_obs, traj_error]
-
-            # If there are redundant parameters that don't affect output,
-            # this makes them unidentifiable for the gate probe
-            return np.concatenate(resids)
+        primary_param = shared_specs[0].name
+        default_residual = _make_default_residual(
+            times, y_obs, primary_param, custom_residual_fn
+        )
+        default_jacobian = _make_default_jacobian(times, primary_param)
 
         # 3. Configure identifiability gate
         gate_options = None
@@ -383,22 +410,6 @@ class EstimationWorkspaceCoordinator:
                 policy=request.identifiability_gate,
                 relative_tolerance=1e-6,
             )
-
-        def default_jacobian(
-            evaluation: SplineTrajectoryEvaluation,
-            parameters: Mapping[str, float],
-            layout: Any,
-        ) -> np.ndarray:
-            primary_param = shared_specs[0].name
-            jac = np.zeros((2 * times.size, layout.size), dtype=float)
-            jac[: times.size, : layout.trajectory_size] = (
-                parameters[primary_param] * evaluation.q_basis[:, 0, :]
-            )
-            jac[: times.size, layout.parameter_column(primary_param)] = evaluation.q[
-                :, 0
-            ]
-            jac[times.size :, : layout.trajectory_size] = evaluation.q_basis[:, 0, :]
-            return jac
 
         # 4. Solve MAP problem
         problem = MapEstimatorProblem(
