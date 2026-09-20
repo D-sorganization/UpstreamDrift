@@ -677,11 +677,13 @@ class SimulationService:
             ingest_candidate_session,
         )
 
-        return ingest_candidate_session(
+        session = ingest_candidate_session(
             candidate_path=candidate_path,
             model_path=model_path,
             receipt_path=receipt_path,
         )
+        self._active_candidate_session = session
+        return session
 
     @property
     def active_candidate_session(self) -> Any:

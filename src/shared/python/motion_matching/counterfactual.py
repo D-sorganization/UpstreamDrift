@@ -258,7 +258,9 @@ def _integrate_dynamics(
             a_nom = np.zeros(n_dofs, dtype=np.float64)
 
         delta_tau = altered_tau[i] - base_tau[i]
-        delta_a = delta_tau / m_eff
+        delta_a = np.zeros(n_dofs, dtype=np.float64)
+        n_map = min(len(delta_tau), n_dofs)
+        delta_a[:n_map] = delta_tau[:n_map] / m_eff
         a_cf[i] = a_nom + delta_a
 
         if i + 1 < n_frames:

@@ -186,9 +186,7 @@ class ForceInspectionWidget(QtWidgets.QWidget):
             self._fork_status_label.setText(
                 f"Forked @ frame {fork.fork_frame_idx} ({strat_val})"
             )
-            self._divergence_label.setText(
-                f"Divergence RMS: {fork.divergence_rms * 1000.0:.1f} mm"
-            )
+            self._divergence_label.setText(f"Divergence RMS: {fork.divergence_rms:.4f}")
             self.counterfactualForked.emit(fork)
         except Exception as exc:
             logger.exception("Counterfactual fork failed: %s", exc)

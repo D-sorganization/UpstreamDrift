@@ -109,6 +109,12 @@ class CandidateSession:
         return markers.model_markers_m is not None
 
     @property
+    def actuator_names(self) -> tuple[str, ...]:
+        """Actuator names declared in candidate metadata or empty tuple."""
+        meta = self.candidate.metadata
+        return meta.actuator_names
+
+    @property
     def rms_error(self) -> float:
         """Marker RMS error in meters if available, otherwise 0.0."""
         if self.receipt is not None:
@@ -152,12 +158,15 @@ class CandidateSession:
         from src.shared.python.motion_matching.force_torque import SpatialWrench
 
         row = self.external_forces[frame_idx]
-        fx = float(row[0]) if len(row) > 0 else 0.0
-        fy = float(row[1]) if len(row) > 1 else 0.0
-        fz = float(row[2]) if len(row) > 2 else 0.0
-        tx = float(row[3]) if len(row) > 3 else 0.0
-        ty = float(row[4]) if len(row) > 4 else 0.0
-        tz = float(row[5]) if len(row) > 5 else 0.0
+        if len(row) < 6:
+            # Missing wrench moments cannot be fabricated as zeros (would corrupt CoP calculations)
+            return None
+        fx = float(row[0])
+        fy = float(row[1])
+        fz = float(row[2])
+        tx = float(row[3])
+        ty = float(row[4])
+        tz = float(row[5])
 
         return SpatialWrench(
             application_frame=contact_name,
@@ -189,11 +198,9 @@ class CandidateSession:
             )
         if self.tau is None:
             return None
+        names: tuple[str, ...] = self.actuator_names or self.coordinate_names
         row = self.tau[frame_idx]
-        return {
-            name: float(row[i])
-            for i, name in enumerate(self.coordinate_names[: len(row)])
-        }
+        return {name: float(row[i]) for i, name in enumerate(names[: len(row)])}
 
     def get_closure_residual_at(self, frame_idx: int) -> float | None:
         """Return kinematic closure residual at frame_idx or None if not computed."""
