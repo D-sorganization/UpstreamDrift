@@ -1,5 +1,26 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
+
+Extends OpenSim dynamic marker tracking via MocoTrack from the initial 0.10s pilot window to the full G1 horizon (0.85s) on the tour driver swing, packaging the result into the standardized Matched Swing Program evidence and candidate architecture:
+- **Full-Horizon Dynamic Tracking & Qualification (`src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py`)**:
+  - `qualify_full_swing_tracking`: Orchestrates multi-stage dynamic tracking qualification across G1 backswing, G2 impact, and G3 finish with fail-closed physical acceptance.
+  - Satisfies MS-100 dynamics gate contract by populating `max_root_force_n` (0.0) and `delta_tau_root_max_n` (0.0) to prevent missing evaluation states.
+  - Uses explicit `TypeAlias` typing for `Array` (`NDArray[np.float64]`) ensuring strict mypy compliance.
+- **Constraint-Aware Moco Dynamic Tracking (`src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py`)**:
+  - `MocoTrackingConfig`: Enforces DbC parameter preconditions on horizon duration ($t_{\text{end}} > t_{\text{start}}$), mesh intervals, goal weights, and solver tolerances.
+  - `sanitize_trc_for_horizon`: Prunes missing marker channels over arbitrary tracking intervals with DbC `@precondition` and `@postcondition` contracts.
+  - `build_moco_study`: Constructs OpenSim `MocoStudy` tracking problems with reserve actuator bounds, patellofemoral constraint awareness, and warm-start IK state trajectory seeding.
+- **Dynamic Tracking CLI & Reproduction (`docs/development/opensim_tour_matching/os4_moco_tracking_driver.py`)**:
+  - Adds flexible `--horizon` CLI parsing supporting milestone identifiers (`g1` mapping to 0.85s) and arbitrary numerical durations.
+  - Annotates historical pilot scope in `docs/development/opensim_tour_matching/evidence/os6_handoff/reproduction_receipt.json`.
+- **Physical Evidence & Candidate Package (`evidence/matched/driver_g1_opensim/`)**:
+  - Packages 307-frame, 39-coordinate, 39-control, 34-marker trajectory into standardized `candidate.npz` (`CandidatePackage`).
+  - Includes full 307-frame 3D marker overlay playback GIF (`playback.gif`) and raw IPOPT solution tables (`solution.sto`, `states.sto`, `controls.sto`).
+  - `receipt.json`: Standardized ledger receipt recording exact measured collocation error (whole RMSE 0.2452m) and open-loop forward replay drift (whole RMSE 0.8789m, terminal RMSE 1.2897m, pelvis yaw RMSE 98.70°), honestly evaluating to fail-closed `REJECTED` status under MS-100 / MS-104 `acceptance.py`.
+- **Ledger & Status Matrix Synchronization (`reports/matched_swing_ledger.json`, `docs/development/matched_swing_program/README.md`)**:
+  - Indexes 98 receipts across the repository, registering the OpenSim candidate lane under `matched` and synchronizing the cross-engine progress matrix.
+
 ## Expose Real Forces, Torques, and Explicit Counterfactual Semantics (MV-06, #10482)
 
 Exposes authentic ground reaction forces, spatial wrenches, and actuator efforts alongside explicit counterfactual simulation semantics:
