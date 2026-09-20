@@ -14,10 +14,12 @@ Nothing here computes; pipeline scripts do. Epic #10162, child #10158 (HO-4).
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
+import sys
+from typing import Any
 
-from PyQt6.QtCore import QObject, QProcess, pyqtSignal
+from PyQt6.QtCore import QObject, QProcess, Qt, pyqtSignal
+from PyQt6.QtGui import QMovie
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -113,6 +115,11 @@ class MotionMatchingWidget(QWidget):
         self._worker = RunWorker(self)
         self._request: pipeline.MatchRequest | None = None
         self._exp_request: pipeline.ExperimentRequest | None = None
+        self.ik_movie: QMovie | None = None
+        self.tracking_movie: QMovie | None = None
+        self._metrics: dict[str, Any] = {}
+        self._browser_window: Any = None
+        self._viewer_window: Any = None
 
         self.tabs = QTabWidget(self)
 
@@ -147,7 +154,13 @@ class MotionMatchingWidget(QWidget):
         self.capture.currentTextChanged.connect(self._default_club)
 
         self.backend = QComboBox()
-        self.backend.addItems(list(pipeline.BACKENDS))
+        engines: list[str] = ["mujoco"]
+        for eng in [*pipeline.available_engines(), *pipeline.BACKENDS]:
+            if eng not in engines:
+                engines.append(eng)
+        self.backend.addItems(engines)
+        self.backend.setCurrentText("mujoco")
+
         self.step_mode = QComboBox()
         self.step_mode.addItems(list(pipeline.STEP_MODES))
 
@@ -210,16 +223,78 @@ class MotionMatchingWidget(QWidget):
 
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
-        self.results = QLabel("No run yet.")
-        self.results.setWordWrap(True)
+        results_group = self._create_results_section()
 
         layout = QVBoxLayout(widget)
         layout.addLayout(form)
         layout.addWidget(self.stages_group)
         layout.addLayout(buttons)
         layout.addWidget(self.log, stretch=1)
-        layout.addWidget(self.results)
+        layout.addWidget(results_group)
         return widget
+
+    def _create_results_section(self) -> QGroupBox:
+        box = QGroupBox("Results & Playback")
+        vbox = QVBoxLayout(box)
+
+        # Header with acceptance badge and action buttons
+        header = QHBoxLayout()
+        header.addWidget(QLabel("Acceptance:"))
+        self.acceptance_badge = QLabel("UNCLASSIFIED")
+        self.acceptance_badge.setStyleSheet("font-weight: bold; color: gray;")
+        header.addWidget(self.acceptance_badge)
+        header.addStretch(1)
+
+        self.open_browser_btn = QPushButton("Open in Results Browser")
+        self.open_browser_btn.clicked.connect(self._on_open_results_browser)
+        header.addWidget(self.open_browser_btn)
+
+        self.open_viewer_btn = QPushButton("Open in Viewer")
+        self.open_viewer_btn.clicked.connect(self._on_open_viewer)
+        header.addWidget(self.open_viewer_btn)
+        vbox.addLayout(header)
+
+        # 5 Metrics grid/form
+        metrics_form = QFormLayout()
+        self.metric_ik_rms = QLabel("-")
+        self.metric_address_rms = QLabel("-")
+        self.metric_backswing_root = QLabel("-")
+        self.metric_whole_run_root = QLabel("-")
+        self.metric_support_polygon = QLabel("-")
+
+        metrics_form.addRow("Full Capture IK RMS:", self.metric_ik_rms)
+        metrics_form.addRow("Address Marker RMS:", self.metric_address_rms)
+        metrics_form.addRow("Backswing Root Error Max:", self.metric_backswing_root)
+        metrics_form.addRow("Whole Run Root RMS:", self.metric_whole_run_root)
+        metrics_form.addRow(
+            "Inside Support Polygon Fraction:", self.metric_support_polygon
+        )
+        vbox.addLayout(metrics_form)
+
+        # Animations row
+        movies_box = QHBoxLayout()
+        ik_box = QVBoxLayout()
+        ik_box.addWidget(QLabel("IK Kinematics Playback:"))
+        self.ik_gif_label = QLabel("No IK animation")
+        self.ik_gif_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.ik_gif_label.setMinimumSize(180, 180)
+        ik_box.addWidget(self.ik_gif_label)
+        movies_box.addLayout(ik_box)
+
+        tr_box = QVBoxLayout()
+        tr_box.addWidget(QLabel("Dynamics Tracking Playback:"))
+        self.tracking_gif_label = QLabel("No tracking animation")
+        self.tracking_gif_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.tracking_gif_label.setMinimumSize(180, 180)
+        tr_box.addWidget(self.tracking_gif_label)
+        movies_box.addLayout(tr_box)
+
+        vbox.addLayout(movies_box)
+
+        self.results = QLabel("No run yet.")
+        self.results.setWordWrap(True)
+        vbox.addWidget(self.results)
+        return box
 
     # -------------------------------------------------------------------------
     # Downswing Experiment Tab
@@ -386,7 +461,7 @@ class MotionMatchingWidget(QWidget):
             zmp_filter=self.zmp_filter.isChecked(),
             shooting_fit=self.shooting_fit.value(),
             shooting_gain=self.shooting_gain.value(),
-            backend=self.backend.currentText(),
+            backend=self.backend.currentText().split()[0].strip(),
             step_mode=self.step_mode.currentText(),
         )
 
@@ -502,11 +577,9 @@ class MotionMatchingWidget(QWidget):
         if idx == 0 and self._request is not None:
             try:
                 summary = pipeline.read_summary(self._request.output_dir)
-                gifs = ", ".join(
-                    str(p) for p in pipeline.artefacts(self._request.output_dir)
-                )
-                self.results.setText(
-                    json.dumps(summary, indent=1) + f"\nPlayback: {gifs or 'none'}"
+                metrics, verdict = pipeline.extract_five_metrics_and_acceptance(summary)
+                self._update_results_ui(
+                    self._request.output_dir, summary, metrics, verdict
                 )
             except ValueError as exc:
                 self.results.setText(str(exc))
@@ -527,6 +600,127 @@ class MotionMatchingWidget(QWidget):
                 self.exp_results.setText(str(exc))
         elif idx == 2:
             self.mjx_results.setText("MJX operation completed successfully.")
+
+    def _update_results_ui(
+        self,
+        output_dir: Path,
+        summary: dict[str, Any],
+        metrics: dict[str, Any],
+        verdict: str,
+    ) -> None:
+        self._metrics = metrics
+        self.acceptance_badge.setText(verdict)
+        if verdict in ("PASSED", "QUALIFIED"):
+            self.acceptance_badge.setStyleSheet("font-weight: bold; color: green;")
+        elif verdict == "REJECTED":
+            self.acceptance_badge.setStyleSheet("font-weight: bold; color: red;")
+        else:
+            self.acceptance_badge.setStyleSheet("font-weight: bold; color: gray;")
+
+        def _fmt_mm(val: Any) -> str:
+            return f"{val} mm" if val is not None else "-"
+
+        self.metric_ik_rms.setText(_fmt_mm(metrics.get("full_capture_ik_rms_mm")))
+        self.metric_address_rms.setText(_fmt_mm(metrics.get("address_marker_rms_mm")))
+        self.metric_backswing_root.setText(
+            _fmt_mm(metrics.get("backswing_root_error_max_mm"))
+        )
+        self.metric_whole_run_root.setText(
+            _fmt_mm(metrics.get("whole_run_root_rms_mm"))
+        )
+        frac = metrics.get("inside_support_polygon_fraction")
+        self.metric_support_polygon.setText(f"{frac:.2f}" if frac is not None else "-")
+
+        self._stop_movies()
+        ik_path = output_dir / "ik_playback.gif"
+        if ik_path.exists():
+            self.ik_movie = QMovie(str(ik_path))
+            self.ik_gif_label.setMovie(self.ik_movie)
+            self.ik_movie.start()
+        else:
+            self.ik_gif_label.setText("No IK animation")
+
+        tracking_path = output_dir / "tracking_playback.gif"
+        if tracking_path.exists():
+            self.tracking_movie = QMovie(str(tracking_path))
+            self.tracking_gif_label.setMovie(self.tracking_movie)
+            self.tracking_movie.start()
+        else:
+            self.tracking_gif_label.setText("No tracking animation")
+
+        gifs = ", ".join(str(p) for p in pipeline.artefacts(output_dir))
+        self.results.setText(
+            json.dumps(summary, indent=1) + f"\nPlayback: {gifs or 'none'}"
+        )
+
+    def metrics_values(self) -> dict[str, Any]:
+        """Return the extracted five headline metrics from the last matching run."""
+        return dict(self._metrics)
+
+    def cleanup(self) -> None:
+        """Halt playback movies and stop active workers."""
+        self._stop_movies()
+        if self._worker.is_running():
+            self._worker.stop()
+
+    def _stop_movies(self) -> None:
+        """Halt and release QMovie playback resources."""
+        if self.ik_movie is not None:
+            self.ik_movie.stop()
+            self.ik_movie = None
+        if self.tracking_movie is not None:
+            self.tracking_movie.stop()
+            self.tracking_movie = None
+        if hasattr(self, "ik_gif_label"):
+            self.ik_gif_label.clear()
+        if hasattr(self, "tracking_gif_label"):
+            self.tracking_gif_label.clear()
+
+    def closeEvent(self, event: Any) -> None:  # noqa: N802
+        self.cleanup()
+        super().closeEvent(event)
+
+    def _on_open_results_browser(self) -> None:
+        """Open or show the Matched Swing Results Browser dialog."""
+        try:
+            from PyQt6.QtWidgets import QDialog, QTableWidget, QTableWidgetItem
+
+            from src.tools.matched_swing_browser.model import MatchedSwingBrowserModel
+
+            model = MatchedSwingBrowserModel()
+            dialog = QDialog(self)
+            dialog.setWindowTitle("Matched Swing Results Browser")
+            dialog.resize(800, 400)
+            d_layout = QVBoxLayout(dialog)
+            table = QTableWidget(dialog)
+            rows = model.load_ledger()
+            table.setColumnCount(5)
+            table.setHorizontalHeaderLabels(
+                ["Receipt Path", "Engine", "Lane", "Capture", "Verdict"]
+            )
+            table.setRowCount(len(rows))
+            for i, r in enumerate(rows):
+                table.setItem(i, 0, QTableWidgetItem(str(r.receipt_path)))
+                table.setItem(i, 1, QTableWidgetItem(str(r.engine)))
+                table.setItem(i, 2, QTableWidgetItem(str(r.lane)))
+                table.setItem(i, 3, QTableWidgetItem(str(r.capture or "")))
+                verdict = model.extract_verdict_string(r)
+                table.setItem(i, 4, QTableWidgetItem(verdict))
+            d_layout.addWidget(table)
+            self._browser_window = dialog
+            dialog.show()
+        except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
+            self.log.appendPlainText(f"Could not open results browser: {exc}\n")
+
+    def _on_open_viewer(self) -> None:
+        """Open or show the Tour Matching Viewer window."""
+        try:
+            from src.tools.tour_matching_viewer.gui import TourMatchingViewerWindow
+
+            self._viewer_window = TourMatchingViewerWindow()
+            self._viewer_window.show()
+        except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
+            self.log.appendPlainText(f"Could not open viewer: {exc}\n")
 
 
 def get_dockable_ui() -> QMainWindow:

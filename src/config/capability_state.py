@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 import sys
 from typing import Any, Final, Literal
 
@@ -71,6 +72,43 @@ def resolve_canonical_display_name(tile_id: str, default: str | None = None) -> 
     if default is not None and default.strip():
         return default
     return tile_id.replace("_", " ").title()
+
+
+_DEFAULT_PROVIDER_LOGO: Final[str] = "golf_logo.svg"
+_WEB_LOGO_BY_DESKTOP_PNG: Final[dict[str, str]] = {
+    "golf_logo.png": "golf_logo.svg",
+    "mujoco.png": "mujoco_humanoid.svg",
+    "drake.png": "drake.svg",
+    "pinocchio.png": "pinocchio.svg",
+    "opensim.png": "opensim.svg",
+    "myosim.png": "myosim.svg",
+    "putting_green_modern.png": "putting_green.svg",
+    "c3d_viewer_modern.png": "c3d_icon.svg",
+    "data_explorer_modern.png": "data_explorer.svg",
+    "video_analyzer_modern.png": "video_analyzer.svg",
+    "matlab_logo.png": "matlab_logo.svg",
+    "project_map.png": "project_map.svg",
+    "urdf_icon.png": "urdf_icon.svg",
+    "bunkershot_icon.png": "bunkershot3d.svg",
+    "training_controller.png": "project_map.svg",
+    "openpose.png": "video_analyzer.svg",
+    "mediapipe.png": "video_analyzer.svg",
+}
+_ENGINE_LOGOS: Final[dict[str, str]] = {
+    "drake": "drake.svg",
+    "mujoco": "mujoco_humanoid.svg",
+    "myosuite": "myosim.svg",
+    "opensim": "opensim.svg",
+    "pinocchio": "pinocchio.svg",
+    "putting_green": "putting_green.svg",
+}
+
+
+def _web_logo(logo: str) -> str:
+    """Return an SVG logo for the web catalog, translating desktop PNGs."""
+    if logo.endswith(".svg"):
+        return logo
+    return _WEB_LOGO_BY_DESKTOP_PNG.get(Path(logo).name, _DEFAULT_PROVIDER_LOGO)
 
 
 # ---------------------------------------------------------------------------
@@ -270,6 +308,25 @@ def adapt_engine_matrix_qualification(
             is_qualified=False,
             failure_reasons=(),
         )
+
+    # If no explicit receipt provided, load pre-evaluated profile from engine_capability_matrix.json
+    if receipt is None:
+        matrix_file = Path(__file__).parent / "engine_capability_matrix.json"
+        if matrix_file.is_file():
+            try:
+                import json
+
+                mdata = json.loads(matrix_file.read_text(encoding="utf-8"))
+                prof = mdata.get("profiles", {}).get(engine_name)
+                if prof:
+                    return CapabilityQualification(
+                        status=prof["status"],
+                        is_qualified=prof["is_qualified"],
+                        receipt_path=receipt_path,
+                        failure_reasons=tuple(prof.get("failure_reasons", [])),
+                    )
+            except (json.JSONDecodeError, OSError, TypeError, KeyError):
+                pass
 
     # Lazily import #10351 audit function to keep catalog load clean
     from src.shared.python.shadow_tracker.engine_matrix import audit_engine_conformance

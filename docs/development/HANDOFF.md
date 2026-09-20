@@ -1,5 +1,162 @@
 # Current Matching Continuation Handoff
 
+## [ORG-10] Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces (#10519)
+
+- Worktree / Branch: `feat/issue-10519-org10-capture-inspection-handoff`, lease `antigravity-ud-10519`, DL-#10519.
+- Changes:
+  - `src/shared/python/workspace/capture_inspection_handoff.py`: Added `CaptureInspectionHandoff`, `TrimSpec`, `CropSpec`, `PreparedVideoInspection`, `ObservationSet2D`, `OpticalMarkerTarget`, `EstimatorType`, `FreeMoCapJobAdapter`, and `JobStatus`.
+  - Enforced that trim/crop/offset survive handoffs with explicit time conversions.
+  - Maintained MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, and source pixels.
+  - FreeMoCap input/output directory validation before subprocess spawn; cancellation leaves source files untouched with preserved HMR2/AGPL license isolation.
+  - C3D and optical imports keep missing samples masked (NaN); reject incompatible spatial units and frames; reject pretending 2-D coordinates are metric 3-D.
+  - Auto-registered target observations in `SessionProjectStore` preserving annotations, calibration, and club metadata without manual path re-entry.
+  - `src/tools/capture_rig/gui.py` & `journey_actions.py`: Added "Open in Inspect Targets" action.
+  - `src/shared/python/workspace/__init__.py`: Exported all new primitives.
+  - `tests/integration/test_capture_target_handoff.py`: 6 comprehensive integration tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/integration/test_capture_target_handoff.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10519, notify parent orchestrator.
+
+## [ORG-21] Generate Accurate Atlas, Help, Parity, and Completion Records (#10531)
+
+- Worktree / Branch: `feat/issue-10531-org21-accurate-atlas-parity`, lease `2026-09-20-org21-atlas`, DL-#10531.
+- Changes:
+  - `src/config/industrial_readiness.json`: Reconciled item U3 (#8820, PR #9995) from open to merged with merge SHA `8ef1bec803de292e44724cdf1f96d3ebf52bf2f2`, verified implementation paths (`src/shared/python/data_io/export.py`, `src/shared/python/data_io/provenance.py`, `src/shared/python/dashboard/_recorder_playback.py`), and test evidence (`tests/unit/test_dashboard_export_provenance.py`).
+  - `docs/operations/industrial-readiness-index.md`: Regenerated from updated industrial readiness ledger.
+  - `src/tools/training_controller/README.md`: Updated status to accurately reflect shipped PyQt6 GUI reality (`MainWindow`, `MainWidget`, `gui.py`, `_embed_adapter.py`, `__main__.py`) and removed obsolete draft branch notes.
+  - `tests/scripts/test_workspace_documentation_freshness.py`: Added 8 comprehensive regression tests covering workspace membership drift, undocumented/dangling aliases, broken links, stale generated views, shell-only parity vs compute-complete separation, deterministic generators, training controller README accuracy, and industrial readiness U3 reconciliation.
+  - `scripts/check_agent_docs_consistency.py`: Exempt markdown headings (such as `### The Rules`) and centrally managed notices from the duplicate paragraph check to prevent false positives when fleet-managed sections (`fleet-guard`, `development-logs`) share standard subheadings.
+- Reproduction: `py -3.12 -m pytest tests/scripts/test_workspace_documentation_freshness.py tests/scripts/test_capability_atlas.py tests/config/industrial_readiness/ -v --timeout=60` and `python scripts/check_agent_docs_consistency.py`.
+- Next: Open PR, arm auto-merge (`--auto --squash`), release lease on #10531, notify parent orchestrator.
+
+## [ORG-09] Guided Workflow Transitions Across Unified Workspaces (#10518)
+
+- Worktree / Branch: `feat/issue-10518-org09-workflow-transitions`, lease `antigravity-ud-10518`, DL-#10518.
+- Changes:
+  - `src/shared/python/workspace/workflow_coordinator.py`: Added `WorkflowCoordinator`, `WorkflowStepId` (7-step canonical pipeline), `WorkflowMode`, `StepStatus`, `StepProjection`, and `WorkflowProjection`.
+  - Step transitions enforce cryptographic hash verification and disk existence, engine requirements (single-view vs 3-D physics), and strict contract distinction preventing dynamics from inheriting purely kinematic passes.
+  - Added cancellation, retry attempt tracking, and later-stage entry from imported artifacts (`entry_from_artifacts`).
+  - Added pure state projection with `.to_dict()` and `.get_step()` for Qt (`WorkflowStripWidget`) and React/Tauri (`WorkflowStrip.tsx`) parity.
+  - `src/shared/python/workspace/__init__.py`: Exported all workflow coordinator primitives.
+  - `tests/unit/workspace/test_workflow_transitions.py`: 8 comprehensive unit tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/unit/workspace/test_workflow_transitions.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10518, notify parent orchestrator.
+
+## [ORG-08] Unified Artifact and Project Context Handoff Between Workspaces (#10517)
+
+- Worktree / Branch: `feat/issue-10517-org08-workspace-handoff`, lease `antigravity-ud-10517`, DL-#10517.
+- Changes:
+  - `src/shared/python/workspace/artifact_handoff.py`: Added `ArtifactKind`, `ArtifactReference`, `WorkspaceHandoff`, cryptographic hash verification (`compute_file_sha256`), supported frames and schemas validation, and named adapter registry (`register_artifact_adapter`, `convert_artifact`) with recorded provenance.
+  - `src/shared/python/workspace/project_store.py`: Added `RunMetadata`, extended `ProjectMetadata` with `runs`, `active_run_id`, and `extra_fields` migration preservation. Extended `SessionProjectStore` with `register_run`, `load_run`, `list_runs`, `set_active_run`, `get_active_run`, `clone_run`, `check_run_artifacts`, `export_handoff`, and `import_handoff`. Enforced Design-by-Contract boundary checks (cross-session subject mismatch, frame/schema validity, artifact presence and hash verification before writes, atomic write resilience).
+  - `src/shared/python/workspace/__init__.py`: Exported all new workspace handoff types and functions.
+  - `tests/unit/workspace/test_artifact_handoff.py`: 12 focused unit tests covering all RED and GREEN acceptance criteria.
+- Reproduction: `python -m pytest tests/unit/workspace/test_artifact_handoff.py tests/unit/workspace/test_project_store.py tests/unit/workspace/test_results_browser.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10517, notify parent orchestrator.
+
+## ORG-20 Consume Provider Ownership Decisions and Verify Runtime Import Authority (#10529)
+
+- Branch: `feat/issue-10529-org20-provider-ownership`, lease held by `local`, DL-#10529.
+- Changes:
+  - `src/shared/python/config/tools_vendor_authority.py`: Implemented `assert_runtime_provenance_parity` enforcing identical implementation roots between test (pytest) and packaged app runtime contexts with fail-closed `ProviderUnavailableError`. Implemented `verify_provider_provenance` asserting module paths resolve within canonical provider roots. Implemented `inspect_provider_authority` handling pinned gitlinks, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback.
+  - `tests/integration/test_installed_provider_authority.py`: 8 integration tests covering all RED and GREEN cases:
+    1. `test_pytest_and_packaged_app_resolving_different_roots_fail_provenance`: Divergent roots between pytest and packaged app fail provenance.
+    2. `test_wrong_pin_produces_blocked_state`: Pin mismatch returns available=False with stale pin message without falling back.
+    3. `test_missing_wheel_and_vendor_produces_blocked_state`: Missing gitlink and wheel produces blocked state.
+    4. `test_provider_import_failure_produces_blocked_state`: Provider probe failure surfaces blocked state.
+    5. `test_sidekick_public_seam_runs_through_intended_authority`: Sidekick adapter runs through intended Tools authority.
+    6. `test_movement_optimizer_public_seam_runs_through_intended_authority`: Movement Optimizer delegates to `tools_movement_optimizer`.
+    7. `test_pendulum_public_seam_runs_through_intended_authority`: Pendulum public seam delegates through intended Tools authority.
+    8. `test_old_supported_imports_delegate_correctly`: `upstream_drift_tools` cleanly delegates to `sidekick` with formal deprecation warning.
+- Reproduction: `pytest tests/integration/test_installed_provider_authority.py --timeout=60`.
+- Next: Push branch, open PR with auto-merge, update issue, release lease.
+
+## ORG-07 Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (#10514)
+
+- Worktree / Branch: `feat/issue-10514-org07-model-variant-grouping`, lease `antigravity-ud-10514`, DL-#10514.
+- Changes:
+  - `model_variant_grouping.py`: Implemented `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection` projecting 28 exercise variants across 4 providers into 7 logical choices without dropping underlying engine assets. Implemented `resolve_shortcut` resolving legacy IDs and presets.
+  - `model_pack_manifest.py`, `model_registry.py`: Preserved `exercise` and `preset_params` fields across serialization and registry loading.
+  - `launcher_model_handlers.py`: Enhanced `SharedRepoHandler` with `get_missing_checkout_diagnostic` to emit explicit actionable diagnostics on missing sibling checkouts. Prevented `sit_to_stand` fallback to `gait` in `BiomechExerciseHandler`.
+  - `exercise_dashboard.py`: Dynamicized exercise title in error dialogs/widgets instead of hardcoding "Gait".
+  - `models.yaml`: Moved `*_models_shared` to Models/Integrations access; annotated engine dashboards as advanced modes; tagged exercise shortcuts and movement optimizer task mapping.
+- Reproduction: `pytest tests/config/test_model_variant_grouping.py tests/config/test_tile_paths_resolve.py tests/unit/config/test_model_pack_manifest.py tests/launchers/test_launcher_model_handlers.py --timeout=60`.
+- Next: Open PR, arm auto-merge (`--auto --squash`), release lease, report to parent orchestrator.
+
+## ORG-18 Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (#10527)
+
+- Branch: `feat/issue-10527-org18-comparison-indicator-workspace`, lease held by `local`, DL-#10527.
+- Changes:
+  - `src/shared/python/workspace/comparison_indicator_workspace.py`: Implemented `ComparisonIndicatorWorkspaceCoordinator`, `ComparisonRunArtifact`, `ModelFidelityLevel`, `CrossEngineComparisonAdapter`, `BiomechanicalLoadChannels`, `InjuryIndicatorAdapter`, and fail-closed compatibility validators (`validate_run_compatibility`, `IncompatibleArtifactError`).
+  - Implemented model fidelity level invariance ensuring disparate fidelity tiers (`stub_pendulum`, `simplified_kinetics`, `qualified_full_body`) are never erroneously cross-compared.
+  - Adapted biomechanical load channels to `InjuryRiskScorer` without mock fallbacks and stamped all outputs with mandatory non-clinical disclaimers.
+  - Surfaced canonical comparison and injury indicator capabilities across `results_and_compare` and `exercise_analysis` workspace shells.
+  - `src/shared/python/workspace/__init__.py`: Exported all new coordinator and adapter symbols.
+  - `tests/integration/test_comparison_indicator_workspace.py`: 10 integration tests validating capability exposure across workspace shells, multi-run comparison, run compatibility validation (units, coordinates, timebase dt, channels, finite values), model fidelity level invariance, injury indicator execution, missing load channel fail-closed validation, and non-clinical disclaimer enforcement.
+- Reproduction: `pytest tests/integration/test_comparison_indicator_workspace.py --timeout=60`.
+- Next: Open PR, arm auto-merge, update issue.
+
+## ORG-06 Apply the Same Workspace Navigation to React and Tauri (#10516)
+
+- Worktree: main checkout, branch `feat/issue-10516-org06-react-workspace-navigation`, lease `antigravity-ud-10516`, DL-#10516.
+- Changes:
+  - `workspaceNavigation.ts`: Authoritative shared catalog definitions for the five primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`).
+  - `capabilityAdapter.ts`: `resolveWorkspaceToolAction` handles in-app web routes, desktop-window launches under Tauri, and actionable explanations with web alternatives for browser users.
+  - `WorkspaceNavigation.tsx`: Accessible `WorkspaceSidebar` with visible focus and focus recovery to `#main-content`, `WorkspaceBreadcrumb`, and `WorkspaceView` listing workspace member tools.
+  - `WorkspacePage.tsx`: Integrates `WorkspaceShell` with `WorkspaceSidebar` and `WorkspaceView` for bookmarkable task URLs (`/workspaces/:slug`).
+  - `LauncherDashboard.tsx`: Added task workspaces bar linking directly to each workspace destination.
+  - `routeTitles.ts`: Centralized page titles for all `/workspaces/:slug` routes.
+- Reproduction: `npm run test:run -- src/components/layout/WorkspaceNavigation.test.tsx` (from `ui/`).
+- Next: Open PR referencing Fixes #10516, enable auto-merge, release lease.
+
+## ORG-05 Build Task-Oriented Desktop Navigation Over Existing Embedded Tools (#10515)
+
+- Worktree: main checkout, branch `feat/issue-10515-org05-desktop-navigation`, lease `antigravity-ud-10515`, DL-#10515.
+- Changes:
+  - `workspace_navigation.py`: Defined 5 primary task workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`); implemented `ALIAS_MAP` canonical migration utilities (`migrate_model_order`, `migrate_favorites`, `migrate_saved_layout`); implemented single-instance tool reuse policy (`find_existing_tool_tab`, `focus_or_open_tool_tab`); guarded dirty tab close (`close_tool_tab_guarded`); created accessible return-to-workspace breadcrumb bar (`WorkspaceBreadcrumbBar`); implemented discoverability status explanations (`explain_tool_status`).
+  - `launcher_layout_manager.py`: Integrated `migrate_saved_layout` in `load_layout()` preserving user tile scaling, view mode, and dock state; updated `get_filtered_order()` to support workspace filters.
+  - `_launcher_navigation_ui.py`: Updated `_build_sidebar_filter_buttons()` with workspace destinations; added workspace routing to `_on_sidebar_routed()`; added `navigate_to_workspace()`.
+  - `launcher_ui_setup.py`: Enforced single-instance tool reuse in `dock_widget_as_tab()` before adding duplicate tabs.
+  - `test_workspace_navigation.py`: 22 comprehensive unit tests covering all requirements.
+- Reproduction: `pytest tests/launchers/test_workspace_navigation.py tests/launchers/test_workspace_tabs.py tests/launchers/test_launcher_layout_manager.py tests/launchers/test_launcher_ui_setup.py -v`.
+- Next: Open PR referencing Fixes #10515, enable auto-merge, release lease.
+
+## MS-82 Motion Matching Tile: Visual Playback, Standardized Metrics, and Navigation Handoff (#10355)
+
+- Branch: `feat/10355-motion-matching-tile-playback`, lease `antigravity-10355`, DL-#10355.
+- Changes:
+  - `src/tools/motion_matching/gui.py`: Added visual playback support using `QMovie` for `ik_playback.gif` and `tracking_playback.gif` with safe cleanup on widget close; added display of five standardized headline metrics (`full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, `inside_support_polygon_fraction`) and color-coded acceptance badge; populated physics backend combo from plant registry; added navigation action buttons "Open in Results Browser" and "Open in Viewer".
+  - `src/tools/motion_matching/pipeline.py`: Added `available_engines()` querying plant registry and fallback engines; added `extract_five_metrics_and_acceptance(summary)` for standardized metric extraction and qualification verdict determination.
+  - `src/tools/matched_swing_browser/model.py`: Resolved circular dependency between `matched_swing_browser` and `workspace` by moving `ResultFilter` import to `TYPE_CHECKING` and lazy runtime usage in `to_result_filter()`.
+  - `src/config/feature_parity.json` & `docs/development/feature_parity_matrix.md`: Upgraded `tools.motion_matching` from `gap` to `parity`, closing #10106 capability gap.
+  - `tests/tools/motion_matching/test_motion_matching_gui.py`: Unit tests for engine selection from plant registry, results pane movies, metrics, acceptance badge, navigation buttons, and step failures.
+- Reproduction: `pytest tests/tools/motion_matching/ tests/config/feature_parity/ -v`.
+- Next: Open PR, arm auto-merge, verify merge, release lease.
+
+## ORG-17 Replace Canonical Estimation Shell With Bounded Estimator Coordinator (#10526)
+
+- Branch: `feat/issue-10526-org17-estimation-workflow`, lease `antigravity-org17`, DL-#10526.
+- Changes:
+  - `src/shared/python/workspace/estimation_workspace.py`: Implemented `EstimationWorkspaceCoordinator`, `EstimationRunConfig`, `EstimationRunResult`, `ParameterPriorConfig`, and `IdentifiabilityGateConfig`.
+  - Wires `solve_single_trial_map`, `IdentifiabilityGateOptions`, parameter priors and bounds, and spline trajectory evaluation into an application service.
+  - Provides fail-closed validation for non-finite cost/trajectories and ill-conditioned systems, with complete provenance persistence round-trips.
+  - `src/shared/python/workspace/__init__.py`: Exported coordinator and dataclasses.
+  - `tests/integration/test_estimation_workspace.py`: 8 integration tests validating capability availability, synthetic parameter recovery, prior regularization, identifiability gating, non-finite cost gating, parameter bounds enforcement, and run provenance serialization roundtrips.
+- Reproduction: `pytest tests/integration/test_estimation_workspace.py --timeout=60`.
+- Next: PR auto-merge and release lease.
+
+## ORG-03 Replace Misleading Launches With Real Tasks or Explicit Nonlaunchable States (#10512)
+
+- Branch: `feat/issue-10512-org03-launch-truthfulness`, lease `issue-10512`, DL-#10512.
+- Changes:
+  - `src/launchers/task_launch_truthfulness.py`: Authoritative launch disposition audit table (`LaunchDisposition`) covering production solvers, prototype demos, library-only algorithms, parametric CLIs, provider-required tools, and service previews. Implemented pre-flight parameter validation contract for FreeMoCap sidecar runner (`launch_freemocap_with_validation`), rejecting zero-arg headless launches and dialog cancellations without spawning subprocesses.
+  - `src/launchers/launcher_model_handlers.py`: Guarded `SpecialAppHandler` to reject direct launches of library-only components (`swing_optimizer`, `injury_analysis`) and parametric CLIs (`motion_capture`), exposing actionable `status_message()` with tracking issue references and remediation. Marked `GolfSimulationSuiteHandler` as prototype demo with truthful status disclosure.
+  - `src/launchers/external_tools_adapter.py`: Removed blank placeholder `VideoAnalyzerWindow` fallback from `_import_video_analyzer()`, allowing missing provider / import errors to surface through the shared `_UnavailableToolWindow` diagnostic.
+  - `src/launchers/launcher_process_manager.py`: Added `launch_script_with_args()` and safe argument forwarding in `launch_script()`. Hardened `_assign_to_job()` on Windows to safely handle non-integer or mock process PIDs without crashing.
+  - `src/config/launcher_manifest.json` & `src/config/models.yaml`: Updated metadata and status chips for `golf_simulation_suite` (`prototype`), `swing_optimizer` (`experimental`/library), `injury_analysis` (`experimental`/library), removing qualified engine claims.
+  - `ui/public/capability-atlas/`: Regenerated `graph.json` and `index.html` via `python -m scripts.generate_capability_atlas`.
+  - `tests/launchers/test_task_launch_truthfulness.py`: TDD acceptance suite verifying all RED/GREEN cases: problematic tiles cannot claim ready/gui_ready; missing video analyzer yields diagnostic window; FreeMoCap zero args/cancellation performs no spawn and valid args pass through unchanged; simulator prototype is marked demo-only.
+- Reproduction: `pytest tests/launchers/test_task_launch_truthfulness.py tests/launchers/test_simulation_guis.py tests/launchers/test_launcher_process_manager.py tests/scripts/test_capability_atlas.py --timeout=60`.
+- Next: Validate against rebased main, enable auto-merge on #10536, release lease on #10512, claim #10513 (ORG-04).
+
 ## ORG-02 Separate Capability Identity, Maturity, Availability, and Qualification (#10511)
 
 - Branch: `feat/issue-10511-org02-capability-state-contract`, lease `antigravity-ud-10511`, DL-#10511.

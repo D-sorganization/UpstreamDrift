@@ -3,16 +3,23 @@
 from __future__ import annotations
 
 import contextlib
-import json
-import os
-import re
-import tempfile
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
+import json
+import os
 from pathlib import Path
+import re
+import tempfile
 from typing import Any
 
 from src.shared.python.core.contracts.exceptions import StateError
+from .artifact_handoff import (
+    ArtifactKind,
+    ArtifactReference,
+    SUPPORTED_FRAMES,
+    SUPPORTED_SCHEMAS,
+    WorkspaceHandoff,
+)
 
 _ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
 _PROJECT_FILE = "project.json"
@@ -50,6 +57,80 @@ class SessionMetadata:
 
 
 @dataclass(frozen=True)
+class RunMetadata:
+    """A versioned run carrying parameters and typed artifact references."""
+
+    run_id: str
+    project_id: str
+    session_id: str
+    subject_id: str
+    engine: str
+    model_id: str
+    club: dict[str, Any]
+    units: dict[str, str]
+    frame: str
+    timebase: dict[str, Any]
+    parameters: dict[str, Any]
+    inputs: tuple[ArtifactReference, ...] = ()
+    outputs: tuple[ArtifactReference, ...] = ()
+    status: str = "draft"
+    qualification: dict[str, Any] | None = None
+    engine_version: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    schema_version: str = "1.0.0"
+    created_at: str = field(default_factory=lambda: _utc_now())
+
+    def to_handoff(self) -> WorkspaceHandoff:
+        """Export this run as a versioned WorkspaceHandoff."""
+        return WorkspaceHandoff(
+            handoff_id=self.run_id,
+            project_id=self.project_id,
+            session_id=self.session_id,
+            subject_id=self.subject_id,
+            engine=self.engine,
+            model_id=self.model_id,
+            club=self.club,
+            units=self.units,
+            frame=self.frame,
+            timebase=self.timebase,
+            parameters=self.parameters,
+            inputs=self.inputs,
+            outputs=self.outputs,
+            status=self.status,
+            qualification=self.qualification,
+            engine_version=self.engine_version,
+            metadata=self.metadata,
+            schema_version=self.schema_version,
+            created_at=self.created_at,
+        )
+
+    @classmethod
+    def from_handoff(cls, handoff: WorkspaceHandoff) -> RunMetadata:
+        """Construct a RunMetadata instance from a WorkspaceHandoff."""
+        return cls(
+            run_id=handoff.handoff_id,
+            project_id=handoff.project_id,
+            session_id=handoff.session_id,
+            subject_id=handoff.subject_id,
+            engine=handoff.engine,
+            model_id=handoff.model_id,
+            club=dict(handoff.club),
+            units=dict(handoff.units),
+            frame=handoff.frame,
+            timebase=dict(handoff.timebase),
+            parameters=dict(handoff.parameters),
+            inputs=handoff.inputs,
+            outputs=handoff.outputs,
+            status=handoff.status,
+            qualification=handoff.qualification,
+            engine_version=handoff.engine_version,
+            metadata=dict(handoff.metadata),
+            schema_version=handoff.schema_version,
+            created_at=handoff.created_at,
+        )
+
+
+@dataclass(frozen=True)
 class ProjectMetadata:
     """The project spine persisted to ``project.json``."""
 
@@ -61,10 +142,13 @@ class ProjectMetadata:
     subjects: dict[str, SubjectMetadata] = field(default_factory=dict)
     sessions: dict[str, SessionMetadata] = field(default_factory=dict)
     datasets: dict[str, DatasetMetadata] = field(default_factory=dict)
+    runs: dict[str, RunMetadata] = field(default_factory=dict)
+    active_run_id: str | None = None
+    extra_fields: dict[str, Any] = field(default_factory=dict)
 
 
 class SessionProjectStore:
-    """JSON-backed project/session/dataset metadata store.
+    """JSON-backed project/session/dataset/run metadata store.
 
     Postcondition: successful mutations are durable in ``project.json`` and a
     fresh store pointed at the same root can load them.
@@ -224,9 +308,195 @@ class SessionProjectStore:
             ]
         return sorted(datasets, key=lambda dataset: dataset.dataset_id)
 
+    # ------------------------------------------------------------------------
+    # Run & Artifact Handoff Management
+    # ------------------------------------------------------------------------
+
+    def register_run(
+        self, handoff_or_run: WorkspaceHandoff | RunMetadata
+    ) -> RunMetadata:
+        """Register and persist a new run / handoff into project metadata.
+
+        Enforces:
+        - Session exists in project
+        - Subject identity matches session's subject (rejects cross-session subject mismatch)
+        - Frame and schemas are known and supported
+        - Referenced artifacts exist on disk and match recorded cryptographic hashes
+        - Canceled/failed run cannot be marked with completed qualification
+        """
+        if isinstance(handoff_or_run, WorkspaceHandoff):
+            run = RunMetadata.from_handoff(handoff_or_run)
+        elif isinstance(handoff_or_run, RunMetadata):
+            run = handoff_or_run
+        else:
+            raise TypeError(
+                f"handoff_or_run must be WorkspaceHandoff or RunMetadata, got {type(handoff_or_run).__name__}"
+            )
+
+        _validate_id(run.run_id, "run_id")
+        project = self.load_project()
+        if run.session_id not in project.sessions:
+            raise KeyError(f"unknown session_id: {run.session_id}")
+        session = project.sessions[run.session_id]
+
+        # DbC: Cross-session subject mismatch check
+        if session.subject_id != run.subject_id:
+            raise ValueError(
+                f"cross-session subject mismatch: session '{run.session_id}' "
+                f"belongs to subject '{session.subject_id}', got '{run.subject_id}'"
+            )
+
+        # DbC: Frame and schema validation
+        if run.frame not in SUPPORTED_FRAMES:
+            raise ValueError(
+                f"unknown or unsupported frame: {run.frame!r}; "
+                f"supported frames are {sorted(SUPPORTED_FRAMES)}"
+            )
+
+        for art in (*run.inputs, *run.outputs):
+            if art.schema not in SUPPORTED_SCHEMAS:
+                raise ValueError(
+                    f"unknown or unsupported schema: {art.schema!r}; "
+                    f"supported schemas are {sorted(SUPPORTED_SCHEMAS)}"
+                )
+
+        # DbC: Artifact presence and hash verification BEFORE writing to disk
+        for art in (*run.inputs, *run.outputs):
+            art.verify_on_disk(self._root)
+
+        # DbC: Invariant: canceled or failed jobs never become completed results
+        if run.status in {"failed", "canceled"} and run.qualification is not None:
+            if run.qualification.get("passed", False):
+                raise ValueError(
+                    f"{run.status} run cannot be marked with completed qualification"
+                )
+
+        runs = dict(project.runs)
+        runs[run.run_id] = run
+        self._save(_replace_project(project, runs=runs))
+        return run
+
+    def load_run(self, run_id: str) -> RunMetadata:
+        """Load a run by run_id."""
+        _validate_id(run_id, "run_id")
+        project = self.load_project()
+        if run_id not in project.runs:
+            raise KeyError(f"unknown run_id: {run_id}")
+        return project.runs[run_id]
+
+    def list_runs(self, session_id: str | None = None) -> list[RunMetadata]:
+        """Return runs ordered by creation time, optionally scoped to one session."""
+        if session_id is not None:
+            _validate_id(session_id, "session_id")
+        runs = list(self.load_project().runs.values())
+        if session_id is not None:
+            runs = [run for run in runs if run.session_id == session_id]
+        return sorted(runs, key=lambda r: (r.created_at, r.run_id))
+
+    def set_active_run(self, run_id: str | None) -> None:
+        """Select the active run context."""
+        project = self.load_project()
+        if run_id is not None:
+            _validate_id(run_id, "run_id")
+            if run_id not in project.runs:
+                raise KeyError(f"unknown run_id: {run_id}")
+        self._save(_replace_project(project, active_run_id=run_id))
+
+    def get_active_run(self) -> RunMetadata | None:
+        """Return the active run if set and present, else None."""
+        project = self.load_project()
+        if project.active_run_id is None:
+            return None
+        return project.runs.get(project.active_run_id)
+
+    def clone_run(
+        self,
+        source_run_id: str,
+        new_run_id: str,
+        *,
+        parameters: dict[str, Any] | None = None,
+    ) -> RunMetadata:
+        """Clone run context to a new run ID without overwriting source evidence.
+
+        Postcondition:
+        - new_run_id has source inputs, parameters, and configuration
+        - outputs and completion qualification are NOT copied over
+        - source run evidence remains completely unchanged
+        """
+        _validate_id(new_run_id, "new_run_id")
+        project = self.load_project()
+        if source_run_id not in project.runs:
+            raise KeyError(f"unknown source_run_id: {source_run_id}")
+        if new_run_id in project.runs:
+            raise StateError(f"run already exists: {new_run_id}")
+
+        source = project.runs[source_run_id]
+        merged_params = dict(source.parameters)
+        if parameters is not None:
+            merged_params.update(parameters)
+
+        cloned = RunMetadata(
+            run_id=new_run_id,
+            project_id=source.project_id,
+            session_id=source.session_id,
+            subject_id=source.subject_id,
+            engine=source.engine,
+            model_id=source.model_id,
+            club=dict(source.club),
+            units=dict(source.units),
+            frame=source.frame,
+            timebase=dict(source.timebase),
+            parameters=merged_params,
+            inputs=source.inputs,
+            outputs=(),
+            status="draft",
+            qualification=None,
+            engine_version=source.engine_version,
+            metadata=dict(source.metadata),
+            schema_version=source.schema_version,
+            created_at=_utc_now(),
+        )
+
+        runs = dict(project.runs)
+        runs[new_run_id] = cloned
+        self._save(_replace_project(project, runs=runs))
+        return cloned
+
+    def check_run_artifacts(self, run_id: str) -> list[str]:
+        """Check all referenced artifacts for a run and explain missing files."""
+        run = self.load_run(run_id)
+        missing: list[str] = []
+        for art in (*run.inputs, *run.outputs):
+            resolved = art.resolve_path(self._root)
+            if not resolved.exists() or not resolved.is_file():
+                kind_str = (
+                    art.kind.value
+                    if isinstance(art.kind, ArtifactKind)
+                    else str(art.kind)
+                )
+                missing.append(
+                    f"Artifact '{art.artifact_id}' ({kind_str}) file is missing at '{resolved}'. "
+                    f"No substitute was invented."
+                )
+        return missing
+
+    def export_handoff(self, run_id: str) -> WorkspaceHandoff:
+        """Export a run as a WorkspaceHandoff."""
+        return self.load_run(run_id).to_handoff()
+
+    def import_handoff(self, handoff: WorkspaceHandoff) -> RunMetadata:
+        """Import a WorkspaceHandoff into the project store."""
+        return self.register_run(handoff)
+
     def _save(self, project: ProjectMetadata) -> None:
         now = _utc_now()
-        payload = asdict(_replace_project(project, updated_at=now))
+        proj_updated = _replace_project(project, updated_at=now)
+        payload = asdict(proj_updated)
+        payload.pop("extra_fields", None)
+        # Merge back any preserved extra fields from prior migration
+        for k, v in proj_updated.extra_fields.items():
+            if k not in payload:
+                payload[k] = v
         try:
             self._root.mkdir(parents=True, exist_ok=True)
             _atomic_write_json(self._path, payload)
@@ -236,24 +506,25 @@ class SessionProjectStore:
 
 def _replace_project(
     project: ProjectMetadata,
-    *,
-    root: str | None = None,
-    updated_at: str | None = None,
-    subjects: dict[str, SubjectMetadata] | None = None,
-    sessions: dict[str, SessionMetadata] | None = None,
-    datasets: dict[str, DatasetMetadata] | None = None,
+    **changes: Any,
 ) -> ProjectMetadata:
-    return replace(
-        project,
-        root=project.root if root is None else root,
-        updated_at=project.updated_at if updated_at is None else updated_at,
-        subjects=project.subjects if subjects is None else subjects,
-        sessions=project.sessions if sessions is None else sessions,
-        datasets=project.datasets if datasets is None else datasets,
-    )
+    return replace(project, **changes)
 
 
 def _project_from_dict(raw: dict[str, Any]) -> ProjectMetadata:
+    known_keys = {
+        "project_id",
+        "name",
+        "root",
+        "created_at",
+        "updated_at",
+        "subjects",
+        "sessions",
+        "datasets",
+        "runs",
+        "active_run_id",
+    }
+    extra_fields = {k: v for k, v in raw.items() if k not in known_keys}
     subjects = {
         key: SubjectMetadata(**value)
         for key, value in dict(raw.get("subjects", {})).items()
@@ -266,6 +537,13 @@ def _project_from_dict(raw: dict[str, Any]) -> ProjectMetadata:
         key: DatasetMetadata(**value)
         for key, value in dict(raw.get("datasets", {})).items()
     }
+    runs = {
+        key: _run_from_dict(value) for key, value in dict(raw.get("runs", {})).items()
+    }
+    active_run_id = raw.get("active_run_id")
+    if active_run_id is not None:
+        active_run_id = str(active_run_id)
+
     return ProjectMetadata(
         project_id=str(raw["project_id"]),
         name=str(raw["name"]),
@@ -275,6 +553,55 @@ def _project_from_dict(raw: dict[str, Any]) -> ProjectMetadata:
         subjects=subjects,
         sessions=sessions,
         datasets=datasets,
+        runs=runs,
+        active_run_id=active_run_id,
+        extra_fields=extra_fields,
+    )
+
+
+def _run_from_dict(raw: dict[str, Any]) -> RunMetadata:
+    inputs = tuple(
+        ArtifactReference(
+            artifact_id=str(art["artifact_id"]),
+            path=str(art["path"]),
+            hash=str(art["hash"]),
+            schema=str(art["schema"]),
+            kind=str(art["kind"]),
+            metadata=dict(art.get("metadata", {})),
+        )
+        for art in raw.get("inputs", ())
+    )
+    outputs = tuple(
+        ArtifactReference(
+            artifact_id=str(art["artifact_id"]),
+            path=str(art["path"]),
+            hash=str(art["hash"]),
+            schema=str(art["schema"]),
+            kind=str(art["kind"]),
+            metadata=dict(art.get("metadata", {})),
+        )
+        for art in raw.get("outputs", ())
+    )
+    return RunMetadata(
+        run_id=str(raw["run_id"]),
+        project_id=str(raw["project_id"]),
+        session_id=str(raw["session_id"]),
+        subject_id=str(raw["subject_id"]),
+        engine=str(raw["engine"]),
+        model_id=str(raw["model_id"]),
+        club=dict(raw.get("club", {})),
+        units=dict(raw.get("units", {})),
+        frame=str(raw["frame"]),
+        timebase=dict(raw.get("timebase", {})),
+        parameters=dict(raw.get("parameters", {})),
+        inputs=inputs,
+        outputs=outputs,
+        status=str(raw.get("status", "draft")),
+        qualification=raw.get("qualification"),
+        engine_version=raw.get("engine_version"),
+        metadata=dict(raw.get("metadata", {})),
+        schema_version=str(raw.get("schema_version", "1.0.0")),
+        created_at=str(raw["created_at"]),
     )
 
 
