@@ -285,6 +285,29 @@ Establishes the capability inventory baseline across all 104 launcher tiles and 
   - Validates 100% tile coverage across local and external provider roots (`UPSTREAM_DRIFT_PROVIDER_ROOTS`).
   - Strict regression gates ensuring legacy layouts and saved workspace configurations resolve without breakage.
 
+## Connect Swing, Impact, Flight, and Preserved Trajectory Viewers (ORG-14, #10523)
+
+Preserves specialized viewer identities and bridges Swing State Providers, Impact Solvers, and Ball Flight Trajectories across Shot Tracer (Qt), web BallFlight (`ui/src/pages/BallFlight.tsx`), and Impact Explorer (ROC):
+- **Shot Trajectory Handoff Coordinator (`src/shared/python/workspace/trajectory_handoff.py`)**:
+  - `ShotTrajectoryHandoffCoordinator`: Orchestrates swing-state extraction, end-to-end impact/flight simulation, wire format export, artifact registration, viewer interchange, and session rollback semantics.
+  - Implements ADR-0047: Preserves viewer identities across Shot Tracer (Qt), web BallFlight, and Impact Explorer without retiring viewers or merging distinct flight model families (`ud.flight_models` vs `swing_sim.flight`).
+- **Wire Contract & SI Trajectory Interchange (`swing_sim.ball_flight_trajectory/1`)**:
+  - Standardizes trajectory wire format with 6 canonical keys: `format`, `source_id`, `frame_id`, `channels`, `provenance`, and `samples`.
+  - Canonical flight frame: `flight_xfwd_yleft_zup` (`FLIGHT_FRAME_ID`), velocity channel `velocity_mps`, with parameter digest provenance.
+  - Retains immutable sample positions and timestamps across interchange; disk bytes and retained arrays are never mutated.
+  - `pipeline_result_to_trajectory_record` (`src/shared/python/physics/flight_trajectory_export.py`): Bridges `PipelineResult` from `SwingBallFlightPipeline` into the canonical wire contract.
+- **Honest Engine Sourcing & Extraction Refusal**:
+  - Integrates honest swing state sourcing: routes supported `manual` and `mujoco` (via `MuJoCoSwingStateProvider`) engines to `SwingBallFlightPipeline`.
+  - Refuses unsupported engine sourcing (`drake`, `pinocchio`) fail-closed with `UnsupportedEngineSourceError`.
+  - Refuses arbitrary unvalidated full-body runs fail-closed with `ExtractionAdapterError`, prohibiting clubhead impact guessing.
+  - Refuses mismatched frames and corrupted hashes fail-closed with `FrameUnitMismatchError` and `InvalidTrajectoryHashError`.
+- **Results Workspace Action Extension (`src/shared/python/workspace/results_workspace.py`)**:
+  - Adds `WorkspaceActionType.COMPARE_FLIGHT_MODELS` (`"open_in_compare_flight_models"`) and `WorkspaceActionType.OPEN_IN_IMPACT_EXPLORER` (`"open_in_impact_explorer"`).
+  - Diagnostic availability: Enables comparison and playback actions when artifacts match required categories (`ResultCategory.FLIGHT_TRAJECTORY` / `DYNAMIC_RUN`) and files exist on disk, providing actionable rationale when disabled.
+- **Session Context & Transaction Rollback**:
+  - Carries environmental conditions (`EnvironmentalConditions`) and launch parameters across active session context.
+  - Supports atomic staging and rollback (`begin_session_transaction`, `stage_tentative_trajectory`, `cancel_session_transaction`): user cancellation or simulation failure safely retains earlier active trajectory.
+
 ## Results Workspace Handoff and Action Integration (ORG-13, #10521)
 
 Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with Replay, Data Explorer, Plot, Compare, and Export actions within a unified workspace:
