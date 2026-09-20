@@ -564,6 +564,7 @@ class CaptureRigWidget(QWidget):
         ("annotate", "Annotate / edit points"),
         ("stop", "Stop"),
         ("load", "Load session"),
+        ("inspect_targets", "Open in Inspect Targets"),
     )
 
     def __init__(
