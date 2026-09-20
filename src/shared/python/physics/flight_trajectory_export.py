@@ -77,7 +77,10 @@ import hashlib
 import json
 import math
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.shared.python.physics.swing_ball_flight_pipeline import PipelineResult
 
 from .flight_models import FlightModelRegistry, FlightModelType, FlightResult
 
@@ -190,7 +193,9 @@ def trajectory_parameter_digest(parameters: Mapping[str, float | int | str]) -> 
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def _validated_samples(result: FlightResult) -> list[dict[str, Any]]:
+def _validated_samples(
+    result: FlightResult | PipelineResult,
+) -> list[dict[str, Any]]:
     """Return the retained trajectory as wire samples, or refuse.
 
     The samples are the integrator's own retained points, never
@@ -298,7 +303,7 @@ def flight_result_to_trajectory_record(
 
 
 def pipeline_result_to_trajectory_record(
-    result: Any,
+    result: PipelineResult,
     *,
     source_id: str | None = None,
 ) -> dict[str, Any]:
