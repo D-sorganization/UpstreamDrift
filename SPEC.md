@@ -1,3 +1,32 @@
+## Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (ORG-07, #10514)
+
+Projects 28 multi-provider exercise variants into 7 cohesive logical model choices while preserving underlying provider assets and enforcing strict authority resolution:
+- **Logical Model Grouping & Projections (`src/shared/python/config/model_variant_grouping.py`)**:
+  - `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection`: Projects 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices (`Gait Analysis`, `Squat Kinematics`, `Jump Land Mechanics`, `Run Sprint Cycle`, `Sit to Stand Transition`, `Stair Climb Descent`, `Single Leg Balance`).
+  - Strict DbC invariants on engine selection preventing silent engine fallback or substitution.
+  - Name collision protection enforcing distinct identities across disparate canonical models.
+- **Shortcut & Task Mapping Resolution (`resolve_shortcut`)**:
+  - Maps legacy shortcut IDs (`biomech_sit_to_stand`, `biomech_gait`) to `biomech_exercise` with explicit preset selection, guaranteeing `sit_to_stand` never falls back to `gait`.
+  - Maps engine dashboards (`drake_dashboard`, `mujoco_dashboard`, `pinocchio_dashboard`) into engine advanced modes.
+  - Resolves `movement_optimizer` and `tools_movement_optimizer` to unified task workflows with #9406 authority resolution.
+- **Sibling Checkout Diagnostics & Handler Hardening (`src/launchers/launcher_model_handlers.py`, `src/launchers/exercise_dashboard.py`)**:
+  - `SharedRepoHandler.get_missing_checkout_diagnostic`: Emits actionable remediation diagnostics when sibling repository clones are missing.
+  - `ExerciseDashboard`: Dynamicizes exercise title and configuration in UI widgets and error messages.
+
+## Unified Artifact and Project Context Handoff Between Workspaces (ORG-08, #10517)
+
+Defines typed, schema-validated artifact and project context handoffs across workspaces with cryptographic integrity and adapter conversion:
+- **Typed Artifact & Workspace Handoff Models (`src/shared/python/workspace/artifact_handoff.py`)**:
+  - `ArtifactKind`: Defines canonical artifact kinds (`time_series_trajectory`, `mesh_geometry`, `kinematic_tree`, `optimization_result`, `sensor_stream`, `calibration_data`).
+  - `ArtifactReference`: Immutable artifact reference with URI/path, kind, schema version, cryptographic SHA-256 integrity hash, coordinate frame convention, and provenance metadata.
+  - `WorkspaceHandoff`: Package containing project metadata, run context, active artifact references, and handoff provenance.
+  - Precondition and schema validation (`compute_file_sha256`, `SUPPORTED_HANDOFF_SCHEMA_VERSIONS`, `SUPPORTED_KINDS`, `SUPPORTED_FRAMES`): Validates file existence and bitwise integrity before transfer or write.
+- **Named Artifact Adapter Registry (`register_artifact_adapter`, `convert_artifact`)**:
+  - Pluggable adapter registry allowing verified artifact transformation across coordinate frames and schema formats with complete provenance recording.
+- **Session Project Store Handoff API (`src/shared/python/workspace/project_store.py`)**:
+  - `SessionProjectStore`: Extends project store with `register_run`, `load_run`, `list_runs`, `set_active_run`, `get_active_run`, `clone_run`, `check_run_artifacts`, `export_handoff`, and `import_handoff`.
+  - Enforces Design-by-Contract boundary checks: cross-session subject mismatch rejection, atomic durability under interrupted writes, and non-destructive run cloning without falsified output evidence.
+
 ## Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (ORG-18, #10527)
 
 Surfaces cross-engine comparison and injury risk indicators into dedicated application service coordinators, consuming qualified biomechanical simulation runs and enforcing fail-closed compatibility and clinical non-diagnostic contracts:

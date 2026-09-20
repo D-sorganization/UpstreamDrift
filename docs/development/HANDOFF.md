@@ -1,4 +1,25 @@
-# Current Matching Continuation Handoff
+## [ORG-08] Unified Artifact and Project Context Handoff Between Workspaces (#10517)
+
+- Worktree / Branch: `feat/issue-10517-org08-workspace-handoff`, lease `antigravity-ud-10517`, DL-#10517.
+- Changes:
+  - `src/shared/python/workspace/artifact_handoff.py`: Added `ArtifactKind`, `ArtifactReference`, `WorkspaceHandoff`, cryptographic hash verification (`compute_file_sha256`), supported frames and schemas validation, and named adapter registry (`register_artifact_adapter`, `convert_artifact`) with recorded provenance.
+  - `src/shared/python/workspace/project_store.py`: Added `RunMetadata`, extended `ProjectMetadata` with `runs`, `active_run_id`, and `extra_fields` migration preservation. Extended `SessionProjectStore` with `register_run`, `load_run`, `list_runs`, `set_active_run`, `get_active_run`, `clone_run`, `check_run_artifacts`, `export_handoff`, and `import_handoff`. Enforced Design-by-Contract boundary checks (cross-session subject mismatch, frame/schema validity, artifact presence and hash verification before writes, atomic write resilience).
+  - `src/shared/python/workspace/__init__.py`: Exported all new workspace handoff types and functions.
+  - `tests/unit/workspace/test_artifact_handoff.py`: 12 focused unit tests covering all RED and GREEN acceptance criteria.
+- Reproduction: `python -m pytest tests/unit/workspace/test_artifact_handoff.py tests/unit/workspace/test_project_store.py tests/unit/workspace/test_results_browser.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10517, notify parent orchestrator.
+
+## ORG-07 Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (#10514)
+
+- Worktree / Branch: `feat/issue-10514-org07-model-variant-grouping`, lease `antigravity-ud-10514`, DL-#10514.
+- Changes:
+  - `model_variant_grouping.py`: Implemented `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection` projecting 28 exercise variants across 4 providers into 7 logical choices without dropping underlying engine assets. Implemented `resolve_shortcut` resolving legacy IDs and presets.
+  - `model_pack_manifest.py`, `model_registry.py`: Preserved `exercise` and `preset_params` fields across serialization and registry loading.
+  - `launcher_model_handlers.py`: Enhanced `SharedRepoHandler` with `get_missing_checkout_diagnostic` to emit explicit actionable diagnostics on missing sibling checkouts. Prevented `sit_to_stand` fallback to `gait` in `BiomechExerciseHandler`.
+  - `exercise_dashboard.py`: Dynamicized exercise title in error dialogs/widgets instead of hardcoding "Gait".
+  - `models.yaml`: Moved `*_models_shared` to Models/Integrations access; annotated engine dashboards as advanced modes; tagged exercise shortcuts and movement optimizer task mapping.
+- Reproduction: `pytest tests/config/test_model_variant_grouping.py tests/config/test_tile_paths_resolve.py tests/unit/config/test_model_pack_manifest.py tests/launchers/test_launcher_model_handlers.py --timeout=60`.
+- Next: Open PR, arm auto-merge (`--auto --squash`), release lease, report to parent orchestrator.
 
 ## ORG-18 Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (#10527)
 
@@ -133,10 +154,6 @@ Docker build and dependency-artifact regeneration before merge.
   - `tests/config/launcher_manifest/test_parity.py`: Added checks for loaded tiles in `test_route_mode_routes_exist_in_react_router`, and added `test_every_tile_destination_resolves_authoritatively`.
 - Reproduction: `npm run test:run` in `ui/` (874 tests pass); `pytest tests/config/launcher_manifest/ tests/config/test_launcher_registry_parity.py` (95 tests pass).
 - Next: Land PR, arm auto-merge, release lease.
-
-=======
-
-> > > > > > > bf6ec7343 (feat(ui): apply task-oriented workspace navigation to React and Tauri (#10516))
 
 ## MV-06 Expose Real Forces, Torques, and Explicit Counterfactual Semantics (#10482)
 

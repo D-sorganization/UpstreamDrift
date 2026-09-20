@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10517 · Unified Artifact and Project Context Handoff Between Workspaces
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10517 (ORG-08, epic #10508)
+- **Branch:** feat/issue-10517-org08-workspace-handoff
+- **PR:** #10542
+- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/artifact_handoff.py; src/shared/python/workspace/project_store.py; tests/unit/workspace/test_artifact_handoff.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (18 unit tests pass across test_artifact_handoff.py, test_project_store.py, test_results_browser.py; ruff check and format clean; check_file_size_budget clean).
+- **Summary:** Extended SessionProjectStore and ProjectMetadata with typed, versioned artifact handoffs (WorkspaceHandoff, ArtifactReference, ArtifactKind, RunMetadata). Enforced Design-by-Contract boundary preconditions (cross-session subject mismatch rejection, frame and schema validation, artifact existence and cryptographic sha256 hash checks before disk write, canceled/failed job qualification invariant). Added migration handling preserving unknown supported fields in older project.json files, atomic durability under interrupted writes, active context selection, and non-destructive run cloning without falsified output evidence. Implemented registered named artifact adapter conversion preserving provenance.
+- **Next step:** Push branch, open PR, enable auto-merge, release lease on #10517, and notify parent orchestrator.
+- **Evidence:** tests/unit/workspace/test_artifact_handoff.py; tests/unit/workspace/test_project_store.py; tests/unit/workspace/test_results_browser.py.
+
 ### DL-#10527 · Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces
 
 - **State:** in_progress
@@ -145,7 +159,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10516 · Apply the Same Workspace Navigation to React and Tauri
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10516 (ORG-06, epic #10508)
 - **Branch:** feat/issue-10516-org06-react-workspace-navigation
@@ -156,6 +170,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Applied task-oriented workspace navigation across React and Tauri (ORG-06). Reused shared catalog metadata for the five primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `WorkspaceSidebar` and `WorkspaceBreadcrumb` within `WorkspaceShell` preserving browser history, bookmarkable task URLs (`/workspaces/:slug`), centralized route titles, and keyboard focus recovery. Created shared `resolveWorkspaceToolAction` capability adapter opening native tools under Tauri/desktop while providing actionable explanations and web alternatives for browser-only users.
 - **Next step:** Commit, push, open PR referencing Fixes #10516, enable auto-merge, and release lease.
 - **Evidence:** ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/components/layout/WorkspaceNavigation.tsx.
+
+### DL-#10514 · Group Engine Dashboards, Exercise Variants, and Repository Shortcuts
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10514 (ORG-07, epic #10508)
+- **Branch:** feat/issue-10514-org07-model-variant-grouping
+- **PR:** #10541
+- **Paths:** src/config/models.yaml; src/launchers/exercise_dashboard.py; src/launchers/launcher_model_handlers.py; src/shared/python/config/**init**.py; src/shared/python/config/model_pack_manifest.py; src/shared/python/config/model_registry.py; src/shared/python/config/model_variant_grouping.py; tests/config/test_model_variant_grouping.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (6 unit tests pass in test_model_variant_grouping.py, 183 tests pass across adjacent suites; ruff check clean; ruff format clean; line budget check clean).
+- **Summary:** Implemented `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection` in `src/shared/python/config/model_variant_grouping.py` to project 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices without dropping any provider assets underneath. Preserved strict DbC on engine selection (never silently substitutes another engine). Added name collision protection across distinct canonical identities. Implemented `resolve_shortcut` mapping `biomech_sit_to_stand` (never falls back to gait) and `biomech_gait` to `biomech_exercise`, engine dashboards (`drake_dashboard`, `mujoco_dashboard`, `pinocchio_dashboard`) to engine advanced modes, and `movement_optimizer` / `tools_movement_optimizer` to unified task with #9406 authority resolution. Updated `SharedRepoHandler` with `get_missing_checkout_diagnostic` to emit actionable diagnostics when sibling repos are missing. Dynamicized exercise names in `exercise_dashboard.py`.
+- **Next step:** Commit with conventional commit, push branch, open PR, and arm auto-merge.
+- **Evidence:** tests/config/test_model_variant_grouping.py; tests/config/test_tile_paths_resolve.py; tests/unit/config/test_model_pack_manifest.py; tests/launchers/test_launcher_model_handlers.py.
 
 ### DL-#10482 · Expose Real Forces, Torques, and Explicit Counterfactual Semantics
 
