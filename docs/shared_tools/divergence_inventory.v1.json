@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1339,
+    "ud-only": 1340,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -826,7 +826,7 @@
     "workspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 6,
+      "ud-only": 7,
       "tools-only": 0,
       "spelling-only": 0
     }
@@ -33765,7 +33765,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 1777,
+      "ud_bytes": 2537,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -33778,6 +33778,18 @@
       "package": "workspace",
       "subpackage": "",
       "ud_bytes": 12113,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/comparison_indicator_workspace.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 16209,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
