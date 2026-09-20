@@ -21,6 +21,7 @@ import logging
 import sys
 import xml.etree.ElementTree as ET  # element creation only; parsing is defused
 from pathlib import Path
+from typing import Any
 
 import defusedxml.ElementTree as DET
 import numpy as np
@@ -64,6 +65,46 @@ def stiffen_weld(xml: str) -> str:
     return ET.tostring(root, encoding="unicode")
 
 
+def _load_reference_trajectory(
+    run: Path, receipt: dict[str, Any]
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    cand_file = run / "candidate.npz"
+    if cand_file.is_file():
+        from src.shared.python.motion_matching.candidate_io import load_candidate
+
+        cand = load_candidate(cand_file)
+        times, q_ref = cand.time_s, cand.q
+        ik = (
+            np.load(run / "ik_trajectory.npz")
+            if (run / "ik_trajectory.npz").is_file()
+            else None
+        )
+        valid = (
+            cand.marker_validity
+            if cand.marker_validity is not None
+            else (
+                ik["valid"]
+                if ik is not None
+                else np.ones((len(times), len(receipt["labels"])), dtype=bool)
+            )
+        )
+        return times, q_ref, valid
+
+    ik = np.load(run / "ik_trajectory.npz")
+    return ik["time_s"], ik["q_ref"], ik["valid"]
+
+
+def _write_mjx_outputs(
+    run: Path,
+    xml: str,
+    meta: dict[str, Any],
+    package_arrays: dict[str, Any],
+) -> None:
+    np.savez(run / "mjx_package.npz", **package_arrays)
+    (run / "mjx_package.xml").write_text(xml, encoding="utf-8")
+    (run / "mjx_package.json").write_text(json.dumps(meta, indent=2) + "\n")
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
@@ -73,8 +114,7 @@ def main() -> None:
     run = args.run if args.run.is_absolute() else HERE / args.run
     receipt = json.loads((run / "receipt.json").read_text())
     spec_bytes = (run / "full_body_spec_hipcal_scaled.json").read_bytes()
-    ik = np.load(run / "ik_trajectory.npz")
-    times, q_ref, valid = ik["time_s"], ik["q_ref"], ik["valid"]
+    times, q_ref, valid = _load_reference_trajectory(run, receipt)
     labels = tuple(receipt["labels"])
     lane = Lane(labels, CAPTURES[receipt["capture"]])
     adapter = NativeMujocoFullBodyModel(spec_bytes)
@@ -102,24 +142,23 @@ def main() -> None:
     sphere_names = list(spheres)
     contact = adapter.contact_parameters
     ground = adapter.ground_plane
-    np.savez(
-        run / "mjx_package.npz",
-        time_s=times,
-        q_track=q_track,
-        q_ref=q_ref,
-        targets_m=lane.points,
-        valid=valid,
-        marker_body_ids=np.array(kin._body_ids),
-        marker_local_m=np.array(kin._local),
-        qpos_adr=qpos_adr,
-        dof_adr=dof_adr,
-        root_mask=root_mask,
-        sphere_site_ids=np.array([spheres[n]["site_id"] for n in sphere_names]),
-        sphere_body_ids=np.array([spheres[n]["body_id"] for n in sphere_names]),
-        sphere_radii_m=np.array([spheres[n]["radius"] for n in sphere_names]),
-        ground_normal=np.asarray(ground.normal, dtype=float),
-        ground_height_m=np.array(ground.height_m),
-    )
+    package_arrays = {
+        "time_s": times,
+        "q_track": q_track,
+        "q_ref": q_ref,
+        "targets_m": lane.points,
+        "valid": valid,
+        "marker_body_ids": np.array(kin._body_ids),
+        "marker_local_m": np.array(kin._local),
+        "qpos_adr": qpos_adr,
+        "dof_adr": dof_adr,
+        "root_mask": root_mask,
+        "sphere_site_ids": np.array([spheres[n]["site_id"] for n in sphere_names]),
+        "sphere_body_ids": np.array([spheres[n]["body_id"] for n in sphere_names]),
+        "sphere_radii_m": np.array([spheres[n]["radius"] for n in sphere_names]),
+        "ground_normal": np.asarray(ground.normal, dtype=float),
+        "ground_height_m": np.array(ground.height_m),
+    }
     meta = {
         "run": run.name,
         "capture": receipt["capture"],
@@ -147,8 +186,7 @@ def main() -> None:
             "reference_marker_rms_m": receipt["ik"]["reference"]["marker_rms_m"],
         },
     }
-    (run / "mjx_package.xml").write_text(xml, encoding="utf-8")
-    (run / "mjx_package.json").write_text(json.dumps(meta, indent=2) + "\n")
+    _write_mjx_outputs(run, xml, meta, package_arrays)
     logging.getLogger("mjx_export").info(
         "exported %s: %d frames, %d markers, %d spheres, %d qpos",
         run.name, len(times), len(labels), len(sphere_names), model.nq,
