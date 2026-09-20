@@ -96,7 +96,13 @@ function getStatusChip(status: string): { label: string; color: string } {
         case 'gui_ready':
             return { label: 'GUI Ready', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-600/50' };
         case 'engine_ready':
+        case 'ready':
             return { label: 'Ready', color: 'bg-blue-500/20 text-blue-300 border-blue-600/50' };
+        case 'experimental':
+            return { label: 'Experimental', color: 'bg-amber-500/20 text-amber-300 border-amber-600/50' };
+        case 'runtime_unavailable':
+        case 'provider_unavailable':
+            return { label: 'Unavailable', color: 'bg-rose-500/20 text-rose-300 border-rose-600/50' };
         case 'utility':
             return { label: 'Utility', color: 'bg-purple-500/20 text-purple-300 border-purple-600/50' };
         case 'external':
