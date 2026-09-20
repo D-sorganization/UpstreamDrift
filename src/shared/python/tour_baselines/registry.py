@@ -171,11 +171,8 @@ def clear_golf_model_registry() -> None:
     _REVERSE_ALIASES.clear()
 
 
-def init_default_registry() -> None:
-    """Initialize canonical model registrations."""
-    clear_golf_model_registry()
-
-    # 1. Kinematic Reconstruction Models (omitting simulated club)
+def _register_reconstruction_models() -> None:
+    """Register kinematic reconstruction models (omitting simulated club)."""
     register_golf_model(
         GolfModelIdentity(
             model_id="reconstruction_golfer",
@@ -236,7 +233,9 @@ def init_default_registry() -> None:
         )
     )
 
-    # 2. Torque-Driven Reduced Pendulum Models (with explicitly simulated club)
+
+def _register_driven_models() -> None:
+    """Register torque-driven reduced pendulum and upper-body models."""
     register_golf_model(
         GolfModelIdentity(
             model_id="driven_double_pendulum",
@@ -302,7 +301,9 @@ def init_default_registry() -> None:
         )
     )
 
-    # 3. Flagship Full-Body Models in All Six Engines
+
+def _register_full_body_models_a() -> None:
+    """Register primary full-body models (MuJoCo, Pinocchio, Drake)."""
     register_golf_model(
         GolfModelIdentity(
             model_id="full_body_mujoco",
@@ -363,6 +364,9 @@ def init_default_registry() -> None:
         )
     )
 
+
+def _register_full_body_models_b() -> None:
+    """Register musculoskeletal and legacy full-body models (OpenSim, Simscape, MyoSuite)."""
     register_golf_model(
         GolfModelIdentity(
             model_id="full_body_opensim",
@@ -423,7 +427,9 @@ def init_default_registry() -> None:
         )
     )
 
-    # 4. Catalog URDF / MJCF Models (#9914)
+
+def _register_reference_urdf_models() -> None:
+    """Register catalog URDF models (Pinocchio, Pinocchio IK, Drake)."""
     register_golf_model(
         GolfModelIdentity(
             model_id="reference_pinocchio_urdf",
@@ -484,6 +490,9 @@ def init_default_registry() -> None:
         )
     )
 
+
+def _register_reference_humanoid_models() -> None:
+    """Register bundled humanoid URDF/MJCF models."""
     register_golf_model(
         GolfModelIdentity(
             model_id="reference_simple_humanoid",
@@ -544,6 +553,9 @@ def init_default_registry() -> None:
         )
     )
 
+
+def _register_placeholder_models() -> None:
+    """Register unavailable placeholder models."""
     register_golf_model(
         GolfModelIdentity(
             model_id="myosuite_body",
@@ -583,6 +595,18 @@ def init_default_registry() -> None:
             notes="Native OpenSim constraints require an OpenSim adapter; no surrogate fit substituted",
         )
     )
+
+
+def init_default_registry() -> None:
+    """Initialize canonical model registrations."""
+    clear_golf_model_registry()
+    _register_reconstruction_models()
+    _register_driven_models()
+    _register_full_body_models_a()
+    _register_full_body_models_b()
+    _register_reference_urdf_models()
+    _register_reference_humanoid_models()
+    _register_placeholder_models()
 
 
 # Auto-initialize default registry on import

@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from .models import EvidenceStatus
+from .models import EvidenceStatus, GolfModelIdentity
 from .registry import list_golf_models
 
 
@@ -120,6 +120,166 @@ def list_excluded_tools() -> list[ToolExclusion]:
     return list(_EXCLUDED_TOOLS)
 
 
+def _cell_reconstruction(m: GolfModelIdentity, capture: str) -> CoverageCell:
+    obs_set = (
+        "Shoulder and hands markers (wrists midpoint)"
+        if "double" in m.model_id
+        else (
+            "Shoulder, elbow, and hands markers"
+            if "triple" in m.model_id
+            else "Upper/lower body anatomical markers (no club)"
+        )
+    )
+    artifact = f"docs/development/reference_fitting_epic.md (Epic #9914, {capture})"
+    return CoverageCell(
+        model_id=m.model_id,
+        capture=capture,
+        supported=True,
+        observation_set=obs_set,
+        existing_artifact=artifact,
+        ownership=m.source_owner.value,
+        missing_adapter=None,
+        blocked_reason=None,
+        governing_issue="#9914",
+        evidence_status=EvidenceStatus.HISTORICAL_REFERENCE,
+    )
+
+
+def _cell_driven(m: GolfModelIdentity, capture: str) -> CoverageCell:
+    return CoverageCell(
+        model_id=m.model_id,
+        capture=capture,
+        supported=True,
+        observation_set="Projected 2D swing plane (shoulder pivot + clubhead/grip)",
+        existing_artifact=None,
+        ownership="Tools",
+        missing_adapter="Pending TB-04 / TB-05 bounded dynamic fitting campaign",
+        blocked_reason=None,
+        governing_issue="#10589" if "double" in m.model_id else "#10590",
+        evidence_status=EvidenceStatus.UNQUALIFIED,
+    )
+
+
+def _cell_upper_body(m: GolfModelIdentity, capture: str) -> CoverageCell:
+    return CoverageCell(
+        model_id=m.model_id,
+        capture=capture,
+        supported=True,
+        observation_set="3D upper torso, bilateral arms, and clubhead trajectory",
+        existing_artifact=None,
+        ownership="Tools",
+        missing_adapter="Pending TB-06 upper-body constrained dynamic fitter",
+        blocked_reason=None,
+        governing_issue="#10591",
+        evidence_status=EvidenceStatus.UNQUALIFIED,
+    )
+
+
+def _cell_full_body(m: GolfModelIdentity, capture: str) -> CoverageCell:
+    engine_name = m.backend.value
+    artifact = (
+        f"evidence/matched/{capture}_g1_crocoddyl_rk45_b100/ (REJECTED)"
+        if engine_name == "pinocchio" and capture == "driver"
+        else (
+            f"docs/development/full_body_models/evidence/ground_support/anthro_{capture}_shoot_g025/receipt.json"
+            if engine_name == "mujoco"
+            else (
+                "docs/development/simscape_tour_matching/native_evidence/run-102.json"
+                if engine_name == "simscape" and capture == "driver"
+                else None
+            )
+        )
+    )
+    blocked = (
+        "Requires MyoSuite environment & retargeting (fail-closed per MS-50)"
+        if engine_name == "myosuite"
+        else (
+            "Pending Moco full-swing tracking convergence under MS-102"
+            if engine_name == "opensim"
+            else (
+                "Terminal error 40.3 mm > 35 mm gate; pinned to MATLAB R2025b"
+                if engine_name == "simscape"
+                else (
+                    "Pending dual-club G3 cross-engine qualification (#10378)"
+                    if capture == "iron"
+                    else None
+                )
+            )
+        )
+    )
+    supported = engine_name != "myosuite"
+    return CoverageCell(
+        model_id=m.model_id,
+        capture=capture,
+        supported=supported,
+        observation_set="Full 38 C3D markers + dual ground reaction force plates",
+        existing_artifact=artifact,
+        ownership="UpstreamDrift",
+        missing_adapter="MyoSuite adapter" if not supported else None,
+        blocked_reason=blocked,
+        governing_issue="#10378",
+        evidence_status=(
+            EvidenceStatus.UNAVAILABLE
+            if not supported
+            else (
+                EvidenceStatus.G1_KINEMATIC_PASSED
+                if engine_name == "mujoco" and capture == "driver"
+                else EvidenceStatus.NATIVE_CANDIDATE
+            )
+        ),
+    )
+
+
+def _cell_reference_or_placeholder(
+    m: GolfModelIdentity, capture: str
+) -> CoverageCell | None:
+    if m.model_id.startswith("reference_"):
+        artifact = f"docs/development/reference_fitting_epic.md (Epic #9914, {capture})"
+        return CoverageCell(
+            model_id=m.model_id,
+            capture=capture,
+            supported=True,
+            observation_set="Mapped subset of anatomical markers (per URDF preset)",
+            existing_artifact=artifact,
+            ownership="UpstreamDrift",
+            missing_adapter=None,
+            blocked_reason=None,
+            governing_issue="#9914",
+            evidence_status=EvidenceStatus.HISTORICAL_REFERENCE,
+        )
+    if m.model_id in ("myosuite_body", "opensim_golfer"):
+        reason = (
+            "Bundled myobody assets are placeholders, not MyoSuite anatomy"
+            if m.model_id == "myosuite_body"
+            else "Native OpenSim custom-joint/muscle constraints require OpenSim adapter"
+        )
+        return CoverageCell(
+            model_id=m.model_id,
+            capture=capture,
+            supported=False,
+            observation_set="None (placeholder)",
+            existing_artifact=None,
+            ownership="UpstreamDrift",
+            missing_adapter=f"{m.model_id} native adapter",
+            blocked_reason=reason,
+            governing_issue="#9914",
+            evidence_status=EvidenceStatus.UNAVAILABLE,
+        )
+    return None
+
+
+def _cell_for_model(m: GolfModelIdentity, capture: str) -> CoverageCell | None:
+    if m.model_id.startswith("reconstruction_"):
+        return _cell_reconstruction(m, capture)
+    if m.model_id.startswith("driven_"):
+        return _cell_driven(m, capture)
+    if m.model_id == "constrained_upper_body_golfer":
+        return _cell_upper_body(m, capture)
+    if m.model_id.startswith("full_body_"):
+        return _cell_full_body(m, capture)
+    return _cell_reference_or_placeholder(m, capture)
+
+
 def generate_coverage_matrix() -> list[CoverageCell]:
     """Generate the authoritative Model x {Driver, Iron} coverage matrix.
 
@@ -132,165 +292,11 @@ def generate_coverage_matrix() -> list[CoverageCell]:
     - Fail-closed evidence status
     """
     cells: list[CoverageCell] = []
-    models = list_golf_models()
-
-    for m in models:
+    for m in list_golf_models():
         for capture in ("driver", "iron"):
-            artifact: str | None = None
-            blocked: str | None = None
-            # Determine observation set, artifacts, and status based on model identity
-            if m.model_id.startswith("reconstruction_"):
-                obs_set = (
-                    "Shoulder and hands markers (wrists midpoint)"
-                    if "double" in m.model_id
-                    else (
-                        "Shoulder, elbow, and hands markers"
-                        if "triple" in m.model_id
-                        else "Upper/lower body anatomical markers (no club)"
-                    )
-                )
-                artifact = f"docs/development/reference_fitting_epic.md (Epic #9914, {capture})"
-                cells.append(
-                    CoverageCell(
-                        model_id=m.model_id,
-                        capture=capture,
-                        supported=True,
-                        observation_set=obs_set,
-                        existing_artifact=artifact,
-                        ownership=m.source_owner.value,
-                        missing_adapter=None,
-                        blocked_reason=None,
-                        governing_issue="#9914",
-                        evidence_status=EvidenceStatus.HISTORICAL_REFERENCE,
-                    )
-                )
-            elif m.model_id.startswith("driven_"):
-                # Driven double / triple pendulums
-                cells.append(
-                    CoverageCell(
-                        model_id=m.model_id,
-                        capture=capture,
-                        supported=True,
-                        observation_set="Projected 2D swing plane (shoulder pivot + clubhead/grip)",
-                        existing_artifact=None,
-                        ownership="Tools",
-                        missing_adapter="Pending TB-04 / TB-05 bounded dynamic fitting campaign",
-                        blocked_reason=None,
-                        governing_issue="#10589"
-                        if "double" in m.model_id
-                        else "#10590",
-                        evidence_status=EvidenceStatus.UNQUALIFIED,
-                    )
-                )
-            elif m.model_id == "constrained_upper_body_golfer":
-                cells.append(
-                    CoverageCell(
-                        model_id=m.model_id,
-                        capture=capture,
-                        supported=True,
-                        observation_set="3D upper torso, bilateral arms, and clubhead trajectory",
-                        existing_artifact=None,
-                        ownership="Tools",
-                        missing_adapter="Pending TB-06 upper-body constrained dynamic fitter",
-                        blocked_reason=None,
-                        governing_issue="#10591",
-                        evidence_status=EvidenceStatus.UNQUALIFIED,
-                    )
-                )
-            elif m.model_id.startswith("full_body_"):
-                # Flagship full body models
-                engine_name = m.backend.value
-                artifact = (
-                    f"evidence/matched/{capture}_g1_crocoddyl_rk45_b100/ (REJECTED)"
-                    if engine_name == "pinocchio" and capture == "driver"
-                    else (
-                        f"docs/development/full_body_models/evidence/ground_support/anthro_{capture}_shoot_g025/receipt.json"
-                        if engine_name == "mujoco"
-                        else (
-                            "docs/development/simscape_tour_matching/native_evidence/run-102.json"
-                            if engine_name == "simscape" and capture == "driver"
-                            else None
-                        )
-                    )
-                )
-                blocked = (
-                    "Requires MyoSuite environment & retargeting (fail-closed per MS-50)"
-                    if engine_name == "myosuite"
-                    else (
-                        "Pending Moco full-swing tracking convergence under MS-102"
-                        if engine_name == "opensim"
-                        else (
-                            "Terminal error 40.3 mm > 35 mm gate; pinned to MATLAB R2025b"
-                            if engine_name == "simscape"
-                            else (
-                                "Pending dual-club G3 cross-engine qualification (#10378)"
-                                if capture == "iron"
-                                else None
-                            )
-                        )
-                    )
-                )
-                supported = engine_name != "myosuite"
-                cells.append(
-                    CoverageCell(
-                        model_id=m.model_id,
-                        capture=capture,
-                        supported=supported,
-                        observation_set="Full 38 C3D markers + dual ground reaction force plates",
-                        existing_artifact=artifact,
-                        ownership="UpstreamDrift",
-                        missing_adapter="MyoSuite adapter" if not supported else None,
-                        blocked_reason=blocked,
-                        governing_issue="#10378",
-                        evidence_status=(
-                            EvidenceStatus.UNAVAILABLE
-                            if not supported
-                            else (
-                                EvidenceStatus.G1_KINEMATIC_PASSED
-                                if engine_name == "mujoco" and capture == "driver"
-                                else EvidenceStatus.NATIVE_CANDIDATE
-                            )
-                        ),
-                    )
-                )
-            elif m.model_id.startswith("reference_"):
-                # Catalog reference models from #9914
-                artifact = f"docs/development/reference_fitting_epic.md (Epic #9914, {capture})"
-                cells.append(
-                    CoverageCell(
-                        model_id=m.model_id,
-                        capture=capture,
-                        supported=True,
-                        observation_set="Mapped subset of anatomical markers (per URDF preset)",
-                        existing_artifact=artifact,
-                        ownership="UpstreamDrift",
-                        missing_adapter=None,
-                        blocked_reason=None,
-                        governing_issue="#9914",
-                        evidence_status=EvidenceStatus.HISTORICAL_REFERENCE,
-                    )
-                )
-            elif m.model_id in ("myosuite_body", "opensim_golfer"):
-                reason = (
-                    "Bundled myobody assets are placeholders, not MyoSuite anatomy"
-                    if m.model_id == "myosuite_body"
-                    else "Native OpenSim custom-joint/muscle constraints require OpenSim adapter"
-                )
-                cells.append(
-                    CoverageCell(
-                        model_id=m.model_id,
-                        capture=capture,
-                        supported=False,
-                        observation_set="None (placeholder)",
-                        existing_artifact=None,
-                        ownership="UpstreamDrift",
-                        missing_adapter=f"{m.model_id} native adapter",
-                        blocked_reason=reason,
-                        governing_issue="#9914",
-                        evidence_status=EvidenceStatus.UNAVAILABLE,
-                    )
-                )
-
+            cell = _cell_for_model(m, capture)
+            if cell is not None:
+                cells.append(cell)
     return cells
 
 
