@@ -13,6 +13,7 @@ import argparse
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 import hashlib
+import json
 import logging
 from pathlib import Path
 import sys
@@ -254,6 +255,171 @@ def _compute_plant_marker_positions(
     return np.stack(frames, axis=0)
 
 
+def _build_engine_list(
+    engines: Sequence[str] | None,
+    plants: Mapping[str, MatchingPlant] | None,
+    reference_engine: str,
+) -> list[str]:
+    """Assemble ordered list of engines to evaluate."""
+    if engines is not None:
+        engine_list = list(engines)
+    else:
+        engine_list = list(ALL_ENGINES)
+        if plants is not None:
+            for p_name in plants:
+                if p_name not in engine_list:
+                    engine_list.append(p_name)
+    if reference_engine not in engine_list:
+        engine_list.insert(0, reference_engine)
+    return engine_list
+
+
+def _resolve_spec_and_attachments(
+    spec: bytes | Mapping[str, Any] | None,
+    attachments: Mapping[str, tuple[str, Sequence[float]]] | None,
+) -> tuple[dict[str, Any], Mapping[str, tuple[str, Sequence[float]]]]:
+    """Resolve full-body spec dictionary and marker attachments mapping."""
+    resolved_spec: dict[str, Any] = {}
+    if spec is None:
+        default_spec_path = Path(
+            "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+        )
+        if default_spec_path.is_file():
+            try:
+                resolved_spec = json.loads(
+                    default_spec_path.read_text(encoding="utf-8")
+                )
+            except (json.JSONDecodeError, OSError):
+                resolved_spec = {}
+    elif isinstance(spec, bytes):
+        try:
+            resolved_spec = json.loads(spec.decode("utf-8"))
+        except (json.JSONDecodeError, OSError):
+            resolved_spec = {}
+    elif isinstance(spec, dict):
+        resolved_spec = dict(spec)
+
+    resolved_attachments: dict[str, tuple[str, Sequence[float]]] = (
+        dict(attachments) if attachments is not None else {}
+    )
+    if not resolved_attachments and "marker_attachments" in resolved_spec:
+        for k, v in resolved_spec["marker_attachments"].items():
+            if isinstance(v, dict):
+                body = str(v.get("body", ""))
+                offsets = (
+                    tuple(float(x) for x in v["offset_m"])
+                    if v.get("offset_m") is not None
+                    else (0.0, 0.0, 0.0)
+                )
+                resolved_attachments[str(k)] = (body, offsets)
+            elif isinstance(v, (list, tuple)):
+                body = str(v[0])
+                offsets = (
+                    tuple(float(x) for x in v[1])
+                    if len(v) > 1 and v[1] is not None
+                    else (0.0, 0.0, 0.0)
+                )
+                resolved_attachments[str(k)] = (body, offsets)
+    return resolved_spec, resolved_attachments
+
+
+def _evaluate_engine_row(
+    eng: str,
+    cand: MatchedSwingCandidate,
+    plant: MatchingPlant | None,
+    reference_engine: str,
+    evaluated_markers: Mapping[str, np.ndarray],
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    plant_error: str = "",
+) -> tuple[EngineParityRow, np.ndarray | None]:
+    """Evaluate one engine for trajectory parity and return row and evaluated markers."""
+    comp_class = (
+        ComparisonClass.SAME_MODEL_NUMERICAL_PARITY
+        if eng in SAME_MODEL_ENGINES
+        else ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT
+    )
+    if plant is None:
+        reason = (
+            plant_error
+            or f"Engine '{eng}' is not installed or registered in the active environment"
+        )
+        return (
+            EngineParityRow(
+                engine=eng,
+                status="unavailable",
+                comparison_class=comp_class,
+                reason=reason,
+            ),
+            None,
+        )
+
+    t0 = time.perf_counter()
+    try:
+        markers = _compute_plant_marker_positions(plant, cand.q, attachments)
+    except Exception as exc:
+        return (
+            EngineParityRow(
+                engine=eng,
+                status="unverified",
+                comparison_class=comp_class,
+                model_name=f"{eng}_model",
+                model_sha256=getattr(plant, "plant_sha", ""),
+                reason=f"Kinematic evaluation error: {exc}",
+            ),
+            None,
+        )
+    wall_clock = time.perf_counter() - t0
+
+    pt_diffs: dict[str, PointwiseDifference] = {}
+    pass_all_gates = True
+
+    if reference_engine in evaluated_markers:
+        ref_markers = evaluated_markers[reference_engine]
+        if ref_markers.shape == markers.shape:
+            m_diff = evaluate_pointwise_trajectory_parity(
+                ref_markers, markers, tolerance_m=0.001
+            )
+            pt_diffs["marker_diff_m"] = m_diff
+            if (
+                not m_diff.pass_gate
+                and comp_class == ComparisonClass.SAME_MODEL_NUMERICAL_PARITY
+            ):
+                pass_all_gates = False
+
+    total_work = (
+        float(cand.metadata.extra["total_work_j"])
+        if cand.metadata and "total_work_j" in cand.metadata.extra
+        else None
+    )
+
+    row = EngineParityRow(
+        engine=eng,
+        status="qualified" if pass_all_gates else "rejected",
+        comparison_class=comp_class,
+        model_name=f"{eng}_model",
+        model_sha256=getattr(plant, "plant_sha", ""),
+        assumptions={
+            "coordinate_count": len(getattr(plant, "coordinate_order", ())),
+            "has_contact": hasattr(plant, "contact_forces"),
+        },
+        pointwise_differences=pt_diffs,
+        total_work_J=total_work,
+        wall_clock_s=wall_clock,
+        reason="" if pass_all_gates else "Diverged beyond tolerance",
+    )
+    return row, markers
+
+
+def _determine_overall_status(rows: Mapping[str, EngineParityRow]) -> str:
+    """Aggregate row statuses into overall verdict."""
+    statuses = [r.status for r in rows.values()]
+    if all(s == "qualified" for s in statuses):
+        return "PASSED"
+    if any(s == "rejected" for s in statuses):
+        return "REJECTED"
+    return "PARTIAL"
+
+
 @postcondition(
     lambda r: isinstance(r, UnifiedParityReport), "Must return a UnifiedParityReport"
 )
@@ -269,51 +435,11 @@ def build_parity_report(
     """Construct unified parity report comparing candidate through all engines."""
     cand = _resolve_candidate(candidate)
     cand_sha = hashlib.sha256(cand.q.tobytes()).hexdigest()[:16]
+    engine_list = _build_engine_list(engines, plants, reference_engine)
+    resolved_spec, resolved_attachments = _resolve_spec_and_attachments(
+        spec, attachments
+    )
 
-    if engines is not None:
-        engine_list = list(engines)
-    else:
-        engine_list = list(ALL_ENGINES)
-        if plants is not None:
-            for p_name in plants:
-                if p_name not in engine_list:
-                    engine_list.append(p_name)
-    if reference_engine not in engine_list:
-        engine_list.insert(0, reference_engine)
-
-    if spec is None:
-        default_spec_path = Path(
-            "docs/development/full_body_models/full_body_spec_anthro_driver.json"
-        )
-        if default_spec_path.is_file():
-            import json
-
-            try:
-                spec = json.loads(default_spec_path.read_text(encoding="utf-8"))
-            except (json.JSONDecodeError, OSError):
-                spec = None
-
-    if attachments is None and isinstance(spec, dict) and "marker_attachments" in spec:
-        attachments = {}
-        for k, v in spec["marker_attachments"].items():
-            if isinstance(v, dict):
-                body = str(v.get("body", ""))
-                offsets = (
-                    tuple(float(x) for x in v["offset_m"])
-                    if v.get("offset_m") is not None
-                    else (0.0, 0.0, 0.0)
-                )
-                attachments[str(k)] = (body, offsets)
-            elif isinstance(v, (list, tuple)):
-                body = str(v[0])
-                offsets = (
-                    tuple(float(x) for x in v[1])
-                    if len(v) > 1 and v[1] is not None
-                    else (0.0, 0.0, 0.0)
-                )
-                attachments[str(k)] = (body, offsets)
-
-    # Resolve plants
     active_plants: dict[str, MatchingPlant] = dict(plants) if plants is not None else {}
     plant_avail: dict[str, bool] = {}
     try:
@@ -323,124 +449,50 @@ def build_parity_report(
 
         plant_avail = {e: is_engine_available(e) for e in ALL_ENGINES}
     except ImportError:
-        plant_avail = {}
+        pass
 
     rows: dict[str, EngineParityRow] = {}
     evaluated_markers: dict[str, np.ndarray] = {}
 
-    # Evaluate reference plant first if provided
     ref_plant = active_plants.get(reference_engine)
     if ref_plant is None and plant_avail.get(reference_engine, False):
         try:
-            ref_plant = get_plant(reference_engine, spec or {})
+            ref_plant = get_plant(reference_engine, resolved_spec)
             active_plants[reference_engine] = ref_plant
         except (EngineUnavailableError, RuntimeError, ValueError):
             ref_plant = None
 
     if ref_plant is not None:
         evaluated_markers[reference_engine] = ref_plant.marker_positions(
-            cand.q, attachments or {}
+            cand.q, resolved_attachments
         )
     elif cand.markers.model_markers_m is not None:
         evaluated_markers[reference_engine] = cand.markers.model_markers_m
 
     for eng in engine_list:
-        comp_class = (
-            ComparisonClass.SAME_MODEL_NUMERICAL_PARITY
-            if eng in SAME_MODEL_ENGINES
-            else ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT
-        )
-
         plant = active_plants.get(eng)
+        plant_err = ""
         if plant is None and plant_avail.get(eng, False):
             try:
-                plant = get_plant(eng, spec or {})
+                plant = get_plant(eng, resolved_spec)
                 active_plants[eng] = plant
             except (EngineUnavailableError, RuntimeError, ValueError) as exc:
-                plant = None
-                rows[eng] = EngineParityRow(
-                    engine=eng,
-                    status="unavailable",
-                    comparison_class=comp_class,
-                    reason=str(exc),
-                )
-                continue
+                plant_err = str(exc)
 
-        if plant is None:
-            # Engine not available
-            rows[eng] = EngineParityRow(
-                engine=eng,
-                status="unavailable",
-                comparison_class=comp_class,
-                reason=f"Engine '{eng}' is not installed or registered in the active environment",
-            )
-            continue
-
-        # Plant is available: evaluate kinematics, work, wall-clock
-        t0 = time.perf_counter()
-        try:
-            markers = _compute_plant_marker_positions(plant, cand.q, attachments or {})
-        except Exception as exc:
-            rows[eng] = EngineParityRow(
-                engine=eng,
-                status="unverified",
-                comparison_class=comp_class,
-                model_name=f"{eng}_model",
-                model_sha256=getattr(plant, "plant_sha", ""),
-                reason=f"Kinematic evaluation error: {exc}",
-            )
-            continue
-        wall_clock = time.perf_counter() - t0
-        evaluated_markers[eng] = markers
-
-        pt_diffs: dict[str, PointwiseDifference] = {}
-        pass_all_gates = True
-
-        # Pointwise marker difference vs reference
-        if reference_engine in evaluated_markers:
-            ref_markers = evaluated_markers[reference_engine]
-            if ref_markers.shape == markers.shape:
-                m_diff = evaluate_pointwise_trajectory_parity(
-                    ref_markers, markers, tolerance_m=0.001
-                )
-                pt_diffs["marker_diff_m"] = m_diff
-                if (
-                    not m_diff.pass_gate
-                    and comp_class == ComparisonClass.SAME_MODEL_NUMERICAL_PARITY
-                ):
-                    pass_all_gates = False
-
-        total_work = (
-            float(cand.metadata.extra["total_work_j"])
-            if cand.metadata and "total_work_j" in cand.metadata.extra
-            else None
+        row, markers = _evaluate_engine_row(
+            eng,
+            cand,
+            plant,
+            reference_engine,
+            evaluated_markers,
+            resolved_attachments,
+            plant_err,
         )
+        rows[eng] = row
+        if markers is not None:
+            evaluated_markers[eng] = markers
 
-        rows[eng] = EngineParityRow(
-            engine=eng,
-            status="qualified" if pass_all_gates else "rejected",
-            comparison_class=comp_class,
-            model_name=f"{eng}_model",
-            model_sha256=getattr(plant, "plant_sha", ""),
-            assumptions={
-                "coordinate_count": len(getattr(plant, "coordinate_order", ())),
-                "has_contact": hasattr(plant, "contact_forces"),
-            },
-            pointwise_differences=pt_diffs,
-            total_work_J=total_work,
-            wall_clock_s=wall_clock,
-            reason="" if pass_all_gates else "Diverged beyond tolerance",
-        )
-
-    # Determine overall status
-    statuses = [r.status for r in rows.values()]
-    if all(s == "qualified" for s in statuses):
-        overall_status = "PASSED"
-    elif any(s == "rejected" for s in statuses):
-        overall_status = "REJECTED"
-    else:
-        overall_status = "PARTIAL"
-
+    overall_status = _determine_overall_status(rows)
     return UnifiedParityReport(
         schema_version=PARITY_REPORT_SCHEMA_VERSION,
         candidate_id=getattr(cand.metadata, "model_name", "candidate") or "candidate",
