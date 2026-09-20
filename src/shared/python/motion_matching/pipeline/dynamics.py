@@ -458,6 +458,70 @@ def _build_backswing_metrics(
     }
 
 
+def compute_swing_phase_windows(
+    times: np.ndarray,
+) -> tuple[tuple[str, float, float], ...]:
+    """Compute (phase_name, start_time, end_time) tuples for canonical swing phases."""
+    if len(times) == 0:
+        return ()
+    t_start = float(times[0])
+    t_end = float(times[-1])
+    t_span = t_end - t_start
+    t_addr_end = t_start + min(0.30, 0.2 * t_span)
+    return (
+        ("address", t_start, t_addr_end),
+        ("backswing", t_addr_end, t_start + 0.60 * t_span),
+        ("downswing", t_start + 0.60 * t_span, t_start + 0.72 * t_span),
+        ("impact", t_start + 0.72 * t_span, t_start + 0.78 * t_span),
+        ("follow_through", t_start + 0.78 * t_span, t_end),
+    )
+
+
+def compute_phase_weight_fractions(
+    times: np.ndarray,
+    record_time_s: np.ndarray,
+    weight_fraction: np.ndarray,
+) -> dict[str, dict[str, float]]:
+    """Compute weight-fraction summary statistics partitioned by biomechanical swing phase.
+
+    Phases:
+        - address: start to min(0.30 s, 20% of duration)
+        - backswing: end of address to 60% of duration
+        - downswing: 60% to 72% of duration
+        - impact: 72% to 78% of duration
+        - follow_through: 78% of duration to end
+
+    Args:
+        times: Array of capture timestamps.
+        record_time_s: Array of simulation timestamps.
+        weight_fraction: Array of total vertical contact force / body weight.
+
+    Returns:
+        Dictionary mapping phase name to dict with 'min', 'max', 'mean' weight fractions.
+    """
+    if len(times) == 0 or len(record_time_s) == 0:
+        return {}
+
+    phase_windows = compute_swing_phase_windows(times)
+    out: dict[str, dict[str, float]] = {}
+    for name, t0, t1 in phase_windows:
+        mask = (record_time_s >= t0) & (record_time_s <= t1)
+        if mask.any():
+            wf_sub = weight_fraction[mask]
+            out[name] = {
+                "min": float(wf_sub.min()),
+                "max": float(wf_sub.max()),
+                "mean": float(wf_sub.mean()),
+            }
+        else:
+            out[name] = {
+                "min": 0.0,
+                "max": 0.0,
+                "mean": 0.0,
+            }
+    return out
+
+
 def build_dynamics_report(
     inputs: DynamicsReportInputs,
 ) -> tuple[dict[str, Any], np.ndarray]:
@@ -509,6 +573,9 @@ def build_dynamics_report(
             "min": float(record.weight_fraction.min()),
             "max": float(record.weight_fraction.max()),
             "mean": float(record.weight_fraction.mean()),
+            "by_phase": compute_phase_weight_fractions(
+                lane.times, record.time_s, record.weight_fraction
+            ),
         },
         "inside_support_polygon_fraction": float(record.inside_support_polygon.mean()),
         "range_of_motion_flags": rom_flags(sim_q, kin.coordinate_order),

@@ -23,6 +23,15 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
+from src.config.capability_state import (
+    KNOWN_PHYSICS_ENGINES,
+    VALID_MATURITY_LEVELS,
+    CapabilityAvailability,
+    CapabilityQualification,
+    SurfaceAvailability,
+    adapt_engine_matrix_qualification,
+    resolve_canonical_display_name,
+)
 from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
@@ -110,6 +119,23 @@ TOOL_LIKE_CATEGORIES = frozenset(
     }
 )
 
+WEB_CATALOG_ONLY_TILES: dict[str, str] = {
+    "chat_assistant": "web chat page (/chat); desktop equivalent is the sidekick dock",
+    "dataset_generator": "web page (/tools/dataset); native path is the MATLAB chooser",
+    "character_builder": "web page (/tools/character-builder); native side is a CLI",
+    "analysis_tools_api": "web page (/tools/analysis) over REST endpoints",
+    "motion_pipeline": "REST pipeline service; no desktop tile",
+    "perturbation_analysis": "API-backed catalog entry; no launchable surface",
+    "force_overlays": "API-backed catalog entry; no launchable surface",
+    "realtime_ws": "WebSocket endpoint catalog entry; no launchable surface",
+    "aip": "API-backed catalog entry; no launchable surface",
+    "actuator_controls": "API-backed catalog entry; no launchable surface",
+    "unreal_integration": "integration library catalog entry; no launchable surface",
+    "robotics_module": "python module catalog entry; no launchable surface",
+    "tools_calculator_hub": "alias surface over the Tools data processor",
+    "pid_generator": "Tools-ported CLI (generate-pid); no GUI yet",
+}
+
 
 def _has_provider_metadata(model: ModelConfig) -> bool:
     """Return True when a registry entry comes from provider-aware metadata."""
@@ -177,7 +203,180 @@ def _provider_status(
         return "provider_unavailable", None
     if check_runtime and not is_engine_runtime_available(model.engine_type):
         return "runtime_unavailable", None
+    if model.engine_type and model.engine_type in KNOWN_PHYSICS_ENGINES:
+        qual = adapt_engine_matrix_qualification(
+            engine_name=model.engine_type,
+            is_engine=True,
+        )
+        if not qual.is_qualified and status in (
+            "ready",
+            "engine_ready",
+            "release_ready",
+        ):
+            return "experimental", None
     return status, None
+
+
+@dataclass(frozen=True)
+class ProviderContext:
+    """Provider metadata for surface availability derivation."""
+
+    provider: str | None = None
+    source_root: str | None = None
+    engine_type: str | None = None
+
+
+def _derive_desktop_availability(
+    tile_id: str,
+    path: str | None,
+    status: str,
+    status_detail: str | None = None,
+    provider_ctx: ProviderContext | None = None,
+    *,
+    repo_root: Path = REPO_ROOT,
+) -> SurfaceAvailability:
+    """Derive desktop surface availability."""
+    provider = provider_ctx.provider if provider_ctx else None
+    source_root = provider_ctx.source_root if provider_ctx else None
+    engine_type = provider_ctx.engine_type if provider_ctx else None
+
+    if provider == "tools":
+        auth = inspect_tools_vendor_authority(repo_root)
+        if not auth.available:
+            return SurfaceAvailability(
+                available=False,
+                reason=f"Tools vendor authority unavailable: {auth.reason or 'Pin stale'}",
+                remediation="Run 'python -m scripts.sync_vendor_tools' to synchronize the vendor submodule",
+            )
+        return SurfaceAvailability(available=True)
+    if status == "provider_unavailable":
+        return SurfaceAvailability(
+            available=False,
+            reason=status_detail or f"Provider source root missing: {source_root}",
+            remediation="Clone provider repository or configure valid source_root in models.yaml",
+        )
+    if status == "runtime_unavailable":
+        return SurfaceAvailability(
+            available=False,
+            reason=f"Runtime unavailable: engine runtime '{engine_type}' is not installed in Python environment",
+            remediation=f"Install runtime dependencies for '{engine_type}' in the active Python environment",
+        )
+    if tile_id in WEB_CATALOG_ONLY_TILES:
+        return SurfaceAvailability(
+            available=False,
+            reason=f"Tile '{tile_id}' is a web-only affordance with no desktop window",
+            remediation="Access this capability via the web catalog or dashboard",
+        )
+    if not path or not path.strip() or path.startswith("virtual/"):
+        return SurfaceAvailability(
+            available=False,
+            reason=f"Capability '{tile_id}' has no native desktop entry point",
+            remediation="Configure a valid script path or launch via web",
+        )
+    return SurfaceAvailability(available=True)
+
+
+def _derive_web_availability(
+    tile_id: str,
+    web: WebLaunchContract | None,
+    path: str | None,
+) -> SurfaceAvailability:
+    """Derive web surface availability."""
+    if web is None:
+        return SurfaceAvailability(
+            available=False,
+            reason=f"No web launch contract configured for tile '{tile_id}'",
+            remediation="Launch from PyQt desktop launcher or use command-line interface",
+        )
+    if web.mode == "route":
+        return SurfaceAvailability(available=True)
+    if web.mode == "native-window":
+        return SurfaceAvailability(
+            available=False,
+            reason="Native-window launch target requires desktop launcher environment; unavailable directly in browser",
+            remediation=(
+                f"Launch from PyQt desktop launcher or run: python {path}"
+                if path
+                else "Launch from desktop launcher"
+            ),
+        )
+    reason_text = web.reason or f"No web affordance declared for tile '{tile_id}'"
+    remediation_text = (
+        "Use desktop Qt launcher or track release milestone in issue tracker"
+        if "planned" in reason_text.lower()
+        else "Launch from PyQt desktop launcher or use command-line interface"
+    )
+    return SurfaceAvailability(
+        available=False,
+        reason=reason_text,
+        remediation=remediation_text,
+    )
+
+
+def _derive_cli_availability(
+    tile_id: str,
+    path: str | None,
+) -> SurfaceAvailability:
+    """Derive CLI surface availability."""
+    if path and path.endswith(".py"):
+        return SurfaceAvailability(available=True)
+    return SurfaceAvailability(
+        available=False,
+        reason=f"Capability '{tile_id}' has no standalone CLI entry point",
+        remediation="Launch via desktop launcher or web interface",
+    )
+
+
+def _build_default_availability(
+    tile_id: str,
+    path: str | None,
+    web: WebLaunchContract | None,
+    status: str,
+    status_detail: str | None = None,
+    provider_ctx: ProviderContext | None = None,
+    *,
+    repo_root: Path = REPO_ROOT,
+) -> CapabilityAvailability:
+    """Derive orthogonal per-surface availability for desktop, web, api, and cli."""
+    desktop = _derive_desktop_availability(
+        tile_id=tile_id,
+        path=path,
+        status=status,
+        status_detail=status_detail,
+        provider_ctx=provider_ctx,
+        repo_root=repo_root,
+    )
+    web_avail = _derive_web_availability(tile_id, web, path)
+    api_avail = SurfaceAvailability(available=True)
+    cli_avail = _derive_cli_availability(tile_id, path)
+
+    return CapabilityAvailability(
+        surfaces={
+            "desktop": desktop,
+            "web": web_avail,
+            "api": api_avail,
+            "cli": cli_avail,
+        }
+    )
+
+
+def _qualify_engine_status(
+    engine_name: str | None,
+    is_engine: bool,
+    status: str,
+) -> tuple[CapabilityQualification, str]:
+    """Adapt engine matrix qualification and demote unverified status to experimental."""
+    qualification = adapt_engine_matrix_qualification(
+        engine_name=engine_name if is_engine else None,
+        is_engine=is_engine,
+    )
+    if (
+        is_engine
+        and not qualification.is_qualified
+        and status in ("ready", "engine_ready", "release_ready")
+    ):
+        status = "experimental"
+    return qualification, status
 
 
 def _build_provider_tile(
@@ -187,9 +386,47 @@ def _build_provider_tile(
     metadata = model.launcher or _legacy_launcher_metadata(model)
     status, status_detail = _provider_status(model, metadata.status, repo_root)
 
+    web_route = metadata.web_route
+    if (
+        model.id in ("movement_optimizer", "tools_movement_optimizer")
+        or web_route == "/tools/movement-optimizer"
+    ):
+        web_route = None
+
+    is_engine = bool(
+        (model.engine_type and model.engine_type in KNOWN_PHYSICS_ENGINES)
+        or metadata.category == "physics_engine"
+    )
+    qualification, status = _qualify_engine_status(model.engine_type, is_engine, status)
+
+    web = WebLaunchContract.derive(
+        web_route=web_route,
+        path=model.path,
+    )
+    availability = _build_default_availability(
+        tile_id=model.id,
+        path=model.path,
+        web=web,
+        status=status,
+        status_detail=status_detail,
+        provider_ctx=ProviderContext(
+            provider=model.provider,
+            source_root=model.source_root,
+            engine_type=model.engine_type,
+        ),
+        repo_root=repo_root,
+    )
+    maturity = (
+        "experimental"
+        if (is_engine and not qualification.is_qualified)
+        or status in ("experimental", "unadvertised_experimental")
+        else "stable"
+    )
+    canonical_name = resolve_canonical_display_name(model.id, model.name)
+
     return LauncherTile(
         id=model.id,
-        name=model.name,
+        name=canonical_name,
         description=model.description,
         category=metadata.category,
         type=model.type,
@@ -202,15 +439,15 @@ def _build_provider_tile(
         engine_type=model.engine_type,
         provider=model.provider,
         source_root=None if model.provider == "tools" else model.source_root,
-        web_route=metadata.web_route,
-        web=WebLaunchContract.derive(
-            web_route=metadata.web_route,
-            path=model.path,
-        ),
+        web_route=web_route,
+        web=web,
         default_launch=metadata.default_launch,
         hidden=model.hidden,
         hidden_reason=model.hidden_reason,
         hidden_owner=model.hidden_owner,
+        maturity=maturity,
+        availability=availability,
+        qualification=qualification,
     )
 
 
@@ -230,14 +467,48 @@ def _with_native_pyqt6_semantics(
     status, status_detail = _provider_status(
         model, model.launcher.status, repo_root, check_runtime=False
     )
+    is_engine = bool(
+        (model.engine_type and model.engine_type in KNOWN_PHYSICS_ENGINES)
+        or model.launcher.category == "physics_engine"
+    )
+    qualification, status = _qualify_engine_status(model.engine_type, is_engine, status)
+
+    maturity = getattr(model.launcher, "maturity", None)
+    if not maturity or maturity not in VALID_MATURITY_LEVELS:
+        if status in ("experimental", "unadvertised_experimental") or (
+            is_engine and not qualification.is_qualified
+        ):
+            maturity = "experimental"
+        else:
+            maturity = "stable"
+
+    availability = _build_default_availability(
+        tile_id=tile.id,
+        path=model.path,
+        web=tile.web,
+        status=status,
+        status_detail=status_detail,
+        provider_ctx=ProviderContext(
+            provider=model.provider,
+            source_root=model.source_root,
+            engine_type=model.engine_type,
+        ),
+        repo_root=repo_root,
+    )
+    canonical_name = resolve_canonical_display_name(tile.id, model.name or tile.name)
+
     return replace(
         tile,
+        name=canonical_name,
         category=model.launcher.category,
         status=status,
         status_detail=status_detail,
         type=model.type,
         path=model.path,
         engine_type=model.engine_type,
+        maturity=maturity,
+        availability=availability,
+        qualification=qualification,
     )
 
 
@@ -334,28 +605,104 @@ class WebLaunchContract:
         return result
 
 
+def _validate_hidden_tile(
+    tile_id: Any,
+    hidden: bool,
+    hidden_reason: Any,
+    hidden_owner: Any,
+) -> tuple[str | None, str | None]:
+    """Validate and normalize hidden tile attributes."""
+    if not hidden:
+        return (
+            hidden_reason.strip() if isinstance(hidden_reason, str) else None,
+            hidden_owner.strip() if isinstance(hidden_owner, str) else None,
+        )
+    if not isinstance(hidden_reason, str) or not hidden_reason.strip():
+        raise ValueError(f"Hidden launcher tile '{tile_id}' must define hidden_reason")
+    if not isinstance(hidden_owner, str) or not hidden_owner.strip():
+        raise ValueError(f"Hidden launcher tile '{tile_id}' must define hidden_owner")
+    return hidden_reason.strip(), hidden_owner.strip()
+
+
+def _parse_tile_state(
+    data: dict[str, Any],
+    web: WebLaunchContract,
+) -> tuple[str, str, CapabilityAvailability, CapabilityQualification]:
+    """Parse maturity, availability, qualification, and status for LauncherTile."""
+    avail_raw = data.get("availability")
+    qual_raw = data.get("qualification")
+    availability = (
+        CapabilityAvailability.from_dict(avail_raw)
+        if isinstance(avail_raw, dict)
+        else None
+    )
+    qualification = (
+        CapabilityQualification.from_dict(qual_raw)
+        if isinstance(qual_raw, dict)
+        else None
+    )
+
+    is_engine = bool(
+        data.get("engine_type")
+        or data.get("category") == "physics_engine"
+        or data.get("type")
+        in (
+            "mujoco",
+            "drake",
+            "pinocchio",
+            "opensim",
+            "myosim",
+            "custom_humanoid",
+        )
+    )
+    if qualification is None:
+        qualification = adapt_engine_matrix_qualification(
+            engine_name=data.get("engine_type"),
+            is_engine=is_engine,
+        )
+
+    status_val = data.get("status", "unknown")
+    if (
+        is_engine
+        and not qualification.is_qualified
+        and status_val in ("ready", "engine_ready", "release_ready")
+    ):
+        status_val = "experimental"
+
+    maturity_raw = data.get("maturity")
+    if maturity_raw in VALID_MATURITY_LEVELS:
+        maturity = maturity_raw
+    elif status_val in ("experimental", "unadvertised_experimental"):
+        maturity = "experimental"
+    elif status_val == "prototype":
+        maturity = "prototype"
+    elif status_val == "deprecated":
+        maturity = "deprecated"
+    elif is_engine and not qualification.is_qualified:
+        maturity = "experimental"
+    else:
+        maturity = "stable"
+
+    if availability is None:
+        availability = _build_default_availability(
+            tile_id=str(data["id"]),
+            path=data.get("path"),
+            web=web,
+            status=status_val,
+            status_detail=data.get("status_detail"),
+            provider_ctx=ProviderContext(
+                provider=data.get("provider"),
+                source_root=data.get("source_root"),
+                engine_type=data.get("engine_type"),
+            ),
+        )
+
+    return status_val, maturity, availability, qualification
+
+
 @dataclass(frozen=True)
 class LauncherTile:
-    """A single launcher tile definition.
-
-    Attributes:
-        id: Unique identifier for the tile
-        name: Display name shown in both launchers
-        description: Brief description shown under the tile
-        category: One of the canonical launcher categories in
-            LAUNCHER_CATEGORIES.
-        type: Engine/handler type for launch dispatch
-        path: Relative path to the script/entry point
-        logo: Logo filename (relative to assets dir)
-        status: Status chip text (gui_ready, engine_ready, utility, etc.)
-        capabilities: List of capability tags for filtering/display
-        order: Display order (1 = first)
-        engine_type: Optional engine type identifier for physics engines
-        web_route: Optional URL path for tiles that open web tools (legacy;
-            superseded by ``web`` for reachability decisions)
-        web: Web launch contract declaring how (or whether) the tile is
-            reachable from the browser/Tauri app (issue #7461)
-    """
+    """A tile or model that can be launched from the GUI launcher."""
 
     id: str
     name: str
@@ -364,7 +711,7 @@ class LauncherTile:
     type: str
     path: str
     logo: str
-    status: str
+    status: str = "experimental"
     status_detail: str | None = None
     capabilities: tuple[str, ...] = ()
     tags: tuple[str, ...] = ()
@@ -381,6 +728,39 @@ class LauncherTile:
     hidden: bool = False
     hidden_reason: str | None = None
     hidden_owner: str | None = None
+
+    maturity: str = "stable"
+    availability: CapabilityAvailability | None = None
+    qualification: CapabilityQualification | None = None
+
+    def __post_init__(self) -> None:
+        """Ensure availability and qualification contracts are always initialized."""
+        if self.availability is None:
+            avail = _build_default_availability(
+                tile_id=self.id,
+                path=self.path,
+                web=self.web,
+                status=self.status,
+                status_detail=self.status_detail,
+                provider_ctx=ProviderContext(
+                    provider=self.provider,
+                    source_root=self.source_root,
+                    engine_type=self.engine_type,
+                ),
+            )
+            object.__setattr__(self, "availability", avail)
+
+        if self.qualification is None:
+            is_eng = bool(
+                self.engine_type
+                or self.category == "physics_engine"
+                or (self.type in KNOWN_PHYSICS_ENGINES and self.category != "tool")
+            )
+            qual = adapt_engine_matrix_qualification(
+                engine_name=self.engine_type,
+                is_engine=is_eng,
+            )
+            object.__setattr__(self, "qualification", qual)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> LauncherTile:
@@ -400,17 +780,9 @@ class LauncherTile:
         if missing:
             raise ValueError(f"Manifest entry missing required fields: {missing}")
         hidden = bool(data.get("hidden", False))
-        hidden_reason = data.get("hidden_reason")
-        hidden_owner = data.get("hidden_owner")
-        if hidden:
-            if not isinstance(hidden_reason, str) or not hidden_reason.strip():
-                raise ValueError(
-                    f"Hidden launcher tile '{data.get('id')}' must define hidden_reason"
-                )
-            if not isinstance(hidden_owner, str) or not hidden_owner.strip():
-                raise ValueError(
-                    f"Hidden launcher tile '{data.get('id')}' must define hidden_owner"
-                )
+        hidden_reason, hidden_owner = _validate_hidden_tile(
+            data.get("id"), hidden, data.get("hidden_reason"), data.get("hidden_owner")
+        )
 
         web_raw = data.get("web")
         if web_raw is not None:
@@ -421,15 +793,18 @@ class LauncherTile:
                 path=data.get("path"),
             )
 
+        status_val, maturity, availability, qualification = _parse_tile_state(data, web)
+        canonical_name = resolve_canonical_display_name(data["id"], data["name"])
+
         return cls(
             id=data["id"],
-            name=data["name"],
+            name=canonical_name,
             description=data["description"],
             category=data["category"],
             type=data["type"],
             path=_normalize_launch_path(data["path"]),
             logo=data["logo"],
-            status=data.get("status", "unknown"),
+            status=status_val,
             status_detail=data.get("status_detail"),
             capabilities=tuple(data.get("capabilities", [])),
             tags=tuple(data.get("tags", [])),
@@ -444,12 +819,11 @@ class LauncherTile:
             default_launch=data.get("default_launch", "tab"),
             shell_surfaces=tuple(data.get("shell_surfaces", [])),
             hidden=hidden,
-            hidden_reason=(
-                hidden_reason.strip() if isinstance(hidden_reason, str) else None
-            ),
-            hidden_owner=(
-                hidden_owner.strip() if isinstance(hidden_owner, str) else None
-            ),
+            hidden_reason=hidden_reason,
+            hidden_owner=hidden_owner,
+            maturity=maturity,
+            availability=availability,
+            qualification=qualification,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -496,6 +870,34 @@ class LauncherTile:
             result["hidden"] = True
             result["hidden_reason"] = self.hidden_reason
             result["hidden_owner"] = self.hidden_owner
+        result["maturity"] = self.maturity
+        if self.availability is not None:
+            result["availability"] = self.availability.to_dict()
+        else:
+            result["availability"] = _build_default_availability(
+                tile_id=self.id,
+                path=self.path,
+                web=self.web,
+                status=self.status,
+                status_detail=self.status_detail,
+                provider_ctx=ProviderContext(
+                    provider=self.provider,
+                    source_root=self.source_root,
+                    engine_type=self.engine_type,
+                ),
+            ).to_dict()
+        if self.qualification is not None:
+            result["qualification"] = self.qualification.to_dict()
+        else:
+            is_eng = bool(
+                self.engine_type
+                or self.category == "physics_engine"
+                or (self.type in KNOWN_PHYSICS_ENGINES and self.category != "tool")
+            )
+            result["qualification"] = adapt_engine_matrix_qualification(
+                engine_name=self.engine_type,
+                is_engine=is_eng,
+            ).to_dict()
         return result
 
     @property
