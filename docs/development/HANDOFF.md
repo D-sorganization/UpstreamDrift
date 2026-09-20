@@ -13,6 +13,31 @@
 - Reproduction: `pytest tests/integration/test_comparison_indicator_workspace.py --timeout=60`.
 - Next: Open PR, arm auto-merge, update issue.
 
+## ORG-06 Apply the Same Workspace Navigation to React and Tauri (#10516)
+
+- Worktree: main checkout, branch `feat/issue-10516-org06-react-workspace-navigation`, lease `antigravity-ud-10516`, DL-#10516.
+- Changes:
+  - `workspaceNavigation.ts`: Authoritative shared catalog definitions for the five primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`).
+  - `capabilityAdapter.ts`: `resolveWorkspaceToolAction` handles in-app web routes, desktop-window launches under Tauri, and actionable explanations with web alternatives for browser users.
+  - `WorkspaceNavigation.tsx`: Accessible `WorkspaceSidebar` with visible focus and focus recovery to `#main-content`, `WorkspaceBreadcrumb`, and `WorkspaceView` listing workspace member tools.
+  - `WorkspacePage.tsx`: Integrates `WorkspaceShell` with `WorkspaceSidebar` and `WorkspaceView` for bookmarkable task URLs (`/workspaces/:slug`).
+  - `LauncherDashboard.tsx`: Added task workspaces bar linking directly to each workspace destination.
+  - `routeTitles.ts`: Centralized page titles for all `/workspaces/:slug` routes.
+- Reproduction: `npm run test:run -- src/components/layout/WorkspaceNavigation.test.tsx` (from `ui/`).
+- Next: Open PR referencing Fixes #10516, enable auto-merge, release lease.
+
+## ORG-05 Build Task-Oriented Desktop Navigation Over Existing Embedded Tools (#10515)
+
+- Worktree: main checkout, branch `feat/issue-10515-org05-desktop-navigation`, lease `antigravity-ud-10515`, DL-#10515.
+- Changes:
+  - `workspace_navigation.py`: Defined 5 primary task workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`); implemented `ALIAS_MAP` canonical migration utilities (`migrate_model_order`, `migrate_favorites`, `migrate_saved_layout`); implemented single-instance tool reuse policy (`find_existing_tool_tab`, `focus_or_open_tool_tab`); guarded dirty tab close (`close_tool_tab_guarded`); created accessible return-to-workspace breadcrumb bar (`WorkspaceBreadcrumbBar`); implemented discoverability status explanations (`explain_tool_status`).
+  - `launcher_layout_manager.py`: Integrated `migrate_saved_layout` in `load_layout()` preserving user tile scaling, view mode, and dock state; updated `get_filtered_order()` to support workspace filters.
+  - `_launcher_navigation_ui.py`: Updated `_build_sidebar_filter_buttons()` with workspace destinations; added workspace routing to `_on_sidebar_routed()`; added `navigate_to_workspace()`.
+  - `launcher_ui_setup.py`: Enforced single-instance tool reuse in `dock_widget_as_tab()` before adding duplicate tabs.
+  - `test_workspace_navigation.py`: 22 comprehensive unit tests covering all requirements.
+- Reproduction: `pytest tests/launchers/test_workspace_navigation.py tests/launchers/test_workspace_tabs.py tests/launchers/test_launcher_layout_manager.py tests/launchers/test_launcher_ui_setup.py -v`.
+- Next: Open PR referencing Fixes #10515, enable auto-merge, release lease.
+
 ## ORG-17 Replace Canonical Estimation Shell With Bounded Estimator Coordinator (#10526)
 
 - Branch: `feat/issue-10526-org17-estimation-workflow`, lease `antigravity-org17`, DL-#10526.
@@ -38,7 +63,6 @@
   - `tests/launchers/test_task_launch_truthfulness.py`: TDD acceptance suite verifying all RED/GREEN cases: problematic tiles cannot claim ready/gui_ready; missing video analyzer yields diagnostic window; FreeMoCap zero args/cancellation performs no spawn and valid args pass through unchanged; simulator prototype is marked demo-only.
 - Reproduction: `pytest tests/launchers/test_task_launch_truthfulness.py tests/launchers/test_simulation_guis.py tests/launchers/test_launcher_process_manager.py tests/scripts/test_capability_atlas.py --timeout=60`.
 - Next: Validate against rebased main, enable auto-merge on #10536, release lease on #10512, claim #10513 (ORG-04).
-  > > > > > > > 7e7ff2473 (feat(launchers): replace misleading launches with real tasks or explicit nonlaunchable states (#10512))
 
 ## ORG-02 Separate Capability Identity, Maturity, Availability, and Qualification (#10511)
 
@@ -97,6 +121,10 @@ Docker build and dependency-artifact regeneration before merge.
   - `tests/config/launcher_manifest/test_parity.py`: Added checks for loaded tiles in `test_route_mode_routes_exist_in_react_router`, and added `test_every_tile_destination_resolves_authoritatively`.
 - Reproduction: `npm run test:run` in `ui/` (874 tests pass); `pytest tests/config/launcher_manifest/ tests/config/test_launcher_registry_parity.py` (95 tests pass).
 - Next: Land PR, arm auto-merge, release lease.
+
+=======
+
+> > > > > > > bf6ec7343 (feat(ui): apply task-oriented workspace navigation to React and Tauri (#10516))
 
 ## MV-06 Expose Real Forces, Torques, and Explicit Counterfactual Semantics (#10482)
 

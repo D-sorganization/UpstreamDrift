@@ -13,6 +13,23 @@ Surfaces cross-engine comparison and injury risk indicators into dedicated appli
   - Requires explicit physical load channels (`peak_compression_bw`, `peak_lateral_shear_bw`, `x_factor_stretch`) normalized by body weight (BW) and fails closed when channels are absent (no mock data fallback).
   - Adapts biomechanical inputs to `InjuryRiskScorer` and stamps every indicator output with mandatory non-clinical educational/research disclaimers.
 
+## Task-Oriented React and Tauri Workspace Navigation (ORG-06, #10516)
+
+Applies consistent, task-oriented workspace navigation across React and Tauri web/desktop interfaces aligned with the five canonical domains:
+- **Shared Catalog Definitions (`ui/src/types/workspaceNavigation.ts`)**:
+  - `TASK_WORKSPACES`: Canonical definitions for the 5 primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`).
+  - Strict membership contracts mapping launcher tools, embedded viewers, and workflow actions to their authoritative task domain.
+- **Capability Adapter & Surface Isolation (`ui/src/api/capabilityAdapter.ts`)**:
+  - `resolveWorkspaceToolAction`: Resolves tool launches across web and Tauri desktop surfaces.
+  - Native-only tools trigger desktop window launches under Tauri or provide actionable explanations with web alternatives when accessed from standard browsers.
+- **Accessible Navigation Components (`ui/src/components/layout/WorkspaceNavigation.tsx`)**:
+  - `WorkspaceSidebar`: Accessible sidebar navigation with visible focus states, ARIA landmarks, and keyboard focus recovery to `#main-content`.
+  - `WorkspaceBreadcrumb`: Accessible return-to-workspace breadcrumb trail preserving hierarchical task context.
+  - `WorkspaceView`: Tabular and card layout of workspace member capabilities with reachability badges and direct actions.
+- **Bookmarkable Routing & State Preservation (`ui/src/pages/WorkspacePage.tsx`, `ui/src/App.tsx`, `ui/src/utils/routeTitles.ts`)**:
+  - Dedicated `/workspaces/:slug` routes supporting direct linking, browser forward/back navigation, and centralized route titles.
+  - Integrated launcher dashboard quick-links into workspace destinations.
+
 ## Replace Canonical Estimation Shell With Bounded Estimator Coordinator (ORG-17, #10526)
 
 Replaces placeholder canonical estimation shells with a bounded application service coordinator integrating parameter estimation, identifiability analysis, and trajectory evaluation:
@@ -39,6 +56,21 @@ Eliminates GUI thread blocking during launcher startup by offloading tool discov
   - Eliminated artificial `msleep(500)` in `AsyncStartupWorker.run()`.
   - Added explicit thread cleanup via `worker.finished.connect(worker.deleteLater)`.
   - Added granular phase duration reporting and startup telemetry.
+
+## Task-Oriented Desktop Navigation Over Existing Embedded Tools (ORG-05, #10515)
+
+Organizes desktop launcher workflows into 5 task-oriented primary workspaces and preserves user customization during alias migration:
+- **Task-Oriented Workspace Navigation (`src/launchers/workspace_navigation.py`, `src/launchers/_launcher_navigation_ui.py`)**:
+  - `TaskWorkspace`: Defines 5 primary task workspaces (`capture_analyze`, `model_match`, `shot_course_lab`, `optimize_train`, `results_compare`) and secondary navigation destinations (`developer_research`, `all_tools`, `favorites`, `history`).
+  - Single-instance tool reuse policy (`find_existing_tool_tab`, `focus_or_open_tool_tab`, `dock_widget_as_tab`): Reuses existing open tabs rather than spawning duplicate windows or parallel sessions.
+  - Return-to-workspace breadcrumb bar (`WorkspaceBreadcrumbBar`): Provides accessible breadcrumb hierarchy, keyboard navigation, and return-to-workspace navigation.
+  - Discoverability status explanations (`explain_tool_status`): Surfaces human-actionable diagnostic reasons and remediation for missing, degraded, or unconfigured capabilities.
+- **Layout Manager & Alias Migration (`src/launchers/launcher_layout_manager.py`)**:
+  - `migrate_saved_layout`: Migrates legacy saved layouts through `ALIAS_MAP` while strictly preserving custom user tile scaling, view mode, and docking geometry.
+  - `get_filtered_order`: Filters launcher tile presentation by active task workspace.
+- **Accessible & Responsive Sidebar UX (`src/launchers/_launcher_navigation_ui.py`, `src/launchers/launcher_ui_setup.py`)**:
+  - Wraps navigation sidebar in `QScrollArea` to enable narrow-window responsiveness without clipping navigation controls.
+  - Configures accessible names and descriptions for screen reader accessibility and keyboard focus order.
 
 ## Launch Truthfulness and Guard Problematic Tiles (ORG-03, #10512)
 
