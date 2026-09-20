@@ -302,6 +302,7 @@ def test_startup_worker_run_docker_error(
     worker.finished_signal.emit.assert_called_once()
 
 
+@pytest.mark.unit
 @patch("src.launchers.startup.secure_run")
 @patch("src.shared.python.engine_core.engine_manager.EngineManager")
 @patch("src.shared.python.config.model_registry.ModelRegistry")
@@ -330,6 +331,7 @@ def test_startup_worker_bootstraps_embeddable_tools_and_omits_msleep(
     worker.finished_signal.emit.assert_called_once()
 
 
+@pytest.mark.unit
 def test_warn_on_manifest_gaps_gated_by_environment(monkeypatch) -> None:
     """_warn_on_manifest_gaps skips missing_embeddable_manifest_tools unless env var is set."""
     from src.launchers import embedded_tool_bootstrap as bootstrap
