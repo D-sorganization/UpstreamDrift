@@ -77,7 +77,10 @@ import hashlib
 import json
 import math
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.shared.python.physics.swing_ball_flight_pipeline import PipelineResult
 
 from .flight_models import FlightModelRegistry, FlightModelType, FlightResult
 
@@ -118,6 +121,7 @@ __all__ = [
     "UD_FLIGHT_FAMILY",
     "VELOCITY_CHANNEL",
     "flight_result_to_trajectory_record",
+    "pipeline_result_to_trajectory_record",
     "trajectory_parameter_digest",
     "trajectory_record_to_json",
 ]
@@ -189,7 +193,9 @@ def trajectory_parameter_digest(parameters: Mapping[str, float | int | str]) -> 
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def _validated_samples(result: FlightResult) -> list[dict[str, Any]]:
+def _validated_samples(
+    result: FlightResult | PipelineResult,
+) -> list[dict[str, Any]]:
     """Return the retained trajectory as wire samples, or refuse.
 
     The samples are the integrator's own retained points, never
@@ -293,6 +299,55 @@ def flight_result_to_trajectory_record(
         },
         "samples": _validated_samples(result),
         "source_id": source_id or f"{UD_FLIGHT_FAMILY}:{model_name}",
+    }
+
+
+def pipeline_result_to_trajectory_record(
+    result: PipelineResult,
+    *,
+    source_id: str | None = None,
+) -> dict[str, Any]:
+    """Build the ``ball_flight_trajectory/1`` payload for a SwingBallFlightPipeline result.
+
+    Args:
+        result: A :class:`~.swing_ball_flight_pipeline.PipelineResult`.
+        source_id: Optional run identifier.
+
+    Returns:
+        A plain ``dict`` matching the documented wire: six top-level keys,
+        the flight frame declared, the ``velocity_mps`` channel declared,
+        mandatory provenance, and strictly increasing non-negative sample times.
+    """
+    from src.shared.python.physics.swing_ball_flight_pipeline import PipelineResult
+
+    if not isinstance(result, PipelineResult):
+        raise TypeError("result must be a PipelineResult")
+
+    params: dict[str, float | str] = {
+        "cor": float(result.impact_params.cor),
+        "friction_mu": float(result.impact_params.friction_coefficient),
+        "launch_speed_ms": float(result.launch_conditions.velocity),
+        "launch_angle_rad": float(result.launch_conditions.launch_angle),
+        "spin_rate_rpm": float(result.launch_conditions.spin_rate),
+        "engine_source": str(result.swing_state.engine_name),
+    }
+    digest = trajectory_parameter_digest(params)
+    model_name = "SwingBallFlightPipeline"
+    sid = (
+        source_id or f"{UD_FLIGHT_FAMILY}:{model_name}:{result.swing_state.engine_name}"
+    )
+
+    return {
+        "channels": [VELOCITY_CHANNEL],
+        "format": BALL_FLIGHT_TRAJECTORY_FORMAT,
+        "frame_id": FLIGHT_FRAME_ID,
+        "provenance": {
+            "model_family": UD_FLIGHT_FAMILY,
+            "model_name": model_name,
+            "parameter_digest": digest,
+        },
+        "samples": _validated_samples(result),
+        "source_id": sid,
     }
 
 
