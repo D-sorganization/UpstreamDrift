@@ -19,7 +19,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10515 · Build Task-Oriented Desktop Navigation Over Existing Embedded Tools
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10515 (ORG-05, epic #10508)
 - **Branch:** feat/issue-10515-org05-desktop-navigation
@@ -38,7 +38,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10526 (ORG-17, epic #10508)
 - **Branch:** feat/issue-10526-org17-estimation-workflow
 - **PR:** #10565
-- **Paths:** src/shared/python/workspace/__init__.py; src/shared/python/workspace/estimation_workspace.py; tests/integration/test_estimation_workspace.py
+- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/estimation_workspace.py; tests/integration/test_estimation_workspace.py
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 at HEAD (8 integration tests pass in test_estimation_workspace.py; ruff check & format clean; file line budget 447 <= 500 LOC).
 - **Summary:** Implemented `EstimationWorkspaceCoordinator` replacing placeholder canonical estimation shells with a bounded application service coordinator. Integrates `solve_single_trial_map`, `IdentifiabilityGateOptions`, parameter priors and bounds, and spline trajectory evaluation. Provides fail-closed validation for non-finite cost/trajectories and ill-conditioned systems, with complete provenance persistence round-trips.
@@ -114,6 +114,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Established canonical route table `KNOWN_APP_ROUTES` and `isKnownAppRoute` in React UI; implemented browser and Tauri reachability evaluation and matrix generator (`evaluateTileReachability`, `generateReachabilityMatrix`); hardened `resolveTileLaunchAction` to reject unmapped routes with honest blocked/unavailable states; removed invalid web_route from Movement Optimizer model packs and sanitized in `LauncherManifestLoader` so Movement Optimizer resolves cleanly to `native-window`; expanded `test_route_mode_routes_exist_in_react_router` to inspect all loaded tiles from `LauncherManifest.load()` and added `test_every_tile_destination_resolves_authoritatively`.
 - **Next step:** Commit, push, enable auto-merge, and release lease.
 - **Evidence:** ui/src/api/launcherReachability.test.tsx; tests/config/launcher_manifest/test_parity.py.
+
+### DL-#10516 · Apply the Same Workspace Navigation to React and Tauri
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10516 (ORG-06, epic #10508)
+- **Branch:** feat/issue-10516-org06-react-workspace-navigation
+- **PR:** #10540
+- **Paths:** ui/src/types/workspaceNavigation.ts; ui/src/api/capabilityAdapter.ts; ui/src/components/layout/WorkspaceNavigation.tsx; ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/pages/WorkspacePage.tsx; ui/src/components/simulation/LauncherDashboard.tsx; ui/src/App.tsx; ui/src/utils/routeTitles.ts; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (SELF; 13 unit tests pass in WorkspaceNavigation.test.tsx; full 94-file 878-test Vitest suite passes; tsc type-check, eslint, vite build pass; WCAG contrast guard passes; file budget clean)
+- **Summary:** Applied task-oriented workspace navigation across React and Tauri (ORG-06). Reused shared catalog metadata for the five primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `WorkspaceSidebar` and `WorkspaceBreadcrumb` within `WorkspaceShell` preserving browser history, bookmarkable task URLs (`/workspaces/:slug`), centralized route titles, and keyboard focus recovery. Created shared `resolveWorkspaceToolAction` capability adapter opening native tools under Tauri/desktop while providing actionable explanations and web alternatives for browser-only users.
+- **Next step:** Commit, push, open PR referencing Fixes #10516, enable auto-merge, and release lease.
+- **Evidence:** ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/components/layout/WorkspaceNavigation.tsx.
 
 ### DL-#10482 · Expose Real Forces, Torques, and Explicit Counterfactual Semantics
 
