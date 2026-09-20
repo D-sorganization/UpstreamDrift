@@ -41,6 +41,40 @@ Implements a dual-pane PyQt6 embeddable tool and lineage model (`src/tools/match
 
 ## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
 
+Consumes provider ownership decisions and enforces immutable runtime import authority and provenance verification across repository, installed, and packaged execution environments:
+- **Provider Authority & Provenance Verification (`src/shared/python/config/tools_vendor_authority.py`)**:
+  - `assert_runtime_provenance_parity(pytest_root, packaged_app_root)`: Asserts that pytest (repository test runtime) and packaged application environments resolve identical implementation roots, failing closed with `ProviderUnavailableError` upon divergence.
+  - `verify_provider_provenance(canonical_root, candidate_path)`: Asserts that candidate modules or paths resolve strictly within the declared canonical provider root, preventing silent escapes to unpinned local forks.
+  - `inspect_provider_authority(repo_root, ...)`: Unified fail-closed authority inspection covering pinned gitlink checkouts, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback.
+- **Fail-Closed Mismatch Gating**:
+  - Pin mismatches explicitly report `Tools pin stale (expected X, found Y)` and produce blocked status (`provider_unavailable`) with remediation instructions.
+  - Missing provider checkouts and missing wheel distributions fail closed with actionable errors, refusing unpinned local fork or sibling fallbacks.
+  - Underlying provider import failures surface clean diagnostic blocked states rather than unhandled host crashes.
+- **Canonical Seam Delegation & Backward Compatibility**:
+  - Sidekick public seams (`EmbeddableTool` adapter, chat history service) resolve through authoritative Tools provider.
+  - Movement Optimizer public seams delegate through `tools_movement_optimizer` via `ALIAS_MAP`, registered in the `optimize_train` workspace.
+  - Pendulum public seams (`swing_objective_lab` adapter, `pendulum_simulator` tile) run through intended provider authority.
+  - Legacy supported imports (`upstream_drift_tools`) delegate cleanly to canonical providers with formal deprecation warnings.
+
+## Engine Capability Matrix, Dynamic Tile Status Derivation, and Non-Blocking Runtime Discovery (MS-71, #10351)
+
+Establishes a single source of truth for physics engine capabilities, qualifications, and tile status across Python and TypeScript surfaces:
+- **Dynamic Capability Matrix Generation (`scripts/generate_engine_matrix.py`, `src/config/engine_capability_matrix.json`)**:
+  - `generate_engine_capability_matrix()`: Scans active physics engines and reconciles capability ledgers (`engine_capabilities.py`), tier declarations (`TIER`), and verification receipts across all 16 standardized capability dimensions (contacts, muscle actuation, ground reaction forces, differentiability, inverse dynamics, closed loops, fluid coupling, etc.).
+  - Distinguishes qualified engines (`advertised_and_qualified`), verified gaps (`advertised_but_unqualified`), and unadvertised features. Reconciles experimental engines (e.g. JaxSim experimental tier) and aliases (e.g. MyoSim/MuJoCo).
+  - CLI supports `--write` for deterministic matrix generation and `--check` for CI freshness validation.
+- **Dynamic Engine Status Derivation & Tile Readiness (`src/config/launcher_manifest_loader.py`, `src/launchers/model_card.py`, `src/config/capability_state.py`)**:
+  - Manifest loader queries the capability matrix and runtime availability: tiles transition to `ready` only when the underlying engine is both installed and qualified (`advertised_and_qualified`), rendering `experimental` or `runtime_unavailable` otherwise.
+  - PyQt model cards (`ModelCard`) render dynamic capability chips and status indicators honoring qualified receipts without optimistic fallback.
+  - Non-blocking engine discovery cache (`src/config/engine_probe_cache.py`, `#8938`) caches discovered engine statuses asynchronously on disk (`~/.upstream_drift/engine_probe.json`) with thread-safe atomic writes to eliminate GUI startup pauses.
+- **Dynamic Matrix API Endpoints (`src/api/routes/capabilities.py`, `src/api/routes/launcher.py`)**:
+  - `GET /engines/matrix`: Public API endpoint exposing the authoritative capability matrix to frontend clients.
+  - `GET /engines/capabilities`: Dynamically populated from `engine_capability_matrix.json`, replacing hardcoded mock profiles and enforcing parity between REST APIs and backend ledgers.
+- **Frontend Capability Chips (`ui/src/components/simulation/LauncherDashboard.tsx`)**:
+  - React/Tauri launcher dashboard styles capability badges and status chips (`ready`, `experimental`, `runtime_unavailable`) consistent with system design tokens.
+
+## Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (ORG-07, #10514)
+
 Projects 28 multi-provider exercise variants into 7 cohesive logical model choices while preserving underlying provider assets and enforcing strict authority resolution:
 - **Logical Model Grouping & Projections (`src/shared/python/config/model_variant_grouping.py`)**:
   - `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection`: Projects 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices (`Gait Analysis`, `Squat Kinematics`, `Jump Land Mechanics`, `Run Sprint Cycle`, `Sit to Stand Transition`, `Stair Climb Descent`, `Single Leg Balance`).
