@@ -92,3 +92,13 @@ def refresh_engine_probe_cache_async(
     thread = threading.Thread(target=_worker, name="EngineProbeWorker", daemon=True)
     thread.start()
     return thread
+
+
+_ORIGINAL_IS_ENGINE_RUNTIME_AVAILABLE = is_engine_runtime_available
+
+
+def check_engine_runtime_availability(engine_type: str | None) -> bool:
+    """Check runtime availability using cache unless monkeypatched in tests."""
+    if is_engine_runtime_available is not _ORIGINAL_IS_ENGINE_RUNTIME_AVAILABLE:
+        return is_engine_runtime_available(engine_type)
+    return is_cached_engine_runtime_available(engine_type)

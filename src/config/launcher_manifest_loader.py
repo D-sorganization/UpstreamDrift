@@ -24,6 +24,10 @@ from pathlib import Path
 from typing import Any
 
 from src.config.capability_state import (
+    _DEFAULT_PROVIDER_LOGO,
+    _ENGINE_LOGOS,
+    _WEB_LOGO_BY_DESKTOP_PNG,
+    _web_logo,
     KNOWN_PHYSICS_ENGINES,
     VALID_MATURITY_LEVELS,
     CapabilityAvailability,
@@ -53,46 +57,7 @@ ASSETS_DIR = Path(__file__).parent.parent.parent / "assets" / "logos"
 PYQT_ASSETS_ROOT = Path(__file__).parent.parent / "launchers"
 REGISTRY_PATH = CONFIG_DIR / "models.yaml"
 REPO_ROOT = CONFIG_DIR.parents[1]
-_DEFAULT_PROVIDER_LOGO = "golf_logo.svg"
-# The desktop launcher keeps legacy PNG artwork under src/launchers/assets;
-# the web catalog serves SVG-only logos from assets/logos. Registry-surfaced
-# tiles translate their desktop artwork to the SVG equivalent for the web.
-_WEB_LOGO_BY_DESKTOP_PNG = {
-    "golf_logo.png": "golf_logo.svg",
-    "mujoco.png": "mujoco_humanoid.svg",
-    "drake.png": "drake.svg",
-    "pinocchio.png": "pinocchio.svg",
-    "opensim.png": "opensim.svg",
-    "myosim.png": "myosim.svg",
-    "putting_green_modern.png": "putting_green.svg",
-    "c3d_viewer_modern.png": "c3d_icon.svg",
-    "data_explorer_modern.png": "data_explorer.svg",
-    "video_analyzer_modern.png": "video_analyzer.svg",
-    "matlab_logo.png": "matlab_logo.svg",
-    "project_map.png": "project_map.svg",
-    "urdf_icon.png": "urdf_icon.svg",
-    "bunkershot_icon.png": "bunkershot3d.svg",
-    "training_controller.png": "project_map.svg",
-    "openpose.png": "video_analyzer.svg",
-    "mediapipe.png": "video_analyzer.svg",
-}
-
-
-def _web_logo(logo: str) -> str:
-    """Return an SVG logo for the web catalog, translating desktop PNGs."""
-    if logo.endswith(".svg"):
-        return logo
-    return _WEB_LOGO_BY_DESKTOP_PNG.get(Path(logo).name, _DEFAULT_PROVIDER_LOGO)
-
-
-_ENGINE_LOGOS = {
-    "drake": "drake.svg",
-    "mujoco": "mujoco_humanoid.svg",
-    "myosuite": "myosim.svg",
-    "opensim": "opensim.svg",
-    "pinocchio": "pinocchio.svg",
-    "putting_green": "putting_green.svg",
-}
+_READY_STATUSES = frozenset({"ready", "engine_ready", "release_ready", "gui_ready"})
 LAUNCHER_CATEGORY_LABELS: dict[str, str] = {
     "physics_engine": "Physics Engines",
     "biomechanics": "Biomechanics",
@@ -219,12 +184,7 @@ def _provider_status(
             engine_name=model.engine_type,
             is_engine=True,
         )
-        if not qual.is_qualified and status in (
-            "ready",
-            "engine_ready",
-            "release_ready",
-            "gui_ready",
-        ):
+        if not qual.is_qualified and status in _READY_STATUSES:
             return "experimental", None
     return status, None
 
@@ -386,7 +346,7 @@ def _qualify_engine_status(
         is_engine
         and status not in ("runtime_unavailable", "provider_unavailable")
         and not qualification.is_qualified
-        and status in ("ready", "engine_ready", "release_ready", "gui_ready")
+        and status in _READY_STATUSES
     ):
         status = "experimental"
     return qualification, status
