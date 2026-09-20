@@ -152,12 +152,25 @@ from .installed_journeys import (
     UtilityNavigationResult,
     UtilityNavigationTarget,
 )
+from .feature_preservation_audit import (
+    AuditCounts,
+    AuditFailureError,
+    AuditReport,
+    AuditSectionResult,
+    AuditStatus,
+    FeaturePreservationAuditor,
+)
 
 __all__ = [
     "ActionAvailability",
     "ArtifactKind",
     "ArtifactReference",
     "AssistantContextSnapshot",
+    "AuditCounts",
+    "AuditFailureError",
+    "AuditReport",
+    "AuditSectionResult",
+    "AuditStatus",
     "BiomechanicalLoadChannels",
     "BunkerFidelityTier",
     "BunkerRunRecord",
@@ -186,6 +199,7 @@ __all__ = [
     "EstimationWorkspaceCoordinator",
     "EstimatorType",
     "ExtractionAdapterError",
+    "FeaturePreservationAuditor",
     "FitJobRequest",
     "FitJobResult",
     "FitJourneyResult",
