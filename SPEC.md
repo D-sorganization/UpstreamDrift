@@ -250,6 +250,20 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
 
+## Move Tour Matching Execution Out of Documentation Without Changing Results (ORG-11, #10520)
+
+Packages tour matching execution into reusable library code outside the documentation tree:
+- **Packaged Execution Modules (`src/shared/python/motion_matching/execution/`)**:
+  - `assets.py`: Reference asset resolution (`get_native_geometry_spec`, `get_opensim_model`, `get_candidate_geometry_spec`, `get_capture_c3d`, `resolve_output_root`) with environment variable overrides and clear actionable `FileNotFoundError` messages.
+  - `spec_builder.py`: Packaged candidate spec builder with self-contained OpenSim parsing, leg extension, and CLI entry point.
+  - `downswing.py`: Packaged downswing tracking experiment runner and CLI entry point.
+  - `mjx_export.py`: Packaged MuJoCo MJX exporter and CLI entry point.
+  - `driver.py`: Packaged ground support driver entry point delegating to `pipeline.cli`.
+- **Legacy Wrapper Compatibility (`docs/development/full_body_models/`)**:
+  - Deprecated wrappers issuing `DeprecationWarning` while delegating directly to packaged entry points, preserving CLI argument schemas and exit codes.
+- **Pipeline Integration (`src/tools/motion_matching/pipeline.py`)**:
+  - Direct delegation to packaged execution scripts writing outputs cleanly outside the documentation directory.
+
 ## Guided Workflow Transitions Across Unified Workspaces (ORG-09, #10518)
 
 Coordinates multi-stage end-to-end biomechanical workflows across workspaces with disk-backed verification, cryptographic artifact hashing, and client UI projection parity:
