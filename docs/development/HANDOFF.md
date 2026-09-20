@@ -1,5 +1,21 @@
 # Current Matching Continuation Handoff
 
+## ORG-19 Unify Sidekick, Setup, Help, and Library as Global Utilities (#10528)
+
+- Branch: `feat/issue-10528-org19-global-utilities`, lease `antigravity-ud-10528`, DL-#10528.
+- Changes:
+  - `src/shared/python/workspace/global_utilities.py`: Implemented `GlobalWorkspaceUtilitiesCoordinator`, `AssistantContextSnapshot`, `WorkspaceContextualHelp`, `OnboardingPreferences`, `PlatformExecutionEnvironment`, `NativeActionUnavailableError`, and `UnknownUtilityError`.
+  - Assistant context updates cleanly on workspace switch without creating duplicate sessions or stale run references.
+  - Canonical alias resolution maps legacy utility IDs (`legacy_assistant`, `setup_wizard`, `library_browser`, `help_center`) to canonical utilities.
+  - Sticky onboarding preferences persist across session reload and migration.
+  - Focus restoration returns focus cleanly to calling widgets upon overlay dismissal.
+  - Browser platform environment refuses native-only controls fail-closed with `NativeActionUnavailableError`.
+  - Assistant conversation history persists across workspace navigation without deletion.
+  - `src/shared/python/workspace/__init__.py`: Exported public coordinator and utility data structures.
+  - `tests/launchers/test_global_workspace_utilities.py`: Full RED and GREEN unit test suite (7/7 tests passing with `pytestmark = pytest.mark.unit`).
+- Reproduction: `python -m pytest tests/launchers/test_global_workspace_utilities.py --timeout=60`.
+- Next: Open PR with auto-merge, release lease, proceed to next issue in backlog.
+
 ## ORG-16 Consolidate Optimization and Training Launchers (#10525)
 
 - Branch: `feat/issue-10525-org16-optimization-training`, lease `antigravity-ud-10525`, DL-#10525.

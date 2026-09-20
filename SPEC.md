@@ -370,6 +370,17 @@ Packages tour matching execution into reusable library code outside the document
 - **Pipeline Integration (`src/tools/motion_matching/pipeline.py`)**:
   - Direct delegation to packaged execution scripts writing outputs cleanly outside the documentation directory.
 
+## Global Workspace Utilities (ORG-19, #10528)
+
+Unifies Sidekick, Setup, Help, and Library as global, workspace-agnostic overlays:
+- **Global Utilities Coordinator (`src/shared/python/workspace/global_utilities.py`)**:
+  - `GlobalWorkspaceUtilitiesCoordinator`: Manages assistant, contextual help, onboarding setup, and model/asset library overlays without duplicating state across workspace transitions.
+  - Contextual Assistant Synchronization: Workspace transitions preserve conversation history while cleanly updating active project, run, and workspace metadata snapshots (`AssistantContextSnapshot`).
+  - Canonical Alias Resolution: Preserves backwards compatibility for deprecated/legacy utility IDs (`legacy_assistant`, `setup_wizard`, `library_browser`, `help_center`) resolving them to canonical destinations.
+  - Persistent Onboarding Preferences: Sticky onboarding dismissal survives session reloads, profile switches, and cross-session handoffs (`OnboardingPreferences`).
+  - Keyboard Focus Restoration: Restores prior keyboard focus cleanly to calling widgets upon modal/drawer overlay dismissal.
+  - Fail-Closed Platform Execution: Refuses native desktop controls (local file explorer, native process invocation, direct GPU profiling) when running in browser execution environments (`NativeActionUnavailableError`).
+
 ## Optimization and Training Workspace (ORG-16, #10525)
 
 Consolidates optimization and training launchers under shared project workspace and controller authority:
