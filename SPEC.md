@@ -1,3 +1,20 @@
+## Generate Accurate Atlas, Help, Parity, and Completion Records (ORG-21, #10531)
+
+Generates accurate, evidence-backed capability atlas graphs, feature parity matrices, industrial readiness records, and workspace documentation without shell-only or stale placeholders:
+- **Workspace Documentation & Freshness Acceptance (`tests/scripts/test_workspace_documentation_freshness.py`)**:
+  - `test_workspace_membership_drift`: Verifies workspace domains match canonical set (`simulation`, `analysis`, `capture`, `putting`, `training`, `governance`) across `capability_migration.json`, `models.yaml`, `launcher_manifest.json`, and `capability_connections.json`, rejecting unregistered domains.
+  - `test_undocumented_alias`: Enforces that all deprecated and configured aliases resolve transitively to active canonical destinations without cycles.
+  - `test_broken_source_and_help_links`: Enforces that all evidenced routes, node targets, and edge references in `capability_connections.json` resolve to existing files on disk.
+  - `test_stale_generated_views`: Validates that generated capability atlas artifacts, feature parity matrix, and industrial readiness index match committed files byte-for-byte.
+  - `test_shell_only_parity_cannot_be_interpreted_as_compute_complete`: Ensures that surface presence (PyQt/API/web) does not conflate with compute engine execution or qualification completeness.
+  - `test_generators_deterministic`: Asserts deterministic, repeatable outputs across repeated generator executions.
+  - `test_training_controller_readme_accurately_reflects_shipped_surface`: Asserts that `src/tools/training_controller/README.md` documents current PyQt6 GUI implementation (`MainWindow`, `gui.py`, `_embed_adapter.py`) without obsolete draft or deferred notes.
+  - `test_industrial_readiness_issue_8820_reconciled`: Validates that entry U3 (#8820, PR #9995) is recorded as merged with verified 40-char SHA and valid implementation/test paths.
+- **Catalog & Documentation Reconciliation**:
+  - `src/config/industrial_readiness.json`: Reconciled item U3 (#8820) status to `"merged"` with merge commit `8ef1bec803de292e44724cdf1f96d3ebf52bf2f2` and test evidence.
+  - `docs/operations/industrial-readiness-index.md`: Synchronized through `generate_industrial_readiness_index`.
+  - `src/tools/training_controller/README.md`: Updated to truthfully describe the shipped PyQt6 GUI surface and canonical embedded adapter.
+
 ## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
 
 Consumes provider ownership decisions and enforces immutable runtime import authority and provenance verification across repository, installed, and packaged execution environments:
