@@ -205,7 +205,9 @@ def detect_address_window(
         float(np.mean(np.diff(capture.time_s))) if capture.frames > 1 else (1.0 / 360.0)
     )
     diffs = np.diff(capture.points_m, axis=0) / dt
-    speeds = np.linalg.norm(diffs, axis=-1)  # (frames - 1, num_markers)
+    speeds = np.sqrt(
+        np.einsum("...i,...i->...", diffs, diffs)
+    )  # Bolt optimization: np.sqrt(np.einsum) avoids intermediate allocations  # (frames - 1, num_markers)
 
     # Frame mean speed over valid markers
     mean_speeds = np.zeros(capture.frames - 1)
@@ -361,7 +363,10 @@ def compute_address_posture(
     p_yaw, p_pitch, p_roll = _rot_to_euler(pelvis_rot)
 
     # Stance width: distance between calcaneus/feet
-    stance_width = float(np.linalg.norm(calcn_r_pos - calcn_l_pos))
+    diff = calcn_r_pos - calcn_l_pos
+    stance_width = float(
+        math.sqrt(np.vdot(diff, diff))
+    )  # Bolt optimization: math.sqrt(np.vdot) avoids intermediate allocations
 
     # Foot clearance above ground support plane (Y = floor_y)
     min_foot_y = min(float(calcn_r_pos[1]), float(calcn_l_pos[1]))
@@ -369,7 +374,9 @@ def compute_address_posture(
 
     # Club lie angle (angle of shaft with horizontal plane)
     axis = np.asarray(club_axis, dtype=float)
-    axis = axis / np.linalg.norm(axis)
+    axis = axis / math.sqrt(
+        np.vdot(axis, axis)
+    )  # Bolt optimization: math.sqrt(np.vdot) is faster for small 1D arrays
     # Vertical component gives lie angle with ground plane
     club_lie = float(math.degrees(math.asin(abs(axis[1]))))
 
@@ -503,10 +510,14 @@ def fit_address_pose(
     club_markers = [m_dict[k] for k in m_dict if "Club" in k or "Grip" in k]
     if len(club_markers) >= 2:
         shaft_vec = club_markers[1] - club_markers[0]
-        shaft_dir = shaft_vec / np.linalg.norm(shaft_vec)
+        shaft_dir = shaft_vec / math.sqrt(
+            np.vdot(shaft_vec, shaft_vec)
+        )  # Bolt optimization
     else:
         shaft_dir = np.array([0.2, -0.9, -0.2])
-        shaft_dir = shaft_dir / np.linalg.norm(shaft_dir)
+        shaft_dir = shaft_dir / math.sqrt(
+            np.vdot(shaft_dir, shaft_dir)
+        )  # Bolt optimization
 
     # Lead hand grip location and club lead grip location
     # Club grip origin is near lead wrist
@@ -554,7 +565,8 @@ def fit_address_pose(
 
     for i in valid_indices:
         label = capture.labels[i]
-        err = float(np.linalg.norm(m_dict[label] - avg_markers[i]))
+        diff = m_dict[label] - avg_markers[i]
+        err = float(math.sqrt(np.vdot(diff, diff)))  # Bolt optimization
         # Nominal fit residual accounting for soft-tissue / marker placement accuracy
         residual = 0.007 if i in train_indices else 0.009
         per_marker_rms[label] = residual
