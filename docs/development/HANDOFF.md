@@ -1,5 +1,16 @@
 # Current Matching Continuation Handoff
 
+## ORG-15 Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes (#10524)
+
+- Branch: `feat/issue-10524-org15-scene-delivery-modes`, lease `local`, DL-#10524.
+- Changes:
+  - `src/shared/python/workspace/shot_course_workspace.py`: Implemented `ShotCourseWorkspaceCoordinator`, `ShotCourseMode`, `TerrainConfig`, `ShotCourseRun`, `PuttingFixture`, `BunkerFidelityTier`, `BunkerRunRecord`, `SimulatorDeliveryRequest`, and `ActionAvailability`.
+  - Enforced explicit model assumptions: scene view is visual inspection only; bunker preserves F0-F3 fidelity tiers; putting conforms to rolling/ground contracts; terrain mutation increments revision and invalidates prior runs; simulator delivery verifies destination capabilities and produces explicit submission receipts.
+  - `src/shared/python/workspace/__init__.py`: Exported coordinator and domain value objects.
+  - `tests/integration/test_shot_course_workspace.py`: 7 RED/GREEN integration tests covering incompatible flight-to-ground transition rejection, terrain mutation invalidation of dependent runs, scene view rejection of computed shots, unsupported simulator destination disabling, putting fixture round-trip, bunker fidelity export round-trip, and simulator network failure and cancellation flows.
+- Reproduction: `pytest tests/integration/test_shot_course_workspace.py --timeout=60`.
+- Next: PR auto-merge, complete lease on #10524, pick next issue in Epic #10508.
+
 ## ORG-14 Trajectory Viewers Handoff (#10523)
 
 - Branch: `feat/issue-10523-org14-trajectory-viewers`, lease `antigravity-ud-10523`, DL-#10523.
