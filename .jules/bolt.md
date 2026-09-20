@@ -128,6 +128,10 @@
 **Learning:** In the motion capture retargeting pipeline (e.g., `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py`), calling `np.linalg.norm(pos_error)` on small 1D arrays (like 3D position errors) incurs significant overhead due to NumPy's internal dispatching and instance checks. Replacing it with `math.sqrt(pos_error.dot(pos_error))` bypasses this overhead and is significantly faster (~2.5x).
 **Action:** Replace `np.linalg.norm(pos_error)` with `math.sqrt(pos_error.dot(pos_error))` for small 1D array magnitude calculations where possible.
 
+## 2026-09-19 - Optimize Math.Sqrt(Dot) vs Np.Linalg.Norm
+**Learning:** When computing magnitude using np.linalg.norm() for small vectors inside heavy computation paths like physics contact laws, math.sqrt(v.dot(v)) continues to give significant reduction in temporary allocations and increases throughput by bypassing standard np.linalg.norm checks.
+**Action:** Applied the math.sqrt(v.dot(v)) optimization in src/shared/python/motion_matching/contact_law.py
+
 ## 2026-09-20 - Optimization of Np.Linalg.Norm for Small Arrays in Opensim Tour Matching
 **Learning:** `np.linalg.norm` has significant overhead due to internal dispatching when working with small 1D vectors (like 3D points or forces).
 **Action:** Replace `np.linalg.norm(arr)` with `math.sqrt(np.vdot(arr, arr))` for small 1D vectors for a substantial speed boost.
