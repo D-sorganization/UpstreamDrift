@@ -144,8 +144,6 @@ class ModelConfig:
     hidden_reason: str | None = None
     hidden_owner: str | None = None
     embed_adapter: str | None = None
-    exercise: str | None = None
-    preset_params: dict[str, Any] | None = None
 
 
 class ModelRegistry(ContractChecker):
@@ -399,8 +397,6 @@ class ModelRegistry(ContractChecker):
             hidden_reason=entry.hidden_reason,
             hidden_owner=entry.hidden_owner,
             embed_adapter=entry.embed_adapter,
-            exercise=entry.exercise,
-            preset_params=entry.preset_params,
         )
 
     def _load_legacy_models(

@@ -33,49 +33,9 @@ CANDIDATE = FULL_BODY / "evidence/native_candidates/returned81_candidate.json"
 CAPTURES = ("driver", "iron")
 CLUBS = ("driver", "iron7")
 CLUB_FOR_CAPTURE = {"driver": "driver", "iron": "iron7"}
-BACKENDS = ("mujoco", "drake", "pinocchio", "opensim", "pink")
+BACKENDS = ("mujoco", "pink")
 STEP_MODES = ("physical", "projection")
 SOLVERS = ("quadprog",)
-
-
-def available_engines() -> list[str]:
-    """Registered physics engines available to the motion-matching plant."""
-    try:
-        from src.shared.python.motion_matching.pipeline.plant import (
-            available_engines as _avail,
-        )
-
-        return _avail()
-    except (ImportError, RuntimeError, TypeError, AttributeError, KeyError):
-        return ["mujoco", "drake", "pinocchio"]
-
-
-def extract_five_metrics_and_acceptance(
-    summary: dict[str, Any],
-) -> tuple[dict[str, Any], str]:
-    """Extract standard five kinematic metrics and determine acceptance verdict.
-
-    Returns:
-        tuple of (metrics_dict, acceptance_verdict)
-    """
-    metrics = {
-        "full_capture_ik_rms_mm": summary.get("full_capture_ik_rms_mm"),
-        "address_marker_rms_mm": summary.get("address_marker_rms_mm"),
-        "backswing_root_error_max_mm": summary.get("backswing_root_error_max_mm"),
-        "whole_run_root_rms_mm": summary.get("whole_run_root_rms_mm"),
-        "inside_support_polygon_fraction": summary.get(
-            "inside_support_polygon_fraction"
-        ),
-    }
-    is_qual = summary.get("is_qualified")
-    converged = summary.get("all_frames_converged")
-    if is_qual is True and (converged is True or converged is None):
-        verdict = "PASSED"
-    elif is_qual is False or converged is False:
-        verdict = "REJECTED"
-    else:
-        verdict = "UNCLASSIFIED"
-    return metrics, verdict
 
 
 @dataclass(frozen=True)
