@@ -19,15 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10531 · Generate Accurate Atlas, Help, Parity, and Completion Records
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10531 (ORG-21, epic #10508)
 - **Branch:** `feat/issue-10531-org21-accurate-atlas-parity`
+- **PR:** #10576
 - **Paths:** `tests/scripts/test_workspace_documentation_freshness.py`, `src/config/industrial_readiness.json`, `docs/operations/industrial-readiness-index.md`, `src/tools/training_controller/README.md`
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 (`SELF`; all 8 tests pass in `test_workspace_documentation_freshness.py`; all 11 tests pass in `test_capability_atlas.py`; all 25 tests pass in `tests/config/industrial_readiness/`; ruff check and format clean; file size budget passed).
+- **Last verified:** 2026-09-20 (`2c9f9fcd3`; all 8 tests pass in `test_workspace_documentation_freshness.py`; all 11 tests pass in `test_capability_atlas.py`; all 25 tests pass in `tests/config/industrial_readiness/`; ruff check and format clean; file size budget passed).
 - **Summary:** Implemented comprehensive regression tests in `test_workspace_documentation_freshness.py` covering workspace membership drift, undocumented/dangling aliases, broken source/help links, stale generated views, shell-only parity vs compute-complete separation, deterministic generators, training controller README accuracy, and reconciled industrial readiness item U3 (#8820 / PR #9995) with merge SHA and verified implementation/test paths.
-- **Next step:** Push branch, open PR with auto-merge, update issue lease.
+- **Next step:** Await CI completion and auto-merge on PR #10576.
 - **Evidence:** `tests/scripts/test_workspace_documentation_freshness.py`, `tests/scripts/test_capability_atlas.py`.
 
 ### DL-#10529 · Consume Provider Ownership Decisions and Verify Runtime Import Authority
