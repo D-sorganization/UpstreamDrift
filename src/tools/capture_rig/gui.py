@@ -564,8 +564,11 @@ class CaptureRigWidget(QWidget):
         ("annotate", "Annotate / edit points"),
         ("stop", "Stop"),
         ("load", "Load session"),
-        ("inspect_targets", "Open in Inspect Targets"),
     )
+
+    def open_in_inspect_targets(self) -> None:
+        """Trigger the Inspect Targets handoff action."""
+        self.journey_actions.trigger("inspect_targets")
 
     def __init__(
         self, parent: QWidget | None = None, *, settings: QSettings | None = None
