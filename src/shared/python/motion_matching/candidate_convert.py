@@ -33,6 +33,12 @@ logger = logging.getLogger(__name__)
 TRANSLATIONAL_SUBSTRINGS = ("translation", "pos_x", "pos_y", "pos_z", "tx", "ty", "tz")
 
 
+def _extract_optional_array(
+    data: Any, key: str, dtype: Any = np.float64
+) -> np.ndarray | None:
+    return np.asarray(data[key], dtype=dtype) if key in data else None
+
+
 @precondition(
     lambda npz_path, spec=None, engine="unknown": Path(npz_path).is_file(),
     "replay NPZ file must exist",
@@ -45,22 +51,14 @@ def convert_returned81_replay(
     spec: Mapping[str, Any] | None = None,
     engine: str = "unknown",
 ) -> MatchedSwingCandidate:
-    """Convert a returned81 replay archive to a versioned MatchedSwingCandidate."""
+    """Convert a returned81 replay archive to MatchedSwingCandidate format."""
     p = Path(npz_path)
     with np.load(p, allow_pickle=False) as data:
         time_s = np.asarray(data["time_s"], dtype=np.float64)
         native_state = np.asarray(data["native_state"], dtype=np.float64)
-        markers_m = (
-            np.asarray(data["markers_m"], dtype=np.float64)
-            if "markers_m" in data
-            else None
-        )
-        target_m = (
-            np.asarray(data["target_m"], dtype=np.float64)
-            if "target_m" in data
-            else None
-        )
-        valid = np.asarray(data["valid"], dtype=bool) if "valid" in data else None
+        markers_m = _extract_optional_array(data, "markers_m")
+        target_m = _extract_optional_array(data, "target_m")
+        valid = _extract_optional_array(data, "valid", dtype=bool)
 
     nq = native_state.shape[1] // 2
     q = native_state[:, :nq]
@@ -313,27 +311,11 @@ def convert_analytic_matched_npz(
         elif "u_optimum" in data:
             tau = np.asarray(data["u_optimum"], dtype=np.float64)
 
-        markers_m = (
-            np.asarray(data["markers_m"], dtype=np.float64)
-            if "markers_m" in data
-            else None
-        )
-        target_m = (
-            np.asarray(data["target_m"], dtype=np.float64)
-            if "target_m" in data
-            else None
-        )
-        valid = np.asarray(data["valid"], dtype=bool) if "valid" in data else None
-        grip_w = (
-            np.asarray(data["grip_wrenches"], dtype=np.float64)
-            if "grip_wrenches" in data
-            else None
-        )
-        ext_f = (
-            np.asarray(data["ground_forces"], dtype=np.float64)
-            if "ground_forces" in data
-            else None
-        )
+        markers_m = _extract_optional_array(data, "markers_m")
+        target_m = _extract_optional_array(data, "target_m")
+        valid = _extract_optional_array(data, "valid", dtype=bool)
+        grip_w = _extract_optional_array(data, "grip_wrenches")
+        ext_f = _extract_optional_array(data, "ground_forces")
 
         coord_order: tuple[str, ...] = ()
         if "coordinate_order" in data:
