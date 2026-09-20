@@ -13,6 +13,16 @@ Connects qualified matching strategies to engine feature contracts:
 - **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
   - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
 
+## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
+
+Freezes fast-matching evidence, schemas, and negative acceptance fixtures across the motion-matching pipeline:
+- **Extended Schema & Conversion (`src/shared/python/motion_matching/candidate.py`, `candidate_convert.py`)**:
+  - `MatchedSwingCandidate` schema extended with `CandidateAuxiliary` (`root_forces`, `contact_modes`, `grip_wrench`), `CandidateMetadata` (`solver_status`, `handedness`, `name_maps`), checksum calculation, and NPZ conversion logic in `candidate_convert.py`.
+  - Truthfully renamed `AllocationObjective.MINIMUM_TRAIL_ARM` with backwards-compatible `trail_zero` parsing, added `HARD_ZERO_TRAIL` mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios in `ContactForceAllocator`.
+  - Updated `SwingEvaluator` to avoid fabricating impact phases without declared `t_events`, audit closure translation and rotation separately (`ClosureAudit`), and return `NaN` RMSE for empty marker populations.
+- **Negative Acceptance Fixtures (`tests/unit/motion_matching/test_acceptance.py`, `src/shared/python/motion_matching/acceptance.py`)**:
+  - Added 7 negative acceptance fixtures in `test_acceptance.py` and corresponding evaluators in `acceptance.py`: (1) friction cone violation, (2) torque bound overwrite, (3) missing root histories, (4) 44 vs 41 coordinate dimension mismatch, (5) missing club coverage / empty population, (6) truncated horizon duration, and (7) synthetic engine false qualification.
+
 ## Reconcile, Audit, and Freeze Feature Preservation Across Historical Boundaries (ORG-24, #10533)
 
 Reconciles, audits, and freezes feature preservation across historical boundaries to guarantee no silent loss or broken historical interfaces across the UpstreamDrift workspace:
@@ -6426,6 +6436,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10471 | Optimize `np.sum(diff**2, axis=-1)` to `np.einsum` to avoid temporary allocations (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10468 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10467 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |
