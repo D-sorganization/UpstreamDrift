@@ -46,6 +46,21 @@ LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "ParametricConfig",
     ),
     "URDFWriter": ("model_generation.builders.urdf_writer", "URDFWriter"),
+    # Export and Bundles
+    "ModelBundle": ("model_generation.export.model_bundle", "ModelBundle"),
+    "ModelBundleManifest": (
+        "model_generation.export.bundle_manifest",
+        "ModelBundleManifest",
+    ),
+    "IncompletePhysicsError": (
+        "model_generation.export.bundle_manifest",
+        "IncompletePhysicsError",
+    ),
+    "export_model_bundle": (
+        "model_generation.export.model_bundle",
+        "export_model_bundle",
+    ),
+    "load_model_bundle": ("model_generation.export.model_bundle", "load_model_bundle"),
     # Converters
     "URDFParser": ("model_generation.converters.urdf_parser", "URDFParser"),
     "ParsedModel": ("model_generation.converters.urdf_parser", "ParsedModel"),

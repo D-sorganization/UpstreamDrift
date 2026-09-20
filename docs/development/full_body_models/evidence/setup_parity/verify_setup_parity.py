@@ -62,7 +62,13 @@ def sha256(path: Path) -> str:
 
 def write_pose() -> dict[str, float]:
     spec = json.loads(SPEC.read_text())
-    q0 = np.load(TRAJECTORY)["q"][0]
+    cand_path = GROUND_SUPPORT / RUN / "candidate.npz"
+    if cand_path.is_file():
+        from src.shared.python.motion_matching.candidate_io import load_candidate
+
+        q0 = load_candidate(cand_path).q[0]
+    else:
+        q0 = np.load(TRAJECTORY)["q"][0]
     pose = {
         name: float(v) for name, v in zip(spec["coordinate_order"], q0, strict=True)
     }
@@ -185,7 +191,10 @@ def main() -> None:
     for engine in ("drake", "pinocchio"):
         try:
             results[engine] = deviation(reference, run_remote(engine))
-        except (RuntimeError, ValueError) as exc:  # noqa: BLE001 - recorded in the receipt
+        except (
+            RuntimeError,
+            ValueError,
+        ) as exc:  # noqa: BLE001 - recorded in the receipt
             results[engine] = {"passed": False, "error": str(exc)[:2000]}
     masses = sum(s["mass_kg"] for b in spec["bodies"] for s in b["solids"])
     receipt = {
