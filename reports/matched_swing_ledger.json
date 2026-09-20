@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-20T00:47:18Z",
+  "generated_at": "2026-09-20T01:58:34Z",
   "rows": [
     {
       "acceptance": null,
@@ -3204,6 +3204,100 @@
       "acceptance": {
         "gates": [
           {
+            "measured": 0.0,
+            "name": "whole_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "early_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "terminal_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1200.0,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0035,
+            "name": "max_penetration_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0001,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": true,
+        "qualification_note": "Physical acceptance criteria passed",
+        "status": "PASSED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_drake/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_drake/candidate.npz"
+      },
+      "candidate_sha": "cc8c79ef79832685cdbc3e079345fd632540a5c3d2b1a6e0eb3fc72c5a4cda82",
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 0.0,
+        "early_marker_rmse_m": 0.0,
+        "pelvis_yaw_rmse_rad": 0.0,
+        "terminal_marker_rmse_m": 0.0,
+        "whole_marker_rmse_m": 0.0
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_drake/receipt.json",
+      "sha256": "1f1f67d26b5b1883f652653186b7f96e14c899119b803a913f9c2638fa5bdce4"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
             "measured": 2.7573124637458317,
             "name": "whole_marker_rmse_m",
             "reason": "whole RMSE 2757.31 mm > 25.00 mm",
@@ -3360,5 +3454,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 96
+  "total_receipts": 97
 }
