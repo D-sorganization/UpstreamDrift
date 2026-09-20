@@ -268,12 +268,18 @@ class TestCapabilityMigrationCoverageGreenCases:
             assert fixture_path.exists(), (
                 f"Preservation fixture file missing: {fixture.path}"
             )
-            computed_sha256 = hashlib.sha256(fixture_path.read_bytes()).hexdigest()
+            raw = fixture_path.read_bytes()
+            # Normalize CRLF to LF for text formats to ensure cross-platform consistency
+            if fixture_path.suffix in {".urdf", ".json", ".csv"}:
+                data = raw.replace(b"\r\n", b"\n")
+            else:
+                data = raw
+            computed_sha256 = hashlib.sha256(data).hexdigest()
             assert computed_sha256 == fixture.sha256, (
                 f"Fixture hash mismatch for {fixture.path}: expected {fixture.sha256}, got {computed_sha256}"
             )
-            assert fixture_path.stat().st_size == fixture.size_bytes, (
-                f"Fixture size mismatch for {fixture.path}: expected {fixture.size_bytes}, got {fixture_path.stat().st_size}"
+            assert len(data) == fixture.size_bytes, (
+                f"Fixture size mismatch for {fixture.path}: expected {fixture.size_bytes}, got {len(data)}"
             )
 
     def test_green_provider_absence_changes_only_availability_not_identity(

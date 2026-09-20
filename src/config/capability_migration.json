@@ -1935,16 +1935,16 @@
     "model.double_pendulum_urdf": {
       "path": "tests/fixtures/models/double_pendulum.urdf",
       "kind": "model",
-      "sha256": "b9d750b8e49331d9174e4550ebe9d71fb8679e3fd5bc46e5ea2a9b2cc1f137c1",
-      "size_bytes": 4808,
+      "sha256": "807f40e3feaf5955b6490d173ce1ad98b25ec1b58664bff4f0c66ae94361c49a",
+      "size_bytes": 4647,
       "support_status": "golden_baseline",
       "notes": "Canonical double pendulum URDF physics model"
     },
     "model.simple_pendulum_urdf": {
       "path": "tests/fixtures/models/simple_pendulum.urdf",
       "kind": "model",
-      "sha256": "8233d6e138ed371752037aaf89a727983b11dd2dab12f66833a4695303af5442",
-      "size_bytes": 4234,
+      "sha256": "91b7eae580ba15eb1b766b6a1de87f369a60da0f900bfe69129d1a52b3aba153",
+      "size_bytes": 4100,
       "support_status": "golden_baseline",
       "notes": "Single degree-of-freedom pendulum URDF model"
     },
@@ -1967,16 +1967,16 @@
     "flight.flightscope_csv": {
       "path": "tests/fixtures/launch_monitor/flightscope.csv",
       "kind": "flight",
-      "sha256": "ebc3998bbeb4c45e92fc317bd2dec6e7e491353dccb0ef90af4cbd92c59e614b",
-      "size_bytes": 301,
+      "sha256": "ec83f5700f7ba70648ed5ed2731e92f97489d6b3e41db470be16fefd4ef7c270",
+      "size_bytes": 298,
       "support_status": "golden_baseline",
       "notes": "FlightScope launch monitor export CSV sample"
     },
     "flight.trackman_csv": {
       "path": "tests/fixtures/launch_monitor/trackman.csv",
       "kind": "flight",
-      "sha256": "5a70ffd728c368f7d5abf755f67f9da8b0a7e5e95840e217d49aff12280c7e38",
-      "size_bytes": 453,
+      "sha256": "e8e344c9b0c08f832973e7fea811cb1322f9b6fcdc7066f80bb95e89ef6c2ddf",
+      "size_bytes": 450,
       "support_status": "golden_baseline",
       "notes": "TrackMan radar telemetry export CSV sample"
     },
