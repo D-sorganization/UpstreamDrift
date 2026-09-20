@@ -18,18 +18,53 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.motion_matching.execution import (
+    assets,
+    downswing as _downswing,
+    driver as _driver,
+    mjx_export as _mjx_export,
+    spec_builder as _spec_builder,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 FULL_BODY = REPO_ROOT / "docs/development/full_body_models"
-BUILDER = FULL_BODY / "build_anthropometric_spec.py"
-DRIVER_SCRIPT = FULL_BODY / "evidence/ground_support/run_ground_support.py"
-DOWNSWING_SCRIPT = FULL_BODY / "evidence/ground_support/downswing_experiment.py"
-EXPORT_MJX_SCRIPT = FULL_BODY / "evidence/ground_support/export_mjx_package.py"
-NATIVE = (
-    REPO_ROOT
-    / "docs/development/simscape_tour_matching/native_evidence/native_geometry_spec_9967.json"
-)
-OSIM = REPO_ROOT / "src/engines/physics_engines/opensim/models/golf_humanoid.osim"
-CANDIDATE = FULL_BODY / "evidence/native_candidates/returned81_candidate.json"
+
+BUILDER = Path(_spec_builder.__file__).resolve()
+DRIVER_SCRIPT = Path(_driver.__file__).resolve()
+DOWNSWING_SCRIPT = Path(_downswing.__file__).resolve()
+EXPORT_MJX_SCRIPT = Path(_mjx_export.__file__).resolve()
+
+
+def resolve_native_spec() -> Path:
+    return assets.get_native_geometry_spec()
+
+
+def resolve_osim_model() -> Path:
+    return assets.get_opensim_model()
+
+
+def resolve_candidate_spec() -> Path:
+    return assets.get_candidate_geometry_spec()
+
+
+try:
+    NATIVE = assets.get_native_geometry_spec()
+except FileNotFoundError:
+    NATIVE = (
+        REPO_ROOT
+        / "docs/development/simscape_tour_matching/native_evidence/native_geometry_spec_9967.json"
+    )
+
+try:
+    OSIM = assets.get_opensim_model()
+except FileNotFoundError:
+    OSIM = REPO_ROOT / "src/engines/physics_engines/opensim/models/golf_humanoid.osim"
+
+try:
+    CANDIDATE = assets.get_candidate_geometry_spec()
+except FileNotFoundError:
+    CANDIDATE = FULL_BODY / "evidence/native_candidates/returned81_candidate.json"
+
 CAPTURES = ("driver", "iron")
 CLUBS = ("driver", "iron7")
 CLUB_FOR_CAPTURE = {"driver": "driver", "iron": "iron7"}
@@ -100,6 +135,10 @@ class MatchRequest:
     backend: str = "mujoco"
     step_mode: str = "physical"
     solver: str = "quadprog"
+    output_root: Path | str | None = None
+    native_path: Path | str | None = None
+    osim_path: Path | str | None = None
+    candidate_path: Path | str | None = None
 
     def __post_init__(self) -> None:
         if self.capture not in CAPTURES:
@@ -139,12 +178,21 @@ class MatchRequest:
         return self.output_name or f"anthro_{self.capture}"
 
     @property
+    def document_output_dir(self) -> Path:
+        return assets.resolve_output_root(self.output_root)
+
+    @property
     def document_path(self) -> Path:
-        return FULL_BODY / f"{self.document_name}.json"
+        return self.document_output_dir / f"{self.document_name}.json"
 
     @property
     def output_dir(self) -> Path:
-        return FULL_BODY / "evidence/ground_support" / self.run_name
+        root = self.document_output_dir
+        if self.output_root is not None:
+            return root / self.run_name
+        if root.joinpath("evidence/ground_support").is_dir() or root == FULL_BODY:
+            return root / "evidence/ground_support" / self.run_name
+        return root / self.run_name
 
 
 @dataclass(frozen=True)
@@ -197,15 +245,18 @@ class ExperimentRequest:
 
 def build_command(request: MatchRequest) -> list[str]:
     """Command line that writes the anthropometric document for ``request``."""
+    native = request.native_path or resolve_native_spec()
+    osim = request.osim_path or resolve_osim_model()
+    candidate = request.candidate_path or resolve_candidate_spec()
     return [
         sys.executable,
         str(BUILDER),
         "--native",
-        str(NATIVE),
+        str(native),
         "--osim",
-        str(OSIM),
+        str(osim),
         "--native-candidate",
-        str(CANDIDATE),
+        str(candidate),
         "--stature",
         str(request.stature_m),
         "--mass",
@@ -219,7 +270,7 @@ def build_command(request: MatchRequest) -> list[str]:
         "--club",
         request.club,
         "--output",
-        str(FULL_BODY),
+        str(request.document_output_dir),
     ]
 
 

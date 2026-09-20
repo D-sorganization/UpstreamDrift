@@ -541,7 +541,7 @@ other.
 - Create it from Repository_Management's `docs/templates/DEVELOPMENT_LOG.md`
   when absent.
 
-### The Rules
+### Development Log Rules
 
 1. **One entry per feature, forever.** Never open a second entry for the same
    feature. If scope changes, edit `Summary` on the existing entry.
