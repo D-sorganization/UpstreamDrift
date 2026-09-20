@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "f67f6b2f1d864efb56a1e18c9cf9bf590a1c21580a3c5d9b6f613df9023654a3",
+      "fingerprint": "a32b9d0c953f7b18f7a9298399aa2c151cabcc372c727e0e8a3e845af0c9325f",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -29,14 +29,14 @@
         "src/config/feature_parity.json": "b0b2f34477e7556aa3ba1dd25316bc047902bb3fd3258938225bece7195efaad",
         "src/config/launcher_manifest.json": "8042791309478513d7cc0c9670568866befbc49486ada446ebb1adda36cfe18b",
         "src/config/launcher_manifest_loader.py": "ffd36708fc7916e406ba3651d446bd3a91733e48cf1c734bedf1602978eef0e3",
-        "src/config/models.yaml": "0aa05c85b24fb2f404cbb60133d33b1b00eba6c57cb6c6ab01f56740ebe796a5",
+        "src/config/models.yaml": "a8377f77c8d5b58afb92ccaa5d8a10951c9e26794aca3a95811c437832575100",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Update feature parity status for tools.motion_matching MS-82 #10355"
+      "rationale": "\\ Update launcher models.yaml with external categories and grouped model variants ORG-07\\"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
