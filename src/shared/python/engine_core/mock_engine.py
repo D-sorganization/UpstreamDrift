@@ -128,10 +128,6 @@ class MockPhysicsEngine:
             "is_loaded": self._is_loaded,
         }
 
-    def close(self) -> None:
-        """Close mock engine and release resources."""
-        self._is_loaded = False
-
     def set_state(self, positions: np.ndarray, velocities: np.ndarray) -> None:
         """Set simulation state.
 
