@@ -187,6 +187,13 @@ def _build_provider_tile(
     metadata = model.launcher or _legacy_launcher_metadata(model)
     status, status_detail = _provider_status(model, metadata.status, repo_root)
 
+    web_route = metadata.web_route
+    if (
+        model.id in ("movement_optimizer", "tools_movement_optimizer")
+        or web_route == "/tools/movement-optimizer"
+    ):
+        web_route = None
+
     return LauncherTile(
         id=model.id,
         name=model.name,
@@ -202,9 +209,9 @@ def _build_provider_tile(
         engine_type=model.engine_type,
         provider=model.provider,
         source_root=None if model.provider == "tools" else model.source_root,
-        web_route=metadata.web_route,
+        web_route=web_route,
         web=WebLaunchContract.derive(
-            web_route=metadata.web_route,
+            web_route=web_route,
             path=model.path,
         ),
         default_launch=metadata.default_launch,
