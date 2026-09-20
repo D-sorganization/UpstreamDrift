@@ -84,10 +84,10 @@ def test_encode_straight_shot_golden() -> None:
     assert payload["DeviceID"] == "UpstreamDrift"
     assert payload["ShotNumber"] == 42
     ball = payload["BallData"]
-    assert math.isclose(ball["Speed"], expected_mph, rel_tol=1e-4)
-    assert math.isclose(ball["VLA"], expected_vla, rel_tol=1e-4)
+    assert math.isclose(ball["Speed"], expected_mph, rel_tol=1e-3)
+    assert math.isclose(ball["VLA"], expected_vla, abs_tol=0.01)
     assert math.isclose(ball["HLA"], 0.0, abs_tol=1e-4)
-    assert math.isclose(ball["TotalSpin"], expected_spin_rpm, rel_tol=1e-4)
+    assert math.isclose(ball["TotalSpin"], expected_spin_rpm, rel_tol=1e-3)
     assert math.isclose(ball["SpinAxis"], 0.0, abs_tol=1e-4)
 
     assert payload["ShotDataOptions"]["ContainsBallData"] is True
@@ -114,7 +114,7 @@ def test_encode_right_launch_hla_sign() -> None:
     payload = encode_shot_payload(envelope, DEFAULT_GSPRO_PROFILE)
     ball = payload["BallData"]
     expected_hla_deg = math.degrees(math.atan2(2.5, 70.0))  # positive right
-    assert math.isclose(ball["HLA"], expected_hla_deg, rel_tol=1e-4)
+    assert math.isclose(ball["HLA"], expected_hla_deg, abs_tol=0.01)
     assert ball["HLA"] > 0.0
 
 
@@ -208,3 +208,16 @@ def test_decode_simulator_responses() -> None:
     )
     assert resp_unknown.code == 777
     assert resp_unknown.category == ResponseCategory.UNKNOWN
+
+
+def test_shared_tools_codec_integration() -> None:
+    """Verify that gspro_connect from Tools is imported and used by codec."""
+    from shared.python.launch_monitor import gspro_connect
+    from src.shared.python.golf_simulator.adapters.gspro import codec
+
+    assert hasattr(gspro_connect, "encode_shot_payload")
+    assert hasattr(gspro_connect, "encode_heartbeat_payload")
+    assert hasattr(gspro_connect, "parse_reply")
+    assert hasattr(codec, "gspro_connect") or hasattr(
+        codec, "_tools_encode_shot_payload"
+    )

@@ -24,7 +24,7 @@ from src.shared.python.motion_matching.acceptance import Horizon, evaluate
 from src.shared.python.motion_matching.pipeline.receipt_schema import validate_receipt
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
     from src.shared.python.motion_matching.pipeline.lane import Lane

@@ -7,6 +7,7 @@ wind modelling, and environment randomization.
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
+import math
 from typing import Any
 
 import numpy as np
@@ -48,7 +49,7 @@ class AerodynamicsConfig:
     # Master and individual toggles
     enabled: bool = True
     drag_enabled: bool = True
-    lift_enabled: bool = False
+    lift_enabled: bool = True
     magnus_enabled: bool = True
 
     # Tunable coefficients
@@ -126,7 +127,7 @@ class WindConfig:
     @property
     def speed(self) -> float:
         """Get base wind speed magnitude."""
-        return float(np.linalg.norm(self.base_velocity))
+        return float(math.sqrt(self.base_velocity.dot(self.base_velocity)))
 
     @property
     def direction(self) -> np.ndarray:

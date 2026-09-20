@@ -5,21 +5,18 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
-
-if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
-        FullBodyMarkerKinematics,
-    )
-    from src.engines.physics_engines.mujoco.python.full_body_model import (
-        NativeMujocoFullBodyModel,
-    )
 
 from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.motion_matching import posture_metrics as post
 from src.shared.python.motion_matching.contact_law import GroundPlane
+from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+from src.shared.python.motion_matching.pipeline.plant import (
+    MatchingPlant,
+    get_plant,
+)
 from src.shared.python.motion_matching.ground_support import (
     calibrate_ground_height,
     capture_to_native_world,
@@ -50,6 +47,7 @@ from src.shared.python.motion_matching.range_of_motion import (
 )
 from src.shared.python.motion_matching.tour_capture_contract import (
     MARKER_SEGMENTS,
+    TourCapture,
     load_tour_capture,
 )
 
@@ -79,9 +77,11 @@ def stance_spheres(
     )
 
     def column(label: str) -> np.ndarray:
-        if label not in labels:
-            return np.zeros(points.shape[0], dtype=bool)
-        return low[:, labels.index(label)]
+        return (
+            low[:, labels.index(label)]
+            if label in labels
+            else np.zeros(points.shape[0], dtype=bool)
+        )
 
     out: list[tuple[str, ...]] = []
     for k in range(points.shape[0]):
@@ -98,11 +98,7 @@ def stance_spheres(
 
 
 def add_toe_spheres(document: dict[str, Any]) -> dict[str, Any]:
-    """Return a copy of ``document`` with toe spheres; native documents also
-    get the stiffer contact law, anthropometric ones keep their own.
-
-    Precondition: ``document`` must contain a ``contact`` block.
-    """
+    """Return a copy of ``document`` with toe spheres."""
     if "contact" not in document:
         raise ValueError("document must contain a 'contact' block")
     contact = dict(document["contact"])
@@ -114,16 +110,16 @@ def add_toe_spheres(document: dict[str, Any]) -> dict[str, Any]:
     contact["parameters"] = {**contact["parameters"], "stiffness_n_m": stiffness}
     names = {sphere["name"] for sphere in contact["spheres"]}
     extra = [
-        {"name": name, "body": body, "position_m": list(position), "radius_m": radius}
-        for name, (body, position, radius) in TOE_SPHERES.items()
-        if name not in names
+        {"name": n, "body": b, "position_m": list(p), "radius_m": r}
+        for n, (b, p, r) in TOE_SPHERES.items()
+        if n not in names
     ]
     contact["spheres"] = list(contact["spheres"]) + extra
     out = dict(document)
     out["contact"] = contact
-    out["provenance"] = str(document.get("provenance", "")) + (
-        " | toe contact spheres added on the calcanei (support polygon to the toe"
-        f" tips); contact stiffness {stiffness:.0e} N/m"
+    prov = str(document.get("provenance", ""))
+    out["provenance"] = (
+        f"{prov} | toe contact spheres added on calcanei; stiffness {stiffness:.0e} N/m"
     )
     return out
 
@@ -135,21 +131,18 @@ def fitted_grip(document: dict[str, Any]) -> bool:
 
 
 def document_bounds(document: dict[str, Any]) -> dict[str, tuple[float, float]]:
-    """Radian IK bounds declared by an anthropometric document (empty
-    otherwise): upper-body coordinates only, minus ``IK_UNBOUNDED``.
-
-    Precondition: low < high for each defined range.
-    """
+    """Radian IK bounds declared by an anthropometric document."""
     ranges = document.get("coordinate_ranges_deg", {})
-    out: dict[str, tuple[float, float]] = {}
     for name, (lo, hi) in ranges.items():
         if lo >= hi:
             raise ValueError(
                 f"ranges low < high violated for coordinate {name}: [{lo}, {hi}]"
             )
-        if name not in IK_UNBOUNDED and not name.endswith(("_r", "_l")):
-            out[name] = (float(np.radians(lo)), float(np.radians(hi)))
-    return out
+    return {
+        name: (float(np.radians(lo)), float(np.radians(hi)))
+        for name, (lo, hi) in ranges.items()
+        if name not in IK_UNBOUNDED and not name.endswith(("_r", "_l"))
+    }
 
 
 def wrist_bounds() -> dict[str, tuple[float, float]]:
@@ -163,7 +156,7 @@ def wrist_bounds() -> dict[str, tuple[float, float]]:
 
 def document_seed(
     document: dict[str, Any],
-    kin: FullBodyMarkerKinematics,
+    kin: Any,
     candidate: dict[str, Any] | None = None,
 ) -> np.ndarray:
     """Start pose: the document's address seed (anthropometric geometry) or
@@ -196,14 +189,32 @@ def configure_lane(lane: Lane, document: dict[str, Any]) -> None:
 class Lane:
     """Capture, ground, stance and bounds shared by every stage."""
 
-    def __init__(self, labels: tuple[str, ...], c3d: Path | str) -> None:
-        self.labels = tuple(labels)
-        self.c3d = Path(c3d)
-        capture = load_tour_capture(self.c3d).subset(self.labels)
-        self.points = capture_to_native_world(capture.points_m)
-        self.valid = capture.valid.copy()
-        self.times = np.asarray(capture.time_s, dtype=float)
-        self.frames = int(capture.frames)
+    def __init__(
+        self,
+        labels: tuple[str, ...] | None = None,
+        c3d: Path | str | None = None,
+        *,
+        capture: TourCapture | None = None,
+        plant: MatchingPlant | None = None,
+    ) -> None:
+        self.plant = plant
+        if capture is not None:
+            self.c3d = Path(c3d) if c3d is not None else Path("synthetic.c3d")
+            c = capture.subset(labels) if labels is not None else capture
+            self.labels = tuple(c.labels)
+        elif c3d is not None:
+            self.c3d = Path(c3d)
+            if labels is None:
+                raise ValueError("labels must be provided with c3d")
+            self.labels = tuple(labels)
+            c = load_tour_capture(self.c3d).subset(self.labels)
+        else:
+            raise ValueError("Either c3d or capture must be provided")
+
+        self.points = capture_to_native_world(c.points_m)
+        self.valid = c.valid.copy()
+        self.times = np.asarray(c.time_s, dtype=float)
+        self.frames = int(c.frames)
         self.ground_cal = calibrate_ground_height(
             self.points,
             self.valid,
@@ -234,22 +245,18 @@ class Lane:
 
     def kinematics(
         self,
-        spec_bytes: bytes,
+        spec_bytes: bytes | Mapping[str, Any],
         attachments: Mapping[str, tuple[str, Sequence[float]]],
-    ) -> tuple[NativeMujocoFullBodyModel, FullBodyMarkerKinematics]:
-        """Instantiate the native model and marker kinematics.
+    ) -> tuple[Any, Any]:
+        """Instantiate the model and marker kinematics via MatchingPlant.
 
         Precondition: spec ground plane matches the toe calibration height.
         """
-        from src.engines.physics_engines.mujoco.python.full_body_markers import (
-            FullBodyMarkerKinematics,
-        )
-        from src.engines.physics_engines.mujoco.python.full_body_model import (
-            NativeMujocoFullBodyModel,
-        )
-
-        adapter = NativeMujocoFullBodyModel(spec_bytes)
-        if abs(adapter.ground_plane.height_m - self.ground.height_m) > 1e-3:
+        if self.plant is None:
+            self.plant = get_plant("mujoco", spec_bytes)
+        ground_plane = self.plant.ground_plane
+        ground = self.ground
+        if abs(ground_plane.height_m - ground.height_m) > 1e-3:
             raise ValueError("Spec ground height disagrees with the toe calibration")
         ordered = {
             label: (
@@ -261,8 +268,13 @@ class Lane:
                 ),
             )
             for label in self.labels
+            if label in attachments
         }
-        return adapter, FullBodyMarkerKinematics(adapter, ordered)
+        kin = self.plant.create_ik(ordered)
+        adapter = getattr(
+            self.plant, "adapter", getattr(self.plant, "model", self.plant)
+        )
+        return adapter, kin
 
     def marker_pit(self, side: str, frames: Sequence[int]) -> np.ndarray | None:
         """Mean marker-derived elbow pit direction of ``side`` over ``frames``
@@ -301,7 +313,7 @@ class Lane:
 
     def trajectory(
         self,
-        kin: FullBodyMarkerKinematics,
+        kin: BaseFullBodyIK,
         q_start: np.ndarray,
         frames: Sequence[int] | None = None,
     ) -> tuple[np.ndarray, list[Any]]:
@@ -338,7 +350,7 @@ class Lane:
 
     def best_address(
         self,
-        kin: FullBodyMarkerKinematics,
+        kin: Any,
         base: np.ndarray,
         *,
         neutral: bool = False,
@@ -354,9 +366,7 @@ class Lane:
         spec_bytes: bytes,
         seeds: dict[str, tuple[str, Sequence[float]]],
         q_seed: np.ndarray,
-    ) -> tuple[
-        dict[str, tuple[str, tuple[float, float, float]]], Any, FullBodyMarkerKinematics
-    ]:
+    ) -> tuple[dict[str, tuple[str, tuple[float, float, float]]], Any, Any]:
         """Alternating static trial: neutral address fit and marker placement."""
         from src.shared.python.motion_matching.pipeline.address import static_trial
 
@@ -364,7 +374,7 @@ class Lane:
 
     def static_offsets(
         self,
-        kin: FullBodyMarkerKinematics,
+        kin: Any,
         q: np.ndarray,
         seeds: dict[str, tuple[str, Sequence[float]]],
     ) -> dict[str, tuple[str, tuple[float, float, float]]]:
@@ -374,7 +384,7 @@ class Lane:
         return static_offsets(self, kin, q, seeds)
 
     def elbow_pit_targets(
-        self, kin: FullBodyMarkerKinematics, q: np.ndarray, weight: float
+        self, kin: Any, q: np.ndarray, weight: float
     ) -> dict[str, tuple[Sequence[float], Sequence[float], float]]:
         """Axis targets pulling upper arms toward address marker pit directions."""
         from src.shared.python.motion_matching.pipeline.address import elbow_pit_targets
@@ -395,21 +405,9 @@ class Lane:
 
 
 def probe_pink_capability() -> tuple[bool, dict[str, Any]]:
-    """Probe if Pink constrained IK solver and dependencies are available.
-
-    Returns:
-        tuple of (is_available, diagnostics_dict)
-    """
-    missing: list[str] = []
-    if not is_engine_available("pink"):
-        missing.append("pink")
-    if not is_engine_available("pinocchio"):
-        missing.append("pinocchio")
-
+    """Probe if Pink constrained IK solver and dependencies are available."""
+    missing = [eng for eng in ("pink", "pinocchio") if not is_engine_available(eng)]
     if missing:
-        return False, {
-            "available": False,
-            "missing": missing,
-            "reason": f"Required packages unavailable: {', '.join(missing)}",
-        }
+        msg = f"Required packages unavailable: {', '.join(missing)}"
+        return False, {"available": False, "missing": missing, "reason": msg}
     return True, {"available": True, "missing": [], "reason": "ok"}
