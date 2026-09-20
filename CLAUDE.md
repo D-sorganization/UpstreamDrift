@@ -697,3 +697,60 @@ python -m pytest -q <tests>
 ```
 
 <!-- END FLEET-MANAGED: headless-execution -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: fleet-guard -->
+
+## 🛡️ Fleet-Guard: Git-Level Rules for Every Agent
+
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/fleet-guard.md.
+
+Hosts run `fleet-guard`, a set of global git hooks (`core.hooksPath`) that
+apply to every agent — Claude Code, Codex, Antigravity, headless runners — and
+to humans for two rules. They speak on **git's stderr**, the one channel every
+agent sees. Read hook output after every `git commit` and `git push`; a line
+starting with `fleet-guard` is addressed to you.
+
+### The Rules
+
+| Rule               | Applies to | What it means for you                                                                                                                                                                                         |
+| ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `primary-checkout` | agents     | Never commit in a repository's primary checkout. Work in your own worktree: `git worktree add ../<repo>-worktrees/<agent>-<issue> -b <branch> origin/main`, or start via `fleet-guard run <agent> --issue N`. |
+| `conflict-markers` | everyone   | A staged diff with `<<<<<<<` / `=======` / `>>>>>>>` is refused.                                                                                                                                              |
+| `protected-push`   | everyone   | No direct or forced push to `main`/`master`. Open a PR; auto-merge lands it.                                                                                                                                  |
+| `stale-push`       | agents     | If the remote branch has commits you do not have (bot force-push, auto-update merge, another session), rebase or merge first. **Never** `--force` around it.                                                  |
+| `handoff`          | agents     | Source staged without `docs/development/HANDOFF.md` → warning. Update the handoff in the same commit.                                                                                                         |
+
+### Modes
+
+Each rule runs in one of `off`, `shadow`, `warn`, `enforce`. A host starts in
+**shadow**: the hook prints `would block once enforced` and records the event,
+but the git command succeeds. Treat a shadow message exactly as if it had
+blocked you — fix the cause — because the same host may be in `enforce`
+tomorrow. `fleet-guard report` shows what has been caught.
+
+### What the Hooks Do for You
+
+- Every agent commit carries `Agent-Id`, `Agent-Session` and `Issue` trailers
+  (`git log --format='%(trailers)'`). Your session id comes from the launcher
+  env (`FLEET_AGENT`, `FLEET_SESSION`, `FLEET_ISSUE`) or is derived from your
+  tool; you do not set it by hand.
+- Every commit and push registers your presence (repository, branch, issue,
+  touched directories). `fleet-guard status` lists live sessions on the host;
+  `fleet-guard inbox` shows messages addressed to you and path collisions with
+  other sessions. The pre-commit hook prints the same inbox on stderr.
+- Presence is forwarded to the GitHub board once per host by a scheduled
+  `fleet-guard sync`; never poll GitHub yourself to discover other agents.
+
+### Escape Hatches (Use Deliberately and Note It in the PR)
+
+- `FLEET_GUARD=off git <cmd>` skips fleet checks for one command; the
+  repository's own pre-commit hooks still run.
+- `FLEET_AGENT=user` runs as a human (human rule set) — for a person typing in
+  an agent's terminal, not for agents.
+- `--no-verify` bypasses every hook. It is counted. Do not use it to get past
+  a fleet-guard verdict; fix the cause or ask the operator to change the mode.
+
+<!-- END FLEET-MANAGED: fleet-guard -->
