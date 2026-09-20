@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10515 · Build Task-Oriented Desktop Navigation Over Existing Embedded Tools
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10515 (ORG-05, epic #10508)
+- **Branch:** feat/issue-10515-org05-desktop-navigation
+- **PR:** #10539
+- **Paths:** src/launchers/workspace_navigation.py; src/launchers/launcher_layout_manager.py; src/launchers/_launcher_navigation_ui.py; src/launchers/launcher_ui_setup.py; tests/launchers/test_workspace_navigation.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-20 at HEAD (SELF; 22 unit tests pass in test_workspace_navigation.py; all 42 tests in test_launcher_ui_setup.py pass; all 35 tests in test_launcher_layout_manager.py pass; all 19 tests in test_workspace_tabs.py pass; ruff check, ruff format --check, mypy, check_file_size_budget clean)
+- **Summary:** Built task-oriented desktop navigation over embedded tools (ORG-05). Added 5 primary task workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `ALIAS_MAP` layout migration into `LayoutManager.load_layout` preserving user custom tile scaling, view mode, and dock state. Enforced single-instance tool reuse in `dock_widget_as_tab` and `focus_or_open_tool_tab`. Provided accessible names, keyboard navigation, narrow-window scrolling via `QScrollArea`, return-to-workspace breadcrumbs (`WorkspaceBreadcrumbBar`), and actionable status explanations for missing/unconfigured capabilities (`explain_tool_status`).
+- **Next step:** Pass CI, auto-merge into main, release lease on #10515.
+- **Evidence:** tests/launchers/test_workspace_navigation.py; src/launchers/workspace_navigation.py.
+
 ### DL-#10526 · Replace Canonical Estimation Shell With Bounded Estimator Coordinator
 
 - **State:** in_review
@@ -24,7 +38,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10526 (ORG-17, epic #10508)
 - **Branch:** feat/issue-10526-org17-estimation-workflow
 - **PR:** #10565
-- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/estimation_workspace.py; tests/integration/test_estimation_workspace.py
+- **Paths:** src/shared/python/workspace/__init__.py; src/shared/python/workspace/estimation_workspace.py; tests/integration/test_estimation_workspace.py
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 at HEAD (8 integration tests pass in test_estimation_workspace.py; ruff check & format clean; file line budget 447 <= 500 LOC).
 - **Summary:** Implemented `EstimationWorkspaceCoordinator` replacing placeholder canonical estimation shells with a bounded application service coordinator. Integrates `solve_single_trial_map`, `IdentifiabilityGateOptions`, parameter priors and bounds, and spline trajectory evaluation. Provides fail-closed validation for non-finite cost/trajectories and ill-conditioned systems, with complete provenance persistence round-trips.
@@ -33,7 +47,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10512 · Replace Misleading Launches With Real Tasks or Explicit Nonlaunchable States
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10512 (ORG-03, epic #10508)
 - **Branch:** feat/issue-10512-org03-launch-truthfulness
@@ -61,7 +75,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10510 · Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10510 (ORG-01, epic #10508)
 - **Branch:** feat/issue-10510-org01-capability-baseline
@@ -75,7 +89,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10521 · Integrate Existing Results Browser Work With Replay, Data, and Export
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10521 (ORG-13, epic #10508)
 - **Branch:** feat/issue-10521-org13-results-workspace-handoff
@@ -89,7 +103,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10513 · Validate Every Browser, Tauri, and Native Launch Destination
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10513 (ORG-04, epic #10508)
 - **Branch:** feat/issue-10513-org04-launch-destinations
