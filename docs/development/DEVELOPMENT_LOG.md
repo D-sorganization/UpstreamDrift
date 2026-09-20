@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10526 · Replace Canonical Estimation Shell With Bounded Estimator Coordinator
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10526 (ORG-17, epic #10508)
+- **Branch:** feat/issue-10526-org17-estimation-workflow
+- **PR:** #10565
+- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/estimation_workspace.py; tests/integration/test_estimation_workspace.py
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (8 integration tests pass in test_estimation_workspace.py; ruff check & format clean; file line budget 447 <= 500 LOC).
+- **Summary:** Implemented `EstimationWorkspaceCoordinator` replacing placeholder canonical estimation shells with a bounded application service coordinator. Integrates `solve_single_trial_map`, `IdentifiabilityGateOptions`, parameter priors and bounds, and spline trajectory evaluation. Provides fail-closed validation for non-finite cost/trajectories and ill-conditioned systems, with complete provenance persistence round-trips.
+- **Next step:** CI auto-merge into main.
+- **Evidence:** tests/integration/test_estimation_workspace.py.
+
 ### DL-#10511 · Separate Capability Identity, Maturity, Availability, and Qualification (ORG-02)
 
 - **State:** in_progress
