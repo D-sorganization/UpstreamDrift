@@ -18,6 +18,8 @@ from typing import Any
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.integration
+
 from src.shared.python.estimation import (
     NonFiniteResidualError,
     UnidentifiableParametersError,
