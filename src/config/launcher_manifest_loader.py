@@ -438,7 +438,7 @@ def _with_native_pyqt6_semantics(
         return tile
 
     status, status_detail = _provider_status(
-        model, model.launcher.status, repo_root, check_runtime=True
+        model, model.launcher.status, repo_root, check_runtime=False
     )
     is_engine = bool(
         (model.engine_type and model.engine_type in KNOWN_PHYSICS_ENGINES)
