@@ -1,5 +1,28 @@
 # Current Matching Continuation Handoff
 
+## ORG-15 Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes (#10524)
+
+- Branch: `feat/issue-10524-org15-scene-delivery-modes`, lease `local`, DL-#10524.
+- Changes:
+  - `src/shared/python/workspace/shot_course_workspace.py`: Implemented `ShotCourseWorkspaceCoordinator`, `ShotCourseMode`, `TerrainConfig`, `ShotCourseRun`, `PuttingFixture`, `BunkerFidelityTier`, `BunkerRunRecord`, `SimulatorDeliveryRequest`, and `ActionAvailability`.
+  - Enforced explicit model assumptions: scene view is visual inspection only; bunker preserves F0-F3 fidelity tiers; putting conforms to rolling/ground contracts; terrain mutation increments revision and invalidates prior runs; simulator delivery verifies destination capabilities and produces explicit submission receipts.
+  - `src/shared/python/workspace/__init__.py`: Exported coordinator and domain value objects.
+  - `tests/integration/test_shot_course_workspace.py`: 7 RED/GREEN integration tests covering incompatible flight-to-ground transition rejection, terrain mutation invalidation of dependent runs, scene view rejection of computed shots, unsupported simulator destination disabling, putting fixture round-trip, bunker fidelity export round-trip, and simulator network failure and cancellation flows.
+- Reproduction: `pytest tests/integration/test_shot_course_workspace.py --timeout=60`.
+- Next: PR auto-merge, complete lease on #10524, pick next issue in Epic #10508.
+
+## ORG-14 Trajectory Viewers Handoff (#10523)
+
+- Branch: `feat/issue-10523-org14-trajectory-viewers`, lease `antigravity-ud-10523`, DL-#10523.
+- Changes:
+  - `trajectory_handoff.py`: Implemented `ShotTrajectoryHandoffCoordinator` connecting swing-state extraction, end-to-end impact/flight simulation, wire export, artifact registration, and specialized viewers per ADR-0047.
+  - Wire contract: `swing_sim.ball_flight_trajectory/1` with immutable SI sample positions and timestamps surviving interchange without mutating original retained samples.
+  - Honest engine sourcing: Routes `manual` and `mujoco` (via `MuJoCoSwingStateProvider`) engines to `SwingBallFlightPipeline`. Refuses unsupported engines (`drake`, `pinocchio`) fail-closed with `UnsupportedEngineSourceError`; refuses arbitrary unvalidated full-body runs fail-closed with `ExtractionAdapterError`; refuses mismatched frames and invalid hashes fail-closed with `FrameUnitMismatchError` and `InvalidTrajectoryHashError`.
+  - Results Workspace actions: Extended `WorkspaceActionType` with `COMPARE_FLIGHT_MODELS` and `OPEN_IN_IMPACT_EXPLORER` and diagnostic availability logic in `ResultsWorkspaceCoordinator`.
+  - Session context & rollback: Carries environmental and launch conditions across active session context; provides atomic transaction staging and rollback.
+- Reproduction: `python -m pytest tests/integration/test_shot_trajectory_handoff.py -v`.
+- Next: PR auto-merge and release lease.
+
 ## [ORG-12] Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (#10522)
 
 - Worktree / Branch: `feat/issue-10522-org12-model-match-handoff`, lease `antigravity-ud-10522`, DL-#10522.
