@@ -8,6 +8,7 @@ import time
 from collections.abc import Iterable
 from typing import Any, cast
 
+import anyio
 import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, ValidationError
@@ -531,6 +532,124 @@ async def _wait_for_resume_or_stop(
             _apply_set_speed(websocket, config, msg)
 
 
+def _step_physics_batch(engine: Any, timestep: float, step_count: int) -> int:
+    """Step the physics engine synchronously for a batch of integration steps.
+
+    Args:
+        engine: The physics engine instance.
+        timestep: Delta time for each step in seconds.
+        step_count: Number of steps to advance.
+
+    Returns:
+        Number of steps successfully executed.
+    """
+    require(timestep > 0, "Simulation timestep must be positive", timestep)
+    require(step_count >= 0, "Step count cannot be negative", step_count)
+    if hasattr(engine, "step"):
+        for _ in range(step_count):
+            engine.step(timestep)
+    return step_count
+
+
+async def _send_simulation_frame(
+    websocket: WebSocket,
+    engine: Any,
+    config: dict[str, Any],
+    frame: int,
+    time_elapsed: float,
+) -> None:
+    """Construct and transmit a frame payload over WebSocket.
+
+    Args:
+        websocket: The active WebSocket connection.
+        engine: The physics engine instance.
+        config: Simulation configuration dict.
+        frame: Current frame counter.
+        time_elapsed: Current simulation time elapsed.
+    """
+    state = _engine_state_to_dict(engine)
+
+    frame_data: dict[str, Any] = {
+        "frame": frame,
+        "time": round(time_elapsed, 4),
+        "state": state,
+    }
+
+    # Include analysis if requested (issue #7718: derive real q/v from
+    # the engine's get_state() instead of unimplemented bespoke calls).
+    if config.get("live_analysis"):
+        frame_data["analysis"] = _engine_analysis_to_dict(engine)
+
+    from src.shared.python.body_part_viz.axial_loads import (
+        read_axial_load_frame,
+    )
+
+    try:
+        loads = read_axial_load_frame(engine, time_elapsed)
+    except (ValueError, TypeError, RuntimeError):
+        logger.exception("Axial load provider unavailable for current frame")
+        loads = None
+    if loads is not None:
+        # Validate against the exact integration clock first, then apply
+        # the same wire timestamp rounding used by the geometry frame.
+        loads["time_s"] = frame_data["time"]
+        frame_data["segment_loads"] = loads
+
+    await websocket.send_json(frame_data)
+
+
+async def _process_pending_client_commands(
+    recv_task: asyncio.Task[Any] | None,
+    websocket: WebSocket,
+    config: dict[str, Any],
+) -> tuple[asyncio.Task[Any] | None, str]:
+    """Check if the receive task has completed and process incoming commands.
+
+    Args:
+        recv_task: Active asyncio.Task awaiting client JSON, or None.
+        websocket: Active WebSocket connection.
+        config: Simulation configuration dict.
+
+    Returns:
+        Tuple of (updated_recv_task, action) where action is "continue", "stop", or "pause".
+    """
+    if recv_task is None:
+        recv_task = asyncio.create_task(websocket.receive_json())
+
+    if not recv_task.done():
+        await anyio.sleep(0)
+
+    while recv_task.done():
+        try:
+            msg = recv_task.result()
+        except (TimeoutError, asyncio.CancelledError):
+            msg = None
+        except json.JSONDecodeError:
+            logger.warning(
+                "Received invalid JSON from WebSocket client; ignoring message"
+            )
+            await websocket.send_json(
+                {"error": "invalid_json", "message": "Message must be valid JSON"}
+            )
+            msg = None
+        except (WebSocketDisconnect, ConnectionResetError, RuntimeError) as exc:
+            logger.debug("WebSocket receive error: %s", exc)
+            return None, "stop"
+
+        recv_task = asyncio.create_task(websocket.receive_json())
+
+        if msg is not None:
+            action = msg.get("action")
+            if action == "stop":
+                return recv_task, "stop"
+            if action == "pause":
+                return recv_task, "pause"
+            if action == "set_speed":
+                _apply_set_speed(websocket, config, msg)
+
+    return recv_task, "continue"
+
+
 async def _run_simulation_loop(
     websocket: WebSocket,
     engine: object,
@@ -563,68 +682,60 @@ async def _run_simulation_loop(
     target_fps = 60
     steps_per_second = 1.0 / timestep
     frame_skip = max(1, int(steps_per_second / target_fps))
+    total_steps = max(1, int(math.ceil(duration / timestep)))
     loop = asyncio.get_running_loop()
     stats = _resolve_sim_stats(websocket)
 
-    while time_elapsed < duration:
-        step_started_at = loop.time()
-        command = await _handle_client_commands(websocket, config)
-        if command == "stop":
-            break
-        if command == "pause":
-            stopped = await _wait_for_resume_or_stop(websocket, config)
-            if stopped:
+    recv_task: asyncio.Task[Any] | None = None
+    try:
+        recv_task = asyncio.create_task(websocket.receive_json())
+        while frame < total_steps:
+            batch_started_at = loop.time()
+            recv_task, command = await _process_pending_client_commands(
+                recv_task, websocket, config
+            )
+            if command == "stop":
                 break
+            if command == "pause":
+                if recv_task is not None and not recv_task.done():
+                    recv_task.cancel()
+                    with contextlib.suppress(asyncio.CancelledError):
+                        await recv_task
+                    recv_task = None
+                stopped = await _wait_for_resume_or_stop(websocket, config)
+                if stopped:
+                    break
+                recv_task = asyncio.create_task(websocket.receive_json())
 
-        # Step simulation
-        if hasattr(engine, "step"):
-            engine.step(timestep)
-
-        time_elapsed += timestep
-        frame += 1
-        if stats is not None:
-            stats.frame_count = frame
-
-        # Send frame data (throttle to ~60fps for UI)
-        if frame % frame_skip == 0:
-            state = _engine_state_to_dict(engine)
-
-            frame_data: dict[str, Any] = {
-                "frame": frame,
-                "time": round(time_elapsed, 4),
-                "state": state,
-            }
-
-            # Include analysis if requested (issue #7718: derive real q/v from
-            # the engine's get_state() instead of unimplemented bespoke calls).
-            if config.get("live_analysis"):
-                frame_data["analysis"] = _engine_analysis_to_dict(engine)
-
-            from src.shared.python.body_part_viz.axial_loads import (
-                read_axial_load_frame,
+            batch_steps = min(frame_skip, total_steps - frame)
+            await anyio.to_thread.run_sync(
+                _step_physics_batch, engine, timestep, batch_steps
             )
 
-            try:
-                loads = read_axial_load_frame(engine, time_elapsed)
-            except (ValueError, TypeError, RuntimeError):
-                logger.exception("Axial load provider unavailable for current frame")
-                loads = None
-            if loads is not None:
-                # Validate against the exact integration clock first, then apply
-                # the same wire timestamp rounding used by the geometry frame.
-                loads["time_s"] = frame_data["time"]
-                frame_data["segment_loads"] = loads
+            frame += batch_steps
+            time_elapsed = min(duration, frame * timestep)
+            if stats is not None:
+                stats.frame_count = frame
 
-            await websocket.send_json(frame_data)
+            if frame % frame_skip == 0 or frame >= total_steps:
+                await _send_simulation_frame(
+                    websocket, engine, config, frame, time_elapsed
+                )
 
-        speed_factor = _get_simulation_speed_factor(websocket, config)
-        delay = _compute_real_time_sleep_delay(
-            timestep,
-            speed_factor,
-            loop.time() - step_started_at,
-        )
-        if delay > 0:
-            await asyncio.sleep(delay)
+            speed_factor = _get_simulation_speed_factor(websocket, config)
+            batch_duration = batch_steps * timestep
+            delay = _compute_real_time_sleep_delay(
+                batch_duration,
+                speed_factor,
+                loop.time() - batch_started_at,
+            )
+            if delay > 0:
+                await asyncio.sleep(delay)
+    finally:
+        if recv_task is not None and not recv_task.done():
+            recv_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await recv_task
 
     return frame, time_elapsed
 
