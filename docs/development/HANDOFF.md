@@ -1,5 +1,46 @@
 # Current Matching Continuation Handoff
 
+## [ORG-12] Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (#10522)
+
+- Worktree / Branch: `feat/issue-10522-org12-model-match-handoff`, lease `antigravity-ud-10522`, DL-#10522.
+- Changes:
+  - `src/shared/python/workspace/model_match_handoff.py`:
+    - Implemented `SubjectSpec`, `ClubSpec`, `ModelSpec`, `InitialPoseSpec` task adapters binding configuration to `SessionProjectStore`.
+    - Implemented route separation with `MatchingRoute` (`TOUR_MATCHING` vs `GENERAL_MOTION_PIPELINE`) and `resolve_matching_route`. Tour route explicitly rejects 2D optical observations / arbitrary video schemas and requires qualified tour captures (driver/iron/c3d).
+    - Implemented honest physics engine qualification across all 6 engines (`mujoco`, `drake`, `pinocchio`, `opensim`, `myosuite`, `simscape`) via `EngineQualification`, `get_engine_qualification`, `list_available_backends`, and `is_backend_available`.
+    - Implemented `FitJobRequest` validating subject/club identity matches, initial pose frame support, engine availability, dynamic capability, and route compatibility before execution.
+    - Implemented `FitJobResult` enforcing the contract invariant that kinematic outputs cannot be marked as dynamic qualified.
+    - Implemented `ModelMatchHandoffCoordinator`:
+      - Updates session model and marks downstream state as invalidated.
+      - Executes discrete `FitStage.KINEMATICS` and `FitStage.DYNAMICS` stages, creating versioned artifact references and recording `RunMetadata` in `SessionProjectStore`.
+      - Handles job cancellation with diagnostics, leaving prior completed runs preserved.
+      - Implemented `reopen_run` returning action descriptor pointing to the existing Results/Replay seam (`results_browser`).
+  - `src/shared/python/workspace/__init__.py`: Exported all new model match handoff types and functions.
+  - `tests/integration/test_model_match_handoff.py`: 3 integration tests covering all RED preconditions (subject/club/frame mismatch, unavailable engine, kinematic vs dynamic qualification, unsupported capture routing) and GREEN execution (fit stages, invalidation on model change, cancellation preserving prior runs, reopen descriptor).
+- Reproduction: `python -m pytest tests/integration/test_model_match_handoff.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10522, notify parent orchestrator.
+
+## [ORG-11] Move Tour Matching Execution Out of Documentation Without Changing Results (#10520)
+
+- Worktree / Branch: `feat/issue-10520-org11-motion-matching-packaging`, lease `antigravity-ud-10520`, DL-#10520.
+- Changes:
+  - `src/shared/python/motion_matching/execution/`: Created new execution package outside documentation tree:
+    - `assets.py`: Reference asset resolution (`get_native_geometry_spec`, `get_opensim_model`, `get_candidate_geometry_spec`, `get_capture_c3d`, `resolve_output_root`) with explicit environment variable overrides and clear actionable `FileNotFoundError` messages.
+    - `spec_builder.py`: Packaged anthropometric candidate spec builder with self-contained OpenSim parsing, leg extension, and CLI entry point.
+    - `downswing.py`: Packaged downswing tracking experiment runner and CLI entry point.
+    - `mjx_export.py`: Packaged MuJoCo MJX package exporter and CLI entry point.
+    - `driver.py`: Packaged ground support driver entry point delegating to `pipeline.cli`.
+    - `__init__.py`: Public package exports.
+  - `docs/development/full_body_models/`: Converted legacy scripts into thin compatibility wrappers that emit `DeprecationWarning` pointing to the packaged modules while preserving CLI argument schemas and exit codes:
+    - `build_anthropometric_spec.py`
+    - `evidence/ground_support/run_ground_support.py`
+    - `evidence/ground_support/downswing_experiment.py`
+    - `evidence/ground_support/export_mjx_package.py`
+  - `src/tools/motion_matching/pipeline.py`: Pointed `BUILDER`, `DRIVER_SCRIPT`, `DOWNSWING_SCRIPT`, and `EXPORT_MJX_SCRIPT` to packaged execution scripts; extended `MatchRequest` with `output_root` and asset override fields; updated `document_path`, `output_dir`, and `build_command` to write outside docs/package.
+  - `tests/integration/test_installed_motion_matching.py`: New regression suite covering wheel execution without docs tree, entry point schema/cancellation/defaults parity, and deterministic numeric parity across packaged service and wrapper.
+- Reproduction: `python -m pytest tests/integration/test_installed_motion_matching.py tests/tools/motion_matching/test_pipeline.py tests/tools/motion_matching/test_motion_matching_gui.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10520, notify parent orchestrator.
+
 ## [ORG-10] Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces (#10519)
 
 - Worktree / Branch: `feat/issue-10519-org10-capture-inspection-handoff`, lease `antigravity-ud-10519`, DL-#10519.
@@ -27,6 +68,22 @@
   - `scripts/check_agent_docs_consistency.py`: Exempt markdown headings (such as `### The Rules`) and centrally managed notices from the duplicate paragraph check to prevent false positives when fleet-managed sections (`fleet-guard`, `development-logs`) share standard subheadings.
 - Reproduction: `py -3.12 -m pytest tests/scripts/test_workspace_documentation_freshness.py tests/scripts/test_capability_atlas.py tests/config/industrial_readiness/ -v --timeout=60` and `python scripts/check_agent_docs_consistency.py`.
 - Next: Open PR, arm auto-merge (`--auto --squash`), release lease on #10531, notify parent orchestrator.
+
+## [ORG-10] Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces (#10519)
+
+- Worktree / Branch: `feat/issue-10519-org10-capture-inspection-handoff`, lease `antigravity-ud-10519`, DL-#10519.
+- Changes:
+  - `src/shared/python/workspace/capture_inspection_handoff.py`: Added `CaptureInspectionHandoff`, `TrimSpec`, `CropSpec`, `PreparedVideoInspection`, `ObservationSet2D`, `OpticalMarkerTarget`, `EstimatorType`, `FreeMoCapJobAdapter`, and `JobStatus`.
+  - Enforced that trim/crop/offset survive handoffs with explicit time conversions.
+  - Maintained MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, and source pixels.
+  - FreeMoCap input/output directory validation before subprocess spawn; cancellation leaves source files untouched with preserved HMR2/AGPL license isolation.
+  - C3D and optical imports keep missing samples masked (NaN); reject incompatible spatial units and frames; reject pretending 2-D coordinates are metric 3-D.
+  - Auto-registered target observations in `SessionProjectStore` preserving annotations, calibration, and club metadata without manual path re-entry.
+  - `src/tools/capture_rig/gui.py` & `journey_actions.py`: Added "Open in Inspect Targets" action.
+  - `src/shared/python/workspace/__init__.py`: Exported all new primitives.
+  - `tests/integration/test_capture_target_handoff.py`: 6 comprehensive integration tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/integration/test_capture_target_handoff.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10519, notify parent orchestrator.
 
 ## [ORG-09] Guided Workflow Transitions Across Unified Workspaces (#10518)
 
