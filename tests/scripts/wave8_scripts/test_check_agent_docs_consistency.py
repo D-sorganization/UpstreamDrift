@@ -25,6 +25,11 @@ def test_iter_duplicate_paragraphs_no_dupes() -> None:
     assert mod._iter_duplicate_paragraphs(text) == []
 
 
+def test_iter_duplicate_paragraphs_ignores_headings() -> None:
+    text = "### The Rules\n\npara one\n\n### The Rules\n\npara two"
+    assert mod._iter_duplicate_paragraphs(text) == []
+
+
 def test_iter_repo_relative_paths_collects() -> None:
     text = "see `src/api/foo.py` and `README.md` and `https://x.com` and `with space`"
     paths = mod._iter_repo_relative_paths(text)
