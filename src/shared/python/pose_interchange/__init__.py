@@ -41,6 +41,10 @@ from src.shared.python.pose_interchange.live_kinematics import (
     LiveKinematicsService,
     ServiceCapabilities,
 )
+from src.shared.python.pose_interchange.cir_bridge import (
+    canonical_pose_to_joint_trajectory,
+    joint_trajectory_to_canonical_pose,
+)
 from src.shared.python.pose_interchange.protocol import (
     JointSlot,
     PoseConventionAdapter,
@@ -90,11 +94,13 @@ __all__ = [
     "ServiceCapabilities",
     "__version__",
     "canonical_from_reference_setup",
+    "canonical_pose_to_joint_trajectory",
     "canonical_state_zero",
     "canonical_zero_pose",
     "compose_se3",
     "euler_xyz_deg_to_quat_wxyz",
     "inverse_se3",
+    "joint_trajectory_to_canonical_pose",
     "quat_exp",
     "quat_log",
     "quat_to_matrix",
