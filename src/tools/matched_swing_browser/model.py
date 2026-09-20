@@ -15,7 +15,10 @@ from typing import Any
 
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.motion_matching.ledger import default_ledger_path
+from src.shared.python.motion_matching.ledger import (
+    default_ledger_path,
+    find_repo_root,
+)
 from src.shared.python.motion_matching.ledger_schema import (
     Ledger,
     LedgerRow,
@@ -52,7 +55,7 @@ class MatchedSwingBrowserModel:
     """Business logic and query engine for browsing matched swing receipts."""
 
     def __init__(self, repo_root: Path | None = None) -> None:
-        self._repo_root = (repo_root or self._find_repo_root()).resolve()
+        self._repo_root = (repo_root or find_repo_root()).resolve()
 
     @property
     def repo_root(self) -> Path:
@@ -192,16 +195,3 @@ class MatchedSwingBrowserModel:
     def get_unique_lanes(rows: list[LedgerRow]) -> list[str]:
         """Extract sorted list of distinct execution lanes present in rows."""
         return sorted({row.lane for row in rows if row.lane})
-
-    @staticmethod
-    def _find_repo_root() -> Path:
-        """Discover the root directory of the UpstreamDrift repository."""
-        here = Path(__file__).resolve()
-        for parent in [here, *here.parents]:
-            if (parent / ".git").exists() or (
-                (parent / "docs").is_dir()
-                and (parent / "src").is_dir()
-                and (parent / "pyproject.toml").is_file()
-            ):
-                return parent
-        return Path.cwd()

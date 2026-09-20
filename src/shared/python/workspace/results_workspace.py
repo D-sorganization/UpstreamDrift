@@ -28,6 +28,7 @@ from src.shared.python.data_io.provenance import (
     add_provenance_header_file,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.motion_matching.ledger import find_repo_root
 from src.shared.python.motion_matching.ledger_schema import LedgerRow
 from src.shared.python.workspace.results_browser import (
     ResultArtifact,
@@ -169,9 +170,7 @@ class ResultsWorkspaceCoordinator:
 
     def __init__(self, repo_root: Path | str | None = None) -> None:
         self._repo_root = (
-            Path(repo_root).resolve()
-            if repo_root is not None
-            else self._find_repo_root()
+            Path(repo_root).resolve() if repo_root is not None else find_repo_root()
         )
         self._results_browser = ResultsBrowser(self._repo_root)
         self._matched_swing_model = MatchedSwingBrowserModel(self._repo_root)
@@ -341,15 +340,7 @@ class ResultsWorkspaceCoordinator:
                     enabled=False,
                     reason=f"Action '{action.value}' requires kinematic replay or dynamic run, got {item.category.value}",
                 )
-            if not target_path.exists():
-                return ActionAvailability(
-                    action=action,
-                    enabled=False,
-                    reason=f"Replay artifact file does not exist on disk: {target_path}",
-                )
-            return ActionAvailability(action=action, enabled=True)
-
-        if action == WorkspaceActionType.DATA_EXPLORER:
+        elif action == WorkspaceActionType.DATA_EXPLORER:
             valid_exts = {".csv", ".h5", ".hdf5", ".tsv", ".json"}
             if target_path.suffix.lower() not in valid_exts:
                 return ActionAvailability(
@@ -357,15 +348,7 @@ class ResultsWorkspaceCoordinator:
                     enabled=False,
                     reason=f"Data Explorer requires tabular or dataset artifact ({', '.join(sorted(valid_exts))})",
                 )
-            if not target_path.exists():
-                return ActionAvailability(
-                    action=action,
-                    enabled=False,
-                    reason=f"Dataset file does not exist: {target_path}",
-                )
-            return ActionAvailability(action=action, enabled=True)
-
-        if action == WorkspaceActionType.PLOT:
+        elif action == WorkspaceActionType.PLOT:
             if item.category not in (
                 ResultCategory.DYNAMIC_RUN,
                 ResultCategory.MEASUREMENTS,
@@ -376,22 +359,13 @@ class ResultsWorkspaceCoordinator:
                     enabled=False,
                     reason="Plot requires numerical dynamic run, measurements, or trajectory data",
                 )
-            if not target_path.exists():
-                return ActionAvailability(
-                    action=action,
-                    enabled=False,
-                    reason=f"Artifact file does not exist: {target_path}",
-                )
-            return ActionAvailability(action=action, enabled=True)
 
-        if action in (WorkspaceActionType.COMPARE, WorkspaceActionType.EXPORT):
-            if not target_path.exists():
-                return ActionAvailability(
-                    action=action,
-                    enabled=False,
-                    reason=f"Artifact file does not exist: {target_path}",
-                )
-            return ActionAvailability(action=action, enabled=True)
+        if not target_path.exists():
+            return ActionAvailability(
+                action=action,
+                enabled=False,
+                reason=f"Artifact file does not exist on disk: {target_path}",
+            )
 
         return ActionAvailability(action=action, enabled=True)
 
@@ -672,15 +646,3 @@ class ResultsWorkspaceCoordinator:
             )
 
         raise ValueError(f"Unsupported format for reimport: {target.suffix}")
-
-    @staticmethod
-    def _find_repo_root() -> Path:
-        here = Path(__file__).resolve()
-        for parent in [here, *here.parents]:
-            if (parent / ".git").exists() or (
-                (parent / "docs").is_dir()
-                and (parent / "src").is_dir()
-                and (parent / "pyproject.toml").is_file()
-            ):
-                return parent
-        return Path.cwd()
