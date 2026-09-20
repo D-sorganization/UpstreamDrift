@@ -38,7 +38,8 @@ class FitWeights:
     Every weight multiplies one half of a squared residual. ``marker`` and
     ``terminal_marker`` are per marker (metres); ``effort`` per actuated
     coordinate (N m); ``velocity`` per coordinate (rad/s); ``range_barrier``
-    per coordinate outside its human range (rad).
+    per coordinate outside its human range (rad); ``pelvis_yaw`` per unit
+    direction residual.
     """
 
     marker: float = 1e3
@@ -46,6 +47,7 @@ class FitWeights:
     effort: float = 1e-5
     velocity: float = 1e-3
     range_barrier: float = 1e3
+    pelvis_yaw: float = 0.0
 
     def __post_init__(self) -> None:
         for name in (
@@ -61,6 +63,11 @@ class FitWeights:
                 f"{name} weight must be finite and positive",
                 value,
             )
+        require(
+            np.isfinite(self.pelvis_yaw) and self.pelvis_yaw >= 0.0,
+            "pelvis_yaw weight must be finite and non-negative",
+            self.pelvis_yaw,
+        )
 
 
 @dataclass(frozen=True)
@@ -128,6 +135,13 @@ class MarkerTargets:
             bool(np.isfinite(self.targets).all()),
             "targets must be finite (zero where invalid)",
         )
+
+    @property
+    def waist_indices(self) -> tuple[int, int]:
+        """Indices of WaistLeft and WaistRight markers, or -1 if absent."""
+        wl_i = self.labels.index("WaistLeft") if "WaistLeft" in self.labels else -1
+        wr_i = self.labels.index("WaistRight") if "WaistRight" in self.labels else -1
+        return wl_i, wr_i
 
 
 def build_marker_targets(
