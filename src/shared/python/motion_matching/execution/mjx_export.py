@@ -11,18 +11,19 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Any
-import xml.etree.ElementTree as ET
+from typing import TYPE_CHECKING, Any
 
 import defusedxml.ElementTree as DET
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python.full_body_ik import (
-    FullBodyMarkerKinematics,
-)
-from src.engines.physics_engines.mujoco.python.full_body_model import (
-    NativeMujocoFullBodyModel,
-)
+if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+
 from src.shared.python.motion_matching.full_body_forward_dynamics import (
     ROOT_COORDINATES,
 )
@@ -50,7 +51,7 @@ def stiffen_weld(xml: str) -> str:
         raise ValueError("Expected exactly one closure weld in the MJCF")
     welds[0].set("solref", "0.002 1")
     welds[0].set("solimp", "0.99 0.999 0.001")
-    return ET.tostring(root, encoding="unicode")
+    return DET.tostring(root, encoding="unicode")
 
 
 def _load_reference_trajectory(
@@ -102,6 +103,13 @@ def export_mjx_package(run: Path | str, timestep: float = 5e-4) -> dict[str, Any
     times, q_ref, valid = _load_reference_trajectory(run_path, receipt)
     labels = tuple(receipt["labels"])
     lane = Lane(labels, CAPTURES[receipt["capture"]])
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+
     adapter = NativeMujocoFullBodyModel(spec_bytes)
     attachments = {
         label: (a["body"], a["offset_m"])
@@ -118,7 +126,7 @@ def export_mjx_package(run: Path | str, timestep: float = 5e-4) -> dict[str, Any
         raise ValueError("Exported MJCF carries no option tag")
     option.set("timestep", f"{timestep:g}")
     option.set("integrator", "Euler")
-    xml = ET.tostring(root, encoding="unicode")
+    xml = DET.tostring(root, encoding="unicode")
 
     names = list(adapter.coordinate_order)
     qpos_adr = np.array([model.joint(n).qposadr[0] for n in names])

@@ -13,17 +13,20 @@ import json
 import logging
 from pathlib import Path
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
 
 import numpy as np
+
 from scipy.signal import butter, filtfilt
 
-from src.engines.physics_engines.mujoco.python.full_body_ik import (
-    FullBodyMarkerKinematics,
-)
-from src.engines.physics_engines.mujoco.python.full_body_model import (
-    NativeMujocoFullBodyModel,
-)
 from src.shared.python.motion_matching import (
     full_body_forward_dynamics as fs,
 )
@@ -118,6 +121,13 @@ def _load_downswing_run(
     FullBodyMarkerKinematics,
     bool,
 ]:
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+
     receipt = json.loads((run / "receipt.json").read_text(encoding="utf-8"))
     spec_bytes = (run / "full_body_spec_hipcal_scaled.json").read_bytes()
     document = json.loads(spec_bytes.decode("utf-8"))
