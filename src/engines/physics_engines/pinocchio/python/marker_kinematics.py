@@ -11,14 +11,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 @dataclass(frozen=True)
