@@ -1,5 +1,18 @@
 # Current Matching Continuation Handoff
 
+## ORG-18 Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (#10527)
+
+- Branch: `feat/issue-10527-org18-comparison-indicator-workspace`, lease held by `local`, DL-#10527.
+- Changes:
+  - `src/shared/python/workspace/comparison_indicator_workspace.py`: Implemented `ComparisonIndicatorWorkspaceCoordinator`, `ComparisonRunArtifact`, `ModelFidelityLevel`, `CrossEngineComparisonAdapter`, `BiomechanicalLoadChannels`, `InjuryIndicatorAdapter`, and fail-closed compatibility validators (`validate_run_compatibility`, `IncompatibleArtifactError`).
+  - Implemented model fidelity level invariance ensuring disparate fidelity tiers (`stub_pendulum`, `simplified_kinetics`, `qualified_full_body`) are never erroneously cross-compared.
+  - Adapted biomechanical load channels to `InjuryRiskScorer` without mock fallbacks and stamped all outputs with mandatory non-clinical disclaimers.
+  - Surfaced canonical comparison and injury indicator capabilities across `results_and_compare` and `exercise_analysis` workspace shells.
+  - `src/shared/python/workspace/__init__.py`: Exported all new coordinator and adapter symbols.
+  - `tests/integration/test_comparison_indicator_workspace.py`: 10 integration tests validating capability exposure across workspace shells, multi-run comparison, run compatibility validation (units, coordinates, timebase dt, channels, finite values), model fidelity level invariance, injury indicator execution, missing load channel fail-closed validation, and non-clinical disclaimer enforcement.
+- Reproduction: `pytest tests/integration/test_comparison_indicator_workspace.py --timeout=60`.
+- Next: Open PR, arm auto-merge, update issue.
+
 ## ORG-06 Apply the Same Workspace Navigation to React and Tauri (#10516)
 
 - Worktree: main checkout, branch `feat/issue-10516-org06-react-workspace-navigation`, lease `antigravity-ud-10516`, DL-#10516.
