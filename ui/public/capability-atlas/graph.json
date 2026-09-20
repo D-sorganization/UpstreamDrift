@@ -303,7 +303,8 @@
         "motion_capture",
         "motion_target_preview",
         "starting_pose_matcher",
-        "motion_pipeline"
+        "motion_pipeline",
+        "shadow_tracker"
       ],
       "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406).",
       "id": "mocap.breadth"
@@ -558,6 +559,22 @@
       "id": "tools.dataset_generator"
     },
     {
+      "feature_id": "tools.golf_simulator",
+      "title": "Golf Simulator capability-aware controls and replay submission",
+      "status": "parity",
+      "pyqt": "src/tools/golf_simulator/gui.py",
+      "api": "src/api/routes/golf_simulator.py",
+      "web": "ui/src/pages/GolfSimulator.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "golf_simulator"
+      ],
+      "notes": "Parity controls across PyQt6 desktop widget and React web console backed by shared API routes.",
+      "id": "tools.golf_simulator"
+    },
+    {
       "feature_id": "tools.launch_monitor_analytics",
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
       "status": "gap",
@@ -572,6 +589,22 @@
       ],
       "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. React/Vite parity in the authoritative Tools Rate of Closure app is tracked cross-repository in Tools #4205 under epic #8364.",
       "id": "tools.launch_monitor_analytics"
+    },
+    {
+      "feature_id": "tools.matched_swing_browser",
+      "title": "Matched Swing Results Browser",
+      "status": "gap",
+      "pyqt": "src/tools/matched_swing_browser/gui.py",
+      "api": null,
+      "web": null,
+      "issue": 10353,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "matched_swing_browser"
+      ],
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff.",
+      "id": "tools.matched_swing_browser"
     },
     {
       "feature_id": "tools.matlab_suite",
@@ -607,18 +640,18 @@
     },
     {
       "feature_id": "tools.motion_matching",
-      "title": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",
-      "status": "gap",
+      "title": "Motion Matching tour-average capture matching",
+      "status": "parity",
       "pyqt": "src/tools/motion_matching/gui.py",
       "api": null,
       "web": null,
-      "issue": 10106,
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "motion_matching"
       ],
-      "notes": "",
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation (MS-82 #10355).",
       "id": "tools.motion_matching"
     },
     {
@@ -817,7 +850,7 @@
       "path": "src/engines/physics_engines/myosuite/python/gui.py",
       "launch_target": "src/engines/physics_engines/myosuite/python/gui.py",
       "category": "physics_engine",
-      "status": "ready",
+      "status": "experimental",
       "capabilities": [
         "musculoskeletal",
         "muscle_control",
@@ -828,7 +861,7 @@
     },
     {
       "id": "matlab_suite",
-      "title": "Simscape",
+      "title": "Matlab Models",
       "description": "MATLAB / Simscape models, dataset generators, and tooling",
       "path": "src/config/models.yaml",
       "launch_target": "virtual/matlab_suite",
@@ -842,16 +875,32 @@
     },
     {
       "id": "golf_simulation_suite",
-      "title": "Simulator",
-      "description": "Complete golf simulation with ball flight physics and putting green",
+      "title": "Golf Simulation Suite",
+      "description": "Prototype visualization and demo inspection suite; not a production physics solver",
       "path": "src/tools/golf_simulation_suite/__main__.py",
       "launch_target": "src/tools/golf_simulation_suite/__main__.py",
       "category": "simulation",
-      "status": "ready",
+      "status": "prototype",
       "capabilities": [
         "full_simulation",
         "parameter_sweep",
         "batch_runs"
+      ]
+    },
+    {
+      "id": "golf_simulator",
+      "title": "Golf Simulator Console",
+      "description": "Capability-aware destination controls and replay submission for simulator integration",
+      "path": "src/tools/golf_simulator/gui.py",
+      "launch_target": "src/tools/golf_simulator/gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "shot_input",
+        "destination_selection",
+        "session_lifecycle",
+        "replay_transport",
+        "uncertainty_recovery"
       ]
     },
     {
@@ -871,40 +920,40 @@
     {
       "id": "mujoco_models_shared",
       "title": "MuJoCo Models",
-      "description": "MuJoCo simulation models repository folder (opens only when the MuJoCo_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "MuJoCo simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if MuJoCo_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "MuJoCo_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "drake_models_shared",
       "title": "Drake Models",
-      "description": "Drake simulation models repository folder (opens only when the Drake_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "Drake simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Drake_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "Drake_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "pinocchio_models_shared",
       "title": "Pinocchio Models",
-      "description": "Pinocchio simulation models repository folder (opens only when the Pinocchio_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "Pinocchio simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Pinocchio_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "Pinocchio_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "opensim_models_shared",
       "title": "OpenSim Models",
-      "description": "OpenSim simulation models repository folder (opens only when the OpenSim_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "OpenSim simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if OpenSim_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "OpenSim_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
@@ -1178,6 +1227,22 @@
       "capabilities": []
     },
     {
+      "id": "shadow_tracker",
+      "title": "Shadow Tracker",
+      "description": "Articulated silhouette tracking, manual mask correction, and forward rollout verification",
+      "path": "src/tools/shadow_tracker/__main__.py",
+      "launch_target": "src/tools/shadow_tracker/__main__.py",
+      "category": "motion_capture",
+      "status": "utility",
+      "capabilities": [
+        "video_import",
+        "manual_mask_editing",
+        "bundle_persistence",
+        "worst_frame_navigation",
+        "canonical_export"
+      ]
+    },
+    {
       "id": "model_explorer",
       "title": "Model Explorer",
       "description": "Explore models and generate URDFs",
@@ -1200,6 +1265,21 @@
       "category": "tool",
       "status": "beta",
       "capabilities": []
+    },
+    {
+      "id": "matched_swing_browser",
+      "title": "Results Browser",
+      "description": "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations",
+      "path": "src/tools/matched_swing_browser/__main__.py",
+      "launch_target": "src/tools/matched_swing_browser/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "motion_matching",
+        "results_browser",
+        "physical_acceptance",
+        "ledger"
+      ]
     },
     {
       "id": "data_explorer",
@@ -1339,7 +1419,7 @@
     {
       "id": "biomech_gait",
       "title": "Gait Model",
-      "description": "Exercise preset that forwards the gait filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)",
+      "description": "Saved shortcut/preset forwarding gait filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -1349,7 +1429,7 @@
     {
       "id": "biomech_sit_to_stand",
       "title": "Sit-to-Stand Model",
-      "description": "Exercise preset that forwards the sit-to-stand filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)",
+      "description": "Saved shortcut/preset forwarding sit-to-stand filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -1359,7 +1439,7 @@
     {
       "id": "movement_optimizer",
       "title": "Movement Optimizer",
-      "description": "Cross-engine trajectory optimization (requires the Movement_Optimizer sibling checkout beside this repository; prefer the vendored tools_movement_optimizer tile — #9478)",
+      "description": "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "src/movement_optimizer/__main__.py",
       "category": "biomechanics",
@@ -1450,7 +1530,7 @@
     {
       "id": "swing_optimizer",
       "title": "Swing Optimizer",
-      "description": "Trajectory optimization with constraint solving and cost functions",
+      "description": "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16",
       "path": "src/shared/python/optimization/swing_optimizer.py",
       "launch_target": "src/shared/python/optimization/swing_optimizer.py",
       "category": "simulation",
@@ -1464,7 +1544,7 @@
     {
       "id": "injury_analysis",
       "title": "Injury Risk Analysis",
-      "description": "Joint stress, spinal load, and swing modification analysis for injury prevention",
+      "description": "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17",
       "path": "src/shared/python/injury/injury_risk.py",
       "launch_target": "src/shared/python/injury/injury_risk.py",
       "category": "biomechanics",
@@ -1479,7 +1559,7 @@
     {
       "id": "drake_dashboard",
       "title": "Drake Dashboard",
-      "description": "Interactive Drake simulation dashboard",
+      "description": "Interactive Drake simulation dashboard (advanced mode of Drake engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/drake_dashboard.py",
       "launch_target": "src/launchers/drake_dashboard.py",
       "category": "physics_engine",
@@ -1495,7 +1575,7 @@
     {
       "id": "mujoco_dashboard",
       "title": "MuJoCo Dashboard",
-      "description": "Interactive MuJoCo simulation dashboard",
+      "description": "Interactive MuJoCo simulation dashboard (advanced mode of MuJoCo engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/mujoco_dashboard.py",
       "launch_target": "src/launchers/mujoco_dashboard.py",
       "category": "physics_engine",
@@ -1511,7 +1591,7 @@
     {
       "id": "pinocchio_dashboard",
       "title": "Pinocchio Dashboard",
-      "description": "Interactive Pinocchio simulation dashboard",
+      "description": "Interactive Pinocchio simulation dashboard (advanced mode of Pinocchio engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/pinocchio_dashboard.py",
       "launch_target": "src/launchers/pinocchio_dashboard.py",
       "category": "physics_engine",
@@ -2786,9 +2866,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "db988b0091b8e70a78c9b862a18c4f52af5fb56b2c58d4c772d95cbea096ac92",
-    "src/config/launcher_manifest.json": "89ce66ae10de8d56905be878c90b9488328b5fb0dbf679b579fe3610d20ec2b0",
-    "src/config/feature_parity.json": "36b24a242e7fc3162eec04d0bec25b56e13d02baf8089b33386679cc47b634ce",
+    "src/config/models.yaml": "1d6ab125ba3d5ac4353a22d10d08aac2873f9c52df188a9bca88e33fdc0ae115",
+    "src/config/launcher_manifest.json": "721474b299891764d36c8246ee6ea4dafb08688fc21bb80b892571f40f86f783",
+    "src/config/feature_parity.json": "b3ea92cc334a28d0c210aae82a2b3ba6da3694b21336b53e387fde3586f9269f",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

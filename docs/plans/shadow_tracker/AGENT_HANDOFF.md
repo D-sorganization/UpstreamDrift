@@ -2,27 +2,24 @@
 
 ## Current State
 
-Reviewed baseline includes merged Stage 0 contract hardening (#10151 / PR #10163),
-MuJoCo IK coordinate alignment (#10140 / PR #10164), production closure units separation
-(#10141 / PR #10165), acceptance gating hardening (#10166 / PR #10170), feasibility qualification
-(#10124 / PR #10169), and evidence regeneration after IK correction (#10167). Historical calibration
-is preserved in `historical/`; active IK trajectory and offsets have been regenerated with aligned
-coordinates, improving grip translation closure from 1.266 m to 13.7 mm (scientific qualification
-remains open due to rotation closure and strict 5 mm tolerance). Code for evidence records (#10125),
-video ingestion (#10126), mask metrics (#10127), calibrated silhouettes (#10128), and shape
-fitting (#10129) has merged. Full ST-01–ST-06 acceptance has not been demonstrated.
-See [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md) for reproduced cases.
+Reviewed `33ffde23f`: provider false success, nested morphology mutation and
+non-finite hypotheses are repaired. Shot-aware in-memory revisions, filled
+reference disks, real OpenCV decoding and regenerated calibration have landed.
+The current review reproduces timestamp/physical-time defaults, geometry/state
+and revision-integrity gaps. Model evidence remains scientifically unqualified.
+No Shadow Tracker launcher application or full fitter is implemented.
 
 ## Immediate Dispatch
 
-Read [Development Review](DEVELOPMENT_REVIEW.md), [Current Progress Review](PROGRESS_REVIEW_2026_09_15.md), and [Continuation Prompt](CONTINUATION_PROMPT.md).
-Evidence regeneration (#10167) is complete, reducing translation error to 13.7 mm. Issue #10202
-is complete, repairing false segmentation success and enforcing shot-isolated mask revisions under ST-04.
-Issue #10206 (ST-05) is complete, implementing filled-area silhouette rendering and state invariants.
-Active slice is #10168 (ST-03A, real local-video clip decoding, bounded iterator, and auditable frame records).
-Next: Forward rollout integration and replay parity (#10130, ST-07), followed by release qualification.
-Stage 7 (#10130) is boundary work only until physical qualification gates pass. Do not use
-issue closure or merged prototypes as proof that scientific gates have passed.
+Read [Current Turnover](TURNOVER_CURRENT.md) and
+[Continuation Prompt](CONTINUATION_PROMPT.md). Merged #10231 (PR #10253): authoritative source
+PTS, unknown physical time by default, and cancellation during actual decode.
+Landing #10232: articulated model binding and clipping/projection oracles.
+The #10233 provider repair is locally validated; review its focused diff and
+[2026-09-18 turnover evidence](TURNOVER_CURRENT.md) before repeating implementation.
+Do not repeat the repaired false-segmentation-success task or call #10168 active.
+Continue scientific qualification, then all ST-07–ST-12 stages including fitting,
+uncertainty, real/archive validation, UI/export and release. No stage is skipped.
 
 ## First Pickup
 

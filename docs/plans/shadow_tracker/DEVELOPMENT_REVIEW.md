@@ -1,7 +1,7 @@
 # Shadow Tracker Implementation Review and Delivery Handoff
 
 For newer implementation findings and pickup instructions, read
-[September 15 Progress Review](PROGRESS_REVIEW_2026_09_15.md). This document
+[Current Turnover](TURNOVER_CURRENT.md). This document
 preserves the earlier review and full delivery requirements.
 
 ## Review Baseline and Verdict

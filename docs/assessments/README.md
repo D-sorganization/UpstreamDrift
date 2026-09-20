@@ -10,6 +10,8 @@
   `docs/assessments/may_10_12_audit_plan.md`, with fleet tracking and
   remediation summaries retained under `docs/operations/` as operational status
   artifacts.
+- Historical feature engine matrix: `docs/assessments/FEATURE_ENGINE_MATRIX.md`
+  (SUPERSEDED 2026-09-17 by `docs/development/matched_swing_program/README.md`).
 
 When assessments are superseded, move old artifacts into `docs/assessments/archive/` and update the archive index.
 

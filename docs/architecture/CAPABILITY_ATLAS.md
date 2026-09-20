@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**59 launcher tiles · 44 feature contracts.**
+**62 launcher tiles · 46 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -227,10 +227,12 @@ flowchart LR
 | Character Builder (humanoid URDF generation) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/model_generation/cli/main.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/character_builder.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/CharacterBuilder.tsx) |
 | Data Explorer (import/filter/visualize datasets) | gap | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/data_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DataExplorer.tsx) |
 | Swing dataset generation and import | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/dataset.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DatasetGenerator.tsx) |
+| Golf Simulator capability-aware controls and replay submission | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/golf_simulator/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/golf_simulator.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/GolfSimulator.tsx) |
 | Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/launch_monitor_analytics/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launch_monitor_analytics.py) |
+| Matched Swing Results Browser | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/matched_swing_browser/gui.py) |
 | MATLAB/Simscape model suite | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/matlab_suite_dialog.py) |
 | Model Explorer (browse/select/build URDF-MJCF) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/launch_model_explorer.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/model_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/ModelExplorer.tsx) |
-| Motion Matching tool (full-body forward-dynamics matching of the tour captures) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/motion_matching/gui.py) |
+| Motion Matching tour-average capture matching | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/motion_matching/gui.py) |
 | Pose Studio interactive pose editing | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/pose_studio/__main__.py) |
 | Putting green simulation | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/putting_green/python/simulator.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/putting_green.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/PuttingGreen.tsx) |
 | Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | parity | [pyqt](https://github.com/D-sorganization/Tools/blob/main/src/rate_of_closure/launch_pyqt6.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/local_server.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/ImpactExplorer.tsx) |
@@ -243,6 +245,9 @@ Semantic connections are declared in `src/config/capability_connections.json`
 with artifact names, constraints and source evidence. Workflow labels and
 instructions come from `capture_rig.workflow`; feature/launcher inventories
 are consumed rather than copied. Initialize the pinned Tools submodule first.
+
+Capability migration and baseline inventory decisions are tracked in
+[ORG-01 Capability Baseline](../development/ORG01_CAPABILITY_BASELINE.md).
 
 Run `python3 -m scripts.generate_capability_atlas --check` to check freshness.
 `tests/scripts/test_capability_atlas.py` gates deterministic outputs and invalid graphs.

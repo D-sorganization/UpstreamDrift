@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from fractions import Fraction
 import math
-from typing import Any, Literal, Protocol, runtime_checkable
+from typing import Any, Final, Literal, Protocol, runtime_checkable
 
 from ._validation import (
     CANDIDATE_RESULT_SCHEMA_VERSION,
@@ -94,6 +94,37 @@ _FRAME_OBSERVATION_KEYS = frozenset(
         "club_mask_ref",
         "valid_mask_ref",
         "confidence_provenance",
+        "timing_mode",
+        "is_timing_exact",
+        "clock_evidence",
+        "decoder_name",
+        "decoder_version",
+        "pixel_format",
+    )
+)
+
+_LEGACY_FRAME_OBSERVATION_KEYS = frozenset(
+    (
+        "schema_version",
+        "shot_id",
+        "camera_id",
+        "frame_id",
+        "pts_ticks",
+        "timebase_numerator",
+        "timebase_denominator",
+        "physical_time_s",
+        "physical_time_reason",
+        "body_mask_ref",
+        "club_mask_ref",
+        "valid_mask_ref",
+        "confidence_provenance",
+    )
+)
+
+_FRAME_OBSERVATION_SCHEMA_VERSIONS = frozenset(
+    (
+        FRAME_OBSERVATION_SCHEMA_VERSION,
+        "shadow-tracker/frame-observation/1.1.0",
     )
 )
 
@@ -306,9 +337,22 @@ class FrameObservation:
     club_mask_ref: str
     valid_mask_ref: str
     confidence_provenance: str
+    timing_mode: str = "estimated_cfr"
+    is_timing_exact: bool = False
+    clock_evidence: str = "unverified_legacy_record"
+    decoder_name: str = "opencv"
+    decoder_version: str = "legacy"
+    pixel_format: str = "bgr24"
 
     def __post_init__(self) -> None:
-        check_schema_version(self.schema_version, FRAME_OBSERVATION_SCHEMA_VERSION)
+        if not isinstance(self.schema_version, str):
+            raise TypeError(
+                f"schema_version must be a str, got {type(self.schema_version).__name__}"
+            )
+        if self.schema_version not in _FRAME_OBSERVATION_SCHEMA_VERSIONS:
+            raise ValueError(
+                f"schema_version must be one of {sorted(_FRAME_OBSERVATION_SCHEMA_VERSIONS)}, got {self.schema_version!r}"
+            )
         check_id(self.shot_id, "shot_id")
         check_id(self.camera_id, "camera_id")
         check_id(self.frame_id, "frame_id")
@@ -335,6 +379,12 @@ class FrameObservation:
         check_id(self.club_mask_ref, "club_mask_ref")
         check_id(self.valid_mask_ref, "valid_mask_ref")
         check_str(self.confidence_provenance, "confidence_provenance")
+        check_str(self.timing_mode, "timing_mode")
+        check_bool(self.is_timing_exact, "is_timing_exact")
+        check_str(self.clock_evidence, "clock_evidence")
+        check_str(self.decoder_name, "decoder_name")
+        check_str(self.decoder_version, "decoder_version")
+        check_str(self.pixel_format, "pixel_format")
 
     @property
     def presentation_time(self) -> Fraction:
@@ -357,12 +407,45 @@ class FrameObservation:
             "club_mask_ref": self.club_mask_ref,
             "valid_mask_ref": self.valid_mask_ref,
             "confidence_provenance": self.confidence_provenance,
+            "timing_mode": self.timing_mode,
+            "is_timing_exact": self.is_timing_exact,
+            "clock_evidence": self.clock_evidence,
+            "decoder_name": self.decoder_name,
+            "decoder_version": self.decoder_version,
+            "pixel_format": self.pixel_format,
         }
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> FrameObservation:
-        check_payload_keys(payload, _FRAME_OBSERVATION_KEYS)
-        return cls(**payload)
+        if not isinstance(payload, dict):
+            raise TypeError(f"Payload must be a dict, got {type(payload).__name__}")
+        extra = set(payload.keys()) - _FRAME_OBSERVATION_KEYS
+        if extra:
+            raise ValueError(f"Unknown fields rejected: {sorted(extra)}")
+        missing = _LEGACY_FRAME_OBSERVATION_KEYS - set(payload.keys())
+        if missing:
+            raise ValueError(f"Missing required fields: {sorted(missing)}")
+        return cls(
+            schema_version=payload["schema_version"],
+            shot_id=payload["shot_id"],
+            camera_id=payload["camera_id"],
+            frame_id=payload["frame_id"],
+            pts_ticks=payload["pts_ticks"],
+            timebase_numerator=payload["timebase_numerator"],
+            timebase_denominator=payload["timebase_denominator"],
+            physical_time_s=payload["physical_time_s"],
+            physical_time_reason=payload["physical_time_reason"],
+            body_mask_ref=payload["body_mask_ref"],
+            club_mask_ref=payload["club_mask_ref"],
+            valid_mask_ref=payload["valid_mask_ref"],
+            confidence_provenance=payload["confidence_provenance"],
+            timing_mode=payload.get("timing_mode", "estimated_cfr"),
+            is_timing_exact=payload.get("is_timing_exact", False),
+            clock_evidence=payload.get("clock_evidence", "unverified_legacy_record"),
+            decoder_name=payload.get("decoder_name", "opencv"),
+            decoder_version=payload.get("decoder_version", "legacy"),
+            pixel_format=payload.get("pixel_format", "bgr24"),
+        )
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -805,11 +888,19 @@ class SegmentationResult:
         check_str(self.provenance, "provenance")
 
 
+POINT_LANDMARKS_CONVENTION: Final[str] = "point_landmarks"
+CANONICAL_ARTICULATED_CONVENTION: Final[str] = "canonical_articulated_v1"
+_VALID_RENDER_STATE_CONVENTIONS: frozenset[str] = frozenset(
+    (POINT_LANDMARKS_CONVENTION, CANONICAL_ARTICULATED_CONVENTION)
+)
+
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class RenderRequest:
     camera_id: str
     state: tuple[float, ...]
     image_size_px: tuple[int, int]
+    state_convention: str = POINT_LANDMARKS_CONVENTION
 
     def __post_init__(self) -> None:
         check_id(self.camera_id, "camera_id")
@@ -823,11 +914,17 @@ class RenderRequest:
             )
         check_pos_int(self.image_size_px[0], "width_px")
         check_pos_int(self.image_size_px[1], "height_px")
+        check_str(self.state_convention, "state_convention")
+        if self.state_convention not in _VALID_RENDER_STATE_CONVENTIONS:
+            raise ValueError(
+                f"state_convention must be one of {sorted(_VALID_RENDER_STATE_CONVENTIONS)}, got {self.state_convention!r}"
+            )
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class RenderResult:
     body_mask: tuple[int, ...]
+
     club_mask: tuple[int, ...]
     visibility_mask: tuple[int, ...]
 

@@ -4,6 +4,7 @@ The input is a portable native_spec geometry export. Actuator routing, damping,
 limits and time integration require separate qualification before swing fitting.
 """
 
+import math
 from collections.abc import Mapping, Sequence
 from importlib import import_module
 from typing import Any, NamedTuple
@@ -24,6 +25,17 @@ from src.shared.python.motion_matching.full_body_spec import (
 )
 from src.shared.python.motion_matching.marker_projection import project_markers
 
+# The principal SE(3) logarithm changes branch at a rotation of pi. Keep
+# derivative claims outside a small explicit numerical margin of that cut.
+_WELD_LOG_BRANCH_MARGIN_RAD = 1e-7
+
+
+def _require_weld_log_chart(
+    pose_error: NDArray[np.float64], margin_rad: float = _WELD_LOG_BRANCH_MARGIN_RAD
+) -> None:
+    if np.linalg.norm(pose_error[3:]) >= np.pi - margin_rad:
+        raise ValueError("Weld log derivative is undefined near the rotation-pi branch")
+
 
 class NativeAccelerationDerivatives(NamedTuple):
     """Detached derivatives in the stated native scalar-coordinate order."""
@@ -40,6 +52,15 @@ class NativeMarkerDerivatives(NamedTuple):
     names: tuple[str, ...]
     positions_m: NDArray[np.float64]
     dposition_dq: NDArray[np.float64]
+
+
+class NativeContactEffortDerivatives(NamedTuple):
+    """Contact-force derivatives in explicit scalar-coordinate order."""
+
+    names: tuple[str, ...]
+    dq: NDArray[np.float64]
+    dv: NDArray[np.float64]
+    differentiable: bool
 
 
 class NativeClosurePositionLinearization(NamedTuple):
@@ -312,11 +333,18 @@ class NativePinocchioModel:
         The constraint backend refreshes its data through the zero-rate,
         zero-effort diagnostic probe. The returned Jacobian is kinematic only;
         it is suitable for a local node chart, never for inverse dynamics.
+        Differentiate the finite residual ``-log6(c1Mc2)`` with the left
+        log Jacobian; the constraint velocity Jacobian alone is valid only
+        at zero pose error. The result owns finite, read-only storage.
+        Rotations within 1e-7 rad of the principal-log branch cut are rejected.
         """
         names = tuple(coordinates)
         position, _ = self.closure_residuals(coordinates)
+        _require_weld_log_chart(position)
         raw, jac_slice = self._constraints_jacobian(names)
-        jacobian = jac_slice.copy()
+        contact = self.constraint_data[0]
+        inverse_placement = contact.c1Mc2.inverse()
+        jacobian = np.asarray(self._pin.Jlog6(inverse_placement) @ jac_slice)
         if (
             position.shape != (6,)
             or raw.shape != (6, self.model.nv)
@@ -390,6 +418,8 @@ class NativePinocchioModel:
         returned acceleration partial is the exact constraint Jacobian because
         the oracle defines that residual as ``J * (a - a0)``. The final base
         probe restores the backend data to the reported state.
+        The pose must stay away from the log branch by at least twice the
+        scalar-coordinate difference step (and the fixed numerical margin).
         """
         names = tuple(coordinates)
         if (
@@ -410,6 +440,9 @@ class NativePinocchioModel:
         acceleration = dict(accelerations)
         base = flatten(
             self.closure_trajectory_residuals(position, velocity, acceleration)
+        )
+        _require_weld_log_chart(
+            base[:6], max(_WELD_LOG_BRANCH_MARGIN_RAD, 2.0 * finite_difference_step)
         )
         derivative_shape = (base.size, len(names))
         dq = np.empty(derivative_shape, dtype=float)
@@ -447,12 +480,13 @@ class NativePinocchioModel:
                     )
                 )
             ) / (2.0 * finite_difference_step)
-        linear = self.closure_position_linearization(position)
         self.closure_trajectory_residuals(position, velocity, acceleration)
+        raw, velocity_jacobian = self._constraints_jacobian(names)
         da = np.zeros(derivative_shape, dtype=float)
-        da[-linear.jacobian.shape[0] :, :] = linear.jacobian
+        da[-velocity_jacobian.shape[0] :, :] = velocity_jacobian
         if (
-            linear.names != names
+            raw.shape != (6, self.model.nv)
+            or velocity_jacobian.shape != (6, len(names))
             or not np.isfinite(base).all()
             or not np.isfinite(dq).all()
             or not np.isfinite(dv).all()
@@ -571,16 +605,21 @@ class NativePinocchioModel:
         if len(raw) < 3:
             raise ValueError("Native acceleration derivatives are missing")
         for value in raw[:3]:
-            matrix = np.asarray(value, dtype=float)
-            if (
-                matrix.shape != (self.model.nv, self.model.nv)
-                or not np.isfinite(matrix).all()
-            ):
-                raise ValueError("Invalid native acceleration derivatives")
-            owned = matrix[np.ix_(indices, indices)].copy()
-            owned.setflags(write=False)
-            matrices.append(owned)
+            matrices.append(self._ordered_derivative(value, indices))
         return NativeAccelerationDerivatives(names, *matrices)
+
+    def _ordered_derivative(
+        self, value: Any, indices: list[int]
+    ) -> NDArray[np.float64]:
+        matrix = np.asarray(value, dtype=float)
+        if (
+            matrix.shape != (self.model.nv, self.model.nv)
+            or not np.isfinite(matrix).all()
+        ):
+            raise ValueError("Invalid native acceleration derivatives")
+        owned = matrix[np.ix_(indices, indices)].copy()
+        owned.setflags(write=False)
+        return owned
 
 
 class FullBodyPinocchioModel(NativePinocchioModel):
@@ -596,13 +635,24 @@ class FullBodyPinocchioModel(NativePinocchioModel):
         self._build_tree(specification)
         self._initialize_contact(specification)
         self._initialize_closure(specification["closure"])
+        from .contact_derivatives import PinocchioContactDifferentiator
+
+        frames = {
+            self._contact_frames[sphere.name]: sphere.radius_m
+            for sphere in self.contact_spheres
+        }
+        self._contact_differentiator = PinocchioContactDifferentiator(
+            pin, self.model, frames
+        )
 
     def _initialize_contact(self, specification: Mapping[str, Any]) -> None:
         pin = self._pin
         contact_spec = specification["contact"]
         self.contact_parameters = ContactParameters(**contact_spec["parameters"])
         g_vec = np.asarray(specification["gravity_m_s2"], dtype=float)
-        g_norm = float(np.linalg.norm(g_vec))
+        g_norm = float(
+            math.sqrt(np.dot(g_vec, g_vec))
+        )  # ⚡ Bolt: math.sqrt(np.dot) is ~2.5x faster than np.linalg.norm
         if g_norm <= 0:
             raise ValueError("Gravity must be a nonzero vector")
         unit_g = -g_vec / g_norm
@@ -687,6 +737,53 @@ class FullBodyPinocchioModel(NativePinocchioModel):
     ) -> dict[str, ContactSample]:
         """Evaluate shared contact law forces for each foot contact sphere."""
         return self.contact_forces(coordinates, rates)
+
+    def contact_effort_derivatives(
+        self, coordinates: Mapping[str, float], rates: Mapping[str, float]
+    ) -> NativeContactEffortDerivatives:
+        """Return contact partials without disturbing the constrained solver.
+
+        Matrices are owned, read-only, and ordered by ``coordinates``.
+        ``differentiable`` is false at activation/clipping boundaries; the
+        shared law's documented inactive branch is selected at those kinks.
+        """
+        result = self._contact_differentiator.evaluate(
+            self.configuration(coordinates),
+            self._velocity_vector(rates),
+            self.ground,
+            self.contact_parameters,
+        )
+        names = tuple(coordinates)
+        indices = [self._velocity_indices[name] for name in names]
+        return NativeContactEffortDerivatives(
+            names,
+            self._ordered_derivative(result.dq, indices),
+            self._ordered_derivative(result.dv, indices),
+            result.differentiable,
+        )
+
+    def acceleration_derivatives(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        primitive_efforts: Mapping[str, float],
+    ) -> NativeAccelerationDerivatives:
+        """Differentiate the actual contact-aware constrained acceleration.
+
+        Include both Jacobian and force state dependence in generalized
+        contact effort. At contact kinks these are selected branch partials,
+        not classical derivatives; query ``contact_effort_derivatives`` for
+        branch validity. The return layout preserves the native API.
+        """
+        base = super().acceleration_derivatives(coordinates, rates, primitive_efforts)
+        contact = self.contact_effort_derivatives(coordinates, rates)
+        dq = base.dq + base.deffort @ contact.dq
+        dv = base.dv + base.deffort @ contact.dv
+        for matrix in (dq, dv):
+            if not np.isfinite(matrix).all():
+                raise ValueError("Full-body acceleration derivatives must be finite")
+            matrix.setflags(write=False)
+        return NativeAccelerationDerivatives(base.names, dq, dv, base.deffort)
 
     def accelerations(
         self,
