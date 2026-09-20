@@ -201,14 +201,9 @@ def _wrap_external_widget(tool_name: str, import_func: Any) -> QMainWindow:
 
 
 def _import_video_analyzer() -> QWidget:
-    try:
-        from video_analyzer.launch_pyqt6 import VideoAnalyzerWidget  # type: ignore[import-untyped]
+    from video_analyzer.launch_pyqt6 import VideoAnalyzerWidget  # type: ignore[import-untyped]
 
-        return VideoAnalyzerWidget()
-    except ImportError:
-        from src.tools.video_analyzer.gui import VideoAnalyzerWindow
-
-        return VideoAnalyzerWindow()
+    return VideoAnalyzerWidget()
 
 
 def get_video_analyzer_dockable_ui() -> QMainWindow:
