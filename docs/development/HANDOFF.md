@@ -1,5 +1,27 @@
 # Current Matching Continuation Handoff
 
+## MS-107 Qualify Crocoddyl Full-Body Fit & Analytic Pelvis Yaw (#10381)
+
+- Branch: `feat/10381-crocoddyl-pelvis-yaw-g1`, DL-#10381.
+- Changes:
+  - `src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py`:
+    - Added non-negative `pelvis_yaw: float = 0.0` to `FitWeights` with contract validation.
+    - Added `waist_indices` property on `MarkerTargets` resolving `WaistLeft` and `WaistRight` marker indices or `(-1, -1)`.
+  - `src/engines/physics_engines/pinocchio/python/crocoddyl_action.py`:
+    - Integrated `compute_pelvis_yaw_residual_and_derivative` into `_NodeCost` (`__init__`, `value`, `gradient_hessian`).
+    - Evaluates 2-component unit vector difference residual $r_{yaw} = w_{yaw} \cdot (\hat{u} - \hat{u}_{tgt})$.
+    - Adds configuration gradient contribution $J_{yaw}^T r_{yaw}$ and Gauss-Newton Hessian contribution $J_{yaw}^T J_{yaw}$.
+    - Passed waist indices from `targets.waist_indices` into `ImplicitEulerAction` and `TerminalAction`.
+  - `src/engines/physics_engines/pinocchio/python/full_body_fit.py`:
+    - Added `--pelvis-yaw-weight` CLI argument forwarding to `FitWeights`.
+    - Updated `cost_breakdown` to calculate and record `"pelvis_yaw"` in execution receipts.
+  - `tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py`:
+    - 4 unit tests verifying waist marker indexing, zero residual/gradient when aligned, central-difference gradient match, positive semi-definite Gauss-Newton Hessian, and no-op behavior when weight is zero or markers missing.
+  - `SPEC.md` & `docs/development/DEVELOPMENT_LOG.md`:
+    - Synchronized specification and active development log entry.
+- Reproduction: `python -m pytest tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py tests/unit/motion_matching/test_crocoddyl_action.py tests/unit/motion_matching/test_crocoddyl_problem.py -v`.
+- Next: Open PR with auto-merge, verify CI.
+
 ## ORG-22 Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows (#10530)
 
 - Branch: `feat/issue-10530-org22-research-lifecycle`, lease `antigravity-ud-10530`, DL-#10530.

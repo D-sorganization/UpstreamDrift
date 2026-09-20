@@ -1,3 +1,21 @@
+## Analytic Pelvis-Yaw Orientation Cost for Crocoddyl Solver (MS-107, #10381)
+
+Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver on the Pinocchio plant:
+- **Pelvis-Yaw Formulations & Contract Enforcement (`src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py`)**:
+  - `FitWeights`: Added validated non-negative weight `pelvis_yaw: float = 0.0`.
+  - `MarkerTargets`: Added `waist_indices` resolving indices of `WaistLeft` and `WaistRight` markers, or `(-1, -1)` if absent.
+- **Node Cost & Dynamics Integration (`src/engines/physics_engines/pinocchio/python/crocoddyl_action.py`)**:
+  - `_NodeCost`: Evaluates 2-component unit vector difference residual $r_{yaw} = w_{yaw} \cdot (\hat{u} - \hat{u}_{tgt})$ via `compute_pelvis_yaw_residual_and_derivative`.
+  - Cost value adds $0.5 \cdot \|r_{yaw}\|^2$.
+  - Analytic gradient contributes $J_{yaw}^T r_{yaw}$ to configuration gradient $L_x[:n]$.
+  - Gauss-Newton Hessian contributes $J_{yaw}^T J_{yaw}$ to configuration Hessian $L_{xx}[:n, :n]$.
+  - Wired waist indices through `ImplicitEulerAction` and `TerminalAction`.
+- **Receipt & CLI Parameterization (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - Added CLI argument `--pelvis-yaw-weight` forwarded to `FitWeights`.
+  - Updated `cost_breakdown` to compute and report `"pelvis_yaw"` per-term cost in execution receipts.
+- **Verification (`tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py`)**:
+  - Unit tests verify zero residual and gradient when aligned, central-difference gradient match, positive semi-definite Gauss-Newton Hessian, and no-op behavior when inactive (`pelvis_yaw = 0.0`) or waist markers are absent.
+
 ## Unified Cross-Engine Parity Report (MS-70, #10350)
 
 Generates unified cross-engine parity evaluation comparing motion-matching candidate trajectories across all available physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite):
