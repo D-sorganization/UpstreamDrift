@@ -31,6 +31,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** CI auto-merge into main.
 - **Evidence:** tests/integration/test_estimation_workspace.py.
 
+### DL-#10511 · Separate Capability Identity, Maturity, Availability, and Qualification (ORG-02)
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10511 (ORG-02, epic #10508)
+- **Branch:** feat/issue-10511-org02-capability-state-contract
+- **PR:** #10535
+- **Paths:** src/config/capability_state.py; src/config/launcher_manifest_loader.py; src/config/models.yaml; tests/config/launcher_manifest/test_capability_state_contract.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-20 at HEAD (All 12 capability state contract regression tests pass; all 99 launcher_manifest tests pass; 7 launcher registry parity tests pass; ruff check clean; ruff format clean; black clean; mypy clean; SPEC.md updated).
+- **Summary:** Disentangled overloaded capability status into four orthogonal typed dimensions: capability identity, lifecycle maturity (prototype/experimental/stable/deprecated), per-surface availability (desktop, web, api, cli) with actionable reason and remediation when unavailable, and evidence-backed qualification conforming to #10351 engine matrix contract (exempt for non-engine tools). Enforced invariant that installed engines without a qualified receipt never serialize as release-ready. Resolved Simscape/Matlab Models and Simulator/Golf Simulation Suite display names from a single canonical authority across native registry and web manifest views. Added lazy probing cache keyed on runtime identity without synchronous engine imports. Preserved backward-compatible legacy status field for API consumers.
+- **Next step:** Pass CI, auto-merge into main, release lease on #10511.
+- **Evidence:** tests/config/launcher_manifest/test_capability_state_contract.py; src/config/capability_state.py; src/config/launcher_manifest_loader.py.
+
 ### DL-#10510 · Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity
 
 - **State:** in_progress
