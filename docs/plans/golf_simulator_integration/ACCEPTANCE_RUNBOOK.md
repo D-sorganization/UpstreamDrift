@@ -2,7 +2,7 @@
 
 ## Status and Scope
 
-This is a future acceptance procedure for [Epic #10188](https://github.com/D-sorganization/UpstreamDrift/issues/10188), not evidence that a connector exists or has passed validation. Execute implementation-dependent steps only after the relevant child issue supplies the named feature and test entry points. Record unavailable checks as **BLOCKED**, never as passed.
+This is the acceptance procedure for [Epic #10188](https://github.com/D-sorganization/UpstreamDrift/issues/10188) and child issue GS-09 ([#10198](https://github.com/D-sorganization/UpstreamDrift/issues/10198)). For the comprehensive topology support matrix, hardware prerequisites, capability boundaries, and disconnect recovery playbooks, see [SUPPORT_MATRIX.md](SUPPORT_MATRIX.md). The corresponding opt-in live qualification test suite is implemented in `tests/integration/golf_simulator/test_live_acceptance.py`. Execute implementation-dependent steps only after the relevant child issue supplies the named feature and test entry points. Record unavailable checks as **BLOCKED**, never as passed.
 
 The baseline experience shows the model swing in a companion view and sends a qualified shot to a licensed GSPro host for ball flight. Native model/avatar insertion into GSPro and automated course-state control remain research gates: no supported SDK for those capabilities has been established. A shot acknowledgment does not establish landing, scoring, readiness for the next shot, or completion of the displayed flight.
 

@@ -315,6 +315,47 @@ class SimulatorCapabilities:
     )
 
 
+class UnsupportedCapabilityError(Exception):
+    """Raised when an operation requires a capability that is unsupported or unverified."""
+
+    def __init__(
+        self,
+        capability_name: str,
+        state: CapabilityState,
+        evidence: str,
+        message: str | None = None,
+    ) -> None:
+        self.capability_name = capability_name
+        self.state = state
+        self.evidence = evidence
+        msg = message or f"Capability '{capability_name}' is {state.value}: {evidence}"
+        super().__init__(msg)
+
+
+def assert_capability_supported(
+    capabilities: SimulatorCapabilities,
+    capability_name: str,
+) -> CapabilityDescriptor:
+    """Assert that a specific simulator capability is SUPPORTED.
+
+    Raises:
+        AttributeError: If capability_name is not a recognized capability descriptor.
+        UnsupportedCapabilityError: If capability is UNSUPPORTED or UNVERIFIED.
+    """
+    if not hasattr(capabilities, capability_name):
+        raise AttributeError(
+            f"'{type(capabilities).__name__}' has no capability descriptor named '{capability_name}'"
+        )
+    descriptor: CapabilityDescriptor = getattr(capabilities, capability_name)
+    if descriptor.state != CapabilityState.SUPPORTED:
+        raise UnsupportedCapabilityError(
+            capability_name=capability_name,
+            state=descriptor.state,
+            evidence=descriptor.evidence,
+        )
+    return descriptor
+
+
 class ConnectionState(str, Enum):
     """Simulator connection state."""
 

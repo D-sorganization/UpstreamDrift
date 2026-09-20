@@ -11,17 +11,26 @@ from typing import Any, Literal
 from ._validation import (
     FRAME_SCHEMA_VERSION,
     SOURCE_SCHEMA_VERSION,
+    check_bool,
     check_id,
     check_int,
     check_payload_keys,
     check_pos_int,
     check_schema_version,
     check_sha256,
+    check_str,
     check_uri,
 )
 
 RightsStatus = Literal["unknown", "restricted", "permitted"]
 _VALID_RIGHTS_STATUSES = frozenset(("unknown", "restricted", "permitted"))
+_VALID_TIMING_MODES = frozenset(("authoritative", "container_pts", "estimated_cfr"))
+_FRAME_SCHEMA_VERSIONS = frozenset(
+    (
+        FRAME_SCHEMA_VERSION,
+        "shadow-tracker/frame/1.1.0",
+    )
+)
 _SOURCE_ASSET_KEYS = frozenset(
     (
         "schema_version",
@@ -35,6 +44,28 @@ _SOURCE_ASSET_KEYS = frozenset(
     )
 )
 _FRAME_IDENTITY_KEYS = frozenset(
+    (
+        "schema_version",
+        "asset_id",
+        "shot_id",
+        "swing_id",
+        "camera_id",
+        "frame_id",
+        "pts_ticks",
+        "timebase_numerator",
+        "timebase_denominator",
+        "physical_time_s",
+        "physical_time_reason",
+        "frame_sha256",
+        "timing_mode",
+        "is_timing_exact",
+        "clock_evidence",
+        "decoder_name",
+        "decoder_version",
+        "pixel_format",
+    )
+)
+_LEGACY_FRAME_IDENTITY_KEYS = frozenset(
     (
         "schema_version",
         "asset_id",
@@ -131,9 +162,22 @@ class FrameIdentity:
     physical_time_s: float | None
     physical_time_reason: str
     frame_sha256: str
+    timing_mode: str = "estimated_cfr"
+    is_timing_exact: bool = False
+    clock_evidence: str = "unverified_legacy_record"
+    decoder_name: str = "opencv"
+    decoder_version: str = "legacy"
+    pixel_format: str = "bgr24"
 
     def __post_init__(self) -> None:
-        check_schema_version(self.schema_version, FRAME_SCHEMA_VERSION)
+        if not isinstance(self.schema_version, str):
+            raise TypeError(
+                f"schema_version must be a str, got {type(self.schema_version).__name__}"
+            )
+        if self.schema_version not in _FRAME_SCHEMA_VERSIONS:
+            raise ValueError(
+                f"schema_version must be one of {sorted(_FRAME_SCHEMA_VERSIONS)}, got {self.schema_version!r}"
+            )
         check_id(self.asset_id, "asset_id")
         check_id(self.shot_id, "shot_id")
         check_id(self.swing_id, "swing_id")
@@ -175,6 +219,16 @@ class FrameIdentity:
                     f"physical_time_reason must be trimmed, got {self.physical_time_reason!r}"
                 )
         check_sha256(self.frame_sha256, "frame_sha256")
+        check_str(self.timing_mode, "timing_mode")
+        if self.timing_mode not in _VALID_TIMING_MODES:
+            raise ValueError(
+                f"timing_mode must be one of {sorted(_VALID_TIMING_MODES)}, got {self.timing_mode!r}"
+            )
+        check_bool(self.is_timing_exact, "is_timing_exact")
+        check_str(self.clock_evidence, "clock_evidence")
+        check_str(self.decoder_name, "decoder_name")
+        check_str(self.decoder_version, "decoder_version")
+        check_str(self.pixel_format, "pixel_format")
 
     @property
     def presentation_time(self) -> Fraction:
@@ -199,13 +253,45 @@ class FrameIdentity:
             "physical_time_s": self.physical_time_s,
             "physical_time_reason": self.physical_time_reason,
             "frame_sha256": self.frame_sha256,
+            "timing_mode": self.timing_mode,
+            "is_timing_exact": self.is_timing_exact,
+            "clock_evidence": self.clock_evidence,
+            "decoder_name": self.decoder_name,
+            "decoder_version": self.decoder_version,
+            "pixel_format": self.pixel_format,
         }
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> FrameIdentity:
         """Deserialize from dictionary, rejecting unknown fields."""
-        check_payload_keys(payload, _FRAME_IDENTITY_KEYS)
-        return cls(**payload)
+        if not isinstance(payload, dict):
+            raise TypeError(f"Payload must be a dict, got {type(payload).__name__}")
+        extra = set(payload.keys()) - _FRAME_IDENTITY_KEYS
+        if extra:
+            raise ValueError(f"Unknown fields rejected: {sorted(extra)}")
+        missing = _LEGACY_FRAME_IDENTITY_KEYS - set(payload.keys())
+        if missing:
+            raise ValueError(f"Missing required fields: {sorted(missing)}")
+        return cls(
+            schema_version=payload["schema_version"],
+            asset_id=payload["asset_id"],
+            shot_id=payload["shot_id"],
+            swing_id=payload["swing_id"],
+            camera_id=payload["camera_id"],
+            frame_id=payload["frame_id"],
+            pts_ticks=payload["pts_ticks"],
+            timebase_numerator=payload["timebase_numerator"],
+            timebase_denominator=payload["timebase_denominator"],
+            physical_time_s=payload["physical_time_s"],
+            physical_time_reason=payload["physical_time_reason"],
+            frame_sha256=payload["frame_sha256"],
+            timing_mode=payload.get("timing_mode", "estimated_cfr"),
+            is_timing_exact=payload.get("is_timing_exact", False),
+            clock_evidence=payload.get("clock_evidence", "unverified_legacy_record"),
+            decoder_name=payload.get("decoder_name", "opencv"),
+            decoder_version=payload.get("decoder_version", "legacy"),
+            pixel_format=payload.get("pixel_format", "bgr24"),
+        )
 
 
 def validate_frame_sequence(frames: Sequence[FrameIdentity]) -> None:
