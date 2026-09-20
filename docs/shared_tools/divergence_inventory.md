@@ -96,7 +96,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plotting` | 0 | 3 | 0 | 25 | 0 | 3 |
 | `pose_editor` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `pose_estimation` | 0 | 0 | 0 | 18 | 0 | 0 |
-| `pose_interchange` | 0 | 0 | 0 | 25 | 0 | 0 |
+| `pose_interchange` | 0 | 0 | 0 | 26 | 0 | 0 |
 | `programmatic_pid` | 0 | 0 | 0 | 0 | 24 | 0 |
 | `putting_dynamics` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -129,8 +129,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `workspace` | 0 | 0 | 0 | 12 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1352** | **709** | **702** |
+| `workspace` | 0 | 0 | 0 | 15 | 0 | 0 |
+| **Total** | **423** | **279** | **123** | **1356** | **709** | **702** |
 
 ## Diverged Files by Package
 
