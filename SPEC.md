@@ -251,6 +251,24 @@ Enforces the capability state contract across discovery, validation, and launche
   - Validates capability health check invariants, state transitions, and diagnostic message fidelity.
   - Ensures robust fallback behavior when optional dependencies are absent.
 
+## Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes (ORG-15, #10524)
+
+Composes Terrain, Putting, Scene, Bunker, and Simulator Delivery modes under a unified Shot & Course Lab coordinator:
+- **Shot & Course Lab Coordinator (`src/shared/python/workspace/shot_course_workspace.py`)**:
+  - `ShotCourseWorkspaceCoordinator`: Coordinates view and simulation mode transitions across `TERRAIN`, `PUTTING`, `SCENE`, `BUNKER`, and `SIMULATOR`.
+  - Enforces explicit model assumptions and boundaries:
+    1. Scene view is for visual inspection only, is not physics, and fails closed with `SceneNonPhysicsError` when asked for computed shots.
+    2. Bunker runs preserve multi-fidelity tiers (`BunkerFidelityTier`: `F0_RIGID_SURROGATE`, `F1_RESISTANCE_FORCE`, `F2_COUPLED_CONTINUUM`, `F3_DISCRETE_ELEMENT`) and physical domain parameters on export/import round-trips.
+    3. Putting runs adhere strictly to rolling/ground contracts and USGA Stimp / rolling models.
+    4. Environment/terrain mutation creates an explicit new run/config revision and invalidates dependent runs (`TerrainMutationInvalidationError`) rather than silently changing historical results.
+    5. Simulator delivery checks declared capability descriptors (`CapabilityState.SUPPORTED`), requires destination evidence receipts (`SubmissionReceipt`), and fails closed with `UnsupportedSimulatorDestinationError` for unsupported destinations.
+- **Automated Verification & Integrity Gates (`tests/integration/test_shot_course_workspace.py`)**:
+  - Validates rejection of incompatible flight-to-ground records without 3D landing coordinates.
+  - Validates terrain edit invalidation of dependent runs.
+  - Validates scene-only view cannot report computed shots.
+  - Validates unsupported simulator destination is disabled.
+  - Validates putting fixture save/reopen, bunker fidelity export round-trip, and simulator network failure and cancellation flows.
+
 ## Baseline Capability Inventory and Preserve Entity Identity (ORG-01, #10510)
 
 Establishes the capability inventory baseline across all 104 launcher tiles and model definitions, enforcing immutable entity identity preservation across catalog discovery and migration:
@@ -263,6 +281,29 @@ Establishes the capability inventory baseline across all 104 launcher tiles and 
 - **Automated Verification & Integrity Gates (`tests/config/test_capability_migration_coverage.py`)**:
   - Validates 100% tile coverage across local and external provider roots (`UPSTREAM_DRIFT_PROVIDER_ROOTS`).
   - Strict regression gates ensuring legacy layouts and saved workspace configurations resolve without breakage.
+
+## Connect Swing, Impact, Flight, and Preserved Trajectory Viewers (ORG-14, #10523)
+
+Preserves specialized viewer identities and bridges Swing State Providers, Impact Solvers, and Ball Flight Trajectories across Shot Tracer (Qt), web BallFlight (`ui/src/pages/BallFlight.tsx`), and Impact Explorer (ROC):
+- **Shot Trajectory Handoff Coordinator (`src/shared/python/workspace/trajectory_handoff.py`)**:
+  - `ShotTrajectoryHandoffCoordinator`: Orchestrates swing-state extraction, end-to-end impact/flight simulation, wire format export, artifact registration, viewer interchange, and session rollback semantics.
+  - Implements ADR-0047: Preserves viewer identities across Shot Tracer (Qt), web BallFlight, and Impact Explorer without retiring viewers or merging distinct flight model families (`ud.flight_models` vs `swing_sim.flight`).
+- **Wire Contract & SI Trajectory Interchange (`swing_sim.ball_flight_trajectory/1`)**:
+  - Standardizes trajectory wire format with 6 canonical keys: `format`, `source_id`, `frame_id`, `channels`, `provenance`, and `samples`.
+  - Canonical flight frame: `flight_xfwd_yleft_zup` (`FLIGHT_FRAME_ID`), velocity channel `velocity_mps`, with parameter digest provenance.
+  - Retains immutable sample positions and timestamps across interchange; disk bytes and retained arrays are never mutated.
+  - `pipeline_result_to_trajectory_record` (`src/shared/python/physics/flight_trajectory_export.py`): Bridges `PipelineResult` from `SwingBallFlightPipeline` into the canonical wire contract.
+- **Honest Engine Sourcing & Extraction Refusal**:
+  - Integrates honest swing state sourcing: routes supported `manual` and `mujoco` (via `MuJoCoSwingStateProvider`) engines to `SwingBallFlightPipeline`.
+  - Refuses unsupported engine sourcing (`drake`, `pinocchio`) fail-closed with `UnsupportedEngineSourceError`.
+  - Refuses arbitrary unvalidated full-body runs fail-closed with `ExtractionAdapterError`, prohibiting clubhead impact guessing.
+  - Refuses mismatched frames and corrupted hashes fail-closed with `FrameUnitMismatchError` and `InvalidTrajectoryHashError`.
+- **Results Workspace Action Extension (`src/shared/python/workspace/results_workspace.py`)**:
+  - Adds `WorkspaceActionType.COMPARE_FLIGHT_MODELS` (`"open_in_compare_flight_models"`) and `WorkspaceActionType.OPEN_IN_IMPACT_EXPLORER` (`"open_in_impact_explorer"`).
+  - Diagnostic availability: Enables comparison and playback actions when artifacts match required categories (`ResultCategory.FLIGHT_TRAJECTORY` / `DYNAMIC_RUN`) and files exist on disk, providing actionable rationale when disabled.
+- **Session Context & Transaction Rollback**:
+  - Carries environmental conditions (`EnvironmentalConditions`) and launch parameters across active session context.
+  - Supports atomic staging and rollback (`begin_session_transaction`, `stage_tentative_trajectory`, `cancel_session_transaction`): user cancellation or simulation failure safely retains earlier active trajectory.
 
 ## Results Workspace Handoff and Action Integration (ORG-13, #10521)
 
