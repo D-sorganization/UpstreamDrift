@@ -31,6 +31,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
+### DL-#10431 · Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10431 (PF-01)
+- **Branch:** feat/issue-10431-pf01-fast-matching-evidence-schemas-fixtures
+- **PR:** #10495
+- **Paths:** src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/candidate.py; src/shared/python/motion_matching/candidate_convert.py; src/shared/python/motion_matching/candidate_io.py; src/shared/python/motion_matching/contact_force_allocator.py; src/shared/python/motion_matching/swing_evaluator.py; tests/unit/motion_matching/test_acceptance.py; tests/unit/motion_matching/test_candidate.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_swing_evaluator.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (46 unit tests pass across test_candidate, test_contact_force_allocator, test_swing_evaluator, test_acceptance; ruff clean, black clean).
+- **Summary:** Preserved existing rejected driver/iron fast-matching receipts and candidate artifacts. Extended MatchedSwingCandidate schema, auxiliary blocks (root_forces, contact_modes, grip_wrench), metadata (solver_status, handedness, name_maps), and NPZ converter. Truthfully renamed AllocationObjective.MINIMUM_TRAIL_ARM with backwards-compatible 'trail_zero' parsing, added HARD_ZERO_TRAIL mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios. Updated SwingEvaluator to avoid fabricating impact phases without declared t_events, audit closure translation and rotation separately, and return NaN RMSE for empty marker populations. Added 7 negative acceptance fixtures in test_acceptance covering friction cone violation, torque bound overwrite, missing root histories, coordinate mismatch (44 vs 41), missing club coverage, truncated horizon, and synthetic engine false qualification.
+- **Next step:** PR #10495 created and awaiting CI checks.
+- **Evidence:** tests/unit/motion_matching/test_candidate.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_swing_evaluator.py; tests/unit/motion_matching/test_acceptance.py.
+
 ### DL-#10350 · Unified Cross-Engine Parity Report
 
 - **State:** in_progress
