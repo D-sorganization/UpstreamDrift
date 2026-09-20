@@ -845,7 +845,7 @@
     },
     {
       "id": "matlab_suite",
-      "title": "Matlab Models",
+      "title": "Simscape",
       "description": "MATLAB / Simscape models, dataset generators, and tooling",
       "path": "src/config/models.yaml",
       "launch_target": "virtual/matlab_suite",
@@ -859,7 +859,7 @@
     },
     {
       "id": "golf_simulation_suite",
-      "title": "Golf Simulation Suite",
+      "title": "Simulator",
       "description": "Complete golf simulation with ball flight physics and putting green",
       "path": "src/tools/golf_simulation_suite/__main__.py",
       "launch_target": "src/tools/golf_simulation_suite/__main__.py",
@@ -2835,7 +2835,7 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "c591debd02eef18d2355ddef3c930e463b1b1d20a08c5873555de803888696ba",
+    "src/config/models.yaml": "5b6e64d27399807b6f2daf738fd2583c07f9ed05e0777a887624c260a3cd8b79",
     "src/config/launcher_manifest.json": "8ed95d534d6ba9e35d528837da43346bac32588f9766018d8c99c89a17099aa2",
     "src/config/feature_parity.json": "d6667fb93d20e1240791d601252e2ca6ffd85bb7a2eba4deec26edc4075f8eba",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",

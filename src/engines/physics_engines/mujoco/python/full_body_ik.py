@@ -7,6 +7,7 @@ least-squares inverse kinematics, and marker kinematics with ground support.
 from __future__ import annotations
 
 import json
+import math
 from collections.abc import Mapping, Sequence
 from typing import Any, TypeAlias
 
@@ -447,4 +448,6 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         )
         offset = self.data.subtree_com[1] - centres
         offset = offset - (offset @ n) * n
-        return float(np.linalg.norm(offset))
+        return math.sqrt(
+            np.vdot(offset, offset)
+        )  # ⚡ Bolt: math.sqrt(np.vdot) avoids np.linalg.norm overhead

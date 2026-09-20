@@ -74,7 +74,7 @@ models:
       default_launch: "tab"
 
   - id: "matlab_suite"
-    name: "Matlab Models"
+    name: "Simscape"
     description: "MATLAB / Simscape models, dataset generators, and tooling"
     type: "matlab_suite"
     path: "virtual/matlab_suite"
@@ -89,7 +89,7 @@ models:
   # =============================================================================
 
   - id: "golf_simulation_suite"
-    name: "Golf Simulation Suite"
+    name: "Simulator"
     description: "Complete golf simulation with ball flight physics and putting green"
     type: "golf_simulation"
     path: "src/tools/golf_simulation_suite/__main__.py"
