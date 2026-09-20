@@ -1,3 +1,58 @@
+## Replace Synthetic Force Adapters With Native Model-Conformant Bridges (PF-09, #10439)
+
+Replaces synthetic force adapters with native model-conformant bridges:
+- **Engine Force Adapter Architecture (`src/shared/python/motion_matching/multi_engine_torque_allocator.py`)**:
+  - Quarantines `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`.
+  - Enforces fail-closed `RuntimeError` in `create_engine_force_adapter` for unbridged native engines (Drake, OpenSim, Simscape) in production mode.
+  - Extends `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`.
+  - Corrects `MujocoForceAdapter` to compute raw unconstrained dynamics \(M a + \text{bias}\) eliminating `qfrc_inverse` passive/constraint force double counting.
+- **Pinocchio Native Bridge (`src/engines/physics_engines/pinocchio/python/force_adapter.py`, `native_model.py`)**:
+  - Implements `PinocchioForceAdapter` implementing shared protocol with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`).
+- **CLI & Quarantine Governance (`scripts/allocate_swing_torques.py`)**:
+  - Adds Pinocchio engine option and enforces `--allow-synthetic` gate flag.
+- **Verification Suite (`tests/unit/motion_matching/test_force_bridges_pf09.py`, `test_native_force_equations.py`, `test_multi_engine_torque_allocator.py`)**:
+  - 17 unit test fixtures validating quarantine enforcement, protocol conformance, CLI synthetic gate, and MuJoCo raw equation checks.
+
+## Reconcile, Audit, and Freeze Feature Preservation Across Historical Boundaries (ORG-24, #10533)
+
+Reconciles, audits, and freezes feature preservation across historical boundaries to guarantee no silent loss or broken historical interfaces across the UpstreamDrift workspace:
+- **Comprehensive Audit Engine (`src/shared/python/workspace/feature_preservation_audit.py`)**:
+  - `AuditStatus` and `AuditFailureError`: Typed pass/failed/warning status outcomes and fail-closed integrity assertion exceptions.
+  - `AuditCounts`: Immutable metric encapsulation capturing total capabilities, active capabilities, deprecated aliases, planned capabilities, headless tools, exempt capabilities, and verified golden fixtures while strictly conforming to the 8-parameter architectural budget limit.
+  - `AuditSectionResult` & `AuditReport`: Detailed structured section reports and full disposition records generating formatted JSON and Markdown summaries.
+  - `run_feature_preservation_audit`: Comprehensive evaluation running all 6 core audit sections:
+    - Baseline capability reconciliation against `src/config/capability_migration.json` ensuring 100% accounting of all historical capabilities.
+    - Deprecated alias acyclic and transitive path resolution verifying reachable canonical targets.
+    - Golden fixture byte-exact SHA-256 and byte-length integrity verification.
+    - Five core workspace task journey contracts across simulation, analysis, capture, putting, and training surfaces.
+    - External runtime dependency and engine qualification isolation checks preventing silent unhandled host crashes.
+    - Immutable disposition artifact generation and publication for Epic #10508 closeout.
+- **Verification & Evidence Suite (`tests/integration/test_feature_preservation_audit.py`)**:
+  - Comprehensive unit test coverage validating audit metrics, parameter budgets, schema conformance, golden fixture checks, and error handling.
+
+## Unified Cross-Engine Parity Report (MS-70, #10350)
+
+Generates unified cross-engine parity evaluation comparing motion-matching candidate trajectories across all available physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite):
+- **Parity Schema & Comparison Classes (`src/shared/python/motion_matching/parity_schema.py`)**:
+  - `ComparisonClass`: Defines three explicit comparison tiers:
+    - `same_model_numerical`: Identical kinematic tree and dynamics model across engines.
+    - `native_model_observable`: Distinct engine-native coordinate definitions and segment representations, comparing observable task-space markers.
+    - `experimental_accuracy`: Comparison against optical capture ground truth.
+  - `PointwiseDifference`: Pointwise max error, RMS error, p95 error, relative percent error, and unit.
+  - `EngineParityRow`: Per-engine execution metrics including verification status (`verified`, `unverified`, `unavailable`), comparison class, pointwise trajectory difference, pointwise joint torque difference, total mechanical work in Joules, contact force agreement, and wall-clock execution time.
+  - `UnifiedParityReport`: Machine-readable JSON artifact and human-readable Markdown table generator summarizing multi-engine parity.
+- **Pointwise Comparison & Evaluation Engine (`src/shared/python/motion_matching/parity_report.py`)**:
+  - `evaluate_pointwise_trajectory_parity`: Computes pointwise Euclidean distance per marker and frame over time; aggregate-only matchers cannot mask pointwise trajectory deviations.
+  - `evaluate_pointwise_torque_parity`: Computes pointwise torque discrepancies with a 1.0 N·m absolute noise floor on relative percentage differences.
+  - `build_parity_report`: Runs candidates through native models and plant simulation, stamping unverified coordinate mismatches or missing platform SDKs with explicit diagnostic reasons.
+  - `run_parity_report_cli`: CLI command for batch report generation.
+- **Cross-Engine Replay & Leaderboard Integration**:
+  - `CrossEngineReplay.to_parity_report`: Produces a `UnifiedParityReport` from recorded multi-engine replays.
+  - `leaderboard.rows_from_parity_report` and `sync_leaderboard_from_parity_report`: Ingests parity rows into the matched swing leaderboard with `total_work_J` and `wall_clock_s`.
+- **Evidence & Parity Specification Sync**:
+  - `src/engines/CROSS_ENGINE_PARITY_SPEC.md`: Section 3 updated with generated Markdown parity comparison matrix.
+  - `evidence/matched/driver_g1/parity_report.json` and `evidence/matched/driver_g1/parity_report.md`: Committed multi-engine parity evidence.
+
 ## Unified Motion-Matching Abstraction Stack and Provider Delegation (MS-12, #10331)
 
 Adopts and documents the single motion-matching abstraction stack (`MatchingPlant` + receipts), resolves engine provider delegation contracts, retires legacy duplicate CIR IK and matching solvers with actionable ADR-0051 diagnostic errors, and bridges CIR `SkeletonRig`/`JointTrajectory` with `CanonicalPose`:
