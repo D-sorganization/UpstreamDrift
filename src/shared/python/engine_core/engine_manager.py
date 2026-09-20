@@ -335,44 +335,14 @@ class EngineManager(ContractChecker):
                 ),
             )
 
-    def _close_active_engine(self) -> None:
-        """Close and discard the active physics engine if one exists."""
-        active_engine = self.active_physics_engine
-        if active_engine is not None:
-            close = getattr(active_engine, "close", None)
-            if callable(close):
-                try:
-                    close()
-                    logger.info("active_engine_shutdown status=success")
-                except (RuntimeError, OSError) as e:
-                    logger.warning(
-                        "active_engine_shutdown_failed error=%s", e, exc_info=True
-                    )
-            self.active_physics_engine = None
-
     def _load_engine(self, engine_type: EngineType) -> None:
         """Load a specific engine."""
         if engine_type is None:
             raise ValueError("engine_type must be provided")
-
-        if (
-            self.current_engine == engine_type
-            and self.active_physics_engine is not None
-        ):
-            logger.info(
-                "engine_already_loaded engine=%s status=loaded",
-                engine_type.value,
-            )
-            self.engine_status[engine_type] = EngineStatus.LOADED
-            return
-
         logger.info("engine_loading_started engine=%s", engine_type.value)
         self._ensure_runtime_importable(engine_type)
         self.engine_status[engine_type] = EngineStatus.LOADING
-
-        # Close outgoing engine on a genuine switch or reload (#8935)
-        self._close_active_engine()
-        self.current_engine = None
+        self.active_physics_engine = None
 
         try:
             registry = get_registry()
@@ -382,7 +352,6 @@ class EngineManager(ContractChecker):
 
             engine = registration.factory()
             self.active_physics_engine = engine
-            self.current_engine = engine_type
 
             self.engine_status[engine_type] = EngineStatus.LOADED
             logger.info(
@@ -392,11 +361,9 @@ class EngineManager(ContractChecker):
 
         except GolfModelingError:
             self.engine_status[engine_type] = EngineStatus.ERROR
-            self.current_engine = None
             raise
         except (ImportError, OSError, RuntimeError, ValueError, TypeError) as e:
             self.engine_status[engine_type] = EngineStatus.ERROR
-            self.current_engine = None
             logger.error(
                 "engine_load_failed engine=%s error=%s",
                 engine_type.value,
@@ -407,7 +374,18 @@ class EngineManager(ContractChecker):
 
     def cleanup(self) -> None:
         """Clean up loaded engines."""
-        self._close_active_engine()
+        active_engine = self.active_physics_engine
+        close = getattr(active_engine, "close", None)
+        if callable(close):
+            try:
+                close()
+                logger.info("active_engine_shutdown status=success")
+            except (RuntimeError, OSError) as e:
+                logger.warning(
+                    "active_engine_shutdown_failed error=%s", e, exc_info=True
+                )
+
+        self.active_physics_engine = None
         self.current_engine = None
         logger.info("engine_cleanup_complete")
 
