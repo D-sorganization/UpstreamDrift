@@ -2839,6 +2839,6 @@
     "src/config/launcher_manifest.json": "8042791309478513d7cc0c9670568866befbc49486ada446ebb1adda36cfe18b",
     "src/config/feature_parity.json": "b0b2f34477e7556aa3ba1dd25316bc047902bb3fd3258938225bece7195efaad",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-    "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
+    "src/tools/capture_rig/workflow.py": "8a3887642deddf09c8fae39a6ee88bceb95241b4b19e91b4fd37c638a5398882"
   }
 }
