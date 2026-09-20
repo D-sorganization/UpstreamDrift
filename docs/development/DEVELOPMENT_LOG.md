@@ -44,6 +44,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Push branch, open PR with auto-merge, update issue.
 - **Evidence:** tests/integration/test_installed_provider_authority.py.
 
+### DL-#10519 · Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10519 (ORG-10, epic #10508)
+- **Branch:** feat/issue-10519-org10-capture-inspection-handoff
+- **PR:** #10545
+- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/capture_inspection_handoff.py; src/tools/capture_rig/gui.py; src/tools/capture_rig/journey_actions.py; tests/integration/test_capture_target_handoff.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (32 tests pass across workspace unit suite and integration test_capture_target_handoff.py; ruff check and format clean; mypy pre-push clean; file size budget clean).
+- **Summary:** Implemented `CaptureInspectionHandoff` and `FreeMoCapJobAdapter` bridging Capture Rig to Inspect Targets and Model Calibration. Enforced that trim, crop, and time offsets survive handoffs with explicit clock calculations; maintained MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, and source pixels; provided FreeMoCap CLI input/output validation before process spawn and cancellation leaving sources untouched with preserved HMR2/AGPL license isolation; opened C3D and optical imports keeping missing samples masked (NaN) and rejecting incompatible units and frames; rejected pretending 2-D coordinates are metric 3-D; and registered targets into `SessionProjectStore` automatically preserving annotations, calibration, and club metadata. Added "Open in Inspect Targets" action to Capture Rig GUI and JourneyActions.
+- **Next step:** Push branch, open PR, enable auto-merge, release lease on #10519, and notify parent orchestrator.
+- **Evidence:** tests/integration/test_capture_target_handoff.py; tests/tools/capture_rig/test_workflow.py; tests/unit/workspace/test_workflow_transitions.py.
+
 ### DL-#10518 · Guided Workflow Transitions Across Unified Workspaces
 
 - **State:** in_progress
