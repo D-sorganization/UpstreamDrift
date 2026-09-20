@@ -41,6 +41,40 @@ Implements a dual-pane PyQt6 embeddable tool and lineage model (`src/tools/match
 
 ## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
 
+Consumes provider ownership decisions and enforces immutable runtime import authority and provenance verification across repository, installed, and packaged execution environments:
+- **Provider Authority & Provenance Verification (`src/shared/python/config/tools_vendor_authority.py`)**:
+  - `assert_runtime_provenance_parity(pytest_root, packaged_app_root)`: Asserts that pytest (repository test runtime) and packaged application environments resolve identical implementation roots, failing closed with `ProviderUnavailableError` upon divergence.
+  - `verify_provider_provenance(canonical_root, candidate_path)`: Asserts that candidate modules or paths resolve strictly within the declared canonical provider root, preventing silent escapes to unpinned local forks.
+  - `inspect_provider_authority(repo_root, ...)`: Unified fail-closed authority inspection covering pinned gitlink checkouts, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback.
+- **Fail-Closed Mismatch Gating**:
+  - Pin mismatches explicitly report `Tools pin stale (expected X, found Y)` and produce blocked status (`provider_unavailable`) with remediation instructions.
+  - Missing provider checkouts and missing wheel distributions fail closed with actionable errors, refusing unpinned local fork or sibling fallbacks.
+  - Underlying provider import failures surface clean diagnostic blocked states rather than unhandled host crashes.
+- **Canonical Seam Delegation & Backward Compatibility**:
+  - Sidekick public seams (`EmbeddableTool` adapter, chat history service) resolve through authoritative Tools provider.
+  - Movement Optimizer public seams delegate through `tools_movement_optimizer` via `ALIAS_MAP`, registered in the `optimize_train` workspace.
+  - Pendulum public seams (`swing_objective_lab` adapter, `pendulum_simulator` tile) run through intended provider authority.
+  - Legacy supported imports (`upstream_drift_tools`) delegate cleanly to canonical providers with formal deprecation warnings.
+
+## Engine Capability Matrix, Dynamic Tile Status Derivation, and Non-Blocking Runtime Discovery (MS-71, #10351)
+
+Establishes a single source of truth for physics engine capabilities, qualifications, and tile status across Python and TypeScript surfaces:
+- **Dynamic Capability Matrix Generation (`scripts/generate_engine_matrix.py`, `src/config/engine_capability_matrix.json`)**:
+  - `generate_engine_capability_matrix()`: Scans active physics engines and reconciles capability ledgers (`engine_capabilities.py`), tier declarations (`TIER`), and verification receipts across all 16 standardized capability dimensions (contacts, muscle actuation, ground reaction forces, differentiability, inverse dynamics, closed loops, fluid coupling, etc.).
+  - Distinguishes qualified engines (`advertised_and_qualified`), verified gaps (`advertised_but_unqualified`), and unadvertised features. Reconciles experimental engines (e.g. JaxSim experimental tier) and aliases (e.g. MyoSim/MuJoCo).
+  - CLI supports `--write` for deterministic matrix generation and `--check` for CI freshness validation.
+- **Dynamic Engine Status Derivation & Tile Readiness (`src/config/launcher_manifest_loader.py`, `src/launchers/model_card.py`, `src/config/capability_state.py`)**:
+  - Manifest loader queries the capability matrix and runtime availability: tiles transition to `ready` only when the underlying engine is both installed and qualified (`advertised_and_qualified`), rendering `experimental` or `runtime_unavailable` otherwise.
+  - PyQt model cards (`ModelCard`) render dynamic capability chips and status indicators honoring qualified receipts without optimistic fallback.
+  - Non-blocking engine discovery cache (`src/config/engine_probe_cache.py`, `#8938`) caches discovered engine statuses asynchronously on disk (`~/.upstream_drift/engine_probe.json`) with thread-safe atomic writes to eliminate GUI startup pauses.
+- **Dynamic Matrix API Endpoints (`src/api/routes/capabilities.py`, `src/api/routes/launcher.py`)**:
+  - `GET /engines/matrix`: Public API endpoint exposing the authoritative capability matrix to frontend clients.
+  - `GET /engines/capabilities`: Dynamically populated from `engine_capability_matrix.json`, replacing hardcoded mock profiles and enforcing parity between REST APIs and backend ledgers.
+- **Frontend Capability Chips (`ui/src/components/simulation/LauncherDashboard.tsx`)**:
+  - React/Tauri launcher dashboard styles capability badges and status chips (`ready`, `experimental`, `runtime_unavailable`) consistent with system design tokens.
+
+## Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (ORG-07, #10514)
+
 Projects 28 multi-provider exercise variants into 7 cohesive logical model choices while preserving underlying provider assets and enforcing strict authority resolution:
 - **Logical Model Grouping & Projections (`src/shared/python/config/model_variant_grouping.py`)**:
   - `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection`: Projects 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices (`Gait Analysis`, `Squat Kinematics`, `Jump Land Mechanics`, `Run Sprint Cycle`, `Sit to Stand Transition`, `Stair Climb Descent`, `Single Leg Balance`).
@@ -249,6 +283,30 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
 - **Provenance Retention & Round-Trip Reimport (`export_result_with_provenance`, `reimport_result_artifact`)**:
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
+
+## Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (ORG-12, #10522)
+
+Coordinates subject, club, model selection, initial pose, fitting, and dynamics through session-bound typed handoff:
+- **Model Match Handoff Coordinator (`src/shared/python/workspace/model_match_handoff.py`)**:
+  - `ModelMatchHandoffCoordinator`: Orchestrates subject configuration, club parameters, model geometry selection, initial pose, kinematic fitting, and forward/inverse dynamics.
+  - Route Separation: Enforces strict separation between general-input motion pipelines and tour driver/7-iron matching routes based on provider/artifact capabilities; rejects sending arbitrary video targets to tour-only drivers.
+  - Distinct Execution Stages: Exposes Fit Kinematics and Run Dynamics as decoupled steps with explicit engine backends; kinematic output cannot masquerade as dynamic success.
+  - Diagnostics and Recovery: Provides failed-fit diagnostics, non-destructive job cancellation, and seamless reopen into the Results/Replay seam.
+  - Session Store Registration: Automatically binds subject snapshots, club definitions, model variations, and fit receipts to the active session.
+
+## Move Tour Matching Execution Out of Documentation Without Changing Results (ORG-11, #10520)
+
+Packages tour matching execution into reusable library code outside the documentation tree:
+- **Packaged Execution Modules (`src/shared/python/motion_matching/execution/`)**:
+  - `assets.py`: Reference asset resolution (`get_native_geometry_spec`, `get_opensim_model`, `get_candidate_geometry_spec`, `get_capture_c3d`, `resolve_output_root`) with environment variable overrides and clear actionable `FileNotFoundError` messages.
+  - `spec_builder.py`: Packaged candidate spec builder with self-contained OpenSim parsing, leg extension, and CLI entry point.
+  - `downswing.py`: Packaged downswing tracking experiment runner and CLI entry point.
+  - `mjx_export.py`: Packaged MuJoCo MJX exporter and CLI entry point.
+  - `driver.py`: Packaged ground support driver entry point delegating to `pipeline.cli`.
+- **Legacy Wrapper Compatibility (`docs/development/full_body_models/`)**:
+  - Deprecated wrappers issuing `DeprecationWarning` while delegating directly to packaged entry points, preserving CLI argument schemas and exit codes.
+- **Pipeline Integration (`src/tools/motion_matching/pipeline.py`)**:
+  - Direct delegation to packaged execution scripts writing outputs cleanly outside the documentation directory.
 
 ## Guided Workflow Transitions Across Unified Workspaces (ORG-09, #10518)
 
@@ -6218,6 +6276,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
+| 2026-09-19 | #10467 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10491 | Barrier-reduced same-integrator G1 continuation converged at 46.8 mm (rollout == replay) and is committed as rejected evidence; `--range-barrier-weight` CLI flag and raised trail-side effort bounds; ledger, README, turnover updated |
 | 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
 | 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |
