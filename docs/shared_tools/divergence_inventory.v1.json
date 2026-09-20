@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1340,
+    "ud-only": 1341,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -217,7 +217,7 @@
     "config": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 13,
+      "ud-only": 14,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -5997,9 +5997,9 @@
       "classification": "diverged",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 5267,
+      "ud_bytes": 5660,
       "tools_bytes": 269,
-      "byte_delta": 4998,
+      "byte_delta": 5391,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -6057,7 +6057,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 30335,
+      "ud_bytes": 30956,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6069,7 +6069,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 18816,
+      "ud_bytes": 18980,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6082,6 +6082,18 @@
       "package": "config",
       "subpackage": "",
       "ud_bytes": 35112,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "config/model_variant_grouping.py",
+      "classification": "ud-only",
+      "package": "config",
+      "subpackage": "",
+      "ud_bytes": 13390,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -35188,9 +35200,9 @@
     {
       "path": "config/__init__.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-09-19",
+        "commit": "861668dbb442f9066820c41e95f0a645daae3876"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -35201,9 +35213,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "codex-scheduled-tasks[bot]",
+        "date": "2026-05-26",
+        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -35292,9 +35304,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-29",
+        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36371,9 +36383,9 @@
     {
       "path": "realtime/__init__.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-27",
+        "commit": "667b3ba078b21c5873e5991a87af0aec005397b2"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36384,9 +36396,9 @@
     {
       "path": "realtime/transport_file.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-06-09",
+        "commit": "64bd5222b1a4dd4643a1e4da6c702b8146149cfd"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -36826,9 +36838,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-20",
+        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
       },
       "tools": {
         "author": "Dieter Olson",

@@ -904,40 +904,40 @@
     {
       "id": "mujoco_models_shared",
       "title": "MuJoCo Models",
-      "description": "MuJoCo simulation models repository folder (opens only when the MuJoCo_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "MuJoCo simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if MuJoCo_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "MuJoCo_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "drake_models_shared",
       "title": "Drake Models",
-      "description": "Drake simulation models repository folder (opens only when the Drake_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "Drake simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Drake_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "Drake_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "pinocchio_models_shared",
       "title": "Pinocchio Models",
-      "description": "Pinocchio simulation models repository folder (opens only when the Pinocchio_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "Pinocchio simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Pinocchio_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "Pinocchio_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "opensim_models_shared",
       "title": "OpenSim Models",
-      "description": "OpenSim simulation models repository folder (opens only when the OpenSim_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "OpenSim simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if OpenSim_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "OpenSim_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
@@ -1388,7 +1388,7 @@
     {
       "id": "biomech_gait",
       "title": "Gait Model",
-      "description": "Exercise preset that forwards the gait filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)",
+      "description": "Saved shortcut/preset forwarding gait filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -1398,7 +1398,7 @@
     {
       "id": "biomech_sit_to_stand",
       "title": "Sit-to-Stand Model",
-      "description": "Exercise preset that forwards the sit-to-stand filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)",
+      "description": "Saved shortcut/preset forwarding sit-to-stand filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -1408,7 +1408,7 @@
     {
       "id": "movement_optimizer",
       "title": "Movement Optimizer",
-      "description": "Cross-engine trajectory optimization (requires the Movement_Optimizer sibling checkout beside this repository; prefer the vendored tools_movement_optimizer tile — #9478)",
+      "description": "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "src/movement_optimizer/__main__.py",
       "category": "biomechanics",
@@ -1528,7 +1528,7 @@
     {
       "id": "drake_dashboard",
       "title": "Drake Dashboard",
-      "description": "Interactive Drake simulation dashboard",
+      "description": "Interactive Drake simulation dashboard (advanced mode of Drake engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/drake_dashboard.py",
       "launch_target": "src/launchers/drake_dashboard.py",
       "category": "physics_engine",
@@ -1544,7 +1544,7 @@
     {
       "id": "mujoco_dashboard",
       "title": "MuJoCo Dashboard",
-      "description": "Interactive MuJoCo simulation dashboard",
+      "description": "Interactive MuJoCo simulation dashboard (advanced mode of MuJoCo engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/mujoco_dashboard.py",
       "launch_target": "src/launchers/mujoco_dashboard.py",
       "category": "physics_engine",
@@ -1560,7 +1560,7 @@
     {
       "id": "pinocchio_dashboard",
       "title": "Pinocchio Dashboard",
-      "description": "Interactive Pinocchio simulation dashboard",
+      "description": "Interactive Pinocchio simulation dashboard (advanced mode of Pinocchio engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/pinocchio_dashboard.py",
       "launch_target": "src/launchers/pinocchio_dashboard.py",
       "category": "physics_engine",
@@ -2835,7 +2835,7 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "0aa05c85b24fb2f404cbb60133d33b1b00eba6c57cb6c6ab01f56740ebe796a5",
+    "src/config/models.yaml": "a8377f77c8d5b58afb92ccaa5d8a10951c9e26794aca3a95811c437832575100",
     "src/config/launcher_manifest.json": "8042791309478513d7cc0c9670568866befbc49486ada446ebb1adda36cfe18b",
     "src/config/feature_parity.json": "b0b2f34477e7556aa3ba1dd25316bc047902bb3fd3258938225bece7195efaad",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
