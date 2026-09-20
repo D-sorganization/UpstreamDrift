@@ -1,3 +1,18 @@
+# Current Matching Continuation Handoff
+
+## [ORG-09] Guided Workflow Transitions Across Unified Workspaces (#10518)
+
+- Worktree / Branch: `feat/issue-10518-org09-workflow-transitions`, lease `antigravity-ud-10518`, DL-#10518.
+- Changes:
+  - `src/shared/python/workspace/workflow_coordinator.py`: Added `WorkflowCoordinator`, `WorkflowStepId` (7-step canonical pipeline), `WorkflowMode`, `StepStatus`, `StepProjection`, and `WorkflowProjection`.
+  - Step transitions enforce cryptographic hash verification and disk existence, engine requirements (single-view vs 3-D physics), and strict contract distinction preventing dynamics from inheriting purely kinematic passes.
+  - Added cancellation, retry attempt tracking, and later-stage entry from imported artifacts (`entry_from_artifacts`).
+  - Added pure state projection with `.to_dict()` and `.get_step()` for Qt (`WorkflowStripWidget`) and React/Tauri (`WorkflowStrip.tsx`) parity.
+  - `src/shared/python/workspace/__init__.py`: Exported all workflow coordinator primitives.
+  - `tests/unit/workspace/test_workflow_transitions.py`: 8 comprehensive unit tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/unit/workspace/test_workflow_transitions.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10518, notify parent orchestrator.
+
 ## [ORG-08] Unified Artifact and Project Context Handoff Between Workspaces (#10517)
 
 - Worktree / Branch: `feat/issue-10517-org08-workspace-handoff`, lease `antigravity-ud-10517`, DL-#10517.

@@ -56,6 +56,14 @@ from .results_workspace import (
     UnitMismatchDiagnosticError,
     WorkspaceActionType,
 )
+from .workflow_coordinator import (
+    StepProjection,
+    StepStatus,
+    WorkflowCoordinator,
+    WorkflowMode,
+    WorkflowProjection,
+    WorkflowStepId,
+)
 
 __all__ = [
     "ActionAvailability",
@@ -95,9 +103,15 @@ __all__ = [
     "SUPPORTED_SCHEMAS",
     "SessionMetadata",
     "SessionProjectStore",
+    "StepProjection",
+    "StepStatus",
     "SubjectMetadata",
     "UnitMismatchDiagnosticError",
     "VALID_STATUSES",
+    "WorkflowCoordinator",
+    "WorkflowMode",
+    "WorkflowProjection",
+    "WorkflowStepId",
     "WorkspaceActionType",
     "WorkspaceHandoff",
     "compute_file_sha256",
