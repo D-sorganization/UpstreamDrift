@@ -9,6 +9,23 @@
 - Reproduction: `python -m pytest tests/unit/workspace/test_artifact_handoff.py tests/unit/workspace/test_project_store.py tests/unit/workspace/test_results_browser.py --timeout=60`.
 - Next: Open PR, arm auto-merge, release lease on #10517, notify parent orchestrator.
 
+## ORG-20 Consume Provider Ownership Decisions and Verify Runtime Import Authority (#10529)
+
+- Branch: `feat/issue-10529-org20-provider-ownership`, lease held by `local`, DL-#10529.
+- Changes:
+  - `src/shared/python/config/tools_vendor_authority.py`: Implemented `assert_runtime_provenance_parity` enforcing identical implementation roots between test (pytest) and packaged app runtime contexts with fail-closed `ProviderUnavailableError`. Implemented `verify_provider_provenance` asserting module paths resolve within canonical provider roots. Implemented `inspect_provider_authority` handling pinned gitlinks, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback.
+  - `tests/integration/test_installed_provider_authority.py`: 8 integration tests covering all RED and GREEN cases:
+    1. `test_pytest_and_packaged_app_resolving_different_roots_fail_provenance`: Divergent roots between pytest and packaged app fail provenance.
+    2. `test_wrong_pin_produces_blocked_state`: Pin mismatch returns available=False with stale pin message without falling back.
+    3. `test_missing_wheel_and_vendor_produces_blocked_state`: Missing gitlink and wheel produces blocked state.
+    4. `test_provider_import_failure_produces_blocked_state`: Provider probe failure surfaces blocked state.
+    5. `test_sidekick_public_seam_runs_through_intended_authority`: Sidekick adapter runs through intended Tools authority.
+    6. `test_movement_optimizer_public_seam_runs_through_intended_authority`: Movement Optimizer delegates to `tools_movement_optimizer`.
+    7. `test_pendulum_public_seam_runs_through_intended_authority`: Pendulum public seam delegates through intended Tools authority.
+    8. `test_old_supported_imports_delegate_correctly`: `upstream_drift_tools` cleanly delegates to `sidekick` with formal deprecation warning.
+- Reproduction: `pytest tests/integration/test_installed_provider_authority.py --timeout=60`.
+- Next: Push branch, open PR with auto-merge, update issue, release lease.
+
 ## ORG-07 Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (#10514)
 
 - Worktree / Branch: `feat/issue-10514-org07-model-variant-grouping`, lease `antigravity-ud-10514`, DL-#10514.

@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10529 · Consume Provider Ownership Decisions and Verify Runtime Import Authority
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10529 (ORG-20, epic #10508)
+- **Branch:** feat/issue-10529-org20-provider-ownership
+- **Paths:** src/shared/python/config/tools_vendor_authority.py; tests/integration/test_installed_provider_authority.py
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (8 integration tests pass in test_installed_provider_authority.py; 221 launcher/manifest tests pass with zero regressions; ruff check & format clean; file line budget passed).
+- **Summary:** Consumed provider ownership decisions and implemented runtime import authority and provenance verification across repository, installed, and packaged execution environments. Added `assert_runtime_provenance_parity` failing closed upon root divergence between pytest and packaged app contexts. Added `verify_provider_provenance` asserting module paths resolve within canonical provider roots. Implemented `inspect_provider_authority` handling pinned gitlinks, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback. Verified public seams for Sidekick, Movement Optimizer (`tools_movement_optimizer` via `ALIAS_MAP`), Pendulum (`swing_objective_lab`), and backward compatibility import delegation (`upstream_drift_tools` -> `sidekick`).
+- **Next step:** Push branch, open PR with auto-merge, update issue.
+- **Evidence:** tests/integration/test_installed_provider_authority.py.
+
 ### DL-#10517 · Unified Artifact and Project Context Handoff Between Workspaces
 
 - **State:** in_progress
@@ -33,16 +46,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10527 · Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10527 (ORG-18, epic #10508)
 - **Branch:** feat/issue-10527-org18-comparison-indicator-workspace
-- **PR:** #10568
+- **PR:** #10568 (merged)
 - **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/comparison_indicator_workspace.py; tests/integration/test_comparison_indicator_workspace.py
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (10 integration tests pass in test_comparison_indicator_workspace.py; 23 total workspace integration tests pass; ruff check & format clean; mypy 0 issues; LoD clean; file line budget 447 <= 500 LOC).
+- **Last verified:** 2026-09-20 at HEAD (10 integration tests pass in test_comparison_indicator_workspace.py; 23 total workspace integration tests pass; ruff check & format clean; mypy 0 issues; LoD clean; file line budget 447 <= 500 LOC; merged to main at 8e6cadb5c).
 - **Summary:** Implemented `ComparisonIndicatorWorkspaceCoordinator` surfacing `canonical_core_comparison` and `injury_analysis` capabilities across `results_and_compare` and `exercise_analysis` workspace shells. Provides fail-closed validation on physical units, coordinate frame identifiers, timebase sample interval alignment, channel names, and model fidelity invariance (`ModelFidelityLevel` enum rejecting cross-tier comparisons with `IncompatibleArtifactError`). Integrates `CrossEngineComparisonAdapter` delegating trace alignment to `compare_traces` with SHA-256 provenance hashes, and `InjuryIndicatorAdapter` requiring physical load channels (`peak_compression_bw`, `peak_lateral_shear_bw`, `x_factor_stretch`) normalized by body weight without mock fallbacks, stamping every output with non-clinical disclaimers.
-- **Next step:** Push branch, open PR with auto-merge, update issue.
+- **Next step:** Shipped.
 - **Evidence:** tests/integration/test_comparison_indicator_workspace.py.
 
 ### DL-#10515 · Build Task-Oriented Desktop Navigation Over Existing Embedded Tools
