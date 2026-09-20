@@ -204,6 +204,27 @@ class ModelBundle:
             for mesh_rel_path, mesh_bytes in self.mesh_assets.items():
                 zf.writestr(f"meshes/{mesh_rel_path}", mesh_bytes)
 
+    def extract_to(self, target_dir: Path | str) -> Path:
+        """Extract model.urdf and all mesh assets to target directory and return path to model.urdf."""
+        out_dir = Path(target_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        urdf_path = out_dir / "model.urdf"
+        urdf_path.write_text(self.urdf_xml, encoding="utf-8")
+        if self.sidecar is not None:
+            (out_dir / "sidecar.json").write_text(
+                json.dumps(self.sidecar, indent=2), encoding="utf-8"
+            )
+        if self.raw_spec:
+            (out_dir / "spec.json").write_bytes(self.raw_spec)
+        (out_dir / "manifest.json").write_text(
+            json.dumps(self.manifest.to_dict(), indent=2), encoding="utf-8"
+        )
+        for mesh_rel, mesh_bytes in self.mesh_assets.items():
+            mesh_path = out_dir / "meshes" / mesh_rel
+            mesh_path.parent.mkdir(parents=True, exist_ok=True)
+            mesh_path.write_bytes(mesh_bytes)
+        return urdf_path
+
 
 def _build_body_and_joint_primitives(
     spec: dict[str, Any], body_links: dict[str, str]
@@ -462,6 +483,24 @@ def export_model_bundle(
     return bundle
 
 
+def _assemble_and_validate_bundle(
+    manifest: ModelBundleManifest,
+    urdf_xml: str,
+    sidecar: dict[str, Any] | None,
+    raw_spec: bytes,
+    mesh_assets: dict[str, bytes],
+) -> ModelBundle:
+    bundle = ModelBundle(
+        manifest=manifest,
+        urdf_xml=urdf_xml,
+        sidecar=sidecar,
+        raw_spec=raw_spec,
+        mesh_assets=mesh_assets,
+    )
+    bundle.validate()
+    return bundle
+
+
 def load_model_bundle(archive_path: Path | str) -> ModelBundle:
     """Load and validate a ModelBundle from a zip archive or directory.
 
@@ -471,6 +510,35 @@ def load_model_bundle(archive_path: Path | str) -> ModelBundle:
     path = Path(archive_path)
     if not path.exists():
         raise FileNotFoundError(f"Model bundle path does not exist: {path}")
+
+    if path.is_dir():
+        manifest_path = path / "manifest.json"
+        urdf_path = path / "model.urdf"
+        if not manifest_path.exists() or not urdf_path.exists():
+            raise FileNotFoundError(
+                f"Model bundle directory missing manifest or urdf: {path}"
+            )
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest = ModelBundleManifest.from_dict(manifest_data)
+        urdf_xml = urdf_path.read_text(encoding="utf-8")
+        sidecar_path = path / "sidecar.json"
+        sidecar = (
+            json.loads(sidecar_path.read_text(encoding="utf-8"))
+            if sidecar_path.exists()
+            else None
+        )
+        spec_path = path / "spec.json"
+        raw_spec = spec_path.read_bytes() if spec_path.exists() else b""
+        mesh_assets: dict[str, bytes] = {}
+        meshes_dir = path / "meshes"
+        if meshes_dir.is_dir():
+            for f in meshes_dir.rglob("*"):
+                if f.is_file():
+                    rel = f.relative_to(meshes_dir).as_posix()
+                    mesh_assets[rel] = f.read_bytes()
+        return _assemble_and_validate_bundle(
+            manifest, urdf_xml, sidecar, raw_spec, mesh_assets
+        )
 
     if path.is_file():
         with zipfile.ZipFile(path, "r") as zf:
@@ -489,15 +557,14 @@ def load_model_bundle(archive_path: Path | str) -> ModelBundle:
                 sidecar = json.loads(zf.read("sidecar.json").decode("utf-8"))
             raw_spec = zf.read("spec.json") if "spec.json" in zf.namelist() else b""
 
-            bundle = ModelBundle(
-                manifest=manifest,
-                urdf_xml=urdf_xml,
-                sidecar=sidecar,
-                raw_spec=raw_spec,
-            )
-            bundle.validate()
-            return bundle
+            mesh_assets = {}
+            for name in zf.namelist():
+                if name.startswith("meshes/") and not name.endswith("/"):
+                    rel_name = name[len("meshes/") :]
+                    mesh_assets[rel_name] = zf.read(name)
 
-    raise NotImplementedError(
-        "Direct directory loading not implemented; use zip archive"
-    )
+            return _assemble_and_validate_bundle(
+                manifest, urdf_xml, sidecar, raw_spec, mesh_assets
+            )
+
+    raise ValueError(f"Unsupported model bundle path: {path}")

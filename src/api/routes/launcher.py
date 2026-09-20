@@ -6,8 +6,9 @@ enabling both launchers to derive their tile lists from a single source.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Final, cast
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
@@ -16,6 +17,7 @@ from src.api.launcher_manifest_cache import (
     get_cached_manifest,
     get_cached_manifest_async,
 )
+from src.config.capability_state import resolve_canonical_display_name
 from src.config.launcher_manifest_loader import ASSETS_DIR, LauncherManifest
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -216,121 +218,42 @@ async def get_logo(filename: str) -> FileResponse:
 
 # --- Engine Capabilities ---
 
-# Registry of known engine capability profiles.
-# Engines register their capabilities here so the API can serve them.
+# Authoritative canonical engine display names
+_CANONICAL_ENGINE_NAMES: Final[dict[str, str]] = {
+    "mujoco": "MuJoCo",
+    "drake": "Drake",
+    "pinocchio": "Pinocchio",
+    "opensim": "OpenSim",
+    "myosuite": "MyoSuite",
+    "myosim": "MyoSuite",
+    "simscape": "Simscape",
+    "jaxsim": "JaxSim",
+    "putting_green": "Putting Green",
+    "double_pendulum": "Double Pendulum",
+    "pendulum": "Pendulum",
+    "matlab": "MATLAB",
+}
+
 _capabilities_state: dict[str, dict[str, dict[str, str]] | None] = {"cache": None}
 
 
-def _capability_profile(engine_name: str, **levels: Any) -> Any:
-    from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
+def _load_engine_capability_matrix() -> dict[str, Any]:
+    """Load engine capability matrix from disk."""
+    from src.config.launcher_manifest_loader import CONFIG_DIR
 
-    defaults: dict[str, Any] = {
-        "mass_matrix": CapabilityLevel.FULL,
-        "jacobian": CapabilityLevel.FULL,
-        "contact_forces": CapabilityLevel.FULL,
-        "inverse_dynamics": CapabilityLevel.FULL,
-        "drift_acceleration": CapabilityLevel.FULL,
-        "parameter_gradients": CapabilityLevel.PARTIAL,
-        "state_control_gradients": CapabilityLevel.PARTIAL,
-        "forward_sim": CapabilityLevel.FULL,
-        "contact_step": CapabilityLevel.PARTIAL,
-        "trajectory_opt": CapabilityLevel.PARTIAL,
-        "video_export": CapabilityLevel.PARTIAL,
-        "dataset_export": CapabilityLevel.FULL,
-        "force_visualization": CapabilityLevel.PARTIAL,
-        "model_positioning": CapabilityLevel.FULL,
-        "measurements": CapabilityLevel.FULL,
-    }
-    defaults.update(levels)
-    return EngineCapabilities(engine_name=engine_name, **defaults)
-
-
-def _primary_engine_profiles() -> dict[str, Any]:
-    from src.engines.common.capabilities import CapabilityLevel
-
-    F = CapabilityLevel.FULL
-    P = CapabilityLevel.PARTIAL
-
-    return {
-        "mujoco": _capability_profile(
-            "MuJoCo",
-            contact_step=F,
-            video_export=F,
-            force_visualization=F,
-        ),
-        "drake": _capability_profile(
-            "Drake",
-            contact_forces=P,
-            state_control_gradients=F,
-            contact_step=F,
-            trajectory_opt=F,
-        ),
-        "pinocchio": _capability_profile("Pinocchio", contact_step=P),
-        "opensim": _capability_profile(
-            "OpenSim",
-            contact_forces=P,
-            model_positioning=P,
-        ),
-    }
-
-
-def _specialized_engine_profiles() -> dict[str, Any]:
-    from src.engines.common.capabilities import CapabilityLevel
-
-    F = CapabilityLevel.FULL
-    P = CapabilityLevel.PARTIAL
-    N = CapabilityLevel.NONE
-
-    return {
-        "myosuite": _capability_profile(
-            "MyoSuite",
-            contact_forces=P,
-            parameter_gradients=N,
-            state_control_gradients=N,
-            contact_step=F,
-            trajectory_opt=N,
-            model_positioning=P,
-        ),
-        "jaxsim": _capability_profile(
-            "JaxSim",
-            contact_forces=P,
-            drift_acceleration=P,
-            parameter_gradients=F,
-            state_control_gradients=F,
-            video_export=N,
-            dataset_export=P,
-            force_visualization=N,
-            model_positioning=P,
-            measurements=N,
-        ),
-        "pendulum": _capability_profile(
-            "Pendulum",
-            contact_forces=N,
-            parameter_gradients=F,
-            state_control_gradients=F,
-            contact_step=N,
-            trajectory_opt=F,
-            force_visualization=F,
-        ),
-        "putting_green": _capability_profile(
-            "Putting Green",
-            contact_forces=P,
-            parameter_gradients=N,
-            state_control_gradients=N,
-            trajectory_opt=N,
-        ),
-    }
-
-
-def _build_engine_profiles() -> dict[str, Any]:
-    return {
-        **_primary_engine_profiles(),
-        **_specialized_engine_profiles(),
-    }
+    matrix_file = CONFIG_DIR / "engine_capability_matrix.json"
+    if matrix_file.is_file():
+        try:
+            return cast(
+                dict[str, Any], json.loads(matrix_file.read_text(encoding="utf-8"))
+            )
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("Failed to load engine capability matrix: %s", exc)
+    return {}
 
 
 def _get_engine_capabilities() -> dict[str, dict[str, str]]:
-    """Get capability profiles for all known engines.
+    """Get capability profiles for all known engines dynamically from matrix.
 
     Returns:
         Dictionary mapping engine_id to capability dict.
@@ -338,12 +261,43 @@ def _get_engine_capabilities() -> dict[str, dict[str, str]]:
     if _capabilities_state["cache"] is not None:
         return _capabilities_state["cache"]
 
-    profiles = _build_engine_profiles()
-    _capabilities_state["cache"] = {k: v.to_dict() for k, v in profiles.items()}
+    matrix = _load_engine_capability_matrix()
+    profiles = matrix.get("profiles", {})
+    result: dict[str, dict[str, str]] = {}
 
-    if not (_capabilities_state["cache"] is not None):  # Ensure not None for mypy
-        raise ValueError("DbC Blocked: Precondition failed.")
-    return _capabilities_state["cache"]
+    for engine_id, prof in profiles.items():
+        caps = dict(prof.get("capabilities", {}))
+        display_name = _CANONICAL_ENGINE_NAMES.get(
+            engine_id, resolve_canonical_display_name(engine_id)
+        )
+        caps["engine_name"] = display_name
+        caps.setdefault("spatial_jacobian_order", "translation_rotation")
+        result[engine_id] = caps
+
+    # Support legacy alias 'pendulum' -> 'double_pendulum' if present
+    if "double_pendulum" in result and "pendulum" not in result:
+        pendulum_caps = dict(result["double_pendulum"])
+        pendulum_caps["engine_name"] = "Pendulum"
+        result["pendulum"] = pendulum_caps
+
+    _capabilities_state["cache"] = result
+    return result
+
+
+class _EngineProfileAdapter:
+    """Compatibility wrapper providing to_dict() for capability profiles."""
+
+    def __init__(self, data: dict[str, str]) -> None:
+        self._data = data
+
+    def to_dict(self) -> dict[str, str]:
+        return dict(self._data)
+
+
+def _build_engine_profiles() -> dict[str, _EngineProfileAdapter]:
+    """Compatibility adapter for launcher capability profile inspection."""
+    raw = _get_engine_capabilities()
+    return {k: _EngineProfileAdapter(v) for k, v in raw.items()}
 
 
 @router.get("/engines/capabilities")
