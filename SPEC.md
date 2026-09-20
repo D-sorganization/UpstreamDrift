@@ -1,3 +1,20 @@
+## Reconcile, Audit, and Freeze Feature Preservation Across Historical Boundaries (ORG-24, #10533)
+
+Reconciles, audits, and freezes feature preservation across historical boundaries to guarantee no silent loss or broken historical interfaces across the UpstreamDrift workspace:
+- **Comprehensive Audit Engine (`src/shared/python/workspace/feature_preservation_audit.py`)**:
+  - `AuditStatus` and `AuditFailureError`: Typed pass/failed/warning status outcomes and fail-closed integrity assertion exceptions.
+  - `AuditCounts`: Immutable metric encapsulation capturing total capabilities, active capabilities, deprecated aliases, planned capabilities, headless tools, exempt capabilities, and verified golden fixtures while strictly conforming to the 8-parameter architectural budget limit.
+  - `AuditSectionResult` & `AuditReport`: Detailed structured section reports and full disposition records generating formatted JSON and Markdown summaries.
+  - `run_feature_preservation_audit`: Comprehensive evaluation running all 6 core audit sections:
+    - Baseline capability reconciliation against `src/config/capability_migration.json` ensuring 100% accounting of all historical capabilities.
+    - Deprecated alias acyclic and transitive path resolution verifying reachable canonical targets.
+    - Golden fixture byte-exact SHA-256 and byte-length integrity verification.
+    - Five core workspace task journey contracts across simulation, analysis, capture, putting, and training surfaces.
+    - External runtime dependency and engine qualification isolation checks preventing silent unhandled host crashes.
+    - Immutable disposition artifact generation and publication for Epic #10508 closeout.
+- **Verification & Evidence Suite (`tests/integration/test_feature_preservation_audit.py`)**:
+  - Comprehensive unit test coverage validating audit metrics, parameter budgets, schema conformance, golden fixture checks, and error handling.
+
 ## Unified Cross-Engine Parity Report (MS-70, #10350)
 
 Generates unified cross-engine parity evaluation comparing motion-matching candidate trajectories across all available physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite):
