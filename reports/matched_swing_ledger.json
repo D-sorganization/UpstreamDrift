@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T21:43:08Z",
+  "generated_at": "2026-09-20T00:47:18Z",
   "rows": [
     {
       "acceptance": null,
@@ -115,6 +115,29 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/anthropometry/scan_grip_roll_receipt.json",
       "sha256": "40ef331b0b258812fabbe3c3c2524643c103d6af6b24d8956b97ccf1434d804b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/contact_id/receipt.json",
+      "sha256": "9bbe5fc4e2fef05d0160af03f1214cc2768068fe0c6f3c71e9cae11c4a7e9556"
     },
     {
       "acceptance": null,
@@ -3337,5 +3360,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 95
+  "total_receipts": 96
 }
