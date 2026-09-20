@@ -1,5 +1,52 @@
 # Current Matching Continuation Handoff
 
+## PF-01 Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (#10431)
+
+- Branch: `feat/issue-10431-pf01-fast-matching-evidence-schemas-fixtures`, PR #10495 (auto-merge armed), lease `antigravity-ud-10431`, DL-#10431.
+- Summary:
+  - Preserved existing rejected driver/iron fast-matching receipts and candidate artifacts (`evidence/matched/`).
+  - Extended `MatchedSwingCandidate` schema, `CandidateAuxiliary` (`root_forces`, `contact_modes`, `grip_wrench`), `CandidateMetadata` (`solver_status`, `handedness`, `name_maps`), checksum calculation, and NPZ conversion logic in `candidate_convert.py`.
+  - Truthfully renamed `AllocationObjective.MINIMUM_TRAIL_ARM` with backwards-compatible `trail_zero` parsing, added `HARD_ZERO_TRAIL` mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios in `ContactForceAllocator`.
+  - Updated `SwingEvaluator` to avoid fabricating impact phases without declared `t_events`, audit closure translation and rotation separately (`ClosureAudit`), and return `NaN` RMSE for empty marker populations.
+  - Added 7 negative acceptance fixtures in `test_acceptance.py` and corresponding evaluators in `acceptance.py`: (1) friction cone violation, (2) torque bound overwrite, (3) missing root histories, (4) 44 vs 41 coordinate dimension mismatch, (5) missing club coverage / empty population, (6) truncated horizon duration, and (7) synthetic engine false qualification.
+- Validation: 46 unit tests pass (`pytest tests/unit/motion_matching/test_candidate.py tests/unit/motion_matching/test_contact_force_allocator.py tests/unit/motion_matching/test_swing_evaluator.py tests/unit/motion_matching/test_acceptance.py`), ruff clean, black clean.
+- Next: PR #10495 auto-merge armed, proceed to PF-02 (#10432).
+
+## ORG-24 Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries (#10533)
+
+- Branch: `feat/issue-10533-org24-feature-preservation-audit`, lease `antigravity-ud-10533`, DL-#10533.
+- Changes:
+  - `src/shared/python/workspace/feature_preservation_audit.py`: Implemented `FeaturePreservationAuditor`, `AuditReport`, `AuditSectionResult`, `AuditStatus`, and `AuditFailureError`.
+  - Reconciled all 159 baseline capabilities from ORG-01 with zero unaccounted or silently removed entries.
+  - Verified 13 golden preservation fixtures byte-for-byte against recorded SHA-256 and size baselines.
+  - Verified acyclic transitive resolution for legacy aliases (`starting_pose_matcher` -> `motion_target_preview`, `putting_green_gui` -> `putting_green`).
+  - Audited 5 core workspaces (`simulation`, `analysis`, `capture`, `putting`, `training` + `governance`) ensuring non-empty capability allocations and strict contract enforcement.
+  - Verified honest engine qualifications and external dependencies (#10351, #10353).
+  - Published final frozen feature preservation audit disposition report at `docs/development/ORG24_FEATURE_PRESERVATION_AUDIT.md`.
+  - `src/shared/python/workspace/__init__.py`: Exported public auditor and audit types.
+  - `tests/integration/test_feature_preservation_audit.py`: Comprehensive test suite with 4 RED failure cases and 7 GREEN acceptance cases.
+- Reproduction: `python -m pytest tests/integration/test_feature_preservation_audit.py --timeout=60`.
+- Next: Open PR with auto-merge, complete lease on #10533, and proceed to close Epic #10508 when all child PRs are merged.
+
+## ORG-23 Validate and Accept Every Enabled Recommended Task Journey Across Shipped Surfaces (#10532)
+
+- Branch: `feat/issue-10532-org23-installed-workspace-journeys`, lease `antigravity-ud-10532`, DL-#10532.
+- Changes:
+  - `src/shared/python/workspace/installed_journeys.py`: Implemented `InstalledWorkspaceJourneysCoordinator`, `JourneyExecutionResult`, `FitJourneyResult`, `ComparisonJourneyResult`, `OptimizationJourneyResult`, `EstimationComparisonJourneyResult`, and `UtilityNavigationResult`.
+  - Implemented 6 recommended task journeys across shipped surfaces:
+    1. Optical/video import -> inspection -> save/reopen
+    2. Model/pose -> supported fit -> replay/export
+    3. Shot -> named flight comparison -> reopen without path re-entry
+    4. Optimization/training -> result in project store
+    5. Bounded estimation -> cross-engine comparison & injury indicators
+    6. Global help/assistant navigation and sidekick dispatch
+  - Enforced failure recovery: cancellation/restart preserves source media, missing external dependencies fail actionably without state corruption, corrupted/unsupported artifact schemas are rejected without output pollution.
+  - Decoupled `CaptureRigWidget.open_in_inspect_targets()` from StepRail action set to preserve contract and fix test suites.
+  - `src/shared/python/workspace/__init__.py`: Exported journey coordinator and result types.
+  - `tests/integration/test_installed_workspace_journeys.py`: Full RED and GREEN integration test suite (9 tests).
+- Reproduction: `python -m pytest tests/integration/test_installed_workspace_journeys.py --timeout=60`.
+- Next: Auto-merge PR #10580, release lease on #10532.
+
 ## ORG-22 Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows (#10530)
 
 - Branch: `feat/issue-10530-org22-research-lifecycle`, lease `antigravity-ud-10530`, DL-#10530.
