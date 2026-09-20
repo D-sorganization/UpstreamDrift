@@ -1,5 +1,48 @@
 # SPEC.md — Repository Specification Document
 
+## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
+
+Extends OpenSim dynamic marker tracking via MocoTrack from the initial 0.10s pilot window to the full G1 horizon (0.85s) on the tour driver swing, packaging the result into the standardized Matched Swing Program evidence and candidate architecture:
+- **Full-Horizon Dynamic Tracking & Qualification (`src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py`)**:
+  - `qualify_full_swing_tracking`: Orchestrates multi-stage dynamic tracking qualification across G1 backswing, G2 impact, and G3 finish with fail-closed physical acceptance.
+  - Satisfies MS-100 dynamics gate contract by populating `max_root_force_n` (0.0) and `delta_tau_root_max_n` (0.0) to prevent missing evaluation states.
+  - Uses explicit `TypeAlias` typing for `Array` (`NDArray[np.float64]`) ensuring strict mypy compliance.
+- **Constraint-Aware Moco Dynamic Tracking (`src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py`)**:
+  - `MocoTrackingConfig`: Enforces DbC parameter preconditions on horizon duration ($t_{\text{end}} > t_{\text{start}}$), mesh intervals, goal weights, and solver tolerances.
+  - `sanitize_trc_for_horizon`: Prunes missing marker channels over arbitrary tracking intervals with DbC `@precondition` and `@postcondition` contracts.
+  - `build_moco_study`: Constructs OpenSim `MocoStudy` tracking problems with reserve actuator bounds, patellofemoral constraint awareness, and warm-start IK state trajectory seeding.
+- **Dynamic Tracking CLI & Reproduction (`docs/development/opensim_tour_matching/os4_moco_tracking_driver.py`)**:
+  - Adds flexible `--horizon` CLI parsing supporting milestone identifiers (`g1` mapping to 0.85s) and arbitrary numerical durations.
+  - Annotates historical pilot scope in `docs/development/opensim_tour_matching/evidence/os6_handoff/reproduction_receipt.json`.
+- **Physical Evidence & Candidate Package (`evidence/matched/driver_g1_opensim/`)**:
+  - Packages 307-frame, 39-coordinate, 39-control, 34-marker trajectory into standardized `candidate.npz` (`CandidatePackage`).
+  - Includes full 307-frame 3D marker overlay playback GIF (`playback.gif`) and raw IPOPT solution tables (`solution.sto`, `states.sto`, `controls.sto`).
+  - `receipt.json`: Standardized ledger receipt recording exact measured collocation error (whole RMSE 0.2452m) and open-loop forward replay drift (whole RMSE 0.8789m, terminal RMSE 1.2897m, pelvis yaw RMSE 98.70°), honestly evaluating to fail-closed `REJECTED` status under MS-100 / MS-104 `acceptance.py`.
+- **Ledger & Status Matrix Synchronization (`reports/matched_swing_ledger.json`, `docs/development/matched_swing_program/README.md`)**:
+  - Indexes 98 receipts across the repository, registering the OpenSim candidate lane under `matched` and synchronizing the cross-engine progress matrix.
+
+## Expose Real Forces, Torques, and Explicit Counterfactual Semantics (MV-06, #10482)
+
+Exposes authentic ground reaction forces, spatial wrenches, and actuator efforts alongside explicit counterfactual simulation semantics:
+- **Spatial Wrench & Contact Reaction Representation (`src/shared/python/motion_matching/force_torque.py`)**:
+  - `SpatialWrench`: Immutable spatial force and torque representation with strict SI units (N, N·m), application frames, and coordinate conventions (`applied_to_body`, `applied_by_body`).
+  - `transform_wrench(wrench, target_frame, rotation, translation)`: Rigid-body spatial transformation incorporating rotational torque mapping and translational cross-product moment arm ($\tau_B = R \tau_A + r \times (R F_A)$).
+  - `compute_center_of_pressure(wrench, f_threshold_n)`: Ground contact Center of Pressure (CoP_x, CoP_y) calculation with strict fail-closed thresholding ($F_z \le 5.0\text{ N}$ returns `None` rather than fabricated zeros).
+  - `ContactReaction`: Surface reaction tracking normal force, friction utilization ($\|F_t\| / (\mu F_z)$), and contact state classification.
+- **Counterfactual Semantics & Acceleration Decomposition (`src/shared/python/motion_matching/counterfactual.py`)**:
+  - `AccelerationDecomposition`: Instantaneous separation of generalized acceleration into gravity ($\ddot{q}_{grav}$), drift ($\ddot{q}_{drift}$), and active control ($\ddot{q}_{ctrl}$), defining Zero-Torque Counterfactual (ZTCF, $\ddot{q}_{ztcf} = \ddot{q}_{grav} + \ddot{q}_{drift}$) and Zero-Velocity Counterfactual (ZVCF, $\ddot{q}_{zvcf} = \ddot{q}_{grav} + \ddot{q}_{ctrl}$).
+  - `CounterfactualStrategy`: Enum defining interventions (`ZERO_TRAIL_ARM_TORQUE`, `CLAMPED_ACTUATOR_TORQUE`, `NULLSPACE_EXPLORATION`, `CUSTOM`).
+  - `CounterfactualFork`: Immutable record of intervened trajectory rollout with baseline candidate SHA-256 binding, initial state preservation, divergence RMS, and constraint compliance status.
+  - `create_counterfactual_rollout`: Dynamic rollout fork generator with cryptographic baseline immutability assertion (SHA-256 byte check before and after execution).
+- **Candidate Session Force & Counterfactual Telemetry (`src/shared/python/motion_matching/candidate_session.py`)**:
+  - Preserves absent force/torque channels as `None` (never fabricating zeros).
+  - Exposes `get_wrench_at()`, `get_center_of_pressure()`, `get_joint_torques_at()`, `get_closure_residual_at()`, and `create_counterfactual_fork()`.
+- **API Simulation Endpoints (`src/api/routes/analysis.py`, `src/api/services/simulation_service.py`, `src/api/models/requests.py`)**:
+  - `GET /analysis/candidate/forces`: Synchronized telemetry readout of GRF, vertical normal force, CoP, and actuator efforts; fails closed (409 Conflict) when no session is loaded.
+  - `POST /analysis/candidate/counterfactual`: Intervened rollout fork execution; fails closed (409 Conflict) on kinematic-only or absent sessions.
+- **Tour Matching Viewer Force Inspection Widget (`src/tools/tour_matching_viewer/force_inspection.py`, `gui.py`)**:
+  - Embeds `ForceInspectionWidget` synchronized with physical playback time, displaying vertical force ($F_z$), net GRF, CoP coordinates, peak actuator torque, and interactive counterfactual fork triggering.
+
 ## Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading (MV-05, #10481)
 
 Establishes managed subprocess lifecycle and socket discovery for interactive 3D viewers alongside an extensible native viewer registry:
@@ -87,6 +130,13 @@ Implements the pure-XML ElementTree exporter producing 44-coordinate `.osim` mod
 - **Verification Suites (`tests/unit/motion_matching/test_full_body_osim.py`, `tests/opensim/test_full_body_osim_native.py`)**:
   - 4 unit tests verifying full XML topology, 44-coordinate order, dual-grip closure formulations, and CLI export.
   - Native OpenSim runtime test suite skipped gracefully when OpenSim bindings are not present.
+
+## Docker Image Tornado Security Floor (#10472)
+
+The canonical Docker image and the runtime dependency declaration both require
+Tornado 6.5.8 or later. This matches the generated lockfiles and keeps the
+in-image `pip-audit` gate free of the Tornado 6.5.7 advisories; no audit waiver
+or CI bypass is permitted for this dependency.
 
 ## Shared Contact Law and Dual-Grip Kinematic Closure Conformance (MS-72, #10352)
 
