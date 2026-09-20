@@ -131,6 +131,13 @@ Implements the pure-XML ElementTree exporter producing 44-coordinate `.osim` mod
   - 4 unit tests verifying full XML topology, 44-coordinate order, dual-grip closure formulations, and CLI export.
   - Native OpenSim runtime test suite skipped gracefully when OpenSim bindings are not present.
 
+## Docker Image Tornado Security Floor (#10472)
+
+The canonical Docker image and the runtime dependency declaration both require
+Tornado 6.5.8 or later. This matches the generated lockfiles and keeps the
+in-image `pip-audit` gate free of the Tornado 6.5.7 advisories; no audit waiver
+or CI bypass is permitted for this dependency.
+
 ## Shared Contact Law and Dual-Grip Kinematic Closure Conformance (MS-72, #10352)
 
 Formalizes the versioned cross-engine contact law and dual-grip kinematic closure contracts across all six physics engines:

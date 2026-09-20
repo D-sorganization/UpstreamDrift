@@ -1,5 +1,13 @@
 # Current Matching Continuation Handoff
 
+## Docker Audit Repair (#10472)
+
+The Docker image now pins Tornado 6.5.8, matching the generated runtime and
+development locks and the declared runtime floor. This resolves the in-image
+pip-audit findings GHSA-wwv5-g3v4-889x and GHSA-8423-8fgw-73vq (plus the third
+Tornado 6.5.7 advisory) without an audit waiver. CI must confirm the complete
+Docker build and dependency-artifact regeneration before merge.
+
 ## MV-06 Expose Real Forces, Torques, and Explicit Counterfactual Semantics (#10482)
 
 - Worktree: `UpstreamDrift-10482-forces`, branch `feat/10482-forces-torques-counterfactual`, lease `antigravity-10482-mv06`, DL-#10482.
@@ -30,7 +38,17 @@
 
 ## MV-01 Qualify Shared URDF Bundles and Numeric Precision (#10477)
 
-- Completed in PR #10485 (merged). 17g float serialization, ModelBundleManifest, ModelBundle zip export/import, Drake export integration, Pinocchio parity verified.
+- # Completed in PR #10485 (merged). 17g float serialization, ModelBundleManifest, ModelBundle zip export/import, Drake export integration, Pinocchio parity verified.
+
+## Docker Audit Repair (#10472)
+
+The Docker image now pins Tornado 6.5.8, matching the generated runtime and
+development locks and the declared runtime floor. This resolves the in-image
+pip-audit findings GHSA-wwv5-g3v4-889x and GHSA-8423-8fgw-73vq (plus the third
+Tornado 6.5.7 advisory) without an audit waiver. CI must confirm the complete
+Docker build and dependency-artifact regeneration before merge.
+
+> > > > > > > 85614213e (fix(docker): update tornado security pin)
 
 ## MS-21 MuJoCo Replay Continuation (#10336)
 
