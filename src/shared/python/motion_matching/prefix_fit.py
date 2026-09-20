@@ -457,7 +457,7 @@ def _run_prefix_stage(
 
         if options.regularization is not None:
             reg_residuals = regularization_residual(parameters, options.regularization)
-            if reg_residuals.size > 0:
+            if len(reg_residuals) > 0:
                 res_list.append(reg_residuals)
 
         return np.concatenate(res_list) if len(res_list) > 1 else marker_residuals
