@@ -25,6 +25,7 @@ def test_iter_duplicate_paragraphs_no_dupes() -> None:
     assert mod._iter_duplicate_paragraphs(text) == []
 
 
+@pytest.mark.unit
 def test_iter_duplicate_paragraphs_ignores_headings() -> None:
     text = "### The Rules\n\npara one\n\n### The Rules\n\npara two"
     assert mod._iter_duplicate_paragraphs(text) == []
