@@ -17,8 +17,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-<<<<<<< HEAD
-
 ### DL-#10510 · Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity
 
 - **State:** in_progress

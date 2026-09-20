@@ -35,6 +35,97 @@ _LIFECYCLE_BADGES = {
 }
 
 
+def _render_workspace_breakdown(inventory: CapabilityMigrationInventory) -> list[str]:
+    """Render the workspace distribution markdown table."""
+    workspace_counts: dict[str, int] = {}
+    for entry in inventory.entries.values():
+        workspace_counts[entry.primary_workspace] = (
+            workspace_counts.get(entry.primary_workspace, 0) + 1
+        )
+
+    lines: list[str] = [
+        "| Workspace | Primary Capability Count | Description |",
+        "| :--- | :---: | :--- |",
+    ]
+    workspace_desc = {
+        "simulation": "Physics engines, multi-body kinematics, dynamics solvers, and forward simulation",
+        "analysis": "Telemetry extraction, metric calculation, video/data analysis, and flight comparison",
+        "capture": "Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction",
+        "putting": "Putting physics, green surface simulation, and ball rolling dynamics",
+        "training": "Drills, objective laboratories, movement/swing optimization, and skill reinforcement",
+        "governance": "Configuration setup, project architecture mapping, sidekick docks, and registry admin",
+    }
+    for ws in sorted(inventory.workspaces):
+        count = workspace_counts.get(ws, 0)
+        lines.append(
+            f"| `{ws}` | {count} | {workspace_desc.get(ws, 'Workspace domain')} |"
+        )
+    lines.append("")
+    return lines
+
+
+def _render_fixtures_table(inventory: CapabilityMigrationInventory) -> list[str]:
+    """Render the golden preservation fixtures markdown table."""
+    lines: list[str] = [
+        "## Representative Golden Preservation Fixtures",
+        "",
+        "| Fixture Key | Kind | Relative Path | Size (bytes) | SHA-256 Hash | Support Status |",
+        "| :--- | :--- | :--- | :---: | :--- | :--- |",
+    ]
+    for fid, fix in sorted(inventory.fixtures.items()):
+        badge = (
+            "✅ supported"
+            if fix.support_status == "golden_baseline"
+            else (
+                "❌ unsupported" if fix.support_status == "unsupported" else "ℹ️ other"
+            )
+        )
+        lines.append(
+            f"| `{fid}` | `{fix.kind}` | `{fix.path}` | {fix.size_bytes} | `{fix.sha256[:16]}...` | {badge} |"
+        )
+    lines.append("")
+    return lines
+
+
+def _render_alias_table(inventory: CapabilityMigrationInventory) -> list[str]:
+    """Render the legacy alias resolution graph markdown table."""
+    lines: list[str] = [
+        "## Legacy Alias Resolution Graph",
+        "",
+        "| Deprecated Alias ID | Canonical Target ID | Lifecycle | Evidence | Acceptance Owner |",
+        "| :--- | :--- | :--- | :--- | :--- |",
+    ]
+    for entry in sorted(inventory.entries.values(), key=lambda e: e.id):
+        if entry.lifecycle == "deprecated_alias":
+            lines.append(
+                f"| `{entry.id}` | `{entry.alias_target}` | {_LIFECYCLE_BADGES[entry.lifecycle]} | `{entry.evidence}` | `{entry.acceptance_owner}` |"
+            )
+    lines.append("")
+    return lines
+
+
+def _render_inventory_table(inventory: CapabilityMigrationInventory) -> list[str]:
+    """Render the complete capability baseline inventory markdown table."""
+    lines: list[str] = [
+        "## Complete Capability Baseline Inventory",
+        "",
+        "| ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
+    ]
+    for entry in sorted(inventory.entries.values(), key=lambda e: e.id):
+        sec = (
+            ", ".join(f"`{s}`" for s in entry.secondary_links)
+            if entry.secondary_links
+            else "—"
+        )
+        badge = _LIFECYCLE_BADGES.get(entry.lifecycle, entry.lifecycle)
+        lines.append(
+            f"| `{entry.id}` | {entry.name} | `{entry.entity_kind}` | `{entry.primary_workspace}` | {sec} | `{entry.provider_authority}` | {badge} | `{entry.evidence}` | `{entry.acceptance_owner}` |"
+        )
+    lines.append("")
+    return lines
+
+
 def render_baseline_document(inventory: CapabilityMigrationInventory) -> str:
     """Render the capability inventory and preservation records as markdown."""
     lines: list[str] = [
@@ -67,90 +158,10 @@ def render_baseline_document(inventory: CapabilityMigrationInventory) -> str:
         "### Workspace Distribution",
         "",
     ]
-
-    # Workspace breakdown
-    workspace_counts: dict[str, int] = {}
-    for entry in inventory.entries.values():
-        workspace_counts[entry.primary_workspace] = (
-            workspace_counts.get(entry.primary_workspace, 0) + 1
-        )
-
-    lines.append("| Workspace | Primary Capability Count | Description |")
-    lines.append("| :--- | :---: | :--- |")
-    workspace_desc = {
-        "simulation": "Physics engines, multi-body kinematics, dynamics solvers, and forward simulation",
-        "analysis": "Telemetry extraction, metric calculation, video/data analysis, and flight comparison",
-        "capture": "Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction",
-        "putting": "Putting physics, green surface simulation, and ball rolling dynamics",
-        "training": "Drills, objective laboratories, movement/swing optimization, and skill reinforcement",
-        "governance": "Configuration setup, project architecture mapping, sidekick docks, and registry admin",
-    }
-    for ws in sorted(inventory.workspaces):
-        count = workspace_counts.get(ws, 0)
-        lines.append(
-            f"| `{ws}` | {count} | {workspace_desc.get(ws, 'Workspace domain')} |"
-        )
-    lines.append("")
-
-    # Preservation Fixtures Table
-    lines.extend(
-        [
-            "## Representative Golden Preservation Fixtures",
-            "",
-            "| Fixture Key | Kind | Relative Path | Size (bytes) | SHA-256 Hash | Support Status |",
-            "| :--- | :--- | :--- | :---: | :--- | :--- |",
-        ]
-    )
-    for fid, fix in sorted(inventory.fixtures.items()):
-        badge = (
-            "✅ supported"
-            if fix.support_status == "golden_baseline"
-            else (
-                "❌ unsupported" if fix.support_status == "unsupported" else "ℹ️ other"
-            )
-        )
-        lines.append(
-            f"| `{fid}` | `{fix.kind}` | `{fix.path}` | {fix.size_bytes} | `{fix.sha256[:16]}...` | {badge} |"
-        )
-    lines.append("")
-
-    # Alias Graph Table
-    lines.extend(
-        [
-            "## Legacy Alias Resolution Graph",
-            "",
-            "| Deprecated Alias ID | Canonical Target ID | Lifecycle | Evidence | Acceptance Owner |",
-            "| :--- | :--- | :--- | :--- | :--- |",
-        ]
-    )
-    for entry in sorted(inventory.entries.values(), key=lambda e: e.id):
-        if entry.lifecycle == "deprecated_alias":
-            lines.append(
-                f"| `{entry.id}` | `{entry.alias_target}` | {_LIFECYCLE_BADGES[entry.lifecycle]} | `{entry.evidence}` | `{entry.acceptance_owner}` |"
-            )
-    lines.append("")
-
-    # Complete Inventory Table
-    lines.extend(
-        [
-            "## Complete Capability Baseline Inventory",
-            "",
-            "| ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |",
-            "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
-        ]
-    )
-    for entry in sorted(inventory.entries.values(), key=lambda e: e.id):
-        sec = (
-            ", ".join(f"`{s}`" for s in entry.secondary_links)
-            if entry.secondary_links
-            else "—"
-        )
-        badge = _LIFECYCLE_BADGES.get(entry.lifecycle, entry.lifecycle)
-        lines.append(
-            f"| `{entry.id}` | {entry.name} | `{entry.entity_kind}` | `{entry.primary_workspace}` | {sec} | `{entry.provider_authority}` | {badge} | `{entry.evidence}` | `{entry.acceptance_owner}` |"
-        )
-    lines.append("")
-
+    lines.extend(_render_workspace_breakdown(inventory))
+    lines.extend(_render_fixtures_table(inventory))
+    lines.extend(_render_alias_table(inventory))
+    lines.extend(_render_inventory_table(inventory))
     return "\n".join(lines)
 
 
