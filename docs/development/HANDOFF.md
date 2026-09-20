@@ -1,5 +1,55 @@
 # Current Matching Continuation Handoff
 
+## ORG-18 Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (#10527)
+
+- Branch: `feat/issue-10527-org18-comparison-indicator-workspace`, lease held by `local`, DL-#10527.
+- Changes:
+  - `src/shared/python/workspace/comparison_indicator_workspace.py`: Implemented `ComparisonIndicatorWorkspaceCoordinator`, `ComparisonRunArtifact`, `ModelFidelityLevel`, `CrossEngineComparisonAdapter`, `BiomechanicalLoadChannels`, `InjuryIndicatorAdapter`, and fail-closed compatibility validators (`validate_run_compatibility`, `IncompatibleArtifactError`).
+  - Implemented model fidelity level invariance ensuring disparate fidelity tiers (`stub_pendulum`, `simplified_kinetics`, `qualified_full_body`) are never erroneously cross-compared.
+  - Adapted biomechanical load channels to `InjuryRiskScorer` without mock fallbacks and stamped all outputs with mandatory non-clinical disclaimers.
+  - Surfaced canonical comparison and injury indicator capabilities across `results_and_compare` and `exercise_analysis` workspace shells.
+  - `src/shared/python/workspace/__init__.py`: Exported all new coordinator and adapter symbols.
+  - `tests/integration/test_comparison_indicator_workspace.py`: 10 integration tests validating capability exposure across workspace shells, multi-run comparison, run compatibility validation (units, coordinates, timebase dt, channels, finite values), model fidelity level invariance, injury indicator execution, missing load channel fail-closed validation, and non-clinical disclaimer enforcement.
+- Reproduction: `pytest tests/integration/test_comparison_indicator_workspace.py --timeout=60`.
+- Next: Open PR, arm auto-merge, update issue.
+
+## ORG-06 Apply the Same Workspace Navigation to React and Tauri (#10516)
+
+- Worktree: main checkout, branch `feat/issue-10516-org06-react-workspace-navigation`, lease `antigravity-ud-10516`, DL-#10516.
+- Changes:
+  - `workspaceNavigation.ts`: Authoritative shared catalog definitions for the five primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`).
+  - `capabilityAdapter.ts`: `resolveWorkspaceToolAction` handles in-app web routes, desktop-window launches under Tauri, and actionable explanations with web alternatives for browser users.
+  - `WorkspaceNavigation.tsx`: Accessible `WorkspaceSidebar` with visible focus and focus recovery to `#main-content`, `WorkspaceBreadcrumb`, and `WorkspaceView` listing workspace member tools.
+  - `WorkspacePage.tsx`: Integrates `WorkspaceShell` with `WorkspaceSidebar` and `WorkspaceView` for bookmarkable task URLs (`/workspaces/:slug`).
+  - `LauncherDashboard.tsx`: Added task workspaces bar linking directly to each workspace destination.
+  - `routeTitles.ts`: Centralized page titles for all `/workspaces/:slug` routes.
+- Reproduction: `npm run test:run -- src/components/layout/WorkspaceNavigation.test.tsx` (from `ui/`).
+- Next: Open PR referencing Fixes #10516, enable auto-merge, release lease.
+
+## ORG-05 Build Task-Oriented Desktop Navigation Over Existing Embedded Tools (#10515)
+
+- Worktree: main checkout, branch `feat/issue-10515-org05-desktop-navigation`, lease `antigravity-ud-10515`, DL-#10515.
+- Changes:
+  - `workspace_navigation.py`: Defined 5 primary task workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`); implemented `ALIAS_MAP` canonical migration utilities (`migrate_model_order`, `migrate_favorites`, `migrate_saved_layout`); implemented single-instance tool reuse policy (`find_existing_tool_tab`, `focus_or_open_tool_tab`); guarded dirty tab close (`close_tool_tab_guarded`); created accessible return-to-workspace breadcrumb bar (`WorkspaceBreadcrumbBar`); implemented discoverability status explanations (`explain_tool_status`).
+  - `launcher_layout_manager.py`: Integrated `migrate_saved_layout` in `load_layout()` preserving user tile scaling, view mode, and dock state; updated `get_filtered_order()` to support workspace filters.
+  - `_launcher_navigation_ui.py`: Updated `_build_sidebar_filter_buttons()` with workspace destinations; added workspace routing to `_on_sidebar_routed()`; added `navigate_to_workspace()`.
+  - `launcher_ui_setup.py`: Enforced single-instance tool reuse in `dock_widget_as_tab()` before adding duplicate tabs.
+  - `test_workspace_navigation.py`: 22 comprehensive unit tests covering all requirements.
+- Reproduction: `pytest tests/launchers/test_workspace_navigation.py tests/launchers/test_workspace_tabs.py tests/launchers/test_launcher_layout_manager.py tests/launchers/test_launcher_ui_setup.py -v`.
+- Next: Open PR referencing Fixes #10515, enable auto-merge, release lease.
+
+## MS-82 Motion Matching Tile: Visual Playback, Standardized Metrics, and Navigation Handoff (#10355)
+
+- Branch: `feat/10355-motion-matching-tile-playback`, lease `antigravity-10355`, DL-#10355.
+- Changes:
+  - `src/tools/motion_matching/gui.py`: Added visual playback support using `QMovie` for `ik_playback.gif` and `tracking_playback.gif` with safe cleanup on widget close; added display of five standardized headline metrics (`full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, `inside_support_polygon_fraction`) and color-coded acceptance badge; populated physics backend combo from plant registry; added navigation action buttons "Open in Results Browser" and "Open in Viewer".
+  - `src/tools/motion_matching/pipeline.py`: Added `available_engines()` querying plant registry and fallback engines; added `extract_five_metrics_and_acceptance(summary)` for standardized metric extraction and qualification verdict determination.
+  - `src/tools/matched_swing_browser/model.py`: Resolved circular dependency between `matched_swing_browser` and `workspace` by moving `ResultFilter` import to `TYPE_CHECKING` and lazy runtime usage in `to_result_filter()`.
+  - `src/config/feature_parity.json` & `docs/development/feature_parity_matrix.md`: Upgraded `tools.motion_matching` from `gap` to `parity`, closing #10106 capability gap.
+  - `tests/tools/motion_matching/test_motion_matching_gui.py`: Unit tests for engine selection from plant registry, results pane movies, metrics, acceptance badge, navigation buttons, and step failures.
+- Reproduction: `pytest tests/tools/motion_matching/ tests/config/feature_parity/ -v`.
+- Next: Open PR, arm auto-merge, verify merge, release lease.
+
 ## ORG-17 Replace Canonical Estimation Shell With Bounded Estimator Coordinator (#10526)
 
 - Branch: `feat/issue-10526-org17-estimation-workflow`, lease `antigravity-org17`, DL-#10526.
@@ -11,6 +61,20 @@
   - `tests/integration/test_estimation_workspace.py`: 8 integration tests validating capability availability, synthetic parameter recovery, prior regularization, identifiability gating, non-finite cost gating, parameter bounds enforcement, and run provenance serialization roundtrips.
 - Reproduction: `pytest tests/integration/test_estimation_workspace.py --timeout=60`.
 - Next: PR auto-merge and release lease.
+
+## ORG-03 Replace Misleading Launches With Real Tasks or Explicit Nonlaunchable States (#10512)
+
+- Branch: `feat/issue-10512-org03-launch-truthfulness`, lease `issue-10512`, DL-#10512.
+- Changes:
+  - `src/launchers/task_launch_truthfulness.py`: Authoritative launch disposition audit table (`LaunchDisposition`) covering production solvers, prototype demos, library-only algorithms, parametric CLIs, provider-required tools, and service previews. Implemented pre-flight parameter validation contract for FreeMoCap sidecar runner (`launch_freemocap_with_validation`), rejecting zero-arg headless launches and dialog cancellations without spawning subprocesses.
+  - `src/launchers/launcher_model_handlers.py`: Guarded `SpecialAppHandler` to reject direct launches of library-only components (`swing_optimizer`, `injury_analysis`) and parametric CLIs (`motion_capture`), exposing actionable `status_message()` with tracking issue references and remediation. Marked `GolfSimulationSuiteHandler` as prototype demo with truthful status disclosure.
+  - `src/launchers/external_tools_adapter.py`: Removed blank placeholder `VideoAnalyzerWindow` fallback from `_import_video_analyzer()`, allowing missing provider / import errors to surface through the shared `_UnavailableToolWindow` diagnostic.
+  - `src/launchers/launcher_process_manager.py`: Added `launch_script_with_args()` and safe argument forwarding in `launch_script()`. Hardened `_assign_to_job()` on Windows to safely handle non-integer or mock process PIDs without crashing.
+  - `src/config/launcher_manifest.json` & `src/config/models.yaml`: Updated metadata and status chips for `golf_simulation_suite` (`prototype`), `swing_optimizer` (`experimental`/library), `injury_analysis` (`experimental`/library), removing qualified engine claims.
+  - `ui/public/capability-atlas/`: Regenerated `graph.json` and `index.html` via `python -m scripts.generate_capability_atlas`.
+  - `tests/launchers/test_task_launch_truthfulness.py`: TDD acceptance suite verifying all RED/GREEN cases: problematic tiles cannot claim ready/gui_ready; missing video analyzer yields diagnostic window; FreeMoCap zero args/cancellation performs no spawn and valid args pass through unchanged; simulator prototype is marked demo-only.
+- Reproduction: `pytest tests/launchers/test_task_launch_truthfulness.py tests/launchers/test_simulation_guis.py tests/launchers/test_launcher_process_manager.py tests/scripts/test_capability_atlas.py --timeout=60`.
+- Next: Validate against rebased main, enable auto-merge on #10536, release lease on #10512, claim #10513 (ORG-04).
 
 ## ORG-02 Separate Capability Identity, Maturity, Availability, and Qualification (#10511)
 
@@ -69,6 +133,10 @@ Docker build and dependency-artifact regeneration before merge.
   - `tests/config/launcher_manifest/test_parity.py`: Added checks for loaded tiles in `test_route_mode_routes_exist_in_react_router`, and added `test_every_tile_destination_resolves_authoritatively`.
 - Reproduction: `npm run test:run` in `ui/` (874 tests pass); `pytest tests/config/launcher_manifest/ tests/config/test_launcher_registry_parity.py` (95 tests pass).
 - Next: Land PR, arm auto-merge, release lease.
+
+=======
+
+> > > > > > > bf6ec7343 (feat(ui): apply task-oriented workspace navigation to React and Tauri (#10516))
 
 ## MV-06 Expose Real Forces, Torques, and Explicit Counterfactual Semantics (#10482)
 

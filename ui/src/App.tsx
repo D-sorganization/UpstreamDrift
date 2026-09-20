@@ -90,6 +90,11 @@ const GolfSimulatorPage = lazy(() =>
     default: m.GolfSimulatorPage,
   })),
 );
+const WorkspacePage = lazy(() =>
+  import("./pages/WorkspacePage").then((m) => ({
+    default: m.WorkspacePage,
+  })),
+);
 /** Themed full-viewport fallback shown while a route chunk loads (#7433). */
 function PageLoadingFallback() {
   return (
@@ -163,6 +168,8 @@ export function RoutedContent() {
           <Route path="/chat" element={<ChatPage />} />
           {/* Settings (#7457): server-persisted preferences surface */}
           <Route path="/settings" element={<SettingsPage />} />
+          {/* Task-oriented workspace destinations (ORG-06, #10516) */}
+          <Route path="/workspaces/:slug" element={<WorkspacePage />} />
           {/* Catch-all 404 (#7430) — must stay last. */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
