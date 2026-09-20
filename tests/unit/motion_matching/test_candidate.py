@@ -456,3 +456,96 @@ def test_candidate_containers_and_immutability() -> None:
     assert not cand.q.flags.writeable
     assert not cand.markers.model_markers_m.flags.writeable
     assert not cand.auxiliary.actuator_states.flags.writeable
+
+
+def test_candidate_extended_auxiliary_and_metadata_roundtrip(tmp_path: Path) -> None:
+    """Verify CandidateAuxiliary root_forces, contact_modes, grip_wrench, and metadata solver_status, handedness, name_maps roundtrip."""
+    meta = CandidateMetadata(
+        schema_version=CANDIDATE_SCHEMA_VERSION,
+        profile=CandidateProfile.DYNAMIC,
+        engine="pinocchio",
+        model_name="full_body_anthro_driver",
+        coordinate_names=("q0", "q1"),
+        velocity_names=("v0", "v1"),
+        actuator_names=("tau0", "tau1"),
+        solver_status="converged",
+        handedness="right",
+        name_maps={"coordinate_to_actuator": {"q1": "tau1"}},
+    )
+    n_frames = 5
+    time_s = np.linspace(0.0, 0.04, n_frames)
+    q = np.zeros((n_frames, 2))
+    v = np.zeros((n_frames, 2))
+    tau = np.ones((n_frames, 2))
+
+    root_forces = np.ones((n_frames, 6)) * 0.05
+    contact_modes = np.ones((n_frames, 4), dtype=np.float64)
+    grip_wrench = np.ones((n_frames, 6)) * 12.0
+
+    aux = CandidateAuxiliary(
+        root_forces=root_forces,
+        contact_modes=contact_modes,
+        grip_wrench=grip_wrench,
+    )
+
+    cand = MatchedSwingCandidate(
+        metadata=meta,
+        time_s=time_s,
+        q=q,
+        v=v,
+        tau=tau,
+        auxiliary=aux,
+    )
+
+    assert cand.root_forces is not None
+    assert cand.contact_modes is not None
+    assert cand.grip_wrench is not None
+    assert cand.metadata.solver_status == "converged"
+    assert cand.metadata.handedness == "right"
+    assert "coordinate_to_actuator" in cand.metadata.name_maps
+
+    # Checksums
+    checksums = cand.compute_checksums()
+    assert "root_forces" in checksums
+    assert "contact_modes" in checksums
+    assert "grip_wrench" in checksums
+
+    # Save and reload
+    save_path = tmp_path / "extended_cand.npz"
+    save_candidate(cand, save_path)
+    loaded = load_candidate(save_path)
+
+    assert loaded.root_forces is not None
+    np.testing.assert_allclose(loaded.root_forces, root_forces)
+    assert loaded.contact_modes is not None
+    np.testing.assert_allclose(loaded.contact_modes, contact_modes)
+    assert loaded.grip_wrench is not None
+    np.testing.assert_allclose(loaded.grip_wrench, grip_wrench)
+    assert loaded.metadata.solver_status == "converged"
+    assert loaded.metadata.handedness == "right"
+    assert loaded.metadata.name_maps == {"coordinate_to_actuator": {"q1": "tau1"}}
+
+
+def test_convert_analytic_matched_npz() -> None:
+    """Verify legacy driver_full_pinocchio candidate.npz converts to versioned MatchedSwingCandidate."""
+    from src.shared.python.motion_matching.candidate_convert import (
+        convert_analytic_matched_npz,
+    )
+
+    repo_root = Path(__file__).resolve().parents[3]
+    legacy_npz = (
+        repo_root / "evidence" / "matched" / "driver_full_pinocchio" / "candidate.npz"
+    )
+    assert legacy_npz.is_file(), f"Missing legacy candidate at {legacy_npz}"
+
+    cand = convert_analytic_matched_npz(legacy_npz, engine="pinocchio")
+    assert isinstance(cand, MatchedSwingCandidate)
+    assert cand.n_frames == 654
+    assert cand.nq == 44
+    assert cand.tau is not None
+    assert cand.model_markers_m is not None
+    assert cand.target_markers_m is not None
+    assert cand.marker_validity is not None
+    assert cand.auxiliary.grip_wrench is not None
+    assert cand.auxiliary.external_forces is not None
+    assert cand.metadata.profile == CandidateProfile.DYNAMIC
