@@ -1,5 +1,25 @@
 # Current Matching Continuation Handoff
 
+## [ORG-12] Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (#10522)
+
+- Worktree / Branch: `feat/issue-10522-org12-model-match-handoff`, lease `antigravity-ud-10522`, DL-#10522.
+- Changes:
+  - `src/shared/python/workspace/model_match_handoff.py`:
+    - Implemented `SubjectSpec`, `ClubSpec`, `ModelSpec`, `InitialPoseSpec` task adapters binding configuration to `SessionProjectStore`.
+    - Implemented route separation with `MatchingRoute` (`TOUR_MATCHING` vs `GENERAL_MOTION_PIPELINE`) and `resolve_matching_route`. Tour route explicitly rejects 2D optical observations / arbitrary video schemas and requires qualified tour captures (driver/iron/c3d).
+    - Implemented honest physics engine qualification across all 6 engines (`mujoco`, `drake`, `pinocchio`, `opensim`, `myosuite`, `simscape`) via `EngineQualification`, `get_engine_qualification`, `list_available_backends`, and `is_backend_available`.
+    - Implemented `FitJobRequest` validating subject/club identity matches, initial pose frame support, engine availability, dynamic capability, and route compatibility before execution.
+    - Implemented `FitJobResult` enforcing the contract invariant that kinematic outputs cannot be marked as dynamic qualified.
+    - Implemented `ModelMatchHandoffCoordinator`:
+      - Updates session model and marks downstream state as invalidated.
+      - Executes discrete `FitStage.KINEMATICS` and `FitStage.DYNAMICS` stages, creating versioned artifact references and recording `RunMetadata` in `SessionProjectStore`.
+      - Handles job cancellation with diagnostics, leaving prior completed runs preserved.
+      - Implemented `reopen_run` returning action descriptor pointing to the existing Results/Replay seam (`results_browser`).
+  - `src/shared/python/workspace/__init__.py`: Exported all new model match handoff types and functions.
+  - `tests/integration/test_model_match_handoff.py`: 3 integration tests covering all RED preconditions (subject/club/frame mismatch, unavailable engine, kinematic vs dynamic qualification, unsupported capture routing) and GREEN execution (fit stages, invalidation on model change, cancellation preserving prior runs, reopen descriptor).
+- Reproduction: `python -m pytest tests/integration/test_model_match_handoff.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10522, notify parent orchestrator.
+
 ## [ORG-11] Move Tour Matching Execution Out of Documentation Without Changing Results (#10520)
 
 - Worktree / Branch: `feat/issue-10520-org11-motion-matching-packaging`, lease `antigravity-ud-10520`, DL-#10520.

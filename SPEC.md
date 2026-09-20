@@ -284,6 +284,16 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
 
+## Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (ORG-12, #10522)
+
+Coordinates subject, club, model selection, initial pose, fitting, and dynamics through session-bound typed handoff:
+- **Model Match Handoff Coordinator (`src/shared/python/workspace/model_match_handoff.py`)**:
+  - `ModelMatchHandoffCoordinator`: Orchestrates subject configuration, club parameters, model geometry selection, initial pose, kinematic fitting, and forward/inverse dynamics.
+  - Route Separation: Enforces strict separation between general-input motion pipelines and tour driver/7-iron matching routes based on provider/artifact capabilities; rejects sending arbitrary video targets to tour-only drivers.
+  - Distinct Execution Stages: Exposes Fit Kinematics and Run Dynamics as decoupled steps with explicit engine backends; kinematic output cannot masquerade as dynamic success.
+  - Diagnostics and Recovery: Provides failed-fit diagnostics, non-destructive job cancellation, and seamless reopen into the Results/Replay seam.
+  - Session Store Registration: Automatically binds subject snapshots, club definitions, model variations, and fit receipts to the active session.
+
 ## Move Tour Matching Execution Out of Documentation Without Changing Results (ORG-11, #10520)
 
 Packages tour matching execution into reusable library code outside the documentation tree:
