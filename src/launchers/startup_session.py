@@ -132,7 +132,6 @@ class StartupSession(QObject):
             lambda results: self._on_finished(generation, results)
         )
         worker.error_signal.connect(lambda msg: self._on_error(generation, msg))
-        worker.finished.connect(worker.deleteLater)
         if is_alive(self._splash) and not self._splash.isVisible():
             self._splash.show()
         self._watchdog.start(int(self._timeout_s * 1000))
@@ -163,11 +162,6 @@ class StartupSession(QObject):
         if not self._is_current(generation):
             return
         self._settle()
-        logger.info(
-            "Startup session generation %d finished in %d ms; delivering results to shell",
-            generation,
-            results.startup_time_ms,
-        )
         self._open_shell(results)
         if results.is_degraded:
             summary = results.degraded_summary()
