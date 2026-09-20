@@ -11,11 +11,11 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 424,
-    "diverged": 278,
-    "ud-only": 1320,
+    "identical": 423,
+    "diverged": 279,
+    "ud-only": 1343,
     "tools-only": 709,
-    "spelling-only": 124
+    "spelling-only": 123
   },
   "packages": {
     "README.md": {
@@ -140,7 +140,7 @@
     "body_part_viz": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 34,
+      "ud-only": 35,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -217,7 +217,7 @@
     "config": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 13,
+      "ud-only": 14,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -322,7 +322,7 @@
     "engine_core": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 21,
+      "ud-only": 22,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -467,16 +467,16 @@
       "spelling-only": 0
     },
     "model_generation": {
-      "identical": 27,
-      "diverged": 52,
-      "ud-only": 16,
+      "identical": 26,
+      "diverged": 53,
+      "ud-only": 18,
       "tools-only": 1,
-      "spelling-only": 16
+      "spelling-only": 15
     },
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 156,
+      "ud-only": 168,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -826,7 +826,7 @@
     "workspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 3,
+      "ud-only": 9,
       "tools-only": 0,
       "spelling-only": 0
     }
@@ -3869,6 +3869,18 @@
       "spelling_only": false
     },
     {
+      "path": "body_part_viz/anatomical_visuals.py",
+      "classification": "ud-only",
+      "package": "body_part_viz",
+      "subpackage": "",
+      "ud_bytes": 5572,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "body_part_viz/asset_library.py",
       "classification": "ud-only",
       "package": "body_part_viz",
@@ -5985,9 +5997,9 @@
       "classification": "diverged",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 5267,
+      "ud_bytes": 5660,
       "tools_bytes": 269,
-      "byte_delta": 4998,
+      "byte_delta": 5391,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -6045,7 +6057,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 30335,
+      "ud_bytes": 30956,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6057,7 +6069,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 18816,
+      "ud_bytes": 18980,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6070,6 +6082,18 @@
       "package": "config",
       "subpackage": "",
       "ud_bytes": 35112,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "config/model_variant_grouping.py",
+      "classification": "ud-only",
+      "package": "config",
+      "subpackage": "",
+      "ud_bytes": 13390,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7378,6 +7402,18 @@
       "package": "engine_core",
       "subpackage": "",
       "ud_bytes": 4682,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "engine_core/wsl_probe.py",
+      "classification": "ud-only",
+      "package": "engine_core",
+      "subpackage": "",
+      "ud_bytes": 3855,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8889,7 +8925,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "adapters",
-      "ud_bytes": 6140,
+      "ud_bytes": 5685,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -9057,7 +9093,7 @@
       "classification": "ud-only",
       "package": "golf_simulator",
       "subpackage": "",
-      "ud_bytes": 14140,
+      "ud_bytes": 14404,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10806,13 +10842,13 @@
     },
     {
       "path": "model_generation/_lazy_map.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "model_generation",
       "subpackage": "",
-      "ud_bytes": 4338,
+      "ud_bytes": 4884,
       "tools_bytes": 4338,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": 546,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -11001,9 +11037,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 25483,
+      "ud_bytes": 26699,
       "tools_bytes": 25102,
-      "byte_delta": 381,
+      "byte_delta": 1597,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -11445,12 +11481,36 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "export",
-      "ud_bytes": 242,
+      "ud_bytes": 676,
       "tools_bytes": 238,
-      "byte_delta": 4,
+      "byte_delta": 438,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
+    },
+    {
+      "path": "model_generation/export/bundle_manifest.py",
+      "classification": "ud-only",
+      "package": "model_generation",
+      "subpackage": "export",
+      "ud_bytes": 4882,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_generation/export/model_bundle.py",
+      "classification": "ud-only",
+      "package": "model_generation",
+      "subpackage": "export",
+      "ud_bytes": 20928,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
     },
     {
       "path": "model_generation/humanoid/__init__.py",
@@ -12077,6 +12137,54 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/candidate.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 16622,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/candidate_convert.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 9426,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/candidate_io.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 5054,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/candidate_session.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 15763,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/capture_audit.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -12197,11 +12305,23 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/contact_identification.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 21665,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/contact_law.py",
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 9374,
+      "ud_bytes": 9554,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12233,6 +12353,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/counterfactual.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 14230,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/crocoddyl_polynomial.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -12249,7 +12381,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 12733,
+      "ud_bytes": 13228,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12454,6 +12586,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 6481,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/force_torque.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 5610,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12717,7 +12861,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 16403,
+      "ud_bytes": 16567,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12989,6 +13133,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/native_viewers.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 11139,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/output_time_grid.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -13101,7 +13257,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 18288,
+      "ud_bytes": 20590,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13125,7 +13281,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 6827,
+      "ud_bytes": 7115,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13137,7 +13293,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 694,
+      "ud_bytes": 848,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13149,7 +13305,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 3770,
+      "ud_bytes": 4086,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13162,6 +13318,18 @@
       "package": "motion_matching",
       "subpackage": "pipeline",
       "ud_bytes": 3998,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/pipeline/plants/opensim.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "pipeline",
+      "ud_bytes": 4457,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13221,7 +13389,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 13559,
+      "ud_bytes": 13826,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13246,6 +13414,30 @@
       "package": "motion_matching",
       "subpackage": "pipeline",
       "ud_bytes": 12892,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/playback.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 8862,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/playback_adapters.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 8748,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13677,7 +13869,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 9222,
+      "ud_bytes": 9380,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13762,6 +13954,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 4721,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/viewer_lifecycle.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 9044,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15225,7 +15429,7 @@
       "classification": "ud-only",
       "package": "movement_optimizer",
       "subpackage": "",
-      "ud_bytes": 1153,
+      "ud_bytes": 1108,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -18321,7 +18525,7 @@
       "classification": "ud-only",
       "package": "physics",
       "subpackage": "aerodynamics",
-      "ud_bytes": 5412,
+      "ud_bytes": 5442,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -33573,7 +33777,55 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 516,
+      "ud_bytes": 3577,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/artifact_handoff.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 12113,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/capture_inspection_handoff.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 15946,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/comparison_indicator_workspace.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 16209,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/estimation_workspace.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 16203,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -33585,7 +33837,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 10702,
+      "ud_bytes": 22836,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -33598,6 +33850,30 @@
       "package": "workspace",
       "subpackage": "",
       "ud_bytes": 6694,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/results_workspace.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 24950,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "workspace/workflow_coordinator.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 22261,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -34948,9 +35224,9 @@
     {
       "path": "config/__init__.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-09-20",
+        "commit": "3ef6f91c33057fb1e6dd4817996e82bc834d8299"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -34961,9 +35237,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "codex-scheduled-tasks[bot]",
+        "date": "2026-05-26",
+        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -35052,9 +35328,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-29",
+        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -35427,6 +35703,19 @@
       }
     },
     {
+      "path": "model_generation/_lazy_map.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-19",
+        "commit": "6d2aa3ee36698e97f680f6ed5969c3c783fa4f33"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-04-26",
+        "commit": "158f6f4c95a49f42c3a50e321a9055f12fcecf68"
+      }
+    },
+    {
       "path": "model_generation/api/__init__.py",
       "ud": {
         "author": "Dieter Olson",
@@ -35585,9 +35874,9 @@
     {
       "path": "model_generation/builders/urdf_writer.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "8075878f55f6c9ee2fdd7327bd30affba0482bd8"
+        "author": "Dieter Olson",
+        "date": "2026-09-19",
+        "commit": "6d2aa3ee36698e97f680f6ed5969c3c783fa4f33"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -35872,8 +36161,8 @@
       "path": "model_generation/export/__init__.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-19",
+        "commit": "6d2aa3ee36698e97f680f6ed5969c3c783fa4f33"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -36118,9 +36407,9 @@
     {
       "path": "realtime/__init__.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-27",
+        "commit": "667b3ba078b21c5873e5991a87af0aec005397b2"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36131,9 +36420,9 @@
     {
       "path": "realtime/transport_file.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-06-09",
+        "commit": "64bd5222b1a4dd4643a1e4da6c702b8146149cfd"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -36573,9 +36862,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-20",
+        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
       },
       "tools": {
         "author": "Dieter Olson",
