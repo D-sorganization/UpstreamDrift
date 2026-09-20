@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10523 · Connect Swing, Impact, Flight, and Preserved Trajectory Viewers
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10523 (ORG-14, epic #10508)
+- **Branch:** feat/issue-10523-org14-trajectory-viewers
+- **PR:** #10560
+- **Paths:** `src/shared/python/workspace/trajectory_handoff.py`; `src/shared/python/workspace/results_workspace.py`; `src/shared/python/workspace/__init__.py`; `src/shared/python/physics/flight_trajectory_export.py`; `src/shared/python/physics/swing_state_providers.py`; `tests/integration/test_shot_trajectory_handoff.py`
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (All 3 integration tests pass in test_shot_trajectory_handoff.py; 65 regression tests pass; ruff clean; DRY duplication clean).
+- **Summary:** Implemented `ShotTrajectoryHandoffCoordinator` connecting swing-state providers, impact solvers, and aerodynamic ball flight simulation with specialized viewers per ADR-0047. Preserves viewer identities (Shot Tracer Qt, web BallFlight, and Impact Explorer ROC) without retiring viewers or merging distinct flight model families (`ud.flight_models` vs `swing_sim.flight`). Bridges `PipelineResult` to `swing_sim.ball_flight_trajectory/1` wire contract with immutable SI sample positions and timestamps. Enforces honest engine sourcing with fail-closed diagnostics (`UnsupportedEngineSourceError`, `ExtractionAdapterError`, `FrameUnitMismatchError`, `InvalidTrajectoryHashError`). Extends ResultsWorkspace with `COMPARE_FLIGHT_MODELS` and `OPEN_IN_IMPACT_EXPLORER` actions and provides atomic transaction staging/rollback.
+- **Next step:** Push branch, verify CI, enable auto-merge, release lease.
+- **Evidence:** tests/integration/test_shot_trajectory_handoff.py.
+
 ### DL-#10522 · Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages
 
 - **State:** in_progress
@@ -149,7 +163,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10515 (ORG-05, epic #10508)
 - **Branch:** feat/issue-10515-org05-desktop-navigation
 - **PR:** #10539
-- **Paths:** src/launchers/workspace_navigation.py; src/launchers/launcher_layout_manager.py; src/launchers/\_launcher_navigation_ui.py; src/launchers/launcher_ui_setup.py; tests/launchers/test_workspace_navigation.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Paths:** src/launchers/workspace_navigation.py; src/launchers/launcher_layout_manager.py; src/launchers/_launcher_navigation_ui.py; src/launchers/launcher_ui_setup.py; tests/launchers/test_workspace_navigation.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-20 at HEAD (SELF; 22 unit tests pass in test_workspace_navigation.py; all 42 tests in test_launcher_ui_setup.py pass; all 35 tests in test_launcher_layout_manager.py pass; all 19 tests in test_workspace_tabs.py pass; ruff check, ruff format --check, mypy, check_file_size_budget clean)
 - **Summary:** Built task-oriented desktop navigation over embedded tools (ORG-05). Added 5 primary task workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `ALIAS_MAP` layout migration into `LayoutManager.load_layout` preserving user custom tile scaling, view mode, and dock state. Enforced single-instance tool reuse in `dock_widget_as_tab` and `focus_or_open_tool_tab`. Provided accessible names, keyboard navigation, narrow-window scrolling via `QScrollArea`, return-to-workspace breadcrumbs (`WorkspaceBreadcrumbBar`), and actionable status explanations for missing/unconfigured capabilities (`explain_tool_status`).
@@ -195,7 +209,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** src/config/launcher_manifest.json; src/config/models.yaml; src/launchers/external_tools_adapter.py; src/launchers/launcher_model_handlers.py; src/launchers/launcher_process_manager.py; src/launchers/task_launch_truthfulness.py; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py; ui/public/capability-atlas/graph.json; ui/public/capability-atlas/index.html
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-20 at HEAD (84 launcher unit tests pass; architecture budget clean; file size budget clean; DRY duplication gate clean; agent_context clean; SPEC.md updated).
-- **Summary:** Audited capability launches and replaced misleading launch actions. Simulator prototype marked inspection/demo-only and distinct from qualified solvers; FreeMoCap parametric CLI guarded against zero-argument headless launch with parameter validation and cancellation safety; Video Analyzer placeholder fallback replaced with explicit unavailable provider diagnostic window (\_UnavailableToolWindow); library-only components (swing_optimizer, injury_analysis, pinn_pure_rigid, pinn_hybrid) and dual-shell service previews (canonical_core_estimation, canonical_core_comparison) audited with truthful dispositions, status messages, and next actions; fixed process assignment to Windows job objects for mock/invalid pids; regenerated capability atlas with verified freshness.
+- **Summary:** Audited capability launches and replaced misleading launch actions. Simulator prototype marked inspection/demo-only and distinct from qualified solvers; FreeMoCap parametric CLI guarded against zero-argument headless launch with parameter validation and cancellation safety; Video Analyzer placeholder fallback replaced with explicit unavailable provider diagnostic window (_UnavailableToolWindow); library-only components (swing_optimizer, injury_analysis, pinn_pure_rigid, pinn_hybrid) and dual-shell service previews (canonical_core_estimation, canonical_core_comparison) audited with truthful dispositions, status messages, and next actions; fixed process assignment to Windows job objects for mock/invalid pids; regenerated capability atlas with verified freshness.
 - **Next step:** Pass CI, auto-merge into main, release lease on #10512.
 - **Evidence:** tests/launchers/test_task_launch_truthfulness.py; tests/launchers/test_simulation_guis.py; tests/launchers/test_launcher_process_manager.py; tests/scripts/test_capability_atlas.py.
 
@@ -222,14 +236,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10534
 - **Paths:** src/config/capability_migration.py; src/config/capability_migration.json; scripts/generate_capability_baseline.py; docs/development/ORG01_CAPABILITY_BASELINE.md; tests/config/test_capability_migration_coverage.py; scripts/capability_atlas/render.py; docs/architecture/CAPABILITY_ATLAS.md
 - **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (18 unit tests pass in test_capability_migration_coverage.py covering all RED and GREEN acceptance cases; all 104 observed tiles, 45 parity features, 9 excluded tool packages cataloged with explicit migration metadata; legacy aliases starting_pose_matcher and putting_green_gui resolve acyclically; 15 golden fixtures pass hash checks; ruff/black/mypy clean).
+- **Last verified:** 2026-09-20 at HEAD (18 unit tests pass in test_capability_migration_coverage.py covering all RED and GREEN acceptance cases; all 104 observed tiles, 45 parity features, 9 excluded tool packages cataloged with explicit migration metadata; legacy aliases starting_pose_matcher and putting_green_gui resolve acyclically; 15 golden fixtures pass hash checks; ruff/black/mypy clean).
 - **Summary:** Built the canonical machine-checkable capability baseline inventory (`capability_migration.json`) and schema/validation engine (`capability_migration.py`) for Epic #10508. Enforced explicit contracts: IDs are unique, aliases are acyclic and resolve to retained targets, every capability has exactly one primary workspace domain, provider absence changes availability rather than identity, and preserved test fixtures retain golden byte hashes. Preserved ADR-0047 viewer identity and provider seam rulings. Created `scripts/generate_capability_baseline.py` producing `docs/development/ORG01_CAPABILITY_BASELINE.md` with freshness validation.
 - **Next step:** Push branch, open PR with auto-merge, complete lease on #10510.
 - **Evidence:** tests/config/test_capability_migration_coverage.py; docs/development/ORG01_CAPABILITY_BASELINE.md; src/config/capability_migration.json.
 
 ### DL-#10521 · Integrate Existing Results Browser Work With Replay, Data, and Export
 
-- **State:** completed
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10521 (ORG-13, epic #10508)
 - **Branch:** feat/issue-10521-org13-results-workspace-handoff
@@ -238,7 +252,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-19 at HEAD (5 integration tests pass in test_results_workspace_handoff.py, 13 unit tests pass in test_model.py; ruff clean; mypy clean; line budget clean).
 - **Summary:** Implemented `ResultsWorkspaceCoordinator` integrating canonical `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with Replay, Data Explorer, Plot, Compare, and Export actions. Enforces selected run context isolation (preventing global state leakage), artifact-type-aware action availability with diagnostic reasons, missing asset and unit mismatch validation (never guessing substitute files or silently comparing disparate units), and complete provenance retention during export and reimport (#8820).
-- **Next step:** Create PR, enable auto-merge, release lease.
+- **Next step:** Merged in PR #10548.
 - **Evidence:** tests/integration/test_results_workspace_handoff.py; tests/tools/matched_swing_browser/test_model.py.
 
 ### DL-#10513 · Validate Every Browser, Tauri, and Native Launch Destination
