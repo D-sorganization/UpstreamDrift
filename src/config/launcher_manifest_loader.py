@@ -32,6 +32,7 @@ from src.config.capability_state import (
     adapt_engine_matrix_qualification,
     resolve_canonical_display_name,
 )
+from src.config.engine_probe_cache import is_cached_engine_runtime_available
 from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
@@ -174,6 +175,16 @@ def _legacy_launcher_metadata(model: ModelConfig) -> LauncherPresentationMetadat
     )
 
 
+_ORIGINAL_IS_ENGINE_RUNTIME_AVAILABLE = is_engine_runtime_available
+
+
+def _check_engine_runtime(engine_type: str | None) -> bool:
+    """Check runtime availability using cache unless monkeypatched in tests."""
+    if is_engine_runtime_available is not _ORIGINAL_IS_ENGINE_RUNTIME_AVAILABLE:
+        return is_engine_runtime_available(engine_type)
+    return is_cached_engine_runtime_available(engine_type)
+
+
 def _provider_status(
     model: ModelConfig,
     status: str,
@@ -201,7 +212,7 @@ def _provider_status(
             return "provider_unavailable", detail
     elif isinstance(model.source_root, str) and not Path(model.source_root).exists():
         return "provider_unavailable", None
-    if check_runtime and not is_engine_runtime_available(model.engine_type):
+    if check_runtime and not _check_engine_runtime(model.engine_type):
         return "runtime_unavailable", None
     if model.engine_type and model.engine_type in KNOWN_PHYSICS_ENGINES:
         qual = adapt_engine_matrix_qualification(
@@ -212,6 +223,7 @@ def _provider_status(
             "ready",
             "engine_ready",
             "release_ready",
+            "gui_ready",
         ):
             return "experimental", None
     return status, None
@@ -372,8 +384,9 @@ def _qualify_engine_status(
     )
     if (
         is_engine
+        and status not in ("runtime_unavailable", "provider_unavailable")
         and not qualification.is_qualified
-        and status in ("ready", "engine_ready", "release_ready")
+        and status in ("ready", "engine_ready", "release_ready", "gui_ready")
     ):
         status = "experimental"
     return qualification, status
@@ -465,7 +478,7 @@ def _with_native_pyqt6_semantics(
         return tile
 
     status, status_detail = _provider_status(
-        model, model.launcher.status, repo_root, check_runtime=False
+        model, model.launcher.status, repo_root, check_runtime=True
     )
     is_engine = bool(
         (model.engine_type and model.engine_type in KNOWN_PHYSICS_ENGINES)
