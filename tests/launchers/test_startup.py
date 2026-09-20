@@ -98,6 +98,7 @@ def test_startup_results_from_dict() -> None:
         "ai_available": True,
         "docker_available": True,
         "startup_time_ms": 1234,
+        "bootstrapped_tools": ["tool1", "tool2"],
     }
     res = StartupResults.from_dict(data)
     assert res.registry == "mock_registry"
@@ -106,6 +107,7 @@ def test_startup_results_from_dict() -> None:
     assert res.ai_available is True
     assert res.docker_available is True
     assert res.startup_time_ms == 1234
+    assert res.bootstrapped_tools == ["tool1", "tool2"]
 
 
 def test_startup_results_from_dict_empty() -> None:
@@ -116,6 +118,7 @@ def test_startup_results_from_dict_empty() -> None:
     assert res.ai_available is False
     assert res.docker_available is False
     assert res.startup_time_ms == 0
+    assert res.bootstrapped_tools == []
 
 
 # ==== SplashScreen Tests ====
@@ -297,3 +300,48 @@ def test_startup_worker_run_docker_error(
 
     assert worker.results.docker_available is False
     worker.finished_signal.emit.assert_called_once()
+
+
+@patch("src.launchers.startup.secure_run")
+@patch("src.shared.python.engine_core.engine_manager.EngineManager")
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+@patch("src.launchers.embedded_tool_bootstrap.bootstrap_embeddable_tools")
+def test_startup_worker_bootstraps_embeddable_tools_and_omits_msleep(
+    mock_bootstrap, mock_registry, mock_engine_mgr, mock_secure_run
+) -> None:
+    """Worker executes PHASE_EMBEDDABLE_TOOLS and does not delay with msleep (issue #8938)."""
+    from src.launchers.startup import PHASE_EMBEDDABLE_TOOLS
+
+    root = Path("fake_root")
+    worker = AsyncStartupWorker(root)
+    worker.progress_signal = MagicMock()
+    worker.finished_signal = MagicMock()
+    mock_secure_run.return_value.returncode = 0
+    mock_bootstrap.return_value = ["mock_tool_1", "mock_tool_2"]
+
+    with patch.object(worker, "msleep") as mock_msleep:
+        worker.run()
+        mock_msleep.assert_not_called()
+
+    mock_bootstrap.assert_called_once()
+    assert worker.results.bootstrapped_tools == ["mock_tool_1", "mock_tool_2"]
+    phase_names = [p.name for p in worker.results.phases]
+    assert PHASE_EMBEDDABLE_TOOLS in phase_names
+    worker.finished_signal.emit.assert_called_once()
+
+
+def test_warn_on_manifest_gaps_gated_by_environment(monkeypatch) -> None:
+    """_warn_on_manifest_gaps skips missing_embeddable_manifest_tools unless env var is set."""
+    from src.launchers import embedded_tool_bootstrap as bootstrap
+
+    monkeypatch.delenv("UPSTREAM_WARN_MANIFEST_GAPS", raising=False)
+    monkeypatch.delenv("UPSTREAM_DEBUG_MANIFEST_GAPS", raising=False)
+
+    with patch.object(bootstrap, "missing_embeddable_manifest_tools") as mock_missing:
+        bootstrap._warn_on_manifest_gaps()
+        mock_missing.assert_not_called()
+
+        monkeypatch.setenv("UPSTREAM_WARN_MANIFEST_GAPS", "1")
+        mock_missing.return_value = []
+        bootstrap._warn_on_manifest_gaps()
+        mock_missing.assert_called_once()

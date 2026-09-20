@@ -13,6 +13,18 @@ Replaces placeholder canonical estimation shells with a bounded application serv
 - **Provenance Persistence Roundtrip (`EstimationRunResult`)**:
   - Encapsulates parameter estimates, final cost, iterations, solver success status, diagnostics, and serialized provenance for reproducible run recording and reimport.
 
+## Launcher Startup GUI Thread Non-Blocking & Worker Latency Elimination (#8938)
+
+Eliminates GUI thread blocking during launcher startup by offloading tool discovery/bootstrap to the worker thread and eliminating artificial sleep delays:
+- **Embeddable Tool Bootstrap Offloading (`src/launchers/embedded_tool_bootstrap.py`, `src/launchers/startup.py`, `src/launchers/upstream_drift_launcher.py`)**:
+  - `_warn_on_manifest_gaps()`: Skips disk/git manifest gap checks unless `UPSTREAM_WARN_MANIFEST_GAPS` or `UPSTREAM_DEBUG_MANIFEST_GAPS` is enabled, eliminating git-storm/disk scan overhead before first paint.
+  - `PHASE_EMBEDDABLE_TOOLS`: Added to `AsyncStartupWorker` phases with 15s timeout budget. Bootstraps embeddable tools on the background thread and collects discovered tools into `StartupResults.bootstrapped_tools`.
+  - `UpstreamDriftLauncher._init_managers`: Gated `bootstrap_embeddable_tools()` so it only runs synchronously when `loading=False`, preventing synchronous tool discovery from blocking the GUI thread during async startup.
+- **Worker Latency & Resource Cleanup (`src/launchers/startup.py`, `src/launchers/startup_session.py`)**:
+  - Eliminated artificial `msleep(500)` in `AsyncStartupWorker.run()`.
+  - Added explicit thread cleanup via `worker.finished.connect(worker.deleteLater)`.
+  - Added granular phase duration reporting and startup telemetry.
+
 ## Capability State Contract With Real-World Health Checks (ORG-02, #10511)
 
 Enforces the capability state contract across discovery, validation, and launcher tile dispatch:
