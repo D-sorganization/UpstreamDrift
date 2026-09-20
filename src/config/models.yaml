@@ -90,14 +90,14 @@ models:
 
   - id: "golf_simulation_suite"
     name: "Golf Simulation Suite"
-    description: "Complete golf simulation with ball flight physics and putting green"
+    description: "Prototype visualization and demo inspection suite; not a production physics solver"
     type: "golf_simulation"
     path: "src/tools/golf_simulation_suite/__main__.py"
-    engine_type: "golf_simulation"
     launcher:
       category: "simulation"
       logo: "assets/golf_logo.png"
-      status: "ready"
+      status: "prototype"
+      maturity: "prototype"
       default_launch: "tab"
 
   - id: "golf_simulator"
@@ -130,53 +130,69 @@ models:
 
   - id: "mujoco_models_shared"
     name: "MuJoCo Models"
-    description: "MuJoCo simulation models repository folder (opens only when the MuJoCo_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
+    description: "MuJoCo simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if MuJoCo_Models is absent beside this repository — #10514)"
     type: "shared_repo"
     path: "MuJoCo_Models"
     capabilities:
       - "model_repository"
+      - "models_integrations_access"
       - "mujoco"
     launcher:
-      category: "simulation"
+      category: "tool"
+      categories:
+        - "tool"
+        - "external"
       logo: "assets/mujoco.png"
       status: "experimental"
 
   - id: "drake_models_shared"
     name: "Drake Models"
-    description: "Drake simulation models repository folder (opens only when the Drake_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
+    description: "Drake simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Drake_Models is absent beside this repository — #10514)"
     type: "shared_repo"
     path: "Drake_Models"
     capabilities:
       - "model_repository"
+      - "models_integrations_access"
       - "drake"
     launcher:
-      category: "simulation"
+      category: "tool"
+      categories:
+        - "tool"
+        - "external"
       logo: "assets/drake.png"
       status: "experimental"
 
   - id: "pinocchio_models_shared"
     name: "Pinocchio Models"
-    description: "Pinocchio simulation models repository folder (opens only when the Pinocchio_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
+    description: "Pinocchio simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Pinocchio_Models is absent beside this repository — #10514)"
     type: "shared_repo"
     path: "Pinocchio_Models"
     capabilities:
       - "model_repository"
+      - "models_integrations_access"
       - "pinocchio"
     launcher:
-      category: "simulation"
+      category: "tool"
+      categories:
+        - "tool"
+        - "external"
       logo: "assets/pinocchio.png"
       status: "experimental"
 
   - id: "opensim_models_shared"
     name: "OpenSim Models"
-    description: "OpenSim simulation models repository folder (opens only when the OpenSim_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
+    description: "OpenSim simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if OpenSim_Models is absent beside this repository — #10514)"
     type: "shared_repo"
     path: "OpenSim_Models"
     capabilities:
       - "model_repository"
+      - "models_integrations_access"
       - "opensim"
     launcher:
-      category: "simulation"
+      category: "tool"
+      categories:
+        - "tool"
+        - "external"
       logo: "assets/opensim.png"
       status: "experimental"
 
@@ -522,6 +538,22 @@ models:
       status: "beta"
       default_launch: "tab"
 
+  - id: "matched_swing_browser"
+    name: "Results Browser"
+    description: "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations"
+    type: "special_app"
+    path: "src/tools/matched_swing_browser/__main__.py"
+    capabilities:
+      - "motion_matching"
+      - "results_browser"
+      - "physical_acceptance"
+      - "ledger"
+    launcher:
+      category: "tool"
+      logo: "assets/matched_swing_browser.png"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "data_explorer"
     name: "Data Explorer"
     description: "Import, filter, and visualise simulation datasets"
@@ -699,7 +731,7 @@ models:
 
   - id: "biomech_gait"
     name: "Gait Model"
-    description: "Exercise preset that forwards the gait filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)"
+    description: "Saved shortcut/preset forwarding gait filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)"
     type: "biomech_exercise"
     exercise: "gait"
     capabilities:
@@ -714,7 +746,7 @@ models:
 
   - id: "biomech_sit_to_stand"
     name: "Sit-to-Stand Model"
-    description: "Exercise preset that forwards the sit-to-stand filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)"
+    description: "Saved shortcut/preset forwarding sit-to-stand filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)"
     type: "biomech_exercise"
     exercise: "sit_to_stand"
     capabilities:
@@ -729,7 +761,7 @@ models:
 
   - id: "movement_optimizer"
     name: "Movement Optimizer"
-    description: "Cross-engine trajectory optimization (requires the Movement_Optimizer sibling checkout beside this repository; prefer the vendored tools_movement_optimizer tile — #9478)"
+    description: "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics — #10514)"
     type: "special_app"
     # Sibling checkout next to UpstreamDrift; resolved by
     # ModelSourcePathPolicy.resolve_source_root (issue #7984).
@@ -741,6 +773,7 @@ models:
       - "trajectory_optimization"
       - "cross_engine_analysis"
       - "biomechanics"
+      - "unified_task_authority"
     launcher:
       category: "biomechanics"
       categories:
@@ -840,35 +873,38 @@ models:
 
   - id: "swing_optimizer"
     name: "Swing Optimizer"
-    description: "Trajectory optimization with constraint solving and cost functions"
+    description: "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16"
     type: "special_app"
     path: "src/shared/python/optimization/swing_optimizer.py"
     launcher:
       category: "simulation"
       logo: "swing_optimizer.svg"
       status: "experimental"
+      maturity: "experimental"
       default_launch: "tab"
 
   - id: "injury_analysis"
     name: "Injury Risk Analysis"
-    description: "Joint stress, spinal load, and swing modification analysis for injury prevention"
+    description: "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17"
     type: "special_app"
     path: "src/shared/python/injury/injury_risk.py"
     launcher:
       category: "biomechanics"
       logo: "injury_analysis.svg"
       status: "experimental"
+      maturity: "experimental"
       default_launch: "tab"
 
   - id: "drake_dashboard"
     name: "Drake Dashboard"
-    description: "Interactive Drake simulation dashboard"
+    description: "Interactive Drake simulation dashboard (advanced mode of Drake engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
     path: "src/launchers/drake_dashboard.py"
     engine_type: "drake"
     capabilities:
       - "rigid_body"
       - "dashboard"
+      - "advanced_mode"
       - "recorder"
     launcher:
       category: "physics_engine"
@@ -878,13 +914,14 @@ models:
 
   - id: "mujoco_dashboard"
     name: "MuJoCo Dashboard"
-    description: "Interactive MuJoCo simulation dashboard"
+    description: "Interactive MuJoCo simulation dashboard (advanced mode of MuJoCo engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
     path: "src/launchers/mujoco_dashboard.py"
     engine_type: "mujoco"
     capabilities:
       - "rigid_body"
       - "dashboard"
+      - "advanced_mode"
       - "recorder"
     launcher:
       category: "physics_engine"
@@ -894,13 +931,14 @@ models:
 
   - id: "pinocchio_dashboard"
     name: "Pinocchio Dashboard"
-    description: "Interactive Pinocchio simulation dashboard"
+    description: "Interactive Pinocchio simulation dashboard (advanced mode of Pinocchio engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
     path: "src/launchers/pinocchio_dashboard.py"
     engine_type: "pinocchio"
     capabilities:
       - "rigid_body"
       - "dashboard"
+      - "advanced_mode"
       - "recorder"
     launcher:
       category: "physics_engine"

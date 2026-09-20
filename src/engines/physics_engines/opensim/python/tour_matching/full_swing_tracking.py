@@ -27,6 +27,7 @@ from typing import Any, TypeAlias
 
 from defusedxml import ElementTree as SafeET
 import numpy as np
+import math
 from numpy.typing import NDArray
 
 from src.engines.physics_engines.opensim.python.tour_matching.address import (

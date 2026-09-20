@@ -1,4 +1,207 @@
-# SPEC.md — Repository Specification Document
+## Generate Accurate Atlas, Help, Parity, and Completion Records (ORG-21, #10531)
+
+Generates accurate, evidence-backed capability atlas graphs, feature parity matrices, industrial readiness records, and workspace documentation without shell-only or stale placeholders:
+- **Workspace Documentation & Freshness Acceptance (`tests/scripts/test_workspace_documentation_freshness.py`)**:
+  - `test_workspace_membership_drift`: Verifies workspace domains match canonical set (`simulation`, `analysis`, `capture`, `putting`, `training`, `governance`) across `capability_migration.json`, `models.yaml`, `launcher_manifest.json`, and `capability_connections.json`, rejecting unregistered domains.
+  - `test_undocumented_alias`: Enforces that all deprecated and configured aliases resolve transitively to active canonical destinations without cycles.
+  - `test_broken_source_and_help_links`: Enforces that all evidenced routes, node targets, and edge references in `capability_connections.json` resolve to existing files on disk.
+  - `test_stale_generated_views`: Validates that generated capability atlas artifacts, feature parity matrix, and industrial readiness index match committed files byte-for-byte.
+  - `test_shell_only_parity_cannot_be_interpreted_as_compute_complete`: Ensures that surface presence (PyQt/API/web) does not conflate with compute engine execution or qualification completeness.
+  - `test_generators_deterministic`: Asserts deterministic, repeatable outputs across repeated generator executions.
+  - `test_training_controller_readme_accurately_reflects_shipped_surface`: Asserts that `src/tools/training_controller/README.md` documents current PyQt6 GUI implementation (`MainWindow`, `gui.py`, `_embed_adapter.py`) without obsolete draft or deferred notes.
+  - `test_industrial_readiness_issue_8820_reconciled`: Validates that entry U3 (#8820, PR #9995) is recorded as merged with verified 40-char SHA and valid implementation/test paths.
+- **Catalog & Documentation Reconciliation**:
+  - `src/config/industrial_readiness.json`: Reconciled item U3 (#8820) status to `"merged"` with merge commit `8ef1bec803de292e44724cdf1f96d3ebf52bf2f2` and test evidence.
+  - `docs/operations/industrial-readiness-index.md`: Synchronized through `generate_industrial_readiness_index`.
+  - `src/tools/training_controller/README.md`: Updated to truthfully describe the shipped PyQt6 GUI surface and canonical embedded adapter.
+
+## Results Browser Tile for Matched Swing Program (MS-80, #10353)
+
+Implements a dual-pane PyQt6 embeddable tool and lineage model (`src/tools/matched_swing_browser/`) indexing and browsing the matched-swing execution ledger (`reports/matched_swing_ledger.json`):
+- **Data Model & Lineage Spine (`src/tools/matched_swing_browser/model.py`)**:
+  - `MatchedSwingFilter`: Filter criteria across engine, capture (`driver`, `iron`), lane, verdict (`PASSED`, `REJECTED`, `UNCLASSIFIED`), and full-text search. Adapts to `ResultFilter` from `src.shared.python.workspace.results_browser` for backend/text lineage, resolving issue #8824 and providing the contract consumed by #10521 (ORG-13).
+  - `MatchedSwingBrowserModel`: Loads and validates `Ledger` data from disk. Formats quantitative metrics with explicit SI/angular units (mm, degrees). Resolves associated file artifacts (GIF animations, NPZ trajectory arrays, receipt JSONs, and parity reports) with fail-closed existence checks. Decorated with `@precondition` and `@postcondition` contracts.
+- **Dual-Pane Desktop GUI (`src/tools/matched_swing_browser/gui.py`)**:
+  - `MatchedSwingBrowserWidget`:
+    - Left pane: Interactive filter group (engine, capture, lane, verdict, search text, and filter reset) coupled to a 7-column `QTableWidget` sorting and listing all 98 committed receipts.
+    - Right pane: Run summary card with acceptance pill badge (green `PASSED`, red `REJECTED`, gray `UNCLASSIFIED`), five standardized comparison metrics (Whole, Early, Terminal, Club, and Pelvis Yaw RMSE), physical gates breakdown, and asynchronous `QMovie` playback for runs with visual GIF animations.
+    - Action launchers: *Open in Tour Matching Viewer* (loads candidate NPZ into 3D viewer), *Open in Native Viewer* (dispatches to MS-83 `open_in_native_viewer`), *Open Parity Report* (displays `parity_vs_mujoco.json`), and *View Receipt JSON*.
+    - Non-blocking resource lifecycle via `cleanup()` stopping active movies.
+  - `MatchedSwingBrowserWindow`: Top-level window wrapper hosting the browser widget with closeEvent cleanup.
+- **Launcher Embedding & Registry Parity**:
+  - `_MatchedSwingBrowserEmbedAdapter` (`src/tools/matched_swing_browser/_embed_adapter.py`): Implements `EmbeddableTool` protocol for tab and dock hosting in the launcher.
+  - Package entry point in `pyproject.toml` under `upstream_drift.embeddable_tools`.
+  - Fallback adapter registration in `src/launchers/embedded_tool_bootstrap.py` (`FALLBACK_ADAPTER_MODULES`).
+  - Desktop tile catalog in `src/config/models.yaml` and web/desktop manifest in `src/config/launcher_manifest.json` with matching ID `matched_swing_browser`.
+  - Feature parity entry in `src/config/feature_parity.json` with regenerated `docs/development/feature_parity_matrix.md`.
+  - Tile icon assets: `assets/logos/matched_swing_browser.svg` and `src/launchers/assets/matched_swing_browser.png`.
+- **Evidence & Verification**:
+  - Automated tests: `tests/tools/matched_swing_browser/test_model.py` and `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py` (21 tests including headless journey test).
+  - Headless screenshot evidence: `docs/development/matched_swing_program/evidence/browser/screenshot.png`.
+
+## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
+
+Consumes provider ownership decisions and enforces immutable runtime import authority and provenance verification across repository, installed, and packaged execution environments:
+- **Provider Authority & Provenance Verification (`src/shared/python/config/tools_vendor_authority.py`)**:
+  - `assert_runtime_provenance_parity(pytest_root, packaged_app_root)`: Asserts that pytest (repository test runtime) and packaged application environments resolve identical implementation roots, failing closed with `ProviderUnavailableError` upon divergence.
+  - `verify_provider_provenance(canonical_root, candidate_path)`: Asserts that candidate modules or paths resolve strictly within the declared canonical provider root, preventing silent escapes to unpinned local forks.
+  - `inspect_provider_authority(repo_root, ...)`: Unified fail-closed authority inspection covering pinned gitlink checkouts, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback.
+- **Fail-Closed Mismatch Gating**:
+  - Pin mismatches explicitly report `Tools pin stale (expected X, found Y)` and produce blocked status (`provider_unavailable`) with remediation instructions.
+  - Missing provider checkouts and missing wheel distributions fail closed with actionable errors, refusing unpinned local fork or sibling fallbacks.
+  - Underlying provider import failures surface clean diagnostic blocked states rather than unhandled host crashes.
+- **Canonical Seam Delegation & Backward Compatibility**:
+  - Sidekick public seams (`EmbeddableTool` adapter, chat history service) resolve through authoritative Tools provider.
+  - Movement Optimizer public seams delegate through `tools_movement_optimizer` via `ALIAS_MAP`, registered in the `optimize_train` workspace.
+  - Pendulum public seams (`swing_objective_lab` adapter, `pendulum_simulator` tile) run through intended provider authority.
+  - Legacy supported imports (`upstream_drift_tools`) delegate cleanly to canonical providers with formal deprecation warnings.
+
+## Engine Capability Matrix, Dynamic Tile Status Derivation, and Non-Blocking Runtime Discovery (MS-71, #10351)
+
+Establishes a single source of truth for physics engine capabilities, qualifications, and tile status across Python and TypeScript surfaces:
+- **Dynamic Capability Matrix Generation (`scripts/generate_engine_matrix.py`, `src/config/engine_capability_matrix.json`)**:
+  - `generate_engine_capability_matrix()`: Scans active physics engines and reconciles capability ledgers (`engine_capabilities.py`), tier declarations (`TIER`), and verification receipts across all 16 standardized capability dimensions (contacts, muscle actuation, ground reaction forces, differentiability, inverse dynamics, closed loops, fluid coupling, etc.).
+  - Distinguishes qualified engines (`advertised_and_qualified`), verified gaps (`advertised_but_unqualified`), and unadvertised features. Reconciles experimental engines (e.g. JaxSim experimental tier) and aliases (e.g. MyoSim/MuJoCo).
+  - CLI supports `--write` for deterministic matrix generation and `--check` for CI freshness validation.
+- **Dynamic Engine Status Derivation & Tile Readiness (`src/config/launcher_manifest_loader.py`, `src/launchers/model_card.py`, `src/config/capability_state.py`)**:
+  - Manifest loader queries the capability matrix and runtime availability: tiles transition to `ready` only when the underlying engine is both installed and qualified (`advertised_and_qualified`), rendering `experimental` or `runtime_unavailable` otherwise.
+  - PyQt model cards (`ModelCard`) render dynamic capability chips and status indicators honoring qualified receipts without optimistic fallback.
+  - Non-blocking engine discovery cache (`src/config/engine_probe_cache.py`, `#8938`) caches discovered engine statuses asynchronously on disk (`~/.upstream_drift/engine_probe.json`) with thread-safe atomic writes to eliminate GUI startup pauses.
+- **Dynamic Matrix API Endpoints (`src/api/routes/capabilities.py`, `src/api/routes/launcher.py`)**:
+  - `GET /engines/matrix`: Public API endpoint exposing the authoritative capability matrix to frontend clients.
+  - `GET /engines/capabilities`: Dynamically populated from `engine_capability_matrix.json`, replacing hardcoded mock profiles and enforcing parity between REST APIs and backend ledgers.
+- **Frontend Capability Chips (`ui/src/components/simulation/LauncherDashboard.tsx`)**:
+  - React/Tauri launcher dashboard styles capability badges and status chips (`ready`, `experimental`, `runtime_unavailable`) consistent with system design tokens.
+
+## Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (ORG-07, #10514)
+
+Projects 28 multi-provider exercise variants into 7 cohesive logical model choices while preserving underlying provider assets and enforcing strict authority resolution:
+- **Logical Model Grouping & Projections (`src/shared/python/config/model_variant_grouping.py`)**:
+  - `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection`: Projects 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices (`Gait Analysis`, `Squat Kinematics`, `Jump Land Mechanics`, `Run Sprint Cycle`, `Sit to Stand Transition`, `Stair Climb Descent`, `Single Leg Balance`).
+  - Strict DbC invariants on engine selection preventing silent engine fallback or substitution.
+  - Name collision protection enforcing distinct identities across disparate canonical models.
+- **Shortcut & Task Mapping Resolution (`resolve_shortcut`)**:
+  - Maps legacy shortcut IDs (`biomech_sit_to_stand`, `biomech_gait`) to `biomech_exercise` with explicit preset selection, guaranteeing `sit_to_stand` never falls back to `gait`.
+  - Maps engine dashboards (`drake_dashboard`, `mujoco_dashboard`, `pinocchio_dashboard`) into engine advanced modes.
+  - Resolves `movement_optimizer` and `tools_movement_optimizer` to unified task workflows with #9406 authority resolution.
+- **Sibling Checkout Diagnostics & Handler Hardening (`src/launchers/launcher_model_handlers.py`, `src/launchers/exercise_dashboard.py`)**:
+  - `SharedRepoHandler.get_missing_checkout_diagnostic`: Emits actionable remediation diagnostics when sibling repository clones are missing.
+  - `ExerciseDashboard`: Dynamicizes exercise title and configuration in UI widgets and error messages.
+
+## Unified Artifact and Project Context Handoff Between Workspaces (ORG-08, #10517)
+
+Defines typed, schema-validated artifact and project context handoffs across workspaces with cryptographic integrity and adapter conversion:
+- **Typed Artifact & Workspace Handoff Models (`src/shared/python/workspace/artifact_handoff.py`)**:
+  - `ArtifactKind`: Defines canonical artifact kinds (`time_series_trajectory`, `mesh_geometry`, `kinematic_tree`, `optimization_result`, `sensor_stream`, `calibration_data`).
+  - `ArtifactReference`: Immutable artifact reference with URI/path, kind, schema version, cryptographic SHA-256 integrity hash, coordinate frame convention, and provenance metadata.
+  - `WorkspaceHandoff`: Package containing project metadata, run context, active artifact references, and handoff provenance.
+  - Precondition and schema validation (`compute_file_sha256`, `SUPPORTED_HANDOFF_SCHEMA_VERSIONS`, `SUPPORTED_KINDS`, `SUPPORTED_FRAMES`): Validates file existence and bitwise integrity before transfer or write.
+- **Named Artifact Adapter Registry (`register_artifact_adapter`, `convert_artifact`)**:
+  - Pluggable adapter registry allowing verified artifact transformation across coordinate frames and schema formats with complete provenance recording.
+- **Session Project Store Handoff API (`src/shared/python/workspace/project_store.py`)**:
+  - `SessionProjectStore`: Extends project store with `register_run`, `load_run`, `list_runs`, `set_active_run`, `get_active_run`, `clone_run`, `check_run_artifacts`, `export_handoff`, and `import_handoff`.
+  - Enforces Design-by-Contract boundary checks: cross-session subject mismatch rejection, atomic durability under interrupted writes, and non-destructive run cloning without falsified output evidence.
+
+## Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (ORG-18, #10527)
+
+Surfaces cross-engine comparison and injury risk indicators into dedicated application service coordinators, consuming qualified biomechanical simulation runs and enforcing fail-closed compatibility and clinical non-diagnostic contracts:
+- **Comparison & Indicator Coordinator (`src/shared/python/workspace/comparison_indicator_workspace.py`)**:
+  - `ComparisonIndicatorWorkspaceCoordinator`: Dedicated application service surfacing `canonical_core_comparison` and `injury_analysis` capabilities across `results_and_compare` and `exercise_analysis` workspace shells.
+  - Exposes `compare_runs()` and `compute_injury_indicators()` without duplicating backend physics, numerical solvers, or scoring routines.
+- **Run Compatibility and Model Fidelity Invariance (`ComparisonRunArtifact`, `validate_run_compatibility`)**:
+  - Validates physical units, coordinate frame identifiers, timebase sample interval alignment ($|dt_1 - dt_2| < 10^{-6}$), channel name coherence, and finite signal values.
+  - Enforces model fidelity level invariance via `ModelFidelityLevel` enum (`STUB_PENDULUM`, `SIMPLIFIED_KINETICS`, `QUALIFIED_FULL_BODY`): rejects cross-comparisons between incompatible fidelity tiers with explicit `IncompatibleArtifactError`.
+- **Cross-Engine Comparison Delegation & Provenance (`CrossEngineComparisonAdapter`)**:
+  - Delegates trace alignment and difference metric evaluations to existing comparison services (`compare_traces`), calculating trajectory RMSE, peak dynamic differences, and deterministic SHA-256 provenance hashes.
+- **Biomechanical Load Channel Validation & Clinical Disclaimer (`InjuryIndicatorAdapter`)**:
+  - Requires explicit physical load channels (`peak_compression_bw`, `peak_lateral_shear_bw`, `x_factor_stretch`) normalized by body weight (BW) and fails closed when channels are absent (no mock data fallback).
+  - Adapts biomechanical inputs to `InjuryRiskScorer` and stamps every indicator output with mandatory non-clinical educational/research disclaimers.
+
+## Task-Oriented React and Tauri Workspace Navigation (ORG-06, #10516)
+
+Applies consistent, task-oriented workspace navigation across React and Tauri web/desktop interfaces aligned with the five canonical domains:
+- **Shared Catalog Definitions (`ui/src/types/workspaceNavigation.ts`)**:
+  - `TASK_WORKSPACES`: Canonical definitions for the 5 primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`).
+  - Strict membership contracts mapping launcher tools, embedded viewers, and workflow actions to their authoritative task domain.
+- **Capability Adapter & Surface Isolation (`ui/src/api/capabilityAdapter.ts`)**:
+  - `resolveWorkspaceToolAction`: Resolves tool launches across web and Tauri desktop surfaces.
+  - Native-only tools trigger desktop window launches under Tauri or provide actionable explanations with web alternatives when accessed from standard browsers.
+- **Accessible Navigation Components (`ui/src/components/layout/WorkspaceNavigation.tsx`)**:
+  - `WorkspaceSidebar`: Accessible sidebar navigation with visible focus states, ARIA landmarks, and keyboard focus recovery to `#main-content`.
+  - `WorkspaceBreadcrumb`: Accessible return-to-workspace breadcrumb trail preserving hierarchical task context.
+  - `WorkspaceView`: Tabular and card layout of workspace member capabilities with reachability badges and direct actions.
+- **Bookmarkable Routing & State Preservation (`ui/src/pages/WorkspacePage.tsx`, `ui/src/App.tsx`, `ui/src/utils/routeTitles.ts`)**:
+  - Dedicated `/workspaces/:slug` routes supporting direct linking, browser forward/back navigation, and centralized route titles.
+  - Integrated launcher dashboard quick-links into workspace destinations.
+
+## Motion Matching Tile: Visual Playback, Standardized Metrics, and Navigation Handoff (MS-82, #10355)
+
+Enhances the Motion Matching PyQt6 tile (`src/tools/motion_matching/gui.py` and `src/tools/motion_matching/pipeline.py`) to deliver full visual playback, standardized metrics, acceptance gating, and tool handoffs:
+- **Kinematics & Dynamics Animation Playback**:
+  - Automatically discovers and plays `ik_playback.gif` and `tracking_playback.gif` upon matching completion using `QMovie` instances mounted on dedicated display labels.
+  - Safe lifecycle management (`cleanup()`, `_stop_movies()`, and `closeEvent`) preventing memory leaks and background movie resource retention.
+- **Five Standardized Headline Metrics & Acceptance Verification**:
+  - `extract_five_metrics_and_acceptance(summary)`: Extracts `full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, and `inside_support_polygon_fraction`.
+  - Color-coded acceptance badge (`PASSED`, `REJECTED`, `UNCLASSIFIED`) reflecting qualification criteria and frame convergence.
+- **Plant Engine Registry Integration**:
+  - Backend selector dynamically queries registered physics engines via `available_engines()` querying the shared plant registry, exposing MuJoCo, Drake, Pinocchio, and Pink.
+- **Workflow Navigation Handoffs**:
+  - "Open in Results Browser": Launches the Matched Swing Results Browser dialog backed by `MatchedSwingBrowserModel`.
+  - "Open in Viewer": Launches the interactive 3D `TourMatchingViewerWindow`.
+- **Feature Parity Registration**:
+  - Upgraded `tools.motion_matching` in `src/config/feature_parity.json` from `gap` to `parity`, closing the #10106 capability gap.
+
+## Replace Canonical Estimation Shell With Bounded Estimator Coordinator (ORG-17, #10526)
+
+Replaces placeholder canonical estimation shells with a bounded application service coordinator integrating parameter estimation, identifiability analysis, and trajectory evaluation:
+- **Estimation Workspace Coordinator (`src/shared/python/workspace/estimation_workspace.py`)**:
+  - `EstimationWorkspaceCoordinator`: Application service executing bounded parameter estimation runs, evaluating model-observation residuals, and preserving execution provenance.
+  - Wires `solve_single_trial_map`, `IdentifiabilityGateOptions`, and spline trajectory evaluation into a coherent workflow without duplicating optimization or gate probe routines.
+- **Run Configuration and Parameter Priors (`EstimationRunConfig`, `ParameterPriorConfig`)**:
+  - Structured parameter bounds and prior regularization (`prior` and `prior_scale`).
+  - Pre-execution validation enforcing positive sample times ($dt > 0$), parameter length matching ($x_0$, bounds, prior scales), and positive finite standard deviations.
+- **Fail-Closed Gate & Diagnostic Handling**:
+  - Pre-run identifiability gating with rank defect detection and conditioning diagnostics via `IdentifiabilityGateConfig`.
+  - Fail-closed handling for non-finite costs and numerical divergence in trajectory rollouts.
+- **Provenance Persistence Roundtrip (`EstimationRunResult`)**:
+  - Encapsulates parameter estimates, final cost, iterations, solver success status, diagnostics, and serialized provenance for reproducible run recording and reimport.
+
+## Launcher Startup GUI Thread Non-Blocking & Worker Latency Elimination (#8938)
+
+Eliminates GUI thread blocking during launcher startup by offloading tool discovery/bootstrap to the worker thread and eliminating artificial sleep delays:
+- **Embeddable Tool Bootstrap Offloading (`src/launchers/embedded_tool_bootstrap.py`, `src/launchers/startup.py`, `src/launchers/upstream_drift_launcher.py`)**:
+  - `_warn_on_manifest_gaps()`: Skips disk/git manifest gap checks unless `UPSTREAM_WARN_MANIFEST_GAPS` or `UPSTREAM_DEBUG_MANIFEST_GAPS` is enabled, eliminating git-storm/disk scan overhead before first paint.
+  - `PHASE_EMBEDDABLE_TOOLS`: Added to `AsyncStartupWorker` phases with 15s timeout budget. Bootstraps embeddable tools on the background thread and collects discovered tools into `StartupResults.bootstrapped_tools`.
+  - `UpstreamDriftLauncher._init_managers`: Gated `bootstrap_embeddable_tools()` so it only runs synchronously when `loading=False`, preventing synchronous tool discovery from blocking the GUI thread during async startup.
+- **Worker Latency & Resource Cleanup (`src/launchers/startup.py`, `src/launchers/startup_session.py`)**:
+  - Eliminated artificial `msleep(500)` in `AsyncStartupWorker.run()`.
+  - Added explicit thread cleanup via `worker.finished.connect(worker.deleteLater)`.
+  - Added granular phase duration reporting and startup telemetry.
+
+## Task-Oriented Desktop Navigation Over Existing Embedded Tools (ORG-05, #10515)
+
+Organizes desktop launcher workflows into 5 task-oriented primary workspaces and preserves user customization during alias migration:
+- **Task-Oriented Workspace Navigation (`src/launchers/workspace_navigation.py`, `src/launchers/_launcher_navigation_ui.py`)**:
+  - `TaskWorkspace`: Defines 5 primary task workspaces (`capture_analyze`, `model_match`, `shot_course_lab`, `optimize_train`, `results_compare`) and secondary navigation destinations (`developer_research`, `all_tools`, `favorites`, `history`).
+  - Single-instance tool reuse policy (`find_existing_tool_tab`, `focus_or_open_tool_tab`, `dock_widget_as_tab`): Reuses existing open tabs rather than spawning duplicate windows or parallel sessions.
+  - Return-to-workspace breadcrumb bar (`WorkspaceBreadcrumbBar`): Provides accessible breadcrumb hierarchy, keyboard navigation, and return-to-workspace navigation.
+  - Discoverability status explanations (`explain_tool_status`): Surfaces human-actionable diagnostic reasons and remediation for missing, degraded, or unconfigured capabilities.
+- **Layout Manager & Alias Migration (`src/launchers/launcher_layout_manager.py`)**:
+  - `migrate_saved_layout`: Migrates legacy saved layouts through `ALIAS_MAP` while strictly preserving custom user tile scaling, view mode, and docking geometry.
+  - `get_filtered_order`: Filters launcher tile presentation by active task workspace.
+- **Accessible & Responsive Sidebar UX (`src/launchers/_launcher_navigation_ui.py`, `src/launchers/launcher_ui_setup.py`)**:
+  - Wraps navigation sidebar in `QScrollArea` to enable narrow-window responsiveness without clipping navigation controls.
+  - Configures accessible names and descriptions for screen reader accessibility and keyboard focus order.
+
+## Launch Truthfulness and Guard Problematic Tiles (ORG-03, #10512)
+
+Replaces misleading launches with real tasks or explicit nonlaunchable states:
+- **Truthful Launch Dispatch & Diagnostic Windows (`src/launchers/task_launch_truthfulness.py`)**:
+  - Distinguishes prototype/demo simulator tiles (`putting_green`, `ball_flight`, `swing_flight`) from qualified numerical solvers, clearly labeling inspection-only execution.
+  - Guards FreeMoCap parametric CLI against zero-argument headless launches, enforcing parameter configuration before invocation.
+  - Replaces placeholder execution fallbacks with explicit diagnostic unavailable tool windows (`_UnavailableToolWindow`) rather than opening blank or misconfigured interfaces.
+- **Truthfulness Contract Verification (`tests/launchers/test_task_launch_truthfulness.py`)**:
+  - Verifies that unconfigured or preview-only capabilities refuse silent mock execution and report actionable diagnostic reasons.
 
 ## Capability State Contract With Real-World Health Checks (ORG-02, #10511)
 
@@ -80,6 +283,32 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
 - **Provenance Retention & Round-Trip Reimport (`export_result_with_provenance`, `reimport_result_artifact`)**:
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
+
+## Guided Workflow Transitions Across Unified Workspaces (ORG-09, #10518)
+
+Coordinates multi-stage end-to-end biomechanical workflows across workspaces with disk-backed verification, cryptographic artifact hashing, and client UI projection parity:
+- **Guided Workflow Pipeline Coordinator (`src/shared/python/workspace/workflow_coordinator.py`)**:
+  - `WorkflowStepId`: Defines the 7 canonical stages (`capture_import`, `inspect_targets`, `configure_model`, `fit`, `dynamics`, `compare`, `export`).
+  - `WorkflowMode`: Tailors required stages by execution mode (`full_body_3d`, `single_view_coaching`, `ball_flight_analysis`). In `single_view_coaching`, 3D physics steps are skipped automatically without blocking downstream steps.
+  - `WorkflowCoordinator`: Manages workflow state transitions with strict preconditions:
+    - Step readiness evaluated dynamically against on-disk artifact files and cryptographic SHA-256 hashes rather than transient UI button state.
+    - Contractual isolation: `DYNAMICS` stage cannot inherit a purely kinematic pass without physics validation.
+    - Pre-existing imported artifacts support entry at downstream stages (`entry_from_artifacts`) without re-running prior stages.
+    - Cancellation diagnostic recording and automatic attempt counter increments on retry.
+- **Client UI State Projections (`WorkflowProjection`, `StepProjection`)**:
+  - Pure data projections serialized via `to_dict()` consumed identically across Qt desktop widgets (`WorkflowStripWidget`) and React/Tauri interfaces (`WorkflowStrip.tsx`).
+
+## Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces (ORG-10, #10519)
+
+Connects Capture Rig as the primary capture and coaching surface to downstream Inspect Targets and Model Calibration workspaces over typed artifact references:
+- **Capture Rig Inspection Handoff (`src/shared/python/workspace/capture_inspection_handoff.py`)**:
+  - `CaptureRigInspectionCoordinator`: Coordinates imported media and video capture passing `ArtifactReference` instances to pose inspection and model calibration workspaces.
+  - Multi-Estimator Isolation: Preserves MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, original video clocks, and source pixels.
+  - FreeMoCap Pre-Spawn Validation: Validates working directories and dependencies before process launch; cancellation preserves source files intact; maintains license isolation.
+  - Optical & C3D Data Integrity: Masks missing marker samples as `NaN`; rejects incompatible spatial frames and unit conversions; prevents 2D coordinates from pretending to be metric 3D.
+  - Session Store Registration: Automatically registers target observations and calibration models into `SessionProjectStore` preserving annotations and club parameters.
+- **Capture Rig UI Action Binding (`src/tools/capture_rig/journey_actions.py`, `src/tools/capture_rig/gui.py`)**:
+  - Adds `Open in Inspect Targets` action to Capture Rig GUI and journey actions.
 
 ## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
 
@@ -6022,6 +6251,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-20 | #10569 | Replaced np.linalg.norm with math.sqrt(np.vdot) and np.einsum in opensim tour matching pipeline (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10491 | Barrier-reduced same-integrator G1 continuation converged at 46.8 mm (rollout == replay) and is committed as rejected evidence; `--range-barrier-weight` CLI flag and raised trail-side effort bounds; ledger, README, turnover updated |
 | 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
 | 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |
@@ -6233,7 +6463,6 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 | 2026-09-03 | #9462 | Pose Studio Save/Load are real (#8882). Both buttons were shown enabled but only flashed a transient `QToolTip` carrying an internal tracker id; `_EmbedAdapter.is_dirty` returned a hardcoded `False` despite a 64-deep undo stack, and `PoseStudioWindow` had no `closeEvent`, so an hour of joint edits was discarded on close with no prompt and no way to have saved them. Implemented rather than disabled: `pose_io` already covers all five engines and `docs/user_guide/pose_studio/save_formats.md` already asserted Pose Studio routed through it, which was untrue until now. New `pose_files.py` holds the per-engine file filter and suffix; `MainWidget.is_dirty()` is real, cleared by a successful save or load; load and close prompt Save / Discard / Cancel; the embed adapter delegates to the widget's public `is_dirty`. |
 | 2026-09-03 | #9449 | Bumped the release version 2.1.1 -> 2.1.2 across every surface `scripts/check_version_consistency.py` audits (`pyproject.toml`, `src/api/_version.py`, `ui/package.json` + `ui/package-lock.json`, root `Cargo.toml`, `rust_core/upstream-physics/pyproject.toml`, `VERSION`, `ui/src-tauri/tauri.conf.json`, `scripts/config/sbom_baseline.json`) plus this Identity table and SECURITY.md's footer. This is the fix-forward release for #9449: the pushed `v2.1.1` tag's `release.yml` run failed in `build` (`build_hooks.py` requires `ui/dist`, CI set `SKIP_UI_BUILD`) and published no wheel, SBOM, checksums, PyPI distribution, or GitHub release. Per `docs/operations/release-runbook.md` "Failed Release Recovery -- Fix Forward, Never Move a Tag", `v2.1.1` is retained where it is and superseded by 2.1.2; CHANGELOG entries moved from `[2.1.1]` to `[2.1.2] - 2026-09-03` with a retained-and-superseded note. No tag is created by this change -- tagging is the release operator's signed step. (spec 1.0.718) |
 | 2026-09-03 | #1520 | Migrated the Section 12 change log to rows keyed by pull request (date, `#<pr>`, summary) instead of a serial spec version, and stopped requiring a `Spec Version` bump per pull request. 590 rows rewritten with each original serial preserved inline as `(spec X.Y.Z)`; row count and every row summary unchanged. `scripts/ci/check_spec_changelog_duplicates.py` now enforces the PR-keyed row contract and key uniqueness for rows dated on or after the cutover, delegating to the fleet-shared `shared_scripts/spec_changelog.py`; its duplicate-*body* ratchet is kept unchanged because a copied row is a different defect from a key collision, and its baseline shrank from 3 recorded pairs to 2. The 54 serial-collision allowances are removed, describing a defect that can no longer occur. `SPEC.md` is now in `.prettierignore` so a new row cannot re-pad the whole table. Governed campaign for Repository_Management#1520 (program #1505). |
-| 2026-09-20 | n/a | Replaced `np.linalg.norm()` with `math.sqrt(np.vdot())` for small 1D arrays and `np.sqrt(np.einsum(...))` for N-D arrays in Opensim tour matching pipeline for performance improvement. (spec-exempt: micro-optimization) |
 | 2026-09-03 | #9446 | Closed the `EngineSrcPivot` restore asymmetry PR #9446 documented as latent. When a third-party cleanup pops a `src.*` parent package's `sys.modules` key while its child's key stays cached, the pivot's snapshot captures a child-without-parent; exit used to restore the child orphaned-by-key, so the next fresh import of the parent produced a childless parent module that the import system never re-links (the cached child short-circuits `_find_and_load`), and every dotted-string patch target under it (`monkeypatch.setattr("src.x.y.attr", ...)`, `mock.patch("src.x.y.f")`) raised `AttributeError` while the module-object form worked -- the exact CI failure #9446 worked around in the myosuite adapter test. `_relink_to_parent` now re-imports the missing parent and links the restored child onto it, parents-first; the `src.shared` keep-set is exempt because the import-alias machinery deliberately seeds child-only entries there and the pivot never evicts that subtree. Regression-covered in `tests/unit/repo_hygiene/test_no_permanent_src_module_shadow.py` by reproducing the popped-parent state through a full enter/exit cycle and asserting the dotted-string form patches the identical child object. (spec 1.0.717) |
 | 2026-09-03 | n/a | **ADR-0046 Stage 2's launch-monitor module retirement is complete.** Wave 3b retires the last eight -- `strokes_gained_types` and `_scoring_statistics` (P12), `outcome_proxy` (P13), `strokes_gained` (P14), `conformance_bundle` (P17) and the `player_covariation` trio (P18) -- onto the canonical launch-monitor layer vendored from Tools, deleting 2,425 lines. Across the four waves all 28 `port-up`/`merge` modules are gone; `src/tools/launch_monitor_model/` now holds only the re-export facade, the app-local `project`, and `strokes_gained_baseline`. That third file is ADR-0048 step P12's documented exclusion, not a leftover: the canonical layer types its `baseline` argument against runtime-checkable protocols because `rate_of_closure.launch_monitor_strokes_gained_baseline` is already the authority for loading and digest-verifying that artifact, but a protocol validates nothing at a trust boundary and the analytics API parses a baseline off the wire, so the hash-verifying pydantic model stays here and is pinned `isinstance`-compatible with both protocols. Behaviour deltas, each under an owner ruling and re-pinned with old and new values: **G1-D2** makes the session cell the canonical strokes-gained inference unit, so a per-player longitudinal fit reports sample_count 5 rather than 40 and P4's r_squared moves 0.15450437016457175 -> 0.5682576505731145 with p 0.012104880151308768 -> 0.1410798565763777 -- the slope is unchanged to 15 significant figures (0.075881035543697128), so what the decision corrected is a significance claim built on pseudo-replication, not a measurement; UpstreamDrift's shot-level fit survives as the named variant `shot-level-sg-trend/1` and every summary names its estimand. **G1-D3** (exclude-and-audit) was already this module's posture and needed no edit. **D22/D23** adopted UpstreamDrift's postures, so no UpstreamDrift number moves; the P18 union adds `method_description` (D26's field count 19 -> 20, leaving `backing_data` as the only legacy-only field, by design), a typed `interval_withheld_reason`, and the documented `BETWEEN_PLAYER_INTERVAL_MIN_GROUPS` threshold. The drift gates stay at 71 with no unruled pin moved. (spec 1.0.716) |
 | 2026-09-03 | n/a | ADR-0046 Stage 2 wave 3a executed: the launch-monitor contract spine and the longitudinal tier -- `flexible_analysis` (P10), `contract_v2` (P11), `longitudinal_types` + `longitudinal_statistics` (P15), `longitudinal` (P16), `corpus` (P19) and the four `dataset_reference*` modules (P20) -- retire onto the canonical launch-monitor layer vendored from Tools, deleting 2,948 lines of UpstreamDrift implementation. Wave contents are ordered by the **canonical** dependency graph rather than by ADR-0048's port-order number, because canonical `contract_v2` imports canonical `flexible_analysis` and canonical `dataset_reference_contract` imports canonical `corpus`: retiring a consumer while its dependency still resolved to UpstreamDrift would leave two copies of `FlexibleAnalysisResult` and of `AnalysisContextV2` in one process. The wave carries three owner rulings, each re-pinned with old and new values. **D15** removes under-sampled predictors from the Benjamini-Hochberg pool before correction, so the drift gate's adjusted p value moves 0.9217169029997262 -> 0.8646154865187129 and now agrees with `rate_of_closure` at delta 0.0 (the 6.60% inflation was always upward, so the defect could only make a finding read less significant than its evidence). **D17** carries the boolean 0/1 projection label up from `relationships` onto `CorrelationEstimate.is_boolean_projected`; the coefficient is unchanged. **G1-D1** makes the pooled longitudinal estimator a named-method pair: `PooledAssociationV1.method` is required with no default and no back-compat alias, `player_fixed_effects_ols_clustered_by_player` becomes `ud-cluster-robust-fe/1`, and `dl-random-effects/1` reproduces `rate_of_closure`'s random-effects estimate (-0.5282789828979909, CI [-1.0145384362562389, -0.04201952953974292], tau^2 0.1594137105940229, I^2 69.38732305300319%) bit-for-bit, closing measured divergences D10, D11 and D12. The drift gates stay at 71 and their pinned numbers are unchanged; three gates change sides from DIFFER to RESOLVED. (spec 1.0.715) |
