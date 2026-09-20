@@ -38,6 +38,18 @@
 - Reproduction: `pytest tests/launchers/test_workspace_navigation.py tests/launchers/test_workspace_tabs.py tests/launchers/test_launcher_layout_manager.py tests/launchers/test_launcher_ui_setup.py -v`.
 - Next: Open PR referencing Fixes #10515, enable auto-merge, release lease.
 
+## MS-82 Motion Matching Tile: Visual Playback, Standardized Metrics, and Navigation Handoff (#10355)
+
+- Branch: `feat/10355-motion-matching-tile-playback`, lease `antigravity-10355`, DL-#10355.
+- Changes:
+  - `src/tools/motion_matching/gui.py`: Added visual playback support using `QMovie` for `ik_playback.gif` and `tracking_playback.gif` with safe cleanup on widget close; added display of five standardized headline metrics (`full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, `inside_support_polygon_fraction`) and color-coded acceptance badge; populated physics backend combo from plant registry; added navigation action buttons "Open in Results Browser" and "Open in Viewer".
+  - `src/tools/motion_matching/pipeline.py`: Added `available_engines()` querying plant registry and fallback engines; added `extract_five_metrics_and_acceptance(summary)` for standardized metric extraction and qualification verdict determination.
+  - `src/tools/matched_swing_browser/model.py`: Resolved circular dependency between `matched_swing_browser` and `workspace` by moving `ResultFilter` import to `TYPE_CHECKING` and lazy runtime usage in `to_result_filter()`.
+  - `src/config/feature_parity.json` & `docs/development/feature_parity_matrix.md`: Upgraded `tools.motion_matching` from `gap` to `parity`, closing #10106 capability gap.
+  - `tests/tools/motion_matching/test_motion_matching_gui.py`: Unit tests for engine selection from plant registry, results pane movies, metrics, acceptance badge, navigation buttons, and step failures.
+- Reproduction: `pytest tests/tools/motion_matching/ tests/config/feature_parity/ -v`.
+- Next: Open PR, arm auto-merge, verify merge, release lease.
+
 ## ORG-17 Replace Canonical Estimation Shell With Bounded Estimator Coordinator (#10526)
 
 - Branch: `feat/issue-10526-org17-estimation-workflow`, lease `antigravity-org17`, DL-#10526.
