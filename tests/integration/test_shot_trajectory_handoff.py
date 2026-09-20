@@ -14,7 +14,8 @@ import hashlib
 import json
 import math
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -75,6 +76,52 @@ from src.shared.python.workspace.trajectory_handoff import (
 )
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.fixture(autouse=True)
+def _ensure_rust_available_or_mock() -> Iterator[None]:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if is_rust_available():
+        yield
+        return
+
+    import sys
+    from types import ModuleType
+
+    fake_physics = ModuleType("upstream_physics")
+
+    class _FakePoint:
+        def __init__(self, t: float, x: float, y: float, z: float) -> None:
+            self.t = t
+            self.x = x
+            self.y = y
+            self.z = z
+            self.vx, self.vy, self.vz = 60.0, 0.0, 5.0
+
+    class _FakeResult:
+        def get_points(self) -> list[Any]:
+            points = []
+            for i in range(20):
+                t = i * 0.25
+                x = i * 10.0
+                z = max(0.0, 25.0 - ((i - 10) ** 2) * 0.2)
+                points.append(_FakePoint(t, x, 0.0, z))
+            return points
+
+    fake_physics.IntegratorConfig = MagicMock(return_value=object())
+    fake_physics.AeroBallProperties = MagicMock(return_value=object())
+    fake_physics.AirProperties = MagicMock(return_value=object())
+    fake_physics.simulate_ball_trajectory_py = MagicMock(return_value=_FakeResult())
+
+    with (
+        patch.dict(sys.modules, {"upstream_physics": fake_physics}),
+        patch(
+            "src.shared.python.physics.rust_kernel.is_rust_available",
+            return_value=True,
+        ),
+    ):
+        yield
 
 
 def _build_ud_family_fixture() -> dict[str, Any]:
