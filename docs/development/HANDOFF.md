@@ -1,5 +1,43 @@
 # Current Matching Continuation Handoff
 
+## ORG-16 Consolidate Optimization and Training Launchers (#10525)
+
+- Branch: `feat/issue-10525-org16-optimization-training`, lease `antigravity-ud-10525`, DL-#10525.
+- Changes:
+  - `src/shared/python/workspace/optimization_training_workspace.py`: Implemented `OptimizationTrainingWorkspaceCoordinator`, `OptimizationJobConfig`, `TrainingJobConfig`, `OptimizationObjective`, `OptimizationResult`, `WorkspaceJob`, `WorkspaceJobKind`, `WorkspaceJobState`, and diagnostic error types (`InvalidOptimizationConfigError`, `IncompatibleBackendError`, `ModelCompatibilityError`, `DuplicateJobSubmissionError`).
+  - Bounded job form over the public optimizer and training controller authority: validates objectives, constraints, and model compatibility prior to dispatch.
+  - Fail-closed handling for unsupported/uninstalled backends (e.g. Crocoddyl/Drake transcription remains honestly disabled).
+  - Enforced lifecycle state integrity (cancel/pause/resume; cancelled jobs cannot be mislabeled complete).
+  - Deduplicated identical submissions using configuration digests without creating redundant jobs.
+  - Linked dataset selection with provenance directly to durable project sessions in `SessionProjectStore` (survives store save and reopen).
+  - `src/shared/python/workspace/__init__.py`: Exported public coordinator and configuration data structures.
+  - `tests/integration/test_optimization_training_workspace.py`: Full RED and GREEN regression test suite (9/9 tests passing).
+- Reproduction: `python3 -m pytest tests/integration/test_optimization_training_workspace.py --timeout=60`.
+- Next: Open PR with auto-merge, release lease, proceed to next issue in backlog.
+
+## ORG-15 Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes (#10524)
+
+- Branch: `feat/issue-10524-org15-scene-delivery-modes`, lease `local`, DL-#10524.
+- Changes:
+  - `src/shared/python/workspace/shot_course_workspace.py`: Implemented `ShotCourseWorkspaceCoordinator`, `ShotCourseMode`, `TerrainConfig`, `ShotCourseRun`, `PuttingFixture`, `BunkerFidelityTier`, `BunkerRunRecord`, `SimulatorDeliveryRequest`, and `ActionAvailability`.
+  - Enforced explicit model assumptions: scene view is visual inspection only; bunker preserves F0-F3 fidelity tiers; putting conforms to rolling/ground contracts; terrain mutation increments revision and invalidates prior runs; simulator delivery verifies destination capabilities and produces explicit submission receipts.
+  - `src/shared/python/workspace/__init__.py`: Exported coordinator and domain value objects.
+  - `tests/integration/test_shot_course_workspace.py`: 7 RED/GREEN integration tests covering incompatible flight-to-ground transition rejection, terrain mutation invalidation of dependent runs, scene view rejection of computed shots, unsupported simulator destination disabling, putting fixture round-trip, bunker fidelity export round-trip, and simulator network failure and cancellation flows.
+- Reproduction: `pytest tests/integration/test_shot_course_workspace.py --timeout=60`.
+- Next: PR auto-merge, complete lease on #10524, pick next issue in Epic #10508.
+
+## ORG-14 Trajectory Viewers Handoff (#10523)
+
+- Branch: `feat/issue-10523-org14-trajectory-viewers`, lease `antigravity-ud-10523`, DL-#10523.
+- Changes:
+  - `trajectory_handoff.py`: Implemented `ShotTrajectoryHandoffCoordinator` connecting swing-state extraction, end-to-end impact/flight simulation, wire export, artifact registration, and specialized viewers per ADR-0047.
+  - Wire contract: `swing_sim.ball_flight_trajectory/1` with immutable SI sample positions and timestamps surviving interchange without mutating original retained samples.
+  - Honest engine sourcing: Routes `manual` and `mujoco` (via `MuJoCoSwingStateProvider`) engines to `SwingBallFlightPipeline`. Refuses unsupported engines (`drake`, `pinocchio`) fail-closed with `UnsupportedEngineSourceError`; refuses arbitrary unvalidated full-body runs fail-closed with `ExtractionAdapterError`; refuses mismatched frames and invalid hashes fail-closed with `FrameUnitMismatchError` and `InvalidTrajectoryHashError`.
+  - Results Workspace actions: Extended `WorkspaceActionType` with `COMPARE_FLIGHT_MODELS` and `OPEN_IN_IMPACT_EXPLORER` and diagnostic availability logic in `ResultsWorkspaceCoordinator`.
+  - Session context & rollback: Carries environmental and launch conditions across active session context; provides atomic transaction staging and rollback.
+- Reproduction: `python -m pytest tests/integration/test_shot_trajectory_handoff.py -v`.
+- Next: PR auto-merge and release lease.
+
 ## [ORG-12] Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (#10522)
 
 - Worktree / Branch: `feat/issue-10522-org12-model-match-handoff`, lease `antigravity-ud-10522`, DL-#10522.
