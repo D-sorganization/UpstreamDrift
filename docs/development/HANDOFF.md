@@ -1,5 +1,18 @@
 # Current Matching Continuation Handoff
 
+## ORG-01 Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity (#10510)
+
+- Worktree: main checkout, branch `feat/issue-10510-org01-capability-baseline`, lease `antigravity-ud-10510`, DL-#10510.
+- Changes:
+  - `src/config/capability_migration.py`: Machine-checkable capability migration data model and validation engine (`CapabilityMigrationInventory`, `MigrationEntry`, `FixtureEntry`). Enforces uniqueness, acyclic alias resolution, primary workspace exclusivity, provider availability decoupling, saved layout validation, and fixture hash verification.
+  - `src/config/capability_migration.json`: Complete canonical baseline inventory cataloging all 104 launcher tiles/models (61 base desktop models + 29 provider models + 14 web catalog tiles), 45 feature parity contracts, 9 excluded tool packages, and 15 golden preservation fixtures with SHA-256 integrity hashes.
+  - `scripts/generate_capability_baseline.py`: Markdown generator and freshness validator for `docs/development/ORG01_CAPABILITY_BASELINE.md`.
+  - `docs/development/ORG01_CAPABILITY_BASELINE.md`: Architecture decision document recording baseline inventory, workspace domains, alias resolution graph, and preservation of ADR-0047 viewer identity and provider seams.
+  - `tests/config/test_capability_migration_coverage.py`: 18 RED and GREEN regression tests covering unclassified local/provider/manifest/CLI detection, alias cycle detection, duplicate identity prevention, missing provenance failure, legacy alias resolution, and fixture hash preservation.
+  - `scripts/capability_atlas/render.py` & `docs/architecture/CAPABILITY_ATLAS.md`: Linked ORG-01 baseline from the generated capability atlas.
+- Reproduction: `pytest tests/config/test_capability_migration_coverage.py --timeout=60` and `python -m scripts.generate_capability_baseline --check`.
+- Next: PR auto-merge, complete lease on #10510, proceed to downstream issues in Epic #10508.
+
 ## ORG-13 Results Workspace Handoff (#10521)
 
 - Branch: `feat/issue-10521-org13-results-workspace-handoff`, lease `antigravity-ud-10521`, DL-#10521.
@@ -32,6 +45,8 @@ Docker build and dependency-artifact regeneration before merge.
   - `force_inspection.py`, `gui.py`: `ForceInspectionWidget` synchronized with physical playback time embedded in Tour Matching Viewer.
 - Reproduction: `pytest tests/unit/motion_matching/test_force_torque.py tests/unit/motion_matching/test_counterfactual.py tests/unit/motion_matching/test_candidate_session_forces.py tests/unit/api/test_candidate_session_analysis_routes.py tests/unit/tools/test_tour_matching_viewer_forces.py`.
 - Next: PR auto-merge; epic #10476 completion!
+
+> > > > > > > origin/main
 
 ## MV-05 Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading (#10481)
 

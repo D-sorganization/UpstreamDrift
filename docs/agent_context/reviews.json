@@ -1,12 +1,12 @@
 {
   "reviews": {
     "capture-atlas": {
-      "fingerprint": "5303bc2bf6c7caa0675ff86c7876fc14665568c4f10947dd7b54eeae59ddc946",
+      "fingerprint": "61f9a62332025150b8c22fb64bccb071585ca14d5c742da5b960a82dcdaa5773",
       "inputs": {
         "docs/agent_context/contracts/capture-atlas.md": "f247f8c3e26b102c1cffb1a132c7dd1a7610377c846cf330953d0ccbf90baec4",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
-        "scripts/capability_atlas/render.py": "50329f3dea4d265c205d090c037452ac1d1bad80ce3f35109e71729edc344976",
+        "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
@@ -16,15 +16,15 @@
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414",
         "tests/tools/capture_rig/test_workflow.py": "f583fecf6ebe50173a9e5b5108f4b105ec8636cec926ce665393fcd90669dbe2"
       },
-      "rationale": "Reviewed Camera Setup to recording-plan edge and shared setup instructions; imported-video goals remain independent of camera hardware. 563 Capture Rig, 16 atlas/workflow and 15 goal tests pass. Formatting changed registry whitespace only."
+      "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "e7de7a2c0ac477abb5450fe63f6f571781a3a0e82b5906b387e9615ef01ffbb0",
+      "fingerprint": "720d48420082e3eca308cdb3976fc584118244971c04b6e9b3b90942f3991fa9",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
-        "scripts/capability_atlas/render.py": "50329f3dea4d265c205d090c037452ac1d1bad80ce3f35109e71729edc344976",
+        "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
         "src/config/feature_parity.json": "d6667fb93d20e1240791d601252e2ca6ffd85bb7a2eba4deec26edc4075f8eba",
         "src/config/launcher_manifest.json": "8ed95d534d6ba9e35d528837da43346bac32588f9766018d8c99c89a17099aa2",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Add SUPERSEDED banner to models.yaml pointing to matched_swing_program single source of truth (#10327)"
+      "rationale": "Preserve launcher boundary review under baseline capability inventory ORG-01"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
