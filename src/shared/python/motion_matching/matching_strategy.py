@@ -408,7 +408,8 @@ class CandidateStrategyPackage:
         Fails closed with KeyError if any coordinate in target_coordinate_order
         is missing from the source candidate.
         """
-        source_names = list(self._candidate.metadata.coordinate_names)
+        cand_meta = self._candidate.metadata
+        source_names = list(cand_meta.coordinate_names)
         source_index = {name: i for i, name in enumerate(source_names)}
 
         indices: list[int] = []
@@ -427,7 +428,7 @@ class CandidateStrategyPackage:
         )
         remapped_a = self._a[:, idx_arr] if self._a is not None else None
 
-        meta_dict = self._candidate.metadata.to_dict()
+        meta_dict = cand_meta.to_dict()
         meta_dict["coordinate_names"] = list(target_coordinate_order)
         if meta_dict.get("velocity_names"):
             meta_dict["velocity_names"] = list(target_coordinate_order)
@@ -461,13 +462,13 @@ class CandidateStrategyPackage:
         target_path = Path(path)
         target_path.parent.mkdir(parents=True, exist_ok=True)
 
+        cand_meta = self._candidate.metadata
+        cand_dict = cand_meta.to_dict()
+        strat_dict = self._strategy.to_dict()
+
         arrays: dict[str, Any] = {
-            "strategy_manifest_json": np.array(
-                json.dumps(self._strategy.to_dict(), indent=2)
-            ),
-            "candidate_manifest_json": np.array(
-                json.dumps(self._candidate.metadata.to_dict(), indent=2)
-            ),
+            "strategy_manifest_json": np.array(json.dumps(strat_dict, indent=2)),
+            "candidate_manifest_json": np.array(json.dumps(cand_dict, indent=2)),
             "time_s": np.ascontiguousarray(self._candidate.time_s),
             "q": np.ascontiguousarray(self._candidate.q),
         }
@@ -630,13 +631,11 @@ class StrategyComparisonService:
         """Extract kinematics and loop closure tracking error profiles."""
         errors: dict[str, dict[str, Any]] = {}
         for pkg in packages:
-            key = pkg.strategy.engine
-            kin_report = pkg.strategy.qualification.get_report(
-                QualificationStage.KINEMATIC_FIT
-            )
-            force_report = pkg.strategy.qualification.get_report(
-                QualificationStage.FORCE_FEASIBLE
-            )
+            strat = pkg.strategy
+            key = strat.engine
+            qual = strat.qualification
+            kin_report = qual.get_report(QualificationStage.KINEMATIC_FIT)
+            force_report = qual.get_report(QualificationStage.FORCE_FEASIBLE)
 
             closure_res = 0.0
             if pkg.reactions and pkg.reactions.closure_wrench is not None:
