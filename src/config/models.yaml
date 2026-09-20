@@ -90,14 +90,14 @@ models:
 
   - id: "golf_simulation_suite"
     name: "Golf Simulation Suite"
-    description: "Complete golf simulation with ball flight physics and putting green"
+    description: "Prototype visualization and demo inspection suite; not a production physics solver"
     type: "golf_simulation"
     path: "src/tools/golf_simulation_suite/__main__.py"
-    engine_type: "golf_simulation"
     launcher:
       category: "simulation"
       logo: "assets/golf_logo.png"
-      status: "ready"
+      status: "prototype"
+      maturity: "prototype"
       default_launch: "tab"
 
   - id: "golf_simulator"
@@ -840,24 +840,26 @@ models:
 
   - id: "swing_optimizer"
     name: "Swing Optimizer"
-    description: "Trajectory optimization with constraint solving and cost functions"
+    description: "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16"
     type: "special_app"
     path: "src/shared/python/optimization/swing_optimizer.py"
     launcher:
       category: "simulation"
       logo: "swing_optimizer.svg"
       status: "experimental"
+      maturity: "experimental"
       default_launch: "tab"
 
   - id: "injury_analysis"
     name: "Injury Risk Analysis"
-    description: "Joint stress, spinal load, and swing modification analysis for injury prevention"
+    description: "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17"
     type: "special_app"
     path: "src/shared/python/injury/injury_risk.py"
     launcher:
       category: "biomechanics"
       logo: "injury_analysis.svg"
       status: "experimental"
+      maturity: "experimental"
       default_launch: "tab"
 
   - id: "drake_dashboard"
