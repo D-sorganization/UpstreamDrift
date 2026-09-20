@@ -17,59 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10529 · Consume Provider Ownership Decisions and Verify Runtime Import Authority
-
-- **State:** in_progress
-- **Owner:** local
-- **Issue:** #10529 (ORG-20, epic #10508)
-- **Branch:** feat/issue-10529-org20-provider-ownership
-- **Paths:** src/shared/python/config/tools_vendor_authority.py; tests/integration/test_installed_provider_authority.py
-- **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (8 integration tests pass in test_installed_provider_authority.py; 221 launcher/manifest tests pass with zero regressions; ruff check & format clean; file line budget passed).
-- **Summary:** Consumed provider ownership decisions and implemented runtime import authority and provenance verification across repository, installed, and packaged execution environments. Added `assert_runtime_provenance_parity` failing closed upon root divergence between pytest and packaged app contexts. Added `verify_provider_provenance` asserting module paths resolve within canonical provider roots. Implemented `inspect_provider_authority` handling pinned gitlinks, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback. Verified public seams for Sidekick, Movement Optimizer (`tools_movement_optimizer` via `ALIAS_MAP`), Pendulum (`swing_objective_lab`), and backward compatibility import delegation (`upstream_drift_tools` -> `sidekick`).
-- **Next step:** Push branch, open PR with auto-merge, update issue.
-- **Evidence:** tests/integration/test_installed_provider_authority.py.
-
-### DL-#10518 · Guided Workflow Transitions Across Unified Workspaces
-
-- **State:** in_progress
-- **Owner:** local
-- **Issue:** #10518 (ORG-09, epic #10508)
-- **Branch:** feat/issue-10518-org09-workflow-transitions
-- **PR:** #10544
-- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/workflow_coordinator.py; tests/unit/workspace/test_workflow_transitions.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (26 unit tests pass across test_workflow_transitions.py, test_artifact_handoff.py, test_project_store.py, test_results_browser.py; ruff check and format clean; pre-commit mypy passed; check_file_size_budget clean).
-- **Summary:** Implemented WorkflowCoordinator coordinating the 7-stage workflow pipeline (`Capture/Import -> Inspect Targets -> Configure Model -> Fit -> Dynamics -> Compare -> Export`) over typed ArtifactReference inputs and outputs. Evaluates live step readiness and diagnostics directly from cryptographic sha256 hashes and on-disk artifact existence rather than superficial flags. Added support for single-view coaching mode skipping 3-D dynamics when physics engines are unavailable, enforced contract distinction preventing dynamics from inheriting purely kinematic passes, tracked cancellation reasons and retry attempts, supported later-stage entry from imported artifacts, and exposed a pure state projection with to_dict() for Qt and React/Tauri parity.
-- **Next step:** Push branch, open PR, enable auto-merge, release lease on #10518, and notify parent orchestrator.
-- **Evidence:** tests/unit/workspace/test_workflow_transitions.py; tests/unit/workspace/test_artifact_handoff.py; tests/unit/workspace/test_project_store.py; tests/unit/workspace/test_results_browser.py.
-
-### DL-#10517 · Unified Artifact and Project Context Handoff Between Workspaces
-
-- **State:** in_progress
-- **Owner:** local
-- **Issue:** #10517 (ORG-08, epic #10508)
-- **Branch:** feat/issue-10517-org08-workspace-handoff
-- **PR:** #10542
-- **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/artifact_handoff.py; src/shared/python/workspace/project_store.py; tests/unit/workspace/test_artifact_handoff.py
-- **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (18 unit tests pass across test_artifact_handoff.py, test_project_store.py, test_results_browser.py; ruff check and format clean; check_file_size_budget clean).
-- **Summary:** Extended SessionProjectStore and ProjectMetadata with typed, versioned artifact handoffs (WorkspaceHandoff, ArtifactReference, ArtifactKind, RunMetadata). Enforced Design-by-Contract boundary preconditions (cross-session subject mismatch rejection, frame and schema validation, artifact existence and cryptographic sha256 hash checks before disk write, canceled/failed job qualification invariant). Added migration handling preserving unknown supported fields in older project.json files, atomic durability under interrupted writes, active context selection, and non-destructive run cloning without falsified output evidence. Implemented registered named artifact adapter conversion preserving provenance.
-- **Next step:** Push branch, open PR, enable auto-merge, release lease on #10517, and notify parent orchestrator.
-- **Evidence:** tests/unit/workspace/test_artifact_handoff.py; tests/unit/workspace/test_project_store.py; tests/unit/workspace/test_results_browser.py.
-
 ### DL-#10527 · Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces
 
-- **State:** shipped
+- **State:** in_progress
 - **Owner:** local
 - **Issue:** #10527 (ORG-18, epic #10508)
 - **Branch:** feat/issue-10527-org18-comparison-indicator-workspace
-- **PR:** #10568 (merged)
+- **PR:** #10568
 - **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/comparison_indicator_workspace.py; tests/integration/test_comparison_indicator_workspace.py
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (10 integration tests pass in test_comparison_indicator_workspace.py; 23 total workspace integration tests pass; ruff check & format clean; mypy 0 issues; LoD clean; file line budget 447 <= 500 LOC; merged to main at 8e6cadb5c).
+- **Last verified:** 2026-09-20 at HEAD (10 integration tests pass in test_comparison_indicator_workspace.py; 23 total workspace integration tests pass; ruff check & format clean; mypy 0 issues; LoD clean; file line budget 447 <= 500 LOC).
 - **Summary:** Implemented `ComparisonIndicatorWorkspaceCoordinator` surfacing `canonical_core_comparison` and `injury_analysis` capabilities across `results_and_compare` and `exercise_analysis` workspace shells. Provides fail-closed validation on physical units, coordinate frame identifiers, timebase sample interval alignment, channel names, and model fidelity invariance (`ModelFidelityLevel` enum rejecting cross-tier comparisons with `IncompatibleArtifactError`). Integrates `CrossEngineComparisonAdapter` delegating trace alignment to `compare_traces` with SHA-256 provenance hashes, and `InjuryIndicatorAdapter` requiring physical load channels (`peak_compression_bw`, `peak_lateral_shear_bw`, `x_factor_stretch`) normalized by body weight without mock fallbacks, stamping every output with non-clinical disclaimers.
-- **Next step:** Shipped.
+- **Next step:** Push branch, open PR with auto-merge, update issue.
 - **Evidence:** tests/integration/test_comparison_indicator_workspace.py.
 
 ### DL-#10515 · Build Task-Oriented Desktop Navigation Over Existing Embedded Tools
