@@ -26,8 +26,19 @@ def test_iter_duplicate_paragraphs_no_dupes() -> None:
 
 
 @pytest.mark.unit
-def test_iter_duplicate_paragraphs_ignores_headings() -> None:
-    text = "### The Rules\n\npara one\n\n### The Rules\n\npara two"
+def test_iter_duplicate_paragraphs_ignores_headings_and_managed_notices() -> None:
+    text = (
+        "### The Rules\n\n"
+        "Some text here.\n\n"
+        "### The Rules\n\n"
+        "> This section is managed centrally by Repository_Management and synced fleet-wide. "
+        "> Do NOT edit it directly in individual repositories — edit the source in "
+        "Repository_Management/fleet-rules/fleet-guard.md.\n\n"
+        "> This section is managed centrally by Repository_Management and synced fleet-wide. "
+        "> Do NOT edit it directly in individual repositories — edit the source in "
+        "Repository_Management/AGENTS.md.\n\n"
+        "Different text."
+    )
     assert mod._iter_duplicate_paragraphs(text) == []
 
 
