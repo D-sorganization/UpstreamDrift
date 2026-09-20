@@ -1,5 +1,18 @@
 # Current Matching Continuation Handoff
 
+## ORG-13 Results Workspace Handoff (#10521)
+
+- Branch: `feat/issue-10521-org13-results-workspace-handoff`, lease `antigravity-ud-10521`, DL-#10521.
+- Changes:
+  - `results_workspace.py`: Implemented `ResultsWorkspaceCoordinator`, `ResultArtifactItem`, `ResultCategory`, `WorkspaceActionType`, `ActionAvailability`, `ComparisonResult`, `MissingAssetDiagnosticError`, `UnitMismatchDiagnosticError`, and `HandoffDispatchPayload`.
+  - Consumed public contract of #10353 (`MatchedSwingBrowserModel` / `MatchedSwingFilter`) and canonical `ResultsBrowser` indexing, without creating a competing browser.
+  - Enforced selected run isolation in tool handoffs, preventing fallback to global active sessions.
+  - Implemented artifact categorization (source data, processed recipes, kinematic replay, dynamic run, measurements, flight trajectory, qualification verdict).
+  - Validated missing assets and unit mismatches during run comparison (never guessing similarly named files or silently comparing mismatched units).
+  - Verified provenance retention (#8820) across export and reimport round-trips.
+- Reproduction: `python3 -m pytest tests/integration/test_results_workspace_handoff.py tests/tools/matched_swing_browser/test_model.py --timeout=60`.
+- Next: PR auto-merge and release lease.
+
 ## Docker Audit Repair (#10472)
 
 The Docker image now pins Tornado 6.5.8, matching the generated runtime and
