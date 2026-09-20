@@ -138,6 +138,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  831 | `src/shared/python/signal_toolkit/widget_processing.py`                                                                                                                       |
 |  831 | `src/tools/bunker_shot_gui/gui.py`                                                                                                                                            |
 |  831 | `src/tools/starting_pose_matcher/gui_builders_mixin.py`                                                                                                                       |
+|  830 | `src/api/routes/simulation_ws.py`                                                                                                                                             |
 |  830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py`                                                                                                                 |
 |  828 | `src/bunkershot3d/solvers/envelope.py`                                                                                                                                        |
 |  828 | `src/research/deformable/objects.py`                                                                                                                                          |
