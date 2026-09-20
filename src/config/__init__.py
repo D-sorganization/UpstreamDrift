@@ -20,4 +20,15 @@ __all__: list[str] = [
     "TOOL_LIKE_CATEGORIES",
     "LauncherManifest",
     "LauncherTile",
+    "CLINotInteractiveGUIError",
+    "IncompleteCapabilityRecord",
+    "ResearchCapabilityLifecycleManager",
+    "audit_research_and_excluded_capabilities",
 ]
+
+from .research_capability_lifecycle import (
+    CLINotInteractiveGUIError,
+    IncompleteCapabilityRecord,
+    ResearchCapabilityLifecycleManager,
+    audit_research_and_excluded_capabilities,
+)

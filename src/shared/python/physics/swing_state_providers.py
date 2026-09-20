@@ -185,10 +185,13 @@ class ManualSwingStateProvider(_BaseSwingStateProvider):
         # stack (the GUI imports us at construction time).
         from src.shared.python.physics.swing_ball_flight_pipeline import SwingState
 
+        loft_rad = math.radians(config.loft_deg)
         return SwingState(
             clubhead_velocity=np.array([config.clubhead_speed_ms, 0.0, 0.0]),
             clubhead_angular_velocity=np.zeros(3),
-            clubhead_orientation=np.array([0.0, 0.0, 1.0]),
+            clubhead_orientation=np.array(
+                [math.cos(loft_rad), 0.0, math.sin(loft_rad)]
+            ),
             clubhead_mass=config.clubhead_mass_kg,
             clubhead_loft_deg=config.loft_deg,
             engine_name=self.provider_id,

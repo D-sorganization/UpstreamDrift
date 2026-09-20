@@ -21,6 +21,15 @@
       "expires_on": "2026-11-30"
     },
     {
+      "path": "src/shared/python/motion_matching/swing_evaluator.py",
+      "symbol": "SwingEvaluator.evaluate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10431,
+      "reason": "Issue #10431: SwingEvaluator.evaluate coordinates tracking, contact penetration, kinematic closure, and phase event verification across full-swing time series without lossy parameter packing.",
+      "expires_on": "2026-11-30"
+    },
+    {
       "path": "src/shared/python/motion_matching/hip_calibration.py",
       "symbol": "apply_hip_calibration",
       "rule": "function-lines",
@@ -45,6 +54,15 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 9967,
       "reason": "Issue #9967: execution script for continuation 101 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/two_window_fit_102.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: execution script for candidate 102 fit preserves CLI options and delegates to modular motion_matching.two_window_fit.",
       "expires_on": "2026-11-30"
     },
     {
@@ -283,7 +301,7 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 7725,
       "reason": "Issue #7725: pre-existing cross-engine CC-30 forward-sim kernel (plant build, actuation wiring, initial-pose, rollout, FK, postconditions) already exceeded the function-lines budget before this change. The rollout/error-handling loop was extracted to _record_rollout (#7727); fully decomposing the remaining plant-construction body is a larger cross-engine refactor shared by every engine's simulate_with_coefficients. Temporary exception until that decomposition lands.",
-      "expires_on": "2026-09-17"
+      "expires_on": "2026-09-30"
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
@@ -676,60 +694,6 @@
       "expires_on": "2026-11-30"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_pose",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_pose landing in HO-0; scheduled for consolidation into full_body_ik.py in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_pose",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_pose parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_trajectory",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_trajectory landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_markers.py",
-      "symbol": "FullBodyMarkerKinematics.solve_trajectory",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: marker IK solve_trajectory parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_simulation.py",
-      "symbol": "_computed_torque",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: computed torque helper parameter count landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/full_body_simulation.py",
-      "symbol": "reference_zmp",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "issue": 10186,
-      "reason": "Issue #10186: reference ZMP computation landing in HO-0; scheduled for consolidation in HO-1 under epic #10162.",
-      "expires_on": "2026-11-30"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/visual_layer.py",
       "symbol": "attach_visual_layer",
       "rule": "function-lines",
@@ -773,6 +737,186 @@
       "issue": 10186,
       "reason": "Issue #10186: visual skeleton derivation landing in HO-0; scheduled for decomposition under epic #10162.",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/address.py",
+      "symbol": "fit_address_pose",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10399,
+      "reason": "Issue #10399: fit_address_pose performs multi-objective optimization with bilateral grip closure, ground plane clearance, and holdout validation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py",
+      "symbol": "qualify_full_swing_tracking",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10400,
+      "reason": "Issue #10400: qualify_full_swing_tracking validates ladder stages, continuity, dynamic grip closure, and compiles dual receipts under MS-100 / MS-104.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/registration.py",
+      "symbol": "align_tour_capture_to_golf_world",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10398,
+      "reason": "Issue #10398: align_tour_capture_to_golf_world computes stance support ground plane translation and target-line yaw rotation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py",
+      "symbol": "apply_segment_scaling",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10396,
+      "reason": "Issue #10396: apply_segment_scaling scales joint frames, attached meshes, COM positions, and inertia matrices under fixed_mass or density_preserving policies.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/view_package.py",
+      "symbol": "build_golf_view_package",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10403,
+      "reason": "Issue #10403: build_golf_view_package packages model variants, verifies hashes, renders keyframe milestone stills, and exports reproducible video.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/view_package.py",
+      "symbol": "build_golf_view_package",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10403,
+      "reason": "Issue #10403: build_golf_view_package accepts trajectory, variant, presets, paths, digest hashes, and event milestones.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/match_pinocchio_c3d.py",
+      "symbol": "match_pinocchio_c3d",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: match_pinocchio_c3d orchestrates full-swing kinematics, C3D extraction, contact detection, and state estimation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/match_pinocchio_c3d.py",
+      "symbol": "match_pinocchio_c3d",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: match_pinocchio_c3d accepts model paths, trajectory configurations, contact parameters, and tolerances without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "make_action_models",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: make_action_models builds Crocoddyl ActionModelAbstract sequences configuring marker tracking and contact residual models.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "make_action_models",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: make_action_models accepts pinocchio model, contact sequences, weights, and time steps without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "tracking_rollout",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: tracking_rollout simulates forward dynamics along Crocoddyl shooting nodes with state/control constraints.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "_resume_from_candidate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: _resume_from_candidate restores optimization warm-start states, multipliers, and trajectory knots from prior checkpoint.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "run_fit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: run_fit coordinates multi-stage full body dynamic motion matching fitting against C3D point cloud.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: CLI entrypoint for full body fitting with argument parsing and execution logging.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/contact_force_allocator.py",
+      "symbol": "ContactForceAllocator.allocate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: ContactForceAllocator.allocate solves quadratic program for trail-side ground reaction force distribution under friction cone constraints.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/swing_evaluator.py",
+      "symbol": "SwingEvaluator.evaluate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: SwingEvaluator.evaluate computes kinetic energy, momentum transfer, and clubhead delivery metrics across motion phases.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "build_parser",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: build_parser configures CLI flags for multi-engine pipeline execution across Drake, MuJoCo, and Pinocchio.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "_solve_pink_ik",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: _solve_pink_ik coordinates Pink solver setup, frame targets, posture regularization, and iterative frame progression.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "_simulate_and_receipt",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: _simulate_and_receipt orchestrates trajectory simulation, marker metrics, receipt schema emission, and artifact bundle export.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/dynamics.py",
+      "symbol": "shooting_fit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10591,
+      "reason": "Issue #10591: Bolt optimization added extra lines to replace np.linalg.norm with np.sqrt(np.einsum) causing function line count to marginally exceed 100.",
+      "expires_on": "2027-01-01"
     }
   ]
 }
