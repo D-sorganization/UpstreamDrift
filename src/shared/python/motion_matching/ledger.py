@@ -30,6 +30,7 @@ __all__ = [
     "extract_candidate_sha",
     "extract_horizon_s",
     "extract_metrics",
+    "find_repo_root",
     "scan",
 ]
 
@@ -58,6 +59,9 @@ def _find_repo_root(start: Path | None = None) -> Path:
         ):
             return parent
     return Path.cwd()
+
+
+find_repo_root = _find_repo_root
 
 
 def _compute_sha256(path: Path) -> str:
@@ -143,7 +147,7 @@ def extract_candidate_sha(data: Mapping[str, Any]) -> str | None:
 
 def extract_horizon_s(data: Mapping[str, Any]) -> float | None:
     """Extract evaluation horizon or trajectory duration in seconds."""
-    for key in ("horizon_s", "duration_s", "elapsed_s"):
+    for key in ("horizon_s", "duration_s"):
         val = data.get(key)
         if isinstance(val, (int, float)) and not math.isnan(val):
             return float(val)
@@ -154,6 +158,9 @@ def extract_horizon_s(data: Mapping[str, Any]) -> float | None:
                 v = nested.get(k)
                 if isinstance(v, (int, float)) and not math.isnan(v):
                     return float(v)
+    val = data.get("elapsed_s")
+    if isinstance(val, (int, float)) and not math.isnan(val):
+        return float(val)
     frames = None
     if isinstance(data.get("ik"), Mapping) and "frames" in data["ik"]:
         frames = data["ik"]["frames"]

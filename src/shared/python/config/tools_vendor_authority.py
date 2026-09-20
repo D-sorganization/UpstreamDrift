@@ -9,6 +9,8 @@ tests validate automatically (issue #8852).
 
 from __future__ import annotations
 
+import importlib
+import importlib.metadata
 import stat
 import subprocess
 from dataclasses import dataclass
@@ -282,10 +284,129 @@ def _inspect_canonical_repo(canonical_repo: Path) -> ToolsVendorAuthority:
     )
 
 
+def assert_runtime_provenance_parity(
+    pytest_root: Path, packaged_app_root: Path
+) -> None:
+    """Validate that pytest and packaged app resolve identical implementation roots.
+
+    Preconditions:
+        Both roots must be pathlib.Path instances.
+
+    Postconditions:
+        Raises ProviderUnavailableError if the resolved canonical roots differ.
+    """
+    if not isinstance(pytest_root, Path) or not isinstance(packaged_app_root, Path):
+        raise TypeError("roots must be pathlib.Path instances")
+    resolved_pytest = pytest_root.resolve(strict=False)
+    resolved_app = packaged_app_root.resolve(strict=False)
+    if resolved_pytest != resolved_app:
+        raise ProviderUnavailableError(
+            f"Provider provenance mismatch: pytest resolved '{resolved_pytest}', "
+            f"packaged app resolved '{resolved_app}'"
+        )
+
+
+def verify_provider_provenance(
+    canonical_root: Path, candidate_path: Path | object
+) -> None:
+    """Validate that candidate_path resolves within canonical_root.
+
+    Preconditions:
+        canonical_root is a Path. candidate_path is a Path, str, or module.
+
+    Postconditions:
+        Raises ProviderUnavailableError if candidate_path is outside canonical_root.
+    """
+    if not isinstance(canonical_root, Path):
+        raise TypeError("canonical_root must be a pathlib.Path")
+    if isinstance(candidate_path, (str, Path)):
+        target = Path(candidate_path).resolve(strict=False)
+    elif hasattr(candidate_path, "__file__") and candidate_path.__file__:
+        target = Path(candidate_path.__file__).resolve(strict=False)
+    else:
+        raise TypeError("candidate_path must be a Path, str, or module with __file__")
+
+    resolved_root = canonical_root.resolve(strict=False)
+    if not _is_within(target, resolved_root):
+        raise ProviderUnavailableError(
+            f"Provider provenance mismatch: '{target}' escapes canonical authority root '{resolved_root}'"
+        )
+
+
+def inspect_provider_authority(
+    repo_root: Path | None = None,
+    *,
+    expected_sha: str | None = None,
+    actual_sha: str | None = None,
+    distribution_name: str | None = None,
+    module_probe: str | None = None,
+) -> ToolsVendorAuthority:
+    """Inspect provider authority across gitlink, wheel distribution, and import probes.
+
+    Preconditions:
+        Handles repository checkouts with gitlink and clean installed wheel environments.
+
+    Postconditions:
+        Returns fail-closed ToolsVendorAuthority. Mismatched pin, missing wheel, or
+        module probe import failure returns available=False with non-empty reason.
+    """
+    target_repo = (repo_root or Path(".")).resolve(strict=False)
+    vendor_root = target_repo / _TOOLS_GITLINK_PATH
+
+    if module_probe is not None:
+        try:
+            importlib.import_module(module_probe)
+        except Exception as exc:
+            return _unavailable(
+                vendor_root,
+                f"Provider import failure: probe '{module_probe}' failed: {exc}",
+            )
+
+    if expected_sha is not None and actual_sha is not None:
+        if expected_sha != actual_sha:
+            return _unavailable(
+                vendor_root,
+                f"Tools pin stale (expected {expected_sha}, found {actual_sha})",
+                expected_sha=expected_sha,
+            )
+
+    if (vendor_root / "src").is_dir():
+        gitlink_auth = inspect_tools_vendor_authority(target_repo)
+        if gitlink_auth.available:
+            return gitlink_auth
+        return gitlink_auth
+
+    dist_name = distribution_name or "ud-tools"
+    try:
+        dist = importlib.metadata.distribution(dist_name)
+        dist_root = Path(str(dist.locate_file("")))
+        return ToolsVendorAuthority(
+            root=dist_root,
+            expected_sha=dist.version,
+            available=True,
+        )
+    except importlib.metadata.PackageNotFoundError:
+        pass
+    except Exception as exc:
+        return _unavailable(
+            vendor_root,
+            f"Provider distribution inspection failed: {exc}",
+        )
+
+    return _unavailable(
+        vendor_root,
+        f"Provider unavailable: neither pinned Tools gitlink ({_TOOLS_GITLINK_PATH.as_posix()}) "
+        f"nor installed '{dist_name}' wheel/distribution is present",
+    )
+
+
 __all__ = [
     "ProviderUnavailableError",
     "ToolsVendorAuthority",
+    "assert_runtime_provenance_parity",
     "clear_tools_vendor_authority_cache",
     "expected_tools_gitlink_sha",
+    "inspect_provider_authority",
     "inspect_tools_vendor_authority",
+    "verify_provider_provenance",
 ]

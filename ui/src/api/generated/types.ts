@@ -592,6 +592,18 @@ export interface CancelShotRequest {
 }
 
 /**
+ * Request model for counterfactual fork rollout on candidate session.
+ */
+export interface CandidateCounterfactualRequest {
+  /** Frame index to initiate intervention fork */
+  fork_frame_idx: number;
+  /** Counterfactual intervention strategy */
+  strategy: string;
+  /** Number of frames to roll forward (defaults to remainder of session) */
+  duration_frames?: number | null;
+}
+
+/**
  * Availability report for one canonical-core workspace.
  */
 export interface CanonicalCoreStatus {
