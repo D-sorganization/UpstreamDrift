@@ -78,6 +78,12 @@
       "owner": "@maintainers",
       "reason": "Generated comprehensive 104-tile capability inventory and disposition table for ORG-01 (#10510).",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/development/feature_parity_matrix.md",
+      "owner": "@maintainers",
+      "reason": "Generated feature parity matrix table from feature_parity.json; pending topic decomposition.",
+      "expires_on": "2026-10-31"
     }
   ]
 }

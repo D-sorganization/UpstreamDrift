@@ -363,6 +363,7 @@ myosim_suite = "src.engines.physics_engines.myosuite.python._embed_adapter"
 # The Simscape adapter's real path contains "3D_Golf_Model" (not a valid
 # dotted-import segment), so it is reached via an importable shim (#8856).
 simscape_3d_golf_model = "src.launchers.adapters.simscape_embed"
+matched_swing_browser = "src.tools.matched_swing_browser._embed_adapter"
 
 [project.urls]
 Homepage = "https://github.com/D-sorganization/UpstreamDrift"
