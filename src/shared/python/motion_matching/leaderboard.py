@@ -61,6 +61,8 @@ __all__ = [
     "append_row",
     "maybe_append_row",
     "sync_leaderboard_from_ledger",
+    "rows_from_parity_report",
+    "sync_leaderboard_from_parity_report",
     "JSON_LEADERBOARD_COLUMNS",
     "default_json_path",
     "valid_engines",
@@ -629,6 +631,56 @@ def sync_leaderboard_from_ledger(
             "iterations": 0,
         }
         rows_out.append(run_dict)
+    path.write_text(
+        json.dumps(rows_out, indent=2, sort_keys=False) + "\n", encoding="utf-8"
+    )
+    return path.resolve()
+
+
+def rows_from_parity_report(report: Any) -> list[dict[str, Any]]:
+    """Convert UnifiedParityReport engine rows into leaderboard JSON row dictionaries."""
+    rows_out: list[dict[str, Any]] = []
+    cand_id = getattr(report, "candidate_id", "unknown")
+    cand_sha = getattr(report, "candidate_sha256", "unknown")
+    engine_rows = getattr(report, "engine_rows", {})
+    for eng, row in engine_rows.items():
+        if eng not in _VALID_ENGINES:
+            continue
+        status = getattr(row, "status", "")
+        if status == "unavailable":
+            continue
+        metrics = getattr(row, "shared_metrics", None) or {}
+        whole_rmse = metrics.get("whole_marker_rmse_m", 0.0)
+        pt_diffs = getattr(row, "pointwise_differences", {})
+        if not whole_rmse and "marker_diff_m" in pt_diffs:
+            whole_rmse = getattr(pt_diffs["marker_diff_m"], "rms_diff", 0.0)
+        run_dict = {
+            "engine": eng,
+            "engine_version": getattr(row, "model_sha256", "unknown") or "unknown",
+            "target_id": cand_id,
+            "theta": [],
+            "residual_rms": float(whole_rmse),
+            "body_marker_rms": float(whole_rmse),
+            "total_work_J": float(getattr(row, "total_work_J", 0.0) or 0.0),
+            "wallclock": float(getattr(row, "wall_clock_s", 0.0) or 0.0),
+            "commit_sha": _short_commit(cand_sha),
+            "run_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "solver": "matching_plant",
+            "iterations": 0,
+        }
+        rows_out.append(run_dict)
+    return rows_out
+
+
+def sync_leaderboard_from_parity_report(
+    report: Any,
+    *,
+    json_path: Path | None = None,
+) -> Path:
+    """Populate cross_engine_leaderboard.json from a UnifiedParityReport."""
+    path = json_path if json_path is not None else default_json_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows_out = rows_from_parity_report(report)
     path.write_text(
         json.dumps(rows_out, indent=2, sort_keys=False) + "\n", encoding="utf-8"
     )
