@@ -66,6 +66,24 @@
       "owner": "@maintainers",
       "reason": "Active repository development log tracking feature states across the project; pending topic decomposition.",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/HANDOFF.md",
+      "owner": "@maintainers",
+      "reason": "Active development turnover document tracking across workstreams; pending topic decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/development/ORG01_CAPABILITY_BASELINE.md",
+      "owner": "@maintainers",
+      "reason": "Generated comprehensive 104-tile capability inventory and disposition table for ORG-01 (#10510).",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/development/feature_parity_matrix.md",
+      "owner": "@maintainers",
+      "reason": "Generated feature parity matrix table from feature_parity.json; pending topic decomposition.",
+      "expires_on": "2026-10-31"
     }
   ]
 }
