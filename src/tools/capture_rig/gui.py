@@ -101,7 +101,7 @@ logger = logging.getLogger(__name__)
 TOOL_ID = "capture_rig"
 PLAN_DEFAULT = "plan default"
 AUTO_EXPOSURE_CHOICES = ("camera default", "on", "off")
-ALWAYS_ENABLED = frozenset({"stop", "load", "preview", "inspect_targets"})
+ALWAYS_ENABLED = frozenset({"stop", "load", "preview"})
 DEFAULT_EXPORT_LAYOUT = "three_across"  # a sensible default for the lab rig
 WINDOW_SIZE = (1600, 900)
 
@@ -564,8 +564,11 @@ class CaptureRigWidget(QWidget):
         ("annotate", "Annotate / edit points"),
         ("stop", "Stop"),
         ("load", "Load session"),
-        ("inspect_targets", "Open in Inspect Targets"),
     )
+
+    def open_in_inspect_targets(self) -> None:
+        """Trigger the Inspect Targets handoff action."""
+        self.journey_actions.trigger("inspect_targets")
 
     def __init__(
         self, parent: QWidget | None = None, *, settings: QSettings | None = None

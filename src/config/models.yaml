@@ -538,6 +538,22 @@ models:
       status: "beta"
       default_launch: "tab"
 
+  - id: "matched_swing_browser"
+    name: "Results Browser"
+    description: "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations"
+    type: "special_app"
+    path: "src/tools/matched_swing_browser/__main__.py"
+    capabilities:
+      - "motion_matching"
+      - "results_browser"
+      - "physical_acceptance"
+      - "ledger"
+    launcher:
+      category: "tool"
+      logo: "assets/matched_swing_browser.png"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "data_explorer"
     name: "Data Explorer"
     description: "Import, filter, and visualise simulation datasets"

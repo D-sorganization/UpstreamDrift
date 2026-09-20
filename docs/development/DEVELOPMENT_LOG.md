@@ -31,6 +31,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Await CI completion and auto-merge on PR #10576.
 - **Evidence:** `tests/scripts/test_workspace_documentation_freshness.py`, `tests/scripts/test_capability_atlas.py`.
 
+### DL-#10353 · Results Browser Tile for Matched Swing Program
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10353 (MS-80, epic #10363)
+- **Branch:** feat/10353-results-browser
+- **PR:** #10543
+- **Paths:** src/tools/matched_swing_browser/**init**.py; src/tools/matched_swing_browser/**main**.py; src/tools/matched_swing_browser/gui.py; src/tools/matched_swing_browser/model.py; src/tools/matched_swing_browser/\_embed_adapter.py; src/config/models.yaml; src/config/launcher_manifest.json; src/config/feature_parity.json; src/launchers/embedded_tool_bootstrap.py; pyproject.toml; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; tests/tools/matched_swing_browser/test_model.py; docs/development/matched_swing_program/evidence/browser/screenshot.png
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (21 unit and GUI tests pass; 10 registry and feature parity tests pass; architecture and file size budgets pass; DRY duplication gate clean; ruff and mypy clean; screenshot evidence recorded).
+- **Summary:** Implemented `matched_swing_browser` embeddable PyQt6 desktop tool and data model. Left pane provides filterable table over 98 ledger receipts (by engine, capture, lane, verdict, search text). Right pane displays receipt summary, acceptance badge, five standardized metrics with units, physical gates breakdown, and lazy-loaded animated QMovie playback for rows with visual GIF artifacts. Provides action buttons to launch Tour Matching Viewer, Native Viewer (MS-83), and parity reports. Reuses `ResultFilter` lineage resolving #8824 and establishing contract for #10521 (ORG-13). Registered across all 5 canonical surfaces (`models.yaml`, `launcher_manifest.json`, `pyproject.toml`, `embedded_tool_bootstrap.py`, `feature_parity.json`).
+- **Next step:** Update PR #10543, enable auto-merge, monitor remote CI to green merge.
+- **Evidence:** tests/tools/matched_swing_browser/test_model.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; docs/development/matched_swing_program/evidence/browser/screenshot.png.
+
 ### DL-#10529 · Consume Provider Ownership Decisions and Verify Runtime Import Authority
 
 - **State:** in_progress
@@ -149,6 +163,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10526 (ORG-17, epic #10508)
 - **Branch:** feat/issue-10526-org17-estimation-workflow
 - **PR:** #10565 (merged)
+
 - **Paths:** src/shared/python/workspace/**init**.py; src/shared/python/workspace/estimation_workspace.py; tests/integration/test_estimation_workspace.py
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 at HEAD (8 integration tests pass in test_estimation_workspace.py; ruff check & format clean; file line budget 447 <= 500 LOC; merged to main at 760a8470e).

@@ -14,6 +14,9 @@ from typing import Any
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.integration
+
+
 from src.shared.python.workspace import (
     ArtifactKind,
     ArtifactReference,
