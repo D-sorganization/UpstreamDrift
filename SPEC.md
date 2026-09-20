@@ -1,3 +1,20 @@
+## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
+
+Consumes provider ownership decisions and enforces immutable runtime import authority and provenance verification across repository, installed, and packaged execution environments:
+- **Provider Authority & Provenance Verification (`src/shared/python/config/tools_vendor_authority.py`)**:
+  - `assert_runtime_provenance_parity(pytest_root, packaged_app_root)`: Asserts that pytest (repository test runtime) and packaged application environments resolve identical implementation roots, failing closed with `ProviderUnavailableError` upon divergence.
+  - `verify_provider_provenance(canonical_root, candidate_path)`: Asserts that candidate modules or paths resolve strictly within the declared canonical provider root, preventing silent escapes to unpinned local forks.
+  - `inspect_provider_authority(repo_root, ...)`: Unified fail-closed authority inspection covering pinned gitlink checkouts, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback.
+- **Fail-Closed Mismatch Gating**:
+  - Pin mismatches explicitly report `Tools pin stale (expected X, found Y)` and produce blocked status (`provider_unavailable`) with remediation instructions.
+  - Missing provider checkouts and missing wheel distributions fail closed with actionable errors, refusing unpinned local fork or sibling fallbacks.
+  - Underlying provider import failures surface clean diagnostic blocked states rather than unhandled host crashes.
+- **Canonical Seam Delegation & Backward Compatibility**:
+  - Sidekick public seams (`EmbeddableTool` adapter, chat history service) resolve through authoritative Tools provider.
+  - Movement Optimizer public seams delegate through `tools_movement_optimizer` via `ALIAS_MAP`, registered in the `optimize_train` workspace.
+  - Pendulum public seams (`swing_objective_lab` adapter, `pendulum_simulator` tile) run through intended provider authority.
+  - Legacy supported imports (`upstream_drift_tools`) delegate cleanly to canonical providers with formal deprecation warnings.
+
 ## Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (ORG-07, #10514)
 
 Projects 28 multi-provider exercise variants into 7 cohesive logical model choices while preserving underlying provider assets and enforcing strict authority resolution:
