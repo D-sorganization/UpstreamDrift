@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 import sys
 from typing import Any, Final, Literal
 
@@ -270,6 +271,25 @@ def adapt_engine_matrix_qualification(
             is_qualified=False,
             failure_reasons=(),
         )
+
+    # If no explicit receipt provided, load pre-evaluated profile from engine_capability_matrix.json
+    if receipt is None:
+        matrix_file = Path(__file__).parent / "engine_capability_matrix.json"
+        if matrix_file.is_file():
+            try:
+                import json
+
+                mdata = json.loads(matrix_file.read_text(encoding="utf-8"))
+                prof = mdata.get("profiles", {}).get(engine_name)
+                if prof:
+                    return CapabilityQualification(
+                        status=prof["status"],
+                        is_qualified=prof["is_qualified"],
+                        receipt_path=receipt_path,
+                        failure_reasons=tuple(prof.get("failure_reasons", [])),
+                    )
+            except (json.JSONDecodeError, OSError, TypeError, KeyError):
+                pass
 
     # Lazily import #10351 audit function to keep catalog load clean
     from src.shared.python.shadow_tracker.engine_matrix import audit_engine_conformance

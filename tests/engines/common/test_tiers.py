@@ -24,6 +24,9 @@ class TestGetEngineTier:
     def test_normalizes_whitespace_and_case(self) -> None:
         assert get_engine_tier("  MuJoCo  ") == "core"
 
+    def test_myosim_alias_resolves(self) -> None:
+        assert get_engine_tier("myosim") == "experimental"
+
     def test_unknown_engine_raises_value_error(self) -> None:
         with pytest.raises(ValueError, match="Unknown engine tier metadata"):
             get_engine_tier("not_a_real_engine")
