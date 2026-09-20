@@ -59,15 +59,17 @@ from src.shared.python.motion_matching.tour_capture_contract import (  # noqa: E
     tracked_labels,
 )
 
-# Shoe sole plus turf compliance (MM-7, #10109): a 78 kg golfer sinks
-# mg / k = 16 mm at rest. The qualified native document keeps 2.0e5 N/m; with
-# that stiffness heel and toe load sharing turns on sub-millimetre root tilt
-# and the tracked downswing hops (root error 178 mm, airborne at 1.3 s);
-# with 5.0e4 N/m and dissipation 2 s/m the body gives the few centimetres the
-# composite reference demands (43 mm, never airborne, peak torque 476 N m;
-# evidence/ground_support/anthro_driver/downswing_*.json).
-CONTACT_STIFFNESS_N_M = 5.0e4
-CONTACT_DISSIPATION_S_M = 2.0
+# Calibrated contact parameters from MS-20 (#10335) identifiability sweep
+# Evidence receipt: docs/development/full_body_models/evidence/contact_id/receipt.json
+CONTACT_RECEIPT_SHA256 = (
+    "9bbe5fc4e2fef05d0160af03f1214cc2768068fe0c6f3c71e9cae11c4a7e9556"
+)
+CONTACT_STIFFNESS_N_M = 1.0e5
+CONTACT_DISSIPATION_S_M = 0.5
+CONTACT_STATIC_FRICTION = 0.6
+CONTACT_DYNAMIC_FRICTION = 0.4
+CONTACT_VISCOUS_FRICTION = 0.01
+CONTACT_TRANSITION_VELOCITY_M_S = 0.01
 SPHERES = (
     ("heel", (0.01, -0.005, 0.0), 0.035),
     ("forefoot", (0.16, -0.005, 0.0), 0.03),
@@ -217,10 +219,10 @@ def main() -> None:
         parameters={
             "stiffness_n_m": CONTACT_STIFFNESS_N_M,
             "dissipation_s_m": CONTACT_DISSIPATION_S_M,
-            "static_friction": 0.9,
-            "dynamic_friction": 0.8,
-            "viscous_friction": 0.0,
-            "transition_velocity_m_s": 0.05,
+            "static_friction": CONTACT_STATIC_FRICTION,
+            "dynamic_friction": CONTACT_DYNAMIC_FRICTION,
+            "viscous_friction": CONTACT_VISCOUS_FRICTION,
+            "transition_velocity_m_s": CONTACT_TRANSITION_VELOCITY_M_S,
         },
         spheres=tuple(
             ContactSphere(f"{kind}_{side}", f"calcn_{side}", position, radius)
@@ -229,7 +231,9 @@ def main() -> None:
         ),
         ground_normal_policy="opposite_gravity",
         ground_height_m=None,
-        provenance="ground-support driver parameters: toe spheres, 2e5 N/m; still placeholders",
+        provenance=(
+            f"MS-20 (#10335) calibrated contact parameters; receipt SHA256 {CONTACT_RECEIPT_SHA256[:16]}"
+        ),
     )
     hub_frame = next(f for f in upper["frames"] if f["name"] == "Hub")
     hub_h = float(np.asarray(hub_frame["placement"])[2, 3])
