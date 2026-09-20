@@ -129,8 +129,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `workspace` | 0 | 0 | 0 | 8 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1342** | **709** | **702** |
+| `workspace` | 0 | 0 | 0 | 7 | 0 | 0 |
+| **Total** | **423** | **279** | **123** | **1341** | **709** | **702** |
 
 ## Diverged Files by Package
 
@@ -261,7 +261,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `config/__init__.py` | +5391 |  | Dieter Olson 2026-09-20 | codex-scheduled-tasks[bot] 2026-05-20 |
+| `config/__init__.py` | +5391 |  | Dieter Olson 2026-09-19 | codex-scheduled-tasks[bot] 2026-05-20 |
 | `config/environment.py` | +13621 |  | codex-scheduled-tasks[bot] 2026-05-26 | codex-scheduled-tasks[bot] 2026-05-20 |
 
 ### Package `contracts.py` (1 Diverged Files)
