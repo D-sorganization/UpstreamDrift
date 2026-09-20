@@ -1,4 +1,41 @@
-# SPEC.md — Repository Specification Document
+## Replace Canonical Estimation Shell With Bounded Estimator Coordinator (ORG-17, #10526)
+
+Replaces placeholder canonical estimation shells with a bounded application service coordinator integrating parameter estimation, identifiability analysis, and trajectory evaluation:
+- **Estimation Workspace Coordinator (`src/shared/python/workspace/estimation_workspace.py`)**:
+  - `EstimationWorkspaceCoordinator`: Application service executing bounded parameter estimation runs, evaluating model-observation residuals, and preserving execution provenance.
+  - Wires `solve_single_trial_map`, `IdentifiabilityGateOptions`, and spline trajectory evaluation into a coherent workflow without duplicating optimization or gate probe routines.
+- **Run Configuration and Parameter Priors (`EstimationRunConfig`, `ParameterPriorConfig`)**:
+  - Structured parameter bounds and prior regularization (`prior` and `prior_scale`).
+  - Pre-execution validation enforcing positive sample times ($dt > 0$), parameter length matching ($x_0$, bounds, prior scales), and positive finite standard deviations.
+- **Fail-Closed Gate & Diagnostic Handling**:
+  - Pre-run identifiability gating with rank defect detection and conditioning diagnostics via `IdentifiabilityGateConfig`.
+  - Fail-closed handling for non-finite costs and numerical divergence in trajectory rollouts.
+- **Provenance Persistence Roundtrip (`EstimationRunResult`)**:
+  - Encapsulates parameter estimates, final cost, iterations, solver success status, diagnostics, and serialized provenance for reproducible run recording and reimport.
+
+## Capability State Contract With Real-World Health Checks (ORG-02, #10511)
+
+Enforces the capability state contract across discovery, validation, and launcher tile dispatch:
+- **Capability State Contract (`src/config/launcher_manifest_loader.py`)**:
+  - Implements contract-checked capability state transitions across `READY`, `UNCONFIGURED`, `UNAVAILABLE`, `DEGRADED`, and `HIDDEN`.
+  - Integrates real-world health and dependency checks, validating external binaries, Python packages, and hardware prerequisites.
+  - Ensures accurate tile availability derivation across Desktop, Web, and CLI contexts with explicit provider authority qualifications.
+- **Contract Verification Gates (`tests/config/launcher_manifest/test_capability_state_contract.py`)**:
+  - Validates capability health check invariants, state transitions, and diagnostic message fidelity.
+  - Ensures robust fallback behavior when optional dependencies are absent.
+
+## WebSocket Simulation Loop Batching and Event Loop Offload (#8936)
+
+Optimizes the WebSocket simulation streaming loop to achieve real-time and faster-than-real-time streaming without blocking the event loop:
+- **Batched Physics Offload (`src/api/routes/simulation_ws.py`)**:
+  - `_step_physics_batch()`: Synchronously advances the physics engine in batches (`frame_skip` steps per batch) with pre- and post-condition contracts (`require`, `ensure`).
+  - Offloads physics batch execution to worker threads via `anyio.to_thread.run_sync()`, preventing compute-intensive physics from starving the asyncio event loop and concurrent REST/WebSocket requests.
+- **Persistent Client Command Processing (`src/api/routes/simulation_ws.py`)**:
+  - `_process_pending_client_commands()`: Replaces per-step `asyncio.wait_for(..., timeout=0.001)` polling with a persistent background receive task. Eliminates timer creation/destruction overhead and OS timer quantum quantization delays (~1-15ms per step).
+  - Yields to the event loop (`anyio.sleep(0)`) to process queued messages promptly, and cleanly cancels the background task on loop completion, pause, or disconnect.
+- **Batched Frame Transmission & Pacing (`src/api/routes/simulation_ws.py`)**:
+  - `_send_simulation_frame()`: Extracts frame construction, live analysis, and axial load generation into a dedicated modular helper.
+  - Paces frame transmission per rendered batch (`batch_steps * timestep`), rather than sleeping on every integration sub-step.
 
 ## Validate Every Browser, Tauri, and Native Launch Destination (ORG-04, #10513)
 
@@ -15,14 +52,14 @@ Validates all launcher tile destinations across web, desktop, and hybrid runtime
 
 ## Simulation Engine Lifecycle Management and Model Caching (#8935)
 
-Eliminates redundant physics engine instantiation and model re-parsing across simulation requests:
-- **Engine Lifecycle Management (`src/shared/python/engine_core/engine_manager.py`)**:
-  - `EngineManager._load_engine()`: Reuses active physics engine instance when matching requested engine type.
-  - Safely closes outgoing physics engine (`_close_active_engine()`) upon switching engines or shutting down (`cleanup()`), preventing native OpenGL and simulation context resource leaks.
-  - Added `close()` to `MockPhysicsEngine`.
-- **Model Parsing Cache (`src/api/services/simulation_service.py`)**:
-  - `SimulationService._prepare_engine()`: Caches parsed model on engine keyed by `(engine_type, str(model_path), mtime)`. Skips re-parsing when the same model file has not changed.
-  - Invokes `engine.reset()` on cached models when custom initial states are omitted, preserving clean simulation states between runs.
+Enforces the capability state contract across discovery, validation, and launcher tile dispatch:
+- **Capability State Contract (`src/config/launcher_manifest_loader.py`)**:
+  - Implements contract-checked capability state transitions across `READY`, `UNCONFIGURED`, `UNAVAILABLE`, `DEGRADED`, and `HIDDEN`.
+  - Integrates real-world health and dependency checks, validating external binaries, Python packages, and hardware prerequisites.
+  - Ensures accurate tile availability derivation across Desktop, Web, and CLI contexts with explicit provider authority qualifications.
+- **Contract Verification Gates (`tests/config/launcher_manifest/test_capability_state_contract.py`)**:
+  - Validates capability health check invariants, state transitions, and diagnostic message fidelity.
+  - Ensures robust fallback behavior when optional dependencies are absent.
 
 ## Baseline Capability Inventory and Preserve Entity Identity (ORG-01, #10510)
 
@@ -36,7 +73,6 @@ Establishes the capability inventory baseline across all 104 launcher tiles and 
 - **Automated Verification & Integrity Gates (`tests/config/test_capability_migration_coverage.py`)**:
   - Validates 100% tile coverage across local and external provider roots (`UPSTREAM_DRIFT_PROVIDER_ROOTS`).
   - Strict regression gates ensuring legacy layouts and saved workspace configurations resolve without breakage.
-
 
 ## Results Workspace Handoff and Action Integration (ORG-13, #10521)
 
@@ -5999,6 +6035,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-20 | n/a | Optimized np.linalg.norm for small 1D array norm calculation in full_body_ik.py using math.sqrt(np.vdot) to avoid temporary allocations. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10491 | Barrier-reduced same-integrator G1 continuation converged at 46.8 mm (rollout == replay) and is committed as rejected evidence; `--range-barrier-weight` CLI flag and raised trail-side effort bounds; ledger, README, turnover updated |
 | 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
 | 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |

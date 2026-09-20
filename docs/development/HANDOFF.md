@@ -1,5 +1,27 @@
 # Current Matching Continuation Handoff
 
+## ORG-17 Replace Canonical Estimation Shell With Bounded Estimator Coordinator (#10526)
+
+- Branch: `feat/issue-10526-org17-estimation-workflow`, lease `antigravity-org17`, DL-#10526.
+- Changes:
+  - `src/shared/python/workspace/estimation_workspace.py`: Implemented `EstimationWorkspaceCoordinator`, `EstimationRunConfig`, `EstimationRunResult`, `ParameterPriorConfig`, and `IdentifiabilityGateConfig`.
+  - Wires `solve_single_trial_map`, `IdentifiabilityGateOptions`, parameter priors and bounds, and spline trajectory evaluation into an application service.
+  - Provides fail-closed validation for non-finite cost/trajectories and ill-conditioned systems, with complete provenance persistence round-trips.
+  - `src/shared/python/workspace/__init__.py`: Exported coordinator and dataclasses.
+  - `tests/integration/test_estimation_workspace.py`: 8 integration tests validating capability availability, synthetic parameter recovery, prior regularization, identifiability gating, non-finite cost gating, parameter bounds enforcement, and run provenance serialization roundtrips.
+- Reproduction: `pytest tests/integration/test_estimation_workspace.py --timeout=60`.
+- Next: PR auto-merge and release lease.
+
+## ORG-02 Separate Capability Identity, Maturity, Availability, and Qualification (#10511)
+
+- Branch: `feat/issue-10511-org02-capability-state-contract`, lease `antigravity-ud-10511`, DL-#10511.
+- Changes:
+  - `capability_state.py`: Implemented orthogonal typed models: `SurfaceAvailability` (with DbC invariant demanding non-empty reason and remediation when unavailable), `CapabilityAvailability` (desktop, web, api, cli), and `CapabilityQualification` (with status, is_qualified, receipt, failure reasons). Implemented `adapt_engine_matrix_qualification` consuming #10351 engine matrix contract (non-engine tools are exempt). Implemented `RuntimeProbeKey` and `RuntimeProbeCache` for lazy cached probing tied to provider pin / runtime identity. Established `CANONICAL_TILE_DISPLAY_NAMES` and `resolve_canonical_display_name`.
+  - `launcher_manifest_loader.py`: Extended `LauncherTile` with `maturity`, `availability`, and `qualification` fields. Implemented `_build_default_availability` deriving surface states from provider and web contracts. Updated `LauncherTile.to_dict()` to serialize orthogonal fields while maintaining backward compatibility for legacy `status`. Enforced that unqualified engines never claim `ready` or `stable`.
+  - `models.yaml`: Synchronized canonical display names for `matlab_suite` ("Matlab Models") and `golf_simulation_suite` ("Golf Simulation Suite").
+- Reproduction: `pytest tests/config/launcher_manifest/test_capability_state_contract.py tests/config/launcher_manifest/ --timeout=60` and `pytest tests/config/test_launcher_registry_parity.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease.
+
 ## ORG-01 Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity (#10510)
 
 - Worktree: main checkout, branch `feat/issue-10510-org01-capability-baseline`, lease `antigravity-ud-10510`, DL-#10510.
@@ -59,8 +81,6 @@ Docker build and dependency-artifact regeneration before merge.
   - `force_inspection.py`, `gui.py`: `ForceInspectionWidget` synchronized with physical playback time embedded in Tour Matching Viewer.
 - Reproduction: `pytest tests/unit/motion_matching/test_force_torque.py tests/unit/motion_matching/test_counterfactual.py tests/unit/motion_matching/test_candidate_session_forces.py tests/unit/api/test_candidate_session_analysis_routes.py tests/unit/tools/test_tour_matching_viewer_forces.py`.
 - Next: PR auto-merge; epic #10476 completion!
-
-> > > > > > > origin/main
 
 ## MV-05 Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading (#10481)
 

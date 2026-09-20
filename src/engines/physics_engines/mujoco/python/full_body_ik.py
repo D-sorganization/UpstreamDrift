@@ -448,6 +448,6 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         )
         offset = self.data.subtree_com[1] - centres
         offset = offset - (offset @ n) * n
-        return math.sqrt(
-            np.vdot(offset, offset)
+        return float(
+            math.sqrt(np.vdot(offset, offset))
         )  # ⚡ Bolt: math.sqrt(np.vdot) avoids np.linalg.norm overhead
