@@ -1,3 +1,24 @@
+## Unified Motion-Matching Abstraction Stack and Provider Delegation (MS-12, #10331)
+
+Adopts and documents the single motion-matching abstraction stack (`MatchingPlant` + receipts), resolves engine provider delegation contracts, retires legacy duplicate CIR IK and matching solvers with actionable ADR-0051 diagnostic errors, and bridges CIR `SkeletonRig`/`JointTrajectory` with `CanonicalPose`:
+- **ADR-0051 (`docs/adr/0051-matched-swing-abstraction.md`)**:
+  - Establishes `MatchingPlant` and validated execution receipts as the sole canonical execution layer for motion-matching.
+  - Formulates provider delegation semantics: `supports_body_target() -> True` for engines with full-body matching lanes (`mujoco`, `drake`, `pinocchio`); `False` for club-only or analytic engines (`opensim`, `myosuite`, `pendulum`).
+  - Standardizes the `CanonicalFitResult.receipt_path` contract pointing to validated on-disk receipts.
+  - Formally retires duplicate CIR stubs (`ik/opensim`, `ik/mujoco`, `ik/drake`, `matching/cmc`, `matching/rra`) with actionable ADR-0051 error diagnostics.
+  - Reserves `src/shared/python/motion_pipeline/api.py` for MS-85 web routing (#8864).
+  - Establishes cross-representation parity between CIR `SkeletonRig`/`JointTrajectory` and `CanonicalPose` (#8867).
+  - Enforces canonical chart metadata conventions (+Z-up, `[w,x,y,z]` quaternion, intrinsic XYZ Euler deg) (#10043).
+- **Motion Matching Provider & Fit Result Infrastructure**:
+  - `src/shared/python/motion_matching/fit_result.py`: Added `receipt_path: Path | str | None = None` to `CanonicalFitResult`.
+  - `src/shared/python/motion_matching/provider.py`: Implemented `has_body_target`, `resolve_body_target`, and `execute_body_fit` with on-disk JSON receipt emission.
+  - Updated engine providers (`mujoco`, `drake`, `pinocchio`) to route body targets via `execute_body_fit`.
+  - Updated `myosuite` provider to fail closed with `UnsupportedTargetError` on body targets.
+- **Cross-Representation Bridge (#8867)**:
+  - `src/shared/python/pose_interchange/cir_bridge.py`: Bidirectional conversion between `CanonicalPose` and CIR `SkeletonRig`/`JointTrajectory` preserving kinematics and joint limits.
+- **Evidence & Verification**:
+  - Added unit tests: `tests/unit/motion_matching/test_body_target_provider.py`, `tests/unit/motion_pipeline/test_motion_pipeline_retirement.py`, and `tests/unit/motion_matching/test_pose_interchange_parity.py`.
+
 ## Generate Accurate Atlas, Help, Parity, and Completion Records (ORG-21, #10531)
 
 Generates accurate, evidence-backed capability atlas graphs, feature parity matrices, industrial readiness records, and workspace documentation without shell-only or stale placeholders:
