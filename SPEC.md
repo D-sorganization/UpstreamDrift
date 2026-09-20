@@ -251,6 +251,24 @@ Enforces the capability state contract across discovery, validation, and launche
   - Validates capability health check invariants, state transitions, and diagnostic message fidelity.
   - Ensures robust fallback behavior when optional dependencies are absent.
 
+## Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes (ORG-15, #10524)
+
+Composes Terrain, Putting, Scene, Bunker, and Simulator Delivery modes under a unified Shot & Course Lab coordinator:
+- **Shot & Course Lab Coordinator (`src/shared/python/workspace/shot_course_workspace.py`)**:
+  - `ShotCourseWorkspaceCoordinator`: Coordinates view and simulation mode transitions across `TERRAIN`, `PUTTING`, `SCENE`, `BUNKER`, and `SIMULATOR`.
+  - Enforces explicit model assumptions and boundaries:
+    1. Scene view is for visual inspection only, is not physics, and fails closed with `SceneNonPhysicsError` when asked for computed shots.
+    2. Bunker runs preserve multi-fidelity tiers (`BunkerFidelityTier`: `F0_RIGID_SURROGATE`, `F1_RESISTANCE_FORCE`, `F2_COUPLED_CONTINUUM`, `F3_DISCRETE_ELEMENT`) and physical domain parameters on export/import round-trips.
+    3. Putting runs adhere strictly to rolling/ground contracts and USGA Stimp / rolling models.
+    4. Environment/terrain mutation creates an explicit new run/config revision and invalidates dependent runs (`TerrainMutationInvalidationError`) rather than silently changing historical results.
+    5. Simulator delivery checks declared capability descriptors (`CapabilityState.SUPPORTED`), requires destination evidence receipts (`SubmissionReceipt`), and fails closed with `UnsupportedSimulatorDestinationError` for unsupported destinations.
+- **Automated Verification & Integrity Gates (`tests/integration/test_shot_course_workspace.py`)**:
+  - Validates rejection of incompatible flight-to-ground records without 3D landing coordinates.
+  - Validates terrain edit invalidation of dependent runs.
+  - Validates scene-only view cannot report computed shots.
+  - Validates unsupported simulator destination is disabled.
+  - Validates putting fixture save/reopen, bunker fidelity export round-trip, and simulator network failure and cancellation flows.
+
 ## Baseline Capability Inventory and Preserve Entity Identity (ORG-01, #10510)
 
 Establishes the capability inventory baseline across all 104 launcher tiles and model definitions, enforcing immutable entity identity preservation across catalog discovery and migration:
