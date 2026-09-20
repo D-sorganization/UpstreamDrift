@@ -47,6 +47,8 @@ from src.shared.python.workspace.shot_course_workspace import (
     UnsupportedSimulatorDestinationError,
 )
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def workspace_coordinator(tmp_path: Path) -> ShotCourseWorkspaceCoordinator:

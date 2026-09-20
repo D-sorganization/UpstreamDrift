@@ -303,10 +303,12 @@ class ShotCourseWorkspaceCoordinator:
             )
 
         caps = self._destinations[destination_id]
-        if caps.shot_input.state != CapabilityState.SUPPORTED:
+        shot_input = caps.shot_input
+        state = shot_input.state
+        if state != CapabilityState.SUPPORTED:
             return ActionAvailability(
                 enabled=False,
-                reason=f"Simulator destination capability shot_input is {caps.shot_input.state.value}: {caps.shot_input.evidence}",
+                reason=f"Simulator destination capability shot_input is {state.value}: {shot_input.evidence}",
             )
 
         return ActionAvailability(enabled=True, reason="Supported")
