@@ -25,6 +25,21 @@ Eliminates GUI thread blocking during launcher startup by offloading tool discov
   - Added explicit thread cleanup via `worker.finished.connect(worker.deleteLater)`.
   - Added granular phase duration reporting and startup telemetry.
 
+## Task-Oriented Desktop Navigation Over Existing Embedded Tools (ORG-05, #10515)
+
+Organizes desktop launcher workflows into 5 task-oriented primary workspaces and preserves user customization during alias migration:
+- **Task-Oriented Workspace Navigation (`src/launchers/workspace_navigation.py`, `src/launchers/_launcher_navigation_ui.py`)**:
+  - `TaskWorkspace`: Defines 5 primary task workspaces (`capture_analyze`, `model_match`, `shot_course_lab`, `optimize_train`, `results_compare`) and secondary navigation destinations (`developer_research`, `all_tools`, `favorites`, `history`).
+  - Single-instance tool reuse policy (`find_existing_tool_tab`, `focus_or_open_tool_tab`, `dock_widget_as_tab`): Reuses existing open tabs rather than spawning duplicate windows or parallel sessions.
+  - Return-to-workspace breadcrumb bar (`WorkspaceBreadcrumbBar`): Provides accessible breadcrumb hierarchy, keyboard navigation, and return-to-workspace navigation.
+  - Discoverability status explanations (`explain_tool_status`): Surfaces human-actionable diagnostic reasons and remediation for missing, degraded, or unconfigured capabilities.
+- **Layout Manager & Alias Migration (`src/launchers/launcher_layout_manager.py`)**:
+  - `migrate_saved_layout`: Migrates legacy saved layouts through `ALIAS_MAP` while strictly preserving custom user tile scaling, view mode, and docking geometry.
+  - `get_filtered_order`: Filters launcher tile presentation by active task workspace.
+- **Accessible & Responsive Sidebar UX (`src/launchers/_launcher_navigation_ui.py`, `src/launchers/launcher_ui_setup.py`)**:
+  - Wraps navigation sidebar in `QScrollArea` to enable narrow-window responsiveness without clipping navigation controls.
+  - Configures accessible names and descriptions for screen reader accessibility and keyboard focus order.
+
 ## Launch Truthfulness and Guard Problematic Tiles (ORG-03, #10512)
 
 Replaces misleading launches with real tasks or explicit nonlaunchable states:

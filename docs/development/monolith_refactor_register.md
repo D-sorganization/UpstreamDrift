@@ -68,8 +68,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1019 | `src/shared/python/optimization/casadi_backend.py`                                                                                                                            |
 | 1012 | `src/shared/python/config/model_source_providers.py`                                                                                                                          |
 | 1008 | `src/shared/python/shadow_tracker/contracts.py`                                                                                                                               |
+| 1007 | `src/launchers/launcher_ui_setup.py`                                                                                                                                          |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
-|  990 | `src/launchers/launcher_ui_setup.py`                                                                                                                                          |
 |  988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py`       |
 |  981 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py`                                                                                              |
 |  973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py`              |
@@ -157,6 +157,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  809 | `src/shared/python/pose_editor/widgets.py`                                                                                                                                    |
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py`                                                                           |
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py`           |
+|  806 | `src/launchers/_launcher_navigation_ui.py`                                                                                                                                    |
 |  803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py`                                                                                                          |
 |  802 | `src/shared/python/gui_pkg/help_system.py`                                                                                                                                    |
 |  802 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py`                                                                                                            |

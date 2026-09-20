@@ -1,5 +1,17 @@
 # Current Matching Continuation Handoff
 
+## ORG-05 Build Task-Oriented Desktop Navigation Over Existing Embedded Tools (#10515)
+
+- Worktree: main checkout, branch `feat/issue-10515-org05-desktop-navigation`, lease `antigravity-ud-10515`, DL-#10515.
+- Changes:
+  - `workspace_navigation.py`: Defined 5 primary task workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`); implemented `ALIAS_MAP` canonical migration utilities (`migrate_model_order`, `migrate_favorites`, `migrate_saved_layout`); implemented single-instance tool reuse policy (`find_existing_tool_tab`, `focus_or_open_tool_tab`); guarded dirty tab close (`close_tool_tab_guarded`); created accessible return-to-workspace breadcrumb bar (`WorkspaceBreadcrumbBar`); implemented discoverability status explanations (`explain_tool_status`).
+  - `launcher_layout_manager.py`: Integrated `migrate_saved_layout` in `load_layout()` preserving user tile scaling, view mode, and dock state; updated `get_filtered_order()` to support workspace filters.
+  - `_launcher_navigation_ui.py`: Updated `_build_sidebar_filter_buttons()` with workspace destinations; added workspace routing to `_on_sidebar_routed()`; added `navigate_to_workspace()`.
+  - `launcher_ui_setup.py`: Enforced single-instance tool reuse in `dock_widget_as_tab()` before adding duplicate tabs.
+  - `test_workspace_navigation.py`: 22 comprehensive unit tests covering all requirements.
+- Reproduction: `pytest tests/launchers/test_workspace_navigation.py tests/launchers/test_workspace_tabs.py tests/launchers/test_launcher_layout_manager.py tests/launchers/test_launcher_ui_setup.py -v`.
+- Next: Open PR referencing Fixes #10515, enable auto-merge, release lease.
+
 ## ORG-17 Replace Canonical Estimation Shell With Bounded Estimator Coordinator (#10526)
 
 - Branch: `feat/issue-10526-org17-estimation-workflow`, lease `antigravity-org17`, DL-#10526.
