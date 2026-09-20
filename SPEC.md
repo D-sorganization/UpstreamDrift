@@ -1,3 +1,18 @@
+## Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (ORG-18, #10527)
+
+Surfaces cross-engine comparison and injury risk indicators into dedicated application service coordinators, consuming qualified biomechanical simulation runs and enforcing fail-closed compatibility and clinical non-diagnostic contracts:
+- **Comparison & Indicator Coordinator (`src/shared/python/workspace/comparison_indicator_workspace.py`)**:
+  - `ComparisonIndicatorWorkspaceCoordinator`: Dedicated application service surfacing `canonical_core_comparison` and `injury_analysis` capabilities across `results_and_compare` and `exercise_analysis` workspace shells.
+  - Exposes `compare_runs()` and `compute_injury_indicators()` without duplicating backend physics, numerical solvers, or scoring routines.
+- **Run Compatibility and Model Fidelity Invariance (`ComparisonRunArtifact`, `validate_run_compatibility`)**:
+  - Validates physical units, coordinate frame identifiers, timebase sample interval alignment ($|dt_1 - dt_2| < 10^{-6}$), channel name coherence, and finite signal values.
+  - Enforces model fidelity level invariance via `ModelFidelityLevel` enum (`STUB_PENDULUM`, `SIMPLIFIED_KINETICS`, `QUALIFIED_FULL_BODY`): rejects cross-comparisons between incompatible fidelity tiers with explicit `IncompatibleArtifactError`.
+- **Cross-Engine Comparison Delegation & Provenance (`CrossEngineComparisonAdapter`)**:
+  - Delegates trace alignment and difference metric evaluations to existing comparison services (`compare_traces`), calculating trajectory RMSE, peak dynamic differences, and deterministic SHA-256 provenance hashes.
+- **Biomechanical Load Channel Validation & Clinical Disclaimer (`InjuryIndicatorAdapter`)**:
+  - Requires explicit physical load channels (`peak_compression_bw`, `peak_lateral_shear_bw`, `x_factor_stretch`) normalized by body weight (BW) and fails closed when channels are absent (no mock data fallback).
+  - Adapts biomechanical inputs to `InjuryRiskScorer` and stamps every indicator output with mandatory non-clinical educational/research disclaimers.
+
 ## Replace Canonical Estimation Shell With Bounded Estimator Coordinator (ORG-17, #10526)
 
 Replaces placeholder canonical estimation shells with a bounded application service coordinator integrating parameter estimation, identifiability analysis, and trajectory evaluation:
