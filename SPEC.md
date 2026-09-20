@@ -1,3 +1,16 @@
+## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
+
+Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility:
+- **Solve Diagnostics & Multi-Start IK (`src/engines/physics_engines/pinocchio/python/marker_kinematics.py`)**:
+  - Implements `SolveDiagnostics` dataclass capturing iterations, final cost, marker RMS, closure error, projected gradient norm, active bounds count, convergence flag, and cost decrease.
+  - Implements `solve_frame_multi_start` evaluating candidate initializations and estimating unconstrained geometric tracking floors with and without weld closure.
+  - Implements `refine_overlapping_window` with bounded window blending and temporal regularization.
+- **Kinematic Smoothing & Acceptance Auditing (`src/shared/python/motion_matching/kinematic_smoothing.py`)**:
+  - Adds zero-phase Butterworth smoothing with verified \(q, v, a\) derivative compatibility (\(\dot{q} \approx v\), \(\dot{v} \approx a\)), boundary spike auditing (`BoundarySpikeAudit`), and cutoff frequency sensitivity analysis.
+  - Enforces physiological human wrist range of motion compliance producing zero violations (MM-2, #10104).
+  - Enforces left elbow pit up-and-inward alignment at address posture (MM-5, #10107).
+  - Enforces strict separation of driver and 7-iron calibration provenance in acceptance gating.
+
 ## Analytic Pelvis-Yaw Orientation Cost for Crocoddyl Solver (MS-107, #10381)
 
 Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver on the Pinocchio plant:
@@ -42,7 +55,6 @@ Reconciles, audits, and freezes feature preservation across historical boundarie
     - Immutable disposition artifact generation and publication for Epic #10508 closeout.
 - **Verification & Evidence Suite (`tests/integration/test_feature_preservation_audit.py`)**:
   - Comprehensive unit test coverage validating audit metrics, parameter budgets, schema conformance, golden fixture checks, and error handling.
->>>>>>> origin/main
 
 ## Unified Cross-Engine Parity Report (MS-70, #10350)
 
