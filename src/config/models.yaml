@@ -130,53 +130,69 @@ models:
 
   - id: "mujoco_models_shared"
     name: "MuJoCo Models"
-    description: "MuJoCo simulation models repository folder (opens only when the MuJoCo_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
+    description: "MuJoCo simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if MuJoCo_Models is absent beside this repository — #10514)"
     type: "shared_repo"
     path: "MuJoCo_Models"
     capabilities:
       - "model_repository"
+      - "models_integrations_access"
       - "mujoco"
     launcher:
-      category: "simulation"
+      category: "tool"
+      categories:
+        - "tool"
+        - "external"
       logo: "assets/mujoco.png"
       status: "experimental"
 
   - id: "drake_models_shared"
     name: "Drake Models"
-    description: "Drake simulation models repository folder (opens only when the Drake_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
+    description: "Drake simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Drake_Models is absent beside this repository — #10514)"
     type: "shared_repo"
     path: "Drake_Models"
     capabilities:
       - "model_repository"
+      - "models_integrations_access"
       - "drake"
     launcher:
-      category: "simulation"
+      category: "tool"
+      categories:
+        - "tool"
+        - "external"
       logo: "assets/drake.png"
       status: "experimental"
 
   - id: "pinocchio_models_shared"
     name: "Pinocchio Models"
-    description: "Pinocchio simulation models repository folder (opens only when the Pinocchio_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
+    description: "Pinocchio simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Pinocchio_Models is absent beside this repository — #10514)"
     type: "shared_repo"
     path: "Pinocchio_Models"
     capabilities:
       - "model_repository"
+      - "models_integrations_access"
       - "pinocchio"
     launcher:
-      category: "simulation"
+      category: "tool"
+      categories:
+        - "tool"
+        - "external"
       logo: "assets/pinocchio.png"
       status: "experimental"
 
   - id: "opensim_models_shared"
     name: "OpenSim Models"
-    description: "OpenSim simulation models repository folder (opens only when the OpenSim_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
+    description: "OpenSim simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if OpenSim_Models is absent beside this repository — #10514)"
     type: "shared_repo"
     path: "OpenSim_Models"
     capabilities:
       - "model_repository"
+      - "models_integrations_access"
       - "opensim"
     launcher:
-      category: "simulation"
+      category: "tool"
+      categories:
+        - "tool"
+        - "external"
       logo: "assets/opensim.png"
       status: "experimental"
 
@@ -699,7 +715,7 @@ models:
 
   - id: "biomech_gait"
     name: "Gait Model"
-    description: "Exercise preset that forwards the gait filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)"
+    description: "Saved shortcut/preset forwarding gait filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)"
     type: "biomech_exercise"
     exercise: "gait"
     capabilities:
@@ -714,7 +730,7 @@ models:
 
   - id: "biomech_sit_to_stand"
     name: "Sit-to-Stand Model"
-    description: "Exercise preset that forwards the sit-to-stand filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)"
+    description: "Saved shortcut/preset forwarding sit-to-stand filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)"
     type: "biomech_exercise"
     exercise: "sit_to_stand"
     capabilities:
@@ -729,7 +745,7 @@ models:
 
   - id: "movement_optimizer"
     name: "Movement Optimizer"
-    description: "Cross-engine trajectory optimization (requires the Movement_Optimizer sibling checkout beside this repository; prefer the vendored tools_movement_optimizer tile — #9478)"
+    description: "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics — #10514)"
     type: "special_app"
     # Sibling checkout next to UpstreamDrift; resolved by
     # ModelSourcePathPolicy.resolve_source_root (issue #7984).
@@ -741,6 +757,7 @@ models:
       - "trajectory_optimization"
       - "cross_engine_analysis"
       - "biomechanics"
+      - "unified_task_authority"
     launcher:
       category: "biomechanics"
       categories:
@@ -864,13 +881,14 @@ models:
 
   - id: "drake_dashboard"
     name: "Drake Dashboard"
-    description: "Interactive Drake simulation dashboard"
+    description: "Interactive Drake simulation dashboard (advanced mode of Drake engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
     path: "src/launchers/drake_dashboard.py"
     engine_type: "drake"
     capabilities:
       - "rigid_body"
       - "dashboard"
+      - "advanced_mode"
       - "recorder"
     launcher:
       category: "physics_engine"
@@ -880,13 +898,14 @@ models:
 
   - id: "mujoco_dashboard"
     name: "MuJoCo Dashboard"
-    description: "Interactive MuJoCo simulation dashboard"
+    description: "Interactive MuJoCo simulation dashboard (advanced mode of MuJoCo engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
     path: "src/launchers/mujoco_dashboard.py"
     engine_type: "mujoco"
     capabilities:
       - "rigid_body"
       - "dashboard"
+      - "advanced_mode"
       - "recorder"
     launcher:
       category: "physics_engine"
@@ -896,13 +915,14 @@ models:
 
   - id: "pinocchio_dashboard"
     name: "Pinocchio Dashboard"
-    description: "Interactive Pinocchio simulation dashboard"
+    description: "Interactive Pinocchio simulation dashboard (advanced mode of Pinocchio engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
     path: "src/launchers/pinocchio_dashboard.py"
     engine_type: "pinocchio"
     capabilities:
       - "rigid_body"
       - "dashboard"
+      - "advanced_mode"
       - "recorder"
     launcher:
       category: "physics_engine"

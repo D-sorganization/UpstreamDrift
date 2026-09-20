@@ -580,7 +580,16 @@ class BiomechExerciseHandler:
         if repo_path is None:
             raise ValueError("repo_path must be provided")
 
-        exercise_name = getattr(model, "exercise", "gait")
+        exercise_name = getattr(model, "exercise", None)
+        if not exercise_name and hasattr(model, "id"):
+            model_id = str(model.id)
+            if "sit_to_stand" in model_id:
+                exercise_name = "sit_to_stand"
+            elif "gait" in model_id:
+                exercise_name = "gait"
+        if not exercise_name:
+            exercise_name = "gait"
+
         model_name = getattr(
             model, "name", f"Biomechanics Exercise: {exercise_name.title()}"
         )
@@ -875,10 +884,23 @@ class SharedRepoHandler:
         # Find sibling folder
         folder_path = repo_path.parent / model_path
         if not folder_path.exists():
-            logger.warning("SharedRepoHandler: directory not found: %s", folder_path)
+            diagnostic = self.get_missing_checkout_diagnostic(model, repo_path)
+            logger.warning("SharedRepoHandler: %s", diagnostic)
             return False
 
         return _open_with_system_app(folder_path, "SharedRepoHandler")
+
+    def get_missing_checkout_diagnostic(self, model: Any, repo_path: Path) -> str:
+        """Return an explicit, actionable diagnostic message for a missing sibling repo checkout."""
+        model_path = getattr(model, "path", None) or getattr(
+            model, "id", "sibling repo"
+        )
+        expected_path = repo_path.parent / model_path if repo_path else Path(model_path)
+        return (
+            f"Sibling repository '{model_path}' is not checked out at '{expected_path}'. "
+            f"Direct Models/Integrations access requires cloning or checking out '{model_path}' "
+            f"beside UpstreamDrift."
+        )
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Shared repository handler does not provide a dockable UI widget."""
