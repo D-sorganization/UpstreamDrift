@@ -1136,6 +1136,26 @@
       "web": {
         "mode": "native-window"
       }
+    },
+    {
+      "id": "matched_swing_browser",
+      "name": "Results Browser",
+      "description": "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/matched_swing_browser/__main__.py",
+      "logo": "matched_swing_browser.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "motion_matching",
+        "results_browser",
+        "physical_acceptance",
+        "ledger"
+      ],
+      "order": 50,
+      "web": {
+        "mode": "native-window"
+      }
     }
   ]
 }

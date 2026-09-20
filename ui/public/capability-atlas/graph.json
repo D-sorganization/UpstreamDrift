@@ -591,6 +591,22 @@
       "id": "tools.launch_monitor_analytics"
     },
     {
+      "feature_id": "tools.matched_swing_browser",
+      "title": "Matched Swing Results Browser",
+      "status": "gap",
+      "pyqt": "src/tools/matched_swing_browser/gui.py",
+      "api": null,
+      "web": null,
+      "issue": 10353,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "matched_swing_browser"
+      ],
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff.",
+      "id": "tools.matched_swing_browser"
+    },
+    {
       "feature_id": "tools.matlab_suite",
       "title": "MATLAB/Simscape model suite",
       "status": "exempt",
@@ -1249,6 +1265,21 @@
       "category": "tool",
       "status": "beta",
       "capabilities": []
+    },
+    {
+      "id": "matched_swing_browser",
+      "title": "Results Browser",
+      "description": "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations",
+      "path": "src/tools/matched_swing_browser/__main__.py",
+      "launch_target": "src/tools/matched_swing_browser/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "motion_matching",
+        "results_browser",
+        "physical_acceptance",
+        "ledger"
+      ]
     },
     {
       "id": "data_explorer",
@@ -2835,9 +2866,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "a8377f77c8d5b58afb92ccaa5d8a10951c9e26794aca3a95811c437832575100",
-    "src/config/launcher_manifest.json": "8042791309478513d7cc0c9670568866befbc49486ada446ebb1adda36cfe18b",
-    "src/config/feature_parity.json": "b0b2f34477e7556aa3ba1dd25316bc047902bb3fd3258938225bece7195efaad",
+    "src/config/models.yaml": "1d6ab125ba3d5ac4353a22d10d08aac2873f9c52df188a9bca88e33fdc0ae115",
+    "src/config/launcher_manifest.json": "721474b299891764d36c8246ee6ea4dafb08688fc21bb80b892571f40f86f783",
+    "src/config/feature_parity.json": "b3ea92cc334a28d0c210aae82a2b3ba6da3694b21336b53e387fde3586f9269f",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "8a3887642deddf09c8fae39a6ee88bceb95241b4b19e91b4fd37c638a5398882"
   }

@@ -21,6 +21,22 @@
 - Reproduction: `python -m pytest tests/integration/test_installed_motion_matching.py tests/tools/motion_matching/test_pipeline.py tests/tools/motion_matching/test_motion_matching_gui.py --timeout=60`.
 - Next: Open PR, arm auto-merge, release lease on #10520, notify parent orchestrator.
 
+## [ORG-10] Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces (#10519)
+
+- Worktree / Branch: `feat/issue-10519-org10-capture-inspection-handoff`, lease `antigravity-ud-10519`, DL-#10519.
+- Changes:
+  - `src/shared/python/workspace/capture_inspection_handoff.py`: Added `CaptureInspectionHandoff`, `TrimSpec`, `CropSpec`, `PreparedVideoInspection`, `ObservationSet2D`, `OpticalMarkerTarget`, `EstimatorType`, `FreeMoCapJobAdapter`, and `JobStatus`.
+  - Enforced that trim/crop/offset survive handoffs with explicit time conversions.
+  - Maintained MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, and source pixels.
+  - FreeMoCap input/output directory validation before subprocess spawn; cancellation leaves source files untouched with preserved HMR2/AGPL license isolation.
+  - C3D and optical imports keep missing samples masked (NaN); reject incompatible spatial units and frames; reject pretending 2-D coordinates are metric 3-D.
+  - Auto-registered target observations in `SessionProjectStore` preserving annotations, calibration, and club metadata without manual path re-entry.
+  - `src/tools/capture_rig/gui.py` & `journey_actions.py`: Added "Open in Inspect Targets" action.
+  - `src/shared/python/workspace/__init__.py`: Exported all new primitives.
+  - `tests/integration/test_capture_target_handoff.py`: 6 comprehensive integration tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/integration/test_capture_target_handoff.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10519, notify parent orchestrator.
+
 ## [ORG-21] Generate Accurate Atlas, Help, Parity, and Completion Records (#10531)
 
 - Worktree / Branch: `feat/issue-10531-org21-accurate-atlas-parity`, lease `2026-09-20-org21-atlas`, DL-#10531.
