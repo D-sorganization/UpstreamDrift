@@ -1,5 +1,18 @@
 # SPEC.md — Repository Specification Document
 
+## Validate Every Browser, Tauri, and Native Launch Destination (ORG-04, #10513)
+
+Validates all launcher tile destinations across web, desktop, and hybrid runtimes:
+- **Canonical Route Table & Reachability Validation (`ui/src/routes.ts`, `ui/src/api/launcherReachability.ts`)**:
+  - `KNOWN_APP_ROUTES` and `isKnownAppRoute`: Defines canonical frontend routes in React application.
+  - `evaluateTileReachability` and `generateReachabilityMatrix`: Evaluates reachable routes across browser and Tauri environments, enforcing host/origin isolation.
+  - Fail-closed launch action: Unknown routes resolve to explicit unavailable/blocked states rather than blank 404 pages.
+- **Provider Tile Route Sanitization (`src/config/launcher_manifest_loader.py`)**:
+  - Movement Optimizer resolves cleanly to `native-window` rather than attempting to navigate non-existent web routes.
+- **Destination Verification Gates (`tests/config/launcher_manifest/test_parity.py`, `ui/src/api/launcherReachability.test.tsx`)**:
+  - `test_route_mode_routes_exist_in_react_router`: Verifies that every route-mode tile in loaded manifests corresponds to an existing React route.
+  - `test_every_tile_destination_resolves_authoritatively`: Verifies authoritative destination resolution for all registered capabilities.
+
 ## Simulation Engine Lifecycle Management and Model Caching (#8935)
 
 Eliminates redundant physics engine instantiation and model re-parsing across simulation requests:

@@ -109,12 +109,13 @@ function PageLoadingFallback() {
   );
 }
 
+
 /**
  * Route-level error boundary: a crash on one page is contained and reset when
  * the route changes, so sidebar/browser navigation still recovers the app
  * instead of bricking the whole tree (#7434).
  */
-function RoutedContent() {
+export function RoutedContent() {
   const location = useLocation();
   return (
     <ErrorBoundary resetKeys={[location.pathname]} label={location.pathname}>
