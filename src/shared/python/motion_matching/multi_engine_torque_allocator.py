@@ -1,4 +1,4 @@
-"""Multi-Engine Dynamic Force Allocator & Torque Determination Architecture (#10415).
+"""Multi-Engine Dynamic Force Allocator & Torque Determination Architecture (#10415, #10439).
 
 Extends the decoupled geometric-first kinematic tracking and contact-aware QP force
 allocation across multiple multibody physics engines:
@@ -21,7 +21,7 @@ from enum import Enum
 import json
 import logging
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, TypeAlias, runtime_checkable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -35,7 +35,7 @@ from src.shared.python.motion_matching.contact_force_allocator import (
 
 logger = logging.getLogger(__name__)
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 class EngineType(str, Enum):
@@ -109,6 +109,25 @@ class BaseEngineForceAdapter(Protocol):
         """Number of ground contact points/spheres."""
         ...
 
+    @property
+    def model_hash(self) -> str:
+        """Cryptographic hash or identifier of the evaluated model."""
+        ...
+
+    @property
+    def coordinate_order(self) -> Sequence[str]:
+        """Explicit coordinate order matching state vectors."""
+        ...
+
+    @property
+    def contact_names(self) -> Sequence[str]:
+        """Names of ground contact points/spheres."""
+        ...
+
+    def compute_mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
+        """Compute inertia matrix M(q) and Coriolis/gravity bias vector b(q, v)."""
+        ...
+
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
         """Compute unconstrained generalized forces tau_rnea = M(q) a + b(q, v)."""
         ...
@@ -142,6 +161,9 @@ class MujocoForceAdapter:
         self._nv = int(mj_model.nv)
         self._actuated_indices = list(range(6, self._nv))
         self._n_spheres = len(self._model._spheres)
+        self._model_hash = getattr(self._model, "model_sha256", "")
+        self._coordinate_order = tuple(getattr(self._model, "coordinate_order", ()))
+        self._contact_names = tuple(getattr(self._model, "_spheres", {}).keys())
 
     @property
     def engine_type(self) -> EngineType:
@@ -159,22 +181,65 @@ class MujocoForceAdapter:
     def n_contact_spheres(self) -> int:
         return self._n_spheres
 
+    @property
+    def model_hash(self) -> str:
+        return self._model_hash
+
+    @property
+    def coordinate_order(self) -> Sequence[str]:
+        return self._coordinate_order
+
+    @property
+    def contact_names(self) -> Sequence[str]:
+        return self._contact_names
+
+    def _checked_vector(self, value: Array, size: int, name: str) -> Array:
+        vector = np.asarray(value, dtype=np.float64)
+        if vector.shape != (size,):
+            raise ValueError(f"{name} shape must be ({size},), got {vector.shape}")
+        if not np.isfinite(vector).all():
+            raise ValueError(f"{name} must be finite")
+        return vector
+
+    def _prepare_state(self, q: Array, v: Array | None = None) -> None:
+        """Refresh all position-dependent fields, including mass and Jacobians."""
+        model, data = self._model.model, self._model.data
+        configuration = self._checked_vector(q, model.nq, "configuration")
+        velocity = self._checked_vector(
+            np.zeros(self._nv) if v is None else v, self._nv, "velocity"
+        )
+        # Validate both arrays before mutating native state.
+        data.qpos[:] = configuration
+        data.qvel[:] = velocity
+        self._mj.mj_fwdPosition(model, data)
+        self._mj.mj_fwdVelocity(model, data)
+
+    def _mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
+        self._prepare_state(q, v)
+        model, data = self._model.model, self._model.data
+        mass = np.zeros((self._nv, self._nv), dtype=np.float64)
+        self._mj.mj_fullM(model, mass, data.qM)
+        return mass, data.qfrc_bias.copy()
+
+    def compute_mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
+        """Compute inertia matrix M(q) and Coriolis/gravity bias vector b(q, v)."""
+        return self._mass_and_bias(q, v)
+
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
-        mj = self._mj
-        model = self._model.model
-        data = self._model.data
-        data.qpos[:] = q
-        data.qvel[:] = v
-        data.qacc[:] = a
-        mj.mj_inverse(model, data)
-        return np.asarray(data.qfrc_inverse.copy(), dtype=np.float64)
+        """Return raw M a + bias, before allocating ground and grip reactions.
+
+        MuJoCo qfrc_inverse subtracts passive/constraint forces and therefore
+        cannot be used as the raw right-hand side of this allocation equation.
+        """
+        acceleration = self._checked_vector(a, self._nv, "acceleration")
+        mass, bias = self._mass_and_bias(q, v)
+        return mass @ acceleration + bias
 
     def compute_contact_jacobian(self, q: Array) -> Array:
         mj = self._mj
         model = self._model.model
         data = self._model.data
-        data.qpos[:] = q
-        mj.mj_kinematics(model, data)
+        self._prepare_state(q)
         j_ground = np.zeros((self._n_spheres * 3, self._nv), dtype=np.float64)
         spheres = self._model._spheres
         for idx, s_info in enumerate(spheres.values()):
@@ -185,32 +250,32 @@ class MujocoForceAdapter:
         return j_ground
 
     def compute_grip_jacobian(self, q: Array) -> Array:
-        mj = self._mj
-        model = self._model.model
-        data = self._model.data
-        data.qpos[:] = q
-        mj.mj_kinematics(model, data)
+        self._prepare_state(q)
         jac_weld, _ = self._model.evaluate_weld_closure()
         return np.asarray(jac_weld, dtype=np.float64)
 
     def verify_acceleration_parity(
         self, q: Array, v: Array, tau_effective: Array, a_target: Array
     ) -> float:
-        mj = self._mj
-        model = self._model.model
-        data = self._model.data
-        data.qpos[:] = q
-        data.qvel[:] = v
-        mass = np.zeros((self._nv, self._nv), dtype=np.float64)
-        mj.mj_fullM(model, mass, data.qM)
-        mj.mj_fwdVelocity(model, data)
-        bias = data.qfrc_bias.copy()
-        a_forward = np.linalg.solve(mass, tau_effective - bias)
-        return float(np.max(np.abs(a_forward - a_target)))
+        """Audit the raw equation at this exact state, independent of call order.
+
+        tau_effective includes every externally supplied force and reaction.
+        This algebraic audit is not constrained/contact forward replay.
+        """
+        effort = self._checked_vector(tau_effective, self._nv, "effective effort")
+        target = self._checked_vector(a_target, self._nv, "target acceleration")
+        mass, bias = self._mass_and_bias(q, v)
+        a_forward = np.linalg.solve(mass, effort - bias)
+        return float(np.max(np.abs(a_forward - target)))
 
 
-class _AnalyticalMultibodyBase:
-    """Base class providing shared analytical kinematics, Jacobians, and parity checks."""
+class SyntheticMultibodyFixture:
+    """Quarantined base class providing shared analytical kinematics, Jacobians, and parity checks.
+
+    QUARANTINE NOTICE: This class and its derived adapters are synthetic fixtures
+    restricted to test-only scenarios where allow_synthetic=True. Production routes
+    must evaluate native model-conformant bridges (#10439).
+    """
 
     def __init__(
         self,
@@ -226,6 +291,10 @@ class _AnalyticalMultibodyBase:
         self._leg_coupling = leg_coupling
 
     @property
+    def engine_type(self) -> EngineType:
+        raise NotImplementedError("Subclasses must define engine_type")
+
+    @property
     def nv(self) -> int:
         return self._nv
 
@@ -237,6 +306,18 @@ class _AnalyticalMultibodyBase:
     def n_contact_spheres(self) -> int:
         return self._n_spheres
 
+    @property
+    def model_hash(self) -> str:
+        return "synthetic-fixture-v1"
+
+    @property
+    def coordinate_order(self) -> Sequence[str]:
+        return tuple(f"coord_{i}" for i in range(self._nv))
+
+    @property
+    def contact_names(self) -> Sequence[str]:
+        return tuple(f"contact_{i}" for i in range(self._n_spheres))
+
     def _get_mass_diag(self) -> Array:
         """Return analytical mass diagonal for dynamics and parity evaluation."""
         m_diag = np.ones(self._nv, dtype=np.float64) * 2.5
@@ -246,6 +327,12 @@ class _AnalyticalMultibodyBase:
         m_diag[18:36] = 3.0
         m_diag[36:] = 0.5
         return m_diag
+
+    def compute_mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
+        m_mat = np.diag(self._get_mass_diag())
+        b_vec = np.zeros(self._nv, dtype=np.float64)
+        b_vec[2] = self._mass_scale * 9.81
+        return m_mat, b_vec
 
     def compute_contact_jacobian(self, q: Array) -> Array:
         """Spatial translational Jacobian matching 6 foot contact sites (heel, midfoot, toe)."""
@@ -298,12 +385,15 @@ class _AnalyticalMultibodyBase:
         raise NotImplementedError  # tracked: #10415
 
 
-class DrakeForceAdapter(_AnalyticalMultibodyBase):
+# Backward-compatible alias for existing test imports
+_AnalyticalMultibodyBase = SyntheticMultibodyFixture
+
+
+class DrakeForceAdapter(SyntheticMultibodyFixture):
     """Drake multibody adapter with exact spatial inverse dynamics and Jacobians.
 
-    If Drake (pydrake) is installed, evaluates live MultibodyPlant.
-    Otherwise, provides analytical spatial Featherstone dynamics conforming
-    to Drake spatial vector conventions.
+    QUARANTINED FIXTURE: Evaluates analytical spatial Featherstone dynamics
+    conforming to Drake spatial vector conventions for test fixtures.
     """
 
     def __init__(
@@ -338,10 +428,10 @@ class DrakeForceAdapter(_AnalyticalMultibodyBase):
         return m_mat @ a + b_vec
 
 
-class OpenSimForceAdapter(_AnalyticalMultibodyBase):
+class OpenSimForceAdapter(SyntheticMultibodyFixture):
     """OpenSim Simbody adapter for generalized inverse dynamics and station Jacobians.
 
-    Provides a 1000x faster, strictly convex alternative to classical OpenSim RRA/CMC.
+    QUARANTINED FIXTURE: Analytical test fixture for OpenSim generalized force allocation.
     """
 
     def __init__(
@@ -373,11 +463,10 @@ class OpenSimForceAdapter(_AnalyticalMultibodyBase):
         return m_mat @ a + c_vec + g_vec
 
 
-class SimscapeForceAdapter(_AnalyticalMultibodyBase):
+class SimscapeForceAdapter(SyntheticMultibodyFixture):
     """Simscape / MATLAB adapter for multibody torque determination & Simulink export.
 
-    Prepares dynamic torque sequences and ground reaction timeseries formatted for
-    Simulink `From Workspace` blocks, eliminating simulation instability.
+    QUARANTINED FIXTURE: Analytical test fixture for Simscape torque determination.
     """
 
     def __init__(
@@ -572,9 +661,26 @@ def create_engine_force_adapter(
     spec_path: Path | str | None = None,
     nv: int = 44,
     n_spheres: int = 6,
+    *,
+    allow_synthetic: bool = False,
 ) -> BaseEngineForceAdapter:
-    """Factory creating an engine force adapter for the requested target."""
+    """Factory creating an engine force adapter for the requested target.
+
+    In production routes (allow_synthetic=False), engines without available native
+    SDKs fail closed by raising RuntimeError. Synthetic multibody fixtures are
+    strictly quarantined and only permitted when allow_synthetic=True (#10439).
+    """
     e = EngineType(engine)
+    if e == EngineType.PINOCCHIO:
+        from src.engines.physics_engines.pinocchio.python.force_adapter import (
+            PinocchioForceAdapter,
+        )
+
+        p = Path(
+            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
+        )
+        require(p.is_file(), f"Pinocchio specification not found: {p}")
+        return PinocchioForceAdapter(p.read_bytes())
     if e == EngineType.MUJOCO:
         if spec_path is None:
             spec_path = Path("docs/development/full_body_models/full_body_spec_v1.json")
@@ -582,9 +688,24 @@ def create_engine_force_adapter(
         require(p.is_file(), f"MuJoCo specification not found: {p}")
         return MujocoForceAdapter(p.read_bytes())
     if e == EngineType.DRAKE:
+        if not allow_synthetic:
+            raise RuntimeError(
+                "Native Drake MultibodyPlant force adapter is not yet registered for production; "
+                "synthetic fixture is quarantined (allow_synthetic=True required)."
+            )
         return DrakeForceAdapter(nv=nv, n_spheres=n_spheres)
     if e == EngineType.OPENSIM:
+        if not allow_synthetic:
+            raise RuntimeError(
+                "Native OpenSim Simbody force adapter is not yet registered for production; "
+                "synthetic fixture is quarantined (allow_synthetic=True required)."
+            )
         return OpenSimForceAdapter(nv=nv, n_spheres=n_spheres)
     if e == EngineType.SIMSCAPE:
+        if not allow_synthetic:
+            raise RuntimeError(
+                "Native Simscape force adapter is not yet registered for production; "
+                "synthetic fixture is quarantined (allow_synthetic=True required)."
+            )
         return SimscapeForceAdapter(nv=nv, n_spheres=n_spheres)
     raise ValueError(f"Unsupported engine type for force adapter: {engine}")
