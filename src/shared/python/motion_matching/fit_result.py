@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -39,6 +40,7 @@ class CanonicalFitResult:
     n_jac_eval: int = 0
     solver_options: dict[str, Any] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
+    receipt_path: Path | str | None = None
 
     @classmethod
     def from_api_contract(
@@ -50,9 +52,7 @@ class CanonicalFitResult:
         target_hash: str,
         timestamp_utc: str,
         solver_status: str = "success",
-        iterations: int = 0,
-        n_evaluations: int = 0,
-        message: str = "",
+        **kwargs: Any,
     ) -> CanonicalFitResult:
         """Build the canonical result from the legacy API-contract payload."""
         coefficients = np.asarray(result.coefficients, dtype=np.float64)
@@ -64,10 +64,10 @@ class CanonicalFitResult:
             final_cost=float(result.final_loss),
             final_rmse_m=float(metadata.get("final_rmse_m", result.final_loss)),
             solver_status=solver_status,
-            iterations=iterations,
-            n_evaluations=n_evaluations,
+            iterations=int(kwargs.get("iterations", 0)),
+            n_evaluations=int(kwargs.get("n_evaluations", 0)),
             wall_clock_s=time_s,
-            message=message,
+            message=str(kwargs.get("message", "")),
             history=(),
             method=method,
             git_commit=git_commit,

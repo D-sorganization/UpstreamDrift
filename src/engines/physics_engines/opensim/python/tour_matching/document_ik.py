@@ -16,6 +16,7 @@ import time
 from typing import Any
 
 import numpy as np
+import math
 
 from src.engines.physics_engines.opensim.python.tour_matching.marker_map import (
     ANTHRO_DOCUMENT_MARKER_BODIES,
@@ -401,8 +402,9 @@ def run_document_ik(
     n_calc = len(times)
     obs_m, valid_m = cap.points_m[:n_calc], cap.valid[:n_calc]
 
-    diff = pred_markers - obs_m
-    errors = np.sqrt(np.einsum("...i,...i->...", diff, diff))  # Bolt optimization
+    errors = np.sqrt(
+        np.einsum("...i,...i->...", diff := (pred_markers - obs_m), diff)
+    )  # Bolt optimization
     whole_rmse = float(np.sqrt(np.mean(errors[valid_m] ** 2)))
     seg_rms_dict = segment_rms(cap.labels, errors, valid_m)
 

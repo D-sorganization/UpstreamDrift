@@ -130,8 +130,7 @@ class TestRegistration:
 
     def test_provider_capability_flags(self) -> None:
         provider = DrakeFitSwingProvider()
-        # Initial pass per #4516: club-only, no body / ball cost terms.
-        assert provider.supports_body_target() is False
+        assert provider.supports_body_target() is True
         assert provider.supports_ball_target() is False
 
 
