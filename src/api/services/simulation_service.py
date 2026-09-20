@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import anyio.to_thread
 
@@ -13,7 +14,7 @@ from src.shared.python.analysis.orchestrator import (
     AnalysisOrchestrator,
     supported_counterfactual_kinds,
 )
-from src.shared.python.core.contracts import precondition
+from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.core.error_utils import (
     EngineLaunchError,
     GolfSuiteError,
@@ -80,6 +81,25 @@ class SimulationService:
         self._last_recording_meta: dict[str, Any] = {}
         self._biomechanics_binding: Any = None
         self._active_candidate_session: Any = None
+        self._model_cache: OrderedDict[tuple[EngineType, str, float | None], bool] = (
+            OrderedDict()
+        )
+        self._model_cache_max_size: int = 32
+
+    def _record_model_cache(
+        self, cache_key: tuple[EngineType, str, float | None]
+    ) -> None:
+        """Record model load in LRU cache with eviction at capacity."""
+        if cache_key in self._model_cache:
+            self._model_cache.move_to_end(cache_key)
+            return
+        if len(self._model_cache) >= self._model_cache_max_size:
+            self._model_cache.popitem(last=False)
+        self._model_cache[cache_key] = True
+
+    def clear_model_cache(self) -> None:
+        """Clear the LRU model cache."""
+        self._model_cache.clear()
 
     @property
     def stats(self) -> SimulationStats:
@@ -293,6 +313,10 @@ class SimulationService:
         ),
         "Engine type must be specified",
     )
+    @postcondition(
+        lambda result: result is not None,
+        "Prepared engine must not be None",
+    )
     def _prepare_engine(self, request: SimulationRequest) -> Any:
         """Load and configure the physics engine for simulation.
 
@@ -316,17 +340,53 @@ class SimulationService:
                 reason="engine loaded but no active engine returned",
             )
 
+        model_loaded_from_cache = False
         if request.model_path:
+            model_path_obj = Path(request.model_path)
             try:
-                engine.load_from_path(request.model_path)
-            except (FileNotFoundError, OSError, ValueError) as e:
-                raise ModelLoadError(str(request.model_path), reason=str(e)) from e
+                mtime: float | None = model_path_obj.stat().st_mtime
+            except OSError:
+                mtime = None
+
+            cache_key = (engine_type, str(request.model_path), mtime)
+            if (
+                getattr(engine, "_loaded_model_cache_key", None) == cache_key
+                and cache_key in self._model_cache
+            ):
+                self._model_cache.move_to_end(cache_key)
+                model_loaded_from_cache = True
+                logger.info(
+                    "engine_model_cache_hit engine=%s model=%s",
+                    engine_type.value,
+                    request.model_path,
+                )
+            else:
+                try:
+                    engine.load_from_path(request.model_path)
+                    cast(Any, engine)._loaded_model_cache_key = cache_key
+                    self._record_model_cache(cache_key)
+                    logger.info(
+                        "engine_model_loaded engine=%s model=%s",
+                        engine_type.value,
+                        request.model_path,
+                    )
+                except (FileNotFoundError, OSError, ValueError) as e:
+                    raise ModelLoadError(str(request.model_path), reason=str(e)) from e
 
         if request.initial_state:
             positions = request.initial_state.get("positions", [])
             velocities = request.initial_state.get("velocities", [])
             if positions and velocities:
                 engine.set_state(positions, velocities)
+        elif (
+            model_loaded_from_cache
+            and hasattr(engine, "reset")
+            and callable(engine.reset)
+        ):
+            try:
+                engine.reset()
+            except (RuntimeError, ValueError, OSError, AttributeError) as e:
+                logger.debug("engine_reset_suppressed error=%s", e)
 
         return engine
 

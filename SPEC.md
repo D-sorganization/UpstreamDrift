@@ -1,5 +1,16 @@
 # SPEC.md — Repository Specification Document
 
+## Simulation Engine Lifecycle Management and Model Caching (#8935)
+
+Eliminates redundant physics engine instantiation and model re-parsing across simulation requests:
+- **Engine Lifecycle Management (`src/shared/python/engine_core/engine_manager.py`)**:
+  - `EngineManager._load_engine()`: Reuses active physics engine instance when matching requested engine type.
+  - Safely closes outgoing physics engine (`_close_active_engine()`) upon switching engines or shutting down (`cleanup()`), preventing native OpenGL and simulation context resource leaks.
+  - Added `close()` to `MockPhysicsEngine`.
+- **Model Parsing Cache (`src/api/services/simulation_service.py`)**:
+  - `SimulationService._prepare_engine()`: Caches parsed model on engine keyed by `(engine_type, str(model_path), mtime)`. Skips re-parsing when the same model file has not changed.
+  - Invokes `engine.reset()` on cached models when custom initial states are omitted, preserving clean simulation states between runs.
+
 ## Baseline Capability Inventory and Preserve Entity Identity (ORG-01, #10510)
 
 Establishes the capability inventory baseline across all 104 launcher tiles and model definitions, enforcing immutable entity identity preservation across catalog discovery and migration:
@@ -12,6 +23,7 @@ Establishes the capability inventory baseline across all 104 launcher tiles and 
 - **Automated Verification & Integrity Gates (`tests/config/test_capability_migration_coverage.py`)**:
   - Validates 100% tile coverage across local and external provider roots (`UPSTREAM_DRIFT_PROVIDER_ROOTS`).
   - Strict regression gates ensuring legacy layouts and saved workspace configurations resolve without breakage.
+
 
 ## Results Workspace Handoff and Action Integration (ORG-13, #10521)
 
