@@ -2,8 +2,7 @@
 
 ## PF-01 Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (#10431)
 
-- Branch: `feat/issue-10431-pf01-fast-matching-evidence-schemas-fixtures`
-- Lease: `antigravity-ud-10431`
+- Branch: `feat/issue-10431-pf01-fast-matching-evidence-schemas-fixtures`, PR #10495 (auto-merge armed), lease `antigravity-ud-10431`, DL-#10431.
 - Summary:
   - Preserved existing rejected driver/iron fast-matching receipts and candidate artifacts (`evidence/matched/`).
   - Extended `MatchedSwingCandidate` schema, `CandidateAuxiliary` (`root_forces`, `contact_modes`, `grip_wrench`), `CandidateMetadata` (`solver_status`, `handedness`, `name_maps`), checksum calculation, and NPZ conversion logic in `candidate_convert.py`.
@@ -11,7 +10,23 @@
   - Updated `SwingEvaluator` to avoid fabricating impact phases without declared `t_events`, audit closure translation and rotation separately (`ClosureAudit`), and return `NaN` RMSE for empty marker populations.
   - Added 7 negative acceptance fixtures in `test_acceptance.py` and corresponding evaluators in `acceptance.py`: (1) friction cone violation, (2) torque bound overwrite, (3) missing root histories, (4) 44 vs 41 coordinate dimension mismatch, (5) missing club coverage / empty population, (6) truncated horizon duration, and (7) synthetic engine false qualification.
 - Validation: 46 unit tests pass (`pytest tests/unit/motion_matching/test_candidate.py tests/unit/motion_matching/test_contact_force_allocator.py tests/unit/motion_matching/test_swing_evaluator.py tests/unit/motion_matching/test_acceptance.py`), ruff clean, black clean.
-- Next: Open PR, obtain CI verification, then release lease and proceed to next backlog item (#10432 / #10433).
+- Next: PR #10495 auto-merge armed, proceed to PF-02 (#10432).
+
+## ORG-22 Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows (#10530)
+
+- Branch: `feat/issue-10530-org22-research-lifecycle`, lease `antigravity-ud-10530`, DL-#10530.
+- Changes:
+  - `src/config/research_capability_lifecycle.py`: Implemented `ResearchCapabilityLifecycleManager`, `IncompleteCapabilityRecord`, `CLINotInteractiveGUIError`, and `audit_research_and_excluded_capabilities`.
+  - Audited all packages in `src/tools/` against launcher tiles and `src/config/registry_exclusions.yaml`.
+  - Enforced fail-closed rule preventing CLI-only or headless capabilities from being claimed as GUI tiles (`CLINotInteractiveGUIError`).
+  - Standardized CLI entry points for retained headless research tools (`python -m src.tools.model_converter`, `contraction`, `drift_control`, `sg_optimizer`).
+  - Added structured incomplete capability tracking linking owners, issues, useful access, inputs/outputs, missing acceptance, and next actionable steps.
+  - Honestly documented SG optimizer Phase 3 PyQt6 UI follow-up tied to #6272 without fake GUIs or claims of abandonment.
+  - `src/config/__init__.py`: Exported lifecycle management symbols.
+  - `src/config/capability_migration.py`: Added `load()` classmethod.
+  - `tests/config/test_research_capability_lifecycle.py`: 8 comprehensive acceptance tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/config/test_research_capability_lifecycle.py --timeout=60`.
+- Next: Open PR with auto-merge, release lease, proceed to ORG-23 (#10532).
 
 ## ORG-19 Unify Sidekick, Setup, Help, and Library as Global Utilities (#10528)
 
