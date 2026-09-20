@@ -443,3 +443,61 @@ class TestEngineManagerBehavior:
                 # State should remain consistent: no current engine
                 assert manager.current_engine is None
                 assert manager.get_current_engine() is None
+
+    def test_load_engine_short_circuits_when_already_loaded(self) -> None:
+        """Test that _load_engine short-circuits if requested engine is already active."""
+        manager = EngineManager()
+        mock_engine = MagicMock()
+        manager.current_engine = EngineType.MUJOCO
+        manager.active_physics_engine = mock_engine
+
+        with patch(
+            "src.shared.python.engine_core.engine_manager.get_registry"
+        ) as mock_reg:
+            manager._load_engine(EngineType.MUJOCO)
+            mock_reg.assert_not_called()
+
+        assert manager.current_engine == EngineType.MUJOCO
+        assert manager.active_physics_engine is mock_engine
+        assert manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
+
+    def test_load_engine_closes_outgoing_engine_on_genuine_switch(self) -> None:
+        """Test that _load_engine calls close() on outgoing engine on switch."""
+        manager = EngineManager()
+        outgoing_engine = MagicMock()
+        incoming_engine = MagicMock()
+
+        manager.current_engine = EngineType.MUJOCO
+        manager.active_physics_engine = outgoing_engine
+
+        mock_reg = MagicMock()
+        mock_registration = MagicMock()
+        mock_registration.factory.return_value = incoming_engine
+        mock_reg.get.return_value = mock_registration
+
+        with (
+            patch(
+                "src.shared.python.engine_core.engine_manager.get_registry",
+                return_value=mock_reg,
+            ),
+            patch.object(manager, "_ensure_runtime_importable"),
+        ):
+            manager._load_engine(EngineType.DRAKE)
+
+        outgoing_engine.close.assert_called_once()
+        assert manager.current_engine == EngineType.DRAKE
+        assert manager.active_physics_engine is incoming_engine
+        assert manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
+
+    def test_cleanup_closes_active_engine(self) -> None:
+        """Test that cleanup() closes the active engine and resets state."""
+        manager = EngineManager()
+        mock_engine = MagicMock()
+        manager.current_engine = EngineType.MUJOCO
+        manager.active_physics_engine = mock_engine
+
+        manager.cleanup()
+
+        mock_engine.close.assert_called_once()
+        assert manager.active_physics_engine is None
+        assert manager.current_engine is None

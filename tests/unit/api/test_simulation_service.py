@@ -240,6 +240,161 @@ class TestRunSimulation:
             await service.run_simulation(request)
             mock_engine.load_from_path.assert_called_once_with("/path/to/model.xml")
 
+    async def test_simulation_skips_model_reparse_on_cached_model(
+        self, mock_engine_manager, tmp_path
+    ) -> None:
+        """Test that sequential simulations with same engine and model skip re-parsing."""
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+
+        model_file = tmp_path / "model.xml"
+        model_file.write_text("<model></model>")
+
+        mock_engine = MagicMock(spec=PhysicsEngine)
+        mock_engine.load_from_path = MagicMock()
+        mock_engine.step = MagicMock()
+        mock_engine.reset = MagicMock()
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
+
+        with (
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
+            patch("src.api.services.simulation_service.EngineType", MockEngineType),
+        ):
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
+            mock_recorder.is_recording = False
+            mock_recorder.record_step = MagicMock()
+            mock_recorder.get_time_series = MagicMock(
+                return_value=(np.array([0.0]), np.array([[0]]))
+            )
+            MockRecorder.return_value = mock_recorder
+
+            service = SimulationService(mock_engine_manager)
+            request = SimulationRequest(
+                engine_type="mujoco",
+                model_path=str(model_file),
+                duration=0.001,
+            )
+
+            await service.run_simulation(request)
+            await service.run_simulation(request)
+
+            # load_from_path must be called exactly once despite 2 runs
+            mock_engine.load_from_path.assert_called_once_with(str(model_file))
+            # On second run, engine.reset was called because model reload was skipped
+            mock_engine.reset.assert_called_once()
+
+    async def test_simulation_reparses_model_when_mtime_changes(
+        self, mock_engine_manager, tmp_path
+    ) -> None:
+        """Test that simulation reloads model when file mtime changes."""
+        import os
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+
+        model_file = tmp_path / "model.xml"
+        model_file.write_text("<model></model>")
+
+        mock_engine = MagicMock(spec=PhysicsEngine)
+        mock_engine.load_from_path = MagicMock()
+        mock_engine.step = MagicMock()
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
+
+        with (
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
+            patch("src.api.services.simulation_service.EngineType", MockEngineType),
+        ):
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
+            mock_recorder.is_recording = False
+            mock_recorder.record_step = MagicMock()
+            mock_recorder.get_time_series = MagicMock(
+                return_value=(np.array([0.0]), np.array([[0]]))
+            )
+            MockRecorder.return_value = mock_recorder
+
+            service = SimulationService(mock_engine_manager)
+            request = SimulationRequest(
+                engine_type="mujoco",
+                model_path=str(model_file),
+                duration=0.001,
+            )
+
+            await service.run_simulation(request)
+
+            # Change mtime to simulate file edit
+            new_mtime = model_file.stat().st_mtime + 10.0
+            os.utime(model_file, (new_mtime, new_mtime))
+
+            await service.run_simulation(request)
+
+            assert mock_engine.load_from_path.call_count == 2
+
+    async def test_two_sequential_simulate_calls_construct_factory_once(
+        self, tmp_path
+    ) -> None:
+        """Issue #8935: Two sequential /simulate calls with same engine+model construct factory once."""
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+        from src.shared.python.engine_core.engine_manager import EngineManager
+
+        model_file = tmp_path / "model.xml"
+        model_file.write_text("<model></model>")
+
+        mock_engine = MagicMock(spec=PhysicsEngine)
+        mock_engine.load_from_path = MagicMock()
+        mock_engine.step = MagicMock()
+        mock_engine.reset = MagicMock()
+
+        factory_mock = MagicMock(return_value=mock_engine)
+        mock_registration = MagicMock()
+        mock_registration.factory = factory_mock
+
+        mock_registry = MagicMock()
+        mock_registry.get.return_value = mock_registration
+
+        manager = EngineManager()
+
+        with (
+            patch(
+                "src.shared.python.engine_core.engine_manager.get_registry",
+                return_value=mock_registry,
+            ),
+            patch.object(manager, "_ensure_runtime_importable"),
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
+        ):
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
+            mock_recorder.is_recording = False
+            mock_recorder.record_step = MagicMock()
+            mock_recorder.get_time_series = MagicMock(
+                return_value=(np.array([0.0]), np.array([[0]]))
+            )
+            MockRecorder.return_value = mock_recorder
+
+            service = SimulationService(manager)
+            request = SimulationRequest(
+                engine_type="mujoco",
+                model_path=str(model_file),
+                duration=0.001,
+            )
+
+            # Two sequential simulation calls
+            await service.run_simulation(request)
+            await service.run_simulation(request)
+
+            # Factory must have been constructed exactly once
+            assert factory_mock.call_count == 1
+            # Model must have been loaded exactly once
+            assert mock_engine.load_from_path.call_count == 1
+
     async def test_simulation_sets_initial_state(self, mock_engine_manager) -> None:
         """Test that simulation sets initial state when provided."""
         from src.api.models.requests import SimulationRequest
