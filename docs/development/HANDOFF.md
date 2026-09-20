@@ -1,5 +1,17 @@
 # Current Matching Continuation Handoff
 
+## PF-01 Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (#10431)
+
+- Branch: `feat/issue-10431-pf01-fast-matching-evidence-schemas-fixtures`, PR #10495 (auto-merge armed), lease `antigravity-ud-10431`, DL-#10431.
+- Summary:
+  - Preserved existing rejected driver/iron fast-matching receipts and candidate artifacts (`evidence/matched/`).
+  - Extended `MatchedSwingCandidate` schema, `CandidateAuxiliary` (`root_forces`, `contact_modes`, `grip_wrench`), `CandidateMetadata` (`solver_status`, `handedness`, `name_maps`), checksum calculation, and NPZ conversion logic in `candidate_convert.py`.
+  - Truthfully renamed `AllocationObjective.MINIMUM_TRAIL_ARM` with backwards-compatible `trail_zero` parsing, added `HARD_ZERO_TRAIL` mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios in `ContactForceAllocator`.
+  - Updated `SwingEvaluator` to avoid fabricating impact phases without declared `t_events`, audit closure translation and rotation separately (`ClosureAudit`), and return `NaN` RMSE for empty marker populations.
+  - Added 7 negative acceptance fixtures in `test_acceptance.py` and corresponding evaluators in `acceptance.py`: (1) friction cone violation, (2) torque bound overwrite, (3) missing root histories, (4) 44 vs 41 coordinate dimension mismatch, (5) missing club coverage / empty population, (6) truncated horizon duration, and (7) synthetic engine false qualification.
+- Validation: 46 unit tests pass (`pytest tests/unit/motion_matching/test_candidate.py tests/unit/motion_matching/test_contact_force_allocator.py tests/unit/motion_matching/test_swing_evaluator.py tests/unit/motion_matching/test_acceptance.py`), ruff clean, black clean.
+- Next: PR #10495 auto-merge armed, proceed to PF-02 (#10432).
+
 ## ORG-24 Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries (#10533)
 
 - Branch: `feat/issue-10533-org24-feature-preservation-audit`, lease `antigravity-ud-10533`, DL-#10533.
