@@ -16,14 +16,17 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 
 
-def _engine_load_error_widget(name: str, error: Exception) -> QLabel:
+def _engine_load_error_widget(
+    name: str, error: Exception, exercise: str = "exercise"
+) -> QLabel:
     """Create an actionable fallback when an optional engine cannot start."""
     message = str(error)
     is_mujoco_dll_failure = name == "MuJoCo_Models" and "dll" in message.lower()
+    exercise_display = exercise.replace("_", " ").title()
     if is_mujoco_dll_failure:
         text = (
             "MuJoCo is unavailable on this computer.\n\n"
-            "The Gait exercise remains open. Choose JaxSim_Models from the "
+            f"The {exercise_display} exercise remains open. Choose JaxSim_Models from the "
             "Engine selector above for a dependency-light analysis view, or "
             "repair the native MuJoCo runtime and select MuJoCo_Models to retry.\n\n"
             f"Technical detail: {message}"
@@ -137,7 +140,9 @@ class ExerciseDashboard(QMainWindow):
                 self.layout.addWidget(self._current_widget)
         except Exception as error:  # noqa: BLE001 - optional engine boundary
             logger.exception("Unable to load exercise dashboard for %s", name)
-            self._current_widget = _engine_load_error_widget(name, error)
+            self._current_widget = _engine_load_error_widget(
+                name, error, exercise=self.exercise
+            )
             self.layout.addWidget(self._current_widget)
 
 

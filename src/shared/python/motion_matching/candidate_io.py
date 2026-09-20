@@ -72,6 +72,12 @@ def save_candidate(candidate: MatchedSwingCandidate, path: Path | str) -> None:
         arrays_to_save["external_forces"] = np.ascontiguousarray(
             candidate.external_forces
         )
+    if candidate.root_forces is not None:
+        arrays_to_save["root_forces"] = np.ascontiguousarray(candidate.root_forces)
+    if candidate.contact_modes is not None:
+        arrays_to_save["contact_modes"] = np.ascontiguousarray(candidate.contact_modes)
+    if candidate.grip_wrench is not None:
+        arrays_to_save["grip_wrench"] = np.ascontiguousarray(candidate.grip_wrench)
 
     np.savez(target_path, **arrays_to_save)  # type: ignore[arg-type]
     meta = candidate.metadata
@@ -121,15 +127,21 @@ def load_candidate(
         target_markers_m = data.get("target_markers_m", None)
         marker_validity = data.get("marker_validity", None)
         external_forces = data.get("external_forces", None)
+        root_forces = data.get("root_forces", None)
+        contact_modes = data.get("contact_modes", None)
+        grip_wrench = data.get("grip_wrench", None)
 
         markers = CandidateMarkers(
-            model_markers_m=data.get("model_markers_m", None),
-            target_markers_m=data.get("target_markers_m", None),
-            marker_validity=data.get("marker_validity", None),
+            model_markers_m=model_markers_m,
+            target_markers_m=target_markers_m,
+            marker_validity=marker_validity,
         )
         auxiliary = CandidateAuxiliary(
-            actuator_states=data.get("actuator_states", None),
-            external_forces=data.get("external_forces", None),
+            actuator_states=actuator_states,
+            external_forces=external_forces,
+            root_forces=root_forces,
+            contact_modes=contact_modes,
+            grip_wrench=grip_wrench,
         )
 
         candidate = MatchedSwingCandidate(
