@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10524 · Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10524 (ORG-15, epic #10508)
+- **Branch:** feat/issue-10524-org15-scene-delivery-modes
+- **PR:** #10561
+- **Paths:** src/shared/python/workspace/shot_course_workspace.py; src/shared/python/workspace/**init**.py; tests/integration/test_shot_course_workspace.py
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (7 integration tests pass in tests/integration/test_shot_course_workspace.py covering all RED and GREEN acceptance criteria: incompatible ground/flight record rejected, terrain edit invalidates dependent run rather than silently mutating history, scene-only view fails closed with SceneNonPhysicsError, unsupported simulator destination disabled, putting fixture save/reopen round-trip, bunker multi-fidelity export round-trip, simulator network failure and cancellation flows; ruff check, ruff format, and check_file_size_budget pass cleanly).
+- **Summary:** Implemented `ShotCourseWorkspaceCoordinator` composing Terrain, Putting, Scene, Bunker, and Simulator Delivery modes per ADR-0047 and issue #10524. Enforced explicit model boundaries: scene view is visual inspection only; bunker preserves F0-F3 fidelity tiers; putting conforms to rolling/ground contracts; terrain mutation increments revision and invalidates prior runs; simulator delivery verifies destination capabilities and produces explicit submission receipts.
+- **Next step:** Push branch, verify CI, enable auto-merge, release lease on #10524.
+- **Evidence:** tests/integration/test_shot_course_workspace.py
+
 ### DL-#10523 · Connect Swing, Impact, Flight, and Preserved Trajectory Viewers
 
 - **State:** in_progress
