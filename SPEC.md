@@ -1,3 +1,20 @@
+## Task-Oriented React and Tauri Workspace Navigation (ORG-06, #10516)
+
+Applies consistent, task-oriented workspace navigation across React and Tauri web/desktop interfaces aligned with the five canonical domains:
+- **Shared Catalog Definitions (`ui/src/types/workspaceNavigation.ts`)**:
+  - `TASK_WORKSPACES`: Canonical definitions for the 5 primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`).
+  - Strict membership contracts mapping launcher tools, embedded viewers, and workflow actions to their authoritative task domain.
+- **Capability Adapter & Surface Isolation (`ui/src/api/capabilityAdapter.ts`)**:
+  - `resolveWorkspaceToolAction`: Resolves tool launches across web and Tauri desktop surfaces.
+  - Native-only tools trigger desktop window launches under Tauri or provide actionable explanations with web alternatives when accessed from standard browsers.
+- **Accessible Navigation Components (`ui/src/components/layout/WorkspaceNavigation.tsx`)**:
+  - `WorkspaceSidebar`: Accessible sidebar navigation with visible focus states, ARIA landmarks, and keyboard focus recovery to `#main-content`.
+  - `WorkspaceBreadcrumb`: Accessible return-to-workspace breadcrumb trail preserving hierarchical task context.
+  - `WorkspaceView`: Tabular and card layout of workspace member capabilities with reachability badges and direct actions.
+- **Bookmarkable Routing & State Preservation (`ui/src/pages/WorkspacePage.tsx`, `ui/src/App.tsx`, `ui/src/utils/routeTitles.ts`)**:
+  - Dedicated `/workspaces/:slug` routes supporting direct linking, browser forward/back navigation, and centralized route titles.
+  - Integrated launcher dashboard quick-links into workspace destinations.
+
 ## Replace Canonical Estimation Shell With Bounded Estimator Coordinator (ORG-17, #10526)
 
 Replaces placeholder canonical estimation shells with a bounded application service coordinator integrating parameter estimation, identifiability analysis, and trajectory evaluation:
