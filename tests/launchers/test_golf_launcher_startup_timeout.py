@@ -42,7 +42,12 @@ def _patch_launcher_ui() -> Generator[None, None, None]:
     tests in this file want to observe ``QTimer.singleShot`` arguments
     directly.
     """
-    with patch("src.launchers.upstream_drift_launcher.DockerCheckThread"):
+    with (
+        patch("src.launchers.upstream_drift_launcher.DockerCheckThread"),
+        patch(
+            "src.launchers.launcher_sidekick_sidebar.SidekickSidebarManager._install_sidekick_import_paths"
+        ),
+    ):
         yield
 
 
@@ -175,10 +180,10 @@ def test_handle_startup_timeout_is_idempotent_after_success(qapp) -> None:
     with (
         _patch_launcher_ui(),
         patch(
-            "src.launchers.upstream_drift_launcher._lazy_load_model_registry"
+            "src.launchers.launcher_orchestrator._lazy_load_model_registry"
         ) as mock_reg,
         patch(
-            "src.launchers.upstream_drift_launcher._lazy_load_engine_manager"
+            "src.launchers.launcher_orchestrator._lazy_load_engine_manager"
         ) as mock_eng,
         patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):
@@ -289,10 +294,10 @@ def test_startup_clears_loading_before_grid_rebuild(qapp) -> None:
     with (
         _patch_launcher_ui(),
         patch(
-            "src.launchers.upstream_drift_launcher._lazy_load_model_registry"
+            "src.launchers.launcher_orchestrator._lazy_load_model_registry"
         ) as mock_reg,
         patch(
-            "src.launchers.upstream_drift_launcher._lazy_load_engine_manager"
+            "src.launchers.launcher_orchestrator._lazy_load_engine_manager"
         ) as mock_eng,
         patch("src.launchers.upstream_drift_launcher.QTimer"),
     ):

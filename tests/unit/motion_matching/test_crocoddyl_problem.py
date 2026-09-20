@@ -149,3 +149,31 @@ def test_ridge_damps_near_singular_sensitivity() -> None:
     assert plain[1] > 1e5
     assert abs(damped[1]) < 1.0
     assert abs(damped[0] - a_ref[0]) < 1e-2
+
+
+def test_trail_side_effort_bounds_exceed_lead_side_and_scapula_pattern_order() -> None:
+    """MS-107 b100 run: trail-side bounds raised; ``RScapInput`` must win over ``ScapInput``."""
+    order = [
+        "RScapInputY",
+        "LScapInputY",
+        "RSInputX",
+        "LSInputX",
+        "REInput",
+        "LEInput",
+        "RFInput",
+        "LFInput",
+        "RWInputX",
+        "LWInputX",
+    ]
+    actuated = np.ones(len(order), dtype=bool)
+    bounds = per_coordinate_effort_bounds(order, actuated, 600.0)
+    by_name = dict(zip(order, bounds.tolist(), strict=True))
+    assert by_name["RScapInputY"] == 160.0
+    assert by_name["LScapInputY"] == 80.0
+    for trail, lead in (
+        ("RSInputX", "LSInputX"),
+        ("REInput", "LEInput"),
+        ("RFInput", "LFInput"),
+        ("RWInputX", "LWInputX"),
+    ):
+        assert by_name[trail] > by_name[lead], (trail, lead)
