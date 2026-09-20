@@ -55,7 +55,7 @@ def _iter_duplicate_paragraphs(text: str) -> list[str]:
     paragraphs = [
         " ".join(paragraph.split())
         for paragraph in re.split(r"\n\s*\n", text)
-        if paragraph.strip()
+        if paragraph.strip() and not paragraph.lstrip().startswith("#")
     ]
     return [
         paragraph
