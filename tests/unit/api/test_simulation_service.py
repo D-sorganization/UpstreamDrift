@@ -14,8 +14,8 @@ from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 import contextlib
 
-# Configure async tests to use asyncio backend only
-pytestmark = pytest.mark.anyio
+# Configure async tests to use asyncio backend only and mark as unit suite
+pytestmark = [pytest.mark.anyio, pytest.mark.unit]
 
 # Explicit attribute list for GenericPhysicsRecorder mocks because the test
 # relies on instance attributes (is_recording) that are set in __init__, not

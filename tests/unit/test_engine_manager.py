@@ -6,12 +6,15 @@ import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
 from src.shared.python.engine_core.engine_manager import (
     EngineManager,
     EngineStatus,
     EngineType,
 )
 from src.shared.python.core.contracts import PreconditionError
+
+pytestmark = pytest.mark.unit
 
 
 class TestEngineManager:
