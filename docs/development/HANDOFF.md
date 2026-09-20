@@ -1,5 +1,37 @@
 # Current Matching Continuation Handoff
 
+## ORG-22 Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows (#10530)
+
+- Branch: `feat/issue-10530-org22-research-lifecycle`, lease `antigravity-ud-10530`, DL-#10530.
+- Changes:
+  - `src/config/research_capability_lifecycle.py`: Implemented `ResearchCapabilityLifecycleManager`, `IncompleteCapabilityRecord`, `CLINotInteractiveGUIError`, and `audit_research_and_excluded_capabilities`.
+  - Audited all packages in `src/tools/` against launcher tiles and `src/config/registry_exclusions.yaml`.
+  - Enforced fail-closed rule preventing CLI-only or headless capabilities from being claimed as GUI tiles (`CLINotInteractiveGUIError`).
+  - Standardized CLI entry points for retained headless research tools (`python -m src.tools.model_converter`, `contraction`, `drift_control`, `sg_optimizer`).
+  - Added structured incomplete capability tracking linking owners, issues, useful access, inputs/outputs, missing acceptance, and next actionable steps.
+  - Honestly documented SG optimizer Phase 3 PyQt6 UI follow-up tied to #6272 without fake GUIs or claims of abandonment.
+  - `src/config/__init__.py`: Exported lifecycle management symbols.
+  - `src/config/capability_migration.py`: Added `load()` classmethod.
+  - `tests/config/test_research_capability_lifecycle.py`: 8 comprehensive acceptance tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/config/test_research_capability_lifecycle.py --timeout=60`.
+- Next: Open PR with auto-merge, release lease, proceed to ORG-23 (#10532).
+
+## ORG-19 Unify Sidekick, Setup, Help, and Library as Global Utilities (#10528)
+
+- Branch: `feat/issue-10528-org19-global-utilities`, lease `antigravity-ud-10528`, DL-#10528.
+- Changes:
+  - `src/shared/python/workspace/global_utilities.py`: Implemented `GlobalWorkspaceUtilitiesCoordinator`, `AssistantContextSnapshot`, `WorkspaceContextualHelp`, `OnboardingPreferences`, `PlatformExecutionEnvironment`, `NativeActionUnavailableError`, and `UnknownUtilityError`.
+  - Assistant context updates cleanly on workspace switch without creating duplicate sessions or stale run references.
+  - Canonical alias resolution maps legacy utility IDs (`legacy_assistant`, `setup_wizard`, `library_browser`, `help_center`) to canonical utilities.
+  - Sticky onboarding preferences persist across session reload and migration.
+  - Focus restoration returns focus cleanly to calling widgets upon overlay dismissal.
+  - Browser platform environment refuses native-only controls fail-closed with `NativeActionUnavailableError`.
+  - Assistant conversation history persists across workspace navigation without deletion.
+  - `src/shared/python/workspace/__init__.py`: Exported public coordinator and utility data structures.
+  - `tests/launchers/test_global_workspace_utilities.py`: Full RED and GREEN unit test suite (7/7 tests passing with `pytestmark = pytest.mark.unit`).
+- Reproduction: `python -m pytest tests/launchers/test_global_workspace_utilities.py --timeout=60`.
+- Next: Open PR with auto-merge, release lease, proceed to next issue in backlog.
+
 ## ORG-16 Consolidate Optimization and Training Launchers (#10525)
 
 - Branch: `feat/issue-10525-org16-optimization-training`, lease `antigravity-ud-10525`, DL-#10525.

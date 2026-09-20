@@ -1,3 +1,24 @@
+## Unified Motion-Matching Abstraction Stack and Provider Delegation (MS-12, #10331)
+
+Adopts and documents the single motion-matching abstraction stack (`MatchingPlant` + receipts), resolves engine provider delegation contracts, retires legacy duplicate CIR IK and matching solvers with actionable ADR-0051 diagnostic errors, and bridges CIR `SkeletonRig`/`JointTrajectory` with `CanonicalPose`:
+- **ADR-0051 (`docs/adr/0051-matched-swing-abstraction.md`)**:
+  - Establishes `MatchingPlant` and validated execution receipts as the sole canonical execution layer for motion-matching.
+  - Formulates provider delegation semantics: `supports_body_target() -> True` for engines with full-body matching lanes (`mujoco`, `drake`, `pinocchio`); `False` for club-only or analytic engines (`opensim`, `myosuite`, `pendulum`).
+  - Standardizes the `CanonicalFitResult.receipt_path` contract pointing to validated on-disk receipts.
+  - Formally retires duplicate CIR stubs (`ik/opensim`, `ik/mujoco`, `ik/drake`, `matching/cmc`, `matching/rra`) with actionable ADR-0051 error diagnostics.
+  - Reserves `src/shared/python/motion_pipeline/api.py` for MS-85 web routing (#8864).
+  - Establishes cross-representation parity between CIR `SkeletonRig`/`JointTrajectory` and `CanonicalPose` (#8867).
+  - Enforces canonical chart metadata conventions (+Z-up, `[w,x,y,z]` quaternion, intrinsic XYZ Euler deg) (#10043).
+- **Motion Matching Provider & Fit Result Infrastructure**:
+  - `src/shared/python/motion_matching/fit_result.py`: Added `receipt_path: Path | str | None = None` to `CanonicalFitResult`.
+  - `src/shared/python/motion_matching/provider.py`: Implemented `has_body_target`, `resolve_body_target`, and `execute_body_fit` with on-disk JSON receipt emission.
+  - Updated engine providers (`mujoco`, `drake`, `pinocchio`) to route body targets via `execute_body_fit`.
+  - Updated `myosuite` provider to fail closed with `UnsupportedTargetError` on body targets.
+- **Cross-Representation Bridge (#8867)**:
+  - `src/shared/python/pose_interchange/cir_bridge.py`: Bidirectional conversion between `CanonicalPose` and CIR `SkeletonRig`/`JointTrajectory` preserving kinematics and joint limits.
+- **Evidence & Verification**:
+  - Added unit tests: `tests/unit/motion_matching/test_body_target_provider.py`, `tests/unit/motion_pipeline/test_motion_pipeline_retirement.py`, and `tests/unit/motion_matching/test_pose_interchange_parity.py`.
+
 ## Generate Accurate Atlas, Help, Parity, and Completion Records (ORG-21, #10531)
 
 Generates accurate, evidence-backed capability atlas graphs, feature parity matrices, industrial readiness records, and workspace documentation without shell-only or stale placeholders:
@@ -325,6 +346,16 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
 
+## Research Capability Lifecycle and Excluded Workflows (ORG-22, #10530)
+
+Reconciles and documents intentionally excluded packages, manifest-only services, and research capabilities:
+- **Research Capability Lifecycle Manager (`src/config/research_capability_lifecycle.py`)**:
+  - `ResearchCapabilityLifecycleManager`: Enforces classification and lifecycle policies across all packages under `src/tools/`, preventing untiled non-excluded package drift.
+  - Fail-Closed GUI Representation Prevention: Explicitly forbids adapting or claiming CLI-only or headless research tools (`contraction`, `drift_control`, `model_converter`, `sg_optimizer`, etc.) as interactive GUI tiles (`CLINotInteractiveGUIError`).
+  - Retained Research CLI Entry Points: Retains executable command-line interfaces with standard package invocation (`python -m src.tools.contraction`, `python -m src.tools.drift_control`, `python -m src.tools.model_converter`, `python -m src.tools.sg_optimizer`).
+  - Explicit Follow-Up for Incomplete Capabilities: Discloses owner, issue, current useful access, supported inputs/outputs, missing acceptance, and next action (`IncompleteCapabilityRecord`).
+  - Honest SG Optimizer Phase 3 UI Status: Accurately classifies shipped CLI reality while maintaining concrete follow-up for Phase 3 PyQt6 profile editor and conditions panel under issue #6272 without claiming premature GUI availability or abandoning the feature.
+
 ## Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (ORG-12, #10522)
 
 Coordinates subject, club, model selection, initial pose, fitting, and dynamics through session-bound typed handoff:
@@ -348,6 +379,17 @@ Packages tour matching execution into reusable library code outside the document
   - Deprecated wrappers issuing `DeprecationWarning` while delegating directly to packaged entry points, preserving CLI argument schemas and exit codes.
 - **Pipeline Integration (`src/tools/motion_matching/pipeline.py`)**:
   - Direct delegation to packaged execution scripts writing outputs cleanly outside the documentation directory.
+
+## Global Workspace Utilities (ORG-19, #10528)
+
+Unifies Sidekick, Setup, Help, and Library as global, workspace-agnostic overlays:
+- **Global Utilities Coordinator (`src/shared/python/workspace/global_utilities.py`)**:
+  - `GlobalWorkspaceUtilitiesCoordinator`: Manages assistant, contextual help, onboarding setup, and model/asset library overlays without duplicating state across workspace transitions.
+  - Contextual Assistant Synchronization: Workspace transitions preserve conversation history while cleanly updating active project, run, and workspace metadata snapshots (`AssistantContextSnapshot`).
+  - Canonical Alias Resolution: Preserves backwards compatibility for deprecated/legacy utility IDs (`legacy_assistant`, `setup_wizard`, `library_browser`, `help_center`) resolving them to canonical destinations.
+  - Persistent Onboarding Preferences: Sticky onboarding dismissal survives session reloads, profile switches, and cross-session handoffs (`OnboardingPreferences`).
+  - Keyboard Focus Restoration: Restores prior keyboard focus cleanly to calling widgets upon modal/drawer overlay dismissal.
+  - Fail-Closed Platform Execution: Refuses native desktop controls (local file explorer, native process invocation, direct GPU profiling) when running in browser execution environments (`NativeActionUnavailableError`).
 
 ## Optimization and Training Workspace (ORG-16, #10525)
 
