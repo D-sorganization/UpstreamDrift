@@ -286,6 +286,20 @@ def test_resolve_uncertain_submission(client: TestClient) -> None:
         "/tools/golf-simulator/session",
         json={"destination_id": "local", "session_id": "sess-test-01"},
     )
+    prep_resp = client.post(
+        "/tools/golf-simulator/shot/prepare",
+        json={"shot": _sample_shot_payload(), "context_revision": 1},
+    )
+    prep_id = prep_resp.json()["prepared_shot_id"]
+    arm_resp = client.post(
+        "/tools/golf-simulator/shot/arm",
+        json={"prepared_shot_id": prep_id, "context_revision": 1},
+    )
+    arm_token = arm_resp.json()["arm_token"]
+    client.post(
+        "/tools/golf-simulator/shot/submit",
+        json={"prepared_shot_id": prep_id, "arm_token": arm_token},
+    )
 
     # Put into uncertain state artificially for test
     from src.api.routes.golf_simulator import get_current_session_service
