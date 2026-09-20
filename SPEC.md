@@ -40,6 +40,16 @@ Eliminates GUI thread blocking during launcher startup by offloading tool discov
   - Added explicit thread cleanup via `worker.finished.connect(worker.deleteLater)`.
   - Added granular phase duration reporting and startup telemetry.
 
+## Launch Truthfulness and Guard Problematic Tiles (ORG-03, #10512)
+
+Replaces misleading launches with real tasks or explicit nonlaunchable states:
+- **Truthful Launch Dispatch & Diagnostic Windows (`src/launchers/task_launch_truthfulness.py`)**:
+  - Distinguishes prototype/demo simulator tiles (`putting_green`, `ball_flight`, `swing_flight`) from qualified numerical solvers, clearly labeling inspection-only execution.
+  - Guards FreeMoCap parametric CLI against zero-argument headless launches, enforcing parameter configuration before invocation.
+  - Replaces placeholder execution fallbacks with explicit diagnostic unavailable tool windows (`_UnavailableToolWindow`) rather than opening blank or misconfigured interfaces.
+- **Truthfulness Contract Verification (`tests/launchers/test_task_launch_truthfulness.py`)**:
+  - Verifies that unconfigured or preview-only capabilities refuse silent mock execution and report actionable diagnostic reasons.
+
 ## Capability State Contract With Real-World Health Checks (ORG-02, #10511)
 
 Enforces the capability state contract across discovery, validation, and launcher tile dispatch:
