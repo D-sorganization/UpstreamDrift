@@ -129,8 +129,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `workspace` | 0 | 0 | 0 | 13 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1353** | **709** | **702** |
+| `workspace` | 0 | 0 | 0 | 14 | 0 | 0 |
+| **Total** | **423** | **279** | **123** | **1354** | **709** | **702** |
 
 ## Diverged Files by Package
 
