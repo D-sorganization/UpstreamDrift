@@ -24,6 +24,19 @@ Enforces the capability state contract across discovery, validation, and launche
   - Validates capability health check invariants, state transitions, and diagnostic message fidelity.
   - Ensures robust fallback behavior when optional dependencies are absent.
 
+## WebSocket Simulation Loop Batching and Event Loop Offload (#8936)
+
+Optimizes the WebSocket simulation streaming loop to achieve real-time and faster-than-real-time streaming without blocking the event loop:
+- **Batched Physics Offload (`src/api/routes/simulation_ws.py`)**:
+  - `_step_physics_batch()`: Synchronously advances the physics engine in batches (`frame_skip` steps per batch) with pre- and post-condition contracts (`require`, `ensure`).
+  - Offloads physics batch execution to worker threads via `anyio.to_thread.run_sync()`, preventing compute-intensive physics from starving the asyncio event loop and concurrent REST/WebSocket requests.
+- **Persistent Client Command Processing (`src/api/routes/simulation_ws.py`)**:
+  - `_process_pending_client_commands()`: Replaces per-step `asyncio.wait_for(..., timeout=0.001)` polling with a persistent background receive task. Eliminates timer creation/destruction overhead and OS timer quantum quantization delays (~1-15ms per step).
+  - Yields to the event loop (`anyio.sleep(0)`) to process queued messages promptly, and cleanly cancels the background task on loop completion, pause, or disconnect.
+- **Batched Frame Transmission & Pacing (`src/api/routes/simulation_ws.py`)**:
+  - `_send_simulation_frame()`: Extracts frame construction, live analysis, and axial load generation into a dedicated modular helper.
+  - Paces frame transmission per rendered batch (`batch_steps * timestep`), rather than sleeping on every integration sub-step.
+
 ## Validate Every Browser, Tauri, and Native Launch Destination (ORG-04, #10513)
 
 Validates all launcher tile destinations across web, desktop, and hybrid runtimes:
