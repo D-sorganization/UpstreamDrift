@@ -1,5 +1,18 @@
 # SPEC.md — Repository Specification Document
 
+## Baseline Capability Inventory and Preserve Entity Identity (ORG-01, #10510)
+
+Establishes the capability inventory baseline across all 104 launcher tiles and model definitions, enforcing immutable entity identity preservation across catalog discovery and migration:
+- **Capability Migration Engine & Inventory (`src/config/capability_migration.py`)**:
+  - `CapabilityMigrationInventory`: Dataclass managing the 104 observed launcher tile entities across local and external provider namespaces.
+  - Implements contract-checked classification tracking `entity_kind`, `primary_workspace`, `lifecycle`, and `provider_authority`.
+  - Preserves immutable entity identity across schema migrations with backward-compatible alias resolution (`starting_pose_matcher` -> `motion_target_preview`, `putting_green_gui` -> `putting_green`).
+- **Comprehensive Baseline Documentation & Reporting (`docs/development/ORG01_CAPABILITY_BASELINE.md`)**:
+  - Generates detailed 104-entry markdown table with classification dispositions, rationale, and lifecycle transitions.
+- **Automated Verification & Integrity Gates (`tests/config/test_capability_migration_coverage.py`)**:
+  - Validates 100% tile coverage across local and external provider roots (`UPSTREAM_DRIFT_PROVIDER_ROOTS`).
+  - Strict regression gates ensuring legacy layouts and saved workspace configurations resolve without breakage.
+
 ## Results Workspace Handoff and Action Integration (ORG-13, #10521)
 
 Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with Replay, Data Explorer, Plot, Compare, and Export actions within a unified workspace:
@@ -19,7 +32,6 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
 - **Provenance Retention & Round-Trip Reimport (`export_result_with_provenance`, `reimport_result_artifact`)**:
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
-
 
 ## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
 
