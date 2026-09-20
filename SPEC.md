@@ -1,3 +1,26 @@
+## Unified Cross-Engine Parity Report (MS-70, #10350)
+
+Generates unified cross-engine parity evaluation comparing motion-matching candidate trajectories across all available physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite):
+- **Parity Schema & Comparison Classes (`src/shared/python/motion_matching/parity_schema.py`)**:
+  - `ComparisonClass`: Defines three explicit comparison tiers:
+    - `same_model_numerical`: Identical kinematic tree and dynamics model across engines.
+    - `native_model_observable`: Distinct engine-native coordinate definitions and segment representations, comparing observable task-space markers.
+    - `experimental_accuracy`: Comparison against optical capture ground truth.
+  - `PointwiseDifference`: Pointwise max error, RMS error, p95 error, relative percent error, and unit.
+  - `EngineParityRow`: Per-engine execution metrics including verification status (`verified`, `unverified`, `unavailable`), comparison class, pointwise trajectory difference, pointwise joint torque difference, total mechanical work in Joules, contact force agreement, and wall-clock execution time.
+  - `UnifiedParityReport`: Machine-readable JSON artifact and human-readable Markdown table generator summarizing multi-engine parity.
+- **Pointwise Comparison & Evaluation Engine (`src/shared/python/motion_matching/parity_report.py`)**:
+  - `evaluate_pointwise_trajectory_parity`: Computes pointwise Euclidean distance per marker and frame over time; aggregate-only matchers cannot mask pointwise trajectory deviations.
+  - `evaluate_pointwise_torque_parity`: Computes pointwise torque discrepancies with a 1.0 N·m absolute noise floor on relative percentage differences.
+  - `build_parity_report`: Runs candidates through native models and plant simulation, stamping unverified coordinate mismatches or missing platform SDKs with explicit diagnostic reasons.
+  - `run_parity_report_cli`: CLI command for batch report generation.
+- **Cross-Engine Replay & Leaderboard Integration**:
+  - `CrossEngineReplay.to_parity_report`: Produces a `UnifiedParityReport` from recorded multi-engine replays.
+  - `leaderboard.rows_from_parity_report` and `sync_leaderboard_from_parity_report`: Ingests parity rows into the matched swing leaderboard with `total_work_J` and `wall_clock_s`.
+- **Evidence & Parity Specification Sync**:
+  - `src/engines/CROSS_ENGINE_PARITY_SPEC.md`: Section 3 updated with generated Markdown parity comparison matrix.
+  - `evidence/matched/driver_g1/parity_report.json` and `evidence/matched/driver_g1/parity_report.md`: Committed multi-engine parity evidence.
+
 ## Unified Motion-Matching Abstraction Stack and Provider Delegation (MS-12, #10331)
 
 Adopts and documents the single motion-matching abstraction stack (`MatchingPlant` + receipts), resolves engine provider delegation contracts, retires legacy duplicate CIR IK and matching solvers with actionable ADR-0051 diagnostic errors, and bridges CIR `SkeletonRig`/`JointTrajectory` with `CanonicalPose`:
