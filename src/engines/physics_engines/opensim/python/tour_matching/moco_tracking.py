@@ -15,6 +15,8 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.contracts import postcondition, precondition
+
 logger = logging.getLogger(__name__)
 
 
@@ -81,6 +83,16 @@ class MocoTrackingResult:
     controls_trajectory_path: str = ""
 
 
+@precondition(
+    lambda input_trc, output_trc, t_start=0.0, t_end=0.85, max_missing_ratio=0.0: (
+        t_end > t_start and max_missing_ratio >= 0.0
+    ),
+    "t_end must be > t_start and max_missing_ratio >= 0.0",
+)
+@postcondition(
+    lambda retained: isinstance(retained, list) and len(retained) > 0,
+    "must return non-empty list of retained marker names",
+)
 def sanitize_trc_for_horizon(
     input_trc: Path | str,
     output_trc: Path | str,
@@ -222,6 +234,12 @@ def _write_sanitized_trc(
         f.writelines(out_lines)
 
 
+@precondition(
+    lambda model_path, trc_path, states_guess_path, config: isinstance(
+        config, MocoTrackingConfig
+    ),
+    "config must be MocoTrackingConfig",
+)
 def build_moco_study(
     model_path: str,
     trc_path: str,
