@@ -76,6 +76,9 @@ class CandidateMetadata:
     event_indices: dict[str, int] = field(default_factory=dict)
     coverage_mask: dict[str, Any] = field(default_factory=dict)
     solver_settings: dict[str, Any] = field(default_factory=dict)
+    solver_status: str | dict[str, Any] | None = None
+    handedness: str | None = None
+    name_maps: dict[str, Any] = field(default_factory=dict)
     contact_parameters: dict[str, Any] = field(default_factory=dict)
     closure_parameters: dict[str, Any] = field(default_factory=dict)
     checksums: dict[str, str] = field(default_factory=dict)
@@ -125,10 +128,13 @@ class CandidateMarkers:
 
 @dataclass(frozen=True)
 class CandidateAuxiliary:
-    """Auxiliary state container (actuator states, contact/external forces)."""
+    """Auxiliary state container (actuator states, contact/external forces, root residuals, contact modes, grip wrench)."""
 
     actuator_states: np.ndarray | None = None
     external_forces: np.ndarray | None = None
+    root_forces: np.ndarray | None = None
+    contact_modes: np.ndarray | None = None
+    grip_wrench: np.ndarray | None = None
 
 
 def _validate_time(time_s: np.ndarray | Sequence[float]) -> np.ndarray:
@@ -275,9 +281,33 @@ def _validate_auxiliary(
             raise ValueError(f"external_forces must be (N, F), got {forces_arr.shape}")
         forces_arr.flags.writeable = False
 
+    root_arr: np.ndarray | None = None
+    if aux.root_forces is not None:
+        root_arr = np.asarray(aux.root_forces, dtype=np.float64)
+        if root_arr.ndim != 2 or root_arr.shape[0] != n_frames:
+            raise ValueError(f"root_forces must be (N, 6), got {root_arr.shape}")
+        root_arr.flags.writeable = False
+
+    modes_arr: np.ndarray | None = None
+    if aux.contact_modes is not None:
+        modes_arr = np.asarray(aux.contact_modes, dtype=np.float64)
+        if modes_arr.ndim != 2 or modes_arr.shape[0] != n_frames:
+            raise ValueError(f"contact_modes must be (N, M), got {modes_arr.shape}")
+        modes_arr.flags.writeable = False
+
+    grip_arr: np.ndarray | None = None
+    if aux.grip_wrench is not None:
+        grip_arr = np.asarray(aux.grip_wrench, dtype=np.float64)
+        if grip_arr.ndim != 2 or grip_arr.shape[0] != n_frames:
+            raise ValueError(f"grip_wrench must be (N, 6), got {grip_arr.shape}")
+        grip_arr.flags.writeable = False
+
     return CandidateAuxiliary(
         actuator_states=act_arr,
         external_forces=forces_arr,
+        root_forces=root_arr,
+        contact_modes=modes_arr,
+        grip_wrench=grip_arr,
     )
 
 
@@ -370,6 +400,18 @@ class MatchedSwingCandidate:
         return self._auxiliary.external_forces
 
     @property
+    def root_forces(self) -> np.ndarray | None:
+        return self._auxiliary.root_forces
+
+    @property
+    def contact_modes(self) -> np.ndarray | None:
+        return self._auxiliary.contact_modes
+
+    @property
+    def grip_wrench(self) -> np.ndarray | None:
+        return self._auxiliary.grip_wrench
+
+    @property
     def n_frames(self) -> int:
         return len(self._time_s)
 
@@ -405,6 +447,12 @@ class MatchedSwingCandidate:
             res["marker_validity"] = _array_sha256(self._markers.marker_validity)
         if self._auxiliary.external_forces is not None:
             res["external_forces"] = _array_sha256(self._auxiliary.external_forces)
+        if self._auxiliary.root_forces is not None:
+            res["root_forces"] = _array_sha256(self._auxiliary.root_forces)
+        if self._auxiliary.contact_modes is not None:
+            res["contact_modes"] = _array_sha256(self._auxiliary.contact_modes)
+        if self._auxiliary.grip_wrench is not None:
+            res["grip_wrench"] = _array_sha256(self._auxiliary.grip_wrench)
         return res
 
     def verify_checksums(self) -> None:
