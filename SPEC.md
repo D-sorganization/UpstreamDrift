@@ -243,6 +243,20 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
 
+## Guided Workflow Transitions Across Unified Workspaces (ORG-09, #10518)
+
+Coordinates multi-stage end-to-end biomechanical workflows across workspaces with disk-backed verification, cryptographic artifact hashing, and client UI projection parity:
+- **Guided Workflow Pipeline Coordinator (`src/shared/python/workspace/workflow_coordinator.py`)**:
+  - `WorkflowStepId`: Defines the 7 canonical stages (`capture_import`, `inspect_targets`, `configure_model`, `fit`, `dynamics`, `compare`, `export`).
+  - `WorkflowMode`: Tailors required stages by execution mode (`full_body_3d`, `single_view_coaching`, `ball_flight_analysis`). In `single_view_coaching`, 3D physics steps are skipped automatically without blocking downstream steps.
+  - `WorkflowCoordinator`: Manages workflow state transitions with strict preconditions:
+    - Step readiness evaluated dynamically against on-disk artifact files and cryptographic SHA-256 hashes rather than transient UI button state.
+    - Contractual isolation: `DYNAMICS` stage cannot inherit a purely kinematic pass without physics validation.
+    - Pre-existing imported artifacts support entry at downstream stages (`entry_from_artifacts`) without re-running prior stages.
+    - Cancellation diagnostic recording and automatic attempt counter increments on retry.
+- **Client UI State Projections (`WorkflowProjection`, `StepProjection`)**:
+  - Pure data projections serialized via `to_dict()` consumed identically across Qt desktop widgets (`WorkflowStripWidget`) and React/Tauri interfaces (`WorkflowStrip.tsx`).
+
 ## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
 
 Extends OpenSim dynamic marker tracking via MocoTrack from the initial 0.10s pilot window to the full G1 horizon (0.85s) on the tour driver swing, packaging the result into the standardized Matched Swing Program evidence and candidate architecture:

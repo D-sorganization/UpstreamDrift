@@ -1,3 +1,5 @@
+# Current Matching Continuation Handoff
+
 ## [ORG-21] Generate Accurate Atlas, Help, Parity, and Completion Records (#10531)
 
 - Worktree / Branch: `feat/issue-10531-org21-accurate-atlas-parity`, lease `2026-09-20-org21-atlas`, DL-#10531.
@@ -8,6 +10,19 @@
   - `tests/scripts/test_workspace_documentation_freshness.py`: Added 8 comprehensive regression tests covering workspace membership drift, undocumented/dangling aliases, broken links, stale generated views, shell-only parity vs compute-complete separation, deterministic generators, training controller README accuracy, and industrial readiness U3 reconciliation.
 - Reproduction: `py -3.12 -m pytest tests/scripts/test_workspace_documentation_freshness.py tests/scripts/test_capability_atlas.py tests/config/industrial_readiness/ -v --timeout=60`.
 - Next: Open PR, arm auto-merge (`--auto --squash`), release lease on #10531, notify parent orchestrator.
+
+## [ORG-09] Guided Workflow Transitions Across Unified Workspaces (#10518)
+
+- Worktree / Branch: `feat/issue-10518-org09-workflow-transitions`, lease `antigravity-ud-10518`, DL-#10518.
+- Changes:
+  - `src/shared/python/workspace/workflow_coordinator.py`: Added `WorkflowCoordinator`, `WorkflowStepId` (7-step canonical pipeline), `WorkflowMode`, `StepStatus`, `StepProjection`, and `WorkflowProjection`.
+  - Step transitions enforce cryptographic hash verification and disk existence, engine requirements (single-view vs 3-D physics), and strict contract distinction preventing dynamics from inheriting purely kinematic passes.
+  - Added cancellation, retry attempt tracking, and later-stage entry from imported artifacts (`entry_from_artifacts`).
+  - Added pure state projection with `.to_dict()` and `.get_step()` for Qt (`WorkflowStripWidget`) and React/Tauri (`WorkflowStrip.tsx`) parity.
+  - `src/shared/python/workspace/__init__.py`: Exported all workflow coordinator primitives.
+  - `tests/unit/workspace/test_workflow_transitions.py`: 8 comprehensive unit tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/unit/workspace/test_workflow_transitions.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10518, notify parent orchestrator.
 
 ## [ORG-08] Unified Artifact and Project Context Handoff Between Workspaces (#10517)
 
