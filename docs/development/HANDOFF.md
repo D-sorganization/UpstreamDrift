@@ -5,13 +5,29 @@
 - Branch: `feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration`, PR #10497 (auto-merge armed), lease `antigravity-ud-10432`, DL-#10432.
 - Changes:
   - `marker_kinematics.py`: Added `SolveDiagnostics` with projected gradient norm, cost decrease, active bounds count, and convergence metrics. Added `solve_frame_multi_start` with unconstrained geometric floor estimation. Added `refine_overlapping_window` with triangular window blending and temporal continuity.
-  - `kinematic_smoothing.py`: Implemented zero-phase Butterworth smoothing with analytical/numerical derivative compatibility ($\dot{q} \approx v$ and $\dot{v} \approx a$), `BoundarySpikeAudit` for boundary jerk and acceleration jump detection, and `audit_cutoff_sensitivity`.
+  - `kinematic_smoothing.py`: Implemented zero-phase Butterworth smoothing with analytical/numerical derivative compatibility (q_dot ≈ v and v_dot ≈ a), `BoundarySpikeAudit` for boundary jerk and acceleration jump detection, and `audit_cutoff_sensitivity`.
   - Addressed backlog items:
     - MM-2 (#10104): Physiological wrist range of motion compliance producing 0 violations.
     - MM-5 (#10107): Left elbow pit up-and-inward address verification (`dot(pit, up) > 0.3` and `dot(pit, inward) > 0.3`).
     - Separate calibration provenance for driver and 7-iron enforced fail-closed.
 - Reproduction: `pytest tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py`.
 - Next: Land PR #10497 with auto-merge enabled, proceed to PF-03.
+
+## ORG-22 Reconcile and Document Intentionally Excluded, Research-Only, and Incomplete Workflows (#10530)
+
+- Branch: `feat/issue-10530-org22-research-lifecycle`, lease `antigravity-ud-10530`, DL-#10530.
+- Changes:
+  - `src/config/research_capability_lifecycle.py`: Implemented `ResearchCapabilityLifecycleManager`, `IncompleteCapabilityRecord`, `CLINotInteractiveGUIError`, and `audit_research_and_excluded_capabilities`.
+  - Audited all packages in `src/tools/` against launcher tiles and `src/config/registry_exclusions.yaml`.
+  - Enforced fail-closed rule preventing CLI-only or headless capabilities from being claimed as GUI tiles (`CLINotInteractiveGUIError`).
+  - Standardized CLI entry points for retained headless research tools (`python -m src.tools.model_converter`, `contraction`, `drift_control`, `sg_optimizer`).
+  - Added structured incomplete capability tracking linking owners, issues, useful access, inputs/outputs, missing acceptance, and next actionable steps.
+  - Honestly documented SG optimizer Phase 3 PyQt6 UI follow-up tied to #6272 without fake GUIs or claims of abandonment.
+  - `src/config/__init__.py`: Exported lifecycle management symbols.
+  - `src/config/capability_migration.py`: Added `load()` classmethod.
+  - `tests/config/test_research_capability_lifecycle.py`: 8 comprehensive acceptance tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/config/test_research_capability_lifecycle.py --timeout=60`.
+- Next: Open PR with auto-merge, release lease, proceed to ORG-23 (#10532).
 
 ## ORG-19 Unify Sidekick, Setup, Help, and Library as Global Utilities (#10528)
 
