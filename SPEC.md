@@ -1,3 +1,52 @@
+## Surface Cross-Engine Comparison and Injury Indicators in Dedicated Workspaces (ORG-18, #10527)
+
+Surfaces cross-engine comparison and injury risk indicators into dedicated application service coordinators, consuming qualified biomechanical simulation runs and enforcing fail-closed compatibility and clinical non-diagnostic contracts:
+- **Comparison & Indicator Coordinator (`src/shared/python/workspace/comparison_indicator_workspace.py`)**:
+  - `ComparisonIndicatorWorkspaceCoordinator`: Dedicated application service surfacing `canonical_core_comparison` and `injury_analysis` capabilities across `results_and_compare` and `exercise_analysis` workspace shells.
+  - Exposes `compare_runs()` and `compute_injury_indicators()` without duplicating backend physics, numerical solvers, or scoring routines.
+- **Run Compatibility and Model Fidelity Invariance (`ComparisonRunArtifact`, `validate_run_compatibility`)**:
+  - Validates physical units, coordinate frame identifiers, timebase sample interval alignment ($|dt_1 - dt_2| < 10^{-6}$), channel name coherence, and finite signal values.
+  - Enforces model fidelity level invariance via `ModelFidelityLevel` enum (`STUB_PENDULUM`, `SIMPLIFIED_KINETICS`, `QUALIFIED_FULL_BODY`): rejects cross-comparisons between incompatible fidelity tiers with explicit `IncompatibleArtifactError`.
+- **Cross-Engine Comparison Delegation & Provenance (`CrossEngineComparisonAdapter`)**:
+  - Delegates trace alignment and difference metric evaluations to existing comparison services (`compare_traces`), calculating trajectory RMSE, peak dynamic differences, and deterministic SHA-256 provenance hashes.
+- **Biomechanical Load Channel Validation & Clinical Disclaimer (`InjuryIndicatorAdapter`)**:
+  - Requires explicit physical load channels (`peak_compression_bw`, `peak_lateral_shear_bw`, `x_factor_stretch`) normalized by body weight (BW) and fails closed when channels are absent (no mock data fallback).
+  - Adapts biomechanical inputs to `InjuryRiskScorer` and stamps every indicator output with mandatory non-clinical educational/research disclaimers.
+
+## Task-Oriented React and Tauri Workspace Navigation (ORG-06, #10516)
+
+Applies consistent, task-oriented workspace navigation across React and Tauri web/desktop interfaces aligned with the five canonical domains:
+- **Shared Catalog Definitions (`ui/src/types/workspaceNavigation.ts`)**:
+  - `TASK_WORKSPACES`: Canonical definitions for the 5 primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`).
+  - Strict membership contracts mapping launcher tools, embedded viewers, and workflow actions to their authoritative task domain.
+- **Capability Adapter & Surface Isolation (`ui/src/api/capabilityAdapter.ts`)**:
+  - `resolveWorkspaceToolAction`: Resolves tool launches across web and Tauri desktop surfaces.
+  - Native-only tools trigger desktop window launches under Tauri or provide actionable explanations with web alternatives when accessed from standard browsers.
+- **Accessible Navigation Components (`ui/src/components/layout/WorkspaceNavigation.tsx`)**:
+  - `WorkspaceSidebar`: Accessible sidebar navigation with visible focus states, ARIA landmarks, and keyboard focus recovery to `#main-content`.
+  - `WorkspaceBreadcrumb`: Accessible return-to-workspace breadcrumb trail preserving hierarchical task context.
+  - `WorkspaceView`: Tabular and card layout of workspace member capabilities with reachability badges and direct actions.
+- **Bookmarkable Routing & State Preservation (`ui/src/pages/WorkspacePage.tsx`, `ui/src/App.tsx`, `ui/src/utils/routeTitles.ts`)**:
+  - Dedicated `/workspaces/:slug` routes supporting direct linking, browser forward/back navigation, and centralized route titles.
+  - Integrated launcher dashboard quick-links into workspace destinations.
+
+## Motion Matching Tile: Visual Playback, Standardized Metrics, and Navigation Handoff (MS-82, #10355)
+
+Enhances the Motion Matching PyQt6 tile (`src/tools/motion_matching/gui.py` and `src/tools/motion_matching/pipeline.py`) to deliver full visual playback, standardized metrics, acceptance gating, and tool handoffs:
+- **Kinematics & Dynamics Animation Playback**:
+  - Automatically discovers and plays `ik_playback.gif` and `tracking_playback.gif` upon matching completion using `QMovie` instances mounted on dedicated display labels.
+  - Safe lifecycle management (`cleanup()`, `_stop_movies()`, and `closeEvent`) preventing memory leaks and background movie resource retention.
+- **Five Standardized Headline Metrics & Acceptance Verification**:
+  - `extract_five_metrics_and_acceptance(summary)`: Extracts `full_capture_ik_rms_mm`, `address_marker_rms_mm`, `backswing_root_error_max_mm`, `whole_run_root_rms_mm`, and `inside_support_polygon_fraction`.
+  - Color-coded acceptance badge (`PASSED`, `REJECTED`, `UNCLASSIFIED`) reflecting qualification criteria and frame convergence.
+- **Plant Engine Registry Integration**:
+  - Backend selector dynamically queries registered physics engines via `available_engines()` querying the shared plant registry, exposing MuJoCo, Drake, Pinocchio, and Pink.
+- **Workflow Navigation Handoffs**:
+  - "Open in Results Browser": Launches the Matched Swing Results Browser dialog backed by `MatchedSwingBrowserModel`.
+  - "Open in Viewer": Launches the interactive 3D `TourMatchingViewerWindow`.
+- **Feature Parity Registration**:
+  - Upgraded `tools.motion_matching` in `src/config/feature_parity.json` from `gap` to `parity`, closing the #10106 capability gap.
+
 ## Replace Canonical Estimation Shell With Bounded Estimator Coordinator (ORG-17, #10526)
 
 Replaces placeholder canonical estimation shells with a bounded application service coordinator integrating parameter estimation, identifiability analysis, and trajectory evaluation:
@@ -24,6 +73,31 @@ Eliminates GUI thread blocking during launcher startup by offloading tool discov
   - Eliminated artificial `msleep(500)` in `AsyncStartupWorker.run()`.
   - Added explicit thread cleanup via `worker.finished.connect(worker.deleteLater)`.
   - Added granular phase duration reporting and startup telemetry.
+
+## Task-Oriented Desktop Navigation Over Existing Embedded Tools (ORG-05, #10515)
+
+Organizes desktop launcher workflows into 5 task-oriented primary workspaces and preserves user customization during alias migration:
+- **Task-Oriented Workspace Navigation (`src/launchers/workspace_navigation.py`, `src/launchers/_launcher_navigation_ui.py`)**:
+  - `TaskWorkspace`: Defines 5 primary task workspaces (`capture_analyze`, `model_match`, `shot_course_lab`, `optimize_train`, `results_compare`) and secondary navigation destinations (`developer_research`, `all_tools`, `favorites`, `history`).
+  - Single-instance tool reuse policy (`find_existing_tool_tab`, `focus_or_open_tool_tab`, `dock_widget_as_tab`): Reuses existing open tabs rather than spawning duplicate windows or parallel sessions.
+  - Return-to-workspace breadcrumb bar (`WorkspaceBreadcrumbBar`): Provides accessible breadcrumb hierarchy, keyboard navigation, and return-to-workspace navigation.
+  - Discoverability status explanations (`explain_tool_status`): Surfaces human-actionable diagnostic reasons and remediation for missing, degraded, or unconfigured capabilities.
+- **Layout Manager & Alias Migration (`src/launchers/launcher_layout_manager.py`)**:
+  - `migrate_saved_layout`: Migrates legacy saved layouts through `ALIAS_MAP` while strictly preserving custom user tile scaling, view mode, and docking geometry.
+  - `get_filtered_order`: Filters launcher tile presentation by active task workspace.
+- **Accessible & Responsive Sidebar UX (`src/launchers/_launcher_navigation_ui.py`, `src/launchers/launcher_ui_setup.py`)**:
+  - Wraps navigation sidebar in `QScrollArea` to enable narrow-window responsiveness without clipping navigation controls.
+  - Configures accessible names and descriptions for screen reader accessibility and keyboard focus order.
+
+## Launch Truthfulness and Guard Problematic Tiles (ORG-03, #10512)
+
+Replaces misleading launches with real tasks or explicit nonlaunchable states:
+- **Truthful Launch Dispatch & Diagnostic Windows (`src/launchers/task_launch_truthfulness.py`)**:
+  - Distinguishes prototype/demo simulator tiles (`putting_green`, `ball_flight`, `swing_flight`) from qualified numerical solvers, clearly labeling inspection-only execution.
+  - Guards FreeMoCap parametric CLI against zero-argument headless launches, enforcing parameter configuration before invocation.
+  - Replaces placeholder execution fallbacks with explicit diagnostic unavailable tool windows (`_UnavailableToolWindow`) rather than opening blank or misconfigured interfaces.
+- **Truthfulness Contract Verification (`tests/launchers/test_task_launch_truthfulness.py`)**:
+  - Verifies that unconfigured or preview-only capabilities refuse silent mock execution and report actionable diagnostic reasons.
 
 ## Capability State Contract With Real-World Health Checks (ORG-02, #10511)
 

@@ -624,18 +624,18 @@
     },
     {
       "feature_id": "tools.motion_matching",
-      "title": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",
-      "status": "gap",
+      "title": "Motion Matching tour-average capture matching",
+      "status": "parity",
       "pyqt": "src/tools/motion_matching/gui.py",
       "api": null,
       "web": null,
-      "issue": 10106,
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "motion_matching"
       ],
-      "notes": "",
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation (MS-82 #10355).",
       "id": "tools.motion_matching"
     },
     {
@@ -860,11 +860,11 @@
     {
       "id": "golf_simulation_suite",
       "title": "Golf Simulation Suite",
-      "description": "Complete golf simulation with ball flight physics and putting green",
+      "description": "Prototype visualization and demo inspection suite; not a production physics solver",
       "path": "src/tools/golf_simulation_suite/__main__.py",
       "launch_target": "src/tools/golf_simulation_suite/__main__.py",
       "category": "simulation",
-      "status": "ready",
+      "status": "prototype",
       "capabilities": [
         "full_simulation",
         "parameter_sweep",
@@ -1499,7 +1499,7 @@
     {
       "id": "swing_optimizer",
       "title": "Swing Optimizer",
-      "description": "Trajectory optimization with constraint solving and cost functions",
+      "description": "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16",
       "path": "src/shared/python/optimization/swing_optimizer.py",
       "launch_target": "src/shared/python/optimization/swing_optimizer.py",
       "category": "simulation",
@@ -1513,7 +1513,7 @@
     {
       "id": "injury_analysis",
       "title": "Injury Risk Analysis",
-      "description": "Joint stress, spinal load, and swing modification analysis for injury prevention",
+      "description": "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17",
       "path": "src/shared/python/injury/injury_risk.py",
       "launch_target": "src/shared/python/injury/injury_risk.py",
       "category": "biomechanics",
@@ -2835,9 +2835,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "c591debd02eef18d2355ddef3c930e463b1b1d20a08c5873555de803888696ba",
-    "src/config/launcher_manifest.json": "8ed95d534d6ba9e35d528837da43346bac32588f9766018d8c99c89a17099aa2",
-    "src/config/feature_parity.json": "d6667fb93d20e1240791d601252e2ca6ffd85bb7a2eba4deec26edc4075f8eba",
+    "src/config/models.yaml": "0aa05c85b24fb2f404cbb60133d33b1b00eba6c57cb6c6ab01f56740ebe796a5",
+    "src/config/launcher_manifest.json": "8042791309478513d7cc0c9670568866befbc49486ada446ebb1adda36cfe18b",
+    "src/config/feature_parity.json": "b0b2f34477e7556aa3ba1dd25316bc047902bb3fd3258938225bece7195efaad",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

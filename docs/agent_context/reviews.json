@@ -19,24 +19,24 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "8261a06f9a49aa144e8d5658f36ef56ac643b245a6810412d1908d1976bbb329",
+      "fingerprint": "f67f6b2f1d864efb56a1e18c9cf9bf590a1c21580a3c5d9b6f613df9023654a3",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "d6667fb93d20e1240791d601252e2ca6ffd85bb7a2eba4deec26edc4075f8eba",
-        "src/config/launcher_manifest.json": "8ed95d534d6ba9e35d528837da43346bac32588f9766018d8c99c89a17099aa2",
+        "src/config/feature_parity.json": "b0b2f34477e7556aa3ba1dd25316bc047902bb3fd3258938225bece7195efaad",
+        "src/config/launcher_manifest.json": "8042791309478513d7cc0c9670568866befbc49486ada446ebb1adda36cfe18b",
         "src/config/launcher_manifest_loader.py": "ffd36708fc7916e406ba3651d446bd3a91733e48cf1c734bedf1602978eef0e3",
-        "src/config/models.yaml": "c591debd02eef18d2355ddef3c930e463b1b1d20a08c5873555de803888696ba",
+        "src/config/models.yaml": "0aa05c85b24fb2f404cbb60133d33b1b00eba6c57cb6c6ab01f56740ebe796a5",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Capability state contract and route destination alignment"
+      "rationale": "Update feature parity status for tools.motion_matching MS-82 #10355"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
