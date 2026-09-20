@@ -18,6 +18,14 @@ from .project_store import (
     SubjectMetadata,
 )
 from .results_browser import ResultArtifact, ResultFilter, ResultsBrowser
+from .estimation_workspace import (
+    EstimationJobResult,
+    EstimationJobStatus,
+    EstimationObservationPayload,
+    EstimationParameterPrior,
+    EstimationRequest,
+    EstimationWorkspaceCoordinator,
+)
 from .results_workspace import (
     ActionAvailability,
     ComparisonResult,
@@ -36,6 +44,12 @@ __all__ = [
     "ArtifactReference",
     "ComparisonResult",
     "DatasetMetadata",
+    "EstimationJobResult",
+    "EstimationJobStatus",
+    "EstimationObservationPayload",
+    "EstimationParameterPrior",
+    "EstimationRequest",
+    "EstimationWorkspaceCoordinator",
     "HandoffDispatchPayload",
     "MissingAssetDiagnosticError",
     "ProjectMetadata",
