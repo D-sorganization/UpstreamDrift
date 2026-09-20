@@ -22,7 +22,11 @@ from ..dependencies import (
     get_simulation_service,
     get_task_manager,
 )
-from ..models.requests import AnalysisRequest, CounterfactualRequest
+from ..models.requests import (
+    AnalysisRequest,
+    CandidateCounterfactualRequest,
+    CounterfactualRequest,
+)
 from ..models.responses import AnalysisResponse
 from ..utils.datetime_compat import UTC
 
@@ -151,3 +155,66 @@ async def run_counterfactual(
         task_manager,
     )
     return {"task_id": task_id, "status": "started", "kind": payload.kind}
+
+
+# ──────────────────────────────────────────────────────────────
+#  Candidate Session Force & Counterfactual Analyses (MV-06, #10482)
+# ──────────────────────────────────────────────────────────────
+
+
+@router.get("/analysis/candidate/forces")
+async def get_candidate_forces(
+    service: SimulationService = Depends(get_simulation_service),
+) -> dict[str, Any]:
+    """Inspect synchronized force/torque, GRF, and CoP telemetry from active candidate session.
+
+    Fails closed with 409 Conflict if no candidate session has been loaded.
+    """
+    if service.active_candidate_session is None:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "No active candidate session loaded; ingest or load a candidate session "
+                "before inspecting force/torque telemetry"
+            ),
+        )
+    return service.get_candidate_forces()
+
+
+@router.post("/analysis/candidate/counterfactual")
+async def run_candidate_counterfactual(
+    payload: CandidateCounterfactualRequest,
+    service: SimulationService = Depends(get_simulation_service),
+) -> dict[str, Any]:
+    """Execute counterfactual fork rollout on the active candidate session.
+
+    Fails closed with 409 Conflict if no candidate session has been loaded or if the
+    session is not a dynamic rollout supporting force/torque channels.
+    """
+    session = service.active_candidate_session
+    if session is None:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "No active candidate session loaded; ingest or load a candidate session "
+                "before requesting counterfactual analysis"
+            ),
+        )
+    if not session.supports_counterfactuals:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Active candidate session does not support counterfactual rollouts "
+                "(requires accepted dynamic candidate with force channels)"
+            ),
+        )
+
+    try:
+        result = service.run_candidate_counterfactual(
+            fork_frame_idx=payload.fork_frame_idx,
+            strategy=payload.strategy,
+            duration_frames=payload.duration_frames,
+        )
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

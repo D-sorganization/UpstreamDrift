@@ -1,5 +1,27 @@
 # SPEC.md — Repository Specification Document
 
+## Expose Real Forces, Torques, and Explicit Counterfactual Semantics (MV-06, #10482)
+
+Exposes authentic ground reaction forces, spatial wrenches, and actuator efforts alongside explicit counterfactual simulation semantics:
+- **Spatial Wrench & Contact Reaction Representation (`src/shared/python/motion_matching/force_torque.py`)**:
+  - `SpatialWrench`: Immutable spatial force and torque representation with strict SI units (N, N·m), application frames, and coordinate conventions (`applied_to_body`, `applied_by_body`).
+  - `transform_wrench(wrench, target_frame, rotation, translation)`: Rigid-body spatial transformation incorporating rotational torque mapping and translational cross-product moment arm ($\tau_B = R \tau_A + r \times (R F_A)$).
+  - `compute_center_of_pressure(wrench, f_threshold_n)`: Ground contact Center of Pressure (CoP_x, CoP_y) calculation with strict fail-closed thresholding ($F_z \le 5.0\text{ N}$ returns `None` rather than fabricated zeros).
+  - `ContactReaction`: Surface reaction tracking normal force, friction utilization ($\|F_t\| / (\mu F_z)$), and contact state classification.
+- **Counterfactual Semantics & Acceleration Decomposition (`src/shared/python/motion_matching/counterfactual.py`)**:
+  - `AccelerationDecomposition`: Instantaneous separation of generalized acceleration into gravity ($\ddot{q}_{grav}$), drift ($\ddot{q}_{drift}$), and active control ($\ddot{q}_{ctrl}$), defining Zero-Torque Counterfactual (ZTCF, $\ddot{q}_{ztcf} = \ddot{q}_{grav} + \ddot{q}_{drift}$) and Zero-Velocity Counterfactual (ZVCF, $\ddot{q}_{zvcf} = \ddot{q}_{grav} + \ddot{q}_{ctrl}$).
+  - `CounterfactualStrategy`: Enum defining interventions (`ZERO_TRAIL_ARM_TORQUE`, `CLAMPED_ACTUATOR_TORQUE`, `NULLSPACE_EXPLORATION`, `CUSTOM`).
+  - `CounterfactualFork`: Immutable record of intervened trajectory rollout with baseline candidate SHA-256 binding, initial state preservation, divergence RMS, and constraint compliance status.
+  - `create_counterfactual_rollout`: Dynamic rollout fork generator with cryptographic baseline immutability assertion (SHA-256 byte check before and after execution).
+- **Candidate Session Force & Counterfactual Telemetry (`src/shared/python/motion_matching/candidate_session.py`)**:
+  - Preserves absent force/torque channels as `None` (never fabricating zeros).
+  - Exposes `get_wrench_at()`, `get_center_of_pressure()`, `get_joint_torques_at()`, `get_closure_residual_at()`, and `create_counterfactual_fork()`.
+- **API Simulation Endpoints (`src/api/routes/analysis.py`, `src/api/services/simulation_service.py`, `src/api/models/requests.py`)**:
+  - `GET /analysis/candidate/forces`: Synchronized telemetry readout of GRF, vertical normal force, CoP, and actuator efforts; fails closed (409 Conflict) when no session is loaded.
+  - `POST /analysis/candidate/counterfactual`: Intervened rollout fork execution; fails closed (409 Conflict) on kinematic-only or absent sessions.
+- **Tour Matching Viewer Force Inspection Widget (`src/tools/tour_matching_viewer/force_inspection.py`, `gui.py`)**:
+  - Embeds `ForceInspectionWidget` synchronized with physical playback time, displaying vertical force ($F_z$), net GRF, CoP coordinates, peak actuator torque, and interactive counterfactual fork triggering.
+
 ## Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading (MV-05, #10481)
 
 Establishes managed subprocess lifecycle and socket discovery for interactive 3D viewers alongside an extensible native viewer registry:
