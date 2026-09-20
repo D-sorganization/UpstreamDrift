@@ -1,3 +1,14 @@
+## [ORG-21] Generate Accurate Atlas, Help, Parity, and Completion Records (#10531)
+
+- Worktree / Branch: `feat/issue-10531-org21-accurate-atlas-parity`, lease `2026-09-20-org21-atlas`, DL-#10531.
+- Changes:
+  - `src/config/industrial_readiness.json`: Reconciled item U3 (#8820, PR #9995) from open to merged with merge SHA `8ef1bec803de292e44724cdf1f96d3ebf52bf2f2`, verified implementation paths (`src/shared/python/data_io/export.py`, `src/shared/python/data_io/provenance.py`, `src/shared/python/dashboard/_recorder_playback.py`), and test evidence (`tests/unit/test_dashboard_export_provenance.py`).
+  - `docs/operations/industrial-readiness-index.md`: Regenerated from updated industrial readiness ledger.
+  - `src/tools/training_controller/README.md`: Updated status to accurately reflect shipped PyQt6 GUI reality (`MainWindow`, `MainWidget`, `gui.py`, `_embed_adapter.py`, `__main__.py`) and removed obsolete draft branch notes.
+  - `tests/scripts/test_workspace_documentation_freshness.py`: Added 8 comprehensive regression tests covering workspace membership drift, undocumented/dangling aliases, broken links, stale generated views, shell-only parity vs compute-complete separation, deterministic generators, training controller README accuracy, and industrial readiness U3 reconciliation.
+- Reproduction: `py -3.12 -m pytest tests/scripts/test_workspace_documentation_freshness.py tests/scripts/test_capability_atlas.py tests/config/industrial_readiness/ -v --timeout=60`.
+- Next: Open PR, arm auto-merge (`--auto --squash`), release lease on #10531, notify parent orchestrator.
+
 ## [ORG-08] Unified Artifact and Project Context Handoff Between Workspaces (#10517)
 
 - Worktree / Branch: `feat/issue-10517-org08-workspace-handoff`, lease `antigravity-ud-10517`, DL-#10517.
