@@ -90,7 +90,7 @@ def generate_ik_overlay_gif(
 
     frames_to_plot = np.arange(0, len(time_s), stride)
     fig = plt.figure(figsize=(7, 7))
-    ax = fig.add_subplot(111, projection="3d")
+    ax: Any = fig.add_subplot(111, projection="3d")
 
     def update(frame_idx: int) -> list[Any]:
         ax.clear()

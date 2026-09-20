@@ -148,12 +148,23 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._rejection_banner.setVisible(False)
         layout.addWidget(self._rejection_banner)
 
-        # 3D Viewport
+        # Center Content: 3D Viewport + Force Inspection Panel
+        content_layout = QtWidgets.QHBoxLayout()
         self._figure = Figure(figsize=(6, 5), dpi=100)
         self._canvas = FigureCanvasQTAgg(self._figure)
         self._ax: Any = self._figure.add_subplot(111, projection="3d")
         self._setup_3d_axes()
-        layout.addWidget(self._canvas, stretch=1)
+        content_layout.addWidget(self._canvas, stretch=3)
+
+        from src.tools.tour_matching_viewer.force_inspection import (
+            ForceInspectionWidget,
+        )
+
+        self._force_widget = ForceInspectionWidget(self)
+        self._force_widget.setMaximumWidth(280)
+        content_layout.addWidget(self._force_widget, stretch=1)
+
+        layout.addLayout(content_layout, stretch=1)
 
         # Playback Transport Controls from Tools (MV-04 #10480)
         self._transport = PlaybackTransportControls(
@@ -172,6 +183,11 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._play_btn = self._transport.play_button
         self._slider = self._transport.scrubber
         self._frame_label = self._transport.time_label
+
+    @property
+    def force_widget(self) -> Any:
+        """Force/torque and counterfactual inspection widget."""
+        return self._force_widget
 
     def _setup_3d_axes(self) -> None:
         self._ax.clear()
@@ -296,6 +312,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         cand_hash = getattr(session, "candidate_sha256", "unknown")[:12]
         eng = getattr(session, "engine", "default")
         self.load_replay_data(replay, candidate_hash=cand_hash, engine_name=eng)
+        self._force_widget.set_candidate_session(session)
 
     def _setup_playback_transport(self, replay: ReplayData) -> None:
         """Initialize physical playback engine and configure transport controls."""
@@ -518,6 +535,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         else:
             self._render_single_frame(frame_idx)
 
+        self._force_widget.update_frame(frame_idx)
         self._canvas.draw_idle()
 
     def _on_export_gif_clicked(self) -> None:
