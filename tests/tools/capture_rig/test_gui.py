@@ -116,6 +116,7 @@ def test_without_a_session_setup_and_capture_actions_are_enabled() -> None:
         "stop",
         "load",
         "preview",
+        "inspect_targets",
     }
     assert {a for a, _ in widget._ACTIONS} == set(ACTION_HELP)
     assert widget.buttons["record"].toolTip().startswith("Record")
