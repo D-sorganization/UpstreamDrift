@@ -1366,6 +1366,18 @@
       "evidence": "src/tools/model_converter/__init__.py",
       "acceptance_owner": "tests/config/test_registry_exclusions.py"
     },
+    "matched_swing_browser": {
+      "id": "matched_swing_browser",
+      "name": "Tools Package: matched_swing_browser",
+      "entity_kind": "library",
+      "primary_workspace": "analysis",
+      "secondary_links": ["viewer"],
+      "provider_authority": "core",
+      "lifecycle": "intentionally_headless",
+      "alias_target": null,
+      "evidence": "src/tools/matched_swing_browser/__init__.py",
+      "acceptance_owner": "tests/config/test_registry_exclusions.py"
+    },
     "analysis.analysis_tools_api": {
       "id": "analysis.analysis_tools_api",
       "name": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
