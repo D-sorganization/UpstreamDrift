@@ -24,6 +24,7 @@ class TestGetEngineTier:
     def test_normalizes_whitespace_and_case(self) -> None:
         assert get_engine_tier("  MuJoCo  ") == "core"
 
+    @pytest.mark.unit
     def test_myosim_alias_resolves(self) -> None:
         assert get_engine_tier("myosim") == "experimental"
 
