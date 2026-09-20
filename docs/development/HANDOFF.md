@@ -46,6 +46,20 @@ pip-audit findings GHSA-wwv5-g3v4-889x and GHSA-8423-8fgw-73vq (plus the third
 Tornado 6.5.7 advisory) without an audit waiver. CI must confirm the complete
 Docker build and dependency-artifact regeneration before merge.
 
+## ORG-04 Validate Every Browser, Tauri, and Native Launch Destination (#10513)
+
+- Branch: `feat/issue-10513-org04-launch-destinations`, lease `antigravity-ud-10513`, DL-#10513.
+- Changes:
+  - `ui/src/routes.ts`: Declared canonical `KNOWN_APP_ROUTES` array and `isKnownAppRoute(route: string): boolean` helper.
+  - `ui/src/api/webLaunch.ts`: Updated `resolveTileLaunchAction` to reject unknown/unregistered routes with `'Unavailable'` badge and reason instead of silently navigating to 404.
+  - `ui/src/api/launcherReachability.ts`: Implemented `evaluateTileReachability` and `generateReachabilityMatrix` covering browser and Tauri contexts.
+  - `ui/src/api/launcherReachability.test.tsx`: Comprehensive Vitest suite for reachability matrix and unknown route rejection.
+  - `src/config/launcher_manifest_loader.py`: Sanitized `web_route` for Movement Optimizer in `_build_provider_tile`, deriving `native-window` cleanly.
+  - `src/shared/python/movement_optimizer/model_pack.yaml`: Removed unmapped `web_route: "/tools/movement-optimizer"`.
+  - `tests/config/launcher_manifest/test_parity.py`: Added checks for loaded tiles in `test_route_mode_routes_exist_in_react_router`, and added `test_every_tile_destination_resolves_authoritatively`.
+- Reproduction: `npm run test:run` in `ui/` (874 tests pass); `pytest tests/config/launcher_manifest/ tests/config/test_launcher_registry_parity.py` (95 tests pass).
+- Next: Land PR, arm auto-merge, release lease.
+
 ## MV-06 Expose Real Forces, Torques, and Explicit Counterfactual Semantics (#10482)
 
 - Worktree: `UpstreamDrift-10482-forces`, branch `feat/10482-forces-torques-counterfactual`, lease `antigravity-10482-mv06`, DL-#10482.
