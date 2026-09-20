@@ -349,6 +349,19 @@ Packages tour matching execution into reusable library code outside the document
 - **Pipeline Integration (`src/tools/motion_matching/pipeline.py`)**:
   - Direct delegation to packaged execution scripts writing outputs cleanly outside the documentation directory.
 
+## Optimization and Training Workspace (ORG-16, #10525)
+
+Consolidates optimization and training launchers under shared project workspace and controller authority:
+- **Optimization & Training Workspace Coordinator (`src/shared/python/workspace/optimization_training_workspace.py`)**:
+  - `OptimizationTrainingWorkspaceCoordinator`: Coordinates bounded optimization and training job lifecycles, deduplication, precondition validation, and durable dataset context across project sessions.
+  - Bounded job forms: `OptimizationJobConfig` and `TrainingJobConfig` replace example-script launches with structured parameterization (golfer, club, objectives, constraints, backend, input reference, output destination).
+  - Validation & Preconditions: Validates non-empty objectives, positive weights, well-posed constraints, model compatibility, and dependency existence before job dispatch.
+  - Fail-Closed Backend Availability: Honestly disables unsupported or uninstalled backends (e.g. Crocoddyl, Drake direct collocation) via `IncompatibleBackendError` rather than claiming unsupported capabilities.
+  - Lifecycle State Invariants: State transitions (`QUEUED`, `RUNNING`, `PAUSED`, `CANCELLED`, `COMPLETED`, `FAILED`) ensure that cancelled or paused jobs can never be mislabeled as complete.
+  - Submission Deduplication: Identical active job requests (matched by configuration digest) reuse existing job handles rather than minting duplicate jobs.
+  - Deterministic Optimization Runner: Executes deterministic forward and inverse optimization yielding reproducible output differences for changed inputs, publishing metrics to registered project session artifacts.
+  - Durable Dataset Selection: Connects dataset selection with provenance directly to durable project sessions in `SessionProjectStore`, surviving store save and reopen.
+
 ## Guided Workflow Transitions Across Unified Workspaces (ORG-09, #10518)
 
 Coordinates multi-stage end-to-end biomechanical workflows across workspaces with disk-backed verification, cryptographic artifact hashing, and client UI projection parity:
