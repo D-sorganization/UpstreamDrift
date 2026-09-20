@@ -1,3 +1,21 @@
+## Analytic Pelvis-Yaw Orientation Cost for Crocoddyl Solver (MS-107, #10381)
+
+Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver on the Pinocchio plant:
+- **Pelvis-Yaw Formulations & Contract Enforcement (`src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py`)**:
+  - `FitWeights`: Added validated non-negative weight `pelvis_yaw: float = 0.0`.
+  - `MarkerTargets`: Added `waist_indices` resolving indices of `WaistLeft` and `WaistRight` markers, or `(-1, -1)` if absent.
+- **Node Cost & Dynamics Integration (`src/engines/physics_engines/pinocchio/python/crocoddyl_action.py`)**:
+  - `_NodeCost`: Evaluates 2-component unit vector difference residual $r_{yaw} = w_{yaw} \cdot (\hat{u} - \hat{u}_{tgt})$ via `compute_pelvis_yaw_residual_and_derivative`.
+  - Cost value adds $0.5 \cdot \|r_{yaw}\|^2$.
+  - Analytic gradient contributes $J_{yaw}^T r_{yaw}$ to configuration gradient $L_x[:n]$.
+  - Gauss-Newton Hessian contributes $J_{yaw}^T J_{yaw}$ to configuration Hessian $L_{xx}[:n, :n]$.
+  - Wired waist indices through `ImplicitEulerAction` and `TerminalAction`.
+- **Receipt & CLI Parameterization (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - Added CLI argument `--pelvis-yaw-weight` forwarded to `FitWeights`.
+  - Updated `cost_breakdown` to compute and report `"pelvis_yaw"` per-term cost in execution receipts.
+- **Verification (`tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py`)**:
+  - Unit tests verify zero residual and gradient when aligned, central-difference gradient match, positive semi-definite Gauss-Newton Hessian, and no-op behavior when inactive (`pelvis_yaw = 0.0`) or waist markers are absent.
+
 ## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
 
 Freezes fast-matching evidence, schemas, and negative acceptance fixtures across the motion-matching pipeline:
@@ -24,6 +42,7 @@ Reconciles, audits, and freezes feature preservation across historical boundarie
     - Immutable disposition artifact generation and publication for Epic #10508 closeout.
 - **Verification & Evidence Suite (`tests/integration/test_feature_preservation_audit.py`)**:
   - Comprehensive unit test coverage validating audit metrics, parameter budgets, schema conformance, golden fixture checks, and error handling.
+>>>>>>> origin/main
 
 ## Unified Cross-Engine Parity Report (MS-70, #10350)
 
