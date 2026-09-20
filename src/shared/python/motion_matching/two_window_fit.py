@@ -100,7 +100,7 @@ def compute_marker_metrics(
         yaw_res, _, _ = compute_pelvis_yaw_residual_and_derivative(
             pred_markers[-1], target_markers[-1], wl_i, wr_i, pelvis_yaw_weight
         )
-        score += float(np.dot(yaw_res, yaw_res))
+        score += float(np.vdot(yaw_res, yaw_res))
 
     whole_rms = float(np.sqrt(np.mean(error_sq[valid_mask])))
     early_rms = (
