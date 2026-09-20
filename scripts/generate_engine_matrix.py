@@ -182,7 +182,7 @@ ENGINE_CAPABILITY_FEATURES: dict[str, dict[str, str]] = {
         "model_positioning": "partial",
         "parameter_gradients": "full",
         "state_control_gradients": "full",
-        "trajectory_opt": "none",
+        "trajectory_opt": "partial",
         "video_export": "none",
         "dataset_export": "partial",
     },

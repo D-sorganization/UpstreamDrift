@@ -284,6 +284,22 @@ def _get_engine_capabilities() -> dict[str, dict[str, str]]:
     return result
 
 
+class _EngineProfileAdapter:
+    """Compatibility wrapper providing to_dict() for capability profiles."""
+
+    def __init__(self, data: dict[str, str]) -> None:
+        self._data = data
+
+    def to_dict(self) -> dict[str, str]:
+        return dict(self._data)
+
+
+def _build_engine_profiles() -> dict[str, _EngineProfileAdapter]:
+    """Compatibility adapter for launcher capability profile inspection."""
+    raw = _get_engine_capabilities()
+    return {k: _EngineProfileAdapter(v) for k, v in raw.items()}
+
+
 @router.get("/engines/capabilities")
 async def get_all_engine_capabilities() -> dict[str, dict[str, str]]:
     """Get capability profiles for all known engines.

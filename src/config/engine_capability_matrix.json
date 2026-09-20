@@ -242,7 +242,7 @@
         "forward_sim": "full",
         "contact_step": "partial",
         "muscles": "none",
-        "trajectory_opt": "none",
+        "trajectory_opt": "partial",
         "video_export": "none",
         "dataset_export": "partial",
         "force_visualization": "none",
