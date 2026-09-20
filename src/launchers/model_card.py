@@ -894,10 +894,9 @@ class DraggableModelCard(QFrame):
         ``resolve_tile_target`` must not render a green "Ready" chip.
         """
         if self._target_resolvable is None:
-            if (
-                hasattr(self.model, "__class__")
-                and "Mock" in self.model.__class__.__name__
-            ):
+            model = self.model
+            model_type = type(model)
+            if "Mock" in model_type.__name__:
                 self._target_resolvable = True
                 return True
             try:
