@@ -1,5 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## Replace Canonical Estimation Shell With Bounded Estimator Coordinator (ORG-17, #10526)
+
+Replaces placeholder canonical estimation shells with a bounded application service coordinator integrating parameter estimation, identifiability analysis, and trajectory evaluation:
+- **Estimation Workspace Coordinator (`src/shared/python/workspace/estimation_workspace.py`)**:
+  - `EstimationWorkspaceCoordinator`: Application service executing bounded parameter estimation runs, evaluating model-observation residuals, and preserving execution provenance.
+  - Wires `solve_single_trial_map`, `IdentifiabilityGateOptions`, and spline trajectory evaluation into a coherent workflow without duplicating optimization or gate probe routines.
+- **Run Configuration and Parameter Priors (`EstimationRunConfig`, `ParameterPriorConfig`)**:
+  - Structured parameter bounds and prior regularization (`prior` and `prior_scale`).
+  - Pre-execution validation enforcing positive sample times ($dt > 0$), parameter length matching ($x_0$, bounds, prior scales), and positive finite standard deviations.
+- **Fail-Closed Gate & Diagnostic Handling**:
+  - Pre-run identifiability gating with rank defect detection and conditioning diagnostics via `IdentifiabilityGateConfig`.
+  - Fail-closed handling for non-finite costs and numerical divergence in trajectory rollouts.
+- **Provenance Persistence Roundtrip (`EstimationRunResult`)**:
+  - Encapsulates parameter estimates, final cost, iterations, solver success status, diagnostics, and serialized provenance for reproducible run recording and reimport.
+
 ## Simulation Engine Lifecycle Management and Model Caching (#8935)
 
 Eliminates redundant physics engine instantiation and model re-parsing across simulation requests:
