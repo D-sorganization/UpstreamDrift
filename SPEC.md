@@ -12,6 +12,34 @@ Freezes model identities, ownership, coordinate conventions, and two-capture cov
 - **Evidence & Verification**:
   - Added unit test suite in `tests/unit/tour_baselines/`: `test_model_identities.py`, `test_coverage_matrix.py`, `test_reconciliation.py` (13 tests).
 
+## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
+
+Freezes fast-matching evidence, schemas, and negative acceptance fixtures across the motion-matching pipeline:
+- **Extended Schema & Conversion (`src/shared/python/motion_matching/candidate.py`, `candidate_convert.py`)**:
+  - `MatchedSwingCandidate` schema extended with `CandidateAuxiliary` (`root_forces`, `contact_modes`, `grip_wrench`), `CandidateMetadata` (`solver_status`, `handedness`, `name_maps`), checksum calculation, and NPZ conversion logic in `candidate_convert.py`.
+  - Truthfully renamed `AllocationObjective.MINIMUM_TRAIL_ARM` with backwards-compatible `trail_zero` parsing, added `HARD_ZERO_TRAIL` mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios in `ContactForceAllocator`.
+  - Updated `SwingEvaluator` to avoid fabricating impact phases without declared `t_events`, audit closure translation and rotation separately (`ClosureAudit`), and return `NaN` RMSE for empty marker populations.
+- **Negative Acceptance Fixtures (`tests/unit/motion_matching/test_acceptance.py`, `src/shared/python/motion_matching/acceptance.py`)**:
+  - Added 7 negative acceptance fixtures in `test_acceptance.py` and corresponding evaluators in `acceptance.py`: (1) friction cone violation, (2) torque bound overwrite, (3) missing root histories, (4) 44 vs 41 coordinate dimension mismatch, (5) missing club coverage / empty population, (6) truncated horizon duration, and (7) synthetic engine false qualification.
+
+## Reconcile, Audit, and Freeze Feature Preservation Across Historical Boundaries (ORG-24, #10533)
+
+Reconciles, audits, and freezes feature preservation across historical boundaries to guarantee no silent loss or broken historical interfaces across the UpstreamDrift workspace:
+- **Comprehensive Audit Engine (`src/shared/python/workspace/feature_preservation_audit.py`)**:
+  - `AuditStatus` and `AuditFailureError`: Typed pass/failed/warning status outcomes and fail-closed integrity assertion exceptions.
+  - `AuditCounts`: Immutable metric encapsulation capturing total capabilities, active capabilities, deprecated aliases, planned capabilities, headless tools, exempt capabilities, and verified golden fixtures while strictly conforming to the 8-parameter architectural budget limit.
+  - `AuditSectionResult` & `AuditReport`: Detailed structured section reports and full disposition records generating formatted JSON and Markdown summaries.
+  - `run_feature_preservation_audit`: Comprehensive evaluation running all 6 core audit sections:
+    - Baseline capability reconciliation against `src/config/capability_migration.json` ensuring 100% accounting of all historical capabilities.
+    - Deprecated alias acyclic and transitive path resolution verifying reachable canonical targets.
+    - Golden fixture byte-exact SHA-256 and byte-length integrity verification.
+    - Five core workspace task journey contracts across simulation, analysis, capture, putting, and training surfaces.
+    - External runtime dependency and engine qualification isolation checks preventing silent unhandled host crashes.
+    - Immutable disposition artifact generation and publication for Epic #10508 closeout.
+- **Verification & Evidence Suite (`tests/integration/test_feature_preservation_audit.py`)**:
+  - Comprehensive unit test coverage validating audit metrics, parameter budgets, schema conformance, golden fixture checks, and error handling.
+>>>>>>> origin/main
+
 ## Unified Cross-Engine Parity Report (MS-70, #10350)
 
 Generates unified cross-engine parity evaluation comparing motion-matching candidate trajectories across all available physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite):
