@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10440 · Connect Qualified Matching Strategies to Existing Results and Engine Feature Contracts
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10440 (PF-10, epic #10430, program #10363)
+- **Branch:** feat/issue-10440-pf10-matching-strategies-contracts
+- **PR:** open
+- **Paths:** src/shared/python/motion_matching/matching_strategy.py; src/shared/python/motion_matching/**init**.py; tests/unit/motion_matching/test_matching_strategy.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (30 unit tests pass across test_matching_strategy, test_candidate, and test_candidate_session; ruff clean; black clean; mypy 0 errors; full 6-engine and dual-club contract validation passed).
+- **Summary:** Implemented versioned matching strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`), stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`), strategy presets, controller specifications, and contact reaction history containers. Created `CandidateStrategyPackage` supporting lossless .npz serialization without pickle, and fail-closed name-permuted coordinate remapping. Implemented `StrategyComparisonService` exposing cross-strategy torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs. Provided sample package generator for concrete handoff to MV-03 #10479 without modifying viewer files.
+- **Next step:** PR creation, auto-merge, complete lease on #10440 and report back.
+- **Evidence:** tests/unit/motion_matching/test_matching_strategy.py.
+
 ### DL-#10481 · Manage MeshCat and Gepetto Launch Lifecycle and URDF Loading
 
 - **State:** in_progress
