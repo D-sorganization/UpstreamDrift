@@ -26,7 +26,7 @@ driver, so this module stays free of engine imports.
 
 from __future__ import annotations
 
-from typing import Any, Protocol
+from typing import Any, Protocol, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -39,7 +39,7 @@ from src.engines.physics_engines.pinocchio.python.crocoddyl_problem import (
 )
 from src.shared.python.contracts import require
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 INFEASIBLE_COST = 1e12
 

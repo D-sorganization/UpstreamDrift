@@ -65,6 +65,14 @@ from .model_pack_manifest import (
     group_entries_by_canonical_id,
 )
 from .model_registry import ModelConfig, ModelRegistry, ModelRegistryLoadError
+from .model_variant_grouping import (
+    LogicalModelChoice,
+    LogicalModelIdentity,
+    ModelGroupingProjection,
+    ModelVariant,
+    get_missing_checkout_diagnostic,
+    resolve_shortcut,
+)
 from .model_source_providers import (
     LocalRepoModelSourceProvider,
     ModelSourcePathPolicy,
@@ -166,6 +174,13 @@ __all__: list[str] = [
     "ModelConfig",
     "ModelRegistry",
     "ModelRegistryLoadError",
+    # model_variant_grouping
+    "LogicalModelChoice",
+    "LogicalModelIdentity",
+    "ModelGroupingProjection",
+    "ModelVariant",
+    "get_missing_checkout_diagnostic",
+    "resolve_shortcut",
     # model_source_providers
     "LocalRepoModelSourceProvider",
     "ModelSourcePathPolicy",
