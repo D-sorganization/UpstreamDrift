@@ -54,6 +54,7 @@ def test_onboarding_is_skipped_in_non_interactive_runs(monkeypatch) -> None:
 
 def test_init_managers_installs_sidekick_extensions_before_tool_bootstrap() -> None:
     launcher = MagicMock()
+    launcher.loading = False
     order: list[str] = []
     launcher.ui_setup_manager._setup_process_console.return_value = None
     launcher.ui_setup_manager._on_process_output = MagicMock()

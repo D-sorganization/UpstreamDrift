@@ -249,10 +249,15 @@ def missing_embeddable_manifest_tools(manifest: object | None = None) -> list[st
     )
 
 
-def _warn_on_manifest_gaps() -> None:
+def _warn_on_manifest_gaps(manifest: object | None = None) -> None:
     """Log a warning for manifest tool tiles without embeddable adapters."""
+    if manifest is None and not (
+        os.environ.get("UPSTREAM_WARN_MANIFEST_GAPS")
+        or os.environ.get("UPSTREAM_DEBUG_MANIFEST_GAPS")
+    ):
+        return
     try:
-        missing = missing_embeddable_manifest_tools()
+        missing = missing_embeddable_manifest_tools(manifest)
     except (FileNotFoundError, ValueError):
         logger.exception("Could not validate launcher manifest coverage")
         return
