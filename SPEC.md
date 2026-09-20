@@ -11,6 +11,24 @@ Qualifies contact modes and native Pinocchio force feasibility:
 - **Verification Suite (`tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`)**:
   - 10 unit test fixtures validating hysteresis, COP containment, slip thresholds, Hunt-Crossley compliance, and unphysical load rejection.
 
+## Analytic Pelvis-Yaw Orientation Cost for Crocoddyl Solver (MS-107, #10381)
+
+Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver on the Pinocchio plant:
+- **Pelvis-Yaw Formulations & Contract Enforcement (`src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py`)**:
+  - `FitWeights`: Added validated non-negative weight `pelvis_yaw: float = 0.0`.
+  - `MarkerTargets`: Added `waist_indices` resolving indices of `WaistLeft` and `WaistRight` markers, or `(-1, -1)` if absent.
+- **Node Cost & Dynamics Integration (`src/engines/physics_engines/pinocchio/python/crocoddyl_action.py`)**:
+  - `_NodeCost`: Evaluates 2-component unit vector difference residual $r_{yaw} = w_{yaw} \cdot (\hat{u} - \hat{u}_{tgt})$ via `compute_pelvis_yaw_residual_and_derivative`.
+  - Cost value adds $0.5 \cdot \|r_{yaw}\|^2$.
+  - Analytic gradient contributes $J_{yaw}^T r_{yaw}$ to configuration gradient $L_x[:n]$.
+  - Gauss-Newton Hessian contributes $J_{yaw}^T J_{yaw}$ to configuration Hessian $L_{xx}[:n, :n]$.
+  - Wired waist indices through `ImplicitEulerAction` and `TerminalAction`.
+- **Receipt & CLI Parameterization (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - Added CLI argument `--pelvis-yaw-weight` forwarded to `FitWeights`.
+  - Updated `cost_breakdown` to compute and report `"pelvis_yaw"` per-term cost in execution receipts.
+- **Verification (`tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py`)**:
+  - Unit tests verify zero residual and gradient when aligned, central-difference gradient match, positive semi-definite Gauss-Newton Hessian, and no-op behavior when inactive (`pelvis_yaw = 0.0`) or waist markers are absent.
+
 ## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
 
 Freezes fast-matching evidence, schemas, and negative acceptance fixtures across the motion-matching pipeline:
@@ -6434,6 +6452,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10471 | Optimize `np.sum(diff**2, axis=-1)` to `np.einsum` to avoid temporary allocations (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10468 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10467 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |

@@ -31,9 +31,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Land PR #10499 via CI and proceed to PF-05.
 - **Evidence:** tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py; src/shared/python/motion_matching/contact_mode_qualifier.py.
 
-### DL-#10431 · Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures
+### DL-#10381 · Qualify Crocoddyl Full-Body Fit & Analytic Pelvis Yaw (MS-107)
 
 - **State:** in_progress
+- **Owner:** claude
+- **Issue:** #10381 (MS-107, epic #10363)
+- **Branch:** feat/10381-crocoddyl-pelvis-yaw-g1
+- **PR:** #10599
+- **Paths:** src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py; src/engines/physics_engines/pinocchio/python/crocoddyl_action.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py; SPEC.md; docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (19 unit tests pass in tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py, test_crocoddyl_action.py, and test_crocoddyl_problem.py; ruff check clean; black clean; ruff format clean; check_lod clean with 0 violations).
+- **Summary:** Integrated analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver (`_NodeCost`, `ImplicitEulerAction`, `TerminalAction`). Augmented `FitWeights` with validated non-negative `pelvis_yaw: float = 0.0` and `MarkerTargets` with `waist_indices`. Wired exact Gauss-Newton Jacobian ($J_{yaw}^T J_{yaw}$) and configuration gradient ($J_{yaw}^T r_{yaw}$) into node dynamics. Added `--pelvis-yaw-weight` CLI argument to `full_body_fit.py` and updated `cost_breakdown` to include the `pelvis_yaw` term in trajectory receipts. Verified that aligned targets evaluate to zero cost and gradient, analytic gradients match central finite differences, and missing waist markers gracefully no-op.
+- **Next step:** Land PR #10599 with auto-merge enabled.
+- **Evidence:** tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py.
+
+### DL-#10431 · Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures
+
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10431 (PF-01)
 - **Branch:** feat/issue-10431-pf01-fast-matching-evidence-schemas-fixtures
@@ -42,21 +56,21 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-19 at HEAD (46 unit tests pass across test_candidate, test_contact_force_allocator, test_swing_evaluator, test_acceptance; ruff clean, black clean).
 - **Summary:** Preserved existing rejected driver/iron fast-matching receipts and candidate artifacts. Extended MatchedSwingCandidate schema, auxiliary blocks (root_forces, contact_modes, grip_wrench), metadata (solver_status, handedness, name_maps), and NPZ converter. Truthfully renamed AllocationObjective.MINIMUM_TRAIL_ARM with backwards-compatible 'trail_zero' parsing, added HARD_ZERO_TRAIL mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios. Updated SwingEvaluator to avoid fabricating impact phases without declared t_events, audit closure translation and rotation separately, and return NaN RMSE for empty marker populations. Added 7 negative acceptance fixtures in test_acceptance covering friction cone violation, torque bound overwrite, missing root histories, coordinate mismatch (44 vs 41), missing club coverage, truncated horizon, and synthetic engine false qualification.
-- **Next step:** PR #10495 created and awaiting CI checks.
+- **Next step:** Landed in main via PR #10495.
 - **Evidence:** tests/unit/motion_matching/test_candidate.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_swing_evaluator.py; tests/unit/motion_matching/test_acceptance.py.
 
 ### DL-#10350 · Unified Cross-Engine Parity Report
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #10350 (MS-70, epic #10363)
 - **Branch:** feat/10350-unified-parity-report
 - **PR:** #10582
 - **Paths:** src/shared/python/motion_matching/parity_schema.py; src/shared/python/motion_matching/parity_report.py; src/shared/python/motion_matching/cross_engine_replay.py; src/shared/python/motion_matching/leaderboard.py; src/engines/CROSS_ENGINE_PARITY_SPEC.md; evidence/matched/driver_g1/parity_report.json; evidence/matched/driver_g1/parity_report.md; tests/unit/motion_matching/test_parity_report.py
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (6 unit tests pass in tests/unit/motion_matching/test_parity_report.py; 39 leaderboard tests pass in tests/unit/motion_matching/test_leaderboard.py; evidence JSON and Markdown generated; cross-engine parity spec synchronized).
+- **Last verified:** 2026-09-20 at HEAD (6 unit tests pass in tests/unit/motion_matching/test_parity_report.py; 39 leaderboard tests pass in tests/unit/motion_matching/test_leaderboard.py; evidence JSON and Markdown generated; cross-engine parity spec synchronized; merged into main).
 - **Summary:** Implemented `UnifiedParityReport` and `build_parity_report` running candidates across all available physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite). Evaluates pointwise trajectory error, pointwise joint torque comparison with 1.0 N·m absolute floor, total mechanical work in Joules, contact forces, and wall-clock execution time. Categorizes cross-engine comparisons into explicit classes: same-model numerical, native-model observable, and experimental accuracy. Gracefully stamps native engines lacking local platform SDKs as unavailable with reasons without falsifying synthetic data. Extends `cross_engine_replay.py` and `leaderboard.py` to ingest unified parity reports. Synchronized Section 3 of `src/engines/CROSS_ENGINE_PARITY_SPEC.md`.
-- **Next step:** Run CI pre-commit checks, push branch, open PR with auto-merge, verify merge, and release lease.
+- **Next step:** Shipped in PR #10582.
 - **Evidence:** evidence/matched/driver_g1/parity_report.json; evidence/matched/driver_g1/parity_report.md; tests/unit/motion_matching/test_parity_report.py.
 
 ### DL-#10533 · Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries
