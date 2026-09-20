@@ -15,24 +15,31 @@ Generates accurate, evidence-backed capability atlas graphs, feature parity matr
   - `docs/operations/industrial-readiness-index.md`: Synchronized through `generate_industrial_readiness_index`.
   - `src/tools/training_controller/README.md`: Updated to truthfully describe the shipped PyQt6 GUI surface and canonical embedded adapter.
 
+## Results Browser Tile for Matched Swing Program (MS-80, #10353)
+
+Implements a dual-pane PyQt6 embeddable tool and lineage model (`src/tools/matched_swing_browser/`) indexing and browsing the matched-swing execution ledger (`reports/matched_swing_ledger.json`):
+- **Data Model & Lineage Spine (`src/tools/matched_swing_browser/model.py`)**:
+  - `MatchedSwingFilter`: Filter criteria across engine, capture (`driver`, `iron`), lane, verdict (`PASSED`, `REJECTED`, `UNCLASSIFIED`), and full-text search. Adapts to `ResultFilter` from `src.shared.python.workspace.results_browser` for backend/text lineage, resolving issue #8824 and providing the contract consumed by #10521 (ORG-13).
+  - `MatchedSwingBrowserModel`: Loads and validates `Ledger` data from disk. Formats quantitative metrics with explicit SI/angular units (mm, degrees). Resolves associated file artifacts (GIF animations, NPZ trajectory arrays, receipt JSONs, and parity reports) with fail-closed existence checks. Decorated with `@precondition` and `@postcondition` contracts.
+- **Dual-Pane Desktop GUI (`src/tools/matched_swing_browser/gui.py`)**:
+  - `MatchedSwingBrowserWidget`:
+    - Left pane: Interactive filter group (engine, capture, lane, verdict, search text, and filter reset) coupled to a 7-column `QTableWidget` sorting and listing all 98 committed receipts.
+    - Right pane: Run summary card with acceptance pill badge (green `PASSED`, red `REJECTED`, gray `UNCLASSIFIED`), five standardized comparison metrics (Whole, Early, Terminal, Club, and Pelvis Yaw RMSE), physical gates breakdown, and asynchronous `QMovie` playback for runs with visual GIF animations.
+    - Action launchers: *Open in Tour Matching Viewer* (loads candidate NPZ into 3D viewer), *Open in Native Viewer* (dispatches to MS-83 `open_in_native_viewer`), *Open Parity Report* (displays `parity_vs_mujoco.json`), and *View Receipt JSON*.
+    - Non-blocking resource lifecycle via `cleanup()` stopping active movies.
+  - `MatchedSwingBrowserWindow`: Top-level window wrapper hosting the browser widget with closeEvent cleanup.
+- **Launcher Embedding & Registry Parity**:
+  - `_MatchedSwingBrowserEmbedAdapter` (`src/tools/matched_swing_browser/_embed_adapter.py`): Implements `EmbeddableTool` protocol for tab and dock hosting in the launcher.
+  - Package entry point in `pyproject.toml` under `upstream_drift.embeddable_tools`.
+  - Fallback adapter registration in `src/launchers/embedded_tool_bootstrap.py` (`FALLBACK_ADAPTER_MODULES`).
+  - Desktop tile catalog in `src/config/models.yaml` and web/desktop manifest in `src/config/launcher_manifest.json` with matching ID `matched_swing_browser`.
+  - Feature parity entry in `src/config/feature_parity.json` with regenerated `docs/development/feature_parity_matrix.md`.
+  - Tile icon assets: `assets/logos/matched_swing_browser.svg` and `src/launchers/assets/matched_swing_browser.png`.
+- **Evidence & Verification**:
+  - Automated tests: `tests/tools/matched_swing_browser/test_model.py` and `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py` (21 tests including headless journey test).
+  - Headless screenshot evidence: `docs/development/matched_swing_program/evidence/browser/screenshot.png`.
+
 ## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
-
-Consumes provider ownership decisions and enforces immutable runtime import authority and provenance verification across repository, installed, and packaged execution environments:
-- **Provider Authority & Provenance Verification (`src/shared/python/config/tools_vendor_authority.py`)**:
-  - `assert_runtime_provenance_parity(pytest_root, packaged_app_root)`: Asserts that pytest (repository test runtime) and packaged application environments resolve identical implementation roots, failing closed with `ProviderUnavailableError` upon divergence.
-  - `verify_provider_provenance(canonical_root, candidate_path)`: Asserts that candidate modules or paths resolve strictly within the declared canonical provider root, preventing silent escapes to unpinned local forks.
-  - `inspect_provider_authority(repo_root, ...)`: Unified fail-closed authority inspection covering pinned gitlink checkouts, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback.
-- **Fail-Closed Mismatch Gating**:
-  - Pin mismatches explicitly report `Tools pin stale (expected X, found Y)` and produce blocked status (`provider_unavailable`) with remediation instructions.
-  - Missing provider checkouts and missing wheel distributions fail closed with actionable errors, refusing unpinned local fork or sibling fallbacks.
-  - Underlying provider import failures surface clean diagnostic blocked states rather than unhandled host crashes.
-- **Canonical Seam Delegation & Backward Compatibility**:
-  - Sidekick public seams (`EmbeddableTool` adapter, chat history service) resolve through authoritative Tools provider.
-  - Movement Optimizer public seams delegate through `tools_movement_optimizer` via `ALIAS_MAP`, registered in the `optimize_train` workspace.
-  - Pendulum public seams (`swing_objective_lab` adapter, `pendulum_simulator` tile) run through intended provider authority.
-  - Legacy supported imports (`upstream_drift_tools`) delegate cleanly to canonical providers with formal deprecation warnings.
-
-## Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (ORG-07, #10514)
 
 Projects 28 multi-provider exercise variants into 7 cohesive logical model choices while preserving underlying provider assets and enforcing strict authority resolution:
 - **Logical Model Grouping & Projections (`src/shared/python/config/model_variant_grouping.py`)**:
