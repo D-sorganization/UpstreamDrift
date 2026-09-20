@@ -1,5 +1,20 @@
 # Current Matching Continuation Handoff
 
+## ORG-16 Consolidate Optimization and Training Launchers (#10525)
+
+- Branch: `feat/issue-10525-org16-optimization-training`, lease `antigravity-ud-10525`, DL-#10525.
+- Changes:
+  - `src/shared/python/workspace/optimization_training_workspace.py`: Implemented `OptimizationTrainingWorkspaceCoordinator`, `OptimizationJobConfig`, `TrainingJobConfig`, `OptimizationObjective`, `OptimizationResult`, `WorkspaceJob`, `WorkspaceJobKind`, `WorkspaceJobState`, and diagnostic error types (`InvalidOptimizationConfigError`, `IncompatibleBackendError`, `ModelCompatibilityError`, `DuplicateJobSubmissionError`).
+  - Bounded job form over the public optimizer and training controller authority: validates objectives, constraints, and model compatibility prior to dispatch.
+  - Fail-closed handling for unsupported/uninstalled backends (e.g. Crocoddyl/Drake transcription remains honestly disabled).
+  - Enforced lifecycle state integrity (cancel/pause/resume; cancelled jobs cannot be mislabeled complete).
+  - Deduplicated identical submissions using configuration digests without creating redundant jobs.
+  - Linked dataset selection with provenance directly to durable project sessions in `SessionProjectStore` (survives store save and reopen).
+  - `src/shared/python/workspace/__init__.py`: Exported public coordinator and configuration data structures.
+  - `tests/integration/test_optimization_training_workspace.py`: Full RED and GREEN regression test suite (9/9 tests passing).
+- Reproduction: `python3 -m pytest tests/integration/test_optimization_training_workspace.py --timeout=60`.
+- Next: Open PR with auto-merge, release lease, proceed to next issue in backlog.
+
 ## ORG-15 Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes (#10524)
 
 - Branch: `feat/issue-10524-org15-scene-delivery-modes`, lease `local`, DL-#10524.
