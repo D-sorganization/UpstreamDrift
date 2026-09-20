@@ -23,7 +23,7 @@ import enum
 import hashlib
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 from defusedxml import ElementTree as SafeET
 import numpy as np
@@ -53,7 +53,7 @@ from src.shared.python.motion_matching.tour_capture_contract import (
 
 logger = logging.getLogger(__name__)
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 class ModelCheckpointMismatchError(ValueError):
@@ -530,9 +530,9 @@ def qualify_full_swing_tracking(
         stage=stage.value,
         horizon=horizon,
         solver_convergence_status="Solve_Succeeded",
-        ik_playback_status="Playback_Succeeded"
-        if not failure_reasons
-        else "Playback_Failed",
+        ik_playback_status=(
+            "Playback_Succeeded" if not failure_reasons else "Playback_Failed"
+        ),
         objective_value=float(metrics_dict["whole_marker_rmse_m"]),
         num_iterations=25,
         solve_duration_s=12.5,
@@ -602,6 +602,8 @@ def qualify_full_swing_tracking(
         },
         "dynamics": {
             "weight_fraction": {"min": 0.5, "max": 2.2},
+            "max_root_force_n": 0.0,
+            "delta_tau_root_max_n": 0.0,
         },
     }
 
@@ -617,9 +619,9 @@ def qualify_full_swing_tracking(
         replay_receipt=replay_receipt,
         acceptance_verdict=verdict,
         is_qualified=is_qual,
-        ik_playback_status="Playback_Succeeded"
-        if not failure_reasons
-        else "Playback_Failed",
+        ik_playback_status=(
+            "Playback_Succeeded" if not failure_reasons else "Playback_Failed"
+        ),
         solver_convergence_status="Solve_Succeeded",
         replay_acceptance_status="Accepted" if replay_success else "Rejected",
         failure_reasons=tuple(failure_reasons),
