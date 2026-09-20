@@ -403,4 +403,5 @@ ACTION_HELP: dict[str, str] = {
     ),
     "stop": "Kill the running rig command.",
     "load": "Load the session folder named in the Capture panel.",
+    "inspect_targets": "Prepare the loaded capture session and hand off to Inspect Targets workspace.",
 }
