@@ -346,6 +346,16 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
 
+## Research Capability Lifecycle and Excluded Workflows (ORG-22, #10530)
+
+Reconciles and documents intentionally excluded packages, manifest-only services, and research capabilities:
+- **Research Capability Lifecycle Manager (`src/config/research_capability_lifecycle.py`)**:
+  - `ResearchCapabilityLifecycleManager`: Enforces classification and lifecycle policies across all packages under `src/tools/`, preventing untiled non-excluded package drift.
+  - Fail-Closed GUI Representation Prevention: Explicitly forbids adapting or claiming CLI-only or headless research tools (`contraction`, `drift_control`, `model_converter`, `sg_optimizer`, etc.) as interactive GUI tiles (`CLINotInteractiveGUIError`).
+  - Retained Research CLI Entry Points: Retains executable command-line interfaces with standard package invocation (`python -m src.tools.contraction`, `python -m src.tools.drift_control`, `python -m src.tools.model_converter`, `python -m src.tools.sg_optimizer`).
+  - Explicit Follow-Up for Incomplete Capabilities: Discloses owner, issue, current useful access, supported inputs/outputs, missing acceptance, and next action (`IncompleteCapabilityRecord`).
+  - Honest SG Optimizer Phase 3 UI Status: Accurately classifies shipped CLI reality while maintaining concrete follow-up for Phase 3 PyQt6 profile editor and conditions panel under issue #6272 without claiming premature GUI availability or abandoning the feature.
+
 ## Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (ORG-12, #10522)
 
 Coordinates subject, club, model selection, initial pose, fitting, and dynamics through session-bound typed handoff:
