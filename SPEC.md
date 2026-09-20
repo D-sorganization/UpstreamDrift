@@ -6298,6 +6298,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-19 | #10467 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10491 | Barrier-reduced same-integrator G1 continuation converged at 46.8 mm (rollout == replay) and is committed as rejected evidence; `--range-barrier-weight` CLI flag and raised trail-side effort bounds; ledger, README, turnover updated |
 | 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
 | 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |
