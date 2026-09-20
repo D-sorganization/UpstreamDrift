@@ -55,22 +55,19 @@
       "issue": 8820,
       "priority": "P1",
       "title": "Engine Dashboard Exports Carry No Engine, Model Path, Run ID, or Timestamp",
-      "status": "merged",
-      "merge_shas": ["8ef1bec803de292e44724cdf1f96d3ebf52bf2f2"],
+      "status": "open",
+      "merge_shas": [],
       "implementation": [
         "src/shared/python/dashboard/window.py",
         "src/shared/python/dashboard/_recorder_playback.py",
         "src/shared/python/data_io/provenance.py",
         "src/shared/python/data_io/export.py"
       ],
-      "tests": [
-        "tests/unit/test_dashboard_export_provenance.py",
-        "tests/unit/test_shared_export.py"
-      ],
-      "acceptance_evidence": "Unified engine dashboard exports now stamp engine, run ID, UTC creation time, application/provider SHA, model content hash, and format-appropriate provenance sidecars/headers via src/shared/python/data_io/export.py and provenance.py (#8820, PR #9995).",
-      "owner": null,
+      "tests": ["tests/unit/data_io/test_provenance.py"],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
       "depends_on": [8822, 8821],
-      "plan": null
+      "plan": "Confirmed still open against the reconciliation SHA. `UnifiedDashboardWindow.export_data` saves under the default name `swing_data` and dumps `recorder.get_data_dict()`, which stamps only `model_name` and `num_frames`; `_flatten_dict_for_csv` then keeps only per-frame arrays, so the CSV carries no identifying column at all and MuJoCo, Drake and Pinocchio exports are byte-level indistinguishable. Narrow PR order: (1) add the engine field to `ProvenanceInfo` and make `model_path` mandatory at the dashboard call site (#8822); (2) emit a sidecar plus header rows for JSON and CSV using the already-present, currently unused `add_provenance_to_csv` (#8821); (3) stamp engine, model path and hash, timestamp and run ID into the dashboard export dict and assert the round trip from each of the three engine dashboards (#8820). Do not widen the export schema without a reimport test."
     },
     {
       "key": "U4",

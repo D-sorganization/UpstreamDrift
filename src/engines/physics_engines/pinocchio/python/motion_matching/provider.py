@@ -36,8 +36,6 @@ from typing import TYPE_CHECKING, Final
 from src.shared.python.motion_matching.provenance import engine_package_version
 from src.shared.python.motion_matching.provider import (
     MultiSourceTarget,
-    execute_body_fit,
-    has_body_target,
     publish_leaderboard_row,
     register_provider,
     resolve_club_target,
@@ -99,10 +97,6 @@ class PinocchioFitSwingProvider:
             ValueError: If ``target`` shapes are inconsistent.
             ImportError: If the ``pinocchio`` bindings are unavailable.
         """
-        if has_body_target(target):
-            return execute_body_fit(
-                self.engine_name, target, opts, engine_version=self.engine_version()
-            )
         club = resolve_club_target(target)
         native_opts: FitOptions | None = None
         if opts is not None:
@@ -122,8 +116,8 @@ class PinocchioFitSwingProvider:
         return result
 
     def supports_body_target(self) -> bool:
-        """Pinocchio supports full-body matching via the Crocoddyl native fitting pipeline."""
-        return True
+        """Return ``False`` -- Pinocchio MM is club-target only."""
+        return False
 
     def supports_ball_target(self) -> bool:
         """Return ``False`` -- Pinocchio MM is club-target only."""

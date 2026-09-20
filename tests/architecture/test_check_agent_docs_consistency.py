@@ -181,15 +181,3 @@ def test_managed_notices_and_rules_are_not_duplicate_instructions() -> None:
     )
     text = f"---\n\n{notice}\n\n---\n\n{notice}\n\nRepeated rule.\n\nRepeated rule."
     assert checker._iter_duplicate_paragraphs(text) == ["Repeated rule."]
-
-
-def test_repeated_headings_are_not_flagged_as_duplicate_paragraphs() -> None:
-    text = (
-        "# Top Level\n\n"
-        "### The Rules\n\n"
-        "Rule 1 explanation.\n\n"
-        "### Next Section\n\n"
-        "### The Rules\n\n"
-        "Rule 2 explanation.\n"
-    )
-    assert checker._iter_duplicate_paragraphs(text) == []

@@ -16,7 +16,6 @@ import time
 from typing import Any
 
 import numpy as np
-import math
 
 from src.engines.physics_engines.opensim.python.tour_matching.marker_map import (
     ANTHRO_DOCUMENT_MARKER_BODIES,

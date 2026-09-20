@@ -5,15 +5,6 @@
  * tool routes resolve before the root route.
  */
 export const ROUTE_TITLES: ReadonlyArray<readonly [string, string]> = [
-  ['/workspaces/capture-analyze', 'Capture & Analyze'],
-  ['/workspaces/model-match', 'Model & Match'],
-  ['/workspaces/shot-course-lab', 'Shot & Course Lab'],
-  ['/workspaces/optimize-train', 'Optimize & Train'],
-  ['/workspaces/results-compare', 'Results & Compare'],
-  ['/workspaces/dev-research', 'Developer & Research'],
-  ['/workspaces/all-tools', 'All Tools'],
-  ['/workspaces/favorites', 'Favorites'],
-  ['/workspaces/history', 'History'],
   ['/simulation', 'Simulation'],
   ['/tools/model-explorer', 'Model Explorer'],
   ['/tools/putting-green', 'Putting Green'],

@@ -11,10 +11,7 @@ from dataclasses import dataclass
 import json
 import math
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from src.shared.python.workspace.results_browser import ResultFilter
+from typing import Any
 
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -26,6 +23,7 @@ from src.shared.python.motion_matching.ledger_schema import (
     Ledger,
     LedgerRow,
 )
+from src.shared.python.workspace.results_browser import ResultFilter
 
 logger = get_logger(__name__)
 
@@ -47,8 +45,6 @@ class MatchedSwingFilter:
 
     def to_result_filter(self) -> ResultFilter:
         """Convert to canonical ResultFilter lineage structure (#8824 / #10521)."""
-        from src.shared.python.workspace.results_browser import ResultFilter
-
         return ResultFilter(
             backend=self.engine,
             text=self.text,

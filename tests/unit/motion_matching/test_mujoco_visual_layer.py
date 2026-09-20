@@ -43,7 +43,6 @@ def test_visual_export_adds_geoms_but_keeps_physics_identical() -> None:
     np.testing.assert_allclose(d_visual.qacc, d_plain.qacc, atol=1e-9)
 
 
-@pytest.mark.requires_gl
 def test_visual_export_renders_offscreen(tmp_path: Path) -> None:
     mujoco = pytest.importorskip("mujoco")
     xml, _ = exporter.export_full_body_mjcf(FULL_BODY.read_bytes(), visual=True)

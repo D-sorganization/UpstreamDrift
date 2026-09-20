@@ -21,7 +21,6 @@ from src.shared.python.motion_matching.provenance import engine_package_version
 from src.shared.python.motion_matching.provider import (
     FitOptions,
     MultiSourceTarget,
-    has_body_target,
     register_provider,
 )
 
@@ -68,11 +67,6 @@ class MyoSuiteFitSwingProvider:
         returns a CanonicalFitResult with status 'unsupported' and never
         synthesizes fake zero-tensor activations.
         """
-        if has_body_target(target):
-            raise UnsupportedTargetError(
-                f"{self.engine_name} does not support body targets."
-            )
-
         logger.info(
             "MyoSuite fit_swing called: failing closed (%s)", UNSUPPORTED_REASON
         )
