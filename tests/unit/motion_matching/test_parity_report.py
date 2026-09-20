@@ -84,7 +84,7 @@ class FakeMatchingPlant:
     def create_ik(
         self, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> BaseFullBodyIK:
-        raise NotImplementedError("Not needed for parity test")
+        raise NotImplementedError("Not needed for parity test")  # tracked: #10350
 
     def frame_poses(
         self, mapping: Mapping[str, tuple[str, Sequence[float]]], q: np.ndarray
