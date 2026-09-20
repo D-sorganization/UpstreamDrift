@@ -11,6 +11,16 @@ Qualifies contact modes and native Pinocchio force feasibility:
 - **Verification Suite (`tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`)**:
   - 10 unit test fixtures validating hysteresis, COP containment, slip thresholds, Hunt-Crossley compliance, and unphysical load rejection.
 
+## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
+
+Freezes fast-matching evidence, schemas, and negative acceptance fixtures across the motion-matching pipeline:
+- **Extended Schema & Conversion (`src/shared/python/motion_matching/candidate.py`, `candidate_convert.py`)**:
+  - `MatchedSwingCandidate` schema extended with `CandidateAuxiliary` (`root_forces`, `contact_modes`, `grip_wrench`), `CandidateMetadata` (`solver_status`, `handedness`, `name_maps`), checksum calculation, and NPZ conversion logic in `candidate_convert.py`.
+  - Truthfully renamed `AllocationObjective.MINIMUM_TRAIL_ARM` with backwards-compatible `trail_zero` parsing, added `HARD_ZERO_TRAIL` mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios in `ContactForceAllocator`.
+  - Updated `SwingEvaluator` to avoid fabricating impact phases without declared `t_events`, audit closure translation and rotation separately (`ClosureAudit`), and return `NaN` RMSE for empty marker populations.
+- **Negative Acceptance Fixtures (`tests/unit/motion_matching/test_acceptance.py`, `src/shared/python/motion_matching/acceptance.py`)**:
+  - Added 7 negative acceptance fixtures in `test_acceptance.py` and corresponding evaluators in `acceptance.py`: (1) friction cone violation, (2) torque bound overwrite, (3) missing root histories, (4) 44 vs 41 coordinate dimension mismatch, (5) missing club coverage / empty population, (6) truncated horizon duration, and (7) synthetic engine false qualification.
+
 ## Reconcile, Audit, and Freeze Feature Preservation Across Historical Boundaries (ORG-24, #10533)
 
 Reconciles, audits, and freezes feature preservation across historical boundaries to guarantee no silent loss or broken historical interfaces across the UpstreamDrift workspace:
