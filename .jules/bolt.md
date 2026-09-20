@@ -135,6 +135,13 @@
 **Learning:** When computing magnitude using np.linalg.norm() for small vectors inside heavy computation paths like physics contact laws, math.sqrt(v.dot(v)) continues to give significant reduction in temporary allocations and increases throughput by bypassing standard np.linalg.norm checks.
 **Action:** Applied the math.sqrt(v.dot(v)) optimization in src/shared/python/motion_matching/contact_law.py
 
+## 2026-09-19 - Fast Squared Error Sums
+
+**Learning:** Optimizing `np.sum(diff**2, axis=-1)` or similar by doing the difference first and then `np.einsum` or `np.vdot` avoids a temporary allocation of `diff**2` and provides a nice ~2x speedup. `np.einsum("...i,...i->...", diff, diff)` is highly efficient for taking the squared error sum along the last dimension.
+
+**Action:** Replace `np.sum((a - b)**2, axis=-1)` with `diff = a - b` followed by `np.einsum('...i,...i->...', diff, diff)`. For 1D arrays, use `np.vdot(diff, diff)`.
+
+
 ## 2026-09-20 - Optimization of Np.Linalg.Norm for Small Arrays
 **Learning:** `np.linalg.norm` has significant overhead due to internal dispatching when working with small 1D vectors (like 3D points or forces).
 **Action:** Replace `np.linalg.norm(arr)` with `math.sqrt(np.vdot(arr, arr))` for small 1D vectors for a substantial speed boost.
