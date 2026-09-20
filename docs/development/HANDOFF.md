@@ -1,5 +1,58 @@
 # Current Matching Continuation Handoff
 
+## [ORG-21] Generate Accurate Atlas, Help, Parity, and Completion Records (#10531)
+
+- Worktree / Branch: `feat/issue-10531-org21-accurate-atlas-parity`, lease `2026-09-20-org21-atlas`, DL-#10531.
+- Changes:
+  - `src/config/industrial_readiness.json`: Reconciled item U3 (#8820, PR #9995) from open to merged with merge SHA `8ef1bec803de292e44724cdf1f96d3ebf52bf2f2`, verified implementation paths (`src/shared/python/data_io/export.py`, `src/shared/python/data_io/provenance.py`, `src/shared/python/dashboard/_recorder_playback.py`), and test evidence (`tests/unit/test_dashboard_export_provenance.py`).
+  - `docs/operations/industrial-readiness-index.md`: Regenerated from updated industrial readiness ledger.
+  - `src/tools/training_controller/README.md`: Updated status to accurately reflect shipped PyQt6 GUI reality (`MainWindow`, `MainWidget`, `gui.py`, `_embed_adapter.py`, `__main__.py`) and removed obsolete draft branch notes.
+  - `tests/scripts/test_workspace_documentation_freshness.py`: Added 8 comprehensive regression tests covering workspace membership drift, undocumented/dangling aliases, broken links, stale generated views, shell-only parity vs compute-complete separation, deterministic generators, training controller README accuracy, and industrial readiness U3 reconciliation.
+  - `scripts/check_agent_docs_consistency.py`: Exempt markdown headings (such as `### The Rules`) and centrally managed notices from the duplicate paragraph check to prevent false positives when fleet-managed sections (`fleet-guard`, `development-logs`) share standard subheadings.
+- Reproduction: `py -3.12 -m pytest tests/scripts/test_workspace_documentation_freshness.py tests/scripts/test_capability_atlas.py tests/config/industrial_readiness/ -v --timeout=60` and `python scripts/check_agent_docs_consistency.py`.
+- Next: Open PR, arm auto-merge (`--auto --squash`), release lease on #10531, notify parent orchestrator.
+
+## [ORG-09] Guided Workflow Transitions Across Unified Workspaces (#10518)
+
+- Worktree / Branch: `feat/issue-10518-org09-workflow-transitions`, lease `antigravity-ud-10518`, DL-#10518.
+- Changes:
+  - `src/shared/python/workspace/workflow_coordinator.py`: Added `WorkflowCoordinator`, `WorkflowStepId` (7-step canonical pipeline), `WorkflowMode`, `StepStatus`, `StepProjection`, and `WorkflowProjection`.
+  - Step transitions enforce cryptographic hash verification and disk existence, engine requirements (single-view vs 3-D physics), and strict contract distinction preventing dynamics from inheriting purely kinematic passes.
+  - Added cancellation, retry attempt tracking, and later-stage entry from imported artifacts (`entry_from_artifacts`).
+  - Added pure state projection with `.to_dict()` and `.get_step()` for Qt (`WorkflowStripWidget`) and React/Tauri (`WorkflowStrip.tsx`) parity.
+  - `src/shared/python/workspace/__init__.py`: Exported all workflow coordinator primitives.
+  - `tests/unit/workspace/test_workflow_transitions.py`: 8 comprehensive unit tests covering all RED and GREEN criteria.
+- Reproduction: `python -m pytest tests/unit/workspace/test_workflow_transitions.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10518, notify parent orchestrator.
+
+## [ORG-08] Unified Artifact and Project Context Handoff Between Workspaces (#10517)
+
+- Worktree / Branch: `feat/issue-10517-org08-workspace-handoff`, lease `antigravity-ud-10517`, DL-#10517.
+- Changes:
+  - `src/shared/python/workspace/artifact_handoff.py`: Added `ArtifactKind`, `ArtifactReference`, `WorkspaceHandoff`, cryptographic hash verification (`compute_file_sha256`), supported frames and schemas validation, and named adapter registry (`register_artifact_adapter`, `convert_artifact`) with recorded provenance.
+  - `src/shared/python/workspace/project_store.py`: Added `RunMetadata`, extended `ProjectMetadata` with `runs`, `active_run_id`, and `extra_fields` migration preservation. Extended `SessionProjectStore` with `register_run`, `load_run`, `list_runs`, `set_active_run`, `get_active_run`, `clone_run`, `check_run_artifacts`, `export_handoff`, and `import_handoff`. Enforced Design-by-Contract boundary checks (cross-session subject mismatch, frame/schema validity, artifact presence and hash verification before writes, atomic write resilience).
+  - `src/shared/python/workspace/__init__.py`: Exported all new workspace handoff types and functions.
+  - `tests/unit/workspace/test_artifact_handoff.py`: 12 focused unit tests covering all RED and GREEN acceptance criteria.
+- Reproduction: `python -m pytest tests/unit/workspace/test_artifact_handoff.py tests/unit/workspace/test_project_store.py tests/unit/workspace/test_results_browser.py --timeout=60`.
+- Next: Open PR, arm auto-merge, release lease on #10517, notify parent orchestrator.
+
+## ORG-20 Consume Provider Ownership Decisions and Verify Runtime Import Authority (#10529)
+
+- Branch: `feat/issue-10529-org20-provider-ownership`, lease held by `local`, DL-#10529.
+- Changes:
+  - `src/shared/python/config/tools_vendor_authority.py`: Implemented `assert_runtime_provenance_parity` enforcing identical implementation roots between test (pytest) and packaged app runtime contexts with fail-closed `ProviderUnavailableError`. Implemented `verify_provider_provenance` asserting module paths resolve within canonical provider roots. Implemented `inspect_provider_authority` handling pinned gitlinks, clean installed wheel distributions (`ud-tools`), and probe import failures without silent fallback.
+  - `tests/integration/test_installed_provider_authority.py`: 8 integration tests covering all RED and GREEN cases:
+    1. `test_pytest_and_packaged_app_resolving_different_roots_fail_provenance`: Divergent roots between pytest and packaged app fail provenance.
+    2. `test_wrong_pin_produces_blocked_state`: Pin mismatch returns available=False with stale pin message without falling back.
+    3. `test_missing_wheel_and_vendor_produces_blocked_state`: Missing gitlink and wheel produces blocked state.
+    4. `test_provider_import_failure_produces_blocked_state`: Provider probe failure surfaces blocked state.
+    5. `test_sidekick_public_seam_runs_through_intended_authority`: Sidekick adapter runs through intended Tools authority.
+    6. `test_movement_optimizer_public_seam_runs_through_intended_authority`: Movement Optimizer delegates to `tools_movement_optimizer`.
+    7. `test_pendulum_public_seam_runs_through_intended_authority`: Pendulum public seam delegates through intended Tools authority.
+    8. `test_old_supported_imports_delegate_correctly`: `upstream_drift_tools` cleanly delegates to `sidekick` with formal deprecation warning.
+- Reproduction: `pytest tests/integration/test_installed_provider_authority.py --timeout=60`.
+- Next: Push branch, open PR with auto-merge, update issue, release lease.
+
 ## ORG-07 Group Engine Dashboards, Exercise Variants, and Repository Shortcuts (#10514)
 
 - Worktree / Branch: `feat/issue-10514-org07-model-variant-grouping`, lease `antigravity-ud-10514`, DL-#10514.
