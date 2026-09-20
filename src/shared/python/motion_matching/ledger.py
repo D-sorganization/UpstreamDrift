@@ -30,6 +30,7 @@ __all__ = [
     "extract_candidate_sha",
     "extract_horizon_s",
     "extract_metrics",
+    "find_repo_root",
     "scan",
 ]
 
@@ -58,6 +59,9 @@ def _find_repo_root(start: Path | None = None) -> Path:
         ):
             return parent
     return Path.cwd()
+
+
+find_repo_root = _find_repo_root
 
 
 def _compute_sha256(path: Path) -> str:

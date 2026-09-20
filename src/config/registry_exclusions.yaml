@@ -63,3 +63,9 @@ exclusions:
       generating URDF and MJCF physics engine models from canonical specification;
       build-time orchestrator with no GUI launcher tile.
     issue: "#9965"
+  - package: matched_swing_browser
+    reason: >-
+      Data model and filter component backing the Results Browser and
+      ResultsWorkspaceCoordinator; consumed directly by workspace workflows
+      rather than a standalone launcher tile.
+    issue: "#10521"
