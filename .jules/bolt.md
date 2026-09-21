@@ -127,28 +127,15 @@
 ## 2024-05-21 - [Optimize Norm Calculation in Motion Retargeting]
 **Learning:** In the motion capture retargeting pipeline (e.g., `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py`), calling `np.linalg.norm(pos_error)` on small 1D arrays (like 3D position errors) incurs significant overhead due to NumPy's internal dispatching and instance checks. Replacing it with `math.sqrt(pos_error.dot(pos_error))` bypasses this overhead and is significantly faster (~2.5x).
 **Action:** Replace `np.linalg.norm(pos_error)` with `math.sqrt(pos_error.dot(pos_error))` for small 1D array magnitude calculations where possible.
-## 2026-09-19 - Optimization of Np.Linalg.Norm With Keepdims Using Einsum
-**Learning:** For batched vector norms (e.g. NxD arrays) where `np.linalg.norm(..., axis=1)` is computed, calculating squared distances with `np.einsum("ij,ij->i", A, A)` and returning `np.sqrt()` is about ~3x faster. If `keepdims=True` was used with `np.linalg.norm(..., axis=1, keepdims=True)`, we can replicate this efficiently using `np.sqrt(np.einsum("ij,ij->i", A, A))[:, np.newaxis]`. This avoids both NumPy's internal dispatching and explicit intermediate allocations. Additionally, downstream norm-squared usages like `np.mean(distances**2)` can directly compute `np.mean(sq_distances)` when the intermediate squared differences are kept.
-**Action:** Replace `np.linalg.norm(..., axis=1, keepdims=True)` with `np.sqrt(np.einsum("ij,ij->i", ...))[:, np.newaxis]` for tight loop 2D/3D batch geometric calculations, while propagating `sq_distances` forwards for root-mean-square and max pooling reductions to eliminate redundant math.
 
-## 2026-09-19 - Optimize Math.Sqrt(Dot) vs Np.Linalg.Norm
-**Learning:** When computing magnitude using np.linalg.norm() for small vectors inside heavy computation paths like physics contact laws, math.sqrt(v.dot(v)) continues to give significant reduction in temporary allocations and increases throughput by bypassing standard np.linalg.norm checks.
-**Action:** Applied the math.sqrt(v.dot(v)) optimization in src/shared/python/motion_matching/contact_law.py
+## 2026-09-20 - Inline Operations in Mathematical Substitutions
+**Learning:** Using Python walrus operators `:=` inline as arguments to mathematical functions (like `np.einsum('...', diff := (a-b), diff)`) violates formatting and stylistic standards and creates syntax errors. Even if technically valid in modern Python, it fails strict linters, drops code readability (which is explicitly against the boundaries), and leads to unexpected CI failures.
+**Action:** When refactoring calculations to avoid intermediate arrays by reusing terms, always assign the term on a separate line (e.g., `diff = a - b`) before invoking the substitution function like `np.einsum('...', diff, diff)`.
 
-## 2026-09-19 - Optimized Multi-Dimensional Norm Computations Using Einsum
-**Learning:** Using `np.linalg.norm(..., axis=1)` creates intermediate arrays and forces NumPy to use general-purpose dispatching, adding significant overhead in hot loops.
-**Action:** Replace `np.linalg.norm(diff, axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` and replace `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for small 1D vectors to prevent temporary allocations and get a ~2.4x speedup.
+## 2026-09-20 - SPEC.md Row Constraints
+**Learning:** `SPEC.md` requires that changelog insertions use either an actual GitHub PR number (e.g., `#1234`) or `n/a` for the second column. Using a placeholder like `#<pr>` will cause `scripts/ci/check_spec_changelog_duplicates.py` to raise a `row contract violated` error.
+**Action:** Always use `n/a` in the second column of the `SPEC.md` changelog when modifying it during offline testing or before a pull request number is assigned.
 
-## 2026-09-19 - Fast Squared Error Sums
-
-**Learning:** Optimizing `np.sum(diff**2, axis=-1)` or similar by doing the difference first and then `np.einsum` or `np.vdot` avoids a temporary allocation of `diff**2` and provides a nice ~2x speedup. `np.einsum("...i,...i->...", diff, diff)` is highly efficient for taking the squared error sum along the last dimension.
-
-**Action:** Replace `np.sum((a - b)**2, axis=-1)` with `diff = a - b` followed by `np.einsum('...i,...i->...', diff, diff)`. For 1D arrays, use `np.vdot(diff, diff)`.
-
-## 2026-09-20 - Optimization of Np.Linalg.Norm for Small Arrays
-**Learning:** `np.linalg.norm` has significant overhead due to internal dispatching when working with small 1D vectors (like 3D points or forces).
-**Action:** Replace `np.linalg.norm(arr)` with `math.sqrt(np.vdot(arr, arr))` for small 1D vectors for a substantial speed boost.
-
-## 2026-09-20 - Speeding up Distance Calculations on Multi-Dimensional Numpy Arrays
-**Learning:** `np.linalg.norm` has overhead due to input validation and handling multiple axes/dtypes. Using `np.sqrt(np.einsum(...))` performs the same mathematical operation (Euclidean distance) but operates closer to C-level speeds, typically yielding a 2x-3x speedup for calculating distances along an axis.
-**Action:** When calculating Euclidean distance along the inner-most axis of 3D or 4D multidimensional arrays in computationally hot paths (like physics simulations or tight mathematical loops), replace `np.linalg.norm(a - b, axis=-1)` with `np.sqrt(np.einsum('ijk,ijk->ij', diff, diff))` (or similar depending on dimensions) to avoid NumPy's internal dispatching and temporary array allocations. Do not apply this micro-optimization inside GUI update methods or string formatting operations where UI rendering overhead completely dwarfs any computational savings.
+## 2026-09-20 - Committing Temporary Files
+**Learning:** Generating utility scripts (like `patch_all.py` or `run_tests_opensim.sh`) and then tracking them into the branch breaks the `repo-structure-gates` check.
+**Action:** Always delete shell scripts and Python utility files used to modify the repo before checking `git status` and invoking `git commit`. Use `git ls-files --others --exclude-standard` to verify the working tree is clean.
