@@ -15,6 +15,7 @@ from src.shared.python.engine_core.engine_availability import (  # noqa: E402
     MUJOCO_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
+from src.shared.python.theme.tool_stylesheet import get_tool_colors  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -127,19 +128,21 @@ class VisualizationWidget(QWidget):
 
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.info_label.setStyleSheet("""
+        colors = get_tool_colors()
 
-            QLabel {
+        self.info_label.setStyleSheet(f"""
 
-                background-color: #f5f5f5;
+            QLabel {{
 
-                color: #333;
+                background-color: {colors["surface_secondary"]};
+
+                color: {colors["text_secondary"]};
 
                 padding: 5px;
 
-                border-top: 1px solid #ddd;
+                border-top: 1px solid {colors["border_default"]};
 
-            }
+            }}
 
         """)
 
