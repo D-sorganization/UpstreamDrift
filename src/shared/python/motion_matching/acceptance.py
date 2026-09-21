@@ -1278,3 +1278,24 @@ def evaluate(
             else "Physical or kinematic thresholds violated"
         ),
     )
+
+
+def evaluate_baseline_package_acceptance(
+    package: Any,
+    *,
+    horizon: Horizon | None = None,
+    gates: AcceptanceGates | None = None,
+) -> AcceptanceVerdict:
+    """Evaluate acceptance for a baseline package or manifest under the Matched Swing Program (TB-02 #10587)."""
+    if hasattr(package, "to_dict"):
+        pkg_dict = package.to_dict()
+    elif isinstance(package, Mapping):
+        pkg_dict = dict(package)
+    else:
+        raise TypeError("package must be BaselinePackage or Mapping")
+
+    ident = pkg_dict.get("identity")
+    ident_dict = ident if isinstance(ident, Mapping) else {}
+    raw_h = ident_dict.get("horizon", "G1") if ident_dict else "G1"
+    h = horizon if horizon is not None else Horizon(raw_h)
+    return evaluate(pkg_dict, horizon=h, gates=gates)
