@@ -1278,7 +1278,9 @@
         "motion_matching",
         "results_browser",
         "physical_acceptance",
-        "ledger"
+        "ledger",
+        "video_export",
+        "report_export"
       ]
     },
     {
@@ -2866,8 +2868,8 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "e33cdd99f3bc3390250b1dfca3a535dd87d7b127a4dce88fcf3d3de948eccc77",
-    "src/config/launcher_manifest.json": "cf943ece3690f285bc0960787c0d161dfb74315088def3098a736c20364f6159",
+    "src/config/models.yaml": "29d2a5fee2e88aad7b92bf924b85ff2867092cfb858aefcf1e729122445df403",
+    "src/config/launcher_manifest.json": "2d4abcd1e1829cfb917e09fd122e1a9006f8c5c0477223fe175acdc8a266c2a4",
     "src/config/feature_parity.json": "e9c8d791d426991c8a516552eecb89b7f0443c6e1a40320f3fefe0eefa46a009",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"

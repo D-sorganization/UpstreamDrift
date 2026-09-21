@@ -1150,7 +1150,9 @@
         "motion_matching",
         "results_browser",
         "physical_acceptance",
-        "ledger"
+        "ledger",
+        "video_export",
+        "report_export"
       ],
       "order": 50,
       "web": {

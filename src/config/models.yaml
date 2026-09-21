@@ -549,6 +549,8 @@ models:
       - "results_browser"
       - "physical_acceptance"
       - "ledger"
+      - "video_export"
+      - "report_export"
     launcher:
       category: "tool"
       logo: "assets/matched_swing_browser.png"
