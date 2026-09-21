@@ -9,12 +9,9 @@ import numpy as np
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.full_body_forward_dynamics import (
     Array,
-    ComputedTorqueGains,
     Controller,
     FullBodySimulator,
-    _balance_acceleration,
-    _check_gains,
-    _root_regulation_acceleration,
+    tracking_controller,
 )
 
 REPLAY_STEPS = 50
@@ -100,39 +97,6 @@ def inverse_dynamics_mj_inverse(
     return tau
 
 
-def _computed_torque_mj_inverse(
-    simulator: FullBodySimulator,
-    q: Array,
-    v: Array,
-    q_ref: Array,
-    v_ref: Array,
-    a_ref: Array,
-    gains: ComputedTorqueGains,
-    com_ref: Array | None = None,
-) -> Array:
-    act = simulator.actuated
-    omega = np.broadcast_to(
-        np.asarray(gains.omega_rad_s, dtype=float), (simulator.nv,)
-    )[act]
-    wanted = (
-        a_ref[act]
-        + 2.0 * gains.zeta * omega * (v_ref[act] - v[act])
-        + omega**2 * (q_ref[act] - q[act])
-    )
-    if gains.balance is not None and com_ref is not None:
-        wanted = (
-            wanted + _balance_acceleration(simulator, q, v, com_ref, gains.balance)[act]
-        )
-    if gains.root_regulation is not None:
-        wanted = (
-            wanted
-            + _root_regulation_acceleration(
-                simulator, q, v, q_ref, v_ref, gains.root_regulation
-            )[act]
-        )
-    return inverse_dynamics_mj_inverse(simulator, q, v, wanted)
-
-
 def tracking_controller_mj_inverse(
     simulator: FullBodySimulator,
     time_ref: Sequence[float] | Array,
@@ -145,44 +109,14 @@ def tracking_controller_mj_inverse(
     acceleration_feedforward: float = 1.0,
 ) -> Controller:
     """Computed-torque tracking using ``mj_inverse`` instead of the KKT path."""
-    if not 0.0 <= acceleration_feedforward <= 1.0:
-        raise ValueError("acceleration_feedforward must lie in [0, 1]")
-    times = np.asarray(time_ref, dtype=float)
-    reference = np.asarray(q_ref, dtype=float)
-    if (
-        times.ndim != 1
-        or np.any(np.diff(times) <= 0)
-        or reference.shape != (times.size, simulator.nv)
-        or not np.isfinite(reference).all()
-    ):
-        raise ValueError("Reference times must increase with one finite q row each")
-    _check_gains(omega_rad_s, zeta, balance)
-    _check_gains(1.0, 1.0, root_regulation)
-    if times.size > 1:
-        velocity = np.gradient(reference, times, axis=0)
-        acceleration = acceleration_feedforward * np.gradient(velocity, times, axis=0)
-    else:
-        velocity = np.zeros_like(reference)
-        acceleration = np.zeros_like(reference)
-    gains = ComputedTorqueGains(
+    return tracking_controller(
+        simulator,
+        time_ref,
+        q_ref,
         omega_rad_s=omega_rad_s,
         zeta=zeta,
         balance=balance,
         root_regulation=root_regulation,
+        acceleration_feedforward=acceleration_feedforward,
+        inverse_fn=inverse_dynamics_mj_inverse,
     )
-
-    def sample(table: Array, t: float) -> Array:
-        return np.array([np.interp(t, times, table[:, k]) for k in range(simulator.nv)])
-
-    def controller(t: float, q: Array, v: Array) -> Array:
-        q_t, v_t, a_t = (
-            sample(reference, t),
-            sample(velocity, t),
-            sample(acceleration, t),
-        )
-        com_ref = simulator.centre_of_mass(q_t)[0] if balance is not None else None
-        return _computed_torque_mj_inverse(
-            simulator, q, v, q_t, v_t, a_t, gains, com_ref
-        )
-
-    return controller

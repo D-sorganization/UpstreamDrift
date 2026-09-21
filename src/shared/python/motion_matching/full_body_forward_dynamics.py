@@ -39,6 +39,9 @@ logger = logging.getLogger(__name__)
 
 Array: TypeAlias = NDArray[np.float64]
 Controller: TypeAlias = Callable[[float, Array, Array], Array]
+InverseDynamicsFn: TypeAlias = Callable[
+    ["FullBodySimulator", Array, Array, Array], Array
+]
 DEFAULT_UNACTUATED: frozenset[int] = frozenset({0, 1, 2, 3, 4, 5})
 MIN_SINGULAR_VALUE: float = 1e-2
 ROOT_COORDINATES: tuple[str, ...] = (
@@ -1279,6 +1282,8 @@ def _computed_torque(
     a_ref: Array,
     gains: ComputedTorqueGains,
     com_ref: Array | None = None,
+    *,
+    inverse_fn: InverseDynamicsFn | None = None,
 ) -> Array:
     act = simulator.actuated
     omega = np.broadcast_to(
@@ -1298,7 +1303,8 @@ def _computed_torque(
                 simulator, q, v, q_ref, v_ref, gains.root_regulation
             )[act]
         )
-    return simulator.inverse_dynamics(q, v, wanted)
+    inv = inverse_fn or (lambda sim, q_i, v_i, w: sim.inverse_dynamics(q_i, v_i, w))
+    return inv(simulator, q, v, wanted)
 
 
 def hold_pose_controller(
@@ -1341,6 +1347,7 @@ def tracking_controller(
     balance: tuple[float, float] | None = None,
     root_regulation: tuple[float, float] | None = None,
     acceleration_feedforward: float = 1.0,
+    inverse_fn: InverseDynamicsFn | None = None,
 ) -> Controller:
     """Computed-torque tracking of a reference trajectory (linear interpolation)."""
     if not 0.0 <= acceleration_feedforward <= 1.0:
@@ -1379,7 +1386,9 @@ def tracking_controller(
             sample(acceleration, t),
         )
         com_ref = simulator.centre_of_mass(q_t)[0] if balance is not None else None
-        return _computed_torque(simulator, q, v, q_t, v_t, a_t, gains, com_ref)
+        return _computed_torque(
+            simulator, q, v, q_t, v_t, a_t, gains, com_ref, inverse_fn=inverse_fn
+        )
 
     return controller
 
