@@ -245,6 +245,12 @@ class _CalibrateAndScaleResult:
     qualification_note: str
 
 
+def _write_spec(path: Path, spec: dict[str, Any]) -> bytes:
+    """Serialise *spec* to *path* (sorted, pretty-printed) and return its bytes."""
+    path.write_text(json.dumps(spec, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path.read_bytes()
+
+
 def _calibrate_and_scale(
     ctx: PipelineContext,
     lane: Lane,
@@ -279,10 +285,7 @@ def _calibrate_and_scale(
             recalibrate_upper=args.recalibrate_upper,
         ),
     )
-    hipcal_path.write_text(
-        json.dumps(hip_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    hip_bytes = hipcal_path.read_bytes()
+    hip_bytes = _write_spec(hipcal_path, hip_spec)
 
     stage2 = solve_address_stage(
         AddressStageInputs(
@@ -313,10 +316,7 @@ def _calibrate_and_scale(
     unqualified = "unqualified" in str(base_spec.get("upper_body_qualification", ""))
     if not args.anthropometric and not unqualified:
         validate_full_body_spec(scaled_spec, upper_base)
-    scaled_path.write_text(
-        json.dumps(scaled_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    spec_bytes = scaled_path.read_bytes()
+    spec_bytes = _write_spec(scaled_path, scaled_spec)
 
     lane.plant = get_plant(ctx.engine, scaled_spec)
     if hasattr(lane.plant, "ik_backend"):
