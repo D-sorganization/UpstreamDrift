@@ -1,3 +1,22 @@
+## Candidate Video and Fit-Quality Report Export (MS-86, #10359)
+
+Wires candidate video animation export (MP4 and GIF) and comprehensive fit-quality and acceptance reporting (Markdown and PDF) with complete cryptographic provenance conforming to #8820 / Industrial Readiness U3:
+- **Core Export Module (`src/shared/python/motion_matching/export.py`)**:
+  - `export_video(candidate, engine, path, *, fps=30, stride=5, view="marker_overlay")`: Renders 3D marker overlay trajectories comparing target vs model markers headlessly across all six physics engines into `.gif` (via `imageio`) or `.mp4` (via `cv2.VideoWriter`). Enforces fail-closed `@precondition` and `@postcondition` contracts; rejects missing or corrupted candidate files and marker trajectories without fabricating data.
+  - `export_report(receipt, path, *, candidate=None, include_provenance=True)`: Extracts standardized metrics (Whole, Early, Terminal, Club, and Pelvis Yaw RMSE), quantitative acceptance gates, physical constraints, and qualification notes from execution receipts. Enforces fail-closed `@precondition` and `@postcondition` contracts; faithfully preserves raw ledger/receipt verdicts without cosmetic masking; generates structured Markdown reports and clean, paginated PDF documents via `matplotlib.backends.backend_pdf`.
+  - Cryptographic Provenance Block: Stamps software version, short git commit SHA (`git_commit_short`), physics engine and package version (`engine_package_version`), candidate SHA-256, receipt SHA-256, capture, lane, authoritative verdict, and UTC ISO 8601 timestamp into every export (#8820 / U3).
+- **CLI Subcommand Integration (`src/shared/python/motion_matching/__main__.py`)**:
+  - Adds `export-video` and `export-report` subcommands to `python -m src.shared.python.motion_matching`.
+- **Results Browser Desktop GUI Integration (`src/tools/matched_swing_browser/gui.py`)**:
+  - Adds "Export Video..." and "Export Report..." buttons to the Actions card with automatic enablement based on candidate/receipt artifact availability on disk.
+  - Connects native file save dialogs with error handling and success confirmations.
+- **Launcher Manifest & Model Capability Alignment (`src/config/launcher_manifest.json`, `src/config/models.yaml`)**:
+  - Registers `"video_export"` and `"report_export"` capabilities under `matched_swing_browser`.
+- **Evidence & Verification (`docs/development/matched_swing_program/evidence/reports/sample_fit_report.md`, `tests/unit/motion_matching/test_export.py`, `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py`)**:
+  - 11 unit tests in `test_export.py` covering GIF/MP4 frame generation, fail-closed marker validation, Markdown/PDF report emission, verdict preservation, and CLI subcommands.
+  - GUI test suite covering action button states, file dialog mock triggers, and export generation.
+  - Sample report emitted from canonical ground-support receipt.
+
 ## Generic Capture Contract and 44-DOF Identifiability (MS-90, #10361)
 
 Defines generic C3D capture ingestion contracts and mathematical identifiability probes for the 44-DOF kinematic model:
@@ -78,7 +97,6 @@ Connects qualified matching strategies to engine feature contracts:
   - Exposes cross-strategy comparison reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
 - **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
   - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
-
 
 ## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
 
