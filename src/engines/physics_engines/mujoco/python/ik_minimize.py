@@ -42,7 +42,7 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
         q_init: Array,
         ground: GroundPlane,
         opts: SolvePoseOptions,
-    ) -> Array:
+    ) -> tuple[Array, int]:
         from mujoco import minimize
         from mujoco.minimize import Verbosity
 
@@ -58,7 +58,7 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
             )
 
         warm_iters = max(5, opts.iterations - max(1, opts.iterations // 3))
-        q_seed, _ = _run_lm_loop(
+        q_seed, lm_done = _run_lm_loop(
             residual_and_jacobian,
             prep.q,
             prep.free,
@@ -81,7 +81,7 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
         lower = prep.low[prep.free]
         upper = prep.high[prep.free]
         bounds = (lower, upper)
-        x_opt, _trace = minimize.least_squares(
+        x_opt, trace = minimize.least_squares(
             q_seed[prep.free].reshape(-1, 1),
             residual,
             bounds=bounds,
@@ -90,12 +90,11 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
             verbose=Verbosity.SILENT,
             mu_max=1e16,
         )
+        min_done = len(trace) if trace is not None else 0
         q_min = unpack(x_opt.reshape(-1))
-        return (
-            q_min
-            if self._marker_rms(q_min, targets_arr, prep.mask) <= seed_rms
-            else q_seed
-        )
+        if self._marker_rms(q_min, targets_arr, prep.mask) <= seed_rms:
+            return q_min, lm_done + min_done
+        return q_seed, lm_done
 
     @precondition(
         lambda self, targets, valid, q_init, ground=None, **_: targets is not None,
@@ -119,7 +118,7 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
         opts = SolvePoseOptions(**kwargs) if options is None else options
         targets_arr = np.asarray(targets, dtype=float)
         prep = self._prepare_pose_fit(targets_arr, valid, q_init, ground, opts)
-        q = self._solve_with_minimize(prep, targets_arr, q_init, ground, opts)
+        q, done = self._solve_with_minimize(prep, targets_arr, q_init, ground, opts)
         return self._finalize_pose_fit(
-            q, targets_arr, prep, ground=ground, iterations=opts.iterations
+            q, targets_arr, prep, ground=ground, iterations=done
         )

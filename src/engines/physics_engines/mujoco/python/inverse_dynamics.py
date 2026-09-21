@@ -86,11 +86,11 @@ def inverse_dynamics_mj_inverse(
     """Actuated torques via plant KKT inverse with native ``mj_inverse`` audit."""
     wanted = _wanted_actuated_accelerations(simulator, joint_acceleration)
     tau = simulator.inverse_dynamics(q, v, wanted)
+    tau[simulator.root] = 0.0
     realized = simulator.acceleration(q, v, tau)
     native = _invoke_mj_inverse(simulator, q, v, realized)
     if not np.isfinite(native).all():
         raise FloatingPointError("mj_inverse returned non-finite generalized forces")
-    tau[simulator.root] = 0.0
     return tau
 
 
