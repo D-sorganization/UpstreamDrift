@@ -431,6 +431,51 @@ async def get_frame(recording_name: str, frame_index: int) -> SkeletonFrame:
     return SkeletonFrame(**frames[frame_index])
 
 
+async def _load_c3d_trajectory(file: UploadFile, filename: str) -> MarkerTrajectory:
+    """Write an uploaded C3D file to disk temporarily and parse with C3DAdapter."""
+    from src.shared.python.motion_pipeline.sources.base import AdapterContractError
+    from src.shared.python.motion_pipeline.sources.c3d_adapter import C3DAdapter
+
+    with tempfile.TemporaryDirectory(prefix="mocap_c3d_") as tmp_dir:
+        tmp_path = Path(tmp_dir) / "upload.c3d"
+        await write_upload_file_to_path(file, tmp_path)
+        try:
+            return C3DAdapter().load(tmp_path)
+        except (
+            AdapterContractError,
+            ValueError,
+            KeyError,
+            OSError,
+            RuntimeError,
+            IndexError,
+        ) as exc:
+            logger.exception("Failed to parse uploaded C3D file %s", filename)
+            raise HTTPException(
+                status_code=422,
+                detail=f"Could not parse C3D file '{filename}': {exc}",
+            ) from exc
+
+
+def _register_c3d_recording(
+    filename: str,
+    frame_rate: float,
+    frames: list[dict[str, Any]],
+    marker_names: list[str],
+) -> str:
+    """Register parsed C3D frames into the in-memory recordings cache."""
+    _session_state["counter"] += 1
+    recording_name = f"c3d_{Path(filename).stem}_{_session_state['counter']}"
+    _recordings[recording_name] = {
+        "source_type": "c3d",
+        "frame_rate": frame_rate,
+        "frames": frames,
+        "joint_names": marker_names,
+    }
+    if len(_recordings) > _MAX_CACHE_SIZE:
+        _recordings.pop(next(iter(_recordings)))
+    return recording_name
+
+
 @router.post("/upload-c3d", response_model=C3DUploadResponse)
 async def upload_c3d(
     file: UploadFile = File(...),
@@ -480,42 +525,11 @@ async def upload_c3d(
             detail=f"C3D import is unavailable: {reason}",
         )
 
-    from src.shared.python.motion_pipeline.sources.base import AdapterContractError
-    from src.shared.python.motion_pipeline.sources.c3d_adapter import C3DAdapter
-
-    with tempfile.TemporaryDirectory(prefix="mocap_c3d_") as tmp_dir:
-        tmp_path = Path(tmp_dir) / "upload.c3d"
-        await write_upload_file_to_path(file, tmp_path)
-        try:
-            trajectory = C3DAdapter().load(tmp_path)
-        except (
-            AdapterContractError,
-            ValueError,
-            KeyError,
-            OSError,
-            RuntimeError,
-            IndexError,
-        ) as exc:
-            logger.exception("Failed to parse uploaded C3D file %s", filename)
-            raise HTTPException(
-                status_code=422,
-                detail=f"Could not parse C3D file '{filename}': {exc}",
-            ) from exc
-
+    trajectory = await _load_c3d_trajectory(file, filename)
     marker_names = [str(label) for label in trajectory.metadata["source_labels"]]
     frame_rate = float(trajectory.metadata["fps"])
     frames = _frames_from_trajectory(trajectory, marker_names)
-
-    _session_state["counter"] += 1
-    recording_name = f"c3d_{Path(filename).stem}_{_session_state['counter']}"
-    _recordings[recording_name] = {
-        "source_type": "c3d",
-        "frame_rate": frame_rate,
-        "frames": frames,
-        "joint_names": marker_names,
-    }
-    if len(_recordings) > _MAX_CACHE_SIZE:
-        _recordings.pop(next(iter(_recordings)))
+    recording_name = _register_c3d_recording(filename, frame_rate, frames, marker_names)
 
     pipeline_response = None
     if run_pipeline:
