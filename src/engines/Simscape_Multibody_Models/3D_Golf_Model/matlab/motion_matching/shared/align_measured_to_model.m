@@ -27,6 +27,12 @@ function result = align_measured_to_model(skel, target, opts)
 %     .x0          initial guess (auto if absent).
 %     .max_iters   fminsearch iteration cap, default 2000.
 %     .tol_fun     fminsearch tolerance, default 1e-12.
+%     .workspace_overrides  optional struct of Simscape model-workspace
+%                  length variables (inches) derived from a geometry
+%                  document by ``coordinate_slice.workspace_overrides_from_geometry_document``.
+%     .geometry_document  optional path to the full-body geometry JSON
+%                  used to populate ``workspace_overrides`` when overrides
+%                  are not supplied explicitly.
 %
 %   The returned struct has:
 %     .mode                     mode used
@@ -54,6 +60,8 @@ function result = align_measured_to_model(skel, target, opts)
     if ~isfield(opts, 'mode');      opts.mode      = 'grip_pose'; end
     if ~isfield(opts, 'max_iters'); opts.max_iters = 2000; end
     if ~isfield(opts, 'tol_fun');   opts.tol_fun   = 1e-12; end
+    if ~isfield(opts, 'workspace_overrides'); opts.workspace_overrides = struct(); end
+    if ~isfield(opts, 'geometry_document'); opts.geometry_document = ''; end
 
     idx = double(target.impact_idx);
     butt_m = target.butt(idx, :);
@@ -63,14 +71,17 @@ function result = align_measured_to_model(skel, target, opts)
 
     if strcmpi(string(opts.mode), "grip_pose")
         result = local_solve_grip_pose(skel, target, idx);
+        result = local_attach_geometry_overrides(result, opts);
         return;
     end
     if strcmpi(string(opts.mode), "clubhead_shaft")
         result = local_solve_clubhead_shaft(butt_m, head_m, butt_s, head_s, skel, false);
+        result = local_attach_geometry_overrides(result, opts);
         return;
     end
     if strcmpi(string(opts.mode), "clubhead_shaft_scaled")
         result = local_solve_clubhead_shaft(butt_m, head_m, butt_s, head_s, skel, true);
+        result = local_attach_geometry_overrides(result, opts);
         return;
     end
 
@@ -132,6 +143,18 @@ function result = align_measured_to_model(skel, target, opts)
         'initial_clubhead_error_mm', 1000 * norm(head_m - head_s), ...
         'final_cost', cost(x_opt), ...
         'initial_cost', initial_cost);
+    result = local_attach_geometry_overrides(result, opts);
+end
+
+%% =====================================================================
+function result = local_attach_geometry_overrides(result, opts)
+%LOCAL_ATTACH_GEOMETRY_OVERRIDES  Echo workspace overrides for Simscape replay.
+    if isfield(opts, 'workspace_overrides') && isstruct(opts.workspace_overrides) ...
+            && ~isempty(fieldnames(opts.workspace_overrides))
+        result.workspace_overrides = opts.workspace_overrides;
+    elseif isfield(opts, 'geometry_document') && strlength(string(opts.geometry_document)) > 0
+        result.geometry_document = char(string(opts.geometry_document));
+    end
 end
 
 %% =====================================================================
@@ -376,4 +399,40 @@ function R = local_align_vectors(a, b)
           v(3),    0, -v(1); ...
          -v(2),  v(1),    0];
     R = eye(3) + Vx + Vx * Vx * ((1 - c) / (s * s));
+end
+
+%% =====================================================================
+function result = local_attach_geometry_overrides(result, opts)
+%LOCAL_ATTACH_GEOMETRY_OVERRIDES  Optional Simscape workspace overrides from JSON document.
+    result.workspace_overrides = struct();
+    if ~isfield(opts, 'geometry_document') || isempty(opts.geometry_document)
+        return;
+    end
+    if ~isfile(opts.geometry_document)
+        error('align_measured_to_model:missingGeometryDocument', ...
+              'geometry_document not found: %s', opts.geometry_document);
+    end
+    result.workspace_overrides = local_geometry_document_overrides(opts.geometry_document);
+end
+
+%% =====================================================================
+function overrides = local_geometry_document_overrides(document_path)
+%LOCAL_GEOMETRY_DOCUMENT_OVERRIDES  Map anthropometry segment lengths to model workspace (in).
+    doc = jsondecode(fileread(document_path));
+    if ~isfield(doc, 'anthropometry') || ~isfield(doc.anthropometry, 'segments')
+        error('align_measured_to_model:badGeometryDocument', ...
+              'document must contain anthropometry.segments');
+    end
+    segs = doc.anthropometry.segments;
+    inches = 39.37007874015748;
+    trunk_m = segs.trunk.length_m;
+    overrides = struct( ...
+        'UpperTorsoLength', trunk_m * 0.45 * inches, ...
+        'HubtoSLength', trunk_m * 0.15 * inches, ...
+        'UpperArmLength', segs.upper_arm.length_m * inches, ...
+        'LowerArmLength', segs.forearm.length_m * inches, ...
+        'LeftUpperArmLength', segs.upper_arm.length_m * inches, ...
+        'RightUpperArmLength', segs.upper_arm.length_m * inches, ...
+        'LeftShoulderWidth', 0.114 * 1.71 * inches, ...
+        'RightShoulderWidth', 0.114 * 1.71 * inches);
 end
