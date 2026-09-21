@@ -1,3 +1,15 @@
+## OpenSim/MyoSuite Native Nightly Lane Receipts (MS-43, #10342)
+
+Adds a ControlTower-oriented native-engine pytest lane with hashed nightly receipts and a freshness gate on `main` without editing `.github/workflows`:
+- **Lane Runner (`scripts/ci/run_native_engine_lane.sh`, `scripts/ci/run_native_engine_lane.py`)**:
+  - Executes `pytest -m requires_opensim` or `requires_myosuite` and writes JSON receipts under `docs/development/matched_swing_program/evidence/nightly/`.
+  - Records contract SHA-256 digests for the runner scripts and `pyproject.toml`, repository revision, engine module hash, and nonzero executed test counts when the lane passes.
+  - Default OpenSim venv path: `/home/dieterolson/opensim-10003` on ControlTower.
+- **Freshness Gate (`tests/docs/test_native_lane_freshness.py`)**:
+  - Validates receipt schema via `validate_receipt()` and warns when receipts are older than seven days; fails closed at thirty days.
+- **Evidence (`docs/development/matched_swing_program/evidence/nightly/opensim_receipt.json`, `myosuite_receipt.json`)**:
+  - Bootstrap receipts committed; refresh weekly on ControlTower per `evidence/nightly/README.md`.
+
 ## Candidate Video and Fit-Quality Report Export (MS-86, #10359)
 
 Wires candidate video animation export (MP4 and GIF) and comprehensive fit-quality and acceptance reporting (Markdown and PDF) with complete cryptographic provenance conforming to #8820 / Industrial Readiness U3:
@@ -6705,6 +6717,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
 | 2026-09-21 | #10648 | Vectorize `BallFlightSimulator._post_process_rust` to build the trajectory's `(3, N)` batch once and call force calculation a single time instead of once per point (#8930); no numerical change. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
