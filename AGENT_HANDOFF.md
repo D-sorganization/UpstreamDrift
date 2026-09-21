@@ -22,14 +22,19 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
+## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615)
+
+Branch `fix/issue-10615-nm00-dataset-audit`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603).
+NM-00 delivers fail-closed inventory in `src/shared/python/neural_motion/` with schema `neural-artifact-audit/1.0.0`, per-model coverage cells, bounded parquet inspect, and receipts under `docs/plans/neural_motion_matching/evidence/`. Documented 10k corpus and default checkpoints are quarantined when absent; synthetic sweep is software-contract-only; mean-baseline plateau notes stay `NOTE_ONLY`. No training or speed claims.
+Next step: Dispatch NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)).
+
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
-- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md).
-- **State:** Planning only. Four unique workbook trials audited; source event parsing failure reproduced. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
-- **Branch:** `docs/club-neural-matching-plans-20260920`; reviewed source `c3111a9177885af945018d730ec40de308cd9971`. Development log entries DL-#10602 and DL-#10603 record the two proposed programs.
-- **Next:** Hand CO-00 #10604 to one worker using its numbered prompt.
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) inventory on `fix/issue-10615-nm00-dataset-audit`.
+- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
+- **State:** Planning epics remain; NM-00 audit landed without claiming native corpora or checkpoints. Existing #10363/#10378/#10430 owners retain physical matching scope.
+- **Next:** Dispatch NM-01 #10616 using its copyable worker prompt.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 

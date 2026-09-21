@@ -277,6 +277,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
   > > > > > > > origin/main
 
+### DL-#10615 · NM-00 Dataset Checkpoint and Training Claim Audit
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10615 (epic #10603)
+- **Branch:** fix/issue-10615-nm00-dataset-audit
+- **PR:** not created
+- **Paths:** src/shared/python/neural_motion/; tests/unit/neural_motion/; docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at SELF (`python -m pytest tests/unit/neural_motion/test_artifact_audit.py -q -n 0 --no-cov --timeout=60` green; absent TenThousandFiles quarantined; synthetic fixture software-contract-only; plateau notes NOTE_ONLY)
+- **Summary:** Fail-closed inventory of neural corpora, default checkpoints and historical training claims with retain/repair/migrate/reject/quarantine dispositions and a per-model coverage matrix keyed to TB-00 identities. No native training or speed claim.
+- **Next step:** Open the focused PR with `Fixes #10615` and dispatch NM-01 (#10616).
+- **Evidence:** docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/nm00_artifact_audit_receipt.json; docs/plans/neural_motion_matching/evidence/nm00_coverage_matrix.json.
+
 ### DL-#10602 · Club-Only Motion Matching Plan
 
 - **State:** proposed
@@ -316,7 +330,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 at c3111a9177885af945018d730ec40de308cd9971 (source/workbook review; four unique numeric trials audited and TW_wiffle event parsing defect reproduced; implementation and training not performed)
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Dispatch #10615 using its copyable worker prompt.
+- **Next step:** Dispatch #10616 (NM-01) after #10615 merges.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#9550 · Impact Explorer Acceptance Matrix and Served-Bundle Verification
