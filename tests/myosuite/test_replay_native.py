@@ -9,7 +9,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-pytestmark = [pytest.mark.requires_myosuite, pytest.mark.requires_mujoco]
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.requires_myosuite,
+    pytest.mark.requires_mujoco,
+]
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_CANDIDATE = ROOT / "evidence/matched/driver_full_pinocchio/candidate.npz"
