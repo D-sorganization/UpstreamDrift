@@ -31,6 +31,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** PR creation, auto-merge, complete lease on #10440 and report back.
 - **Evidence:** tests/unit/motion_matching/test_matching_strategy.py.
 
+### DL-#9550 · Impact Explorer Acceptance Matrix and Served-Bundle Verification
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9550 (epic #9546)
+- **Branch:** conductor/issue-9550
+- **PR:** #10441
+- **Paths:** src/config/impact_acceptance.json; tests/config/impact_acceptance/test_impact_acceptance_matrix.py; scripts/ci/verify_impact_explorer_bundle.py; tests/ci/test_verify_impact_explorer_bundle.py; tests/api/test_impact_explorer_mount.py; .github/workflows/ci-standard.yml; src/config/feature_parity.json; docs/development/impact_acceptance_matrix.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; matrix gate 26 passed; verifier + mount 14 passed; feature-parity/industrial-readiness gates 91 passed; real pinned bundle `62e8cdbf` verified locally: 76 assets, 5 JS, 404 on missing artifact)
+- **Summary:** Froze the model-capability matrix for `src/shared/python/physics/impact_model` (spin support stated as unavailable where absent), recorded the six acceptance items with evidence or explicit open state and a `code_verified_only` claim, made CI stamp Tools' release artifacts with the pinned gitlink and verify that `/impact-explorer-app/` serves that revision's real JavaScript, and downgraded `tools.rate_of_closure` parity to an evidence-based gap.
+- **Next step:** Open the PR and, once #9417 fixes the artifact set, run the served-bundle verifier against the installed artifact with restart/reload/offline checks.
+- **Evidence:** docs/development/impact_acceptance_matrix.md; tests/config/impact_acceptance/test_impact_acceptance_matrix.py.
+
+### DL-#9541 · BunkerShot3D Product Acceptance Matrix
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9541 (epic; children #9542–#9545, #9239, #9286, #8733, #8880, #9688–#9695)
+- **Branch:** conductor/issue-9541
+- **PR:** #10459 (open)
+- **Paths:** src/config/bunkershot3d_qualification.json; tests/config/bunkershot3d_qualification/test_bunkershot3d_qualification_ledger.py; CLAUDE.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at 9af408974 (SELF); 16 matrix tests plus the 21 sibling readiness-ledger tests pass on Python 3.12 with the Tools pin 62e8cdbf materialized; ruff check and format clean.
+- **Summary:** Machine-readable product acceptance matrix for epic #9541, reusing the #9539 readiness-ledger loader unchanged: all sixteen checklist children recorded open with owner, dependency order and narrow TDD plan; eight acceptance criteria from the epic's prediction protocol (one met, two partial, five unmet); `release_status` bound to `shipped_register()` and `credibility_assessment()` so it cannot be greened by editing JSON. No physics, calibration or GUI change; the tool remains an exploratory simulator.
+- **Next step:** Land the matrix, then start U1 (#9286) and U2 (#9542) with their RED tests and update their entries with merge SHAs.
+- **Evidence:** src/config/bunkershot3d_qualification.json; tests/config/bunkershot3d_qualification/test_bunkershot3d_qualification_ledger.py.
+
 ### DL-#10363 · Matched Swing Continuation Review
 
 - **State:** in_review
