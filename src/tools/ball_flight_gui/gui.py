@@ -333,8 +333,12 @@ class BallFlightWidget(QWidget):
                     f"{self._wind_dir.value():.0f}°, altitude "
                     f"{self._altitude.value():.0f} ft "
                     f"(air density {env.air_density:.3f} kg/m³)\n\n"
+                    # Primary unit is always SI (m); the secondary
+                    # parenthetical is always yards, so the two length
+                    # readouts in this pane never disagree on system
+                    # (issue #8886).
                     f"Carry:       {carry:.1f} m ({carry * 1.09361:.1f} yd)\n"
-                    f"Max Height:  {max_h:.1f} m ({max_h * 3.28084:.1f} ft)\n"
+                    f"Max Height:  {max_h:.1f} m ({max_h * 1.09361:.2f} yd)\n"
                     f"Flight Time: {last.time:.2f} s\n"
                     f"Points:      {len(trajectory)}\n\n"
                     f"Landing Position:\n"

@@ -37,6 +37,10 @@ _needs_gl = pytest.mark.skipif(
     not _HAS_PYQTGRAPH, reason="pyqtgraph.opengl not installed"
 )
 
+# The cup-distance control is SI (metres); these mirror the historical
+# 1-30 ft documented range exactly (issue #8886).
+_FT_TO_M = 0.3048
+
 
 @pytest.fixture(scope="module")
 def qapp() -> QApplication:
@@ -61,7 +65,9 @@ def widget(qapp: QApplication) -> PuttingGreenWidget:
 def test_widget_constructs_with_default_values(widget: PuttingGreenWidget) -> None:
     assert widget._speed_spin.value() == pytest.approx(2.5)
     assert widget._aim_spin.value() == pytest.approx(0.0)
-    assert widget._distance_spin.value() == pytest.approx(10.0)
+    # The distance spinbox displays 2 decimal places (metres), so compare
+    # with a tolerance that absorbs its own rounding.
+    assert widget._distance_spin.value() == pytest.approx(10.0 * _FT_TO_M, abs=0.005)
     assert widget._stimp_spin.value() == pytest.approx(10.0)
     assert widget._slope_spin.value() == pytest.approx(1.0)
 
@@ -71,8 +77,8 @@ def test_spin_ranges_match_documented_bounds(widget: PuttingGreenWidget) -> None
     assert widget._speed_spin.maximum() == pytest.approx(8.0)
     assert widget._aim_spin.minimum() == pytest.approx(-45.0)
     assert widget._aim_spin.maximum() == pytest.approx(45.0)
-    assert widget._distance_spin.minimum() == pytest.approx(1.0)
-    assert widget._distance_spin.maximum() == pytest.approx(30.0)
+    assert widget._distance_spin.minimum() == pytest.approx(1.0 * _FT_TO_M, abs=0.005)
+    assert widget._distance_spin.maximum() == pytest.approx(30.0 * _FT_TO_M, abs=0.005)
     assert widget._stimp_spin.minimum() == pytest.approx(6.0)
     assert widget._stimp_spin.maximum() == pytest.approx(14.0)
     assert widget._slope_spin.minimum() == pytest.approx(0.0)
@@ -110,14 +116,20 @@ def test_3d_view_initialized_when_pyqtgraph_present(
 
 @pytest.mark.parametrize(
     "speed, dist",
-    [(1.5, 5.0), (2.5, 15.0), (4.0, 30.0), (0.5, 1.0), (8.0, 30.0)],
+    [
+        (1.5, 5.0 * _FT_TO_M),
+        (2.5, 15.0 * _FT_TO_M),
+        (4.0, 30.0 * _FT_TO_M),
+        (0.5, 1.0 * _FT_TO_M),
+        (8.0, 30.0 * _FT_TO_M),
+    ],
 )
 def test_apply_preset_updates_speed_and_distance(
     widget: PuttingGreenWidget, speed: float, dist: float
 ) -> None:
     widget._apply_preset(speed, dist)
     assert widget._speed_spin.value() == pytest.approx(speed)
-    assert widget._distance_spin.value() == pytest.approx(dist)
+    assert widget._distance_spin.value() == pytest.approx(dist, abs=0.005)
 
 
 def test_apply_preset_does_not_touch_aim_or_green(
@@ -127,7 +139,7 @@ def test_apply_preset_does_not_touch_aim_or_green(
     widget._stimp_spin.setValue(11.0)
     widget._slope_spin.setValue(2.5)
 
-    widget._apply_preset(2.0, 7.0)
+    widget._apply_preset(2.0, 7.0 * _FT_TO_M)
 
     assert widget._aim_spin.value() == pytest.approx(5.0)
     assert widget._stimp_spin.value() == pytest.approx(11.0)
@@ -149,7 +161,7 @@ def test_apply_preset_clamped_to_spin_bounds(widget: PuttingGreenWidget) -> None
 
 def test_run_simulation_reports_real_metrics(widget: PuttingGreenWidget) -> None:
     widget._speed_spin.setValue(2.5)
-    widget._distance_spin.setValue(12.0)
+    widget._distance_spin.setValue(12.0 * _FT_TO_M)
     widget._run_simulation()
     text = widget._results_text.toPlainText()
     assert "Putting Simulation" in text
@@ -170,7 +182,7 @@ def test_run_simulation_stores_scene_with_trajectory(
 def test_flat_straight_putt_reports_holed(widget: PuttingGreenWidget) -> None:
     widget._speed_spin.setValue(2.2)
     widget._aim_spin.setValue(0.0)
-    widget._distance_spin.setValue(12.0)
+    widget._distance_spin.setValue(12.0 * _FT_TO_M)
     widget._slope_spin.setValue(0.0)
     widget._run_simulation()
     assert widget._scene.holed is True
@@ -180,7 +192,7 @@ def test_flat_straight_putt_reports_holed(widget: PuttingGreenWidget) -> None:
 def test_cross_slope_straight_putt_breaks_offline(widget: PuttingGreenWidget) -> None:
     widget._speed_spin.setValue(2.6)
     widget._aim_spin.setValue(0.0)
-    widget._distance_spin.setValue(15.0)
+    widget._distance_spin.setValue(15.0 * _FT_TO_M)
     widget._slope_spin.setValue(3.0)
     widget._run_simulation()
     assert widget._scene.holed is False
@@ -191,7 +203,11 @@ def test_cross_slope_straight_putt_breaks_offline(widget: PuttingGreenWidget) ->
 def test_run_simulation_does_not_error_for_each_preset(
     widget: PuttingGreenWidget,
 ) -> None:
-    for s, d in [(1.5, 5.0), (2.5, 15.0), (4.0, 30.0)]:
+    for s, d in [
+        (1.5, 5.0 * _FT_TO_M),
+        (2.5, 15.0 * _FT_TO_M),
+        (4.0, 30.0 * _FT_TO_M),
+    ]:
         widget._apply_preset(s, d)
         widget._run_simulation()
         assert "error" not in widget._results_text.toPlainText().lower()

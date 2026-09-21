@@ -48,6 +48,9 @@ from src.tools.putting_green_gui._scene_builder import (
 logger = logging.getLogger(__name__)
 
 _M_TO_FT = 3.280839895
+_FT_TO_M = 1.0 / _M_TO_FT
+_M_TO_CM = 100.0
+_MS_TO_MPH = 2.236936
 _PANEL_STYLE = """
 QWidget#puttControls { background-color: #1b2530; }
 QLabel { color: #d7e2ec; }
@@ -118,7 +121,9 @@ class PuttingGreenWidget(QWidget):
         putt_form.addRow("Putter Speed:", self._speed_spin)
         self._aim_spin = self._make_spin(-45.0, 45.0, 0.0, "°")
         putt_form.addRow("Aim Angle:", self._aim_spin)
-        self._distance_spin = self._make_spin(1.0, 30.0, 10.0, " ft")
+        self._distance_spin = self._make_spin(
+            1.0 * _FT_TO_M, 30.0 * _FT_TO_M, 10.0 * _FT_TO_M, " m", decimals=2
+        )
         putt_form.addRow("Cup Distance:", self._distance_spin)
         left_layout.addWidget(putt_group)
 
@@ -132,14 +137,14 @@ class PuttingGreenWidget(QWidget):
 
         preset_group = QGroupBox("Presets")
         preset_layout = QHBoxLayout(preset_group)
-        for name, speed, dist in (
+        for name, speed, dist_ft in (
             ("Short", 1.5, 5.0),
             ("Medium", 2.5, 15.0),
             ("Long", 4.0, 30.0),
         ):
             btn = QPushButton(name)
             btn.clicked.connect(
-                lambda _checked, s=speed, d=dist: self._apply_preset(s, d)
+                lambda _checked, s=speed, d=dist_ft * _FT_TO_M: self._apply_preset(s, d)
             )
             preset_layout.addWidget(btn)
         left_layout.addWidget(preset_group)
@@ -254,7 +259,7 @@ class PuttingGreenWidget(QWidget):
         return PuttConfig(
             putter_speed_ms=self._speed_spin.value(),
             aim_deg=self._aim_spin.value(),
-            cup_distance_ft=self._distance_spin.value(),
+            cup_distance_m=self._distance_spin.value(),
             stimp=self._stimp_spin.value(),
             slope_deg=self._slope_spin.value(),
         )
@@ -338,6 +343,9 @@ def _format_metrics(scene: PuttScene) -> str:
         if scene.holed
         else f"Result:        Missed by {dist_cm:.1f} cm"
     )
+    # Primary unit is always SI; the secondary parenthetical is always
+    # imperial, so no two lines in this pane mix systems inconsistently
+    # (issue #8886).
     return (
         f"Putting Simulation - {outcome}\n"
         f"{'=' * 44}\n"
@@ -345,8 +353,10 @@ def _format_metrics(scene: PuttScene) -> str:
         f"Total roll:    {scene.total_roll_m:.2f} m "
         f"({scene.total_roll_m * _M_TO_FT:.1f} ft)\n"
         f"Roll time:     {scene.duration_s:.2f} s\n"
-        f"Peak break:    {scene.peak_break_m * 100.0:.1f} cm\n"
-        f"Launch speed:  {scene.launch_speed_ms:.2f} m/s\n"
+        f"Peak break:    {scene.peak_break_m * _M_TO_CM:.1f} cm "
+        f"({scene.peak_break_m * _M_TO_FT * 12.0:.2f} in)\n"
+        f"Launch speed:  {scene.launch_speed_ms:.2f} m/s "
+        f"({scene.launch_speed_ms * _MS_TO_MPH:.1f} mph)\n"
         f"Roll model:    {scene.roll_model}\n"
         f"Track colour:  amber = skidding, green = pure roll, grey = stopped\n"
     )
