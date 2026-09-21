@@ -40,6 +40,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.anthropometry import (
     DE_LEVA_MALE,
+    de_leva_table_sha256,
     inertia_about_axis,
     segment_parameters,
 )
@@ -492,6 +493,7 @@ def build_upper_body(
             "grip_roll_deg": grip_roll_deg,
             "grip_rotation_deg": {k: list(v) for k, v in grip_rotation.items()},
             "source": "de Leva 1996 male table",
+            "de_leva_table_sha256": de_leva_table_sha256(),
         },
         "coordinate_ranges_deg": {k: list(v) for k, v in COORDINATE_RANGES_DEG.items()},
         "address_seed_deg": dict(ADDRESS_SEED_DEG),

@@ -37,6 +37,10 @@ class SegmentLengths:
     forearm: float = 0.27
     hand: float = 0.10
     club_shaft: float = 1.10
+    pelvis_to_hip: float = 0.10
+    thigh: float = 0.44
+    shin: float = 0.42
+    foot: float = 0.18
 
 
 @dataclass(frozen=True)
@@ -72,6 +76,8 @@ def _euler_xyz(x: float, y: float, z: float) -> np.ndarray:
 def forward_kinematics(
     angles: Mapping[str, float],
     lengths: SegmentLengths | None = None,
+    *,
+    include_lower_body: bool = False,
 ) -> SkeletonPose:
     """Compute landmark positions for a coarse golfer skeleton.
 
@@ -85,6 +91,9 @@ def forward_kinematics(
         Missing fields default to 0.
     lengths
         Segment lengths, default :class:`SegmentLengths`.
+    include_lower_body
+        Whether to compute lower-body landmarks (hips, knees, ankles, feet).
+        Defaults to False to preserve 13-landmark upper-body kinematics compatibility.
 
     Returns
     -------
@@ -115,62 +124,75 @@ def forward_kinematics(
     R_hip = _euler_xyz(
         a("HipStartPositionX"), a("HipStartPositionY"), a("HipStartPositionZ")
     )
-    # Spine joins pelvis to torso. Spine X = forward tilt, Y = side-bend.
-    R_spine = R_hip @ _rx(a("SpineStartPositionX")) @ _ry(a("SpineStartPositionY"))
+    points = _compute_upper_body(pelvis, R_hip, a, lengths)
+    if include_lower_body:
+        points.update(_compute_lower_body(pelvis, R_hip, a, lengths))
+    return SkeletonPose(points=points)
+
+
+def _compute_upper_body(
+    pelvis: np.ndarray,
+    R_hip: np.ndarray,
+    a: object,
+    lengths: SegmentLengths,
+) -> dict[str, np.ndarray]:
+    getter = a if callable(a) else (lambda _: 0.0)
+    R_spine = (
+        R_hip @ _rx(getter("SpineStartPositionX")) @ _ry(getter("SpineStartPositionY"))
+    )
     spine_top = pelvis + R_spine @ np.array([0, 0, lengths.pelvis_to_spine])
 
-    # Torso = axial rotation (Z) about spine.
-    R_torso = R_spine @ _rz(a("TorsoStartPosition"))
+    R_torso = R_spine @ _rz(getter("TorsoStartPosition"))
     torso_top = spine_top + R_torso @ np.array([0, 0, lengths.spine_to_torso])
 
-    # Shoulders located laterally from torso top.
     R_lscap = R_torso @ _euler_xyz(
-        a("LScapStartPositionX"), a("LScapStartPositionY"), 0.0
+        getter("LScapStartPositionX"), getter("LScapStartPositionY"), 0.0
     )
     R_rscap = R_torso @ _euler_xyz(
-        a("RScapStartPositionX"), a("RScapStartPositionY"), 0.0
+        getter("RScapStartPositionX"), getter("RScapStartPositionY"), 0.0
     )
     l_shoulder = torso_top + R_lscap @ np.array([0, lengths.torso_to_shoulder, 0])
     r_shoulder = torso_top + R_rscap @ np.array([0, -lengths.torso_to_shoulder, 0])
 
     R_ls = R_lscap @ _euler_xyz(
-        a("LSStartPositionX"), a("LSStartPositionY"), a("LSStartPositionZ")
+        getter("LSStartPositionX"),
+        getter("LSStartPositionY"),
+        getter("LSStartPositionZ"),
     )
     R_rs = R_rscap @ _euler_xyz(
-        a("RSStartPositionX"), a("RSStartPositionY"), a("RSStartPositionZ")
+        getter("RSStartPositionX"),
+        getter("RSStartPositionY"),
+        getter("RSStartPositionZ"),
     )
 
-    # Upper arms point along the shoulder's local +X by default (T-pose
-    # extension). With all angles zero this reproduces a T-pose.
     l_elbow = l_shoulder + R_ls @ np.array([0, lengths.upper_arm, 0])
     r_elbow = r_shoulder + R_rs @ np.array([0, -lengths.upper_arm, 0])
 
-    R_le = R_ls @ _rx(a("LEStartPosition"))
-    R_re = R_rs @ _rx(a("REStartPosition"))
+    R_le = R_ls @ _rx(getter("LEStartPosition"))
+    R_re = R_rs @ _rx(getter("REStartPosition"))
     l_wrist = l_elbow + R_le @ np.array([0, lengths.forearm, 0])
     r_wrist = r_elbow + R_re @ np.array([0, -lengths.forearm, 0])
 
     R_lw = (
         R_le
-        @ _ry(a("LFStartPosition"))
-        @ _euler_xyz(a("LWStartPositionX"), a("LWStartPositionY"), 0.0)
+        @ _ry(getter("LFStartPosition"))
+        @ _euler_xyz(getter("LWStartPositionX"), getter("LWStartPositionY"), 0.0)
     )
     R_rw = (
         R_re
-        @ _ry(a("RFStartPosition"))
-        @ _euler_xyz(a("RWStartPositionX"), a("RWStartPositionY"), 0.0)
+        @ _ry(getter("RFStartPosition"))
+        @ _euler_xyz(getter("RWStartPositionX"), getter("RWStartPositionY"), 0.0)
     )
     l_hand = l_wrist + R_lw @ np.array([0, lengths.hand, 0])
     r_hand = r_wrist + R_rw @ np.array([0, -lengths.hand, 0])
 
     butt = 0.5 * (l_hand + r_hand)
-    # Club extends from butt along the average lead-hand axis.
     club_dir = R_lw @ np.array([1.0, 0.0, 0.0])
     norm = np.linalg.norm(club_dir)
     club_dir = club_dir / norm if norm > 1e-9 else np.array([1.0, 0.0, 0.0])
     clubhead = butt + lengths.club_shaft * club_dir
 
-    points = {
+    return {
         "pelvis": pelvis,
         "spine_top": spine_top,
         "torso_top": torso_top,
@@ -185,4 +207,51 @@ def forward_kinematics(
         "butt": butt,
         "clubhead": clubhead,
     }
-    return SkeletonPose(points=points)
+
+
+def _compute_lower_body(
+    pelvis: np.ndarray,
+    R_hip: np.ndarray,
+    a: object,
+    lengths: SegmentLengths,
+) -> dict[str, np.ndarray]:
+    getter = a if callable(a) else (lambda _: 0.0)
+    l_hip = pelvis + R_hip @ np.array([0.0, lengths.pelvis_to_hip, 0.0])
+    r_hip = pelvis + R_hip @ np.array([0.0, -lengths.pelvis_to_hip, 0.0])
+
+    R_lhip = R_hip @ _euler_xyz(
+        getter("LHipStartPositionX"),
+        getter("LHipStartPositionY"),
+        getter("LHipStartPositionZ"),
+    )
+    R_rhip = R_hip @ _euler_xyz(
+        getter("RHipStartPositionX"),
+        getter("RHipStartPositionY"),
+        getter("RHipStartPositionZ"),
+    )
+
+    l_knee = l_hip + R_lhip @ np.array([0.0, 0.0, -lengths.thigh])
+    r_knee = r_hip + R_rhip @ np.array([0.0, 0.0, -lengths.thigh])
+
+    R_lknee = R_lhip @ _rx(getter("LKneeStartPosition"))
+    R_rknee = R_rhip @ _rx(getter("RKneeStartPosition"))
+
+    l_ankle = l_knee + R_lknee @ np.array([0.0, 0.0, -lengths.shin])
+    r_ankle = r_knee + R_rknee @ np.array([0.0, 0.0, -lengths.shin])
+
+    R_lankle = R_lknee @ _rx(getter("LAnkleStartPosition"))
+    R_rankle = R_rknee @ _rx(getter("RAnkleStartPosition"))
+
+    l_foot = l_ankle + R_lankle @ np.array([lengths.foot, 0.0, 0.0])
+    r_foot = r_ankle + R_rankle @ np.array([lengths.foot, 0.0, 0.0])
+
+    return {
+        "l_hip": l_hip,
+        "r_hip": r_hip,
+        "l_knee": l_knee,
+        "r_knee": r_knee,
+        "l_ankle": l_ankle,
+        "r_ankle": r_ankle,
+        "l_foot": l_foot,
+        "r_foot": r_foot,
+    }
