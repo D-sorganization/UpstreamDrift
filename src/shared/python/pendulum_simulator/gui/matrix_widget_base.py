@@ -12,6 +12,7 @@ import logging
 from abc import abstractmethod
 from typing import Any
 
+import numpy as np
 from PyQt6.QtCore import QRectF, Qt
 from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPen
 from PyQt6.QtWidgets import QWidget
@@ -57,6 +58,10 @@ class MatrixWidgetBase(QWidget):
         self.setMinimumSize(200, 300)
         self._result: Any = None
         self._current_idx: int = 0
+        # Per-frame dynamics snapshot; paintEvent only reads it (#8929)
+        self._frame_data: dict[str, Any] | None = None
+        self._coriolis_drawable: bool | None = None
+        self._font_cache: dict[tuple[str, int, bool], QFont] = {}
         logger.debug("%s initialized", self.__class__.__name__)
 
     def set_simulation(self, result: Any) -> None:
@@ -74,6 +79,8 @@ class MatrixWidgetBase(QWidget):
             )
         self._result = result
         self._current_idx = 0
+        self._coriolis_drawable = None
+        self._frame_data = self._compute_frame_data(0)
         logger.debug(
             "%s: simulation set with %d steps",
             self.__class__.__name__,
@@ -88,18 +95,24 @@ class MatrixWidgetBase(QWidget):
           - idx >= 0
         Post:
           - _current_idx is clamped to [0, n_steps-1]
+          - _frame_data holds the dynamics snapshot for _current_idx
         """
         if not (idx is not None):
             raise ValueError("idx must be provided")
         if self._result is None:
             return
-        self._current_idx = max(0, min(idx, self._result.n_steps - 1))
+        idx = max(0, min(idx, self._result.n_steps - 1))
+        if idx == self._current_idx and self._frame_data is not None:
+            return  # unchanged frame: nothing to recompute or repaint
+        self._current_idx = idx
+        self._frame_data = self._compute_frame_data(idx)
         self.update()
 
     def clear(self) -> None:
         """Clear the displayed simulation."""
         self._result = None
         self._current_idx = 0
+        self._frame_data = None
         logger.debug("%s: simulation cleared", self.__class__.__name__)
         self.update()
 
@@ -113,14 +126,14 @@ class MatrixWidgetBase(QWidget):
 
         if self._result is None:
             painter.setPen(self.COLOR_LABEL)
-            painter.setFont(QFont("Sans", 11))
+            painter.setFont(self._font("Sans", 11))
             painter.drawText(
                 self.rect(), Qt.AlignmentFlag.AlignCenter, "No simulation loaded"
             )
             painter.end()
             return
 
-        mc = self._result.mass_matrix_at(self._current_idx)
+        mc = self._current_frame_data()["mass"]
         y_cursor = 10
 
         y_cursor = self._draw_section_title(painter, "Mass Matrix M(q)", y_cursor)
@@ -139,6 +152,68 @@ class MatrixWidgetBase(QWidget):
         y_cursor = self._draw_energy(painter, y_cursor)
 
         painter.end()
+
+    # ======================================================================
+    # Per-frame dynamics snapshot (#8929)
+    # ======================================================================
+
+    def _compute_frame_data(self, idx: int) -> dict[str, Any]:
+        """Evaluate every dynamics quantity the panel shows for frame *idx*.
+
+        Called once per frame change so paintEvent never touches the model.
+        Subclasses extend the returned dict with model-specific entries.
+
+        Pre:
+          - _result is not None
+          - 0 <= idx < n_steps
+        """
+        if not (self._result is not None):
+            raise ValueError("DbC Blocked: Precondition failed.")
+        result = self._result
+        coriolis = None
+        if self._coriolis_drawable is not False:
+            try:
+                coriolis = np.asarray(result.coriolis_at(idx), dtype=float)
+            except (AttributeError, TypeError, ValueError):
+                coriolis = None
+            # Only a per-joint vector can be listed; an (n, n) Coriolis matrix
+            # (golfer model) was never drawable, so stop evaluating it.
+            self._coriolis_drawable = coriolis is not None and coriolis.ndim == 1
+            if not self._coriolis_drawable:
+                coriolis = None
+        return {
+            "idx": idx,
+            "mass": result.mass_matrix_at(idx),
+            "tau": result.torques_at(idx),
+            "gravity": result.gravity_at(idx),
+            "coriolis": coriolis,
+            "energy": result.energy_at(idx),
+        }
+
+    def _current_frame_data(self) -> dict[str, Any]:
+        """Return the snapshot for ``_current_idx``, refreshing it if stale.
+
+        Pre:
+          - _result is not None
+        """
+        if not (self._result is not None):
+            raise ValueError("DbC Blocked: Precondition failed.")
+        data = self._frame_data
+        if data is None or data["idx"] != self._current_idx:
+            data = self._compute_frame_data(self._current_idx)
+            self._frame_data = data
+        return data
+
+    def _font(self, family: str, size: int, bold: bool = False) -> QFont:
+        """Return a cached QFont so paintEvent does not construct fonts."""
+        key = (family, size, bold)
+        font = self._font_cache.get(key)
+        if font is None:
+            font = (
+                QFont(family, size, QFont.Weight.Bold) if bold else QFont(family, size)
+            )
+            self._font_cache[key] = font
+        return font
 
     # ======================================================================
     # Abstract methods (subclass-specific)
@@ -215,8 +290,7 @@ class MatrixWidgetBase(QWidget):
         if not (painter is not None):
             raise ValueError("painter must be provided")
         painter.setPen(self.COLOR_TEXT)
-        font = QFont("Sans", 11, QFont.Weight.Bold)
-        painter.setFont(font)
+        painter.setFont(self._font("Sans", 11, bold=True))
         painter.drawText(15, y + 16, title)
         # underline
         painter.setPen(QPen(self.COLOR_BRACKET, 1))
@@ -277,21 +351,19 @@ class MatrixWidgetBase(QWidget):
 
             # Label
             painter.setPen(self.COLOR_LABEL)
-            font_label = QFont("Monospace", 8)
-            painter.setFont(font_label)
+            painter.setFont(self._font("Monospace", 8))
             label_y = cy + int(cell_h * 0.35)
             painter.drawText(cx + 5, label_y, label)
 
             # Value
             painter.setPen(self.COLOR_TEXT)
-            font_val = QFont("Monospace", 10 if rows > 2 else 14, QFont.Weight.Bold)
-            painter.setFont(font_val)
+            painter.setFont(self._font("Monospace", 10 if rows > 2 else 14, bold=True))
             value_y = cy + int(cell_h * 0.8)
             painter.drawText(cx + 5, value_y, f"{value:.3f}")
 
         # Legend
         ly = y + rows * cell_h + (rows - 1) * gap + 16
-        painter.setFont(QFont("Sans", 9))
+        painter.setFont(self._font("Sans", 9))
 
         painter.setPen(self.COLOR_DIAGONAL)
         painter.drawText(margin_x, ly, "\u25a0 Diagonal (self-coupling)")
@@ -313,11 +385,11 @@ class MatrixWidgetBase(QWidget):
         """
         if not (self._result is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        idx = self._current_idx
-        tau = self._result.torques_at(idx)
-        G = self._result.gravity_at(idx)
+        data = self._current_frame_data()
+        tau = data["tau"]
+        G = data["gravity"]
 
-        painter.setFont(QFont("Monospace", 9 if len(tau) > 2 else 10))
+        painter.setFont(self._font("Monospace", 9 if len(tau) > 2 else 10))
         lines = []
 
         # Tau lines (use joint names if available, else generic indices)
@@ -331,14 +403,11 @@ class MatrixWidgetBase(QWidget):
             label = col_labels[i] if i < len(col_labels) else f"joint_{i + 1}"
             lines.append((f"G_{label:>5s} = {g:+8.2f} N*m", QColor(130, 200, 130)))
 
-        # Try to add Coriolis if available
-        try:
-            C = self._result.coriolis_at(idx)
-            for i, c in enumerate(C):
-                label = col_labels[i] if i < len(col_labels) else f"joint_{i + 1}"
-                lines.append((f"C_{label:>5s} = {c:+8.2f} N*m", QColor(180, 130, 200)))
-        except (AttributeError, TypeError):
-            pass
+        # Coriolis lines (None when the model has no drawable vector)
+        C = data["coriolis"]
+        for i, c in enumerate(C if C is not None else ()):
+            label = col_labels[i] if i < len(col_labels) else f"joint_{i + 1}"
+            lines.append((f"C_{label:>5s} = {c:+8.2f} N*m", QColor(180, 130, 200)))
 
         for text, color in lines:
             painter.setPen(color)
@@ -359,8 +428,8 @@ class MatrixWidgetBase(QWidget):
         """
         if not (self._result is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        e = self._result.energy_at(self._current_idx)
-        painter.setFont(QFont("Monospace", 10))
+        e = self._current_frame_data()["energy"]
+        painter.setFont(self._font("Monospace", 10))
         lines = [
             (f"Kinetic    = {e['kinetic']:+8.2f} J", QColor(230, 160, 80)),
             (f"Potential  = {e['potential']:+8.2f} J", QColor(80, 180, 230)),

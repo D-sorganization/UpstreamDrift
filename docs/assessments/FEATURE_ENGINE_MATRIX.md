@@ -1,10 +1,12 @@
 # Feature × Engine Support Matrix
 
+> [!WARNING] > **SUPERSEDED (2026-09-17)**: The claims and engine readiness statuses in this document are superseded by the Matched Swing Program single source of truth. See [`docs/development/matched_swing_program/README.md`](../development/matched_swing_program/README.md) for authoritative physical gates, engine qualification status, and run evidence.
+
 ## UpstreamDrift - February 2026
 
 **Last Updated:** 2026-02-01
 **Source:** Comprehensive Codebase Analysis
-**Status:** All Engines Fully Implemented
+**Status:** All Engines Fully Implemented (SUPERSEDED by matched_swing_program)
 
 ---
 

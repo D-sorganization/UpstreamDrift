@@ -190,6 +190,11 @@ export interface ActuatorUpdateRequest {
   target_velocities?: number[] | null;
 }
 
+export interface AimContextSchema {
+  source_to_target_rotation?: number[][];
+  revision: number;
+}
+
 /**
  * Caller-supplied lineage and identity assertions.
  */
@@ -301,6 +306,17 @@ export interface AppearanceSettings {
   theme_id: string;
   /** Root font scale multiplier (0.5–2.0). */
   font_scale: number;
+}
+
+export interface ArmShotRequest {
+  prepared_shot_id: string;
+  context_revision: number;
+}
+
+export interface ArmShotResponse {
+  prepared_shot_id: string;
+  arm_token: string;
+  state: string;
 }
 
 /**
@@ -569,6 +585,22 @@ export interface CameraPresetResponse {
   target: number[];
   /** Camera up vector [x, y, z] */
   up: number[];
+}
+
+export interface CancelShotRequest {
+  prepared_shot_id: string;
+}
+
+/**
+ * Request model for counterfactual fork rollout on candidate session.
+ */
+export interface CandidateCounterfactualRequest {
+  /** Frame index to initiate intervention fork */
+  fork_frame_idx: number;
+  /** Counterfactual intervention strategy */
+  strategy: string;
+  /** Number of frames to roll forward (defaults to remainder of session) */
+  duration_frames?: number | null;
 }
 
 /**
@@ -846,6 +878,12 @@ export interface CreateEnvironmentRequest {
   slope_direction_deg: number;
 }
 
+export interface CreateSessionRequest {
+  destination_id: string;
+  session_id: string;
+  config?: Record<string, unknown> | null;
+}
+
 /**
  * Perturbation study configuration. All fields match ``CrossEngineSimConfig`` from the service layer.
  */
@@ -1101,6 +1139,22 @@ export interface DatasetUnavailableStateV1 {
   code: "root_not_authorized" | "authority_unavailable" | "repository_mismatch" | "commit_mismatch" | "manifest_mismatch" | "content_mismatch" | "row_count_mismatch" | "backing_manifest_mismatch" | "dependency_unavailable" | "operation_unavailable" | "internal_execution_error";
   message: string;
   retryable: boolean;
+}
+
+export interface DestinationInfo {
+  destination_id: string;
+  name: string;
+  description: string;
+  is_connected: boolean;
+  capabilities: Record<string, unknown>;
+}
+
+export interface DestinationsResponse {
+  destinations: DestinationInfo[];
+}
+
+export interface DisarmShotRequest {
+  prepared_shot_id: string;
 }
 
 /**
@@ -2193,6 +2247,19 @@ export interface PooledAssociationV1 {
   improvement_probability?: number | null;
 }
 
+export interface PrepareShotRequest {
+  shot: ShotEnvelopeSchema;
+  context_revision: number;
+}
+
+export interface PreparedShotResponse {
+  prepared_shot_id: string;
+  shot_id: string;
+  context_revision: number;
+  is_armed: boolean;
+  created_at_utc: string;
+}
+
 /**
  * Available golfer presets.
  */
@@ -2365,6 +2432,23 @@ export interface RefreshTokenResponse {
   expires_in: number;
 }
 
+export interface ReplayActionRequest {
+  action: "play" | "pause" | "stop" | "seek" | "rate";
+  target_time_s?: number | null;
+  playback_rate?: number | null;
+}
+
+export interface ReplayStatusResponse {
+  playback_state: string;
+  current_time_s: number;
+  playback_rate: number;
+}
+
+export interface ResolveUncertainRequest {
+  operator_evidence: string;
+  confirmed: boolean;
+}
+
 /**
  * Request to create or update a custom theme.
  */
@@ -2427,12 +2511,42 @@ export interface SessionIdentityV2 {
   evidence?: string | null;
 }
 
+export interface SessionStatusResponse {
+  session_id: string;
+  destination_id: string;
+  state: string;
+  capabilities: Record<string, unknown>;
+}
+
 /**
  * Request to change the active theme.
  */
 export interface SetActiveThemeRequest {
   /** Theme name to activate */
   name: string;
+}
+
+export interface ShotEnvelopeSchema {
+  schema_version: number;
+  shot_id: string;
+  session_id: string;
+  source_kind: string;
+  ball_velocity_m_s: number[];
+  ball_angular_velocity_rad_s: number[];
+  aim_context: AimContextSchema;
+  qualification: ShotQualificationSchema;
+  created_at_utc: string;
+  model_run_id?: string | null;
+  trace_digest?: string | null;
+  impact_id?: string | null;
+  impact_time_s?: number | null;
+}
+
+export interface ShotQualificationSchema {
+  contact: string;
+  numerical: string;
+  scientific: string;
+  evidence_refs?: string[];
 }
 
 /**
@@ -2616,6 +2730,21 @@ export interface StrokesGainedUncertaintyV1 {
   benchmark_method: string;
   benchmark_standard_error_mean?: number | null;
   assumptions: string[];
+}
+
+export interface SubmissionReceiptResponse {
+  shot_id: string;
+  session_id: string;
+  state: string;
+  destination_id: string;
+  attempt_id: string;
+  timestamp_utc: string;
+  detail: string;
+}
+
+export interface SubmitShotRequest {
+  prepared_shot_id: string;
+  arm_token: string;
 }
 
 /**

@@ -34,12 +34,13 @@ separated from current guidance.
 - [`api/`](api/README.md) - 7 pages
 - [`architecture/`](architecture/) - 22 pages
 - [`audits/`](audits/) - 7 pages
+- [`ci-failures/`](ci-failures/10255-2026-09-16.md) - 1 page
 - [`code-quality/`](code-quality/function-design-review.md) - 1 page
 - [`codemap/`](codemap/README.md) - 3 pages
 - [`conformance/`](conformance/) - no Markdown pages
 - [`conventions/`](conventions/) - 3 pages
 - [`deployment/`](deployment/interim_setup.md) - 1 page
-- [`development/`](development/README.md) - 146 pages
+- [`development/`](development/README.md) - 161 pages
 - [`engineering/`](engineering/) - 2 pages
 - [`engines/`](engines/README.md) - 15 pages
 - [`estimation/`](estimation/) - 2 pages
@@ -79,7 +80,7 @@ separated from current guidance.
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
 - [`motion_capture/`](motion_capture/) - 21 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
-- [`plans/`](plans/README.md) - 17 pages
+- [`plans/`](plans/README.md) - 44 pages
 - [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
 - [`research/`](research/) - 33 pages
 - [`sg_optimizer/`](sg_optimizer/README.md) - 3 pages
@@ -153,6 +154,7 @@ repository, which made them effectively unreachable.
 | `audit_reports/`        | @quality-team         | archived  | Audit outputs and review evidence from repository-wide inspections.                                                                 |
 | `audits/`               | @quality-team         | stable    | Dated audit records, including the current adversarial and hardening reviews.                                                       |
 | `bunkershot3d/`         | @physics-team         | draft     | Granular bunker-shot backend comparison notes (Project Chrono, LIGGGHTS, MuJoCo MPM).                                               |
+| `ci-failures/`          | @quality-team         | stable    | CI failure reports and evidence for tracked regressions, blockers, and qualification-gate outcomes.                                 |
 | `code-quality/`         | @quality-team         | stable    | Coding standards, quality gates, and maintainability guidance.                                                                      |
 | `codemap/`              | @docs-team            | stable    | Code-map indexer (chat + MCP) integration notes, agent setup, and MCP wiring guidance.                                              |
 | `competitive_analysis/` | @product-team         | draft     | Market and ecosystem comparisons used for planning context.                                                                         |

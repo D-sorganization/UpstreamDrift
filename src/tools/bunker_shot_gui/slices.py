@@ -1011,7 +1011,9 @@ def _vector(value: NDArray[np.float64], name: str) -> NDArray[np.float64]:
 def _unit(value: NDArray[np.float64], name: str) -> NDArray[np.float64]:
     """A finite unit 3-vector."""
     array = np.asarray(_vector(value, name), dtype=np.float64)
-    norm = float(np.linalg.norm(array))
+    norm = float(
+        math.sqrt(array.dot(array))
+    )  # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
     if norm <= _TOL:
         raise ValueError(f"{name} must have a direction, got {value!r}")
     unit = array / norm

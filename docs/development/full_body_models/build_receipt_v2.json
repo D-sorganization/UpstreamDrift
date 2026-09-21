@@ -1,0 +1,68 @@
+{
+  "spec_sha256": "4f7ba8250a152c1ce5db86abf33e66b77510bd4c7c58c02f7890a86a97dd355a",
+  "spec_file_sha256": "2a048865f53868adf1f8d62272d959ba30f2ba63990d3df627e76a5306f6e8d9",
+  "inputs": {
+    "docs\\development\\simscape_tour_matching\\native_evidence\\native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+    "src\\engines\\physics_engines\\opensim\\models\\golf_humanoid.osim": "344e8a86bd155e90d0882db4300c963b2665fe087b950245555fc38dc33b5ad7",
+    "docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+    "docs\\development\\opensim_tour_matching\\evidence\\os3_unlocked_stride20\\receipt.json": "300f9079623508df2b3c2fdb113cb748bdb91e68f0d5595ca06fbbc41b96865d",
+    "docs\\development\\full_body_models\\build_full_body_spec.py": "1a45770c1a4a65d30a34a27b385c2821e37ca2d7a4d182e7d44f83bf4e08f405"
+  },
+  "native_candidate_sha256": "a9a0fa8eb20aa1b1a4e8a4c885cc13d2d1cfe750755357eee0de25354373ee56",
+  "coordinates": 41,
+  "bodies": 24,
+  "joints": 23,
+  "pelvis_alignment": {
+    "hip_from_opensim_pelvis": [
+      [
+        0.6504727502650939, 0.6500414984938581, -0.39285016405549067,
+        0.04440847777714397
+      ],
+      [
+        -0.5852459365738377, 0.0992837638832309, -0.8047545762237035,
+        0.007635391482366478
+      ],
+      [
+        -0.4841202277186715, 0.7533848846804925, 0.4450155285476936,
+        0.032233315498015
+      ],
+      [0.0, 0.0, 0.0, 1.0]
+    ],
+    "rms_residual_m": 0.005773135234829789,
+    "native_offsets_hip_frame_m": {
+      "WaistLeft": [
+        0.0029718963859520706, -0.18606766425528395, 0.024527093055368196
+      ],
+      "WaistRight": [
+        -0.13297490211266402, 0.1308167975330139, 0.017993187017833003
+      ],
+      "WaistLBack": [
+        0.09712818513919727, -0.0503926396927078, -0.01504260737948378
+      ],
+      "WaistRBack": [
+        0.03284287775060125, 0.10562097870935211, -0.027450235081243404
+      ]
+    },
+    "opensim_offsets_pelvis_frame_m": {
+      "WaistLeft": [
+        0.08789186342118621, -0.05084095799261835, 0.16123780387356088
+      ],
+      "WaistRight": [
+        -0.17578591223033552, -0.11196977360637436, -0.036070303267806685
+      ],
+      "WaistLBack": [
+        0.08869683235187306, -0.009345597219538744, 0.007707206427589081
+      ],
+      "WaistRBack": [
+        -0.036076151528934584, -0.04348406700201485, -0.09584714651198689
+      ]
+    },
+    "note": "OS-3 offsets came from a 6.5 cm RMS unscaled fit; FB-4 recalibrates"
+  },
+  "simplifications": [
+    "patella bodies and patellofemoral coupler constraints dropped",
+    "walker knee reduced to a hinge about its primary axis; coupled spline translations ignored",
+    "OpenSim body inertia interpreted as about the mass centre in the body frame"
+  ],
+  "marker_attachments_with_offsets": 25
+}

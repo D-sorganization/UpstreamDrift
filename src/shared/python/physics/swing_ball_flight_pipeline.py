@@ -421,22 +421,10 @@ class SwingBallFlightPipeline:
 
     def _solve_impact(self, pre: PreImpactState) -> PostImpactState:
         """Delegate impact solving to ``ImpactSolverAPI`` (one layer)."""
-        if pre.impact_offset is not None:
-            return self._solver.solve_with_gear_effect(
-                timestamp=0.0,
-                clubhead_velocity=pre.clubhead_velocity,
-                clubhead_orientation=pre.clubhead_orientation,
-                impact_offset=pre.impact_offset,
-                ball_velocity=pre.ball_velocity,
-                clubhead_mass=pre.clubhead_mass,
-            )
-        return self._solver.solve_impact(
+        return self._solver.solve_pre_impact_state(
             timestamp=0.0,
-            clubhead_velocity=pre.clubhead_velocity,
-            clubhead_orientation=pre.clubhead_orientation,
-            ball_velocity=pre.ball_velocity,
-            ball_angular_velocity=pre.ball_angular_velocity,
-            clubhead_mass=pre.clubhead_mass,
+            pre_state=pre,
+            record=True,
         )
 
     def _run_flight_simulation(self, launch: LaunchConditions) -> list[TrajectoryPoint]:

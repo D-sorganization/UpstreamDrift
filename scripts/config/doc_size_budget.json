@@ -29,7 +29,7 @@
       "path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
       "owner": "@physics-team",
       "reason": "CRBA requalification context for issue #9153 temporarily exceeds the chapter budget; split this governed chapter only after the protected evidence release is merged.",
-      "expires_on": "2026-09-15"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md",
@@ -42,6 +42,48 @@
       "owner": "@physics-team",
       "reason": "Falsification matrix tracking model-tier and empirical completion gates for proximal distal energy transfer; staged for decomposition.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "AGENT_HANDOFF.md",
+      "owner": "@simulation-team",
+      "reason": "Active multi-agent continuation turnover document tracking forward dynamics optimization and gate audits.",
+      "expires_on": "2026-10-15"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/anthropometry/REVIEW.md",
+      "owner": "@simulation-team",
+      "reason": "Comprehensive anthropometry and posture review evidence document for AN-1 and ground support program; staged for section decomposition under epic #10162.",
+      "expires_on": "2026-10-15"
+    },
+    {
+      "path": "docs/development/full_body_models/HANDOFF.md",
+      "owner": "@simulation-team",
+      "reason": "Active multi-agent full-body program turnover document tracking Visuals, FB-4/5/6, and ground support lane reconciliation.",
+      "expires_on": "2026-10-15"
+    },
+    {
+      "path": "docs/development/DEVELOPMENT_LOG.md",
+      "owner": "@maintainers",
+      "reason": "Active repository development log tracking feature states across the project; pending topic decomposition.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/HANDOFF.md",
+      "owner": "@maintainers",
+      "reason": "Active development turnover document tracking across workstreams; pending topic decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/development/ORG01_CAPABILITY_BASELINE.md",
+      "owner": "@maintainers",
+      "reason": "Generated comprehensive 104-tile capability inventory and disposition table for ORG-01 (#10510).",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/development/feature_parity_matrix.md",
+      "owner": "@maintainers",
+      "reason": "Generated feature parity matrix table from feature_parity.json; pending topic decomposition.",
+      "expires_on": "2026-10-31"
     }
   ]
 }

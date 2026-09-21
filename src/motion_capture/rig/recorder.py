@@ -32,8 +32,6 @@ from .plan import CaptureMode, RigPlan
 
 logger = get_logger(__name__)
 
-# KSCATEGORY_VIDEO_CAMERA — the DirectShow "alternative name" suffix.
-_DSHOW_CATEGORY = "{65e8773d-8f56-11d0-a3b9-00a0c9223196}"
 STDERR_TAIL_CHARS = 600
 STREAMING_BYTES = 4096  # more than a container header: frames are flowing
 WARMUP_POLL_S = 0.25
@@ -82,19 +80,34 @@ class Recorder(Protocol):
         ...
 
 
+def require_pnp_instance_id(camera_instance_id: str) -> None:
+    """The rig addresses cameras by PnP instance id (``USB\\VID_...\\6&...``).
+
+    Never by a bare name or index: three identically named units must stay
+    unambiguous. Raises ``ValueError`` (contract) for anything else.
+    """
+    require(
+        "\\" in camera_instance_id, "expected a PnP instance id", camera_instance_id
+    )
+
+
 def dshow_device_ref(camera_instance_id: str) -> str:
     """DirectShow device path for a PnP camera instance id.
 
     ``USB\\VID_32E4&PID_5234&MI_00\\6&FADBF3B&0&0000`` becomes
     ``@device_pnp_\\\\?\\usb#vid_32e4&pid_5234&mi_00#6&fadbf3b&0&0000#{...}\\global``
-    — the inverse of :func:`.topology.parse_dshow_listing`. Addressing a camera
-    this way is what keeps three identically named units unambiguous.
+    — the inverse of :func:`.topology.parse_dshow_listing`. The mapping is the
+    shared camera layer's (Tools ``shared.python.camera``, ported from here and
+    pinned there, #10204); this entry point adds the rig's stricter precondition.
     """
-    require(
-        "\\" in camera_instance_id, "expected a PnP instance id", camera_instance_id
-    )
-    body = camera_instance_id.lower().replace("\\", "#")
-    return f"@device_pnp_\\\\?\\{body}#{_DSHOW_CATEGORY}\\global"
+    # Resolved on call, not at import: the shared package is a
+    # ``sidekick.lab.mocap`` consumer, which the root test process keeps
+    # unresolvable by design (tests/conftest.py caches UpstreamDrift's own
+    # Sidekick first); the launcher bootstrap serves it from the pinned tree.
+    from shared.python.camera import dshow_device_ref as shared_dshow_device_ref
+
+    require_pnp_instance_id(camera_instance_id)
+    return shared_dshow_device_ref(camera_instance_id)
 
 
 LIVE_PREVIEW_WIDTH = 480
