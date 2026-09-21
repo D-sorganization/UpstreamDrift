@@ -11,7 +11,8 @@ from src.shared.python.motion_matching.full_body_forward_dynamics import (
     Array,
     Controller,
     FullBodySimulator,
-    tracking_controller,
+    _tracking_controller_from_gains,
+    _tracking_gains,
 )
 
 REPLAY_STEPS = 50
@@ -109,14 +110,16 @@ def tracking_controller_mj_inverse(
     acceleration_feedforward: float = 1.0,
 ) -> Controller:
     """Computed-torque tracking using ``mj_inverse`` instead of the KKT path."""
-    return tracking_controller(
+    return _tracking_controller_from_gains(
         simulator,
         time_ref,
         q_ref,
-        omega_rad_s=omega_rad_s,
-        zeta=zeta,
-        balance=balance,
-        root_regulation=root_regulation,
+        _tracking_gains(
+            omega_rad_s,
+            zeta,
+            balance,
+            root_regulation,
+            inverse_fn=inverse_dynamics_mj_inverse,
+        ),
         acceleration_feedforward=acceleration_feedforward,
-        inverse_fn=inverse_dynamics_mj_inverse,
     )

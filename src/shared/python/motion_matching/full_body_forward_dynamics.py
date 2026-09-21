@@ -885,6 +885,7 @@ class ComputedTorqueGains:
     zeta: float = 1.0
     balance: tuple[float, float] | None = None
     root_regulation: tuple[float, float] | None = None
+    inverse_fn: InverseDynamicsFn | None = None
 
 
 class FullBodySimulator:
@@ -1282,8 +1283,6 @@ def _computed_torque(
     a_ref: Array,
     gains: ComputedTorqueGains,
     com_ref: Array | None = None,
-    *,
-    inverse_fn: InverseDynamicsFn | None = None,
 ) -> Array:
     act = simulator.actuated
     omega = np.broadcast_to(
@@ -1303,8 +1302,73 @@ def _computed_torque(
                 simulator, q, v, q_ref, v_ref, gains.root_regulation
             )[act]
         )
-    inv = inverse_fn or (lambda sim, q_i, v_i, w: sim.inverse_dynamics(q_i, v_i, w))
+    inv = gains.inverse_fn or (
+        lambda sim, q_i, v_i, w: sim.inverse_dynamics(q_i, v_i, w)
+    )
     return inv(simulator, q, v, wanted)
+
+
+def _tracking_gains(
+    omega_rad_s: float | Array,
+    zeta: float,
+    balance: tuple[float, float] | None,
+    root_regulation: tuple[float, float] | None,
+    *,
+    inverse_fn: InverseDynamicsFn | None = None,
+) -> ComputedTorqueGains:
+    _check_gains(omega_rad_s, zeta, balance)
+    _check_gains(1.0, 1.0, root_regulation)
+    return ComputedTorqueGains(
+        omega_rad_s=omega_rad_s,
+        zeta=zeta,
+        balance=balance,
+        root_regulation=root_regulation,
+        inverse_fn=inverse_fn,
+    )
+
+
+def _tracking_controller_from_gains(
+    simulator: FullBodySimulator,
+    time_ref: Sequence[float] | Array,
+    q_ref: Array,
+    gains: ComputedTorqueGains,
+    *,
+    acceleration_feedforward: float = 1.0,
+) -> Controller:
+    """Computed-torque tracking with pre-built gains."""
+    if not 0.0 <= acceleration_feedforward <= 1.0:
+        raise ValueError("acceleration_feedforward must lie in [0, 1]")
+    times = np.asarray(time_ref, dtype=float)
+    reference = np.asarray(q_ref, dtype=float)
+    if (
+        times.ndim != 1
+        or np.any(np.diff(times) <= 0)
+        or reference.shape != (times.size, simulator.nv)
+        or not np.isfinite(reference).all()
+    ):
+        raise ValueError("Reference times must increase with one finite q row each")
+    if times.size > 1:
+        velocity = np.gradient(reference, times, axis=0)
+        acceleration = acceleration_feedforward * np.gradient(velocity, times, axis=0)
+    else:
+        velocity = np.zeros_like(reference)
+        acceleration = np.zeros_like(reference)
+
+    def sample(table: Array, t: float) -> Array:
+        return np.array([np.interp(t, times, table[:, k]) for k in range(simulator.nv)])
+
+    def controller(t: float, q: Array, v: Array) -> Array:
+        q_t, v_t, a_t = (
+            sample(reference, t),
+            sample(velocity, t),
+            sample(acceleration, t),
+        )
+        com_ref = (
+            simulator.centre_of_mass(q_t)[0] if gains.balance is not None else None
+        )
+        return _computed_torque(simulator, q, v, q_t, v_t, a_t, gains, com_ref)
+
+    return controller
 
 
 def hold_pose_controller(
@@ -1347,50 +1411,15 @@ def tracking_controller(
     balance: tuple[float, float] | None = None,
     root_regulation: tuple[float, float] | None = None,
     acceleration_feedforward: float = 1.0,
-    inverse_fn: InverseDynamicsFn | None = None,
 ) -> Controller:
     """Computed-torque tracking of a reference trajectory (linear interpolation)."""
-    if not 0.0 <= acceleration_feedforward <= 1.0:
-        raise ValueError("acceleration_feedforward must lie in [0, 1]")
-    times = np.asarray(time_ref, dtype=float)
-    reference = np.asarray(q_ref, dtype=float)
-    if (
-        times.ndim != 1
-        or np.any(np.diff(times) <= 0)
-        or reference.shape != (times.size, simulator.nv)
-        or not np.isfinite(reference).all()
-    ):
-        raise ValueError("Reference times must increase with one finite q row each")
-    _check_gains(omega_rad_s, zeta, balance)
-    _check_gains(1.0, 1.0, root_regulation)
-    if times.size > 1:
-        velocity = np.gradient(reference, times, axis=0)
-        acceleration = acceleration_feedforward * np.gradient(velocity, times, axis=0)
-    else:
-        velocity = np.zeros_like(reference)
-        acceleration = np.zeros_like(reference)
-    gains = ComputedTorqueGains(
-        omega_rad_s=omega_rad_s,
-        zeta=zeta,
-        balance=balance,
-        root_regulation=root_regulation,
+    return _tracking_controller_from_gains(
+        simulator,
+        time_ref,
+        q_ref,
+        _tracking_gains(omega_rad_s, zeta, balance, root_regulation),
+        acceleration_feedforward=acceleration_feedforward,
     )
-
-    def sample(table: Array, t: float) -> Array:
-        return np.array([np.interp(t, times, table[:, k]) for k in range(simulator.nv)])
-
-    def controller(t: float, q: Array, v: Array) -> Array:
-        q_t, v_t, a_t = (
-            sample(reference, t),
-            sample(velocity, t),
-            sample(acceleration, t),
-        )
-        com_ref = simulator.centre_of_mass(q_t)[0] if balance is not None else None
-        return _computed_torque(
-            simulator, q, v, q_t, v_t, a_t, gains, com_ref, inverse_fn=inverse_fn
-        )
-
-    return controller
 
 
 def _distance_outside(point_xy: Array, hull_xy: Array) -> float:

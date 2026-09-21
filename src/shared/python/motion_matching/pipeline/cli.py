@@ -301,6 +301,7 @@ def _calibrate_and_scale(
         json.dumps(hip_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     hip_bytes = hipcal_path.read_bytes()
+    lane.plant = get_plant(ctx.engine, hip_spec)
 
     stage2 = solve_address_stage(
         AddressStageInputs(
