@@ -21,9 +21,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_review
 - **Owner:** local
-- **Issue:** #10435 (PF-05, epic #10430)
+- **Issue:** #10435 (epic #10363, PF-05)
 - **Branch:** feat/issue-10435-pf05-smooth-torque-trajectory-optimization
-- **PR:** #10503
+- **PR:** #10503 (auto-merge enabled)
 - **Paths:** src/shared/python/motion_matching/smooth_torque_optimizer.py; tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-19 at HEAD (SELF; 10 unit tests pass in tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py covering known convex analytic optimum, frame-independent baseline comparison with strictly reduced derivative, non-uniform dt and unit-scaling invariance, hard physical constraint enforcement with 8-faceted friction cone and unilateral ground forces, actuator torque rate and power limits, epigraph peak utilization minimization, overlapping sliding windows with zero seam jump, initial/terminal torque continuity clamping, cubic Hermite interpolation validation, and detailed objective breakdown; ruff check clean, ruff format clean, black clean, mypy clean).
@@ -58,6 +58,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Upgrades ContactForceAllocator with constrained QP inverse dynamics. Enforces 8-faceted polyhedral friction pyramid, non-negative normal ground forces along arbitrary terrain normals, exact contact separation masks, and strict actuator bounds without post-projection. Separates diagnostic root slack so ungrounded reactions never create false physical success. Introduces FeasibilityStatus, HARD_ZERO_TRAIL mode, and verify_torque_and_rate_bounds.
 - **Next step:** PR #10498 open with auto-merge.
 - **Evidence:** tests/unit/motion_matching/test_contact_force_allocator_pf03.py; tests/unit/motion_matching/test_contact_force_allocator.py.
+
+### DL-#10363 · Matched Swing Continuation Review
+
+- **State:** in_review
+- **Owner:** codex (handoff review only; execution by next lease holder)
+- **Issue:** #10363
+- **Branch:** docs/matching-agent-continuation
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10393
+- **Paths:** docs/development/HANDOFF.md; docs/development/matched_swing_program; docs/development/opensim_tour_matching/HANDOFF.md; docs/development/opensim_tour_matching/NEXT_AGENT_PROMPT.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at 94d593cf1 (review base; SELF contains handoff; ControlTower process/artifact/source snapshot; 14 Pinocchio and 27 OpenSim focused tests passed)
+- **Summary:** Reviewed Claude native branches and deployed code; preserved checkpoint/source recovery evidence; documented active jobs, physical failures, source integration gaps and bounded cheaper-agent continuation. Expanded #10394 into nine bounded tasks after inspecting empty club geometry and inconsistent arm scaling; recorded future muscle/tendon contracts. No new native solve or physical acceptance claimed.
+- **Next step:** For existing fits inspect ControlTower jobs; for anatomical golf corrections start #10395 then #10397 under epic #10394. See EPIC_GOLF_MODEL.md and GOLF_MODEL_AGENT_PROMPT.md.
+- **Evidence:** docs/development/matched_swing_program/evidence/continuation_20260918/matching-handoff-snapshot.json; docs/development/matched_swing_program/AGENT_CONTINUATION_PROMPT.md.
+
+### DL-#10432 · Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10432 (PF-02, epic #10427)
+- **Branch:** feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration
+- **PR:** #10497 (auto-merge enabled)
+- **Paths:** src/engines/physics_engines/pinocchio/python/marker_kinematics.py; src/shared/python/motion_matching/kinematic_smoothing.py; tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (10 unit tests in test_pinocchio_kinematics_calibration.py pass 100%; 41 related motion-matching tests pass; 979 pre-push tests pass; ruff check, ruff format, bandit, and mypy clean).
+- **Summary:** Implemented SolveDiagnostics for Pinocchio MarkerIkSolver capturing convergence, projected gradient norm, cost decrease, and active bound counts. Added multi-start resolution solve_frame_multi_start evaluating geometric tracking floors with and without weld closure. Added refine_overlapping_window with bounded temporal regularization. Implemented kinematic_smoothing module providing joint trajectory smoothing with analytical/numerical derivative compatibility (q_dot ≈ v, v_dot ≈ a), boundary spike auditing, and cutoff frequency sensitivity analysis. Verified human range of motion wrist compliance (MM-2, #10104) and address left elbow pit up-and-inward alignment (MM-5, #10107).
+- **Next step:** Land PR #10497 via CI and proceed to PF-03.
+- **Evidence:** tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py; src/shared/python/motion_matching/kinematic_smoothing.py; src/engines/physics_engines/pinocchio/python/marker_kinematics.py.
 
 ### DL-#10381 · Qualify Crocoddyl Full-Body Fit & Analytic Pelvis Yaw (MS-107)
 
