@@ -279,16 +279,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10604 (epic #10602)
 - **Branch:** fix/issue-10604-co00-workbook-identity
-- **PR:**
+- **PR:** #10667 (open)
 - **Paths:** src/shared/python/motion_matching/club_only/; src/shared/python/motion_matching/loaders/event_labels.py; src/shared/python/motion_matching/loaders/excel.py; src/engines/physics_engines/pinocchio/python/motion_training/club_trajectory_parser.py; tests/unit/motion_matching/test_club_workbook_identity.py; docs/plans/club_only_matching/evidence/club_workbook_identity.json
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21 — focused unit suite GREEN; ruff check/format clean on touched paths; both workbook SHA-256 manifests verified; TW_wiffle `A=` event regression repaired through shared normalization.
 - **Summary:** Freezes hash-verified workbook manifests, four-trial lineage (Filtering Experiments aliases TW_ProV1), centimetre unit authority with inches declaration retained, native 240 Hz impact-relative events, and orientation derivation policy. Shared event-label normalization and axis-component helper remove silent NaN/zero bugs across Excel and Pinocchio loaders.
-- **Next step:** Open PR, pass protected checks, then dispatch #10605.
+- **Next step:** Pass protected checks on #10667, merge, then dispatch #10605.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_workbook_identity.json; tests/unit/motion_matching/test_club_workbook_identity.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
