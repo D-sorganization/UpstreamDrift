@@ -282,9 +282,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10615 (epic #10603)
 - **Branch:** fix/issue-10615-nm00-dataset-audit
 - **PR:** #10668
-- **Paths:** src/shared/python/neural_motion/; src/shared/python/motion_matching/surrogate/artifact_paths.py; src/shared/python/motion_matching/surrogate/perstep/extract_dataset.py; tests/unit/neural_motion/; docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/; docs/shared_tools/divergence_inventory.v1.json
+- **Paths:** src/shared/python/neural_motion/; src/shared/python/motion_matching/surrogate/artifact_paths.py; src/shared/python/motion_matching/surrogate/nm00_audit.py; src/shared/python/motion_matching/surrogate/perstep/extract_dataset.py; tests/unit/neural_motion/; docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 at SELF (`python3 scripts/ci/check_spec_changelog_duplicates.py` green after dropping duplicate `#10615` SPEC row; keep `#10668` only)
+- **Last verified:** 2026-09-21T19:16:27Z at SELF (restored CO-00 test vs main; dropped duplicate SPEC #10615; surrogate nm00_audit discovery pointer; inventory regenerated; architecture budget OK; pytest tests/unit/neural_motion green)
 - **Summary:** Fail-closed inventory of neural corpora, default checkpoints and historical training claims with retain/repair/migrate/reject/quarantine dispositions and a per-model coverage matrix keyed to TB-00 identities. No native training or speed claim.
 - **Next step:** Merge PR #10668 after green CI, then claim NM-01 (#10616).
 - **Evidence:** docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/nm00_artifact_audit_receipt.json; docs/plans/neural_motion_matching/evidence/nm00_coverage_matrix.json.
