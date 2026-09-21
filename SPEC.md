@@ -1,3 +1,18 @@
+## Connect Qualified Matching Strategies to Engine Feature Contracts (PF-10, #10440)
+
+Connects qualified matching strategies to engine feature contracts:
+- **Strategy Schema & Qualification Matrix (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Implements versioned strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`).
+  - Stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`).
+  - Preconfigured strategy presets, controller specifications, and contact reaction history containers.
+- **Candidate Strategy Serialization (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - `CandidateStrategyPackage` binds candidate trajectories with strategy metadata, accelerations, and contact reactions.
+  - Fail-closed name-permuted coordinate remapping and lossless `.npz` serialization without pickle.
+- **Strategy Comparison Service (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Exposes cross-strategy comparison reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
+- **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
+  - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
+
 ## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
 
 Defines versioned baseline packages, fit metrics, and frozen qualification profiles under the Tour Baselines program:
