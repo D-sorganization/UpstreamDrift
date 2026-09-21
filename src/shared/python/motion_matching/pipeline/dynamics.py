@@ -211,6 +211,8 @@ def shooting_fit(
     iterations: int,
     log: logging.Logger,
     gain: float = SHOOTING_RELAXATION,
+    *,
+    tracking_backend: str = "kkt",
 ) -> tuple[np.ndarray, dict[str, Any], dict[str, Any]]:
     """Contact-aware shooting fit of the tracked reference (FB-5, MM-7b).
 
@@ -229,7 +231,7 @@ def shooting_fit(
     history: list[dict[str, Any]] = []
     best_q, best_rms = q_track, np.inf
     for k in range(iterations + 1):
-        record, sim_q = replay(sim, lane, q_track)
+        record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking_backend)
         errors = marker_errors(kin, sim_q, lane.points)
         rms = float(np.sqrt(np.mean(errors[lane.valid] ** 2)))
         diff = sim_q[:, :3] - q_ref[:, :3]
