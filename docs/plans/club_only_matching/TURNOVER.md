@@ -4,11 +4,13 @@
 
 Governing epic: [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602).
 Companion epic: [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603).
-Planning and source/workbook review only; no new neural training or fitting campaign was
-executed in this task. Existing reference epic
-[#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) and native
-program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363) remain
-authoritative for their model and physical contracts. Read the companion
+**CO-00 (#10604)** implementation is in progress on
+`fix/issue-10604-co00-workbook-identity`: shared event-label normalization,
+hash-verified workbook manifests, and the four-trial lineage table. Evidence:
+[club_workbook_identity.json](evidence/club_workbook_identity.json). Existing
+reference epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584)
+and native program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)
+remain authoritative for their model and physical contracts. Read the companion
 [Review](../club_neural_review/REVIEW.md) and [Workbook
 Audit](../club_neural_review/excel_audit.json).
 
