@@ -18,9 +18,10 @@ from dataclasses import dataclass
 import math
 
 import numpy as np
-from scipy.optimize import least_squares
+from scipy.optimize import OptimizeResult, least_squares
 
 from src.engines.physics_engines.pendulum.python.motion_matching.adapters_golfer import (
+    GolferFeasibilityReport,
     grip_and_clubhead_positions,
     solve_feasible_initial_state,
 )
@@ -290,56 +291,35 @@ def _tracking_errors(
     return residuals, rmse
 
 
-def fit_bounded_golfer(
-    target: GolferFitTarget,
+def _infeasible_outcome(feasibility: GolferFeasibilityReport) -> GolferFitOutcome:
+    """Build the honest failure outcome for an infeasible/non-convergent q0/v0."""
+    return GolferFitOutcome(
+        feasible=False,
+        profile=None,
+        q_traj=None,
+        v_traj=None,
+        constraint_residual_max=feasibility.position_residual,
+        final_cost=float("nan"),
+        final_rmse_m=float("nan"),
+        unforced_rmse_m=float("nan"),
+        converged=False,
+        evaluations=0,
+        message="initial state infeasible; optimizer not invoked",
+        reason=feasibility.reason,
+    )
+
+
+def _run_bernstein_least_squares(
     params: GolferParams,
-    options: GolferFitOptions | None = None,
-) -> GolferFitOutcome:
-    """Optimize degree-6 Bernstein control points for all 7 actuated joints.
-
-    Loop closure is enforced throughout by the constrained rollout itself.
-    Infeasible initial conditions (singular Jacobian, non-convergent
-    projection) are diagnosed up front and returned as an honest failure
-    outcome -- the optimizer is never invoked on an unclosable loop.
-    """
-    opts = options or GolferFitOptions()
-    times = np.asarray(target.times, dtype=np.float64)
-    duration = float(times[-1] - times[0])
-    if duration <= 0.0:
-        raise ValueError("Target duration must be strictly positive")
-
-    feasibility = solve_feasible_initial_state(
-        target.q0, target.v0, params, max_iter=opts.feasibility_max_iter
-    )
-    if not feasibility.feasible:
-        return GolferFitOutcome(
-            feasible=False,
-            profile=None,
-            q_traj=None,
-            v_traj=None,
-            constraint_residual_max=feasibility.position_residual,
-            final_cost=float("nan"),
-            final_rmse_m=float("nan"),
-            unforced_rmse_m=float("nan"),
-            converged=False,
-            evaluations=0,
-            message="initial state infeasible; optimizer not invoked",
-            reason=feasibility.reason,
-        )
-
-    q0, v0 = feasibility.q0, feasibility.v0
-    target_clubhead = np.asarray(target.clubhead, dtype=np.float64)[:, :2]
-    target_grip_right = np.asarray(target.grip_right, dtype=np.float64)[:, :2]
-
-    zero_profile = BernsteinGolferTorqueProfile(
-        controls=np.zeros((N_ACTUATED_JOINTS, COEFFS_PER_JOINT)),
-        duration_s=duration,
-    )
-    unforced = integrate_golfer_rollout(params, q0, v0, times, zero_profile, substeps=1)
-    _, unforced_rmse = _tracking_errors(
-        unforced.q_traj, params, target_clubhead, target_grip_right
-    )
-
+    q0: np.ndarray,
+    v0: np.ndarray,
+    times: np.ndarray,
+    duration: float,
+    target_clubhead: np.ndarray,
+    target_grip_right: np.ndarray,
+    opts: GolferFitOptions,
+) -> tuple[BernsteinGolferTorqueProfile, GolferRolloutResult, OptimizeResult, int]:
+    """Optimize Bernstein control points against clubhead/grip_right tracking targets."""
     n_params = N_ACTUATED_JOINTS * COEFFS_PER_JOINT
     lo = np.full(n_params, opts.tau_bounds[0])
     hi = np.full(n_params, opts.tau_bounds[1])
@@ -376,6 +356,49 @@ def fit_bounded_golfer(
         duration_s=duration,
     )
     best = integrate_golfer_rollout(params, q0, v0, times, optimal_profile, substeps=1)
+    return optimal_profile, best, opt_res, n_eval
+
+
+def fit_bounded_golfer(
+    target: GolferFitTarget,
+    params: GolferParams,
+    options: GolferFitOptions | None = None,
+) -> GolferFitOutcome:
+    """Optimize degree-6 Bernstein control points for all 7 actuated joints.
+
+    Loop closure is enforced throughout by the constrained rollout itself.
+    Infeasible initial conditions (singular Jacobian, non-convergent
+    projection) are diagnosed up front and returned as an honest failure
+    outcome -- the optimizer is never invoked on an unclosable loop.
+    """
+    opts = options or GolferFitOptions()
+    times = np.asarray(target.times, dtype=np.float64)
+    duration = float(times[-1] - times[0])
+    if duration <= 0.0:
+        raise ValueError("Target duration must be strictly positive")
+
+    feasibility = solve_feasible_initial_state(
+        target.q0, target.v0, params, max_iter=opts.feasibility_max_iter
+    )
+    if not feasibility.feasible:
+        return _infeasible_outcome(feasibility)
+
+    q0, v0 = feasibility.q0, feasibility.v0
+    target_clubhead = np.asarray(target.clubhead, dtype=np.float64)[:, :2]
+    target_grip_right = np.asarray(target.grip_right, dtype=np.float64)[:, :2]
+
+    zero_profile = BernsteinGolferTorqueProfile(
+        controls=np.zeros((N_ACTUATED_JOINTS, COEFFS_PER_JOINT)),
+        duration_s=duration,
+    )
+    unforced = integrate_golfer_rollout(params, q0, v0, times, zero_profile, substeps=1)
+    _, unforced_rmse = _tracking_errors(
+        unforced.q_traj, params, target_clubhead, target_grip_right
+    )
+
+    optimal_profile, best, opt_res, n_eval = _run_bernstein_least_squares(
+        params, q0, v0, times, duration, target_clubhead, target_grip_right, opts
+    )
     _, final_rmse = _tracking_errors(
         best.q_traj, params, target_clubhead, target_grip_right
     )
