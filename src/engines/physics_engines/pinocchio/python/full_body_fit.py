@@ -844,9 +844,6 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--effort-weight", type=float, default=FitWeights().effort)
     parser.add_argument("--velocity-weight", type=float, default=FitWeights().velocity)
-    parser.add_argument(
-        "--range-barrier-weight", type=float, default=FitWeights().range_barrier
-    )
     parser.add_argument("--ik-iterations", type=int, default=15)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--quiet", action="store_true")
@@ -857,7 +854,6 @@ def main(argv: list[str] | None = None) -> int:
         terminal_marker=args.terminal_marker_weight,
         effort=args.effort_weight,
         velocity=args.velocity_weight,
-        range_barrier=args.range_barrier_weight,
     )
     inputs = load_inputs(
         args.document,

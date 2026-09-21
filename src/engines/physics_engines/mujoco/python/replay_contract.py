@@ -68,18 +68,10 @@ def load_candidate(path: Path, expected_sha256: str) -> dict[str, Any]:
     for key, expected in (
         ("q", shape),
         ("v", shape),
+        ("u", (len(times), int(actuated.sum()))),
     ):
         if arrays[key].shape != expected or not np.isfinite(arrays[key]).all():
             raise ValueError(f"{key} must be finite with shape {expected}")
-    n_act = int(actuated.sum())
-    u_shape = arrays["u"].shape
-    if (
-        u_shape not in ((len(times), n_act), (len(times) - 1, n_act))
-        or not np.isfinite(arrays["u"]).all()
-    ):
-        raise ValueError(
-            f"u must be finite with shape (len(times), {n_act}) or (len(times) - 1, {n_act})"
-        )
     labels = tuple(str(x) for x in arrays["labels"])
     if not labels or len(set(labels)) != len(labels):
         raise ValueError("Marker labels must be unique and nonempty")
@@ -173,13 +165,11 @@ def g1_acceptance(metrics: dict, evidence: dict[str, bool]) -> dict:
                 "name": f"required_{name}",
                 "threshold": threshold,
                 "measured": value if finite else None,
-                "status": (
-                    "passed"
-                    if isinstance(value, (int, float))
-                    and finite
-                    and 0 <= value <= threshold
-                    else "failed"
-                ),
+                "status": "passed"
+                if isinstance(value, (int, float))
+                and finite
+                and 0 <= value <= threshold
+                else "failed",
                 "reason": "Required finite G1 measurement",
                 "unit": "",
             }

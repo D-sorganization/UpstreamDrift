@@ -1,8 +1,7 @@
 """
 OpenSim backend for Inverse Kinematics.
 
-Part of issue #4566. Retired per ADR-0051 (MS-12 #10331); use the unified
-MatchingPlant pipeline (MS-10) or 'geometric' / 'pinocchio' backend.
+Part of issue #4566. Wraps OpenSim's InverseKinematicsTool.
 """
 
 from __future__ import annotations
@@ -121,7 +120,7 @@ class OpenSimIKSolver(BaseIKSolver):
         # OpenSim's InverseKinematicsTool, and parse the output .mot file.
         # Until that lands we raise loudly rather than returning a silent
         # neutral pose.
-        raise NotImplementedError(  # tracked: #7046, retired per ADR-0051
-            "OpenSim IK backend is retired per ADR-0051; use the unified "
-            "MatchingPlant pipeline or the 'geometric' backend."
+        raise NotImplementedError(  # tracked: #7046
+            "OpenSim IK backend is not implemented; use the 'geometric' "
+            "backend (#7046)."
         )

@@ -63,19 +63,6 @@ class CrossEngineReplayConfig:
         if self.tolerance_rad <= 0.0:
             raise ValueError("tolerance_rad must be strictly positive")
 
-    def load_candidate(self) -> Any:
-        """Load candidate as MatchedSwingCandidate, falling back to legacy converter."""
-        from src.shared.python.motion_matching.candidate_convert import (
-            convert_returned81_replay,
-        )
-        from src.shared.python.motion_matching.candidate_io import load_candidate
-
-        p = Path(self.candidate_path)
-        try:
-            return load_candidate(p)
-        except Exception:
-            return convert_returned81_replay(p)
-
 
 @dataclass(frozen=True)
 class StepSizeConvergenceResult:
@@ -212,61 +199,6 @@ class CrossEngineComparisonReport:
             "pairwise_metric_diffs": self.pairwise_metric_diffs,
             "max_marker_rmse_diff_m": self.max_marker_rmse_diff_m,
         }
-
-    def to_parity_report(self) -> Any:
-        """Convert CrossEngineComparisonReport to a UnifiedParityReport."""
-        from src.shared.python.motion_matching.parity_schema import (
-            PARITY_REPORT_SCHEMA_VERSION,
-            ComparisonClass,
-            EngineParityRow,
-            PointwiseDifference,
-            UnifiedParityReport,
-        )
-
-        rows: dict[str, EngineParityRow] = {}
-        for eng, outcome in self.outcomes.items():
-            comp_class = (
-                ComparisonClass.SAME_MODEL_NUMERICAL_PARITY
-                if eng in {"mujoco", "drake", "pinocchio"}
-                else ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT
-            )
-            metrics = outcome.shared_metrics.as_dict()
-            pt_diffs: dict[str, PointwiseDifference] = {}
-            for pair_key, diffs in self.pairwise_metric_diffs.items():
-                if eng in pair_key:
-                    for k, val in diffs.items():
-                        pt_diffs[k] = PointwiseDifference(
-                            metric_name=k,
-                            max_abs_diff=val,
-                            rms_diff=val,
-                            mean_diff=val,
-                            unit="m" if "marker" in k else "rad",
-                            pass_gate=(val <= 0.001 if "marker" in k else val <= 0.05),
-                        )
-            rows[eng] = EngineParityRow(
-                engine=eng,
-                status=(
-                    "qualified" if outcome.status.upper() == "PASSED" else "rejected"
-                ),
-                comparison_class=comp_class,
-                shared_metrics=metrics,
-                pointwise_differences=pt_diffs,
-                assumptions={
-                    "max_closure_residual_m": outcome.max_closure_residual_m,
-                    "is_converged": outcome.convergence.is_converged,
-                },
-            )
-
-        ref_engine = self.engines[0] if self.engines else "unknown"
-        return UnifiedParityReport(
-            schema_version=PARITY_REPORT_SCHEMA_VERSION,
-            candidate_id="cross_engine_replay",
-            reference_engine=ref_engine,
-            status=self.status,
-            is_physically_accepted=self.is_physically_accepted,
-            engine_rows=rows,
-            pairwise_comparisons=self.pairwise_metric_diffs,
-        )
 
 
 def _compute_pairwise_diffs(
@@ -419,11 +351,8 @@ def render_marker_overlay_animation(
             label=f"Model ({engine_name})",
         )
 
-        diff = m_valid - t_valid
         err = (
-            float(
-                np.sqrt(np.mean(np.einsum("...i,...i->...", diff, diff)))
-            )  # ⚡ Bolt: np.einsum is ~2x faster than np.sum(diff ** 2, axis=-1)
+            float(np.sqrt(np.mean(np.sum((m_valid - t_valid) ** 2, axis=-1))))
             if len(t_valid) > 0
             else 0.0
         )

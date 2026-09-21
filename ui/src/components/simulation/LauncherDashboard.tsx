@@ -26,7 +26,7 @@ import {
     Wrench,
     Zap,
 } from 'lucide-react';
-import { useNavigate, NavLink } from 'react-router';
+import { useNavigate } from 'react-router';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 import type { ManifestLoadState } from '@/api/useLauncherManifest';
 import type { LauncherWindowRecord } from '@/api/launcherWindowRegistry';
@@ -96,13 +96,7 @@ function getStatusChip(status: string): { label: string; color: string } {
         case 'gui_ready':
             return { label: 'GUI Ready', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-600/50' };
         case 'engine_ready':
-        case 'ready':
             return { label: 'Ready', color: 'bg-blue-500/20 text-blue-300 border-blue-600/50' };
-        case 'experimental':
-            return { label: 'Experimental', color: 'bg-amber-500/20 text-amber-300 border-amber-600/50' };
-        case 'runtime_unavailable':
-        case 'provider_unavailable':
-            return { label: 'Unavailable', color: 'bg-rose-500/20 text-rose-300 border-rose-600/50' };
         case 'utility':
             return { label: 'Utility', color: 'bg-purple-500/20 text-purple-300 border-purple-600/50' };
         case 'external':
@@ -415,50 +409,6 @@ export function LauncherDashboard({
                     </button>
                 </div>
             </header>
-
-            {/* Task Workspaces Bar (ORG-06, #10516) */}
-            <nav
-                aria-label="Task Workspaces"
-                className="flex items-center gap-2 px-6 py-2.5 bg-gray-800/40 border-b border-gray-700/50 overflow-x-auto text-xs flex-shrink-0"
-            >
-                <span className="font-semibold text-gray-400 uppercase tracking-wider text-[11px] mr-1">Workspaces:</span>
-                <NavLink
-                    to="/workspaces/capture-analyze"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
-                >
-                    Capture & Analyze
-                </NavLink>
-                <NavLink
-                    to="/workspaces/model-match"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
-                >
-                    Model & Match
-                </NavLink>
-                <NavLink
-                    to="/workspaces/shot-course-lab"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
-                >
-                    Shot & Course Lab
-                </NavLink>
-                <NavLink
-                    to="/workspaces/optimize-train"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
-                >
-                    Optimize & Train
-                </NavLink>
-                <NavLink
-                    to="/workspaces/results-compare"
-                    className="px-2.5 py-1 rounded bg-blue-600/10 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 whitespace-nowrap transition-colors"
-                >
-                    Results & Compare
-                </NavLink>
-                <NavLink
-                    to="/workspaces/dev-research"
-                    className="px-2.5 py-1 rounded bg-gray-700/30 hover:bg-gray-700/50 text-gray-300 border border-gray-600/30 whitespace-nowrap transition-colors"
-                >
-                    Developer & Research
-                </NavLink>
-            </nav>
 
             {/* Scrollable tile grid */}
             <main className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-3 md:py-6" id="tile-grid-container">

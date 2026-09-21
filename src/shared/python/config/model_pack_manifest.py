@@ -8,7 +8,7 @@ and future external provider repositories without changing launcher callers.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -466,8 +466,6 @@ class ModelPackEntry:
     hidden_reason: str | None = None
     hidden_owner: str | None = None
     embed_adapter: str | None = None
-    exercise: str | None = None
-    preset_params: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ModelPackEntry:
@@ -607,16 +605,6 @@ class ModelPackEntry:
             embed_adapter=(
                 embed_adapter.strip() if isinstance(embed_adapter, str) else None
             ),
-            exercise=(
-                str(data["exercise"]).strip()
-                if "exercise" in data and data["exercise"] is not None
-                else None
-            ),
-            preset_params=(
-                dict(data["preset_params"])
-                if isinstance(data.get("preset_params"), dict)
-                else {}
-            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -631,10 +619,6 @@ class ModelPackEntry:
             "tags": list(self.tags),
             "order": self.order,
         }
-        if self.exercise:
-            data["exercise"] = self.exercise
-        if self.preset_params:
-            data["preset_params"] = dict(self.preset_params)
         if self.engine_type:
             data["engine_type"] = self.engine_type
         if self.provider:

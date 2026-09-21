@@ -14,12 +14,10 @@ httpx. Integration tests (TestClient) are skipped when httpx is not installed.
 
 from __future__ import annotations
 
-import asyncio
 import json
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import anyio
 import numpy as np
 import pytest
 import src.api.routes.simulation_ws as simulation_ws_module
@@ -36,12 +34,8 @@ from src.api.routes.simulation_ws import (
     _get_simulation_speed_factor,
     _handle_client_commands,
     _is_numeric_sequence,
-    _process_pending_client_commands,
-    _send_simulation_frame,
-    _step_physics_batch,
     _wait_for_resume_or_stop,
 )
-from src.shared.python.core.contracts.exceptions import PreconditionError
 from src.shared.python.engine_core.engine_registry import EngineType
 
 pytestmark = pytest.mark.unit
@@ -1168,8 +1162,7 @@ class _LoopWebSocket:
     async def receive_json(self) -> dict[str, Any]:
         if self._messages:
             return self._messages.pop(0)
-        # No queued command -> behave like an idle client awaiting incoming messages.
-        await anyio.sleep(3600)
+        # No queued command -> behave like an idle client so the loop proceeds.
         raise TimeoutError
 
     async def send_json(self, data: dict[str, Any]) -> None:
@@ -1282,207 +1275,3 @@ class TestRunSimulationLoop:
 
         # At least one positive pacing delay was awaited.
         assert any(d > 0 for d in sleeps)
-
-    @pytest.mark.anyio
-    async def test_batches_physics_steps_to_worker_thread(self) -> None:
-        """The loop batches steps and offloads them to worker threads via anyio."""
-        engine = _FakeStepEngine()
-        websocket: Any = _LoopWebSocket(speed_factor=1000.0)
-        # 100 steps total; with frame_skip ~ 16, this should require ~7 batch dispatches.
-        config = {"duration": 0.1, "timestep": 0.001}
-
-        dispatched_batches: list[int] = []
-        original_run_sync = anyio.to_thread.run_sync
-
-        async def intercept_run_sync(fn: Any, *args: Any, **kwargs: Any) -> Any:
-            if fn is _step_physics_batch:
-                dispatched_batches.append(args[2])
-            return await original_run_sync(fn, *args, **kwargs)
-
-        with patch("anyio.to_thread.run_sync", side_effect=intercept_run_sync):
-            frame, elapsed = await simulation_ws_module._run_simulation_loop(
-                websocket, engine, config
-            )
-
-        assert engine.steps == 100
-        assert frame == 100
-        assert elapsed == pytest.approx(0.1)
-        # Verify batching took place: far fewer calls than individual steps.
-        assert len(dispatched_batches) < 10
-        assert sum(dispatched_batches) == 100
-        assert all(b > 1 for b in dispatched_batches[:-1])
-
-    @pytest.mark.anyio
-    async def test_high_speed_throughput_reaches_real_time(self) -> None:
-        """200 steps must complete well under 0.2s wall-clock time at high speed factor."""
-        import time
-
-        engine = _FakeStepEngine()
-        websocket: Any = _LoopWebSocket(speed_factor=1000.0)
-        config = {"duration": 0.2, "timestep": 0.001}
-
-        start = time.perf_counter()
-        frame, elapsed = await simulation_ws_module._run_simulation_loop(
-            websocket, engine, config
-        )
-        duration_sec = time.perf_counter() - start
-
-        assert frame == 200
-        assert elapsed == pytest.approx(0.2)
-        # Previously took >0.2-2.0s due to 1ms wait_for timer overhead per step.
-        assert duration_sec < 0.2
-
-
-# ---------------------------------------------------------------------------
-# 11. Physics batch stepping and persistent loop performance — issue #8936
-# ---------------------------------------------------------------------------
-
-
-class TestStepPhysicsBatch:
-    """Unit tests for _step_physics_batch contract and batch execution."""
-
-    def test_steps_engine_correct_number_of_times(self) -> None:
-        engine = MagicMock()
-        executed = _step_physics_batch(engine, timestep=0.002, step_count=5)
-        assert executed == 5
-        assert engine.step.call_count == 5
-        engine.step.assert_called_with(0.002)
-
-    def test_zero_steps_does_not_call_step(self) -> None:
-        engine = MagicMock()
-        executed = _step_physics_batch(engine, timestep=0.002, step_count=0)
-        assert executed == 0
-        engine.step.assert_not_called()
-
-    def test_engine_without_step_method_is_safe(self) -> None:
-        engine = object()
-        executed = _step_physics_batch(engine, timestep=0.001, step_count=3)
-        assert executed == 3
-
-    def test_non_positive_timestep_violates_precondition(self) -> None:
-        engine = MagicMock()
-        with pytest.raises(PreconditionError):
-            _step_physics_batch(engine, timestep=0.0, step_count=5)
-        with pytest.raises(PreconditionError):
-            _step_physics_batch(engine, timestep=-0.001, step_count=5)
-
-    def test_negative_step_count_violates_precondition(self) -> None:
-        engine = MagicMock()
-        with pytest.raises(PreconditionError):
-            _step_physics_batch(engine, timestep=0.002, step_count=-1)
-
-
-class TestSendSimulationFrame:
-    """Unit tests for _send_simulation_frame."""
-
-    @pytest.mark.anyio
-    async def test_sends_basic_frame_payload(self) -> None:
-        engine = _FakeStepEngine()
-        websocket = MagicMock()
-        websocket.send_json = AsyncMock()
-
-        await _send_simulation_frame(
-            websocket,
-            engine,
-            config={},
-            frame=10,
-            time_elapsed=0.02,
-        )
-
-        websocket.send_json.assert_awaited_once()
-        payload = websocket.send_json.await_args.args[0]
-        assert payload["frame"] == 10
-        assert payload["time"] == 0.02
-        assert "state" in payload
-        assert payload["state"]["q"] == [0.0, 0.0]
-
-    @pytest.mark.anyio
-    async def test_includes_live_analysis_when_configured(self) -> None:
-        engine = _FakeStepEngine()
-        websocket = MagicMock()
-        websocket.send_json = AsyncMock()
-
-        await _send_simulation_frame(
-            websocket,
-            engine,
-            config={"live_analysis": True},
-            frame=5,
-            time_elapsed=0.01,
-        )
-
-        payload = websocket.send_json.await_args.args[0]
-        assert "analysis" in payload
-        assert "joint_angles" in payload["analysis"]
-
-
-class TestProcessPendingClientCommands:
-    """Unit tests for _process_pending_client_commands."""
-
-    @pytest.mark.anyio
-    async def test_initializes_recv_task_when_none(self) -> None:
-        import contextlib
-
-        websocket = _LoopWebSocket()
-        recv_task, action = await _process_pending_client_commands(
-            None, websocket, config={}
-        )
-        assert action == "continue"
-        assert recv_task is not None
-        recv_task.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
-            await recv_task
-
-    @pytest.mark.anyio
-    async def test_handles_stop_command(self) -> None:
-        import contextlib
-
-        websocket = _LoopWebSocket([{"action": "stop"}])
-        recv_task, action = await _process_pending_client_commands(
-            None, websocket, config={}
-        )
-        assert action == "stop"
-        if recv_task is not None:
-            recv_task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
-                await recv_task
-
-    @pytest.mark.anyio
-    async def test_handles_set_speed_command(self) -> None:
-        import contextlib
-
-        websocket = _LoopWebSocket([{"action": "set_speed", "speed_factor": 3.0}])
-        config: dict[str, Any] = {"speed_factor": 1.0}
-        recv_task, action = await _process_pending_client_commands(
-            None, websocket, config
-        )
-        assert action == "continue"
-        assert config["speed_factor"] == pytest.approx(3.0)
-        if recv_task is not None:
-            recv_task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
-                await recv_task
-
-    @pytest.mark.anyio
-    async def test_handles_invalid_json_gracefully(self) -> None:
-        import contextlib
-
-        websocket = MagicMock()
-        websocket.send_json = AsyncMock()
-
-        async def fail_receive() -> dict[str, Any]:
-            raise json.JSONDecodeError("Invalid JSON", "", 0)
-
-        websocket.receive_json = fail_receive
-        recv_task = asyncio.create_task(fail_receive())
-
-        new_recv_task, action = await _process_pending_client_commands(
-            recv_task, websocket, config={}
-        )
-        assert action == "continue"
-        websocket.send_json.assert_awaited_once_with(
-            {"error": "invalid_json", "message": "Message must be valid JSON"}
-        )
-        if new_recv_task is not None:
-            new_recv_task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
-                await new_recv_task

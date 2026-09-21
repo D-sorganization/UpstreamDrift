@@ -148,24 +148,3 @@ to enforce that the committed artifact matches the script.
   `osim.Model(path).initSystem()` succeeds and the joint / actuator
   counts match the topology. Skipped automatically when the OpenSim
   Python bindings are not installed.
-
-## Full-Body Anthropometric Models (MS-40 #10339)
-
-The `generated/` subdirectory contains pure-XML generated 44-coordinate
-full-body OpenSim models produced from the canonical anthropometric
-specifications (`full_body_spec_anthro_driver.json` and `full_body_spec_anthro_iron7.json`):
-
-| File                                     | Description                                                                                                               |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `generated/full_body_anthro_driver.osim` | Full-body golfer with driver club, 44 coordinates, weld grip closure, foot Hunt-Crossley contact spheres, 34 tour markers |
-| `generated/full_body_anthro_iron7.osim`  | Full-body golfer with 7-iron club, 44 coordinates, weld grip closure, foot Hunt-Crossley contact spheres, 34 tour markers |
-| `generated/export_receipt.json`          | Hash provenance receipt linking spec sha256 to osim sha256 and topology metadata                                          |
-
-### Exporter Command
-
-```bash
-python -m src.engines.physics_engines.opensim.python.full_body_osim \
-  --spec docs/development/full_body_models/full_body_spec_anthro_driver.json \
-  --out src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.osim \
-  --receipt src/engines/physics_engines/opensim/models/generated/export_receipt.json
-```

@@ -53,10 +53,7 @@ class ReplayPlant:
             dict(zip(self.names, q, strict=True)), dict.fromkeys(self.names, 0.0)
         )
         mass = np.zeros((model.nv, model.nv))
-        if hasattr(data, "qM"):
-            mujoco.mj_fullM(model, mass, data.qM)
-        else:
-            mujoco.mj_fullM(model, data, mass)
+        mujoco.mj_fullM(model, mass, data.qM)
         return mass[np.ix_(self.indices, self.indices)]
 
     @precondition(

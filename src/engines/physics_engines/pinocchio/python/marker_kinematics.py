@@ -11,14 +11,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, TypeAlias
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
 
-Array: TypeAlias = NDArray[np.float64]
+Array = NDArray[np.float64]
 
 
 @dataclass(frozen=True)
@@ -345,12 +345,9 @@ class MarkerIkSolver:
                 break
         positions = self.markers(q)
         rows = np.flatnonzero(valid)
-        diff = positions[rows] - target[rows]
         rms = (
             float(
-                np.sqrt(
-                    np.mean(np.einsum("...i,...i->...", diff, diff))
-                )  # ⚡ Bolt: np.einsum is ~2x faster than np.sum(diff ** 2, axis=1)
+                np.sqrt(np.mean(np.sum((positions[rows] - target[rows]) ** 2, axis=1)))
             )
             if rows.size
             else float("nan")

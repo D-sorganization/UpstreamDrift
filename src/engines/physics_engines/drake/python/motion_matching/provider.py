@@ -27,8 +27,6 @@ from typing import Any
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult
 from src.shared.python.motion_matching.provenance import engine_package_version
 from src.shared.python.motion_matching.provider import (
-    execute_body_fit,
-    has_body_target,
     publish_leaderboard_row,
     resolve_club_target,
 )
@@ -74,10 +72,6 @@ class DrakeFitSwingProvider:
             TypeError: If ``target`` lacks a usable ``.club`` /
                 :class:`ClubTarget` shape.
         """
-        if has_body_target(target):
-            return execute_body_fit(
-                self.engine_name, target, opts, engine_version=self.engine_version()
-            )
         club_target = resolve_club_target(target)
         native_opts = None
         if opts is not None:
@@ -92,8 +86,8 @@ class DrakeFitSwingProvider:
         return result
 
     def supports_body_target(self) -> bool:
-        """Drake supports full-body matching via the native trajectory optimization pipeline."""
-        return True
+        """Drake body-target cost terms are out-of-scope for #4516."""
+        return False
 
     def supports_ball_target(self) -> bool:
         """Ball-boundary-condition cost terms land separately (see #4488)."""

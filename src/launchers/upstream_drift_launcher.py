@@ -420,11 +420,8 @@ class UpstreamDriftLauncher(QMainWindow):
 
         # Bootstrap embeddable tools registry (fixes #5049)
         # This ensures EMBEDDABLE_TOOL_REGISTRY is populated before any
-        # context menus or embedded host widgets are created.
-        # When loading asynchronously, this phase is executed in the background
-        # by AsyncStartupWorker to prevent blocking the GUI thread (issue #8938).
-        if not self.loading:
-            bootstrap_embeddable_tools()
+        # context menus or embedded host widgets are created
+        bootstrap_embeddable_tools()
 
         if "PYTEST_CURRENT_TEST" not in os.environ:
             try:
@@ -605,11 +602,6 @@ class UpstreamDriftLauncher(QMainWindow):
         self._initialize_model_order()
         self._apply_docker_status(results.docker_available)
         bootstrap_embeddable_tools()
-        logger.info(
-            "Startup results applied to launcher (worker time: %d ms, phases: %s)",
-            self._startup_time_ms,
-            ", ".join(f"{p.name}={p.duration_ms}ms" for p in results.phases),
-        )
         self._load_layout()
 
         from PyQt6.QtCore import QTimer as _QTimer

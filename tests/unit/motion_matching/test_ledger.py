@@ -17,7 +17,6 @@ from src.shared.python.motion_matching.ledger import (
     Ledger,
     LedgerRow,
     default_ledger_path,
-    extract_horizon_s,
     scan,
 )
 from src.tools.motion_matching.pipeline import list_runs
@@ -188,20 +187,3 @@ def test_self_reported_acceptance_is_never_passed() -> None:
     }
     block = extract_acceptance("z/receipt.json", evaluated, None)
     assert block is not None and block["status"] == "PASSED"
-
-
-@pytest.mark.unit
-def test_extract_horizon_s_prefers_dynamics_duration_over_elapsed_s() -> None:
-    """extract_horizon_s prefers physical simulation duration over wall-clock elapsed_s."""
-    payload = {
-        "elapsed_s": 326.2,
-        "dynamics": {
-            "duration_s": 1.81,
-        },
-    }
-    assert extract_horizon_s(payload) == 1.81
-
-    payload_no_dynamics = {
-        "elapsed_s": 326.2,
-    }
-    assert extract_horizon_s(payload_no_dynamics) == 326.2

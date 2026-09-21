@@ -55,17 +55,12 @@ def _iter_duplicate_paragraphs(text: str) -> list[str]:
     paragraphs = [
         " ".join(paragraph.split())
         for paragraph in re.split(r"\n\s*\n", text)
-        if paragraph.strip() and not paragraph.lstrip().startswith("#")
+        if paragraph.strip()
     ]
     return [
         paragraph
         for paragraph, count in Counter(paragraphs).items()
-        if count > 1
-        and paragraph not in {"---", _MANAGED_NOTICE}
-        and not paragraph.startswith("#")
-        and not paragraph.startswith(
-            "> This section is managed centrally by Repository_Management"
-        )
+        if count > 1 and paragraph not in {"---", _MANAGED_NOTICE}
     ]
 
 
