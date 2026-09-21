@@ -9,6 +9,12 @@
 - **Branch:** `docs/club-neural-matching-plans-20260920`; reviewed source `c3111a9177885af945018d730ec40de308cd9971`. Development log entries DL-#10602 and DL-#10603 record the two proposed programs.
 - **Next:** Hand CO-00 #10604 to one worker using its numbered prompt.
 
+## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
+
+Branch `feat/tb01-tour-targets-audit-10586`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586)) audits the canonical tour-average captures (`C3D_TA_Driver.c3d` and `C3D_TA_Iron.c3d`), establishes content-based verification by SHA-256 (never path name alone), and versions `tour-measurement-map/1.0.0` distinguishing observed surface markers, inferred joint centers, and rigid cluster centroids while explicitly marking calibrated clubface orientation and contact points as `UNAVAILABLE` in raw data. Defines native swing intervals on independent clocks (360.0 Hz driver vs 359.0 Hz iron) with trajectory-inferred events explicitly labeled `is_inferred = True`. Records full GearsSports provenance (`PLAYER_ID: 967eac5b-2e78-4207-a99f-d57437296d70`), separating shared player anatomy from capture-specific geometry. Emitted reproducible receipts in `docs/plans/tour_baselines/evidence/` and documented in `target_audit.md`. All 35 tests pass, ruff/black/mypy pass, architecture budget passes, divergence inventory is synchronized.
+Next step: Merge TB-01 PR; next dispatch is TB-02 ([#10587](https://github.com/D-sorganization/UpstreamDrift/issues/10587): Calibrate Common Anthropometrics and Club Geometries).
+
 ## Tour Baselines TB-00: Freeze Model Identities, Ownership, and Coverage (#10585)
 
 Branch `feat/tb00-model-identities-10585`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
