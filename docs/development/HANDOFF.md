@@ -1,5 +1,29 @@
 # Current Matching Continuation Handoff
 
+## Bunker Contact Regimes #9544 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9544`.
+- Branch: `conductor/issue-9544`; base `b455aa4fd` (origin/main); implementation
+  SELF; PR #10455. Governing issue #9544 (epic #9541). Pinned Tools
+  `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (gitlink unchanged; the issue's
+  audit pin `3d93bb2c…` predates the current gitlink).
+- Entry DL-#9544. Delivered: `bunkershot3d.ball.regimes` (four regimes,
+  refusal of every non-splash launch), `RotationMode`/`RotationCoupling` on
+  `solvers/shot.py` with wrench conventions, `vandv.conservation`
+  support-impulse and driver-work ledger, workbench classification before
+  carry, `docs/bunkershot3d/contact-regimes.md` (F2 requirement record).
+- Validation: `python3 -m pytest tests/bunkershot3d/ball/test_contact_regimes_9544.py tests/bunkershot3d/solvers/test_rotation_coupling_9544.py`
+  (29 passed); `python3 -m pytest tests/bunkershot3d tests/unit/tools/bunker_shot_gui -n auto`
+  passes except three pre-existing failures reproduced with the classifier
+  bypassed (pyvista `n_faces` in `test_shot_scene_render_vtk.py`; two #9243
+  band/budget assertions). `ruff check` and `ruff format --check` clean.
+- Limitations (declared, not hidden): F0 does not measure the face-ball sand
+  cushion, so regimes are geometric conventions; no measured validation
+  exists for any regime; coupled mode ships the boundary and an oracle
+  coupling, not a calibrated shaft model; F2/3-D contact remains unbuilt.
+- Next action: open PR `Closes #9544`; completion comment must cite merge SHA,
+  pin, test results and the limitations above.
+
 ## Bunker Transfer Qualification #9543 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9543`.

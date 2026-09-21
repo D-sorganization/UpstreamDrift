@@ -267,11 +267,19 @@ statement that the reported mass is wrong, so it is reported and not raised."""
 
 
 class ContactType(enum.Enum):
-    """Type of club-ball-sand interaction."""
+    """Type of club-ball-sand interaction.
+
+    Only ``SPLASH`` has a launch model. The others are the regimes
+    :func:`~bunkershot3d.ball.regimes.classify_contact_regime` can decide
+    a strike fell into, and every one of them is refused by
+    :func:`~bunkershot3d.ball.pipeline.compute_bunker_launch` (issue #9544).
+    """
 
     SPLASH = "splash"  # Club never touches ball
     THIN = "thin"  # Club strikes ball directly (blade/thin shot)
     MIXED = "mixed"  # Both sand and direct contact
+    NO_HIT = "no_hit"  # Nothing reached the ball
+    BURIED_NO_RELEASE = "buried_no_release"  # Head never came back out
 
 
 def _refuse(name: str, value: float, requirement: str) -> None:
