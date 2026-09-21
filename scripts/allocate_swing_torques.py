@@ -45,8 +45,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--engine",
         type=str,
         default="mujoco",
-        choices=[e.value for e in EngineType if e != EngineType.PINOCCHIO],
-        help="Target physics engine (mujoco, drake, opensim, simscape)",
+        choices=[e.value for e in EngineType],
+        help="Target physics engine (mujoco, pinocchio, drake, opensim, simscape)",
+    )
+    parser.add_argument(
+        "--allow-synthetic",
+        action="store_true",
+        default=False,
+        help="Allow quarantined synthetic multibody fixtures for engines without native bridges",
     )
     parser.add_argument(
         "--candidate",
@@ -115,6 +121,7 @@ def main(argv: list[str] | None = None) -> int:
         engine=args.engine,
         spec_path=args.spec if Path(args.spec).is_file() else None,
         nv=q.shape[1],
+        allow_synthetic=args.allow_synthetic,
     )
 
     allocator = MultiEngineTorqueAllocator(adapter=adapter)
