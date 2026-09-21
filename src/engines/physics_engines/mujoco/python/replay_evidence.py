@@ -219,42 +219,52 @@ def _convergence(
     )  # ⚡ Bolt: np.sqrt(np.max(np.einsum(...))) is faster than np.max(np.linalg.norm(..., axis=-1))
 
 
+@dataclass(frozen=True)
+class ReceiptContext:
+    files: ReplayFiles
+    settings: ReplaySettings
+    document: dict
+    source: dict
+    arrays: dict
+    capture: TourCapture
+    plant: ReplayPlant
+    kin: FullBodyMarkerKinematics
+
+
+@dataclass(frozen=True)
+class ReceiptData:
+    failures: list[str]
+    marker_parity: float
+    q: np.ndarray
+    v: np.ndarray
+    markers: np.ndarray
+    reference: np.ndarray
+    failure: str | None
+    g1_count: int
+    convergence: float | None
+    start: float
+
+
 def _build_receipt(
-    files: ReplayFiles,
-    settings: ReplaySettings,
-    document: dict,
-    source: dict,
-    arrays: dict,
-    capture: TourCapture,
-    failures: list[str],
-    marker_parity: float,
-    q: np.ndarray,
-    v: np.ndarray,
-    markers: np.ndarray,
-    reference: np.ndarray,
-    failure: str | None,
-    g1_count: int,
-    convergence: float | None,
-    start: float,
-    plant: ReplayPlant,
-    kin: FullBodyMarkerKinematics,
+    ctx: ReceiptContext,
+    data: ReceiptData,
 ) -> dict:
     import mujoco
 
-    full_metrics = _metrics(capture, markers)
-    complete = len(q) >= g1_count
-    count = min(len(q), g1_count)
-    g1_metrics = _metrics(capture, markers[:count]) | _audit(
-        plant, kin, q[:count], v[:count]
+    full_metrics = _metrics(ctx.capture, data.markers)
+    complete = len(data.q) >= data.g1_count
+    count = min(len(data.q), data.g1_count)
+    g1_metrics = _metrics(ctx.capture, data.markers[:count]) | _audit(
+        ctx.plant, ctx.kin, data.q[:count], data.v[:count]
     )
     evidence = {
-        "parity": not failures,
+        "parity": not data.failures,
         "complete": complete,
-        "converged": convergence is not None and convergence <= 1e-5,
-        "root_history": "delta_tau_root" in arrays
-        and np.isfinite(arrays["delta_tau_root"]).all().item()
-        and float(np.max(np.abs(arrays["delta_tau_root"]))) <= 0.1,
-        "coverage": complete and metric_coverage(arrays, g1_count),
+        "converged": data.convergence is not None and data.convergence <= 1e-5,
+        "root_history": "delta_tau_root" in ctx.arrays
+        and np.isfinite(ctx.arrays["delta_tau_root"]).all().item()
+        and float(np.max(np.abs(ctx.arrays["delta_tau_root"]))) <= 0.1,
+        "coverage": complete and metric_coverage(ctx.arrays, data.g1_count),
         # This archive stores smoothed IK, not an independent forward replay.
         # Source dynamics qualification remains blocked under #10336.
         "source_dynamics": False,
@@ -262,15 +272,15 @@ def _build_receipt(
     receipt = CandidateReplayReceipt(
         engine="mujoco",
         engine_version=mujoco.__version__,
-        candidate_sha256=files.candidate_sha256,
-        document_sha256=_digest(files.document),
-        capture_sha256=_digest(files.capture),
-        source_receipt_sha256=_digest(files.source_receipt),
-        attachments_sha256=_digest(files.attachments),
+        candidate_sha256=ctx.files.candidate_sha256,
+        document_sha256=_digest(ctx.files.document),
+        capture_sha256=_digest(ctx.files.capture),
+        source_receipt_sha256=_digest(ctx.files.source_receipt),
+        attachments_sha256=_digest(ctx.files.attachments),
         configuration={
-            "settings": asdict(settings),
-            "contact": document["contact"],
-            "ground_height_m": source["ground_height_m"],
+            "settings": asdict(ctx.settings),
+            "contact": ctx.document["contact"],
+            "ground_height_m": ctx.source["ground_height_m"],
             "control_interpolation": "zero_order_hold",
             "root_efforts": "zero",
             "controller": "none",
@@ -278,22 +288,22 @@ def _build_receipt(
             "integrator": "DOP853",
         },
         parity={
-            "status": "UNVERIFIED" if failures else "PASSED",
-            "failures": failures,
-            "same_state_marker_max_m": marker_parity,
+            "status": "UNVERIFIED" if data.failures else "PASSED",
+            "failures": data.failures,
+            "same_state_marker_max_m": data.marker_parity,
             "dynamics_parity": "UNVERIFIED: no independent source forward replay",
         },
         integration={
             "acceptance_audit_sha256": _digest(
                 Path(__file__).with_name("replay_contract.py")
             ),
-            "requested_frames": len(arrays["time_s"]),
-            "completed_frames": len(q),
-            "requested_end_s": float(arrays["time_s"][-1]),
-            "completed_end_s": float(arrays["time_s"][len(q) - 1]),
-            "failure": failure,
+            "requested_frames": len(ctx.arrays["time_s"]),
+            "completed_frames": len(data.q),
+            "requested_end_s": float(ctx.arrays["time_s"][-1]),
+            "completed_end_s": float(ctx.arrays["time_s"][len(data.q) - 1]),
+            "failure": data.failure,
             "pose_resets": 0,
-            "g1_convergence_max_marker_m": convergence,
+            "g1_convergence_max_marker_m": data.convergence,
             "g1_convergence_tolerance_m": 1e-5,
         },
         shared_metrics=full_metrics,
@@ -301,11 +311,13 @@ def _build_receipt(
         acceptance=AcceptanceReceipt.model_validate(
             g1_acceptance(g1_metrics, evidence)
         ),
-        artifacts=_save_playback(files, arrays, q, v, markers, reference),
-        elapsed_s=perf_counter() - start,
+        artifacts=_save_playback(
+            ctx.files, ctx.arrays, data.q, data.v, data.markers, data.reference
+        ),
+        elapsed_s=perf_counter() - data.start,
         qualification="Diagnostic replay only. Legacy source lacks plant/control provenance and root history; IK playback is not dynamics acceptance.",
     ).model_dump(mode="json")
-    (files.output / "receipt.json").write_text(
+    (ctx.files.output / "receipt.json").write_text(
         json.dumps(receipt, indent=2, allow_nan=False) + "\n"
     )
     return receipt
@@ -316,7 +328,6 @@ def generate_replay(
     files: ReplayFiles, settings: ReplaySettings, *, diagnostic: bool = False
 ) -> dict:
     """Replay all saved intervals; certify G1 only with complete, converged evidence."""
-    import mujoco
 
     start = perf_counter()
     source, document, arrays, capture, attachments, failures = _prepare(
@@ -346,13 +357,8 @@ def generate_replay(
     markers = np.stack([kin.marker_positions(qi) for qi in q])
     g1_count = len(window_indices(arrays["time_s"], 0.85))
     convergence = _convergence(plant, kin, arrays, efforts, markers, settings)
-    return _build_receipt(
-        files,
-        settings,
-        document,
-        source,
-        arrays,
-        capture,
+    ctx = ReceiptContext(files, settings, document, source, arrays, capture, plant, kin)
+    data = ReceiptData(
         failures,
         marker_parity,
         q,
@@ -363,6 +369,5 @@ def generate_replay(
         g1_count,
         convergence,
         start,
-        plant,
-        kin,
     )
+    return _build_receipt(ctx, data)
