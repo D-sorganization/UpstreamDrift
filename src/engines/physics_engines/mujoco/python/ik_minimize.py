@@ -53,28 +53,9 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
             return np.clip(q, prep.low, prep.high)
 
         def residual_and_jacobian(q_k: Array) -> tuple[Array, Array]:
-            self._set(q_k)
-            positions = self._positions()
-            jac = self._marker_jacobian(positions)
-            rows = [
-                prep.row_scale
-                * (positions[prep.mask] - targets_arr[prep.mask]).reshape(-1)
-            ]
-            jacs = [prep.row_scale[:, None] * jac[prep.mask].reshape(-1, prep.nv)]
-            rows.append(prep.sqrt_prior * (q_k - q_init))
-            jacs.append(prep.sqrt_prior * np.eye(prep.nv))
-            rot_w = (
-                opts.closure_weight
-                if opts.closure_rotation_weight is None
-                else opts.closure_rotation_weight
+            return self._pose_residual_stack(
+                q_k, prep, targets_arr, q_init, ground, opts
             )
-            self._append_closure(rows, jacs, opts.closure_weight, rot_w)
-            self._append_ground(rows, jacs, ground, opts.ground_weight, prep.pinned)
-            self._append_anchors(rows, jacs, prep.planted, opts.ground_weight)
-            self._append_balance(rows, jacs, ground, opts.balance_weight)
-            self._append_com_target(rows, jacs, ground, prep.com_goal)
-            self._append_axes(rows, jacs, prep.axes)
-            return np.concatenate(rows), np.concatenate(jacs)[:, prep.free]
 
         warm_iters = max(5, opts.iterations - max(1, opts.iterations // 3))
         q_seed, _ = _run_lm_loop(
@@ -141,22 +122,6 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
         targets_arr = np.asarray(targets, dtype=float)
         prep = self._prepare_pose_fit(targets_arr, valid, q_init, ground, opts)
         q = self._solve_with_minimize(prep, targets_arr, q_init, ground, opts)
-        self._set(q)
-        diff = self._positions() - targets_arr
-        errors = np.sqrt(np.einsum("ij,ij->i", diff, diff))
-        per_marker = {
-            label: float(errors[k])
-            for k, label in enumerate(self.labels)
-            if prep.mask[k]
-        }
-        heights = self._sphere_heights(ground)
-        pos_err, rot_err = self.closure_error(q)
-        return PoseFit(
-            q=q,
-            marker_rms_m=self._marker_rms(q, targets_arr, prep.mask),
-            per_marker_m=per_marker,
-            closure_error_m=pos_err,
-            closure_error_rad=rot_err,
-            lowest_sphere_height_m=min(heights.values()),
-            iterations=opts.iterations,
+        return self._finalize_pose_fit(
+            q, targets_arr, prep, ground=ground, iterations=opts.iterations
         )
