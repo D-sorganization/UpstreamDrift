@@ -4,7 +4,7 @@
 
 - Workspace: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-issue-8883`.
 - Branch: `fix/8883-video-analyzer-gui`; base `origin/main` @ `4651b8793`;
-  implementation SELF; PR not created yet. Governing issue #8883
+  implementation SELF; PR #10651. Governing issue #8883
   ("Video Analyzer tile opens a bare 'GUI placeholder' label ... the
   sibling-repo fallback is a dead end"); related #8854 (closed — confirms
   the sibling `src/video_analyzer/` path never exists in this checkout)
