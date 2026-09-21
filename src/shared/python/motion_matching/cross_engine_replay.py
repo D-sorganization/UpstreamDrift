@@ -366,21 +366,52 @@ def render_marker_overlay_animation(
     valid_mask: BoolArray | None = None,
 ) -> Path:
     """Render a lightweight 3D marker overlay animation comparing target and model markers."""
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
     import imageio
 
     out_p = Path(output_gif_path)
     out_p.parent.mkdir(parents=True, exist_ok=True)
 
+    frames = render_replay_frames(
+        time_s=time_s,
+        target_markers_m=target_markers_m,
+        model_markers_m=model_markers_m,
+        engine_name=engine_name,
+        stride=stride,
+        valid_mask=valid_mask,
+    )
+
+    duration_ms = (
+        float(1000.0 * stride * (time_s[1] - time_s[0])) if len(time_s) > 1 else 50.0
+    )
+    imageio.mimsave(str(out_p), frames, duration=duration_ms, loop=0)
+    logger.info("Saved overlay animation to %s (%d frames)", out_p, len(frames))
+    return out_p
+
+
+def render_replay_frames(
+    time_s: Array,
+    target_markers_m: Array,
+    model_markers_m: Array,
+    *,
+    engine_name: str = "engine",
+    stride: int = 5,
+    valid_mask: BoolArray | None = None,
+) -> list[np.ndarray]:
+    """Render 3D marker overlay frames comparing target and model markers."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
     n_frames = len(time_s)
-    frames: list[Any] = []
+    frames: list[np.ndarray] = []
     color_map = {
         "mujoco": "#d62728",
         "pinocchio": "#1f77b4",
         "drake": "#2ca02c",
+        "opensim": "#9467bd",
+        "myosuite": "#8c564b",
+        "matlab": "#17becf",
     }
     m_color = color_map.get(engine_name.lower(), "#ff7f0e")
 
@@ -445,9 +476,4 @@ def render_marker_overlay_animation(
         frames.append(rgba[:, :, :3].copy())
 
     plt.close(fig)
-    duration_ms = (
-        float(1000.0 * stride * (time_s[1] - time_s[0])) if len(time_s) > 1 else 50.0
-    )
-    imageio.mimsave(str(out_p), frames, duration=duration_ms, loop=0)
-    logger.info("Saved overlay animation to %s (%d frames)", out_p, len(frames))
-    return out_p
+    return frames
