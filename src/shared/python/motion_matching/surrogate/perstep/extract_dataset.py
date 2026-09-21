@@ -18,7 +18,11 @@ import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.parquet as pq
 
-DEFAULT_SOURCE = Path(r"C:\Users\diete\Repositories\data\TenThousandFiles.parquet")
+from src.shared.python.motion_matching.surrogate.artifact_paths import (
+    DOCUMENTED_TEN_THOUSAND_FILES,
+)
+
+DEFAULT_SOURCE = DOCUMENTED_TEN_THOUSAND_FILES
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_MANIFEST = SCRIPT_DIR / "column_manifest_inverse_ready.json"
 DEFAULT_OUTPUT = SCRIPT_DIR / "data" / "processed" / "golf_dynamics_slim.parquet"

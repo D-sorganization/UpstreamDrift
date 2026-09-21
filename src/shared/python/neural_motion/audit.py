@@ -159,10 +159,80 @@ def inspect_parquet_bounded(
     )
 
 
+@dataclass(frozen=True)
+class _PresenceOutcome:
+    """Varying presence / claim fields for a catalog-derived identity row."""
+
+    exists: bool
+    content_sha256: str | None
+    disposition: Disposition
+    claim_status: ClaimStatus
+    blockers: tuple[str, ...]
+    trial_ancestry: str | None = None
+    schema_version: str | None = None
+
+
 def _resolve_path(repo_root: Path, entry: CatalogEntry) -> Path:
     if entry.path_is_absolute:
         return entry.path_spec
     return (repo_root / entry.path_spec).resolve()
+
+
+def _identity_from_entry(
+    entry: CatalogEntry,
+    path: Path | None,
+    source_revision: str | None,
+    outcome: _PresenceOutcome,
+) -> ArtifactIdentity:
+    """Build ArtifactIdentity from a catalog entry plus a presence outcome."""
+    return ArtifactIdentity(
+        artifact_id=entry.artifact_id,
+        kind=entry.kind,
+        role=entry.role,
+        path=path,
+        exists=outcome.exists,
+        content_sha256=outcome.content_sha256,
+        schema_version=(
+            outcome.schema_version
+            if outcome.schema_version is not None
+            else entry.schema_version
+        ),
+        model_ids=(),
+        engine=entry.engine,
+        source_revision=source_revision,
+        units=entry.units,
+        seeds=(),
+        trial_ancestry=outcome.trial_ancestry,
+        required_channels=entry.required_channels,
+        label_availability=entry.label_availability,
+        is_synthetic_fixture=entry.is_synthetic_fixture,
+        disposition=outcome.disposition,
+        claim_status=outcome.claim_status,
+        blockers=outcome.blockers,
+        retrieval_instructions=entry.retrieval_instructions,
+        notes=entry.notes,
+        related_issues=entry.related_issues,
+    )
+
+
+def _quarantine_absent(
+    entry: CatalogEntry,
+    path: Path,
+    source_revision: str,
+    blocker: str,
+) -> ArtifactIdentity:
+    return _identity_from_entry(
+        entry,
+        path,
+        source_revision,
+        _PresenceOutcome(
+            exists=False,
+            content_sha256=None,
+            disposition=Disposition.QUARANTINE,
+            claim_status=ClaimStatus.UNSUPPORTED,
+            blockers=(blocker,),
+        ),
+    )
 
 
 def _audit_sweep_folder(
@@ -174,32 +244,13 @@ def _audit_sweep_folder(
     trials = folder / "trials.parquet"
     timesteps = folder / "timesteps.parquet"
     if not trials.is_file() or not timesteps.is_file():
-        return ArtifactIdentity(
-            artifact_id=entry.artifact_id,
-            kind=entry.kind,
-            role=entry.role,
-            path=folder,
-            exists=False,
-            content_sha256=None,
-            schema_version=entry.schema_version,
-            model_ids=(),
-            engine=entry.engine,
-            source_revision=source_revision,
-            units=entry.units,
-            seeds=(),
-            trial_ancestry=None,
-            required_channels=entry.required_channels,
-            label_availability=entry.label_availability,
-            is_synthetic_fixture=entry.is_synthetic_fixture,
-            disposition=Disposition.QUARANTINE,
-            claim_status=ClaimStatus.UNSUPPORTED,
-            blockers=("sweep folder missing trials.parquet or timesteps.parquet",),
-            retrieval_instructions=entry.retrieval_instructions,
-            notes=entry.notes,
-            related_issues=entry.related_issues,
+        return _quarantine_absent(
+            entry,
+            folder,
+            source_revision,
+            "sweep folder missing trials.parquet or timesteps.parquet",
         )
 
-    # Bounded inspect before any bulk read; channel inventory from schema.
     trials_meta = inspect_parquet_bounded(trials, max_rows=4)
     timesteps_meta = inspect_parquet_bounded(timesteps, max_rows=4)
     blockers: list[str] = []
@@ -208,8 +259,6 @@ def _audit_sweep_folder(
         if channel not in channel_names:
             blockers.append(f"missing required channel: {channel}")
 
-    schema_version = entry.schema_version or SWEEP_SCHEMA_VERSION
-
     claim_status = (
         ClaimStatus.SOFTWARE_CONTRACT_ONLY
         if entry.is_synthetic_fixture
@@ -217,39 +266,59 @@ def _audit_sweep_folder(
     )
     disposition = Disposition.RETAIN if not blockers else Disposition.REPAIR
     if entry.is_synthetic_fixture:
-        blockers = list(blockers) + [
+        blockers.append(
             "synthetic fixture cannot certify native physical supervision",
-        ]
+        )
 
-    # Folder identity: stable hash of the two content digests.
     combined = hashlib.sha256()
     combined.update((trials_meta.content_sha256 or "").encode("ascii"))
     combined.update((timesteps_meta.content_sha256 or "").encode("ascii"))
-    folder_sha = combined.hexdigest()
 
-    return ArtifactIdentity(
-        artifact_id=entry.artifact_id,
-        kind=entry.kind,
-        role=entry.role,
-        path=folder,
-        exists=True,
-        content_sha256=folder_sha,
-        schema_version=schema_version,
-        model_ids=(),
-        engine=entry.engine,
-        source_revision=source_revision,
-        units=entry.units,
-        seeds=(),
-        trial_ancestry="synthetic-fixture" if entry.is_synthetic_fixture else None,
-        required_channels=entry.required_channels,
-        label_availability=entry.label_availability,
-        is_synthetic_fixture=entry.is_synthetic_fixture,
-        disposition=disposition,
-        claim_status=claim_status,
-        blockers=tuple(blockers),
-        retrieval_instructions=entry.retrieval_instructions,
-        notes=entry.notes,
-        related_issues=entry.related_issues,
+    return _identity_from_entry(
+        entry,
+        folder,
+        source_revision,
+        _PresenceOutcome(
+            exists=True,
+            content_sha256=combined.hexdigest(),
+            disposition=disposition,
+            claim_status=claim_status,
+            blockers=tuple(blockers),
+            trial_ancestry=(
+                "synthetic-fixture" if entry.is_synthetic_fixture else None
+            ),
+            schema_version=entry.schema_version or SWEEP_SCHEMA_VERSION,
+        ),
+    )
+
+
+def _audit_present_file(
+    entry: CatalogEntry,
+    path: Path,
+    source_revision: str,
+) -> ArtifactIdentity:
+    content_sha = _sha256_file(path)
+    disposition = Disposition.RETAIN
+    claim_status = ClaimStatus.REPRODUCED_LOCALLY
+    blockers: tuple[str, ...] = ()
+    if entry.kind == ArtifactKind.CHECKPOINT:
+        disposition = Disposition.MIGRATE
+        claim_status = ClaimStatus.SOFTWARE_CONTRACT_ONLY
+        blockers = (
+            "checkpoint present but not yet schema-qualified under NM-00; "
+            "load only via weights_only helpers before any training claim",
+        )
+    return _identity_from_entry(
+        entry,
+        path,
+        source_revision,
+        _PresenceOutcome(
+            exists=True,
+            content_sha256=content_sha,
+            disposition=disposition,
+            claim_status=claim_status,
+            blockers=blockers,
+        ),
     )
 
 
@@ -264,119 +333,29 @@ def _audit_catalog_entry(
     if entry.is_sweep_folder:
         if path.is_dir():
             return _audit_sweep_folder(entry, path, source_revision=source_revision)
-        return ArtifactIdentity(
-            artifact_id=entry.artifact_id,
-            kind=entry.kind,
-            role=entry.role,
-            path=path,
-            exists=False,
-            content_sha256=None,
-            schema_version=entry.schema_version,
-            model_ids=(),
-            engine=entry.engine,
-            source_revision=source_revision,
-            units=entry.units,
-            seeds=(),
-            trial_ancestry=None,
-            required_channels=entry.required_channels,
-            label_availability=entry.label_availability,
-            is_synthetic_fixture=entry.is_synthetic_fixture,
-            disposition=Disposition.QUARANTINE,
-            claim_status=ClaimStatus.UNSUPPORTED,
-            blockers=(f"absent sweep folder: {path}",),
-            retrieval_instructions=entry.retrieval_instructions,
-            notes=entry.notes,
-            related_issues=entry.related_issues,
+        return _quarantine_absent(
+            entry, path, source_revision, f"absent sweep folder: {path}"
         )
 
     if not path.exists():
-        return ArtifactIdentity(
-            artifact_id=entry.artifact_id,
-            kind=entry.kind,
-            role=entry.role,
-            path=path,
-            exists=False,
-            content_sha256=None,
-            schema_version=entry.schema_version,
-            model_ids=(),
-            engine=entry.engine,
-            source_revision=source_revision,
-            units=entry.units,
-            seeds=(),
-            trial_ancestry=None,
-            required_channels=entry.required_channels,
-            label_availability=entry.label_availability,
-            is_synthetic_fixture=entry.is_synthetic_fixture,
-            disposition=Disposition.QUARANTINE,
-            claim_status=ClaimStatus.UNSUPPORTED,
-            blockers=(f"absent documented path: {path}",),
-            retrieval_instructions=entry.retrieval_instructions,
-            notes=entry.notes,
-            related_issues=entry.related_issues,
+        return _quarantine_absent(
+            entry, path, source_revision, f"absent documented path: {path}"
         )
 
-    # Present file/dir — record hash for files; migrate unsafe checkpoints later.
     if path.is_file():
-        content_sha = _sha256_file(path)
-        disposition = Disposition.RETAIN
-        claim_status = ClaimStatus.REPRODUCED_LOCALLY
-        blockers: tuple[str, ...] = ()
-        if entry.kind == ArtifactKind.CHECKPOINT:
-            # Presence alone is not native qualification; require safe-load keys.
-            disposition = Disposition.MIGRATE
-            claim_status = ClaimStatus.SOFTWARE_CONTRACT_ONLY
-            blockers = (
-                "checkpoint present but not yet schema-qualified under NM-00; "
-                "load only via weights_only helpers before any training claim",
-            )
-        return ArtifactIdentity(
-            artifact_id=entry.artifact_id,
-            kind=entry.kind,
-            role=entry.role,
-            path=path,
-            exists=True,
-            content_sha256=content_sha,
-            schema_version=entry.schema_version,
-            model_ids=(),
-            engine=entry.engine,
-            source_revision=source_revision,
-            units=entry.units,
-            seeds=(),
-            trial_ancestry=None,
-            required_channels=entry.required_channels,
-            label_availability=entry.label_availability,
-            is_synthetic_fixture=entry.is_synthetic_fixture,
-            disposition=disposition,
-            claim_status=claim_status,
-            blockers=blockers,
-            retrieval_instructions=entry.retrieval_instructions,
-            notes=entry.notes,
-            related_issues=entry.related_issues,
-        )
+        return _audit_present_file(entry, path, source_revision)
 
-    return ArtifactIdentity(
-        artifact_id=entry.artifact_id,
-        kind=entry.kind,
-        role=entry.role,
-        path=path,
-        exists=True,
-        content_sha256=None,
-        schema_version=entry.schema_version,
-        model_ids=(),
-        engine=entry.engine,
-        source_revision=source_revision,
-        units=entry.units,
-        seeds=(),
-        trial_ancestry=None,
-        required_channels=entry.required_channels,
-        label_availability=entry.label_availability,
-        is_synthetic_fixture=entry.is_synthetic_fixture,
-        disposition=Disposition.REPAIR,
-        claim_status=ClaimStatus.SOFTWARE_CONTRACT_ONLY,
-        blockers=("path exists but is not a regular file; repair inventory",),
-        retrieval_instructions=entry.retrieval_instructions,
-        notes=entry.notes,
-        related_issues=entry.related_issues,
+    return _identity_from_entry(
+        entry,
+        path,
+        source_revision,
+        _PresenceOutcome(
+            exists=True,
+            content_sha256=None,
+            disposition=Disposition.REPAIR,
+            claim_status=ClaimStatus.SOFTWARE_CONTRACT_ONLY,
+            blockers=("path exists but is not a regular file; repair inventory",),
+        ),
     )
 
 
