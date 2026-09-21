@@ -34,7 +34,6 @@ Freezes target audits, marker measurement semantics, native clocks/events, and p
   - Provides `CanonicalTourTarget` facade for kinematic reference and dynamic fitting paths, guaranteeing missing club clusters or phases are never scored as zero error.
 - **Evidence & Verification**:
   - Added unit test suite in `tests/unit/tour_baselines/`: `test_measurement_map.py`, `test_tour_events.py`, `test_target_audit.py`, `test_canonical_targets.py` (17 tests, 35 total in tour baselines suite).
->>>>>>> origin/main
 
 ## Tour Baselines Model Identities and Coverage Matrix (TB-00, #10585)
 
@@ -6559,6 +6558,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-12 | #10010 | Burn down 43 quarantined packaging and governance tests in scripts/config/unit_gate_quarantine.json under the packaging_ci_and_repository_governance cluster, anchor test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and sync monolith refactor register (#8766). |
 | 2026-09-12 | #10005 | Tightened the DRY duplication quarantine ledger: deleted 72 fingerprints whose occurrence count had fallen below 2 across all supported scanner runtimes (Python 3.11, 3.12, 3.13, 3.14), reducing quarantined debt from 666 to 594. No entry was raised or added; the baseline was not regenerated (#8695). |
 | 2026-09-12 | #10008 | Enforce cryptographic signature verification on release tags in release.yml, update release runbook commands and requirements, and add automated regression tests (#9747). |
+| 2026-09-11 | #9991 | Record the epic #8557 program status ledger (workstreams A–G, milestones M0–M7, status and blocking gate per row) and the canonical-authority statement superseding #8426 in COMPREHENSIVE_RESEARCH_PROGRAM.md; regenerate the proximal–distal release manifest, checksums, and claim-evidence manifest for the edited document (#8557). |
 | 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |
 | 2026-09-10 | #8360 | Bound the launcher splash: every async startup phase (registry, engines, Docker, optional Tools/Rate provider) runs under an explicit timeout with timestamped structured diagnostics; optional-provider failure degrades the shell instead of blocking it; a StartupSession watchdog plus Retry / Continue without provider / Copy diagnostics / Close dialog replaces the quit-on-error path; loading-mode construction no longer loads the registry on the GUI thread. |
 | 2026-09-09 | #9941 | Add calibrated cross-model joint convention conversion, gap-safe golf metrics including event-defined X-Factor stretch and shaft twist velocity, explicit COM/missing-data contracts, model link adapters, and configurable desktop/web plots and API surfaces (#9934). |
