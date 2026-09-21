@@ -81,7 +81,7 @@
 **Learning:** For small 1D NumPy arrays (like 3D vectors), `np.sqrt(ndarray.dot(ndarray))` is ~2x faster than `np.linalg.norm(ndarray)`. It is also faster than `np.sqrt(np.einsum('i,i->', arr, arr))` which is optimized for multidimensional arrays.
 **Action:** Replace `np.linalg.norm()` with `np.sqrt(ndarray.dot(ndarray))` when calculating the magnitude of single 1D arrays.
 
-## 2026-11-20 - Optimize np.linalg.norm in bundle adjustment
+## 2026-11-20 - Optimize Np.Linalg.Norm in Bundle Adjustment
 **Learning:** In bundle adjustment (and other multidimensional vector math operations) replacing `np.linalg.norm(arr, axis=1)` with `np.sqrt(np.einsum('ij,ij->i', arr, arr))` reduces NumPy overhead by avoiding temporary array allocations. However, `np.linalg.norm` creates temporary variables implicitly. For 2D matrices where calculating differences `diff = a - b` happens before norming, `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is significantly faster (~35% speedup) because it avoids those allocations inside `norm(..., axis=1)`.
 **Action:** Always replace `np.linalg.norm(diff, axis=1)` with pre-calculated differences and `np.sqrt(np.einsum('ij,ij->i', diff, diff))` for performance-critical path routines like physics and bundle adjustment in NumPy arrays with >1 dimension.
 
@@ -89,10 +89,10 @@
 **Learning:** Using `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is significantly faster than `np.linalg.norm(..., axis=1)` for multi-dimensional distance calculations since it bypasses the overhead of np.linalg.norm which internally does checks and allocations. Using `np.einsum('ij,ij->i', diff, diff)` directly to compute squared distances allows for further optimizations when calculating RMS or max distance, saving square root evaluations.
 **Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.einsum('ij,ij->i', diff, diff)` in `src/shared/python/biomechanics/joint_conventions.py` and `src/shared/python/biomechanics/golf_trajectory.py`.
 
-## 2024-05-20 - [Optimize RMS and Max Norm Calculation with Einsum]
+## 2024-05-20 - [Optimize RMS and Max Norm Calculation With Einsum]
 **Learning:** Using `np.linalg.norm(..., axis=1)` to compute array magnitudes followed by another power operation like `distances**2` creates unnecessary intermediate arrays and performs redundant square root operations. By replacing it directly with `sq_distances = np.einsum('ij,ij->i', diff_arr, diff_arr)`, we avoid `np.linalg.norm` dispatch overhead and temporary allocations. We can then compute both the RMS and max directly from the squared distances (`np.sqrt(np.mean(sq_distances))` and `np.sqrt(np.max(sq_distances))`), which is ~10-15% faster.
 **Action:** Replace `distances = np.linalg.norm(prediction - target, axis=1)` with `sq_distances = np.einsum('ij,ij->i', diff_arr, diff_arr)` when scalar reductions (like mean or max) are subsequently needed on the distances, to optimize computation.
-## 2024-05-20 - [Optimize Euclidean distance for 1D arrays]
+## 2024-05-20 - [Optimize Euclidean Distance for 1D Arrays]
 **Learning:** To optimize element-wise Euclidean distance calculations for NumPy arrays, replace `np.sqrt(a**2 + b**2)` with `np.hypot(a, b)`. When reducing the array, replacing `np.sum(np.sqrt(a**2 + b**2))` with `np.hypot(a, b).sum()` is surprisingly ~2.3x faster for 1D arrays, as it avoids temporary allocations and bypasses the overhead of the global `np.sum()`.
 **Action:** Replace `np.sum(np.sqrt(a**2 + b**2))` with `np.hypot(a, b).sum()` for 1D arrays.
 
