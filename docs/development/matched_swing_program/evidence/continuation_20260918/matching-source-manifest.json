@@ -1,0 +1,275 @@
+[
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/swing_plane_integration.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/swing_plane_integration.py",
+    "sha256": "35a74d45a035736646e55378926973f5676c703a2341aab4b91016b79bd6bd98",
+    "lf_sha256": "35a74d45a035736646e55378926973f5676c703a2341aab4b91016b79bd6bd98",
+    "size": 6779
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py",
+    "sha256": "5aac7c41d6fc44323f021db4fa9eda95528e1fdc83c12429dc5e92371ab1f228",
+    "lf_sha256": "5aac7c41d6fc44323f021db4fa9eda95528e1fdc83c12429dc5e92371ab1f228",
+    "size": 20452
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/__init__.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/__init__.py",
+    "sha256": "88d8122a38b597a4b116e0c35a4176fd9c841fe12c86da9eb9d944ff6d82c8d6",
+    "lf_sha256": "88d8122a38b597a4b116e0c35a4176fd9c841fe12c86da9eb9d944ff6d82c8d6",
+    "size": 1113
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py",
+    "sha256": "07f09dc12ccbdfa071541d2a57fb0be973f8c5e2ac573086569259bf184407ff",
+    "lf_sha256": "162a35704e6ca7688b8c9dc004c77b01069f80764fe9a74e6f284b968590d616",
+    "size": 10833
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/pinocchio_screw_kinematics.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/pinocchio_screw_kinematics.py",
+    "sha256": "0df97513ba89cb01a6db7e1781895d6e995c9427c3a385f4d9dd981301b63d26",
+    "lf_sha256": "0df97513ba89cb01a6db7e1781895d6e995c9427c3a385f4d9dd981301b63d26",
+    "size": 6132
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/pink_tasks.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/pink_tasks.py",
+    "sha256": "778b5a64f8a8e59adaac80c54b925623759a502f1404f1c77810539a164287a9",
+    "lf_sha256": "778b5a64f8a8e59adaac80c54b925623759a502f1404f1c77810539a164287a9",
+    "size": 29859
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/simulate_with_coefficients.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/simulate_with_coefficients.py",
+    "sha256": "16f6f29ea5ca245f532d450b42a9e6e3429640ba1ac01230c0e931cd985a9bce",
+    "lf_sha256": "16f6f29ea5ca245f532d450b42a9e6e3429640ba1ac01230c0e931cd985a9bce",
+    "size": 6717
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/__main__.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/__main__.py",
+    "sha256": "f316bb726e1a4c6f98b39f0f621a8c9fdcf385b7c5646155f92292501d5d81f1",
+    "lf_sha256": "f316bb726e1a4c6f98b39f0f621a8c9fdcf385b7c5646155f92292501d5d81f1",
+    "size": 377
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/full_body_ik.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/full_body_ik.py",
+    "sha256": "7ca5d92b681a21bd44239637577ef7d5a6abdcf58e6bb86377f5f3504cdfbf53",
+    "lf_sha256": "7ca5d92b681a21bd44239637577ef7d5a6abdcf58e6bb86377f5f3504cdfbf53",
+    "size": 3484
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/marker_kinematics.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/marker_kinematics.py",
+    "sha256": "942714f30cd04e77bac27469fa86f7193ba633ba27cee1ed9482d9badf536769",
+    "lf_sha256": "9c43c23ef0e56afe29b53798f7b7cb3ac6e431d7b0406c27c51fb33c436eeabb",
+    "size": 12909
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/native_model.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/native_model.py",
+    "sha256": "ce26984a11099e4581ab0ee7ef73aedb455406d821342bd10ee7044102bc1dc2",
+    "lf_sha256": "ce26984a11099e4581ab0ee7ef73aedb455406d821342bd10ee7044102bc1dc2",
+    "size": 35262
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/pink_trajectory.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/pink_trajectory.py",
+    "sha256": "85e11742679f9753da2b7b3012b61d2ee831701713c6cc4326cfa72af78d8e5e",
+    "lf_sha256": "85e11742679f9753da2b7b3012b61d2ee831701713c6cc4326cfa72af78d8e5e",
+    "size": 18901
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/candidate_playback.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/candidate_playback.py",
+    "sha256": "35e7a04a7d9f5030911aa28961ecd7e9eae63e6f795341918c0be4455eb7b0c2",
+    "lf_sha256": "35e7a04a7d9f5030911aa28961ecd7e9eae63e6f795341918c0be4455eb7b0c2",
+    "size": 1790
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+    "sha256": "9e0c9015b658a7bd38c2f3c4784d9ef0f1d1b6911f35be1d880956a007d2702e",
+    "lf_sha256": "8f218ca82e46ac248e299cca124d7f7659e9ce0b3139a02ffd848a312b08453c",
+    "size": 15199
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/contact_derivatives.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/contact_derivatives.py",
+    "sha256": "3ad7a62efd4ea43802032b7acbaf3e76b004fe0ae9aff76413cc6313a2d43d67",
+    "lf_sha256": "3ad7a62efd4ea43802032b7acbaf3e76b004fe0ae9aff76413cc6313a2d43d67",
+    "size": 5249
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+    "archive_path": "ms31-crocoddyl/src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+    "sha256": "df8acf974af6239797c859612f5926e2f94c5fe053245bf41c307b1603d65925",
+    "lf_sha256": "863c355d6e6303f37aefcadc863290a3a8d36a6d9b8b2fc27dc27b9536ab7277",
+    "size": 33061
+  },
+  {
+    "path": "/home/dieterolson/ms31-crocoddyl/tests/integration/motion_matching/test_full_body_fit_native.py",
+    "archive_path": "ms31-crocoddyl/tests/integration/motion_matching/test_full_body_fit_native.py",
+    "sha256": "6fc822104ce9e81e359a14a337b3b34052403782f6bd647888163e15e36ca125",
+    "lf_sha256": "6fc822104ce9e81e359a14a337b3b34052403782f6bd647888163e15e36ca125",
+    "size": 2925
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/__init__.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/__init__.py",
+    "sha256": "4c4ab734fd810ffa1b00292b0dc9e437689474d4257686514af5688f8f23a0e7",
+    "lf_sha256": "cecf5f27111f5952d3b811ba6fa4fbf8427064ef0cc9022a9f1db97a879ed9ea",
+    "size": 3168
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/cli.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/cli.py",
+    "sha256": "7af731aebfbeb54b62b58a2124cc1418346c73cf1b2e24fac29b2db89aaae13a",
+    "lf_sha256": "7af731aebfbeb54b62b58a2124cc1418346c73cf1b2e24fac29b2db89aaae13a",
+    "size": 7704
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/visualization.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/visualization.py",
+    "sha256": "a2a943aefbfda1c35b6cfd25757998bc22fed408602da151d18ffef72b1d67b7",
+    "lf_sha256": "a2a943aefbfda1c35b6cfd25757998bc22fed408602da151d18ffef72b1d67b7",
+    "size": 6454
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/marker_calibration.py",
+    "sha256": "81990aaaa0cc2c187dd2297997501e473f7831431622f19394f1020bace6e701",
+    "lf_sha256": "81990aaaa0cc2c187dd2297997501e473f7831431622f19394f1020bace6e701",
+    "size": 833
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/polynomial_profile.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/polynomial_profile.py",
+    "sha256": "d33d7e6b360a1ae1994452f9b1918ceee5c802fc7e2072eebc1cb3d0c29de9dd",
+    "lf_sha256": "d33d7e6b360a1ae1994452f9b1918ceee5c802fc7e2072eebc1cb3d0c29de9dd",
+    "size": 13760
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/test_opensim_os0_qualification.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/test_opensim_os0_qualification.py",
+    "sha256": "f0912812609aad63016945d2a7c084921c6feffe64a0a972cc65384d11062008",
+    "lf_sha256": "f0912812609aad63016945d2a7c084921c6feffe64a0a972cc65384d11062008",
+    "size": 1409
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/moco_tracking.py",
+    "sha256": "fa2c7ca5e02de5b518d010d9f6e0742978114e8700430eb94fc954a9d2445a48",
+    "lf_sha256": "ed71874b5e0e843031149464e67de1f148ac92f02e2efab5632d51188ea5b4df",
+    "size": 21904
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/moco_g1.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/moco_g1.py",
+    "sha256": "f2ba352aaaa23aaec3690b9dac4473f72a59071788809ba1342335c5e25ba3a1",
+    "lf_sha256": "1201ed614dbfc0ac34684dbcc963f89eb8cf66d41a2d76dcca0437626a3f453c",
+    "size": 15375
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/scale.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/scale.py",
+    "sha256": "fcc0d27c57959ba6dab4d7d06306fa29fbcea6075590b748c7f369fae7825ff3",
+    "lf_sha256": "fcc0d27c57959ba6dab4d7d06306fa29fbcea6075590b748c7f369fae7825ff3",
+    "size": 6607
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/metrics.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/metrics.py",
+    "sha256": "d9208224d8e05a5c9d14c71077c1b07ae2f5e01362c0e681a04a396627d768ad",
+    "lf_sha256": "d9208224d8e05a5c9d14c71077c1b07ae2f5e01362c0e681a04a396627d768ad",
+    "size": 440
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/marker_set.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/marker_set.py",
+    "sha256": "c1c2e932df0f89ad761c2d47324284e5ff2c011cb662d25339e85a4ea06e291a",
+    "lf_sha256": "c1c2e932df0f89ad761c2d47324284e5ff2c011cb662d25339e85a4ea06e291a",
+    "size": 5494
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/os2_runtime_qualification.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/os2_runtime_qualification.py",
+    "sha256": "8bbd19fa6eb60400b6965265a2bb50d639a13454b99bb2d20aec8a6fb3cc8a13",
+    "lf_sha256": "8bbd19fa6eb60400b6965265a2bb50d639a13454b99bb2d20aec8a6fb3cc8a13",
+    "size": 3508
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/marker_map.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/marker_map.py",
+    "sha256": "d607d4ae0651be4b90274a1bc696062f711dc5d2701a0069c991b56a53a36a36",
+    "lf_sha256": "d607d4ae0651be4b90274a1bc696062f711dc5d2701a0069c991b56a53a36a36",
+    "size": 3520
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/trc.py",
+    "archive_path": "opensim-10341-runtime/src/engines/physics_engines/opensim/python/tour_matching/trc.py",
+    "sha256": "d9a26a091809b631e5337375bb50b34dd897dada0dc9723c24007b5d0eeb417f",
+    "lf_sha256": "d9a26a091809b631e5337375bb50b34dd897dada0dc9723c24007b5d0eeb417f",
+    "size": 4222
+  },
+  {
+    "path": "/home/dieterolson/opensim-10341-runtime/docs/development/opensim_tour_matching/os7_moco_g1_driver.py",
+    "archive_path": "opensim-10341-runtime/docs/development/opensim_tour_matching/os7_moco_g1_driver.py",
+    "sha256": "cf3c9bda6d6f0a664e935797b69cd0d51ca9cb8abe05abe4246ef309a336e1a2",
+    "lf_sha256": "29e39f0799b3d18a88a778360692fd7cc659913f56de6457d39fbde4de06cd5d",
+    "size": 19583
+  },
+  {
+    "path": "/home/dieterolson/fits/w030r/receipt.json",
+    "archive_path": "fits/w030r/receipt.json",
+    "sha256": "8d0b9a6f1e6b8320b7313b93ade7689f6257b992b008fe305a76be26345a2742",
+    "lf_sha256": "8d0b9a6f1e6b8320b7313b93ade7689f6257b992b008fe305a76be26345a2742",
+    "size": 8058
+  },
+  {
+    "path": "/home/dieterolson/fits/w030r/warm_start.npz",
+    "archive_path": "fits/w030r/warm_start.npz",
+    "sha256": "54cf5d569defae172b1827231eaaeca54ef0192b91f8cf19beda4baf4d5cae63",
+    "lf_sha256": "63ca4a17d6cdd9eb6dbd6cc30c527660f1c51ef1753479ee19360a687cf1a729",
+    "size": 200211
+  },
+  {
+    "path": "/home/dieterolson/fits/w030r/candidate.npz",
+    "archive_path": "fits/w030r/candidate.npz",
+    "sha256": "90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599",
+    "lf_sha256": "c2a394a85b045c748c60d7a3b702048faa072c09946b08ac4d756b6ce8ea25a3",
+    "size": 308261
+  },
+  {
+    "path": "/home/dieterolson/fits/driver_g1/stage_0.30s.npz",
+    "archive_path": "fits/driver_g1/stage_0.30s.npz",
+    "sha256": "67dba68f5c01201aa72c1326f55cc647a19db1429bcbc70e6551348c1a10b3c9",
+    "lf_sha256": "a2536388c9197128bb5961148a7d5eaedfce45b9a5d41c58f5045d22ba3716c1",
+    "size": 107170
+  },
+  {
+    "path": "/home/dieterolson/fits/driver_g1/stage_0.60s.npz",
+    "archive_path": "fits/driver_g1/stage_0.60s.npz",
+    "sha256": "eebfa0e7b69e62aac3a10f4d6cf9b18c02c81900f89da51b12e45475d66082ec",
+    "lf_sha256": "280d13154122bad3bd05b5bb667662c6720dae8661ed4174c4bb52b0837efb84",
+    "size": 212458
+  },
+  {
+    "path": "/home/dieterolson/fits/driver_g1/warm_start.npz",
+    "archive_path": "fits/driver_g1/warm_start.npz",
+    "sha256": "44331c9eff0ccc46c759b9084dd9d7d1d472bb8cb758ebc82baa0e29fbb9f606",
+    "lf_sha256": "570060be94dd18feef87e909f7f178fa3be9e770bf383cb6bbb685c0fad6d31c",
+    "size": 575988
+  },
+  {
+    "path": "/home/dieterolson/fits/driver_g1/stage_0.45s.npz",
+    "archive_path": "fits/driver_g1/stage_0.45s.npz",
+    "sha256": "1126a7da166b216ec44894eee7f10d3ca82c29006149f3ae5446e99a5378a3ce",
+    "lf_sha256": "1126a7da166b216ec44894eee7f10d3ca82c29006149f3ae5446e99a5378a3ce",
+    "size": 159945
+  }
+]
