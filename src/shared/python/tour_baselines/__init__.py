@@ -11,6 +11,10 @@ from .audit import (
     TargetAuditReceipt,
     audit_tour_target,
 )
+from .calibration_receipt import (
+    CALIBRATION_RECEIPT_SCHEMA_VERSION,
+    CalibrationReceipt,
+)
 from .canonical_targets import (
     CanonicalTourTarget,
     evaluate_target_tracking_error,
@@ -22,6 +26,25 @@ from .coverage import (
     generate_coverage_matrix,
     list_excluded_tools,
     render_coverage_markdown,
+)
+from .geometry_calibration import (
+    CalibratedGeometry,
+    calibrate_link_geometry,
+)
+from .hub_conditions import (
+    FixedPivotHub,
+    MovingHub,
+)
+from .initial_state import (
+    InitialStateMapping,
+    estimate_initial_state,
+)
+from .plane import (
+    DegeneratePlaneError,
+    PlaneFitDiagnostics,
+    PlaneGravity,
+    RigidSwingPlane,
+    fit_rigid_swing_plane,
 )
 from .events import (
     SWING_EVENTS_DRIVER,
@@ -114,14 +137,20 @@ __all__ = [
     "BaselineIdentity",
     "BaselinePackage",
     "BiomechanicalEvent",
+    "CALIBRATION_RECEIPT_SCHEMA_VERSION",
+    "CalibratedGeometry",
+    "CalibrationReceipt",
     "CanonicalTourTarget",
     "CoverageCell",
+    "DegeneratePlaneError",
     "DetectionMethod",
     "DynamicFeasibilityStatus",
     "EvidenceStatus",
     "FitMode",
+    "FixedPivotHub",
     "GolfModelIdentity",
     "GoverningEpic",
+    "InitialStateMapping",
     "KinematicAccuracyStatus",
     "MEASUREMENT_MAP_DRIVER",
     "MEASUREMENT_MAP_IRON",
@@ -131,16 +160,20 @@ __all__ = [
     "MarkerMetricSummary",
     "MeasurementClass",
     "ModelTopology",
+    "MovingHub",
     "PROVENANCE_DRIVER",
     "PROVENANCE_IRON",
     "PhaseMetricSummary",
     "PhysicalFitMetrics",
     "PlanarDrivenPendulumProfile",
+    "PlaneFitDiagnostics",
+    "PlaneGravity",
     "ProductPromotionStatus",
     "QUALIFICATION_PROFILE_VERSION",
     "QualificationGateResult",
     "QualificationVerdict",
     "ReconciliationRecord",
+    "RigidSwingPlane",
     "SHARED_PLAYER_ID",
     "SWING_EVENTS_DRIVER",
     "SWING_EVENTS_IRON",
@@ -156,14 +189,17 @@ __all__ = [
     "TriplePendulumProfile",
     "UpperBodyGolferProfile",
     "audit_tour_target",
+    "calibrate_link_geometry",
     "clear_golf_model_registry",
     "compute_fit_metrics",
     "compute_landmark_signature",
     "detect_provider_mismatch",
     "detect_tour_events",
+    "estimate_initial_state",
     "evaluate_baseline_qualification",
     "evaluate_target_tracking_error",
     "export_baseline_package",
+    "fit_rigid_swing_plane",
     "generate_coverage_matrix",
     "get_golf_model",
     "get_governing_epics",
