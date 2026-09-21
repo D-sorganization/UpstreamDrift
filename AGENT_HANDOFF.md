@@ -835,6 +835,39 @@ scripts.shared_tools.divergence_inventory --write` re-records the 16 new
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
 
+## Impact Explorer Acceptance Matrix: #9550
+
+- Branch `conductor/issue-9550`, commit SELF; PR not created. Epic #9546.
+- Audit snapshot UD `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / Tools
+  `3d93bb2c89813e17551814d3be7e895f791e29af`; reconciled 2026-09-18 against UD
+  `5347cba0f4378cd72a6e8afea9fb27c8bfe5db75` and the consumed Tools pin
+  `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (unchanged by this work).
+- `src/config/impact_acceptance.json` is the frozen matrix; its gate
+  `tests/config/impact_acceptance/test_impact_acceptance_matrix.py` probes each
+  capability row against the shipping library and refuses a predictive claim
+  while any item is open. Human packet:
+  `docs/development/impact_acceptance_matrix.md`.
+- `impact-explorer-web-build` now runs Tools' `release/generateReleaseArtifacts.mjs`
+  with `ROC_RELEASE_REVISION=<gitlink>` and
+  `scripts/ci/verify_impact_explorer_bundle.py`, which serves `dist` through the
+  `/impact-explorer-app` mount contract and checks revision-stamped index,
+  manifest SHA-256 for every asset, JavaScript media type, base path and a
+  404 for a missing artifact; receipt artifact
+  `impact-explorer-bundle-receipt-<sha>`. Local run at the pin: 76 assets,
+  5 JS, PASS (Git Bash needs `MSYS_NO_PATHCONV=1` or the base path is mangled).
+- Validation: matrix gate 26 passed; verifier + mount tests 14 passed;
+  feature-parity / industrial-readiness gates 91 passed; ruff check/format,
+  LoD, error-handling ratchet, file-size, TODO, declared-route-producer,
+  workflow-context and SPEC gates pass. Pre-existing local failures outside
+  scope: `test_tools_child_copy_contract.py` (needs a git-backed Tools
+  checkout) and `test_urdf_governance_docs.py` docstring checks.
+- Open (recorded with owner/plan/blockers in the JSON): shared provider goldens
+  and reference datasets (Tools #4251), installed-artifact restart/reload/offline
+  smoke (#9417), rendered screenshot manifest, numerical cross-runtime scenario
+  comparison; `tools.rate_of_closure` parity is a gap under #9546 until then.
+  Do not close #9550 on this PR alone; it delivers the matrix and install
+  evidence, not items 3 and 5.
+
 ## Impact Explorer Web Route Producer: #9484
 
 - PR: #9724 (open against `main`, `Fixes #9484`).
