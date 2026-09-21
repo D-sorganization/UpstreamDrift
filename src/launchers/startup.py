@@ -38,7 +38,6 @@ PHASE_REGISTRY = "Loading model registry"
 PHASE_ENGINES = "Initializing engine manager"
 PHASE_DOCKER = "Checking Docker status"
 PHASE_TOOLS_PROVIDER = "Checking Tools provider (Rate of Closure)"
-PHASE_EMBEDDABLE_TOOLS = "Bootstrapping embeddable tools"
 
 # Per-phase hard bounds in seconds. Every phase that can block (imports,
 # filesystem discovery, subprocess probes) settles within its bound; the
@@ -47,7 +46,6 @@ REGISTRY_PHASE_TIMEOUT_S = 20.0
 ENGINE_PHASE_TIMEOUT_S = 20.0
 DOCKER_PHASE_TIMEOUT_S = 15.0
 PROVIDER_PHASE_TIMEOUT_S = 5.0
-EMBEDDABLE_PHASE_TIMEOUT_S = 15.0
 
 # Theme availability check
 try:
@@ -121,7 +119,6 @@ class StartupResults:
         # degraded instead of inferring it from splash behaviour.
         self.phases: tuple[StartupPhaseRecord, ...] = ()
         self.tools_provider: ProviderProbeResult | None = None
-        self.bootstrapped_tools: list[str] = []
 
     @classmethod
     def from_dict(cls, data: dict) -> StartupResults:
@@ -137,7 +134,6 @@ class StartupResults:
         results.startup_time_ms = data.get("startup_time_ms", 0)
         results.phases = tuple(data.get("phases", ()))
         results.tools_provider = data.get("tools_provider")
-        results.bootstrapped_tools = list(data.get("bootstrapped_tools", []))
         return results
 
     @property
@@ -423,11 +419,6 @@ class AsyncStartupWorker(QThread):
     def _probe_tools_provider(self) -> ProviderProbeResult:
         return probe_tools_provider(self.repos_root, os.environ.get("TOOLS_REPO_PATH"))
 
-    def _bootstrap_embeddable_tools(self) -> list[str]:
-        from src.launchers.embedded_tool_bootstrap import bootstrap_embeddable_tools
-
-        return bootstrap_embeddable_tools()
-
     @staticmethod
     def _docker_outcome(available: bool) -> tuple[str, str, str]:
         return OUTCOME_OK, "", "available" if available else "not available"
@@ -467,22 +458,12 @@ class AsyncStartupWorker(QThread):
                 )
             )
 
-            self.progress_signal.emit(f"{PHASE_TOOLS_PROVIDER}...", 75)
+            self.progress_signal.emit(f"{PHASE_TOOLS_PROVIDER}...", 80)
             self.results.tools_provider = timeline.run_phase(
                 PHASE_TOOLS_PROVIDER,
                 self._probe_tools_provider,
                 timeout_s=PROVIDER_PHASE_TIMEOUT_S,
                 outcome_of=ProviderProbeResult.phase_outcome,
-            )
-
-            self.progress_signal.emit(f"{PHASE_EMBEDDABLE_TOOLS}...", 90)
-            self.results.bootstrapped_tools = (
-                timeline.run_phase(
-                    PHASE_EMBEDDABLE_TOOLS,
-                    self._bootstrap_embeddable_tools,
-                    timeout_s=EMBEDDABLE_PHASE_TIMEOUT_S,
-                )
-                or []
             )
         except StartupPhaseError as exc:
             self._finish_timeline()
@@ -492,11 +473,5 @@ class AsyncStartupWorker(QThread):
 
         self._finish_timeline()
         self.progress_signal.emit("Ready", 100)
-        logger.info(
-            "Async startup completed in %d ms (phases: %s)",
-            self.results.startup_time_ms,
-            ", ".join(
-                f"{p.name}={p.duration_ms}ms [{p.outcome}]" for p in self.results.phases
-            ),
-        )
+        self.msleep(500)  # QThread.msleep: non-blocking within the Qt thread scheduler
         self.finished_signal.emit(self.results)

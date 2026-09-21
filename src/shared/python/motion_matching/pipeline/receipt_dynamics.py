@@ -144,11 +144,6 @@ class WeightFractionReceipt(BaseModel):
         description="Mean weight fraction observed during forward simulation",
         json_schema_extra={"unit": "BW", "stage": "dynamics"},
     )
-    by_phase: dict[str, dict[str, float]] | None = Field(
-        None,
-        description="Phase-specific weight fraction breakdown (address, backswing, downswing, impact, follow-through)",
-        json_schema_extra={"unit": "compound", "stage": "dynamics"},
-    )
 
 
 class BackswingReceipt(BaseModel):

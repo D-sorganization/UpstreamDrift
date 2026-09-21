@@ -111,11 +111,3 @@ class DrakeMatchingPlant:
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float
     ) -> tuple[np.ndarray, np.ndarray]:
         return self.model.step(q, v, tau, dt)
-
-    def fit(self, *args: Any, **kwargs: Any) -> Any:
-        """Execute Drake native full-body trajectory fitting (MS-30)."""
-        from src.engines.physics_engines.drake.python.full_body_fit import (
-            fit_full_body_drake,
-        )
-
-        return fit_full_body_drake(self.spec_dict, *args, **kwargs)

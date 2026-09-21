@@ -894,11 +894,6 @@ class DraggableModelCard(QFrame):
         ``resolve_tile_target`` must not render a green "Ready" chip.
         """
         if self._target_resolvable is None:
-            model = self.model
-            model_type = type(model)
-            if "Mock" in model_type.__name__:
-                self._target_resolvable = True
-                return True
             try:
                 from src.shared.python.config.tile_target_resolution import (
                     resolve_tile_target,
@@ -926,17 +921,15 @@ class DraggableModelCard(QFrame):
         if not self._target_is_resolvable():
             return self._STATUS_STRINGS["unavailable"]
 
-        # 1. Prefer an explicit model.status or launcher.status — that is the
-        #    canonical declaration.
-        model_status = getattr(self.model, "status", None)
-        if not isinstance(model_status, str):
-            launcher = getattr(self.model, "launcher", None)
-            if isinstance(launcher, dict):
-                model_status = launcher.get("status")
-            else:
-                model_status = getattr(launcher, "status", None) if launcher else None
-        if isinstance(model_status, str):
-            mapped = self._STATUS_STRINGS.get(model_status.strip().lower())
+        # 1. Prefer an explicit launcher.status from the YAML — that is the
+        #    canonical declaration. Most tiles already set it.
+        launcher = getattr(self.model, "launcher", None)
+        if isinstance(launcher, dict):
+            yaml_status = launcher.get("status")
+        else:
+            yaml_status = getattr(launcher, "status", None) if launcher else None
+        if isinstance(yaml_status, str):
+            mapped = self._STATUS_STRINGS.get(yaml_status.strip().lower())
             if mapped is not None:
                 return mapped
 

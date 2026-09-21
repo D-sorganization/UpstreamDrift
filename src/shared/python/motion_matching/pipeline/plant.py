@@ -113,17 +113,9 @@ def _init_builtins() -> None:
 
         return PinocchioMatchingPlant(spec)
 
-    def _load_opensim(spec: bytes | Mapping[str, Any]) -> MatchingPlant:
-        from src.shared.python.motion_matching.pipeline.plants.opensim import (
-            OpensimMatchingPlant,
-        )
-
-        return OpensimMatchingPlant(spec)
-
     _PLANT_REGISTRY["mujoco"] = _load_mujoco
     _PLANT_REGISTRY["drake"] = _load_drake
     _PLANT_REGISTRY["pinocchio"] = _load_pinocchio
-    _PLANT_REGISTRY["opensim"] = _load_opensim
 
 
 @precondition(lambda engine, factory: bool(engine), "Engine name must be non-empty")

@@ -6,7 +6,6 @@ import pytest
 
 from src.shared.python.motion_matching.pipeline.dynamics import (
     com_report,
-    compute_phase_weight_fractions,
     rom_flags,
     segment_rms,
     zmp_summary,
@@ -149,33 +148,6 @@ def test_build_dynamics_report_structure() -> None:
     assert "marker_rms_m" in report
     assert "root_error_timeline_m" in report
     assert "backswing_to_1s" in report
-    assert "by_phase" in report["weight_fraction"]
-    assert "address" in report["weight_fraction"]["by_phase"]
     assert report["lowest_sphere_height_min_m"] == 0.0
     assert report["lowest_sphere_height_max_m"] == 0.0
     assert errors.shape == (720, 2)
-
-
-@pytest.mark.unit
-def test_compute_phase_weight_fractions() -> None:
-    times = np.linspace(0.0, 2.0, 201)
-    record_time_s = np.linspace(0.0, 2.0, 201)
-    weight_fraction = np.ones(201)
-    # Set address to 1.0, impact to 1.8
-    weight_fraction[145:156] = 1.8
-
-    result = compute_phase_weight_fractions(times, record_time_s, weight_fraction)
-    for expected_phase in (
-        "address",
-        "backswing",
-        "downswing",
-        "impact",
-        "follow_through",
-    ):
-        assert expected_phase in result
-        assert "min" in result[expected_phase]
-        assert "max" in result[expected_phase]
-        assert "mean" in result[expected_phase]
-
-    assert result["address"]["min"] == pytest.approx(1.0)
-    assert result["impact"]["max"] == pytest.approx(1.8)

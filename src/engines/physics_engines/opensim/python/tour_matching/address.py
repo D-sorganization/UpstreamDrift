@@ -21,7 +21,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import Any
 
 from defusedxml import ElementTree as SafeET
 import numpy as np
@@ -37,7 +37,7 @@ from src.engines.physics_engines.opensim.python.tour_matching.marker_map import 
 from src.shared.python.contracts import ensure, require
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
-Array: TypeAlias = NDArray[np.float64]
+Array = NDArray[np.float64]
 
 
 @dataclass(frozen=True)

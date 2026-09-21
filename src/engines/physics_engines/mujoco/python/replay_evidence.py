@@ -237,11 +237,7 @@ def generate_replay(
     if failures and not diagnostic:
         raise ValueError("Parity failed: " + "; ".join(failures))
     efforts = np.zeros_like(arrays["q"])
-    if len(arrays["u"]) == len(arrays["q"]):
-        efforts[:, plant.actuated] = arrays["u"]
-    else:
-        efforts[:-1, plant.actuated] = arrays["u"]
-        efforts[-1, plant.actuated] = arrays["u"][-1]
+    efforts[:, plant.actuated] = arrays["u"]
     q, v, failure = replay_controls(
         plant, arrays["time_s"], arrays["q"][0], arrays["v"][0], efforts, settings
     )

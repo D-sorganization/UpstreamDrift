@@ -225,8 +225,8 @@ class MatchingBackendType(str, Enum):
 
 
 _EXPERIMENTAL_BACKEND_REASONS: dict[MatchingBackendType, str] = {
-    MatchingBackendType.CMC: "OpenSim CMC muscle redundancy solve is not implemented (retired per ADR-0051; use MatchingPlant pipeline)",
-    MatchingBackendType.RRA: "OpenSim RRA setup, execution, and residual parsing are not implemented (retired per ADR-0051; use MatchingPlant pipeline)",
+    MatchingBackendType.CMC: "OpenSim CMC muscle redundancy solve is not implemented",
+    MatchingBackendType.RRA: "OpenSim RRA setup, execution, and residual parsing are not implemented",
     # TRAJOPT_DRAKE re-exposed per #8131's criteria: the direct-collocation
     # solver is implemented and its dependency-present test passes without
     # xfail (epic #8390, B2/#8397). pydrake absence degrades to a failed

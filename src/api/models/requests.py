@@ -261,23 +261,6 @@ class CounterfactualRequest(BaseModel):
         return normalized
 
 
-class CandidateCounterfactualRequest(BaseModel):
-    """Request model for counterfactual fork rollout on candidate session."""
-
-    fork_frame_idx: int = Field(
-        ge=0, description="Frame index to initiate intervention fork"
-    )
-    strategy: str = Field(
-        "zero_trail_arm_torque",
-        description="Counterfactual intervention strategy",
-    )
-    duration_frames: int | None = Field(
-        None,
-        ge=1,
-        description="Number of frames to roll forward (defaults to remainder of session)",
-    )
-
-
 class VideoAnalysisRequest(BaseModel):
     """Request model for video-based pose estimation."""
 

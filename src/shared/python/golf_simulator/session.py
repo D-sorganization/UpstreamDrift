@@ -347,13 +347,6 @@ class GolfSessionService:
         self._receipts[shot_id] = reconciled
 
         if self._journal is not None:
-            try:
-                self._journal.get_entry(shot_id)
-            except KeyError:
-                self._journal.record_intent(
-                    shot_id=shot_id,
-                    payload_bytes=operator_evidence.encode("utf-8"),
-                )
             if confirmed:
                 self._journal.record_acknowledgment(
                     shot_id=shot_id,

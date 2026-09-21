@@ -5,7 +5,6 @@ from __future__ import annotations
 __all__ = [
     "DrakeMatchingPlant",
     "MujocoMatchingPlant",
-    "OpensimMatchingPlant",
     "PinocchioMatchingPlant",
 ]
 
@@ -19,10 +18,6 @@ def __getattr__(name: str) -> object:
         from .drake_plant import DrakeMatchingPlant
 
         return DrakeMatchingPlant
-    if name == "OpensimMatchingPlant":
-        from .opensim import OpensimMatchingPlant
-
-        return OpensimMatchingPlant
     if name == "PinocchioMatchingPlant":
         from .pinocchio_plant import PinocchioMatchingPlant
 
