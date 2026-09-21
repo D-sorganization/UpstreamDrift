@@ -2,6 +2,22 @@
 
 from __future__ import annotations
 
+from .adapters import club_target_to_observation, observation_to_club_target
+from .observation import (
+    OBSERVATION_SCHEMA,
+    ClubObservation,
+    ComponentMask,
+    ComponentStatus,
+    DerivationMetadata,
+    ObservationEvent,
+    ResampleRecord,
+    UncertaintyMetadata,
+    build_calibrated_observation_fixture,
+    interpolate_observation,
+    load_observation_fixture_pack,
+    orientation_residual_so3,
+    scored_component_subset,
+)
 from .workbook_identity import (
     ALIAS_SHEETS,
     CANONICAL_TRIAL_SHEETS,
@@ -30,14 +46,29 @@ __all__ = [
     "FRAME_AUTHORITY",
     "IDENTITY_SCHEMA",
     "NATIVE_SAMPLE_RATE_HZ",
+    "OBSERVATION_SCHEMA",
     "ORIENTATION_AXIS_POLICY",
     "UNIT_AUTHORITY",
     "WIFFLE_PROV1_SHA256",
+    "ClubObservation",
     "ClubWorkbookIdentity",
+    "ComponentMask",
+    "ComponentStatus",
+    "DerivationMetadata",
+    "ObservationEvent",
+    "ResampleRecord",
     "TrialRecord",
+    "UncertaintyMetadata",
     "WorkbookManifest",
+    "build_calibrated_observation_fixture",
     "build_club_workbook_identity",
+    "club_target_to_observation",
     "count_numeric_samples",
+    "interpolate_observation",
+    "load_observation_fixture_pack",
+    "observation_to_club_target",
+    "orientation_residual_so3",
     "read_sheet_event_samples",
+    "scored_component_subset",
     "verify_workbook_hash",
 ]
