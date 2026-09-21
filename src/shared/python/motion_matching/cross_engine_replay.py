@@ -383,7 +383,7 @@ def render_marker_overlay_animation(
     duration_ms = (
         float(1000.0 * stride * (time_s[1] - time_s[0])) if len(time_s) > 1 else 50.0
     )
-    imageio.mimsave(str(out_p), frames, duration=duration_ms, loop=0)
+    imageio.mimsave(str(out_p), list(frames), duration=duration_ms, loop=0)  # type: ignore[arg-type]
     logger.info("Saved overlay animation to %s (%d frames)", out_p, len(frames))
     return out_p
 
