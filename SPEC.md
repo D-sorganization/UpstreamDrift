@@ -35,6 +35,29 @@ Defines generic C3D capture ingestion contracts and mathematical identifiability
 - **Verification Suite**:
   - Unit tests in `tests/unit/motion_matching/test_capture_contract_generic.py` and `test_identifiability.py` covering backwards compatibility, CMU locomotion rejection, unit scaling/label mapping, gap fraction tolerances, synthetic planted null directions, and 44-DOF uncalibrated/calibrated/regularized rank.
 
+## Fit and Independently Replay Driven Double Pendulum (TB-04, #10589)
+
+Fits bounded continuous joint torques to observed swing data and verifies forward dynamics replay under the Tour Baselines program:
+- **Bidirectional Mapping and Dynamics Parity (`src/engines/physics_engines/pendulum/python/motion_matching/adapters.py`)**:
+  - Implements bidirectional parameter conversion between `DoublePendulumParameters` and Tools `physics.py` (`double_pendulum_equations`).
+  - Verifies exact analytical acceleration parity ($< 10^{-14}\text{ rad/s}^2$) between both dynamics formulations across broad state and forcing grids.
+  - Exposes `check_dynamics_parity` as a reusable qualification gate.
+- **Bounded Smooth Torque Optimization (`src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py`)**:
+  - Formulates joint torque profiles $\tau(t)$ using degree-6 Bernstein polynomials strictly bounded within physical limits $[\tau_{\min}, \tau_{\max}]$ via control point bounds.
+  - Incorporates combined objective function penalizing Euclidean marker tracking error, torque rate curvature, effort regularizer, and terminal impact velocity.
+  - Implements `fit_bounded_double_pendulum` using bounded non-linear least squares (`scipy.optimize.least_squares`) with analytical and numerical fallback modes.
+- **Motion Matching Provider Integration (`src/engines/physics_engines/pendulum/python/motion_matching/provider.py`)**:
+  - Implements `PendulumFitSwingProvider` adhering to `MotionMatchingProvider` interface.
+  - Computes deterministic cryptographic 16-character SHA-256 target hashes.
+  - Supports non-uniform observation timestamps and maps initial observations directly to initial generalized state $(q_0, v_0)$, eliminating frame-0 off-by-one regressions.
+- **Authoritative Qualification & Independent Replay (`src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`)**:
+  - Replays fitted continuous torques in an independent forward simulation using 4x tighter integration substeps (`Radau` / `RK45`).
+  - Verifies replay numerical agreement ($< 10^{-4}\text{ m}$) against optimized rollout trajectory.
+  - Generates authoritative baseline packages (`tb04_driver_baseline_package.npz`, `tb04_iron_baseline_package.npz`) and qualification receipts (`tb04_driver_qualification_receipt.json`, `tb04_iron_qualification_receipt.json`).
+  - Updates tour baseline coverage matrix (`docs/plans/tour_baselines/coverage_matrix.md`).
+- **Verification Suite (`tests/unit/engines/physics_engines/pendulum/test_double_pendulum_fit.py`)**:
+  - Unit test suite validating dynamics parity, target hash determinism, initial state tracking, non-uniform time integration, bounded torque guarantee, tighter-step replay, unfeasible error reporting, and driver/iron qualification receipts.
+
 ## Tour Baselines Swing Planes, Fixed Geometry, and Feasible Initial States (TB-03, #10588)
 
 Calibrates swing planes, fixed geometry, and feasible initial states under the Tour Baselines program:
@@ -6643,6 +6666,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
 | 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
 | 2026-09-18 | #10459 | Add the fail-closed BunkerShot3D product acceptance matrix (`src/config/bunkershot3d_qualification.json`) tracking every epic child, dependency order and prediction-acceptance criteria; `release_status` is bound to the live V&V register and reads `blocked`. |
@@ -6667,7 +6691,6 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
-| 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10316 | Optimized np.linalg.norm with math.sqrt(dot) in mujoco_swing_source.py. (spec-exempt: micro-optimization) |
