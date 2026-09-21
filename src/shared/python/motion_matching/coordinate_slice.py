@@ -9,7 +9,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 SLICE_MAP_SCHEMA_VERSION = "coordinate-slice-v1"
 INCHES_PER_M = 39.37007874015748
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 _DEFAULT_SLICE_MAP = (
     Path(__file__).resolve().parents[4]
