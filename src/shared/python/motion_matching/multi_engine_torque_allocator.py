@@ -292,7 +292,7 @@ class SyntheticMultibodyFixture:
 
     @property
     def engine_type(self) -> EngineType:
-        raise NotImplementedError("Subclasses must define engine_type")
+        return getattr(self, "_engine_type", EngineType.SIMSCAPE)
 
     @property
     def nv(self) -> int:
