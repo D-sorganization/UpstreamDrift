@@ -255,7 +255,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #8684
 - **Branch:** conductor/issue-8684
-- **PR:** not created
+- **PR:** #10668
 - **Paths:** docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md, MODEL_COMPLETION_FALSIFICATION_MATRIX.md
 - **Started:** 2026-09-11
 - **Last verified:** 2026-09-11 (`SELF`)
@@ -283,7 +283,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10615 (epic #10603)
 - **Branch:** fix/issue-10615-nm00-dataset-audit
-- **PR:** not created
+- **PR:** #10668
 - **Paths:** src/shared/python/neural_motion/; tests/unit/neural_motion/; docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21 at SELF (`python -m pytest tests/unit/neural_motion/test_artifact_audit.py -q -n 0 --no-cov --timeout=60` green; absent TenThousandFiles quarantined; synthetic fixture software-contract-only; plateau notes NOTE_ONLY)
@@ -968,7 +968,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10460
 - **Branch:** feat/10460-consume-tools-gspro-codec
-- **PR:** not created
+- **PR:** #10668
 - **Paths:** src/shared/python/golf_simulator/adapters/gspro/codec.py; tests/unit/golf_simulator/test_gspro_codec.py; vendor/ud-tools; Cargo.toml; requirements-tools.txt; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED captured then green verified; 106 golf simulator unit and integration tests pass; ruff, black, mypy clean with 0 errors).
@@ -1011,7 +1011,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10403 (epic #10394 / #10363, OG-09)
 - **Branch:** feat/og09-golf-native-viewer-package-10403
-- **PR:** not created
+- **PR:** #10668
 - **Paths:** src/engines/physics_engines/opensim/python/tour_matching/view_package.py; src/engines/physics_engines/opensim/python/tour_matching/**init**.py; tests/opensim/test_golf_view_package.py; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
 - **Started:** 2026-09-18
 - **Last verified:** 2026-09-18 at HEAD (SELF; TDD RED fixtures established; blank motion name raises InvalidMotionSpecificationError; invalid/inverted frame range raises InvalidMotionSpecificationError; missing club asset raises MissingClubAssetError; model/motion hash mismatch raises ModelMotionHashMismatchError; torque baseline truthfully sets muscles_available=False; muscle variant sets muscles_available=True; reset to address verifies bilateral grip closure <= 5 mm and canonical face-on viewpoint; scrub to time linearly interpolates coordinates across swing horizon; motion status explicitly distinguishes IK_PLAYBACK, REJECTED_REPLAY, and ACCEPTED_DYNAMIC; 4 canonical milestone stills generated [address, top, impact, finish]; reproducible video exported; deterministic SHA-256 package digest; all 12 view package tests pass; all 139 opensim unit tests pass; ruff, mypy, lod clean)
@@ -1165,7 +1165,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #10334 (MS-15, epic #10363)
 - **Branch:** feat/10334-matched-swing-candidate
-- **PR:** not created
+- **PR:** #10668
 - **Paths:** src/shared/python/motion_matching/candidate.py; src/shared/python/motion_matching/candidate_io.py; src/shared/python/motion_matching/candidate_convert.py; src/tools/tour_matching_viewer/core.py; src/shared/python/motion_matching/cross_engine_replay.py; docs/development/full_body_models/CANDIDATES.md; tests/unit/motion_matching/test_candidate.py
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-19 at HEAD (SELF; candidate package defined with kinematic and dynamic profiles, immutable arrays, and SHA-256 tamper-proof checksumming; lossless converters for returned81 replays, OpenSim MOT files, and ground-support IK/dynamics; 24 candidate and viewer unit tests pass 100%; architecture budget, ruff, mypy clean)
@@ -1408,7 +1408,7 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** claude
 - **Issue:** #9193 (parent #9174)
 - **Branch:** conductor/issue-9193
-- **PR:** not created
+- **PR:** #10668
 - **Paths:** scripts/companion_evidence.py; scripts/companion_catalog.py; scripts/config/companion_documentation.v1.json; scripts/config/companion_capability_evidence.v1.json; docs/api/contracts/upstreamdrift-companion-v1.schema.json; docs/engines/engine_capability_evidence.md; tests/companion/test_companion_evidence.py
 - **Started:** 2026-09-17
 - **Last verified:** 2026-09-17 (SELF; `tests/companion` 140 passed locally with the workflow-execution test deselected for a pre-existing interpreter/env issue; ruff, ruff-format, mypy clean on changed files; generated page `--check` current)
