@@ -29,10 +29,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1183 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Skeleton Plotter/GolfSwingVisualizer.m`                                                                           |
 | 1180 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/GolfSwingVisualizer.m`                                                     |
 | 1180 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Matlab Versions/SkeletonPlotter/GolfSwingVisualizer.m`         |
-<<<<<<< HEAD
 | 1176 | `src/bunkershot3d/ball/splash.py`                                                                                                                                             |
-=======
->>>>>>> dc5e5c815 (fix(motion_matching): fix parameter budget and register inventories for force_nullspace)
 | 1171 | `src/config/launcher_manifest_loader.py`                                                                                                                                      |
 | 1171 | `src/shared/python/movement_optimizer/gui/motion_tabs.py`                                                                                                                     |
 | 1168 | `src/api/routes/data_explorer.py`                                                                                                                                             |
@@ -129,10 +126,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  853 | `src/shared/python/ai/gui/assistant_panel.py`                                                                                                                                 |
 |  853 | `src/shared/python/sidekick/process_calculators/constants.py`                                                                                                                 |
 |  849 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py`                                                                                |
-<<<<<<< HEAD
 |  845 | `src/tools/matched_swing_browser/gui.py`                                                                                                                                      |
-=======
->>>>>>> dc5e5c815 (fix(motion_matching): fix parameter budget and register inventories for force_nullspace)
 |  844 | `src/shared/python/config/model_pack_manifest.py`                                                                                                                             |
 |  843 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/grip_modelling_tab.py`                                                                                        |
 |  843 | `src/shared/python/motion_pipeline/orchestrator.py`                                                                                                                           |
