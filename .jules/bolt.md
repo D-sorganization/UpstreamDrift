@@ -139,3 +139,7 @@
 ## 2026-09-20 - Committing Temporary Files
 **Learning:** Generating utility scripts (like `patch_all.py` or `run_tests_opensim.sh`) and then tracking them into the branch breaks the `repo-structure-gates` check.
 **Action:** Always delete shell scripts and Python utility files used to modify the repo before checking `git status` and invoking `git commit`. Use `git ls-files --others --exclude-standard` to verify the working tree is clean.
+
+## 2026-09-21 - [Optimize np.linalg.norm in TrajectoryFunnelBenchmark]
+**Learning:** `np.linalg.norm` creates intermediate temporary arrays and involves heavy numpy dispatch overhead, especially noticeable for small arrays or simple array reduction tasks. Built-in `math.sqrt((states[-1] - reference[-1]).dot(states[-1] - reference[-1]))` calculates the magnitude directly using dot product without the dispatching overhead.
+**Action:** Replace `float(np.linalg.norm(states[-1] - reference[-1]))` with `math.sqrt((states[-1] - reference[-1]).dot(states[-1] - reference[-1]))` for faster execution time inside `TrajectoryFunnelBenchmark`.
