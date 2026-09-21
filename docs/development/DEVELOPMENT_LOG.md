@@ -31,6 +31,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open the PR with `Closes #9544` and record the merge SHA plus pinned Tools `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` in the completion comment.
 - **Evidence:** tests/bunkershot3d/ball/test_contact_regimes_9544.py; tests/bunkershot3d/solvers/test_rotation_coupling_9544.py; docs/bunkershot3d/contact-regimes.md.
 
+### DL-#9543 · Bunker Sand-to-Ball Transfer Calibration and Held-Out Qualification
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9543 (epic #9541)
+- **Branch:** conductor/issue-9543
+- **PR:** #10457 (open)
+- **Paths:** src/bunkershot3d/ball/qualification.py; src/bunkershot3d/ball/qualification_fit.py; src/bunkershot3d/ball/rig_capability.py; src/bunkershot3d/ball/splash.py; src/bunkershot3d/ball/**init**.py; src/bunkershot3d/vandv/validation.py; src/bunkershot3d/vandv/measurement_intake.py; src/bunkershot3d/sand/provenance.py; tests/bunkershot3d/ball/test_transfer_qualification.py; docs/bunkershot3d/transfer-qualification.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at SELF (base 49d94788a; 55 new tests pass; 1018 tests across tests/bunkershot3d ball, vandv, sand, study and public-API suites pass; scoped ruff, ruff format, mypy, LoD, file-size, architecture and error-handling ratchet checks pass; pinned Tools tree 62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1 materialised read-only for the run)
+- **Summary:** Software half of the measurement-to-prediction program: measured-stroke intake contract with instrument-only launch records and raw-data digests, registered intended-use matrix and protocol, session-designated split with leakage refusal and #9286 sand-batch admission, bounded fit with identifiability and sensitivity checks preserving failed fits, held-out V&V 20 comparison against predeclared tolerances, versioned `TransferQualification` that lifts the launch verdict floor per qualified regime only, `CALIBRATED` provenance basis, and the #9239 objective disposition. No strokes are on file; physical qualification remains blocked and the issue stays open.
+- **Next step:** Open the PR referencing #9543 (not `Closes`), then acquire measured strokes under `MEASUREMENT_PROTOCOL` before any qualification is attempted.
+- **Evidence:** tests/bunkershot3d/ball/test_transfer_qualification.py; docs/bunkershot3d/transfer-qualification.md.
+
 ### DL-#9548 · Impact-Interval Energy Audit Consumer Gate
 
 - **State:** in_review

@@ -24,6 +24,47 @@
 - Next action: open PR `Closes #9544`; completion comment must cite merge SHA,
   pin, test results and the limitations above.
 
+## Bunker Transfer Qualification #9543 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9543`.
+- Branch: `conductor/issue-9543`; base `49d94788a856d4aeeec095ebb2e3625fc724879c`
+  (audit baseline in the issue: `1f69a51fce997932f04a6ad1dd95bf4d065ba971`);
+  implementation SELF; PR #10457. Pinned Tools tree
+  `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`, materialised read-only into the
+  worktree's empty `vendor/ud-tools` for the test run; not edited.
+- Entry DL-#9543. Objective: the software half of the sand-to-ball transfer
+  measurement-to-prediction program (intake → calibration → held-out
+  validation → versioned evidence), with the launch verdict floor lifted only
+  inside a qualified regime.
+- Files: `src/bunkershot3d/ball/qualification.py` (contract, registered matrix
+  and protocol, tolerances, evidence object, #9239 disposition),
+  `src/bunkershot3d/ball/rig_capability.py` (what the three-camera rig can
+  and cannot measure), `src/bunkershot3d/ball/qualification_fit.py` (fit,
+  holdout, `qualify`, report), `src/bunkershot3d/ball/splash.py` (qualification-aware
+  `launch_verdict`, `compute_ball_launch_from_splash`, provenance),
+  `src/bunkershot3d/vandv/validation.py` (`measured_record` on
+  `ValidationComparison`), `src/bunkershot3d/sand/provenance.py` and
+  `vandv/measurement_intake.py` (`CALIBRATED` basis at rank 1),
+  `tests/bunkershot3d/ball/test_transfer_qualification.py`,
+  `docs/bunkershot3d/transfer-qualification.md`, SPEC.md row and section.
+- Key decisions: no new ledger specs (every spec must be named by a level
+  step); launch references are `MeasurementRecord`s against three explicit keys
+  in `BALL_LAUNCH_REFERENCE_SPECS`; intake is programmatic because a stroke
+  carries the solver's verdict; `spin_lever_arm_fraction` is never fitted;
+  the launch model's own status is `WITHIN` inside a qualified regime and the
+  solver's verdict still combines via `worst_of`.
+- Validation: `python3 -m pytest tests/bunkershot3d/ball tests/bunkershot3d/vandv tests/bunkershot3d/sand tests/bunkershot3d/study tests/bunkershot3d/test_public_api_8608.py -q -n 4 --timeout=120`
+  → 1018 passed; scoped `ruff check`, `ruff format --check`, `mypy`,
+  `scripts/ci/check_lod.py src/bunkershot3d/ball`, file-size, architecture and
+  error-handling ratchet checks pass. Not run: the full suite and pre-push
+  `pytest-unit` hook (CI's job).
+- Limitations: no measured strokes exist, so no regime is qualified and every
+  shipped launch verdict stays `BEYOND_VALIDATION`; the fitted-parameter
+  uncertainty is not yet entered into the #9243 ranking budget; `BunkerShotState`
+  does not carry a qualification (pass it to `compute_ball_launch_from_splash`).
+- Next: open the PR referencing #9543 without `Closes`; the issue stays open
+  until strokes measured under `MEASUREMENT_PROTOCOL` produce a qualification.
+
 ## Tools MocapSession Consumer Slice (#9422)
 
 Working directory: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9422`.
