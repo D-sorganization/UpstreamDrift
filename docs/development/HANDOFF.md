@@ -34,7 +34,7 @@
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10347-ms60`.
 - Branch: `fix/issue-10347-ms60-run-management`; PR #10669 open with auto-merge squash armed. Governing issue #10347 (MS-60, epic #10363).
 - Entry DL-#10347. Delivered: fail-closed R2025b run manifest (`SimscapeRunManifestRequest` + builder), returned-replay→MatchedSwingCandidate converter, `run_simscape_candidate.ps1`, committed run-102 candidate/manifest/playback GIF.
-- Validation: `python -m pytest tests/unit/motion_matching/test_simscape_candidate_convert.py -q`; architecture budget clean; divergence inventory regenerated for `simscape_run_manifest.py`.
+- Validation: divergence inventory refreshed after Tools pin dropped the ignored PSA PDF leftover; `test_committed_inventory_is_current_when_vendor_present` and matched-swing ledger freshness suites pass locally. Prior tip also refreshed `reports/matched_swing_ledger.json`.
 - Next action: wait for CI green + auto-merge of PR #10669; DeskComputer second-person replay under 30 minutes.
 
 ## MS-62 Simscape Coordinate Slice #10349 Handoff
