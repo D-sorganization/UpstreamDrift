@@ -160,3 +160,73 @@ above the loader boundary uses source-agnostic names: `BodyTarget`
 not `MarkerSetTarget`, `load_body_target` not the per-vendor variant.
 The motivation is documented in
 [ADR 0006](../../adr/0006-multi-source-motion-targets.md).
+
+## Generic Capture Contract and Validation (#10361)
+
+While the canonical tour captures (`TOUR_CAPTURE` and `TOUR_CAPTURE_IRON`) are pinned
+by cryptographic hash, external users can load generic C3D files through a
+`CaptureContract` without modifying library code:
+
+```python
+from pathlib import Path
+from src.shared.python.motion_matching.tour_capture_contract import (
+    CaptureContract,
+    load_capture,
+    validate_capture_contract,
+)
+
+# 1. Define expectations for an external capture
+contract = CaptureContract(
+    units="m",
+    vertical_axis="y",
+    required_segments=("trunk", "pelvis", "club"),
+    label_map={
+        "Subject1:LFHD": "HeadFront",
+        "Subject1:RFHD": "HeadSide",
+        "Subject1:LBHD": "HeadTop",
+    },
+    max_gap_fraction=0.5,
+)
+
+# 2. Audit the file before loading
+report = validate_capture_contract(Path("data/my_capture.c3d"), contract=contract)
+if not report.is_valid:
+    print(f"Capture rejected: {report.reasons}")
+    # e.g., 'invalid_units: expected m, found mm', 'missing_required_segment: club'
+    report.raise_for_status()
+
+# 3. Load with automatic label remapping and unit conversion (mm -> m)
+capture = load_capture(Path("data/my_capture.c3d"), contract=contract)
+```
+
+Non-conforming files fail closed with actionable named diagnostic strings
+(`invalid_units`, `missing_required_segment: <name>`, `missing_required_labels`,
+`excessive_gap_fraction`, `missing_static_calibration`).
+
+## Model Identifiability Probe (44-DOF Full-Body)
+
+Before fitting target swings, the kinematic chain's observability is evaluated
+via `probe_spec_identifiability`:
+
+```python
+from pathlib import Path
+import json
+from src.shared.python.motion_matching.identifiability import probe_spec_identifiability
+
+spec = json.loads(Path("docs/development/full_body_models/full_body_spec_anthro_driver.json").read_text())
+
+# 1. Uncalibrated baseline: lower limbs lack marker offsets (offset_m: null),
+# reporting all 14 leg DOFs as strictly unobservable.
+raw_result = probe_spec_identifiability(spec)
+assert not raw_result.is_full_rank  # rank 28 of 44
+
+# 2. With calibrated lower limb marker offsets and anthropometric prior regularization
+# (prior_weight > 0.0), longitudinal spine trade-offs (#9769) are resolved to full rank.
+calibrated_result = probe_spec_identifiability(
+    spec,
+    marker_offsets=calibrated_offsets,
+    prior_weight=0.05,
+)
+assert calibrated_result.is_full_rank  # rank 44 of 44
+```
+

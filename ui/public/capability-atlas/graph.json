@@ -699,7 +699,7 @@
       "tiles": [
         "rate_of_closure"
       ],
-      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts. Through-contact interval inspection (UD #9549 / epic #9546; Tools #4130, #4946) is provider work: the pinned Tools tree exposes the swing_sim.impact_interval facade, but its rate_of_closure run record carries no interval phase yet. UD adopts it through a reviewed pin bump; tests/shared_contracts/test_impact_interval_provider.py gates the pin and flips to a failure when the phase ships.",
+      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts.",
       "id": "tools.rate_of_closure"
     },
     {
@@ -1278,7 +1278,9 @@
         "motion_matching",
         "results_browser",
         "physical_acceptance",
-        "ledger"
+        "ledger",
+        "video_export",
+        "report_export"
       ]
     },
     {
@@ -2866,9 +2868,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "28002cc5c4a10f8b8e83f874bcbf8ec26f399cf22610e8ab5a6ccef9bd3c07d3",
-    "src/config/launcher_manifest.json": "721474b299891764d36c8246ee6ea4dafb08688fc21bb80b892571f40f86f783",
-    "src/config/feature_parity.json": "628b23911743bfe97c684dd5923d6792fd5b7bc52400be674bc23fa6bd408497",
+    "src/config/models.yaml": "ab36e654c25c5fc100547c7c6eb6cfd35c56a33381c230b852d5f65b2366b834",
+    "src/config/launcher_manifest.json": "c004401e04468a49905a27b3c079183ab010b8742e93a5f7d4d9580e35ba85a4",
+    "src/config/feature_parity.json": "e9c8d791d426991c8a516552eecb89b7f0443c6e1a40320f3fefe0eefa46a009",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
