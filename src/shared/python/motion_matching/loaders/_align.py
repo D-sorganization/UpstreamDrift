@@ -12,8 +12,9 @@ import math
 
 import numpy as np
 
+from .._series_interp import interp_xyz_series
 from ..club_target import AlignOptions
-from ._quaternion import slerp
+from ._quaternion import slerp_series
 
 logger = logging.getLogger(__name__)
 
@@ -89,41 +90,8 @@ def resample_target(
     else:
         raise ValueError(f"Unknown time_alignment {opts.time_alignment!r}")
 
-    butt = _interp_xyz(sim_time, raw_time, raw_butt)
-    clubhead = _interp_xyz(sim_time, raw_time, raw_clubhead)
-    quat = _slerp_series(sim_time, raw_time, raw_quat)
+    butt = interp_xyz_series(sim_time, raw_time, raw_butt)
+    clubhead = interp_xyz_series(sim_time, raw_time, raw_clubhead)
+    quat = slerp_series(sim_time, raw_time, raw_quat)
     impact_idx_out = int(np.argmin(np.abs(sim_time - opts.impact_target_t_s))) + 1
     return sim_time, butt, clubhead, quat, impact_idx_out
-
-
-def _interp_xyz(
-    sim_t: np.ndarray, raw_t: np.ndarray, raw_xyz: np.ndarray
-) -> np.ndarray:
-    """Linear interpolation of an ``(N, 3)`` series, clamping at endpoints."""
-    out = np.empty((sim_t.shape[0], 3), dtype=np.float64)
-    for k in range(3):
-        out[:, k] = np.interp(sim_t, raw_t, raw_xyz[:, k])
-    return out
-
-
-def _slerp_series(
-    sim_t: np.ndarray, raw_t: np.ndarray, raw_q: np.ndarray
-) -> np.ndarray:
-    """SLERP an ``(N, 4)`` quaternion series onto ``sim_t``."""
-    out = np.empty((sim_t.shape[0], 4), dtype=np.float64)
-    last = raw_t.shape[0] - 1
-    for i, t in enumerate(sim_t):
-        if t <= raw_t[0]:
-            out[i] = raw_q[0]
-            continue
-        if t >= raw_t[last]:
-            out[i] = raw_q[last]
-            continue
-        j = int(np.searchsorted(raw_t, t)) - 1
-        j = max(0, min(j, last - 1))
-        span = raw_t[j + 1] - raw_t[j]
-        alpha = 0.0 if span == 0.0 else (t - raw_t[j]) / span
-        out[i] = slerp(raw_q[j], raw_q[j + 1], float(alpha))
-    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
-    norms[norms == 0.0] = 1.0
-    return out / norms

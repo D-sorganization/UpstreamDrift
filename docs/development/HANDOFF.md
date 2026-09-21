@@ -216,6 +216,16 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Reproduction: `pytest tests/unit/motion_matching/test_native_force_equations.py tests/unit/motion_matching/test_multi_engine_torque_allocator.py tests/unit/motion_matching/test_force_bridges_pf09.py -m "requires_mujoco or unit" -v`.
 - Next: PR auto-merge, release lease on #10439, claim next issue in sequence (#10440: PF-10).
 
+## Club-Only Observation Contracts CO-01 #10605 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10605-co01`.
+- Branch: `fix/issue-10605-co01-club-observation`; PR [#10670](https://github.com/D-sorganization/UpstreamDrift/pull/10670). Governing issue #10605 (CO-01, epic #10602). Prerequisite CO-00 #10604 / PR #10667 merged.
+- Entry DL-#10605. Delivered: `ClubObservation` (masks, dual mid-hands/face frames+quats, native 240 Hz clock, uncertainty/derivation metadata), `club_calibration.py` (SE(3) tool-to-model, catalog length/type checks, grip-face rigidity, explicit mid-hands→butt-end offset), legacy adapters that refuse invented identity quats, versioned four-trial fixture pack.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_observation_contracts.py -q -n 0 --no-cov --timeout=60` (14 passed); python -O public validation confirmed. Synthetic fixtures only — not native physical qualification.
+- CI hygiene (SELF): regenerated `docs/shared_tools/divergence_inventory.{v1.json,md}` with `--write --no-authorship` so the gitignored Tools PSA PDF path is no longer listed (`test_committed_inventory_is_current_when_vendor_present` green).
+- Limitations: Excel/mat loaders still emit legacy `ClubTarget`; native workbook→`ClubObservation` ingest is deferred; twist remains unobserved in fixtures.
+- Next action: Dispatch CO-02 #10606 after merge; do not start NM-_ or PF-_.
+
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
@@ -224,6 +234,13 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - **NM-00 state:** Merged via PR [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668). Fail-closed dataset/checkpoint/claim audit remains authoritative; no native training or speed claim from NM-00.
 - **NM-01 state:** Freezes forward/inverse/masked learning-task contracts, TB-00-keyed model roster (20 models; full-body deferred pending benefit) and benefit experiment (100/500/2000 nested stages, three seeds, five baselines, latency phases including replay/refinement/failures, 2× median / non-worse p95 gates, break-even undefined when savings ≤ 0). Package: `src/shared/python/neural_motion/{tasks,roster,experiment}.py`. Evidence under `docs/plans/neural_motion_matching/evidence/nm01_*.json`. Branch `feat/nm01-freeze-learning-tasks`; PR [#10672](https://github.com/D-sorganization/UpstreamDrift/pull/10672) (squash auto-merge). Tip `SELF` (divergence inventory refreshed for NM-01 paths + deleted Tools PDF).
 - **Next:** After #10672 merges, dispatch [NM-02 #10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) (native dataset label completeness).
+
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 shipped (#10667); active child [CO-01 #10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) on PR [#10670](https://github.com/D-sorganization/UpstreamDrift/pull/10670).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md).
+- **NM-00 state:** Fail-closed dataset/checkpoint/claim audit in src/shared/python/neural_motion/; surrogate path constants shared; absent/quarantined default checkpoints; data/sweep_synthetic software-contract-only; CVAE/regressor mean-baseline plateaus NOTE_ONLY. Receipts under docs/plans/neural_motion_matching/evidence/.
+- **CO-01 state:** Observation/calibration contracts ready for review (synthetic fixtures only). Branch ix/issue-10605-co01-club-observation. DL-#10602, DL-#10604, DL-#10605.
+- **Next:** Land CO-01 #10605 / #10670, then dispatch CO-02 #10606 and NM-01 #10616. No new physical match, trained checkpoint, or measured speedup claimed.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
