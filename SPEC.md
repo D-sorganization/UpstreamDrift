@@ -13,6 +13,20 @@ Connects qualified matching strategies to engine feature contracts:
 - **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
   - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
 
+## Tour Baselines Model Identities and Coverage Matrix (TB-00, #10585)
+
+Freezes model identities, ownership, coordinate conventions, and two-capture coverage matrix under the Tour Baselines program:
+- **Model Identity & Registry (`src/shared/python/tour_baselines/models.py`, `src/shared/python/tour_baselines/registry.py`)**:
+  - Defines strict enums: `ModelTopology`, `BackendType`, `SourceOwner`, `FitMode`, and `EvidenceStatus`.
+  - Distinguishes kinematic reconstruction pendulums (`reconstruction_double_pendulum`, `reconstruction_triple_pendulum`) tracking body landmarks from dynamic torque-driven pendulums (`driven_double_pendulum`, `driven_triple_pendulum`) simulating the true club.
+  - Documents Upper-Body Golfer (5 DOF independent via rank-3 loop closure constraints on 8 generalized coordinates).
+  - Establishes canonical registry with provider mismatch detection and alias resolution.
+- **Coverage & Reconciliation (`src/shared/python/tour_baselines/coverage.py`, `src/shared/python/tour_baselines/reconciliation.py`)**:
+  - Generates Model x {Driver (360 Hz), 7-Iron (359 Hz)} coverage matrix, explicitly excluding 12 non-golf tools.
+  - Reconciles historical issues #9914, #9921, and #10003, tracking Tools submodule commit ownership.
+- **Evidence & Verification**:
+  - Added unit test suite in `tests/unit/tour_baselines/`: `test_model_identities.py`, `test_coverage_matrix.py`, `test_reconciliation.py` (13 tests).
+
 ## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
 
 Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility:
@@ -44,6 +58,7 @@ Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body sol
   - Updated `cost_breakdown` to compute and report `"pelvis_yaw"` per-term cost in execution receipts.
 - **Verification (`tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py`)**:
   - Unit tests verify zero residual and gradient when aligned, central-difference gradient match, positive semi-definite Gauss-Newton Hessian, and no-op behavior when inactive (`pelvis_yaw = 0.0`) or waist markers are absent.
+
 
 ## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
 
