@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1365,
+    "ud-only": 1366,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 177,
+      "ud-only": 178,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12917,6 +12917,18 @@
       "package": "motion_matching",
       "subpackage": "inverse_timestep",
       "ud_bytes": 22030,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/kinematic_smoothing.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 7867,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
