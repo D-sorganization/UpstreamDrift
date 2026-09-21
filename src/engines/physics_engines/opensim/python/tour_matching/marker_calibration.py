@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import numpy as np
+import math
 
 from src.shared.python.contracts import require
 from src.shared.python.motion_matching.marker_calibration import (
@@ -53,12 +54,12 @@ def bound_marker_offsets(
         if prior_offsets is not None and label in prior_offsets:
             prior = np.asarray(prior_offsets[label], dtype=float)
             diff = v - prior
-            dist = float(np.linalg.norm(diff))
+            dist = float(math.sqrt(np.vdot(diff, diff)))  # Bolt optimization
             if dist > max_deviation_from_prior_m:
                 v = prior + diff * (max_deviation_from_prior_m / dist)
 
         # Check total radius from body origin
-        rad = float(np.linalg.norm(v))
+        rad = float(math.sqrt(np.vdot(v, v)))  # Bolt optimization
         if rad > max_offset_radius_m:
             v = v * (max_offset_radius_m / rad)
 

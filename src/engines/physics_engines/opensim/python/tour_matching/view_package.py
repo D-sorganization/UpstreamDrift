@@ -41,6 +41,7 @@ import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 import numpy as np
+import math
 from numpy.typing import NDArray
 
 from src.engines.physics_engines.opensim.python.tour_matching.full_swing_tracking import (
@@ -299,7 +300,7 @@ def _render_scene_still(
     pos = np.asarray(camera_view.position, dtype=float)
     tgt = np.asarray(camera_view.target, dtype=float)
     diff = pos - tgt
-    dist = float(np.linalg.norm(diff))
+    dist = float(math.sqrt(np.vdot(diff, diff)))  # Bolt optimization
     azim = float(np.degrees(np.arctan2(diff[1], diff[0])))
     elev = float(np.degrees(np.arcsin(np.clip(diff[2] / max(dist, 1e-6), -1.0, 1.0))))
     ax.view_init(elev=elev, azim=azim)
