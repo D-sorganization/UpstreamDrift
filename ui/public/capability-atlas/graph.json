@@ -689,17 +689,17 @@
     {
       "feature_id": "tools.rate_of_closure",
       "title": "Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite)",
-      "status": "parity",
+      "status": "gap",
       "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
       "api": "src/api/local_server.py",
       "web": "ui/src/pages/ImpactExplorer.tsx",
-      "issue": null,
-      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
+      "issue": 9546,
+      "reason": null,
       "pending_decision": false,
       "tiles": [
         "rate_of_closure"
       ],
-      "notes": "Through-contact interval inspection (UD #9549 / epic #9546; Tools #4130, #4946) is provider work: the pinned Tools tree exposes the swing_sim.impact_interval facade, but its rate_of_closure run record carries no interval phase yet. UD adopts it through a reviewed pin bump; tests/shared_contracts/test_impact_interval_provider.py gates the pin and flips to a failure when the phase ships.",
+      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts. Through-contact interval inspection (UD #9549 / epic #9546; Tools #4130, #4946) is provider work: the pinned Tools tree exposes the swing_sim.impact_interval facade, but its rate_of_closure run record carries no interval phase yet. UD adopts it through a reviewed pin bump; tests/shared_contracts/test_impact_interval_provider.py gates the pin and flips to a failure when the phase ships.",
       "id": "tools.rate_of_closure"
     },
     {
@@ -2868,7 +2868,7 @@
   "inputs": {
     "src/config/models.yaml": "28002cc5c4a10f8b8e83f874bcbf8ec26f399cf22610e8ab5a6ccef9bd3c07d3",
     "src/config/launcher_manifest.json": "721474b299891764d36c8246ee6ea4dafb08688fc21bb80b892571f40f86f783",
-    "src/config/feature_parity.json": "e8a12783b57fd260d2bf62fede6e2c366e7b2b8a187955bbe1a0abdf4a3d869c",
+    "src/config/feature_parity.json": "628b23911743bfe97c684dd5923d6792fd5b7bc52400be674bc23fa6bd408497",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

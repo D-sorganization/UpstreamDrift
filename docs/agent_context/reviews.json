@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "11ce0743663e0470a300c4b1c84131db84d710a5c1762a48492fe22f1bd2d95f",
+      "fingerprint": "f00fbbed1b80dd21257ec1de1592e82582ea47e08a4c147af20766928bc7de48",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "e8a12783b57fd260d2bf62fede6e2c366e7b2b8a187955bbe1a0abdf4a3d869c",
+        "src/config/feature_parity.json": "628b23911743bfe97c684dd5923d6792fd5b7bc52400be674bc23fa6bd408497",
         "src/config/launcher_manifest.json": "721474b299891764d36c8246ee6ea4dafb08688fc21bb80b892571f40f86f783",
         "src/config/launcher_manifest_loader.py": "222144b05e4d8e1904188853ce12ae01f66c658624a2fa45a76322e1a4585aa4",
         "src/config/models.yaml": "28002cc5c4a10f8b8e83f874bcbf8ec26f399cf22610e8ab5a6ccef9bd3c07d3",

@@ -289,10 +289,10 @@
       "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
       "api": "src/api/local_server.py",
       "web": "ui/src/pages/ImpactExplorer.tsx",
-      "status": "parity",
-      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
-      "tiles": ["rate_of_closure"],
-      "notes": "Through-contact interval inspection (UD #9549 / epic #9546; Tools #4130, #4946) is provider work: the pinned Tools tree exposes the swing_sim.impact_interval facade, but its rate_of_closure run record carries no interval phase yet. UD adopts it through a reviewed pin bump; tests/shared_contracts/test_impact_interval_provider.py gates the pin and flips to a failure when the phase ships."
+      "status": "gap",
+      "issue": 9546,
+      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts. Through-contact interval inspection (UD #9549 / epic #9546; Tools #4130, #4946) is provider work: the pinned Tools tree exposes the swing_sim.impact_interval facade, but its rate_of_closure run record carries no interval phase yet. UD adopts it through a reviewed pin bump; tests/shared_contracts/test_impact_interval_provider.py gates the pin and flips to a failure when the phase ships.",
+      "tiles": ["rate_of_closure"]
     },
     "tools.launch_monitor_analytics": {
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
