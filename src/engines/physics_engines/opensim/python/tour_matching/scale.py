@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 
 import numpy as np
+import math
 
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
@@ -81,7 +82,8 @@ def _segment_distance(
     """Compute Euclidean distance between proximal and distal marker centroids at a frame."""
     p_prox = _centroid_points(capture, proximal_labels, frame)
     p_dist = _centroid_points(capture, distal_labels, frame)
-    return float(np.linalg.norm(p_prox - p_dist))
+    diff = p_prox - p_dist
+    return float(math.sqrt(np.vdot(diff, diff)))  # Bolt optimization
 
 
 # Segment definitions: (proximal_labels, distal_labels, description)
