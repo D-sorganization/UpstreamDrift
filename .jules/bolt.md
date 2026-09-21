@@ -148,3 +148,7 @@
 ## 2026-09-20 - Optimization of Np.Linalg.Norm for Small Arrays
 **Learning:** `np.linalg.norm` has significant overhead due to internal dispatching when working with small 1D vectors (like 3D points or forces).
 **Action:** Replace `np.linalg.norm(arr)` with `math.sqrt(np.vdot(arr, arr))` for small 1D vectors for a substantial speed boost.
+
+## 2026-09-20 - Speeding up Distance Calculations on Multi-Dimensional Numpy Arrays
+**Learning:** `np.linalg.norm` has overhead due to input validation and handling multiple axes/dtypes. Using `np.sqrt(np.einsum(...))` performs the same mathematical operation (Euclidean distance) but operates closer to C-level speeds, typically yielding a 2x-3x speedup for calculating distances along an axis.
+**Action:** When calculating Euclidean distance along the inner-most axis of 3D or 4D multidimensional arrays in computationally hot paths (like physics simulations or tight mathematical loops), replace `np.linalg.norm(a - b, axis=-1)` with `np.sqrt(np.einsum('ijk,ijk->ij', diff, diff))` (or similar depending on dimensions) to avoid NumPy's internal dispatching and temporary array allocations. Do not apply this micro-optimization inside GUI update methods or string formatting operations where UI rendering overhead completely dwarfs any computational savings.
