@@ -1,5 +1,34 @@
 # Current Matching Continuation Handoff
 
+## PF-06 Feasible Force Null Spaces and Torque-Distribution Tradeoffs (#10436)
+
+- Worktree: `Worktrees/UpstreamDrift-10504-pf06-rebase`, branch
+  `feat/issue-10436-pf06-feasible-force-nullspace`, DL-#10436.
+- Changes:
+  - `force_nullspace.py`: Scaled SVD and column-pivoted QR null space
+    representations with dynamic rank and contact mode reporting
+    (`ForceNullSpace.from_balance`). Added `NullSpaceAnalysis` and
+    `validate_null_space` checking condition numbers and residuals
+    ($A N = 0$, $A x_p = b$). Implemented `redistribute_trajectory`
+    penalizing physical rates and ensuring strict basis sign-change
+    invariance across frames. Formulated `explore_torque_tradeoffs`
+    generating Pareto alternatives (`baseline_minimum_effort`,
+    `conservative_default`, `trail_arm_reduced_50`,
+    `trail_arm_reduced_80`, `hard_zero_trail`, `relaxed_minimum_trail`,
+    `grip_squeeze_minimized`, `ground_load_regularized`) with per-joint
+    torque/power, lead/trail effort, ground COP, grip wrench, and
+    explicit SI units. Exported reproducible Pareto tables to JSON and
+    CSV. Selected conservative default with mechanical rationale
+    (reserve torque margins; no unfounded metabolic/injury claims).
+  - `test_force_nullspace.py` and `test_force_nullspace_pf06.py`: unit
+    coverage for null-space and tradeoff acceptance criteria.
+- Reproduction:
+  `pytest tests/unit/motion_matching/test_force_nullspace.py tests/unit/motion_matching/test_force_nullspace_pf06.py -v`.
+- Status: rebased onto `origin/main` (includes MS-62); SPEC §12 `#10504`
+  present; focused PF-06 suites 29 passed; architecture budget and DRY
+  duplication gates clean locally.
+- Next: Confirm CI green after force-with-lease push; merge closes #10436.
+
 ## MS-62 Simscape Coordinate Slice #10349 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/issue-10349-local`.
