@@ -108,6 +108,19 @@ Solves smooth low-effort torque histories with sparse trajectory optimization:
 - **Verification Suite (`tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py`)**:
   - 10 unit test fixtures validating convex optimality, derivative reduction, unit-scaling invariance, physical constraint enforcement, epigraph utilization, seam continuity, and objective breakdowns.
 
+## Qualify Contact Modes and Native Pinocchio Force Feasibility (PF-04, #10434)
+
+Qualifies contact modes and native Pinocchio force feasibility:
+- **Contact Mode Qualifier (`src/shared/python/motion_matching/contact_mode_qualifier.py`)**:
+  - Infers multi-sphere heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis.
+  - Computes support mode ambiguity metric, center of pressure (COP), and 2D convex hull support polygon containment under arbitrary surface normal \(\hat{n}\).
+  - Evaluates slip speed thresholding and friction cone saturation ratios.
+  - Performs constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation.
+  - Enforces separate linear force (N) and moment (\(\text{N}\cdot\text{m}\)) residual budgets.
+  - Rejects unphysical loads (> 5000 N, > 300 \(\text{N}\cdot\text{m}\)) and generates mass/geometry/friction sensitivity reporting.
+- **Verification Suite (`tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`)**:
+  - 10 unit test fixtures validating hysteresis, COP containment, slip thresholds, Hunt-Crossley compliance, and unphysical load rejection.
+
 ## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
 
 Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility:

@@ -16,7 +16,7 @@
 - Changes:
   - `contact_mode_qualifier.py`: Infer heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis; support mode ambiguity metric; COP and 2D convex hull support polygon containment under arbitrary surface normal n_hat; slip speed thresholding and friction cone saturation ratio; constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation; separate linear force (N) and moment (N\*m) residual budgets; unphysical load rejection (> 5000 N, > 300 Nm); and mass/geometry/friction sensitivity reporting.
 - Reproduction: `pytest tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`.
-- Next: PR #10499 open with auto-merge armed.
+- Next: Land PR #10499 via CI and proceed to PF-05.
 
 ## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
 

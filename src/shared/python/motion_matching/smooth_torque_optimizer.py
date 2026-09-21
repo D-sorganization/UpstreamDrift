@@ -142,16 +142,32 @@ class SmoothTorqueOptimizer:
         regularisation_grip: float = 1e-4,
         root_penalty_weight: float = 1e5,
     ) -> None:
-        require(nv > 6, "nv must exceed 6 floating base coordinates", nv)
-        require(len(actuated_indices) > 0, "must have actuated coordinates")
-        require(n_contact_spheres > 0, "must have contact spheres")
-        require(mu_friction > 0.0, "friction coefficient must be positive", mu_friction)
+        eff = (
+            float(weights.w_effort)
+            if (weights is not None and weights.w_effort > 0.0)
+            else 1.0
+        )
+        w_contact = (
+            float(weights.w_contact) if weights is not None else regularisation_contact
+        )
+        w_grip = float(weights.w_grip) if weights is not None else regularisation_grip
+        w_root = float(weights.w_root) if weights is not None else root_penalty_weight
 
-        self.nv = nv
-        self.actuated_indices = np.asarray(actuated_indices, dtype=np.int64)
-        self.n_actuated = len(self.actuated_indices)
-        self.n_contact_spheres = n_contact_spheres
-        self.n_ground_vars = n_contact_spheres * 3
+        self._frame_allocator = ContactForceAllocator(
+            nv=nv,
+            actuated_indices=actuated_indices,
+            n_contact_spheres=n_contact_spheres,
+            mu_friction=mu_friction,
+            regularisation_contact=w_contact / eff,
+            regularisation_grip=w_grip / eff,
+            root_penalty_weight=w_root / eff,
+        )
+
+        self.nv = self._frame_allocator.nv
+        self.actuated_indices = self._frame_allocator.actuated_indices
+        self.n_actuated = self._frame_allocator.n_actuated
+        self.n_contact_spheres = self._frame_allocator.n_contact_spheres
+        self.n_ground_vars = self._frame_allocator.n_ground_vars
         self.n_grip_vars = 6
         self.n_root_vars = 6
         self.n_vars_per_node = (
@@ -178,66 +194,62 @@ class SmoothTorqueOptimizer:
         else:
             self.limits = ActuatorLimits(tau_max=np.full(self.n_actuated, 500.0))
 
-        # Single frame allocator for baseline and warm-starting
-        # Normalize weights relative to effort so initial guess is invariant under time scaling
-        eff = float(self.weights.w_effort) if self.weights.w_effort > 0.0 else 1.0
-        self._frame_allocator = ContactForceAllocator(
-            nv=nv,
-            actuated_indices=self.actuated_indices,
-            n_contact_spheres=n_contact_spheres,
-            mu_friction=mu_friction,
-            regularisation_contact=float(self.weights.w_contact) / eff,
-            regularisation_grip=float(self.weights.w_grip) / eff,
-            root_penalty_weight=float(self.weights.w_root) / eff,
+    @staticmethod
+    def _compute_trapezoidal_weights(time_s: Array) -> Array:
+        """Compute trapezoidal quadrature weights for non-uniform time grids."""
+        n_nodes = len(time_s)
+        weights = np.zeros(n_nodes, dtype=np.float64)
+        if n_nodes == 1:
+            weights[0] = 1.0
+        else:
+            weights[0] = 0.5 * (time_s[1] - time_s[0])
+            weights[-1] = 0.5 * (time_s[-1] - time_s[-2])
+            for k in range(1, n_nodes - 1):
+                weights[k] = 0.5 * (time_s[k + 1] - time_s[k - 1])
+        return weights
+
+    def _allocate_single_node(self, node: TrajectoryNode) -> Any:
+        mask = (
+            np.asarray(node.contact_mask, dtype=bool)
+            if node.contact_mask is not None
+            else None
+        )
+        return self._frame_allocator.allocate(
+            tau_rnea=node.tau_rnea,
+            j_ground=node.j_ground,
+            j_grip=node.j_grip,
+            contact_mask=mask,
+            ground_normal=node.surface_normal,
         )
 
-    def solve_frame_independent_baseline(
-        self, nodes: Sequence[TrajectoryNode]
+    def _create_node_buffers(self, n_nodes: int) -> tuple[Array, Array, Array, Array]:
+        return (
+            np.zeros((n_nodes, self.n_actuated), dtype=np.float64),
+            np.zeros((n_nodes, self.n_ground_vars), dtype=np.float64),
+            np.zeros((n_nodes, self.n_grip_vars), dtype=np.float64),
+            np.zeros((n_nodes, self.n_root_vars), dtype=np.float64),
+        )
+
+    def _package_trajectory_result(
+        self,
+        time_s: Array,
+        nodes: Sequence[TrajectoryNode],
+        tau_actuated: Array,
+        f_ground: Array,
+        lambda_grip: Array,
+        delta_tau_root: Array,
+        max_eq_res: float,
+        max_root_res: float,
+        success: bool,
+        status: str,
+        u_max_override: float | None = None,
     ) -> TrajectoryOptimizationResult:
-        """Solve each trajectory node independently using ContactForceAllocator as a baseline."""
-        require(len(nodes) > 0, "nodes sequence cannot be empty")
-        n_nodes = len(nodes)
-        time_s = np.array([node.time_s for node in nodes], dtype=np.float64)
-
-        tau_actuated = np.zeros((n_nodes, self.n_actuated), dtype=np.float64)
-        f_ground = np.zeros((n_nodes, self.n_ground_vars), dtype=np.float64)
-        lambda_grip = np.zeros((n_nodes, self.n_grip_vars), dtype=np.float64)
-        delta_tau_root = np.zeros((n_nodes, self.n_root_vars), dtype=np.float64)
-
-        max_eq_res = 0.0
-        max_root_res = 0.0
-        all_success = True
-
-        for k, node in enumerate(nodes):
-            mask_bool = (
-                np.asarray(node.contact_mask, dtype=bool)
-                if node.contact_mask is not None
-                else None
-            )
-            alloc = self._frame_allocator.allocate(
-                tau_rnea=node.tau_rnea,
-                j_ground=node.j_ground,
-                j_grip=node.j_grip,
-                contact_mask=mask_bool,
-                ground_normal=node.surface_normal,
-            )
-            tau_actuated[k] = alloc.tau_actuated
-            f_ground[k] = alloc.f_ground
-            lambda_grip[k] = alloc.lambda_grip
-            delta_tau_root[k] = alloc.delta_tau_root
-            if alloc.equilibrium_residual > max_eq_res:
-                max_eq_res = alloc.equilibrium_residual
-            if alloc.root_balance_residual > max_root_res:
-                max_root_res = alloc.root_balance_residual
-            if not alloc.success:
-                all_success = False
-
-        # Compute physical derivatives, power, and utilization
         tau_rate = self._compute_rates(time_s, tau_actuated)
         power = self._compute_power(nodes, tau_actuated)
         norm_util = np.abs(tau_actuated) / self.limits.tau_max[np.newaxis, :]
         peak_util = float(np.max(norm_util))
 
+        u_max_val = u_max_override if u_max_override is not None else peak_util
         breakdown = self._compute_objective_breakdown(
             time_s=time_s,
             tau_actuated=tau_actuated,
@@ -245,7 +257,7 @@ class SmoothTorqueOptimizer:
             f_ground=f_ground,
             lambda_grip=lambda_grip,
             delta_tau_root=delta_tau_root,
-            u_max=peak_util,
+            u_max=u_max_val,
         )
 
         return TrajectoryOptimizationResult(
@@ -259,8 +271,53 @@ class SmoothTorqueOptimizer:
             normalized_utilization=norm_util,
             peak_utilization=peak_util,
             objective_breakdown=breakdown,
-            max_equilibrium_residual=max_eq_res,
-            max_root_residual=max_root_res,
+            max_equilibrium_residual=float(max_eq_res),
+            max_root_residual=float(max_root_res),
+            success=bool(success),
+            status=status,
+        )
+
+    def _prepare_trajectory_buffers(
+        self, nodes: Sequence[TrajectoryNode]
+    ) -> tuple[Array, Array, Array, Array, Array]:
+        time_s = np.array([node.time_s for node in nodes], dtype=np.float64)
+        tau_actuated, f_ground, lambda_grip, delta_tau_root = self._create_node_buffers(
+            len(nodes)
+        )
+        return time_s, tau_actuated, f_ground, lambda_grip, delta_tau_root
+
+    def solve_frame_independent_baseline(
+        self, nodes: Sequence[TrajectoryNode]
+    ) -> TrajectoryOptimizationResult:
+        """Solve each trajectory node independently using ContactForceAllocator as a baseline."""
+        require(len(nodes) > 0, "nodes sequence cannot be empty")
+        time_s, tau_actuated, f_ground, lambda_grip, delta_tau_root = (
+            self._prepare_trajectory_buffers(nodes)
+        )
+
+        max_eq_res = 0.0
+        max_root_res = 0.0
+        all_success = True
+
+        for k, node in enumerate(nodes):
+            alloc = self._allocate_single_node(node)
+            tau_actuated[k] = alloc.tau_actuated
+            f_ground[k] = alloc.f_ground
+            lambda_grip[k] = alloc.lambda_grip
+            delta_tau_root[k] = alloc.delta_tau_root
+            max_eq_res = max(max_eq_res, float(alloc.equilibrium_residual))
+            max_root_res = max(max_root_res, float(alloc.root_balance_residual))
+            all_success = all_success and bool(alloc.success)
+
+        return self._package_trajectory_result(
+            time_s=time_s,
+            nodes=nodes,
+            tau_actuated=tau_actuated,
+            f_ground=f_ground,
+            lambda_grip=lambda_grip,
+            delta_tau_root=delta_tau_root,
+            max_eq_res=max_eq_res,
+            max_root_res=max_root_res,
             success=all_success,
             status="baseline_independent_frames",
         )
@@ -413,37 +470,19 @@ class SmoothTorqueOptimizer:
             or (res.status in (0, 8, 9))
         )
 
-        tau_rate = self._compute_rates(time_s, tau_actuated)
-        power = self._compute_power(nodes, tau_actuated)
-        norm_util = np.abs(tau_actuated) / self.limits.tau_max[np.newaxis, :]
-        peak_util = float(np.max(norm_util))
-
-        u_max_val = float(x_sol[-1]) if use_epigraph else peak_util
-        breakdown = self._compute_objective_breakdown(
+        u_max_val = float(x_sol[-1]) if use_epigraph else None
+        return self._package_trajectory_result(
             time_s=time_s,
-            tau_actuated=tau_actuated,
-            tau_rate=tau_rate,
-            f_ground=f_ground,
-            lambda_grip=lambda_grip,
-            delta_tau_root=delta_tau_root,
-            u_max=u_max_val,
-        )
-
-        return TrajectoryOptimizationResult(
-            time_s=time_s,
+            nodes=nodes,
             tau_actuated=tau_actuated,
             f_ground=f_ground,
             lambda_grip=lambda_grip,
             delta_tau_root=delta_tau_root,
-            tau_rate=tau_rate,
-            power=power,
-            normalized_utilization=norm_util,
-            peak_utilization=peak_util,
-            objective_breakdown=breakdown,
-            max_equilibrium_residual=max_eq_res,
-            max_root_residual=max_root_res,
+            max_eq_res=max_eq_res,
+            max_root_res=max_root_res,
             success=success,
             status=str(res.message),
+            u_max_override=u_max_val,
         )
 
     def optimize_sliding_window(
@@ -467,15 +506,13 @@ class SmoothTorqueOptimizer:
         )
         step = win_size - overlap
 
-        time_s = np.array([node.time_s for node in nodes], dtype=np.float64)
-        tau_actuated = np.zeros((n_nodes, self.n_actuated), dtype=np.float64)
-        f_ground = np.zeros((n_nodes, self.n_ground_vars), dtype=np.float64)
-        lambda_grip = np.zeros((n_nodes, self.n_grip_vars), dtype=np.float64)
-        delta_tau_root = np.zeros((n_nodes, self.n_root_vars), dtype=np.float64)
+        time_s, tau_actuated, f_ground, lambda_grip, delta_tau_root = (
+            self._prepare_trajectory_buffers(nodes)
+        )
 
-        max_eq_res = 0.0
-        max_root_res = 0.0
-        all_success = True
+        window_max_eq = 0.0
+        window_max_root = 0.0
+        overall_success = True
 
         start_idx = 0
         prev_tau_end: Array | None = None
@@ -492,7 +529,7 @@ class SmoothTorqueOptimizer:
             )
 
             if not win_res.success:
-                all_success = False
+                overall_success = False
 
             # Assign to output buffer
             if start_idx == 0:
@@ -512,10 +549,8 @@ class SmoothTorqueOptimizer:
                     0:local_end
                 ]
 
-            if win_res.max_equilibrium_residual > max_eq_res:
-                max_eq_res = win_res.max_equilibrium_residual
-            if win_res.max_root_residual > max_root_res:
-                max_root_res = win_res.max_root_residual
+            window_max_eq = max(window_max_eq, float(win_res.max_equilibrium_residual))
+            window_max_root = max(window_max_root, float(win_res.max_root_residual))
 
             # For next window, set continuity clamp to the torque at the seam
             next_start = start_idx + step
@@ -523,35 +558,16 @@ class SmoothTorqueOptimizer:
                 prev_tau_end = win_res.tau_actuated[step]
             start_idx = next_start
 
-        tau_rate = self._compute_rates(time_s, tau_actuated)
-        power = self._compute_power(nodes, tau_actuated)
-        norm_util = np.abs(tau_actuated) / self.limits.tau_max[np.newaxis, :]
-        peak_util = float(np.max(norm_util))
-
-        breakdown = self._compute_objective_breakdown(
+        return self._package_trajectory_result(
             time_s=time_s,
-            tau_actuated=tau_actuated,
-            tau_rate=tau_rate,
-            f_ground=f_ground,
-            lambda_grip=lambda_grip,
-            delta_tau_root=delta_tau_root,
-            u_max=peak_util,
-        )
-
-        return TrajectoryOptimizationResult(
-            time_s=time_s,
+            nodes=nodes,
             tau_actuated=tau_actuated,
             f_ground=f_ground,
             lambda_grip=lambda_grip,
             delta_tau_root=delta_tau_root,
-            tau_rate=tau_rate,
-            power=power,
-            normalized_utilization=norm_util,
-            peak_utilization=peak_util,
-            objective_breakdown=breakdown,
-            max_equilibrium_residual=max_eq_res,
-            max_root_residual=max_root_res,
-            success=all_success,
+            max_eq_res=window_max_eq,
+            max_root_res=window_max_root,
+            success=overall_success,
             status="sliding_window_continuous",
         )
 
@@ -615,14 +631,7 @@ class SmoothTorqueOptimizer:
         c = np.zeros(n_vars, dtype=np.float64)
 
         # Integration weights for trapezoidal quadrature
-        dt_nodes = np.zeros(n_nodes, dtype=np.float64)
-        if n_nodes == 1:
-            dt_nodes[0] = 1.0
-        else:
-            dt_nodes[0] = (time_s[1] - time_s[0]) / 2.0
-            dt_nodes[-1] = (time_s[-1] - time_s[-2]) / 2.0
-            for k in range(1, n_nodes - 1):
-                dt_nodes[k] = (time_s[k + 1] - time_s[k - 1]) / 2.0
+        dt_nodes = self._compute_trapezoidal_weights(time_s)
 
         tau_max_sq = self.limits.tau_max**2
 
@@ -1023,18 +1032,7 @@ class SmoothTorqueOptimizer:
         else:
             # Warm start via frame allocation
             for k, node in enumerate(nodes):
-                mask_bool = (
-                    np.asarray(node.contact_mask, dtype=bool)
-                    if node.contact_mask is not None
-                    else None
-                )
-                alloc = self._frame_allocator.allocate(
-                    tau_rnea=node.tau_rnea,
-                    j_ground=node.j_ground,
-                    j_grip=node.j_grip,
-                    contact_mask=mask_bool,
-                    ground_normal=node.surface_normal,
-                )
+                alloc = self._allocate_single_node(node)
                 offset = k * self.n_vars_per_node
                 x0[offset : offset + self.n_actuated] = alloc.tau_actuated
                 x0[
@@ -1093,14 +1091,7 @@ class SmoothTorqueOptimizer:
     ) -> dict[str, float]:
         """Compute transparent breakdown of each objective term."""
         n_nodes = len(time_s)
-        dt_nodes = np.zeros(n_nodes, dtype=np.float64)
-        if n_nodes == 1:
-            dt_nodes[0] = 1.0
-        else:
-            dt_nodes[0] = (time_s[1] - time_s[0]) / 2.0
-            dt_nodes[-1] = (time_s[-1] - time_s[-2]) / 2.0
-            for k in range(1, n_nodes - 1):
-                dt_nodes[k] = (time_s[k + 1] - time_s[k - 1]) / 2.0
+        dt_nodes = self._compute_trapezoidal_weights(time_s)
 
         tau_max_sq = self.limits.tau_max**2
 
