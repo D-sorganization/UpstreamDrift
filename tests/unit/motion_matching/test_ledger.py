@@ -17,6 +17,7 @@ from src.shared.python.motion_matching.ledger import (
     Ledger,
     LedgerRow,
     default_ledger_path,
+    extract_horizon_s,
     scan,
 )
 from src.tools.motion_matching.pipeline import list_runs
@@ -160,3 +161,47 @@ def test_pipeline_list_runs():
     runs = list_runs()
     assert len(runs) >= 40
     assert isinstance(runs[0], LedgerRow)
+
+
+@pytest.mark.unit
+def test_self_reported_acceptance_is_never_passed() -> None:
+    """MS-100: a receipt's own ``accepted`` flag cannot mark a ledger row accepted."""
+    from src.shared.python.motion_matching.ledger import extract_acceptance
+
+    self_reported = {"receipt": {"accepted": True, "status": "terminal"}}
+    block = extract_acceptance("x/receipt.json", self_reported, None)
+    assert block is not None
+    assert block["is_physically_accepted"] is False
+    assert block["status"] == "UNVERIFIED"
+
+    gateless = {"acceptance": {"is_physically_accepted": True, "status": "PASSED"}}
+    block = extract_acceptance("y/receipt.json", gateless, None)
+    assert block is not None and block["status"] == "UNVERIFIED"
+
+    evaluated = {
+        "acceptance": {
+            "horizon": "G1",
+            "is_physically_accepted": True,
+            "status": "PASSED",
+            "gates": [{"name": "whole", "status": "PASSED"}],
+        }
+    }
+    block = extract_acceptance("z/receipt.json", evaluated, None)
+    assert block is not None and block["status"] == "PASSED"
+
+
+@pytest.mark.unit
+def test_extract_horizon_s_prefers_dynamics_duration_over_elapsed_s() -> None:
+    """extract_horizon_s prefers physical simulation duration over wall-clock elapsed_s."""
+    payload = {
+        "elapsed_s": 326.2,
+        "dynamics": {
+            "duration_s": 1.81,
+        },
+    }
+    assert extract_horizon_s(payload) == 1.81
+
+    payload_no_dynamics = {
+        "elapsed_s": 326.2,
+    }
+    assert extract_horizon_s(payload_no_dynamics) == 326.2

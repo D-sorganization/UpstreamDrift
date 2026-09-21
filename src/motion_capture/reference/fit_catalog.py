@@ -1,4 +1,8 @@
-"""Reviewed landmark bindings for bundled native models; extensible via URDF."""
+"""Reviewed landmark bindings for bundled native models; extensible via URDF.
+
+Models cataloged here are assigned canonical identities in the Tour Baselines
+registry (see ``src.shared.python.tour_baselines.registry``, TB-00 #10585).
+"""
 
 from pathlib import Path
 

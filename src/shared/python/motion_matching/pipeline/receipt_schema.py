@@ -53,6 +53,7 @@ __all__ = [
     "AttachmentOffset",
     "BackswingReceipt",
     "CalibratedAddressReport",
+    "CandidateReplayReceipt",
     "CalibrationReport",
     "CentreOfMassReport",
     "ClavicleLinkDeg",
@@ -88,6 +89,30 @@ __all__ = [
 # -----------------------------------------------------------------------------
 # Top-Level Receipt Model
 # -----------------------------------------------------------------------------
+
+
+class CandidateReplayReceipt(BaseModel):
+    """Same-input native replay evidence, distinct from an IK/fit receipt (#10336)."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    schema_version: str = "matched-swing-replay/1"
+    engine: str
+    engine_version: str
+    candidate_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    document_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    capture_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    attachments_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    configuration: dict[str, Any]
+    parity: dict[str, Any]
+    integration: dict[str, Any]
+    shared_metrics: dict[str, float]
+    g1_metrics: dict[str, float]
+    acceptance: AcceptanceReceipt
+    artifacts: dict[str, Any]
+    elapsed_s: float
+    qualification: str
 
 
 class Receipt(BaseModel):
