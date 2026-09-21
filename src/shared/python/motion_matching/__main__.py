@@ -114,48 +114,10 @@ def export_video_cli(args: argparse.Namespace) -> int:
         return 1
 
 
-def main() -> int:
-    """Parse CLI arguments and dispatch to subcommand."""
-    parser = argparse.ArgumentParser(
-        description="Motion matching utilities",
-        prog="python3 -m src.shared.python.motion_matching",
-    )
-    subparsers = parser.add_subparsers(dest="command", help="Subcommand to run")
-
-    # Leaderboard subcommand
-    leaderboard_parser = subparsers.add_parser(
-        "leaderboard", help="Generate cross-engine leaderboard"
-    )
-    leaderboard_parser.add_argument(
-        "--results-dir",
-        type=str,
-        required=True,
-        help="Directory containing <trial>/<engine>.json result files",
-    )
-    leaderboard_parser.add_argument(
-        "--output",
-        type=str,
-        default="LEADERBOARD.md",
-        help="Output file path (default: LEADERBOARD.md)",
-    )
-
-    # Ledger subcommand
-    ledger_parser = subparsers.add_parser(
-        "ledger", help="Scan receipts and generate matched swing ledger"
-    )
-    ledger_parser.add_argument(
-        "--write",
-        action="store_true",
-        help="Write ledger to reports/matched_swing_ledger.json",
-    )
-    ledger_parser.add_argument(
-        "--output",
-        type=str,
-        default=None,
-        help="Custom output file path for ledger JSON",
-    )
-
-    # Export report subcommand
+def _register_export_subparsers(
+    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    """Register export-report and export-video subcommands."""
     report_parser = subparsers.add_parser(
         "export-report", help="Export fit-quality report from receipt"
     )
@@ -178,7 +140,6 @@ def main() -> int:
         help="Optional path to candidate .npz package",
     )
 
-    # Export video subcommand
     video_parser = subparsers.add_parser(
         "export-video", help="Export marker overlay video for candidate"
     )
@@ -213,6 +174,53 @@ def main() -> int:
         help="Frame subsampling stride (default: 5)",
     )
 
+
+def _build_parser() -> argparse.ArgumentParser:
+    """Build top-level CLI argument parser."""
+    parser = argparse.ArgumentParser(
+        description="Motion matching utilities",
+        prog="python3 -m src.shared.python.motion_matching",
+    )
+    subparsers = parser.add_subparsers(dest="command", help="Subcommand to run")
+
+    leaderboard_parser = subparsers.add_parser(
+        "leaderboard", help="Generate cross-engine leaderboard"
+    )
+    leaderboard_parser.add_argument(
+        "--results-dir",
+        type=str,
+        required=True,
+        help="Directory containing <trial>/<engine>.json result files",
+    )
+    leaderboard_parser.add_argument(
+        "--output",
+        type=str,
+        default="LEADERBOARD.md",
+        help="Output file path (default: LEADERBOARD.md)",
+    )
+
+    ledger_parser = subparsers.add_parser(
+        "ledger", help="Scan receipts and generate matched swing ledger"
+    )
+    ledger_parser.add_argument(
+        "--write",
+        action="store_true",
+        help="Write ledger to reports/matched_swing_ledger.json",
+    )
+    ledger_parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Custom output file path for ledger JSON",
+    )
+
+    _register_export_subparsers(subparsers)
+    return parser
+
+
+def main() -> int:
+    """Parse CLI arguments and dispatch to subcommand."""
+    parser = _build_parser()
     args = parser.parse_args()
     if args.command == "leaderboard":
         return leaderboard_cli(args)
