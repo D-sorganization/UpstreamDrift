@@ -64,8 +64,12 @@ function report = run_simscape_candidate(repo, run_id, do_replay)
     opts = struct();
     opts.run_id = run_id;
     opts.issue = "#10347";
-    opts.host = "DeskComputer";
-    opts.machine = "DeskComputer";
+    host_name = getenv('COMPUTERNAME');
+    if isempty(host_name)
+        host_name = char(java.net.InetAddress.getLocalHost().getHostName());
+    end
+    opts.host = string(host_name);
+    opts.machine = string(host_name);
     opts.matlab_release = string(rel);
     opts.matlab_version = string(version);
     opts.model_sha256 = string(cand.model_sha256);
