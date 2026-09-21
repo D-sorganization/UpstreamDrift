@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 21 parity · 12 gap · 13 exempt (12 pending decision in #7460).
+**Summary:** 20 parity · 13 gap · 13 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -54,7 +54,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.motion_matching`<br>Motion Matching tour-average capture matching | ✅ parity | `src/tools/motion_matching/gui.py` | — | — | — |
 | `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Interactive 3D pose editing and shared scene-bound native reference points/planes (#9942); desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/engines/physics_engines/putting_green/python/simulator.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
-| `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | ✅ parity | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `src/api/local_server.py` | `ui/src/pages/ImpactExplorer.tsx` | Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent. |
+| `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | 🔴 gap | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `src/api/local_server.py` | `ui/src/pages/ImpactExplorer.tsx` | #9546 |
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
 | `visualization.force_color_controls`<br>Shared Segment Force Color Controls | ✅ parity | `src/shared/python/body_part_viz/force_color_controls.py` | — | `ui/src/components/visualization/ForceColorControls.tsx` | — |
 

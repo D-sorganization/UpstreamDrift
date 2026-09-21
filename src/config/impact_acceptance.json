@@ -1,0 +1,184 @@
+{
+  "version": "1.0.0",
+  "issue": 9550,
+  "epic": 9546,
+  "audit_snapshot": {
+    "upstreamdrift": "1f69a51fce997932f04a6ad1dd95bf4d065ba971",
+    "tools": "3d93bb2c89813e17551814d3be7e895f791e29af",
+    "recorded_on": "2026-09-04"
+  },
+  "reconciled_against": {
+    "upstreamdrift": "5347cba0f4378cd72a6e8afea9fb27c8bfe5db75",
+    "tools": "a9ed0e7c5c6905b1164082659051d6381068052d",
+    "reconciled_on": "2026-09-20"
+  },
+  "release_claim": "code_verified_only",
+  "predictive_accuracy_claim": false,
+  "claim_boundary": "Every entry below is software correctness evidence: synthetic golden cases and agreement with another implementation verify code, not physics. No predictive-accuracy or polished-delivery claim is made on the basis of the audit's 16 library tests or the probes here; that claim requires the physical reference datasets and predeclared error criteria of item 3.",
+  "model_capabilities": {
+    "library": "src/shared/python/physics/impact_model",
+    "vocabulary": {
+      "contact": [
+        "instantaneous",
+        "finite_duration_reported_only",
+        "finite_duration_integrated"
+      ],
+      "tangential_spin": ["supported", "unavailable"],
+      "gear_effect": ["empirical_overlay_via_solver_api", "unavailable"],
+      "inertia_tensor": ["scalar_moi_effective_mass", "ignored"],
+      "velocity_dependent_cor": ["unavailable_constant_cor"],
+      "shaft_grip": ["not_modelled_free_clubhead"]
+    },
+    "models": [
+      {
+        "id": "rigid_body",
+        "module": "src/shared/python/physics/impact_model/models.py",
+        "contact": "instantaneous",
+        "tangential_spin": "supported",
+        "gear_effect": "empirical_overlay_via_solver_api",
+        "inertia_tensor": "scalar_moi_effective_mass",
+        "velocity_dependent_cor": "unavailable_constant_cor",
+        "shaft_grip": "not_modelled_free_clubhead",
+        "numerical_limits": "Closed-form impulse; Coulomb friction impulse capped at the rolling-without-slip value 2/7*m*v_t; effective mass 1/(1/m + r^2/I) uses a scalar MOI, not the 3x3 tensor; requires non-zero face normal and finite inputs.",
+        "user_facing_statement": "Instantaneous rigid-body impulse with constant COR. Friction spin about the (t x n) axis is supported; gear-effect spin is an empirical overlay (offset * speed * scale) applied only through ImpactSolverAPI, not a rigid-body result."
+      },
+      {
+        "id": "spring_damper",
+        "module": "src/shared/python/physics/impact_model/models.py",
+        "contact": "finite_duration_integrated",
+        "tangential_spin": "unavailable",
+        "gear_effect": "empirical_overlay_via_solver_api",
+        "inertia_tensor": "ignored",
+        "velocity_dependent_cor": "unavailable_constant_cor",
+        "shaft_grip": "not_modelled_free_clubhead",
+        "numerical_limits": "Semi-implicit Euler, dt default 1e-7 s, contact capped at 5 ms and 1e5 N; ball velocity converges to rtol 1e-4 between dt 1e-7 and 5e-8. Default stiffness 1e6 N/m and damping 1e3 N*s/m are uncalibrated: a 45 m/s driver strike yields ~1.26 ms contact and smash factor ~0.82, so defaults are for code verification only.",
+        "user_facing_statement": "Kelvin-Voigt compliant contact along the face normal only. Tangential spin: unavailable (normal-only) - the returned ball spin is the pre-impact spin, not a prediction. Impact offset and clubhead MOI are ignored by the model; COR parameter is unused."
+      },
+      {
+        "id": "finite_time",
+        "module": "src/shared/python/physics/impact_model/models.py",
+        "contact": "finite_duration_reported_only",
+        "tangential_spin": "supported",
+        "gear_effect": "empirical_overlay_via_solver_api",
+        "inertia_tensor": "scalar_moi_effective_mass",
+        "velocity_dependent_cor": "unavailable_constant_cor",
+        "shaft_grip": "not_modelled_free_clubhead",
+        "numerical_limits": "Delegates entirely to rigid_body; the reported contact_duration is the input parameter (default 0.5 ms), not a computed quantity.",
+        "user_facing_statement": "Rigid-body result relabelled with a user-supplied contact duration. Velocities and spin are identical to rigid_body; the duration is reported, not modelled."
+      }
+    ],
+    "frames_and_units": "SI throughout (m, m/s, rad/s, kg, kg*m^2, s). Frame is the caller's: clubhead_orientation is the outward face normal n; friction spin axis is t x n with t the relative tangential direction; gear-effect overlay assumes z-up and puts horizontal-offset spin about +z. The library performs no imperial conversion; conversion and left/right or loft/path/attack decomposition are Impact Explorer (Tools) responsibilities."
+  },
+  "acceptance_work": [
+    {
+      "item": 1,
+      "title": "Freeze a model-capability matrix",
+      "status": "met",
+      "evidence": "model_capabilities above is verified row by row against the shipping library: contact duration, spin availability, off-center effective mass, gear-effect overlay path and constant COR are each probed by the gate tests, and the review packet restates the matrix for humans.",
+      "tests": [
+        "tests/config/impact_acceptance/test_impact_acceptance_matrix.py"
+      ],
+      "evidence_paths": ["docs/development/impact_acceptance_matrix.md"],
+      "blockers": [],
+      "owner": null,
+      "plan": null
+    },
+    {
+      "item": 2,
+      "title": "Shared golden cases and invariants",
+      "status": "partial",
+      "evidence": "Library goldens covered by the gate: centered vs 20 mm toe strike, no-hit (zero approach -> zero launch and spin), 20 vs 60 m/s (constant smash factor), backspin sign for a lofted strike, normal-direction momentum conservation, passivity (kinetic energy never increases) and spring-damper dt convergence. Not covered: left/right and loft/path/attack decompositions, imperial conversion, external impulses and instantaneous-limit comparisons across the Tools explorer models (impactPhysics.ts, swing_sim/impact); those goldens are provider-owned.",
+      "tests": [
+        "tests/config/impact_acceptance/test_impact_acceptance_matrix.py",
+        "tests/unit/physics/test_impact_physics_value_assertions.py",
+        "tests/unit/physics/test_impact_friction_axis_and_gear_offset.py"
+      ],
+      "evidence_paths": [],
+      "blockers": [9546],
+      "external_dependencies": ["D-sorganization/Tools#4251"],
+      "owner": "unassigned",
+      "plan": "Consume the provider's shared golden bundle (Tools #4251 physics-approximation register) through the pinned vendor tree and add a UD consumer test that replays the same cases through ImpactSolverAPI and the explorer's Python runtime, comparing frames, units and spin signs numerically."
+    },
+    {
+      "item": 3,
+      "title": "Physical reference datasets and predeclared error criteria",
+      "status": "open",
+      "evidence": "No physical launch-monitor or high-speed-camera reference dataset is in the tree; docs/api/contracts/fixtures/launch-monitor-conformance-bundle-v1.golden.json is a synthetic conformance fixture and counts as code verification only.",
+      "tests": [],
+      "evidence_paths": [],
+      "blockers": [9546],
+      "external_dependencies": ["D-sorganization/Tools#4251"],
+      "owner": "unassigned",
+      "plan": "Register a licensed reference dataset in the design-manual governance pathway with predeclared per-model error and uncertainty criteria before any predictive-accuracy wording is added to the product or marketing surfaces."
+    },
+    {
+      "item": 4,
+      "title": "Clean installation serves real assets at /impact-explorer-app/ from the pinned source",
+      "status": "partial",
+      "evidence": "CI Standard's impact-explorer-web-build job builds the pinned Tools bundle from a clean checkout, stamps Tools' release artifacts with the gitlink (ROC_RELEASE_REVISION), and scripts/ci/verify_impact_explorer_bundle.py serves dist through the /impact-explorer-app mount contract and checks that index.html carries the pinned revision, every manifest asset (76 at this pin, 5 JavaScript) is served with its SHA-256, references sit under the base path, and a missing artifact answers 404. The receipt is uploaded as impact-explorer-bundle-receipt-<sha>. Missing-bundle behaviour (explicit fallback, startup metric false) is pinned by tests/api/test_impact_explorer_mount.py. Restart, reload and offline journeys of a built artifact are not demonstrated because no installable artifact ships the bundle yet.",
+      "tests": [
+        "tests/ci/test_verify_impact_explorer_bundle.py",
+        "tests/api/test_impact_explorer_mount.py"
+      ],
+      "evidence_paths": [
+        "scripts/ci/verify_impact_explorer_bundle.py",
+        ".github/workflows/ci-standard.yml"
+      ],
+      "blockers": [9417],
+      "owner": "unassigned",
+      "plan": "Once #9417 decides the artifact set, run the served-bundle verifier against the installed wheel/image on a clean machine and add restart, reload and offline checks to that install smoke."
+    },
+    {
+      "item": 5,
+      "title": "Rendered PyQt and web inspection with a reproducible screenshot manifest",
+      "status": "open",
+      "evidence": "No rendered-inspection manifest exists in this repository for the Impact Explorer; the vendored Tools tree carries browser smoke specs (src/rate_of_closure/web/tests/browser) that are provider-owned and not executed here.",
+      "tests": [],
+      "evidence_paths": [],
+      "blockers": [9546],
+      "owner": "unassigned",
+      "plan": "Add a headless capture job (representative desktop and narrow viewports) that stores a screenshot manifest with revision, viewport and check outcomes for defaults, keyboard focus, labels/units, contrast, error, progress/cancel and stale-result states, using only sanitized fixtures."
+    },
+    {
+      "item": 6,
+      "title": "Every control changes its contract; parity from numerical evidence",
+      "status": "partial",
+      "evidence": "Feature parity for tools.rate_of_closure no longer rests on the iframe: the entry is recorded as a gap under epic #9546 with the evidence that exists (both runtimes execute the same pinned Tools revision; the web mount serves verified artifacts). Identical saved scenarios have not been compared numerically across the PyQt and web runtimes, and per-control contract checks are not enumerated.",
+      "tests": ["tests/config/feature_parity/test_registry.py"],
+      "evidence_paths": ["src/config/feature_parity.json"],
+      "blockers": [9546],
+      "owner": "unassigned",
+      "plan": "Export one saved scenario from each runtime, compare the impact and flight results numerically with declared tolerances, enumerate exposed controls with their contract or disabled reason, then flip the parity entry on that evidence."
+    }
+  ],
+  "closure": [
+    {
+      "id": "dependency-pins",
+      "criterion": "Dependency tickets have implementation and exact-pin evidence.",
+      "status": "partial",
+      "evidence": "#9484 merged via PR #9724 (route producer). The pinned provider consumed here is 62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1 and the served bundle is verified against that exact gitlink. #9349 (canonical consumer migration) and Tools #4251 remain open.",
+      "blockers": [9349, 9546]
+    },
+    {
+      "id": "review-packet",
+      "criterion": "Review packet includes install logs, golden comparisons, supported Python matrix, rendered artifacts, reference-validation results and bounded claims.",
+      "status": "partial",
+      "evidence": "docs/development/impact_acceptance_matrix.md carries the capability matrix, the golden coverage, the CI install evidence path and the bounded claim; Python 3.11 and 3.12 are the tested matrix. Rendered artifacts and reference-validation results are absent (items 3 and 5).",
+      "blockers": [9546]
+    },
+    {
+      "id": "release-gates",
+      "criterion": "Main's protected release gates and post-merge smoke checks pass.",
+      "status": "partial",
+      "evidence": "The served-bundle verification joins the required quality-gate aggregate through impact-explorer-web-build; post-merge smoke of an installed artifact waits on #9417.",
+      "blockers": [9417]
+    },
+    {
+      "id": "no-overclaim",
+      "criterion": "No claim of polished or predictive delivery based only on the 16 library tests from this audit.",
+      "status": "met",
+      "evidence": "release_claim is code_verified_only and predictive_accuracy_claim is false; the gate refuses any other value while an acceptance item is outstanding.",
+      "blockers": []
+    }
+  ]
+}
