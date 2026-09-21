@@ -79,7 +79,7 @@ def _invoke_mj_inverse(
     lambda result, **_: (
         isinstance(result, np.ndarray)
         and result.ndim == 1
-        and np.isfinite(result).all()
+        and bool(np.isfinite(result).all())
     ),
     "mj_inverse torques must be finite with model size",
 )
