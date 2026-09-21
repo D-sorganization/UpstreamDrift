@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10345 · MyoSuite Kinematic Replay With Coordinate Map and Marker Parity Receipt
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10345 (epic #10363, MS-52)
+- **Branch:** fix/issue-10345-ms-52-local
+- **PR:** #10666
+- **Paths:** src/engines/physics_engines/myosuite/python/{retarget,replay,golfer_scene,coordinate_map_anthro.json,viz/render_replay.py}; tests/unit/engines/myosuite/test_retarget.py; tests/myosuite/test_replay_native.py; evidence/matched/driver_g1_myosuite/
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at SELF — TDD RED→GREEN on `tests/unit/engines/myosuite/test_retarget.py`; native replay writes receipt/candidate/GIF with honest `parity.passed=false` on placeholder MJCF (195 mm aligned RMS vs 15 mm budget until MS-51 scene); `dynamics.status=not_run`.
+- **Summary:** Added pure-numpy retarget map, kinematic replay CLI, marker parity receipt (`stage=replay`), MyoSuite registration in `cross_engine_replay.VALID_ENGINES` as kinematic-only, and viewer colour. Evidence committed under `evidence/matched/driver_g1_myosuite/`.
+- **Next step:** Merge PR after CI green; MS-51 golfer scene required before 15 mm parity gate can pass.
+
 ### DL-#10436 · Explore Feasible Force Null Spaces and Publish Torque-Distribution Tradeoffs
 
 - **State:** in_review
