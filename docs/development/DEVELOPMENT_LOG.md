@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9543 · Bunker Sand-to-Ball Transfer Calibration and Held-Out Qualification
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9543 (epic #9541)
+- **Branch:** conductor/issue-9543
+- **PR:** #10457 (open)
+- **Paths:** src/bunkershot3d/ball/qualification.py; src/bunkershot3d/ball/qualification_fit.py; src/bunkershot3d/ball/rig_capability.py; src/bunkershot3d/ball/splash.py; src/bunkershot3d/ball/**init**.py; src/bunkershot3d/vandv/validation.py; src/bunkershot3d/vandv/measurement_intake.py; src/bunkershot3d/sand/provenance.py; tests/bunkershot3d/ball/test_transfer_qualification.py; docs/bunkershot3d/transfer-qualification.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at SELF (base 49d94788a; 55 new tests pass; 1018 tests across tests/bunkershot3d ball, vandv, sand, study and public-API suites pass; scoped ruff, ruff format, mypy, LoD, file-size, architecture and error-handling ratchet checks pass; pinned Tools tree 62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1 materialised read-only for the run)
+- **Summary:** Software half of the measurement-to-prediction program: measured-stroke intake contract with instrument-only launch records and raw-data digests, registered intended-use matrix and protocol, session-designated split with leakage refusal and #9286 sand-batch admission, bounded fit with identifiability and sensitivity checks preserving failed fits, held-out V&V 20 comparison against predeclared tolerances, versioned `TransferQualification` that lifts the launch verdict floor per qualified regime only, `CALIBRATED` provenance basis, and the #9239 objective disposition. No strokes are on file; physical qualification remains blocked and the issue stays open.
+- **Next step:** Open the PR referencing #9543 (not `Closes`), then acquire measured strokes under `MEASUREMENT_PROTOCOL` before any qualification is attempted.
+- **Evidence:** tests/bunkershot3d/ball/test_transfer_qualification.py; docs/bunkershot3d/transfer-qualification.md.
+
 ### DL-#9548 · Impact-Interval Energy Audit Consumer Gate
 
 - **State:** in_review
@@ -30,6 +44,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The pinned Tools solver already integrates release, dashpot/friction, torsional damping and boundary storage independently of the residual (Tools #5079). UD consumes that pin through a fail-closed gate that recomputes the residual from the ledger identity, audits free vs supported momentum separately, reports evidence plus limitations as a JSON-ready record, and refuses `to_post_impact_state()` on unseparated contact or a failed audit. No UI consumer of the interval solver exists yet; the report record is the surface for one.
 - **Next step:** Open the PR with `Closes #9548`, then wire the verdict report into the first UI/report consumer of the interval solver when one lands.
 - **Evidence:** tests/shared_contracts/test_impact_interval_provider.py (interrupted compression 32.54 J stored / 0 J release / −0.063 J signed residual; clipping release 1.71 J; perturbed law residual > 0.5 J blocked; halving dt lowers both residuals).
+  > > > > > > > origin/main
 
 ### DL-#10359 · Wire Video and Fit-Quality Report Export
 

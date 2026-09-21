@@ -62,6 +62,12 @@ class ProvenanceBasis(StrEnum):
     MEASURED = "measured"
     """Measured on golf bunker sand itself. Nothing in this package is."""
 
+    CALIBRATED = "calibrated"
+    """Fitted to instrument measurements made on golf bunker sand and
+    qualified on held-out sessions (issue #9543). Constrained by measurement,
+    not measured: a model parameter absorbs model-form error in the fit, so
+    this never reads as ``MEASURED``."""
+
     SPECIFICATION = "specification"
     """Read off a published specification or recommendation table."""
 

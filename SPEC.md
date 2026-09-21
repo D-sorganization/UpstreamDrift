@@ -902,6 +902,26 @@ Formalizes dynamic validation gates for open-loop replay drift, collocation defe
 - **Pinocchio MatchingPlant Adapter (`src/engines/physics_engines/pinocchio/python/matching_plant.py`)**:
   - Exports `PinocchioMatchingPlant` conforming to the unified `MatchingPlant` protocol.
 
+## Bunker Sand-to-Ball Transfer Calibration and Held-Out Qualification (#9543)
+
+`bunkershot3d.ball.qualification` and `qualification_fit` are the software half
+of the measurement-to-prediction program for the splash-shot momentum transfer:
+a `MeasuredStroke` intake contract (instrument records only, ISO date, SHA-256
+raw-data digest, missing quantities kept missing), a registered intended-use
+matrix and measurement protocol, a `QualificationDataset` split by session with
+digest-level leakage refusal and #9286 sand-batch admission, a bounded
+least-squares `fit_transfer` with identifiability and sensitivity checks that
+preserves failed fits, a held-out `validate_holdout` under ASME V&V 20 judged
+against `PRACTICAL_TOLERANCES` fixed with rationale before analysis, and a
+versioned `TransferQualification`. `launch_verdict` lifts the `BEYOND_VALIDATION`
+floor to `WITHIN` only for a strike inside a qualified regime and preserves it
+elsewhere; fitted parameters carry the new `ProvenanceBasis.CALIBRATED`, ranked
+below `MEASURED`. `ValidationComparison` admits a launch-side quantity only with
+an on-file instrument `measured_record`. `objective_disposition` gives #9239 its
+disposition: ranking unavailable until calibrated, then degenerate or supported
+per target. The shipped stroke register is empty; no physical qualification is
+claimed and the report states what the three-camera rig cannot measure.
+
 ## Saved Pinocchio Controls in MuJoCo (#10336)
 
 `scripts/replay_pinocchio_in_mujoco.py` replays saved joint efforts from the
@@ -6669,6 +6689,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
 | 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
+| 2026-09-18 | #10457 | Bunker sand-to-ball transfer: stroke intake contract, session-split calibration fit with identifiability checks, held-out V&V 20 qualification against predeclared tolerances, versioned evidence that lifts the launch verdict floor per regime only; shipped register stays empty. |
 | 2026-09-18 | #10459 | Add the fail-closed BunkerShot3D product acceptance matrix (`src/config/bunkershot3d_qualification.json`) tracking every epic child, dependency order and prediction-acceptance criteria; `release_status` is bound to the live V&V register and reads `blocked`. |
 | 2026-09-19 | #10466 | Rig capture sessions export through the pinned Tools `MocapSessionManifest` (`mocap-session/1.0.0`): the bridge probes the Tools family, pins the schema, and writes `mocap_session.json` via the Tools builders and canonical serializer; retained video without recorded consent is refused, not faked. First M-track consumer slice of #9422. |
 | 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
