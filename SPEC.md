@@ -15,6 +15,19 @@ Separates kinematic projection from dynamic model reduction for Simscape upper-b
 - **Verification Suite (`tests/unit/motion_matching/test_coordinate_slice.py`)**:
   - 9 unit tests covering map coverage, projection, virtual work, boundary wrenches, fail-closed mismatch, and workspace overrides.
 
+## Club Workbook Identity, Units, Events, and Trial Lineage (CO-00, #10604)
+
+Freezes content-addressed club Excel workbook identity for epic #10602 without altering source workbooks:
+- **Shared Event Labels (`src/shared/python/motion_matching/loaders/event_labels.py`)**:
+  - Normalizes bare and equals-suffixed markers (`A` / `A=`, …, `CHS`) and preserves real zero direction-cosine components (rejects `value or default` false zeros).
+- **Workbook Identity Package (`src/shared/python/motion_matching/club_only/workbook_identity.py`)**:
+  - Verifies SHA-256 for `data/Club_Data.xlsx` and the Wiffle/ProV1 companion workbook.
+  - Emits a four-trial lineage table; Filtering Experiments aliases TW_ProV1 by numeric fingerprint; trailing blank rows are not samples.
+  - Records centimetre interpretation with inches declaration retained, native 240 Hz impact-relative clock, T-event meaning, GW_wiffle ball-label conflict, and derived-not-measured orientation policy.
+- **Loader Alignment**: Excel `read_excel_event_markers` and Pinocchio `ClubTrajectoryParser` consume the shared helpers so TW_wiffle `A=` no longer returns NaN.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_workbook_identity.json` and `tests/unit/motion_matching/test_club_workbook_identity.py`.
+
+
 ## OpenSim/MyoSuite Native Nightly Lane Receipts (MS-43, #10342)
 
 Adds a ControlTower-oriented native-engine pytest lane with hashed nightly receipts and a freshness gate on `main` without editing `.github/workflows`:
@@ -6757,6 +6770,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
+| 2026-09-21 | #10667 | Freeze club workbook identity, shared A=/A event-label normalization, and four-trial lineage for CO-00 (#10604); centimetre unit authority retained with inches declaration recorded. |
 | 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
 | 2026-09-21 | #10648 | Vectorize `BallFlightSimulator._post_process_rust` to build the trajectory's `(3, N)` batch once and call force calculation a single time instead of once per point (#8930); no numerical change. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
