@@ -1,3 +1,35 @@
+## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
+
+Defines versioned baseline packages, fit metrics, and frozen qualification profiles under the Tour Baselines program:
+- **Baseline Identity & Manifest (`src/shared/python/tour_baselines/baseline_package.py`)**:
+  - Implements `BaselineIdentity` linking capture target, model topology, numerical backend, provider pin, fit mode, horizon, coordinate/plane conventions, measurement map version, fixed geometry/inertia hashes, initial state hashes, solver configuration, random seed, computational budgets, candidate ancestry, and runtime/file environment hashes.
+  - Implements `StatusBundle` strictly separating five orthogonal dimensions: `solver_convergence`, `kinematic_accuracy`, `dynamic_feasibility`, `scientific_qualification`, and `product_promotion`.
+  - Enforces fail-closed native replay rule: a manifest lacking native simulation replay evidence cannot qualify scientifically (`scientific_qualification != qualified`).
+  - Guards synthetic test data with `is_synthetic = True`, permanently barring synthetic packages from product promotion.
+  - Provides `export_baseline_package` and `import_baseline_package` using self-contained `.npz` storage with array-level SHA-256 checksums (`allow_pickle = False`).
+- **Physical Fit Metrics Formulation (`src/shared/python/tour_baselines/fit_metrics.py`)**:
+  - Computes physical 3D Euclidean marker tracking error $\text{RMSE} = \sqrt{\frac{1}{N_{\text{valid}}} \sum_{(t,m) \in \mathcal{V}} \|\mathbf{p}^{\text{pred}}_{t,m} - \mathbf{p}^{\text{obs}}_{t,m}\|_2^2}$, p95, and max error over valid observations.
+  - Rejects empty valid sets ($N_{\text{valid}} = 0$) and non-finite coordinates ($\text{NaN}, \infty$) at valid indices with `ValueError`.
+  - Provides per-marker and per-phase breakdown (address, backswing, downswing, impact, follow-through) using audited swing events.
+  - Decomposes errors into in-plane tracking error and out-of-plane residual relative to swing or frontal planes.
+  - Reports optimizer weighted loss separately from physical Euclidean error.
+  - Binds evaluations to cryptographic `landmark_set_signature` (SHA-256) to ensure disparate marker sets cannot be ranked as equivalent.
+- **Frozen Qualification Profiles (`src/shared/python/tour_baselines/qualification_profiles.py`)**:
+  - Defines "best" as best feasible candidate within a declared model class, objective, observation set, horizon, and computation budget.
+  - Preserves authoritative full-body G1/G2/G3 clinical acceptance gates (`AcceptanceGates` in `acceptance.py`).
+  - Freezes distinct numeric qualification profiles for reduced educational baselines based on attainable fixed-geometry residuals over observable subsets:
+    - `PlanarDrivenPendulumProfile`: 2-DOF planar driven pendulum (club RMSE $\le 150$ mm, out-of-plane residual $\le 50$ mm).
+    - `UpperBodyGolferProfile`: 5-DOF constrained upper body (whole marker RMSE $\le 55$ mm, weld closure residual $\le 5$ mm).
+    - `TriplePendulumProfile`: 3-DOF kinematic reconstruction (club RMSE $\le 120$ mm).
+  - Implements `evaluate_baseline_qualification` enforcing fail-closed verdicts.
+- **Integration & Acceptance Facades (`src/shared/python/motion_matching/acceptance.py`, `tour_baselines.py`)**:
+  - Implements `evaluate_baseline_package_acceptance` connecting baseline packages to the physical acceptance engine.
+  - Re-exports TB-02 models, metrics, and profiles under `src.shared.python.tour_baselines` and `src.shared.python.motion_matching.tour_baselines`.
+- **Evidence & Verification**:
+  - Added unit test suite in `tests/unit/tour_baselines/`: `test_fit_metrics.py`, `test_baseline_packages.py`, `test_qualification_profiles.py` (20 tests, 50 total in tour baselines suite).
+  - Emitted synthetic example fixtures in `docs/plans/tour_baselines/evidence/`: `synthetic_valid_baseline_package.json`, `synthetic_invalid_baseline_package.json`.
+  - Published comprehensive documentation in `docs/plans/tour_baselines/`: `baseline_packages.md`, `qualification_profiles.md`.
+
 ## Replace Synthetic Force Adapters With Native Model-Conformant Bridges (PF-09, #10439)
 
 Replaces synthetic force adapters with native model-conformant bridges:
@@ -6518,6 +6550,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
 | 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
 | 2026-09-18 | #10459 | Add the fail-closed BunkerShot3D product acceptance matrix (`src/config/bunkershot3d_qualification.json`) tracking every epic child, dependency order and prediction-acceptance criteria; `release_status` is bound to the live V&V register and reads `blocked`. |
 | 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
