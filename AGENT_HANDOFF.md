@@ -1,5 +1,18 @@
 # Simscape Tour-Average Fit Continuation
 
+## Tour Baselines TB-02: Define Versioned Baseline Packages, Fit Metrics, and Qualification Profiles (#10587)
+
+Branch `feat/tb02-baseline-packages-10587`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-02 ([#10587](https://github.com/D-sorganization/UpstreamDrift/issues/10587)) establishes the canonical Baseline Package contract (`tour-baseline-package/1.0.0`) extending portable packaging (#10379, #10334).
+
+- Implements `BaselineIdentity` linking capture target, model topology, backend pin, fit mode, horizon, frame/plane conventions, measurement map version, fixed geometry/inertia hashes, q0/v0 hashes, controls hash, solver config, seed, budgets, ancestry, and environment hashes.
+- Formulates `StatusBundle` separating solver convergence, kinematic accuracy, dynamic feasibility, scientific qualification, and product promotion into orthogonal statuses, enforcing that missing native replay forbids scientific qualification.
+- Formulates physical 3D Euclidean marker RMSE, p95, max, per-marker, per-phase, endpoint, and impact errors, distinct from optimizer loss, bound to cryptographic landmark signatures.
+- Froze numeric qualification profiles for authoritative full-body G1/G2/G3 and reduced educational models (planar driven pendulum, upper-body golfer, triple pendulum) with documented attainable-geometry rationale without relaxing full-body thresholds.
+- Provided clean-machine export/import with array checksum validation.
+- All 50 unit tests pass in `tests/unit/tour_baselines/` and 45/45 motion-matching tests pass; ruff check/format clean; mypy passes on all 14 files; architecture budget passes with 0 violations; check_file_size_budget passes; check_lod clean with 0 violations.
+  Next step: Merge TB-02 PR; next dispatch is TB-03 ([#10588](https://github.com/D-sorganization/UpstreamDrift/issues/10588): Prescribe Inputs and Trajectory Fitting Pipeline).
+
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
