@@ -26,9 +26,24 @@ Defines versioned baseline packages, fit metrics, and frozen qualification profi
   - Implements `evaluate_baseline_package_acceptance` connecting baseline packages to the physical acceptance engine.
   - Re-exports TB-02 models, metrics, and profiles under `src.shared.python.tour_baselines` and `src.shared.python.motion_matching.tour_baselines`.
 - **Evidence & Verification**:
-  - Added unit test suite in `tests/unit/tour_baselines/`: `test_fit_metrics.py`, `test_baseline_packages.py`, `test_qualification_profiles.py` (19 tests, 49 total in tour baselines suite).
+  - Added unit test suite in `tests/unit/tour_baselines/`: `test_fit_metrics.py`, `test_baseline_packages.py`, `test_qualification_profiles.py` (20 tests, 50 total in tour baselines suite).
   - Emitted synthetic example fixtures in `docs/plans/tour_baselines/evidence/`: `synthetic_valid_baseline_package.json`, `synthetic_invalid_baseline_package.json`.
   - Published comprehensive documentation in `docs/plans/tour_baselines/`: `baseline_packages.md`, `qualification_profiles.md`.
+
+## Replace Synthetic Force Adapters With Native Model-Conformant Bridges (PF-09, #10439)
+
+Replaces synthetic force adapters with native model-conformant bridges:
+- **Engine Force Adapter Architecture (`src/shared/python/motion_matching/multi_engine_torque_allocator.py`)**:
+  - Quarantines `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`.
+  - Enforces fail-closed `RuntimeError` in `create_engine_force_adapter` for unbridged native engines (Drake, OpenSim, Simscape) in production mode.
+  - Extends `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`.
+  - Corrects `MujocoForceAdapter` to compute raw unconstrained dynamics \(M a + \text{bias}\) eliminating `qfrc_inverse` passive/constraint force double counting.
+- **Pinocchio Native Bridge (`src/engines/physics_engines/pinocchio/python/force_adapter.py`, `native_model.py`)**:
+  - Implements `PinocchioForceAdapter` implementing shared protocol with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`).
+- **CLI & Quarantine Governance (`scripts/allocate_swing_torques.py`)**:
+  - Adds Pinocchio engine option and enforces `--allow-synthetic` gate flag.
+- **Verification Suite (`tests/unit/motion_matching/test_force_bridges_pf09.py`, `test_native_force_equations.py`, `test_multi_engine_torque_allocator.py`)**:
+  - 17 unit test fixtures validating quarantine enforcement, protocol conformance, CLI synthetic gate, and MuJoCo raw equation checks.
 
 ## Tour Baselines Target Audit, Marker Semantics, Events, and Provenance (TB-01, #10586)
 
