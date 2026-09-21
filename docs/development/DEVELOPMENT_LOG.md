@@ -316,18 +316,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
-### DL-#10615 · NM-00 Dataset Checkpoint and Training Claim Audit
+### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
 
 - **State:** in_review
+- **Owner:** local
+- **Issue:** #10616 (epic #10603)
+- **Branch:** feat/nm01-freeze-learning-tasks
+- **PR:** #10672
+- **Paths:** src/shared/python/neural*motion/tasks.py; src/shared/python/neural_motion/roster.py; src/shared/python/neural_motion/experiment.py; src/shared/python/neural_motion/**init**.py; tests/unit/neural_motion/test_learning_tasks.py; tests/unit/neural_motion/test_model_roster.py; tests/unit/neural_motion/test_benefit_experiment.py; tests/unit/neural_motion/test_nm01_dbc_optimize.py; docs/plans/neural_motion_matching/learning_freeze.md; docs/plans/neural_motion_matching/evidence/nm01*\*.json
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21T22:29:46Z at SELF (main sync + Tools pin restore a9ed0e7c; agent-context green; anchor helpers exported)
+- **Summary:** Freezes typed forward/inverse/masked learning-task contracts (dimensions from TB-00 identities; inverse non-uniqueness policy required), a 20-model neural roster with full-body deferred pending benefit, and the benefit experiment (nested 100/500/2000 stages, three seeds, five baselines, all-phase latency including failures, 2× median/non-worse p95 gates, break-even None when savings ≤ 0). No training or speed claim.
+- **Next step:** Wait for CI green on PR #10672 then confirm squash auto-merge.
+- **Evidence:** docs/plans/neural_motion_matching/learning_freeze.md; docs/plans/neural_motion_matching/evidence/nm01_learning_tasks_pilot.json; docs/plans/neural_motion_matching/evidence/nm01_model_roster.json; docs/plans/neural_motion_matching/evidence/nm01_benefit_experiment_receipt.json.
+
+### DL-#10615 · NM-00 Dataset Checkpoint and Training Claim Audit
+
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10615 (epic #10603)
 - **Branch:** fix/issue-10615-nm00-dataset-audit
 - **PR:** #10668
 - **Paths:** src/shared/python/neural_motion/; src/shared/python/motion_matching/surrogate/artifact_paths.py; src/shared/python/motion_matching/surrogate/nm00_audit.py; src/shared/python/motion_matching/surrogate/perstep/extract_dataset.py; tests/unit/neural_motion/; docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21T19:43:06Z at SELF (rebased on main a5cec3063; CO-00 test present; SPEC #10668 only; nm00_audit pointer; inventory current; cherry-picked corpus audit fix)
+- **Last verified:** 2026-09-21 at 839b645dc (merged to main via #10668)
 - **Summary:** Fail-closed inventory of neural corpora, default checkpoints and historical training claims with retain/repair/migrate/reject/quarantine dispositions and a per-model coverage matrix keyed to TB-00 identities. No native training or speed claim.
-- **Next step:** Merge PR #10668 after green CI, then claim NM-01 (#10616).
+- **Next step:** Continue NM-01 (#10616) under the frozen audit inventory.
 - **Evidence:** docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/nm00_artifact_audit_receipt.json; docs/plans/neural_motion_matching/evidence/nm00_coverage_matrix.json.
 
 ### DL-#10602 · Club-Only Motion Matching Plan
@@ -397,7 +411,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 at c3111a9177885af945018d730ec40de308cd9971 (source/workbook review; four unique numeric trials audited and TW_wiffle event parsing defect reproduced; implementation and training not performed)
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Dispatch #10616 (NM-01) after #10615 merges.
+- **Next step:** Land NM-01 (#10616), then dispatch #10617 (NM-02).
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#9550 · Impact Explorer Acceptance Matrix and Served-Bundle Verification

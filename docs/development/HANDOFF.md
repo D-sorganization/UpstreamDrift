@@ -243,11 +243,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667 and CO-01/#10670 shipped; active child [CO-02 #10606](https://github.com/D-sorganization/UpstreamDrift/issues/10606) via PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md).
-- **NM-00 state:** Fail-closed dataset/checkpoint/claim audit in src/shared/python/neural_motion/; surrogate path constants shared; absent/quarantined default checkpoints; data/sweep_synthetic software-contract-only; CVAE/regressor mean-baseline plateaus NOTE_ONLY. Receipts under docs/plans/neural_motion_matching/evidence/.
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-01 [#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616) merged (#10672).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md).
+- **NM-00 state:** Fail-closed dataset/checkpoint/claim audit remains authoritative; no native training or speed claim from NM-00.
+- **NM-01 state:** Learning-task contracts, TB-00-keyed roster and benefit experiment frozen in `src/shared/python/neural_motion/{tasks,roster,experiment}.py` with evidence under `docs/plans/neural_motion_matching/evidence/nm01_*.json`.
 - **CO-02 state:** Roster profiles, priors, ambiguity, and club-only acceptance implemented (synthetic tests + evidence receipt); PR #10675 in review with squash auto-merge. DL-#10602, DL-#10604, DL-#10605, DL-#10606.
-- **Next:** After #10675 merges, dispatch CO-03 #10607 (and NM-01 #10616 separately). No new physical match, trained checkpoint, or measured speedup claimed.
+- **Next:** Land CO-02/#10675 CI + squash merge; then dispatch [NM-02 #10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617). Do not start CO-03 until #10675 merges.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
