@@ -1,5 +1,52 @@
 # Current Matching Continuation Handoff
 
+## PF-06 Feasible Force Null Spaces and Torque-Distribution Tradeoffs (#10436)
+
+- Worktree: `Worktrees/UpstreamDrift-10504-pf06-rebase`, branch
+  `feat/issue-10436-pf06-feasible-force-nullspace`, DL-#10436.
+- Changes:
+  - `force_nullspace.py`: Scaled SVD and column-pivoted QR null space
+    representations with dynamic rank and contact mode reporting
+    (`ForceNullSpace.from_balance`). Added `NullSpaceAnalysis` and
+    `validate_null_space` checking condition numbers and residuals
+    ($A N = 0$, $A x_p = b$). Implemented `redistribute_trajectory`
+    penalizing physical rates and ensuring strict basis sign-change
+    invariance across frames. Formulated `explore_torque_tradeoffs`
+    generating Pareto alternatives (`baseline_minimum_effort`,
+    `conservative_default`, `trail_arm_reduced_50`,
+    `trail_arm_reduced_80`, `hard_zero_trail`, `relaxed_minimum_trail`,
+    `grip_squeeze_minimized`, `ground_load_regularized`) with per-joint
+    torque/power, lead/trail effort, ground COP, grip wrench, and
+    explicit SI units. Exported reproducible Pareto tables to JSON and
+    CSV. Selected conservative default with mechanical rationale
+    (reserve torque margins; no unfounded metabolic/injury claims).
+  - `test_force_nullspace.py` and `test_force_nullspace_pf06.py`: unit
+    coverage for null-space and tradeoff acceptance criteria.
+- Reproduction:
+  `pytest tests/unit/motion_matching/test_force_nullspace.py tests/unit/motion_matching/test_force_nullspace_pf06.py -v`.
+- Status: rebased onto `origin/main` (includes MS-62); SPEC §12 `#10504`
+  present; focused PF-06 suites 29 passed; architecture budget and DRY
+  duplication gates clean locally.
+- Next: Confirm CI green after force-with-lease push; merge closes #10436.
+
+## MS-62 Simscape Coordinate Slice #10349 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/agent-worktrees/issue-10349-local`.
+- Branch: `fix/issue-10349-ms-62-local`; PR #10665 open. Governing issue #10349 (MS-62, epic #10363).
+- Entry DL-#10349. Delivered: `coordinate_slice.py` (JSON map, kinematic projection, boundary wrenches, CLI), `align_measured_to_model.m` geometry-document workspace overrides, evidence under `evidence/matched/driver_g1_simscape_slice/`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_coordinate_slice.py -q` (9 passed); `python scripts/ci/check_architecture_budget.py` clean; `ruff check` clean on touched Python.
+- Limitations: kinematic slice only; legacy source `u` is 38-DOF actuated so sliced candidate is kinematic profile; Simscape R2025b native replay and boundary-load acceptance unqualified.
+- Next action: drive PR #10665 CI green; Simscape R2025b native replay on DeskComputer.
+
+## MS-52 MyoSuite Kinematic Replay #10345 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/agent-worktrees/issue-10345-local`.
+- Branch: `fix/issue-10345-ms-52-local`; PR #10666. Governing issue #10345 (epic #10363).
+- Delivered: `retarget.py`, `replay.py`, `golfer_scene.py`, `coordinate_map_anthro.json`, `viz/render_replay.py`; unit/native tests; evidence `evidence/matched/driver_g1_myosuite/{candidate.npz,receipt.json,playback.gif}`.
+- Validation: `pytest tests/unit/engines/myosuite/test_retarget.py tests/myosuite/test_replay_native.py -q`; cross-engine registration; ledger/status refresh for 99 receipts.
+- Honest limit: placeholder MyoBody MJCF yields diagnostic marker parity only; 15 mm gate deferred to MS-51 scene.
+- Next action: merge PR #10666 after rebase CI green; teardown worktree.
+
 ## Bunker Contact Regimes #9544 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9544`.
@@ -165,11 +212,10 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md).
-- **State:** Planning only. Four unique workbook trials audited; source event parsing failure reproduced. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
-- **Branch:** `docs/club-neural-matching-plans-20260920`; reviewed source `c3111a9177885af945018d730ec40de308cd9971`. Development log entries DL-#10602 and DL-#10603 record the two proposed programs.
-- **Next:** Hand CO-00 #10604 to one worker using its numbered prompt.
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) inventory landed on branch `fix/issue-10615-nm00-dataset-audit`.
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md).
+- **NM-00 state:** Fail-closed dataset/checkpoint/claim audit in `src/shared/python/neural_motion/` with shared surrogate path constants in `motion_matching/surrogate/artifact_paths.py` and discovery re-export `motion_matching/surrogate/nm00_audit.py` (phantom-guard path membership for #10615). Documented `TenThousandFiles.parquet` and default surrogate checkpoints are absent/quarantined; `data/sweep_synthetic` is software-contract-only; CVAE/regressor mean-baseline plateaus are `NOTE_ONLY`. No native training or speed claim. Receipts under `docs/plans/neural_motion_matching/evidence/`. PR [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668). Branch rebased onto main (absorbs CO-00 so CI no longer sees false deleted-test). Checkpoint SELF.
+- **Next:** Merge #10668 after green CI, then dispatch [NM-01 #10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616) (freeze learning tasks, model roster and benefit experiment).
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
@@ -1143,3 +1189,5 @@ Evidence root: simscape_tour_matching/native_evidence. Preserve raw ZIP archives
 ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts identify exact archived source and inputs. Never overwrite runs.
 
 [Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md) preserves earlier matching history. Update this concise handoff and DEVELOPMENT_LOG with each commit.
+
+- 2026-09-21T10:12:34Z — CI remediation for #10663: replace BLE001 noqa catch-alls in preflight capacity checks with concrete exception tuples. Commit SELF.
