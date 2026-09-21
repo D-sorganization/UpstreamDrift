@@ -144,6 +144,7 @@ def test_basis_sign_change_invariance_for_trajectory_smoothing() -> None:
         space1.particular,
         flipped_basis1,
         space1.rank,
+        space1.variable_scale,
     )
 
     flipped_basis2 = -space2.basis.copy()
@@ -154,6 +155,7 @@ def test_basis_sign_change_invariance_for_trajectory_smoothing() -> None:
         space2.particular,
         flipped_basis2,
         space2.rank,
+        space2.variable_scale,
     )
 
     constraints = [

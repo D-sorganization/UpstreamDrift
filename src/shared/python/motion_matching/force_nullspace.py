@@ -55,10 +55,11 @@ class ForceNullSpace:
     particular: Array
     basis: Array
     rank: int
+    variable_scale: Array
 
     def analyze(self) -> NullSpaceAnalysis:
         """Compute rank, nullity, residuals, singular values, and condition number."""
-        scaled = self.matrix / self.row_scale[:, None]
+        scaled = self.matrix * self.variable_scale[None, :] / self.row_scale[:, None]
         s = np.linalg.svd(scaled, compute_uv=False)
         cond = (
             float(s[0] / s[self.rank - 1])
@@ -174,6 +175,7 @@ class ForceNullSpace:
             _array(particular, 1, "particular"),
             _array(basis, 2, "basis"),
             rank,
+            sx,
         )
 
 
@@ -848,12 +850,7 @@ def explore_torque_tradeoffs(
                 np.zeros_like(per_joint_torque), 1, "per_joint_power"
             )
 
-        cop_estimate = 0.0
-        if len(ground_idx) >= 2:
-            g_forces = x[ground_idx]
-            g_sum = float(np.sum(np.abs(g_forces)))
-            if g_sum > 1e-6:
-                cop_estimate = float((g_forces[0] - g_forces[1]) / g_sum)
+        cop_estimate = float("nan")
 
         grip_wrench = _array(x[grip_idx], 1, "grip_wrench") if grip_idx else np.empty(0)
 
