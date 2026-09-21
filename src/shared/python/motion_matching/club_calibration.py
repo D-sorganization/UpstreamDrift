@@ -15,7 +15,11 @@ import numpy as np
 
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.math_utils.quaternion import rotmat_to_quat
-from src.shared.python.motion_matching.club_models import CLUBS, ClubSpec
+from src.shared.python.motion_matching.club_models import (
+    CLUBS,
+    ClubSpec,
+    WRIST_TO_BUTT_M,
+)
 from src.shared.python.motion_matching.club_only.observation import (
     ClubObservation,
     ComponentStatus,
@@ -100,10 +104,11 @@ class ClubGeometryCalibration:
             )
         spec = CLUBS[club_type]
         measured = _median_grip_face_length(obs.mid_hands_xyz, obs.face_xyz)
-        if abs(measured - spec.length_m) / spec.length_m > LENGTH_REL_TOL:
+        expected = spec.wrist_to_head_m
+        if abs(measured - expected) / expected > LENGTH_REL_TOL:
             raise ValueError(
                 f"measured grip-to-face length {measured:.4f} m disagrees with "
-                f"catalog length {spec.length_m:.4f} m for {club_type}"
+                f"expected wrist-to-head length {expected:.4f} m for {club_type}"
             )
         identity = ToolToModelTransform(
             rotation=np.eye(3),
@@ -293,13 +298,14 @@ def cross_check_grip_face_consistency(
         raise ValueError("grip/face consistency requires measured positions")
     measured = _median_grip_face_length(obs.mid_hands_xyz, obs.face_xyz)
     catalog = float(obs.catalog_length_m)
-    rel = abs(measured - catalog) / catalog
+    expected = catalog - WRIST_TO_BUTT_M
+    rel = abs(measured - expected) / expected
     passed = rel <= LENGTH_REL_TOL
     notes: list[str] = []
     if not passed:
         notes.append(
             f"median length {measured:.4f} m exceeds {LENGTH_REL_TOL:.0%} of "
-            f"catalog {catalog:.4f} m"
+            f"expected wrist-to-head {expected:.4f} m"
         )
     return GripFaceConsistencyReport(
         median_length_m=measured,
