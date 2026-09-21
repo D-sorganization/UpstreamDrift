@@ -2312,7 +2312,7 @@ jobs:
           path: tests/benchmarks/baseline.json
           if-no-files-found: warn
 
-      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: env.CODECOV_TOKEN != '' && steps.core-test-changes.outputs.skip != 'true'
