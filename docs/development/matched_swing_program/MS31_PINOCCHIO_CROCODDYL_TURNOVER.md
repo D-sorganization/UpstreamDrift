@@ -2,8 +2,55 @@
 
 Governing issue: #10338 (epic #10363, Matched Swing Program). Branch
 `feat/10338-crocoddyl-native-fit`. Development-log entry `DL-#10338`.
-Last updated 2026-09-17 18:10 PT by claude. Read this file first; it is kept current
+Last updated 2026-09-18 by claude (program truth reset, see #10381). Read this file first; it is kept current
 at every checkpoint so another agent can continue without the chat history.
+
+## State on 2026-09-19 (Read First)
+
+- **Best full-G1-horizon dynamic candidate (still rejected).**
+  `evidence/matched/driver_g1_crocoddyl_rk45_b100/`: continuation 0.60 to
+  0.85 s from `driver_g1_rtol6/stage_0.60s.npz` with RK45 rtol 1e-6 on both
+  solve and replay, range-barrier weight 100 (was 1,000) and trail-side effort
+  bounds raised (`RScapInput` 160, `RSInput` 250, `REInput` 180, `RFInput` 80,
+  `RWInput` 60 N m). The 0.85 s stage **converged** (99 iterations, cost 145.3
+  = marker 136.9 + velocity 6.5 + barrier 1.6) and rollout == replay at
+  46.8 mm whole / 25.7 early / 64.3 terminal / 52.6 club, pelvis yaw 9.3 deg,
+  1.49 BW peak contact, closure 0.03 mm. Fails G1 on whole, early, terminal,
+  yaw, penetration (17.2 mm) and weight fraction (min 0). The range barrier
+  was the convergence blocker, not the model: the IK reference has zero range
+  violations, the unconverged rtol6 solution had 24 coordinates out of range.
+- **What is verified.** The only replay-verified forward-dynamics match on the
+  44-coordinate document is the FDDP 0.30 s window `w030r` (19.7 mm whole,
+  14.2 mm terminal, 9.8 mm club, identical on the RK45 replay, 1.4 body-weights
+  peak contact). It is not G1 (G1 is 0 to 0.85 s).
+- **G1 attempt (rejected, kept as evidence).** `evidence/matched/driver_g1_crocoddyl_rk45/`
+  (receipt, solver stages, candidate): continuation 0.30/0.45/0.60/0.85 s with
+  RK45 nodes at rtol 1e-4, 6,636 s wall clock. In-solver rollout 46.4 mm whole
+  / 35.6 early / 53.7 terminal / 38.3 club; the rtol 1e-6 replay diverges to
+  340 mm whole (782 mm terminal). Lesson: the open-loop candidate is sensitive
+  to integrator tolerance because a balancing human is open-loop unstable over
+  0.85 s; solve and replay must use the same integrator and tolerance, and
+  acceptance needs a stated tolerance (MS-107 / MS-100).
+- **`evidence/matched/driver_g1_pinocchio/` is NOT a G1 match.** Its
+  `receipt.metrics` block (20.3 mm) is the solver-internal fit of the
+  27-coordinate native run-102 candidate; its own `forward_rollout` block is
+  2.76 m. The self-declared `accepted: true` was promoted to a PASSED ledger
+  row by a fail-open ledger rule; the rule is now fail-closed and the row is
+  REJECTED via `reevaluation.json` (registered in the MS-01 verdict registry).
+- **The decoupled pipeline (`scripts/match_pinocchio_c3d.py`, PR #10411) is a
+  kinetic-analysis product, not a matched candidate.** Driver whole-marker RMS
+  133.5 mm (club 50.2 mm), iron 336.9 mm; the "trail-side zero" mode is a
+  minimum trail-arm torque (33.4 / 40.6 N m peak), not zero; the iron run reused
+  the driver's attachment calibration and document (`attachments_source`,
+  `document_sha256` identical), which explains its error. The MuJoCo replay of
+  its controls (PR #10448) is honestly rejected at 0.94 m. Its value is the fast
+  IK + contact-aware inverse dynamics (8 s per swing), which the PF series
+  (#10430) continues.
+- **Where the G1 candidate will come from.** MS-107 (#10381) continues the FDDP
+  lane with: same-integrator solve/replay (RK45 rtol 1e-6 on both sides, or a
+  fixed-step integrator declared in the receipt), resume from
+  `stage_0.60s.npz`, and a stabilised-replay definition for cross-engine parity
+  (below). MS-111 (#10385) takes it to G2/G3.
 
 ## Objective
 
@@ -71,34 +118,58 @@ pipe through `tr -d '\r'`. Long runs: launch detached with
 
 ## Results so Far (ControlTower, Driver Document `anthro_driver/full_body_spec_hipcal_scaled.json`)
 
-| Run       | Window | Nodes | Solver rollout whole / terminal / club (mm) | RK45 replay whole (mm) | Note                                                                                                                                                                 |
-| --------- | ------ | ----- | ------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| smoke     | 0.05 s | 19    | 24.5 / 14.7 / 9.8                           | 26.9                   | implicit-Euler nodes, 8 iterations                                                                                                                                   |
-| w030      | 0.30 s | 109   | 467 (fallen)                                | 442                    | no continuation, kinematic warm start                                                                                                                                |
-| w030c     | 0.30 s | 109   | 15.9 / 13.8 / 4.8                           | 192                    | continuation; implicit-Euler nodes exploit integrator damping                                                                                                        |
-| w030r     | 0.30 s | 109   | **19.7 / 14.2 / 9.8**, yaw 1.35 deg         | **19.7 (identical)**   | continuation + exact RK45 nodes; 66 min; audit: 1.4 BW peak contact, penetration 17 mm, weight fraction min 0.21, peak effort 165 N m                                |
-| w030s     | 0.30 s | 109   | 34.0 / 25.6 / 52.8                          | 79.2                   | 4-substep implicit-Euler nodes: worse and not converged; abandoned                                                                                                   |
-| driver_g1 | 0.85 s | 307   | (first attempt lost, see below)             |                        | relaunched 2026-09-17 18:05 PT with stage checkpoints; RK45 nodes, rtol 1e-4, warm start from w030r, continuation 0.30/0.45/0.60, 30 iterations per stage, 120 final |
+| Run       | Window | Nodes | Solver rollout whole / terminal / club (mm) | RK45 replay whole (mm) | Note                                                                                                                                     |
+| --------- | ------ | ----- | ------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| smoke     | 0.05 s | 19    | 24.5 / 14.7 / 9.8                           | 26.9                   | implicit-Euler nodes, 8 iterations                                                                                                       |
+| w030      | 0.30 s | 109   | 467 (fallen)                                | 442                    | no continuation, kinematic warm start                                                                                                    |
+| w030c     | 0.30 s | 109   | 15.9 / 13.8 / 4.8                           | 192                    | continuation; implicit-Euler nodes exploit integrator damping                                                                            |
+| w030r     | 0.30 s | 109   | **19.7 / 14.2 / 9.8**, yaw 1.35 deg         | **19.7 (identical)**   | continuation + exact RK45 nodes; 66 min; audit: 1.4 BW peak contact, penetration 17 mm, weight fraction min 0.21, peak effort 165 N m    |
+| w030s     | 0.30 s | 109   | 34.0 / 25.6 / 52.8                          | 79.2                   | 4-substep implicit-Euler nodes: worse and not converged; abandoned                                                                       |
+| driver_g1 | 0.85 s | 307   | 46.4 / 53.7 / 38.3 (rtol 1e-4 nodes)        | 340 (rtol 1e-6)        | REJECTED, kept at `evidence/matched/driver_g1_crocoddyl_rk45/`; 6,636 s; stages 0.30 (19.7) / 0.45 (21.3) / 0.60 (22.4) / 0.85 (46.4) mm |
+
+| driver_g1_rtol6_trail_b100 | 0.85 s | 307 | 46.8 / 64.3 / 52.6 (rtol 1e-6 nodes, barrier 100, trail bounds raised) | 46.8 (identical) | REJECTED, `evidence/matched/driver_g1_crocoddyl_rk45_b100/`; 0.85 s stage CONVERGED in 99 iterations (9,865 s total); early 25.7, yaw 9.3 deg, penetration 17.2 mm, weight fraction min 0; efforts still hit 300 N m on the hips/spine |
+| driver_g1_rtol6 | 0.85 s | 307 | 123.5 / 233 / 225 (rtol 1e-6 nodes) | 123.5 (identical) | REJECTED, `evidence/matched/driver_g1_crocoddyl_rk45_rtol6/`; 0.60 s stage 22.4 mm healthy; 0.85 s stage not converged, cost = marker 3,077 + range barrier 3,788; tolerance sensitivity closed |
 
 Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
 
 ## Next Steps (In Order)
 
-1. (done) w030r validated the RK45-node configuration. Read `/home/dieterolson/fits/driver_g1/receipt.json` when `grep EXIT /home/dieterolson/fits/driver_g1.log` (or `fit_driver_g1.log`) reports; then `candidate_playback.py` for the GIF. If it did not converge, resume with `--warm-start-candidate /home/dieterolson/fits/driver_g1/candidate.npz`.
-   1b. Old note: (`python3 summ.py` pattern:
-   print `solver.stages`, `metrics.*.shared`, `physical_audit`). Solver
-   rollout and replay must now agree; if FDDP stalls with RK45 nodes, lower
-   `initial_regularisation` or use `--node-integrator implicit_euler` for the
-   early stages and RK45 for the last.
-2. Run G1: `bash scripts/matched_swing/run_crocoddyl_fit.sh driver_g1 0.85 150 --quiet --continuation 0.05,0.10,0.20,0.30,0.45,0.60 --stage-iterations 40`
-   (about 5 to 15 s per iteration at 307 nodes).
-3. Copy the G1 outputs into `docs/development/full_body_models/evidence/matched/driver_g1_pinocchio/`
-   (`receipt.json`, `candidate.npz`, `playback.gif`), commit, update
-   `DL-#10338`, this file, and comment on #10338 and #10363.
-4. Hand off to MS-21 (#10336): replay `candidate.npz` in MuJoCo with the same
-   armature and contact law; MS-70 parity report.
-5. Then the 7-iron (`FIT_DOCUMENT=.../anthro_iron/full_body_spec_hipcal_scaled.json`,
-   `FIT_ATTACHMENTS_RECEIPT=.../anthro_iron_zmp/receipt.json`, `FIT_CAPTURE=data/C3D_TA_Iron.c3d`).
+1. **(done 2026-09-19, rejected at 46.8 mm) MS-107 barrier-reduced G1**: the
+   0.85 s stage now converges with `--range-barrier-weight 100` and the raised
+   trail-side bounds (the bounds are now the repo defaults; the barrier weight
+   is the `--range-barrier-weight` flag, default still 1e3). Remaining
+   G1 gap is 46.8 -> 25 mm whole, 25.7 -> 12 early, 64.3 -> 35 terminal,
+   yaw 9.3 -> 3 deg, penetration 17.2 -> 10 mm, weight-fraction floor. Next
+   receipts, one lever each, all from `driver_g1_rtol6_trail_b100/stage_0.85s.npz`
+   via `--warm-start-candidate`: (a) 300 more iterations at the same settings
+   (stage 0.60 s had not converged at 150; cost was still falling); (b)
+   terminal/club marker weight x3 for the last 0.15 s; (c) MS-20 contact
+   identification (penetration 17 mm and weight-fraction 0 say the sole is
+   too soft or the feet lift); (d) pelvis-yaw cost term. Earlier history: same-integrator rerun (rtol 1e-6) gave 123.5 mm, barrier-dominated; original instruction was: rerun the 0.85 s continuation from
+   `evidence/matched/driver_g1_crocoddyl_rk45/` stage checkpoints with
+   `--rk45-rtol 1e-6` (solve == replay) and 60 iterations per stage; commit the
+   receipt whatever the verdict. Then a tolerance study (rtol 1e-4/1e-5/1e-6)
+   to bound the open-loop sensitivity in the receipt.
+2. **Define replay acceptance precisely (MS-100).** (a) open-loop replay with
+   the declared integrator and tolerance over the horizon; (b) collocation
+   defect per node from the solver's own rollout; (c) a _stabilised replay_
+   (declared low-gain joint PD on the candidate, gains in the receipt) that is
+   the artefact every other engine replays for parity. Without (c) the
+   cross-engine parity of a 1.8 s balancing motion is not well posed.
+3. **Downswing.** The 0.60 to 0.85 s stage is where error doubles (22.6 to 46.8 mm, b100 run).
+   Candidate levers, each with its own receipt: contact parameter
+   identification (MS-20), per-phase marker weights, effort bounds on the
+   trail side, and the 7-iron document with its own calibration.
+4. **Fleet transfer (Pinocchio-first).** The action model only needs
+   `acceleration`, `derivatives`, `markers_and_jacobians` (the `PlantContext`
+   Protocol in `crocoddyl_action.py`). Route it through the MS-10
+   `MatchingPlant` registry so the same fitter runs on the Drake and MuJoCo
+   plants (MS-13/MS-30, MS-21) with the same document, armature and contact
+   law; OpenSim keeps Moco on the shared document (MS-40/42), MyoSuite does
+   muscle allocation over the accepted torque candidate (MS-53), Simscape
+   replays the upper-body slice (MS-62).
+5. Keep this file, `DL-#10381` and the epic status section current at every
+   checkpoint.
 
 ## Known Gaps / Risks
 

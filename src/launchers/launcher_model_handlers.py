@@ -26,6 +26,10 @@ from src.launchers.launcher_model_sources import (
     get_model_working_directory,
     resolve_model_artifact_path,
 )
+from src.launchers.task_launch_truthfulness import (
+    LaunchDisposition,
+    get_launch_truthfulness_audit,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -298,6 +302,27 @@ class SpecialAppHandler:
         # DBC Precondition: model must have a path
         if repo_path is None:
             raise ValueError("repo_path must be provided")
+
+        model_id = getattr(model, "id", None) or ""
+        audit = get_launch_truthfulness_audit(model_id)
+        if audit is not None:
+            if audit.disposition == LaunchDisposition.LIBRARY_ONLY:
+                logger.error(
+                    "SpecialAppHandler: %s is a library-only component and cannot be launched as an interactive application. %s",
+                    audit.label,
+                    audit.explanation,
+                )
+                return False
+            if (
+                audit.disposition == LaunchDisposition.PARAMETRIC_CLI
+                and model_id == "motion_capture"
+            ):
+                logger.error(
+                    "SpecialAppHandler: %s requires input/output parameters. Headless launch with zero arguments rejected.",
+                    audit.label,
+                )
+                return False
+
         model_path = getattr(model, "path", None) or ""
         if not model_path:
             logger.error(
@@ -337,6 +362,17 @@ class SpecialAppHandler:
                 keep_terminal_open=True,
             )
         return process is not None
+
+    def status_message(self, model: Any) -> str | None:
+        """Return user-facing explanation when a special application cannot launch."""
+        model_id = getattr(model, "id", None) or ""
+        audit = get_launch_truthfulness_audit(model_id)
+        if audit is not None:
+            if audit.disposition == LaunchDisposition.LIBRARY_ONLY:
+                return f"{audit.label}: {audit.explanation} Next action: {audit.next_action}"
+            if audit.disposition == LaunchDisposition.PARAMETRIC_CLI:
+                return f"{audit.label}: {audit.explanation} Next action: {audit.next_action}"
+        return None
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Try to load the special app script and get its dockable UI widget."""
@@ -544,7 +580,16 @@ class BiomechExerciseHandler:
         if repo_path is None:
             raise ValueError("repo_path must be provided")
 
-        exercise_name = getattr(model, "exercise", "gait")
+        exercise_name = getattr(model, "exercise", None)
+        if not exercise_name and hasattr(model, "id"):
+            model_id = str(model.id)
+            if "sit_to_stand" in model_id:
+                exercise_name = "sit_to_stand"
+            elif "gait" in model_id:
+                exercise_name = "gait"
+        if not exercise_name:
+            exercise_name = "gait"
+
         model_name = getattr(
             model, "name", f"Biomechanics Exercise: {exercise_name.title()}"
         )
@@ -666,18 +711,30 @@ class ProviderExerciseHandler:
 
 
 class GolfSimulationSuiteHandler:
-    """Handler for launching the Golf Simulation Suite.
+    """Handler for launching the Golf Simulation Suite prototype inspection/demo.
 
     Design by Contract:
-        Precondition: model.path must point to launch_golf_suite.py
-        Postcondition: Golf Simulation Suite is launched
+        Precondition: model.path must point to launch_golf_suite.py or __main__.py
+        Postcondition: Golf Simulation Suite prototype is launched
     """
 
     MODEL_TYPES = {"golf_simulation"}
 
+    @property
+    def is_prototype(self) -> bool:
+        """Declare that this handler operates a prototype demo inspection suite."""
+        return True
+
     def can_handle(self, model_type: str) -> bool:
         """Check if this handler supports the model type."""
         return model_type.lower() in self.MODEL_TYPES
+
+    def status_message(self, model: Any) -> str:
+        """Return truthful status message distinguishing prototype demo from production solver."""
+        return (
+            "Golf Simulation Suite is a prototype demo inspection suite; "
+            "it is not a production physics solver."
+        )
 
     def launch(
         self,
@@ -685,7 +742,7 @@ class GolfSimulationSuiteHandler:
         repo_path: Path,
         process_manager: ProcessManager,
     ) -> bool:
-        """Launch the Golf Simulation Suite.
+        """Launch the Golf Simulation Suite prototype.
 
         Args:
             model: Model configuration with 'path' attr.
@@ -710,7 +767,7 @@ class GolfSimulationSuiteHandler:
             return False
 
         process = process_manager.launch_script(
-            name="Golf Simulation Suite",
+            name="Golf Simulation Suite (Prototype)",
             script_path=script_path,
             cwd=repo_path,
             extra_python_paths=get_model_python_paths(model, repo_path),
@@ -827,10 +884,23 @@ class SharedRepoHandler:
         # Find sibling folder
         folder_path = repo_path.parent / model_path
         if not folder_path.exists():
-            logger.warning("SharedRepoHandler: directory not found: %s", folder_path)
+            diagnostic = self.get_missing_checkout_diagnostic(model, repo_path)
+            logger.warning("SharedRepoHandler: %s", diagnostic)
             return False
 
         return _open_with_system_app(folder_path, "SharedRepoHandler")
+
+    def get_missing_checkout_diagnostic(self, model: Any, repo_path: Path) -> str:
+        """Return an explicit, actionable diagnostic message for a missing sibling repo checkout."""
+        model_path = getattr(model, "path", None) or getattr(
+            model, "id", "sibling repo"
+        )
+        expected_path = repo_path.parent / model_path if repo_path else Path(model_path)
+        return (
+            f"Sibling repository '{model_path}' is not checked out at '{expected_path}'. "
+            f"Direct Models/Integrations access requires cloning or checking out '{model_path}' "
+            f"beside UpstreamDrift."
+        )
 
     def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
         """Shared repository handler does not provide a dockable UI widget."""

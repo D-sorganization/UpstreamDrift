@@ -1,0 +1,70 @@
+{
+  "schema": "matched-swing-reevaluation/v1",
+  "source_receipt": "evidence/matched/iron_full_pinocchio/receipt.json",
+  "evaluated_by": "src/shared/python/motion_matching/acceptance.py",
+  "horizon": "G3",
+  "note": "Decoupled IK + inverse-dynamics allocation (scripts/match_pinocchio_c3d.py). Kinematic fit only; no forward-replay metrics in the receipt. Evaluated on the kinematic metrics against G3 for the record.",
+  "inputs": {
+    "whole_marker_rmse_m": 0.3369243511857251,
+    "early_marker_rmse_m": 0.21532722263879503,
+    "terminal_marker_rmse_m": 0.3891311136322293,
+    "club_marker_rmse_m": 0.22572158864018038,
+    "pelvis_yaw_rmse_rad": 2.574501828432221
+  },
+  "verdict": {
+    "horizon": "G3",
+    "is_physically_accepted": false,
+    "status": "REJECTED",
+    "gates": [
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.06,
+        "measured": 0.3369243511857251,
+        "unit": "m",
+        "reason": "whole RMSE 336.92 mm > 60.00 mm"
+      },
+      {
+        "name": "early_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.02,
+        "measured": 0.21532722263879503,
+        "unit": "m",
+        "reason": "early RMSE 215.33 mm > 20.00 mm"
+      },
+      {
+        "name": "terminal_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.08,
+        "measured": 0.3891311136322293,
+        "unit": "m",
+        "reason": "terminal RMSE 389.13 mm > 80.00 mm"
+      },
+      {
+        "name": "club_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.1,
+        "measured": 0.22572158864018038,
+        "unit": "m",
+        "reason": "club RMSE 225.72 mm > 100.00 mm"
+      },
+      {
+        "name": "pelvis_yaw_rmse_rad",
+        "status": "failed",
+        "threshold": 0.10472,
+        "measured": 2.574501828432221,
+        "unit": "rad",
+        "reason": "pelvis yaw RMSE 2.5745 rad > 0.1047 rad"
+      },
+      {
+        "name": "max_normal_force_n",
+        "status": "missing",
+        "threshold": 2354.4,
+        "measured": null,
+        "unit": "N",
+        "reason": "missing dynamics.max_normal_force_n"
+      }
+    ],
+    "qualification_note": "Physical or kinematic thresholds violated"
+  }
+}
