@@ -1,0 +1,125 @@
+{
+  "artifacts": {
+    "trajectory_npz": "trajectories/synthetic_full_body_g1_invalid.npz"
+  },
+  "identity": {
+    "backend": "mujoco",
+    "candidate_ancestry": [],
+    "capture": "driver",
+    "capture_sha256": "4d1a0c8b2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b",
+    "controls_hash": null,
+    "file_hashes": {
+      "model_xml": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fixed_geometry_hash": "1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff",
+    "fixed_inertia_hash": "aaaabbbbccccddddeeeeffff1111222233334444555566667777888899990000",
+    "fit_mode": "torque_driven",
+    "frame_convention": "z_up_y_forward",
+    "horizon": "G1",
+    "identity_hash": "5b6d99fb5ef94dcb740f8ed3f5276fb0df9e67c1dfb1c18b6214fd7b228676fc",
+    "integrator": "implicit_euler",
+    "max_evaluations_budget": 1000,
+    "measurement_map_version": "tour-measurement-map/1.0.0",
+    "model_id": "full_body_golf_g1",
+    "plane_convention": "transverse_sagittal_frontal",
+    "provider_pin": "df8f6eeb3",
+    "q0_hash": null,
+    "runtime_hashes": {
+      "numpy": "1.26.4",
+      "python": "3.11.9"
+    },
+    "seed": 99,
+    "solver_config": {
+      "max_iter": 500,
+      "tol": 0.0001
+    },
+    "solver_name": "ipopt",
+    "topology": "full_body_multibody",
+    "v0_hash": null,
+    "wall_clock_budget_s": 60.0
+  },
+  "is_synthetic": true,
+  "metrics": {
+    "coverage_fraction": 1.0,
+    "endpoint_error_m": 0.045,
+    "impact_error_m": null,
+    "in_plane_rmse_m": 0.038,
+    "landmark_set_signature": "e8d6411abef9d0d35992982d61483863484f29e1f5795642456e792576b5c397",
+    "max_marker_error_m": 0.078,
+    "n_excluded": 0,
+    "n_valid": 100,
+    "optimizer_weighted_loss": 15.6,
+    "out_of_plane_residual_m": 0.029,
+    "p95_marker_error_m": 0.065,
+    "pelvis_yaw_rmse_rad": 0.082,
+    "per_marker": {
+      "HeadFront": {
+        "max_m": 0.055,
+        "p95_m": 0.048,
+        "rmse_m": 0.038,
+        "total_count": 100,
+        "valid_count": 100
+      },
+      "Marker_2": {
+        "max_m": 0.078,
+        "p95_m": 0.071,
+        "rmse_m": 0.058,
+        "total_count": 100,
+        "valid_count": 100
+      },
+      "Marker_3": {
+        "max_m": 0.072,
+        "p95_m": 0.066,
+        "rmse_m": 0.052,
+        "total_count": 100,
+        "valid_count": 100
+      },
+      "WaistLeft": {
+        "max_m": 0.048,
+        "p95_m": 0.041,
+        "rmse_m": 0.031,
+        "total_count": 100,
+        "valid_count": 100
+      },
+      "WaistRight": {
+        "max_m": 0.049,
+        "p95_m": 0.042,
+        "rmse_m": 0.032,
+        "total_count": 100,
+        "valid_count": 100
+      }
+    },
+    "per_phase": {
+      "address": {
+        "max_m": 0.035,
+        "p95_m": 0.03,
+        "rmse_m": 0.025,
+        "valid_count": 20
+      },
+      "backswing": {
+        "max_m": 0.078,
+        "p95_m": 0.068,
+        "rmse_m": 0.052,
+        "valid_count": 80
+      }
+    },
+    "total_observations": 100,
+    "whole_marker_rmse_m": 0.048
+  },
+  "notes": "Synthetic invalid fixture failing G1 whole marker RMSE threshold (> 25 mm) and missing native replay evidence.",
+  "replay_command": "python -m src.engines.physics_engines.mujoco.python.replay --candidate synthetic_full_body_g1_invalid.npz",
+  "reports": {
+    "closure_residual_m": 0.0085,
+    "max_normal_force_bw": 3.6,
+    "max_penetration_m": 0.015
+  },
+  "schema_version": "tour-baseline-package/1.0.0",
+  "statuses": {
+    "dynamic_feasibility": "infeasible",
+    "has_native_replay": false,
+    "kinematic_accuracy": "exceeds_threshold",
+    "product_promotion": "rejected",
+    "scientific_qualification": "disqualified",
+    "solver_convergence": "max_iterations"
+  }
+}
