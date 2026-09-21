@@ -1,5 +1,91 @@
 # Simscape Tour-Average Fit Continuation
 
+## MuJoCo Saved-Control Replay (#10336)
+
+Branch `feat/10336-mujoco-candidate-replay`; implementation `94ccb1825`;
+PR #10448 open. See DL-#10336 in `docs/development/DEVELOPMENT_LOG.md`
+and `evidence/matched/driver_full_mujoco_replay/README.md` for reproduction.
+Forty focused tests and scoped Ruff/mypy checks pass. The diagnostic replay
+and playback are preserved, but G1 is rejected and source configuration parity
+is unverified. Merge delivers the replay path, not physical qualification;
+keep #10336 open. Commit/push hooks pass, as do 21 replay tests on pinned
+MuJoCo 3.8.0. The next step is PR CI and review, then protected merge.
+
+## Shadow Tracker Revision Integrity (#10233)
+
+Provider registration and persistence repair is locally validated on
+`fix/shadow-tracker-10233-pr`; [PR #10450](https://github.com/D-sorganization/UpstreamDrift/pull/10450) is in CI. See
+[turnover evidence](docs/plans/shadow_tracker/TURNOVER_CURRENT.md) for contracts,
+13-failure RED receipt, 306-test GREEN receipt and separate ST-11 bundle risks.
+Renderer work and the original checkout are preserved. Review the focused diff.
+
+## Polynomial Full-Body Dynamics Boundary (#10265)
+
+The integration retains global degree-six Bernstein efforts for every non-root
+coordinate. World-root names are derived and checked; their efforts remain
+zero. The RK4 boundary differentiates all stages and substeps of the corrected
+native plant. Outputs are owned/read-only and expose contact branch validity.
+This is a dynamics prerequisite, not a completed Crocoddyl optimizer. Next:
+coefficient-lift action assembly, objective contracts and independent replay.
+
+## Qualified Motion Integration (#10254)
+
+- **Dispatch:** [Worker Turnover](docs/plans/qualified_motion_integration/TURNOVER.md)
+  and [Pink Packets](docs/plans/qualified_motion_integration/PINK_TURNOVER.md).
+  Post-storage runtime probes pass; full-body actions are in progress. Pink
+  production wiring still requires task translation, trajectory timing and
+  product integration. #10250/#10251 are closed; #10271 tracks receipt integrity.
+
+- **Read First:** [Integration Boundaries and Delegation Plan](docs/plans/qualified_motion_integration/README.md).
+- **First Numerical Boundary (#10255):** Full-body Pinocchio derivatives now
+  include the state dependence of shared ground forces and contact Jacobians.
+  Real Pinocchio 3.8 tests reproduce the previous active-contact failure and
+  pass after the chain-rule correction. This is derivative qualification,
+  not a full-swing fitting or contact-model acceptance claim.
+- **Optional Viewer Adapters (#10256, #10254):** Gepetto and MeshCat wrappers retain their native visualizers and dispatch
+  validated configurations, including neutral pose. They distinguish visual and
+  collision geometry, own unique scene roots, and preserve shared servers/scenes
+  during cleanup. MeshCat's owned server is explicitly managed. Adapter tests
+  and a real MeshCat runtime smoke check exist; a live Gepetto CORBA/server
+  qualification and production replay selection remain outstanding. This change
+  does not certify any motion-fit result or replace the native viewer.
+- **Optional Motion Runtime (#10262):** The numerical runtime has a conda-forge version manifest and Linux x86-64-v3
+  explicit package lock. `scripts/ci/check_motion_runtime.py` isolates native
+  imports and solver probes and emits a fail-closed capability receipt with
+  versions, hashes, bounded process diagnostics and source-freshness status.
+  The qualified sample stack is Pinocchio 4.1, Pink 4.4 and Crocoddyl 3.2.1.
+  This does not qualify full-body fitting, physics, or Gepetto rendering.
+  Continue model and product integration under #10254.
+- **Pink Adapter Contract (#10257, #10254):** Both Pink entry points share one validated solve step. They preserve geometry,
+  forward explicit hard constraints/limits, refresh cached kinematics and
+  integrate tangent velocity exactly once. Solver failures propagate with
+  context; unchanged poses are no longer returned as a success fallback.
+  The adapter has real equality, infeasibility, cache and free-flyer tests.
+  Full-body marker/stance/weld task assembly and production selection remain
+  outstanding. The reproducible combined runtime is tracked by #10262.
+- **Bounded Work:** #10256 viewer lifecycle and #10257 Pink state/constraint
+  adapters are separate implementation slices; review actual tests and CI
+  before treating either as delivered.
+- **Finite Weld Error (#10260):** The pose linearization now applies the SE(3)
+  log Jacobian away from closure. The trajectory acceleration partial retains
+  the raw constraint velocity Jacobian. Real directional checks cover closed
+  and displaced grips; these do not qualify a fitted full-body trajectory.
+- **Preserve:** #10250 owns anthropometric evidence regeneration; #10108 and
+  #10159 retain their model-calibration and MJX reconciliation scope. Keep the
+  full #10162 physical gates and MATLAB R2025b requirement.
+
+## Shadow Tracker Current Turnover (#10122)
+
+- **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)
+  and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
+- **Baseline:** `0ec64e45f`; timing #10253 merged. Restart repair marks estimated
+  timestamps inexact; 195 focused/model-probe tests pass.
+- **Next:** Renderer owner finishes #10264 import failure and merge conflicts;
+  independent agents claim #10233 revision persistence. #10273 tracks remaining
+  native PTS and stored clock-authority gaps. Preserve existing renderer edits.
+- **Product Milestone:** Import, manual mask review, save/reopen in the launcher
+  under #10134; no claim of qualified fitting or completed ST-07–ST-12.
+
 ## Current State (2026-09-15, Supersedes the Sections Below)
 
 - **ALL 4 GATES COMPLETED & CERTIFIED**:
@@ -27,36 +113,13 @@
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
-## GSPro Integration (#10188) — GS-00, GS-01, GS-02, GS-03, GS-04, GS-05 Complete
+## GSPro Integration (#10188, #10460)
 
-- **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
-  [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
-  GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
-  and GS-05 (#10194) shared session service and local reference destination complete.
-  Planning PR #10201, PR #10208, PR #10213, and PR #10215 merged.
-- **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10194-session-service`.
-- **Delivered:** `src/shared/python/golf_simulator/contracts.py`,
-  `src/shared/python/golf_simulator/session.py`,
-  `src/shared/python/golf_simulator/launch_bridge.py`,
-  `src/shared/python/golf_simulator/adapters/local.py`,
-  `src/shared/python/golf_simulator/adapters/fake.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/profile.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/codec.py`,
-  `src/shared/python/golf_simulator/adapters/gspro/transport.py`,
-  `src/shared/python/golf_simulator/journal.py`.
-  - `GolfSessionService`: Central orchestrator enforcing state machine (`IDLE` -> `PREPARED` -> `ARMED` -> `SUBMITTING` -> `IDLE`/`UNCERTAIN`),
-    guarding destination switching, invalidating arm tokens on context/destination changes, validating model qualification before arming,
-    and handling ambiguous deliveries via operator reconciliation.
-  - `LocalReferenceAdapter`: Satisfies `SimulatorAdapter` protocol, wraps `FlightSimulatorProtocol` (`BallFlightSimulator` with pure-Python
-    `EnhancedBallFlightSimulator` fallback), computes RK4 ball trajectories with full provenance labeling, and maintains distinct trajectory and receipt contracts.
-  - `shot_envelope_to_launch_conditions`: Reconstitutes scalar launch parameters and 3D spin axis from canonical `ShotEnvelope`.
-  - `FakeSimulatorAdapter`: Configurable test spy for testing adapter substitution, capability auditing, and fault simulation.
-- **Validation:** 50 unit tests across `tests/unit/golf_simulator/` (including session service, local adapter, reverse bridge, and unified service contracts) pass 100%.
-  Ruff check, Ruff format check, Black, changed-file architecture budget, and mypy pass with 0 errors.
-- **Next:** Open PR for GS-05 (#10194) and proceed to GS-06 (#10195) replay and one-impact submission.
-- **Preserve:** Original checkout's unrelated branch/untracked work.
+- **State:** GS-00 through GS-11 merged. #10460 consumes shared Tools `launch_monitor.gspro_connect` codec (#5228).
+- **Branch:** `feat/10460-consume-tools-gspro-codec`.
+- **Implementation:** `src/shared/python/golf_simulator/adapters/gspro/codec.py` retains canonical SI/radian conversion and profile handling while delegating protocol wire encoding and response decoding to `shared.python.launch_monitor.gspro_connect`.
+- **Validation:** 106 golf simulator unit and integration tests pass cleanly; ruff, black, and mypy pass with 0 errors.
+- **Next:** Open PR referencing `Closes #10460`, arm auto-merge with squash.
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 

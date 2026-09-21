@@ -1,5 +1,8 @@
 # Shadow Tracker Progress Review: September 15, 2026
 
+Historical review: use [Current Turnover](TURNOVER_CURRENT.md) for resolved
+findings and the latest correction queue. Preserve this baseline as evidence.
+
 ## Authority and Current Status
 
 Reviewed `b97e159dcc1686b4fc36351124996862619d8f35`, including PRs #10169–#10173,

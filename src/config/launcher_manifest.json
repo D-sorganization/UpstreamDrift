@@ -160,7 +160,7 @@
       "path": "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py",
       "engine_type": "myosuite",
       "logo": "myosim.svg",
-      "status": "engine_ready",
+      "status": "experimental",
       "capabilities": [
         "musculoskeletal",
         "muscle_control",
@@ -509,12 +509,13 @@
     {
       "id": "golf_simulation_suite",
       "name": "Golf Simulation Suite",
-      "description": "Comprehensive golf simulation suite with parameter sweeps and batch runs",
+      "description": "Prototype visualization and demo inspection suite; not a production physics solver",
       "category": "simulation",
       "type": "golf_simulation",
       "path": "src/tools/golf_simulation_suite/__main__.py",
       "logo": "golf_logo.svg",
-      "status": "gui_ready",
+      "status": "prototype",
+      "maturity": "prototype",
       "capabilities": ["full_simulation", "parameter_sweep", "batch_runs"],
       "order": 21,
       "web": {
@@ -524,12 +525,13 @@
     {
       "id": "swing_optimizer",
       "name": "Swing Optimizer",
-      "description": "Trajectory optimization with constraint solving and cost functions",
+      "description": "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16",
       "category": "simulation",
       "type": "special_app",
       "path": "src/shared/python/optimization/swing_optimizer.py",
       "logo": "swing_optimizer.svg",
-      "status": "gui_ready",
+      "status": "experimental",
+      "maturity": "experimental",
       "capabilities": [
         "trajectory_optimization",
         "constraint_solving",
@@ -543,12 +545,13 @@
     {
       "id": "injury_analysis",
       "name": "Injury Risk Analysis",
-      "description": "Joint stress, spinal load, and swing modification analysis for injury prevention",
+      "description": "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17",
       "category": "biomechanics",
       "type": "special_app",
       "path": "src/shared/python/injury/injury_risk.py",
       "logo": "injury_analysis.svg",
-      "status": "gui_ready",
+      "status": "experimental",
+      "maturity": "experimental",
       "capabilities": [
         "injury_risk",
         "joint_stress",
@@ -1087,6 +1090,69 @@
         "hdf5_export"
       ],
       "order": 46,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "golf_simulator",
+      "name": "Golf Simulator Console",
+      "description": "Capability-aware destination controls and replay submission for simulator integration",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/tools/golf_simulator/gui.py",
+      "logo": "golf_logo.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "shot_input",
+        "destination_selection",
+        "session_lifecycle",
+        "replay_transport",
+        "uncertainty_recovery"
+      ],
+      "order": 47,
+      "web": {
+        "mode": "route",
+        "route": "/tools/golf-simulator"
+      }
+    },
+    {
+      "id": "shadow_tracker",
+      "name": "Shadow Tracker",
+      "description": "Articulated silhouette tracking, manual mask correction, and forward rollout verification",
+      "category": "motion_capture",
+      "type": "special_app",
+      "path": "src/tools/shadow_tracker/__main__.py",
+      "logo": "shadow_tracker.svg",
+      "status": "utility",
+      "capabilities": [
+        "video_import",
+        "manual_mask_editing",
+        "bundle_persistence",
+        "worst_frame_navigation",
+        "canonical_export"
+      ],
+      "order": 49,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "matched_swing_browser",
+      "name": "Results Browser",
+      "description": "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/matched_swing_browser/__main__.py",
+      "logo": "matched_swing_browser.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "motion_matching",
+        "results_browser",
+        "physical_acceptance",
+        "ledger"
+      ],
+      "order": 50,
       "web": {
         "mode": "native-window"
       }

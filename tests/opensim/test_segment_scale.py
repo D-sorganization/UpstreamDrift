@@ -177,3 +177,189 @@ def test_estimate_segment_scales_validates_nominal_lengths() -> None:
     cap = _synthetic_capture(frames=25)
     with pytest.raises(ValueError, match="positive finite"):
         estimate_segment_scales(cap, nominal_lengths_m={"tibia_r": -0.4})
+
+
+def test_estimate_segment_scales_real_tour_capture_bilateral_symmetry() -> None:
+    """Assert real tour capture humerus scaling is bilaterally consistent (ratio <= 1.10)."""
+    if not C3D_PATH.exists():
+        pytest.skip(f"Capture file not found at {C3D_PATH}")
+
+    cap = load_tour_capture(C3D_PATH)
+    res = estimate_segment_scales(cap)
+
+    # Historical uncorrected ratio was 1.4567 / 1.2436 = 1.1713 (> 1.10).
+    # Corrected scaling reconstructs acromion proxy to keep ratio <= 1.10.
+    ratio = res.scale_factors["humerus_r"] / res.scale_factors["humerus_l"]
+    assert 0.90 <= ratio <= 1.10, (
+        f"Humerus bilateral ratio {ratio:.4f} exceeds 10% tolerance "
+        f"(R={res.scale_factors['humerus_r']:.4f}, L={res.scale_factors['humerus_l']:.4f})"
+    )
+
+
+def test_apply_segment_scaling_transforms_joints_meshes_com_inertia(
+    tmp_path: Path,
+) -> None:
+    """Test consistent segment scaling updates joint frames, meshes, COM, and inertia."""
+    from src.engines.physics_engines.opensim.python.tour_matching.model_audit import (
+        audit_model_geometry,
+        verify_model_qualification,
+    )
+    from src.engines.physics_engines.opensim.python.tour_matching.segment_scaling import (
+        apply_segment_scaling,
+    )
+
+    base_osim = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "engines"
+        / "physics_engines"
+        / "opensim"
+        / "models"
+        / "golf_humanoid.osim"
+    )
+    if not base_osim.is_file():
+        pytest.skip(f"Base model not found at {base_osim}")
+
+    scales = {
+        "humerus_r": 1.10,
+        "humerus_l": 1.05,
+        "radius_r": 1.08,
+        "radius_l": 1.07,
+    }
+
+    out_osim = tmp_path / "golf_humanoid_consistent_scaled.osim"
+    res_path = apply_segment_scaling(base_osim, scales, out_path=out_osim)
+    assert res_path == out_osim
+    assert out_osim.is_file()
+
+    # Model geometry audit should find NO unscaled arm mesh defects on scaled arms
+    audit = audit_model_geometry(out_osim)
+    assert not audit.has_unscaled_arm_mesh_defect
+
+    # Check that humerus_r mesh scales match 1.10
+    humerus_r_meshes = audit.arm_mesh_scales["humerus_r"]
+    assert len(humerus_r_meshes) > 0
+    for _, s_factors in humerus_r_meshes:
+        assert s_factors[1] == pytest.approx(1.10, rel=1e-4)
+
+
+def test_apply_segment_scaling_repeat_protection(tmp_path: Path) -> None:
+    """Test that applying segment scaling twice fails closed to prevent double scaling."""
+    from src.engines.physics_engines.opensim.python.tour_matching.segment_scaling import (
+        apply_segment_scaling,
+    )
+
+    base_osim = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "engines"
+        / "physics_engines"
+        / "opensim"
+        / "models"
+        / "golf_humanoid.osim"
+    )
+    if not base_osim.is_file():
+        pytest.skip(f"Base model not found at {base_osim}")
+
+    scales = {"humerus_r": 1.10}
+    out_osim = tmp_path / "scaled.osim"
+    apply_segment_scaling(base_osim, scales, out_path=out_osim)
+
+    # Second scaling call on already scaled model must raise ValueError
+    with pytest.raises(ValueError, match="already scaled"):
+        apply_segment_scaling(out_osim, scales, out_path=tmp_path / "scaled2.osim")
+
+
+def test_apply_segment_scaling_validates_inputs(tmp_path: Path) -> None:
+    """Test that non-finite or non-positive scale factors are rejected."""
+    from src.engines.physics_engines.opensim.python.tour_matching.segment_scaling import (
+        apply_segment_scaling,
+    )
+
+    base_osim = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "engines"
+        / "physics_engines"
+        / "opensim"
+        / "models"
+        / "golf_humanoid.osim"
+    )
+    if not base_osim.is_file():
+        pytest.skip(f"Base model not found at {base_osim}")
+
+    with pytest.raises(ValueError, match="positive finite"):
+        apply_segment_scaling(
+            base_osim, {"humerus_r": -1.1}, out_path=tmp_path / "out.osim"
+        )
+
+    with pytest.raises(ValueError, match="positive finite"):
+        apply_segment_scaling(
+            base_osim, {"humerus_r": float("nan")}, out_path=tmp_path / "out.osim"
+        )
+
+
+def test_apply_segment_scaling_policies_and_analytical_invariants(
+    tmp_path: Path,
+) -> None:
+    """Assert fixed_mass and density_preserving policies follow analytical scaling laws."""
+    from defusedxml import ElementTree as ET
+    from src.engines.physics_engines.opensim.python.tour_matching.segment_scaling import (
+        ScalingPolicy,
+        apply_segment_scaling,
+    )
+
+    base_osim = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "engines"
+        / "physics_engines"
+        / "opensim"
+        / "models"
+        / "golf_humanoid.osim"
+    )
+    if not base_osim.is_file():
+        pytest.skip(f"Base model not found at {base_osim}")
+
+    tree_orig = ET.parse(str(base_osim))
+    b_orig = tree_orig.find(".//Body[@name='femur_r']")
+    assert b_orig is not None
+    m_orig = float(b_orig.findtext("mass", "0.0"))
+    mc_orig = [float(v) for v in b_orig.findtext("mass_center", "0 0 0").split()]
+    in_orig = [float(v) for v in b_orig.findtext("inertia", "0 0 0 0 0 0").split()]
+
+    s = 1.20
+    scales = {"femur_r": s}
+
+    # 1. Fixed mass policy: m' = m, COM' = s*COM, I' = s^2 * I
+    out_fixed = tmp_path / "scaled_fixed.osim"
+    apply_segment_scaling(
+        base_osim, scales, out_path=out_fixed, policy=ScalingPolicy.FIXED_MASS
+    )
+    tree_fixed = ET.parse(str(out_fixed))
+    b_fixed = tree_fixed.find(".//Body[@name='femur_r']")
+    assert b_fixed is not None
+    m_fixed = float(b_fixed.findtext("mass", "0.0"))
+    mc_fixed = [float(v) for v in b_fixed.findtext("mass_center", "0 0 0").split()]
+    in_fixed = [float(v) for v in b_fixed.findtext("inertia", "0 0 0 0 0 0").split()]
+
+    assert m_fixed == pytest.approx(m_orig, rel=1e-6)
+    assert mc_fixed[1] == pytest.approx(mc_orig[1] * s, rel=1e-6)
+    assert in_fixed[0] == pytest.approx(in_orig[0] * (s**2), rel=1e-6)
+    assert in_fixed[1] == pytest.approx(in_orig[1] * (s**2), rel=1e-6)
+
+    # 2. Density preserving policy: m' = s^3 * m, COM' = s*COM, I' = s^5 * I
+    out_dens = tmp_path / "scaled_dens.osim"
+    apply_segment_scaling(
+        base_osim, scales, out_path=out_dens, policy=ScalingPolicy.DENSITY_PRESERVING
+    )
+    tree_dens = ET.parse(str(out_dens))
+    b_dens = tree_dens.find(".//Body[@name='femur_r']")
+    assert b_dens is not None
+    m_dens = float(b_dens.findtext("mass", "0.0"))
+    mc_dens = [float(v) for v in b_dens.findtext("mass_center", "0 0 0").split()]
+    in_dens = [float(v) for v in b_dens.findtext("inertia", "0 0 0 0 0 0").split()]
+
+    assert m_dens == pytest.approx(m_orig * (s**3), rel=1e-6)
+    assert mc_dens[1] == pytest.approx(mc_orig[1] * s, rel=1e-6)
+    assert in_dens[0] == pytest.approx(in_orig[0] * (s**5), rel=1e-6)

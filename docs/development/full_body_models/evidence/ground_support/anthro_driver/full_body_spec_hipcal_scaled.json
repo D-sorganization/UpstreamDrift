@@ -5,6 +5,78 @@
     "REInput": -20.0,
     "RSInputY": 45.0
   },
+  "anthropometry": {
+    "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+    "segments": {
+      "foot": {
+        "com_fraction": 0.4415,
+        "length_m": 0.2581,
+        "mass_fraction": 0.0137,
+        "radii": [0.257, 0.245, 0.124]
+      },
+      "forearm": {
+        "com_fraction": 0.4574,
+        "length_m": 0.2689,
+        "mass_fraction": 0.0162,
+        "radii": [0.276, 0.265, 0.121]
+      },
+      "hand": {
+        "com_fraction": 0.79,
+        "length_m": 0.0862,
+        "mass_fraction": 0.0061,
+        "radii": [0.628, 0.513, 0.401]
+      },
+      "head": {
+        "com_fraction": 0.5002,
+        "length_m": 0.2429,
+        "mass_fraction": 0.0694,
+        "radii": [0.303, 0.315, 0.261]
+      },
+      "lower_trunk": {
+        "com_fraction": 0.6115,
+        "length_m": 0.1457,
+        "mass_fraction": 0.1117,
+        "radii": [0.615, 0.551, 0.587]
+      },
+      "middle_trunk": {
+        "com_fraction": 0.4502,
+        "length_m": 0.2155,
+        "mass_fraction": 0.1633,
+        "radii": [0.482, 0.383, 0.468]
+      },
+      "shank": {
+        "com_fraction": 0.4395,
+        "length_m": 0.434,
+        "mass_fraction": 0.0433,
+        "radii": [0.251, 0.246, 0.102]
+      },
+      "thigh": {
+        "com_fraction": 0.4095,
+        "length_m": 0.4222,
+        "mass_fraction": 0.1416,
+        "radii": [0.329, 0.329, 0.149]
+      },
+      "trunk": {
+        "com_fraction": 0.5138,
+        "length_m": 0.5319,
+        "mass_fraction": 0.4346,
+        "radii": [0.328, 0.306, 0.169]
+      },
+      "upper_arm": {
+        "com_fraction": 0.5772,
+        "length_m": 0.2817,
+        "mass_fraction": 0.0271,
+        "radii": [0.285, 0.269, 0.158]
+      },
+      "upper_trunk": {
+        "com_fraction": 0.2999,
+        "length_m": 0.1707,
+        "mass_fraction": 0.1596,
+        "radii": [0.505, 0.465, 0.418]
+      }
+    },
+    "table": "de_leva_1996_male"
+  },
   "bodies": [
     {
       "name": "world",
@@ -408,11 +480,11 @@
       "name": "femur_r",
       "solids": [
         {
-          "com_m": [0.0, -0.168783, 0.0],
+          "com_m": [0.0, -0.16371950999999998, 0.0],
           "inertia_com_kg_m2": [
-            [0.13907, 0.0, 0.0],
-            [0.0, 0.0364552, 0.0],
-            [0.0, 0.0, 0.146652]
+            [0.130850963, 0.0, 0.0],
+            [0.0, 0.03430069768, 0.0],
+            [0.0, 0.0, 0.1379848668]
           ],
           "mass_kg": 9.80040405351952,
           "name": "femur_r",
@@ -513,11 +585,11 @@
       "name": "femur_l",
       "solids": [
         {
-          "com_m": [0.0, -0.16385, 0.0],
+          "com_m": [0.0, -0.15893449999999998, 0.0],
           "inertia_com_kg_m2": [
-            [0.13106, 0.0, 0.0],
-            [0.0, 0.0343555, 0.0],
-            [0.0, 0.0, 0.138205]
+            [0.123314354, 0.0, 0.0],
+            [0.0, 0.03232508995, 0.0],
+            [0.0, 0.0, 0.13003708449999998]
           ],
           "mass_kg": 9.80040405351952,
           "name": "femur_l",
@@ -776,6 +848,7 @@
     "subtalar_angle_l": [-20.0, 20.0],
     "subtalar_angle_r": [-20.0, 20.0]
   },
+  "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
   "frames": [
     {
       "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
@@ -1362,9 +1435,18 @@
       "name": "hip_r",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
-        [0.0, 1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0, -0.08892],
-        [0.0, 0.0, 1.0, 0.0],
+        [
+          0.2695573528439115, 0.8371264475735776, -0.47598124364372135,
+          -0.008897556778798686
+        ],
+        [
+          -0.9405809263079962, 0.12287914687487479, -0.3165568453357052,
+          -0.10237072770747913
+        ],
+        [
+          -0.20650993824359512, 0.533029104304956, 0.8205081470469885,
+          -0.05912787804927681
+        ],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1404,15 +1486,15 @@
       "parent_to_base": [
         [
           -0.12429404455826688, 0.9922454285544172, -4.5655751879009243e-7,
-          -0.00803206
+          -0.007791098200000001
         ],
         [
           0.9897616899776521, 0.12398288545581986, -0.07071096921009314,
-          -0.405038
+          -0.39288686
         ],
         [
           -0.07016257934204852, -0.008789404240898925, -0.997496846527928,
-          -0.00273031
+          -0.0026484007
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1527,9 +1609,18 @@
       "name": "hip_l",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
       "parent_to_base": [
-        [0.0, 1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0, 0.08892],
-        [0.0, 0.0, 1.0, 0.0],
+        [
+          0.8792167884636203, 0.020486448767230075, -0.47598124364372135,
+          -0.01458323891976674
+        ],
+        [
+          -0.19301437197917298, 0.9287288171907828, -0.3165568453357052,
+          0.1143317558989422
+        ],
+        [
+          0.4355723718203455, 0.3701933137379926, 0.8205081470469885,
+          -0.09829744266772117
+        ],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1569,15 +1660,15 @@
       "parent_to_base": [
         [
           -0.12429404455826688, -0.9922454285544172, -4.5655751879009243e-7,
-          -0.00779732
+          -0.0075634004
         ],
         [
           0.9897616899776521, -0.12398288545581986, -0.07071096921009314,
-          -0.393201
+          -0.38140497
         ],
         [
           0.07016257934204852, -0.008789404240898925, 0.997496846527928,
-          0.00265051
+          0.0025709947
         ],
         [0.0, 0.0, 0.0, 1.0]
       ],
@@ -1831,15 +1922,20 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | hip joints relocated to functional centres from the capture (radii 0.4040/0.3829 m, sphere sd 1.9/2.0 mm over 649 frames) with zero twist calibrated (R: -25.73 deg, L: 45.08 deg) | toe contact spheres added on the calcanei (support polygon to the toe tips); contact stiffness 5e+04 N/m | segments scaled femur_l x0.9700, femur_r x0.9700, tibia_l x1.0000, tibia_r x1.0000 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
     "arm_scale": 1.1,
+    "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
     "grip_roll_deg": 0.0,
     "grip_rotation_deg": {
       "L": [-90.0, 47.0, 0.0],
       "R": [-34.0, 46.0, 62.0]
+    },
+    "hip_zero_twist_deg": {
+      "l": 45.08,
+      "r": -25.73
     },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,
@@ -1854,7 +1950,7 @@
   },
   "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
   "upper_body_schema_version": 1,
-  "upper_body_sha256": "5bd6947b4fd943df456a4a28ca4c4334cc0c54530a984cdabb10d32e05756238",
+  "upper_body_sha256": "090341b1ad5ce51b917df617c3ce91c8e1d71e41e6398f6c218f8e2feefad558",
   "visual_hints": {
     "capsule_radius_m": {
       "femur_l": 0.072,

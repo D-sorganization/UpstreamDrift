@@ -12,10 +12,12 @@ claim it must be checked line by line against the paper.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TypeAlias
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -52,7 +54,7 @@ DE_LEVA_MALE: Mapping[str, SegmentTable] = {
     "forearm": SegmentTable(0.2689, 0.0162, 0.4574, (0.276, 0.265, 0.121)),
     "hand": SegmentTable(0.0862, 0.0061, 0.7900, (0.628, 0.513, 0.401)),
     "thigh": SegmentTable(0.4222, 0.1416, 0.4095, (0.329, 0.329, 0.149)),
-    "shank": SegmentTable(0.4340, 0.0433, 0.4459, (0.255, 0.249, 0.103)),
+    "shank": SegmentTable(0.4340, 0.0433, 0.4395, (0.251, 0.246, 0.102)),
     "foot": SegmentTable(0.2581, 0.0137, 0.4415, (0.257, 0.245, 0.124)),
 }
 
@@ -150,3 +152,22 @@ def inertia_about_axis(
     rot = np.column_stack([x, y, a])
     principal = np.diag([mass_kg * (k * length_m) ** 2 for k in radii])
     return np.asarray(rot @ principal @ rot.T, dtype=np.float64)
+
+
+def de_leva_table_dict() -> dict[str, dict[str, Any]]:
+    """Return DE_LEVA_MALE table as a serializable dictionary of segment parameters."""
+    return {
+        name: {
+            "length_m": row.length_m,
+            "mass_fraction": row.mass_fraction,
+            "com_fraction": row.com_fraction,
+            "radii": list(row.radii),
+        }
+        for name, row in sorted(DE_LEVA_MALE.items())
+    }
+
+
+def de_leva_table_sha256() -> str:
+    """Canonical SHA-256 hash of the DE_LEVA_MALE table as JSON."""
+    raw = json.dumps(de_leva_table_dict(), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
