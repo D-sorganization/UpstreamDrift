@@ -13,6 +13,21 @@ Connects qualified matching strategies to engine feature contracts:
 - **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
   - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
 
+## Replace Synthetic Force Adapters With Native Model-Conformant Bridges (PF-09, #10439)
+
+Replaces synthetic force adapters with native model-conformant bridges:
+- **Engine Force Adapter Architecture (`src/shared/python/motion_matching/multi_engine_torque_allocator.py`)**:
+  - Quarantines `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`.
+  - Enforces fail-closed `RuntimeError` in `create_engine_force_adapter` for unbridged native engines (Drake, OpenSim, Simscape) in production mode.
+  - Extends `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`.
+  - Corrects `MujocoForceAdapter` to compute raw unconstrained dynamics \(M a + \text{bias}\) eliminating `qfrc_inverse` passive/constraint force double counting.
+- **Pinocchio Native Bridge (`src/engines/physics_engines/pinocchio/python/force_adapter.py`, `native_model.py`)**:
+  - Implements `PinocchioForceAdapter` implementing shared protocol with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`).
+- **CLI & Quarantine Governance (`scripts/allocate_swing_torques.py`)**:
+  - Adds Pinocchio engine option and enforces `--allow-synthetic` gate flag.
+- **Verification Suite (`tests/unit/motion_matching/test_force_bridges_pf09.py`, `test_native_force_equations.py`, `test_multi_engine_torque_allocator.py`)**:
+  - 17 unit test fixtures validating quarantine enforcement, protocol conformance, CLI synthetic gate, and MuJoCo raw equation checks.
+
 ## Tour Baselines Target Audit, Marker Semantics, Events, and Provenance (TB-01, #10586)
 
 Freezes target audits, marker measurement semantics, native clocks/events, and provenance under the Tour Baselines program:
@@ -6511,6 +6526,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10471 | Optimize `np.sum(diff**2, axis=-1)` to `np.einsum` to avoid temporary allocations (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10468 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
+| 2026-09-20 | #10569 | Replace `np.linalg.norm` with `math.sqrt(np.vdot)` and `np.einsum` in opensim tour matching pipeline (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10467 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10491 | Barrier-reduced same-integrator G1 continuation converged at 46.8 mm (rollout == replay) and is committed as rejected evidence; `--range-barrier-weight` CLI flag and raised trail-side effort bounds; ledger, README, turnover updated |
 | 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
