@@ -13,6 +13,29 @@ Replaces synthetic force adapters with native model-conformant bridges:
 - **Verification Suite (`tests/unit/motion_matching/test_force_bridges_pf09.py`, `test_native_force_equations.py`, `test_multi_engine_torque_allocator.py`)**:
   - 17 unit test fixtures validating quarantine enforcement, protocol conformance, CLI synthetic gate, and MuJoCo raw equation checks.
 
+## Tour Baselines Target Audit, Marker Semantics, Events, and Provenance (TB-01, #10586)
+
+Freezes target audits, marker measurement semantics, native clocks/events, and provenance under the Tour Baselines program:
+- **Target Audit & Content Verification (`src/shared/python/tour_baselines/audit.py`, `src/shared/python/motion_matching/tour_capture_contract.py`)**:
+  - Verifies canonical capture files (`C3D_TA_Driver.c3d`, `C3D_TA_Iron.c3d`) by content SHA-256 (never path name alone).
+  - Audits per-marker valid and missing sample counts, contiguous missing frame spans, and observed coverage ratios (Driver: 24,135/24,852 valid, 97.11%; Iron: 24,219/24,966 valid, 97.01%).
+  - Emits reproducible JSON audit receipts (`docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json`, `iron_target_audit_receipt.json`).
+- **Measurement Maps (`src/shared/python/tour_baselines/measurement_map.py`)**:
+  - Classifies channels under `tour-measurement-map/1.0.0`: `observed_surface`, `inferred_joint_center`, `observed_cluster_centroid`, `calibrated_club_point`, and `unassigned_or_sentinel`.
+  - Classifies calibrated clubface normal, groove coordinates, and ball impact contact as `UNAVAILABLE` in raw C3D without synthetic fabrication.
+  - Accounts for channel 38 divergence: `Uname*38` in Driver vs `pelvis` in Iron.
+- **Native Clocks & Biomechanical Events (`src/shared/python/tour_baselines/events.py`)**:
+  - Strictly isolates Driver (360.0 Hz) and 7-Iron (359.0 Hz) native clocks; driver sample rate and event timing are never imposed on iron.
+  - Defines swing intervals (`address`, `backswing`, `downswing`, `impact`, `follow_through`, `full_swing`).
+  - Explicitly labels trajectory-inferred impact as `is_inferred = True`.
+- **Provenance & Canonical Targets (`src/shared/python/tour_baselines/provenance.py`, `canonical_targets.py`)**:
+  - Records GearsSports optical metadata (`PLAYER_ID: 967eac5b-2e78-4207-a99f-d57437296d70`), separating shared player anatomy from capture-specific club geometry.
+  - Documents unresolved averaging and usage rights as explicit fields without fabricated citations.
+  - Provides `CanonicalTourTarget` facade for kinematic reference and dynamic fitting paths, guaranteeing missing club clusters or phases are never scored as zero error.
+- **Evidence & Verification**:
+  - Added unit test suite in `tests/unit/tour_baselines/`: `test_measurement_map.py`, `test_tour_events.py`, `test_target_audit.py`, `test_canonical_targets.py` (17 tests, 35 total in tour baselines suite).
+>>>>>>> origin/main
+
 ## Tour Baselines Model Identities and Coverage Matrix (TB-00, #10585)
 
 Freezes model identities, ownership, coordinate conventions, and two-capture coverage matrix under the Tour Baselines program:
