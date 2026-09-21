@@ -190,6 +190,44 @@ def get_qualification_profile(topology: ModelTopology) -> Any:
     return AuthoritativeFullBodyProfile()
 
 
+def _extract_club_rmse(metrics: Any) -> float:
+    """Extract average club marker RMSE or fallback to whole marker RMSE."""
+    club_errors = [
+        m_sum.rmse_m
+        for name, m_sum in metrics.per_marker.items()
+        if "Marker_" in name or "Club" in name
+    ]
+    return (
+        float(np.mean(club_errors))
+        if club_errors
+        else float(metrics.whole_marker_rmse_m)
+    )
+
+
+def _eval_closure_gate(
+    package: BaselinePackage,
+    max_closure_residual_m: float,
+) -> QualificationGateResult | None:
+    """Evaluate closure residual gate if reported in package."""
+    closure_meas = package.reports.get("closure_residual_m")
+    if closure_meas is None:
+        return None
+    cl_pass = closure_meas <= max_closure_residual_m
+    reason = (
+        ""
+        if cl_pass
+        else f"closure {closure_meas * 1e3:.1f} mm > {max_closure_residual_m * 1e3:.1f} mm"
+    )
+    return QualificationGateResult(
+        name="closure_residual_m",
+        threshold=max_closure_residual_m,
+        measured=float(closure_meas),
+        passed=cl_pass,
+        unit="m",
+        reason=reason,
+    )
+
+
 def _eval_full_body_gates(
     package: BaselinePackage,
     profile: AuthoritativeFullBodyProfile,
@@ -231,43 +269,25 @@ def _eval_full_body_gates(
     )
 
     # Club marker RMSE
-    club_errors = [
-        m_sum.rmse_m
-        for name, m_sum in metrics.per_marker.items()
-        if "Marker_" in name or "Club" in name
-    ]
-    if club_errors:
-        c_meas = float(np.mean(club_errors))
-        c_pass = c_meas <= club_th
-        gates.append(
-            QualificationGateResult(
-                name="club_marker_rmse_m",
-                threshold=club_th,
-                measured=c_meas,
-                passed=c_pass,
-                unit="m",
-                reason=""
-                if c_pass
-                else f"club marker RMSE {c_meas * 1e3:.1f} mm > {club_th * 1e3:.1f} mm",
-            )
+    c_meas = _extract_club_rmse(metrics)
+    c_pass = c_meas <= club_th
+    gates.append(
+        QualificationGateResult(
+            name="club_marker_rmse_m",
+            threshold=club_th,
+            measured=c_meas,
+            passed=c_pass,
+            unit="m",
+            reason=""
+            if c_pass
+            else f"club marker RMSE {c_meas * 1e3:.1f} mm > {club_th * 1e3:.1f} mm",
         )
+    )
 
     # Closure residual if reported
-    closure_meas = package.reports.get("closure_residual_m")
-    if closure_meas is not None:
-        cl_pass = closure_meas <= profile.max_closure_residual_m
-        gates.append(
-            QualificationGateResult(
-                name="closure_residual_m",
-                threshold=profile.max_closure_residual_m,
-                measured=float(closure_meas),
-                passed=cl_pass,
-                unit="m",
-                reason=""
-                if cl_pass
-                else f"closure {closure_meas * 1e3:.1f} mm > {profile.max_closure_residual_m * 1e3:.1f} mm",
-            )
-        )
+    cl_gate = _eval_closure_gate(package, profile.max_closure_residual_m)
+    if cl_gate is not None:
+        gates.append(cl_gate)
 
     return gates
 
@@ -281,12 +301,7 @@ def _eval_planar_pendulum_gates(
     metrics = package.metrics
 
     # Club RMSE
-    club_errors = [
-        m_sum.rmse_m
-        for name, m_sum in metrics.per_marker.items()
-        if "Marker_" in name or "Club" in name
-    ]
-    c_meas = float(np.mean(club_errors)) if club_errors else metrics.whole_marker_rmse_m
+    c_meas = _extract_club_rmse(metrics)
     c_pass = c_meas <= profile.max_club_rmse_m
     gates.append(
         QualificationGateResult(
@@ -346,21 +361,9 @@ def _eval_upper_body_gates(
     )
 
     # Closure residual
-    closure_meas = package.reports.get("closure_residual_m")
-    if closure_meas is not None:
-        cl_pass = closure_meas <= profile.max_closure_residual_m
-        gates.append(
-            QualificationGateResult(
-                name="closure_residual_m",
-                threshold=profile.max_closure_residual_m,
-                measured=float(closure_meas),
-                passed=cl_pass,
-                unit="m",
-                reason=""
-                if cl_pass
-                else f"closure {closure_meas * 1e3:.1f} mm > {profile.max_closure_residual_m * 1e3:.1f} mm",
-            )
-        )
+    cl_gate = _eval_closure_gate(package, profile.max_closure_residual_m)
+    if cl_gate is not None:
+        gates.append(cl_gate)
 
     return gates
 
@@ -372,12 +375,7 @@ def _eval_triple_pendulum_gates(
     """Evaluate triple pendulum kinematic reconstruction gates."""
     gates: list[QualificationGateResult] = []
     metrics = package.metrics
-    club_errors = [
-        m_sum.rmse_m
-        for name, m_sum in metrics.per_marker.items()
-        if "Marker_" in name or "Club" in name
-    ]
-    c_meas = float(np.mean(club_errors)) if club_errors else metrics.whole_marker_rmse_m
+    c_meas = _extract_club_rmse(metrics)
     c_pass = c_meas <= profile.max_club_rmse_m
     gates.append(
         QualificationGateResult(
