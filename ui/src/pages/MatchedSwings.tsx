@@ -63,43 +63,6 @@ export function MatchedSwingsPage() {
   const [previewFrame, setPreviewFrame] = useState(0);
   const [previewFrameCount, setPreviewFrameCount] = useState(0);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoadState('loading');
-    fetchMatchedSwingLedger()
-      .then((data) => {
-        if (cancelled) return;
-        setRuns(data.runs);
-        setLoadState('ready');
-        if (data.runs.length > 0) {
-          setSelectedId(data.runs[0].id);
-        }
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Failed to load ledger');
-        setLoadState('error');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const filteredRuns = useMemo(
-    () => filterRuns(runs, engineFilter, verdictFilter, search),
-    [runs, engineFilter, verdictFilter, search],
-  );
-
-  const selectedRun = useMemo(
-    () => filteredRuns.find((run) => run.id === selectedId) ?? filteredRuns[0] ?? null,
-    [filteredRuns, selectedId],
-  );
-
-  const engineOptions = useMemo(
-    () => ['all', ...Array.from(new Set(runs.map((run) => run.engine))).sort()],
-    [runs],
-  );
-
   const loadPreview = useCallback(async (run: MatchedSwingRun, frameIndex: number) => {
     if (!run.capabilities.has_candidate_npz) {
       setPreviewJoints([]);
@@ -117,10 +80,52 @@ export function MatchedSwingsPage() {
     }
   }, []);
 
+  const handleSelectRun = useCallback(
+    (run: MatchedSwingRun) => {
+      setSelectedId(run.id);
+      void Promise.resolve().then(() => loadPreview(run, 0));
+    },
+    [loadPreview],
+  );
+
   useEffect(() => {
-    if (!selectedRun) return;
-    void loadPreview(selectedRun, 0);
-  }, [selectedRun, loadPreview]);
+    let cancelled = false;
+    void Promise.resolve().then(async () => {
+      try {
+        const data = await fetchMatchedSwingLedger();
+        if (cancelled) return;
+        setRuns(data.runs);
+        setLoadState('ready');
+        if (data.runs.length > 0) {
+          const first = data.runs[0];
+          setSelectedId(first.id);
+          await loadPreview(first, 0);
+        }
+      } catch (err: unknown) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : 'Failed to load ledger');
+        setLoadState('error');
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadPreview]);
+
+  const filteredRuns = useMemo(
+    () => filterRuns(runs, engineFilter, verdictFilter, search),
+    [runs, engineFilter, verdictFilter, search],
+  );
+
+  const selectedRun = useMemo(
+    () => filteredRuns.find((run) => run.id === selectedId) ?? filteredRuns[0] ?? null,
+    [filteredRuns, selectedId],
+  );
+
+  const engineOptions = useMemo(
+    () => ['all', ...Array.from(new Set(runs.map((run) => run.engine))).sort()],
+    [runs],
+  );
 
   const leftPanel = (
     <div className="flex flex-col gap-3 p-4 text-sm text-gray-200">
@@ -178,7 +183,7 @@ export function MatchedSwingsPage() {
           <button
             key={run.id}
             type="button"
-            onClick={() => setSelectedId(run.id)}
+            onClick={() => handleSelectRun(run)}
             className={`text-left rounded border px-2 py-2 transition ${
               selectedRun?.id === run.id
                 ? 'border-blue-500 bg-gray-900'

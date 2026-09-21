@@ -16,7 +16,6 @@ from typing import Any, Literal
 import numpy as np
 
 from src.shared.python.contracts import postcondition, precondition
-from src.shared.python.motion_matching.candidate_io import load_candidate
 from src.shared.python.motion_matching.ledger import (
     default_ledger_path,
     find_repo_root,
@@ -180,6 +179,8 @@ class MatchedSwingsService:
         self, run_id: str, frame_index: int = 0
     ) -> list[dict[str, Any]]:
         """Build MocapSkeleton3D-compatible joints from candidate marker positions."""
+        from src.shared.python.motion_matching.candidate_io import load_candidate
+
         npz_path = self.resolve_artifact_path(run_id, "candidate")
         candidate = load_candidate(npz_path, validate_checksums=False)
         markers = candidate.markers.model_markers_m
