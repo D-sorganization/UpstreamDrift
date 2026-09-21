@@ -667,6 +667,12 @@ Disposition of the 38-PR open backlog (REST-verified states at sweep start):
 
 No issue was closed in this sweep (redundant-PR closures do not close issues). Fleet-wide handoff/lease state at sweep start: `C:/tmp/backlog/UpstreamDrift.md`.
 
+## Impact-Interval Energy Audit Gate: #9548
+
+- Provider fix is in the pin: Tools #5079 (independent ledger) and #5088 (termination), both ancestors of `vendor/ud-tools` = Tools `1ac89c18e6280752d949e520c2143d2fb584d31e`. Do not rewind.
+- UD consumes it through `src/shared/python/physics/impact_interval_audit.py`: `audit_impact_interval` recomputes the signed residual from the reported terms, audits linear momentum only for FREE and the angular balance about the attachment only for supported boundaries, and `qualified_post_impact_state` raises `ImpactAuditError` (verdict attached, `to_report()` JSON-ready with limitations) on unseparated contact or any residual outside `ImpactAuditTolerances` (0.15 J, 1e-8 N s, 1e-3 N m s).
+- Gate: `REQUIRE_REAL_TOOLS_REPO=1 python -m pytest tests/shared_contracts/ --tools-mode=vendored` and `python -m pytest tests/unit/physics/test_impact_interval_audit.py`. Tolerance is justified only by the halving-dt check in the contract test; closure is software correctness, not physical qualification. No UI consumer of the interval solver exists yet — wire the verdict report when one lands (DL-#9548).
+
 ## Impact Dynamics and Acoustics: #9700
 
 - Current checkpoint: docs/9700-impact-handoff, SELF; PR #9962. Canonical [HANDOFF.md](docs/development/HANDOFF.md) records merged sources, validation boundaries and ordered takeover. Provider #9916/#9920 are merged; Python/Rust/gitlink agree on e83bd2e4a7a29a2dcd8145ef2d1efa07123324f0. This checkpoint changes no pin or installed runtime.
