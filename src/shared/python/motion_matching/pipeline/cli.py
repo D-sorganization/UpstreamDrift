@@ -324,7 +324,6 @@ def _calibrate_and_scale(
         json.dumps(scaled_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     spec_bytes = scaled_path.read_bytes()
-
     lane.plant = get_plant(ctx.engine, scaled_spec)
     offsets, calibration2 = lane.calibrate_legs(
         spec_bytes, fixed, scaled_offsets(offsets, femur_scale, tibia_scale), address.q
@@ -339,19 +338,19 @@ def _calibrate_and_scale(
         sim, kin, address2, lane, labels, adapter
     )
     return _CalibrateAndScaleResult(
-        scaled_spec=scaled_spec,
-        spec_bytes=spec_bytes,
-        address_report=address_report,
-        adapter=adapter,
-        kin=kin,
-        sim=sim,
-        address2=address2,
-        attachments=attachments,
-        offsets=offsets,
-        calibration=calibration,
-        calibration2=calibration2,
-        hip_report=hip_report,
-        qualification_note=qualification_note,
+        scaled_spec,
+        spec_bytes,
+        address_report,
+        adapter,
+        kin,
+        sim,
+        address2,
+        attachments,
+        offsets,
+        calibration,
+        calibration2,
+        hip_report,
+        qualification_note,
     )
 
 
