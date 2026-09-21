@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "568d93c79e419469dd854fdce54fa502938a38c6e5948b6c89a644aa7da50388",
+      "fingerprint": "3b6865d670e4d84188ea26fc9e7e13c592aaeab41bd408d6481af18456cd08db",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -27,16 +27,16 @@
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
         "src/config/feature_parity.json": "e9c8d791d426991c8a516552eecb89b7f0443c6e1a40320f3fefe0eefa46a009",
-        "src/config/launcher_manifest.json": "721474b299891764d36c8246ee6ea4dafb08688fc21bb80b892571f40f86f783",
+        "src/config/launcher_manifest.json": "c004401e04468a49905a27b3c079183ab010b8742e93a5f7d4d9580e35ba85a4",
         "src/config/launcher_manifest_loader.py": "222144b05e4d8e1904188853ce12ae01f66c658624a2fa45a76322e1a4585aa4",
-        "src/config/models.yaml": "28002cc5c4a10f8b8e83f874bcbf8ec26f399cf22610e8ab5a6ccef9bd3c07d3",
+        "src/config/models.yaml": "ab36e654c25c5fc100547c7c6eb6cfd35c56a33381c230b852d5f65b2366b834",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "refresh launcher atlas boundary review after capability atlas update"
+      "rationale": "add_video_and_report_export_capabilities"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
