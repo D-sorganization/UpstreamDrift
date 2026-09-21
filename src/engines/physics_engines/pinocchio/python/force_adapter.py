@@ -120,12 +120,13 @@ class PinocchioForceAdapter:
         self._pin.computeJointJacobians(self._model, self._data, configuration)
         self._pin.updateFramePlacements(self._model, self._data)
         result = np.empty((3 * self.n_contact_spheres, self.nv))
+        ref_frame = self._pin.ReferenceFrame
         for i, frame in enumerate(self._contact_ids):
             jac = self._pin.getFrameJacobian(
                 self._model,
                 self._data,
                 frame,
-                self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+                ref_frame.LOCAL_WORLD_ALIGNED,
             )
             result[3 * i : 3 * i + 3] = jac[:3]
         return result
