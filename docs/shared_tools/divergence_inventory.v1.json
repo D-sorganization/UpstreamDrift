@@ -13,11 +13,18 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1393,
-    "tools-only": 709,
+    "ud-only": 1397,
+    "tools-only": 707,
     "spelling-only": 123
   },
   "packages": {
+    ".coverage": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 0,
+      "tools-only": 1,
+      "spelling-only": 0
+    },
     "README.md": {
       "identical": 0,
       "diverged": 0,
@@ -37,6 +44,13 @@
       "diverged": 1,
       "ud-only": 0,
       "tools-only": 0,
+      "spelling-only": 0
+    },
+    "__init__.py.bak": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "_contracts_decorators.py": {
@@ -150,13 +164,6 @@
       "ud-only": 2,
       "tools-only": 0,
       "spelling-only": 5
-    },
-    "camera": {
-      "identical": 0,
-      "diverged": 0,
-      "ud-only": 0,
-      "tools-only": 4,
-      "spelling-only": 0
     },
     "canonical_core": {
       "identical": 0,
@@ -435,7 +442,7 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 30,
+      "tools-only": 29,
       "spelling-only": 0
     },
     "launcher_embed": {
@@ -476,7 +483,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 189,
+      "ud-only": 193,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -806,7 +813,7 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 1,
+      "tools-only": 2,
       "spelling-only": 0
     },
     "ux": {
@@ -847,6 +854,18 @@
   },
   "files": [
     {
+      "path": ".coverage",
+      "classification": "tools-only",
+      "package": ".coverage",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 53248,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "README.md",
       "classification": "tools-only",
       "package": "README.md",
@@ -878,6 +897,18 @@
       "ud_bytes": 2300,
       "tools_bytes": 1588,
       "byte_delta": 712,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "__init__.py.bak",
+      "classification": "tools-only",
+      "package": "__init__.py.bak",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 1372,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -4838,54 +4869,6 @@
       "ud_bytes": 17895,
       "tools_bytes": 5517,
       "byte_delta": 12378,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "camera/__init__.py",
-      "classification": "tools-only",
-      "package": "camera",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 1830,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "camera/dshow.py",
-      "classification": "tools-only",
-      "package": "camera",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 4567,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "camera/ffmpeg_source.py",
-      "classification": "tools-only",
-      "package": "camera",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 7450,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "camera/video_file_source.py",
-      "classification": "tools-only",
-      "package": "camera",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 4695,
-      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10495,18 +10478,6 @@
       "spelling_only": false
     },
     {
-      "path": "launch_monitor/gspro_connect.py",
-      "classification": "tools-only",
-      "package": "launch_monitor",
-      "subpackage": "",
-      "ud_bytes": null,
-      "tools_bytes": 11714,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "launch_monitor/importer.py",
       "classification": "tools-only",
       "package": "launch_monitor",
@@ -10811,7 +10782,7 @@
       "classification": "ud-only",
       "package": "math_utils",
       "subpackage": "",
-      "ud_bytes": 202,
+      "ud_bytes": 232,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10823,7 +10794,7 @@
       "classification": "ud-only",
       "package": "math_utils",
       "subpackage": "",
-      "ud_bytes": 3634,
+      "ud_bytes": 4653,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12055,6 +12026,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/_series_interp.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 766,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/acceptance.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -12235,6 +12218,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/club_calibration.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 11342,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/club_models.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -12251,7 +12246,31 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 999,
+      "ud_bytes": 2009,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/club_only/adapters.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 5701,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/club_only/observation.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 20694,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12443,7 +12462,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 16413,
+      "ud_bytes": 16760,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12551,7 +12570,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "diagnostics",
-      "ud_bytes": 19325,
+      "ud_bytes": 18241,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13103,7 +13122,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "loaders",
-      "ud_bytes": 4647,
+      "ud_bytes": 3569,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13151,7 +13170,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "loaders",
-      "ud_bytes": 323,
+      "ud_bytes": 380,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14147,7 +14166,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 1730,
+      "ud_bytes": 2311,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16979,7 +16998,7 @@
       "classification": "ud-only",
       "package": "neural_motion",
       "subpackage": "",
-      "ud_bytes": 13524,
+      "ud_bytes": 14809,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17015,7 +17034,7 @@
       "classification": "ud-only",
       "package": "neural_motion",
       "subpackage": "",
-      "ud_bytes": 3897,
+      "ud_bytes": 4241,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -34003,6 +34022,18 @@
       "spelling_only": false
     },
     {
+      "path": "upstream_drift_tools/process_calculators/psa_package/References/3041-PID-ALL-2025-03-21 H2 Industry Recommendations.pdf",
+      "classification": "tools-only",
+      "package": "upstream_drift_tools",
+      "subpackage": "process_calculators",
+      "ud_bytes": null,
+      "tools_bytes": 12338662,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "ux/__init__.py",
       "classification": "ud-only",
       "package": "ux",
@@ -35350,8 +35381,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-05-16",
-        "commit": "d5eec901cd3902101b4c214590afa1ade72eb6db"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -35610,8 +35641,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-05-15",
-        "commit": "33d83fad2b3061e6e1e9309625990a1483907479"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -35843,9 +35874,9 @@
         "commit": "3ef6f91c33057fb1e6dd4817996e82bc834d8299"
       },
       "tools": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-20",
-        "commit": "54d47b4dc98072e54c381e445e8669b4e65db96c"
+        "author": "Dieter Olson",
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -35856,9 +35887,9 @@
         "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
       },
       "tools": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-20",
-        "commit": "54d47b4dc98072e54c381e445e8669b4e65db96c"
+        "author": "Dieter Olson",
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -36325,8 +36356,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-04-26",
-        "commit": "158f6f4c95a49f42c3a50e321a9055f12fcecf68"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -36949,8 +36980,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-03-15",
-        "commit": "5af09a829405b29389a52904b203c9a93e949a83"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -36962,8 +36993,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-04-19",
-        "commit": "415dc5e967a9e70e63612df9a2810e21fa483ce3"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -36975,8 +37006,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-01-30",
-        "commit": "2340cec886a463834c3763194c0c2fcea82d75b7"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -37053,8 +37084,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-05-15",
-        "commit": "15745bf91bbda27b01c48372264c3bf48c40c6ce"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -37235,8 +37266,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -37872,8 +37903,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -37924,8 +37955,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -37963,8 +37994,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
@@ -37976,8 +38007,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
+        "date": "2026-05-26",
+        "commit": "3e2fc9622d7b32522f137a57bcfa85cf79f5f107"
       }
     },
     {
