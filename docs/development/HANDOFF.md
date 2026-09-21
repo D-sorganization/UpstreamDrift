@@ -43,7 +43,7 @@
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/issue-10345-local`.
 - Branch: `fix/issue-10345-ms-52-local`; PR #10666. Governing issue #10345 (epic #10363).
 - Delivered: `retarget.py`, `replay.py`, `golfer_scene.py`, `coordinate_map_anthro.json`, `viz/render_replay.py`; unit/native tests; evidence `evidence/matched/driver_g1_myosuite/{candidate.npz,receipt.json,playback.gif}`.
-- Validation: `pytest tests/unit/engines/myosuite/test_retarget.py tests/myosuite/test_replay_native.py -q`; cross-engine registration; ledger/status refresh for 99 receipts.
+- Validation: `pytest tests/unit/engines/myosuite/test_retarget.py tests/myosuite/test_replay_native.py -q`; cross-engine registration; ledger/status refresh for 101 receipts.
 - Honest limit: placeholder MyoBody MJCF yields diagnostic marker parity only; 15 mm gate deferred to MS-51 scene.
 - Next action: merge PR #10666 after rebase CI green; teardown worktree.
 
@@ -169,7 +169,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
   - `ik_minimize.py`: `MinimizeMarkerKinematics` using `mujoco.minimize.least_squares` with LM warm start and best-of fallback; marker RMS within 0.5 mm of LM on driver frames 0 and 300.
   - `inverse_dynamics.py`: `tracking_controller_mj_inverse` and `inverse_dynamics_mj_inverse` with plant KKT torques and native `mj_inverse` audit; MS-72 replay/discretization gates.
   - Pipeline: `--ik-backend mujoco-minimize`, `--tracking mj-inverse`, receipt fields `ik_backend` / `tracking_backend`.
-  - CI unblock: regenerated matched-swing status README for 100 receipts; browser model assert reads `total_receipts` from ledger JSON.
+  - CI unblock: regenerated matched-swing status README for 101 receipts; browser model assert reads `total_receipts` from ledger JSON.
 - Reproduction: `pytest tests/docs/test_matched_swing_status_freshness.py tests/tools/matched_swing_browser/test_model.py::TestMatchedSwingBrowserModel::test_load_production_ledger -q`
 - Next: Push fix, await CI Standard green on #10660, close #10662 as duplicate.
 
@@ -1204,5 +1204,5 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
-- 2026-09-21T10:11:03Z — CI remediation for #10660: FakePlant accepts `ik_backend`; refreshed `reports/matched_swing_ledger.json` to 100 receipts. Commit SELF.
+- 2026-09-21T10:11:03Z — CI remediation for #10660: FakePlant accepts `ik_backend`; refreshed `reports/matched_swing_ledger.json` to 101 receipts. Commit SELF.
 - 2026-09-21T10:40:00Z — Fix unit-test-gate on #10660: regenerate matched_swing status (99→100) and stop hardcoding receipt count in browser model test. Commit SELF.
