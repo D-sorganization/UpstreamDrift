@@ -1,5 +1,16 @@
 # Current Matching Continuation Handoff
 
+## PF-09 Replace Synthetic Force Adapters With Native Bridges (#10439)
+
+- Worktree: primary, branch `feat/issue-10439-pf09-native-force-bridges`, lease `antigravity-ud-10439`, DL-#10439.
+- Changes:
+  - `multi_engine_torque_allocator.py`: Extended `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`. Quarantined `_AnalyticalMultibodyBase` as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`. Enforced fail-closed `RuntimeError` in `create_engine_force_adapter` for unbridged native engines (Drake, OpenSim, Simscape) in production mode. Corrected `MujocoForceAdapter` to compute raw unconstrained dynamics M a + bias eliminating `qfrc_inverse` passive/constraint force double counting, added input validation (`_checked_vector`) and state refresh (`_prepare_state`) before mutation, and verified exact acceleration parity.
+  - `force_adapter.py` & `native_model.py` (Pinocchio): Implemented `PinocchioForceAdapter` implementing the shared interface with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`).
+  - `allocate_swing_torques.py`: Extended CLI choices to include `pinocchio` and added `--allow-synthetic` flag to gate quarantined fixtures.
+  - Test suites: Added `test_native_force_equations.py` (MuJoCo raw equation checks), `test_force_adapter.py` & `test_force_mapping.py` (Pinocchio integration), and `test_force_bridges_pf09.py` (quarantine enforcement, protocol conformance, CLI synthetic gate).
+- Reproduction: `pytest tests/unit/motion_matching/test_native_force_equations.py tests/unit/motion_matching/test_multi_engine_torque_allocator.py tests/unit/motion_matching/test_force_bridges_pf09.py -m "requires_mujoco or unit" -v`.
+- Next: PR auto-merge, release lease on #10439, claim next issue in sequence (#10440: PF-10).
+
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
