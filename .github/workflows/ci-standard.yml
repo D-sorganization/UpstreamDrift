@@ -2639,6 +2639,7 @@ jobs:
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Fetch pinned Tools packages
+        id: tools
         uses: ./.github/actions/fetch-pinned-tools
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -2649,9 +2650,15 @@ jobs:
           cache-dependency-path: vendor/ud-tools/src/rate_of_closure/web/package-lock.json
       - name: Build Impact Explorer bundle
         working-directory: vendor/ud-tools/src/rate_of_closure/web
+        env:
+          # Tools' release contract stamps this revision into index.html, the
+          # runtime descriptor and the SHA-256 asset manifest, so the served
+          # artifact provably comes from the pinned source (#9550 item 4).
+          ROC_RELEASE_REVISION: ${{ steps.tools.outputs.gitlink-sha }}
         run: |
           npm ci
           npm run build -- --base=/impact-explorer-app/
+          node release/generateReleaseArtifacts.mjs
       - name: Verify bundle is built under the mandated base path
         shell: bash
         run: |
@@ -2660,6 +2667,31 @@ jobs:
           grep -q '/impact-explorer-app/' \
             vendor/ud-tools/src/rate_of_closure/web/dist/index.html
           echo "Impact Explorer bundle present and base-pathed to /impact-explorer-app/"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Install served-bundle verifier dependencies
+        run: |
+          python3 -m pip install --disable-pip-version-check \
+            fastapi==0.136.3 httpx==0.28.1
+      # Serve the built bundle through the /impact-explorer-app mount contract
+      # and check what a client receives: real JavaScript whose digests match
+      # the provider manifest, a descriptor stamped with the pinned gitlink,
+      # and 404 (not the index fallback) for a missing artifact. HTTP 200 on
+      # index.html alone is not install evidence (#9550 item 4).
+      - name: Verify served bundle matches pinned Tools release artifacts
+        run: |
+          python3 scripts/ci/verify_impact_explorer_bundle.py \
+            --dist vendor/ud-tools/src/rate_of_closure/web/dist \
+            --expected-revision "${{ steps.tools.outputs.gitlink-sha }}" \
+            --receipt "$RUNNER_TEMP/impact-explorer-bundle-receipt.json"
+      - name: Upload served-bundle receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: impact-explorer-bundle-receipt-${{ github.sha }}
+          path: ${{ runner.temp }}/impact-explorer-bundle-receipt.json
+          if-no-files-found: error
+          retention-days: 30
 
   frontend-tests:
     needs: [pick-runner, changed-paths]
