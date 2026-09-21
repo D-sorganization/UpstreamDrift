@@ -70,6 +70,7 @@ def test_joint_panel_set_show_radians() -> None:
     panel._spinboxes[joint].setValue.assert_called_with(45.0)  # type: ignore
 
 
+@pytest.mark.unit
 def test_joint_panel_tooltip_matches_display_mode() -> None:
     """Regression test for #8886: the slider/spinbox tooltips must reflect
     the *current* display unit, not always claim degrees."""
