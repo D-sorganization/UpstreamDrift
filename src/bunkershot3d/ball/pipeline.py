@@ -44,9 +44,11 @@ from src.shared.python.core.contracts import require
 from src.shared.python.physics.impact_model import PostImpactState
 
 from .lie import BallLie, BallProperties
+from .regimes import UnsupportedContactRegimeError
 from .splash import (
     DEFAULT_MOMENTUM_TRANSFER,
     BallLaunchResult,
+    ContactType,
     MomentumTransfer,
     SandDelivery,
     compute_ball_launch_from_splash,
@@ -75,6 +77,11 @@ class BunkerShotState:
         club_mass_kg: Club head mass [kg].
         ball: Ball properties.
         transfer: The uncalibrated sand-to-ball partition parameters.
+        contact_regime: Which regime the strike fell into, as decided by
+            :func:`~bunkershot3d.ball.regimes.classify_contact_regime`.
+            Declared by the caller, never inferred here: only ``SPLASH``
+            has a launch model, and :func:`compute_bunker_launch` refuses
+            every other value (issue #9544).
     """
 
     club_loft_deg: float
@@ -83,6 +90,7 @@ class BunkerShotState:
     club_mass_kg: float = 0.30  # 300g wedge head
     ball: BallProperties = field(default_factory=BallProperties)
     transfer: MomentumTransfer = DEFAULT_MOMENTUM_TRANSFER
+    contact_regime: ContactType = ContactType.SPLASH
 
     def __post_init__(self) -> None:
         """Validate the declared club properties.
@@ -100,20 +108,42 @@ class BunkerShotState:
                 "the delivered impulse and the divot mass (issue #8657), and "
                 "neither has a sensible default"
             )
+        if not isinstance(self.contact_regime, ContactType):
+            raise ValueError(
+                f"contact_regime must be a ContactType, got {self.contact_regime!r}"
+            )
 
 
 def compute_bunker_launch(state: BunkerShotState) -> BallLaunchResult:
     """Compute ball launch conditions from bunker shot.
 
-    This is the main entry point for bunker shot physics. Thin/blade direct
-    contact remains out of scope, so the splash transfer is always used.
+    This is the main entry point for bunker shot physics. The splash
+    transfer is the only launch model, so a state whose declared
+    :attr:`~BunkerShotState.contact_regime` is anything else is refused
+    rather than routed through it (issue #9544): a direct strike is an
+    impact problem, and a head that never hit or never came out has no
+    launch at all.
 
     Args:
         state: Complete bunker shot specification.
 
     Returns:
         The launch, its validity verdict and the provenance of the partition.
+
+    Raises:
+        UnsupportedContactRegimeError: If the declared regime is not a
+            splash. A plain ``raise`` rather than a contract, because a
+            carry manufactured for a bladed shot must not survive
+            ``DBC_LEVEL=off``.
     """
+    if state.contact_regime is not ContactType.SPLASH:
+        raise UnsupportedContactRegimeError(
+            f"no ball launch is derivable for a {state.contact_regime.value} "
+            "strike: the splash partition models sand thrown at the ball from "
+            "a head that passed beneath it, and nothing else; direct contact "
+            "is an impact problem outside this model, and a no-hit or "
+            "buried no-release outcome has no launch (issue #9544)"
+        )
     return compute_ball_launch_from_splash(
         lie=state.ball_lie,
         ball=state.ball,

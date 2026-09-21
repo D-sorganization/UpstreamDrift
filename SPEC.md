@@ -902,6 +902,26 @@ Formalizes dynamic validation gates for open-loop replay drift, collocation defe
 - **Pinocchio MatchingPlant Adapter (`src/engines/physics_engines/pinocchio/python/matching_plant.py`)**:
   - Exports `PinocchioMatchingPlant` conforming to the unified `MatchingPlant` protocol.
 
+## Bunker Sand-to-Ball Transfer Calibration and Held-Out Qualification (#9543)
+
+`bunkershot3d.ball.qualification` and `qualification_fit` are the software half
+of the measurement-to-prediction program for the splash-shot momentum transfer:
+a `MeasuredStroke` intake contract (instrument records only, ISO date, SHA-256
+raw-data digest, missing quantities kept missing), a registered intended-use
+matrix and measurement protocol, a `QualificationDataset` split by session with
+digest-level leakage refusal and #9286 sand-batch admission, a bounded
+least-squares `fit_transfer` with identifiability and sensitivity checks that
+preserves failed fits, a held-out `validate_holdout` under ASME V&V 20 judged
+against `PRACTICAL_TOLERANCES` fixed with rationale before analysis, and a
+versioned `TransferQualification`. `launch_verdict` lifts the `BEYOND_VALIDATION`
+floor to `WITHIN` only for a strike inside a qualified regime and preserves it
+elsewhere; fitted parameters carry the new `ProvenanceBasis.CALIBRATED`, ranked
+below `MEASURED`. `ValidationComparison` admits a launch-side quantity only with
+an on-file instrument `measured_record`. `objective_disposition` gives #9239 its
+disposition: ranking unavailable until calibrated, then degenerate or supported
+per target. The shipped stroke register is empty; no physical qualification is
+claimed and the report states what the three-camera rig cannot measure.
+
 ## Saved Pinocchio Controls in MuJoCo (#10336)
 
 `scripts/replay_pinocchio_in_mujoco.py` replays saved joint efforts from the
@@ -6688,6 +6708,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
 | 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
+| 2026-09-18 | #10457 | Bunker sand-to-ball transfer: stroke intake contract, session-split calibration fit with identifiability checks, held-out V&V 20 qualification against predeclared tolerances, versioned evidence that lifts the launch verdict floor per regime only; shipped register stays empty. |
 | 2026-09-18 | #10459 | Add the fail-closed BunkerShot3D product acceptance matrix (`src/config/bunkershot3d_qualification.json`) tracking every epic child, dependency order and prediction-acceptance criteria; `release_status` is bound to the live V&V register and reads `blocked`. |
 | 2026-09-19 | #10466 | Rig capture sessions export through the pinned Tools `MocapSessionManifest` (`mocap-session/1.0.0`): the bridge probes the Tools family, pins the schema, and writes `mocap_session.json` via the Tools builders and canonical serializer; retained video without recorded consent is refused, not faked. First M-track consumer slice of #9422. |
 | 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
@@ -6704,6 +6725,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10458 | Same-integrator G1 continuation (rtol 1e-6) committed as rejected evidence; rollout equals replay at 123.5 mm; ledger and turnover updated |
 | 2026-09-18 | #10448 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
 | 2026-09-18 | #10381 | Matched-swing ledger fail-closed (self-declared acceptance is UNVERIFIED); G1 Crocoddyl continuation committed as rejected evidence; matched receipts re-evaluated; program docs truth reset |
+| 2026-09-18 | #9544 | BunkerShot3D qualifies contact regimes and coupled club rotation: `classify_contact_regime` distinguishes no-hit, direct (thin) strike, splash and buried no-release from the F0 sole path, `compute_bunker_launch` refuses every regime but splash (no forced carry), `ShotSettings.rotation_mode` names prescribed rotation and an optional `RotationCoupling` club/shaft/grip boundary with stated wrench reference-point conventions, and the V&V ledger records the support angular impulse and prescribed-driver work; F1 still refuses ball launch and out-of-plane metrics. Doc: `docs/bunkershot3d/contact-regimes.md`. |
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
 | 2026-09-18 | #9550 | Froze the Impact Explorer acceptance matrix (epic #9546) in `src/config/impact_acceptance.json` with a library-probed model-capability matrix (rigid_body instantaneous with capped friction spin; spring_damper finite-duration normal-only with spin explicitly unavailable and uncalibrated defaults; finite_time a relabelled rigid result), SI golden invariants (no-hit, off-center, constant COR at 20/60 m/s, spin sign, momentum, passivity, dt convergence), the bounded `code_verified_only` claim and per-item open state; `impact-explorer-web-build` now stamps Tools release artifacts with the pinned gitlink and `scripts/ci/verify_impact_explorer_bundle.py` proves `/impact-explorer-app/` serves that revision's real JavaScript with manifest digests (76 assets, 5 JS at `62e8cdbf`) and 404s missing artifacts; `tools.rate_of_closure` parity is recorded as an evidence-based gap (#9546) until saved scenarios are compared numerically across runtimes. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
