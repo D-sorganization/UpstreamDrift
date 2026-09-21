@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-20T03:38:25Z",
+  "generated_at": "2026-09-21T17:08:20Z",
   "rows": [
     {
       "acceptance": null,
@@ -3476,6 +3476,29 @@
       "sha256": "9bbca5abbd0eb97bd0a063994934bc69a1708d2d0ee07266c50ed6775a5fa317"
     },
     {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_simscape_slice/candidate27.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_simscape_slice/receipt.json",
+      "sha256": "17b9716ce964d35bea4e09b7f5ea18428dd8d54185ccb3ab9cdfbdd8237785db"
+    },
+    {
       "acceptance": {
         "gates": [
           {
@@ -3556,5 +3579,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 98
+  "total_receipts": 99
 }

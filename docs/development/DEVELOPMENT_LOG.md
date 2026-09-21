@@ -86,6 +86,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR referencing #10359, await green CI, merge and release lease.
 - **Evidence:** docs/development/matched_swing_program/evidence/reports/sample_fit_report.md; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py.
 
+### DL-#10349 · Simscape 44-to-27 Coordinate Slice and Boundary-Load Validation
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10349 (MS-62, epic #10363)
+- **Branch:** fix/issue-10349-ms-62-local
+- **PR:** #10665 (open)
+- **Paths:** src/shared/python/motion_matching/coordinate_slice.py; tests/unit/motion_matching/test_coordinate_slice.py; evidence/matched/driver_g1_simscape_slice/; src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/align_measured_to_model.m
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (9 unit tests pass in test_coordinate_slice.py; ruff and architecture budget clean; kinematic slice receipt committed; dynamic Simscape replay unqualified)
+- **Summary:** Added JSON-backed 44-to-27 coordinate slice with name-based kinematic projection, virtual-work decomposition tests, boundary-wrench derivation for omitted neck/leg DOFs, CLI, and Simscape workspace overrides from anthropometric geometry documents in `align_measured_to_model.m`.
+- **Next step:** R2025b Simscape native replay of `candidate27.npz` with boundary-load validation.
+- **Evidence:** evidence/matched/driver_g1_simscape_slice/{slice_map.json,receipt.json,parity.json,run_manifest.json,candidate27.npz}; tests/unit/motion_matching/test_coordinate_slice.py.
+
 ### DL-#10342 · OpenSim/MyoSuite Native Nightly Lane Receipts
 
 - **State:** in_review
