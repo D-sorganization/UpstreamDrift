@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 from unittest.mock import patch
 
 import numpy as np
@@ -299,9 +300,13 @@ def test_validate_export_path_outside_rejected(
     # Patch Path.cwd to a clean string that doesn't contain "pytest"/"test",
     # and target a clean path likewise. Otherwise the test-env heuristic
     # short-circuits the security check.
-    fake_cwd = Path("C:/clean_root_xyz").resolve()
+    if sys.platform == "win32":
+        fake_cwd = Path("C:/clean_root_xyz").resolve()
+        other = Path("C:/").resolve() / "outside_clean_root" / "out.csv"
+    else:
+        fake_cwd = Path("/clean_root_xyz").resolve()
+        other = Path("/outside_clean_root/out.csv").resolve()
     monkeypatch.setattr(Path, "cwd", classmethod(lambda cls: fake_cwd))
-    other = Path("C:/").resolve() / "outside_clean_root" / "out.csv"
     with pytest.raises(ValueError, match="Refusing to output"):
         validate_export_path(other)
 

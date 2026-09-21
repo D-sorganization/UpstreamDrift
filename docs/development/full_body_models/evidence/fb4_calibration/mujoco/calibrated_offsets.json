@@ -1,0 +1,262 @@
+{
+  "schema_version": "v1",
+  "spec_sha256": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+  "engine": "mujoco",
+  "best_iteration": 3,
+  "total_iterations": 3,
+  "best_subsample_rms_m": 0.14516707389804354,
+  "iterations_rms_history_m": [
+    0.48267686431724643, 0.21567366316344516, 0.14516707389804356
+  ],
+  "head_marker_limitation": "Three head markers (HeadTop, HeadFront, HeadSide) are attached to the single rigid trunk/head torso segment ('Hub'). Because the skeletal spec models the torso rigidly without a cervical neck joint, head movements relative to the thorax produce higher rigid marker residual on Hub.",
+  "marker_offsets": {
+    "BackLeft": {
+      "body": "Hub",
+      "offset_m": [
+        1.3058943775338143, -1.0800208170356218, -0.5693939560215178
+      ],
+      "subsample_rms_m": 0.22062666601197423,
+      "full_trajectory_rms_m": 0.1895374658105259
+    },
+    "BackRight": {
+      "body": "Hub",
+      "offset_m": [
+        1.2074674372001768, -1.0413292988906033, -0.6119305239894763
+      ],
+      "subsample_rms_m": 0.15328154381696862,
+      "full_trajectory_rms_m": 0.13185966432421622
+    },
+    "BackTop": {
+      "body": "Hub",
+      "offset_m": [
+        1.2773576652768195, -1.1446876151804433, -0.7103784189314829
+      ],
+      "subsample_rms_m": 0.09903707494931832,
+      "full_trajectory_rms_m": 0.07281715996066099
+    },
+    "HeadFront": {
+      "body": "Hub",
+      "offset_m": [
+        1.3826047107708461, -1.2014933445072777, -0.9200070493226291
+      ],
+      "subsample_rms_m": 0.17879936385750714,
+      "full_trajectory_rms_m": 0.17918848712971064
+    },
+    "HeadSide": {
+      "body": "Hub",
+      "offset_m": [
+        1.3708070091768256, -1.2577935403364375, -0.8502418602900438
+      ],
+      "subsample_rms_m": 0.11174533675040293,
+      "full_trajectory_rms_m": 0.10361157983247564
+    },
+    "HeadTop": {
+      "body": "Hub",
+      "offset_m": [
+        1.3338181322239442, -1.2642877372581267, -0.9170781599290151
+      ],
+      "subsample_rms_m": 0.17715993903460367,
+      "full_trajectory_rms_m": 0.14377569920119862
+    },
+    "LAnkleOut": {
+      "body": "tibia_l",
+      "offset_m": [-0.9060633617824202, -0.6740486683998275, 1.162975310913287],
+      "subsample_rms_m": 0.12627476461421347,
+      "full_trajectory_rms_m": 0.08097977061645725
+    },
+    "LElbowOut": {
+      "body": "LS",
+      "offset_m": [
+        -0.09326289736088116, 1.0943903680637819, -1.3199739826393149
+      ],
+      "subsample_rms_m": 0.14442854915790537,
+      "full_trajectory_rms_m": 0.18454629978391243
+    },
+    "LKneeOut": {
+      "body": "femur_l",
+      "offset_m": [0.7467560680655949, -0.8695099078941381, 0.5102376712556408],
+      "subsample_rms_m": 0.1383743325363691,
+      "full_trajectory_rms_m": 0.08667302696825989
+    },
+    "LShoulderBack": {
+      "body": "LScap",
+      "offset_m": [
+        1.4110862111310412, -1.2064026553250145, -0.38187374637782334
+      ],
+      "subsample_rms_m": 0.1661340997356663,
+      "full_trajectory_rms_m": 0.16567037475014837
+    },
+    "LShoulderTop": {
+      "body": "LScap",
+      "offset_m": [
+        1.4667974277315659, -1.1675537380767835, -0.4401676278064051
+      ],
+      "subsample_rms_m": 0.12253529258293028,
+      "full_trajectory_rms_m": 0.1349510583025405
+    },
+    "LToeIn": {
+      "body": "calcn_l",
+      "offset_m": [-0.485764583434531, 1.2628247678761346, -1.633774228814061],
+      "subsample_rms_m": 0.07833018154004227,
+      "full_trajectory_rms_m": 0.08178592509317051
+    },
+    "LToeOut": {
+      "body": "calcn_l",
+      "offset_m": [-0.5178289153717646, 1.258632916284989, -1.6831634737712555],
+      "subsample_rms_m": 0.0923697547985628,
+      "full_trajectory_rms_m": 0.08762358764828794
+    },
+    "LUArmHigh": {
+      "body": "LS",
+      "offset_m": [-0.10316343381028782, 1.0479369628084088, -1.46058613941196],
+      "subsample_rms_m": 0.14067954527027718,
+      "full_trajectory_rms_m": 0.1703144717622275
+    },
+    "LWristTop": {
+      "body": "LF",
+      "offset_m": [
+        0.9507633295908974, -1.1475554014047282, -0.9691620529319664
+      ],
+      "subsample_rms_m": 0.1407418787889651,
+      "full_trajectory_rms_m": 0.15743284342412855
+    },
+    "Marker_2:2:1": {
+      "body": "Clubhead",
+      "offset_m": [-1.5599726715476556, 0.8810909101190725, -1.71664332697632],
+      "subsample_rms_m": 0.10784577509310571,
+      "full_trajectory_rms_m": 0.08920374944645679
+    },
+    "Marker_2:2:2": {
+      "body": "Clubhead",
+      "offset_m": [-1.5887121761185328, 0.8605471592626956, -1.77932524587335],
+      "subsample_rms_m": 0.11999173113775008,
+      "full_trajectory_rms_m": 0.08894449590137452
+    },
+    "Marker_2:2:3": {
+      "body": "Clubhead",
+      "offset_m": [
+        -1.5991468814810097, 0.8351229152190444, -1.7639672288189963
+      ],
+      "subsample_rms_m": 0.12053809725538557,
+      "full_trajectory_rms_m": 0.08651588062210934
+    },
+    "Marker_3:3:1": {
+      "body": "Clubhead",
+      "offset_m": [
+        -0.9938835630669247, 1.0218523193404174, -1.4938756173106624
+      ],
+      "subsample_rms_m": 0.0816119831228116,
+      "full_trajectory_rms_m": 0.06617163758181993
+    },
+    "Marker_3:3:2": {
+      "body": "Clubhead",
+      "offset_m": [-0.9383874657422525, 1.013194764784375, -1.4688188702878895],
+      "subsample_rms_m": 0.09915067764709333,
+      "full_trajectory_rms_m": 0.08329860479183995
+    },
+    "Marker_3:3:3": {
+      "body": "Clubhead",
+      "offset_m": [
+        -0.9029048266904772, 1.0380024453359231, -1.4558346807734357
+      ],
+      "subsample_rms_m": 0.0949549294290513,
+      "full_trajectory_rms_m": 0.0812994065878621
+    },
+    "RAnkleOut": {
+      "body": "tibia_r",
+      "offset_m": [1.0174299178203974, 0.5167823950423857, 0.6225072476228507],
+      "subsample_rms_m": 0.21255082904115943,
+      "full_trajectory_rms_m": 0.178877473296343
+    },
+    "RElbowOut": {
+      "body": "RS",
+      "offset_m": [
+        -0.45183973810892636, -0.9706427470062134, -1.181217737534366
+      ],
+      "subsample_rms_m": 0.2009671029673255,
+      "full_trajectory_rms_m": 0.18269746238890008
+    },
+    "RKneeOut": {
+      "body": "femur_r",
+      "offset_m": [
+        0.34523440677718836, -0.8705415655498835, 0.6779453309417433
+      ],
+      "subsample_rms_m": 0.1489651239310967,
+      "full_trajectory_rms_m": 0.14633736408869133
+    },
+    "RShoulderBack": {
+      "body": "RScap",
+      "offset_m": [
+        1.394952922552645, -1.0989234324051473, -0.11867244245269326
+      ],
+      "subsample_rms_m": 0.15782972858536426,
+      "full_trajectory_rms_m": 0.1422448515937996
+    },
+    "RShoulderTop": {
+      "body": "RScap",
+      "offset_m": [1.428194390654408, -1.2696026957404518, -0.155714567141997],
+      "subsample_rms_m": 0.12950454479896065,
+      "full_trajectory_rms_m": 0.12670222254404415
+    },
+    "RToeIn": {
+      "body": "calcn_r",
+      "offset_m": [0.3673928429827532, 0.4489501465772994, 1.6584430582756247],
+      "subsample_rms_m": 0.08796034479263606,
+      "full_trajectory_rms_m": 0.07229146351586954
+    },
+    "RToeOut": {
+      "body": "calcn_r",
+      "offset_m": [0.3402109550936941, 0.3894616734469809, 1.6707751441610132],
+      "subsample_rms_m": 0.11469757831761666,
+      "full_trajectory_rms_m": 0.10208640811406573
+    },
+    "RUArmHigh": {
+      "body": "RS",
+      "offset_m": [
+        -0.6040771751771222, -0.9892685071018715, -1.1964408452023736
+      ],
+      "subsample_rms_m": 0.18990378058003576,
+      "full_trajectory_rms_m": 0.22505267171098806
+    },
+    "RWristTop": {
+      "body": "RF",
+      "offset_m": [
+        -0.9151578083561269, -1.4423670305656477, -0.4527446598740574
+      ],
+      "subsample_rms_m": 0.17749090897558165,
+      "full_trajectory_rms_m": 0.19392753304775712
+    },
+    "WaistLBack": {
+      "body": "Hip",
+      "offset_m": [
+        0.9369994780300647, 0.7943584234129661, -0.35627265779490447
+      ],
+      "subsample_rms_m": 0.12608374708950243,
+      "full_trajectory_rms_m": 0.11290864253567624
+    },
+    "WaistLeft": {
+      "body": "Hip",
+      "offset_m": [
+        0.9037010915251898, 0.8477638974531512, -0.47791409242421257
+      ],
+      "subsample_rms_m": 0.1758586704002716,
+      "full_trajectory_rms_m": 0.1505005949483619
+    },
+    "WaistRBack": {
+      "body": "Hip",
+      "offset_m": [
+        0.9506734350639174, 0.6783591888901265, -0.32411342593007286
+      ],
+      "subsample_rms_m": 0.1081336092852406,
+      "full_trajectory_rms_m": 0.12621422849113323
+    },
+    "WaistRight": {
+      "body": "Hip",
+      "offset_m": [
+        0.9459608987296811, 0.6032101619116887, -0.42261332015066333
+      ],
+      "subsample_rms_m": 0.19320150207347678,
+      "full_trajectory_rms_m": 0.1982674086629648
+    }
+  }
+}

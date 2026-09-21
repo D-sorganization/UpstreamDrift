@@ -60,12 +60,13 @@ class ProvenanceRecord:
     computed_at: datetime
     engine: str
     run_id: str
+    citation: str | None = None
 
     def __post_init__(self) -> None:
         _validate_record(self)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        data: dict[str, Any] = {
             "formula": self.formula,
             "inputs": list(self.inputs),
             "source": self.source,
@@ -73,6 +74,9 @@ class ProvenanceRecord:
             "engine": self.engine,
             "run_id": self.run_id,
         }
+        if self.citation is not None:
+            data["citation"] = self.citation
+        return data
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> ProvenanceRecord:
@@ -89,6 +93,11 @@ class ProvenanceRecord:
                 computed_at=_parse_dt(payload["computed_at"]),
                 engine=str(payload["engine"]),
                 run_id=str(payload["run_id"]),
+                citation=(
+                    str(payload["citation"])
+                    if payload.get("citation") is not None
+                    else None
+                ),
             )
         except KeyError as exc:
             raise ProvenanceError(
@@ -162,13 +171,20 @@ class ProvenanceValue:
         else:
             inputs_line = "(no inputs)"
         unit = f" {self.display_units}" if self.display_units else ""
-        return (
-            f"value: {self.value}{unit}\n"
-            f"formula: {self.record.formula}\n"
-            f"{inputs_line}\n"
-            f"source: {self.record.source}\n"
-            f"computed at: {self.record.computed_at.isoformat()}"
+        lines = [
+            f"value: {self.value}{unit}",
+            f"formula: {self.record.formula}",
+        ]
+        if self.record.citation:
+            lines.append(f"citation: {self.record.citation}")
+        lines.extend(
+            [
+                inputs_line,
+                f"source: {self.record.source}",
+                f"computed at: {self.record.computed_at.isoformat()}",
+            ]
         )
+        return "\n".join(lines)
 
 
 __all__ = ["ProvenanceError", "ProvenanceRecord", "ProvenanceValue"]

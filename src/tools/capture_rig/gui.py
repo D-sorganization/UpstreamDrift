@@ -566,6 +566,10 @@ class CaptureRigWidget(QWidget):
         ("load", "Load session"),
     )
 
+    def open_in_inspect_targets(self) -> None:
+        """Trigger the Inspect Targets handoff action."""
+        self.journey_actions.trigger("inspect_targets")
+
     def __init__(
         self, parent: QWidget | None = None, *, settings: QSettings | None = None
     ) -> None:

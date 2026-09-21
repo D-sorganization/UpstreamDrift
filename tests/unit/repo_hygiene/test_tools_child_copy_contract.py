@@ -237,6 +237,16 @@ def _deferred_entries() -> frozenset[str]:
     )
 
 
+def _split_entries() -> frozenset[str]:
+    """Return the top-level shared entries with split seam rulings."""
+    if not _SEAM_RULINGS.is_file():
+        return frozenset()
+    rulings = json.loads(_SEAM_RULINGS.read_text(encoding="utf-8")).get("rulings", {})
+    return frozenset(
+        name for name, entry in rulings.items() if entry.get("ruling") == "split"
+    )
+
+
 def _is_ud_canonical(relative: Path) -> bool:
     """Return whether ``relative`` falls under a ud-canonical ruling."""
     parts = relative.as_posix().split("/")
@@ -249,6 +259,13 @@ def _is_deferred(relative: Path) -> bool:
     parts = relative.as_posix().split("/")
     candidate = parts[0] if len(parts) > 1 else relative.as_posix()
     return candidate in _deferred_entries()
+
+
+def _is_split_ud_only(relative: Path, tools_paths: set[str]) -> bool:
+    """Return whether ``relative`` is a UD-only file in a split package."""
+    parts = relative.as_posix().split("/")
+    candidate = parts[0] if len(parts) > 1 else relative.as_posix()
+    return candidate in _split_entries() and relative.as_posix() not in tools_paths
 
 
 def _normalise_seam_imports(text: str) -> str:
@@ -312,6 +329,7 @@ def _direct_tools_edit_offenders(
         and not _converges_on_canonical(relative)
         and not _is_ud_canonical(relative)
         and not _is_deferred(relative)
+        and not _is_split_ud_only(relative, tools_paths)
     ]
 
 
@@ -730,3 +748,13 @@ def test_deferred_clusters_may_be_edited_here() -> None:
     assert deferred, "fixture assumption: some entries are deferred"
     assert _is_deferred(Path("__init__.py"))
     assert _is_deferred(Path("config/__init__.py"))
+
+
+def test_split_clusters_allow_editing_ud_only_files() -> None:
+    """In split packages, files absent from Tools are UD-only and editable."""
+    split = _split_entries()
+
+    assert "ui" in split
+    assert _is_split_ud_only(Path("ui/toast.py"), set())
+    assert not _is_split_ud_only(Path("ui/toast.py"), {"ui/toast.py"})
+    assert not _is_split_ud_only(Path("nonexistent_pkg/toast.py"), set())

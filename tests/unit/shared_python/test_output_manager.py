@@ -130,7 +130,7 @@ def test_output_manager_convenience_functions(tmp_path, monkeypatch) -> None:
     # We can test them by using unittest.mock.patch as a context manager.
     from unittest.mock import MagicMock, patch
 
-    import shared.python.output_manager as om_module
+    import src.shared.python.data_io.output_manager as om_module
 
     mock_manager_instance = MagicMock()
     mock_manager_instance.save_simulation_results.return_value = Path("mock_path.csv")

@@ -17,6 +17,7 @@ from PyQt6.QtGui import QDesktopServices, QKeySequence, QShortcut
 from PyQt6.QtWidgets import QMessageBox, QDialog, QWidget
 
 from src.launchers import wsl_probe
+from src.launchers.help_menu import show_keyboard_shortcuts_modal
 from src.launchers.launcher_constants import (
     AI_AVAILABLE,
     HELP_SYSTEM_AVAILABLE,
@@ -95,18 +96,22 @@ class DialogsManager:
         """Set up global keyboard shortcuts."""
         # F1 for help dialog (User Manual)
         shortcut_f1 = QShortcut(QKeySequence("F1"), self.launcher)
+        shortcut_f1.setObjectName("User Manual")
         shortcut_f1.activated.connect(self._show_help_dialog)
 
-        # Ctrl+? for shortcuts overlay
+        # Ctrl+? for shortcuts modal
         shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self.launcher)
-        shortcut_help.activated.connect(self._show_shortcuts_overlay)
+        shortcut_help.setObjectName("Keyboard Shortcuts")
+        shortcut_help.activated.connect(self._show_shortcuts_modal)
 
         # Ctrl+, for preferences
         shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self.launcher)
+        shortcut_prefs.setObjectName("Preferences")
         shortcut_prefs.activated.connect(self._show_preferences)
 
         # Ctrl+Q to quit
         shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self.launcher)
+        shortcut_quit.setObjectName("Quit Application")
         shortcut_quit.activated.connect(self.close)
 
         # Sidekick feature shortcuts (Tools #2882/#2883/#2884/#2888/#2889).
@@ -119,6 +124,7 @@ class DialogsManager:
                 if not entry.availability_probe():
                     continue
                 sc = QShortcut(QKeySequence(entry.shortcut), self.launcher)
+                sc.setObjectName(entry.label.replace("&", "").strip())
                 sc.activated.connect(lambda e=entry: e.factory(self.launcher))
         except ImportError as exc:  # pragma: no cover — guard import path
             logger.debug("feature_menu not importable: %s", exc)
@@ -184,14 +190,13 @@ class DialogsManager:
             '<p><a href="https://github.com/dieterolson/UpstreamDrift">GitHub Repository</a></p>',
         )
 
-    def _show_shortcuts_overlay(self) -> None:
-        """Show the keyboard shortcuts overlay."""
-        if UI_COMPONENTS_AVAILABLE:
-            from src.shared.python.ui.shortcuts_overlay import ShortcutsOverlay
+    def _show_shortcuts_modal(self) -> None:
+        """Show the live keyboard shortcuts modal."""
+        show_keyboard_shortcuts_modal(self.launcher)
 
-            overlay = ShortcutsOverlay(self)
-            overlay.show()
-            overlay.setFocus()
+    def _show_shortcuts_overlay(self) -> None:
+        """Show the live keyboard shortcuts dialog."""
+        self._show_shortcuts_modal()
 
     def _show_preferences(self) -> None:
         """Show the preferences in the unified settings tab."""

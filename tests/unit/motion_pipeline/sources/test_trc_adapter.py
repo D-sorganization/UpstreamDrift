@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+from src.shared.python.motion_pipeline.contracts import MarkerTrajectory
+from src.shared.python.motion_pipeline.sources import trc_adapter
 from src.shared.python.motion_pipeline.sources.base import AdapterContractError
 from src.shared.python.motion_pipeline.sources.trc_adapter import TRCAdapter
 
@@ -47,6 +49,7 @@ def test_trc_metadata(tmp_path: Path) -> None:
 
 def test_trc_load_converts_mm_to_meters(tmp_path: Path) -> None:
     traj = TRCAdapter().load_checked(_write_trc(tmp_path))
+    assert isinstance(traj, MarkerTrajectory)
     assert traj.num_frames == 3
     # 1000 mm -> 1.0 m
     head_first = traj.frames[0].markers["HEAD"]
@@ -58,13 +61,12 @@ def test_trc_load_converts_mm_to_meters(tmp_path: Path) -> None:
 def test_trc_load_converts_cm_to_meters_python_fallback(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(
-        "src.shared.python.motion_pipeline.sources.trc_adapter._HAS_RUST", False
-    )
+    monkeypatch.setattr(trc_adapter, "_HAS_RUST", False)
     p = _write_trc(tmp_path)
     p.write_text(_TRC.replace("\tmm\t", "\tcm\t"), encoding="utf-8")
 
     traj = TRCAdapter().load_checked(p)
+    assert isinstance(traj, MarkerTrajectory)
 
     head_first = traj.frames[0].markers["HEAD"]
     assert head_first.x == pytest.approx(10.0)

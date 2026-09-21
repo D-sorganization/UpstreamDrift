@@ -1,6 +1,8 @@
 """Video Analyzer GUI component."""
 
-from PyQt6.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QLabel, QMainWindow, QVBoxLayout, QWidget
+
+from src.launchers.help_menu import build_help_menu
 
 
 class VideoAnalyzerWindow(QMainWindow):
@@ -14,6 +16,16 @@ class VideoAnalyzerWindow(QMainWindow):
         layout = QVBoxLayout(widget)
         layout.addWidget(QLabel("Video Analyzer (GUI placeholder)"))
         self.setCentralWidget(widget)
+        menubar = self.menuBar()
+        assert menubar is not None
+        build_help_menu(
+            menubar,
+            self,
+            doc_target=(
+                "Video Analysis Tutorial",
+                "docs/tutorials/content/04_video_analysis.md",
+            ),
+        )
 
 
 def get_dockable_ui(parent=None) -> VideoAnalyzerWindow:

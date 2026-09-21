@@ -741,3 +741,22 @@ def test_resizing_scroll_area_triggers_rebuild(launcher) -> None:
 
     # Verify that the launcher's _rebuild_grid method was called
     launcher._rebuild_grid.assert_called_once()
+
+
+@pytest.mark.unit
+def test_search_and_zoom_shortcuts_have_object_names(launcher) -> None:
+    """Verify search and zoom shortcuts have descriptive objectName set (#8902)."""
+    from PyQt6.QtGui import QShortcut
+
+    launcher._setup_search_shortcuts()
+    launcher._setup_zoom_shortcuts()
+
+    shortcuts = launcher.findChildren(QShortcut)
+    names = {sc.objectName() for sc in shortcuts}
+    assert "Search Models" in names
+    assert "Clear Search" in names
+    assert "Zoom In" in names
+    assert "Zoom Out" in names
+    for sc in shortcuts:
+        assert sc.objectName()
+        assert sc.objectName() != "(shortcut)"

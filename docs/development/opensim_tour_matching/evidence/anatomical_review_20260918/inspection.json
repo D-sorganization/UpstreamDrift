@@ -1,0 +1,53 @@
+{
+  "source_commit": "6914383f5",
+  "model_path": "docs/development/opensim_tour_matching/evidence/os7_moco_g1/golf_humanoid_scaled_tour_markers_moco.osim",
+  "model_sha256": "051d61eab9b72912105a308145392dd5c6c30faeaf7979b460c2ea485e9b0a8d",
+  "bodies": 23,
+  "coordinates": 39,
+  "club_attached_geometry_count": 0,
+  "club_mass_kg": "0.32000000000000001",
+  "arm_meshes": {
+    "humerus_r": [
+      {
+        "file": "humerus_rv.vtp",
+        "scale": "1 1 1"
+      }
+    ],
+    "humerus_l": [
+      {
+        "file": "humerus_lv.vtp",
+        "scale": "1 1 1"
+      }
+    ],
+    "ulna_r": [
+      {
+        "file": "ulna_rv.vtp",
+        "scale": "1 1 1"
+      }
+    ],
+    "radius_r": [
+      {
+        "file": "radius_rv.vtp",
+        "scale": "1 1 1"
+      }
+    ]
+  },
+  "observations": [
+    "GUI shows disconnected/extended arm meshes and no visible club.",
+    "apply_segment_scaling changes joint frame translations only; does not update meshes, inertia or muscle geometry.",
+    "Orientation error cause remains unverified: camera, registration, pose and offsets must be isolated."
+  ],
+  "scale_factors": {
+    "femur_r": 0.9922237590782061,
+    "femur_l": 1.0258735775039245,
+    "tibia_r": 0.9673512421353035,
+    "tibia_l": 0.9694478920768417,
+    "calcn_r": 1.0008261755860735,
+    "calcn_l": 1.055418960197093,
+    "humerus_r": 1.4567005142180642,
+    "humerus_l": 1.243623153053832,
+    "radius_r": 1.1641304709089288,
+    "radius_l": 1.1547149770999696,
+    "torso": 1.0418649386853418
+  }
+}

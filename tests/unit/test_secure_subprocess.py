@@ -167,6 +167,9 @@ class TestSecureSubprocess(unittest.TestCase):
         self.assertEqual(result, mock_process)
         mock_popen.assert_called_once()
 
+    @unittest.skipUnless(
+        sys.platform == "win32", "Windows creationflags only apply on Windows"
+    )
     @patch("src.shared.python.security.secure_subprocess.subprocess.Popen")
     def test_secure_popen_hides_windows_by_default_on_windows(self, mock_popen) -> None:
         """Background Python probes must not flash console windows on Windows."""
@@ -183,6 +186,9 @@ class TestSecureSubprocess(unittest.TestCase):
         kwargs = mock_popen.call_args.kwargs
         self.assertEqual(kwargs["creationflags"], 0x08000000)
 
+    @unittest.skipUnless(
+        sys.platform == "win32", "Windows creationflags only apply on Windows"
+    )
     @patch("src.shared.python.security.secure_subprocess.subprocess.Popen")
     def test_secure_popen_preserves_explicit_creationflags(self, mock_popen) -> None:
         """Interactive launch paths can still request their own console flags."""
@@ -223,6 +229,9 @@ class TestSecureSubprocess(unittest.TestCase):
         self.assertEqual(result, mock_result)
         mock_run.assert_called_once()
 
+    @unittest.skipUnless(
+        sys.platform == "win32", "Windows creationflags only apply on Windows"
+    )
     @patch("src.shared.python.security.secure_subprocess.subprocess.run")
     def test_secure_run_hides_windows_by_default_on_windows(self, mock_run) -> None:
         """Synchronous probes such as Docker checks should also stay hidden."""

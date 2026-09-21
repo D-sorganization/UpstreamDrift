@@ -7,6 +7,7 @@ analysis system. Extracted from statistical_analysis.py for modularity.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -34,6 +35,26 @@ class MethodCitation:
     title: str
     doi: str | None = None
     notes: str | None = None
+
+    def format_citation(self) -> str:
+        """Return formatted academic citation string with DOI if present."""
+        parts = [f"{self.authors} ({self.year}).", f'"{self.title}".']
+        if self.doi:
+            parts.append(f"DOI: {self.doi}")
+        if self.notes:
+            parts.append(f"({self.notes})")
+        return " ".join(parts)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return JSON-serializable dictionary representation."""
+        return {
+            "name": self.name,
+            "authors": self.authors,
+            "year": self.year,
+            "title": self.title,
+            "doi": self.doi,
+            "notes": self.notes,
+        }
 
 
 # ---------------------------------------------------------------------------

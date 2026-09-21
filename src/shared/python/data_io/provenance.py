@@ -30,6 +30,7 @@ with open('results.csv', 'w') as f:
 
 import hashlib
 import subprocess
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -60,6 +61,10 @@ class ProvenanceInfo:
     git_branch: str | None = None
     git_is_dirty: bool = False  # True if uncommitted changes exist
 
+    # Engine & Run identity (#8820)
+    engine_name: str | None = None
+    run_id: str | None = None
+
     # Model metadata
     model_file_path: str | None = None
     model_file_hash: str | None = None  # SHA256 of model file
@@ -71,36 +76,74 @@ class ProvenanceInfo:
     python_version: str | None = None
     numpy_version: str | None = None
     mujoco_version: str | None = None
+    drake_version: str | None = None
+    pinocchio_version: str | None = None
+
+    @staticmethod
+    def _get_environment_versions() -> tuple[
+        str, str, str | None, str | None, str | None
+    ]:
+        """Detect versions of Python, NumPy, MuJoCo, Drake, and Pinocchio."""
+        import sys
+
+        python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        numpy_version = str(getattr(np, "__version__", "unknown"))
+
+        def _detect_version(
+            module_name: str, package_names: tuple[str, ...]
+        ) -> str | None:
+            if module_name in sys.modules:
+                mod = sys.modules[module_name]
+                return (
+                    str(getattr(mod, "__version__", "unknown"))
+                    if mod is not None
+                    else None
+                )
+            from importlib.metadata import PackageNotFoundError, version
+
+            for pkg in package_names:
+                try:
+                    return version(pkg)
+                except (PackageNotFoundError, ImportError):
+                    continue
+            return None
+
+        mujoco_version = _detect_version("mujoco", ("mujoco",))
+        drake_version = _detect_version("pydrake", ("drake",))
+        pinocchio_version = _detect_version("pinocchio", ("pin",))
+
+        return (
+            python_version,
+            numpy_version,
+            mujoco_version,
+            drake_version,
+            pinocchio_version,
+        )
 
     @classmethod
     def capture(
         cls,
         model_path: Path | str | None = None,
         parameters: dict[str, Any] | None = None,
+        engine_name: str | None = None,
+        run_id: str | None = None,
     ) -> "ProvenanceInfo":
-        """Automaticall
-        y capture provenance information.
+        """Automatically capture provenance information.
 
-                Args:
-                    model_path: Optional path to model file (URDF, MJCF, etc.)
-                    parameters: Optional analysis parameters to record
+        Args:
+            model_path: Optional path to model file (URDF, MJCF, etc.)
+            parameters: Optional analysis parameters to record
+            engine_name: Optional physics engine name (e.g. MuJoCo, Drake, Pinocchio)
+            run_id: Optional unique identifier for this simulation run
 
-                Returns:
-                    ProvenanceInfo with automatically captured metadata
-
-                Example:
-                    >>> provenance = ProvenanceInfo.capture(
-                    ...     model_path="models/humanoid.xml",
-                    ...     parameters={"dt": 0.001, "integrator": "RK4"}
-                    ... )
+        Returns:
+            ProvenanceInfo with automatically captured metadata
         """
         now_utc = datetime.now(timezone.utc)  # noqa: UP017 (mypy compatibility)
         now_local = datetime.now().astimezone()
 
-        # Git information (best effort)
         git_sha, git_branch, git_dirty = cls._get_git_info()
 
-        # Model file hash
         model_hash = None
         model_path_str = None
         if model_path is not None:
@@ -109,26 +152,7 @@ class ProvenanceInfo:
                 model_hash = cls._hash_file(model_path_obj)
                 model_path_str = str(model_path_obj)
 
-        # Environment versions
-        import sys
-
-        python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-        numpy_version = str(getattr(np, "__version__", "unknown"))
-
-        # MuJoCo version (if available)
-        mujoco_version = None
-        if "mujoco" in sys.modules:
-            mod = sys.modules["mujoco"]
-            mujoco_version = (
-                str(getattr(mod, "__version__", "unknown")) if mod is not None else None
-            )
-        else:
-            try:
-                from importlib.metadata import PackageNotFoundError, version
-
-                mujoco_version = version("mujoco")
-            except (PackageNotFoundError, ImportError):
-                pass
+        py_v, np_v, mj_v, dk_v, pin_v = cls._get_environment_versions()
 
         return cls(
             timestamp_utc=now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -136,12 +160,16 @@ class ProvenanceInfo:
             git_commit_sha=git_sha,
             git_branch=git_branch,
             git_is_dirty=git_dirty,
+            engine_name=engine_name,
+            run_id=run_id or str(uuid.uuid4()),
             model_file_path=model_path_str,
             model_file_hash=model_hash,
             parameters=parameters or {},
-            python_version=python_version,
-            numpy_version=numpy_version,
-            mujoco_version=mujoco_version,
+            python_version=py_v,
+            numpy_version=np_v,
+            mujoco_version=mj_v,
+            drake_version=dk_v,
+            pinocchio_version=pin_v,
         )
 
     @staticmethod
@@ -230,6 +258,12 @@ class ProvenanceInfo:
         lines.append(f"# Generated: {self.timestamp_utc} (UTC)")
         lines.append(f"# Local time: {self.timestamp_local}")
 
+        # Engine & Run identity (#8820)
+        if self.engine_name:
+            lines.append(f"# Engine: {self.engine_name}")
+        if self.run_id:
+            lines.append(f"# Run ID: {self.run_id}")
+
         # Model information
         if self.model_file_path:
             lines.append(f"# Model file: {self.model_file_path}")
@@ -252,6 +286,10 @@ class ProvenanceInfo:
         lines.append(f"#   NumPy: {self.numpy_version}")
         if self.mujoco_version:
             lines.append(f"#   MuJoCo: {self.mujoco_version}")
+        if self.drake_version:
+            lines.append(f"#   Drake: {self.drake_version}")
+        if self.pinocchio_version:
+            lines.append(f"#   Pinocchio: {self.pinocchio_version}")
 
         # Reproducibility warning if git is dirty
         if self.git_is_dirty:
@@ -309,6 +347,8 @@ def add_provenance_to_csv(
     provenance: ProvenanceInfo | None = None,
     model_path: Path | str | None = None,
     parameters: dict[str, Any] | None = None,
+    engine_name: str | None = None,
+    run_id: str | None = None,
 ) -> ProvenanceInfo:
     """Prepend provenance header to existing CSV file.
 
@@ -317,6 +357,8 @@ def add_provenance_to_csv(
         provenance: Optional pre-captured provenance (if None, auto-capture)
         model_path: Optional model path (used if provenance is None)
         parameters: Optional parameters (used if provenance is None)
+        engine_name: Optional engine name (used if provenance is None)
+        run_id: Optional run ID (used if provenance is None)
 
     Returns:
         ProvenanceInfo that was added
@@ -330,7 +372,10 @@ def add_provenance_to_csv(
         raise ValueError("filepath must be provided")
     if provenance is None:
         provenance = ProvenanceInfo.capture(
-            model_path=model_path, parameters=parameters
+            model_path=model_path,
+            parameters=parameters,
+            engine_name=engine_name,
+            run_id=run_id,
         )
 
     # Read existing file

@@ -40,7 +40,8 @@ from src.shared.python.physics.swing_state_providers import (
     SwingStateProvider,
     available_swing_state_providers,
 )
-from src.shared.python.ui import HoverCopyTextBrowser
+from src.launchers.help_menu import build_help_menu
+from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
 from src.shared.python.ui.provenance_value import ProvenanceValueLabel
 from src.shared.python.ux.provenance import ProvenanceRecord, ProvenanceValue
@@ -421,6 +422,16 @@ class SwingFlightWindow(QMainWindow):
         status = QStatusBar()
         self.setStatusBar(status)
         status.showMessage("Configure swing parameters and run the pipeline")
+        menubar = self.menuBar()
+        assert menubar is not None
+        build_help_menu(
+            menubar,
+            self,
+            doc_target=(
+                "Ball Flight Model Documentation",
+                "docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md",
+            ),
+        )
 
     def closeEvent(self, event: Any) -> None:
         self._widget.cleanup()

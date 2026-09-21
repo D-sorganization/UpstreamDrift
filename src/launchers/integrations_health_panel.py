@@ -51,6 +51,15 @@ _STATUS_COLOURS: dict[str, str] = {
     "unknown": "#cdd6f4",  # text
 }
 
+_STATUS_TEXT_COLOURS: dict[str, str] = {
+    "healthy": "#11111b",
+    "configured": "#11111b",
+    "warning": "#11111b",
+    "error": "#11111b",
+    "unconfigured": "#ffffff",
+    "unknown": "#11111b",
+}
+
 _COLUMNS = ("Kind", "Name", "Status", "Last Checked", "Notes")
 
 
@@ -104,9 +113,9 @@ class IntegrationsHealthPanel(QWidget):
         # Table
         self._table = QTableWidget(0, len(_COLUMNS))
         self._table.setHorizontalHeaderLabels(list(_COLUMNS))
-        self._table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch
-        )
+        header = self._table.horizontalHeader()
+        if header is not None:
+            header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self._table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self._table.setAlternatingRowColors(True)
@@ -149,22 +158,41 @@ class IntegrationsHealthPanel(QWidget):
             self._records = self._status_provider()
         except Exception as exc:  # noqa: BLE001
             logger.warning("collect_all raised unexpectedly: %s", exc)
-            self._records = []
+            self._status_label.setText("Probe failed — see logs")
+            self._refresh_btn.setEnabled(True)
+            return
 
         self._populate_table(self._records)
-
-        healthy = sum(1 for r in self._records if r.status in ("healthy", "configured"))
-        total = len(self._records)
-        self._status_label.setText(f"{healthy}/{total} OK")
+        self._update_status_label()
         self._refresh_btn.setEnabled(True)
 
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
 
+    def _update_status_label(self) -> None:
+        """Compute and display healthy/total counts in the status label."""
+        healthy = sum(1 for r in self._records if r.status in ("healthy", "configured"))
+        total = len(self._records)
+        self._status_label.setText(f"{healthy}/{total} OK")
+
     def _populate_table(self, records: list[IntegrationRecord]) -> None:
         """Replace table contents with *records*."""
+        self._table.clearSpans()
         self._table.setRowCount(0)
+
+        if not records:
+            self._table.insertRow(0)
+            item = QTableWidgetItem(
+                "No integrations configured yet. Add one in Settings → MCP Servers."
+            )
+            item.setTextAlignment(
+                int(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter)
+            )
+            self._table.setItem(0, 0, item)
+            self._table.setSpan(0, 0, 1, len(_COLUMNS))
+            return
+
         for row_idx, rec in enumerate(records):
             self._table.insertRow(row_idx)
             cells = [
@@ -179,6 +207,7 @@ class IntegrationsHealthPanel(QWidget):
                 rec.detail or rec.last_error or "",
             ]
             colour = QColor(_STATUS_COLOURS.get(rec.status, "#cdd6f4"))
+            text_colour = QColor(_STATUS_TEXT_COLOURS.get(rec.status, "#11111b"))
             for col_idx, text in enumerate(cells):
                 item = QTableWidgetItem(text)
                 item.setTextAlignment(
@@ -186,6 +215,7 @@ class IntegrationsHealthPanel(QWidget):
                 )
                 if col_idx == 2:  # Status column — colour the cell
                     item.setBackground(colour)
+                    item.setForeground(text_colour)
                 self._table.setItem(row_idx, col_idx, item)
 
     def _copy_diagnostics(self) -> None:
@@ -194,14 +224,19 @@ class IntegrationsHealthPanel(QWidget):
             md = copy_diagnostics(self._records)
         except Exception as exc:  # noqa: BLE001
             logger.warning("copy_diagnostics failed: %s", exc)
+            self._status_label.setText("Copy failed — see logs")
+            QTimer.singleShot(2000, self._update_status_label)
             return
 
         clipboard: QClipboard | None = QApplication.clipboard()
         if clipboard is not None:
             clipboard.setText(md)
             self._status_label.setText("Copied!")
+            QTimer.singleShot(2000, self._update_status_label)
         else:
             logger.warning("No clipboard available")
+            self._status_label.setText("Copy failed — see logs")
+            QTimer.singleShot(2000, self._update_status_label)
 
 
 __all__ = ["IntegrationsHealthPanel"]

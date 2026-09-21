@@ -20,6 +20,19 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+_WINDOWS_DEPENDENCIES: dict[str, tuple[str, str, bool]] = {
+    "numpy": ("NumPy", ">=1.26.4", False),
+    "scipy": ("SciPy", ">=1.13.1", False),
+    "mujoco": ("MuJoCo", ">=3.6.0", False),
+    "PyQt6": ("PyQt6", ">=6.5.0", False),
+    "matplotlib": ("Matplotlib", ">=3.10.8", False),
+    "pandas": ("Pandas", ">=2.0.0", False),
+    "pydrake": ("Drake", ">=1.22.0", True),
+    "pinocchio": ("Pinocchio", ">=2.6.0", True),
+    "opensim": ("OpenSim", ">=4.4.0", True),
+    "myosuite": ("MyoSuite", ">=2.0.0", True),
+}
+
 _RUNTIME_DEPENDENCIES = {
     "numpy": ">=1.26.4",
     "scipy": ">=1.13.1",
@@ -288,6 +301,56 @@ def check_wsl_dependencies_report() -> RuntimeDependencyReport:
         check_results=build_dependency_check_results(
             parse_dependency_output(probe.stdout.strip())
         ),
+    )
+
+
+def check_windows_dependencies_report() -> RuntimeDependencyReport:
+    """Probe installed Python dependencies in the native Windows host environment."""
+    import importlib.metadata
+    import sys
+
+    check_results: list[dict[str, Any]] = []
+    for import_name, (name, req, is_opt) in _WINDOWS_DEPENDENCIES.items():
+        try:
+            __import__(import_name)
+            try:
+                v = importlib.metadata.version(import_name)
+            except importlib.metadata.PackageNotFoundError:
+                mod = sys.modules.get(import_name)
+                v = getattr(mod, "__version__", None) or getattr(
+                    mod, "version", "Unknown"
+                )
+
+            is_ok = compare_version_strings(str(v), req)
+            status = "ok" if is_ok else "error"
+            check_results.append(
+                {"name": name, "required": req, "installed": str(v), "status": status}
+            )
+        except ImportError:
+            if is_opt:
+                check_results.append(
+                    {
+                        "name": name,
+                        "required": req,
+                        "installed": "Missing (Use Docker/WSL)",
+                        "status": "warn",
+                    }
+                )
+            else:
+                check_results.append(
+                    {
+                        "name": name,
+                        "required": req,
+                        "installed": "Missing",
+                        "status": "error",
+                    }
+                )
+
+    return RuntimeDependencyReport(
+        dialog_title="Windows Dependency Check",
+        table_title="Windows Environment",
+        environment_name="Native Windows",
+        check_results=check_results,
     )
 
 

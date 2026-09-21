@@ -1,0 +1,46 @@
+{
+  "issue": "#10099",
+  "run": "anthro_iron",
+  "club": {
+    "grip_mass_kg": 0.05,
+    "head_mass_kg": 0.268,
+    "length_m": 0.94,
+    "name": "iron7",
+    "shaft_mass_kg": 0.11,
+    "total_mass_kg": 0.428,
+    "wrist_to_head_m": 0.9079999999999999
+  },
+  "timestamp_utc": "2026-09-14T20:23:48.663088+00:00",
+  "spec": "docs\\development\\full_body_models\\evidence\\ground_support\\anthro_iron\\full_body_spec_hipcal_scaled.json",
+  "spec_sha256": "5d037fb991e827b0846bc8e832089d8459870d7ec3e330c54a36f152413abcb6",
+  "trajectory_sha256": "5a65e23681ad2d6bfa5f1ce0d2f5de210e151d17ff7fd6daa10eb6069ac1208a",
+  "pose": "frame 0 of the ground-support IK trajectory, by coordinate name",
+  "coordinates": 44,
+  "total_mass_kg": 79.4734923989728,
+  "tolerances": {
+    "position_m": 1e-5,
+    "rotation_rad": 2e-5
+  },
+  "engines": {
+    "mujoco": {
+      "frames": 17,
+      "passed": true,
+      "reference": true
+    },
+    "drake": {
+      "max_position_error_m": 5.396852079177599e-6,
+      "max_rotation_error_rad": 1.037452616594397e-5,
+      "worst_frame": "RW",
+      "frames": 17,
+      "passed": true
+    },
+    "pinocchio": {
+      "max_position_error_m": 7.997507952675014e-16,
+      "max_rotation_error_rad": 4.2146848510894035e-8,
+      "worst_frame": "LW",
+      "frames": 17,
+      "passed": true
+    }
+  },
+  "translation_rule": "a pose is a mapping coordinate name -> value in the document's coordinate_order; every adapter's frame_poses takes that mapping"
+}

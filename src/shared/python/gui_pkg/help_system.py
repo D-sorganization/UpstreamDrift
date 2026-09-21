@@ -53,44 +53,65 @@ from src.shared.python import SUITE_ROOT
 # Get paths
 DOCS_DIR = SUITE_ROOT / "docs"
 HELP_DIR = DOCS_DIR / "help"
-USER_MANUAL_PATH = DOCS_DIR / "user_guide" / "user_manual.md"
+USER_GUIDE_DIR = DOCS_DIR / "user_guide"
+USER_MANUAL_PATH = USER_GUIDE_DIR / "user_manual.md"
 
 
 def get_user_manual_content() -> str:
-    """Load the main USER_MANUAL.md content.
+    """Load the main user manual content.
 
     Returns:
-        The content of USER_MANUAL.md, or an error message if not found.
+        The content of user_manual.md, or an error message if not found.
     """
     if USER_MANUAL_PATH.exists():
         try:
             return USER_MANUAL_PATH.read_text(encoding="utf-8")
         except (RuntimeError, ValueError, OSError) as e:
-            return f"# Error Loading Manual\n\nFailed to load USER_MANUAL.md: {e}"
-    return "# User Manual Not Found\n\nThe USER_MANUAL.md file could not be found."
+            return f"# Error Loading Manual\n\nFailed to load user manual: {e}"
+    return "# User Manual Not Found\n\nThe user manual file could not be found."
 
 
 def get_help_topic_content(topic: str) -> str:
     """Load help content for a specific topic.
 
     Args:
-        topic: The topic name (corresponds to a file in docs/help/).
+        topic: The topic name (corresponds to a file in docs/help/ or docs/user_guide/,
+               or a registered topic in help_content.HELP_TOPICS).
 
     Returns:
         The markdown content for the topic, or a fallback message.
     """
-    # Try topic-specific file first
-    topic_file = HELP_DIR / f"{topic}.md"
-    if topic_file.exists():
-        try:
-            content = topic_file.read_text(encoding="utf-8")
-            # Add link back to main manual
-            content += "\n\n---\n\n*See also: [Full User Manual](../USER_MANUAL.md)*"
-            return content
-        except (RuntimeError, ValueError, OSError) as e:
-            return f"# Error Loading Topic\n\nFailed to load {topic}.md: {e}"
+    # Candidate filenames to search: directly by topic stem, or by registered help_file
+    filenames = [f"{topic}.md"]
+    try:
+        from src.shared.python.gui_pkg import help_content
 
-    # Fallback: try to extract section from USER_MANUAL.md
+        registered_topic = help_content.HELP_TOPICS.get(topic)
+        if registered_topic and registered_topic.help_file:
+            if registered_topic.help_file not in filenames:
+                filenames.append(registered_topic.help_file)
+    except (ImportError, AttributeError):
+        pass
+
+    # Try topic-specific files in docs/help/ first, then docs/user_guide/
+    candidate_files = []
+    for fname in filenames:
+        candidate_files.append((HELP_DIR / fname, "../user_guide/user_manual.md"))
+        candidate_files.append((USER_GUIDE_DIR / fname, "user_manual.md"))
+
+    for topic_file, manual_rel_link in candidate_files:
+        if topic_file.exists():
+            try:
+                content = topic_file.read_text(encoding="utf-8")
+                # Add link back to main manual
+                content += (
+                    f"\n\n---\n\n*See also: [Full User Manual]({manual_rel_link})*"
+                )
+                return content
+            except (RuntimeError, ValueError, OSError) as e:
+                return f"# Error Loading Topic\n\nFailed to load {topic_file.name}: {e}"
+
+    # Fallback: try to extract section from USER_MANUAL_PATH
     manual_content = get_user_manual_content()
     section = _extract_section_from_manual(manual_content, topic)
     if section:
@@ -100,7 +121,7 @@ def get_help_topic_content(topic: str) -> str:
 
 
 def _extract_section_from_manual(content: str, topic: str) -> str | None:
-    """Extract a relevant section from the USER_MANUAL.md based on topic.
+    """Extract a relevant section from the user manual based on topic.
 
     Args:
         content: The full manual content.
@@ -118,6 +139,13 @@ def _extract_section_from_manual(content: str, topic: str) -> str | None:
         "motion_capture": "Motion Capture Integration",
         "visualization": "Visualization and Analysis",
         "analysis_tools": "Analysis",
+        "launching": "Launching the Suite",
+        "model_explorer": "Model Explorer",
+        "video_analyzer": "Video Analyzer",
+        "data_explorer": "Data Explorer",
+        "biomechanics_simulation": "Biomechanics Simulation",
+        "document_reader": "Using the Document Reader",
+        "troubleshooting": "Troubleshooting & Diagnostics",
     }
 
     search_term = topic_mapping.get(topic, topic.replace("_", " ").title())
@@ -137,20 +165,25 @@ def list_help_topics() -> list[tuple[str, str]]:
     Returns:
         A list of tuples (topic_id, topic_title) for all available help files.
     """
-    topics = []
+    topics_dict: dict[str, str] = {}
 
-    if HELP_DIR.exists():
-        for md_file in HELP_DIR.glob("*.md"):
-            topic_id = md_file.stem
-            # Read first line as title
-            try:
-                first_line = md_file.read_text(encoding="utf-8").split("\n")[0]
-                title = first_line.lstrip("#").strip()
-            except (RuntimeError, ValueError, OSError):
-                title = topic_id.replace("_", " ").title()
-            topics.append((topic_id, title))
+    search_dirs = [HELP_DIR, USER_GUIDE_DIR]
+    for directory in search_dirs:
+        if directory.exists():
+            for md_file in directory.glob("*.md"):
+                topic_id = md_file.stem
+                if topic_id in ("user_manual", "upstream_drift_user_manual", "README"):
+                    continue
+                if topic_id not in topics_dict:
+                    # Read first line as title
+                    try:
+                        first_line = md_file.read_text(encoding="utf-8").split("\n")[0]
+                        title = first_line.lstrip("#").strip()
+                    except (RuntimeError, ValueError, OSError):
+                        title = topic_id.replace("_", " ").title()
+                    topics_dict[topic_id] = title
 
-    return sorted(topics, key=lambda x: x[1])
+    return sorted(topics_dict.items(), key=lambda x: x[1])
 
 
 class HelpDialog(QDialog):

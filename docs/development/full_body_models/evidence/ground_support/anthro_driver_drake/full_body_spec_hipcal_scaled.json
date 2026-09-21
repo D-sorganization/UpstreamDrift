@@ -1,0 +1,1966 @@
+{
+  "address_seed_deg": {
+    "LEInput": -20.0,
+    "LSInputY": 45.0,
+    "REInput": -20.0,
+    "RSInputY": 45.0
+  },
+  "anthropometry": {
+    "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+    "segments": {
+      "foot": {
+        "com_fraction": 0.4415,
+        "length_m": 0.2581,
+        "mass_fraction": 0.0137,
+        "radii": [0.257, 0.245, 0.124]
+      },
+      "forearm": {
+        "com_fraction": 0.4574,
+        "length_m": 0.2689,
+        "mass_fraction": 0.0162,
+        "radii": [0.276, 0.265, 0.121]
+      },
+      "hand": {
+        "com_fraction": 0.79,
+        "length_m": 0.0862,
+        "mass_fraction": 0.0061,
+        "radii": [0.628, 0.513, 0.401]
+      },
+      "head": {
+        "com_fraction": 0.5002,
+        "length_m": 0.2429,
+        "mass_fraction": 0.0694,
+        "radii": [0.303, 0.315, 0.261]
+      },
+      "lower_trunk": {
+        "com_fraction": 0.6115,
+        "length_m": 0.1457,
+        "mass_fraction": 0.1117,
+        "radii": [0.615, 0.551, 0.587]
+      },
+      "middle_trunk": {
+        "com_fraction": 0.4502,
+        "length_m": 0.2155,
+        "mass_fraction": 0.1633,
+        "radii": [0.482, 0.383, 0.468]
+      },
+      "shank": {
+        "com_fraction": 0.4395,
+        "length_m": 0.434,
+        "mass_fraction": 0.0433,
+        "radii": [0.251, 0.246, 0.102]
+      },
+      "thigh": {
+        "com_fraction": 0.4095,
+        "length_m": 0.4222,
+        "mass_fraction": 0.1416,
+        "radii": [0.329, 0.329, 0.149]
+      },
+      "trunk": {
+        "com_fraction": 0.5138,
+        "length_m": 0.5319,
+        "mass_fraction": 0.4346,
+        "radii": [0.328, 0.306, 0.169]
+      },
+      "upper_arm": {
+        "com_fraction": 0.5772,
+        "length_m": 0.2817,
+        "mass_fraction": 0.0271,
+        "radii": [0.285, 0.269, 0.158]
+      },
+      "upper_trunk": {
+        "com_fraction": 0.2999,
+        "length_m": 0.1707,
+        "mass_fraction": 0.1596,
+        "radii": [0.505, 0.465, 0.418]
+      }
+    },
+    "table": "de_leva_1996_male"
+  },
+  "bodies": [
+    {
+      "name": "world",
+      "solids": []
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, 0.0844985910228317],
+          "inertia_com_kg_m2": [
+            [0.050507629431820626, 0.0, 0.0],
+            [0.0, 0.06292221745597135, 0.0],
+            [0.0, 0.0, 0.05732314243264351]
+          ],
+          "mass_kg": 8.7126,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [0.0001, 0.0, 0.0],
+            [0.0, 0.0001, 0.0],
+            [0.0, 0.0, 0.0001]
+          ],
+          "mass_kg": 0.3,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase/joint",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, 0.09512972168377368],
+          "inertia_com_kg_m2": [
+            [0.08342568981302116, 0.0, 0.0],
+            [0.0, 0.13212844835073062, 0.0],
+            [0.0, 0.0, 0.12456440691263249]
+          ],
+          "mass_kg": 12.737400000000001,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        },
+        {
+          "com_m": [0.0, 0.0, 0.27467597782482767],
+          "inertia_com_kg_m2": [
+            [0.12018627262359642, 0.0, 0.0],
+            [0.0, 0.1417528231047875, 0.0],
+            [0.0, 0.0, 0.09711840119267087]
+          ],
+          "mass_kg": 12.448799999999999,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/upper_trunk",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GolfSwing3D_Kinetic/Head",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, 0.11933519345203904],
+          "inertia_com_kg_m2": [
+            [0.030572073067708965, 0.0, 0.0],
+            [0.0, 0.028287139896934158, 0.0],
+            [0.0, 0.0, 0.020988664040769992]
+          ],
+          "mass_kg": 5.413200000000001,
+          "name": "GolfSwing3D_Kinetic/Head/head",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/HubtoLS",
+      "solids": [
+        {
+          "com_m": [0.0, 0.11251936800000001, 0.0],
+          "inertia_com_kg_m2": [
+            [0.001162519837946987, 0.0, 0.0],
+            [0.0, 0.0004010605883626344, 0.0],
+            [0.0, 0.0, 0.0013049249435088514]
+          ],
+          "mass_kg": 0.42276,
+          "name": "solid_reference:GolfSwing3D_Kinetic/HubtoLS/clavicle",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, -0.17567226217116602],
+          "inertia_com_kg_m2": [
+            [0.014168445253400446, 0.0, 0.0],
+            [0.0, 0.015904036230945547, 0.0],
+            [0.0, 0.0, 0.004888006900207137]
+          ],
+          "mass_kg": 2.1138,
+          "name": "solid_reference:GolfSwing3D_Kinetic/LUpperArm/upper_arm",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, -0.06644265699597932],
+          "inertia_com_kg_m2": [
+            [0.0009362094734777109, 0.0, 0.0],
+            [0.0, 0.0010155456440247505, 0.0],
+            [0.0, 0.0, 0.00019518751016286455]
+          ],
+          "mass_kg": 0.6317999999999999,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid/forearm_proximal",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, -0.06644265699597932],
+          "inertia_com_kg_m2": [
+            [0.0009362094734777109, 0.0, 0.0],
+            [0.0, 0.0010155456440247505, 0.0],
+            [0.0, 0.0, 0.00019518751016286455]
+          ],
+          "mass_kg": 0.6317999999999999,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm/forearm_distal",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [0.00031680000000000006, 0.0, 0.0],
+            [0.0, 0.00040095, 0.0],
+            [0.0, 0.0, 0.00040095]
+          ],
+          "mass_kg": 0.198,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector/Clubhead",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.064],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        },
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [0.004300875312499999, 0.0, 0.0],
+            [0.0, 1.3731249999999999e-6, 0.0],
+            [0.0, 0.0, 0.004300875312499999]
+          ],
+          "mass_kg": 0.065,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector/Rigid Shaft",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, -0.44549999999999995],
+            [0.0, 0.0, 1.0, 0.064],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        },
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [0.00029455729166666676, 0.0, 0.0],
+            [0.0, 3.906250000000001e-6, 0.0],
+            [0.0, 0.0, 0.00029455729166666676]
+          ],
+          "mass_kg": 0.05,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector/Grip",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, -1.0234999999999999],
+            [0.0, 0.0, 1.0, 0.064],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        },
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [0.000566848709239423, 0.0, 0.0],
+            [0.0, 0.000566848709239423, 0.0],
+            [0.0, 0.0, 0.000566848709239423]
+          ],
+          "mass_kg": 0.5491357853472616,
+          "name": "GolfSwing3D_Kinetic/Grip/LHand",
+          "placement": [
+            [0.0, 0.1736481776669303, -0.9848077530122079, 0.0],
+            [1.0, 0.0, 0.0, -1.1239999999999999],
+            [0.0, -0.984807753012208, -0.1736481776669303, 0.0635],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        },
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [9.408583333333334e-7, 0.0, 0.0],
+            [0.0, 9.408583333333334e-7, 0.0],
+            [0.0, 0.0, 8.0645e-7]
+          ],
+          "mass_kg": 0.01,
+          "name": "GolfSwing3D_Kinetic/Grip/LHandStandoff",
+          "placement": [
+            [
+              0.0, 0.1736481776669303, -0.9848077530122079, -0.01250705846325504
+            ],
+            [1.0, 0.0, 0.0, -1.1239999999999999],
+            [
+              0.0, -0.984807753012208, -0.1736481776669303, 0.061294668143629986
+            ],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        },
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [0.000566848709239423, 0.0, 0.0],
+            [0.0, 0.000566848709239423, 0.0],
+            [0.0, 0.0, 0.000566848709239423]
+          ],
+          "mass_kg": 0.5491357853472616,
+          "name": "GolfSwing3D_Kinetic/Grip/RHand",
+          "placement": [
+            [0.0, 0.1736481776669303, -0.9848077530122079, 0.0],
+            [1.0, 0.0, 0.0, -1.0477999999999998],
+            [0.0, -0.984807753012208, -0.1736481776669303, 0.0635],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
+      "solids": [
+        {
+          "com_m": [0.0, -0.11251936800000001, 0.0],
+          "inertia_com_kg_m2": [
+            [0.001162519837946987, 0.0, 0.0],
+            [0.0, 0.0004010605883626344, 0.0],
+            [0.0, 0.0, 0.0013049249435088514]
+          ],
+          "mass_kg": 0.42276,
+          "name": "solid_reference:GolfSwing3D_Kinetic/HubtoRS/clavicle",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/RUpperArm",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, -0.17567226217116602],
+          "inertia_com_kg_m2": [
+            [0.014168445253400446, 0.0, 0.0],
+            [0.0, 0.015904036230945547, 0.0],
+            [0.0, 0.0, 0.004888006900207137]
+          ],
+          "mass_kg": 2.1138,
+          "name": "solid_reference:GolfSwing3D_Kinetic/RUpperArm/upper_arm",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, -0.06644265699597932],
+          "inertia_com_kg_m2": [
+            [0.0009362094734777109, 0.0, 0.0],
+            [0.0, 0.0010155456440247505, 0.0],
+            [0.0, 0.0, 0.00019518751016286455]
+          ],
+          "mass_kg": 0.6317999999999999,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1/forearm_proximal",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, -0.06644265699597932],
+          "inertia_com_kg_m2": [
+            [0.0009362094734777109, 0.0, 0.0],
+            [0.0, 0.0010155456440247505, 0.0],
+            [0.0, 0.0, 0.00019518751016286455]
+          ],
+          "mass_kg": 0.6317999999999999,
+          "name": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm/forearm_distal",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [9.408583333333334e-7, 0.0, 0.0],
+            [0.0, 9.408583333333334e-7, 0.0],
+            [0.0, 0.0, 8.0645e-7]
+          ],
+          "mass_kg": 0.01,
+          "name": "GolfSwing3D_Kinetic/Grip/RHandStandoff",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "femur_r",
+      "solids": [
+        {
+          "com_m": [0.0, -0.168783, 0.0],
+          "inertia_com_kg_m2": [
+            [0.13907, 0.0, 0.0],
+            [0.0, 0.0364552, 0.0],
+            [0.0, 0.0, 0.146652]
+          ],
+          "mass_kg": 9.80040405351952,
+          "name": "femur_r",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tibia_r",
+      "solids": [
+        {
+          "com_m": [0.0, -0.19855027, 0.0],
+          "inertia_com_kg_m2": [
+            [0.05968363925, 0.0, 0.0],
+            [0.0, 0.00532709353, 0.0],
+            [0.0, 0.0, 0.05968363925]
+          ],
+          "mass_kg": 3.90640097495255,
+          "name": "tibia_r",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "talus_r",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [0.00108152, 0.0, 0.0],
+            [0.0, 0.000973557, 0.0],
+            [0.0, 0.0, 0.000973557]
+          ],
+          "mass_kg": 0.105364827375659,
+          "name": "talus_r",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "calcn_r",
+      "solids": [
+        {
+          "com_m": [0.0906376, 0.03, 0.0],
+          "inertia_com_kg_m2": [
+            [0.00151413, 0.0, 0.0],
+            [0.0, 0.00352695, 0.0],
+            [0.0, 0.0, 0.00352695]
+          ],
+          "mass_kg": 1.31706034219573,
+          "name": "calcn_r",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "toes_r",
+      "solids": [
+        {
+          "com_m": [0.0313606, 0.006, -0.017963],
+          "inertia_com_kg_m2": [
+            [0.000108152, 0.0, 0.0],
+            [0.0, 0.000183915, 0.0],
+            [0.0, 0.0, 0.000183915]
+          ],
+          "mass_kg": 0.228220216095677,
+          "name": "toes_r",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "femur_l",
+      "solids": [
+        {
+          "com_m": [0.0, -0.16385, 0.0],
+          "inertia_com_kg_m2": [
+            [0.13106, 0.0, 0.0],
+            [0.0, 0.0343555, 0.0],
+            [0.0, 0.0, 0.138205]
+          ],
+          "mass_kg": 9.80040405351952,
+          "name": "femur_l",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tibia_l",
+      "solids": [
+        {
+          "com_m": [0.0, -0.19665295, 0.0],
+          "inertia_com_kg_m2": [
+            [0.05858542077, 0.0, 0.0],
+            [0.0, 0.005299666295, 0.0],
+            [0.0, 0.0, 0.05858542077]
+          ],
+          "mass_kg": 3.90640097495255,
+          "name": "tibia_l",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "talus_l",
+      "solids": [
+        {
+          "com_m": [0.0, 0.0, 0.0],
+          "inertia_com_kg_m2": [
+            [0.00107874, 0.0, 0.0],
+            [0.0, 0.000962282, 0.0],
+            [0.0, 0.0, 0.000962282]
+          ],
+          "mass_kg": 0.105364827375659,
+          "name": "talus_l",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "calcn_l",
+      "solids": [
+        {
+          "com_m": [0.0895969, 0.03, 0.0],
+          "inertia_com_kg_m2": [
+            [0.00151023, 0.0, 0.0],
+            [0.0, 0.00346176, 0.0],
+            [0.0, 0.0, 0.00346176]
+          ],
+          "mass_kg": 1.31706034219573,
+          "name": "calcn_l",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "toes_l",
+      "solids": [
+        {
+          "com_m": [0.0310005, 0.006, 0.0179167],
+          "inertia_com_kg_m2": [
+            [0.000107874, 0.0, 0.0],
+            [0.0, 0.000180811, 0.0],
+            [0.0, 0.0, 0.000180811]
+          ],
+          "mass_kg": 0.228220216095677,
+          "name": "toes_l",
+          "placement": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+          ]
+        }
+      ]
+    }
+  ],
+  "closure": {
+    "body_a": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
+    "body_b": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
+    "name": "GolfSwing3D_Kinetic/Grip/RightHandOnClubForce",
+    "placement_a": [
+      [1.0, 0.0, 0.0, 0.0],
+      [0.0, 1.0, 0.0, 0.0],
+      [0.0, 0.0, 1.0, -0.0127],
+      [0.0, 0.0, 0.0, 1.0]
+    ],
+    "placement_b": [
+      [0.0, 0.1736481776669303, -0.9848077530122079, 0.0],
+      [1.0, 0.0, 0.0, -1.0477999999999998],
+      [0.0, -0.984807753012208, -0.1736481776669303, 0.0635],
+      [0.0, 0.0, 0.0, 1.0]
+    ]
+  },
+  "club": {
+    "grip_mass_kg": 0.05,
+    "head_mass_kg": 0.198,
+    "length_m": 1.156,
+    "name": "driver",
+    "shaft_mass_kg": 0.065,
+    "total_mass_kg": 0.313,
+    "wrist_to_head_m": 1.1239999999999999
+  },
+  "contact": {
+    "ground": {
+      "calibrated": false,
+      "height_m": null,
+      "normal_policy": "opposite_gravity"
+    },
+    "law": "hunt_crossley_coulomb",
+    "parameters": {
+      "dissipation_s_m": 2.0,
+      "dynamic_friction": 0.8,
+      "static_friction": 0.9,
+      "stiffness_n_m": 50000.0,
+      "transition_velocity_m_s": 0.05,
+      "viscous_friction": 0.0
+    },
+    "provenance": "ground-support driver parameters: toe spheres, 2e5 N/m; still placeholders",
+    "spheres": [
+      {
+        "body": "calcn_r",
+        "name": "heel_r",
+        "position_m": [0.01, -0.005, 0.0],
+        "radius_m": 0.035
+      },
+      {
+        "body": "calcn_r",
+        "name": "forefoot_r",
+        "position_m": [0.16, -0.005, 0.0],
+        "radius_m": 0.03
+      },
+      {
+        "body": "calcn_r",
+        "name": "toe_r",
+        "position_m": [0.23, -0.01, 0.0],
+        "radius_m": 0.025
+      },
+      {
+        "body": "calcn_l",
+        "name": "heel_l",
+        "position_m": [0.01, -0.005, 0.0],
+        "radius_m": 0.035
+      },
+      {
+        "body": "calcn_l",
+        "name": "forefoot_l",
+        "position_m": [0.16, -0.005, 0.0],
+        "radius_m": 0.03
+      },
+      {
+        "body": "calcn_l",
+        "name": "toe_l",
+        "position_m": [0.23, -0.01, 0.0],
+        "radius_m": 0.025
+      }
+    ]
+  },
+  "coordinate_order": [
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+    "SpineInputX",
+    "SpineInputY",
+    "TorsoInput",
+    "LEInput",
+    "LFInput",
+    "LScapInputX",
+    "LScapInputY",
+    "LSInputX",
+    "LSInputY",
+    "LSInputZ",
+    "LWInputX",
+    "LWInputY",
+    "REInput",
+    "RFInput",
+    "RScapInputX",
+    "RScapInputY",
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "RWInputX",
+    "RWInputY",
+    "NeckInputX",
+    "NeckInputY",
+    "NeckInputZ",
+    "hip_flexion_r",
+    "hip_adduction_r",
+    "hip_rotation_r",
+    "knee_angle_r",
+    "ankle_angle_r",
+    "subtalar_angle_r",
+    "mtp_angle_r",
+    "hip_flexion_l",
+    "hip_adduction_l",
+    "hip_rotation_l",
+    "knee_angle_l",
+    "ankle_angle_l",
+    "subtalar_angle_l",
+    "mtp_angle_l"
+  ],
+  "coordinate_ranges_deg": {
+    "LEInput": [-150.0, 5.0],
+    "LFInput": [-90.0, 90.0],
+    "LScapInputX": [-10.0, 30.0],
+    "LScapInputY": [-40.0, 40.0],
+    "LWInputX": [-40.0, 25.0],
+    "LWInputY": [-70.0, 70.0],
+    "NeckInputX": [-45.0, 45.0],
+    "NeckInputY": [-60.0, 60.0],
+    "NeckInputZ": [-80.0, 80.0],
+    "REInput": [-150.0, 5.0],
+    "RFInput": [-90.0, 90.0],
+    "RScapInputX": [-30.0, 10.0],
+    "RScapInputY": [-40.0, 40.0],
+    "RWInputX": [-40.0, 25.0],
+    "RWInputY": [-70.0, 70.0],
+    "SpineInputX": [-35.0, 35.0],
+    "SpineInputY": [-45.0, 45.0],
+    "TorsoInput": [-100.0, 100.0],
+    "ankle_angle_l": [-40.0, 30.0],
+    "ankle_angle_r": [-40.0, 30.0],
+    "hip_adduction_l": [-50.0, 30.0],
+    "hip_adduction_r": [-50.0, 30.0],
+    "hip_flexion_l": [-30.0, 120.0],
+    "hip_flexion_r": [-30.0, 120.0],
+    "hip_rotation_l": [-40.0, 40.0],
+    "hip_rotation_r": [-40.0, 40.0],
+    "knee_angle_l": [-120.0, 10.0],
+    "knee_angle_r": [-120.0, 10.0],
+    "mtp_angle_l": [-30.0, 30.0],
+    "mtp_angle_r": [-30.0, 30.0],
+    "subtalar_angle_l": [-20.0, 20.0],
+    "subtalar_angle_r": [-20.0, 20.0]
+  },
+  "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+  "frames": [
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+      "name": "Hip",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase",
+      "name": "Torso",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "name": "Spine",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "name": "Hub",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.42261093595634686],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "GolfSwing3D_Kinetic/Head",
+      "name": "Head",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/HubtoLS",
+      "name": "LScap",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+      "name": "LS",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid",
+      "name": "LE",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm",
+      "name": "LF",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
+      "name": "RScap",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/RUpperArm",
+      "name": "RS",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
+      "name": "RE",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
+      "name": "RF",
+      "placement": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
+      "name": "LW",
+      "placement": [
+        [0.1736481776669303, 0.0, 0.9848077530122079, -0.02501411692651008],
+        [0.0, 1.0, 0.0, -1.1239999999999999],
+        [-0.984807753012208, 0.0, 0.1736481776669303, 0.05908933628725997],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
+      "name": "RW",
+      "placement": [
+        [0.0, 1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0, 0.0127],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
+      "name": "Clubhead",
+      "placement": [
+        [0.0, 0.1736481776669303, -0.9848077530122079, 0.0],
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, -0.984807753012208, -0.1736481776669303, 0.0635],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    {
+      "body": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
+      "name": "Grip",
+      "placement": [
+        [0.0, 0.1736481776669303, -0.9848077530122079, 0.0],
+        [1.0, 0.0, 0.0, -1.0858999999999999],
+        [0.0, -0.984807753012208, -0.1736481776669303, 0.0635],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    }
+  ],
+  "gravity_m_s2": [0.0, 0.0, -9.80665],
+  "joints": [
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "parent": "world",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "TranslationInputX",
+          "primitive": "Px"
+        },
+        {
+          "coordinate": "TranslationInputY",
+          "primitive": "Py"
+        },
+        {
+          "coordinate": "TranslationInputZ",
+          "primitive": "Pz"
+        },
+        {
+          "coordinate": "HipInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "HipInputY",
+          "primitive": "Ry"
+        },
+        {
+          "coordinate": "HipInputZ",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Kinetically Driven Revolute",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.13818248736358413],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "TorsoInput",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/UpperTorsoBase",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "SpineInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "SpineInputY",
+          "primitive": "Ry"
+        }
+      ]
+    },
+    {
+      "child": "GolfSwing3D_Kinetic/Head",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Neck Joint",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.4626109359563469],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "NeckInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "NeckInputY",
+          "primitive": "Ry"
+        },
+        {
+          "coordinate": "NeckInputZ",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/HubtoLS",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.42261093595634686],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "LScapInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "LScapInputY",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/HubtoLS",
+      "parent_to_base": [
+        [0.0, 0.0, -1.0, 0.0],
+        [0.0, 1.0, 0.0, 0.19494],
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "LSInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "LSInputY",
+          "primitive": "Ry"
+        },
+        {
+          "coordinate": "LSInputZ",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, -0.30435249856404367],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "LEInput",
+          "primitive": "Ry"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, -0.14526160252728315],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "LFInput",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
+      "child_to_follower": [
+        [
+          -0.5343338817661774, -0.7357083276751796, 0.4161977407267835,
+          -0.02501411692651008
+        ],
+        [
+          0.30908343009591993, 0.28822496143962084, 0.9063077870366498,
+          -1.1239999999999999
+        ],
+        [
+          -0.7867367641319611, 0.6129107832242139, 0.07338689100003808,
+          0.05908933628725997
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm",
+      "parent_to_base": [
+        [1.2246063538223773e-16, -2.220446049250313e-16, 1.0, 0.0],
+        [-1.0, 1.2246063538223773e-16, 1.2246063538223775e-16, 0.0],
+        [
+          -1.2246063538223775e-16, -1.0, -2.220446049250313e-16,
+          -0.14526160252728315
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "LWInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "LWInputY",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.42261093595634686],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "RScapInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "RScapInputY",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/RUpperArm",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
+      "parent_to_base": [
+        [0.0, 0.0, -1.0, 0.0],
+        [0.0, 1.0, 0.0, -0.19494],
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "RSInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "RSInputY",
+          "primitive": "Ry"
+        },
+        {
+          "coordinate": "RSInputZ",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/RUpperArm",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, -0.30435249856404367],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "REInput",
+          "primitive": "Ry"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
+      "child_to_follower": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
+      "parent_to_base": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, -0.14526160252728315],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "RFInput",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
+      "child_to_follower": [
+        [0.8598872403227148, 0.19501971017073785, 0.47176397337557163, 0.0],
+        [0.3261223507816858, -0.9208415297808589, -0.21376409743330366, 0.0],
+        [0.3927316466123055, 0.3376657958333494, -0.8554201681474538, 0.0127],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
+      "parent_to_base": [
+        [1.2246063538223773e-16, -2.220446049250313e-16, 1.0, 0.0],
+        [-1.0, 1.2246063538223773e-16, 1.2246063538223775e-16, 0.0],
+        [
+          -1.2246063538223775e-16, -1.0, -2.220446049250313e-16,
+          -0.14526160252728315
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "RWInputX",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "RWInputY",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "femur_r",
+      "child_to_follower": [
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "hip_r",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+      "parent_to_base": [
+        [0.0, 1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, -0.08892],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "hip_flexion_r",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "hip_adduction_r",
+          "primitive": "Ry"
+        },
+        {
+          "coordinate": "hip_rotation_r",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "tibia_r",
+      "child_to_follower": [
+        [
+          -0.12429404455826688, 0.9922454285544172, -4.5655751879009243e-7,
+          -0.00830356
+        ],
+        [
+          0.9897616899776521, 0.12398288545581986, -0.07071096921009314,
+          -0.00387542
+        ],
+        [
+          -0.07016257934204852, -0.008789404240898925, -0.997496846527928,
+          -0.00152402
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "knee_r",
+      "parent": "femur_r",
+      "parent_to_base": [
+        [
+          -0.12429404455826688, 0.9922454285544172, -4.5655751879009243e-7,
+          -0.00803206
+        ],
+        [
+          0.9897616899776521, 0.12398288545581986, -0.07071096921009314,
+          -0.405038
+        ],
+        [
+          -0.07016257934204852, -0.008789404240898925, -0.997496846527928,
+          -0.00273031
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "knee_angle_r",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "talus_r",
+      "child_to_follower": [
+        [0.9942975703750765, -0.018557934606193413, -0.10501402101325395, 0.0],
+        [4.12693463669788e-8, 0.9847417938081873, -0.1740218363523156, 0.0],
+        [0.10664118128667834, 0.17302948474345656, 0.9791263737961489, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "ankle_r",
+      "parent": "tibia_r",
+      "parent_to_base": [
+        [
+          0.9942975703750765, -0.018557934606193413, -0.10501402101325395,
+          -0.009956662
+        ],
+        [
+          4.12693463669788e-8, 0.9847417938081873, -0.1740218363523156,
+          -0.42538768
+        ],
+        [0.10664118128667834, 0.17302948474345656, 0.9791263737961489, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "ankle_angle_r",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "calcn_r",
+      "child_to_follower": [
+        [-0.1518648160464598, -0.5977329934043571, 0.787179996089231, 0.0],
+        [-7.640858197584669e-7, 0.7964174948886904, 0.6047471982858945, 0.0],
+        [-0.9884012735962006, 0.09183922054922673, -0.12094825307675756, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "subtalar_r",
+      "parent": "talus_r",
+      "parent_to_base": [
+        [
+          -0.1518648160464598, -0.5977329934043571, 0.787179996089231,
+          -0.0442039
+        ],
+        [
+          -7.640858197584669e-7, 0.7964174948886904, 0.6047471982858945,
+          -0.04195
+        ],
+        [
+          -0.9884012735962006, 0.09183922054922673, -0.12094825307675756,
+          0.00812953
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "subtalar_angle_r",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "toes_r",
+      "child_to_follower": [
+        [0.8139359751549218, 0.0, 0.5809545837228643, 0.0],
+        [
+          -1.5416151537684768e-6, -0.9999999999964793, 2.1598521961137016e-6,
+          0.0
+        ],
+        [0.580954583720819, -2.65358979335273e-6, -0.8139359751520561, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "mtp_r",
+      "parent": "calcn_r",
+      "parent_to_base": [
+        [0.8139359751549218, 0.0, 0.5809545837228643, 0.16206],
+        [
+          -1.5416151537684768e-6, -0.9999999999964793, 2.1598521961137016e-6,
+          -0.002
+        ],
+        [
+          0.580954583720819, -2.65358979335273e-6, -0.8139359751520561,
+          0.00110857
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "mtp_angle_r",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "femur_l",
+      "child_to_follower": [
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "hip_l",
+      "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso",
+      "parent_to_base": [
+        [0.0, 1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.08892],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "hip_flexion_l",
+          "primitive": "Rx"
+        },
+        {
+          "coordinate": "hip_adduction_l",
+          "primitive": "Ry"
+        },
+        {
+          "coordinate": "hip_rotation_l",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "tibia_l",
+      "child_to_follower": [
+        [
+          -0.12429404455826688, -0.9922454285544172, -4.5655751879009243e-7,
+          -0.00828216
+        ],
+        [
+          0.9897616899776521, -0.12398288545581986, -0.07071096921009314,
+          -0.00383839
+        ],
+        [
+          0.07016257934204852, -0.008789404240898925, 0.997496846527928,
+          0.00152009
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "knee_l",
+      "parent": "femur_l",
+      "parent_to_base": [
+        [
+          -0.12429404455826688, -0.9922454285544172, -4.5655751879009243e-7,
+          -0.00779732
+        ],
+        [
+          0.9897616899776521, -0.12398288545581986, -0.07071096921009314,
+          -0.393201
+        ],
+        [
+          0.07016257934204852, -0.008789404240898925, 0.997496846527928,
+          0.00265051
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "knee_angle_l",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "talus_l",
+      "child_to_follower": [
+        [0.9942975703750765, -0.018557934606193413, 0.10501402101325395, 0.0],
+        [4.12693463669788e-8, 0.9847417938081873, 0.1740218363523156, 0.0],
+        [-0.10664118128667834, -0.17302948474345656, 0.9791263737961489, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "ankle_l",
+      "parent": "tibia_l",
+      "parent_to_base": [
+        [
+          0.9942975703750765, -0.018557934606193413, 0.10501402101325395,
+          -0.009930956999999999
+        ],
+        [
+          4.12693463669788e-8, 0.9847417938081873, 0.1740218363523156,
+          -0.42132338
+        ],
+        [-0.10664118128667834, -0.17302948474345656, 0.9791263737961489, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "ankle_angle_l",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "calcn_l",
+      "child_to_follower": [
+        [-0.1518648160464598, -0.5977329934043571, -0.787179996089231, 0.0],
+        [-7.640858197584669e-7, 0.7964174948886904, -0.6047471982858945, 0.0],
+        [0.9884012735962006, -0.09183922054922673, -0.12094825307675756, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "subtalar_l",
+      "parent": "talus_l",
+      "parent_to_base": [
+        [
+          -0.1518648160464598, -0.5977329934043571, -0.787179996089231,
+          -0.0436964
+        ],
+        [
+          -7.640858197584669e-7, 0.7964174948886904, -0.6047471982858945,
+          -0.04195
+        ],
+        [
+          0.9884012735962006, -0.09183922054922673, -0.12094825307675756,
+          -0.00810858
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "subtalar_angle_l",
+          "primitive": "Rz"
+        }
+      ]
+    },
+    {
+      "child": "toes_l",
+      "child_to_follower": [
+        [0.8139359751549218, 0.0, -0.5809545837228643, 0.0],
+        [
+          1.5416151537684768e-6, -0.9999999999964793, 2.1598521961137016e-6, 0.0
+        ],
+        [-0.580954583720819, -2.65358979335273e-6, -0.8139359751520561, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "name": "mtp_l",
+      "parent": "calcn_l",
+      "parent_to_base": [
+        [0.8139359751549218, 0.0, -0.5809545837228643, 0.160199],
+        [
+          1.5416151537684768e-6, -0.9999999999964793, 2.1598521961137016e-6,
+          -0.002
+        ],
+        [
+          -0.580954583720819, -2.65358979335273e-6, -0.8139359751520561,
+          -0.00110572
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "primitives": [
+        {
+          "coordinate": "mtp_angle_l",
+          "primitive": "Rz"
+        }
+      ]
+    }
+  ],
+  "lower_limb_provenance": "Rajagopal et al. 2016 via golf_humanoid.osim (OpenSense variant); patella bodies and patellofemoral coupler constraints dropped; walker knee reduced to a hinge about its primary axis; coupled spline translations ignored; OpenSim body inertia interpreted as about the mass centre in the body frame; hip centres at the subject hip half width on the pelvis frame",
+  "marker_attachments": {
+    "BackLeft": {
+      "body": "Spine",
+      "offset_m": [-0.11, 0.09, 0.29582765516944276]
+    },
+    "BackRight": {
+      "body": "Spine",
+      "offset_m": [-0.11, -0.09, 0.29582765516944276]
+    },
+    "BackTop": {
+      "body": "Spine",
+      "offset_m": [-0.1, 0.0, 0.4426109359563469]
+    },
+    "HeadFront": {
+      "body": "Head",
+      "offset_m": [0.1, 0.0, 0.16]
+    },
+    "HeadSide": {
+      "body": "Head",
+      "offset_m": [0.0, 0.08, 0.16]
+    },
+    "HeadTop": {
+      "body": "Head",
+      "offset_m": [0.0, 0.0, 0.24]
+    },
+    "LAnkleOut": {
+      "body": "tibia_l",
+      "offset_m": null
+    },
+    "LElbowOut": {
+      "body": "LS",
+      "offset_m": [0.0, 0.04, -0.30435249856404367]
+    },
+    "LKneeOut": {
+      "body": "femur_l",
+      "offset_m": null
+    },
+    "LShoulderBack": {
+      "body": "LScap",
+      "offset_m": [-0.06, 0.18494, 0.02]
+    },
+    "LShoulderTop": {
+      "body": "LScap",
+      "offset_m": [0.0, 0.19494, 0.05]
+    },
+    "LToeIn": {
+      "body": "calcn_l",
+      "offset_m": null
+    },
+    "LToeOut": {
+      "body": "calcn_l",
+      "offset_m": null
+    },
+    "LUArmHigh": {
+      "body": "LS",
+      "offset_m": [0.01, 0.04, -0.10652337449741528]
+    },
+    "LWristTop": {
+      "body": "LF",
+      "offset_m": [0.03, 0.0, -0.13526160252728314]
+    },
+    "Marker_2:2:1": {
+      "body": "Clubhead",
+      "offset_m": [
+        -0.005013763277325188, -0.04723804658646823, -0.020422312849740262
+      ]
+    },
+    "Marker_2:2:2": {
+      "body": "Clubhead",
+      "offset_m": [
+        0.039764746459329495, 0.033540927867569084, -0.021534496183147525
+      ]
+    },
+    "Marker_2:2:3": {
+      "body": "Clubhead",
+      "offset_m": [
+        0.05213033572826101, 0.014535978774719217, 0.025324102391800447
+      ]
+    },
+    "Marker_3:3:1": {
+      "body": "Clubhead",
+      "offset_m": [
+        -0.6889570460849377, -0.07981249704439086, -0.0394272179523681
+      ]
+    },
+    "Marker_3:3:2": {
+      "body": "Clubhead",
+      "offset_m": [
+        -0.760691797691206, -0.07648040771272901, -0.0032467887386094605
+      ]
+    },
+    "Marker_3:3:3": {
+      "body": "Clubhead",
+      "offset_m": [
+        -0.8101014861494318, -0.08113826173535343, -0.035081864800729966
+      ]
+    },
+    "RAnkleOut": {
+      "body": "tibia_r",
+      "offset_m": null
+    },
+    "RElbowOut": {
+      "body": "RS",
+      "offset_m": [0.0, -0.04, -0.30435249856404367]
+    },
+    "RKneeOut": {
+      "body": "femur_r",
+      "offset_m": null
+    },
+    "RShoulderBack": {
+      "body": "RScap",
+      "offset_m": [-0.06, -0.18494, 0.02]
+    },
+    "RShoulderTop": {
+      "body": "RScap",
+      "offset_m": [0.0, -0.19494, 0.05]
+    },
+    "RToeIn": {
+      "body": "calcn_r",
+      "offset_m": null
+    },
+    "RToeOut": {
+      "body": "calcn_r",
+      "offset_m": null
+    },
+    "RUArmHigh": {
+      "body": "RS",
+      "offset_m": [0.01, -0.04, -0.10652337449741528]
+    },
+    "RWristTop": {
+      "body": "RF",
+      "offset_m": [0.03, 0.0, -0.13526160252728314]
+    },
+    "WaistLBack": {
+      "body": "Hip",
+      "offset_m": [-0.1, 0.07, 0.1]
+    },
+    "WaistLeft": {
+      "body": "Hip",
+      "offset_m": [0.02, 0.15, 0.08]
+    },
+    "WaistRBack": {
+      "body": "Hip",
+      "offset_m": [-0.1, -0.07, 0.1]
+    },
+    "WaistRight": {
+      "body": "Hip",
+      "offset_m": [0.02, -0.15, 0.08]
+    }
+  },
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated | toe contact spheres added on calcanei; stiffness 5e+04 N/m | segments scaled femur_l x1.0000, femur_r x1.0000, tibia_l x0.9700, tibia_r x0.9700 (lengths, COMs, sphere and marker offsets by s; inertias by s^2; masses kept)",
+  "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
+  "schema_version": "full-body-v1",
+  "subject": {
+    "arm_scale": 1.1,
+    "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+    "grip_roll_deg": 0.0,
+    "grip_rotation_deg": {
+      "L": [-90.0, 47.0, 0.0],
+      "R": [-34.0, 46.0, 62.0]
+    },
+    "mass_kg": 78.0,
+    "shoulder_scale": 1.0,
+    "source": "de Leva 1996 male table",
+    "stature_m": 1.71,
+    "trunk_scale": 1.15
+  },
+  "upper_body_counts": {
+    "bodies": 15,
+    "coordinates": 30,
+    "joints": 14
+  },
+  "upper_body_qualification": "anthropometric geometry (AN-1); unqualified until Simscape parity",
+  "upper_body_schema_version": 1,
+  "upper_body_sha256": "090341b1ad5ce51b917df617c3ce91c8e1d71e41e6398f6c218f8e2feefad558",
+  "visual_hints": {
+    "capsule_radius_m": {
+      "femur_l": 0.072,
+      "femur_r": 0.072,
+      "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector": 0.0065,
+      "solid_reference:GolfSwing3D_Kinetic/HubtoLS": 0.04,
+      "solid_reference:GolfSwing3D_Kinetic/HubtoRS": 0.04,
+      "tibia_l": 0.055,
+      "tibia_r": 0.055
+    },
+    "shapes": {
+      "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector/Clubhead": {
+        "center_m": [0.0, 0.0, 0.064],
+        "half_size_m": [0.06, 0.032, 0.05],
+        "shape": "ellipsoid"
+      },
+      "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/middle_trunk": {
+        "center_m": [0.0, 0.0, 0.11410495270821366],
+        "half_size_m": [0.09405, 0.132525, 0.13100939014646754],
+        "shape": "ellipsoid"
+      },
+      "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod/upper_trunk": {
+        "center_m": [0.0, 0.0, 0.29582765516944276],
+        "half_size_m": [0.1026, 0.15817499999999998, 0.13100939014646754],
+        "shape": "ellipsoid"
+      },
+      "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso/pelvis": {
+        "center_m": [0.0, 0.0, 0.05909124368179206],
+        "half_size_m": [0.098325, 0.14535, 0.12909124368179206],
+        "shape": "ellipsoid"
+      }
+    }
+  }
+}

@@ -160,6 +160,152 @@ class TestThemeMenuHasNoDuplicates:
         )
 
 
+class TestInAppHelpSystem:
+    """#8843 — In-app help system roots and component mappings."""
+
+    def test_user_manual_path_exists(self) -> None:
+        from src.shared.python.gui_pkg import help_system
+
+        assert help_system.USER_MANUAL_PATH.exists()
+        content = help_system.get_user_manual_content()
+        assert "# User Manual Not Found" not in content
+        assert "UpstreamDrift User Manual" in content
+
+    def test_all_ui_help_topics_resolve_to_feature_help(self) -> None:
+        from src.shared.python.gui_pkg import help_content
+
+        missing: list[str] = []
+        for component_id, topic_id in help_content.UI_HELP_TOPICS.items():
+            help_dict = help_content.get_component_help(component_id)
+            if help_dict is None:
+                missing.append(f"{component_id} -> {topic_id}")
+            else:
+                assert "title" in help_dict
+                assert "description" in help_dict
+        assert not missing, f"Components resolve to no feature help: {missing}"
+
+    def test_all_registered_topics_resolve_content(self) -> None:
+        from src.shared.python.gui_pkg import help_content, help_system
+
+        missing: list[str] = []
+        for topic_id in help_content.HELP_TOPICS:
+            content = help_system.get_help_topic_content(topic_id)
+            if "Topic Not Found" in content or "Error Loading" in content:
+                missing.append(topic_id)
+            assert "../USER_MANUAL.md" not in content, (
+                f"Topic {topic_id} contains dead ../USER_MANUAL.md link"
+            )
+        assert not missing, f"Topics could not be loaded: {missing}"
+
+    def test_list_help_topics_includes_getting_started(self) -> None:
+        from src.shared.python.gui_pkg import help_system
+
+        topics = help_system.list_help_topics()
+        topic_ids = [t[0] for t in topics]
+        assert "getting_started" in topic_ids
+        assert "analysis_tools" in topic_ids
+        assert "simulation_controls" in topic_ids
+        assert "user_manual" not in topic_ids
+
+
+class TestToolHelpAffordances:
+    """#8846 — GUI tool windows must expose a Help menu and calculation docs."""
+
+    def test_build_help_menu_with_doc_target(self, qapp) -> None:
+        from PyQt6.QtWidgets import QMainWindow
+        from src.launchers.help_menu import build_help_menu
+
+        win = QMainWindow()
+        try:
+            bar = win.menuBar()
+            menu = build_help_menu(
+                bar,
+                win,
+                doc_target=(
+                    "Ball Flight Model Documentation",
+                    "docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md",
+                ),
+            )
+            labels = [a.text() for a in menu.actions() if not a.isSeparator()]
+            assert "&Ball Flight Model Documentation" in labels
+            assert "&User Guide" in labels
+            assert "&Motion-Match Loaders" in labels
+            assert "&About" in labels
+        finally:
+            win.deleteLater()
+
+    @pytest.mark.parametrize(
+        ("module_path", "window_cls_name", "expected_doc_action"),
+        [
+            (
+                "src.tools.ball_flight_gui.gui",
+                "BallFlightWindow",
+                "&Ball Flight Model Documentation",
+            ),
+            (
+                "src.tools.bunker_shot_gui.gui",
+                "BunkerShotWindow",
+                "&BunkerShot3D Credibility Statement",
+            ),
+            (
+                "src.tools.putting_green_gui.gui",
+                "PuttingGreenWindow",
+                "&Putting Kinematics & Kinetics Review",
+            ),
+            (
+                "src.tools.swing_flight_pipeline.gui",
+                "SwingFlightWindow",
+                "&Ball Flight Model Documentation",
+            ),
+            (
+                "src.tools.golf_environment.gui",
+                "EnvironmentWindow",
+                "&Environment & Architecture Map",
+            ),
+            (
+                "src.tools.video_analyzer.gui",
+                "VideoAnalyzerWindow",
+                "&Video Analysis Tutorial",
+            ),
+            (
+                "src.tools.launch_monitor_analytics.gui",
+                "LaunchMonitorAnalyticsWindow",
+                "&User Manual",
+            ),
+            (
+                "src.tools.simulation_backends_launcher.gui",
+                "SimulationBackendsWindow",
+                "&Double Pendulum Dynamics",
+            ),
+        ],
+    )
+    def test_tool_window_exposes_help_menu_and_doc_affordance(
+        self, qapp, module_path: str, window_cls_name: str, expected_doc_action: str
+    ) -> None:
+        import importlib
+
+        mod = importlib.import_module(module_path)
+        cls = getattr(mod, window_cls_name)
+        win = cls()
+        try:
+            bar = win.menuBar()
+            assert bar is not None
+            menus = [action.menu() for action in bar.actions() if action.menu()]
+            help_menus = [m for m in menus if m.title() == "&Help"]
+            assert len(help_menus) == 1, f"Expected 1 &Help menu in {window_cls_name}"
+            help_menu = help_menus[0]
+            action_texts = [
+                a.text() for a in help_menu.actions() if not a.isSeparator()
+            ]
+            assert expected_doc_action in action_texts, (
+                f"{window_cls_name} missing expected doc action {expected_doc_action}"
+            )
+            assert "&User Guide" in action_texts
+            assert "&About" in action_texts
+        finally:
+            win.deleteLater()
+
+
 @pytest.fixture
 def qapp():
     from PyQt6.QtWidgets import QApplication

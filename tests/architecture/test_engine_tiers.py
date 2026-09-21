@@ -14,6 +14,7 @@ EXPECTED_ENGINE_TIERS = {
     "opensim": "experimental",
     "myosuite": "experimental",
     "putting_green": "core",
+    "jaxsim": "experimental",
 }
 
 
