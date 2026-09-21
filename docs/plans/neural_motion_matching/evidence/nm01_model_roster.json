@@ -1,0 +1,300 @@
+{
+  "content_digest": "1451cfb6cdcd1d8a7e951ec7fa5296f2cc5ee286904a7bb5c062dbb14ad59c6c",
+  "entries": [
+    {
+      "backend": "scipy_ode",
+      "blockers": [],
+      "checkpoint_layout": "from_identity:q=8,nu=5,nc=4",
+      "constraint_count": 4,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 5,
+      "model_id": "constrained_upper_body_golfer",
+      "pilot_stage": "pilot_eligible",
+      "q_dim": 8,
+      "topology": "constrained_upper_body"
+    },
+    {
+      "backend": "scipy_ode",
+      "blockers": [],
+      "checkpoint_layout": "from_identity:q=2,nu=2,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 2,
+      "model_id": "driven_double_pendulum",
+      "pilot_stage": "pilot_eligible",
+      "q_dim": 2,
+      "topology": "planar_driven_pendulum"
+    },
+    {
+      "backend": "scipy_ode",
+      "blockers": [],
+      "checkpoint_layout": "from_identity:q=3,nu=3,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 3,
+      "model_id": "driven_triple_pendulum",
+      "pilot_stage": "pilot_eligible",
+      "q_dim": 3,
+      "topology": "planar_driven_pendulum"
+    },
+    {
+      "backend": "drake",
+      "blockers": [
+        "full-body training deferred pending NM-01 benefit review and generation/cost break-even"
+      ],
+      "checkpoint_layout": "from_identity:q=40,nu=34,nc=6",
+      "constraint_count": 6,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 34,
+      "model_id": "full_body_drake",
+      "pilot_stage": "deferred_pending_benefit",
+      "q_dim": 40,
+      "topology": "full_body_multibody"
+    },
+    {
+      "backend": "mujoco",
+      "blockers": [
+        "full-body training deferred pending NM-01 benefit review and generation/cost break-even"
+      ],
+      "checkpoint_layout": "from_identity:q=38,nu=35,nc=3",
+      "constraint_count": 3,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 35,
+      "model_id": "full_body_mujoco",
+      "pilot_stage": "deferred_pending_benefit",
+      "q_dim": 38,
+      "topology": "full_body_multibody"
+    },
+    {
+      "backend": "myosuite",
+      "blockers": [
+        "full-body training deferred pending NM-01 benefit review and generation/cost break-even"
+      ],
+      "checkpoint_layout": "from_identity:q=30,nu=24,nc=6",
+      "constraint_count": 6,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 24,
+      "model_id": "full_body_myosuite",
+      "pilot_stage": "deferred_pending_benefit",
+      "q_dim": 30,
+      "topology": "full_body_multibody"
+    },
+    {
+      "backend": "opensim",
+      "blockers": [
+        "full-body training deferred pending NM-01 benefit review and generation/cost break-even"
+      ],
+      "checkpoint_layout": "from_identity:q=35,nu=29,nc=6",
+      "constraint_count": 6,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 29,
+      "model_id": "full_body_opensim",
+      "pilot_stage": "deferred_pending_benefit",
+      "q_dim": 35,
+      "topology": "full_body_multibody"
+    },
+    {
+      "backend": "pinocchio",
+      "blockers": [
+        "full-body training deferred pending NM-01 benefit review and generation/cost break-even"
+      ],
+      "checkpoint_layout": "from_identity:q=46,nu=40,nc=6",
+      "constraint_count": 6,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 40,
+      "model_id": "full_body_pinocchio",
+      "pilot_stage": "deferred_pending_benefit",
+      "q_dim": 46,
+      "topology": "full_body_multibody"
+    },
+    {
+      "backend": "simscape",
+      "blockers": [
+        "full-body training deferred pending NM-01 benefit review and generation/cost break-even"
+      ],
+      "checkpoint_layout": "from_identity:q=26,nu=20,nc=6",
+      "constraint_count": 6,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 20,
+      "model_id": "full_body_simscape",
+      "pilot_stage": "deferred_pending_benefit",
+      "q_dim": 26,
+      "topology": "full_body_multibody"
+    },
+    {
+      "backend": "myosuite",
+      "blockers": [
+        "reference catalog URDF is not a pilot neural training target"
+      ],
+      "checkpoint_layout": "from_identity:q=0,nu=0,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": false,
+      "independent_dof": 0,
+      "model_id": "myosuite_body",
+      "pilot_stage": "reference_only",
+      "q_dim": 0,
+      "topology": "reference_catalog_urdf"
+    },
+    {
+      "backend": "opensim",
+      "blockers": [
+        "reference catalog URDF is not a pilot neural training target"
+      ],
+      "checkpoint_layout": "from_identity:q=0,nu=0,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": false,
+      "independent_dof": 0,
+      "model_id": "opensim_golfer",
+      "pilot_stage": "reference_only",
+      "q_dim": 0,
+      "topology": "reference_catalog_urdf"
+    },
+    {
+      "backend": "reconstruct_solver",
+      "blockers": [
+        "kinematic reconstruction models lack torque-driven supervision"
+      ],
+      "checkpoint_layout": "from_identity:q=4,nu=4,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": false,
+      "independent_dof": 4,
+      "model_id": "reconstruction_double_pendulum",
+      "pilot_stage": "reference_only",
+      "q_dim": 4,
+      "topology": "kinematic_reconstruction"
+    },
+    {
+      "backend": "reconstruct_solver",
+      "blockers": [
+        "kinematic reconstruction models lack torque-driven supervision"
+      ],
+      "checkpoint_layout": "from_identity:q=17,nu=17,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": false,
+      "independent_dof": 17,
+      "model_id": "reconstruction_golfer",
+      "pilot_stage": "reference_only",
+      "q_dim": 17,
+      "topology": "kinematic_reconstruction"
+    },
+    {
+      "backend": "reconstruct_solver",
+      "blockers": [
+        "kinematic reconstruction models lack torque-driven supervision"
+      ],
+      "checkpoint_layout": "from_identity:q=5,nu=5,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": false,
+      "independent_dof": 5,
+      "model_id": "reconstruction_triple_pendulum",
+      "pilot_stage": "reference_only",
+      "q_dim": 5,
+      "topology": "kinematic_reconstruction"
+    },
+    {
+      "backend": "drake",
+      "blockers": [
+        "reference catalog URDF is not a pilot neural training target"
+      ],
+      "checkpoint_layout": "from_identity:q=40,nu=40,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 40,
+      "model_id": "reference_drake_urdf",
+      "pilot_stage": "reference_only",
+      "q_dim": 40,
+      "topology": "reference_catalog_urdf"
+    },
+    {
+      "backend": "reconstruct_solver",
+      "blockers": [
+        "reference catalog URDF is not a pilot neural training target"
+      ],
+      "checkpoint_layout": "from_identity:q=32,nu=32,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": false,
+      "independent_dof": 32,
+      "model_id": "reference_human_subject",
+      "pilot_stage": "reference_only",
+      "q_dim": 32,
+      "topology": "reference_catalog_urdf"
+    },
+    {
+      "backend": "mujoco",
+      "blockers": [
+        "reference catalog URDF is not a pilot neural training target"
+      ],
+      "checkpoint_layout": "from_identity:q=21,nu=21,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": false,
+      "independent_dof": 21,
+      "model_id": "reference_mujoco_humanoid",
+      "pilot_stage": "reference_only",
+      "q_dim": 21,
+      "topology": "reference_catalog_urdf"
+    },
+    {
+      "backend": "pinocchio",
+      "blockers": [
+        "reference catalog URDF is not a pilot neural training target"
+      ],
+      "checkpoint_layout": "from_identity:q=46,nu=46,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 46,
+      "model_id": "reference_pinocchio_urdf",
+      "pilot_stage": "reference_only",
+      "q_dim": 46,
+      "topology": "reference_catalog_urdf"
+    },
+    {
+      "backend": "pinocchio",
+      "blockers": [
+        "reference catalog URDF is not a pilot neural training target"
+      ],
+      "checkpoint_layout": "from_identity:q=46,nu=46,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": true,
+      "independent_dof": 46,
+      "model_id": "reference_pinocchio_urdf_ik",
+      "pilot_stage": "reference_only",
+      "q_dim": 46,
+      "topology": "reference_catalog_urdf"
+    },
+    {
+      "backend": "reconstruct_solver",
+      "blockers": [
+        "reference catalog URDF is not a pilot neural training target"
+      ],
+      "checkpoint_layout": "from_identity:q=28,nu=28,nc=0",
+      "constraint_count": 0,
+      "governing_issues": ["#10585", "#10616"],
+      "has_simulated_club": false,
+      "independent_dof": 28,
+      "model_id": "reference_simple_humanoid",
+      "pilot_stage": "reference_only",
+      "q_dim": 28,
+      "topology": "reference_catalog_urdf"
+    }
+  ],
+  "schema": "neural-model-roster/1.0.0"
+}
