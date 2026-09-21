@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8887
+- **Branch:** fix/8887-pose-studio-joint-limits
+- **PR:** #10650 (open)
+- **Paths:** src/shared/python/pose_interchange/live_kinematics.py; src/shared/python/pose_interchange/services/\_mock.py; src/shared/python/pose_interchange/services/drake.py; src/shared/python/pose_interchange/services/mujoco.py; src/shared/python/pose_interchange/services/myosuite.py; src/shared/python/pose_interchange/services/opensim.py; src/shared/python/pose_interchange/services/pinocchio.py; src/shared/python/pose_interchange/services/simscape.py; src/tools/pose_studio/controllers/engine_controller.py; src/tools/pose_studio/gui.py; src/tools/pose_studio/widgets/joint_panel.py; tests/tools/pose_studio/test_engine_controller_internals.py; tests/unit/tools/pose_studio/test_gui.py; tests/unit/tools/pose_studio/test_joint_panel.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 (`563b5fdd8`) — mypy/bandit/pytest-unit passed on push; new JointPanel/EngineController/gui tests independently re-verified against real PyQt6 widgets outside pytest because this workstation's real PyQt6 install crashes `test_joint_panel.py`/`test_gui.py` under plain pytest (confirmed pre-existing via `git stash`); ruff check/format clean.
+- **Summary:** `LiveKinematicsService.joint_limits()` extends the kinematics-service protocol (every engine service implements it, `{}` pending real anatomical data); `JointPanel.set_limits()`/`set_error()` re-range joints per engine and give visible feedback on a rejected edit; wired from `MainWidget` on init, engine switch, and angle-edit rejection/success.
+
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
 - **State:** in_review
