@@ -71,6 +71,18 @@ class NativeClosurePositionLinearization(NamedTuple):
     jacobian: NDArray[np.float64]
 
 
+class NativeClosureForceJacobian(NamedTuple):
+    """Velocity constraint and its wrench dual in the constraint LOCAL frame.
+
+    Rows are linear then angular; columns follow names. A wrench in this
+    constraint frame maps to generalized effort as jacobian.T @ wrench.
+    This is distinct from differentiating a finite SE(3) pose-error logarithm.
+    """
+
+    names: tuple[str, ...]
+    jacobian: NDArray[np.float64]
+
+
 class NativeClosureTrajectoryResiduals(NamedTuple):
     """Pose, velocity, and acceleration weld residuals at one native state."""
 
@@ -313,6 +325,19 @@ class NativePinocchioModel:
         self.accelerations(position, velocity, efforts)
         return self.closure_errors()
 
+    def _refresh_constraint_data(self) -> None:
+        """Refresh constraint placement data from current joint placements."""
+        for cm, cd in zip(self.constraints, self.constraint_data, strict=True):
+            if hasattr(cm, "calc"):
+                cm.calc(self.model, self.data, cd)
+            else:
+                oMc1 = self.data.oMi[cm.joint1_id] * cm.joint1_placement
+                oMc2 = self.data.oMi[cm.joint2_id] * cm.joint2_placement
+                cd.c1Mc2 = oMc1.inverse() * oMc2
+                cd.oMc1 = oMc1
+                if hasattr(cd, "oMc2"):
+                    cd.oMc2 = oMc2
+
     def _constraints_jacobian(
         self, names: tuple[str, ...]
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
@@ -356,6 +381,27 @@ class NativePinocchioModel:
         position.setflags(write=False)
         jacobian.setflags(write=False)
         return NativeClosurePositionLinearization(names, position, jacobian)
+
+    def closure_force_jacobian(
+        self, coordinates: Mapping[str, float]
+    ) -> NativeClosureForceJacobian:
+        """Refresh the native velocity constraint without a dynamics solve.
+
+        Preconditions: exactly the finite native coordinate inventory.
+        Postconditions: owned finite read-only 6-by-n matrix in caller order.
+        Use its transpose for inverse-dynamics grip-force allocation. Position
+        fitting must continue to use closure_position_linearization instead.
+        """
+        q = self.configuration(coordinates)
+        names = tuple(coordinates)
+        self._pin.computeJointJacobians(self.model, self.data, q)
+        self._refresh_constraint_data()
+        _, jacobian = self._constraints_jacobian(names)
+        jacobian = np.array(jacobian, dtype=float, copy=True)
+        if jacobian.shape != (6, len(names)) or not np.isfinite(jacobian).all():
+            raise ValueError("Invalid native weld force Jacobian")
+        jacobian.setflags(write=False)
+        return NativeClosureForceJacobian(names, jacobian)
 
     def closure_trajectory_residuals(
         self,

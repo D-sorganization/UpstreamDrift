@@ -6,8 +6,11 @@ The proximal-to-distal framework becomes the common language for an open,
 engine-neutral program that tests golf-swing and human-motion mechanisms from
 analytical mechanics through governed human evidence. The program is managed
 by [epic #8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557),
-a child of the existing model-completion epic. It is not a promise that the
-current theory will survive. A useful outcome may be support, contradiction,
+the single canonical completion epic. It supersedes the older master framing in
+[#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426) without
+declaring that older scope complete; every still-open scientific child remains
+governed by #8557 until its own acceptance evidence passes. It is not a promise
+that the current theory will survive. A useful outcome may be support, contradiction,
 inconclusive evidence, or discovery that a proposed quantity is not
 identifiable.
 
@@ -250,6 +253,52 @@ schema, release qualification, and AffineDrift's pinned review surface. The
 GitHub epic is the scheduling authority; this document defines the durable
 scientific contract.
 
+## Program Status Ledger
+
+Verified 2026-09-11 against this checkout and the epic's dependency-ordered
+issue ledger. Issue state is not completion evidence: a row reads `complete`
+only when merged, reproducible artifacts satisfy its exit gate, and `open`
+rows name the gate that still blocks them. The zero contradicted count in the
+claim authority does not mean every mechanism survived; supported claims may
+accurately report null or adverse model results.
+
+| Workstream or Milestone                        | Status   | Evidence or Blocking Gate                                                                                                                                                                                                                                |
+| ---------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A — Atomic claim census and adversarial audit  | complete | #8724 normalized authority; [`data/claim_audit_registry.json`](data/claim_audit_registry.json), [`data/claim_adjudication_summary.json`](data/claim_adjudication_summary.json), [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json) |
+| B — Biomechanics research expansion            | open     | Source register and leads exist above; the model-to-measurement map, identifiability assessment, and preregistered falsifiers are not complete for every promoted claim                                                                                  |
+| C — Nonlinear dynamics and control expansion   | open     | [`HYBRID_SYSTEM_CONTRACT.md`](HYBRID_SYSTEM_CONTRACT.md) and local diagnostics are registered; #9027 governs execution and #9092 the analytical local-rank slice; out-of-sample controller and inference evidence is outstanding                         |
+| D — Comprehensive model ladder                 | open     | Tiers 1–3 and the bounded tier-4 prerequisites (#8668, #8680, #8682, #8685) are qualified; calibrated distributed contact, tiers 5–8, and the #8752/#8800 uncertainty campaigns remain open                                                              |
+| E — Data, reproducibility, and public resource | open     | Manifests, checksums, and fail-closed qualification are merged ([`OPEN_RELEASE_QUALIFICATION.md`](OPEN_RELEASE_QUALIFICATION.md)); the archival profile and persistent identifier are not met                                                            |
+| F — NotebookLM research collections            | open     | No network-validated profile on 2026-08-12, 2026-08-14, or 2026-09-06; no notebook identifier is recorded and repository evidence remains the authority                                                                                                  |
+| G — Side-task integration                      | open     | Tools #4430 is complete and pinned; Tools #4142 remains open, so its ensemble authority is not yet consumed here                                                                                                                                         |
+| M0 — Audit infrastructure                      | complete | [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md), [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md), and the reproducible core validation battery below                                                                                                   |
+| M1 — Paper adjudication                        | complete | [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md) and [`data/release_claim_review.json`](data/release_claim_review.json)                                                                                                        |
+| M2 — Research map                              | open     | Collection manifests are blocked by Workstream F; the experiment matrix is partial                                                                                                                                                                       |
+| M3 — Reusable uncertainty authority            | open     | Tools #4142 is not merged                                                                                                                                                                                                                                |
+| M4 — Articulated spatial model                 | open     | Calibrated grip/shaft and whole-body contact are outstanding; the #8752 terminal record is not on remote `main`; #8800 holds 93/830 restart checkpoints                                                                                                  |
+| M5 — Neuromuscular and control models          | open     | Depends on M4 and Workstream C                                                                                                                                                                                                                           |
+| M6 — Human falsification                       | open     | #9004 and #8556 have no qualifying governed participant dataset; motion-only data cannot close the bilateral-wrench gate                                                                                                                                 |
+| M7 — Open release                              | open     | The computational profile passes; the archival profile, external deposit, and stable citation are outstanding                                                                                                                                            |
+
+The epic closes only when every `open` row above reaches `complete` through
+protected merges verified on remote `main`. Until then this ledger, the root
+`AGENT_HANDOFF.md`, and the
+[falsification matrix](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) are the
+durable record; chat history is not.
+
+### Reproducible Core Validation
+
+```bash
+python -m scripts.research.proximal_distal_energy.claim_audit validate
+python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
+python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
+python -m scripts.research.proximal_distal_energy.qualify_open_release validate --source-revision "$(git rev-parse HEAD)" --publication-profile computational
+pytest tests/research -q
+```
+
+Passing this common battery does not close a child whose narrower scientific
+acceptance criteria remain unmet.
+
 ## Completed Candidate Census and Ongoing Release Review
 
 The narrative census adjudicates all 1,100 paper candidates against 303 atomic
@@ -353,6 +402,83 @@ engine-parity gates pass. Multi-fiber grips can be partly open, but no natural
 active-set transition occurs through 50 ms. The result qualifies an engineering
 contact discretization, not measured grip pressure, fingers, friction, shaft
 response, timing economy, delivery benefit, human transfer, or strategy.
+
+Child issue #8797 extends the same distributed grip with a bounded regularized
+Coulomb comparator ($\mu\in\{0,0.35\}$), unilateral opening and reattachment
+events, and a perfect-stick projection control. The 576-trajectory matrix, a
+24-trajectory dead-zone event probe, and 144 stick-projection cells pass every
+registered gate. The probes record 80 opening and 186 reattachment station
+events with exact MuJoCo--Pinocchio agreement, but nominal branches remain
+right-censored through 50 ms. Finite-friction minus frictionless 50 ms speed
+differences span $-0.0483$ to $+0.0462$ m/s with a median of $+0.00056$ m/s,
+so mixed signs reject a universal finite-friction benefit.
+
+Child issue #8715 adds passive shaft compliance while holding the state
+authority, five-fiber grip law, perturbation, and support pathway fixed. Two
+orthogonal first-mode bending coordinates and one torsional coordinate are
+qualified against a committed structural basis with a rigid-shaft comparator
+and separately excited bending, torsion, and coupled branches. Twelve states,
+two velocity signs, 0.25 and 0.125 ms steps, and two native engines produce
+384 trajectories summarized at nested 4, 10, 25, and 50 ms. All numerical,
+initial-energy, declared-domain, refinement, and parity gates pass; the 1.0 and
+0.5 ms torsion probes leave the declared linear domain and are retained as
+excluded negative controls. Under the preregistered 5% peak-load and
+dissipated-work match, 126 of 384 coupled-versus-rigid cells qualify, and the
+coupled-minus-rigid 50 ms speed difference spans $-0.0285$ to $+0.0212$ m/s
+with 82 negative and 44 positive cells.
+
+Child issue #8723 adds finite base translation, base pitch, ground reaction,
+and intrinsic free moment with a fixed-base comparator, a rigid-shaft control,
+and a horizontal-restraint-removed control. Center-of-pressure reference
+reversal is contract-tested as a transport invariance: it changes the
+transported moment but not the generalized force or the trajectory. A
+42-trajectory initialization diagnostic shows that natural-zero, gravity-only,
+and conditional-base starts move peak ground force from 32.8 to 565.5 N, so
+the atlas uses natural zero as the only exact common-state killswitch. All 576
+atlas trajectories pass the declared-domain, numerical, refinement, and
+two-engine gates. The primary load--work screen is adverse: none of 384
+coupled-versus-fixed cells matches at 5%, because ground damping adds a
+dissipative pathway that a fixed base cannot contain, so the uniformly
+positive unmatched speed differences (0.0280--0.1772 m/s) do not identify a
+ground-pathway effect. A separately labeled post-hoc screen that excludes
+ground damping from the work variable admits 60 cells with 20 positive and 40
+negative signs.
+
+Together these children answer the four questions registered for parent issue
+#8684 at the synthetic, model-conditional tier. First, the typed open/taut
+conclusions persist when grip force is distributed: one-, three-, and
+five-station grips at equal total stiffness differ by at most 0.0030 relative
+between three and five fibers on the fine step, and no natural active-set
+transition occurs through 50 ms in any nominal branch. Second, shaft
+bending/torsion and ground/free-moment pathways are mechanically active and
+change the magnitude and sign of the force-generated couple and of the 50 ms
+delivery proxy under identical-state killswitches, but every matched screen
+contains both signs across states, velocity branches, and horizons. Third,
+the apparent benefits decompose into preload energy (the initialization
+spread of the ground tier), contact discretization (the 0.042 one-to-three
+fiber discrepancy), shaft recoil (the matched-cell sign split), and ground
+damping work (the failed primary match); law class, time step, and numerical
+stabilization are excluded as sources by the common-initial-energy, refinement,
+and two-engine gates. Fourth, no favorable region survives matched state,
+matched work/load, time-step and station refinement, and independent
+MuJoCo/Pinocchio evaluation simultaneously. Every horizon through 50 ms is
+right-censored with zero nominal first failures; the only first-failure classes
+recorded are the excluded coarse-step torsion domain exits and the
+initialization-dependent ground transients. All branches retain no direct club
+actuation.
+
+What remains open is promotion, not the registered design. The grip is a
+memoryless tension-fiber law with a viscous-limited friction bound rather than
+stateful stick--slip or measured pressure; the shaft is a first-mode linear
+reference rather than a calibrated club; the ground is linear bilateral
+support rather than unilateral Coulomb foot contact; the 40-sample
+parameter-uncertainty screen on the three-fiber grip alone (17 full-loss, 5
+partial-opening, and 18 slip outcomes under energy closure) has not been
+crossed with the shaft and ground pathways; and the distributed contact event
+smoke registered under #9306 is frozen but unexecuted. None of this tier
+establishes tissue mechanics, scapular or wrist intent, passive human muscle
+action, injury risk, timing economy, a universal transfer strategy, or
+coaching advice. Human promotion remains blocked on #8556.
 
 Completion of the candidate census is not completion of release review or the
 research program. In
