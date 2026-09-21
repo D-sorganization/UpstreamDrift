@@ -99,3 +99,72 @@ def test_joint_panel_on_spinbox_changed() -> None:
     panel._on_spinbox_changed(joint, 45.0)
 
     panel._sliders[joint].setValue.assert_called_with(450)  # type: ignore
+
+
+def test_joint_panel_set_limits_rejects_non_mapping() -> None:
+    panel = JointPanel()
+    with pytest.raises(TypeError):
+        panel.set_limits([("a", (0.0, 1.0))])  # type: ignore
+
+
+def test_joint_panel_set_limits_rejects_inverted_range() -> None:
+    panel = JointPanel()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+    with pytest.raises(ValueError):
+        panel.set_limits({joint: (10.0, -10.0)})
+
+
+def test_joint_panel_set_limits_re_ranges_slider_and_spinbox() -> None:
+    panel = JointPanel()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+
+    panel.set_limits({joint: (-30.0, 30.0)})
+
+    panel._sliders[joint].setMinimum.assert_called_with(-300)  # type: ignore
+    panel._sliders[joint].setMaximum.assert_called_with(300)  # type: ignore
+    panel._spinboxes[joint].setMinimum.assert_called_with(-30.0)  # type: ignore
+    panel._spinboxes[joint].setMaximum.assert_called_with(30.0)  # type: ignore
+
+
+def test_joint_panel_set_limits_defaults_unlisted_joints() -> None:
+    panel = JointPanel()
+    other_joint = REFERENCE_GOLFER_FIELDS[1]
+
+    panel.set_limits({REFERENCE_GOLFER_FIELDS[0]: (-30.0, 30.0)})
+
+    panel._sliders[other_joint].setMinimum.assert_called_with(-1800)  # type: ignore
+    panel._sliders[other_joint].setMaximum.assert_called_with(1800)  # type: ignore
+
+
+def test_joint_panel_set_limits_does_not_read_or_emit() -> None:
+    """set_limits only re-ranges min/max; Qt clamps the value itself, so
+    this must not read slider.value() (real widgets return an int; the
+    unit-test double does not) or emit angle_edited."""
+    panel = JointPanel()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+
+    seen: list[tuple[str, float]] = []
+    panel.angle_edited.connect(lambda name, value: seen.append((name, value)))
+
+    panel.set_limits({joint: (-30.0, 30.0)})
+
+    panel._sliders[joint].value.assert_not_called()  # type: ignore
+    assert seen == []
+
+
+def test_joint_panel_set_error_applies_and_clears_border() -> None:
+    panel = JointPanel()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+
+    panel.set_error(joint, True)
+    style_call = panel._spinboxes[joint].setStyleSheet.call_args  # type: ignore
+    assert "border" in style_call.args[0]
+
+    panel.set_error(joint, False)
+    panel._spinboxes[joint].setStyleSheet.assert_called_with("")  # type: ignore
+
+
+def test_joint_panel_set_error_rejects_unknown_joint() -> None:
+    panel = JointPanel()
+    with pytest.raises(KeyError):
+        panel.set_error("not-a-joint", True)
