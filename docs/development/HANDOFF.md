@@ -1009,7 +1009,10 @@ SLSQP acceptance without recreating the solver or accepting state-reset motion.
 - [Canonical Representations](simscape_tour_matching/REPRESENTATION_HANDOFF.md):
   angle/quaternion/rate/convective-acceleration/effort conversions and fixed-frame
   transport. Preserve units, named frames, branch/winding and model identity.
-  Moving-frame acceleration transport and #8867 convention consolidation remain open.
+  Moving-frame acceleration transport and #8867 convention consolidation remain open;
+  #8867 is a Cluster C residual in the
+  [adversarial review remediation ledger](adversarial_review_remediation_9410.md)
+  (epic #9410, 34 of 61 children landed on `main` at `db4fe88c4`).
 - [MuJoCo](mujoco_native_matching/HANDOFF.md) and
   [Drake](drake_native_matching/HANDOFF.md): native adapters and narrower receipts
   exist; alternate quaternion builders/full trajectory equivalence remain open.
