@@ -3,9 +3,11 @@
 This package exposes a tiny ``publish`` / ``subscribe`` pair that lets one
 launcher tool stream events to another without the two having to share a
 process or a Qt widget tree. The default transport is a JSON-line append
-log under the user cache dir; a websocket transport can be opted into via
-the ``REALTIME_TRANSPORT`` env var (left as a follow-up — see Subtask 4
-of EPIC #4993).
+log under the user cache dir; a websocket transport (Subtask 4 of EPIC
+#4993) can be opted into via ``transport="ws"`` or the
+``REALTIME_TRANSPORT=ws`` env var — see :mod:`.api` for the full
+transport contract. Any other transport value is a configuration error
+and raises immediately rather than silently falling back (issue #8869).
 
 The contract is intentionally narrow:
 

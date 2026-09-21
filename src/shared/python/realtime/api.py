@@ -1,10 +1,24 @@
 """Public API for the realtime IPC facade.
 
 This module is intentionally tiny: it owns the channel registry and a
-small dispatch glue layer that delegates to a transport (file by
-default; websocket as a follow-up). The Pose Studio cross-tool demo
-(Subtask 6 of EPIC #4993) only needs the file transport, so that is
-what is wired up here.
+small dispatch glue layer that delegates to a transport. Two transports
+are supported (see :data:`SUPPORTED_TRANSPORTS`):
+
+- ``"file"`` (default) — :class:`~.transport_file.FileTransport`. Works
+  across processes started in either order and across crashes; the
+  right choice for the Pose Studio cross-tool demo (Subtask 6 of
+  EPIC #4993).
+- ``"ws"`` — :class:`~.ws_pubsub.WSPubSub`. Lower latency, backed by the
+  Rust ``upstream-realtime`` Tokio server when its wheel is importable
+  (soak-tested nightly, see ``.github/workflows/realtime-soak.yml``),
+  otherwise an autostarted FastAPI/uvicorn server. Opt in explicitly via
+  the ``transport`` argument or the ``REALTIME_TRANSPORT`` env var —
+  constructing it starts a background server, so it is never selected
+  implicitly.
+
+Any other value for ``transport`` / ``REALTIME_TRANSPORT`` is a
+configuration error and raises :class:`ValueError` immediately (issue
+#8869) rather than silently falling back to the file transport.
 """
 
 from __future__ import annotations
@@ -17,16 +31,23 @@ from typing import Any
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .transport_file import FileTransport, default_channel_path
+from .ws_pubsub import WSPubSub
 
 logger = get_logger(__name__)
 
 __all__ = [
     "CHANNEL_REGISTRY",
+    "SUPPORTED_TRANSPORTS",
     "Subscription",
     "publish",
     "register_channel",
     "subscribe",
 ]
+
+# The only values ``transport`` / ``REALTIME_TRANSPORT`` may resolve to.
+# Keep in contract lockstep with the docstring above and with
+# ``_resolve_transport``'s error message.
+SUPPORTED_TRANSPORTS: tuple[str, ...] = ("file", "ws")
 
 
 # Channel name -> small descriptor. Tools register here at import time so
@@ -103,12 +124,13 @@ class Subscription:
     """Handle returned by :func:`subscribe`.
 
     The :meth:`unsubscribe` method tears the underlying transport
-    watcher down. It is idempotent.
+    watcher down. It is idempotent. Backed uniformly by a single
+    no-argument callable regardless of which transport produced it, so
+    callers never reach into transport internals (Law of Demeter).
     """
 
     channel: str
-    _transport: FileTransport | None = None
-    _token: int = -1
+    _unsubscribe_fn: Callable[[], None] | None = None
     _closed: bool = field(default=False)
 
     def unsubscribe(self) -> None:
@@ -122,9 +144,9 @@ class Subscription:
         if self._closed:
             return
         self._closed = True
-        if self._transport is not None and self._token >= 0:
+        if self._unsubscribe_fn is not None:
             try:
-                self._transport.unsubscribe(self._token)
+                self._unsubscribe_fn()
             except Exception:  # pragma: no cover - defensive
                 logger.exception(
                     "Subscription.unsubscribe failed on channel %s", self.channel
@@ -136,6 +158,13 @@ class Subscription:
 # and cheap to construct, so a single instance per process is fine.
 _TRANSPORT: FileTransport | None = None
 
+# Module-global websocket transport, lazily initialised on first use.
+# Unlike the file transport this one is *not* free to construct: it
+# autostarts a background server (Rust in-process, or a spawned
+# FastAPI/uvicorn process). Only build it when a caller actually asks
+# for "ws", never speculatively.
+_WS_TRANSPORT: WSPubSub | None = None
+
 
 def _get_transport() -> FileTransport:
     global _TRANSPORT
@@ -144,39 +173,85 @@ def _get_transport() -> FileTransport:
     return _TRANSPORT
 
 
+def _get_ws_transport() -> WSPubSub:
+    global _WS_TRANSPORT
+    if _WS_TRANSPORT is None:
+        _WS_TRANSPORT = WSPubSub()
+    return _WS_TRANSPORT
+
+
+def _resolve_transport(explicit: str | None) -> str:
+    """Resolve and validate the transport to use for one call.
+
+    Precedence: the explicit *transport* argument, then the
+    ``REALTIME_TRANSPORT`` env var, else ``"file"``.
+
+    Contract (issue #8869): an unsupported value is a configuration
+    error and fails loudly here — it must never silently fall back to
+    another transport.
+
+    Args:
+        explicit: Caller-supplied transport override, or ``None`` to
+            fall back to the environment/default.
+
+    Returns:
+        One of :data:`SUPPORTED_TRANSPORTS`.
+
+    Raises:
+        ValueError: If the resolved value is not in
+            :data:`SUPPORTED_TRANSPORTS`.
+    """
+    transport = (
+        explicit
+        if explicit is not None
+        else os.environ.get("REALTIME_TRANSPORT", "file")
+    )
+    if transport not in SUPPORTED_TRANSPORTS:
+        raise ValueError(
+            f"unsupported realtime transport {transport!r}; supported "
+            f"values are {SUPPORTED_TRANSPORTS!r}"
+        )
+    return transport
+
+
 def publish(channel: str, payload: Any, transport: str | None = None) -> None:
     """Publish *payload* on *channel*.
 
-    *payload* must be JSON-serialisable. Errors are logged and swallowed
-    — callers should treat realtime as a hint layer, never a critical
-    path. The default transport is the file transport; the websocket
-    transport can be opted into via ``REALTIME_TRANSPORT=ws`` in the
-    future (not implemented here).
+    *payload* must be JSON-serialisable. Once the transport is resolved,
+    delivery errors (I/O, network) are logged and swallowed — callers
+    should treat realtime as a hint layer, never a critical path. An
+    unsupported *transport* is different: that is a caller/config
+    mistake, not a delivery failure, so it raises immediately instead of
+    being swallowed or silently downgraded to the file transport.
 
     Args:
         channel: Channel to publish on (e.g., "scope/topic/sub")
         payload: JSON-serialisable dict to publish
         transport: Optional transport override ("file" or "ws"). If not
             provided, uses REALTIME_TRANSPORT env var or defaults to "file".
+
+    Raises:
+        ValueError: If the resolved transport is not one of
+            :data:`SUPPORTED_TRANSPORTS`.
     """
     if not isinstance(channel, str) or not channel.strip():
         logger.warning("realtime.publish: invalid channel %r", channel)
         return
-    if transport is None:
-        transport = os.environ.get("REALTIME_TRANSPORT", "file")
-    if transport != "file":
-        logger.debug(
-            "realtime.publish: transport %r not wired in this build, "
-            "falling back to file",
-            transport,
-        )
+    resolved = _resolve_transport(transport)
     try:
-        _get_transport().publish(channel, payload)
+        if resolved == "ws":
+            _get_ws_transport().publish(channel, payload)
+        else:
+            _get_transport().publish(channel, payload)
     except Exception:
         logger.exception("realtime.publish failed on channel %s", channel)
 
 
-def subscribe(channel: str, callback: Callable[[Any], None]) -> Subscription:
+def subscribe(
+    channel: str,
+    callback: Callable[[Any], None],
+    transport: str | None = None,
+) -> Subscription:
     """Register *callback* to fire for every payload published on *channel*.
 
     The callback runs on a transport-owned daemon thread.  Consumers that
@@ -186,30 +261,41 @@ def subscribe(channel: str, callback: Callable[[Any], None]) -> Subscription:
     If the underlying transport raises during setup, the error is logged and
     a closed :class:`Subscription` is returned rather than propagating the
     exception — callers can check ``sub._closed`` if they need to detect the
-    failure.
+    failure. An unsupported *transport* is not a setup failure and is not
+    swallowed this way; see Raises below.
 
     Args:
         channel: Channel name to subscribe to (e.g. ``"pose/canonical"``).
             Must be a non-empty string.
         callback: Callable invoked with the decoded payload dict each time a
             message arrives.  Must accept a single positional argument.
+        transport: Optional transport override ("file" or "ws"). If not
+            provided, uses REALTIME_TRANSPORT env var or defaults to "file".
 
     Returns:
         A :class:`Subscription` handle.  Call
         :meth:`Subscription.unsubscribe` to stop receiving messages.
 
     Raises:
-        ValueError: If ``channel`` is empty or whitespace.
+        ValueError: If ``channel`` is empty or whitespace, or if the
+            resolved transport is not one of :data:`SUPPORTED_TRANSPORTS`.
         TypeError: If ``callback`` is not callable.
     """
     if not isinstance(channel, str) or not channel.strip():
         raise ValueError("channel must be a non-empty string")
     if not callable(callback):
         raise TypeError("callback must be callable")
+    resolved = _resolve_transport(transport)
     try:
-        transport = _get_transport()
-        token = transport.subscribe(channel, callback)
-        return Subscription(channel=channel, _transport=transport, _token=token)
+        if resolved == "ws":
+            ws_sub = _get_ws_transport().subscribe(channel, callback)
+            return Subscription(channel=channel, _unsubscribe_fn=ws_sub.unsubscribe)
+        file_transport = _get_transport()
+        token = file_transport.subscribe(channel, callback)
+        return Subscription(
+            channel=channel,
+            _unsubscribe_fn=lambda: file_transport.unsubscribe(token),
+        )
     except Exception:
         logger.exception("realtime.subscribe failed on channel %s", channel)
-        return Subscription(channel=channel, _transport=None, _token=-1, _closed=True)
+        return Subscription(channel=channel, _unsubscribe_fn=None, _closed=True)
