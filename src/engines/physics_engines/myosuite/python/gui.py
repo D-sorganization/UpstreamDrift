@@ -87,6 +87,7 @@ class MainWidget(QWidget):
         super().__init__(parent)
         self.setWindowTitle("MyoSuite Dashboard")
         self._build_ui()
+        self._on_probe_clicked()
         logger.info("MyoSuite MainWidget initialized")
 
     # ---- UI construction ------------------------------------------------
@@ -114,6 +115,7 @@ class MainWidget(QWidget):
         # Status row -----------------------------------------------------
         status_row = QHBoxLayout()
         self._status_label = QLabel("Engine status: not probed")
+        self._status_label.setWordWrap(True)
         self._status_label.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
@@ -145,6 +147,31 @@ class MainWidget(QWidget):
     def _on_probe_clicked(self) -> None:
         """Lazy-probe the optional MyoSuite engine and report status."""
         try:
+            from pathlib import Path
+
+            from src.shared.python.engine_core.engine_availability import (
+                MYOSUITE_AVAILABLE,
+            )
+
+            missing_parts: list[str] = []
+            if not MYOSUITE_AVAILABLE:
+                missing_parts.append("wheel 'myosuite' (run: pip install myosuite)")
+
+            repo_root = Path(__file__).resolve().parents[6]
+            myo_sim_dir = repo_root / "shared" / "models" / "myosuite" / "myo_sim"
+            if not myo_sim_dir.exists() or not any(myo_sim_dir.iterdir()):
+                missing_parts.append(
+                    "submodule 'shared/models/myosuite/myo_sim' "
+                    "(run: git submodule update --init shared/models/myosuite/myo_sim)"
+                )
+
+            if missing_parts:
+                bullets = "\n".join(f"  • Missing {p}" for p in missing_parts)
+                self._status_label.setText(
+                    f"Engine status: unavailable\n\nTo enable MyoSuite:\n{bullets}"
+                )
+                return
+
             # Lazy import: the engine module pulls in MyoSuite/Gym/MuJoCo.
             from .myosuite_physics_engine import MyoSuitePhysicsEngine
 
@@ -153,17 +180,18 @@ class MainWidget(QWidget):
             # the wrapper instantiates fine, and the probe is purely a
             # smoke test. Suppress the abstract-class diagnostic.
             engine = MyoSuitePhysicsEngine()  # type: ignore[abstract]
+            del engine
+            self._status_label.setText("Engine status: available")
         except (
             Exception  # noqa: BLE001 - environment-dependent third-party import
         ) as exc:  # pragma: no cover - environment-dependent
             logger.warning("MyoSuite engine probe failed: %s", exc)
-            self._status_label.setText(f"Engine status: unavailable ({exc!s})")
-            return
-        # We don't keep a handle to the engine here — the dashboard is a
-        # status surface, not a runtime owner. Discarding the reference
-        # is intentional.
-        del engine
-        self._status_label.setText("Engine status: available")
+            self._status_label.setText(
+                f"Engine status: unavailable ({exc!s})\n\n"
+                "To enable MyoSuite:\n"
+                "  • Install wheel: pip install myosuite\n"
+                "  • Initialize submodule: git submodule update --init shared/models/myosuite/myo_sim"
+            )
 
     # ---- embed-contract surface ----------------------------------------
 

@@ -57,6 +57,7 @@ follow-up" (`#6805`).
 
 from __future__ import annotations
 
+import math
 import textwrap
 from importlib import import_module
 from importlib.util import find_spec
@@ -315,7 +316,8 @@ def _camera_geometry(
         ]
     )
     radius = max(
-        float(np.linalg.norm(span_mm)) * _CAMERA_RADIUS_FACTOR, _MIN_CAMERA_RADIUS_MM
+        float(math.sqrt(np.vdot(span_mm, span_mm))) * _CAMERA_RADIUS_FACTOR,
+        _MIN_CAMERA_RADIUS_MM,  # ⚡ Bolt: math.sqrt(np.vdot) avoids np.linalg.norm overhead
     )
     direction = np.asarray(camera.eye_direction, dtype=np.float64)
     eye = (

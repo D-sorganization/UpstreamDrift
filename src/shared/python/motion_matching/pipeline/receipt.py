@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-import hashlib
+from collections.abc import Mapping
 from dataclasses import dataclass
+import hashlib
+import json
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -17,9 +20,11 @@ from src.shared.python.motion_matching.pipeline.constants import (
     STANCE_TOLERANCE_M,
     TOE_SPHERES,
 )
+from src.shared.python.motion_matching.acceptance import Horizon, evaluate
+from src.shared.python.motion_matching.pipeline.receipt_schema import validate_receipt
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
     from src.shared.python.motion_matching.pipeline.lane import Lane
@@ -48,6 +53,8 @@ class GroundSupportReceiptInputs:
     kin: FullBodyMarkerKinematics
     q_ref: np.ndarray
     elapsed_s: float
+    backend: str = "mujoco"
+    validate: bool = True
 
 
 def build_ground_support_receipt(
@@ -74,7 +81,8 @@ def build_ground_support_receipt(
     tob_frame = min(int(round(0.83 * RATE_HZ)), len(q_ref) - 1)
     tob_posture = posture_summary(kin, q_ref[tob_frame])
 
-    return {
+    receipt_dict = {
+        "backend": inputs.backend,
         "base_spec_sha256": canonical_sha256(inputs.base_spec),
         "base_spec_file": inputs.spec_path.name,
         "spec_file": inputs.scaled_path.name,
@@ -82,6 +90,10 @@ def build_ground_support_receipt(
         "recalibrate_upper": bool(inputs.recalibrate_upper),
         "anthropometric": (
             list(inputs.anthropometric) if inputs.anthropometric else None
+        ),
+        "de_leva_table_sha256": (
+            inputs.base_spec.get("de_leva_table_sha256")
+            or inputs.base_spec.get("subject", {}).get("de_leva_table_sha256")
         ),
         "posture_top_of_backswing": tob_posture,
         "spec_sha256": hashlib.sha256(inputs.spec_bytes).hexdigest(),
@@ -117,3 +129,57 @@ def build_ground_support_receipt(
             f"full-body model ({inputs.qualification_note}); not a fit, not acceptance"
         ),
     }
+
+    # Evaluate physical & kinematic acceptance under Matched Swing Program contract (MS-01)
+    verdict = evaluate(receipt_dict, horizon=Horizon.G3)
+    receipt_dict["acceptance"] = verdict.as_dict()
+
+    if inputs.validate:
+        validate_receipt(receipt_dict)
+
+    return receipt_dict
+
+
+def log_pipeline_summary(
+    log: logging.Logger,
+    receipt: Mapping[str, Any],
+    ik_report: Mapping[str, Any],
+    calibration: Any,
+    calibration2: Any,
+) -> None:
+    """Log formatted summaries of address, dynamics, IK, and calibration.
+
+    Args:
+        log: Logger instance.
+        receipt: Complete ground support receipt dictionary.
+        ik_report: Full IK stage report dictionary.
+        calibration: Initial leg calibration result object.
+        calibration2: Recalibration result object after segment scaling.
+    """
+    log.info(
+        json.dumps(
+            {k: receipt[k] for k in ("address", "dynamics")}, indent=1, default=float
+        )
+    )
+    log.info(
+        "ik %s",
+        json.dumps(
+            {
+                k: ik_report[k]
+                for k in (
+                    "marker_rms_m",
+                    "segment_rms_m",
+                    "reference",
+                    "segment_scaling",
+                    "leg_angle_ranges_deg",
+                )
+            },
+            indent=1,
+            default=float,
+        ),
+    )
+    log.info(
+        "calibration rms %s -> scaled %s",
+        calibration.rms_per_iteration_m,
+        calibration2.rms_per_iteration_m,
+    )

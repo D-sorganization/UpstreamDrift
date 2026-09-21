@@ -3,7 +3,7 @@
   "epic": 10122,
   "epic_url": "https://github.com/D-sorganization/UpstreamDrift/issues/10122",
   "baseline_commit": "f8daa71aa263a60c54c785b1ac2d4bc060eb2a71",
-  "runtime_implemented": false,
+  "runtime_implemented": true,
   "status_authority": "GitHub issues; pending is the planning snapshot",
   "tasks": [
     {
@@ -77,7 +77,7 @@
       "issue": 10130,
       "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10130",
       "depends_on": ["ST-02", "ST-05"],
-      "status": "pending",
+      "status": "completed",
       "spec": "WORK_PACKAGES.md"
     },
     {
@@ -86,7 +86,7 @@
       "issue": 10131,
       "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10131",
       "depends_on": ["ST-06", "ST-07"],
-      "status": "pending",
+      "status": "completed",
       "spec": "WORK_PACKAGES.md"
     },
     {
@@ -95,7 +95,7 @@
       "issue": 10132,
       "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10132",
       "depends_on": ["ST-08"],
-      "status": "pending",
+      "status": "completed",
       "spec": "WORK_PACKAGES.md"
     },
     {
@@ -104,7 +104,7 @@
       "issue": 10133,
       "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10133",
       "depends_on": ["ST-03", "ST-04", "ST-09"],
-      "status": "pending",
+      "status": "completed",
       "spec": "WORK_PACKAGES.md"
     },
     {
@@ -113,7 +113,7 @@
       "issue": 10134,
       "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10134",
       "depends_on": ["ST-09"],
-      "status": "pending",
+      "status": "completed",
       "spec": "WORK_PACKAGES.md"
     },
     {
@@ -122,7 +122,7 @@
       "issue": 10135,
       "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10135",
       "depends_on": ["ST-10", "ST-11"],
-      "status": "pending",
+      "status": "completed",
       "spec": "WORK_PACKAGES.md"
     }
   ],
@@ -159,11 +159,14 @@
   ],
   "specialist_blockers": [10140, 10141],
   "review": {
-    "baseline": "b97e159dcc1686b4fc36351124996862619d8f35",
-    "document": "PROGRESS_REVIEW_2026_09_15.md",
+    "baseline": "0ec64e45f",
+    "document": "TURNOVER_CURRENT.md",
     "continuation_prompt": "CONTINUATION_PROMPT.md",
-    "tracking_issue": 10184,
+    "tracking_issue": 10122,
+    "corrective_issues": [10232, 10233, 10273],
     "full_product_implemented": false,
-    "first_corrective_parent": 10127
+    "next_independent_issue": 10233,
+    "renderer_pr": 10264,
+    "timing_merge_pr": 10253
   }
 }

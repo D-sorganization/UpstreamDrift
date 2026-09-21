@@ -34,6 +34,60 @@ from src.shared.python.motion_matching.visual_skeleton import (
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
 
+ENGINE_COLORS: dict[str, str] = {
+    "mujoco": "#1f77b4",  # Blue
+    "pinocchio": "#d62728",  # Red
+    "drake": "#2ca02c",  # Green
+    "opensim": "#9467bd",  # Purple
+    "simscape": "#ff7f0e",  # Orange
+    "default": "#ff7f0e",  # Orange
+}
+
+
+@dataclass(frozen=True)
+class MultiCandidateReplay:
+    """Up to 4 candidate trajectories overlaid on a shared timeline (MV-03 #10479)."""
+
+    candidates: tuple[tuple[str, ReplayData], ...]
+
+    def __post_init__(self) -> None:
+        if len(self.candidates) > 4:
+            raise ValueError("MultiCandidateReplay supports at most 4 candidates")
+        if not self.candidates:
+            raise ValueError("MultiCandidateReplay requires at least 1 candidate")
+
+    @property
+    def frame_count(self) -> int:
+        return self.candidates[0][1].frame_count
+
+    @property
+    def time_s(self) -> NDArray[np.float64]:
+        return self.candidates[0][1].time_s
+
+    def get_per_engine_rms(self, frame_idx: int) -> dict[str, float]:
+        """Compute valid marker RMS error (in meters) for each candidate at frame_idx."""
+        res: dict[str, float] = {}
+        for engine, replay in self.candidates:
+            if frame_idx < 0 or frame_idx >= replay.frame_count:
+                continue
+            tm = (
+                replay.target_markers_m[frame_idx]
+                if replay.target_markers_m is not None
+                else None
+            )
+            mm = (
+                replay.model_markers_m[frame_idx]
+                if replay.model_markers_m is not None
+                else None
+            )
+            vm = replay.valid_mask[frame_idx] if replay.valid_mask is not None else None
+            if tm is not None and mm is not None:
+                diff = mm[vm] - tm[vm] if vm is not None else mm - tm
+                res[engine] = float(np.sqrt(np.mean(diff**2))) if len(diff) > 0 else 0.0
+            else:
+                res[engine] = 0.0
+        return res
+
 
 @dataclass(frozen=True)
 class ReplayData:
@@ -139,7 +193,7 @@ def _load_npz_replay(path: Path, spec: Mapping[str, Any] | None) -> ReplayData:
             break
 
     valid_mask: NDArray[np.bool_] | None = None
-    for key in ("valid", "valid_mask"):
+    for key in ("valid", "valid_mask", "marker_validity"):
         if key in data:
             valid_mask = np.asarray(data[key], dtype=np.bool_)
             if valid_mask.shape[0] != n_frames:
@@ -151,6 +205,15 @@ def _load_npz_replay(path: Path, spec: Mapping[str, Any] | None) -> ReplayData:
     coord_names: tuple[str, ...] | None = None
     if "coordinate_order" in data:
         coord_names = tuple(str(x) for x in data["coordinate_order"])
+    elif "manifest_json" in data:
+        import json
+
+        try:
+            manifest = json.loads(str(data["manifest_json"]))
+            if manifest.get("coordinate_names"):
+                coord_names = tuple(manifest["coordinate_names"])
+        except (json.JSONDecodeError, KeyError, TypeError):
+            pass
     elif spec is not None and "coordinate_order" in spec:
         coord_names = tuple(spec["coordinate_order"])
 
@@ -532,3 +595,93 @@ def export_provenance_table(
                 writer.writeheader()
                 writer.writerows(rows)
     return out
+
+
+def _render_single_gif_frame(
+    ax: Any,
+    spec: Mapping[str, Any],
+    replays: tuple[tuple[str, ReplayData], ...],
+    frame_idx: int,
+) -> None:
+    """Render 3D visual segments and markers for one frame onto axes."""
+    from mpl_toolkits.mplot3d.art3d import Line3DCollection
+
+    ax.clear()
+    ax.set_xlim(-1.5, 1.5)
+    ax.set_ylim(-1.5, 1.5)
+    ax.set_zlim(0.0, 2.0)
+    ax.view_init(elev=20, azim=45)
+
+    for engine, rep in replays:
+        if frame_idx >= rep.frame_count:
+            continue
+        vframe = viewer_frame(spec, rep, frame_idx)
+        lines = [[seg.start_m, seg.end_m] for seg in vframe.segments]
+        eng_col = ENGINE_COLORS.get(engine, ENGINE_COLORS["default"])
+        if lines:
+            ax.add_collection3d(
+                Line3DCollection(lines, colors=eng_col, linewidths=2.0, alpha=0.8)
+            )
+        if vframe.model_markers is not None:
+            ax.scatter(
+                vframe.model_markers[:, 0],
+                vframe.model_markers[:, 1],
+                vframe.model_markers[:, 2],
+                color=eng_col,
+                s=15,
+            )
+
+
+def export_animation_gif(
+    replay: ReplayData | MultiCandidateReplay,
+    spec: Mapping[str, Any],
+    output_path: Path | str,
+    *,
+    fps: int = 30,
+    dpi: int = 80,
+    max_frames: int | None = None,
+) -> Path:
+    """Export 3D trajectory playback as an animated GIF."""
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+    from PIL import Image
+
+    matplotlib.use("Agg")
+    out_p = Path(output_path)
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+
+    fig = Figure(figsize=(5, 5), dpi=dpi)
+    canvas = FigureCanvasAgg(fig)
+    ax = fig.add_subplot(111, projection="3d")
+
+    total_frames = replay.frame_count
+    if max_frames is not None:
+        total_frames = min(total_frames, max_frames)
+
+    replays = (
+        replay.candidates
+        if isinstance(replay, MultiCandidateReplay)
+        else (("default", replay),)
+    )
+
+    frames: list[Image.Image] = []
+    for i in range(total_frames):
+        _render_single_gif_frame(ax, spec, replays, i)
+        canvas.draw()
+        buf = canvas.buffer_rgba()
+        img = Image.frombuffer(
+            "RGBA", canvas.get_width_height(), buf, "raw", "RGBA", 0, 1
+        )
+        frames.append(img.convert("RGB"))
+
+    if frames:
+        duration_ms = max(10, int(1000 / max(1, fps)))
+        frames[0].save(
+            out_p,
+            save_all=True,
+            append_images=frames[1:],
+            duration=duration_ms,
+            loop=0,
+        )
+    return out_p
