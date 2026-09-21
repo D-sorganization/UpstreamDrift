@@ -100,3 +100,42 @@
 **Learning:** `np.linalg.norm()` is known to be relatively slow for small arrays (like 3D vectors) due to internal overhead and instance checks. Built-in `math.sqrt(np.vdot(arr, arr))` provides a significant speedup by bypassing `np.linalg.norm` overhead while leveraging the fast C-level `np.vdot`. For simple length threshold checks like `np.linalg.norm(diff) <= 1e-9`, squaring the threshold (`np.vdot(diff, diff) <= 1e-18`) completely skips the square root.
 **Action:** When computing vector norms for small 1D arrays, replace `np.linalg.norm(v)` with `math.sqrt(np.vdot(v, v))`. For simple threshold checks, replace `np.linalg.norm(v) < threshold` with `np.vdot(v, v) < threshold**2`.
 
+## 2024-05-20 - [Optimize Norm Calculation in Fit2d]
+**Learning:** Using `np.linalg.norm(..., axis=3)` to compute array magnitudes for 4D arrays (like those in `fit2d.py` for shape `(T, V, L, 2)`) incurs significant overhead due to temporary array allocations. By replacing it directly with `d = np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))`, we avoid `np.linalg.norm` dispatch overhead and temporary allocations.
+**Action:** Replace `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` when scalar reductions are needed, to optimize computation.
+
+## 2026-09-14 - Math.Sqrt(Np.Dot) Optimization
+**Learning:** For small 1D NumPy arrays (e.g., 3D vectors), `math.sqrt(array.dot(array))` is significantly faster (~2.5x) than `np.linalg.norm(array)` because it bypasses NumPy's internal dispatching and instance checks. This is safe to use where array inputs are known to be small 1D vectors.
+**Action:** Replace `float(np.linalg.norm(array))` with `float(math.sqrt(array.dot(array)))` in tight loops or where small 1D vector magnitudes are calculated frequently.
+
+## 2025-05-19 - Vector Magnitude Calculation
+**Learning:** `np.sqrt(np.einsum("ij,ij->i", v, v))` is significantly faster (~2.5x) than `np.linalg.norm(v, axis=1)` for multidimensional arrays in tight loops.
+**Action:** Use `np.sqrt(np.einsum("ij,ij->i", v, v))` instead of `np.linalg.norm(v, axis=1)` for performance optimizations when calculating vector magnitudes along an axis.
+
+## 2026-09-17 - [Optimization: Replace Np.Linalg.Norm With Math.Sqrt(Dot)]
+**Learning:** For small 1D NumPy arrays (e.g. 3D vectors) in tight physics calculation loops, `np.linalg.norm` adds substantial Python dispatch and internal instance checking overhead. Built-in `math.sqrt(np.vdot(arr, arr))` or `math.sqrt(arr.dot(arr))` avoids this overhead entirely, yielding significant performance gains (~2.5x speedup) while being safe, domain-correct, and functionally equivalent.
+**Action:** Always replace `float(np.linalg.norm(array))` with `float(math.sqrt(array.dot(array)))` where array sizes are small and statically known.
+
+## 2026-09-16 - Safe SPEC.md Modification Pattern Update
+**Learning:** Even using a pattern like `line.startswith('| YYYY-MM-DD |')` may fail the `repo-structure-gates` tests because older rows, like `| Date | PR | Summary |`, might not be found. We must explicitly search for the header format in the specific `## 12. Change Log` section and insert below the actual table header separator (e.g. `| --- | --- | --- |`).
+**Action:** When updating `SPEC.md` programmatically, use a script that correctly finds the header separator in the proper section and inserts the new row. Additionally, the unit tests inside `repo_hygiene` like `test_spec_changelog_integrity.py` are a great way to verify the file was updated without breaking the parser rules.
+
+## 2026-09-16 - [Small Array Norm Calculation]
+**Learning:** For small 1D array norm calculation, math.sqrt(np.vdot(array, array)) is significantly faster than np.linalg.norm. Avoid using math.hypot(*array) because it causes test regressions in some contexts despite being slightly faster in isolated testing.
+**Action:** Replace np.linalg.norm with math.sqrt(np.vdot) for small 3D vectors when safe, ensuring no regressions.
+
+## 2024-05-21 - [Optimize Norm Calculation in Motion Retargeting]
+**Learning:** In the motion capture retargeting pipeline (e.g., `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py`), calling `np.linalg.norm(pos_error)` on small 1D arrays (like 3D position errors) incurs significant overhead due to NumPy's internal dispatching and instance checks. Replacing it with `math.sqrt(pos_error.dot(pos_error))` bypasses this overhead and is significantly faster (~2.5x).
+**Action:** Replace `np.linalg.norm(pos_error)` with `math.sqrt(pos_error.dot(pos_error))` for small 1D array magnitude calculations where possible.
+
+## 2026-09-20 - Inline Operations in Mathematical Substitutions
+**Learning:** Using Python walrus operators `:=` inline as arguments to mathematical functions (like `np.einsum('...', diff := (a-b), diff)`) violates formatting and stylistic standards and creates syntax errors. Even if technically valid in modern Python, it fails strict linters, drops code readability (which is explicitly against the boundaries), and leads to unexpected CI failures.
+**Action:** When refactoring calculations to avoid intermediate arrays by reusing terms, always assign the term on a separate line (e.g., `diff = a - b`) before invoking the substitution function like `np.einsum('...', diff, diff)`.
+
+## 2026-09-20 - SPEC.md Row Constraints
+**Learning:** `SPEC.md` requires that changelog insertions use either an actual GitHub PR number (e.g., `#1234`) or `n/a` for the second column. Using a placeholder like `#<pr>` will cause `scripts/ci/check_spec_changelog_duplicates.py` to raise a `row contract violated` error.
+**Action:** Always use `n/a` in the second column of the `SPEC.md` changelog when modifying it during offline testing or before a pull request number is assigned.
+
+## 2026-09-20 - Committing Temporary Files
+**Learning:** Generating utility scripts (like `patch_all.py` or `run_tests_opensim.sh`) and then tracking them into the branch breaks the `repo-structure-gates` check.
+**Action:** Always delete shell scripts and Python utility files used to modify the repo before checking `git status` and invoking `git commit`. Use `git ls-files --others --exclude-standard` to verify the working tree is clean.

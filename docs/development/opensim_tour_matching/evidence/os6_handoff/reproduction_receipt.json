@@ -6,6 +6,7 @@
   "git_commit": "653c97fe97b01b53ed3455f1b145d0a9f85daa45",
   "status": "ACCEPTED",
   "summary": "Complete delivery of OpenSim tour matching pipeline (OS-0 through OS-6). Includes C3D validation, TRC export, model calibration, Moco dynamic tracking pilot, degree-6 polynomial effort fitting, continuous zero-feedback forward simulation, and clean-machine reproduction evidence.",
+  "scope_note": "Pilot scope evaluated on initial 0.10s observation window; full G1 (0.85s) tracking evaluated in evidence/matched/driver_g1_opensim (MS-42 #10341).",
   "asset_manifest": {
     "c3d_capture": {
       "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\data\\C3D_TA_Driver.c3d",

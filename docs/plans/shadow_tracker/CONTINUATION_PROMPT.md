@@ -11,6 +11,7 @@ single/multiview captures and historical footage with explicit ambiguity and
 unknown timing. Do not stop at data classes, a mock UI, or a synthetic-only demo.
 
 Read current AGENTS.md, CLAUDE.md, SPEC.md and root AGENT_HANDOFF.md. Then read:
+  docs/plans/shadow_tracker/TURNOVER_CURRENT.md
   docs/plans/shadow_tracker/DEVELOPMENT_REVIEW.md
   docs/plans/shadow_tracker/CONTRACT_FREEZE.md
   docs/plans/shadow_tracker/QUALIFICATION_FINDINGS.md
@@ -18,25 +19,31 @@ Read current AGENTS.md, CLAUDE.md, SPEC.md and root AGENT_HANDOFF.md. Then read:
   docs/plans/shadow_tracker/INTEGRATION.md
   docs/plans/shadow_tracker/VALIDATION.md
   docs/plans/shadow_tracker/CAPTURE_AND_ARCHIVES.md
-Inspect current code and GitHub state; the review baseline is c3395229, not an
-assumption about your checkout. A/B/C (#10137/#10139/#10138) are already merged.
+Inspect current source and GitHub state. Reviewed main is 0ec64e45f. Timing
+PR #10253 merged; unknown physical time and incremental decode exist. The restart
+review corrects estimated-CFR is_timing_exact. Native PTS and persisted clock
+authority remain #10273. Read TURNOVER_CURRENT.md before older review sections.
 
-FIRST ACTION: check the claim for #10151 in Repository_Management and lease it
-if free. In an isolated topic worktree reproduce the review's malformed-input
-and pre-conversion mask-length findings as failing behavioral tests. Repair only
-that packet, preserving schemas/hash compatibility and immutable ownership.
-Resolve the physical_time_s coercion discrepancy explicitly against the frozen
-contract. Run all Shadow Tracker and affected-consumer tests, lint, format,
-types, inventory checks and repository CI; publish a focused PR referencing
-#10151. Do not reimplement A/B/C from the old pickup prompt.
+FIRST ACTION: check ownership and status of renderer PR #10264 / #10232. Its
+unit-test-gate failed importing motion_matching.diagnostics, and it has merge
+conflicts. Existing uncommitted import corrections are present in the original
+checkout; preserve them. The owning agent should verify them, integrate current
+main and obtain passing full-unit collection plus focused tests at the new SHA.
+Do not create a competing renderer PR or claim this unmerged feature is ready.
 
-AFTER THAT: follow the complete delivery sequence in DEVELOPMENT_REVIEW.md.
-Before each stage, inspect issue dependencies and create/claim a bounded child
-slice with one concrete outcome, allowed files and red/green acceptance tests.
-Specialist work #10140/#10141 and #10124 remains prerequisite to qualified
-dynamics. Never compensate for incorrect model coordinates with optimizer
-freedom or loosen physics tolerances. Image-only work can advance only with an
-explicit bounded dependency decision, without closing the blocked parent.
+NEXT INDEPENDENT TASK: claim #10233 for revision identity and atomic persistence.
+Start with failing duplicate-ID/idempotence/parent-ownership tests, then implement
+save/reopen and invalidation. Keep changes small for reliable cheaper-agent
+execution. Follow with #10273 native timestamp authority, not another FPS proxy.
+
+Then fix initialization no-evidence/club-scoring/velocity acceptance and deliver
+a real import -> review -> manual edit -> save/reopen launcher slice using one
+service, manifest/entry point/lazy adapter and real UI tests. Fitting remains
+unavailable until real continuous rollout and scientific qualification pass.
+Regenerated grip evidence is improved but still outside the physical profile;
+retain that limitation and complete all ST-07–ST-12 stages, including uncertainty,
+modern/archive validation, full UI/API/React/export parity and packaged release.
+Do not jump from a Stage 7 prototype directly to release.
 
 Apply TDD, DbC, LoD and DRY throughout production code, adapters and UI. Preserve
 behavioral red/green evidence. Reuse existing public camera/canonical-state,

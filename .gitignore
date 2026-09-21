@@ -72,10 +72,12 @@ motion_matching/
 !/src/shared/python/motion_matching/
 !/src/engines/**/motion_matching/
 !/tests/**/motion_matching/
+!/src/tools/motion_matching/
 /reports/*.json
 /reports/**/*.json
 reports/*.json
 reports/**/*.json
+!/reports/matched_swing_ledger.json
 reports/pip_audit.json
 reports/semgrep.json
 # Third-party model repos are git submodules at shared/models/…; the plain-blob

@@ -100,7 +100,7 @@ def render_matrix(registry: FeatureParityRegistry) -> str:
         )
     lines += [
         "",
-        "## Launcher tile coverage",
+        "## Launcher Tile Coverage",
         "",
         "Tiles from `src/config/launcher_manifest.json` mapped to registry entries:",
         "",

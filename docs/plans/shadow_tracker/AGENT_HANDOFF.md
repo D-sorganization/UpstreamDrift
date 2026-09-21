@@ -2,20 +2,24 @@
 
 ## Current State
 
-Current implementation baseline includes merged Stage 0 contract hardening (#10151 / PR #10163),
-MuJoCo IK coordinate alignment (#10140 / PR #10164), production closure units separation
-(#10141 / PR #10165), and feasibility qualification (#10124 / PR #10169). Stage 2 (#10125)
-full contracts freeze and Stage 3 (#10126) video ingestion, shot partitioning, timing mappings,
-and capture evidence have been implemented and tested with 100% boundary and DbC enforcement.
-Scientific gates remain blocked.
+Reviewed `33ffde23f`: provider false success, nested morphology mutation and
+non-finite hypotheses are repaired. Shot-aware in-memory revisions, filled
+reference disks, real OpenCV decoding and regenerated calibration have landed.
+The current review reproduces timestamp/physical-time defaults, geometry/state
+and revision-integrity gaps. Model evidence remains scientifically unqualified.
+No Shadow Tracker launcher application or full fitter is implemented.
 
 ## Immediate Dispatch
 
-Read [Development Review](DEVELOPMENT_REVIEW.md) and [Continuation Prompt](CONTINUATION_PROMPT.md).
-Prerequisites #10140, #10141, #10124, #10125, and #10126 are complete. Next task is Stage 4 (#10127):
-Produce and Review Body/Club Silhouettes (manual mask baseline, segmentation and occlusion handling).
-Do not interpret passing unit tests as physical-model qualification. Recompute historical IK trajectories
-before attempting forward fitting.
+Read [Current Turnover](TURNOVER_CURRENT.md) and
+[Continuation Prompt](CONTINUATION_PROMPT.md). Merged #10231 (PR #10253): authoritative source
+PTS, unknown physical time by default, and cancellation during actual decode.
+Landing #10232: articulated model binding and clipping/projection oracles.
+The #10233 provider repair is locally validated; review its focused diff and
+[2026-09-18 turnover evidence](TURNOVER_CURRENT.md) before repeating implementation.
+Do not repeat the repaired false-segmentation-success task or call #10168 active.
+Continue scientific qualification, then all ST-07–ST-12 stages including fitting,
+uncertainty, real/archive validation, UI/export and release. No stage is skipped.
 
 ## First Pickup
 
@@ -32,9 +36,9 @@ before attempting forward fitting.
 7. Update the root handoff and this project's evidence/status pointers. Reference
    the child issue. Close a child only when all of its acceptance criteria land.
 
-ST-01 remains the research task. Lower-cost agents take frozen image-only
-ST-02A/C/B packets, not the entire ST-02 or ST-08 work package. The full-body
-native/canonical mapping and scientific profile are not frozen by this handoff.
+Lower-cost agents take one corrective or real-ingestion slice from the current
+progress review. A/B/C are already implemented. Scientific model qualification
+and full-body native/canonical mapping still require independent evidence.
 
 ## Original Planning Validation
 
