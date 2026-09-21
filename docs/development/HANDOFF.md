@@ -215,6 +215,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Branch: `fix/issue-10605-co01-club-observation`; PR [#10670](https://github.com/D-sorganization/UpstreamDrift/pull/10670). Governing issue #10605 (CO-01, epic #10602). Prerequisite CO-00 #10604 / PR #10667 merged.
 - Entry DL-#10605. Delivered: `ClubObservation` (masks, dual mid-hands/face frames+quats, native 240 Hz clock, uncertainty/derivation metadata), `club_calibration.py` (SE(3) tool-to-model, catalog length/type checks, grip-face rigidity, explicit mid-hands→butt-end offset), legacy adapters that refuse invented identity quats, versioned four-trial fixture pack.
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_observation_contracts.py -q -n 0 --no-cov --timeout=60` (14 passed); python -O public validation confirmed. Synthetic fixtures only — not native physical qualification.
+- CI hygiene (SELF): regenerated `docs/shared_tools/divergence_inventory.{v1.json,md}` with `--write --no-authorship` so the gitignored Tools PSA PDF path is no longer listed (`test_committed_inventory_is_current_when_vendor_present` green).
 - Limitations: Excel/mat loaders still emit legacy `ClubTarget`; native workbook→`ClubObservation` ingest is deferred; twist remains unobserved in fixtures.
 - Next action: Dispatch CO-02 #10606 after merge; do not start NM-_ or PF-_.
 
