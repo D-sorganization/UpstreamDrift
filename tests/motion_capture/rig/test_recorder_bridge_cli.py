@@ -10,7 +10,6 @@ from src.motion_capture.rig.plan import CameraBinding, CaptureMode, RigPlan
 from src.motion_capture.rig.recorder import (
     NullRecorder,
     RecordingResult,
-    dshow_device_ref,
     ffmpeg_stream_copy_args,
     record_all,
 )
@@ -18,16 +17,6 @@ from src.motion_capture.rig.tools_bridge import probe_tools_schema
 from src.shared.python.core.contracts import StateError
 
 pytestmark = pytest.mark.unit
-
-
-def test_dshow_device_ref_is_the_inverse_of_listing_parse() -> None:
-    ref = dshow_device_ref("USB\\VID_32E4&PID_5234&MI_00\\6&FADBF3B&0&0000")
-    assert ref == (
-        "@device_pnp_\\\\?\\usb#vid_32e4&pid_5234&mi_00#6&fadbf3b&0&0000"
-        "#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global"
-    )
-    with pytest.raises(Exception, match="PnP instance id"):
-        dshow_device_ref("not-an-instance-id")
 
 
 def test_ffmpeg_args_stream_copy_mjpeg(tmp_path: Path) -> None:

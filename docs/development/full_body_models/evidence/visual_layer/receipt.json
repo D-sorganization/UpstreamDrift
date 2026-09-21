@@ -1,0 +1,18 @@
+{
+  "spec_sha256": "2927f5f81c9952165df1e7dc038a3d96f0eaca3a39953555233eb76124342abb",
+  "mjcf_sha256": "2b5bf970e7bc8270713c7b7787ba34be3c223df0a27c68b49458115b82cdfd9d",
+  "visual_layer": {
+    "capsules": 27,
+    "spheres": 48,
+    "floor": true,
+    "ground_calibrated": false,
+    "lights": 2
+  },
+  "ngeom": 80,
+  "nlight": 2,
+  "render_size": [240, 320],
+  "playback": "kinematic only: returned81 upper-body q applied by joint name, lower-limb coordinates zero, no dynamics",
+  "frames": 103,
+  "source_replay": "two_window_fit_9967_81/returned-replay.npz",
+  "radius_policy": "uniform-density cylinder sqrt(m / (pi rho L)), rho 1500 kg/m^3, clamped 6-50 mm"
+}

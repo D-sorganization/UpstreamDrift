@@ -96,6 +96,14 @@ jobs:
         python-version: ["3.11"]
 
     steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 

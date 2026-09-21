@@ -1,0 +1,16 @@
+{
+  "step": "Step 3 (Visuals Handoff)",
+  "tool_id": "tour_matching_viewer",
+  "spec_sha256": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+  "evidence_files": {
+    "screenshot_returned81": "screenshot_returned81.png",
+    "screenshot_mot": "screenshot_mot.png",
+    "replay_npz": "returned81_replay.npz",
+    "replay_mot": "opensim_os3b_ik.mot"
+  },
+  "capabilities": ["motion_matching", "visual_skeleton", "kinematic_playback"],
+  "parity": {
+    "tolerance_vs_mujoco": "< 1e-9",
+    "kinematics": "pure-Python rigid-body recursion with no engine requirement"
+  }
+}

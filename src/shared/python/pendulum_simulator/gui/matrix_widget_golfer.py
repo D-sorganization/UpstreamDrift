@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 from PyQt6.QtCore import QRectF, Qt
-from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPen
+from PyQt6.QtGui import QBrush, QColor, QPainter, QPen
 from PyQt6.QtWidgets import QWidget
 
 from ..simulation_golfer import GolferSimulationResult
@@ -56,6 +56,14 @@ class GolferMatrixWidget(MatrixWidgetBase):
         """Return DOF labels for golfer model."""
         return self.DOF_LABELS
 
+    def _compute_frame_data(self, idx: int) -> dict:
+        """Extend the base snapshot with the constraint violation (#8929)."""
+        if not (self._result is not None):
+            raise ValueError("DbC Blocked: Precondition failed.")
+        data = super()._compute_frame_data(idx)
+        data["constraint_violation"] = self._result.constraint_violation_at(idx)
+        return data
+
     def paintEvent(self, event: object) -> None:
         """Override to include constraint violation section."""
         if not (event is not None):
@@ -66,7 +74,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
 
         if self._result is None:
             painter.setPen(self.COLOR_LABEL)
-            painter.setFont(QFont("Sans", 11))
+            painter.setFont(self._font("Sans", 11))
             painter.drawText(
                 self.rect(),
                 Qt.AlignmentFlag.AlignCenter,
@@ -97,7 +105,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
         """Draw the 8x8 mass matrix in compact heat-map style."""
         if not (self._result is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        M = self._result.mass_matrix_at(self._current_idx)
+        M = self._current_frame_data()["mass"]
 
         n = 8
         avail_w = self.width() - 60
@@ -106,7 +114,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
         margin_x = (self.width() - grid_w) // 2
 
         max_val = max(np.abs(M).max(), 1e-12)
-        painter.setFont(QFont("Monospace", 7))
+        painter.setFont(self._font("Monospace", 7))
 
         for row in range(n):
             for col in range(n):
@@ -144,7 +152,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
                 painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, txt)
 
         painter.setPen(self.COLOR_LABEL)
-        painter.setFont(QFont("Sans", 6))
+        painter.setFont(self._font("Sans", 6))
         for i, label in enumerate(self.DOF_LABELS):
             lx = margin_x + i * cell
             painter.drawText(lx, y - 2, label)
@@ -157,7 +165,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
         """Draw constraint violation as a progress bar."""
         if not (self._result is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        v = self._result.constraint_violation_at(self._current_idx)
+        v = self._current_frame_data()["constraint_violation"]
 
         bar_x = 20
         bar_w = self.width() - 40
@@ -173,7 +181,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
         painter.drawRoundedRect(QRectF(bar_x, y, bar_w * ratio, bar_h), 4, 4)
 
         painter.setPen(self.COLOR_TEXT)
-        painter.setFont(QFont("Monospace", 9, QFont.Weight.Bold))
+        painter.setFont(self._font("Monospace", 9, bold=True))
         painter.drawText(
             QRectF(bar_x, y, bar_w, bar_h),
             Qt.AlignmentFlag.AlignCenter,

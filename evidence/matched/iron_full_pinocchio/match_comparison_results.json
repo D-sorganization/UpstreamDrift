@@ -1,0 +1,153 @@
+{
+  "num_frames": 657,
+  "duration_s": 1.8272980501392757,
+  "kinematics": {
+    "marker_rms_m": 0.33638683832269006,
+    "marker_rms_first_frame_m": 0.21247289172020764,
+    "closure_position_error_max_m": 0.01925522584081037,
+    "wall_clock_s": 8.36952793301316,
+    "per_frame_ms": 12.739007508391415
+  },
+  "audit": {
+    "overall_rmse_mm": 336.92435118572513,
+    "coverage_fraction": 0.967275494672755,
+    "segments": {
+      "club": {
+        "name": "club",
+        "marker_count": 6,
+        "rmse_mm": 225.72158864018039,
+        "max_error_mm": 567.0789832730317,
+        "coverage_fraction": 0.987062404870624
+      },
+      "feet": {
+        "name": "feet",
+        "marker_count": 6,
+        "rmse_mm": 232.0763554591171,
+        "max_error_mm": 487.3245441246211,
+        "coverage_fraction": 1.0
+      },
+      "wrists_hands": {
+        "name": "wrists_hands",
+        "marker_count": 2,
+        "rmse_mm": 309.703820556491,
+        "max_error_mm": 652.4660040885241,
+        "coverage_fraction": 1.0
+      },
+      "arms": {
+        "name": "arms",
+        "marker_count": 8,
+        "rmse_mm": 369.5877056593635,
+        "max_error_mm": 816.5169123667848,
+        "coverage_fraction": 0.8721461187214612
+      },
+      "pelvis": {
+        "name": "pelvis",
+        "marker_count": 4,
+        "rmse_mm": 456.7629557404829,
+        "max_error_mm": 736.1138672550549,
+        "coverage_fraction": 0.9969558599695586
+      },
+      "torso_head": {
+        "name": "torso_head",
+        "marker_count": 10,
+        "rmse_mm": 417.9835413675819,
+        "max_error_mm": 997.1012880703025,
+        "coverage_fraction": 1.0
+      }
+    },
+    "phases": {
+      "address": {
+        "phase": "address",
+        "start_time_s": 0.0,
+        "end_time_s": 0.3,
+        "frame_count": 108,
+        "overall_rmse_mm": 211.05715168661436,
+        "club_rmse_mm": 112.227132198509,
+        "feet_rmse_mm": 93.76063746219553
+      },
+      "backswing": {
+        "phase": "backswing",
+        "start_time_s": 0.3,
+        "end_time_s": 1.0963788300835653,
+        "frame_count": 286,
+        "overall_rmse_mm": 372.20240011791964,
+        "club_rmse_mm": 262.292749368653,
+        "feet_rmse_mm": 276.9875763095201
+      },
+      "downswing": {
+        "phase": "downswing",
+        "start_time_s": 1.0963788300835653,
+        "end_time_s": 1.3156545961002786,
+        "frame_count": 79,
+        "overall_rmse_mm": 331.8253406188473,
+        "club_rmse_mm": 207.09344273093913,
+        "feet_rmse_mm": 265.1235393658518
+      },
+      "impact": {
+        "phase": "impact",
+        "start_time_s": 1.3156545961002786,
+        "end_time_s": 1.425292479108635,
+        "frame_count": 39,
+        "overall_rmse_mm": 255.9458012372517,
+        "club_rmse_mm": 148.2850289709329,
+        "feet_rmse_mm": 126.3480200445004
+      },
+      "follow_through": {
+        "phase": "follow_through",
+        "start_time_s": 1.425292479108635,
+        "end_time_s": 1.8272980501392757,
+        "frame_count": 145,
+        "overall_rmse_mm": 358.54402551378143,
+        "club_rmse_mm": 238.41996600498751,
+        "feet_rmse_mm": 208.74255749875272
+      }
+    },
+    "ground_penetration": {
+      "max_penetration_mm": 9.815127945845575,
+      "mean_penetration_mm": 0.14157711661794278,
+      "penetration_frames": 311,
+      "worst_frame": 465,
+      "worst_sphere_index": 5
+    },
+    "closure": {
+      "max_closure_mm": 19.87328598976102,
+      "mean_closure_mm": 6.925223185731828,
+      "worst_frame": 579
+    }
+  },
+  "shared_metrics": {
+    "whole_marker_rmse_m": 0.3369243511857251,
+    "early_marker_rmse_m": 0.21532722263879503,
+    "terminal_marker_rmse_m": 0.3891311136322293,
+    "club_marker_rmse_m": 0.22572158864018038,
+    "pelvis_yaw_rmse_rad": 2.574501828432221
+  },
+  "replay_five": {
+    "whole_rms_m": 0.3369243511857251,
+    "early_rms_m": 0.21532722263879503,
+    "terminal_rms_m": 0.41173520043940176,
+    "club_cluster_rms_m": 0.15178169374662812,
+    "pelvis_yaw_error_pct": 81.55223119350946
+  },
+  "optimum": {
+    "solve_time_ms": 5795.216547994642,
+    "per_frame_ms": 8.820725339413457,
+    "peak_lead_arm_n_m": 269.4443624703604,
+    "mean_lead_arm_n_m": 11.20842726707021,
+    "peak_trail_arm_n_m": 336.0597301494345,
+    "mean_trail_arm_n_m": 11.58783148250524,
+    "peak_total_effort_n_m": 11532.60476600937,
+    "max_accel_parity_residual": 0.04101872509539817
+  },
+  "trail_zero": {
+    "solve_time_ms": 5795.216547994642,
+    "per_frame_ms": 8.820725339413457,
+    "peak_lead_arm_n_m": 497.4083354280129,
+    "mean_lead_arm_n_m": 27.39273107395468,
+    "peak_trail_arm_n_m": 40.644537559700886,
+    "mean_trail_arm_n_m": 2.639870580350007,
+    "peak_grip_force_n": 366.3740878958087,
+    "peak_grip_moment_n_m": 29.02709050002509,
+    "max_accel_parity_residual": 0.04101872510597104
+  }
+}
