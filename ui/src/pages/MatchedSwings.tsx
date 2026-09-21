@@ -176,7 +176,7 @@ export function MatchedSwingsPage() {
         />
       </label>
 
-      <p className="text-xs text-gray-500">{filteredRuns.length} run(s)</p>
+      <p className="text-xs text-gray-400">{filteredRuns.length} run(s)</p>
 
       <div className="flex flex-col gap-1 overflow-y-auto max-h-[50vh]">
         {filteredRuns.map((run) => (
@@ -229,27 +229,27 @@ export function MatchedSwingsPage() {
 
       <dl className="grid grid-cols-2 gap-2 text-xs">
         <div>
-          <dt className="text-gray-500">Whole RMSE</dt>
+          <dt className="text-gray-400">Whole RMSE</dt>
           <dd>{formatMetric(selectedRun.metrics.whole_marker_rmse_m)}</dd>
         </div>
         <div>
-          <dt className="text-gray-500">Early RMSE</dt>
+          <dt className="text-gray-400">Early RMSE</dt>
           <dd>{formatMetric(selectedRun.metrics.early_marker_rmse_m)}</dd>
         </div>
         <div>
-          <dt className="text-gray-500">Terminal RMSE</dt>
+          <dt className="text-gray-400">Terminal RMSE</dt>
           <dd>{formatMetric(selectedRun.metrics.terminal_marker_rmse_m)}</dd>
         </div>
         <div>
-          <dt className="text-gray-500">Club RMSE</dt>
+          <dt className="text-gray-400">Club RMSE</dt>
           <dd>{formatMetric(selectedRun.metrics.club_marker_rmse_m)}</dd>
         </div>
         <div>
-          <dt className="text-gray-500">Pelvis yaw</dt>
+          <dt className="text-gray-400">Pelvis yaw</dt>
           <dd>{formatMetric(selectedRun.metrics.pelvis_yaw_rmse_rad, 'deg')}</dd>
         </div>
         <div>
-          <dt className="text-gray-500">Candidate SHA</dt>
+          <dt className="text-gray-400">Candidate SHA</dt>
           <dd className="truncate" title={selectedRun.candidate_sha256 ?? undefined}>
             {selectedRun.candidate_sha256?.slice(0, 16) ?? '—'}…
           </dd>
@@ -296,7 +296,7 @@ export function MatchedSwingsPage() {
                 className="mx-auto max-h-72 rounded border border-gray-700 bg-black"
               />
             ) : (
-              <p className="text-xs text-gray-500">No animation artefact for this run.</p>
+              <p className="text-xs text-gray-400">No animation artefact for this run.</p>
             )}
           </section>
 
@@ -332,7 +332,7 @@ export function MatchedSwingsPage() {
                 </div>
               </Suspense>
             ) : (
-              <p className="text-xs text-gray-500">No candidate marker preview available.</p>
+              <p className="text-xs text-gray-400">No candidate marker preview available.</p>
             )}
           </section>
         </div>
