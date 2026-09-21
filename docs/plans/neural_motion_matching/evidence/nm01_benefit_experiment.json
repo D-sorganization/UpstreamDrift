@@ -1,0 +1,229 @@
+{
+  "schema": "neural-benefit-experiment/1.0.0",
+  "governing_issue": "#10616",
+  "baselines": [
+    "cold_classical",
+    "retrieval_plus_solve",
+    "existing_networks_plus_solve",
+    "forward_surrogate_plus_polish",
+    "proposed_inverse_plus_polish"
+  ],
+  "latency_phases": [
+    "startup",
+    "preprocessing",
+    "candidate_generation",
+    "neural_inference",
+    "physical_refinement",
+    "rejected_attempts",
+    "independent_replay"
+  ],
+  "pilot_scale": {
+    "episode_stages": [100, 500, 2000],
+    "n_seeds": 3,
+    "min_synthetic_queries_per_stratum": 30,
+    "n_workbook_trials": 4,
+    "n_c3d_tests": 2,
+    "statistical_limitations": "Four workbook trials and two C3D-derived tests are a tiny empirical set; do not report population confidence. Synthetic strata validate software contracts and within-model generalization only."
+  },
+  "promotion_gates": {
+    "median_speedup_min": 2.0,
+    "p95_nonworse": true,
+    "accepted_quality_rate_nonworse": true,
+    "is_measured_outcome": false
+  },
+  "split_policy": "by_source_trial_seed_family_geometry_and_contact_regime",
+  "hardware_targets": ["cpu_cold", "cpu_warm", "gpu_if_available"],
+  "qualification_profile_version": "tour-qualification-profile/1.0.0",
+  "qualification_alignment_note": "Native accuracy and feasibility gates reuse TB-02/#10587 qualification profile version tour-qualification-profile/1.0.0; model-specific reduced profiles must not silently inherit full-body G3 thresholds when body markers are unobserved.",
+  "compute_caps_pending_timing_probe": true,
+  "split_digest": "7d93734cf5a5529b1d943bb8196403b771a74caedd909ae991eccb00bfd382a9",
+  "gate_digest": "7d93734cf5a5529b1d943bb8196403b771a74caedd909ae991eccb00bfd382a9",
+  "model_roster": [
+    {
+      "model_id": "constrained_upper_body_golfer",
+      "backend": "scipy_ode",
+      "dof": 8,
+      "independent_dof": 5,
+      "constraint_count": 4,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "driven_double_pendulum",
+      "backend": "scipy_ode",
+      "dof": 2,
+      "independent_dof": 2,
+      "constraint_count": 0,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "driven_triple_pendulum",
+      "backend": "scipy_ode",
+      "dof": 3,
+      "independent_dof": 3,
+      "constraint_count": 0,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "full_body_drake",
+      "backend": "drake",
+      "dof": 40,
+      "independent_dof": 34,
+      "constraint_count": 6,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "full_body_mujoco",
+      "backend": "mujoco",
+      "dof": 38,
+      "independent_dof": 35,
+      "constraint_count": 3,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "full_body_myosuite",
+      "backend": "myosuite",
+      "dof": 30,
+      "independent_dof": 24,
+      "constraint_count": 6,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "full_body_opensim",
+      "backend": "opensim",
+      "dof": 35,
+      "independent_dof": 29,
+      "constraint_count": 6,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "full_body_pinocchio",
+      "backend": "pinocchio",
+      "dof": 46,
+      "independent_dof": 40,
+      "constraint_count": 6,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "full_body_simscape",
+      "backend": "simscape",
+      "dof": 26,
+      "independent_dof": 20,
+      "constraint_count": 6,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "myosuite_body",
+      "backend": "myosuite",
+      "dof": 0,
+      "independent_dof": 0,
+      "constraint_count": 0,
+      "has_simulated_club": false,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "opensim_golfer",
+      "backend": "opensim",
+      "dof": 0,
+      "independent_dof": 0,
+      "constraint_count": 0,
+      "has_simulated_club": false,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reconstruction_double_pendulum",
+      "backend": "reconstruct_solver",
+      "dof": 4,
+      "independent_dof": 4,
+      "constraint_count": 0,
+      "has_simulated_club": false,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reconstruction_golfer",
+      "backend": "reconstruct_solver",
+      "dof": 17,
+      "independent_dof": 17,
+      "constraint_count": 0,
+      "has_simulated_club": false,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reconstruction_triple_pendulum",
+      "backend": "reconstruct_solver",
+      "dof": 5,
+      "independent_dof": 5,
+      "constraint_count": 0,
+      "has_simulated_club": false,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reference_drake_urdf",
+      "backend": "drake",
+      "dof": 40,
+      "independent_dof": 40,
+      "constraint_count": 0,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reference_human_subject",
+      "backend": "reconstruct_solver",
+      "dof": 32,
+      "independent_dof": 32,
+      "constraint_count": 0,
+      "has_simulated_club": false,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reference_mujoco_humanoid",
+      "backend": "mujoco",
+      "dof": 21,
+      "independent_dof": 21,
+      "constraint_count": 0,
+      "has_simulated_club": false,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reference_pinocchio_urdf",
+      "backend": "pinocchio",
+      "dof": 46,
+      "independent_dof": 46,
+      "constraint_count": 0,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reference_pinocchio_urdf_ik",
+      "backend": "pinocchio",
+      "dof": 46,
+      "independent_dof": 46,
+      "constraint_count": 0,
+      "has_simulated_club": true,
+      "governing_issue": "#10585"
+    },
+    {
+      "model_id": "reference_simple_humanoid",
+      "backend": "reconstruct_solver",
+      "dof": 28,
+      "independent_dof": 28,
+      "constraint_count": 0,
+      "has_simulated_club": false,
+      "governing_issue": "#10585"
+    }
+  ],
+  "learning_tasks": [
+    "forward_dynamics",
+    "inverse_dynamics",
+    "masked_trajectory_to_controls"
+  ],
+  "notes": "NM-01 freeze only: no training executed. Checkpoint dimensions come from TB-00 GolfModelIdentity entries; inverse labels require selection or multimodal targets; no physical uniqueness claim. Compute caps remain pending a short timing probe before training dispatch."
+}
