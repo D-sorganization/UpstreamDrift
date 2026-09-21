@@ -89,9 +89,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--horizon",
-        type=float,
-        default=0.10,
-        help="Tracking horizon in seconds (default: 0.10s for pilot)",
+        type=str,
+        default="0.10",
+        help="Tracking horizon in seconds or milestone name ('g1' -> 0.85s, default: 0.10)",
     )
     parser.add_argument(
         "--mesh-interval",
@@ -225,21 +225,28 @@ def run_tracking_pilot(args: argparse.Namespace) -> int:
         logger.error("OpenSim 4.x Python bindings not found: %s", err)
         return 1
 
+    try:
+        horizon_s = (
+            0.85 if str(args.horizon).strip().lower() == "g1" else float(args.horizon)
+        )
+    except ValueError:
+        horizon_s = 0.10
+
     t0 = time.time()
     outdir: Path = args.outdir
     outdir.mkdir(parents=True, exist_ok=True)
 
-    sanitized_trc = outdir / f"tour_sanitized_{int(args.horizon * 1000)}ms.trc"
+    sanitized_trc = outdir / f"tour_sanitized_{int(horizon_s * 1000)}ms.trc"
     retained_markers = sanitize_trc_for_horizon(
         input_trc=args.trc,
         output_trc=sanitized_trc,
         t_start=0.0,
-        t_end=args.horizon,
+        t_end=horizon_s,
         max_missing_ratio=0.0,
     )
 
     config = MocoTrackingConfig(
-        horizon_s=args.horizon,
+        horizon_s=horizon_s,
         t_start_s=0.0,
         mesh_interval_s=args.mesh_interval,
         effort_weight=1e-4,
@@ -280,7 +287,7 @@ def run_tracking_pilot(args: argparse.Namespace) -> int:
     opensim.STOFileAdapter.write(controls_table, str(controls_path))
 
     objective_terms = _extract_objective_terms(solution)
-    replay = _run_forward_replay(args.model, controls_path, states_table, args.horizon)
+    replay = _run_forward_replay(args.model, controls_path, states_table, horizon_s)
 
     receipt = _build_receipt_dict(
         args,
