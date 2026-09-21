@@ -1,0 +1,327 @@
+{
+  "title": "Simscape\u2013Pinocchio Bounded Solver Convergence Audit (Candidate 100)",
+  "timestamp": "2026-09-15T19:15:00Z",
+  "reference_candidate": "Candidate 100 (duration = 0.85 s, 307 frames @ 360 Hz)",
+  "pinocchio_solver": "DOP853 (rtol=1e-11, atol=1e-13, max_step=6.25e-5 s)",
+  "simscape_refined_baseline": "ode15s (RelTol=1e-6, MaxStep=1/1440 s)",
+  "audit_summary": {
+    "finding": "Cross-engine discrepancy is 100% numerical tolerance truncation under loose ode23t RelTol 1e-3.",
+    "unrefined_simscape_discrepancy_mm": 662.22,
+    "refined_simscape_discrepancy_mm": 0.063,
+    "refined_whole_rms_match": "Simscape 20.34 mm vs Pinocchio 20.34 mm (MATCH)",
+    "refined_early_rms_match": "Simscape 10.01 mm vs Pinocchio 10.01 mm (MATCH)",
+    "refined_terminal_rms_match": "Simscape 39.20 mm vs Pinocchio 39.20 mm (MATCH)",
+    "acceleration_agreement_t055s": {
+      "max_coordinate_state_difference_rad_m": 2.0447400514325524e-6,
+      "max_velocity_state_difference_rad_s": 4.27603126578191e-5
+    }
+  },
+  "configurations": [
+    {
+      "name": "ode23t_tol1e3_auto",
+      "solver": "ode23t",
+      "reltol": "1e-3",
+      "abstol": "1e-6",
+      "maxstep": "auto",
+      "elapsed_s": 29.5106801,
+      "metrics_vs_target": {
+        "whole_rms_mm": 81.08284242192352,
+        "early_rms_mm": 10.051620591318056,
+        "terminal_rms_mm": 287.4084708076533
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 496.20013423886223,
+        "mean_coord_discrepancy_mm": 10.837287046891133,
+        "max_euclidean_discrepancy_mm": 662.2182919648078,
+        "mean_euclidean_discrepancy_mm": 21.14871467163168
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 662.2149505389859
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.25833333333333336,
+        "time_to_0.1mm_s": 0.4222222222222222,
+        "time_to_0.5mm_s": 0.49166666666666664,
+        "time_to_1.0mm_s": 0.5194444444444445,
+        "time_to_5.0mm_s": 0.5888888888888889,
+        "time_to_10.0mm_s": 0.6166666666666667
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 1,
+        "worst_marker_euclidean_mm": 2.089321484438876
+      }
+    },
+    {
+      "name": "ode23t_tol1e4_auto",
+      "solver": "ode23t",
+      "reltol": "1e-4",
+      "abstol": "1e-7",
+      "maxstep": "auto",
+      "elapsed_s": 16.1631616,
+      "metrics_vs_target": {
+        "whole_rms_mm": 37.24535789237297,
+        "early_rms_mm": 10.019790119733791,
+        "terminal_rms_mm": 178.53036106075442
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 334.99696326714735,
+        "mean_coord_discrepancy_mm": 3.0147409563593794,
+        "max_euclidean_discrepancy_mm": 443.0636871702703,
+        "mean_euclidean_discrepancy_mm": 6.129292205831233
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 443.0205185317154
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.4638888888888889,
+        "time_to_0.1mm_s": 0.49444444444444446,
+        "time_to_0.5mm_s": 0.5611111111111111,
+        "time_to_1.0mm_s": 0.5916666666666667,
+        "time_to_5.0mm_s": 0.6583333333333333,
+        "time_to_10.0mm_s": 0.6861111111111111
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 1,
+        "worst_marker_euclidean_mm": 0.39307031154854705
+      }
+    },
+    {
+      "name": "ode23t_tol1e6_auto",
+      "solver": "ode23t",
+      "reltol": "1e-6",
+      "abstol": "1e-9",
+      "maxstep": "auto",
+      "elapsed_s": 25.6974547,
+      "metrics_vs_target": {
+        "whole_rms_mm": 20.462532013364918,
+        "early_rms_mm": 10.015030016622608,
+        "terminal_rms_mm": 40.461394620723674
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 21.8418177176342,
+        "mean_coord_discrepancy_mm": 0.14378139201022191,
+        "max_euclidean_discrepancy_mm": 24.429849565083163,
+        "mean_euclidean_discrepancy_mm": 0.29325786110862445
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 24.368518973109882
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.5944444444444444,
+        "time_to_0.1mm_s": 0.625,
+        "time_to_0.5mm_s": 0.6916666666666667,
+        "time_to_1.0mm_s": 0.7194444444444444,
+        "time_to_5.0mm_s": 0.7861111111111111,
+        "time_to_10.0mm_s": 0.8138888888888889
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 1,
+        "worst_marker_euclidean_mm": 0.017529736658580184
+      }
+    },
+    {
+      "name": "ode23t_tol1e8_auto",
+      "solver": "ode23t",
+      "reltol": "1e-8",
+      "abstol": "1e-11",
+      "maxstep": "auto",
+      "elapsed_s": 52.6700357,
+      "metrics_vs_target": {
+        "whole_rms_mm": 20.345464864929784,
+        "early_rms_mm": 10.014841620055872,
+        "terminal_rms_mm": 39.204829513241414
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 1.1213119208441786,
+        "mean_coord_discrepancy_mm": 0.007325062345031991,
+        "max_euclidean_discrepancy_mm": 1.2349337546739938,
+        "mean_euclidean_discrepancy_mm": 0.014920651559526012
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 1.1735243407263838
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.7194444444444444,
+        "time_to_0.1mm_s": 0.7472222222222222,
+        "time_to_0.5mm_s": 0.8138888888888889,
+        "time_to_1.0mm_s": 0.8416666666666667,
+        "time_to_5.0mm_s": null,
+        "time_to_10.0mm_s": null
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 1,
+        "worst_marker_euclidean_mm": 0.0008943088105143073
+      }
+    },
+    {
+      "name": "ode23t_tol1e6_step720",
+      "solver": "ode23t",
+      "reltol": "1e-6",
+      "abstol": "1e-9",
+      "maxstep": "0.00138889",
+      "elapsed_s": 18.4961755,
+      "metrics_vs_target": {
+        "whole_rms_mm": 20.462532013364918,
+        "early_rms_mm": 10.015030016622608,
+        "terminal_rms_mm": 40.461394620723674
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 21.8418177176342,
+        "mean_coord_discrepancy_mm": 0.14378139201022191,
+        "max_euclidean_discrepancy_mm": 24.429849565083163,
+        "mean_euclidean_discrepancy_mm": 0.29325786110862445
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 24.368518973109882
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.5944444444444444,
+        "time_to_0.1mm_s": 0.625,
+        "time_to_0.5mm_s": 0.6916666666666667,
+        "time_to_1.0mm_s": 0.7194444444444444,
+        "time_to_5.0mm_s": 0.7861111111111111,
+        "time_to_10.0mm_s": 0.8138888888888889
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 1,
+        "worst_marker_euclidean_mm": 0.017529736658580184
+      }
+    },
+    {
+      "name": "ode23t_tol1e6_step1440",
+      "solver": "ode23t",
+      "reltol": "1e-6",
+      "abstol": "1e-9",
+      "maxstep": "0.00069444",
+      "elapsed_s": 18.0543302,
+      "metrics_vs_target": {
+        "whole_rms_mm": 20.462541404943046,
+        "early_rms_mm": 10.015028098996886,
+        "terminal_rms_mm": 40.46161990901343
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 21.84362577916002,
+        "mean_coord_discrepancy_mm": 0.1437819300568181,
+        "max_euclidean_discrepancy_mm": 24.432105725146265,
+        "mean_euclidean_discrepancy_mm": 0.29325853484422115
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 24.37077514871995
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.5944444444444444,
+        "time_to_0.1mm_s": 0.625,
+        "time_to_0.5mm_s": 0.6916666666666667,
+        "time_to_1.0mm_s": 0.7194444444444444,
+        "time_to_5.0mm_s": 0.7861111111111111,
+        "time_to_10.0mm_s": 0.8138888888888889
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 1,
+        "worst_marker_euclidean_mm": 0.017529736658580184
+      }
+    },
+    {
+      "name": "ode15s_tol1e3_auto",
+      "solver": "ode15s",
+      "reltol": "1e-3",
+      "abstol": "1e-6",
+      "maxstep": "auto",
+      "elapsed_s": 11.0801807,
+      "metrics_vs_target": {
+        "whole_rms_mm": 23.34407456874026,
+        "early_rms_mm": 10.018420364461623,
+        "terminal_rms_mm": 84.17733563231842
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 158.8704964022986,
+        "mean_coord_discrepancy_mm": 1.2040715066217795,
+        "max_euclidean_discrepancy_mm": 175.62926980897174,
+        "mean_euclidean_discrepancy_mm": 2.4084175801987153
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 175.68422136933856
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.1638888888888889,
+        "time_to_0.1mm_s": 0.31666666666666665,
+        "time_to_0.5mm_s": 0.6055555555555555,
+        "time_to_1.0mm_s": 0.6333333333333333,
+        "time_to_5.0mm_s": 0.7,
+        "time_to_10.0mm_s": 0.7277777777777777
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 1,
+        "worst_marker_euclidean_mm": 0.13268317958802717
+      }
+    },
+    {
+      "name": "ode15s_tol1e6_auto",
+      "solver": "ode15s",
+      "reltol": "1e-6",
+      "abstol": "1e-9",
+      "maxstep": "auto",
+      "elapsed_s": 13.2542981,
+      "metrics_vs_target": {
+        "whole_rms_mm": 20.34703664296963,
+        "early_rms_mm": 10.015055866080115,
+        "terminal_rms_mm": 39.20702058083785
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 1.4420066969060423,
+        "mean_coord_discrepancy_mm": 0.011111325020791474,
+        "max_euclidean_discrepancy_mm": 1.6053234111986279,
+        "mean_euclidean_discrepancy_mm": 0.02260085519837419
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 1.5439095537319665
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.5861111111111111,
+        "time_to_0.1mm_s": 0.7361111111111112,
+        "time_to_0.5mm_s": 0.8027777777777778,
+        "time_to_1.0mm_s": 0.8305555555555556,
+        "time_to_5.0mm_s": null,
+        "time_to_10.0mm_s": null
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 17,
+        "worst_marker_euclidean_mm": 0.019803932266617648
+      }
+    },
+    {
+      "name": "ode15s_tol1e6_step1440",
+      "solver": "ode15s",
+      "reltol": "1e-6",
+      "abstol": "1e-9",
+      "maxstep": "0.00069444",
+      "elapsed_s": 15.2462241,
+      "metrics_vs_target": {
+        "whole_rms_mm": 20.3424908280664,
+        "early_rms_mm": 10.014865402119108,
+        "terminal_rms_mm": 39.201714436738015
+      },
+      "cross_engine_vs_pinocchio": {
+        "max_coord_discrepancy_mm": 0.05546125760794163,
+        "mean_coord_discrepancy_mm": 0.0005454251264550259,
+        "max_euclidean_discrepancy_mm": 0.06141876644597334,
+        "mean_euclidean_discrepancy_mm": 0.0011051808562465679
+      },
+      "self_convergence_vs_refined_simscape": {
+        "max_euclidean_discrepancy_mm": 0.0
+      },
+      "first_divergence_time_s": {
+        "time_to_0.05mm_s": 0.8416666666666667,
+        "time_to_0.1mm_s": null,
+        "time_to_0.5mm_s": null,
+        "time_to_1.0mm_s": null,
+        "time_to_5.0mm_s": null,
+        "time_to_10.0mm_s": null
+      },
+      "error_at_t055s_frame198": {
+        "worst_marker_index": 17,
+        "worst_marker_euclidean_mm": 0.0023079339716460924
+      }
+    }
+  ]
+}

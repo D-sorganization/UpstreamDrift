@@ -1,74 +1,167 @@
 # Simscape Tour-Average Fit Continuation
 
-## Active Horizon Execution & Parity Turnover (2026-09-12 Live Continuation)
+## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
-### 0. 1.05 s Downswing Delivery Certification & Audit (`candidate_downswing_105s_locked_package.json`, DeskComputer)
+Branch `feat/tb01-tour-targets-audit-10586`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586)) audits the canonical tour-average captures (`C3D_TA_Driver.c3d` and `C3D_TA_Iron.c3d`), establishes content-based verification by SHA-256 (never path name alone), and versions `tour-measurement-map/1.0.0` distinguishing observed surface markers, inferred joint centers, and rigid cluster centroids while explicitly marking calibrated clubface orientation and contact points as `UNAVAILABLE` in raw data. Defines native swing intervals on independent clocks (360.0 Hz driver vs 359.0 Hz iron) with trajectory-inferred events explicitly labeled `is_inferred = True`. Records full GearsSports provenance (`PLAYER_ID: 967eac5b-2e78-4207-a99f-d57437296d70`), separating shared player anatomy from capture-specific geometry. Emitted reproducible receipts in `docs/plans/tour_baselines/evidence/` and documented in `target_audit.md`. All 35 tests pass, ruff/black/mypy pass, architecture budget passes, divergence inventory is synchronized.
+Next step: Merge TB-01 PR; next dispatch is TB-02 ([#10587](https://github.com/D-sorganization/UpstreamDrift/issues/10587): Calibrate Common Anthropometrics and Club Geometries).
+
+## Tour Baselines TB-00: Freeze Model Identities, Ownership, and Coverage (#10585)
+
+Branch `feat/tb00-model-identities-10585`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+Initial dispatch TB-00 ([#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585)) implements canonical model identities, separates kinematic
+reconstruction models (which omit the club) from torque-driven pendulums (with simulated club)
+and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving
+rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron,
+non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified
+Tools pin at `a9ed0e7c5c6905b1164082659051d6381068052d` and published documentation under
+`docs/plans/tour_baselines/`. All 13 unit tests pass, ruff check and format pass, mypy passes.
+Next step: Merge TB-00 PR; next dispatch is TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586): Audit Tour Targets, Marker Semantics,
+Events, and Provenance).
+
+## MuJoCo Saved-Control Replay (#10336)
+
+Branch `feat/10336-mujoco-candidate-replay`; implementation `94ccb1825`;
+PR #10448 open. See DL-#10336 in `docs/development/DEVELOPMENT_LOG.md`
+and `evidence/matched/driver_full_mujoco_replay/README.md` for reproduction.
+Forty focused tests and scoped Ruff/mypy checks pass. The diagnostic replay
+and playback are preserved, but G1 is rejected and source configuration parity
+is unverified. Merge delivers the replay path, not physical qualification;
+keep #10336 open. Commit/push hooks pass, as do 21 replay tests on pinned
+MuJoCo 3.8.0. The next step is PR CI and review, then protected merge.
+
+## Shadow Tracker Revision Integrity (#10233)
+
+Provider registration and persistence repair is locally validated on
+`fix/shadow-tracker-10233-pr`; [PR #10450](https://github.com/D-sorganization/UpstreamDrift/pull/10450) is in CI. See
+[turnover evidence](docs/plans/shadow_tracker/TURNOVER_CURRENT.md) for contracts,
+13-failure RED receipt, 306-test GREEN receipt and separate ST-11 bundle risks.
+Renderer work and the original checkout are preserved. Review the focused diff.
+
+## Polynomial Full-Body Dynamics Boundary (#10265)
+
+The integration retains global degree-six Bernstein efforts for every non-root
+coordinate. World-root names are derived and checked; their efforts remain
+zero. The RK4 boundary differentiates all stages and substeps of the corrected
+native plant. Outputs are owned/read-only and expose contact branch validity.
+This is a dynamics prerequisite, not a completed Crocoddyl optimizer. Next:
+coefficient-lift action assembly, objective contracts and independent replay.
+
+## Qualified Motion Integration (#10254)
+
+- **Dispatch:** [Worker Turnover](docs/plans/qualified_motion_integration/TURNOVER.md)
+  and [Pink Packets](docs/plans/qualified_motion_integration/PINK_TURNOVER.md).
+  Post-storage runtime probes pass; full-body actions are in progress. Pink
+  production wiring still requires task translation, trajectory timing and
+  product integration. #10250/#10251 are closed; #10271 tracks receipt integrity.
+
+- **Read First:** [Integration Boundaries and Delegation Plan](docs/plans/qualified_motion_integration/README.md).
+- **First Numerical Boundary (#10255):** Full-body Pinocchio derivatives now
+  include the state dependence of shared ground forces and contact Jacobians.
+  Real Pinocchio 3.8 tests reproduce the previous active-contact failure and
+  pass after the chain-rule correction. This is derivative qualification,
+  not a full-swing fitting or contact-model acceptance claim.
+- **Optional Viewer Adapters (#10256, #10254):** Gepetto and MeshCat wrappers retain their native visualizers and dispatch
+  validated configurations, including neutral pose. They distinguish visual and
+  collision geometry, own unique scene roots, and preserve shared servers/scenes
+  during cleanup. MeshCat's owned server is explicitly managed. Adapter tests
+  and a real MeshCat runtime smoke check exist; a live Gepetto CORBA/server
+  qualification and production replay selection remain outstanding. This change
+  does not certify any motion-fit result or replace the native viewer.
+- **Optional Motion Runtime (#10262):** The numerical runtime has a conda-forge version manifest and Linux x86-64-v3
+  explicit package lock. `scripts/ci/check_motion_runtime.py` isolates native
+  imports and solver probes and emits a fail-closed capability receipt with
+  versions, hashes, bounded process diagnostics and source-freshness status.
+  The qualified sample stack is Pinocchio 4.1, Pink 4.4 and Crocoddyl 3.2.1.
+  This does not qualify full-body fitting, physics, or Gepetto rendering.
+  Continue model and product integration under #10254.
+- **Pink Adapter Contract (#10257, #10254):** Both Pink entry points share one validated solve step. They preserve geometry,
+  forward explicit hard constraints/limits, refresh cached kinematics and
+  integrate tangent velocity exactly once. Solver failures propagate with
+  context; unchanged poses are no longer returned as a success fallback.
+  The adapter has real equality, infeasibility, cache and free-flyer tests.
+  Full-body marker/stance/weld task assembly and production selection remain
+  outstanding. The reproducible combined runtime is tracked by #10262.
+- **Bounded Work:** #10256 viewer lifecycle and #10257 Pink state/constraint
+  adapters are separate implementation slices; review actual tests and CI
+  before treating either as delivered.
+- **Finite Weld Error (#10260):** The pose linearization now applies the SE(3)
+  log Jacobian away from closure. The trajectory acceleration partial retains
+  the raw constraint velocity Jacobian. Real directional checks cover closed
+  and displaced grips; these do not qualify a fitted full-body trajectory.
+- **Preserve:** #10250 owns anthropometric evidence regeneration; #10108 and
+  #10159 retain their model-calibration and MJX reconciliation scope. Keep the
+  full #10162 physical gates and MATLAB R2025b requirement.
+
+## Shadow Tracker Current Turnover (#10122)
+
+- **Read First:** [Current Turnover](docs/plans/shadow_tracker/TURNOVER_CURRENT.md)
+  and [Continuation Prompt](docs/plans/shadow_tracker/CONTINUATION_PROMPT.md).
+- **Baseline:** `0ec64e45f`; timing #10253 merged. Restart repair marks estimated
+  timestamps inexact; 195 focused/model-probe tests pass.
+- **Next:** Renderer owner finishes #10264 import failure and merge conflicts;
+  independent agents claim #10233 revision persistence. #10273 tracks remaining
+  native PTS and stored clock-authority gaps. Preserve existing renderer edits.
+- **Product Milestone:** Import, manual mask review, save/reopen in the launcher
+  under #10134; no claim of qualified fitting or completed ST-07–ST-12.
+
+## Current State (2026-09-15, Supersedes the Sections Below)
+
+- **ALL 4 GATES COMPLETED & CERTIFIED**:
+  - **GATE 1 (Replay Fix Qualified & Preserved)**:
+    - Geometry seed path resolution restored arm lengths to 14.5/12.0 in, eliminating 950 mm defect.
+    - Translational force frame guard (`actuator_force_frame == "world"`) eliminates double-rotation.
+    - Replay MAT slimmed to 444 KB (pure numeric arrays, no raw Simulink objects).
+    - Regression tests in `tests/unit/motion_matching/test_replay_regression.py` passing.
+    - Receipt units corrected: $1.554\text{ fm}$ at $t=0$, $1.7\text{ }\mu\text{m}$ at frames 1–30, separate coordinate vs Euclidean metrics.
+  - **GATE 2 (Bounded Solver-Convergence Audit)**:
+    - Full 9-configuration convergence matrix on DeskComputer in MATLAB R2025b on Candidate 100 (`run_solver_convergence_matrix.m`).
+    - Audit results certified in `SOLVER_CONVERGENCE_AUDIT.json`.
+    - Proved cross-engine discrepancy is 100% numerical solver tolerance truncation under default settings: at `ode15s` (`RelTol 1e-6`, `MaxStep 1/1440 s`), Simscape Multibody matches Pinocchio DOP853 within **60.5 micrometers** across all 307 frames ($0 \dots 0.85\text{ s}$) and all 25 markers!
+  - **GATE 3 (Pelvis Yaw Repair & Analytic Jacobian Qualified)**:
+    - Formulated 2-component unit vector difference $r = w (\hat{v}_p - \hat{v}_t) \in \mathbb{R}^2$ eliminating $180^\circ$ reversal singularity.
+    - Formulated and verified exact analytic Jacobian with directional finite difference checks.
+    - Cache-key validation implemented for empty, stale, or out-of-order calls.
+    - Shared module `src/shared/python/motion_matching/pelvis_yaw.py` created and tested (TDD/DbC/LoD/DRY).
+  - **GATE 4 (Bounded Fitting Trial 101 & Cross-Engine Replay)**:
+    - Continuation trial 101 executed on ControlTower restarting from Candidate 100 with `--pelvis-yaw-weight 40.0` and balanced `--terminal-weight 25.0`.
+    - **Single-Digit Early RMS**: **`9.995 mm`** (historic project first, $\le 12.0\text{ mm}$ Gate $\to$ **PASS**).
+    - **Pelvis Yaw Error**: Plunged from 15.69% to **`0.54%`** ($+0.297^\circ$ difference, $< 5.0\%$ Gate $\to$ **PASS**).
+    - **Whole RMS**: Record low **`20.265 mm`** ($\le 25.0\text{ mm}$ Gate $\to$ **PASS**).
+    - **Club Cluster RMS**: **`8.422 mm`** ($\le 60.0\text{ mm}$ Gate $\to$ **PASS**).
+    - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
+    - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
+
+## GSPro Integration (#10188, #10460)
+
+- **State:** GS-00 through GS-11 merged. #10460 consumes shared Tools `launch_monitor.gspro_connect` codec (#5228).
+- **Branch:** `feat/10460-consume-tools-gspro-codec`.
+- **Implementation:** `src/shared/python/golf_simulator/adapters/gspro/codec.py` retains canonical SI/radian conversion and profile handling while delegating protocol wire encoding and response decoding to `shared.python.launch_monitor.gspro_connect`.
+- **Validation:** 106 golf simulator unit and integration tests pass cleanly; ruff, black, and mypy pass with 0 errors.
+- **Next:** Open PR referencing `Closes #10460`, arm auto-merge with squash.
+
+## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
+
+### 0. Active Live Horizon: 0.80 s Continuation (`prefix-800ms-sextic-01`, DeskComputer)
 
 - **Execution Status**:
-  - Run completed on DeskComputer (276 forward dynamics rollouts in Simscape Multibody R2025b `GolfSwing3D_Kinetic.slx`, 4,071.4 s compute, `xtol` termination satisfied).
-  - Continuous 100% forward dynamics rollout without resets: **Defect Norm = 0.000000 m (PASS)**.
-  - Exactly one global degree-6 polynomial per native channel on basis $T_{\text{basis}} = 1.813889\text{ s}$.
-  - Degrees $k=0, 1, 2, 3$ **100% FROZEN** across all 27 joints ($\max |\Delta \theta_{j, 0..3}| = 0.000000$).
-- **Gate Audit Performance**:
-  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.22 mm (PASS $\le 12.0\text{ mm}$)**. Address ($1.40\text{ mm}$) and takeaway ($3.55\text{ mm}$) completely preserved and immune to downswing dynamics.
-  - **Downswing Cost Descent**: Cost dropped across 5 accepted trust-region steps from $5.88 \times 10^6 \to \mathbf{2.1939 \times 10^4}$ (at Eval 265).
-  - **Downswing Pelvis Yaw at 1.05 s**: Error dropped from $>378\%$ to **8.44%** at Eval 265 and **29.03%** at termination.
-  - **Whole-Window RMSE ($[0, 1.05\text{ s}]$)**: **212.02 mm**.
-  - **Terminal Marker RMSE ($1.05\text{ s}$)**: **585.30 mm**.
-  - **Terminal Clubhead RMSE ($1.05\text{ s}$)**: **695.76 mm** (best intermediate: $462.29\text{ mm}$).
-  - **0.80 s Horizon Trajectory Audit with 1.05 s Control Curve**: Whole Window RMSE = **33.43 mm**, Early Retention RMSE = **11.22 mm**, Pelvis Yaw @ 0.80s = **15.32%** ($8.96^\circ$).
-- **Candidate Package**:
-  - `candidates/candidate_downswing_105s_locked_package.json` (ID: `prefix-1050ms-downswing-locked-1789243882`).
-  - Synced to DeskComputer runtime worktree.
-
-### 0.1 0.80 s Transition Apex Certification & Audit (`candidate_transition_conditioned_080s_package.json`, DeskComputer)
-
-- **Execution Status**:
-  - Run completed on DeskComputer (1,710.3 s compute, clean exit).
-  - 100% continuous unsegmented forward dynamics: **Defect Norm = 0.000000 m (PASS)**.
-  - Single degree-6 polynomial per channel on $T_{\text{basis}} = 1.813889\text{ s}$.
-- **Gate Audit Performance**:
-  - **Gate 4 Early Retention ($[0, 0.60\text{ s}]$)**: **11.19 mm (PASS $\le 12.0\text{ mm}$)**.
-  - **Gate 5 Pelvis Yaw @ 0.80 s**: **2.21%** ($-1.29^\circ$) / **1.03%** ($-0.60^\circ$ in diffstep) (**PASS $< 5.0\%$**).
-  - **Whole-Window RMSE ($[0, 0.80\text{ s}]$)**: **32.16 mm** (best unsegmented rollout: **31.72 mm** in targeted package).
-  - **Terminal Marker RMSE ($0.80\text{ s}$)**: **95.84 mm**.
-  - **Clubhead Terminal RMSE ($0.80\text{ s}$)**: **69.26 mm** (matches documented 7.0 cm modeled club length gap).
-  - **Gates Passed**: **2/5 gates passed** (Early retention, Pelvis yaw).
-- **Candidate Packages**:
-  - `candidates/candidate_transition_conditioned_080s_package.json`
-  - `candidates/candidate_transition_080s_diffstep_package.json`
-  - `candidates/candidate_ms_080s_targeted_package.json`
-
-### 0.2 0.80 s Completed Audit & Candidate Eval #559 Package (`prefix-800ms-sextic-01`, DeskComputer)
-
-- **Execution Status**:
-  - Run completed on DeskComputer (775 logged evaluations in `evaluations.jsonl`, `xtol` termination satisfied).
-  - Fast restart Simscape forward dynamics running under MATLAB R2025b.
-  - Warm-Started from Candidate Eval #79 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_package.json`).
-- **Best Logged Intermediate Milestone: Candidate Eval #559 ($0.80\text{ s}$)**:
-  - **Whole-Window Marker RMSE**: **43.228 mm** (FAIL vs $25.0\text{ mm}$ gate, best on $0.80\text{ s}$ horizon).
-  - **Early Retention RMSE** ($[0, 0.60\text{ s}]$): **9.851 mm** (PASS $\le 12.0\text{ mm}$, fully preserved).
-  - **Pelvis Yaw Residual**: **$+0.81^\circ$**, Error **1.38%** (PASS, gate strictly $< 5.0\%$).
-  - **Terminal Frame RMSE**: **195.214 mm** (FAIL vs $35.0\text{ mm}$).
-  - **Clubhead Terminal RMSE**: **283.236 mm** (FAIL vs $60.0\text{ mm}$).
-  - **Gates Passed**: **2/5 gates passed** (Early retention, Pelvis yaw).
-- **Run 080s Final Step Audit (Eval 775)**:
-  - Whole-Window RMSE: **209.196 mm** (FAIL)
-  - Early Retention RMSE: **96.672 mm** (FAIL)
-  - Terminal Frame RMSE: **435.615 mm** (FAIL)
-  - Clubhead Terminal RMSE: **486.635 mm** (FAIL)
-  - Pelvis Yaw Residual: **$-13.73^\circ$**, Error **23.49%** (FAIL)
-  - Gates Passed: **0/5 gates passed**.
-- **Cold Replay Verification (Independent MATLAB R2025b Forward Rollout)**:
-  - Receipt: `docs/development/simscape_tour_matching/native_evidence/reproduction/cold_replay_deliverable1_receipt.json`
-  - Eval 79 ($0.75\text{ s}$): Whole window **23.859 mm** (RECORD, PASS), Early **9.852 mm** (PASS), Yaw **1.675%** (PASS), Gates **3/5**.
-  - Eval 559 ($0.80\text{ s}$): Whole window **43.228 mm** (FAIL), Early **9.851 mm** (PASS), Yaw **1.378%** (PASS), Gates **2/5**.
-  - Eval 775 ($0.80\text{ s}$): Whole window **209.196 mm** (FAIL), Gates **0/5**.
-- **Immutable Candidate Packages Created**:
-  - **Candidate Eval #559 Package ($0.80\text{ s}$)**:
-    - Repo: `candidates/candidate_eval559_package.json`
-    - DeskComputer: `C:/Users/diete/SimscapeTour9921/candidates/candidate-080s-eval559-pkg/candidate_eval559_package.json`
-    - Whole-window marker RMS: **43.228 mm**, Yaw error: **1.38%**, Early retention: **9.851 mm**
+  - Actively running on DeskComputer under MATLAB R2025b FastRestart.
+  - Spawning: Detached CIM process (`Invoke-CimMethod -ClassName Win32_Process -MethodName Create`) with live heartbeat logging.
+  - Directory: `C:/Users/diete/SimscapeTour9921/prefix-800ms-sextic-01`.
+  - Warm-Start Seed: Candidate Eval #79 (`C:/Users/diete/SimscapeTour9921/candidates/candidate-run06-eval79-pkg/candidate_eval79_package.json`).
+  - **Baseline Transfer Audit on 0.80 s**:
+    - Evaluated before optimization using De Casteljau's left subdivision and degree elevation:
+    - Early Retention RMSE ($[0, 0.60\text{ s}]$): **$9.852\text{ mm}$** (PASS $\le 12.0\text{ mm}$, exactly preserved).
+    - Whole-Window RMSE ($[0, 0.80\text{ s}]$): **$45.109\text{ mm}$** (raw baseline).
+    - Pelvis Yaw at $0.80\text{ s}$: Model $37.23^\circ$ vs Target $58.45^\circ$ (diff $-21.22^\circ$, error $36.30\%$).
+  - **Objective Formulation**:
+    - `--duration 0.80 --basis sextic`
+    - `--finite-difference-step 0.001 --smoothness-weight 0.08 --anatomical-weights`
+    - `--club-marker-weight 70.0 --terminal-weight 40.0`
+    - `--time-weight-scale 4.0 --time-weight-power 2.0`
+    - `--pelvis-yaw-weight 75.0 --pelvis-yaw-max-error-pct 5.0`
+    - `--max-nfev 250`
+  - Current Evaluations: Actively evaluating, $\approx 3.7\text{ s}$ per forward rollout.
 
 ### 0.1 Run 06 Completed Audit: All-Time Record & Terminal Error Reduction (`prefix-750ms-sextic-06`, DeskComputer)
 
@@ -741,6 +834,39 @@ scripts.shared_tools.divergence_inventory --write` re-records the 16 new
 - Tools force-source frame #4873 merged as
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
+
+## Impact Explorer Acceptance Matrix: #9550
+
+- Branch `conductor/issue-9550`, commit SELF; PR not created. Epic #9546.
+- Audit snapshot UD `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / Tools
+  `3d93bb2c89813e17551814d3be7e895f791e29af`; reconciled 2026-09-18 against UD
+  `5347cba0f4378cd72a6e8afea9fb27c8bfe5db75` and the consumed Tools pin
+  `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (unchanged by this work).
+- `src/config/impact_acceptance.json` is the frozen matrix; its gate
+  `tests/config/impact_acceptance/test_impact_acceptance_matrix.py` probes each
+  capability row against the shipping library and refuses a predictive claim
+  while any item is open. Human packet:
+  `docs/development/impact_acceptance_matrix.md`.
+- `impact-explorer-web-build` now runs Tools' `release/generateReleaseArtifacts.mjs`
+  with `ROC_RELEASE_REVISION=<gitlink>` and
+  `scripts/ci/verify_impact_explorer_bundle.py`, which serves `dist` through the
+  `/impact-explorer-app` mount contract and checks revision-stamped index,
+  manifest SHA-256 for every asset, JavaScript media type, base path and a
+  404 for a missing artifact; receipt artifact
+  `impact-explorer-bundle-receipt-<sha>`. Local run at the pin: 76 assets,
+  5 JS, PASS (Git Bash needs `MSYS_NO_PATHCONV=1` or the base path is mangled).
+- Validation: matrix gate 26 passed; verifier + mount tests 14 passed;
+  feature-parity / industrial-readiness gates 91 passed; ruff check/format,
+  LoD, error-handling ratchet, file-size, TODO, declared-route-producer,
+  workflow-context and SPEC gates pass. Pre-existing local failures outside
+  scope: `test_tools_child_copy_contract.py` (needs a git-backed Tools
+  checkout) and `test_urdf_governance_docs.py` docstring checks.
+- Open (recorded with owner/plan/blockers in the JSON): shared provider goldens
+  and reference datasets (Tools #4251), installed-artifact restart/reload/offline
+  smoke (#9417), rendered screenshot manifest, numerical cross-runtime scenario
+  comparison; `tools.rate_of_closure` parity is a gap under #9546 until then.
+  Do not close #9550 on this PR alone; it delivers the matrix and install
+  evidence, not items 3 and 5.
 
 ## Impact Explorer Web Route Producer: #9484
 

@@ -80,3 +80,75 @@
 ## 2024-03-22 - [Optimization: Small 1D Array Norm Calculation]
 **Learning:** For small 1D NumPy arrays (like 3D vectors), `np.sqrt(ndarray.dot(ndarray))` is ~2x faster than `np.linalg.norm(ndarray)`. It is also faster than `np.sqrt(np.einsum('i,i->', arr, arr))` which is optimized for multidimensional arrays.
 **Action:** Replace `np.linalg.norm()` with `np.sqrt(ndarray.dot(ndarray))` when calculating the magnitude of single 1D arrays.
+
+## 2026-11-20 - Optimize np.linalg.norm in bundle adjustment
+**Learning:** In bundle adjustment (and other multidimensional vector math operations) replacing `np.linalg.norm(arr, axis=1)` with `np.sqrt(np.einsum('ij,ij->i', arr, arr))` reduces NumPy overhead by avoiding temporary array allocations. However, `np.linalg.norm` creates temporary variables implicitly. For 2D matrices where calculating differences `diff = a - b` happens before norming, `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is significantly faster (~35% speedup) because it avoids those allocations inside `norm(..., axis=1)`.
+**Action:** Always replace `np.linalg.norm(diff, axis=1)` with pre-calculated differences and `np.sqrt(np.einsum('ij,ij->i', diff, diff))` for performance-critical path routines like physics and bundle adjustment in NumPy arrays with >1 dimension.
+
+## 2026-09-12 - [Optimize Euclidean Distance in 2D Array]
+**Learning:** Using `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is significantly faster than `np.linalg.norm(..., axis=1)` for multi-dimensional distance calculations since it bypasses the overhead of np.linalg.norm which internally does checks and allocations. Using `np.einsum('ij,ij->i', diff, diff)` directly to compute squared distances allows for further optimizations when calculating RMS or max distance, saving square root evaluations.
+**Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.einsum('ij,ij->i', diff, diff)` in `src/shared/python/biomechanics/joint_conventions.py` and `src/shared/python/biomechanics/golf_trajectory.py`.
+
+## 2024-05-20 - [Optimize RMS and Max Norm Calculation with Einsum]
+**Learning:** Using `np.linalg.norm(..., axis=1)` to compute array magnitudes followed by another power operation like `distances**2` creates unnecessary intermediate arrays and performs redundant square root operations. By replacing it directly with `sq_distances = np.einsum('ij,ij->i', diff_arr, diff_arr)`, we avoid `np.linalg.norm` dispatch overhead and temporary allocations. We can then compute both the RMS and max directly from the squared distances (`np.sqrt(np.mean(sq_distances))` and `np.sqrt(np.max(sq_distances))`), which is ~10-15% faster.
+**Action:** Replace `distances = np.linalg.norm(prediction - target, axis=1)` with `sq_distances = np.einsum('ij,ij->i', diff_arr, diff_arr)` when scalar reductions (like mean or max) are subsequently needed on the distances, to optimize computation.
+## 2024-05-20 - [Optimize Euclidean distance for 1D arrays]
+**Learning:** To optimize element-wise Euclidean distance calculations for NumPy arrays, replace `np.sqrt(a**2 + b**2)` with `np.hypot(a, b)`. When reducing the array, replacing `np.sum(np.sqrt(a**2 + b**2))` with `np.hypot(a, b).sum()` is surprisingly ~2.3x faster for 1D arrays, as it avoids temporary allocations and bypasses the overhead of the global `np.sum()`.
+**Action:** Replace `np.sum(np.sqrt(a**2 + b**2))` with `np.hypot(a, b).sum()` for 1D arrays.
+
+## 2024-05-20 - Fast Small Array Magnitude
+**Learning:** `np.linalg.norm()` is known to be relatively slow for small arrays (like 3D vectors) due to internal overhead and instance checks. Built-in `math.sqrt(np.vdot(arr, arr))` provides a significant speedup by bypassing `np.linalg.norm` overhead while leveraging the fast C-level `np.vdot`. For simple length threshold checks like `np.linalg.norm(diff) <= 1e-9`, squaring the threshold (`np.vdot(diff, diff) <= 1e-18`) completely skips the square root.
+**Action:** When computing vector norms for small 1D arrays, replace `np.linalg.norm(v)` with `math.sqrt(np.vdot(v, v))`. For simple threshold checks, replace `np.linalg.norm(v) < threshold` with `np.vdot(v, v) < threshold**2`.
+
+## 2024-05-20 - [Optimize Norm Calculation in Fit2d]
+**Learning:** Using `np.linalg.norm(..., axis=3)` to compute array magnitudes for 4D arrays (like those in `fit2d.py` for shape `(T, V, L, 2)`) incurs significant overhead due to temporary array allocations. By replacing it directly with `d = np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))`, we avoid `np.linalg.norm` dispatch overhead and temporary allocations.
+**Action:** Replace `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` when scalar reductions are needed, to optimize computation.
+
+## 2026-09-14 - Math.Sqrt(Np.Dot) Optimization
+**Learning:** For small 1D NumPy arrays (e.g., 3D vectors), `math.sqrt(array.dot(array))` is significantly faster (~2.5x) than `np.linalg.norm(array)` because it bypasses NumPy's internal dispatching and instance checks. This is safe to use where array inputs are known to be small 1D vectors.
+**Action:** Replace `float(np.linalg.norm(array))` with `float(math.sqrt(array.dot(array)))` in tight loops or where small 1D vector magnitudes are calculated frequently.
+
+## 2025-05-19 - Vector Magnitude Calculation
+**Learning:** `np.sqrt(np.einsum("ij,ij->i", v, v))` is significantly faster (~2.5x) than `np.linalg.norm(v, axis=1)` for multidimensional arrays in tight loops.
+**Action:** Use `np.sqrt(np.einsum("ij,ij->i", v, v))` instead of `np.linalg.norm(v, axis=1)` for performance optimizations when calculating vector magnitudes along an axis.
+
+## 2026-09-17 - [Optimization: Replace Np.Linalg.Norm With Math.Sqrt(Dot)]
+**Learning:** For small 1D NumPy arrays (e.g. 3D vectors) in tight physics calculation loops, `np.linalg.norm` adds substantial Python dispatch and internal instance checking overhead. Built-in `math.sqrt(np.vdot(arr, arr))` or `math.sqrt(arr.dot(arr))` avoids this overhead entirely, yielding significant performance gains (~2.5x speedup) while being safe, domain-correct, and functionally equivalent.
+**Action:** Always replace `float(np.linalg.norm(array))` with `float(math.sqrt(array.dot(array)))` where array sizes are small and statically known.
+
+## 2026-09-16 - Safe SPEC.md Modification Pattern Update
+**Learning:** Even using a pattern like `line.startswith('| YYYY-MM-DD |')` may fail the `repo-structure-gates` tests because older rows, like `| Date | PR | Summary |`, might not be found. We must explicitly search for the header format in the specific `## 12. Change Log` section and insert below the actual table header separator (e.g. `| --- | --- | --- |`).
+**Action:** When updating `SPEC.md` programmatically, use a script that correctly finds the header separator in the proper section and inserts the new row. Additionally, the unit tests inside `repo_hygiene` like `test_spec_changelog_integrity.py` are a great way to verify the file was updated without breaking the parser rules.
+
+## 2026-09-16 - [Small Array Norm Calculation]
+**Learning:** For small 1D array norm calculation, math.sqrt(np.vdot(array, array)) is significantly faster than np.linalg.norm. Avoid using math.hypot(*array) because it causes test regressions in some contexts despite being slightly faster in isolated testing.
+**Action:** Replace np.linalg.norm with math.sqrt(np.vdot) for small 3D vectors when safe, ensuring no regressions.
+
+## 2024-05-21 - [Optimize Norm Calculation in Motion Retargeting]
+**Learning:** In the motion capture retargeting pipeline (e.g., `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_retargeting.py`), calling `np.linalg.norm(pos_error)` on small 1D arrays (like 3D position errors) incurs significant overhead due to NumPy's internal dispatching and instance checks. Replacing it with `math.sqrt(pos_error.dot(pos_error))` bypasses this overhead and is significantly faster (~2.5x).
+**Action:** Replace `np.linalg.norm(pos_error)` with `math.sqrt(pos_error.dot(pos_error))` for small 1D array magnitude calculations where possible.
+## 2026-09-19 - Optimization of Np.Linalg.Norm With Keepdims Using Einsum
+**Learning:** For batched vector norms (e.g. NxD arrays) where `np.linalg.norm(..., axis=1)` is computed, calculating squared distances with `np.einsum("ij,ij->i", A, A)` and returning `np.sqrt()` is about ~3x faster. If `keepdims=True` was used with `np.linalg.norm(..., axis=1, keepdims=True)`, we can replicate this efficiently using `np.sqrt(np.einsum("ij,ij->i", A, A))[:, np.newaxis]`. This avoids both NumPy's internal dispatching and explicit intermediate allocations. Additionally, downstream norm-squared usages like `np.mean(distances**2)` can directly compute `np.mean(sq_distances)` when the intermediate squared differences are kept.
+**Action:** Replace `np.linalg.norm(..., axis=1, keepdims=True)` with `np.sqrt(np.einsum("ij,ij->i", ...))[:, np.newaxis]` for tight loop 2D/3D batch geometric calculations, while propagating `sq_distances` forwards for root-mean-square and max pooling reductions to eliminate redundant math.
+
+## 2026-09-19 - Optimize Math.Sqrt(Dot) vs Np.Linalg.Norm
+**Learning:** When computing magnitude using np.linalg.norm() for small vectors inside heavy computation paths like physics contact laws, math.sqrt(v.dot(v)) continues to give significant reduction in temporary allocations and increases throughput by bypassing standard np.linalg.norm checks.
+**Action:** Applied the math.sqrt(v.dot(v)) optimization in src/shared/python/motion_matching/contact_law.py
+
+## 2026-09-19 - Optimized Multi-Dimensional Norm Computations Using Einsum
+**Learning:** Using `np.linalg.norm(..., axis=1)` creates intermediate arrays and forces NumPy to use general-purpose dispatching, adding significant overhead in hot loops.
+**Action:** Replace `np.linalg.norm(diff, axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` and replace `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for small 1D vectors to prevent temporary allocations and get a ~2.4x speedup.
+
+## 2026-09-19 - Fast Squared Error Sums
+
+**Learning:** Optimizing `np.sum(diff**2, axis=-1)` or similar by doing the difference first and then `np.einsum` or `np.vdot` avoids a temporary allocation of `diff**2` and provides a nice ~2x speedup. `np.einsum("...i,...i->...", diff, diff)` is highly efficient for taking the squared error sum along the last dimension.
+
+**Action:** Replace `np.sum((a - b)**2, axis=-1)` with `diff = a - b` followed by `np.einsum('...i,...i->...', diff, diff)`. For 1D arrays, use `np.vdot(diff, diff)`.
+
+## 2026-09-20 - Optimization of Np.Linalg.Norm for Small Arrays
+**Learning:** `np.linalg.norm` has significant overhead due to internal dispatching when working with small 1D vectors (like 3D points or forces).
+**Action:** Replace `np.linalg.norm(arr)` with `math.sqrt(np.vdot(arr, arr))` for small 1D vectors for a substantial speed boost.
+
+## 2026-09-20 - Speeding up Distance Calculations on Multi-Dimensional Numpy Arrays
+**Learning:** `np.linalg.norm` has overhead due to input validation and handling multiple axes/dtypes. Using `np.sqrt(np.einsum(...))` performs the same mathematical operation (Euclidean distance) but operates closer to C-level speeds, typically yielding a 2x-3x speedup for calculating distances along an axis.
+**Action:** When calculating Euclidean distance along the inner-most axis of 3D or 4D multidimensional arrays in computationally hot paths (like physics simulations or tight mathematical loops), replace `np.linalg.norm(a - b, axis=-1)` with `np.sqrt(np.einsum('ijk,ijk->ij', diff, diff))` (or similar depending on dimensions) to avoid NumPy's internal dispatching and temporary array allocations. Do not apply this micro-optimization inside GUI update methods or string formatting operations where UI rendering overhead completely dwarfs any computational savings.

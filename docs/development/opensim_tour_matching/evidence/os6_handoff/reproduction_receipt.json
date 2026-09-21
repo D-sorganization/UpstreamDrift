@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "deliverable": "OS-6",
+  "title": "OpenSim Tour Matching Repeatability, Visualization, and Handoff Receipt",
+  "timestamp_utc": "2026-09-14T00:04:05.704185+00:00",
+  "git_commit": "653c97fe97b01b53ed3455f1b145d0a9f85daa45",
+  "status": "ACCEPTED",
+  "summary": "Complete delivery of OpenSim tour matching pipeline (OS-0 through OS-6). Includes C3D validation, TRC export, model calibration, Moco dynamic tracking pilot, degree-6 polynomial effort fitting, continuous zero-feedback forward simulation, and clean-machine reproduction evidence.",
+  "scope_note": "Pilot scope evaluated on initial 0.10s observation window; full G1 (0.85s) tracking evaluated in evidence/matched/driver_g1_opensim (MS-42 #10341).",
+  "asset_manifest": {
+    "c3d_capture": {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\data\\C3D_TA_Driver.c3d",
+      "sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+      "exists": true,
+      "size_bytes": 402240
+    },
+    "tracked_trc": {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\tour_average_tracked.trc",
+      "sha256": "203ad3629ea38c4c4705426bbd938de8c9706ea364c08366b61068f554eaa07f",
+      "exists": true,
+      "size_bytes": 614355
+    },
+    "os4_controls": {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os4_moco_tracking\\tracked_controls.sto",
+      "sha256": "dab10f6acdf76cf83549955fdf16df8dfac3a249aebe4452e0e715ddb8f01080",
+      "exists": true,
+      "size_bytes": 19441
+    },
+    "os5_coefficients": {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\polynomial_coefficients.json",
+      "sha256": "f8ad89ffa7839d7d38ae89e07bdd6649794693a9838805c5b0317180524c083d",
+      "exists": true,
+      "size_bytes": 26010
+    },
+    "os5_states": {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\forward_states.sto",
+      "sha256": "baf2bb5fbc4b063771238d1f38b7be56e9d77f9cbb7c3b22b8968a85adfcb051",
+      "exists": true,
+      "size_bytes": 11997
+    },
+    "os5_receipt": {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os5_polynomial_profile\\receipt.json",
+      "sha256": "9e96585aac4fb4527d50dc50daeb9126a5a4d9785d7006a957e16881f7704d30",
+      "exists": true,
+      "size_bytes": 9864
+    }
+  },
+  "shared_cross_engine_metrics": {
+    "whole_swing_marker_rms_m": 0.065,
+    "early_prefix_marker_rms_m": 0.015,
+    "terminal_marker_rms_m": 0.035,
+    "terminal_club_cluster_rms_m": 0.03,
+    "pelvis_yaw_error_deg": 1.2,
+    "forward_replay_success": true,
+    "forward_integration_wall_ms": 7.16,
+    "polynomial_bounds_passed": true
+  },
+  "visual_artifacts": {
+    "effort_rates_plot": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_effort_and_rates.png",
+    "marker_error_plot": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_marker_error_timecourse.png",
+    "trajectory_overlay_plot": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-opensim-10003\\docs\\development\\opensim_tour_matching\\evidence\\os6_handoff\\os6_3d_trajectory_overlay.png"
+  },
+  "reproduction_instructions": [
+    "1. Clone repository UpstreamDrift and install dependencies.",
+    "2. Ensure OpenSim 4.6 is available in active environment.",
+    "3. Run 'python -m src.engines.physics_engines.opensim.python.tour_matching.cli --help' to verify operations.",
+    "4. Run docs/development/opensim_tour_matching/os5_polynomial_fit_driver.py to reproduce forward replay.",
+    "5. Run docs/development/opensim_tour_matching/os6_handoff_driver.py to regenerate receipt and plots."
+  ]
+}
