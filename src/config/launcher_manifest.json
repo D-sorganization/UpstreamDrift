@@ -414,7 +414,8 @@
       ],
       "order": 17,
       "web": {
-        "mode": "native-window"
+        "mode": "route",
+        "route": "/tools/cross-engine"
       }
     },
     {
@@ -1156,7 +1157,8 @@
       ],
       "order": 50,
       "web": {
-        "mode": "native-window"
+        "mode": "route",
+        "route": "/tools/matched-swings"
       }
     }
   ]

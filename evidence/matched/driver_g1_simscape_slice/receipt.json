@@ -1,0 +1,11 @@
+{
+  "schema_version": "coordinate-slice-receipt-v1",
+  "issue": "#10349",
+  "timestamp_utc": "2026-09-21T16:36:37.071491+00:00",
+  "source_coordinate_count": 44,
+  "target_coordinate_count": 27,
+  "omitted_count": 17,
+  "virtual_work_max_residual": 0.0,
+  "qualification": "kinematic projection map; boundary loads unqualified until Simscape R2025b replay",
+  "candidate_npz": "candidate27.npz"
+}

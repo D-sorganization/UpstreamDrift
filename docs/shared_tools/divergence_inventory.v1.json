@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1378,
+    "ud-only": 1393,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 181,
+      "ud-only": 189,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -491,6 +491,13 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 169,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
+    "neural_motion": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 6,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12240,6 +12247,30 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/club_only/__init__.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 999,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/club_only/workbook_identity.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 17933,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/club_target.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -12353,6 +12384,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 5758,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/coordinate_slice.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 11916,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12689,6 +12732,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 6551,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/force_nullspace.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 36694,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13140,11 +13195,23 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/loaders/event_labels.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "loaders",
+      "ud_bytes": 2575,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/loaders/excel.py",
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "loaders",
-      "ud_bytes": 8732,
+      "ud_bytes": 7609,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13872,6 +13939,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/surrogate/artifact_paths.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "surrogate",
+      "ud_bytes": 967,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/surrogate/compact/__init__.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -13944,6 +14023,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/surrogate/nm00_audit.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "surrogate",
+      "ud_bytes": 842,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/surrogate/perstep/__init__.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -13960,7 +14051,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "surrogate",
-      "ud_bytes": 5070,
+      "ud_bytes": 5204,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16872,6 +16963,78 @@
       "spelling_only": false
     },
     {
+      "path": "neural_motion/__init__.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "",
+      "ud_bytes": 986,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/audit.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "",
+      "ud_bytes": 13524,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/catalog.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "",
+      "ud_bytes": 6474,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/claims.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "",
+      "ud_bytes": 4646,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/coverage.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "",
+      "ud_bytes": 3897,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/types.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "",
+      "ud_bytes": 5123,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "notes/__init__.py",
       "classification": "tools-only",
       "package": "notes",
@@ -18832,7 +18995,7 @@
       "classification": "ud-only",
       "package": "physics",
       "subpackage": "",
-      "ud_bytes": 12284,
+      "ud_bytes": 13061,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

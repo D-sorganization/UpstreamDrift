@@ -8,6 +8,53 @@ Adds `src/engines/preflight.py` with `EnginePreflightChecker`, `PreflightRunner`
 - **Single source of truth**: `KNOWN_ENGINES` derived from `src/engines/tiers.py:ENGINE_TIERS` — no duplication of engine name registry.
 - **TDD test suite**: 62 tests in `tests/unit/engines/test_preflight.py` covering all check methods, tier degradation, `PreflightSummary` aggregation, and JSON serialization.
 
+## Simscape 44-to-27 Coordinate Slice and Boundary-Load Validation (MS-62, #10349)
+
+Separates kinematic projection from dynamic model reduction for Simscape upper-body replay:
+- **Coordinate Slice Module (`src/shared/python/motion_matching/coordinate_slice.py`)**:
+  - JSON-backed `SliceMap` defining 44 source coordinates (anthropometric driver spec) to 27 native Simscape coordinates with 17 omitted neck/leg DOFs.
+  - `project_kinematic_trajectory` performs name-based kinematic projection preserving shared coordinate names.
+  - `derive_boundary_wrenches` accumulates omitted-body joint efforts into six-axis boundary wrenches at cut joints.
+  - `check_slice_virtual_work` decomposes virtual power into retained and omitted contributions with fail-closed tolerance.
+  - `slice_candidate` writes sliced `.npz` candidates with receipt metadata; CLI via `python -m src.shared.python.motion_matching.coordinate_slice`.
+- **MATLAB Alignment Overrides (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/align_measured_to_model.m`)**:
+  - `opts.geometry_document` support maps anthropometry segment lengths to Simscape workspace variables (inches).
+- **Evidence (`evidence/matched/driver_g1_simscape_slice/`)**:
+  - Committed `slice_map.json`, `candidate27.npz`, `receipt.json`, `parity.json`, and `run_manifest.json`.
+  - Kinematic projection only; dynamic Simscape replay and boundary-load acceptance marked unqualified.
+- **Verification Suite (`tests/unit/motion_matching/test_coordinate_slice.py`)**:
+  - 9 unit tests covering map coverage, projection, virtual work, boundary wrenches, fail-closed mismatch, and workspace overrides.
+
+## MyoSuite Kinematic Replay With Retarget Map and Marker Parity Receipt (MS-52, #10345)
+
+Adds kinematic-only replay of matched candidates in the MyoSuite engine lane with coordinate retargeting, marker parity receipts, cross-engine registration, and viewer support:
+- **Retarget Map (`src/engines/physics_engines/myosuite/python/retarget.py`, `coordinate_map_anthro.json`)**:
+  - Pure-numpy `RetargetMap` projects anthro coordinate order into a MyoSuite joint vector with chain interpolation and signed source-to-target mapping.
+  - `retarget_frame` / `retarget_trajectory` enforce DbC pre/postconditions for identity round-trip and finite outputs.
+- **Replay CLI (`src/engines/physics_engines/myosuite/python/replay.py`, `golfer_scene.py`, `viz/render_replay.py`)**:
+  - `run_kinematic_replay` retargets source `q`, embeds into placeholder MyoBody MJCF via MuJoCo FK, and writes receipt, candidate NPZ, and playback GIF under `evidence/matched/<driver>/`.
+  - Receipt declares `stage=replay`, `dynamics.status=not_run` (excitation-driven replay is MS-53), and honest marker parity on placeholder topology pending MS-51 golfer scene.
+  - `render_playback_gif` reuses shared cross-engine marker overlay rendering.
+- **Cross-Engine and Viewer Integration (`src/shared/python/motion_matching/cross_engine_replay.py`, `src/tools/tour_matching_viewer/core.py`)**:
+  - Registers `myosuite` in `VALID_ENGINES` and `KINEMATIC_ONLY_ENGINES`; tour matching viewer assigns engine colour `#8c564b`.
+- **Evidence (`evidence/matched/driver_g1_myosuite/receipt.json`, `candidate.npz`, `playback.gif`)**:
+  - Committed from canonical `driver_g1_crocoddyl_rk45_b100/candidate.npz`; native 15 mm marker parity gate deferred until MS-51 scene ships.
+- **Verification (`tests/unit/engines/myosuite/test_retarget.py`, `tests/myosuite/test_replay_native.py`, `tests/unit/engines/myosuite/test_cross_engine_registration.py`)**:
+  - TDD retarget round-trip, cross-engine registration, and native replay artifact emission with placeholder-aware parity gating.
+
+## Club Workbook Identity, Units, Events, and Trial Lineage (CO-00, #10604)
+
+Freezes content-addressed club Excel workbook identity for epic #10602 without altering source workbooks:
+- **Shared Event Labels (`src/shared/python/motion_matching/loaders/event_labels.py`)**:
+  - Normalizes bare and equals-suffixed markers (`A` / `A=`, …, `CHS`) and preserves real zero direction-cosine components (rejects `value or default` false zeros).
+- **Workbook Identity Package (`src/shared/python/motion_matching/club_only/workbook_identity.py`)**:
+  - Verifies SHA-256 for `data/Club_Data.xlsx` and the Wiffle/ProV1 companion workbook.
+  - Emits a four-trial lineage table; Filtering Experiments aliases TW_ProV1 by numeric fingerprint; trailing blank rows are not samples.
+  - Records centimetre interpretation with inches declaration retained, native 240 Hz impact-relative clock, T-event meaning, GW_wiffle ball-label conflict, and derived-not-measured orientation policy.
+- **Loader Alignment**: Excel `read_excel_event_markers` and Pinocchio `ClubTrajectoryParser` consume the shared helpers so TW_wiffle `A=` no longer returns NaN.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_workbook_identity.json` and `tests/unit/motion_matching/test_club_workbook_identity.py`.
+
+
 ## OpenSim/MyoSuite Native Nightly Lane Receipts (MS-43, #10342)
 
 Adds a ControlTower-oriented native-engine pytest lane with hashed nightly receipts and a freshness gate on `main` without editing `.github/workflows`:
@@ -375,6 +422,28 @@ Implements a dual-pane PyQt6 embeddable tool and lineage model (`src/tools/match
 - **Evidence & Verification**:
   - Automated tests: `tests/tools/matched_swing_browser/test_model.py` and `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py` (21 tests including headless journey test).
   - Headless screenshot evidence: `docs/development/matched_swing_program/evidence/browser/screenshot.png`.
+
+## Web Matched-Swing Results API and Results Page (MS-85, #10358)
+
+Exposes read-only, local-only matched-swing ledger routes for the web/Tauri shell and mounts the Results and Cross-Engine dashboard pages:
+- **API Service & Routes (`src/api/services/matched_swings_service.py`, `src/api/routes/matched_swings.py`)**:
+  - `GET /api/v1/matched-swings`: Public ledger index keyed by receipt SHA-256 (no absolute filesystem paths).
+  - `GET /api/v1/matched-swings/{id}`: Receipt JSON with summary, candidate hash, and explicit capability flags.
+  - `GET /api/v1/matched-swings/{id}/candidate`: NPZ stream or `preview_frame` JSON marker joints for 3D replay.
+  - `GET /api/v1/matched-swings/{id}/parity`: Cross-engine parity report JSON when present adjacent to the receipt.
+  - `GET /api/v1/matched-swings/{id}/animation.gif`: GIF animation stream when indexed in the ledger.
+  - Local-only guard rejects remote clients; typed job errors use structured HTTP 404 bodies.
+  - Reuses MS-02 ledger indexing and MS-80 browser artefact resolution (`MatchedSwingBrowserModel`).
+- **Web Results Page (`ui/src/pages/MatchedSwings.tsx`, `ui/src/api/matchedSwings.ts`)**:
+  - Route `/tools/matched-swings`: Filterable run list with verdict badges, five standardized metrics, GIF playback, and lazy `MocapSkeleton3D` marker preview.
+  - Links to `/tools/cross-engine` for parity/robustness review.
+- **Routing & Launcher Parity**:
+  - `ui/src/App.tsx`: Mounts `MatchedSwingsPage` and previously unmounted `CrossEngineDashboardPage`.
+  - `src/config/launcher_manifest.json`: `matched_swing_browser` and `cross_engine_dashboard` tiles use `web.mode: route`.
+  - `src/api/route_registry.py`: Registers `matched_swings` router as public (local-only evidence guard remains in handlers).
+- **Evidence & Verification**:
+  - API tests: `tests/api/test_matched_swings.py` (ledger, receipt, candidate NPZ/preview, parity, GIF, remote 403).
+  - UI tests: `ui/src/pages/MatchedSwings.test.tsx` (list badges, engine filter, 3D preview hook, cross-engine link).
 
 ## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
 
@@ -6728,6 +6797,11 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-21 | #10668 | NM-00 fail-closed audit of neural datasets, checkpoints and training claims (`neural-artifact-audit/1.0.0`); absent 10k corpus and note-only plateaus quarantined; no training or speed claims. |
+| 2026-09-21 | #10666 | MyoSuite kinematic replay with coordinate retarget map, marker parity receipt (`stage=replay`, `dynamics.status=not_run`), cross-engine kinematic-only registration, viewer support, and committed evidence for MS-52 (#10345); native 15 mm parity deferred until MS-51 scene. |
+| 2026-09-21 | #10667 | Freeze club workbook identity, shared A=/A event-label normalization, and four-trial lineage for CO-00 (#10604); centimetre unit authority retained with inches declaration recorded. |
+| 2026-09-21 | #10504 | Add PF-06 force-only null-space exploration (`force_nullspace.py`): scaled SVD/QR basis, feasible redistribution under cone and trail-side constraints, and bounded torque-tradeoff Pareto diagnostics without native replay approval (#10436). |
+| 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
 | 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
 | 2026-09-21 | #10648 | Vectorize `BallFlightSimulator._post_process_rust` to build the trajectory's `(3, N)` batch once and call force calculation a single time instead of once per point (#8930); no numerical change. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
