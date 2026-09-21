@@ -43,6 +43,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Delivered complete Package C milestones CF-1 through CF-8 test-first for epic #10286. Implemented versioned spatial wrench contracts (SpatialWrench with Varignon moment transport and action-reaction negation, PointwiseCounterfactualSample), NativeConstrainedCounterfactualProvider with Pinocchio closure_reaction_wrench, 3D spatial power/work/impulse integrals, and authoritative 5-engine capability matrix (counterfactual_matrix.py) with state restoration guarantees and zero silent fallbacks. Implemented forward branched ZTCF dynamics rollouts (ForwardZTCFBranch, CutState, RK4 integration, explicit rejection of forward ZVCF rollouts). Added /analysis/counterfactual API route with offline catalog baseline execution. Integrated reaction wrenches into Tour Matching Viewer (TourMatchingViewerWidget with CF badge, 'Reaction Wrenches (CF)' 3D overlay, load_counterfactual_trajectory, and provenance table export). Verified WSCG 2024 two-hand model audit reproduction and byte-deterministic evidence generation.
 - **Next step:** Merge PR on feat/10285-native-saved-replay closing epic #10286. Proceed to next active work package or maintenance issue.
 
+### DL-#9550 · Impact Explorer Acceptance Matrix and Served-Bundle Verification
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9550 (epic #9546)
+- **Branch:** conductor/issue-9550
+- **PR:** #10441
+- **Paths:** src/config/impact_acceptance.json; tests/config/impact_acceptance/test_impact_acceptance_matrix.py; scripts/ci/verify_impact_explorer_bundle.py; tests/ci/test_verify_impact_explorer_bundle.py; tests/api/test_impact_explorer_mount.py; .github/workflows/ci-standard.yml; src/config/feature_parity.json; docs/development/impact_acceptance_matrix.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at HEAD (SELF; matrix gate 26 passed; verifier + mount 14 passed; feature-parity/industrial-readiness gates 91 passed; real pinned bundle `62e8cdbf` verified locally: 76 assets, 5 JS, 404 on missing artifact)
+- **Summary:** Froze the model-capability matrix for `src/shared/python/physics/impact_model` (spin support stated as unavailable where absent), recorded the six acceptance items with evidence or explicit open state and a `code_verified_only` claim, made CI stamp Tools' release artifacts with the pinned gitlink and verify that `/impact-explorer-app/` serves that revision's real JavaScript, and downgraded `tools.rate_of_closure` parity to an evidence-based gap.
+- **Next step:** Open the PR and, once #9417 fixes the artifact set, run the served-bundle verifier against the installed artifact with restart/reload/offline checks.
+- **Evidence:** docs/development/impact_acceptance_matrix.md; tests/config/impact_acceptance/test_impact_acceptance_matrix.py.
+
 ### DL-#9541 · BunkerShot3D Product Acceptance Matrix
 
 - **State:** in_review
