@@ -277,8 +277,9 @@ def _marker_subsets(
             else np.ones((len(source.time_s), len(site_labels)), dtype=bool)
         )
         return source_subset, predicted, valid_subset
-    valid = np.ones((len(source.time_s), len(site_labels)), dtype=bool)
-    return predicted, predicted, valid
+    valid = np.zeros((len(source.time_s), len(site_labels)), dtype=bool)
+    nan_source = np.full(predicted.shape, np.nan, dtype=np.float64)
+    return nan_source, predicted, valid
 
 
 def _parity_metrics(
