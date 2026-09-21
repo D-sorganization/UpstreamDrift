@@ -307,11 +307,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10605 · CO-01 Extend Canonical Club Observation Contracts and Calibration
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10605 (epic #10602)
 - **Branch:** fix/issue-10605-co01-club-observation
-- **PR:** not created
+- **PR:** #10670 (open)
 - **Paths:** src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/adapters.py; src/shared/python/motion_matching/club_calibration.py; src/shared/python/motion_matching/target.py; tests/unit/motion_matching/test_club_observation_contracts.py; docs/plans/club_only_matching/evidence/club_observation_contracts.json
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21 — `python -m pytest tests/unit/motion_matching/test_club_observation_contracts.py -q -n 0 --no-cov --timeout=60` (14 passed); python -O public input validation confirmed; ruff check/format clean on touched paths.

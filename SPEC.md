@@ -6783,7 +6783,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-21 | #10504 | Add PF-06 force-only null-space exploration (`force_nullspace.py`): scaled SVD/QR basis, feasible redistribution under cone and trail-side constraints, and bounded torque-tradeoff Pareto diagnostics without native replay approval (#10436). |
-| 2026-09-21 | #10605 | Extend canonical club observation contracts with component masks, dual mid-hands/face frames, native 240 Hz clock, SO(3) residuals/interpolation, catalog-backed calibration, and legacy ClubTarget adapters (CO-01); synthetic fixtures only. |
+| 2026-09-21 | #10670 | Extend canonical club observation contracts with component masks, dual mid-hands/face frames, native 240 Hz clock, SO(3) residuals/interpolation, catalog-backed calibration, and legacy ClubTarget adapters (CO-01); synthetic fixtures only. |
 | 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
 | 2026-09-21 | #10667 | Freeze club workbook identity, shared A=/A event-label normalization, and four-trial lineage for CO-00 (#10604); centimetre unit authority retained with inches declaration recorded. |
 | 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
