@@ -25,8 +25,8 @@
 - Reproduction:
   `pytest tests/unit/motion_matching/test_force_nullspace.py tests/unit/motion_matching/test_force_nullspace_pf06.py -v`.
 - Status: rebased onto `origin/main` (includes MS-62); SPEC §12 `#10504`
-  present; focused PF-06 suites green; CI Standard quality/unit gates green
-  after flake re-run.
+  present; focused PF-06 suites green; addressing CI unit/repo-structure
+  gate failures after rebase.
 - Next: Confirm CI green after this rebase push; merge closes #10436.
 
 ## MS-62 Simscape Coordinate Slice #10349 Handoff
