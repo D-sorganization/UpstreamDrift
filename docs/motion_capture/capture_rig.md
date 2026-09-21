@@ -434,12 +434,28 @@ turns the file into an observation set the pipeline uses like any other.
 ## Tools Schema Bridge
 
 `tools_bridge.probe_tools_schema()` reports `unavailable` while the pinned
-vendor tree lacks `sidekick.lab.mocap`, `incompatible` when it is present but
-missing expected submodules, and `ready` otherwise. The result is written into
-every manifest under `tools_schema`. No mapping to Tools records is attempted
-until the pinned release documents its builders; that export is #9422's
-responsibility, and inventing it here would be exactly the duplicate authority
-ADR-0041 forbids.
+Tools family (`shared.python.sidekick.lab.mocap`) does not resolve,
+`incompatible` when it resolves but lacks expected submodules or ships a
+session schema other than the one this adapter maps (`mocap-session/1.0.0`),
+and `ready` otherwise. The result is written into every manifest under
+`tools_schema`.
+
+When the probe is `ready`, `capture` and `record` also write
+`mocap_session.json` beside `session_manifest.json`: the session in the one
+canonical Tools `MocapSessionManifest`, built through the Tools builders and
+serialized by the Tools canonical serializer (#9422). The rig contributes only
+what it knows — plan name and start time as the session identity, each view's
+device identity and serial, the host-monotonic arrival clock, the capture
+method and licence, and the classify reasons as warnings. The world frame is
+the ADR-0041 candidate `affinedrift-world-v1`; it names the convention, not a
+calibration. A session is `finalized` only when the capture was `supported`,
+`--consent-recorded` was given and a calibration id was supplied; otherwise it
+is `incomplete` and the warnings say why. The Tools policy contract decides
+what the recording terms permit — a real `record` take retains raw video, so
+without `--consent-recorded` the export is refused and
+`tools_schema.export` records `rejected` with the Tools reason rather than a
+faked session. Nothing here restates the schema; a pin that ships a different
+one makes the export `unavailable`, not wrong.
 
 ## Time Sync
 
