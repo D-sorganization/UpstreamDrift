@@ -290,16 +290,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10616 (epic #10603)
 - **Branch:** feat/nm01-learning-tasks-freeze
-- **PR:** not created
+- **PR:** #10671
 - **Paths:** src/shared/python/neural_motion/tasks.py; src/shared/python/neural_motion/roster.py; src/shared/python/neural_motion/experiment.py; src/shared/python/neural_motion/**init**.py; tests/unit/neural_motion/test_learning_tasks.py; tests/unit/neural_motion/test_benefit_experiment.py; docs/plans/neural_motion_matching/learning_tasks.md; docs/plans/neural_motion_matching/evidence/nm01_benefit_experiment.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21T20:43:34Z at SELF (24 unit tests GREEN; ruff check/format clean on touched paths; freeze digest 7d93734cf5a5…)
+- **Last verified:** 2026-09-21T20:51:00Z at SELF (PR #10671 open with agent:local; 24 unit tests GREEN; freeze digest 7d93734cf5a5…)
 - **Summary:** Freeze distinct forward/inverse/masked-trajectory learning-task contracts with geometry/q0/v0/horizon/contact/mask conditioning; checkpoint dimensions from TB-00 roster (no hard-coded 27×7); inverse labels require selection or multimodal target without physical uniqueness; benefit experiment registers five baselines, all-phase latency, pilot scales, TB-02-aligned gates and break-even fail-closed when savings ≤ 0. No training executed.
-- **Next step:** Open ready-for-review PR with Fixes #10616 and arm squash auto-merge when green.
+- **Next step:** Confirm squash auto-merge on PR #10671 after protected checks, then claim NM-02 (#10617).
 - **Evidence:** docs/plans/neural_motion_matching/learning_tasks.md; docs/plans/neural_motion_matching/evidence/nm01_benefit_experiment.json.
 
 ### DL-#10615 · NM-00 Dataset Checkpoint and Training Claim Audit
