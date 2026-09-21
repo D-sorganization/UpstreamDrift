@@ -222,7 +222,7 @@ class TestMatchedSwingBrowserModel:
         model = MatchedSwingBrowserModel()
         rows = model.load_ledger()
         assert len(rows) >= 40
-        assert len(rows) == 99
+        assert len(rows) == 100
 
     def test_format_metric(self) -> None:
         model = MatchedSwingBrowserModel()
