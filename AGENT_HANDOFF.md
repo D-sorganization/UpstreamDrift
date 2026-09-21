@@ -22,11 +22,17 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615)
+## Neural Motion Matching NM-01: Freeze Learning Tasks, Roster and Benefit Experiment (#10616)
 
-Branch `fix/issue-10615-nm00-dataset-audit`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603).
-NM-00 delivers fail-closed inventory in `src/shared/python/neural_motion/` with schema `neural-artifact-audit/1.0.0`, per-model coverage cells, bounded parquet inspect, and receipts under `docs/plans/neural_motion_matching/evidence/`. Documented 10k corpus and default checkpoints are quarantined when absent; synthetic sweep is software-contract-only; mean-baseline plateau notes stay `NOTE_ONLY`. No training or speed claims.
-Next step: Dispatch NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)).
+Branch `feat/nm01-freeze-learning-tasks`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisite NM-00 [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668) merged.
+NM-01 freezes typed forward/inverse/masked task contracts, a 20-model roster keyed to TB-00 identities (full-body deferred pending benefit) and benefit-experiment gates (100/500/2000 nested stages, three seeds, five baselines, latency including replay/refinement/failures, 2× median/non-worse p95, break-even undefined when savings ≤ 0). Evidence: `docs/plans/neural_motion_matching/evidence/nm01_*.json`. No training or speed claim.
+Next step: Land PR with `Fixes #10616`, then dispatch NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617)).
+
+## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615) [MERGED]
+
+Branch `fix/issue-10615-nm00-dataset-audit` merged to main in PR [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668).
+NM-00 delivered fail-closed inventory in `src/shared/python/neural_motion/` with schema `neural-artifact-audit/1.0.0`. No training or speed claims.
+Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)).
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
