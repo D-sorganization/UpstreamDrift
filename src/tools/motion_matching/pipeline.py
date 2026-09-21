@@ -69,6 +69,8 @@ CAPTURES = ("driver", "iron")
 CLUBS = ("driver", "iron7")
 CLUB_FOR_CAPTURE = {"driver": "driver", "iron": "iron7"}
 BACKENDS = ("mujoco", "drake", "pinocchio", "opensim", "pink")
+IK_BACKENDS = ("lm", "mujoco-minimize")
+TRACKING_BACKENDS = ("kkt", "mj-inverse")
 STEP_MODES = ("physical", "projection")
 SOLVERS = ("quadprog",)
 
@@ -133,6 +135,8 @@ class MatchRequest:
     shooting_gain: float = 0.7
     cutoff_hz: float | None = None
     backend: str = "mujoco"
+    ik_backend: str = "lm"
+    tracking: str = "kkt"
     step_mode: str = "physical"
     solver: str = "quadprog"
     output_root: Path | str | None = None
@@ -147,6 +151,18 @@ class MatchRequest:
             raise ValueError(f"Club must be one of {CLUBS}")
         if self.backend not in BACKENDS:
             raise ValueError(f"backend must be one of {BACKENDS}")
+        if self.ik_backend not in IK_BACKENDS:
+            raise ValueError(f"ik_backend must be one of {IK_BACKENDS}")
+        if self.tracking not in TRACKING_BACKENDS:
+            raise ValueError(f"tracking must be one of {TRACKING_BACKENDS}")
+        if self.backend != "mujoco" and self.ik_backend != "lm":
+            raise ValueError("Native IK backends require backend=mujoco")
+        if self.backend != "mujoco" and self.tracking != "kkt":
+            raise ValueError("mj-inverse tracking requires backend=mujoco")
+        if self.backend == "pink" and self.ik_backend != "lm":
+            raise ValueError("Pink backend cannot use native MuJoCo IK")
+        if self.backend == "pink" and self.tracking != "kkt":
+            raise ValueError("Pink backend cannot use mj-inverse tracking")
         if self.step_mode not in STEP_MODES:
             raise ValueError(f"step_mode must be one of {STEP_MODES}")
         if self.solver not in SOLVERS:
@@ -290,6 +306,10 @@ def match_command(request: MatchRequest) -> list[str]:
     ]
     if request.backend != "mujoco":
         cmd.extend(["--backend", request.backend])
+    if request.ik_backend != "lm":
+        cmd.extend(["--ik-backend", request.ik_backend])
+    if request.tracking != "kkt":
+        cmd.extend(["--tracking", request.tracking])
     if request.step_mode != "physical":
         cmd.extend(["--pink-step-mode", request.step_mode])
     if request.solver != "quadprog":
