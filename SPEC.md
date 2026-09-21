@@ -1,3 +1,31 @@
+## Tour Baselines Driven Double Pendulum Fitting and Independent Replay (TB-04, #10589)
+
+Fits and independently replays the driven planar double pendulum baseline under the Tour Baselines program:
+- **Convention Adapters & Dynamics Parity (`src/shared/python/tour_baselines/pendulum_adapter.py`)**:
+  - Reconciles analytical `DoublePendulumDynamics` / `GolfModelParams` with Tools simulator `pendulum_simulator.physics` (`PendulumParams`).
+  - Proves exact mathematical equivalence ($< 10^{-10}$ residual on mass matrix and generalized accelerations) under point-mass limits via `compare_dynamics_parity`.
+  - Implements bidirectional parameter conversion (`analytical_to_tools_params`, `tools_to_analytical_params`, `golf_model_to_double_pendulum_params`) and state coordinate extraction (`state_to_planar_coordinates`).
+- **Initial State Evaluation at $t_0$ Without Off-By-One Regression (`src/shared/python/tour_baselines/pendulum_fit.py`)**:
+  - Evaluates frame 0 prediction directly from $(q_0, v_0)$ forward kinematics before stepping, eliminating the first-frame evaluation error.
+  - Supports non-uniform timestamp sequences across variable frame intervals $\Delta t_k$.
+- **Continuous Bounded Bernstein Torque Optimization (`src/shared/python/tour_baselines/pendulum_fit.py`)**:
+  - Fits continuous bounded shoulder and wrist torques using degree-6 Bernstein polynomials (14 control points total).
+  - Enforces physical torque bounds ($|\tau_{\text{shoulder}}| \le 300\text{ N}\cdot\text{m}$, $|\tau_{\text{wrist}}| \le 120\text{ N}\cdot\text{m}$) via bounded SLSQP.
+  - Incorporates effort regularization ($\lambda_{\text{effort}} \|\tau\|^2$) and smoothness regularization ($\lambda_{\text{smooth}} \|\dot{\tau}\|^2$).
+- **Independent Tighter-Step Replay (`src/shared/python/tour_baselines/pendulum_fit.py`)**:
+  - Executes independent higher-resolution RK4 rollout ($\Delta t_{\text{replay}} \le \Delta t / 4$) starting from $t_0$ with zero state resets or feedback.
+  - Certifies dynamic feasibility (`DynamicFeasibilityStatus.PHYSICALLY_FEASIBLE`) only when independent replay tracking matches optimization within tolerance ($|\text{RMSE}_{\text{replay}} - \text{RMSE}_{\text{fit}}| \le 0.05\text{ m}$).
+- **Unforced / Passive Baseline Comparison Diagnostic (`src/shared/python/tour_baselines/pendulum_fit.py`)**:
+  - Simulates unforced dynamics ($\tau = 0$) from $(q_0, v_0)$ to compute `unforced_rmse_m` and benchmark driven torque improvements.
+- **Cryptographic Provenance & Status Bundles (`src/shared/python/tour_baselines/pendulum_fit.py`)**:
+  - Computes deterministic SHA-256 target hash across timestamps and coordinates (eliminating `target_hash="dummy"`).
+  - Populates complete `BaselineIdentity` and `StatusBundle` with `has_native_replay=True` and `ScientificQualificationStatus.QUALIFIED`.
+- **Motion-Matching Provider Upgrade (`src/engines/physics_engines/pendulum/python/motion_matching/provider.py`)**:
+  - Upgrades `PendulumFitSwingProvider` to consume calibrated plane, geometry, initial state, and continuous Bernstein torques.
+- **Evidence & Verification**:
+  - Unit test suites in `tests/unit/tour_baselines/test_pendulum_adapter.py` (5 tests), `tests/unit/tour_baselines/test_pendulum_fit.py` (7 tests), and `tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py` (5 tests), 72 total passed across tour baselines.
+  - Published comprehensive architectural documentation in `docs/plans/tour_baselines/driven_double_pendulum_fitting.md`.
+
 ## Tour Baselines Swing Planes, Fixed Geometry, and Feasible Initial States (TB-03, #10588)
 
 Calibrates swing planes, fixed geometry, and feasible initial states under the Tour Baselines program:
