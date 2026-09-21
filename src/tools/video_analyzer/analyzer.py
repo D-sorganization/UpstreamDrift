@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import math
+from pathlib import Path
 from typing import Any
 
 from .types import Landmark, PoseFrame, PostureMetrics
@@ -17,6 +18,69 @@ logger = logging.getLogger(__name__)
 
 # MediaPipe nose landmark index (matches the 33-point BlazePose model).
 _MEDIAPIPE_NOSE_IDX = 0
+
+
+def _pose_frames_from_video(video_path: Path) -> list[PoseFrame]:
+    """Run MediaPipe pose estimation over a video and convert it to frames.
+
+    Deliberately imports the pose-estimation stack lazily (issue #8883):
+    this keeps :mod:`analyzer` importable/testable without MediaPipe
+    installed, matching the module-level contract above.
+
+    Args:
+        video_path: Path to a video file readable by OpenCV.
+
+    Returns:
+        One :class:`PoseFrame` per decoded video frame, in MediaPipe's
+        33-landmark order (index 0 = nose, matching
+        :data:`_MEDIAPIPE_NOSE_IDX`).
+
+    Raises:
+        RuntimeError: If the MediaPipe pose estimator is not available on
+            this host. The message includes the install remedy.
+    """
+    from src.shared.python.pose_estimation.mediapipe_estimator import (
+        MediaPipeEstimator,
+    )
+    from src.shared.python.pose_estimation.registry import (
+        create_estimator,
+        estimator_availability,
+    )
+
+    available, reason = estimator_availability("mediapipe")
+    if not available:
+        raise RuntimeError(reason or "MediaPipe pose estimator is not available.")
+
+    estimator = create_estimator("mediapipe")
+    estimator.load_model()
+    results = estimator.estimate_from_video(video_path)
+
+    landmark_order = [
+        MediaPipeEstimator.LANDMARK_MAP[i]
+        for i in sorted(MediaPipeEstimator.LANDMARK_MAP)
+    ]
+    frames: list[PoseFrame] = []
+    for index, result in enumerate(results):
+        keypoints = result.raw_keypoints or {}
+        confidences = result.raw_confidences or {}
+        landmarks = [
+            Landmark(
+                x=float(keypoints[name][0]) if name in keypoints else 0.0,
+                y=float(keypoints[name][1]) if name in keypoints else 0.0,
+                z=float(keypoints[name][2]) if name in keypoints else 0.0,
+                visibility=float(confidences.get(name, 0.0)),
+            )
+            for name in landmark_order
+        ]
+        frames.append(
+            PoseFrame(
+                frame_number=index,
+                timestamp=result.timestamp,
+                landmarks=landmarks,
+                confidence=result.confidence,
+            )
+        )
+    return frames
 
 
 class SwingAnalyzer:
@@ -59,6 +123,31 @@ class SwingAnalyzer:
         # Clamp to [-1, 1] to guard against floating-point rounding outside acos domain.
         cos_theta = max(-1.0, min(1.0, dot / (mag_ba * mag_bc)))
         return math.degrees(math.acos(cos_theta))
+
+    def analyze_video(self, video_path: str | Path) -> PostureMetrics:
+        """Run end-to-end head-stability analysis on a video file.
+
+        Decodes ``video_path`` with MediaPipe pose tracking and feeds the
+        resulting frames into :meth:`_calculate_posture`. This is the real
+        analysis path behind the Video Analyzer GUI (issue #8883) — the
+        math in this class was already tested; this method is what wires
+        it to an actual video instead of a placeholder label.
+
+        Args:
+            video_path: Path to a video file readable by OpenCV.
+
+        Returns:
+            :class:`PostureMetrics` computed from the decoded frames.
+
+        Raises:
+            FileNotFoundError: If ``video_path`` does not exist.
+            RuntimeError: If the MediaPipe pose estimator is unavailable.
+        """
+        path = Path(video_path)
+        if not path.exists():
+            raise FileNotFoundError(f"Video file not found: {path}")
+        frames = _pose_frames_from_video(path)
+        return self._calculate_posture(frames, key_frames={}, stance=None)
 
     def _calculate_posture(
         self,
