@@ -1038,6 +1038,7 @@ unexpected token`, swallowing the finding). Posting now runs
 - Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`; publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
 - Governed companion workflows (#9190) define the 15-record registry, public executor, and CI execution evidence across 10 success and 4 failure fixtures.
 - #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes; #9174 remains open.
+- #9193 (COMP-B5) delivers documentation freshness and engine capability evidence: `scripts/companion_evidence.py` parses `scripts/config/companion_documentation.v1.json` and `scripts/config/companion_capability_evidence.v1.json` into exact-commit, hash-bound, immutable-URL records; four MuJoCo capabilities are qualified by real-engine tests, all other engine capabilities stay `unqualified` with reasons; `docs/engines/engine_capability_evidence.md` is generated (`python3 -m scripts.companion_evidence render-docs --check`). To record a doc review, set `last_reviewed`/`review_due`/`reviewed_sha256`; edits without a review demote to `review_required`, not a build failure.
 - ADR-0043 and schema v1 are one-way UpstreamDrift software-fact authority for AffineDrift #4010. #9064 remains design-manual authority and #9070 remains typed calculation-manifest authority.
 
 ## Validation
