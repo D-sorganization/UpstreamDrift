@@ -160,8 +160,11 @@ def generate_baseline_package_for_target(
     q0, v0 = init_st.q0, init_st.v0
 
     dynamics = DoublePendulumDynamics()
-    dynamics.parameters.upper_segment.length_m = l1
-    dynamics.parameters.lower_segment.length_m = l2
+    dyn_params = dynamics.parameters
+    upper_seg = dyn_params.upper_segment
+    lower_seg = dyn_params.lower_segment
+    upper_seg.length_m = l1
+    lower_seg.length_m = l2
 
     # Standard rollout and 4x tighter replay
     q_rollout, v_rollout = integrate_double_pendulum_rollout(
