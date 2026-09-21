@@ -74,7 +74,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
     - Added `verify_torque_and_rate_bounds` for discrete trajectory limits and rate verification.
   - `tests/unit/motion_matching/test_contact_force_allocator_pf03.py`: Comprehensive test suite for all 10 acceptance scenarios.
 - Validation: 12 unit tests pass 100% across PF-03 and legacy suites; ruff clean; black clean; mypy strict clean; bandit clean.
-- Next: PR #10498 open with auto-merge armed.
+- Next: Land PR #10498 via CI and proceed to PF-04.
 
 ## PF-10 Connect Qualified Matching Strategies to Engine Feature Contracts (#10440)
 

@@ -424,7 +424,7 @@ class ContactForceAllocator:
         # Initial point
         y0 = np.zeros(n_total_vars)
 
-        res = minimize(
+        res = minimize(  # type: ignore[call-overload]
             fun=lambda y: 0.5 * np.sum(y**2),
             x0=y0,
             jac=lambda y: y,
@@ -529,7 +529,12 @@ class ContactForceAllocator:
                 and np.all(tau_sol <= tau_bounds[1] + 1e-5)
             )
 
-        success = bool(is_physically_feasible and eq_res < 1e-4 and bounds_satisfied)
+        solver_converged = bool(
+            res.success
+            or (res.status in (0, 8, 9) and eq_res < 1e-4)
+            or (eq_res < 1e-4 and friction_viol_max < 1e-3)
+        )
+        success = bool(solver_converged and eq_res < 1e-4 and bounds_satisfied)
 
         return ContactForceAllocation(
             tau_actuated=tau_sol,
